@@ -18,8 +18,7 @@ The formal system which we are using as a target system is Lean's dependent type
 
 Below we explain how to engage with the Lean code directly.
 We also provide a [blueprint](https://leanprover-community.github.io/con-nf/)
-including two [dependency](https://leanprover-community.github.io/con-nf/dep_graph_section_1.html)
-[graphs](https://leanprover-community.github.io/con-nf/dep_graph_section_2.html)
+including a [dependency graph](https://leanprover-community.github.io/con-nf/dep_graph.html)
 of the main ingredients in the repository.
 This blueprint is developed in sync with the Lean formalization,
 and will hence see frequent updates during the length of the project.
@@ -97,6 +96,6 @@ on the perfectoid project website.
 
 ## Source reference
 
-`[Analytic]` : http://www.math.uni-bonn.de/people/scholze/Analytic.pdf
+`[newattempt]` : https://randall-holmes.github.io/Nfproof/newattempt.pdf
 
-[Analytic]: http://www.math.uni-bonn.de/people/scholze/Analytic.pdf
+[newattempt]: https://randall-holmes.github.io/Nfproof/newattempt.pdf
