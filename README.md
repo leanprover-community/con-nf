@@ -8,6 +8,8 @@ The purpose of this community-owned repository is to *digitise* some mathematica
 
 The definitions, theorems and proofs in this repository are taken from Randall Holmes [newattempt.pdf](https://randall-holmes.github.io/Nfproof/newattempt.pdf), claiming to prove the consistency of Quine's New Foundations axiom system.
 
+Randall Holmes himself comments:  this is not necessarily the exact document that will be used.
+
 ## The target
 
 The formal system which we are using as a target system is Lean's dependent type theory. Lean is a project being developed at Microsoft Research by Leonardo de Moura and his team. Our formalisation could not have even started without a major classical mathematical library backing it up, and so we chose Lean 3 as the engine behind the project. Note that Lean 4's type theory is the same as Lean 3's type theory, however porting 800K lines of mathematical library between languages is a *highly* nontrivial endeavour.
