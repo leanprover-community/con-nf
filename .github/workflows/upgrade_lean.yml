@@ -13,6 +13,6 @@ jobs:
         uses: leanprover-contrib/lean-upgrade-action@master
         with:
           repo: ${{ github.repository }}
-      access-token: ${{ secrets.GITHUB_TOKEN }}
+          access-token: ${{ secrets.GITHUB_TOKEN }}
       - name: update version branches
         uses: leanprover-contrib/update-versions-action@master
