@@ -16,5 +16,39 @@ jobs:
       if: github.ref == 'refs/heads/master'
       uses: leanprover-contrib/update-versions-action@master
 
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- --default-toolchain none -y
+        ~/.elan/bin/lean --version
+        echo "$HOME/.elan/bin" >> $GITHUB_PATH
+    - name: install python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.9
+
+    - name: blueprint deps
+      run: |
+        sudo apt-get update
+        sudo apt install graphviz libgraphviz-dev pandoc texlive-full texlive-xetex
+        pip install invoke
+        git clone https://github.com/plastex/plastex.git
+        pip install ./plastex
+        git clone https://github.com/PatrickMassot/leanblueprint.git
+        pip install ./leanblueprint
+
     - name: build project
-      uses: leanprover-contrib/lean-build-action@master
+      run: |
+        leanproject get-mathlib-cache
+        lean --make src
+
+    - name: build blueprint
+      run: |
+        inv all html
+
+    - name: deploy
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+        SINGLE_COMMIT: true
+        BRANCH: gh-pages # The branch the action should deploy to.
+        FOLDER: docs/

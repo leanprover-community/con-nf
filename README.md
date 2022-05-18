@@ -1,6 +1,8 @@
 # The consistency of New Foundations
 
-[![](https://github.com/leanprover-community/con-nf/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/leanprover-community/con-nf/actions/workflows/build.yml)
+[![.github/workflows/leanbuild.yml](https://github.com/leanprover-community/con-nf/actions/workflows/leanbuild.yml/badge.svg)](https://github.com/leanprover-community/con-nf/actions/workflows/leanbuild.yml)
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/leanprover-community/con-nf)
 
 The purpose of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer implementation of a logical theory (such as set theory or type theory).
 
