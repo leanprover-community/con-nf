@@ -4,6 +4,8 @@
 
 The purpose of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer implementation of a logical theory (such as set theory or type theory).
 
+Much of the project infrastructure has been adapted from the [sphere eversion project](https://leanprover-community.github.io/sphere-eversion/), the [liquid tensor experiment](https://leanprover-community.github.io/lean-liquid/), and the [unit fractions project](https://github.com/b-mehta/unit-fractions/).
+
 ## The source
 
 The definitions, theorems and proofs in this repository are taken from Randall Holmes [newattempt.pdf](https://randall-holmes.github.io/Nfproof/newattempt.pdf), claiming to prove the consistency of Quine's New Foundations axiom system.
@@ -24,6 +26,7 @@ including a [dependency graph](https://leanprover-community.github.io/con-nf/dep
 of the main ingredients in the repository.
 This blueprint is developed in sync with the Lean formalization,
 and will hence see frequent updates during the length of the project.
+More information on building the blueprint locally is given below.
 
 ### Getting the project
 
@@ -69,6 +72,30 @@ There are two pieces of functionality that help a lot when browsing through Lean
 ### Organization of the project
 
 * The Lean code is contained in the directory `src/`.
+
+## Building the blueprint locally
+
+To build the web version of the blueprint locally, you need a working LaTeX installation.
+Furthermore, you need some packages:
+```
+sudo apt install graphviz libgraphviz-dev pandoc
+pip3 install invoke
+cd .. # go to a folder where you are happy to clone git repos
+git clone https://github.com/plastex/plastex
+pip3 install ./plastex
+git clone https://github.com/PatrickMassot/leanblueprint
+pip3 install ./leanblueprint
+```
+
+To actually build the blueprint, `cd` to the `con-nf` folder and run
+```
+leanproject get-mathlib-cache
+leanproject build
+inv all
+```
+
+To view the web version of the blueprint locally, run `inv serve` and navigate to
+`http://localhost:8000/` in your favorite browser.
 
 ## Brief note on type theory
 
