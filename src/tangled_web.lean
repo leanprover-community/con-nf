@@ -1,11 +1,20 @@
 import group_theory.group_action.basic
-import set_theory.cofinality
+import set_theory.cardinal.cofinality
 import order.symm_diff
+
+/-!
+# Draft for a tangled web
+
+This is a draft by Mario Carneiro for a tangled web of cardinals. It should not be directly useful
+to the project but will hopefully provide inspiration.
+-/
 
 noncomputable theory
 open_locale cardinal classical pointwise
 
 universes u v
+
+namespace con_nf
 
 section
 variables (A : Type*) {X : Type*} [group X] [mul_action X A] (G : subgroup X)
@@ -84,7 +93,7 @@ def atoms := Σ A, clan A
 
 def litter (A) (x : μ) : set (clan A) := {p | p.1 = x}
 
-def litter.is_near {A} (N : set (clan A)) (x : μ) := small (N Δ litter A x)
+def litter.is_near {A} (N : set (clan A)) (x : μ) := small (N ∆ litter A x)
 
 def local_cards (A : xti) : Type u := μ
 
@@ -247,3 +256,5 @@ def τ_elementary (A A' B B' : xti_below) (n)
   (hA : A.1.dropn n = some A'.1) (hB : B.1.dropn n = some B'.1)
   (H : A.1.1 \ A'.1.1 = B.1.1 \ B'.1.1) :
   sset_n (n+2) (τ A') ≃ sset_n (n+2) (τ B') := sorry
+
+end con_nf
