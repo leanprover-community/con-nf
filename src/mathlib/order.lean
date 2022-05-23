@@ -24,6 +24,26 @@ begin
   refl,
 end
 
+variables {a b c}
+
+@[simp] lemma le_symm_diff_iff_left : a ≤ a ∆ b ↔ disjoint a b :=
+begin
+  refine ⟨λ h, _, λ h, _⟩,
+  { rw symm_diff_eq_sup_sdiff_inf at h,
+    exact (le_sdiff_iff.1 $ inf_le_of_left_le h).le },
+  { rw h.symm_diff_eq_sup,
+    exact le_sup_left }
+end
+
+@[simp] lemma le_symm_diff_iff_right : b ≤ a ∆ b ↔ disjoint a b :=
+begin
+  refine ⟨λ h, _, λ h, _⟩,
+  { rw symm_diff_eq_sup_sdiff_inf at h,
+    exact (le_sdiff_iff.1 $ inf_le_of_right_le h).le },
+  { rw h.symm_diff_eq_sup,
+    exact le_sup_right }
+end
+
 end boolean_algebra
 
 namespace set

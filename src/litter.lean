@@ -67,16 +67,35 @@ h.image.mono $ subset_image_symm_diff _ _ _
 
 end is_near
 
+variables {i j : μ}
+
 /-- The `i`-th litter. -/
 def litter (i : μ) : set base_type := {p | p.1 = i}
+
+@[simp] lemma mk_litter (i : μ) : #(litter i) = #κ :=
+cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, by { ext, exacts [x.2.symm, rfl] }, λ k, rfl⟩⟩
+
+lemma pairwise_disjoint_litter : pairwise (disjoint on litter) :=
+λ i j h x hx, h $ hx.1.symm.trans hx.2
 
 /-- A `i`-near-litter is a set of small symmetric to the `i`-th litter. -/
 def is_near_litter (i : μ) (s : set base_type) : Prop := is_near (litter i) s
 
 lemma is_near_litter_litter (i : μ) : is_near_litter i (litter i) := is_near_rfl
 
-lemma is_near_litter.near {i : μ} {s t : set base_type} (hs : is_near_litter i s)
+lemma is_near_litter.near {s t : set base_type} (hs : is_near_litter i s)
   (ht : is_near_litter i t) : is_near s t := hs.symm.trans ht
+
+@[simp] lemma is_near_litter_litter_iff : is_near_litter i (litter j) ↔ i = j :=
+begin
+  refine ⟨λ h, _, _⟩,
+  { by_contra',
+    refine ((mk_litter i).symm.trans_le $ mk_le_mk_of_subset _).not_lt h,
+    change litter i ≤ _,
+    exact le_symm_diff_iff_left.2 (pairwise_disjoint_litter _ _ this) },
+  { rintro rfl,
+    exact is_near_litter_litter _ }
+end
 
 /-- A near-litter permutation is a permutation of the base type which sends near-litters to
 near-litters. It turns out that the images of near-litters near the same litter are themselves near
@@ -88,15 +107,23 @@ structure near_litter_perm : Type u :=
 (near ⦃i : μ⦄ ⦃s : set base_type⦄ :
   is_near_litter i s → is_near_litter (litter_perm i) (⇑base_perm⁻¹ ⁻¹' s))
 
-lemma is_near_litter.map {f : near_litter_perm} {i : μ} {s : set base_type}
-  (h : is_near_litter i s) :
+lemma is_near_litter.map {f : near_litter_perm} {s : set base_type} (h : is_near_litter i s) :
   is_near_litter (f.litter_perm i) (⇑f.base_perm⁻¹ ⁻¹' s) :=
 f.near h
 
 namespace near_litter_perm
 variables {f g : near_litter_perm}
 
-lemma base_perm_injective : injective near_litter_perm.base_perm := sorry
+lemma base_perm_injective : injective near_litter_perm.base_perm :=
+begin
+  rintro ⟨f, f', hf⟩ ⟨g, g', hg⟩ (h : f = g),
+  suffices : f' = g',
+  { subst h,
+    subst this },
+  ext i,
+  exact is_near_litter_litter_iff.1
+    (((hf $ is_near_litter_litter _).trans $ by rw h).trans (hg $ is_near_litter_litter _).symm),
+end
 
 @[ext] lemma near_litter_perm.ext (h : f.base_perm = g.base_perm) : f = g := base_perm_injective h
 
