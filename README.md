@@ -10,9 +10,7 @@ Much of the project infrastructure has been adapted from the [sphere eversion pr
 
 ## The source
 
-The definitions, theorems and proofs in this repository are taken from Randall Holmes [newattempt.pdf](https://randall-holmes.github.io/Nfproof/newattempt.pdf), claiming to prove the consistency of Quine's New Foundations axiom system.
-
-Randall Holmes himself comments:  this is not necessarily the exact document that will be used.
+The definitions, theorems and proofs in this repository are taken from Randall Holmes [untangled.pdf](https://randall-holmes.github.io/Nfproof/untangled.pdf), claiming to prove the consistency of Quine's New Foundations axiom system.
 
 ## The target
 
@@ -127,6 +125,6 @@ on the perfectoid project website.
 
 ## Source reference
 
-`[newattempt]` : https://randall-holmes.github.io/Nfproof/newattempt.pdf
+`[untangled]` : https://randall-holmes.github.io/Nfproof/untangled.pdf
 
-[newattempt]: https://randall-holmes.github.io/Nfproof/newattempt.pdf
+[untangled]: https://randall-holmes.github.io/Nfproof/untangled.pdf

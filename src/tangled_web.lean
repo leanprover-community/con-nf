@@ -7,6 +7,9 @@ import params
 
 This is a draft by Mario Carneiro for a tangled web of cardinals. It should not be directly useful
 to the project but will hopefully provide inspiration.
+
+The main difference with the new approach are the presence of clans, indexed by the extended type
+index.
 -/
 
 noncomputable theory
