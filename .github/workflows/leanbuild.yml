@@ -44,7 +44,8 @@ jobs:
 
     - name: build blueprint
       run: |
-        mkdir docs
+        cp -r docs_src/static/* docs
+        rm docs/.gitignore
         inv all html
 
     - name: deploy
