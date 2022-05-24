@@ -44,7 +44,6 @@ jobs:
 
     - name: build blueprint
       run: |
-        cp -r docs_src/static/* docs
         rm docs/.gitignore
         inv all html
 

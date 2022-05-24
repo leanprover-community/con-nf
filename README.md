@@ -91,7 +91,6 @@ To actually build the blueprint, `cd` to the `con-nf` folder and run
 ```
 leanproject get-mathlib-cache
 leanproject build
-cp -r docs_src/static/* docs # useful for building the static webpages, the blueprint will work fine without this
 inv all html
 ```
 

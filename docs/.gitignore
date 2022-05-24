@@ -1,2 +1,3 @@
-*
-!.gitignore
+*.html
+blueprint/
+blueprint.pdf
