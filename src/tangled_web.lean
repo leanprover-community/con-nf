@@ -17,7 +17,8 @@ open_locale cardinal classical pointwise
 
 universes u v
 
-namespace con_nf_tangled_web
+namespace con_nf
+namespace tangled_web
 
 section
 variables (A : Type*) {X : Type*} [group X] [mul_action X A] (G : subgroup X)
@@ -218,4 +219,5 @@ def τ_elementary (A A' B B' : xti_below) (n)
   (H : A.1.1 \ A'.1.1 = B.1.1 \ B'.1.1) :
   sset_n (n+2) (τ A') ≃ sset_n (n+2) (τ B') := sorry
 
-end con_nf_tangled_web
+end tangled_web
+end con_nf
