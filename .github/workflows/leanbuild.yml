@@ -44,6 +44,7 @@ jobs:
 
     - name: build blueprint
       run: |
+        mkdir docs
         inv all html
 
     - name: deploy
