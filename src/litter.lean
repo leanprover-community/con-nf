@@ -147,7 +147,8 @@ begin
   exact is_near.trans hi hj.symm
 end
 
-/-- A near-litter permutation is a permutation of the base type which sends near-litters to
+/--
+A near-litter permutation is a permutation of the base type which sends near-litters to
 near-litters. It turns out that the images of near-litters near the same litter are themselves near
 the same litter. Hence a near-litter permutation induces a permutation of litters, and we keep that
 as data for simplicity.
@@ -155,7 +156,12 @@ as data for simplicity.
 In the paper, this is called a -1-allowable permutation.
 The proposition `near` can be interpreted as saying that if `s` is an `i`-near-litter, then its
 image under the permutation (`base_perm`) is near the litter that `i` is mapped to under the litter
-permutation (`litter_perm`). -/
+permutation (`litter_perm`).
+
+The definition `⇑base_perm⁻¹ ⁻¹' s` is used instead of `⇑base_perm '' s` because it has better
+definitional properties. For instance, `x in base_perm⁻¹ ⁻¹' s` is definitionally equal to
+`base_perm x in s`.
+-/
 structure near_litter_perm : Type u :=
 (base_perm : perm base_type)
 (litter_perm : perm μ)

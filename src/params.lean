@@ -54,12 +54,12 @@ open params
 variables [params.{u}]
 
 /-- To allow Lean's type checker to see that the ordering `Λr` is a well-ordering without having to
-explicitly write `Λwf` everywhere, we declare it as an instance.
-We can then deduce from the well-ordering that `Λ` is linearly ordered. -/
+explicitly write `Λwf` everywhere, we declare it as an instance. -/
 instance : is_well_order Λ Λr := Λwf
+/-- We can deduce from the well-ordering `Λwf` that `Λ` is linearly ordered. -/
 instance : linear_order Λ := linear_order_of_STO' Λr
 
--- Since `μ` has cofinality `≥ κ`, the cardinality of `κ` must be at most that of `μ`.
+/-- Since `μ` has cofinality `≥ κ`, the cardinality of `κ` must be at most that of `μ`. -/
 lemma κ_le_μ : #κ ≤ #μ := κ_le_μ_cof.trans $ ordinal.cof_ord_le _
 
 /-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
