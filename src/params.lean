@@ -2,11 +2,15 @@ import set_theory.cardinal.cofinality
 
 /-!
 # Parameters of the construction
-This file is based on sections 3.1 and 3.2 of the paper. -/
 
-/-- We do not assume that our definitions, instances, lemmas and theorems are 'computable';
+This file is based on sections 3.1 and 3.2 of the paper.
+-/
+
+/-!
+We do not assume that our definitions, instances, lemmas and theorems are 'computable';
 that is, can be provably evaluated in finite time by a computer.
-For our purposes, restricting to only computable functions is unnecessary. -/
+For our purposes, restricting to only computable functions is unnecessary.
+-/
 noncomputable theory
 
 open cardinal
