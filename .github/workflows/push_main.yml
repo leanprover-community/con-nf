@@ -1,0 +1,72 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update_con_nf_branch_and_build:
+    runs-on: ubuntu-latest
+    name: Update con-nf branch and build project
+    steps:
+      - name: checkout project
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: update branch
+        if: github.ref == 'refs/heads/master'
+        uses: leanprover-contrib/update-versions-action@master
+
+      - name: install elan
+        run: |
+          set -o pipefail
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- --default-toolchain none -y
+          ~/.elan/bin/lean --version
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
+
+      - name: install python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+
+      - name: lean deps
+        run: |
+          pip install mathlibtools
+
+      - name: build project
+        run: |
+          leanproject get-mathlib-cache
+          lean --make src
+
+      - name: blueprint deps
+        run: |
+          sudo apt-get update
+          sudo apt install graphviz libgraphviz-dev pandoc texlive-full texlive-xetex
+          pip install invoke
+          git clone https://github.com/plastex/plastex.git
+          pip install ./plastex
+          git clone https://github.com/PatrickMassot/leanblueprint.git
+          pip install ./leanblueprint
+
+      - name: build blueprint
+        run: |
+          rm docs/.gitignore
+          inv all html
+
+      - name: bundler deps
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: docs
+          ruby-version: "3.0" # Not needed with a .ruby-version file
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: bundle website
+        working-directory: docs
+        run: JEKYLL_ENV=production bundle exec jekyll build
+
+      - name: deploy
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          SINGLE_COMMIT: true
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: docs/_site
