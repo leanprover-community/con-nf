@@ -29,13 +29,8 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: blueprint deps
+      - name: lean deps
         run: |
-          sudo apt-get update
-          sudo apt install graphviz libgraphviz-dev pandoc texlive-full texlive-xetex
-          pip install invoke
-          git clone https://github.com/plastex/plastex.git
-          pip install ./plastex
           git clone https://github.com/PatrickMassot/leanblueprint.git
           pip install ./leanblueprint
 
@@ -43,6 +38,14 @@ jobs:
         run: |
           leanproject get-mathlib-cache
           lean --make src
+
+      - name: blueprint deps
+        run: |
+          sudo apt-get update
+          sudo apt install graphviz libgraphviz-dev pandoc texlive-full texlive-xetex
+          pip install invoke
+          git clone https://github.com/plastex/plastex.git
+          pip install ./plastex
 
       - name: build blueprint
         run: |
@@ -57,6 +60,7 @@ jobs:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: bundle website
+        working-directory: docs
         run: bundle exec jekyll build
 
       - name: deploy
