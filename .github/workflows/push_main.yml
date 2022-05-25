@@ -31,8 +31,7 @@ jobs:
 
       - name: lean deps
         run: |
-          git clone https://github.com/PatrickMassot/leanblueprint.git
-          pip install ./leanblueprint
+          pip install mathlibtools
 
       - name: build project
         run: |
