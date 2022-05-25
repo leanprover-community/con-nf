@@ -29,11 +29,6 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: build project
-        run: |
-          leanproject get-mathlib-cache
-          lean --make src
-
       - name: blueprint deps
         run: |
           sudo apt-get update
@@ -43,6 +38,11 @@ jobs:
           pip install ./plastex
           git clone https://github.com/PatrickMassot/leanblueprint.git
           pip install ./leanblueprint
+
+      - name: build project
+        run: |
+          leanproject get-mathlib-cache
+          lean --make src
 
       - name: build blueprint
         run: |
