@@ -23,13 +23,16 @@ used for lambda abstractions.
 
 Ordinals and cardinals are represented here as arbitrary types (not sets) with certain properties.
 For instance, `Λ` is an arbitrary type that has an ordering `Λr`, which is assumed to be a
-well-ordering (the `Λwf` term is a proof of this fact).
+well-ordering (the `Λwf` term is a proof of this fact). If `Λr a b` holds, then we can say `a < b`.
 
 The prefix `#` denotes the cardinality of a type.
 
 Where possible, we use `<` and `≤` instead of `>` and `≥`. Human readers can easily convert between
 the two, but it is not as immediately transparent for Lean. For simplicity, we keep with the
 convention of using only `<` and `≤`.
+
+When working with these parameters, it is useful to `open params` in order to address the parameters
+simply by name, instead of having to type `params.Λ`, for instance.
 -/
 class params :=
 (Λ : Type u) (Λr : Λ → Λ → Prop) [Λwf : is_well_order Λ Λr]
@@ -57,7 +60,10 @@ lemma κ_le_μ : #κ ≤ #μ := κ_le_μ_cof.trans $ ordinal.cof_ord_le _
 
 /-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
 arbitrary type of cardinality `μ` and partitioning it in parts of cardinality `κ` afterwards, we
-define it as `μ × κ`, which has the correct cardinality and comes with an obvious partition. -/
+define it as `μ × κ`, which has the correct cardinality and comes with an obvious partition.
+
+This type is occasionally referred to as a type of atoms. These are not 'atoms' in the ZFU, TTTU or
+NFU sense; they are simply the elements of the model which are in type `τ₋₁`. -/
 def base_type : Type* := μ × κ
 
 /-- The cardinality of `τ₋₁` is the cardinality of `μ`.
