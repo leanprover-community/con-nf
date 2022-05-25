@@ -177,6 +177,9 @@ f.near h
 namespace near_litter_perm
 variables {f g : near_litter_perm}
 
+/-- The map from the type of near-litter permutations to the type of permutations of `τ₋₁` is
+injective. That is, if two near-litter permutations have the same action on the base type, they are
+equal. -/
 lemma base_perm_injective : injective near_litter_perm.base_perm :=
 begin
   rintro ⟨f, f', hf⟩ ⟨g, g', hg⟩ (h : f = g),
@@ -188,10 +191,20 @@ begin
     (((hf $ is_near_litter_litter _).trans $ by rw h).trans (hg $ is_near_litter_litter _).symm),
 end
 
+/-- An extensionality result for near-litter permutations.
+If two near-litter permutations have the same action on the base type, they are equal. -/
 @[ext] lemma near_litter_perm.ext (h : f.base_perm = g.base_perm) : f = g := base_perm_injective h
 
+/-!
+We are going to show that the set of near-litter permutations forms a group.
+To do this, we construct several instances, such as the existence of an identity
+element or inverse elements.
+-/
+
+/-- The identity near-litter permutation. -/
 instance : has_one near_litter_perm := ⟨⟨1, 1, λ i s, id⟩⟩
 
+/-- Any near-litter permutation admits an inverse, which is also a near-litter permutation. -/
 instance : has_inv near_litter_perm :=
 ⟨λ f, ⟨f.base_perm⁻¹, f.litter_perm⁻¹, λ i s h, begin
   have : is_near (⇑f.base_perm⁻¹ ⁻¹' litter (f.litter_perm⁻¹ i)) s,
@@ -199,18 +212,34 @@ instance : has_inv near_litter_perm :=
   simpa only [preimage_inv, perm.image_inv, preimage_image] using this.image ⇑f.base_perm⁻¹,
 end⟩⟩
 
+/-- Near-litter permutations can be composed. -/
 instance : has_mul near_litter_perm :=
 ⟨λ f g, ⟨f.base_perm * g.base_perm, f.litter_perm * g.litter_perm, λ i s h, h.map.map⟩⟩
 
+/-- Dividing two permutations `f / g` can be interpreted as `f⁻¹ * g`. -/
 instance : has_div near_litter_perm :=
 ⟨λ f g, ⟨f.base_perm / g.base_perm, f.litter_perm / g.litter_perm,
   by { simp_rw [div_eq_mul_inv], exact (f * g⁻¹).near }⟩⟩
 
+/-- We can raise near-litter permutations to a natural power since we can do this to
+permutations of the base type and the type of litters. -/
 instance has_pow : has_pow near_litter_perm ℕ :=
 ⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, sorry⟩⟩
 
+/-- We can raise near-litter permutations to an integer power since we can do this to
+permutations of the base type and the type of litters. -/
 instance has_zpow : has_pow near_litter_perm ℤ :=
 ⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, sorry⟩⟩
+
+/-!
+The following lemmas describe how the group of near-litter permutations interacts with the group of
+base type permutations and the group of litter permutations. In particular, many group operations,
+such as taking the inverse, can be moved out of the near-litter context and into the (simpler) base
+permutation or litter permutation context.
+
+The `@[simp]` attribute teaches these results to the `simp` tactic. This means that `simp` will (for
+example) prefer group operations to be applied after extracting the base permutation, not before.
+-/
 
 @[simp] lemma base_perm_one : (1 : near_litter_perm).base_perm = 1 := rfl
 @[simp] lemma base_perm_inv (f : near_litter_perm) : f⁻¹.base_perm = f.base_perm⁻¹ := rfl
@@ -234,20 +263,31 @@ rfl
 @[simp] lemma litter_perm_zpow (f : near_litter_perm) (n : ℤ) :
   (f ^ n).litter_perm = f.litter_perm ^ n := rfl
 
+/-- The type of near-litter permutations forms a group. -/
 instance : group near_litter_perm :=
 base_perm_injective.group _ base_perm_one base_perm_mul base_perm_inv base_perm_div base_perm_pow
   base_perm_zpow
 
+/-- The group of near-litter permutations acts on the base type, `τ₋₁`, by using the base
+permutation `base_perm`. -/
 instance : mul_action near_litter_perm base_type :=
 { smul := λ f, f.base_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
+/-- The group of near-litter permutations acts on the type of litters, `μ`, by using the litter
+permutation `litter_perm`. -/
 instance : mul_action near_litter_perm μ :=
 { smul := λ f, f.litter_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
 end near_litter_perm
 
+/-- A near litter is an index `i : μ` of a litter and a set `s : set base_type`, such that `s` is
+an `i`-near-litter.
+
+This allows us to forget which set and which litter we are talking about at the type level, and
+hence deal with an arbitrary near-litter. -/
 def near_litter : Type* := Σ' i s, is_near_litter i s
 
+/-- If this is satisfied for a near-litter `N`, then `N` is actually a litter. -/
 def near_litter.is_litter (N : near_litter) : Prop := N.2.1 = litter N.1
 
 end con_nf
