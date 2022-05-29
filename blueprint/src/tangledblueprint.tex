@@ -64,14 +64,14 @@ Define $\tau_{-1}$ as  $\{(-1,\nu,\alpha):\nu<\mu \wedge \alpha<\kappa\}$.  Note
 We may refer to objects of type $-1$ as ``atoms".  They are not understood here to be atoms in a conventional sense, but the analogous objects in earlier versions of the construction were atoms and I have this mental habit.
 
 \begin{definition}
-\label {def:litter}  \uses {def:mu}  \uses {def kappa}
+\label {def:litter}  \uses {def:mu}  \uses {def:kappa}
 We define $L_\nu$ for $\nu<\mu$ as $\{(-1,\nu,\alpha):\alpha<\kappa\}$.  We refer to sets $L_\nu$ as {\em litters\/}.
 
 Note that the litters make up a partition of type $-1$ into sets of size $\kappa$.
 \end{definition}
 
 \begin{definition}
-\label {def-local-cardinal} \uses {def:litter} \uses {def:type-minus-one}
+\label {def:local-cardinal} \uses {def:litter} \uses {def:type-minus-one}
 A set $K$ is a local cardinal iff there is a litter $L$ such that $K=\{N \subseteq \tau_{-1}:|N \Delta L|<\kappa\}$.
 \end{definition}
 
@@ -95,7 +95,7 @@ For any near-litter $N$ (including litters), we define $[N]$ as the unique local
 \end{definition}
 
 \begin{lemma}
-\label {lem:count-near-litters} \uses {def:kappa}  \uses {def:mu}  \uses {near-litter}
+\label {lem:count-near-litters} \uses {def:kappa}  \uses {def:mu}  \uses {def:near-litter}
 
 Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ near-litters.
 \end{lemma}
@@ -154,12 +154,12 @@ We designate a pairwise disjoint family of subsets $X_{(\beta,\gamma)}$ of the s
 \end{definition}
 
 \begin{lemma}
-\label {lem:near-litter-code} \uses {near-litter}  \uses {codes}  \uses {oldtau}
+\label {lem:near-litter-code} \uses {def:near-litter}  \uses {def:codes}  \uses {def:oldtau}
 All codes $(\beta,-1,N)$ where $N$ is a near-litter are stipulated to be elements of $\tau_\beta$ (of course we need to verify this when the criterion for membership in $\tau_\beta$ is revealed).
 \end{lemma}
 
 \begin{definition}
-\label {def:typed-near-litter} \uses {near-litter}  \uses {codes}
+\label {def:typed-near-litter} \uses {def:near-litter}  \uses {def:codes}
 Codes $(\beta,-1,N)$ where $N$ is a near-litter are called {\em typed near-litters\/}.
 \end{definition}
 
@@ -169,14 +169,14 @@ We define $\iota(x)$ for $x \in \tau_\beta$ as the order type of $\leq_\beta$ re
 \end{definition}
 
 \begin{definition}
-\label {fmap}  \uses {typewords} \uses {local-cardinals}
+\label {fmap}  \uses {def:typewords} \uses {def:local-cardinals}
 We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$,   $f_{\beta,\gamma}(x)$ as the local cardinal $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
 \end{definition}
 
 Notice that when we are constructing type $\alpha$, we assume that we have constructed all earlier types and we have the information already to define $f_{\beta,\gamma}$ when $\beta$ and $\gamma$ are less than $\alpha$.   This definition does not actually depend on the value of $\alpha$ except insofar as this defines its domain of application.
 
 \begin{definition}
-\label {def:alt-ext}  \uses {fmap} \uses {codes}
+\label {def:alt-ext}  \uses {def:fmap} \uses {def:codes}
 Let $\beta$ be a proper type index less than $\alpha$.  Let $\gamma$ be an extended type index less than $\beta$.
 
 For any code $(\beta,\gamma,G)$ with $G$ nonempty and $\delta$ a proper type index less than $\beta$ and distinct from $\gamma$, we define
@@ -227,7 +227,7 @@ If $(\beta,\gamma,G)$ has an odd number of iterated images under $A^{-1}$ then $
 \end{definition}
 
 \begin{definition}
-\label {def:representative-code}  \uses {equiv-codes}
+\label {def:representative-code}  \uses {def:equiv-code}
 
 Note that each equivalence class under $\equiv_\beta$ with nonempty third component contains exactly one
 element with an even number of iterated images under $A^{-1}$.  We refer to this code as the representative code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation
@@ -241,7 +241,7 @@ Not all representative $\beta$-codes belong to $\tau_\beta$.
 \end{lemma}
 
 \begin{definition}
-\label {ttt-membership}  \uses {def:representative-code}  \uses {def:ainverse}  \uses {def:codes}
+\label {def:ttt-membership}  \uses {def:representative-code}  \uses {def:ainverse}  \uses {def:codes}
 (An extension of) the membership relations of objects at and below type $\alpha$ in the intended model of tangled type theory is then defined as follows: if $\delta < \beta \leq \alpha$ are proper type indices  $(\delta,\epsilon,E) \in_{TTT} (\beta,\gamma,G)$ (where both triples given are codes and representatives of their equivalence classes) iff $\gamma=\delta$ and
 $(\gamma,\delta,D)  \in B$ or $\gamma\neq \delta$ and $(\delta,\epsilon,E) \in \pi_3(A_{\delta}(\beta,\gamma,G))$.  Note that in this latter case we will certainly have $\delta=-1$.  This does define membership of codes of lower types in
 type $\beta$ codes which do not necessarily belong to $\tau_\beta$;  this is harmless.
