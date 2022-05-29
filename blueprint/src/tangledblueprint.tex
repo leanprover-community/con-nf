@@ -119,7 +119,6 @@ With the tacit need to prove that there is only one.
 \label {def:the-litter-in} \uses {def:litter}  \uses {lem:small-diff-equiv}  \uses {def:local-cardinal}
 
 We introduce the notation $[N]^\circ$ for the litter belonging to the local cardinal $N$.  With the tacit need to prove that there is only one.
-
 \end{definition}
 
 \section{Set codes and alternative extensions:  membership defined and extensionality enforced}
@@ -128,21 +127,18 @@ We introduce the notation $[N]^\circ$ for the litter belonging to the local card
 \label {def:alpha}
 
 Fix a proper type index $\alpha$.
-
 \end{definition}
 
 \begin{definition}
 \label {def:oldtau}  \uses {def:alpha}  \uses {def:type-minus-one}
 
 Posit that we have already defined $\tau_\beta$ for each type index $\beta<\alpha$ (notice that we have already defined $\tau_{-1}$).
-
 \end{definition}
 
 \begin{definition}
 \label {def:typewords}  \uses {def:oldtau}  \uses {def:mu}
 
 We select a well-ordering $\leq_\beta$ of order type $\mu$ (with associated strict well-ordering $<_\beta$) for each type index $\beta<\alpha$.
-
 \end{definition}
 
 We will define $\tau_{\alpha}$, the implementation of type $\alpha$ of the model.  This definition is recursive:  when we are defining type $\alpha$ and associated concepts, we are supposing that related concepts have already been defined for all $\beta<\alpha$, and this process will define all types in the structure.
@@ -152,7 +148,6 @@ We will define $\tau_{\alpha}$, the implementation of type $\alpha$ of the model
 
 Let $\beta$ be a proper type index $\leq \alpha$.
 A type $\beta$ code is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ and $G \subseteq \tau_{\gamma}$.
-
 \end{definition}
 
 
@@ -202,7 +197,6 @@ For any code $(\beta,\gamma,G)$ with $G$ nonempty and $\delta$ a proper type ind
 $A_\delta(\beta,\gamma,G)$ as $$(\beta,\delta,\{(\delta,-1,N):N \in \bigcup (f_{\gamma,\delta}``B)\}).$$
 
 Note that the computation of $A_\delta$ does not depend on $\alpha$ apart from the fact that $\alpha$ must be at least as large as $\beta$ and larger than $\gamma$ or $\delta$.
-
 \end{definition}
 
 \begin{lemma}
@@ -210,28 +204,24 @@ Note that the computation of $A_\delta$ does not depend on $\alpha$ apart from t
 
 Clearly each $A_\delta$ is injective.  Notice that since the ranges of $f_{\gamma,\delta}$ and $f_{\gamma',\delta'}$ are disjoint unless $\gamma=\gamma'$ and $\delta=\delta'$, it follows that the ranges of
 maps $A_\delta$ with distinct indices are disjoint.
-
 \end{lemma}
 
 \begin{definition}
 \label {def:ainverse}  \uses {lem:alt-ext-nature}  \uses {def:alt-ext}
 
 By the previous lemma, the union of the $A_\gamma$'s is a function, which has an inverse, which we call $A^{-1}$.
-
 \end{definition}
 
 \begin{lemma}
 \label {lem:ainverse-stops} \uses {def:ainverse}  \uses {def:fmap}
 
 No code has infinitely many iterated images under $A^{-1}$.
-
 \end{lemma}
 
 \begin{proof}
 Computation of $A^{-1}$ involves replacing a local cardinal appearing as a subset of the extension of a code
 with (the singleton of) an element appearing in the well-ordering of its type with position indexed by an ordinal
 less than the ordinal indexing the position of any of the elements of the local cardinal in their type.  Consider the ordinal indices of positions in the order on appropriate types of the first element in the appropriate order of the extensions of successive iterated images under $A^{-1}$:  these must decrease.
-
 \end{proof}
 
 \begin{definition}
@@ -252,7 +242,6 @@ then $(\beta,\delta,D) \equiv_\beta (\beta,\gamma,G)$ (for $\delta$ a type index
 $(\beta,\delta,D) = A_{\delta}(\beta,\gamma,G)$.
 
 If $(\beta,\gamma,G)$ has an odd number of iterated images under $A^{-1}$ then $(\beta,\delta,D) \equiv_\beta (\beta,\gamma,G)$ iff $(\beta,\delta,D) \equiv_\beta A^{-1}(\beta,\gamma,G)$ (which reduces to the previous case).
-
 \end{definition}
 
 \begin{definition}
@@ -261,7 +250,6 @@ If $(\beta,\gamma,G)$ has an odd number of iterated images under $A^{-1}$ then $
 Note that each equivalence class under $\equiv_\beta$ with nonempty third component contains exactly one
 element with an even number of iterated images under $A^{-1}$.  We refer to this code as the representative code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation
 that $(\beta,-1,\emptyset)$ is a representative code as well.
-
 \end{definition}
 
 \begin{lemma}
@@ -269,7 +257,6 @@ that $(\beta,-1,\emptyset)$ is a representative code as well.
 
 We stipulate that all elements of $\tau_\beta$ are representative $\beta$-codes, for proper type indices $\beta<\alpha$.
 Not all representative $\beta$-codes belong to $\tau_\beta$.
-
 \end{lemma}
 
 \begin{definition}
@@ -278,7 +265,6 @@ Not all representative $\beta$-codes belong to $\tau_\beta$.
 (An extension of) the membership relations of objects at and below type $\alpha$ in the intended model of tangled type theory is then defined as follows: if $\delta < \beta \leq \alpha$ are proper type indices  $(\delta,\epsilon,E) \in_{TTT} (\beta,\gamma,G)$ (where both triples given are codes and representatives of their equivalence classes) iff $\gamma=\delta$ and
 $(\gamma,\delta,D)  \in B$ or $\gamma\neq \delta$ and $(\delta,\epsilon,E) \in \pi_3(A_{\delta}(\beta,\gamma,G))$.  Note that in this latter case we will certainly have $\delta=-1$.  This does define membership of codes of lower types in
 type $\beta$ codes which do not necessarily belong to $\tau_\beta$;  this is harmless.
-
 \end{definition}
 
 This all serves to enforce extensionality, but something much more radical needs to be done to make all this work, as we are assuming the existence of the maps $f_{\beta,\gamma}$ which witness that all the types are of cardinality no greater than $\mu$.  There must be a very strong restriction on what sets can appear as third components of codes in the model.
