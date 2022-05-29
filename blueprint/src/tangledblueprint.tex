@@ -7,13 +7,11 @@ In this section, we give a complete description of what we claim is a model of t
 \begin{definition}
 \label {def:lambda}
 Let $\lambda$ be your favorite limit ordinal.
-
 \end{definition}
 
 \begin{definition}
 \label {def:type-index}   \uses {def:lambda}
 We define a type index as an element of $\lambda \cup \{-1\}$.
-
 \end{definition}
 
 \begin{definition}
@@ -22,13 +20,11 @@ We define a proper type index as an element of $\lambda$.
 
 I am not convinced that a separate concept of proper type index has merit:  I think that $-1$ is a type index and
 sometimes is treated differently.  But I provide it.
-
 \end{definition}
 
 \begin{definition}
 \label {def:extended-type-index} \uses {def:type-index}
 We define an extended type index as a nonempty finite set of type indices.
-
 \end{definition}
 
 \begin{definition}
@@ -40,10 +36,10 @@ We define a proper extended type index as a nonempty finite set of proper type i
 \begin{definition}
 \label {def:kappa}  \uses {def:lambda}
 Let $\kappa>\lambda$ be your favorite uncountable regular cardinal.
-
 \end{definition}
+
 \begin{definition}
-\label {def:small}
+\label {def:small} \uses {def:kappa}
 We refer to sets of size smaller than $\kappa$ as small [and all other sets as large].
 \end{definition}
 
@@ -62,15 +58,12 @@ We will define a function taking type indices $\alpha$ to sets $\tau_\alpha$ (ty
 
 \begin{definition}
 \label {def:type-minus-one}  \uses {def:kappa}  \uses {def:mu}
-
 Define $\tau_{-1}$ as  $\{(-1,\nu,\alpha):\nu<\mu \wedge \alpha<\kappa\}$.  Note that this is a set of size $\mu$.
-
 \end{definition}
 
-  We may refer to objects of type $-1$ as ``atoms".  They are not understood here to be atoms in a conventional sense, but the analogous objects in earlier versions of the construction were atoms and I have this mental habit.
+We may refer to objects of type $-1$ as ``atoms".  They are not understood here to be atoms in a conventional sense, but the analogous objects in earlier versions of the construction were atoms and I have this mental habit.
 
 \begin{definition}
-
 \label {def:litter}  \uses {def:mu}  \uses {def kappa}
 
 We define $L_\nu$ for $\nu<\mu$ as $\{(-1,\nu,\alpha):\alpha<\kappa\}$.  We refer to sets $L_\nu$ as {\em litters\/}.
@@ -83,6 +76,7 @@ Note that the litters make up a partition of type $-1$ into sets of size $\kappa
 \label {def-local-cardinal} \uses {def:litter} \uses {def:type-minus-one}
 A set $K$ is a local cardinal iff there is a litter $L$ such that $K=\{N \subseteq \tau_{-1}:|N \Delta L|<\kappa\}$.
 \end{definition}
+
 \begin{definition}
 \label {def:near-litter} \uses {def:local-cardinal} \uses {def:small}
 A set is a {\em near-litter} precisely if it is a subset of $\tau_{-1}$ and has small symmetric difference from some litter, i.e., exactly if it belongs to some local cardinal.
@@ -95,7 +89,6 @@ Note that the local cardinals are the equivalence classes of an equivalence rela
 
 \begin{proof}
 This is left as an easy exercise for the reader.
-
 \end{proof}
 
 \begin{definition}
@@ -104,29 +97,25 @@ For any near-litter $N$ (including litters), we define $[N]$ as the unique local
 \end{definition}
 
 \begin{lemma}
-
-\label {lem:count-near-litters}
-
-\uses {def:kappa}  \uses {def:mu}  \uses {near-litter}
+\label {lem:count-near-litters} \uses {def:kappa}  \uses {def:mu}  \uses {near-litter}
 
 Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ near-litters.
 \end{lemma}
+
 \begin{proof}
 Cardinal arithmetic issue.
 \end{proof}
 
 One might be concerned with the fact that if $\mu$ has cofinality $\kappa$, it might have more than $\mu$ subsets of size $\kappa$:  but it still has only $\mu$ subsets of size $<\kappa$, and that is what matters for counting the near-litters:  a near-litter is determined as the symmetric difference of a litter ($\mu$ of these) and a small subset (cardinality $<\kappa$) of $\tau_{-1}$ (which is of size $\mu$) and there are only $\mu$ small subsets of $\tau_{-1}$.  If the cofinality of $\mu$ were less than $\kappa$, the cardinal arithmetic pathology mentioned as of concern could come into play.
-\begin{definition}
 
+\begin{definition}
 \label {def:the-litter-near} \uses {def:litter}  \uses {lem:small-diff-equiv}
 
 We introduce the notation $N^\circ$ for the litter with small symmetric difference from the near-litter $N$.
 With the tacit need to prove that there is only one.
-
 \end{definition}
 
 \begin{definition}
-
 \label {def:the-litter-in} \uses {def:litter}  \uses {lem:small-diff-equiv}  \uses {def:local-cardinal}
 
 We introduce the notation $[N]^\circ$ for the litter belonging to the local cardinal $N$.  With the tacit need to prove that there is only one.
@@ -136,7 +125,6 @@ We introduce the notation $[N]^\circ$ for the litter belonging to the local card
 \section{Set codes and alternative extensions:  membership defined and extensionality enforced}
 
 \begin{definition}
-
 \label {def:alpha}
 
 Fix a proper type index $\alpha$.
@@ -144,7 +132,6 @@ Fix a proper type index $\alpha$.
 \end{definition}
 
 \begin{definition}
-
 \label {def:oldtau}  \uses {def:alpha}  \uses {def:type-minus-one}
 
 Posit that we have already defined $\tau_\beta$ for each type index $\beta<\alpha$ (notice that we have already defined $\tau_{-1}$).
@@ -152,7 +139,6 @@ Posit that we have already defined $\tau_\beta$ for each type index $\beta<\alph
 \end{definition}
 
 \begin{definition}
-
 \label {def:typewords}  \uses {def:oldtau}  \uses {def:mu}
 
 We select a well-ordering $\leq_\beta$ of order type $\mu$ (with associated strict well-ordering $<_\beta$) for each type index $\beta<\alpha$.
@@ -162,7 +148,6 @@ We select a well-ordering $\leq_\beta$ of order type $\mu$ (with associated stri
 We will define $\tau_{\alpha}$, the implementation of type $\alpha$ of the model.  This definition is recursive:  when we are defining type $\alpha$ and associated concepts, we are supposing that related concepts have already been defined for all $\beta<\alpha$, and this process will define all types in the structure.
 
 \begin{definition}
-
 \label {codes}  \uses {def:alpha}  \uses {def:oldtau}
 
 Let $\beta$ be a proper type index $\leq \alpha$.
@@ -177,7 +162,6 @@ A type $\beta$ code is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ and $G \
 
 
 \begin{definition}
-
 \label {def:ftargets}  \uses {def:local-cardinal}  \uses {def:type-index}  \uses {def:proper-type-index}
 
 We designate a pairwise disjoint family of subsets $X_{(\beta,\gamma)}$ of the set of local cardinals, each of cardinality $\mu$, indexed by ordered pairs $(\beta,\gamma)$ with $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$.
@@ -188,6 +172,7 @@ We designate a pairwise disjoint family of subsets $X_{(\beta,\gamma)}$ of the s
 
 All codes $(\beta,-1,N)$ where $N$ is a near-litter are stipulated to be elements of $\tau_\beta$ (of course we need to verify this when the criterion for membership in $\tau_\beta$ is revealed).
 \end{lemma}
+
 \begin{definition}
 \label {def:typed-near-litter} \uses {near-litter}  \uses {codes}
 
@@ -197,14 +182,13 @@ Codes $(\beta,-1,N)$ where $N$ is a near-litter are called {\em typed near-litte
 \begin{definition}
 \label {def:iota}  use {\tt def:typewords}
 
-   We define $\iota(x)$ for $x \in \tau_\beta$ as the order type of $\leq_\beta$ restricted to $\{y \in \tau_\beta:y <_\beta x\}$.
+We define $\iota(x)$ for $x \in \tau_\beta$ as the order type of $\leq_\beta$ restricted to $\{y \in \tau_\beta:y <_\beta x\}$.
 \end{definition}
 
 \begin{definition}
-
 \label {fmap}  \uses {typewords}  \uses {local-cardinals}
 
- We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$,   $f_{\beta,\gamma}(x)$ as the local cardinal $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
+We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$,   $f_{\beta,\gamma}(x)$ as the local cardinal $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
 \end{definition}
 
 Notice that when we are constructing type $\alpha$, we assume that we have constructed all earlier types and we have the information already to define $f_{\beta,\gamma}$ when $\beta$ and $\gamma$ are less than $\alpha$.   This definition does not actually depend on the value of $\alpha$ except insofar as this defines its domain of application.
@@ -222,10 +206,7 @@ Note that the computation of $A_\delta$ does not depend on $\alpha$ apart from t
 \end{definition}
 
 \begin{lemma}
-
-\label {lem:alt-ext-nature}
-
-\uses {def:alt-ext}  \uses {def: fmap}
+\label {lem:alt-ext-nature} \uses {def:alt-ext}  \uses {def:fmap}
 
 Clearly each $A_\delta$ is injective.  Notice that since the ranges of $f_{\gamma,\delta}$ and $f_{\gamma',\delta'}$ are disjoint unless $\gamma=\gamma'$ and $\delta=\delta'$, it follows that the ranges of
 maps $A_\delta$ with distinct indices are disjoint.
@@ -233,7 +214,6 @@ maps $A_\delta$ with distinct indices are disjoint.
 \end{lemma}
 
 \begin{definition}
-
 \label {def:ainverse}  \uses {lem:alt-ext-nature}  \uses {def:alt-ext}
 
 By the previous lemma, the union of the $A_\gamma$'s is a function, which has an inverse, which we call $A^{-1}$.
@@ -241,7 +221,6 @@ By the previous lemma, the union of the $A_\gamma$'s is a function, which has an
 \end{definition}
 
 \begin{lemma}
-
 \label {lem:ainverse-stops} \uses {def:ainverse}  \uses {def:fmap}
 
 No code has infinitely many iterated images under $A^{-1}$.
@@ -249,7 +228,6 @@ No code has infinitely many iterated images under $A^{-1}$.
 \end{lemma}
 
 \begin{proof}
-
 Computation of $A^{-1}$ involves replacing a local cardinal appearing as a subset of the extension of a code
 with (the singleton of) an element appearing in the well-ordering of its type with position indexed by an ordinal
 less than the ordinal indexing the position of any of the elements of the local cardinal in their type.  Consider the ordinal indices of positions in the order on appropriate types of the first element in the appropriate order of the extensions of successive iterated images under $A^{-1}$:  these must decrease.
@@ -257,7 +235,6 @@ less than the ordinal indexing the position of any of the elements of the local 
 \end{proof}
 
 \begin{definition}
-
 \label {def:equiv-code} \uses {lem:ainverse-stops} \uses {def:ainverse}  \uses {def:codes}
 
 Let $\beta$ be a type index $\leq \alpha$.  We define an equivalence relation $\equiv_\beta$ on $\beta$-codes.
@@ -279,7 +256,6 @@ If $(\beta,\gamma,G)$ has an odd number of iterated images under $A^{-1}$ then $
 \end{definition}
 
 \begin{definition}
-
 \label {def:representative-code}  \uses {equiv-codes}
 
 Note that each equivalence class under $\equiv_\beta$ with nonempty third component contains exactly one
@@ -289,7 +265,6 @@ that $(\beta,-1,\emptyset)$ is a representative code as well.
 \end{definition}
 
 \begin{lemma}
-
 \label {objects-are-representative}  \uses {def:representative-code}
 
 We stipulate that all elements of $\tau_\beta$ are representative $\beta$-codes, for proper type indices $\beta<\alpha$.
@@ -298,7 +273,6 @@ Not all representative $\beta$-codes belong to $\tau_\beta$.
 \end{lemma}
 
 \begin{definition}
-
 \label {ttt-membership}  \uses {def:representative-code}  \uses {def:ainverse}  \uses {def:codes}
 
 (An extension of) the membership relations of objects at and below type $\alpha$ in the intended model of tangled type theory is then defined as follows: if $\delta < \beta \leq \alpha$ are proper type indices  $(\delta,\epsilon,E) \in_{TTT} (\beta,\gamma,G)$ (where both triples given are codes and representatives of their equivalence classes) iff $\gamma=\delta$ and
