@@ -120,7 +120,7 @@ We introduce the notation $[N]^\circ$ for the litter belonging to the local card
 \section{Set codes and alternative extensions:  membership defined and extensionality enforced}
 
 \begin{definition}
-\label {def:alpha}
+\label {def:alpha} \uses {def:proper-type-index}
 Fix a proper type index $\alpha$.
 \end{definition}
 
@@ -137,7 +137,7 @@ We select a well-ordering $\leq_\beta$ of order type $\mu$ (with associated stri
 We will define $\tau_{\alpha}$, the implementation of type $\alpha$ of the model.  This definition is recursive:  when we are defining type $\alpha$ and associated concepts, we are supposing that related concepts have already been defined for all $\beta<\alpha$, and this process will define all types in the structure.
 
 \begin{definition}
-\label {codes}  \uses {def:alpha}  \uses {def:oldtau}
+\label {def:codes}  \uses {def:alpha}  \uses {def:oldtau}
 Let $\beta$ be a proper type index $\leq \alpha$.
 A type $\beta$ code is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ and $G \subseteq \tau_{\gamma}$.
 \end{definition}
@@ -169,7 +169,7 @@ We define $\iota(x)$ for $x \in \tau_\beta$ as the order type of $\leq_\beta$ re
 \end{definition}
 
 \begin{definition}
-\label {fmap}  \uses {def:typewords} \uses {def:local-cardinals}
+\label {def:fmap}  \uses {def:typewords} \uses {def:local-cardinal}
 We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$,   $f_{\beta,\gamma}(x)$ as the local cardinal $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
 \end{definition}
 
