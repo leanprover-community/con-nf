@@ -1,8 +1,8 @@
-\section{The model description}
+\chapter{The model description}
 
 In this section, we give a complete description of what we claim is a model of tangled type theory.  The construction may be supposed carried out in ZFC (or some weak subsystem thereof:  we will see how much ZFC is needed).
 
-\subsection{Cardinal parameters}
+\section{Cardinal parameters}
 
 \begin{definition}
 \label {def:lambda}
@@ -56,7 +56,7 @@ Let $\mu$ be your favorite strong limit cardinal $>\kappa$ of cofinality $\geq \
 I waffled about this:  but cofinality exactly $\kappa$ will work.
 % \end{comment}
 
-\subsection{Type $-1$:  ``Atoms", litters, and local cardinals}
+\section{Type $-1$:  ``Atoms", litters, and local cardinals}
 
 We will define a function taking type indices $\alpha$ to sets $\tau_\alpha$ (type $\alpha$).
 
@@ -133,7 +133,7 @@ We introduce the notation $[N]^\circ$ for the litter belonging to the local card
 
 \end{definition}
 
-\subsection{Set codes and alternative extensions:  membership defined and extensionality enforced}
+\section{Set codes and alternative extensions:  membership defined and extensionality enforced}
 
 \begin{definition}
 
@@ -309,7 +309,7 @@ type $\beta$ codes which do not necessarily belong to $\tau_\beta$;  this is har
 
 This all serves to enforce extensionality, but something much more radical needs to be done to make all this work, as we are assuming the existence of the maps $f_{\beta,\gamma}$ which witness that all the types are of cardinality no greater than $\mu$.  There must be a very strong restriction on what sets can appear as third components of codes in the model.
 
-\subsection{Permutations, symmetry and the model definition}
+\section{Permutations, symmetry and the model definition}
 
 We now define the notion of an $\alpha$-allowable permutation (recalling that we have already defined what a $\beta$-allowable permutation is for each $\beta<\alpha$).
 
@@ -361,7 +361,7 @@ There is lots to be proven, but that is the entire description.
 
 \section{Showing that it is all true:  proving that the structure described in the previous section is a model of tangled type theory}
 
-\subsection{Strong supports defined}
+\section{Strong supports defined}
 
 Treating supports as sets suffices for the model description, but we will need to analyze supports and orbits with more care, so it is better for purposes
 of the proof to regard a support as a well-ordering.
@@ -423,7 +423,7 @@ The third components in the elements of support domains seem actually to be nece
 {\bf Note for the formal verification project:}  This should be ready to go.
 % \end{comment}
 \newpage
-\subsection{Freedom of action of allowable permutations}
+\section{Freedom of action of allowable permutations}
 
 The practical application of strong supports is to the proof that allowable permutations act freely in a suitable sense, and in guiding applications of this theorem.
 
@@ -475,7 +475,7 @@ Once we know how to carry out this calculation along any $\alpha$-strong support
 % \end{comment}
 
 \newpage
-\subsection{Types are of size \texorpdfstring{$\mu$}{μ} (so the construction actually succeeds)}
+\section{Types are of size \texorpdfstring{$\mu$}{μ} (so the construction actually succeeds)}
 
 Now we argue that (given that everything worked out correctly already at lower types) each type $\alpha$ is of size $\mu$, which ensures
 that the construction actually succeeds at every type.
@@ -542,7 +542,7 @@ This completes the proof that each type is of size $\mu$, which ensures that the
 {\bf Note for the formal verification project:}  I think everything is here, but filling in details to the satisfaction of a theorem prover will be work.
 % \end{comment}
 \newpage
-\subsection{The structure is a model of predicative TTT}
+\section{The structure is a model of predicative TTT}
 
 There is then a very direct proof that the structure presented is a model of predicative TTT (in which the definition of a set at a particular type may not mention any higher type).  Use $E$ for the membership relation of the structure.  It should be evident that $x E y \leftrightarrow \pi_\beta(x) E \pi(y)$,
 where $x$ is of type $\beta$, $y$ is of type $\alpha$, and $\pi$ is an $\alpha$-allowable permutation.
@@ -560,7 +560,7 @@ There are easier proofs of the consistency of predicative tangled type theory;  
 % \end{comment}
 
 \newpage
-\subsection{Impredicativity:  verifying the axiom of union}
+\section{Impredicativity:  verifying the axiom of union}
 
 What remains to complete the proof is that typed versions of the axiom of set union hold.  That this is sufficient is a fact about predicative type theory.
 If we have predicative comprehension and union, we note that for any formula $\phi$, $\{\iota^k(x):\phi(x)\}$ will be predicative if $k$ is taken to be large enough, then application of union $k$ times to this set will give $\{x:\phi(x)\}$.  $\iota(x)$ here denotes $\{x\}$.  It is evidently sufficient to prove that unions of sets of singletons exist.
