@@ -39,7 +39,7 @@ lemma small_empty : small (∅ : set α) := by { rw [small, mk_emptyc], exact κ
 lemma small.mono (h : s ⊆ t) : small t → small s := (cardinal.mk_le_mk_of_subset h).trans_lt
 
 lemma small.union (hs : small s) (ht : small t) : small (s ∪ t) :=
-(mk_union_le _ _).trans_lt $ add_lt_of_lt κ_regular.omega_le hs ht
+(mk_union_le _ _).trans_lt $ add_lt_of_lt κ_regular.aleph_0_le hs ht
 
 lemma small.image : small s → small (f '' s) := mk_image_le.trans_lt
 

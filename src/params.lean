@@ -20,6 +20,7 @@ class params :=
 (μ : Type u) (μr : μ → μ → Prop) [μwf : is_well_order μ μr]
 (μ_ord : ordinal.type μr = (#μ).ord)
 (μ_limit : (#μ).is_strong_limit)
+(κ_lt_μ : #κ < #μ)
 (κ_le_μ_cof : #κ ≤ (#μ).ord.cof)
 (δ : Λ)
 (hδ : (ordinal.typein Λr δ).is_limit)
@@ -31,8 +32,6 @@ variables [params.{u}]
 instance : is_well_order Λ Λr := Λwf
 instance : linear_order Λ := linear_order_of_STO' Λr
 
-lemma κ_le_μ : #κ ≤ #μ := κ_le_μ_cof.trans $ ordinal.cof_ord_le _
-
 /-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
 arbitrary type of cardinality `μ` and partitioning it in parts of cardinality `κ` afterwards, we
 define it as `μ × κ`, which has the correct cardinality and comes with an obvious partition. -/
@@ -40,7 +39,7 @@ def base_type : Type* := μ × κ
 
 @[simp] lemma mk_base_type : #base_type = #μ :=
 by simp_rw [base_type, mk_prod, lift_id,
-  mul_eq_left (κ_regular.omega_le.trans κ_le_μ) κ_le_μ κ_regular.pos.ne']
+  mul_eq_left (κ_regular.aleph_0_le.trans κ_lt_μ.le) κ_lt_μ.le κ_regular.pos.ne']
 
 /-- Extended type index. -/
 def xti : Type* := {s : finset Λ // s.nonempty}
