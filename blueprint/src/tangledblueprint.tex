@@ -418,7 +418,7 @@ I am going to define supports as well-orderings, as is done in the proof in chap
 Let $\beta \leq \alpha$ be a proper type index.
 
 We define a $\beta$-support $S$ as a well-ordering (we will write $x \leq_S y$ for $(x,y) \in S$ and define $<_S$ in the obvious way) such that the domain of $S$ is a small set and each element $x$ of the domain of $S$ is an ordered pair of the form
-$((\gamma,-1,X),A,\delta)$, where $A$ is a proper extended type index whose minimum is $\gamma$ and whose maximum is $\beta$, $\delta$ is a proper type index $\leq \beta$ (whose function will not be apparent at all at this point)
+$((\gamma,-1,X),A)$, where $A$ is a proper extended type index whose minimum is $\gamma$ and whose maximum is $\beta$
 and $X$ is either a singleton of an element of $\tau_{-1}$ or a near-litter.
 
 We also stipulate that when $((\gamma,-1,X),A,\delta)$ and $((\gamma,-1,X'),A,\gamma)$ belong to the domain of $S$
@@ -435,7 +435,7 @@ Let $\beta$ be a proper type index $\leq \alpha$.
 Let $X$ be a $\beta$-code.
 
 We say that a $\beta$-support $S$ is a $\beta$-support of $X$ iff for every $\beta$-allowable permutation such that
-we have for each $(x,A,\beta) \in {\tt dom}(S)$ [yes, we really mean the third component is $\beta$] that $\pi_A(x)=x$, we also have that $\pi(X)=X$.
+we have for each $(x,A) \in {\tt dom}(S)$ that $\pi_A(x)=x$, we also have that $\pi(X)=X$.
 
 \end{definition}
 
@@ -487,6 +487,15 @@ It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|
 \label {word-obligation}
 
 [I'm not sure what to call this]  Let $\leq_\alpha$ be your favorite well-ordering of $\tau_\alpha$, needed for the recursive definition of the $f$ maps at later stages.
+
+This order needs to satisfy some technical conditions.
+
+For each litter $L$ and element $a$ of $L$, $(\alpha,-1,L)$ must precede $(\alpha,-1,\{a\})$ in the order.
+
+A typed near-litter $N$ which is not a litter must be preceded in the order by the litter $N^\circ$ and the elements of
+$N \Delta N^\circ$.
+
+For each $x$ in $\tau_\alpha$ which is not a typed singleton or typed near-litter, we designate a support.  For any $(y,A)$ in the domain of the designated support of $x$, we must have $\iota(y)<\iota(x)$. 
 
 \end{definition}
 
