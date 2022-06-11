@@ -321,7 +321,7 @@ This all cries out for a Theorem which should be here and which I left implicit 
 
 \begin{theorem}
 \label {thm:extensionality}
-\uses{ttt-membership}
+\uses{def:ttt-membership}
 
 If $X$ and $Y$ are representative codes of type $\alpha$ and $\beta<\alpha$ is a proper type index
 and $(\forall Z \in \tau_\beta:Z \in_{\tt TTT} X \leftrightarrow Z \in_{\tt TTT} Y)$, then $X=Y$.
@@ -332,14 +332,15 @@ and $(\forall Z \in \tau_\beta:Z \in_{\tt TTT} X \leftrightarrow Z \in_{\tt TTT}
 
 \begin{lemma}
 \label {lem:singletons}
+\uses{def:type-index}
 
 We stipulate that for any proper type index $\beta<\alpha$ and any type index $\gamma<\beta$ and any $g \in \tau_\gamma$, $(\beta,\gamma,\{g\})\in \tau_\beta$.  Of course this will need to be verified for $\alpha$ as part of the recursion.  It is immediately evident that it is a representative code, at any rate.
 
 \end{lemma}
-\label {def:structural}
-\uses{def:codes}
 
 \begin{definition}
+  \label {def:structural}
+  \uses{def:codes}
 
 Let $\beta\leq \alpha$ be a proper type index.  We say that a permutation $\pi$ of type $\beta$ codes is a $\beta$-structural permutation iff for each type index $\gamma<\beta$ there is a $\gamma$-structural permutation $\pi_\gamma$ such that
 $\pi(\beta,\gamma,G) = (\beta,\gamma,\pi_\gamma``G)$ for each code $\pi(\beta,\gamma,G)$.  We say that any permutation of $\tau_{-1}$ is a structural permutation.
@@ -396,8 +397,8 @@ It is straightforward to show that this condition is equivalent to the coherence
 \end{proof}
 
 \begin{lemma}
-\label {rep-preserved}
-\uses{coherence-unpacked}
+\label {lem:rep-preserved}
+\uses{lem:coherence-unpacked}
 
 The image under an allowable permutation of a representative code is a representative code.  (This is an initial step toward the eventual requirement that an image of a type element should be a type element).
 
@@ -412,8 +413,8 @@ This should be straightforward.  A target should be the equation $\pi(A_\gamma(X
 I am going to define supports as well-orderings, as is done in the proof in chapter 4.
 
 \begin{definition}
-\label {support}
-\uses{extended-type-index}
+\label {def:support}
+\uses{def:extended-type-index}
 
 Let $\beta \leq \alpha$ be a proper type index.
 
@@ -427,8 +428,8 @@ and $X$ and $X'$ are distinct near-litters, that $X$ and $X'$ are disjoint.
 \end{definition}
 
 \begin{definition}
-\label {support-of}
-\uses{allowable}
+\label {def:support-of}
+\uses{def:allowable}
 
 Let $\beta$ be a proper type index $\leq \alpha$.
 
@@ -440,8 +441,8 @@ we have for each $(x,A) \in {\tt dom}(S)$ that $\pi_A(x)=x$, we also have that $
 \end{definition}
 
 \begin{definition}
-\label {tau-alpha}
-\uses{support-of}
+\label {def:tau-alpha}
+\uses{def:support-of}
 
 
 
@@ -466,7 +467,8 @@ This code is obviously representative and the domain of its support is a decorat
 \end{proof}
 
 \begin{lemma}
-\label {singleton-obligation}
+\label {def:singleton-obligation}
+\uses{def:tau-alpha}
 
 For any $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$
 
@@ -479,12 +481,12 @@ Think about the $\beta$-support that $b$ must have and apply a suitable transfor
 \end{proof}
 
 \begin{lemma}
-\label {small-subsets-closure}
+\label {lem:small-subsets-closure}
 
 It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|B|<\kappa$ [take the union of the $\beta$-supports of elements of $B$ and add $\alpha$ to all the second components of elements of this union]:  all small subsets of a type are realized in each higher type.
 
 \begin{definition}
-\label {word-obligation}
+\label {def:word-obligation}
 
 [I'm not sure what to call this]  Let $\leq_\alpha$ be your favorite well-ordering of $\tau_\alpha$, needed for the recursive definition of the $f$ maps at later stages.
 
@@ -495,7 +497,7 @@ For each litter $L$ and element $a$ of $L$, $(\alpha,-1,L)$ must precede $(\alph
 A typed near-litter $N$ which is not a litter must be preceded in the order by the litter $N^\circ$ and the elements of
 $N \Delta N^\circ$.
 
-For each $x$ in $\tau_\alpha$ which is not a typed singleton or typed near-litter, we designate a support.  For any $(y,A)$ in the domain of the designated support of $x$, we must have $\iota(y)<\iota(x)$. 
+For each $x$ in $\tau_\alpha$ which is not a typed singleton or typed near-litter, we designate a support.  For any $(y,A)$ in the domain of the designated support of $x$, we must have $\iota(y)<\iota(x)$.
 
 \end{definition}
 

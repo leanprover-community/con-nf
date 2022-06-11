@@ -22,7 +22,7 @@ The formal system which we are using as a target system is Lean's dependent type
 
 Below we explain how to engage with the Lean code directly.
 We also provide a [blueprint](https://leanprover-community.github.io/con-nf/)
-including a [dependency graph](https://leanprover-community.github.io/con-nf/dep_graph.html)
+including a [dependency graph](https://leanprover-community.github.io/con-nf/blueprint/dep_graph_document.html)
 of the main ingredients in the repository.
 This blueprint is developed in sync with the Lean formalization,
 and will hence see frequent updates during the length of the project.
