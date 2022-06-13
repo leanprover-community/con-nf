@@ -1,6 +1,7 @@
 import mathlib.equiv
 import mathlib.order
 import params
+import algebra.hom.iterate
 
 /-!
 # Litters, near-litters
@@ -18,7 +19,7 @@ considered opaque, as we only care about the fact that their cardinality is `κ`
 * `con_nf.is_near_litter`: A set is a `i`-near-litter if it is near the `i`-th litter.
 -/
 
-open cardinal equiv equiv.perm function set
+open cardinal cardinal.is_regular equiv equiv.perm function set
 open_locale cardinal
 
 universe u
@@ -144,10 +145,32 @@ instance : has_div near_litter_perm :=
   by { simp_rw [div_eq_mul_inv], exact (f * g⁻¹).near }⟩⟩
 
 instance has_pow : has_pow near_litter_perm ℕ :=
-⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, sorry⟩⟩
+begin
+  refine ⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, _⟩⟩,
+  intros i s h,
+  induction n with d hd,
+  exact h,
+  have := f.3 hd, exact this,
+end
 
 instance has_zpow : has_pow near_litter_perm ℤ :=
-⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, sorry⟩⟩
+begin
+  refine ⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, _⟩⟩,
+  intros i s h,
+  induction n,
+  { induction n with d hd, exact h, have := f.3 hd, exact this },
+  { induction n with d hd,
+    have := (f⁻¹).3 h, exact this,
+    have := (f⁻¹).3 hd,
+    simp, rw coe_pow,
+    have r1 : f⁻¹.litter_perm = f.litter_perm⁻¹ := by refl,
+    have r2 : f⁻¹.base_perm = f.base_perm⁻¹ := by refl,
+    rw [r1, r2] at this, simp at this, rw ← preimage_comp at this,
+    have that : ∀ n : ℕ, (f.litter_perm ^ n)⁻¹ = (f.litter_perm⁻¹ ^ n) := by simp,
+    rw [that, coe_pow, coe_pow] at this, rw [that, coe_pow],
+    sorry,
+    }
+end
 
 @[simp] lemma base_perm_one : (1 : near_litter_perm).base_perm = 1 := rfl
 @[simp] lemma base_perm_inv (f : near_litter_perm) : f⁻¹.base_perm = f.base_perm⁻¹ := rfl
