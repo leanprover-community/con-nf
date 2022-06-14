@@ -12,13 +12,19 @@ variables [params.{u}]
 
 open params
 
+/-- Either the base type or a proper type index (an element of `Λ`).
+The base type is written `⊥`. -/
+@[reducible]
+def type_index := with_bot Λ
+
 /-- A *pretangle* is an object that may become a *tangle*,
-an element of the model. -/
+an element of the model.
+The type of pretangles forms a model of TTT without extensionality. -/
 def pretangle : Λ → Type u
 | α :=
-    (Π (β : Λ), β < α → set (pretangle β)) ×
+    (Π β < α, set (pretangle β)) ×
     (option (set base_type)) ×
-    ({β : with_bot Λ | β < α})
+    ({β : type_index | β < α})
 using_well_founded { dec_tac := `[assumption] }
 
 end con_nf
