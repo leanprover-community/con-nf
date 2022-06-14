@@ -68,21 +68,21 @@ h.image.mono $ subset_image_symm_diff _ _ _
 
 end is_near
 
-variables {i j : μ}
+variables {i j : litter_name}
 
 /-- The `i`-th litter. -/
-def litter (δ γ : Λ) (i : μ) : set base_type := {p | p.1.1 = δ ∧ p.1.2 = γ ∧ p.2.1 = i }
+def litter (i : litter_name) : set base_type := {p | p.1 = i}
 
-@[simp] lemma mk_litter (δ γ : Λ) (i : μ) : #(litter δ γ i) = #κ :=
-cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, by { ext, exacts [x.2.symm, rfl] }, λ k, rfl⟩⟩
+@[simp] lemma mk_litter (i : litter_name) : #(litter i) = #κ :=
+cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, subtype.ext $ prod.ext x.2.symm rfl, λ k, rfl⟩⟩
 
 lemma pairwise_disjoint_litter : pairwise (disjoint on litter) :=
 λ i j h x hx, h $ hx.1.symm.trans hx.2
 
 /-- A `i`-near-litter is a set of small symmetric to the `i`-th litter. -/
-def is_near_litter (i : μ) (s : set base_type) : Prop := is_near (litter i) s
+def is_near_litter (i : litter_name) (s : set base_type) : Prop := is_near (litter i) s
 
-lemma is_near_litter_litter (i : μ) : is_near_litter i (litter i) := is_near_rfl
+lemma is_near_litter_litter (i : litter_name) : is_near_litter i (litter i) := is_near_rfl
 
 lemma is_near_litter.near {s t : set base_type} (hs : is_near_litter i s)
   (ht : is_near_litter i t) : is_near s t := hs.symm.trans ht
@@ -104,8 +104,8 @@ the same litter. Hence a near-litter permutation induces a permutation of litter
 as data for simplicity. -/
 structure near_litter_perm : Type u :=
 (base_perm : perm base_type)
-(litter_perm : perm μ)
-(near ⦃i : μ⦄ ⦃s : set base_type⦄ :
+(litter_perm : perm litter_name)
+(near ⦃i : litter_name⦄ ⦃s : set base_type⦄ :
   is_near_litter i s → is_near_litter (litter_perm i) (⇑base_perm⁻¹ ⁻¹' s))
 
 lemma is_near_litter.map {f : near_litter_perm} {s : set base_type} (h : is_near_litter i s) :
@@ -201,7 +201,7 @@ base_perm_injective.group _ base_perm_one base_perm_mul base_perm_inv base_perm_
 instance : mul_action near_litter_perm base_type :=
 { smul := λ f, f.base_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
-instance : mul_action near_litter_perm μ :=
+instance : mul_action near_litter_perm litter_name :=
 { smul := λ f, f.litter_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
 end near_litter_perm

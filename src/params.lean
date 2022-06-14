@@ -15,12 +15,13 @@ namespace con_nf
 /-- The parameters of the constructions. We collect them all in one class for simplicity. -/
 class params :=
 (Λ : Type u) (Λr : Λ → Λ → Prop) [Λwf : is_well_order Λ Λr]
-(hΛ : (ordinal.type Λr).is_limit)
+(Λ_ord : ordinal.type Λr = (#Λ).ord)
+(Λ_limit : (#Λ).is_limit)
 (κ : Type u) (κ_regular : (#κ).is_regular)
 (Λ_lt_κ : #Λ < #κ)
 (μ : Type u) (μr : μ → μ → Prop) [μwf : is_well_order μ μr]
 (μ_ord : ordinal.type μr = (#μ).ord)
-(μ_limit : (#μ).is_strong_limit)
+(μ_strong_limit : (#μ).is_strong_limit)
 (κ_lt_μ : #κ < #μ)
 (κ_le_μ_cof : #κ ≤ (#μ).ord.cof)
 (δ : Λ)
@@ -33,28 +34,26 @@ variables [params.{u}]
 instance : is_well_order Λ Λr := Λwf
 instance : linear_order Λ := linear_order_of_STO' Λr
 
+noncomputable instance : inhabited Λ := @classical.inhabited_of_nonempty _ sorry
+noncomputable instance : inhabited κ := @classical.inhabited_of_nonempty _ sorry
+noncomputable instance : inhabited μ  := @classical.inhabited_of_nonempty _ sorry
+
+/-- The litter names. -/
+@[derive inhabited, irreducible] def litter_name := (Λ × Λ) × μ
+
+@[simp] lemma mk_litter_name : #litter_name = #μ :=
+by simp_rw [litter_name, mk_prod, lift_id, mul_assoc, mul_eq_right
+  (κ_regular.aleph_0_le.trans κ_lt_μ.le) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_limit.ne_zero]
+
 /-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
 arbitrary type of cardinality `μ` and partitioning it into suitable sets of litters afterwards, we
-define it as `(Λ × Λ) × μ × κ`, which has the correct cardinality and comes with a natural partition. -/
-def base_type : Type* := (Λ × Λ) × μ × κ
+define it as `litter_name × κ`, which has the correct cardinality and comes with a natural
+partition. -/
+@[derive inhabited] def base_type : Type* := litter_name × κ
 
 @[simp] lemma mk_base_type : #base_type = #μ :=
-begin
-  simp_rw [base_type, mk_prod, lift_id,
-    mul_eq_left (κ_regular.aleph_0_le.trans κ_lt_μ.le) κ_lt_μ.le κ_regular.pos.ne'],
-  have ΛΛ_Λ : # Λ * # Λ = # Λ,
-  { refine mul_eq_left _ _ _, sorry, sorry, sorry, },
-  /- strang difficulties applying lemmas about ℵ₀ -/
-  rw ΛΛ_Λ, clear ΛΛ_Λ,
-  refine mul_eq_right (κ_regular.aleph_0_le.trans κ_lt_μ.le) _ _,
-  transitivity, exact Λ_lt_κ.le, exact κ_lt_μ.le,
-  rw cardinal.mk_ne_zero_iff,
-  sorry,  /- lemma that a limit ordinal is non-zero and hence non-empty -/
-end
-/- may want:
-  ordinal.omega_le_of_is_limit
-  ordinal.card_le_card
--/
+by simp_rw [base_type, mk_prod, lift_id, mk_litter_name,
+  mul_eq_left (κ_regular.aleph_0_le.trans κ_lt_μ.le) κ_lt_μ.le κ_regular.pos.ne']
 
 /-- Extended type index. -/
 def xti : Type* := {s : finset Λ // s.nonempty}
