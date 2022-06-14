@@ -71,9 +71,9 @@ end is_near
 variables {i j : μ}
 
 /-- The `i`-th litter. -/
-def litter (i : μ) : set base_type := {p | p.1 = i}
+def litter (δ γ : Λ) (i : μ) : set base_type := {p | p.1.1 = δ ∧ p.1.2 = γ ∧ p.2.1 = i }
 
-@[simp] lemma mk_litter (i : μ) : #(litter i) = #κ :=
+@[simp] lemma mk_litter (δ γ : Λ) (i : μ) : #(litter δ γ i) = #κ :=
 cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, by { ext, exacts [x.2.symm, rfl] }, λ k, rfl⟩⟩
 
 lemma pairwise_disjoint_litter : pairwise (disjoint on litter) :=

@@ -17,6 +17,7 @@ class params :=
 (Λ : Type u) (Λr : Λ → Λ → Prop) [Λwf : is_well_order Λ Λr]
 (hΛ : (ordinal.type Λr).is_limit)
 (κ : Type u) (κ_regular : (#κ).is_regular)
+(Λ_lt_κ : #Λ < #κ)
 (μ : Type u) (μr : μ → μ → Prop) [μwf : is_well_order μ μr]
 (μ_ord : ordinal.type μr = (#μ).ord)
 (μ_limit : (#μ).is_strong_limit)
@@ -33,13 +34,27 @@ instance : is_well_order Λ Λr := Λwf
 instance : linear_order Λ := linear_order_of_STO' Λr
 
 /-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
-arbitrary type of cardinality `μ` and partitioning it in parts of cardinality `κ` afterwards, we
-define it as `μ × κ`, which has the correct cardinality and comes with an obvious partition. -/
-def base_type : Type* := μ × κ
+arbitrary type of cardinality `μ` and partitioning it into suitable sets of litters afterwards, we
+define it as `(Λ × Λ) × μ × κ`, which has the correct cardinality and comes with a natural partition. -/
+def base_type : Type* := (Λ × Λ) × μ × κ
 
 @[simp] lemma mk_base_type : #base_type = #μ :=
-by simp_rw [base_type, mk_prod, lift_id,
-  mul_eq_left (κ_regular.aleph_0_le.trans κ_lt_μ.le) κ_lt_μ.le κ_regular.pos.ne']
+begin
+  simp_rw [base_type, mk_prod, lift_id,
+    mul_eq_left (κ_regular.aleph_0_le.trans κ_lt_μ.le) κ_lt_μ.le κ_regular.pos.ne'],
+  have ΛΛ_Λ : # Λ * # Λ = # Λ,
+  { refine mul_eq_left _ _ _, sorry, sorry, sorry, },
+  /- strang difficulties applying lemmas about ℵ₀ -/
+  rw ΛΛ_Λ, clear ΛΛ_Λ,
+  refine mul_eq_right (κ_regular.aleph_0_le.trans κ_lt_μ.le) _ _,
+  transitivity, exact Λ_lt_κ.le, exact κ_lt_μ.le,
+  rw cardinal.mk_ne_zero_iff,
+  sorry,  /- lemma that a limit ordinal is non-zero and hence non-empty -/
+end
+/- may want:
+  ordinal.omega_le_of_is_limit
+  ordinal.card_le_card
+-/
 
 /-- Extended type index. -/
 def xti : Type* := {s : finset Λ // s.nonempty}
