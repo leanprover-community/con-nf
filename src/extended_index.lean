@@ -24,7 +24,7 @@ instance coe_lt_to_hom (β γ : Λ) : has_lift_t (β < γ) ((γ : type_index) �
 ⟨λ h, by { unfold quiver.hom, simp, exact h }⟩
 
 /-- The direct path from the base type to `α`. -/
-def direct_index_path (α : Λ) : index_path α :=
+def index_path.direct (α : Λ) : index_path α :=
 quiver.hom.to_path $ with_bot.bot_lt_coe α
 
 /-- A proper type index, together with a path from the base type.
