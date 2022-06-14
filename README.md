@@ -1,6 +1,6 @@
 # The consistency of New Foundations
 
-[![.github/workflows/leanbuild.yml](https://github.com/leanprover-community/con-nf/actions/workflows/leanbuild.yml/badge.svg)](https://github.com/leanprover-community/con-nf/actions/workflows/leanbuild.yml)
+[![.github/workflows/push_main.yml](https://github.com/leanprover-community/con-nf/actions/workflows/push_main.yml/badge.svg)](https://github.com/leanprover-community/con-nf/actions/workflows/push_main.yml)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/leanprover-community/con-nf)
 
