@@ -25,12 +25,16 @@ class params :=
 (δ : Λ)
 (hδ : (ordinal.typein Λr δ).is_limit)
 
+/-- There exists a set of valid parameters for the model. -/
+example : params := sorry
+
 open params
 
 variables [params.{u}]
 
 instance : is_well_order Λ Λr := Λwf
 instance : linear_order Λ := linear_order_of_STO' Λr
+instance : has_well_founded Λ := is_well_order.to_has_well_founded
 
 /-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
 arbitrary type of cardinality `μ` and partitioning it in parts of cardinality `κ` afterwards, we
