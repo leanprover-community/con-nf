@@ -1,6 +1,7 @@
 import mathlib.equiv
 import mathlib.order
 import params
+import algebra.hom.iterate
 
 /-!
 # Litters, near-litters
@@ -18,7 +19,7 @@ considered opaque, as we only care about the fact that their cardinality is `κ`
 * `con_nf.is_near_litter`: A set is a `i`-near-litter if it is near the `i`-th litter.
 -/
 
-open cardinal equiv equiv.perm function set
+open cardinal cardinal.is_regular equiv equiv.perm function set
 open_locale cardinal
 
 universe u
@@ -43,7 +44,7 @@ lemma small.mono (h : s ⊆ t) : small t → small s := (cardinal.mk_le_mk_of_su
 
 /-- Unions of small subsets are small. -/
 lemma small.union (hs : small s) (ht : small t) : small (s ∪ t) :=
-(mk_union_le _ _).trans_lt $ add_lt_of_lt κ_regular.omega_le hs ht
+(mk_union_le _ _).trans_lt $ add_lt_of_lt κ_regular.aleph_0_le hs ht
 
 /-- The image of a small set under any function `f` is small. -/
 lemma small.image : small s → small (f '' s) := mk_image_le.trans_lt
@@ -224,12 +225,22 @@ instance : has_div near_litter_perm :=
 /-- We can raise near-litter permutations to a natural power since we can do this to
 permutations of the base type and the type of litters. -/
 instance has_pow : has_pow near_litter_perm ℕ :=
-⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, sorry⟩⟩
+begin
+  refine ⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, _⟩⟩,
+  induction n with d hd,
+  { exact (1 : near_litter_perm).near },
+  { exact (f * ⟨f.base_perm ^ d, f.litter_perm ^ d, hd⟩).near }
+end
 
 /-- We can raise near-litter permutations to an integer power since we can do this to
 permutations of the base type and the type of litters. -/
 instance has_zpow : has_pow near_litter_perm ℤ :=
-⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, sorry⟩⟩
+begin
+  refine ⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, _⟩⟩,
+  cases n,
+  { exact (f ^ n).near },
+  { exact (f ^ (n + 1))⁻¹.near }
+end
 
 /-!
 The following lemmas describe how the group of near-litter permutations interacts with the group of

@@ -1,6 +1,6 @@
 # The consistency of New Foundations
 
-[![.github/workflows/leanbuild.yml](https://github.com/leanprover-community/con-nf/actions/workflows/leanbuild.yml/badge.svg)](https://github.com/leanprover-community/con-nf/actions/workflows/leanbuild.yml)
+[![.github/workflows/push_main.yml](https://github.com/leanprover-community/con-nf/actions/workflows/push_main.yml/badge.svg)](https://github.com/leanprover-community/con-nf/actions/workflows/push_main.yml)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/leanprover-community/con-nf)
 
@@ -22,7 +22,7 @@ The formal system which we are using as a target system is Lean's dependent type
 
 Below we explain how to engage with the Lean code directly.
 We also provide a [blueprint](https://leanprover-community.github.io/con-nf/)
-including a [dependency graph](https://leanprover-community.github.io/con-nf/dep_graph.html)
+including a [dependency graph](https://leanprover-community.github.io/con-nf/blueprint/dep_graph_document.html)
 of the main ingredients in the repository.
 This blueprint is developed in sync with the Lean formalization,
 and will hence see frequent updates during the length of the project.

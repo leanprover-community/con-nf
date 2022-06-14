@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 0
 
       - name: update branch
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: leanprover-contrib/update-versions-action@master
 
       - name: install elan

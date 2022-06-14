@@ -45,9 +45,13 @@ class params :=
 (μ : Type u) (μr : μ → μ → Prop) [μwf : is_well_order μ μr]
 (μ_ord : ordinal.type μr = (#μ).ord)
 (μ_limit : (#μ).is_strong_limit)
+(κ_lt_μ : #κ < #μ)
 (κ_le_μ_cof : #κ ≤ (#μ).ord.cof)
 (δ : Λ)
 (hδ : (ordinal.typein Λr δ).is_limit)
+
+/-- There exists a set of valid parameters for the model. -/
+example : params := sorry
 
 open params
 
@@ -58,6 +62,8 @@ explicitly write `Λwf` everywhere, we declare it as an instance. -/
 instance : is_well_order Λ Λr := Λwf
 /-- We can deduce from the well-ordering `Λwf` that `Λ` is linearly ordered. -/
 instance : linear_order Λ := linear_order_of_STO' Λr
+/-- We deduce that `Λ` has a well-founded relation. -/
+instance : has_well_founded Λ := is_well_order.to_has_well_founded
 
 /-- Since `μ` has cofinality `≥ κ`, the cardinality of `κ` must be at most that of `μ`. -/
 lemma κ_le_μ : #κ ≤ #μ := κ_le_μ_cof.trans $ ordinal.cof_ord_le _
@@ -74,7 +80,7 @@ def base_type : Type* := μ × κ
 We will prove that all types constructed in our model have cardinality equal to `μ`. -/
 @[simp] lemma mk_base_type : #base_type = #μ :=
 by simp_rw [base_type, mk_prod, lift_id,
-  mul_eq_left (κ_regular.omega_le.trans κ_le_μ) κ_le_μ κ_regular.pos.ne']
+  mul_eq_left (κ_regular.aleph_0_le.trans κ_lt_μ.le) κ_lt_μ.le κ_regular.pos.ne']
 
 /-- Extended type index. -/
 def xti : Type* := {s : finset Λ // s.nonempty}
