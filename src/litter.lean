@@ -147,29 +147,17 @@ instance : has_div near_litter_perm :=
 instance has_pow : has_pow near_litter_perm ℕ :=
 begin
   refine ⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, _⟩⟩,
-  intros i s h,
   induction n with d hd,
-  exact h,
-  have := f.3 hd, exact this,
+  { exact (1 : near_litter_perm).near },
+  { exact (f * ⟨f.base_perm ^ d, f.litter_perm ^ d, hd⟩).near }
 end
 
 instance has_zpow : has_pow near_litter_perm ℤ :=
 begin
   refine ⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, _⟩⟩,
-  intros i s h,
-  induction n,
-  { induction n with d hd, exact h, have := f.3 hd, exact this },
-  { induction n with d hd,
-    have := (f⁻¹).3 h, exact this,
-    have := (f⁻¹).3 hd,
-    simp, rw coe_pow,
-    have r1 : f⁻¹.litter_perm = f.litter_perm⁻¹ := by refl,
-    have r2 : f⁻¹.base_perm = f.base_perm⁻¹ := by refl,
-    rw [r1, r2] at this, simp at this, rw ← preimage_comp at this,
-    have that : ∀ n : ℕ, (f.litter_perm ^ n)⁻¹ = (f.litter_perm⁻¹ ^ n) := by simp,
-    rw [that, coe_pow, coe_pow] at this, rw [that, coe_pow],
-    sorry,
-    }
+  cases n,
+  { exact (f ^ n).near },
+  { exact (f ^ (n + 1))⁻¹.near }
 end
 
 @[simp] lemma base_perm_one : (1 : near_litter_perm).base_perm = 1 := rfl
