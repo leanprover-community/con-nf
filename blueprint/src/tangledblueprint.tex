@@ -48,6 +48,8 @@ Let $\mu$ be your favorite strong limit cardinal $>\kappa$ of cofinality $\geq \
 \begin{definition}
 \label {def:type-index}
 \uses{def:params}
+\leanok
+\lean{con_nf.type_index}
 We define a {\em type index} as an element of $\lambda \cup \{-1\}$.
 We define a {\em proper type index} as an element of $\lambda$.
 \end{definition}
@@ -566,7 +568,8 @@ We give an exact statement of what is meant, then we prove it.
 
 \begin{description}
 
-\begin{definition}[Local bijection]
+\begin{definition}
+\label {def:local-bijection}
 \uses{def:extended-type-index, def:litter, def:small}
 An $\alpha$-local bijection is a map $\pi^0$ whose domain is a set of pairs $(A,x)$ where $A$ is an $\alpha$-extended type index and $x$ is in type $-1$,  and whose range is a subset of $\tau_{-1}$.  To state further conditions, we introduce the notation $\pi^0_A(x) = \pi^0(A,x)$ and state the further condition that each map $\pi^0_A$ is injective and has domain the same as its range, and that the intersection of the domain of $\pi^0_A$ with any litter is small (empty being an important case of small).
 \end{definition}
@@ -579,9 +582,9 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 
 \item[Stipulation:]  For each litter $L$ we specify a well-ordering $\leq_L$ of order type $\kappa$ with coordinated strict well-ordering $<_L$.
 
-\begin{theorem}[Freedom of action]
+\begin{theorem}
 \label {freedom-of-action}
-\uses{def:derivative, def:perm-exception, def:strong-support}
+\uses{def:derivative, def:perm-exception, def:strong-support, def:local-bijection}
 For any $\alpha$-local bijection $\pi^0$ there is an $\alpha$-allowable permutation $\pi$ such that
 $\pi_{A\cup \{-1\}}$ extends $\pi^0_A$ for each $A$, and satisfying a further technical condition:  the permutation $\pi$ obtained from $\pi^0$ has no exceptions of its derivatives other than those determined by elements of the domains of maps $\pi^0_A$:  $(A,x)$ being in the domain of $\pi^0$ is required for (but does not require) $x$ to be an exception of $\pi_{A \cup \{-1\}}$.
 \end{theorem}
