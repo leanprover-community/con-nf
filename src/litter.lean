@@ -135,9 +135,24 @@ end
 is_near_litter_litter_iff
 
 /-- A set is near at most one litter. -/
-lemma is_near_unique_litter {s : set base_type}
+lemma is_near_litter.unique {s : set base_type}
   (hi : is_near_litter i s) (hj : is_near_litter j s) : i = j :=
 is_near_litter_litter_iff.1 $ hi.trans hj.symm
+
+/-- There are `μ` near-litters near the `i`-th litter. -/
+lemma mk_near_litter (i : μ) : #{s : set base_type // is_near_litter i s} = #μ :=
+begin
+  refine (le_antisymm _ _).trans mk_base_type,
+  { refine le_of_le_of_eq _
+     (mk_subset_mk_lt_cof $ by { simp_rw mk_base_type, exact μ_strong_limit.2 }),
+    rw mk_base_type,
+    exact (cardinal.mk_congr $ subtype_equiv (equiv.symm_diff $ litter i) $ λ s, iff.rfl).trans_le
+      ⟨subtype.imp_embedding _ _ $ λ s, κ_le_μ_cof.trans_lt'⟩ },
+  refine ⟨⟨λ a, ⟨litter i ∆ {a}, _⟩, λ a b h, _⟩⟩,
+  { rw [is_near_litter, is_near, small, symm_diff_symm_diff_self, mk_singleton],
+    exact one_lt_aleph_0.trans_le κ_regular.aleph_0_le },
+  { exact singleton_injective (symm_diff_left_injective _ $ by convert congr_arg subtype.val h) }
+end
 
 /--
 A near-litter permutation is a permutation of the base type which sends near-litters to
@@ -185,7 +200,7 @@ end
 
 /-- An extensionality result for near-litter permutations.
 If two near-litter permutations have the same action on the base type, they are equal. -/
-@[ext] lemma near_litter_perm.ext (h : f.base_perm = g.base_perm) : f = g := base_perm_injective h
+@[ext] lemma ext (h : f.base_perm = g.base_perm) : f = g := base_perm_injective h
 
 /-!
 We are going to show that the set of near-litter permutations forms a group.
@@ -232,6 +247,8 @@ begin
   { exact (f ^ n).near },
   { exact (f ^ (n + 1))⁻¹.near }
 end
+
+instance : inhabited near_litter_perm := ⟨1⟩
 
 /-!
 The following lemmas describe how the group of near-litter permutations interacts with the group of
