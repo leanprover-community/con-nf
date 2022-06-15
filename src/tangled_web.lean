@@ -49,6 +49,34 @@ open params
 
 variable [params.{u}]
 
+/-- Extended type index. -/
+def xti : Type* := {s : finset Λ // s.nonempty}
+
+def xti.min (s : xti) : Λ := s.1.min' s.2
+def xti.max (s : xti) : Λ := s.1.max' s.2
+
+def xti.drop (s : xti) : option xti := if h : _ then some ⟨s.1.erase s.min, h⟩ else none
+def xti.drop_max (s : xti) : option xti := if h : _ then some ⟨s.1.erase s.max, h⟩ else none
+
+instance : has_singleton Λ xti := ⟨λ x, ⟨{x}, finset.singleton_nonempty _⟩⟩
+instance : has_insert Λ xti := ⟨λ x s, ⟨insert x s.1, finset.insert_nonempty _ _⟩⟩
+
+noncomputable def xti.dropn (s : xti) : ℕ → option xti
+| 0 := some s
+| (n+1) := xti.dropn n >>= xti.drop
+
+def sdom : xti → xti → Prop
+| A := λ B, A.max < B.max ∨ A.max = B.max ∧
+  ∃ A' ∈ A.drop_max, ∀ B' ∈ B.drop_max,
+    have (A':xti).1.card < A.1.card, from sorry,
+    sdom A' B'
+using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf (λ A, A.1.card)⟩]}
+
+instance : has_lt xti := ⟨sdom⟩
+instance xti.is_well_order : is_well_order xti (<) := sorry
+instance : has_well_founded xti := ⟨_, xti.is_well_order.wf⟩
+instance : has_le xti := ⟨λ A B, A < B ∨ A = B⟩
+
 def small {α} (x : set α) := #x < #κ
 
 def clan (A : xti) := μ × κ
