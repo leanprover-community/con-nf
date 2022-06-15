@@ -78,7 +78,7 @@ noncomputable instance : inhabited κ :=
 noncomputable instance : inhabited μ  :=
 @classical.inhabited_of_nonempty _ $ cardinal.mk_ne_zero_iff.1 μ_strong_limit.ne_zero
 
-/-- The litters. This is the type indexing the partition of `base_type`. -/
+/-- The litters. This is the type indexing the partition of `atom`. -/
 @[derive inhabited, irreducible] def litter := (Λ × Λ) × μ
 
 @[simp] lemma mk_litter : #litter = #μ :=
@@ -90,14 +90,14 @@ arbitrary type of cardinality `μ` and partitioning it into suitable sets of lit
 define it as `litter × κ`, which has the correct cardinality and comes with a natural
 partition.
 
-This type is occasionally referred to as a type of atoms. These are not 'atoms' in the ZFU, TTTU or
-NFU sense; they are simply the elements of the model which are in type `τ₋₁`. -/
-@[derive inhabited] def base_type : Type* := litter × κ
+These are not 'atoms' in the ZFU, TTTU or NFU sense; they are simply the elements of the model which
+are in type `τ₋₁`. -/
+@[derive inhabited] def atom : Type* := litter × κ
 
 /-- The cardinality of `τ₋₁` is the cardinality of `μ`.
 We will prove that all types constructed in our model have cardinality equal to `μ`. -/
-@[simp] lemma mk_base_type : #base_type = #μ :=
-by simp_rw [base_type, mk_prod, lift_id, mk_litter,
+@[simp] lemma mk_atom : #atom = #μ :=
+by simp_rw [atom, mk_prod, lift_id, mk_litter,
   mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) κ_le_μ κ_regular.pos.ne']
 
 end con_nf

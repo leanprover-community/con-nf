@@ -1,5 +1,4 @@
-import mathlib.equiv
-import mathlib.order
+import order.bounded_order
 
 instance with_bot_has_strict_total_order' (α : Type*)
 [has_lt α] [is_well_order α (<)] : is_strict_total_order' (with_bot α) (<) :=

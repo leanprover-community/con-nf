@@ -90,11 +90,11 @@ I waffled about this:  but cofinality exactly $\kappa$ will work.
 We will define a function taking type indices $\alpha$ to sets $\tau_\alpha$ (type $\alpha$).
 
 \begin{definition}
-\label {def:type-minus-one}
+\label {def:atom}
 \uses{def:params}
 \leanok
-\lean{con_nf.base_type}
-Define $\tau_{-1}$ as  $\{(-1,\nu,\alpha):\nu<\mu \wedge \alpha<\kappa\}$.  Note that this is a set of size $\mu$.
+\lean{con_nf.atom}
+Define $\mathcal L$ as $ \lambda ^ 2 \times \mu$ and $\tau_{-1}$ as $\mathcal L \times \kappa$.  Note that both sets have size $\mu$.
 \end{definition}
 
 We may refer to objects of type $-1$ as ``atoms".  They are not understood here to be atoms in a conventional sense, but the analogous objects in earlier versions of the construction were atoms and I have this mental habit.
@@ -111,7 +111,7 @@ Note that the litters make up a partition of type $-1$ into sets of size $\kappa
 
 \begin{definition}
 \label {def:local-cardinal}
-\uses{def:litter, def:type-minus-one}
+\uses{def:litter, def:atom}
 A set $K$ is a local cardinal iff there is a litter $L$ such that $K=\{N \subseteq \tau_{-1}:|N \Delta L|<\kappa\}$.
 \end{definition}
 
@@ -181,7 +181,7 @@ Fix a proper type index $\alpha$.
 
 \begin{definition}
 \label {def:oldtau}
-\uses{def:alpha, def:type-minus-one}
+\uses{def:alpha, def:atom}
 Posit that we have already defined $\tau_\beta$ for each type index $\beta<\alpha$ (notice that we have already defined $\tau_{-1}$), and that the cardinality of each set $\tau_\beta$ is $\mu$.
 \end{definition}
 

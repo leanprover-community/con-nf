@@ -1,5 +1,3 @@
-import mathlib.equiv
-import mathlib.order
 import mathlib.well_founded
 import params
 
@@ -23,15 +21,15 @@ def type_index := with_bot Λ
 /- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
 This allows well founded recursion on type indices. -/
 
-instance : linear_order type_index := linear_order_of_STO' (<)
-instance : has_well_founded type_index := is_well_order.to_has_well_founded
+instance : linear_order type_index := infer_instance
+instance : has_well_founded type_index := infer_instance
 
 /-- A pretangle has a preferred extension, which is either a proper type `β : Λ`,
 or the base type `-1`. A pretangle has a `-1`-extension if and only if its preferred extension
 is the `-1`-extension. -/
 inductive preferred_extension (α : Λ) : Type u
 | proper_extension : Π (β < α), preferred_extension
-| base_extension : set base_type → preferred_extension
+| base_extension : set atom → preferred_extension
 
 /-- A *pretangle* is an object that may become a *tangle*,
 an element of the model.

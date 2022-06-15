@@ -8,7 +8,7 @@ import algebra.hom.iterate
 
 In this file, we define smallness, nearness, litters and near-litters.
 
-Litters are the parts of an indexed partition of `con_nf.base_type`. Their precise definition can be
+Litters are the parts of an indexed partition of `con_nf.atom`. Their precise definition can be
 considered opaque, as we only care about the fact that their cardinality is `κ`.
 
 ## Main declarations
@@ -89,7 +89,7 @@ variables {i j : litter}
 We define a litter as the set of elements of the base type `τ₋₁` where the first element of the pair
 is `i`. However, as noted above, the definition can be viewed as opaque, since its cardinality is
 the only interesting feature. -/
-def litter_set (i : litter) : set base_type := {p | p.1 = i}
+def litter_set (i : litter) : set atom := {p | p.1 = i}
 
 /-- Each litter has cardinality `κ`. -/
 @[simp] lemma mk_litter_set (i : litter) : #(litter_set i) = #κ :=
@@ -105,17 +105,17 @@ it is near the `i`-th litter.
 Note that here we keep track of which litter a set is near; a set cannot be merely a near-litter, it
 must be an `i`-near-litter for some `i`. A priori, a set could be an `i`-near-litter and also a
 `j`-near-litter, but this is not the case. -/
-def is_near_litter (i : litter) (s : set base_type) : Prop := is_near (litter_set i) s
+def is_near_litter (i : litter) (s : set atom) : Prop := is_near (litter_set i) s
 
 /-- Litter `i` is a near-litter to litter `i`.
-Note that the type of litters is `set base_type`, and the type of objects that can be near-litters
-is also `set base_type`. There is therefore no type-level distinction between elements of a litter
+Note that the type of litters is `set atom`, and the type of objects that can be near-litters
+is also `set atom`. There is therefore no type-level distinction between elements of a litter
 and elements of a near-litter. -/
 lemma is_near_litter_litter_set (i : litter) : is_near_litter i (litter_set i) := is_near_rfl
 
 /-- If two sets are `i`-near-litters, they are near each other.
 This is because they are both near litter `i`, and nearness is transitive. -/
-lemma is_near_litter.near {s t : set base_type} (hs : is_near_litter i s)
+lemma is_near_litter.near {s t : set atom} (hs : is_near_litter i s)
   (ht : is_near_litter i t) : is_near s t := hs.symm.trans ht
 
 /-- A litter is only a near-litter to itself. -/
@@ -131,17 +131,17 @@ begin
 end
 
 /-- A set is near at most one litter. -/
-lemma is_near_litter.unique {s : set base_type}
+lemma is_near_litter.unique {s : set atom}
   (hi : is_near_litter i s) (hj : is_near_litter j s) : i = j :=
 is_near_litter_litter_set_iff.1 $ hi.trans hj.symm
 
 /-- There are `μ` near-litters near the `i`-th litter. -/
-lemma mk_near_litter (i : litter) : #{s : set base_type // is_near_litter i s} = #μ :=
+lemma mk_near_litter (i : litter) : #{s : set atom // is_near_litter i s} = #μ :=
 begin
-  refine (le_antisymm _ _).trans mk_base_type,
+  refine (le_antisymm _ _).trans mk_atom,
   { refine le_of_le_of_eq _
-     (mk_subset_mk_lt_cof $ by { simp_rw mk_base_type, exact μ_strong_limit.2 }),
-    rw mk_base_type,
+     (mk_subset_mk_lt_cof $ by { simp_rw mk_atom, exact μ_strong_limit.2 }),
+    rw mk_atom,
     exact (cardinal.mk_congr $ subtype_equiv (equiv.symm_diff $ litter_set i) $
       λ s, iff.rfl).trans_le ⟨subtype.imp_embedding _ _ $ λ s, κ_le_μ_cof.trans_lt'⟩ },
   refine ⟨⟨λ a, ⟨litter_set i ∆ {a}, _⟩, λ a b h, _⟩⟩,
@@ -158,23 +158,23 @@ as data for simplicity.
 
 In the paper, this is called a -1-allowable permutation.
 The proposition `near` can be interpreted as saying that if `s` is an `i`-near-litter, then its
-image under the permutation (`base_perm`) is near the litter that `i` is mapped to under the litter
+image under the permutation (`atom_perm`) is near the litter that `i` is mapped to under the litter
 permutation (`litter_perm`).
 
-The definition `⇑base_perm⁻¹ ⁻¹' s` is used instead of `⇑base_perm '' s` because it has better
-definitional properties. For instance, `x in base_perm⁻¹ ⁻¹' s` is definitionally equal to
-`base_perm x ∈ s`.
+The definition `⇑atom_perm⁻¹ ⁻¹' s` is used instead of `⇑atom_perm '' s` because it has better
+definitional properties. For instance, `x in atom_perm⁻¹ ⁻¹' s` is definitionally equal to
+`atom_perm x ∈ s`.
 -/
 structure near_litter_perm : Type u :=
-(base_perm : perm base_type)
+(atom_perm : perm atom)
 (litter_perm : perm litter)
-(near ⦃i : litter⦄ ⦃s : set base_type⦄ :
-  is_near_litter i s → is_near_litter (litter_perm i) (⇑base_perm⁻¹ ⁻¹' s))
+(near ⦃i : litter⦄ ⦃s : set atom⦄ :
+  is_near_litter i s → is_near_litter (litter_perm i) (⇑atom_perm⁻¹ ⁻¹' s))
 
-/-- This is the condition that relates the `base_perm` and the `litter_perm`. This is essentially
+/-- This is the condition that relates the `atom_perm` and the `litter_perm`. This is essentially
 the field `near` in the structure `near_litter_perm`, but presented here as a lemma. -/
-lemma is_near_litter.map {f : near_litter_perm} {s : set base_type} (h : is_near_litter i s) :
-  is_near_litter (f.litter_perm i) (⇑f.base_perm⁻¹ ⁻¹' s) :=
+lemma is_near_litter.map {f : near_litter_perm} {s : set atom} (h : is_near_litter i s) :
+  is_near_litter (f.litter_perm i) (⇑f.atom_perm⁻¹ ⁻¹' s) :=
 f.near h
 
 namespace near_litter_perm
@@ -183,7 +183,7 @@ variables {f g : near_litter_perm}
 /-- The map from the type of near-litter permutations to the type of permutations of `τ₋₁` is
 injective. That is, if two near-litter permutations have the same action on the base type, they are
 equal. -/
-lemma base_perm_injective : injective near_litter_perm.base_perm :=
+lemma atom_perm_injective : injective near_litter_perm.atom_perm :=
 begin
   rintro ⟨f, f', hf⟩ ⟨g, g', hg⟩ (h : f = g),
   suffices : f' = g',
@@ -196,7 +196,7 @@ end
 
 /-- An extensionality result for near-litter permutations.
 If two near-litter permutations have the same action on the base type, they are equal. -/
-@[ext] lemma ext (h : f.base_perm = g.base_perm) : f = g := base_perm_injective h
+@[ext] lemma ext (h : f.atom_perm = g.atom_perm) : f = g := atom_perm_injective h
 
 /-!
 We are going to show that the set of near-litter permutations forms a group.
@@ -209,36 +209,36 @@ instance : has_one near_litter_perm := ⟨⟨1, 1, λ i s, id⟩⟩
 
 /-- Any near-litter permutation admits an inverse, which is also a near-litter permutation. -/
 instance : has_inv near_litter_perm :=
-⟨λ f, ⟨f.base_perm⁻¹, f.litter_perm⁻¹, λ i s h, begin
-  have : is_near (⇑f.base_perm⁻¹ ⁻¹' litter_set (f.litter_perm⁻¹ i)) s,
+⟨λ f, ⟨f.atom_perm⁻¹, f.litter_perm⁻¹, λ i s h, begin
+  have : is_near (⇑f.atom_perm⁻¹ ⁻¹' litter_set (f.litter_perm⁻¹ i)) s,
   { exact (f.near $ is_near_litter_litter_set _).near (by rwa apply_inv_self) },
-  simpa only [preimage_inv, perm.image_inv, preimage_image] using this.image ⇑f.base_perm⁻¹,
+  simpa only [preimage_inv, perm.image_inv, preimage_image] using this.image ⇑f.atom_perm⁻¹,
 end⟩⟩
 
 /-- Near-litter permutations can be composed. -/
 instance : has_mul near_litter_perm :=
-⟨λ f g, ⟨f.base_perm * g.base_perm, f.litter_perm * g.litter_perm, λ i s h, h.map.map⟩⟩
+⟨λ f g, ⟨f.atom_perm * g.atom_perm, f.litter_perm * g.litter_perm, λ i s h, h.map.map⟩⟩
 
 /-- Dividing two permutations `f / g` can be interpreted as `f⁻¹ * g`. -/
 instance : has_div near_litter_perm :=
-⟨λ f g, ⟨f.base_perm / g.base_perm, f.litter_perm / g.litter_perm,
+⟨λ f g, ⟨f.atom_perm / g.atom_perm, f.litter_perm / g.litter_perm,
   by { simp_rw [div_eq_mul_inv], exact (f * g⁻¹).near }⟩⟩
 
 /-- We can raise near-litter permutations to a natural power since we can do this to
 permutations of the base type and the type of litters. -/
 instance has_pow : has_pow near_litter_perm ℕ :=
 begin
-  refine ⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, _⟩⟩,
+  refine ⟨λ f n, ⟨f.atom_perm ^ n, f.litter_perm ^ n, _⟩⟩,
   induction n with d hd,
   { exact (1 : near_litter_perm).near },
-  { exact (f * ⟨f.base_perm ^ d, f.litter_perm ^ d, hd⟩).near }
+  { exact (f * ⟨f.atom_perm ^ d, f.litter_perm ^ d, hd⟩).near }
 end
 
 /-- We can raise near-litter permutations to an integer power since we can do this to
 permutations of the base type and the type of litters. -/
 instance has_zpow : has_pow near_litter_perm ℤ :=
 begin
-  refine ⟨λ f n, ⟨f.base_perm ^ n, f.litter_perm ^ n, _⟩⟩,
+  refine ⟨λ f n, ⟨f.atom_perm ^ n, f.litter_perm ^ n, _⟩⟩,
   cases n,
   { exact (f ^ n).near },
   { exact (f ^ (n + 1))⁻¹.near }
@@ -256,15 +256,15 @@ The `@[simp]` attribute teaches these results to the `simp` tactic. This means t
 example) prefer group operations to be applied after extracting the base permutation, not before.
 -/
 
-@[simp] lemma base_perm_one : (1 : near_litter_perm).base_perm = 1 := rfl
-@[simp] lemma base_perm_inv (f : near_litter_perm) : f⁻¹.base_perm = f.base_perm⁻¹ := rfl
-@[simp] lemma base_perm_mul (f g : near_litter_perm) :
-  (f * g).base_perm = f.base_perm * g.base_perm := rfl
-@[simp] lemma base_perm_div (f g : near_litter_perm) :
-  (f / g).base_perm = f.base_perm / g.base_perm := rfl
-@[simp] lemma base_perm_pow (f : near_litter_perm) (n : ℕ) : (f ^ n).base_perm = f.base_perm ^ n :=
+@[simp] lemma atom_perm_one : (1 : near_litter_perm).atom_perm = 1 := rfl
+@[simp] lemma atom_perm_inv (f : near_litter_perm) : f⁻¹.atom_perm = f.atom_perm⁻¹ := rfl
+@[simp] lemma atom_perm_mul (f g : near_litter_perm) :
+  (f * g).atom_perm = f.atom_perm * g.atom_perm := rfl
+@[simp] lemma atom_perm_div (f g : near_litter_perm) :
+  (f / g).atom_perm = f.atom_perm / g.atom_perm := rfl
+@[simp] lemma atom_perm_pow (f : near_litter_perm) (n : ℕ) : (f ^ n).atom_perm = f.atom_perm ^ n :=
 rfl
-@[simp] lemma base_perm_zpow (f : near_litter_perm) (n : ℤ) : (f ^ n).base_perm = f.base_perm ^ n :=
+@[simp] lemma atom_perm_zpow (f : near_litter_perm) (n : ℤ) : (f ^ n).atom_perm = f.atom_perm ^ n :=
 rfl
 
 @[simp] lemma litter_perm_one : (1 : near_litter_perm).litter_perm = 1 := rfl
@@ -280,12 +280,12 @@ rfl
 
 /-- The type of near-litter permutations forms a group. -/
 instance : group near_litter_perm :=
-base_perm_injective.group _ base_perm_one base_perm_mul base_perm_inv base_perm_div base_perm_pow
-  base_perm_zpow
+atom_perm_injective.group _ atom_perm_one atom_perm_mul atom_perm_inv atom_perm_div atom_perm_pow
+  atom_perm_zpow
 
 /-- The group of near-litter permutations acts on the base type via the base permutation. -/
-instance : mul_action near_litter_perm base_type :=
-{ smul := λ f, f.base_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
+instance : mul_action near_litter_perm atom :=
+{ smul := λ f, f.atom_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
 /-- The group of near-litter permutations acts on litters via the litter permutation. -/
 instance : mul_action near_litter_perm litter :=
@@ -293,7 +293,7 @@ instance : mul_action near_litter_perm litter :=
 
 end near_litter_perm
 
-/-- A near litter is an index `i : μ` of a litter and a set `s : set base_type`, such that `s` is
+/-- A near litter is an index `i : μ` of a litter and a set `s : set atom`, such that `s` is
 an `i`-near-litter.
 
 This allows us to forget which set and which litter we are talking about at the type level, and
