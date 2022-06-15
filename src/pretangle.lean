@@ -1,5 +1,6 @@
 import mathlib.equiv
 import mathlib.order
+import mathlib.well_founded
 import params
 
 noncomputable theory
@@ -19,58 +20,9 @@ The base type is written `⊥`. -/
 @[reducible]
 def type_index := with_bot Λ
 
-/-- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
-This allows well founded recursion on type indices.
-TODO(zeramorphic): This proof is rather arduous, is there an easier solution? -/
-instance : is_well_order type_index (<) := begin
-  split,
-  rw well_founded.well_founded_iff_has_min',
-  intros p hp,
-  have := well_founded.well_founded_iff_has_min'.mp Λwf.2,
-  let p' : set Λ := ⋃ (x ∈ p), option.elim ∅ singleton x,
-  by_cases h : p'.nonempty,
-  { obtain ⟨m, ⟨i, hi₁, hi₂⟩, hm⟩ := this p' h, clear this,
-    simp at hi₁,
-    obtain ⟨y, hy⟩ := hi₁,
-    rw ← hy at hi₂, clear hy,
-    simp at hi₂,
-    obtain ⟨hy₁, hy₂⟩ := hi₂,
-    cases y; simp at hy₂,
-    { contradiction },
-    by_cases hbot : ⊥ ∈ p,
-    { refine ⟨⊥, hbot, _⟩, intros x hx₁ hx₂,
-      simp at hx₂, exact hx₂ },
-    rw hy₂ at *, clear hy₂, clear m,
-    refine ⟨↑y, _, _⟩,
-    { exact hy₁ },
-    { intros x hx₁ hx₂,
-      cases x,
-      { exfalso, exact hbot hx₁ },
-      { rw option.coe_def,
-        rw hm x _ _,
-        { simp, refine ⟨some x, hx₁, _⟩, simp },
-        { rw option.coe_def at hx₂, simp at hx₂, exact hx₂ } } } },
-  { simp at h,
-    simp_rw ← set.ne_empty_iff_nonempty at h,
-    push_neg at h,
-    have : ∀ x ∈ p, x = ⊥,
-    { intros x hx, have := h x hx, cases x,
-      { refl },
-      { dsimp at this, exfalso,
-        exact (set.nonempty.ne_empty (set.singleton_nonempty x)) this_1 } },
-    have : p = {⊥},
-    { ext, split; intro hx,
-      { simp, exact this x hx },
-      { simp at hx,
-        obtain ⟨t, ht⟩ := hp,
-        have := this t ht,
-        rw [this, ← hx] at ht,
-        exact ht } },
-    refine ⟨⊥, _, _⟩,
-    { rw this, simp },
-    { intros x hx₁ hx₂,
-      simp at hx₂, exact hx₂ } }
-end
+/- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
+This allows well founded recursion on type indices. -/
+
 instance : linear_order type_index := linear_order_of_STO' (<)
 instance : has_well_founded type_index := is_well_order.to_has_well_founded
 
