@@ -48,29 +48,19 @@ Let $\mu$ be your favorite strong limit cardinal $>\kappa$ of cofinality $\geq \
 \begin{definition}
 \label {def:type-index}
 \uses{def:params}
-We define a type index as an element of $\lambda \cup \{-1\}$.
+We define a {\em type index} as an element of $\lambda \cup \{-1\}$.
+We define a {\em proper type index} as an element of $\lambda$.
 \end{definition}
 
-\begin{definition}
-\label {def:proper-type-index}
-\uses{def:params}
-We define a proper type index as an element of $\lambda$.
-
-I am not convinced that a separate concept of proper type index has merit:  I think that $-1$ is a type index and
-sometimes is treated differently.  But I provide it.
-\end{definition}
+I am not convinced that a separate concept of proper type index has merit:  I think that $-1$ is a type index and sometimes is treated differently.  But I provide it.
 
 \begin{definition}
 \label {def:extended-type-index}
 \uses{def:type-index}
-We define an extended type index as a nonempty finite set of type indices.
-\end{definition}
-
-\begin{definition}
-\label {def:proper-extended-type-index}
-\uses{def:proper-type-index}
-We define a proper extended type index as a nonempty finite set of proper type indices.
-
+\leanok
+\lean{con_nf.extended_index}
+We define an {\em extended type index} as a nonempty finite decreasing sequence of type indices.
+We define a {\em proper extended type index} as a nonempty finite decreasing sequence of proper type indices.
 \end{definition}
 
 \begin{definition}
@@ -94,33 +84,43 @@ We will define a function taking type indices $\alpha$ to sets $\tau_\alpha$ (ty
 \uses{def:params}
 \leanok
 \lean{con_nf.atom}
-Define $\mathcal L$ as $ \lambda ^ 2 \times \mu$ and $\tau_{-1}$ as $\mathcal L \times \kappa$.  Note that both sets have size $\mu$.
+Define $\mathcal L$ as $ \lambda ^ 2 \times \mu$ and $\tau_{-1}$ as $\mathcal L \times \kappa$.
+
+Note that both sets have size $\mu$.
 \end{definition}
 
 We may refer to objects of type $-1$ as ``atoms".  They are not understood here to be atoms in a conventional sense, but the analogous objects in earlier versions of the construction were atoms and I have this mental habit.
 
 \begin{definition}
 \label {def:litter}
-\uses{def:params}
+\uses{def:atom}
 \leanok
 \lean{con_nf.litter}
-We define $L_\nu$ for $\nu<\mu$ as $\{(-1,\nu,\alpha):\alpha<\kappa\}$.  We refer to sets $L_\nu$ as {\em litters\/}.
+Define $L_i$ for $i \in \mathcal L$ as $\{(i, k) : k \in \kappa\}$.
+
+We will refer to both elements of $\mathcal L$ and sets $L_i$ as {\em litters}. To be more precise,
+we will call $L_i$ the {\em $i$-th litter}.
 
 Note that the litters make up a partition of type $-1$ into sets of size $\kappa$.
 \end{definition}
 
 \begin{definition}
-\label {def:local-cardinal}
-\uses{def:litter, def:atom}
-A set $K$ is a local cardinal iff there is a litter $L$ such that $K=\{N \subseteq \tau_{-1}:|N \Delta L|<\kappa\}$.
+\label {def:near-litter}
+\uses{def:litter, def:small}
+\leanok
+\lean{con_nf.is_near_litter}
+A subset of $\tau_{-1}$ is a $i$-{\em near-litter} precisely if it has small symmetric difference from  litter.
+
+We introduce the notation $N^\circ$ for the litter with small symmetric difference from the near-litter $N$.
+With the tacit need to prove that there is only one.
 \end{definition}
 
 \begin{definition}
-\label {def:near-litter}
-\uses{def:local-cardinal, def:small}
-\leanok
-\lean{con_nf.is_near_litter}
-A set is a {\em near-litter} precisely if it is a subset of $\tau_{-1}$ and has small symmetric difference from some litter, i.e., exactly if it belongs to some local cardinal.
+\label {def:local-cardinal}
+\uses{def:near-litter}
+For $i \in \mathcal L$, the $i$-th {\em local cardinal} is $\{N \subseteq \tau_{-1}:|N \Delta L|<\kappa\}$.
+
+For any near-litter $N$ (including litters), we write $[N]$ for the unique local cardinal that contains $N$. We introduce the notation $[N]^\circ$ for the litter belonging to the local cardinal $N$, with the tacit need to prove that there is only one.
 \end{definition}
 
 \begin{lemma}
@@ -136,18 +136,11 @@ Note that the local cardinals are the equivalence classes of an equivalence rela
 This is left as an easy exercise for the reader.
 \end{proof}
 
-\begin{definition}
-\label {def:local-cardinal-of}
-\uses{def:local-cardinal}
-For any near-litter $N$ (including litters), we define $[N]$ as the unique local cardinal which contains $N$.
-\end{definition}
-
 \begin{lemma}
 \label {lem:count-near-litters}
 \uses{def:near-litter}
 \leanok
 \lean{con_nf.mk_near_litter}
-
 Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ near-litters.
 \end{lemma}
 
@@ -158,71 +151,69 @@ First, there are at least $\mu$ near-litters. Second, the equivalence induced by
 
 One might be concerned with the fact that if $\mu$ has cofinality $\kappa$, it might have more than $\mu$ subsets of size $\kappa$:  but it still has only $\mu$ subsets of size $<\kappa$, and that is what matters for counting the near-litters:  a near-litter is determined as the symmetric difference of a litter ($\mu$ of these) and a small subset (cardinality $<\kappa$) of $\tau_{-1}$ (which is of size $\mu$) and there are only $\mu$ small subsets of $\tau_{-1}$.  If the cofinality of $\mu$ were less than $\kappa$, the cardinal arithmetic pathology mentioned as of concern could come into play.
 
-\begin{definition}
-\label {def:the-litter-near}
-\uses{def:litter, lem:small-diff-equiv}
-We introduce the notation $N^\circ$ for the litter with small symmetric difference from the near-litter $N$.
-With the tacit need to prove that there is only one.
-\end{definition}
-
-\begin{definition}
-\label {def:the-litter-in}
-\uses{def:litter, lem:small-diff-equiv, def:local-cardinal}
-We introduce the notation $[N]^\circ$ for the litter belonging to the local cardinal $N$.  With the tacit need to prove that there is only one.
-\end{definition}
-
 \section{Set codes and alternative extensions:  membership defined and extensionality enforced}
 
+We first define a big model of TTT without extensionality, which we call {\em pretangles}. Later, we will carve out our model of TTT from it.
+
 \begin{definition}
-\label {def:alpha}
-\uses{def:proper-type-index}
-Fix a proper type index $\alpha$.
+\label {def:pretangle}
+\leanok
+\lean{con_nf.pretangle}
+Define {\em pretangles} inductively. $D_{\-1}$ is defined as $\tau_{\-1}$. For $\alpha$ a proper type index, $D_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal P (D_\beta)$.
 \end{definition}
 
 \begin{definition}
-\label {def:oldtau}
-\uses{def:alpha, def:atom}
+\label {def:recursion-motor}
+\uses{def:atom, def:type-index}
+Fix a proper type index $\alpha$.
+
 Posit that we have already defined $\tau_\beta$ for each type index $\beta<\alpha$ (notice that we have already defined $\tau_{-1}$), and that the cardinality of each set $\tau_\beta$ is $\mu$.
 \end{definition}
 
 \begin{definition}
 \label {def:typewords}
-\uses{def:oldtau, def:params}
+\uses{def:recursion-motor}
 We select a well-ordering $\leq_\beta$ of order type $\mu$ (with associated strict well-ordering $<_\beta$) for each type index $\beta<\alpha$.
 \end{definition}
 
 We will define $\tau_\alpha$, the implementation of type $\alpha$ of the model.  This definition is recursive:  when we are defining type $\alpha$ and associated concepts, we are supposing that related concepts have already been defined for all $\beta<\alpha$, and this process will define all types in the structure.
 
 \begin{definition}
-\label {def:codes}
-\uses{def:alpha, def:oldtau}
+\label {def:code}
+\uses{def:recursion-motor}
 Let $\beta$ be a proper type index $\leq \alpha$.
-A type $\beta$ code is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ and $G \subseteq \tau_{\gamma}$.
+A {\em type $\beta$ code} is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ and $G \subseteq \tau_\gamma$.
 \end{definition}
 
 
 
 
 
+\begin{definition}
+\label {def:fmap}
+\uses{def:typewords, def:local-cardinal}
+We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$, $f_{\beta,\gamma}(x)$ as the local cardinal $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
+\end{definition}
 
+Notice that when we are constructing type $\alpha$, we assume that we have constructed all earlier types and we have the information already to define $f_{\beta,\gamma}$ when $\beta$ and $\gamma$ are less than $\alpha$.  This definition does not actually depend on the value of $\alpha$ except insofar as this defines its domain of application.
 
 \begin{definition}
 \label {def:ftargets}
-\uses{def:local-cardinal, def:type-index, def:proper-type-index, def:fmap}
+\uses{def:type-index, def:fmap}
 We designate a pairwise disjoint family of subsets $X_{(\beta,\gamma)}$ of the set of local cardinals, each of cardinality $\mu$, indexed by ordered pairs $(\beta,\gamma)$ with $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$.
+\end{definition}
+
+\begin{definition}
+\label {def:typed-near-litter}
+\uses{def:near-litter, def:code}
+Codes $(\beta,-1,N)$ where $N$ is a near-litter are called {\em typed near-litters\/}.
 \end{definition}
 
 \begin{lemma}
 \label {lem:near-litter-code}
-\uses{def:near-litter, def:codes, def:oldtau}
-All codes $(\beta,-1,N)$ where $N$ is a near-litter are stipulated to be elements of $\tau_\beta$ (of course we need to verify this when the criterion for membership in $\tau_\beta$ is revealed).
+\uses{def:typed-near-litter}
+All typed near-litters are stipulated to be elements of $\tau_\beta$ (of course we need to verify this when the criterion for membership in $\tau_\beta$ is revealed).
 \end{lemma}
-
-\begin{definition}
-\label {def:typed-near-litter}
-\uses{def:near-litter, def:codes}
-Codes $(\beta,-1,N)$ where $N$ is a near-litter are called {\em typed near-litters\/}.
-\end{definition}
 
 \begin{definition}
 \label {def:iota}
@@ -231,16 +222,8 @@ We define $\iota(x)$ for $x \in \tau_\beta$ as the order type of $\leq_\beta$ re
 \end{definition}
 
 \begin{definition}
-\label {def:fmap}
-\uses{def:typewords, def:local-cardinal}
-We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$,   $f_{\beta,\gamma}(x)$ as the local cardinal $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
-\end{definition}
-
-Notice that when we are constructing type $\alpha$, we assume that we have constructed all earlier types and we have the information already to define $f_{\beta,\gamma}$ when $\beta$ and $\gamma$ are less than $\alpha$.   This definition does not actually depend on the value of $\alpha$ except insofar as this defines its domain of application.
-
-\begin{definition}
 \label {def:alt-ext}
-\uses{def:fmap, def:codes}
+\uses{def:fmap, def:code, def:extended-type-index}
 Let $\beta$ be a proper type index less than $\alpha$.  Let $\gamma$ be an extended type index less than $\beta$.
 
 For any code $(\beta,\gamma,G)$ with $G$ nonempty and $\delta$ a proper type index less than $\beta$ and distinct from $\gamma$, we define
@@ -276,7 +259,7 @@ less than the ordinal indexing the position of any of the elements of the local 
 
 \begin{definition}
 \label {def:equiv-code}
-\uses{lem:ainverse-stops, def:ainverse, def:codes}
+\uses{lem:ainverse-stops, def:ainverse, def:code}
 Let $\beta$ be a type index $\leq \alpha$.  We define an equivalence relation $\equiv_\beta$ on $\beta$-codes.
 
 If $\beta=-1$, we define $\equiv_\beta$ as equality restricted to type $-1$.
@@ -289,7 +272,7 @@ Assume for the rest of the definition that $(\beta,\gamma,G)$ is a code.
 
 If $(\beta,\gamma,G)$ has an even number of iterated images under $A^{-1}$ (including none as an important case)
 then $(\beta,\delta,D) \equiv_\beta (\beta,\gamma,G)$ (for $\delta$ a type index distinct from $\gamma$) iff
-$(\beta,\delta,D) = A_{\delta}(\beta,\gamma,G)$.
+$(\beta,\delta,D) = A_\delta(\beta,\gamma,G)$.
 
 If $(\beta,\gamma,G)$ has an odd number of iterated images under $A^{-1}$ then $(\beta,\delta,D) \equiv_\beta (\beta,\gamma,G)$ iff $(\beta,\delta,D) \equiv_\beta A^{-1}(\beta,\gamma,G)$ (which reduces to the previous case).
 \end{definition}
@@ -297,10 +280,7 @@ If $(\beta,\gamma,G)$ has an odd number of iterated images under $A^{-1}$ then $
 \begin{definition}
 \label {def:representative-code}
 \uses{def:equiv-code}
-
-Note that each equivalence class under $\equiv_\beta$ with nonempty third component contains exactly one
-element with an even number of iterated images under $A^{-1}$.  We refer to this code as the representative code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation
-that $(\beta,-1,\emptyset)$ is a representative code as well.
+Note that each equivalence class under $\equiv_\beta$ with nonempty third component contains exactly one element with an even number of iterated images under $A^{-1}$.  We refer to this code as the representative code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation that $(\beta,-1,\emptyset)$ is a representative code as well.
 \end{definition}
 
 \begin{lemma}
@@ -312,10 +292,8 @@ Not all representative $\beta$-codes belong to $\tau_\beta$.
 
 \begin{definition}
 \label {def:ttt-membership}
-\uses{def:representative-code, def:ainverse, def:codes}
-(An extension of) the membership relations of objects at and below type $\alpha$ in the intended model of tangled type theory is then defined as follows: if $\delta < \beta \leq \alpha$ are proper type indices  $(\delta,\epsilon,E) \in_{TTT} (\beta,\gamma,G)$ (where both triples given are codes and representatives of their equivalence classes) iff $\gamma=\delta$ and
-$(\gamma,\delta,D)  \in B$ or $\gamma\neq \delta$ and $(\delta,\epsilon,E) \in \pi_3(A_{\delta}(\beta,\gamma,G))$.  Note that in this latter case we will certainly have $\delta=-1$.  This does define membership of codes of lower types in
-type $\beta$ codes which do not necessarily belong to $\tau_\beta$;  this is harmless.
+\uses{def:representative-code, def:ainverse, def:code}
+(An extension of) the membership relations of objects at and below type $\alpha$ in the intended model of tangled type theory is then defined as follows: if $\delta < \beta \leq \alpha$ are proper type indices  $(\delta,\epsilon,E) \in_{TTT} (\beta,\gamma,G)$ (where both triples given are codes and representatives of their equivalence classes) iff $\gamma=\delta$ and $(\gamma,\delta,D)  \in B$ or $\gamma\neq \delta$ and $(\delta,\epsilon,E) \in \pi_3(A_\delta(\beta,\gamma,G))$.  Note that in this latter case we will certainly have $\delta=-1$.  This does define membership of codes of lower types in type $\beta$ codes which do not necessarily belong to $\tau_\beta$;  this is harmless.
 \end{definition}
 
 This all serves to enforce extensionality, but something much more radical needs to be done to make all this work, as we are assuming the existence of the maps $f_{\beta,\gamma}$ which witness that all the types are of cardinality no greater than $\mu$.  There must be a very strong restriction on what sets can appear as third components of codes in the model.
@@ -325,10 +303,8 @@ This all cries out for a Theorem which should be here and which I left implicit 
 \begin{theorem}
 \label {thm:extensionality}
 \uses{def:ttt-membership}
-
 If $X$ and $Y$ are representative codes of type $\alpha$ and $\beta<\alpha$ is a proper type index
 and $(\forall Z \in \tau_\beta:Z \in_{\tt TTT} X \leftrightarrow Z \in_{\tt TTT} Y)$, then $X=Y$.
-
 \end{theorem}
 
 \section{Permutations, symmetry and the model definition}
@@ -336,89 +312,88 @@ and $(\forall Z \in \tau_\beta:Z \in_{\tt TTT} X \leftrightarrow Z \in_{\tt TTT}
 \begin{lemma}
 \label {lem:singletons}
 \uses{def:type-index}
-
 We stipulate that for any proper type index $\beta<\alpha$ and any type index $\gamma<\beta$ and any $g \in \tau_\gamma$, $(\beta,\gamma,\{g\})\in \tau_\beta$.  Of course this will need to be verified for $\alpha$ as part of the recursion.  It is immediately evident that it is a representative code, at any rate.
-
 \end{lemma}
 
 \begin{definition}
-  \label {def:structural}
-  \uses{def:codes}
-
+\label {def:structural-perm}
+\uses{def:code}
 Let $\beta\leq \alpha$ be a proper type index.  We say that a permutation $\pi$ of type $\beta$ codes is a $\beta$-structural permutation iff for each type index $\gamma<\beta$ there is a $\gamma$-structural permutation $\pi_\gamma$ such that
 $\pi(\beta,\gamma,G) = (\beta,\gamma,\pi_\gamma``G)$ for each code $\pi(\beta,\gamma,G)$.  We say that any permutation of $\tau_{-1}$ is a structural permutation.
 
 Note that due to the fact that typed singletons are codes, $\pi_\gamma$ can be defined given $\pi$.
-
 \end{definition}
 
 The concept of structural permutation is a temporary convenience.  The definition does have some interesting consequences which are not used:  a structural permutation must send representative codes to representative codes, for example.  It would be very amusing if one could prove that a structural permutation actually must be allowable on the basis of this,  but I invest nothing in this passing thought.
 
 \begin{definition}
 \label {def:derivative}
-\uses{def:structural}
-
+\uses{def:structural-perm, def:extended-type-index}
 Let $\beta\leq \alpha$ be a proper type index.  We provide extended notation for the lower type permutations on which an $\beta$-structural permutation depends.
 For any extended type index $A$ with $\beta$ as its largest element, define $\pi_A$ as $\pi$ if $A = \{\beta\}$
 and otherwise as $(\pi_{A \setminus \{{\tt min}(A)\}})_{{\tt min}(A)}$ (this last condition being referred to as the coherence condition).  We refer to permutations $\pi_A$ as derivatives of $\pi$.
 \end{definition}
 
 \begin{definition}
-\label {def:allowable}
-\uses{def:structural}
+\label {def:near-litter-perm}
+\uses{def:near-litter}
+\leanok
+\lean{con_nf.near_litter_perm}
+A permutation $\pi$ of $\tau_{-1}$ is said to be a near-litter permutation iff $\pi``L_i$ is a near-litter for each $i \in \mathcal L$.  This is equivalent to the assertion that the action of $\pi$ sends near-litters to near-litters, or local cardinals to local cardinals.
 
-A permutation $\pi$ of $\tau_{-1}$ is said to be a $-1$-allowable permutation iff $\pi``L_\nu$ is a near-litter for
-each $\nu<\mu$.  This is equivalent to the assertion that the action of $\pi$ sends near-litters to near-litters, or local cardinals to local cardinals.
+Near-litter permutations form a group that acts on both $\mathcal L$ and $\tau_{-1}$.
+\end{definition}
+
+\begin{definition}
+\label {def:allowable-perm}
+\uses{def:structural-perm, def:near-litter-perm}
+We define {\em $-1$-allowable permutations} as near-litter permutations.
 
 Let $\beta \leq \alpha$ be a proper type index.  A permutation $\pi$ of type $\beta$ codes is said to be
-{\em allowable\/} iff it is $\beta$-structural and each $\pi_\gamma$ for $\gamma<\beta$ is $\gamma$-allowable, and further
-for all $\beta$-codes $X,Y$, $X \equiv_\beta Y \leftrightarrow \pi(X) \equiv_\beta \pi(Y)$.
+{\em allowable\/} iff it is $\beta$-structural and each $\pi_\gamma$ for $\gamma<\beta$ is $\gamma$-allowable, and further for all $\beta$-codes $X,Y$, $X \equiv_\beta Y \leftrightarrow \pi(X) \equiv_\beta \pi(Y)$.
 
 Note that we do presume that allowable (as structural) permutations send elements of $\tau_\beta$ to elements of
 $\tau_\beta$ for each $\beta<\alpha$, and as part of the recursion we will need to demonstrate (after defining $\tau_\alpha$) that $\alpha$-allowable permutations send elements of type $\alpha$ to elements of type $\alpha$.
-
 \end{definition}
 
 \begin{lemma}
 \label {lem:coherence-unpacked}
-\uses{def:allowable, def:the-litter-near}
-
+\uses{def:allowable-perm, def:near-litter}
 A permutation $\pi$ of $\beta$-codes is $\beta$-allowable ($\beta \leq \alpha$ and proper) iff $\pi_A$ is $-1$-allowable when $\pi_A$ is defined and $-1 \in A$
 and  $$f_{\gamma,\delta}(\pi_\gamma(g)) = [(\pi_\delta)_{-1}``f_{\gamma,\delta}(g)^\circ].$$
 holds for all $f_{\gamma,\delta}$ with $\gamma,\delta<\beta$.
-
 \end{lemma}
 
 \begin{proof}
 This is discussion supporting the preceding lemma.  More may go into a proof of it.
 
-The coherence condition can be unpacked.  $$(\beta,\gamma,\{g\}) \equiv_{\beta} (\beta,\delta,\{(\delta,-1,N):N \in f_{\gamma,\delta}(g)\})$$ (where $\delta\neq \gamma$).  Thus we expect $$\pi(\beta,\gamma,\{g\}) \equiv_{\beta} \pi(\beta,\delta,\{(\delta,-1,N):N \in f_{\gamma,\delta}(g)\}),$$ that is, $$(\beta,\gamma,\{\pi_{\gamma}(g)\}) \equiv_{\beta} (\beta,\delta,\{(\delta,-1,(\pi_{\delta})_{-1}``N):N \in f_{\gamma,\delta}(g)\}),$$ so $f_{\gamma,\delta}(\pi_\gamma(g) = [(\pi_\delta)_{-1}``L]$, where $f_{\gamma,\delta}(g)=[L]$.
+The coherence condition can be unpacked.
+$$(\beta,\gamma,\{g\}) \equiv_\beta (\beta,\delta,\{(\delta,-1,N):N \in f_{\gamma,\delta}(g)\})$$(where $\delta\neq \gamma$).  Thus we expect
+$$\pi(\beta,\gamma,\{g\}) \equiv_\beta \pi(\beta,\delta,\{(\delta,-1,N):N \in f_{\gamma,\delta}(g)\})$$
+that is,
+$$(\beta,\gamma,\{\pi_\gamma(g)\}) \equiv_\beta (\beta,\delta,\{(\delta,-1,(\pi_\delta)_{-1}``N):N \in f_{\gamma,\delta}(g)\})$$
+so $f_{\gamma,\delta}(\pi_\gamma(g) = [(\pi_\delta)_{-1}``L]$, where $f_{\gamma,\delta}(g)=[L]$.
 
-Recalling the notations $N^\circ=[N]^\circ$ for the litter with small symmetric difference from the near-litter $N$, we can write this $$f_{\gamma,\delta}(\pi_\gamma(g)) = [(\pi_\delta)_{-1}``f_{\gamma,\delta}(g)^\circ].$$
+Recalling the notations $N^\circ$ for the litter with small symmetric difference from the near-litter $N$, we can write this $$f_{\gamma,\delta}(\pi_\gamma(g)) = [(\pi_\delta)_{-1}``f_{\gamma,\delta}(g)^\circ].$$
 
-It is straightforward to show that this condition is equivalent to the coherence condition.  Notice that $\pi_\gamma$ imposes some restrictions on $\pi_\delta$, but only on the way it acts on certain typed near-litters (and of course there are reciprocal relations between $\pi_{\delta}$ and $\pi_\gamma$).
+It is straightforward to show that this condition is equivalent to the coherence condition.  Notice that $\pi_\gamma$ imposes some restrictions on $\pi_\delta$, but only on the way it acts on certain typed near-litters (and of course there are reciprocal relations between $\pi_\delta$ and $\pi_\gamma$).
 \end{proof}
 
 \begin{lemma}
 \label {lem:rep-preserved}
 \uses{lem:coherence-unpacked}
-
 The image under an allowable permutation of a representative code is a representative code.  (This is an initial step toward the eventual requirement that an image of a type element should be a type element).
-
 \end{lemma}
 
 \begin{proof}
-
 This should be straightforward.  A target should be the equation $\pi(A_\gamma(X)) = A_\gamma(\pi(X))$ for any allowable permutation $\pi$ and code $X$ for which $\pi_\gamma$ is defined.
-
 \end{proof}
 
 I am going to define supports as well-orderings, as is done in the proof in chapter 4.
 
 \begin{definition}
 \label {def:support}
-\uses{def:extended-type-index}
-
+\uses{def:near-litter, def:extended-type-index}
 Let $\beta \leq \alpha$ be a proper type index.
 
 We define a $\beta$-support $S$ as a well-ordering (we will write $x \leq_S y$ for $(x,y) \in S$ and define $<_S$ in the obvious way) such that the domain of $S$ is a small set and each element $x$ of the domain of $S$ is an ordered pair of the form
@@ -427,74 +402,64 @@ and $X$ is either a singleton of an element of $\tau_{-1}$ or a near-litter.
 
 We also stipulate that when $((\gamma,-1,X),A,\delta)$ and $((\gamma,-1,X'),A,\gamma)$ belong to the domain of $S$
 and $X$ and $X'$ are distinct near-litters, that $X$ and $X'$ are disjoint.
-
 \end{definition}
+
+\begin{lemma}
+\label {lem:count-supports}
+\uses{def:support}
+Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
+\end{lemma}
 
 \begin{definition}
 \label {def:support-of}
-\uses{def:allowable, def:support}
-
+\uses{def:allowable-perm, def:support}
 Let $\beta$ be a proper type index $\leq \alpha$.
 
 Let $X$ be a $\beta$-code.
 
 We say that a $\beta$-support $S$ is a $\beta$-support of $X$ iff for every $\beta$-allowable permutation such that
 we have for each $(x,A) \in {\tt dom}(S)$ that $\pi_A(x)=x$, we also have that $\pi(X)=X$.
-
 \end{definition}
 
 \begin{definition}
 \label {def:tau-alpha}
 \uses{def:support-of}
-
-
-
 We stipulate that $\tau_\beta$ was already defined as the set of $\beta$-representative codes $X$ such that for some $\beta$-support $S$,
 $S$ is an $\beta$-support for $X$,  and define $\tau_\alpha$ as the set of $\alpha$-representative codes $X$ such that for some $\alpha$-support $S$,
 $S$ is an $\alpha$-support for $X$.
-
 \end{definition}
 
 We state a couple of easy lemmas which are things we assumed about $\tau_\beta$ for $\beta<\alpha$ and which must be shown to carry forward to $\tau_\alpha$.  There are more obligations of this sort which are harder which will be discussed in the next chapter.
 
 \begin{lemma}
-
+\label {def:near-litter-obligation}
+\uses{def:code}
 Any code $(\alpha,-1,N)$ where $N$ is a near-litter is an element of $\tau_{-1}$.
-
 \end{lemma}
 
 \begin{proof}
-
 This code is obviously representative and the domain of its support is a decorated version of its own singleton.
-
 \end{proof}
 
 \begin{lemma}
 \label {def:singleton-obligation}
 \uses{def:tau-alpha, def:singletons}
-
 For any $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$
-
 \end{lemma}
 
 \begin{proof}
-
 Think about the $\beta$-support that $b$ must have and apply a suitable transformation.
-
 \end{proof}
 
 \begin{lemma}
 \label {lem:small-subsets-closure}
 \uses{def:tau-alpha}
-
 It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|B|<\kappa$ [take the union of the $\beta$-supports of elements of $B$ and add $\alpha$ to all the second components of elements of this union]:  all small subsets of a type are realized in each higher type.
-
 \end{lemma}
 
 \begin{definition}
 \label {def:word-obligation}
 \uses{def:tau-alpha}
-
 [I'm not sure what to call this]  Let $\leq_\alpha$ be your favorite well-ordering of $\tau_\alpha$, needed for the recursive definition of the $f$ maps at later stages.
 
 This order needs to satisfy some technical conditions.
@@ -505,7 +470,6 @@ A typed near-litter $N$ which is not a litter must be preceded in the order by t
 $N \Delta N^\circ$.
 
 For each $x$ in $\tau_\alpha$ which is not a typed singleton or typed near-litter, we designate a support.  For any $(y,A)$ in the domain of the designated support of $x$, we must have $\iota(y)<\iota(x)$.
-
 \end{definition}
 
 
@@ -540,12 +504,9 @@ If $S$ is an $\alpha$-support, we define $S^+$ as $\{(x,A,\alpha):(x,A,\alpha) \
 
 We can then say that $S$ is a support of $X$ if $X$ is an $\alpha$-code, $S$ is an $\alpha$-support, and for any $\alpha$-allowable permutation $\pi$, if $\pi[S^+]=S^+$ then $\pi(x)=x$.  In some sense the items in the support with third components less than $\alpha$ are fluff, but they {\em are\/} important as we will see.
 
-\item[Observation (cardinality of the set of near-litters):]  It is a useful observation that because $\mu$ has cofinality $\geq \kappa$, there are no more than $\mu$ (and so exactly $\mu$) near-litters,
-and similarly there are exactly $\mu$ supports.
-
 \item[Remark on definitions of support and symmetry:]  It should be clear that the supports we have defined here do exactly the same work as the set supports in the model description (since the additional order structure and the third components of support domain elements actually do no work at this point).
 
-\item[Applying permutations to objects with support:]  Quite standard techniques show that if $\pi$ is an $\alpha$-allowable permutation and $X \in \tau_\alpha$ has $\alpha$-support $S$, then $\pi(X)$ has $\alpha$-support $\pi[S]$.   It follows from this that an allowable permutation on $\alpha$-codes restricts to a permutation on $\tau_\alpha$, as we presumed in the definition of allowable permutation.
+\item[Applying permutations to objects with support:]  Quite standard techniques show that if $\pi$ is an $\alpha$-allowable permutation and $X \in \tau_\alpha$ has $\alpha$-support $S$, then $\pi(X)$ has $\alpha$-support $\pi[S]$.  It follows from this that an allowable permutation on $\alpha$-codes restricts to a permutation on $\tau_\alpha$, as we presumed in the definition of allowable permutation.
 
 % \begin{comment}
 This probably represents a chunk of formal verification work, as what is obvious to people is not always obvious to theorem provers.
@@ -556,10 +517,12 @@ $\{((x,A\cup C,\gamma),(y,B\cup C,\delta)):((x,A,\gamma),(y,B,\delta)) \in S\}$.
 
 If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the largest support $U$ such that $U^{\{\alpha\}} \subseteq S$ and $U$ is a $\beta$-support.
 
-\item[Definition (strong support):]  A strong support is a support $S$ with certain additional properties.
+\begin{definition}
+\label {def:strong-support}
+\uses{def:support}
+A strong support is a support $S$ with certain additional properties.
 
 \begin{enumerate}
-
 \item  If $((\beta,-1,x),A,\gamma) \in S$ then $x$ is a singleton or a litter.
 
 \item  If $((\beta,-1,\{x\}),A,\gamma) \in S$, then $((\beta,-1,L),A,\gamma) <_S ((\beta,-1,\{x\}),A,\gamma)$, where $L$ is the litter containing $x$.
@@ -567,18 +530,26 @@ If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the la
 \item  If $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$, where $\gamma<\delta$, then there is a $\gamma$-support $T$ of $y$ such that $T^{A \setminus \{\beta\}} \subseteq S$ and each element of the domain of $T^{A \setminus \{\beta\}}$ is $\leq_S ((\beta,-1,L),A)$.  Note that these conditions imply that there is an index-raised version of a strong $\gamma$ support of $y$ included in $T$.
 
 \end{enumerate}
+\end{definition}
 
-It should be straightforward to see that any $X$ with support $S$ has a support $S^\circ$ which satisfies the first condition.  Replace each
-element $((\beta,-1,x),A)$ of the domain of $S$ for which $x$ is a near-litter and not a litter with $((\beta,-1,x^\circ),A)$ and $((\beta,-1,\{y\}),A)$ for each $y$ in the symmetric difference of $x$ and $x^\circ$.
+\begin{lemma}
+\label {strengthen-support}
+\uses{def:strong-support}
+Any support can be extended to a strong support.
+\end{lemma}
 
-\item[Observation (any support can be extended to a strong support):]  We describe the process of extending a support to a strong support, assuming that it already satisfies the first condition.  Before each typed singleton element of the domain, insert the appropriate typed litter (removing an extra copy of it if it occurred later in the order).  This will only need to be done once for each typed singleton element.
+\begin{proof}
+It should be straightforward to see that any $X$ with support $S$ has a support $S^\circ$ which satisfies the first condition.  Replace each element $((\beta,-1,x),A)$ of the domain of $S$ for which $x$ is a near-litter and not a litter with $((\beta,-1,x^\circ),A)$ and $((\beta,-1,\{y\}),A)$ for each $y$ in the symmetric difference of $x$ and $x^\circ$.
+
+We describe the process of extending a support to a strong support, assuming that it already satisfies the first condition.  Before each typed singleton element of the domain, insert the appropriate typed litter (removing an extra copy of it if it occurred later in the order).  This will only need to be done once for each typed singleton element.
 
 The condition $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$ for $\gamma<\delta$ forces insertion of a $\gamma$-support for $y$.  Of course this might cause further insertions.  Notice that
 the third components of all inserted items will be $\leq \gamma <\delta$.  So it is not possible for an infinite regress of insertions to occur which would cause the extended support to fail to be a well-ordering.  (Of course, if an item is inserted which occurs later in the order, remove later occurrences).
+\end{proof}
 
 \end{description}
 
-The third components in the elements of support domains seem actually to be necessary to ensure that strong supports can always be produced.  What the third component is doing is providing a comment on the index of the sub-support the element is required for.   There is another approach:  indexing the $f$ maps with $\alpha,\beta,\gamma$ instead of just $\beta,\gamma$ and requiring that ranges of $f$ maps with distinct indices be disjoint, which would require very straightforward modifications of the paper above, would ensure that we could tell the difference between insertions into an $\alpha$ support and insertions into a $\beta$-support for $\beta<\alpha$.  It seems that the added complexity is about the same with both approaches, and I have left it this way.  The approach used here also has the interesting effect that the extension over type $\gamma$ of a type $\alpha$ set is determined by its extension over type $\beta$ in a way which does not depend on $\alpha$;  it is interesting that this can be done.
+The third components in the elements of support domains seem actually to be necessary to ensure that strong supports can always be produced.  What the third component is doing is providing a comment on the index of the sub-support the element is required for.  There is another approach:  indexing the $f$ maps with $\alpha,\beta,\gamma$ instead of just $\beta,\gamma$ and requiring that ranges of $f$ maps with distinct indices be disjoint, which would require very straightforward modifications of the paper above, would ensure that we could tell the difference between insertions into an $\alpha$ support and insertions into a $\beta$-support for $\beta<\alpha$.  It seems that the added complexity is about the same with both approaches, and I have left it this way.  The approach used here also has the interesting effect that the extension over type $\gamma$ of a type $\alpha$ set is determined by its extension over type $\beta$ in a way which does not depend on $\alpha$;  it is interesting that this can be done.
 
 
 % \begin{comment}
@@ -595,19 +566,30 @@ We give an exact statement of what is meant, then we prove it.
 
 \begin{description}
 
-\item[Definition (local bijection):]  An $\alpha$-local bijection is a map $\pi^0$ whose domain is a set of pairs $(A,x)$ where $A$ is a nonempty finite subset of $\lambda$ with maximum $\alpha$ and $x$ is in type $-1$,  and whose range is a subset of $\tau_{-1}$.  To state further conditions, we introduce the notation $\pi^0_A(x) = \pi^0(A,x)$ and state the further condition that each map $\pi^0_A$ is injective and has domain the same as its range, and that the intersection of the domain of $\pi^0_A$ with any litter is small (empty being an important case of small).
+\begin{definition}[Local bijection]
+\uses{def:extended-type-index, def:litter, def:small}
+An $\alpha$-local bijection is a map $\pi^0$ whose domain is a set of pairs $(A,x)$ where $A$ is an $\alpha$-extended type index and $x$ is in type $-1$,  and whose range is a subset of $\tau_{-1}$.  To state further conditions, we introduce the notation $\pi^0_A(x) = \pi^0(A,x)$ and state the further condition that each map $\pi^0_A$ is injective and has domain the same as its range, and that the intersection of the domain of $\pi^0_A$ with any litter is small (empty being an important case of small).
+\end{definition}
 
-\item[Definition (exception of a permutation):]  We say that $x$ is an exception of a $-1$-allowable permutation $\pi$ iff ($L$ being the litter containing $x$) either $\pi(x) \not\in (\pi``L)^\circ$ or $\pi^{-1}(x) \not\in ({\pi^{-1}}``L)^\circ$.
+\begin{definition}{Exception of a permutation}
+\label {def:perm-exception}
+\uses{def:near-litter-perm}
+We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L$ being the litter containing $x$) either $\pi(x) \not\in (\pi``L)^\circ$ or $\pi^{-1}(x) \not\in ({\pi^{-1}}``L)^\circ$.
+\end{definition}
 
 \item[Stipulation:]  For each litter $L$ we specify a well-ordering $\leq_L$ of order type $\kappa$ with coordinated strict well-ordering $<_L$.
 
-\item[Theorem (freedom of action):]  For any $\alpha$-local bijection $\pi^0$ there is an $\alpha$-allowable permutation $\pi$ such that
-$\pi_{A\cup \{-1\}}$ extends $\pi^0_A$ for each $A$, and satisfying a further technical condition:    the permutation $\pi$ obtained from $\pi^0$ has no exceptions of its derivatives other than those determined by elements of the domains of maps $\pi^0_A$:  $(A,x)$ being in the domain of $\pi^0$ is required for (but does not require) $x$ to be an exception of $\pi_{A \cup \{-1\}}$.
+\begin{theorem}[Freedom of action]
+\label {freedom-of-action}
+\uses{def:derivative, def:perm-exception, def:strong-support}
+For any $\alpha$-local bijection $\pi^0$ there is an $\alpha$-allowable permutation $\pi$ such that
+$\pi_{A\cup \{-1\}}$ extends $\pi^0_A$ for each $A$, and satisfying a further technical condition:  the permutation $\pi$ obtained from $\pi^0$ has no exceptions of its derivatives other than those determined by elements of the domains of maps $\pi^0_A$:  $(A,x)$ being in the domain of $\pi^0$ is required for (but does not require) $x$ to be an exception of $\pi_{A \cup \{-1\}}$.
+\end{theorem}
 
-\item[Proof of the Freedom of Action Theorem:]  We prove this by exhibiting a recursive procedure for computing $\pi$ and its derivatives along a strong support;  this succeeds because all objects have
-strong supports, and because computing all values of derivatives of $\pi$ on type $-1$ allows computation of all derivatives of $\pi$ at all types.
+\begin{proof}
+We prove this by exhibiting a recursive procedure for computing $\pi$ and its derivatives along a strong support;  this succeeds because all objects have strong supports, and because computing all values of derivatives of $\pi$ on type $-1$ allows computation of all derivatives of $\pi$ at all types.
 
-For each nonempty finite subset $A$ of $\lambda$, we specify a permutation $\chi_A$ of local cardinals $[L]$ is not of the form $f_{\gamma,\beta}(y)$ for any $\gamma<{\tt min}(A)$ and $y \in \tau_\gamma$.
+For each extended type index, we specify a permutation $\chi_A$ of local cardinals $[L]$ is not of the form $f_{\gamma,\beta}(y)$ for any $\gamma<{\tt min}(A)$ and $y \in \tau_\gamma$.
 
 We consider an item $((\beta,-1,\{x\}),A,\gamma)$ and our aim is to compute $\pi_{A \cup \{-1\}}(x)$.  By hypothesis of the recursion, we have already
 computed $\pi_A$ at $((\beta,-1,L),A)$, where $L$ is the litter which contains $x$.
@@ -615,7 +597,7 @@ computed $\pi_A$ at $((\beta,-1,L),A)$, where $L$ is the litter which contains $
 There are two cases.  If $(A,x)$ is in the domain of $\pi^0$, we compute $\pi_{A \cup \{-1\}}(x) = \pi^0_A(x)$ and we are done.
 
 Otherwise we use the hypothesis of the recursion:  we compute $\pi_{A \cup \{-1\}}(x)$ for any $x$ in $L$ with $(A,x)$ not in the domain of $\pi_0$ using the fact that we have already computed $\pi_A(\beta,-1,L) = (\beta,-1,N)$:  we define $\pi_{A \cup \{-1\}}$ to agree with the unique bijective map from the
-elements of $L$ not in the domain of $\pi^0_A$ to the elements of $N^{\circ}$ not in the domain of $\pi^0_A$ which is strictly increasing in the sense that it sends larger objects in the sense of $<_L$ to larger objects in the sense of $<_{N^{\circ}}$.
+elements of $L$ not in the domain of $\pi^0_A$ to the elements of $N^\circ$ not in the domain of $\pi^0_A$ which is strictly increasing in the sense that it sends larger objects in the sense of $<_L$ to larger objects in the sense of $<_{N^\circ}$.
 
 Now we consider items of the form $((\beta,-1,L),A,\delta)$ in the strong support where $L$ is a litter.
 
@@ -630,6 +612,7 @@ $\pi_A((\beta,-1,L))$ as $$(\beta,-1,{\pi^0_A}``L \cup (f_{\gamma,\beta}(\pi_{A 
 The nasty recursive idea here is that we already know how to compute $\pi_{A \setminus \{\beta\} \cup \{\gamma\}}(y)$ from the embedded strong $\gamma$ support of $y$ because we assume as a hypothesis of the recursion that we already know how to carry out this computation for $\gamma$-supports, $\gamma<\alpha$.  The  local information we need about the $\gamma$ allowable permutation (the local bijection to be used and the relevant $\chi$ maps) is included in the information we are given initially about $\pi$ (though this data will have indices modified when used on the $\gamma$-support, of course).  Notice that we certainly do know how to do it for 0-supports, because the recursive clause will never be invoked if $\alpha=0$:  the rest of the procedure tells us what to do.
 
 Once we know how to carry out this calculation along any $\alpha$-strong support, we can compute the derivatives of $\pi$ on elements of type $-1$  along all type paths, and so compute the value of $\pi$ and all of its derivatives on all types.  The method of calculation clearly gives an allowable permutation without exceptions other than those dictated by the local bijection.
+end{proof}
 
 \end{description}
 % \begin{comment}
@@ -671,7 +654,7 @@ An arbitrary $c \in \chi_{X,S}(S)$ is of the form $\chi_{b,T_b}(U)$, where $U$ e
 Our strategy is to show that there is an allowable permutation $\pi$ which fixes $X$ (so that $\pi_\beta``B = B$) such that $\pi_\beta[T_b]=U$, so that
 $\pi_\beta(b) = c$, so $c \in B$, whence $\chi_{X,S}(S)$ as defined is equal to $X$ as required.
 
-We build a support $S+T_b^{\{\alpha\}}$ and a support $S+U^{\{\alpha\}}$ with parallel structure by appending $T_b$ (respectively $U$) to $S$ then removing all but the first occurrence of each repeated item.  The parallelism of structure is enforced by the identity of items taken from $S \setminus S_{\beta}$
+We build a support $S+T_b^{\{\alpha\}}$ and a support $S+U^{\{\alpha\}}$ with parallel structure by appending $T_b$ (respectively $U$) to $S$ then removing all but the first occurrence of each repeated item.  The parallelism of structure is enforced by the identity of items taken from $S \setminus S_\beta$
 in both supports and the fact that $U$ is the image of $T_b$ under some allowable permutation.
 
 We construct an $\alpha$-allowable permutation whose action takes one of these supports to the other, which will complete the plan given above.
