@@ -44,7 +44,7 @@ class params :=
 (κ : Type u) (κ_regular : (#κ).is_regular)
 (μ : Type u) (μr : μ → μ → Prop) [μwf : is_well_order μ μr]
 (μ_ord : ordinal.type μr = (#μ).ord)
-(μ_limit : (#μ).is_strong_limit)
+(μ_strong_limit : (#μ).is_strong_limit)
 (κ_lt_μ : #κ < #μ)
 (κ_le_μ_cof : #κ ≤ (#μ).ord.cof)
 (δ : Λ)
