@@ -82,21 +82,21 @@ h.image.mono $ subset_image_symm_diff _ _ _
 
 end is_near
 
-variables {i j : litter_name}
+variables {i j : litter}
 
-/-- The `i`-th litter.
+/-- The set corresponding to the `i`-th litter.
 
 We define a litter as the set of elements of the base type `τ₋₁` where the first element of the pair
 is `i`. However, as noted above, the definition can be viewed as opaque, since its cardinality is
 the only interesting feature. -/
-def litter (i : litter_name) : set base_type := {p | p.1 = i}
+def litter_set (i : litter) : set base_type := {p | p.1 = i}
 
 /-- Each litter has cardinality `κ`. -/
-@[simp] lemma mk_litter (i : litter_name) : #(litter i) = #κ :=
+@[simp] lemma mk_litter_set (i : litter) : #(litter_set i) = #κ :=
 cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, subtype.ext $ prod.ext x.2.symm rfl, λ k, rfl⟩⟩
 
 /-- Two litters with different indices are disjoint. -/
-lemma pairwise_disjoint_litter : pairwise (disjoint on litter) :=
+lemma pairwise_disjoint_litter_set : pairwise (disjoint on litter_set) :=
 λ i j h x hx, h $ hx.1.symm.trans hx.2
 
 /-- A `i`-near-litter is a set of small symmetric difference to the `i`-th litter. In other words,
@@ -105,13 +105,13 @@ it is near the `i`-th litter.
 Note that here we keep track of which litter a set is near; a set cannot be merely a near-litter, it
 must be an `i`-near-litter for some `i`. A priori, a set could be an `i`-near-litter and also a
 `j`-near-litter, but this is not the case. -/
-def is_near_litter (i : litter_name) (s : set base_type) : Prop := is_near (litter i) s
+def is_near_litter (i : litter) (s : set base_type) : Prop := is_near (litter_set i) s
 
 /-- Litter `i` is a near-litter to litter `i`.
 Note that the type of litters is `set base_type`, and the type of objects that can be near-litters
 is also `set base_type`. There is therefore no type-level distinction between elements of a litter
 and elements of a near-litter. -/
-lemma is_near_litter_litter (i : litter_name) : is_near_litter i (litter i) := is_near_rfl
+lemma is_near_litter_litter_set (i : litter) : is_near_litter i (litter_set i) := is_near_rfl
 
 /-- If two sets are `i`-near-litters, they are near each other.
 This is because they are both near litter `i`, and nearness is transitive. -/
@@ -119,36 +119,32 @@ lemma is_near_litter.near {s t : set base_type} (hs : is_near_litter i s)
   (ht : is_near_litter i t) : is_near s t := hs.symm.trans ht
 
 /-- A litter is only a near-litter to itself. -/
-@[simp] lemma is_near_litter_litter_iff : is_near_litter i (litter j) ↔ i = j :=
+@[simp] lemma is_near_litter_litter_set_iff : is_near_litter i (litter_set j) ↔ i = j :=
 begin
   refine ⟨λ h, _, _⟩,
   { by_contra',
-    refine ((mk_litter i).symm.trans_le $ mk_le_mk_of_subset _).not_lt h,
-    change litter i ≤ _,
-    exact le_symm_diff_iff_left.2 (pairwise_disjoint_litter _ _ this) },
+    refine ((mk_litter_set i).symm.trans_le $ mk_le_mk_of_subset _).not_lt h,
+    change litter_set i ≤ _,
+    exact le_symm_diff_iff_left.2 (pairwise_disjoint_litter_set _ _ this) },
   { rintro rfl,
-    exact is_near_litter_litter _ }
+    exact is_near_litter_litter_set _ }
 end
-
-/-- If two litters are near, they must be the same. -/
-@[simp] lemma litter_is_near_litter_iff : is_near (litter i) (litter j) ↔ i = j :=
-is_near_litter_litter_iff
 
 /-- A set is near at most one litter. -/
 lemma is_near_litter.unique {s : set base_type}
   (hi : is_near_litter i s) (hj : is_near_litter j s) : i = j :=
-is_near_litter_litter_iff.1 $ hi.trans hj.symm
+is_near_litter_litter_set_iff.1 $ hi.trans hj.symm
 
 /-- There are `μ` near-litters near the `i`-th litter. -/
-lemma mk_near_litter (i : μ) : #{s : set base_type // is_near_litter i s} = #μ :=
+lemma mk_near_litter (i : litter) : #{s : set base_type // is_near_litter i s} = #μ :=
 begin
   refine (le_antisymm _ _).trans mk_base_type,
   { refine le_of_le_of_eq _
      (mk_subset_mk_lt_cof $ by { simp_rw mk_base_type, exact μ_strong_limit.2 }),
     rw mk_base_type,
-    exact (cardinal.mk_congr $ subtype_equiv (equiv.symm_diff $ litter i) $ λ s, iff.rfl).trans_le
-      ⟨subtype.imp_embedding _ _ $ λ s, κ_le_μ_cof.trans_lt'⟩ },
-  refine ⟨⟨λ a, ⟨litter i ∆ {a}, _⟩, λ a b h, _⟩⟩,
+    exact (cardinal.mk_congr $ subtype_equiv (equiv.symm_diff $ litter_set i) $
+      λ s, iff.rfl).trans_le ⟨subtype.imp_embedding _ _ $ λ s, κ_le_μ_cof.trans_lt'⟩ },
+  refine ⟨⟨λ a, ⟨litter_set i ∆ {a}, _⟩, λ a b h, _⟩⟩,
   { rw [is_near_litter, is_near, small, symm_diff_symm_diff_self, mk_singleton],
     exact one_lt_aleph_0.trans_le κ_regular.aleph_0_le },
   { exact singleton_injective (symm_diff_left_injective _ $ by convert congr_arg subtype.val h) }
@@ -171,8 +167,8 @@ definitional properties. For instance, `x in base_perm⁻¹ ⁻¹' s` is definit
 -/
 structure near_litter_perm : Type u :=
 (base_perm : perm base_type)
-(litter_perm : perm litter_name)
-(near ⦃i : litter_name⦄ ⦃s : set base_type⦄ :
+(litter_perm : perm litter)
+(near ⦃i : litter⦄ ⦃s : set base_type⦄ :
   is_near_litter i s → is_near_litter (litter_perm i) (⇑base_perm⁻¹ ⁻¹' s))
 
 /-- This is the condition that relates the `base_perm` and the `litter_perm`. This is essentially
@@ -194,8 +190,8 @@ begin
   { subst h,
     subst this },
   ext i,
-  exact is_near_litter_litter_iff.1
-    (((hf $ is_near_litter_litter _).trans $ by rw h).trans (hg $ is_near_litter_litter _).symm),
+  exact is_near_litter_litter_set_iff.1
+    (((hf $ is_near_litter_litter_set _).trans $ by rw h).trans (hg $ is_near_litter_litter_set _).symm),
 end
 
 /-- An extensionality result for near-litter permutations.
@@ -214,8 +210,8 @@ instance : has_one near_litter_perm := ⟨⟨1, 1, λ i s, id⟩⟩
 /-- Any near-litter permutation admits an inverse, which is also a near-litter permutation. -/
 instance : has_inv near_litter_perm :=
 ⟨λ f, ⟨f.base_perm⁻¹, f.litter_perm⁻¹, λ i s h, begin
-  have : is_near (⇑f.base_perm⁻¹ ⁻¹' litter (f.litter_perm⁻¹ i)) s,
-  { exact (f.near $ is_near_litter_litter _).near (by rwa apply_inv_self) },
+  have : is_near (⇑f.base_perm⁻¹ ⁻¹' litter_set (f.litter_perm⁻¹ i)) s,
+  { exact (f.near $ is_near_litter_litter_set _).near (by rwa apply_inv_self) },
   simpa only [preimage_inv, perm.image_inv, preimage_image] using this.image ⇑f.base_perm⁻¹,
 end⟩⟩
 
@@ -292,7 +288,7 @@ instance : mul_action near_litter_perm base_type :=
 { smul := λ f, f.base_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
 /-- The group of near-litter permutations acts on litters via the litter permutation. -/
-instance : mul_action near_litter_perm litter_name :=
+instance : mul_action near_litter_perm litter :=
 { smul := λ f, f.litter_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
 end near_litter_perm
@@ -305,6 +301,6 @@ hence deal with an arbitrary near-litter. -/
 def near_litter : Type* := Σ' i s, is_near_litter i s
 
 /-- If this is satisfied for a near-litter `N`, then `N` is actually a litter. -/
-def near_litter.is_litter (N : near_litter) : Prop := N.2.1 = litter N.1
+def near_litter.is_litter (N : near_litter) : Prop := N.2.1 = litter_set N.1
 
 end con_nf
