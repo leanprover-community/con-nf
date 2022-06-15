@@ -65,8 +65,7 @@ instance : linear_order Λ := linear_order_of_STO' Λr
 /-- We deduce that `Λ` has a well-founded relation. -/
 instance : has_well_founded Λ := is_well_order.to_has_well_founded
 
-/-- Since `μ` has cofinality `≥ κ`, the cardinality of `κ` must be at most that of `μ`. -/
-lemma κ_le_μ : #κ ≤ #μ := κ_le_μ_cof.trans $ ordinal.cof_ord_le _
+lemma κ_le_μ : #κ ≤ #μ := κ_lt_μ.le
 
 /-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
 arbitrary type of cardinality `μ` and partitioning it in parts of cardinality `κ` afterwards, we
@@ -80,7 +79,7 @@ def base_type : Type* := μ × κ
 We will prove that all types constructed in our model have cardinality equal to `μ`. -/
 @[simp] lemma mk_base_type : #base_type = #μ :=
 by simp_rw [base_type, mk_prod, lift_id,
-  mul_eq_left (κ_regular.aleph_0_le.trans κ_lt_μ.le) κ_lt_μ.le κ_regular.pos.ne']
+  mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) κ_le_μ κ_regular.pos.ne']
 
 /-- Extended type index. -/
 def xti : Type* := {s : finset Λ // s.nonempty}
