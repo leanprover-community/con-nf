@@ -84,9 +84,14 @@ end is_near
 
 variables {i j : litter_name}
 
-/-- The `i`-th litter. -/
+/-- The `i`-th litter.
+
+We define a litter as the set of elements of the base type `τ₋₁` where the first element of the pair
+is `i`. However, as noted above, the definition can be viewed as opaque, since its cardinality is
+the only interesting feature. -/
 def litter (i : litter_name) : set base_type := {p | p.1 = i}
 
+/-- Each litter has cardinality `κ`. -/
 @[simp] lemma mk_litter (i : litter_name) : #(litter i) = #κ :=
 cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, subtype.ext $ prod.ext x.2.symm rfl, λ k, rfl⟩⟩
 
@@ -94,9 +99,18 @@ cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, subtype.ext $ pr
 lemma pairwise_disjoint_litter : pairwise (disjoint on litter) :=
 λ i j h x hx, h $ hx.1.symm.trans hx.2
 
-/-- A `i`-near-litter is a set of small symmetric to the `i`-th litter. -/
+/-- A `i`-near-litter is a set of small symmetric difference to the `i`-th litter. In other words,
+it is near the `i`-th litter.
+
+Note that here we keep track of which litter a set is near; a set cannot be merely a near-litter, it
+must be an `i`-near-litter for some `i`. A priori, a set could be an `i`-near-litter and also a
+`j`-near-litter, but this is not the case. -/
 def is_near_litter (i : litter_name) (s : set base_type) : Prop := is_near (litter i) s
 
+/-- Litter `i` is a near-litter to litter `i`.
+Note that the type of litters is `set base_type`, and the type of objects that can be near-litters
+is also `set base_type`. There is therefore no type-level distinction between elements of a litter
+and elements of a near-litter. -/
 lemma is_near_litter_litter (i : litter_name) : is_near_litter i (litter i) := is_near_rfl
 
 /-- If two sets are `i`-near-litters, they are near each other.
@@ -277,6 +291,7 @@ base_perm_injective.group _ base_perm_one base_perm_mul base_perm_inv base_perm_
 instance : mul_action near_litter_perm base_type :=
 { smul := λ f, f.base_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
+/-- The group of near-litter permutations acts on litters via the litter permutation. -/
 instance : mul_action near_litter_perm litter_name :=
 { smul := λ f, f.litter_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
