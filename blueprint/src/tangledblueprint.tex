@@ -145,12 +145,15 @@ For any near-litter $N$ (including litters), we define $[N]$ as the unique local
 \begin{lemma}
 \label {lem:count-near-litters}
 \uses{def:near-litter}
+\leanok
+\lean{con_nf.mk_near_litter}
 
 Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ near-litters.
 \end{lemma}
 
 \begin{proof}
-Cardinal arithmetic issue.
+\leanok
+First, there are at least $\mu$ near-litters. Second, the equivalence induced by the symmetric difference with the $i$-th litter sends near-litters to sets of size strictly less than $\kappa$, hence of size strictly less than the cofinality of $\mu$. But there are at most (exactly, in fact) $\mu$ such sets, because by definition of cofinality they are all bounded in $\mu$ and $\sum_{\alpha < \mu} 2 ^ \alpha = \mu $ because $\mu$ is a strong limit cardinal.
 \end{proof}
 
 One might be concerned with the fact that if $\mu$ has cofinality $\kappa$, it might have more than $\mu$ subsets of size $\kappa$:  but it still has only $\mu$ subsets of size $<\kappa$, and that is what matters for counting the near-litters:  a near-litter is determined as the symmetric difference of a litter ($\mu$ of these) and a small subset (cardinality $<\kappa$) of $\tau_{-1}$ (which is of size $\mu$) and there are only $\mu$ small subsets of $\tau_{-1}$.  If the cofinality of $\mu$ were less than $\kappa$, the cardinal arithmetic pathology mentioned as of concern could come into play.

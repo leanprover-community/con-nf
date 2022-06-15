@@ -5,10 +5,12 @@ import order.symm_diff
 # Order theoretic results
 -/
 
+open function
+
 variables {α β : Type*}
 
-section boolean_algebra
-variables [boolean_algebra α] (a b c : α)
+section generalized_boolean_algebra
+variables [generalized_boolean_algebra α] (a b c : α)
 
 -- True in co-Heyting algebras
 lemma sdiff_triangle : a \ c ≤ a \ b ⊔ b \ c :=
@@ -44,7 +46,7 @@ begin
     exact le_sup_right }
 end
 
-end boolean_algebra
+end generalized_boolean_algebra
 
 namespace set
 variables (f : α → β) (s t : set α)
@@ -54,3 +56,28 @@ lemma subset_image_symm_diff : (f '' s) ∆ (f '' t) ⊆ f '' s ∆ t :=
   (image_union _ _ _).superset
 
 end set
+
+namespace equiv
+variables [generalized_boolean_algebra α]
+
+/-- Symmetric difference by `a` as an equivalence. -/
+protected def symm_diff (a : α) : α ≃ α :=
+{ to_fun := (∆) a,
+  inv_fun := λ b, b ∆ a,
+  left_inv := symm_diff_symm_diff_self' _,
+  right_inv := λ b, by rw [←symm_diff_assoc, symm_diff_symm_diff_self'] }
+
+@[simp] lemma coe_symm_diff (a : α) : ⇑(equiv.symm_diff a) =  (∆) a := rfl
+@[simp] lemma symm_diff_apply (a b : α) : equiv.symm_diff a b = a ∆ b := rfl
+@[simp] lemma symm_diff_symm (a : α) : (equiv.symm_diff a).symm = equiv.symm_diff a :=
+ext $ λ b, symm_diff_comm _ _
+
+end equiv
+
+section generalized_boolean_algebra
+variables [generalized_boolean_algebra α]
+
+lemma symm_diff_left_injective (a : α): injective ((∆) a) := (equiv.symm_diff a).injective
+lemma symm_diff_right_injective (a : α): injective (∆ a) := (equiv.symm_diff a).symm.injective
+
+end generalized_boolean_algebra
