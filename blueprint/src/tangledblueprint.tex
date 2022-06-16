@@ -566,8 +566,6 @@ We claim that any locally small specification of values of derivatives of an all
 
 We give an exact statement of what is meant, then we prove it.
 
-\begin{description}
-
 \begin{definition}
 \label {def:local-bijection}
 \uses{def:extended-type-index, def:litter, def:small}
@@ -580,7 +578,11 @@ An $\alpha$-local bijection is a map $\pi^0$ whose domain is a set of pairs $(A,
 We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L$ being the litter containing $x$) either $\pi(x) \not\in (\pi``L)^\circ$ or $\pi^{-1}(x) \not\in ({\pi^{-1}}``L)^\circ$.
 \end{definition}
 
+\begin{description}
+
 \item[Stipulation:]  For each litter $L$ we specify a well-ordering $\leq_L$ of order type $\kappa$ with coordinated strict well-ordering $<_L$.
+
+\end{description}
 
 \begin{theorem}
 \label {freedom-of-action}
@@ -617,7 +619,6 @@ The nasty recursive idea here is that we already know how to compute $\pi_{A \se
 Once we know how to carry out this calculation along any $\alpha$-strong support, we can compute the derivatives of $\pi$ on elements of type $-1$  along all type paths, and so compute the value of $\pi$ and all of its derivatives on all types.  The method of calculation clearly gives an allowable permutation without exceptions other than those dictated by the local bijection.
 end{proof}
 
-\end{description}
 % \begin{comment}
 {\bf Note for the formal verification project:}  This section is vitally important and should be ready to work on (once the model and the definition of strong support are handled).  Setting up the recursive definition of the computation may be nasty.
 % \end{comment}

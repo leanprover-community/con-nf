@@ -85,7 +85,7 @@ using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf (λ A, A.length)
 
 -- TODO: Do we want all extended indices to be well-ordered, or just all extended indices of a given α?
 instance : has_lt (extended_index α) := ⟨lt⟩
-instance extended_index.is_well_order : is_well_order (extended_index α) (<) := sorry
+instance is_well_order : is_well_order (extended_index α) (<) := sorry
 instance : has_well_founded (extended_index α) := ⟨_, extended_index.is_well_order.wf⟩
 instance : has_le (extended_index α) := ⟨λ A B, A < B ∨ A = B⟩
 
