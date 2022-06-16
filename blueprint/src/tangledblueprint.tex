@@ -332,6 +332,8 @@ The concept of structural permutation is a temporary convenience.  The definitio
 \begin{definition}
 \label {def:derivative}
 \uses{def:structural-perm, def:extended-type-index}
+%\leanok
+\lean{con_nf.struct_perm.derivative}
 Let $\beta\leq \alpha$ be a proper type index.  We provide extended notation for the lower type permutations on which an $\beta$-structural permutation depends.
 For any extended type index $A$ with $\beta$ as its largest element, define $\pi_A$ as $\pi$ if $A = \{\beta\}$
 and otherwise as $(\pi_{A \setminus \{{\tt min}(A)\}})_{{\tt min}(A)}$ (this last condition being referred to as the coherence condition).  We refer to permutations $\pi_A$ as derivatives of $\pi$.
