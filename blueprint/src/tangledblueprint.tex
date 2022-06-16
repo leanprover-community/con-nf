@@ -118,6 +118,14 @@ With the tacit need to prove that there is only one.
 \end{definition}
 
 \begin{definition}
+\label {def:ftargets}
+\uses{def:litter}
+\leanok
+\lean{con_nf.ftargets}
+Define $X_{\beta,\gamma}$ as ${(\beta, \gamma, i) : i \in \mu}$. Note that $|X_{\beta,\gamma}| = \mu$ and that the $X_{\beta,\gamma}$ partition $\mathcal L$.
+\end{definition}
+
+\begin{definition}
 \label {def:local-cardinal}
 \uses{def:near-litter}
 For $i \in \mathcal L$, the $i$-th {\em local cardinal} is $\{N \subseteq \tau_{-1}:|N \Delta L|<\kappa\}$.
@@ -130,7 +138,7 @@ For any near-litter $N$ (including litters), we write $[N]$ for the unique local
 \uses{def:small}
 \leanok
 \lean{con_nf.is_near.trans}
-Note that the local cardinals are the equivalence classes of an equivalence relation on near-litters, which obtains between two near-litters iff they have small symmetric difference.
+Note that $\mathcal L$ corresponds to the equivalence classes of an equivalence relation on near-litters, which obtains between two near-litters iff they have small symmetric difference.
 \end{lemma}
 
 \begin{proof}
@@ -188,20 +196,10 @@ Let $\beta$ be a proper type index $\leq \alpha$.
 A {\em type $\beta$ code} is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ and $G \subseteq \tau_\gamma$.
 \end{definition}
 
-
-
-
-
-\begin{definition}
-\label {def:ftargets}
-\uses{def:local-cardinal}
-We designate a pairwise disjoint family of subsets $X_{(\beta,\gamma)}$ of the set of local cardinals, each of cardinality $\mu$, indexed by ordered pairs $(\beta,\gamma)$ with $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$.
-\end{definition}
-
 \begin{definition}
 \label {def:fmap}
 \uses{def:iota, def:ftargets}
-We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$, $f_{\beta,\gamma}(x)$ as the local cardinal $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
+We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$, $f_{\beta,\gamma}(x)$ as the litter $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
 \end{definition}
 
 Notice that when we are constructing type $\alpha$, we assume that we have constructed all earlier types and we have the information already to define $f_{\beta,\gamma}$ when $\beta$ and $\gamma$ are less than $\alpha$.  This definition does not actually depend on the value of $\alpha$ except insofar as this defines its domain of application.
@@ -394,7 +392,7 @@ I am going to define supports as well-orderings, as is done in the proof in chap
 
 \begin{definition}
 \label {def:support}
-\uses{def:near-litter, def:extended-type-index}
+\uses{def:near-litter, def:derivative}
 Let $\beta \leq \alpha$ be a proper type index.
 
 We define a $\beta$-support $S$ as a well-ordering (we will write $x \leq_S y$ for $(x,y) \in S$ and define $<_S$ in the obvious way) such that the domain of $S$ is a small set and each element $x$ of the domain of $S$ is an ordered pair of the form
@@ -495,8 +493,6 @@ In this chapter, we prove that the structure described in the previous chapter i
 Treating supports as sets suffices for the model description, but we will need to analyze supports and orbits with more care, so it is better for purposes
 of the proof to regard a support as a well-ordering.
 
-\begin{description}
-\item[]
 We may write $x \leq_S y$ for $(x,y) \in S$, and $x <_S y$ when we also want to indicate that $x,y$ are distinct.
 
 If $\pi$ is an $\alpha$-allowable permutation and $S$ is an $\alpha$-support, we define $\pi[S]$ as $\{((\pi_A(x),A,\gamma),(\pi_B(y),B,\delta)):((x,A,\gamma),(y,B,\delta))\in S\}$.
@@ -505,7 +501,9 @@ If $S$ is an $\alpha$-support, we define $S^+$ as $\{(x,A,\alpha):(x,A,\alpha) \
 
 We can then say that $S$ is a support of $X$ if $X$ is an $\alpha$-code, $S$ is an $\alpha$-support, and for any $\alpha$-allowable permutation $\pi$, if $\pi[S^+]=S^+$ then $\pi(x)=x$.  In some sense the items in the support with third components less than $\alpha$ are fluff, but they {\em are\/} important as we will see.
 
+\begin{description}
 \item[Remark on definitions of support and symmetry:]  It should be clear that the supports we have defined here do exactly the same work as the set supports in the model description (since the additional order structure and the third components of support domain elements actually do no work at this point).
+\end{description}
 
 \begin{lemma}
 \label {restrict-allowable-perm}
@@ -556,8 +554,6 @@ We describe the process of extending a support to a strong support, assuming tha
 
 The condition $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$ for $\gamma<\delta$ forces insertion of a $\gamma$-support for $y$.  Of course this might cause further insertions.  Notice that the third components of all inserted items will be $\leq \gamma <\delta$.  So it is not possible for an infinite regress of insertions to occur which would cause the extended support to fail to be a well-ordering.  (Of course, if an item is inserted which occurs later in the order, remove later occurrences).
 \end{proof}
-
-\end{description}
 
 The third components in the elements of support domains seem actually to be necessary to ensure that strong supports can always be produced.  What the third component is doing is providing a comment on the index of the sub-support the element is required for.  There is another approach:  indexing the $f$ maps with $\alpha,\beta,\gamma$ instead of just $\beta,\gamma$ and requiring that ranges of $f$ maps with distinct indices be disjoint, which would require very straightforward modifications of the paper above, would ensure that we could tell the difference between insertions into an $\alpha$ support and insertions into a $\beta$-support for $\beta<\alpha$.  It seems that the added complexity is about the same with both approaches, and I have left it this way.  The approach used here also has the interesting effect that the extension over type $\gamma$ of a type $\alpha$ set is determined by its extension over type $\beta$ in a way which does not depend on $\alpha$;  it is interesting that this can be done.
 
