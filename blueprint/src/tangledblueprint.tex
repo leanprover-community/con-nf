@@ -192,6 +192,8 @@ We will define $\tau_\alpha$, the implementation of type $\alpha$ of the model. 
 \begin{definition}
 \label {def:code}
 \uses{def:recursion-motor}
+%\leanok
+\lean{con_nf.code}
 Let $\beta$ be a proper type index $\leq \alpha$.
 A {\em type $\beta$ code} is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ and $G \subseteq \tau_\gamma$.
 \end{definition}
@@ -317,6 +319,8 @@ We stipulate that for any proper type index $\beta<\alpha$ and any type index $\
 \begin{definition}
 \label {def:structural-perm}
 \uses{def:code}
+%\leanok
+\lean{con_nf.struct_perm}
 Let $\beta\leq \alpha$ be a proper type index.  We say that a permutation $\pi$ of type $\beta$ codes is a $\beta$-structural permutation iff for each type index $\gamma<\beta$ there is a $\gamma$-structural permutation $\pi_\gamma$ such that
 $\pi(\beta,\gamma,G) = (\beta,\gamma,\pi_\gamma``G)$ for each code $\pi(\beta,\gamma,G)$.  We say that any permutation of $\tau_{-1}$ is a structural permutation.
 

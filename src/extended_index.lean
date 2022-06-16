@@ -89,6 +89,9 @@ instance is_well_order : is_well_order (extended_index α) (<) := sorry
 instance : has_well_founded (extended_index α) := ⟨_, extended_index.is_well_order.wf⟩
 instance : has_le (extended_index α) := ⟨λ A B, A < B ∨ A = B⟩
 
+@[simp] lemma drop_min_lt (A : extended_index α)
+: ∀ A' ∈ drop_min A, A' < A := sorry
+
 end extended_index
 
 end con_nf

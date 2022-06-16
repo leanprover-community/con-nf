@@ -21,8 +21,8 @@ def type_index := with_bot Λ
 /- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
 This allows well founded recursion on type indices. -/
 
-instance : linear_order type_index := infer_instance
-instance : has_well_founded type_index := infer_instance
+instance : linear_order type_index := linear_order_of_STO' (<)
+instance : has_well_founded type_index := is_well_order.to_has_well_founded
 
 /-- A pretangle has a preferred extension, which is either a proper type `β : Λ`,
 or the base type `-1`. A pretangle has a `-1`-extension if and only if its preferred extension
