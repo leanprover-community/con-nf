@@ -291,16 +291,10 @@ instance : mul_action near_litter_perm atom :=
 instance : mul_action near_litter_perm litter :=
 { smul := λ f, f.litter_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
+/-- `a` is an exception of the near-litter permutation `f` if it is not sent to the corresponding
+litter under either `f` or `f⁻¹`. -/
+def exception (f : near_litter_perm) (a : atom) : Prop :=
+f.atom_perm a ∉ litter_set (f.litter_perm a.1) ∨ f.atom_perm⁻¹ a ∉ litter_set (f.litter_perm⁻¹ a.1)
+
 end near_litter_perm
-
-/-- A near litter is an index `i : μ` of a litter and a set `s : set atom`, such that `s` is
-an `i`-near-litter.
-
-This allows us to forget which set and which litter we are talking about at the type level, and
-hence deal with an arbitrary near-litter. -/
-def near_litter : Type* := Σ' i s, is_near_litter i s
-
-/-- If this is satisfied for a near-litter `N`, then `N` is actually a litter. -/
-def near_litter.is_litter (N : near_litter) : Prop := N.2.1 = litter_set N.1
-
 end con_nf

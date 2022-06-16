@@ -159,6 +159,7 @@ We first define a big model of TTT without extensionality, which we call {\em pr
 
 \begin{definition}
 \label {def:pretangle}
+\uses{def:atom}
 \leanok
 \lean{con_nf.pretangle}
 Define {\em pretangles} inductively. $D_{-1}$ is defined as $\tau_{-1}$. For $\alpha$ a proper type index, $D_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal P (D_\beta)$.
@@ -166,7 +167,7 @@ Define {\em pretangles} inductively. $D_{-1}$ is defined as $\tau_{-1}$. For $\a
 
 \begin{definition}
 \label {def:recursion-motor}
-\uses{def:atom, def:type-index}
+\uses{def:pretangle, def:type-index}
 Fix a proper type index $\alpha$.
 
 Posit that we have already defined $\tau_\beta$ for each type index $\beta<\alpha$ (notice that we have already defined $\tau_{-1}$), and that the cardinality of each set $\tau_\beta$ is $\mu$.
@@ -192,18 +193,18 @@ A {\em type $\beta$ code} is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ an
 
 
 \begin{definition}
+\label {def:ftargets}
+\uses{def:local-cardinal}
+We designate a pairwise disjoint family of subsets $X_{(\beta,\gamma)}$ of the set of local cardinals, each of cardinality $\mu$, indexed by ordered pairs $(\beta,\gamma)$ with $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$.
+\end{definition}
+
+\begin{definition}
 \label {def:fmap}
-\uses{def:iota, def:local-cardinal}
+\uses{def:iota, def:ftargets}
 We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$, $f_{\beta,\gamma}(x)$ as the local cardinal $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
 \end{definition}
 
 Notice that when we are constructing type $\alpha$, we assume that we have constructed all earlier types and we have the information already to define $f_{\beta,\gamma}$ when $\beta$ and $\gamma$ are less than $\alpha$.  This definition does not actually depend on the value of $\alpha$ except insofar as this defines its domain of application.
-
-\begin{definition}
-\label {def:ftargets}
-\uses{def:fmap}
-We designate a pairwise disjoint family of subsets $X_{(\beta,\gamma)}$ of the set of local cardinals, each of cardinality $\mu$, indexed by ordered pairs $(\beta,\gamma)$ with $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$.
-\end{definition}
 
 \begin{definition}
 \label {def:typed-near-litter}
@@ -422,7 +423,7 @@ we have for each $(x,A) \in {\tt dom}(S)$ that $\pi_A(x)=x$, we also have that $
 \end{definition}
 
 \begin{definition}
-\label {def:tau-alpha}
+\label {def:tangle}
 \uses{def:representative-code, def:support-of}
 We stipulate that $\tau_\beta$ was already defined as the set of $\beta$-representative codes $X$ such that for some $\beta$-support $S$,
 $S$ is an $\beta$-support for $X$,  and define $\tau_\alpha$ as the set of $\alpha$-representative codes $X$ such that for some $\alpha$-support $S$,
@@ -443,7 +444,7 @@ This code is obviously representative and the domain of its support is a decorat
 
 \begin{lemma}
 \label {def:singleton-obligation}
-\uses{def:tau-alpha, def:singletons}
+\uses{def:tangle, def:singletons}
 For any $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$.
 \end{lemma}
 
@@ -453,13 +454,13 @@ Think about the $\beta$-support that $b$ must have and apply a suitable transfor
 
 \begin{lemma}
 \label {lem:small-subsets-closure}
-\uses{def:tau-alpha}
+\uses{def:tangle}
 It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|B|<\kappa$ [take the union of the $\beta$-supports of elements of $B$ and add $\alpha$ to all the second components of elements of this union]:  all small subsets of a type are realized in each higher type.
 \end{lemma}
 
 \begin{definition}
 \label {def:word-obligation}
-\uses{def:tau-alpha}
+\uses{def:tangle}
 [I'm not sure what to call this]  Let $\leq_\alpha$ be your favorite well-ordering of $\tau_\alpha$, needed for the recursive definition of the $f$ maps at later stages.
 
 This order needs to satisfy some technical conditions.
@@ -494,10 +495,8 @@ In this chapter, we prove that the structure described in the previous chapter i
 Treating supports as sets suffices for the model description, but we will need to analyze supports and orbits with more care, so it is better for purposes
 of the proof to regard a support as a well-ordering.
 
-\begin{description}
-
-\item[Definition (support and symmetry, refined):]  An $\alpha$-support is a well-ordering of a small set of triples $((\beta,-1,x),A,\gamma)$, where $\beta<\alpha$ (it may be different for different elements of the domain of the support), $A$ is a finite subset of $\lambda$ with maximum $\alpha$ and minimum $\beta$, $x$ is either a near-litter or a singleton, and $0 \leq \gamma \leq\alpha$.  Further, we impose the condition that if $((\beta,-1,x),A,\gamma)$ and $((\beta,-1,x'),A,\delta)$ belong to the domain of the support and $x,x'$ are near-litters, then $x$ and $x'$ are disjoint.
-
+\begin{description}.
+\item
 We may write $x \leq_S y$ for $(x,y) \in S$, and $x <_S y$ when we also want to indicate that $x,y$ are distinct.
 
 If $\pi$ is an $\alpha$-allowable permutation and $S$ is an $\alpha$-support, we define $\pi[S]$ as $\{((\pi_A(x),A,\gamma),(\pi_B(y),B,\delta)):((x,A,\gamma),(y,B,\delta))\in S\}$.
@@ -510,7 +509,7 @@ We can then say that $S$ is a support of $X$ if $X$ is an $\alpha$-code, $S$ is 
 
 \begin{lemma}
 \label {restrict-allowable-perm}
-\uses{support-of}
+\uses{def:support-of}
 An allowable permutation on $\alpha$-codes restricts to a permutation on $\tau_\alpha$, as we presumed in the definition of allowable permutation.
 \end{lemma}
 \begin{proof}
@@ -521,10 +520,14 @@ Quite standard techniques show that if $\pi$ is an $\alpha$-allowable permutatio
 This probably represents a chunk of formal verification work, as what is obvious to people is not always obvious to theorem provers.
 % \end{comment}
 
-\item[Definition (raising and lowering index on a support):]  For any $\alpha$-support $S$ and finite subset $C$ of $\lambda$ with minimum element greater than $\alpha$, we define $S^C$ as
+\begin{definition}
+\label {def:raise-lower-index}
+\uses{def:support-of}
+For any $\alpha$-support $S$ and an extended type index $C$ with minimum element greater than $\alpha$, we define $S^C$ as
 $\{((x,A\cup C,\gamma),(y,B\cup C,\delta)):((x,A,\gamma),(y,B,\delta)) \in S\}$.
 
 If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the largest support $U$ such that $U^{\{\alpha\}} \subseteq S$ and $U$ is a $\beta$-support.
+\end{definition}
 
 \begin{definition}
 \label {def:strong-support}
@@ -541,7 +544,7 @@ A strong support is a support $S$ with certain additional properties.
 \end{definition}
 
 \begin{lemma}
-\label {strengthen-support}
+\label {lem:strengthen-support}
 \uses{def:strong-support}
 Any support can be extended to a strong support.
 \end{lemma}
@@ -580,6 +583,8 @@ An $\alpha$-local bijection is a map $\pi^0$ whose domain is a set of pairs $(A,
 \begin{definition}
 \label {def:perm-exception}
 \uses{def:near-litter-perm}
+\leanok
+\lean{con_nf.near_litter_perm.exception}
 We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L$ being the litter containing $x$) either $\pi(x) \not\in (\pi``L)^\circ$ or $\pi^{-1}(x) \not\in ({\pi^{-1}}``L)^\circ$.
 \end{definition}
 
@@ -670,8 +675,7 @@ We build a support $S+T_b^{\{\alpha\}}$ and a support $S+U^{\{\alpha\}}$ with pa
 in both supports and the fact that $U$ is the image of $T_b$ under some allowable permutation.
 
 We construct an $\alpha$-allowable permutation whose action takes one of these supports to the other, which will complete the plan given above.
-For this we use the freedom of action theorem.  We define a local bijection which sends $(A,x)$ to $y$ just in case a $(\beta,A,\{x\})$ in the first support corresponds to a $(\beta,A,\{y\})$ in the other, and further enforces agreement of derivatives  of the permutation to be constructed with derivatives of the known permutation $\pi'$ sending $T_b$ to $U$ at exceptions of derivatives of $\pi'$ which lie in litters in $T_b$.  This causes singleton items in the first support to be mapped to the corresponding singleton items in the other support.  We have to argue that litters in the domain of $S+T_b^{\{\alpha\}}$ (which is a strong support) are mapped to the correct near-litters in the domain of $S+U^{\{\alpha\}}$.  If there is a failure, there is a first one.  The local cardinal of the
-first failure is treated correctly (because a support of it is treated correctly), so the failure must consist in the map constructed having an exception which is moved by the permutation into or out of the litter in question (if a litter $L$ in $T_b$ is mapped to a near-litter $N$ in $U$, all elements of $N \Delta N^\circ$ are treated correctly because they are values at exceptions of the known permutation), so a failure implies an exception of the constructed permutation lying in $L$ which is not an exception of the known map and whose singleton is not an item in $T_b$, and there are no such exceptions.
+For this we use the freedom of action theorem.  We define a local bijection which sends $(A,x)$ to $y$ just in case a $(\beta,A,\{x\})$ in the first support corresponds to a $(\beta,A,\{y\})$ in the other, and further enforces agreement of derivatives  of the permutation to be constructed with derivatives of the known permutation $\pi'$ sending $T_b$ to $U$ at exceptions of derivatives of $\pi'$ which lie in litters in $T_b$.  This causes singleton items in the first support to be mapped to the corresponding singleton items in the other support.  We have to argue that litters in the domain of $S+T_b^{\{\alpha\}}$ (which is a strong support) are mapped to the correct near-litters in the domain of $S+U^{\{\alpha\}}$.  If there is a failure, there is a first one.  The local cardinal of the first failure is treated correctly (because a support of it is treated correctly), so the failure must consist in the map constructed having an exception which is moved by the permutation into or out of the litter in question (if a litter $L$ in $T_b$ is mapped to a near-litter $N$ in $U$, all elements of $N \Delta N^\circ$ are treated correctly because they are values at exceptions of the known permutation), so a failure implies an exception of the constructed permutation lying in $L$ which is not an exception of the known map and whose singleton is not an item in $T_b$, and there are no such exceptions.
 
 The constructed map fixes $X$ because of its identity action on $S$, and it sends $b$ to $c$ because its action sends $T_b$ to $U$, which is what we claimed,
 
