@@ -1,7 +1,5 @@
-import extended_index
-import group_theory.perm.basic
 import litter
-import params
+import type_index
 
 noncomputable theory
 
@@ -26,7 +24,7 @@ variable [code_params.{u}]
 structure code (β : Λ) (β_le_α : β ≤ α) :=
 (extension : type_index)
 (extension_lt : extension < β)
-(elts : set (tangle extension (lt_of_lt_of_le extension_lt (with_bot.coe_le_coe.mpr β_le_α))))
+(elts : set (tangle extension (extension_lt.trans_le $ with_bot.coe_le_coe.mpr β_le_α)))
 
 /-- Suppose that the set of tangles embeds into the set of codes. -/
 class code_params_embedding :=
@@ -40,7 +38,7 @@ def code.is_tangle {β < α} (c : code β (le_of_lt ‹_›)) : Prop :=
 /-- A *structural permutation* on a proper type index is defined by its derivatives,
 as well as its permutation on atoms. -/
 def struct_perm : Π (β : Λ), Type u
-| β := (perm atom) × (Π (γ < β), struct_perm γ)
+| β := perm atom × Π γ < β, struct_perm γ
 using_well_founded { dec_tac := `[assumption] }
 
 namespace struct_perm

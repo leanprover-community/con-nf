@@ -1,7 +1,6 @@
-import combinatorics.quiver.basic
 import combinatorics.quiver.path
+import mathlib.well_founded
 import params
-import pretangle
 
 universe u
 
@@ -9,6 +8,17 @@ namespace con_nf
 variables [params.{u}]
 
 open params
+
+/-- Either the base type or a proper type index (an element of `Λ`).
+The base type is written `⊥`. -/
+@[reducible]
+def type_index := with_bot Λ
+
+/- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
+This allows well founded recursion on type indices. -/
+
+noncomputable instance : linear_order type_index := linear_order_of_STO' (<)
+noncomputable instance : has_well_founded type_index := is_well_order.to_has_well_founded
 
 /-- We define the type of paths from certain types to lower types
 as elements of this quiver. -/

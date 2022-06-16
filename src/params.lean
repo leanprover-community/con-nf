@@ -1,3 +1,4 @@
+import mathlib.order
 import set_theory.cardinal.cofinality
 
 /-!
@@ -13,7 +14,7 @@ For our purposes, restricting to only computable functions is unnecessary.
 -/
 noncomputable theory
 
-open cardinal
+open cardinal set
 open_locale cardinal classical
 
 universe u
@@ -57,7 +58,7 @@ example : params := sorry
 
 open params
 
-variables [params.{u}]
+variables [params.{u}] {α β : Type u}
 
 /-- To allow Lean's type checker to see that the ordering `Λr` is a well-ordering without having to
 explicitly write `Λwf` everywhere, we declare it as an instance. -/
@@ -104,5 +105,58 @@ We will prove that all types constructed in our model have cardinality equal to 
 @[simp] lemma mk_atom : #atom = #μ :=
 by simp_rw [atom, mk_prod, lift_id, mk_litter,
   mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) κ_le_μ κ_regular.pos.ne']
+
+section small
+variables {f : α → β} {s t : set α}
+
+/-- A set is small if its cardinality is strictly less than `κ`. -/
+def small (s : set α) := #s < #κ
+
+/-- The empty set is small. -/
+lemma small_empty : small (∅ : set α) := by { rw [small, mk_emptyc], exact κ_regular.pos }
+
+/-- Subsets of small sets are small.
+We say that the 'smallness' relation is monotonic. -/
+lemma small.mono (h : s ⊆ t) : small t → small s := (cardinal.mk_le_mk_of_subset h).trans_lt
+
+/-- Unions of small subsets are small. -/
+lemma small.union (hs : small s) (ht : small t) : small (s ∪ t) :=
+(mk_union_le _ _).trans_lt $ add_lt_of_lt κ_regular.aleph_0_le hs ht
+
+/-- The image of a small set under any function `f` is small. -/
+lemma small.image : small s → small (f '' s) := mk_image_le.trans_lt
+
+end small
+
+section is_near
+variables {s t u : set α}
+
+/-- Two sets are near if their symmetric difference is small. -/
+def is_near (s t : set α) : Prop := small (s ∆ t)
+
+/-- A set is near itself. -/
+@[refl] lemma is_near_refl (s : set α) : is_near s s :=
+by { rw [is_near, symm_diff_self], exact small_empty }
+
+/-- A version of the `is_near_refl` lemma that does not require the set `s` to be given explicitly.
+The value of `s` will be inferred automatically by the elaborator. -/
+lemma is_near_rfl : is_near s s := is_near_refl _
+
+/-- If `s` is near `t`, then `t` is near `s`. -/
+@[symm] lemma is_near.symm (h : is_near s t) : is_near t s := by rwa [is_near, symm_diff_comm]
+/-- `s` is near `t` if and only if `t` is near `s`.
+In each direction, this is an application of the `is_near.symm` lemma.
+Lemmas using `↔` can be used with `rw`, so this form of the result is particularly useful. -/
+lemma is_near_comm : is_near s t ↔ is_near t s := ⟨is_near.symm, is_near.symm⟩
+
+/-- Nearness is transitive: if `s` is near `t` and `t` is near `u`, then `s` is near `u`. -/
+@[trans] lemma is_near.trans (hst : is_near s t) (htu : is_near t u) : is_near s u :=
+(hst.union htu).mono $ symm_diff_triangle s t u
+
+/-- If two sets are near each other, then their images under an arbitrary function are also near. -/
+lemma is_near.image (f : α → β) (h : is_near s t) : is_near (f '' s) (f '' t) :=
+h.image.mono $ subset_image_symm_diff _ _ _
+
+end is_near
 
 end con_nf

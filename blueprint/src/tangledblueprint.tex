@@ -250,7 +250,7 @@ By the previous lemma, the union of the $A_\gamma$'s is a function, which has an
 
 \begin{lemma}
 \label {lem:ainverse-stops}
-\uses{def:ainverse, def:fmap}
+\uses{def:ainverse}
 No code has infinitely many iterated images under $A^{-1}$.
 \end{lemma}
 
@@ -285,7 +285,7 @@ Note that each equivalence class under $\equiv_\beta$ with nonempty third compon
 \end{definition}
 
 \begin{lemma}
-\label {objects-are-representative}
+\label {lem:objects-are-representative}
 \uses{def:representative-code}
 We stipulate that all elements of $\tau_\beta$ are representative $\beta$-codes, for proper type indices $\beta<\alpha$.
 Not all representative $\beta$-codes belong to $\tau_\beta$.
@@ -512,7 +512,7 @@ We can then say that $S$ is a support of $X$ if $X$ is an $\alpha$-code, $S$ is 
 \end{description}
 
 \begin{lemma}
-\label {restrict-allowable-perm}
+\label {lem:restrict-allowable-perm}
 \uses{def:support-of}
 An allowable permutation on $\alpha$-codes restricts to a permutation on $\tau_\alpha$, as we presumed in the definition of allowable permutation.
 \end{lemma}
@@ -599,8 +599,8 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 \end{description}
 
 \begin{theorem}
-\label {freedom-of-action}
-\uses{def:derivative, def:perm-exception, lem:strengthen-support, def:local-bijection}
+\label {lem:freedom-of-action}
+\uses{def:perm-exception, lem:strengthen-support, def:local-bijection}
 For any $\alpha$-local bijection $\pi^0$ there is an $\alpha$-allowable permutation $\pi$ such that
 $\pi_{A\cup \{-1\}}$ extends $\pi^0_A$ for each $A$, and satisfying a further technical condition:  the permutation $\pi$ obtained from $\pi^0$ has no exceptions of its derivatives other than those determined by elements of the domains of maps $\pi^0_A$:  $(A,x)$ being in the domain of $\pi^0$ is required for (but does not require) $x$ to be an exception of $\pi_{A \cup \{-1\}}$.
 \end{theorem}
