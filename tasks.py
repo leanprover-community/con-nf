@@ -5,7 +5,7 @@ from invoke import run, task
 
 from mathlibtools.lib import LeanProject
 
-from blueprint.tasks import web, bp, print, serve
+from blueprint.tasks import web, bp, print_bp, serve
 
 ROOT = Path(__file__).parent
 
