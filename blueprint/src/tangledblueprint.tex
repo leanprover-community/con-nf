@@ -161,7 +161,7 @@ We first define a big model of TTT without extensionality, which we call {\em pr
 \label {def:pretangle}
 \leanok
 \lean{con_nf.pretangle}
-Define {\em pretangles} inductively. $D_{\-1}$ is defined as $\tau_{\-1}$. For $\alpha$ a proper type index, $D_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal P (D_\beta)$.
+Define {\em pretangles} inductively. $D_{-1}$ is defined as $\tau_{-1}$. For $\alpha$ a proper type index, $D_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal P (D_\beta)$.
 \end{definition}
 
 \begin{definition}
@@ -193,7 +193,7 @@ A {\em type $\beta$ code} is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ an
 
 \begin{definition}
 \label {def:fmap}
-\uses{def:typewords, def:local-cardinal}
+\uses{def:iota, def:local-cardinal}
 We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$, $f_{\beta,\gamma}(x)$ as the local cardinal $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
 \end{definition}
 
@@ -201,7 +201,7 @@ Notice that when we are constructing type $\alpha$, we assume that we have const
 
 \begin{definition}
 \label {def:ftargets}
-\uses{def:type-index, def:fmap}
+\uses{def:fmap}
 We designate a pairwise disjoint family of subsets $X_{(\beta,\gamma)}$ of the set of local cardinals, each of cardinality $\mu$, indexed by ordered pairs $(\beta,\gamma)$ with $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$.
 \end{definition}
 
@@ -254,14 +254,12 @@ No code has infinitely many iterated images under $A^{-1}$.
 \end{lemma}
 
 \begin{proof}
-Computation of $A^{-1}$ involves replacing a local cardinal appearing as a subset of the extension of a code
-with (the singleton of) an element appearing in the well-ordering of its type with position indexed by an ordinal
-less than the ordinal indexing the position of any of the elements of the local cardinal in their type.  Consider the ordinal indices of positions in the order on appropriate types of the first element in the appropriate order of the extensions of successive iterated images under $A^{-1}$:  these must decrease.
+Computation of $A^{-1}$ involves replacing a local cardinal appearing as a subset of the extension of a code with (the singleton of) an element appearing in the well-ordering of its type with position indexed by an ordinal less than the ordinal indexing the position of any of the elements of the local cardinal in their type.  Consider the ordinal indices of positions in the order on appropriate types of the first element in the appropriate order of the extensions of successive iterated images under $A^{-1}$:  these must decrease.
 \end{proof}
 
 \begin{definition}
 \label {def:equiv-code}
-\uses{lem:ainverse-stops, def:ainverse, def:code}
+\uses{lem:ainverse-stops, def:ainverse}
 Let $\beta$ be a type index $\leq \alpha$.  We define an equivalence relation $\equiv_\beta$ on $\beta$-codes.
 
 If $\beta=-1$, we define $\equiv_\beta$ as equality restricted to type $-1$.
@@ -294,7 +292,7 @@ Not all representative $\beta$-codes belong to $\tau_\beta$.
 
 \begin{definition}
 \label {def:ttt-membership}
-\uses{def:representative-code, def:ainverse, def:code}
+\uses{def:representative-code, def:ainverse}
 (An extension of) the membership relations of objects at and below type $\alpha$ in the intended model of tangled type theory is then defined as follows: if $\delta < \beta \leq \alpha$ are proper type indices  $(\delta,\epsilon,E) \in_{TTT} (\beta,\gamma,G)$ (where both triples given are codes and representatives of their equivalence classes) iff $\gamma=\delta$ and $(\gamma,\delta,D)  \in B$ or $\gamma\neq \delta$ and $(\delta,\epsilon,E) \in \pi_3(A_\delta(\beta,\gamma,G))$.  Note that in this latter case we will certainly have $\delta=-1$.  This does define membership of codes of lower types in type $\beta$ codes which do not necessarily belong to $\tau_\beta$;  this is harmless.
 \end{definition}
 
@@ -313,7 +311,7 @@ and $(\forall Z \in \tau_\beta:Z \in_{\tt TTT} X \leftrightarrow Z \in_{\tt TTT}
 
 \begin{lemma}
 \label {lem:singletons}
-\uses{def:type-index}
+\uses{def:representative-code}
 We stipulate that for any proper type index $\beta<\alpha$ and any type index $\gamma<\beta$ and any $g \in \tau_\gamma$, $(\beta,\gamma,\{g\})\in \tau_\beta$.  Of course this will need to be verified for $\alpha$ as part of the recursion.  It is immediately evident that it is a representative code, at any rate.
 \end{lemma}
 
@@ -360,7 +358,7 @@ $\tau_\beta$ for each $\beta<\alpha$, and as part of the recursion we will need 
 
 \begin{lemma}
 \label {lem:coherence-unpacked}
-\uses{def:allowable-perm, def:near-litter}
+\uses{def:fmap, def:allowable-perm}
 A permutation $\pi$ of $\beta$-codes is $\beta$-allowable ($\beta \leq \alpha$ and proper) iff $\pi_A$ is $-1$-allowable when $\pi_A$ is defined and $-1 \in A$
 and  $$f_{\gamma,\delta}(\pi_\gamma(g)) = [(\pi_\delta)_{-1}``f_{\gamma,\delta}(g)^\circ].$$
 holds for all $f_{\gamma,\delta}$ with $\gamma,\delta<\beta$.
@@ -383,7 +381,7 @@ It is straightforward to show that this condition is equivalent to the coherence
 
 \begin{lemma}
 \label {lem:rep-preserved}
-\uses{lem:coherence-unpacked}
+\uses{lem:coherence-unpacked, def:representative-code}
 The image under an allowable permutation of a representative code is a representative code.  (This is an initial step toward the eventual requirement that an image of a type element should be a type element).
 \end{lemma}
 
@@ -425,7 +423,7 @@ we have for each $(x,A) \in {\tt dom}(S)$ that $\pi_A(x)=x$, we also have that $
 
 \begin{definition}
 \label {def:tau-alpha}
-\uses{def:support-of}
+\uses{def:representative-code, def:support-of}
 We stipulate that $\tau_\beta$ was already defined as the set of $\beta$-representative codes $X$ such that for some $\beta$-support $S$,
 $S$ is an $\beta$-support for $X$,  and define $\tau_\alpha$ as the set of $\alpha$-representative codes $X$ such that for some $\alpha$-support $S$,
 $S$ is an $\alpha$-support for $X$.
@@ -446,7 +444,7 @@ This code is obviously representative and the domain of its support is a decorat
 \begin{lemma}
 \label {def:singleton-obligation}
 \uses{def:tau-alpha, def:singletons}
-For any $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$
+For any $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$.
 \end{lemma}
 
 \begin{proof}
@@ -487,7 +485,9 @@ There is lots to be proven, but that is the entire description.
 
 \newpage
 
-\section{Showing that it is all true:  proving that the structure described in the previous section is a model of tangled type theory}
+\chapter{It is a model of tangled type theory}
+
+In this chapter, we prove that the structure described in the previous chapter is a model of tangled type theory.
 
 \section{Strong supports defined}
 
@@ -508,7 +508,14 @@ We can then say that $S$ is a support of $X$ if $X$ is an $\alpha$-code, $S$ is 
 
 \item[Remark on definitions of support and symmetry:]  It should be clear that the supports we have defined here do exactly the same work as the set supports in the model description (since the additional order structure and the third components of support domain elements actually do no work at this point).
 
-\item[Applying permutations to objects with support:]  Quite standard techniques show that if $\pi$ is an $\alpha$-allowable permutation and $X \in \tau_\alpha$ has $\alpha$-support $S$, then $\pi(X)$ has $\alpha$-support $\pi[S]$.  It follows from this that an allowable permutation on $\alpha$-codes restricts to a permutation on $\tau_\alpha$, as we presumed in the definition of allowable permutation.
+\begin{lemma}
+\label {restrict-allowable-perm}
+\uses{support-of}
+An allowable permutation on $\alpha$-codes restricts to a permutation on $\tau_\alpha$, as we presumed in the definition of allowable permutation.
+\end{lemma}
+\begin{proof}
+Quite standard techniques show that if $\pi$ is an $\alpha$-allowable permutation and $X \in \tau_\alpha$ has $\alpha$-support $S$, then $\pi(X)$ has $\alpha$-support $\pi[S]$.  The results follows from this.
+\end{proof}
 
 % \begin{comment}
 This probably represents a chunk of formal verification work, as what is obvious to people is not always obvious to theorem provers.
@@ -521,7 +528,7 @@ If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the la
 
 \begin{definition}
 \label {def:strong-support}
-\uses{def:support}
+\uses{def:support-of}
 A strong support is a support $S$ with certain additional properties.
 
 \begin{enumerate}
@@ -529,8 +536,7 @@ A strong support is a support $S$ with certain additional properties.
 
 \item  If $((\beta,-1,\{x\}),A,\gamma) \in S$, then $((\beta,-1,L),A,\gamma) <_S ((\beta,-1,\{x\}),A,\gamma)$, where $L$ is the litter containing $x$.
 
-\item  If $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$, where $\gamma<\delta$, then there is a $\gamma$-support $T$ of $y$ such that $T^{A \setminus \{\beta\}} \subseteq S$ and each element of the domain of $T^{A \setminus \{\beta\}}$ is $\leq_S ((\beta,-1,L),A)$.  Note that these conditions imply that there is an index-raised version of a strong $\gamma$ support of $y$ included in $T$.
-
+\item  If $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$, where $\gamma<\delta$, then there is a $\gamma$-support $T$ of $y$ such that $T^{A \setminus \{\beta\}} \subseteq S$ and each element of the domain of $T^{A \setminus \{\beta\}}$ is $\leq_S ((\beta,-1,L),A)$.  Note that these conditions imply that there is an index-raised version of a strong $\gamma$-support of $y$ included in $T$.
 \end{enumerate}
 \end{definition}
 
@@ -545,8 +551,7 @@ It should be straightforward to see that any $X$ with support $S$ has a support 
 
 We describe the process of extending a support to a strong support, assuming that it already satisfies the first condition.  Before each typed singleton element of the domain, insert the appropriate typed litter (removing an extra copy of it if it occurred later in the order).  This will only need to be done once for each typed singleton element.
 
-The condition $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$ for $\gamma<\delta$ forces insertion of a $\gamma$-support for $y$.  Of course this might cause further insertions.  Notice that
-the third components of all inserted items will be $\leq \gamma <\delta$.  So it is not possible for an infinite regress of insertions to occur which would cause the extended support to fail to be a well-ordering.  (Of course, if an item is inserted which occurs later in the order, remove later occurrences).
+The condition $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$ for $\gamma<\delta$ forces insertion of a $\gamma$-support for $y$.  Of course this might cause further insertions.  Notice that the third components of all inserted items will be $\leq \gamma <\delta$.  So it is not possible for an infinite regress of insertions to occur which would cause the extended support to fail to be a well-ordering.  (Of course, if an item is inserted which occurs later in the order, remove later occurrences).
 \end{proof}
 
 \end{description}
@@ -572,7 +577,7 @@ We give an exact statement of what is meant, then we prove it.
 An $\alpha$-local bijection is a map $\pi^0$ whose domain is a set of pairs $(A,x)$ where $A$ is an $\alpha$-extended type index and $x$ is in type $-1$,  and whose range is a subset of $\tau_{-1}$.  To state further conditions, we introduce the notation $\pi^0_A(x) = \pi^0(A,x)$ and state the further condition that each map $\pi^0_A$ is injective and has domain the same as its range, and that the intersection of the domain of $\pi^0_A$ with any litter is small (empty being an important case of small).
 \end{definition}
 
-\begin{definition}{Exception of a permutation}
+\begin{definition}
 \label {def:perm-exception}
 \uses{def:near-litter-perm}
 We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L$ being the litter containing $x$) either $\pi(x) \not\in (\pi``L)^\circ$ or $\pi^{-1}(x) \not\in ({\pi^{-1}}``L)^\circ$.
@@ -586,7 +591,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 
 \begin{theorem}
 \label {freedom-of-action}
-\uses{def:derivative, def:perm-exception, def:strong-support, def:local-bijection}
+\uses{def:derivative, def:perm-exception, lem:strengthen-support, def:local-bijection}
 For any $\alpha$-local bijection $\pi^0$ there is an $\alpha$-allowable permutation $\pi$ such that
 $\pi_{A\cup \{-1\}}$ extends $\pi^0_A$ for each $A$, and satisfying a further technical condition:  the permutation $\pi$ obtained from $\pi^0$ has no exceptions of its derivatives other than those determined by elements of the domains of maps $\pi^0_A$:  $(A,x)$ being in the domain of $\pi^0$ is required for (but does not require) $x$ to be an exception of $\pi_{A \cup \{-1\}}$.
 \end{theorem}
@@ -630,10 +635,13 @@ Now we argue that (given that everything worked out correctly already at lower t
 that the construction actually succeeds at every type.
 
 
-
+\begin{definition}
+\label {def:coding-function}
+\uses{def:allowable-perm}
 For any support $S$ and object $x$, we can define a function $\chi_{x,S}$ which sends $T=\pi(S)$ to $\pi(x)$ for every $T$ in the orbit of $S$ under
 the action of allowable permutations.  We call such functions {\em coding functions\/}.  Note that if $\pi[S]=\pi'[S]$ then $(\pi^{-1}\circ \pi')[S]= S$, so
 $(\pi^{-1}\circ \pi')(x)= x$, so $\pi(x)=\pi'(x)$, ensuring that the map $\chi_{x,S}$ for which we gave an implicit definition is well defined.
+\end{definition}
 
 The strategy of our argument for the size of the types is to show that that there are $<\mu$ coding functions for each type whose domain includes a strong support, which implies that there are no more than $\mu$ (and so exactly $\mu$) elements of each type, since every element of a type is obtainable by applying a coding function (of which there are $<\mu$) to a support (of which there are $\mu$), and every element of a type has a strong support.
 
