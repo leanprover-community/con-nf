@@ -81,9 +81,14 @@ noncomputable instance : inhabited μ  :=
 /-- The litters. This is the type indexing the partition of `atom`. -/
 @[derive inhabited, irreducible] def litter := (Λ × Λ) × μ
 
+local attribute [semireducible] litter
+
 @[simp] lemma mk_litter : #litter = #μ :=
 by simp_rw [litter, mk_prod, lift_id, mul_assoc, mul_eq_right
   (κ_regular.aleph_0_le.trans κ_lt_μ.le) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_limit.ne_zero]
+
+/-- The domains of the f-maps. -/
+def ftarget (k l : Λ) : set litter := {i | i.1 = (k, l)}
 
 /-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
 arbitrary type of cardinality `μ` and partitioning it into suitable sets of litters afterwards, we
