@@ -617,7 +617,7 @@ $\pi_A((\beta,-1,L))$ as $$(\beta,-1,{\pi^0_A}``L \cup (f_{\gamma,\beta}(\pi_{A 
 The nasty recursive idea here is that we already know how to compute $\pi_{A \setminus \{\beta\} \cup \{\gamma\}}(y)$ from the embedded strong $\gamma$ support of $y$ because we assume as a hypothesis of the recursion that we already know how to carry out this computation for $\gamma$-supports, $\gamma<\alpha$.  The  local information we need about the $\gamma$ allowable permutation (the local bijection to be used and the relevant $\chi$ maps) is included in the information we are given initially about $\pi$ (though this data will have indices modified when used on the $\gamma$-support, of course).  Notice that we certainly do know how to do it for 0-supports, because the recursive clause will never be invoked if $\alpha=0$:  the rest of the procedure tells us what to do.
 
 Once we know how to carry out this calculation along any $\alpha$-strong support, we can compute the derivatives of $\pi$ on elements of type $-1$  along all type paths, and so compute the value of $\pi$ and all of its derivatives on all types.  The method of calculation clearly gives an allowable permutation without exceptions other than those dictated by the local bijection.
-end{proof}
+\end{proof}
 
 % \begin{comment}
 {\bf Note for the formal verification project:}  This section is vitally important and should be ready to work on (once the model and the definition of strong support are handled).  Setting up the recursive definition of the computation may be nasty.
