@@ -174,17 +174,24 @@ Define {\em pretangles} inductively. $D_{-1}$ is defined as $\tau_{-1}$. For $\a
 \end{definition}
 
 \begin{definition}
-\label {def:recursion-motor}
+\label {def:stage1-data}
 \uses{def:pretangle, def:type-index}
 \lean{con_nf.recursion_motor}
 Fix a proper type index $\alpha$.
 
-Posit that we have already defined $\tau_\beta$ for each type index $\beta<\alpha$ (notice that we have already defined $\tau_{-1}$), and that the cardinality of each set $\tau_\beta$ is $\mu$.
+Assume that for each earlier index $\beta < \alpha$ we have the following data defined:
+\begin{itemize}
+  \item the set $\tau_\beta$;
+  \item an injection $\iota_\beta : \tau_\beta \to \mu$ [alternatively, we could assume an ordering $<_\beta$ of order-type $\mu$]
+  \item an injection $j_\beta$ from the set of local cardinals (equivalently, the set litters) to $\tau_\beta$. (We will call these the \emph{typed litters} below.
+\end{itemize}
+
+Call this \emph{stage 1 data} for level $\beta$.
 \end{definition}
 
 \begin{definition}
 \label {def:typewords}
-\uses{def:recursion-motor}
+\uses{def:stage1-data}
 We select a well-ordering $\leq_\beta$ of order type $\mu$ (with associated strict well-ordering $<_\beta$) for each type index $\beta<\alpha$.
 \end{definition}
 
@@ -192,7 +199,7 @@ We will define $\tau_\alpha$, the implementation of type $\alpha$ of the model. 
 
 \begin{definition}
 \label {def:code}
-\uses{def:recursion-motor}
+\uses{def:stage1-data}
 %\leanok
 \lean{con_nf.code}
 Let $\beta$ be a proper type index $\leq \alpha$.
@@ -201,8 +208,10 @@ A {\em type $\beta$ code} is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ an
 
 \begin{definition}
 \label {def:fmap}
-\uses{def:ftargets, def:code, def:iota}
-We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$, $f_{\beta,\gamma}(x)$ as the litter $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
+\uses{def:ftargets, def:code,de}
+We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $\mu$, as follows:
+
+for $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota_\gamma(\gamma,-1,M)>\iota_\beta(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
 \end{definition}
 
 Notice that when we are constructing type $\alpha$, we assume that we have constructed all earlier types and we have the information already to define $f_{\beta,\gamma}$ when $\beta$ and $\gamma$ are less than $\alpha$.  This definition does not actually depend on the value of $\alpha$ except insofar as this defines its domain of application.
@@ -218,12 +227,6 @@ Codes $(\beta,-1,N)$ where $N$ is a near-litter are called {\em typed near-litte
 \uses{def:typed-near-litter}
 All typed near-litters are stipulated to be elements of $\tau_\beta$ (of course we need to verify this when the criterion for membership in $\tau_\beta$ is revealed).
 \end{lemma}
-
-\begin{definition}
-\label {def:iota}
-\uses{def:typewords}
-We define $\iota(x)$ for $x \in \tau_\beta$ as the order type of $\leq_\beta$ restricted to $\{y \in \tau_\beta:y <_\beta x\}$.
-\end{definition}
 
 \begin{definition}
 \label {def:alt-ext}
@@ -258,7 +261,7 @@ Equivalently (this may be easier for the formalisation), the relation $\rightsqu
 \end{lemma}
 
 \begin{proof}
-  Consider the map $j$ from codes to $\mu$ sending $(\beta,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the position function defined from $<_\gamma$.
+  Consider the map $j$ from codes to $\mu$ sending $(\beta,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the  position function assumed in the stage 1 data.
 
   The definition of the functions $A_{\delta,\gamma}$ and the condition that $\iota f_{\gamma,\delta}()$ ensure that $j(\beta,\gamma,X) < j(A_\delta(\beta,\gamma,X))$, for all suitable $\gamma,\delta,X$.
 
@@ -483,7 +486,7 @@ For each litter $L$ and element $a$ of $L$, $(\alpha,-1,L)$ must precede $(\alph
 A typed near-litter $N$ which is not a litter must be preceded in the order by the litter $N^\circ$ and the elements of
 $N \Delta N^\circ$.
 
-For each $x$ in $\tau_\alpha$ which is not a typed singleton or typed near-litter, we designate a support.  For any $(y,A)$ in the domain of the designated support of $x$, we must have $\iota(y)<\iota(x)$.
+For each $x$ in $\tau_\alpha$ which is not a typed singleton or typed near-litter, we designate a support.  For any $(y,A)$ in the domain of the designated support of $x$, we must have $\iota_\alpha(y)<\iota_\alpha(x)$.
 \end{definition}
 
 
