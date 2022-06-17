@@ -12,9 +12,14 @@ variable [params.{u}]
 
 open params
 
-/-- The motor of the recursion. -/
+/-- The motor of the recursion. This contains all the information needed for the main recursion.
+Expect it to grow bigger with time. -/
 class recursion_motor (α : Λ) :=
 (tangle : Π β < α, Type u)
+(to_tangle : Π β (h : β < α), litter ↪ tangle β h)
+(of_tangle : Π β (h : β < α), tangle β h ↪ μ)
+
+export recursion_motor (of_tangle to_tangle)
 
 variables (α : Λ) [recursion_motor.{u} α]
 
