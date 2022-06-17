@@ -253,10 +253,16 @@ By the previous lemma, the union of the $A_\gamma$'s is a function, which has an
 \label {lem:ainverse-stops}
 \uses{def:ainverse}
 No code has infinitely many iterated images under $A^{-1}$.
+
+Equivalently (this may be easier for the formalisation), the relation $\rightsquigarrow$ on codes --- defined by $ (\beta,\gamma ,X) \rightsquigarrow A_\gamma,\delta (\beta,\gamma ,X)$ for all codes $ (\beta,\gamma ,X)$ and all $\delta \neq \gamma$ --- is well-founded.
 \end{lemma}
 
 \begin{proof}
-Computation of $A^{-1}$ involves replacing a local cardinal appearing as a subset of the extension of a code with (the singleton of) an element appearing in the well-ordering of its type with position indexed by an ordinal less than the ordinal indexing the position of any of the elements of the local cardinal in their type.  Consider the ordinal indices of positions in the order on appropriate types of the first element in the appropriate order of the extensions of successive iterated images under $A^{-1}$:  these must decrease.
+  Consider the map $j$ from codes to $\mu$ sending $(\beta,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the position function defined from $<_\gamma$.
+
+  The definition of the functions $A_{\delta,\gamma}$ and the condition that $\iota f_{\gamma,\delta}()$ ensure that $j(\beta,\gamma,X) < j(A_\delta(\beta,\gamma,X))$, for all suitable $\gamma,\delta,X$.
+
+  In other words, if $C \rightsquigarrow C'$, then $j(C) < j(C')$ in $\mu$.  It follows that $\rightsquigarrow$ is well-founded.
 \end{proof}
 
 \begin{definition}
@@ -272,17 +278,19 @@ We have $(\beta,\gamma,\emptyset) \equiv_\beta (\beta,\delta,D)$ iff $D=\emptyse
 
 Assume for the rest of the definition that $(\beta,\gamma,G)$ is a code.
 
-If $(\beta,\gamma,G)$ has an even number of iterated images under $A^{-1}$ (including none as an important case)
+Define the \emph{height} of a code as its number of iterated images under $A^{-1}$.  Formally this can be given by induction over the well-founded relation $\rightsquigarrow$ defined in \cref{lem:ainverse-stops}: If $C$ has no predecessors under $\rightsquigarrow$, then $h(C) = 0$; if $C$ has a predecessor $C' \rightsquigarrow C$, this is unique by injectivity of $A^{-1}$, and we set $h(C) = h(C') + 1$.
+
+If $(\beta,\gamma,G)$ has even height (including 0 as an important case)
 then $(\beta,\delta,D) \equiv_\beta (\beta,\gamma,G)$ (for $\delta$ a type index distinct from $\gamma$) iff
 $(\beta,\delta,D) = A_\delta(\beta,\gamma,G)$.
 
-If $(\beta,\gamma,G)$ has an odd number of iterated images under $A^{-1}$ then $(\beta,\delta,D) \equiv_\beta (\beta,\gamma,G)$ iff $(\beta,\delta,D) \equiv_\beta A^{-1}(\beta,\gamma,G)$ (which reduces to the previous case).
+If $(\beta,\gamma,G)$ has odd height then $(\beta,\delta,D) \equiv_\beta (\beta,\gamma,G)$ iff $(\beta,\delta,D) \equiv_\beta A^{-1}(\beta,\gamma,G)$ (which reduces to the previous case).
 \end{definition}
 
 \begin{definition}
 \label {def:representative-code}
 \uses{def:equiv-code}
-Note that each equivalence class under $\equiv_\beta$ with nonempty third component contains exactly one element with an even number of iterated images under $A^{-1}$.  We refer to this code as the representative code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation that $(\beta,-1,\emptyset)$ is a representative code as well.
+Note that each equivalence class under $\equiv_\beta$ with nonempty third component contains exactly one element with even height.  We refer to this code as the representative code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation that $(\beta,-1,\emptyset)$ is a representative code as well.
 \end{definition}
 
 \begin{lemma}
