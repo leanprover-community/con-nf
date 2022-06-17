@@ -166,7 +166,7 @@ One might be concerned with the fact that if $\mu$ has cofinality $\kappa$, it m
 We first define a big model of TTT without extensionality, which we call {\em pretangles}. Later, we will carve out our model of TTT from it.
 
 \begin{definition}
-\label {def:pretangle}
+\label{def:pretangle}
 \uses{def:atom}
 \leanok
 \lean{con_nf.pretangle}
@@ -183,16 +183,10 @@ Assume that for each earlier index $\beta < \alpha$ we have the following data d
 \begin{itemize}
   \item the set $\tau_\beta$;
   \item an injection $\iota_\beta : \tau_\beta \to \mu$ [alternatively, we could assume an ordering $<_\beta$ of order-type $\mu$]
-  \item an injection $j_\beta$ from the set of local cardinals (equivalently, the set litters) to $\tau_\beta$. (We will call these the \emph{typed litters} below.
+  \item an injection $j_\beta$ from the set of near-litters to $\tau_\beta$. [These will be concretely represented as the \emph{typed near-litters} below.]
 \end{itemize}
 
 Call this \emph{stage 1 data} for level $\beta$.
-\end{definition}
-
-\begin{definition}
-\label {def:typewords}
-\uses{def:stage1-data}
-We select a well-ordering $\leq_\beta$ of order type $\mu$ (with associated strict well-ordering $<_\beta$) for each type index $\beta<\alpha$.
 \end{definition}
 
 We will define $\tau_\alpha$, the implementation of type $\alpha$ of the model.  This definition is recursive:  when we are defining type $\alpha$ and associated concepts, we are supposing that related concepts have already been defined for all $\beta<\alpha$, and this process will define all types in the structure.
@@ -202,8 +196,7 @@ We will define $\tau_\alpha$, the implementation of type $\alpha$ of the model. 
 \uses{def:stage1-data}
 %\leanok
 \lean{con_nf.code}
-Let $\beta$ be a proper type index $\leq \alpha$.
-A {\em type $\beta$ code} is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ and $G \subseteq \tau_\gamma$.
+An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \subseteq \tau_\gamma$. (We include the $\alpha$ in case we later want to compare codes at different levels.)
 \end{definition}
 
 \begin{definition}
@@ -214,29 +207,27 @@ We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type
 for $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota_\gamma(\gamma,-1,M)>\iota_\beta(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
 \end{definition}
 
-Notice that when we are constructing type $\alpha$, we assume that we have constructed all earlier types and we have the information already to define $f_{\beta,\gamma}$ when $\beta$ and $\gamma$ are less than $\alpha$.  This definition does not actually depend on the value of $\alpha$ except insofar as this defines its domain of application.
+Notice that when we are constructing type $\alpha$, we assume that we have stage 1 data, which gives us the information already to define $f_{\beta,\gamma}$ for all $\beta, \gamma < \alpha$.  This definition will in the end not actually depend on the value of $\alpha$.
 
 \begin{definition}
 \label {def:typed-near-litter}
 \uses{def:near-litter, def:code}
-Codes $(\beta,-1,N)$ where $N$ is a near-litter are called {\em typed near-litters\/}.
+Codes $(\alpha,-1,N)$ where $N$ is a near-litter are called {\em typed near-litters\/}.  [These will eventually provide the injection $j_\alpha$ from near-litters into $\tau_\alpha$.]
 \end{definition}
-
-\begin{lemma}
-\label {lem:near-litter-code}
-\uses{def:typed-near-litter}
-All typed near-litters are stipulated to be elements of $\tau_\beta$ (of course we need to verify this when the criterion for membership in $\tau_\beta$ is revealed).
-\end{lemma}
 
 \begin{definition}
 \label {def:alt-ext}
 \uses{def:fmap, def:code, def:extended-type-index}
-Let $\beta$ be a proper type index less than $\alpha$.  Let $\gamma$ be an extended type index less than $\beta$.
+Let $\gamma$ be an extended type index less than $\alpha$.
 
-For any code $(\beta,\gamma,G)$ with $G$ nonempty and $\delta$ a proper type index less than $\beta$ and distinct from $\gamma$, we define
-$A_\delta(\beta,\gamma,G)$ as $$(\beta,\delta,\{(\delta,-1,N):N \in \bigcup (f_{\gamma,\delta}``B)\}).$$
+For any code $(\alpha,\gamma,G)$ with $G$ nonempty and $\delta$ a proper type index less than $\alpha$ and distinct from $\gamma$, we define
+$A_\delta(\alpha,\gamma,G)$ as $$(\alpha,\delta,\{ j_\delta(N) : N \in \bigcup (f_{\gamma,\delta}``B)\}).$$
 
-Note that the computation of $A_\delta$ does not depend on $\alpha$ apart from the fact that $\alpha$ must be at least as large as $\beta$ and larger than $\gamma$ or $\delta$.
+(Here $j_\delta(N)$ is the “typed near-litters” of level $\delta$, assumed in the stage 1 data.)
+
+For the formalisation, each individual $A_\delta$ is probably most easily represented as a function on $\mathcal{P}_{\neq \empty}(\tau_(\gamma))$, rather than on “codes of the form $(\alpha,\gamma,G)$…”
+
+Note that the computation of $A_\delta$ does not depend on $\alpha$ apart from the fact that $\alpha$ must be larger than $\gamma$ and $\delta$.
 \end{definition}
 
 \begin{lemma}
@@ -253,17 +244,17 @@ By the previous lemma, the union of the $A_\gamma$'s is a function, which has an
 \end{definition}
 
 \begin{lemma}
-\label {lem:ainverse-stops}
+\label{lem:ainverse-stops}
 \uses{def:ainverse}
 No code has infinitely many iterated images under $A^{-1}$.
 
-Equivalently (this may be easier for the formalisation), the relation $\rightsquigarrow$ on codes --- defined by $ (\beta,\gamma ,X) \rightsquigarrow A_\gamma,\delta (\beta,\gamma ,X)$ for all codes $ (\beta,\gamma ,X)$ and all $\delta \neq \gamma$ --- is well-founded.
+Equivalently (this may be easier for the formalisation), the relation $\rightsquigarrow$ on codes --- defined by $ (\alpha,\gamma ,X) \rightsquigarrow A_\gamma,\delta (\alpha,\gamma ,X)$ for all codes $ (\alpha,\gamma ,X)$ and all $\delta \neq \gamma$ --- is well-founded.
 \end{lemma}
 
 \begin{proof}
-  Consider the map $j$ from codes to $\mu$ sending $(\beta,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the  position function assumed in the stage 1 data.
+  Consider the map $j$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the  position function assumed in the stage 1 data.
 
-  The definition of the functions $A_{\delta,\gamma}$ and the condition that $\iota f_{\gamma,\delta}()$ ensure that $j(\beta,\gamma,X) < j(A_\delta(\beta,\gamma,X))$, for all suitable $\gamma,\delta,X$.
+  The definition of the functions $A_{\delta,\gamma}$ and the condition that $\iota f_{\gamma,\delta}()$ ensure that $j(\alpha,\gamma,X) < j(A_\delta(\alpha,\gamma,X))$, for all suitable $\gamma,\delta,X$.
 
   In other words, if $C \rightsquigarrow C'$, then $j(C) < j(C')$ in $\mu$.  It follows that $\rightsquigarrow$ is well-founded.
 \end{proof}
@@ -271,61 +262,71 @@ Equivalently (this may be easier for the formalisation), the relation $\rightsqu
 \begin{definition}
 \label {def:equiv-code}
 \uses{lem:ainverse-stops, def:ainverse}
-Let $\beta$ be a type index $\leq \alpha$.  We define an equivalence relation $\equiv_\beta$ on $\beta$-codes.
+We define an equivalence relation $\equiv_\alpha$ on $\alpha$-codes.
 
-If $\beta=-1$, we define $\equiv_\beta$ as equality restricted to type $-1$.
+We have $(\alpha,\gamma,\emptyset) \equiv_\alpha (\alpha,\delta,D)$ iff $D=\emptyset$.
 
-Assume for the rest of the definition that $\beta$ is a proper type index.
+Assume for the rest of the definition that $(\alpha,\gamma,G)$ is a code.
 
-We have $(\beta,\gamma,\emptyset) \equiv_\beta (\beta,\delta,D)$ iff $D=\emptyset$.
+Define the \emph{height} of a code as its number of iterated images under $A^{-1}$.  Formally this can be given by induction over the well-founded relation $\rightsquigarrow$ defined in Lemma \ref{lem:ainverse-stops}: If $C$ has no predecessors under $\rightsquigarrow$, then $h(C) = 0$; if $C$ has a predecessor $C' \rightsquigarrow C$, this is unique by injectivity of $A^{-1}$, and we set $h(C) = h(C') + 1$.
 
-Assume for the rest of the definition that $(\beta,\gamma,G)$ is a code.
+If $(\alpha,\gamma,G)$ has even height (including 0 as an important case)
+then $(\alpha,\delta,D) \equiv_\alpha (\alpha,\gamma,G)$ (for $\delta$ a type index distinct from $\gamma$) iff
+$(\alpha,\delta,D) = A_\delta(\alpha,\gamma,G)$.
 
-Define the \emph{height} of a code as its number of iterated images under $A^{-1}$.  Formally this can be given by induction over the well-founded relation $\rightsquigarrow$ defined in \cref{lem:ainverse-stops}: If $C$ has no predecessors under $\rightsquigarrow$, then $h(C) = 0$; if $C$ has a predecessor $C' \rightsquigarrow C$, this is unique by injectivity of $A^{-1}$, and we set $h(C) = h(C') + 1$.
-
-If $(\beta,\gamma,G)$ has even height (including 0 as an important case)
-then $(\beta,\delta,D) \equiv_\beta (\beta,\gamma,G)$ (for $\delta$ a type index distinct from $\gamma$) iff
-$(\beta,\delta,D) = A_\delta(\beta,\gamma,G)$.
-
-If $(\beta,\gamma,G)$ has odd height then $(\beta,\delta,D) \equiv_\beta (\beta,\gamma,G)$ iff $(\beta,\delta,D) \equiv_\beta A^{-1}(\beta,\gamma,G)$ (which reduces to the previous case).
+If $(\alpha,\gamma,G)$ has odd height then $(\alpha,\delta,D) \equiv_\alpha (\alpha,\gamma,G)$ iff $(\alpha,\delta,D) \equiv_\alpha A^{-1}(\alpha,\gamma,G)$ (which reduces to the previous case).
 \end{definition}
 
 \begin{definition}
 \label {def:representative-code}
 \uses{def:equiv-code}
-Note that each equivalence class under $\equiv_\beta$ with nonempty third component contains exactly one element with even height.  We refer to this code as the representative code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation that $(\beta,-1,\emptyset)$ is a representative code as well.
+Note that each equivalence class under $\equiv_\alpha$ with nonempty third component contains exactly one element with even height.  We refer to this code as the representative code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation that $(\alpha,-1,\emptyset)$ is a representative code as well.
+
+Note also that any equivalence class contains at most one code of the form $(\alpha,-1,X)$, and contains exactly one code of the form $(\alpha,\gamma,G)$ for each $\gamma < \alpha$.
 \end{definition}
 
-\begin{lemma}
-\label {lem:objects-are-representative}
-\uses{def:representative-code}
-We stipulate that all elements of $\tau_\beta$ are representative $\beta$-codes, for proper type indices $\beta<\alpha$.
-Not all representative $\beta$-codes belong to $\tau_\beta$.
-\end{lemma}
+\begin{definition}
+  \label{def:semi-tangle}
+  \uses{def:representative-code}
+  An \emph{$\alpha$-semi-tangle} is an element $x$ of $\prod_{\beta < \alpha}\mathcal{P}(\tau_\beta) \times (\alpha + \mathcal{P}(\tau_{-1}))$, whose components we denote $x_\beta$, such that:
+  \begin{itemize}
+    \item if $x_{-1}$ is some $\beta < \alpha$, then $(\alpha,\beta,x_\beta)$ is a representative code, and for each other $\gamma$, $A_{\beta,\gamma}(\alpha,\beta,x_\beta) = (\alpha,\gamma,x_\gamma)$;
+    \item if $x_{-1}$ is a set of atoms, then $(\alpha,-1,x_{-1})$ is a representative code, and for each other $\gamma$, $A_{-1,\gamma}(\alpha,-1,x_{-1}) = (\alpha,\gamma,x_\gamma)$;
+  \end{itemize}
+
+  [Note that these are intermediate between “pretangles” and “tangles”.]
+\end{definition}
 
 \begin{definition}
 \label {def:ttt-membership}
-\uses{def:representative-code, def:ainverse}
-(An extension of) the membership relations of objects at and below type $\alpha$ in the intended model of tangled type theory is then defined as follows: if $\delta < \beta \leq \alpha$ are proper type indices  $(\delta,\epsilon,E) \in_{TTT} (\beta,\gamma,G)$ (where both triples given are codes and representatives of their equivalence classes) iff $\gamma=\delta$ and $(\gamma,\delta,D)  \in B$ or $\gamma\neq \delta$ and $(\delta,\epsilon,E) \in \pi_3(A_\delta(\beta,\gamma,G))$.  Note that in this latter case we will certainly have $\delta=-1$.  This does define membership of codes of lower types in type $\beta$ codes which do not necessarily belong to $\tau_\beta$;  this is harmless.
+\uses{def:tangle, def:ainverse}
+Membership relations of $\alpha$-semi-tangles, for the intended model of tangled type theory, can now be defined as follows: for each proper type index $\beta < \alpha$, and $x \in \tau_\beta$, and each $\alpha$-pretangle $y \in \tau_\alpha$, say $x \in_{TTT} y$ just if $x \in y_\beta$.
 \end{definition}
 
-This all serves to enforce extensionality, but something much more radical needs to be done to make all this work, as we are assuming the existence of the maps $f_{\beta,\gamma}$ which witness that all the types are of cardinality no greater than $\mu$.  There must be a very strong restriction on what sets can appear as third components of codes in the model.
+This would be enough to enforce extensionality, but something much more radical needs to be done to make all this work, as we are assuming the existence of the maps $\iota_\beta$, which witness that all the types are of cardinality no greater than $\mu$.  There must therefore be a very strong restriction on which sets can appear as components of tangles.
 
 This all cries out for a Theorem which should be here and which I left implicit in the original text.
 
 \begin{theorem}
 \label {thm:extensionality}
 \uses{def:ttt-membership}
-If $X$ and $Y$ are representative codes of type $\alpha$ and $\beta<\alpha$ is a proper type index
-and $(\forall Z \in \tau_\beta:Z \in_{\tt TTT} X \leftrightarrow Z \in_{\tt TTT} Y)$, then $X=Y$.
+For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-semitangles $y$, the following (nearly-obviously equivalent) statements hold:
+\begin{itemize}
+  \item if for all $z \in \tau_\beta$, $(z \in_{\tt TTT} x \leftrightarrow z \in_{\tt TTT} y)$, then $x=y$;
+  \item if $x_\beta = y_\beta$, then $x=y$.
+\end{itemize}
 \end{theorem}
 
 \section{Permutations, symmetry and the model definition}
+
+This section should have its inductive assumptions collected together as “stage 2 data”, or possibly “stage 1a data” if they can be specified abstractly without referring to the constructions relying on stage 1 data.
 
 \begin{lemma}
 \label {lem:singletons}
 \uses{def:representative-code}
 We stipulate that for any proper type index $\beta<\alpha$ and any type index $\gamma<\beta$ and any $g \in \tau_\gamma$, $(\beta,\gamma,\{g\})\in \tau_\beta$.  Of course this will need to be verified for $\alpha$ as part of the recursion.  It is immediately evident that it is a representative code, at any rate.
+
+[This is probably not needed now that we have the extrinsic construction of the groups of pre-)structural perms.  If it is needed, it should be included in the “stage 2 data” assumptions, as just assuming “typed singleton” embeddings $\tau_{-1} \to \tau_\beta$.]
 \end{lemma}
 
 \begin{definition}
