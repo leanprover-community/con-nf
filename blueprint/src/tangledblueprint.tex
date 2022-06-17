@@ -174,46 +174,56 @@ Define {\em pretangles} inductively. $D_{-1}$ is defined as $\tau_{-1}$. For $\a
 \end{definition}
 
 \begin{definition}
-\label {def:stage1-data}
+\label {def:phase-1a-data}
 \uses{def:pretangle, def:type-index}
 \lean{con_nf.recursion_motor}
-Fix a proper type index $\alpha$.
+Fix a proper type index $\alpha$.  \emph{Phase 1a data at $\alpha$} consists of:
 
-Assume that for each earlier index $\beta < \alpha$ we have the following data defined:
 \begin{itemize}
-  \item the set $\tau_\beta$;
-  \item an injection $\iota_\beta : \tau_\beta \to \mu$ [alternatively, we could assume an ordering $<_\beta$ of order-type $\mu$]
-  \item an injection $j_\beta$ from the set of near-litters to $\tau_\beta$. [These will be concretely represented as the \emph{typed near-litters} below.]
+  \item a set $\tau$ (whose elements we call \emph{tangles});
+  \item an injection $\iota : \tau \to \mu$ [alternatively, we could assume an ordering $<$ on $\tau$ of order-type $\mu$]
+  \item an injection $j$ from the set of near-litters to $\tau$. [These will be concretely represented as the \emph{typed near-litters} below.]
 \end{itemize}
 
-Call this \emph{stage 1 data} for level $\beta$.
+In the following few constructions, we will fix a proper type index $\alpha$ and assume we have phase 1a data given for all proper $\beta < \alpha$
 \end{definition}
 
-We will define $\tau_\alpha$, the implementation of type $\alpha$ of the model.  This definition is recursive:  when we are defining type $\alpha$ and associated concepts, we are supposing that related concepts have already been defined for all $\beta<\alpha$, and this process will define all types in the structure.
+We will define $\tau_\alpha$, the implementation of type $\alpha$ of the model.  This definition is recursive:  when we are defining type $\alpha$ and associated concepts, we are supposing that related concepts have already been defined for all $\beta<\alpha$ [we will now introduce these explicitly as the “phase X data”], and this process will define all types in the structure.
 
 \begin{definition}
 \label {def:code}
-\uses{def:stage1-data}
-%\leanok
+\uses{def:phase-1a-data}
 \lean{con_nf.code}
-An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \subseteq \tau_\gamma$. (We include the $\alpha$ in case we later want to compare codes at different levels.)
+An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \subseteq \tau_\gamma$. [The set-theoretic interpretation includes the $\alpha$, to keep codes at different levels disjoint.  In the type-theoretic implementation, the first component $\alpha$ is almost certainly unnecessary ]
 \end{definition}
 
 \begin{definition}
 \label {def:fmap}
 \uses{def:ftargets, def:iota}
-We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $\mu$, as follows:
+We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $\mathrm{Litter}$, as follows.
 
-for $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota_\gamma(\gamma,-1,M)>\iota_\beta(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
+For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $[N]$ of the minimal near-litter $N$ (under the ordering induced by $j_\beta \circ \iota_\beta : \mathrm{NearLit} \to \tau_\beta \to \mu$) such that:
+\begin{itemize}
+  \item $[N]\in X_{(\beta,\gamma)}$, i.e. $[N] = L_{(\beta,\gamma,i)}$, for some $i$;
+  \item for each $M \in [N]$, $\iota_\gamma(\gamma,-1,M) >\iota_\beta(x)$;
+  \item $[N] \neq f_{\beta,\gamma}(y)$, for each $y <_\beta x$.
+\end{itemize}
+
+[This can be decompose slightly at both ends.  Firstly, since we know that $f_{\beta_\gamma}(x) = (\beta,\gamma,\chi)$ for some $\chi$, we could take the output just to be the component $\chi \in \mu$, and turn it into a litter later.  Secondly, $f_{\beta_\gamma}(x)$ depends on $x$ essentially just via its position $i_\beta(x) \in \mu$, so we could start by defining a function $g_{\beta,\gamma} : \mu \to \mathrm{Litter}$, and then take $f_{\beta,\gamma}$ as the composite $g_{\beta,\gamma} \circ \iota_\beta$.  I don’t think these will really make a difference either way, though.]
 \end{definition}
 
-Notice that when we are constructing type $\alpha$, we assume that we have stage 1 data, which gives us the information already to define $f_{\beta,\gamma}$ for all $\beta, \gamma < \alpha$.  This definition will in the end not actually depend on the value of $\alpha$.
+Notice that the phase 1a data for $\alpha$ gives us the information already to define $f_{\beta,\gamma}$ for all $\beta, \gamma < \alpha$.  This definition will in the end not actually depend on the value of $\alpha$.
 
-\begin{definition}
-\label {def:typed-near-litter}
-\uses{def:near-litter, def:code}
-Codes $(\alpha,-1,N)$ where $N$ is a near-litter are called {\em typed near-litters\/}.  [These will eventually provide the injection $j_\alpha$ from near-litters into $\tau_\alpha$.]
-\end{definition}
+\begin{lemma}
+  \label{lem:fmap-properties}
+  \uses{def:fmap}
+  The maps $f_{\beta,\gamma}$ satisfy:
+  \begin{enumerate}
+  \item each $f_{\beta,\gamma}$ is injective;
+  \item their images are disjoint, for all different pairs $(\beta,\gamma)$;
+  \item each $f_{\beta,\gamma}$ is “position-raising”: $\iota_\gamma(j_\gamma(N)) > \iota_\beta(x)$, for any near-litter $N$ near to the litter $L_{(\beta,\gamma,f_{\beta,\gamma}(x))}$.
+  \end{enumerate}
+\end{lemma}
 
 \begin{definition}
 \label {def:alt-ext}
@@ -223,24 +233,30 @@ Let $\gamma$ be an extended type index less than $\alpha$.
 For any code $(\alpha,\gamma,G)$ with $G$ nonempty and $\delta$ a proper type index less than $\alpha$ and distinct from $\gamma$, we define
 $A_\delta(\alpha,\gamma,G)$ as $$(\alpha,\delta,\{ j_\delta(N) : N \in \bigcup (f_{\gamma,\delta}``B)\}).$$
 
-(Here $j_\delta(N)$ is the “typed near-litters” of level $\delta$, assumed in the stage 1 data.)
+(Here $j_\delta(N)$ is the “typed near-litters” of level $\delta$, assumed in the phase 1a data.)
 
-For the formalisation, each individual $A_\delta$ is probably most easily represented as a function on $\mathcal{P}_{\neq \empty}(\tau_(\gamma))$, rather than on “codes of the form $(\alpha,\gamma,G)$…”
-
-Note that the computation of $A_\delta$ does not depend on $\alpha$ apart from the fact that $\alpha$ must be larger than $\gamma$ and $\delta$.
+[For the formalisation, each individual $A_\delta$ is probably most easily represented as a function on $\mathcal{P}_{\neq \empty}(\tau_(\gamma))$, rather than on “codes of the form $(\alpha,\gamma,G)$…”]
 \end{definition}
+
+Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart from the fact that $\alpha$ must be larger than $\gamma$ and $\delta$.
 
 \begin{lemma}
 \label {lem:alt-ext-nature}
-\uses{def:alt-ext, def:fmap}
-Clearly each $A_\delta$ is injective.  Notice that since the ranges of $f_{\gamma,\delta}$ and $f_{\gamma',\delta'}$ are disjoint unless $\gamma=\gamma'$ and $\delta=\delta'$, it follows that the ranges of
-maps $A_\delta$ with distinct indices are disjoint.
+\uses{def:alt-ext, lem:fmap-properties}
+\begin{enumerate}
+\item Each $A_\delta$ is injective (since each $f_{\gamma,\delta}$ is injective, and $f_{\gamma,\delta}$ have disjoint images for different $\gamma$).
+\item The ranges of $A_\delta$ are disjoint for different $\delta$ (since the ranges of $f_{\gamma,\delta}$ are).
+\end{enumerate}
+
+NB: injectivity here really depends on having excluded the empty set from the domains of the $A_\delta$!
 \end{lemma}
 
 \begin{definition}
 \label {def:ainverse}
 \uses{lem:alt-ext-nature, def:alt-ext}
-By the previous lemma, the union of the $A_\gamma$'s is a function, which has an inverse, which we call $A^{-1}$.
+By the previous lemma, the inverse relation of the union of the $A_\gamma$'s is a partial function, which we call $A^{-1}$.
+
+It can be helpful to view codes as forming a \emph{forest} under the $A$-maps: each code $C = (\alpha,\beta,X)$ has at most one “parent” $A^{–1}(C)$, and many children $A_\gamma(C)$ for each $\gamma \neq beta$.
 \end{definition}
 
 \begin{lemma}
@@ -252,7 +268,7 @@ Equivalently (this may be easier for the formalisation), the relation $\rightsqu
 \end{lemma}
 
 \begin{proof}
-  Consider the map $j$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the  position function assumed in the stage 1 data.
+  Consider the map $j$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the  position function assumed in the phase 1a data.
 
   The definition of the functions $A_{\delta,\gamma}$ and the condition that $\iota f_{\gamma,\delta}()$ ensure that $j(\alpha,\gamma,X) < j(A_\delta(\alpha,\gamma,X))$, for all suitable $\gamma,\delta,X$.
 
@@ -278,9 +294,9 @@ If $(\alpha,\gamma,G)$ has odd height then $(\alpha,\delta,D) \equiv_\alpha (\al
 \end{definition}
 
 \begin{definition}
-\label {def:representative-code}
+\label{def:representative-code}
 \uses{def:equiv-code}
-Note that each equivalence class under $\equiv_\alpha$ with nonempty third component contains exactly one element with even height.  We refer to this code as the representative code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation that $(\alpha,-1,\emptyset)$ is a representative code as well.
+Note that each equivalence class under $\equiv_\alpha$ with nonempty third component contains exactly one element with even height.  We call this as the \emph{representative} code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation that $(\alpha,-1,\emptyset)$ is a representative code as well.
 
 Note also that any equivalence class contains at most one code of the form $(\alpha,-1,X)$, and contains exactly one code of the form $(\alpha,\gamma,G)$ for each $\gamma < \alpha$.
 \end{definition}
@@ -294,13 +310,15 @@ Note also that any equivalence class contains at most one code of the form $(\al
     \item if $x_{-1}$ is a set of atoms, then $(\alpha,-1,x_{-1})$ is a representative code, and for each other $\gamma$, $A_{-1,\gamma}(\alpha,-1,x_{-1}) = (\alpha,\gamma,x_\gamma)$;
   \end{itemize}
 
-  [Note that these are intermediate between “pretangles” and “tangles”.]
+  [Note that these are intermediate between “pretangles” and “tangles”.  Also note that — as with pretangles — we probably don’t need the “preferred extension” component.]
+
+  [Actually it’s probably simpler to go back to representing these as representative codes for now, and just define here the components $x_\beta$, for later embedding them into pretangles, which will become useful in phase 2.]
 \end{definition}
 
 \begin{definition}
-\label {def:ttt-membership}
-\uses{def:tangle, def:ainverse}
-Membership relations of $\alpha$-semi-tangles, for the intended model of tangled type theory, can now be defined as follows: for each proper type index $\beta < \alpha$, and $x \in \tau_\beta$, and each $\alpha$-pretangle $y \in \tau_\alpha$, say $x \in_{TTT} y$ just if $x \in y_\beta$.
+\label{def:ttt-membership}
+\uses{def:semi-tangle, def:ainverse}
+  Membership relations of $\alpha$-semi-tangles, for the intended model of tangled type theory, can now be defined as follows: for each proper type index $\beta < \alpha$, and $x \in \tau_\beta$, and each $\alpha$-semi-tangle $y \in \tau_\alpha$, say $x \in_{TTT} y$ just if $x \in y_\beta$.
 \end{definition}
 
 This would be enough to enforce extensionality, but something much more radical needs to be done to make all this work, as we are assuming the existence of the maps $\iota_\beta$, which witness that all the types are of cardinality no greater than $\mu$.  There must therefore be a very strong restriction on which sets can appear as components of tangles.
@@ -319,71 +337,95 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 
 \section{Permutations, symmetry and the model definition}
 
-This section should have its inductive assumptions collected together as “stage 2 data”, or possibly “stage 1a data” if they can be specified abstractly without referring to the constructions relying on stage 1 data.
+\newcommand{\Sym}{\mathrm{Sym}}
+\newcommand{\Str}{\mathrm{Str}}
+\newcommand{\All}{\mathrm{All}}
+\begin{definition}
+  \label{def:structural-perms-atoms}
+  \uses{def:atoms}
+  \leanok
+  \lean{con_nf.near_litter_perm}
+
+  A \emph{structural $(-1)$-permutation} [aka a near-litter-perm; we should fix on one name or the other] is a permutation $\pi$ of $\tau_{-1}$, along with a permutation $\bar{\pi}$ of litters, such that for each litter $L$, $\pi``(L)$ is near to $\bar{\pi}(L)$ (in the sense that they have small symmetric difference).  Denote the group of these by $\Str{-1}$.
+
+  [In fact $\bar{\pi}$ is uniquely determined by $\pi$ — we could define this just as a subgroup of $\Sym(\tau_{-1})$.  But it’s convenient in formalisation to have the $\bar{\pi}$ component explicit.]
+\end{definition}
+
+\begin{definition}
+  \label{def:structural-perms}
+  \uses{def:structural-perms-atoms}
+  %leanok
+  For a \emph{proper} type index $\alpha$, the structural $\alpha$-permutations are the group $\Str_\alpha = \prod_{\beta < \alpha} \Str_\beta$.
+\end{definition}
+
+\begin{definition}
+  \label{def:structural-perms-derivatives}
+  \uses{def:structural-perms}
+  %leanok
+  \lean{con_nf.struct_perm}
+  Any path $A : \beta \to \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
+
+  Moreover, this is functorial: they make $\Str$ into a functor $\mathrm{Path}(\Lambda)^\mathrm{op} \to \mathrm{Gp}$.
+
+  [TODO: this should also depend on “paths”, but they aren’t yet explicitly in the blueprint.]
+\end{definition}
+
+\begin{definition}
+  \label{def:structural-perms-near-litters-action}
+  \uses{def:structural-perms-atoms}
+  $\Str_{-1}$ acts on near-litters.
+\end{definition}
+
+\begin{definition}
+  \label{def:allowable-perms-atoms}
+  \uses{def:structural-perms-atoms}
+  An \emph{allowable $(-1)$-permutation} is just a structural $(-1)$-permutation. We denote the group of these by $\All_{-1} = \Str_{-1}$.  ($\Str_\beta$ and $\All_\beta$ will diverge for higher $\beta$ later…)
+
+  [Actually this definition should probably go later, in phase 1c or even 2?]
+\end{definition}
+
+\begin{definition}
+  \label{def:phase-1b-data}
+  \uses{def:phase-1a-data}
+  \emph{Phase 1b data} at a proper type index $\alpha$ consists of:
+  \begin{itemize}
+  \item phase 1a data at $\alpha$;
+  \item a group $\All$ (whose elements we call “allowable permutations”), with a map $\varphi : \All \to \Str_\alpha$;
+  \item a group action of $\All$ on the tangles $\tau$ (that is, on the set $\tau$ assumed in the 1a-data).
+  \end{itemize}
+  [Note: happily, “group actions” are already provided in mathlib.]
+
+  For the subsequent constructions of this section, we assume we are given phase 1b data for all $\beta < \alpha$.
+\end{definition}
 
 \begin{lemma}
 \label {lem:singletons}
 \uses{def:representative-code}
 We stipulate that for any proper type index $\beta<\alpha$ and any type index $\gamma<\beta$ and any $g \in \tau_\gamma$, $(\beta,\gamma,\{g\})\in \tau_\beta$.  Of course this will need to be verified for $\alpha$ as part of the recursion.  It is immediately evident that it is a representative code, at any rate.
 
-[This is probably not needed now that we have the extrinsic construction of the groups of pre-)structural perms.  If it is needed, it should be included in the “stage 2 data” assumptions, as just assuming “typed singleton” embeddings $\tau_{-1} \to \tau_\beta$.]
+[This is probably unnecessary now that we have the extrinsic construction of the groups of (pre-)structural perms.  If it is still needed, it should be included in the “phase 2 data” assumptions, as just assuming “typed singleton” embeddings $\tau_{-1} \to \tau_\beta$.]
 \end{lemma}
 
 \begin{definition}
-\label {def:structural-perm}
-\uses{def:code}
-%\leanok
-\lean{con_nf.struct_perm}
-Let $\beta\leq \alpha$ be a proper type index.  We say that a permutation $\pi$ of type $\beta$ codes is a $\beta$-structural permutation iff for each type index $\gamma<\beta$ there is a $\gamma$-structural permutation $\pi_\gamma$ such that
-$\pi(\beta,\gamma,G) = (\beta,\gamma,\pi_\gamma``G)$ for each code $\pi(\beta,\gamma,G)$.  We say that any permutation of $\tau_{-1}$ is a structural permutation.
-
-Note that due to the fact that typed singletons are codes, $\pi_\gamma$ can be defined given $\pi$.
-\end{definition}
-
-The concept of structural permutation is a temporary convenience.  The definition does have some interesting consequences which are not used:  a structural permutation must send representative codes to representative codes, for example.  It would be very amusing if one could prove that a structural permutation actually must be allowable on the basis of this,  but I invest nothing in this passing thought.
-
-\begin{definition}
-\label {def:derivative}
-\uses{def:structural-perm, def:extended-type-index}
-%\leanok
-\lean{con_nf.struct_perm.derivative}
-Let $\beta\leq \alpha$ be a proper type index.  We provide extended notation for the lower type permutations on which an $\beta$-structural permutation depends.
-For any extended type index $A$ with $\beta$ as its largest element, define $\pi_A$ as $\pi$ if $A = \{\beta\}$
-and otherwise as $(\pi_{A \setminus \{{\tt min}(A)\}})_{{\tt min}(A)}$ (this last condition being referred to as the coherence condition).  We refer to permutations $\pi_A$ as derivatives of $\pi$.
-\end{definition}
-
-\begin{definition}
-\label {def:near-litter-perm}
-\uses{def:near-litter}
-\leanok
-\lean{con_nf.near_litter_perm}
-A permutation $\pi$ of $\tau_{-1}$ is said to be a near-litter permutation iff $\pi``L_i$ is a near-litter for each $i \in \mathcal L$.  This is equivalent to the assertion that the action of $\pi$ sends near-litters to near-litters, or local cardinals to local cardinals.
-
-Near-litter permutations form a group that acts on both $\mathcal L$ and $\tau_{-1}$.
-\end{definition}
-
-\begin{definition}
 \label {def:allowable-perm}
-\uses{def:structural-perm, def:near-litter-perm, def:equiv-code}
-We define {\em $-1$-allowable permutations} as near-litter permutations.
+\uses{def:structural-perm, def:equiv-code}
+  An \emph{semi-allowable permutation} at level $\alpha$ is a family of allowable pemutations at all lower levels (including $-1$), $(\pi_\beta)_{\beta < \alpha} \in \prod_{\beta < \alpha} \All_\beta$.
 
-Let $\beta \leq \alpha$ be a proper type index.  A permutation $\pi$ of type $\beta$ codes is said to be
-{\em allowable\/} iff it is $\beta$-structural and each $\pi_\gamma$ for $\gamma<\beta$ is $\gamma$-allowable, and further for all $\beta$-codes $X,Y$, $X \equiv_\beta Y \leftrightarrow \pi(X) \equiv_\beta \pi(Y)$.
+  Semi-allowable permutations act on $\alpha$-codes.
 
-Note that we do presume that allowable (as structural) permutations send elements of $\tau_\beta$ to elements of
-$\tau_\beta$ for each $\beta<\alpha$, and as part of the recursion we will need to demonstrate (after defining $\tau_\alpha$) that $\alpha$-allowable permutations send elements of type $\alpha$ to elements of type $\alpha$.
+  An \emph{allowable permutation} is a semi-allowable permutation which preserves $\equiv_\alpha$: for all $\alpha$-codes $X,Y$, $X \equiv_\alpha Y \leftrightarrow \pi(X) \equiv_\alpha \pi(Y)$.
 \end{definition}
 
 \begin{lemma}
 \label {lem:coherence-unpacked}
 \uses{def:allowable-perm}
-A permutation $\pi$ of $\beta$-codes is $\beta$-allowable ($\beta \leq \alpha$ and proper) iff $\pi_A$ is $-1$-allowable when $\pi_A$ is defined and $-1 \in A$
-and  $$f_{\gamma,\delta}(\pi_\gamma(g)) = [(\pi_\delta)_{-1}``f_{\gamma,\delta}(g)^\circ].$$
-holds for all $f_{\gamma,\delta}$ with $\gamma,\delta<\beta$.
+A semi-allowable permutation $\pi$ is allowable just if
+$$f_{\gamma,\delta}(\pi_\gamma(g)) = [(\pi_\delta)_{-1}``f_{\gamma,\delta}(g)^\circ].$$
+holds for all $f_{\gamma,\delta}$ with $\gamma,\delta<\alpha$, and all $g \in \tau_\gamma$.
 \end{lemma}
 
 \begin{proof}
-This is discussion supporting the preceding lemma.  More may go into a proof of it.
+This is discussion supporting the preceding lemma. The proof is given more carefully in Randall’s more recent version of the note.
 
 The coherence condition can be unpacked.
 $$(\beta,\gamma,\{g\}) \equiv_\beta (\beta,\delta,\{(\delta,-1,N):N \in f_{\gamma,\delta}(g)\})$$(where $\delta\neq \gamma$).  Thus we expect
@@ -405,9 +447,9 @@ The image under an allowable permutation of a representative code is a represent
 
 \begin{proof}
 This should be straightforward.  A target should be the equation $\pi(A_\gamma(X)) = A_\gamma(\pi(X))$ for any allowable permutation $\pi$ and code $X$ for which $\pi_\gamma$ is defined.
-\end{proof}
 
-I am going to define supports as well-orderings, as is done in the proof in chapter 4.
+[Note: This will probably need the phase 1b data to include an assumption that the typed-near-litter embeddings commute with the group action.]
+\end{proof}
 
 \begin{definition}
 \label {def:support}
@@ -416,7 +458,7 @@ Let $\beta \leq \alpha$ be a proper type index.
 
 We define a $\beta$-support $S$ as a well-ordering (we will write $x \leq_S y$ for $(x,y) \in S$ and define $<_S$ in the obvious way) such that the domain of $S$ is a small set and each element $x$ of the domain of $S$ is an ordered pair of the form
 $((\gamma,-1,X),A)$, where $A$ is a proper extended type index whose minimum is $\gamma$ and whose maximum is $\beta$
-and $X$ is either a singleton of an element of $\tau_{-1}$ or a near-litter.
+and $X$ is either a singleton of an element of $\tau_{-1}$ or a near-litter. [NOTE for formalisation: Well-orderings almost certainly shouldn’t be necessary in this phase. Also we should probably explicitly name the type of things that can appear in supports. This can be done before any inductive data are assumed.]
 
 We also stipulate that when $((\gamma,-1,X),A,\delta)$ and $((\gamma,-1,X'),A,\gamma)$ belong to the domain of $S$
 and $X$ and $X'$ are distinct near-litters, that $X$ and $X'$ are disjoint.
@@ -478,7 +520,7 @@ It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|
 \begin{definition}
 \label {def:word-obligation}
 \uses{def:tangle}
-[I'm not sure what to call this]  Let $\leq_\alpha$ be your favorite well-ordering of $\tau_\alpha$, needed for the recursive definition of the $f$ maps at later stages.
+[I'm not sure what to call this]  Let $\leq_\alpha$ be your favorite well-ordering of $\tau_\alpha$, needed for the recursive definition of the $f$ maps at later phases.
 
 This order needs to satisfy some technical conditions.
 
