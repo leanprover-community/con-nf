@@ -28,23 +28,20 @@ using_well_founded { dec_tac := `[assumption] }
 
 namespace struct_perm
 
-variable {β : Λ}
-
 /-- Obtains the atom permutation given by a prestructural permutation. -/
-def atom_perm (π : struct_perm β) : perm atom :=
-by { sorry } /- unfold struct_perm at π, exact π.1 -/
+def atom_perm {β : type_index} (π : struct_perm β) : perm atom :=
+by { sorry } /- should by just unfolding -/
 
 /-- Obtains the permutations on lower types induced by a prestructural permutation. -/
-def lower_code_perm (π : struct_perm β) (γ < β) : struct_perm γ :=
-by { sorry } /- unfold struct_perm at π, exact π.2 γ ‹_› -/
+def lower_code_perm {β : type_index} (π : struct_perm β) (γ < β) : struct_perm γ :=
+by { sorry } /- should need a case analysis to show β can’t be ⊥ -/
 
 /-- the derivative of a structural permutation at any lower level -/
-noncomputable def derivative {β : Λ} : Π {γ : type_index} (A : quiver.path (β : type_index) γ), struct_perm β → struct_perm γ
+noncomputable def derivative {β : type_index} : Π {γ : type_index} (A : quiver.path (β : type_index) γ), struct_perm β → struct_perm γ
 | _ quiver.path.nil := id
-| _ (@quiver.path.cons _ _ _ δ _ a b) :=
+| δ (@quiver.path.cons _ _ _ _ _ p_βδ lt_γδ) :=
   λ π, begin
-    refine π.lower_code_perm _ _,
-    sorry
+    refine lower_code_perm (derivative p_βδ π) _ lt_γδ,
     end
 
 end struct_perm
