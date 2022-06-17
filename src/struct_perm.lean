@@ -4,7 +4,10 @@ import type_index
 /-!
 # Structural permutations
 
-Structural permutations In this file, we define the ambient groups of *structural permutations*.  These will later have recursively-constructed subgroups of *semi-allowable* and *allowable permutations* which will act on tangles; we define these larger ambient groups in advance in order to set up their infrastructure of derivatives and so on independently of the recursion.
+Structural permutations In this file, we define the ambient groups of *structural permutations*.
+These will later have recursively-constructed subgroups of *semi-allowable* and *allowable
+permutations* which will act on tangles; we define these larger ambient groups in advance in order
+to set up their infrastructure of derivatives and so on independently of the recursion.
 -/
 
 open equiv equiv.perm with_bot
@@ -21,7 +24,7 @@ open params
 /-- A *structural permutation* on a proper type index is defined by its derivatives,
 as well as its permutation on atoms. -/
 /- Note: perhaps should be constructed directly as *groups*, not just types. -/
-noncomputable def struct_perm : Π (β : type_index), Type u
+def struct_perm : Π (β : type_index), Type u
 | none := near_litter_perm
 | β := Π γ < β, struct_perm γ
 using_well_founded { dec_tac := `[assumption] }
@@ -37,12 +40,10 @@ def lower_code_perm {β : type_index} (π : struct_perm β) (γ < β) : struct_p
 by { sorry } /- should need a case analysis to show β can’t be ⊥ -/
 
 /-- the derivative of a structural permutation at any lower level -/
-noncomputable def derivative {β : type_index} : Π {γ : type_index} (A : quiver.path (β : type_index) γ), struct_perm β → struct_perm γ
+def derivative {β : type_index} :
+Π {γ : type_index} (A : quiver.path (β : type_index) γ), struct_perm β → struct_perm γ
 | _ quiver.path.nil := id
-| δ (@quiver.path.cons _ _ _ _ _ p_βδ lt_γδ) :=
-  λ π, begin
-    refine lower_code_perm (derivative p_βδ π) _ lt_γδ,
-    end
+| δ (quiver.path.cons p_βδ lt_γδ) := λ π, lower_code_perm (derivative p_βδ π) _ lt_γδ
 
 end struct_perm
 
