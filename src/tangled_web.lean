@@ -1,7 +1,6 @@
 import group_theory.group_action.basic
 import order.symm_diff
 import params
-import extended_index
 
 /-!
 # Draft for a tangled web

@@ -1,6 +1,8 @@
 import litter
 import type_index
 
+open equiv equiv.perm with_bot
+
 noncomputable theory
 
 universe u
@@ -8,32 +10,34 @@ universe u
 namespace con_nf
 variable [params.{u}]
 
-open params equiv equiv.perm
+open params
 
--- Suppose that `τ_β` has been constructed for all type indices `β < α`.
-class code_params :=
-(α : Λ) (tangle : Π (β : type_index), β < α → Type u)
-(tangle_atom : tangle ⊥ (with_bot.bot_lt_coe _) = atom)
+/-- The motor of the recursion. -/
+class recursion_motor (α : Λ) :=
+(tangle : Π β < α, Type u)
 
--- TODO: Do we need `(h : tangle ⊥ _ = atom)`?
+variables (α : Λ) [recursion_motor.{u} α]
 
-open code_params
-variable [code_params.{u}]
+/-- The tangles already constructed at stage `α`. -/
+def tangle : Π β < (α : type_index), Type u
+| ⊥ h := atom
+| ((β : Λ) : type_index) h := recursion_motor.tangle β $ coe_lt_coe.1 h
 
 /-- A type-`β` code is a type index `γ < β` together with a set of tangles of type `γ`. -/
 structure code (β : Λ) (β_le_α : β ≤ α) :=
 (extension : type_index)
 (extension_lt : extension < β)
-(elts : set (tangle extension (extension_lt.trans_le $ with_bot.coe_le_coe.mpr β_le_α)))
+(elts : set (tangle α extension (extension_lt.trans_le $ coe_le_coe.mpr β_le_α)))
 
 /-- Suppose that the set of tangles embeds into the set of codes. -/
-class code_params_embedding :=
-(tangle_embedding : Π (β < α), tangle β (with_bot.coe_lt_coe.mpr ‹_›) ↪ code β (le_of_lt ‹_›))
-open code_params_embedding
-variable [code_params_embedding.{u}]
+class recursion_motor_embedding :=
+(tangle_embedding : Π (β < α), tangle _ β (coe_lt_coe.mpr ‹_›) ↪ code _ β (le_of_lt ‹_›))
 
-def code.is_tangle {β < α} (c : code β (le_of_lt ‹_›)) : Prop :=
-∃ (t : tangle β (with_bot.coe_lt_coe.mpr ‹_›)), c = tangle_embedding β ‹_› t
+open recursion_motor_embedding
+variable [recursion_motor_embedding.{u} α]
+
+def code.is_tangle {β < α} (c : code α β (le_of_lt ‹_›)) : Prop :=
+∃ t : tangle α β (coe_lt_coe.2 ‹_›), c = tangle_embedding β ‹_› t
 
 /-- A *structural permutation* on a proper type index is defined by its derivatives,
 as well as its permutation on atoms. -/

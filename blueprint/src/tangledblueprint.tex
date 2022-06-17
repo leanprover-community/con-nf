@@ -176,6 +176,7 @@ Define {\em pretangles} inductively. $D_{-1}$ is defined as $\tau_{-1}$. For $\a
 \begin{definition}
 \label {def:recursion-motor}
 \uses{def:pretangle, def:type-index}
+\lean{con_nf.recursion_motor}
 Fix a proper type index $\alpha$.
 
 Posit that we have already defined $\tau_\beta$ for each type index $\beta<\alpha$ (notice that we have already defined $\tau_{-1}$), and that the cardinality of each set $\tau_\beta$ is $\mu$.
@@ -200,7 +201,7 @@ A {\em type $\beta$ code} is a triple $(\beta,\gamma,G)$ where $\gamma<\beta$ an
 
 \begin{definition}
 \label {def:fmap}
-\uses{def:iota, def:ftargets}
+\uses{def:ftargets, def:code, def:iota}
 We define for $\beta$ a type index less than $\alpha$ and $\gamma$ a proper type index less than $\alpha$ and distinct from $\beta$, $f_{\beta,\gamma}(x)$ as the litter $[N]$ of the third component of the first $(\gamma,-1,N)$ in $<_\gamma$ such that $N$ is a near-litter and $[N] \in X_{(\beta,\gamma)}$ and $\iota(\gamma,-1,M)>\iota(x)$ for each $M \in [N]$ and $[N] \neq f_{\beta,\gamma}(y)$ for any $y <_\beta x$.
 \end{definition}
 
