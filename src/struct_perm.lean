@@ -23,47 +23,27 @@ open params
 
 /-- A *structural permutation* on a proper type index is defined by its derivatives,
 as well as its permutation on atoms. -/
-def struct_perm : Π (β : Λ), Type u
-| β := perm atom × Π γ < β, struct_perm γ
+/- Note: perhaps should be constructed directly as *groups*, not just types. -/
+def struct_perm : Π (β : type_index), Type u
+| none := near_litter_perm
+| β := Π γ < β, struct_perm γ
 using_well_founded { dec_tac := `[assumption] }
 
 namespace struct_perm
 
-variable {β : Λ}
-
 /-- Obtains the atom permutation given by a prestructural permutation. -/
-def atom_perm (π : struct_perm β) : perm atom :=
-by { unfold struct_perm at π, exact π.1 }
+def atom_perm {β : type_index} (π : struct_perm β) : perm atom :=
+by { sorry } /- should by just unfolding -/
 
 /-- Obtains the permutations on lower types induced by a prestructural permutation. -/
-def lower_code_perm (π : struct_perm β) (γ < β) : struct_perm γ :=
-by { unfold struct_perm at π, exact π.2 γ ‹_›}
+def lower_code_perm {β : type_index} (π : struct_perm β) (γ < β) : struct_perm γ :=
+by { sorry } /- should need a case analysis to show β can’t be ⊥ -/
 
--- There is no permutation on β-codes since the structural permutations do not act on tangles.
-
-/-- We construct the ordering on extended type indices such that when we remove the lowest arrow,
-the resulting path is considered smaller. -/
-lemma drop_min_lt {β : Λ} {γ δ : type_index}
-(a : quiver.path (β : type_index) γ) (b : γ ⟶ δ) (c : δ ⟶ ⊥) :
-extended_index.lt (a.cons (lt_trans c b) : extended_index β) ((a.cons b).cons c : extended_index β) :=
-begin
-  sorry
-end
-
-noncomputable def derivative_core : Π (A : extended_index β), struct_perm β → struct_perm A.min
-| (quiver.path.cons quiver.path.nil _) := id
-| (@quiver.path.cons _ _ _ p _ (@quiver.path.cons _ _ _ q _ a b) c) :=
-  λ π, begin
-    refine (derivative_core (quiver.path.cons a (lt_trans c b)) π).lower_code_perm _ _,
-    induction p, { unfold quiver.hom at c, simp at c, contradiction },
-    induction q, { unfold quiver.hom at b, simp at b, contradiction },
-    unfold quiver.hom at b, simp at b, exact b
-  end
-using_well_founded { dec_tac := `[exact drop_min_lt a b c] }
-
-/-- The derivative of a structural permutation with respect to a given extended type index. -/
-def derivative (π : struct_perm β) (A : extended_index β) : struct_perm A.min :=
-derivative_core A π
+/-- the derivative of a structural permutation at any lower level -/
+def derivative {β : type_index} :
+Π {γ : type_index} (A : quiver.path (β : type_index) γ), struct_perm β → struct_perm γ
+| _ quiver.path.nil := id
+| δ (quiver.path.cons p_βδ lt_γδ) := λ π, lower_code_perm (derivative p_βδ π) _ lt_γδ
 
 end struct_perm
 
