@@ -24,6 +24,8 @@ def struct_perm : Π (β : Λ), Type u
 | β := perm atom × Π γ < β, struct_perm γ
 using_well_founded { dec_tac := `[assumption] }
 
+namespace struct_perm
+
 variable {β : Λ}
 
 /-- Obtains the atom permutation given by a prestructural permutation. -/
