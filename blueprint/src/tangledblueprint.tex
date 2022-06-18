@@ -202,15 +202,16 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 \begin{definition}
   \label{def:structural-perm}
   \uses{def:structural-perm-atoms}
-  %leanok
+  \leanok
+  \lean{con_nf.struct_perm}
   For a \emph{proper} type index $\alpha$, the structural $\alpha$-permutations are the group $\Str_\alpha = \prod_{\beta < \alpha} \Str_\beta$.
 \end{definition}
 
 \begin{definition}
   \label{def:structural-perm-derivative}
   \uses{def:structural-perm}
-  %leanok
-  \lean{con_nf.struct_perm}
+  \leanok
+  \lean{con_nf.struct_perm.derivative}
   Any path $A : \beta \to \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
 
   Moreover, this is functorial: they make $\Str$ into a functor $\mathrm{Path}(\Lambda)^\mathrm{op} \to \mathrm{Gp}$.
@@ -229,6 +230,8 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 \begin{definition}
   \label{def:support-condition}
   \uses{def:near-litter,def:atom} % TODO: add def:paths upstream, and add it here.
+  \lean{con_nf.support_condition}
+  \leanok
   Let $\alpha$ be a proper type index. An \emph{$alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
 
   Type-theoretically, $\Cond := (\tau_{-1} + \mathrm{NearLit}) \times \mathrm{Path}(-1,\alpha)$.
@@ -238,6 +241,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 \begin{definition}
   \label{def:support-condition-action}
   \uses{def:structural-perm-derivative, def:support-condition}
+  \lean{con_nf.struct_perm_action}
 
   Structural permutations act on support conditions.
 
@@ -749,8 +753,6 @@ We give an exact statement of what is meant, then we prove it.
 \leanok
 \lean{con_nf.local_bijection}
 An $\alpha$-local bijection consists of: for each $\alpha$-extended type index (i.e.\ path $A : -1 \to \alpha$), a permutation $\pi^0_A$ of some subset $\dom(\pi^0_A) \subseteq \tau{-1}$, such that the intersection of $\dom(\pi^0_A)$ with any litter is small (including possibly empty).
-
-[Note: this definition has been slightly rephrased since it was first formalised.  To do: check that the formalisation matches the current definition.]
 \end{definition}
 
 \begin{definition}

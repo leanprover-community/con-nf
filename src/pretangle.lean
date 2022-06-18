@@ -23,18 +23,14 @@ inductive preferred_extension (α : Λ) : Type u
 an element of the model.
 The type of pretangles forms a model of TTT without extensionality. -/
 def pretangle : Λ → Type u
-| α := (Π β < α, set (pretangle β)) × preferred_extension α
+| α := Π β < α, set (pretangle β)
 using_well_founded { dec_tac := `[assumption] }
 
 namespace pretangle
 
 /-- Obtains the members of a pretangle of type `α`, seen as a set of elements of type `β < α`. -/
 def members {α : Λ} (a : pretangle α) : Π (β < α), set (pretangle β) :=
-by { unfold pretangle at a, exact a.1 }
-
-/-- The preferred extension of a pretangle. -/
-def pref_extension {α : Λ} (a : pretangle α) : preferred_extension α :=
-by { unfold pretangle at a, exact a.2 }
+by { unfold pretangle at a, exact a }
 
 -- Yaël: Note, this instance is useless as it won't fire because `β < α` is not a class
 /-- The membership relation defined on pretangles.
