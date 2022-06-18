@@ -165,12 +165,13 @@ One might be concerned with the fact that if $\mu$ has cofinality $\kappa$, it m
 
 We first define a big model of TTT without extensionality, which we call {\em pretangles}. Later, we will carve out our model of TTT from it.
 
+\newcommand{\Pretangle}{\mathrm{Pretangle}}
 \begin{definition}
 \label{def:pretangle}
 \uses{def:atom}
 \leanok
 \lean{con_nf.pretangle}
-Define {\em pretangles} inductively. $D_{-1}$ is defined as $\tau_{-1}$. For $\alpha$ a proper type index, $D_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal P (D_\beta)$.
+Define the sets $\Pretangle_\alpha$ of \emph{$\alpha$-pretangles} inductively. $\Pretangle_{-1}$ is defined as $\tau_{-1}$. For $\alpha$ a proper type index, $\Pretangle_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal{P}(\Pretangle_\beta)$.
 \end{definition}
 
 \begin{definition}
@@ -594,7 +595,7 @@ There is lots to be proven, but that is the entire description.
   \emph{Phase 1b data} at a proper type index $\alpha$ consists of:
   \begin{itemize}
   \item phase 1b data (including phase 1a data) at $\alpha$;
-  \item an injection $\tau \to \mathrm{Pretangle}_\alpha$;
+  \item an injection $\tau \to \Pretangle_\alpha$;
   \item commuting with the $\All$-action (where $\varphi : \All \to \Str_\alpha$ and its action on $\tau$ is given in the phase 1b data, and its action on pretangles is given by composing the $\Str_\alpha$-action with $\varphi$).
   \end{itemize}
 
@@ -604,16 +605,53 @@ There is lots to be proven, but that is the entire description.
 \begin{definition}
   \label{def:embedding-into-pretangles}
   \uses{def:semi-tangle, def:phase-1c-data}
-  There is an injection $\tau_\alpha \to \mathrm{Pretangle}_\alpha$ (where $\tau_\alpha$ is constructed from the given phase 1 data).  Moreover, this commutes with the $\All_\alpha$-action.
+  There is an injection $\tau_\alpha \to \Pretangle_\alpha$ (where $\tau_\alpha$ is constructed from the given phase 1 data).  Moreover, this commutes with the $\All_\alpha$-action.
 \end{definition}
 
 \newpage
 
-\chapter{It is a model of tangled type theory}
+\chapter{Phase 2: Constraining the number of tangles}
 
-In this chapter, we prove that the structure described in the previous chapter is a model of tangled type theory.
+In this phase, we give the three hard theorems about the constructions of phase 1: strengthening supports, freedom of action, and constraining the number of tangles.
 
-In this phase, we meet the major technical difficulty of the recursion: It seems like we need to assume not just that we have sets of tangles etc at all earlier levels, but also that they fit together “correctly”, in the sense of being inductively defined at all levels by the constructions so far.  This is the reason why we need the major phase separation in the components of the recursion.
+These meet the major technical difficulty of the recursion: We need (it seems) to assume not just that we have sets of tangles etc at all earlier levels, but also that they fit together correctly, in the sense of being inductively defined at all levels by the constructions so far.  This is the reason why we need the major phase separation in the components of the recursion.
+
+\section{Preliminaries: coherent phase 2 data}
+
+\begin{definition}
+  \label{def:concrete-phase-1-data}
+  \uses{def:phase-1a-data,def:phase-1b-data,def:phase-1c-data}
+  For a type index $\alpha$, \emph{concrete phase 1 data} at level $\alpha$ consists of a subset $\tau \subseteq \Pretangle_\alpha$ and a subgroup $\All \subseteq G_\alpha$, together with the rest of phase 1a, 1b, and 1c data on these.
+
+  Notes for formalisation:
+  \begin{itemize}
+    \item The reason we use \emph{subsets} from here on is because we will soon impose equalities between these components, and subset equalities are much less nasty to deal with than type equalities.
+    \item To define this, we almost certainly want to factor out the type $\tau$ as a parameter of the phase 1a data from the start, and likewise the group $\All$ in the phase 1b data.
+    \item We could avoid that “factoring out as a parameter” by assuming this concreteness already in the phase 1 data, i.e. positing $\tau$ as a subset of pretangles and $\All$ as a subgroup of $\Str_\alpha$ from the start.  At least for $\tau$, that seems a bit unnatural — it adds an entirely irrelevant extra assumption throughout phase 1.  For $\All$ it perhaps wouldn’t be so unnatural, since $\All$ does need to be assumed with at least a homomorphism to $\Str_\alpha$ anyway.
+  \end{itemize}
+
+  The \emph{standard} concrete phase 1 data at level $-1$ are the defined $\tau_{-1} = \Pretangle_{-1}$ and $\All_{-1} = \Str_{-1}$.
+\end{definition}
+
+\begin{definition}
+  \label{def:concrete-phase-1-data-propagates}
+  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:near-litter-obligation,\def:allowable-perm}
+  For $\alpha \in \lambda$, if we have concrete phase 1 data at all levels $\beta < \alpha$, then the constructions in phase 1 provide \emph{most} components of concrete phase 1 data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$!
+
+  In particular, the new set of $\alpha$-tangles $\tau_\alpha \subseteq \Pretangle_\alpha$ is the the image of the $\alpha$-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations.  (We could call these “concrete $\alpha$-tangles” and “abstract $\alpha$-tangles”, if we need to for disambiguation.)
+\end{definition}
+
+\begin{definition}
+  \label{def:phase-2-data}
+  \uses{def:concrete-phase-1-data-propagates}
+  For $\alpha \in \lambda + 1$, \emph{Phase 2 data up to $\alpha$} consists of concrete phase 1 data at every level $\beta < \alpha$, which is moreover \emph{coherent}, in that for each $\beta$, all components at level $\beta$ that \emph{could} have been induced from the data at lower levels $\gamma < \beta$ are, in fact, equal to what would have been induced that way.
+
+  [Note we want to provide this definiton also for $\alpha = \lambda$!  I think this should be available in mathlib as \verb|with_top|.]
+
+  For $\alpha < \beta$, “phase 2 data up to $\alpha$” can be restricted to “phase 2 data up to $\beta$”.
+
+  Most constructions in phase 2 will assume phase 2 data up to $\alpha$, for some fixed $\alpha$.
+\end{definition}
 
 \section{Strong supports defined}
 
@@ -821,6 +859,11 @@ This completes the proof that each type is of size $\mu$, which ensures that the
 {\bf Note for the formal verification project:}  I think everything is here, but filling in details to the satisfaction of a theorem prover will be work.
 % \end{comment}
 \newpage
+
+\chapter{It is a model of tangled type theory}
+
+Now we can prove that the structure constructed in the previous chapters is a model of tangled type theory.
+
 \section{The structure is a model of predicative TTT}
 
 There is then a very direct proof that the structure presented is a model of predicative TTT (in which the definition of a set at a particular type may not mention any higher type).  Use $E$ for the membership relation of the structure.  It should be evident that $x E y \leftrightarrow \pi_\beta(x) E \pi(y)$,
