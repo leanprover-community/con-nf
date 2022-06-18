@@ -39,7 +39,7 @@
 \newcommand{\All}{\mathrm{All}}
 \newcommand{\Cond}{\mathrm{Cond}}
 
-\chapter{The model description}
+\chapter{Phase 1: The model description}
 
 In this section, we give a complete description of what we claim is a model of tangled type theory.  The construction may be supposed carried out in ZFC (or some weak subsystem thereof:  we will see how much ZFC is needed).
 
@@ -86,7 +86,7 @@ We refer to sets of size smaller than $\kappa$ as small [and all other sets as l
 I waffled about this:  but cofinality exactly $\kappa$ will work.
 % \end{comment}
 
-\section{Type $-1$:  ``Atoms", litters, and local cardinals}
+\section{Type $-1$: atoms, litters, and local cardinals}
 
 We will define a function taking type indices $\alpha$ to sets $\tau_\alpha$ (type $\alpha$).
 
@@ -170,17 +170,108 @@ First, there are at least $\mu$ near-litters. Second, the equivalence induced by
 
 One might be concerned with the fact that if $\mu$ has cofinality $\kappa$, it might have more than $\mu$ subsets of size $\kappa$:  but it still has only $\mu$ subsets of size $<\kappa$, and that is what matters for counting the near-litters:  a near-litter is determined as the symmetric difference of a litter ($\mu$ of these) and a small subset (cardinality $<\kappa$) of $\tau_{-1}$ (which is of size $\mu$) and there are only $\mu$ small subsets of $\tau_{-1}$.  If the cofinality of $\mu$ were less than $\kappa$, the cardinal arithmetic pathology mentioned as of concern could come into play.
 
-\section{Phase 1a: Set codes and alternative extensions:  membership defined and extensionality enforced}
+\section{Preliminaries: pretangles, structural permuations}
 
-We first define a big model of TTT without extensionality, which we call {\em pretangles}. Later, we will carve out our model of TTT from it.
+Before embarking on the large recursive construction of the eventual model, we set up some structures in advance which we will make use of during the main recursion.
+
+We first define a big structure, which can be viewed model of TTT without extensionality, whose elements we call \emph{pretangles}.  In the main recursion, we will carve out our actual model of TTT as a substructure of \emph{tangles} within the pretangles.
 
 \begin{definition}
-\label{def:pretangle}
-\uses{def:atom}
-\leanok
-\lean{con_nf.pretangle}
-Define the sets $\Pretangle_\alpha$ of \emph{$\alpha$-pretangles} inductively. $\Pretangle_{-1}$ is defined as $\tau_{-1}$. For $\alpha$ a proper type index, $\Pretangle_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal{P}(\Pretangle_\beta)$.
+  \label{def:pretangle}
+  \uses{def:atom}
+  \leanok
+  \lean{con_nf.pretangle}
+  Define the sets $\Pretangle_\alpha$ of \emph{$\alpha$-pretangles} inductively. $\Pretangle_{-1}$ is defined as $\tau_{-1}$. For $\alpha$ a proper type index, $\Pretangle_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal{P}(\Pretangle_\beta)$.
 \end{definition}
+
+We also set up a sequence of groups that act on pretangles; subgroups of these will later act on the tangles.
+
+\begin{definition}
+  \label{def:structural-perm-atoms}
+  \uses{def:atoms,def:near-litter}
+  \leanok
+  \lean{con_nf.near_litter_perm}
+
+  A \emph{structural $(-1)$-permutation} [aka a near-litter-perm; we should fix on one name or the other] is a permutation $\pi$ of $\tau_{-1}$, along with a permutation $\bar{\pi}$ of litters, such that for each litter $L$, $\pi``(L)$ is near to $\bar{\pi}(L)$ (in the sense that they have small symmetric difference).  Denote the group of these by $\Str{-1}$.
+
+  [In fact $\bar{\pi}$ is uniquely determined by $\pi$ — we could define this just as a subgroup of $\Sym(\tau_{-1})$.  But it’s convenient in formalisation to have the $\bar{\pi}$ component explicit.]
+
+  $\Str_{-1}$ has obvious actions on atoms and near-litters.
+\end{definition}
+
+\begin{definition}
+  \label{def:structural-perm}
+  \uses{def:structural-perm-atoms}
+  %leanok
+  For a \emph{proper} type index $\alpha$, the structural $\alpha$-permutations are the group $\Str_\alpha = \prod_{\beta < \alpha} \Str_\beta$.
+\end{definition}
+
+\begin{definition}
+  \label{def:structural-perm-derivative}
+  \uses{def:structural-perm}
+  %leanok
+  \lean{con_nf.struct_perm}
+  Any path $A : \beta \to \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
+
+  Moreover, this is functorial: they make $\Str$ into a functor $\mathrm{Path}(\Lambda)^\mathrm{op} \to \mathrm{Gp}$.
+
+  [TODO: this should also depend on “paths”, but they aren’t yet explicitly in the blueprint.]
+\end{definition}
+
+\begin{definition}
+  \label{def:allowable-perm-atoms}
+  \uses{def:structural-perm-atoms}
+  An \emph{allowable $(-1)$-permutation} is just a structural $(-1)$-permutation. We denote the group of these by $\All_{-1} = \Str_{-1}$.  ($\Str_\beta$ and $\All_\beta$ will diverge for higher $\beta$ later…)
+
+  [Actually this definition should probably go later, in phase 1c or even 2?]
+\end{definition}
+
+\begin{definition}
+  \label{def:support-condition}
+  \uses{def:near-litter,def:atom} % TODO: add def:paths upstream, and add it here.
+  Let $\alpha$ be a proper type index. An \emph{$alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
+
+  Type-theoretically, $\Cond := (\tau_{-1} + \mathrm{NearLit}) \times \mathrm{Path}(-1,\alpha)$.
+  [It would suffice to use just litters here instead of near-litters; they give an equivalent notion of support, as shown later (“replacing near-litters with litters”).  That makes a few things simpler; but using near-litters lets us talk about the action, Def.~\ref{def:support-condition-action}, which seems algebraically cleaner.]
+\end{definition}
+
+\begin{definition}
+  \label{def:support-condition-action}
+  \uses{def:structural-perm-derivative, def:support-condition}
+
+  Structural permutations act on support conditions.
+
+  [Hopefully, mathlib has general disjoint unions of group actions, which should supply this automatically.]
+\end{definition}
+
+\begin{definition}
+\label{def:support}
+\uses{def:support-condition}
+Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alpha$-support-conditions.  (A little more pedantically, one could call these something like “potential small supports”: they become actual supports once they support some element.)
+
+[NOTES for formalisation: Well-orderings are assumed here in some version of Randall’s note, but they almost certainly aren’t wanted in the basic definition of supports, as used in phase 1. Strong supports, as used in phase 2, are probably better viewed as a separate notion: a more elaborate data structure that can be used to “present” a support in a particularly good way.]
+\end{definition}
+
+\begin{lemma}
+\label {lem:count-supports}
+\uses{def:support,lem:count-near-litters}
+Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
+\end{lemma}
+
+\begin{definition}
+\label{def:support-of}
+  \uses{def:support, def:derivative, def:support-condition-action}
+  Suppose $\varphi : H \to \Str_\alpha$ is any group homomorphism, and $\tau$ is a set equipped with an $H$-action.
+
+  Given $x \in \tau$ and $S$ any set of $\alpha$-support conditions, say \emph{$S$ supports $x$} if every $\pi \in H$ that fixes every element of $S$ also fixes $x$.
+
+  A \emph{support for $x$} is a support (i.e.\ a \emph{small} set of conditions) that supports $x$. [Should we try to always say “small support” to avoid ambiguity?]
+
+  We say $x$ is \emph{symmetric} if it has some small support.
+\end{definition}
+
+\section{Phase 1a: Set codes and alternative extensions}
+
 
 \begin{definition}
 \label {def:phase-1a-data}
@@ -343,94 +434,6 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
   \item if $x_\beta = y_\beta$, then $x=y$.
 \end{itemize}
 \end{theorem}
-
-\section{Preliminaries on permutations and symmetry}
-
-This section does not depend on any inductive assumptions.
-
-\begin{definition}
-  \label{def:structural-perm-atoms}
-  \uses{def:atoms,def:near-litter}
-  \leanok
-  \lean{con_nf.near_litter_perm}
-
-  A \emph{structural $(-1)$-permutation} [aka a near-litter-perm; we should fix on one name or the other] is a permutation $\pi$ of $\tau_{-1}$, along with a permutation $\bar{\pi}$ of litters, such that for each litter $L$, $\pi``(L)$ is near to $\bar{\pi}(L)$ (in the sense that they have small symmetric difference).  Denote the group of these by $\Str{-1}$.
-
-  [In fact $\bar{\pi}$ is uniquely determined by $\pi$ — we could define this just as a subgroup of $\Sym(\tau_{-1})$.  But it’s convenient in formalisation to have the $\bar{\pi}$ component explicit.]
-
-  $\Str_{-1}$ has obvious actions on atoms and near-litters.
-\end{definition}
-
-\begin{definition}
-  \label{def:structural-perm}
-  \uses{def:structural-perm-atoms}
-  %leanok
-  For a \emph{proper} type index $\alpha$, the structural $\alpha$-permutations are the group $\Str_\alpha = \prod_{\beta < \alpha} \Str_\beta$.
-\end{definition}
-
-\begin{definition}
-  \label{def:structural-perm-derivative}
-  \uses{def:structural-perm}
-  %leanok
-  \lean{con_nf.struct_perm}
-  Any path $A : \beta \to \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
-
-  Moreover, this is functorial: they make $\Str$ into a functor $\mathrm{Path}(\Lambda)^\mathrm{op} \to \mathrm{Gp}$.
-
-  [TODO: this should also depend on “paths”, but they aren’t yet explicitly in the blueprint.]
-\end{definition}
-
-\begin{definition}
-  \label{def:allowable-perm-atoms}
-  \uses{def:structural-perm-atoms}
-  An \emph{allowable $(-1)$-permutation} is just a structural $(-1)$-permutation. We denote the group of these by $\All_{-1} = \Str_{-1}$.  ($\Str_\beta$ and $\All_\beta$ will diverge for higher $\beta$ later…)
-
-  [Actually this definition should probably go later, in phase 1c or even 2?]
-\end{definition}
-
-\begin{definition}
-  \label{def:support-condition}
-  \uses{def:near-litter,def:atom} % TODO: add def:paths upstream, and add it here.
-  Let $\alpha$ be a proper type index. An \emph{$alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
-
-  Type-theoretically, $\Cond := (\tau_{-1} + \mathrm{NearLit}) \times \mathrm{Path}(-1,\alpha)$.
-  [It would suffice to use just litters here instead of near-litters; they give an equivalent notion of support, as shown later (“replacing near-litters with litters”).  That makes a few things simpler; but using near-litters lets us talk about the action, Def.~\ref{def:support-condition-action}, which seems algebraically cleaner.]
-\end{definition}
-
-\begin{definition}
-  \label{def:support-condition-action}
-  \uses{def:structural-perm-derivative, def:support-condition}
-
-  Structural permutations act on support conditions.
-
-  [Hopefully, mathlib has general disjoint unions of group actions, which should supply this automatically.]
-\end{definition}
-
-\begin{definition}
-\label{def:support}
-\uses{def:support-condition}
-Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alpha$-support-conditions.  (A little more pedantically, one could call these something like “potential small supports”: they become actual supports once they support some element.)
-
-[NOTES for formalisation: Well-orderings almost certainly shouldn’t be necessary in this phase. All this can also come before any inductive data are assumed, in the background on structural permutations.]
-\end{definition}
-
-\begin{lemma}
-\label {lem:count-supports}
-\uses{def:support,lem:count-near-litters}
-Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
-\end{lemma}
-
-\begin{definition}
-\label{def:support-of}
-  \uses{def:support, def:derivative, def:support-condition-action}
-  Suppose $\varphi : H \to \Str_\alpha$ is any group homomorphism, and $\tau$ is a set equipped with an $H$-action.
-
-  Given $x \in \tau$ and $S$ any set of $\alpha$-support conditions, say \emph{$S$ supports $x$} if every $\pi \in H$ that fixes every element of $S$ also fixes $x$.
-
-  A \emph{support for $x$} is a support (i.e.\ a \emph{small} set of conditions) that supports $x$. [Should we try to always say “small support” to avoid ambiguity?]
-
-  We say $x$ is \emph{symmetric} if it has some small support.
-\end{definition}
 
 \section{Phase 1b: Actual tangles: the model definition}
 
@@ -595,7 +598,7 @@ In this phase, we give the three hard theorems about the constructions of phase 
 
 These meet the major technical difficulty of the recursion: We need (it seems) to assume not just that we have sets of tangles etc at all earlier levels, but also that they fit together correctly, in the sense of being inductively defined at all levels by the constructions so far.  This is the reason why we need the major phase separation in the components of the recursion.
 
-\section{Preliminaries: phase 2 data}
+\section{Assumptions for phase 2: Coherent data at all lower levels}
 
 \begin{definition}
   \label{def:full-phase-1-data}
@@ -613,7 +616,7 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
     \item for each $x$ in $\tau_\alpha$ that is not a typed litter or singleton, $x$ comes later than all of its designated support -- explicitly, for each $(a,A)$ or $(N,A)$ in the in $S(x)$, we must have $\iota_\alpha(j(N)), \iota_\alpha(k(a))<\iota_\alpha(x)$.
   \end{enumerate}
 
-  Note: to see these conditions are not unreasonable, note that each element has $<\mu$ many things that it must come after, and that the chains of these constraints are of depth at most 4: litters $<$ atoms $<$ other near-litters $<$ everything else.  (This should become the proof sketch for when we eventually construct these orderings below, as one of the last steps of the main recursion.)
+  Note: to see these conditions are not unreasonable, note that each element has $<\mu$ many things that it must come after, and that the chains of these constraints are of depth at most 4: litters $<$ atoms $<$ other near-litters $<$ everything else.  We make this precise in \cref{lem:position-functions-propagate} below.
 
   Note: we could have called this “phase 1d data”, and should perhaps state it already in phase 1.  But it’s not needed before phase 2.
 \end{definition}
@@ -657,15 +660,17 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 
   Most constructions in phase 2 will assume coherent phase 1 data up to $\alpha$, for some fixed $\alpha$.
 
-  [Terminology: perhaps we should call this “phase 2 data at $\alpha$”?  That seems more consistent for the overall scheme, but “coherent phase 1 data up to $\alpha$” seems nicer and more transparent in itself.  Maybe we should reconsider the naming scheme.]
+  [Terminology: perhaps we should call this “phase 2 data at $\alpha$”?  That seems more consistent for the overall naming scheme, but “coherent phase 1 data up to $\alpha$” seems clearer and more transparent in itself.  Maybe we should reconsider the naming scheme, so that it’s not in tension with clarity!]
 \end{definition}
 
 \section{Strong supports defined}
 
-Throughout this section, fix some $\alpha \in \lambda + 1$, and assume coherent phase 1 data up to $\alpha$.
+NOTE: much of this section has not been updated since early in the formalisation, so may not match the current implementation and abstractions very closely.
+
+Throughout this section, fix some $\alpha \in \lambda + 1$, and assume coherent phase 1 data up to $\alpha$. [Actually, perhaps this section doesn’t need the coherence and could be done in phase 1, i.e. working purely in a single level, assuming full phase 1 data is available at lower levels?  This should become clearer as it is formalised.]
 
 Treating supports as sets suffices for the model description, but we will need to analyze supports and orbits with more care, so it is better for purposes
-of the proof to regard a support as a well-ordering.
+of the proof to equip supports with a well-orderings.
 
 We may write $x \leq_S y$ for $(x,y) \in S$, and $x <_S y$ when we also want to indicate that $x,y$ are distinct.
 
@@ -728,6 +733,7 @@ The third components in the elements of support domains seem actually to be nece
 % \begin{comment}
 {\bf Note for the formal verification project:}  This should be ready to go.
 % \end{comment}
+
 \newpage
 \section{Freedom of action of allowable permutations}
 
@@ -780,15 +786,16 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
   Note: Earlier versions of the note/blueprint stated the 3rd condition in terms of exceptions; recent versions of the note spell it out in more detail and add the “increasing” condition, which is necessary for the uniqueness in the theorem conclusion.  If there are any doubts, the current version of Randall’s note should be consulted!
 \end{definition}
 
-\begin{theorem}
-\label {lem:freedom-of-action}
-\uses{def:freedom-of-action-statement,lem:strengthen-support}
+\begin{lemma}
+\label{lem:freedom-of-action-propagates}
+\uses{def:freedom-of-action-statement}
 Given coherent part 1 data up to $\alpha$, if freedom of action holds at each level $\beta < \alpha$, then it holds at level $\alpha$.
 
 Note: I (Peter) have an alternative approach to freedom of action (slightly different in both statement and proof) which might possibly be easier to formalise, avoiding the dependence on strong supports in the proof.  Iff Randall approves it then I will add it in the blueprint as an alternative.  But it doesn’t change the overall structure of the main argument/recursion, so this doesn’t need to be worried about until the point of formalising the FoA theorem itself.
-\end{theorem}
+\end{lemma}
 
 \begin{proof}
+  \uses{lem:strengthen-support}
   [This proof is is substantially clarified in more recent versions of Randall’s note.]
 
   We prove this by exhibiting a recursive procedure for computing $\pi$ and its derivatives along a strong support;  this succeeds because all objects have strong supports, and because computing all values of derivatives of $\pi$ on type $-1$ allows computation of all derivatives of $\pi$ at all types.
@@ -822,12 +829,25 @@ Once we know how to carry out this calculation along any $\alpha$-strong support
 {\bf Note for the formal verification project:}  This section is vitally important and should be ready to work on (once the model and the definition of strong support are handled).  Setting up the recursive definition of the computation may be nasty.
 % \end{comment}
 
+\begin{theorem}
+  \label{thm:freedom-of-action}
+  \uses{def:freedom-of-action-statement}
+  Given coherent phase 1 data up to $\alpha$, it satisfies freedom of action at every level.
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:freedom-of-action-propagates}
+  By induction over $\beta < \alpha$, using \cref{lem:freedom-of-action-propagates}.
+\end{proof}
+
+
 \newpage
 \section{Types are of size \texorpdfstring{$\mu$}{μ} (so the construction actually succeeds)}
 
+[Note: this section is treated MUCH more clearly in Randall’s more recent versions of the note — we should certainly pull in from that newer version before attempting to formalise the section.]
+
 Now we argue that (given that everything worked out correctly already at lower types) each type $\alpha$ is of size $\mu$, which ensures
 that the construction actually succeeds at every type.
-
 
 \begin{definition}
 \label {def:coding-function}
@@ -887,13 +907,143 @@ $M$ which is not in $M^\circ$ to something in $N^\circ \cap N$, and each element
 
 There are clearly $<\mu$ specifications since these are small structures built with components taken from sets of size $<\mu$.  Notice the recursive dependency on the coding functions for items of lower types being taken from sets of size $<\mu$.
 
-This completes the proof that each type is of size $\mu$, which ensures that the construction described in the first section actually succeeds.
+Pulling out the main items from the discussion above, for formalisation targets:
+
+\begin{definition}
+  \label{def:support-spec}
+  \uses{def:coherent-phase-1-data}
+  Fix coherent phase 1 data up to $\alpha$.  A \emph{support-specification} is \ldots [this is quite long to define; we should get the text from more recent versions of Randall’s note]
+
+  [Perhaps the coherence is not needed?]
+\end{definition}
+
+\begin{lemma}
+  \label{lem:count-support-specs}
+  \uses{def:support-spec}
+  There are $<\mu$-many support specifications.
+\end{lemma}
+
+\begin{definition}
+  \label{def:support-spec-realisation}
+  \uses{def:support-spec,def:strong-support}
+  Any support specification can be realised (non-uniquely) to give a strong support.
+\end{definition}
+
+\begin{lemma}
+  \label{lem:support-spec-realisation-unique}
+  \uses{def:support-spec-realisation,def:freedom-of-action-statement}
+  If freedom of action holds at $\alpha$, then realisations of a support specification are unique modulo the group action.  That is, for any two realisations $S, S'$ of a support specification $S$, there is some allowable permutation $\pi$ such that $\pi S = S'$.
+
+  [Note: we don’t need to explicitly assume freedom of action here: we could appeal to the \cref{thm:freedom-of-action} to know that it holds.  But the explicit assumption keeps things more modular, and avoids unnecessary dependency, which will be helpful in case it turns out the argument needs restructuring at any point.]
+\end{lemma}
+
+\begin{proof}
+  Hopefully quite direct, given heavy use of freedom of action.  May need some lemmas about realisations.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:strong-support-has-spec}
+  \uses{def:support-spec-realisation}
+  Every strong support can be obtained as the realisation of some specification
+\end{lemma}
+
+\begin{corollary}
+  \label{cor:count-strong-supports}
+  \uses{def:strong-support}
+  There are $<\mu$-many orbits of strong supports, under the group action of allowable permutations.
+\end{corollary}
+
+\begin{proof}
+  \uses{lem:strong-support-has-spec,lem:count-support-specs}
+  Immediate from \cref{lem:count-support-specs} and \cref{lem:strong-support-has-spec}.
+\end{proof}
+
+Now, everything that we did with supports, we repeat with coding functions.
+
+\begin{definition}
+  \label{def:coding-function-spec}
+  \uses{def:coherent-phase-1-data,def:support-spec;def:coding-function}
+  A \emph{coding function specification} is \ldots [again, see recent versions of Randall’s note]
+
+  [Perhaps the coherence is not needed?]
+\end{definition}
+
+\begin{lemma}
+  \label{lem:count-coding-function-specs}
+  \uses{def:coding-function-spec}
+  There are $<\mu$-many coding function specifications.
+\end{lemma}
+
+\begin{definition}
+  \label{def:coding-function-spec-realisation}
+  \uses{def:coding-function-spec,def:support-spec-realisation}
+  Any coding function specification can be realised as a coding function.
+\end{definition}
+
+\begin{lemma}
+  \label{lem:coding-function-has-spec}
+  \uses{def:coding-function-spec-realisation}
+  Every coding function can be obtained as the realisation of some specification
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:strong-support-has-spec}
+  See Randall’s more recent versions of the note.
+\end{proof}
+
+\begin{corollary}
+  \label{cor:count-coding-functions}
+  \uses{def:coding-function}
+  There are $<\mu$-many coding functions.
+\end{corollary}
+
+\begin{proof}
+  \uses{lem:coding-function-has-spec,lem:count-coding-function-specs}
+  Immediate from \cref{lem:count-coding-function-specs} and \cref{lem:coding-function-has-spec}.
+\end{proof}
+
+\begin{corollary}
+  \label{cor:count-tangles}
+  \uses{def:tangles}
+  There are $\mu$-many $\alpha$-tangles.
+\end{corollary}
+
+\begin{proof}
+  \uses{lem:count-supports,cor:count-coding-functions}
+  Every tangle can be obtained as a coding function (of which there are $<\mu$) applied to a support (of which there are $\mu$).
+\end{proof}
+
+This completes the proof that each type is of size $\mu$, which finally closes the loop on the recursion --- or very nearly so: we still have to show that the orderings can be chosen to satisfy the extra technical conditions required.
+
+\begin{lemma}
+  \label{lem:position-functions-propagate}
+  \uses{lem:coherent-phase-1-data}
+  Given coherent phase 1 data up to $\alpha$ satisfying freedom of action, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:full-phase-1-data}:
+  \begin{enumerate}
+    \item for each litter $L$, the typed litter of $L$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
+    \item for each near-litter $N$ which is not a litter, $j(N)$ comes after its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \Delta N^\circ$;
+
+    \item for each $x$ in $\tau_\alpha$ that is not a typed litter or singleton, $x$ comes later than all of its designated support -- explicitly, for each $(a,A)$ or $(N,A)$ in the in $S(x)$, we must have $\iota_\alpha(j(N)), \iota_\alpha(k(a))<\iota_\alpha(x)$.
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  \uses{cor:count-tangles}
+  The constraints can be seen as defining a relation $\prec$ on $\tau_\alpha$; we want to extend $\prec$ to a well-ordering of order-type $\leq \mu$, or equivalently, to give an injection $\iota:\tau_\alpha \to \mu$ sending $\prec$ to $<$.  We know:
+  \begin{itemize}
+  \item $\prec$ has depth 4: it is of the form “litters $\prec$ atoms $\prec$ other near-litters $\prec$ everything else”;
+  \item each tangle has $<\kappa$-many predecessors under $\prec$;
+  \item $|\tau_\mu| \leq \mu$.
+  \end{itemize}
+  These conditions should suffice to imply the existence of the desired ordering/functions.
+\end{proof}
+
 % \begin{comment}
 {\bf Note for the formal verification project:}  I think everything is here, but filling in details to the satisfaction of a theorem prover will be work.
 % \end{comment}
 \newpage
 
-\chapter{It is a model of tangled type theory}
+\chapter{Tangles model tangled type theory}
 
 Now we can prove that the structure constructed in the previous chapters is a model of tangled type theory.
 
