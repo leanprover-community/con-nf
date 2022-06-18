@@ -30,6 +30,15 @@
 
 % preamble \begin{document}
 
+%% Locally defined macros
+\newcommand{\dom}{\mathrm{dom}}
+\newcommand{\rge}{\mathrm{rge}}
+\newcommand{\Pretangle}{\mathrm{Pretangle}}
+\newcommand{\Sym}{\mathrm{Sym}}
+\newcommand{\Str}{\mathrm{Str}}
+\newcommand{\All}{\mathrm{All}}
+\newcommand{\Cond}{\mathrm{Cond}}
+
 \chapter{The model description}
 
 In this section, we give a complete description of what we claim is a model of tangled type theory.  The construction may be supposed carried out in ZFC (or some weak subsystem thereof:  we will see how much ZFC is needed).
@@ -165,7 +174,6 @@ One might be concerned with the fact that if $\mu$ has cofinality $\kappa$, it m
 
 We first define a big model of TTT without extensionality, which we call {\em pretangles}. Later, we will carve out our model of TTT from it.
 
-\newcommand{\Pretangle}{\mathrm{Pretangle}}
 \begin{definition}
 \label{def:pretangle}
 \uses{def:atom}
@@ -340,9 +348,6 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 
 This section does not depend on any inductive assumptions.
 
-\newcommand{\Sym}{\mathrm{Sym}}
-\newcommand{\Str}{\mathrm{Str}}
-\newcommand{\All}{\mathrm{All}}
 \begin{definition}
   \label{def:structural-perm-atoms}
   \uses{def:atoms,def:near-litter}
@@ -383,7 +388,6 @@ This section does not depend on any inductive assumptions.
   [Actually this definition should probably go later, in phase 1c or even 2?]
 \end{definition}
 
-\newcommand{\Cond}{\mathrm{Cond}}
 \begin{definition}
   \label{def:support-condition}
   \uses{def:near-litter,def:atom} % TODO: add def:paths upstream, and add it here.
@@ -631,7 +635,7 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 
 \begin{definition}
   \label{def:concrete-phase-1-data-propagates}
-  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,def:allowable-perm,tangle-action}
+  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,def:allowable-perm,def:tangle-action}
   For a proper type index $\alpha \in \lambda$, if we have concrete phase 1 data at all levels $\beta < \alpha$, then the constructions in phase 1 provide \emph{most} components of concrete phase 1 data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$!
 
   In particular, the new set of $\alpha$-tangles $\tau_\alpha \subseteq \Pretangle_\alpha$ is the the image of the $\alpha$-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations.  (We could call these “concrete $\alpha$-tangles” and “abstract $\alpha$-tangles”, if we need to for disambiguation.)
@@ -738,7 +742,9 @@ We give an exact statement of what is meant, then we prove it.
 \uses{def:extended-type-index, def:litter, def:small}
 \leanok
 \lean{con_nf.local_bijection}
-An $\alpha$-local bijection is a map $\pi^0$ whose domain is a set of pairs $(A,x)$ where $A$ is an $\alpha$-extended type index and $x$ is in type $-1$,  and whose range is a subset of $\tau_{-1}$.  To state further conditions, we introduce the notation $\pi^0_A(x) = \pi^0(A,x)$ and state the further condition that each map $\pi^0_A$ is injective and has domain the same as its range, and that the intersection of the domain of $\pi^0_A$ with any litter is small (empty being an important case of small).
+An $\alpha$-local bijection consists of: for each $\alpha$-extended type index (i.e.\ path $A : -1 \to \alpha$), a permutation $\pi^0_A$ of some subset $\dom(\pi^0_A) \subseteq \tau{-1}$, such that the intersection of $\dom(\pi^0_A)$ with any litter is small (including possibly empty).
+
+[Note: this definition has been slightly rephrased since it was first formalised.  To do: check that the formalisation matches the current definition.]
 \end{definition}
 
 \begin{definition}
@@ -750,20 +756,42 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 \end{definition}
 
 \begin{description}
-
-\item[Stipulation:]  For each litter $L$ we specify a well-ordering $\leq_L$ of order type $\kappa$ with coordinated strict well-ordering $<_L$.
-
+\item[Stipulation:]  For each litter $L$ we specify a well-ordering $\leq_L$ of order type $\kappa$ with coordinated strict well-ordering $<_L$.  [In fact this is provided trivially by the current implementation of atoms.]
 \end{description}
+
+\begin{definition}
+  \label{def:flexible}
+  \uses{def:coherent-phase-1-data}
+  Given coherent part 1 data up to $\alpha$, a path $A : \beta \to \alpha$, and a litter $L$, say $L$ is \emph{$A$-flexible} (or that the pair $(L,A)$ is \emph{flexible}) if $L$ is not in the range of $f_{\beta,\gamma}$, for any $\gamma < \alpha$.
+
+  (In particular, if $\beta = -1$, every such pair is flexible, since $f_{\gamma,\beta}$-maps is only defined for $\beta$ proper.)
+\end{definition}
+
+\begin{definition}
+  \label{def:freedom-of-action-statement}
+  \uses{def:coherent-phase-1-data,def:perm-exception,def:local-bijection,def:flexible}
+  Given coherent part 1 data up to $\alpha$, say that \emph{freedom of action holds (at $\alpha$)} if: Given an $\alpha$-local bijection $\pi^0$ and a specification for each path $A : \beta \to \alpha$ a bijection of the $\beta$-flexible litters, there is a unique allowable permutation $\pi \in \All_\alpha$ such that:
+  \begin{enumerate}
+   \item $\pi{A}$ extends $\pi^0_{A}$ for each $A$;
+   \item for each path $A : \beta \to \alpha$ and $A$-flexible litter $L$, $\pi_A(j_\beta(L)) = j_\beta(N)$ for some $N$ near to $\chi_A(L)$;
+   \item The only exceptions of $\pi$ are $\pi^0$, and everywhere else, $\pi$ is order-preserving between litters.  That is: for each path $A : -1 \to \alpha$ and litter $L$, and writing $N$ for the near-litter $\pi_A``L$, the restriction of $\pi_A$ to $L \setminus \dom(\pi^0_A)$ is the unique bijection from $L \setminus \dom(\pi^0_A)$ to $N^\circ \setminus \rge(\pi^0_A)$ which is strictly increasing with respect to the (given/canonical) orders on $L$ and $N^\circ$.
+  \end{enumerate}
+
+  Note: Earlier versions of the note/blueprint stated the 3rd condition in terms of exceptions; recent versions of the note spell it out in more detail and add the “increasing” condition, which is necessary for the uniqueness in the theorem conclusion.  If there are any doubts, the current version of Randall’s note should be consulted!
+\end{definition}
 
 \begin{theorem}
 \label {lem:freedom-of-action}
-\uses{def:coherent-phase-1-data,def:perm-exception, lem:strengthen-support, def:local-bijection}
-For any $\alpha$-local bijection $\pi^0$ there is an $\alpha$-allowable permutation $\pi$ such that
-$\pi_{A\cup \{-1\}}$ extends $\pi^0_A$ for each $A$, and satisfying a further technical condition:  the permutation $\pi$ obtained from $\pi^0$ has no exceptions of its derivatives other than those determined by elements of the domains of maps $\pi^0_A$:  $(A,x)$ being in the domain of $\pi^0$ is required for (but does not require) $x$ to be an exception of $\pi_{A \cup \{-1\}}$.
+\uses{def:freedom-of-action-statement,lem:strengthen-support}
+Given coherent part 1 data up to $\alpha$, if freedom of action holds at each level $\beta < \alpha$, then it holds at level $\alpha$.
+
+Note: I (Peter) have an alternative approach to freedom of action (slightly different in both statement and proof) which might possibly be easier to formalise, avoiding the dependence on strong supports in the proof.  Iff Randall approves it then I will add it in the blueprint as an alternative.  But it doesn’t change the overall structure of the main argument/recursion, so this doesn’t need to be worried about until the point of formalising the FoA theorem itself.
 \end{theorem}
 
 \begin{proof}
-We prove this by exhibiting a recursive procedure for computing $\pi$ and its derivatives along a strong support;  this succeeds because all objects have strong supports, and because computing all values of derivatives of $\pi$ on type $-1$ allows computation of all derivatives of $\pi$ at all types.
+  [This proof is is substantially clarified in more recent versions of Randall’s note.]
+
+  We prove this by exhibiting a recursive procedure for computing $\pi$ and its derivatives along a strong support;  this succeeds because all objects have strong supports, and because computing all values of derivatives of $\pi$ on type $-1$ allows computation of all derivatives of $\pi$ at all types.
 
 For each extended type index, we specify a permutation $\chi_A$ of local cardinals $[L]$ is not of the form $f_{\gamma,\beta}(y)$ for any $\gamma<{\tt min}(A)$ and $y \in \tau_\gamma$.
 
