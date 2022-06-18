@@ -10,7 +10,7 @@ universe u
 
 namespace con_nf
 open params
-variables [params.{u}] {α β γ : Λ} [recursion_motor.{u} α]
+variables [params.{u}] {α β γ : Λ} [phase_1a.{u} α]
 
 instance (h : β ≤ α) : linear_order (code α β h) := sorry
 

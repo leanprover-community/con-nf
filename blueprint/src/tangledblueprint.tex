@@ -284,7 +284,8 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
 \begin{definition}
 \label {def:phase-1a-data}
 \uses{def:type-index}
-\lean{con_nf.recursion_motor}
+\lean{con_nf.phase_1a}
+\leanok
 Fix a proper type index $\alpha$.  \emph{Phase 1a data at $\alpha$} consists of:
 
 \begin{itemize}
@@ -302,6 +303,7 @@ We will define $\tau_\alpha$, the implementation of type $\alpha$ of the model. 
 \label {def:code}
 \uses{def:phase-1a-data}
 \lean{con_nf.code}
+\leanok
 An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \subseteq \tau_\gamma$. [The set-theoretic interpretation includes the $\alpha$, to keep codes at different levels disjoint.  In the type-theoretic implementation, the first component $\alpha$ is almost certainly unnecessary ]
 \end{definition}
 
@@ -582,7 +584,7 @@ There is lots to be proven, but that is the entire description.
 \begin{definition}
   \label{def:phase-1c-data}
   \uses{def:phase-1b-data}
-  \emph{Phase 1b data} at a proper type index $\alpha$ consists of:
+  \emph{Phase 1c data} at a proper type index $\alpha$ consists of:
   \begin{itemize}
   \item phase 1b data (including phase 1a data) at $\alpha$;
   \item an injection $\tau \to \Pretangle_\alpha$;
