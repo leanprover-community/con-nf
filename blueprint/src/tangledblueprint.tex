@@ -1056,7 +1056,7 @@ We can now wrap up the recursion.  It is a little subtle: to know that the recur
 
 \begin{definition}
   \label{def:very-coherent-data}
-  \uses{coherent-phase-1-data,lem:position-functions-propagate}
+  \uses{def:coherent-phase-1-data,lem:position-functions-propagate}
   For $\alpha \in \lambda + 1$, a choice of coherent phase 1 data below $\alpha$ is \emph{very coherent} if its ordering functions and designated supports at each level are the ones provided by \cref{lem:position-functions-propagate} applied to the earlier levels, using \cref{thm:freedom-of-action} to supply the assumption of freedom of action.
 
   [This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice.]
@@ -1064,7 +1064,7 @@ We can now wrap up the recursion.  It is a little subtle: to know that the recur
 
 \begin{lemma}
   \label{lem:very-coherent-data-unique}
-  \uses{coherent-phase-1-data}
+  \uses{def:coherent-phase-1-data}
   For any $\alpha$, very coherent data below $\alpha$ is unique (if it exists).
 
   [Actually, we probably don’t need this: it effectively gets inlined in the main recursion.]
