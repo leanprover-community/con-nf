@@ -78,25 +78,22 @@ instance struct_perm_action (α : Λ) : mul_action (struct_perm α) (support_con
 
 section support_declaration
 
--- TODO: Why can't we put the conditions on `Φ` in this `variables` list too?
-variables {α : Λ} {H : Type*} [monoid H] {Φ : Type*} {τ : Type*} [mul_action H τ]
+variables {α : Λ} {H : Type*} [monoid H] {τ : Type*} [mul_action H τ]
 
 /-- Given `x ∈ τ` and `S` any set of `α`-support conditions, we say `S` supports `x` if every
 `π ∈ H` that fixes every element of `S` also fixes `x`.
 
-Note that we constrain `φ` to be a homomorphism by using the `monoid_hom_class` typeclass, see
-mathlib's documentation for `monoid_hom` for more information. -/
-def supports [monoid_hom_class Φ H (struct_perm α)] (φ : Φ)
-  (x : τ) (S : set (support_condition α)) :=
+We do not constrain here that `φ` be a group homomorphism, but this is required later. -/
+def supports (φ : H → struct_perm α) (x : τ) (S : set (support_condition α)) :=
 ∀ (π : H), (∀ s ∈ S, (φ π) • s = s) → π • x = x
 
 /-- A *support for `x`* is a potential support that supports `x`. -/
-structure support [monoid_hom_class Φ H (struct_perm α)] (φ : Φ) (x : τ)
+structure support (φ : H → struct_perm α) (x : τ)
 extends potential_support α :=
 (supports : supports φ x carrier)
 
 /-- An element of `τ` is *symmetric* if it has some (small) support. -/
-def symmetric [monoid_hom_class Φ H (struct_perm α)] (φ : Φ) (x : τ) : Prop
+def symmetric (φ : H → struct_perm α) (x : τ) : Prop
 := nonempty $ support φ x
 
 end support_declaration
