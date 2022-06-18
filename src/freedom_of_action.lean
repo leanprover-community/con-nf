@@ -20,12 +20,11 @@ It must satisfy two conditions, that the map is really an injection, and that th
 intersection of the domain with any litter is small. -/
 structure local_bijection (α : Λ) :=
 (domain (A : extended_index α) : set atom)
-(to_fun (A) : domain A → domain A)
-(injective (A) : injective (to_fun A))
+(to_fun (A) : equiv.perm (domain A))
 (litter_inter (A) (i : litter) : small $ domain A ∩ litter_set i)
 
 instance (α : Λ) : has_coe_to_fun (local_bijection α) (λ π₀, Π A, π₀.domain A → π₀.domain A) :=
-⟨local_bijection.to_fun⟩
+⟨λ π₀ A, (π₀.to_fun A).to_fun⟩
 
 /-- `a` is an exception of the near-litter permutation `f` if it is not sent to the corresponding
 litter under either `f` or `f⁻¹`. -/

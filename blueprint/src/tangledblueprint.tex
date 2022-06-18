@@ -391,7 +391,7 @@ This section does not depend on any inductive assumptions.
 \begin{definition}
   \label{def:support-condition}
   \uses{def:near-litter,def:atom} % TODO: add def:paths upstream, and add it here.
-  Let $\alpha$ be a proper type index. An \emph{$alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
+  Let $\alpha$ be a proper type index. An \emph{$\alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
 
   Type-theoretically, $\Cond := (\tau_{-1} + \mathrm{NearLit}) \times \mathrm{Path}(-1,\alpha)$.
   [It would suffice to use just litters here instead of near-litters; they give an equivalent notion of support, as shown later (“replacing near-litters with litters”).  That makes a few things simpler; but using near-litters lets us talk about the action, Def.~\ref{def:support-condition-action}, which seems algebraically cleaner.]
@@ -743,8 +743,6 @@ We give an exact statement of what is meant, then we prove it.
 \leanok
 \lean{con_nf.local_bijection}
 An $\alpha$-local bijection consists of: for each $\alpha$-extended type index (i.e.\ path $A : -1 \to \alpha$), a permutation $\pi^0_A$ of some subset $\dom(\pi^0_A) \subseteq \tau{-1}$, such that the intersection of $\dom(\pi^0_A)$ with any litter is small (including possibly empty).
-
-[Note: this definition has been slightly rephrased since it was first formalised.  To do: check that the formalisation matches the current definition.]
 \end{definition}
 
 \begin{definition}
