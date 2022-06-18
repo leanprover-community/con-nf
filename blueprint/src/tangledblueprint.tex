@@ -379,7 +379,7 @@ This section does not depend on any inductive assumptions.
 \end{definition}
 
 \begin{definition}
-  \label{def:allowable-perms-atoms}
+  \label{def:allowable-perm-atoms}
   \uses{def:structural-perm-atoms}
   An \emph{allowable $(-1)$-permutation} is just a structural $(-1)$-permutation. We denote the group of these by $\All_{-1} = \Str_{-1}$.  ($\Str_\beta$ and $\All_\beta$ will diverge for higher $\beta$ later…)
 
@@ -420,8 +420,8 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
 \end{lemma}
 
 \begin{definition}
-  \label{def:support-of}
-  \uses{def:allowable-perm, support}
+\label{def:support-of}
+  \uses{def:support}
   Suppose $\varphi : H \to \Str_\alpha$ is any group homomorphism, and $\tau$ is a set equipped with an $H$-action.
 
   Given $x \in \tau$ and $S$ any set of $\alpha$-support conditions, say \emph{$S$ supports $x$} if every $\pi \in H$ that fixes every element of $S$ also fixes $x$.
@@ -704,7 +704,7 @@ An $\alpha$-local bijection is a map $\pi^0$ whose domain is a set of pairs $(A,
 
 \begin{definition}
 \label{def:perm-exception}
-\uses{def:structural-perm-atom}
+\uses{def:structural-perm-atoms}
 \leanok
 \lean{con_nf.near_litter_perm.exception}
 We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L$ being the litter containing $x$) either $\pi(x) \not\in (\pi``L)^\circ$ or $\pi^{-1}(x) \not\in ({\pi^{-1}}``L)^\circ$.
