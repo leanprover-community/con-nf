@@ -444,14 +444,6 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
   For the subsequent constructions of this section, we assume we are given phase 1b data for all $\beta < \alpha$.
 \end{definition}
 
-\begin{lemma}
-\label {lem:singletons-assumption}
-\uses{def:representative-code}
-We stipulate that for any proper type index $\beta<\alpha$ and any type index $\gamma<\beta$ and any $g \in \tau_\gamma$, $(\beta,\gamma,\{g\})\in \tau_\beta$.  Of course this will need to be verified for $\alpha$ as part of the recursion.  It is immediately evident that it is a representative code, at any rate.
-
-[This is probably unnecessary now that we have the extrinsic construction of the groups of (pre-)structural perms.  If it is still needed, it should be included in the “phase 2 data” assumptions, as just assuming “typed singleton” embeddings $\tau_{-1} \to \tau_\beta$.]
-\end{lemma}
-
 \begin{definition}
 \label {def:semiallowable-perm}
 \uses{def:structural-perm, def:phase-1b-data}
@@ -530,7 +522,7 @@ We take the set of $\alpha$-tangles, $\tau_\alpha$, to be the set of \emph{symme
 We state a couple of easy lemmas which are things we assumed in the inductive data, which must be shown to carry forward to $\tau_\alpha$.  There are more obligations of this sort which are harder to discharge, which will be provided in phase 2.
 
 \begin{lemma}
-\label{def:near-litter-obligation}
+\label{def:typed-near-litter}
 \uses{def:code}
 Any code $(\alpha,-1,N)$, where $N$ is a near-litter, gives an element of $\tau_{\alpha}$.
 \end{lemma}
@@ -540,13 +532,13 @@ This code is obviously representative [though this isn’t really necessary, tha
 \end{proof}
 
 \begin{lemma}
-\label {def:singleton-obligation}
-\uses{def:tangle, def:singletons}
-For any $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$.
+\label{def:typed-singleton}
+\uses{def:tangle}
+For any symmetric $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$. In particular, this works for each atom $a \in \tau_{-a}$.
 \end{lemma}
 
 \begin{proof}
-Take a $\beta$-support for $b$, and extend all the paths in it at the top by the step $\beta < \alpha$.
+Take a $\beta$-support for $b$, and extend all the paths in it at the top by the step $\beta < \alpha$.  At level $-1$, any atom is clearly supported by its own singleton.
 
 [This should be easy if we defined paths by induction from the top; if we have paths in reverse, it may need lemmas on how derivatives interact with extension at the top.  Or they might follow from functoriality of derivatives?]
 \end{proof}
@@ -566,24 +558,7 @@ It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|
   The algebra of group actions should show reasonably easily that if $\pi$ is an $\alpha$-allowable permutation and $X \in \tau_\alpha$ has $\alpha$-support $S$, then $\pi(X)$ has $\alpha$-support $\pi``S$.
 \end{proof}
 
-\begin{definition}
-\label{def:wellorder-conditions}
-\uses{def:tangle}
-[This doesn’t belong here in phase 1!  The ordering has been already assumed in the phase 1 data, and the technical conditions will need to be assumed later as part of the phase 2 data, at least by the proof of freedom-of-action; and then all of this will be constructed at the very end of phase 2.]
-
-[Like most things about $<_\alpha$, this should probably be rephrased in terms of the injections $\iota_\alpha : \tau_\alpha \to \mu$.]
-
-Let $\leq_\alpha$ be the assumed well-ordering of $\tau_\alpha$, needed for the recursive definition of the $f$ maps at later phases. This order needs to satisfy some technical conditions.
-
-For each litter $L$ and element $a$ of $L$, $(\alpha,-1,L)$ must precede $(\alpha,-1,\{a\})$ in the order.
-
-A typed near-litter $N$ which is not a litter must be preceded in the order by the litter $N^\circ$ and the elements of
-$N \Delta N^\circ$.
-
-For each $x$ in $\tau_\alpha$ which is not a typed singleton or typed near-litter, we designate a support.  For any $(y,A)$ in the domain of the designated support of $x$, we must have $\iota_\alpha(y)<\iota_\alpha(x)$.
-\end{definition}
-
-The obligation to prove that $\tau_\alpha$ is of type $\mu$ remains outstanding.  And of course we want to prove that the entire structure is a model of tangled type theory with $\tau_\gamma$ as type $\gamma$ for each $\gamma<\lambda$ and $\in_{\tt TTT}$ as its membership relation.
+The obligation to prove that $\tau_\alpha$ is of size $\mu$ remains outstanding.  And of course we want to prove that the entire structure is a model of tangled type theory with $\tau_\gamma$ as type $\gamma$ for each $\gamma<\lambda$ and $\in_{\tt TTT}$ as its membership relation.
 
 There is lots to be proven, but that is the entire description.
 
@@ -616,12 +591,33 @@ In this phase, we give the three hard theorems about the constructions of phase 
 
 These meet the major technical difficulty of the recursion: We need (it seems) to assume not just that we have sets of tangles etc at all earlier levels, but also that they fit together correctly, in the sense of being inductively defined at all levels by the constructions so far.  This is the reason why we need the major phase separation in the components of the recursion.
 
-\section{Preliminaries: coherent phase 2 data}
+\section{Preliminaries: phase 2 data}
+
+\begin{definition}
+  \label{def:full-phase-1-data}
+  \uses{def:phase-1a-data,def:phase-1b-data,def:phase-1c-data}
+  \emph{(Full) phase 1 data} at $\alpha$ consists of phase 1c data (including 1a and 1b components), together with:
+  \begin{enumerate}
+    \item a “typed singleton” injection $k : \tau_{-1} \to \tau$;
+    \item a “designated” small support $S(x)$ for each tangle $x \in \tau$
+  \end{enumerate}
+  and such that the position functions $\iota_\beta : \tau_\beta \to \mu$ (or equivalently, their induced orderings) satisfy:
+  \begin{enumerate}
+    \item for each litter $L$, the typed litter of $L$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
+    \item for each near-litter $N$ which is not a litter, $j(N)$ comes after its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \Delta N^\circ$;
+
+    \item for each $x$ in $\tau_\alpha$ that is not a typed litter or singleton, $x$ comes later than all of its designated support -- explicitly, for each $(a,A)$ or $(N,A)$ in the in $S(x)$, we must have $\iota_\alpha(j(N)), \iota_\alpha(k(a))<\iota_\alpha(x)$.
+  \end{enumerate}
+
+  Note: to see these conditions are not unreasonable, note that each element has $<\mu$ many things that it must come after, and that the chains of these constraints are of depth at most 4: litters $<$ atoms $<$ other near-litters $<$ everything else.  (This should become the proof sketch for when we eventually construct these orderings below, as one of the last steps of the main recursion.)
+
+  Note: we could have called this “phase 1d data”, and should perhaps state it already in phase 1.  But it’s not needed before phase 2.
+\end{definition}
 
 \begin{definition}
   \label{def:concrete-phase-1-data}
-  \uses{def:phase-1a-data,def:phase-1b-data,def:phase-1c-data}
-  For a type index $\alpha$, \emph{concrete phase 1 data} at level $\alpha$ consists of a subset $\tau \subseteq \Pretangle_\alpha$ and a subgroup $\All \subseteq G_\alpha$, together with the rest of phase 1a, 1b, and 1c data on these.
+  \uses{def:full-phase-1-data}
+  For a type index $\alpha$, \emph{concrete phase 1 data} at level $\alpha$ consists of a subset $\tau \subseteq \Pretangle_\alpha$ and a subgroup $\All \subseteq G_\alpha$, together with full phase 1 data on these.
 
   Notes for formalisation:
   \begin{itemize}
@@ -635,22 +631,29 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 
 \begin{definition}
   \label{def:concrete-phase-1-data-propagates}
-  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:near-litter-obligation,\def:allowable-perm}
-  For $\alpha \in \lambda$, if we have concrete phase 1 data at all levels $\beta < \alpha$, then the constructions in phase 1 provide \emph{most} components of concrete phase 1 data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$!
+  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,def:allowable-perm}
+  For a proper type index $\alpha \in \lambda$, if we have concrete phase 1 data at all levels $\beta < \alpha$, then the constructions in phase 1 provide \emph{most} components of concrete phase 1 data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$!
 
   In particular, the new set of $\alpha$-tangles $\tau_\alpha \subseteq \Pretangle_\alpha$ is the the image of the $\alpha$-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations.  (We could call these “concrete $\alpha$-tangles” and “abstract $\alpha$-tangles”, if we need to for disambiguation.)
+
+  [To give the “designated supports” here, we will need to invoke the axiom of choice.  This is not entirely necessary, but not too extravagant either: if I (PLL) am not mistaken, what the overall proof really requires here is something like $\mathrm{DC}_\lambda$, but I can’t see how to get by with just that without complicating the recursion structure further, and we are making use of AC elsewhere anyway.]
 \end{definition}
 
 \begin{definition}
-  \label{def:phase-2-data}
+  \label{def:coherent-phase-1-data}
   \uses{def:concrete-phase-1-data-propagates}
-  For $\alpha \in \lambda + 1$, \emph{Phase 2 data up to $\alpha$} consists of concrete phase 1 data at every level $\beta < \alpha$, which is moreover \emph{coherent}, in that for each $\beta$, all components at level $\beta$ that \emph{could} have been induced from the data at lower levels $\gamma < \beta$ are, in fact, equal to what would have been induced that way.
+  For $\alpha \in \lambda + 1$, \emph{Phase 1 data up to $\alpha$} consists of concrete phase 1 data at every level $\beta < \alpha$.  Say this is \emph{coherent} if it is standard at level $-1$, and at each proper type index $\beta < \gamma$, all components at level $\beta$ that \emph{could} have been induced from the data at lower levels $\gamma < \beta$ are, in fact, equal to what would have been induced that way.
 
-  [Note we want to provide this definiton also for $\alpha = \lambda$!  I think this should be available in mathlib as \verb|with_top|.]
+  \begin{itemize}
+  \item Note we want to provide this definiton also for $\alpha = \lambda$!  I think this should be available in mathlib as \verb|with_top|.
+  \item We could unify “standard at level $-1$” with induced at proper type indices by generalising the definition of each component of the “induced concrete phase 1 data at $\alpha$” to include the case $\alpha = -1$, defining the induced data as the standard one in that case.  Is this more natural?  Will it make life easier?
+  \end{itemize}
 
   For $\alpha < \beta$, “phase 2 data up to $\alpha$” can be restricted to “phase 2 data up to $\beta$”.
 
-  Most constructions in phase 2 will assume phase 2 data up to $\alpha$, for some fixed $\alpha$.
+  Most constructions in phase 2 will assume coherent phase 1 data up to $\alpha$, for some fixed $\alpha$.
+
+  [Terminology: perhaps we should call this “phase 2 data at $\alpha$”?  That seems more consistent for the overall scheme, but “coherent phase 1 data up to $\alpha$” seems nicer and more transparent in itself.  Maybe we should reconsider the naming scheme.]
 \end{definition}
 
 \section{Strong supports defined}
