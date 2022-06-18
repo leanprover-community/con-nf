@@ -76,10 +76,21 @@ There are two pieces of functionality that help a lot when browsing through Lean
 ## Building the blueprint locally
 
 To build the web version of the blueprint locally, you need a working LaTeX installation.
-Furthermore, you need some packages:
+Furthermore, you need some dependencies.  Under Linux, you should be able to get the prepackaged ones with something like:
 ```
 sudo apt install graphviz libgraphviz-dev pandoc
 pip3 install invoke
+```
+
+Under Mac OS, you should be able to get these with:
+```
+brew install graphviz pandoc
+pip3 install pygraphviz invoke
+```
+([This stackoverflow answer](https://stackoverflow.com/a/70439868/) may help to fix an error installing `pygraphviz`.
+
+A couple of depedencies are not prepackaged (for now) so must be installed from source:
+```
 cd .. # go to a folder where you are happy to clone git repos
 git clone https://github.com/plastex/plastex
 pip3 install ./plastex
