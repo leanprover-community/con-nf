@@ -199,7 +199,7 @@ An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \s
 
 \begin{definition}
 \label {def:f-map}
-\uses{def:ftargets, def:iota}
+\uses{def:ftargets, def:phase-1a-data}
 We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $X_{\beta,\gamma} \subseteq \mathrm{Litter}$, as follows.
 
 For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $[N]$ of the minimal near-litter $N$ (under the ordering induced by $j_\beta \circ \iota_\beta : \mathrm{NearLit} \to \tau_\beta \to \mu$) such that:
@@ -343,8 +343,8 @@ This section does not depend on any inductive assumptions.
 \newcommand{\Str}{\mathrm{Str}}
 \newcommand{\All}{\mathrm{All}}
 \begin{definition}
-  \label{def:structural-perms-atoms}
-  \uses{def:atoms}
+  \label{def:structural-perm-atoms}
+  \uses{def:atoms,def:near-litter}
   \leanok
   \lean{con_nf.near_litter_perm}
 
@@ -354,15 +354,15 @@ This section does not depend on any inductive assumptions.
 \end{definition}
 
 \begin{definition}
-  \label{def:structural-perms}
-  \uses{def:structural-perms-atoms}
+  \label{def:structural-perm}
+  \uses{def:structural-perm-atoms}
   %leanok
   For a \emph{proper} type index $\alpha$, the structural $\alpha$-permutations are the group $\Str_\alpha = \prod_{\beta < \alpha} \Str_\beta$.
 \end{definition}
 
 \begin{definition}
-  \label{def:structural-perms-derivatives}
-  \uses{def:structural-perms}
+  \label{def:structural-perm-derivatives}
+  \uses{def:structural-perm}
   %leanok
   \lean{con_nf.struct_perm}
   Any path $A : \beta \to \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
@@ -374,13 +374,13 @@ This section does not depend on any inductive assumptions.
 
 \begin{definition}
   \label{def:near-litters-action}
-  \uses{def:structural-perms-atoms,def:near-litters}
+  \uses{def:structural-perm-atoms,def:near-litter}
   $\Str_{-1}$ acts on near-litters.
 \end{definition}
 
 \begin{definition}
   \label{def:allowable-perms-atoms}
-  \uses{def:structural-perms-atoms}
+  \uses{def:structural-perm-atoms}
   An \emph{allowable $(-1)$-permutation} is just a structural $(-1)$-permutation. We denote the group of these by $\All_{-1} = \Str_{-1}$.  ($\Str_\beta$ and $\All_\beta$ will diverge for higher $\beta$ later…)
 
   [Actually this definition should probably go later, in phase 1c or even 2?]
@@ -703,8 +703,8 @@ An $\alpha$-local bijection is a map $\pi^0$ whose domain is a set of pairs $(A,
 \end{definition}
 
 \begin{definition}
-\label {def:perm-exception}
-\uses{def:near-litter-perm}
+\label{def:perm-exception}
+\uses{def:structural-perm-atom}
 \leanok
 \lean{con_nf.near_litter_perm.exception}
 We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L$ being the litter containing $x$) either $\pi(x) \not\in (\pi``L)^\circ$ or $\pi^{-1}(x) \not\in ({\pi^{-1}}``L)^\circ$.
