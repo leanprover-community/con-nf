@@ -227,7 +227,7 @@ Notice that the phase 1a data for $\alpha$ gives us the information already to d
 \end{lemma}
 
 \begin{definition}
-\label {def:alt-ext}
+\label {def:a-map}
 \uses{def:f-map, def:code, def:extended-type-index}
 Let $\gamma$ be an extended type index less than $\alpha$.
 
@@ -242,8 +242,8 @@ $A_\delta(\alpha,\gamma,G)$ as $$(\alpha,\delta,\{ j_\delta(N) : N \in \bigcup (
 Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart from the fact that $\alpha$ must be larger than $\gamma$ and $\delta$.
 
 \begin{lemma}
-\label {lem:alt-ext-nature}
-\uses{def:alt-ext, lem:f-map-properties}
+\label {lem:a-map-properties}
+\uses{def:a-map, lem:f-map-properties}
 \begin{enumerate}
 \item Each $A_\delta$ is injective (since each $f_{\gamma,\delta}$ is injective, and $f_{\gamma,\delta}$ have disjoint images for different $\gamma$).
 \item The ranges of $A_\delta$ are disjoint for different $\delta$ (since the ranges of $f_{\gamma,\delta}$ are).
@@ -254,7 +254,7 @@ NB: injectivity here really depends on having excluded the empty set from the do
 
 \begin{definition}
 \label {def:ainverse}
-\uses{lem:alt-ext-nature, def:alt-ext}
+\uses{lem:a-map-properties, def:a-map}
 By the previous lemma, the inverse relation of the union of the $A_\gamma$'s is a partial function, which we call $A^{-1}$.
 
 It can be helpful to view codes as forming a \emph{forest} under the $A$-maps: each code $C = (\alpha,\beta,X)$ has at most one “parent” $A^{–1}(C)$, and many children $A_\gamma(C)$ for each $\gamma \neq beta$.
@@ -318,7 +318,7 @@ Note also that any equivalence class contains at most one code of the form $(\al
 
 \begin{definition}
 \label{def:ttt-membership}
-\uses{def:semi-tangle, def:ainverse}
+\uses{def:semi-tangle}
   Membership relations of $\alpha$-semi-tangles, for the intended model of tangled type theory, can now be defined as follows: for each proper type index $\beta < \alpha$, and $x \in \tau_\beta$, and each $\alpha$-semi-tangle $y \in \tau_\alpha$, say $x \in_{TTT} y$ just if $x \in y_\beta$.
 \end{definition}
 
@@ -404,7 +404,7 @@ This section does not depend on any inductive assumptions.
 
 \begin{definition}
 \label{def:support}
-\uses{def:near-litter, def:derivative, def:support-condition-action}
+\uses{def:support-condition}
 Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alpha$-support-conditions.  (A little more pedantically, one could call these something like “potential small supports”: they become actual supports once they support some element.)
 
 [NOTES for formalisation: Well-orderings almost certainly shouldn’t be necessary in this phase. All this can also come before any inductive data are assumed, in the background on structural permutations.]
@@ -418,7 +418,7 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
 
 \begin{definition}
 \label{def:support-of}
-  \uses{def:support}
+  \uses{def:support, def:derivative, def:support-condition-action}
   Suppose $\varphi : H \to \Str_\alpha$ is any group homomorphism, and $\tau$ is a set equipped with an $H$-action.
 
   Given $x \in \tau$ and $S$ any set of $\alpha$-support conditions, say \emph{$S$ supports $x$} if every $\pi \in H$ that fixes every element of $S$ also fixes $x$.
@@ -446,7 +446,7 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
 
 \begin{definition}
 \label {def:semiallowable-perm}
-\uses{def:structural-perm, def:phase-1b-data}
+\uses{def:phase-1b-data}
   An \emph{semi-allowable permutation} at level $\alpha$ is a family of allowable pemutations at all lower levels (including $-1$), $(\pi_\beta)_{\beta < \alpha} \in \prod_{\beta < \alpha} \All_\beta$.
 \end{definition}
 
@@ -499,7 +499,7 @@ This should be straightforward.  A target should be the equation $\pi(A_\gamma(X
 
 \begin{lemma}
 \label{lem:semi-tangle-action}
-\uses{def:rep-preserved,def:semi-tangle}
+\uses{lem:rep-preserved,def:semi-tangle}
   Allowable permutations act on semi-tangles.
 \end{lemma}
 
@@ -631,7 +631,7 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 
 \begin{definition}
   \label{def:concrete-phase-1-data-propagates}
-  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,def:allowable-perm}
+  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,def:allowable-perm,tangle-action}
   For a proper type index $\alpha \in \lambda$, if we have concrete phase 1 data at all levels $\beta < \alpha$, then the constructions in phase 1 provide \emph{most} components of concrete phase 1 data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$!
 
   In particular, the new set of $\alpha$-tangles $\tau_\alpha \subseteq \Pretangle_\alpha$ is the the image of the $\alpha$-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations.  (We could call these “concrete $\alpha$-tangles” and “abstract $\alpha$-tangles”, if we need to for disambiguation.)
