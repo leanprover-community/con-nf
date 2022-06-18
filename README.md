@@ -89,7 +89,7 @@ pip3 install pygraphviz invoke
 ```
 ([This stackoverflow answer](https://stackoverflow.com/a/70439868/) may help to fix an error installing `pygraphviz`.
 
-A couple of depedencies are not prepackaged (for now) so must be installed from source:
+A couple of depedencies must be installed from source, for now (`leanblueprint` is not yet released, and the released `plastex` is out of date):
 ```
 cd .. # go to a folder where you are happy to clone git repos
 git clone https://github.com/plastex/plastex
