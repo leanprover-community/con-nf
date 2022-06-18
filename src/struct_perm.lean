@@ -12,8 +12,6 @@ derivatives and so on independently of the recursion.
 
 open equiv equiv.perm with_bot
 
-noncomputable theory
-
 universe u
 
 namespace con_nf
@@ -31,19 +29,24 @@ using_well_founded { dec_tac := `[assumption] }
 
 namespace struct_perm
 
+instance group_instance : Π β, group (struct_perm β) := sorry
+
 /-- Obtains the atom permutation given by a prestructural permutation. -/
-def atom_perm {β : type_index} (π : struct_perm β) : perm atom :=
-by { sorry } /- should by just unfolding -/
+def to_near_litter_perm : Π {β : type_index} (π : struct_perm β), near_litter_perm
+| none π := by { unfold struct_perm at π, exact π }
+| (some β) π := by { unfold struct_perm at π,
+  have := π none (by simp), unfold struct_perm at this, exact this }
 
 /-- Obtains the permutations on lower types induced by a prestructural permutation. -/
-def lower_code_perm {β : type_index} (π : struct_perm β) (γ < β) : struct_perm γ :=
-by { sorry } /- should need a case analysis to show β can’t be ⊥ -/
+def lower_struct_perm : Π {β : type_index} (π : struct_perm β) (γ < β), struct_perm γ
+| none π γ γ_lt_β := by { exfalso, simp at γ_lt_β, exact γ_lt_β }
+| (some β) π γ γ_lt_β := by { unfold struct_perm at π, exact π γ γ_lt_β }
 
-/-- the derivative of a structural permutation at any lower level -/
+/-- The derivative of a structural permutation at any lower level. -/
 def derivative {β : type_index} :
 Π {γ : type_index} (A : quiver.path (β : type_index) γ), struct_perm β → struct_perm γ
 | _ quiver.path.nil := id
-| δ (quiver.path.cons p_βδ lt_γδ) := λ π, lower_code_perm (derivative p_βδ π) _ lt_γδ
+| δ (quiver.path.cons p_βδ lt_γδ) := λ π, lower_struct_perm (derivative p_βδ π) _ lt_γδ
 
 end struct_perm
 
