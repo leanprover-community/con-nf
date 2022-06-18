@@ -351,6 +351,8 @@ This section does not depend on any inductive assumptions.
   A \emph{structural $(-1)$-permutation} [aka a near-litter-perm; we should fix on one name or the other] is a permutation $\pi$ of $\tau_{-1}$, along with a permutation $\bar{\pi}$ of litters, such that for each litter $L$, $\pi``(L)$ is near to $\bar{\pi}(L)$ (in the sense that they have small symmetric difference).  Denote the group of these by $\Str{-1}$.
 
   [In fact $\bar{\pi}$ is uniquely determined by $\pi$ — we could define this just as a subgroup of $\Sym(\tau_{-1})$.  But it’s convenient in formalisation to have the $\bar{\pi}$ component explicit.]
+
+  $\Str_{-1}$ has obvious actions on atoms and near-litters.
 \end{definition}
 
 \begin{definition}
@@ -361,7 +363,7 @@ This section does not depend on any inductive assumptions.
 \end{definition}
 
 \begin{definition}
-  \label{def:structural-perm-derivatives}
+  \label{def:structural-perm-derivative}
   \uses{def:structural-perm}
   %leanok
   \lean{con_nf.struct_perm}
@@ -370,12 +372,6 @@ This section does not depend on any inductive assumptions.
   Moreover, this is functorial: they make $\Str$ into a functor $\mathrm{Path}(\Lambda)^\mathrm{op} \to \mathrm{Gp}$.
 
   [TODO: this should also depend on “paths”, but they aren’t yet explicitly in the blueprint.]
-\end{definition}
-
-\begin{definition}
-  \label{def:near-litters-action}
-  \uses{def:structural-perm-atoms,def:near-litter}
-  $\Str_{-1}$ acts on near-litters.
 \end{definition}
 
 \begin{definition}
@@ -398,7 +394,7 @@ This section does not depend on any inductive assumptions.
 
 \begin{definition}
   \label{def:support-condition-action}
-  \uses{def:near-litter-action, def:derivative, def:support-condition}
+  \uses{def:structural-perm-derivative, def:support-condition}
 
   Structural permutations act on support conditions.
 
@@ -415,7 +411,7 @@ Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alp
 
 \begin{lemma}
 \label {lem:count-supports}
-\uses{def:support}
+\uses{def:support,lem:count-near-litters}
 Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
 \end{lemma}
 
