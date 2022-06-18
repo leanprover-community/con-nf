@@ -13,7 +13,8 @@ variable [params.{u}]
 open params
 
 /-- The motor of the initial recursion. This contains all the information needed for phase 1a of the
-recursion. -/
+recursion. Note that this is slightly different to the blueprint's formulation; here, we keep phase
+1a data *cumulatively*, for all previous iterations of the recursion at once. -/
 class phase_1a (α : Λ) :=
 (tangle : Π β < α, Type u)
 (to_tangle : Π β (h : β < α), litter ↪ tangle β h)

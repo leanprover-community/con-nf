@@ -450,6 +450,8 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 \begin{definition}
   \label{def:phase-1b-data}
   \uses{def:phase-1a-data}
+  \lean{con_nf.phase_1b}
+  \leanok
   \emph{Phase 1b data} at a proper type index $\alpha$ consists of:
   \begin{itemize}
   \item phase 1a data at $\alpha$;
@@ -463,6 +465,8 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 
 \begin{definition}
 \label {def:semiallowable-perm}
+\lean{con_nf.semiallowable_perm}
+\leanok
 \uses{def:phase-1b-data}
   An \emph{semi-allowable permutation} at level $\alpha$ is a family of allowable pemutations at all lower levels (including $-1$), $(\pi_\beta)_{\beta < \alpha} \in \prod_{\beta < \alpha} \All_\beta$.
 \end{definition}
@@ -470,6 +474,7 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 \begin{definition}
   \label{def:codes-action}
   \uses{def:code,def:semiallowable-perm}
+  \lean{con_nf.semiallowable_perm_action}
   Semi-allowable permutations act on $\alpha$-codes.
 \end{definition}
 
