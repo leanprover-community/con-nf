@@ -658,6 +658,8 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 
 \section{Strong supports defined}
 
+Throughout this section, fix some $\alpha \in \lambda + 1$, and assume coherent phase 1 data up to $\alpha$.
+
 Treating supports as sets suffices for the model description, but we will need to analyze supports and orbits with more care, so it is better for purposes
 of the proof to regard a support as a well-ordering.
 
@@ -680,7 +682,7 @@ This probably represents a chunk of formal verification work, as what is obvious
 \begin{definition}
 \label {def:raise-lower-index}
 \uses{def:support-of}
-[Note: all this stuff — raising and lowering indices, and the results about repeatedly applying them to structural permutations, etc — is MUCH more clearly described in algebraic language, with the category of paths, the functoriality of $\Str_\alpha$ and $\All_\alpha$ in paths, and maps between group actions, etc.]
+[Note: all this stuff — raising and lowering indices, and the results about repeatedly applying them to structural permutations, etc — is MUCH more clearly handled in algebraic language, using the category of paths, the functoriality of $\Str_\alpha$ and $\All_\alpha$ in paths, and maps between group actions, etc.]
 
 For any $\alpha$-support $S$ and an extended type index $C$ with minimum element greater than $\alpha$, we define $S^C$ as
 $\{((x,A\cup C,\gamma),(y,B\cup C,\delta)):((x,A,\gamma),(y,B,\delta)) \in S\}$.
@@ -689,8 +691,8 @@ If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the la
 \end{definition}
 
 \begin{definition}
-\label {def:strong-support}
-\uses{def:support-of}
+\label{def:strong-support}
+\uses{def:coherent-phase-1-data,def:support-of}
 A strong support is a support $S$ with certain additional properties.
 
 \begin{enumerate}
@@ -755,7 +757,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 
 \begin{theorem}
 \label {lem:freedom-of-action}
-\uses{def:perm-exception, lem:strengthen-support, def:local-bijection}
+\uses{def:coherent-phase-1-data,def:perm-exception, lem:strengthen-support, def:local-bijection}
 For any $\alpha$-local bijection $\pi^0$ there is an $\alpha$-allowable permutation $\pi$ such that
 $\pi_{A\cup \{-1\}}$ extends $\pi^0_A$ for each $A$, and satisfying a further technical condition:  the permutation $\pi$ obtained from $\pi^0$ has no exceptions of its derivatives other than those determined by elements of the domains of maps $\pi^0_A$:  $(A,x)$ being in the domain of $\pi^0$ is required for (but does not require) $x$ to be an exception of $\pi_{A \cup \{-1\}}$.
 \end{theorem}
@@ -801,7 +803,7 @@ that the construction actually succeeds at every type.
 
 \begin{definition}
 \label {def:coding-function}
-\uses{def:allowable-perm}
+\uses{def:coherent-phase-1-data}
 For any support $S$ and object $x$, we can define a function $\chi_{x,S}$ which sends $T=\pi(S)$ to $\pi(x)$ for every $T$ in the orbit of $S$ under
 the action of allowable permutations.  We call such functions {\em coding functions\/}.  Note that if $\pi[S]=\pi'[S]$ then $(\pi^{-1}\circ \pi')[S]= S$, so
 $(\pi^{-1}\circ \pi')(x)= x$, so $\pi(x)=\pi'(x)$, ensuring that the map $\chi_{x,S}$ for which we gave an implicit definition is well defined.
