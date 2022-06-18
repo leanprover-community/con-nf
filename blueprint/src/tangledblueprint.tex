@@ -188,7 +188,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 
 \begin{definition}
   \label{def:structural-perm-atoms}
-  \uses{def:atoms,def:near-litter}
+  \uses{def:atom,def:near-litter}
   \leanok
   \lean{con_nf.near_litter_perm}
 
@@ -260,7 +260,7 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
 
 \begin{definition}
 \label{def:support-of}
-  \uses{def:support, def:derivative, def:support-condition-action}
+  \uses{def:support, def:structural-perm-derivative, def:support-condition-action}
   Suppose $\varphi : H \to \Str_\alpha$ is any group homomorphism, and $\tau$ is a set equipped with an $H$-action.
 
   Given $x \in \tau$ and $S$ any set of $\alpha$-support conditions, say \emph{$S$ supports $x$} if every $\pi \in H$ that fixes every element of $S$ also fixes $x$.
@@ -494,7 +494,7 @@ It is straightforward to show that this condition is equivalent to the coherence
 
 \begin{lemma}
 \label{lem:rep-preserved}
-\uses{def:code-action, lem:coherence-unpacked, def:representative-code}
+\uses{def:codes-action, lem:coherence-unpacked, def:representative-code}
 The image under an allowable permutation of a representative code is a representative code.
 \end{lemma}
 
@@ -518,7 +518,7 @@ We take the set of $\alpha$-tangles, $\tau_\alpha$, to be the set of \emph{symme
 
 \begin{lemma}
   \label{lem:supportedness-equiv}
-  \uses{def:codes-action,def:equiv-codes}
+  \uses{def:codes-action,def:equiv-code}
   If $X \subseteq \tau_\beta$, $Y \subseteq \tau_\gamma$, and $(\alpha,\beta,X) \equiv_\alpha (\alpha,\gamma,Y)$, then (under the action of allowable permutations on codes) a set $S$ of conditions supports $\alpha$ if and only if it supports $\beta$.  In particular, $\alpha$ has some small support if and only if $\beta$ does.
 \end{lemma}
 
