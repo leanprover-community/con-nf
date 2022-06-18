@@ -17,36 +17,32 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: leanprover-contrib/update-versions-action@master
 
-      - name: install elan
-        run: |
-          set -o pipefail
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- --default-toolchain none -y
-          ~/.elan/bin/lean --version
-          echo "$HOME/.elan/bin" >> $GITHUB_PATH
-
       - name: install python
         uses: actions/setup-python@v3
         with:
           python-version: 3.9
 
-      - name: lean deps
-        run: |
-          pip install mathlibtools
+      - name: load cache
+        uses: actions/cache@v2
+        id: cache-id
+        with:
+          path: ${{ runner.temp }}/cache-directory
+          key: ${{ runner.os }}-cache-key-v1.0
+
+      - name: cache new files
+        uses: airvzxf/cache-anything-new-action@v1.0.1
+        with:
+          script: 'install.sh'
+          is_cached: ${{ steps.cache-id.outputs.cache-hit }}
+          cache: ${{ runner.temp }}/cache-directory
+          snapshot: '/'
+          exclude: '/boot /data /dev /mnt /proc /run /sys'
+
+      - name: get mathlib cache
+        run: leanproject get-mathlib-cache
 
       - name: build project
-        run: |
-          leanproject get-mathlib-cache
-          lean --make src
-
-      - name: blueprint deps
-        run: |
-          sudo apt-get update
-          sudo apt install graphviz libgraphviz-dev pandoc texlive-full texlive-xetex
-          pip install invoke
-          git clone https://github.com/plastex/plastex.git
-          pip install ./plastex
-          git clone https://github.com/PatrickMassot/leanblueprint.git
-          pip install ./leanblueprint
+        run: lean --make src
 
       - name: build blueprint
         run: |
