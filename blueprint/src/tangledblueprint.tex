@@ -251,6 +251,8 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 \begin{definition}
 \label{def:support}
 \uses{def:support-condition}
+\lean{con_nf.potential_support}
+\leanok
 Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alpha$-support-conditions.  (A little more pedantically, one could call these something like “potential small supports”: they become actual supports once they support some element.)
 
 [NOTES for formalisation: Well-orderings are assumed here in some version of Randall’s note, but they almost certainly aren’t wanted in the basic definition of supports, as used in phase 1. Strong supports, as used in phase 2, are probably better viewed as a separate notion: a more elaborate data structure that can be used to “present” a support in a particularly good way.]
@@ -891,7 +893,7 @@ For this we use the freedom of action theorem.  We define a local bijection whic
 The constructed map fixes $X$ because of its identity action on $S$, and it sends $b$ to $c$ because its action sends $T_b$ to $U$, which is what we claimed,
 
 The final move is to argue that there are $<\mu$ orbits in the $\alpha$-allowable permutations.  The idea is that the orbit in which a permutation lies
-is completely determined by a certain amount of combinatorial information, similarly to what happened in type 0 but a bit more complex.  The orbit is specified if we know the second and third components of each item (taken from $\lambda$ items in each case, the first and second components of the first item, and whether the third component is a singleton or a near-litter.  If this is a singleton, we want to know the position in the support of a near-litter containing it (which will be present).  If this is a near-litter and its local cardinal is an image under an $f$ map, we can extract from information about the preceding part of the support order a subsupport which is an index-raised version of a strong support for the near-litter and so for its inverse image under the $f$ map:  as part of our specification, we take the coding function which generates that inverse image.
+is completely determined by a certain amount of combinatorial information, similarly to what happened in type 0 but a bit more complex.  The orbit is specified if we know the second and third components of each item, taken from $\lambda$ items in each case, the first and second components of the first item, and whether the third component is a singleton or a near-litter.  If this is a singleton, we want to know the position in the support of a near-litter containing it (which will be present).  If this is a near-litter and its local cardinal is an image under an $f$ map, we can extract from information about the preceding part of the support order a subsupport which is an index-raised version of a strong support for the near-litter and so for its inverse image under the $f$ map:  as part of our specification, we take the coding function which generates that inverse image.
 
 We give exact details.  If $S$ is a strong support (or an image of a strong support under an allowable permutation), we define
 its specification $S^*$ as a well-ordering of the same length in which an item $((\beta,-1,x),A,\gamma)$ will be replaced by an item
@@ -964,7 +966,7 @@ Now, everything that we did with supports, we repeat with coding functions.
 
 \begin{definition}
   \label{def:coding-function-spec}
-  \uses{def:coherent-phase-1-data,def:support-spec;def:coding-function}
+  \uses{def:coherent-phase-1-data,def:support-spec,def:coding-function}
   A \emph{coding function specification} is \ldots [again, see recent versions of Randall’s note]
 
   [Perhaps the coherence is not needed?]
