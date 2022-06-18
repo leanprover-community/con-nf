@@ -10,7 +10,8 @@ tangles; we define these larger ambient groups in advance in order to set up the
 derivatives and so on independently of the recursion.
 -/
 
-open equiv equiv.perm with_bot
+open cardinal equiv equiv.perm with_bot
+open_locale cardinal
 
 universe u
 
@@ -52,12 +53,33 @@ def derivative {β : type_index} :
 end struct_perm
 
 structure support_condition (α : Λ) :=
-(source : atom ⊕ Σ' s i, is_near_litter i s)
+(source : atom ⊕ Σ i, {s : set atom // is_near_litter i s})
 (path : extended_index α)
+
+/-- There are `μ` support conditions. -/
+@[simp] lemma mk_support_condition (α : Λ) : #(support_condition α) = #μ :=
+begin
+  have : support_condition α ≃ (atom ⊕ Σ i, {s : set atom // is_near_litter i s}) × extended_index α,
+  { refine ⟨λ c, ⟨c.source, c.path⟩, λ p, ⟨p.fst, p.snd⟩, _, _⟩;
+    intro x; dsimp; cases x; simp },
+  rw mk_congr this, simp,
+  rw add_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) le_rfl,
+  exact mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ)
+    (le_trans (mk_extended_index α)$ le_of_lt $ lt_trans Λ_lt_κ κ_lt_μ) (mk_ne_zero _)
+end
 
 structure potential_support (α : Λ) :=
 (carrier : set (support_condition α))
 (small : small carrier)
+
+/-- There are `μ` potential supports. -/
+@[simp] lemma mk_potential_support (α : Λ) : #(potential_support α) = #μ :=
+begin
+  have : potential_support α ≃ Σ' c : set (support_condition α), small c,
+  { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.fst, s.snd⟩, _, _⟩;
+    intro x; dsimp; cases x; simp },
+  rw mk_congr this, simp, sorry
+end
 
 /-- Structural permutations act on support conditions. -/
 instance struct_perm_scalar (α : Λ) : has_scalar (struct_perm α) (support_condition α) :=
@@ -66,10 +88,10 @@ instance struct_perm_scalar (α : Λ) : has_scalar (struct_perm α) (support_con
   refine ⟨_, path⟩,
   cases c,
   { left, exact π₀.to_near_litter_perm.atom_perm c },
-  { right, obtain ⟨s, i, h⟩ := c,
+  { right, obtain ⟨i, s, h⟩ := c,
     exact ⟨
-      ⇑π₀.to_near_litter_perm.atom_perm⁻¹ ⁻¹' s,
       π₀.to_near_litter_perm.litter_perm i,
+      ⇑π₀.to_near_litter_perm.atom_perm⁻¹ ⁻¹' s,
       π₀.to_near_litter_perm.near h⟩ }
 end⟩
 
@@ -78,14 +100,14 @@ instance struct_perm_action (α : Λ) : mul_action (struct_perm α) (support_con
 
 section support_declaration
 
-variables {α : Λ} {H : Type*} [monoid H] {τ : Type*} [mul_action H τ]
+variables {α : Λ} {H : Type u} [monoid H] {τ : Type u} [mul_action H τ]
 
 /-- Given `x ∈ τ` and `S` any set of `α`-support conditions, we say `S` supports `x` if every
 `π ∈ H` that fixes every element of `S` also fixes `x`.
 
 We do not constrain here that `φ` be a group homomorphism, but this is required later. -/
 def supports (φ : H → struct_perm α) (x : τ) (S : set (support_condition α)) :=
-∀ (π : H), (∀ s ∈ S, (φ π) • s = s) → π • x = x
+∀ (π : H), (∀ s ∈ S, φ π • s = s) → π • x = x
 
 /-- A *support for `x`* is a potential support that supports `x`. -/
 structure support (φ : H → struct_perm α) (x : τ)
@@ -95,6 +117,19 @@ extends potential_support α :=
 /-- An element of `τ` is *symmetric* if it has some (small) support. -/
 def symmetric (φ : H → struct_perm α) (x : τ) : Prop
 := nonempty $ support φ x
+
+/-- There are `μ` supports for `x`, given that there are `μ` tangles (elements of `τ`). -/
+@[simp] lemma mk_support (φ : H → struct_perm α) (hτ : #τ = #μ) (x : τ) : #(support φ x) = #μ := sorry
+
+/-- There are `μ` supports, given that there are `μ` tangles (elements of `τ`). -/
+@[simp] lemma mk_support_any (φ : H → struct_perm α) (hτ : #τ = #μ) : #(Σ (x : τ), support φ x) = #μ :=
+begin
+  suffices : ∀ (x : τ), #(support φ x) = #μ,
+  { simp, simp_rw this, simp, rw hτ,
+    exact mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) le_rfl μ_strong_limit.ne_zero },
+  intro x,
+  exact mk_support φ hτ x
+end
 
 end support_declaration
 

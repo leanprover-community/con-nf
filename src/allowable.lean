@@ -41,9 +41,9 @@ has_scalar (semiallowable_perm α) (code α β h) :=
   cases γ,
   { exact π.fst.atom_perm '' G },
   { rw with_bot.some_eq_coe at hγ, simp at hγ,
-    haveI := allowable_action γ (lt_of_lt_of_le hγ h),
+    haveI := allowable_action γ (hγ.trans_le h),
     simp_rw with_bot.some_eq_coe,
-    exact (λ g, (π.snd γ (lt_of_lt_of_le hγ h)) • g) '' G }
+    exact (λ g, (π.snd γ (hγ.trans_le h)) • g) '' G }
 end⟩
 
 -- TODO(zeramorphic)

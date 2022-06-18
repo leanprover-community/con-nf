@@ -82,7 +82,7 @@ lemma is_near_litter.unique {s : set atom}
 is_near_litter_litter_set_iff.1 $ hi.trans hj.symm
 
 /-- There are `μ` near-litters near the `i`-th litter. -/
-lemma mk_near_litter (i : litter) : #{s : set atom // is_near_litter i s} = #μ :=
+@[simp] lemma mk_near_litter (i : litter) : #{s : set atom // is_near_litter i s} = #μ :=
 begin
   refine (le_antisymm _ _).trans mk_atom,
   { refine le_of_le_of_eq _
@@ -95,6 +95,10 @@ begin
     exact one_lt_aleph_0.trans_le κ_regular.aleph_0_le },
   { exact singleton_injective (symm_diff_left_injective _ $ by convert congr_arg subtype.val h) }
 end
+
+/-- There are `μ` near-litters in total. -/
+@[simp] lemma mk_near_litter_any : #(Σ i, {s : set atom // is_near_litter i s}) = #μ :=
+by { simp, exact mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) le_rfl μ_strong_limit.ne_zero }
 
 /--
 A near-litter permutation is a permutation of the base type which sends near-litters to

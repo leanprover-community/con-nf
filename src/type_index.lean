@@ -2,6 +2,9 @@ import combinatorics.quiver.path
 import mathlib.well_founded
 import params
 
+open cardinal
+open_locale cardinal
+
 universe u
 
 namespace con_nf
@@ -30,6 +33,10 @@ types in the hierarchy until we reach the base type.
 This plays the role of an extended type index in the paper. -/
 def extended_index (α : Λ) := quiver.path (α : type_index) ⊥
 
+/-- There are at most `Λ` `α`-extended type indices.
+TODO: This sounds like the kind of thing that could go in mathlib? -/
+@[simp] lemma mk_extended_index (α : Λ) : #(extended_index α) ≤ #Λ := sorry
+
 /-- If `β < γ`, we have a path directly between the two types in the opposite order.
 Note that the `⟶` symbol (long right arrow) is not the normal `→` (right arrow),
 even though monospace fonts often display them similarly. -/
@@ -39,5 +46,7 @@ instance coe_lt_to_hom (β γ : Λ) : has_lift_t (β < γ) ((γ : type_index) �
 /-- The direct path from the base type to `α`. -/
 def extended_index.direct (α : Λ) : extended_index α :=
 quiver.hom.to_path $ with_bot.bot_lt_coe α
+
+instance extended_index_inhabited (α : Λ) : inhabited (extended_index α) := ⟨extended_index.direct α⟩
 
 end con_nf
