@@ -53,7 +53,8 @@ class params :=
 (δ : Λ)
 (hδ : (ordinal.typein Λr δ).is_limit)
 
-/-- There exists a set of valid parameters for the model. -/
+/-- There exists a set of valid parameters for the model. The smallest such set is Λ, κ, μ = ℵ_0,
+ℵ_1, ℶ_{ω_1} -/
 example : params := sorry
 
 open params
