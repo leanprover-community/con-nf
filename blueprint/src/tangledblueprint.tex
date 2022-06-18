@@ -198,9 +198,9 @@ An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \s
 \end{definition}
 
 \begin{definition}
-\label {def:fmap}
+\label {def:f-map}
 \uses{def:ftargets, def:iota}
-We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $\mathrm{Litter}$, as follows.
+We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $X_{\beta,\gamma} \subseteq \mathrm{Litter}$, as follows.
 
 For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $[N]$ of the minimal near-litter $N$ (under the ordering induced by $j_\beta \circ \iota_\beta : \mathrm{NearLit} \to \tau_\beta \to \mu$) such that:
 \begin{itemize}
@@ -215,8 +215,8 @@ For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $[N]$ of the minimal
 Notice that the phase 1a data for $\alpha$ gives us the information already to define $f_{\beta,\gamma}$ for all $\beta, \gamma < \alpha$.  This definition will in the end not actually depend on the value of $\alpha$.
 
 \begin{lemma}
-  \label{lem:fmap-properties}
-  \uses{def:fmap}
+  \label{lem:f-map-properties}
+  \uses{def:f-map}
   The maps $f_{\beta,\gamma}$ satisfy:
   \begin{enumerate}
   \item each $f_{\beta,\gamma}$ is injective;
@@ -227,7 +227,7 @@ Notice that the phase 1a data for $\alpha$ gives us the information already to d
 
 \begin{definition}
 \label {def:alt-ext}
-\uses{def:fmap, def:code, def:extended-type-index}
+\uses{def:f-map, def:code, def:extended-type-index}
 Let $\gamma$ be an extended type index less than $\alpha$.
 
 For any code $(\alpha,\gamma,G)$ with $G$ nonempty and $\delta$ a proper type index less than $\alpha$ and distinct from $\gamma$, we define
@@ -242,7 +242,7 @@ Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart
 
 \begin{lemma}
 \label {lem:alt-ext-nature}
-\uses{def:alt-ext, lem:fmap-properties}
+\uses{def:alt-ext, lem:f-map-properties}
 \begin{enumerate}
 \item Each $A_\delta$ is injective (since each $f_{\gamma,\delta}$ is injective, and $f_{\gamma,\delta}$ have disjoint images for different $\gamma$).
 \item The ranges of $A_\delta$ are disjoint for different $\delta$ (since the ranges of $f_{\gamma,\delta}$ are).
@@ -448,7 +448,7 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
 \end{definition}
 
 \begin{lemma}
-\label {lem:singletons}
+\label {lem:singletons-assumption}
 \uses{def:representative-code}
 We stipulate that for any proper type index $\beta<\alpha$ and any type index $\gamma<\beta$ and any $g \in \tau_\gamma$, $(\beta,\gamma,\{g\})\in \tau_\beta$.  Of course this will need to be verified for $\alpha$ as part of the recursion.  It is immediately evident that it is a representative code, at any rate.
 
@@ -509,14 +509,14 @@ This should be straightforward.  A target should be the equation $\pi(A_\gamma(X
 \end{proof}
 
 \begin{lemma}
-  \label{lem:semi-tangle-action}
-  \uses{def:rep-preserved}
-  Allowable permutations act semi-tangles.
+\label{lem:semi-tangle-action}
+\uses{def:rep-preserved,def:semi-tangle}
+  Allowable permutations act on semi-tangles.
 \end{lemma}
 
 \begin{definition}
 \label{def:tangle}
-\uses{def:semi-tangle-action, def:support-of}
+\uses{lem:semi-tangle-action, def:support-of}
 We take the set of $\alpha$-tangles, $\tau_\alpha$, to be the set of \emph{symmetric} $\alpha$-semi-tangles under the action of allowable permutations; that is, tanlges that are supported by some small $\alpha$-support $S$,.
 \end{definition}
 
@@ -551,7 +551,7 @@ For any $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$.
 \begin{proof}
 Take a $\beta$-support for $b$, and extend all the paths in it at the top by the step $\beta < \alpha$.
 
-[This will be easy if we defined paths by induction from the top; if we have paths in reverse, it may need lemmas on how derivatives interact with extension at the top.  Or they might follow from functoriality of derivatives?]
+[This should be easy if we defined paths by induction from the top; if we have paths in reverse, it may need lemmas on how derivatives interact with extension at the top.  Or they might follow from functoriality of derivatives?]
 \end{proof}
 
 \begin{lemma}
@@ -560,8 +560,17 @@ Take a $\beta$-support for $b$, and extend all the paths in it at the top by the
 It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|B|<\kappa$ [take the union of the $\beta$-supports of elements of $B$ and add $\alpha$ to all the second components of elements of this union]:  all small subsets of a type are realized in each higher type.
 \end{lemma}
 
+\begin{lemma}
+  \label{lem:tangle-action}
+  \uses{def:tangle}
+  The action of $\alpha$-allowable permutations on semi-tangles restricts to an action on tangles.  Explicitly, if an $\alpha$ semi-tangle $x$ is symmetric, then so is $\pi x$ for any $\alpha$-allowable permutation $\pi$.
+\end{lemma}
+\begin{proof}
+  The algebra of group actions should show reasonably easily that if $\pi$ is an $\alpha$-allowable permutation and $X \in \tau_\alpha$ has $\alpha$-support $S$, then $\pi(X)$ has $\alpha$-support $\pi``S$.
+\end{proof}
+
 \begin{definition}
-\label{def:word-obligation}
+\label{def:wellorder-conditions}
 \uses{def:tangle}
 [This doesn’t belong here in phase 1!  The ordering has been already assumed in the phase 1 data, and the technical conditions will need to be assumed later as part of the phase 2 data, at least by the proof of freedom-of-action; and then all of this will be constructed at the very end of phase 2.]
 
@@ -598,7 +607,7 @@ There is lots to be proven, but that is the entire description.
 
 \begin{definition}
   \label{def:embedding-into-pretangles}
-  \uses{def:semi-tangles, def:phase-1c-data}
+  \uses{def:semi-tangle, def:phase-1c-data}
   There is an injection $\tau_\alpha \to \mathrm{Pretangle}_\alpha$ (where $\tau_\alpha$ is constructed from the given phase 1 data).  Moreover, this commutes with the $\All_\alpha$-action.
 \end{definition}
 
@@ -627,15 +636,6 @@ We can then say that $S$ is a support of $X$ if $X$ is an $\alpha$-code, $S$ is 
 \item[Remark on definitions of support and symmetry:]  It should be clear that the supports we have defined here do exactly the same work as the set supports in the model description (since the additional order structure and the third components of support domain elements actually do no work at this point).
 \end{description}
 
-\begin{lemma}
-\label {lem:restrict-allowable-perm}
-\uses{def:support-of}
-An allowable permutation on $\alpha$-codes restricts to a permutation on $\tau_\alpha$, as we presumed in the definition of allowable permutation.
-\end{lemma}
-\begin{proof}
-Quite standard techniques show that if $\pi$ is an $\alpha$-allowable permutation and $X \in \tau_\alpha$ has $\alpha$-support $S$, then $\pi(X)$ has $\alpha$-support $\pi[S]$.  The results follows from this.
-\end{proof}
-
 % \begin{comment}
 This probably represents a chunk of formal verification work, as what is obvious to people is not always obvious to theorem provers.
 % \end{comment}
@@ -643,6 +643,8 @@ This probably represents a chunk of formal verification work, as what is obvious
 \begin{definition}
 \label {def:raise-lower-index}
 \uses{def:support-of}
+[Note: all this stuff — raising and lowering indices, and the results about repeatedly applying them to structural permutations, etc — is MUCH more clearly described in algebraic language, with the category of paths, the functoriality of $\Str_\alpha$ and $\All_\alpha$ in paths, and maps between group actions, etc.]
+
 For any $\alpha$-support $S$ and an extended type index $C$ with minimum element greater than $\alpha$, we define $S^C$ as
 $\{((x,A\cup C,\gamma),(y,B\cup C,\delta)):((x,A,\gamma),(y,B,\delta)) \in S\}$.
 
