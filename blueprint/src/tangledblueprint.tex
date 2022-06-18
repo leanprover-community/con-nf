@@ -364,15 +364,16 @@ This section does not depend on any inductive assumptions.
 \begin{definition}
   \label{def:structural-perm}
   \uses{def:structural-perm-atoms}
-  %leanok
+  \leanok
+  \lean{con_nf.struct_perm}
   For a \emph{proper} type index $\alpha$, the structural $\alpha$-permutations are the group $\Str_\alpha = \prod_{\beta < \alpha} \Str_\beta$.
 \end{definition}
 
 \begin{definition}
   \label{def:structural-perm-derivative}
   \uses{def:structural-perm}
-  %leanok
-  \lean{con_nf.struct_perm}
+  \leanok
+  \lean{con_nf.struct_perm.derivative}
   Any path $A : \beta \to \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
 
   Moreover, this is functorial: they make $\Str$ into a functor $\mathrm{Path}(\Lambda)^\mathrm{op} \to \mathrm{Gp}$.
@@ -391,6 +392,8 @@ This section does not depend on any inductive assumptions.
 \begin{definition}
   \label{def:support-condition}
   \uses{def:near-litter,def:atom} % TODO: add def:paths upstream, and add it here.
+  \lean{con_nf.support_condition}
+  \leanok
   Let $\alpha$ be a proper type index. An \emph{$\alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
 
   Type-theoretically, $\Cond := (\tau_{-1} + \mathrm{NearLit}) \times \mathrm{Path}(-1,\alpha)$.
@@ -400,6 +403,7 @@ This section does not depend on any inductive assumptions.
 \begin{definition}
   \label{def:support-condition-action}
   \uses{def:structural-perm-derivative, def:support-condition}
+  \lean{con_nf.struct_perm_action}
 
   Structural permutations act on support conditions.
 

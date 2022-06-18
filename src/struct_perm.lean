@@ -29,6 +29,7 @@ using_well_founded { dec_tac := `[assumption] }
 
 namespace struct_perm
 
+-- TODO(zeramorphic): Write this up when Π types on Props can be formed into groups in mathlib.
 instance group_instance : Π β, group (struct_perm β) := sorry
 
 /-- Obtains the atom permutation given by a prestructural permutation. -/
@@ -49,5 +50,30 @@ def derivative {β : type_index} :
 | δ (quiver.path.cons p_βδ lt_γδ) := λ π, lower_struct_perm (derivative p_βδ π) _ lt_γδ
 
 end struct_perm
+
+structure support_condition (α : Λ) :=
+(source : atom ⊕ Σ' s i, is_near_litter i s)
+(path : extended_index α)
+
+structure potential_support (α : Λ) :=
+(carrier : set (support_condition α))
+(small : small carrier)
+
+/-- Structural permutations act on support conditions. -/
+instance struct_perm_scalar (α : Λ) : has_scalar (struct_perm α) (support_condition α) :=
+⟨λ π₀, begin
+  rintro ⟨c, path⟩,
+  refine ⟨_, path⟩,
+  cases c,
+  { left, exact π₀.to_near_litter_perm.atom_perm c },
+  { right, obtain ⟨s, i, h⟩ := c,
+    exact ⟨
+      ⇑π₀.to_near_litter_perm.atom_perm⁻¹ ⁻¹' s,
+      π₀.to_near_litter_perm.litter_perm i,
+      π₀.to_near_litter_perm.near h⟩ }
+end⟩
+
+-- TODO(zeramorphic): Complete this when the group instance for structural permutations is written.
+instance struct_perm_action (α : Λ) : mul_action (struct_perm α) (support_condition α) := sorry
 
 end con_nf
