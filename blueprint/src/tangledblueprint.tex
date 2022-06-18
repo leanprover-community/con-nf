@@ -638,7 +638,7 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 
 \begin{definition}
   \label{def:concrete-phase-1-data-propagates}
-  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,def:allowable-perm,def:tangle-action}
+  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,def:allowable-perm,lem:tangle-action}
   For a proper type index $\alpha \in \lambda$, if we have concrete phase 1 data at all levels $\beta < \alpha$, then the constructions in phase 1 provide \emph{most} components of concrete phase 1 data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$!
 
   In particular, the new set of $\alpha$-tangles $\tau_\alpha \subseteq \Pretangle_\alpha$ is the the image of the $\alpha$-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations.  (We could call these “concrete $\alpha$-tangles” and “abstract $\alpha$-tangles”, if we need to for disambiguation.)
@@ -775,7 +775,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 
 \begin{definition}
   \label{def:freedom-of-action-statement}
-  \uses{def:coherent-phase-1-data,def:perm-exception,def:local-bijection,def:flexible}
+  \uses{def:coherent-phase-1-data,def:perm-exception,def:local-bijection,def:flexible,def:allowable-perm-atoms}
   Given coherent part 1 data up to $\alpha$, say that \emph{freedom of action holds (at $\alpha$)} if: Given an $\alpha$-local bijection $\pi^0$ and a specification for each path $A : \beta \to \alpha$ a bijection of the $\beta$-flexible litters, there is a unique allowable permutation $\pi \in \All_\alpha$ such that:
   \begin{enumerate}
    \item $\pi{A}$ extends $\pi^0_{A}$ for each $A$;
@@ -852,7 +852,7 @@ that the construction actually succeeds at every type.
 \begin{definition}
 \label {def:coding-function}
 \uses{def:coherent-phase-1-data}
-For any support $S$ and object $x$, we can define a function $\chi_{x,S}$ which sends $T=\pi(S)$ to $\pi(x)$ for every $T$ in the orbit of $S$ under
+For any support $S$ and tangle $x$, we can define a function $\chi_{x,S}$ which sends $T=\pi(S)$ to $\pi(x)$ for every $T$ in the orbit of $S$ under
 the action of allowable permutations.  We call such functions {\em coding functions\/}.  Note that if $\pi[S]=\pi'[S]$ then $(\pi^{-1}\circ \pi')[S]= S$, so
 $(\pi^{-1}\circ \pi')(x)= x$, so $\pi(x)=\pi'(x)$, ensuring that the map $\chi_{x,S}$ for which we gave an implicit definition is well defined.
 \end{definition}
@@ -1004,7 +1004,7 @@ Now, everything that we did with supports, we repeat with coding functions.
 
 \begin{corollary}
   \label{cor:count-tangles}
-  \uses{def:tangles}
+  \uses{def:coherent-phase-1-data,def:freedom-of-action-statement}
   There are $\mu$-many $\alpha$-tangles.
 \end{corollary}
 
@@ -1017,8 +1017,8 @@ This completes the proof that each type is of size $\mu$, which finally closes t
 
 \begin{lemma}
   \label{lem:position-functions-propagate}
-  \uses{lem:coherent-phase-1-data}
-  Given coherent phase 1 data up to $\alpha$ satisfying freedom of action, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:full-phase-1-data}:
+  \uses{def:coherent-phase-1-data,def:freedom-of-action-statement}
+  Given coherent phase 1 data up to $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:full-phase-1-data}:
   \begin{enumerate}
     \item for each litter $L$, the typed litter of $L$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
     \item for each near-litter $N$ which is not a litter, $j(N)$ comes after its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \Delta N^\circ$;
