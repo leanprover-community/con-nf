@@ -649,32 +649,32 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 \begin{definition}
   \label{def:coherent-phase-1-data}
   \uses{def:concrete-phase-1-data-propagates}
-  For $\alpha \in \lambda + 1$, \emph{Phase 1 data up to $\alpha$} consists of concrete phase 1 data at every level $\beta < \alpha$.  Say this is \emph{coherent} if it is standard at level $-1$, and at each proper type index $\beta < \gamma$, all components at level $\beta$ that \emph{could} have been induced from the data at lower levels $\gamma < \beta$ are, in fact, equal to what would have been induced that way.
+  For $\alpha \in \lambda + 1$, \emph{Phase 1 data below $\alpha$} consists of concrete phase 1 data at every level $\beta < \alpha$.  Say this is \emph{coherent} if it is standard at level $-1$, and at each proper type index $\beta < \gamma$, all components at level $\beta$ that \emph{could} have been induced from the data at lower levels $\gamma < \beta$ are, in fact, equal to what would have been induced that way.
 
   \begin{itemize}
   \item Note we want to provide this definiton also for $\alpha = \lambda$!  I think this should be available in mathlib as \verb|with_top|.
   \item We could unify “standard at level $-1$” with induced at proper type indices by generalising the definition of each component of the “induced concrete phase 1 data at $\alpha$” to include the case $\alpha = -1$, defining the induced data as the standard one in that case.  Is this more natural?  Will it make life easier?
   \end{itemize}
 
-  For $\alpha < \beta$, “phase 2 data up to $\alpha$” can be restricted to “phase 2 data up to $\beta$”.
+  For $\alpha < \beta$, “phase 2 data below $\alpha$” can be restricted to “phase 2 data below $\beta$”.
 
-  Most constructions in phase 2 will assume coherent phase 1 data up to $\alpha$, for some fixed $\alpha$.
+  Most constructions in phase 2 will assume coherent phase 1 data below $\alpha$, for some fixed $\alpha$.
 
-  [Terminology: perhaps we should call this “phase 2 data at $\alpha$”?  That seems more consistent for the overall naming scheme, but “coherent phase 1 data up to $\alpha$” seems clearer and more transparent in itself.  Maybe we should reconsider the naming scheme, so that it’s not in tension with clarity!]
+  [Terminology: perhaps we should call this “phase 2 data at $\alpha$”?  That seems more consistent for the overall naming scheme, but “coherent phase 1 data below $\alpha$” seems clearer and more transparent in itself.  Maybe we should reconsider the naming scheme, so that it’s not in tension with clarity!]
 \end{definition}
 
 \section{Strong supports defined}
 
 NOTE: much of this section has not been updated since early in the formalisation, so may not match the current implementation and abstractions very closely.
 
-Throughout this section, fix some $\alpha \in \lambda + 1$, and assume coherent phase 1 data up to $\alpha$. [Actually, perhaps this section doesn’t need the coherence and could be done in phase 1, i.e. working purely in a single level, assuming full phase 1 data is available at lower levels?  This should become clearer as it is formalised.]
+Throughout this section, fix some $\alpha \in \lambda + 1$, and assume coherent phase 1 data below $\alpha$. [Actually, perhaps this section doesn’t need the coherence and could be done in phase 1, i.e. working purely in a single level, assuming full phase 1 data is available at lower levels?  This should become clearer as it is formalised.]
 
 Treating supports as sets suffices for the model description, but we will need to analyze supports and orbits with more care, so it is better for purposes
 of the proof to equip supports with a well-orderings.
 
 We may write $x \leq_S y$ for $(x,y) \in S$, and $x <_S y$ when we also want to indicate that $x,y$ are distinct.
 
-If $\pi$ is an $\alpha$-allowable permutation and $S$ is an $\alpha$-support, we define $\pi[S]$ as $\{((\pi_A(x),A,\gamma),(\pi_B(y),B,\delta)):((x,A,\gamma),(y,B,\delta))\in S\}$.
+If $\pi$ is an $\alpha$-allowable permutation and $S$ is an $\alpha$-support, we define $\pi[S]$ as $$\{((\pi_A(x),A,\gamma),(\pi_B(y),B,\delta)):((x,A,\gamma),(y,B,\delta))\in S\}.$$
 
 If $S$ is an $\alpha$-support, we define $S^+$ as $\{(x,A,\alpha):(x,A,\alpha) \in S\}$.
 
@@ -768,7 +768,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 \begin{definition}
   \label{def:flexible}
   \uses{def:coherent-phase-1-data}
-  Given coherent part 1 data up to $\alpha$, a path $A : \beta \to \alpha$, and a litter $L$, say $L$ is \emph{$A$-flexible} (or that the pair $(L,A)$ is \emph{flexible}) if $L$ is not in the range of $f_{\beta,\gamma}$, for any $\gamma < \alpha$.
+  Given coherent part 1 data below $\alpha$, a path $A : \beta \to \alpha$, and a litter $L$, say $L$ is \emph{$A$-flexible} (or that the pair $(L,A)$ is \emph{flexible}) if $L$ is not in the range of $f_{\beta,\gamma}$, for any $\gamma < \alpha$.
 
   (In particular, if $\beta = -1$, every such pair is flexible, since $f_{\gamma,\beta}$-maps is only defined for $\beta$ proper.)
 \end{definition}
@@ -776,7 +776,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 \begin{definition}
   \label{def:freedom-of-action-statement}
   \uses{def:coherent-phase-1-data,def:perm-exception,def:local-bijection,def:flexible,def:allowable-perm-atoms}
-  Given coherent part 1 data up to $\alpha$, say that \emph{freedom of action holds (at $\alpha$)} if: Given an $\alpha$-local bijection $\pi^0$ and a specification for each path $A : \beta \to \alpha$ a bijection of the $\beta$-flexible litters, there is a unique allowable permutation $\pi \in \All_\alpha$ such that:
+  Given coherent part 1 data below $\alpha$, say that \emph{freedom of action holds (at $\alpha$)} if: Given an $\alpha$-local bijection $\pi^0$ and a specification for each path $A : \beta \to \alpha$ a bijection of the $\beta$-flexible litters, there is a unique allowable permutation $\pi \in \All_\alpha$ such that:
   \begin{enumerate}
    \item $\pi{A}$ extends $\pi^0_{A}$ for each $A$;
    \item for each path $A : \beta \to \alpha$ and $A$-flexible litter $L$, $\pi_A(j_\beta(L)) = j_\beta(N)$ for some $N$ near to $\chi_A(L)$;
@@ -789,7 +789,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 \begin{lemma}
 \label{lem:freedom-of-action-propagates}
 \uses{def:freedom-of-action-statement}
-Given coherent part 1 data up to $\alpha$, if freedom of action holds at each level $\beta < \alpha$, then it holds at level $\alpha$.
+Given coherent part 1 data below $\alpha$, if freedom of action holds at each level $\beta < \alpha$, then it holds at level $\alpha$.
 
 Note: I (Peter) have an alternative approach to freedom of action (slightly different in both statement and proof) which might possibly be easier to formalise, avoiding the dependence on strong supports in the proof.  Iff Randall approves it then I will add it in the blueprint as an alternative.  But it doesn’t change the overall structure of the main argument/recursion, so this doesn’t need to be worried about until the point of formalising the FoA theorem itself.
 \end{lemma}
@@ -832,7 +832,7 @@ Once we know how to carry out this calculation along any $\alpha$-strong support
 \begin{theorem}
   \label{thm:freedom-of-action}
   \uses{def:freedom-of-action-statement}
-  Given coherent phase 1 data up to $\alpha$, it satisfies freedom of action at every level.
+  Given coherent phase 1 data below $\alpha$, it satisfies freedom of action at every level.
 \end{theorem}
 
 \begin{proof}
@@ -912,7 +912,7 @@ Pulling out the main items from the discussion above, for formalisation targets:
 \begin{definition}
   \label{def:support-spec}
   \uses{def:coherent-phase-1-data}
-  Fix coherent phase 1 data up to $\alpha$.  A \emph{support-specification} is \ldots [this is quite long to define; we should get the text from more recent versions of Randall’s note]
+  Fix coherent phase 1 data below $\alpha$.  A \emph{support-specification} is \ldots [this is quite long to define; we should get the text from more recent versions of Randall’s note]
 
   [Perhaps the coherence is not needed?]
 \end{definition}
@@ -1018,7 +1018,7 @@ This completes the proof that each type is of size $\mu$, which finally closes t
 \begin{lemma}
   \label{lem:position-functions-propagate}
   \uses{def:coherent-phase-1-data,def:freedom-of-action-statement}
-  Given coherent phase 1 data up to $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:full-phase-1-data}:
+  Given coherent phase 1 data below $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:full-phase-1-data}:
   \begin{enumerate}
     \item for each litter $L$, the typed litter of $L$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
     \item for each near-litter $N$ which is not a litter, $j(N)$ comes after its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \Delta N^\circ$;
@@ -1041,6 +1041,48 @@ This completes the proof that each type is of size $\mu$, which finally closes t
 % \begin{comment}
 {\bf Note for the formal verification project:}  I think everything is here, but filling in details to the satisfaction of a theorem prover will be work.
 % \end{comment}
+
+\section{Completing the recursion}
+
+We can now wrap up the recursion.  It is a little subtle: to know that the recursion fits together right as we build it up, we need to pin it down some more, to make it uniquely determined.
+
+[A probably cleaner approach would be to state and prove a general principle of \emph{$\lambda$-dependent-choice}, (it might be already in mathlib), and apply that to choices of coherent data, avoiding the need for “very coherent”.  The current approach is effectively unwinding what a general proof of $\lambda$-DC would give, applied to this case.]
+
+\begin{definition}
+  \label{def:very-coherent-data}
+  \uses{coherent-phase-1-data,lem:position-functions-propagate}
+  For $\alpha \in \lambda + 1$, a choice of coherent phase 1 data below $\alpha$ is \emph{very coherent} if its ordering functions and designated supports at each level are the ones provided by \cref{lem:position-functions-propagate} applied to the earlier levels, using \cref{thm:freedom-of-action} to supply the assumption of freedom of action.
+
+  [This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice.]
+\end{definition}
+
+\begin{lemma}
+  \label{lem:very-coherent-data-unique}
+  \uses{coherent-phase-1-data}
+  For any $\alpha$, very coherent data below $\alpha$ is unique (if it exists).
+
+  [Actually, we probably don’t need this: it effectively gets inlined in the main recursion.]
+\end{lemma}
+\begin{proof}
+  By induction on $\beta < \alpha$: all components of the data at level $\beta$ are either propositions, or the coherence condition fixes them in terms of earlier data.
+\end{proof}
+
+\begin{theorem}
+  \label{thm:main-recursion}
+  \uses{def:very-coherent-data}
+    For every $\alpha \in \lambda + 1$, there is a unique choice of very coherent data below $\alpha$.
+\end{theorem}
+\begin{proof}
+  By induction on $\beta < \alpha$: take the unique choice below each $\beta < \alpha$; extend each one up to give very coherent data up-to-and-including each $\beta < \alpha$; and then by uniqueness, these fit together to give very coherent data below $\alpha$.
+\end{proof}
+
+\newcommand{\Tangle}{\mathrm{Tangle}}
+\begin{definition}
+  \label{def:tangle-completed}
+  \uses{thm:main-recursion}
+  The (genuine, definitive!) tangles are the substructure $\Tangle$ of $\Pretangle$ given by the unique choice of very coherent data up to $\lambda$, provided by \cref{thm:main-recursion}.
+\end{definition}
+
 \newpage
 
 \chapter{Tangles model tangled type theory}
