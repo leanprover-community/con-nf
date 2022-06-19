@@ -33,9 +33,22 @@ types in the hierarchy until we reach the base type.
 This plays the role of an extended type index in the paper. -/
 def extended_index (α : Λ) := quiver.path (α : type_index) ⊥
 
-/-- There are at most `Λ` `α`-extended type indices.
-TODO: This sounds like the kind of thing that could go in mathlib? -/
-@[simp] lemma mk_extended_index (α : Λ) : #(extended_index α) ≤ #Λ := sorry
+/-- If there is a path between `α` and `β`, we must have `β ≤ α`.
+The case `β = α` can occur with the nil path. -/
+lemma le_of_path {α : Λ} : Π {β : type_index}, quiver.path (α : type_index) β → β ≤ (α : type_index)
+| β (quiver.path.cons A B) := le_trans (le_of_lt B) (le_of_path A)
+| β (quiver.path.nil) := le_rfl
+
+/- There are at most `Λ` paths from `α` to `β`. -/
+lemma mk_path_len (α : Λ) (n : ℕ) : #({A : extended_index α // A.length = n}) ≤ #Λ := sorry
+
+/-- There are at most `Λ` `α`-extended type indices. -/
+@[simp] lemma mk_extended_index (α : Λ) : #(extended_index α) ≤ #Λ :=
+begin
+  have : extended_index α ≃ Σ n, {A : extended_index α // A.length = n},
+  { sorry },
+  rw cardinal.eq.mpr ⟨this⟩, simp, sorry
+end
 
 /-- If `β < γ`, we have a path directly between the two types in the opposite order.
 Note that the `⟶` symbol (long right arrow) is not the normal `→` (right arrow),
