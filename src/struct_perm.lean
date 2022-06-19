@@ -1,6 +1,5 @@
 import litter
 import type_index
-import logic.equiv.set
 
 /-!
 # Structural permutations
@@ -76,19 +75,19 @@ structure potential_support (α : Λ) :=
 /-- There are `μ` potential supports. -/
 @[simp] lemma mk_potential_support (α : Λ) : #(potential_support α) = #μ :=
 begin
-  have : potential_support α ≃ {c : set (support_condition α) // small c},
+  have : potential_support α ≃ {S : set (support_condition α) // small S},
   { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.val, s.property⟩, _, _⟩;
     intro x; dsimp; cases x; simp },
   rw mk_congr this, simp,
   have eq := (cardinal.eq.mp $ mk_support_condition α).some,
-  have lt_cof_eq_μ : #{c : set (support_condition α) // #c < (#μ).ord.cof} = #μ,
+  have lt_cof_eq_μ : #{S : set (support_condition α) // #S < (#μ).ord.cof} = #μ,
   { convert mk_subset_mk_lt_cof μ_strong_limit.2 using 1,
-    have := mk_subtype_of_equiv (λ c, # ↥c < (#μ).ord.cof) (equiv.set.congr eq),
+    have := mk_subtype_of_equiv (λ S, # ↥S < (#μ).ord.cof) (equiv.set.congr eq),
     convert this using 1,
-    suffices : ∀ c, # ↥c = # ↥(set.congr eq c), { simp_rw this },
-    intro c, rw cardinal.eq, exact ⟨equiv.image _ _⟩ },
+    suffices : ∀ S, # ↥S = # ↥(set.congr eq S), { simp_rw this },
+    intro S, rw cardinal.eq, exact ⟨equiv.image _ _⟩ },
   refine le_antisymm _ _,
-  { rw ← lt_cof_eq_μ, exact cardinal.mk_subtype_mono (λ c h, h.trans_le κ_le_μ_cof) },
+  { rw ← lt_cof_eq_μ, exact cardinal.mk_subtype_mono (λ S h, h.trans_le κ_le_μ_cof) },
   exact ⟨⟨λ m, ⟨{eq.symm m}, by simp⟩, λ a b h, by { simp at h, exact h }⟩⟩
 end
 
@@ -129,17 +128,13 @@ extends potential_support α :=
 def symmetric (φ : H → struct_perm α) (x : τ) : Prop
 := nonempty $ support φ x
 
-/-- There are `μ` supports for `x`, given that there are `μ` tangles (elements of `τ`). -/
-@[simp] lemma mk_support (φ : H → struct_perm α) (hτ : #τ = #μ) (x : τ) : #(support φ x) = #μ := sorry
-
-/-- There are `μ` supports, given that there are `μ` tangles (elements of `τ`). -/
-@[simp] lemma mk_support_any (φ : H → struct_perm α) (hτ : #τ = #μ) : #(Σ (x : τ), support φ x) = #μ :=
+/-- There are at most `μ` supports for a given `x : τ`. -/
+@[simp] lemma mk_support_le (φ : H → struct_perm α) (x : τ) : #(support φ x) ≤ #μ :=
 begin
-  suffices : ∀ (x : τ), #(support φ x) = #μ,
-  { simp, simp_rw this, simp, rw hτ,
-    exact mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) le_rfl μ_strong_limit.ne_zero },
-  intro x,
-  exact mk_support φ hτ x
+  have : support φ x ≃ {S : potential_support α // supports φ x S.carrier},
+  { refine ⟨λ S, ⟨S.to_potential_support, S.supports⟩, λ ⟨carrier, supports⟩, ⟨carrier, supports⟩, _, _⟩;
+    intro x; dsimp; cases x; simp },
+  rw cardinal.mk_congr this, convert mk_subtype_le _ using 1, simp
 end
 
 end support_declaration

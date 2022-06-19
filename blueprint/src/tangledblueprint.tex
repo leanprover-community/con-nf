@@ -232,7 +232,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
   \uses{def:near-litter,def:atom} % TODO: add def:paths upstream, and add it here.
   \lean{con_nf.support_condition}
   \leanok
-  Let $\alpha$ be a proper type index. An \emph{$alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
+  Let $\alpha$ be a proper type index. An \emph{$\alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
 
   Type-theoretically, $\Cond := (\tau_{-1} + \mathrm{NearLit}) \times \mathrm{Path}(-1,\alpha)$.
   [It would suffice to use just litters here instead of near-litters; they give an equivalent notion of support, as shown later (“replacing near-litters with litters”).  That makes a few things simpler; but using near-litters lets us talk about the action, Def.~\ref{def:support-condition-action}, which seems algebraically cleaner.]
@@ -263,8 +263,9 @@ Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alp
 \uses{def:support,lem:count-near-litters}
 \lean{con_nf.mk_support}
 \leanok
-Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ supports.
+Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supports, and therefore at most $\mu$ supports for each $x \in \tau$.
 \end{lemma}
+\begin{proof}\leanok\end{proof}
 
 \begin{definition}
 \label{def:support-of}
