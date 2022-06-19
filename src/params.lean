@@ -117,7 +117,14 @@ variables {f : α → β} {s t : set α}
 def small (s : set α) := #s < #κ
 
 /-- The empty set is small. -/
-lemma small_empty : small (∅ : set α) := by { rw [small, mk_emptyc], exact κ_regular.pos }
+@[simp] lemma small_empty : small (∅ : set α) := by { rw [small, mk_emptyc], exact κ_regular.pos }
+
+/-- Singleton sets are small. -/
+@[simp] lemma small_singleton (x : α) : small ({x} : set α) :=
+begin
+  unfold small, simp,
+  exact lt_of_lt_of_le (one_lt_aleph_0) (is_regular.aleph_0_le κ_regular)
+end
 
 /-- Subsets of small sets are small.
 We say that the 'smallness' relation is monotonic. -/

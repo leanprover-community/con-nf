@@ -1,5 +1,6 @@
 import litter
 import type_index
+import logic.equiv.set
 
 /-!
 # Structural permutations
@@ -75,10 +76,20 @@ structure potential_support (α : Λ) :=
 /-- There are `μ` potential supports. -/
 @[simp] lemma mk_potential_support (α : Λ) : #(potential_support α) = #μ :=
 begin
-  have : potential_support α ≃ Σ' c : set (support_condition α), small c,
-  { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.fst, s.snd⟩, _, _⟩;
+  have : potential_support α ≃ {c : set (support_condition α) // small c},
+  { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.val, s.property⟩, _, _⟩;
     intro x; dsimp; cases x; simp },
-  rw mk_congr this, simp, sorry
+  rw mk_congr this, simp,
+  have eq := (cardinal.eq.mp $ mk_support_condition α).some,
+  have lt_cof_eq_μ : #{c : set (support_condition α) // #c < (#μ).ord.cof} = #μ,
+  { convert mk_subset_mk_lt_cof μ_strong_limit.2 using 1,
+    have := mk_subtype_of_equiv (λ c, # ↥c < (#μ).ord.cof) (equiv.set.congr eq),
+    convert this using 1,
+    suffices : ∀ c, # ↥c = # ↥(set.congr eq c), { simp_rw this },
+    intro c, rw cardinal.eq, exact ⟨equiv.image _ _⟩ },
+  refine le_antisymm _ _,
+  { rw ← lt_cof_eq_μ, exact cardinal.mk_subtype_mono (λ c h, h.trans_le κ_le_μ_cof) },
+  exact ⟨⟨λ m, ⟨{eq.symm m}, by simp⟩, λ a b h, by { simp at h, exact h }⟩⟩
 end
 
 /-- Structural permutations act on support conditions. -/
