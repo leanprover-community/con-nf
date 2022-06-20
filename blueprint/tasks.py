@@ -23,7 +23,6 @@ def bp(ctx):
     run('cd src && xelatex -output-directory=../print print.tex')
     os.chdir(cwd)
 
-
 @task
 def web(ctx):
     cwd = os.getcwd()
