@@ -1,5 +1,6 @@
 import combinatorics.quiver.path
 import mathlib.well_founded
+import mathlib.quiver
 import params
 
 open cardinal
@@ -16,6 +17,12 @@ open params
 The base type is written `⊥`. -/
 @[reducible]
 def type_index := with_bot Λ
+
+@[simp] lemma mk_type_index : #type_index = #Λ :=
+begin
+  unfold type_index, unfold with_bot, rw mk_option,
+  exact add_eq_left Λ_limit.aleph_0_le (le_trans one_le_aleph_0 Λ_limit.aleph_0_le),
+end
 
 /- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
 This allows well founded recursion on type indices. -/
@@ -39,15 +46,11 @@ lemma le_of_path {α : Λ} : Π {β : type_index}, quiver.path (α : type_index)
 | β (quiver.path.cons A B) := le_trans (le_of_lt B) (le_of_path A)
 | β (quiver.path.nil) := le_rfl
 
-/- There are at most `Λ` paths from `α` to `β`. -/
-lemma mk_path_len (α : Λ) (n : ℕ) : #({A : extended_index α // A.length = n}) ≤ #Λ := sorry
-
 /-- There are at most `Λ` `α`-extended type indices. -/
 @[simp] lemma mk_extended_index (α : Λ) : #(extended_index α) ≤ #Λ :=
 begin
-  have : extended_index α ≃ Σ n, {A : extended_index α // A.length = n},
-  { sorry },
-  rw cardinal.eq.mpr ⟨this⟩, simp, sorry
+  refine le_trans ((cardinal.le_def _ _).mpr ⟨quiver.path.to_list_embedding (α : type_index) ⊥⟩) _,
+  convert mk_list_le_max _ using 1, simp, rw max_eq_right Λ_limit.aleph_0_le
 end
 
 /-- If `β < γ`, we have a path directly between the two types in the opposite order.

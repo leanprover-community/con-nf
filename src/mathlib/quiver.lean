@@ -33,7 +33,7 @@ function.injective $ @quiver.path.to_list V _ a b := quiver.path.to_list_injecti
 /-- In quivers with morphisms in `Prop`, a path is uniquely determined by the list of points it
 passes through, due to propositional irrelevance. -/
 def to_list_embedding {V : Type*} [quiver.{0} V] (a b : V) :
-quiver.path a b ↪ list V := ⟨quiver.path.to_list, quiver.path.to_list_injective⟩
+quiver.path a b ↪ list V := ⟨quiver.path.to_list, quiver.path.to_list_injective a b⟩
 
 lemma eq_of_length_zero {V : Type u} [quiver V] {a b : V} (p : quiver.path a b)
 (hzero: p.length = 0) : a = b :=
