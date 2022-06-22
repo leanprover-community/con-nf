@@ -269,7 +269,7 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supp
 
 \begin{definition}
 \label{def:support-of}
-  \uses{def:support, def:structural-perm-derivative, def:support-condition-action}
+  \uses{def:support, def:support-condition-action}
   \lean{con_nf.support}
   \leanok
   Suppose $\varphi : H \to \Str_\alpha$ is any group homomorphism, and $\tau$ is a set equipped with an $H$-action.
@@ -286,7 +286,7 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supp
 
 \begin{definition}
 \label {def:phase-1a-data}
-\uses{def:type-index}
+\uses{def:type-index, def:pretangle}
 \lean{con_nf.phase_1a}
 \leanok
 Fix a proper type index $\alpha$.  \emph{Phase 1a data at $\alpha$} consists of:
@@ -350,7 +350,7 @@ $A_\delta(\alpha,\gamma,G)$ as $$(\alpha,\delta,\{ j_\delta(N) : N \in \bigcup (
 
 (Here $j_\delta(N)$ is the “typed near-litters” of level $\delta$, assumed in the phase 1a data.)
 
-[For the formalisation, each individual $A_\delta$ is probably most easily represented as a function on $\mathcal{P}_{\neq \empty}(\tau_(\gamma))$, rather than on “codes of the form $(\alpha,\gamma,G)$…”]
+[For the formalisation, each individual $A_\delta$ is probably most easily represented as a function on $\mathcal{P}_{\neq \emptyset}(\tau_(\gamma))$, rather than on “codes of the form $(\alpha,\gamma,G)$…”]
 \end{definition}
 
 Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart from the fact that $\alpha$ must be larger than $\gamma$ and $\delta$.
@@ -593,7 +593,7 @@ There is lots to be proven, but that is the entire description.
 
 \begin{definition}
   \label{def:phase-1c-data}
-  \uses{def:phase-1b-data}
+  \uses{def:allowable-perm}
   \emph{Phase 1c data} at a proper type index $\alpha$ consists of:
   \begin{itemize}
   \item phase 1b data (including phase 1a data) at $\alpha$;
@@ -622,7 +622,7 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 
 \begin{definition}
   \label{def:full-phase-1-data}
-  \uses{def:phase-1a-data,def:phase-1b-data,def:phase-1c-data}
+  \uses{def:phase-1c-data}
   \emph{(Full) phase 1 data} at $\alpha$ consists of phase 1c data (including 1a and 1b components), together with:
   \begin{enumerate}
     \item a “typed singleton” injection $k : \tau_{-1} \to \tau$;
@@ -793,7 +793,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 
 \begin{definition}
   \label{def:freedom-of-action-statement}
-  \uses{def:coherent-phase-1-data,def:perm-exception,def:local-bijection,def:flexible,def:allowable-perm-atoms}
+  \uses{def:perm-exception,def:local-bijection,def:flexible,def:allowable-perm-atoms}
   Given coherent part 1 data below $\alpha$, say that \emph{freedom of action holds (at $\alpha$)} if: Given an $\alpha$-local bijection $\pi^0$ and a specification for each path $A : \beta \to \alpha$ a bijection of the $\beta$-flexible litters, there is a unique allowable permutation $\pi \in \All_\alpha$ such that:
   \begin{enumerate}
    \item $\pi{A}$ extends $\pi^0_{A}$ for each $A$;
@@ -980,7 +980,7 @@ Now, everything that we did with supports, we repeat with coding functions.
 
 \begin{definition}
   \label{def:coding-function-spec}
-  \uses{def:coherent-phase-1-data,def:support-spec,def:coding-function}
+  \uses{def:support-spec,def:coding-function}
   A \emph{coding function specification} is \ldots [again, see recent versions of Randall’s note]
 
   [Perhaps the coherence is not needed?]
@@ -1022,7 +1022,7 @@ Now, everything that we did with supports, we repeat with coding functions.
 
 \begin{corollary}
   \label{cor:count-tangles}
-  \uses{def:coherent-phase-1-data,def:freedom-of-action-statement}
+  \uses{def:freedom-of-action-statement}
   There are $\mu$-many $\alpha$-tangles.
 \end{corollary}
 
@@ -1035,7 +1035,7 @@ This completes the proof that each type is of size $\mu$, which finally closes t
 
 \begin{lemma}
   \label{lem:position-functions-propagate}
-  \uses{def:coherent-phase-1-data,def:freedom-of-action-statement}
+  \uses{def:freedom-of-action-statement}
   Given coherent phase 1 data below $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:full-phase-1-data}:
   \begin{enumerate}
     \item for each litter $L$, the typed litter of $L$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
