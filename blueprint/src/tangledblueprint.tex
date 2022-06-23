@@ -550,7 +550,7 @@ We state a couple of easy lemmas which are things we assumed in the inductive da
 
 \begin{lemma}
 \label{def:typed-near-litter}
-\uses{def:code}
+\uses{def:tangle}
 Any code $(\alpha,-1,N)$, where $N$ is a near-litter, gives an element of $\tau_{\alpha}$.
 \end{lemma}
 
@@ -593,12 +593,12 @@ There is lots to be proven, but that is the entire description.
 
 \begin{definition}
   \label{def:phase-1c-data}
-  \uses{def:allowable-perm}
+  \uses{def:phase-1c-data}
   \emph{Phase 1c data} at a proper type index $\alpha$ consists of:
   \begin{itemize}
   \item phase 1b data (including phase 1a data) at $\alpha$;
   \item an injection $\tau \to \Pretangle_\alpha$;
-  \item commuting with the $\All$-action (where $\varphi : \All \to \Str_\alpha$ and its action on $\tau$ is given in the phase 1b data, and its action on pretangles is given by composing the $\Str_\alpha$-action with $\varphi$).
+  \item commuting with the $\All$-action (where $\varphi : \All \to \Str_\alpha$ and its action on $\tau$ is the group action assumed in the phase 1b data, and its action on pretangles is given by composing the $\Str_\alpha$-action with $\varphi$).
   \end{itemize}
 
   For the subsequent constructions of this section, we assume we are given phase 1b data for all $\beta < \alpha$.
@@ -1068,10 +1068,10 @@ We can now wrap up the recursion.  It is a little subtle: to know that the recur
 
 \begin{definition}
   \label{def:very-coherent-data}
-  \uses{def:coherent-phase-1-data,lem:position-functions-propagate}
+  \uses{def:coherent-phase-1-data,lem:position-functions-propagate,thm:freedom-of-action}
   For $\alpha \in \lambda + 1$, a choice of coherent phase 1 data below $\alpha$ is \emph{very coherent} if its ordering functions and designated supports at each level are the ones provided by \cref{lem:position-functions-propagate} applied to the earlier levels, using \cref{thm:freedom-of-action} to supply the assumption of freedom of action.
 
-  [This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice.]
+  [This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice.  See also discusson above replacing this with an explicit principle of “dependent choice”.]
 \end{definition}
 
 \begin{lemma}
