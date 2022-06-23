@@ -17,7 +17,7 @@ recursion. Note that this is slightly different to the blueprint's formulation; 
 1a data *cumulatively*, for all previous iterations of the recursion at once. -/
 class phase_1a (α : Λ) :=
 (tangle : Π β < α, Type u)
-(to_tangle : Π β (h : β < α), litter ↪ tangle β h)
+(to_tangle : Π β (h : β < α), (Σ i, {s // is_near_litter i s}) ↪ tangle β h)
 (of_tangle : Π β (h : β < α), tangle β h ↪ μ)
 
 export phase_1a (of_tangle to_tangle)
