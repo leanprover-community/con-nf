@@ -30,19 +30,19 @@ def tangle : Π β < (α : type_index), Type u
 | ((β : Λ) : type_index) h := phase_1a.tangle β $ coe_lt_coe.1 h
 
 /-- A type-`β` code is a type index `γ < β` together with a set of tangles of type `γ`. -/
-structure code (β : Λ) (β_le_α : β ≤ α) :=
+structure code (β : Λ) (β_lt_α : β < α) :=
 (extension : type_index)
 (extension_lt : extension < β)
-(elts : set (tangle α extension (extension_lt.trans_le $ coe_le_coe.mpr β_le_α)))
+(elts : set (tangle α extension (extension_lt.trans $ coe_lt_coe.mpr β_lt_α)))
 
 /-- Suppose that the set of tangles embeds into the set of codes. -/
 class phase_1a_embedding :=
-(tangle_embedding : Π (β < α), tangle _ β (coe_lt_coe.mpr ‹_›) ↪ code _ β (le_of_lt ‹_›))
+(tangle_embedding : Π (β < α), tangle _ β (coe_lt_coe.mpr ‹_›) ↪ code _ β ‹_›)
 
 open phase_1a_embedding
 variable [phase_1a_embedding.{u} α]
 
-def code.is_tangle {β < α} (c : code α β (le_of_lt ‹_›)) : Prop :=
+def code.is_tangle {β < α} (c : code α β ‹_›) : Prop :=
 ∃ t : tangle α β (coe_lt_coe.2 ‹_›), c = tangle_embedding β ‹_› t
 
 end con_nf

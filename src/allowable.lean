@@ -34,20 +34,20 @@ def semiallowable_perm := near_litter_perm × Π β (h : β < α), allowable β 
 
 instance semiallowable_perm_group : group (semiallowable_perm α) := prod.group
 
-instance semiallowable_perm_scalar {β : Λ} {h : β ≤ α} :
+instance semiallowable_perm_scalar {β : Λ} {h : β < α} :
 has_scalar (semiallowable_perm α) (code α β h) :=
 ⟨λ π ⟨γ, hγ, G⟩, begin
   refine ⟨γ, hγ, _⟩,
   cases γ,
   { exact π.fst.atom_perm '' G },
   { rw with_bot.some_eq_coe at hγ, simp at hγ,
-    haveI := allowable_action γ (hγ.trans_le h),
+    haveI := allowable_action γ (hγ.trans h),
     simp_rw with_bot.some_eq_coe,
-    exact (λ g, (π.snd γ (hγ.trans_le h)) • g) '' G }
+    exact (λ g, (π.snd γ (hγ.trans h)) • g) '' G }
 end⟩
 
 -- TODO(zeramorphic)
-instance semiallowable_perm_action {β : Λ} {h : β ≤ α} :
+instance semiallowable_perm_action {β : Λ} {h : β < α} :
 mul_action (semiallowable_perm α) (code α β h) := sorry
 
 end con_nf

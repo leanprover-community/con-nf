@@ -192,7 +192,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 
 \begin{definition}
   \label{def:structural-perm-atoms}
-  \uses{def:atom,def:near-litter}
+  \uses{def:near-litter}
   \leanok
   \lean{con_nf.near_litter_perm}
 
@@ -601,7 +601,7 @@ There is lots to be proven, but that is the entire description.
 
 \begin{definition}
   \label{def:phase-1c-data}
-  \uses{def:phase-1c-data}
+  \uses{def:phase-1b-data}
   \emph{Phase 1c data} at a proper type index $\alpha$ consists of:
   \begin{itemize}
   \item phase 1b data (including phase 1a data) at $\alpha$;
@@ -666,7 +666,7 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 
 \begin{definition}
   \label{def:concrete-phase-1-data-propagates}
-  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,def:allowable-perm,lem:tangle-action}
+  \uses{def:concrete-phase-1-data,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,lem:tangle-action}
   For a proper type index $\alpha \in \lambda$, if we have concrete phase 1 data at all levels $\beta < \alpha$, then the constructions in phase 1 provide \emph{most} components of concrete phase 1 data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$!
 
   In particular, the new set of $\alpha$-tangles $\tau_\alpha \subseteq \Pretangle_\alpha$ is the the image of the $\alpha$-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations.  (We could call these “concrete $\alpha$-tangles” and “abstract $\alpha$-tangles”, if we need to for disambiguation.)
@@ -729,7 +729,7 @@ If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the la
 
 \begin{definition}
 \label{def:strong-support}
-\uses{def:coherent-phase-1-data,def:support-of}
+\uses{def:coherent-phase-1-data}
 A strong support is a support $S$ with certain additional properties.
 
 \begin{enumerate}

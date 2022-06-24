@@ -18,9 +18,9 @@ namespace con_nf
 open params
 variables [params.{u}] {α β γ : Λ} [phase_1a.{u} α]
 
-instance (h : β ≤ α) : linear_order (code α β h) := sorry
+instance (h : β < α) : linear_order (code α β h) := sorry
 
-lemma well_founded_code (h : β ≤ α) : @well_founded (code α β h) (<) := sorry
+lemma well_founded_code (h : β < α) : @well_founded (code α β h) (<) := sorry
 
 lemma well_founded_of_tangle (h : β < α) :
   well_founded (λ a b, of_tangle _ h a < of_tangle _ _ b) :=
