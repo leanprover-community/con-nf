@@ -100,6 +100,8 @@ Define $\mathcal L$ as $ \lambda ^ 2 \times \mu$ and $\tau_{-1}$ as $\mathcal L 
 Note that both sets have size $\mu$.
 \end{definition}
 
+{\bf Holmes comment:  I didn't expect that $\lambda^2$ but I think I see what it is doing}
+
 We may refer to objects of type $-1$ as ``atoms".  They are not understood here to be atoms in a conventional sense, but the analogous objects in earlier versions of the construction were atoms and I have this mental habit.
 
 \begin{definition}
@@ -120,7 +122,7 @@ Note that the litters make up a partition of type $-1$ into sets of size $\kappa
 \uses{def:litter, def:small}
 \leanok
 \lean{con_nf.is_near_litter}
-A subset of $\tau_{-1}$ is a $i$-{\em near-litter} precisely if it has small symmetric difference from  litter.
+A subset of $\tau_{-1}$ is a $i$-{\em near-litter} precisely if it has small symmetric difference from  a litter.
 
 We introduce the notation $N^\circ$ for the litter with small symmetric difference from the near-litter $N$.
 With the tacit need to prove that there is only one.
@@ -133,6 +135,8 @@ With the tacit need to prove that there is only one.
 \lean{con_nf.ftargets}
 Define $X_{\beta,\gamma}$ as ${(\beta, \gamma, i) : i \in \mu}$. Note that $|X_{\beta,\gamma}| = \mu$ and that the $X_{\beta,\gamma}$ partition $\mathcal L$.
 \end{definition}
+
+{\bf Holmes comment:  this is what I expected after my initial startlement at the definition of $\tau_{-1}$.}
 
 \begin{definition}
 \label {def:local-cardinal}
@@ -170,11 +174,11 @@ First, there are at least $\mu$ near-litters. Second, the equivalence induced by
 
 One might be concerned with the fact that if $\mu$ has cofinality $\kappa$, it might have more than $\mu$ subsets of size $\kappa$:  but it still has only $\mu$ subsets of size $<\kappa$, and that is what matters for counting the near-litters:  a near-litter is determined as the symmetric difference of a litter ($\mu$ of these) and a small subset (cardinality $<\kappa$) of $\tau_{-1}$ (which is of size $\mu$) and there are only $\mu$ small subsets of $\tau_{-1}$.  If the cofinality of $\mu$ were less than $\kappa$, the cardinal arithmetic pathology mentioned as of concern could come into play.
 
-\section{Preliminaries: pretangles, structural permuations}
+\section{Preliminaries: pretangles, structural permutations}
 
 Before embarking on the large recursive construction of the eventual model, we set up some structures in advance which we will make use of during the main recursion.
 
-We first define a big structure, which can be viewed model of TTT without extensionality, whose elements we call \emph{pretangles}.  In the main recursion, we will carve out our actual model of TTT as a substructure of \emph{tangles} within the pretangles.
+We first define a big structure, which can be viewed as a model of TTT without extensionality, whose elements we call \emph{pretangles}.  In the main recursion, we will carve out our actual model of TTT as a substructure of \emph{tangles} within the pretangles.
 
 \begin{definition}
   \label{def:pretangle}
@@ -192,7 +196,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
   \leanok
   \lean{con_nf.near_litter_perm}
 
-  A \emph{structural $(-1)$-permutation} [aka a near-litter-perm; we should fix on one name or the other] is a permutation $\pi$ of $\tau_{-1}$, along with a permutation $\bar{\pi}$ of litters, such that for each litter $L$, $\pi``(L)$ is near to $\bar{\pi}(L)$ (in the sense that they have small symmetric difference).  Denote the group of these by $\Str{-1}$.
+  A \emph{structural $(-1)$-permutation} [aka a near-litter-perm; we should fix on one name or the other] is a permutation $\pi$ of $\tau_{-1}$, along with a permutation $\bar{\pi}$ of litters, such that for each litter $L$, $\pi``(L)$ is near to $\bar{\pi}(L)$ (in the sense that they have small symmetric difference).  Denote the group of these by $\Str_{-1}$.
 
   [In fact $\bar{\pi}$ is uniquely determined by $\pi$ — we could define this just as a subgroup of $\Sym(\tau_{-1})$.  But it’s convenient in formalisation to have the $\bar{\pi}$ component explicit.]
 
@@ -318,7 +322,7 @@ We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\bet
 For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $[N]$ of the minimal near-litter $N$ (under the ordering induced by $j_\beta \circ \iota_\beta : \mathrm{NearLit} \to \tau_\beta \to \mu$) such that:
 \begin{itemize}
   \item $[N]\in X_{(\beta,\gamma)}$, i.e. $[N] = L_{(\beta,\gamma,i)}$, for some $i$;
-  \item for each $M \in [N]$, $\iota_\gamma(\gamma,-1,M) >\iota_\beta(x)$;
+  \item for each $M \in [N]$, $\iota_\gamma(j_\gamma(M)) >\iota_\beta(x)$;
   \item $[N] \neq f_{\beta,\gamma}(y)$, for each $y <_\beta x$.
 \end{itemize}
 
@@ -350,7 +354,7 @@ $A_\delta(\alpha,\gamma,G)$ as
 $$(\alpha,\delta,\{ j_\delta(N) : N \simeq f_{\gamma,\delta}(b),\, b \in B \})$$
 if the maps $f_{\gamma,\delta}$ are considered as valued in litters, or
 $$(\alpha,\delta,\{ j_\delta(N) : N \in f_{\gamma,\delta}(b),\, b \in B \})$$
-if they are taken as valued directly in local carcinals.
+if they are taken as valued directly in local cardinals.
 
 (Here $j_\delta(N)$ is the “typed near-litters” map for level $\delta$, assumed in the phase 1a data.)
 
@@ -543,7 +547,7 @@ We take the set of $\alpha$-tangles, $\tau_\alpha$, to be the set of \emph{symme
 \begin{lemma}
   \label{lem:supportedness-equiv}
   \uses{def:codes-action,def:equiv-code}
-  If $X \subseteq \tau_\beta$, $Y \subseteq \tau_\gamma$, and $(\alpha,\beta,X) \equiv_\alpha (\alpha,\gamma,Y)$, then (under the action of allowable permutations on codes) a set $S$ of conditions supports $\alpha$ if and only if it supports $\beta$.  In particular, $\alpha$ has some small support if and only if $\beta$ does.
+  If $X \subseteq \tau_\beta$, $Y \subseteq \tau_\gamma$, and $(\alpha,\beta,X) \equiv_\alpha (\alpha,\gamma,Y)$, then (under the action of allowable permutations on codes) a set $S$ of conditions supports $\alpha$ if and only if it supports $\beta$.  In particular,  $(\alpha,\beta,X)$ has some small support if and only if $(\alpha,\gamma,Y)$ does.
 \end{lemma}
 
 \begin{proof}
