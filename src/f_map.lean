@@ -104,43 +104,44 @@ blueprint, except that it is defined as a function `μ → μ` instead of from t
 However, given the conversion functions in `phase_1a`, it is an easy translation into the true
 `f_map` as required. -/
 noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) : μ → μ
-| x := let f_map_core' := λ (y < x), f_map_core y in have this : {i : μ |
+| x := let f_map_core' := λ (y < x), f_map_core y in have this : {i |
     (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
       x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
     ∧ ∀ y (H : y < x), f_map_core' y H ≠ i
   }.nonempty, begin
-    by_contradiction, refine lt_irrefl (#μ) _,
-    rw set.not_nonempty_iff_eq_empty at h,
-    rw ← cardinal.mk_emptyc_iff at h,
-
-    refine lt_of_le_of_lt _ _,
-    exact #{a : μ | (∃ (N : {s // is_near_litter ((β, γ), a) s}),
-        (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), a), N⟩) ≤ x)
-      ∨ ∃ y (H : y < x), f_map_core' y H = a},
+    by_contradiction, refine lt_irrefl (#μ) (lt_of_le_of_lt _ _),
+    -- We need to explicitly specify which intermediate cardinal to use in the transitivity
+    -- argument; the elaborator can't determine it at this point.
+    exact #{i | (∃ (N : {s // is_near_litter ((β, γ), i) s}),
+        of_tangle _ hγ (to_tangle _ _ ⟨((β, γ), i), N⟩) ≤ x)
+      ∨ ∃ y (H : y < x), f_map_core' y H = i},
 
     { convert cardinal.mk_union_le
-        {i : μ |
+        {i |
           (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
             x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
           ∧ ∀ y (H : y < x), f_map_core' y H ≠ i }
-        ({i : μ | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+        ({i | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
             of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
-          ∪ {i : μ | ∃ y (H : y < x), f_map_core' y H = i}) using 1,
+          ∪ {i | ∃ y (H : y < x), f_map_core' y H = i}) using 1,
       { rw ← cardinal.mk_univ, congr,
+        -- This is just basic logic and linear arithmetic.
+        -- However, we can't close the goal with just `tauto` or `linarith` since both styles of
+        -- reasoning are used at once.
         refine (set.eq_univ_of_forall _).symm,
         intro i,
         by_cases h₁ : (∀ (N : subtype (is_near_litter ((β, γ), i))),
           x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
           ∧ ∀ y (H : y < x), f_map_core' y H ≠ i,
         { left, exact h₁ },
-        { right,
-          dsimp,
-          rw not_and_distrib at h₁,
-          rw not_forall at h₁,
+        { right, dsimp,
+          rw [not_and_distrib, not_forall] at h₁,
           cases h₁,
           { left, obtain ⟨N, hN⟩ := h₁, exact ⟨N, le_of_not_lt hN⟩ },
           { right, rw not_forall at h₁, obtain ⟨y, hy⟩ := h₁, simp at hy ⊢, exact ⟨y, hy⟩ } } },
-      { rw h, rw zero_add, rw set.union_def, refl } },
+      { rw set.not_nonempty_iff_eq_empty at h,
+        rw ← cardinal.mk_emptyc_iff at h,
+        rw h, rw zero_add, rw set.union_def, refl } },
 
     { have inflationary := mk_litters_inflationary_constraint β γ hβ hγ x,
       have inj := mk_litters_inj_constraint β γ hβ hγ x (λ y hy, f_map_core y),
