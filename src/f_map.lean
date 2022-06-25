@@ -68,16 +68,15 @@ begin
 end
 
 /-- Only `< μ` elements of `μ` have been hit so far by f_map_core. -/
-lemma mk_litters_inj_constraint (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) (f_map_core' : {y // y < x} → μ) :
-#{i : μ | ∃ y, f_map_core' y = i} < #μ :=
+lemma mk_litters_inj_constraint (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+(f_map_core' : {y // y < x} → μ) : #{i : μ | ∃ y, f_map_core' y = i} < #μ :=
 begin
-  /- same proof sketch; each predecessor can rule out at most one thing -/
-  /- have μ,
-  choose a well-ordering of μ with smallest order type (as an ordinal)
-  the initial ordinal of a cardinal is the smallest order type of a set of that cardinality
-  the initial ordinal of μ, all proper initial segments have smaller cardinality than μ
-  by contradiction, use this set -/
-  sorry
+  have range_rw : {i : μ | ∃ y, f_map_core' y = i} = set.range f_map_core' := rfl,
+  rw range_rw, clear range_rw,
+  have mk_range_le := @cardinal.mk_range_le _ _ f_map_core',
+  simp at mk_range_le,
+  refine lt_of_le_of_lt mk_range_le (cardinal.card_typein_lt (<) x _), clear mk_range_le,
+  exact μ_ord.symm
 end
 
 /-- The core of the definition for the f-maps. This is essentially the definition as in the
@@ -85,7 +84,7 @@ blueprint, except that it is defined as a function `μ → μ` instead of from t
 However, given the conversion functions in `phase_1a`, it is an easy translation into the true
 `f_map` as required. -/
 noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) : μ → μ
-| x := (have this : {i : μ |
+| x := have this : {i : μ |
     (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
       x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
     ∧ ∀ y < x, have y < x := ‹_›, f_map_core y ≠ i
@@ -131,7 +130,7 @@ noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) : μ �
     have inj := mk_litters_inj_constraint β γ hβ hγ x f_map_core',
     refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt _ inflationary inj),
     exact κ_regular.aleph_0_le.trans κ_le_μ
-  end, this).some
+  end, this.some
 using_well_founded { dec_tac := `[assumption] }
 
 /-- The f-maps. -/
