@@ -99,11 +99,98 @@ begin
   rw this, exact lt_of_le_of_lt cardinal.mk_range_le (principal_seg_card_lt x),
 end
 
+/-!
+To keep track of the hypotheses that went into creating the f-maps, we create a few structures to
+store the result of the f-map as well as the conditions on their values.
+-/
+
+def f_map_generator {β γ : Λ} (hβ : β < α) (hγ : γ < α)
+(x : μ) (R : Π y < x, μ) := {i |
+  (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+    x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
+  ∧ ∀ y (H : y < x), R y H ≠ i
+}
+
+def pre_f_map_result_is_viable (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) (R : Π y < x, μ) :=
+∀ y ≤ x, (f_map_generator hβ hγ y (λ z hz, R z (lt_of_lt_of_le hz H))).nonempty
+
+def pre_f_map_result_is_allowed (β γ : Λ) (hβ : β < α) (hγ : γ < α)
+(x : μ) (R : Π y ≤ x, μ) :=
+Σ' hv : pre_f_map_result_is_viable β γ hβ hγ x (λ z hz, R z (le_of_lt hz)),
+∀ y ≤ x, R y ‹_› = (hv y ‹_›).some
+
+def f_map_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) : Type u :=
+{R : Π y ≤ x, μ // nonempty (pre_f_map_result_is_allowed β γ hβ hγ x R)}
+
+def extend_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+(h_lt : Π y < x, f_map_result β γ hβ hγ y) : Π y < x, μ := λ y hy, (h_lt y hy).val y le_rfl
+
+/-- By construction, all the f_map_results have matching output values, where they are defined. -/
+lemma f_map_result_coherent (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x y : μ)
+(fx : f_map_result β γ hβ hγ x) (fy : f_map_result β γ hβ hγ y) :
+Π (z : μ), z ≤ x → z ≤ y → fx.val z ‹_› = fy.val z ‹_›
+| z hzx hzy := begin
+  rw (fx.property.some).snd z hzx,
+  rw (fy.property.some).snd z hzy,
+  congr,
+  ext w hw, dsimp,
+  refine f_map_result_coherent w _ _
+end
+using_well_founded { dec_tac := `[exact psigma.lex.left _ _ ‹_›] }
+
+/-- We can recursively construct the (unique) f_map_result for arbitrary `x`. -/
+noncomputable def mk_f_map_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+(h_lt : Π y < x, f_map_result β γ hβ hγ y)
+(hx : (f_map_generator hβ hγ x $ extend_result β γ hβ hγ x h_lt).nonempty)
+: f_map_result β γ hβ hγ x :=
+begin
+  refine ⟨λ y hy, _, _⟩,
+  { by_cases x = y,
+    { exact hx.some },
+    { refine (h_lt y _).val y le_rfl,
+      rw le_iff_lt_or_eq at hy,
+      cases hy,
+      { exact hy },
+      { exfalso, exact h hy.symm } } },
+  refine ⟨⟨_, _⟩⟩,
+  { intros y hy,
+    by_cases x = y,
+    { subst h, convert hx, unfold extend_result, ext z hz, split_ifs,
+      { exfalso, exact ne_of_lt hz h.symm },
+      { refl } },
+    { convert (h_lt y (lt_of_le_of_ne hy (ne.symm h))).property.some.fst y le_rfl,
+      ext z hz, dsimp, split_ifs with h₁,
+      { exfalso, rw h₁ at hy, exact not_lt_of_ge hy hz },
+      { exact f_map_result_coherent β γ hβ hγ z y (h_lt z _) (h_lt y _) z le_rfl _ } } },
+  { intros y hy, dsimp,
+    split_ifs,
+    { subst h, congr,
+      ext z hz, split_ifs,
+      { exfalso, exact ne_of_lt hz h.symm, },
+      { refl } },
+    { convert ((h_lt y _).property.some).snd y le_rfl,
+      ext z hz, split_ifs with h₁,
+      { exfalso, rw h₁ at hy, exact not_lt_of_ge hy hz },
+      { exact f_map_result_coherent β γ hβ hγ z y (h_lt z _) (h_lt y _) z le_rfl _ } } }
+end
+
 /-- The core of the definition for the f-maps. This is essentially the definition as in the
 blueprint, except that it is defined as a function `μ → μ` instead of from tangles to litters.
 However, given the conversion functions in `phase_1a`, it is an easy translation into the true
 `f_map` as required. -/
-noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) : μ → μ
+@[irreducible] noncomputable def f_map_core_new (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
+Π (x : μ), f_map_result β γ hβ hγ x
+| x := begin
+  refine mk_f_map_result β γ hβ hγ x (λ y hy, f_map_core_new y) _,
+  sorry
+end
+using_well_founded { dec_tac := `[assumption] }
+
+/-- The core of the definition for the f-maps. This is essentially the definition as in the
+blueprint, except that it is defined as a function `μ → μ` instead of from tangles to litters.
+However, given the conversion functions in `phase_1a`, it is an easy translation into the true
+`f_map` as required. -/
+@[irreducible] noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) : μ → μ
 | x := let f_map_core' := λ (y < x), f_map_core y in have this : {i |
     (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
       x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
@@ -130,8 +217,7 @@ noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) : μ �
         -- reasoning are used at once.
         refine (set.eq_univ_of_forall _).symm,
         intro i,
-        by_cases h₁ : (∀ (N : subtype (is_near_litter ((β, γ), i))),
-          x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
+        by_cases h₁ : (∀ N, x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
           ∧ ∀ y (H : y < x), f_map_core' y H ≠ i,
         { left, exact h₁ },
         { right, dsimp,
@@ -151,7 +237,7 @@ noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) : μ �
 using_well_founded { dec_tac := `[assumption] }
 
 /-- The f-maps. -/
-noncomputable def f_map (β γ : Λ) (hβ : β < α) (hγ : γ < α)
+@[irreducible] noncomputable def f_map (β γ : Λ) (hβ : β < α) (hγ : γ < α)
 (a : tangle α β (coe_lt_coe.2 hβ)) : litter := ⟨⟨β, γ⟩, f_map_core β γ hβ hγ (of_tangle _ _ a)⟩
 
 /-!
@@ -161,7 +247,70 @@ TODO: Once these properties have all been proven, we can be (relatively) certain
 of `f_map` is correct.
 -/
 
-lemma f_map_injective (β γ : Λ) (hβ : β < α) (hγ : γ < α) : function.injective $ f_map β γ hβ hγ := sorry
+local attribute [semireducible] f_map_core f_map
+
+private lemma f_map_core_set_nonempty (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) :
+let f_map_core' := λ (y < x), f_map_core β γ hβ hγ y in {i |
+  (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+    x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
+  ∧ ∀ y (H : y < x), f_map_core' y H ≠ i
+}.nonempty :=
+-- An almost verbatim copy of the proof inside `f_map_core`.
+-- TODO: Is it possible to somehow extract the inner proof to avoid this duplication?
+let f_map_core' := λ (y < x), f_map_core β γ hβ hγ y in begin
+  by_contradiction, refine lt_irrefl (#μ) (lt_of_le_of_lt _ _),
+  exact #{i | (∃ (N : {s // is_near_litter ((β, γ), i) s}),
+      of_tangle _ hγ (to_tangle _ _ ⟨((β, γ), i), N⟩) ≤ x)
+    ∨ ∃ y (H : y < x), f_map_core' y H = i},
+  { convert cardinal.mk_union_le
+      {i |
+        (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+          x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
+        ∧ ∀ y (H : y < x), f_map_core' y H ≠ i }
+      ({i | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+          of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
+        ∪ {i | ∃ y (H : y < x), f_map_core' y H = i}) using 1,
+    { rw ← cardinal.mk_univ, congr,
+      refine (set.eq_univ_of_forall _).symm,
+      intro i,
+      by_cases h₁ : (∀ N, x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
+        ∧ ∀ y (H : y < x), f_map_core' y H ≠ i,
+      { left, exact h₁ },
+      { right, dsimp,
+        rw [not_and_distrib, not_forall] at h₁,
+        cases h₁,
+        { left, obtain ⟨N, hN⟩ := h₁, exact ⟨N, le_of_not_lt hN⟩ },
+        { right, rw not_forall at h₁, obtain ⟨y, hy⟩ := h₁, simp at hy ⊢, exact ⟨y, hy⟩ } } },
+    { rw set.not_nonempty_iff_eq_empty at h,
+      rw ← cardinal.mk_emptyc_iff at h,
+      rw h, rw zero_add, rw set.union_def, refl } },
+  { have inflationary := mk_litters_inflationary_constraint β γ hβ hγ x,
+    have inj := mk_litters_inj_constraint β γ hβ hγ x (λ y hy, f_map_core' y hy),
+    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt _ inflationary inj),
+    exact κ_regular.aleph_0_le.trans κ_le_μ }
+end
+
+private lemma unfold_f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
+Π (x : μ), f_map_core β γ hβ hγ x = (f_map_core_set_nonempty β γ hβ hγ x).some
+| x := begin
+  unfold f_map_core, simp,
+  congr, ext i, dsimp,
+end
+
+lemma f_map_core_injective (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
+function.injective $ f_map_core β γ hβ hγ :=
+begin
+  intros i j h,
+  wlog : i ≤ j using i j,
+
+end
+
+lemma f_map_injective (β γ : Λ) (hβ : β < α) (hγ : γ < α) : function.injective $ f_map β γ hβ hγ :=
+begin
+  intros i j h,
+  unfold f_map at h, simp at h,
+  exact (of_tangle β hβ).inj' (f_map_core_injective β γ hβ hγ h)
+end
 
 lemma f_map_range (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : tangle α β (coe_lt_coe.2 hβ)) :
 (f_map β γ hβ hγ x).fst = ⟨β, γ⟩ := rfl
