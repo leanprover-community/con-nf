@@ -92,60 +92,60 @@ end
 
 /-- Only `< μ` elements of `μ` have been hit so far by f_map_core. -/
 lemma mk_litters_inj_constraint (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
-(f_map_core' : {y // y < x} → μ) : #{i : μ | ∃ y, f_map_core' y = i} < #μ :=
-lt_of_le_of_lt cardinal.mk_range_le (principal_seg_card_lt x)
+(f_map_core : Π (y < x), μ) : #{i : μ | ∃ y < x, f_map_core y ‹_› = i} < #μ :=
+begin
+  have : {i | ∃ y < x, f_map_core y ‹_› = i}
+    = {i | ∃ (y : {y // y < x}), f_map_core y.val y.property = i} := by simp,
+  rw this, exact lt_of_le_of_lt cardinal.mk_range_le (principal_seg_card_lt x),
+end
 
 /-- The core of the definition for the f-maps. This is essentially the definition as in the
 blueprint, except that it is defined as a function `μ → μ` instead of from tangles to litters.
 However, given the conversion functions in `phase_1a`, it is an easy translation into the true
 `f_map` as required. -/
 noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) : μ → μ
-| x := have this : {i : μ |
+| x := let f_map_core' := λ (y < x), f_map_core y in have this : {i : μ |
     (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
       x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
-    ∧ ∀ y < x, have y < x := ‹_›, f_map_core y ≠ i
+    ∧ ∀ y (H : y < x), f_map_core' y H ≠ i
   }.nonempty, begin
-    let f_map_core' : {y // y < x} → μ := λ ⟨y, hy⟩, have y < x := hy, f_map_core y,
-    have unfold_f_map_core' : ∀ i, (∃ y, f_map_core' y = i) ↔
-      ∃ y < x, have y < x := ‹_›, f_map_core y = i,
-    { intro i, split,
-      { rintro ⟨⟨y, hy₁⟩, hy₂⟩, exact ⟨y, hy₁, hy₂⟩ },
-      { rintro ⟨y, hy₁, hy₂⟩, exact ⟨⟨y, hy₁⟩, hy₂⟩ } },
-    have cases_total : ∀ i, ((∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-          x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
-        ∧ ∀ y < x, have y < x := ‹_›, f_map_core y ≠ i)
-      ∨ (∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-        of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x) ∨ (∃ y, f_map_core' y = i),
-    { intro i, rw unfold_f_map_core',
-      by_cases h₁ : (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-          x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩)),
-      { by_cases h₂ : ∀ y < x, have y < x := ‹_›, f_map_core y ≠ i,
-        { left, exact ⟨h₁, h₂⟩ },
-        { right, right, push_neg at h₂, obtain ⟨y, hy₁, hy₂⟩ := h₂, exact ⟨y, hy₁, hy₂⟩ } },
-      { right, left, push_neg at h₁, exact h₁ } },
-
-    by_contradiction, rw set.not_nonempty_iff_eq_empty at h,
+    by_contradiction, refine lt_irrefl (#μ) _,
+    rw set.not_nonempty_iff_eq_empty at h,
     rw ← cardinal.mk_emptyc_iff at h,
-    have := cardinal.mk_union_le
-      {i : μ |
-        (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-          x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
-        ∧ ∀ y < x, f_map_core y ≠ i }
-      ({i : μ | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-          of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
-        ∪ {i : μ | ∃ y, f_map_core' y = i}),
-    rw h at this,
 
-    rw [set.union_def, set.union_def] at this,
-    simp_rw [set.mem_set_of, cases_total] at this,
-    dsimp at this, rw cardinal.mk_univ at this,
-    refine lt_irrefl (#μ) (lt_of_le_of_lt this _),
+    refine lt_of_le_of_lt _ _,
+    exact #{a : μ | (∃ (N : {s // is_near_litter ((β, γ), a) s}),
+        (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), a), N⟩) ≤ x)
+      ∨ ∃ y (H : y < x), f_map_core' y H = a},
 
-    rw zero_add,
-    have inflationary := mk_litters_inflationary_constraint β γ hβ hγ x,
-    have inj := mk_litters_inj_constraint β γ hβ hγ x f_map_core',
-    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt _ inflationary inj),
-    exact κ_regular.aleph_0_le.trans κ_le_μ
+    { convert cardinal.mk_union_le
+        {i : μ |
+          (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+            x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
+          ∧ ∀ y (H : y < x), f_map_core' y H ≠ i }
+        ({i : μ | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+            of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
+          ∪ {i : μ | ∃ y (H : y < x), f_map_core' y H = i}) using 1,
+      { rw ← cardinal.mk_univ, congr,
+        refine (set.eq_univ_of_forall _).symm,
+        intro i,
+        by_cases h₁ : (∀ (N : subtype (is_near_litter ((β, γ), i))),
+          x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
+          ∧ ∀ y (H : y < x), f_map_core' y H ≠ i,
+        { left, exact h₁ },
+        { right,
+          dsimp,
+          rw not_and_distrib at h₁,
+          rw not_forall at h₁,
+          cases h₁,
+          { left, obtain ⟨N, hN⟩ := h₁, exact ⟨N, le_of_not_lt hN⟩ },
+          { right, rw not_forall at h₁, obtain ⟨y, hy⟩ := h₁, simp at hy ⊢, exact ⟨y, hy⟩ } } },
+      { rw h, rw zero_add, rw set.union_def, refl } },
+
+    { have inflationary := mk_litters_inflationary_constraint β γ hβ hγ x,
+      have inj := mk_litters_inj_constraint β γ hβ hγ x (λ y hy, f_map_core y),
+      refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt _ inflationary inj),
+      exact κ_regular.aleph_0_le.trans κ_le_μ }
   end, this.some
 using_well_founded { dec_tac := `[assumption] }
 
