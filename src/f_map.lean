@@ -175,70 +175,66 @@ begin
 end
 
 /-- The core of the definition for the f-maps. This is essentially the definition as in the
-blueprint, except that it is defined as a function `μ → μ` instead of from tangles to litters.
-However, given the conversion functions in `phase_1a`, it is an easy translation into the true
-`f_map` as required. -/
-@[irreducible] noncomputable def f_map_core_new (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
+blueprint, except that it is defined as a function from `μ` to `f_map_result` instead of from
+tangles to litters. This gives two benefits:
+1. We preserve the hypotheses of the construction. This allows us to easily derive properties of the
+  `f_map` function later.
+2. Given the conversion functions in `phase_1a`, it is an easy translation into the true `f_map`
+  as required. -/
+@[irreducible] noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
 Π (x : μ), f_map_result β γ hβ hγ x
-| x := begin
-  refine mk_f_map_result β γ hβ hγ x (λ y hy, f_map_core_new y) _,
-  sorry
+| x := let f_map_core' := λ (y < x), (f_map_core y).val y le_rfl in begin
+  refine mk_f_map_result β γ hβ hγ x (λ y hy, f_map_core y) _,
+  by_contradiction, refine lt_irrefl (#μ) (lt_of_le_of_lt _ _),
+  -- We need to explicitly specify which intermediate cardinal to use in the transitivity
+  -- argument; the elaborator can't determine it at this point.
+  exact #{i | (∃ (N : {s // is_near_litter ((β, γ), i) s}),
+      of_tangle _ hγ (to_tangle _ _ ⟨((β, γ), i), N⟩) ≤ x)
+    ∨ ∃ y (H : y < x), f_map_core' y H = i},
+
+  { convert cardinal.mk_union_le
+      {i |
+        (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+          x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
+        ∧ ∀ y (H : y < x), f_map_core' y H ≠ i }
+      ({i | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+          of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
+        ∪ {i | ∃ y (H : y < x), f_map_core' y H = i}) using 1,
+    { rw ← cardinal.mk_univ, congr,
+      -- This is just basic logic and linear arithmetic.
+      -- However, we can't close the goal with just `tauto` or `linarith` since both styles of
+      -- reasoning are used at once.
+      refine (set.eq_univ_of_forall _).symm,
+      intro i,
+      by_cases h₁ : (∀ N, x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
+        ∧ ∀ y (H : y < x), f_map_core' y H ≠ i,
+      { left, exact h₁ },
+      { right, dsimp,
+        rw [not_and_distrib, not_forall] at h₁,
+        cases h₁,
+        { left, obtain ⟨N, hN⟩ := h₁, exact ⟨N, le_of_not_lt hN⟩ },
+        { right, rw not_forall at h₁, obtain ⟨y, hy⟩ := h₁, simp at hy ⊢, exact ⟨y, hy⟩ } } },
+    { rw set.not_nonempty_iff_eq_empty at h,
+      rw ← cardinal.mk_emptyc_iff at h,
+      suffices : f_map_generator hβ hγ x
+        (extend_result β γ hβ hγ x (λ (y : μ) (hy : y < x), f_map_core y)) =
+        {i : μ | (∀ (N : subtype (is_near_litter ((β, γ), i))),
+          x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
+          ∧ ∀ (y : μ) (H : y < x), f_map_core' y H ≠ i},
+      { rw this at h, rw [h, zero_add, set.union_def], refl },
+      unfold f_map_generator, congr } },
+
+  { have inflationary := mk_litters_inflationary_constraint β γ hβ hγ x,
+    have inj := mk_litters_inj_constraint β γ hβ hγ x f_map_core',
+    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt _ inflationary inj),
+    exact κ_regular.aleph_0_le.trans κ_le_μ }
 end
-using_well_founded { dec_tac := `[assumption] }
-
-/-- The core of the definition for the f-maps. This is essentially the definition as in the
-blueprint, except that it is defined as a function `μ → μ` instead of from tangles to litters.
-However, given the conversion functions in `phase_1a`, it is an easy translation into the true
-`f_map` as required. -/
-@[irreducible] noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) : μ → μ
-| x := let f_map_core' := λ (y < x), f_map_core y in have this : {i |
-    (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-      x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
-    ∧ ∀ y (H : y < x), f_map_core' y H ≠ i
-  }.nonempty, begin
-    by_contradiction, refine lt_irrefl (#μ) (lt_of_le_of_lt _ _),
-    -- We need to explicitly specify which intermediate cardinal to use in the transitivity
-    -- argument; the elaborator can't determine it at this point.
-    exact #{i | (∃ (N : {s // is_near_litter ((β, γ), i) s}),
-        of_tangle _ hγ (to_tangle _ _ ⟨((β, γ), i), N⟩) ≤ x)
-      ∨ ∃ y (H : y < x), f_map_core' y H = i},
-
-    { convert cardinal.mk_union_le
-        {i |
-          (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-            x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
-          ∧ ∀ y (H : y < x), f_map_core' y H ≠ i }
-        ({i | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-            of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
-          ∪ {i | ∃ y (H : y < x), f_map_core' y H = i}) using 1,
-      { rw ← cardinal.mk_univ, congr,
-        -- This is just basic logic and linear arithmetic.
-        -- However, we can't close the goal with just `tauto` or `linarith` since both styles of
-        -- reasoning are used at once.
-        refine (set.eq_univ_of_forall _).symm,
-        intro i,
-        by_cases h₁ : (∀ N, x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
-          ∧ ∀ y (H : y < x), f_map_core' y H ≠ i,
-        { left, exact h₁ },
-        { right, dsimp,
-          rw [not_and_distrib, not_forall] at h₁,
-          cases h₁,
-          { left, obtain ⟨N, hN⟩ := h₁, exact ⟨N, le_of_not_lt hN⟩ },
-          { right, rw not_forall at h₁, obtain ⟨y, hy⟩ := h₁, simp at hy ⊢, exact ⟨y, hy⟩ } } },
-      { rw set.not_nonempty_iff_eq_empty at h,
-        rw ← cardinal.mk_emptyc_iff at h,
-        rw h, rw zero_add, rw set.union_def, refl } },
-
-    { have inflationary := mk_litters_inflationary_constraint β γ hβ hγ x,
-      have inj := mk_litters_inj_constraint β γ hβ hγ x (λ y hy, f_map_core y),
-      refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt _ inflationary inj),
-      exact κ_regular.aleph_0_le.trans κ_le_μ }
-  end, this.some
 using_well_founded { dec_tac := `[assumption] }
 
 /-- The f-maps. -/
 @[irreducible] noncomputable def f_map (β γ : Λ) (hβ : β < α) (hγ : γ < α)
-(a : tangle α β (coe_lt_coe.2 hβ)) : litter := ⟨⟨β, γ⟩, f_map_core β γ hβ hγ (of_tangle _ _ a)⟩
+(a : tangle α β (coe_lt_coe.2 hβ)) : litter :=
+⟨⟨β, γ⟩, (f_map_core β γ hβ hγ (of_tangle _ _ a)).val (of_tangle _ _ a) le_rfl⟩
 
 /-!
 The f-maps have a number of useful properties.
