@@ -70,14 +70,7 @@ end
 /-- Only `< μ` elements of `μ` have been hit so far by f_map_core. -/
 lemma mk_litters_inj_constraint (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
 (f_map_core' : {y // y < x} → μ) : #{i : μ | ∃ y, f_map_core' y = i} < #μ :=
-begin
-  have range_rw : {i : μ | ∃ y, f_map_core' y = i} = set.range f_map_core' := rfl,
-  rw range_rw, clear range_rw,
-  have mk_range_le := @cardinal.mk_range_le _ _ f_map_core',
-  simp at mk_range_le,
-  refine lt_of_le_of_lt mk_range_le (cardinal.card_typein_lt (<) x _), clear mk_range_le,
-  exact μ_ord.symm
-end
+lt_of_le_of_lt cardinal.mk_range_le (cardinal.card_typein_lt (<) x μ_ord.symm)
 
 /-- The core of the definition for the f-maps. This is essentially the definition as in the
 blueprint, except that it is defined as a function `μ → μ` instead of from tangles to litters.
