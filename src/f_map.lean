@@ -48,8 +48,8 @@ local attribute [semireducible] litter
 `N`, they are positioned higher than `x` in `μ` (under `to_tangle`). We show that there are less
 than `μ` litters that do *not* satisfy this constraint. -/
 lemma mk_litters_inflationary_constraint (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) :
-#{y : μ | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, y⟩ s},
-  of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, y⟩, N⟩) ≤ x} < #μ :=
+#{i : μ | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+  of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x} < #μ :=
 begin
   /- 1. reduce to the version before, with the Σ type - the set in the statement of the lemma is the image of "the set of all near litters N such that of_tangle N ≤ of_tangle a", by forgetting the set component
   should be a lemma: where there is a surjective fn, card image ≤ card of domain
@@ -88,11 +88,49 @@ noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) : μ �
 | x := (have this : {i : μ |
     (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
       x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
-    ∧ ∀ y < x, f_map_core y ≠ i
+    ∧ ∀ y < x, have y < x := ‹_›, f_map_core y ≠ i
   }.nonempty, begin
-    -- The equation compiler uses `hy` as the condition required for well-founded recursion.
-    have f_map_core' : {y // y < x} → μ := λ ⟨y, hy⟩, f_map_core y,
-    sorry
+    let f_map_core' : {y // y < x} → μ := λ ⟨y, hy⟩, have y < x := hy, f_map_core y,
+    have unfold_f_map_core' : ∀ i, (∃ y, f_map_core' y = i) ↔
+      ∃ y < x, have y < x := ‹_›, f_map_core y = i,
+    { intro i, split,
+      { rintro ⟨⟨y, hy₁⟩, hy₂⟩, exact ⟨y, hy₁, hy₂⟩ },
+      { rintro ⟨y, hy₁, hy₂⟩, exact ⟨⟨y, hy₁⟩, hy₂⟩ } },
+    have cases_total : ∀ i, ((∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+          x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
+        ∧ ∀ y < x, have y < x := ‹_›, f_map_core y ≠ i)
+      ∨ (∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+        of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x) ∨ (∃ y, f_map_core' y = i),
+    { intro i, rw unfold_f_map_core',
+      by_cases h₁ : (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+          x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩)),
+      { by_cases h₂ : ∀ y < x, have y < x := ‹_›, f_map_core y ≠ i,
+        { left, exact ⟨h₁, h₂⟩ },
+        { right, right, push_neg at h₂, obtain ⟨y, hy₁, hy₂⟩ := h₂, exact ⟨y, hy₁, hy₂⟩ } },
+      { right, left, push_neg at h₁, exact h₁ } },
+
+    by_contradiction, rw set.not_nonempty_iff_eq_empty at h,
+    rw ← cardinal.mk_emptyc_iff at h,
+    have := cardinal.mk_union_le
+      {i : μ |
+        (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+          x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
+        ∧ ∀ y < x, f_map_core y ≠ i }
+      ({i : μ | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+          of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
+        ∪ {i : μ | ∃ y, f_map_core' y = i}),
+    rw h at this,
+
+    rw [set.union_def, set.union_def] at this,
+    simp_rw [set.mem_set_of, cases_total] at this,
+    dsimp at this, rw cardinal.mk_univ at this,
+    refine lt_irrefl (#μ) (lt_of_le_of_lt this _),
+
+    rw zero_add,
+    have inflationary := mk_litters_inflationary_constraint β γ hβ hγ x,
+    have inj := mk_litters_inj_constraint β γ hβ hγ x f_map_core',
+    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt _ inflationary inj),
+    exact κ_regular.aleph_0_le.trans κ_le_μ
   end, this).some
 using_well_founded { dec_tac := `[assumption] }
 
