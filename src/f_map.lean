@@ -44,6 +44,36 @@ our pool of potential litters.
 
 local attribute [semireducible] litter
 
+/-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
+lemma principal_seg_card_lt (x : μ) : #{y // y < x} < #μ := cardinal.card_typein_lt (<) x μ_ord.symm
+
+/-- Initial segments (sets of the form `{y | y ≤ x}`) have cardinality `< μ`. -/
+lemma initial_seg_card_lt (x : μ) : #{y // y ≤ x} < #μ :=
+begin
+  have : {y | y ≤ x} = {y | y < x} ∪ {x},
+  { rw set.union_def, simp, simp_rw le_iff_lt_or_eq },
+  rw ← set.coe_set_of, rw this,
+  rw cardinal.mk_union_of_disjoint,
+  rw set.coe_set_of,
+  rw cardinal.mk_singleton,
+  by_cases ℵ₀ ≤ #{y // y < x},
+  { convert (principal_seg_card_lt x), exact cardinal.add_one_eq h },
+  { transitivity ℵ₀,
+    push_neg at h, exact cardinal.add_lt_aleph_0 h cardinal.one_lt_aleph_0,
+    exact lt_of_le_of_lt κ_regular.aleph_0_le κ_lt_μ },
+  { simp }
+end
+
+lemma mk_litters_inflationary_constraint' (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) :
+#{N : (Σ i, {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s}) |
+  of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, N.fst⟩, N.snd⟩) ≤ x} < #μ :=
+begin
+  refine lt_of_le_of_lt (cardinal.mk_le_of_injective _) (initial_seg_card_lt x),
+  { rintro ⟨⟨i, N⟩, hN⟩, exact ⟨of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩), hN⟩ },
+  rintros ⟨⟨i, N⟩, hN⟩ ⟨⟨j, M⟩, hM⟩ h,
+  simp at h, obtain ⟨hij, hNM⟩ := h, subst hij, simp at hNM, subst hNM
+end
+
 /-- One of the constraints in defining the f-maps is that for all near-litters to the result litter
 `N`, they are positioned higher than `x` in `μ` (under `to_tangle`). We show that there are less
 than `μ` litters that do *not* satisfy this constraint. -/
@@ -51,26 +81,19 @@ lemma mk_litters_inflationary_constraint (β γ : Λ) (hβ : β < α) (hγ : γ 
 #{i : μ | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
   of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x} < #μ :=
 begin
-  /- 1. reduce to the version before, with the Σ type - the set in the statement of the lemma is the image of "the set of all near litters N such that of_tangle N ≤ of_tangle a", by forgetting the set component
-  should be a lemma: where there is a surjective fn, card image ≤ card of domain
-  2. this set of near-litters has an injection into the predecessors in μ -- each predecessor can rule out at most one litter -/
-  /- rw ← mk_litter,
-  refine le_antisymm _ _,
-  { rw ← @cardinal.mk_univ litter,
-    refine cardinal.mk_le_mk_of_subset _,
-    simp },
-  { refine ⟨⟨λ j, ⟨_, _⟩, _⟩⟩,
-    /- let j_ord := @ordinal.typein _
-      (λ i j, of_tangle _ hβ (to_tangle _ _ i) < of_tangle _ hγ (to_tangle _ _ j))
-      ⟨well_founded_of_litter hβ hγ⟩ j, -/
-    sorry, sorry, sorry } -/
-  sorry
+  suffices : #{i : μ | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
+    of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
+    ≤ #{N : (Σ i, {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s}) |
+    of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, N.fst⟩, N.snd⟩) ≤ x},
+  { exact lt_of_le_of_lt this (mk_litters_inflationary_constraint' _ _ hβ hγ _) },
+  dsimp, refine ⟨⟨λ ⟨i, hi⟩, ⟨⟨i, hi.some⟩, hi.some_spec⟩, _⟩⟩,
+  rintros ⟨i, N, hN⟩ ⟨j, M, hM⟩ hij, simp at hij ⊢, exact hij.left
 end
 
 /-- Only `< μ` elements of `μ` have been hit so far by f_map_core. -/
 lemma mk_litters_inj_constraint (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
 (f_map_core' : {y // y < x} → μ) : #{i : μ | ∃ y, f_map_core' y = i} < #μ :=
-lt_of_le_of_lt cardinal.mk_range_le (cardinal.card_typein_lt (<) x μ_ord.symm)
+lt_of_le_of_lt cardinal.mk_range_le (principal_seg_card_lt x)
 
 /-- The core of the definition for the f-maps. This is essentially the definition as in the
 blueprint, except that it is defined as a function `μ → μ` instead of from tangles to litters.
