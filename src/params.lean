@@ -1,11 +1,6 @@
 import mathlib.order
 import mathlib.well_founded
 import set_theory.cardinal.cofinality
-import order.succ_pred.basic
-import init.core
-import init.data.nat
-import algebra.order.group
-import set_theory.zfc
 
 /-!
 # Parameters of the construction
@@ -47,7 +42,7 @@ simply by name, instead of having to type `params.Λ`, for instance.
 -/
 class params :=
 (Λ : Type u) (Λr : Λ → Λ → Prop) [Λwf : is_well_order Λ Λr]
-(Λ_ord : (ordinal.type Λr) = (#Λ).ord)
+(Λ_ord : ordinal.type Λr = (#Λ).ord)
 (Λ_limit : (#Λ).is_limit)
 (κ : Type u) (κ_regular : (#κ).is_regular)
 (Λ_lt_κ : #Λ < #κ)
@@ -110,7 +105,7 @@ example : params.{0} := { Λ := ℕ ,
   κ_lt_μ := _,
   κ_le_μ_cof := _}-/
 
-example : params.{0} := sorry
+example : params := sorry
 open params
 
 variables [params.{u}] {α β : Type u}
