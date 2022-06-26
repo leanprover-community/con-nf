@@ -245,60 +245,20 @@ of `f_map` is correct.
 
 local attribute [semireducible] f_map_core f_map
 
-private lemma f_map_core_set_nonempty (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) :
-let f_map_core' := λ (y < x), f_map_core β γ hβ hγ y in {i |
-  (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-    x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
-  ∧ ∀ y (H : y < x), f_map_core' y H ≠ i
-}.nonempty :=
--- An almost verbatim copy of the proof inside `f_map_core`.
--- TODO: Is it possible to somehow extract the inner proof to avoid this duplication?
-let f_map_core' := λ (y < x), f_map_core β γ hβ hγ y in begin
-  by_contradiction, refine lt_irrefl (#μ) (lt_of_le_of_lt _ _),
-  exact #{i | (∃ (N : {s // is_near_litter ((β, γ), i) s}),
-      of_tangle _ hγ (to_tangle _ _ ⟨((β, γ), i), N⟩) ≤ x)
-    ∨ ∃ y (H : y < x), f_map_core' y H = i},
-  { convert cardinal.mk_union_le
-      {i |
-        (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-          x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
-        ∧ ∀ y (H : y < x), f_map_core' y H ≠ i }
-      ({i | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-          of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
-        ∪ {i | ∃ y (H : y < x), f_map_core' y H = i}) using 1,
-    { rw ← cardinal.mk_univ, congr,
-      refine (set.eq_univ_of_forall _).symm,
-      intro i,
-      by_cases h₁ : (∀ N, x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
-        ∧ ∀ y (H : y < x), f_map_core' y H ≠ i,
-      { left, exact h₁ },
-      { right, dsimp,
-        rw [not_and_distrib, not_forall] at h₁,
-        cases h₁,
-        { left, obtain ⟨N, hN⟩ := h₁, exact ⟨N, le_of_not_lt hN⟩ },
-        { right, rw not_forall at h₁, obtain ⟨y, hy⟩ := h₁, simp at hy ⊢, exact ⟨y, hy⟩ } } },
-    { rw set.not_nonempty_iff_eq_empty at h,
-      rw ← cardinal.mk_emptyc_iff at h,
-      rw h, rw zero_add, rw set.union_def, refl } },
-  { have inflationary := mk_litters_inflationary_constraint β γ hβ hγ x,
-    have inj := mk_litters_inj_constraint β γ hβ hγ x (λ y hy, f_map_core' y hy),
-    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt _ inflationary inj),
-    exact κ_regular.aleph_0_le.trans κ_le_μ }
-end
-
-private lemma unfold_f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
-Π (x : μ), f_map_core β γ hβ hγ x = (f_map_core_set_nonempty β γ hβ hγ x).some
-| x := begin
-  unfold f_map_core, simp,
-  congr, ext i, dsimp,
-end
-
 lemma f_map_core_injective (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
-function.injective $ f_map_core β γ hβ hγ :=
+function.injective $ λ x, (f_map_core β γ hβ hγ x).val x le_rfl :=
 begin
   intros i j h,
   wlog : i ≤ j using i j,
-
+  dsimp at h,
+  by_contradiction i_ne_j,
+  have i_lt_j := lt_of_le_of_ne case i_ne_j,
+  have snd := (f_map_core β γ hβ hγ j).property.some.snd j le_rfl,
+  simp_rw subtype.val_eq_coe at snd,
+  rw snd at h,
+  have := set.nonempty.some_mem ((f_map_core β γ hβ hγ j).property.some.fst j le_rfl),
+  dsimp at this, rw ← h at this, unfold f_map_generator at this, simp at this,
+  exact this.right i i_lt_j (f_map_result_coherent β γ hβ hγ _ _ _ _ _ _ _)
 end
 
 lemma f_map_injective (β γ : Λ) (hβ : β < α) (hγ : γ < α) : function.injective $ f_map β γ hβ hγ :=
@@ -330,4 +290,5 @@ end
 lemma f_map_position_raising (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : tangle α β (coe_lt_coe.2 hβ))
 (N : set atom) (hN : is_near_litter (f_map β γ hβ hγ x) N) :
 of_tangle β hβ x < of_tangle γ hγ (to_tangle γ hγ ⟨f_map β γ hβ hγ x, N, hN⟩) := sorry
+
 end con_nf
