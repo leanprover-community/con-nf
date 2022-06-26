@@ -35,7 +35,7 @@ def semiallowable_perm := near_litter_perm × Π β (h : β < α), allowable β 
 instance semiallowable_perm_group : group (semiallowable_perm α) := prod.group
 
 instance semiallowable_perm_scalar {β : Λ} {h : β < α} :
-has_scalar (semiallowable_perm α) (code α β h) :=
+has_scalar (semiallowable_perm α) (code α β (le_of_lt h)) :=
 ⟨λ π ⟨γ, hγ, G⟩, begin
   refine ⟨γ, hγ, _⟩,
   cases γ,
@@ -48,6 +48,6 @@ end⟩
 
 -- TODO(zeramorphic)
 instance semiallowable_perm_action {β : Λ} {h : β < α} :
-mul_action (semiallowable_perm α) (code α β h) := sorry
+mul_action (semiallowable_perm α) (code α β (le_of_lt h)) := sorry
 
 end con_nf
