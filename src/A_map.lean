@@ -168,7 +168,9 @@ end
 lemma A_map_relation_well_founded : well_founded (@A_map_relation _ α _) :=
 subrelation.wf A_map_subrelation code_wf
 
-def A_map_predecessor_subsingleton (c : {c : code α α le_rfl // c.elts.nonempty}) :
+/-- There is at most one inverse under an A-map. This corresponds to the fact that there is only one
+code which is related (on the left) to any given code under the A-map relation. -/
+lemma A_map_predecessor_subsingleton (c : {c : code α α le_rfl // c.elts.nonempty}) :
 {d | A_map_relation d c}.subsingleton :=
 begin
   obtain ⟨⟨γ, hγ, G⟩, hG⟩ := c,
@@ -195,5 +197,19 @@ begin
   have fε := f_map_range ε γ hε (coe_lt_coe.mp hγ) j,
   simp_rw [this.left, fε] at fδ, simp at fδ, exact fδ.symm
 end
+
+/-- The height of a code is the amount of iterated images under an inverse alternative extension map
+that it admits. This is uniquely defined since any code has at most one inverse image under the
+A-map, and we can just repeat this process until no inverse image exists. -/
+noncomputable def height : {c : code α α le_rfl // c.elts.nonempty} → ℕ
+| c := begin
+  by_cases ∃ d, A_map_relation d c,
+  { exact height h.some },
+  { exact 0 },
+end
+using_well_founded {
+  rel_tac := λ _ _, `[exact ⟨A_map_relation, A_map_relation_well_founded⟩],
+  dec_tac := `[exact h.some_spec]
+}
 
 end con_nf
