@@ -287,8 +287,20 @@ begin
   simp, refine ⟨_, _⟩; ext; assumption,
 end
 
+lemma f_map_core_position_raising (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+(N : set atom) (hN : is_near_litter ⟨⟨β,γ⟩, (f_map_core β γ hβ hγ x).val x le_rfl⟩ N) :
+x < of_tangle γ hγ (to_tangle γ hγ ⟨⟨⟨β,γ⟩, (f_map_core β γ hβ hγ x).val x le_rfl⟩, N, hN⟩) :=
+begin
+  have snd := (f_map_core β γ hβ hγ x).property.some.snd x le_rfl,
+  have := set.nonempty.some_mem ((f_map_core β γ hβ hγ x).property.some.fst x le_rfl),
+  rw ← snd at this,
+  unfold f_map_generator at this,
+  exact this.left _
+end
+
 lemma f_map_position_raising (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : tangle α β (coe_lt_coe.2 hβ))
 (N : set atom) (hN : is_near_litter (f_map β γ hβ hγ x) N) :
-of_tangle β hβ x < of_tangle γ hγ (to_tangle γ hγ ⟨f_map β γ hβ hγ x, N, hN⟩) := sorry
+of_tangle β hβ x < of_tangle γ hγ (to_tangle γ hγ ⟨f_map β γ hβ hγ x, N, hN⟩) :=
+f_map_core_position_raising β γ hβ hγ (of_tangle β hβ x) N hN
 
 end con_nf
