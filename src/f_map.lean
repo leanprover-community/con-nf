@@ -18,10 +18,6 @@ namespace con_nf
 open params
 variables [params.{u}] {α β γ : Λ} [phase_1a.{u} α]
 
-lemma well_founded_of_tangle (h : β < α) :
-  well_founded (λ a b, of_tangle _ h a < of_tangle _ _ b) :=
-well_founded.inv_image _ is_well_order.wf
-
 /-!
 We now define the f-maps. We will do so in two stages; first, we define it as a function `μ → μ`,
 (named `f_map_core`) and then raise it to be litter-valued and defined on tangles. This allows some
@@ -60,12 +56,12 @@ begin
   { simp }
 end
 
-lemma mk_litters_inflationary_constraint' (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) :
+lemma mk_litters_inflationary_constraint' (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) :
 #{N : (Σ i, {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s}) |
-  of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, N.fst⟩, N.snd⟩) ≤ x} < #μ :=
+  of_tangle α (coe_lt_coe.mpr hγ) (to_tangle _ _ ⟨⟨⟨β, γ⟩, N.fst⟩, N.snd⟩) ≤ x} < #μ :=
 begin
   refine lt_of_le_of_lt (cardinal.mk_le_of_injective _) (initial_seg_card_lt x),
-  { rintro ⟨⟨i, N⟩, hN⟩, exact ⟨of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩), hN⟩ },
+  { rintro ⟨⟨i, N⟩, hN⟩, exact ⟨of_tangle α (coe_lt_coe.mpr hγ) (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩), hN⟩ },
   rintros ⟨⟨i, N⟩, hN⟩ ⟨⟨j, M⟩, hM⟩ h,
   simp at h, obtain ⟨hij, hNM⟩ := h, subst hij, simp at hNM, subst hNM
 end
@@ -73,21 +69,21 @@ end
 /-- One of the constraints in defining the f-maps is that for all near-litters to the result litter
 `N`, they are positioned higher than `x` in `μ` (under `to_tangle`). We show that there are less
 than `μ` litters that do *not* satisfy this constraint. -/
-lemma mk_litters_inflationary_constraint (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) :
+lemma mk_litters_inflationary_constraint (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) :
 #{i : μ | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-  of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x} < #μ :=
+  of_tangle α (coe_lt_coe.mpr hγ) (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x} < #μ :=
 begin
   suffices : #{i : μ | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-    of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
+    of_tangle α (coe_lt_coe.mpr hγ) (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
     ≤ #{N : (Σ i, {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s}) |
-    of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, N.fst⟩, N.snd⟩) ≤ x},
+    of_tangle α (coe_lt_coe.mpr hγ) (to_tangle _ _ ⟨⟨⟨β, γ⟩, N.fst⟩, N.snd⟩) ≤ x},
   { exact lt_of_le_of_lt this (mk_litters_inflationary_constraint' _ _ hβ hγ _) },
   dsimp, refine ⟨⟨λ ⟨i, hi⟩, ⟨⟨i, hi.some⟩, hi.some_spec⟩, _⟩⟩,
   rintros ⟨i, N, hN⟩ ⟨j, M, hM⟩ hij, simp at hij ⊢, exact hij.left
 end
 
 /-- Only `< μ` elements of `μ` have been hit so far by f_map_core. -/
-lemma mk_litters_inj_constraint (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+lemma mk_litters_inj_constraint (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
 (f_map_core : Π (y < x), μ) : #{i : μ | ∃ y < x, f_map_core y ‹_› = i} < #μ :=
 begin
   have : {i | ∃ y < x, f_map_core y ‹_› = i}
@@ -102,29 +98,29 @@ These definitions are private so that we just use the intended properties of the
 their internal structure.
 -/
 
-private def f_map_generator {β γ : Λ} (hβ : β < α) (hγ : γ < α)
+private def f_map_generator {β : type_index} {γ : Λ} (hβ : β < α) (hγ : γ < α)
 (x : μ) (R : Π y < x, μ) := {i |
   (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-    x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
+    x < of_tangle α (coe_lt_coe.mpr hγ) (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
   ∧ ∀ y (H : y < x), R y H ≠ i
 }
 
-private def pre_f_map_result_is_viable (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) (R : Π y < x, μ)
-:= ∀ y ≤ x, (f_map_generator hβ hγ y (λ z hz, R z (lt_of_lt_of_le hz H))).nonempty
+private def pre_f_map_result_is_viable (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+(R : Π y < x, μ) := ∀ y ≤ x, (f_map_generator hβ hγ y (λ z hz, R z (lt_of_lt_of_le hz H))).nonempty
 
-private def pre_f_map_result_is_allowed (β γ : Λ) (hβ : β < α) (hγ : γ < α)
+private def pre_f_map_result_is_allowed (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α)
 (x : μ) (R : Π y ≤ x, μ) :=
 Σ' hv : pre_f_map_result_is_viable β γ hβ hγ x (λ z hz, R z (le_of_lt hz)),
 ∀ y ≤ x, R y ‹_› = (hv y ‹_›).some
 
-private def f_map_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) : Type u :=
+private def f_map_result (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) : Type u :=
 {R : Π y ≤ x, μ // nonempty (pre_f_map_result_is_allowed β γ hβ hγ x R)}
 
-private def extend_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+private def extend_result (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
 (h_lt : Π y < x, f_map_result β γ hβ hγ y) : Π y < x, μ := λ y hy, (h_lt y hy).val y le_rfl
 
 /-- By construction, all the f_map_results have matching output values, where they are defined. -/
-private lemma f_map_result_coherent (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x y : μ)
+private lemma f_map_result_coherent (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x y : μ)
 (fx : f_map_result β γ hβ hγ x) (fy : f_map_result β γ hβ hγ y) :
 Π (z : μ), z ≤ x → z ≤ y → fx.val z ‹_› = fy.val z ‹_›
 | z hzx hzy := begin
@@ -137,7 +133,7 @@ end
 using_well_founded { dec_tac := `[exact psigma.lex.left _ _ ‹_›] }
 
 /-- We can recursively construct the (unique) f_map_result for arbitrary `x`. -/
-private noncomputable def mk_f_map_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+private noncomputable def mk_f_map_result (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
 (h_lt : Π y < x, f_map_result β γ hβ hγ y)
 (hx : (f_map_generator hβ hγ x $ extend_result β γ hβ hγ x h_lt).nonempty)
 : f_map_result β γ hβ hγ x :=
@@ -179,7 +175,8 @@ tangles to litters. This gives two benefits:
   `f_map` function later.
 2. Given the conversion functions in `phase_1a`, it is an easy translation into the true `f_map`
   as required. -/
-@[irreducible] private noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
+@[irreducible] private noncomputable def f_map_core (β : type_index) (γ : Λ)
+(hβ : β < α) (hγ : γ < α) :
 Π (x : μ), f_map_result β γ hβ hγ x
 | x := let f_map_core' := λ (y < x), (f_map_core y).val y le_rfl in begin
   refine mk_f_map_result β γ hβ hγ x (λ y hy, f_map_core y) _,
@@ -187,16 +184,16 @@ tangles to litters. This gives two benefits:
   -- We need to explicitly specify which intermediate cardinal to use in the transitivity
   -- argument; the elaborator can't determine it at this point.
   exact #{i | (∃ (N : {s // is_near_litter ((β, γ), i) s}),
-      of_tangle _ hγ (to_tangle _ _ ⟨((β, γ), i), N⟩) ≤ x)
+      of_tangle α (coe_lt_coe.mpr hγ) (to_tangle _ _ ⟨((β, γ), i), N⟩) ≤ x)
     ∨ ∃ y (H : y < x), f_map_core' y H = i},
 
   { convert cardinal.mk_union_le
       {i |
         (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-          x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
+          x < of_tangle α (coe_lt_coe.mpr hγ) (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
         ∧ ∀ y (H : y < x), f_map_core' y H ≠ i }
       ({i | ∃ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
-          of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
+          of_tangle α (coe_lt_coe.mpr hγ) (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩) ≤ x}
         ∪ {i | ∃ y (H : y < x), f_map_core' y H = i}) using 1,
     { rw ← cardinal.mk_univ, congr,
       -- This is just basic logic and linear arithmetic.
@@ -204,7 +201,7 @@ tangles to litters. This gives two benefits:
       -- reasoning are used at once.
       refine (set.eq_univ_of_forall _).symm,
       intro i,
-      by_cases h₁ : (∀ N, x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
+      by_cases h₁ : (∀ N, x < (of_tangle α (coe_lt_coe.mpr hγ)) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
         ∧ ∀ y (H : y < x), f_map_core' y H ≠ i,
       { left, exact h₁ },
       { right, dsimp,
@@ -217,7 +214,7 @@ tangles to litters. This gives two benefits:
       suffices : f_map_generator hβ hγ x
         (extend_result β γ hβ hγ x (λ (y : μ) (hy : y < x), f_map_core y)) =
         {i : μ | (∀ (N : subtype (is_near_litter ((β, γ), i))),
-          x < (of_tangle γ hγ) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
+          x < (of_tangle α (coe_lt_coe.mpr hγ)) ((to_tangle γ hγ) ⟨((β, γ), i), N⟩))
           ∧ ∀ (y : μ) (H : y < x), f_map_core' y H ≠ i},
       { rw this at h, rw [h, zero_add, set.union_def], refl },
       unfold f_map_generator, congr } },
@@ -230,8 +227,8 @@ end
 using_well_founded { dec_tac := `[assumption] }
 
 /-- The f-maps. -/
-@[irreducible] noncomputable def f_map (β γ : Λ) (hβ : β < α) (hγ : γ < α)
-(a : tangle α β (coe_lt_coe.2 hβ)) : litter :=
+@[irreducible] noncomputable def f_map (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α)
+(a : tangle α β hβ) : litter :=
 ⟨⟨β, γ⟩, (f_map_core β γ hβ hγ (of_tangle _ _ a)).val (of_tangle _ _ a) le_rfl⟩
 
 /-!
@@ -243,7 +240,7 @@ of `f_map` is correct.
 
 local attribute [semireducible] f_map_core f_map
 
-private lemma f_map_core_injective (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
+private lemma f_map_core_injective (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) :
 function.injective $ λ x, (f_map_core β γ hβ hγ x).val x le_rfl :=
 begin
   intros i j h,
@@ -259,20 +256,21 @@ begin
   exact this.right i i_lt_j (f_map_result_coherent β γ hβ hγ _ _ _ _ _ _ _)
 end
 
-lemma f_map_injective (β γ : Λ) (hβ : β < α) (hγ : γ < α) : function.injective $ f_map β γ hβ hγ :=
+lemma f_map_injective (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) :
+function.injective $ f_map β γ hβ hγ :=
 begin
   intros i j h,
   unfold f_map at h, simp at h,
-  exact (of_tangle β hβ).inj' (f_map_core_injective β γ hβ hγ h)
+  exact (of_tangle α hβ).inj' (f_map_core_injective β γ hβ hγ h)
 end
 
-lemma f_map_range (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : tangle α β (coe_lt_coe.2 hβ)) :
+lemma f_map_range (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : tangle α β hβ) :
 (f_map β γ hβ hγ x).fst = ⟨β, γ⟩ := rfl
 
 /-- The f-maps have disjoint ranges; that is, for each choice of pair `(β, γ)`, the range of `f_map`
 is disjoint. -/
 lemma f_map_disjoint : pairwise (@disjoint (set litter) _ _ on
-  (λ ⟨β, γ⟩, set.range (f_map β.val γ.val β.property γ.property)
+  (λ ⟨β, γ⟩, set.range (f_map β.val γ.val (coe_lt_coe.mpr β.property) γ.property)
     : {β // β < α} × {γ // γ < α} → set litter)) :=
 begin
   rintros ⟨β₁, γ₁⟩ ⟨β₂, γ₂⟩ hne N hN,
@@ -282,12 +280,13 @@ begin
   have h₁ : N.fst = ⟨β₁, γ₁⟩ := by { rw ← hN₁, exact f_map_range _ _ _ _ _ },
   have h₂ : N.fst = ⟨β₂, γ₂⟩ := by { rw ← hN₂, exact f_map_range _ _ _ _ _ },
   rw h₁ at h₂, simp at h₂, obtain ⟨β_eq, γ_eq⟩ := h₂,
-  simp, refine ⟨_, _⟩; ext; assumption,
+  simp, refine ⟨_, _⟩; ext, exact option.some_inj.mp β_eq, exact γ_eq
 end
 
-private lemma f_map_core_position_raising (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+private lemma f_map_core_position_raising (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
 (N : set atom) (hN : is_near_litter ⟨⟨β,γ⟩, (f_map_core β γ hβ hγ x).val x le_rfl⟩ N) :
-x < of_tangle γ hγ (to_tangle γ hγ ⟨⟨⟨β,γ⟩, (f_map_core β γ hβ hγ x).val x le_rfl⟩, N, hN⟩) :=
+x < of_tangle α (coe_lt_coe.mpr hγ)
+  (to_tangle γ hγ ⟨⟨⟨β,γ⟩, (f_map_core β γ hβ hγ x).val x le_rfl⟩, N, hN⟩) :=
 begin
   have snd := (f_map_core β γ hβ hγ x).property.some.snd x le_rfl,
   have := set.nonempty.some_mem ((f_map_core β γ hβ hγ x).property.some.fst x le_rfl),
@@ -296,9 +295,9 @@ begin
   exact this.left _
 end
 
-lemma f_map_position_raising (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : tangle α β (coe_lt_coe.2 hβ))
+lemma f_map_position_raising (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : tangle α β hβ)
 (N : set atom) (hN : is_near_litter (f_map β γ hβ hγ x) N) :
-of_tangle β hβ x < of_tangle γ hγ (to_tangle γ hγ ⟨f_map β γ hβ hγ x, N, hN⟩) :=
-f_map_core_position_raising β γ hβ hγ (of_tangle β hβ x) N hN
+of_tangle α hβ x < of_tangle α (coe_lt_coe.mpr hγ) (to_tangle γ hγ ⟨f_map β γ hβ hγ x, N, hN⟩) :=
+f_map_core_position_raising β γ hβ hγ (of_tangle α hβ x) N hN
 
 end con_nf

@@ -24,8 +24,8 @@ end
 /-- The *alternative extension* map. For a non-empty set of tangles `Γ`, consider the code
 `(α, γ, Γ)`. We then construct the non-empty set `Δ` such that `(α, δ, Δ)` is an alternative
 extension of the same object in TTT. -/
-def A_map {γ δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
-{s : set (tangle α γ (coe_lt_coe.2 hγ)) // s.nonempty} →
+def A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
+{s : set (tangle α γ hγ) // s.nonempty} →
 {t : set (tangle α δ (coe_lt_coe.2 hδ)) // t.nonempty}
 | ⟨G, hG⟩ := ⟨⋃ b ∈ G, to_tangle δ hδ '' local_cardinal (f_map γ δ hγ hδ b), begin
   simp,
@@ -42,9 +42,8 @@ begin
   obtain ⟨c, hc₁, hc₂⟩ := this, exact ⟨c, hc₁, x, hx, hc₂⟩
 end
 
-lemma A_map_injective_inner {γ δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
-(s t : {s : set (tangle α γ (coe_lt_coe.2 hγ)) // s.nonempty})
-(h : A_map hγ hδ hγδ s = A_map hγ hδ hγδ t) :
+lemma A_map_injective_inner {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
+(s t : {s : set (tangle α γ hγ) // s.nonempty}) (h : A_map hγ hδ hγδ s = A_map hγ hδ hγδ t) :
 ∀ x ∈ s.val, x ∈ t.val :=
 begin
   cases s with G₁ hG₁, cases t with G₂ hG₂,
@@ -63,7 +62,7 @@ begin
   exact this ⟨hs₁, ht₁⟩,
 end
 
-lemma A_map_injective {γ δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
+lemma A_map_injective {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
 function.injective (A_map hγ hδ hγδ) :=
 begin
   rintros s t h,
@@ -71,5 +70,10 @@ begin
   exact A_map_injective_inner hγ hδ hγδ s t h x,
   exact A_map_injective_inner hγ hδ hγδ t s h.symm x
 end
+
+/-!
+We don't need to prove that the ranges of the `A_δ` are disjoint for different `δ`, since this holds
+at the type level.
+-/
 
 end con_nf

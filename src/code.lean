@@ -20,7 +20,7 @@ class phase_1a (α : Λ) :=
 (to_tangle : Π β (h : β < α), (Σ i, {s // is_near_litter i s}) ↪ tangle β h)
 (of_tangle : Π β (h : β < α), tangle β h ↪ μ)
 
-export phase_1a (of_tangle to_tangle)
+export phase_1a (to_tangle)
 
 variables (α : Λ) [phase_1a.{u} α]
 
@@ -28,6 +28,11 @@ variables (α : Λ) [phase_1a.{u} α]
 def tangle : Π β < (α : type_index), Type u
 | ⊥ h := atom
 | ((β : Λ) : type_index) h := phase_1a.tangle β $ coe_lt_coe.1 h
+
+/-- For each type index less than `α`, there is an embedding from tangles at that level into `μ`. -/
+@[irreducible] def of_tangle : Π {β : type_index} (h : β < α), tangle α β h ↪ μ
+| ⊥ h := let equiv := (cardinal.eq.mp mk_atom).some in ⟨equiv.to_fun, equiv.injective⟩
+| (some β) h := phase_1a.of_tangle β (coe_lt_coe.mp h)
 
 /-- A type-`β` code is a type index `γ < β` together with a set of tangles of type `γ`. -/
 structure code (β : Λ) (β_lt_α : β < α) :=

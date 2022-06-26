@@ -1,4 +1,5 @@
 import mathlib.order
+import mathlib.well_founded
 import set_theory.cardinal.cofinality
 
 /-!
@@ -83,13 +84,30 @@ noncomputable instance : inhabited κ :=
 noncomputable instance : inhabited μ  :=
 @classical.inhabited_of_nonempty _ $ cardinal.mk_ne_zero_iff.1 μ_strong_limit.ne_zero
 
+/-- Either the base type or a proper type index (an element of `Λ`).
+The base type is written `⊥`. -/
+@[reducible]
+def type_index := with_bot Λ
+
+@[simp] lemma mk_type_index : #type_index = #Λ :=
+begin
+  unfold type_index, unfold with_bot, rw mk_option,
+  exact add_eq_left Λ_limit.aleph_0_le (le_trans one_le_aleph_0 Λ_limit.aleph_0_le),
+end
+
+/- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
+This allows well founded recursion on type indices. -/
+
+noncomputable instance : linear_order type_index := linear_order_of_STO' (<)
+noncomputable instance : has_well_founded type_index := is_well_order.to_has_well_founded
+
 /-- The litters. This is the type indexing the partition of `atom`. -/
-@[derive inhabited, irreducible] def litter := (Λ × Λ) × μ
+@[derive inhabited, irreducible] def litter := (type_index × Λ) × μ
 
 local attribute [semireducible] litter
 
 @[simp] lemma mk_litter : #litter = #μ :=
-by simp_rw [litter, mk_prod, lift_id, mul_assoc, mul_eq_right
+by simp_rw [litter, mk_prod, mk_type_index, lift_id, mul_assoc, mul_eq_right
   (κ_regular.aleph_0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_limit.ne_zero]
 
 /-- The domains of the f-maps. -/

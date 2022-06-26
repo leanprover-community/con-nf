@@ -13,23 +13,6 @@ variables [params.{u}]
 
 open params
 
-/-- Either the base type or a proper type index (an element of `Λ`).
-The base type is written `⊥`. -/
-@[reducible]
-def type_index := with_bot Λ
-
-@[simp] lemma mk_type_index : #type_index = #Λ :=
-begin
-  unfold type_index, unfold with_bot, rw mk_option,
-  exact add_eq_left Λ_limit.aleph_0_le (le_trans one_le_aleph_0 Λ_limit.aleph_0_le),
-end
-
-/- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
-This allows well founded recursion on type indices. -/
-
-noncomputable instance : linear_order type_index := linear_order_of_STO' (<)
-noncomputable instance : has_well_founded type_index := is_well_order.to_has_well_founded
-
 /-- We define the type of paths from certain types to lower types
 as elements of this quiver. -/
 instance has_paths : quiver type_index := ⟨(>)⟩
