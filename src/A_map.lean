@@ -25,8 +25,7 @@ end
 `(α, γ, Γ)`. We then construct the non-empty set `Δ` such that `(α, δ, Δ)` is an alternative
 extension of the same object in TTT. -/
 def A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
-{s : set (tangle α γ hγ) // s.nonempty} →
-{t : set (tangle α δ (coe_lt_coe.2 hδ)) // t.nonempty}
+{s : set (tangle α γ hγ) // s.nonempty} → {t : set (tangle α δ (coe_lt_coe.2 hδ)) // t.nonempty}
 | ⟨G, hG⟩ := ⟨⋃ b ∈ G, to_tangle δ hδ '' local_cardinal (f_map γ δ hγ hδ b), begin
   simp,
   cases hG with t ht,
@@ -75,5 +74,16 @@ end
 We don't need to prove that the ranges of the `A_δ` are disjoint for different `δ`, since this holds
 at the type level.
 -/
+
+/-- The inverse of the A-map. We will show that no code has infinitely many iterated images under
+this inverse map. -/
+noncomputable def A_inverse {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
+{t : set (tangle α δ (coe_lt_coe.2 hδ)) // t.nonempty}
+  → option {s : set (tangle α γ hγ) // s.nonempty}
+:= function.partial_inv $ A_map hγ hδ hγδ
+
+lemma A_inverse_is_partial_inv {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
+function.is_partial_inv (A_map hγ hδ hγδ) (A_inverse hγ hδ hγδ) :=
+function.partial_inv_of_injective (A_map_injective hγ hδ hγδ)
 
 end con_nf
