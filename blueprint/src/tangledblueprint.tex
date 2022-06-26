@@ -395,12 +395,15 @@ It can be helpful to view codes as forming a \emph{forest} under the $A$-maps: e
 \begin{lemma}
 \label{lem:ainverse-stops}
 \uses{def:ainverse}
+\lean{con_nf.A_map_relation_well_founded}
+\leanok
 No code has infinitely many iterated images under $A^{-1}$.
 
 Equivalently (this may be easier for the formalisation), the relation $\rightsquigarrow$ on codes --- defined by $ (\alpha,\gamma ,X) \rightsquigarrow A_\gamma,\delta (\alpha,\gamma ,X)$ for all codes $ (\alpha,\gamma ,X)$ and all $\delta \neq \gamma$ --- is well-founded.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Consider the map $j$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the  position function assumed in the phase 1a data.
 
   The definition of the functions $A_{\delta,\gamma}$ and the condition that $\iota f_{\gamma,\delta}()$ ensure that $j(\alpha,\gamma,X) < j(A_\delta(\alpha,\gamma,X))$, for all suitable $\gamma,\delta,X$.

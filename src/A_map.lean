@@ -9,11 +9,14 @@ universe u
 
 namespace con_nf
 open params
-variables [params.{u}] {α β : Λ} [phase_1a.{u} α]
+variables [params.{u}] {α : Λ} [phase_1a.{u} α]
 
 /-- The *local cardinal* of a litter is the set of all near-litters to that litter. -/
 @[reducible] def local_cardinal (i : litter) : set (Σ j, {s // is_near_litter j s}) :=
 {s : (Σ j, {s // is_near_litter j s}) | s.1 = i}
+
+lemma local_cardinal_nonempty (i : litter) : (local_cardinal i).nonempty :=
+⟨⟨i, litter_set _, is_near_litter_litter_set _⟩, by simp⟩
 
 lemma local_cardinal_disjoint : pairwise (disjoint on local_cardinal) :=
 begin
@@ -24,11 +27,12 @@ end
 /-- The *alternative extension* map. For a non-empty set of tangles `Γ`, consider the code
 `(α, γ, Γ)`. We then construct the non-empty set `Δ` such that `(α, δ, Δ)` is an alternative
 extension of the same object in TTT. -/
-def A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
-{s : set (tangle α γ hγ) // s.nonempty} → {t : set (tangle α δ (coe_lt_coe.2 hδ)) // t.nonempty}
-| ⟨G, hG⟩ := ⟨⋃ b ∈ G, to_tangle δ hδ '' local_cardinal (f_map γ δ hγ hδ b), begin
+def A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
+(c : {s : set (tangle α γ hγ) // s.nonempty}) :
+{t : set (tangle α δ (coe_lt_coe.2 hδ)) // t.nonempty} :=
+⟨⋃ b ∈ c.val, to_tangle δ hδ '' local_cardinal (f_map γ δ hγ hδ b), begin
   simp,
-  cases hG with t ht,
+  cases c.property with t ht,
   exact ⟨t, ht, ⟨f_map γ δ hγ hδ t, litter_set _, is_near_litter_litter_set _⟩, by simp⟩,
 end⟩
 
@@ -73,17 +77,90 @@ end
 /-!
 We don't need to prove that the ranges of the `A_δ` are disjoint for different `δ`, since this holds
 at the type level.
+
+We now show that there are only finitely many iterated images under any inverse A-map.
 -/
 
-/-- The inverse of the A-map. We will show that no code has infinitely many iterated images under
-this inverse map. -/
-noncomputable def A_inverse {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
-{t : set (tangle α δ (coe_lt_coe.2 hδ)) // t.nonempty}
-  → option {s : set (tangle α γ hγ) // s.nonempty}
-:= function.partial_inv $ A_map hγ hδ hγδ
+lemma well_founded_of_tangle {β : type_index} (h : β < α) :
+  well_founded (λ a b, of_tangle α h a < of_tangle α h b) :=
+well_founded.inv_image _ is_well_order.wf
 
-lemma A_inverse_is_partial_inv {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
-function.is_partial_inv (A_map hγ hδ hγδ) (A_inverse hγ hδ hγδ) :=
-function.partial_inv_of_injective (A_map_injective hγ hδ hγδ)
+noncomputable def min_tangle {γ : type_index} (hγ : γ < α)
+(c : {s : set (tangle α γ hγ) // s.nonempty}) : tangle α γ hγ :=
+well_founded.min (well_founded_of_tangle hγ) c.val c.property
+
+lemma min_tangle_mem {γ : type_index} (hγ : γ < α) (c : {s : set (tangle α γ hγ) // s.nonempty}) :
+min_tangle hγ c ∈ c.val :=
+well_founded.min_mem (well_founded_of_tangle hγ) c.val c.property
+
+lemma min_tangle_le {γ : type_index} (hγ : γ < α) (c : {s : set (tangle α γ hγ) // s.nonempty}) :
+∀ x ∈ c.val, ¬ of_tangle α hγ x < (of_tangle α hγ $ min_tangle hγ c) :=
+λ x hx, well_founded.not_lt_min (well_founded_of_tangle hγ) c.val c.property hx
+
+lemma A_map_order {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
+(c : {s : set (tangle α γ hγ) // s.nonempty}) :
+(of_tangle α hγ $ min_tangle hγ c) <
+(of_tangle α (coe_lt_coe.mpr hδ) $ min_tangle (coe_lt_coe.mpr hδ) (A_map hγ hδ hγδ c)) :=
+begin
+  obtain ⟨s, ⟨t, ht⟩, hs⟩ := min_tangle_mem (coe_lt_coe.mpr hδ) (A_map hγ hδ hγδ c),
+  rw ← ht at hs, clear ht,
+  rw set.mem_Union at hs, obtain ⟨ht, hs⟩ := hs, rw set.mem_image at hs, obtain ⟨N, hN₁, hN₂⟩ := hs,
+  rw ← hN₂, clear hN₂,
+  have : is_near_litter (f_map γ δ hγ hδ t) N.snd.val,
+  { convert N.snd.property, exact hN₁.symm },
+  convert lt_of_le_of_lt _ (f_map_position_raising γ δ hγ hδ t N.snd.val this),
+  { cases N, cases N_snd, dsimp at hN₁, subst hN₁ },
+  { have := min_tangle_le hγ c t ht, push_neg at this, exact this }
+end
+
+/-- Tool that lets us use well-founded recursion on codes via `μ`. -/
+noncomputable def code_min_map (c : {c : code α α le_rfl // c.elts.nonempty}) : μ :=
+of_tangle α c.val.extension_lt $ min_tangle c.val.extension_lt ⟨c.val.elts, c.property⟩
+
+/-- The pullback `<` relation on codes is well-founded. -/
+lemma code_wf : well_founded (inv_image μr (@code_min_map _ α _)) :=
+inv_image.wf code_min_map μwf.wf
+
+/-- The A-map, phrased as a function on non-empty `α`-codes. -/
+def A_map_code {δ : Λ} (hδ : δ < α) (c : {c : code α α le_rfl // c.elts.nonempty})
+(hne : c.val.extension ≠ δ) : {c : code α α le_rfl // c.elts.nonempty} :=
+⟨⟨δ, coe_lt_coe.mpr hδ, A_map c.val.extension_lt hδ hne ⟨c.val.elts, c.property⟩⟩, begin
+  obtain ⟨x, hx⟩ := c.property,
+  dsimp, unfold A_map, simp,
+  exact ⟨x, hx, local_cardinal_nonempty _⟩
+end⟩
+
+lemma A_map_code_order {δ : Λ} (hδ : δ < α)
+(c : {c : code α α le_rfl // c.elts.nonempty}) (hne : c.val.extension ≠ δ) :
+code_min_map c < code_min_map (A_map_code hδ c hne) :=
+A_map_order c.val.extension_lt hδ hne ⟨c.val.elts, c.property⟩
+
+/-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
+under the inverse A-map. -/
+def A_map_relation (c d : {c : code α α le_rfl // c.elts.nonempty}) : Prop :=
+begin
+  obtain ⟨⟨δ, hδ, D⟩, hD⟩ := d,
+  cases δ,
+  { exact false },
+  { by_cases c.val.extension = δ,
+    { exact false },
+    { exact D = (A_map_code (coe_lt_coe.mp hδ) c h).val.elts } }
+end
+
+lemma A_map_subrelation : subrelation (@A_map_relation _ α _) (inv_image μr code_min_map) :=
+begin
+  intros c d h,
+  obtain ⟨⟨δ, hδ, D⟩, hD⟩ := d,
+  unfold A_map_relation at h,
+  cases δ, { exfalso, exact h },
+  dsimp at h,
+  split_ifs at h, { exfalso, exact h },
+  simp_rw h,
+  refine A_map_code_order _ _ ‹_›
+end
+
+/-- There are only finitely many iterated images under any inverse A-map. -/
+lemma A_map_relation_well_founded : well_founded (@A_map_relation _ α _) :=
+subrelation.wf A_map_subrelation code_wf
 
 end con_nf
