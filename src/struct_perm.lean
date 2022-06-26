@@ -1,5 +1,5 @@
+import extended_index
 import litter
-import type_index
 
 /-!
 # Structural permutations

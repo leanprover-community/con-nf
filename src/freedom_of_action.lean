@@ -1,4 +1,4 @@
-import type_index
+import extended_index
 import litter
 
 /-!

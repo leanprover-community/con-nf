@@ -1,5 +1,4 @@
 import litter
-import type_index
 
 open equiv equiv.perm with_bot
 
