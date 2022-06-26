@@ -270,8 +270,8 @@ lemma f_map_range (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x
 /-- The f-maps have disjoint ranges; that is, for each choice of pair `(β, γ)`, the range of `f_map`
 is disjoint. -/
 lemma f_map_disjoint : pairwise (@disjoint (set litter) _ _ on
-  (λ ⟨β, γ⟩, set.range (f_map β.val γ.val (coe_lt_coe.mpr β.property) γ.property)
-    : {β // β < α} × {γ // γ < α} → set litter)) :=
+  (λ ⟨β, γ⟩, set.range (f_map β.val γ.val β.property γ.property)
+    : {β : type_index // β < α} × {γ // γ < α} → set litter)) :=
 begin
   rintros ⟨β₁, γ₁⟩ ⟨β₂, γ₂⟩ hne N hN,
   simp at hN ⊢,
@@ -280,7 +280,7 @@ begin
   have h₁ : N.fst = ⟨β₁, γ₁⟩ := by { rw ← hN₁, exact f_map_range _ _ _ _ _ },
   have h₂ : N.fst = ⟨β₂, γ₂⟩ := by { rw ← hN₂, exact f_map_range _ _ _ _ _ },
   rw h₁ at h₂, simp at h₂, obtain ⟨β_eq, γ_eq⟩ := h₂,
-  simp, refine ⟨_, _⟩; ext, exact option.some_inj.mp β_eq, exact γ_eq
+  simp, refine ⟨_, _⟩; ext, rw β_eq, rw γ_eq
 end
 
 private lemma f_map_core_position_raising (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)

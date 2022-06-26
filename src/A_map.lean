@@ -130,6 +130,11 @@ def A_map_code {δ : Λ} (hδ : δ < α) (c : {c : code α α le_rfl // c.elts.n
   exact ⟨x, hx, local_cardinal_nonempty _⟩
 end⟩
 
+lemma A_map_code_elts {δ : Λ} (hδ : δ < α) (c : {c : code α α le_rfl // c.elts.nonempty})
+(hne : c.val.extension ≠ δ) :
+(↑(A_map_code hδ c hne) : code α α le_rfl).elts =
+  (A_map c.val.extension_lt hδ hne ⟨c.val.elts, c.property⟩).val := rfl
+
 lemma A_map_code_order {δ : Λ} (hδ : δ < α)
 (c : {c : code α α le_rfl // c.elts.nonempty}) (hne : c.val.extension ≠ δ) :
 code_min_map c < code_min_map (A_map_code hδ c hne) :=
@@ -162,5 +167,33 @@ end
 /-- There are only finitely many iterated images under any inverse A-map. -/
 lemma A_map_relation_well_founded : well_founded (@A_map_relation _ α _) :=
 subrelation.wf A_map_subrelation code_wf
+
+def A_map_predecessor_subsingleton (c : {c : code α α le_rfl // c.elts.nonempty}) :
+{d | A_map_relation d c}.subsingleton :=
+begin
+  obtain ⟨⟨γ, hγ, G⟩, hG⟩ := c,
+  intros x hx y hy, dsimp at hx hy, unfold A_map_relation at hx hy, simp at hx hy,
+  cases γ,
+  { exfalso, dsimp at hx, exact hx },
+  dsimp at hx hy,
+  split_ifs at hx hy; try { exfalso, assumption },
+  rw [hy, A_map_code_elts, A_map_code_elts, subtype.val_inj] at hx,
+  obtain ⟨⟨δ, hδ, D⟩, hD⟩ := x, obtain ⟨⟨ε, hε, E⟩, hE⟩ := y,
+  suffices : δ = ε,
+  { subst this,
+    have := A_map_injective _ _ _ hx,
+    dsimp at this, cases this, refl },
+  obtain ⟨t, ht⟩ := (A_map _ (coe_lt_coe.mp hγ) _ ⟨D, hD⟩).property,
+  have ht' : t ∈ (A_map _ (coe_lt_coe.mp hγ) _ ⟨E, hE⟩).val,
+  { rw hx, exact ht },
+  unfold A_map at ht ht',
+  simp at ht ht',
+  obtain ⟨i, hi₁, x, hx₁, hx₂⟩ := ht,
+  obtain ⟨j, hj₁, y, hy₁, hy₂⟩ := ht',
+  rw ← hy₂ at hx₂, have := (to_tangle γ _).inj' hx₂, simp at this,
+  have fδ := f_map_range δ γ hδ (coe_lt_coe.mp hγ) i,
+  have fε := f_map_range ε γ hε (coe_lt_coe.mp hγ) j,
+  simp_rw [this.left, fε] at fδ, simp at fδ, exact fδ.symm
+end
 
 end con_nf
