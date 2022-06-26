@@ -102,31 +102,33 @@ end
 /-!
 To keep track of the hypotheses that went into creating the f-maps, we create a few structures to
 store the result of the f-map as well as the conditions on their values.
+These definitions are private so that we just use the intended properties of the f-maps, instead of
+their internal structure.
 -/
 
-def f_map_generator {β γ : Λ} (hβ : β < α) (hγ : γ < α)
+private def f_map_generator {β γ : Λ} (hβ : β < α) (hγ : γ < α)
 (x : μ) (R : Π y < x, μ) := {i |
   (∀ N : {s // is_near_litter ⟨⟨β, γ⟩, i⟩ s},
     x < of_tangle _ hγ (to_tangle _ _ ⟨⟨⟨β, γ⟩, i⟩, N⟩))
   ∧ ∀ y (H : y < x), R y H ≠ i
 }
 
-def pre_f_map_result_is_viable (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) (R : Π y < x, μ) :=
-∀ y ≤ x, (f_map_generator hβ hγ y (λ z hz, R z (lt_of_lt_of_le hz H))).nonempty
+private def pre_f_map_result_is_viable (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) (R : Π y < x, μ)
+:= ∀ y ≤ x, (f_map_generator hβ hγ y (λ z hz, R z (lt_of_lt_of_le hz H))).nonempty
 
-def pre_f_map_result_is_allowed (β γ : Λ) (hβ : β < α) (hγ : γ < α)
+private def pre_f_map_result_is_allowed (β γ : Λ) (hβ : β < α) (hγ : γ < α)
 (x : μ) (R : Π y ≤ x, μ) :=
 Σ' hv : pre_f_map_result_is_viable β γ hβ hγ x (λ z hz, R z (le_of_lt hz)),
 ∀ y ≤ x, R y ‹_› = (hv y ‹_›).some
 
-def f_map_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) : Type u :=
+private def f_map_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ) : Type u :=
 {R : Π y ≤ x, μ // nonempty (pre_f_map_result_is_allowed β γ hβ hγ x R)}
 
-def extend_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+private def extend_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
 (h_lt : Π y < x, f_map_result β γ hβ hγ y) : Π y < x, μ := λ y hy, (h_lt y hy).val y le_rfl
 
 /-- By construction, all the f_map_results have matching output values, where they are defined. -/
-lemma f_map_result_coherent (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x y : μ)
+private lemma f_map_result_coherent (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x y : μ)
 (fx : f_map_result β γ hβ hγ x) (fy : f_map_result β γ hβ hγ y) :
 Π (z : μ), z ≤ x → z ≤ y → fx.val z ‹_› = fy.val z ‹_›
 | z hzx hzy := begin
@@ -139,7 +141,7 @@ end
 using_well_founded { dec_tac := `[exact psigma.lex.left _ _ ‹_›] }
 
 /-- We can recursively construct the (unique) f_map_result for arbitrary `x`. -/
-noncomputable def mk_f_map_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+private noncomputable def mk_f_map_result (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
 (h_lt : Π y < x, f_map_result β γ hβ hγ y)
 (hx : (f_map_generator hβ hγ x $ extend_result β γ hβ hγ x h_lt).nonempty)
 : f_map_result β γ hβ hγ x :=
@@ -181,7 +183,7 @@ tangles to litters. This gives two benefits:
   `f_map` function later.
 2. Given the conversion functions in `phase_1a`, it is an easy translation into the true `f_map`
   as required. -/
-@[irreducible] noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
+@[irreducible] private noncomputable def f_map_core (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
 Π (x : μ), f_map_result β γ hβ hγ x
 | x := let f_map_core' := λ (y < x), (f_map_core y).val y le_rfl in begin
   refine mk_f_map_result β γ hβ hγ x (λ y hy, f_map_core y) _,
@@ -239,13 +241,13 @@ using_well_founded { dec_tac := `[assumption] }
 /-!
 The f-maps have a number of useful properties.
 This is `f-map-properties` in the blueprint.
-TODO: Once these properties have all been proven, we can be (relatively) certain that the definition
+Now that these properties have all been proven, we can be (relatively) certain that the definition
 of `f_map` is correct.
 -/
 
 local attribute [semireducible] f_map_core f_map
 
-lemma f_map_core_injective (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
+private lemma f_map_core_injective (β γ : Λ) (hβ : β < α) (hγ : γ < α) :
 function.injective $ λ x, (f_map_core β γ hβ hγ x).val x le_rfl :=
 begin
   intros i j h,
@@ -287,7 +289,7 @@ begin
   simp, refine ⟨_, _⟩; ext; assumption,
 end
 
-lemma f_map_core_position_raising (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
+private lemma f_map_core_position_raising (β γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
 (N : set atom) (hN : is_near_litter ⟨⟨β,γ⟩, (f_map_core β γ hβ hγ x).val x le_rfl⟩ N) :
 x < of_tangle γ hγ (to_tangle γ hγ ⟨⟨⟨β,γ⟩, (f_map_core β γ hβ hγ x).val x le_rfl⟩, N, hN⟩) :=
 begin
