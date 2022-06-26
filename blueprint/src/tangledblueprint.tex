@@ -371,6 +371,8 @@ Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart
 \begin{lemma}
 \label {lem:a-map-properties}
 \uses{def:a-map, lem:f-map-properties}
+\lean{con_nf.A_map_injective}
+\leanok
 \begin{enumerate}
 \item Each $A_\delta$ is injective (since each $f_{\gamma,\delta}$ is injective, and $f_{\gamma,\delta}$ have disjoint images for different $\gamma$).
 \item The ranges of $A_\delta$ are disjoint for different $\delta$ (since the ranges of $f_{\gamma,\delta}$ are).
@@ -378,6 +380,7 @@ Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart
 
 NB: injectivity here really depends on having excluded the empty set from the domains of the $A_\delta$!
 \end{lemma}
+\begin{proof}\leanok\end{proof}
 
 \begin{definition}
 \label {def:ainverse}
