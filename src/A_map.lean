@@ -83,29 +83,33 @@ We now show that there are only finitely many iterated images under any inverse 
 
 lemma well_founded_of_tangle {β : type_index} (h : β < α) :
   well_founded (λ a b, of_tangle α h a < of_tangle α h b) :=
-well_founded.inv_image _ is_well_order.wf
+inv_image.wf _ is_well_order.wf
 
 noncomputable def min_tangle {γ : type_index} (hγ : γ < α)
-(c : {s : set (tangle α γ hγ) // s.nonempty}) : tangle α γ hγ :=
-well_founded.min (well_founded_of_tangle hγ) c.val c.property
+  (c : {s : set (tangle α γ hγ) // s.nonempty}) : tangle α γ hγ :=
+(well_founded_of_tangle hγ).min c.val c.property
 
 lemma min_tangle_mem {γ : type_index} (hγ : γ < α) (c : {s : set (tangle α γ hγ) // s.nonempty}) :
-min_tangle hγ c ∈ c.val :=
-well_founded.min_mem (well_founded_of_tangle hγ) c.val c.property
+  min_tangle hγ c ∈ c.val :=
+well_founded.min_mem _ c.val c.property
 
 lemma min_tangle_le {γ : type_index} (hγ : γ < α) (c : {s : set (tangle α γ hγ) // s.nonempty}) :
-∀ x ∈ c.val, ¬ of_tangle α hγ x < (of_tangle α hγ $ min_tangle hγ c) :=
-λ x hx, well_founded.not_lt_min (well_founded_of_tangle hγ) c.val c.property hx
+  ∀ x ∈ c.val, ¬ of_tangle α hγ x < (of_tangle α hγ $ min_tangle hγ c) :=
+λ x hx, (well_founded_of_tangle hγ).not_lt_min c.val c.property hx
 
 lemma A_map_order {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
-(c : {s : set (tangle α γ hγ) // s.nonempty}) :
-(of_tangle α hγ $ min_tangle hγ c) <
-(of_tangle α (coe_lt_coe.mpr hδ) $ min_tangle (coe_lt_coe.mpr hδ) (A_map hγ hδ hγδ c)) :=
+  (c : {s : set (tangle α γ hγ) // s.nonempty}) :
+  of_tangle α hγ (min_tangle hγ c) <
+    of_tangle α (coe_lt_coe.mpr hδ) (min_tangle (coe_lt_coe.mpr hδ) (A_map hγ hδ hγδ c)) :=
 begin
   obtain ⟨s, ⟨t, ht⟩, hs⟩ := min_tangle_mem (coe_lt_coe.mpr hδ) (A_map hγ hδ hγδ c),
-  rw ← ht at hs, clear ht,
-  rw set.mem_Union at hs, obtain ⟨ht, hs⟩ := hs, rw set.mem_image at hs, obtain ⟨N, hN₁, hN₂⟩ := hs,
-  rw ← hN₂, clear hN₂,
+  rw ← ht at hs,
+  clear ht,
+  rw set.mem_Union at hs,
+  obtain ⟨ht, hs⟩ := hs,
+  rw set.mem_image at hs,
+  obtain ⟨N, hN₁, hN₂⟩ := hs,
+  rw ←hN₂, clear hN₂,
   have : is_near_litter (f_map γ δ hγ hδ t) N.snd.val,
   { convert N.snd.property, exact hN₁.symm },
   convert lt_of_le_of_lt _ (f_map_position_raising γ δ hγ hδ t N.snd.val this),
@@ -126,7 +130,9 @@ def A_map_code {δ : Λ} (hδ : δ < α) (c : {c : code α α le_rfl // c.elts.n
 (hne : c.val.extension ≠ δ) : {c : code α α le_rfl // c.elts.nonempty} :=
 ⟨⟨δ, coe_lt_coe.mpr hδ, A_map c.val.extension_lt hδ hne ⟨c.val.elts, c.property⟩⟩, begin
   obtain ⟨x, hx⟩ := c.property,
-  dsimp, unfold A_map, simp,
+  dsimp,
+  unfold A_map,
+  simp,
   exact ⟨x, hx, local_cardinal_nonempty _⟩
 end⟩
 
@@ -154,19 +160,18 @@ end
 
 lemma A_map_subrelation : subrelation (@A_map_relation _ α _) (inv_image μr code_min_map) :=
 begin
-  intros c d h,
-  obtain ⟨⟨δ, hδ, D⟩, hD⟩ := d,
+  rintro c ⟨⟨δ, hδ, D⟩, hD⟩ h,
+  cases δ,
+  { cases h },
   unfold A_map_relation at h,
-  cases δ, { exfalso, exact h },
-  dsimp at h,
   split_ifs at h, { exfalso, exact h },
   simp_rw h,
-  refine A_map_code_order _ _ ‹_›
+  exact A_map_code_order _ _ ‹_›,
 end
 
 /-- There are only finitely many iterated images under any inverse A-map. -/
 lemma A_map_relation_well_founded : well_founded (@A_map_relation _ α _) :=
-subrelation.wf A_map_subrelation code_wf
+A_map_subrelation.wf code_wf
 
 /-- There is at most one inverse under an A-map. This corresponds to the fact that there is only one
 code which is related (on the left) to any given code under the A-map relation. -/
@@ -174,13 +179,17 @@ lemma A_map_predecessor_subsingleton (c : {c : code α α le_rfl // c.elts.nonem
 {d | A_map_relation d c}.subsingleton :=
 begin
   obtain ⟨⟨γ, hγ, G⟩, hG⟩ := c,
-  intros x hx y hy, dsimp at hx hy, unfold A_map_relation at hx hy, simp at hx hy,
+  intros x hx y hy,
+  dsimp at hx hy,
+  unfold A_map_relation at hx hy,
+  simp at hx hy,
   cases γ,
   { exfalso, dsimp at hx, exact hx },
   dsimp at hx hy,
   split_ifs at hx hy; try { exfalso, assumption },
   rw [hy, A_map_code_elts, A_map_code_elts, subtype.val_inj] at hx,
-  obtain ⟨⟨δ, hδ, D⟩, hD⟩ := x, obtain ⟨⟨ε, hε, E⟩, hE⟩ := y,
+  obtain ⟨⟨δ, hδ, D⟩, hD⟩ := x,
+  obtain ⟨⟨ε, hε, E⟩, hE⟩ := y,
   suffices : δ = ε,
   { subst this,
     have := A_map_injective _ _ _ hx,
@@ -192,10 +201,14 @@ begin
   simp at ht ht',
   obtain ⟨i, hi₁, x, hx₁, hx₂⟩ := ht,
   obtain ⟨j, hj₁, y, hy₁, hy₂⟩ := ht',
-  rw ← hy₂ at hx₂, have := (to_tangle γ _).inj' hx₂, simp at this,
+  rw ← hy₂ at hx₂,
+  have := (to_tangle γ _).inj' hx₂,
+  simp at this,
   have fδ := f_map_range δ γ hδ (coe_lt_coe.mp hγ) i,
   have fε := f_map_range ε γ hε (coe_lt_coe.mp hγ) j,
-  simp_rw [this.left, fε] at fδ, simp at fδ, exact fδ.symm
+  simp_rw [this.left, fε] at fδ,
+  simp at fδ,
+  exact fδ.symm
 end
 
 /-- The height of a code is the amount of iterated images under an inverse alternative extension map
@@ -207,9 +220,8 @@ noncomputable def height : {c : code α α le_rfl // c.elts.nonempty} → ℕ
   { exact height h.some },
   { exact 0 },
 end
-using_well_founded {
-  rel_tac := λ _ _, `[exact ⟨A_map_relation, A_map_relation_well_founded⟩],
-  dec_tac := `[exact h.some_spec]
-}
+using_well_founded
+{ rel_tac := λ _ _, `[exact ⟨A_map_relation, A_map_relation_well_founded⟩],
+  dec_tac := `[exact h.some_spec] }
 
 end con_nf

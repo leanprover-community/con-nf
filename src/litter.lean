@@ -88,12 +88,13 @@ begin
   { refine le_of_le_of_eq _
      (mk_subset_mk_lt_cof $ by { simp_rw mk_atom, exact μ_strong_limit.2 }),
     rw mk_atom,
-    exact (cardinal.mk_congr $ subtype_equiv (equiv.symm_diff $ litter_set i) $
-      λ s, iff.rfl).trans_le ⟨subtype.imp_embedding _ _ $ λ s, κ_le_μ_cof.trans_lt'⟩ },
+    exact (cardinal.mk_congr $ subtype_equiv
+      ((symm_diff_right_involutive $ litter_set i).to_perm _) $ λ s, iff.rfl).trans_le
+        ⟨subtype.imp_embedding _ _ $ λ s, κ_le_μ_cof.trans_lt'⟩ },
   refine ⟨⟨λ a, ⟨litter_set i ∆ {a}, _⟩, λ a b h, _⟩⟩,
-  { rw [is_near_litter, is_near, small, symm_diff_symm_diff_self, mk_singleton],
+  { rw [is_near_litter, is_near, small, symm_diff_symm_diff_cancel_left, mk_singleton],
     exact one_lt_aleph_0.trans_le κ_regular.aleph_0_le },
-  { exact singleton_injective (symm_diff_left_injective _ $ by convert congr_arg subtype.val h) }
+  { exact singleton_injective (symm_diff_right_injective _ $ by convert congr_arg subtype.val h) }
 end
 
 /-- There are `μ` near-litters in total. -/
