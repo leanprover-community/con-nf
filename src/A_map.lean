@@ -1,6 +1,7 @@
 import code
 import f_map
 import litter
+import data.nat.parity
 
 open with_bot
 open_locale cardinal
@@ -24,8 +25,8 @@ begin
   exfalso, dsimp at hs₂ hs₃, rw [← hs₂, ← hs₃] at h, exact h rfl
 end
 
-/-- The *alternative extension* map. For a non-empty set of tangles `Γ`, consider the code
-`(α, γ, Γ)`. We then construct the non-empty set `Δ` such that `(α, δ, Δ)` is an alternative
+/-- The *alternative extension* map. For a non-empty set of tangles `G`, consider the code
+`(α, γ, G)`. We then construct the non-empty set `D` such that `(α, δ, D)` is an alternative
 extension of the same object in TTT. -/
 def A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
 (c : {s : set (tangle α γ hγ) // s.nonempty}) :
@@ -109,7 +110,7 @@ begin
   obtain ⟨ht, hs⟩ := hs,
   rw set.mem_image at hs,
   obtain ⟨N, hN₁, hN₂⟩ := hs,
-  rw ←hN₂, clear hN₂,
+  rw ← hN₂, clear hN₂,
   have : is_near_litter (f_map γ δ hγ hδ t) N.snd.val,
   { convert N.snd.property, exact hN₁.symm },
   convert lt_of_le_of_lt _ (f_map_position_raising γ δ hγ hδ t N.snd.val this),
@@ -118,17 +119,21 @@ begin
 end
 
 /-- Tool that lets us use well-founded recursion on codes via `μ`. -/
-noncomputable def code_min_map (c : {c : code α α le_rfl // c.elts.nonempty}) : μ :=
-of_tangle α c.val.extension_lt $ min_tangle c.val.extension_lt ⟨c.val.elts, c.property⟩
+noncomputable def code_min_map {β : Λ} (hβ : β ≤ α)
+(c : {c : code α β hβ // c.elts.nonempty}) : μ :=
+of_tangle α (c.val.extension_lt.trans_le $ coe_le_coe.mpr hβ) $
+  min_tangle (c.val.extension_lt.trans_le $ coe_le_coe.mpr hβ) ⟨c.val.elts, c.property⟩
 
 /-- The pullback `<` relation on codes is well-founded. -/
-lemma code_wf : well_founded (inv_image μr (@code_min_map _ α _)) :=
-inv_image.wf code_min_map μwf.wf
+lemma code_wf {β : Λ} (hβ : β ≤ α) : well_founded (inv_image μr (code_min_map hβ)) :=
+inv_image.wf (code_min_map hβ) μwf.wf
 
 /-- The A-map, phrased as a function on non-empty `α`-codes. -/
-def A_map_code {δ : Λ} (hδ : δ < α) (c : {c : code α α le_rfl // c.elts.nonempty})
-(hne : c.val.extension ≠ δ) : {c : code α α le_rfl // c.elts.nonempty} :=
-⟨⟨δ, coe_lt_coe.mpr hδ, A_map c.val.extension_lt hδ hne ⟨c.val.elts, c.property⟩⟩, begin
+def A_map_code {β : Λ} (hβ : β ≤ α) {δ : Λ} (hδ : δ < β) (c : {c : code α β hβ // c.elts.nonempty})
+(hne : c.val.extension ≠ δ) : {c : code α β hβ // c.elts.nonempty} :=
+⟨⟨δ, coe_lt_coe.mpr hδ,
+  A_map (c.val.extension_lt.trans_le $ coe_le_coe.mpr hβ) (hδ.trans_le hβ)
+  hne ⟨c.val.elts, c.property⟩⟩, begin
   obtain ⟨x, hx⟩ := c.property,
   dsimp,
   unfold A_map,
@@ -136,29 +141,31 @@ def A_map_code {δ : Λ} (hδ : δ < α) (c : {c : code α α le_rfl // c.elts.n
   exact ⟨x, hx, local_cardinal_nonempty _⟩
 end⟩
 
-lemma A_map_code_elts {δ : Λ} (hδ : δ < α) (c : {c : code α α le_rfl // c.elts.nonempty})
-(hne : c.val.extension ≠ δ) :
-(↑(A_map_code hδ c hne) : code α α le_rfl).elts =
-  (A_map c.val.extension_lt hδ hne ⟨c.val.elts, c.property⟩).val := rfl
+lemma A_map_code_elts {β : Λ} (hβ : β ≤ α) {δ : Λ} (hδ : δ < β)
+(c : {c : code α β hβ // c.elts.nonempty}) (hne : c.val.extension ≠ δ) :
+(↑(A_map_code hβ hδ c hne) : code α β hβ).elts =
+  (A_map (c.val.extension_lt.trans_le $ coe_le_coe.mpr hβ) (hδ.trans_le hβ)
+    hne ⟨c.val.elts, c.property⟩).val := rfl
 
-lemma A_map_code_order {δ : Λ} (hδ : δ < α)
-(c : {c : code α α le_rfl // c.elts.nonempty}) (hne : c.val.extension ≠ δ) :
-code_min_map c < code_min_map (A_map_code hδ c hne) :=
-A_map_order c.val.extension_lt hδ hne ⟨c.val.elts, c.property⟩
+lemma A_map_code_order {β : Λ} (hβ : β ≤ α) {δ : Λ} (hδ : δ < β)
+(c : {c : code α β hβ // c.elts.nonempty}) (hne : c.val.extension ≠ δ) :
+(code_min_map _) c < (code_min_map _) (A_map_code hβ hδ c hne) :=
+A_map_order (c.val.extension_lt.trans_le $ coe_le_coe.mpr hβ) (hδ.trans_le hβ) hne ⟨c.val.elts, c.property⟩
 
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse A-map. -/
-def A_map_relation (c d : {c : code α α le_rfl // c.elts.nonempty}) : Prop :=
+def A_map_relation {β : Λ} (hβ : β ≤ α) (c d : {c : code α β hβ // c.elts.nonempty}) : Prop :=
 begin
   obtain ⟨⟨δ, hδ, D⟩, hD⟩ := d,
   cases δ,
   { exact false },
   { by_cases c.val.extension = δ,
     { exact false },
-    { exact D = (A_map_code (coe_lt_coe.mp hδ) c h).val.elts } }
+    { exact D = (A_map_code hβ (coe_lt_coe.mp hδ) c h).val.elts } }
 end
 
-lemma A_map_subrelation : subrelation (@A_map_relation _ α _) (inv_image μr code_min_map) :=
+lemma A_map_subrelation {β : Λ} (hβ : β ≤ α) :
+subrelation (A_map_relation hβ) (inv_image μr (code_min_map hβ)) :=
 begin
   rintro c ⟨⟨δ, hδ, D⟩, hD⟩ h,
   cases δ,
@@ -166,17 +173,17 @@ begin
   unfold A_map_relation at h,
   split_ifs at h, { exfalso, exact h },
   simp_rw h,
-  exact A_map_code_order _ _ ‹_›,
+  exact A_map_code_order _ _ _ ‹_›
 end
 
 /-- There are only finitely many iterated images under any inverse A-map. -/
-lemma A_map_relation_well_founded : well_founded (@A_map_relation _ α _) :=
-A_map_subrelation.wf code_wf
+lemma A_map_relation_well_founded {β : Λ} (hβ : β ≤ α) : well_founded (A_map_relation hβ) :=
+(A_map_subrelation hβ).wf (code_wf hβ)
 
 /-- There is at most one inverse under an A-map. This corresponds to the fact that there is only one
 code which is related (on the left) to any given code under the A-map relation. -/
-lemma A_map_predecessor_subsingleton (c : {c : code α α le_rfl // c.elts.nonempty}) :
-{d | A_map_relation d c}.subsingleton :=
+lemma A_map_predecessor_subsingleton {β : Λ} (hβ : β ≤ α) (c : {c : code α β hβ // c.elts.nonempty}) :
+{d | A_map_relation hβ d c}.subsingleton :=
 begin
   obtain ⟨⟨γ, hγ, G⟩, hG⟩ := c,
   intros x hx y hy,
@@ -194,8 +201,8 @@ begin
   { subst this,
     have := A_map_injective _ _ _ hx,
     dsimp at this, cases this, refl },
-  obtain ⟨t, ht⟩ := (A_map _ (coe_lt_coe.mp hγ) _ ⟨D, hD⟩).property,
-  have ht' : t ∈ (A_map _ (coe_lt_coe.mp hγ) _ ⟨E, hE⟩).val,
+  obtain ⟨t, ht⟩ := (A_map _ ((coe_lt_coe.mp hγ).trans_le hβ) _ ⟨D, hD⟩).property,
+  have ht' : t ∈ (A_map _ ((coe_lt_coe.mp hγ).trans_le hβ) _ ⟨E, hE⟩).val,
   { rw hx, exact ht },
   unfold A_map at ht ht',
   simp at ht ht',
@@ -204,8 +211,8 @@ begin
   rw ← hy₂ at hx₂,
   have := (to_tangle γ _).inj' hx₂,
   simp at this,
-  have fδ := f_map_range δ γ hδ (coe_lt_coe.mp hγ) i,
-  have fε := f_map_range ε γ hε (coe_lt_coe.mp hγ) j,
+  have fδ := f_map_range δ γ (hδ.trans_le (coe_le_coe.mpr hβ)) ((coe_lt_coe.mp hγ).trans_le hβ) i,
+  have fε := f_map_range ε γ (hε.trans_le (coe_le_coe.mpr hβ)) ((coe_lt_coe.mp hγ).trans_le hβ) j,
   simp_rw [this.left, fε] at fδ,
   simp at fδ,
   exact fδ.symm
@@ -214,10 +221,68 @@ end
 /-- The height of a code is the amount of iterated images under an inverse alternative extension map
 that it admits. This is uniquely defined since any code has at most one inverse image under the
 A-map, and we can just repeat this process until no inverse image exists. -/
-noncomputable def height : {c : code α α le_rfl // c.elts.nonempty} → ℕ
-| c := @dite _ (∃ d, A_map_relation d c) (classical.dec _) (λ h, height h.some) (λ _, 0)
+noncomputable def height {β : Λ} (hβ : β ≤ α) : {c : code α β hβ // c.elts.nonempty} → ℕ
+| c := @dite _ (∃ d, A_map_relation hβ d c) (classical.dec _) (λ h, height h.some) (λ _, 0)
 using_well_founded
-{ rel_tac := λ _ _, `[exact ⟨A_map_relation, A_map_relation_well_founded⟩],
+{ rel_tac := λ _ _, `[exact ⟨A_map_relation hβ, A_map_relation_well_founded hβ⟩],
   dec_tac := `[exact h.some_spec] }
+
+lemma height_zero_of_no_inverse {β : Λ} (hβ : β ≤ α) (c : {c : code α β hβ // c.elts.nonempty})
+(hempty : ∀ d, ¬ A_map_relation hβ d c) : height hβ c = 0 :=
+by { rw height, split_ifs, { rw ← not_forall_not at h, contradiction }, { refl } }
+
+lemma exists_inverse_of_height_pos {β : Λ} (hβ : β ≤ α) (c : {c : code α β hβ // c.elts.nonempty})
+(hpos : 0 < height hβ c) : {d | A_map_relation hβ d c}.nonempty :=
+begin
+  contrapose hpos,
+  simp at ⊢,
+  rw [set.not_nonempty_iff_eq_empty, set.eq_empty_iff_forall_not_mem] at hpos,
+  exact height_zero_of_no_inverse hβ c hpos
+end
+
+noncomputable def A_inverse {β : Λ} (hβ : β ≤ α)
+(c : {c : code α β hβ // c.elts.nonempty}) (hpos : 0 < height hβ c) :
+{c : code α β hβ // c.elts.nonempty} :=
+(exists_inverse_of_height_pos hβ c hpos).some
+
+lemma A_inverse_spec {β : Λ} (hβ : β ≤ α)
+(c : {c : code α β hβ // c.elts.nonempty}) (hpos : 0 < height hβ c) :
+A_map_relation hβ (A_inverse hβ c hpos) c :=
+(exists_inverse_of_height_pos hβ c hpos).some_spec
+
+noncomputable def A_inverse_of_odd {β : Λ} (hβ : β ≤ α) (c : {c : code α β hβ // c.elts.nonempty})
+(hodd : odd $ height hβ c) : {c : code α β hβ // c.elts.nonempty} :=
+A_inverse hβ c (nat.odd_gt_zero hodd)
+
+def code_equiv {β : Λ} (hβ : β ≤ α) (c d : code α β hβ) : Prop :=
+@dite _ (c.elts.nonempty) (classical.dec _)
+(λ hnonempty, dite (odd $ height hβ ⟨c, hnonempty⟩)
+  (λ hodd, c = d ∨ let e := A_inverse_of_odd hβ ⟨c, hnonempty⟩ hodd in
+    dite (e.val.extension = d.extension)
+    (λ heq, (cast (by simp_rw heq) e.val.elts) = d.elts)
+    (λ hne, begin
+      have extension_lt := d.extension_lt,
+      revert extension_lt, revert hne,
+      induction d.extension; intros hne extension_lt,
+      { exact false },
+      { exact (A_map_code hβ (coe_lt_coe.mp extension_lt) e hne).val = d }
+    end))
+  (λ heven, dite (c.extension = d.extension)
+    (λ heq, (cast (by simp_rw heq) c.elts) = d.elts)
+    (λ hne, begin
+      have extension_lt := d.extension_lt,
+      revert extension_lt, revert hne,
+      induction d.extension; intros hne extension_lt,
+      { exact false },
+      { exact (A_map_code hβ (coe_lt_coe.mp extension_lt) ⟨c, hnonempty⟩ hne).val = d }
+    end)))
+(λ h, d.elts.nonempty)
+
+lemma code_equiv_reflexive {β : Λ} (hβ : β ≤ α) : reflexive (code_equiv hβ) := sorry
+lemma code_equiv_symmetric {β : Λ} (hβ : β ≤ α) : symmetric (code_equiv hβ) := sorry
+lemma code_equiv_transitive {β : Λ} (hβ : β ≤ α) : transitive (code_equiv hβ) := sorry
+
+lemma code_equiv_equivalence {β : Λ} (hβ : β ≤ α) : equivalence (code_equiv hβ) :=
+⟨code_equiv_reflexive hβ, code_equiv_symmetric hβ, code_equiv_transitive hβ⟩
 
 end con_nf

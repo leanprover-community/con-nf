@@ -5,15 +5,13 @@ import algebra.hom.iterate
 /-!
 # Litters, near-litters
 
-In this file, we define smallness, nearness, litters and near-litters.
+In this file, we define litters and near-litters.
 
 Litters are the parts of an indexed partition of `con_nf.atom`. Their precise definition can be
 considered opaque, as we only care about the fact that their cardinality is `κ`.
 
 ## Main declarations
 
-* `con_nf.small`: A set is small if its cardinality is strictly less than `κ`.
-* `con_nf.is_near`: Two sets are near if their symmetric difference is small.
 * `con_nf.litter`: The `i`-th litter.
 * `con_nf.is_near_litter`: A set is a `i`-near-litter if it is near the `i`-th litter.
 -/
