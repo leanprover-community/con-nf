@@ -278,11 +278,14 @@ def code_equiv {β : Λ} (hβ : β ≤ α) (c d : code α β hβ) : Prop :=
     end)))
 (λ h, d.elts.nonempty)
 
-lemma code_equiv_reflexive {β : Λ} (hβ : β ≤ α) : reflexive (code_equiv hβ) := sorry
-lemma code_equiv_symmetric {β : Λ} (hβ : β ≤ α) : symmetric (code_equiv hβ) := sorry
-lemma code_equiv_transitive {β : Λ} (hβ : β ≤ α) : transitive (code_equiv hβ) := sorry
+/-! We declare new notation for code equivalence. -/
+infix `≡`:50 := code_equiv ‹_ ≤ _›
 
-lemma code_equiv_equivalence {β : Λ} (hβ : β ≤ α) : equivalence (code_equiv hβ) :=
+lemma code_equiv_reflexive {β : Λ} (hβ : β ≤ α) : reflexive (≡) := sorry
+lemma code_equiv_symmetric {β : Λ} (hβ : β ≤ α) : symmetric (≡) := sorry
+lemma code_equiv_transitive {β : Λ} (hβ : β ≤ α) : transitive (≡) := sorry
+
+lemma code_equiv_equivalence {β : Λ} (hβ : β ≤ α) : equivalence (≡) :=
 ⟨code_equiv_reflexive hβ, code_equiv_symmetric hβ, code_equiv_transitive hβ⟩
 
 end con_nf

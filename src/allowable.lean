@@ -1,5 +1,6 @@
 import code
 import struct_perm
+import A_map
 
 /-!
 # Allowable permutations
@@ -29,14 +30,16 @@ variables [phase_1b.{u} α]
 instance allowable_group_pi : group (Π β (h : β < α), allowable β h) := sorry
 
 /-- A semiallowable permutation is a `-1`-allowable permutation of atoms (a near-litter permutation)
-together with allowable permutations on all `β < α`. This forms a group structure automatically. -/
-def semiallowable_perm := near_litter_perm × Π β (h : β < α), allowable β h
+together with allowable permutations on all `γ < β`. This forms a group structure automatically. -/
+def semiallowable_perm {β : Λ} (hβ : β ≤ α) :=
+near_litter_perm × Π γ (h : γ < β), allowable γ (h.trans_le hβ)
 
-instance semiallowable_perm_group : group (semiallowable_perm α) := prod.group
+instance semiallowable_perm_group {β : Λ} (hβ : β ≤ α) : group (semiallowable_perm α hβ) := sorry
+-- Use prod.group and allowable_group
 
-instance semiallowable_perm_scalar {β : Λ} {h : β < α} :
-has_scalar (semiallowable_perm α) (code α β (le_of_lt h)) :=
-⟨λ π ⟨γ, hγ, G⟩, begin
+instance semiallowable_perm_scalar {β : Λ} (hβ : β ≤ α) :
+has_scalar (semiallowable_perm α hβ) (code α β hβ) := sorry
+/- ⟨λ π ⟨γ, hγ, G⟩, begin
   refine ⟨γ, hγ, _⟩,
   cases γ,
   { exact π.fst.atom_perm '' G },
@@ -44,10 +47,13 @@ has_scalar (semiallowable_perm α) (code α β (le_of_lt h)) :=
     haveI := allowable_action γ (hγ.trans h),
     simp_rw with_bot.some_eq_coe,
     exact (λ g, (π.snd γ (hγ.trans h)) • g) '' G }
-end⟩
+end⟩ -/
 
 -- TODO(zeramorphic)
-instance semiallowable_perm_action {β : Λ} {h : β < α} :
-mul_action (semiallowable_perm α) (code α β (le_of_lt h)) := sorry
+instance semiallowable_perm_action {β : Λ} (hβ : β ≤ α) :
+mul_action (semiallowable_perm α hβ) (code α β hβ) := sorry
+
+def allowable_perm {β : Λ} (hβ : β ≤ α) :=
+{π : semiallowable_perm α hβ // ∀ (X Y : code α β hβ), X ≡ Y ↔ π • X ≡ π • Y}
 
 end con_nf
