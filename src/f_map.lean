@@ -140,30 +140,29 @@ private noncomputable def mk_f_map_result (β : type_index) (γ : Λ) (hβ : β 
   (h_lt : Π y < x, f_map_result β γ hβ hγ y)
   (hx : (f_map_generator hβ hγ x $ extend_result β γ hβ hγ x h_lt).nonempty) :
   f_map_result β γ hβ hγ x :=
-begin
-  refine ⟨λ y hy, _, ⟨⟨λ y hy, _, λ y hy, _⟩⟩⟩,
-  { by_cases x = y,
-    { exact hx.some },
-    { exact (h_lt y $ hy.lt_of_ne' h).val y le_rfl } },
-  { by_cases x = y,
-    { subst h, convert hx, unfold extend_result, ext z hz, split_ifs,
-      { exfalso, exact ne_of_lt hz h.symm },
-      { refl } },
-    { convert (h_lt y (lt_of_le_of_ne hy (ne.symm h))).property.some.fst y le_rfl,
-      ext z hz, dsimp, split_ifs with h₁,
-      { exfalso, rw h₁ at hy, exact not_lt_of_ge hy hz },
-      { exact f_map_result_coherent β γ hβ hγ z y (h_lt z _) (h_lt y _) z le_rfl _ } } },
-  { dsimp,
-    split_ifs,
-    { subst h, congr,
-      ext z hz, split_ifs,
-      { exfalso, exact ne_of_lt hz h.symm, },
-      { refl } },
-    { convert ((h_lt y _).property.some).snd y le_rfl,
-      ext z hz, split_ifs with h₁,
-      { exfalso, rw h₁ at hy, exact not_lt_of_ge hy hz },
-      { exact f_map_result_coherent β γ hβ hγ z y (h_lt z _) (h_lt y _) z le_rfl _ } } }
-end
+⟨λ y hy, dite (x = y) (λ h, hx.some) (λ h, (h_lt y $ hy.lt_of_ne' h).val y le_rfl),
+⟨⟨λ y hy, begin
+  by_cases x = y,
+  { subst h, convert hx, unfold extend_result, ext z hz, split_ifs,
+    { exfalso, exact ne_of_lt hz h.symm },
+    { refl } },
+  { convert (h_lt y (lt_of_le_of_ne hy (ne.symm h))).property.some.fst y le_rfl,
+    ext z hz, dsimp, split_ifs with h₁,
+    { exfalso, rw h₁ at hy, exact not_lt_of_ge hy hz },
+    { exact f_map_result_coherent β γ hβ hγ z y (h_lt z _) (h_lt y _) z le_rfl _ } }
+end,
+λ y hy, begin
+  dsimp,
+  split_ifs,
+  { subst h, congr,
+    ext z hz, split_ifs,
+    { exfalso, exact ne_of_lt hz h.symm, },
+    { refl } },
+  { convert ((h_lt y _).property.some).snd y le_rfl,
+    ext z hz, split_ifs with h₁,
+    { exfalso, rw h₁ at hy, exact not_lt_of_ge hy hz },
+    { exact f_map_result_coherent β γ hβ hγ z y (h_lt z _) (h_lt y _) z le_rfl _ } }
+end⟩⟩⟩
 
 /-- The core of the definition for the f-maps. This is essentially the definition as in the
 blueprint, except that it is defined as a function from `μ` to `f_map_result` instead of from

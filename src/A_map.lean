@@ -215,11 +215,7 @@ end
 that it admits. This is uniquely defined since any code has at most one inverse image under the
 A-map, and we can just repeat this process until no inverse image exists. -/
 noncomputable def height : {c : code α α le_rfl // c.elts.nonempty} → ℕ
-| c := begin
-  by_cases ∃ d, A_map_relation d c,
-  { exact height h.some },
-  { exact 0 },
-end
+| c := @dite _ (∃ d, A_map_relation d c) (classical.dec _) (λ h, height h.some) (λ _, 0)
 using_well_founded
 { rel_tac := λ _ _, `[exact ⟨A_map_relation, A_map_relation_well_founded⟩],
   dec_tac := `[exact h.some_spec] }
