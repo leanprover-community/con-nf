@@ -51,13 +51,61 @@ class params :=
 (μ_strong_limit : (#μ).is_strong_limit)
 (κ_lt_μ : #κ < #μ)
 (κ_le_μ_cof : #κ ≤ (#μ).ord.cof)
-(δ : Λ)
-(hδ : (ordinal.typein Λr δ).is_limit)
 
 /-- There exists a set of valid parameters for the model. The smallest such set is Λ, κ, μ = ℵ_0,
 ℵ_1, ℶ_{ω_1} -/
-example : params := sorry
 
+
+/-
+
+def candid_κ : Type := Exists.some (quot.exists_rep (aleph 1))
+
+lemma def_candid_k : #(candid_κ) = aleph 1 :=
+Exists.some_spec (quot.exists_rep (aleph 1))
+
+def candid_μ : Type := Exists.some (quot.exists_rep (bet (omega 1)))
+
+lemma def_candid_μ : #(candid_μ) = bet (omega 1) :=
+Exists.some_spec (quot.exists_rep (aleph 1))
+
+lemma card_of_N:   #ℕ = aleph_0 :=
+by symmetry; apply cardinal.lift_id
+
+example : params.{0} := { Λ := ℕ ,
+  Λr := (<),
+  Λwf := nat.lt.is_well_order,
+  Λ_ord :=  begin
+      have h1 : (ordinal.type has_lt.lt).lift = ordinal.omega,
+      by refl,
+      let u : ordinal := ordinal.type has_lt.lt,
+      have h2: ordinal.type has_lt.lt = u,
+      by refl,
+      rw h2,
+      have h3 : u = u.lift,
+      {
+        symmetry,
+        have key := ordinal.lift_id,
+        specialize key u,
+        exact key,
+      },
+      rw h3,
+      rw card_of_N,
+      rw ord_aleph_0,
+      rw h1,
+  end,
+  Λ_limit := by rw card_of_N; exact is_limit_aleph_0,
+  κ := candid_κ,
+  κ_regular := by rw def_candid_k; exact is_regular_aleph_one,
+  Λ_lt_κ := by rw def_candid_k; rw card_of_N; exact aleph_0_lt_aleph_one,
+  μ := _  ,
+  μr := _,
+  μwf := _,
+  μ_ord := _,
+  μ_strong_limit := _,
+  κ_lt_μ := _,
+  κ_le_μ_cof := _}-/
+
+example : params := sorry
 open params
 
 variables [params.{u}] {α β : Type u}
