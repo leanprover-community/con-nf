@@ -286,6 +286,15 @@ begin
   rw γ_eq
 end
 
+lemma f_map_range_eq {δ ε : type_index} {γ : Λ} {hδ : δ < α} {hε : ε < α} {hγ : γ < α}
+{x : tangle α δ hδ} {y : tangle α ε hε} (h : f_map δ γ hδ hγ x = f_map ε γ hε hγ y) :
+δ = ε :=
+begin
+  have := congr_arg prod.fst h,
+  rw [f_map_range, f_map_range] at this,
+  cases this, refl
+end
+
 private lemma f_map_core_position_raising (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
 (N : set atom) (hN : is_near_litter ⟨⟨β,γ⟩, (f_map_core β γ hβ hγ x).val x le_rfl⟩ N) :
 x < of_tangle α (coe_lt_coe.mpr hγ)

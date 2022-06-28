@@ -198,6 +198,27 @@ end
 lemma A_map_relation_well_founded {β : Λ} (hβ : β ≤ α) : well_founded (A_map_relation hβ) :=
 (A_map_subrelation hβ).wf (code_wf hβ)
 
+lemma A_map_ranges_disjoint {γ : Λ} (hγ : γ < α) {δ ε : type_index} (hδ : δ < α) (hε : ε < α)
+(hγδ : δ ≠ γ) (hγε : ε ≠ γ)
+(c : {c : set (tangle α δ _) // c.nonempty}) (d : {d : set (tangle α ε _) // d.nonempty})
+(h : A_map hδ hγ hγδ c = A_map hε hγ hγε d) : δ = ε :=
+begin
+  --obtain ⟨t, ht⟩ := (A_map hδ hγ hγδ c).property,
+  --obtain ⟨s, hs⟩ := (A_map hε hγ hγε d).property,
+  unfold A_map at h, rw subtype.ext_iff_val at h, dsimp at h,
+  obtain ⟨b, hb⟩ := c.property,
+  have mem : (to_tangle γ hγ '' local_cardinal (f_map δ γ hδ hγ b))
+    ⊆ ⋃ b ∈ (c : set (tangle α δ _)), to_tangle γ hγ '' local_cardinal (f_map δ γ hδ hγ b)
+    := set.subset_Union₂ b hb,
+  rw h at mem,
+  have mem2 : (to_tangle γ hγ) ⟨f_map δ γ hδ hγ b, litter_set _, is_near_litter_litter_set _⟩
+    ∈ to_tangle γ hγ '' local_cardinal (f_map δ γ hδ hγ b),
+  { refine set.mem_image_of_mem _ _, simp },
+  have := set.mem_of_subset_of_mem mem mem2, simp at this,
+  obtain ⟨i, hi₁, hi₂, hi₃⟩ := this,
+  exact f_map_range_eq hi₂.symm
+end
+
 /-- There is at most one inverse under an A-map. This corresponds to the fact that there is only one
 code which is related (on the left) to any given code under the A-map relation. -/
 lemma A_map_predecessor_subsingleton {β : Λ} (hβ : β ≤ α) (c : {c : code α β hβ // c.elts.nonempty}) :
@@ -215,29 +236,11 @@ begin
   rw [hy, subtype.coe_inj] at hx,
   obtain ⟨⟨δ, hδ, D⟩, hD⟩ := x,
   obtain ⟨⟨ε, hε, E⟩, hE⟩ := y,
-  suffices : δ = ε,
-  { subst this,
-    have := A_map_injective _ _ _ hx,
-    dsimp at this, cases this, refl },
-  obtain ⟨t, ht⟩ := (A_map _ ((coe_lt_coe.mp hγ).trans_le hβ) _ ⟨D, hD⟩).property,
-  have ht' := ht,
-  rw ← hx at ht',
-  unfold A_map at ht ht',
-  simp at ht ht',
-  obtain ⟨i, hi₁, x, hx₁, hx₂⟩ := ht,
-  obtain ⟨j, hj₁, y, hy₁, hy₂⟩ := ht',
-  rw ← hy₂ at hx₂,
-  have := (to_tangle γ _).inj' hx₂,
-  simp at this,
-  have fδ := f_map_range δ γ (hδ.trans_le (coe_le_coe.mpr hβ)) ((coe_lt_coe.mp hγ).trans_le hβ) i,
-  have fε := f_map_range ε γ (hε.trans_le (coe_le_coe.mpr hβ)) ((coe_lt_coe.mp hγ).trans_le hβ) j,
-  simp_rw [this.left, fε] at fδ,
-  simp at fδ,
-  exact fδ.symm
+  have : δ = ε := A_map_ranges_disjoint _ _ _ _ _ _ _ hx.symm,
+  subst this,
+  have := A_map_injective _ _ _ hx,
+  dsimp at this, cases this, refl
 end
-
-/--have ht' : t ∈ (A_map _ ((coe_lt_coe.mp hγ).trans_le hβ) _ ⟨E, hE⟩).val,
-  { rw hx, exact ht },-/
 
 /-- The height of a code is the amount of iterated images under an inverse alternative extension map
 that it admits. This is uniquely defined since any code has at most one inverse image under the
@@ -308,13 +311,10 @@ begin
     exact h },
 end
 
--- lemma A_map_of_A_map_inverse {β : Λ}(hβ : β ≤ α)(c: {c : code α β hβ // c.elts.nonempty})
---  (o: odd(height hβ c)) :
-
 lemma code_equiv_nonempty_iff_nonempty {β : Λ} (hβ : β ≤ α) (c d : code α β hβ)(e : c ≡ d) :
-    c.elts.nonempty ↔ d.elts.nonempty :=
+  c.elts.nonempty ↔ d.elts.nonempty :=
 begin
-classical,
+  classical,
   cases c with γ hγ G,
   cases d with δ hδ D,
   dsimp,
@@ -323,58 +323,26 @@ classical,
     dsimp at e,
     intro c1,
     rw dif_pos c1 at e,
-
     by_cases odd (height hβ ⟨⟨γ, hγ, G⟩, c1⟩),
     { rw dif_pos h at e,
       cases e,
-      { cases e,
-        exact c1, },
+      { cases e, exact c1 },
       { split_ifs at e,
-      { subst h_1,
-        rw ← e,
-        simp,
-        exact (A_inverse_of_odd _ _ _).property, },
-      { cases δ,
-      { dsimp at e,
-        exfalso,
-        exact e, },
-      { dsimp at e,
-        have := (A_map_code_coe_eq_iff _ _ _ _ _).mp e,
-        rw ← this,
-        exact (A_map_code _ _ _ _).property,
-      },
-      },
-      },
-    },
+        { subst h_1, rw ← e, simp, exact (A_inverse_of_odd _ _ _).property },
+        { cases δ,
+          { exfalso, exact e, },
+          { have := (A_map_code_coe_eq_iff _ _ _ _ _).mp e,
+            rw ← this,
+            exact (A_map_code _ _ _ _).property } } } },
     { rw dif_neg h at e,
       by_cases γ = δ,
-      { rw dif_pos h at e,
-        convert c1,
-        { exact h.symm, },
-        { rw ← e,
-          simp, },
-      },
+      { rw dif_pos h at e, convert c1, { exact h.symm }, { rw ← e, simp } },
       { rw dif_neg h at e,
         cases δ,
-        { dsimp at e,
-          exfalso,
-          exact e, },
-        { dsimp at e,
-          rw subtype.coe_eq_iff at e,
-          obtain ⟨h1,-⟩:= e,
-          exact h1,
-        },
-      },
-    },
-  },
- {
-    unfold code_equiv at e,
-    contrapose,
-    intro c1,
-    rw dif_neg c1 at e,
-    rw set.not_nonempty_iff_eq_empty,
-    exact e,
-  },
+        { exfalso, exact e, },
+        { dsimp at e, rw subtype.coe_eq_iff at e, obtain ⟨h1, -⟩ := e, exact h1 } } } },
+  { unfold code_equiv at e, contrapose, intro c1,
+    rw dif_neg c1 at e, rw set.not_nonempty_iff_eq_empty, exact e }
 end
 
 lemma code_equiv_symmetric {β : Λ} (hβ : β ≤ α) : symmetric (≡) :=
@@ -383,44 +351,9 @@ begin
   dsimp,
   rintros ⟨γ, hγ, G⟩ ⟨δ, hδ, D⟩ h,
   unfold code_equiv at h ⊢,
-  by_cases g:G.nonempty,
-  { rw dif_pos g at h,
-    rw dif_pos,
-    { sorry },
-    { dsimp at h,
-      split_ifs at h,
-    { cases h,
-    { dsimp,
-      cases h,
-      sorry,
-      },
-    { rw ← h,
-      convert (A_inverse_of_odd hβ ⟨c, g⟩ h_1).property,
-      simp,},
-    },
-    { cases h,
-    { rw h at g,
-      exact g},
-    { cases d.extension,
-    { dsimp at h,
-      sorry},
-    { sorry },
-
-    },
-      sorry },
-    { sorry },
-    { sorry },
-    },
-    },
-  { rw dif_neg at h ⊢,
-    { rw set.not_nonempty_iff_eq_empty at g,
-      exact g},
-    { rw set.not_nonempty_iff_eq_empty,
-      exact h},
-    { exact g},
-      },
-
+  sorry
 end
+
 lemma code_equiv_transitive {β : Λ} (hβ : β ≤ α) : transitive (≡) := sorry
 
 lemma code_equiv_equivalence {β : Λ} (hβ : β ≤ α) : equivalence (≡) :=
