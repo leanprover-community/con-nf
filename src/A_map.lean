@@ -426,7 +426,7 @@ lemma code_equiv_transitive {β : Λ} (hβ : β ≤ α) : transitive (≡) := so
 lemma code_equiv_equivalence {β : Λ} (hβ : β ≤ α) : equivalence (≡) :=
 ⟨code_equiv_reflexive hβ, code_equiv_symmetric hβ, code_equiv_transitive hβ⟩
 
-def code_is_representative {β : Λ} {hβ : β ≤ α} (c : code α β hβ) : Prop :=
+def code.is_representative {β : Λ} {hβ : β ≤ α} (c : code α β hβ) : Prop :=
 @dite _ (c.elts.nonempty) (classical.dec _)
 (λ hnonempty, even $ height hβ ⟨c, hnonempty⟩)
 (λ h, c.extension = ⊥)
@@ -437,7 +437,7 @@ to be useful to use some lemmas in the proofs of others.
 -/
 
 lemma representative_code_exists_unique {β : Λ} {hβ : β ≤ α} (c : code α β hβ) :
-∃! d ≡ c, code_is_representative d := sorry
+∃! d ≡ c, d.is_representative := sorry
 
 lemma equiv_code_exists_unique {β : Λ} {hβ : β ≤ α} (γ : Λ) (c : code α β hβ) :
 ∃! d ≡ c, d.extension = γ := sorry
