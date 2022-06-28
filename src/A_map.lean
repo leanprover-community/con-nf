@@ -25,6 +25,18 @@ begin
   exfalso, dsimp at hs₂ hs₃, rw [← hs₂, ← hs₃] at h, exact h rfl
 end
 
+@[simp] lemma mk_local_cardinal (i : litter) : #(local_cardinal i) = #μ :=
+begin
+  suffices : # {x : Σ j, {s // is_near_litter j s} // x.fst = i} = #{s // is_near_litter i s},
+  { simp, rw this, simp },
+  rw cardinal.eq,
+  refine ⟨⟨_, _, _, _⟩⟩,
+  { rintro ⟨x, hx⟩, subst hx, exact x.snd },
+  { intro x, exact ⟨⟨i, x⟩, rfl⟩ },
+  { rintro ⟨⟨j, S⟩, hx⟩, simp, subst hx, split; refl },
+  { rintro ⟨j, S⟩, simp }
+end
+
 /-- The *alternative extension* map. For a non-empty set of tangles `G`, consider the code
 `(α, γ, G)`. We then construct the non-empty set `D` such that `(α, δ, D)` is an alternative
 extension of the same object in TTT. -/
@@ -36,6 +48,26 @@ def A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : �
   cases c.property with t ht,
   exact ⟨t, ht, ⟨f_map γ δ hγ hδ t, litter_set _, is_near_litter_litter_set _⟩, by simp⟩,
 end⟩
+
+lemma subset_A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
+(c : {s : set (tangle α γ hγ) // s.nonempty}) :
+to_tangle δ hδ '' local_cardinal (f_map γ δ hγ hδ c.property.some) ⊆ (A_map hγ hδ hγδ c).val :=
+begin
+  unfold A_map,
+  convert set.subset_Union₂ c.property.some _,
+  refl, exact c.property.some_spec
+end
+
+lemma mk_A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
+(c : {s : set (tangle α γ hγ) // s.nonempty}) :
+#μ ≤ #(A_map hγ hδ hγδ c : set (tangle α δ (coe_lt_coe.mpr hδ))) :=
+begin
+  suffices : #μ = #(to_tangle δ hδ '' local_cardinal (f_map γ δ hγ hδ c.property.some)),
+  from le_of_eq_of_le this (cardinal.mk_le_mk_of_subset $ subset_A_map _ _ hγδ _),
+  rw cardinal.mk_image_eq _,
+  rw mk_local_cardinal,
+  exact (to_tangle δ hδ).inj'
+end
 
 lemma exists_inter_of_Union_eq_Union {α β : Type*} {S T : set α} {f : α → set β}
 (h : (⋃ b ∈ S, f b) = ⋃ c ∈ T, f c) : ∀ b ∈ S, (f b).nonempty → ∃ c ∈ T, (f b ∩ f c).nonempty :=
@@ -311,7 +343,7 @@ begin
     exact h },
 end
 
-lemma code_equiv_nonempty_iff_nonempty {β : Λ} (hβ : β ≤ α) (c d : code α β hβ)(e : c ≡ d) :
+lemma code_equiv_nonempty_iff_nonempty {β : Λ} (hβ : β ≤ α) (c d : code α β hβ) (e : c ≡ d) :
   c.elts.nonempty ↔ d.elts.nonempty :=
 begin
   classical,
@@ -363,6 +395,26 @@ def code.is_representative {β : Λ} {hβ : β ≤ α} (c : code α β hβ) : Pr
 @dite _ (c.elts.nonempty) (classical.dec _)
 (λ hnonempty, even $ height hβ ⟨c, hnonempty⟩)
 (λ h, c.extension = ⊥)
+
+@[simp] lemma height_zero_of_singleton {β : Λ} (hβ : β ≤ α)
+{γ : type_index} (hγ : γ < β) (g : tangle α γ _) :
+height hβ ⟨⟨γ, hγ, {g}⟩, set.singleton_nonempty g⟩ = 0 :=
+begin
+  refine height_zero_of_no_inverse _ _ _,
+  intros d hd,
+  unfold A_map_relation at hd,
+  cases γ,
+  { dsimp at hd, exact hd },
+  { dsimp at hd, split_ifs at hd,
+    { exact hd },
+    { have mk := cardinal.mk_singleton g, rw hd at mk,
+      suffices : ¬ #μ ≤ 1,
+      { rw ← mk at this, exact this (mk_A_map _ _ h ⟨(d : code α β hβ).elts, _⟩) },
+      push_neg,
+      transitivity ℵ₀,
+      exact cardinal.one_lt_aleph_0,
+      exact lt_of_le_of_lt κ_regular.aleph_0_le κ_lt_μ } }
+end
 
 /-!
 Note for whoever is formalising this: feel free to reorder these definitions if it turns out

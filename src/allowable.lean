@@ -106,10 +106,19 @@ has_scalar (allowable_perm α hβ) {c : code α β hβ // c.elts.nonempty} := �
 
 /-- The unpacked coherence condition for allowable permutations on proper type indices γ. -/
 lemma allowable_perm_coherence {β : Λ} {hβ : β ≤ α} (π : allowable_perm α hβ) :
-∀ γ (hγ : γ < β) δ (hδ : δ < α) g,
-f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) hδ
+∀ γ (hγ : γ < β) δ (hδ : δ < β) g,
+f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) (hδ.trans_le hβ)
   (@has_scalar.smul _ _ (allowable_scalar α γ (hγ.trans_le hβ)) (π.val.snd γ hγ) g) =
-π.val.fst • (f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) hδ g) := sorry
+π.val.fst • (f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) (hδ.trans_le hβ) g) :=
+begin
+  classical,
+  rintros γ hγ δ hδ g,
+  unfold has_scalar.smul,
+  have : ⟨γ, coe_lt_coe.mpr hγ, {g}⟩ ≡
+    ⟨δ, coe_lt_coe.mpr hδ, to_tangle δ (hδ.trans_le hβ) ''
+      local_cardinal (f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) (hδ.trans_le hβ) g)⟩,
+  { unfold code_equiv, dsimp, rw dif_pos (set.singleton_nonempty g), },
+end
 
 lemma allowable_perm_commute {β : Λ} {hβ : β ≤ α} (π : allowable_perm α hβ)
 {δ : Λ} (hδ : δ < β) (X : {c : code α β hβ // c.elts.nonempty}) (hX : X.val.extension ≠ δ) :

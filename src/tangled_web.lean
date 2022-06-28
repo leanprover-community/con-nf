@@ -235,7 +235,7 @@ noncomputable instance mul_action.sset_n :
 | 0 α h := h
 | (n+1) α h := mul_action.sset_n n _
 
-def xti_below := {A : xti // A < {δ}}
+/- def xti_below := {A : xti // A < {δ}}
 def τ (A : xti_below) := sset_n 2 (clan (insert δ A.1))
 instance (A) : mul_action clans_perm (τ A) := by unfold τ; apply_instance
 
@@ -245,7 +245,7 @@ theorem τ_power (A A' : xti_below) (h : A.1.drop = some A'.1) :
 def τ_elementary (A A' B B' : xti_below) (n)
   (hA : A.1.dropn n = some A'.1) (hB : B.1.dropn n = some B'.1)
   (H : A.1.1 \ A'.1.1 = B.1.1 \ B'.1.1) :
-  sset_n (n+2) (τ A') ≃ sset_n (n+2) (τ B') := sorry
+  sset_n (n+2) (τ A') ≃ sset_n (n+2) (τ B') := sorry -/
 
 end tangled_web
 end con_nf
