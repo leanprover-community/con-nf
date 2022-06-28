@@ -46,6 +46,7 @@ instance coe_lt_to_hom (β γ : Λ) : has_lift_t (β < γ) ((γ : type_index) �
 def extended_index.direct (α : Λ) : extended_index α :=
 quiver.hom.to_path $ with_bot.bot_lt_coe α
 
-instance extended_index_inhabited (α : Λ) : inhabited (extended_index α) := ⟨extended_index.direct α⟩
+instance extended_index_inhabited (α : Λ) : inhabited (extended_index α) :=
+⟨extended_index.direct α⟩
 
 end con_nf
