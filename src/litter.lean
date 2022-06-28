@@ -69,7 +69,7 @@ begin
   { by_contra',
     refine ((mk_litter_set i).symm.trans_le $ mk_le_mk_of_subset _).not_lt h,
     change litter_set i ≤ _,
-    exact le_symm_diff_iff_left.2 (pairwise_disjoint_litter_set _ _ this) },
+    exact (le_symm_diff_iff_left _ _).2 (pairwise_disjoint_litter_set _ _ this) },
   { rintro rfl,
     exact is_near_litter_litter_set _ }
 end
