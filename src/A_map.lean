@@ -258,24 +258,20 @@ def code_equiv {β : Λ} (hβ : β ≤ α) (c d : code α β hβ) : Prop :=
 @dite _ (c.elts.nonempty) (classical.dec _)
 (λ hnonempty, dite (odd $ height hβ ⟨c, hnonempty⟩)
   (λ hodd, c = d ∨ let e := A_inverse_of_odd hβ ⟨c, hnonempty⟩ hodd in
-    dite (e.val.extension = d.extension)
+    dite (d.extension = e.val.extension)
     (λ heq, (cast (by simp_rw heq) e.val.elts) = d.elts)
-    (λ hne, begin
-      have extension_lt := d.extension_lt,
-      revert extension_lt, revert hne,
-      induction d.extension; intros hne extension_lt,
-      { exact false },
-      { exact (A_map_code hβ (coe_lt_coe.mp extension_lt) e hne).val = d }
-    end))
+    (λ hne, @option.rec_on _
+      (λ (δ : type_index), Π (extension_lt : δ < β) (hne : e.val.extension ≠ δ), Prop) d.extension
+      (λ extension_lt hne, false)
+      (λ δ extension_lt hne, (A_map_code hβ (coe_lt_coe.mp extension_lt) e hne).val = d)
+      d.extension_lt (ne.symm hne)))
   (λ heven, dite (c.extension = d.extension)
     (λ heq, (cast (by simp_rw heq) c.elts) = d.elts)
-    (λ hne, begin
-      have extension_lt := d.extension_lt,
-      revert extension_lt, revert hne,
-      induction d.extension; intros hne extension_lt,
-      { exact false },
-      { exact (A_map_code hβ (coe_lt_coe.mp extension_lt) ⟨c, hnonempty⟩ hne).val = d }
-    end)))
+    (λ hne, @option.rec_on _
+      (λ (δ : type_index), Π (extension_lt : δ < β) (hne : c.extension ≠ δ), Prop) d.extension
+      (λ extension_lt hne, false)
+      (λ δ extension_lt hne, (A_map_code hβ (coe_lt_coe.mp extension_lt) ⟨c, hnonempty⟩ hne).val = d)
+      d.extension_lt hne)))
 (λ h, d.elts.nonempty)
 
 /-! We declare new notation for code equivalence. -/
