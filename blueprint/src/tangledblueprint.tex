@@ -416,6 +416,8 @@ Equivalently (this may be easier for the formalisation), the relation $\rightsqu
 \begin{definition}
 \label {def:equiv-code}
 \uses{lem:ainverse-stops, def:ainverse}
+\lean{con_nf.code_equiv}
+\leanok
 We define an equivalence relation $\equiv_\alpha$ on $\alpha$-codes.
 
 We have $(\alpha,\gamma,\emptyset) \equiv_\alpha (\alpha,\delta,D)$ iff $D=\emptyset$.
@@ -434,6 +436,8 @@ If $(\alpha,\gamma,G)$ has odd height then $(\alpha,\delta,D) \equiv_\alpha (\al
 \begin{definition}
 \label{def:representative-code}
 \uses{def:equiv-code}
+\lean{con_nf.code.is_representative}
+% not putting \leanok until we have proven the required properties
 Note that each equivalence class under $\equiv_\alpha$ with nonempty third component contains exactly one element with even height.  We call this as the \emph{representative} code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation that $(\alpha,-1,\emptyset)$ is a representative code as well.
 
 Note also that any equivalence class contains at most one code of the form $(\alpha,-1,X)$, and contains exactly one code of the form $(\alpha,\gamma,G)$ for each $\gamma < \alpha$.
@@ -515,6 +519,8 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 \begin{lemma}
 \label {lem:coherence-unpacked}
 \uses{def:allowable-perm}
+\lean{con_nf.allowable_perm_coherence}
+\leanok
 A semi-allowable permutation $\pi$ is allowable just if
 $$f_{\gamma,\delta}(\pi_\gamma(g)) = [(\pi_\delta)_{-1}``f_{\gamma,\delta}(g)^\circ].$$
 holds for all $f_{\gamma,\delta}$ with $\gamma,\delta<\alpha$, and all $g \in \tau_\gamma$.
@@ -538,6 +544,8 @@ It is straightforward to show that this condition is equivalent to the coherence
 \begin{lemma}
 \label{lem:rep-preserved}
 \uses{def:codes-action, lem:coherence-unpacked, def:representative-code}
+\lean{con_nf.representative_code_map}
+\leanok
 The image under an allowable permutation of a representative code is a representative code.
 \end{lemma}
 
