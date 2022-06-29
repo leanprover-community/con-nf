@@ -35,10 +35,12 @@ def tangle : Π β < (α : type_index), Type u
 
 /-- A type-`β` code is a type index `γ < β` together with a set of tangles of type `γ`.
 So far, we can only construct type `β` codes for `β ≤ α`. Notably, we can construct `α`-codes. -/
-@[ext] structure code (β : Λ) (β_le_α : β ≤ α) :=
+@[ext] structure code (β : Λ) (hβ : β ≤ α) :=
 (extension : type_index)
 (extension_lt : extension < β)
-(elts : set (tangle α extension (lt_of_lt_of_le extension_lt $ coe_le_coe.mpr β_le_α)))
+(elts : set (tangle α extension $ extension_lt.trans_le $ coe_le_coe.2 hβ))
+
+abbreviation nonempty_code (β : Λ) (hβ : β ≤ α) : Type* := {c : code α β hβ // c.elts.nonempty}
 
 /-- Suppose that the set of tangles embeds into the set of codes. -/
 class phase_1a_embedding :=

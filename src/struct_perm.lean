@@ -105,8 +105,7 @@ structure potential_support (α : Λ) :=
 @[simp] lemma mk_potential_support (α : Λ) : #(potential_support α) = #μ :=
 begin
   have : potential_support α ≃ {S : set (support_condition α) // small S},
-  { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.val, s.property⟩, _, _⟩;
-    intro x; cases x; simp },
+  { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.val, s.property⟩, _, _⟩; intro x; cases x; simp },
   obtain ⟨e⟩ := cardinal.eq.1 (mk_support_condition α),
   refine le_antisymm _ ⟨⟨λ m, ⟨{e.symm m}, by simp⟩, λ a b h, by { simp at h, exact h }⟩⟩,
   have lt_cof_eq_μ : #{S : set (support_condition α) // #S < (#μ).ord.cof} = #μ,
@@ -156,9 +155,9 @@ def symmetric (φ : H → struct_perm α) (x : τ) : Prop := nonempty $ support 
 @[simp] lemma mk_support_le (φ : H → struct_perm α) (x : τ) : #(support φ x) ≤ #μ :=
 begin
   have : support φ x ≃ {S : potential_support α // supports φ x S.carrier},
-  { refine ⟨λ S, ⟨S.to_potential_support, S.supports⟩, λ ⟨carrier, supports⟩, ⟨carrier, supports⟩, _, _⟩;
-    intro x; dsimp; cases x; simp },
-  rw cardinal.mk_congr this, convert mk_subtype_le _ using 1, simp
+  { refine ⟨λ S, ⟨S.1, S.2⟩, λ S, ⟨S.1, S.2⟩, _, _⟩; intro x; dsimp; cases x; simp },
+  rw [cardinal.mk_congr this, ←mk_potential_support α],
+  exact mk_subtype_le _,
 end
 
 end support_declaration

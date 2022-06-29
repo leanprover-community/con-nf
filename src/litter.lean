@@ -143,8 +143,8 @@ begin
   { subst h,
     subst this },
   ext i,
-  exact is_near_litter_litter_set_iff.1
-    (((hf $ is_near_litter_litter_set _).trans $ by rw h).trans (hg $ is_near_litter_litter_set _).symm),
+  exact is_near_litter_litter_set_iff.1 (((hf $ is_near_litter_litter_set _).trans $ by rw h).trans
+    (hg $ is_near_litter_litter_set _).symm),
 end
 
 /-- An extensionality result for near-litter permutations.

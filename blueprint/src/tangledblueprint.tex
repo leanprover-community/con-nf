@@ -506,15 +506,16 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 \end{definition}
 
 \begin{definition}
-  \label{def:codes-action}
-  \uses{def:code,def:semiallowable-perm}
-  \lean{con_nf.semiallowable_perm_action}
-  Semi-allowable permutations act on $\alpha$-codes.
+\label{def:code-action}
+\uses{def:code,def:semiallowable-perm}
+\lean{con_nf.semiallowable_perm.mul_action_code}
+\leanok
+Semi-allowable permutations act on $\alpha$-codes.
 \end{definition}
 
 \begin{definition}
   \label{def:allowable-perm}
-  \uses{def:codes-action,def:equiv-code}
+  \uses{def:code-action,def:equiv-code}
   \lean{con_nf.allowable_perm}
   \leanok
   An \emph{allowable permutation} is a semi-allowable permutation which preserves $\equiv_\alpha$: for all $\alpha$-codes $X,Y$, $X \equiv_\alpha Y \leftrightarrow \pi(X) \equiv_\alpha \pi(Y)$.
@@ -575,7 +576,7 @@ We take the set of $\alpha$-tangles, $\tau_\alpha$, to be the set of \emph{symme
 
 \begin{lemma}
   \label{lem:supportedness-equiv}
-  \uses{def:codes-action,def:equiv-code}
+  \uses{def:code-action,def:equiv-code}
   If $X \subseteq \tau_\beta$, $Y \subseteq \tau_\gamma$, and $(\alpha,\beta,X) \equiv_\alpha (\alpha,\gamma,Y)$, then (under the action of allowable permutations on codes) a set $S$ of conditions supports $\alpha$ if and only if it supports $\beta$.  In particular,  $(\alpha,\beta,X)$ has some small support if and only if $(\alpha,\gamma,Y)$ does.
 \end{lemma}
 
