@@ -247,7 +247,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 \begin{definition}
 \label{def:support-condition-action}
 \uses{def:structural-perm-derivative, def:support-condition}
-\lean{con_nf.struct_perm.mul_action_support_condition}
+\lean{con_nf.mul_action_support_condition}
 \leanok
 Structural permutations act on support conditions.
 \end{definition}
@@ -265,7 +265,7 @@ Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alp
 \begin{lemma}
 \label {lem:count-supports}
 \uses{def:support,lem:count-near-litters}
-\lean{con_nf.mk_support}
+\lean{con_nf.mk_support_le}
 \leanok
 Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supports, and therefore at most $\mu$ supports for each $x \in \tau$.
 \end{lemma}
@@ -548,7 +548,7 @@ It is straightforward to show that this condition is equivalent to the coherence
 \begin{lemma}
 \label{lem:rep-preserved}
 \uses{def:codes-action, lem:coherence-unpacked, def:representative-code}
-\lean{con_nf.representative_code_map}
+\lean{con_nf.code.is_representative.smul}
 \leanok
 The image under an allowable permutation of a representative code is a representative code.
 \end{lemma}

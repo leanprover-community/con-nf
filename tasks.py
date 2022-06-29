@@ -24,3 +24,12 @@ def all(ctx):
 def html(ctx):
     shutil.rmtree(ROOT/'docs'/'blueprint', ignore_errors=True)
     shutil.copytree(ROOT/'blueprint'/'web', ROOT/'docs'/'blueprint')
+
+# Continuous integration task.
+@task
+def ci(ctx):
+    os.system("leanproject up")
+    os.system("leanproject get-mathlib-cache")
+    os.system("leanproject build")
+    # Call these tasks afterwards.
+    os.system("inv all html")
