@@ -87,7 +87,8 @@ begin
   unfold A_map at h,
   have := subtype.ext_iff_val.mp h, dsimp at this,
   obtain ⟨x, hx, y, hy₁, hy₂⟩ := exists_inter_of_Union_eq_Union this g hg
-    ⟨to_tangle δ hδ $ ⟨f_map γ δ hγ hδ g, litter_set _, is_near_litter_litter_set _⟩, by simp⟩,
+    ⟨to_tangle δ hδ $ ⟨f_map γ δ hγ hδ g, litter_set _, is_near_litter_litter_set _⟩,
+      by { simp, refine ⟨_⟩} ⟩,
   rw set.mem_image at hy₁ hy₂,
   obtain ⟨s, hs₁, hs₂⟩ := hy₁, obtain ⟨t, ht₁, ht₂⟩ := hy₂,
   rw ← ht₂ at hs₂, have s_eq_t := (to_tangle δ hδ).inj' hs₂, rw s_eq_t at hs₁,
@@ -95,7 +96,7 @@ begin
   by_contradiction,
   have := local_cardinal_disjoint (f_map γ δ hγ hδ g) (f_map γ δ hγ hδ x)
     ((f_map_injective γ δ hγ hδ).ne h),
-  exact this ⟨hs₁, ht₁⟩,
+  exact this ⟨hs₁, ht₁⟩
 end
 
 lemma A_map_injective {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
@@ -146,7 +147,8 @@ begin
   have : is_near_litter (f_map γ δ hγ hδ t) N.snd.val,
   { convert N.snd.property, exact hN₁.symm },
   convert lt_of_le_of_lt _ (f_map_position_raising γ δ hγ hδ t N.snd.val this),
-  { cases N, cases N_snd, dsimp at hN₁, subst hN₁ },
+  { cases N, cases N_snd, unfold local_cardinal at hN₁,
+    have := set.mem_set_of.mp hN₁, dsimp at this, subst this_1 },
   { have := min_tangle_le hγ c t ht, push_neg at this, exact this }
 end
 
