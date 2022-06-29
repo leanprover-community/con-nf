@@ -446,6 +446,8 @@ Note also that any equivalence class contains at most one code of the form $(\al
 \begin{definition}
   \label{def:semi-tangle}
   \uses{def:representative-code}
+  \lean{con_nf.semitangle}
+  \leanok
   An \emph{$\alpha$-semi-tangle} is an element $x$ of $\prod_{\beta < \alpha}\mathcal{P}(\tau_\beta) \times (\alpha + \mathcal{P}(\tau_{-1}))$, whose components we denote $x_\beta$, such that:
   \begin{itemize}
     \item if $x_{-1}$ is some $\beta < \alpha$, then $(\alpha,\beta,x_\beta)$ is a representative code, and for each other $\gamma$, $A_{\beta,\gamma}(\alpha,\beta,x_\beta) = (\alpha,\gamma,x_\gamma)$;
@@ -460,6 +462,8 @@ Note also that any equivalence class contains at most one code of the form $(\al
 \begin{definition}
 \label{def:ttt-membership}
 \uses{def:semi-tangle}
+\lean{con_nf.semitangle.mem}
+\leanok
   Membership relations of $\alpha$-semi-tangles, for the intended model of tangled type theory, can now be defined as follows: for each proper type index $\beta < \alpha$, and $x \in \tau_\beta$, and each $\alpha$-semi-tangle $y \in \tau_\alpha$, say $x \in_{TTT} y$ just if $x \in y_\beta$.
 \end{definition}
 
@@ -560,6 +564,8 @@ This should be straightforward.  A target should be the equation $\pi(A_\gamma(X
 \begin{lemma}
 \label{lem:semi-tangle-action}
 \uses{lem:rep-preserved,def:semi-tangle}
+\lean{con_nf.semitangle.has_scalar}
+\leanok
   Allowable permutations act on semi-tangles.
 \end{lemma}
 
