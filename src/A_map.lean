@@ -58,7 +58,7 @@ begin
   refl, exact c.property.some_spec
 end
 
-lemma mk_A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
+@[simp] lemma mk_A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
 (c : {s : set (tangle α γ hγ) // s.nonempty}) :
 #μ ≤ #(A_map hγ hδ hγδ c : set (tangle α δ (coe_lt_coe.mpr hδ))) :=
 begin
@@ -235,8 +235,6 @@ lemma A_map_ranges_disjoint {γ : Λ} (hγ : γ < α) {δ ε : type_index} (hδ 
 (c : {c : set (tangle α δ _) // c.nonempty}) (d : {d : set (tangle α ε _) // d.nonempty})
 (h : A_map hδ hγ hγδ c = A_map hε hγ hγε d) : δ = ε :=
 begin
-  --obtain ⟨t, ht⟩ := (A_map hδ hγ hγδ c).property,
-  --obtain ⟨s, hs⟩ := (A_map hε hγ hγε d).property,
   unfold A_map at h, rw subtype.ext_iff_val at h, dsimp at h,
   obtain ⟨b, hb⟩ := c.property,
   have mem : (to_tangle γ hγ '' local_cardinal (f_map δ γ hδ hγ b))
@@ -414,6 +412,85 @@ begin
       transitivity ℵ₀,
       exact cardinal.one_lt_aleph_0,
       exact lt_of_le_of_lt κ_regular.aleph_0_le κ_lt_μ } }
+end
+
+lemma singleton_equiv {β : Λ} {hβ : β ≤ α} {γ : Λ} (hγ : γ < β) {δ : Λ} (hδ : δ < β) (hγδ : γ ≠ δ)
+(g : tangle _ _ _) :
+⟨γ, coe_lt_coe.mpr hγ, {g}⟩ ≡
+  ⟨δ, coe_lt_coe.mpr hδ, to_tangle δ (hδ.trans_le hβ) ''
+    local_cardinal (f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) (hδ.trans_le hβ) g)⟩ :=
+begin
+  classical,
+  unfold code_equiv, dsimp, rw dif_pos (set.singleton_nonempty g),
+  have : even (height hβ ⟨⟨γ, coe_lt_coe.mpr hγ, {g}⟩, set.singleton_nonempty g⟩),
+  { convert even_zero, simp },
+  rw [dif_neg (nat.even_iff_not_odd.mp this), dif_neg (hγδ ∘ coe_eq_coe.mp)],
+  simp_rw option.coe_def, unfold A_map_code, simp, unfold A_map, simp
+end
+
+lemma singleton_equiv_iff {β : Λ} {hβ : β ≤ α} {γ : Λ} {hγ : γ < β}
+{g : tangle _ _ _} {c : code α β hβ} :
+⟨γ, coe_lt_coe.mpr hγ, {g}⟩ ≡ c ↔
+c = ⟨γ, coe_lt_coe.mpr hγ, {g}⟩ ∨
+∃ δ (hc : c.extension = some δ) (hδ : δ < β) (hγδ : γ ≠ δ),
+  c = (A_map_code hβ hδ
+    ⟨⟨γ, coe_lt_coe.mpr hγ, {g}⟩, set.singleton_nonempty g⟩ (hγδ ∘ coe_eq_coe.mp)) :=
+begin
+  classical,
+  split,
+  { intro h, unfold code_equiv at h, dsimp at h, rw dif_pos (set.singleton_nonempty g) at h,
+    have : even (height hβ ⟨⟨γ, coe_lt_coe.mpr hγ, {g}⟩, set.singleton_nonempty g⟩),
+    { convert even_zero, simp },
+    rw dif_neg (nat.even_iff_not_odd.mp this) at h,
+    cases c with δ hδ D,
+    split_ifs at h,
+    { left, dsimp at h_1, subst h_1, simp at h, rw h },
+    { right, cases δ; dsimp at h,
+      { exfalso, exact h },
+      { rw ← h, exact ⟨δ, by { simp, refl }, coe_lt_coe.mp hδ, h_1 ∘ coe_eq_coe.mpr, rfl⟩ } } },
+  { intro h, cases h,
+    { rw h, exact code_equiv_reflexive hβ _ },
+    { obtain ⟨δ, hc, hδ, hγδ, hA⟩ := h, rw hA,
+      convert singleton_equiv hγ hδ hγδ g,
+      unfold A_map_code, unfold A_map, simp } }
+end
+
+@[simp] lemma singleton_ne_A_map_code {β : Λ} {hβ : β ≤ α} {δ : Λ} {hδ : δ < β}
+{g : tangle α δ (coe_lt_coe.mpr (hδ.trans_le hβ))} {c : {c : code α β hβ // c.elts.nonempty}}
+{hγδ : c.val.extension ≠ δ}
+(h : (⟨δ, coe_lt_coe.mpr hδ, {g}⟩ : code α β hβ) = A_map_code hβ hδ c hγδ) : false :=
+begin
+  unfold A_map_code at h, simp at h,
+  have := cardinal.mk_singleton g,
+  rw h at this,
+  have : #μ ≤ 1,
+  { rw ← this, simp },
+  contrapose this, push_neg, transitivity ℵ₀,
+  exact cardinal.one_lt_aleph_0, exact lt_of_le_of_lt κ_regular.aleph_0_le κ_lt_μ
+end
+
+lemma extension_eq_of_singleton_equiv_singleton {β : Λ} {hβ : β ≤ α}
+{γ δ : Λ} (hγ : γ < β) (hδ : δ < β)
+(a b : tangle _ _ _) (h : ⟨γ, coe_lt_coe.mpr hγ, {a}⟩ ≡ ⟨δ, coe_lt_coe.mpr hδ, {b}⟩) :
+γ = δ :=
+begin
+  cases singleton_equiv_iff.mp h,
+  { simp at h_1, exact coe_eq_coe.mp h_1.left.symm },
+  { exfalso, obtain ⟨ε, hc, hε, hγε, hA⟩ := h_1,
+    have := congr_arg code.extension hA, simp at this, rw coe_eq_coe at this, subst this,
+    simp at hA, exact hA }
+end
+
+lemma eq_of_singleton_equiv_singleton {β : Λ} {hβ : β ≤ α}
+{γ δ : Λ} (hγ : γ < β) (hδ : δ < β)
+(a b : tangle _ _ _) (h : ⟨γ, coe_lt_coe.mpr hγ, {a}⟩ ≡ ⟨δ, coe_lt_coe.mpr hδ, {b}⟩) :
+a = cast (by simp_rw extension_eq_of_singleton_equiv_singleton _ _ _ _ h) b :=
+begin
+  cases singleton_equiv_iff.mp h,
+  { simp at h_1, have := coe_eq_coe.mp h_1.left, subst this, simp at h_1 ⊢, exact h_1.symm },
+  { exfalso, obtain ⟨ε, hc, hε, hγε, hA⟩ := h_1,
+    have := congr_arg code.extension hA, simp at this, rw coe_eq_coe at this, subst this,
+    simp at hA, exact hA }
 end
 
 /-!
