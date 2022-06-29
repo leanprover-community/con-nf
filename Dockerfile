@@ -26,5 +26,7 @@ WORKDIR /src
 
 COPY entrypoint.sh /entrypoint.sh
 
+ENV PATH="${PATH}:${HOME}/.elan/bin"
+
 # Run the continuous integration pipeline
-ENTRYPOINT /entrypoint.sh
+ENTRYPOINT inv ci
