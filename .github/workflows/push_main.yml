@@ -24,7 +24,7 @@ jobs:
         run: docker build -t con-nf .
 
       - name: build project
-        run: docker run --rm -it -v ${pwd}:/src con-nf
+        run: docker run --rm -v ${pwd}:/src con-nf
 
       - name: remove .gitignore for gh-pages
         run: rm docs/.gitignore
