@@ -394,37 +394,55 @@ begin
     rw dif_pos h' at e,
     rw dif_pos h,
     simp at e ⊢,
-    by_cases o1 : even (height hβ ⟨{extension := γ, extension_lt := hγ, elts := G}, h'⟩);
-    by_cases o2 : even (height hβ ⟨{extension := δ, extension_lt := hδ, elts := D}, h⟩);
-    by_cases eq : γ=δ,
-    { rw dif_pos o2,
-      rw dif_pos o1 at e,
-      rw dif_pos eq.symm,
-      rw dif_pos eq at e,
-      --should be easy
-      sorry, },
-    { rw dif_pos o2,
-      rw dif_pos o1 at e,
-      rw dif_neg eq at e,
-      rw dif_neg (ne.symm eq),
-      --codes both have even height, and are different; absurd (possibly hard) case
-      sorry, },
-    { rw dif_neg o2,
-      rw dif_pos o1 at e,
-      rw dif_pos eq at e,
-      -- unify eq and e with LHS of or in goal.
-      sorry, },
-    { rw dif_neg o2,
-      rw dif_pos o1 at e,
-      rw dif_neg eq at e,
-      -- codes have different height parity, and are different; nontrivial case.
-      sorry, },
+    -- I want a 'δ=γ → D==G' lemma (or something stronger)
+    -- The nested structure of dite blocks means we need by-cases on parity of number of preimages,
+    -- then care if δ=γ. Logically, I want the opposite.
 
-      --should be similar to above 4 cases.
-    { sorry, },
-    { sorry, },
-    { sorry, },
-    { sorry, },
+    by_cases o1 : even (height hβ ⟨{extension := γ, extension_lt := hγ, elts := G}, h'⟩);
+    by_cases o2 : even (height hβ ⟨{extension := δ, extension_lt := hδ, elts := D}, h⟩),
+    { rw dif_pos o2,
+      rw dif_pos o1 at e,
+      by_cases eq: γ = δ,
+      { rw dif_pos eq.symm, rw dif_pos eq at e,
+        sorry, },
+      { rw dif_neg eq at e,
+        rw dif_neg (ne.symm eq),
+        sorry, },
+    },
+    { rw dif_neg o2,
+      rw dif_pos o1 at e,
+      by_cases eq: γ = δ,
+      { rw dif_pos eq at e,
+        --Need D == G, or break open another dite.
+        sorry, },
+      { rw dif_neg eq at e,
+        right,
+        --ugly dite block.
+        sorry, }
+    },
+    { rw dif_pos o2,
+      rw dif_neg o1 at e,
+      by_cases eq: γ = δ,
+      { rw dif_pos eq.symm,
+        -- D == G again, or break open a dite.
+        sorry, },
+      { rw dif_neg (ne.symm eq),
+        -- use eq to take RHS of e.
+        sorry, },
+    },
+    { rw dif_neg o2,
+      rw dif_neg o1 at e,
+      by_cases eq: γ = δ,
+      { --if D==G, done. If not, need unpick another dite (or exfalso it)
+        sorry, },
+      { right,
+        -- use eq to take RHS of e.
+        -- codes have different height parity, and are different; nontrivial case.
+        sorry, },
+
+
+
+    },
   },
 sorry  {
       --Trivial case; codes c and d are empty (can definitely be golfed)
