@@ -24,8 +24,6 @@ RUN curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -
 
 WORKDIR /src
 
-COPY entrypoint.sh /entrypoint.sh
-
 ENV PATH="${PATH}:${HOME}/.elan/bin"
 
 # Run the continuous integration pipeline
