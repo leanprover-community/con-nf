@@ -435,7 +435,7 @@ begin
       rw dif_pos o1 at e,
       by_cases eq: γ = δ,
       { rw dif_pos eq.symm, rw dif_pos eq at e,
-        sorry, },
+        rw ← e, simp, },
       { rw dif_neg eq at e,
         rw dif_neg (ne.symm eq),
         sorry, },
@@ -444,9 +444,8 @@ begin
       rw dif_pos o1 at e,
       by_cases eq: γ = δ,
       { rw dif_pos eq at e,
-        --Easy (or lemma)
         left,
-        sorry, },
+        refine ⟨eq.symm, _⟩, rw ← e, simp, },
       { rw dif_neg eq at e,
         right,
         --ugly dite block.
@@ -608,6 +607,39 @@ end
 Note for whoever is formalising this: feel free to reorder these definitions if it turns out
 to be useful to use some lemmas in the proofs of others.
 -/
+
+lemma height_plus_one {β δ : Λ} {hβ : β ≤ α} {hδ : δ < β} (c : code α β hβ) (h : c.elts.nonempty) {hcδ : c.extension ≠ δ} : height hβ (A_map_code hβ hδ ⟨c, h⟩ hcδ) = (height hβ ⟨c, h⟩).succ := sorry
+
+lemma representative_code_unique {β : Λ} {hβ : β ≤ α} (c : code α β hβ) (d : code α β hβ) (hc : c.is_representative) (hd : d.is_representative) (hequiv : d ≡ c) : d = c :=
+begin
+  classical,
+  by_cases c.elts.nonempty,
+  { have := (code_equiv_nonempty_iff_nonempty hβ d c hequiv).2 h,
+    unfold code.is_representative at hc hd,
+    unfold code_equiv at hequiv,
+    rw dif_pos h at hc,
+    rw dif_pos this at hd hequiv,
+    rw dif_neg (nat.even_iff_not_odd.1 hd) at hequiv,
+    split_ifs at hequiv,
+    { ext1, exact h_1,
+      refine heq_of_cast_eq _ hequiv, },
+    { cases c with γ hγ G, dsimp at h h_1 hequiv,
+      cases γ; dsimp at hequiv, cases hequiv,
+      suffices : ¬even (height hβ ⟨d, this⟩), cases this hd,
+      rw [← nat.even_succ, ← height_plus_one],
+      simp_rw ← hequiv at hc, exact hc, }},
+  { have := h, rw ← code_equiv_nonempty_iff_nonempty hβ d c hequiv at this,
+    unfold code.is_representative at hc hd,
+    unfold code_equiv at hequiv,
+    rw dif_neg h at hc,
+    rw dif_neg this at hd hequiv,
+    ext1, rw [hc, hd],
+    rw set.not_nonempty_iff_eq_empty at h this,
+    rw ← hd at hc,
+    cases c with γ hγ G, cases d with δ hδ D,
+    dsimp at hc h this, subst hc,
+    dsimp, rw [h, this], }
+end
 
 lemma representative_code_exists_unique {β : Λ} {hβ : β ≤ α} (c : code α β hβ) :
 ∃! d ≡ c, d.is_representative := sorry
