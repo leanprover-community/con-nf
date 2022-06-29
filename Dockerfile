@@ -24,13 +24,7 @@ RUN curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -
 
 WORKDIR /src
 
-# COPY . .
+COPY entrypoint.sh /entrypoint.sh
 
-# Remove docs - this should be mounted manually when running the Dockerfile
-# so that we can actually get the output
-# RUN rm -rf docs
-
-# RUN PATH=$PATH:$HOME/.elan/bin leanproject up
-
-# Run the blueprint generator
-ENTRYPOINT PATH=$PATH:$HOME/.elan/bin inv ci
+# Run the continuous integration pipeline
+ENTRYPOINT /entrypoint.sh

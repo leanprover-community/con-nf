@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 from pathlib import Path
 from invoke import run, task
 
@@ -28,8 +29,9 @@ def html(ctx):
 # Continuous integration task.
 @task
 def ci(ctx):
-    os.system("leanproject up")
-    os.system("leanproject get-mathlib-cache")
-    os.system("leanproject build")
+    if os.system("leanproject up") != 0:
+        sys.exit("leanproject up failed")
+    if os.system("leanproject build") != 0:
+        sys.exit("leanproject build failed")
     # Call these tasks afterwards.
     os.system("inv all html")
