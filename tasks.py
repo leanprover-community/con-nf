@@ -1,6 +1,6 @@
 import os
 import shutil
-import sys
+import subprocess
 from pathlib import Path
 from invoke import run, task
 
@@ -29,9 +29,9 @@ def html(ctx):
 # Continuous integration task.
 @task
 def ci(ctx):
-    if os.system("leanproject up") != 0:
-        sys.exit("leanproject up failed")
-    if os.system("leanproject build") != 0:
-        sys.exit("leanproject build failed")
+    env = os.environ.copy()
+    env["PATH"] = env["HOME"] + "/.elan/bin:" + env["PATH"]
+    subprocess.run(["leanproject", "up"], env=env, check=True)
+    subprocess.run(["leanproject", "build"], env=env, check=True)
     # Call these tasks afterwards.
-    os.system("inv all html")
+    subprocess.run(["inv", "all", "html"], env=env, check=True)
