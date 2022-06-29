@@ -40,9 +40,9 @@ jobs:
         working-directory: docs
         run: JEKYLL_ENV=production bundle exec jekyll build
 
-      # - name: deploy
-      #   uses: JamesIves/github-pages-deploy-action@3.7.1
-      #   with:
-      #     SINGLE_COMMIT: true
-      #     BRANCH: gh-pages # The branch the action should deploy to.
-      #     FOLDER: docs/_site
+      - name: deploy
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          SINGLE_COMMIT: true
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: docs/_site
