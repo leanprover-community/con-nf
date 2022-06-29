@@ -496,7 +496,7 @@ begin
       exact lt_of_le_of_lt κ_regular.aleph_0_le κ_lt_μ } }
 end
 
-lemma singleton_equiv {β : Λ} {hβ : β ≤ α} {γ : Λ} (hγ : γ < β) {δ : Λ} (hδ : δ < β) (hγδ : γ ≠ δ)
+lemma singleton_equiv {β : Λ} (hβ : β ≤ α) {γ : Λ} (hγ : γ < β) {δ : Λ} (hδ : δ < β) (hγδ : γ ≠ δ)
 (g : tangle _ _ _) :
 ⟨γ, coe_lt_coe.mpr hγ, {g}⟩ ≡
   ⟨δ, coe_lt_coe.mpr hδ, to_tangle δ (hδ.trans_le hβ) ''
@@ -510,7 +510,7 @@ begin
   simp_rw option.coe_def, unfold A_map_code, simp, unfold A_map, simp
 end
 
-lemma singleton_equiv_iff {β : Λ} {hβ : β ≤ α} {γ : Λ} {hγ : γ < β}
+lemma singleton_equiv_iff {β : Λ} (hβ : β ≤ α) {γ : Λ} {hγ : γ < β}
 {g : tangle _ _ _} {c : code α β hβ} :
 ⟨γ, coe_lt_coe.mpr hγ, {g}⟩ ≡ c ↔
 c = ⟨γ, coe_lt_coe.mpr hγ, {g}⟩ ∨
@@ -533,11 +533,11 @@ begin
   { intro h, cases h,
     { rw h, exact code_equiv_reflexive hβ _ },
     { obtain ⟨δ, hc, hδ, hγδ, hA⟩ := h, rw hA,
-      convert singleton_equiv hγ hδ hγδ g,
+      convert singleton_equiv hβ hγ hδ hγδ g,
       unfold A_map_code, unfold A_map, simp } }
 end
 
-@[simp] lemma singleton_ne_A_map_code {β : Λ} {hβ : β ≤ α} {δ : Λ} {hδ : δ < β}
+@[simp] lemma singleton_ne_A_map_code {β : Λ} (hβ : β ≤ α) {δ : Λ} {hδ : δ < β}
 {g : tangle α δ (coe_lt_coe.mpr (hδ.trans_le hβ))} {c : {c : code α β hβ // c.elts.nonempty}}
 {hγδ : c.val.extension ≠ δ}
 (h : (⟨δ, coe_lt_coe.mpr hδ, {g}⟩ : code α β hβ) = A_map_code hβ hδ c hγδ) : false :=
@@ -551,24 +551,24 @@ begin
   exact cardinal.one_lt_aleph_0, exact lt_of_le_of_lt κ_regular.aleph_0_le κ_lt_μ
 end
 
-lemma extension_eq_of_singleton_equiv_singleton {β : Λ} {hβ : β ≤ α}
+lemma extension_eq_of_singleton_equiv_singleton {β : Λ} (hβ : β ≤ α)
 {γ δ : Λ} (hγ : γ < β) (hδ : δ < β)
 (a b : tangle _ _ _) (h : ⟨γ, coe_lt_coe.mpr hγ, {a}⟩ ≡ ⟨δ, coe_lt_coe.mpr hδ, {b}⟩) :
 γ = δ :=
 begin
-  cases singleton_equiv_iff.mp h,
+  cases (singleton_equiv_iff hβ).mp h,
   { simp at h_1, exact coe_eq_coe.mp h_1.left.symm },
   { exfalso, obtain ⟨ε, hc, hε, hγε, hA⟩ := h_1,
     have := congr_arg code.extension hA, simp at this, rw coe_eq_coe at this, subst this,
     simp at hA, exact hA }
 end
 
-lemma eq_of_singleton_equiv_singleton {β : Λ} {hβ : β ≤ α}
+lemma eq_of_singleton_equiv_singleton {β : Λ} (hβ : β ≤ α)
 {γ δ : Λ} (hγ : γ < β) (hδ : δ < β)
 (a b : tangle _ _ _) (h : ⟨γ, coe_lt_coe.mpr hγ, {a}⟩ ≡ ⟨δ, coe_lt_coe.mpr hδ, {b}⟩) :
-a = cast (by simp_rw extension_eq_of_singleton_equiv_singleton _ _ _ _ h) b :=
+a = cast (by simp_rw extension_eq_of_singleton_equiv_singleton _ _ _ _ _ h) b :=
 begin
-  cases singleton_equiv_iff.mp h,
+  cases (singleton_equiv_iff hβ).mp h,
   { simp at h_1, have := coe_eq_coe.mp h_1.left, subst this, simp at h_1 ⊢, exact h_1.symm },
   { exfalso, obtain ⟨ε, hc, hε, hγε, hA⟩ := h_1,
     have := congr_arg code.extension hA, simp at this, rw coe_eq_coe at this, subst this,
