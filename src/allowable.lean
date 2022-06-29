@@ -100,7 +100,7 @@ begin
   rw subtype.val_eq_coe at this,
   rw hA' at this,
   rw set.mem_smul_set at this,
-  obtain ⟨t, ⟨N, hN₁, hN₂⟩, ht⟩ := this, dsimp at hN₁, rw ← hN₁, rw ← hN₂ at ht,
+  obtain ⟨t, ⟨N, hN₁, hN₂⟩, ht⟩ := this, have := set.mem_set_of.mp hN₁, rw ← this, rw ← hN₂ at ht,
   sorry
 end
 
