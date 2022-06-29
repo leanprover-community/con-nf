@@ -1,6 +1,0 @@
-name: "build con-nf project"
-runs:
-  using: "docker"
-  image: "Dockerfile"
-  args:
-    - -v ${PWD}:/src

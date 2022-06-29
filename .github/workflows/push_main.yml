@@ -17,9 +17,14 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: leanprover-contrib/update-versions-action@master
 
+      - name: build docker container
+        run: docker build -t con-nf .
+
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
       - name: build project
-        uses: ./ # Uses an action in the root directory
-        id: build_action
+        run: docker run --rm -it -v ${pwd}:/src con-nf
 
       - name: remove .gitignore for gh-pages
         run: rm docs/.gitignore
