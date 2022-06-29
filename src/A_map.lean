@@ -13,8 +13,8 @@ open params
 variables [params.{u}] {α : Λ} [phase_1a.{u} α]
 
 /-- The *local cardinal* of a litter is the set of all near-litters to that litter. -/
-@[reducible] def local_cardinal (i : litter) : set (Σ j, {s // is_near_litter j s}) :=
-{s : (Σ j, {s // is_near_litter j s}) | s.1 = i}
+@[reducible] def local_cardinal (i : litter) : set near_litter :=
+{s : near_litter | s.1 = i}
 
 lemma local_cardinal_nonempty (i : litter) : (local_cardinal i).nonempty :=
 ⟨⟨i, litter_set _, is_near_litter_litter_set _⟩, by simp⟩
@@ -27,7 +27,7 @@ end
 
 @[simp] lemma mk_local_cardinal (i : litter) : #(local_cardinal i) = #μ :=
 begin
-  suffices : # {x : Σ j, {s // is_near_litter j s} // x.fst = i} = #{s // is_near_litter i s},
+  suffices : # {x : near_litter // x.fst = i} = #{s // is_near_litter i s},
   { simp, rw this, simp },
   rw cardinal.eq,
   refine ⟨⟨_, _, _, _⟩⟩,
@@ -46,7 +46,7 @@ def A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : �
 ⟨⋃ b ∈ c.val, to_tangle δ hδ '' local_cardinal (f_map γ δ hγ hδ b), begin
   simp,
   cases c.property with t ht,
-  exact ⟨t, ht, ⟨f_map γ δ hγ hδ t, litter_set _, is_near_litter_litter_set _⟩, by simp⟩,
+  exact ⟨t, ht, ⟨f_map γ δ hγ hδ t, litter_set _, is_near_litter_litter_set _⟩, ⟨_⟩⟩,
 end⟩
 
 lemma subset_A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
@@ -87,7 +87,8 @@ begin
   unfold A_map at h,
   have := subtype.ext_iff_val.mp h, dsimp at this,
   obtain ⟨x, hx, y, hy₁, hy₂⟩ := exists_inter_of_Union_eq_Union this g hg
-    ⟨to_tangle δ hδ $ ⟨f_map γ δ hγ hδ g, litter_set _, is_near_litter_litter_set _⟩, by simp⟩,
+    ⟨to_tangle δ hδ $ ⟨f_map γ δ hγ hδ g, litter_set _, is_near_litter_litter_set _⟩,
+      by simp ⟩,
   rw set.mem_image at hy₁ hy₂,
   obtain ⟨s, hs₁, hs₂⟩ := hy₁, obtain ⟨t, ht₁, ht₂⟩ := hy₂,
   rw ← ht₂ at hs₂, have s_eq_t := (to_tangle δ hδ).inj' hs₂, rw s_eq_t at hs₁,
@@ -95,7 +96,7 @@ begin
   by_contradiction,
   have := local_cardinal_disjoint (f_map γ δ hγ hδ g) (f_map γ δ hγ hδ x)
     ((f_map_injective γ δ hγ hδ).ne h),
-  exact this ⟨hs₁, ht₁⟩,
+  exact this ⟨hs₁, ht₁⟩
 end
 
 lemma A_map_injective {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) :
@@ -146,7 +147,8 @@ begin
   have : is_near_litter (f_map γ δ hγ hδ t) N.snd.val,
   { convert N.snd.property, exact hN₁.symm },
   convert lt_of_le_of_lt _ (f_map_position_raising γ δ hγ hδ t N.snd.val this),
-  { cases N, cases N_snd, dsimp at hN₁, subst hN₁ },
+  { cases N, cases N_snd, unfold local_cardinal at hN₁,
+    have := set.mem_set_of.mp hN₁, dsimp at this, subst this_1 },
   { have := min_tangle_le hγ c t ht, push_neg at this, exact this }
 end
 
@@ -243,10 +245,10 @@ begin
   rw h at mem,
   have mem2 : (to_tangle γ hγ) ⟨f_map δ γ hδ hγ b, litter_set _, is_near_litter_litter_set _⟩
     ∈ to_tangle γ hγ '' local_cardinal (f_map δ γ hδ hγ b),
-  { refine set.mem_image_of_mem _ _, simp },
+  { refine set.mem_image_of_mem _ _, split, },
   have := set.mem_of_subset_of_mem mem mem2, simp at this,
-  obtain ⟨i, hi₁, hi₂, hi₃⟩ := this,
-  exact f_map_range_eq hi₂.symm
+  obtain ⟨i, hi₁, hi₂⟩ := this,
+  exact f_map_range_eq hi₂
 end
 
 /-- There is at most one inverse under an A-map. This corresponds to the fact that there is only one
