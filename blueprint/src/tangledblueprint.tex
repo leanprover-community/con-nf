@@ -384,7 +384,7 @@ NB: injectivity here really depends on having excluded the empty set from the do
 
 \begin{definition}
 \label {def:ainverse}
-\uses{lem:a-map-properties, def:a-map}
+\uses{lem:a-map-properties}
 \lean{con_nf.A_inverse}
 \leanok
 By the previous lemma, the inverse relation of the union of the $A_\gamma$'s is a partial function, which we call $A^{-1}$.
@@ -413,7 +413,7 @@ Equivalently (this may be easier for the formalisation), the relation $\rightsqu
 
 \begin{definition}
 \label {def:equiv-code}
-\uses{lem:ainverse-stops, def:ainverse}
+\uses{lem:ainverse-stops}
 \lean{con_nf.code_equiv}
 \leanok
 We define an equivalence relation $\equiv_\alpha$ on $\alpha$-codes.
@@ -547,7 +547,7 @@ It is straightforward to show that this condition is equivalent to the coherence
 
 \begin{lemma}
 \label{lem:rep-preserved}
-\uses{def:codes-action, lem:coherence-unpacked, def:representative-code}
+\uses{lem:coherence-unpacked, def:representative-code}
 \lean{con_nf.code.is_representative.smul}
 \leanok
 The image under an allowable permutation of a representative code is a representative code.
@@ -1105,7 +1105,7 @@ We can now wrap up the recursion.  It is a little subtle: to know that the recur
 
 \begin{definition}
   \label{def:very-coherent-data}
-  \uses{def:coherent-phase-1-data,lem:position-functions-propagate,thm:freedom-of-action}
+  \uses{lem:position-functions-propagate,thm:freedom-of-action}
   For $\alpha \in \lambda + 1$, a choice of coherent phase 1 data below $\alpha$ is \emph{very coherent} if its ordering functions and designated supports at each level are the ones provided by \cref{lem:position-functions-propagate} applied to the earlier levels, using \cref{thm:freedom-of-action} to supply the assumption of freedom of action.
 
   [This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice.  See also discusson above replacing this with an explicit principle of “dependent choice”.]
