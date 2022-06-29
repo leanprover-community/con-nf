@@ -383,14 +383,52 @@ begin
   intros c d e,
   by_cases c.elts.nonempty,
   {
-      --Nontrivial case; codes c and d are non-empty
-      rw (code_equiv_nonempty_iff_nonempty hβ c d e) at h,
-      -- Now we want c = δ hδ G
-      unfold code_equiv at e ⊢,
-      sorry,
+    --Nontrivial case; codes c and d are non-empty
+    have h' := h,
+    rw (code_equiv_nonempty_iff_nonempty hβ c d e) at h,
+    cases c with γ hγ G,
+    cases d with δ hδ D,
+    dsimp at h,
+    unfold code_equiv at e ⊢,
+    dsimp at e h' ⊢,
+    rw dif_pos h' at e,
+    rw dif_pos h,
+    simp at e ⊢,
+    by_cases o1 : even (height hβ ⟨{extension := γ, extension_lt := hγ, elts := G}, h'⟩);
+    by_cases o2 : even (height hβ ⟨{extension := δ, extension_lt := hδ, elts := D}, h⟩);
+    by_cases eq : γ=δ,
+    { rw dif_pos o2,
+      rw dif_pos o1 at e,
+      rw dif_pos eq.symm,
+      rw dif_pos eq at e,
+      --should be easy
+      sorry, },
+    { rw dif_pos o2,
+      rw dif_pos o1 at e,
+      rw dif_neg eq at e,
+      rw dif_neg (ne.symm eq),
+      --codes both have even height, and are different; absurd (possibly hard) case
+      sorry, },
+    { rw dif_neg o2,
+      rw dif_pos o1 at e,
+      rw dif_pos eq at e,
+      -- unify eq and e with LHS of or in goal.
+      sorry, },
+    { rw dif_neg o2,
+      rw dif_pos o1 at e,
+      rw dif_neg eq at e,
+      -- codes have different height parity, and are different; nontrivial case.
+      sorry, },
+
+      --should be similar to above 4 cases.
+    { sorry, },
+    { sorry, },
+    { sorry, },
+    { sorry, },
   },
-  {
+sorry  {
       --Trivial case; codes c and d are empty (can definitely be golfed)
+      have h' := h,
       rw (code_equiv_nonempty_iff_nonempty hβ c d e) at h,
       unfold code_equiv,
       split_ifs,
@@ -402,9 +440,8 @@ begin
         exact h h_1, },
       { exfalso,
         exact h h_1, },
-      { rw ← (code_equiv_nonempty_iff_nonempty hβ c d e) at h,
-        rw set.not_nonempty_iff_eq_empty at h,
-        exact h, },
+      { rw set.not_nonempty_iff_eq_empty at h',
+        exact h', },
   },
   /- rintros ⟨γ, hγ, G⟩ ⟨δ, hδ, D⟩ h,
   unfold code_equiv at h ⊢,
