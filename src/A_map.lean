@@ -375,6 +375,10 @@ begin
     rw dif_neg c1 at e, rw set.not_nonempty_iff_eq_empty, exact e }
 end
 
+lemma code_equiv_equal_if_ext_equal {β : Λ}(hβ : β ≤ α)(c d : code α β hβ)(e : c ≡ d)
+    (r : c.extension = d.extension) : c = d := sorry
+    -- Is this true? - I think we only need c.elts == d.elts (Alex)
+
 lemma code_equiv_symmetric {β : Λ} (hβ : β ≤ α) : symmetric (≡) :=
 begin
   classical,
@@ -396,7 +400,7 @@ begin
     simp at e ⊢,
     -- I want a 'δ=γ → D==G' lemma (or something stronger)
     -- The nested structure of dite blocks means we need by-cases on parity of number of preimages,
-    -- then care if δ=γ. Logically, I want the opposite.
+    -- then care if δ=γ. Logically, I want the opposite (Alex)
 
     by_cases o1 : even (height hβ ⟨{extension := γ, extension_lt := hγ, elts := G}, h'⟩);
     by_cases o2 : even (height hβ ⟨{extension := δ, extension_lt := hδ, elts := D}, h⟩),
@@ -461,9 +465,6 @@ sorry  {
       { rw set.not_nonempty_iff_eq_empty at h',
         exact h', },
   },
-  /- rintros ⟨γ, hγ, G⟩ ⟨δ, hδ, D⟩ h,
-  unfold code_equiv at h ⊢,
-  split_ifs at h, -/
 end
 
 lemma code_equiv_transitive {β : Λ} (hβ : β ≤ α) : transitive (≡) := sorry
