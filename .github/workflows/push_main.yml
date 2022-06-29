@@ -24,10 +24,7 @@ jobs:
         run: docker build -t con-nf .
 
       - name: build project
-        uses: addnab/docker-run-action@v3
-        with:
-          image: con-nf:latest
-          options: -v ${{ github.workspace }}:/src
+        run: docker run --rm -v ${{ github.workspace }}:/src con-nf
 
       - name: remove .gitignore for gh-pages
         run: rm docs/.gitignore
