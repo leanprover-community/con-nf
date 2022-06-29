@@ -379,9 +379,36 @@ lemma code_equiv_symmetric {β : Λ} (hβ : β ≤ α) : symmetric (≡) :=
 begin
   classical,
   dsimp,
-  rintros ⟨γ, hγ, G⟩ ⟨δ, hδ, D⟩ h,
+  -- We split codes into constituent parts after excluding trivial cases
+  intros c d e,
+  by_cases c.elts.nonempty,
+  {
+      --Nontrivial case; codes c and d are non-empty
+      rw (code_equiv_nonempty_iff_nonempty hβ c d e) at h,
+      -- Now we want c = δ hδ G
+      unfold code_equiv at e ⊢,
+      sorry,
+  },
+  {
+      --Trivial case; codes c and d are empty (can definitely be golfed)
+      rw (code_equiv_nonempty_iff_nonempty hβ c d e) at h,
+      unfold code_equiv,
+      split_ifs,
+      { exfalso,
+        exact h h_1, },
+      { exfalso,
+        exact h h_1, },
+      { exfalso,
+        exact h h_1, },
+      { exfalso,
+        exact h h_1, },
+      { rw ← (code_equiv_nonempty_iff_nonempty hβ c d e) at h,
+        rw set.not_nonempty_iff_eq_empty at h,
+        exact h, },
+  },
+  /- rintros ⟨γ, hγ, G⟩ ⟨δ, hδ, D⟩ h,
   unfold code_equiv at h ⊢,
-  sorry
+  split_ifs at h, -/
 end
 
 lemma code_equiv_transitive {β : Λ} (hβ : β ≤ α) : transitive (≡) := sorry
