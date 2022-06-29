@@ -75,12 +75,12 @@ begin
 end
 
 /-- A set is near at most one litter. -/
-lemma is_near_litter.unique {s : set atom}
-  (hi : is_near_litter i s) (hj : is_near_litter j s) : i = j :=
+lemma is_near_litter.unique {s : set atom} (hi : is_near_litter i s) (hj : is_near_litter j s) :
+  i = j :=
 is_near_litter_litter_set_iff.1 $ hi.trans hj.symm
 
 /-- There are `μ` near-litters near the `i`-th litter. -/
-@[simp] lemma mk_near_litter (i : litter) : #{s : set atom // is_near_litter i s} = #μ :=
+@[simp] lemma mk_near_litter' (i : litter) : #{s // is_near_litter i s} = #μ :=
 begin
   refine (le_antisymm _ _).trans mk_atom,
   { refine le_of_le_of_eq _
@@ -95,9 +95,13 @@ begin
   { exact singleton_injective (symm_diff_right_injective _ $ by convert congr_arg subtype.val h) }
 end
 
+/-- The type of near-litters. -/
+def near_litter : Type* := Σ i, {s // is_near_litter i s}
+
 /-- There are `μ` near-litters in total. -/
-@[simp] lemma mk_near_litter_any : #(Σ i, {s : set atom // is_near_litter i s}) = #μ :=
-by { simp, exact mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) le_rfl μ_strong_limit.ne_zero }
+@[simp] lemma mk_near_litter : #near_litter = #μ :=
+by { simp only [near_litter, mk_sigma, mk_near_litter', sum_const, mk_litter, lift_id],
+  exact mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) le_rfl μ_strong_limit.ne_zero }
 
 /--
 A near-litter permutation is a permutation of the base type which sends near-litters to
@@ -227,18 +231,24 @@ rfl
 @[simp] lemma litter_perm_zpow (f : near_litter_perm) (n : ℤ) :
   (f ^ n).litter_perm = f.litter_perm ^ n := rfl
 
-/-- The type of near-litter permutations forms a group. -/
+/-- Near-litter permutations form a group. -/
 instance : group near_litter_perm :=
 atom_perm_injective.group _ atom_perm_one atom_perm_mul atom_perm_inv atom_perm_div atom_perm_pow
   atom_perm_zpow
 
-/-- The group of near-litter permutations acts on the base type via the base permutation. -/
+/-- Near-litter permutations act on the base type via the base permutation. -/
 instance : mul_action near_litter_perm atom :=
 { smul := λ f, f.atom_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
-/-- The group of near-litter permutations acts on litters via the litter permutation. -/
+/-- Near-litter permutations act on litters via the litter permutation. -/
 instance : mul_action near_litter_perm litter :=
 { smul := λ f, f.litter_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
+
+/-- Near-litter permutations act on near-litters. -/
+instance : mul_action near_litter_perm near_litter :=
+{ smul := λ f N, ⟨f.litter_perm N.1, ⇑(f.atom_perm)⁻¹ ⁻¹' N.2, f.near N.2.2⟩,
+  one_smul := λ _, sigma.ext rfl $ by simp,
+  mul_smul := λ _ _ _, rfl }
 
 end near_litter_perm
 end con_nf
