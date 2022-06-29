@@ -13,8 +13,8 @@ open params
 variables [params.{u}] {α : Λ} [phase_1a.{u} α]
 
 /-- The *local cardinal* of a litter is the set of all near-litters to that litter. -/
-@[reducible] def local_cardinal (i : litter) : set (Σ j, {s // is_near_litter j s}) :=
-{s : (Σ j, {s // is_near_litter j s}) | s.1 = i}
+@[reducible] def local_cardinal (i : litter) : set near_litter :=
+{s : near_litter | s.1 = i}
 
 lemma local_cardinal_nonempty (i : litter) : (local_cardinal i).nonempty :=
 ⟨⟨i, litter_set _, is_near_litter_litter_set _⟩, by simp⟩
@@ -27,7 +27,7 @@ end
 
 @[simp] lemma mk_local_cardinal (i : litter) : #(local_cardinal i) = #μ :=
 begin
-  suffices : # {x : Σ j, {s // is_near_litter j s} // x.fst = i} = #{s // is_near_litter i s},
+  suffices : # {x : near_litter // x.fst = i} = #{s // is_near_litter i s},
   { simp, rw this, simp },
   rw cardinal.eq,
   refine ⟨⟨_, _, _, _⟩⟩,
@@ -88,7 +88,7 @@ begin
   have := subtype.ext_iff_val.mp h, dsimp at this,
   obtain ⟨x, hx, y, hy₁, hy₂⟩ := exists_inter_of_Union_eq_Union this g hg
     ⟨to_tangle δ hδ $ ⟨f_map γ δ hγ hδ g, litter_set _, is_near_litter_litter_set _⟩,
-      by { simp, refine ⟨_⟩} ⟩,
+      by simp ⟩,
   rw set.mem_image at hy₁ hy₂,
   obtain ⟨s, hs₁, hs₂⟩ := hy₁, obtain ⟨t, ht₁, ht₂⟩ := hy₂,
   rw ← ht₂ at hs₂, have s_eq_t := (to_tangle δ hδ).inj' hs₂, rw s_eq_t at hs₁,
@@ -245,7 +245,7 @@ begin
   rw h at mem,
   have mem2 : (to_tangle γ hγ) ⟨f_map δ γ hδ hγ b, litter_set _, is_near_litter_litter_set _⟩
     ∈ to_tangle γ hγ '' local_cardinal (f_map δ γ hδ hγ b),
-  { refine set.mem_image_of_mem _ _, simp },
+  { refine set.mem_image_of_mem _ _, split, },
   have := set.mem_of_subset_of_mem mem mem2, simp at this,
   obtain ⟨i, hi₁, hi₂⟩ := this,
   exact f_map_range_eq hi₂
