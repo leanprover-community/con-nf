@@ -96,7 +96,7 @@ begin
   simp at hA', unfold A_map at hA', simp at hA', dsimp at hA',
   have : to_tangle δ (hε.trans_le hβ) ⟨f_map γ δ _ (hδ.trans_le hβ) (π.val.snd γ hγ • g), litter_set _, is_near_litter_litter_set _⟩
     ∈ to_tangle δ (hε.trans_le hβ) '' local_cardinal (f_map γ δ _ (hδ.trans_le hβ) (π.val.snd γ hγ • g))
-    := set.mem_image_of_mem (to_tangle δ (hε.trans_le hβ)) (by simp),
+    := set.mem_image_of_mem (to_tangle δ (hε.trans_le hβ)) (by {simp, split,}),
   rw subtype.val_eq_coe at this,
   rw hA' at this,
   rw set.mem_smul_set at this,
