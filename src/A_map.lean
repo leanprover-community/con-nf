@@ -376,8 +376,33 @@ begin
 end
 
 lemma code_equiv_equal_if_ext_equal {β : Λ}(hβ : β ≤ α)(c d : code α β hβ)(e : c ≡ d)
-    (r : c.extension = d.extension) : c = d := sorry
-    -- Is this true? - I think we only need c.elts == d.elts (Alex)
+    (r : c.extension = d.extension) : c = d :=
+    begin
+      cases c with γ hγ G,
+      cases d with δ hδ D,
+      unfold code_equiv at e,
+      simp at r e ⊢,
+      split_ifs at e; subst r; simp at e ⊢,
+      { exact e, },
+      { cases e,
+        { exact e, },
+        { --h2 should be contradictory,
+          sorry, },
+      },
+      { cases e,
+        { exact e, },
+        { --proof looks nontrivial
+
+          sorry, },
+      },
+      { dsimp at h,
+        rw set.not_nonempty_iff_eq_empty at h,
+        rw e,
+        exact h,
+      },
+
+    end
+    -- I think this is true (although we only need c.elts == d.elts) (Alex)
 
 lemma code_equiv_symmetric {β : Λ} (hβ : β ≤ α) : symmetric (≡) :=
 begin
@@ -417,7 +442,8 @@ begin
       rw dif_pos o1 at e,
       by_cases eq: γ = δ,
       { rw dif_pos eq at e,
-        --Need D == G, or break open another dite.
+        --Easy (or lemma)
+        left,
         sorry, },
       { rw dif_neg eq at e,
         right,
@@ -428,7 +454,7 @@ begin
       rw dif_neg o1 at e,
       by_cases eq: γ = δ,
       { rw dif_pos eq.symm,
-        -- D == G again, or break open a dite.
+        -- converse of above two cases
         sorry, },
       { rw dif_neg (ne.symm eq),
         -- use eq to take RHS of e.
