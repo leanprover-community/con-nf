@@ -46,7 +46,7 @@ def A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : �
 ⟨⋃ b ∈ c.val, to_tangle δ hδ '' local_cardinal (f_map γ δ hγ hδ b), begin
   simp,
   cases c.property with t ht,
-  exact ⟨t, ht, ⟨f_map γ δ hγ hδ t, litter_set _, is_near_litter_litter_set _⟩, by simp⟩,
+  exact ⟨t, ht, ⟨f_map γ δ hγ hδ t, litter_set _, is_near_litter_litter_set _⟩, ⟨_⟩⟩,
 end⟩
 
 lemma subset_A_map {γ : type_index} {δ : Λ} (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ)
@@ -245,8 +245,8 @@ begin
     ∈ to_tangle γ hγ '' local_cardinal (f_map δ γ hδ hγ b),
   { refine set.mem_image_of_mem _ _, simp },
   have := set.mem_of_subset_of_mem mem mem2, simp at this,
-  obtain ⟨i, hi₁, hi₂, hi₃⟩ := this,
-  exact f_map_range_eq hi₂.symm
+  obtain ⟨i, hi₁, hi₂⟩ := this,
+  exact f_map_range_eq hi₂
 end
 
 /-- There is at most one inverse under an A-map. This corresponds to the fact that there is only one
