@@ -125,12 +125,40 @@ end
 
 /-- We can construct nonempty semitangles from nonempty representative codes with extensions at
 proper type indices. -/
-def nonempty_semitangle_of_nonempty_representative_code (c : nonempty_code α α le_rfl)
+def intro_nonempty_semitangle_proper (c : nonempty_code α α le_rfl)
   (heven : even $ height c) {β : Λ} (hβ : c.val.extension = β) : nonempty_semitangle α :=
 ⟨semitangle_members_of_nonempty_code α c hβ,
 semitangle_extension.proper β (coe_lt_coe.mp $ hβ ▸ c.val.extension_lt : β < α)
 (by { convert code.is_representative.nonempty c heven, rw semitangle_members_eq, refl })
 (λ γ hγ hβγ, by { simp_rw [semitangle_members_ne α c hβ hγ hβγ, semitangle_members_eq], refl })⟩
+
+def semitangle_members_of_nonempty_code_base (c : nonempty_code α α le_rfl)
+  (hc : c.val.extension = ⊥) : semitangle_members α :=
+λ γ hγ, A_map (bot_lt_coe _) hγ
+  ⟨cast (by simp_rw hc) c.val.elts, by { convert c.property, rw hc, simp }⟩
+
+@[simp] lemma semitangle_members_base (c : nonempty_code α α le_rfl)
+  (hc : c.val.extension = ⊥) {β : Λ} (hβ : β < α) :
+  (⟨β, coe_lt_coe.mpr hβ, semitangle_members_of_nonempty_code_base α c hc β hβ⟩ : code α α le_rfl) =
+  A_map_code hβ c :=
+begin
+  obtain ⟨⟨γ, hγ, G⟩, hG⟩ := c, dsimp at hc, subst hc,
+  unfold semitangle_members_of_nonempty_code_base, simp
+end
+
+def intro_nonempty_semitangle_base (c : nonempty_code α α le_rfl)
+  (hc : c.val.extension = ⊥) : nonempty_semitangle α :=
+⟨semitangle_members_of_nonempty_code_base α c hc,
+semitangle_extension.base (cast (by { simp_rw hc, refl }) c.val.elts)
+(by { convert c.property, simp_rw hc, refl, simp })
+begin
+  convert code.is_representative.nonempty c (by { convert even_zero, exact height_base c hc }),
+  obtain ⟨⟨γ, hγ, G⟩, hG⟩ := c, dsimp at hc, subst hc, refl
+end
+(λ β hβ, begin
+  simp_rw semitangle_members_base α c hc hβ,
+  obtain ⟨⟨γ, hγ, G⟩, hG⟩ := c, dsimp at hc, subst hc, refl
+end)⟩
 
 variable [phase_1b.{u u} α]
 
@@ -148,5 +176,10 @@ instance semitangle.mul_action : mul_action (allowable_perm α le_rfl) (semitang
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
 def new_tangle :=
 {s : semitangle α // symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) s}
+
+/-- For any near-litter `N`, the code `(α, -1, N)` is a tangle at level `α`.
+This is called a *typed near litter*. -/
+def typed_near_litter (N : near_litter) : new_tangle α :=
+⟨some $ intro_nonempty_semitangle_base α ⟨⟨⊥, bot_lt_coe _, N.snd.val⟩, sorry⟩ rfl, sorry⟩
 
 end con_nf

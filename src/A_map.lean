@@ -294,6 +294,10 @@ begin
   exact coe_A_map_code_ne_singleton (congr_arg subtype.val h),
 end
 
+@[simp] lemma height_base (c : nonempty_code α β hβ) (hc : c.val.extension = ⊥) :
+  height c = 0 :=
+by { rw height_eq_zero, rintros d ⟨γ, hγ, -⟩, simp at hc, exact hc }
+
 /-! ### A⁻¹ and equivalence of codes -/
 
 /-- The inverse map to `A_map_code`. -/
