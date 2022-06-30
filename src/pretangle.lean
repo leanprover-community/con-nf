@@ -70,13 +70,12 @@ structure nonempty_semitangle :=
   (λ (β : Iio α) cond,
     let c : code α α le_rfl := ⟨β.val, coe_lt_coe.mpr β.property, members β.val β.property⟩
     in c.is_representative ∧ ∀ δ (hδ : δ < α) (hγδ : β.val ≠ δ),
-      A_map_code le_rfl hδ ⟨c, members_nonempty β.val β.property⟩ (hγδ ∘ coe_eq_coe.mp)
+      A_map_code hδ ⟨c, members_nonempty β.val β.property⟩
       = ⟨⟨δ, coe_lt_coe.mpr hδ, members δ hδ⟩, members_nonempty δ hδ⟩)
   (λ (atoms : set atom) cond,
     let c : code α α le_rfl := ⟨⊥, bot_lt_coe _, atoms⟩
     in c.is_representative ∧ ∀ δ (hδ : δ < α),
-      A_map_code le_rfl hδ ⟨c, cond⟩ bot_ne_coe
-      = ⟨⟨δ, coe_lt_coe.mpr hδ, members δ hδ⟩, members_nonempty δ hδ⟩)
+      A_map_code hδ ⟨c, cond⟩ = ⟨⟨δ, coe_lt_coe.mpr hδ, members δ hδ⟩, members_nonempty δ hδ⟩)
   extension_nonempty)
 
 -- TODO: Are we supposed to have a membership relation on tangles or semitangles?
