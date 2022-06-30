@@ -1,4 +1,5 @@
 import allowable
+import mathlib.option
 
 noncomputable theory
 
@@ -239,14 +240,12 @@ end)⟩
 variable [phase_1b.{u u} α]
 
 /-- Allowable permutations act on nonempty semitangles. -/
-instance nonempty_semitangle.has_scalar :
-  has_scalar (allowable_perm α le_rfl) (nonempty_semitangle α) := sorry
+instance nonempty_semitangle.mul_action :
+  mul_action (allowable_perm α le_rfl) (nonempty_semitangle α) := sorry
 
 /-- Allowable permutations act on semitangles. -/
-instance semitangle.has_scalar : has_scalar (allowable_perm α le_rfl) (semitangle α) :=
-⟨λ π s, with_bot.rec_bot_coe ⊥ (λ s, some $ π • s) s⟩
-
-instance semitangle.mul_action : mul_action (allowable_perm α le_rfl) (semitangle α) := sorry
+instance semitangle.mul_action : mul_action (allowable_perm α le_rfl) (semitangle α) :=
+option.mul_action
 
 /-- A tangle at the new level `α` is a symmetric semitangle. This is `τ_α` in the blueprint.
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
