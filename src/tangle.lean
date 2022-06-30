@@ -96,6 +96,14 @@ def semitangle.mem {β : Λ} (hβ : β < α)
   (t : tangle α β (coe_lt_coe.mpr hβ)) (s : semitangle α) :=
   s.elim false (nonempty_semitangle.mem α hβ t)
 
+lemma semitangle.ext (x y : nonempty_semitangle α) {β : Λ} (hβ : β < α) :
+  x.members β hβ = y.members β hβ → x = y := sorry
+
+lemma semitangle.ext' (x y : nonempty_semitangle α) {β : Λ} (hβ : β < α) :
+  (∀ (t : tangle α β (coe_lt_coe.mpr hβ)),
+    nonempty_semitangle.mem α hβ t x ↔ nonempty_semitangle.mem α hβ t y)
+  → x = y := sorry
+
 def semitangle_members_of_nonempty_code (c : nonempty_code α α le_rfl)
   {β : Λ} (hβ : c.val.extension = β) : semitangle_members α :=
 λ γ hγ, dite (β = γ)
