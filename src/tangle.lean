@@ -177,6 +177,17 @@ Unlike the type `tangle`, this is not an opaque definition, and we can inspect a
 def new_tangle :=
 {s : semitangle α // symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) s}
 
+/-- If a set of support conditions supports a code, it supports all equivalent codes. -/
+lemma supportedness_equiv {c d : code α α le_rfl} (hcd : c ≡ d) (S : set (support_condition α))
+(hS : supports (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) c S) :
+  supports (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) d S := sorry
+
+/-- By the previous lemma, if two codes are equivalent,
+one is symmetric if and only if the other is. -/
+lemma symmetric_equiv {c d : code α α le_rfl} (hcd : c ≡ d) :
+  symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) c ↔
+  symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) d := sorry
+
 /-- For any near-litter `N`, the code `(α, -1, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
 def typed_near_litter (N : near_litter) : new_tangle α :=

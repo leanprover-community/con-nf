@@ -102,6 +102,9 @@ equivalence. -/
 def allowable_perm (hβ : β ≤ α) :=
 {π : semiallowable_perm α hβ // ∀ X Y : code α β hβ, π • X ≡ π • Y ↔ X ≡ Y}
 
+@[reducible] def allowable_perm.to_struct_perm (hβ : β ≤ α) : allowable_perm α hβ → struct_perm β :=
+semiallowable_perm.to_struct_perm ∘ subtype.val
+
 instance allowable_perm_group (hβ : β ≤ α) : group (allowable_perm α hβ) := sorry
 
 instance allowable_perm_scalar_tangle {β : type_index} (hβ : β < α) :
@@ -113,6 +116,9 @@ mul_action (allowable_perm α le_rfl) (tangle α β hβ) := sorry
 
 instance allowable_perm_scalar_code (hβ : β ≤ α) : has_scalar (allowable_perm α hβ) (code α β hβ) :=
 ⟨λ π X, π.val • X⟩
+
+instance allowable_perm_mul_code (hβ : β ≤ α) : mul_action (allowable_perm α hβ) (code α β hβ) :=
+sorry
 
 instance allowable_perm_scalar_nonempty (hβ : β ≤ α) :
   has_scalar (allowable_perm α hβ) (nonempty_code α β hβ) := ⟨λ π X, π.val • X⟩
