@@ -625,12 +625,16 @@ Take a $\beta$-support for $b$, and extend all the paths in it at the top by the
 \begin{lemma}
 \label {lem:small-subsets-closure}
 \uses{def:tangle}
+\lean{con_nf.symmetric_set}
+\leanok
 It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|B|<\kappa$ [take the union of the $\beta$-supports of elements of $B$ and add $\alpha$ to all the second components of elements of this union]:  all small subsets of a type are realized in each higher type.
 \end{lemma}
 
 \begin{lemma}
   \label{lem:tangle-action}
   \uses{def:tangle}
+  \lean{con_nf.new_tangle.mul_action}
+  \leanok
   The action of $\alpha$-allowable permutations on semi-tangles restricts to an action on tangles.  Explicitly, if an $\alpha$ semi-tangle $x$ is symmetric, then so is $\pi x$ for any $\alpha$-allowable permutation $\pi$.
 \end{lemma}
 \begin{proof}

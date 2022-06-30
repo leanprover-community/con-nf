@@ -200,4 +200,20 @@ def symmetric_singleton {β : Λ} (hβ : β < α) (x : tangle α β (coe_lt_coe.
   (by { convert even_zero, exact height_singleton x }) rfl,
   sorry⟩
 
+/-- For any small set `B` of symmetric `β`-tangles, the code `(α, β, B)` is a tangle at level `α`. -/
+def symmetric_set {β : Λ} (hβ : β < α) (B : set $ tangle α β (coe_lt_coe.mpr hβ))
+  (hne : B.nonempty) (hsmall : small B)
+  (symm : ∀ b ∈ B, symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) b) :
+  new_tangle α :=
+⟨some $ intro_nonempty_semitangle_proper α ⟨⟨β, coe_lt_coe.mpr hβ, B⟩, hne⟩
+  sorry rfl,
+  sorry⟩
+
+/-- Allowable permutations act on `α`-tangles. -/
+instance new_tangle.has_scalar : has_scalar (allowable_perm α le_rfl) (new_tangle α) :=
+⟨λ π t, ⟨π • t.val, sorry⟩⟩
+
+instance new_tangle.mul_action : mul_action (allowable_perm α le_rfl) (new_tangle α) :=
+sorry
+
 end con_nf
