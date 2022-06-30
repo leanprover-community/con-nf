@@ -40,6 +40,7 @@ So far, we can only construct type `β` codes for `β ≤ α`. Notably, we can c
 (extension_lt : extension < β)
 (elts : set (tangle α extension $ extension_lt.trans_le $ coe_le_coe.2 hβ))
 
+/-- Nonempty codes -/
 abbreviation nonempty_code (β : Λ) (hβ : β ≤ α) : Type* := {c : code α β hβ // c.elts.nonempty}
 
 /-- Suppose that the set of tangles embeds into the set of codes. -/

@@ -412,17 +412,23 @@ Equivalently (this may be easier for the formalisation), the relation $\rightsqu
 \end{proof}
 
 \begin{definition}
-\label {def:equiv-code}
+\label {def:code-height}
 \uses{lem:ainverse-stops}
-\lean{con_nf.code_equiv}
+\lean{con_nf.height}
+\leanok
+The \emph{height} of a code is its number of iterated images under $A^{-1}$.  Formally this can be given by induction over the well-founded relation $\rightsquigarrow$ defined in Lemma \ref{lem:ainverse-stops}: If $C$ has no predecessors under $\rightsquigarrow$, then $h(C) = 0$; if $C$ has a predecessor $C' \rightsquigarrow C$, this is unique by injectivity of $A^{-1}$, and we set $h(C) = h(C') + 1$.
+\end{definition}
+
+\begin{definition}
+\label {def:code-equiv}
+\uses{def:code-height}
+\lean{con_nf.code.equiv}
 \leanok
 We define an equivalence relation $\equiv_\alpha$ on $\alpha$-codes.
 
 We have $(\alpha,\gamma,\emptyset) \equiv_\alpha (\alpha,\delta,D)$ iff $D=\emptyset$.
 
 Assume for the rest of the definition that $(\alpha,\gamma,G)$ is a code.
-
-Define the \emph{height} of a code as its number of iterated images under $A^{-1}$.  Formally this can be given by induction over the well-founded relation $\rightsquigarrow$ defined in Lemma \ref{lem:ainverse-stops}: If $C$ has no predecessors under $\rightsquigarrow$, then $h(C) = 0$; if $C$ has a predecessor $C' \rightsquigarrow C$, this is unique by injectivity of $A^{-1}$, and we set $h(C) = h(C') + 1$.
 
 If $(\alpha,\gamma,G)$ has even height (including 0 as an important case)
 then $(\alpha,\delta,D) \equiv_\alpha (\alpha,\gamma,G)$ (for $\delta$ a type index distinct from $\gamma$) iff
@@ -433,7 +439,7 @@ If $(\alpha,\gamma,G)$ has odd height then $(\alpha,\delta,D) \equiv_\alpha (\al
 
 \begin{definition}
 \label{def:representative-code}
-\uses{def:equiv-code}
+\uses{def:code-equiv}
 \lean{con_nf.code.is_representative}
 % not putting \leanok until we have proven the required properties
 Note that each equivalence class under $\equiv_\alpha$ with nonempty third component contains exactly one element with even height.  We call this as the \emph{representative} code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation that $(\alpha,-1,\emptyset)$ is a representative code as well.
@@ -515,7 +521,7 @@ Semi-allowable permutations act on $\alpha$-codes.
 
 \begin{definition}
   \label{def:allowable-perm}
-  \uses{def:code-action,def:equiv-code}
+  \uses{def:code-action,def:code-equiv}
   \lean{con_nf.allowable_perm}
   \leanok
   An \emph{allowable permutation} is a semi-allowable permutation which preserves $\equiv_\alpha$: for all $\alpha$-codes $X,Y$, $X \equiv_\alpha Y \leftrightarrow \pi(X) \equiv_\alpha \pi(Y)$.
@@ -576,7 +582,7 @@ We take the set of $\alpha$-tangles, $\tau_\alpha$, to be the set of \emph{symme
 
 \begin{lemma}
   \label{lem:supportedness-equiv}
-  \uses{def:code-action,def:equiv-code}
+  \uses{def:code-action,def:code-equiv}
   If $X \subseteq \tau_\beta$, $Y \subseteq \tau_\gamma$, and $(\alpha,\beta,X) \equiv_\alpha (\alpha,\gamma,Y)$, then (under the action of allowable permutations on codes) a set $S$ of conditions supports $\alpha$ if and only if it supports $\beta$.  In particular,  $(\alpha,\beta,X)$ has some small support if and only if $(\alpha,\gamma,Y)$ does.
 \end{lemma}
 
@@ -589,7 +595,7 @@ We state a couple of easy lemmas which are things we assumed in the inductive da
 \begin{lemma}
 \label{def:typed-near-litter}
 \uses{def:tangle}
-Any code $(\alpha,-1,N)$, where $N$ is a near-litter, gives an element of $\tau_{\alpha}$.
+Any code $(\alpha,-1,N)$, where $N$ is a near-litter, gives an element of $\tau_\alpha$.
 \end{lemma}
 
 \begin{proof}

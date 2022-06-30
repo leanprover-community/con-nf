@@ -1,8 +1,5 @@
 import A_map
-import code
 import mathlib.group
-import mathlib.logic
-import mathlib.with_bot
 import struct_perm
 
 /-!
@@ -30,7 +27,7 @@ export phase_1b (allowable allowable_group to_struct_perm allowable_action)
 
 attribute [instance] allowable_group allowable_action
 
-variables [phase_1b.{u} α] {β γ δ : Λ}
+variables [phase_1b.{u} α] {β γ δ : Λ} {hβ : β ≤ α}
 
 /-- A semi-allowable permutation is a `-1`-allowable permutation of atoms (a near-litter
 permutation) together with allowable permutations on all `γ < β`. This forms a group structure
@@ -62,7 +59,7 @@ instance mul_action_code (hβ : β ≤ α) : mul_action (semiallowable_perm α h
     { exact (mul_smul _ _ _).heq }
   end }
 
-variables {α} {hβ : β ≤ α} (π : semiallowable_perm α hβ) (X : code α β hβ)
+variables {α} (π : semiallowable_perm α hβ) (X : code α β hβ)
 
 lemma smul_code_def :
   π • X =
@@ -75,15 +72,15 @@ lemma smul_code_def :
 @[simp] lemma extension_smul : (π • X).extension = X.extension := rfl
 
 instance has_scalar_nonempty_code (hβ : β ≤ α) :
-  has_scalar (semiallowable_perm α hβ) {c : code α β hβ // c.elts.nonempty} :=
+  has_scalar (semiallowable_perm α hβ) (nonempty_code α β hβ) :=
 ⟨λ π X, ⟨π • X, let ⟨⟨γ, hγ, G⟩, hG⟩ := X in
   by induction γ using with_bot.rec_bot_coe; exact hG.image _⟩⟩
 
-@[simp, norm_cast] lemma coe_smul (X : {c : code α β hβ // c.elts.nonempty}) :
-   (↑(π • X) : code α β hβ) = π • X := rfl
+@[simp, norm_cast] lemma coe_smul (X : nonempty_code α β hβ) :
+  (↑(π • X) : code α β hβ) = π • X := rfl
 
 instance mul_action_nonempty_code (hβ : β ≤ α) :
-  mul_action (semiallowable_perm α hβ) {c : code α β hβ // c.elts.nonempty} :=
+  mul_action (semiallowable_perm α hβ) (nonempty_code α β hβ) :=
 subtype.coe_injective.mul_action _ coe_smul
 
 end semiallowable_perm
@@ -97,44 +94,51 @@ instance allowable_perm_scalar (hβ : β ≤ α) : has_scalar (allowable_perm α
 ⟨λ π X, π.val • X⟩
 
 instance allowable_perm_scalar_nonempty (hβ : β ≤ α) :
-  has_scalar (allowable_perm α hβ) {c : code α β hβ // c.elts.nonempty} := ⟨λ π X, π.val • X⟩
+  has_scalar (allowable_perm α hβ) (nonempty_code α β hβ) := ⟨λ π X, π.val • X⟩
 
 /-- The unpacked coherence condition for allowable permutations on proper type indices γ. -/
-lemma allowable_perm_coherence {hβ : β ≤ α} (π : allowable_perm α hβ) (hγ : γ < β) (hδ : δ < β)
+lemma allowable_perm_coherence (π : allowable_perm α hβ) (hγ : γ < β) (hδ : δ < β)
   (hγδ : γ ≠ δ) (g) :
   f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) (hδ.trans_le hβ) (π.val.snd γ hγ • g) =
     π.val.fst • (f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) (hδ.trans_le hβ) g) :=
 begin
   classical,
   unfold has_scalar.smul,
-  have equiv := singleton_equiv hβ hγ hδ hγδ g,
+  have equiv := code.singleton_equiv hγ hδ hγδ g,
   rw ← π.property at equiv,
   unfold has_scalar.smul at equiv, simp at equiv,
-  rw singleton_equiv_iff at equiv, cases equiv,
+  rw code.singleton_equiv_iff at equiv, cases equiv,
   { exfalso,
     have := congr_arg code.extension equiv, dsimp at this, rw coe_eq_coe at this,
     rw this at hγδ, exact hγδ rfl },
   obtain ⟨ε, hc, hε, hγε, hA⟩ := equiv,
-  have hc' := coe_eq_coe.mp hc, subst hc', clear hc,
-  dsimp at hA, have hA' := hA.symm, rw A_map_code_coe_eq_iff at hA',
-  simp at hA', unfold A_map at hA', simp at hA', dsimp at hA',
-  have : to_tangle δ (hε.trans_le hβ) ⟨f_map γ δ _ (hδ.trans_le hβ) (π.val.snd γ hγ • g),
-    litter_set _, is_near_litter_litter_set _⟩
-    ∈ to_tangle δ (hε.trans_le hβ) '' local_cardinal (f_map γ δ _ (hδ.trans_le hβ)
-      (π.val.snd γ hγ • g)) := mem_image_of_mem (to_tangle δ $ hε.trans_le hβ) (by simp),
-  rw subtype.val_eq_coe at this,
-  rw hA' at this,
-  rw mem_smul_set at this,
-  obtain ⟨t, ⟨N, hN₁, hN₂⟩, ht⟩ := this, have := mem_set_of.mp hN₁, rw ← this, rw ← hN₂ at ht,
-  sorry
+  have hc' := coe_eq_coe.mp hc,
+  subst hc',
+  clear hc,
+  dsimp at hA,
+  have hA' := hA.symm,
+  sorry,
+  -- rw A_map_code_coe_eq_iff at hA',
+  -- simp at hA', unfold A_map at hA',
+  -- simp at hA',
+  -- dsimp at hA',
+  -- have : to_tangle δ (hε.trans_le hβ) ⟨f_map γ δ _ (hδ.trans_le hβ) (π.val.snd γ hγ • g),
+  --   litter_set _, is_near_litter_litter_set _⟩
+  --   ∈ to_tangle δ (hε.trans_le hβ) '' local_cardinal (f_map γ δ _ (hδ.trans_le hβ)
+  --     (π.val.snd γ hγ • g)) := mem_image_of_mem (to_tangle δ $ hε.trans_le hβ) (by simp),
+  -- rw subtype.val_eq_coe at this,
+  -- rw hA' at this,
+  -- rw mem_smul_set at this,
+  -- obtain ⟨t, ⟨N, hN₁, hN₂⟩, ht⟩ := this, have := mem_set_of.mp hN₁, rw ← this, rw ← hN₂ at ht,
+  -- sorry
 end
 
-lemma allowable_perm_commute {hβ : β ≤ α} (π : allowable_perm α hβ) (hδ : δ < β)
-  (X : {c : code α β hβ // c.elts.nonempty}) (hX : X.val.extension ≠ δ) :
-π • (A_map_code hβ hδ X hX) = A_map_code hβ hδ (π • X) hX := sorry
+lemma allowable_perm_commute (π : allowable_perm α hβ) (hδ : δ < β) (X : nonempty_code α β hβ)
+  (hX : X.val.extension ≠ δ) :
+  π • (A_map_code hδ X) = A_map_code hδ (π • X) := sorry
 
 /-- Representative codes are mapped to representative codes under allowable permutations. -/
-lemma code.is_representative.smul {hβ : β ≤ α} (π : allowable_perm α hβ) (hδ : δ < β)
+lemma code.is_representative.smul (π : allowable_perm α hβ) (hδ : δ < β)
   (X : code α β hβ) (hX : X.is_representative) :
   (π • X).is_representative := sorry
 

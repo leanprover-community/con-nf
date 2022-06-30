@@ -208,7 +208,7 @@ of `f_map` is correct.
 local attribute [semireducible] f_map_core f_map
 
 private lemma f_map_core_injective (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) :
-function.injective $ λ x, (f_map_core β γ hβ hγ x).val x le_rfl :=
+  injective $ λ x, (f_map_core β γ hβ hγ x).val x le_rfl :=
 begin
   intros i j h,
   wlog : i ≤ j using i j,
