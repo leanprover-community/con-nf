@@ -495,6 +495,18 @@ begin
       assumption, }, },
 end
 
+lemma is_representative.A_map (c d : nonempty_code α β hβ)
+  (hc : c.val.is_representative) (hd : d.val.is_representative)
+  {γ : Λ} (hγ : γ < β) (hγd : d.val.extension ≠ γ) : c ≠ A_map_code hγ d :=
+begin
+  intro h,
+  have := code.is_representative.unique hc hd _, rwa subtype.val_inj at this, rw this at h,
+  exact A_map_code_ne hγ d h,
+  by_cases even (height d),
+  { exfalso, have := code.equiv.A_map_left _ hγ _ hγd h, sorry },
+  { have := height_even_of_A_map_code_not_even hγ d hγd h, sorry }
+end
+
 lemma representative_code_exists (c : code α β hβ) : ∃ d ≡ c, d.is_representative :=
 begin
    by_cases hne : c.elts.nonempty,
@@ -515,18 +527,6 @@ begin
     refine ⟨d, ⟨_, is_representative.empty⟩⟩,
     cases c with γ hγ G, dsimp at hne, rw not_nonempty_iff_eq_empty at hne, rw [hne, hd_def],
     exact equiv.empty_empty (bot_lt_coe β) hγ, },
-end
-
-lemma is_representative.A_map (c d : nonempty_code α β hβ)
-  (hc : c.val.is_representative) (hd : d.val.is_representative)
-  {γ : Λ} (hγ : γ < β) (hγd : d.val.extension ≠ γ) : c ≠ A_map_code hγ d :=
-begin
-  intro h,
-  have := code.is_representative.unique hc hd _, rwa subtype.val_inj at this, rw this at h,
-  exact A_map_code_ne hγ d h,
-  by_cases even (height d),
-  { exfalso, have := code.equiv.A_map_left _ hγ _ hγd h, sorry },
-  { have := height_even_of_A_map_code_not_even hγ d hγd h, sorry }
 end
 
 lemma representative_code_exists_unique (c : code α β hβ) : ∃! d ≡ c, d.is_representative := sorry
