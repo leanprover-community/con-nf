@@ -462,7 +462,7 @@ to be useful to use some lemmas in the proofs of others.
 
 /-- A code is representative if it is empty and has preferred extension `⊥`, or it is nonempty and
 has even height. -/
-inductive is_representative : code α β hβ → Prop
+@[mk_iff] inductive is_representative : code α β hβ → Prop
 | empty : is_representative ⟨⊥, bot_lt_coe _, ∅⟩
 | nonempty (c : nonempty_code α β hβ) : even (height c) → is_representative c
 
@@ -522,14 +522,25 @@ lemma is_representative.A_map (c d : nonempty_code α β hβ)
   {γ : Λ} (hγ : γ < β) (hγd : d.val.extension ≠ γ) : c ≠ A_map_code hγ d :=
 begin
   intro h,
-  have := code.is_representative.unique hc hd _, rwa subtype.val_inj at this, rw this at h,
-  exact A_map_code_ne hγ d h,
-  by_cases even (height d),
-  { exfalso, have := code.equiv.A_map_left _ hγ _ hγd h, sorry },
-  { have := height_even_of_A_map_code_not_even hγ d hγd h, sorry }
+  have := height_A_map_code d hγd, rw ← h at this,
+  rw is_representative_iff at hc hd,
+  cases hc, { dsimp at hc, have := c.prop, rw hc at this, exact set.not_nonempty_empty this, },
+  cases hd, { dsimp at hd, have := d.prop, rw hd at this, exact set.not_nonempty_empty this, },
+  rcases hc with ⟨e, heeven, hce⟩, rcases hd with ⟨f, hfeven, hdf⟩,
+  dsimp at hce hdf,
+  have hce : c = e := by { ext1, assumption, },
+  have hdf : d = f := by { ext1, assumption, },
+  rw [← hce, this, hdf, nat.even_succ] at heeven, exact heeven hfeven,
 end
 
-lemma representative_code_exists_unique (c : code α β hβ) : ∃! d ≡ c, d.is_representative := sorry
+lemma representative_code_exists_unique (c : code α β hβ) : ∃! d ≡ c, d.is_representative :=
+begin
+  rcases representative_code_exists c with ⟨d, hequiv, drep⟩,
+  use d, split, use hequiv, split, exact drep,
+  intros h h', refl,
+  rintros e ⟨hequiv', erep, _⟩,
+  exact is_representative.unique erep drep (equiv_transitive hequiv' hequiv.symm),
+end
 
 lemma equiv_code_exists_unique (γ : Λ) (c : code α β hβ) : ∃! d ≡ c, d.extension = γ := sorry
 
