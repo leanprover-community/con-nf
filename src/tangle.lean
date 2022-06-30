@@ -182,4 +182,11 @@ This is called a *typed near litter*. -/
 def typed_near_litter (N : near_litter) : new_tangle α :=
 ⟨some $ intro_nonempty_semitangle_base α ⟨⟨⊥, bot_lt_coe _, N.snd.val⟩, sorry⟩ rfl, sorry⟩
 
+/-- For any symmetric tangle `x`, the code `(α, β, {x})` is a tangle at level `α`. -/
+def symmetric_singleton {β : Λ} (hβ : β < α) (x : tangle α β (coe_lt_coe.mpr hβ))
+  (symm : symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) x) : new_tangle α :=
+⟨some $ intro_nonempty_semitangle_proper α ⟨⟨β, coe_lt_coe.mpr hβ, {x}⟩, set.singleton_nonempty _⟩
+  (by { convert even_zero, exact height_singleton x }) rfl,
+  sorry⟩
+
 end con_nf
