@@ -466,6 +466,22 @@ has even height. -/
 | empty : is_representative ⟨⊥, bot_lt_coe _, ∅⟩
 | nonempty (c : nonempty_code α β hβ) : even (height c) → is_representative c
 
+lemma is_representative.A_map (c d : nonempty_code α β hβ)
+  (hc : c.val.is_representative) (hd : d.val.is_representative)
+  {γ : Λ} (hγ : γ < β) (hγd : d.val.extension ≠ γ) : c ≠ A_map_code hγ d :=
+begin
+  intro h,
+  have := height_A_map_code d hγd, rw ← h at this,
+  rw is_representative_iff at hc hd,
+  cases hc, { dsimp at hc, have := c.prop, rw hc at this, exact set.not_nonempty_empty this, },
+  cases hd, { dsimp at hd, have := d.prop, rw hd at this, exact set.not_nonempty_empty this, },
+  rcases hc with ⟨e, heeven, hce⟩, rcases hd with ⟨f, hfeven, hdf⟩,
+  dsimp at hce hdf,
+  have hce : c = e := by { ext1, assumption, },
+  have hdf : d = f := by { ext1, assumption, },
+  rw [← hce, this, hdf, nat.even_succ] at heeven, exact heeven hfeven,
+end
+
 lemma is_representative.unique (hc : c.is_representative) (hd : d.is_representative)
   (hequiv : c ≡ d) : c = d :=
 begin
@@ -493,22 +509,6 @@ begin
       rw height_A_map_code at this,
       rw nat.even_succ at this, cases this h1,
       assumption, }, },
-end
-
-lemma is_representative.A_map (c d : nonempty_code α β hβ)
-  (hc : c.val.is_representative) (hd : d.val.is_representative)
-  {γ : Λ} (hγ : γ < β) (hγd : d.val.extension ≠ γ) : c ≠ A_map_code hγ d :=
-begin
-  intro h,
-  have := height_A_map_code d hγd, rw ← h at this,
-  rw is_representative_iff at hc hd,
-  cases hc, { dsimp at hc, have := c.prop, rw hc at this, exact set.not_nonempty_empty this, },
-  cases hd, { dsimp at hd, have := d.prop, rw hd at this, exact set.not_nonempty_empty this, },
-  rcases hc with ⟨e, heeven, hce⟩, rcases hd with ⟨f, hfeven, hdf⟩,
-  dsimp at hce hdf,
-  have hce : c = e := by { ext1, assumption, },
-  have hdf : d = f := by { ext1, assumption, },
-  rw [← hce, this, hdf, nat.even_succ] at heeven, exact heeven hfeven,
 end
 
 lemma representative_code_exists (c : code α β hβ) : ∃ d ≡ c, d.is_representative :=
