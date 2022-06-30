@@ -119,7 +119,7 @@ Note that the litters make up a partition of type $-1$ into sets of size $\kappa
 
 \begin{definition}
 \label {def:near-litter}
-\uses{def:litter, def:small}
+\uses{def:litter,def:small}
 \leanok
 \lean{con_nf.is_near_litter}
 A subset of $\tau_{-1}$ is a $i$-{\em near-litter} precisely if it has small symmetric difference from  a litter.
@@ -246,7 +246,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 
 \begin{definition}
 \label{def:support-condition-action}
-\uses{def:structural-perm-derivative, def:support-condition}
+\uses{def:structural-perm-derivative,def:support-condition}
 \lean{con_nf.mul_action_support_condition}
 \leanok
 Structural permutations act on support conditions.
@@ -273,7 +273,7 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supp
 
 \begin{definition}
 \label{def:support-of}
-  \uses{def:support, def:support-condition-action}
+  \uses{def:support,def:support-condition-action}
   \lean{con_nf.support}
   \leanok
   Suppose $\varphi : H \to \Str_\alpha$ is any group homomorphism, and $\tau$ is a set equipped with an $H$-action.
@@ -290,7 +290,7 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supp
 
 \begin{definition}
 \label {def:phase-1a-data}
-\uses{def:type-index, def:pretangle,def:near-litter}
+\uses{def:type-index,def:pretangle,def:near-litter}
 \lean{con_nf.phase_1a}
 \leanok
 Fix a proper type index $\alpha$.  \emph{Phase 1a data at $\alpha$} consists of:
@@ -316,7 +316,7 @@ An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \s
 
 \begin{definition}
 \label {def:f-map}
-\uses{def:ftargets, def:phase-1a-data}
+\uses{def:ftargets,def:phase-1a-data}
 \lean{con_nf.f_map}
 \leanok
 We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $X_{\beta,\gamma} \subseteq \mathrm{Litter}$, as follows.
@@ -349,7 +349,7 @@ Notice that the phase 1a data for $\alpha$ gives us the information already to d
 
 \begin{definition}
 \label {def:a-map}
-\uses{def:f-map, def:code, def:local-cardinal}
+\uses{def:f-map,def:code,def:local-cardinal}
 \lean{con_nf.A_map}
 \leanok
 Let $\gamma$ be a type index less than $\alpha$.
@@ -370,7 +370,7 @@ Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart
 
 \begin{lemma}
 \label {lem:a-map-properties}
-\uses{def:a-map, lem:f-map-properties}
+\uses{def:a-map,lem:f-map-properties}
 \lean{con_nf.A_map_injective}
 \leanok
 \begin{enumerate}
@@ -554,7 +554,7 @@ It is straightforward to show that this condition is equivalent to the coherence
 
 \begin{lemma}
 \label{lem:rep-preserved}
-\uses{lem:coherence-unpacked, def:representative-code}
+\uses{lem:coherence-unpacked,def:representative-code}
 \lean{con_nf.code.is_representative.smul}
 \leanok
 The image under an allowable permutation of a representative code is a representative code.
@@ -576,14 +576,14 @@ This should be straightforward.  A target should be the equation $\pi(A_\gamma(X
 
 \begin{definition}
 \label{def:tangle}
-\uses{lem:semi-tangle-action, def:support-of}
+\uses{lem:semi-tangle-action,def:support-of}
 We take the set of $\alpha$-tangles, $\tau_\alpha$, to be the set of \emph{symmetric} $\alpha$-semi-tangles under the action of allowable permutations; that is, tangles that are supported by some small $\alpha$-support $S$,.
 \end{definition}
 
 \begin{lemma}
-  \label{lem:supportedness-equiv}
-  \uses{def:code-action,def:code-equiv}
-  If $X \subseteq \tau_\beta$, $Y \subseteq \tau_\gamma$, and $(\alpha,\beta,X) \equiv_\alpha (\alpha,\gamma,Y)$, then (under the action of allowable permutations on codes) a set $S$ of conditions supports $\alpha$ if and only if it supports $\beta$.  In particular,  $(\alpha,\beta,X)$ has some small support if and only if $(\alpha,\gamma,Y)$ does.
+\label{lem:supportedness-equiv}
+\uses{def:support-of,def:allowable-perm}
+If $X \subseteq \tau_\beta$, $Y \subseteq \tau_\gamma$, and $(\alpha,\beta,X) \equiv_\alpha (\alpha,\gamma,Y)$, then (under the action of allowable permutations on codes) a set $S$ of conditions supports $\beta$ if and only if it supports $\gamma$.  In particular,  $(\alpha,\beta,X)$ has some small support if and only if $(\alpha,\gamma,Y)$ does.
 \end{lemma}
 
 \begin{proof}
@@ -650,7 +650,7 @@ There is lots to be proven, but that is the entire description.
 
 \begin{definition}
   \label{def:embedding-into-pretangles}
-  \uses{def:semi-tangle, def:phase-1c-data}
+  \uses{def:semi-tangle,def:phase-1c-data}
   There is an injection $\tau_\alpha \to \Pretangle_\alpha$ (where $\tau_\alpha$ is constructed from the given phase 1 data).  Moreover, this commutes with the $\All_\alpha$-action.
 \end{definition}
 
@@ -717,7 +717,7 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 
   \begin{itemize}
   \item Note we want to provide this definiton also for $\alpha = \lambda$!  I think this should be available in mathlib as \verb|with_top|.
-  \item We could unify “standard at level $-1$” with induced at proper type indices by generalising the definition of each component of the “induced concrete phase 1 data at $\alpha$” to include the case $\alpha = -1$, defining the induced data as the standard one in that case.  Is this more natural?  Will it make life easier?
+  \item We could unify “standard at level $-1$” with induced at proper type indices by generalising the definition of each component of the “induced concrete phase 1 data at $\alpha$” to include the case $\alpha = -1$,defining the induced data as the standard one in that case.  Is this more natural?  Will it make life easier?
   \end{itemize}
 
   For $\alpha < \beta$, “phase 2 data below $\alpha$” can be restricted to “phase 2 data below $\beta$”.
@@ -765,7 +765,7 @@ If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the la
 
 \begin{definition}
 \label{def:strong-support}
-\uses{def:coherent-phase-1-data}
+\uses{def:coherent-phase-1-data,def:raise-lower-index}
 A strong support is a support $S$ with certain additional properties.
 
 \begin{enumerate}
@@ -809,7 +809,7 @@ We give an exact statement of what is meant, then we prove it.
 
 \begin{definition}
 \label {def:local-bijection}
-\uses{def:extended-type-index, def:litter, def:small}
+\uses{def:extended-type-index,def:litter,def:small}
 \leanok
 \lean{con_nf.local_bijection}
 An $\alpha$-local bijection consists of: for each $\alpha$-extended type index (i.e.\ path $A : -1 \to \alpha$), a permutation $\pi^0_A$ of some subset $\dom(\pi^0_A) \subseteq \tau{-1}$, such that the intersection of $\dom(\pi^0_A)$ with any litter is small (including possibly empty).
@@ -1142,7 +1142,7 @@ We can now wrap up the recursion.  It is a little subtle: to know that the recur
 \begin{definition}
   \label{def:tangle-completed}
   \uses{thm:main-recursion}
-  The (genuine, definitive!) tangles are the substructure $\Tangle$ of $\Pretangle$ given by the unique choice of very coherent data up to $\lambda$, provided by \cref{thm:main-recursion}.
+  The (genuine,definitive!) tangles are the substructure $\Tangle$ of $\Pretangle$ given by the unique choice of very coherent data up to $\lambda$, provided by \cref{thm:main-recursion}.
 \end{definition}
 
 \newpage
