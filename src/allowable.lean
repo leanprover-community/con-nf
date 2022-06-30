@@ -44,6 +44,15 @@ namespace semiallowable_perm
 def to_struct_perm {α : Λ} [phase_1a.{u} α] [phase_1b.{u} α] {hβ : β ≤ α}
   (π : semiallowable_perm α hβ) : struct_perm β := sorry
 
+instance semiallowable_perm_scalar_tangle {β : type_index} (hβ : β < α) :
+has_scalar (semiallowable_perm α le_rfl) (tangle α β hβ) :=
+⟨λ π t, with_bot.rec_bot_coe
+  (λ hβ t, π.fst.atom_perm t)
+  (λ β hβ t, π.snd β (coe_lt_coe.mp hβ) • t) β hβ t⟩
+
+instance semiallowable_perm_mul_tangle {β : type_index} (hβ : β < α) :
+mul_action (semiallowable_perm α le_rfl) (tangle α β hβ) := sorry
+
 instance mul_action_code (hβ : β ≤ α) : mul_action (semiallowable_perm α hβ) (code α β hβ) :=
 { smul := λ π X,
     ⟨X.extension, X.extension_lt,
@@ -93,10 +102,23 @@ equivalence. -/
 def allowable_perm (hβ : β ≤ α) :=
 {π : semiallowable_perm α hβ // ∀ X Y : code α β hβ, π • X ≡ π • Y ↔ X ≡ Y}
 
+@[reducible] def allowable_perm.to_struct_perm (hβ : β ≤ α) : allowable_perm α hβ → struct_perm β :=
+semiallowable_perm.to_struct_perm ∘ subtype.val
+
 instance allowable_perm_group (hβ : β ≤ α) : group (allowable_perm α hβ) := sorry
 
-instance allowable_perm_scalar (hβ : β ≤ α) : has_scalar (allowable_perm α hβ) (code α β hβ) :=
+instance allowable_perm_scalar_tangle {β : type_index} (hβ : β < α) :
+has_scalar (allowable_perm α le_rfl) (tangle α β hβ) :=
+⟨λ π t, π.val • t⟩
+
+instance allowable_perm_mul_tangle {β : type_index} (hβ : β < α) :
+mul_action (allowable_perm α le_rfl) (tangle α β hβ) := sorry
+
+instance allowable_perm_scalar_code (hβ : β ≤ α) : has_scalar (allowable_perm α hβ) (code α β hβ) :=
 ⟨λ π X, π.val • X⟩
+
+instance allowable_perm_mul_code (hβ : β ≤ α) : mul_action (allowable_perm α hβ) (code α β hβ) :=
+sorry
 
 instance allowable_perm_scalar_nonempty (hβ : β ≤ α) :
   has_scalar (allowable_perm α hβ) (nonempty_code α β hβ) := ⟨λ π X, π.val • X⟩

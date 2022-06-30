@@ -478,6 +478,8 @@ This all cries out for a Theorem which should be here and which I left implicit 
 \begin{theorem}
 \label {thm:extensionality}
 \uses{def:ttt-membership}
+\lean{con_nf.semitangle.ext}
+\leanok
 For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-semitangles $y$, the following (nearly-obviously equivalent) statements hold:
 \begin{itemize}
   \item if for all $z \in \tau_\beta$, $(z \in_{\tt TTT} x \leftrightarrow z \in_{\tt TTT} y)$, then $x=y$;
@@ -585,6 +587,8 @@ We take the set of $\alpha$-tangles, $\tau_\alpha$, to be the set of \emph{symme
 \begin{lemma}
 \label{lem:supportedness-equiv}
 \uses{def:support-of,def:allowable-perm}
+\lean{con_nf.symmetric_equiv}
+\leanok
 If $X \subseteq \tau_\beta$, $Y \subseteq \tau_\gamma$, and $(\alpha,\beta,X) \equiv_\alpha (\alpha,\gamma,Y)$, then (under the action of allowable permutations on codes) a set $S$ of conditions supports $\beta$ if and only if it supports $\gamma$.  In particular,  $(\alpha,\beta,X)$ has some small support if and only if $(\alpha,\gamma,Y)$ does.
 \end{lemma}
 
@@ -597,6 +601,8 @@ We state a couple of easy lemmas which are things we assumed in the inductive da
 \begin{lemma}
 \label{def:typed-near-litter}
 \uses{def:tangle}
+\lean{con_nf.typed_near_litter}
+\leanok
 Any code $(\alpha,-1,N)$, where $N$ is a near-litter, gives an element of $\tau_\alpha$.
 \end{lemma}
 
@@ -607,6 +613,8 @@ This code is obviously representative [though this isn’t really necessary, tha
 \begin{lemma}
 \label{def:typed-singleton}
 \uses{def:tangle}
+\lean{symmetric_singleton}
+\leanok
 For any symmetric $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$. In particular, this works for each atom $a \in \tau_{-a}$.
 \end{lemma}
 
@@ -619,12 +627,16 @@ Take a $\beta$-support for $b$, and extend all the paths in it at the top by the
 \begin{lemma}
 \label {lem:small-subsets-closure}
 \uses{def:tangle}
+\lean{con_nf.symmetric_set}
+\leanok
 It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|B|<\kappa$ [take the union of the $\beta$-supports of elements of $B$ and add $\alpha$ to all the second components of elements of this union]:  all small subsets of a type are realized in each higher type.
 \end{lemma}
 
 \begin{lemma}
   \label{lem:tangle-action}
   \uses{def:tangle}
+  \lean{con_nf.new_tangle.mul_action}
+  \leanok
   The action of $\alpha$-allowable permutations on semi-tangles restricts to an action on tangles.  Explicitly, if an $\alpha$ semi-tangle $x$ is symmetric, then so is $\pi x$ for any $\alpha$-allowable permutation $\pi$.
 \end{lemma}
 \begin{proof}

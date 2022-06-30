@@ -179,6 +179,11 @@ lemma A_map_code_coe_eq_iff (hδ : δ < β) (c : nonempty_code α β hβ)
     ↔ (↑(A_map_code hδ c) : code α β hβ).elts = D :=
 by split; { intro h, cases h, refl }
 
+lemma A_map_code_injective (hδ : δ < α) :
+  injective (A_map_code hδ : nonempty_code α α le_rfl → nonempty_code α α le_rfl) := sorry
+
+lemma A_map_code_ne (hδ : δ < β) (c : nonempty_code α β hβ) : c ≠ A_map_code hδ c := sorry
+
 lemma A_map_code_order (hδ : δ < β) (c : nonempty_code α β hβ) :
   code_min_map c < code_min_map (A_map_code hδ c) :=
 A_map_order (c.val.extension_lt.trans_le $ coe_le_coe.2 hβ) (hδ.trans_le hβ) ⟨c.val.elts, c.2⟩
@@ -266,13 +271,17 @@ end
 lemma height_ne_zero {c : nonempty_code α β hβ} : height c ≠ 0 ↔ {d | A_map_rel d c}.nonempty :=
 height_eq_zero.not.trans $ by { push_neg, refl }
 
-@[simp] lemma height_A_map_code {hδ : δ < β} (c : nonempty_code α β hβ) {hcδ : c.1.extension ≠ δ} :
+@[simp] lemma height_A_map_code {hδ : δ < β} (c : nonempty_code α β hβ) (hcδ : c.1.extension ≠ δ) :
   height (A_map_code hδ c) = height c + 1 :=
 begin
   classical,
   have h : ∃ d, A_map_rel d (A_map_code hδ c) := ⟨c, A_map_rel.intro _ _ hcδ⟩,
   rw [height, dif_pos h, A_map_rel_subsingleton _ _ h.some_spec (A_map_rel.intro _ _ hcδ)],
 end
+
+lemma height_even_of_A_map_code_not_even {γ : Λ} (hγ : γ < β) (c : nonempty_code α β hβ)
+  (hcγ : c.1.extension ≠ γ) (hc : ¬ even (height c)) : even (height $ A_map_code hγ c) :=
+by { rw [height_A_map_code c hcγ, nat.even_succ], exact hc }
 
 lemma coe_A_map_code_ne_singleton {γ : type_index} {hγ : γ < β} {hδ : δ < β}
   {g : tangle α γ (hγ.trans_le $ coe_le_coe.2 hβ)} {c : nonempty_code α β hβ} :
@@ -293,6 +302,10 @@ begin
   obtain ⟨δ, hδ, hc, h⟩ := A_map_rel_iff.1 hc,
   exact coe_A_map_code_ne_singleton (congr_arg subtype.val h),
 end
+
+@[simp] lemma height_base (c : nonempty_code α β hβ) (hc : c.val.extension = ⊥) :
+  height c = 0 :=
+by { rw height_eq_zero, rintros d ⟨γ, hγ, -⟩, simp at hc, exact hc }
 
 /-! ### A⁻¹ and equivalence of codes -/
 
@@ -504,10 +517,19 @@ begin
     exact equiv.empty_empty (bot_lt_coe β) hγ, },
 end
 
-lemma representative_code_exists_unique (c : code α β hβ) : ∃! d ≡ c, d.is_representative :=
+lemma is_representative.A_map (c d : nonempty_code α β hβ)
+  (hc : c.val.is_representative) (hd : d.val.is_representative)
+  {γ : Λ} (hγ : γ < β) (hγd : d.val.extension ≠ γ) : c ≠ A_map_code hγ d :=
 begin
-  sorry,
+  intro h,
+  have := code.is_representative.unique hc hd _, rwa subtype.val_inj at this, rw this at h,
+  exact A_map_code_ne hγ d h,
+  by_cases even (height d),
+  { exfalso, have := code.equiv.A_map_left _ hγ _ hγd h, sorry },
+  { have := height_even_of_A_map_code_not_even hγ d hγd h, sorry }
 end
+
+lemma representative_code_exists_unique (c : code α β hβ) : ∃! d ≡ c, d.is_representative := sorry
 
 lemma equiv_code_exists_unique (γ : Λ) (c : code α β hβ) : ∃! d ≡ c, d.extension = γ := sorry
 
