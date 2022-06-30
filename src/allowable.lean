@@ -41,6 +41,9 @@ sorry
 
 namespace semiallowable_perm
 
+def to_struct_perm {α : Λ} [phase_1a.{u} α] [phase_1b.{u} α] {hβ : β ≤ α}
+  (π : semiallowable_perm α hβ) : struct_perm β := sorry
+
 instance mul_action_code (hβ : β ≤ α) : mul_action (semiallowable_perm α hβ) (code α β hβ) :=
 { smul := λ π X,
     ⟨X.extension, X.extension_lt,
@@ -89,6 +92,8 @@ end semiallowable_perm
 equivalence. -/
 def allowable_perm (hβ : β ≤ α) :=
 {π : semiallowable_perm α hβ // ∀ X Y : code α β hβ, π • X ≡ π • Y ↔ X ≡ Y}
+
+instance allowable_perm_group (hβ : β ≤ α) : group (allowable_perm α hβ) := sorry
 
 instance allowable_perm_scalar (hβ : β ≤ α) : has_scalar (allowable_perm α hβ) (code α β hβ) :=
 ⟨λ π X, π.val • X⟩

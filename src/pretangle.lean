@@ -92,7 +92,7 @@ def semitangle.mem {β : Λ} (hβ : β < α)
   (t : tangle α β (coe_lt_coe.mpr hβ)) (s : semitangle α) :=
   s.elim false (nonempty_semitangle.mem α hβ t)
 
-variable [phase_1b.{u} α]
+variable [phase_1b.{u u} α]
 
 /-- Allowable permutations act on nonempty semitangles. -/
 instance nonempty_semitangle.has_scalar :
@@ -101,5 +101,12 @@ instance nonempty_semitangle.has_scalar :
 /-- Allowable permutations act on semitangles. -/
 instance semitangle.has_scalar : has_scalar (allowable_perm α le_rfl) (semitangle α) :=
 ⟨λ π s, with_bot.rec_bot_coe ⊥ (λ s, some $ π • s) s⟩
+
+instance semitangle.mul_action : mul_action (allowable_perm α le_rfl) (semitangle α) := sorry
+
+/-- A tangle at the new level `α` is a symmetric semitangle. This is `τ_α` in the blueprint.
+Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
+def new_tangle :=
+{s : semitangle α // symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) s}
 
 end con_nf
