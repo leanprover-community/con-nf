@@ -12,6 +12,8 @@ variables [params.{u}]
 
 open params
 
+/-
+
 /-- A pretangle has a preferred extension, which is either a proper type `β : Λ`,
 or the base type `-1`. A pretangle has a `-1`-extension if and only if its preferred extension
 is the `-1`-extension. -/
@@ -49,38 +51,40 @@ instance has_mem {α β : Λ} (h : β < α) : has_mem (pretangle β) (pretangle 
 
 end pretangle
 
-open params
-variables [params.{u}] (α : Λ) [phase_1a.{u} α]
+-/
+
+variables (α : Λ) [phase_1a.{u} α]
+
+abbreviation semitangle_members :=
+Π β (hβ : β < α), {s : set (tangle α β $ coe_lt_coe.mpr hβ) // s.nonempty}
+
+/-- Keeps track of the preferred extension of a semitangle, along with coherence conditions
+relating each extension of the semitangle. -/
+inductive semitangle_extension (members : semitangle_members α)
+| proper (β : Λ) (hβ : β < α) :
+    let c : code α α le_rfl := ⟨β, coe_lt_coe.mpr hβ, members β hβ⟩
+    in c.is_representative →
+      (∀ γ (hγ : γ < α) (hβγ : β ≠ γ),
+        A_map_code hγ ⟨c, (members β hβ).property⟩
+        = ⟨⟨γ, coe_lt_coe.mpr hγ, members γ hγ⟩, (members γ hγ).property⟩)
+      → semitangle_extension
+| base (atoms : set atom) (hne : atoms.nonempty) :
+    let c : code α α le_rfl := ⟨⊥, bot_lt_coe _, atoms⟩
+    in c.is_representative →
+      (∀ γ (hγ : γ < α),
+        A_map_code hγ ⟨c, hne⟩ = ⟨⟨γ, coe_lt_coe.mpr hγ, members γ hγ⟩, (members γ hγ).property⟩)
+      → semitangle_extension
 
 /-- A *semitangle* may become an element of our model of tangled type theory.
 We keep track of its members, written as tangles of all lower levels `β < α`.
-The preferred extension is either a proper type index `β < α`, or it is `-1`, in which case
-we store its `-1`-extension as a set of atoms in the `preferred_extension` field.
 
 Here, we restrict our definition to just nonempty semitangles; this simplifies the definition. -/
 structure nonempty_semitangle :=
-(members (β : Λ) (hβ : β < α) : set (tangle α β $ coe_lt_coe.mpr hβ))
-(preferred_extension : Iio α ⊕ set atom)
-(members_nonempty (β : Λ) (hβ : β < α) : (members β hβ).nonempty)
-(extension_nonempty : preferred_extension.elim
-  (λ β, true)
-  (λ (atoms : set atom), atoms.nonempty))
-(extension_condition : @sum.rec_on _ _
-  (λ x, ∀ (h : x.elim (λ β, true) (λ (atoms : set atom), atoms.nonempty)), Prop) preferred_extension
-  (λ (β : Iio α) cond,
-    let c : code α α le_rfl := ⟨β.val, coe_lt_coe.mpr β.property, members β.val β.property⟩
-    in c.is_representative ∧ ∀ δ (hδ : δ < α) (hγδ : β.val ≠ δ),
-      A_map_code hδ ⟨c, members_nonempty β.val β.property⟩
-      = ⟨⟨δ, coe_lt_coe.mpr hδ, members δ hδ⟩, members_nonempty δ hδ⟩)
-  (λ (atoms : set atom) cond,
-    let c : code α α le_rfl := ⟨⊥, bot_lt_coe _, atoms⟩
-    in c.is_representative ∧ ∀ δ (hδ : δ < α),
-      A_map_code hδ ⟨c, cond⟩ = ⟨⟨δ, coe_lt_coe.mpr hδ, members δ hδ⟩, members_nonempty δ hδ⟩)
-  extension_nonempty)
+(members : semitangle_members α)
+(extension : semitangle_extension α members)
 
--- TODO: Are we supposed to have a membership relation on tangles or semitangles?
 def nonempty_semitangle.mem {β : Λ} (hβ : β < α)
-  (t : tangle α β (coe_lt_coe.mpr hβ)) (s : nonempty_semitangle α) := t ∈ s.members β hβ
+  (t : tangle α β (coe_lt_coe.mpr hβ)) (s : nonempty_semitangle α) := t ∈ (s.members β hβ).val
 
 /-- A semitangle is either a nonempty semitangle, or the `⊥` element, which is considered the empty
 set. Note that in TTT, a set contains no elements at one level if and only if it contains no
@@ -91,6 +95,42 @@ elements at all levels. -/
 def semitangle.mem {β : Λ} (hβ : β < α)
   (t : tangle α β (coe_lt_coe.mpr hβ)) (s : semitangle α) :=
   s.elim false (nonempty_semitangle.mem α hβ t)
+
+def semitangle_members_of_nonempty_code (c : nonempty_code α α le_rfl)
+  {β : Λ} (hβ : c.val.extension = β) : semitangle_members α :=
+λ γ hγ, dite (β = γ)
+    (λ heq, ⟨cast (by simp_rw [hβ, heq]) c.val.elts, by { convert c.property, rw [hβ, heq], simp }⟩)
+    (λ hne, A_map c.val.extension_lt hγ ⟨c.val.elts, c.property⟩)
+
+@[simp] lemma semitangle_members_eq (c : nonempty_code α α le_rfl)
+  {β : Λ} (hβ : c.val.extension = β) :
+  (⟨β, (hβ ▸ c.val.extension_lt : (β : type_index) < α),
+    (semitangle_members_of_nonempty_code α c hβ β
+      (coe_lt_coe.mp $ hβ ▸ c.val.extension_lt : β < α))⟩ : code α α le_rfl) = c.val :=
+begin
+  obtain ⟨⟨γ, hγ, G⟩, hG⟩ := c, dsimp at hβ, subst hβ,
+  unfold semitangle_members_of_nonempty_code,
+  rw dif_pos rfl, refl
+end
+
+@[simp] lemma semitangle_members_ne (c : nonempty_code α α le_rfl)
+  {β : Λ} (hβ : c.val.extension = β) {γ : Λ} (hγ : γ < α) (hβγ : β ≠ γ) :
+  (⟨γ, coe_lt_coe.mpr hγ, semitangle_members_of_nonempty_code α c hβ γ hγ⟩ : code α α le_rfl) =
+  A_map_code hγ c :=
+begin
+  obtain ⟨⟨γ, hγ, G⟩, hG⟩ := c, dsimp at hβ, subst hβ,
+  unfold semitangle_members_of_nonempty_code,
+  rw dif_neg hβγ, refl
+end
+
+/-- We can construct nonempty semitangles from nonempty representative codes with extensions at
+proper type indices. -/
+def nonempty_semitangle_of_nonempty_representative_code (c : nonempty_code α α le_rfl)
+  (heven : even $ height c) {β : Λ} (hβ : c.val.extension = β) : nonempty_semitangle α :=
+⟨semitangle_members_of_nonempty_code α c hβ,
+semitangle_extension.proper β (coe_lt_coe.mp $ hβ ▸ c.val.extension_lt : β < α)
+(by { convert code.is_representative.nonempty c heven, rw semitangle_members_eq, refl })
+(λ γ hγ hβγ, by { simp_rw [semitangle_members_ne α c hβ hγ hβγ, semitangle_members_eq], refl })⟩
 
 variable [phase_1b.{u u} α]
 
