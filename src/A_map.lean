@@ -23,15 +23,12 @@ lemma local_cardinal_disjoint : pairwise (disjoint on local_cardinal) :=
 
 @[simp] lemma mk_local_cardinal (i : litter) : #(local_cardinal i) = #μ :=
 begin
-  suffices : # {x : near_litter // x.fst = i} = #{s // is_near_litter i s},
-  { simp [local_cardinal, this] },
-  refine cardinal.eq.2 ⟨⟨_, λ x, ⟨⟨i, x⟩, rfl⟩, _, _⟩⟩,
-  { rintro ⟨x, rfl⟩,
+  refine eq.trans (cardinal.eq.2 ⟨⟨_, λ x, ⟨⟨i, x⟩, rfl⟩, _, _⟩⟩) (mk_near_litter' i),
+  { rintro ⟨x, (rfl : x.1 = i)⟩,
     exact x.snd },
-  { rintro ⟨⟨j, S⟩, rfl⟩,
-    simp },
-  { rintro ⟨j, S⟩,
-    simp }
+  { rintro ⟨⟨j, S⟩, (rfl : j = i)⟩,
+    refl },
+  { exact λ x, rfl }
 end
 
 /-- The *alternative extension* map. For a non-empty set of tangles `G`, consider the code
@@ -44,7 +41,7 @@ def A_map {γ : type_index} (hγ : γ < α) (hδ : δ < α) (c : {s : set (tangl
   exact c.2.imp (λ t ht, ⟨ht, ⟨f_map γ δ hγ hδ _, litter_set _, is_near_litter_litter_set _⟩, rfl⟩),
 end⟩
 
-@[simp] lemma coe_A_map {γ : type_index} (hγ : γ < α) (hδ : δ < α)
+@[simp] lemma coe_A_map {γ : type_index} {hγ : γ < α} (hδ : δ < α)
   (c : {s : set (tangle α γ hγ) // s.nonempty}) :
   (A_map hγ hδ c : set (tangle α δ (coe_lt_coe.2 hδ))) =
     ⋃ b ∈ (c : set (tangle α γ hγ)), to_tangle δ hδ '' local_cardinal (f_map γ δ hγ hδ b) := rfl
@@ -145,14 +142,14 @@ inv_image.wf (code_min_map) μwf.wf
 /-- The A-map, phrased as a function on non-empty `α`-codes. -/
 def A_map_code (hδ : δ < β) (c : nonempty_code α β hβ) : nonempty_code α β hβ :=
 ⟨⟨δ, coe_lt_coe.2 hδ,
-  A_map (c.val.extension_lt.trans_le $ coe_le_coe.2 hβ) (hδ.trans_le hβ)
-    ⟨c.val.elts, c.property⟩⟩, begin
-  obtain ⟨x, hx⟩ := c.property,
-  dsimp,
-  simp only [subtype.coe_mk, nonempty_bUnion, nonempty_image_iff, exists_prop, coe_lt_coe,
-    coe_le_coe],
-  exact ⟨x, hx, local_cardinal_nonempty _⟩,
-end⟩
+  A_map (c.val.extension_lt.trans_le $ coe_le_coe.2 hβ) (hδ.trans_le hβ) ⟨c.val.elts, c.property⟩⟩,
+    begin
+      obtain ⟨x, hx⟩ := c.property,
+      dsimp,
+      simp only [subtype.coe_mk, nonempty_bUnion, nonempty_image_iff, exists_prop, coe_lt_coe,
+        coe_le_coe],
+      exact ⟨x, hx, local_cardinal_nonempty _⟩,
+    end⟩
 
 @[simp] lemma coe_A_map_code (hδ : δ < β) (c : nonempty_code α β hβ) :
   (A_map_code hδ c : code α β hβ) =
@@ -190,18 +187,8 @@ A_map_order (c.val.extension_lt.trans_le $ coe_le_coe.2 hβ) (hδ.trans_le hβ) 
 
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse A-map. -/
-inductive A_map_rel (c : nonempty_code α β hβ) : nonempty_code α β hβ → Prop
+@[mk_iff] inductive A_map_rel (c : nonempty_code α β hβ) : nonempty_code α β hβ → Prop
 | intro (δ : Λ) (hδ : δ < β) : (c : code α β hβ).extension ≠ δ → A_map_rel (A_map_code hδ c)
-
-@[simp] lemma A_map_rel_iff {c d : nonempty_code α β hβ} :
-  A_map_rel c d ↔ ∃ δ (hδ : δ < β), (c : code α β hβ).extension ≠ δ ∧ A_map_code hδ c = d :=
-begin
-  refine ⟨λ h, _, _⟩,
-  { obtain ⟨δ, hδ, hc⟩ := h,
-    exact ⟨δ, hδ, hc, rfl⟩ },
-  { rintro ⟨δ, hδ, hc, rfl⟩,
-    exact A_map_rel.intro _ _ hc }
-end
 
 lemma A_map_subrelation :
   subrelation A_map_rel (inv_image μr (code_min_map : nonempty_code α β hβ → μ))
@@ -231,7 +218,7 @@ end
 
 /-- There is at most one inverse under an A-map. This corresponds to the fact that there is only one
 code which is related (on the left) to any given code under the A-map relation. -/
-lemma A_map_rel_subsingleton (hβ : β ≤ α) (c : nonempty_code α β hβ) :
+lemma A_map_rel_subsingleton (c : nonempty_code α β hβ) :
   {d : nonempty_code α β hβ  | A_map_rel d c}.subsingleton :=
 begin
   intros x hx y hy,
@@ -239,313 +226,13 @@ begin
   obtain ⟨δ, hδ, hx, rfl⟩ := hx,
   obtain ⟨ε, hε, hy, h⟩ := hy,
   rw [subtype.ext_iff, code.ext_iff] at ⊢ h,
-  have : ε = δ := coe_injective h.1,
+  have : δ = ε := coe_injective h.1,
   subst this,
   obtain ⟨⟨γ, hγ, C⟩, hC⟩ := x,
   obtain ⟨⟨δ, hδ, D⟩, hD⟩ := y,
-  have : δ = γ := A_map_disjoint_range _ _ (subtype.coe_injective h.2.eq),
+  have : γ = δ := A_map_disjoint_range _ _ (subtype.coe_injective h.2.eq),
   subst this,
   refine ⟨rfl, _⟩,
-  simpa using A_map_injective _ _ (subtype.coe_injective h.2.eq).symm,
+  simpa using A_map_injective _ _ (subtype.coe_injective h.2.eq),
 end
-
-/-! ### Height of a code -/
-
-/-- The height of a code is the amount of iterated images under an inverse alternative extension map
-that it admits. This is uniquely defined since any code has at most one inverse image under the
-A-map, and we can just repeat this process until no inverse image exists. -/
-noncomputable def height : nonempty_code α β hβ → ℕ
-| c := @dite _ (∃ d, A_map_rel d c) (classical.dec _) (λ h, height h.some + 1) (λ _, 0)
-using_well_founded
-{ rel_tac := λ _ _, `[exact ⟨A_map_rel, A_map_rel_well_founded hβ⟩],
-  dec_tac := `[exact h.some_spec] }
-
-lemma height_eq_zero {c : nonempty_code α β hβ} : height c = 0 ↔ ∀ d, ¬ A_map_rel d c :=
-begin
-  classical,
-  rw height,
-  refine (ne.dite_eq_right_iff $ λ h, _).trans not_exists,
-  exact nat.succ_ne_zero _,
-end
-
-lemma height_ne_zero {c : nonempty_code α β hβ} : height c ≠ 0 ↔ {d | A_map_rel d c}.nonempty :=
-height_eq_zero.not.trans $ by { push_neg, refl }
-
-@[simp] lemma height_A_map_code {hδ : δ < β} (c : nonempty_code α β hβ) (hcδ : c.1.extension ≠ δ) :
-  height (A_map_code hδ c) = height c + 1 :=
-begin
-  classical,
-  have h : ∃ d, A_map_rel d (A_map_code hδ c) := ⟨c, A_map_rel.intro _ _ hcδ⟩,
-  rw [height, dif_pos h, A_map_rel_subsingleton _ _ h.some_spec (A_map_rel.intro _ _ hcδ)],
-end
-
-lemma height_even_of_A_map_code_not_even {γ : Λ} (hγ : γ < β) (c : nonempty_code α β hβ)
-  (hcγ : c.1.extension ≠ γ) (hc : ¬ even (height c)) : even (height $ A_map_code hγ c) :=
-by { rw [height_A_map_code c hcγ, nat.even_succ], exact hc }
-
-lemma coe_A_map_code_ne_singleton {γ : type_index} {hγ : γ < β} {hδ : δ < β}
-  {g : tangle α γ (hγ.trans_le $ coe_le_coe.2 hβ)} {c : nonempty_code α β hβ} :
-  (A_map_code hδ c : code α β hβ) ≠ ⟨γ, hγ, {g}⟩ :=
-begin
-  simp only [A_map_code, coe_A_map, subtype.coe_mk, ne.def, eq_self_iff_true, heq_iff_eq, true_and],
-  rintro ⟨rfl, h⟩,
-  refine (cardinal.one_lt_aleph_0.trans_le $ κ_regular.aleph_0_le.trans κ_le_μ).not_le _,
-  rw [←cardinal.mk_singleton g, ←h.eq],
-  exact μ_le_mk_A_map _ ⟨(c : code α β hβ).elts, c.2⟩,
-end
-
-@[simp] lemma height_singleton {γ : type_index} {hγ : γ < β}
-  (g : tangle α γ $ hγ.trans_le $ coe_le_coe.2 hβ) :
-  height (⟨⟨γ, hγ, {g}⟩, singleton_nonempty _⟩ : nonempty_code α β hβ) = 0 :=
-begin
-  refine height_eq_zero.2 (λ c hc, _),
-  obtain ⟨δ, hδ, hc, h⟩ := A_map_rel_iff.1 hc,
-  exact coe_A_map_code_ne_singleton (congr_arg subtype.val h),
-end
-
-@[simp] lemma height_base (c : nonempty_code α β hβ) (hc : c.val.extension = ⊥) :
-  height c = 0 :=
-by { rw height_eq_zero, rintros d ⟨γ, hγ, -⟩, simp at hc, exact hc }
-
-/-! ### A⁻¹ and equivalence of codes -/
-
-/-- The inverse map to `A_map_code`. -/
-noncomputable def A_inverse (c : nonempty_code α β hβ) (hc : height c ≠ 0) : nonempty_code α β hβ :=
-(height_ne_zero.1 hc).some
-
-lemma A_inverse_spec (c : nonempty_code α β hβ) (hc) : A_map_rel (A_inverse c hc) c :=
-(height_ne_zero.1 hc).some_spec
-
-namespace code
-variables {c d : code α β hβ}
-
-/-- Equivalence of codes. -/
-@[mk_iff] inductive equiv : code α β hβ → code α β hβ → Prop
-| refl (c) : equiv c c
-| empty_empty ⦃γ⦄ (hγ) ⦃δ⦄ (hδ) : equiv ⟨γ, hγ, ∅⟩ ⟨δ, hδ, ∅⟩
-| A_map_left (γ) (hγ : γ < β) (c : nonempty_code α β hβ) :
-  c.1.extension ≠ γ → even (height c) → equiv (A_map_code hγ c) c
-| A_map_right (γ) (hγ : γ < β) (c : nonempty_code α β hβ) :
-  c.1.extension ≠ γ → even (height c) → equiv c (A_map_code hγ c)
-
-/-! We declare new notation for code equivalence. -/
-infix ` ≡ `:50 := equiv
-
-attribute [refl] equiv.refl
-
-lemma equiv.rfl : c ≡ c := equiv.refl _
-
-lemma equiv.symm : symmetric ((≡) : code α β hβ → code α β hβ → Prop)
-| _ _ (equiv.refl _) := equiv.refl _
-| _ _ (equiv.empty_empty hγ hδ) := equiv.empty_empty _ _
-| _ _ (equiv.A_map_left γ hγ c hcγ hc) := equiv.A_map_right γ hγ c hcγ hc
-| _ _ (equiv.A_map_right γ hγ c hcγ hc) := equiv.A_map_left γ hγ c hcγ hc
-
-lemma equiv_transitive : transitive ((≡) : code α β hβ → code α β hβ → Prop) := sorry
--- | _ _ _ (equiv.refl _) _ := ‹_›
--- | _ _ _ _ (equiv.refl _) := ‹_›
--- | _ _ _ (equiv.empty_empty hγ hδ) (equiv.empty_empty _ hε) := equiv.empty_empty _ _
--- | _ _ _ (equiv.A_map_left γ hγ _ hcγ _) (equiv.A_map_right δ hδ c hcδ h) := sorry
--- | _ _ _ (equiv.A_map_right γ hγ c hc h) (equiv.A_map_left _ _ _ _ _) := equiv.refl _
--- | _ _ _ (equiv.empty_empty hγ _) (equiv.A_map_right δ hδ c hcδ h) := _
-
-lemma equiv_equivalence : equivalence ((≡) : code α β hβ → code α β hβ → Prop) :=
-⟨equiv.refl, equiv.symm, equiv_transitive⟩
-
-lemma equiv.nonempty_iff_nonempty :
-  ∀ {c d : code α β hβ}, c ≡ d → (c.elts.nonempty ↔ d.elts.nonempty)
-| _ _ (equiv.refl _) := iff.rfl
-| _ _ (equiv.empty_empty hγ hδ) := iff_of_false not_nonempty_empty not_nonempty_empty
-| _ _ (equiv.A_map_left γ hγ c hc h) := iff_of_true (A_map_code _ _).2 c.2
-| _ _ (equiv.A_map_right γ hγ c hc h) := iff_of_true c.2 (A_map_code _ _).2
-
-lemma equiv.ext : ∀ {c d : code α β hβ}, c ≡ d → c.extension = d.extension → c = d
-| _ _ (equiv.refl _) _ := rfl
-| _ _ (equiv.empty_empty hγ hδ) rfl := rfl
-| _ _ (equiv.A_map_left γ hγ c hc h) H := (hc H.symm).elim
-| _ _ (equiv.A_map_right γ hγ c hc h) H := (hc H).elim
-
-lemma singleton_equiv (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (g : tangle α γ _) :
-  (⟨γ, coe_lt_coe.2 hγ, {g}⟩ : code α β hβ) ≡
-    ⟨δ, coe_lt_coe.2 hδ, to_tangle δ (hδ.trans_le hβ) ''
-      local_cardinal (f_map γ δ (coe_lt_coe.2 (hγ.trans_le hβ)) (hδ.trans_le hβ) g)⟩ :=
-begin
-  convert code.equiv.A_map_right _ hδ
-    ⟨⟨γ, coe_lt_coe.2 hγ, {g}⟩, singleton_nonempty g⟩ (coe_ne_coe.2 hγδ) _,
-  { simp only [coe_A_map, subtype.coe_mk, mem_singleton_iff, Union_Union_eq_left] },
-  { rw height_singleton,
-    exact even_zero }
-end
-
-lemma singleton_equiv_iff {hγ : γ < β} {g : tangle _ _ _} {c : code α β hβ} :
-  ⟨γ, coe_lt_coe.2 hγ, {g}⟩ ≡ c ↔
-    c = ⟨γ, coe_lt_coe.2 hγ, {g}⟩ ∨
-      ∃ δ (hc : c.extension = some δ) (hδ : δ < β) (hγδ : γ ≠ δ),
-        c = A_map_code hδ ⟨⟨γ, coe_lt_coe.2 hγ, {g}⟩, singleton_nonempty g⟩ :=
-begin
-  classical,
-  refine ⟨λ h, _, λ h, _⟩,
-  {
-    sorry
-    -- cases h,
-    -- dsimp at h,
-    -- rw dif_pos (singleton_nonempty g) at h,
-    -- have : even (height ⟨⟨γ, coe_lt_coe.2 hγ, {g}⟩, singleton_nonempty g⟩),
-    -- { convert even_zero,
-    --   simp },
-    -- rw dif_neg (nat.even_iff_not_odd.mp this) at h,
-    -- cases c with δ hδ D,
-    -- split_ifs at h,
-    -- { left,
-    --   dsimp at h_1,
-    --   subst h_1,
-    --   simp at h,
-    --   rw h },
-    -- { right,
-    --   cases δ; dsimp at h,
-    --   { cases h },
-    --   { rw ← h,
-    --     exact ⟨δ, by { simp, refl }, coe_lt_coe.1 hδ, h_1 ∘ coe_eq_coe.2, rfl⟩ } }
-        },
-  { obtain rfl | ⟨δ, hc, hδ, hγδ, rfl⟩ := h,
-    { refl },
-    { convert singleton_equiv hγ hδ hγδ g,
-      simp } }
-end
-
-lemma extension_eq_of_singleton_equiv_singleton (hγ : γ < β) (hδ : δ < β) {a b : tangle α _ _}
-  (h : (⟨γ, coe_lt_coe.2 hγ, {a}⟩ : code α β hβ) ≡ ⟨δ, coe_lt_coe.2 hδ, {b}⟩) :
-  γ = δ :=
-begin
-  cases singleton_equiv_iff.1 h,
-  { simp at h_1,
-    exact coe_eq_coe.1 h_1.left.symm },
-  { exfalso,
-    obtain ⟨ε, hc, hε, hγε, hA⟩ := h_1,
-    have := congr_arg code.extension hA,
-    simp at this,
-    rw coe_eq_coe at this,
-    subst this,
-    simp at hA,
-    sorry,
-    -- exact hA
-    }
-end
-
-/- Yaël: Do we really need this lemma? looks like `extension_eq_of_singleton_equiv_singleton` is
-just as practical -/
-lemma eq_of_singleton_equiv_singleton (hβ : β ≤ α) (hγ : γ < β) (hδ : δ < β) (a b : tangle _ _ _)
-  (h : (⟨γ, coe_lt_coe.2 hγ, {a}⟩ : code α β hβ) ≡ ⟨δ, coe_lt_coe.2 hδ, {b}⟩) :
-  a = cast (by simp_rw extension_eq_of_singleton_equiv_singleton _ _ h) b :=
-begin
-  sorry,
-  -- cases singleton_equiv_iff.mp h,
-  -- { simp at h_1,
-  --   have := coe_eq_coe.1 h_1.left,
-  --   subst this,
-  --   simp at h_1 ⊢,
-  --   exact h_1.symm },
-  -- { exfalso,
-  --   obtain ⟨ε, hc, hε, hγε, hA⟩ := h_1,
-  --   have := congr_arg code.extension hA,
-  --   simp at this,
-  --   rw coe_eq_coe at this,
-  --   subst this,
-  --   simp at hA,
-  --   exact hA }
-end
-
-/-!
-Note for whoever is formalising this: feel free to reorder these definitions if it turns out
-to be useful to use some lemmas in the proofs of others.
--/
-
-/-- A code is representative if it is empty and has preferred extension `⊥`, or it is nonempty and
-has even height. -/
-@[mk_iff] inductive is_representative : code α β hβ → Prop
-| empty : is_representative ⟨⊥, bot_lt_coe _, ∅⟩
-| nonempty (c : nonempty_code α β hβ) : even (height c) → is_representative c
-
-lemma is_representative.A_map (c d : nonempty_code α β hβ)
-  (hc : c.val.is_representative) (hd : d.val.is_representative)
-  {γ : Λ} (hγ : γ < β) (hγd : d.val.extension ≠ γ) : c ≠ A_map_code hγ d :=
-begin
-  intro h,
-  have := height_A_map_code d hγd, rw ← h at this,
-  rw is_representative_iff at hc hd,
-  cases hc, { dsimp at hc, have := c.prop, rw hc at this, exact set.not_nonempty_empty this, },
-  cases hd, { dsimp at hd, have := d.prop, rw hd at this, exact set.not_nonempty_empty this, },
-  rcases hc with ⟨e, heeven, hce⟩, rcases hd with ⟨f, hfeven, hdf⟩,
-  dsimp at hce hdf,
-  have hce : c = e := by { ext1, assumption, },
-  have hdf : d = f := by { ext1, assumption, },
-  rw [← hce, this, hdf, nat.even_succ] at heeven, exact heeven hfeven,
-end
-
-lemma is_representative.unique (hc : c.is_representative) (hd : d.is_representative)
-  (hequiv : c ≡ d) : c = d :=
-begin
-  classical,
-  obtain hc | ⟨c, hc⟩ := hc; obtain hd | ⟨d, hd⟩ := hd,
-  { refl },
-  { have := (equiv.nonempty_iff_nonempty hequiv).2 d.prop, cases set.not_nonempty_empty this, },
-  { have := (equiv.nonempty_iff_nonempty hequiv).1 c.prop, cases set.not_nonempty_empty this, },
-  { rw equiv_iff at hequiv,
-    cases hequiv, rw hequiv,
-    cases hequiv,
-    { rcases hequiv with ⟨γ, hγ, δ, hδ, h1, h2⟩,
-      have := c.prop,
-      dsimp at h1, rw h1 at this, cases set.not_nonempty_empty this, },
-    cases hequiv,
-    { rcases hequiv with ⟨γ, hγ, e, he, h1, h2, h3⟩,
-      have : c = A_map_code hγ e := by { ext1, exact h2, },
-      have : even (height $ A_map_code hγ e) := by { rw ← this, assumption, },
-      rw height_A_map_code at this,
-      rw nat.even_succ at this, cases this h1,
-      assumption, },
-    { rcases hequiv with ⟨γ, hγ, e, he, h1, h2, h3⟩,
-      have : d = A_map_code hγ e := by { ext1, exact h3, },
-      have : even (height $ A_map_code hγ e) := by { rw ← this, assumption, },
-      rw height_A_map_code at this,
-      rw nat.even_succ at this, cases this h1,
-      assumption, }, },
-end
-
-lemma representative_code_exists (c : code α β hβ) : ∃ d ≡ c, d.is_representative :=
-begin
-   by_cases hne : c.elts.nonempty,
-  { by_cases heven : even (height ⟨c, hne⟩),
-    { use c, split,
-      refl,
-      exact is_representative.nonempty ⟨c, hne⟩ heven, },
-    { have : height ⟨c, hne⟩ ≠ 0,
-      { by_contra, have := even_zero, rw ← h at this, exact heven this, },
-      rw height_ne_zero at this, rcases this with ⟨⟨d, dne⟩, hd⟩,
-      use d, dsimp at hd, rw A_map_rel_iff at hd, rcases hd with ⟨γ, hγ, hdγ, hA⟩,
-      rw [← hA, height_A_map_code, nat.even_succ, not_not] at heven,
-      have := equiv.A_map_right γ hγ ⟨d, dne⟩ hdγ heven, rw hA at this,
-      split, exact this,
-      exact is_representative.nonempty ⟨d, dne⟩ heven,
-      exact hdγ, }, },
-  { set d : code α β hβ := ⟨⊥, bot_lt_coe β, ∅⟩ with hd_def,
-    refine ⟨d, ⟨_, is_representative.empty⟩⟩,
-    cases c with γ hγ G, dsimp at hne, rw not_nonempty_iff_eq_empty at hne, rw [hne, hd_def],
-    exact equiv.empty_empty (bot_lt_coe β) hγ, },
-end
-
-lemma representative_code_exists_unique (c : code α β hβ) : ∃! d ≡ c, d.is_representative :=
-begin
-  rcases representative_code_exists c with ⟨d, hequiv, drep⟩,
-  use d, split, use hequiv, split, exact drep,
-  intros h h', refl,
-  rintros e ⟨hequiv', erep, _⟩,
-  exact is_representative.unique erep drep (equiv_transitive hequiv' hequiv.symm),
-end
-
-lemma equiv_code_exists_unique (γ : Λ) (c : code α β hβ) : ∃! d ≡ c, d.extension = γ := sorry
-
-lemma equiv_bot_code_subsingleton (c : code α β hβ) :
-  ∀ d ≡ c, ∀ e ≡ c, d.extension = ⊥ → e.extension = ⊥ → d = e := sorry
-
-end code
 end con_nf

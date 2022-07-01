@@ -1,4 +1,4 @@
-import A_map
+import code_equiv
 import mathlib.group
 import struct_perm
 
