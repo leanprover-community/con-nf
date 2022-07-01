@@ -142,6 +142,10 @@ lemma equiv.ext : ∀ {c d : code α β hβ}, c ≡ d → c.extension = d.extens
 | _ _ (equiv.A_map_A_map c hc γ hγ hcγ δ hδ hcδ) H :=
   by { have : γ = δ := coe_injective H, subst this }
 
+lemma equiv_A_map {hγ : γ < β} {c d : nonempty_code α β hβ} (h : A_map_code hγ c = d)
+  (heven : even (height c)) (hcγ : c.val.extension ≠ γ)  : (c : code α β hβ) ≡ d :=
+by { convert equiv.A_map_right c heven _ _ hcγ, exact h.symm }
+
 lemma singleton_equiv (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (g : tangle α γ _) :
   (⟨γ, coe_lt_coe.2 hγ, {g}⟩ : code α β hβ) ≡
     ⟨δ, coe_lt_coe.2 hδ, to_tangle δ (hδ.trans_le hβ) ''
@@ -242,6 +246,9 @@ has even height. -/
 @[mk_iff] inductive is_representative : code α β hβ → Prop
 | empty : is_representative ⟨⊥, bot_lt_coe _, ∅⟩
 | nonempty (c : nonempty_code α β hβ) : even (height c) → is_representative c
+
+lemma is_representative.even (c : nonempty_code α β hβ) (hc : c.val.is_representative) :
+  even (height c) := sorry
 
 lemma is_representative.A_map (c d : nonempty_code α β hβ)
   (hc : c.val.is_representative) (hd : d.val.is_representative)

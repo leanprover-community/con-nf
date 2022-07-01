@@ -188,7 +188,7 @@ begin
   { obtain ⟨xs, hxs⟩ := x,
     obtain ⟨ys, hys⟩ := y,
     have : xs = ys,
-    { refine funext _, intro γ, refine funext _, intro hγ, exfalso, exact ex_γ ⟨γ,hγ⟩ },
+    { refine funext _, intro γ, refine funext _, intro hγ, exfalso, exact ex_γ ⟨γ, hγ⟩ },
     subst this, congr,
     cases hxs with β hβ rep hA atoms₁ hne₁ rep₁ hA₁,
     { exfalso, exact ex_γ ⟨β, hβ⟩ },
@@ -203,9 +203,45 @@ lemma ext (x y : nonempty_semitangle α) (hβ : β < α) (h : x.members β hβ =
 begin
   obtain ⟨xs, hxs⟩ := x,
   obtain ⟨ys, hys⟩ := y,
-  -- refine ext_code α _ _ _,
-  -- refine ext_core _ _ _ ⟨β, hβ⟩ _, dsimp at h ⊢, refine funext _, intro γ, refine funext _, intro hγ,
-  sorry
+  dsimp only at h,
+  refine ext_code α _ _ _,
+  cases hxs with γ hγ rep₁ hA₁ atoms₁ hne₁ rep₁ hA₁;
+  cases hys with δ hδ rep₂ hA₂ atoms₂ hne₂ rep₂ hA₂,
+  { rw [representative_code_proper_def, representative_code_proper_def],
+    by_cases hβγ : β = γ,
+    { subst hβγ,
+      by_cases hβδ : β = δ,
+      { subst hβδ, convert code.equiv.refl _, exact h.symm },
+      rw h, exact code.equiv.symm (code.equiv_A_map (hA₂ β hβ (ne.symm hβδ))
+        (code.is_representative.even _ rep₂) (ne.symm hβδ ∘ coe_eq_coe.mp)) },
+    by_cases hβδ : β = δ,
+    { subst hβδ,
+      rw ← h,
+      exact code.equiv_A_map (hA₁ β hβ (ne.symm hβγ))
+        (code.is_representative.even _ rep₁) (ne.symm hβγ ∘ coe_eq_coe.mp) },
+    have h₁ := code.equiv_A_map (hA₁ β hβ (ne.symm hβγ))
+      (code.is_representative.even _ rep₁) (ne.symm hβγ ∘ coe_eq_coe.mp),
+    have h₂ := code.equiv_A_map (hA₂ β hβ (ne.symm hβδ))
+      (code.is_representative.even _ rep₂) (ne.symm hβδ ∘ coe_eq_coe.mp),
+    rw h at h₁, exact code.equiv_transitive h₁ h₂.symm },
+  { rw [representative_code_proper_def, representative_code_base_def],
+    by_cases hβγ : β = γ,
+    { subst hβγ, rw h, exact code.equiv.symm (code.equiv_A_map (hA₂ β hβ) (by simp) (by simp)) },
+    { have h₁ := code.equiv_A_map (hA₁ β hβ (ne.symm hβγ))
+        (code.is_representative.even _ rep₁) (ne.symm hβγ ∘ coe_eq_coe.mp),
+      have h₂ := code.equiv_A_map (hA₂ β hβ) (by simp) (by simp),
+      rw h at h₁, exact code.equiv_transitive h₁ h₂.symm } },
+  { rw [representative_code_proper_def, representative_code_base_def],
+    by_cases hβδ : β = δ,
+    { subst hβδ, rw ← h, exact code.equiv_A_map (hA₁ β hβ) (by simp) (by simp) },
+    { have h₁ := code.equiv_A_map (hA₁ β hβ) (by simp) (by simp),
+      have h₂ := code.equiv_A_map (hA₂ β hβ (ne.symm hβδ))
+        (code.is_representative.even _ rep₂) (ne.symm hβδ ∘ coe_eq_coe.mp),
+      rw h at h₁, exact code.equiv_transitive h₁ h₂.symm } },
+  { rw [representative_code_base_def, representative_code_base_def],
+    have h₁ := code.equiv_A_map (hA₁ β hβ) (by simp) (by simp),
+    have h₂ := code.equiv_A_map (hA₂ β hβ) (by simp) (by simp),
+    rw h at h₁, exact code.equiv_transitive h₁ h₂.symm }
 end
 
 lemma ext' (x y : nonempty_semitangle α) (hβ : β < α) (h : ∀ t, mem α hβ t x ↔ mem α hβ t y) :
