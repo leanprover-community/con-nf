@@ -3,6 +3,7 @@ import group_theory.group_action.sigma
 import group_theory.group_action.sum
 import litter
 import mathlib.group
+import mathlib.support
 
 /-!
 # Structural permutations
@@ -42,10 +43,10 @@ using_well_founded { dec_tac := `[assumption] }
 namespace struct_perm
 variables {α : type_index}
 
-noncomputable! instance struct_perm.group : Π α, group (struct_perm α)
+noncomputable! instance group : Π α, group (struct_perm α)
 | ⊥ := by { unfold struct_perm, exact near_litter_perm.group }
 | (α : Λ) := by { unfold struct_perm,
-  exact @pi.group _ _ (λ β, @pi.group_Prop _ _ $ λ _ : β < ↑α, struct_perm.group β) }
+  exact @pi.group _ _ (λ β, @pi.group_Prop _ _ $ λ _ : β < ↑α, group β) }
 using_well_founded { dec_tac := `[assumption] }
 
 /-- Obtains the atom permutation given by a prestructural permutation. -/
@@ -81,11 +82,19 @@ def derivative :
 | _ quiver.path.nil := id
 | γ (quiver.path.cons p_αγ lt_βγ) := λ π, (derivative p_αγ π).lower _ lt_βγ
 
+/-- Structural permutations act on atoms. -/
+instance mul_action_atom (α : Λ) : mul_action (struct_perm α) atom :=
+mul_action.comp_hom _ to_near_litter_perm_hom
+
+/-- Structural permutations act on near-litters. -/
+instance mul_action_near_litter (α : Λ) : mul_action (struct_perm α) near_litter :=
+mul_action.comp_hom _ to_near_litter_perm_hom
+
 end struct_perm
 
 /-- A support condition is an atom or a near-litter together with an extended type index. -/
-@[derive inhabited] def support_condition (α : Λ) : Type u :=
-(atom ⊕ near_litter) × extended_index α
+@[derive [inhabited, mul_action near_litter_perm, mul_action (struct_perm ‹Λ›)]]
+def support_condition (α : Λ) : Type u := (atom ⊕ near_litter) × extended_index α
 
 /-- There are `μ` support conditions. -/
 @[simp] lemma mk_support_condition (α : Λ) : #(support_condition α) = #μ :=
@@ -100,6 +109,10 @@ end
 structure potential_support (α : Λ) :=
 (carrier : set (support_condition α))
 (small : small carrier)
+
+instance (α : Λ) : set_like (potential_support α) (support_condition α) :=
+{ coe := potential_support.carrier,
+  coe_injective' := λ s t h, by { cases s, cases t, congr' } }
 
 /-- There are `μ` potential supports. -/
 @[simp] lemma mk_potential_support (α : Λ) : #(potential_support α) = #μ :=
@@ -118,35 +131,13 @@ begin
   exact cardinal.mk_subtype_mono (λ S (h : _ < _), h.trans_le κ_le_μ_cof),
 end
 
-/-- Structural permutations act on atoms. -/
-instance mul_action_atom (α : Λ) : mul_action (struct_perm α) atom :=
-mul_action.comp_hom _ struct_perm.to_near_litter_perm_hom
-
-/-- Structural permutations act on near-litters. -/
-instance mul_action_near_litter (α : Λ) : mul_action (struct_perm α) near_litter :=
-mul_action.comp_hom _ struct_perm.to_near_litter_perm_hom
-
-/-- Structural permutations act (trivially) on extended type indices. -/
-instance mul_action_extended_index (α : Λ) : mul_action (struct_perm α) (extended_index α) :=
-{ smul := λ _, id, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
-
-instance mul_action_support_condition (α : Λ) : mul_action (struct_perm α) (support_condition α) :=
-prod.mul_action
-
 section support_declaration
 
 variables {α : Λ} {H τ : Type u} [monoid H] [mul_action H τ]
 
-/-- Given `x ∈ τ` and `S` any set of `α`-support conditions, we say `S` supports `x` if every
-`π ∈ H` that fixes every element of `S` also fixes `x`.
-
-We do not constrain here that `φ` be a group homomorphism, but this is required later. -/
-def supports (φ : H → struct_perm α) (x : τ) (S : set (support_condition α)) :=
-∀ π, (∀ s ∈ S, φ π • s = s) → π • x = x
-
 /-- A *support for `x`* is a potential support that supports `x`. -/
 structure support (φ : H → struct_perm α) (x : τ) extends potential_support α :=
-(supports : supports φ x carrier)
+(supports : supports φ carrier x)
 
 /-- An element of `τ` is *symmetric* if it has some (small) support. -/
 def symmetric (φ : H → struct_perm α) (x : τ) : Prop := nonempty $ support φ x
@@ -154,7 +145,7 @@ def symmetric (φ : H → struct_perm α) (x : τ) : Prop := nonempty $ support 
 /-- There are at most `μ` supports for a given `x : τ`. -/
 @[simp] lemma mk_support_le (φ : H → struct_perm α) (x : τ) : #(support φ x) ≤ #μ :=
 begin
-  have : support φ x ≃ {S : potential_support α // supports φ x S.carrier},
+  have : support φ x ≃ {S : potential_support α // supports φ S.carrier x},
   { refine ⟨λ S, ⟨S.1, S.2⟩, λ S, ⟨S.1, S.2⟩, _, _⟩; intro x; dsimp; cases x; simp },
   rw [cardinal.mk_congr this, ←mk_potential_support α],
   exact mk_subtype_le _,

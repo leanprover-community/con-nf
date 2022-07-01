@@ -6,12 +6,14 @@ import struct_perm
 # Allowable permutations
 -/
 
+noncomputable theory
+
 universe u
 
 namespace con_nf
 variable [params.{u}]
 
-open params set with_bot
+open function params set with_bot
 open_locale pointwise
 
 variables (α : Λ) [phase_1a.{u} α]
@@ -37,21 +39,22 @@ near_litter_perm × Π γ (h : γ < β), allowable γ (h.trans_le hβ)
 
 instance near_litter_perm.mul_action_tangle (hβ : β < α) :
   mul_action near_litter_perm (tangle α β $ coe_lt_coe.2 hβ) :=
-sorry
+{ smul := λ f t, to_tangle _ _ $ f • sorry,
+  one_smul := sorry,
+  mul_smul := sorry }
 
 namespace semiallowable_perm
 variables {α} (π : semiallowable_perm α hβ) (X : code α β hβ)
 
-def to_struct_perm {hβ : β ≤ α} (π : semiallowable_perm α hβ) : struct_perm β := sorry
-
-instance has_smul_tangle {β : type_index} (hβ : β < α) :
-  has_smul (semiallowable_perm α le_rfl) (tangle α β hβ) :=
-⟨λ π t, with_bot.rec_bot_coe
-  (λ hβ t, π.fst.atom_perm t)
-  (λ β hβ t, π.snd β (coe_lt_coe.mp hβ) • t) β hβ t⟩
+def to_struct_perm : semiallowable_perm α hβ →* struct_perm β := sorry
 
 instance mul_action_tangle {β : type_index} (hβ : β < α) :
-  mul_action (semiallowable_perm α le_rfl) (tangle α β hβ) := sorry
+  mul_action (semiallowable_perm α le_rfl) (tangle α β hβ) :=
+{ smul := λ π, with_bot.rec_bot_coe
+    (λ hβ t, π.fst.atom_perm t)
+    (λ β hβ t, π.snd β (coe_lt_coe.mp hβ) • t) β hβ,
+  one_smul := λ t, by { cases β, { refl }, { exact one_smul _ _ } },
+  mul_smul := λ f g t, by { cases β, { refl }, { exact mul_smul _ _ _ } } }
 
 instance mul_action_code (hβ : β ≤ α) : mul_action (semiallowable_perm α hβ) (code α β hβ) :=
 { smul := λ π X,
@@ -100,30 +103,89 @@ equivalence. -/
 def allowable_perm (hβ : β ≤ α) :=
 {π : semiallowable_perm α hβ // ∀ X Y : code α β hβ, π • X ≡ π • Y ↔ X ≡ Y}
 
-@[reducible] def allowable_perm.to_struct_perm (hβ : β ≤ α) : allowable_perm α hβ → struct_perm β :=
-semiallowable_perm.to_struct_perm ∘ subtype.val
+namespace allowable_perm
+variables {α}
 
-instance allowable_perm_group (hβ : β ≤ α) : group (allowable_perm α hβ) := sorry
+instance : has_coe (allowable_perm α hβ) (semiallowable_perm α hβ) := coe_subtype
 
-instance allowable_perm_scalar_tangle {β : type_index} (hβ : β < α) :
-has_smul (allowable_perm α le_rfl) (tangle α β hβ) :=
-⟨λ π t, π.val • t⟩
+lemma coe_injective : injective (coe : allowable_perm α hβ → semiallowable_perm α hβ) :=
+subtype.coe_injective
 
-instance allowable_perm_mul_tangle {β : type_index} (hβ : β < α) :
-mul_action (allowable_perm α le_rfl) (tangle α β hβ) := sorry
+instance (hβ : β ≤ α) : has_one (allowable_perm α hβ) := ⟨⟨1, λ _ _, by simp_rw one_smul⟩⟩
+instance (hβ : β ≤ α) : has_inv (allowable_perm α hβ) :=
+⟨λ f, ⟨f⁻¹, λ c d, by rw [←f.prop, smul_inv_smul, smul_inv_smul]⟩⟩
+instance (hβ : β ≤ α) : has_mul (allowable_perm α hβ) :=
+⟨λ f g, ⟨f * g, λ c d, by simp_rw [mul_smul, f.prop, g.prop]⟩⟩
+instance (hβ : β ≤ α) : has_div (allowable_perm α hβ) :=
+⟨λ f g, ⟨f / g, by { simp_rw [div_eq_mul_inv], exact (f * g⁻¹).2 }⟩⟩
+instance (hβ : β ≤ α) : has_pow (allowable_perm α hβ) ℕ :=
+⟨λ f n, ⟨f ^ n, begin
+  induction n with d hd,
+  { simp_rw pow_zero,
+    exact (1 : allowable_perm α hβ).2 },
+  { simp_rw pow_succ,
+    exact (f * ⟨f ^ d, hd⟩).2 }
+end⟩⟩
 
-instance allowable_perm_scalar_code (hβ : β ≤ α) : has_smul (allowable_perm α hβ) (code α β hβ) :=
-⟨λ π X, π.val • X⟩
+instance (hβ : β ≤ α) : has_pow (allowable_perm α hβ) ℤ :=
+⟨λ f n, ⟨f ^ n, begin
+  cases n,
+  { simp_rw zpow_of_nat,
+    exact (f ^ n).2 },
+  { simp_rw zpow_neg_succ_of_nat,
+    exact (f ^ (n + 1))⁻¹.2 }
+end⟩⟩
 
-instance allowable_perm_mul_code (hβ : β ≤ α) : mul_action (allowable_perm α hβ) (code α β hβ) :=
-sorry
+@[simp] lemma coe_one : ((1 : allowable_perm α hβ) : semiallowable_perm α hβ) = 1 := rfl
+@[simp] lemma coe_inv (f : allowable_perm α hβ) : (↑(f⁻¹) : semiallowable_perm α hβ) = f⁻¹ := rfl
+@[simp] lemma coe_mul (f g : allowable_perm α hβ) :
+  (↑(f * g) : semiallowable_perm α hβ) = f * g := rfl
+@[simp] lemma coe_div (f g : allowable_perm α hβ) :
+  (↑(f / g) : semiallowable_perm α hβ) = f / g := rfl
+@[simp] lemma coe_pow (f : allowable_perm α hβ) (n : ℕ) :
+  (↑(f ^ n) : semiallowable_perm α hβ) = f ^ n := rfl
+@[simp] lemma coe_zpow (f : allowable_perm α hβ) (n : ℤ) :
+  (↑(f ^ n) : semiallowable_perm α hβ) = f ^ n := rfl
 
-instance allowable_perm_scalar_nonempty (hβ : β ≤ α) :
-  has_smul (allowable_perm α hβ) (nonempty_code α β hβ) := ⟨λ π X, π.val • X⟩
+instance (hβ : β ≤ α) : group (allowable_perm α hβ) :=
+coe_injective.group _ coe_one coe_mul coe_inv coe_div coe_pow coe_zpow
+
+/-- The coercion from allowable to semi-allowable permutation as a monoid homomorphism. -/
+def coe_hom : allowable_perm α hβ →* semiallowable_perm α hβ := ⟨coe, coe_one, coe_mul⟩
+
+/-- Turn an allowable permutation into a structural permutation. -/
+def to_struct_perm (hβ : β ≤ α) : allowable_perm α hβ →* struct_perm β :=
+semiallowable_perm.to_struct_perm.comp coe_hom
+
+instance mul_action_tangle {β : type_index} (hβ : β < α) :
+  mul_action (allowable_perm α le_rfl) (tangle α β hβ) :=
+mul_action.comp_hom _ coe_hom
+
+instance mul_action_code (hβ : β ≤ α) : mul_action (allowable_perm α hβ) (code α β hβ) :=
+mul_action.comp_hom _ coe_hom
+
+instance mul_action_nonempty_code (hβ : β ≤ α) :
+  mul_action (allowable_perm α hβ) (nonempty_code α β hβ) :=
+mul_action.comp_hom _ coe_hom
+
+@[simp] lemma height_smul (f : allowable_perm α hβ) (c : nonempty_code α β hβ) :
+  height (f • c) = height c := sorry
+
+instance mul_action_support_condition : mul_action (allowable_perm α le_rfl) (support_condition α) :=
+mul_action.comp_hom  _ (allowable_perm.to_struct_perm _)
+
+instance has_smul_potential_support : has_smul (allowable_perm α le_rfl) (potential_support α) :=
+⟨λ f s, ⟨f • s, s.2.image⟩⟩
+
+@[simp] lemma coe_smul_potential_support (f : allowable_perm α le_rfl) (s : potential_support α) :
+  (↑(f • s) : set (support_condition α)) = f • s := rfl
+
+instance mul_action_potential_support :
+  mul_action (allowable_perm α le_rfl) (potential_support α) :=
+set_like.coe_injective.mul_action _ coe_smul_potential_support
 
 /-- The unpacked coherence condition for allowable permutations on proper type indices γ. -/
-lemma allowable_perm_coherence (π : allowable_perm α hβ) (hγ : γ < β) (hδ : δ < β)
-  (hγδ : γ ≠ δ) (g) :
+lemma coherence (π : allowable_perm α hβ) (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (g) :
   f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) (hδ.trans_le hβ) (π.val.snd γ hγ • g) =
     π.val.fst • (f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) (hδ.trans_le hβ) g) :=
 begin
@@ -158,13 +220,20 @@ begin
   -- sorry
 end
 
-lemma allowable_perm_commute (π : allowable_perm α hβ) (hδ : δ < β) (X : nonempty_code α β hβ)
+lemma commute (π : allowable_perm α hβ) (hδ : δ < β) (X : nonempty_code α β hβ)
   (hX : X.val.extension ≠ δ) :
   π • (A_map_code hδ X) = A_map_code hδ (π • X) := sorry
 
-/-- Representative codes are mapped to representative codes under allowable permutations. -/
-lemma code.is_representative.smul (π : allowable_perm α hβ) (hδ : δ < β)
-  (X : code α β hβ) (hX : X.is_representative) :
-  (π • X).is_representative := sorry
+end allowable_perm
 
+namespace code
+
+/-- Representative codes are mapped to representative codes under allowable permutations. -/
+lemma is_representative.smul (π : allowable_perm α hβ) (hδ : δ < β) :
+  ∀ c : code α β hβ, c.is_representative → (π • c).is_representative
+| _ is_representative.empty :=
+  by { convert is_representative.empty, exact code.ext _ _ rfl (image_empty _).heq }
+| _ (is_representative.nonempty c hc) := is_representative.nonempty (π • c) $ by rwa π.height_smul
+
+end code
 end con_nf

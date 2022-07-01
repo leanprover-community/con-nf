@@ -49,4 +49,8 @@ quiver.hom.to_path $ with_bot.bot_lt_coe α
 instance extended_index_inhabited (α : Λ) : inhabited (extended_index α) :=
 ⟨extended_index.direct α⟩
 
+/-- For our purposes, we let any monoid act trivially on extended type indices. -/
+instance {α : Type*} [monoid α] {β : Λ} : mul_action α (extended_index β) :=
+{ smul := λ _, id, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
+
 end con_nf

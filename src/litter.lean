@@ -98,6 +98,10 @@ end
 /-- The type of near-litters. -/
 def near_litter : Type* := Σ i, {s // is_near_litter i s}
 
+/-- Consider a litter as a near-litter. -/
+def litter.to_near_litter (i : litter) : near_litter :=
+⟨i, litter_set i, is_near_litter_litter_set i⟩
+
 /-- There are `μ` near-litters in total. -/
 @[simp] lemma mk_near_litter : #near_litter = #μ :=
 by { simp only [near_litter, mk_sigma, mk_near_litter', sum_const, mk_litter, lift_id],
@@ -180,22 +184,20 @@ instance : has_div near_litter_perm :=
 /-- We can raise near-litter permutations to a natural power since we can do this to
 permutations of the base type and the type of litters. -/
 instance has_pow : has_pow near_litter_perm ℕ :=
-begin
-  refine ⟨λ f n, ⟨f.atom_perm ^ n, f.litter_perm ^ n, _⟩⟩,
+⟨λ f n, ⟨f.atom_perm ^ n, f.litter_perm ^ n, begin
   induction n with d hd,
   { exact (1 : near_litter_perm).near },
   { exact (f * ⟨f.atom_perm ^ d, f.litter_perm ^ d, hd⟩).near }
-end
+end⟩⟩
 
 /-- We can raise near-litter permutations to an integer power since we can do this to
 permutations of the base type and the type of litters. -/
 instance has_zpow : has_pow near_litter_perm ℤ :=
-begin
-  refine ⟨λ f n, ⟨f.atom_perm ^ n, f.litter_perm ^ n, _⟩⟩,
+⟨λ f n, ⟨f.atom_perm ^ n, f.litter_perm ^ n, begin
   cases n,
   { exact (f ^ n).near },
   { exact (f ^ (n + 1))⁻¹.near }
-end
+end⟩⟩
 
 instance : inhabited near_litter_perm := ⟨1⟩
 
