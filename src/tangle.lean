@@ -89,14 +89,51 @@ namespace nonempty_semitangle
 def mem (hβ : β < α) (t : tangle α β (coe_lt_coe.mpr hβ)) (s : nonempty_semitangle α) : Prop :=
 t ∈ (s.members β hβ).val
 
-def representative_code : nonempty_semitangle α → code α α le_rfl
-| ⟨members, semitangle_extension.proper β hβ rep hA⟩ := ⟨β, coe_lt_coe.mpr hβ, members β hβ⟩
-| ⟨members, semitangle_extension.base atoms hne rep hA⟩ := ⟨⊥, bot_lt_coe _, atoms⟩
+def representative_code : nonempty_semitangle α → nonempty_code α α le_rfl
+| ⟨members, semitangle_extension.proper β hβ rep hA⟩ :=
+  ⟨⟨β, coe_lt_coe.mpr hβ, members β hβ⟩, (members β hβ).property⟩
+| ⟨members, semitangle_extension.base atoms hne rep hA⟩ :=
+  ⟨⟨⊥, bot_lt_coe _, atoms⟩, hne⟩
+
+@[simp] lemma representative_code_proper_def (members : semitangle_members α) (β) (hβ) (rep) (hA) :
+  representative_code α ⟨members, semitangle_extension.proper β hβ rep hA⟩ =
+  ⟨⟨β, coe_lt_coe.mpr hβ, members β hβ⟩, (members β hβ).property⟩ := rfl
+
+@[simp] lemma representative_code_base_def (members : semitangle_members α) (atoms) (hne) (rep) (hA) :
+  representative_code α ⟨members, semitangle_extension.base atoms hne rep hA⟩ =
+  ⟨⟨⊥, bot_lt_coe _, atoms⟩, hne⟩ := rfl
 
 lemma representative_code_spec :
-  Π (s : nonempty_semitangle α), (representative_code α s).is_representative
+  Π (s : nonempty_semitangle α), (representative_code α s : code α α le_rfl).is_representative
 | ⟨members, semitangle_extension.proper β hβ rep hA⟩ := rep
 | ⟨members, semitangle_extension.base atoms hne rep hA⟩ := rep
+
+lemma representative_code_members_eq :
+  Π (s : nonempty_semitangle α) {γ : Λ} (hγ : γ < α)
+  (hcγ : (representative_code α s : code α α le_rfl).extension = γ),
+  s.members γ hγ =
+    ⟨cast (by simp_rw hcγ) (representative_code α s : code α α le_rfl).elts,
+    by { convert (representative_code α s).property, exact hcγ.symm, exact cast_heq _ _ }⟩
+| ⟨members, semitangle_extension.proper β hβ rep hA⟩ γ hγ hcγ :=
+    by { rw representative_code_proper_def at hcγ, cases hcγ, dsimp, rw subtype.coe_eta }
+| ⟨members, semitangle_extension.base atoms hne rep hA⟩ γ hγ hcγ :=
+    by { rw representative_code_base_def at hcγ, cases hcγ }
+
+lemma representative_code_members_ne :
+  Π (s : nonempty_semitangle α) {γ : Λ} (hγ : γ < α)
+  (hcγ : (representative_code α s : code α α le_rfl).extension ≠ γ),
+  A_map_code hγ (representative_code α s)
+  = ⟨⟨γ, coe_lt_coe.mpr hγ, s.members γ hγ⟩, (s.members γ hγ).property⟩
+| ⟨members, semitangle_extension.proper β hβ rep hA⟩ γ hγ hcγ := hA _ _ (hcγ ∘ coe_eq_coe.mpr)
+| ⟨members, semitangle_extension.base atoms hne rep hA⟩ γ hγ hcγ := hA _ _
+
+lemma representative_code_members_val (s : nonempty_semitangle α) {γ : Λ} (hγ : γ < α)
+  (hcγ : (representative_code α s : code α α le_rfl).extension ≠ γ) :
+  (s.members γ hγ).val = (A_map_code hγ (representative_code α s)).val.elts :=
+begin
+  have := congr_arg_heq code.elts (congr_arg subtype.val (representative_code_members_ne α s hγ hcγ)),
+  rw heq_iff_eq at this, exact this.symm
+end
 
 -- Remark: This formulation of extensionality holds only for types larger than type zero, since
 -- it doesn't take into account any `-1`-extension.
@@ -130,13 +167,44 @@ begin
     have := A_map_code_injective hγ ((hA₁ γ hγ).trans (hA₂ γ hγ).symm), cases this, refl }
 end
 
+lemma ext_code (x y : nonempty_semitangle α) :
+  ((representative_code α x : code α α le_rfl) ≡ representative_code α y) → x = y :=
+begin
+  intro h,
+  have code_eq := code.is_representative.unique
+    (representative_code_spec α x) (representative_code_spec α y) h,
+  rw subtype.coe_inj at code_eq,
+  by_cases ex_γ : ∃ γ, γ < α,
+  { refine ext_core _ _ _ ex_γ _,
+    refine funext _, intro γ, refine funext _, intro hγ, rw ← subtype.val_inj, dsimp only at ⊢,
+    by_cases (representative_code α x : code α α le_rfl).extension = γ,
+    { rw representative_code_members_eq α _ _ h,
+      rw representative_code_members_eq α _ _ _,
+      dsimp only, rw _root_.cast_eq_iff_heq, symmetry, convert cast_heq _ _ using 2,
+      rw code_eq, rw code_eq, simp_rw h, rw ← code_eq, rw h },
+    rw representative_code_members_val,
+    rw representative_code_members_val,
+    rw code_eq, rw ← code_eq, exact h, exact h },
+  { obtain ⟨xs, hxs⟩ := x,
+    obtain ⟨ys, hys⟩ := y,
+    have : xs = ys,
+    { refine funext _, intro γ, refine funext _, intro hγ, exfalso, exact ex_γ ⟨γ,hγ⟩ },
+    subst this, congr,
+    cases hxs with β hβ rep hA atoms₁ hne₁ rep₁ hA₁,
+    { exfalso, exact ex_γ ⟨β, hβ⟩ },
+    cases hys with β hβ rep hA atoms₂ hne₂ rep₂ hA₂,
+    { exfalso, exact ex_γ ⟨β, hβ⟩ },
+    rw [representative_code_base_def, representative_code_base_def] at code_eq,
+    cases code_eq, refl }
+end
+
 lemma ext (x y : nonempty_semitangle α) (hβ : β < α) (h : x.members β hβ = y.members β hβ) :
   x = y :=
 begin
   obtain ⟨xs, hxs⟩ := x,
   obtain ⟨ys, hys⟩ := y,
-  refine ext_core α _ _ ⟨β, hβ⟩ _,
-  dsimp at ⊢ h,
+  -- refine ext_code α _ _ _,
+  -- refine ext_core _ _ _ ⟨β, hβ⟩ _, dsimp at h ⊢, refine funext _, intro γ, refine funext _, intro hγ,
   sorry
 end
 
