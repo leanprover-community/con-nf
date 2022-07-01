@@ -167,6 +167,8 @@ begin
     have := A_map_code_injective hγ ((hA₁ γ hγ).trans (hA₂ γ hγ).symm), cases this, refl }
 end
 
+/-- One useful form of extensionality in tangled type theory. Two nonempty semitangles are equal if
+their representative codes are equivalent (and hence equal, by uniqueness). -/
 lemma ext_code (x y : nonempty_semitangle α) :
   ((representative_code α x : code α α le_rfl) ≡ representative_code α y) → x = y :=
 begin
@@ -198,6 +200,8 @@ begin
     cases code_eq, refl }
 end
 
+/-- Extensionality in tangled type theory. Two nonempty semitangles are equal if their
+`β`-extensions are equal for *any* choice of `β < α`. -/
 lemma ext (x y : nonempty_semitangle α) (hβ : β < α) (h : x.members β hβ = y.members β hβ) :
   x = y :=
 begin
@@ -244,6 +248,8 @@ begin
     rw h at h₁, exact code.equiv_transitive h₁ h₂.symm }
 end
 
+/-- Extensionality in tangled type theory. Two nonempty semitangles are equal if their
+`β`-extensions are equal for *any* choice of `β < α`. -/
 lemma ext' (x y : nonempty_semitangle α) (hβ : β < α) (h : ∀ t, mem α hβ t x ↔ mem α hβ t y) :
   x = y :=
 by { refine ext α x y hβ _, ext t, exact h t }
