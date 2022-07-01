@@ -184,6 +184,16 @@ instance mul_action_potential_support :
   mul_action (allowable_perm α le_rfl) (potential_support α) :=
 set_like.coe_injective.mul_action _ coe_smul_potential_support
 
+/-- Contains coherence conditions on to_tangle. -/
+class phase_1b_coherence (α : Λ) [phase_1a α] [phase_1b α] :=
+(to_tangle_perm (β : Λ) (hβ : β < α) (π : allowable_perm α le_rfl) (N : near_litter) :
+  @has_smul.smul _ _ (@mul_action.to_has_smul _ _ _ (allowable_action β hβ))
+    (π.val.snd β hβ) (to_tangle β hβ N) = to_tangle β hβ (π.val.fst • N))
+
+export phase_1b_coherence (to_tangle_perm)
+
+variables [phase_1b_coherence.{u} α]
+
 /-- The unpacked coherence condition for allowable permutations on proper type indices γ. -/
 lemma coherence (π : allowable_perm α hβ) (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (g) :
   f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) (hδ.trans_le hβ) (π.val.snd γ hγ • g) =

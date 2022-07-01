@@ -49,7 +49,7 @@ noncomputable! instance group : Π α, group (struct_perm α)
   exact @pi.group _ _ (λ β, @pi.group_Prop _ _ $ λ _ : β < ↑α, group β) }
 using_well_founded { dec_tac := `[assumption] }
 
-/-- Obtains the atom permutation given by a prestructural permutation. -/
+/-- Obtains the atom permutation given by a structural permutation. -/
 def to_near_litter_perm : Π {α}, struct_perm α → near_litter_perm
 | ⊥ π := by { unfold struct_perm at π, exact π }
 | (α : Λ) π := by { unfold struct_perm at π,
