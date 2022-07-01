@@ -248,7 +248,20 @@ has even height. -/
 | nonempty (c : nonempty_code α β hβ) : even (height c) → is_representative c
 
 lemma is_representative.even (c : nonempty_code α β hβ) (hc : c.val.is_representative) :
-  even (height c) := sorry
+  even (height c) :=
+begin
+rw is_representative_iff at hc,
+cases hc,
+suffices key : height c = 0,
+{ rw key,  exact even_zero,},
+{apply height_base, rw hc, },
+have h1: hc.some = c,
+{have h2 := hc.some_spec, cases c,  cases hc.some,dsimp at h2,
+ have h3 : val = c_val, {symmetry, exact h2.right},
+ subst h3},
+rw ← h1, exact hc.some_spec.left,
+end
+
 
 lemma is_representative.A_map (c d : nonempty_code α β hβ)
   (hc : c.val.is_representative) (hd : d.val.is_representative)
@@ -361,3 +374,18 @@ end
 
 end code
 end con_nf
+
+
+namespace hidden
+open nat
+theorem zero_add (n : ℕ) : 0 + n = n :=
+nat.rec_on n
+  (show 0 + 0 = 0, from rfl)
+  (assume n,
+    assume ih : 0 + n = n,
+    show 0 + succ n = succ n, from
+      calc
+        0 + succ n = succ (0 + n) : rfl
+          ... = succ n : by rw ih)
+
+end hidden
