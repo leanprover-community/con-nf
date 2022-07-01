@@ -327,7 +327,22 @@ begin
   rwa ← subtype.eta d at hodd,
 end
 
-lemma equiv_code_unique (c d : code α β hβ) (hequiv : c ≡ d) (h : c.extension = d.extension) : c = d := sorry
+lemma equiv_code_unique (c d : code α β hβ) (hequiv : c ≡ d) (h : c.extension = d.extension) : c = d :=
+begin
+  -- obtain ⟨c', cequiv, hc'⟩ := exists_representative_code c,
+  -- obtain ⟨d', dequiv, hd'⟩ := exists_representative_code d,
+  -- have := is_representative.unique hc' hd' (equiv_transitive cequiv $ equiv_transitive hequiv dequiv.symm),
+  rw equiv_iff at hequiv,
+  obtain hequiv | ⟨γ, hγ, δ, hδ, h1, h2⟩ | ⟨e, he, γ, hγ, hcγ, h2, h3⟩ | ⟨e, he, γ, hγ, hcγ, h2, h3⟩ |
+    ⟨e, he, γ, hγ, hcγ, δ, hδ, hdδ, h₁, h₂⟩ := hequiv, rw hequiv,
+  { ext1, exact h,
+    rw [h1, h2] at h ⊢,
+    dsimp at h, subst h, },
+  { rw [h2, h3] at h, dsimp at h, cases hcγ h.symm, },
+  { rw [h2, h3] at h, dsimp at h, cases hcγ h, },
+  { rw [h₁, h₂] at h ⊢, dsimp at h,
+    dsimp, have := coe_eq_coe.1 h, subst this, },
+end
 
 lemma equiv_code_exists_unique (γ : Λ) (hγ : γ < β) (c : code α β hβ) : ∃! d ≡ c, d.extension = γ :=
 begin
