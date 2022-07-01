@@ -54,7 +54,7 @@ end pretangle
 
 -/
 
-variables (α : Λ) [phase_1a.{u} α]
+variables (α : Λ) [phase_1a.{u} α] {β γ : Λ} {hβ : β < α}
 
 abbreviation semitangle_members :=
 Π β (hβ : β < α), {s : set (tangle α β $ coe_lt_coe.mpr hβ) // s.nonempty}
@@ -86,8 +86,8 @@ structure nonempty_semitangle :=
 
 namespace nonempty_semitangle
 
-def mem {β : Λ} (hβ : β < α)
-  (t : tangle α β (coe_lt_coe.mpr hβ)) (s : nonempty_semitangle α) := t ∈ (s.members β hβ).val
+def mem (hβ : β < α) (t : tangle α β (coe_lt_coe.mpr hβ)) (s : nonempty_semitangle α) : Prop :=
+t ∈ (s.members β hβ).val
 
 def representative_code : nonempty_semitangle α → code α α le_rfl
 | ⟨members, semitangle_extension.proper β hβ rep hA⟩ := ⟨β, coe_lt_coe.mpr hβ, members β hβ⟩
@@ -102,10 +102,13 @@ lemma representative_code_spec :
 -- it doesn't take into account any `-1`-extension.
 lemma ext_core (x y : nonempty_semitangle α) : (∃ γ, γ < α) → x.members = y.members → x = y :=
 begin
-  obtain ⟨xs, hxs⟩ := x, obtain ⟨ys, hys⟩ := y, dsimp,
-  intros ex_γ h, subst h, refine congr_arg (λ h, ⟨xs, h⟩) _,
+  obtain ⟨xs, hxs⟩ := x,
+  obtain ⟨ys, hys⟩ := y,
+  dsimp,
+  rintro ex_γ rfl,
+  refine congr_arg (λ h, ⟨xs, h⟩) _,
   cases hxs with β hβ rep₁ hA₁ atoms₁ hne rep₁ hA₁;
-  cases hys with γ hγ rep₂ hA₂ atoms₂ hne rep₂ hA₂,
+    cases hys with γ hγ rep₂ hA₂ atoms₂ hne rep₂ hA₂,
   { simp,
     by_contradiction β_ne_γ,
     refine code.is_representative.A_map
@@ -114,32 +117,32 @@ begin
       rep₁ rep₂ hβ (ne.symm β_ne_γ ∘ coe_eq_coe.mp) _,
     symmetry,
     exact hA₂ _ _ (ne.symm β_ne_γ) },
-  { exfalso,
-    exact code.is_representative.A_map
+  { cases code.is_representative.A_map
       ⟨⟨β, coe_lt_coe.mpr hβ, (xs β hβ).val⟩, (xs β hβ).property⟩
       ⟨⟨⊥, bot_lt_coe _, atoms₂⟩, hne⟩
       rep₁ rep₂ hβ bot_ne_coe (hA₂ β hβ).symm },
-  { exfalso,
-    exact code.is_representative.A_map
+  { cases code.is_representative.A_map
       ⟨⟨γ, coe_lt_coe.mpr hγ, (xs γ hγ).val⟩, (xs γ hγ).property⟩
       ⟨⟨⊥, bot_lt_coe _, atoms₁⟩, hne⟩
       rep₂ rep₁ hγ bot_ne_coe (hA₁ γ hγ).symm },
-  { simp, obtain ⟨γ, hγ⟩ := ex_γ, have h₁ := hA₁ γ hγ, have h₂ := hA₂ γ hγ, rw ← h₂ at h₁,
-    have := A_map_code_injective hγ h₁, cases this, refl }
+  { simp,
+    obtain ⟨γ, hγ⟩ := ex_γ,
+    have := A_map_code_injective hγ ((hA₁ γ hγ).trans (hA₂ γ hγ).symm), cases this, refl }
 end
 
-lemma ext (x y : nonempty_semitangle α) {β : Λ} (hβ : β < α) :
-  x.members β hβ = y.members β hβ → x = y :=
+lemma ext (x y : nonempty_semitangle α) (hβ : β < α) (h : x.members β hβ = y.members β hβ) :
+  x = y :=
 begin
-  intro h,
-  obtain ⟨xs, hxs⟩ := x, obtain ⟨ys, hys⟩ := y, dsimp at h,
-  refine ext_core α _ _ ⟨β, hβ⟩ _, dsimp,
+  obtain ⟨xs, hxs⟩ := x,
+  obtain ⟨ys, hys⟩ := y,
+  refine ext_core α _ _ ⟨β, hβ⟩ _,
+  dsimp at ⊢ h,
   sorry
 end
 
-lemma ext' (x y : nonempty_semitangle α) {β : Λ} (hβ : β < α) :
-  (∀ (t : tangle α β (coe_lt_coe.mpr hβ)), mem α hβ t x ↔ mem α hβ t y) → x = y :=
-by { intro h, refine ext α x y hβ _, ext t, exact h t }
+lemma ext' (x y : nonempty_semitangle α) (hβ : β < α) (h : ∀ t, mem α hβ t x ↔ mem α hβ t y) :
+  x = y :=
+by { refine ext α x y hβ _, ext t, exact h t }
 
 end nonempty_semitangle
 
@@ -149,22 +152,20 @@ elements at all levels. -/
 @[reducible] def semitangle := with_bot (nonempty_semitangle α)
 
 /-- The membership relation of tangles and semitangles in TTT at this level. -/
-def semitangle.mem {β : Λ} (hβ : β < α)
-  (t : tangle α β (coe_lt_coe.mpr hβ)) (s : semitangle α) :=
+def semitangle.mem (hβ : β < α) (t : tangle α β (coe_lt_coe.2 hβ)) (s : semitangle α) :=
   s.elim false (nonempty_semitangle.mem α hβ t)
 
-@[simp] lemma semitangle.mem_bot {β : Λ} (hβ : β < α)
-  (t : tangle α β (coe_lt_coe.mpr hβ)) : semitangle.mem α hβ t ⊥ = false := rfl
+@[simp] lemma semitangle.mem_bot (hβ : β < α) (t : tangle α β (coe_lt_coe.mpr hβ)) :
+  semitangle.mem α hβ t ⊥ = false := rfl
 
-@[simp] lemma semitangle.mem_none {β : Λ} (hβ : β < α)
-  (t : tangle α β (coe_lt_coe.mpr hβ)) : semitangle.mem α hβ t none = false := rfl
+@[simp] lemma semitangle.mem_none (hβ : β < α) (t : tangle α β (coe_lt_coe.mpr hβ)) :
+  semitangle.mem α hβ t none = false := rfl
 
-lemma semitangle.eq_bot_of_forall_not_mem {β : Λ} (hβ : β < α) (s : semitangle α) :
-  (∀ (t : tangle α β (coe_lt_coe.mpr hβ)), ¬ semitangle.mem α hβ t s) → s = ⊥ := sorry
+lemma semitangle.eq_bot_of_forall_not_mem (hβ : β < α) (s : semitangle α) :
+  (∀ t, ¬ semitangle.mem α hβ t s) → s = ⊥ := sorry
 
-lemma semitangle.ext (x y : semitangle α) {β : Λ} (hβ : β < α) :
-  (∀ (t : tangle α β (coe_lt_coe.mpr hβ)),
-    semitangle.mem α hβ t x ↔ semitangle.mem α hβ t y) → x = y :=
+lemma semitangle.ext (x y : semitangle α) (hβ : β < α) :
+  (∀ t, semitangle.mem α hβ t x ↔ semitangle.mem α hβ t y) → x = y :=
 begin
   intro h, cases x,
   { symmetry, simp at h, refine semitangle.eq_bot_of_forall_not_mem α hβ y h },
@@ -173,14 +174,13 @@ begin
   rw nonempty_semitangle.ext' α x y hβ _, intro t, exact h t
 end
 
-def semitangle_members_of_nonempty_code (c : nonempty_code α α le_rfl)
-  {β : Λ} (hβ : c.val.extension = β) : semitangle_members α :=
+def semitangle_members_of_nonempty_code (c : nonempty_code α α le_rfl) (hβ : c.val.extension = β) :
+  semitangle_members α :=
 λ γ hγ, dite (β = γ)
     (λ heq, ⟨cast (by simp_rw [hβ, heq]) c.val.elts, by { convert c.property, rw [hβ, heq], simp }⟩)
     (λ hne, A_map c.val.extension_lt hγ ⟨c.val.elts, c.property⟩)
 
-@[simp] lemma semitangle_members_eq (c : nonempty_code α α le_rfl)
-  {β : Λ} (hβ : c.val.extension = β) :
+@[simp] lemma semitangle_members_eq (c : nonempty_code α α le_rfl) (hβ : c.val.extension = β) :
   (⟨β, (hβ ▸ c.val.extension_lt : (β : type_index) < α),
     (semitangle_members_of_nonempty_code α c hβ β
       (coe_lt_coe.mp $ hβ ▸ c.val.extension_lt : β < α))⟩ : code α α le_rfl) = c.val :=
@@ -190,8 +190,8 @@ begin
   rw dif_pos rfl, refl
 end
 
-@[simp] lemma semitangle_members_ne (c : nonempty_code α α le_rfl)
-  {β : Λ} (hβ : c.val.extension = β) {γ : Λ} (hγ : γ < α) (hβγ : β ≠ γ) :
+@[simp] lemma semitangle_members_ne (c : nonempty_code α α le_rfl) (hβ : c.val.extension = β)
+  (hγ : γ < α) (hβγ : β ≠ γ) :
   (⟨γ, coe_lt_coe.mpr hγ, semitangle_members_of_nonempty_code α c hβ γ hγ⟩ : code α α le_rfl) =
   A_map_code hγ c :=
 begin
@@ -214,8 +214,8 @@ def semitangle_members_of_nonempty_code_base (c : nonempty_code α α le_rfl)
 λ γ hγ, A_map (bot_lt_coe _) hγ
   ⟨cast (by simp_rw hc) c.val.elts, by { convert c.property, rw hc, simp }⟩
 
-@[simp] lemma semitangle_members_base (c : nonempty_code α α le_rfl)
-  (hc : c.val.extension = ⊥) {β : Λ} (hβ : β < α) :
+@[simp] lemma semitangle_members_base (c : nonempty_code α α le_rfl) (hc : c.val.extension = ⊥)
+  {β : Λ} (hβ : β < α) :
   (⟨β, coe_lt_coe.mpr hβ, semitangle_members_of_nonempty_code_base α c hc β hβ⟩ : code α α le_rfl) =
   A_map_code hβ c :=
 begin
@@ -223,8 +223,8 @@ begin
   unfold semitangle_members_of_nonempty_code_base, simp
 end
 
-def intro_nonempty_semitangle_base (c : nonempty_code α α le_rfl)
-  (hc : c.val.extension = ⊥) : nonempty_semitangle α :=
+def intro_nonempty_semitangle_base (c : nonempty_code α α le_rfl) (hc : c.val.extension = ⊥) :
+  nonempty_semitangle α :=
 ⟨semitangle_members_of_nonempty_code_base α c hc,
 semitangle_extension.base (cast (by { simp_rw hc, refl }) c.val.elts)
 (by { convert c.property, simp_rw hc, refl, simp })
@@ -285,7 +285,7 @@ def symmetric_set {β : Λ} (hβ : β < α) (B : set $ tangle α β (coe_lt_coe.
   sorry⟩
 
 /-- Allowable permutations act on `α`-tangles. -/
-instance new_tangle.has_scalar : has_scalar (allowable_perm α le_rfl) (new_tangle α) :=
+instance new_tangle.has_smul : has_smul (allowable_perm α le_rfl) (new_tangle α) :=
 ⟨λ π t, ⟨π • t.val, sorry⟩⟩
 
 instance new_tangle.mul_action : mul_action (allowable_perm α le_rfl) (new_tangle α) :=

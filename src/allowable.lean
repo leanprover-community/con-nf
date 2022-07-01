@@ -40,18 +40,18 @@ instance near_litter_perm.mul_action_tangle (hβ : β < α) :
 sorry
 
 namespace semiallowable_perm
+variables {α} (π : semiallowable_perm α hβ) (X : code α β hβ)
 
-def to_struct_perm {α : Λ} [phase_1a.{u} α] [phase_1b.{u} α] {hβ : β ≤ α}
-  (π : semiallowable_perm α hβ) : struct_perm β := sorry
+def to_struct_perm {hβ : β ≤ α} (π : semiallowable_perm α hβ) : struct_perm β := sorry
 
-instance semiallowable_perm_scalar_tangle {β : type_index} (hβ : β < α) :
-has_scalar (semiallowable_perm α le_rfl) (tangle α β hβ) :=
+instance has_smul_tangle {β : type_index} (hβ : β < α) :
+  has_smul (semiallowable_perm α le_rfl) (tangle α β hβ) :=
 ⟨λ π t, with_bot.rec_bot_coe
   (λ hβ t, π.fst.atom_perm t)
   (λ β hβ t, π.snd β (coe_lt_coe.mp hβ) • t) β hβ t⟩
 
-instance semiallowable_perm_mul_tangle {β : type_index} (hβ : β < α) :
-mul_action (semiallowable_perm α le_rfl) (tangle α β hβ) := sorry
+instance mul_action_tangle {β : type_index} (hβ : β < α) :
+  mul_action (semiallowable_perm α le_rfl) (tangle α β hβ) := sorry
 
 instance mul_action_code (hβ : β ≤ α) : mul_action (semiallowable_perm α hβ) (code α β hβ) :=
 { smul := λ π X,
@@ -71,8 +71,6 @@ instance mul_action_code (hβ : β ≤ α) : mul_action (semiallowable_perm α h
     { exact (mul_smul _ _ _).heq }
   end }
 
-variables {α} (π : semiallowable_perm α hβ) (X : code α β hβ)
-
 lemma smul_code_def :
   π • X =
     ⟨X.extension, X.extension_lt,
@@ -83,13 +81,13 @@ lemma smul_code_def :
 
 @[simp] lemma extension_smul : (π • X).extension = X.extension := rfl
 
-instance has_scalar_nonempty_code (hβ : β ≤ α) :
-  has_scalar (semiallowable_perm α hβ) (nonempty_code α β hβ) :=
+instance has_smul_nonempty_code (hβ : β ≤ α) :
+  has_smul (semiallowable_perm α hβ) (nonempty_code α β hβ) :=
 ⟨λ π X, ⟨π • X, let ⟨⟨γ, hγ, G⟩, hG⟩ := X in
   by induction γ using with_bot.rec_bot_coe; exact hG.image _⟩⟩
 
-@[simp, norm_cast] lemma coe_smul (X : nonempty_code α β hβ) :
-  (↑(π • X) : code α β hβ) = π • X := rfl
+@[simp, norm_cast] lemma coe_smul (X : nonempty_code α β hβ) : (↑(π • X) : code α β hβ) = π • X :=
+rfl
 
 instance mul_action_nonempty_code (hβ : β ≤ α) :
   mul_action (semiallowable_perm α hβ) (nonempty_code α β hβ) :=
@@ -108,20 +106,20 @@ semiallowable_perm.to_struct_perm ∘ subtype.val
 instance allowable_perm_group (hβ : β ≤ α) : group (allowable_perm α hβ) := sorry
 
 instance allowable_perm_scalar_tangle {β : type_index} (hβ : β < α) :
-has_scalar (allowable_perm α le_rfl) (tangle α β hβ) :=
+has_smul (allowable_perm α le_rfl) (tangle α β hβ) :=
 ⟨λ π t, π.val • t⟩
 
 instance allowable_perm_mul_tangle {β : type_index} (hβ : β < α) :
 mul_action (allowable_perm α le_rfl) (tangle α β hβ) := sorry
 
-instance allowable_perm_scalar_code (hβ : β ≤ α) : has_scalar (allowable_perm α hβ) (code α β hβ) :=
+instance allowable_perm_scalar_code (hβ : β ≤ α) : has_smul (allowable_perm α hβ) (code α β hβ) :=
 ⟨λ π X, π.val • X⟩
 
 instance allowable_perm_mul_code (hβ : β ≤ α) : mul_action (allowable_perm α hβ) (code α β hβ) :=
 sorry
 
 instance allowable_perm_scalar_nonempty (hβ : β ≤ α) :
-  has_scalar (allowable_perm α hβ) (nonempty_code α β hβ) := ⟨λ π X, π.val • X⟩
+  has_smul (allowable_perm α hβ) (nonempty_code α β hβ) := ⟨λ π X, π.val • X⟩
 
 /-- The unpacked coherence condition for allowable permutations on proper type indices γ. -/
 lemma allowable_perm_coherence (π : allowable_perm α hβ) (hγ : γ < β) (hδ : δ < β)
@@ -130,10 +128,10 @@ lemma allowable_perm_coherence (π : allowable_perm α hβ) (hγ : γ < β) (hδ
     π.val.fst • (f_map γ δ (coe_lt_coe.mpr (hγ.trans_le hβ)) (hδ.trans_le hβ) g) :=
 begin
   classical,
-  unfold has_scalar.smul,
+  unfold has_smul.smul,
   have equiv := code.singleton_equiv hγ hδ hγδ g,
   rw ← π.property at equiv,
-  unfold has_scalar.smul at equiv, simp at equiv,
+  unfold has_smul.smul at equiv, simp at equiv,
   rw code.singleton_equiv_iff at equiv, cases equiv,
   { exfalso,
     have := congr_arg code.extension equiv, dsimp at this, rw coe_eq_coe at this,
