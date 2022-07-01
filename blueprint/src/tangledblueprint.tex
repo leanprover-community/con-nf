@@ -486,6 +486,7 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
   \item if $x_\beta = y_\beta$, then $x=y$.
 \end{itemize}
 \end{theorem}
+\begin{proof}\leanok\end{proof}
 
 \section{Phase 1b: Actual tangles: the model definition}
 
@@ -568,13 +569,13 @@ This should be straightforward.  A target should be the equation $\pi(A_\gamma(X
 [Note: This will probably need the phase 1b data to include an assumption that the typed-near-litter embeddings commute with the group action.]
 \end{proof}
 
-\begin{def}
+\begin{definition}
 \label{def:semi-tangle-action}
 \uses{lem:rep-preserved,def:semi-tangle}
 \lean{con_nf.mul_action_nonempty_semitangle}
 \leanok
   Allowable permutations act on semi-tangles.
-\end{def}
+\end{definition}
 
 \begin{definition}
 \label{def:tangle}
@@ -607,6 +608,7 @@ Any code $(\alpha,-1,N)$, where $N$ is a near-litter, gives an element of $\tau_
 \end{lemma}
 
 \begin{proof}
+\uses{lem:supportedness-equiv}
 This code is obviously representative [though this isn’t really necessary, thanks to Lemma~\ref{lem:supportedness-equiv}] and it is supported by a singleton condition, a suitable decorated version of $N$.
 \end{proof}
 
