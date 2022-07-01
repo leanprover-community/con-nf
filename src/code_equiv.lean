@@ -260,10 +260,8 @@ begin
   cases hc, { dsimp at hc, have := c.prop, rw hc at this, exact set.not_nonempty_empty this },
   cases hd, { dsimp at hd, have := d.prop, rw hd at this, exact set.not_nonempty_empty this },
   rcases hc with ⟨e, heeven, hce⟩, rcases hd with ⟨f, hfeven, hdf⟩,
-  dsimp at hce hdf,
-  have hce : c = e := by { ext1, assumption },
-  have hdf : d = f := by { ext1, assumption },
-  rw [← hce, this, hdf, nat.even_succ] at heeven, exact heeven hfeven,
+  rw [← subtype.coe_injective hce, this, subtype.coe_injective hdf, nat.even_succ] at heeven,
+  exact heeven hfeven,
 end
 
 lemma is_representative.unique (hc : c.is_representative) (hd : d.is_representative) (h : c ≡ d) :
@@ -304,10 +302,47 @@ begin
   exact ⟨d, this, is_representative.nonempty d hodd⟩,
 end
 
-lemma equiv_code_exists_unique (γ : Λ) (c : code α β hβ) : ∃! d ≡ c, d.extension = γ := sorry
+lemma equiv_even_code_exists (γ : Λ) (hγ : γ < β) (c : code α β hβ) (hc : c.elts.nonempty) (heven : even (height ⟨c, hc⟩)) : ∃ d ≡ c, d.extension = γ :=
+begin
+  by_cases c.extension = γ,
+  exact ⟨c, equiv.refl c, h⟩,
+  exact ⟨A_map_code hγ ⟨c, hc⟩, equiv.A_map_left _ heven _ _ h, rfl⟩,
+end
+
+lemma equiv_code_exists (γ : Λ) (hγ : γ < β) (c : code α β hβ) : ∃ d ≡ c, d.extension = γ :=
+begin
+  by_cases c.elts = ∅,
+  { cases c with δ hδ D, dsimp at h, rw h,
+   refine ⟨⟨γ, coe_lt_coe.2 hγ, ∅⟩, equiv.empty_empty γ (coe_lt_coe.2 hγ) δ hδ, rfl⟩, },
+  rw [← not_nonempty_iff_eq_empty, not_not] at h,
+  obtain heven | hodd := (height ⟨c, h⟩).even_or_odd,
+  exact equiv_even_code_exists _ hγ _ _ heven,
+  obtain ⟨d, hd⟩ := height_ne_zero.1 hodd.pos.ne',
+  rw A_map_rel_iff at hd,
+  obtain ⟨δ, hδ, hdext, hd⟩ := hd,
+  rw [hd, height_A_map_code _ hdext, nat.odd_succ, ← nat.even_iff_not_odd] at hodd,
+  rcases equiv_even_code_exists γ hγ d.val d.prop _ with ⟨e, hequiv, he⟩,
+  rw ((congr_arg subtype.val hd).congr_right.mp rfl : c = (A_map_code hδ d).val),
+  exact ⟨e, equiv_transitive hequiv $ equiv.A_map_right d hodd δ hδ hdext, he⟩,
+  rwa ← subtype.eta d at hodd,
+end
+
+lemma equiv_code_unique (c d : code α β hβ) (hequiv : c ≡ d) (h : c.extension = d.extension) : c = d := sorry
+
+lemma equiv_code_exists_unique (γ : Λ) (hγ : γ < β) (c : code α β hβ) : ∃! d ≡ c, d.extension = γ :=
+begin
+  obtain ⟨d, hequiv, hd⟩ := equiv_code_exists γ hγ c, use d, split, refine ⟨hequiv, hd, λ x y, rfl⟩,
+  rintros e ⟨hequiv', heext, he⟩,
+  rw ← hd at heext,
+  exact equiv_code_unique e d (equiv_transitive hequiv' hequiv.symm) heext,
+end
 
 lemma equiv_bot_code_subsingleton (c : code α β hβ) :
-  ∀ d ≡ c, ∀ e ≡ c, d.extension = ⊥ → e.extension = ⊥ → d = e := sorry
+  ∀ d ≡ c, ∀ e ≡ c, d.extension = ⊥ → e.extension = ⊥ → d = e :=
+begin
+  intros d hd e he hdext heext, rw ← heext at hdext,
+  exact equiv_code_unique d e (equiv_transitive hd he.symm) hdext,
+end
 
 end code
 end con_nf
