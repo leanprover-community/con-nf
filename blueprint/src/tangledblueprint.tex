@@ -247,7 +247,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 \begin{definition}
 \label{def:support-condition-action}
 \uses{def:structural-perm-derivative,def:support-condition}
-\lean{con_nf.mul_action_support_condition}
+\lean{con_nf.con_nf.support_condition.mul_action_2}
 \leanok
 Structural permutations act on support conditions.
 \end{definition}
@@ -533,7 +533,7 @@ Semi-allowable permutations act on $\alpha$-codes.
 \begin{lemma}
 \label {lem:coherence-unpacked}
 \uses{def:allowable-perm}
-\lean{con_nf.allowable_perm_coherence}
+\lean{con_nf.allowable_perm.coherence}
 \leanok
 A semi-allowable permutation $\pi$ is allowable just if
 $$f_{\gamma,\delta}(\pi_\gamma(g)) = [(\pi_\delta)_{-1}``f_{\gamma,\delta}(g)^\circ].$$
@@ -569,17 +569,17 @@ This should be straightforward.  A target should be the equation $\pi(A_\gamma(X
 [Note: This will probably need the phase 1b data to include an assumption that the typed-near-litter embeddings commute with the group action.]
 \end{proof}
 
-\begin{lemma}
-\label{lem:semi-tangle-action}
+\begin{def}
+\label{def:semi-tangle-action}
 \uses{lem:rep-preserved,def:semi-tangle}
-\lean{con_nf.semitangle.mul_action}
+\lean{con_nf.mul_action_nonempty_semitangle}
 \leanok
   Allowable permutations act on semi-tangles.
-\end{lemma}
+\end{def}
 
 \begin{definition}
 \label{def:tangle}
-\uses{lem:semi-tangle-action,def:support-of}
+\uses{def:semi-tangle-action,def:support-of}
 \lean{con_nf.new_tangle}
 \leanok
 We take the set of $\alpha$-tangles, $\tau_\alpha$, to be the set of \emph{symmetric} $\alpha$-semi-tangles under the action of allowable permutations; that is, tangles that are supported by some small $\alpha$-support $S$,.
@@ -636,7 +636,7 @@ It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|
 \begin{lemma}
   \label{lem:tangle-action}
   \uses{def:tangle}
-  \lean{con_nf.new_tangle.mul_action}
+  \lean{con_nf.allowable_perm.mul_action_new_tangle}
   \leanok
   The action of $\alpha$-allowable permutations on semi-tangles restricts to an action on tangles.  Explicitly, if an $\alpha$ semi-tangle $x$ is symmetric, then so is $\pi x$ for any $\alpha$-allowable permutation $\pi$.
 \end{lemma}

@@ -4,7 +4,7 @@ import mathlib.option
 noncomputable theory
 
 open cardinal cardinal.is_regular equiv equiv.perm function set with_bot
-open_locale cardinal
+open_locale cardinal pointwise
 
 universe u
 
@@ -313,11 +313,11 @@ end
 /-- We can construct nonempty semitangles from nonempty representative codes with extensions at
 proper type indices. -/
 def intro_nonempty_semitangle_proper (c : nonempty_code α α le_rfl)
-  (heven : even $ height c) {β : Λ} (hβ : c.val.extension = β) : nonempty_semitangle α :=
+  (heven : even $ height c) (hβ : c.val.extension = β) : nonempty_semitangle α :=
 ⟨semitangle_members_of_nonempty_code α c hβ,
-semitangle_extension.proper β (coe_lt_coe.mp $ hβ ▸ c.val.extension_lt : β < α)
-(by { convert code.is_representative.nonempty c heven, rw semitangle_members_eq, refl })
-(λ γ hγ hβγ, by { simp_rw [semitangle_members_ne α c hβ hγ hβγ, semitangle_members_eq], refl })⟩
+  semitangle_extension.proper β (coe_lt_coe.mp $ hβ ▸ c.val.extension_lt : β < α)
+  (by { convert code.is_representative.nonempty c heven, rw semitangle_members_eq, refl })
+  (λ γ hγ hβγ, by { simp_rw [semitangle_members_ne α c hβ hγ hβγ, semitangle_members_eq], refl })⟩
 
 def semitangle_members_of_nonempty_code_base (c : nonempty_code α α le_rfl)
   (hc : c.val.extension = ⊥) : semitangle_members α :=
@@ -325,7 +325,7 @@ def semitangle_members_of_nonempty_code_base (c : nonempty_code α α le_rfl)
   ⟨cast (by simp_rw hc) c.val.elts, by { convert c.property, rw hc, simp }⟩
 
 @[simp] lemma semitangle_members_base (c : nonempty_code α α le_rfl) (hc : c.val.extension = ⊥)
-  {β : Λ} (hβ : β < α) :
+  (hβ : β < α) :
   (⟨β, coe_lt_coe.mpr hβ, semitangle_members_of_nonempty_code_base α c hc β hβ⟩ : code α α le_rfl) =
   A_map_code hβ c :=
 begin
@@ -349,13 +349,17 @@ end)⟩
 
 variable [phase_1b.{u u} α]
 
+namespace allowable_perm
+
 /-- Allowable permutations act on nonempty semitangles. -/
-instance nonempty_semitangle.mul_action :
+instance mul_action_nonempty_semitangle :
   mul_action (allowable_perm α le_rfl) (nonempty_semitangle α) := sorry
 
 /-- Allowable permutations act on semitangles. -/
-instance semitangle.mul_action : mul_action (allowable_perm α le_rfl) (semitangle α) :=
+instance mul_action_semitangle : mul_action (allowable_perm α le_rfl) (semitangle α) :=
 option.mul_action
+
+end allowable_perm
 
 /-- A tangle at the new level `α` is a symmetric semitangle. This is `τ_α` in the blueprint.
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
@@ -364,8 +368,8 @@ def new_tangle :=
 
 /-- If a set of support conditions supports a code, it supports all equivalent codes. -/
 lemma supportedness_equiv {c d : code α α le_rfl} (hcd : c ≡ d) (S : set (support_condition α))
-(hS : supports (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) c S) :
-  supports (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) d S := sorry
+  (hS : supports (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) S c) :
+  supports (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) S d := sorry
 
 /-- By the previous lemma, if two codes are equivalent,
 one is symmetric if and only if the other is. -/
@@ -379,26 +383,50 @@ def typed_near_litter (N : near_litter) : new_tangle α :=
 ⟨some $ intro_nonempty_semitangle_base α ⟨⟨⊥, bot_lt_coe _, N.snd.val⟩, sorry⟩ rfl, sorry⟩
 
 /-- For any symmetric tangle `x`, the code `(α, β, {x})` is a tangle at level `α`. -/
-def symmetric_singleton {β : Λ} (hβ : β < α) (x : tangle α β (coe_lt_coe.mpr hβ))
+def symmetric_singleton (hβ : β < α) (x : tangle α β (coe_lt_coe.mpr hβ))
   (symm : symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) x) : new_tangle α :=
 ⟨some $ intro_nonempty_semitangle_proper α ⟨⟨β, coe_lt_coe.mpr hβ, {x}⟩, set.singleton_nonempty _⟩
   (by { convert even_zero, exact height_singleton x }) rfl,
   sorry⟩
 
 /-- For any small set `B` of symmetric `β`-tangles, the code `(α, β, B)` is a tangle at level `α`. -/
-def symmetric_set {β : Λ} (hβ : β < α) (B : set $ tangle α β (coe_lt_coe.mpr hβ))
-  (hne : B.nonempty) (hsmall : small B)
+def symmetric_set (hβ : β < α) (B : set $ tangle α β (coe_lt_coe.mpr hβ)) (hne : B.nonempty)
+  (hsmall : small B)
   (symm : ∀ b ∈ B, symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) b) :
   new_tangle α :=
 ⟨some $ intro_nonempty_semitangle_proper α ⟨⟨β, coe_lt_coe.mpr hβ, B⟩, hne⟩
   sorry rfl,
   sorry⟩
 
+variables {α}
+
+namespace new_tangle
+
+instance : has_coe (new_tangle α) (semitangle α) := coe_subtype
+
+lemma coe_injective : injective (coe : new_tangle α → semitangle α) := subtype.coe_injective
+
+end new_tangle
+
+namespace allowable_perm
+
+lemma _root_.supports.smul {s : set (support_condition α)} {t : semitangle α}
+  (f : allowable_perm α le_rfl) (h : supports (allowable_perm.to_struct_perm $ le_refl α) s t) :
+  supports (allowable_perm.to_struct_perm $ le_refl α) (f • s) (f • t) :=
+λ g hg, begin
+  have := ball_image_iff.1 hg,
+  sorry
+end
+
 /-- Allowable permutations act on `α`-tangles. -/
-instance new_tangle.has_smul : has_smul (allowable_perm α le_rfl) (new_tangle α) :=
-⟨λ π t, ⟨π • t.val, sorry⟩⟩
+instance has_smul_new_tangle : has_smul (allowable_perm α le_rfl) (new_tangle α) :=
+⟨λ π t, ⟨π • t, t.2.map $ λ s, ⟨π • s.1, s.2.smul _⟩⟩⟩
 
-instance new_tangle.mul_action : mul_action (allowable_perm α le_rfl) (new_tangle α) :=
-sorry
+@[simp, norm_cast] lemma coe_smul_new_tangle (f : allowable_perm α le_rfl) (t : new_tangle α) :
+  (↑(f • t) : semitangle α) = f • t := rfl
 
+instance mul_action_new_tangle : mul_action (allowable_perm α le_rfl) (new_tangle α) :=
+new_tangle.coe_injective.mul_action _ coe_smul_new_tangle
+
+end allowable_perm
 end con_nf
