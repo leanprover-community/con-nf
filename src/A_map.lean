@@ -177,7 +177,20 @@ lemma A_map_code_coe_eq_iff (hδ : δ < β) (c : nonempty_code α β hβ)
 by split; { intro h, cases h, refl }
 
 lemma A_map_code_injective (hδ : δ < α) :
-  injective (A_map_code hδ : nonempty_code α α le_rfl → nonempty_code α α le_rfl) := sorry
+  injective (A_map_code hδ : nonempty_code α α le_rfl → nonempty_code α α le_rfl) :=
+begin
+  rintros ⟨⟨γ, hγ, G⟩, hG⟩ ⟨⟨ε, hε, E⟩, hE⟩ hce,
+  by_cases hγε : γ = ε,
+  { subst hγε,
+    ext1, ext1, refl, dsimp, refine heq_of_eq _,
+    unfold A_map_code at hce,
+    suffices : A_map _ hδ ⟨G, hG⟩ = A_map _ hδ ⟨E, hE⟩,
+    { exact subtype.mk.inj (A_map_injective _ _ this), },
+    simp_rw [subtype.val_eq_coe] at hce, cases hce with _ hce,
+    rw ← subtype.heq_iff_coe_heq rfl heq.rfl at hce,
+    exact eq_of_heq hce, },
+  { sorry, }, -- use f-map range disjoint
+end
 
 lemma A_map_code_ne (hδ : δ < β) (c : nonempty_code α β hβ) : c ≠ A_map_code hδ c := sorry
 
