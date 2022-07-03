@@ -21,7 +21,7 @@ class phase_1a (α : Λ) :=
 
 export phase_1a (to_tangle)
 
-variables (α : Λ) [phase_1a.{u} α]
+variables (α : Λ) [phase_1a.{u} α] {β : Λ} {hβ : β ≤ α}
 
 /-- The tangles already constructed at stage `α`. -/
 def tangle : Π β < (α : type_index), Type u
@@ -42,6 +42,15 @@ So far, we can only construct type `β` codes for `β ≤ α`. Notably, we can c
 
 /-- Nonempty codes -/
 abbreviation nonempty_code (β : Λ) (hβ : β ≤ α) : Type* := {c : code α β hβ // c.elts.nonempty}
+
+variables {α}
+
+/-- A code is empty if it has no element.-/
+protected def code.is_empty (c : code α β hβ) : Prop := c.elts = ∅
+
+@[simp] lemma code.is_empty_mk {γ hγ s} : (⟨γ, hγ, s⟩ : code α β hβ).is_empty ↔ s = ∅ := iff.rfl
+
+variables (α)
 
 /-- Suppose that the set of tangles embeds into the set of codes. -/
 class phase_1a_embedding :=

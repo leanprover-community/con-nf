@@ -33,7 +33,7 @@ universe u
 
 namespace con_nf
 open params
-variables [params.{u}] {α β δ : Λ} [phase_1a.{u} α] {hβ : β ≤ α} {γ : type_index} {hγ : γ < α}
+variables [params.{u}] {α β δ ε : Λ} [phase_1a.{u} α] {hβ : β ≤ α} {γ : type_index} {hγ : γ < α}
   {hδ : δ < α} {s : set (tangle α γ hγ)} {t : tangle α γ hγ} {c d : code α β hβ}
 
 /-- The *alternative extension* map. For a set of tangles `G`, consider the code
@@ -157,6 +157,13 @@ def A_map_code (hδ : δ < β) (c : code α β hβ) : code α β hβ :=
 @[simp] lemma A_map_code_mk (γ hγ s) (hδ : δ < β) :
   A_map_code hδ (⟨γ, hγ, s⟩ : code α β hβ) = ⟨δ, coe_lt_coe.2 hδ, A_map (hδ.trans_le hβ) s⟩ := rfl
 
+@[simp] lemma A_map_code_is_empty {hδ : δ < β} : (A_map_code hδ c).is_empty ↔ c.is_empty :=
+by { cases c, exact A_map_eq_empty }
+
+alias A_map_code_is_empty ↔ _ code.is_empty.A_map_code
+
+attribute [protected] code.is_empty.A_map_code
+
 lemma A_map_code_inj_on (hδ : δ < β) :
   {c : code α β hβ | c.elts.nonempty}.inj_on (A_map_code hδ : code α β hβ → code α β hβ) :=
 begin
@@ -221,6 +228,14 @@ begin
   refine A_map_code_inj_on _ (A_map_nonempty.1 hc) _ h,
   rw h at hc,
   exact A_map_nonempty.1 hc,
+end
+
+lemma eq_of_A_map_code {hδ : δ < β} {hε : ε < β} (hc : c.elts.nonempty) (hcδ : c.extension ≠ δ)
+  (hdε : d.extension ≠ ε) (h : A_map_code hδ c = A_map_code hε d) : c = d :=
+begin
+  refine A_map_rel_subsingleton (by exact hc.A_map) (A_map_rel.intro _ hδ hcδ) _,
+  simp_rw h,
+  exact A_map_rel.intro _ _ hdε,
 end
 
 lemma A_map_rel_A_map_code {hδ : δ < β} (hd : d.elts.nonempty) (hdδ : d.extension ≠ δ) :

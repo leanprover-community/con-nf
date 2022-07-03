@@ -2,6 +2,7 @@ import code
 
 /-!
 # f-maps
+
 Consider a code `(α, γ, G)`. We are interested in the alternative extensions of this object at
 different proper type indices `δ : Λ`. We will define the function `A_δ` which will map the code
 `(α, γ, G)` to a new code `(α, δ, D)`. The elements of `D` are produced by the so-called f-maps.
