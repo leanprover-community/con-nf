@@ -1,6 +1,5 @@
 import combinatorics.quiver.path
 import data.list.basic
-import logic.embedding
 
 open function quiver quiver.path
 

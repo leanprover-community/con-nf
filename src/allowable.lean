@@ -1,5 +1,4 @@
 import code_equiv
-import mathlib.group
 import struct_perm
 
 /-!
@@ -104,7 +103,7 @@ def allowable_perm (hβ : β ≤ α) :=
 {π : semiallowable_perm α hβ // ∀ X Y : code α β hβ, π • X ≡ π • Y ↔ X ≡ Y}
 
 namespace allowable_perm
-variables {α}
+variables {α} {f : allowable_perm α hβ} {c : code α β hβ}
 
 instance : has_coe (allowable_perm α hβ) (semiallowable_perm α hβ) := coe_subtype
 
@@ -168,11 +167,17 @@ instance mul_action_nonempty_code (hβ : β ≤ α) :
   mul_action (allowable_perm α hβ) (nonempty_code α β hβ) :=
 mul_action.comp_hom _ coe_hom
 
-@[simp] lemma height_smul (f : allowable_perm α hβ) (c : nonempty_code α β hβ) :
-  height (f • c) = height c := sorry
+@[simp] lemma is_even_smul : (f • c).is_even ↔ c.is_even := sorry
 
-instance mul_action_support_condition : mul_action (allowable_perm α le_rfl) (support_condition α) :=
-mul_action.comp_hom  _ (allowable_perm.to_struct_perm _)
+@[simp] lemma is_odd_smul : (f • c).is_odd ↔ c.is_odd :=
+by simp_rw [←code.not_is_even, is_even_smul]
+
+alias is_even_smul ↔ _ _root_.con_nf.code.is_even.smul
+alias is_odd_smul ↔ _ _root_.con_nf.code.is_odd.smul
+
+instance mul_action_support_condition :
+  mul_action (allowable_perm α le_rfl) (support_condition α) :=
+mul_action.comp_hom _ (allowable_perm.to_struct_perm _)
 
 instance has_smul_potential_support : has_smul (allowable_perm α le_rfl) (potential_support α) :=
 ⟨λ f s, ⟨f • s, s.2.image⟩⟩
@@ -201,13 +206,14 @@ lemma coherence (π : allowable_perm α hβ) (hγ : γ < β) (hδ : δ < β) (h�
 begin
   classical,
   unfold has_smul.smul,
-  have equiv := code.singleton_equiv hγ hδ hγδ g,
+  have equiv := code.singleton_equiv (coe_lt_coe.2 hγ) hδ (coe_ne_coe.2 hγδ) g,
   rw ← π.property at equiv,
-  unfold has_smul.smul at equiv, simp at equiv,
-  rw code.singleton_equiv_iff at equiv, cases equiv,
-  { exfalso,
-    have := congr_arg code.extension equiv, dsimp at this, rw coe_eq_coe at this,
-    rw this at hγδ, exact hγδ rfl },
+  unfold has_smul.smul at equiv,
+  simp only [subtype.val_eq_coe, rec_bot_coe_coe, image_smul, smul_set_singleton] at equiv,
+  rw [code.equiv_comm, code.equiv_singleton_iff] at equiv,
+  cases equiv,
+  { have := congr_arg code.extension equiv,
+    cases hγδ.symm (with_bot.coe_injective this) },
   obtain ⟨ε, hc, hε, hγε, hA⟩ := equiv,
   have hc' := coe_eq_coe.mp hc,
   subst hc',
@@ -216,7 +222,8 @@ begin
   have hA' := hA.symm,
   sorry,
   -- rw A_map_code_coe_eq_iff at hA',
-  -- simp at hA', unfold A_map at hA',
+  -- simp at hA',
+  -- unfold A_map at hA',
   -- simp at hA',
   -- dsimp at hA',
   -- have : to_tangle δ (hε.trans_le hβ) ⟨f_map γ δ _ (hδ.trans_le hβ) (π.val.snd γ hγ • g),
@@ -226,24 +233,14 @@ begin
   -- rw subtype.val_eq_coe at this,
   -- rw hA' at this,
   -- rw mem_smul_set at this,
-  -- obtain ⟨t, ⟨N, hN₁, hN₂⟩, ht⟩ := this, have := mem_set_of.mp hN₁, rw ← this, rw ← hN₂ at ht,
+  -- obtain ⟨t, ⟨N, hN₁, hN₂⟩, ht⟩ := this,
+  -- have := mem_set_of.mp hN₁,
+  -- rw ← this, rw ← hN₂ at ht,
   -- sorry
 end
 
-lemma commute (π : allowable_perm α hβ) (hδ : δ < β) (X : nonempty_code α β hβ)
-  (hX : X.val.extension ≠ δ) :
+lemma commute (π : allowable_perm α hβ) (hδ : δ < β) (X : code α β hβ) (hX : X.extension ≠ δ) :
   π • (A_map_code hδ X) = A_map_code hδ (π • X) := sorry
 
 end allowable_perm
-
-namespace code
-
-/-- Representative codes are mapped to representative codes under allowable permutations. -/
-lemma is_representative.smul (π : allowable_perm α hβ) (hδ : δ < β) :
-  ∀ c : code α β hβ, c.is_representative → (π • c).is_representative
-| _ is_representative.empty :=
-  by { convert is_representative.empty, exact code.ext _ _ rfl (image_empty _).heq }
-| _ (is_representative.nonempty c hc) := is_representative.nonempty (π • c) $ by rwa π.height_smul
-
-end code
 end con_nf

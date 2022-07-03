@@ -1,5 +1,3 @@
-import combinatorics.quiver.path
-import mathlib.well_founded
 import mathlib.quiver
 import params
 

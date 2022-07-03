@@ -68,13 +68,13 @@ def candid_μ : Type := Exists.some (quot.exists_rep (bet (omega 1)))
 lemma def_candid_μ : #(candid_μ) = bet (omega 1) :=
 Exists.some_spec (quot.exists_rep (aleph 1))
 
-lemma card_of_N:   #ℕ = aleph_0 :=
+lemma card_of_N : #ℕ = aleph_0 :=
 by symmetry; apply cardinal.lift_id
 
 example : params.{0} := { Λ := ℕ ,
   Λr := (<),
   Λwf := nat.lt.is_well_order,
-  Λ_ord :=  begin
+  Λ_ord := begin
       have h1 : (ordinal.type has_lt.lt).lift = ordinal.omega,
       by refl,
       let u : ordinal := ordinal.type has_lt.lt,
@@ -97,7 +97,7 @@ example : params.{0} := { Λ := ℕ ,
   κ := candid_κ,
   κ_regular := by rw def_candid_k; exact is_regular_aleph_one,
   Λ_lt_κ := by rw def_candid_k; rw card_of_N; exact aleph_0_lt_aleph_one,
-  μ := _  ,
+  μ := _,
   μr := _,
   μwf := _,
   μ_ord := _,
@@ -129,7 +129,7 @@ noncomputable instance : inhabited Λ :=
 noncomputable instance : inhabited κ :=
 @classical.inhabited_of_nonempty _ $ cardinal.mk_ne_zero_iff.1 κ_regular.pos.ne'
 
-noncomputable instance : inhabited μ  :=
+noncomputable instance : inhabited μ :=
 @classical.inhabited_of_nonempty _ $ cardinal.mk_ne_zero_iff.1 μ_strong_limit.ne_zero
 
 /-- Either the base type or a proper type index (an element of `Λ`).
@@ -138,10 +138,7 @@ The base type is written `⊥`. -/
 def type_index := with_bot Λ
 
 @[simp] lemma mk_type_index : #type_index = #Λ :=
-begin
-  unfold type_index, unfold with_bot, rw mk_option,
-  exact add_eq_left Λ_limit.aleph_0_le (le_trans one_le_aleph_0 Λ_limit.aleph_0_le),
-end
+mk_option.trans $ add_eq_left Λ_limit.aleph_0_le $ one_le_aleph_0.trans Λ_limit.aleph_0_le
 
 /- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
 This allows well founded recursion on type indices. -/

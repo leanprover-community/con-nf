@@ -1,6 +1,5 @@
 import mathlib.equiv
 import params
-import algebra.hom.iterate
 
 /-!
 # Litters, near-litters
@@ -106,6 +105,28 @@ def litter.to_near_litter (i : litter) : near_litter :=
 @[simp] lemma mk_near_litter : #near_litter = #μ :=
 by { simp only [near_litter, mk_sigma, mk_near_litter', sum_const, mk_litter, lift_id],
   exact mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) le_rfl μ_strong_limit.ne_zero }
+
+/-- The *local cardinal* of a litter is the set of all near-litters to that litter. -/
+def local_cardinal (i : litter) : set near_litter := {s : near_litter | s.1 = i}
+
+lemma local_cardinal_nonempty (i : litter) : (local_cardinal i).nonempty :=
+⟨⟨i, litter_set _, is_near_litter_litter_set _⟩, rfl⟩
+
+lemma local_cardinal_disjoint : pairwise (disjoint on local_cardinal) :=
+λ i j h N hN, h $ hN.1.symm.trans hN.2
+
+lemma litter.to_near_litter_mem_local_cardinal (i : litter) : i.to_near_litter ∈ local_cardinal i :=
+by exact rfl
+
+@[simp] lemma mk_local_cardinal (i : litter) : #(local_cardinal i) = #μ :=
+begin
+  refine eq.trans (cardinal.eq.2 ⟨⟨_, λ x, ⟨⟨i, x⟩, rfl⟩, _, _⟩⟩) (mk_near_litter' i),
+  { rintro ⟨x, (rfl : x.1 = i)⟩,
+    exact x.snd },
+  { rintro ⟨⟨j, S⟩, (rfl : j = i)⟩,
+    refl },
+  { exact λ x, rfl }
+end
 
 /--
 A near-litter permutation is a permutation of the base type which sends near-litters to

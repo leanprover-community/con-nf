@@ -187,7 +187,7 @@ We first define a big structure, which can be viewed as a model of TTT without e
   \uses{def:atom}
   \leanok
   \lean{con_nf.pretangle}
-  Define the sets $\Pretangle_\alpha$ of \emph{$\alpha$-pretangles} inductively. $\Pretangle_{-1}$ is defined as $\tau_{-1}$. For $\alpha$ a proper type index, $\Pretangle_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal{P}(\Pretangle_\beta)$.
+  Define the sets $\Pretangle_\alpha$ of \emph{$\alpha$-pretangles} inductively. $\Pretangle_{-1}$ is defined as $\tau_{-1}$. For $\alpha$ a proper type index, $\Pretangle_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal P(\Pretangle_\beta)$.
 \end{definition}
 
 We also set up a sequence of groups that act on pretangles; subgroups of these will later act on the tangles.
@@ -354,16 +354,18 @@ Notice that the phase 1a data for $\alpha$ gives us the information already to d
 \leanok
 Let $\gamma$ be a type index less than $\alpha$.
 
-For any code $(\alpha,\gamma,G)$ with $G$ nonempty and $\delta$ a proper type index less than $\alpha$ and distinct from $\gamma$, we define
+For any code $(\alpha,\gamma,G)$ with $\delta$ a proper type index less than $\alpha$ and distinct from $\gamma$, we define
 $A_\delta(\alpha,\gamma,G)$ as
 $$(\alpha,\delta,\{ j_\delta(N) : N \simeq f_{\gamma,\delta}(b),\, b \in B \})$$
 if the maps $f_{\gamma,\delta}$ are considered as valued in litters, or
 $$(\alpha,\delta,\{ j_\delta(N) : N \in f_{\gamma,\delta}(b),\, b \in B \})$$
 if they are taken as valued directly in local cardinals.
 
+We say that a code $c$ \emph{leads to} a code $d$ if $d$ is the image of $c$ under some A-map. We denote this $c \rightsquigarrow d$.
+
 (Here $j_\delta(N)$ is the “typed near-litters” map for level $\delta$, assumed in the phase 1a data.)
 
-[For the formalisation, each individual $A_\delta$ is probably most easily represented as a function on $\mathcal{P}_{\neq \emptyset}(\tau_(\gamma))$, rather than on “codes of the form $(\alpha,\gamma,G)$…”.  Also it could — and perhaps should, for flexibility later — have parameters just $\gamma$, $\delta$, and their phase 1a data, rather than assume “$\alpha$, phase 1a everywhere below $\alpha$, and $\gamma,\delta < \alpha$”.]
+[For the formalisation, each individual $A_\delta$ is probably most easily represented as a function on $\mathcal P(\tau_(\gamma))$, rather than on “codes of the form $(\alpha,\gamma,G)$…”.  Also it could — and perhaps should, for flexibility later — have parameters just $\gamma$, $\delta$, and their phase 1a data, rather than assume “$\alpha$, phase 1a everywhere below $\alpha$, and $\gamma,\delta < \alpha$”.]
 \end{definition}
 
 Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart from the fact that $\alpha$ must be larger than $\gamma$ and $\delta$.
@@ -374,37 +376,29 @@ Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart
 \lean{con_nf.A_map_injective}
 \leanok
 \begin{enumerate}
-\item Each $A_\delta$ is injective (since each $f_{\gamma,\delta}$ is injective, and $f_{\gamma,\delta}$ have disjoint images for different $\gamma$).
-\item The ranges of $A_\delta$ are disjoint for different $\delta$ (since the ranges of $f_{\gamma,\delta}$ are).
+\item Each $A_\delta$ is injective on nonempty codes.
+\item The ranges of $A_\delta$ are disjoint for different $\delta$.
 \end{enumerate}
 
 NB: injectivity here really depends on having excluded the empty set from the domains of the $A_\delta$!
 \end{lemma}
-\begin{proof}\leanok\end{proof}
-
-\begin{definition}
-\label {def:ainverse}
-\uses{lem:a-map-properties}
-\lean{con_nf.A_inverse}
+\begin{proof}
 \leanok
-By the previous lemma, the inverse relation of the union of the $A_\gamma$'s is a partial function, which we call $A^{-1}$.
-
-It can be helpful to view codes as forming a \emph{forest} under the $A$-maps: each code $C = (\alpha,\beta,X)$ has at most one “parent” $A^{–1}(C)$, and many children $A_\gamma(C)$ for each $\gamma \neq \beta$.
-\end{definition}
+\item Each $f_{\gamma,\delta}$ is injective, and $f_{\gamma,\delta}$ have disjoint images for different $\gamma$.
+\item The ranges of $f_{\gamma,\delta}$ are disjoint for different $\delta$.
+\end{proof}
 
 \begin{lemma}
-\label{lem:ainverse-stops}
-\uses{def:ainverse}
-\lean{con_nf.A_map_relation_well_founded}
+\label{lem:a-map-wf}
+\uses{lem:a-map-properties}
+\lean{con_nf.A_map_rel_well_founded}
 \leanok
-No code has infinitely many iterated images under $A^{-1}$.
-
-Equivalently (this may be easier for the formalisation), the relation $\rightsquigarrow$ on codes --- defined by $ (\alpha,\gamma ,X) \rightsquigarrow A_\gamma,\delta (\alpha,\gamma ,X)$ for all codes $ (\alpha,\gamma ,X)$ and all $\delta \neq \gamma$ --- is well-founded.
+The relation $\rightsquigarrow$ on codes is well-founded.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  Consider the map $j$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the  position function assumed in the phase 1a data.
+  Consider the map $j$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the position function assumed in the phase 1a data.
 
   The definition of the functions $A_{\delta,\gamma}$ and the condition that $\iota f_{\gamma,\delta}()$ ensure that $j(\alpha,\gamma,X) < j(A_\delta(\alpha,\gamma,X))$, for all suitable $\gamma,\delta,X$.
 
@@ -412,16 +406,35 @@ Equivalently (this may be easier for the formalisation), the relation $\rightsqu
 \end{proof}
 
 \begin{definition}
-\label {def:code-height}
-\uses{lem:ainverse-stops}
-\lean{con_nf.height}
+\label {def:code-parity}
+\uses{def:a-map}
+\lean{con_nf.code.is_even}
 \leanok
-The \emph{height} of a code is its number of iterated images under $A^{-1}$.  Formally this can be given by induction over the well-founded relation $\rightsquigarrow$ defined in Lemma \ref{lem:ainverse-stops}: If $C$ has no predecessors under $\rightsquigarrow$, then $h(C) = 0$; if $C$ has a predecessor $C' \rightsquigarrow C$, this is unique by injectivity of $A^{-1}$, and we set $h(C) = h(C') + 1$.
+A code is \emph{even} if it only leads to odd codes. A code is \emph{odd} if it leads to some even code.
+
+Note: This exactly says that even codes are the losing positions of the game whose states are codes
+and possible moves are taking the preimage under some A-map.
 \end{definition}
+
+\begin{lemma}
+\label {lem:code-parity-properties}
+\uses{lem:a-map-wf, def:code-parity}
+\lean{con_nf.code.is_even_or_is_odd}
+\begin{enumerate}
+\item All codes are even or odd.
+\item An odd nonempty code only leads to even codes.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+\begin{enumerate}
+\item $\rightsquigarrow$ is well-founded.
+\item The A-maps are injective on nonempty codes.
+\end{enumerate}
+\end{proof}
 
 \begin{definition}
 \label {def:code-equiv}
-\uses{def:code-height}
+\uses{lem:code-parity-properties}
 \lean{con_nf.code.equiv}
 \leanok
 We define an equivalence relation $\equiv_\alpha$ on $\alpha$-codes.
@@ -437,23 +450,25 @@ $(\alpha,\delta,D) = A_\delta(\alpha,\gamma,G)$.
 If $(\alpha,\gamma,G)$ has odd height then $(\alpha,\delta,D) \equiv_\alpha (\alpha,\gamma,G)$ iff $(\alpha,\delta,D) \equiv_\alpha A^{-1}(\alpha,\gamma,G)$ (which reduces to the previous case).
 \end{definition}
 
-\begin{definition}
-\label{def:representative-code}
+\begin{lemma}
+\label{lem:code-equiv-properties}
 \uses{def:code-equiv}
 \leanok
-\lean{con_nf.code.is_representative}
-% not putting \leanok until we have proven the required properties
-Note that each equivalence class under $\equiv_\alpha$ with nonempty third component contains exactly one element with even height.  We call this as the \emph{representative} code of its equivalence class, and we refer to such codes as representative codes generally, with the additional stipulation that $(\alpha,-1,\emptyset)$ is a representative code as well.
-
-Note also that any equivalence class contains at most one code of the form $(\alpha,-1,X)$, and contains exactly one code of the form $(\alpha,\gamma,G)$ for each $\gamma < \alpha$.
-\end{definition}
+\lean{con_nf.code.equiv.unique}
+Under $\equiv_\alpha$, each code is equivalent to
+\begin{enumerate}
+\item exactly one even code
+\item exactly one code of extension $\gamma$ for all $\gamma \ne -1$, $\gamma < \alpha$
+\item at most one code of extension $-1$
+\end{enumerate}
+\end{lemma}
 
 \begin{definition}
   \label{def:semi-tangle}
-  \uses{def:representative-code}
+  \uses{lem:code-equiv-properties}
   \lean{con_nf.semitangle}
   \leanok
-  An \emph{$\alpha$-semi-tangle} is an element $x$ of $\prod_{\beta < \alpha}\mathcal{P}(\tau_\beta) \times (\alpha + \mathcal{P}(\tau_{-1}))$, whose components we denote $x_\beta$, such that:
+  An \emph{$\alpha$-semi-tangle} is an element $x$ of $\prod_{\beta < \alpha}\mathcal P(\tau_\beta) \times (\alpha + \mathcal P(\tau_{-1}))$, whose components we denote $x_\beta$, such that:
   \begin{itemize}
     \item if $x_{-1}$ is some $\beta < \alpha$, then $(\alpha,\beta,x_\beta)$ is a representative code, and for each other $\gamma$, $A_{\beta,\gamma}(\alpha,\beta,x_\beta) = (\alpha,\gamma,x_\gamma)$;
     \item if $x_{-1}$ is a set of atoms, then $(\alpha,-1,x_{-1})$ is a representative code, and for each other $\gamma$, $A_{-1,\gamma}(\alpha,-1,x_{-1}) = (\alpha,\gamma,x_\gamma)$;
@@ -566,11 +581,11 @@ It is straightforward to show that this condition is equivalent to the coherence
 \end{proof}
 
 \begin{lemma}
-\label{lem:rep-preserved}
-\uses{lem:coherence-unpacked,def:representative-code}
-\lean{con_nf.code.is_representative.smul}
+\label{lem:parity-action}
+\uses{lem:coherence-unpacked,lem:code-equiv-properties}
+\lean{con_nf.code.is_even.smul}
 \leanok
-The image under an allowable permutation of a representative code is a representative code.
+The action of allowable permutations on codes preserves parity.
 \end{lemma}
 
 \begin{proof}
@@ -581,7 +596,7 @@ This should be straightforward.  A target should be the equation $\pi(A_\gamma(X
 
 \begin{definition}
 \label{def:semi-tangle-action}
-\uses{lem:rep-preserved,def:semi-tangle}
+\uses{def:semi-tangle,lem:parity-action}
 \lean{con_nf.mul_action_nonempty_semitangle}
 \leanok
   Allowable permutations act on semi-tangles.
@@ -619,7 +634,7 @@ Any code $(\alpha,-1,N)$, where $N$ is a near-litter, gives an element of $\tau_
 
 \begin{proof}
 \uses{lem:supportedness-equiv}
-This code is obviously representative [though this isn’t really necessary, thanks to Lemma~\ref{lem:supportedness-equiv}] and it is supported by a singleton condition, a suitable decorated version of $N$.
+This code is obviously even [though this isn’t really necessary, thanks to Lemma~\ref{lem:supportedness-equiv}] and it is supported by a singleton condition, a suitable decorated version of $N$.
 \end{proof}
 
 \begin{lemma}

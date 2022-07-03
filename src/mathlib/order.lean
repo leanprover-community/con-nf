@@ -1,12 +1,13 @@
 import algebra.parity
-import data.set.lattice
 import order.symm_diff
 
 /-!
 # Order theoretic results
 -/
 
-variables {α β : Type*}
+open function set
+
+variables {ι α β : Type*}
 
 namespace set
 variables (f : α → β) (s t : set α)
@@ -20,16 +21,6 @@ variables {s}
 @[simp] lemma compl_eq_empty : sᶜ = ∅ ↔ s = univ := compl_eq_bot
 @[simp] lemma compl_eq_univ : sᶜ = univ ↔ s = ∅ := compl_eq_top
 
-lemma exists_inter_of_Union_eq_Union {s t : set α} {f : α → set β}
-  (h : (⋃ b ∈ s, f b) = ⋃ c ∈ t, f c) :
-  ∀ b ∈ s, (f b).nonempty → ∃ c ∈ t, (f b ∩ f c).nonempty :=
-begin
-  rintros b hb ⟨x, hx⟩,
-  have : x ∈ ⋃ c ∈ t, f c := (subset_Union₂ b hb).trans h.subset hx,
-  rw mem_Union₂ at this,
-  exact Exists₂.imp (λ c _ hc, ⟨x, hx, hc⟩) this,
-end
-
 end set
 
 section canonically_ordered_comm_semiring
@@ -40,3 +31,30 @@ by { rintro ⟨a, rfl⟩,
   exact add_pos_of_nonneg_of_pos (zero_le _) ((zero_le _).lt_of_ne zero_ne_one) }
 
 end canonically_ordered_comm_semiring
+
+section pairwise
+variables {a b : α} {r : α → α → Prop}
+
+protected lemma pairwise.eq (h : pairwise r) : ¬ r a b → a = b := not_imp_comm.1 $ h _ _
+
+end pairwise
+
+section
+variables {f : ι → set α} {s t : set ι}
+
+lemma pairwise.subset_of_bUnion_subset_bUnion (h₀ : pairwise (disjoint on f))
+  (h₁ : ∀ i ∈ s, (f i).nonempty) (h : (⋃ i ∈ s, f i) ⊆ ⋃ i ∈ t, f i) :
+  s ⊆ t :=
+begin
+  rintro i hi,
+  obtain ⟨a, hai⟩ := h₁ i hi,
+  obtain ⟨j, hj, haj⟩ := mem_Union₂.1 (h $ mem_Union₂_of_mem hi hai),
+  rwa h₀.eq (not_disjoint_iff.2 ⟨a, hai, haj⟩),
+end
+
+lemma pairwise.bUnion_injective (h₀ : pairwise (disjoint on f)) (h₁ : ∀ i, (f i).nonempty) :
+  injective (λ s : set ι, ⋃ i ∈ s, f i) :=
+λ s t h, (h₀.subset_of_bUnion_subset_bUnion (λ _ _, h₁ _) $ h.subset).antisymm $
+  h₀.subset_of_bUnion_subset_bUnion (λ _ _, h₁ _) $ h.superset
+
+end

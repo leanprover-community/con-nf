@@ -1,5 +1,4 @@
 import extended_index
-import group_theory.group_action.sigma
 import group_theory.group_action.sum
 import litter
 import mathlib.group
@@ -61,7 +60,7 @@ def to_near_litter_perm : Π {α}, struct_perm α → near_litter_perm
 
 @[simp] lemma to_near_litter_perm_mul :
   Π {α} (f g : struct_perm α),
-    (f  * g).to_near_litter_perm = f.to_near_litter_perm * g.to_near_litter_perm
+    (f * g).to_near_litter_perm = f.to_near_litter_perm * g.to_near_litter_perm
 | ⊥ := sorry
 | (α : Λ) := sorry
 
