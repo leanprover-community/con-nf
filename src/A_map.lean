@@ -194,6 +194,8 @@ lemma A_map_rel'_well_founded (hβ : β ≤ α) :
   well_founded (A_map_rel' : nonempty_code α β hβ → nonempty_code α β hβ → Prop) :=
 A_map_subrelation.wf code_wf
 
+instance : has_well_founded (nonempty_code α β hβ) := ⟨_, A_map_rel'_well_founded hβ⟩
+
 /-- There is at most one inverse under an A-map. This corresponds to the fact that there is only one
 code which is related (on the left) to any given code under the A-map relation. -/
 lemma A_map_rel'_subsingleton (c : nonempty_code α β hβ) :

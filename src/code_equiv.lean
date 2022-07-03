@@ -64,7 +64,54 @@ lemma is_odd_iff : c.is_odd ↔ ∃ d, d ↝ c ∧ d.is_even := (even_odd_iff _ 
 
 lemma is_even_of_forall_not (h : ∀ d, ¬ d ↝ c) : is_even c := is_even_iff.2 $ λ d hd, (h _ hd).elim
 
-@[simp] lemma not_is_odd : ¬ c.is_odd ↔ c.is_even := sorry -- use `A_map_rel'_well_founded`
+@[simp] lemma is_even_of_eq_bot (c : code α β hβ) (hc : c.extension = ⊥) : c.is_even :=
+is_even_of_forall_not $ by { rintro d ⟨γ, hγ, -⟩, exact coe_ne_bot hc }
+
+lemma is_even_bot (s : set atom) : is_even (⟨⊥, bot_lt_coe _, s⟩ : code α β hβ) :=
+is_even_of_eq_bot _ rfl
+
+lemma not_is_odd_bot (s : set atom) : ¬ is_odd (⟨⊥, bot_lt_coe _, s⟩ : code α β hβ) :=
+sorry
+
+@[simp] lemma is_even_empty_iff : is_even (⟨γ, hγ, ∅⟩ : code α β hβ) ↔ γ = ⊥ :=
+begin
+  refine ⟨λ h, _, is_even_of_eq_bot ⟨γ, hγ, ∅⟩⟩,
+  cases γ,
+  { refl },
+  cases (not_is_odd_bot _) (is_even_iff.1 h ⟨⊥, _, ∅⟩ _),
+  convert A_map_rel.intro _ (coe_lt_coe.1 hγ) _,
+  exacts [(A_map_empty _).symm, bot_ne_coe],
+end
+
+@[simp] lemma is_odd_empty_iff : is_odd (⟨γ, hγ, ∅⟩ : code α β hβ) ↔ γ ≠ ⊥ :=
+sorry
+
+@[simp] lemma A_map_rel_iff_A_map_rel' {c d : nonempty_code α β hβ} : c.1 ↝ d.1 ↔ A_map_rel' c d :=
+sorry
+
+private lemma not_is_odd_nonempty : ∀ c : nonempty_code α β hβ, ¬ c.1.is_odd ↔ c.1.is_even
+| c := begin
+  rw [is_odd_iff, is_even_iff],
+  push_neg,
+  apply forall_congr (λ d, _),
+  apply imp_congr_right (λ h, _),
+  rw [iff.comm, ←not_iff_not, not_not],
+  cases d with δ hδ els,
+  rcases eq_empty_or_nonempty els with rfl | hd,
+  { rw [is_odd_empty_iff, is_even_empty_iff, not_not] },
+  { let : A_map_rel' ⟨⟨δ, hδ, els⟩, hd⟩ c := A_map_rel_iff_A_map_rel'.1 h,
+    exact @not_is_odd_nonempty ⟨⟨δ, hδ, els⟩, hd⟩ }
+end
+using_well_founded { dec_tac := `[assumption] }
+
+@[simp] lemma not_is_odd : ¬ c.is_odd ↔ c.is_even :=
+begin
+  cases c with γ hγ els,
+  rcases eq_empty_or_nonempty els with rfl | hc,
+  { rw [is_odd_empty_iff, is_even_empty_iff, not_not] },
+  { exact not_is_odd_nonempty ⟨⟨γ, hγ, els⟩, hc⟩ }
+end
+
 @[simp] lemma not_is_even : ¬ c.is_even ↔ c.is_odd := not_is_odd.symm.not_left
 
 alias not_is_odd ↔ _ is_even.not_is_odd
@@ -72,22 +119,6 @@ alias not_is_even ↔ _ is_odd.not_is_even
 
 lemma is_even_or_is_odd (c : code α β hβ) : c.is_even ∨ c.is_odd :=
 by { rw ←not_is_even, exact em _ }
-
-@[simp] lemma is_even_of_eq_bot (c : code α β hβ) (hc : c.extension = ⊥) : c.is_even :=
-is_even_of_forall_not $ by { rintro d ⟨γ, hγ, -⟩, exact coe_ne_bot hc }
-
-lemma is_even_bot (s : set atom) : is_even (⟨⊥, bot_lt_coe _, s⟩ : code α β hβ) :=
-is_even_of_eq_bot _ rfl
-
-@[simp] lemma is_even_empty_iff : is_even (⟨γ, hγ, ∅⟩ : code α β hβ) ↔ γ = ⊥ :=
-begin
-  refine ⟨λ h, _, is_even_of_eq_bot ⟨γ, hγ, ∅⟩⟩,
-  cases γ,
-  { refl },
-  cases (is_even_bot _).not_is_odd (is_even_iff.1 h ⟨⊥, _, ∅⟩ _),
-  convert A_map_rel.intro _ (coe_lt_coe.1 hγ) _,
-  exacts [(A_map_empty _).symm, bot_ne_coe],
-end
 
 protected lemma _root_.con_nf.A_map_rel.is_odd (hc : c.is_even) (h : c ↝ d) : d.is_odd :=
 is_odd_iff.2 ⟨_, h, hc⟩
