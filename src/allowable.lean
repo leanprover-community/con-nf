@@ -103,7 +103,7 @@ def allowable_perm (hβ : β ≤ α) :=
 {π : semiallowable_perm α hβ // ∀ X Y : code α β hβ, π • X ≡ π • Y ↔ X ≡ Y}
 
 namespace allowable_perm
-variables {α} {f : allowable_perm α hβ} {c : code α β hβ}
+variables {α} {f : allowable_perm α hβ} {c d : code α β hβ}
 
 instance : has_coe (allowable_perm α hβ) (semiallowable_perm α hβ) := coe_subtype
 
@@ -166,6 +166,8 @@ mul_action.comp_hom _ coe_hom
 instance mul_action_nonempty_code (hβ : β ≤ α) :
   mul_action (allowable_perm α hβ) (nonempty_code α β hβ) :=
 mul_action.comp_hom _ coe_hom
+
+lemma _root_.con_nf.code.equiv.smul : c ≡ d → f • c ≡ f • d := (f.2 _ _).2
 
 @[simp] lemma is_even_smul : (f • c).is_even ↔ c.is_even := sorry
 

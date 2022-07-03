@@ -154,7 +154,7 @@ begin
 end
 
 /-- One useful form of extensionality in tangled type theory. Two nonempty semitangles are equal if
-their representative codes are equivalent (and hence equal, by uniqueness). -/
+their even codes are equivalent (and hence equal, by uniqueness). -/
 lemma ext_code (x y : nonempty_semitangle α) :
   ((repr_code α x : code α α le_rfl) ≡ repr_code α y) → x = y :=
 begin
@@ -304,11 +304,12 @@ end
 begin
   obtain ⟨⟨γ, hγ, G⟩, hG⟩ := c, dsimp at hβ, subst hβ,
   unfold semitangle_members_of_nonempty_code,
-  rw dif_neg hβγ, refl
+  rw dif_neg hβγ,
+  refl,
 end
 
-/-- We can construct nonempty semitangles from nonempty representative codes with extensions at
-proper type indices. -/
+/-- We can construct nonempty semitangles from nonempty even codes with extensions at proper type
+indices. -/
 def intro_nonempty_semitangle_proper (c : nonempty_code α α le_rfl) (heven : c.1.is_even)
   (hβ : c.val.extension = β) : nonempty_semitangle α :=
 ⟨semitangle_members_of_nonempty_code α c hβ,
@@ -376,18 +377,26 @@ end allowable_perm
 /-- A tangle at the new level `α` is a symmetric semitangle. This is `τ_α` in the blueprint.
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
 def new_tangle :=
-{s : semitangle α // symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) s}
+{s : semitangle α // symmetric (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) s}
+
+variables {α} {c d : code α α le_rfl} {S : set (support_condition α)}
 
 /-- If a set of support conditions supports a code, it supports all equivalent codes. -/
-lemma supportedness_equiv {c d : code α α le_rfl} (hcd : c ≡ d) (S : set (support_condition α))
-  (hS : supports (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) S c) :
-  supports (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) S d := sorry
+protected lemma code.equiv.supports (hcd : c ≡ d)
+  (hS : supports (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) S c) :
+  supports (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) S d :=
+λ f h, (hcd.symm.smul.trans $ (code.equiv.of_eq $ hS f h).trans hcd).unique rfl
 
-/-- By the previous lemma, if two codes are equivalent,
-one is symmetric if and only if the other is. -/
-lemma symmetric_equiv {c d : code α α le_rfl} (hcd : c ≡ d) :
-  symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) c ↔
-  symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) d := sorry
+lemma code.equiv.supports_iff (hcd : c ≡ d) :
+  supports (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) S c ↔
+    supports (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) S d :=
+⟨hcd.supports, hcd.symm.supports⟩
+
+/-- If two codes are equivalent, one is symmetric if and only if the other is. -/
+lemma code.equiv.symmetric_iff (hcd : c ≡ d) :
+  symmetric (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) c ↔
+    symmetric (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) d :=
+⟨λ ⟨⟨s, h⟩⟩, ⟨⟨s, hcd.supports h⟩⟩, λ ⟨⟨s, h⟩⟩, ⟨⟨s, hcd.symm.supports h⟩⟩⟩
 
 /-- For any near-litter `N`, the code `(α, -1, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
@@ -396,7 +405,7 @@ def typed_near_litter (N : near_litter) : new_tangle α :=
 
 /-- For any symmetric tangle `x`, the code `(α, β, {x})` is a tangle at level `α`. -/
 def symmetric_singleton (hβ : β < α) (x : tangle α β (coe_lt_coe.mpr hβ))
-  (symm : symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) x) : new_tangle α :=
+  (symm : symmetric (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) x) : new_tangle α :=
 ⟨some $ intro_nonempty_semitangle_proper α ⟨⟨β, coe_lt_coe.mpr hβ, {x}⟩, set.singleton_nonempty _⟩
   (code.is_even_singleton _) rfl,
   sorry⟩
@@ -405,7 +414,7 @@ def symmetric_singleton (hβ : β < α) (x : tangle α β (coe_lt_coe.mpr hβ))
 -/
 def symmetric_set (hβ : β < α) (B : set $ tangle α β (coe_lt_coe.mpr hβ)) (hne : B.nonempty)
   (hsmall : small B)
-  (symm : ∀ b ∈ B, symmetric (λ (π : allowable_perm α le_rfl), π.val.to_struct_perm) b) :
+  (symm : ∀ b ∈ B, symmetric (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) b) :
   new_tangle α :=
 ⟨some $ intro_nonempty_semitangle_proper α ⟨⟨β, coe_lt_coe.mpr hβ, B⟩, hne⟩
   sorry rfl,
