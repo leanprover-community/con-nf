@@ -372,7 +372,7 @@ Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart
 
 \begin{lemma}
 \label {lem:a-map-properties}
-\uses{def:a-map,lem:f-map-properties}
+\uses{def:a-map}
 \lean{con_nf.A_map_injective}
 \leanok
 \begin{enumerate}
@@ -383,6 +383,7 @@ Note again that the computation of $A_\delta$ does not depend on $\alpha$, apart
 NB: injectivity here really depends on having excluded the empty set from the domains of the $A_\delta$!
 \end{lemma}
 \begin{proof}
+\uses{lem:f-map-properties}
 \leanok
 \item Each $f_{\gamma,\delta}$ is injective, and $f_{\gamma,\delta}$ have disjoint images for different $\gamma$.
 \item The ranges of $f_{\gamma,\delta}$ are disjoint for different $\delta$.
@@ -390,14 +391,15 @@ NB: injectivity here really depends on having excluded the empty set from the do
 
 \begin{lemma}
 \label{lem:a-map-wf}
-\uses{lem:a-map-properties}
+\uses{def:a-map}
 \lean{con_nf.A_map_rel_well_founded}
 \leanok
 The relation $\rightsquigarrow$ on codes is well-founded.
 \end{lemma}
 
 \begin{proof}
-  \leanok
+\uses{lem:a-map-properties}
+\leanok
   Consider the map $j$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the position function assumed in the phase 1a data.
 
   The definition of the functions $A_{\delta,\gamma}$ and the condition that $\iota f_{\gamma,\delta}()$ ensure that $j(\alpha,\gamma,X) < j(A_\delta(\alpha,\gamma,X))$, for all suitable $\gamma,\delta,X$.
@@ -418,17 +420,19 @@ and possible moves are taking the preimage under some A-map.
 
 \begin{lemma}
 \label {lem:code-parity-properties}
-\uses{lem:a-map-wf, def:code-parity}
+\uses{def:code-parity}
 \lean{con_nf.code.is_even_or_is_odd}
+\leanok
 \begin{enumerate}
 \item All codes are even or odd.
 \item An odd nonempty code only leads to even codes.
 \end{enumerate}
 \end{lemma}
 \begin{proof}
+\uses{lem:a-map-wf}
 \begin{enumerate}
 \item $\rightsquigarrow$ is well-founded.
-\item The A-maps are injective on nonempty codes.
+\item An odd nonempty code leads to an even code and the A-maps are injective on nonempty codes and have disjoint ranges.
 \end{enumerate}
 \end{proof}
 
@@ -437,17 +441,14 @@ and possible moves are taking the preimage under some A-map.
 \uses{lem:code-parity-properties}
 \lean{con_nf.code.equiv}
 \leanok
-We define an equivalence relation $\equiv_\alpha$ on $\alpha$-codes.
+We define an equivalence relation $\equiv_\alpha$ on $\alpha$-codes inductively:
+\begin{enumerate}
+\item For every code $c$, $c \equiv_\alpha c$.
+\item If $(\alpha,\gamma,G)$ is even and $\gamma \neq \delta$, then $(\alpha,\gamma,G) \equiv_\alpha A_\delta (\alpha,\gamma,G)$ and $A_\delta (\alpha,\gamma,G) \equiv_\alpha (\alpha,\gamma,G)$.
+\item If $(\alpha,\gamma,G)$ is even and $\gamma \neq \delta, \varepsilon$, then $A_\delta (\alpha,\gamma,G) \equiv_\alpha A_\varepsilon (\alpha,\gamma,G)$.
+\end{enumerate}
 
-We have $(\alpha,\gamma,\emptyset) \equiv_\alpha (\alpha,\delta,D)$ iff $D=\emptyset$.
-
-Assume for the rest of the definition that $(\alpha,\gamma,G)$ is a code.
-
-If $(\alpha,\gamma,G)$ has even height (including 0 as an important case)
-then $(\alpha,\delta,D) \equiv_\alpha (\alpha,\gamma,G)$ (for $\delta$ a type index distinct from $\gamma$) iff
-$(\alpha,\delta,D) = A_\delta(\alpha,\gamma,G)$.
-
-If $(\alpha,\gamma,G)$ has odd height then $(\alpha,\delta,D) \equiv_\alpha (\alpha,\gamma,G)$ iff $(\alpha,\delta,D) \equiv_\alpha A^{-1}(\alpha,\gamma,G)$ (which reduces to the previous case).
+This is reflexive and symmetric by definition, and transitive by using the properties of code parity.
 \end{definition}
 
 \begin{lemma}
@@ -462,6 +463,9 @@ Under $\equiv_\alpha$, each code is equivalent to
 \item at most one code of extension $-1$
 \end{enumerate}
 \end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
 
 \begin{definition}
   \label{def:semi-tangle}
