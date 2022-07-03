@@ -71,7 +71,14 @@ lemma is_even_bot (s : set atom) : is_even (⟨⊥, bot_lt_coe _, s⟩ : code α
 is_even_of_eq_bot _ rfl
 
 lemma not_is_odd_bot (s : set atom) : ¬ is_odd (⟨⊥, bot_lt_coe _, s⟩ : code α β hβ) :=
-sorry
+begin
+  by_contra,
+  obtain ⟨d, hd, hde⟩ := is_odd_iff.1 h,
+  rw A_map_rel_iff at hd,
+  obtain ⟨δ, hδ, h1, h2⟩ := hd,
+  rw code.ext_iff at h2,
+  exact coe_ne_bot h2.1.symm,
+end
 
 @[simp] lemma is_even_empty_iff : is_even (⟨γ, hγ, ∅⟩ : code α β hβ) ↔ γ = ⊥ :=
 begin
@@ -84,10 +91,27 @@ begin
 end
 
 @[simp] lemma is_odd_empty_iff : is_odd (⟨γ, hγ, ∅⟩ : code α β hβ) ↔ γ ≠ ⊥ :=
-sorry
+begin
+  split; intro h,
+  { by_contra h', subst h', exact not_is_odd_bot ∅ h, },
+  { rw is_odd_iff,
+    refine ⟨⟨⊥, bot_lt_coe β, ∅⟩, _, by simp⟩,
+    rw A_map_rel_iff,
+    induction γ,
+    { cases h rfl, },
+    refine ⟨γ, coe_lt_coe.1 hγ, by simp, _⟩,
+    unfold A_map_code,
+    simp_rw some_eq_coe,
+    simp, },
+end
 
 @[simp] lemma A_map_rel_iff_A_map_rel' {c d : nonempty_code α β hβ} : c.1 ↝ d.1 ↔ A_map_rel' c d :=
-sorry
+begin
+  rw [A_map_rel_iff, A_map_rel'_iff],
+  split; intro h; obtain ⟨δ, hδ, xne, h⟩ := h; refine ⟨δ, hδ, by assumption, _⟩,
+  { rwa subtype.ext_iff_val, },
+  { rw h, refl, },
+end
 
 private lemma not_is_odd_nonempty : ∀ c : nonempty_code α β hβ, ¬ c.1.is_odd ↔ c.1.is_even
 | c := begin
