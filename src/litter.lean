@@ -1,3 +1,4 @@
+import mathlib.cardinal
 import mathlib.equiv
 import params
 
@@ -25,7 +26,7 @@ variables [params.{u}] {α β : Type u}
 
 open params
 
-variables {i j : litter}
+variables {i j : litter} {s t : set atom}
 
 /-- The set corresponding to the `i`-th litter.
 
@@ -58,8 +59,17 @@ lemma is_near_litter_litter_set (i : litter) : is_near_litter i (litter_set i) :
 
 /-- If two sets are `i`-near-litters, they are near each other.
 This is because they are both near litter `i`, and nearness is transitive. -/
-lemma is_near_litter.near {s t : set atom} (hs : is_near_litter i s)
-  (ht : is_near_litter i t) : is_near s t := hs.symm.trans ht
+lemma is_near_litter.near (hs : is_near_litter i s) (ht : is_near_litter i t) : is_near s t :=
+hs.symm.trans ht
+
+lemma is_near_litter.mk_eq_κ (hs : is_near_litter i s) : #s = #κ :=
+((le_mk_diff_add_mk _ _).trans $ add_le_of_le κ_regular.aleph_0_le
+  (hs.mono $ subset_union_right _ _).lt.le (mk_litter_set _).le).eq_of_not_lt $ λ h,
+    ((mk_litter_set _).symm.trans_le $ le_mk_diff_add_mk _ _).not_lt $
+      add_lt_of_lt κ_regular.aleph_0_le (hs.mono $ subset_union_left _ _) h
+
+protected lemma is_near_litter.nonempty (hs : is_near_litter i s) : s.nonempty :=
+by { rw [←nonempty_coe_sort, ←mk_ne_zero_iff, hs.mk_eq_κ], exact κ_regular.pos.ne' }
 
 /-- A litter is only a near-litter to itself. -/
 @[simp] lemma is_near_litter_litter_set_iff : is_near_litter i (litter_set j) ↔ i = j :=

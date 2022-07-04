@@ -179,6 +179,8 @@ variables {f : α → β} {s t : set α}
 /-- A set is small if its cardinality is strictly less than `κ`. -/
 def small (s : set α) := #s < #κ
 
+lemma small.lt : small s → #s < #κ := id
+
 /-- The empty set is small. -/
 @[simp] lemma small_empty : small (∅ : set α) := by { rw [small, mk_emptyc], exact κ_regular.pos }
 
