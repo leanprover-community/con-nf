@@ -74,10 +74,8 @@ lemma not_is_odd_bot (s : set atom) : ¬ is_odd (⟨⊥, bot_lt_coe _, s⟩ : co
 begin
   by_contra,
   obtain ⟨d, hd, hde⟩ := is_odd_iff.1 h,
-  rw A_map_rel_iff at hd,
-  obtain ⟨δ, hδ, h1, h2⟩ := hd,
-  rw code.ext_iff at h2,
-  exact coe_ne_bot h2.1.symm,
+  obtain ⟨δ, hδ, h1, h2⟩ := (A_map_rel_iff _ _).1 hd,
+  exact coe_ne_bot ((code.ext_iff _ _).1 h2).1.symm,
 end
 
 @[simp] lemma is_even_empty_iff : is_even (⟨γ, hγ, ∅⟩ : code α β hβ) ↔ γ = ⊥ :=
@@ -93,22 +91,20 @@ end
 @[simp] lemma is_odd_empty_iff : is_odd (⟨γ, hγ, ∅⟩ : code α β hβ) ↔ γ ≠ ⊥ :=
 begin
   split; intro h,
-  { by_contra h', subst h', exact not_is_odd_bot ∅ h, },
-  { rw is_odd_iff,
-    refine ⟨⟨⊥, bot_lt_coe β, ∅⟩, _, by simp⟩,
-    rw A_map_rel_iff,
-    induction γ,
-    { cases h rfl, },
-    refine ⟨γ, coe_lt_coe.1 hγ, by simp, _⟩,
-    unfold A_map_code,
-    simp_rw some_eq_coe,
-    simp, },
+  { by_contra h',
+    subst h',
+    exact not_is_odd_bot ∅ h, },
+  { refine is_odd_iff.2 ⟨⟨⊥, bot_lt_coe β, ∅⟩, _, by simp⟩,
+    obtain ⟨γ, hne⟩ := with_bot.ne_bot_iff_exists.1 h,
+    subst hne,
+    refine (A_map_rel_iff _ _).2 ⟨γ, coe_lt_coe.1 hγ, h.symm,
+      by simp only [A_map_code_mk, A_map_empty, eq_self_iff_true, heq_iff_eq, and_self]⟩, },
 end
 
 @[simp] lemma A_map_rel_iff_A_map_rel' {c d : nonempty_code α β hβ} : c.1 ↝ d.1 ↔ A_map_rel' c d :=
 begin
   rw [A_map_rel_iff, A_map_rel'_iff],
-  split; intro h; obtain ⟨δ, hδ, xne, h⟩ := h; refine ⟨δ, hδ, by assumption, _⟩,
+  split; intro h; obtain ⟨δ, hδ, xne, h⟩ := h; refine ⟨δ, hδ, xne, _⟩,
   { rwa subtype.ext_iff_val, },
   { rw h, refl, },
 end
