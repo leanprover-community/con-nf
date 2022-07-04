@@ -360,42 +360,40 @@ end
   simp [semitangle_members_of_nonempty_code_base],
 end)⟩
 
-variable [phase_1b.{u u} α]
+variable [phase_1b α]
 
 namespace allowable_perm
 
 /-- Allowable permutations act on nonempty semitangles. -/
 instance mul_action_nonempty_semitangle :
-  mul_action (allowable_perm α le_rfl) (nonempty_semitangle α) := sorry
+  mul_action (allowable_perm α) (nonempty_semitangle α) := sorry
 
 /-- Allowable permutations act on semitangles. -/
-instance mul_action_semitangle : mul_action (allowable_perm α le_rfl) (semitangle α) :=
-option.mul_action
+instance mul_action_semitangle : mul_action (allowable_perm α) (semitangle α) := option.mul_action
 
 end allowable_perm
 
 /-- A tangle at the new level `α` is a symmetric semitangle. This is `τ_α` in the blueprint.
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
-def new_tangle :=
-{s : semitangle α // symmetric (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) s}
+def new_tangle := {s : semitangle α // symmetric (λ π : allowable_perm α, π.1.to_struct_perm) s}
 
 variables {α} {c d : code α α le_rfl} {S : set (support_condition α)}
 
 /-- If a set of support conditions supports a code, it supports all equivalent codes. -/
 protected lemma code.equiv.supports (hcd : c ≡ d)
-  (hS : supports (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) S c) :
-  supports (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) S d :=
+  (hS : supports (λ π : allowable_perm α, π.1.to_struct_perm) S c) :
+  supports (λ π : allowable_perm α, π.1.to_struct_perm) S d :=
 λ f h, (hcd.symm.smul.trans $ (code.equiv.of_eq $ hS f h).trans hcd).unique rfl
 
 lemma code.equiv.supports_iff (hcd : c ≡ d) :
-  supports (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) S c ↔
-    supports (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) S d :=
+  supports (λ π : allowable_perm α, π.1.to_struct_perm) S c ↔
+    supports (λ π : allowable_perm α, π.1.to_struct_perm) S d :=
 ⟨hcd.supports, hcd.symm.supports⟩
 
 /-- If two codes are equivalent, one is symmetric if and only if the other is. -/
 lemma code.equiv.symmetric_iff (hcd : c ≡ d) :
-  symmetric (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) c ↔
-    symmetric (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) d :=
+  symmetric (λ π : allowable_perm α, π.1.to_struct_perm) c ↔
+    symmetric (λ π : allowable_perm α, π.1.to_struct_perm) d :=
 ⟨λ ⟨⟨s, h⟩⟩, ⟨⟨s, hcd.supports h⟩⟩, λ ⟨⟨s, h⟩⟩, ⟨⟨s, hcd.symm.supports h⟩⟩⟩
 
 /-- For any near-litter `N`, the code `(α, -1, N)` is a tangle at level `α`.
@@ -405,7 +403,7 @@ def typed_near_litter (N : near_litter) : new_tangle α :=
 
 /-- For any symmetric tangle `x`, the code `(α, β, {x})` is a tangle at level `α`. -/
 def symmetric_singleton (hβ : β < α) (x : tangle α β (coe_lt_coe.mpr hβ))
-  (symm : symmetric (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) x) : new_tangle α :=
+  (symm : symmetric (λ π : allowable_perm α, π.1.to_struct_perm) x) : new_tangle α :=
 ⟨some $ intro_nonempty_semitangle_proper α ⟨⟨β, coe_lt_coe.mpr hβ, {x}⟩, set.singleton_nonempty _⟩
   (code.is_even_singleton _) rfl,
   sorry⟩
@@ -414,7 +412,7 @@ def symmetric_singleton (hβ : β < α) (x : tangle α β (coe_lt_coe.mpr hβ))
 -/
 def symmetric_set (hβ : β < α) (B : set $ tangle α β (coe_lt_coe.mpr hβ)) (hne : B.nonempty)
   (hsmall : small B)
-  (symm : ∀ b ∈ B, symmetric (λ π : allowable_perm α le_rfl, π.1.to_struct_perm) b) :
+  (symm : ∀ b ∈ B, symmetric (λ π : allowable_perm α, π.1.to_struct_perm) b) :
   new_tangle α :=
 ⟨some $ intro_nonempty_semitangle_proper α ⟨⟨β, coe_lt_coe.mpr hβ, B⟩, hne⟩
   sorry rfl,
@@ -433,21 +431,21 @@ end new_tangle
 namespace allowable_perm
 
 lemma _root_.supports.smul {s : set (support_condition α)} {t : semitangle α}
-  (f : allowable_perm α le_rfl) (h : supports (allowable_perm.to_struct_perm $ le_refl α) s t) :
-  supports (allowable_perm.to_struct_perm $ le_refl α) (f • s) (f • t) :=
+  (f : allowable_perm α) (h : supports (to_struct_perm : allowable_perm α → struct_perm α) s t) :
+  supports (to_struct_perm : allowable_perm α → struct_perm α) (f • s) (f • t) :=
 λ g hg, begin
   have := ball_image_iff.1 hg,
   sorry
 end
 
 /-- Allowable permutations act on `α`-tangles. -/
-instance has_smul_new_tangle : has_smul (allowable_perm α le_rfl) (new_tangle α) :=
+instance has_smul_new_tangle : has_smul (allowable_perm α) (new_tangle α) :=
 ⟨λ π t, ⟨π • t, t.2.map $ λ s, ⟨π • s.1, s.2.smul _⟩⟩⟩
 
-@[simp, norm_cast] lemma coe_smul_new_tangle (f : allowable_perm α le_rfl) (t : new_tangle α) :
+@[simp, norm_cast] lemma coe_smul_new_tangle (f : allowable_perm α) (t : new_tangle α) :
   (↑(f • t) : semitangle α) = f • t := rfl
 
-instance mul_action_new_tangle : mul_action (allowable_perm α le_rfl) (new_tangle α) :=
+instance mul_action_new_tangle : mul_action (allowable_perm α) (new_tangle α) :=
 new_tangle.coe_injective.mul_action _ coe_smul_new_tangle
 
 end allowable_perm

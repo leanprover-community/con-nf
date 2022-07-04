@@ -218,8 +218,7 @@ under the inverse A-map. -/
 
 infix ` ↝ `:62 := A_map_rel
 
-lemma A_map_rel_subsingleton (hc : c.elts.nonempty) :
-  {d : code α β hβ | A_map_rel d c}.subsingleton :=
+lemma A_map_rel_subsingleton (hc : c.elts.nonempty) : {d : code α β hβ | d ↝ c}.subsingleton :=
 begin
   intros d hd e he,
   simp only [A_map_rel_iff, mem_set_of_eq] at hd he,
