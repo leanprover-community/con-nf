@@ -204,7 +204,7 @@ export phase_1b_coherence (to_tangle_perm)
 
 namespace allowable_perm
 
-variables {α} [phase_1b_coherence.{u} α]
+variables {α} [phase_1b_coherence.{u} α] {f : allowable_perm α} {c : code α α le_rfl}
 
 /-- The unpacked coherence condition for allowable permutations on proper type indices γ. -/
 lemma coherence (π : allowable_perm α) (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) (g) :
