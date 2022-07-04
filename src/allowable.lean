@@ -21,7 +21,7 @@ variables (α : Λ) [phase_1a.{u} α]
 class phase_1b :=
 (allowable : Π β < α, Type u)
 [allowable_group : Π β hβ, group (allowable β hβ)]
-(to_struct_perm : Π β hβ, allowable β hβ →* struct_perm α)
+(to_struct_perm : Π β hβ, allowable β hβ →* struct_perm β)
 [allowable_action : Π β hβ, mul_action (allowable β hβ) (tangle α β $ coe_lt_coe.2 hβ)]
 
 export phase_1b (allowable allowable_group to_struct_perm allowable_action)
@@ -200,6 +200,8 @@ instance has_smul_potential_support : has_smul (allowable_perm α) (potential_su
 instance mul_action_potential_support : mul_action (allowable_perm α) (potential_support α) :=
 set_like.coe_injective.mul_action _ coe_smul_potential_support
 
+end allowable_perm
+
 /-- Contains coherence conditions on to_tangle. -/
 class phase_1b_coherence (α : Λ) [phase_1a α] [phase_1b α] :=
 (to_tangle_perm (β : Λ) (hβ : β < α) (π : allowable_perm α) (N : near_litter) :
@@ -208,7 +210,9 @@ class phase_1b_coherence (α : Λ) [phase_1a α] [phase_1b α] :=
 
 export phase_1b_coherence (to_tangle_perm)
 
-variables [phase_1b_coherence.{u} α]
+namespace allowable_perm
+
+variables {α} [phase_1b_coherence.{u} α]
 
 /-- The unpacked coherence condition for allowable permutations on proper type indices γ. -/
 lemma coherence (π : allowable_perm α) (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) (g) :

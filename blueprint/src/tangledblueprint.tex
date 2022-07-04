@@ -683,6 +683,8 @@ There is lots to be proven, but that is the entire description.
 \begin{definition}
   \label{def:phase-1c-data}
   \uses{def:phase-1b-coherence}
+  \lean{con_nf.phase_1c}
+  \leanok
   \emph{Phase 1c data} at a proper type index $\alpha$ consists of:
   \begin{itemize}
   \item phase 1b data (including phase 1a data) at $\alpha$;
@@ -713,6 +715,8 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 \begin{definition}
   \label{def:full-phase-1-data}
   \uses{def:phase-1c-data}
+  \lean{con_nf.phase_1}
+  \leanok
   \emph{(Full) phase 1 data} at $\alpha$ consists of phase 1c data (including 1a and 1b components), together with:
   \begin{enumerate}
     \item a “typed singleton” injection $k : \tau_{-1} \to \tau$;

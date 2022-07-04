@@ -22,36 +22,6 @@ inductive preferred_extension (α : Λ) : Type u
 | proper_extension : Π (β < α), preferred_extension
 | base_extension : set atom → preferred_extension
 
-/-- A *pretangle* is an object that may become a *tangle*,
-an element of the model.
-The type of pretangles forms a model of TTT without extensionality. -/
-def pretangle : Λ → Type u
-| α := set atom × Π β < α, set (pretangle β)
-using_well_founded { dec_tac := `[assumption] }
-
-namespace pretangle
-
-/-- Obtains the members of a pretangle of type `α`, seen as a set of atoms. -/
-def atom_members {α : Λ} (a : pretangle α) : set atom :=
-by { unfold pretangle at a, exact a.fst }
-
-/-- Obtains the members of a pretangle of type `α`, seen as a set of elements of type `β < α`. -/
-def members {α : Λ} (a : pretangle α) : Π (β < α), set (pretangle β) :=
-by { unfold pretangle at a, exact a.snd }
-
-/-- The membership relation defined on pretangles for atoms. -/
-instance has_mem_atom {α : Λ} : has_mem atom (pretangle α) :=
-⟨λ b a, b ∈ a.atom_members⟩
-
--- Yaël: Note, this instance is useless as it won't fire because `β < α` is not a class
-/-- The membership relation defined on pretangles.
-This is exactly the membership relation on tangles, without the extensionality condition that
-allows this membership relation to be used in a model of TTT. -/
-instance has_mem {α β : Λ} (h : β < α) : has_mem (pretangle β) (pretangle α) :=
-⟨λ b a, b ∈ a.members β h⟩
-
-end pretangle
-
 -/
 
 variables (α : Λ) [phase_1a.{u} α] {β γ : Λ} {hβ : β < α}

@@ -1,8 +1,9 @@
 import extended_index
 import group_theory.group_action.sum
 import litter
-import mathlib.group
+import mathlib.group_action
 import mathlib.support
+import pretangle
 
 /-!
 # Structural permutations
@@ -14,7 +15,7 @@ derivatives and so on independently of the recursion.
 -/
 
 open cardinal equiv equiv.perm with_bot
-open_locale cardinal
+open_locale cardinal pointwise
 
 noncomputable theory
 
@@ -39,14 +40,56 @@ noncomputable! instance : Π α, inhabited (struct_perm α)
   exact @pi.inhabited _ _ (λ β, @pi.inhabited _ _ $ λ _ : β < ↑α, struct_perm.inhabited β) }
 using_well_founded { dec_tac := `[assumption] }
 
+@[simp] lemma struct_perm.bot_def : struct_perm ⊥ = near_litter_perm := by { unfold struct_perm }
+
+@[simp] lemma struct_perm.coe_def {α : Λ} :
+  struct_perm α = Π β : type_index, β < α → struct_perm β :=
+by { unfold struct_perm }
+
+def near_litter_perm.to_struct_perm (π : near_litter_perm) : struct_perm ⊥ :=
+cast struct_perm.bot_def.symm π
+
+def struct_perm.mk {α : Λ} (lower : Π β : type_index, β < α → struct_perm β) : struct_perm α :=
+cast struct_perm.coe_def.symm lower
+
+-- TODO(zeramorphic): write some api
+
 namespace struct_perm
 variables {α : type_index}
 
 noncomputable! instance group : Π α, group (struct_perm α)
-| ⊥ := by { unfold struct_perm, exact near_litter_perm.group }
-| (α : Λ) := by { unfold struct_perm,
-  exact @pi.group _ _ (λ β, @pi.group_Prop _ _ $ λ _ : β < ↑α, group β) }
+| ⊥ := cast (by rw struct_perm.bot_def) near_litter_perm.group
+| (α : Λ) := cast (by rw struct_perm.coe_def)
+  (@pi.group _ _ (λ β, @pi.group_Prop _ _ $ λ _ : β < ↑α, group β))
 using_well_founded { dec_tac := `[assumption] }
+
+lemma group_bot :
+  struct_perm.group ⊥ = cast (by rw struct_perm.bot_def) near_litter_perm.group :=
+by { unfold struct_perm.group }
+
+lemma group_coe (α : Λ) : struct_perm.group α = cast (by rw struct_perm.coe_def)
+  (@pi.group _ _ (λ β, @pi.group_Prop _ _ $ λ _ : β < ↑α, struct_perm.group β)) :=
+by { unfold struct_perm.group }
+
+lemma one_to_struct_perm_aux : cast struct_perm.bot_def (1 : struct_perm ⊥) = 1 :=
+begin
+  unfold has_one.one,
+  convert cast_eq _ _; try { simp },
+  rw group_bot, simp,
+end
+
+lemma one_to_struct_perm : (1 : near_litter_perm).to_struct_perm = (1 : struct_perm ⊥) :=
+by { unfold near_litter_perm.to_struct_perm, rw ← one_to_struct_perm_aux, simp }
+
+lemma mk_one_aux (α : Λ) : cast struct_perm.coe_def (1 : struct_perm α) = 1 :=
+begin
+  unfold has_one.one,
+  convert cast_eq _ _; try { simp },
+  rw group_coe, simp
+end
+
+@[simp] lemma mk_one (α : Λ) : mk 1 = (1 : struct_perm α) :=
+by { unfold mk, rw ← mk_one_aux, simp }
 
 /-- Obtains the atom permutation given by a structural permutation. -/
 def to_near_litter_perm : Π {α}, struct_perm α → near_litter_perm
@@ -75,6 +118,16 @@ def lower : Π {α} (π : struct_perm α) (β < α), struct_perm β
 | ⊥ π β β_lt_α := by { exfalso, simp at β_lt_α, exact β_lt_α }
 | (α : Λ) π β β_lt_α := by { unfold struct_perm at π, exact π β β_lt_α }
 
+@[simp] lemma one_lower : Π (α β : type_index) (hβ : β < α),
+  (1 : struct_perm α).lower β hβ = (1 : struct_perm β)
+| ⊥ β hβ := by { exfalso, simp only [not_lt_bot] at hβ, exact hβ }
+| (α : Λ) β hβ := by { unfold lower, rw ← mk_one, unfold mk, simpa }
+
+@[simp] lemma mul_lower : Π (α β : type_index) (hβ : β < α) (π₁ π₂ : struct_perm α),
+  (π₁ * π₂).lower β hβ = π₁.lower β hβ * π₂.lower β hβ
+| ⊥ β hβ π₁ π₂ := by { exfalso, simp only [not_lt_bot] at hβ, exact hβ }
+| (α : Λ) β hβ π₁ π₂ := sorry
+
 /-- The derivative of a structural permutation at any lower level. -/
 def derivative :
   Π {β} (A : quiver.path (α) β), struct_perm α → struct_perm β
@@ -88,6 +141,35 @@ mul_action.comp_hom _ to_near_litter_perm_hom
 /-- Structural permutations act on near-litters. -/
 instance mul_action_near_litter (α : Λ) : mul_action (struct_perm α) near_litter :=
 mul_action.comp_hom _ to_near_litter_perm_hom
+
+-- TODO: Why can't the equation compiler handle my sorried proofs (the `funext` call breaks things)?
+instance mul_action_pretangle : Π (α : Λ), mul_action (struct_perm α) (pretangle α)
+| α := {
+  smul := λ π t, pretangle.mk (π • t.atom_extension) (λ β hβ, begin
+    letI := mul_action_pretangle β,
+    exact π.lower β (coe_lt_coe.mpr hβ) • t.extension β hβ,
+  end),
+  one_smul := λ t, begin
+    unfold has_smul.smul,
+    convert pretangle.eta t,
+    { simp },
+    sorry { refine funext (λ β, funext (λ hβ, _)),
+      letI := mul_action_pretangle β, rw one_lower, dsimp only, unfold has_smul.smul,
+      convert set.image_id _,
+      ext t,
+      exact one_smul (struct_perm β) t }
+  end,
+  mul_smul := λ π₁ π₂ t, begin
+    unfold has_smul.smul, refine congr (congr rfl _) _,
+    { rw pretangle.atom_extension_mk, rw set.image_image, refine set.image_congr' (λ a, _),
+      rw [has_smul.comp.smul, has_smul.comp.smul, has_smul.comp.smul,
+        mul_hom_class.map_mul, mul_smul] },
+    sorry { refine funext (λ β, funext (λ hβ, _)),
+      letI := mul_action_pretangle β,
+      dsimp only, rw [mul_lower, mul_smul], simp }
+  end
+}
+using_well_founded { dec_tac := `[assumption] }
 
 end struct_perm
 
