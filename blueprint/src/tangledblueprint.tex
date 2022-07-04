@@ -430,6 +430,8 @@ and possible moves are taking the preimage under some A-map.
 \end{lemma}
 \begin{proof}
 \uses{lem:a-map-wf}
+\lean{con_nf.A_map_rel.is_odd}
+\leanok
 \begin{enumerate}
 \item $\rightsquigarrow$ is well-founded.
 \item An odd nonempty code leads to an even code and the A-maps are injective on nonempty codes and have disjoint ranges.
@@ -593,6 +595,8 @@ The action of allowable permutations on codes preserves parity.
 \end{lemma}
 
 \begin{proof}
+\lean{con_nf.code.is_even_smul}
+\leanok
 This should be straightforward.  A target should be the equation $\pi(A_\gamma(X)) = A_\gamma(\pi(X))$ for any allowable permutation $\pi$ and code $X$ for which $\pi_\gamma$ is defined.
 
 [Note: This will probably need the phase 1b data to include an assumption that the typed-near-litter embeddings commute with the group action.]

@@ -180,14 +180,6 @@ mul_action.comp_hom _ coe_hom
 
 lemma _root_.con_nf.code.equiv.smul : c ≡ d → f • c ≡ f • d := (f.2 _ _).2
 
-@[simp] lemma is_even_smul : (f • c).is_even ↔ c.is_even := sorry
-
-@[simp] lemma is_odd_smul : (f • c).is_odd ↔ c.is_odd :=
-by simp_rw [←code.not_is_even, is_even_smul]
-
-alias is_even_smul ↔ _ _root_.con_nf.code.is_even.smul
-alias is_odd_smul ↔ _ _root_.con_nf.code.is_odd.smul
-
 instance mul_action_support_condition : mul_action (allowable_perm α) (support_condition α) :=
 mul_action.comp_hom _ $ allowable_perm.to_struct_perm
 
@@ -259,6 +251,55 @@ lemma smul_A_map_code  (π : allowable_perm α) (hδ : δ < α) (c : code α α 
   π • A_map_code hδ c = A_map_code hδ (π • c) :=
 by simp only [code.ext_iff, smul_A_map _ hδ _ hc, extension_smul, extension_A_map_code,
   eq_self_iff_true, elts_smul, elts_A_map_code, heq_iff_eq, and_self]
+
+lemma smul_A_map_rel (π : allowable_perm α) (c d : code α α le_rfl) : π • c ↝ π • d ↔ c ↝ d :=
+begin
+  split; intro h; rw A_map_rel_iff at h ⊢; obtain ⟨δ, hδ, hcδ, h⟩ := h; refine ⟨δ, hδ, hcδ, _⟩,
+  { rw ← smul_A_map_code _ _ c hcδ at h,
+    exact mul_action.injective _ h, },
+  { rw [← smul_A_map_code _ _ c hcδ, h], },
+end
+
+lemma is_even_smul_nonempty : ∀ (c : nonempty_code α α le_rfl), (f • c.val).is_even ↔ c.val.is_even
+| ⟨c, hc⟩ := begin
+  rw [code.is_even_iff, code.is_even_iff],
+  have leadnonempty : ∀ (c d : code α α le_rfl) (h : c ↝ d), d.elts.nonempty → c.elts.nonempty := by
+  { intros c d hcd,
+    contrapose!,
+    intro hc,
+    obtain ⟨δ, hδ, hcδ, h⟩ := (A_map_rel_iff _ _).1 hcd,
+    rw not_nonempty_iff_eq_empty at hc,
+    rwa [h, not_nonempty_iff_eq_empty, elts_A_map_code, A_map_eq_empty], },
+  split; intros h d hd,
+  { have := leadnonempty d c hd hc,
+    rw ← smul_A_map_rel f at hd,
+    let rec : A_map_rel' ⟨d, this⟩ ⟨c, hc⟩ := code.A_map_rel_iff_A_map_rel'.1 ((smul_A_map_rel f _ _).1 hd),
+    exact code.not_is_even.1 (mt (is_even_smul_nonempty ⟨d, this⟩).2 $ code.not_is_even.2 $ h _ hd), },
+  set e := f⁻¹ • d with he_def,
+  have : d = f • e := by rw smul_inv_smul,
+  rw this at hd ⊢,
+  rw smul_A_map_rel f at hd,
+  have := leadnonempty e c hd hc,
+  let rec : A_map_rel' ⟨e, this⟩ ⟨c, hc⟩ := code.A_map_rel_iff_A_map_rel'.1 hd,
+  refine code.not_is_even.1 (mt (is_even_smul_nonempty ⟨e, this⟩).1 $ code.not_is_even.2 $ h _ hd),
+end
+using_well_founded { dec_tac := `[assumption] }
+
+@[simp] lemma is_even_smul : ∀ (c : code α α le_rfl), (f • c).is_even ↔ c.is_even :=
+begin
+  intro c,
+  cases eq_empty_or_nonempty c.elts,
+  { obtain ⟨γ, hγ, G⟩ := c, dsimp at h, subst h,
+    have : f • (⟨γ, hγ, ∅⟩ : code α α le_rfl) = ⟨γ, hγ, ∅⟩,
+    { induction γ using with_bot.rec_bot_coe; simp, },
+    rw [this, code.is_even_empty_iff], },
+  { exact is_even_smul_nonempty ⟨c, h⟩, },
+end
+@[simp] lemma is_odd_smul : (f • c).is_odd ↔ c.is_odd :=
+by simp_rw [←code.not_is_even, is_even_smul]
+
+alias is_even_smul ↔ _ _root_.con_nf.code.is_even.smul
+alias is_odd_smul ↔ _ _root_.con_nf.code.is_odd.smul
 
 end allowable_perm
 end con_nf
