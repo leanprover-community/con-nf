@@ -59,15 +59,15 @@ inductive preference (exts : extension α)
       (∀ γ hγ, β ≠ γ → A_map hγ (exts β hβ : set (tangle α ↑β $ coe_lt_coe.2 hβ)) = exts γ hγ)
       → preference
 
+/-- The `-1`-extension associated with a given semitangle extension. -/
+def preference.atoms {α : Λ} [phase_1a.{u} α] {members : extension α} :
+  preference α members → set atom
+| (preference.base atoms _ _ _) := atoms
+| (preference.proper _ _ _ _) := ∅
+
 end semitangle
 
 open semitangle
-
-/-- The `-1`-extension associated with a given semitangle extension. -/
-def semitangle_extension.atoms {α : Λ} [phase_1a.{u} α] {members : semitangle_members α} :
-  semitangle_extension α members → set atom
-| (semitangle_extension.proper _ _ _ _) := ∅
-| (semitangle_extension.base atoms _ _ _) := atoms
 
 /-- A *semitangle* may become an element of our model of tangled type theory.
 We keep track of its members, written as tangles of all lower levels `β < α`.
@@ -254,13 +254,13 @@ ext x y hβ $ subtype.ext $ set.ext h
 At type 0, all nonempty semitangles have a `-1`-extension.
 Therefore, the extensionality principle in this case applies to the `-1`-extensions. -/
 lemma ext_zero (x y : nonempty_semitangle α) (α_zero : ¬∃ β, β < α)
-  (h : x.extension.atoms = y.extension.atoms) : x = y :=
+  (h : x.pref.atoms = y.pref.atoms) : x = y :=
 begin
   obtain ⟨xs, hxs⟩ := x,
   obtain ⟨ys, hys⟩ := y,
-  obtain ⟨γ, hγ, _, _⟩ | ⟨atoms₁, hne₁, rep₁, hA₁⟩ := hxs,
+  obtain ⟨atoms₁, hne₁, rep₁, hA₁⟩ | ⟨γ, hγ, _, _⟩ := hxs, swap,
   { exfalso, exact α_zero ⟨γ, hγ⟩ },
-  obtain ⟨γ, hγ, _, _⟩ | ⟨atoms₂, hne₂, rep₂, hA₂⟩ := hys,
+  obtain ⟨atoms₂, hne₂, rep₂, hA₂⟩ | ⟨γ, hγ, _, _⟩ := hys, swap,
   { exfalso, exact α_zero ⟨γ, hγ⟩ },
   cases h,
   suffices : xs = ys, by subst this,

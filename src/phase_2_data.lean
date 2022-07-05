@@ -25,8 +25,8 @@ variable [phase_1c.{u} α]
 namespace nonempty_semitangle
 
 def to_pretangle (t : nonempty_semitangle α) : pretangle α :=
-pretangle.mk t.extension.atoms (λ β hβ, pretangle_inj β (coe_lt_coe.mpr hβ) ''
-  (t.members β hβ : set (tangle α β $ coe_lt_coe.mpr hβ)))
+pretangle.mk t.pref.atoms (λ β hβ, pretangle_inj β (coe_lt_coe.mpr hβ) ''
+  (t.exts β hβ : set (tangle α β $ coe_lt_coe.mpr hβ)))
 
 lemma to_pretangle_ne_empty (t : nonempty_semitangle α) :
   to_pretangle α t ≠ pretangle.mk ∅ (λ β hβ, ∅) :=
@@ -38,13 +38,13 @@ begin
     rw pretangle.extension_mk at this,
     have := congr_fun₂ this β hβ,
     rw [to_pretangle, pretangle.extension_mk, set.image_eq_empty] at this,
-    exact (t.members β hβ).property.ne_empty this },
+    exact (t.exts β hβ).property.ne_empty this },
   { intro h,
     have := congr_arg pretangle.atom_extension h,
     rw [to_pretangle, pretangle.atom_extension_mk, pretangle.atom_extension_mk] at this,
-    obtain ⟨ts, ⟨β, hβ, rep, hA⟩ | ⟨atoms, hne, rep, hA⟩⟩ := t,
-    { exfalso, exact hzero ⟨β, hβ⟩ },
-    exact hne.ne_empty this }
+    obtain ⟨ts, ⟨atoms, hne, rep, hA⟩ | ⟨β, hβ, rep, hA⟩⟩ := t,
+    { exact hne.ne_empty this },
+    { exfalso, exact hzero ⟨β, hβ⟩ } }
 end
 
 lemma to_pretangle_injective : injective (to_pretangle α) :=
@@ -56,10 +56,10 @@ begin
     rw [pretangle.extension_mk, pretangle.extension_mk] at this,
     have := congr_fun₂ this β hβ,
     rw set.image_eq_image (embedding.injective _) at this,
-    exact ext _ _ _ _ (subtype.coe_inj.mp this) },
+    exact ext _ _ _ (subtype.coe_inj.mp this) },
   { have := congr_arg pretangle.atom_extension hst,
     rw [pretangle.atom_extension_mk, pretangle.atom_extension_mk] at this,
-    exact ext_zero _ _ _ h this }
+    exact ext_zero _ _ h this }
 end
 
 end nonempty_semitangle
