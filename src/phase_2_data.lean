@@ -18,7 +18,80 @@ class phase_1c :=
   pretangle_inj β (coe_lt_coe.2 hβ) (π • t) =
     (to_struct_perm β hβ π) • (pretangle_inj β (coe_lt_coe.2 hβ) t))
 
+export phase_1c (pretangle_inj pretangle_inj_comm)
+
 variable [phase_1c.{u} α]
+
+namespace nonempty_semitangle
+
+def to_pretangle (t : nonempty_semitangle α) : pretangle α :=
+pretangle.mk t.extension.atoms (λ β hβ, pretangle_inj β (coe_lt_coe.mpr hβ) ''
+  (t.members β hβ : set (tangle α β $ coe_lt_coe.mpr hβ)))
+
+lemma to_pretangle_ne_empty (t : nonempty_semitangle α) :
+  to_pretangle α t ≠ pretangle.mk ∅ (λ β hβ, ∅) :=
+begin
+  by_cases hzero : ∃ β, β < α,
+  { obtain ⟨β, hβ⟩ := hzero,
+    intro h,
+    have := congr_arg pretangle.extension h,
+    rw pretangle.extension_mk at this,
+    have := congr_fun₂ this β hβ,
+    rw [to_pretangle, pretangle.extension_mk, set.image_eq_empty] at this,
+    exact (t.members β hβ).property.ne_empty this },
+  { intro h,
+    have := congr_arg pretangle.atom_extension h,
+    rw [to_pretangle, pretangle.atom_extension_mk, pretangle.atom_extension_mk] at this,
+    obtain ⟨ts, ⟨β, hβ, rep, hA⟩ | ⟨atoms, hne, rep, hA⟩⟩ := t,
+    { exfalso, exact hzero ⟨β, hβ⟩ },
+    exact hne.ne_empty this }
+end
+
+lemma to_pretangle_injective : injective (to_pretangle α) :=
+begin
+  intros s t hst, unfold to_pretangle at hst,
+  by_cases h : ∃ β, β < α,
+  { obtain ⟨β, hβ⟩ := h,
+    have := congr_arg pretangle.extension hst,
+    rw [pretangle.extension_mk, pretangle.extension_mk] at this,
+    have := congr_fun₂ this β hβ,
+    rw set.image_eq_image (embedding.injective _) at this,
+    exact ext _ _ _ _ (subtype.coe_inj.mp this) },
+  { have := congr_arg pretangle.atom_extension hst,
+    rw [pretangle.atom_extension_mk, pretangle.atom_extension_mk] at this,
+    exact ext_zero _ _ _ h this }
+end
+
+end nonempty_semitangle
+
+namespace semitangle
+
+def to_pretangle : semitangle α → pretangle α
+| ⊥ := pretangle.mk ∅ (λ β hβ, ∅)
+| (t : nonempty_semitangle α) := nonempty_semitangle.to_pretangle α t
+
+lemma to_pretangle_injective : injective (to_pretangle α) :=
+begin
+  intros s t hst,
+  induction s using with_bot.rec_bot_coe; induction t using with_bot.rec_bot_coe,
+  { refl },
+  { exfalso, rw [to_pretangle, to_pretangle] at hst,
+    exact nonempty_semitangle.to_pretangle_ne_empty _ _ hst.symm },
+  { exfalso, rw [to_pretangle, to_pretangle] at hst,
+    exact nonempty_semitangle.to_pretangle_ne_empty _ _ hst },
+  { rw nonempty_semitangle.to_pretangle_injective α hst }
+end
+
+end semitangle
+
+namespace new_tangle
+
+def to_pretangle (t : new_tangle α) : pretangle α := semitangle.to_pretangle α t
+
+lemma to_pretangle_injective : injective (to_pretangle α) :=
+λ s t hst, subtype.coe_inj.mp (semitangle.to_pretangle_injective α hst)
+
+end new_tangle
 
 class phase_1 :=
 (typed_singleton (β : Λ) (hβ) : atom ↪ tangle α β hβ)

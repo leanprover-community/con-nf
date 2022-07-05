@@ -43,6 +43,12 @@ inductive semitangle_extension (members : semitangle_members α)
       (∀ γ hγ, A_map hγ c.elts = members γ hγ)
       → semitangle_extension
 
+/-- The `-1`-extension associated with a given semitangle extension. -/
+def semitangle_extension.atoms {α : Λ} [phase_1a.{u} α] {members : semitangle_members α} :
+  semitangle_extension α members → set atom
+| (semitangle_extension.proper _ _ _ _) := ∅
+| (semitangle_extension.base atoms _ _ _) := atoms
+
 /-- A *semitangle* may become an element of our model of tangled type theory.
 We keep track of its members, written as tangles of all lower levels `β < α`.
 
@@ -220,6 +226,23 @@ end
 lemma ext' (x y : nonempty_semitangle α) (hβ : β < α) (h : ∀ t, mem α hβ t x ↔ mem α hβ t y) :
   x = y :=
 by { refine ext α x y hβ _, ext t, exact h t }
+
+/-- Extensionality at the lowest level of tangled type theory.
+At type 0, all nonempty semitangles have a `-1`-extension.
+Therefore, the extensionality principle in this case applies to the `-1`-extensions. -/
+lemma ext_zero (x y : nonempty_semitangle α) (α_zero : ¬∃ β, β < α)
+  (h : x.extension.atoms = y.extension.atoms) : x = y :=
+begin
+  obtain ⟨xs, hxs⟩ := x,
+  obtain ⟨ys, hys⟩ := y,
+  obtain ⟨γ, hγ, _, _⟩ | ⟨atoms₁, hne₁, rep₁, hA₁⟩ := hxs,
+  { exfalso, exact α_zero ⟨γ, hγ⟩ },
+  obtain ⟨γ, hγ, _, _⟩ | ⟨atoms₂, hne₂, rep₂, hA₂⟩ := hys,
+  { exfalso, exact α_zero ⟨γ, hγ⟩ },
+  cases h,
+  suffices : xs = ys, by subst this,
+  ext β hβ -, exfalso, exact α_zero ⟨β, hβ⟩
+end
 
 end nonempty_semitangle
 
