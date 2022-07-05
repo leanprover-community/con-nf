@@ -14,7 +14,7 @@ tangles; we define these larger ambient groups in advance in order to set up the
 derivatives and so on independently of the recursion.
 -/
 
-open cardinal equiv equiv.perm with_bot
+open cardinal equiv equiv.perm quiver with_bot
 open_locale cardinal pointwise
 
 noncomputable theory
@@ -129,10 +129,9 @@ def lower : Π {α} (π : struct_perm α) (β < α), struct_perm β
 | (α : Λ) β hβ π₁ π₂ := sorry
 
 /-- The derivative of a structural permutation at any lower level. -/
-def derivative :
-  Π {β} (A : quiver.path (α) β), struct_perm α → struct_perm β
-| _ quiver.path.nil := id
-| γ (quiver.path.cons p_αγ lt_βγ) := λ π, (derivative p_αγ π).lower _ lt_βγ
+def derivative : Π {β} (A : path α β), struct_perm α → struct_perm β
+| _ path.nil := id
+| γ (path.cons p_αγ lt_βγ) := λ π, (derivative p_αγ π).lower _ lt_βγ
 
 /-- Structural permutations act on atoms. -/
 instance mul_action_atom (α : Λ) : mul_action (struct_perm α) atom :=
