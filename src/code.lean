@@ -40,6 +40,11 @@ So far, we can only construct type `β` codes for `β ≤ α`. Notably, we can c
 (extension_lt : extension < β)
 (elts : set (tangle α extension $ extension_lt.trans_le $ coe_le_coe.2 hβ))
 
+lemma code.mk_eq_mk (β : Λ) (hβ : β ≤ α) (γ : type_index) (hγ : γ < β)
+  (e f : set (tangle α γ $ hγ.trans_le $ coe_le_coe.2 hβ)) :
+  (⟨γ, hγ, e⟩ : code α β hβ) = ⟨γ, hγ, f⟩ ↔ e = f :=
+by { split; intro h; cases h; refl }
+
 /-- Nonempty codes -/
 abbreviation nonempty_code (β : Λ) (hβ : β ≤ α) : Type* := {c : code α β hβ // c.elts.nonempty}
 

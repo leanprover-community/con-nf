@@ -198,7 +198,8 @@ end allowable_perm
 class phase_1b_coherence (α : Λ) [phase_1a α] [phase_1b α] :=
 (to_tangle_perm (β : Λ) (hβ : β < α) (π : allowable_perm α) (N : near_litter) :
   @has_smul.smul _ _ (@mul_action.to_has_smul _ _ _ (allowable_action β hβ))
-    (π.val.snd β hβ) (to_tangle β hβ N) = to_tangle β hβ (π.val.fst • N))
+    ((↑π : semiallowable_perm α).snd β hβ) (to_tangle β hβ N) =
+      to_tangle β hβ ((↑π : semiallowable_perm α).fst • N))
 
 export phase_1b_coherence (to_tangle_perm)
 
@@ -225,24 +226,13 @@ begin
   subst hc',
   clear hc,
   dsimp at hA,
-  have hA' := hA.symm,
-  sorry,
-  -- rw A_map_code_coe_eq_iff at hA',
-  -- simp at hA',
-  -- unfold A_map at hA',
-  -- simp at hA',
-  -- dsimp at hA',
-  -- have : to_tangle δ (hε.trans_le hβ) ⟨f_map γ δ _ (hδ.trans_le hβ) (π.val.snd γ hγ • g),
-  --   litter_set _, is_near_litter_litter_set _⟩
-  --   ∈ to_tangle δ (hε.trans_le hβ) '' local_cardinal (f_map γ δ _ (hδ.trans_le hβ)
-  --     (π.val.snd γ hγ • g)) := mem_image_of_mem (to_tangle δ $ hε.trans_le hβ) (by simp),
-  -- rw subtype.val_eq_coe at this,
-  -- rw hA' at this,
-  -- rw mem_smul_set at this,
-  -- obtain ⟨t, ⟨N, hN₁, hN₂⟩, ht⟩ := this,
-  -- have := mem_set_of.mp hN₁,
-  -- rw ← this, rw ← hN₂ at ht,
-  -- sorry
+  rw [code.mk_eq_mk, ← set.image_smul, set.image_image] at hA,
+  simp_rw to_tangle_perm at hA,
+  rw set.image_comp _ (λ a, (↑π : semiallowable_perm α).fst • a) at hA,
+  unfold A_map at hA,
+  simpa only [set.image_eq_image (embedding.injective $ to_tangle δ _), image_smul,
+    near_litter_perm.smul_local_cardinal, mem_singleton_iff, Union_Union_eq_left,
+    function.injective.eq_iff local_cardinal_injective] using hA
 end
 
 lemma smul_A_map {γ : type_index} {hγ : γ < α} (π : allowable_perm α) (hδ : δ < α)
