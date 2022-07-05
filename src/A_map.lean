@@ -247,4 +247,18 @@ begin
   exact ⟨_, _, hdδ⟩,
 end
 
+lemma A_map_rel.nonempty_iff :  c ↝ d → (c.elts.nonempty ↔ d.elts.nonempty) :=
+by { rintro ⟨δ, hδ, hcδ⟩, exact A_map_nonempty.symm }
+
+@[simp] lemma A_map_rel_coe_coe {c d : nonempty_code α β hβ} :
+  (c : code α β hβ) ↝ d ↔ A_map_rel' c d :=
+begin
+  rw [A_map_rel_iff, A_map_rel'_iff, iff.comm],
+  exact exists₂_congr (λ δ hδ, and_congr_right' subtype.ext_iff),
+end
+
+lemma A_map_rel_empty_empty {hγ : γ < β} {hδ : δ < β} (hγδ : γ ≠ δ) :
+  (⟨γ, hγ, ∅⟩ : code α β hβ) ↝ ⟨δ, coe_lt_coe.2 hδ, ∅⟩ :=
+(A_map_rel_iff _ _).2 ⟨_, hδ, hγδ, by simp⟩
+
 end con_nf
