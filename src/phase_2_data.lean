@@ -1,14 +1,14 @@
 import tangle
 
+open set with_bot
+open_locale pointwise
+
 noncomputable theory
 
 universe u
 
 namespace con_nf
 variable [params.{u}]
-
-open function params set with_bot
-open_locale pointwise
 
 variables (α : Λ) [phase_1a.{u} α] [phase_1b.{u} α] [phase_1b_coherence.{u} α]
 

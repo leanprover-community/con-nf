@@ -12,8 +12,6 @@ universe u
 namespace con_nf
 variables [params.{u}]
 
-open params
-
 /-- An α-local bijection associates to each extended type index `A` a domain of atoms,
 and defines an injection from that domain to itself.
 It must satisfy two conditions, that the map is really an injection, and that the

@@ -9,8 +9,6 @@ universe u
 namespace con_nf
 variables [params.{u}]
 
-open params
-
 /-- We define the type of paths from certain types to lower types as elements of this quiver. -/
 instance quiver : quiver type_index := ⟨(≥)⟩
 

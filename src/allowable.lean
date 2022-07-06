@@ -5,15 +5,15 @@ import struct_perm
 # Allowable permutations
 -/
 
+open function set with_bot
+open_locale pointwise
+
 noncomputable theory
 
 universe u
 
 namespace con_nf
 variable [params.{u}]
-
-open function params set with_bot
-open_locale pointwise
 
 variables (α : Λ) [phase_1a.{u} α]
 

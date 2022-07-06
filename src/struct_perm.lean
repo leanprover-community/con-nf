@@ -25,8 +25,6 @@ universe u
 namespace con_nf
 variable [params.{u}]
 
-open params
-
 /-- A *structural permutation* on a proper type index is defined by its derivatives,
 as well as its permutation on atoms. -/
 /- Note: perhaps should be constructed directly as *groups*, not just types. -/

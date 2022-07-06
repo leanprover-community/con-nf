@@ -24,8 +24,6 @@ universe u
 namespace con_nf
 variables [params.{u}] {α β : Type u}
 
-open params
-
 variables {i j : litter} {s t : set atom}
 
 /-- The set corresponding to the `i`-th litter.

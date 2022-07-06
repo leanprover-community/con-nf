@@ -32,7 +32,6 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-open params
 variables [params.{u}] {α β δ ε : Λ} [phase_1a.{u} α] {hβ : β ≤ α} {γ : type_index} {hγ : γ < α}
   {hδ : δ < α} {s : set (tangle α γ hγ)} {t : tangle α γ hγ} {c d : code α β hβ}
 

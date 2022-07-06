@@ -16,7 +16,6 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-open params
 variables [params.{u}] {α β γ : Λ} [phase_1a.{u} α]
 
 /-!

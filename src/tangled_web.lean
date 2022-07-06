@@ -44,8 +44,6 @@ instance (α) [mul_action X α] : mul_action X (F.set α) :=
   mul_smul := sorry }
 end
 
-open params
-
 variable [params.{u}]
 
 /-- Extended type index. -/
