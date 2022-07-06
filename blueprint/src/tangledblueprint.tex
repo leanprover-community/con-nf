@@ -288,7 +288,7 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supp
 \uses{def:type-index,def:pretangle,def:near-litter}
 \lean{con_nf.phase_1a}
 \leanok
-Fix a proper type index $\alpha$.  \emph{Phase 1a data at $\alpha$} consists of:
+Fix a proper type index $\alpha$.  \emph{Phase 1a data at level $\alpha$} consists of:
 
 \begin{itemize}
   \item a set $\tau$ (whose elements we call \emph{tangles});
@@ -509,13 +509,14 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 \begin{definition}
   \label{def:phase-1b-data}
   \uses{def:phase-1a-data}
-  \lean{con_nf.phase_1b}
+  \lean{con_nf.phase_1b,con_nf.phase_1b_coherence}
   \leanok
   \emph{Phase 1b data} at a proper type index $\alpha$ consists of:
   \begin{itemize}
   \item phase 1a data at $\alpha$;
   \item a group $\All$ (whose elements we call “allowable permutations”), with a map $\varphi : \All \to \Str_\alpha$;
-  \item a group action of $\All$ on the tangles $\tau$ (that is, on the set $\tau$ assumed in the 1a-data).
+  \item a group action of $\All$ on the tangles $\tau$ (that is, on the set $\tau$ assumed in the 1a-data);
+  \item such that the map $j$ from near-litters to $\tau$ commutes with the $\All$-action.
   \end{itemize}
   [Note: happily, “group actions” are already provided in mathlib.]
 
@@ -546,14 +547,6 @@ Semi-allowable permutations act on $\alpha$-codes.
   An \emph{allowable permutation} is a semi-allowable permutation which preserves $\equiv_\alpha$: for all $\alpha$-codes $X,Y$, $X \equiv_\alpha Y \leftrightarrow \pi(X) \equiv_\alpha \pi(Y)$.
 \end{definition}
 
-\begin{definition}
-  \label{def:phase-1b-coherence}
-  \uses{def:phase-1b-data}
-  \lean{con_nf.phase_1b_coherence}
-  \leanok
-  The \emph{phase 1b coherence condition} is the assumption that $\pi$ commutes with $j$. This will be simple to prove when we define $j$ as a map from near-litters to typed near-litters.
-\end{definition}
-
 \begin{lemma}
 \label {lem:coherence-unpacked}
 \uses{def:allowable-perm}
@@ -565,7 +558,6 @@ holds for all $f_{\gamma,\delta}$ with $\gamma,\delta<\alpha$, and all $g \in \t
 \end{lemma}
 
 \begin{proof}
-\uses{def:phase-1b-coherence}
 \leanok
 This is discussion supporting the preceding lemma. The proof is given more carefully in Randall’s more recent version of the note.
 
@@ -677,13 +669,12 @@ There is lots to be proven, but that is the entire description.
 
 \begin{definition}
   \label{def:phase-1c-data}
-  \uses{def:phase-1b-coherence}
+  \uses{def:phase-1b-data}
   \lean{con_nf.phase_1c}
   \leanok
   \emph{Phase 1c data} at a proper type index $\alpha$ consists of:
   \begin{itemize}
   \item phase 1b data (including phase 1a data) at $\alpha$;
-  \item the phase 1b coherence condition at $\alpha$;
   \item an injection $\tau \to \Pretangle_\alpha$;
   \item commuting with the $\All$-action (where $\varphi : \All \to \Str_\alpha$ and its action on $\tau$ is the group action assumed in the phase 1b data, and its action on pretangles is given by composing the $\Str_\alpha$-action with $\varphi$).
   \end{itemize}
