@@ -179,7 +179,7 @@ mul_action.comp_hom _ coe_hom
 lemma _root_.con_nf.code.equiv.smul : c ≡ d → f • c ≡ f • d := (f.2 _ _).2
 
 instance mul_action_support_condition : mul_action (allowable_perm α) (support_condition α) :=
-mul_action.comp_hom _ $ allowable_perm.to_struct_perm
+mul_action.comp_hom _ allowable_perm.to_struct_perm
 
 instance has_smul_potential_support : has_smul (allowable_perm α) (potential_support α) :=
 ⟨λ f s, ⟨f • s, s.2.image⟩⟩

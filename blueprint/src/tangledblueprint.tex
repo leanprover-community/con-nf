@@ -264,12 +264,15 @@ Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alp
 
 \begin{lemma}
 \label {lem:count-supports}
-\uses{def:support,lem:count-near-litters}
+\uses{def:support}
 \lean{con_nf.mk_support_le}
 \leanok
 Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supports, and therefore at most $\mu$ supports for each $x \in \tau$.
 \end{lemma}
-\begin{proof}\leanok\end{proof}
+\begin{proof}
+\uses{lem:count-near-litters}
+\leanok
+\end{proof}
 
 \begin{definition}
 \label{def:support-of}
@@ -588,18 +591,14 @@ It is straightforward to show that this condition is equivalent to the coherence
 
 \begin{lemma}
 \label{lem:parity-action}
-\uses{lem:coherence-unpacked,lem:code-equiv-properties}
 \lean{con_nf.code.is_even.smul}
 \leanok
 The action of allowable permutations on codes preserves parity.
 \end{lemma}
-
 \begin{proof}
-\lean{con_nf.code.is_even_smul}
+  \uses{lem:coherence-unpacked,lem:code-equiv-properties}
 \leanok
 This should be straightforward.  A target should be the equation $\pi(A_\gamma(X)) = A_\gamma(\pi(X))$ for any allowable permutation $\pi$ and code $X$ for which $\pi_\gamma$ is defined.
-
-[Note: This will probably need the phase 1b data to include an assumption that the typed-near-litter embeddings commute with the group action.]
 \end{proof}
 
 \begin{definition}

@@ -28,22 +28,26 @@ inductive preferred_extension (α : Λ) : Type u
 
 variables (α : Λ) [phase_1a.{u} α] {β : Λ} {hβ : β < α} {γ : type_index} {hγ : γ < α}
 
+/-- Nonempty sets of tangles. -/
+abbreviation tangles (γ : type_index) (hγ : γ < α) : Type u :=
+{s : set (tangle α γ hγ) // s.nonempty}
+
 namespace semitangle
 
 /-- The possible extensions of a nonempty semitangle. -/
-abbreviation extension := Π β (hβ : β < α), {s : set (tangle α β $ coe_lt_coe.mpr hβ) // s.nonempty}
+abbreviation extension := Π β (hβ : β < α), tangles α β $ coe_lt_coe.2 hβ
 
 namespace extension
 variables {α}
 
 /-- The extensions for a code. -/
-protected def A_map (s : {s : set (tangle α γ hγ) // s.nonempty}) : extension α :=
+protected def A_map (s : tangles α γ hγ) : extension α :=
 λ β hβ, if hβγ : ↑β = γ then by { subst hβγ, exact s } else ⟨A_map hβ _, s.prop.A_map⟩
 
-@[simp] lemma A_map_self (s : {s : set (tangle α β $ coe_lt_coe.2 hβ) // s.nonempty}) :
-  extension.A_map s _ hβ = s := dif_pos rfl
+@[simp] lemma A_map_self (s : tangles α β $ coe_lt_coe.2 hβ) : extension.A_map s _ hβ = s :=
+dif_pos rfl
 
-lemma A_map_of_ne (s : {s : set (tangle α γ hγ) // s.nonempty}) (hβγ : ↑β ≠ γ) :
+lemma A_map_of_ne (s : tangles α γ hγ) (hβγ : ↑β ≠ γ) :
   extension.A_map s β hβ = ⟨A_map hβ _, s.prop.A_map⟩ := dif_neg hβγ
 
 end extension
@@ -51,9 +55,9 @@ end extension
 /-- Keeps track of the preferred extension of a semitangle, along with coherence conditions
 relating each extension of the semitangle. -/
 inductive preference (exts : extension α)
-| base (atoms : set (tangle α ⊥ $ bot_lt_coe _)) (hne : atoms.nonempty) :
+| base (atoms : tangles α ⊥ $ bot_lt_coe _) :
     (⟨⊥, bot_lt_coe _, atoms⟩ : code α α le_rfl).is_even →
-      (∀ γ hγ, A_map hγ atoms = exts γ hγ) → preference
+      (∀ γ hγ, A_map hγ (atoms : set (tangle α ⊥ $ bot_lt_coe _)) = exts γ hγ) → preference
 | proper (β : Λ) (hβ : β < α) :
     (⟨β, coe_lt_coe.mpr hβ, exts β hβ⟩ : code α α le_rfl).is_even →
       (∀ γ hγ, β ≠ γ → A_map hγ (exts β hβ : set (tangle α ↑β $ coe_lt_coe.2 hβ)) = exts γ hγ)
@@ -62,7 +66,7 @@ inductive preference (exts : extension α)
 /-- The `-1`-extension associated with a given semitangle extension. -/
 def preference.atoms {α : Λ} [phase_1a.{u} α] {members : extension α} :
   preference α members → set atom
-| (preference.base atoms _ _ _) := atoms
+| (preference.base atoms _ _) := (atoms : set (tangle α ⊥ $ bot_lt_coe _))
 | (preference.proper _ _ _ _) := ∅
 
 end semitangle
@@ -88,20 +92,19 @@ notation t ` ∈ₙₛₜ `:50 s:50 := mem ‹_› t s
 
 /-- The even code associated to a nonempty semitangle. -/
 def repr_code : nonempty_semitangle α → nonempty_code α α le_rfl
-| ⟨exts, preference.base atoms hne rep hA⟩ := ⟨⟨⊥, bot_lt_coe _, atoms⟩, hne⟩
+| ⟨exts, preference.base atoms rep hA⟩ := ⟨⟨⊥, bot_lt_coe _, atoms⟩, atoms.2⟩
 | ⟨exts, preference.proper β hβ rep hA⟩ := ⟨⟨β, coe_lt_coe.mpr hβ, exts β hβ⟩, (exts β hβ).property⟩
 
 @[simp] lemma repr_code_proper (exts : extension α) (β hβ rep hA) :
   repr_code ⟨exts, preference.proper β hβ rep hA⟩ =
     ⟨⟨β, coe_lt_coe.mpr hβ, exts β hβ⟩, (exts β hβ).property⟩ := rfl
 
-@[simp] lemma repr_code_base (exts : extension α) (atoms hne rep hA) :
-  repr_code ⟨exts, preference.base atoms hne rep hA⟩ =
-    ⟨⟨⊥, bot_lt_coe _, atoms⟩, hne⟩ := rfl
+@[simp] lemma repr_code_base (exts : extension α) (atoms rep hA) :
+  repr_code ⟨exts, preference.base atoms rep hA⟩ = ⟨⟨⊥, bot_lt_coe _, atoms⟩, atoms.2⟩ := rfl
 
 lemma repr_code_spec : Π (s : nonempty_semitangle α), (repr_code s : code α α le_rfl).is_even
 | ⟨exts, preference.proper β hβ rep hA⟩ := rep
-| ⟨exts, preference.base atoms hne rep hA⟩ := rep
+| ⟨exts, preference.base atoms rep hA⟩ := rep
 
 lemma repr_code_members_eq :
   Π (s : nonempty_semitangle α) {γ : Λ} (hγ : γ < α)
@@ -111,15 +114,14 @@ lemma repr_code_members_eq :
     by { convert (repr_code s).property, exact hcγ.symm, exact cast_heq _ _ }⟩
 | ⟨exts, preference.proper β hβ rep hA⟩ γ hγ hcγ :=
     by { rw repr_code_proper at hcγ, cases hcγ, dsimp, rw subtype.coe_eta }
-| ⟨exts, preference.base atoms hne rep hA⟩ γ hγ hcγ :=
-    by { rw repr_code_base at hcγ, cases hcγ }
+| ⟨exts, preference.base atoms rep hA⟩ γ hγ hcγ := by { rw repr_code_base at hcγ, cases hcγ }
 
 lemma repr_code_members_ne :
   Π (s : nonempty_semitangle α) {γ : Λ} (hγ : γ < α)
   (hcγ : (repr_code s : code α α le_rfl).extension ≠ γ),
   (A_map_code hγ (repr_code s : code α α le_rfl)).elts = (s.exts γ hγ : set (tangle α γ _))
 | ⟨exts, preference.proper β hβ rep hA⟩ γ hγ hcγ := hA _ _ (hcγ ∘ coe_eq_coe.mpr)
-| ⟨exts, preference.base atoms hne rep hA⟩ γ hγ hcγ := hA _ _
+| ⟨exts, preference.base atoms rep hA⟩ γ hγ hcγ := hA _ _
 
 lemma repr_code_members_val (s : nonempty_semitangle α) {γ : Λ} (hγ : γ < α)
   (hcγ : (repr_code s : code α α le_rfl).extension ≠ γ) :
@@ -136,9 +138,9 @@ begin
   dsimp,
   rintro ⟨γ, hγ⟩ rfl,
   refine congr_arg (λ h, ⟨xs, h⟩) _,
-  obtain ⟨atoms₁, hne₁, even₁, hA₁⟩ | ⟨β, hβ, even₁, hA₁⟩ := hxs;
-    obtain ⟨atoms₂, hne₂, even₂, hA₂⟩ | ⟨γ, hγ, even₂, hA₂⟩ := hys,
-  { simp_rw A_map_injective _ ((hA₁ γ hγ).trans (hA₂ γ hγ).symm) },
+  obtain ⟨atoms₁, even₁, hA₁⟩ | ⟨β, hβ, even₁, hA₁⟩ := hxs;
+    obtain ⟨atoms₂, even₂, hA₂⟩ | ⟨γ, hγ, even₂, hA₂⟩ := hys,
+  { simp_rw subtype.coe_injective (A_map_injective _ $ (hA₁ γ hγ).trans (hA₂ γ hγ).symm) },
   { cases even₁.A_map_code_ne even₂  bot_ne_coe
       ((code.ext_iff _ _).2 ⟨rfl, (hA₁ γ hγ).heq⟩),
     assumption },
@@ -155,13 +157,13 @@ end
 their even codes are equivalent (and hence equal, by uniqueness). -/
 lemma ext_code :
   ∀ {x y : nonempty_semitangle α}, (repr_code x : code α α le_rfl) ≡ repr_code y → x = y
-| ⟨x, preference.base atoms₁ hne₁ even₁ hA₁⟩ ⟨y, preference.base atoms₂ hne₂ even₂ hA₂⟩ h := begin
-  obtain rfl := code.equiv.bot_bot_iff.1 h,
+| ⟨x, preference.base atoms₁ even₁ hA₁⟩ ⟨y, preference.base atoms₂ even₂ hA₂⟩ h := begin
+  obtain rfl := subtype.coe_injective (code.equiv.bot_bot_iff.1 h),
   obtain rfl : x = y := funext (λ γ, funext $ λ hγ, subtype.coe_injective $ (hA₁ _ _).symm.trans $
     hA₂ _ _),
   refl,
 end
-| ⟨x, preference.base s hs even₁ hA₁⟩ ⟨y, preference.proper γ hγ even₂ hA₂⟩ h := begin
+| ⟨x, preference.base s even₁ hA₁⟩ ⟨y, preference.proper γ hγ even₂ hA₂⟩ h := begin
   dsimp at h,
   obtain ⟨δ, hδ, hγδ⟩ := (code.equiv.bot_left_iff.1 h).resolve_left
     (λ h, bot_ne_coe $ congr_arg code.extension h),
@@ -169,7 +171,7 @@ end
   cases even₂.not_is_odd (even₁.A_map_code bot_ne_coe),
   exact hδ,
 end
-| ⟨x, preference.proper γ hγ even₁ hA₁⟩ ⟨y, preference.base s hs even₂ hA₂⟩ h := begin
+| ⟨x, preference.proper γ hγ even₁ hA₁⟩ ⟨y, preference.base s even₂ hA₂⟩ h := begin
   dsimp at h,
   obtain ⟨δ, hδ, hγδ⟩ := (code.equiv.bot_right_iff.1 h).resolve_left
     (λ h, coe_ne_bot $ congr_arg code.extension h),
@@ -208,8 +210,8 @@ begin
   obtain ⟨ys, hys⟩ := y,
   dsimp only at h,
   refine ext_code _,
-  obtain ⟨atoms₁, hne₁, even₁, hA₁⟩ | ⟨γ, hγ, even₁, hA₁⟩ := hxs;
-    obtain ⟨atoms₂, hne₂, even₂, hA₂⟩ | ⟨δ, hδ, even₂, hA₂⟩ := hys,
+  obtain ⟨atoms₁, even₁, hA₁⟩ | ⟨γ, hγ, even₁, hA₁⟩ := hxs;
+    obtain ⟨atoms₂, even₂, hA₂⟩ | ⟨δ, hδ, even₂, hA₂⟩ := hys,
   { refine (code.equiv.A_map_right _ (code.is_even_bot _) _ hβ bot_ne_coe).trans _,
     dsimp,
     rw [hA₁ _ hβ, h, ←hA₂ _ hβ],
@@ -253,18 +255,18 @@ ext x y hβ $ subtype.ext $ set.ext h
 /-- Extensionality at the lowest level of tangled type theory.
 At type 0, all nonempty semitangles have a `-1`-extension.
 Therefore, the extensionality principle in this case applies to the `-1`-extensions. -/
-lemma ext_zero (x y : nonempty_semitangle α) (α_zero : ¬∃ β, β < α)
-  (h : x.pref.atoms = y.pref.atoms) : x = y :=
+lemma ext_zero (x y : nonempty_semitangle α) (α_zero : is_min α) (h : x.pref.atoms = y.pref.atoms) :
+  x = y :=
 begin
-  obtain ⟨xs, hxs⟩ := x,
-  obtain ⟨ys, hys⟩ := y,
-  obtain ⟨atoms₁, hne₁, rep₁, hA₁⟩ | ⟨γ, hγ, _, _⟩ := hxs, swap,
-  { exfalso, exact α_zero ⟨γ, hγ⟩ },
-  obtain ⟨atoms₂, hne₂, rep₂, hA₂⟩ | ⟨γ, hγ, _, _⟩ := hys, swap,
-  { exfalso, exact α_zero ⟨γ, hγ⟩ },
-  cases h,
+  obtain ⟨xs, ⟨atoms₁, rep₁, hA₁⟩ | ⟨γ, hγ, _, _⟩⟩ := x, swap,
+  { cases α_zero.not_lt hγ },
+  obtain ⟨ys, ⟨atoms₂, rep₂, hA₂⟩ | ⟨γ, hγ, _, _⟩⟩ := y, swap,
+  { cases α_zero.not_lt hγ },
+  have : atoms₁ = atoms₂ := subtype.coe_injective h,
+  subst this,
   suffices : xs = ys, by subst this,
-  ext β hβ -, exfalso, exact α_zero ⟨β, hβ⟩
+  ext β hβ -,
+  cases α_zero.not_lt hβ,
 end
 
 end nonempty_semitangle
@@ -307,16 +309,16 @@ begin
 end
 
 /-- Construct a nonempty semitangle from an even nonempty code. -/
-def intro (s : {s : set (tangle α γ hγ) // s.nonempty})
+def intro (s : tangles α γ hγ)
   (heven : (⟨γ, hγ, s⟩ : code α α le_rfl).is_even) : nonempty_semitangle α :=
 ⟨extension.A_map s, rec_bot_coe
-  (λ _ s _, preference.base s.1 s.2 (code.is_even_bot _) $ λ β hβ, sorry)
+  (λ _ s _, preference.base s (code.is_even_bot _) $ λ β hβ, sorry)
   (λ γ hγ s heven, preference.proper γ (coe_lt_coe.1 hγ)
     (by rwa extension.A_map_self) $ λ β hβ hβγ,
       by { rw [extension.A_map_self, extension.A_map_of_ne _ (coe_ne_coe.2 hβγ.symm)], refl })
     γ hγ s heven⟩
 
-@[simp] lemma exts_intro (s : {s : set (tangle α γ hγ) // s.nonempty}) (heven) :
+@[simp] lemma exts_intro (s : tangles α γ hγ) (heven) :
   (intro s heven).exts = extension.A_map s := rfl
 
 end semitangle
@@ -327,41 +329,45 @@ variables [phase_1b α] [phase_1b_coherence α]
 
 namespace allowable_perm
 
-lemma smul_aux₁ {f : allowable_perm α} {m : extension α}
-  {s : set (tangle α ⊥ $ bot_lt_coe _)} (h : ∀ γ (hγ : γ < α), A_map hγ s = m γ hγ) (γ hγ) :
-  A_map hγ (f • s) = f • m γ hγ :=
+lemma smul_extension_A_map (f : allowable_perm α) (s : tangles α γ hγ) :
+  f • extension.A_map s = extension.A_map (f • s) :=
+sorry
+
+lemma smul_aux₁ {f : allowable_perm α} {e : extension α}
+  {s : set (tangle α ⊥ $ bot_lt_coe _)} (h : ∀ γ (hγ : γ < α), A_map hγ s = e γ hγ) (γ hγ) :
+  A_map hγ (f • s) = f • e γ hγ :=
 by { rw [←h γ hγ, smul_A_map _ _ _ bot_ne_coe], assumption }
 
-lemma smul_aux₂ {f : allowable_perm α} {m : extension α} {γ} {hγ : γ < α}
+lemma smul_aux₂ {f : allowable_perm α} {e : extension α} {γ} {hγ : γ < α}
   (h : ∀ δ (hδ : δ < α), γ ≠ δ →
-    A_map hδ (m γ hγ : set (tangle α ↑γ $ coe_lt_coe.2 hγ)) = ↑(m δ hδ)) (δ hδ) (hγδ : γ ≠ δ) :
-  A_map hδ (f • (m γ hγ : set (tangle α ↑γ $ coe_lt_coe.2 hγ))) = f • ↑(m δ hδ) :=
+    A_map hδ (e γ hγ : set (tangle α ↑γ $ coe_lt_coe.2 hγ)) = ↑(e δ hδ)) (δ hδ) (hγδ : γ ≠ δ) :
+  A_map hδ (f • (e γ hγ : set (tangle α ↑γ $ coe_lt_coe.2 hγ))) = f • ↑(e δ hδ) :=
 by { rw [←smul_A_map _ _ _ (coe_ne_coe.2 hγδ), h _ _ hγδ], assumption }
 
 /-- Allowable permutations act on nonempty semitangles. -/
 instance mul_action_nonempty_semitangle : mul_action (allowable_perm α) (nonempty_semitangle α) :=
 { smul := λ f t, ⟨f • t.exts, begin
-    obtain ⟨exts, ⟨s, hs, ht, h⟩ | ⟨γ, hγ, ht, h⟩⟩ := t,
-    { exact preference.base (f • s) hs.smul_set (code.is_even_bot _) (smul_aux₁ h) },
+    obtain ⟨exts, ⟨s, ht, h⟩ | ⟨γ, hγ, ht, h⟩⟩ := t,
+    { exact preference.base (f • s) (code.is_even_bot _) (smul_aux₁ h) },
     { exact preference.proper _ hγ ht.smul (smul_aux₂ h) }
     end⟩,
   one_smul := begin
-    rintro ⟨exts, ⟨s, hs, ht, h⟩ | ⟨γ, hγ, ht, h⟩⟩; sorry
+    rintro ⟨exts, ⟨s, ht, h⟩ | ⟨γ, hγ, ht, h⟩⟩; sorry
   end,
   mul_smul := begin
-    rintro f g ⟨exts, ⟨s, hs, ht, h⟩ | ⟨γ, hγ, ht, h⟩⟩; sorry
+    rintro f g ⟨exts, ⟨s, ht, h⟩ | ⟨γ, hγ, ht, h⟩⟩; sorry
   end }
 
 @[simp] lemma members_smul (f : allowable_perm α) (s : nonempty_semitangle α) :
   (f • s).exts = f • s.exts := rfl
 
-@[simp] lemma smul_base (f : allowable_perm α) (m : extension α) (s hs ht h) :
-  f • (⟨m, preference.base s hs ht h⟩ : nonempty_semitangle α) =
-    ⟨f • m, preference.base (f • s) hs.smul_set ht.smul $ smul_aux₁ h⟩ := rfl
+@[simp] lemma smul_base (f : allowable_perm α) (e : extension α) (s ht h) :
+  f • (⟨e, preference.base s ht h⟩ : nonempty_semitangle α) =
+    ⟨f • e, preference.base (f • s) ht.smul $ smul_aux₁ h⟩ := rfl
 
-@[simp] lemma smul_proper (f : allowable_perm α) (m : extension α) (γ hγ ht h) :
-  f • (⟨m, preference.proper γ hγ ht h⟩ : nonempty_semitangle α) =
-    ⟨f • m, preference.proper _ hγ ht.smul $ smul_aux₂ h⟩ := rfl
+@[simp] lemma smul_proper (f : allowable_perm α) (e : extension α) (γ hγ ht h) :
+  f • (⟨e, preference.proper γ hγ ht h⟩ : nonempty_semitangle α) =
+    ⟨f • e, preference.proper _ hγ ht.smul $ smul_aux₂ h⟩ := rfl
 
 /-- Allowable permutations act on semitangles. -/
 instance mul_action_semitangle : mul_action (allowable_perm α) (semitangle α) := option.mul_action
@@ -393,11 +399,37 @@ lemma code.equiv.symmetric_iff (hcd : c ≡ d) :
     symmetric (λ π : allowable_perm α, π.1.to_struct_perm) d :=
 ⟨λ ⟨⟨s, h⟩⟩, ⟨⟨s, hcd.supports h⟩⟩, λ ⟨⟨s, h⟩⟩, ⟨⟨s, hcd.symm.supports h⟩⟩⟩
 
+@[simp] lemma smul_intro (f : allowable_perm α) (s : tangles α γ hγ) (hs) :
+  f • intro s hs = intro (f • s) (by cases γ; exact hs.smul) :=
+begin
+  induction γ using with_bot.rec_bot_coe,
+  { dsimp [intro],
+    simp_rw f.smul_extension_A_map,
+    sorry },
+  { dsimp [intro],
+    simp_rw f.smul_extension_A_map,
+    sorry }
+end
+
 /-- For any near-litter `N`, the code `(α, -1, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
 def typed_near_litter (N : near_litter) : new_tangle α :=
 ⟨some $ intro ⟨(show set (tangle α ⊥ $ bot_lt_coe _), from N.2.1), N.2.2.nonempty⟩ $
-  code.is_even_bot _, sorry⟩
+  code.is_even_bot _, ⟨⟨⟨{(sum.inr N, default)}, small_singleton _⟩, λ f h, begin
+  dsimp at ⊢ h,
+  rw smul_intro,
+  have := congr_arg prod.fst (h _ rfl),
+  have := sum.inr_injective this,
+  conv { to_rhs, rw ←this },
+  dsimp,
+  congr',
+  refl,
+  nth_rewrite 0 ←this,
+  have := congr_arg sigma.snd this,
+  dsimp at this,
+  rw smul_intro,
+  dsimp,
+end⟩⟩⟩
 
 /-- For any symmetric tangle `x`, the code `(α, β, {x})` is a tangle at level `α`. -/
 def symmetric_singleton (hβ : β < α) (x : tangle α β (coe_lt_coe.mpr hβ))
