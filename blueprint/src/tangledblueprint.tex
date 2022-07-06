@@ -293,7 +293,7 @@ For now, we group the data assumed at each level, according to which constructio
 \begin{definition}
   \label{def:phase-1-data}
   \uses{def:support-of,def:pretangle}
-  \lean{con_nf.phase_1a,con_nf.phase_1b,con_nf.phase_1b_coherence,con_nf.phase_1c,con_nf.phase_1}
+  \lean{con_nf.phase_1}
 
   Fix a proper type index $\alpha$.  Then \emph{phase 1 data at $\alpha$} consists of:
   \begin{enumerate}
@@ -533,7 +533,7 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 \lean{con_nf.semiallowable_perm}
 \leanok
 \uses{def:phase-1-data}
-  An \emph{semi-allowable permutation} at level $\alpha$ is a family of allowable pemutations at all lower levels (including $-1$), $(\pi_\beta)_{\beta < \alpha} \in \prod_{\beta < \alpha} \All_\beta$.
+  A \emph{semi-allowable permutation} at level $\alpha$ is a family of allowable pemutations at all lower levels (including $-1$), $(\pi_\beta)_{\beta < \alpha} \in \prod_{\beta < \alpha} \All_\beta$.
 \end{definition}
 
 \begin{definition}
@@ -689,8 +689,8 @@ For the subsequent constructions of this section, we assume we are given phase 1
 Overall, we have now shown:
 
 \begin{definition}
-  \label{def:phase-1-data-propagates}
-  \uses{def:phase-1-data,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,lem:tangle-action}
+  \label{def:phase-1-propagates}
+  \uses{def:phase-1,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,lem:tangle-action}
   For a proper type index $\alpha \in \lambda$, given phase 1 data at all levels $\beta < \alpha$, then the constructions above provide \emph{most} components of phase 1 data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$ and its properties.
 
   [Note that to treat this as a \emph{definition}, in particular of the “designated supports” component, we are implicitly invoking the axiom of choice --- a priori we only know that there \emph{exists} some support for each new tangle.]
@@ -723,7 +723,7 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 
 \begin{definition}
   \label{def:concrete-phase-1-data-propagates}
-  \uses{def:concrete-phase-1-data,def:phase-1-data-propagates}
+  \uses{def:concrete-phase-1-data,def:phase-1-propagates}
   For a proper type index $\alpha \in \lambda$, given concrete phase 1 data at all levels $\beta < \alpha$, we get \emph{most} components of concrete phase 1 data at level $\alpha$.
 
   In particular, the new set of $\alpha$-tangles $\tau_\alpha \subseteq \Pretangle_\alpha$ is the the image of the $\alpha$-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations.  (We could call these “concrete $\alpha$-tangles” and “abstract $\alpha$-tangles”, if we need to for disambiguation.)

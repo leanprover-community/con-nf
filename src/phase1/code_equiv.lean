@@ -35,7 +35,7 @@ open set with_bot
 universe u
 
 namespace con_nf
-variables [params.{u}] {α β δ : Λ} {γ : type_index} [phase_1a α] {hβ : β ≤ α} {hγ : γ < α}
+variables [params.{u}] {α β δ : Λ} {γ : type_index} [phase_1 α] {hβ : β ≤ α} {hγ : γ < α}
   {hδ : δ < α}
 
 namespace code

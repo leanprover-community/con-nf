@@ -15,7 +15,7 @@ tangles; we define these larger ambient groups in advance in order to set up the
 derivatives and so on independently of the recursion.
 -/
 
-open cardinal equiv equiv.perm quiver with_bot
+open cardinal equiv quiver with_bot
 open_locale cardinal pointwise
 
 noncomputable theory
@@ -127,13 +127,17 @@ noncomputable def derivative : Π {β}, path α β → struct_perm α →* struc
 | _ path.nil := monoid_hom.id _
 | γ (path.cons p_αγ hβγ) := (lower hβγ).comp $ derivative p_αγ
 
+section
+variables {X : Type*} [mul_action near_litter_perm X]
+
 /-- Structural permutations act on atoms. -/
-instance mul_action_atom (α : Λ) : mul_action (struct_perm α) atom :=
+instance mul_action_of_near_litter_perm : mul_action (struct_perm α) X :=
 mul_action.comp_hom _ to_near_litter_perm
 
-/-- Structural permutations act on near-litters. -/
-instance mul_action_near_litter (α : Λ) : mul_action (struct_perm α) near_litter :=
-mul_action.comp_hom _ to_near_litter_perm
+@[simp] lemma to_near_litter_perm_smul (f : struct_perm α) (x : X) :
+  f.to_near_litter_perm • x = f • x := rfl
+
+end
 
 -- TODO: Why can't the equation compiler handle my sorried proofs (the `funext` call breaks things)?
 instance mul_action_pretangle : Π (α : Λ), mul_action (struct_perm α) (pretangle α)

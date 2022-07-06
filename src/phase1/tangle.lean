@@ -24,7 +24,7 @@ inductive preferred_extension (α : Λ) : Type u
 
 -/
 
-variables (α : Λ) [phase_1a α] {β : Λ} {hβ : β < α} {γ : type_index} {hγ : γ < α}
+variables (α : Λ) [phase_1 α] {β : Λ} {hβ : β < α} {γ : type_index} {hγ : γ < α}
 
 namespace semitangle
 
@@ -58,7 +58,7 @@ inductive preference (exts : extension α)
       → preference
 
 /-- The `-1`-extension associated with a given semitangle extension. -/
-def preference.atoms {α : Λ} [phase_1a α] {members : extension α} :
+def preference.atoms {α : Λ} [phase_1 α] {members : extension α} :
   preference α members → set atom
 | (preference.base atoms _ _) := (atoms : set (tangle α ⊥ $ bot_lt_coe _))
 | (preference.proper _ _ _ _) := ∅
@@ -306,8 +306,6 @@ end semitangle
 
 open semitangle
 
-variables [phase_1b α] [phase_1b_coherence α]
-
 namespace allowable_perm
 
 lemma smul_extension_A_map (f : allowable_perm α) (s : tangles α γ hγ) :
@@ -317,13 +315,13 @@ sorry
 lemma smul_aux₁ {f : allowable_perm α} {e : extension α}
   {s : set (tangle α ⊥ $ bot_lt_coe _)} (h : ∀ γ (hγ : γ < α), A_map hγ s = e γ hγ) (γ hγ) :
   A_map hγ (f • s) = f • e γ hγ :=
-by { rw [←h γ hγ, smul_A_map _ _ _ bot_ne_coe], assumption }
+by rw [←h γ hγ, smul_A_map _ _ _ bot_ne_coe]
 
 lemma smul_aux₂ {f : allowable_perm α} {e : extension α} {γ} {hγ : γ < α}
   (h : ∀ δ (hδ : δ < α), γ ≠ δ →
     A_map hδ (e γ hγ : set (tangle α ↑γ $ coe_lt_coe.2 hγ)) = ↑(e δ hδ)) (δ hδ) (hγδ : γ ≠ δ) :
   A_map hδ (f • (e γ hγ : set (tangle α ↑γ $ coe_lt_coe.2 hγ))) = f • ↑(e δ hδ) :=
-by { rw [←smul_A_map _ _ _ (coe_ne_coe.2 hγδ), h _ _ hγδ], assumption }
+by rw [←smul_A_map _ _ _ (coe_ne_coe.2 hγδ), h _ _ hγδ]
 
 /-- Allowable permutations act on nonempty semitangles. -/
 instance mul_action_nonempty_semitangle : mul_action (allowable_perm α) (nonempty_semitangle α) :=

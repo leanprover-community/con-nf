@@ -16,7 +16,7 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-variables [params.{u}] {α β γ : Λ} [phase_1a α]
+variables [params.{u}] {α β γ : Λ} [phase_1 α]
 
 /-!
 We now define the f-maps. We will do so in two stages; first, we define it as a function `μ → μ`,
@@ -170,7 +170,7 @@ blueprint, except that it is defined as a function from `μ` to `f_map_result` i
 tangles to litters. This gives two benefits:
 1. We preserve the hypotheses of the construction. This allows us to easily derive properties of the
   `f_map` function later.
-2. Given the conversion functions in `phase_1a`, it is an easy translation into the true `f_map`
+2. Given the conversion functions in `phase_1`, it is an easy translation into the true `f_map`
   as required. -/
 @[irreducible] private noncomputable def f_map_core (β : type_index) (γ : Λ) (hβ : β < α)
   (hγ : γ < α) :
