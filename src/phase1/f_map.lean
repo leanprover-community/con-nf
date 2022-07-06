@@ -1,4 +1,4 @@
-import phase1.code
+import phase1.basic
 
 /-!
 # f-maps
@@ -122,7 +122,7 @@ private def extend_result (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ 
   (h_lt : Π y < x, f_map_result β γ hβ hγ y) : Π y < x, μ :=
 λ y hy, (h_lt y hy).val y le_rfl
 
-/-- By construction, all the f_map_results have matching output values, where they are defined. -/
+/-- By construction, all the `f_map_result`s have matching output values, where they are defined. -/
 private lemma f_map_result_coherent (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x y : μ)
   (fx : f_map_result β γ hβ hγ x) (fy : f_map_result β γ hβ hγ y) :
   Π (z : μ), z ≤ x → z ≤ y → fx.val z ‹_› = fy.val z ‹_›
@@ -134,7 +134,7 @@ private lemma f_map_result_coherent (β : type_index) (γ : Λ) (hβ : β < α) 
 end
 using_well_founded { dec_tac := `[exact psigma.lex.left _ _ ‹_›] }
 
-/-- We can recursively construct the (unique) f_map_result for arbitrary `x`. -/
+/-- We can recursively construct the (unique) `f_map_result` for arbitrary `x`. -/
 private noncomputable def mk_f_map_result (β : type_index) (γ : Λ) (hβ : β < α) (hγ : γ < α) (x : μ)
   (h_lt : Π y < x, f_map_result β γ hβ hγ y)
   (hx : (f_map_generator hβ hγ x $ extend_result β γ hβ hγ x h_lt).nonempty) :

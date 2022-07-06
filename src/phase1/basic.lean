@@ -1,6 +1,18 @@
 import phase0.litter
 import phase0.struct_perm
 
+/-!
+# Phase 1 of the recursion
+
+This file contains the induction hypothesis for the first phase of the recursion. In this phase at
+level `α`, we assume phase 1 at all levels `β < α`, but we do not assume any interaction between the
+levels. Interaction will be introduced in phase 2.
+
+## Main declarations
+
+* `conf_`
+-/
+
 open equiv equiv.perm with_bot
 
 noncomputable theory
@@ -31,6 +43,10 @@ def tangle : Π β < (α : type_index), Type u
 @[irreducible] def of_tangle : Π {β : type_index} (h : β < α), tangle α β h ↪ μ
 | ⊥ h := let equiv := (cardinal.eq.mp mk_atom).some in ⟨equiv.to_fun, equiv.injective⟩
 | (some β) h := phase_1a.of_tangle β (coe_lt_coe.mp h)
+
+/-- Nonempty sets of tangles. -/
+abbreviation tangles (γ : type_index) (hγ : γ < α) : Type u :=
+{s : set (tangle α γ hγ) // s.nonempty}
 
 /-- Contains all the information needed for phase 1b of the recursion. -/
 class phase_1b :=
