@@ -1,5 +1,6 @@
 import mathlib.logic
 import mathlib.with_bot
+import phase1.code
 import phase1.f_map
 
 /-!
@@ -33,7 +34,7 @@ universe u
 
 namespace con_nf
 variables [params.{u}] {α β δ ε : Λ} [phase_1a α] {hβ : β ≤ α} {γ : type_index} {hγ : γ < α}
-  {hδ : δ < α} {s : set (tangle α γ hγ)} {t : tangle α γ hγ} {c d : code α β hβ}
+  {hδ : δ < α} {s : set (tangle α γ hγ)} {t : tangle α γ hγ} {c d : code α}
 
 /-- The *alternative extension* map. For a set of tangles `G`, consider the code
 `(α, γ, G)`. We then construct the non-empty set `D` such that `(α, δ, D)` is an alternative
@@ -116,17 +117,17 @@ lemma well_founded_of_tangle {β : type_index} (h : β < α) :
 inv_image.wf _ is_well_order.wf
 
 /-- The minimum tangle of a nonempty set of tangles. -/
-noncomputable def min_tangle (c : {s : set (tangle α γ hγ) // s.nonempty}) : tangle α γ hγ :=
+noncomputable def min_tangle (c : tangles α γ hγ) : tangle α γ hγ :=
 (well_founded_of_tangle hγ).min c.val c.property
 
-lemma min_tangle_mem (c : {s : set (tangle α γ hγ) // s.nonempty}) : min_tangle c ∈ c.val :=
+lemma min_tangle_mem (c : tangles α γ hγ) : min_tangle c ∈ c.val :=
 well_founded.min_mem _ c.val c.property
 
-lemma min_tangle_le (c : {s : set (tangle α γ hγ) // s.nonempty}) {x} (hx : x ∈ c.1) :
+lemma min_tangle_le (c : tangles α γ hγ) {x} (hx : x ∈ c.1) :
   of_tangle α hγ (min_tangle c) ≤ of_tangle α hγ x :=
 not_lt.1 $ (well_founded_of_tangle hγ).not_lt_min c.val c.property hx
 
-lemma A_map_order (hδ : δ < α) (c : {s : set (tangle α γ hγ) // s.nonempty}) :
+lemma A_map_order (hδ : δ < α) (c : tangles α γ hγ) :
   of_tangle α hγ (min_tangle c) <
     of_tangle α (coe_lt_coe.2 hδ) (min_tangle ⟨A_map hδ c.1, c.2.A_map⟩) :=
 begin
@@ -136,35 +137,31 @@ begin
 end
 
 /-- Tool that lets us use well-founded recursion on codes via `μ`. -/
-noncomputable def code_min_map (c : nonempty_code α β hβ) : μ :=
+noncomputable def code_min_map (c : nonempty_code α) : μ :=
 of_tangle α _ $ min_tangle ⟨c.val.elts, c.property⟩
 
 /-- The pullback `<` relation on codes is well-founded. -/
-lemma code_wf : well_founded (inv_image μr (code_min_map : nonempty_code α β hβ → μ)) :=
+lemma code_wf : well_founded (inv_image μr (code_min_map : nonempty_code α → μ)) :=
 inv_image.wf (code_min_map) μwf.wf
 
 /-- The A-map, phrased as a function on `α`-codes. -/
-def A_map_code (hδ : δ < β) (c : code α β hβ) : code α β hβ :=
-⟨δ, coe_lt_coe.2 hδ, A_map (hδ.trans_le hβ) c.elts⟩
+def A_map_code (hδ : δ < α) (c : code α) : code α := ⟨δ, coe_lt_coe.2 hδ, A_map hδ c.elts⟩
 
-@[simp] lemma extension_A_map_code (hδ : δ < β) (c : code α β hβ) :
-  (A_map_code hδ c).extension = δ := rfl
+@[simp] lemma extension_A_map_code (hδ : δ < α) (c) : (A_map_code hδ c).extension = δ := rfl
+@[simp] lemma elts_A_map_code (hδ : δ < α) (c) : (A_map_code hδ c).elts = A_map hδ c.elts := rfl
 
-@[simp] lemma elts_A_map_code (hδ : δ < β) (c : code α β hβ) :
-  (A_map_code hδ c).elts = A_map (hδ.trans_le hβ) c.elts := rfl
+@[simp] lemma A_map_code_mk (γ hγ s) (hδ : δ < α) :
+  A_map_code hδ ⟨γ, hγ, s⟩ = ⟨δ, coe_lt_coe.2 hδ, A_map hδ s⟩ := rfl
 
-@[simp] lemma A_map_code_mk (γ hγ s) (hδ : δ < β) :
-  A_map_code hδ (⟨γ, hγ, s⟩ : code α β hβ) = ⟨δ, coe_lt_coe.2 hδ, A_map (hδ.trans_le hβ) s⟩ := rfl
-
-@[simp] lemma A_map_code_is_empty {hδ : δ < β} : (A_map_code hδ c).is_empty ↔ c.is_empty :=
+@[simp] lemma A_map_code_is_empty {hδ : δ < α} : (A_map_code hδ c).is_empty ↔ c.is_empty :=
 by { cases c, exact A_map_eq_empty }
 
 alias A_map_code_is_empty ↔ _ code.is_empty.A_map_code
 
 attribute [protected] code.is_empty.A_map_code
 
-lemma A_map_code_inj_on (hδ : δ < β) :
-  {c : code α β hβ | c.elts.nonempty}.inj_on (A_map_code hδ : code α β hβ → code α β hβ) :=
+lemma A_map_code_inj_on (hδ : δ < α) :
+  {c : code α | c.elts.nonempty}.inj_on (A_map_code hδ : code α → code α) :=
 begin
   rintro ⟨γ, hγ, s⟩ hs ⟨ε, hε, t⟩ ht h,
   have := (congr_arg_heq code.elts h).eq,
@@ -174,31 +171,31 @@ begin
   rw A_map_injective _ this,
 end
 
-lemma A_map_code_order (hδ : δ < β) (c : nonempty_code α β hβ) :
+lemma A_map_code_order (hδ : δ < α) (c : nonempty_code α) :
   code_min_map c < code_min_map ⟨A_map_code hδ c.1, c.2.A_map⟩ :=
 A_map_order _ _
 
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse A-map. -/
-@[mk_iff] inductive A_map_rel' (c : nonempty_code α β hβ) : nonempty_code α β hβ → Prop
-| intro (δ : Λ) (hδ : δ < β) : (c : code α β hβ).extension ≠ δ →
-  A_map_rel' ⟨A_map_code hδ (c : code α β hβ), c.2.A_map⟩
+@[mk_iff] inductive A_map_rel' (c : nonempty_code α) : nonempty_code α → Prop
+| intro (δ : Λ) (hδ : δ < α) : (c : code α).extension ≠ δ →
+  A_map_rel' ⟨A_map_code hδ c, c.2.A_map⟩
 
 lemma A_map_subrelation :
-  subrelation A_map_rel' (inv_image μr (code_min_map : nonempty_code α β hβ → μ))
+  subrelation A_map_rel' (inv_image μr (code_min_map : nonempty_code α → μ))
 | c _ (A_map_rel'.intro δ hδ hc) := A_map_code_order _ _
 
 /-- There are only finitely many iterated images under any inverse A-map. -/
-lemma A_map_rel'_well_founded (hβ : β ≤ α) :
-  well_founded (A_map_rel' : nonempty_code α β hβ → nonempty_code α β hβ → Prop) :=
+lemma A_map_rel'_well_founded :
+  well_founded (A_map_rel' : nonempty_code α → nonempty_code α → Prop) :=
 A_map_subrelation.wf code_wf
 
-instance : has_well_founded (nonempty_code α β hβ) := ⟨_, A_map_rel'_well_founded hβ⟩
+instance : has_well_founded (nonempty_code α) := ⟨_, A_map_rel'_well_founded⟩
 
 /-- There is at most one inverse under an A-map. This corresponds to the fact that there is only one
 code which is related (on the left) to any given code under the A-map relation. -/
-lemma A_map_rel'_subsingleton (c : nonempty_code α β hβ) :
-  {d : nonempty_code α β hβ | A_map_rel' d c}.subsingleton :=
+lemma A_map_rel'_subsingleton (c : nonempty_code α) :
+  {d : nonempty_code α | A_map_rel' d c}.subsingleton :=
 begin
   intros x hx y hy,
   simp only [subtype.val_eq_coe, ne.def, A_map_rel'_iff, mem_set_of_eq] at hx hy,
@@ -212,12 +209,12 @@ end
 
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse A-map. -/
-@[mk_iff] inductive A_map_rel (c : code α β hβ) : code α β hβ → Prop
-| intro (δ : Λ) (hδ : δ < β) : c.extension ≠ δ → A_map_rel (A_map_code hδ c)
+@[mk_iff] inductive A_map_rel (c : code α) : code α → Prop
+| intro (δ : Λ) (hδ : δ < α) : c.extension ≠ δ → A_map_rel (A_map_code hδ c)
 
 infix ` ↝ `:62 := A_map_rel
 
-lemma A_map_rel_subsingleton (hc : c.elts.nonempty) : {d : code α β hβ | d ↝ c}.subsingleton :=
+lemma A_map_rel_subsingleton (hc : c.elts.nonempty) : {d : code α | d ↝ c}.subsingleton :=
 begin
   intros d hd e he,
   simp only [A_map_rel_iff, mem_set_of_eq] at hd he,
@@ -230,7 +227,7 @@ begin
   exact A_map_nonempty.1 hc,
 end
 
-lemma eq_of_A_map_code {hδ : δ < β} {hε : ε < β} (hc : c.elts.nonempty) (hcδ : c.extension ≠ δ)
+lemma eq_of_A_map_code {hδ : δ < α} {hε : ε < α} (hc : c.elts.nonempty) (hcδ : c.extension ≠ δ)
   (hdε : d.extension ≠ ε) (h : A_map_code hδ c = A_map_code hε d) : c = d :=
 begin
   refine A_map_rel_subsingleton (by exact hc.A_map) (A_map_rel.intro _ hδ hcδ) _,
@@ -238,7 +235,7 @@ begin
   exact A_map_rel.intro _ _ hdε,
 end
 
-lemma A_map_rel_A_map_code {hδ : δ < β} (hd : d.elts.nonempty) (hdδ : d.extension ≠ δ) :
+lemma A_map_rel_A_map_code {hδ : δ < α} (hd : d.elts.nonempty) (hdδ : d.extension ≠ δ) :
   c ↝ A_map_code hδ d ↔ c = d :=
 begin
   refine ⟨λ h, A_map_rel_subsingleton (by exact hd.A_map) h $ A_map_rel.intro _ _ hdδ, _⟩,
@@ -249,15 +246,14 @@ end
 lemma A_map_rel.nonempty_iff :  c ↝ d → (c.elts.nonempty ↔ d.elts.nonempty) :=
 by { rintro ⟨δ, hδ, hcδ⟩, exact A_map_nonempty.symm }
 
-@[simp] lemma A_map_rel_coe_coe {c d : nonempty_code α β hβ} :
-  (c : code α β hβ) ↝ d ↔ A_map_rel' c d :=
+@[simp] lemma A_map_rel_coe_coe {c d : nonempty_code α} : (c : code α) ↝ d ↔ A_map_rel' c d :=
 begin
   rw [A_map_rel_iff, A_map_rel'_iff, iff.comm],
   exact exists₂_congr (λ δ hδ, and_congr_right' subtype.ext_iff),
 end
 
-lemma A_map_rel_empty_empty {hγ : γ < β} {hδ : δ < β} (hγδ : γ ≠ δ) :
-  (⟨γ, hγ, ∅⟩ : code α β hβ) ↝ ⟨δ, coe_lt_coe.2 hδ, ∅⟩ :=
+lemma A_map_rel_empty_empty {hγ : γ < α} {hδ : δ < α} (hγδ : γ ≠ δ) :
+  (⟨γ, hγ, ∅⟩ : code α) ↝ ⟨δ, coe_lt_coe.2 hδ, ∅⟩ :=
 (A_map_rel_iff _ _).2 ⟨_, hδ, hγδ, by simp⟩
 
 end con_nf
