@@ -1,4 +1,4 @@
-import code
+import phase1.code
 
 /-!
 # f-maps
@@ -16,8 +16,7 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-open params
-variables [params.{u}] {α β γ : Λ} [phase_1a.{u} α]
+variables [params.{u}] {α β γ : Λ} [phase_1a α]
 
 /-!
 We now define the f-maps. We will do so in two stages; first, we define it as a function `μ → μ`,

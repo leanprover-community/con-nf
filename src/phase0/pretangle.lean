@@ -1,4 +1,4 @@
-import params
+import phase0.params
 
 noncomputable theory
 
@@ -6,8 +6,6 @@ universe u
 
 namespace con_nf
 variables [params.{u}]
-
-open params
 
 /-- A *pretangle* is an object that may become a *tangle*,
 an element of the model.
@@ -34,11 +32,11 @@ def extension (a : pretangle α) : Π (β < α), set (pretangle β) :=
 by { unfold pretangle at a, exact a.snd }
 
 @[simp] lemma atom_extension_mk (atoms : set atom) (extensions : Π β < α, set (pretangle β)) :
-  atom_extension (mk atoms extensions) = atoms :=
+  (mk atoms extensions).atom_extension = atoms :=
 by { simp [atom_extension, mk] }
 
-@[simp] lemma extension_mk (atoms : set atom) (extensions : Π β < α, set (pretangle β))
-{β : Λ} (hβ : β < α) : extension (mk atoms extensions) β hβ = extensions β hβ :=
+@[simp] lemma extension_mk (atoms : set atom) (extensions : Π β < α, set (pretangle β)) :
+  (mk atoms extensions).extension = extensions :=
 by { simp [extension, mk] }
 
 lemma eta (t : pretangle α) : mk (t.atom_extension) (t.extension) = t :=

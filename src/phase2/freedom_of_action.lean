@@ -1,5 +1,5 @@
-import extended_index
-import litter
+import phase0.extended_index
+import phase0.litter
 
 /-!
 # The freedom of action theorem
@@ -11,8 +11,6 @@ universe u
 
 namespace con_nf
 variables [params.{u}]
-
-open params
 
 /-- An α-local bijection associates to each extended type index `A` a domain of atoms,
 and defines an injection from that domain to itself.

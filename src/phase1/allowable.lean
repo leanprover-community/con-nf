@@ -1,9 +1,11 @@
-import code_equiv
-import struct_perm
+import phase1.code_equiv
 
 /-!
 # Allowable permutations
 -/
+
+open function set with_bot
+open_locale pointwise
 
 noncomputable theory
 
@@ -12,25 +14,7 @@ universe u
 namespace con_nf
 variable [params.{u}]
 
-open function params set with_bot
-open_locale pointwise
-
-variables (α : Λ) [phase_1a.{u} α]
-
-/-- Contains all the information needed for phase 1b of the recursion. -/
-class phase_1b :=
-(allowable : Π β < α, Type u)
-[allowable_group : Π β hβ, group (allowable β hβ)]
-(to_struct_perm : Π β hβ, allowable β hβ →* struct_perm β)
-[allowable_action : Π β hβ, mul_action (allowable β hβ) (tangle α β $ coe_lt_coe.2 hβ)]
-
-export phase_1b (allowable allowable_group to_struct_perm allowable_action)
-
-attribute [instance] allowable_group allowable_action
-
-variables [phase_1b.{u} α] {β γ δ : Λ} {hβ : β ≤ α}
-
-instance {hβ : β < α} : mul_action (allowable β hβ) (tangle α β $ coe_lt_coe.2 hβ) := infer_instance
+variables (α : Λ) [phase_1a α] [phase_1b α] {β γ δ : Λ} {hβ : β ≤ α}
 
 /-- A semi-allowable permutation is a `-1`-allowable permutation of atoms (a near-litter
 permutation) together with allowable permutations on all `γ < β`. This forms a group structure
@@ -181,7 +165,7 @@ mul_action.comp_hom _ coe_hom
 lemma _root_.con_nf.code.equiv.smul : c ≡ d → f • c ≡ f • d := (f.2 _ _).2
 
 instance mul_action_support_condition : mul_action (allowable_perm α) (support_condition α) :=
-mul_action.comp_hom _ $ allowable_perm.to_struct_perm
+mul_action.comp_hom _ allowable_perm.to_struct_perm
 
 instance has_smul_potential_support : has_smul (allowable_perm α) (potential_support α) :=
 ⟨λ f s, ⟨f • s, s.2.image⟩⟩
@@ -194,17 +178,18 @@ set_like.coe_injective.mul_action _ coe_smul_potential_support
 
 end allowable_perm
 
-/-- Contains coherence conditions on to_tangle. -/
-class phase_1b_coherence (α : Λ) [phase_1a α] [phase_1b α] :=
+/-- Contains coherence conditions on `to_tangle`. -/
+class phase_1b_coherence (α : Λ) [phase_1a α] [phase_1b α] : Prop :=
 (to_tangle_perm (β : Λ) (hβ : β < α) (π : allowable_perm α) (N : near_litter) :
   @has_smul.smul _ _ (@mul_action.to_has_smul _ _ _ (allowable_action β hβ))
-    (π.val.snd β hβ) (to_tangle β hβ N) = to_tangle β hβ (π.val.fst • N))
+    ((↑π : semiallowable_perm α).snd β hβ) (to_tangle β hβ N) =
+      to_tangle β hβ ((↑π : semiallowable_perm α).fst • N))
 
 export phase_1b_coherence (to_tangle_perm)
 
-namespace allowable_perm
+variables {α} [phase_1b_coherence α] {f : allowable_perm α} {c d : code α α le_rfl}
 
-variables {α} [phase_1b_coherence.{u} α] {f : allowable_perm α} {c : code α α le_rfl}
+namespace allowable_perm
 
 /-- The unpacked coherence condition for allowable permutations on proper type indices γ. -/
 lemma coherence (π : allowable_perm α) (hγ : γ < α) (hδ : δ < α) (hγδ : γ ≠ δ) (g) :
@@ -212,11 +197,11 @@ lemma coherence (π : allowable_perm α) (hγ : γ < α) (hδ : δ < α) (hγδ 
 begin
   classical,
   unfold has_smul.smul,
-  have equiv := code.singleton_equiv (coe_lt_coe.2 hγ) hδ (coe_ne_coe.2 hγδ) g,
+  have equiv := code.equiv.singleton (coe_lt_coe.2 hγ) hδ (coe_ne_coe.2 hγδ) g,
   rw ← π.property at equiv,
   unfold has_smul.smul at equiv,
   simp only [subtype.val_eq_coe, rec_bot_coe_coe, image_smul, smul_set_singleton] at equiv,
-  rw [code.equiv.comm, code.equiv_singleton_iff] at equiv,
+  rw [code.equiv.comm, code.equiv.singleton_iff] at equiv,
   cases equiv,
   { have := congr_arg code.extension equiv,
     cases hγδ.symm (with_bot.coe_injective this) },
@@ -225,24 +210,13 @@ begin
   subst hc',
   clear hc,
   dsimp at hA,
-  have hA' := hA.symm,
-  sorry,
-  -- rw A_map_code_coe_eq_iff at hA',
-  -- simp at hA',
-  -- unfold A_map at hA',
-  -- simp at hA',
-  -- dsimp at hA',
-  -- have : to_tangle δ (hε.trans_le hβ) ⟨f_map γ δ _ (hδ.trans_le hβ) (π.val.snd γ hγ • g),
-  --   litter_set _, is_near_litter_litter_set _⟩
-  --   ∈ to_tangle δ (hε.trans_le hβ) '' local_cardinal (f_map γ δ _ (hδ.trans_le hβ)
-  --     (π.val.snd γ hγ • g)) := mem_image_of_mem (to_tangle δ $ hε.trans_le hβ) (by simp),
-  -- rw subtype.val_eq_coe at this,
-  -- rw hA' at this,
-  -- rw mem_smul_set at this,
-  -- obtain ⟨t, ⟨N, hN₁, hN₂⟩, ht⟩ := this,
-  -- have := mem_set_of.mp hN₁,
-  -- rw ← this, rw ← hN₂ at ht,
-  -- sorry
+  rw [code.mk_eq_mk, ← set.image_smul, set.image_image] at hA,
+  simp_rw to_tangle_perm at hA,
+  rw set.image_comp _ (λ a, (↑π : semiallowable_perm α).fst • a) at hA,
+  unfold A_map at hA,
+  simpa only [set.image_eq_image (embedding.injective $ to_tangle δ _), image_smul,
+    near_litter_perm.smul_local_cardinal, mem_singleton_iff, Union_Union_eq_left,
+    function.injective.eq_iff local_cardinal_injective] using hA
 end
 
 
@@ -369,60 +343,55 @@ lemma smul_A_map {γ : type_index} {hγ : γ < α} (π : allowable_perm α) (hδ
 
   end
 
-lemma smul_A_map_code  (π : allowable_perm α) (hδ : δ < α) (c : code α α le_rfl)
+lemma smul_A_map_code (π : allowable_perm α) (hδ : δ < α) {c : code α α le_rfl}
   (hc : c.extension ≠ δ) :
   π • A_map_code hδ c = A_map_code hδ (π • c) :=
 by simp only [code.ext_iff, smul_A_map _ hδ _ hc, extension_smul, extension_A_map_code,
   eq_self_iff_true, elts_smul, elts_A_map_code, heq_iff_eq, and_self]
 
-lemma smul_A_map_rel (π : allowable_perm α) (c d : code α α le_rfl) : π • c ↝ π • d ↔ c ↝ d :=
-begin
-  split; intro h; rw A_map_rel_iff at h ⊢; obtain ⟨δ, hδ, hcδ, h⟩ := h; refine ⟨δ, hδ, hcδ, _⟩,
-  { rw ← smul_A_map_code _ _ c hcδ at h,
-    exact mul_action.injective _ h, },
-  { rw [← smul_A_map_code _ _ c hcδ, h], },
-end
+end allowable_perm
+
+@[simp] lemma A_map_rel.smul {c d : code α α le_rfl} : c ↝ d → f • c ↝ f • d :=
+by { rintro ⟨δ, hδ, hcδ⟩, exact (A_map_rel_iff _ _).2 ⟨_, hδ, hcδ, f.smul_A_map_code _ hcδ⟩ }
+
+@[simp] lemma smul_A_map_rel {c d : code α α le_rfl} : f • c ↝ f • d ↔ c ↝ d :=
+by { refine ⟨λ h, _, A_map_rel.smul⟩, rw [←inv_smul_smul f c, ←inv_smul_smul f d], exact h.smul }
+
+namespace code
 
 lemma is_even_smul_nonempty : ∀ (c : nonempty_code α α le_rfl), (f • c.val).is_even ↔ c.val.is_even
 | ⟨c, hc⟩ := begin
-  rw [code.is_even_iff, code.is_even_iff],
-  have leadnonempty : ∀ (c d : code α α le_rfl) (h : c ↝ d), d.elts.nonempty → c.elts.nonempty := by
-  { intros c d hcd,
-    contrapose!,
-    intro hc,
-    obtain ⟨δ, hδ, hcδ, h⟩ := (A_map_rel_iff _ _).1 hcd,
-    rw not_nonempty_iff_eq_empty at hc,
-    rwa [h, not_nonempty_iff_eq_empty, elts_A_map_code, A_map_eq_empty], },
+  simp_rw code.is_even_iff,
   split; intros h d hd,
-  { have := leadnonempty d c hd hc,
-    rw ← smul_A_map_rel f at hd,
-    let rec : A_map_rel' ⟨d, this⟩ ⟨c, hc⟩ := code.A_map_rel_iff_A_map_rel'.1 ((smul_A_map_rel f _ _).1 hd),
-    exact code.not_is_even.1 (mt (is_even_smul_nonempty ⟨d, this⟩).2 $ code.not_is_even.2 $ h _ hd), },
-  set e := f⁻¹ • d with he_def,
-  have : d = f • e := by rw smul_inv_smul,
-  rw this at hd ⊢,
-  rw smul_A_map_rel f at hd,
-  have := leadnonempty e c hd hc,
-  let rec : A_map_rel' ⟨e, this⟩ ⟨c, hc⟩ := code.A_map_rel_iff_A_map_rel'.1 hd,
-  refine code.not_is_even.1 (mt (is_even_smul_nonempty ⟨e, this⟩).1 $ code.not_is_even.2 $ h _ hd),
+  { have := hd.nonempty_iff.2 hc,
+    let rec : A_map_rel' ⟨d, this⟩ ⟨c, hc⟩ := A_map_rel_coe_coe.1 hd,
+    exact code.not_is_even.1 (λ H, (h _ hd.smul).not_is_even $
+      (is_even_smul_nonempty ⟨d, this⟩).2 H) },
+  { rw ←smul_inv_smul f d at hd ⊢,
+    rw smul_A_map_rel at hd,
+    have := hd.nonempty_iff.2 hc,
+    let rec : A_map_rel' ⟨_, this⟩ ⟨c, hc⟩ := A_map_rel_coe_coe.1 hd,
+    exact code.not_is_even.1 (λ H, (h _ hd).not_is_even $ (is_even_smul_nonempty ⟨_, this⟩).1 H) }
 end
 using_well_founded { dec_tac := `[assumption] }
 
-@[simp] lemma is_even_smul : ∀ (c : code α α le_rfl), (f • c).is_even ↔ c.is_even :=
+@[simp] lemma is_even_smul : (f • c).is_even ↔ c.is_even :=
 begin
-  intro c,
-  cases eq_empty_or_nonempty c.elts,
-  { obtain ⟨γ, hγ, G⟩ := c, dsimp at h, subst h,
+  cases c.elts.eq_empty_or_nonempty,
+  { obtain ⟨γ, hγ, G⟩ := c,
+    dsimp at h,
+    subst h,
     have : f • (⟨γ, hγ, ∅⟩ : code α α le_rfl) = ⟨γ, hγ, ∅⟩,
-    { induction γ using with_bot.rec_bot_coe; simp, },
-    rw [this, code.is_even_empty_iff], },
-  { exact is_even_smul_nonempty ⟨c, h⟩, },
+    { induction γ using with_bot.rec_bot_coe; simp },
+    rw [this, code.is_even_empty_iff] },
+  { exact is_even_smul_nonempty ⟨c, h⟩ }
 end
+
 @[simp] lemma is_odd_smul : (f • c).is_odd ↔ c.is_odd :=
 by simp_rw [←code.not_is_even, is_even_smul]
 
-alias is_even_smul ↔ _ _root_.con_nf.code.is_even.smul
-alias is_odd_smul ↔ _ _root_.con_nf.code.is_odd.smul
+alias is_even_smul ↔ _ is_even.smul
+alias is_odd_smul ↔ _ is_odd.smul
 
-end allowable_perm
+end code
 end con_nf

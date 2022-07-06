@@ -1,6 +1,6 @@
 import mathlib.cardinal
 import mathlib.equiv
-import params
+import phase0.params
 
 /-!
 # Litters, near-litters
@@ -23,8 +23,6 @@ universe u
 
 namespace con_nf
 variables [params.{u}] {α β : Type u}
-
-open params
 
 variables {i j : litter} {s t : set atom}
 
@@ -124,6 +122,15 @@ lemma local_cardinal_nonempty (i : litter) : (local_cardinal i).nonempty :=
 
 lemma local_cardinal_disjoint : pairwise (disjoint on local_cardinal) :=
 λ i j h N hN, h $ hN.1.symm.trans hN.2
+
+lemma local_cardinal_injective : injective local_cardinal :=
+begin
+  intros i j hij,
+  by_contradiction,
+  have := local_cardinal_disjoint i j h,
+  rw [(on), disjoint, hij, inf_idem, le_bot_iff, bot_eq_empty, ← not_nonempty_iff_eq_empty] at this,
+  exact this (local_cardinal_nonempty _)
+end
 
 lemma litter.to_near_litter_mem_local_cardinal (i : litter) : i.to_near_litter ∈ local_cardinal i :=
 by exact rfl
@@ -282,6 +289,25 @@ instance : mul_action near_litter_perm near_litter :=
 { smul := λ f N, ⟨f.litter_perm N.1, ⇑(f.atom_perm)⁻¹ ⁻¹' N.2, f.near N.2.2⟩,
   one_smul := λ _, sigma.ext rfl $ by simp,
   mul_smul := λ _ _ _, rfl }
+
+open_locale pointwise
+
+@[simp] lemma smul_fst (π : near_litter_perm) (N : near_litter) : (π • N).fst = π • N.fst := rfl
+@[simp] lemma smul_snd (π : near_litter_perm) (N : near_litter) : (π • N).snd.val = π • N.snd.val :=
+by { dsimp only [(•)], simp }
+
+@[simp] lemma smul_local_cardinal (π : near_litter_perm) (i : litter) :
+  π • local_cardinal i = local_cardinal (π • i) :=
+begin
+  ext M,
+  unfold local_cardinal,
+  unfold has_smul.smul,
+  dsimp, split,
+  { rintro ⟨N, hN₁, hN₂⟩, rw [← hN₂, ← hN₁] },
+  { intro h, refine ⟨π⁻¹ • M, _, _⟩,
+    { rw [smul_fst, h], unfold has_smul.smul, simp },
+    { ext; simp_rw smul_fst; dsimp only [(•)]; simp } }
+end
 
 end near_litter_perm
 end con_nf
