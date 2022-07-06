@@ -245,10 +245,129 @@ begin
   -- sorry
 end
 
+
+lemma coherence_bot (hγ : ⊥ < ↑α) (π : allowable_perm α) (hδ : δ < α)
+ (i : tangle α ⊥ hγ):
+    (π.val.fst.litter_perm) (f_map ⊥ δ hγ hδ i)= f_map ⊥ δ hγ hδ ((π.val.fst.atom_perm) i):= begin
+sorry,
+end
+
+lemma a_perm_commutes_with_local_cardinal (π : allowable_perm α) (a : near_litter) (b : litter) :
+π.val.fst • a ∈ local_cardinal (π.val.fst.litter_perm b) ↔ a ∈ local_cardinal (b):= begin
+  unfold local_cardinal,
+  dsimp,
+  dsimp only [(•)],
+  simp only [embedding_like.apply_eq_iff_eq],
+end
+
+/-
+lemma litter_def (π : allowable_perm α) (a : near_litter) (b : litter) :
+local_cardinal (⇑(π.val.fst.litter_perm) (f_map ⊥ δ hγ hδ _.some)) =
+local_cardinal (f_map ⊥ δ hγ hδ (⇑(↑π.fst.atom_perm) _.some)) := sorry,
+-/
+
 lemma smul_A_map {γ : type_index} {hγ : γ < α} (π : allowable_perm α) (hδ : δ < α)
   (s : set (tangle α γ hγ)) (hγδ : γ ≠ δ) :
-  π • A_map hδ s = A_map hδ (π • s) :=
-sorry
+  π • A_map hδ s = A_map hδ (π • s) := begin
+  unfold A_map,
+  dsimp only [(•)],
+  simp only [has_smul.comp.smul, image_smul, mem_image, Union_exists, bUnion_and', Union_Union_eq_right],
+  dsimp only [(coe_hom)],
+  simp only [monoid_hom.coe_mk],
+  dsimp only [(•)],
+  unfold image,
+  simp only [mem_Union, exists_prop, mem_set_of_eq, subtype.val_eq_coe, exists_exists_and_eq_and],
+  ext,
+  simp only [mem_set_of_eq],
+  rw rec_bot_coe_coe,
+  induction γ using with_bot.rec_bot_coe,
+  {
+  rw rec_bot_coe_bot,
+  split,
+  intro lhs,
+  use (π.1.1 • lhs.some),
+  use lhs.some_spec.left.some,
+  split,
+  exact lhs.some_spec.left.some_spec.left,
+  let a := f_map ⊥ δ hγ hδ ((π.val.fst.atom_perm)  lhs.some_spec.left.some),
+  have hm1 : a = f_map ⊥ δ hγ hδ ((π.val.fst.atom_perm)  lhs.some_spec.left.some), by refl,
+  suffices hm2 : (π.val.fst • lhs.some) ∈ local_cardinal (a),
+  {
+    rw hm1 at hm2,
+    exact hm2,
+  },
+  rw ← coherence_bot hγ π hδ lhs.some_spec.left.some at hm1,
+  rw hm1,
+  exact (a_perm_commutes_with_local_cardinal π lhs.some _).mpr lhs.some_spec.left.some_spec.right,
+  rw ← to_tangle_perm,
+  exact lhs.some_spec.right,
+  intro rhs,
+  use ((π⁻¹).1.1 • rhs.some),
+  use rhs.some_spec.left.some,
+  split,
+  exact rhs.some_spec.left.some_spec.left,
+  suffices h5 : π.val.fst • π⁻¹.val.fst • rhs.some ∈ local_cardinal ( π.val.fst.litter_perm (f_map ⊥ δ hγ hδ rhs.some_spec.left.some)),
+  {
+    rw a_perm_commutes_with_local_cardinal at h5,
+    exact h5,
+  },
+
+  rw (coherence_bot hγ π hδ),
+  suffices h6 :  π.val.fst • π⁻¹.val.fst • rhs.some = rhs.some,
+  {
+    rw h6,
+    exact rhs.some_spec.left.some_spec.right,
+  },
+    apply smul_inv_smul,
+  rw ← to_tangle_perm,
+  let f : tangle α ↑δ (coe_lt_coe.mpr hδ) := (to_tangle δ hδ) rhs.some,
+  suffices h7 : π.val.snd δ _ • π⁻¹.val.snd δ hδ • (f)= x,
+  {
+    exact h7,
+  },
+  have h8 : f = (to_tangle δ hδ) rhs.some, by refl,
+  rw rhs.some_spec.right at h8,
+  rw h8,
+  apply smul_inv_smul,
+  },
+
+  rw rec_bot_coe_coe,
+  have h1 : (↑π : semiallowable_perm α).snd = π.val.snd, by refl,
+  rw h1,
+
+  have h3 : γ ≠ δ, {by_contra, exact (hγδ (coe_eq_coe.mpr h))},
+  simp_rw ← coherence π _ hδ h3,
+
+  split,
+
+  intro lhs,
+  use (π.1.1 • lhs.some),
+  use lhs.some_spec.left.some,
+  split,
+  exact lhs.some_spec.left.some_spec.left,
+  exact (a_perm_commutes_with_local_cardinal π lhs.some _).mpr lhs.some_spec.left.some_spec.right,
+  rw ← to_tangle_perm,
+  exact lhs.some_spec.right,
+  intro rhs,
+  use ((π⁻¹).1.1 • rhs.some),
+  use rhs.some_spec.left.some,
+  split,
+  exact rhs.some_spec.left.some_spec.left,
+
+  have h4 : ∀ b : litter, b = π⁻¹.1.fst.litter_perm • π.1.fst.litter_perm • b,
+  {
+    intro b,
+    simp only [subtype.val_eq_coe, coe_inv, prod.fst_inv, near_litter_perm.litter_perm_inv, equiv.perm.smul_def,
+  equiv.perm.inv_apply_self],
+  },
+  specialize h4 (f_map ↑γ δ hγ hδ rhs.some_spec.left.some),
+  rw h4,
+  exact (a_perm_commutes_with_local_cardinal π⁻¹ rhs.some _).mpr rhs.some_spec.left.some_spec.right,
+  rw ← to_tangle_perm,
+  rw rhs.some_spec.right,
+  apply smul_inv_smul,
+
+  end
 
 lemma smul_A_map_code  (π : allowable_perm α) (hδ : δ < α) (c : code α α le_rfl)
   (hc : c.extension ≠ δ) :
