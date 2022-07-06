@@ -128,14 +128,6 @@ We introduce the notation $N^\circ$ for the litter with small symmetric differen
 With the tacit need to prove that there is only one.
 \end{definition}
 
-\begin{definition}
-\label {def:ftargets}
-\uses{def:litter}
-\leanok
-\lean{con_nf.ftargets}
-Define $X_{\beta,\gamma}$ as ${(\beta, \gamma, i) : i \in \mu}$. Note that $|X_{\beta,\gamma}| = \mu$ and that the $X_{\beta,\gamma}$ partition $\mathcal L$.
-\end{definition}
-
 {\bf Holmes comment:  this is what I expected after my initial startlement at the definition of $\tau_{-1}$.}
 
 \begin{definition}
@@ -264,12 +256,15 @@ Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alp
 
 \begin{lemma}
 \label {lem:count-supports}
-\uses{def:support,lem:count-near-litters}
+\uses{def:support}
 \lean{con_nf.mk_support_le}
 \leanok
 Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supports, and therefore at most $\mu$ supports for each $x \in \tau$.
 \end{lemma}
-\begin{proof}\leanok\end{proof}
+\begin{proof}
+\uses{lem:count-near-litters}
+\leanok
+\end{proof}
 
 \begin{definition}
 \label{def:support-of}
@@ -316,7 +311,7 @@ An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \s
 
 \begin{definition}
 \label {def:f-map}
-\uses{def:ftargets,def:phase-1a-data}
+\uses{def:phase-1a-data}
 \lean{con_nf.f_map}
 \leanok
 We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $X_{\beta,\gamma} \subseteq \mathrm{Litter}$, as follows.
@@ -588,18 +583,14 @@ It is straightforward to show that this condition is equivalent to the coherence
 
 \begin{lemma}
 \label{lem:parity-action}
-\uses{lem:coherence-unpacked,lem:code-equiv-properties}
 \lean{con_nf.code.is_even.smul}
 \leanok
 The action of allowable permutations on codes preserves parity.
 \end{lemma}
-
 \begin{proof}
-\lean{con_nf.code.is_even_smul}
+  \uses{lem:coherence-unpacked,lem:code-equiv-properties}
 \leanok
 This should be straightforward.  A target should be the equation $\pi(A_\gamma(X)) = A_\gamma(\pi(X))$ for any allowable permutation $\pi$ and code $X$ for which $\pi_\gamma$ is defined.
-
-[Note: This will probably need the phase 1b data to include an assumption that the typed-near-litter embeddings commute with the group action.]
 \end{proof}
 
 \begin{definition}

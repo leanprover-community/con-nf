@@ -16,7 +16,7 @@ protected def has_smul_nonempty : has_smul α {s : set β // s.nonempty} :=
 
 localized "attribute [instance] set.has_vadd_nonempty set.has_smul_nonempty" in pointwise
 
-@[simp, to_additive] lemma coe_smul_nonempty (a : α) (s : {s : set β // s.nonempty}) :
+@[simp, norm_cast, to_additive] lemma coe_smul_nonempty (a : α) (s : {s : set β // s.nonempty}) :
   (↑(a • s) : set β) = a • s := rfl
 
 @[simp, to_additive] lemma smul_nonempty_mk (a : α) (s hs) :

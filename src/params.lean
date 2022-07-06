@@ -36,9 +36,6 @@ The prefix `#` denotes the cardinality of a type.
 Where possible, we use `<` and `≤` instead of `>` and `≥`. Human readers can easily convert between
 the two, but it is not as immediately transparent for Lean. For simplicity, we keep with the
 convention of using only `<` and `≤`.
-
-When working with these parameters, it is useful to `open params` in order to address the parameters
-simply by name, instead of having to type `params.Λ`, for instance.
 -/
 class params :=
 (Λ : Type u) (Λr : Λ → Λ → Prop) [Λwf : is_well_order Λ Λr]
@@ -51,6 +48,9 @@ class params :=
 (μ_strong_limit : (#μ).is_strong_limit)
 (κ_lt_μ : #κ < #μ)
 (κ_le_μ_cof : #κ ≤ (#μ).ord.cof)
+
+export params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular Λ_lt_κ μ μr μwf μ_ord μr μ_strong_limit κ_lt_μ
+  κ_le_μ_cof)
 
 /-- There exists a set of valid parameters for the model. The smallest such set is Λ, κ, μ = ℵ_0,
 ℵ_1, ℶ_{ω_1} -/
@@ -106,7 +106,6 @@ example : params.{0} := { Λ := ℕ ,
   κ_le_μ_cof := _}-/
 
 example : params := sorry
-open params
 
 variables [params.{u}] {α β : Type u}
 

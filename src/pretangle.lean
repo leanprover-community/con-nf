@@ -7,8 +7,6 @@ universe u
 namespace con_nf
 variables [params.{u}]
 
-open params
-
 /-- A *pretangle* is an object that may become a *tangle*,
 an element of the model.
 The type of pretangles forms a model of TTT without extensionality. -/
