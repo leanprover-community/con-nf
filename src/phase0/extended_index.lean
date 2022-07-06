@@ -1,5 +1,5 @@
 import mathlib.quiver
-import params
+import phase0.params
 
 open cardinal quiver
 open_locale cardinal

@@ -1,5 +1,5 @@
-import extended_index
-import litter
+import phase0.extended_index
+import phase0.litter
 
 /-!
 # The freedom of action theorem

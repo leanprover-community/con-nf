@@ -1,6 +1,6 @@
 import mathlib.cardinal
 import mathlib.equiv
-import params
+import phase0.params
 
 /-!
 # Litters, near-litters

@@ -1,5 +1,4 @@
-import code_equiv
-import struct_perm
+import phase1.code_equiv
 
 /-!
 # Allowable permutations
@@ -15,20 +14,7 @@ universe u
 namespace con_nf
 variable [params.{u}]
 
-variables (α : Λ) [phase_1a.{u} α]
-
-/-- Contains all the information needed for phase 1b of the recursion. -/
-class phase_1b :=
-(allowable : Π β < α, Type u)
-[allowable_group : Π β hβ, group (allowable β hβ)]
-(to_struct_perm : Π β hβ, allowable β hβ →* struct_perm β)
-[allowable_action : Π β hβ, mul_action (allowable β hβ) (tangle α β $ coe_lt_coe.2 hβ)]
-
-export phase_1b (allowable allowable_group to_struct_perm allowable_action)
-
-attribute [instance] allowable_group allowable_action
-
-variables [phase_1b α] {β γ δ : Λ} {hβ : β ≤ α}
+variables (α : Λ) [phase_1a α] [phase_1b α] {β γ δ : Λ} {hβ : β ≤ α}
 
 /-- A semi-allowable permutation is a `-1`-allowable permutation of atoms (a near-litter
 permutation) together with allowable permutations on all `γ < β`. This forms a group structure

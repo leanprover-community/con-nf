@@ -1,10 +1,10 @@
-import extended_index
 import group_theory.group_action.sum
-import litter
 import logic.equiv.transfer_instance
 import mathlib.group_action
 import mathlib.support
-import pretangle
+import phase0.extended_index
+import phase0.litter
+import phase0.pretangle
 
 /-!
 # Structural permutations
@@ -213,8 +213,8 @@ variables {α : Λ} {H τ : Type u} [monoid H] [mul_action H τ]
 structure support (φ : H → struct_perm α) (x : τ) extends potential_support α :=
 (supports : supports φ carrier x)
 
-/-- An element of `τ` is *symmetric* if it has some (small) support. -/
-def symmetric (φ : H → struct_perm α) (x : τ) : Prop := nonempty $ support φ x
+/-- An element of `τ` is *supported* if it has some (small) support. -/
+def supported (φ : H → struct_perm α) (x : τ) : Prop := nonempty $ support φ x
 
 /-- There are at most `μ` supports for a given `x : τ`. -/
 @[simp] lemma mk_support_le (φ : H → struct_perm α) (x : τ) : #(support φ x) ≤ #μ :=

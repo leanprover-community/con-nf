@@ -1,6 +1,6 @@
-import f_map
 import mathlib.logic
 import mathlib.with_bot
+import phase1.f_map
 
 /-!
 # Alternative extensions
@@ -32,7 +32,7 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-variables [params.{u}] {α β δ ε : Λ} [phase_1a.{u} α] {hβ : β ≤ α} {γ : type_index} {hγ : γ < α}
+variables [params.{u}] {α β δ ε : Λ} [phase_1a α] {hβ : β ≤ α} {γ : type_index} {hγ : γ < α}
   {hδ : δ < α} {s : set (tangle α γ hγ)} {t : tangle α γ hγ} {c d : code α β hβ}
 
 /-- The *alternative extension* map. For a set of tangles `G`, consider the code

@@ -1,6 +1,6 @@
-import tangle
+import phase1.tangle
 
-open set with_bot
+open function set with_bot
 open_locale pointwise
 
 noncomputable theory
@@ -10,7 +10,7 @@ universe u
 namespace con_nf
 variable [params.{u}]
 
-variables (α : Λ) [phase_1a.{u} α] [phase_1b.{u} α] [phase_1b_coherence.{u} α]
+variables (α : Λ) [phase_1a α] [phase_1b α] [phase_1b_coherence.{u} α]
 
 class phase_1c :=
 (pretangle_inj : Π (β : Λ) hβ, tangle α β hβ ↪ pretangle β)
@@ -42,24 +42,24 @@ begin
   { intro h,
     have := congr_arg pretangle.atom_extension h,
     rw [to_pretangle, pretangle.atom_extension_mk, pretangle.atom_extension_mk] at this,
-    obtain ⟨ts, ⟨atoms, hne, rep, hA⟩ | ⟨β, hβ, rep, hA⟩⟩ := t,
-    { exact hne.ne_empty this },
+    obtain ⟨ts, ⟨atoms, rep, hA⟩ | ⟨β, hβ, rep, hA⟩⟩ := t,
+    { exact atoms.2.ne_empty this },
     { exfalso, exact hzero ⟨β, hβ⟩ } }
 end
 
 lemma to_pretangle_injective : injective (to_pretangle α) :=
 begin
   intros s t hst, unfold to_pretangle at hst,
-  by_cases h : ∃ β, β < α,
-  { obtain ⟨β, hβ⟩ := h,
+  by_cases h : is_min α,
+  { have := congr_arg pretangle.atom_extension hst,
+    rw [pretangle.atom_extension_mk, pretangle.atom_extension_mk] at this,
+    exact ext_zero _ _ h this },
+  { obtain ⟨β, hβ⟩ := not_is_min_iff.1 h,
     have := congr_arg pretangle.extension hst,
     rw [pretangle.extension_mk, pretangle.extension_mk] at this,
     have := congr_fun₂ this β hβ,
     rw set.image_eq_image (embedding.injective _) at this,
-    exact ext _ _ _ (subtype.coe_inj.mp this) },
-  { have := congr_arg pretangle.atom_extension hst,
-    rw [pretangle.atom_extension_mk, pretangle.atom_extension_mk] at this,
-    exact ext_zero _ _ h this }
+    exact ext _ _ _ (subtype.coe_inj.mp this) }
 end
 
 end nonempty_semitangle

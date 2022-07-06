@@ -1,7 +1,7 @@
-import allowable
 import mathlib.group_action
 import mathlib.option
 import mathlib.pointwise
+import phase1.allowable
 
 noncomputable theory
 
@@ -24,7 +24,7 @@ inductive preferred_extension (α : Λ) : Type u
 
 -/
 
-variables (α : Λ) [phase_1a.{u} α] {β : Λ} {hβ : β < α} {γ : type_index} {hγ : γ < α}
+variables (α : Λ) [phase_1a α] {β : Λ} {hβ : β < α} {γ : type_index} {hγ : γ < α}
 
 /-- Nonempty sets of tangles. -/
 abbreviation tangles (γ : type_index) (hγ : γ < α) : Type u :=
@@ -62,7 +62,7 @@ inductive preference (exts : extension α)
       → preference
 
 /-- The `-1`-extension associated with a given semitangle extension. -/
-def preference.atoms {α : Λ} [phase_1a.{u} α] {members : extension α} :
+def preference.atoms {α : Λ} [phase_1a α] {members : extension α} :
   preference α members → set atom
 | (preference.base atoms _ _) := (atoms : set (tangle α ⊥ $ bot_lt_coe _))
 | (preference.proper _ _ _ _) := ∅
@@ -374,9 +374,9 @@ end allowable_perm
 
 variables (α)
 
-/-- A tangle at the new level `α` is a symmetric semitangle. This is `τ_α` in the blueprint.
+/-- A tangle at the new level `α` is a supported semitangle. This is `τ_α` in the blueprint.
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
-def new_tangle := {s : semitangle α // symmetric (λ π : allowable_perm α, π.1.to_struct_perm) s}
+def new_tangle := {s : semitangle α // supported (λ π : allowable_perm α, π.1.to_struct_perm) s}
 
 variables {α} {c d : code α α le_rfl} {S : set (support_condition α)}
 
@@ -391,10 +391,10 @@ lemma code.equiv.supports_iff (hcd : c ≡ d) :
     supports (λ π : allowable_perm α, π.1.to_struct_perm) S d :=
 ⟨hcd.supports, hcd.symm.supports⟩
 
-/-- If two codes are equivalent, one is symmetric if and only if the other is. -/
-lemma code.equiv.symmetric_iff (hcd : c ≡ d) :
-  symmetric (λ π : allowable_perm α, π.1.to_struct_perm) c ↔
-    symmetric (λ π : allowable_perm α, π.1.to_struct_perm) d :=
+/-- If two codes are equivalent, one is supported if and only if the other is. -/
+lemma code.equiv.supported_iff (hcd : c ≡ d) :
+  supported (λ π : allowable_perm α, π.1.to_struct_perm) c ↔
+    supported (λ π : allowable_perm α, π.1.to_struct_perm) d :=
 ⟨λ ⟨⟨s, h⟩⟩, ⟨⟨s, hcd.supports h⟩⟩, λ ⟨⟨s, h⟩⟩, ⟨⟨s, hcd.symm.supports h⟩⟩⟩
 
 @[simp] lemma smul_intro (f : allowable_perm α) (s : tangles α γ hγ) (hs) :
@@ -421,25 +421,20 @@ def typed_near_litter (N : near_litter) : new_tangle α :=
   conv { to_rhs, rw ←this },
   dsimp,
   congr',
-  refl,
-  nth_rewrite 0 ←this,
-  have := congr_arg sigma.snd this,
-  dsimp at this,
-  rw smul_intro,
-  dsimp,
+  sorry
 end⟩⟩⟩
 
-/-- For any symmetric tangle `x`, the code `(α, β, {x})` is a tangle at level `α`. -/
-def symmetric_singleton (hβ : β < α) (x : tangle α β (coe_lt_coe.mpr hβ))
-  (symm : symmetric (λ π : allowable_perm α, π.1.to_struct_perm) x) : new_tangle α :=
+/-- For any supported tangle `x`, the code `(α, β, {x})` is a tangle at level `α`. -/
+def supported_singleton (hβ : β < α) (x : tangle α β (coe_lt_coe.mpr hβ))
+  (supp : supported (λ π : allowable_perm α, π.1.to_struct_perm) x) : new_tangle α :=
 ⟨some $ intro ⟨{x}, singleton_nonempty _⟩ (code.is_even_singleton _), sorry⟩
 
-/-- For any small set `B` of symmetric `β`-tangles, the code `(α, β, B)` is a tangle at level `α`.
+/-- For any small set `B` of supported `β`-tangles, the code `(α, β, B)` is a tangle at level `α`.
 -/
-def symmetric_set (hβ : β < α) (s : {s : set $ tangle α β (coe_lt_coe.2 hβ) // s.nonempty})
+def supported_set (hβ : β < α) (s : {s : set $ tangle α β (coe_lt_coe.2 hβ) // s.nonempty})
   (hs : small (s : set $ tangle α β (coe_lt_coe.2 hβ)))
   (symm : ∀ b ∈ (s : set $ tangle α β (coe_lt_coe.2 hβ)),
-    symmetric (λ π : allowable_perm α, π.1.to_struct_perm) b) :
+    supported (λ π : allowable_perm α, π.1.to_struct_perm) b) :
   new_tangle α :=
 ⟨some $ intro s sorry, sorry⟩
 
