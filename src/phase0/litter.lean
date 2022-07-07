@@ -115,7 +115,10 @@ by { simp only [near_litter, mk_sigma, mk_near_litter', sum_const, mk_litter, li
   exact mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) le_rfl μ_strong_limit.ne_zero }
 
 /-- The *local cardinal* of a litter is the set of all near-litters to that litter. -/
-def local_cardinal (i : litter) : set near_litter := {s : near_litter | s.1 = i}
+def local_cardinal (i : litter) : set near_litter := {N : near_litter | N.1 = i}
+
+@[simp] lemma mem_local_cardinal {i : litter} {N : near_litter} : N ∈ local_cardinal i ↔ N.1 = i :=
+iff.rfl
 
 lemma local_cardinal_nonempty (i : litter) : (local_cardinal i).nonempty :=
 ⟨⟨i, litter_set _, is_near_litter_litter_set _⟩, rfl⟩
