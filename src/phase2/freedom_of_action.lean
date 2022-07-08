@@ -1,4 +1,4 @@
-import phase0.extended_index
+import phase0.index
 import phase0.litter
 
 /-!

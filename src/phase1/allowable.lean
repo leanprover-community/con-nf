@@ -13,16 +13,16 @@ noncomputable theory
 universe u
 
 namespace con_nf
-variables [params.{u}] {α β γ δ : Λ} [phase_1 α] {hβ : β < α}
+variables [params.{u}] {α β γ δ : Λ} [tangle_data α] {hβ : β < α}
 
 namespace allowable
 
 /-- Reinterpret an allowable permutation as a structural permutation. -/
 def to_struct_perm (hβ : β < α) : allowable β hβ →* struct_perm β :=
-phase_1.allowable_to_struct_perm _ _
+tangle_data.allowable_to_struct_perm _ _
 
 instance mul_action_tangle : mul_action (allowable β hβ) (tangle α β $ coe_lt_coe.2 hβ) :=
-phase_1.allowable_action _ _
+tangle_data.allowable_action _ _
 
 end allowable
 
@@ -77,7 +77,7 @@ mul_action.comp_hom _ to_struct_perm
 end
 
 instance mul_action_tangle' (hβ : β < α) :
-  mul_action (semiallowable_perm α) (phase_1.tangle β hβ) :=
+  mul_action (semiallowable_perm α) (tangle_data.tangle β hβ) :=
 mul_action.comp_hom _ $ to_allowable hβ
 
 instance mul_action_tangle {β : type_index} (hβ : β < α) :
@@ -246,6 +246,15 @@ namespace allowable_perm
   (π : semiallowable_perm α).1 • L = π • L := sorry
 
 @[simp] lemma smul_to_near_litter_perm (π : allowable_perm α) (N : near_litter) :
+/-
+_inst_1 : params,
+α : Λ,
+_inst_2 : tangle_data α,
+π : allowable_perm α,
+N : near_litter
+⊢ ↑π.fst • N = π • N
+-/
+
   (π : semiallowable_perm α).1 • N = π • N := sorry --Yaël: Currently false, investigating...
 
 lemma f_map_smul {γ : type_index} {hγ : γ < α} (hδ : δ < α) (hγδ : γ ≠ δ)
