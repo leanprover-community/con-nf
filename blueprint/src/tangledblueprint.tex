@@ -40,6 +40,7 @@
 \newcommand{\Cond}{\mathrm{Cond}}
 \newcommand{\TTT}{\mathrm{TTT}}
 \newcommand{\pathto}{\dashrightarrow}
+\newcommand{\symdiff}{\mathrel{\triangle}}
 
 \chapter{Phase 0: Preliminaries} \label{ch:preliminaries}
 
@@ -53,8 +54,8 @@ In this section, we give the background constructions for the model — as much 
 \lean{con_nf.params}
 Throughout, we fix three parameters:
 \begin{itemize}
-  \item $\lambda$ may be any limit ordinal; \\
-  \item $\kappa$ may be any regular cardinal $>\lambda$; \\
+  \item $\lambda$ may be any limit ordinal;
+  \item $\kappa$ may be any regular cardinal $>\lambda$;
   \item $\mu$ may be any strong limit cardinal $>\kappa$ of cofinality $\geq \kappa$.
 \end{itemize}
 
@@ -98,54 +99,42 @@ We will write paths as $A : \beta \pathto \alpha$.  We will write path concatena
 
 We will define a function taking type indices $\alpha$ to sets $\tau_\alpha$ (type $\alpha$).
 
+\newcommand{\Litter}{\mathcal{L}}
+\newcommand{\NearLitter}{\mathcal{NL}}
 \begin{definition}
-\label {def:atom}
+\label{def:atoms-and-litters}
 \uses{def:params}
 \leanok
-\lean{con_nf.atom}
-Define $\mathcal L$ as $ \lambda ^ 2 \times \mu$ and $\tau_{-1}$ as $\mathcal L \times \kappa$.
+\lean{con_nf.atom,con_nf.litter}
+Define $\Litter$ as $ \lambda ^ 2 \times \mu$, and $\tau_{-1}$ as $\Litter \times \kappa$.
 
-Note that both sets have size $\mu$.
+We refer to elements of $\tau_{-1}$ as \emph{atoms}.
+
+By construction, they come partitioned into $\Litter$-many \emph{litters} of size $\kappa$, $L_{\alpha,\beta,\xi} := {((\alpha,\beta,\xi),x) \mid x \in \kappa }$.  The litters, in turn, come partitioned into $\lambda^2$-many classes of size $\mu$: $X_{\alpha,\beta} := \{ (\alpha,\beta,\xi) \mid \xi \in \mu \}$.
+
+We generally idenfity litters $L_{\alpha,\beta,\xi}$ with their indices $(\alpha,\beta,\xi) \in \Litter$; for instance a quantification over “all litters” is formally a quantification over $\Litter$.
 \end{definition}
 
-{\bf Holmes comment:  I didn't expect that $\lambda^2$ but I think I see what it is doing}
-
-We may refer to objects of type $-1$ as ``atoms".  They are not understood here to be atoms in a conventional sense, but the analogous objects in earlier versions of the construction were atoms and I have this mental habit.
-
-\begin{definition}
-\label {def:litter}
-\uses{def:atom}
-\leanok
-\lean{con_nf.litter}
-Define $L_i$ for $i \in \mathcal L$ as $\{(i, k) : k \in \kappa\}$.
-
-We will refer to both elements of $\mathcal L$ and sets $L_i$ as {\em litters}. To be more precise,
-we will call $L_i$ the {\em $i$-th litter}.
-
-Note that the litters make up a partition of type $-1$ into sets of size $\kappa$.
-\end{definition}
+[The “atoms” of $\tau_{-1}$ are not quite atoms in a traditional sense — they do not appear as elements of the eventual structure — but they fulfil the same role of getting the set hierarchy off to a sufficiently non-trivial start.]
 
 \begin{definition}
 \label {def:near-litter}
-\uses{def:litter,def:small}
+\uses{def:atoms-and-litters,def:small}
 \leanok
 \lean{con_nf.is_near_litter}
-A subset of $\tau_{-1}$ is a $i$-{\em near-litter} precisely if it has small symmetric difference from  a litter.
-
-We introduce the notation $N^\circ$ for the litter with small symmetric difference from the near-litter $N$.
-With the tacit need to prove that there is only one.
+A \emph{near-litter} is a subset $N$ of $\tau_{-1}$ with small symmetric difference from some litter. This litter is necessarily unique, and we denote it by $N^\circ$.  We write $\NearLitter$ for the set of all near-litters.
 \end{definition}
-
-{\bf Holmes comment:  this is what I expected after my initial startlement at the definition of $\tau_{-1}$.}
 
 \begin{definition}
 \label {def:local-cardinal}
 \uses{def:near-litter}
 \lean{con_nf.local_cardinal}
 \leanok
-For $i \in \mathcal L$, the $i$-th {\em local cardinal} is $\{N \subseteq \tau_{-1}:|N \Delta L|<\kappa\}$.
+For $i \in \Litter$, the $i$-th {\em local cardinal} $[L_i]$ is $\{N \subseteq \tau_{-1}:|N \symdiff L|<\kappa\}$.
 
 For any near-litter $N$ (including litters), we write $[N]$ for the unique local cardinal that contains $N$. We introduce the notation $[N]^\circ$ for the litter belonging to the local cardinal $N$, with the tacit need to prove that there is only one.
+
+[Note: almost all roles played by local cardinals in the original text should be fulfilled in the formalisation by litter-indices $i \in \Litter$.]
 \end{definition}
 
 \begin{lemma}
@@ -153,7 +142,7 @@ For any near-litter $N$ (including litters), we write $[N]$ for the unique local
 \uses{def:small}
 \leanok
 \lean{con_nf.is_near.trans}
-Note that $\mathcal L$ corresponds to the equivalence classes of an equivalence relation on near-litters, which obtains between two near-litters iff they have small symmetric difference.
+Note that $\Litter$ corresponds to the equivalence classes of an equivalence relation $\sim$ on near-litters, where $X \sim Y$ iff the symmetric difference $X \symdiff Y$ is small.
 \end{lemma}
 
 \begin{proof}
@@ -184,7 +173,7 @@ We first define a big structure, which can be viewed as a model of TTT without e
 
 \begin{definition}
   \label{def:pretangle}
-  \uses{def:atom}
+  \uses{def:atoms-and-litters}
   \leanok
   \lean{con_nf.pretangle}
   Define the sets $\Pretangle_\alpha$ of \emph{$\alpha$-pretangles} inductively. $\Pretangle_{-1}$ is defined as $\tau_{-1}$. For $\alpha$ a proper type index, $\Pretangle_\alpha$ is defined as $\prod_{\beta < \alpha} \mathcal P(\Pretangle_\beta)$.
@@ -233,12 +222,12 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 
 \begin{definition}
   \label{def:support-condition}
-  \uses{def:near-litter,def:atom} % TODO: add def:paths upstream, and add it here.
+  \uses{def:near-litter,def:atoms-and-litters} % TODO: add def:paths upstream, and add it here.
   \lean{con_nf.support_condition}
   \leanok
   Let $\alpha$ be a proper type index. An \emph{$\alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
 
-  Type-theoretically, $\Cond := (\tau_{-1} + \mathrm{NearLit}) \times \mathrm{Path}(-1,\alpha)$.
+  Type-theoretically, $\Cond := (\tau_{-1} + \NearLitter) \times \mathrm{Path}(-1,\alpha)$.
   [It would suffice to use just litters here instead of near-litters; they give an equivalent notion of support, as shown later (“replacing near-litters with litters”).  That makes a few things simpler; but using near-litters lets us talk about the action, Def.~\ref{def:support-condition-action}, which seems algebraically cleaner.]
 \end{definition}
 
@@ -314,7 +303,7 @@ For now, we group the data assumed at each level, according to which constructio
     \begin{enumerate}
       \item each typed litter $j(L)$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
 
-      \item each typed near-litter $k(N)$ which is not a litter comes later than its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \Delta N^\circ$;
+      \item each typed near-litter $k(N)$ which is not a litter comes later than its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \symdiff N^\circ$;
 
       \item for each $x$ in $\tau_\alpha$ that is not a typed litter or singleton, $x$ comes later than all of its designated support -- explicitly, for each $(a,A)$ or $(N,A)$ in $S_x$, we must have $\iota_\alpha(j(N)), \iota_\alpha(k(a))<\iota_\alpha(x)$.
     \end{enumerate}
@@ -346,10 +335,10 @@ An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \s
 \leanok
 We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $X_{\beta,\gamma} \subseteq \mathrm{Litter}$, as follows.
 
-For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $[N]$ of the minimal near-litter $N$ (under the ordering induced by $j_\beta \circ \iota_\beta : \mathrm{NearLit} \to \tau_\beta \to \mu$) such that:
+For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $N^\circ$ of the minimal near-litter $N$ (under the ordering induced by $j_\beta \circ \iota_\beta : \NearLitter \to \tau_\beta \to \mu$) such that:
 \begin{itemize}
-  \item $[N]\in X_{(\beta,\gamma)}$, i.e. $[N] = L_{(\beta,\gamma,i)}$, for some $i$;
-  \item for each $M \in [N]$, $\iota_\gamma(j_\gamma(M)) >\iota_\beta(x)$;
+  \item $N^\circ\in X_{(\beta,\gamma)}$, i.e. $N^\circ = L_{(\beta,\gamma,i)}$, for some $i$;
+  \item for each nearby near-litter $M \sim N$, $\iota_\gamma(j_\gamma(M)) >\iota_\beta(x)$;
   \item $[N] \neq f_{\beta,\gamma}(y)$, for each $y <_\beta x$.
 \end{itemize}
 
@@ -381,9 +370,9 @@ Let $\gamma$ be a type index (not necessarily proper) below $\alpha$.
 
 For any code $(\alpha,\gamma,G)$, with $\delta$ a proper type index below $\alpha$ and distinct from $\gamma$, we define
 $A_\delta(\alpha,\gamma,G)$ as
-$$(\alpha,\delta,\{ j_\delta(N) : N \simeq f_{\gamma,\delta}(b),\, b \in B \})$$
+$$(\alpha,\delta,\{ j_\delta(N) \mid N \in \NearLitter,\, N \sim f_{\gamma,\delta}(b),\, b \in B \})$$
 if the maps $f_{\gamma,\delta}$ are considered as valued in litters, or
-$$(\alpha,\delta,\{ j_\delta(N) : N \in f_{\gamma,\delta}(b),\, b \in B \})$$
+$$(\alpha,\delta,\{ j_\delta(N) \mid N \in f_{\gamma,\delta}(b),\, b \in B \})$$
 if they are taken as valued directly in local cardinals.
 
 We say that a code $c$ \emph{leads to} a code $d$ if $d$ is the image of $c$ under some A-map. We denote this $c \rightsquigarrow d$.
@@ -835,7 +824,7 @@ We give an exact statement of what is meant, then we prove it.
 
 \begin{definition}
 \label {def:local-bijection}
-\uses{def:path,def:litter,def:small}
+\uses{def:path,def:atoms-and-litters,def:small}
 \leanok
 \lean{con_nf.local_bijection}
 An $\alpha$-local bijection consists of: for each $\alpha$-extended type index (i.e.\ path $A : -1 \to \alpha$), a permutation $\pi^0_A$ of some subset $\dom(\pi^0_A) \subseteq \tau{-1}$, such that the intersection of $\dom(\pi^0_A)$ with any litter is small (including possibly empty).
@@ -972,7 +961,7 @@ We build a support $S+T_b^{\{\alpha\}}$ and a support $S+U^{\{\alpha\}}$ with pa
 in both supports and the fact that $U$ is the image of $T_b$ under some allowable permutation.
 
 We construct an $\alpha$-allowable permutation whose action takes one of these supports to the other, which will complete the plan given above.
-For this we use the freedom of action theorem.  We define a local bijection which sends $(A,x)$ to $y$ just in case a $(\beta,A,\{x\})$ in the first support corresponds to a $(\beta,A,\{y\})$ in the other, and further enforces agreement of derivatives  of the permutation to be constructed with derivatives of the known permutation $\pi'$ sending $T_b$ to $U$ at exceptions of derivatives of $\pi'$ which lie in litters in $T_b$.  This causes singleton items in the first support to be mapped to the corresponding singleton items in the other support.  We have to argue that litters in the domain of $S+T_b^{\{\alpha\}}$ (which is a strong support) are mapped to the correct near-litters in the domain of $S+U^{\{\alpha\}}$.  If there is a failure, there is a first one.  The local cardinal of the first failure is treated correctly (because a support of it is treated correctly), so the failure must consist in the map constructed having an exception which is moved by the permutation into or out of the litter in question (if a litter $L$ in $T_b$ is mapped to a near-litter $N$ in $U$, all elements of $N \Delta N^\circ$ are treated correctly because they are values at exceptions of the known permutation), so a failure implies an exception of the constructed permutation lying in $L$ which is not an exception of the known map and whose singleton is not an item in $T_b$, and there are no such exceptions.
+For this we use the freedom of action theorem.  We define a local bijection which sends $(A,x)$ to $y$ just in case a $(\beta,A,\{x\})$ in the first support corresponds to a $(\beta,A,\{y\})$ in the other, and further enforces agreement of derivatives  of the permutation to be constructed with derivatives of the known permutation $\pi'$ sending $T_b$ to $U$ at exceptions of derivatives of $\pi'$ which lie in litters in $T_b$.  This causes singleton items in the first support to be mapped to the corresponding singleton items in the other support.  We have to argue that litters in the domain of $S+T_b^{\{\alpha\}}$ (which is a strong support) are mapped to the correct near-litters in the domain of $S+U^{\{\alpha\}}$.  If there is a failure, there is a first one.  The local cardinal of the first failure is treated correctly (because a support of it is treated correctly), so the failure must consist in the map constructed having an exception which is moved by the permutation into or out of the litter in question (if a litter $L$ in $T_b$ is mapped to a near-litter $N$ in $U$, all elements of $N \symdiff N^\circ$ are treated correctly because they are values at exceptions of the known permutation), so a failure implies an exception of the constructed permutation lying in $L$ which is not an exception of the known map and whose singleton is not an item in $T_b$, and there are no such exceptions.
 
 The constructed map fixes $X$ because of its identity action on $S$, and it sends $b$ to $c$ because its action sends $T_b$ to $U$, which is what we claimed,
 
@@ -1109,7 +1098,7 @@ This completes the proof that each type is of size $\mu$, which finally closes t
   Given coherent phase 1 data below $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:phase-1-data}:
   \begin{enumerate}
     \item for each litter $L$, the typed litter of $L$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
-    \item for each near-litter $N$ which is not a litter, $j(N)$ comes after its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \Delta N^\circ$;
+    \item for each near-litter $N$ which is not a litter, $j(N)$ comes after its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \symdiff N^\circ$;
 
     \item for each $x$ in $\tau_\alpha$ that is not a typed litter or singleton, $x$ comes later than all of its designated support -- explicitly, for each $(a,A)$ or $(N,A)$ in the in $S(x)$, we must have $\iota_\alpha(j(N)), \iota_\alpha(k(a))<\iota_\alpha(x)$.
   \end{enumerate}
