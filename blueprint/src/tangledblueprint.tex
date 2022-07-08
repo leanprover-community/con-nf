@@ -38,6 +38,8 @@
 \newcommand{\Str}{\mathrm{Str}}
 \newcommand{\All}{\mathrm{All}}
 \newcommand{\Cond}{\mathrm{Cond}}
+\newcommand{\TTT}{\mathrm{TTT}}
+\newcommand{\pathto}{\dashrightarrow}
 
 \chapter{Phase 0: Preliminaries} \label{ch:preliminaries}
 
@@ -49,42 +51,48 @@ In this section, we give the background constructions for the model — as much 
 \label {def:params}
 \leanok
 \lean{con_nf.params}
-Let $\lambda$ be your favorite limit ordinal. \\
-Let $\kappa>\lambda$ be your favorite uncountable regular cardinal. \\
-Let $\mu$ be your favorite strong limit cardinal $>\kappa$ of cofinality $\geq \kappa$.
+Throughout, we fix three parameters:
+\begin{itemize}
+  \item $\lambda$ may be any limit ordinal; \\
+  \item $\kappa$ may be any regular cardinal $>\lambda$; \\
+  \item $\mu$ may be any strong limit cardinal $>\kappa$ of cofinality $\geq \kappa$.
+\end{itemize}
+
+[Note: The assumptions on $\kappa$ and $\mu$ are essential for the construction of the model to work.  The assumptions on $\lambda$ are not needed for this model — everything probably works for an arbitrary well-founded strict partial order $\lambda$, and gives a model of $\TTT_\lambda$. The assumption that $\lambda$ is a limit ordinals is require afterwards, to convert the model of $\TTT_\lambda$ into a model of $\mathrm{TST} + \text{typical ambiguity}$.]
 \end{definition}
+
+\begin{definition}
+  \label {def:small}
+  \uses{def:params}
+  \leanok
+  \lean{con_nf.small}
+  We refer to sets of size smaller than $\kappa$ as \emph{small} [and all other sets as large].
+  \end{definition}
 
 \begin{definition}
 \label {def:type-index}
 \uses{def:params}
 \leanok
 \lean{con_nf.type_index}
-We define a {\em type index} as an element of $\lambda \cup \{-1\}$.
+We define a {\em type index} as an element of $\lambda^\bot := \lambda \cup \{-1\}$.
 We define a {\em proper type index} as an element of $\lambda$.
+
+In many ways, $-1$ should be viewed as a type index on the same footing as other elements of $\lambda$; but it frequently needs treating as a special case.
+
+[In the formalisation, “$-1$” is referred to as $\bot$.  Should we consider following that in the text too?]
 \end{definition}
 
-I am not convinced that a separate concept of proper type index has merit:  I think that $-1$ is a type index and sometimes is treated differently.  But I provide it.
-
 \begin{definition}
-\label {def:extended-type-index}
+\label{def:path}
 \uses{def:type-index}
 \leanok
 \lean{con_nf.extended_index}
-We define an {\em extended type index} as a nonempty finite decreasing sequence of type indices.
-We define a {\em proper extended type index} as a nonempty finite decreasing sequence of proper type indices.
-\end{definition}
+By a \emph{path}, we mean a path in the directed graph $(\lambda^\bot,<)$; that is, a nonempty finite strictly increasing sequence of type indices $\alpha_0 < \cdots < \alpha_k$.  A path is \emph{proper} if its source (least element) is proper.
 
-\begin{definition}
-\label {def:small}
-\uses{def:params}
-\leanok
-\lean{con_nf.small}
-We refer to sets of size smaller than $\kappa$ as small [and all other sets as large].
-\end{definition}
+We will write paths as $A : \beta \pathto \alpha$.  We will write path concatenation and extension as $\gamma;A$, $A;B$, and similar.
 
-% \begin{comment}
-I waffled about this:  but cofinality exactly $\kappa$ will work.
-% \end{comment}
+[There may be some terminological inconsistency: In places, paths are called \emph{extended type indices}, and are considered as sets rather than sequences; also, they are sometimes taken to be decreasing instead of increasing.]
+\end{definition}
 
 \section{Type $-1$: atoms, litters, and local cardinals}
 
@@ -827,7 +835,7 @@ We give an exact statement of what is meant, then we prove it.
 
 \begin{definition}
 \label {def:local-bijection}
-\uses{def:extended-type-index,def:litter,def:small}
+\uses{def:path,def:litter,def:small}
 \leanok
 \lean{con_nf.local_bijection}
 An $\alpha$-local bijection consists of: for each $\alpha$-extended type index (i.e.\ path $A : -1 \to \alpha$), a permutation $\pi^0_A$ of some subset $\dom(\pi^0_A) \subseteq \tau{-1}$, such that the intersection of $\dom(\pi^0_A)$ with any litter is small (including possibly empty).
