@@ -1,6 +1,6 @@
 import phase1.tangle
 
-open function set with_bot
+open function set with_bot quiver
 open_locale pointwise
 
 noncomputable theory
@@ -115,11 +115,14 @@ phase 2, so we use this alternate formalisation.
 This type is intended to be used in place of `β : type_index, β ≤ α` in phase 2. -/
 structure le_index (α : Λ) :=
 (index : type_index)
-(path : quiver.path (α : type_index) index)
+(path : path (α : type_index) index)
 
 /-- By forgetting the path that we took from `α` to the lower index `β`, we can recover the type
 index `β` that this `le_index` wraps. -/
 instance le_index.has_coe {α : Λ} : has_coe (le_index α) type_index := ⟨le_index.index⟩
+
+def le_index.cons {α : Λ} (A : le_index α) {γ : type_index} (hγ : γ < A.index) : le_index α :=
+⟨γ, path.cons A.path hγ⟩
 
 /-- A type index `β`, together with a path `A` down from `α` to level `γ` and then to level `β`.
 This enforces that the path obtained from composing `A` with this new `γ ⟶ β` morphism is
@@ -129,12 +132,12 @@ structure lt_index (α : Λ) :=
 (index : type_index)
 (higher : type_index)
 (index_lt : index < higher)
-(path' : quiver.path (α : type_index) higher)
+(path' : path (α : type_index) higher)
 
 /-- A path compatible with the one from `le_index`, formed by composing the inner `path'` field
 with the morphism `higher ⟶ index`. By construction, this path is always nontrivial. -/
-def lt_index.path {α : Λ} (A : lt_index α) : quiver.path (α : type_index) A.index :=
-quiver.path.cons A.path' A.index_lt
+def lt_index.path {α : Λ} (A : lt_index α) : path (α : type_index) A.index :=
+path.cons A.path' A.index_lt
 
 /-- An `lt_index` is not equal to its source `α`. This is the lemma that justifies the name
 `lt_index` as compared to `le_index`, which permits the trivial path `α ⟶ α`. -/
@@ -161,12 +164,12 @@ structure proper_lt_index (α : Λ) :=
 (index : Λ)
 (higher : Λ)
 (index_lt : index < higher)
-(path' : quiver.path (α : type_index) higher)
+(path' : path (α : type_index) higher)
 
 /-- A path compatible with the one from `le_index`, formed by composing the inner `path'` field
 with the morphism `higher ⟶ index`. By construction, this path is always nontrivial. -/
-def proper_lt_index.path {α : Λ} (A : proper_lt_index α) : quiver.path (α : type_index) A.index :=
-quiver.path.cons A.path' $ coe_lt_coe.mpr A.index_lt
+def proper_lt_index.path {α : Λ} (A : proper_lt_index α) : path (α : type_index) A.index :=
+path.cons A.path' $ coe_lt_coe.mpr A.index_lt
 
 /-- An `proper_lt_index` is not equal to its source `α`. See also `lt_index.ne`. -/
 lemma proper_lt_index.ne {α : Λ} (A : proper_lt_index α) : A.index ≠ α :=
@@ -308,6 +311,21 @@ tangle data for all proper type indices `β < α` along all paths. -/
 class phase_2_assumptions :=
 [lower_almost_tangle_data : Π (A : proper_lt_index α), almost_tangle_data A.index]
 [lower_tangle_data : Π (A : proper_lt_index α), tangle_data A.index]
+(derivative : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index) (π : allowable A.index),
+  allowable (A.cons hγ).index)
+(derivative_comm : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index) (π : allowable A.index),
+  allowable_to_struct_perm (derivative A hγ π) =
+    struct_perm.derivative (path.cons path.nil hγ) (allowable_to_struct_perm π))
+
+/-- The derivative of a permutation along a particular path.
+Note that `allowable (A.cons hγ).index` is defeq to `allowable γ`, but by writing it in this form,
+lean's typeclass resolution can find the particular instance of `core_tangle_data` that we want. -/
+add_decl_doc phase_2_assumptions.derivative
+
+/-- The derivative map commutes with the map from allowable to structural permutations.
+The term `path.cons path.nil hγ` is the singleton path `A.index ⟶ γ`.
+TODO: Should we refactor `struct_perm.derivative` to use singleton paths as well? -/
+add_decl_doc phase_2_assumptions.derivative_comm
 
 attribute [instance]
   phase_2_assumptions.lower_almost_tangle_data
