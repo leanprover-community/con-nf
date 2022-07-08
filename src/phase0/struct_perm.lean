@@ -2,7 +2,7 @@ import group_theory.group_action.sum
 import logic.equiv.transfer_instance
 import mathlib.group_action
 import mathlib.support
-import phase0.extended_index
+import phase0.index
 import phase0.litter
 import phase0.pretangle
 
