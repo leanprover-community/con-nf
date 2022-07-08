@@ -1,0 +1,131 @@
+\documentclass[a4paper]{article}
+
+\usepackage[textwidth=14cm]{geometry}
+\usepackage{xfrac}
+\usepackage{polyglossia}
+\setdefaultlanguage{english}
+
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\usepackage{tikz-cd}
+
+\usepackage[nameinlink, capitalize]{cleveref}
+
+\input{macros_common}
+
+\usepackage{amsthm}
+\usepackage{etexcmds}
+\usepackage{thmtools}
+\usepackage{physics}
+\usepackage{parskip}
+
+%\input{macros_print}
+\declaretheorem[numberwithin=section]{theorem}
+\declaretheorem[sibling=theorem]{proposition}
+\declaretheorem[sibling=theorem]{corollary}
+\declaretheorem[sibling=theorem]{remark}
+\declaretheorem[sibling=theorem]{lemma}
+\declaretheorem[sibling=theorem]{definition}
+\declaretheorem[sibling=theorem]{example}
+
+\title{Con(NF)}
+\author{Con(NF) project contributors}
+
+\begin{document}
+\maketitle
+
+\noindent This is a discussion on the freedom of action theorem.
+
+\section{Data we have available}
+Let \( \alpha \) be a proper type index throughout.
+To state the freedom of action theorem, we have the following data.
+
+For all lower levels \( \beta < \alpha \), and all paths \( A \) from \( \beta \) to \( \alpha \),
+we have \textit{core tangle data} at \( \beta \); that is, \( \mathrm{All}_A \to \mathrm{Str}_A \), \( \tau_A \), and the actions of the relevant groups.
+We will later represent \( \mathrm{All}_A \) by simply \( \mathrm{All}_\beta \), but this is not required for the proof of freedom of action itself.
+
+Further, when \( A \) is a proper (nontrivial) path, we have the \textit{full tangle data}; that is, the embeddings \( j, k \) and the position function \( \iota \) as well as its properties.
+At \( \alpha \) itself, we cannot assume that we have the smallness and the orderings in particular, since we have not yet proven the size of \( \tau_\alpha \).
+
+The connection between these data is that for each \( \gamma < \beta \) and a path \( A \) from \( \beta \) to \( \alpha \), we have a derivative map from \( \gamma \) to \( \alpha \) in \( \mathrm{All}_{\gamma:A} \) where \( \gamma:A \) is the path created from \( \gamma \) and the elements of \( A \).
+Further, this derivative map commutes with the map from allowable permutations to structural permutations, as is assumed in the tangle data above.
+
+\section{Stating freedom of action}
+\subsection{Rough description}
+The idea behind freedom of action is that any `reasonable partial description' of an allowable permutation at level \( \alpha \) actually extends to an \( \alpha \)-allowable permutation \( \pi \).
+The statement of freedom of action is essentially a description of what `reasonable' should mean.
+\begin{itemize}
+  \item The unpacked coherence condition, roughly \( \qty(\pi_A)_{\delta} (f_{\gamma,\delta} \vdot x) = f_{\gamma,\delta}\qty(\qty(\pi_A)_\delta \vdot x) \), should hold for any proper path \( A \colon \beta \to \alpha \).
+  \item The specification should be `small on non-flexible things', where \textit{non-flexible} means roughly that anything that could be constrained by these conditions.
+  \item The specification must be either `small or total on flexible things'.
+\end{itemize}
+
+\subsection{Support conditions}
+Recall the notion of a \textit{support condition} for level \( \alpha \), which is either an atom or a near-litter, together with a path from \( -1 \) to \( \alpha \).
+Type-theoretically, this is \( \mathrm{Cond}_\alpha = (\tau_{-1} \oplus \mathcal N) \times \mathrm{Path}(-1,\alpha) \), where \( \mathcal N \) is the type of near-litters.
+For a support condition \( (x, A) \), we have that \( \pi_A(x) = x \).
+A \textit{binary condition} at level \( \alpha \) is a pair of atoms or a pair of near-litters, together with a path: \( \mathrm{Cond}_\alpha^2 = (\tau_{-1}^2 \oplus \mathcal N^2) \times \mathrm{Path}(-1,\alpha) \).
+For a condition \( (x,y,A) \), we say \( \pi_A(x) = y \).
+
+Any \( \alpha \)-structural permutation \( \pi \) gives a set of binary conditions, given by the graph of the permutations.
+We will implement a specification of an allowable permutation as a certain set of binary conditions.
+Note that there is an injection \( \mathrm{Str}_\alpha \hookrightarrow \mathcal P(\mathrm{Cond}_\alpha^2) \).
+
+\subsection{Maps on support conditions}
+For any path \( A \colon \beta \to \alpha \), we have a map \( \mathrm{Cond}_\beta^{(2)} \to \mathrm{Cond}_\alpha^{(2)} \) by concatenating this path into the path component: \( (x,B) \mapsto (x,B:A) \). This map applies both in the unary and the binary case. These maps are also suitably functorial.
+Hence, we have \( \mathcal P(\mathrm{Cond}_\alpha^{(2)}) \to \mathcal P(\mathrm{Cond}_\beta^{(2)}) \) given by \( S \mapsto \qty{(x,B) \mid (x,B:A) \in S} \) as an inverse image.
+
+We also have two maps \( \mathrm{dom, range} \colon \mathrm{Cond}_\alpha^2 \to \mathrm{Cond}_\alpha \) as maps from \( (x,y,A) \) to \( (x,A) \) and \( (y,A) \), and hence two maps \( \mathrm{dom, range} \colon \mathcal P(\mathrm{Cond}_\alpha^2) \to \mathcal P(\mathrm{Cond}_\alpha) \) as a forward image.
+
+\subsection{Constraining conditions}
+We have a relation \( \prec \) (read \textit{`constrains'}) on \( \mathrm{Cond}_\alpha \), where we say
+\begin{itemize}
+  \item \( (L, A) \prec (x, A) \) when \( x \in L \) and \( L \) is a litter (an atom is constrained by the litter it belongs to);
+  \item \( (N^\circ, A) \prec (N, A) \) when \( N \) is a near-litter and not equal to its corresponding litter \( N^\circ \);
+  \item \( (x, A) \prec (N, A) \) for all \( x \in N\,\Delta\, N^\circ \);
+  \item \( (y, B:(\gamma<\beta):A) \prec (L, A) \) for all paths \( A \colon \beta \to \alpha \), and \( \gamma,\delta < \beta \), and \( L = f^A_{\gamma,\delta}(x), x \in \tau_{\gamma:A} \), and \( (y,B) \in S_x \), where \( S_x \subseteq \mathrm{Cond}_\gamma \) is the designated support of \( x \).
+\end{itemize}
+
+\begin{proposition}
+  The relation \( \prec \) is well-founded.
+\end{proposition}
+\begin{proof}
+  By the conditions on orderings, if some constraint \( (x, A) \prec (y,B) \) holds, then \( \iota_A(x) < \iota_B(y) \) in \( \mu \).
+\end{proof}
+
+\subsection{Properties on sets of unary conditions}
+A constraint on a litter \( (L,A) \) is \textit{flexible} if it is not of the form \( f^A_{\gamma,\delta}(x) \) as above.
+These are precisely the elements of \( \mathrm{Cond}_\alpha \) that are not constrained by anything.
+
+We say that \( S \subseteq \mathrm{Cond}_\alpha \) is \textit{support-closed} if whenever \( (f^A_{\gamma,\delta}(x),A) \in S \), we have that \( S_{\gamma:A} \subseteq \mathrm{Cond}_\gamma \) supports \( x \in \tau_{\gamma:A} \).
+
+We say that \( S \) is \textit{local} if
+\begin{itemize}
+  \item for all litters \( L \) such that \( (L,A) \in S \), we have \( (x,A) \in S \) for all \( a \in L \);
+  \item for all litters \( L \) such that \( (L,A) \not\in S \), we have that \( \norm{\qty{a \in L \mid (a,A) \in S}} < \kappa \).
+\end{itemize}
+
+We say \( S \) is \textit{non-flex-small} if it includes a small amount (\( < \kappa \)-many) of non-flexible litters.
+
+We say \( S \) is \textit{flex-small} if it contains either a small amount of flexible litters or all flexible litters.
+
+\subsection{Properties on sets of binary conditions}
+A set \( \sigma \subseteq \mathrm{Cond}^2_\alpha \) of binary conditions is \textit{one-to-one} if it is one-to-one viewed as a binary relation; that is, \( (x,y,A), (x,y',A) \in \sigma \implies y = y' \), and \( (x,y,A),(x',y,A) \in \sigma \implies x = x' \).
+
+We say \( \sigma \) is \textit{coherent} if its domain \( \mathrm{dom}(\sigma) \) and range \( \mathrm{range}(\sigma) \) are both support-closed, and whenever \( (f^A_{\gamma,\delta}(x),L,A) \in \sigma \), we have that \( (\sigma)_{\gamma:A} \), \( L = f^A_{\gamma,\delta}(\sigma \vdot x) \), and the same holds for \( \sigma^{-1} \).
+% TODO: what is the action \sigma \vdot x?
+
+\subsection{Property of freedom of action}
+The property of \textit{freedom of action} holds if for all choices the data we considered at the start that satisfies the conditions, the specification extends to an allowable permutation \( \pi \).
+\begin{theorem}[freedom of action theorem]
+  Suppose that for all \( \beta < \alpha \), we have full tangle data for all \( A \colon \gamma \to \beta \), and suitable derivative maps.
+  Then
+  \begin{enumerate}
+    \item This synthesises, by phase 1, into the context above: core tangle data at all paths and full tangle data at all proper paths.
+    \item If the earlier assumed tangle levels satisfy freedom of action, so do the newly-synthesised tangles at type \( \alpha \).
+  \end{enumerate}
+\end{theorem}
+
+\end{document}

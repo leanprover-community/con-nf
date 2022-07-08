@@ -8,7 +8,7 @@ noncomputable theory
 universe u
 
 namespace con_nf
-variables [params.{u}] (α : Λ) [phase_1 α]
+variables [params.{u}] (α : Λ) [tangle_data α]
 
 namespace nonempty_semitangle
 

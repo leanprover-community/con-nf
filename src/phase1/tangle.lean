@@ -24,7 +24,7 @@ inductive preferred_extension (α : Λ) : Type u
 
 -/
 
-variables (α : Λ) [phase_1 α] {β : Λ} {hβ : β < α} {γ : type_index} {hγ : γ < α}
+variables (α : Λ) [tangle_data α] {β : Λ} {hβ : β < α} {γ : type_index} {hγ : γ < α}
 
 namespace semitangle
 
@@ -58,7 +58,7 @@ inductive preference (exts : extension α)
       → preference
 
 /-- The `-1`-extension associated with a given semitangle extension. -/
-def preference.atoms {α : Λ} [phase_1 α] {members : extension α} :
+def preference.atoms {α : Λ} [tangle_data α] {members : extension α} :
   preference α members → set atom
 | (preference.base atoms _ _) := (atoms : set (tangle α ⊥ $ bot_lt_coe _))
 | (preference.proper _ _ _ _) := ∅
