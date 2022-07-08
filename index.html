@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang=" en-US">
+
+<head>
+  <meta charset="UTF-8">
+
+  <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>The consistency of New Foundations | Consistency of New Foundations</title>
+<meta name="generator" content="Jekyll v3.9.2" />
+<meta property="og:title" content="The consistency of New Foundations" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A digitisation of Randall Holmes’ proof" />
+<meta property="og:description" content="A digitisation of Randall Holmes’ proof" />
+<link rel="canonical" href="https://leanprover-community.github.io/con-nf//" />
+<meta property="og:url" content="https://leanprover-community.github.io/con-nf//" />
+<meta property="og:site_name" content="Consistency of New Foundations" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="The consistency of New Foundations" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","description":"A digitisation of Randall Holmes’ proof","headline":"The consistency of New Foundations","name":"Consistency of New Foundations","url":"https://leanprover-community.github.io/con-nf//"}</script>
+<!-- End Jekyll SEO tag -->
+
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link rel="preload" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" as="style"
+    type="text/css" crossorigin>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#157878">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <link rel="stylesheet"
+    href="/con-nf/assets/css/style.css?v=f4b9a45440787aa3d05c1ada4bab4f8138944a6c">
+  
+  <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+</head>
+
+<body>
+  <a id="skip-to-content" href="#content">Skip to the content.</a>
+
+  <header class="page-header" role="banner">
+    <h1 class="project-name">The consistency of New Foundations</h1>
+    <h2 class="project-tagline">A digitisation of Randall Holmes' proof</h2>
+    <a href="blueprint" class="btn">Blueprint</a>
+    
+    <a href="https://github.com/leanprover-community/con-nf" class="btn">View on GitHub</a>
+    
+    
+  </header>
+
+  <main id="content" class="main-content" role="main">
+    <h1 id="the-consistency-of-new-foundations">The consistency of New Foundations</h1>
+
+<p>The purpose of this community-owned repository is to <em>digitise</em> some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer implementation of a logical theory (such as set theory or type theory).</p>
+
+<p>Much of the project infrastructure has been adapted from the <a href="https://leanprover-community.github.io/sphere-eversion/">sphere eversion project</a>, the <a href="https://leanprover-community.github.io/lean-liquid/">liquid tensor experiment</a>, and the <a href="https://github.com/b-mehta/unit-fractions/">unit fractions project</a>.</p>
+
+<h2 id="the-source">The source</h2>
+
+<p>The definitions, theorems and proofs in this repository are taken from Randall Holmes <a href="https://randall-holmes.github.io/Nfproof/untangled.pdf">untangled.pdf</a>, claiming to prove the consistency of Quine’s New Foundations axiom system.</p>
+
+<h2 id="the-target">The target</h2>
+
+<p>The formal system which we are using as a target system is Lean’s dependent type theory. Lean is a project being developed at Microsoft Research by Leonardo de Moura and his team. Our formalisation could not have even started without a major classical mathematical library backing it up, and so we chose Lean 3 as the engine behind the project. Note that Lean 4’s type theory is the same as Lean 3’s type theory, however porting 800K lines of mathematical library between languages is a <em>highly</em> nontrivial endeavour.</p>
+
+<h2 id="how-to-browse-this-repository">How to browse this repository</h2>
+
+<h3 id="blueprint">Blueprint</h3>
+
+<p>Below we explain how to engage with the Lean code directly.
+We also provide a <a href="https://leanprover-community.github.io/con-nf/">blueprint</a>
+including a <a href="https://leanprover-community.github.io/con-nf/blueprint/dep_graph_document.html">dependency graph</a>
+of the main ingredients in the repository.
+This blueprint is developed in sync with the Lean formalization,
+and will hence see frequent updates during the length of the project.
+More information on building the blueprint locally is given below.</p>
+
+<h3 id="getting-the-project">Getting the project</h3>
+
+<p>At the moment, the recommended way of browsing this repository,
+is by using a Lean development environment.
+Crucially, this will allow you to introspect Lean’s “Goal state” during proofs,
+and easily jump to definitions or otherwise follow paths through the code.</p>
+
+<p>We are looking into ways to setup an online interactive website
+that will provide the same experience without the hassle of installing a complete
+Lean development environment.</p>
+
+<p>For the time being: please use the
+<a href="https://leanprover-community.github.io/get_started.html#regular-install">installation instructions</a>
+to install Lean and a supporting toolchain.
+After that, download and open a copy of the repository
+by executing the following command in a terminal:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>leanproject get con-nf
+code con-nf
+</code></pre></div></div>
+<p>For detailed instructions on how to work with Lean projects,
+see <a href="https://leanprover-community.github.io/install/project.html">this</a>. The script <code class="language-plaintext highlighter-rouge">scripts/get-cache.sh</code>
+in the folder <code class="language-plaintext highlighter-rouge">con-nf</code> will download the <code class="language-plaintext highlighter-rouge">olean</code> files created by our continuous integration. This
+will save you some time by not havig to do <code class="language-plaintext highlighter-rouge">leanproject build</code>.</p>
+
+<h3 id="reading-the-project">Reading the project</h3>
+
+<p>With the project opened in VScode,
+you are all set to start exploring the code.
+There are two pieces of functionality that help a lot when browsing through Lean code:</p>
+
+<ul>
+  <li>“Go to definition”: If you right-click on a name of a definition or lemma
+(such as <code class="language-plaintext highlighter-rouge">normal_filter</code>, or <code class="language-plaintext highlighter-rouge">clans</code>), then you can choose “Go to definition” from the menu,
+and you will be taken to the relevant location in the source files.
+This also works by <code class="language-plaintext highlighter-rouge">Ctrl</code>-clicking on the name.</li>
+  <li>“Goal view”: in the event that you would like to read a <em>proof</em>,
+you can step through the proof line-by-line,
+and see the internals of Lean’s “brain” in the Goal window.
+If the Goal window is not open,
+you can open it by clicking on one of the icons in the top right hand corner.</li>
+</ul>
+
+<h3 id="organization-of-the-project">Organization of the project</h3>
+
+<ul>
+  <li>The Lean code is contained in the directory <code class="language-plaintext highlighter-rouge">src/</code>.</li>
+</ul>
+
+<h2 id="building-the-blueprint-locally">Building the blueprint locally</h2>
+
+<p>To build the web version of the blueprint locally, you need a working LaTeX installation.
+Furthermore, you need some packages:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt install graphviz libgraphviz-dev pandoc
+pip3 install invoke
+cd .. # go to a folder where you are happy to clone git repos
+git clone https://github.com/plastex/plastex
+pip3 install ./plastex
+git clone https://github.com/PatrickMassot/leanblueprint
+pip3 install ./leanblueprint
+</code></pre></div></div>
+
+<p>To actually build the blueprint, <code class="language-plaintext highlighter-rouge">cd</code> to the <code class="language-plaintext highlighter-rouge">con-nf</code> folder and run</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>leanproject get-mathlib-cache
+leanproject build
+inv all html
+</code></pre></div></div>
+
+<p>To view the web version of the blueprint locally, run <code class="language-plaintext highlighter-rouge">inv serve</code> and navigate to
+<code class="language-plaintext highlighter-rouge">http://localhost:8000/</code> in your favorite browser.</p>
+
+<h2 id="brief-note-on-type-theory">Brief note on type theory</h2>
+
+<p>Lean is based on type theory,
+which means that some things work slightly differently from set theory.
+We highlight two syntactical differences.</p>
+
+<ul>
+  <li>
+    <p>Firstly, the element-of relation (<code class="language-plaintext highlighter-rouge">∈</code>) plays no fundamental role.
+Instead, there is a typing judgment (<code class="language-plaintext highlighter-rouge">:</code>).</p>
+
+    <p>This means that we write <code class="language-plaintext highlighter-rouge">x : X</code> to say that “<code class="language-plaintext highlighter-rouge">x</code> is a term of type <code class="language-plaintext highlighter-rouge">X</code>”
+instead of “<code class="language-plaintext highlighter-rouge">x</code> is an element of the set <code class="language-plaintext highlighter-rouge">X</code>”.
+Conveniently, we can write <code class="language-plaintext highlighter-rouge">f : X → Y</code> to mean “<code class="language-plaintext highlighter-rouge">f</code> has type <code class="language-plaintext highlighter-rouge">X → Y</code>”,
+in other words “<code class="language-plaintext highlighter-rouge">f</code> is a function from <code class="language-plaintext highlighter-rouge">X</code> to <code class="language-plaintext highlighter-rouge">Y</code>”.</p>
+  </li>
+  <li>
+    <p>Secondly, type theorists do not use the mapsto symbol (<code class="language-plaintext highlighter-rouge">↦</code>),
+but instead use lambda-notation.
+This means that we can define the square function on the integers via
+<code class="language-plaintext highlighter-rouge">λ x, x^2</code>, which translates to <code class="language-plaintext highlighter-rouge">x ↦ x^2</code> in set-theoretic notation.
+For more information about <code class="language-plaintext highlighter-rouge">λ</code>, see the Wikipedia page on
+<a href="https://en.wikipedia.org/wiki/Lambda_calculus">lambda calculus</a>.</p>
+  </li>
+</ul>
+
+<p>For a more extensive discussion of type theory,
+see the dedicated
+<a href="https://leanprover-community.github.io/lean-perfectoid-spaces/type_theory.html">page</a>
+on the perfectoid project website.</p>
+
+<h2 id="source-reference">Source reference</h2>
+
+<p><code class="language-plaintext highlighter-rouge">[untangled]</code> : https://randall-holmes.github.io/Nfproof/untangled.pdf</p>
+
+
+
+    <footer class="site-footer">
+      
+      <span class="site-footer-owner"><a href="https://github.com/leanprover-community/con-nf">con-nf</a>
+        is maintained by a team of contributors from the University of Cambridge. Visit the repository on GitHub for
+        more information.</span>
+      
+    </footer>
+  </main>
+</body>
+
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tangles model tangled type theory</title>
+<link rel="prev" href="sect0001.html" title="Phase 2: Constraining the number of tangles" />
+<link rel="up" href="index.html" title="Con(NF)" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Con(NF)</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="ch-preliminaries.html"><span class="toc_ref">1</span> <span class="toc_entry">Phase 0: Preliminaries</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="ch-preliminaries.html#a0000000004"><span class="toc_ref">1.1</span> <span class="toc_entry">Cardinal parameters</span></a>
+ </li>
+<li class="">
+  <a href="ch-preliminaries.html#a0000000005"><span class="toc_ref">1.2</span> <span class="toc_entry">Type \(-1\): atoms, litters, and local cardinals</span></a>
+ </li>
+<li class="">
+  <a href="ch-preliminaries.html#a0000000010"><span class="toc_ref">1.3</span> <span class="toc_entry">Preliminaries: pretangles, structural permutations</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html"><span class="toc_ref">2</span> <span class="toc_entry">Phase 1: The model construction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="ch-model-construction.html#a0000000012"><span class="toc_ref">2.1</span> <span class="toc_entry">Inductive assumptions</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000013"><span class="toc_ref">2.2</span> <span class="toc_entry">Phase 1a: Set codes and alternative extensions</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000014"><span class="toc_ref">2.3</span> <span class="toc_entry">Phase 1b: Actual tangles: the model definition</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000015"><span class="toc_ref">2.4</span> <span class="toc_entry">Phase 1c: the embedding into pretangles</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000016"><span class="toc_ref">2.5</span> <span class="toc_entry">Review</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">3</span> <span class="toc_entry">Phase 2: Constraining the number of tangles</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0001.html#a0000000017"><span class="toc_ref">3.1</span> <span class="toc_entry">Inductive assumptions: Coherent data at all lower levels</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000018"><span class="toc_ref">3.2</span> <span class="toc_entry">Strong supports defined</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000019"><span class="toc_ref">3.3</span> <span class="toc_entry">Freedom of action of allowable permutations</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000020"><span class="toc_ref">3.4</span> <span class="toc_entry">Types are of size \(\mu \) (so the construction actually succeeds)</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000021"><span class="toc_ref">3.5</span> <span class="toc_entry">Completing the recursion</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class=" active current">
+  <a href="sect0002.html"><span class="toc_ref">4</span> <span class="toc_entry">Tangles model tangled type theory</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="sect0002.html#a0000000022"><span class="toc_ref">4.1</span> <span class="toc_entry">The structure is a model of predicative TTT</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html#a0000000023"><span class="toc_ref">4.2</span> <span class="toc_entry">Impredicativity: verifying the axiom of union</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000003">4 Tangles model tangled type theory</h1>
+<p>Now we can prove that the structure constructed in the previous chapters is a model of tangled type theory. </p>
+<h1 id="a0000000022">4.1 The structure is a model of predicative TTT</h1>
+<p>There is then a very direct proof that the structure presented is a model of predicative TTT (in which the definition of a set at a particular type may not mention any higher type). Use \(E\) for the membership relation of the structure. It should be evident that \(x E y \leftrightarrow \pi _\beta (x) E \pi (y)\), where \(x\) is of type \(\beta \), \(y\) is of type \(\alpha \), and \(\pi \) is an \(\alpha \)-allowable permutation. </p>
+<p>Suppose that we are considering the existence of \(\{ x : \phi ^s\} \), where \(\phi \) is a formula of the language of TST with \(\in \) translated as \(E\), and \(s\) is a strictly increasing sequence of types. The truth value of each subformula of \(\phi \) will be preserved if we replace each \(x\) of type \(s(i)\) with \(\pi _{A_{s,i}}(x)\), where \(x=s(j)\) and \(A_{s,i}\) is the set of all \(s_k\) for \(i \leq k \leq j+1\). The formula \(\phi \) will contain various parameters \(a_i\) of types \(s(n_i)\) and it is then evident that the set \(\{ x : \phi ^s\} \) will be fixed by any \(s(j+1)\)-allowable permutation \(\pi \) such that \(\pi _{A{s,n_i}}\) fixes \(a_i\) for each \(i\). But this means that \((s(j+1),s(j),\{ x : \phi ^s\} )\) is symmetric and belongs to type \(s(j+1)\). </p>
+<p>This procedure will certainly work if the set definition is predicative (all bound variables are of type no higher than that of \(x\), parameters at the type of the set being defined are allowed). </p>
+<p>There are easier proofs of the consistency of predicative tangled type theory; there is a reason of course that we have pursued this one. <b class="bf">Note for the formal verification project:</b> We note that in order to avoid metamathematics, we actually suggest proving finitely many instances of comprehension with typed parameters from which the full comprehension scheme can be deduced. That there are such finite schemes (mod the infinite sequence of types) is well-known. </p>
+<p><br /></p>
+<h1 id="a0000000023">4.2 Impredicativity: verifying the axiom of union</h1>
+<p>What remains to complete the proof is that typed versions of the axiom of set union hold. That this is sufficient is a fact about predicative type theory. If we have predicative comprehension and union, we note that for any formula \(\phi \), \(\{ \iota ^k(x):\phi (x)\} \) will be predicative if \(k\) is taken to be large enough, then application of union \(k\) times to this set will give \(\{ x:\phi (x)\} \). \(\iota (x)\) here denotes \(\{ x\} \). It is evidently sufficient to prove that unions of sets of singletons exist. </p>
+<p>So what we need to show is that if \((\alpha ,\beta ,\{ (\beta ,\gamma ,\{ g\} ):g \in G\} )\) is symmetric, then \((\beta ,\gamma ,G)\) is symmetric. </p>
+<p>Suppose that \((\alpha ,\beta ,\{ (\beta ,\gamma ,\{ g\} ):g \in G\} )\) is symmetric. It then has a strong support \(S\). We claim that \(S_\beta \) (same notion defined above) is a \(\beta \)-support for \((\beta ,\gamma ,G)\). </p>
+<p>Suppose that \(\pi [S_\beta ]=S_\beta \). </p>
+<p>Any \(g \in G\) has a strong \(\gamma \)-support \(T\) which extends \((S_\beta )_\gamma \). </p>
+<p>Construct using freedom of action technology a permutation \(\pi ^*\) which acts as the identity on \(S \setminus S_\beta \), such that \(\pi ^*_\beta \) agrees with \(\pi \) on \(S_\beta \) [so in fact \(\pi ^*\) will fix \((\alpha ,\beta ,\{ (\beta ,\gamma ,\{ g\} ):g \in G\} )\)) and \((\pi ^*_\beta )_\gamma \) agrees with \(\pi _\gamma \) on \(T\), both on the orbits under \(\pi \) of items in \(T\) and on the orbits under \(\pi \) of exceptions of \(\pi \) which are in litters in \(T\). It will follow that \(\pi ^*\) fixes \((\alpha ,\beta ,\{ (\beta ,\gamma ,\{ g\} ):g \in G\} )\) and that \((\pi ^*_\beta )_\gamma \) has the same value as \(\pi _\gamma \) at \(g\), which means that \(\pi _\gamma (g) \in G\) (and the same things follow for the inverse of \(\pi \)) which verifies that that \(S_\beta \) (same notion defined above) is a \(\beta \)-support for \((\beta ,\gamma ,G)\), so the axiom of union holds in the interpreted TTT. </p>
+<p>The application of the freedom of action theorem works because no movement of typed atoms of type \(\gamma \) stipulated by the behaviour of \(\pi _\gamma \) can force movement of elements of \(S \setminus S_\beta \), because this would have to be mediated by the action of \(\pi \) on \(S_\beta \), which fixes all elements of \(S_\beta \). <b class="bf">Note for formal verification project:</b> This is a high level description which will probably acquire more detailed text if we get to it. The whole idea is here, I’m not saying there is a gap. But I have a strong suspicion that unwinding the details will induce more text. </p>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="sect0001.html" title="Phase 2: Constraining the number of tangles"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Con(NF)"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>

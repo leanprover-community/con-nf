@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="styles/style.css" />
+<link rel="stylesheet" href="styles/theme-blue.css" />
+<link rel="stylesheet" href="styles/stylecours.css" />
+<link rel="stylesheet" href="styles/style_coverage.css" />
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+<title>Formalization status</title>
+</head>
+
+<body>
+<div class="wrapper">
+<header>
+  <a href="index.html">Home</a>
+  <h1 id="doc_title">Formalization status</h1>
+</header>
+
+<div class="content">
+
+<h2>Completion report</h2>
+
+Click chapter titles to see missing items.
+
+
+<section>
+  <h3>1 Phase 0: Preliminaries <span class="partial">94%</span></h3>
+  
+  <ul class="coverage">
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 1.14 (def:allowable-perm-atoms)</div>
+      <div class="thm_thm_content"><p>  An <em>allowable \((-1)\)-permutation</em> is just a structural \((-1)\)-permutation. We denote the group of these by \(\mathrm{All}_{-1} = \mathrm{Str}_{-1}\). (Later we will define \(\mathrm{Str}_\beta \) as a proper subgroup of \(\mathrm{All}_\beta \), for higher \(\beta \).) </p>
+</div>
+    </li>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  </ul>
+  
+</section>
+
+<section>
+  <h3>2 Phase 1: The model construction <span class="partial">75%</span></h3>
+  
+  <ul class="coverage">
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 2.1 (def:phase-1-data)</div>
+      <div class="thm_thm_content">
+<p>Fix a proper type index \(\alpha \). Then <em>phase 1 data at \(\alpha \)</em> consists of: </p>
+<ol class="enumerate">
+  <li><p>a group \(\mathrm{All}\) (whose elements we call <em>allowable permutations</em>), with a map \(\varphi : \mathrm{All}\to \mathrm{Str}_\alpha \); </p>
+</li>
+  <li><p>a set \(\tau \) (whose elements we call <em>tangles</em>), equipped with an \(\mathrm{All}\)-action; </p>
+</li>
+  <li><p>a map \(j\) (<em>typed near-litters</em>) from near-litters to \(\tau \), equivariant with respect to the \(\mathrm{All}\)-action on near-litters induced by \(\mathrm{All}\to \mathrm{Str}_{\alpha } \to \mathrm{Str}_{-1}\); </p>
+</li>
+  <li><p>a map \(k\) (<em>typed singletons</em>) from \(\tau _{-1}\) to \(\tau \), again \(\mathrm{All}\)-equivariant w.r.t. the induced action on \(\tau _{-1}\); </p>
+</li>
+  <li><p>for each \(x \in \tau \), a small set \(S_x\) of \(\alpha \)-support-conditions that supports \(x\) under the \(\mathrm{All}\)-action (a <em>designated support</em> for \(x\)); </p>
+</li>
+  <li><p>an injection \(\iota : \tau \to \mu \), satisfying the following conditions: </p>
+<ol class="enumerate">
+  <li><p>each typed litter \(j(L)\) precedes the typed singletons of all its elements \(a \in L\) — explicitly, \(\iota (j(L)) {\lt} \iota (k(a))\); </p>
+</li>
+  <li><p>each typed near-litter \(k(N)\) which is not a litter comes later than its (typed) litter \(j(N^\circ )\), and after (the typed singletons of) all elements of \(N \mathrel {\triangle }N^\circ \); </p>
+</li>
+  <li><p>for each \(x\) in \(\tau _\alpha \) that is not a typed litter or singleton, \(x\) comes later than all of its designated support – explicitly, for each \((a,A)\) or \((N,A)\) in \(S_x\), we must have \(\iota _\alpha (j(N)), \iota _\alpha (k(a)){\lt}\iota _\alpha (x)\). </p>
+</li>
+</ol>
+<p> [Note: to see these conditions are not unreasonable, note that each \(x \in \tau \) has \({\lt}\mu \) many things that it must come after, and that the chains of these constraints are of depth at most 4: litters \({\lt}\) atoms \({\lt}\) other near-litters \({\lt}\) everything else. This is said more carefully in <a href="sect0001.html#lem:position-functions-propagate">lemma 3.26</a> below.] </p>
+</li>
+  <li></li>
+</ol>
+</div>
+    </li>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 2.20 (def:semi-tangle-action)</div>
+      <div class="thm_thm_content"><p>   Allowable permutations act on semi-tangles. </p>
+</div>
+    </li>
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.23 (def:typed-near-litter)</div>
+      <div class="thm_thm_content"><p>   Any code \((\alpha ,-1,N)\), where \(N\) is a near-litter, gives an element of \(\tau _\alpha \). </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.24 (def:typed-singleton)</div>
+      <div class="thm_thm_content"><p>   For any symmetric \(b \in \tau _\beta \), \((\alpha ,\beta ,\{ b\} ) \in \tau _\alpha \). In particular, this works for each atom \(a \in \tau _{-a}\). </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.25 (lem:small-subsets-closure)</div>
+      <div class="thm_thm_content"><p>   It should also be evident that \((\alpha ,\beta ,B)\) will always be symmetric if \(|B|{\lt}\kappa \) [take the union of the \(\beta \)-supports of elements of \(B\) and add \(\alpha \) to all the second components of elements of this union]: all small subsets of a type are realized in each higher type. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.26 (lem:tangle-action)</div>
+      <div class="thm_thm_content"><p>   The action of \(\alpha \)-allowable permutations on semi-tangles restricts to an action on tangles. Explicitly, if an \(\alpha \) semi-tangle \(x\) is symmetric, then so is \(\pi x\) for any \(\alpha \)-allowable permutation \(\pi \). </p>
+</div>
+    </li>
+    
+    
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 2.28 (def:phase-1-propagates)</div>
+      <div class="thm_thm_content"><p>  For a proper type index \(\alpha \in \lambda \), given phase 1 data at all levels \(\beta {\lt} \alpha \), then the constructions above provide <em>most</em> components of phase 1 data at level \(\alpha \) — everything except for the embedding \(\iota _\alpha : \tau _\alpha \to \mu \) and its properties. </p>
+<p>[Note that to treat this as a <em>definition</em>, in particular of the “designated supports” component, we are implicitly invoking the axiom of choice — a priori we only know that there <em>exists</em> some support for each new tangle.] </p>
+</div>
+    </li>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  </ul>
+  
+</section>
+
+<section>
+  <h3>3 Phase 2: Constraining the number of tangles <span class="partial">6%</span></h3>
+  
+  <ul class="coverage">
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.1 (def:concrete-phase-1-data)</div>
+      <div class="thm_thm_content"><p>  For a type index \(\alpha \), <em>concrete phase 1 data</em> at level \(\alpha \) consists of a subset \(\tau \subseteq \mathrm{Pretangle}_\alpha \) and a subgroup \(\mathrm{All}\subseteq G_\alpha \), together with full phase 1 data on these. </p>
+<p>Notes for formalisation: </p>
+<ul class="itemize">
+  <li><p>The reason we use <em>subsets</em> from here on is because we will soon impose equalities between these components, and subset equalities are much less nasty to deal with than type equalities. </p>
+</li>
+  <li><p>To define this, we almost certainly want to factor out the types \(\tau \) and \(\mathrm{All}\) as parameters of the phase 1 data from the start. </p>
+</li>
+  <li><p>We could avoid that “factoring out as a parameter” by assuming this concreteness already in the phase 1 data, i.e. positing \(\tau \) as a subset of pretangles and \(\mathrm{All}\) as a subgroup of \(\mathrm{Str}_\alpha \) from the start. At least for \(\tau \), that seems a bit unnatural — it adds an entirely irrelevant extra assumption throughout phase 1. For \(\mathrm{All}\) it perhaps wouldn’t be so unnatural, since \(\mathrm{All}\) does need to be assumed with at least a homomorphism to \(\mathrm{Str}_\alpha \) anyway. </p>
+</li>
+</ul>
+<p>The <em>standard</em> concrete phase 1 data at level \(-1\) are the defined \(\tau _{-1} = \mathrm{Pretangle}_{-1}\) and \(\mathrm{All}_{-1} = \mathrm{Str}_{-1}\). </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.10 (def:freedom-of-action-statement)</div>
+      <div class="thm_thm_content"><p>  Given coherent part 1 data below \(\alpha \), say that <em>freedom of action holds (at \(\alpha \))</em> if: Given an \(\alpha \)-local bijection \(\pi ^0\) and a specification for each path \(A : \beta \to \alpha \) a bijection of the \(\beta \)-flexible litters, there is a unique allowable permutation \(\pi \in \mathrm{All}_\alpha \) such that: </p>
+<ol class="enumerate">
+  <li><p>\(\pi {A}\) extends \(\pi ^0_{A}\) for each \(A\); </p>
+</li>
+  <li><p>for each path \(A : \beta \to \alpha \) and \(A\)-flexible litter \(L\), \(\pi _A(j_\beta (L)) = j_\beta (N)\) for some \(N\) near to \(\chi _A(L)\); </p>
+</li>
+  <li><p>The only exceptions of \(\pi \) are \(\pi ^0\), and everywhere else, \(\pi \) is order-preserving between litters. That is: for each path \(A : -1 \to \alpha \) and litter \(L\), and writing \(N\) for the near-litter \(\pi _A``L\), the restriction of \(\pi _A\) to \(L \setminus \mathrm{dom}(\pi ^0_A)\) is the unique bijection from \(L \setminus \mathrm{dom}(\pi ^0_A)\) to \(N^\circ \setminus \mathrm{rge}(\pi ^0_A)\) which is strictly increasing with respect to the (given/canonical) orders on \(L\) and \(N^\circ \). </p>
+</li>
+</ol>
+<p>Note: Earlier versions of the note/blueprint stated the 3rd condition in terms of exceptions; recent versions of the note spell it out in more detail and add the “increasing” condition, which is necessary for the uniqueness in the theorem conclusion. If there are any doubts, the current version of Randall’s note should be consulted! </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 3.11 (lem:freedom-of-action-propagates)</div>
+      <div class="thm_thm_content"><p>  Given coherent part 1 data below \(\alpha \), if freedom of action holds at each level \(\beta {\lt} \alpha \), then it holds at level \(\alpha \). </p>
+<p>Note: I (Peter) have an alternative approach to freedom of action (slightly different in both statement and proof) which might possibly be easier to formalise, avoiding the dependence on strong supports in the proof. Iff Randall approves it then I will add it in the blueprint as an alternative. But it doesn’t change the overall structure of the main argument/recursion, so this doesn’t need to be worried about until the point of formalising the FoA theorem itself. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Theorem 3.12 (thm:freedom-of-action)</div>
+      <div class="thm_thm_content"><p>  Given coherent phase 1 data below \(\alpha \), it satisfies freedom of action at every level. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.13 (def:coding-function)</div>
+      <div class="thm_thm_content"><p>  For any support \(S\) and tangle \(x\), we can define a function \(\chi _{x,S}\) which sends \(T=\pi (S)\) to \(\pi (x)\) for every \(T\) in the orbit of \(S\) under the action of allowable permutations. We call such functions <em>coding functions </em>. Note that if \(\pi [S]=\pi '[S]\) then \((\pi ^{-1}\circ \pi ')[S]= S\), so \((\pi ^{-1}\circ \pi ')(x)= x\), so \(\pi (x)=\pi '(x)\), ensuring that the map \(\chi _{x,S}\) for which we gave an implicit definition is well defined. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.14 (def:support-spec)</div>
+      <div class="thm_thm_content"><p>  Fix coherent phase 1 data below \(\alpha \). A <em>support-specification</em> is …[this is quite long to define; we should get the text from more recent versions of Randall’s note] </p>
+<p>[Perhaps the coherence is not needed?] </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 3.15 (lem:count-support-specs)</div>
+      <div class="thm_thm_content"><p>  There are \({\lt}\mu \)-many support specifications. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.16 (def:support-spec-realisation)</div>
+      <div class="thm_thm_content"><p>  Any support specification can be realised (non-uniquely) to give a strong support. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 3.17 (lem:support-spec-realisation-unique)</div>
+      <div class="thm_thm_content"><p>  If freedom of action holds at \(\alpha \), then realisations of a support specification are unique modulo the group action. That is, for any two realisations \(S, S'\) of a support specification \(S\), there is some allowable permutation \(\pi \) such that \(\pi S = S'\). </p>
+<p>[Note: we don’t need to explicitly assume freedom of action here: we could appeal to the <a href="sect0001.html#thm:freedom-of-action">theorem 3.12</a> to know that it holds. But the explicit assumption keeps things more modular, and avoids unnecessary dependency, which will be helpful in case it turns out the argument needs restructuring at any point.] </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 3.18 (lem:strong-support-has-spec)</div>
+      <div class="thm_thm_content"><p>  Every strong support can be obtained as the realisation of some specification </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Corollary 3.19 (cor:count-strong-supports)</div>
+      <div class="thm_thm_content"><p>  There are \({\lt}\mu \)-many orbits of strong supports, under the group action of allowable permutations. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.2 (def:concrete-phase-1-data-propagates)</div>
+      <div class="thm_thm_content"><p>  For a proper type index \(\alpha \in \lambda \), given concrete phase 1 data at all levels \(\beta {\lt} \alpha \), we get <em>most</em> components of concrete phase 1 data at level \(\alpha \). </p>
+<p>In particular, the new set of \(\alpha \)-tangles \(\tau _\alpha \subseteq \mathrm{Pretangle}_\alpha \) is the the image of the \(\alpha \)-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations. (We could call these “concrete \(\alpha \)-tangles” and “abstract \(\alpha \)-tangles”, if we need to for disambiguation.) </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.20 (def:coding-function-spec)</div>
+      <div class="thm_thm_content"><p>  A <em>coding function specification</em> is …[again, see recent versions of Randall’s note] </p>
+<p>[Perhaps the coherence is not needed?] </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 3.21 (lem:count-coding-function-specs)</div>
+      <div class="thm_thm_content"><p>  There are \({\lt}\mu \)-many coding function specifications. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.22 (def:coding-function-spec-realisation)</div>
+      <div class="thm_thm_content"><p>  Any coding function specification can be realised as a coding function. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 3.23 (lem:coding-function-has-spec)</div>
+      <div class="thm_thm_content"><p>  Every coding function can be obtained as the realisation of some specification </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Corollary 3.24 (cor:count-coding-functions)</div>
+      <div class="thm_thm_content"><p>  There are \({\lt}\mu \)-many coding functions. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Corollary 3.25 (cor:count-tangles)</div>
+      <div class="thm_thm_content"><p>  There are \(\mu \)-many \(\alpha \)-tangles. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 3.26 (lem:position-functions-propagate)</div>
+      <div class="thm_thm_content"><p>  Given coherent phase 1 data below \(\alpha \) satisfying freedom of action at \(\alpha \), we can choose supports \(S(x)\) for all \(\alpha \)-tangles \(x\) and a position function \(\iota _\alpha : \tau _\alpha \to \mu \) satisfying the conditions demanded in <a href="ch-model-construction.html#def:phase-1-data">definition 2.1</a>: </p>
+<ol class="enumerate">
+  <li><p>for each litter \(L\), the typed litter of \(L\) precedes the typed singletons of all its elements \(a \in L\) — explicitly, \(\iota (j(L)) {\lt} \iota (k(a))\); </p>
+</li>
+  <li><p>for each near-litter \(N\) which is not a litter, \(j(N)\) comes after its (typed) litter \(j(N^\circ )\), and after (the typed singletons of) all elements of \(N \mathrel {\triangle }N^\circ \); </p>
+</li>
+  <li><p>for each \(x\) in \(\tau _\alpha \) that is not a typed litter or singleton, \(x\) comes later than all of its designated support – explicitly, for each \((a,A)\) or \((N,A)\) in the in \(S(x)\), we must have \(\iota _\alpha (j(N)), \iota _\alpha (k(a)){\lt}\iota _\alpha (x)\). </p>
+</li>
+</ol>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.27 (def:very-coherent-data)</div>
+      <div class="thm_thm_content"><p>  For \(\alpha \in \lambda + 1\), a choice of coherent phase 1 data below \(\alpha \) is <em>very coherent</em> if its ordering functions and designated supports at each level are the ones provided by <a href="sect0001.html#lem:position-functions-propagate">lemma 3.26</a> applied to the earlier levels, using <a href="sect0001.html#thm:freedom-of-action">theorem 3.12</a> to supply the assumption of freedom of action. </p>
+<p>[This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice. See also discusson above replacing this with an explicit principle of “dependent choice”.] </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 3.28 (lem:very-coherent-data-unique)</div>
+      <div class="thm_thm_content"><p>  For any \(\alpha \), very coherent data below \(\alpha \) is unique (if it exists). </p>
+<p>[Actually, we probably don’t need this: it effectively gets inlined in the main recursion.] </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Theorem 3.29 (thm:main-recursion)</div>
+      <div class="thm_thm_content"><p>  For every \(\alpha \in \lambda + 1\), there is a unique choice of very coherent data below \(\alpha \). </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.3 (def:coherent-phase-1-data)</div>
+      <div class="thm_thm_content"><p>  For \(\alpha \in \lambda + 1\), <em>Phase 1 data below \(\alpha \)</em> consists of concrete phase 1 data at every level \(\beta {\lt} \alpha \). Say this is <em>coherent</em> if it is standard at level \(-1\), and at each proper type index \(\beta {\lt} \gamma \), all components at level \(\beta \) that <em>could</em> have been induced from the data at lower levels \(\gamma {\lt} \beta \) are, in fact, equal to what would have been induced that way. </p>
+<ul class="itemize">
+  <li><p>Note we want to provide this definiton also for \(\alpha = \lambda \)! I think this should be available in mathlib as <code class="verbatim">with_top</code>. </p>
+</li>
+  <li><p>We could unify “standard at level \(-1\)” with induced at proper type indices by generalising the definition of each component of the “induced concrete phase 1 data at \(\alpha \)” to include the case \(\alpha = -1\),defining the induced data as the standard one in that case. Is this more natural? Will it make life easier? </p>
+</li>
+</ul>
+<p>For \(\alpha {\lt} \beta \), “phase 2 data below \(\alpha \)” can be restricted to “phase 2 data below \(\beta \)”. </p>
+<p>Most constructions in phase 2 will assume coherent phase 1 data below \(\alpha \), for some fixed \(\alpha \). </p>
+<p>[Terminology: perhaps we should call this “phase 2 data at \(\alpha \)”? That seems more consistent for the overall naming scheme, but “coherent phase 1 data below \(\alpha \)” seems clearer and more transparent in itself. Maybe we should reconsider the naming scheme, so that it’s not in tension with clarity!] </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.30 (def:tangle-completed)</div>
+      <div class="thm_thm_content"><p>  The (genuine,definitive!) tangles are the substructure \(\mathrm{Tangle}\) of \(\mathrm{Pretangle}\) given by the unique choice of very coherent data up to \(\lambda \), provided by <a href="sect0001.html#thm:main-recursion">theorem 3.29</a>. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.4 (def:raise-lower-index)</div>
+      <div class="thm_thm_content"><p>  [Note: all this stuff — raising and lowering indices, and the results about repeatedly applying them to structural permutations, etc — is MUCH more clearly handled in algebraic language, using the category of paths, the functoriality of \(\mathrm{Str}_\alpha \) and \(\mathrm{All}_\alpha \) in paths, and maps between group actions, etc.] </p>
+<p>For any \(\alpha \)-support \(S\) and an extended type index \(C\) with minimum element greater than \(\alpha \), we define \(S^C\) as \(\{ ((x,A\cup C,\gamma ),(y,B\cup C,\delta )):((x,A,\gamma ),(y,B,\delta )) \in S\} \). </p>
+<p>If \(S\) is an \(\alpha \)-support and \(\beta {\lt}\alpha \), \(S_\beta \) is defined as the largest support \(U\) such that \(U^{\{ \alpha \} } \subseteq S\) and \(U\) is a \(\beta \)-support. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.5 (def:strong-support)</div>
+      <div class="thm_thm_content"><p>  A strong support is a support \(S\) with certain additional properties. </p>
+<ol class="enumerate">
+  <li><p>If \(((\beta ,-1,x),A,\gamma ) \in S\) then \(x\) is a singleton or a litter. </p>
+</li>
+  <li><p>If \(((\beta ,-1,\{ x\} ),A,\gamma ) \in S\), then \(((\beta ,-1,L),A,\gamma ) {\lt}_S ((\beta ,-1,\{ x\} ),A,\gamma )\), where \(L\) is the litter containing \(x\). </p>
+</li>
+  <li><p>If \(((\beta ,-1,L),A,\delta ) \in S\) and \([L]=f_{\gamma ,\beta }(y)\), where \(\gamma {\lt}\delta \), then there is a \(\gamma \)-support \(T\) of \(y\) such that \(T^{A \setminus \{ \beta \} } \subseteq S\) and each element of the domain of \(T^{A \setminus \{ \beta \} }\) is \(\leq _S ((\beta ,-1,L),A)\). Note that these conditions imply that there is an index-raised version of a strong \(\gamma \)-support of \(y\) included in \(T\). </p>
+</li>
+</ol>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 3.6 (lem:strengthen-support)</div>
+      <div class="thm_thm_content"><p>  Any support can be extended to a strong support. </p>
+</div>
+    </li>
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.9 (def:flexible)</div>
+      <div class="thm_thm_content"><p>  Given coherent part 1 data below \(\alpha \), a path \(A : \beta \to \alpha \), and a litter \(L\), say \(L\) is <em>\(A\)-flexible</em> (or that the pair \((L,A)\) is <em>flexible</em>) if \(L\) is not in the range of \(f_{\beta ,\gamma }\), for any \(\gamma {\lt} \alpha \). </p>
+<p>(In particular, if \(\beta = -1\), every such pair is flexible, since \(f_{\gamma ,\beta }\)-maps is only defined for \(\beta \) proper.) </p>
+</div>
+    </li>
+    
+    
+  </ul>
+  
+</section>
+
+<section>
+  <h3>4 Tangles model tangled type theory <span class="ok">100%</span></h3>
+  
+</section>
+
+
+<h2>What to define next?</h2>
+
+
+<section>
+  
+  <h3>1 Phase 0: Preliminaries</h3>
+  <ul class="coverage">
+    
+    <li>
+      <div class="thm_thmheading">Definition 1.14 (def:allowable-perm-atoms)</div>
+      <div class="thm_thm_content"><p>  An <em>allowable \((-1)\)-permutation</em> is just a structural \((-1)\)-permutation. We denote the group of these by \(\mathrm{All}_{-1} = \mathrm{Str}_{-1}\). (Later we will define \(\mathrm{Str}_\beta \) as a proper subgroup of \(\mathrm{All}_\beta \), for higher \(\beta \).) </p>
+</div>
+    </li>
+    
+  </ul>
+  
+</section>
+
+<section>
+  
+  <h3>2 Phase 1: The model construction</h3>
+  <ul class="coverage">
+    
+    <li>
+      <div class="thm_thmheading">Definition 2.1 (def:phase-1-data)</div>
+      <div class="thm_thm_content">
+<p>Fix a proper type index \(\alpha \). Then <em>phase 1 data at \(\alpha \)</em> consists of: </p>
+<ol class="enumerate">
+  <li><p>a group \(\mathrm{All}\) (whose elements we call <em>allowable permutations</em>), with a map \(\varphi : \mathrm{All}\to \mathrm{Str}_\alpha \); </p>
+</li>
+  <li><p>a set \(\tau \) (whose elements we call <em>tangles</em>), equipped with an \(\mathrm{All}\)-action; </p>
+</li>
+  <li><p>a map \(j\) (<em>typed near-litters</em>) from near-litters to \(\tau \), equivariant with respect to the \(\mathrm{All}\)-action on near-litters induced by \(\mathrm{All}\to \mathrm{Str}_{\alpha } \to \mathrm{Str}_{-1}\); </p>
+</li>
+  <li><p>a map \(k\) (<em>typed singletons</em>) from \(\tau _{-1}\) to \(\tau \), again \(\mathrm{All}\)-equivariant w.r.t. the induced action on \(\tau _{-1}\); </p>
+</li>
+  <li><p>for each \(x \in \tau \), a small set \(S_x\) of \(\alpha \)-support-conditions that supports \(x\) under the \(\mathrm{All}\)-action (a <em>designated support</em> for \(x\)); </p>
+</li>
+  <li><p>an injection \(\iota : \tau \to \mu \), satisfying the following conditions: </p>
+<ol class="enumerate">
+  <li><p>each typed litter \(j(L)\) precedes the typed singletons of all its elements \(a \in L\) — explicitly, \(\iota (j(L)) {\lt} \iota (k(a))\); </p>
+</li>
+  <li><p>each typed near-litter \(k(N)\) which is not a litter comes later than its (typed) litter \(j(N^\circ )\), and after (the typed singletons of) all elements of \(N \mathrel {\triangle }N^\circ \); </p>
+</li>
+  <li><p>for each \(x\) in \(\tau _\alpha \) that is not a typed litter or singleton, \(x\) comes later than all of its designated support – explicitly, for each \((a,A)\) or \((N,A)\) in \(S_x\), we must have \(\iota _\alpha (j(N)), \iota _\alpha (k(a)){\lt}\iota _\alpha (x)\). </p>
+</li>
+</ol>
+<p> [Note: to see these conditions are not unreasonable, note that each \(x \in \tau \) has \({\lt}\mu \) many things that it must come after, and that the chains of these constraints are of depth at most 4: litters \({\lt}\) atoms \({\lt}\) other near-litters \({\lt}\) everything else. This is said more carefully in <a href="sect0001.html#lem:position-functions-propagate">lemma 3.26</a> below.] </p>
+</li>
+  <li></li>
+</ol>
+</div>
+    </li>
+    
+    <li>
+      <div class="thm_thmheading">Definition 2.20 (def:semi-tangle-action)</div>
+      <div class="thm_thm_content"><p>   Allowable permutations act on semi-tangles. </p>
+</div>
+    </li>
+    
+    <li>
+      <div class="thm_thmheading">Definition 2.28 (def:phase-1-propagates)</div>
+      <div class="thm_thm_content"><p>  For a proper type index \(\alpha \in \lambda \), given phase 1 data at all levels \(\beta {\lt} \alpha \), then the constructions above provide <em>most</em> components of phase 1 data at level \(\alpha \) — everything except for the embedding \(\iota _\alpha : \tau _\alpha \to \mu \) and its properties. </p>
+<p>[Note that to treat this as a <em>definition</em>, in particular of the “designated supports” component, we are implicitly invoking the axiom of choice — a priori we only know that there <em>exists</em> some support for each new tangle.] </p>
+</div>
+    </li>
+    
+  </ul>
+  
+</section>
+
+<section>
+  
+  <h3>3 Phase 2: Constraining the number of tangles</h3>
+  <ul class="coverage">
+    
+    <li>
+      <div class="thm_thmheading">Definition 3.4 (def:raise-lower-index)</div>
+      <div class="thm_thm_content"><p>  [Note: all this stuff — raising and lowering indices, and the results about repeatedly applying them to structural permutations, etc — is MUCH more clearly handled in algebraic language, using the category of paths, the functoriality of \(\mathrm{Str}_\alpha \) and \(\mathrm{All}_\alpha \) in paths, and maps between group actions, etc.] </p>
+<p>For any \(\alpha \)-support \(S\) and an extended type index \(C\) with minimum element greater than \(\alpha \), we define \(S^C\) as \(\{ ((x,A\cup C,\gamma ),(y,B\cup C,\delta )):((x,A,\gamma ),(y,B,\delta )) \in S\} \). </p>
+<p>If \(S\) is an \(\alpha \)-support and \(\beta {\lt}\alpha \), \(S_\beta \) is defined as the largest support \(U\) such that \(U^{\{ \alpha \} } \subseteq S\) and \(U\) is a \(\beta \)-support. </p>
+</div>
+    </li>
+    
+  </ul>
+  
+</section>
+
+<section>
+  
+</section>
+
+
+<h2>What to state next?</h2>
+
+
+<section>
+  
+</section>
+
+<section>
+  
+  <h3>2 Phase 1: The model construction</h3>
+  <ul class="coverage">
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.18 (lem:coherence-unpacked)</div>
+      <div class="thm_thm_content"><p>   A semi-allowable permutation \(\pi \) is allowable just if </p>
+<div class="displaymath" id="a0000000033">
+  \[ f_{\gamma ,\delta }(\pi _\gamma (g)) = [(\pi _\delta )_{-1}``f_{\gamma ,\delta }(g)^\circ ]. \]
+</div>
+<p> holds for all \(f_{\gamma ,\delta }\) with \(\gamma ,\delta {\lt}\alpha \), and all \(g \in \tau _\gamma \). </p>
+</div>
+    </li>
+    
+  </ul>
+  
+</section>
+
+<section>
+  
+</section>
+
+<section>
+  
+</section>
+
+
+<h2>What to prove next?</h2>
+
+
+<section>
+  
+</section>
+
+<section>
+  
+  <h3>2 Phase 1: The model construction</h3>
+  <ul class="coverage">
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.23 (def:typed-near-litter)</div>
+      <div class="thm_thm_content"><p>   Any code \((\alpha ,-1,N)\), where \(N\) is a near-litter, gives an element of \(\tau _\alpha \). </p>
+</div>
+    </li>
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.24 (def:typed-singleton)</div>
+      <div class="thm_thm_content"><p>   For any symmetric \(b \in \tau _\beta \), \((\alpha ,\beta ,\{ b\} ) \in \tau _\alpha \). In particular, this works for each atom \(a \in \tau _{-a}\). </p>
+</div>
+    </li>
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.26 (lem:tangle-action)</div>
+      <div class="thm_thm_content"><p>   The action of \(\alpha \)-allowable permutations on semi-tangles restricts to an action on tangles. Explicitly, if an \(\alpha \) semi-tangle \(x\) is symmetric, then so is \(\pi x\) for any \(\alpha \)-allowable permutation \(\pi \). </p>
+</div>
+    </li>
+    
+  </ul>
+  
+</section>
+
+<section>
+  
+</section>
+
+<section>
+  
+</section>
+
+
+</div>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/coverage.js"></script>
+</body>
+</html>

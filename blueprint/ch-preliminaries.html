@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Phase 0: Preliminaries</title>
+<link rel="next" href="ch-model-construction.html" title="Phase 1: The model construction" />
+<link rel="prev" href="index.html" title="Con(NF)" />
+<link rel="up" href="index.html" title="Con(NF)" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Con(NF)</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class=" active current">
+  <a href="ch-preliminaries.html"><span class="toc_ref">1</span> <span class="toc_entry">Phase 0: Preliminaries</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="ch-preliminaries.html#a0000000004"><span class="toc_ref">1.1</span> <span class="toc_entry">Cardinal parameters</span></a>
+ </li>
+<li class="">
+  <a href="ch-preliminaries.html#a0000000005"><span class="toc_ref">1.2</span> <span class="toc_entry">Type \(-1\): atoms, litters, and local cardinals</span></a>
+ </li>
+<li class="">
+  <a href="ch-preliminaries.html#a0000000010"><span class="toc_ref">1.3</span> <span class="toc_entry">Preliminaries: pretangles, structural permutations</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html"><span class="toc_ref">2</span> <span class="toc_entry">Phase 1: The model construction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="ch-model-construction.html#a0000000012"><span class="toc_ref">2.1</span> <span class="toc_entry">Inductive assumptions</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000013"><span class="toc_ref">2.2</span> <span class="toc_entry">Phase 1a: Set codes and alternative extensions</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000014"><span class="toc_ref">2.3</span> <span class="toc_entry">Phase 1b: Actual tangles: the model definition</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000015"><span class="toc_ref">2.4</span> <span class="toc_entry">Phase 1c: the embedding into pretangles</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000016"><span class="toc_ref">2.5</span> <span class="toc_entry">Review</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">3</span> <span class="toc_entry">Phase 2: Constraining the number of tangles</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0001.html#a0000000017"><span class="toc_ref">3.1</span> <span class="toc_entry">Inductive assumptions: Coherent data at all lower levels</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000018"><span class="toc_ref">3.2</span> <span class="toc_entry">Strong supports defined</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000019"><span class="toc_ref">3.3</span> <span class="toc_entry">Freedom of action of allowable permutations</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000020"><span class="toc_ref">3.4</span> <span class="toc_entry">Types are of size \(\mu \) (so the construction actually succeeds)</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000021"><span class="toc_ref">3.5</span> <span class="toc_entry">Completing the recursion</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">4</span> <span class="toc_entry">Tangles model tangled type theory</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0002.html#a0000000022"><span class="toc_ref">4.1</span> <span class="toc_entry">The structure is a model of predicative TTT</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html#a0000000023"><span class="toc_ref">4.2</span> <span class="toc_entry">Impredicativity: verifying the axiom of union</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="ch:preliminaries">1 Phase 0: Preliminaries</h1>
+
+<p>In this section, we give the background constructions for the model — as much as can be given before we enter into the main recursion. </p>
+<h1 id="a0000000004">1.1 Cardinal parameters</h1>
+<p><div class="definition_thmwrapper" id="def:params">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.1</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:params">#</a>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/params.lean#L40">con_nf.params</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Throughout, we fix three parameters: </p>
+<ul class="itemize">
+  <li><p>\(\lambda \) may be any limit ordinal; </p>
+</li>
+  <li><p>\(\kappa \) may be any regular cardinal \({\gt}\lambda \); </p>
+</li>
+  <li><p>\(\mu \) may be any strong limit cardinal \({\gt}\kappa \) of cofinality \(\geq \kappa \). </p>
+</li>
+</ul>
+<p>[Note: The assumptions on \(\kappa \) and \(\mu \) are essential for the construction of the model to work. The assumptions on \(\lambda \) are not needed for this model — everything probably works for an arbitrary well-founded strict partial order \(\lambda \), and gives a model of \(\mathrm{TTT}_\lambda \). The assumption that \(\lambda \) is a limit ordinals is require afterwards, to convert the model of \(\mathrm{TTT}_\lambda \) into a model of \(\mathrm{TST} + \text{typical ambiguity}\).] </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:small">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.2</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:small">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:params">Definition 1.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/params.lean#L179">con_nf.small</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   We refer to sets of size smaller than \(\kappa \) as <em>small</em> [and all other sets as large]. </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:type-index">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.3</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:type-index">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:params">Definition 1.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/params.lean#L137">con_nf.type_index</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   We define a <em>type index</em> as an element of \(\lambda ^\bot := \lambda \cup \{ -1\} \). We define a <em>proper type index</em> as an element of \(\lambda \). </p>
+<p>In many ways, \(-1\) should be viewed as a type index on the same footing as other elements of \(\lambda \); but it frequently needs treating as a special case. </p>
+<p>[In the formalisation, “\(-1\)” is referred to as \(\bot \). Should we consider following that in the text too?] </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:path">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.4</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:path">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:type-index">Definition 1.3</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/index.lean#L19">con_nf.extended_index</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   By a <em>path</em>, we mean a path in the directed graph \((\lambda ^\bot ,{\lt})\); that is, a nonempty finite strictly increasing sequence of type indices \(\alpha _0 {\lt} \cdots {\lt} \alpha _k\). A path is <em>proper</em> if its source (least element) is proper. </p>
+<p>We will write paths as \(A : \beta \dashrightarrow \alpha \). We will write path concatenation and extension as \(\gamma ;A\), \(A;B\), and similar. </p>
+<p>[There may be some terminological inconsistency: In places, paths are called <em>extended type indices</em>, and are considered as sets rather than sequences; also, they are sometimes taken to be decreasing instead of increasing.] </p>
+
+  </div>
+</div> </p>
+<h1 id="a0000000005">1.2 Type \(-1\): atoms, litters, and local cardinals</h1>
+<p>We will define a function taking type indices \(\alpha \) to sets \(\tau _\alpha \) (type \(\alpha \)). </p>
+<p>  <div class="definition_thmwrapper" id="def:atoms-and-litters">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.5</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:atoms-and-litters">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:params">Definition 1.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/params.lean#L167">con_nf.atom</a></li>
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/params.lean#L149">con_nf.litter</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   Define \(\mathcal{L}\) as \( \lambda ^2 \times \mu \), and \(\tau _{-1}\) as \(\mathcal{L}\times \kappa \). </p>
+<p>We refer to elements of \(\tau _{-1}\) as <em>atoms</em>. </p>
+<p>By construction, atoms come partitioned into \(\mathcal{L}\)-many <em>litters</em> of size \(\kappa \), </p>
+<div class="displaymath" id="a0000000006">
+  \[  L_{\alpha ,\beta ,\xi } := \{ ((\alpha ,\beta ,\xi ),x) \mid x \in \kappa \} . \]
+</div>
+<p>The litters, in turn, come partitioned into \(\lambda ^2\)-many classes of size \(\mu \): </p>
+<div class="displaymath" id="a0000000007">
+  \[  X_{\alpha ,\beta } := \{  (\alpha ,\beta ,\xi ) \mid \xi \in \mu \} .  \]
+</div>
+<p>We generally identify litters \(L_{\alpha ,\beta ,\xi }\) with their indices \((\alpha ,\beta ,\xi ) \in \mathcal{L}\); for instance a quantification over “all litters” is formally a quantification over \(\mathcal{L}\). </p>
+
+  </div>
+</div> </p>
+<p>The “atoms” of \(\tau _{-1}\) are not quite atoms in a traditional sense — they do not appear as elements of the eventual structure — but they fulfil the same role of getting the set hierarchy off to a sufficiently non-trivial start. </p>
+<p><div class="definition_thmwrapper" id="def:near-litter">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.6</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:near-litter">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:atoms-and-litters">Definition 1.5</a></li>
+          <li><a href="ch-preliminaries.html#def:small">Definition 1.2</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/litter.lean#L50">con_nf.is_near_litter</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   A <em>near-litter</em> is a subset \(N\) of \(\tau _{-1}\) with small symmetric difference from some litter. This litter is necessarily unique, and we denote it by \(N^\circ \). We write \(\mathcal{NL}\) for the set of all near-litters. </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:local-cardinal">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.7</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:local-cardinal">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:near-litter">Definition 1.6</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/litter.lean#L118">con_nf.local_cardinal</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   For \(i \in \mathcal{L}\), the \(i\)-th <em>local cardinal</em> \([L_i]\) is \(\{ N \subseteq \tau _{-1}:|N \mathrel {\triangle }L|{\lt}\kappa \} \). </p>
+<p>For any near-litter \(N\) (including litters), we write \([N]\) for the unique local cardinal that contains \(N\). We introduce the notation \([N]^\circ \) for the litter belonging to the local cardinal \(N\), with the tacit need to prove that there is only one. </p>
+<p>[Note: almost all roles played by local cardinals in the original text should be fulfilled in the formalisation by litter-indices \(i \in \mathcal{L}\).] </p>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:small-diff-equiv">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">1.8</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#lem:small-diff-equiv">#</a>
+    <a class="icon proof" href="ch-preliminaries.html#a0000000008"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:small">Definition 1.2</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/params.lean#L228">con_nf.is_near.trans</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Note that \(\mathcal{L}\) corresponds to the equivalence classes of an equivalence relation \(\sim \) on near-litters, where \(X \sim Y\) iff the symmetric difference \(X \mathrel {\triangle }Y\) is small. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000008">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>This is left as an easy exercise for the reader. </p>
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:count-near-litters">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">1.9</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#lem:count-near-litters">#</a>
+    <a class="icon proof" href="ch-preliminaries.html#a0000000009"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:near-litter">Definition 1.6</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/litter.lean#L113">con_nf.mk_near_litter</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Because the cofinality of \(\mu \) is \(\geq \kappa \), there are \(\mu \) near-litters. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000009">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>First, there are at least \(\mu \) near-litters. Second, the equivalence induced by the symmetric difference with the \(i\)-th litter sends near-litters to sets of size strictly less than \(\kappa \), hence of size strictly less than the cofinality of \(\mu \). But there are at most (exactly, in fact) \(\mu \) such sets, because by definition of cofinality they are all bounded in \(\mu \) and \(\sum _{\alpha {\lt} \mu } 2 ^\alpha = \mu \) because \(\mu \) is a strong limit cardinal. </p>
+
+  </div>
+</div>
+<p>One might be concerned with the fact that if \(\mu \) has cofinality \(\kappa \), it might have more than \(\mu \) subsets of size \(\kappa \): but it still has only \(\mu \) subsets of size \({\lt}\kappa \), and that is what matters for counting the near-litters: a near-litter is determined as the symmetric difference of a litter (\(\mu \) of these) and a small subset (cardinality \({\lt}\kappa \)) of \(\tau _{-1}\) (which is of size \(\mu \)) and there are only \(\mu \) small subsets of \(\tau _{-1}\). If the cofinality of \(\mu \) were less than \(\kappa \), the cardinal arithmetic pathology mentioned as of concern could come into play. </p>
+<h1 id="a0000000010">1.3 Preliminaries: pretangles, structural permutations</h1>
+<p>Before embarking on the large recursive construction of the eventual model, we set up some structures in advance which we will make use of during the main recursion. </p>
+<p>We first define a big structure, which can be viewed as a model of TTT without extensionality, whose elements we call <em>pretangles</em>. In the main recursion, we will carve out our actual model of TTT as a substructure of <em>tangles</em> within the pretangles. </p>
+<p><div class="definition_thmwrapper" id="def:pretangle">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.10</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:pretangle">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:atoms-and-litters">Definition 1.5</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/pretangle.lean#L13">con_nf.pretangle</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   Define the sets \(\mathrm{Pretangle}_\alpha \) of <em>\(\alpha \)-pretangles</em> inductively. \(\mathrm{Pretangle}_{-1}\) is defined as \(\tau _{-1}\). For \(\alpha \) a proper type index, \(\mathrm{Pretangle}_\alpha \) is defined as \(\prod _{\beta {\lt} \alpha } \mathcal P(\mathrm{Pretangle}_\beta )\). </p>
+
+  </div>
+</div> </p>
+<p>We also set up a sequence of groups that act on pretangles; subgroups of these will later act on the tangles. </p>
+<p><div class="definition_thmwrapper" id="def:structural-perm-atoms">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.11</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:structural-perm-atoms">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:near-litter">Definition 1.6</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/litter.lean#L166">con_nf.near_litter_perm</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  
+<p>A <em>structural \((-1)\)-permutation</em> [aka a near-litter-perm; we should fix on one name or the other] is a permutation \(\pi \) of \(\tau _{-1}\), along with a permutation \(\bar{\pi }\) of litters, such that for each litter \(L\), \(\pi ``(L)\) is near to \(\bar{\pi }(L)\) (in the sense that they have small symmetric difference). Denote the group of these by \(\mathrm{Str}_{-1}\). </p>
+<p>[In fact \(\bar{\pi }\) is uniquely determined by \(\pi \) — we could define this just as a subgroup of \(\mathrm{Sym}(\tau _{-1})\). But it’s convenient in formalisation to have the \(\bar{\pi }\) component explicit.] </p>
+<p>\(\mathrm{Str}_{-1}\) has obvious actions on atoms and near-litters. </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:structural-perm">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.12</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:structural-perm">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:structural-perm-atoms">Definition 1.11</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/struct_perm.lean#L31">con_nf.struct_perm</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   For a <em>proper</em> type index \(\alpha \), the structural \(\alpha \)-permutations are the group \(\mathrm{Str}_\alpha = \prod _{\beta {\lt} \alpha } \mathrm{Str}_\beta \). </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:structural-perm-derivative">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.13</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:structural-perm-derivative">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:structural-perm">Definition 1.12</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/struct_perm.lean#L126">con_nf.struct_perm.derivative</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   Any path \(A : \beta \to \alpha \) gives a group homomorphism \((-)_A : \mathrm{Str}_\alpha \to \mathrm{Str}_\beta \). </p>
+<p>Moreover, this is functorial: they make \(\mathrm{Str}\) into a functor \(\mathrm{Path}(\Lambda )^\mathrm {op} \to \mathrm{Gp}\). </p>
+<p>[TODO: this should also depend on “paths”, but they aren’t yet explicitly in the blueprint.] </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:allowable-perm-atoms">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.14</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:allowable-perm-atoms">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:structural-perm-atoms">Definition 1.11</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  An <em>allowable \((-1)\)-permutation</em> is just a structural \((-1)\)-permutation. We denote the group of these by \(\mathrm{All}_{-1} = \mathrm{Str}_{-1}\). (Later we will define \(\mathrm{Str}_\beta \) as a proper subgroup of \(\mathrm{All}_\beta \), for higher \(\beta \).) </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:support-condition">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.15</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:support-condition">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:near-litter">Definition 1.6</a></li>
+          <li><a href="ch-preliminaries.html#def:atoms-and-litters">Definition 1.5</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/struct_perm.lean#L175">con_nf.support_condition</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   Let \(\alpha \) be a proper type index. An <em>\(\alpha \)-condition</em> is a pair \((x,A)\), where \(A\) is a path from \(-1\) to \(\alpha \) (aka an extended type index) and \(x\) is either an atom or a near-litter. </p>
+<p>Type-theoretically, \(\mathrm{Cond}:= (\tau _{-1} + \mathcal{NL}) \times \mathrm{Path}(-1,\alpha )\). [It would suffice to use just litters here instead of near-litters; they give an equivalent notion of support, as shown later (“replacing near-litters with litters”). That makes a few things simpler; but using near-litters lets us talk about the action, Def.&#160;<a href="ch-preliminaries.html#def:support-condition-action">1.16</a>, which seems algebraically cleaner.] </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:support-condition-action">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.16</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:support-condition-action">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:structural-perm-derivative">Definition 1.13</a></li>
+          <li><a href="ch-preliminaries.html#def:support-condition">Definition 1.15</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   Structural permutations act on support conditions. </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:support">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.17</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:support">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:support-condition">Definition 1.15</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/struct_perm.lean#L187">con_nf.potential_support</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   Let \(\alpha \) be a proper type index. An \(\alpha \)-support is a small set of \(\alpha \)-support-conditions. (A little more pedantically, one could call these something like “potential small supports”: they become actual supports once they support some element.) </p>
+<p>[NOTES for formalisation: Well-orderings are assumed here in some version of Randall’s note, but they almost certainly aren’t wanted in the basic definition of supports, as used in phase 1. Strong supports, as used in phase 2, are probably better viewed as a separate notion: a more elaborate data structure that can be used to “present” a support in a particularly good way.] </p>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:count-supports">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">1.18</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#lem:count-supports">#</a>
+    <a class="icon proof" href="ch-preliminaries.html#a0000000011"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:support">Definition 1.17</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/struct_perm.lean#L224">con_nf.mk_support_le</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Because the cofinality of \(\mu \) is \(\geq \kappa \), there are \(\mu \) potential supports, and therefore at most \(\mu \) supports for each \(x \in \tau \). </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000011">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="definition_thmwrapper" id="def:support-of">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.19</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="ch-preliminaries.html#def:support-of">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:support">Definition 1.17</a></li>
+          <li><a href="ch-preliminaries.html#def:support-condition-action">Definition 1.16</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/f4b9a45440787aa3d05c1ada4bab4f8138944a6c/src/phase0/struct_perm.lean#L217">con_nf.support</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   Suppose \(\varphi : H \to \mathrm{Str}_\alpha \) is any group homomorphism, and \(\tau \) is a set equipped with an \(H\)-action. </p>
+<p>Given \(x \in \tau \) and \(S\) any set of \(\alpha \)-support conditions, say <em>\(S\) supports \(x\)</em> if every \(\pi \in H\) that fixes every element of \(S\) also fixes \(x\). </p>
+<p>A <em>support for \(x\)</em> is a support (i.e. a <em>small</em> set of conditions) that supports \(x\). [Should we try to always say “small support” to avoid ambiguity?] </p>
+<p>We say \(x\) is <em>symmetric</em> if it has some small support. </p>
+
+  </div>
+</div> </p>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="index.html" title="Con(NF)"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Con(NF)"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="ch-model-construction.html" title="Phase 1: The model construction"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>
