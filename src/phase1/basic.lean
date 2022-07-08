@@ -51,6 +51,8 @@ class phase_1 (α : Λ) :=
   (not_near_litter : ∀ (L : litter), t ≠ to_tangle β hβ L.to_near_litter),
   of_tangle _ hβ (c.fst.elim (typed_singleton β hβ) (to_tangle β hβ)) < of_tangle _ hβ t)
 
+-- TODO(zeramorphic): remove hN from litter_lt_near_litter, replace with ≤ by injectivity of iota
+
 /-- The type of tangles that we assume were constructed at stage `α`.
 Later in the recursion, we will construct this type explicitly, but for now, we will just assume
 that it exists.

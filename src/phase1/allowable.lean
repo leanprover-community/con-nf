@@ -242,6 +242,9 @@ variables {α} {f : allowable_perm α} {c d : code α}
 
 namespace allowable_perm
 
+@[simp] lemma smul_to_litter_perm (π : allowable_perm α) (L : litter) :
+  (π : semiallowable_perm α).1 • L = π • L := sorry
+
 @[simp] lemma smul_to_near_litter_perm (π : allowable_perm α) (N : near_litter) :
   (π : semiallowable_perm α).1 • N = π • N := sorry --Yaël: Currently false, investigating...
 
@@ -255,25 +258,47 @@ begin
   rw ← π.property at equiv,
   unfold has_smul.smul at equiv,
   simp only [subtype.val_eq_coe, rec_bot_coe_coe, image_smul, smul_set_singleton] at equiv,
+  have smul_to_tangle_aux : (λ N, (↑π : semiallowable_perm α).snd δ hδ • (to_tangle δ _ N)) =
+    λ N, to_tangle δ hδ (π • N),
+  { funext N, rw ← smul_to_tangle, refl },
   induction γ using with_bot.rec_bot_coe,
-  { sorry },
-  dsimp at equiv,
-  rw [code.equiv.comm, smul_set_singleton, code.equiv.singleton_iff] at equiv,
-  obtain equiv | ⟨ε, hc, hε, hγε, hA⟩ := equiv,
-  { have := congr_arg code.extension equiv,
-    cases hγδ.symm this },
-  have hc' := with_bot.coe_injective hc,
-  subst hc',
-  clear hc,
-  dsimp at hA,
-  rw [code.mk_inj, ← set.image_smul, set.image_image] at hA,
-  sorry
-  -- simp_rw ←smul_to_tangle at hA,
-  -- rw set.image_comp _ (λ a, (↑π : semiallowable_perm α).fst • a) at hA,
-  -- unfold A_map at hA,
-  -- simpa only [set.image_eq_image (embedding.injective $ to_tangle δ _), image_smul,
-  --   near_litter_perm.smul_local_cardinal, mem_singleton_iff, Union_Union_eq_left,
-  --   local_cardinal_injective.eq_iff] using hA,
+  { rw code.equiv_iff at equiv,
+    obtain a | ⟨heven, ε, hε, hne, hA⟩ | ⟨heven, ε, hε, hne, hA⟩ |
+      ⟨c, heven, ε, hε, hεne, ζ, hζ, hζne, h₁, h₂⟩ := equiv,
+    { cases a },
+    { cases hA },
+    { clear heven hne,
+      have := (congr_arg code.extension hA), dsimp at this,
+      have := with_bot.coe_injective this, subst this, clear this,
+      dsimp at hA,
+      rw code.eq_of_elts_eq at hA,
+      unfold A_map at hA,
+      unfold has_smul.smul at hA,
+      simp only [mem_image, mem_singleton_iff, exists_eq_left, Union_Union_eq_right] at hA,
+      rw [set.image_image, smul_to_tangle_aux, set.image_comp,
+        set.image_eq_image (embedding.injective $ to_tangle δ _)] at hA,
+      simp_rw ← smul_to_near_litter_perm π at hA,
+      rw [image_smul, near_litter_perm.smul_local_cardinal, local_cardinal_injective.eq_iff] at hA,
+      convert hA.symm using 1,
+      rw smul_to_litter_perm π, refl, },
+    { cases h₁ } },
+  { dsimp at equiv,
+    rw [code.equiv.comm, smul_set_singleton, code.equiv.singleton_iff] at equiv,
+    obtain equiv | ⟨ε, hc, hε, hγε, hA⟩ := equiv,
+    { have := congr_arg code.extension equiv,
+      cases hγδ.symm this },
+    have hc' := with_bot.coe_injective hc,
+    subst hc',
+    dsimp at hA,
+    rw [code.mk_inj, ← set.image_smul, set.image_image] at hA,
+    unfold A_map at hA,
+    rw [smul_to_tangle_aux, set.image_comp,
+      set.image_eq_image (embedding.injective $ to_tangle δ _)] at hA,
+    simp_rw ← smul_to_near_litter_perm π at hA,
+    rw [image_smul, near_litter_perm.smul_local_cardinal] at hA,
+    simp only [smul_to_litter_perm, mem_singleton_iff, Union_Union_eq_left] at hA,
+    rw local_cardinal_injective.eq_iff at hA,
+    exact hA.symm, }
 end
 
 lemma smul_A_map {γ : type_index} {hγ : γ < α} (π : allowable_perm α) (hδ : δ < α)

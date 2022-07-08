@@ -12,6 +12,9 @@ variables [params.{u}] (α : Λ) [phase_1 α] {β : type_index} {hβ : β < α}
 (extension_lt : extension < α)
 (elts : set (tangle α extension extension_lt))
 
+lemma code.eq_of_elts_eq (γ : type_index) (hγ : γ < α) (A B : set (tangle α γ hγ)) :
+  (⟨γ, hγ, A⟩ : code α) = ⟨γ, hγ, B⟩ ↔ A = B := by simp
+
 /-- Nonempty codes. -/
 abbreviation nonempty_code : Type u := {c : code α // c.elts.nonempty}
 
