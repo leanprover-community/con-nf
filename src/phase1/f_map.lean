@@ -16,7 +16,8 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-variables [params.{u}] (α : type_index) (β : Λ) [weak_tangle_data α] [tangle_data β]
+variables [params.{u}] (α : type_index) (β : Λ) [core_tangle_data α] [positioned_tangle_data α]
+variables [core_tangle_data β] [positioned_tangle_data β] [almost_tangle_data β] [tangle_data β]
 
 /-!
 We now define the f-maps. We will do so in two stages; first, we define it as a function `μ → μ`,
@@ -213,8 +214,9 @@ lemma f_map_injective : injective (f_map β : tangle α → litter) :=
 
 @[simp] lemma f_map_fst (x : tangle α) : (f_map β x).fst = (α, β) := rfl
 
-lemma f_map_range_eq {α₁ α₂ : type_index} [weak_tangle_data α₁] [weak_tangle_data α₂]
-  {x : tangle α₁} {y : tangle α₂} (h : f_map β x = f_map β y) : α₁ = α₂ :=
+lemma f_map_range_eq {α₁ α₂ : type_index} [core_tangle_data α₁] [positioned_tangle_data α₁]
+  [core_tangle_data α₂] [positioned_tangle_data α₂] {x : tangle α₁} {y : tangle α₂}
+  (h : f_map β x = f_map β y) : α₁ = α₂ :=
 congr_arg (prod.fst ∘ prod.fst) h
 
 lemma f_map_position_raising (x : tangle α)(N : set atom) (hN : is_near_litter (f_map β x) N) :
