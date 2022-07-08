@@ -310,7 +310,16 @@ namespace allowable_perm
 
 lemma smul_extension_A_map (f : allowable_perm α) (s : tangles α γ hγ) :
   f • extension.A_map s = extension.A_map (f • s) :=
-sorry
+begin
+unfold extension.A_map,
+funext β hβ,
+dsimp,
+split_ifs,
+{ subst h, },
+{ rw ← subtype.coe_inj,
+  simp only [smul_nonempty_mk, subtype.coe_mk],
+  exact smul_A_map _ _ _ (ne.symm h), },
+end
 
 lemma smul_aux₁ {f : allowable_perm α} {e : extension α}
   {s : set (tangle α ⊥ $ bot_lt_coe _)} (h : ∀ γ (hγ : γ < α), A_map hγ s = e γ hγ) (γ hγ) :
