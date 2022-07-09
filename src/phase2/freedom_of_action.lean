@@ -16,7 +16,7 @@ one of two reasons:
     therefore reversed.
 -/
 
-open function quiver
+open function quiver with_bot
 
 universe u
 
@@ -128,5 +128,41 @@ def unary_spec.lower {α β : Λ} (σ : unary_spec α) (A : path (α : type_inde
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
 def spec.lower {α β : Λ} (σ : spec α) (A : path (α : type_index) β) : spec β :=
 {c | c.extend_path A ∈ σ}
+
+variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
+  [phase_2_assumptions α]
+
+/--
+Support conditions can be said to *constrain* each other in a number of ways. This is discussed
+in the "freedom of action discussion".
+
+1. `⟨L, A⟩ ≺ ⟨a, A⟩` when `a ∈ L` and `L` is a litter. We can say that an atom is constrained by the
+    litter it belongs to.
+2. `⟨N°, A⟩ ≺ ⟨N, A⟩` when `N` is a near-litter not equal to its corresponding litter `N°`.
+3. `⟨a, A⟩ ≺ ⟨N, A⟩` for all `a ∈ N ∆ N°`.
+4. `⟨y, B : (γ < β) : A⟩ ≺ ⟨L, A⟩` for all paths `A : α ⟶ β` and `γ, δ < β` with `γ ≠ δ`,
+    and `L = f_{γ,δ}^A(x)` for some `x ∈ τ_{γ:A}`, where `⟨y, B⟩` lies in the designated support
+    `S_x` of `x`.
+    Note that for this to type check, we must constrain `γ : Λ` not `γ : type_index` - this point
+    may need revisiting later.
+-/
+@[mk_iff] inductive constrains : support_condition α → support_condition α → Prop
+| mem_litter (L : litter) (a ∈ litter_set L) (A : extended_index α) :
+    constrains ⟨sum.inr L.to_near_litter, A⟩ ⟨sum.inl a, A⟩
+| near_litter (N : near_litter) (hN : litter_set N.fst ≠ N.snd) (A : extended_index α) :
+    constrains ⟨sum.inr N.fst.to_near_litter, A⟩ ⟨sum.inr N, A⟩
+| symm_diff (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd) (A : extended_index α) :
+    constrains ⟨sum.inl a, A⟩ ⟨sum.inr N, A⟩
+| f_map {β γ δ : Λ} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (A : path (α : type_index) β)
+    (t : tangle_path ((proper_lt_index.mk' hγ A) : le_index α))
+    (c ∈ (designated_support_path t).carrier) :
+    constrains
+      ⟨c.fst, path.comp (path.cons A (coe_lt_coe.mpr hγ)) c.snd⟩
+      ⟨sum.inr (f_map_path
+        (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t)
+        .to_near_litter, path.comp (path.cons A (coe_lt_coe.mpr hγ)) c.snd⟩
+
+/-! We declare new notation for the "constrains" relation on support conditions. -/
+local infix ` ≺ `:50 := constrains
 
 end con_nf

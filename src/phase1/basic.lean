@@ -50,7 +50,7 @@ class almost_tangle_data :=
 (typed_singleton : atom ↪ core.tangle)
 (designated_support : Π (t : core.tangle), support core.allowable_to_struct_perm t)
 
-export almost_tangle_data (to_tangle typed_singleton)
+export almost_tangle_data (to_tangle typed_singleton designated_support)
 
 variables [almost : almost_tangle_data α] [positioned_tangle_data α]
 

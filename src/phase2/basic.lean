@@ -166,6 +166,10 @@ structure proper_lt_index (α : Λ) :=
 (index_lt : index < higher)
 (path' : path (α : type_index) higher)
 
+def proper_lt_index.mk' {α index higher : Λ}
+  (index_lt : index < higher) (path' : path (α : type_index) higher) : proper_lt_index α :=
+⟨index, higher, index_lt, path'⟩
+
 /-- A path compatible with the one from `le_index`, formed by composing the inner `path'` field
 with the morphism `higher ⟶ index`. By construction, this path is always nontrivial. -/
 def proper_lt_index.path {α : Λ} (A : proper_lt_index α) : path (α : type_index) A.index :=
@@ -349,5 +353,8 @@ def allowable_path (A : le_index α) : Type u := allowable A.index
 
 def f_map_path {A : lt_index α} (B : proper_lt_index α) (t : tangle_path (A : le_index α)) :=
 f_map B.index t
+
+def designated_support_path {A : proper_lt_index α} (t : tangle_path (A : le_index α)) :
+  support allowable_to_struct_perm t := designated_support t
 
 end con_nf
