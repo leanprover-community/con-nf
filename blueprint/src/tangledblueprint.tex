@@ -292,11 +292,11 @@ Unfortunately, one piece of the data is harder to propagate --- essentially just
 For now, we group the data assumed at each level, according to which constructions it will be needed for.
 
 \begin{definition}
-  \label{def:phase-1-data}
+  \label{def:tangle-data}
   \uses{def:support-of,def:pretangle}
   \lean{con_nf.phase_1}
 
-  Fix a proper type index $\alpha$.  Then \emph{phase 1 data at $\alpha$} consists of:
+  Fix a proper type index $\alpha$.  Then \emph{tangle data at $\alpha$} consists of:
   \begin{enumerate}
     \item a group $\All$ (whose elements we call \emph{allowable permutations}), with a map $\varphi : \All \to \Str_\alpha$;
     \item a set $\tau$ (whose elements we call \emph{tangles}), equipped with an $\All$-action;
@@ -314,19 +314,21 @@ For now, we group the data assumed at each level, according to which constructio
     [Note: to see these conditions are not unreasonable, note that each $x \in \tau$ has $<\mu$ many things that it must come after, and that the chains of these constraints are of depth at most 4: litters $<$ atoms $<$ other near-litters $<$ everything else.  This is said more carefully in \cref{lem:position-functions-propagate} below.]
     \item [Optionally: An injection $\tau \to \Pretangle_\alpha$, equivariant with respect to the induced $\All$-action.  This may or may not be needed, depending on how the phase 2 data is organised.]
   \end{enumerate}
+
+  By \emph{core tangle data}, we will mean just $\All$, $\varphi$, $\tau$, and the $\All$-action on $\tau$ as above.  By \emph{incomplete tangle data}, we will mean all the above data except for the position functions $\iota$ and their properties.
+
+  When we assume this data at multiple levels, we will refer to the compomnents $\tau_\beta$, $\All_\beta$, and so on, and call their elements $\alpha$-tangles, etc.
 \end{definition}
 
-When we assume this data at multiple levels, we will refer to the compomnents $\tau_\beta$, $\All_\beta$, and so on, and call their elements $\alpha$-tangles, etc.
-
-Analogues of some of this data also exist at level $-1$, as the notation suggests: in particular, $\tau_{-1}$ and $\iota_{-1} : \tau_{-1} \to \mu$.  (But not the typed near-litters, or the further conditions on $\iota_{-1}$.) So, for instance, if we assume phase 1 data at all \emph{proper} levels $\beta < \alpha$, we may then refer to $\tau_\beta$ for all levels $\beta < \alpha$: for $\beta$ proper, this means the tangles of the assumed phase 1 data, while for $\beta = -1$ it means the fixed set of atoms $\tau_{-1}$.
+There is standard core tangle data at level $-1$, and also the position function $\iota_{-1} : \tau_{-1} \to \mu$.  We will often refer to this uniformly with assumed tangle data at other levels: for instance, if we assume tangle data at all \emph{proper} levels $\beta < \alpha$, we may then refer to $\tau_\beta$ for all levels $\beta < \alpha$: for $\beta$ proper, this means the tangles of the assumed tangle data, while for $\beta = -1$ it means the fixed set of atoms $\tau_{-1}$.
 
 \section{Phase 1a: Set codes and alternative extensions}
 
-In the following few constructions, we will fix a proper type index $\alpha$ and assume we have phase 1 data given for all proper $\beta < \alpha$. (In fact some results --- in particular, the $f$-maps, $A$-maps and their properties --- only need to refer to the data at certain earlier levels.)
+In most of the following few constructions, we will fix a proper type index $\alpha$ and assume we have tangle data given for all proper $\beta < \alpha$. (In fact some results --- in particular, the $f$-maps, $A$-maps and their properties --- only need to refer to the data at certain earlier levels.)
 
 \begin{definition}
 \label {def:code}
-\uses{def:phase-1-data}
+\uses{def:tangle-data}
 \lean{con_nf.code}
 \leanok
 An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \subseteq \tau_\gamma$. [The original set-theoretic implementation includes the $\alpha$, to keep codes at different levels disjoint.  In the type-theoretic implementation, the first component $\alpha$ is unnecessary.]
@@ -334,7 +336,7 @@ An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \s
 
 \begin{definition}
 \label {def:f-map}
-\uses{def:phase-1-data}
+\uses{def:tangle-data}
 \lean{con_nf.f_map}
 \leanok
 We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $X_{\beta,\gamma} \subseteq \mathrm{Litter}$, as follows.
@@ -348,7 +350,7 @@ For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $N^\circ$ of the min
 
 [This can be decomposed slightly at both ends.  Firstly, since we know that $f_{\beta_\gamma}(x) = (\beta,\gamma,\chi)$ for some $\chi$, we could take the output just to be the component $\chi \in \mu$, and turn it into a litter later.  Secondly, $f_{\beta_\gamma}(x)$ depends on $x$ essentially just via its position $i_\beta(x) \in \mu$, so we could start by defining a function $g_{\beta,\gamma} : \mu \to \mathrm{Litter}$, and then take $f_{\beta,\gamma}$ as the composite $g_{\beta,\gamma} \circ \iota_\beta$.  I don’t think these will really make a difference either way, though.]
 
-[Notice that this only depends on a small fragment of the phase 1 data at $\beta$ and $\gamma$. In particular, it doesn’t depend on $\alpha$ nor on the phase 1 data at other levels. In the formalisation, it would be good to avoid it depending on more than it needs.]
+[Notice that this only depends on a small fragment of the tangle data at $\beta$ and $\gamma$. In particular, it doesn’t depend on $\alpha$ nor on the tangle data at other levels. In the formalisation, it would be good to avoid it depending on more than it needs.]
 \end{definition}
 
 \begin{lemma}
@@ -381,9 +383,9 @@ if they are taken as valued directly in local cardinals.
 
 We say that a code $c$ \emph{leads to} a code $d$ if $d$ is the image of $c$ under some A-map. We denote this $c \rightsquigarrow d$.
 
-(Here $j_\delta(N)$ is the “typed near-litters” map for level $\delta$, assumed in the phase 1 data.)
+(Here $j_\delta(N)$ is the “typed near-litters” map for level $\delta$, assumed in the tangle data.)
 
-[For the formalisation, each individual $A_\delta$ is probably best represented as a function $\mathcal{P}(\tau_(\gamma)) \to \mathcal{P}(\tau_\delta)$, rather than on “codes of the form $(\alpha,\gamma,G)$…”.  Also it could — and perhaps should, for flexibility later — have parameters just “$\gamma$, $\delta$, and their phase 1 data”, rather than “$\alpha$, phase 1 data everywhere below $\alpha$, and $\gamma,\delta < \alpha$”.]
+[For the formalisation, each individual $A_\delta$ is probably best represented as a function $\mathcal{P}(\tau_(\gamma)) \to \mathcal{P}(\tau_\delta)$, rather than on “codes of the form $(\alpha,\gamma,G)$…”.  Also it could — and perhaps should, for flexibility later — have parameters just “$\gamma$, $\delta$, and their tangle data”, rather than “$\alpha$, tangle data everywhere below $\alpha$, and $\gamma,\delta < \alpha$”.]
 \end{definition}
 
 \begin{lemma}
@@ -416,7 +418,7 @@ The relation $c \rightsquigarrow d$ on codes (“$c$ leads to $d$ under some $A$
 \begin{proof}
 \uses{lem:a-map-properties}
 \leanok
-  Consider the map $m$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the position function assumed in the phase 1 data.
+  Consider the map $m$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the position function assumed in the tangle data.
 
   The definition of the functions $A_{\delta,\gamma}$ and the fact that $\iota f_{\gamma,\delta}(x) > \iota x $ ensure that $j(\alpha,\gamma,X) < j(A_\delta(\alpha,\gamma,X))$, for all suitable $\gamma,\delta,X$.
 
@@ -527,13 +529,13 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 
 \section{Phase 1b: Actual tangles: the model definition}
 
-  For the subsequent constructions of this section, we assume we are given phase 1 data for all $\beta < \alpha$.
+  For the subsequent constructions of this section, we assume we are given tangle data for all $\beta < \alpha$.
 
 \begin{definition}
 \label {def:semiallowable-perm}
 \lean{con_nf.semiallowable_perm}
 \leanok
-\uses{def:phase-1-data}
+\uses{def:tangle-data}
   A \emph{semi-allowable permutation} at level $\alpha$ is a family of allowable pemutations at all lower levels (including $-1$), $(\pi_\beta)_{\beta < \alpha} \in \prod_{\beta < \alpha} \All_\beta$.
 \end{definition}
 
@@ -674,14 +676,14 @@ There is lots to be proven, but that is the entire description.
 
 [Note: this may not eventually be needed, depending on how the “coherence” in phase 2 is assumed.]
 
-For the subsequent constructions of this section, we assume we are given phase 1 data for all $\beta < \alpha$.
+For the subsequent constructions of this section, we assume we are given tangle data for all $\beta < \alpha$.
 
 \begin{definition}
   \label{def:embedding-into-pretangles}
-  \uses{def:semi-tangle,def:phase-1-data}
+  \uses{def:semi-tangle,def:tangle-data}
   \lean{con_nf.new_tangle.to_pretangle}
   \leanok
-  There is an evident injection $\tau_\alpha \to \Pretangle_\alpha$ (where $\tau_\alpha$ is constructed from the given phase 1 data).  Moreover, this commutes with the $\All_\alpha$-action.
+  There is an evident injection $\tau_\alpha \to \Pretangle_\alpha$ (where $\tau_\alpha$ is constructed from the given tangle data).  Moreover, this commutes with the $\All_\alpha$-action.
 \end{definition}
 
 \section{Review}
@@ -689,9 +691,9 @@ For the subsequent constructions of this section, we assume we are given phase 1
 Overall, we have now shown:
 
 \begin{definition}
-  \label{def:phase-1-propagates}
-  \uses{def:phase-1,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,lem:tangle-action}
-  For a proper type index $\alpha \in \lambda$, given phase 1 data at all levels $\beta < \alpha$, then the constructions above provide \emph{most} components of phase 1 data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$ and its properties.
+  \label{def:tangle-data-propagates}
+  \uses{def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,lem:tangle-action}
+  For a proper type index $\alpha \in \lambda$, given tangle data at all levels $\beta < \alpha$, then the constructions above provide \emph{most} components of tangle data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$ and its properties.
 
   [Note that to treat this as a \emph{definition}, in particular of the “designated supports” component, we are implicitly invoking the axiom of choice --- a priori we only know that there \emph{exists} some support for each new tangle.]
 \end{definition}
@@ -707,50 +709,52 @@ These meet the major technical difficulty of the recursion: We need (it seems) t
 \section{Inductive assumptions: Coherent data at all lower levels}
 
 \begin{definition}
-  \label{def:concrete-phase-1-data}
-  \uses{def:phase-1-data}
-  For a type index $\alpha$, \emph{concrete phase 1 data} at level $\alpha$ consists of a subset $\tau \subseteq \Pretangle_\alpha$ and a subgroup $\All \subseteq G_\alpha$, together with full phase 1 data on these.
+  \label{def:concrete-tangle-data}
+  \uses{def:tangle-data}
+  NOTE: this definition and subsequent Phase 2 material is outdated; it should be updated based on the material currently found in \verb|foa_discussion.tex|.
+
+  For a type index $\alpha$, \emph{concrete tangle data} at level $\alpha$ consists of a subset $\tau \subseteq \Pretangle_\alpha$ and a subgroup $\All \subseteq G_\alpha$, together with full tangle data on these.
 
   Notes for formalisation:
   \begin{itemize}
     \item The reason we use \emph{subsets} from here on is because we will soon impose equalities between these components, and subset equalities are much less nasty to deal with than type equalities.
-    \item To define this, we almost certainly want to factor out the types $\tau$ and $\All$ as parameters of the phase 1 data from the start.
-    \item We could avoid that “factoring out as a parameter” by assuming this concreteness already in the phase 1 data, i.e. positing $\tau$ as a subset of pretangles and $\All$ as a subgroup of $\Str_\alpha$ from the start.  At least for $\tau$, that seems a bit unnatural — it adds an entirely irrelevant extra assumption throughout phase 1.  For $\All$ it perhaps wouldn’t be so unnatural, since $\All$ does need to be assumed with at least a homomorphism to $\Str_\alpha$ anyway.
+    \item To define this, we almost certainly want to factor out the types $\tau$ and $\All$ as parameters of the tangle data from the start.
+    \item We could avoid that “factoring out as a parameter” by assuming this concreteness already in the tangle data, i.e. positing $\tau$ as a subset of pretangles and $\All$ as a subgroup of $\Str_\alpha$ from the start.  At least for $\tau$, that seems a bit unnatural — it adds an entirely irrelevant extra assumption throughout phase 1.  For $\All$ it perhaps wouldn’t be so unnatural, since $\All$ does need to be assumed with at least a homomorphism to $\Str_\alpha$ anyway.
   \end{itemize}
 
-  The \emph{standard} concrete phase 1 data at level $-1$ are the defined $\tau_{-1} = \Pretangle_{-1}$ and $\All_{-1} = \Str_{-1}$.
+  The \emph{standard} concrete tangle data at level $-1$ are the defined $\tau_{-1} = \Pretangle_{-1}$ and $\All_{-1} = \Str_{-1}$.
 \end{definition}
 
 \begin{definition}
-  \label{def:concrete-phase-1-data-propagates}
-  \uses{def:concrete-phase-1-data,def:phase-1-propagates}
-  For a proper type index $\alpha \in \lambda$, given concrete phase 1 data at all levels $\beta < \alpha$, we get \emph{most} components of concrete phase 1 data at level $\alpha$.
+  \label{def:concrete-tangle-data-propagates}
+  \uses{def:concrete-tangle-data,def:tangle-data-propagates}
+  For a proper type index $\alpha \in \lambda$, given concrete tangle data at all levels $\beta < \alpha$, we get \emph{most} components of concrete tangle data at level $\alpha$.
 
   In particular, the new set of $\alpha$-tangles $\tau_\alpha \subseteq \Pretangle_\alpha$ is the the image of the $\alpha$-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations.  (We could call these “concrete $\alpha$-tangles” and “abstract $\alpha$-tangles”, if we need to for disambiguation.)
 \end{definition}
 
 \begin{definition}
-  \label{def:coherent-phase-1-data}
-  \uses{def:concrete-phase-1-data-propagates}
-  For $\alpha \in \lambda + 1$, \emph{Phase 1 data below $\alpha$} consists of concrete phase 1 data at every level $\beta < \alpha$.  Say this is \emph{coherent} if it is standard at level $-1$, and at each proper type index $\beta < \gamma$, all components at level $\beta$ that \emph{could} have been induced from the data at lower levels $\gamma < \beta$ are, in fact, equal to what would have been induced that way.
+  \label{def:coherent-tangle-data}
+  \uses{def:concrete-tangle-data-propagates}
+  For $\alpha \in \lambda + 1$, \emph{tangle data below $\alpha$} consists of concrete tangle data at every level $\beta < \alpha$.  Say this is \emph{coherent} if it is standard at level $-1$, and at each proper type index $\beta < \gamma$, all components at level $\beta$ that \emph{could} have been induced from the data at lower levels $\gamma < \beta$ are, in fact, equal to what would have been induced that way.
 
   \begin{itemize}
   \item Note we want to provide this definiton also for $\alpha = \lambda$!  I think this should be available in mathlib as \verb|with_top|.
-  \item We could unify “standard at level $-1$” with induced at proper type indices by generalising the definition of each component of the “induced concrete phase 1 data at $\alpha$” to include the case $\alpha = -1$,defining the induced data as the standard one in that case.  Is this more natural?  Will it make life easier?
+  \item We could unify “standard at level $-1$” with induced at proper type indices by generalising the definition of each component of the “induced concrete tangle data at $\alpha$” to include the case $\alpha = -1$,defining the induced data as the standard one in that case.  Is this more natural?  Will it make life easier?
   \end{itemize}
 
   For $\alpha < \beta$, “phase 2 data below $\alpha$” can be restricted to “phase 2 data below $\beta$”.
 
-  Most constructions in phase 2 will assume coherent phase 1 data below $\alpha$, for some fixed $\alpha$.
+  Most constructions in phase 2 will assume coherent tangle data below $\alpha$, for some fixed $\alpha$.
 
-  [Terminology: perhaps we should call this “phase 2 data at $\alpha$”?  That seems more consistent for the overall naming scheme, but “coherent phase 1 data below $\alpha$” seems clearer and more transparent in itself.  Maybe we should reconsider the naming scheme, so that it’s not in tension with clarity!]
+  [Terminology: perhaps we should call this “phase 2 data at $\alpha$”?  That seems more consistent for the overall naming scheme, but “coherent tangle data below $\alpha$” seems clearer and more transparent in itself.  Maybe we should reconsider the naming scheme, so that it’s not in tension with clarity!]
 \end{definition}
 
 \section{Strong supports defined}
 
 NOTE: much of this section has not been updated since early in the formalisation, so may not match the current implementation and abstractions very closely.
 
-Throughout this section, fix some $\alpha \in \lambda + 1$, and assume coherent phase 1 data below $\alpha$. [Actually, perhaps this section doesn’t need the coherence and could be done in phase 1, i.e. working purely in a single level, assuming full phase 1 data is available at lower levels?  This should become clearer as it is formalised.]
+Throughout this section, fix some $\alpha \in \lambda + 1$, and assume coherent tangle data below $\alpha$. [Actually, perhaps this section doesn’t need the coherence and could be done in phase 1, i.e. working purely in a single level, assuming full tangle data is available at lower levels?  This should become clearer as it is formalised.]
 
 Treating supports as sets suffices for the model description, but we will need to analyze supports and orbits with more care, so it is better for purposes
 of the proof to equip supports with a well-orderings.
@@ -784,7 +788,7 @@ If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the la
 
 \begin{definition}
 \label{def:strong-support}
-\uses{def:coherent-phase-1-data,def:raise-lower-index}
+\uses{def:coherent-tangle-data,def:raise-lower-index}
 A strong support is a support $S$ with certain additional properties.
 
 \begin{enumerate}
@@ -848,7 +852,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 
 \begin{definition}
   \label{def:flexible}
-  \uses{def:coherent-phase-1-data}
+  \uses{def:coherent-tangle-data}
   Given coherent part 1 data below $\alpha$, a path $A : \beta \to \alpha$, and a litter $L$, say $L$ is \emph{$A$-flexible} (or that the pair $(L,A)$ is \emph{flexible}) if $L$ is not in the range of $f_{\beta,\gamma}$, for any $\gamma < \alpha$.
 
   (In particular, if $\beta = -1$, every such pair is flexible, since $f_{\gamma,\beta}$-maps is only defined for $\beta$ proper.)
@@ -913,7 +917,7 @@ Once we know how to carry out this calculation along any $\alpha$-strong support
 \begin{theorem}
   \label{thm:freedom-of-action}
   \uses{def:freedom-of-action-statement}
-  Given coherent phase 1 data below $\alpha$, it satisfies freedom of action at every level.
+  Given coherent tangle data below $\alpha$, it satisfies freedom of action at every level.
 \end{theorem}
 
 \begin{proof}
@@ -932,7 +936,7 @@ that the construction actually succeeds at every type.
 
 \begin{definition}
 \label {def:coding-function}
-\uses{def:coherent-phase-1-data}
+\uses{def:coherent-tangle-data}
 For any support $S$ and tangle $x$, we can define a function $\chi_{x,S}$ which sends $T=\pi(S)$ to $\pi(x)$ for every $T$ in the orbit of $S$ under
 the action of allowable permutations.  We call such functions {\em coding functions\/}.  Note that if $\pi[S]=\pi'[S]$ then $(\pi^{-1}\circ \pi')[S]= S$, so
 $(\pi^{-1}\circ \pi')(x)= x$, so $\pi(x)=\pi'(x)$, ensuring that the map $\chi_{x,S}$ for which we gave an implicit definition is well defined.
@@ -992,8 +996,8 @@ Pulling out the main items from the discussion above, for formalisation targets:
 
 \begin{definition}
   \label{def:support-spec}
-  \uses{def:coherent-phase-1-data}
-  Fix coherent phase 1 data below $\alpha$.  A \emph{support-specification} is \ldots [this is quite long to define; we should get the text from more recent versions of Randall’s note]
+  \uses{def:coherent-tangle-data}
+  Fix coherent tangle data below $\alpha$.  A \emph{support-specification} is \ldots [this is quite long to define; we should get the text from more recent versions of Randall’s note]
 
   [Perhaps the coherence is not needed?]
 \end{definition}
@@ -1099,7 +1103,7 @@ This completes the proof that each type is of size $\mu$, which finally closes t
 \begin{lemma}
   \label{lem:position-functions-propagate}
   \uses{def:freedom-of-action-statement}
-  Given coherent phase 1 data below $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:phase-1-data}:
+  Given coherent tangle data below $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:tangle-data}:
   \begin{enumerate}
     \item for each litter $L$, the typed litter of $L$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
     \item for each near-litter $N$ which is not a litter, $j(N)$ comes after its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \symdiff N^\circ$;
@@ -1132,14 +1136,14 @@ We can now wrap up the recursion.  It is a little subtle: to know that the recur
 \begin{definition}
   \label{def:very-coherent-data}
   \uses{lem:position-functions-propagate,thm:freedom-of-action}
-  For $\alpha \in \lambda + 1$, a choice of coherent phase 1 data below $\alpha$ is \emph{very coherent} if its ordering functions and designated supports at each level are the ones provided by \cref{lem:position-functions-propagate} applied to the earlier levels, using \cref{thm:freedom-of-action} to supply the assumption of freedom of action.
+  For $\alpha \in \lambda + 1$, a choice of coherent tangle data below $\alpha$ is \emph{very coherent} if its ordering functions and designated supports at each level are the ones provided by \cref{lem:position-functions-propagate} applied to the earlier levels, using \cref{thm:freedom-of-action} to supply the assumption of freedom of action.
 
   [This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice.  See also discusson above replacing this with an explicit principle of “dependent choice”.]
 \end{definition}
 
 \begin{lemma}
   \label{lem:very-coherent-data-unique}
-  \uses{def:coherent-phase-1-data}
+  \uses{def:coherent-tangle-data}
   For any $\alpha$, very coherent data below $\alpha$ is unique (if it exists).
 
   [Actually, we probably don’t need this: it effectively gets inlined in the main recursion.]
