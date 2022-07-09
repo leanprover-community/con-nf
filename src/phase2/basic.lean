@@ -349,10 +349,16 @@ also be defeq to each other.
 
 def tangle_path (A : le_index α) : Type u := tangle A.index
 
+def to_tangle_path (A : proper_lt_index α) : near_litter ↪ tangle_path (A : le_index α) :=
+to_tangle
+
 def allowable_path (A : le_index α) : Type u := allowable A.index
 
-def f_map_path {A : lt_index α} (B : proper_lt_index α) (t : tangle_path (A : le_index α)) :=
-f_map B.index t
+def f_map_path {A : lt_index α} (B : proper_lt_index α) : tangle_path (A : le_index α) → litter :=
+f_map B.index
+
+def typed_singleton_path (A : proper_lt_index α) : atom ↪ tangle_path (A : le_index α) :=
+typed_singleton
 
 def designated_support_path {A : proper_lt_index α} (t : tangle_path (A : le_index α)) :
   support allowable_to_struct_perm t := designated_support t
