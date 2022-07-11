@@ -224,6 +224,10 @@ flexible L A ↔ ∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < 
 L ≠ (f_map_path (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t) :=
 sorry
 
+namespace unary_spec
+
+/-- A unary specification is *support-closed* if whenever `⟨f_{γ,δ}^A(x), A⟩ ∈ σ`, `S_{γ:A}`
+supports `x`. -/
 def support_closed (σ : unary_spec α) : Prop :=
 ∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
   (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α)),
@@ -233,5 +237,50 @@ def support_closed (σ : unary_spec α) : Prop :=
       support_condition α) ∈ σ →
       supports (@allowable_to_struct_perm _ (lt_index.mk' hγ A).index _)
         (σ.lower (path.cons A hγ)) t
+
+-- TODO: In the following definitions, is `A` supposed to be an external parameter or included
+-- in some kind of quantification?
+
+/-- A unary specification is *local* if
+* for all litters `L` such that `⟨L, A⟩ ∈ σ`, we have `⟨a, A⟩ ∈ σ` for `a ∈ L`, and
+* for all litters `L` such that `⟨L, A⟩ ∉ σ`, we have `∥{a ∈ L | ⟨a, A⟩ ∈ σ}∥ < κ`.
+TODO: The name "local" is reserved but I don't particularly like `litter_local` either.
+-/
+def litter_local (σ : unary_spec α) (A : extended_index α) : Prop :=
+∀ (L : litter),
+@ite _ ((⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ) (classical.dec _)
+  (∀ a ∈ litter_set L, (⟨sum.inl a, A⟩ : support_condition α) ∈ σ)
+  (small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition α) ∈ σ})
+
+def non_flex_small (σ : unary_spec α) (A : extended_index α) : Prop :=
+small {L : litter | ¬flexible L A}
+
+/-- A unary specification is *flex-small* if it contains either a small amount of flexible litters,
+or all of the flexible litters. -/
+@[mk_iff] inductive flex_small (σ : unary_spec α) (A : extended_index α) : Prop
+| small : small {L : litter | flexible L A} → flex_small
+| all : (∀ L, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ) → flex_small
+
+end unary_spec
+
+namespace spec
+
+/-- A specification is *one-to-one* if
+* `⟨a, b₁⟩, ⟨a, b₂⟩ ∈ σ` implies `b₁ = b₂`,
+* `⟨a₁, b⟩, ⟨a₂, b⟩ ∈ σ` implies `a₁ = a₂`,
+where `a, b` may be either atoms or near-litters.
+-/
+@[mk_iff] structure one_to_one (σ : spec α) (A : extended_index α) : Prop :=
+(left_atom         : ∀ b, {a | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
+(right_atom        : ∀ a, {b | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
+(left_near_litter  : ∀ N, {M | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
+(right_near_litter : ∀ M, {N | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
+
+-- @[mk_iff] structure coherent (σ : spec α) (A : extended_index α) : Prop :=
+-- (domain_closed : σ.domain.support_closed)
+-- (range_closed : σ.range.support_closed)
+-- ...
+
+end spec
 
 end con_nf
