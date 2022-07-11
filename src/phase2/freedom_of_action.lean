@@ -49,62 +49,62 @@ f.atom_perm a ∉ litter_set (f.litter_perm a.1) ∨ f.atom_perm⁻¹ a ∉ litt
 /-- A *binary condition* is like a support condition but uses either two atoms or two near-litters
 instead of one. A binary condition `⟨⟨x, y⟩, A⟩` represents the constraint `π_A(x) = y` on an
 allowable permutation. -/
-@[derive [inhabited, mul_action near_litter_perm, mul_action (struct_perm ‹Λ›)]]
-def binary_condition (α : Λ) : Type u :=
+@[derive [inhabited, mul_action near_litter_perm, mul_action (struct_perm ‹type_index›)]]
+def binary_condition (α : type_index) : Type u :=
 ((atom × atom) ⊕ (near_litter × near_litter)) × extended_index α
 
 /-- Converts a binary condition `⟨⟨x, y⟩, A⟩` into the support condition `⟨x, A⟩`. -/
-def binary_condition.domain {α : Λ} (cond : binary_condition α) : support_condition α :=
+def binary_condition.domain {α : type_index} (cond : binary_condition α) : support_condition α :=
 ⟨cond.fst.elim (λ atoms, sum.inl atoms.fst) (λ Ns, sum.inr Ns.fst), cond.snd⟩
 
 /-- Converts a binary condition `⟨⟨x, y⟩, A⟩` into the support condition `⟨y, A⟩`. -/
-def binary_condition.range {α : Λ} (cond : binary_condition α) : support_condition α :=
+def binary_condition.range {α : type_index} (cond : binary_condition α) : support_condition α :=
 ⟨cond.fst.elim (λ atoms, sum.inl atoms.snd) (λ Ns, sum.inr Ns.snd), cond.snd⟩
 
 /-- A *unary specification* is a set of support conditions. This can be thought of as either the
 domain or range of a `spec`. -/
-abbreviation unary_spec (α : Λ) : Type u := set (support_condition α)
+abbreviation unary_spec (α : type_index) : Type u := set (support_condition α)
 
 /-- A *specification* of an allowable permutation is a set of binary conditions on the allowable
 permutation. -/
-abbreviation spec (α : Λ) : Type u := set (binary_condition α)
+abbreviation spec (α : type_index) : Type u := set (binary_condition α)
 
 /-- The domain of a specification is the unary specification consisting of the domains of all
 binary conditions in the specification. -/
-def spec.domain {α : Λ} (σ : spec α) : unary_spec α := binary_condition.domain '' σ
+def spec.domain {α : type_index} (σ : spec α) : unary_spec α := binary_condition.domain '' σ
 /-- The range of a specification is the unary specification consisting of the ranges of all
 binary conditions in the specification. -/
-def spec.range {α : Λ} (σ : spec α) : unary_spec α := binary_condition.range '' σ
+def spec.range {α : type_index} (σ : spec α) : unary_spec α := binary_condition.range '' σ
 
 /-- A structural permutation *satisfies* a condition `⟨⟨x, y⟩, A⟩` if `π_A(x) = y`. -/
-def struct_perm.satisfies_cond {α : Λ} (π : struct_perm α) (c : binary_condition α) : Prop :=
+def struct_perm.satisfies_cond {α : type_index} (π : struct_perm α) (c : binary_condition α) :=
 c.fst.elim
   (λ atoms, derivative c.snd π • atoms.fst = atoms.snd)
   (λ Ns, derivative c.snd π • Ns.fst = Ns.snd)
 
-@[simp] lemma struct_perm.satisfies_cond_atoms {α : Λ} (π : struct_perm α) (a b : atom)
+@[simp] lemma struct_perm.satisfies_cond_atoms {α : type_index} (π : struct_perm α) (a b : atom)
   (A : extended_index α) : π.satisfies_cond ⟨sum.inl ⟨a, b⟩, A⟩ ↔ derivative A π • a = b :=
 by { unfold struct_perm.satisfies_cond, refl }
 
-@[simp] lemma struct_perm.satisfies_cond_near_litters {α : Λ} (π : struct_perm α)
+@[simp] lemma struct_perm.satisfies_cond_near_litters {α : type_index} (π : struct_perm α)
   (M N : near_litter) (A : extended_index α) :
   π.satisfies_cond ⟨sum.inr ⟨M, N⟩, A⟩ ↔ derivative A π • M = N :=
 by { unfold struct_perm.satisfies_cond, refl }
 
 /-- A structural permutation *satisfies* a specification if for all conditions `⟨⟨x, y⟩, A⟩` in the
 specification, we have `π_A(x) = y`. -/
-def struct_perm.satisfies {α : Λ} (π : struct_perm α) (σ : spec α) : Prop :=
+def struct_perm.satisfies {α : type_index} (π : struct_perm α) (σ : spec α) : Prop :=
 ∀ c ∈ σ, π.satisfies_cond c
 
 /- There is an injection from the type of structural permutations to the type of specifications,
 in such a way that any structural permutation satisfies its specification. We construct this
 specification by simply drawing the graph of the permutation. It suffices to construct the graph of
 atoms with each derivative; the graphs of near-litters is then implicit. -/
-def struct_perm.to_spec {α : Λ} (π : struct_perm α) : spec α :=
+def struct_perm.to_spec {α : type_index} (π : struct_perm α) : spec α :=
 set.range (λ (x : atom × extended_index α), ⟨sum.inl ⟨x.fst, derivative x.snd π • x.fst⟩, x.snd⟩)
 
 /-- Any structural permutation satisfies its own specification. -/
-lemma struct_perm.satisfies_to_spec {α : Λ} (π : struct_perm α) : π.satisfies π.to_spec :=
+lemma struct_perm.satisfies_to_spec {α : type_index} (π : struct_perm α) : π.satisfies π.to_spec :=
 begin
   unfold struct_perm.satisfies struct_perm.to_spec struct_perm.satisfies_cond,
   rintros ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ ⟨⟨a, b⟩, ha⟩; simp only [prod.mk.inj_iff] at ha,
@@ -114,25 +114,25 @@ begin
 end
 
 /-- The map from structural permutations to their specifications is injective. -/
-lemma struct_perm.to_spec_injective (α : Λ) : injective (@struct_perm.to_spec _ α) := sorry
+lemma struct_perm.to_spec_injective (α : type_index) : injective (@struct_perm.to_spec _ α) := sorry
 
 /-- We can extend any support condition to one of a higher proper type index `α` by providing a path
 connecting the old extended index up to `α`. -/
-def support_condition.extend_path {α β : Λ} (c : support_condition β)
+def support_condition.extend_path {α β : type_index} (c : support_condition β)
   (A : path (α : type_index) β) : support_condition α := ⟨c.fst, A.comp c.snd⟩
 
 /-- We can extend any binary condition to one of a higher proper type index `α` by providing a path
 connecting the old extended index up to `α`. -/
-def binary_condition.extend_path {α β : Λ} (c : binary_condition β)
+def binary_condition.extend_path {α β : type_index} (c : binary_condition β)
   (A : path (α : type_index) β) : binary_condition α := ⟨c.fst, A.comp c.snd⟩
 
 /-- We can lower a unary specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping support conditions whose paths begin with `A`. -/
-def unary_spec.lower {α β : Λ} (σ : unary_spec α) (A : path (α : type_index) β) : unary_spec β :=
+def unary_spec.lower {α β : type_index} (σ : unary_spec α) (A : path α β) : unary_spec β :=
 {c | c.extend_path A ∈ σ}
 
 /-- Lowering along the empty path does nothing. -/
-lemma unary_spec.lower_nil {α β γ : Λ} (σ : unary_spec α) :
+lemma unary_spec.lower_nil {α β γ : type_index} (σ : unary_spec α) :
   σ.lower path.nil = σ :=
 begin
   unfold unary_spec.lower support_condition.extend_path,
@@ -140,7 +140,7 @@ begin
 end
 
 /-- The lowering map is functorial. -/
-lemma unary_spec.lower_lower {α β γ : Λ} (σ : unary_spec α)
+lemma unary_spec.lower_lower {α β γ : type_index} (σ : unary_spec α)
   (A : path (α : type_index) β) (B : path (β : type_index) γ) :
   (σ.lower A).lower B = σ.lower (path.comp A B) :=
 begin
@@ -150,11 +150,11 @@ end
 
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
-def spec.lower {α β : Λ} (σ : spec α) (A : path (α : type_index) β) : spec β :=
+def spec.lower {α β : type_index} (σ : spec α) (A : path (α : type_index) β) : spec β :=
 {c | c.extend_path A ∈ σ}
 
 /-- Lowering along the empty path does nothing. -/
-lemma spec.lower_nil {α β γ : Λ} (σ : spec α) :
+lemma spec.lower_nil {α β γ : type_index} (σ : spec α) :
   σ.lower path.nil = σ :=
 begin
   unfold spec.lower binary_condition.extend_path,
@@ -162,7 +162,7 @@ begin
 end
 
 /-- The lowering map is functorial. -/
-lemma spec.lower_lower {α β γ : Λ} (σ : spec α)
+lemma spec.lower_lower {α β γ : type_index} (σ : spec α)
   (A : path (α : type_index) β) (B : path (β : type_index) γ) :
   (σ.lower A).lower B = σ.lower (path.comp A B) :=
 begin
@@ -224,12 +224,14 @@ flexible L A ↔ ∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < 
 L ≠ (f_map_path (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t) :=
 sorry
 
-/- def support_closed (σ : unary_spec α) : Prop :=
-∀ {β γ δ : Λ} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (A : path (α : type_index) β)
-  (t : tangle_path ((proper_lt_index.mk' hγ A) : le_index α)),
+def support_closed (σ : unary_spec α) : Prop :=
+∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α)),
   (⟨sum.inr (f_map_path
     (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t)
     .to_near_litter, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩ :
-      support_condition α) ∈ σ → _ -/
+      support_condition α) ∈ σ →
+      supports (@allowable_to_struct_perm _ (lt_index.mk' hγ A).index _)
+        (σ.lower (path.cons A hγ)) t
 
 end con_nf

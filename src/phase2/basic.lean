@@ -358,6 +358,13 @@ to_tangle
 
 def allowable_path (A : le_index α) : Type u := allowable A.index
 
+instance allowable_smul_le (A : le_index α) :
+  mul_action (allowable A.index) (tangle_path A) := core_tangle_data.allowable_action
+instance allowable_smul_lt (A : lt_index α) :
+  mul_action (allowable A.index) (tangle_path (A : le_index α)) := core_tangle_data.allowable_action
+instance allowable_smul_proper_lt (A : proper_lt_index α) :
+  mul_action (allowable A.index) (tangle_path (A : le_index α)) := core_tangle_data.allowable_action
+
 def f_map_path {A : lt_index α} (B : proper_lt_index α) : tangle_path (A : le_index α) → litter :=
 f_map B.index
 
