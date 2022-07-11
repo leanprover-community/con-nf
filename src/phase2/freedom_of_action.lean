@@ -16,7 +16,8 @@ one of two reasons:
     therefore reversed.
 -/
 
-open function quiver with_bot
+open function quiver with_bot cardinal
+open_locale cardinal
 
 universe u
 
@@ -53,6 +54,11 @@ allowable permutation. -/
 def binary_condition (α : type_index) : Type u :=
 ((atom × atom) ⊕ (near_litter × near_litter)) × extended_index α
 
+/-- The binary condition representing the inverse permutation. If `π_A(x) = y`,
+then `π_A⁻¹(y) = x`. -/
+instance (α : type_index) : has_inv (binary_condition α) :=
+⟨λ c, ⟨c.fst.elim (λ atoms, sum.inl ⟨atoms.2, atoms.1⟩) (λ Ns, sum.inr ⟨Ns.2, Ns.1⟩), c.snd⟩⟩
+
 /-- Converts a binary condition `⟨⟨x, y⟩, A⟩` into the support condition `⟨x, A⟩`. -/
 def binary_condition.domain {α : type_index} (cond : binary_condition α) : support_condition α :=
 ⟨cond.fst.elim (λ atoms, sum.inl atoms.fst) (λ Ns, sum.inr Ns.fst), cond.snd⟩
@@ -68,6 +74,13 @@ abbreviation unary_spec (α : type_index) : Type u := set (support_condition α)
 /-- A *specification* of an allowable permutation is a set of binary conditions on the allowable
 permutation. -/
 abbreviation spec (α : type_index) : Type u := set (binary_condition α)
+
+/-- There are `< μ` unary specifications. TODO: is this lemma actually required? -/
+lemma mk_unary_spec (α : type_index) : #(unary_spec α) < #μ := sorry
+/-- There are `< μ` support specifications. -/
+lemma mk_spec (α : type_index) : #(spec α) < #μ := sorry
+
+instance (α : type_index) : has_inv (spec α) := ⟨λ σ, {c | c⁻¹ ∈ σ}⟩
 
 /-- The domain of a specification is the unary specification consisting of the domains of all
 binary conditions in the specification. -/
@@ -235,52 +248,126 @@ def support_closed (σ : unary_spec α) : Prop :=
     (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t)
     .to_near_litter, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩ :
       support_condition α) ∈ σ →
-      supports (@allowable_to_struct_perm _ (lt_index.mk' hγ A).index _)
+      supports (allowable_path_to_struct_perm (lt_index.mk' hγ A : le_index α))
         (σ.lower (path.cons A hγ)) t
 
 -- TODO: In the following definitions, is `A` supposed to be an external parameter or included
 -- in some kind of quantification?
+-- Also, are the definitions even needed when defining things in terms of binary specifications?
 
 /-- A unary specification is *local* if
 * for all litters `L` such that `⟨L, A⟩ ∈ σ`, we have `⟨a, A⟩ ∈ σ` for `a ∈ L`, and
 * for all litters `L` such that `⟨L, A⟩ ∉ σ`, we have `∥{a ∈ L | ⟨a, A⟩ ∈ σ}∥ < κ`.
 TODO: The name "local" is reserved but I don't particularly like `litter_local` either.
 -/
-def litter_local (σ : unary_spec α) (A : extended_index α) : Prop :=
-∀ (L : litter),
+def litter_local (σ : unary_spec α) : Prop :=
+∀ (L : litter) (A : extended_index α),
 @ite _ ((⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ) (classical.dec _)
   (∀ a ∈ litter_set L, (⟨sum.inl a, A⟩ : support_condition α) ∈ σ)
   (small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition α) ∈ σ})
 
-def non_flex_small (σ : unary_spec α) (A : extended_index α) : Prop :=
-small {L : litter | ¬flexible L A}
+def non_flex_small (σ : unary_spec α) : Prop :=
+small {L : litter | ∀ (A : extended_index α), ¬flexible L A}
 
 /-- A unary specification is *flex-small* if it contains either a small amount of flexible litters,
 or all of the flexible litters. -/
-@[mk_iff] inductive flex_small (σ : unary_spec α) (A : extended_index α) : Prop
-| small : small {L : litter | flexible L A} → flex_small
-| all : (∀ L, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ) → flex_small
+@[mk_iff] inductive flex_small (σ : unary_spec α) : Prop
+| small : small {L : litter | ∃ (A : extended_index α), flexible L A} → flex_small
+| all : (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ) →
+    flex_small
 
 end unary_spec
 
 namespace spec
 
-/-- A specification is *one-to-one* if
+/-!
+We now set out the allowability conditions for specifications of permutations.
+These are collected in the structure `allowable_spec`, which may be treated as a proposition.
+We say a specification is allowable if `allowable_spec` holds.
+-/
+
+/--
+A specification is *one-to-one* on a particular path `A` if
 * `⟨a, b₁⟩, ⟨a, b₂⟩ ∈ σ` implies `b₁ = b₂`,
 * `⟨a₁, b⟩, ⟨a₂, b⟩ ∈ σ` implies `a₁ = a₂`,
 where `a, b` may be either atoms or near-litters.
 -/
-@[mk_iff] structure one_to_one (σ : spec α) (A : extended_index α) : Prop :=
+@[mk_iff] structure one_to_one_path (σ : spec α) (A : extended_index α) : Prop :=
 (left_atom         : ∀ b, {a | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
 (right_atom        : ∀ a, {b | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
 (left_near_litter  : ∀ N, {M | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
 (right_near_litter : ∀ M, {N | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
 
--- @[mk_iff] structure coherent (σ : spec α) (A : extended_index α) : Prop :=
--- (domain_closed : σ.domain.support_closed)
--- (range_closed : σ.range.support_closed)
--- ...
+/-- A specification is one-to-one if it is one-to-one on all paths. -/
+def one_to_one (σ : spec α) : Prop := ∀ A, σ.one_to_one_path A
+
+/-- The allowability condition on atoms.
+In an absent litter, we must specify only `< κ`-many atoms.
+In a present litter, we can specify either `< κ`-many atoms, or all of the atoms in the litter, and
+in this case, almost all of them must be mapped to the right place.
+Note that the `small` constructor does not depend on whether the litter is present or absent. -/
+@[mk_iff] inductive atom_cond (σ : spec α) (L : litter) (A : extended_index α) : Prop
+| small : small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition α) ∈ σ.domain} → atom_cond
+| all (N : near_litter) (atom_map : litter_set L → atom) :
+    (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition α) ∈ σ →
+    (∀ a ∈ litter_set L, (⟨sum.inl ⟨a, atom_map ⟨a, ‹_›⟩⟩, A⟩ : binary_condition α) ∈ σ) →
+    small {a : litter_set L | atom_map a ∈ N.snd.val} →
+    atom_cond
+
+/-- The allowability condition on near-litters.
+If a near-litter is present, so are its litter and all atoms in the symmetric difference, and it is
+mapped to the right place. -/
+@[mk_iff] inductive near_litter_cond (σ : spec α) (N : near_litter) (A : extended_index α) : Prop
+| absent : (∀ M, (⟨sum.inr ⟨N, M⟩, A⟩ : binary_condition α) ∉ σ) → near_litter_cond
+| present (M₁ M₂ : near_litter) (atom_map : litter_set N.fst ∆ N.snd → atom) :
+    (⟨sum.inr ⟨N, M₁⟩, A⟩ : binary_condition α) ∈ σ →
+    (⟨sum.inr ⟨N.fst.to_near_litter, M₂⟩, A⟩ : binary_condition α) ∈ σ →
+    (∀ a : litter_set N.fst ∆ N.snd, (⟨sum.inl ⟨a, atom_map a⟩, A⟩ : binary_condition α) ∈ σ) →
+    M₁.snd.val = M₂.snd.val ∆ set.range atom_map →
+    near_litter_cond
+
+/-- This is the allowability condition for flexible litters.
+Either all flexible litters are in both the domain and range (`all`), or there are `μ`-many not in
+the domain and `μ`-many not in the range. -/
+@[mk_iff] inductive flexible_cond (σ : spec α) : Prop
+| co_large :
+  #μ = #{L : litter | ∃ (A : extended_index α),
+    flexible L A ∧ (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∉ σ.domain} →
+  #μ = #{L : litter | ∃ (A : extended_index α),
+    flexible L A ∧ (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∉ σ.range} →
+  flexible_cond
+| all :
+  (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ.domain) →
+  (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ.range) →
+  flexible_cond
+
+/-- The allowability condition on non-flexible litters.
+Whenever `σ` contains some condition `⟨⟨f_{γ,δ}^A(g), N⟩, [-1,δ,A]⟩`, then every allowable
+permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`.
+Note: Definition is incomplete, this won't type check until allowable.lean is refactored. -/
+def non_flexible_cond (σ : spec α) : Prop :=
+∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (N : near_litter)
+  (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α)),
+  (⟨sum.inr ⟨(f_map_path
+    (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t).to_near_litter,
+    N⟩, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩ : binary_condition α) ∈ σ →
+  ∀ (ρ : allowable_path ⟨α, path.nil⟩), true /- ρ.to_struct_perm.satisfies σ -/ →
+  N = (f_map_path (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil)
+    (allowable_derivative_nil_comp (path.cons A hγ) ρ • t)).to_near_litter
+
+structure allowable_spec (σ : spec α) : Prop :=
+(domain_closed : σ.domain.support_closed)
+(range_closed : σ.range.support_closed)
+(one_to_one : σ.one_to_one)
+(atom_cond : ∀ a A, σ.atom_cond a A)
+(near_litter_cond : ∀ N A, σ.near_litter_cond N A)
+(flexible_cond : σ.flexible_cond)
+(non_flexible_cond : σ.non_flexible_cond)
+(inv_non_flexible_cond : σ⁻¹.non_flexible_cond)
 
 end spec
+
+/-- An *allowable partial permutation* is a specification satisfying the above properties. -/
+def allowable_partial_perm := {σ : spec α // σ.allowable_spec}
 
 end con_nf

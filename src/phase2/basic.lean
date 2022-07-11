@@ -113,7 +113,7 @@ phase 2, so we use this alternate formalisation.
 
 /-- A type index `β`, together with a path down from `α` to level `β`. Hence, `β ≤ α`.
 This type is intended to be used in place of `β : type_index, β ≤ α` in phase 2. -/
-structure le_index (α : Λ) :=
+@[ext] structure le_index (α : Λ) :=
 (index : type_index)
 (path : path (α : type_index) index)
 
@@ -128,7 +128,7 @@ def le_index.cons {α : Λ} (A : le_index α) {γ : type_index} (hγ : γ < A.in
 This enforces that the path obtained from composing `A` with this new `γ ⟶ β` morphism is
 nontrivial by construction. This type is intended to be used in place of `β : type_index, β < α`
 and `β : Iio (α : type_index)` in phase 2. -/
-structure lt_index (α : Λ) :=
+@[ext] structure lt_index (α : Λ) :=
 (index : type_index)
 (higher : type_index)
 (index_lt : index < higher)
@@ -164,7 +164,7 @@ instance lt_index.has_coe_to_type_index {α : Λ} : has_coe (lt_index α) type_i
 `β`. This enforces that the path obtained from composing `A` with this new `γ ⟶ β` morphism is
 nontrivial by construction. This type is intended to be used in phase of `β : Λ, β < α` and
 `β : Iio α` in phase 2. -/
-structure proper_lt_index (α : Λ) :=
+@[ext] structure proper_lt_index (α : Λ) :=
 (index : Λ)
 (higher : Λ)
 (index_lt : index < higher)
@@ -319,21 +319,22 @@ tangle data for all proper type indices `β < α` along all paths. -/
 class phase_2_assumptions :=
 [lower_almost_tangle_data : Π (A : proper_lt_index α), almost_tangle_data A.index]
 [lower_tangle_data : Π (A : proper_lt_index α), tangle_data A.index]
-(derivative : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index) (π : allowable A.index),
-  allowable (A.cons hγ).index)
-(derivative_comm : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index) (π : allowable A.index),
-  allowable_to_struct_perm (derivative A hγ π) =
+(allowable_derivative : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index),
+  allowable A.index → allowable (A.cons hγ).index)
+(allowable_derivative_comm : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index)
+  (π : allowable A.index),
+  allowable_to_struct_perm (allowable_derivative A hγ π) =
     struct_perm.derivative (path.cons path.nil hγ) (allowable_to_struct_perm π))
 
 /-- The derivative of a permutation along a particular path.
 Note that `allowable (A.cons hγ).index` is defeq to `allowable γ`, but by writing it in this form,
 lean's typeclass resolution can find the particular instance of `core_tangle_data` that we want. -/
-add_decl_doc phase_2_assumptions.derivative
+add_decl_doc phase_2_assumptions.allowable_derivative
 
 /-- The derivative map commutes with the map from allowable to structural permutations.
 The term `path.cons path.nil hγ` is the singleton path `A.index ⟶ γ`.
 TODO: Should we refactor `struct_perm.derivative` to use singleton paths as well? -/
-add_decl_doc phase_2_assumptions.derivative_comm
+add_decl_doc phase_2_assumptions.allowable_derivative_comm
 
 attribute [instance]
   phase_2_assumptions.lower_almost_tangle_data
@@ -358,12 +359,26 @@ to_tangle
 
 def allowable_path (A : le_index α) : Type u := allowable A.index
 
+instance (A : le_index α) : group (allowable_path A) := core_tangle_data.allowable_group
+
+/-! Utility instances to let us write things in a nicer way. -/
 instance allowable_smul_le (A : le_index α) :
-  mul_action (allowable A.index) (tangle_path A) := core_tangle_data.allowable_action
+  mul_action (allowable_path A) (tangle_path A) := core_tangle_data.allowable_action
+
 instance allowable_smul_lt (A : lt_index α) :
-  mul_action (allowable A.index) (tangle_path (A : le_index α)) := core_tangle_data.allowable_action
+  mul_action (allowable_path (A : le_index α)) (tangle_path (A : le_index α)) :=
+core_tangle_data.allowable_action
+
 instance allowable_smul_proper_lt (A : proper_lt_index α) :
-  mul_action (allowable A.index) (tangle_path (A : le_index α)) := core_tangle_data.allowable_action
+  mul_action (allowable_path (A : le_index α)) (tangle_path (A : le_index α)) :=
+core_tangle_data.allowable_action
+
+instance allowable_smul_cons {β γ : type_index} (A : path (α : type_index) β) (hγ : γ < β) :
+  mul_action (allowable_path ⟨γ, A.cons hγ⟩) (tangle_path (lt_index.mk' hγ A : le_index α)) :=
+core_tangle_data.allowable_action
+
+def allowable_path_to_struct_perm (A : le_index α) : allowable_path A →* struct_perm A.index :=
+allowable_to_struct_perm
 
 def f_map_path {A : lt_index α} (B : proper_lt_index α) : tangle_path (A : le_index α) → litter :=
 f_map B.index
@@ -373,5 +388,26 @@ typed_singleton
 
 def designated_support_path {A : le_index α} (t : tangle_path A) :
   small_support allowable_to_struct_perm t := designated_support t
+
+def allowable_derivative_path : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index),
+  allowable_path A → allowable_path (A.cons hγ) := phase_2_assumptions.allowable_derivative
+
+def allowable_derivative_path_comm : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index)
+  (π : allowable_path A),
+  allowable_to_struct_perm (allowable_derivative_path A hγ π) =
+    struct_perm.derivative (path.cons path.nil hγ) (allowable_to_struct_perm π) :=
+phase_2_assumptions.allowable_derivative_comm
+
+/-- Computes the derivative of an allowable permutation along a path `B`. -/
+def allowable_derivative_path_comp (A : le_index α) :
+  Π {γ : type_index} (B : path A.index γ) (π : allowable_path A),
+    allowable_path ⟨γ, path.comp A.path B⟩
+| _ path.nil π := by { convert π, rw path.comp_nil, ext, simp }
+| γ (path.cons B hγ) π :=
+    allowable_derivative_path ⟨_, path.comp A.path B⟩ hγ (allowable_derivative_path_comp B π)
+
+def allowable_derivative_nil_comp {β : type_index} (B : path (α : type_index) β)
+  (π : allowable_path ⟨α, path.nil⟩) : allowable_path ⟨β, B⟩ :=
+by { convert allowable_derivative_path_comp ⟨α, path.nil⟩ B π, rw path.nil_comp }
 
 end con_nf
