@@ -124,10 +124,28 @@ def binary_condition.extend_path {α β : Λ} (c : binary_condition β)
 def unary_spec.lower {α β : Λ} (σ : unary_spec α) (A : path (α : type_index) β) : unary_spec β :=
 {c | c.extend_path A ∈ σ}
 
+/-- Lowering along the empty path does nothing. -/
+lemma unary_spec.lower_nil {α β γ : Λ} (σ : unary_spec α) :
+  σ.lower path.nil = σ := sorry
+
+/-- The lowering map is functorial. -/
+lemma unary_spec.lower_lower {α β γ : Λ} (σ : unary_spec α)
+  (A : path (α : type_index) β) (B : path (β : type_index) γ) :
+  (σ.lower A).lower B = σ.lower (path.comp A B) := sorry
+
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
 def spec.lower {α β : Λ} (σ : spec α) (A : path (α : type_index) β) : spec β :=
 {c | c.extend_path A ∈ σ}
+
+/-- Lowering along the empty path does nothing. -/
+lemma spec.lower_nil {α β γ : Λ} (σ : spec α) :
+  σ.lower path.nil = σ := sorry
+
+/-- The lowering map is functorial. -/
+lemma spec.lower_lower {α β γ : Λ} (σ : spec α)
+  (A : path (α : type_index) β) (B : path (β : type_index) γ) :
+  (σ.lower A).lower B = σ.lower (path.comp A B) := sorry
 
 variables (α : Λ) [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
   [phase_2_assumptions α]
