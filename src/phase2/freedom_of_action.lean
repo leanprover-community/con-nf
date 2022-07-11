@@ -184,7 +184,7 @@ begin
 end
 
 variables (α : Λ) [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α]
+  [phase_2_assumptions α] (B : proper_lt_index α)
 
 /--
 Support conditions can be said to *constrain* each other in a number of ways. This is discussed
@@ -200,20 +200,22 @@ in the "freedom of action discussion".
     Note that for this to type check, we must constrain `γ : Λ` not `γ : type_index` - this point
     may need revisiting later.
 -/
-@[mk_iff] inductive constrains : support_condition α → support_condition α → Prop
-| mem_litter (L : litter) (a ∈ litter_set L) (A : extended_index α) :
+@[mk_iff] inductive constrains : support_condition B → support_condition B → Prop
+| mem_litter (L : litter) (a ∈ litter_set L) (A : extended_index B) :
     constrains ⟨sum.inr L.to_near_litter, A⟩ ⟨sum.inl a, A⟩
-| near_litter (N : near_litter) (hN : litter_set N.fst ≠ N.snd) (A : extended_index α) :
+| near_litter (N : near_litter) (hN : litter_set N.fst ≠ N.snd) (A : extended_index B) :
     constrains ⟨sum.inr N.fst.to_near_litter, A⟩ ⟨sum.inr N, A⟩
-| symm_diff (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd) (A : extended_index α) :
+| symm_diff (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd) (A : extended_index B) :
     constrains ⟨sum.inl a, A⟩ ⟨sum.inr N, A⟩
 | f_map {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
-    (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α))
+    (A : path (B : type_index) β)
+    (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α))
     (c ∈ (designated_support_path t).carrier) :
     constrains
       ⟨c.fst, path.comp (path.cons A hγ) c.snd⟩
       ⟨sum.inr (f_map_path
-        (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t)
+        (proper_lt_index.mk'
+          (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil) t)
         .to_near_litter, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩
 
 /-! We declare new notation for the "constrains" relation on support conditions. -/
@@ -221,7 +223,7 @@ local infix ` ≺ `:50 := constrains _
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,
 then `x < y` in `µ`, under the `to_tangle_path` or `typed_singleton_path` maps. -/
-lemma constrains_wf : well_founded (constrains α) := sorry
+lemma constrains_wf : well_founded (constrains α B) := sorry
 
 variable {α}
 
@@ -369,5 +371,8 @@ end spec
 
 /-- An *allowable partial permutation* is a specification satisfying the above properties. -/
 def allowable_partial_perm := {σ : spec α // σ.allowable_spec}
+
+lemma lower_allowable (σ : spec α) {β : Λ} (A : path (α : type_index) β)
+  (h : σ.allowable_spec) : (σ.lower A).allowable_spec := sorry
 
 end con_nf
