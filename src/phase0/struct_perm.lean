@@ -171,11 +171,11 @@ using_well_founded { dec_tac := `[assumption] }
 end struct_perm
 
 /-- A support condition is an atom or a near-litter together with an extended type index. -/
-@[derive [inhabited, mul_action near_litter_perm, mul_action (struct_perm ‹Λ›)]]
-def support_condition (α : Λ) : Type u := (atom ⊕ near_litter) × extended_index α
+@[derive [inhabited, mul_action near_litter_perm, mul_action (struct_perm ‹type_index›)]]
+def support_condition (α : type_index) : Type u := (atom ⊕ near_litter) × extended_index α
 
 /-- There are `μ` support conditions. -/
-@[simp] lemma mk_support_condition (α : Λ) : #(support_condition α) = #μ :=
+@[simp] lemma mk_support_condition (α : type_index) : #(support_condition α) = #μ :=
 begin
   simp only [support_condition, mk_prod, mk_sum, mk_atom, lift_id, mk_near_litter],
   rw add_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) le_rfl,
@@ -183,51 +183,60 @@ begin
     (le_trans (mk_extended_index α) $ le_of_lt $ lt_trans Λ_lt_κ κ_lt_μ) (mk_ne_zero _),
 end
 
-/-- A potential support is a small set of support conditions. -/
-structure potential_support (α : Λ) :=
-(carrier : set (support_condition α))
-(small : small carrier)
-
-instance (α : Λ) : set_like (potential_support α) (support_condition α) :=
-{ coe := potential_support.carrier,
-  coe_injective' := λ s t h, by { cases s, cases t, congr' } }
-
-/-- There are `μ` potential supports. -/
-@[simp] lemma mk_potential_support (α : Λ) : #(potential_support α) = #μ :=
-begin
-  have : potential_support α ≃ {S : set (support_condition α) // small S},
-  { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.val, s.property⟩, _, _⟩; intro x; cases x; simp },
-  obtain ⟨e⟩ := cardinal.eq.1 (mk_support_condition α),
-  refine le_antisymm _ ⟨⟨λ m, ⟨{e.symm m}, by simp⟩, λ a b h, by { simp at h, exact h }⟩⟩,
-  have lt_cof_eq_μ : #{S : set (support_condition α) // #S < (#μ).ord.cof} = #μ,
-  { convert mk_subset_mk_lt_cof μ_strong_limit.2 using 1,
-    have := mk_subtype_of_equiv (λ S, # ↥S < (#μ).ord.cof) (equiv.set.congr e),
-    convert this using 1,
-    suffices : ∀ S, # ↥S = # ↥(set.congr e S), { simp_rw this },
-    intro S, rw cardinal.eq, exact ⟨equiv.image _ _⟩ },
-  rw [mk_congr this, ←lt_cof_eq_μ],
-  exact cardinal.mk_subtype_mono (λ S (h : _ < _), h.trans_le κ_le_μ_cof),
-end
-
 section support_declaration
 
-variables {α : Λ} {H τ : Type u} [monoid H] [mul_action H τ]
+variables {α : type_index} {H τ : Type u} [monoid H] [mul_action H τ]
 
 /-- A *support for `x`* is a potential support that supports `x`. -/
-structure support (φ : H → struct_perm α) (x : τ) extends potential_support α :=
+structure support (φ : H → struct_perm α) (x : τ) :=
+(carrier : set (support_condition α))
 (supports : supports φ carrier x)
 
-/-- An element of `τ` is *supported* if it has some (small) support. -/
+/-- A potential support is a small set of support conditions. -/
+structure small_support (φ : H → struct_perm α) (x : τ) extends support φ x :=
+(small : small carrier)
+
+/-- An element of `τ` is *supported* if it has some (not necessarily small) support. -/
 def supported (φ : H → struct_perm α) (x : τ) : Prop := nonempty $ support φ x
 
-/-- There are at most `μ` supports for a given `x : τ`. -/
-@[simp] lemma mk_support_le (φ : H → struct_perm α) (x : τ) : #(support φ x) ≤ #μ :=
-begin
-  have : support φ x ≃ {S : potential_support α // supports φ S.carrier x},
-  { refine ⟨λ S, ⟨S.1, S.2⟩, λ S, ⟨S.1, S.2⟩, _, _⟩; intro x; dsimp; cases x; simp },
-  rw [cardinal.mk_congr this, ←mk_potential_support α],
-  exact mk_subtype_le _,
-end
+/-- An element of `τ` is *small-supported* if it has some small support. -/
+def small_supported (φ : H → struct_perm α) (x : τ) : Prop := nonempty $ small_support φ x
+
+instance support.set_like (φ : H → struct_perm α) (x : τ) :
+  set_like (support φ x) (support_condition α) :=
+{ coe := support.carrier,
+  coe_injective' := λ s t h, by { cases s, cases t, congr' } }
+
+instance small_support.set_like (φ : H → struct_perm α) (x : τ) :
+  set_like (small_support φ x) (support_condition α) :=
+{ coe := support.carrier ∘ small_support.to_support,
+  coe_injective' := λ s t h, by { cases s, cases t, congr', sorry } }
+
+/-- There are `μ` supports for a given `x : τ`. -/
+@[simp] lemma mk_potential_support (φ : H → struct_perm α) (x : τ) : #(support φ x) = #μ := sorry
+-- begin
+--   have : potential_support α ≃ {S : set (support_condition α) // small S},
+--   { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.val, s.property⟩, _, _⟩; intro x; cases x; simp },
+--   obtain ⟨e⟩ := cardinal.eq.1 (mk_support_condition α),
+--   refine le_antisymm _ ⟨⟨λ m, ⟨{e.symm m}, by simp⟩, λ a b h, by { simp at h, exact h }⟩⟩,
+--   have lt_cof_eq_μ : #{S : set (support_condition α) // #S < (#μ).ord.cof} = #μ,
+--   { convert mk_subset_mk_lt_cof μ_strong_limit.2 using 1,
+--     have := mk_subtype_of_equiv (λ S, # ↥S < (#μ).ord.cof) (equiv.set.congr e),
+--     convert this using 1,
+--     suffices : ∀ S, # ↥S = # ↥(set.congr e S), { simp_rw this },
+--     intro S, rw cardinal.eq, exact ⟨equiv.image _ _⟩ },
+--   rw [mk_congr this, ←lt_cof_eq_μ],
+--   exact cardinal.mk_subtype_mono (λ S (h : _ < _), h.trans_le κ_le_μ_cof),
+-- end
+
+/-- There are at most `μ` small supports for a given `x : τ`. -/
+@[simp] lemma mk_support_le (φ : H → struct_perm α) (x : τ) : #(small_support φ x) ≤ #μ := sorry
+-- begin
+--   have : support φ x ≃ {S : potential_support α // supports φ S.carrier x},
+--   { refine ⟨λ S, ⟨S.1, S.2⟩, λ S, ⟨S.1, S.2⟩, _, _⟩; intro x; dsimp; cases x; simp },
+--   rw [cardinal.mk_congr this, ←mk_potential_support α],
+--   exact mk_subtype_le _,
+-- end
 
 end support_declaration
 end con_nf

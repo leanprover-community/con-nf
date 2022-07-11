@@ -153,11 +153,11 @@ in the "freedom of action discussion".
     constrains ⟨sum.inr N.fst.to_near_litter, A⟩ ⟨sum.inr N, A⟩
 | symm_diff (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd) (A : extended_index α) :
     constrains ⟨sum.inl a, A⟩ ⟨sum.inr N, A⟩
-| f_map {β γ δ : Λ} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (A : path (α : type_index) β)
-    (t : tangle_path ((proper_lt_index.mk' hγ A) : le_index α))
+| f_map {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+    (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α))
     (c ∈ (designated_support_path t).carrier) :
     constrains
-      ⟨c.fst, path.comp (path.cons A (coe_lt_coe.mpr hγ)) c.snd⟩
+      ⟨c.fst, path.comp (path.cons A hγ) c.snd⟩
       ⟨sum.inr (f_map_path
         (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t)
         .to_near_litter, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩
@@ -175,11 +175,11 @@ variable {α}
 element with respect to the relation `≺`. In other words, it is not constrained by anything. -/
 def flexible (L : litter) (A : extended_index α) : Prop := ∀ c, ¬ c ≺ ⟨sum.inr L.to_near_litter, A⟩
 
-/-- A litter and extended index is flexible iff it is not of the form `f_{γδ}^A(x)` for some
+/-- A litter and extended index is flexible iff it is not of the form `f_{γ,δ}^A(x)` for some
 `x ∈ τ_{γ:A}` with conditions defined as above. -/
 lemma flexible_iff (L : litter) (A : extended_index α) :
-flexible L A ↔ ∀ {β γ δ : Λ} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (A : path (α : type_index) β)
-  (t : tangle_path ((proper_lt_index.mk' hγ A) : le_index α)),
+flexible L A ↔ ∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+    (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α)),
 L ≠ (f_map_path (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t) :=
 sorry
 

@@ -29,8 +29,9 @@ class core_tangle_data (α : type_index) :=
 [allowable_group : group allowable]
 (allowable_to_struct_perm : allowable →* struct_perm α)
 [allowable_action : mul_action allowable tangle]
+(designated_support : Π (t : tangle), small_support allowable_to_struct_perm t)
 
-export core_tangle_data (allowable_to_struct_perm)
+export core_tangle_data (allowable_to_struct_perm designated_support)
 attribute [instance] core_tangle_data.allowable_group core_tangle_data.allowable_action
 
 class positioned_tangle_data (α : type_index) [core : core_tangle_data α] :=
@@ -48,11 +49,10 @@ class almost_tangle_data :=
 (smul_pretangle_inj : Π (π : core.allowable) (t : core.tangle),
   allowable_to_struct_perm π • pretangle_inj t = pretangle_inj (π • t))
 (typed_singleton : atom ↪ core.tangle)
-(designated_support : Π (t : core.tangle), support core.allowable_to_struct_perm t)
 
-export almost_tangle_data (to_tangle typed_singleton designated_support)
+export almost_tangle_data (to_tangle typed_singleton)
 
-variables [almost : almost_tangle_data α] [positioned_tangle_data α]
+variables [almost_tangle_data α] [positioned_tangle_data α]
 
 class tangle_data :=
 (litter_lt : Π (L : litter) (a ∈ litter_set L),
@@ -61,11 +61,11 @@ class tangle_data :=
   position (to_tangle N.fst.to_near_litter : core.tangle) ≤ position (to_tangle N : core.tangle))
 (symm_diff_lt_near_litter : Π (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd),
   position (typed_singleton a : core.tangle) < position (to_tangle N : core.tangle))
-(support_lt : Π (t : core.tangle) (c : support_condition α)
-  (hc : c ∈ ((almost.designated_support : Π (t : core.tangle), support _ _) t).to_potential_support)
+(support_le : Π (t : core.tangle) (c : support_condition α)
+  (hc : c ∈ designated_support t)
   (not_singleton : ∀ a, t ≠ typed_singleton a)
   (not_near_litter : ∀ (L : litter), t ≠ to_tangle L.to_near_litter),
-  position (c.fst.elim (typed_singleton) (to_tangle) : core.tangle) < position t)
+  position (c.fst.elim (typed_singleton) (to_tangle) : core.tangle) ≤ position t)
 
 /-- The type of tangles that we assume were constructed at stage `α`.
 Later in the recursion, we will construct this type explicitly, but for now, we will just assume
@@ -92,6 +92,10 @@ add_decl_doc core_tangle_data.allowable_to_struct_perm
 /-- Allowable permutations act on tangles. This action commutes with certain other operations; the
 exact conditions are given in `smul_to_tangle` and `smul_pretangle_inj`. -/
 add_decl_doc core_tangle_data.allowable_action
+
+/-- For each tangle, we provide a small support for it. This is known as the designated support of
+the tangle. -/
+add_decl_doc core_tangle_data.designated_support
 
 /-- An injection from near-litters into level `α` tangles.
 These will be explicitly constructed as "typed near-litters", which are codes of the form
@@ -121,16 +125,12 @@ add_decl_doc almost_tangle_data.smul_pretangle_inj
 this atom. This is called a typed singleton. In the blueprint, this is the function `k`. -/
 add_decl_doc almost_tangle_data.typed_singleton
 
-/-- For each tangle, we provide a support for it. This is known as the designated support of the
-tangle. -/
-add_decl_doc almost_tangle_data.designated_support
-
 /-- An injection from level `α` tangles into the type `μ`.
 Since `μ` has a well-ordering, this induces a well-ordering on `α`-tangles: to compare two tangles,
 simply compare their images under this map.
 
 Conditions satisfied by this injection are given in `litter_lt`, `litter_lt_near_litter`,
-`symm_diff_lt_near_litter`, and `support_lt`. In the blueprint, this is function `ι`. -/
+`symm_diff_lt_near_litter`, and `support_le`. In the blueprint, this is function `ι`. -/
 add_decl_doc positioned_tangle_data.position
 
 /-- Each typed litter `L` precedes the typed singletons of all of its elements `a ∈ L`. -/
@@ -147,7 +147,7 @@ add_decl_doc tangle_data.symm_diff_lt_near_litter
 all of the support conditions in its designated support. That is, if an atom `a` is in the
 designated support for `t`, then `t` lies after `a`, and if a near-litter `N` is in the designated
 support for `t`, then `t` lies after `N` (under suitable maps to `μ`). -/
-add_decl_doc tangle_data.support_lt
+add_decl_doc tangle_data.support_le
 
 end define_tangle_data
 
@@ -156,12 +156,13 @@ export almost_tangle_data (to_tangle pretangle_inj typed_singleton)
 export positioned_tangle_data (position)
 
 /-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
-permutations to be near-litter-permutations. -/
+permutations to be near-litter-permutations, and the designated supports to be singletons. -/
 instance bot.core_tangle_data : core_tangle_data ⊥ :=
 { tangle := atom,
   allowable := near_litter_perm,
   allowable_to_struct_perm := struct_perm.to_bot_iso.to_monoid_hom,
-  allowable_action := infer_instance }
+  allowable_action := infer_instance,
+  designated_support := sorry }
 
 def bot.positioned_tangle_data : positioned_tangle_data ⊥ := ⟨nonempty.some mk_atom.le⟩
 

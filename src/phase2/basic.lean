@@ -134,6 +134,10 @@ structure lt_index (α : Λ) :=
 (index_lt : index < higher)
 (path' : path (α : type_index) higher)
 
+def lt_index.mk' {α : Λ} {index higher : type_index}
+  (index_lt : index < higher) (path' : path (α : type_index) higher) : lt_index α :=
+⟨index, higher, index_lt, path'⟩
+
 /-- A path compatible with the one from `le_index`, formed by composing the inner `path'` field
 with the morphism `higher ⟶ index`. By construction, this path is always nontrivial. -/
 def lt_index.path {α : Λ} (A : lt_index α) : path (α : type_index) A.index :=
@@ -360,7 +364,7 @@ f_map B.index
 def typed_singleton_path (A : proper_lt_index α) : atom ↪ tangle_path (A : le_index α) :=
 typed_singleton
 
-def designated_support_path {A : proper_lt_index α} (t : tangle_path (A : le_index α)) :
-  support allowable_to_struct_perm t := designated_support t
+def designated_support_path {A : le_index α} (t : tangle_path A) :
+  small_support allowable_to_struct_perm t := designated_support t
 
 end con_nf
