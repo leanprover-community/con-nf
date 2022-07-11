@@ -72,10 +72,6 @@ to_coe.injective.eq_iff
 @[simp] lemma of_coe_inj {a b : struct_perm α} : of_coe a = of_coe b ↔ a = b :=
 of_coe.injective.eq_iff
 
-@[simp] lemma of_coe_of_coe (hγβ : γ < β) (hβα) (f : struct_perm α) :
-  of_coe (of_coe f _ $ hβα) _ hγβ = of_coe f _ (hγβ.trans hβα) :=
-sorry
-
 noncomputable! instance group : Π α, group (struct_perm α)
 | ⊥ := of_bot.group
 | (α : Λ) := @equiv.group _ _ of_coe $ @pi.group _ _ $ λ β,

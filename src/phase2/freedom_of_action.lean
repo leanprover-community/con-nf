@@ -104,7 +104,14 @@ def struct_perm.to_spec {α : Λ} (π : struct_perm α) : spec α :=
 set.range (λ (x : atom × extended_index α), ⟨sum.inl ⟨x.fst, derivative x.snd π • x.fst⟩, x.snd⟩)
 
 /-- Any structural permutation satisfies its own specification. -/
-lemma struct_perm.satisfies_to_spec {α : Λ} (π : struct_perm α) : π.satisfies π.to_spec := sorry
+lemma struct_perm.satisfies_to_spec {α : Λ} (π : struct_perm α) : π.satisfies π.to_spec :=
+begin
+  unfold struct_perm.satisfies struct_perm.to_spec struct_perm.satisfies_cond,
+  rintros ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ ⟨⟨a, b⟩, ha⟩; simp only [prod.mk.inj_iff] at ha,
+  { simp,
+    rw [← ha.2, ← ha.1.1], exact ha.1.2 },
+  cases ha.1
+end
 
 /-- The map from structural permutations to their specifications is injective. -/
 lemma struct_perm.to_spec_injective (α : Λ) : injective (@struct_perm.to_spec _ α) := sorry
@@ -126,12 +133,20 @@ def unary_spec.lower {α β : Λ} (σ : unary_spec α) (A : path (α : type_inde
 
 /-- Lowering along the empty path does nothing. -/
 lemma unary_spec.lower_nil {α β γ : Λ} (σ : unary_spec α) :
-  σ.lower path.nil = σ := sorry
+  σ.lower path.nil = σ :=
+begin
+  unfold unary_spec.lower support_condition.extend_path,
+  simp,
+end
 
 /-- The lowering map is functorial. -/
 lemma unary_spec.lower_lower {α β γ : Λ} (σ : unary_spec α)
   (A : path (α : type_index) β) (B : path (β : type_index) γ) :
-  (σ.lower A).lower B = σ.lower (path.comp A B) := sorry
+  (σ.lower A).lower B = σ.lower (path.comp A B) :=
+begin
+  unfold unary_spec.lower support_condition.extend_path,
+  simp,
+end
 
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
@@ -140,12 +155,20 @@ def spec.lower {α β : Λ} (σ : spec α) (A : path (α : type_index) β) : spe
 
 /-- Lowering along the empty path does nothing. -/
 lemma spec.lower_nil {α β γ : Λ} (σ : spec α) :
-  σ.lower path.nil = σ := sorry
+  σ.lower path.nil = σ :=
+begin
+  unfold spec.lower binary_condition.extend_path,
+  simp,
+end
 
 /-- The lowering map is functorial. -/
 lemma spec.lower_lower {α β γ : Λ} (σ : spec α)
   (A : path (α : type_index) β) (B : path (β : type_index) γ) :
-  (σ.lower A).lower B = σ.lower (path.comp A B) := sorry
+  (σ.lower A).lower B = σ.lower (path.comp A B) :=
+begin
+  unfold spec.lower binary_condition.extend_path,
+  simp,
+end
 
 variables (α : Λ) [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
   [phase_2_assumptions α]
