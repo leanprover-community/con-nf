@@ -219,21 +219,21 @@ in the "freedom of action discussion".
         .to_near_litter, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩
 
 /-! We declare new notation for the "constrains" relation on support conditions. -/
-local infix ` ≺ `:50 := constrains _
+local infix ` ≺ `:50 := constrains _ _
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,
 then `x < y` in `µ`, under the `to_tangle_path` or `typed_singleton_path` maps. -/
 lemma constrains_wf : well_founded (constrains α B) := sorry
 
-variable {α}
+variables {α} {B}
 
 /-- A litter and extended index is *flexible* if the associated support condition is a minimal
 element with respect to the relation `≺`. In other words, it is not constrained by anything. -/
-def flexible (L : litter) (A : extended_index α) : Prop := ∀ c, ¬ c ≺ ⟨sum.inr L.to_near_litter, A⟩
+def flexible (L : litter) (A : extended_index B) : Prop := ∀ c, ¬ c ≺ ⟨sum.inr L.to_near_litter, A⟩
 
 /-- A litter and extended index is flexible iff it is not of the form `f_{γ,δ}^A(x)` for some
 `x ∈ τ_{γ:A}` with conditions defined as above. -/
-lemma flexible_iff (L : litter) (A : extended_index α) :
+lemma flexible_iff (L : litter) (A : extended_index B) :
 flexible L A ↔ ∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
     (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α)),
 L ≠ (f_map_path (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t) :=
@@ -243,14 +243,15 @@ namespace unary_spec
 
 /-- A unary specification is *support-closed* if whenever `⟨f_{γ,δ}^A(x), A⟩ ∈ σ`, `S_{γ:A}`
 supports `x`. -/
-def support_closed (σ : unary_spec α) : Prop :=
+def support_closed (σ : unary_spec B) : Prop :=
 ∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
-  (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α)),
-  (⟨sum.inr (f_map_path
-    (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t)
-    .to_near_litter, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩ :
-      support_condition α) ∈ σ →
-      supports (allowable_path_to_struct_perm (lt_index.mk' hγ A : le_index α))
+  (A : path (B : type_index) β)
+  (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α)),
+  (⟨sum.inr (f_map_path (proper_lt_index.mk'
+      (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil) t)
+    .to_near_litter, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩
+      : support_condition B) ∈ σ →
+      supports (allowable_path_to_struct_perm (lt_index.mk' hγ (path.comp B.path A) : le_index α))
         (σ.lower (path.cons A hγ)) t
 
 -- TODO: In the following definitions, is `A` supposed to be an external parameter or included
@@ -262,20 +263,20 @@ def support_closed (σ : unary_spec α) : Prop :=
 * for all litters `L` such that `⟨L, A⟩ ∉ σ`, we have `∥{a ∈ L | ⟨a, A⟩ ∈ σ}∥ < κ`.
 TODO: The name "local" is reserved but I don't particularly like `litter_local` either.
 -/
-def litter_local (σ : unary_spec α) : Prop :=
-∀ (L : litter) (A : extended_index α),
-@ite _ ((⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ) (classical.dec _)
-  (∀ a ∈ litter_set L, (⟨sum.inl a, A⟩ : support_condition α) ∈ σ)
-  (small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition α) ∈ σ})
+def litter_local (σ : unary_spec B) : Prop :=
+∀ (L : litter) (A : extended_index B),
+@ite _ ((⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ) (classical.dec _)
+  (∀ a ∈ litter_set L, (⟨sum.inl a, A⟩ : support_condition B) ∈ σ)
+  (small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ})
 
-def non_flex_small (σ : unary_spec α) : Prop :=
-small {L : litter | ∀ (A : extended_index α), ¬flexible L A}
+def non_flex_small (σ : unary_spec B) : Prop :=
+small {L : litter | ∀ (A : extended_index B), ¬flexible L A}
 
 /-- A unary specification is *flex-small* if it contains either a small amount of flexible litters,
 or all of the flexible litters. -/
-@[mk_iff] inductive flex_small (σ : unary_spec α) : Prop
-| small : small {L : litter | ∃ (A : extended_index α), flexible L A} → flex_small
-| all : (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ) →
+@[mk_iff] inductive flex_small (σ : unary_spec B) : Prop
+| small : small {L : litter | ∃ (A : extended_index B), flexible L A} → flex_small
+| all : (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ) →
     flex_small
 
 end unary_spec
@@ -294,70 +295,74 @@ A specification is *one-to-one* on a particular path `A` if
 * `⟨a₁, b⟩, ⟨a₂, b⟩ ∈ σ` implies `a₁ = a₂`,
 where `a, b` may be either atoms or near-litters.
 -/
-@[mk_iff] structure one_to_one_path (σ : spec α) (A : extended_index α) : Prop :=
-(left_atom         : ∀ b, {a | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
-(right_atom        : ∀ a, {b | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
-(left_near_litter  : ∀ N, {M | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
-(right_near_litter : ∀ M, {N | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition α) ∈ σ}.subsingleton)
+@[mk_iff] structure one_to_one_path (σ : spec B) (A : extended_index B) : Prop :=
+(left_atom         : ∀ b, {a | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
+(right_atom        : ∀ a, {b | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
+(left_near_litter  : ∀ N, {M | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
+(right_near_litter : ∀ M, {N | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
 
 /-- A specification is one-to-one if it is one-to-one on all paths. -/
-def one_to_one (σ : spec α) : Prop := ∀ A, σ.one_to_one_path A
+def one_to_one (σ : spec B) : Prop := ∀ A, σ.one_to_one_path A
 
 /-- The allowability condition on atoms.
 In an absent litter, we must specify only `< κ`-many atoms.
 In a present litter, we can specify either `< κ`-many atoms, or all of the atoms in the litter, and
 in this case, almost all of them must be mapped to the right place.
 Note that the `small` constructor does not depend on whether the litter is present or absent. -/
-@[mk_iff] inductive atom_cond (σ : spec α) (L : litter) (A : extended_index α) : Prop
-| small : small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition α) ∈ σ.domain} → atom_cond
+@[mk_iff] inductive atom_cond (σ : spec B) (L : litter) (A : extended_index B) : Prop
+| small : small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.domain} → atom_cond
 | all (N : near_litter) (atom_map : litter_set L → atom) :
-    (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition α) ∈ σ →
-    (∀ a ∈ litter_set L, (⟨sum.inl ⟨a, atom_map ⟨a, ‹_›⟩⟩, A⟩ : binary_condition α) ∈ σ) →
+    (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ σ →
+    (∀ a ∈ litter_set L, (⟨sum.inl ⟨a, atom_map ⟨a, ‹_›⟩⟩, A⟩ : binary_condition B) ∈ σ) →
     small {a : litter_set L | atom_map a ∈ N.snd.val} →
     atom_cond
 
 /-- The allowability condition on near-litters.
 If a near-litter is present, so are its litter and all atoms in the symmetric difference, and it is
 mapped to the right place. -/
-@[mk_iff] inductive near_litter_cond (σ : spec α) (N : near_litter) (A : extended_index α) : Prop
-| absent : (∀ M, (⟨sum.inr ⟨N, M⟩, A⟩ : binary_condition α) ∉ σ) → near_litter_cond
+@[mk_iff] inductive near_litter_cond (σ : spec B) (N : near_litter) (A : extended_index B) : Prop
+| absent : (∀ M, (⟨sum.inr ⟨N, M⟩, A⟩ : binary_condition B) ∉ σ) → near_litter_cond
 | present (M₁ M₂ : near_litter) (atom_map : litter_set N.fst ∆ N.snd → atom) :
-    (⟨sum.inr ⟨N, M₁⟩, A⟩ : binary_condition α) ∈ σ →
-    (⟨sum.inr ⟨N.fst.to_near_litter, M₂⟩, A⟩ : binary_condition α) ∈ σ →
-    (∀ a : litter_set N.fst ∆ N.snd, (⟨sum.inl ⟨a, atom_map a⟩, A⟩ : binary_condition α) ∈ σ) →
+    (⟨sum.inr ⟨N, M₁⟩, A⟩ : binary_condition B) ∈ σ →
+    (⟨sum.inr ⟨N.fst.to_near_litter, M₂⟩, A⟩ : binary_condition B) ∈ σ →
+    (∀ a : litter_set N.fst ∆ N.snd, (⟨sum.inl ⟨a, atom_map a⟩, A⟩ : binary_condition B) ∈ σ) →
     M₁.snd.val = M₂.snd.val ∆ set.range atom_map →
     near_litter_cond
 
 /-- This is the allowability condition for flexible litters.
 Either all flexible litters are in both the domain and range (`all`), or there are `μ`-many not in
 the domain and `μ`-many not in the range. -/
-@[mk_iff] inductive flexible_cond (σ : spec α) : Prop
+@[mk_iff] inductive flexible_cond (σ : spec B) : Prop
 | co_large :
-  #μ = #{L : litter | ∃ (A : extended_index α),
-    flexible L A ∧ (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∉ σ.domain} →
-  #μ = #{L : litter | ∃ (A : extended_index α),
-    flexible L A ∧ (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∉ σ.range} →
+  #μ = #{L : litter | ∃ (A : extended_index B),
+    flexible L A ∧ (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∉ σ.domain} →
+  #μ = #{L : litter | ∃ (A : extended_index B),
+    flexible L A ∧ (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∉ σ.range} →
   flexible_cond
 | all :
-  (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ.domain) →
-  (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition α) ∈ σ.range) →
+  (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ.domain) →
+  (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ.range) →
   flexible_cond
 
 /-- The allowability condition on non-flexible litters.
 Whenever `σ` contains some condition `⟨⟨f_{γ,δ}^A(g), N⟩, [-1,δ,A]⟩`, then every allowable
 permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`.
 Note: Definition is incomplete, this won't type check until allowable.lean is refactored. -/
-def non_flexible_cond (σ : spec α) : Prop :=
+def non_flexible_cond (σ : spec B) : Prop :=
 ∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (N : near_litter)
-  (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α)),
-  (⟨sum.inr ⟨(f_map_path
-    (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t).to_near_litter,
-    N⟩, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩ : binary_condition α) ∈ σ →
+  (A : path (B : type_index) β)
+  (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α)),
+  (⟨sum.inr ⟨(f_map_path (proper_lt_index.mk'
+      (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil) t).to_near_litter,
+    N⟩, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩ : binary_condition B) ∈ σ →
   ∀ (ρ : allowable_path ⟨α, path.nil⟩), true /- ρ.to_struct_perm.satisfies σ -/ →
-  N = (f_map_path (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil)
-    (allowable_derivative_nil_comp (path.cons A hγ) ρ • t)).to_near_litter
+  N = (f_map_path (proper_lt_index.mk'
+      (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil)
+      (allowable_derivative_nil_comp (path.cons (path.comp B.path A) hγ) ρ • t)).to_near_litter
 
-structure allowable_spec (σ : spec α) : Prop :=
+variable (B)
+
+structure allowable_spec (σ : spec B) : Prop :=
 (domain_closed : σ.domain.support_closed)
 (range_closed : σ.range.support_closed)
 (one_to_one : σ.one_to_one)
@@ -370,9 +375,9 @@ structure allowable_spec (σ : spec α) : Prop :=
 end spec
 
 /-- An *allowable partial permutation* is a specification satisfying the above properties. -/
-def allowable_partial_perm := {σ : spec α // σ.allowable_spec}
+def allowable_partial_perm := {σ : spec B // σ.allowable_spec B}
 
-lemma lower_allowable (σ : spec α) {β : Λ} (A : path (α : type_index) β)
-  (h : σ.allowable_spec) : (σ.lower A).allowable_spec := sorry
+lemma lower_allowable (σ : spec B) {β : Λ} (A : path (B : type_index) β) (hβ : β < B)
+  (h : σ.allowable_spec B) : (σ.lower A).allowable_spec (proper_lt_index.mk' hβ B.path) := sorry
 
 end con_nf
