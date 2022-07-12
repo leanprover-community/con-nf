@@ -184,7 +184,7 @@ begin
 end
 
 variables (α : Λ) [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] (B : proper_lt_index α)
+  [phase_2_assumptions α] (B : le_index α)
 
 /--
 Support conditions can be said to *constrain* each other in a number of ways. This is discussed
@@ -244,7 +244,7 @@ namespace unary_spec
 /-- A unary specification is *support-closed* if whenever `⟨f_{γ,δ}^A(x), A⟩ ∈ σ`, `S_{γ:A}`
 supports `x`. -/
 def support_closed (σ : unary_spec B) : Prop :=
-∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+∀ ⦃β δ : Λ⦄ ⦃γ : type_index⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
   (A : path (B : type_index) β)
   (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α)),
   (⟨sum.inr (f_map_path (proper_lt_index.mk'
@@ -349,7 +349,7 @@ Whenever `σ` contains some condition `⟨⟨f_{γ,δ}^A(g), N⟩, [-1,δ,A]⟩`
 permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`.
 Note: Definition is incomplete, this won't type check until allowable.lean is refactored. -/
 def non_flexible_cond (σ : spec B) : Prop :=
-∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (N : near_litter)
+∀ ⦃β δ : Λ⦄ ⦃γ : type_index⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (N : near_litter)
   (A : path (B : type_index) β)
   (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α)),
   (⟨sum.inr ⟨(f_map_path (proper_lt_index.mk'
@@ -366,7 +366,7 @@ structure allowable_spec (σ : spec B) : Prop :=
 (domain_closed : σ.domain.support_closed)
 (range_closed : σ.range.support_closed)
 (one_to_one : σ.one_to_one)
-(atom_cond : ∀ a A, σ.atom_cond a A)
+(atom_cond : ∀ L A, σ.atom_cond L A)
 (near_litter_cond : ∀ N A, σ.near_litter_cond N A)
 (flexible_cond : σ.flexible_cond)
 (non_flexible_cond : σ.non_flexible_cond)
@@ -374,10 +374,143 @@ structure allowable_spec (σ : spec B) : Prop :=
 
 end spec
 
-/-- An *allowable partial permutation* is a specification satisfying the above properties. -/
+variable (B)
+
+/-- An *allowable partial permutation* is a specification that is allowable as defined above. -/
 def allowable_partial_perm := {σ : spec B // σ.allowable_spec B}
 
-lemma lower_allowable (σ : spec B) {β : Λ} (A : path (B : type_index) β) (hβ : β < B)
-  (h : σ.allowable_spec B) : (σ.lower A).allowable_spec (proper_lt_index.mk' hβ B.path) := sorry
+/-- The restriction lemma. If `σ` is a partial allowable permutation, then so is `σ` restricted to
+a lower path `A`. The proof should be mostly straightforward. The non-trivial bit is the "co-large
+or all" on flexible litters: in a proper restriction, `μ`-many non-flexible litters get freed up
+and become flexible, so if it was “all”, it becomes "co-large". -/
+lemma lower_allowable (σ : spec B) {β : Λ} (A : path (B : type_index) β) (hβ : (β : type_index) < B)
+  (hσ : σ.allowable_spec B) : (σ.lower A).allowable_spec (le_index.mk β (path.cons B.path hβ)) :=
+sorry
+
+/-- We say that *freedom of action* holds along a path `B` if any partial allowable permutation `σ`
+admits an allowable permutation `π` extending it. -/
+def freedom_of_action : Prop := ∀ σ : allowable_partial_perm B,
+∃ (π : allowable_path B), (allowable_path_to_struct_perm B π).satisfies σ.val
+
+/-- The action lemma. If freedom of action holds, and `σ` is any allowable partial permutation
+that supports some `α`-tangle `t`, then there exists a unique `α`-tangle `σ(t)` such that every
+allowable permutation `π` extending `σ` maps `t` to `σ(t)`.
+
+Proof: Freedom of action gives some extension `π`, and hence some candidate value; the support
+condition implies that any two extensions agree. -/
+lemma exists_tangle_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
+  (ht : supports (allowable_path_to_struct_perm B) σ.val t) :
+  ∃ s, ∀ π, (allowable_path_to_struct_perm B π).satisfies σ.val → π • t = s := sorry
+
+namespace allowable_partial_perm
+
+/--
+We now define a preorder on partial allowable permutations.
+`σ ≤ ρ` means:
+
+* `σ` is a subset of `ρ`;
+* if `ρ` has any new flexible litter, then it has all (in both domain and range);
+* within each litter, if `ρ.domain` has any new atom, then it must have all
+    atoms in that litter (and hence must also have the litter).
+
+Note that the second condition is exactly the condition in `spec.flexible_cond.all`.
+-/
+structure perm_le (σ ρ : allowable_partial_perm B) : Prop :=
+(subset : σ.val ⊆ ρ.val)
+(all_flex (L : litter) (N : near_litter) (A : extended_index B) (hL : flexible L A)
+  (hσ : (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∉ σ.val)
+  (hρ : (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ ρ.val) :
+  (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain) ∧
+  (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.range))
+(all_atoms (a b : atom) (L : litter) (ha : a ∈ litter_set L) (A : extended_index B)
+  (hσ : (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∉ σ.val)
+  (hρ : (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ ρ.val) :
+  ∀ c ∈ litter_set L, ∃ d, (⟨sum.inl ⟨c, d⟩, A⟩ : binary_condition B) ∈ ρ.val)
+
+instance has_le : has_le (allowable_partial_perm B) := ⟨perm_le B⟩
+
+/-! We now prove that the claimed preorder really is a preorder. -/
+
+lemma extends_refl (σ : allowable_partial_perm B) : σ ≤ σ := sorry
+
+lemma extends_trans (ρ σ τ : allowable_partial_perm B)
+  (h₁ : ρ ≤ σ) (h₂ : σ ≤ τ) : ρ ≤ τ := sorry
+
+instance preorder : preorder (allowable_partial_perm B) := {
+  le := perm_le B,
+  le_refl := extends_refl B,
+  le_trans := extends_trans B,
+}
+
+section zorn_setup
+
+/-! To set up for Zorn's lemma, we need to show that the union of all allowable partial permutations
+in a chain is an upper bound for the chain. In particular, we first show that it is allowable, and
+then we show it extends all elements in the chain.
+
+Non-trivial bit: the "small or all" conditions — these are enforced by the "if adding any, add all"
+parts of the definition of ≤. -/
+
+variables (c : set (allowable_partial_perm B))
+
+lemma domain_closed_Union (hc : is_chain (≤) c) :
+  unary_spec.support_closed (spec.domain ⋃₀ (subtype.val '' c)) := sorry
+
+lemma range_closed_Union (hc : is_chain (≤) c) :
+  unary_spec.support_closed (spec.range ⋃₀ (subtype.val '' c)) := sorry
+
+lemma one_to_one_Union (hc : is_chain (≤) c) :
+  spec.one_to_one ⋃₀ (subtype.val '' c) := sorry
+
+lemma atom_cond_Union (hc : is_chain (≤) c) :
+  ∀ L A, spec.atom_cond (⋃₀ (subtype.val '' c)) L A := sorry
+
+lemma near_litter_cond_Union (hc : is_chain (≤) c) :
+  ∀ N A, spec.near_litter_cond (⋃₀ (subtype.val '' c)) N A := sorry
+
+lemma flexible_cond_Union (hc : is_chain (≤) c) :
+  spec.flexible_cond ⋃₀ (subtype.val '' c) := sorry
+
+-- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
+
+lemma non_flexible_cond_Union (hc : is_chain (≤) c) :
+  spec.non_flexible_cond ⋃₀ (subtype.val '' c) := sorry
+
+lemma inv_non_flexible_cond_Union (hc : is_chain (≤) c) :
+  spec.non_flexible_cond (⋃₀ (subtype.val '' c))⁻¹ := sorry
+
+variables (hc : is_chain (≤) c)
+
+/-- The union of a chain of allowable partial permutations is allowable. -/
+lemma allowable_Union :
+  spec.allowable_spec B ⋃₀ (subtype.val '' c) := {
+  domain_closed := domain_closed_Union B c hc,
+  range_closed := range_closed_Union B c hc,
+  one_to_one := one_to_one_Union B c hc,
+  atom_cond := atom_cond_Union B c hc,
+  near_litter_cond := near_litter_cond_Union B c hc,
+  flexible_cond := flexible_cond_Union B c hc,
+  non_flexible_cond := non_flexible_cond_Union B c hc,
+  inv_non_flexible_cond := inv_non_flexible_cond_Union B c hc,
+}
+
+lemma mem_perm_le (σ : allowable_partial_perm B) (hσ : c ⊆ {ρ | σ ≤ ρ}) :
+  σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
+
+lemma maximal_Union (σ : allowable_partial_perm B) (hσ : c ⊆ {ρ | σ ≤ ρ}) :
+  ∀ z ∈ c, z ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
+
+end zorn_setup
+
+/-- There is a maximal allowable partial permutation extending any given allowable partial
+permutation. This result is due to Zorn's lemma. -/
+lemma maximal_perm (σ : allowable_partial_perm B) :
+  ∃ (ρ : allowable_partial_perm B) (h : σ ≤ ρ), ∀ τ (hτ₁ : σ ≤ τ) (hτ₂ : ρ ≤ τ), τ ≤ ρ :=
+zorn_preorder₀ _ (λ c hc₁ hc₂,
+  ⟨⟨⋃₀ (subtype.val '' c), allowable_Union B c hc₂⟩,
+    mem_perm_le _ _ _ _ hc₁,
+    maximal_Union _ _ _ σ hc₁⟩)
+
+end allowable_partial_perm
 
 end con_nf
