@@ -829,7 +829,7 @@ In order to state the theorem precisely, we must first set up a framework for di
 
 \begin{definition}
   \label{def:allowable-partial-perm}
-  \uses{def:condition-total-1-1,def:condition-dom-rge}
+  \uses{def:condition-total-1-1,def:condition-functoriality,def:flexible-condition}
   Assume a freedom of action context at a proper type index $\alpha$.
 
   An \emph{allowable partial permutation} is a set $\sigma$ of binary $\alpha$-conditions satisfying the following properties:
@@ -843,6 +843,34 @@ In order to state the theorem precisely, we must first set up a framework for di
 
   We will often refer to these conditions individually, as “the allowability condition for atoms”, etc.
 \end{definition}
+
+The motivation for allowable permutations is precisely to state the freedom of action property:
+
+\begin{definition}
+  \label{def:foa-property}
+  \uses{def:allowable-partial-perm,def:conditions-from-perm}
+  Given a freedom of action context at a proper type index $\alpha$, say that \emph{freedom of action holds} if for every allowable permutation $\sigma$, there is some allowable permutation $\pi \in \All_\alpha$ extending $\sigma$.
+\end{definition}
+
+\begin{proposition}
+  \label{def:allowability-restriction}
+  \uses{def:allowable-partial-perm,def:restrict-foa-context}
+  If $\sigma$ is an allowable permutation in a freedom of action context at $\alpha$, then for any $A : \beta \to \alpha$, the restriction $\sigma_A$ is again allowable in the context restricted along $A$.
+\end{proposition}
+
+\begin{proposition}
+  \label{prop:allowable-partial-perm-action}
+  \uses{def:foa-property}
+  Given a freedom of action context at a proper type index $\alpha$, an allowable permuation $\sigma$, and an $\alpha$-tangle $x$ such that $\dom \sigma$ supports $x$:
+  \begin{enumerate}
+    \item if $\pi, \pi' \in \All_\alpha$ are allowable permutations extending $\sigma$, then $\pi x = \pi' x$;
+    \item if freedom of action holds, there is a unique $y \ in \tau_\alpha$ such that every allowable permutation $\pi$ extending $\sigma$ has $\pi x = y$; we denote this unique value by $\sigma x$.
+  \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+  For the first part: given such $\pi, \pi'$, $(\pi^-1)\pi$ acts trivally on $\dom \sigma$, and hence fixes $x$.  The second part follows from the first together with the freedom of action property.
+\end{proof}
 
 \section{Coherent tangle data}
 
@@ -988,7 +1016,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 \end{description}
 
 \begin{definition}
-  \label{def:flexible}
+  \label{def:flexible-old}
   \uses{def:coherent-tangle-data}
   Given coherent part 1 data below $\alpha$, a path $A : \beta \to \alpha$, and a litter $L$, say $L$ is \emph{$A$-flexible} (or that the pair $(L,A)$ is \emph{flexible}) if $L$ is not in the range of $f_{\beta,\gamma}$, for any $\gamma < \alpha$.
 
@@ -996,8 +1024,8 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 \end{definition}
 
 \begin{definition}
-  \label{def:freedom-of-action-statement}
-  \uses{def:perm-exception,def:local-bijection,def:flexible,def:allowable-perm-atoms}
+  \label{def:freedom-of-action-statement-old}
+  \uses{def:perm-exception,def:local-bijection,def:flexible-old,def:allowable-perm-atoms}
   Given coherent part 1 data below $\alpha$, say that \emph{freedom of action holds (at $\alpha$)} if: Given an $\alpha$-local bijection $\pi^0$ and a specification for each path $A : \beta \to \alpha$ a bijection of the $\beta$-flexible litters, there is a unique allowable permutation $\pi \in \All_\alpha$ such that:
   \begin{enumerate}
    \item $\pi{A}$ extends $\pi^0_{A}$ for each $A$;
@@ -1009,8 +1037,8 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 \end{definition}
 
 \begin{lemma}
-\label{lem:freedom-of-action-propagates}
-\uses{def:freedom-of-action-statement}
+\label{lem:freedom-of-action-propagates-old}
+\uses{def:freedom-of-action-statement-old}
 Given coherent part 1 data below $\alpha$, if freedom of action holds at each level $\beta < \alpha$, then it holds at level $\alpha$.
 
 Note: I (Peter) have an alternative approach to freedom of action (slightly different in both statement and proof) which might possibly be easier to formalise, avoiding the dependence on strong supports in the proof.  Iff Randall approves it then I will add it in the blueprint as an alternative.  But it doesn’t change the overall structure of the main argument/recursion, so this doesn’t need to be worried about until the point of formalising the FoA theorem itself.
@@ -1052,14 +1080,14 @@ Once we know how to carry out this calculation along any $\alpha$-strong support
 % \end{comment}
 
 \begin{theorem}
-  \label{thm:freedom-of-action}
-  \uses{def:freedom-of-action-statement}
+  \label{thm:freedom-of-action-old}
+  \uses{def:freedom-of-action-statement-old}
   Given coherent tangle data below $\alpha$, it satisfies freedom of action at every level.
 \end{theorem}
 
 \begin{proof}
-  \uses{lem:freedom-of-action-propagates}
-  By induction over $\beta < \alpha$, using \cref{lem:freedom-of-action-propagates}.
+  \uses{lem:freedom-of-action-propagates-old}
+  By induction over $\beta < \alpha$, using \cref{lem:freedom-of-action-propagates-old}.
 \end{proof}
 
 
@@ -1153,10 +1181,10 @@ Pulling out the main items from the discussion above, for formalisation targets:
 
 \begin{lemma}
   \label{lem:support-spec-realisation-unique}
-  \uses{def:support-spec-realisation,def:freedom-of-action-statement}
+  \uses{def:support-spec-realisation,def:freedom-of-action-statement-old}
   If freedom of action holds at $\alpha$, then realisations of a support specification are unique modulo the group action.  That is, for any two realisations $S, S'$ of a support specification $S$, there is some allowable permutation $\pi$ such that $\pi S = S'$.
 
-  [Note: we don’t need to explicitly assume freedom of action here: we could appeal to the \cref{thm:freedom-of-action} to know that it holds.  But the explicit assumption keeps things more modular, and avoids unnecessary dependency, which will be helpful in case it turns out the argument needs restructuring at any point.]
+  [Note: we don’t need to explicitly assume freedom of action here: we could appeal to the \cref{thm:freedom-of-action-old} to know that it holds.  But the explicit assumption keeps things more modular, and avoids unnecessary dependency, which will be helpful in case it turns out the argument needs restructuring at any point.]
 \end{lemma}
 
 \begin{proof}
@@ -1226,7 +1254,7 @@ Now, everything that we did with supports, we repeat with coding functions.
 
 \begin{corollary}
   \label{cor:count-tangles}
-  \uses{def:freedom-of-action-statement}
+  \uses{def:freedom-of-action-statement-old}
   There are $\mu$-many $\alpha$-tangles.
 \end{corollary}
 
@@ -1239,7 +1267,7 @@ This completes the proof that each type is of size $\mu$, which finally closes t
 
 \begin{lemma}
   \label{lem:position-functions-propagate}
-  \uses{def:freedom-of-action-statement}
+  \uses{def:freedom-of-action-statement-old}
   Given coherent tangle data below $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:tangle-data}:
   \begin{enumerate}
     \item for each litter $L$, the typed litter of $L$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
@@ -1272,8 +1300,8 @@ We can now wrap up the recursion.  It is a little subtle: to know that the recur
 
 \begin{definition}
   \label{def:very-coherent-data}
-  \uses{lem:position-functions-propagate,thm:freedom-of-action}
-  For $\alpha \in \lambda + 1$, a choice of coherent tangle data below $\alpha$ is \emph{very coherent} if its ordering functions and designated supports at each level are the ones provided by \cref{lem:position-functions-propagate} applied to the earlier levels, using \cref{thm:freedom-of-action} to supply the assumption of freedom of action.
+  \uses{lem:position-functions-propagate,thm:freedom-of-action-old}
+  For $\alpha \in \lambda + 1$, a choice of coherent tangle data below $\alpha$ is \emph{very coherent} if its ordering functions and designated supports at each level are the ones provided by \cref{lem:position-functions-propagate} applied to the earlier levels, using \cref{thm:freedom-of-action-old} to supply the assumption of freedom of action.
 
   [This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice.  See also discusson above replacing this with an explicit principle of “dependent choice”.]
 \end{definition}
