@@ -863,7 +863,7 @@ The motivation for allowable permutations is precisely to state the freedom of a
 \end{theorem}
 
 \begin{proof}
-  \uses{prop:allowable-partial-perm-chain-union,def:constrains-well-founded,lem:maximal-allowable-partial-perm-total,prop:total-allowable-partial-perm-actual}
+  \uses{prop:allowable-partial-perm-chain-union,lem:maximal-allowable-partial-perm-total,prop:total-allowable-partial-perm-actual}
   The proof is quite lengthy, so we break it down into various lemmas.
 
   In outline: We first define an ordering on allowable partial permutations (\cref{def:allowable-partial-perm-order}), show that it has unions of chains (\cref{prop:allowable-partial-perm-chain-union}), and so apply Zorn’s lemma to conclude that it has a maximal element above any element.  This is the easy part.  The main work then consists of showing that any maximal partial permutation is total and co-total (\cref{lem:maximal-allowable-partial-perm-total}), and hence is an allowable permutation (\cref{prop:total-allowable-partial-perm-actual}).
@@ -947,10 +947,23 @@ In order to make use of the inductive assumption that freedom of action holds at
 \end{lemma}
 
 \begin{proof}
-  \uses{prop:allowable-partial-perm-action,prop:constrains-well-founded}
+  \uses{prop:allowable-partial-perm-action,prop:constrains-well-founded,prop:restrict-allowable-partial-perm}
   This is the main hard work of the proof of \cref{thm:foa-propagates}, and should probably be broken down into separate lemmas.
 
-  TODO: incorporate the sketch of this proof.
+  It suffices to show the claim: For any allowable partial $\sigma$, and any $x$, if everything that constrains $x$ is in $\dom \sigma$, then there is some $\sigma' \sqsupseteq \sigma$ with $x \in \dom \sigma$.  (Given this claim and a maximal element $\sigma$, it follows by induction over “constrains” that $\dom \sigma$ is all of $\Cond_\alpha$. Co-totality follows dually.)
+
+  Proof of claim: Treat the 4 cases for $x$ separately.
+
+  \begin{enumerate}
+  \item A flexible litter $(L,A)$.  TO GIVE.
+  \item An atom $(x,A)$.  TO GIVE.
+  \item A non-litter near-litter $(N,A)$.  TO GIVE.
+  \item A non-flexible litter $(f^A_{\gamma,\delta}(x),-1;\delta;A)$.  TO GIVE.
+  \end{enumerate}
+
+  Note: The “straightforward” parts of checking allowability are fairly repetitive between the different cases here.  This is the sort of thing that — if just tackled greedily — could take a lot of time and create a lot of code duplication.  Probably good to write a few of these cases directly, but then see if they can be abstracted out as lemmas that can be re-used across cases.  For the near-litter and non-flexible litter conditions, the point is that these are of the form “if [thing $x$] is present, then [condition $P$ holds]”, where condition $P$ is something which is clearly preserved by subset-expansion (i.e. if $\sigma \subseteq \rho$ and $P$ holds for $\sigma$, then it holds for $\rho$). So when we expand $\sigma$ to $\rho$, these allowability conditions will still hold for all things that were already in $\sigma$ — we only need to check for any new things that were added in $\rho$.
+
+  We should also avoid code-duplication of checking dual conditions separately, probably by lemmas explicitly connecting each condition to its dual, or by explicitly making use of duals in the definition of the allowability conditions.
 \end{proof}
 
 \begin{proposition}
