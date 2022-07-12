@@ -235,7 +235,8 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
   \leanok
   Let $\alpha$ be a proper type index. An \emph{$\alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
 
-  Type-theoretically, $\Cond := (\tau_{-1} + \NearLitter) \times \mathrm{Path}(-1,\alpha)$.
+  Type-theoretically, $\Cond_\alpha := (\tau_{-1} + \NearLitter) \times \mathrm{Path}(-1,\alpha)$.
+
   [It would suffice to use just litters here instead of near-litters; they give an equivalent notion of support, as shown later (“replacing near-litters with litters”).  That makes a few things simpler; but using near-litters lets us talk about the action, Def.~\ref{def:support-condition-action}, which seems algebraically cleaner.]
 \end{definition}
 
@@ -749,6 +750,73 @@ The bluntest approach, which should certainly suffice for everything, is to assu
   Given $\alpha \in \lambda$, and a freedom of action context at each $\beta < \alpha$, together with extensions of their top-level core tangle data to full tangle data at each $\beta < \alpha$, there is a \emph{synthesised} freedom of action context at $\alpha$, with its top-level core tangle data given by the constructions of phase 1.
 \end{definition}
 
+\section{Freedom of action [new version]}
+
+A key technical lemma, used both for counting tangles and for proving that they satisfy comprehension, is the proof that allowable permutations act freely, in a suitable sense.
+
+Roughly, any consistent and locally small specification of values of derivatives of an allowable permutation at elements of type $-1$ can be realized.
+
+In order to state the theorem precisely, we must first set up a framework for discussing partial specifications of structural/allowable permutations.
+
+\begin{definition}
+  \label{def:binary-condition}
+  \uses{def:support-condition}
+  Let $\alpha$ be a proper type index. Recall that an \emph{$\alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter; the set of these was denoted $\Cond_\alpha := (\tau_{-1} + \NearLitter) \times \mathrm{Path}(-1,\alpha)$.
+
+  A \emph{binary condition} similarly consists of a pair of atoms or of near-litters, together with a path from $-1$ to $\alpha$:
+  \[ \BiCond_\alpha := (\tau_{-1}^2 + \NearLitter^2) \times \mathrm{Path}(-1,\alpha).\]
+\end{definition}
+
+\begin{definition}
+  \label{def:condition-functoriality}
+  \uses{def:binary-condition}
+  Paths act covariantly on binary conditions.  Explicitly, a path $A : \beta \to \alpha$ induces a map $(-)A \BiCond_\beta \to \BiCond_\alpha$, defined by $(x,B)A := (x,BA)$; and this preserves identities and composition.
+
+  Taking inverse images under these maps, paths act contravariantly on sets of binary conditions: a path $A : \beta \to \alpha$ induces $(-)_A : \pow(\BiCond_\alpha) \to \po(\BiCond(\beta))$, given by $\sigma_A := \{ (x,y,B) \mid (x,y,BA) \in \sigma \}$.
+\end{definition}
+
+\begin{definition}
+  \label{def:conditions-from-perm}
+  \uses{def:binary-condition}
+  A binary condition $(x,y,A)$ is viewed as representing the condition “$\pi_A(x) = y$”.  Any $\alpha$-structural permutation $\pi$ thus induces a set of binary conditions, its \emph{graph}, $\{ (x,y,A) \in \BiCond_\alpha \mid \pi_A(x) = y \}$.  This gives an evident embedding $\Str_\alpha \to \pow(\BiCond_\alpha)$; we will notationally identify structural permutations with their graphs.
+
+  We say that a structural permutation $\pi$ \emph{extends} a set of binary conditions $\sigma$ if $\sigma \subseteq \pi$, viewing $\pi$ as its graph.  More generally, given any group with a map $\varphi : G \to \Str$ (e.g.\ the allowable permutations of some tangle data), we say $\pi \in G$ extends a set of binary conditions $\sigma$ if $\sigma \subseteq \varphi(\pi)$.
+\end{definition}
+
+\begin{proposition}
+  \label{prop:conditions-from-perm-restriction}
+  \uses{def:conditions-from-perm,def:condition-functoriality}
+  This identification of permutations respects the actions of paths.  That is, given a structural permutation $\pi$, the graph of the derivative $\pi_A$ is precisely the restriction along $A$ of the graph of $\pi$ (as our notational identification suggests).
+\end{proposition}
+
+\begin{definition}
+  \label{def:condition-dom-rge}
+  \uses{def:binary-condition}
+  Previously, we viewed $\alpha$-conditions $(x,A) \in \Cond_\alpha$ as representing the conditions $\pi_A(x) = x$, as used in supports (and under this view we could identify them with the binary conditions $(x,y,A)$).  In this section, we will more often view them as elements of the domain or range of a set of binary conditions.  Precisely, for a set $\sigma$ of binary conditions, we take $\dom \sigma := \{ (x,A) \mid (x,y,A) \in \sigma \}$, and similarly $\rge \sigma := \{ (y,A) \mid (x,y,a) \in \sigma \}$.
+\end{definition}
+
+\begin{definition}
+  \label{def:condition-total-1-1}
+  \uses{def:condition-dom-rge}
+  We extend standard properties of binary relations to sets of binary conditions:
+
+  Say a set of binary conditions $\sigma \subseteq \BiCond_\alpha$ is \emph{total} if its domain is $\Cond_\alpha$; co-total if its range is; and 1-1 if whenever $(x,y,A)$ and $(x',y',A')$ are in $\sigma$, $x = x'$ if and only if $y = y'$.
+\end{definition}
+
+\begin{proposition}
+  \label{prop:total-1-1-gives-perm}
+  \uses{def:condition-total-1-1,def:conditions-from-perm}
+  A set of binary conditions is the graph of a structural permutation precisely if it is 1-1 and total.
+
+  (NOTE: this may not be explicitly needed, but it is helpful to know, and should be a good warmup and definition-test ahead of the main freedom of action theorem.)
+\end{proposition}
+
+\begin{proposition}
+  \label{prop:total-1-1-restriction}
+  \uses{def:condition-total-1-1,def:condition-functoriality}
+  If a set of $\alpha$-conditions $\sigma$ is total (resp.\ co-total, 1-1) then so is its restriction $\sigma_A$ for any path $A : \beta \to \alpha$.
+\end{proposition}
+
 \section{Coherent tangle data}
 
 \begin{definition}
@@ -864,8 +932,7 @@ The third components in the elements of support domains seem actually to be nece
 {\bf Note for the formal verification project:}  This should be ready to go.
 % \end{comment}
 
-\newpage
-\section{Freedom of action of allowable permutations}
+\section{Freedom of action of allowable permutations [older version]}
 
 The practical application of strong supports is to the proof that allowable permutations act freely in a suitable sense, and in guiding applications of this theorem.
 
