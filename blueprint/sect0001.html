@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Phase 2: Constraining the number of tangles</title>
+<link rel="next" href="sect0002.html" title="Tangles model tangled type theory" />
+<link rel="prev" href="ch-model-construction.html" title="Phase 1: The model construction" />
+<link rel="up" href="index.html" title="Con(NF)" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Con(NF)</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="ch-preliminaries.html"><span class="toc_ref">1</span> <span class="toc_entry">Phase 0: Preliminaries</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="ch-preliminaries.html#a0000000004"><span class="toc_ref">1.1</span> <span class="toc_entry">Cardinal parameters</span></a>
+ </li>
+<li class="">
+  <a href="ch-preliminaries.html#a0000000005"><span class="toc_ref">1.2</span> <span class="toc_entry">Type \(-1\): atoms, litters, and local cardinals</span></a>
+ </li>
+<li class="">
+  <a href="ch-preliminaries.html#a0000000010"><span class="toc_ref">1.3</span> <span class="toc_entry">Preliminaries: pretangles, structural permutations</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html"><span class="toc_ref">2</span> <span class="toc_entry">Phase 1: The model construction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="ch-model-construction.html#a0000000012"><span class="toc_ref">2.1</span> <span class="toc_entry">Inductive assumptions</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000013"><span class="toc_ref">2.2</span> <span class="toc_entry">Phase 1a: Set codes and alternative extensions</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000014"><span class="toc_ref">2.3</span> <span class="toc_entry">Phase 1b: Actual tangles: the model definition</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000015"><span class="toc_ref">2.4</span> <span class="toc_entry">Phase 1c: the embedding into pretangles</span></a>
+ </li>
+<li class="">
+  <a href="ch-model-construction.html#a0000000016"><span class="toc_ref">2.5</span> <span class="toc_entry">Review</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class=" active current">
+  <a href="sect0001.html"><span class="toc_ref">3</span> <span class="toc_entry">Phase 2: Constraining the number of tangles</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="sect0001.html#a0000000017"><span class="toc_ref">3.1</span> <span class="toc_entry">Freedom of action context</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000018"><span class="toc_ref">3.2</span> <span class="toc_entry">Freedom of action [new version]</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000019"><span class="toc_ref">3.3</span> <span class="toc_entry">Coherent tangle data</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000020"><span class="toc_ref">3.4</span> <span class="toc_entry">Strong supports defined</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000021"><span class="toc_ref">3.5</span> <span class="toc_entry">Freedom of action of allowable permutations [older version]</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000022"><span class="toc_ref">3.6</span> <span class="toc_entry">Types are of size \(\mu \) (so the construction actually succeeds)</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#a0000000023"><span class="toc_ref">3.7</span> <span class="toc_entry">Completing the recursion</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">4</span> <span class="toc_entry">Tangles model tangled type theory</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0002.html#a0000000024"><span class="toc_ref">4.1</span> <span class="toc_entry">The structure is a model of predicative TTT</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html#a0000000025"><span class="toc_ref">4.2</span> <span class="toc_entry">Impredicativity: verifying the axiom of union</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000002">3 Phase 2: Constraining the number of tangles</h1>
+<p>In this phase, we give the three hard theorems about the constructions of phase 1: strengthening supports, freedom of action, and constraining the number of tangles. </p>
+<p>These meet the major technical difficulty of the recursion: For each topic in phase 2, we need to assume something along the lines of tangle data at all earlier levels, and suitable connections between them”. The tricky bit is structing the “…suitable connections…” cleanly. </p>
+<p>The bluntest approach, which should certainly suffice for everything, is to assume some form of “at every level, the tangle data is equal to what is constructed from the data at earlier levels, but the constructions of phase 1”. This is made precise in “coherent tangle data” <a href="sect0001.html#def:coherent-tangle-data">definition 3.26</a>. However, this is somewhat awkward to work with in formalisation. A more cleanly-structured version is given by “freedom of action contexts”, <a href="sect0001.html#def:foa-context">definition 3.1</a>, which suffices at least for strong supports and freedom of action. Hopefully it may also be possible to recast counting tangles in terms of <a href="sect0001.html#def:foa-context">definition 3.1</a> or some other algebraically-cleaner version, but we haven’t done so yet. </p>
+<h1 id="a0000000017">3.1 Freedom of action context</h1>
+<p><div class="definition_thmwrapper" id="def:foa-context">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.1</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:foa-context">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-model-construction.html#def:tangle-data">Definition 2.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  A <em>freedom of action context</em> at a proper type index \(\alpha \) consists of: </p>
+<ol class="enumerate">
+  <li><p>for every \(\beta \) and path \(A : \beta \to \alpha \), core tangle data \(\mathrm{All}_A\), \(\tau _A\) etc at \(\beta \); </p>
+</li>
+  <li><p>for each such \(\beta \), \(A\), when \(A\) a <em>proper</em> path (equivalently, when \(\beta {\lt} \alpha \)), <em>full</em> tangle data extending the given core data; </p>
+</li>
+  <li><p>for \(A : \beta \to \alpha \) and \(\gamma {\lt} \beta \), a <em>derivative</em> map \((-)_\gamma : \mathrm{All}_{A} \to \mathrm{All}_{\gamma ;A}\), commuting with the maps \(\mathrm{All}_\bullet \to \mathrm{Str}_\bullet \) and \((-)_{\gamma } : \mathrm{Str}_\beta \to \mathrm{Str}_\gamma \). </p>
+</li>
+</ol>
+<p>Notes: </p>
+<ol class="enumerate">
+  <li><p>The name “freedom of action context” is very much a placeholder; it would be good to find a better name. </p>
+</li>
+  <li><p>This can be repackaged several equivalent ways. For instance, the quantification over paths could be re-grouped as “for each \(\beta {\lt} \alpha \) and \(A : \gamma \to \beta \), full tangle data at \(\gamma \); and core tangle data at \(\alpha \)”. This would avoid needing to say “full tangle data extending the given core data”, but would make access to the core data less uniform. </p>
+</li>
+  <li><p>Viewed categorically, the assumed maps make \(\mathrm{All}\) into a functor on the slice category \((\mathrm{Path}(\lambda ,{\lt})/\alpha )^\mathrm{op}\to \mathrm{Gp}\), making the maps \(\mathrm{All}\to \mathrm{Str}\) a natural transformation. </p>
+</li>
+  <li><p>The motivation for assuming just “core data” at \(\alpha \) itself is that for the main constructions, we’ll be working in the inductive step of the recursion where we’re assuming the data is already available at lower levels, and by the constructions of phase 1, we can assume some but not all of it is available at the “current level”. </p>
+</li>
+  <li><p>The motivation for parametrising the lower data not just by levels but by paths is so that when we synthesise this data at \(\alpha \) from similar data at each \(\beta {\lt} \alpha \), no coherence between the given data is required. </p>
+</li>
+</ol>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:restrict-foa-context">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.2</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:restrict-foa-context">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:foa-context">Definition 3.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Given a freedom of action context at \(\alpha \) and a path \(A : \beta \to \alpha \), we can restrict the context along \(A\) to get a freedom of action context at \(\beta \). Moreover, this is functorial in \(A\). </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:synthesise-foa-context">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.3</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:synthesise-foa-context">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:foa-context">Definition 3.1</a></li>
+          <li><a href="ch-model-construction.html#def:tangle-data-propagates">Definition 2.28</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Given \(\alpha \in \lambda \), and a freedom of action context at each \(\beta {\lt} \alpha \), together with extensions of their top-level core tangle data to full tangle data at each \(\beta {\lt} \alpha \), there is a <em>synthesised</em> freedom of action context at \(\alpha \), with its top-level core tangle data given by the constructions of phase 1. </p>
+
+  </div>
+</div> </p>
+<h1 id="a0000000018">3.2 Freedom of action [new version]</h1>
+<p>A key technical lemma, used both for counting tangles and for proving that they satisfy comprehension, is the proof that allowable permutations act freely, in a suitable sense. </p>
+<p>Roughly, any consistent and locally small specification of values of derivatives of an allowable permutation at elements of type \(-1\) can be realized. </p>
+<p>In order to state the theorem precisely, we must first set up a framework for discussing partial specifications of structural/allowable permutations. </p>
+<p><div class="definition_thmwrapper" id="def:binary-condition">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.4</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:binary-condition">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:support-condition">Definition 1.15</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Let \(\alpha \) be a proper type index. Recall that an <em>\(\alpha \)-condition</em> is a pair \((x,A)\), where \(A\) is a path from \(-1\) to \(\alpha \) (aka an extended type index) and \(x\) is either an atom or a near-litter; the set of these was denoted \(\mathrm{Cond}_\alpha := (\tau _{-1} + \mathcal{NL}) \times \mathrm{Path}(-1,\alpha )\). </p>
+<p>A <em>binary condition</em> similarly consists of a pair of atoms or of near-litters, together with a path from \(-1\) to \(\alpha \): </p>
+<div class="displaymath" id="a0000000045">
+  \[  \mathrm{BiCond}_\alpha := (\tau _{-1}^2 + \mathcal{NL}^2) \times \mathrm{Path}(-1,\alpha ). \]
+</div>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:condition-functoriality">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.5</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:condition-functoriality">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:binary-condition">Definition 3.4</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Paths act covariantly on binary conditions. Explicitly, a path \(A : \beta \to \alpha \) induces a map \((-)A \mathrm{BiCond}_\beta \to \mathrm{BiCond}_\alpha \), defined by \((x,B)A := (x,BA)\); and this preserves identities and composition. </p>
+<p>Taking inverse images under these maps, paths act contravariantly on sets of binary conditions: a path \(A : \beta \to \alpha \) induces \((-)_A : \mathcal{P}(\mathrm{BiCond}_\alpha ) \to \mathcal{P}(\mathrm{BiCond}(\beta ))\), given by \(\sigma _A := \{  (x,y,B) \mid (x,y,BA) \in \sigma \} \). </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:conditions-from-perm">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.6</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:conditions-from-perm">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:binary-condition">Definition 3.4</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  A binary condition \((x,y,A)\) is viewed as representing the condition “\(\pi _A(x) = y\)”. Any \(\alpha \)-structural permutation \(\pi \) thus induces a set of binary conditions, its <em>graph</em>, \(\{  (x,y,A) \in \mathrm{BiCond}_\alpha \mid \pi _A(x) = y \} \). This gives an evident embedding \(\mathrm{Str}_\alpha \to \mathcal{P}(\mathrm{BiCond}_\alpha )\); we will notationally identify structural permutations with their graphs. </p>
+<p>We say that a structural permutation \(\pi \) <em>extends</em> a set of binary conditions \(\sigma \) if \(\sigma \subseteq \pi \), viewing \(\pi \) as its graph. More generally, given any group with a map \(\varphi : G \to \mathrm{Str}\) (e.g. the allowable permutations of some tangle data), we say \(\pi \in G\) extends a set of binary conditions \(\sigma \) if \(\sigma \subseteq \varphi (\pi )\). </p>
+
+  </div>
+</div> </p>
+<p><div class="proposition_thmwrapper" id="prop:conditions-from-perm-restriction">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">3.7</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#prop:conditions-from-perm-restriction">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:conditions-from-perm">Definition 3.6</a></li>
+          <li><a href="sect0001.html#def:condition-functoriality">Definition 3.5</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  This identification of permutations respects the actions of paths. That is, given a structural permutation \(\pi \), the graph of the derivative \(\pi _A\) is precisely the restriction along \(A\) of the graph of \(\pi \) (as our notational identification suggests). </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:condition-dom-rge">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.8</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:condition-dom-rge">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:binary-condition">Definition 3.4</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Previously, we viewed \(\alpha \)-conditions \((x,A) \in \mathrm{Cond}_\alpha \) as representing the conditions \(\pi _A(x) = x\), as used in supports (and under this view we could identify them with the binary conditions \((x,y,A)\)). In this section, we will more often view them as elements of the domain or range of a set of binary conditions. Precisely, for a set \(\sigma \) of binary conditions, we take \(\mathrm{dom}\sigma := \{  (x,A) \mid (x,y,A) \in \sigma \} \), and similarly \(\mathrm{rge}\sigma := \{  (y,A) \mid (x,y,a) \in \sigma \} \). </p>
+<p>By a slight abuse of terminology, when working with sets of conditions, we will often say “litter” to mean “litter-with-path”, i.e. “condition of the form \((L,A)\)”, and similarly for near-litter” and “atom”. </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:condition-total-1-1">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.9</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:condition-total-1-1">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:condition-dom-rge">Definition 3.8</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  We extend standard properties of binary relations to sets of binary conditions: </p>
+<p>Say a set of binary conditions \(\sigma \subseteq \mathrm{BiCond}_\alpha \) is <em>total</em> if its domain is \(\mathrm{Cond}_\alpha \); co-total if its range is; and one-to-one if whenever \((x,y,A)\) and \((x',y',A')\) are in \(\sigma \), \(x = x'\) if and only if \(y = y'\). </p>
+<p>The <em>dual</em> \(\sigma ^{-1}\) of a set of binary conditions is \(\{  (y,x,A) \mid (x,y,A) \in \sigma \} \). </p>
+
+  </div>
+</div> </p>
+<p><div class="proposition_thmwrapper" id="prop:total-1-1-gives-perm">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">3.10</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#prop:total-1-1-gives-perm">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:condition-total-1-1">Definition 3.9</a></li>
+          <li><a href="sect0001.html#def:conditions-from-perm">Definition 3.6</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  A set of binary conditions is the graph of a structural permutation precisely if it is one-to-one and total. </p>
+<p>(NOTE: sthis may not be explicitly needed, but it is helpful to know, and should be a good warmup and definition-test ahead of the main freedom of action theorem, in particular <a href="sect0001.html#prop:total-allowable-partial-perm-actual">proposition 3.23</a>.) </p>
+
+  </div>
+</div> </p>
+<p><div class="proposition_thmwrapper" id="prop:total-1-1-restriction">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">3.11</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#prop:total-1-1-restriction">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:condition-total-1-1">Definition 3.9</a></li>
+          <li><a href="sect0001.html#def:condition-functoriality">Definition 3.5</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  If a set of \(\alpha \)-conditions \(\sigma \) is total (resp. co-total, 1-1) then so is its restriction \(\sigma _A\) for any path \(A : \beta \to \alpha \). </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:flexible-condition">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.12</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:flexible-condition">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:foa-context">Definition 3.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Given a freedom of action context at a proper type index \(\alpha \), a <em>flexible litter</em> is a condition \((L,A)\), with \(L\) a litter, such that \(L\) is not in the image of any of the \(f\)-maps \(f^A_{\gamma ,\delta }\) (for any \(\gamma ,\delta {\lt} \beta \dashrightarrow ^A \alpha \)). </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:allowable-partial-perm">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.13</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:allowable-partial-perm">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:condition-total-1-1">Definition 3.9</a></li>
+          <li><a href="sect0001.html#def:condition-functoriality">Definition 3.5</a></li>
+          <li><a href="sect0001.html#def:flexible-condition">Definition 3.12</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Assume a freedom of action context at a proper type index \(\alpha \). </p>
+<p>An <em>allowable partial permutation</em> is a set \(\sigma \) of binary \(\alpha \)-conditions satisfying the following properties: </p>
+<ol class="enumerate">
+  <li><p>It is one-to-one. </p>
+</li>
+  <li><p>(Flexible litters:) Either \(\mathrm{dom}\sigma \) and \(\mathrm{rge}\sigma \) both include all flexible litters, or else they both include <em>co-\(\mu \)-many</em>, i.e. there are at least \(\mu \)-many flexible litters not in \(\mathrm{dom}\sigma \), and dually for \(\mathrm{rge}\sigma \). </p>
+</li>
+  <li><p>(Atoms:) For each litter \((L,A)\) not in \(\mathrm{dom}\sigma \), then \(\mathrm{dom}\sigma \) contains \({\lt}\kappa \)-many atoms \((x,A)\) with \(x \in L\); and dually for \(\mathrm{rge}(\sigma )\). On the other hand, for each litter \((L,A) \in \mathrm{dom}\sigma \) (say \(M\) is the unique near-litter such that \((L,M,A) \in \sigma \)), then either \(\mathrm{dom}\sigma \) contains \({\lt}\kappa \)-many atoms of \((L,A)\) and \(\mathrm{rge}\sigma \) contains \({\lt}\kappa \)-many atoms of \((M,A)\), or else \(\mathrm{dom}\sigma \) contains all atoms of \((L,A)\) and all except \({\lt}\kappa \)-many of them are mapped to atoms in \((M,A)\), and dually, \(\mathrm{rge}\sigma \) contains all atoms of \((M,A)\) and maps them almost all to \((L,A)\); and dually for each litter \((L,A) \in \mathrm{rge}\sigma \). </p>
+</li>
+  <li><p>(Near-litters.) For each near-litter \((N,A) \in \mathrm{dom}\sigma \), its litter \((N^\circ ,A)\) and all atoms \((x,A)\) from the symmetric difference \(N \mathrel {\triangle }N^\circ \) are also in \(A\), and \(\sigma _A(N) = \sigma _A(N^\circ ) \mathrel {\triangle }\sigma _A''(N \mathrel {\triangle }N^\circ )\); and dually for each near-litter in \(\mathrm{rge}\sigma \). </p>
+</li>
+  <li><p>(Non-flexible litters.) Whenever \(\sigma \) contains some triple \((f^A_{\gamma ,\delta }(x),N,(-1;\delta ;A))\) (where \(\gamma ,\delta {\lt} \beta \dashrightarrow ^A \alpha \), \(\delta \) is proper, and \(x \in \tau _{\gamma ;A}\)), then \((\mathrm{dom}\sigma )_{\gamma ;A}\) supports \(x\), and every allowable permutation \(\rho \in \mathrm{All}_A\) extending \(\sigma _A\) has \(N = f^A_{\gamma ,\delta }(\rho _\gamma x)\). Dually, whenever \(\sigma \) contains some \((N,f^A_{\gamma ,\delta }(x),(-1;\delta ;A))\), then \((\mathrm{rge}\sigma )_{\gamma ;A}\) supports \(x\), and any allowable \(\rho \) extending \(\sigma _A\) has \(N = f^A_{\gamma ,\delta }(\rho ^{-1}_\gamma x)\) (note the inverse in this case). </p>
+</li>
+</ol>
+<p>We will often refer to these conditions individually, as “the allowability condition for atoms”, etc. </p>
+
+  </div>
+</div> </p>
+<p>The motivation for allowable permutations is precisely to state the freedom of action property: </p>
+<p><div class="definition_thmwrapper" id="def:foa-property">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.14</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:foa-property">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:allowable-partial-perm">Definition 3.13</a></li>
+          <li><a href="sect0001.html#def:conditions-from-perm">Definition 3.6</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Given a freedom of action context at a proper type index \(\alpha \), say that <em>freedom of action holds</em> if for every allowable permutation \(\sigma \), there is some allowable permutation \(\pi \in \mathrm{All}_\alpha \) extending \(\sigma \). </p>
+
+  </div>
+</div> </p>
+<p><div class="theorem_thmwrapper" id="thm:foa-propagates">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">3.15</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#thm:foa-propagates">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000046"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:foa-property">Definition 3.14</a></li>
+          <li><a href="sect0001.html#def:synthesise-foa-context">Definition 3.3</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  Suppose given, for each \(\beta {\lt} \alpha \), a freedom of action context together with full tangle data at the top level; and such that for all their restrictions along any path \(A : \gamma \to \beta \) (including identity paths), freedom of action holds. </p>
+<p>Then freedom of action holds in the synthesised freedom of action context at \(\alpha \) (i.e. with the tangles and allowable permutations at \(\alpha \) defined by the constructions of phase 1). </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000046">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> The proof is quite lengthy, so we break it down into various lemmas. </p>
+<p>In outline: We first define an ordering on allowable partial permutations (<a href="sect0001.html#def:allowable-partial-perm-order">definition 3.16</a>), show that it has unions of chains (<a href="sect0001.html#prop:allowable-partial-perm-chain-union">proposition 3.17</a>), and so apply Zorn’s lemma to conclude that it has a maximal element above any element. This is the easy part. The main work then consists of showing that any maximal partial permutation is total and co-total (<a href="sect0001.html#lem:maximal-allowable-partial-perm-total">lemma 3.22</a>), and hence is an allowable permutation (<a href="sect0001.html#prop:total-allowable-partial-perm-actual">proposition 3.23</a>). </p>
+<p>Most lemmas involved can (and should) be given in an arbitrary freedom-of-action context, not required to be the synthesised one. </p>
+
+  </div>
+</div>
+<p><div class="definition_thmwrapper" id="def:allowable-partial-perm-order">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.16</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:allowable-partial-perm-order">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:allowable-partial-perm">Definition 3.13</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Work in a freedom of action context at a proper type index \(\alpha \). </p>
+<p>Given allowable partial permutations \(\sigma , \rho \), say that \(\sigma \sqsubseteq \rho \) (“\(\sigma \) <em>carefully extends</em> \(\rho \)”) if: </p>
+<ol class="enumerate">
+  <li><p>\(\sigma \subseteq \rho \); </p>
+</li>
+  <li><p>if \(\rho \) has any new flexible litter, then it has all of them (in both domain and range); </p>
+</li>
+  <li><p>within each litter, if \(\mathrm{dom}\rho \) has any new atom, then it must have all atoms in that litter (and hence must also have the litter); and dually. </p>
+</li>
+</ol>
+
+  </div>
+</div> </p>
+<p><div class="proposition_thmwrapper" id="prop:allowable-partial-perm-chain-union">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">3.17</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#prop:allowable-partial-perm-chain-union">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:allowable-partial-perm-order">Definition 3.16</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  \(\sqsubseteq \) has upper bounds for chains, given by taking unions. That is: given a set of allowable partial permutations that is a chain under \(\sqsubseteq \), its union is again an allowable partial permutation, and carefully extends each element of the chain. (Indeed, this gives a supremum for the chain, and so shows that \(\sqsubseteq \) is chain-complete; but “upper bounds” is all we need in order to apply Zorn’s lemma.) </p>
+
+  </div>
+</div> </p>
+<p>To prove that maximal allowable partial permutations are total, we will make use of a well-ordering on (unary) conditions: </p>
+<p><div class="definition_thmwrapper" id="def:constrains">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.18</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:constrains">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:foa-context">Definition 3.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Fix a freedom of action context at \(\alpha \). Then the relation \( \prec \) on \(\mathrm{Cond}_\alpha \), read as <em>“constrains”</em>, is defined by: </p>
+<ul class="itemize">
+  <li><p>\( (L, A) \prec (x, A) \), whenever \( L \) is a litter and \( x \in L \); (an atom is constrained by the litter it belongs to); </p>
+</li>
+  <li><p>\( (N^\circ , A) \prec (N, A) \) when \( N \) is a near-litter not equal to its corresponding litter \( N^\circ \); </p>
+</li>
+  <li><p>\( (x, A) \prec (N, A) \) for \(N\) as above and all \( x \in N\, \Delta \,  N^\circ \); </p>
+</li>
+  <li><p>\( (y, B:(\gamma {\lt}\beta ):A) \prec (L, A) \) for all paths \( A \colon \beta \to \alpha \), and \( \gamma ,\delta {\lt} \beta \), and \( L = f^A_{\gamma ,\delta }(x), x \in \tau _{\gamma :A} \), and \( (y,B) \in S_x \), where \( S_x \subseteq \mathrm{Cond}_\gamma \) is the designated support of \( x \). </p>
+</li>
+</ul>
+<p>Note: “\(x\) constrains \(y\)” is effectively defined separately in the three cases that \(y\) is an atom, a non-litter near-litter, or a non-flexible litter. Flexible litters are not constrained by anything. </p>
+<p>Note: This relation is not transitive — that’s OK, it’s not intended to be! </p>
+
+  </div>
+</div> </p>
+<p><div class="proposition_thmwrapper" id="prop:constrains-well-founded">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">3.19</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#prop:constrains-well-founded">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000047"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:constrains">Definition 3.18</a></li>
+          <li><a href="ch-model-construction.html#lem:f-map-properties">Lemma 2.4</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  The relation \( \prec \) is well-founded. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000047">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>By the conditions on orderings assumed in full tangle data, and the properties of \(f\)-maps, whenever some constraint \( (x, A) \prec (y,B) \) holds, we have \( \iota _A(x) {\lt} \iota _B(y) \) in \( \mu \). </p>
+
+  </div>
+</div>
+<p>In order to make use of the inductive assumption that freedom of action holds at earlier levels, we will need a few notes about consquences of freedom of action, and about how the definitions of this section interact with restriction of the context. </p>
+<p><div class="proposition_thmwrapper" id="prop:restrict-allowable-partial-perm">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">3.20</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#prop:restrict-allowable-partial-perm">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:allowable-partial-perm">Definition 3.13</a></li>
+          <li><a href="sect0001.html#def:restrict-foa-context">Definition 3.2</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  If \(\sigma \) is an allowable permutation in a freedom of action context at \(\alpha \), then for any \(A : \beta \to \alpha \), the restriction \(\sigma _A\) is again allowable in the context restricted along \(A\). </p>
+
+  </div>
+</div> </p>
+<p><div class="proposition_thmwrapper" id="prop:allowable-partial-perm-action">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">3.21</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#prop:allowable-partial-perm-action">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000048"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:foa-property">Definition 3.14</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  Given a freedom of action context at a proper type index \(\alpha \), an allowable permuation \(\sigma \), and an \(\alpha \)-tangle \(x\) such that \(\mathrm{dom}\sigma \) supports \(x\): </p>
+<ol class="enumerate">
+  <li><p>if \(\pi , \pi ' \in \mathrm{All}_\alpha \) are allowable permutations extending \(\sigma \), then \(\pi x = \pi ' x\); </p>
+</li>
+  <li><p>if freedom of action holds, there is a unique \(y \  in \tau _\alpha \) such that every allowable permutation \(\pi \) extending \(\sigma \) has \(\pi x = y\); we denote this unique value by \(\sigma x\). </p>
+</li>
+</ol>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000048">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>For the first part: given such \(\pi , \pi '\), \((\pi ^-1)\pi \) acts trivally on \(\mathrm{dom}\sigma \), and hence fixes \(x\). The second part follows from the first together with the freedom of action property. </p>
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:maximal-allowable-partial-perm-total">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">3.22</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#lem:maximal-allowable-partial-perm-total">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000049"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:allowable-partial-perm-order">Definition 3.16</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Any allowable partial permutation that is maximal under \(\sqsubseteq \) is total. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000049">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> This is the main hard work of the proof of <a href="sect0001.html#thm:foa-propagates">theorem 3.15</a>, and should probably be broken down into separate lemmas. </p>
+<p>It suffices to show the claim: For any allowable partial \(\sigma \), and any \(x\), if everything that constrains \(x\) is in \(\mathrm{dom}\sigma \), then there is some \(\sigma ' \sqsupseteq \sigma \) with \(x \in \mathrm{dom}\sigma \). (Given this claim and a maximal element \(\sigma \), it follows by induction over “constrains” that \(\mathrm{dom}\sigma \) is all of \(\mathrm{Cond}_\alpha \). Co-totality follows dually.) </p>
+<p>Proof of claim: Treat the 4 cases for \(x\) separately. </p>
+<ol class="enumerate">
+  <li><p>A flexible litter \((L,A)\). TO GIVE. </p>
+</li>
+  <li><p>An atom \((x,A)\). TO GIVE. </p>
+</li>
+  <li><p>A non-litter near-litter \((N,A)\). TO GIVE. </p>
+</li>
+  <li><p>A non-flexible litter \((f^A_{\gamma ,\delta }(x),-1;\delta ;A)\). TO GIVE. </p>
+</li>
+</ol>
+<p>Note: The “straightforward” parts of checking allowability are fairly repetitive between the different cases here. This is the sort of thing that — if just tackled greedily — could take a lot of time and create a lot of code duplication. Probably good to write a few of these cases directly, but then see if they can be abstracted out as lemmas that can be re-used across cases. For the near-litter and non-flexible litter conditions, the point is that these are of the form “if [thing \(x\)] is present, then [condition \(P\) holds]”, where condition \(P\) is something which is clearly preserved by subset-expansion (i.e. if \(\sigma \subseteq \rho \) and \(P\) holds for \(\sigma \), then it holds for \(\rho \)). So when we expand \(\sigma \) to \(\rho \), these allowability conditions will still hold for all things that were already in \(\sigma \) — we only need to check for any new things that were added in \(\rho \). </p>
+<p>We should also avoid code-duplication of checking dual conditions separately, probably by lemmas explicitly connecting each condition to its dual, or by explicitly making use of duals in the definition of the allowability conditions. </p>
+
+  </div>
+</div>
+<p><div class="proposition_thmwrapper" id="prop:total-allowable-partial-perm-actual">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">3.23</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#prop:total-allowable-partial-perm-actual">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000050"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:synthesise-foa-context">Definition 3.3</a></li>
+          <li><a href="sect0001.html#def:foa-property">Definition 3.14</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  In the synthesised freedom of action context at \(\alpha \), any partial allowable permutation (at \(\alpha \)) that is total and co-total extends to an actual allowable permutation at \(\alpha \). </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000050">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> Take \(\sigma \) a total and co-total allowable partial permutation. For each \(\beta {\lt} \alpha \), \(\sigma _\beta \) is again allowable, so by the assumption of FoA at earlier levels, \(\sigma _\beta \) extends to an allowable permutation \(\pi _\beta \in \mathrm{All}_\beta \). [If we assumed \(\mathrm{All}\to \mathrm{Str}\) is injective, then \(\pi _\beta \) is uniquely determined, since \(\sigma _\beta \) is total and co-total.] Together these \(\pi _\beta \) comprise a semi-allowable permutation \(\pi \) extending \(\sigma \); the allowability condition for non-flexible litters ensures that the unpacked coherence condition holds, and hence by <a href="ch-model-construction.html#lem:coherence-unpacked">lemma 2.18</a>, \(\pi \) is allowable. </p>
+
+  </div>
+</div>
+<h1 id="a0000000019">3.3 Coherent tangle data</h1>
+<p><div class="definition_thmwrapper" id="def:concrete-tangle-data">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.24</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:concrete-tangle-data">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-model-construction.html#def:tangle-data">Definition 2.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  NOTE: this definition and subsequent Phase 2 material is outdated; it should be updated based on the material currently found in <code class="verbatim">foa_discussion.tex</code>. </p>
+<p>For a type index \(\alpha \), <em>concrete tangle data</em> at level \(\alpha \) consists of a subset \(\tau \subseteq \mathrm{Pretangle}_\alpha \) and a subgroup \(\mathrm{All}\subseteq G_\alpha \), together with full tangle data on these. </p>
+<p>Notes for formalisation: </p>
+<ul class="itemize">
+  <li><p>The reason we use <em>subsets</em> from here on is because we will soon impose equalities between these components, and subset equalities are much less nasty to deal with than type equalities. </p>
+</li>
+  <li><p>To define this, we almost certainly want to factor out the types \(\tau \) and \(\mathrm{All}\) as parameters of the tangle data from the start. </p>
+</li>
+  <li><p>We could avoid that “factoring out as a parameter” by assuming this concreteness already in the tangle data, i.e. positing \(\tau \) as a subset of pretangles and \(\mathrm{All}\) as a subgroup of \(\mathrm{Str}_\alpha \) from the start. At least for \(\tau \), that seems a bit unnatural — it adds an entirely irrelevant extra assumption throughout phase 1. For \(\mathrm{All}\) it perhaps wouldn’t be so unnatural, since \(\mathrm{All}\) does need to be assumed with at least a homomorphism to \(\mathrm{Str}_\alpha \) anyway. </p>
+</li>
+</ul>
+<p>The <em>standard</em> concrete tangle data at level \(-1\) are the defined \(\tau _{-1} = \mathrm{Pretangle}_{-1}\) and \(\mathrm{All}_{-1} = \mathrm{Str}_{-1}\). </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:concrete-tangle-data-propagates">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.25</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:concrete-tangle-data-propagates">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:concrete-tangle-data">Definition 3.24</a></li>
+          <li><a href="ch-model-construction.html#def:tangle-data-propagates">Definition 2.28</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  For a proper type index \(\alpha \in \lambda \), given concrete tangle data at all levels \(\beta {\lt} \alpha \), we get <em>most</em> components of concrete tangle data at level \(\alpha \). </p>
+<p>In particular, the new set of \(\alpha \)-tangles \(\tau _\alpha \subseteq \mathrm{Pretangle}_\alpha \) is the the image of the \(\alpha \)-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations. (We could call these “concrete \(\alpha \)-tangles” and “abstract \(\alpha \)-tangles”, if we need to for disambiguation.) </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:coherent-tangle-data">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.26</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:coherent-tangle-data">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:concrete-tangle-data-propagates">Definition 3.25</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  For \(\alpha \in \lambda + 1\), <em>tangle data below \(\alpha \)</em> consists of concrete tangle data at every level \(\beta {\lt} \alpha \). Say this is <em>coherent</em> if it is standard at level \(-1\), and at each proper type index \(\beta {\lt} \gamma \), all components at level \(\beta \) that <em>could</em> have been induced from the data at lower levels \(\gamma {\lt} \beta \) are, in fact, equal to what would have been induced that way. </p>
+<ul class="itemize">
+  <li><p>Note we want to provide this definiton also for \(\alpha = \lambda \)! I think this should be available in mathlib as <code class="verbatim">with_top</code>. </p>
+</li>
+  <li><p>We could unify “standard at level \(-1\)” with induced at proper type indices by generalising the definition of each component of the “induced concrete tangle data at \(\alpha \)” to include the case \(\alpha = -1\),defining the induced data as the standard one in that case. Is this more natural? Will it make life easier? </p>
+</li>
+</ul>
+<p>For \(\alpha {\lt} \beta \), “phase 2 data below \(\alpha \)” can be restricted to “phase 2 data below \(\beta \)”. </p>
+<p>Most constructions in phase 2 will assume coherent tangle data below \(\alpha \), for some fixed \(\alpha \). </p>
+<p>[Terminology: perhaps we should call this “phase 2 data at \(\alpha \)”? That seems more consistent for the overall naming scheme, but “coherent tangle data below \(\alpha \)” seems clearer and more transparent in itself. Maybe we should reconsider the naming scheme, so that it’s not in tension with clarity!] </p>
+
+  </div>
+</div> </p>
+<h1 id="a0000000020">3.4 Strong supports defined</h1>
+<p>NOTE: much of this section has not been updated since early in the formalisation, so may not match the current implementation and abstractions very closely. </p>
+<p>Throughout this section, fix some \(\alpha \in \lambda + 1\), and assume coherent tangle data below \(\alpha \). [Actually, perhaps this section doesn’t need the coherence and could be done in phase 1, i.e. working purely in a single level, assuming full tangle data is available at lower levels? This should become clearer as it is formalised.] </p>
+<p>Treating supports as sets suffices for the model description, but we will need to analyze supports and orbits with more care, so it is better for purposes of the proof to equip supports with a well-orderings. </p>
+<p>We may write \(x \leq _S y\) for \((x,y) \in S\), and \(x {\lt}_S y\) when we also want to indicate that \(x,y\) are distinct. </p>
+<p>If \(\pi \) is an \(\alpha \)-allowable permutation and \(S\) is an \(\alpha \)-support, we define \(\pi [S]\) as </p>
+<div class="displaymath" id="a0000000051">
+  \[ \{ ((\pi _A(x),A,\gamma ),(\pi _B(y),B,\delta )):((x,A,\gamma ),(y,B,\delta ))\in S\} . \]
+</div>
+<p>If \(S\) is an \(\alpha \)-support, we define \(S^+\) as \(\{ (x,A,\alpha ):(x,A,\alpha ) \in S\} \). </p>
+<p>We can then say that \(S\) is a support of \(X\) if \(X\) is an \(\alpha \)-code, \(S\) is an \(\alpha \)-support, and for any \(\alpha \)-allowable permutation \(\pi \), if \(\pi [S^+]=S^+\) then \(\pi (x)=x\). In some sense the items in the support with third components less than \(\alpha \) are fluff, but they <em>are </em> important as we will see. </p>
+<dl class="description">
+  <dt>Remark on definitions of support and symmetry:</dt>
+  <dd><p>It should be clear that the supports we have defined here do exactly the same work as the set supports in the model description (since the additional order structure and the third components of support domain elements actually do no work at this point). </p>
+</dd>
+</dl>
+<p>This probably represents a chunk of formal verification work, as what is obvious to people is not always obvious to theorem provers. </p>
+<p><div class="definition_thmwrapper" id="def:raise-lower-index">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.27</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:raise-lower-index">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:support-of">Definition 1.19</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  [Note: all this stuff — raising and lowering indices, and the results about repeatedly applying them to structural permutations, etc — is MUCH more clearly handled in algebraic language, using the category of paths, the functoriality of \(\mathrm{Str}_\alpha \) and \(\mathrm{All}_\alpha \) in paths, and maps between group actions, etc.] </p>
+<p>For any \(\alpha \)-support \(S\) and an extended type index \(C\) with minimum element greater than \(\alpha \), we define \(S^C\) as \(\{ ((x,A\cup C,\gamma ),(y,B\cup C,\delta )):((x,A,\gamma ),(y,B,\delta )) \in S\} \). </p>
+<p>If \(S\) is an \(\alpha \)-support and \(\beta {\lt}\alpha \), \(S_\beta \) is defined as the largest support \(U\) such that \(U^{\{ \alpha \} } \subseteq S\) and \(U\) is a \(\beta \)-support. </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:strong-support">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.28</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:strong-support">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:coherent-tangle-data">Definition 3.26</a></li>
+          <li><a href="sect0001.html#def:raise-lower-index">Definition 3.27</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  A strong support is a support \(S\) with certain additional properties. </p>
+<ol class="enumerate">
+  <li><p>If \(((\beta ,-1,x),A,\gamma ) \in S\) then \(x\) is a singleton or a litter. </p>
+</li>
+  <li><p>If \(((\beta ,-1,\{ x\} ),A,\gamma ) \in S\), then \(((\beta ,-1,L),A,\gamma ) {\lt}_S ((\beta ,-1,\{ x\} ),A,\gamma )\), where \(L\) is the litter containing \(x\). </p>
+</li>
+  <li><p>If \(((\beta ,-1,L),A,\delta ) \in S\) and \([L]=f_{\gamma ,\beta }(y)\), where \(\gamma {\lt}\delta \), then there is a \(\gamma \)-support \(T\) of \(y\) such that \(T^{A \setminus \{ \beta \} } \subseteq S\) and each element of the domain of \(T^{A \setminus \{ \beta \} }\) is \(\leq _S ((\beta ,-1,L),A)\). Note that these conditions imply that there is an index-raised version of a strong \(\gamma \)-support of \(y\) included in \(T\). </p>
+</li>
+</ol>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:strengthen-support">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">3.29</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#lem:strengthen-support">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000052"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:strong-support">Definition 3.28</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Any support can be extended to a strong support. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000052">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>It should be straightforward to see that any \(X\) with support \(S\) has a support \(S^\circ \) which satisfies the first condition. Replace each element \(((\beta ,-1,x),A)\) of the domain of \(S\) for which \(x\) is a near-litter and not a litter with \(((\beta ,-1,x^\circ ),A)\) and \(((\beta ,-1,\{ y\} ),A)\) for each \(y\) in the symmetric difference of \(x\) and \(x^\circ \). </p>
+<p>We describe the process of extending a support to a strong support, assuming that it already satisfies the first condition. Before each typed singleton element of the domain, insert the appropriate typed litter (removing an extra copy of it if it occurred later in the order). This will only need to be done once for each typed singleton element. </p>
+<p>The condition \(((\beta ,-1,L),A,\delta ) \in S\) and \([L]=f_{\gamma ,\beta }(y)\) for \(\gamma {\lt}\delta \) forces insertion of a \(\gamma \)-support for \(y\). Of course this might cause further insertions. Notice that the third components of all inserted items will be \(\leq \gamma {\lt}\delta \). So it is not possible for an infinite regress of insertions to occur which would cause the extended support to fail to be a well-ordering. (Of course, if an item is inserted which occurs later in the order, remove later occurrences). </p>
+
+  </div>
+</div>
+<p>The third components in the elements of support domains seem actually to be necessary to ensure that strong supports can always be produced. What the third component is doing is providing a comment on the index of the sub-support the element is required for. There is another approach: indexing the \(f\) maps with \(\alpha ,\beta ,\gamma \) instead of just \(\beta ,\gamma \) and requiring that ranges of \(f\) maps with distinct indices be disjoint, which would require very straightforward modifications of the paper above, would ensure that we could tell the difference between insertions into an \(\alpha \) support and insertions into a \(\beta \)-support for \(\beta {\lt}\alpha \). It seems that the added complexity is about the same with both approaches, and I have left it this way. The approach used here also has the interesting effect that the extension over type \(\gamma \) of a type \(\alpha \) set is determined by its extension over type \(\beta \) in a way which does not depend on \(\alpha \); it is interesting that this can be done. </p>
+<p><b class="bf">Note for the formal verification project:</b> This should be ready to go. </p>
+<h1 id="a0000000021">3.5 Freedom of action of allowable permutations [older version]</h1>
+<p>The practical application of strong supports is to the proof that allowable permutations act freely in a suitable sense, and in guiding applications of this theorem. </p>
+<p>We claim that any locally small specification of values of derivatives of an allowable permutation at elements of type \(-1\) can be realized. </p>
+<p>We give an exact statement of what is meant, then we prove it. </p>
+<p><div class="definition_thmwrapper" id="def:local-bijection">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.30</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:local-bijection">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:path">Definition 1.4</a></li>
+          <li><a href="ch-preliminaries.html#def:atoms-and-litters">Definition 1.5</a></li>
+          <li><a href="ch-preliminaries.html#def:small">Definition 1.2</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/5ba6af6785a3f099dfe53152f8807b28c12b74ec/src/phase2/freedom_of_action.lean#L19">con_nf.local_bijection</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   An \(\alpha \)-local bijection consists of: for each \(\alpha \)-extended type index (i.e. path \(A : -1 \to \alpha \)), a permutation \(\pi ^0_A\) of some subset \(\mathrm{dom}(\pi ^0_A) \subseteq \tau {-1}\), such that the intersection of \(\mathrm{dom}(\pi ^0_A)\) with any litter is small (including possibly empty). </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:perm-exception">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.31</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:perm-exception">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="ch-preliminaries.html#def:structural-perm-atoms">Definition 1.11</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <button class="modal lean">L∃∀N</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="https://github.com/leanprover-community/con-nf//blob/5ba6af6785a3f099dfe53152f8807b28c12b74ec/src/phase2/freedom_of_action.lean#L29">con_nf.near_litter_perm.exception</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   We say that \(x\) is an <em>exception</em> of a near-litter permutation \(\pi \) iff (\(L\) being the litter containing \(x\)) either \(\pi (x) \not\in (\pi ``L)^\circ \) or \(\pi ^{-1}(x) \not\in ({\pi ^{-1}}``L)^\circ \). </p>
+
+  </div>
+</div> </p>
+<dl class="description">
+  <dt>Stipulation:</dt>
+  <dd><p>For each litter \(L\) we specify a well-ordering \(\leq _L\) of order type \(\kappa \) with coordinated strict well-ordering \({\lt}_L\). [In fact this is provided trivially by the current implementation of atoms.] </p>
+</dd>
+</dl>
+<p><div class="definition_thmwrapper" id="def:flexible-old">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.32</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:flexible-old">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:coherent-tangle-data">Definition 3.26</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Given coherent part 1 data below \(\alpha \), a path \(A : \beta \to \alpha \), and a litter \(L\), say \(L\) is <em>\(A\)-flexible</em> (or that the pair \((L,A)\) is <em>flexible</em>) if \(L\) is not in the range of \(f_{\beta ,\gamma }\), for any \(\gamma {\lt} \alpha \). </p>
+<p>(In particular, if \(\beta = -1\), every such pair is flexible, since \(f_{\gamma ,\beta }\)-maps is only defined for \(\beta \) proper.) </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:freedom-of-action-statement-old">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.33</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:freedom-of-action-statement-old">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:perm-exception">Definition 3.31</a></li>
+          <li><a href="sect0001.html#def:local-bijection">Definition 3.30</a></li>
+          <li><a href="sect0001.html#def:flexible-old">Definition 3.32</a></li>
+          <li><a href="ch-preliminaries.html#def:allowable-perm-atoms">Definition 1.14</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Given coherent part 1 data below \(\alpha \), say that <em>freedom of action holds (at \(\alpha \))</em> if: Given an \(\alpha \)-local bijection \(\pi ^0\) and a specification for each path \(A : \beta \to \alpha \) a bijection of the \(\beta \)-flexible litters, there is a unique allowable permutation \(\pi \in \mathrm{All}_\alpha \) such that: </p>
+<ol class="enumerate">
+  <li><p>\(\pi {A}\) extends \(\pi ^0_{A}\) for each \(A\); </p>
+</li>
+  <li><p>for each path \(A : \beta \to \alpha \) and \(A\)-flexible litter \(L\), \(\pi _A(j_\beta (L)) = j_\beta (N)\) for some \(N\) near to \(\chi _A(L)\); </p>
+</li>
+  <li><p>The only exceptions of \(\pi \) are \(\pi ^0\), and everywhere else, \(\pi \) is order-preserving between litters. That is: for each path \(A : -1 \to \alpha \) and litter \(L\), and writing \(N\) for the near-litter \(\pi _A``L\), the restriction of \(\pi _A\) to \(L \setminus \mathrm{dom}(\pi ^0_A)\) is the unique bijection from \(L \setminus \mathrm{dom}(\pi ^0_A)\) to \(N^\circ \setminus \mathrm{rge}(\pi ^0_A)\) which is strictly increasing with respect to the (given/canonical) orders on \(L\) and \(N^\circ \). </p>
+</li>
+</ol>
+<p>Note: Earlier versions of the note/blueprint stated the 3rd condition in terms of exceptions; recent versions of the note spell it out in more detail and add the “increasing” condition, which is necessary for the uniqueness in the theorem conclusion. If there are any doubts, the current version of Randall’s note should be consulted! </p>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:freedom-of-action-propagates-old">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">3.34</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#lem:freedom-of-action-propagates-old">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000053"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:freedom-of-action-statement-old">Definition 3.33</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Given coherent part 1 data below \(\alpha \), if freedom of action holds at each level \(\beta {\lt} \alpha \), then it holds at level \(\alpha \). </p>
+<p>Note: I (Peter) have an alternative approach to freedom of action (slightly different in both statement and proof) which might possibly be easier to formalise, avoiding the dependence on strong supports in the proof. Iff Randall approves it then I will add it in the blueprint as an alternative. But it doesn’t change the overall structure of the main argument/recursion, so this doesn’t need to be worried about until the point of formalising the FoA theorem itself. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000053">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> [This proof is is substantially clarified in more recent versions of Randall’s note.] </p>
+<p>We prove this by exhibiting a recursive procedure for computing \(\pi \) and its derivatives along a strong support; this succeeds because all objects have strong supports, and because computing all values of derivatives of \(\pi \) on type \(-1\) allows computation of all derivatives of \(\pi \) at all types. </p>
+<p>For each extended type index, we specify a permutation \(\chi _A\) of local cardinals \([L]\) is not of the form \(f_{\gamma ,\beta }(y)\) for any \(\gamma {\lt}{\tt min}(A)\) and \(y \in \tau _\gamma \). </p>
+<p>We consider an item \(((\beta ,-1,\{ x\} ),A,\gamma )\) and our aim is to compute \(\pi _{A \cup \{ -1\} }(x)\). By hypothesis of the recursion, we have already computed \(\pi _A\) at \(((\beta ,-1,L),A)\), where \(L\) is the litter which contains \(x\). </p>
+<p>There are two cases. If \((A,x)\) is in the domain of \(\pi ^0\), we compute \(\pi _{A \cup \{ -1\} }(x) = \pi ^0_A(x)\) and we are done. </p>
+<p>Otherwise we use the hypothesis of the recursion: we compute \(\pi _{A \cup \{ -1\} }(x)\) for any \(x\) in \(L\) with \((A,x)\) not in the domain of \(\pi _0\) using the fact that we have already computed \(\pi _A(\beta ,-1,L) = (\beta ,-1,N)\): we define \(\pi _{A \cup \{ -1\} }\) to agree with the unique bijective map from the elements of \(L\) not in the domain of \(\pi ^0_A\) to the elements of \(N^\circ \) not in the domain of \(\pi ^0_A\) which is strictly increasing in the sense that it sends larger objects in the sense of \({\lt}_L\) to larger objects in the sense of \({\lt}_{N^\circ }\). </p>
+<p>Now we consider items of the form \(((\beta ,-1,L),A,\delta )\) in the strong support where \(L\) is a litter. </p>
+<p>If \([L]\) is not of the form \(f_{\gamma ,\beta }(y)\) for a \(\gamma {\lt}{\tt min}(A)\) and \(y \in \tau _\gamma \), we compute \(\pi _A((\beta ,-1,L))\) as </p>
+<div class="displaymath" id="a0000000054">
+  \[ (\beta ,-1,{\pi ^0_A}``L \cup (\chi _A([L])^\circ \setminus {\pi ^0_A}``(\tau _{-1} \setminus L))): \]
+</div>
+<p> we map \(L\) to the near-litter in \(\chi _A([L])\) with the exact modifications required by the local bijection. </p>
+<p>If \([L]\) is of the form \(f_{\gamma ,\beta }(y)\) for a \(\gamma {\lt}{\tt min}(A)\) and \(y \in \tau _\gamma \) then we proceed just as above but we take the action on \([L]\) from a different source: the coherence condition tells us that \([L]\) should be mapped to \(f_{\gamma ,\beta }(\pi _{A \setminus \{ \beta \}  \cup \{ \gamma \} }(y))\), so we compute \(\pi _A((\beta ,-1,L))\) as </p>
+<div class="displaymath" id="a0000000055">
+  \[ (\beta ,-1,{\pi ^0_A}``L \cup (f_{\gamma ,\beta }(\pi _{A \setminus \{ \beta \}  \cup \{ \gamma \} }(y))^\circ \setminus {\pi ^0_A}``(\tau _{-1}\setminus L))), \]
+</div>
+<p> which is essentially the same idea but a bit more complex. </p>
+<p>The nasty recursive idea here is that we already know how to compute \(\pi _{A \setminus \{ \beta \}  \cup \{ \gamma \} }(y)\) from the embedded strong \(\gamma \) support of \(y\) because we assume as a hypothesis of the recursion that we already know how to carry out this computation for \(\gamma \)-supports, \(\gamma {\lt}\alpha \). The local information we need about the \(\gamma \) allowable permutation (the local bijection to be used and the relevant \(\chi \) maps) is included in the information we are given initially about \(\pi \) (though this data will have indices modified when used on the \(\gamma \)-support, of course). Notice that we certainly do know how to do it for 0-supports, because the recursive clause will never be invoked if \(\alpha =0\): the rest of the procedure tells us what to do. </p>
+<p>Once we know how to carry out this calculation along any \(\alpha \)-strong support, we can compute the derivatives of \(\pi \) on elements of type \(-1\) along all type paths, and so compute the value of \(\pi \) and all of its derivatives on all types. The method of calculation clearly gives an allowable permutation without exceptions other than those dictated by the local bijection. </p>
+
+  </div>
+</div>
+<p><b class="bf">Note for the formal verification project:</b> This section is vitally important and should be ready to work on (once the model and the definition of strong support are handled). Setting up the recursive definition of the computation may be nasty. </p>
+<p><div class="theorem_thmwrapper" id="thm:freedom-of-action-old">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">3.35</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#thm:freedom-of-action-old">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000056"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:freedom-of-action-statement-old">Definition 3.33</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  Given coherent tangle data below \(\alpha \), it satisfies freedom of action at every level. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000056">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> By induction over \(\beta {\lt} \alpha \), using <a href="sect0001.html#lem:freedom-of-action-propagates-old">lemma 3.34</a>. </p>
+
+  </div>
+</div>
+<p><br /></p>
+<h1 id="a0000000022">3.6 Types are of size \(\mu \) (so the construction actually succeeds)</h1>
+<p>[Note: this section is treated MUCH more clearly in Randall’s more recent versions of the note — we should certainly pull in from that newer version before attempting to formalise the section.] </p>
+<p>Now we argue that (given that everything worked out correctly already at lower types) each type \(\alpha \) is of size \(\mu \), which ensures that the construction actually succeeds at every type. </p>
+<p><div class="definition_thmwrapper" id="def:coding-function">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.36</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:coding-function">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:coherent-tangle-data">Definition 3.26</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  For any support \(S\) and tangle \(x\), we can define a function \(\chi _{x,S}\) which sends \(T=\pi (S)\) to \(\pi (x)\) for every \(T\) in the orbit of \(S\) under the action of allowable permutations. We call such functions <em>coding functions </em>. Note that if \(\pi [S]=\pi '[S]\) then \((\pi ^{-1}\circ \pi ')[S]= S\), so \((\pi ^{-1}\circ \pi ')(x)= x\), so \(\pi (x)=\pi '(x)\), ensuring that the map \(\chi _{x,S}\) for which we gave an implicit definition is well defined. </p>
+
+  </div>
+</div> </p>
+<p>The strategy of our argument for the size of the types is to show that that there are \({\lt}\mu \) coding functions for each type whose domain includes a strong support, which implies that there are no more than \(\mu \) (and so exactly \(\mu \)) elements of each type, since every element of a type is obtainable by applying a coding function (of which there are \({\lt}\mu \)) to a support (of which there are \(\mu \)), and every element of a type has a strong support. </p>
+<p>We describe all coding functions for type 0 (without concerning ourselves about whether supports are strong). The orbit of a 0-support in the allowable permutations is determined by the positions in the support order occupied by near-litters, and for each position in the support order occupied by a singleton, the position, if any, of the near-litter in the support order which includes it. There are no more than \(2^\kappa \) ways to specify an orbit. Now for each such equivalence class, there is a natural partition of type \(-1\) into near-litters, singletons, and a large complement set. Notice that near-litters in the partition will be obtained by removing any singletons in the domain of the support which are included in them. The partition has \(\nu {\lt}\kappa \) elements, and there will be \(2^\nu \leq 2^\kappa \) coding functions for that orbit in the supports, determined by specifying for each compartment in the partition whether it is to be included or excluded from the set computed from a support in that orbit. So there are no more than \(2^\kappa {\lt}\mu \) coding functions over type 0. </p>
+<p>We specify an object \(X\) and a strong support \(S\) for \(X\), and develop a recipe for the coding function \(\chi _{X,S}\) which can be used to see that there are \({\lt}\mu \) coding functions. </p>
+<p>\(X = (\alpha ,\beta ,B)\), where \(B\) is a subset of \(\tau _\beta \). By inductive hypothesis, each element \(b\) of \(B\) can be expressed as \(\chi _{b,T_b}(T_b)\), where \(T_b\) is a strong support for \(b\) end extending \(S_\beta \) (which is defined as the largest \(\beta \)-support \(U\) such that \(U^{\{ \alpha \} } \subseteq S\)). </p>
+<p>We claim that \(\chi _{X,S}\) can be defined in terms of the orbit of \(S\) in the allowable permutations and the set of coding functions \(\chi _{b,T_b}\). There are \({\lt}\mu \) sets of type \(\beta \) coding functions by inductive hypothesis, and we will argue that there are \({\lt}\mu \) orbits in the \(\alpha \)-strong supports under allowable permutations, so this will imply that there are \(\leq \mu \) elements of type \(\alpha \) (it is obvious that there are \(\geq \mu \) elements of each type). Of course we get \(\leq \mu \) codes for each \(\beta {\lt}\alpha \), but we know that \(\lambda {\lt}\kappa {\lt}\mu \). </p>
+<p>The definition that we claim works is that \(\chi _{X,S}(U) = (\alpha ,\beta ,B')\), where \(B'\) is the set of all \(\chi _{b,T_b}(U')\) for \(b \in B\) and \(U'\) end extending \(U_\beta \). Clearly this definition depends only on the orbit of \(S\) and the set of coding functions derived from \(B\). </p>
+<p>The function we have defined is certainly a coding function, in the sense that \(\chi _{X,S}(\pi (S)) = \pi (\chi _{X,S}(S))\). What requires work is to show that \(\chi _{X,S}(S)=S\), from which it follows that it is in fact the intended function. </p>
+<p>Clearly each \(b \in B\) belongs to \(\chi _{X,S}(S)\) as defined, because \(b = \chi _{b,T_b}(T_b)\), and \(T_b\) end extends \(S_\beta \). </p>
+<p>An arbitrary \(c \in \chi _{X,S}(S)\) is of the form \(\chi _{b,T_b}(U)\), where \(U\) end extends \(S_\beta \) and of course must be in the orbit of \(T_b\) under allowable permutations. </p>
+<p>Our strategy is to show that there is an allowable permutation \(\pi \) which fixes \(X\) (so that \(\pi _\beta ``B = B\)) such that \(\pi _\beta [T_b]=U\), so that \(\pi _\beta (b) = c\), so \(c \in B\), whence \(\chi _{X,S}(S)\) as defined is equal to \(X\) as required. </p>
+<p>We build a support \(S+T_b^{\{ \alpha \} }\) and a support \(S+U^{\{ \alpha \} }\) with parallel structure by appending \(T_b\) (respectively \(U\)) to \(S\) then removing all but the first occurrence of each repeated item. The parallelism of structure is enforced by the identity of items taken from \(S \setminus S_\beta \) in both supports and the fact that \(U\) is the image of \(T_b\) under some allowable permutation. </p>
+<p>We construct an \(\alpha \)-allowable permutation whose action takes one of these supports to the other, which will complete the plan given above. For this we use the freedom of action theorem. We define a local bijection which sends \((A,x)\) to \(y\) just in case a \((\beta ,A,\{ x\} )\) in the first support corresponds to a \((\beta ,A,\{ y\} )\) in the other, and further enforces agreement of derivatives of the permutation to be constructed with derivatives of the known permutation \(\pi '\) sending \(T_b\) to \(U\) at exceptions of derivatives of \(\pi '\) which lie in litters in \(T_b\). This causes singleton items in the first support to be mapped to the corresponding singleton items in the other support. We have to argue that litters in the domain of \(S+T_b^{\{ \alpha \} }\) (which is a strong support) are mapped to the correct near-litters in the domain of \(S+U^{\{ \alpha \} }\). If there is a failure, there is a first one. The local cardinal of the first failure is treated correctly (because a support of it is treated correctly), so the failure must consist in the map constructed having an exception which is moved by the permutation into or out of the litter in question (if a litter \(L\) in \(T_b\) is mapped to a near-litter \(N\) in \(U\), all elements of \(N \mathrel {\triangle }N^\circ \) are treated correctly because they are values at exceptions of the known permutation), so a failure implies an exception of the constructed permutation lying in \(L\) which is not an exception of the known map and whose singleton is not an item in \(T_b\), and there are no such exceptions. </p>
+<p>The constructed map fixes \(X\) because of its identity action on \(S\), and it sends \(b\) to \(c\) because its action sends \(T_b\) to \(U\), which is what we claimed, </p>
+<p>The final move is to argue that there are \({\lt}\mu \) orbits in the \(\alpha \)-allowable permutations. The idea is that the orbit in which a permutation lies is completely determined by a certain amount of combinatorial information, similarly to what happened in type 0 but a bit more complex. The orbit is specified if we know the second and third components of each item, taken from \(\lambda \) items in each case, the first and second components of the first item, and whether the third component is a singleton or a near-litter. If this is a singleton, we want to know the position in the support of a near-litter containing it (which will be present). If this is a near-litter and its local cardinal is an image under an \(f\) map, we can extract from information about the preceding part of the support order a subsupport which is an index-raised version of a strong support for the near-litter and so for its inverse image under the \(f\) map: as part of our specification, we take the coding function which generates that inverse image. </p>
+<p>We give exact details. If \(S\) is a strong support (or an image of a strong support under an allowable permutation), we define its specification \(S^*\) as a well-ordering of the same length in which an item \(((\beta ,-1,x),A,\gamma )\) will be replaced by an item \(((\beta ,-1,X),A,\gamma )\) in a way that we describe. If \(x=\{ y\} \), we replace \(x\) with \(\{ \delta \} \), where \(\delta \) is the position of a typed near-litter containing \(y\) in the obvious sense. If \(x\) is a near litter which does not belong to any \(f_{\gamma ,\beta }(y)\) with \(\gamma {\lt}{\tt min}(A)\), then \(X= \emptyset \). If \(x \in f_{\gamma ,\beta }(y)\) with \(\gamma {\lt}{\tt min}(A)\), then we extract the maximal strong support \(T\) of \(y\) such that \(T^{\{ \alpha \} } \subseteq S\), and set \(X = \chi _{y,T}\), a coding function. </p>
+<p>There is a straightforward argument by induction on the structure of strong supports that if we have two items with strong supports which have the same specification in the sense we have just described, there is an allowable permutation (by freedom of action) whose action sends the one support to the other, and so the one item to the other. </p>
+<p>Suppose \(S^* = T^*\): we discuss the construction of an allowable permutation \(\pi \) such that \(\pi [S^*]=T^*\). It should not be a surprise that we construct the desired \(\pi \) as an extension (as in the freedom of action theorem) of a local bijection defined by consulting the parallel structures of \(S\) and \(T\). If \(((\beta ,-1,\{ x\} ),A,\delta )\) and \(((\beta ,-1,\{ y\} ),A,\delta )\) appear at corresponding positions in \(S\) and \(T\), we have \(\pi ^0\) send \((A,x)\) to \(y\). If \(((\beta ,-1,M),A,\delta )\) and \(((\beta ,-1,N),A,\delta )\) appear at corresponding positions in \(S\) and \(T\) and \(((\beta ,-1,\emptyset ),A,\delta )\) appears at the corresponding position in \(S^*=T^*\), we can provide that the map \(\chi _A\) used in the freedom of action construction maps \([M]\) to \([N]\). If \(((\beta ,-1,M),A,\delta )\) and \(((\beta ,-1,N),A,\delta )\) appear at corresponding positions in \(S\) and \(T\) and \(((\beta ,-1,\emptyset ),\chi _{y,T},\delta )\) appears at the corresponding position in \(S^*=T^*\), then we know by the inductive hypothesis that everything works before this item in the support that the action of the permutation \(\pi _A\) constructed so far will send \([M]\) to \([N]\). In both near-litter cases, we need to do a little more work to ensure that \(M\) is mapped exactly to \(N\) without exceptions. The idea is to extend \(\pi ^0_A\) so as to map each element of \(M\) which is not in \(M^\circ \) to something in \(N^\circ \cap N\), and each element of \(M^\circ \) which is not in \(M\) to something not in \(N\), and do the analogous things for \((\pi ^0_A)^{-1}\), and then fill in orbits, which only requires countably many atoms for each orbit [this is why we take \(\kappa \) to be uncountable], with the rule that images and preimages chosen in the filling out process are chosen so as not to create exceptions (their images and preimages will agree with expected actions on near-litters in the supports, which is really action on their local cardinals, because all elements of the symmetric differences of near-litters with their corresponding litters are treated individually). The extension of this local bijection will have exactly the desired effect. </p>
+<p>There are clearly \({\lt}\mu \) specifications since these are small structures built with components taken from sets of size \({\lt}\mu \). Notice the recursive dependency on the coding functions for items of lower types being taken from sets of size \({\lt}\mu \). </p>
+<p>Pulling out the main items from the discussion above, for formalisation targets: </p>
+<p><div class="definition_thmwrapper" id="def:support-spec">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.37</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:support-spec">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:coherent-tangle-data">Definition 3.26</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Fix coherent tangle data below \(\alpha \). A <em>support-specification</em> is …[this is quite long to define; we should get the text from more recent versions of Randall’s note] </p>
+<p>[Perhaps the coherence is not needed?] </p>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:count-support-specs">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">3.38</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#lem:count-support-specs">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:support-spec">Definition 3.37</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  There are \({\lt}\mu \)-many support specifications. </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:support-spec-realisation">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.39</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:support-spec-realisation">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:support-spec">Definition 3.37</a></li>
+          <li><a href="sect0001.html#def:strong-support">Definition 3.28</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Any support specification can be realised (non-uniquely) to give a strong support. </p>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:support-spec-realisation-unique">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">3.40</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#lem:support-spec-realisation-unique">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000057"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:support-spec-realisation">Definition 3.39</a></li>
+          <li><a href="sect0001.html#def:freedom-of-action-statement-old">Definition 3.33</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  If freedom of action holds at \(\alpha \), then realisations of a support specification are unique modulo the group action. That is, for any two realisations \(S, S'\) of a support specification \(S\), there is some allowable permutation \(\pi \) such that \(\pi S = S'\). </p>
+<p>[Note: we don’t need to explicitly assume freedom of action here: we could appeal to the <a href="sect0001.html#thm:freedom-of-action-old">theorem 3.35</a> to know that it holds. But the explicit assumption keeps things more modular, and avoids unnecessary dependency, which will be helpful in case it turns out the argument needs restructuring at any point.] </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000057">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Hopefully quite direct, given heavy use of freedom of action. May need some lemmas about realisations. </p>
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:strong-support-has-spec">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">3.41</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#lem:strong-support-has-spec">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:support-spec-realisation">Definition 3.39</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Every strong support can be obtained as the realisation of some specification </p>
+
+  </div>
+</div> </p>
+<p><div class="corollary_thmwrapper" id="cor:count-strong-supports">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">3.42</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#cor:count-strong-supports">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000058"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:strong-support">Definition 3.28</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  There are \({\lt}\mu \)-many orbits of strong supports, under the group action of allowable permutations. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000058">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> Immediate from <a href="sect0001.html#lem:count-support-specs">lemma 3.38</a> and <a href="sect0001.html#lem:strong-support-has-spec">lemma 3.41</a>. </p>
+
+  </div>
+</div>
+<p>Now, everything that we did with supports, we repeat with coding functions. </p>
+<p><div class="definition_thmwrapper" id="def:coding-function-spec">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.43</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:coding-function-spec">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:support-spec">Definition 3.37</a></li>
+          <li><a href="sect0001.html#def:coding-function">Definition 3.36</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  A <em>coding function specification</em> is …[again, see recent versions of Randall’s note] </p>
+<p>[Perhaps the coherence is not needed?] </p>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:count-coding-function-specs">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">3.44</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#lem:count-coding-function-specs">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:coding-function-spec">Definition 3.43</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  There are \({\lt}\mu \)-many coding function specifications. </p>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:coding-function-spec-realisation">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.45</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:coding-function-spec-realisation">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:coding-function-spec">Definition 3.43</a></li>
+          <li><a href="sect0001.html#def:support-spec-realisation">Definition 3.39</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Any coding function specification can be realised as a coding function. </p>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:coding-function-has-spec">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">3.46</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#lem:coding-function-has-spec">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000059"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:coding-function-spec-realisation">Definition 3.45</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Every coding function can be obtained as the realisation of some specification </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000059">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> See Randall’s more recent versions of the note. </p>
+
+  </div>
+</div>
+<p><div class="corollary_thmwrapper" id="cor:count-coding-functions">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">3.47</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#cor:count-coding-functions">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000060"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:coding-function">Definition 3.36</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  There are \({\lt}\mu \)-many coding functions. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000060">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> Immediate from <a href="sect0001.html#lem:count-coding-function-specs">lemma 3.44</a> and <a href="sect0001.html#lem:coding-function-has-spec">lemma 3.46</a>. </p>
+
+  </div>
+</div>
+<p><div class="corollary_thmwrapper" id="cor:count-tangles">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">3.48</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#cor:count-tangles">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000061"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:freedom-of-action-statement-old">Definition 3.33</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  There are \(\mu \)-many \(\alpha \)-tangles. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000061">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> Every tangle can be obtained as a coding function (of which there are \({\lt}\mu \)) applied to a support (of which there are \(\mu \)). </p>
+
+  </div>
+</div>
+<p>This completes the proof that each type is of size \(\mu \), which finally closes the loop on the recursion — or very nearly so: we still have to show that the orderings can be chosen to satisfy the extra technical conditions required. </p>
+<p><div class="lemma_thmwrapper" id="lem:position-functions-propagate">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">3.49</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#lem:position-functions-propagate">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000062"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:freedom-of-action-statement-old">Definition 3.33</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Given coherent tangle data below \(\alpha \) satisfying freedom of action at \(\alpha \), we can choose supports \(S(x)\) for all \(\alpha \)-tangles \(x\) and a position function \(\iota _\alpha : \tau _\alpha \to \mu \) satisfying the conditions demanded in <a href="ch-model-construction.html#def:tangle-data">definition 2.1</a>: </p>
+<ol class="enumerate">
+  <li><p>for each litter \(L\), the typed litter of \(L\) precedes the typed singletons of all its elements \(a \in L\) — explicitly, \(\iota (j(L)) {\lt} \iota (k(a))\); </p>
+</li>
+  <li><p>for each near-litter \(N\) which is not a litter, \(j(N)\) comes after its (typed) litter \(j(N^\circ )\), and after (the typed singletons of) all elements of \(N \mathrel {\triangle }N^\circ \); </p>
+</li>
+  <li><p>for each \(x\) in \(\tau _\alpha \) that is not a typed litter or singleton, \(x\) comes later than all of its designated support – explicitly, for each \((a,A)\) or \((N,A)\) in the in \(S(x)\), we must have \(\iota _\alpha (j(N)), \iota _\alpha (k(a)){\lt}\iota _\alpha (x)\). </p>
+</li>
+</ol>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000062">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> The constraints can be seen as defining a relation \(\prec \) on \(\tau _\alpha \); we want to extend \(\prec \) to a well-ordering of order-type \(\leq \mu \), or equivalently, to give an injection \(\iota :\tau _\alpha \to \mu \) sending \(\prec \) to \({\lt}\). We know: </p>
+<ul class="itemize">
+  <li><p>\(\prec \) has depth 4: it is of the form “litters \(\prec \) atoms \(\prec \) other near-litters \(\prec \) everything else”; </p>
+</li>
+  <li><p>each tangle has \({\lt}\kappa \)-many predecessors under \(\prec \); </p>
+</li>
+  <li><p>\(|\tau _\mu | \leq \mu \). </p>
+</li>
+</ul>
+<p> These conditions should suffice to imply the existence of the desired ordering/functions. </p>
+
+  </div>
+</div>
+<p><b class="bf">Note for the formal verification project:</b> I think everything is here, but filling in details to the satisfaction of a theorem prover will be work. </p>
+<h1 id="a0000000023">3.7 Completing the recursion</h1>
+<p>We can now wrap up the recursion. It is a little subtle: to know that the recursion fits together right as we build it up, we need to pin it down some more, to make it uniquely determined. </p>
+<p>[A probably cleaner approach would be to state and prove a general principle of <em>\(\lambda \)-dependent-choice</em>, (it might be already in mathlib), and apply that to choices of coherent data, avoiding the need for “very coherent”. The current approach is effectively unwinding what a general proof of \(\lambda \)-DC would give, applied to this case.] </p>
+<p><div class="definition_thmwrapper" id="def:very-coherent-data">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.50</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:very-coherent-data">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#lem:position-functions-propagate">Lemma 3.49</a></li>
+          <li><a href="sect0001.html#thm:freedom-of-action-old">Theorem 3.35</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  For \(\alpha \in \lambda + 1\), a choice of coherent tangle data below \(\alpha \) is <em>very coherent</em> if its ordering functions and designated supports at each level are the ones provided by <a href="sect0001.html#lem:position-functions-propagate">lemma 3.49</a> applied to the earlier levels, using <a href="sect0001.html#thm:freedom-of-action-old">theorem 3.35</a> to supply the assumption of freedom of action. </p>
+<p>[This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice. See also discusson above replacing this with an explicit principle of “dependent choice”.] </p>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:very-coherent-data-unique">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">3.51</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#lem:very-coherent-data-unique">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000063"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:coherent-tangle-data">Definition 3.26</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  For any \(\alpha \), very coherent data below \(\alpha \) is unique (if it exists). </p>
+<p>[Actually, we probably don’t need this: it effectively gets inlined in the main recursion.] </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000063">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>By induction on \(\beta {\lt} \alpha \): all components of the data at level \(\beta \) are either propositions, or the coherence condition fixes them in terms of earlier data. </p>
+
+  </div>
+</div>
+<p><div class="theorem_thmwrapper" id="thm:main-recursion">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">3.52</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#thm:main-recursion">#</a>
+    <a class="icon proof" href="sect0001.html#a0000000064"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#def:very-coherent-data">Definition 3.50</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  For every \(\alpha \in \lambda + 1\), there is a unique choice of very coherent data below \(\alpha \). </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000064">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>By induction on \(\beta {\lt} \alpha \): take the unique choice below each \(\beta {\lt} \alpha \); extend each one up to give very coherent data up-to-and-including each \(\beta {\lt} \alpha \); and then by uniqueness, these fit together to give very coherent data below \(\alpha \). </p>
+
+  </div>
+</div>
+<p> <div class="definition_thmwrapper" id="def:tangle-completed">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.53</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="sect0001.html#def:tangle-completed">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="sect0001.html#thm:main-recursion">Theorem 3.52</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  The (genuine,definitive!) tangles are the substructure \(\mathrm{Tangle}\) of \(\mathrm{Pretangle}\) given by the unique choice of very coherent data up to \(\lambda \), provided by <a href="sect0001.html#thm:main-recursion">theorem 3.52</a>. </p>
+
+  </div>
+</div> </p>
+<p><br /></p>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="ch-model-construction.html" title="Phase 1: The model construction"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Con(NF)"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0002.html" title="Tangles model tangled type theory"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>
