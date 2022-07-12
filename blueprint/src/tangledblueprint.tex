@@ -41,6 +41,8 @@
 \newcommand{\TTT}{\mathrm{TTT}}
 \newcommand{\pathto}{\dashrightarrow}
 \newcommand{\symdiff}{\mathrel{\triangle}}
+\newcommand{\Path}{\mathrm{Path}}
+\newcommand{\op}{\mathrm{op}}
 
 \chapter{Phase 0: Preliminaries} \label{ch:preliminaries}
 
@@ -88,9 +90,11 @@ In many ways, $-1$ should be viewed as a type index on the same footing as other
 \uses{def:type-index}
 \leanok
 \lean{con_nf.extended_index}
-By a \emph{path}, we mean a path in the directed graph $(\lambda^\bot,<)$; that is, a nonempty finite strictly increasing sequence of type indices $\alpha_0 < \cdots < \alpha_k$.  A path is \emph{proper} if its source (least element) is proper.
+By a \emph{path}, we mean a path in the directed graph (aka quiver) $(\lambda^\bot,<)$; that is, a nonempty finite strictly increasing sequence of type indices $\alpha_0 < \cdots < \alpha_k$.  A path is \emph{proper} if its source (least element) is proper.
 
 We will write paths as $A : \beta \pathto \alpha$.  We will write path concatenation and extension as $\gamma;A$, $A;B$, and similar.
+
+These may be viewed as the arrows of the free category on $(\lambda^\bot,<)$.  We mostly avoid using this categorical packaging, to keep things elementary and avoid unnecessary dependencies; but we mention it occasionally in the blueprint, as $\Path(\lambda^\bot)$.
 
 [There may be some terminological inconsistency: In places, paths are called \emph{extended type indices}, and are considered as sets rather than sequences; also, they are sometimes taken to be decreasing instead of increasing.]
 \end{definition}
@@ -213,7 +217,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
   \lean{con_nf.struct_perm.derivative}
   Any path $A : \beta \to \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
 
-  Moreover, this is functorial: they make $\Str$ into a functor $\mathrm{Path}(\Lambda)^\mathrm{op} \to \mathrm{Gp}$.
+  Moreover, this is functorial: they make $\Str$ into a functor $\Path(\Lambda^\bot)^\op \to \mathrm{Gp}$.
 
   [TODO: this should also depend on “paths”, but they aren’t yet explicitly in the blueprint.]
 \end{definition}
@@ -704,9 +708,48 @@ Overall, we have now shown:
 
 In this phase, we give the three hard theorems about the constructions of phase 1: strengthening supports, freedom of action, and constraining the number of tangles.
 
-These meet the major technical difficulty of the recursion: We need (it seems) to assume not just that we have sets of tangles etc at all earlier levels, but also that they fit together correctly, in the sense of being inductively defined at all levels by the constructions so far.  This is the reason why we need the major phase separation in the components of the recursion.
+These meet the major technical difficulty of the recursion: For each topic in phase 2, we need to assume something along the lines of tangle data at all earlier levels, and suitable connections between them”.  The tricky bit is structing the “…suitable connections…” cleanly.
 
-\section{Inductive assumptions: Coherent data at all lower levels}
+The bluntest approach, which should certainly suffice for everything, is to assume some form of “at every level, the tangle data is equal to what is constructed from the data at earlier levels, but the constructions of phase 1”.  This is made precise in “coherent tangle data” \cref{def:coherent-tangle-data}.  However, this is somewhat awkward to work with in formalisation.  A more cleanly-structured version is given by “freedom of action contexts”, \cref{def:foa-context}, which suffices at least for strong supports and freedom of action.  Hopefully it may also be possible to recast counting tangles in terms of \cref{def:foa-context} or some other algebraically-cleaner version, but we haven’t done so yet.
+
+\section{Freedom of action context}
+
+\begin{definition}
+  \label{def:foa-context}
+  \uses{def:tangle-data}
+  A \emph{freedom of action context} at a proper type index $\alpha$ consists of:
+
+  \begin{enumerate}
+  \item for every $\beta$ and path $A : \beta \to \alpha$, core tangle data $\All_A$, $\tau_A$ etc at $\beta$;
+  \item for each such $\beta$, $A$, when $A$ a \emph{proper} path (equivalently, when $\beta < \alpha$), \emph{full} tangle data extending the given core data;
+  \item for $A : \beta \to \alpha$ and $\gamma < \beta$, a \emph{derivative} map $(-)_\gamma : \All_{A} \to \All_{\gamma;A}$, commuting with the maps $\All_\bullet \to \Str_\bullet$ and $(-)_{\gamma} : \Str_\beta \to \Str_\gamma$.
+  \end{enumerate}
+
+  Notes:
+  \begin{enumerate}
+  \item The name “freedom of action context” is very much a placeholder; it would be good to find a better name.
+  \item This can be repackaged several equivalent ways.  For instance, the quantification over paths could be re-grouped as “for each $\beta < \alpha$ and $A : \gamma \to \beta$, full tangle data at $\gamma$; and core tangle data at $\alpha$”.  This would avoid needing to say “full tangle data extending the given core data”, but would make access to the core data less uniform.
+  \item Viewed categorically, the assumed maps make $\All$ into a functor on the slice category $(\Path (\lambda,<)/\alpha)^\op \to \mathrm{Gp}$, making the maps $\All \to \Str$ a natural transformation.
+  \item The motivation for assuming just “core data” at $\alpha$ itself is that for the main constructions, we’ll be working in the inductive step of the recursion where we’re assuming the data is already available at lower levels, and by the constructions of phase 1, we can assume some but not all of it is available at the “current level”.
+  \item The motivation for parametrising the lower data not just by levels but by paths is so that when we synthesise this data at $\alpha$ from similar data at each $\beta < \alpha$, no coherence between the given data is required.
+  \end{enumerate}
+\end{definition}
+
+\begin{definition}
+  \label{def:restrict-foa-context}
+  \uses{def:foa-context}
+  Given a freedom of action context at $\alpha$ and a path $A : \beta \to \alpha$, we can restrict the context along $A$ to get a freedom of action context at $\beta$.
+  %
+  Moreover, this is functorial in $A$.
+\end{definition}
+
+\begin{definition}
+  \label{def:synthesise-foa-context}
+  \uses{def:foa-context,def:tangle-data-propagates}
+  Given $\alpha \in \lambda$, and a freedom of action context at each $\beta < \alpha$, together with extensions of their top-level core tangle data to full tangle data at each $\beta < \alpha$, there is a \emph{synthesised} freedom of action context at $\alpha$, with its top-level core tangle data given by the constructions of phase 1.
+\end{definition}
+
+\section{Coherent tangle data}
 
 \begin{definition}
   \label{def:concrete-tangle-data}
