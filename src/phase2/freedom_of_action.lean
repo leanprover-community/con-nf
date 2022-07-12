@@ -237,7 +237,33 @@ lemma flexible_iff (L : litter) (A : extended_index B) :
 flexible L A ↔ ∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
     (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α)),
 L ≠ (f_map_path (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t) :=
-sorry
+begin
+  unfold flexible,
+  split; intro h,
+  { intros β δ γ hγ hδ hγδ A t ht,
+    refine not_not.2 h _, push_neg,
+    sorry },
+  { intros c hc,
+    rw constrains_iff at hc,
+    obtain ⟨L, a, ha, A', hc, hA'⟩ | ⟨N, hN, A', hc, hA'⟩ | ⟨N, a, ha, A', hc, hA'⟩ | ⟨β, δ, γ, hγ, hδ, hγδ, A', t, ht, c', hc, h'⟩ := hc,
+    { cases hA' },
+    { obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 hA',
+      simp only at hLN,
+      rw ← hLN at hN,
+      apply hN, refl },
+    { obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 hA',
+      suffices : litter_set N.1 = N.2,
+      { have that := symm_diff_self (litter_set N.1),
+        nth_rewrite 1 this at that,
+        rw that at ha, exact ha },
+      simp only at hLN,
+      rw ← hLN, refl },
+      unfold extended_index at A,
+    specialize h hγ hδ hγδ _ t,
+    obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 h',
+    simp only at hLN,
+    exact h (congr_arg sigma.fst hLN) }
+end
 
 namespace unary_spec
 
@@ -431,10 +457,29 @@ instance has_le : has_le (allowable_partial_perm B) := ⟨perm_le B⟩
 
 /-! We now prove that the claimed preorder really is a preorder. -/
 
-lemma extends_refl (σ : allowable_partial_perm B) : σ ≤ σ := sorry
+lemma extends_refl (σ : allowable_partial_perm B) : σ ≤ σ :=
+⟨set.subset.rfl,
+ λ _ _ _ _ h1 h2, by cases h1 h2,
+ λ _ _ _ _ _ h1 h2, by cases h1 h2⟩
 
 lemma extends_trans (ρ σ τ : allowable_partial_perm B)
-  (h₁ : ρ ≤ σ) (h₂ : σ ≤ τ) : ρ ≤ τ := sorry
+  (h₁ : ρ ≤ σ) (h₂ : σ ≤ τ) : ρ ≤ τ :=
+begin
+  obtain ⟨hsub, hflex, hatom⟩ := h₁,
+  obtain ⟨hsub', hflex', hatom'⟩ := h₂,
+  refine ⟨hsub.trans hsub', λ L N A hLA hnin hin, _, λ a b L hab A hnin hin, _⟩,
+  { by_cases (sum.inr (L.to_near_litter, N), A) ∈ σ.val,
+    { obtain ⟨h1, h2⟩ := hflex L N A hLA hnin h,
+      split; intros L' A' hLA'; specialize h1 L' A' hLA'; specialize h2 L' A' hLA',
+      { exact set.image_subset binary_condition.domain hsub' h1 },
+      { exact set.image_subset binary_condition.range hsub' h2 } },
+    { exact hflex' L N A hLA h hin } },
+  { by_cases (sum.inl (a, b), A) ∈ σ.val,
+    { intros c hc,
+      obtain ⟨d, hd⟩ := hatom a b L hab A hnin h c hc,
+      refine ⟨d, hsub' hd⟩ },
+    { exact hatom' a b L hab A h hin } }
+end
 
 instance preorder : preorder (allowable_partial_perm B) := {
   le := perm_le B,
