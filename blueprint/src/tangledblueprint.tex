@@ -793,6 +793,8 @@ In order to state the theorem precisely, we must first set up a framework for di
   \label{def:condition-dom-rge}
   \uses{def:binary-condition}
   Previously, we viewed $\alpha$-conditions $(x,A) \in \Cond_\alpha$ as representing the conditions $\pi_A(x) = x$, as used in supports (and under this view we could identify them with the binary conditions $(x,y,A)$).  In this section, we will more often view them as elements of the domain or range of a set of binary conditions.  Precisely, for a set $\sigma$ of binary conditions, we take $\dom \sigma := \{ (x,A) \mid (x,y,A) \in \sigma \}$, and similarly $\rge \sigma := \{ (y,A) \mid (x,y,a) \in \sigma \}$.
+
+  By a slight abuse of terminology, when working with sets of conditions, we will often say “litter” to mean “litter-with-path”, i.e.\ “condition of the form $(L,A)$”, and similarly for near-litter” and “atom”.
 \end{definition}
 
 \begin{definition}
@@ -800,15 +802,17 @@ In order to state the theorem precisely, we must first set up a framework for di
   \uses{def:condition-dom-rge}
   We extend standard properties of binary relations to sets of binary conditions:
 
-  Say a set of binary conditions $\sigma \subseteq \BiCond_\alpha$ is \emph{total} if its domain is $\Cond_\alpha$; co-total if its range is; and 1-1 if whenever $(x,y,A)$ and $(x',y',A')$ are in $\sigma$, $x = x'$ if and only if $y = y'$.
+  Say a set of binary conditions $\sigma \subseteq \BiCond_\alpha$ is \emph{total} if its domain is $\Cond_\alpha$; co-total if its range is; and one-to-one if whenever $(x,y,A)$ and $(x',y',A')$ are in $\sigma$, $x = x'$ if and only if $y = y'$.
+
+  The \emph{dual} $\sigma^{-1}$ of a set of binary conditions is $\{ (y,x,A) \mid (x,y,A) \in \sigma \}$.
 \end{definition}
 
 \begin{proposition}
   \label{prop:total-1-1-gives-perm}
   \uses{def:condition-total-1-1,def:conditions-from-perm}
-  A set of binary conditions is the graph of a structural permutation precisely if it is 1-1 and total.
+  A set of binary conditions is the graph of a structural permutation precisely if it is one-to-one and total.
 
-  (NOTE: this may not be explicitly needed, but it is helpful to know, and should be a good warmup and definition-test ahead of the main freedom of action theorem.)
+  (NOTE: sthis may not be explicitly needed, but it is helpful to know, and should be a good warmup and definition-test ahead of the main freedom of action theorem.)
 \end{proposition}
 
 \begin{proposition}
@@ -816,6 +820,29 @@ In order to state the theorem precisely, we must first set up a framework for di
   \uses{def:condition-total-1-1,def:condition-functoriality}
   If a set of $\alpha$-conditions $\sigma$ is total (resp.\ co-total, 1-1) then so is its restriction $\sigma_A$ for any path $A : \beta \to \alpha$.
 \end{proposition}
+
+\begin{definition}
+  \label{def:flexible-condition}
+  \uses{def:foa-context}
+  Given a freedom of action context at a proper type index $\alpha$, a \emph{flexible litter} is a condition $(L,A)$, with $L$ a litter, such that $L$ is not in the image of any of the $f$-maps $f^A_{\gamma,\delta}$ (for any $\gamma,\delta < \beta \pathto^A \alpha$).
+\end{definition}
+
+\begin{definition}
+  \label{def:allowable-partial-perm}
+  \uses{def:condition-total-1-1,def:condition-dom-rge}
+  Assume a freedom of action context at a proper type index $\alpha$.
+
+  An \emph{allowable partial permutation} is a set $\sigma$ of binary $\alpha$-conditions satisfying the following properties:
+  \begin{enumerate}
+  \item It is one-to-one.
+  \item (Flexible litters:)  Either $\dom \sigma$ and $\rge \sigma$ both include all flexible litters, or else they both include \emph{co-$\mu$-many}, i.e.\ there are at least $\mu$-many flexible litters not in $\dom \sigma$, and dually for $\rge \sigma$.
+  \item (Atoms:) For each litter $(L,A)$ not in $\dom \sigma$, then $\dom \sigma$ contains $<\kappa$-many atoms $(x,A)$ with $x \in L$; and dually for $\rge(\sigma)$.  On the other hand, for each litter $(L,A) \i \dom \sigma$ (say $M$ is the unique near-litter such that $(L,M,A) \in \sigma$), then either $\dom \sigma$ contains $<\kappa$-many atoms of $(L,A)$ and $\rge \sigma$ contains $<\kappa$-many atoms of $(M,A)$, or else $\dom \sigma$ contains all atoms of $(L,A)$ and all except $<\kappa$-many of them are mapped to atoms in $(M,A)$, and dually, $\rge \sigma$ contains all atoms of $(M,A)$ and maps them almost all to $(L,A)$; and dually for each litter $(L,A) \in \rge \sigma$.
+  \item (Near-litters.) For each near-litter $(N,A) \in \dom \sigma$, its litter $(N^\circ,A)$ and all atoms $(x,A)$ from the symmetric difference $N \symdiff N^\circ$ are also in $A$, and $\sigma_A(N) = \sigma_A(N^\circ) \symdiff \sigma_A''(N \symdiff N^\circ)$; and dually for each near-litter in $\rge \sigma$.
+  \item (Non-flexible litters.) Whenever $\sigma$ contains some triple $(f^A_{\gamma,\delta}(x),N,(-1;\delta;A))$ (where $\gamma,\delta < \beta \pathto^A \alpha$, $\delta$ is proper, and $x \in \tau_{\gamma;A}$), then $(\dom \sigma)_{\gamma;A}$ supports $x$, and every allowable permutation $\rho \in \All_A$ extending $\sigma_A$ has $N = f^A_{\gamma,\delta}(\rho_\gamma x)$.  Dually, whenever $\sigma$ contains some $(N,f^A_{\gamma,\delta}(x),(-1;\delta;A))$, then $(\rge \sigma)_{\gamma;A}$ supports $x$, and any allowable $\rho$ extending $\sigma_A$ has $N = f^A_{\gamma,\delta}(\rho^{-1}_\gamma x)$ (note the inverse in this case).
+  \end{enumerate}
+
+  We will often refer to these conditions individually, as “the allowability condition for atoms”, etc.
+\end{definition}
 
 \section{Coherent tangle data}
 
