@@ -111,19 +111,23 @@ def struct_perm.satisfies {α : type_index} (π : struct_perm α) (σ : spec α)
 
 /- There is an injection from the type of structural permutations to the type of specifications,
 in such a way that any structural permutation satisfies its specification. We construct this
-specification by simply drawing the graph of the permutation. It suffices to construct the graph of
-atoms with each derivative; the graphs of near-litters is then implicit. -/
+specification by simply drawing the graph of the permutation on atoms and near-litters. -/
 def struct_perm.to_spec {α : type_index} (π : struct_perm α) : spec α :=
-set.range (λ (x : atom × extended_index α), ⟨sum.inl ⟨x.fst, derivative x.snd π • x.fst⟩, x.snd⟩)
+set.range (λ (x : atom × extended_index α),
+  ⟨sum.inl ⟨x.fst, derivative x.snd π • x.fst⟩, x.snd⟩) ∪
+set.range (λ (x : near_litter × extended_index α),
+  ⟨sum.inr ⟨x.fst, derivative x.snd π • x.fst⟩, x.snd⟩)
 
 /-- Any structural permutation satisfies its own specification. -/
 lemma struct_perm.satisfies_to_spec {α : type_index} (π : struct_perm α) : π.satisfies π.to_spec :=
 begin
   unfold struct_perm.satisfies struct_perm.to_spec struct_perm.satisfies_cond,
-  rintros ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ ⟨⟨a, b⟩, ha⟩; simp only [prod.mk.inj_iff] at ha,
-  { simp,
-    rw [← ha.2, ← ha.1.1], exact ha.1.2 },
-  cases ha.1
+  -- sorry, I realised the definition needs the graph of near-litters as well as the graph of atoms
+  sorry
+  -- rintros ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ ⟨⟨a, b⟩, ha⟩; simp only [prod.mk.inj_iff] at ha,
+  -- { simp,
+  --   rw [← ha.2, ← ha.1.1], exact ha.1.2 },
+  -- cases ha.1
 end
 
 /-- The map from structural permutations to their specifications is injective. -/
@@ -182,6 +186,26 @@ begin
   unfold spec.lower binary_condition.extend_path,
   simp,
 end
+
+/-- Lowering a specification corresponds exactly to forming the derivative of the corresponding
+structural permutation. -/
+lemma struct_perm.spec_lower_eq_derivative {α β : type_index} (π : struct_perm α)
+  (A : path (α : type_index) β) : π.to_spec.lower A = (struct_perm.derivative A π).to_spec := sorry
+
+/-- A specification is total if it specifies where every element in its domain goes. -/
+def spec.total {α : type_index} (σ : spec α) : Prop := σ.domain = set.univ
+/-- A specification is co-total if it specifies where every element in its codomain came from. -/
+def spec.co_total {α : type_index} (σ : spec α) : Prop := σ.range = set.univ
+
+/-- If we lower a total specification along a path, it is still total.
+This is one part of `total-1-1-restriction` in the blueprint. -/
+lemma spec.lower_total {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
+  σ.total → (σ.lower A).total := sorry
+
+/-- If we lower a co-total specification along a path, it is still co-total.
+This is one part of `total-1-1-restriction` in the blueprint. -/
+lemma spec.lower_co_total {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
+  σ.co_total → (σ.lower A).co_total := sorry
 
 variables (α : Λ) [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
   [phase_2_assumptions α] (B : le_index α)
@@ -338,6 +362,18 @@ where `a, b` may be either atoms or near-litters.
 /-- A specification is one-to-one if it is one-to-one on all paths. -/
 def one_to_one (σ : spec B) : Prop := ∀ A, σ.one_to_one_path B A
 
+/-- If we lower a one-to-one specification along a path, it is still one-to-one.
+This is one part of `total-1-1-restriction` in the blueprint. -/
+lemma lower_one_to_one {β : type_index} (σ : spec B) (A : path (B : type_index) β) :
+  σ.one_to_one B → (σ.lower A).one_to_one ⟨β, path.comp B.path A⟩ := sorry
+
+/-- A specification is the graph of a structural permutation if it is one-to-one and total.
+This is one direction of implication of `total-1-1-gives-perm` on the blueprint - the other
+direction may not be needed. We may also require `hσ₃ : σ.co_total` - but hopefully this isn't
+needed. -/
+lemma graph_struct_perm (σ : spec B) (hσ₁ : σ.one_to_one B) (hσ₂ : σ.total) :
+  ∃ (π : struct_perm B), π.to_spec = σ := sorry
+
 /-- The allowability condition on atoms.
 In an absent litter, we must specify only `< κ`-many atoms.
 In a present litter, we can specify either `< κ`-many atoms, or all of the atoms in the litter, and
@@ -469,21 +505,29 @@ admits an allowable permutation `π` extending it. -/
 def freedom_of_action : Prop := ∀ σ : allowable_partial_perm B,
 ∃ (π : allowable_path B), (allowable_path_to_struct_perm B π).satisfies σ.val
 
+/-- If an allowable partial permutation `σ` supports some `α`-tangle `t`, any permutations extending
+`σ` must map `t` to the same value.
+TODO: Can this be proven only assuming the permutations are structural? -/
+lemma eq_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
+  (ht : supports (allowable_path_to_struct_perm B) σ.val t) (π₁ π₂ : allowable_path B)
+  (hπ₁ : (allowable_path_to_struct_perm B π₁).satisfies σ.val)
+  (hπ₂ : (allowable_path_to_struct_perm B π₂).satisfies σ.val) : π₁ • t = π₂ • t := sorry
+
 /-- The action lemma. If freedom of action holds, and `σ` is any allowable partial permutation
 that supports some `α`-tangle `t`, then there exists a unique `α`-tangle `σ(t)` such that every
 allowable permutation `π` extending `σ` maps `t` to `σ(t)`.
 
 Proof: Freedom of action gives some extension `π`, and hence some candidate value; the support
-condition implies that any two extensions agree. -/
+condition implies that any two extensions agree. Use the above lemma for the second part. -/
 lemma exists_tangle_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
-  (ht : supports (allowable_path_to_struct_perm B) σ.val t) :
+  (foa : freedom_of_action B) (ht : supports (allowable_path_to_struct_perm B) σ.val t) :
   ∃ s, ∀ π, (allowable_path_to_struct_perm B π).satisfies σ.val → π • t = s := sorry
 
 namespace allowable_partial_perm
 
 /--
 We now define a preorder on partial allowable permutations.
-`σ ≤ ρ` means:
+`σ ≤ ρ` (written `σ ⊑ ρ` in the blueprint) means:
 
 * `σ` is a subset of `ρ`;
 * if `ρ` has any new flexible litter, then it has all (in both domain and range);
@@ -607,6 +651,32 @@ zorn_preorder₀ _ (λ c hc₁ hc₂,
     mem_perm_le _ _ _ _ hc₁,
     maximal_Union _ _ _ σ hc₁⟩)
 
+/-- Any maximal allowable partial permutation under `≤` is total. -/
+lemma total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ) : σ.val.total := sorry
+
+/-- Any allowable partial permutation extends to an allowable permutation at level `α`, given that
+it is total and co-total. This is `total-allowable-partial-perm-actual` in the blueprint.
+We may need extra hypotheses - I'm (zeramorphic) not quite sure where the FoA assumptions are
+supposed to come in yet. -/
+lemma extends_to_allowable_of_total (σ : allowable_partial_perm ⟨α, path.nil⟩)
+  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total) :
+  ∃ (π : allowable_path ⟨α, path.nil⟩), (allowable_path_to_struct_perm _ π).satisfies σ.val := sorry
+
+noncomputable def to_allowable_of_total (σ : allowable_partial_perm ⟨α, path.nil⟩)
+  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total) : allowable_path ⟨α, path.nil⟩ :=
+Exists.some $ extends_to_allowable_of_total σ hσ₁ hσ₂
+
+lemma to_allowable_of_total_spec (σ : allowable_partial_perm ⟨α, path.nil⟩)
+  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total) :
+  (allowable_path_to_struct_perm _  $ σ.to_allowable_of_total hσ₁ hσ₂).satisfies σ.val :=
+Exists.some_spec $ extends_to_allowable_of_total σ hσ₁ hσ₂
+
 end allowable_partial_perm
+
+/-- The *freedom of action theorem*. If freedom of action holds at all lower levels and paths (all
+`B : lt_index` in our formulation), it holds at level `α`. -/
+theorem freedom_of_action_propagates
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
+  freedom_of_action ⟨α, path.nil⟩ := sorry
 
 end con_nf
