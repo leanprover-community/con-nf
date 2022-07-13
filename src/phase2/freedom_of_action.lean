@@ -337,9 +337,13 @@ or all of the flexible litters. -/
 
 end unary_spec
 
+
+
+
 namespace spec
 
 variable (B)
+
 
 /-!
 We now set out the allowability conditions for specifications of permutations.
@@ -365,7 +369,25 @@ def one_to_one (σ : spec B) : Prop := ∀ A, σ.one_to_one_path B A
 /-- If we lower a one-to-one specification along a path, it is still one-to-one.
 This is one part of `total-1-1-restriction` in the blueprint. -/
 lemma lower_one_to_one {β : type_index} (σ : spec B) (A : path (B : type_index) β) :
-  σ.one_to_one B → (σ.lower A).one_to_one ⟨β, path.comp B.path A⟩ := sorry
+  σ.one_to_one B → (σ.lower A).one_to_one ⟨β, path.comp B.path A⟩ :=
+  begin
+    intro ho,
+    unfold one_to_one,
+    intro he,
+    split; rintros hz ha hb hc hd; dsimp at hb hd,
+    {
+      sorry,
+    },
+    {
+      sorry,
+    },
+    {
+      sorry,
+    },
+    {
+      sorry,
+      },
+  end
 
 /-- A specification is the graph of a structural permutation if it is one-to-one and total.
 This is one direction of implication of `total-1-1-gives-perm` on the blueprint - the other
@@ -461,7 +483,14 @@ section lower
 variables {σ : spec B} {β : Λ} (A : path (B : type_index) β) (hβ : (β : type_index) < B)
 
 lemma lower_one_to_one (hσ : σ.allowable_spec B) :
-  (σ.lower A).one_to_one (le_index.mk β (path.comp B.path A)) := sorry
+  (σ.lower A).one_to_one (le_index.mk β (path.comp B.path A)) :=
+begin
+
+  -- Apply is bad here? Maybe replace with something better (Alex)
+  apply spec.lower_one_to_one _ _,
+  exact hσ.one_to_one,
+
+end
 
 lemma lower_atom_cond (hσ : σ.allowable_spec B) :
   ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C := sorry
