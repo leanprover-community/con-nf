@@ -593,8 +593,53 @@ parts of the definition of ≤. -/
 
 variables (c : set (allowable_partial_perm B))
 
+lemma is_subset_chain_of_is_chain (hc : is_chain (≤) c) :
+  is_chain (⊆) (subtype.val '' c) :=
+begin
+  rintros σ ⟨x, hx₁, hx₂⟩ τ ⟨y, hy₁, hy₂⟩ hneq,
+  cases hc hx₁ hy₁ (λ he, hneq _);
+  rw [← hx₂, ← hy₂],
+  { exact or.inl h.subset, },
+  { exact or.inr h.subset, },
+  { rw he, }
+end
+
 lemma one_to_one_Union (hc : is_chain (≤) c) :
-  spec.one_to_one B ⋃₀ (subtype.val '' c) := sorry
+  spec.one_to_one B ⋃₀ (subtype.val '' c) :=
+begin
+  intro A,
+  split,
+  all_goals { intros b x hx y hy,
+    rw set.mem_set_of at hx hy,
+    rw set.mem_sUnion at hx hy,
+    obtain ⟨σx, Hx, hx⟩ := hx,
+    obtain ⟨σy, Hy, hy⟩ := hy,
+    have hc' := is_subset_chain_of_is_chain B c hc Hx Hy,
+    by_cases (σx = σy),
+    rw ← h at hy,
+    obtain ⟨⟨σx,hσx⟩, Hx₁, rfl⟩ := Hx,
+    swap,
+    specialize hc' h,
+    cases hc',
+    have hx' := set.mem_of_mem_of_subset hx hc',
+    obtain ⟨⟨σy,hσy⟩, Hy₁, rfl⟩ := Hy,
+    swap,
+    have hy' := set.mem_of_mem_of_subset hy hc',
+    obtain ⟨⟨σx,hσx⟩, Hx₁, rfl⟩ := Hx, },
+  -- Note: there must be a better way of doing this below.
+  exact (hσx.one_to_one A).left_atom b hx hy',
+  exact (hσy.one_to_one A).left_atom b hx' hy,
+  exact (hσx.one_to_one A).left_atom b hx hy,
+  exact (hσx.one_to_one A).right_atom b hx hy',
+  exact (hσy.one_to_one A).right_atom b hx' hy,
+  exact (hσx.one_to_one A).right_atom b hx hy,
+  exact (hσx.one_to_one A).left_near_litter b hx hy',
+  exact (hσy.one_to_one A).left_near_litter b hx' hy,
+  exact (hσx.one_to_one A).left_near_litter b hx hy,
+  exact (hσx.one_to_one A).right_near_litter b hx hy',
+  exact (hσy.one_to_one A).right_near_litter b hx' hy,
+  exact (hσx.one_to_one A).right_near_litter b hx hy,
+end
 
 lemma atom_cond_Union (hc : is_chain (≤) c) :
   ∀ L A, spec.atom_cond B (⋃₀ (subtype.val '' c)) L A := sorry
