@@ -67,6 +67,17 @@ def binary_condition.domain {α : type_index} (cond : binary_condition α) : sup
 def binary_condition.range {α : type_index} (cond : binary_condition α) : support_condition α :=
 ⟨cond.fst.elim (λ atoms, sum.inl atoms.snd) (λ Ns, sum.inr Ns.snd), cond.snd⟩
 
+/-- There are `μ` binary conditions. -/
+lemma mk_binary_condition (α : type_index) : #(binary_condition α) = #μ :=
+begin
+  unfold binary_condition,
+  have h := μ_strong_limit.is_limit.aleph_0_le,
+  rw [← cardinal.mul_def, ← cardinal.add_def, ← cardinal.mul_def, ← cardinal.mul_def, mk_atom,
+      mk_near_litter, cardinal.mul_eq_self h, cardinal.add_eq_self h],
+  exact cardinal.mul_eq_left h (le_trans (mk_extended_index α) (le_of_lt (lt_trans Λ_lt_κ κ_lt_μ)))
+      (mk_extended_index_ne_zero α),
+end
+
 /-- A *unary specification* is a set of support conditions. This can be thought of as either the
 domain or range of a `spec`. -/
 abbreviation unary_spec (α : type_index) : Type u := set (support_condition α)
@@ -74,11 +85,6 @@ abbreviation unary_spec (α : type_index) : Type u := set (support_condition α)
 /-- A *specification* of an allowable permutation is a set of binary conditions on the allowable
 permutation. -/
 abbreviation spec (α : type_index) : Type u := set (binary_condition α)
-
-/-- There are `< μ` unary specifications. TODO: is this lemma actually required? -/
-lemma mk_unary_spec (α : type_index) : #(unary_spec α) < #μ := sorry
-/-- There are `< μ` support specifications. -/
-lemma mk_spec (α : type_index) : #(spec α) < #μ := sorry
 
 instance (α : type_index) : has_inv (spec α) := ⟨λ σ, {c | c⁻¹ ∈ σ}⟩
 

@@ -49,6 +49,9 @@ instance extended_index_inhabited_bot : inhabited (extended_index ⊥) :=
 instance extended_index_inhabited (α : type_index) : inhabited (extended_index α) :=
 ⟨with_bot.rec_bot_coe path.nil extended_index.direct α⟩
 
+/-- There exists an `α`-extended type index. --/
+lemma mk_extended_index_ne_zero (α : type_index) : #(extended_index α) ≠ 0 := cardinal.mk_ne_zero _
+
 /-- For our purposes, we let any monoid act trivially on extended type indices. -/
 instance {α : Type*} [monoid α] {β : type_index} : mul_action α (extended_index β) :=
 { smul := λ _, id, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
