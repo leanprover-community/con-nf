@@ -122,12 +122,15 @@ set.range (λ (x : near_litter × extended_index α),
 lemma struct_perm.satisfies_to_spec {α : type_index} (π : struct_perm α) : π.satisfies π.to_spec :=
 begin
   unfold struct_perm.satisfies struct_perm.to_spec struct_perm.satisfies_cond,
-  -- sorry, I realised the definition needs the graph of near-litters as well as the graph of atoms
-  sorry
-  -- rintros ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ ⟨⟨a, b⟩, ha⟩; simp only [prod.mk.inj_iff] at ha,
-  -- { simp,
-  --   rw [← ha.2, ← ha.1.1], exact ha.1.2 },
-  -- cases ha.1
+  rintros ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ hxy; cases hxy,
+  { simp only [set.mem_range, prod.mk.inj_iff, prod.exists, exists_eq_right, exists_eq_left] at hxy,
+    rw sum.elim_inl,
+    exact hxy },
+  { simp only [set.mem_range, prod.mk.inj_iff, false_and, exists_false] at hxy, cases hxy },
+  { simp only [set.mem_range, prod.mk.inj_iff, false_and, exists_false] at hxy, cases hxy },
+  { simp only [set.mem_range, prod.mk.inj_iff, prod.exists, exists_eq_right, exists_eq_left] at hxy,
+    rw sum.elim_inr,
+    exact hxy }
 end
 
 /-- The map from structural permutations to their specifications is injective. -/
@@ -560,15 +563,14 @@ lemma extends_refl (σ : allowable_partial_perm B) : σ ≤ σ :=
 lemma extends_trans (ρ σ τ : allowable_partial_perm B)
   (h₁ : ρ ≤ σ) (h₂ : σ ≤ τ) : ρ ≤ τ :=
 begin
-  obtain ⟨hsub, hflex, hatom⟩ := h₁,
-  obtain ⟨hsub', hflex', hatom'⟩ := h₂,
+  obtain ⟨hsub, hflx, hatom⟩ := h₁,
+  obtain ⟨hsub', hflx', hatom'⟩ := h₂,
   refine ⟨hsub.trans hsub', λ L N A hLA hnin hin, _, λ a b L hab A hnin hin, _⟩,
   { by_cases (sum.inr (L.to_near_litter, N), A) ∈ σ.val,
-    { obtain ⟨h1, h2⟩ := hflex L N A hLA hnin h,
-      split; intros L' A' hLA'; specialize h1 L' A' hLA'; specialize h2 L' A' hLA',
-      { exact set.image_subset binary_condition.domain hsub' h1 },
-      { exact set.image_subset binary_condition.range hsub' h2 } },
-    { exact hflex' L N A hLA h hin } },
+    { split; intros l a hla,
+      { exact set.image_subset binary_condition.domain hsub' ((hflx L N A hLA hnin h).1 l a hla) },
+      { exact set.image_subset binary_condition.range hsub' ((hflx L N A hLA hnin h).2 l a hla) } },
+    { exact hflx' L N A hLA h hin } },
   { by_cases (sum.inl (a, b), A) ∈ σ.val,
     { intros c hc,
       obtain ⟨d, hd⟩ := hatom a b L hab A hnin h c hc,
