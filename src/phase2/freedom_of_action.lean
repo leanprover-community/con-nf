@@ -267,6 +267,8 @@ end
 
 namespace unary_spec
 
+variable (B)
+
 /-- A unary specification is *support-closed* if whenever `⟨f_{γ,δ}^A(x), A⟩ ∈ σ`, `S_{γ:A}`
 supports `x`. -/
 def support_closed (σ : unary_spec B) : Prop :=
@@ -279,6 +281,8 @@ def support_closed (σ : unary_spec B) : Prop :=
       : support_condition B) ∈ σ →
       supports (allowable_path_to_struct_perm (lt_index.mk' hγ (path.comp B.path A) : le_index α))
         (σ.lower (path.cons A hγ)) t
+
+/-
 
 -- TODO: In the following definitions, is `A` supposed to be an external parameter or included
 -- in some kind of quantification?
@@ -305,9 +309,13 @@ or all of the flexible litters. -/
 | all : (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ) →
     flex_small
 
+-/
+
 end unary_spec
 
 namespace spec
+
+variable (B)
 
 /-!
 We now set out the allowability conditions for specifications of permutations.
@@ -328,7 +336,7 @@ where `a, b` may be either atoms or near-litters.
 (right_near_litter : ∀ M, {N | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
 
 /-- A specification is one-to-one if it is one-to-one on all paths. -/
-def one_to_one (σ : spec B) : Prop := ∀ A, σ.one_to_one_path A
+def one_to_one (σ : spec B) : Prop := ∀ A, σ.one_to_one_path B A
 
 /-- The allowability condition on atoms.
 In an absent litter, we must specify only `< κ`-many atoms.
@@ -386,17 +394,19 @@ def non_flexible_cond (σ : spec B) : Prop :=
       (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil)
       (allowable_derivative_nil_comp (path.cons (path.comp B.path A) hγ) ρ • t)).to_near_litter
 
-variable (B)
-
+/-- A specification is *allowable* if it satisfies the following eight conditions.
+Conditions 5-8 are all conditions on non-flexible litters, bundled into what the blueprint names
+condition 5.
+-/
 structure allowable_spec (σ : spec B) : Prop :=
-(domain_closed : σ.domain.support_closed)
-(range_closed : σ.range.support_closed)
-(one_to_one : σ.one_to_one)
-(atom_cond : ∀ L A, σ.atom_cond L A)
-(near_litter_cond : ∀ N A, σ.near_litter_cond N A)
-(flexible_cond : σ.flexible_cond)
-(non_flexible_cond : σ.non_flexible_cond)
-(inv_non_flexible_cond : σ⁻¹.non_flexible_cond)
+(one_to_one : σ.one_to_one B)
+(atom_cond : ∀ L A, σ.atom_cond B L A)
+(near_litter_cond : ∀ N A, σ.near_litter_cond B N A)
+(flexible_cond : σ.flexible_cond B)
+(domain_closed : σ.domain.support_closed B)
+(range_closed : σ.range.support_closed B)
+(non_flexible_cond : σ.non_flexible_cond B)
+(inv_non_flexible_cond : σ⁻¹.non_flexible_cond B)
 
 end spec
 
@@ -405,13 +415,54 @@ variable (B)
 /-- An *allowable partial permutation* is a specification that is allowable as defined above. -/
 def allowable_partial_perm := {σ : spec B // σ.allowable_spec B}
 
-/-- The restriction lemma. If `σ` is a partial allowable permutation, then so is `σ` restricted to
-a lower path `A`. The proof should be mostly straightforward. The non-trivial bit is the "co-large
-or all" on flexible litters: in a proper restriction, `μ`-many non-flexible litters get freed up
-and become flexible, so if it was “all”, it becomes "co-large". -/
-lemma lower_allowable (σ : spec B) {β : Λ} (A : path (B : type_index) β) (hβ : (β : type_index) < B)
-  (hσ : σ.allowable_spec B) : (σ.lower A).allowable_spec (le_index.mk β (path.cons B.path hβ)) :=
-sorry
+/-! We prove the restriction lemma: if `σ` is a partial allowable permutation, then so is `σ`
+restricted to a lower path `A`. The proof should be mostly straightforward. The non-trivial bit is
+the "co-large or all" on flexible litters: in a proper restriction, `μ`-many non-flexible litters
+get freed up and become flexible, so if it was “all”, it becomes "co-large". -/
+
+section lower
+
+variables {σ : spec B} {β : Λ} (A : path (B : type_index) β) (hβ : (β : type_index) < B)
+
+lemma lower_one_to_one (hσ : σ.allowable_spec B) :
+  (σ.lower A).one_to_one (le_index.mk β (path.comp B.path A)) := sorry
+
+lemma lower_atom_cond (hσ : σ.allowable_spec B) :
+  ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C := sorry
+
+lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
+  ∀ N C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N C := sorry
+
+lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
+  (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) := sorry
+
+lemma lower_domain_closed (hσ : σ.allowable_spec B) :
+  (σ.lower A).domain.support_closed (le_index.mk β (path.comp B.path A)) := sorry
+
+lemma lower_range_closed (hσ : σ.allowable_spec B) :
+  (σ.lower A).range.support_closed (le_index.mk β (path.comp B.path A)) := sorry
+
+-- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
+
+lemma lower_non_flexible_cond (hσ : σ.allowable_spec B) :
+  (σ.lower A).non_flexible_cond (le_index.mk β (path.comp B.path A)) := sorry
+
+lemma lower_inv_non_flexible_cond (hσ : σ.allowable_spec B) :
+  (σ.lower A)⁻¹.non_flexible_cond (le_index.mk β (path.comp B.path A)) := sorry
+
+lemma lower_allowable (hσ : σ.allowable_spec B) :
+  (σ.lower A).allowable_spec (le_index.mk β (path.comp B.path A)) := {
+  one_to_one := lower_one_to_one B A hσ,
+  atom_cond := lower_atom_cond B A hσ,
+  near_litter_cond := lower_near_litter_cond B A hσ,
+  flexible_cond := lower_flexible_cond B A hσ,
+  domain_closed := lower_domain_closed B A hσ,
+  range_closed := lower_range_closed B A hσ,
+  non_flexible_cond := lower_non_flexible_cond B A hσ,
+  inv_non_flexible_cond := lower_inv_non_flexible_cond B A hσ,
+}
+
+end lower
 
 /-- We say that *freedom of action* holds along a path `B` if any partial allowable permutation `σ`
 admits an allowable permutation `π` extending it. -/
@@ -498,43 +549,43 @@ parts of the definition of ≤. -/
 
 variables (c : set (allowable_partial_perm B))
 
-lemma domain_closed_Union (hc : is_chain (≤) c) :
-  unary_spec.support_closed (spec.domain ⋃₀ (subtype.val '' c)) := sorry
-
-lemma range_closed_Union (hc : is_chain (≤) c) :
-  unary_spec.support_closed (spec.range ⋃₀ (subtype.val '' c)) := sorry
-
 lemma one_to_one_Union (hc : is_chain (≤) c) :
-  spec.one_to_one ⋃₀ (subtype.val '' c) := sorry
+  spec.one_to_one B ⋃₀ (subtype.val '' c) := sorry
 
 lemma atom_cond_Union (hc : is_chain (≤) c) :
-  ∀ L A, spec.atom_cond (⋃₀ (subtype.val '' c)) L A := sorry
+  ∀ L A, spec.atom_cond B (⋃₀ (subtype.val '' c)) L A := sorry
 
 lemma near_litter_cond_Union (hc : is_chain (≤) c) :
-  ∀ N A, spec.near_litter_cond (⋃₀ (subtype.val '' c)) N A := sorry
+  ∀ N A, spec.near_litter_cond B (⋃₀ (subtype.val '' c)) N A := sorry
 
 lemma flexible_cond_Union (hc : is_chain (≤) c) :
-  spec.flexible_cond ⋃₀ (subtype.val '' c) := sorry
+  spec.flexible_cond B ⋃₀ (subtype.val '' c) := sorry
+
+lemma domain_closed_Union (hc : is_chain (≤) c) :
+  unary_spec.support_closed B (spec.domain ⋃₀ (subtype.val '' c)) := sorry
+
+lemma range_closed_Union (hc : is_chain (≤) c) :
+  unary_spec.support_closed B (spec.range ⋃₀ (subtype.val '' c)) := sorry
 
 -- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
 
 lemma non_flexible_cond_Union (hc : is_chain (≤) c) :
-  spec.non_flexible_cond ⋃₀ (subtype.val '' c) := sorry
+  spec.non_flexible_cond B ⋃₀ (subtype.val '' c) := sorry
 
 lemma inv_non_flexible_cond_Union (hc : is_chain (≤) c) :
-  spec.non_flexible_cond (⋃₀ (subtype.val '' c))⁻¹ := sorry
+  spec.non_flexible_cond B (⋃₀ (subtype.val '' c))⁻¹ := sorry
 
 variables (hc : is_chain (≤) c)
 
 /-- The union of a chain of allowable partial permutations is allowable. -/
 lemma allowable_Union :
   spec.allowable_spec B ⋃₀ (subtype.val '' c) := {
-  domain_closed := domain_closed_Union B c hc,
-  range_closed := range_closed_Union B c hc,
   one_to_one := one_to_one_Union B c hc,
   atom_cond := atom_cond_Union B c hc,
   near_litter_cond := near_litter_cond_Union B c hc,
   flexible_cond := flexible_cond_Union B c hc,
+  domain_closed := domain_closed_Union B c hc,
+  range_closed := range_closed_Union B c hc,
   non_flexible_cond := non_flexible_cond_Union B c hc,
   inv_non_flexible_cond := inv_non_flexible_cond_Union B c hc,
 }
