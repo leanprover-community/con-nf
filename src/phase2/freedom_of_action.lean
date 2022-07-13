@@ -122,12 +122,15 @@ set.range (λ (x : near_litter × extended_index α),
 lemma struct_perm.satisfies_to_spec {α : type_index} (π : struct_perm α) : π.satisfies π.to_spec :=
 begin
   unfold struct_perm.satisfies struct_perm.to_spec struct_perm.satisfies_cond,
-  -- sorry, I realised the definition needs the graph of near-litters as well as the graph of atoms
-  sorry
-  -- rintros ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ ⟨⟨a, b⟩, ha⟩; simp only [prod.mk.inj_iff] at ha,
-  -- { simp,
-  --   rw [← ha.2, ← ha.1.1], exact ha.1.2 },
-  -- cases ha.1
+  rintros ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ hxy; cases hxy,
+  { simp only [set.mem_range, prod.mk.inj_iff, prod.exists, exists_eq_right, exists_eq_left] at hxy,
+    rw sum.elim_inl,
+    exact hxy },
+  { simp only [set.mem_range, prod.mk.inj_iff, false_and, exists_false] at hxy, cases hxy },
+  { simp only [set.mem_range, prod.mk.inj_iff, false_and, exists_false] at hxy, cases hxy },
+  { simp only [set.mem_range, prod.mk.inj_iff, prod.exists, exists_eq_right, exists_eq_left] at hxy,
+    rw sum.elim_inr,
+    exact hxy }
 end
 
 /-- The map from structural permutations to their specifications is injective. -/
@@ -197,18 +200,40 @@ def spec.total {α : type_index} (σ : spec α) : Prop := σ.domain = set.univ
 /-- A specification is co-total if it specifies where every element in its codomain came from. -/
 def spec.co_total {α : type_index} (σ : spec α) : Prop := σ.range = set.univ
 
+lemma spec.total_1_1_restriction {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
+  (σ.total → (σ.lower A).total) ∧ (σ.co_total → (σ.lower A).co_total) :=
+begin
+  split,
+  all_goals {
+    intro hσ,
+    unfold spec.total spec.co_total spec.lower spec.domain spec.range at hσ ⊢,
+    ext,
+    refine ⟨by simp, λ _, _⟩,
+    simp only [set.mem_image, set.mem_set_of_eq],
+    obtain ⟨y, ⟨hyσ, hy⟩⟩ := (set.ext_iff.1 hσ $ x.extend_path A).2 (set.mem_univ _),
+    set z : binary_condition β := ⟨y.fst, x.snd⟩,
+    refine ⟨z, ⟨_, prod.ext_iff.2 ⟨(prod.ext_iff.1 hy).1, rfl⟩⟩⟩,
+    have : y = z.extend_path A, -- probably can cut this
+    { ext,
+      { refl },
+      { unfold binary_condition.extend_path,
+        dsimp only,
+        exact congr_arg prod.snd hy } },
+    convert hyσ, rw ← this },
+end
+
 /-- If we lower a total specification along a path, it is still total.
 This is one part of `total-1-1-restriction` in the blueprint. -/
 lemma spec.lower_total {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
-  σ.total → (σ.lower A).total := sorry
+  σ.total → (σ.lower A).total := (spec.total_1_1_restriction _ _).1
 
 /-- If we lower a co-total specification along a path, it is still co-total.
 This is one part of `total-1-1-restriction` in the blueprint. -/
 lemma spec.lower_co_total {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
-  σ.co_total → (σ.lower A).co_total := sorry
+  σ.co_total → (σ.lower A).co_total := (spec.total_1_1_restriction _ _).2
 
 variables (α : Λ) [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] (B : le_index α)
+  [phase_2_assumptions α] (B : le_index α) (C : proper_lt_index α)
 
 /--
 Support conditions can be said to *constrain* each other in a number of ways. This is discussed
@@ -247,8 +272,41 @@ local infix ` ≺ `:50 := constrains _ _
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,
 then `x < y` in `µ`, under the `to_tangle_path` or `typed_singleton_path` maps. -/
-lemma constrains_wf : well_founded (constrains α B) := sorry
+lemma constrains_is_subrelation : subrelation (constrains α C) (inv_image μr (λ a, position (sum.elim (λ b, typed_singleton_path C b) (λ N,
+to_tangle_path C N) a.1))) := begin
+unfold subrelation,
+intros x y hxy,
+unfold inv_image,
+cases hxy,
+-- part 1
+apply tangle_data.litter_lt,
+apply hxy_H,
+-- part 2
+apply or.resolve_left,
+convert (eq_or_gt_of_le (tangle_data.litter_lt_near_litter _)),
+sorry,
+by_contra,
+apply hxy_hN,
+cases hxy_N,
+unfold litter.to_near_litter at h,
+simp only [embedding_like.apply_eq_iff_eq, eq_self_iff_true, heq_iff_eq, true_and] at h,
+rw h,
+refl,
+-- part 3
+apply tangle_data.symm_diff_lt_near_litter,
+apply hxy_H,
+-- part 4
+dsimp only [(to_tangle_path), (f_map_path), (litter.to_near_litter)],
+simp only [sum.elim_inr],
+sorry,
+end
 
+lemma constrains_wf : well_founded (constrains α C) := begin
+apply subrelation.wf,
+apply constrains_is_subrelation,
+apply inv_image.wf,
+convert μwf.wf,
+end
 variables {α} {B}
 
 /-- A litter and extended index is *flexible* if the associated support condition is a minimal
@@ -337,9 +395,13 @@ or all of the flexible litters. -/
 
 end unary_spec
 
+
+
+
 namespace spec
 
 variable (B)
+
 
 /-!
 We now set out the allowability conditions for specifications of permutations.
@@ -365,7 +427,25 @@ def one_to_one (σ : spec B) : Prop := ∀ A, σ.one_to_one_path B A
 /-- If we lower a one-to-one specification along a path, it is still one-to-one.
 This is one part of `total-1-1-restriction` in the blueprint. -/
 lemma lower_one_to_one {β : type_index} (σ : spec B) (A : path (B : type_index) β) :
-  σ.one_to_one B → (σ.lower A).one_to_one ⟨β, path.comp B.path A⟩ := sorry
+  σ.one_to_one B → (σ.lower A).one_to_one ⟨β, path.comp B.path A⟩ :=
+  begin
+    intro ho,
+    unfold one_to_one,
+    intro he,
+    split; rintros hz ha hb hc hd; dsimp at hb hd,
+    {
+      sorry,
+    },
+    {
+      sorry,
+    },
+    {
+      sorry,
+    },
+    {
+      sorry,
+      },
+  end
 
 /-- A specification is the graph of a structural permutation if it is one-to-one and total.
 This is one direction of implication of `total-1-1-gives-perm` on the blueprint - the other
@@ -461,7 +541,14 @@ section lower
 variables {σ : spec B} {β : Λ} (A : path (B : type_index) β) (hβ : (β : type_index) < B)
 
 lemma lower_one_to_one (hσ : σ.allowable_spec B) :
-  (σ.lower A).one_to_one (le_index.mk β (path.comp B.path A)) := sorry
+  (σ.lower A).one_to_one (le_index.mk β (path.comp B.path A)) :=
+begin
+
+  -- Apply is bad here? Maybe replace with something better (Alex)
+  apply spec.lower_one_to_one _ _,
+  exact hσ.one_to_one,
+
+end
 
 lemma lower_atom_cond (hσ : σ.allowable_spec B) :
   ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C := sorry
@@ -560,15 +647,14 @@ lemma extends_refl (σ : allowable_partial_perm B) : σ ≤ σ :=
 lemma extends_trans (ρ σ τ : allowable_partial_perm B)
   (h₁ : ρ ≤ σ) (h₂ : σ ≤ τ) : ρ ≤ τ :=
 begin
-  obtain ⟨hsub, hflex, hatom⟩ := h₁,
-  obtain ⟨hsub', hflex', hatom'⟩ := h₂,
+  obtain ⟨hsub, hflx, hatom⟩ := h₁,
+  obtain ⟨hsub', hflx', hatom'⟩ := h₂,
   refine ⟨hsub.trans hsub', λ L N A hLA hnin hin, _, λ a b L hab A hnin hin, _⟩,
   { by_cases (sum.inr (L.to_near_litter, N), A) ∈ σ.val,
-    { obtain ⟨h1, h2⟩ := hflex L N A hLA hnin h,
-      split; intros L' A' hLA'; specialize h1 L' A' hLA'; specialize h2 L' A' hLA',
-      { exact set.image_subset binary_condition.domain hsub' h1 },
-      { exact set.image_subset binary_condition.range hsub' h2 } },
-    { exact hflex' L N A hLA h hin } },
+    { split; intros l a hla,
+      { exact set.image_subset binary_condition.domain hsub' ((hflx L N A hLA hnin h).1 l a hla) },
+      { exact set.image_subset binary_condition.range hsub' ((hflx L N A hLA hnin h).2 l a hla) } },
+    { exact hflx' L N A hLA h hin } },
   { by_cases (sum.inl (a, b), A) ∈ σ.val,
     { intros c hc,
       obtain ⟨d, hd⟩ := hatom a b L hab A hnin h c hc,
