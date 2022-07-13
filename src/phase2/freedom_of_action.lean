@@ -200,15 +200,37 @@ def spec.total {α : type_index} (σ : spec α) : Prop := σ.domain = set.univ
 /-- A specification is co-total if it specifies where every element in its codomain came from. -/
 def spec.co_total {α : type_index} (σ : spec α) : Prop := σ.range = set.univ
 
+lemma spec.total_1_1_restriction {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
+  (σ.total → (σ.lower A).total) ∧ (σ.co_total → (σ.lower A).co_total) :=
+begin
+  split,
+  all_goals {
+    intro hσ,
+    unfold spec.total spec.co_total spec.lower spec.domain spec.range at hσ ⊢,
+    ext,
+    refine ⟨by simp, λ _, _⟩,
+    simp only [set.mem_image, set.mem_set_of_eq],
+    obtain ⟨y, ⟨hyσ, hy⟩⟩ := (set.ext_iff.1 hσ $ x.extend_path A).2 (set.mem_univ _),
+    set z : binary_condition β := ⟨y.fst, x.snd⟩,
+    refine ⟨z, ⟨_, prod.ext_iff.2 ⟨(prod.ext_iff.1 hy).1, rfl⟩⟩⟩,
+    have : y = z.extend_path A, -- probably can cut this
+    { ext,
+      { refl },
+      { unfold binary_condition.extend_path,
+        dsimp only,
+        exact congr_arg prod.snd hy } },
+    convert hyσ, rw ← this },
+end
+
 /-- If we lower a total specification along a path, it is still total.
 This is one part of `total-1-1-restriction` in the blueprint. -/
 lemma spec.lower_total {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
-  σ.total → (σ.lower A).total := sorry
+  σ.total → (σ.lower A).total := (spec.total_1_1_restriction _ _).1
 
 /-- If we lower a co-total specification along a path, it is still co-total.
 This is one part of `total-1-1-restriction` in the blueprint. -/
 lemma spec.lower_co_total {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
-  σ.co_total → (σ.lower A).co_total := sorry
+  σ.co_total → (σ.lower A).co_total := (spec.total_1_1_restriction _ _).2
 
 variables (α : Λ) [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
   [phase_2_assumptions α] (B : le_index α) (C : proper_lt_index α)
