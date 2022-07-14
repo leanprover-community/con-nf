@@ -434,32 +434,13 @@ def one_to_one (σ : spec B) : Prop := ∀ A, σ.one_to_one_path B A
 This is one part of `total-1-1-restriction` in the blueprint. -/
 lemma lower_one_to_one {β : type_index} (σ : spec B) (A : path (B : type_index) β) :
   σ.one_to_one B → (σ.lower A).one_to_one ⟨β, path.comp B.path A⟩ :=
-  begin
-    intro ho,
-    unfold one_to_one,
-    intro he,
-    split; intros hz ha hb hc hd; unfold spec.lower at hb hd; dsimp at hb hd;
-    unfold binary_condition.extend_path at hb hd,
-    --[maybe do this?] unfold spec.one_to_one at ho,
-    {
-      --have h' : ho ({index := β, path := B.path}),
-      have hσc : (sum.inl (hc, hz), A.comp he) ∈ σ;
-      have hσd :  (sum.inl (ha, hz), A.comp he) ∈ σ,
-      --should be trivial set theory for the 3 'new' goals
-      { sorry, },
-      { sorry, },
-      { sorry, },
-      sorry,
-    },
-    {
-      sorry,
-    },
-    {
-      sorry,
-    },
-    {
-      sorry,
-      },
+begin
+  intros ho he,
+  split; intros hz ha hb hc hd; dsimp at hb hd,
+  { exact (ho $ A.comp he).left_atom hz (by assumption) (by assumption), },
+  { exact (ho $ A.comp he).right_atom hz (by assumption) (by assumption), },
+  { exact (ho $ A.comp he).left_near_litter hz (by assumption) (by assumption), },
+  { exact (ho $ A.comp he).right_near_litter hz (by assumption) (by assumption), },
   end
 
 --Lemma definition has bugs, was trying to abstract out the 'change form of data to obviously
