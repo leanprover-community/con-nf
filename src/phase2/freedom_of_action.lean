@@ -438,8 +438,17 @@ lemma lower_one_to_one {β : type_index} (σ : spec B) (A : path (B : type_index
     intro ho,
     unfold one_to_one,
     intro he,
-    split; rintros hz ha hb hc hd; dsimp at hb hd,
+    split; intros hz ha hb hc hd; unfold spec.lower at hb hd; dsimp at hb hd;
+    unfold binary_condition.extend_path at hb hd,
+    --[maybe do this?] unfold spec.one_to_one at ho,
     {
+      --have h' : ho ({index := β, path := B.path}),
+      have hσc : (sum.inl (hc, hz), A.comp he) ∈ σ;
+      have hσd :  (sum.inl (ha, hz), A.comp he) ∈ σ,
+      --should be trivial set theory for the 3 'new' goals
+      { sorry, },
+      { sorry, },
+      { sorry, },
       sorry,
     },
     {
@@ -452,6 +461,16 @@ lemma lower_one_to_one {β : type_index} (σ : spec B) (A : path (B : type_index
       sorry,
       },
   end
+
+--Lemma definition has bugs, was trying to abstract out the 'change form of data to obviously
+--equivalent form so I could continue with the maths.
+/-lemma atom_aux {β : type_index} (σ : spec B) (A : path (B : type_index) β)
+(he : extended_index ↑{index := β, path := B.path.comp A})(hx hy: atom)
+(hd : (sum.inl (hx, hy), he) ∈ {c : binary_condition β | (c.fst, A.comp c.snd) ∈ σ}) :
+(sum.inl (hx, hy), A.comp he) ∈ σ :=
+begin
+  sorry,
+end-/
 
 /-- A specification is the graph of a structural permutation if it is one-to-one and total.
 This is one direction of implication of `total-1-1-gives-perm` on the blueprint - the other
