@@ -567,13 +567,7 @@ variables {σ : spec B} {β : Λ} (A : path (B : type_index) β) (hβ : (β : ty
 
 lemma lower_one_to_one (hσ : σ.allowable_spec B) :
   (σ.lower A).one_to_one (le_index.mk β (path.comp B.path A)) :=
-begin
-
-  -- Apply is bad here? Maybe replace with something better (Alex)
-  apply spec.lower_one_to_one _ _,
-  exact hσ.one_to_one,
-
-end
+spec.lower_one_to_one _ _ _ hσ.one_to_one
 
 lemma lower_atom_cond (hσ : σ.allowable_spec B) :
   ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C := sorry
