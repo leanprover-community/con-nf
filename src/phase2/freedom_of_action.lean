@@ -26,27 +26,6 @@ variables [params.{u}]
 
 open struct_perm
 
-/- The following code may not be relevant for the newest way we're implementing the FoA theorem.
-
-/-- An α-local bijection associates to each extended type index `A` a domain of atoms,
-and defines an injection from that domain to itself.
-It must satisfy two conditions, that the map is really an injection, and that the
-intersection of the domain with any litter is small. -/
-structure local_bijection (α : Λ) :=
-(domain (A : extended_index α) : set atom)
-(to_fun (A) : equiv.perm (domain A))
-(litter_inter (A) (i : litter) : small $ domain A ∩ litter_set i)
-
-instance (α : Λ) : has_coe_to_fun (local_bijection α) (λ π₀, Π A, π₀.domain A → π₀.domain A) :=
-⟨λ π₀ A, (π₀.to_fun A).to_fun⟩
-
-/-- `a` is an exception of the near-litter permutation `f` if it is not sent to the corresponding
-litter under either `f` or `f⁻¹`. -/
-def near_litter_perm.exception (f : near_litter_perm) (a : atom) : Prop :=
-f.atom_perm a ∉ litter_set (f.litter_perm a.1) ∨ f.atom_perm⁻¹ a ∉ litter_set (f.litter_perm⁻¹ a.1)
-
--/
-
 /-- A *binary condition* is like a support condition but uses either two atoms or two near-litters
 instead of one. A binary condition `⟨⟨x, y⟩, A⟩` represents the constraint `π_A(x) = y` on an
 allowable permutation. -/
@@ -407,9 +386,6 @@ or all of the flexible litters. -/
 
 end unary_spec
 
-
-
-
 namespace spec
 
 variable (B)
@@ -425,6 +401,8 @@ A specification is *one-to-one* on a particular path `A` if
 * `⟨a, b₁⟩, ⟨a, b₂⟩ ∈ σ` implies `b₁ = b₂`,
 * `⟨a₁, b⟩, ⟨a₂, b⟩ ∈ σ` implies `a₁ = a₂`,
 where `a, b` may be either atoms or near-litters.
+
+TODO(zeramorphic): split this up into 'left' and 'right' pairs
 -/
 @[mk_iff] structure one_to_one_path (σ : spec B) (A : extended_index B) : Prop :=
 (left_atom         : ∀ b, {a | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
@@ -448,16 +426,6 @@ begin
   { exact (ho $ A.comp he).right_near_litter hz (by assumption) (by assumption), },
   end
 
---Lemma definition has bugs, was trying to abstract out the 'change form of data to obviously
---equivalent form so I could continue with the maths.
-/-lemma atom_aux {β : type_index} (σ : spec B) (A : path (B : type_index) β)
-(he : extended_index ↑{index := β, path := B.path.comp A})(hx hy: atom)
-(hd : (sum.inl (hx, hy), he) ∈ {c : binary_condition β | (c.fst, A.comp c.snd) ∈ σ}) :
-(sum.inl (hx, hy), A.comp he) ∈ σ :=
-begin
-  sorry,
-end-/
-
 /-- A specification is the graph of a structural permutation if it is one-to-one and total.
 This is one direction of implication of `total-1-1-gives-perm` on the blueprint - the other
 direction may not be needed. We may also require `hσ₃ : σ.co_total` - but hopefully this isn't
@@ -475,7 +443,7 @@ Note that the `small` constructor does not depend on whether the litter is prese
 | all (N : near_litter) (atom_map : litter_set L → atom) :
     (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ σ →
     (∀ a ∈ litter_set L, (⟨sum.inl ⟨a, atom_map ⟨a, ‹_›⟩⟩, A⟩ : binary_condition B) ∈ σ) →
-    small {a : litter_set L | atom_map a ∈ N.snd.val} →
+    N.snd.val = set.range atom_map →
     atom_cond
 
 /-- The allowability condition on near-litters.
@@ -489,6 +457,14 @@ mapped to the right place. -/
     (∀ a : litter_set N.fst ∆ N.snd, (⟨sum.inl ⟨a, atom_map a⟩, A⟩ : binary_condition B) ∈ σ) →
     M₁.snd.val = M₂.snd.val ∆ set.range atom_map →
     near_litter_cond
+
+-- TODO(zeramorphic): refactor this statement
+def near_litter_cond' (σ : spec B) (N₁ N₂ : near_litter) (A : extended_index B) : Prop :=
+(⟨sum.inr ⟨N₁, N₂⟩, A⟩ : binary_condition B) ∈ σ →
+  ∃ M, (⟨sum.inr ⟨N₁.fst.to_near_litter, M⟩, A⟩ : binary_condition B) ∈ σ ∧
+  ∃ (symm_diff : litter_set N₁.fst ∆ N₁.snd → atom),
+    (∀ a : litter_set N₁.fst ∆ N₁.snd, (⟨sum.inl ⟨a, symm_diff a⟩, A⟩ : binary_condition B) ∈ σ) ∧
+  N₂.snd.val = M.snd.val ∆ set.range symm_diff
 
 /-- This is the allowability condition for flexible litters.
 Either all flexible litters are in both the domain and range (`all`), or there are `μ`-many not in
@@ -504,6 +480,8 @@ the domain and `μ`-many not in the range. -/
   (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ.domain) →
   (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ.range) →
   flexible_cond
+
+-- TODO(zeramorphic): sorry .to_struct_perm.satisfies instead of `true`ing it
 
 /-- The allowability condition on non-flexible litters.
 Whenever `σ` contains some condition `⟨⟨f_{γ,δ}^A(g), N⟩, [-1,δ,A]⟩`, then every allowable
@@ -843,22 +821,21 @@ lemma allowable_Union :
   inv_non_flexible_cond := inv_non_flexible_cond_Union B c hc,
 }
 
-lemma mem_perm_le (σ : allowable_partial_perm B) (hσ : c ⊆ {ρ | σ ≤ ρ}) :
-  σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
-
-lemma maximal_Union (σ : allowable_partial_perm B) (hσ : c ⊆ {ρ | σ ≤ ρ}) :
-  ∀ z ∈ c, z ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
+lemma upper_bound_Union (σ : allowable_partial_perm B) :
+  ∀ (c : set (allowable_partial_perm B)), c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ} →
+  is_chain has_le.le c → ∀ (y : allowable_partial_perm B), y ∈ c →
+  (∃ (ub : allowable_partial_perm B) (H : ub ∈ {ρ : allowable_partial_perm B | σ ≤ ρ}),
+    ∀ (z : allowable_partial_perm B), z ∈ c → z ≤ ub) := sorry
 
 end zorn_setup
 
 /-- There is a maximal allowable partial permutation extending any given allowable partial
 permutation. This result is due to Zorn's lemma. -/
 lemma maximal_perm (σ : allowable_partial_perm B) :
-  ∃ (ρ : allowable_partial_perm B) (h : σ ≤ ρ), ∀ τ (hτ₁ : σ ≤ τ) (hτ₂ : ρ ≤ τ), τ ≤ ρ :=
-zorn_preorder₀ _ (λ c hc₁ hc₂,
-  ⟨⟨⋃₀ (subtype.val '' c), allowable_Union B c hc₂⟩,
-    mem_perm_le _ _ _ _ hc₁,
-    maximal_Union _ _ _ σ hc₁⟩)
+  ∃ (m : allowable_partial_perm B) (H : m ∈ {ρ : allowable_partial_perm B | σ ≤ ρ}), σ ≤ m ∧
+    ∀ (z : allowable_partial_perm B), z ∈ {ρ : allowable_partial_perm B | σ ≤ ρ} →
+    m ≤ z → z ≤ m :=
+zorn_nonempty_preorder₀ {ρ | σ ≤ ρ} (upper_bound_Union B σ) σ (extends_refl _ _)
 
 /-- Any maximal allowable partial permutation under `≤` is total. -/
 lemma total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
@@ -906,7 +883,7 @@ theorem freedom_of_action_propagates
   freedom_of_action ⟨α, path.nil⟩ :=
 begin
   intro σ,
-  obtain ⟨ρ, hσρ, hρ⟩ := allowable_partial_perm.maximal_perm ⟨α, path.nil⟩ σ,
+  obtain ⟨ρ, -, hσρ, hρ⟩ := allowable_partial_perm.maximal_perm ⟨α, path.nil⟩ σ,
   have : ∀ (τ : allowable_partial_perm ⟨α, path.nil⟩), τ ≥ ρ → τ = ρ :=
     λ τ hτ, subtype.val_inj.mp
       (set.eq_of_subset_of_subset (hρ τ (le_trans hσρ hτ) hτ).subset hτ.subset),

@@ -5,17 +5,16 @@ open set
 universe u
 
 namespace con_nf
-variables [params.{u}] (α : Λ) [weak_tangle_cumul α] {β : Iio (α : type_index)}
+variables [params.{u}] (α : Λ) [core_tangle_cumul α] {β : Iio (α : type_index)}
   {s t : set (tangle β)}
 
 /-- An `α` code is a type index `β < α` together with a set of tangles of type `β`. -/
 @[ext] structure code : Type u :=
-(extension : type_index)
-(extension_lt : extension < α)
-(elts : set (tangle ⟨extension, extension_lt⟩))
+(extension : Iio (α : type_index))
+(elts : set (tangle extension))
 
-lemma code.eq_of_elts_eq (γ : type_index) (hγ : γ < α) (A B : set (tangle α γ hγ)) :
-  (⟨γ, hγ, A⟩ : code α) = ⟨γ, hγ, B⟩ ↔ A = B := by simp
+lemma code.eq_of_elts_eq (γ : Iio (α : type_index)) (A B : set (tangle γ)) :
+  (⟨γ, A⟩ : code α) = ⟨γ, B⟩ ↔ A = B := by simp
 
 /-- Nonempty codes. -/
 abbreviation nonempty_code : Type u := {c : code α // c.elts.nonempty}

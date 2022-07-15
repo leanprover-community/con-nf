@@ -36,8 +36,13 @@ namespace con_nf
 variables [params.{u}]
 
 section A_map
-variables {α α₁ α₂ : type_index} (β : Λ) [weak_tangle_data α] [weak_tangle_data α₁]
-  [weak_tangle_data α₂] [tangle_data β] {s : set (tangle α)} {t : tangle α}
+variables {α : Λ} {α₁ α₂ : type_index} (β : Iio α) [core_tangle_data α] [positioned_tangle_data α]
+  [core_tangle_data α₁] [positioned_tangle_data α₁]
+  [core_tangle_data α₂] [positioned_tangle_data α₂]
+  [core_tangle_data β] [positioned_tangle_data β]
+  [almost_tangle_data β]
+  [tangle_data β]
+  {s : set (tangle α)} {t : tangle α}
 
 /-- The *alternative extension* map. For a set of tangles `G`, consider the code
 `(α, γ, G)`. We then construct the non-empty set `D` such that `(α, β, D)` is an alternative
@@ -139,8 +144,9 @@ end
 end A_map
 
 section A_map_code
-variables {α α₁ α₂ β : Λ} {hβ : β < α} [weak_tangle_data α] [weak_tangle_data α₁] [tangle_cumul α]
-  [tangle_cumul α₁] [weak_tangle_data α₂] {c d : code α}
+variables {α α₁ α₂ β : Λ} {hβ : β < α} [core_tangle_data α] [core_tangle_data α₁]
+  [core_tangle_cumul α] [positioned_tangle_cumul α]
+  [core_tangle_cumul α₁] [core_tangle_data α₂] {c d : code α}
 
 /-- Tool that lets us use well-founded recursion on codes via `μ`. -/
 noncomputable def code_min_map (c : nonempty_code α) : μ := position $ min_tangle ⟨_, c.prop⟩

@@ -172,10 +172,13 @@ variables (α : type_index) [core_tangle_data α]
 abbreviation tangles : Type u := {s : set (tangle α) // s.nonempty}
 
 /-- The core tangle data up to phase `α`. -/
-abbreviation core_tangle_cumul (α : Λ) := Π β : Iio α, core_tangle_data β
+abbreviation core_tangle_cumul (α : Λ) := Π β : Iio (α : type_index), core_tangle_data β
 
 abbreviation positioned_tangle_cumul (α : Λ) [core : core_tangle_cumul α] :=
-Π β : Iio α, @positioned_tangle_data _ β (core β)
+Π β : Iio (α : type_index), @positioned_tangle_data _ β (core β)
+
+instance coe_Iio (α : Λ) : has_coe (Iio α) (Iio (α : type_index)) :=
+⟨λ β, ⟨β.val, coe_lt_coe.mpr β.property⟩⟩
 
 abbreviation almost_tangle_cumul (α : Λ) [core : core_tangle_cumul α] :=
 Π β : Iio α, @almost_tangle_data _ β (core β)
@@ -187,6 +190,6 @@ abbreviation tangle_cumul (α : Λ) [core : core_tangle_cumul α]
 instance core_tangle_cumul.to_core_tangle_data (α : Λ) [hα : core_tangle_cumul α] :
   Π β : Iio (α : type_index), core_tangle_data β
 | ⟨⊥, h⟩ := bot.core_tangle_data
-| ⟨(β : Λ), hβ⟩ := hα ⟨β, coe_lt_coe.1 hβ⟩
+| ⟨(β : Λ), hβ⟩ := hα ⟨β, hβ⟩
 
 end con_nf
