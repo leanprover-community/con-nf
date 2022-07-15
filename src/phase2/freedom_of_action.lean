@@ -74,6 +74,22 @@ def spec.domain {α : type_index} (σ : spec α) : unary_spec α := binary_condi
 binary conditions in the specification. -/
 def spec.range {α : type_index} (σ : spec α) : unary_spec α := binary_condition.range '' σ
 
+@[simp] lemma spec.domain_empty {α : type_index} : spec.domain (∅ : spec α) = ∅ :=
+begin
+  unfold spec.domain,
+  simp,
+end
+
+lemma spec.sUnion_domain_eq_domain_sUnion {α : type_index} (c : set (spec α)) :
+  ⋃₀ (spec.domain '' c) = spec.domain ⋃₀ c :=
+begin
+  ext x,
+  unfold spec.domain,
+  simp only [set.sUnion_image, set.mem_Union, set.mem_image, exists_prop, set.mem_sUnion],
+  exact ⟨λ ⟨σ, hσ, b, hbσ, hb⟩, ⟨b, ⟨σ, hσ, hbσ⟩, hb⟩,
+         λ ⟨b, ⟨σ, hσ, hbσ⟩, hb⟩, ⟨σ, hσ, b, hbσ, hb⟩⟩,
+end
+
 /-- A structural permutation *satisfies* a condition `⟨⟨x, y⟩, A⟩` if `π_A(x) = y`. -/
 def struct_perm.satisfies_cond {α : type_index} (π : struct_perm α) (c : binary_condition α) :=
 c.fst.elim
@@ -122,7 +138,13 @@ begin
 end
 
 /-- The map from structural permutations to their specifications is injective. -/
-lemma struct_perm.to_spec_injective (α : type_index) : injective (@struct_perm.to_spec _ α) := sorry
+lemma struct_perm.to_spec_injective (α : type_index) : injective (@struct_perm.to_spec _ α) :=
+begin
+  unfold injective,
+  intros σ τ heq,
+  unfold struct_perm.to_spec at heq,
+  sorry, -- lemmas which require derivatives can't be fully unsorried right now (I think)
+end
 
 /-- We can extend any support condition to one of a higher proper type index `α` by providing a path
 connecting the old extended index up to `α`. -/
@@ -722,7 +744,11 @@ instance preorder : preorder (allowable_partial_perm B) := {
 lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ := sorry
 
 /-- Inverses are involutive. -/
-@[simp] lemma inv_inv (σ : allowable_partial_perm B) : σ⁻¹⁻¹ = σ := sorry
+@[simp] lemma inv_inv (σ : allowable_partial_perm B) : σ⁻¹⁻¹ = σ :=
+begin
+  unfold has_inv.inv,
+  ext ⟨x | x, y⟩; simp,
+end
 
 section zorn_setup
 
@@ -784,7 +810,28 @@ begin
 end
 
 lemma atom_cond_Union (hc : is_chain (≤) c) :
-  ∀ L A, spec.atom_cond B (⋃₀ (subtype.val '' c)) L A := sorry
+  ∀ L A, spec.atom_cond B (⋃₀ (subtype.val '' c)) L A :=
+begin
+  /- sorries are here but will work on them tomorrow - not waiting on anything and no big problems,
+     just not finished yet! -/
+  intros L A,
+  by_cases (∀ σ ∈ c, ∀ ρ ∈ c, ∀ a ∈ litter_set L,
+      (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.val.domain →
+      (⟨sum.inl a, A⟩ : support_condition B) ∈ ρ.val.domain),
+  { rcases set.eq_empty_or_nonempty c with hemp | ⟨⟨σ, hσ₁⟩, hσ₂⟩,
+    { rw hemp,
+      refine spec.atom_cond.small _,
+      simp, },
+    { cases hσ₁.atom_cond L A with h₁ h₂,
+      { refine spec.atom_cond.small _,
+        convert h₁,
+        refine funext (λ a, _),
+        rw ← spec.sUnion_domain_eq_domain_sUnion,
+        sorry, },
+      { sorry, }, }, },
+  { push_neg at h,
+    sorry, },
+end
 
 lemma near_litter_cond_Union (hc : is_chain (≤) c) :
   ∀ N A, spec.near_litter_cond B (⋃₀ (subtype.val '' c)) N A := sorry
