@@ -131,6 +131,9 @@ specification, we have `π_A(x) = y`. -/
 def struct_perm.satisfies {α : type_index} (π : struct_perm α) (σ : spec α) : Prop :=
 ∀ c ∈ σ, π.satisfies_cond c
 
+lemma struct_perm.satisfies_mono {α : type_index} (π : struct_perm α) (σ ρ : spec α) (hσρ : σ ⊆ ρ) :
+  π.satisfies ρ → π.satisfies σ := sorry
+
 /- There is an injection from the type of structural permutations to the type of specifications,
 in such a way that any structural permutation satisfies its specification. We construct this
 specification by simply drawing the graph of the permutation on atoms and near-litters. -/
@@ -227,6 +230,9 @@ lemma struct_perm.spec_lower_eq_derivative {α β : type_index} (π : struct_per
 def spec.total {α : type_index} (σ : spec α) : Prop := σ.domain = set.univ
 /-- A specification is co-total if it specifies where every element in its codomain came from. -/
 def spec.co_total {α : type_index} (σ : spec α) : Prop := σ.range = set.univ
+
+lemma spec.co_total_of_inv_total {α : type_index} (σ : spec α) :
+  σ⁻¹.total → σ.co_total := sorry
 
 lemma spec.total_1_1_restriction {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
   (σ.total → (σ.lower A).total) ∧ (σ.co_total → (σ.lower A).co_total) :=
@@ -452,24 +458,24 @@ def one_to_one (σ : spec B) : Prop := ∀ A, σ.one_to_one_path B A
 This is one part of `total-1-1-restriction` in the blueprint. -/
 lemma lower_one_to_one {β : type_index} (σ : spec B) (A : path (B : type_index) β) :
   σ.one_to_one B → (σ.lower A).one_to_one ⟨β, path.comp B.path A⟩ :=
-  begin
-    intro ho,
-    unfold one_to_one,
-    intro he,
-    split; rintros hz ha hb hc hd; dsimp at hb hd,
-    {
-      sorry,
-    },
-    {
-      sorry,
-    },
-    {
-      sorry,
-    },
-    {
-      sorry,
-      },
+begin
+  intros ho he,
+  split; intros hz ha hb hc hd; dsimp at hb hd,
+  { exact (ho $ A.comp he).left_atom hz (by assumption) (by assumption), },
+  { exact (ho $ A.comp he).right_atom hz (by assumption) (by assumption), },
+  { exact (ho $ A.comp he).left_near_litter hz (by assumption) (by assumption), },
+  { exact (ho $ A.comp he).right_near_litter hz (by assumption) (by assumption), },
   end
+
+--Lemma definition has bugs, was trying to abstract out the 'change form of data to obviously
+--equivalent form so I could continue with the maths.
+/-lemma atom_aux {β : type_index} (σ : spec B) (A : path (B : type_index) β)
+(he : extended_index ↑{index := β, path := B.path.comp A})(hx hy: atom)
+(hd : (sum.inl (hx, hy), he) ∈ {c : binary_condition β | (c.fst, A.comp c.snd) ∈ σ}) :
+(sum.inl (hx, hy), A.comp he) ∈ σ :=
+begin
+  sorry,
+end-/
 
 /-- A specification is the graph of a structural permutation if it is one-to-one and total.
 This is one direction of implication of `total-1-1-gives-perm` on the blueprint - the other
@@ -552,8 +558,50 @@ end spec
 
 variable (B)
 
+namespace spec
+section has_inv
+
+variables {σ : spec B}
+
+lemma inv_one_to_one (hσ : σ.allowable_spec B) : σ⁻¹.one_to_one B := sorry
+
+lemma inv_atom_cond (hσ : σ.allowable_spec B) : ∀ L C, σ⁻¹.atom_cond B L C := sorry
+
+lemma inv_near_litter_cond (hσ : σ.allowable_spec B) : ∀ N C, σ⁻¹.near_litter_cond B N C := sorry
+
+lemma inv_flexible_cond (hσ : σ.allowable_spec B) : σ⁻¹.flexible_cond B := sorry
+
+lemma inv_domain_closed (hσ : σ.allowable_spec B) : σ⁻¹.domain.support_closed B := sorry
+
+lemma inv_range_closed (hσ : σ.allowable_spec B) : σ⁻¹.range.support_closed B := sorry
+
+-- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
+
+lemma inv_non_flexible_cond (hσ : σ.allowable_spec B) : σ⁻¹.non_flexible_cond B := sorry
+
+lemma inv_inv_non_flexible_cond (hσ : σ.allowable_spec B) : σ⁻¹⁻¹.non_flexible_cond B := sorry
+
+/-- The inverse of an allowable specification is allowable. -/
+lemma inv_allowable (σ : spec B) (hσ : σ.allowable_spec B) :
+  σ⁻¹.allowable_spec B := {
+  one_to_one := inv_one_to_one B hσ,
+  atom_cond := inv_atom_cond B hσ,
+  near_litter_cond := inv_near_litter_cond B hσ,
+  flexible_cond := inv_flexible_cond B hσ,
+  domain_closed := inv_domain_closed B hσ,
+  range_closed := inv_range_closed B hσ,
+  non_flexible_cond := inv_non_flexible_cond B hσ,
+  inv_non_flexible_cond := inv_inv_non_flexible_cond B hσ,
+}
+
+end has_inv
+end spec
+
 /-- An *allowable partial permutation* is a specification that is allowable as defined above. -/
 def allowable_partial_perm := {σ : spec B // σ.allowable_spec B}
+
+instance allowable_partial_perm.has_inv : has_inv (allowable_partial_perm B) :=
+⟨λ σ, ⟨σ.val⁻¹, σ.val.inv_allowable B σ.property⟩⟩
 
 /-! We prove the restriction lemma: if `σ` is a partial allowable permutation, then so is `σ`
 restricted to a lower path `A`. The proof should be mostly straightforward. The non-trivial bit is
@@ -569,7 +617,20 @@ lemma lower_one_to_one (hσ : σ.allowable_spec B) :
 spec.lower_one_to_one _ _ _ hσ.one_to_one
 
 lemma lower_atom_cond (hσ : σ.allowable_spec B) :
-  ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C := sorry
+  ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C :=
+begin
+intros hl he,
+convert hσ.atom_cond,
+simp,
+split,
+  { intro hs,
+    cases hs; intro hl'; intro he',
+    { sorry, },
+    { sorry, },
+  },
+  { intro hL,
+    sorry, },
+end
 
 lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
   ∀ N C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N C := sorry
@@ -591,7 +652,8 @@ lemma lower_non_flexible_cond (hσ : σ.allowable_spec B) :
 lemma lower_inv_non_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A)⁻¹.non_flexible_cond (le_index.mk β (path.comp B.path A)) := sorry
 
-lemma lower_allowable (hσ : σ.allowable_spec B) :
+lemma lower_allowable (σ : spec B) (hσ : σ.allowable_spec B)
+  ⦃β : Λ⦄ (A : path (B : type_index) β) (hβ : (β : type_index) < B) :
   (σ.lower A).allowable_spec (le_index.mk β (path.comp B.path A)) := {
   one_to_one := lower_one_to_one B A hσ,
   atom_cond := lower_atom_cond B A hσ,
@@ -637,7 +699,7 @@ We now define a preorder on partial allowable permutations.
 * `σ` is a subset of `ρ`;
 * if `ρ` has any new flexible litter, then it has all (in both domain and range);
 * within each litter, if `ρ.domain` has any new atom, then it must have all
-    atoms in that litter (and hence must also have the litter).
+    atoms in that litter (and hence must also have the litter), and dually for the range.
 
 Note that the second condition is exactly the condition in `spec.flexible_cond.all`.
 -/
@@ -648,10 +710,14 @@ structure perm_le (σ ρ : allowable_partial_perm B) : Prop :=
   (hρ : (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ ρ.val) :
   (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain) ∧
   (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.range))
-(all_atoms (a b : atom) (L : litter) (ha : a ∈ litter_set L) (A : extended_index B)
+(all_atoms_domain (a b : atom) (L : litter) (ha : a ∈ litter_set L) (A : extended_index B)
   (hσ : (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∉ σ.val)
   (hρ : (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ ρ.val) :
   ∀ c ∈ litter_set L, ∃ d, (⟨sum.inl ⟨c, d⟩, A⟩ : binary_condition B) ∈ ρ.val)
+(all_atoms_range (a b : atom) (L : litter) (ha : b ∈ litter_set L) (A : extended_index B)
+  (hσ : (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∉ σ.val)
+  (hρ : (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ ρ.val) :
+  ∀ c ∈ litter_set L, ∃ d, (⟨sum.inl ⟨d, c⟩, A⟩ : binary_condition B) ∈ ρ.val)
 
 instance has_le : has_le (allowable_partial_perm B) := ⟨perm_le B⟩
 
@@ -660,14 +726,16 @@ instance has_le : has_le (allowable_partial_perm B) := ⟨perm_le B⟩
 lemma extends_refl (σ : allowable_partial_perm B) : σ ≤ σ :=
 ⟨set.subset.rfl,
  λ _ _ _ _ h1 h2, by cases h1 h2,
+ λ _ _ _ _ _ h1 h2, by cases h1 h2,
  λ _ _ _ _ _ h1 h2, by cases h1 h2⟩
 
 lemma extends_trans (ρ σ τ : allowable_partial_perm B)
   (h₁ : ρ ≤ σ) (h₂ : σ ≤ τ) : ρ ≤ τ :=
 begin
-  obtain ⟨hsub, hflx, hatom⟩ := h₁,
-  obtain ⟨hsub', hflx', hatom'⟩ := h₂,
-  refine ⟨hsub.trans hsub', λ L N A hLA hnin hin, _, λ a b L hab A hnin hin, _⟩,
+  obtain ⟨hsub, hflx, hatom_domain, hatom_range⟩ := h₁,
+  obtain ⟨hsub', hflx', hatom_domain', hatom_range'⟩ := h₂,
+  refine ⟨hsub.trans hsub', λ L N A hLA hnin hin, _,
+    λ a b L hab A hnin hin, _, λ a b L hab A hnin hin, _⟩,
   { by_cases (sum.inr (L.to_near_litter, N), A) ∈ σ.val,
     { split; intros l a hla,
       { exact set.image_subset binary_condition.domain hsub' ((hflx L N A hLA hnin h).1 l a hla) },
@@ -675,9 +743,14 @@ begin
     { exact hflx' L N A hLA h hin } },
   { by_cases (sum.inl (a, b), A) ∈ σ.val,
     { intros c hc,
-      obtain ⟨d, hd⟩ := hatom a b L hab A hnin h c hc,
+      obtain ⟨d, hd⟩ := hatom_domain a b L hab A hnin h c hc,
       refine ⟨d, hsub' hd⟩ },
-    { exact hatom' a b L hab A h hin } }
+    { exact hatom_domain' a b L hab A h hin } },
+  { by_cases (sum.inl (a, b), A) ∈ σ.val,
+    { intros c hc,
+      obtain ⟨d, hd⟩ := hatom_range a b L hab A hnin h c hc,
+      refine ⟨d, hsub' hd⟩ },
+    { exact hatom_range' a b L hab A h hin } },
 end
 
 instance preorder : preorder (allowable_partial_perm B) := {
@@ -685,6 +758,12 @@ instance preorder : preorder (allowable_partial_perm B) := {
   le_refl := extends_refl B,
   le_trans := extends_trans B,
 }
+
+/-- A condition required later. -/
+lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ := sorry
+
+/-- Inverses are involutive. -/
+@[simp] lemma inv_inv (σ : allowable_partial_perm B) : σ⁻¹⁻¹ = σ := sorry
 
 section zorn_setup
 
@@ -822,24 +901,41 @@ zorn_preorder₀ _ (λ c hc₁ hc₂,
     maximal_Union _ _ _ σ hc₁⟩)
 
 /-- Any maximal allowable partial permutation under `≤` is total. -/
-lemma total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ) : σ.val.total := sorry
+lemma total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) : σ.val.total := sorry
+
+/-- Any maximal allowable partial permutation under `≤` is co-total. -/
+lemma co_total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) : σ.val.co_total :=
+begin
+  refine spec.co_total_of_inv_total σ.val (total_of_maximal B σ⁻¹ _ foa),
+  intros ρ hρ,
+  convert congr_arg has_inv.inv (hσ ρ⁻¹ _),
+  rw inv_inv,
+  convert inv_le B σ⁻¹ ρ hρ,
+  rw inv_inv,
+end
 
 /-- Any allowable partial permutation extends to an allowable permutation at level `α`, given that
-it is total and co-total. This is `total-allowable-partial-perm-actual` in the blueprint.
-We may need extra hypotheses - I'm (zeramorphic) not quite sure where the FoA assumptions are
-supposed to come in yet. -/
+it is total and co-total. This is `total-allowable-partial-perm-actual` in the blueprint. -/
 lemma extends_to_allowable_of_total (σ : allowable_partial_perm ⟨α, path.nil⟩)
-  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total) :
-  ∃ (π : allowable_path ⟨α, path.nil⟩), (allowable_path_to_struct_perm _ π).satisfies σ.val := sorry
-
-noncomputable def to_allowable_of_total (σ : allowable_partial_perm ⟨α, path.nil⟩)
-  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total) : allowable_path ⟨α, path.nil⟩ :=
-Exists.some $ extends_to_allowable_of_total σ hσ₁ hσ₂
-
-lemma to_allowable_of_total_spec (σ : allowable_partial_perm ⟨α, path.nil⟩)
-  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total) :
-  (allowable_path_to_struct_perm _  $ σ.to_allowable_of_total hσ₁ hσ₂).satisfies σ.val :=
-Exists.some_spec $ extends_to_allowable_of_total σ hσ₁ hσ₂
+  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
+  ∃ (π : allowable_path ⟨α, path.nil⟩), (allowable_path_to_struct_perm _ π).satisfies σ.val :=
+begin
+  have lower_allowable_spec :
+    ∀ (B : proper_lt_index α), (σ.val.lower B.path).allowable_spec (B : le_index α),
+  { intro B,
+    have := lower_allowable ⟨α, path.nil⟩ σ.val σ.property B.path
+      (coe_lt_coe.mpr (B.index_lt.trans_le (coe_le_coe.mp $ le_of_path B.path'))),
+    rw path.nil_comp at this,
+    exact this, },
+  have exists_lower_allowable : ∀ (B : proper_lt_index α), ∃ (π : allowable_path (B : le_index α)),
+    (allowable_path_to_struct_perm (B : le_index α) π).satisfies (σ.val.lower B.path) :=
+    λ B, foa B ⟨σ.val.lower B.path, lower_allowable_spec B⟩,
+  -- We need allowable.lean to compile for the rest of this proof.
+  sorry
+end
 
 end allowable_partial_perm
 
@@ -847,6 +943,17 @@ end allowable_partial_perm
 `B : lt_index` in our formulation), it holds at level `α`. -/
 theorem freedom_of_action_propagates
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
-  freedom_of_action ⟨α, path.nil⟩ := sorry
+  freedom_of_action ⟨α, path.nil⟩ :=
+begin
+  intro σ,
+  obtain ⟨ρ, hσρ, hρ⟩ := allowable_partial_perm.maximal_perm ⟨α, path.nil⟩ σ,
+  have : ∀ (τ : allowable_partial_perm ⟨α, path.nil⟩), τ ≥ ρ → τ = ρ :=
+    λ τ hτ, subtype.val_inj.mp
+      (set.eq_of_subset_of_subset (hρ τ (le_trans hσρ hτ) hτ).subset hτ.subset),
+  have ρ_total := allowable_partial_perm.total_of_maximal ⟨α, path.nil⟩ ρ this foa,
+  have ρ_co_total := allowable_partial_perm.co_total_of_maximal ⟨α, path.nil⟩ ρ this foa,
+  obtain ⟨π, hπ⟩ := ρ.extends_to_allowable_of_total ρ_total ρ_co_total foa,
+  exact ⟨π, struct_perm.satisfies_mono _ σ.val ρ.val hσρ.subset hπ⟩,
+end
 
 end con_nf
