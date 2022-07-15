@@ -598,7 +598,20 @@ lemma lower_one_to_one (hσ : σ.allowable_spec B) :
 spec.lower_one_to_one _ _ _ hσ.one_to_one
 
 lemma lower_atom_cond (hσ : σ.allowable_spec B) :
-  ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C := sorry
+  ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C :=
+begin
+intros hl he,
+convert hσ.atom_cond,
+simp,
+split,
+  { intro hs,
+    cases hs; intro hl'; intro he',
+    { sorry, },
+    { sorry, },
+  },
+  { intro hL,
+    sorry, },
+end
 
 lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
   ∀ N C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N C := sorry
