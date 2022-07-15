@@ -763,7 +763,11 @@ instance preorder : preorder (allowable_partial_perm B) := {
 lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ := sorry
 
 /-- Inverses are involutive. -/
-@[simp] lemma inv_inv (σ : allowable_partial_perm B) : σ⁻¹⁻¹ = σ := sorry
+@[simp] lemma inv_inv (σ : allowable_partial_perm B) : σ⁻¹⁻¹ = σ :=
+begin
+  unfold has_inv.inv,
+  ext ⟨x | x, y⟩; simp,
+end
 
 section zorn_setup
 
