@@ -115,6 +115,9 @@ specification, we have `π_A(x) = y`. -/
 def struct_perm.satisfies {α : type_index} (π : struct_perm α) (σ : spec α) : Prop :=
 ∀ c ∈ σ, π.satisfies_cond c
 
+lemma struct_perm.satisfies_mono {α : type_index} (π : struct_perm α) (σ ρ : spec α) (hσρ : σ ⊆ ρ) :
+  π.satisfies ρ → π.satisfies σ := sorry
+
 /- There is an injection from the type of structural permutations to the type of specifications,
 in such a way that any structural permutation satisfies its specification. We construct this
 specification by simply drawing the graph of the permutation on atoms and near-litters. -/
@@ -796,24 +799,30 @@ zorn_preorder₀ _ (λ c hc₁ hc₂,
     maximal_Union _ _ _ σ hc₁⟩)
 
 /-- Any maximal allowable partial permutation under `≤` is total. -/
-lemma total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ) : σ.val.total := sorry
+lemma total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) : σ.val.total := sorry
+
+/-- Any maximal allowable partial permutation under `≤` is co-total. -/
+lemma co_total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) : σ.val.co_total := sorry
 
 /-- Any allowable partial permutation extends to an allowable permutation at level `α`, given that
-it is total and co-total. This is `total-allowable-partial-perm-actual` in the blueprint.
-We may need extra hypotheses - I'm (zeramorphic) not quite sure where the FoA assumptions are
-supposed to come in yet. -/
+it is total and co-total. This is `total-allowable-partial-perm-actual` in the blueprint. -/
 lemma extends_to_allowable_of_total (σ : allowable_partial_perm ⟨α, path.nil⟩)
-  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total) :
+  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
   ∃ (π : allowable_path ⟨α, path.nil⟩), (allowable_path_to_struct_perm _ π).satisfies σ.val := sorry
 
 noncomputable def to_allowable_of_total (σ : allowable_partial_perm ⟨α, path.nil⟩)
-  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total) : allowable_path ⟨α, path.nil⟩ :=
-Exists.some $ extends_to_allowable_of_total σ hσ₁ hσ₂
+  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) : allowable_path ⟨α, path.nil⟩ :=
+Exists.some $ extends_to_allowable_of_total σ hσ₁ hσ₂ foa
 
 lemma to_allowable_of_total_spec (σ : allowable_partial_perm ⟨α, path.nil⟩)
-  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total) :
-  (allowable_path_to_struct_perm _  $ σ.to_allowable_of_total hσ₁ hσ₂).satisfies σ.val :=
-Exists.some_spec $ extends_to_allowable_of_total σ hσ₁ hσ₂
+  (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
+  (allowable_path_to_struct_perm _  $ σ.to_allowable_of_total hσ₁ hσ₂ foa).satisfies σ.val :=
+Exists.some_spec $ extends_to_allowable_of_total σ hσ₁ hσ₂ foa
 
 end allowable_partial_perm
 
@@ -821,6 +830,17 @@ end allowable_partial_perm
 `B : lt_index` in our formulation), it holds at level `α`. -/
 theorem freedom_of_action_propagates
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
-  freedom_of_action ⟨α, path.nil⟩ := sorry
+  freedom_of_action ⟨α, path.nil⟩ :=
+begin
+  intro σ,
+  obtain ⟨ρ, hσρ, hρ⟩ := allowable_partial_perm.maximal_perm ⟨α, path.nil⟩ σ,
+  have : ∀ (τ : allowable_partial_perm ⟨α, path.nil⟩), τ ≥ ρ → τ = ρ :=
+    λ τ hτ, subtype.val_inj.mp
+      (set.eq_of_subset_of_subset (hρ τ (le_trans hσρ hτ) hτ).subset hτ.subset),
+  have ρ_total := allowable_partial_perm.total_of_maximal ⟨α, path.nil⟩ ρ this foa,
+  have ρ_co_total := allowable_partial_perm.co_total_of_maximal ⟨α, path.nil⟩ ρ this foa,
+  obtain ⟨π, hπ⟩ := ρ.extends_to_allowable_of_total ρ_total ρ_co_total foa,
+  exact ⟨π, struct_perm.satisfies_mono _ σ.val ρ.val hσρ.subset hπ⟩,
+end
 
 end con_nf
