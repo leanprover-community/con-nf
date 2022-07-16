@@ -261,7 +261,7 @@ Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alp
 \end{definition}
 
 \begin{lemma}
-\label {lem:count-supports}
+\label{lem:count-supports}
 \uses{def:support}
 \lean{con_nf.mk_support_le}
 \leanok
@@ -814,7 +814,7 @@ In order to state the theorem precisely, we must first set up a framework for di
   \uses{def:condition-total-1-1,def:conditions-from-perm}
   A set of binary conditions is the graph of a structural permutation precisely if it is one-to-one and total.
 
-  (NOTE: sthis may not be explicitly needed, but it is helpful to know, and should be a good warmup and definition-test ahead of the main freedom of action theorem, in particular \cref{prop:total-allowable-partial-perm-actual}.)
+  (NOTE: this may not be explicitly needed, but it is helpful to know, and should be a good warmup and definition-test ahead of the main freedom of action theorem, in particular \cref{prop:total-allowable-partial-perm-actual}.)
 \end{proposition}
 
 \begin{proposition}
@@ -926,6 +926,11 @@ In order to make use of the inductive assumption that freedom of action holds at
   If $\sigma$ is an allowable permutation in a freedom of action context at $\alpha$, then for any $A : \beta \to \alpha$, the restriction $\sigma_A$ is again allowable in the context restricted along $A$.
 \end{proposition}
 
+\begin{proof}
+  \uses{prop:total-1-1-restriction,prop:conditions-from-perm-restriction}
+  Hopefully straightforward, but probably a bit lengthy, using \cref{prop:total-1-1-restriction}, \cref{prop:conditions-from-perm-restriction}.
+\end{proof}
+
 \begin{proposition}
   \label{prop:allowable-partial-perm-action}
   \uses{def:foa-property}
@@ -1003,50 +1008,25 @@ This probably represents a chunk of formal verification work, as what is obvious
 % \end{comment}
 
 \begin{definition}
-\label {def:raise-lower-index}
-\uses{def:support-of}
-[Note: all this stuff — raising and lowering indices, and the results about repeatedly applying them to structural permutations, etc — is MUCH more clearly handled in algebraic language, using the category of paths, the functoriality of $\Str_\alpha$ and $\All_\alpha$ in paths, and maps between group actions, etc.]
-
-For any $\alpha$-support $S$ and an extended type index $C$ with minimum element greater than $\alpha$, we define $S^C$ as
-$\{((x,A\cup C,\gamma),(y,B\cup C,\delta)):((x,A,\gamma),(y,B,\delta)) \in S\}$.
-
-If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the largest support $U$ such that $U^{\{\alpha\}} \subseteq S$ and $U$ is a $\beta$-support.
-\end{definition}
-
-\begin{definition}
-\label{def:strong-support}
-\uses{def:foa-context,def:raise-lower-index}
-A strong support is a support $S$ with certain additional properties.
-
-\begin{enumerate}
-\item  If $((\beta,-1,x),A,\gamma) \in S$ then $x$ is a singleton or a litter.
-
-\item  If $((\beta,-1,\{x\}),A,\gamma) \in S$, then $((\beta,-1,L),A,\gamma) <_S ((\beta,-1,\{x\}),A,\gamma)$, where $L$ is the litter containing $x$.
-
-\item  If $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$, where $\gamma<\delta$, then there is a $\gamma$-support $T$ of $y$ such that $T^{A \setminus \{\beta\}} \subseteq S$ and each element of the domain of $T^{A \setminus \{\beta\}}$ is $\leq_S ((\beta,-1,L),A)$.  Note that these conditions imply that there is an index-raised version of a strong $\gamma$-support of $y$ included in $T$.
-\end{enumerate}
+  \label{def:strong-support}
+  \uses{def:foa-context,def:constrains}
+  A \emph{strong support} is a support $S$ equipped with a well-ordering $\prec_S$, such that whenever $c \in S$ and $d$ constrains $c$, then $d \in S$ and $d \prec_S c$.
 \end{definition}
 
 \begin{lemma}
-\label {lem:strengthen-support}
-\uses{def:strong-support}
-Any support can be extended to a strong support.
+  \label{lem:strengthen-support}
+  \uses{def:strong-support}
+  Any support is a subset of some strong support (and hence any tangle is supported by some strong support).
 \end{lemma}
 
 \begin{proof}
-It should be straightforward to see that any $X$ with support $S$ has a support $S^\circ$ which satisfies the first condition.  Replace each element $((\beta,-1,x),A)$ of the domain of $S$ for which $x$ is a near-litter and not a litter with $((\beta,-1,x^\circ),A)$ and $((\beta,-1,\{y\}),A)$ for each $y$ in the symmetric difference of $x$ and $x^\circ$.
+  \uses{prop:constrains-well-founded}
+  Given a support $S$, take its down-closure of $\downarrow S$ under the “constrains” relation.
 
-We describe the process of extending a support to a strong support, assuming that it already satisfies the first condition.  Before each typed singleton element of the domain, insert the appropriate typed litter (removing an extra copy of it if it occurred later in the order).  This will only need to be done once for each typed singleton element.
+  First we need to check this has size $<\kappa$.  The “constrains” relation is well-founded, and each condition has $<\kappa$ (immediate) predecessors, so by induction, the down-closure of any singleton is of size $<kappa$. Then $ \downarrow S$ is the union of the down-closures of its singletons (down-closure under any relation preserves arbitrary unions); so it’s a union of $<\kappa$-many sets of size $<\kappa$.
 
-The condition $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$ for $\gamma<\delta$ forces insertion of a $\gamma$-support for $y$.  Of course this might cause further insertions.  Notice that the third components of all inserted items will be $\leq \gamma <\delta$.  So it is not possible for an infinite regress of insertions to occur which would cause the extended support to fail to be a well-ordering.  (Of course, if an item is inserted which occurs later in the order, remove later occurrences).
+  Now “constrains” on $\downarrow S$ is a well-founded relation; and any well-founded relation can be extended to a well-ordering.  [This is a standard general theorem which is hopefully already in mathlib. If not, it can be proven probably most easily by Zorn’s lemma.]
 \end{proof}
-
-The third components in the elements of support domains seem actually to be necessary to ensure that strong supports can always be produced.  What the third component is doing is providing a comment on the index of the sub-support the element is required for.  There is another approach:  indexing the $f$ maps with $\alpha,\beta,\gamma$ instead of just $\beta,\gamma$ and requiring that ranges of $f$ maps with distinct indices be disjoint, which would require very straightforward modifications of the paper above, would ensure that we could tell the difference between insertions into an $\alpha$ support and insertions into a $\beta$-support for $\beta<\alpha$.  It seems that the added complexity is about the same with both approaches, and I have left it this way.  The approach used here also has the interesting effect that the extension over type $\gamma$ of a type $\alpha$ set is determined by its extension over type $\beta$ in a way which does not depend on $\alpha$;  it is interesting that this can be done.
-
-
-% \begin{comment}
-{\bf Note for the formal verification project:}  This should be ready to go.
-% \end{comment}
 
 \section{Types are of size \texorpdfstring{$\mu$}{μ} (so the construction actually succeeds)}
 
@@ -1119,8 +1099,6 @@ Pulling out the main items from the discussion above, for formalisation targets:
   \label{def:support-spec}
   \uses{def:foa-context}
   Fix a freedom of action context for $\alpha$.  A \emph{support-specification} is \ldots [this is quite long to define; we should get the text from more recent versions of Randall’s note]
-
-  [Perhaps the coherence is not needed?]
 \end{definition}
 
 \begin{lemma}
@@ -1139,8 +1117,6 @@ Pulling out the main items from the discussion above, for formalisation targets:
   \label{lem:support-spec-realisation-unique}
   \uses{def:support-spec-realisation,def:freedom-of-action-statement-old}
   If freedom of action holds at $\alpha$, then realisations of a support specification are unique modulo the group action.  That is, for any two realisations $S, S'$ of a support specification $S$, there is some allowable permutation $\pi$ such that $\pi S = S'$.
-
-  [Note: we don’t need to explicitly assume freedom of action here: we could appeal to the \cref{thm:freedom-of-action-old} to know that it holds.  But the explicit assumption keeps things more modular, and avoids unnecessary dependency, which will be helpful in case it turns out the argument needs restructuring at any point.]
 \end{lemma}
 
 \begin{proof}
@@ -1170,8 +1146,6 @@ Now, everything that we did with supports, we repeat with coding functions.
   \label{def:coding-function-spec}
   \uses{def:support-spec,def:coding-function}
   A \emph{coding function specification} is \ldots [again, see recent versions of Randall’s note]
-
-  [Perhaps the coherence is not needed?]
 \end{definition}
 
 \begin{lemma}
@@ -1215,8 +1189,8 @@ Now, everything that we did with supports, we repeat with coding functions.
 \end{corollary}
 
 \begin{proof}
-  \uses{lem:count-supports,cor:count-coding-functions}
-  Every tangle can be obtained as a coding function (of which there are $<\mu$) applied to a support (of which there are $\mu$).
+  \uses{lem:strengthen-support,lem:count-supports,cor:count-coding-functions}
+  Every tangle can be obtained as a coding function (of which there are $<\mu$) applied to a strong support (of which there are $\mu$).
 \end{proof}
 
 This completes the proof that each type is of size $\mu$, which finally closes the loop on the recursion --- or very nearly so: we still have to show that the orderings can be chosen to satisfy the extra technical conditions required.
