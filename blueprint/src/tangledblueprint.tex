@@ -713,7 +713,7 @@ In this phase, we give the three hard theorems about the constructions of phase 
 
 These meet the major technical difficulty of the recursion: For each topic in phase 2, we need to assume something along the lines of tangle data at all earlier levels, and suitable connections between them”.  The tricky bit is structing the “…suitable connections…” cleanly.
 
-The greediest approach, which can’t fail to work, is to assume some form of “at every level, the tangle data is equal to what is constructed from the data at earlier levels, by the constructions of phase 1”.  This is made precise in “coherent tangle data” \cref{def:coherent-tangle-data}.  However, this is somewhat awkward to work with in formalisation.  A more cleanly-structured version is given by “freedom of action contexts”, \cref{def:foa-context}, which suffices at least for strong supports and freedom of action.
+The greediest approach, which can’t fail to work, is to assume some form of “at every level, the tangle data is equal to what is constructed from the data at earlier levels, by the constructions of phase 1”.  This was used in previous versions, as “coherent tangle data”.  However, this is somewhat awkward to work with in formalisation.  A more cleanly-structured version is given by “freedom of action contexts”, \cref{def:foa-context}, which axiomatise just as much of the connection between earlier levels as the recursive construction needs to know.
 
 \section{Freedom of action context}
 
@@ -977,46 +977,6 @@ In order to make use of the inductive assumption that freedom of action holds at
   Take $\sigma$ a total and co-total allowable partial permutation.  For each $\beta < \alpha$, $\sigma_\beta$ is again allowable, so by the assumption of FoA at earlier levels, $\sigma_\beta$ extends to an allowable permutation $\pi_\beta \in \All_\beta$. [If we assumed $\All \to \Str$ is injective, then $\pi_\beta$ is uniquely determined, since $\sigma_\beta$ is total and co-total.]  Together these $\pi_\beta$ comprise a semi-allowable permutation $\pi$ extending $\sigma$; the allowability condition for non-flexible litters ensures that the unpacked coherence condition holds, and hence by \cref{lem:coherence-unpacked}, $\pi$ is allowable.
 \end{proof}
 
-\section{Coherent tangle data}
-
-\begin{definition}
-  \label{def:concrete-tangle-data}
-  \uses{def:tangle-data}
-  NOTE: this definition and subsequent Phase 2 material is outdated; it should be updated based on the material currently found in \verb|foa_discussion.tex|.
-
-  For a type index $\alpha$, \emph{concrete tangle data} at level $\alpha$ consists of a subset $\tau \subseteq \Pretangle_\alpha$ and a subgroup $\All \subseteq G_\alpha$, together with full tangle data on these.
-
-  Notes for formalisation:
-  \begin{itemize}
-    \item The reason we use \emph{subsets} from here on is because we will soon impose equalities between these components, and subset equalities are much less nasty to deal with than type equalities.
-    \item To define this, we almost certainly want to factor out the types $\tau$ and $\All$ as parameters of the tangle data from the start.
-    \item We could avoid that “factoring out as a parameter” by assuming this concreteness already in the tangle data, i.e. positing $\tau$ as a subset of pretangles and $\All$ as a subgroup of $\Str_\alpha$ from the start.  At least for $\tau$, that seems a bit unnatural — it adds an entirely irrelevant extra assumption throughout phase 1.  For $\All$ it perhaps wouldn’t be so unnatural, since $\All$ does need to be assumed with at least a homomorphism to $\Str_\alpha$ anyway.
-  \end{itemize}
-
-  The \emph{standard} concrete tangle data at level $-1$ are the defined $\tau_{-1} = \Pretangle_{-1}$ and $\All_{-1} = \Str_{-1}$.
-\end{definition}
-
-\begin{definition}
-  \label{def:concrete-tangle-data-propagates}
-  \uses{def:concrete-tangle-data,def:tangle-data-propagates}
-  For a proper type index $\alpha \in \lambda$, given concrete tangle data at all levels $\beta < \alpha$, we get \emph{most} components of concrete tangle data at level $\alpha$.
-
-  In particular, the new set of $\alpha$-tangles $\tau_\alpha \subseteq \Pretangle_\alpha$ is the the image of the $\alpha$-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations.  (We could call these “concrete $\alpha$-tangles” and “abstract $\alpha$-tangles”, if we need to for disambiguation.)
-\end{definition}
-
-\begin{definition}
-  \label{def:coherent-tangle-data}
-  \uses{def:concrete-tangle-data-propagates}
-  For $\alpha \in \lambda + 1$, \emph{tangle data below $\alpha$} consists of concrete tangle data at every level $\beta < \alpha$.  Say this is \emph{coherent} if it is standard at level $-1$, and at each proper type index $\beta < \gamma$, all components at level $\beta$ that \emph{could} have been induced from the data at lower levels $\gamma < \beta$ are, in fact, equal to what would have been induced that way.
-
-  \begin{itemize}
-  \item Note we want to provide this definiton also for $\alpha = \lambda$!  I think this should be available in mathlib as \verb|with_top|.
-  \item We could unify “standard at level $-1$” with induced at proper type indices by generalising the definition of each component of the “induced concrete tangle data at $\alpha$” to include the case $\alpha = -1$,defining the induced data as the standard one in that case.  Is this more natural?  Will it make life easier?
-  \end{itemize}
-
-  For $\alpha < \beta$, “phase 2 data below $\alpha$” can be restricted to “phase 2 data below $\beta$”.
-\end{definition}
-
 \section{Strong supports defined}
 
 NOTE: much of this section has not been updated since early in the formalisation, so may not match the current implementation and abstractions very closely.
@@ -1088,111 +1048,6 @@ The third components in the elements of support domains seem actually to be nece
 {\bf Note for the formal verification project:}  This should be ready to go.
 % \end{comment}
 
-\section{Freedom of action of allowable permutations [older version]}
-
-The practical application of strong supports is to the proof that allowable permutations act freely in a suitable sense, and in guiding applications of this theorem.
-
-We claim that any locally small specification of values of derivatives of an allowable permutation at elements of type $-1$ can be realized.
-
-We give an exact statement of what is meant, then we prove it.
-
-\begin{definition}
-\label {def:local-bijection}
-\uses{def:path,def:atoms-and-litters,def:small}
-\leanok
-\lean{con_nf.local_bijection}
-An $\alpha$-local bijection consists of: for each $\alpha$-extended type index (i.e.\ path $A : -1 \to \alpha$), a permutation $\pi^0_A$ of some subset $\dom(\pi^0_A) \subseteq \tau{-1}$, such that the intersection of $\dom(\pi^0_A)$ with any litter is small (including possibly empty).
-\end{definition}
-
-\begin{definition}
-\label{def:perm-exception}
-\uses{def:structural-perm-atoms}
-\leanok
-\lean{con_nf.near_litter_perm.exception}
-We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L$ being the litter containing $x$) either $\pi(x) \not\in (\pi``L)^\circ$ or $\pi^{-1}(x) \not\in ({\pi^{-1}}``L)^\circ$.
-\end{definition}
-
-\begin{description}
-\item[Stipulation:]  For each litter $L$ we specify a well-ordering $\leq_L$ of order type $\kappa$ with coordinated strict well-ordering $<_L$.  [In fact this is provided trivially by the current implementation of atoms.]
-\end{description}
-
-\begin{definition}
-  \label{def:flexible-old}
-  \uses{def:foa-context}
-  Given a freedom of action context for $\alpha$, a path $A : \beta \to \alpha$, and a litter $L$, say $L$ is \emph{$A$-flexible} (or that the pair $(L,A)$ is \emph{flexible}) if $L$ is not in the range of $f_{\beta,\gamma}$, for any $\gamma < \alpha$.
-
-  (In particular, if $\beta = -1$, every such pair is flexible, since $f_{\gamma,\beta}$-maps is only defined for $\beta$ proper.)
-\end{definition}
-
-\begin{definition}
-  \label{def:freedom-of-action-statement-old}
-  \uses{def:perm-exception,def:local-bijection,def:flexible-old,def:allowable-perm-atoms}
-  Given a freedom of action context for $\alpha$, say that \emph{freedom of action holds (at $\alpha$)} if: Given an $\alpha$-local bijection $\pi^0$ and a specification for each path $A : \beta \to \alpha$ a bijection of the $\beta$-flexible litters, there is a unique allowable permutation $\pi \in \All_\alpha$ such that:
-  \begin{enumerate}
-   \item $\pi{A}$ extends $\pi^0_{A}$ for each $A$;
-   \item for each path $A : \beta \to \alpha$ and $A$-flexible litter $L$, $\pi_A(j_\beta(L)) = j_\beta(N)$ for some $N$ near to $\chi_A(L)$;
-   \item The only exceptions of $\pi$ are $\pi^0$, and everywhere else, $\pi$ is order-preserving between litters.  That is: for each path $A : -1 \to \alpha$ and litter $L$, and writing $N$ for the near-litter $\pi_A``L$, the restriction of $\pi_A$ to $L \setminus \dom(\pi^0_A)$ is the unique bijection from $L \setminus \dom(\pi^0_A)$ to $N^\circ \setminus \rge(\pi^0_A)$ which is strictly increasing with respect to the (given/canonical) orders on $L$ and $N^\circ$.
-  \end{enumerate}
-
-  Note: Earlier versions of the note/blueprint stated the 3rd condition in terms of exceptions; recent versions of the note spell it out in more detail and add the “increasing” condition, which is necessary for the uniqueness in the theorem conclusion.  If there are any doubts, the current version of Randall’s note should be consulted!
-\end{definition}
-
-\begin{lemma}
-\label{lem:freedom-of-action-propagates-old}
-\uses{def:freedom-of-action-statement-old}
-Given a freedom of action context for $\alpha$, if freedom of action holds at each level $\beta < \alpha$, then it holds at level $\alpha$.
-
-Note: I (Peter) have an alternative approach to freedom of action (slightly different in both statement and proof) which might possibly be easier to formalise, avoiding the dependence on strong supports in the proof.  Iff Randall approves it then I will add it in the blueprint as an alternative.  But it doesn’t change the overall structure of the main argument/recursion, so this doesn’t need to be worried about until the point of formalising the FoA theorem itself.
-\end{lemma}
-
-\begin{proof}
-  \uses{lem:strengthen-support}
-  [This proof is is substantially clarified in more recent versions of Randall’s note.]
-
-  We prove this by exhibiting a recursive procedure for computing $\pi$ and its derivatives along a strong support;  this succeeds because all objects have strong supports, and because computing all values of derivatives of $\pi$ on type $-1$ allows computation of all derivatives of $\pi$ at all types.
-
-For each extended type index, we specify a permutation $\chi_A$ of local cardinals $[L]$ is not of the form $f_{\gamma,\beta}(y)$ for any $\gamma<{\tt min}(A)$ and $y \in \tau_\gamma$.
-
-We consider an item $((\beta,-1,\{x\}),A,\gamma)$ and our aim is to compute $\pi_{A \cup \{-1\}}(x)$.  By hypothesis of the recursion, we have already
-computed $\pi_A$ at $((\beta,-1,L),A)$, where $L$ is the litter which contains $x$.
-
-There are two cases.  If $(A,x)$ is in the domain of $\pi^0$, we compute $\pi_{A \cup \{-1\}}(x) = \pi^0_A(x)$ and we are done.
-
-Otherwise we use the hypothesis of the recursion:  we compute $\pi_{A \cup \{-1\}}(x)$ for any $x$ in $L$ with $(A,x)$ not in the domain of $\pi_0$ using the fact that we have already computed $\pi_A(\beta,-1,L) = (\beta,-1,N)$:  we define $\pi_{A \cup \{-1\}}$ to agree with the unique bijective map from the
-elements of $L$ not in the domain of $\pi^0_A$ to the elements of $N^\circ$ not in the domain of $\pi^0_A$ which is strictly increasing in the sense that it sends larger objects in the sense of $<_L$ to larger objects in the sense of $<_{N^\circ}$.
-
-Now we consider items of the form $((\beta,-1,L),A,\delta)$ in the strong support where $L$ is a litter.
-
-If $[L]$ is not of the form $f_{\gamma,\beta}(y)$ for a $\gamma<{\tt min}(A)$ and $y \in \tau_\gamma$,
-we compute $\pi_A((\beta,-1,L))$ as $$(\beta,-1,{\pi^0_A}``L \cup (\chi_A([L])^\circ \setminus {\pi^0_A}``(\tau_{-1} \setminus L))):$$ we map
-$L$ to the near-litter in $\chi_A([L])$ with the exact modifications required by the local bijection.
-
-If $[L]$ is of the form $f_{\gamma,\beta}(y)$ for a $\gamma<{\tt min}(A)$ and $y \in \tau_\gamma$ then we proceed just as above but we take the action on $[L]$ from a different source:
-the coherence condition tells us that $[L]$ should be mapped to $f_{\gamma,\beta}(\pi_{A \setminus \{\beta\} \cup \{\gamma\}}(y))$, so we compute
-$\pi_A((\beta,-1,L))$ as $$(\beta,-1,{\pi^0_A}``L \cup (f_{\gamma,\beta}(\pi_{A \setminus \{\beta\} \cup \{\gamma\}}(y))^\circ \setminus {\pi^0_A}``(\tau_{-1}\setminus L))),$$  which is essentially the same idea but a bit more complex.
-
-The nasty recursive idea here is that we already know how to compute $\pi_{A \setminus \{\beta\} \cup \{\gamma\}}(y)$ from the embedded strong $\gamma$ support of $y$ because we assume as a hypothesis of the recursion that we already know how to carry out this computation for $\gamma$-supports, $\gamma<\alpha$.  The  local information we need about the $\gamma$ allowable permutation (the local bijection to be used and the relevant $\chi$ maps) is included in the information we are given initially about $\pi$ (though this data will have indices modified when used on the $\gamma$-support, of course).  Notice that we certainly do know how to do it for 0-supports, because the recursive clause will never be invoked if $\alpha=0$:  the rest of the procedure tells us what to do.
-
-Once we know how to carry out this calculation along any $\alpha$-strong support, we can compute the derivatives of $\pi$ on elements of type $-1$  along all type paths, and so compute the value of $\pi$ and all of its derivatives on all types.  The method of calculation clearly gives an allowable permutation without exceptions other than those dictated by the local bijection.
-\end{proof}
-
-% \begin{comment}
-{\bf Note for the formal verification project:}  This section is vitally important and should be ready to work on (once the model and the definition of strong support are handled).  Setting up the recursive definition of the computation may be nasty.
-% \end{comment}
-
-\begin{theorem}
-  \label{thm:freedom-of-action-old}
-  \uses{def:freedom-of-action-statement-old}
-  Given coherent tangle data below $\alpha$, it satisfies freedom of action at every level.
-\end{theorem}
-
-\begin{proof}
-  \uses{lem:freedom-of-action-propagates-old}
-  By induction over $\beta < \alpha$, using \cref{lem:freedom-of-action-propagates-old}.
-\end{proof}
-
-
-\newpage
 \section{Types are of size \texorpdfstring{$\mu$}{μ} (so the construction actually succeeds)}
 
 [Note: this section is treated MUCH more clearly in Randall’s more recent versions of the note — we should certainly pull in from that newer version before attempting to formalise the section.]
