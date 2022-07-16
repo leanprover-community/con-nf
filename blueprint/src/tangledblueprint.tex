@@ -713,7 +713,7 @@ In this phase, we give the three hard theorems about the constructions of phase 
 
 These meet the major technical difficulty of the recursion: For each topic in phase 2, we need to assume something along the lines of tangle data at all earlier levels, and suitable connections between them”.  The tricky bit is structing the “…suitable connections…” cleanly.
 
-The bluntest approach, which should certainly suffice for everything, is to assume some form of “at every level, the tangle data is equal to what is constructed from the data at earlier levels, but the constructions of phase 1”.  This is made precise in “coherent tangle data” \cref{def:coherent-tangle-data}.  However, this is somewhat awkward to work with in formalisation.  A more cleanly-structured version is given by “freedom of action contexts”, \cref{def:foa-context}, which suffices at least for strong supports and freedom of action.  Hopefully it may also be possible to recast counting tangles in terms of \cref{def:foa-context} or some other algebraically-cleaner version, but we haven’t done so yet.
+The greediest approach, which can’t fail to work, is to assume some form of “at every level, the tangle data is equal to what is constructed from the data at earlier levels, by the constructions of phase 1”.  This is made precise in “coherent tangle data” \cref{def:coherent-tangle-data}.  However, this is somewhat awkward to work with in formalisation.  A more cleanly-structured version is given by “freedom of action contexts”, \cref{def:foa-context}, which suffices at least for strong supports and freedom of action.
 
 \section{Freedom of action context}
 
@@ -1015,17 +1015,13 @@ In order to make use of the inductive assumption that freedom of action holds at
   \end{itemize}
 
   For $\alpha < \beta$, “phase 2 data below $\alpha$” can be restricted to “phase 2 data below $\beta$”.
-
-  Most constructions in phase 2 will assume coherent tangle data below $\alpha$, for some fixed $\alpha$.
-
-  [Terminology: perhaps we should call this “phase 2 data at $\alpha$”?  That seems more consistent for the overall naming scheme, but “coherent tangle data below $\alpha$” seems clearer and more transparent in itself.  Maybe we should reconsider the naming scheme, so that it’s not in tension with clarity!]
 \end{definition}
 
 \section{Strong supports defined}
 
 NOTE: much of this section has not been updated since early in the formalisation, so may not match the current implementation and abstractions very closely.
 
-Throughout this section, fix some $\alpha \in \lambda + 1$, and assume coherent tangle data below $\alpha$. [Actually, perhaps this section doesn’t need the coherence and could be done in phase 1, i.e. working purely in a single level, assuming full tangle data is available at lower levels?  This should become clearer as it is formalised.]
+Throughout this section, fix some $\alpha \in \lambda + 1$, and assume a freedom of action context at $\alpha$.
 
 Treating supports as sets suffices for the model description, but we will need to analyze supports and orbits with more care, so it is better for purposes
 of the proof to equip supports with a well-orderings.
@@ -1059,7 +1055,7 @@ If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the la
 
 \begin{definition}
 \label{def:strong-support}
-\uses{def:coherent-tangle-data,def:raise-lower-index}
+\uses{def:foa-context,def:raise-lower-index}
 A strong support is a support $S$ with certain additional properties.
 
 \begin{enumerate}
@@ -1122,8 +1118,8 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 
 \begin{definition}
   \label{def:flexible-old}
-  \uses{def:coherent-tangle-data}
-  Given coherent part 1 data below $\alpha$, a path $A : \beta \to \alpha$, and a litter $L$, say $L$ is \emph{$A$-flexible} (or that the pair $(L,A)$ is \emph{flexible}) if $L$ is not in the range of $f_{\beta,\gamma}$, for any $\gamma < \alpha$.
+  \uses{def:foa-context}
+  Given a freedom of action context for $\alpha$, a path $A : \beta \to \alpha$, and a litter $L$, say $L$ is \emph{$A$-flexible} (or that the pair $(L,A)$ is \emph{flexible}) if $L$ is not in the range of $f_{\beta,\gamma}$, for any $\gamma < \alpha$.
 
   (In particular, if $\beta = -1$, every such pair is flexible, since $f_{\gamma,\beta}$-maps is only defined for $\beta$ proper.)
 \end{definition}
@@ -1131,7 +1127,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 \begin{definition}
   \label{def:freedom-of-action-statement-old}
   \uses{def:perm-exception,def:local-bijection,def:flexible-old,def:allowable-perm-atoms}
-  Given coherent part 1 data below $\alpha$, say that \emph{freedom of action holds (at $\alpha$)} if: Given an $\alpha$-local bijection $\pi^0$ and a specification for each path $A : \beta \to \alpha$ a bijection of the $\beta$-flexible litters, there is a unique allowable permutation $\pi \in \All_\alpha$ such that:
+  Given a freedom of action context for $\alpha$, say that \emph{freedom of action holds (at $\alpha$)} if: Given an $\alpha$-local bijection $\pi^0$ and a specification for each path $A : \beta \to \alpha$ a bijection of the $\beta$-flexible litters, there is a unique allowable permutation $\pi \in \All_\alpha$ such that:
   \begin{enumerate}
    \item $\pi{A}$ extends $\pi^0_{A}$ for each $A$;
    \item for each path $A : \beta \to \alpha$ and $A$-flexible litter $L$, $\pi_A(j_\beta(L)) = j_\beta(N)$ for some $N$ near to $\chi_A(L)$;
@@ -1144,7 +1140,7 @@ We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L
 \begin{lemma}
 \label{lem:freedom-of-action-propagates-old}
 \uses{def:freedom-of-action-statement-old}
-Given coherent part 1 data below $\alpha$, if freedom of action holds at each level $\beta < \alpha$, then it holds at level $\alpha$.
+Given a freedom of action context for $\alpha$, if freedom of action holds at each level $\beta < \alpha$, then it holds at level $\alpha$.
 
 Note: I (Peter) have an alternative approach to freedom of action (slightly different in both statement and proof) which might possibly be easier to formalise, avoiding the dependence on strong supports in the proof.  Iff Randall approves it then I will add it in the blueprint as an alternative.  But it doesn’t change the overall structure of the main argument/recursion, so this doesn’t need to be worried about until the point of formalising the FoA theorem itself.
 \end{lemma}
@@ -1206,7 +1202,7 @@ that the construction actually succeeds at every type.
 
 \begin{definition}
 \label {def:coding-function}
-\uses{def:coherent-tangle-data}
+\uses{def:foa-context}
 For any support $S$ and tangle $x$, we can define a function $\chi_{x,S}$ which sends $T=\pi(S)$ to $\pi(x)$ for every $T$ in the orbit of $S$ under
 the action of allowable permutations.  We call such functions {\em coding functions\/}.  Note that if $\pi[S]=\pi'[S]$ then $(\pi^{-1}\circ \pi')[S]= S$, so
 $(\pi^{-1}\circ \pi')(x)= x$, so $\pi(x)=\pi'(x)$, ensuring that the map $\chi_{x,S}$ for which we gave an implicit definition is well defined.
@@ -1266,8 +1262,8 @@ Pulling out the main items from the discussion above, for formalisation targets:
 
 \begin{definition}
   \label{def:support-spec}
-  \uses{def:coherent-tangle-data}
-  Fix coherent tangle data below $\alpha$.  A \emph{support-specification} is \ldots [this is quite long to define; we should get the text from more recent versions of Randall’s note]
+  \uses{def:foa-context}
+  Fix a freedom of action context for $\alpha$.  A \emph{support-specification} is \ldots [this is quite long to define; we should get the text from more recent versions of Randall’s note]
 
   [Perhaps the coherence is not needed?]
 \end{definition}
@@ -1359,7 +1355,7 @@ Now, everything that we did with supports, we repeat with coding functions.
 
 \begin{corollary}
   \label{cor:count-tangles}
-  \uses{def:freedom-of-action-statement-old}
+  \uses{def:foa-property}
   There are $\mu$-many $\alpha$-tangles.
 \end{corollary}
 
@@ -1372,8 +1368,8 @@ This completes the proof that each type is of size $\mu$, which finally closes t
 
 \begin{lemma}
   \label{lem:position-functions-propagate}
-  \uses{def:freedom-of-action-statement-old}
-  Given coherent tangle data below $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:tangle-data}:
+  \uses{def:foa-property}
+  Given a freedom of action context for $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:tangle-data}:
   \begin{enumerate}
     \item for each litter $L$, the typed litter of $L$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
     \item for each near-litter $N$ which is not a litter, $j(N)$ comes after its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \symdiff N^\circ$;
@@ -1399,43 +1395,38 @@ This completes the proof that each type is of size $\mu$, which finally closes t
 
 \section{Completing the recursion}
 
-We can now wrap up the recursion.  It is a little subtle: to know that the recursion fits together right as we build it up, we need to pin it down some more, to make it uniquely determined.
-
-[A probably cleaner approach would be to state and prove a general principle of \emph{$\lambda$-dependent-choice}, (it might be already in mathlib), and apply that to choices of coherent data, avoiding the need for “very coherent”.  The current approach is effectively unwinding what a general proof of $\lambda$-DC would give, applied to this case.]
+We can now wrap up the recursion.
 
 \begin{definition}
-  \label{def:very-coherent-data}
-  \uses{lem:position-functions-propagate,thm:freedom-of-action-old}
-  For $\alpha \in \lambda + 1$, a choice of coherent tangle data below $\alpha$ is \emph{very coherent} if its ordering functions and designated supports at each level are the ones provided by \cref{lem:position-functions-propagate} applied to the earlier levels, using \cref{thm:freedom-of-action-old} to supply the assumption of freedom of action.
+  \label{def:main-recursion}
+  \uses{thm:foa-propagates,lem:position-functions-propagate}
+  For each $\alpha \in \lambda$, we have the following data:
+  \begin{enumerate}
+  \item a full freedom of action context $C_\alpha$ (whose components we write as $\All^\alpha_A$, $\tau^\alpha_A$, etc.),
+  \item such that each restruction $(C_\alpha)_A$ satisfies freedom of action,
+  \item and with $<\mu$-many coding functions at the top level.
+  \end{enumerate}
 
-  [This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice.  See also discusson above replacing this with an explicit principle of “dependent choice”.]
+  This data is defined by recursion on $\alpha$.  Given such data for each $\beta < \alpha$,
+  \begin{enumerate}
+  \item the core freedom of action context at $\alpha$ is synthesised by \cref{def:synthesise-foa-context} (i.e.\ using the constructions of phase 1 to give the core tangle data at the top level, and assembling the context at proper paths from the given lower contexts);
+  \item freedom of action at the top level follows by \cref{thm:foa-propagates};
+  \item the top-level coding functions are bounded by \cref{cor:count-coding-functions};
+  \item this allows us to complete the full tangle data at the top level, by \cref{lem:position-functions-propagate}.
+  \end{enumerate}
 \end{definition}
-
-\begin{lemma}
-  \label{lem:very-coherent-data-unique}
-  \uses{def:coherent-tangle-data}
-  For any $\alpha$, very coherent data below $\alpha$ is unique (if it exists).
-
-  [Actually, we probably don’t need this: it effectively gets inlined in the main recursion.]
-\end{lemma}
-\begin{proof}
-  By induction on $\beta < \alpha$: all components of the data at level $\beta$ are either propositions, or the coherence condition fixes them in terms of earlier data.
-\end{proof}
-
-\begin{theorem}
-  \label{thm:main-recursion}
-  \uses{def:very-coherent-data}
-    For every $\alpha \in \lambda + 1$, there is a unique choice of very coherent data below $\alpha$.
-\end{theorem}
-\begin{proof}
-  By induction on $\beta < \alpha$: take the unique choice below each $\beta < \alpha$; extend each one up to give very coherent data up-to-and-including each $\beta < \alpha$; and then by uniqueness, these fit together to give very coherent data below $\alpha$.
-\end{proof}
 
 \newcommand{\Tangle}{\mathrm{Tangle}}
 \begin{definition}
   \label{def:tangle-completed}
-  \uses{thm:main-recursion}
-  The (genuine,definitive!) tangles are the substructure $\Tangle$ of $\Pretangle$ given by the unique choice of very coherent data up to $\lambda$, provided by \cref{thm:main-recursion}.
+  \uses{def:main-recursion}
+  The (actual, genuine, definitive!) tangles are the structure $\Tangle$ extracted from the freedom of action contexts defined in \cref{def:main-recursion} as follows:
+  \begin{enumerate}
+    \item $\tau_\alpha$ is the top-level tangles of the freedom of action context at $\alpha$;
+    \item “by construction” (i.e. by the defining clause of \cref{def:main-recursion}), $\tau_\alpha$ is constructed by \cref{def:tangle} from the tangles $\tau_\beta$ for $\beta < \alpha$; thus \cref{def:ttt-membership} gives a membership relation $\in_{\beta,\alpha}$ from $\tau_\beta$ to $\tau_\alpha$, for each $\beta < \alpha$.
+  \end{enumerate}
+
+  [Note: The definition of $\in_{\beta,\alpha}$ uses a type equality on $\tau_\alpha$, so may not be very nice to work with directly in subsequenet lemmas.  However, it’s hard to see how any approach to this inductively constructed structure could avoid such issues.  When we get to this stage, we can think about how to deal with this issue.]
 \end{definition}
 
 \newpage
