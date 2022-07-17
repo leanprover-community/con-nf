@@ -435,36 +435,30 @@ A specification is *one-to-one* on a particular path `A` if
 * `⟨a, b₁⟩, ⟨a, b₂⟩ ∈ σ` implies `b₁ = b₂`,
 * `⟨a₁, b⟩, ⟨a₂, b⟩ ∈ σ` implies `a₁ = a₂`,
 where `a, b` may be either atoms or near-litters.
-
-TODO(zeramorphic): split this up into 'left' and 'right' pairs
 -/
-@[mk_iff] structure one_to_one_path (σ : spec B) (A : extended_index B) : Prop :=
-(left_atom         : ∀ b, {a | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
-(right_atom        : ∀ a, {b | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
-(left_near_litter  : ∀ N, {M | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
-(right_near_litter : ∀ M, {N | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
+@[mk_iff] structure one_to_one_forward_path (σ : spec B) (A : extended_index B) : Prop :=
+(atom        : ∀ b, {a | (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
+(near_litter : ∀ N, {M | (⟨sum.inr ⟨M, N⟩, A⟩ : binary_condition B) ∈ σ}.subsingleton)
 
 /-- A specification is one-to-one if it is one-to-one on all paths. -/
-def one_to_one (σ : spec B) : Prop := ∀ A, σ.one_to_one_path B A
+def one_to_one_forward (σ : spec B) : Prop := ∀ A, σ.one_to_one_forward_path B A
 
 /-- If we lower a one-to-one specification along a path, it is still one-to-one.
 This is one part of `total-1-1-restriction` in the blueprint. -/
 lemma lower_one_to_one {β : type_index} (σ : spec B) (A : path (B : type_index) β) :
-  σ.one_to_one B → (σ.lower A).one_to_one ⟨β, path.comp B.path A⟩ :=
+  σ.one_to_one_forward B → (σ.lower A).one_to_one_forward ⟨β, path.comp B.path A⟩ :=
 begin
   intros ho he,
   split; intros hz ha hb hc hd; dsimp at hb hd,
-  { exact (ho $ A.comp he).left_atom hz (by assumption) (by assumption), },
-  { exact (ho $ A.comp he).right_atom hz (by assumption) (by assumption), },
-  { exact (ho $ A.comp he).left_near_litter hz (by assumption) (by assumption), },
-  { exact (ho $ A.comp he).right_near_litter hz (by assumption) (by assumption), },
-  end
+  { exact (ho $ A.comp he).atom hz (by assumption) (by assumption), },
+  { exact (ho $ A.comp he).near_litter hz (by assumption) (by assumption), },
+end
 
 /-- A specification is the graph of a structural permutation if it is one-to-one and total.
 This is one direction of implication of `total-1-1-gives-perm` on the blueprint - the other
-direction may not be needed. We may also require `hσ₃ : σ.co_total` - but hopefully this isn't
-needed. -/
-lemma graph_struct_perm (σ : spec B) (hσ₁ : σ.one_to_one B) (hσ₂ : σ.total) :
+direction may not be needed. We may also require `hσ₃ : σ.co_total` or
+`hσ₄ : σ⁻¹.one_to_one_forward B` - but hopefully this isn't needed. -/
+lemma graph_struct_perm (σ : spec B) (hσ₁ : σ.one_to_one_forward B) (hσ₂ : σ.total) :
   ∃ (π : struct_perm B), π.to_spec = σ := sorry
 
 /-- The allowability condition on atoms.
@@ -483,17 +477,7 @@ Note that the `small` constructor does not depend on whether the litter is prese
 /-- The allowability condition on near-litters.
 If a near-litter is present, so are its litter and all atoms in the symmetric difference, and it is
 mapped to the right place. -/
-@[mk_iff] inductive near_litter_cond (σ : spec B) (N : near_litter) (A : extended_index B) : Prop
-| absent : (∀ M, (⟨sum.inr ⟨N, M⟩, A⟩ : binary_condition B) ∉ σ) → near_litter_cond
-| present (M₁ M₂ : near_litter) (atom_map : litter_set N.fst ∆ N.snd → atom) :
-    (⟨sum.inr ⟨N, M₁⟩, A⟩ : binary_condition B) ∈ σ →
-    (⟨sum.inr ⟨N.fst.to_near_litter, M₂⟩, A⟩ : binary_condition B) ∈ σ →
-    (∀ a : litter_set N.fst ∆ N.snd, (⟨sum.inl ⟨a, atom_map a⟩, A⟩ : binary_condition B) ∈ σ) →
-    M₁.snd.val = M₂.snd.val ∆ set.range atom_map →
-    near_litter_cond
-
--- TODO(zeramorphic): refactor this statement
-def near_litter_cond' (σ : spec B) (N₁ N₂ : near_litter) (A : extended_index B) : Prop :=
+def near_litter_cond (σ : spec B) (N₁ N₂ : near_litter) (A : extended_index B) : Prop :=
 (⟨sum.inr ⟨N₁, N₂⟩, A⟩ : binary_condition B) ∈ σ →
   ∃ M, (⟨sum.inr ⟨N₁.fst.to_near_litter, M⟩, A⟩ : binary_condition B) ∈ σ ∧
   ∃ (symm_diff : litter_set N₁.fst ∆ N₁.snd → atom),
@@ -515,12 +499,10 @@ the domain and `μ`-many not in the range. -/
   (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ.range) →
   flexible_cond
 
--- TODO(zeramorphic): sorry .to_struct_perm.satisfies instead of `true`ing it
-
 /-- The allowability condition on non-flexible litters.
 Whenever `σ` contains some condition `⟨⟨f_{γ,δ}^A(g), N⟩, [-1,δ,A]⟩`, then every allowable
 permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`.
-Note: Definition is incomplete, this won't type check until allowable.lean is refactored. -/
+TODO: Make the correct derivative of `ρ` so that this type checks. -/
 def non_flexible_cond (σ : spec B) : Prop :=
 ∀ ⦃β δ : Λ⦄ ⦃γ : type_index⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (N : near_litter)
   (A : path (B : type_index) β)
@@ -528,66 +510,46 @@ def non_flexible_cond (σ : spec B) : Prop :=
   (⟨sum.inr ⟨(f_map_path (proper_lt_index.mk'
       (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil) t).to_near_litter,
     N⟩, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩ : binary_condition B) ∈ σ →
-  ∀ (ρ : allowable_path ⟨α, path.nil⟩), true /- ρ.to_struct_perm.satisfies σ -/ →
+  ∀ (ρ : allowable_path B), (allowable_path_to_struct_perm _ ρ).satisfies σ →
   N = (f_map_path (proper_lt_index.mk'
-      (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil)
-      (allowable_derivative_nil_comp (path.cons (path.comp B.path A) hγ) ρ • t)).to_near_litter
+        (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil)
+      (ρ • t)).to_near_litter
 
-/-- A specification is *allowable* if it satisfies the following eight conditions.
-Conditions 5-8 are all conditions on non-flexible litters, bundled into what the blueprint names
-condition 5.
--/
-structure allowable_spec (σ : spec B) : Prop :=
-(one_to_one : σ.one_to_one B)
+/-- A specification is *allowable* in the forward direction if it satisfies the following
+conditions. -/
+structure allowable_spec_forward (σ : spec B) : Prop :=
+(one_to_one : σ.one_to_one_forward B)
 (atom_cond : ∀ L A, σ.atom_cond B L A)
-(near_litter_cond : ∀ N A, σ.near_litter_cond B N A)
+(near_litter_cond : ∀ N₁ N₂ A, σ.near_litter_cond B N₁ N₂ A)
 (flexible_cond : σ.flexible_cond B)
-(domain_closed : σ.domain.support_closed B)
-(range_closed : σ.range.support_closed B)
 (non_flexible_cond : σ.non_flexible_cond B)
-(inv_non_flexible_cond : σ⁻¹.non_flexible_cond B)
+(support_closed : σ.domain.support_closed B)
+
+/-- A specification is *allowable* if it is allowable in the forward and backward directions. -/
+structure allowable_spec (σ : spec B) : Prop :=
+(forward : σ.allowable_spec_forward B)
+(backward : σ⁻¹.allowable_spec_forward B)
 
 end spec
 
 variable (B)
 
 namespace spec
-section has_inv
 
-variables {σ : spec B}
-
-lemma inv_one_to_one (hσ : σ.allowable_spec B) : σ⁻¹.one_to_one B := sorry
-
-lemma inv_atom_cond (hσ : σ.allowable_spec B) : ∀ L C, σ⁻¹.atom_cond B L C := sorry
-
-lemma inv_near_litter_cond (hσ : σ.allowable_spec B) : ∀ N C, σ⁻¹.near_litter_cond B N C := sorry
-
-lemma inv_flexible_cond (hσ : σ.allowable_spec B) : σ⁻¹.flexible_cond B := sorry
-
-lemma inv_domain_closed (hσ : σ.allowable_spec B) : σ⁻¹.domain.support_closed B := sorry
-
-lemma inv_range_closed (hσ : σ.allowable_spec B) : σ⁻¹.range.support_closed B := sorry
-
--- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
-
-lemma inv_non_flexible_cond (hσ : σ.allowable_spec B) : σ⁻¹.non_flexible_cond B := sorry
-
-lemma inv_inv_non_flexible_cond (hσ : σ.allowable_spec B) : σ⁻¹⁻¹.non_flexible_cond B := sorry
+/-- Inverses are involutive. -/
+@[simp] lemma inv_inv (σ : spec B) : σ⁻¹⁻¹ = σ :=
+begin
+  unfold has_inv.inv,
+  ext ⟨x | x, y⟩; simp,
+end
 
 /-- The inverse of an allowable specification is allowable. -/
 lemma inv_allowable (σ : spec B) (hσ : σ.allowable_spec B) :
   σ⁻¹.allowable_spec B := {
-  one_to_one := inv_one_to_one B hσ,
-  atom_cond := inv_atom_cond B hσ,
-  near_litter_cond := inv_near_litter_cond B hσ,
-  flexible_cond := inv_flexible_cond B hσ,
-  domain_closed := inv_domain_closed B hσ,
-  range_closed := inv_range_closed B hσ,
-  non_flexible_cond := inv_non_flexible_cond B hσ,
-  inv_non_flexible_cond := inv_inv_non_flexible_cond B hσ,
+  forward := hσ.backward,
+  backward := by { rw inv_inv, exact hσ.forward },
 }
 
-end has_inv
 end spec
 
 /-- An *allowable partial permutation* is a specification that is allowable as defined above. -/
@@ -605,15 +567,15 @@ section lower
 
 variables {σ : spec B} {β : Λ} (A : path (B : type_index) β) (hβ : (β : type_index) < B)
 
-lemma lower_one_to_one (hσ : σ.allowable_spec B) :
-  (σ.lower A).one_to_one (le_index.mk β (path.comp B.path A)) :=
-spec.lower_one_to_one _ _ _ hσ.one_to_one
+lemma lower_one_to_one_forward (hσ : σ.allowable_spec B) :
+  (σ.lower A).one_to_one_forward (le_index.mk β (path.comp B.path A)) :=
+spec.lower_one_to_one _ _ _ hσ.forward.one_to_one
 
 lemma lower_atom_cond (hσ : σ.allowable_spec B) :
   ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C :=
 begin
 intros hl he,
-convert hσ.atom_cond,
+convert hσ.forward.atom_cond,
 simp,
 split,
   { intro hs,
@@ -626,36 +588,38 @@ split,
 end
 
 lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
-  ∀ N C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N C := sorry
+  ∀ N₁ N₂ C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N₁ N₂ C := sorry
 
 lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) := sorry
-
-lemma lower_domain_closed (hσ : σ.allowable_spec B) :
-  (σ.lower A).domain.support_closed (le_index.mk β (path.comp B.path A)) := sorry
-
-lemma lower_range_closed (hσ : σ.allowable_spec B) :
-  (σ.lower A).range.support_closed (le_index.mk β (path.comp B.path A)) := sorry
 
 -- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
 
 lemma lower_non_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A).non_flexible_cond (le_index.mk β (path.comp B.path A)) := sorry
 
-lemma lower_inv_non_flexible_cond (hσ : σ.allowable_spec B) :
-  (σ.lower A)⁻¹.non_flexible_cond (le_index.mk β (path.comp B.path A)) := sorry
+lemma lower_domain_closed (hσ : σ.allowable_spec B) :
+  (σ.lower A).domain.support_closed (le_index.mk β (path.comp B.path A)) := sorry
 
 lemma lower_allowable (σ : spec B) (hσ : σ.allowable_spec B)
   ⦃β : Λ⦄ (A : path (B : type_index) β) (hβ : (β : type_index) < B) :
   (σ.lower A).allowable_spec (le_index.mk β (path.comp B.path A)) := {
-  one_to_one := lower_one_to_one B A hσ,
-  atom_cond := lower_atom_cond B A hσ,
-  near_litter_cond := lower_near_litter_cond B A hσ,
-  flexible_cond := lower_flexible_cond B A hσ,
-  domain_closed := lower_domain_closed B A hσ,
-  range_closed := lower_range_closed B A hσ,
-  non_flexible_cond := lower_non_flexible_cond B A hσ,
-  inv_non_flexible_cond := lower_inv_non_flexible_cond B A hσ,
+  forward := {
+    one_to_one := lower_one_to_one_forward B A hσ,
+    atom_cond := lower_atom_cond B A hσ,
+    near_litter_cond := lower_near_litter_cond B A hσ,
+    flexible_cond := lower_flexible_cond B A hσ,
+    non_flexible_cond := lower_non_flexible_cond B A hσ,
+    support_closed := lower_domain_closed B A hσ,
+  },
+  backward := {
+    one_to_one := lower_one_to_one_forward B A (σ.inv_allowable B hσ),
+    atom_cond := lower_atom_cond B A (σ.inv_allowable B hσ),
+    near_litter_cond := lower_near_litter_cond B A (σ.inv_allowable B hσ),
+    flexible_cond := lower_flexible_cond B A (σ.inv_allowable B hσ),
+    non_flexible_cond := lower_non_flexible_cond B A (σ.inv_allowable B hσ),
+    support_closed := lower_domain_closed B A (σ.inv_allowable B hσ),
+  }
 }
 
 end lower
@@ -752,14 +716,22 @@ instance preorder : preorder (allowable_partial_perm B) := {
   le_trans := extends_trans B,
 }
 
-/-- A condition required later. -/
-lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ := sorry
-
 /-- Inverses are involutive. -/
 @[simp] lemma inv_inv (σ : allowable_partial_perm B) : σ⁻¹⁻¹ = σ :=
 begin
   unfold has_inv.inv,
   ext ⟨x | x, y⟩; simp,
+end
+
+/-- A condition required later. -/
+lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ := sorry
+
+lemma inv_le_iff (σ τ : allowable_partial_perm B) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
+begin
+  refine ⟨_, inv_le _ _ _⟩,
+  have := inv_le _ σ⁻¹ τ⁻¹,
+  rw [inv_inv, inv_inv] at this,
+  exact this,
 end
 
 section zorn_setup
@@ -785,7 +757,7 @@ begin
 end
 
 lemma one_to_one_Union (hc : is_chain (≤) c) :
-  spec.one_to_one B ⋃₀ (subtype.val '' c) :=
+  spec.one_to_one_forward B ⋃₀ (subtype.val '' c) :=
 begin
   intro A,
   split,
@@ -807,18 +779,12 @@ begin
     have hy' := set.mem_of_mem_of_subset hy hc',
     obtain ⟨⟨σx,hσx⟩, Hx₁, rfl⟩ := Hx, },
   -- Note: there must be a better way of doing this below.
-  exact (hσx.one_to_one A).left_atom b hx hy',
-  exact (hσy.one_to_one A).left_atom b hx' hy,
-  exact (hσx.one_to_one A).left_atom b hx hy,
-  exact (hσx.one_to_one A).right_atom b hx hy',
-  exact (hσy.one_to_one A).right_atom b hx' hy,
-  exact (hσx.one_to_one A).right_atom b hx hy,
-  exact (hσx.one_to_one A).left_near_litter b hx hy',
-  exact (hσy.one_to_one A).left_near_litter b hx' hy,
-  exact (hσx.one_to_one A).left_near_litter b hx hy,
-  exact (hσx.one_to_one A).right_near_litter b hx hy',
-  exact (hσy.one_to_one A).right_near_litter b hx' hy,
-  exact (hσx.one_to_one A).right_near_litter b hx hy,
+  exact (hσx.forward.one_to_one A).atom b hx hy',
+  exact (hσy.forward.one_to_one A).atom b hx' hy,
+  exact (hσx.forward.one_to_one A).atom b hx hy,
+  exact (hσx.forward.one_to_one A).near_litter b hx hy',
+  exact (hσy.forward.one_to_one A).near_litter b hx' hy,
+  exact (hσx.forward.one_to_one A).near_litter b hx hy,
 end
 
 lemma atom_cond_Union (hc : is_chain (≤) c) :
@@ -834,7 +800,7 @@ begin
     { rw hemp,
       refine spec.atom_cond.small _,
       simp, },
-    { cases hσ₁.atom_cond L A with h₁ h₂,
+    { cases hσ₁.forward.atom_cond L A with h₁ h₂,
       { refine spec.atom_cond.small _,
         convert h₁,
         refine funext (λ a, _),
@@ -846,38 +812,70 @@ begin
 end
 
 lemma near_litter_cond_Union (hc : is_chain (≤) c) :
-  ∀ N A, spec.near_litter_cond B (⋃₀ (subtype.val '' c)) N A := sorry
+  ∀ N₁ N₂ A, spec.near_litter_cond B (⋃₀ (subtype.val '' c)) N₁ N₂ A := sorry
 
 lemma flexible_cond_Union (hc : is_chain (≤) c) :
   spec.flexible_cond B ⋃₀ (subtype.val '' c) := sorry
-
-lemma domain_closed_Union (hc : is_chain (≤) c) :
-  unary_spec.support_closed B (spec.domain ⋃₀ (subtype.val '' c)) := sorry
-
-lemma range_closed_Union (hc : is_chain (≤) c) :
-  unary_spec.support_closed B (spec.range ⋃₀ (subtype.val '' c)) := sorry
 
 -- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
 
 lemma non_flexible_cond_Union (hc : is_chain (≤) c) :
   spec.non_flexible_cond B ⋃₀ (subtype.val '' c) := sorry
 
-lemma inv_non_flexible_cond_Union (hc : is_chain (≤) c) :
-  spec.non_flexible_cond B (⋃₀ (subtype.val '' c))⁻¹ := sorry
+lemma domain_closed_Union (hc : is_chain (≤) c) :
+  unary_spec.support_closed B (spec.domain ⋃₀ (subtype.val '' c)) := sorry
 
 variables (hc : is_chain (≤) c)
 
 /-- The union of a chain of allowable partial permutations is allowable. -/
 lemma allowable_Union :
-  spec.allowable_spec B ⋃₀ (subtype.val '' c) := {
-  one_to_one := one_to_one_Union B c hc,
-  atom_cond := atom_cond_Union B c hc,
-  near_litter_cond := near_litter_cond_Union B c hc,
-  flexible_cond := flexible_cond_Union B c hc,
-  domain_closed := domain_closed_Union B c hc,
-  range_closed := range_closed_Union B c hc,
-  non_flexible_cond := non_flexible_cond_Union B c hc,
-  inv_non_flexible_cond := inv_non_flexible_cond_Union B c hc,
+  spec.allowable_spec B ⋃₀ (subtype.val '' c) :=
+have c_inv_chain : is_chain has_le.le (has_inv.inv '' c) := begin
+  rintros σ' ⟨σ, hσ₁, hσ₂⟩ τ' ⟨τ, hτ₁, hτ₂⟩ hne,
+  rw [← hσ₂, ← hτ₂],
+  have := hc hσ₁ hτ₁ _,
+  { rw [inv_le_iff, inv_le_iff],
+    exact this, },
+  { refine λ h, hne _,
+    rw [← hσ₂, ← hτ₂, h], },
+end,
+have Union_rw : (⋃₀ (subtype.val '' c))⁻¹ = (⋃₀ (subtype.val ''
+  ((λ (σ : allowable_partial_perm B), ⟨σ.val⁻¹, σ.val.inv_allowable B σ.property⟩) '' c))) :=
+begin
+  unfold has_inv.inv,
+  ext cond,
+  split,
+  { rintro ⟨σ, ⟨⟨σ, hσ⟩, hσ₁, rfl⟩, hmem⟩,
+    exact ⟨σ⁻¹, ⟨⟨σ⁻¹, spec.inv_allowable B σ hσ⟩, ⟨⟨σ, hσ⟩, hσ₁, rfl⟩, rfl⟩, hmem⟩, },
+  { rintro ⟨σ, ⟨⟨σ, hσ⟩, ⟨τ, hτ₁, hτ₂⟩, rfl⟩, hmem⟩,
+    refine ⟨σ⁻¹, ⟨⟨σ⁻¹, spec.inv_allowable B σ hσ⟩, _, rfl⟩, _⟩,
+    { rw subtype.mk_eq_mk at hτ₂, simp_rw ← hτ₂, unfold has_inv.inv, convert hτ₁,
+      ext ⟨c₁ | c₁, c₂⟩; dsimp; rw prod.mk.eta, },
+    { unfold has_inv.inv, obtain ⟨c₁ | c₁, c₂⟩ := cond; dsimp; rw prod.mk.eta; exact hmem, } },
+end,
+{
+  forward := {
+    one_to_one := one_to_one_Union B c hc,
+    atom_cond := atom_cond_Union B c hc,
+    near_litter_cond := near_litter_cond_Union B c hc,
+    flexible_cond := flexible_cond_Union B c hc,
+    non_flexible_cond := non_flexible_cond_Union B c hc,
+    support_closed := domain_closed_Union B c hc,
+  },
+  backward := {
+    one_to_one := by { rw Union_rw,
+      exact one_to_one_Union B (has_inv.inv '' c) c_inv_chain },
+    atom_cond := by { rw Union_rw,
+      exact atom_cond_Union B (has_inv.inv '' c) c_inv_chain },
+    near_litter_cond := by { rw Union_rw,
+      exact near_litter_cond_Union B (has_inv.inv '' c) c_inv_chain },
+    flexible_cond := by { rw Union_rw,
+      exact flexible_cond_Union B (has_inv.inv '' c) c_inv_chain },
+    non_flexible_cond := by { rw Union_rw,
+      exact non_flexible_cond_Union B (has_inv.inv '' c) c_inv_chain },
+    support_closed := by { rw Union_rw,
+      exact domain_closed_Union B (has_inv.inv '' c) c_inv_chain },
+  }
 }
 
 lemma upper_bound_Union (σ : allowable_partial_perm B) :
