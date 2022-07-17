@@ -878,11 +878,11 @@ end,
   }
 }
 
-lemma upper_bound_Union (σ : allowable_partial_perm B) :
-  ∀ (c : set (allowable_partial_perm B)), c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ} →
-  is_chain has_le.le c → ∀ (y : allowable_partial_perm B), y ∈ c →
-  (∃ (ub : allowable_partial_perm B) (H : ub ∈ {ρ : allowable_partial_perm B | σ ≤ ρ}),
-    ∀ (z : allowable_partial_perm B), z ∈ c → z ≤ ub) := sorry
+lemma le_Union₁ (σ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
+  : σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
+
+lemma le_Union₂ (σ τ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
+  (hτ : τ ∈ c) : τ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
 
 end zorn_setup
 
@@ -892,7 +892,12 @@ lemma maximal_perm (σ : allowable_partial_perm B) :
   ∃ (m : allowable_partial_perm B) (H : m ∈ {ρ : allowable_partial_perm B | σ ≤ ρ}), σ ≤ m ∧
     ∀ (z : allowable_partial_perm B), z ∈ {ρ : allowable_partial_perm B | σ ≤ ρ} →
     m ≤ z → z ≤ m :=
-zorn_nonempty_preorder₀ {ρ | σ ≤ ρ} (upper_bound_Union B σ) σ (extends_refl _ _)
+zorn_nonempty_preorder₀ {ρ | σ ≤ ρ}
+  (λ c hc₁ hc₂ τ hτ,
+    ⟨⟨⋃₀ (subtype.val '' c), allowable_Union B c hc₂⟩,
+      le_Union₁ B c hc₂ σ hc₁,
+      λ τ, le_Union₂ B c hc₂ σ τ hc₁⟩)
+  σ (extends_refl _ _)
 
 /-- Any maximal allowable partial permutation under `≤` is total. -/
 lemma total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
