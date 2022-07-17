@@ -67,6 +67,13 @@ abbreviation spec (α : type_index) : Type u := set (binary_condition α)
 
 instance (α : type_index) : has_inv (spec α) := ⟨λ σ, {c | c⁻¹ ∈ σ}⟩
 
+/-- Inverses are involutive. -/
+instance (α : type_index) : has_involutive_inv (spec α) := ⟨has_inv.inv, begin
+  intro σ,
+  unfold has_inv.inv,
+  ext ⟨x | x, y⟩; simp,
+end⟩
+
 /-- The domain of a specification is the unary specification consisting of the domains of all
 binary conditions in the specification. -/
 def spec.domain {α : type_index} (σ : spec α) : unary_spec α := binary_condition.domain '' σ
@@ -499,6 +506,13 @@ the domain and `μ`-many not in the range. -/
   (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ.range) →
   flexible_cond
 
+-- TODO: This instance feels unnecessary and really shouldn't be needed.
+-- Is there a better way of writing `non_flexible_cond` so that the instance is inferred?
+instance (β : Λ) (γ : type_index) (hγ : γ < β) (A : path (B : type_index) β) :
+mul_action (allowable_path (le_index.cons ⟨β, B.path.comp A⟩ hγ))
+  (tangle_path (lt_index.mk' hγ (B.path.comp A) : le_index α)) :=
+core_tangle_data.allowable_action
+
 /-- The allowability condition on non-flexible litters.
 Whenever `σ` contains some condition `⟨⟨f_{γ,δ}^A(g), N⟩, [-1,δ,A]⟩`, then every allowable
 permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`.
@@ -512,8 +526,9 @@ def non_flexible_cond (σ : spec B) : Prop :=
     N⟩, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩ : binary_condition B) ∈ σ →
   ∀ (ρ : allowable_path B), (allowable_path_to_struct_perm _ ρ).satisfies σ →
   N = (f_map_path (proper_lt_index.mk'
-        (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil)
-      (ρ • t)).to_near_litter
+          (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil)
+        ((allowable_derivative_path ⟨β, _⟩ hγ (allowable_derivative_path_comp B A ρ)) • t)
+      ).to_near_litter
 
 /-- A specification is *allowable* in the forward direction if it satisfies the following
 conditions. -/
@@ -536,13 +551,6 @@ variable (B)
 
 namespace spec
 
-/-- Inverses are involutive. -/
-@[simp] lemma inv_inv (σ : spec B) : σ⁻¹⁻¹ = σ :=
-begin
-  unfold has_inv.inv,
-  ext ⟨x | x, y⟩; simp,
-end
-
 /-- The inverse of an allowable specification is allowable. -/
 lemma inv_allowable (σ : spec B) (hσ : σ.allowable_spec B) :
   σ⁻¹.allowable_spec B := {
@@ -557,6 +565,13 @@ def allowable_partial_perm := {σ : spec B // σ.allowable_spec B}
 
 instance allowable_partial_perm.has_inv : has_inv (allowable_partial_perm B) :=
 ⟨λ σ, ⟨σ.val⁻¹, σ.val.inv_allowable B σ.property⟩⟩
+
+/-- Inverses are involutive. -/
+instance : has_involutive_inv (allowable_partial_perm B) := ⟨has_inv.inv, begin
+  intro σ,
+  unfold has_inv.inv,
+  ext ⟨x | x, y⟩; simp,
+end⟩
 
 /-! We prove the restriction lemma: if `σ` is a partial allowable permutation, then so is `σ`
 restricted to a lower path `A`. The proof should be mostly straightforward. The non-trivial bit is
@@ -715,13 +730,6 @@ instance preorder : preorder (allowable_partial_perm B) := {
   le_refl := extends_refl B,
   le_trans := extends_trans B,
 }
-
-/-- Inverses are involutive. -/
-@[simp] lemma inv_inv (σ : allowable_partial_perm B) : σ⁻¹⁻¹ = σ :=
-begin
-  unfold has_inv.inv,
-  ext ⟨x | x, y⟩; simp,
-end
 
 /-- A condition required later. -/
 lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ := sorry
