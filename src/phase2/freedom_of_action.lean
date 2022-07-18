@@ -916,10 +916,7 @@ end
 
 lemma le_Union₁ (hcne : c.nonempty) (σ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
   : σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
-begin
-  obtain ⟨τ, hτ⟩ := hcne,
-  refine (set.set_of_app_iff.1 $ set.mem_def.1 $ hc₁ hτ).trans (le_Union₂ B c hc σ τ hτ),
-end
+let ⟨τ, h⟩ := hcne in (set.set_of_app_iff.1 $ set.mem_def.1 $ hc₁ h).trans (le_Union₂ B c hc σ τ h)
 
 end zorn_setup
 
