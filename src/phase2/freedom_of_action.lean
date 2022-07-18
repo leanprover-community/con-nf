@@ -890,8 +890,32 @@ end,
 lemma le_Union₁ (σ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
   : σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
 
-lemma le_Union₂ (σ τ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
-  (hτ : τ ∈ c) : τ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
+lemma le_Union₂ (σ τ : allowable_partial_perm B) -- (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
+  (hτ : τ ∈ c) : τ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
+begin
+  have hsub : ∀ (t : allowable_partial_perm B) (ht : t ∈ c), t.val ⊆ ⋃₀ (subtype.val '' c) := λ t ht b hb, ⟨t.val, set.mem_image_of_mem _ ht, hb⟩,
+  refine ⟨hsub τ hτ,
+    λ L N A hLA hnin hin, _,
+    λ a b L h A hnin hin p hp, _,
+    λ a b L h A hnin hin p hp, _⟩,
+  all_goals
+  { obtain ⟨ρ, ⟨σ, hσ, hσρ⟩, hρ⟩ := hin,
+    rw ← hσρ at hρ,
+    have hneq : σ ≠ τ,
+    { by_contra,
+      rw h at hρ,
+      exact hnin hρ },
+    obtain ⟨hsub, -, -, -⟩ | hleq := hc hσ hτ hneq,
+    { cases hnin (hsub hρ) } },
+  { have := hleq.2 L N A hLA hnin hρ,
+    refine ⟨
+      λ l a hla, set.image_subset binary_condition.domain (hsub σ hσ) (this.1 l a hla),
+      λ l a hla, set.image_subset binary_condition.range (hsub σ hσ) (this.2 l a hla)⟩ },
+  { obtain ⟨q, hq⟩ := hleq.3 a b L h A hnin hρ p hp,
+    exact ⟨q, (hsub σ hσ) hq⟩ },
+  { obtain ⟨q, hq⟩ := hleq.4 a b L h A hnin hρ p hp,
+    exact ⟨q, (hsub σ hσ) hq⟩ }
+end
 
 end zorn_setup
 
@@ -905,7 +929,7 @@ zorn_nonempty_preorder₀ {ρ | σ ≤ ρ}
   (λ c hc₁ hc₂ τ hτ,
     ⟨⟨⋃₀ (subtype.val '' c), allowable_Union B c hc₂⟩,
       le_Union₁ B c hc₂ σ hc₁,
-      λ τ, le_Union₂ B c hc₂ σ τ hc₁⟩)
+      λ τ, le_Union₂ B c hc₂ σ τ /- hc₁ -/⟩)
   σ (extends_refl _ _)
 
 /-- Any maximal allowable partial permutation under `≤` is total. -/
