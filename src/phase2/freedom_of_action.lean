@@ -741,12 +741,7 @@ begin
 end
 
 lemma inv_le_iff (σ τ : allowable_partial_perm B) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
-begin
-  refine ⟨_, inv_le _ _ _⟩,
-  have := inv_le _ σ⁻¹ τ⁻¹,
-  rw [inv_inv, inv_inv] at this,
-  exact this,
-end
+⟨by simpa only [inv_inv] using inv_le B σ⁻¹ τ⁻¹, inv_le _ _ _⟩
 
 section zorn_setup
 
