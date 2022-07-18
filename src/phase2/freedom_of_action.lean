@@ -111,7 +111,8 @@ def struct_perm.satisfies {α : type_index} (π : struct_perm α) (σ : spec α)
 ∀ c ∈ σ, π.satisfies_cond c
 
 lemma struct_perm.satisfies_mono {α : type_index} (π : struct_perm α) (σ ρ : spec α) (hσρ : σ ⊆ ρ) :
-  π.satisfies ρ → π.satisfies σ := sorry
+  π.satisfies ρ → π.satisfies σ :=
+λ hρ c hc, hρ c (hσρ hc)
 
 /- There is an injection from the type of structural permutations to the type of specifications,
 in such a way that any structural permutation satisfies its specification. We construct this
@@ -574,17 +575,11 @@ spec.lower_one_to_one _ _ _ hσ.forward.one_to_one
 lemma lower_atom_cond (hσ : σ.allowable_spec B) :
   ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C :=
 begin
-intros hl he,
-convert hσ.forward.atom_cond,
-simp,
-split,
-  { intro hs,
-    cases hs; intro hl'; intro he',
-    { sorry, },
-    { sorry, },
-  },
-  { intro hL,
-    sorry, },
+  intros hl he,
+  convert hσ.forward.atom_cond,
+  refine eq_iff_iff.2 ⟨λ _ hl' he', hσ.forward.atom_cond hl' he', _⟩,
+  intro hL,
+  sorry,
 end
 
 lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
@@ -724,7 +719,16 @@ begin
 end
 
 /-- A condition required later. -/
-lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ := sorry
+lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ :=
+begin
+  rintro ⟨h1, h2, h3, h4⟩,
+  unfold has_inv.inv,
+  refine ⟨_, _, λ a b, h4 b a, λ a b, h3 b a⟩,
+  { rintro ⟨x | x, y⟩; intro h; exact h1 h, },
+  intros L N A hLA hnin hin,
+  simp at hnin hin,
+  sorry
+end
 
 lemma inv_le_iff (σ τ : allowable_partial_perm B) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
 begin
