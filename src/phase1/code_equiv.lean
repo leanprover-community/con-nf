@@ -43,8 +43,8 @@ variables {c d : code α}
 
 /-! ### Parity of a code -/
 
-/-- Parity of codes. We define them mutually inductively (`even_odd ff` is evenness, `even_odd
-tt` is oddity). If we consider codes as states of a game and `A_map_rel` as the "leads to"
+/-- Parity of codes. We define them mutually inductively (`even_odd ff` is evenness, `even_odd tt`
+is oddity). If we consider codes as states of a game and `A_map_rel` as the "leads to"
 relation, then even codes are precisely losing codes and odd codes are precisely winning codes.
 Parity of a nonempty code corresponds to the parity of its number of iterated preimages under
 A-maps. The only even empty code is `⊥` one, all others are odd. -/

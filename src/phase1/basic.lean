@@ -155,6 +155,23 @@ export core_tangle_data (tangle allowable allowable_to_struct_perm)
 export almost_tangle_data (to_tangle pretangle_inj typed_singleton)
 export positioned_tangle_data (position)
 
+section instances
+
+instance coe_Iio (α : Λ) : has_coe (Iio α) (Iio (α : type_index)) :=
+⟨λ β, ⟨β.val, coe_lt_coe.mpr β.property⟩⟩
+
+variables (α : Λ) (β : Iio α) [core_tangle_data β] [positioned_tangle_data β]
+
+instance core_val : core_tangle_data β.val := ‹core_tangle_data β›
+instance core_coe_coe : core_tangle_data (β : Λ) := ‹core_tangle_data β›
+instance core_coe_b : core_tangle_data (coe_b β : Iio (α : type_index)) := ‹core_tangle_data β›
+instance positioned_val : positioned_tangle_data β.val := ‹positioned_tangle_data β›
+instance positioned_coe_coe : positioned_tangle_data (β : Λ) := ‹positioned_tangle_data β›
+instance positioned_coe_b : positioned_tangle_data (coe_b β : Iio (α : type_index)) :=
+‹positioned_tangle_data β›
+
+end instances
+
 /-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
 permutations to be near-litter-permutations, and the designated supports to be singletons. -/
 instance bot.core_tangle_data : core_tangle_data ⊥ :=
@@ -166,19 +183,11 @@ instance bot.core_tangle_data : core_tangle_data ⊥ :=
 
 def bot.positioned_tangle_data : positioned_tangle_data ⊥ := ⟨nonempty.some mk_atom.le⟩
 
-variables (α : type_index) [core_tangle_data α]
-
-/-- Nonempty sets of tangles. -/
-abbreviation tangles : Type u := {s : set (tangle α) // s.nonempty}
-
 /-- The core tangle data up to phase `α`. -/
 abbreviation core_tangle_cumul (α : Λ) := Π β : Iio (α : type_index), core_tangle_data β
 
 abbreviation positioned_tangle_cumul (α : Λ) [core : core_tangle_cumul α] :=
 Π β : Iio (α : type_index), @positioned_tangle_data _ β (core β)
-
-instance coe_Iio (α : Λ) : has_coe (Iio α) (Iio (α : type_index)) :=
-⟨λ β, ⟨β.val, coe_lt_coe.mpr β.property⟩⟩
 
 abbreviation almost_tangle_cumul (α : Λ) [core : core_tangle_cumul α] :=
 Π β : Iio α, @almost_tangle_data _ β (core β)
@@ -191,5 +200,18 @@ instance core_tangle_cumul.to_core_tangle_data (α : Λ) [hα : core_tangle_cumu
   Π β : Iio (α : type_index), core_tangle_data β
 | ⟨⊥, h⟩ := bot.core_tangle_data
 | ⟨(β : Λ), hβ⟩ := hα ⟨β, hβ⟩
+
+section instances
+
+variables (α : Λ) (β : Iio α) [core_tangle_cumul α]
+instance cumul_core : core_tangle_data β := ‹core_tangle_cumul α› β
+variable [positioned_tangle_cumul α]
+instance cumul_positioned : positioned_tangle_data β := ‹positioned_tangle_cumul α› β
+variable [almost_tangle_cumul α]
+instance cumul_almost : almost_tangle_data β := ‹almost_tangle_cumul α› β
+variable [tangle_cumul α]
+instance cumul_full : tangle_data β := ‹tangle_cumul α› β
+
+end instances
 
 end con_nf
