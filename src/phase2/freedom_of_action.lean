@@ -314,41 +314,8 @@ local infix ` ≺ `:50 := constrains _ _
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,
 then `x < y` in `µ`, under the `to_tangle_path` or `typed_singleton_path` maps. -/
-lemma constrains_is_subrelation : subrelation (constrains α C) (inv_image μr (λ a, position (sum.elim (λ b, typed_singleton_path C b) (λ N,
-to_tangle_path C N) a.1))) := begin
-unfold subrelation,
-intros x y hxy,
-unfold inv_image,
-cases hxy,
--- part 1
-apply tangle_data.litter_lt,
-apply hxy_H,
--- part 2
-apply or.resolve_left,
-convert (eq_or_gt_of_le (tangle_data.litter_lt_near_litter _)),
-sorry,
-by_contra,
-apply hxy_hN,
-cases hxy_N,
-unfold litter.to_near_litter at h,
-simp only [embedding_like.apply_eq_iff_eq, eq_self_iff_true, heq_iff_eq, true_and] at h,
-rw h,
-refl,
--- part 3
-apply tangle_data.symm_diff_lt_near_litter,
-apply hxy_H,
--- part 4
-dsimp only [(to_tangle_path), (f_map_path), (litter.to_near_litter)],
-simp only [sum.elim_inr],
-sorry,
-end
 
-lemma constrains_wf : well_founded (constrains α C) := begin
-apply subrelation.wf,
-apply constrains_is_subrelation,
-apply inv_image.wf,
-convert μwf.wf,
-end
+lemma constrains_wf : well_founded (constrains α C) := sorry
 variables {α} {B}
 
 /-- A litter and extended index is *flexible* if the associated support condition is a minimal
@@ -674,7 +641,12 @@ Proof: Freedom of action gives some extension `π`, and hence some candidate val
 condition implies that any two extensions agree. Use the above lemma for the second part. -/
 lemma exists_tangle_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
   (foa : freedom_of_action B) (ht : supports (allowable_path_to_struct_perm B) σ.val t) :
-  ∃ s, ∀ π, (allowable_path_to_struct_perm B π).satisfies σ.val → π • t = s := sorry
+  ∃ s, ∀ π, (allowable_path_to_struct_perm B π).satisfies σ.val → π • t = s := begin
+use ((foa σ).some • t),
+intros π₂ hπ₂,
+symmetry,
+exact eq_of_supports B σ t ht (foa σ).some π₂ (foa σ).some_spec hπ₂,
+end
 
 namespace allowable_partial_perm
 
