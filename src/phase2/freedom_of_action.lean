@@ -579,7 +579,19 @@ begin
   convert hσ.forward.atom_cond,
   refine eq_iff_iff.2 ⟨λ _ hl' he', hσ.forward.atom_cond hl' he', _⟩,
   intro hL,
-  sorry,
+  unfold spec.lower binary_condition.extend_path,
+  obtain hsmall | ⟨N, atom_map, h1, h2, h3⟩ := hL hl (A.comp he),
+  { refine spec.atom_cond.small _,
+    convert hsmall,
+    unfold spec.domain binary_condition.domain,
+    ext a,
+    simp,
+    split; rintro ⟨⟨x, y⟩, hx1, hx2, hx3⟩,
+    { exact ⟨⟨x, A.comp y⟩, hx1, hx2, by rw ← hx3⟩ },
+    dsimp only at hx3,
+    rw hx3 at hx1 hx2,
+    exact ⟨⟨x, he⟩, hx1, hx2, rfl⟩ },
+  { exact spec.atom_cond.all N atom_map h1 h2 h3 }
 end
 
 lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
