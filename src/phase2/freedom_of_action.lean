@@ -224,7 +224,16 @@ def spec.total {α : type_index} (σ : spec α) : Prop := σ.domain = set.univ
 def spec.co_total {α : type_index} (σ : spec α) : Prop := σ.range = set.univ
 
 lemma spec.co_total_of_inv_total {α : type_index} (σ : spec α) :
-  σ⁻¹.total → σ.co_total := sorry
+  σ⁻¹.total → σ.co_total :=
+begin
+  unfold has_inv.inv spec.total spec.co_total spec.domain spec.range binary_condition.domain binary_condition.range,
+  intro h,
+  rw set.eq_univ_iff_forall at h ⊢,
+  intro c,
+  obtain ⟨⟨⟨x1, x2⟩ | ⟨x1, x2⟩, y⟩, hxy, hc⟩ := h c,
+  { refine ⟨⟨sum.inl ⟨x2, x1⟩, y⟩, hxy, hc⟩ },
+  { refine ⟨⟨sum.inr ⟨x2, x1⟩, y⟩, hxy, hc⟩ }
+end
 
 lemma spec.total_1_1_restriction {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
   (σ.total → (σ.lower A).total) ∧ (σ.co_total → (σ.lower A).co_total) :=
