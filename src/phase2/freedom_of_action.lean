@@ -118,7 +118,8 @@ def struct_perm.satisfies {α : type_index} (π : struct_perm α) (σ : spec α)
 ∀ c ∈ σ, π.satisfies_cond c
 
 lemma struct_perm.satisfies_mono {α : type_index} (π : struct_perm α) (σ ρ : spec α) (hσρ : σ ⊆ ρ) :
-  π.satisfies ρ → π.satisfies σ := sorry
+  π.satisfies ρ → π.satisfies σ :=
+λ hρ c hc, hρ c (hσρ hc)
 
 /- There is an injection from the type of structural permutations to the type of specifications,
 in such a way that any structural permutation satisfies its specification. We construct this
@@ -230,7 +231,16 @@ def spec.total {α : type_index} (σ : spec α) : Prop := σ.domain = set.univ
 def spec.co_total {α : type_index} (σ : spec α) : Prop := σ.range = set.univ
 
 lemma spec.co_total_of_inv_total {α : type_index} (σ : spec α) :
-  σ⁻¹.total → σ.co_total := sorry
+  σ⁻¹.total → σ.co_total :=
+begin
+  unfold has_inv.inv spec.total spec.co_total spec.domain spec.range binary_condition.domain binary_condition.range,
+  intro h,
+  rw set.eq_univ_iff_forall at h ⊢,
+  intro c,
+  obtain ⟨⟨⟨x1, x2⟩ | ⟨x1, x2⟩, y⟩, hxy, hc⟩ := h c,
+  { refine ⟨⟨sum.inl ⟨x2, x1⟩, y⟩, hxy, hc⟩ },
+  { refine ⟨⟨sum.inr ⟨x2, x1⟩, y⟩, hxy, hc⟩ }
+end
 
 lemma spec.total_1_1_restriction {α β : type_index} (σ : spec α) (A : path (α : type_index) β) :
   (σ.total → (σ.lower A).total) ∧ (σ.co_total → (σ.lower A).co_total) :=
@@ -589,21 +599,25 @@ spec.lower_one_to_one _ _ _ hσ.forward.one_to_one
 lemma lower_atom_cond (hσ : σ.allowable_spec B) :
   ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C :=
 begin
-intros hl he,
-convert hσ.forward.atom_cond,
-simp,
-split,
-  { intro hs,
-    cases hs; intro hl'; intro he',
-    { sorry, },
-    { sorry, },
-  },
-  { intro hL,
-    sorry, },
+  intros L C,
+  unfold spec.lower binary_condition.extend_path,
+  obtain hsmall | ⟨N, atom_map, h1, h2, h3⟩ := hσ.forward.atom_cond L (A.comp C),
+  { refine spec.atom_cond.small _,
+    convert hsmall,
+    unfold spec.domain binary_condition.domain,
+    ext a,
+    simp,
+    split; rintro ⟨⟨x, y⟩, hx1, hx2, hx3⟩,
+    { exact ⟨⟨x, A.comp y⟩, hx1, hx2, by rw ← hx3⟩ },
+    dsimp only at hx3,
+    rw hx3 at hx1 hx2,
+    exact ⟨⟨x, C⟩, hx1, hx2, rfl⟩ },
+  { exact spec.atom_cond.all N atom_map h1 h2 h3 }
 end
 
 lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
-  ∀ N₁ N₂ C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N₁ N₂ C := sorry
+  ∀ N₁ N₂ C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N₁ N₂ C :=
+λ N₁ N₂ C hN, hσ.forward.near_litter_cond N₁ N₂ (A.comp C) hN
 
 lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) := sorry
@@ -732,15 +746,19 @@ instance preorder : preorder (allowable_partial_perm B) := {
 }
 
 /-- A condition required later. -/
-lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ := sorry
+lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ :=
+begin
+  rintro ⟨h1, h2, h3, h4⟩,
+  unfold has_inv.inv,
+  refine ⟨_, _, λ a b, h4 b a, λ a b, h3 b a⟩,
+  { rintro ⟨x | x, y⟩; intro h; exact h1 h, },
+  intros L N A hLA hnin hin,
+  simp at hnin hin,
+  sorry
+end
 
 lemma inv_le_iff (σ τ : allowable_partial_perm B) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
-begin
-  refine ⟨_, inv_le _ _ _⟩,
-  have := inv_le _ σ⁻¹ τ⁻¹,
-  rw [inv_inv, inv_inv] at this,
-  exact this,
-end
+⟨by simpa only [inv_inv] using inv_le B σ⁻¹ τ⁻¹, inv_le _ _ _⟩
 
 section zorn_setup
 
@@ -886,11 +904,36 @@ end,
   }
 }
 
-lemma le_Union₁ (σ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
-  : σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
+lemma le_Union₂ (σ τ : allowable_partial_perm B) -- (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
+  (hτ : τ ∈ c) : τ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
+begin
+  have hsub : ∀ (t : allowable_partial_perm B) (ht : t ∈ c), t.val ⊆ ⋃₀ (subtype.val '' c) := λ t ht b hb, ⟨t.val, set.mem_image_of_mem _ ht, hb⟩,
+  refine ⟨hsub τ hτ,
+    λ L N A hLA hnin hin, _,
+    λ a b L h A hnin hin p hp, _,
+    λ a b L h A hnin hin p hp, _⟩,
+  all_goals
+  { obtain ⟨ρ, ⟨σ, hσ, hσρ⟩, hρ⟩ := hin,
+    rw ← hσρ at hρ,
+    have hneq : σ ≠ τ,
+    { by_contra,
+      rw h at hρ,
+      exact hnin hρ },
+    obtain ⟨hsub, -, -, -⟩ | hleq := hc hσ hτ hneq,
+    { cases hnin (hsub hρ) } },
+  { have := hleq.2 L N A hLA hnin hρ,
+    refine ⟨
+      λ l a hla, set.image_subset binary_condition.domain (hsub σ hσ) (this.1 l a hla),
+      λ l a hla, set.image_subset binary_condition.range (hsub σ hσ) (this.2 l a hla)⟩ },
+  { obtain ⟨q, hq⟩ := hleq.3 a b L h A hnin hρ p hp,
+    exact ⟨q, (hsub σ hσ) hq⟩ },
+  { obtain ⟨q, hq⟩ := hleq.4 a b L h A hnin hρ p hp,
+    exact ⟨q, (hsub σ hσ) hq⟩ }
+end
 
-lemma le_Union₂ (σ τ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
-  (hτ : τ ∈ c) : τ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
+lemma le_Union₁ (hcne : c.nonempty) (σ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
+  : σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
+let ⟨τ, h⟩ := hcne in (set.set_of_app_iff.1 $ set.mem_def.1 $ hc₁ h).trans (le_Union₂ B c hc σ τ h)
 
 end zorn_setup
 
@@ -903,8 +946,8 @@ lemma maximal_perm (σ : allowable_partial_perm B) :
 zorn_nonempty_preorder₀ {ρ | σ ≤ ρ}
   (λ c hc₁ hc₂ τ hτ,
     ⟨⟨⋃₀ (subtype.val '' c), allowable_Union B c hc₂⟩,
-      le_Union₁ B c hc₂ σ hc₁,
-      λ τ, le_Union₂ B c hc₂ σ τ hc₁⟩)
+      le_Union₁ B c hc₂ ⟨τ, hτ⟩ σ hc₁,
+      λ τ, le_Union₂ B c hc₂ σ τ /- hc₁ -/⟩)
   σ (extends_refl _ _)
 
 /-- Any maximal allowable partial permutation under `≤` is total. -/
