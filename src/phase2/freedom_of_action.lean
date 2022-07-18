@@ -887,9 +887,6 @@ end,
   }
 }
 
-lemma le_Union₁ (σ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
-  : σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ := sorry
-
 lemma le_Union₂ (σ τ : allowable_partial_perm B) -- (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
   (hτ : τ ∈ c) : τ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
 begin
@@ -917,6 +914,13 @@ begin
     exact ⟨q, (hsub σ hσ) hq⟩ }
 end
 
+lemma le_Union₁ (hcne : c.nonempty) (σ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
+  : σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
+begin
+  obtain ⟨τ, hτ⟩ := hcne,
+  refine (set.set_of_app_iff.1 $ set.mem_def.1 $ hc₁ hτ).trans (le_Union₂ B c hc σ τ hτ),
+end
+
 end zorn_setup
 
 /-- There is a maximal allowable partial permutation extending any given allowable partial
@@ -928,7 +932,7 @@ lemma maximal_perm (σ : allowable_partial_perm B) :
 zorn_nonempty_preorder₀ {ρ | σ ≤ ρ}
   (λ c hc₁ hc₂ τ hτ,
     ⟨⟨⋃₀ (subtype.val '' c), allowable_Union B c hc₂⟩,
-      le_Union₁ B c hc₂ σ hc₁,
+      le_Union₁ B c hc₂ ⟨τ, hτ⟩ σ hc₁,
       λ τ, le_Union₂ B c hc₂ σ τ /- hc₁ -/⟩)
   σ (extends_refl _ _)
 
