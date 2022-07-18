@@ -575,12 +575,9 @@ spec.lower_one_to_one _ _ _ hσ.forward.one_to_one
 lemma lower_atom_cond (hσ : σ.allowable_spec B) :
   ∀ L C, (σ.lower A).atom_cond (le_index.mk β (path.comp B.path A)) L C :=
 begin
-  intros hl he,
-  convert hσ.forward.atom_cond,
-  refine eq_iff_iff.2 ⟨λ _ hl' he', hσ.forward.atom_cond hl' he', _⟩,
-  intro hL,
+  intros L C,
   unfold spec.lower binary_condition.extend_path,
-  obtain hsmall | ⟨N, atom_map, h1, h2, h3⟩ := hL hl (A.comp he),
+  obtain hsmall | ⟨N, atom_map, h1, h2, h3⟩ := hσ.forward.atom_cond L (A.comp C),
   { refine spec.atom_cond.small _,
     convert hsmall,
     unfold spec.domain binary_condition.domain,
@@ -590,12 +587,13 @@ begin
     { exact ⟨⟨x, A.comp y⟩, hx1, hx2, by rw ← hx3⟩ },
     dsimp only at hx3,
     rw hx3 at hx1 hx2,
-    exact ⟨⟨x, he⟩, hx1, hx2, rfl⟩ },
+    exact ⟨⟨x, C⟩, hx1, hx2, rfl⟩ },
   { exact spec.atom_cond.all N atom_map h1 h2 h3 }
 end
 
 lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
-  ∀ N₁ N₂ C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N₁ N₂ C := sorry
+  ∀ N₁ N₂ C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N₁ N₂ C :=
+λ N₁ N₂ C hN, hσ.forward.near_litter_cond N₁ N₂ (A.comp C) hN
 
 lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) := sorry
