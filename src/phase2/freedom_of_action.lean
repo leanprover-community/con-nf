@@ -584,6 +584,10 @@ begin
   { --Domain condition
     intros L A1 hf,
     --feels like unary condition lemma?
+
+    --again, unknown in usefuness.
+    ring_nf,
+    fconstructor;
     sorry, },
   { --Range condition
     intros L A1 hf,
