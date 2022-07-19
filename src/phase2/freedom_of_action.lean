@@ -598,6 +598,8 @@ begin
     rw flexible_iff at hf,
     dsimp at hf,
     --need to mess with hf here? - not sure how.
+    unfold spec.domain,
+    dsimp,
     sorry, },
 end
 
