@@ -130,16 +130,9 @@ set.range (λ (x : near_litter × extended_index α),
 /-- Any structural permutation satisfies its own specification. -/
 lemma struct_perm.satisfies_to_spec {α : type_index} (π : struct_perm α) : π.satisfies π.to_spec :=
 begin
-  unfold struct_perm.satisfies struct_perm.to_spec struct_perm.satisfies_cond,
-  rintros ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ hxy; cases hxy,
-  { simp only [set.mem_range, prod.mk.inj_iff, prod.exists, exists_eq_right, exists_eq_left] at hxy,
-    rw sum.elim_inl,
-    exact hxy },
-  { simp only [set.mem_range, prod.mk.inj_iff, false_and, exists_false] at hxy, cases hxy },
-  { simp only [set.mem_range, prod.mk.inj_iff, false_and, exists_false] at hxy, cases hxy },
-  { simp only [set.mem_range, prod.mk.inj_iff, prod.exists, exists_eq_right, exists_eq_left] at hxy,
-    rw sum.elim_inr,
-    exact hxy }
+  rintros ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ hxy; cases hxy;
+  simpa only [set.mem_range, prod.mk.inj_iff, prod.exists, exists_eq_right, exists_eq_left,
+    sum.elim_inl, sum.elim_inr, false_and, exists_false] using hxy,
 end
 
 /-- The map from structural permutations to their specifications is injective. -/
