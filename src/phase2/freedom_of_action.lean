@@ -68,11 +68,8 @@ abbreviation spec (α : type_index) : Type u := set (binary_condition α)
 instance (α : type_index) : has_inv (spec α) := ⟨λ σ, {c | c⁻¹ ∈ σ}⟩
 
 /-- Inverses are involutive. -/
-instance (α : type_index) : has_involutive_inv (spec α) := ⟨has_inv.inv, begin
-  intro σ,
-  unfold has_inv.inv,
-  ext ⟨x | x, y⟩; simp,
-end⟩
+instance (α : type_index) : has_involutive_inv (spec α) := ⟨has_inv.inv, λ σ, by
+ext ⟨x | x, y⟩; simp only [has_inv.inv, set.mem_set_of_eq, sum.elim_inl, sum.elim_inr, prod.mk.eta]⟩
 
 /-- The domain of a specification is the unary specification consisting of the domains of all
 binary conditions in the specification. -/
