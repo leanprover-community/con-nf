@@ -68,11 +68,8 @@ abbreviation spec (α : type_index) : Type u := set (binary_condition α)
 instance (α : type_index) : has_inv (spec α) := ⟨λ σ, {c | c⁻¹ ∈ σ}⟩
 
 /-- Inverses are involutive. -/
-instance (α : type_index) : has_involutive_inv (spec α) := ⟨has_inv.inv, begin
-  intro σ,
-  unfold has_inv.inv,
-  ext ⟨x | x, y⟩; simp,
-end⟩
+instance (α : type_index) : has_involutive_inv (spec α) := ⟨has_inv.inv, λ σ, by
+ext ⟨x | x, y⟩; simp only [has_inv.inv, set.mem_set_of_eq, sum.elim_inl, sum.elim_inr, prod.mk.eta]⟩
 
 /-- The domain of a specification is the unary specification consisting of the domains of all
 binary conditions in the specification. -/
@@ -736,11 +733,10 @@ lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ�
 begin
   rintro ⟨h1, h2, h3, h4⟩,
   unfold has_inv.inv,
-  refine ⟨_, _, λ a b, h4 b a, λ a b, h3 b a⟩,
-  { rintro ⟨x | x, y⟩; intro h; exact h1 h, },
+  refine ⟨λ x h, h1 h, _, λ a b, h4 b a, λ a b, h3 b a⟩,
   intros L N A hLA hnin hin,
   simp at hnin hin,
-  sorry
+  sorry -- do we need two all_flex the same way there are two all_atoms?
 end
 
 lemma inv_le_iff (σ τ : allowable_partial_perm B) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
@@ -824,7 +820,14 @@ begin
 end
 
 lemma near_litter_cond_Union (hc : is_chain (≤) c) :
-  ∀ N₁ N₂ A, spec.near_litter_cond B (⋃₀ (subtype.val '' c)) N₁ N₂ A := sorry
+  ∀ N₁ N₂ A, spec.near_litter_cond B (⋃₀ (subtype.val '' c)) N₁ N₂ A :=
+begin
+  rintros N₁ N₂ A ⟨ρ, ⟨σ, hσ, hσρ⟩, hρ⟩,
+  subst hσρ,
+  have : σ.val ⊆ ⋃₀ (subtype.val '' c) := λ x h, ⟨σ, ⟨σ, hσ, rfl⟩, h⟩,
+  obtain ⟨M, hM, symm_diff, h1, h2⟩ := σ.prop.forward.near_litter_cond N₁ N₂ A hρ,
+  exact ⟨M, this hM, symm_diff, λ a, this (h1 a), h2⟩,
+end
 
 lemma flexible_cond_Union (hc : is_chain (≤) c) :
   spec.flexible_cond B ⋃₀ (subtype.val '' c) := sorry
