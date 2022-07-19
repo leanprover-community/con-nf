@@ -312,6 +312,7 @@ local infix ` ≺ `:50 := constrains _ _
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,
 then `x < y` in `µ`, under the `to_tangle_path` or `typed_singleton_path` maps. -/
 
+-- Currently unprovable, as the ι maps are not defined at this point.
 lemma constrains_wf : well_founded (constrains α C) := sorry
 variables {α} {B}
 
@@ -637,6 +638,8 @@ def freedom_of_action : Prop := ∀ σ : allowable_partial_perm B,
 /-- If an allowable partial permutation `σ` supports some `α`-tangle `t`, any permutations extending
 `σ` must map `t` to the same value.
 TODO: Can this be proven only assuming the permutations are structural? -/
+/- Currently unprovable: 'supports ' in ht is ill-defined - it means π fixes both elements of a
+binary condition, rather than it sends one to the other.-/
 lemma eq_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
   (ht : supports (allowable_path_to_struct_perm B) σ.val t) (π₁ π₂ : allowable_path B)
   (hπ₁ : (allowable_path_to_struct_perm B π₁).satisfies σ.val)
