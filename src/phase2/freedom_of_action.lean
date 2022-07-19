@@ -587,7 +587,19 @@ lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
 λ N₁ N₂ C hN, hσ.forward.near_litter_cond N₁ N₂ (A.comp C) hN
 
 lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
-  (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) := sorry
+  (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) :=
+begin
+  convert spec.flexible_cond.all _,
+  any_goals{ assumption, },
+  { --secretly an "unfolding" thing; not sure how to do this on the inductive type I have
+    --Note that if you can prove this, you can probably delete the convert block?
+    sorry, },
+  { intros L A hf,
+    rw flexible_iff at hf,
+    dsimp at hf,
+    --need to mess with hf here? - not sure how.
+    sorry, },
+end
 
 -- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
 
