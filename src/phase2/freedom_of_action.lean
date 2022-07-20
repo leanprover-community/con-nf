@@ -265,7 +265,7 @@ lemma spec.lower_co_total {α β : type_index} (σ : spec α) (A : path (α : ty
   σ.co_total → (σ.lower A).co_total := (spec.total_1_1_restriction _ _).2
 
 variables (α : Λ) [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] (B : le_index α) (C : proper_lt_index α)
+  [phase_2_assumptions α] (B : le_index α)
 
 /--
 Support conditions can be said to *constrain* each other in a number of ways. This is discussed
@@ -305,7 +305,10 @@ local infix ` ≺ `:50 := constrains _ _
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,
 then `x < y` in `µ`, under the `to_tangle_path` or `typed_singleton_path` maps. -/
 
-lemma constrains_wf : well_founded (constrains α C) := sorry
+lemma constrains_wf : well_founded (constrains α B) := sorry
+
+instance : has_well_founded (support_condition B) := ⟨constrains α B, constrains_wf α B⟩
+
 variables {α} {B}
 
 /-- A litter and extended index is *flexible* if it is not of the form `f_{γ,δ}^A(x)` for some
@@ -872,10 +875,11 @@ end,
   }
 }
 
-lemma le_Union₂ (σ τ : allowable_partial_perm B) -- (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
+lemma le_Union₂ (σ τ : allowable_partial_perm B)
   (hτ : τ ∈ c) : τ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
 begin
-  have hsub : ∀ (t : allowable_partial_perm B) (ht : t ∈ c), t.val ⊆ ⋃₀ (subtype.val '' c) := λ t ht b hb, ⟨t.val, set.mem_image_of_mem _ ht, hb⟩,
+  have hsub : ∀ (t : allowable_partial_perm B) (ht : t ∈ c), t.val ⊆ ⋃₀ (subtype.val '' c) :=
+    λ t ht b hb, ⟨t.val, set.mem_image_of_mem _ ht, hb⟩,
   refine ⟨hsub τ hτ,
     λ L N A hLA hnin hin, _,
     λ a b L h A hnin hin p hp, _,
@@ -899,8 +903,9 @@ begin
     exact ⟨q, (hsub σ hσ) hq⟩ }
 end
 
-lemma le_Union₁ (hcne : c.nonempty) (σ : allowable_partial_perm B) (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ})
-  : σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
+lemma le_Union₁ (hcne : c.nonempty) (σ : allowable_partial_perm B)
+  (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ}) :
+  σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
 let ⟨τ, h⟩ := hcne in (set.set_of_app_iff.1 $ set.mem_def.1 $ hc₁ h).trans (le_Union₂ B c hc σ τ h)
 
 end zorn_setup
@@ -915,12 +920,98 @@ zorn_nonempty_preorder₀ {ρ | σ ≤ ρ}
   (λ c hc₁ hc₂ τ hτ,
     ⟨⟨⋃₀ (subtype.val '' c), allowable_Union B c hc₂⟩,
       le_Union₁ B c hc₂ ⟨τ, hτ⟩ σ hc₁,
-      λ τ, le_Union₂ B c hc₂ σ τ /- hc₁ -/⟩)
+      λ τ, le_Union₂ B c hc₂ σ τ⟩)
   σ (extends_refl _ _)
+
+/-! The next four lemmas are discussed in "FoA proof sketch completion". -/
+
+-- TODO: Factor out some of these sorries into lemmas, and try to generalise.
+lemma exists_ge_atom (σ : allowable_partial_perm B) (a : atom) (A : extended_index B)
+  (hσ : ∀ c, c ≺ (⟨sum.inl a, A⟩ : support_condition B) → c ∈ σ.val.domain) :
+  ∃ ρ ≥ σ, (⟨sum.inl a, A⟩ : support_condition B) ∈ ρ.val.domain :=
+begin
+  by_cases haσ : (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.val.domain,
+  { exact ⟨σ, le_rfl, haσ⟩ },
+  have := hσ (⟨sum.inr a.fst.to_near_litter, A⟩ : support_condition B)
+    (constrains.mem_litter a.fst a rfl _),
+  obtain ⟨⟨_ | ⟨_, N⟩, A⟩, hc₁, hc₂⟩ := this; cases hc₂,
+  obtain hsmall | ⟨N', atom_map, hσ₁, hσ₂, hN'⟩ := σ.property.forward.atom_cond a.fst A,
+  swap, { exfalso, exact haσ ⟨_, hσ₂ a rfl, rfl⟩, },
+  have h₁ : #↥{a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} = #μ,
+  { sorry },
+  have h₂ : #↥{a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.range} = #μ,
+  { sorry },
+  have : #↥{a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} =
+    #↥{a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.range} := by rw [h₁, h₂],
+  let atom_map : {a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} →
+    binary_condition B :=
+    λ b, (⟨sum.inl ⟨b, (cardinal.eq.mp this).some b⟩, A⟩ : binary_condition B),
+  refine ⟨⟨σ.val ∪ set.range atom_map, _⟩, _,
+    (⟨sum.inl ⟨a, (cardinal.eq.mp this).some ⟨a, rfl, haσ⟩⟩, A⟩ : binary_condition B),
+    set.mem_union_right _ ⟨⟨a, rfl, haσ⟩, rfl⟩, rfl⟩,
+  { sorry },
+  { sorry },
+end
+
+lemma exists_ge_near_litter (σ : allowable_partial_perm B) (N : near_litter) (A : extended_index B)
+  (hN : litter_set N.fst ≠ N.snd)
+  (hσ : ∀ c, c ≺ (⟨sum.inr N, A⟩ : support_condition B) → c ∈ σ.val.domain) :
+  ∃ ρ ≥ σ, (⟨sum.inr N, A⟩ : support_condition B) ∈ ρ.val.domain :=
+sorry
+
+lemma exists_ge_flexible (σ : allowable_partial_perm B) (L : litter) (A : extended_index B)
+  (hL : flexible L A)
+  (hσ : ∀ c, c ≺ (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) → c ∈ σ.val.domain) :
+  ∃ ρ ≥ σ, (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain :=
+sorry
+
+lemma exists_ge_non_flexible (σ : allowable_partial_perm B) (L : litter) (A : extended_index B)
+  (β δ : Λ) (γ : type_index)
+    (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+    (C : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ C) : le_index α))
+  (hL : L = (f_map_path (proper_lt_index.mk'
+    (hδ.trans_le (coe_le_coe.mp $ le_of_path C)) path.nil) t))
+  (hσ : ∀ c, c ≺ (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) → c ∈ σ.val.domain) :
+  ∃ ρ ≥ σ, (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain :=
+sorry
+
+lemma total_of_maximal_aux (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
+  Π (c : support_condition B), c ∈ σ.val.domain
+| ⟨sum.inl a, A⟩ := begin
+    obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_atom B σ a A (λ c hc, total_of_maximal_aux c),
+    rw hσ ρ hρ₁ at hρ₂,
+    exact hρ₂,
+  end
+| ⟨sum.inr N, A⟩ := begin
+    by_cases hnl : litter_set N.fst = N.snd,
+    { -- This is a litter.
+      have hind : ∀ c (hc : c ≺ ⟨sum.inr N, A⟩), c ∈ σ.val.domain := λ c hc, total_of_maximal_aux c,
+      obtain ⟨L, N, hN⟩ := N,
+      dsimp only at hnl, rw subtype.coe_mk at hnl, subst hnl,
+      by_cases flexible L A,
+      { -- This litter is flexible.
+        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_flexible B σ L A h hind,
+        rw hσ ρ hρ₁ at hρ₂,
+        exact hρ₂, },
+      { -- This litter is non-flexible.
+        unfold flexible at h,
+        push_neg at h,
+        obtain ⟨β, δ, γ, hγ, hδ, hγδ, C, t, hL⟩ := h,
+        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flexible B σ L A β δ γ hγ hδ hγδ C t hL hind,
+        rw hσ ρ hρ₁ at hρ₂,
+        exact hρ₂, }, },
+    { -- This is a near-litter.
+      obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_near_litter B σ N A hnl (λ c hc, total_of_maximal_aux c),
+      rw hσ ρ hρ₁ at hρ₂,
+      exact hρ₂, }
+  end
+using_well_founded { dec_tac := `[assumption] }
 
 /-- Any maximal allowable partial permutation under `≤` is total. -/
 lemma total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
-  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) : σ.val.total := sorry
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) : σ.val.total :=
+set.eq_univ_of_forall (total_of_maximal_aux B σ hσ foa)
 
 /-- Any maximal allowable partial permutation under `≤` is co-total. -/
 lemma co_total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
