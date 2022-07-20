@@ -677,9 +677,9 @@ structure perm_le (σ ρ : allowable_partial_perm B) : Prop :=
 (all_flex (L : litter) (N : near_litter) (A : extended_index B) (hL : flexible L A)
   (hσ : (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∉ σ.val)
   (hρ : (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ ρ.val) :
-  (∀ L A, flexible L A →
-    (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain ∧
-    (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.range))
+  (∀ L' A', flexible L' A' →
+    (⟨sum.inr L'.to_near_litter, A'⟩ : support_condition B) ∈ ρ.val.domain ∧
+    (⟨sum.inr L'.to_near_litter, A'⟩ : support_condition B) ∈ ρ.val.range))
 (all_atoms_domain (a b : atom) (L : litter) (ha : a ∈ litter_set L) (A : extended_index B)
   (hσ : (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∉ σ.val)
   (hρ : (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ ρ.val) :
