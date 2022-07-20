@@ -29,7 +29,7 @@ open struct_perm
 /-- A *binary condition* is like a support condition but uses either two atoms or two near-litters
 instead of one. A binary condition `⟨⟨x, y⟩, A⟩` represents the constraint `π_A(x) = y` on an
 allowable permutation. -/
-@[derive [inhabited, mul_action near_litter_perm, mul_action (struct_perm ‹type_index›)]]
+@[derive inhabited]
 def binary_condition (α : type_index) : Type u :=
 ((atom × atom) ⊕ (near_litter × near_litter)) × extended_index α
 
@@ -308,42 +308,38 @@ then `x < y` in `µ`, under the `to_tangle_path` or `typed_singleton_path` maps.
 lemma constrains_wf : well_founded (constrains α C) := sorry
 variables {α} {B}
 
-/-- A litter and extended index is *flexible* if the associated support condition is a minimal
-element with respect to the relation `≺`. In other words, it is not constrained by anything. -/
-def flexible (L : litter) (A : extended_index B) : Prop := ∀ c, ¬ c ≺ ⟨sum.inr L.to_near_litter, A⟩
+/-- A litter and extended index is *flexible* if it is not of the form `f_{γ,δ}^A(x)` for some
+`x ∈ τ_{γ:A}` with conditions defined as above. Hence, it is not constrained by anything. -/
+def flexible (L : litter) (A : extended_index B) : Prop := ∀ ⦃β δ : Λ⦄ ⦃γ : type_index⦄
+  (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α)),
+L ≠ (f_map_path (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t)
 
-/-- A litter and extended index is flexible iff it is not of the form `f_{γ,δ}^A(x)` for some
-`x ∈ τ_{γ:A}` with conditions defined as above. -/
-lemma flexible_iff (L : litter) (A : extended_index B) :
-flexible L A ↔ ∀ {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
-    (A : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ A) : le_index α)),
-L ≠ (f_map_path (proper_lt_index.mk' (hδ.trans_le (coe_le_coe.mp $ le_of_path A)) path.nil) t) :=
+/-- A litter and extended index is flexible only if it is not constrained by anything. -/
+lemma unconstrained_of_flexible (L : litter) (A : extended_index B) (h : flexible L A) :
+∀ c, ¬ c ≺ ⟨sum.inr L.to_near_litter, A⟩ :=
 begin
-  unfold flexible,
-  split; intro h,
-  { intros β δ γ hγ hδ hγδ A t ht,
-    refine not_not.2 h _, push_neg,
-    sorry },
-  { intros c hc,
-    rw constrains_iff at hc,
-    obtain ⟨L, a, ha, A', hc, hA'⟩ | ⟨N, hN, A', hc, hA'⟩ | ⟨N, a, ha, A', hc, hA'⟩ | ⟨β, δ, γ, hγ, hδ, hγδ, A', t, ht, c', hc, h'⟩ := hc,
-    { cases hA' },
-    { obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 hA',
-      simp only at hLN,
-      rw ← hLN at hN,
-      apply hN, refl },
-    { obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 hA',
-      suffices : litter_set N.1 = N.2,
-      { have that := symm_diff_self (litter_set N.1),
-        nth_rewrite 1 this at that,
-        rw that at ha, exact ha },
-      simp only at hLN,
-      rw ← hLN, refl },
-      unfold extended_index at A,
-    specialize h hγ hδ hγδ _ t,
-    obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 h',
+  intros c hc,
+  rw constrains_iff at hc,
+  obtain ⟨L, a, ha, A', hc, hA'⟩ | ⟨N, hN, A', hc, hA'⟩ |
+    ⟨N, a, ha, A', hc, hA'⟩ | ⟨β, δ, γ, hγ, hδ, hγδ, A', t, ht, c', hc, h'⟩ := hc,
+  { cases hA' },
+  { obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 hA',
     simp only at hLN,
-    exact h (congr_arg sigma.fst hLN) }
+    rw ← hLN at hN,
+    apply hN, refl },
+  { obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 hA',
+    suffices : litter_set N.1 = N.2,
+    { have that := symm_diff_self (litter_set N.1),
+      nth_rewrite 1 this at that,
+      rw that at ha, exact ha },
+    simp only at hLN,
+    rw ← hLN, refl },
+    unfold extended_index at A,
+  specialize h hγ hδ hγδ _ t,
+  obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 h',
+  simp only at hLN,
+  exact h (congr_arg sigma.fst hLN)
 end
 
 namespace unary_spec
@@ -579,23 +575,11 @@ lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
 lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) :=
 begin
-  convert spec.flexible_cond.all _ _,
-  { --Domain condition
-    intros L he hf,
-    --feels like unary condition lemma?
-
-    --again, unknown in usefuness.
-    fconstructor;
-    sorry, },
-  { --Range condition
-    intros L he hf,
-    --feels like same unary condition lemma?
-
-    --unknown if this is useful
-    rw flexible_iff at hf,
-    dsimp at hf,
-    sorry,
-   },
+  obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ.forward.flexible_cond,
+  { refine spec.flexible_cond.co_large _ _,
+    sorry, sorry },
+  { refine spec.flexible_cond.all _ _,
+    sorry, sorry },
 end
 
 -- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
@@ -637,10 +621,8 @@ def freedom_of_action : Prop := ∀ σ : allowable_partial_perm B,
 /-- If an allowable partial permutation `σ` supports some `α`-tangle `t`, any permutations extending
 `σ` must map `t` to the same value.
 TODO: Can this be proven only assuming the permutations are structural? -/
-/- Currently unprovable: 'supports ' in ht is ill-defined - it means π fixes both elements of a
-binary condition, rather than it sends one to the other.-/
 lemma eq_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
-  (ht : supports (allowable_path_to_struct_perm B) σ.val t) (π₁ π₂ : allowable_path B)
+  (ht : supports (allowable_path_to_struct_perm B) σ.val.domain t) (π₁ π₂ : allowable_path B)
   (hπ₁ : (allowable_path_to_struct_perm B π₁).satisfies σ.val)
   (hπ₂ : (allowable_path_to_struct_perm B π₂).satisfies σ.val) : π₁ • t = π₂ • t := sorry
 
@@ -651,13 +633,9 @@ allowable permutation `π` extending `σ` maps `t` to `σ(t)`.
 Proof: Freedom of action gives some extension `π`, and hence some candidate value; the support
 condition implies that any two extensions agree. Use the above lemma for the second part. -/
 lemma exists_tangle_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
-  (foa : freedom_of_action B) (ht : supports (allowable_path_to_struct_perm B) σ.val t) :
-  ∃ s, ∀ π, (allowable_path_to_struct_perm B π).satisfies σ.val → π • t = s := begin
-use ((foa σ).some • t),
-intros π₂ hπ₂,
-symmetry,
-exact eq_of_supports B σ t ht (foa σ).some π₂ (foa σ).some_spec hπ₂,
-end
+  (foa : freedom_of_action B) (ht : supports (allowable_path_to_struct_perm B) σ.val.domain t) :
+  ∃ s, ∀ π, (allowable_path_to_struct_perm B π).satisfies σ.val → π • t = s :=
+⟨(foa σ).some • t, λ π₁ hπ₁, eq_of_supports B σ t ht π₁ (foa σ).some hπ₁ (foa σ).some_spec⟩
 
 namespace allowable_partial_perm
 
