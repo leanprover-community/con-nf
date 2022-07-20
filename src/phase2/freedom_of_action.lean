@@ -582,15 +582,14 @@ lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
 begin
   convert spec.flexible_cond.all _ _,
   { --Domain condition
-    intros L A1 hf,
+    intros L he hf,
     --feels like unary condition lemma?
 
     --again, unknown in usefuness.
-    ring_nf,
     fconstructor;
     sorry, },
   { --Range condition
-    intros L A1 hf,
+    intros L he hf,
     --feels like same unary condition lemma?
 
     --unknown if this is useful
