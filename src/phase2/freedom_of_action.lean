@@ -677,8 +677,9 @@ structure perm_le (σ ρ : allowable_partial_perm B) : Prop :=
 (all_flex (L : litter) (N : near_litter) (A : extended_index B) (hL : flexible L A)
   (hσ : (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∉ σ.val)
   (hρ : (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ ρ.val) :
-  (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain ∧
-  (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.range)
+  (∀ L A, flexible L A →
+    (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain ∧
+    (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.range))
 (all_atoms_domain (a b : atom) (L : litter) (ha : a ∈ litter_set L) (A : extended_index B)
   (hσ : (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∉ σ.val)
   (hρ : (⟨sum.inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ ρ.val) :
@@ -706,9 +707,9 @@ begin
   refine ⟨hsub.trans hsub', λ L N A hLA hnin hin, _,
     λ a b L hab A hnin hin, _, λ a b L hab A hnin hin, _⟩,
   { by_cases (sum.inr (L.to_near_litter, N), A) ∈ σ.val,
-    { split; intros l a hla,
-      { exact set.image_subset binary_condition.domain hsub' ((hflx L N A hLA hnin h).1 l a hla) },
-      { exact set.image_subset binary_condition.range hsub' ((hflx L N A hLA hnin h).2 l a hla) } },
+    { exact λ l a hla,
+        ⟨set.image_subset binary_condition.domain hsub' (hflx L N A hLA hnin h l a hla).1,
+        set.image_subset binary_condition.range hsub' (hflx L N A hLA hnin h l a hla).2⟩ },
     { exact hflx' L N A hLA h hin } },
   { by_cases (sum.inl (a, b), A) ∈ σ.val,
     { intros c hc,
@@ -911,9 +912,9 @@ begin
     obtain ⟨hsub, -, -, -⟩ | hleq := hc hσ hτ hneq,
     { cases hnin (hsub hρ) } },
   { have := hleq.2 L N A hLA hnin hρ,
-    refine ⟨
-      λ l a hla, set.image_subset binary_condition.domain (hsub σ hσ) (this.1 l a hla),
-      λ l a hla, set.image_subset binary_condition.range (hsub σ hσ) (this.2 l a hla)⟩ },
+    refine λ l a hla, ⟨
+      set.image_subset binary_condition.domain (hsub σ hσ) (this l a hla).1,
+      set.image_subset binary_condition.range (hsub σ hσ) (this l a hla).2⟩ },
   { obtain ⟨q, hq⟩ := hleq.3 a b L h A hnin hρ p hp,
     exact ⟨q, (hsub σ hσ) hq⟩ },
   { obtain ⟨q, hq⟩ := hleq.4 a b L h A hnin hρ p hp,
