@@ -481,8 +481,7 @@ core_tangle_data.allowable_action
 
 /-- The allowability condition on non-flexible litters.
 Whenever `σ` contains some condition `⟨⟨f_{γ,δ}^A(g), N⟩, [-1,δ,A]⟩`, then every allowable
-permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`.
-TODO: Make the correct derivative of `ρ` so that this type checks. -/
+permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`. -/
 def non_flexible_cond (σ : spec B) : Prop :=
 ∀ ⦃β δ : Λ⦄ ⦃γ : type_index⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (N : near_litter)
   (A : path (B : type_index) β)
@@ -1111,6 +1110,8 @@ lemma atom_union_allowable (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.v
   spec.allowable_spec B (σ.val ∪ set.range (atom_map B σ a A N hsmall)) :=
 sorry
 
+-- TODO: I'm (zeramorphic) not sure this is actually true.
+-- I think we're going to have problems with the "add all" atom condition in the backward direction.
 lemma le_atom_union (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   σ ≤ ⟨σ.val ∪ set.range (atom_map B σ a A N hsmall), atom_union_allowable B σ a A N hc hsmall⟩ :=
