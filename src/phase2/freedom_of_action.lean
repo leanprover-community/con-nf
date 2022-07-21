@@ -94,6 +94,7 @@ begin
          λ ⟨b, ⟨σ, hσ, hbσ⟩, hb⟩, ⟨σ, hσ, b, hbσ, hb⟩⟩,
 end
 
+/-- combined lemma for `spec.inv_domain` and `spec.inv_range`, since the proof is the same. -/
 lemma spec.inv_domain_range {α : type_index} (σ : spec α) : σ⁻¹.domain = σ.range ∧ σ⁻¹.range = σ.domain :=
 begin
   split; ext x; split,
@@ -174,21 +175,15 @@ def unary_spec.lower {α β : type_index} (σ : unary_spec α) (A : path α β) 
 {c | c.extend_path A ∈ σ}
 
 /-- Lowering along the empty path does nothing. -/
-lemma unary_spec.lower_nil {α β γ : type_index} (σ : unary_spec α) :
-  σ.lower path.nil = σ :=
-begin
-  unfold unary_spec.lower support_condition.extend_path,
-  simp,
-end
+lemma unary_spec.lower_nil {α β γ : type_index} (σ : unary_spec α) : σ.lower path.nil = σ :=
+by simp only
+  [unary_spec.lower, support_condition.extend_path, path.nil_comp, prod.mk.eta, set.set_of_mem_eq]
 
 /-- The lowering map is functorial. -/
 lemma unary_spec.lower_lower {α β γ : type_index} (σ : unary_spec α)
   (A : path (α : type_index) β) (B : path (β : type_index) γ) :
   (σ.lower A).lower B = σ.lower (path.comp A B) :=
-begin
-  unfold unary_spec.lower support_condition.extend_path,
-  simp,
-end
+by simp only [unary_spec.lower, support_condition.extend_path, set.mem_set_of_eq, path.comp_assoc]
 
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
@@ -196,21 +191,15 @@ def spec.lower {α β : type_index} (σ : spec α) (A : path (α : type_index) �
 {c | c.extend_path A ∈ σ}
 
 /-- Lowering along the empty path does nothing. -/
-lemma spec.lower_nil {α β γ : type_index} (σ : spec α) :
-  σ.lower path.nil = σ :=
-begin
-  unfold spec.lower binary_condition.extend_path,
-  simp,
-end
+lemma spec.lower_nil {α β γ : type_index} (σ : spec α) : σ.lower path.nil = σ :=
+by simp only
+  [spec.lower, binary_condition.extend_path, path.nil_comp, prod.mk.eta, set.set_of_mem_eq]
 
 /-- The lowering map is functorial. -/
 lemma spec.lower_lower {α β γ : type_index} (σ : spec α)
   (A : path (α : type_index) β) (B : path (β : type_index) γ) :
   (σ.lower A).lower B = σ.lower (path.comp A B) :=
-begin
-  unfold spec.lower binary_condition.extend_path,
-  simp,
-end
+by simp only [spec.lower, binary_condition.extend_path, set.mem_set_of_eq, path.comp_assoc]
 
 /-- Lowering a specification corresponds exactly to forming the derivative of the corresponding
 structural permutation. -/
