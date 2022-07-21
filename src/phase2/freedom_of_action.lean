@@ -94,6 +94,10 @@ begin
          λ ⟨b, ⟨σ, hσ, hbσ⟩, hb⟩, ⟨σ, hσ, b, hbσ, hb⟩⟩,
 end
 
+lemma spec.inv_domain {α : type_index} (σ : spec α) : σ⁻¹.domain = σ.range := sorry
+
+lemma spec.inv_range {α : type_index} (σ : spec α) : σ⁻¹.range = σ.domain := sorry
+
 /-- A structural permutation *satisfies* a condition `⟨⟨x, y⟩, A⟩` if `π_A(x) = y`. -/
 def struct_perm.satisfies_cond {α : type_index} (π : struct_perm α) (c : binary_condition α) :=
 c.fst.elim
@@ -481,8 +485,7 @@ core_tangle_data.allowable_action
 
 /-- The allowability condition on non-flexible litters.
 Whenever `σ` contains some condition `⟨⟨f_{γ,δ}^A(g), N⟩, [-1,δ,A]⟩`, then every allowable
-permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`.
-TODO: Make the correct derivative of `ρ` so that this type checks. -/
+permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`. -/
 def non_flexible_cond (σ : spec B) : Prop :=
 ∀ ⦃β δ : Λ⦄ ⦃γ : type_index⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (N : near_litter)
   (A : path (B : type_index) β)
@@ -502,7 +505,6 @@ structure allowable_spec_forward (σ : spec B) : Prop :=
 (one_to_one : σ.one_to_one_forward B)
 (atom_cond : ∀ L A, σ.atom_cond B L A)
 (near_litter_cond : ∀ N₁ N₂ A, σ.near_litter_cond B N₁ N₂ A)
-(flexible_cond : σ.flexible_cond B)
 (non_flexible_cond : σ.non_flexible_cond B)
 (support_closed : σ.domain.support_closed B)
 
@@ -510,6 +512,7 @@ structure allowable_spec_forward (σ : spec B) : Prop :=
 structure allowable_spec (σ : spec B) : Prop :=
 (forward : σ.allowable_spec_forward B)
 (backward : σ⁻¹.allowable_spec_forward B)
+(flexible_cond : σ.flexible_cond B)
 
 end spec
 
@@ -522,6 +525,15 @@ lemma inv_allowable (σ : spec B) (hσ : σ.allowable_spec B) :
   σ⁻¹.allowable_spec B := {
   forward := hσ.backward,
   backward := by { rw inv_inv, exact hσ.forward },
+  flexible_cond := begin
+    obtain ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩ := hσ.flexible_cond,
+    { refine flexible_cond.co_large _ _,
+      { rw inv_domain, exact h₂, },
+      { rw inv_range, exact h₁, }, },
+    { refine flexible_cond.all _ _,
+      { rw inv_domain, exact h₂, },
+      { rw inv_range, exact h₁, }, },
+  end
 }
 
 end spec
@@ -578,7 +590,7 @@ lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
 lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) :=
 begin
-  obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ.forward.flexible_cond,
+  obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ.flexible_cond,
   { refine spec.flexible_cond.co_large _ _; dsimp at hdom hrge ⊢,
   { sorry, },
   { sorry, },
@@ -623,7 +635,6 @@ lemma lower_allowable (σ : spec B) (hσ : σ.allowable_spec B)
     one_to_one := lower_one_to_one_forward B A hσ,
     atom_cond := lower_atom_cond B A hσ,
     near_litter_cond := lower_near_litter_cond B A hσ,
-    flexible_cond := lower_flexible_cond B A hσ,
     non_flexible_cond := lower_non_flexible_cond B A hσ,
     support_closed := lower_domain_closed B A hσ,
   },
@@ -631,10 +642,10 @@ lemma lower_allowable (σ : spec B) (hσ : σ.allowable_spec B)
     one_to_one := lower_one_to_one_forward B A (σ.inv_allowable B hσ),
     atom_cond := lower_atom_cond B A (σ.inv_allowable B hσ),
     near_litter_cond := lower_near_litter_cond B A (σ.inv_allowable B hσ),
-    flexible_cond := lower_flexible_cond B A (σ.inv_allowable B hσ),
     non_flexible_cond := lower_non_flexible_cond B A (σ.inv_allowable B hσ),
     support_closed := lower_domain_closed B A (σ.inv_allowable B hσ),
-  }
+  },
+  flexible_cond := lower_flexible_cond B A hσ,
 }
 
 end lower
@@ -906,7 +917,6 @@ end,
     one_to_one := one_to_one_Union B c hc,
     atom_cond := atom_cond_Union B c hc,
     near_litter_cond := near_litter_cond_Union B c hc,
-    flexible_cond := flexible_cond_Union B c hc,
     non_flexible_cond := non_flexible_cond_Union B c hc,
     support_closed := domain_closed_Union B c hc,
   },
@@ -917,13 +927,12 @@ end,
       exact atom_cond_Union B (has_inv.inv '' c) c_inv_chain },
     near_litter_cond := by { rw Union_rw,
       exact near_litter_cond_Union B (has_inv.inv '' c) c_inv_chain },
-    flexible_cond := by { rw Union_rw,
-      exact flexible_cond_Union B (has_inv.inv '' c) c_inv_chain },
     non_flexible_cond := by { rw Union_rw,
       exact non_flexible_cond_Union B (has_inv.inv '' c) c_inv_chain },
     support_closed := by { rw Union_rw,
       exact domain_closed_Union B (has_inv.inv '' c) c_inv_chain },
-  }
+  },
+  flexible_cond := flexible_cond_Union B c hc,
 }
 
 lemma le_Union₂ (σ τ : allowable_partial_perm B)
@@ -1144,6 +1153,8 @@ lemma atom_union_allowable (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.v
   spec.allowable_spec B (σ.val ∪ set.range (atom_map B σ a A N hsmall)) :=
 sorry
 
+-- TODO: I'm (zeramorphic) not sure this is actually true.
+-- I think we're going to have problems with the "add all" atom condition in the backward direction.
 lemma le_atom_union (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   σ ≤ ⟨σ.val ∪ set.range (atom_map B σ a A N hsmall), atom_union_allowable B σ a A N hc hsmall⟩ :=

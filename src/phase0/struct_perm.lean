@@ -121,7 +121,7 @@ to_bot_iso.symm.to_monoid_hom.comp $ lower bot_le
 /-- The derivative of a structural permutation at any lower level. -/
 noncomputable def derivative : Π {β}, path α β → struct_perm α →* struct_perm β
 | _ path.nil := monoid_hom.id _
-| γ (path.cons p_αγ hβγ) := (lower hβγ).comp $ derivative p_αγ
+| γ (path.cons p_αγ hβγ) := (lower $ le_of_lt hβγ).comp $ derivative p_αγ
 
 section
 variables {X : Type*} [mul_action near_litter_perm X]
