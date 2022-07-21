@@ -579,10 +579,33 @@ lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) :=
 begin
   obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ.forward.flexible_cond,
-  { refine spec.flexible_cond.co_large _ _,
-    sorry, sorry },
+  { refine spec.flexible_cond.co_large _ _; dsimp at hdom hrge ⊢,
+  { sorry, },
+  { sorry, },
+  },
   { refine spec.flexible_cond.all _ _,
-    sorry, sorry },
+  { intros L he hf,
+    --⟨B.index,B.path⟩
+    have hdom' := hdom L (A.comp he) _,
+    { unfold spec.lower,
+      unfold binary_condition.extend_path,
+      unfold spec.domain at hdom' ⊢,
+      dsimp at hdom' ⊢,
+      obtain ⟨x, hx_1, hx_2⟩ := hdom',
+      refine ⟨⟨x.fst, he⟩,_,_⟩,
+      { sorry, },
+      { unfold binary_condition.domain at hx_2 ⊢,
+        simp at hx_2 ⊢,
+        exact and.elim_left hx_2,
+      },
+
+       },
+    { sorry, },
+    --exact hdom L (A.comp he),
+    },
+  { intros L he hf,
+    sorry, }
+  },
 end
 
 -- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
