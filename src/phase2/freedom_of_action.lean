@@ -366,35 +366,6 @@ def support_closed (σ : unary_spec B) : Prop :=
       supports (allowable_path_to_struct_perm (lt_index.mk' hγ (path.comp B.path A) : le_index α))
         (σ.lower (path.cons A hγ)) t
 
-/-
-
--- TODO: In the following definitions, is `A` supposed to be an external parameter or included
--- in some kind of quantification?
--- Also, are the definitions even needed when defining things in terms of binary specifications?
-
-/-- A unary specification is *local* if
-* for all litters `L` such that `⟨L, A⟩ ∈ σ`, we have `⟨a, A⟩ ∈ σ` for `a ∈ L`, and
-* for all litters `L` such that `⟨L, A⟩ ∉ σ`, we have `∥{a ∈ L | ⟨a, A⟩ ∈ σ}∥ < κ`.
-TODO: The name "local" is reserved but I don't particularly like `litter_local` either.
--/
-def litter_local (σ : unary_spec B) : Prop :=
-∀ (L : litter) (A : extended_index B),
-@ite _ ((⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ) (classical.dec _)
-  (∀ a ∈ litter_set L, (⟨sum.inl a, A⟩ : support_condition B) ∈ σ)
-  (small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ})
-
-def non_flex_small (σ : unary_spec B) : Prop :=
-small {L : litter | ∀ (A : extended_index B), ¬flexible L A}
-
-/-- A unary specification is *flex-small* if it contains either a small amount of flexible litters,
-or all of the flexible litters. -/
-@[mk_iff] inductive flex_small (σ : unary_spec B) : Prop
-| small : small {L : litter | ∃ (A : extended_index B), flexible L A} → flex_small
-| all : (∀ L A, flexible L A → (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ σ) →
-    flex_small
-
--/
-
 end unary_spec
 
 namespace spec
@@ -1146,19 +1117,139 @@ noncomputable def atom_map (hsmall : small {a ∈ litter_set a.fst | (sum.inl a,
     binary_condition B :=
 λ b, ((sum.inl ⟨b, (cardinal.eq.mp $ equiv_not_mem_atom B σ a A N hsmall).some b⟩, A))
 
--- This lemma is going to be work, and we have three others just like it later.
--- Is there a way to unify all of the cases somehow, or at least avoid duplicating code?
-lemma atom_union_allowable (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+lemma atom_union_one_to_one_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
-  spec.allowable_spec B (σ.val ∪ set.range (atom_map B σ a A N hsmall)) :=
+  spec.one_to_one_forward B (σ.val ∪ set.range (atom_map B σ a A N hsmall)) :=
 sorry
 
--- TODO: I'm (zeramorphic) not sure this is actually true.
--- I think we're going to have problems with the "add all" atom condition in the backward direction.
+lemma atom_union_one_to_one_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  spec.one_to_one_forward B (σ.val ∪ set.range (atom_map B σ a A N hsmall))⁻¹ :=
+sorry
+
+lemma atom_union_atom_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  ∀ L C, spec.atom_cond B (σ.val ∪ set.range (atom_map B σ a A N hsmall)) L C :=
+sorry
+
+lemma atom_union_atom_cond_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  ∀ L C, spec.atom_cond B (σ.val ∪ set.range (atom_map B σ a A N hsmall))⁻¹ L C :=
+sorry
+
+lemma atom_union_near_litter_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  ∀ N₁ N₂ C, spec.near_litter_cond B (σ.val ∪ set.range (atom_map B σ a A N hsmall)) N₁ N₂ C :=
+sorry
+
+lemma atom_union_near_litter_cond_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  ∀ N₁ N₂ C, spec.near_litter_cond B (σ.val ∪ set.range (atom_map B σ a A N hsmall))⁻¹ N₁ N₂ C :=
+sorry
+
+lemma atom_union_non_flexible_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  spec.non_flexible_cond B (σ.val ∪ set.range (atom_map B σ a A N hsmall)) :=
+sorry
+
+lemma atom_union_non_flexible_cond_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  spec.non_flexible_cond B (σ.val ∪ set.range (atom_map B σ a A N hsmall))⁻¹ :=
+sorry
+
+lemma atom_union_support_closed_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  (σ.val ∪ set.range (atom_map B σ a A N hsmall)).domain.support_closed B :=
+sorry
+
+lemma atom_union_support_closed_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  (σ.val ∪ set.range (atom_map B σ a A N hsmall)).range.support_closed B :=
+sorry
+
+lemma atom_union_flexible_cond (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  spec.flexible_cond B (σ.val ∪ set.range (atom_map B σ a A N hsmall)) :=
+sorry
+
+/-- When we add the provided atoms from the atom map, we preserve allowability.
+
+This lemma is going to be work, and we have three others just like it later.
+Is there a way to unify all of the cases somehow, or at least avoid duplicating code?
+At the moment, I can't see a way to use any less than eleven lemmas here, since the symmetry is
+broken. -/
+lemma atom_union_allowable (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  spec.allowable_spec B (σ.val ∪ set.range (atom_map B σ a A N hsmall)) := {
+  forward := {
+    one_to_one := atom_union_one_to_one_forward B σ a A N hc hsmall,
+    atom_cond := atom_union_atom_cond_forward B σ a A N hc hsmall,
+    near_litter_cond := atom_union_near_litter_cond_forward B σ a A N hc hsmall,
+    non_flexible_cond := atom_union_non_flexible_cond_forward B σ a A N hc hsmall,
+    support_closed := atom_union_support_closed_forward B σ a A N hc hsmall,
+  },
+  backward := {
+    one_to_one := atom_union_one_to_one_backward B σ a A N hc hsmall,
+    atom_cond := atom_union_atom_cond_backward B σ a A N hc hsmall,
+    near_litter_cond := atom_union_near_litter_cond_backward B σ a A N hc hsmall,
+    non_flexible_cond := atom_union_non_flexible_cond_backward B σ a A N hc hsmall,
+    support_closed := by { rw spec.inv_domain,
+      exact atom_union_support_closed_backward B σ a A N hc hsmall },
+  },
+  flexible_cond := atom_union_flexible_cond B σ a A N hc hsmall,
+}
+
+lemma atom_union_all_atoms_domain (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) (b₁ b₂ : atom)
+  (L : litter) (hb₁ : b₁ ∈ litter_set L) (C : extended_index B)
+  (hσ : (⟨sum.inl ⟨b₁, b₂⟩, C⟩ : binary_condition B) ∈ set.range (atom_map B σ a A N hsmall)) :
+  ∀ c ∈ litter_set L, ∃ d, (⟨sum.inl ⟨c, d⟩, C⟩ : binary_condition B) ∈
+    σ.val ∪ set.range (atom_map B σ a A N hsmall) :=
+sorry
+
+lemma atom_union_all_atoms_range (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) (b₁ b₂ : atom)
+  (L : litter) (hb₂ : b₂ ∈ litter_set L) (C : extended_index B)
+  (hσ : (⟨sum.inl ⟨b₁, b₂⟩, C⟩ : binary_condition B) ∈ set.range (atom_map B σ a A N hsmall)) :
+  ∀ c ∈ litter_set L, ∃ d, (⟨sum.inl ⟨d, c⟩, C⟩ : binary_condition B) ∈
+    σ.val ∪ set.range (atom_map B σ a A N hsmall) :=
+sorry
+
+/-- When we add the atoms from the atom map, the resulting permutation "carefully extends" `σ`.
+The atom conditions hold because `σ` is allowable and the `near_litter_cond` is satisfies - in
+particular, the atoms in the symmetric difference between `N` and `N.fst.to_near_litter` are already
+given in `σ`, so do not appear in the `atom_map`. -/
 lemma le_atom_union (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
-  σ ≤ ⟨σ.val ∪ set.range (atom_map B σ a A N hsmall), atom_union_allowable B σ a A N hc hsmall⟩ :=
-sorry
+  σ ≤ ⟨σ.val ∪ set.range (atom_map B σ a A N hsmall), atom_union_allowable B σ a A N hc hsmall⟩ := {
+  subset := set.subset_union_left _ _,
+  all_flex_domain := begin
+    intros L N' C hN' hσ₁ hσ₂,
+    cases set.mem_or_mem_of_mem_union hσ₂,
+    { exfalso, exact hσ₁ h, },
+    unfold atom_map at h,
+    simpa only [set.mem_range, prod.mk.inj_iff, false_and, exists_false] using h,
+  end,
+  all_flex_range := begin
+    intros L N' C hN' hσ₁ hσ₂,
+    cases set.mem_or_mem_of_mem_union hσ₂,
+    { exfalso, exact hσ₁ h, },
+    unfold atom_map at h,
+    simpa only [set.mem_range, prod.mk.inj_iff, false_and, exists_false] using h,
+  end,
+  all_atoms_domain := begin
+    intros b₁ b₂ L hb₁ C hC₁ hC₂ c hc',
+    cases hC₂,
+    { exfalso, exact hC₁ hC₂, },
+    exact atom_union_all_atoms_domain B σ a A N hc hsmall b₁ b₂ L hb₁ C hC₂ c hc',
+  end,
+  all_atoms_range := begin
+    intros b₁ b₂ L hb₁ C hC₁ hC₂ c hc',
+    cases hC₂,
+    { exfalso, exact hC₁ hC₂, },
+    exact atom_union_all_atoms_range B σ a A N hc hsmall b₁ b₂ L hb₁ C hC₂ c hc',
+  end,
+}
 
 /-- If everything that constrains an atom lies in `σ`, we can add the atom to `σ`, giving a new
 allowable partial permutation `ρ ≥ σ`. -/
