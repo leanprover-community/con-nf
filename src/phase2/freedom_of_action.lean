@@ -950,11 +950,54 @@ zorn_nonempty_preorder₀ {ρ | σ ≤ ρ}
 
 -- TODO: Generalise and improve the naming of the following lemmas.
 
+/-- Gets the value that a given input atom `b` is mapped to
+under any allowable `π` extending `σ`. -/
+noncomputable def atom_value (σ : allowable_partial_perm B) (A : extended_index B)
+  (b : atom) (hb : (sum.inl b, A) ∈ σ.val.domain) : atom :=
+@sum.rec_on _ _ (λ (c : atom × atom ⊕ near_litter × near_litter),
+  c.elim (λ atoms, sum.inl atoms.fst) (λ Ns, sum.inr Ns.fst) = sum.inl b → atom)
+  (classical.subtype_of_exists hb).val.fst
+  (λ lhs _, lhs.snd) (λ lhs h, by cases h)
+  (congr_arg prod.fst (classical.subtype_of_exists hb).property.right)
+
+lemma atom_value_spec (σ : allowable_partial_perm B) (A : extended_index B)
+  (b : atom) (hb : (sum.inl b, A) ∈ σ.val.domain) :
+  (sum.inl (b, atom_value B σ A b hb), A) ∈ σ.val :=
+sorry
+
+lemma atom_value_spec_range (σ : allowable_partial_perm B) (A : extended_index B)
+  (b : atom) (hb : (sum.inl b, A) ∈ σ.val.domain) :
+  (sum.inl (atom_value B σ A b hb), A) ∈ σ.val.range :=
+⟨(sum.inl (b, atom_value B σ A b hb), A), atom_value_spec B σ A b hb, rfl⟩
+
+noncomputable def atom_value_inj (σ : allowable_partial_perm B) (A : extended_index B) :
+  {b | (sum.inl b, A) ∈ σ.val.domain} ↪ atom :=
+⟨λ b, atom_value B σ A b.val b.property, begin
+  intros b₁ b₂ hb,
+  have h₁ := atom_value_spec B σ A b₁ b₁.property,
+  have h₂ := atom_value_spec B σ A b₂ b₂.property,
+  dsimp at hb, rw ← hb at h₂,
+  exact subtype.coe_inj.mp
+    ((σ.property.forward.one_to_one A).atom (atom_value B σ A b₁ b₁.property) h₁ h₂),
+end⟩
+
 noncomputable def cond_domain_range_equiv (σ : allowable_partial_perm B) (a : atom)
   (A : extended_index B) (N : near_litter) :
   {b | b ∈ litter_set a.fst ∧ (sum.inl b, A) ∈ σ.val.domain} ≃
   {b | b ∈ N.snd.val ∧ (sum.inl b, A) ∈ σ.val.range} :=
-sorry
+begin
+  convert equiv.of_injective (λ (b : {b | b ∈ litter_set a.fst ∧ (sum.inl b, A) ∈ σ.val.domain}),
+    atom_value_inj B σ A ⟨b.val, b.property.right⟩) _ using 2,
+  { ext b, split,
+    { sorry, },
+    { sorry, } },
+  { intros b₁ b₂ hb,
+    have := @function.embedding.injective _ _ (atom_value_inj B σ A)
+      ⟨b₁.val, b₁.property.right⟩ ⟨b₂.val, b₂.property.right⟩ _,
+    rw [subtype.mk_eq_mk, subtype.val_inj] at this,
+    exact this,
+    dsimp at hb, exact hb, },
+end
 
 lemma equiv_not_mem_atom (σ : allowable_partial_perm B) (a : atom) (A : extended_index B)
   (N : near_litter) (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
