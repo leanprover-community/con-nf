@@ -923,34 +923,82 @@ zorn_nonempty_preorder₀ {ρ | σ ≤ ρ}
       λ τ, le_Union₂ B c hc₂ σ τ⟩)
   σ (extends_refl _ _)
 
-/-! The next four lemmas are discussed in "FoA proof sketch completion". -/
+/-! The next few lemmas are discussed in "FoA proof sketch completion". -/
 
--- TODO: Factor out some of these sorries into lemmas, and try to generalise.
+-- TODO: Generalise and improve the naming of the following lemmas.
+
+noncomputable def cond_domain_range_equiv (σ : allowable_partial_perm B) (a : atom)
+  (A : extended_index B) (N : near_litter) :
+  {b | b ∈ litter_set a.fst ∧ (sum.inl b, A) ∈ σ.val.domain} ≃
+  {b | b ∈ N.snd.val ∧ (sum.inl b, A) ∈ σ.val.range} :=
+sorry
+
+lemma equiv_not_mem_atom (σ : allowable_partial_perm B) (a : atom) (A : extended_index B)
+  (N : near_litter) (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  #↥{a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} =
+    #↥{a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.range} :=
+begin
+  have h₁ : #↥{a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} = #κ,
+  { cases le_iff_eq_or_lt.mp (cardinal.mk_le_mk_of_subset (show
+      {a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain}
+        ⊆ litter_set a.fst, by simp only [set.sep_subset])),
+    { rw [h, mk_litter_set], },
+    { rw mk_litter_set at h,
+      exfalso, refine (ne_of_lt $ cardinal.add_lt_of_lt κ_regular.aleph_0_le hsmall h) _,
+      rw [cardinal.mk_sep, cardinal.mk_sep],
+      convert cardinal.mk_sum_compl _ using 1,
+      rw mk_litter_set, }, },
+  have h₂' : #↥{a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∈ σ.val.range} < #κ,
+  { convert hsmall using 1,
+    rw cardinal.eq,
+    exact ⟨(cond_domain_range_equiv B σ a A N).symm⟩, },
+  have h₂ : #↥{a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.range} = #κ,
+  { cases le_iff_eq_or_lt.mp (cardinal.mk_le_mk_of_subset (show
+      {a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.range}
+        ⊆ N.snd.val, by simp only [set.sep_subset])),
+    { rw [h, N.snd.property.mk_eq_κ], },
+    { rw N.snd.property.mk_eq_κ at h,
+      exfalso, refine (ne_of_lt $ cardinal.add_lt_of_lt κ_regular.aleph_0_le h₂' h) _,
+      rw [cardinal.mk_sep, cardinal.mk_sep],
+      convert cardinal.mk_sum_compl _ using 1,
+      rw N.snd.property.mk_eq_κ, }, },
+  rw [h₁, h₂],
+end
+
+lemma atom_union_allowable (σ : allowable_partial_perm B) (a : atom) (A : extended_index B)
+  (N : near_litter) (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  let atom_map : {a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} →
+    binary_condition B :=
+    λ b, ((sum.inl ⟨b, (cardinal.eq.mp $ equiv_not_mem_atom B σ a A N hsmall).some b⟩, A))
+  in spec.allowable_spec B (σ.val ∪ set.range atom_map) := sorry
+
+lemma le_atom_union (σ : allowable_partial_perm B) (a : atom) (A : extended_index B)
+  (N : near_litter) (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  let atom_map : {a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} →
+    binary_condition B :=
+    λ b, ((sum.inl ⟨b, (cardinal.eq.mp $ equiv_not_mem_atom B σ a A N hsmall).some b⟩, A))
+  in σ ≤ ⟨σ.val ∪ set.range atom_map, atom_union_allowable B σ a A N hc hsmall⟩ := sorry
+
 lemma exists_ge_atom (σ : allowable_partial_perm B) (a : atom) (A : extended_index B)
   (hσ : ∀ c, c ≺ (⟨sum.inl a, A⟩ : support_condition B) → c ∈ σ.val.domain) :
   ∃ ρ ≥ σ, (⟨sum.inl a, A⟩ : support_condition B) ∈ ρ.val.domain :=
 begin
   by_cases haσ : (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.val.domain,
   { exact ⟨σ, le_rfl, haσ⟩ },
-  have := hσ (⟨sum.inr a.fst.to_near_litter, A⟩ : support_condition B)
-    (constrains.mem_litter a.fst a rfl _),
-  obtain ⟨⟨_ | ⟨_, N⟩, A⟩, hc₁, hc₂⟩ := this; cases hc₂,
+  obtain ⟨⟨_ | ⟨_, N⟩, A⟩, hc₁, hc₂⟩ := hσ (⟨sum.inr a.fst.to_near_litter, A⟩ : support_condition B)
+    (constrains.mem_litter a.fst a rfl _); cases hc₂,
   obtain hsmall | ⟨N', atom_map, hσ₁, hσ₂, hN'⟩ := σ.property.forward.atom_cond a.fst A,
   swap, { exfalso, exact haσ ⟨_, hσ₂ a rfl, rfl⟩, },
-  have h₁ : #↥{a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} = #μ,
-  { sorry },
-  have h₂ : #↥{a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.range} = #μ,
-  { sorry },
-  have : #↥{a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} =
-    #↥{a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.range} := by rw [h₁, h₂],
+  have := equiv_not_mem_atom B σ a A N hsmall,
   let atom_map : {a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} →
     binary_condition B :=
     λ b, (⟨sum.inl ⟨b, (cardinal.eq.mp this).some b⟩, A⟩ : binary_condition B),
-  refine ⟨⟨σ.val ∪ set.range atom_map, _⟩, _,
+  exact ⟨⟨σ.val ∪ set.range atom_map, atom_union_allowable B σ a A N hc₁ hsmall⟩,
+    le_atom_union B σ a A N hc₁ hsmall,
     (⟨sum.inl ⟨a, (cardinal.eq.mp this).some ⟨a, rfl, haσ⟩⟩, A⟩ : binary_condition B),
     set.mem_union_right _ ⟨⟨a, rfl, haσ⟩, rfl⟩, rfl⟩,
-  { sorry },
-  { sorry },
 end
 
 lemma exists_ge_near_litter (σ : allowable_partial_perm B) (N : near_litter) (A : extended_index B)
