@@ -678,9 +678,15 @@ Note that the second condition is exactly the condition in `spec.flexible_cond.a
 -/
 structure perm_le (σ ρ : allowable_partial_perm B) : Prop :=
 (subset : σ.val ⊆ ρ.val)
-(all_flex (L : litter) (N : near_litter) (A : extended_index B) (hL : flexible L A)
+(all_flex_domain (L : litter) (N : near_litter) (A : extended_index B) (hL : flexible L A)
   (hσ : (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∉ σ.val)
   (hρ : (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ ρ.val) :
+  (∀ L' A', flexible L' A' →
+    (⟨sum.inr L'.to_near_litter, A'⟩ : support_condition B) ∈ ρ.val.domain ∧
+    (⟨sum.inr L'.to_near_litter, A'⟩ : support_condition B) ∈ ρ.val.range))
+(all_flex_range (L : litter) (N : near_litter) (A : extended_index B) (hL : flexible L A)
+  (hσ : (⟨sum.inr ⟨N, L.to_near_litter⟩, A⟩ : binary_condition B) ∉ σ.val)
+  (hρ : (⟨sum.inr ⟨N, L.to_near_litter⟩, A⟩ : binary_condition B) ∈ ρ.val) :
   (∀ L' A', flexible L' A' →
     (⟨sum.inr L'.to_near_litter, A'⟩ : support_condition B) ∈ ρ.val.domain ∧
     (⟨sum.inr L'.to_near_litter, A'⟩ : support_condition B) ∈ ρ.val.range))
@@ -700,21 +706,27 @@ instance has_le : has_le (allowable_partial_perm B) := ⟨perm_le B⟩
 lemma extends_refl (σ : allowable_partial_perm B) : σ ≤ σ :=
 ⟨set.subset.rfl,
  λ _ _ _ _ h1 h2, by cases h1 h2,
+ λ _ _ _ _ h1 h2, by cases h1 h2,
  λ _ _ _ _ _ h1 h2, by cases h1 h2,
  λ _ _ _ _ _ h1 h2, by cases h1 h2⟩
 
 lemma extends_trans (ρ σ τ : allowable_partial_perm B)
   (h₁ : ρ ≤ σ) (h₂ : σ ≤ τ) : ρ ≤ τ :=
 begin
-  obtain ⟨hsub, hflx, hatom_domain, hatom_range⟩ := h₁,
-  obtain ⟨hsub', hflx', hatom_domain', hatom_range'⟩ := h₂,
-  refine ⟨hsub.trans hsub', λ L N A hLA hnin hin, _,
+  obtain ⟨hsub, hflx_domain, hflx_range, hatom_domain, hatom_range⟩ := h₁,
+  obtain ⟨hsub', hflx_domain', hflx_range', hatom_domain', hatom_range'⟩ := h₂,
+  refine ⟨hsub.trans hsub', λ L N A hLA hnin hin, _, λ L N A hLA hnin hin, _,
     λ a b L hab A hnin hin, _, λ a b L hab A hnin hin, _⟩,
   { by_cases (sum.inr (L.to_near_litter, N), A) ∈ σ.val,
     { exact λ l a hla,
-        ⟨set.image_subset binary_condition.domain hsub' (hflx L N A hLA hnin h l a hla).1,
-        set.image_subset binary_condition.range hsub' (hflx L N A hLA hnin h l a hla).2⟩ },
-    { exact hflx' L N A hLA h hin } },
+        ⟨set.image_subset binary_condition.domain hsub' (hflx_domain L N A hLA hnin h l a hla).1,
+        set.image_subset binary_condition.range hsub' (hflx_domain L N A hLA hnin h l a hla).2⟩ },
+    { exact hflx_domain' L N A hLA h hin } },
+  { by_cases (sum.inr (N, L.to_near_litter), A) ∈ σ.val,
+    { exact λ l a hla,
+        ⟨set.image_subset binary_condition.domain hsub' (hflx_range L N A hLA hnin h l a hla).1,
+        set.image_subset binary_condition.range hsub' (hflx_range L N A hLA hnin h l a hla).2⟩ },
+    { exact hflx_range' L N A hLA h hin } },
   { by_cases (sum.inl (a, b), A) ∈ σ.val,
     { intros c hc,
       obtain ⟨d, hd⟩ := hatom_domain a b L hab A hnin h c hc,
@@ -736,12 +748,28 @@ instance preorder : preorder (allowable_partial_perm B) := {
 /-- A condition required later. -/
 lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ :=
 begin
-  rintro ⟨h1, h2, h3, h4⟩,
+  rintro ⟨h1, h2, h3, h4, h5⟩,
   unfold has_inv.inv,
-  refine ⟨λ x h, h1 h, _, λ a b, h4 b a, λ a b, h3 b a⟩,
-  intros L N A hLA hnin hin,
-  simp at hnin hin,
-  sorry -- do we need two all_flex the same way there are two all_atoms?
+  refine ⟨λ x h, h1 h,
+          λ L N A hLA hnin hin L' A' hLA', _,
+          λ L N A hLA hnin hin L' A' hLA', _,
+          λ a b, h5 b a, λ a b, h4 b a⟩,
+  { obtain ⟨⟨⟨⟨b1, b2⟩ | ⟨b1, b2⟩, b⟩, hb⟩, ⟨⟨⟨c1, c2⟩ | ⟨c1, c2⟩, c⟩, hc⟩⟩ := h3 L N A hLA hnin hin L' A' hLA',
+    { simp [binary_condition.domain] at hb, cases hb, },
+    { simp [binary_condition.domain] at hb, cases hb, },
+    { simp [binary_condition.range] at hc, cases hc, },
+    exact ⟨⟨⟨sum.inr ⟨c2, c1⟩, c⟩,
+              by simpa [binary_condition.domain, binary_condition.range] using hc⟩,
+           ⟨⟨sum.inr ⟨b2, b1⟩, b⟩,
+              by simpa [binary_condition.domain, binary_condition.range] using hb⟩⟩ },
+  { obtain ⟨⟨⟨⟨b1, b2⟩ | ⟨b1, b2⟩, b⟩, hb⟩, ⟨⟨⟨c1, c2⟩ | ⟨c1, c2⟩, c⟩, hc⟩⟩ := h2 L N A hLA hnin hin L' A' hLA',
+    { simp [binary_condition.domain] at hb, cases hb, },
+    { simp [binary_condition.domain] at hb, cases hb, },
+    { simp [binary_condition.range] at hc, cases hc, },
+    exact ⟨⟨⟨sum.inr ⟨c2, c1⟩, c⟩,
+              by simpa [binary_condition.domain, binary_condition.range] using hc⟩,
+           ⟨⟨sum.inr ⟨b2, b1⟩, b⟩,
+              by simpa [binary_condition.domain, binary_condition.range] using hb⟩⟩ }
 end
 
 lemma inv_le_iff (σ τ : allowable_partial_perm B) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
@@ -905,6 +933,7 @@ begin
     λ t ht b hb, ⟨t.val, set.mem_image_of_mem _ ht, hb⟩,
   refine ⟨hsub τ hτ,
     λ L N A hLA hnin hin, _,
+    λ L N A hLA hnin hin, _,
     λ a b L h A hnin hin p hp, _,
     λ a b L h A hnin hin p hp, _⟩,
   all_goals
@@ -917,12 +946,16 @@ begin
     obtain ⟨hsub, -, -, -⟩ | hleq := hc hσ hτ hneq,
     { cases hnin (hsub hρ) } },
   { have := hleq.2 L N A hLA hnin hρ,
-    refine λ l a hla, ⟨
+    exact λ l a hla, ⟨
       set.image_subset binary_condition.domain (hsub σ hσ) (this l a hla).1,
       set.image_subset binary_condition.range (hsub σ hσ) (this l a hla).2⟩ },
-  { obtain ⟨q, hq⟩ := hleq.3 a b L h A hnin hρ p hp,
-    exact ⟨q, (hsub σ hσ) hq⟩ },
+  { have := hleq.3 L N A hLA hnin hρ,
+    exact λ l a hla, ⟨
+      set.image_subset binary_condition.domain (hsub σ hσ) (this l a hla).1,
+      set.image_subset binary_condition.range (hsub σ hσ) (this l a hla).2⟩ },
   { obtain ⟨q, hq⟩ := hleq.4 a b L h A hnin hρ p hp,
+    exact ⟨q, (hsub σ hσ) hq⟩ },
+  { obtain ⟨q, hq⟩ := hleq.5 a b L h A hnin hρ p hp,
     exact ⟨q, (hsub σ hσ) hq⟩ }
 end
 
