@@ -410,4 +410,24 @@ def allowable_derivative_nil_comp {β : type_index} (B : path (α : type_index) 
   (π : allowable_path ⟨α, path.nil⟩) : allowable_path ⟨β, B⟩ :=
 by { convert allowable_derivative_path_comp ⟨α, path.nil⟩ B π, rw path.nil_comp }
 
+lemma litter_lt_path (A : proper_lt_index α) (L : litter) (a ∈ litter_set L) :
+  position (to_tangle_path A L.to_near_litter) < position (typed_singleton_path A a) :=
+tangle_data.litter_lt L a ‹_›
+
+lemma litter_lt_near_litter_path (A : proper_lt_index α) (N : near_litter) :
+  position (to_tangle_path A N.fst.to_near_litter) ≤ position (to_tangle_path A N) :=
+tangle_data.litter_lt_near_litter N
+
+lemma symm_diff_lt_near_litter_path (A : proper_lt_index α) (N : near_litter)
+  (a ∈ litter_set N.fst ∆ N.snd) :
+  position (typed_singleton_path A a) < position (to_tangle_path A N) :=
+tangle_data.symm_diff_lt_near_litter N a ‹_›
+
+lemma support_le_path (A : proper_lt_index α) (t : tangle_path (A : le_index α))
+  (c : support_condition A) (hc : c ∈ designated_support_path t)
+  (not_singleton : ∀ a, t ≠ typed_singleton a)
+  (not_near_litter : ∀ (L : litter), t ≠ to_tangle L.to_near_litter) :
+  position (c.fst.elim (typed_singleton_path A) (to_tangle_path A)) ≤ position t :=
+tangle_data.support_le t c hc not_singleton not_near_litter
+
 end con_nf

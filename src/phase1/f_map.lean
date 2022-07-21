@@ -219,7 +219,7 @@ lemma f_map_range_eq {α₁ α₂ : type_index} [core_tangle_data α₁] [positi
   (h : f_map β x = f_map β y) : α₁ = α₂ :=
 congr_arg (prod.fst ∘ prod.fst) h
 
-lemma f_map_position_raising (x : tangle α)(N : set atom) (hN : is_near_litter (f_map β x) N) :
+lemma f_map_position_raising (x : tangle α) (N : set atom) (hN : is_near_litter (f_map β x) N) :
   position x < position (to_tangle ⟨f_map β x, N, hN⟩ : tangle β) :=
 f_map_core_position_raising α β (position x) N hN
 
