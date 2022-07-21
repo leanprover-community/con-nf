@@ -923,24 +923,33 @@ zorn_nonempty_preorder₀ {ρ | σ ≤ ρ}
       λ τ, le_Union₂ B c hc₂ σ τ⟩)
   σ (extends_refl _ _)
 
-/-! The next few lemmas are discussed in "FoA proof sketch completion". -/
-
--- TODO: Generalise and improve the naming of the following lemmas.
+section values
 
 /-- Gets the value that a given input atom `b` is mapped to
 under any allowable `π` extending `σ`. -/
 noncomputable def atom_value (σ : allowable_partial_perm B) (A : extended_index B)
   (b : atom) (hb : (sum.inl b, A) ∈ σ.val.domain) : atom :=
-@sum.rec_on _ _ (λ (c : atom × atom ⊕ near_litter × near_litter),
+@sum.rec _ _ (λ (c : atom × atom ⊕ near_litter × near_litter),
   c.elim (λ atoms, sum.inl atoms.fst) (λ Ns, sum.inr Ns.fst) = sum.inl b → atom)
-  (classical.subtype_of_exists hb).val.fst
   (λ lhs _, lhs.snd) (λ lhs h, by cases h)
-  (congr_arg prod.fst (classical.subtype_of_exists hb).property.right)
+  hb.some.fst
+  (congr_arg prod.fst hb.some_spec.right)
 
 lemma atom_value_spec (σ : allowable_partial_perm B) (A : extended_index B)
   (b : atom) (hb : (sum.inl b, A) ∈ σ.val.domain) :
   (sum.inl (b, atom_value B σ A b hb), A) ∈ σ.val :=
-sorry
+begin
+  unfold atom_value,
+  generalize hc : hb.some = c,
+  obtain ⟨hc₁, hc₂⟩ := hb.some_spec,
+  simp_rw hc at hc₁ hc₂ ⊢,
+  obtain ⟨⟨b₁, b₂⟩ | Ns, C⟩ := c,
+  { obtain ⟨⟨⟨d₁, d₂⟩ | _, D⟩, hd₁, hd₂⟩ := hb; cases hd₂,
+    rw ← hc₂ at hd₂, cases hd₂,
+    convert hd₁,
+    exact (σ.property.backward.one_to_one A).atom b hc₁ hd₁, },
+  { cases hc₂, }
+end
 
 lemma atom_value_spec_range (σ : allowable_partial_perm B) (A : extended_index B)
   (b : atom) (hb : (sum.inl b, A) ∈ σ.val.domain) :
@@ -958,8 +967,63 @@ noncomputable def atom_value_inj (σ : allowable_partial_perm B) (A : extended_i
     ((σ.property.forward.one_to_one A).atom (atom_value B σ A b₁ b₁.property) h₁ h₂),
 end⟩
 
-noncomputable def cond_domain_range_equiv (σ : allowable_partial_perm B) (a : atom)
-  (A : extended_index B) (N : near_litter) :
+/-- Gets the value that a given input near litter `N` is mapped to
+under any allowable `π` extending `σ`. -/
+noncomputable def near_litter_value (σ : allowable_partial_perm B) (A : extended_index B)
+  (N : near_litter) (hb : (sum.inr N, A) ∈ σ.val.domain) : near_litter :=
+@sum.rec _ _ (λ (c : atom × atom ⊕ near_litter × near_litter),
+  c.elim (λ atoms, sum.inl atoms.fst) (λ Ns, sum.inr Ns.fst) = sum.inr N → near_litter)
+  (λ lhs h, by cases h) (λ lhs _, lhs.snd)
+  hb.some.fst
+  (congr_arg prod.fst hb.some_spec.right)
+
+lemma near_litter_value_spec (σ : allowable_partial_perm B) (A : extended_index B)
+  (N : near_litter) (hN : (sum.inr N, A) ∈ σ.val.domain) :
+  (sum.inr (N, near_litter_value B σ A N hN), A) ∈ σ.val :=
+begin
+  unfold near_litter_value,
+  generalize hc : hN.some = c,
+  obtain ⟨hc₁, hc₂⟩ := hN.some_spec,
+  simp_rw hc at hc₁ hc₂ ⊢,
+  obtain ⟨_ | ⟨N₁, N₂⟩, C⟩ := c,
+  { cases hc₂, },
+  { obtain ⟨⟨_ | ⟨N₃, N₄⟩, D⟩, hd₁, hd₂⟩ := hN; cases hd₂,
+    rw ← hc₂ at hd₂, cases hd₂,
+    convert hd₁,
+    exact (σ.property.backward.one_to_one A).near_litter N hc₁ hd₁, },
+end
+
+lemma near_litter_value_spec_range (σ : allowable_partial_perm B) (A : extended_index B)
+  (N : near_litter) (hN : (sum.inr N, A) ∈ σ.val.domain) :
+  (sum.inr (near_litter_value B σ A N hN), A) ∈ σ.val.range :=
+⟨(sum.inr (N, near_litter_value B σ A N hN), A), near_litter_value_spec B σ A N hN, rfl⟩
+
+noncomputable def near_litter_value_inj (σ : allowable_partial_perm B) (A : extended_index B) :
+  {N | (sum.inr N, A) ∈ σ.val.domain} ↪ near_litter :=
+⟨λ N, near_litter_value B σ A N.val N.property, begin
+  intros N₁ N₂ hN,
+  have h₁ := near_litter_value_spec B σ A N₁ N₁.property,
+  have h₂ := near_litter_value_spec B σ A N₂ N₂.property,
+  dsimp at hN, rw ← hN at h₂,
+  exact subtype.coe_inj.mp
+    ((σ.property.forward.one_to_one A).near_litter (near_litter_value B σ A N₁ N₁.property) h₁ h₂),
+end⟩
+
+end values
+
+/-! The next few lemmas are discussed in "FoA proof sketch completion". -/
+
+-- TODO: Generalise and improve the naming of the following lemmas.
+
+section exists_ge_atom
+
+variables (σ : allowable_partial_perm B) (a : atom) (A : extended_index B) (N : near_litter)
+
+/-- The domain and range of an allowable partial permutation, restricted to a given litter, are
+equivalent. The equivalence produced by this function is induced by the allowable partial
+permutation itself, so if this function maps an atom `a` to `b`, we have `π_A(a) = b` for all
+allowable `π` satisfying `σ`. -/
+noncomputable def cond_domain_range_equiv :
   {b | b ∈ litter_set a.fst ∧ (sum.inl b, A) ∈ σ.val.domain} ≃
   {b | b ∈ N.snd.val ∧ (sum.inl b, A) ∈ σ.val.range} :=
 begin
@@ -976,8 +1040,12 @@ begin
     dsimp at hb, exact hb, },
 end
 
-lemma equiv_not_mem_atom (σ : allowable_partial_perm B) (a : atom) (A : extended_index B)
-  (N : near_litter) (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+/-- If we are in the "small" case (although this holds in both cases), the amount of atoms in a
+given litter whose positions we have not defined so far is the same as the amount of atoms in the
+resulting near-litter which are not the image of anything under `σ`. This means we can construct an
+arbitrary bijection of these remaining atoms, "filling out" the specification to define the
+permutation of all atoms in the litter to the atoms in the resulting near-litter. -/
+lemma equiv_not_mem_atom  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   #↥{a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} =
     #↥{a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.range} :=
 begin
@@ -1008,24 +1076,26 @@ begin
   rw [h₁, h₂],
 end
 
-lemma atom_union_allowable (σ : allowable_partial_perm B) (a : atom) (A : extended_index B)
-  (N : near_litter) (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
-  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
-  let atom_map : {a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} →
+noncomputable def atom_map (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  {a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} →
     binary_condition B :=
-    λ b, ((sum.inl ⟨b, (cardinal.eq.mp $ equiv_not_mem_atom B σ a A N hsmall).some b⟩, A))
-  in spec.allowable_spec B (σ.val ∪ set.range atom_map) := sorry
+λ b, ((sum.inl ⟨b, (cardinal.eq.mp $ equiv_not_mem_atom B σ a A N hsmall).some b⟩, A))
 
-lemma le_atom_union (σ : allowable_partial_perm B) (a : atom) (A : extended_index B)
-  (N : near_litter) (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+-- This lemma is going to be work, and we have three others just like it later.
+-- Is there a way to unify all of the cases somehow, or at least avoid duplicating code?
+lemma atom_union_allowable (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
-  let atom_map : {a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} →
-    binary_condition B :=
-    λ b, ((sum.inl ⟨b, (cardinal.eq.mp $ equiv_not_mem_atom B σ a A N hsmall).some b⟩, A))
-  in σ ≤ ⟨σ.val ∪ set.range atom_map, atom_union_allowable B σ a A N hc hsmall⟩ := sorry
+  spec.allowable_spec B (σ.val ∪ set.range (atom_map B σ a A N hsmall)) :=
+sorry
 
-lemma exists_ge_atom (σ : allowable_partial_perm B) (a : atom) (A : extended_index B)
-  (hσ : ∀ c, c ≺ (⟨sum.inl a, A⟩ : support_condition B) → c ∈ σ.val.domain) :
+lemma le_atom_union (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
+  σ ≤ ⟨σ.val ∪ set.range (atom_map B σ a A N hsmall), atom_union_allowable B σ a A N hc hsmall⟩ :=
+sorry
+
+/-- If everything that constrains an atom lies in `σ`, we can add the atom to `σ`, giving a new
+allowable partial permutation `ρ ≥ σ`. -/
+lemma exists_ge_atom (hσ : ∀ c, c ≺ (⟨sum.inl a, A⟩ : support_condition B) → c ∈ σ.val.domain) :
   ∃ ρ ≥ σ, (⟨sum.inl a, A⟩ : support_condition B) ∈ ρ.val.domain :=
 begin
   by_cases haσ : (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.val.domain,
@@ -1043,6 +1113,8 @@ begin
     (⟨sum.inl ⟨a, (cardinal.eq.mp this).some ⟨a, rfl, haσ⟩⟩, A⟩ : binary_condition B),
     set.mem_union_right _ ⟨⟨a, rfl, haσ⟩, rfl⟩, rfl⟩,
 end
+
+end exists_ge_atom
 
 lemma exists_ge_near_litter (σ : allowable_partial_perm B) (N : near_litter) (A : extended_index B)
   (hN : litter_set N.fst ≠ N.snd)
