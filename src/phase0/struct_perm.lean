@@ -123,6 +123,22 @@ noncomputable def derivative : Π {β}, path α β → struct_perm α →* struc
 | _ path.nil := monoid_hom.id _
 | γ (path.cons p_αγ hβγ) := (lower $ le_of_lt hβγ).comp $ derivative p_αγ
 
+/-- The derivative along the empty path does nothing. -/
+lemma derivative_nil (π : struct_perm α) :
+  derivative path.nil π = π :=
+by { unfold derivative, refl }
+
+/-- The derivative map is functorial. -/
+lemma derivative_comp {β γ : type_index} (π : struct_perm α)
+  (A : path (α : type_index) β) (B : path (β : type_index) γ) :
+  derivative B (derivative A π) = derivative (path.comp A B) π :=
+sorry
+
+/-- The derivative map preserves multiplication. -/
+lemma derivative_mul {β} (π₁ π₂ : struct_perm α) (A : path (α : type_index) β) :
+  derivative A (π₁ * π₂) = derivative A π₁ * derivative A π₂ :=
+sorry
+
 section
 variables {X : Type*} [mul_action near_litter_perm X]
 
@@ -167,7 +183,7 @@ using_well_founded { dec_tac := `[assumption] }
 end struct_perm
 
 /-- A support condition is an atom or a near-litter together with an extended type index. -/
-@[derive [inhabited, mul_action near_litter_perm, mul_action (struct_perm ‹type_index›)]]
+@[derive [inhabited]]
 def support_condition (α : type_index) : Type u := (atom ⊕ near_litter) × extended_index α
 
 /-- There are `μ` support conditions. -/
@@ -178,6 +194,16 @@ begin
   exact mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ)
     (le_trans (mk_extended_index α) $ le_of_lt $ lt_trans Λ_lt_κ κ_lt_μ) (mk_ne_zero _),
 end
+
+instance struct_perm.mul_action {α : type_index} :
+  mul_action (struct_perm α) (support_condition α) := {
+  smul := λ π c, ⟨struct_perm.derivative c.snd π • c.fst, c.snd⟩,
+  one_smul := by { rintro ⟨atoms | Ns, A⟩; unfold has_smul.smul; simp },
+  mul_smul := begin
+    rintros π₁ π₂ ⟨atoms | Ns, A⟩; unfold has_smul.smul;
+    rw struct_perm.derivative_mul; dsimp; rw mul_smul,
+  end
+}
 
 section support_declaration
 

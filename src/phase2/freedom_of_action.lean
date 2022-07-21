@@ -363,6 +363,11 @@ namespace unary_spec
 
 variable (B)
 
+noncomputable instance {β : Λ} {γ : type_index} {hγ : γ < β} (A : path (B : type_index) β) :
+  mul_action (struct_perm ((lt_index.mk' hγ (path.comp B.path A)) : le_index α).index)
+    (support_condition γ) :=
+struct_perm.mul_action
+
 /-- A unary specification is *support-closed* if whenever `⟨f_{γ,δ}^A(x), A⟩ ∈ σ`, `S_{γ:A}`
 supports `x`. -/
 def support_closed (σ : unary_spec B) : Prop :=
@@ -1203,7 +1208,16 @@ lemma atom_union_all_atoms_domain (hc : (sum.inr (a.fst.to_near_litter, N), A) �
   (hσ : (⟨sum.inl ⟨b₁, b₂⟩, C⟩ : binary_condition B) ∈ set.range (atom_map B σ a A N hsmall)) :
   ∀ c ∈ litter_set L, ∃ d, (⟨sum.inl ⟨c, d⟩, C⟩ : binary_condition B) ∈
     σ.val ∪ set.range (atom_map B σ a A N hsmall) :=
-sorry
+begin
+  intros c hc,
+  by_cases (⟨sum.inl c, C⟩ : support_condition B) ∈ σ.val.domain,
+  { exact ⟨atom_value B σ C c h, or.inl (atom_value_spec B σ C c h)⟩, },
+  obtain ⟨d, hd⟩ := hσ,
+  -- refine ⟨b₂, or.inr ⟨d, _⟩⟩,
+  -- rw hd,
+  -- do we need to have as a hypothesis that one-to-one holds?
+  sorry
+end
 
 lemma atom_union_all_atoms_range (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) (b₁ b₂ : atom)

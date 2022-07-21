@@ -352,6 +352,9 @@ Because of how the instances are all parametrised, all suitable instances of def
 also be defeq to each other.
 -/
 
+instance (A : le_index α) : mul_action (struct_perm A.index) (support_condition A) :=
+struct_perm.mul_action
+
 def tangle_path (A : le_index α) : Type u := tangle A.index
 
 def to_tangle_path (A : proper_lt_index α) : near_litter ↪ tangle_path (A : le_index α) :=
