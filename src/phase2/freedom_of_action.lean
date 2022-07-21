@@ -94,9 +94,19 @@ begin
          λ ⟨b, ⟨σ, hσ, hbσ⟩, hb⟩, ⟨σ, hσ, b, hbσ, hb⟩⟩,
 end
 
-lemma spec.inv_domain {α : type_index} (σ : spec α) : σ⁻¹.domain = σ.range := sorry
+lemma spec.inv_domain_range {α : type_index} (σ : spec α) : σ⁻¹.domain = σ.range ∧ σ⁻¹.range = σ.domain :=
+begin
+  split; ext x; split,
+  all_goals
+  { rintro ⟨c, hc⟩,
+    refine ⟨c⁻¹, _⟩,
+    obtain ⟨⟨c1, c2⟩ | ⟨c1, c2⟩, c⟩ := c;
+    simpa only using hc }
+end
 
-lemma spec.inv_range {α : type_index} (σ : spec α) : σ⁻¹.range = σ.domain := sorry
+lemma spec.inv_domain {α : type_index} (σ : spec α) : σ⁻¹.domain = σ.range := (spec.inv_domain_range σ).1
+
+lemma spec.inv_range {α : type_index} (σ : spec α) : σ⁻¹.range = σ.domain := (spec.inv_domain_range σ).2
 
 /-- A structural permutation *satisfies* a condition `⟨⟨x, y⟩, A⟩` if `π_A(x) = y`. -/
 def struct_perm.satisfies_cond {α : type_index} (π : struct_perm α) (c : binary_condition α) :=
@@ -731,27 +741,15 @@ instance preorder : preorder (allowable_partial_perm B) := {
 lemma inv_le (σ τ : allowable_partial_perm B) : σ ≤ τ → σ⁻¹ ≤ τ⁻¹ :=
 begin
   rintro ⟨h1, h2, h3, h4, h5⟩,
-  unfold has_inv.inv,
+  have : τ⁻¹.val = (τ.val)⁻¹ := rfl,
   refine ⟨λ x h, h1 h,
           λ L N A hLA hnin hin L' A' hLA', _,
           λ L N A hLA hnin hin L' A' hLA', _,
           λ a b, h5 b a, λ a b, h4 b a⟩,
-  { obtain ⟨⟨⟨⟨b1, b2⟩ | ⟨b1, b2⟩, b⟩, hb⟩, ⟨⟨⟨c1, c2⟩ | ⟨c1, c2⟩, c⟩, hc⟩⟩ := h3 L N A hLA hnin hin L' A' hLA',
-    { simp [binary_condition.domain] at hb, cases hb, },
-    { simp [binary_condition.domain] at hb, cases hb, },
-    { simp [binary_condition.range] at hc, cases hc, },
-    exact ⟨⟨⟨sum.inr ⟨c2, c1⟩, c⟩,
-              by simpa [binary_condition.domain, binary_condition.range] using hc⟩,
-           ⟨⟨sum.inr ⟨b2, b1⟩, b⟩,
-              by simpa [binary_condition.domain, binary_condition.range] using hb⟩⟩ },
-  { obtain ⟨⟨⟨⟨b1, b2⟩ | ⟨b1, b2⟩, b⟩, hb⟩, ⟨⟨⟨c1, c2⟩ | ⟨c1, c2⟩, c⟩, hc⟩⟩ := h2 L N A hLA hnin hin L' A' hLA',
-    { simp [binary_condition.domain] at hb, cases hb, },
-    { simp [binary_condition.domain] at hb, cases hb, },
-    { simp [binary_condition.range] at hc, cases hc, },
-    exact ⟨⟨⟨sum.inr ⟨c2, c1⟩, c⟩,
-              by simpa [binary_condition.domain, binary_condition.range] using hc⟩,
-           ⟨⟨sum.inr ⟨b2, b1⟩, b⟩,
-              by simpa [binary_condition.domain, binary_condition.range] using hb⟩⟩ }
+  { rw [this, spec.inv_domain, spec.inv_range],
+    exact and.comm.1 (h3 L N A hLA hnin hin L' A' hLA') },
+  { rw [this, spec.inv_domain, spec.inv_range],
+    exact and.comm.1 (h2 L N A hLA hnin hin L' A' hLA') }
 end
 
 lemma inv_le_iff (σ τ : allowable_partial_perm B) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
