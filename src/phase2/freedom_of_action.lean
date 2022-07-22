@@ -306,8 +306,7 @@ in the "freedom of action discussion".
     constrains
       ⟨c.fst, path.comp (path.cons A hγ) c.snd⟩
       ⟨sum.inr (f_map_path
-        (proper_lt_index.mk'
-          (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil) t)
+        (proper_lt_index.mk' hδ (path.comp B.path A)) t)
         .to_near_litter, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩
 
 /-! We declare new notation for the "constrains" relation on support conditions. -/

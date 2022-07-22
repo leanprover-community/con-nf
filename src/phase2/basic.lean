@@ -386,6 +386,11 @@ allowable_to_struct_perm
 def f_map_path {A : lt_index α} (B : proper_lt_index α) : tangle_path (A : le_index α) → litter :=
 f_map B.index
 
+lemma f_map_path_position_raising {A : lt_index α} (B : proper_lt_index α)
+  (t : tangle_path (A : le_index α)) (N : set atom) (hN : is_near_litter (f_map_path B t) N) :
+  position t < position (to_tangle_path B ⟨f_map_path B t, N, hN⟩) :=
+f_map_position_raising B.index t N hN
+
 def typed_singleton_path (A : proper_lt_index α) : atom ↪ tangle_path (A : le_index α) :=
 typed_singleton
 
