@@ -567,8 +567,16 @@ lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
 begin
   obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ.flexible_cond,
   { refine spec.flexible_cond.co_large _ _; dsimp at hdom hrge ⊢,
-    { sorry, },
-    { sorry, },
+    { rw hdom,
+      rw cardinal.eq,
+      refine ⟨⟨_, _, _, _⟩⟩,
+      { sorry, },
+      { sorry, },
+      { sorry, },
+      { sorry, },
+    },
+    { rw hrge,
+      sorry, },
   },
   { refine spec.flexible_cond.all _ _,
     { intros L he hf,
@@ -599,7 +607,10 @@ begin
 
       },
       { --***
-        sorry, },
+        unfold flexible at hf ⊢,
+        simp at hf ⊢,
+        exact hf,
+      },
     },
     { intros L he hf,
       have hrge' := hrge L (A.comp he) _,
@@ -632,7 +643,10 @@ begin
 
       },
       { --identical proof to above (at ***)
-        sorry, },
+        unfold flexible at hf ⊢,
+        simp at hf ⊢,
+        exact hf,
+      },
     }
   },
 end
