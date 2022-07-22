@@ -105,17 +105,32 @@ begin
     simpa only using hc }
 end
 
+lemma spec.inv_mem_inv {α : type_index} {σ : spec α} {x : binary_condition α} : x ∈ σ ↔ x⁻¹ ∈ σ⁻¹ :=
+by obtain ⟨x1 | x1, x2⟩ := x;
+  simp only [has_inv.inv, sum.elim_inl, sum.elim_inr, set.mem_set_of_eq, prod.mk.eta]
+
 lemma spec.inv_domain {α : type_index} (σ : spec α) : σ⁻¹.domain = σ.range := (spec.inv_domain_range σ).1
 
 lemma spec.inv_range {α : type_index} (σ : spec α) : σ⁻¹.range = σ.domain := (spec.inv_domain_range σ).2
 
-lemma spec.inv_union {α : type_index} (σ τ : spec α) : (σ ∪ τ)⁻¹ = σ⁻¹ ∪ τ⁻¹ := sorry
+lemma spec.inv_union {α : type_index} (σ τ : spec α) : (σ ∪ τ)⁻¹ = σ⁻¹ ∪ τ⁻¹ :=
+begin
+  ext,
+  rw spec.inv_mem_inv,
+  split; intro h; cases h,
+  { exact or.inl (spec.inv_mem_inv.2 h) },
+  { exact or.inr (spec.inv_mem_inv.2 h) },
+  { exact or.inl (spec.inv_mem_inv.1 h) },
+  { exact or.inr (spec.inv_mem_inv.1 h) }
+end
 
 lemma spec.inl_mem_inv {α : type_index} (σ : spec α) (a₁ a₂ : atom) (A : extended_index α) :
-  (sum.inl (a₁, a₂), A) ∈ σ⁻¹ ↔ (sum.inl (a₂, a₁), A) ∈ σ := sorry
+  (sum.inl (a₁, a₂), A) ∈ σ⁻¹ ↔ (sum.inl (a₂, a₁), A) ∈ σ :=
+spec.inv_mem_inv
 
 lemma spec.inr_mem_inv {α : type_index} (σ : spec α) (N₁ N₂ : near_litter) (A : extended_index α) :
-  (sum.inr (N₁, N₂), A) ∈ σ⁻¹ ↔ (sum.inr (N₂, N₁), A) ∈ σ := sorry
+  (sum.inr (N₁, N₂), A) ∈ σ⁻¹ ↔ (sum.inr (N₂, N₁), A) ∈ σ :=
+spec.inv_mem_inv
 
 /-- A structural permutation *satisfies* a condition `⟨⟨x, y⟩, A⟩` if `π_A(x) = y`. -/
 def struct_perm.satisfies_cond {α : type_index} (π : struct_perm α) (c : binary_condition α) :=
@@ -528,11 +543,8 @@ instance allowable_partial_perm.has_inv : has_inv (allowable_partial_perm B) :=
 ⟨λ σ, ⟨σ.val⁻¹, σ.val.inv_allowable B σ.property⟩⟩
 
 /-- Inverses are involutive. -/
-instance : has_involutive_inv (allowable_partial_perm B) := ⟨has_inv.inv, begin
-  intro σ,
-  unfold has_inv.inv,
-  ext ⟨x | x, y⟩; simp,
-end⟩
+instance : has_involutive_inv (allowable_partial_perm B) :=
+⟨has_inv.inv, λ σ, by ext ⟨x | x, y⟩; simp [has_inv.inv]⟩
 
 /-! We prove the restriction lemma: if `σ` is a partial allowable permutation, then so is `σ`
 restricted to a lower path `A`. The proof should be mostly straightforward. The non-trivial bit is
