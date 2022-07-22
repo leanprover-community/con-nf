@@ -1284,10 +1284,22 @@ begin
   by_cases (⟨sum.inl c, C⟩ : support_condition B) ∈ σ.val.domain,
   { exact ⟨atom_value B σ C c h, or.inl (atom_value_spec B σ C c h)⟩, },
   obtain ⟨d, hd⟩ := hσ,
-  -- refine ⟨b₂, or.inr ⟨d, _⟩⟩,
-  -- rw hd,
-  -- do we need to have as a hypothesis that one-to-one holds?
-  sorry
+  have hL : L = a.fst,
+  { unfold atom_map at hd,
+    have hd' := congr_arg prod.fst hd, have := congr_arg prod.fst (sum.inl.inj hd'),
+    dsimp only at this,
+    rw ← this at hb₁, cases hb₁,
+    obtain ⟨d, hd₁, hd₂⟩ := d,
+    exact hd₁, },
+  have hC : A = C,
+  { cases hd, refl },
+  subst hL,
+  subst hC,
+  generalize he : atom_map B σ a A N hsmall ⟨c, hc, h⟩ = e,
+  obtain ⟨⟨e₁, e₂⟩ | Ns, E⟩ := e,
+  { refine ⟨e₂, or.inr ⟨⟨c, hc, h⟩, _⟩⟩,
+    cases he, exact he, },
+  { unfold atom_map at he, simpa only [prod.mk.inj_iff, false_and] using he, },
 end
 
 lemma atom_union_all_atoms_range (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
@@ -1296,7 +1308,11 @@ lemma atom_union_all_atoms_range (hc : (sum.inr (a.fst.to_near_litter, N), A) �
   (hσ : (⟨sum.inl ⟨b₁, b₂⟩, C⟩ : binary_condition B) ∈ set.range (atom_map B σ a A N hsmall)) :
   ∀ c ∈ litter_set L, ∃ d, (⟨sum.inl ⟨d, c⟩, C⟩ : binary_condition B) ∈
     σ.val ∪ set.range (atom_map B σ a A N hsmall) :=
-sorry
+begin
+  intros c hc,
+  by_cases (⟨sum.inl c, C⟩ : support_condition B) ∈ σ.val.range,
+  sorry, sorry
+end
 
 /-- When we add the atoms from the atom map, the resulting permutation "carefully extends" `σ`.
 The atom conditions hold because `σ` is allowable and the `near_litter_cond` is satisfies - in
