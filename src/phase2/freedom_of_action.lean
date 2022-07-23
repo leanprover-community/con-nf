@@ -1227,7 +1227,16 @@ lemma atom_to_cond_eq (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) �
   {b c d e f C D} (hb : atom_to_cond B σ a A N hsmall b = (sum.inl (d, e), C))
   (hc : atom_to_cond B σ a A N hsmall c = (sum.inl (d, f), D)) :
   e = f ∧ C = D :=
-sorry
+begin
+  unfold atom_to_cond at hb hc,
+  simp only [prod.mk.inj_iff] at hb hc,
+  obtain ⟨⟨h1, h2⟩, h3⟩ := hb,
+  obtain ⟨⟨h1', h2'⟩, h3'⟩ := hc,
+  rw ← h1' at h1,
+  rw [subtype.coe_inj.1 h1, h2'] at h2,
+  rw [h2, ← h3, ← h3'],
+  exact ⟨rfl, rfl⟩,
+end
 
 lemma atom_union_one_to_one_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
