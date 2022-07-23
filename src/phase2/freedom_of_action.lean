@@ -1228,20 +1228,52 @@ lemma atom_to_cond_eq (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) �
   (hc : atom_to_cond B σ a A N hsmall c = (sum.inl (d, f), D)) :
   e = f ∧ C = D :=
 begin
-  unfold atom_to_cond at hb hc,
-  simp only [prod.mk.inj_iff] at hb hc,
+  simp only [atom_to_cond, prod.mk.inj_iff] at hb hc,
   obtain ⟨⟨h1, h2⟩, h3⟩ := hb,
   obtain ⟨⟨h1', h2'⟩, h3'⟩ := hc,
-  rw ← h1' at h1,
-  rw [subtype.coe_inj.1 h1, h2'] at h2,
-  rw [h2, ← h3, ← h3'],
-  exact ⟨rfl, rfl⟩,
+  rw [subtype.coe_inj.1 (h1.trans h1'.symm), h2'] at h2,
+  exact ⟨h2.symm, h3.symm.trans h3'⟩,
+end
+
+lemma atom_to_cond_eq' (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
+  {b c d e f C D} (hb : atom_to_cond B σ a A N hsmall b = (sum.inl (e, d), C))
+  (hc : atom_to_cond B σ a A N hsmall c = (sum.inl (f, d), D)) :
+  e = f ∧ C = D :=
+begin
+  simp only [atom_to_cond, prod.mk.inj_iff] at hb hc,
+  obtain ⟨⟨h1, h2⟩, h3⟩ := hb,
+  obtain ⟨⟨h1', h2'⟩, h3'⟩ := hc,
+  rw [← h2', subtype.coe_inj, embedding_like.apply_eq_iff_eq] at h2,
+  exact ⟨h1.symm.trans ((subtype.coe_inj.2 h2).trans h1'), h3.symm.trans h3'⟩,
 end
 
 lemma atom_union_one_to_one_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   spec.one_to_one_forward B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall)) :=
-sorry
+begin
+  refine λ C, ⟨λ b p hp q hq, _, λ N' M hM M' hM', _⟩,
+  { simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_set_of_eq,
+               set.mem_union_eq, set.mem_range, set_coe.exists] at hp hq,
+    obtain hp | ⟨x, ⟨hxa, hxσ⟩, hx⟩ := hp; obtain hq | ⟨y, ⟨hya, hyσ⟩, hy⟩ := hq,
+    { exact (σ.prop.forward.one_to_one C).atom b hp hq },
+    { simp only [atom_to_cond, atom_map, subtype.coe_mk, prod.mk.inj_iff] at hy,
+      obtain ⟨⟨h1, h2⟩, h3⟩ := hy,
+      subst h1, subst h2, subst h3,
+      -- seek contradiction: p = y -> false:
+      -- have : (sum.inl p, A) ∈ σ.val.domain := ⟨_, hp, by simp only [binary_condition.domain, sum.elim_inl]⟩,
+      sorry },
+    { sorry },
+    { exact (atom_to_cond_eq' B σ a A _ hsmall hx hy).1, } },
+  simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_set_of_eq,
+             set.mem_union_eq, set.mem_range, set_coe.exists] at hM hM',
+  obtain hM | ⟨x, ⟨hxa, hxσ⟩, hx⟩ := hM,
+  { obtain hM' | ⟨y, ⟨hya, hyσ⟩, hy⟩ := hM',
+    { exact (σ.prop.forward.one_to_one C).near_litter N' hM hM' },
+    simp only [atom_to_cond, prod.mk.inj_iff, false_and] at hy,
+    cases hy },
+  { simp only [atom_to_cond, prod.mk.inj_iff, false_and] at hx,
+    cases hx }
+end
 
 lemma atom_union_one_to_one_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
