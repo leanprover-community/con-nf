@@ -63,7 +63,7 @@ Throughout, we fix three parameters:
   \item $\mu$ may be any strong limit cardinal $>\kappa$ of cofinality $\geq \kappa$.
 \end{itemize}
 
-[Note: The assumptions on $\kappa$ and $\mu$ are essential for the construction of the model to work.  The assumptions on $\lambda$ are not needed for this model — everything probably works for an arbitrary well-founded strict partial order $\lambda$, and gives a model of $\TTT_\lambda$. The assumption that $\lambda$ is a limit ordinals is require afterwards, to convert the model of $\TTT_\lambda$ into a model of $\mathrm{TST} + \text{typical ambiguity}$.]
+[Note: The assumptions on $\kappa$ and $\mu$ are essential for the construction of the model to work.  The assumptions on $\lambda$ are not needed for this model — everything probably works for an arbitrary well-founded strict partial order $\lambda$, and gives a model of $\TTT_\lambda$. The assumption that $\lambda$ is a limit ordinal is required afterwards, to convert the model of $\TTT_\lambda$ into a model of $\mathrm{TST} + \text{typical ambiguity}$.]
 \end{definition}
 
 \begin{definition}
@@ -140,9 +140,9 @@ A \emph{near-litter} is a subset $N$ of $\tau_{-1}$ with small symmetric differe
 \uses{def:near-litter}
 \lean{con_nf.local_cardinal}
 \leanok
-For $i \in \Litter$, the $i$-th {\em local cardinal} $[L_i]$ is $\{N \subseteq \tau_{-1}:|N \symdiff L|<\kappa\}$.
+For $i \in \Litter$, the $i$-th {\em local cardinal} $[L_i]$ is $\{N \subseteq \tau_{-1}:|N \symdiff L_i|<\kappa\}$.
 
-For any near-litter $N$ (including litters), we write $[N]$ for the unique local cardinal that contains $N$. We introduce the notation $[N]^\circ$ for the litter belonging to the local cardinal $N$, with the tacit need to prove that there is only one.
+For any near-litter $N$ (including litters), we write $[N]$ for the unique local cardinal that contains $N$. We introduce the notation $[N]^\circ$ for the litter belonging to the local cardinal of $N$, with the tacit need to prove that there is only one.
 
 [Note: almost all roles played by local cardinals in the original text should be fulfilled in the formalisation by litter-indices $i \in \Litter$.]
 \end{definition}
@@ -217,9 +217,9 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
   \uses{def:structural-perm}
   \leanok
   \lean{con_nf.struct_perm.derivative}
-  Any path $A : \beta \to \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
+  Any path $A : \beta \pathto \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
 
-  Moreover, this is functorial: they make $\Str$ into a functor $\Path(\Lambda^\bot)^\op \to \mathrm{Gp}$.
+  Moreover, this is functorial: they make $\Str$ into a functor $\Path(\lambda^\bot)^\op \to \mathrm{Gp}$.
 
   [TODO: this should also depend on “paths”, but they aren’t yet explicitly in the blueprint.]
 \end{definition}
@@ -235,7 +235,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
   \uses{def:near-litter,def:atoms-and-litters} % TODO: add def:paths upstream, and add it here.
   \lean{con_nf.support_condition}
   \leanok
-  Let $\alpha$ be a proper type index. An \emph{$\alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
+  Let $\alpha$ be a proper type index. An \emph{$\alpha$-support-condition} (or just \emph{$alpha$-condition}) is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
 
   Type-theoretically, $\Cond_\alpha := (\tau_{-1} + \NearLitter) \times \mathrm{Path}(-1,\alpha)$.
 
@@ -260,18 +260,6 @@ Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alp
 [NOTES for formalisation: Well-orderings are assumed here in some version of Randall’s note, but they almost certainly aren’t wanted in the basic definition of supports, as used in phase 1. Strong supports, as used in phase 2, are probably better viewed as a separate notion: a more elaborate data structure that can be used to “present” a support in a particularly good way.]
 \end{definition}
 
-\begin{lemma}
-\label{lem:count-supports}
-\uses{def:support}
-\lean{con_nf.mk_support_le}
-\leanok
-Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supports, and therefore at most $\mu$ supports for each $x \in \tau$.
-\end{lemma}
-\begin{proof}
-\uses{lem:count-near-litters}
-\leanok
-\end{proof}
-
 \begin{definition}
 \label{def:support-of}
   \uses{def:support,def:support-condition-action}
@@ -285,6 +273,18 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supp
 
   We say $x$ is \emph{symmetric} if it has some small support.
 \end{definition}
+
+\begin{lemma}
+  \label{lem:count-supports}
+  \uses{def:support-of}
+  \lean{con_nf.mk_support_le}
+  \leanok
+  Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supports, and therefore at most $\mu$ supports for each $x \in \tau$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:count-near-litters}
+  \leanok
+\end{proof}
 
 \chapter{Phase 1: The model construction} \label{ch:model-construction}
 
@@ -319,7 +319,7 @@ For now, we group the data assumed at each level, according to which constructio
       \item for each $x$ in $\tau_\alpha$ that is not a typed litter or singleton, $x$ comes later than all of its designated support -- explicitly, for each $(a,A)$ or $(N,A)$ in $S_x$, we must have $\iota_\alpha(j(N)), \iota_\alpha(k(a))<\iota_\alpha(x)$.
     \end{enumerate}
     [Note: to see these conditions are not unreasonable, note that each $x \in \tau$ has $<\mu$ many things that it must come after, and that the chains of these constraints are of depth at most 4: litters $<$ atoms $<$ other near-litters $<$ everything else.  This is said more carefully in \cref{lem:position-functions-propagate} below.]
-    \item [Optionally: An injection $\tau \to \Pretangle_\alpha$, equivariant with respect to the induced $\All$-action.  This may or may not be needed, depending on how the phase 2 data is organised.]
+    \item {[Optionally: An injection $\tau \to \Pretangle_\alpha$, equivariant with respect to the induced $\All$-action.  This may or may not be needed, depending on how the phase 2 data is organised.]}
   \end{enumerate}
 
   By \emph{core tangle data}, we will mean just $\All$, $\varphi$, $\tau$, and the $\All$-action on $\tau$ as above.  By \emph{incomplete tangle data}, we will mean all the above data except for the position functions $\iota$ and their properties.
