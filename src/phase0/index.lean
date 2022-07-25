@@ -24,6 +24,12 @@ lemma le_of_path {α : type_index} : Π {β : type_index}, path α β → β ≤
 | β (path.cons A B) := le_trans (le_of_lt B) $ le_of_path A
 | β path.nil := le_rfl
 
+lemma path_nil {α : type_index} (A : path α α) : A = path.nil :=
+begin
+  obtain - | ⟨β, _, B, hβ⟩ := A, refl,
+  exfalso, exact not_lt_of_le (le_of_path B) hβ,
+end
+
 /-- There are at most `Λ` `α`-extended type indices. -/
 @[simp] lemma mk_extended_index (α : type_index) : #(extended_index α) ≤ #Λ :=
 begin

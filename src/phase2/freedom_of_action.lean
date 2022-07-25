@@ -214,7 +214,7 @@ def spec.lower {α β : type_index} (σ : spec α) (A : path (α : type_index) �
 {c | c.extend_path A ∈ σ}
 
 /-- Lowering along the empty path does nothing. -/
-lemma spec.lower_nil {α β γ : type_index} (σ : spec α) : σ.lower path.nil = σ :=
+lemma spec.lower_nil {α : type_index} (σ : spec α) : σ.lower path.nil = σ :=
 by simp only
   [spec.lower, binary_condition.extend_path, path.nil_comp, prod.mk.eta, set.set_of_mem_eq]
 
@@ -585,15 +585,34 @@ lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
 lemma flexible_descends (he : extended_index (⟨β, B.path.comp A⟩ : le_index α)) (L : litter) :
 flexible L he → flexible L (A.comp he) := sorry
 
+/-- Descending down a proper path `A`, `μ`-many litters become flexible. -/
+lemma lower_flexible_co_large (hβ : (B : type_index) ≠ β) :
+  #{L : litter // ∃ (C : extended_index (⟨β, B.path.comp A⟩ : le_index α)),
+    flexible L C ∧ ¬ flexible L (A.comp C : extended_index B)} = #μ := sorry
+
+/-- Using the previous lemma, at each lower level `A`, we have either `μ`-many flexible litters not
+in the domain, or none at all (so the domain contains all flexible litters).
+TODO: Is this actually true? -/
+lemma lower_flexible_dichotomy
+  (hdom : #μ = #{L : litter | ∃ (C : extended_index B),
+    flexible L C ∧ (⟨sum.inr L.to_near_litter, C⟩ : support_condition B) ∉ σ.domain})
+  (hβ : (B : type_index) ≠ β) :
+  #{L : litter | ∃ (C : extended_index (⟨β, B.path.comp A⟩ : le_index α)),
+    flexible L C ∧ (sum.inr L.to_near_litter, C) ∉ (σ.lower A).domain} = #μ ∨
+  {L : litter | ∃ (C : extended_index (⟨β, B.path.comp A⟩ : le_index α)),
+    flexible L C ∧ (sum.inr L.to_near_litter, C) ∉ (σ.lower A).domain} = ∅ := sorry
+
 lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) :=
 begin
   obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ.flexible_cond,
-  { refine spec.flexible_cond.co_large _ _; dsimp at hdom hrge ⊢,
-    {
-      refine le_antisymm _ _,
-      { sorry },
-      { rw hdom, refine cardinal.mk_subtype_mono _,
+  { by_cases hβ : (B : type_index) = β,
+    { obtain ⟨B_index, B⟩ := B,
+      dsimp only [le_index_coe_def] at *,
+      subst hβ,
+      rw [path_nil A, spec.lower_nil σ],
+      exact spec.flexible_cond.co_large hdom hrge,
+      /- { rw hdom, refine cardinal.mk_subtype_mono _,
         intro L,
         intro h',
         cases h' with he hf',
@@ -616,12 +635,12 @@ begin
           unfold spec.lower,
           unfold binary_condition.extend_path,
           obtain ⟨As|Ns,he'⟩ := hb; dsimp at heq; rw heq; rw heq at h1; dsimp; exact h1,
-        }, },
+        }, }, -/
     },
-    { rw hrge,
-      sorry, },
+    { -- Postponing until we have proven `lower_flexible_co_large`.
+      sorry },
   },
-  { refine spec.flexible_cond.all _ _,
+  sorry { refine spec.flexible_cond.all _ _,
     { intros L he hf,
       have hdom' := hdom L (A.comp he) _,
       { unfold spec.lower,

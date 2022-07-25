@@ -121,6 +121,9 @@ This type is intended to be used in place of `β : type_index, β ≤ α` in pha
 index `β` that this `le_index` wraps. -/
 instance le_index.has_coe {α : Λ} : has_coe (le_index α) type_index := ⟨le_index.index⟩
 
+@[simp] lemma le_index_coe_def {α : Λ} (index : type_index) (path : path (α : type_index) index) :
+  ((⟨index, path⟩ : le_index α) : type_index) = index := rfl
+
 def le_index.cons {α : Λ} (A : le_index α) {γ : type_index} (hγ : γ < A.index) : le_index α :=
 ⟨γ, path.cons A.path hγ⟩
 
