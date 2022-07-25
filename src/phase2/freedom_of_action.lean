@@ -582,6 +582,9 @@ lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
   ∀ N₁ N₂ C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N₁ N₂ C :=
 λ N₁ N₂ C hN, hσ.forward.near_litter_cond N₁ N₂ (A.comp C) hN
 
+/--lemma flexible_descends (he : extended_index B) (L : litter) :
+flexible L he → flexible L (A.comp he) := sorry--/
+
 lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) :=
 begin
@@ -590,13 +593,19 @@ begin
     { convert hdom using 3,
       ext L,
       split,
-      sorry{ intro h',
+      { intro h',
         cases h' with he hf',
         obtain ⟨hf,hin⟩ := hf',
         refine ⟨A.comp he,_⟩,
         split,
-        { unfold flexible at hf ⊢,
-          exact hf,
+        { --need to replace below with call of flexible_descends lemma above - after it compiles
+
+          /-unfold flexible at hf ⊢,
+          simp at hf ⊢,
+          convert hf,
+          simp,-/
+          sorry,
+          --exact hf,
         },
         { unfold spec.domain at hin ⊢,
           unfold binary_condition.domain at hin ⊢,
@@ -616,15 +625,20 @@ begin
       { intro h',
         cases h' with he hf',
         obtain ⟨hf,hin⟩ := hf',
-        unfold spec.domain at hin ⊢,
-        unfold binary_condition.domain at hin ⊢,
-        simp at hin ⊢,
+        unfold spec.lower,
+        --unfold spec.domain at hin ⊢,
+        --unfold binary_condition.domain at hin ⊢,
+        --simp at hin ⊢,
+
+
+        --fconstructor,
+        --obtain ⟨As|Hs,he'⟩ := hin,
         sorry, },
     },
     { rw hrge,
       sorry, },
   },
-  sorry{ refine spec.flexible_cond.all _ _,
+  { refine spec.flexible_cond.all _ _,
     { intros L he hf,
       have hdom' := hdom L (A.comp he) _,
       { unfold spec.lower,
@@ -653,9 +667,10 @@ begin
 
       },
       { --***
-        unfold flexible at hf ⊢,
+        --use flexible_descends lemma after it compiles.
+        /-unfold flexible at hf ⊢,
         simp at hf ⊢,
-        exact hf,
+        exact hf,-/
       },
     },
     { intros L he hf,
@@ -688,7 +703,7 @@ begin
         },
 
       },
-      { --identical proof to above (at ***)
+      { --use flexible_descends lemma after it compiles.
         unfold flexible at hf ⊢,
         simp at hf ⊢,
         exact hf,
