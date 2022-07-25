@@ -1426,6 +1426,16 @@ begin
       a.fst.to_near_litter (or.inl hc) hall₁, }
 end
 
+lemma atom_union_mem' (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
+  (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
+  (b₁ b₂ : atom) (C : extended_index B)
+  (hσ : (⟨sum.inl ⟨b₁, b₂⟩, C⟩ : binary_condition B) ∈ set.range (atom_to_cond B σ a A N hsmall))
+  (c : atom) (hc₁ : c ∈ litter_set b₂.fst) (hc₂ : (sum.inl c, A) ∉ σ.val.range) :
+  c ∈ (N.snd : set atom) :=
+begin
+  sorry
+end
+
 lemma atom_union_all_atoms_range (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) (b₁ b₂ : atom)
   (L : litter) (hb₂ : b₂ ∈ litter_set L) (C : extended_index B)
@@ -1464,7 +1474,7 @@ begin
   { obtain ⟨⟨⟨d₁, d₂⟩ | Ns, D⟩, hc₁, hc₂⟩ := h; cases hc₂,
     exact ⟨d₁, or.inl hc₁⟩, },
   have : c ∈ N.snd.val,
-  { sorry },
+  { convert atom_union_mem' B σ a A N ‹_› hsmall d b₂ A ⟨d, hd⟩ _ _ h, convert hc, },
   refine ⟨(atom_map B σ a A N hsmall).inv_fun ⟨c, this, h⟩,
     or.inr ⟨(atom_map B σ a A N hsmall).inv_fun ⟨c, this, h⟩, _⟩⟩,
   unfold atom_to_cond,
