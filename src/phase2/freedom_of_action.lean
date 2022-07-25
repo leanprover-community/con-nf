@@ -582,9 +582,8 @@ lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
   ∀ N₁ N₂ C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N₁ N₂ C :=
 λ N₁ N₂ C hN, hσ.forward.near_litter_cond N₁ N₂ (A.comp C) hN
 
-/-lemma flexible_descends (he : extended_index B) (L : litter) (hf : flexible L he):
-flexible L (A.comp he) := sorry-/
-
+lemma flexible_descends (he : extended_index (⟨β, B.path.comp A⟩ : le_index α)) (L : litter) :
+flexible L he → flexible L (A.comp he) := sorry
 
 lemma lower_flexible_cond (hσ : σ.allowable_spec B) :
   (σ.lower A).flexible_cond (le_index.mk β (path.comp B.path A)) :=
@@ -599,14 +598,8 @@ begin
         obtain ⟨hf,hin⟩ := hf',
         refine ⟨A.comp he,_⟩,
         split,
-        { --need to replace below with call of flexible_descends lemma above - after it compiles
-
-          /-unfold flexible at hf ⊢,
-          simp at hf ⊢,
-          convert hf,
-          simp,-/
-          sorry,
-          --exact hf,
+        {
+          exact flexible_descends _ _ _ L hf,
         },
         { unfold spec.domain at hin ⊢,
           unfold binary_condition.domain at hin ⊢,
@@ -620,19 +613,18 @@ begin
           refine hin' _,
           unfold spec.lower,
           unfold binary_condition.extend_path,
-          obtain ⟨As|Hs,he'⟩ := hb; dsimp at heq; rw heq; rw heq at h1; dsimp; exact h1,
+          obtain ⟨As|Ns,he'⟩ := hb; dsimp at heq; rw heq; rw heq at h1; dsimp; exact h1,
         },
       },
       { intro h',
         cases h' with he hf',
         obtain ⟨hf,hin⟩ := hf',
-        unfold spec.lower,
+        --refine A.comp he,
+        --have he' := extended_index (⟨β, B.path.comp A⟩ : le_index α),
+        --unfold spec.lower,
         --unfold spec.domain at hin ⊢,
         --unfold binary_condition.domain at hin ⊢,
         --simp at hin ⊢,
-
-
-        --fconstructor,
         --obtain ⟨As|Hs,he'⟩ := hin,
         sorry, },
     },
@@ -665,21 +657,15 @@ begin
           simp at hx_2 ⊢,
           exact and.elim_left hx_2,
         },
-
       },
-      { --***
-        --use flexible_descends lemma after it compiles.
-        /-unfold flexible at hf ⊢,
-        simp at hf ⊢,
-        exact hf,-/
-        sorry,
+      {
+        exact flexible_descends _ _ _ L hf,
       },
     },
     { intros L he hf,
       have hrge' := hrge L (A.comp he) _,
       { unfold spec.lower,
         unfold binary_condition.extend_path,
-        --unfold spec.domain at hdom',
         unfold spec.range at hrge' ⊢,
         dsimp at hrge' ⊢,
         obtain ⟨x, hx_1, hx_2⟩ := hrge',
@@ -700,16 +686,11 @@ begin
         { unfold binary_condition.range at hx_2 ⊢,
           simp at hx_2 ⊢,
           obtain ⟨hx_2,hx_3⟩ := hx_2,
-          --exact hx_2,
           exact hx_2,
         },
-
       },
-      { --use flexible_descends lemma after it compiles.
-        sorry,
-        --unfold flexible at hf ⊢,
-        --simp at hf ⊢,
-        --exact hf,
+      {
+      exact flexible_descends _ _ _ L hf,
       },
     }
   },
