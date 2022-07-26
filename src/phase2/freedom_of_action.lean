@@ -248,7 +248,7 @@ by simp only [unary_spec.lower, support_condition.extend_path, set.mem_set_of_eq
 
 @[simp] lemma unary_spec.lower_union {α β : type_index} (σ τ : unary_spec α) (A : path α β) :
   (σ ∪ τ).lower A = σ.lower A ∪ τ.lower A :=
-sorry
+by ext ⟨x | x, y⟩; simp only [unary_spec.lower, set.mem_union_eq, set.mem_set_of_eq]
 
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
@@ -268,7 +268,7 @@ by simp only [spec.lower, binary_condition.extend_path, set.mem_set_of_eq, path.
 
 @[simp] lemma spec.lower_union {α β : type_index} (σ τ : spec α) (A : path α β) :
   (σ ∪ τ).lower A = σ.lower A ∪ τ.lower A :=
-sorry
+by ext ⟨x | x, y⟩; simp only [spec.lower, set.mem_union_eq, set.mem_set_of_eq]
 
 /-- Lowering a specification corresponds exactly to forming the derivative of the corresponding
 structural permutation. -/
