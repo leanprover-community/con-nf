@@ -1332,12 +1332,24 @@ sorry
 lemma atom_union_near_litter_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   ∀ N₁ N₂ C, spec.near_litter_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall)) N₁ N₂ C :=
-sorry
+begin
+  rintros N₁ N₂ C (h | h),
+  { obtain ⟨M, hM₁, sd, hsd₁, hsd₂⟩ := σ.property.forward.near_litter_cond N₁ N₂ C h,
+    exact ⟨M, or.inl hM₁, sd, λ a, or.inl (hsd₁ a), hsd₂⟩, },
+  obtain ⟨d, hd⟩ := h,
+  cases hd,
+end
 
 lemma atom_union_near_litter_cond_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   ∀ N₁ N₂ C, spec.near_litter_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall))⁻¹ N₁ N₂ C :=
-sorry
+begin
+  rintros N₁ N₂ C (h | h),
+  { obtain ⟨M, hM₁, sd, hsd₁, hsd₂⟩ := σ.property.backward.near_litter_cond N₁ N₂ C h,
+    exact ⟨M, or.inl hM₁, sd, λ a, or.inl (hsd₁ a), hsd₂⟩, },
+  obtain ⟨d, hd⟩ := h,
+  cases hd,
+end
 
 lemma atom_union_non_flexible_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
