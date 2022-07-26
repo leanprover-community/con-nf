@@ -583,7 +583,16 @@ lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
 λ N₁ N₂ C hN, hσ.forward.near_litter_cond N₁ N₂ (A.comp C) hN
 
 lemma flexible_descends (he : extended_index (⟨β, B.path.comp A⟩ : le_index α)) (L : litter) :
-flexible L he → flexible L (A.comp he) := sorry
+flexible L he → flexible L (A.comp he) :=
+begin
+  intro hf,
+  have hs := unconstrained_of_flexible L he hf,
+  unfold flexible,
+  simp,
+  intros hb hd hg hgb hdb hdg hp htp heq,
+
+  sorry,
+end
 
 /-- Descending down a proper path `A`, `μ`-many litters become flexible. -/
 lemma lower_flexible_co_large (hβ : (B : type_index) ≠ β) :
