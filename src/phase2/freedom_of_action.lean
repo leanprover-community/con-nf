@@ -1255,6 +1255,15 @@ begin
   exact ⟨h1.symm.trans ((subtype.coe_inj.2 h2).trans h1'), h3.symm.trans h3'⟩,
 end
 
+lemma exists_atom_to_cond (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
+  {c : atom} (hc₁ : c ∈ N.snd.val) (hc₂ : (sum.inl c, A) ∉ σ.val.range) :
+  ∃ d, atom_to_cond B σ a A N hsmall d = (sum.inl (d, c), A) :=
+begin
+  obtain ⟨d, hd⟩ : (⟨c, hc₁, hc₂⟩ : ↥{a' ∈ N.snd.val | _}) ∈ set.range (atom_map B σ a A N hsmall),
+  { rw equiv.range_eq_univ, exact set.mem_univ _, },
+  refine ⟨d, _⟩, unfold atom_to_cond, rw hd, refl,
+end
+
 lemma atom_union_one_to_one_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   spec.one_to_one_forward B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall)) :=
@@ -1438,6 +1447,9 @@ begin
       a.fst.to_near_litter (or.inl hc) hall₁, }
 end
 
+/-- The atom map only ever maps to the intersection of `N` with its corresponding litter, `N.fst`.
+In particular, we prove that if some atom `c` lies in the litter we're mapping to, it lies in the
+precise near-litter we are mapping to as well. -/
 lemma atom_union_mem' (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (b₁ b₂ : atom) (C : extended_index B)
@@ -1445,7 +1457,30 @@ lemma atom_union_mem' (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (c : atom) (hc₁ : c ∈ litter_set b₂.fst) (hc₂ : (sum.inl c, A) ∉ σ.val.range) :
   c ∈ (N.snd : set atom) :=
 begin
-  sorry
+  contrapose hc₂,
+  rw set.not_not_mem,
+
+  suffices hb₂ : b₂.fst = N.fst,
+  { rw hb₂ at hc₁,
+    obtain ⟨M, hM, symm_diff, hS₁, hS₂⟩ :=
+      σ.property.backward.near_litter_cond N a.fst.to_near_litter A hc,
+    refine ⟨_, hS₁ ⟨c, or.inl ⟨hc₁, hc₂⟩⟩, rfl⟩, },
+
+  obtain ⟨d, hd⟩ := hσ,
+  have : b₁ = d,
+  { unfold atom_to_cond at hd,
+    have hd' := congr_arg prod.fst hd, have := congr_arg prod.fst (sum.inl.inj hd'),
+    cases this, refl, },
+  subst this,
+
+  obtain ⟨M, hM, symm_diff, hS₁, hS₂⟩ :=
+    σ.property.backward.near_litter_cond N a.fst.to_near_litter A hc,
+  by_contradiction hb₂,
+  have := hS₁ ⟨b₂, or.inr ⟨atom_union_mem B σ a A N hc hsmall d b₂ C ⟨d, hd⟩, hb₂⟩⟩,
+  obtain ⟨e, he₁, he₂, he₃⟩ := atom_to_cond_spec B σ a A N hsmall d,
+  rw hd at he₁,
+  cases he₁,
+  refine he₃ ⟨_, this, rfl⟩,
 end
 
 lemma atom_union_all_atoms_range (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
