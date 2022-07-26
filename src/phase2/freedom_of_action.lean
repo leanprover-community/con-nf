@@ -1295,7 +1295,23 @@ end
 lemma atom_union_one_to_one_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   spec.one_to_one_forward B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall))⁻¹ :=
-sorry
+begin
+  refine λ C, ⟨λ b p hp q hq, _, λ N' M hM M' hM', _⟩,
+  { simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_set_of_eq,
+               set.mem_union_eq, set.mem_range, set_coe.exists, set.mem_inv] at hp hq,
+    obtain hp | ⟨x, ⟨hxa, hxσ⟩, hx⟩ := hp; obtain hq | ⟨y, ⟨hya, hyσ⟩, hy⟩ := hq,
+    { exact (σ.prop.backward.one_to_one C).atom b hp hq },
+    { obtain ⟨⟨h1, h2⟩, h3⟩ := hy, -- auto subst what???
+      simp only [has_inv.inv, sum.elim_inl] at hp,
+      cases hyσ ⟨_, hp, by simp only [binary_condition.domain, sum.elim_inl]⟩ },
+    { obtain ⟨⟨h1, h2⟩, h3⟩ := hx, -- same as above
+      simp only [has_inv.inv, sum.elim_inl] at hq,
+      cases hxσ ⟨_, hq, by simp only [binary_condition.domain, sum.elim_inl]⟩ },
+    { exact (atom_to_cond_eq B σ a A _ hsmall hx hy).1 } },
+  obtain hM | ⟨x, ⟨hxa, hxσ⟩, hx⟩ := hM,
+  obtain hM' | ⟨y, ⟨hya, hyσ⟩, hy⟩ := hM',
+  exact (σ.prop.backward.one_to_one C).near_litter N' hM hM'
+end
 
 lemma atom_union_atom_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
