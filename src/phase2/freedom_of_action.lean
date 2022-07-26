@@ -1294,16 +1294,10 @@ begin
     { exact (σ.prop.backward.one_to_one C).atom b hp hq },
     { obtain ⟨⟨h1, h2⟩, h3⟩ := hy, -- auto subst what???
       simp only [has_inv.inv, sum.elim_inl] at hp,
-      have : (sum.inl b, A) ∈ σ.val.domain,
-      { simp only [spec.domain, binary_condition.domain, subtype.val_eq_coe, set.mem_image, prod.mk.inj_iff],
-        exact ⟨_, hp, rfl, rfl⟩ },
-      cases hyσ this },
+      cases hyσ ⟨_, hp, by simp only [binary_condition.domain, sum.elim_inl]⟩ },
     { obtain ⟨⟨h1, h2⟩, h3⟩ := hx, -- same as above
       simp only [has_inv.inv, sum.elim_inl] at hq,
-      have : (sum.inl b, A) ∈ σ.val.domain,
-      { simp only [spec.domain, binary_condition.domain, subtype.val_eq_coe, set.mem_image, prod.mk.inj_iff],
-        exact ⟨_, hq, rfl, rfl⟩ },
-      cases hxσ this },
+      cases hxσ ⟨_, hq, by simp only [binary_condition.domain, sum.elim_inl]⟩ },
     { exact (atom_to_cond_eq B σ a A _ hsmall hx hy).1 } },
   obtain hM | ⟨x, ⟨hxa, hxσ⟩, hx⟩ := hM,
   obtain hM' | ⟨y, ⟨hya, hyσ⟩, hy⟩ := hM',
