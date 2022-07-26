@@ -84,7 +84,37 @@ begin
   simp,
 end
 
-lemma spec.sUnion_domain_eq_domain_sUnion {α : type_index} (c : set (spec α)) :
+@[simp] lemma spec.domain_union {α : type_index} (σ τ : spec α) :
+  (σ ∪ τ).domain = σ.domain ∪ τ.domain :=
+begin
+  ext c,
+  unfold spec.domain,
+  simp only [set.mem_image, set.mem_union_eq],
+  split,
+  { rintro ⟨x, hx₁ | hx₁, hx₂⟩,
+    exact or.inl ⟨x, hx₁, hx₂⟩,
+    exact or.inr ⟨x, hx₁, hx₂⟩, },
+  { rintro (⟨x, hx₁, hx₂⟩ | ⟨x, hx₁, hx₂⟩),
+    exact ⟨x, or.inl hx₁, hx₂⟩,
+    exact ⟨x, or.inr hx₁, hx₂⟩, },
+end
+
+@[simp] lemma spec.range_union {α : type_index} (σ τ : spec α) :
+  (σ ∪ τ).range = σ.range ∪ τ.range :=
+begin
+  ext c,
+  unfold spec.range,
+  simp only [set.mem_image, set.mem_union_eq],
+  split,
+  { rintro ⟨x, hx₁ | hx₁, hx₂⟩,
+    exact or.inl ⟨x, hx₁, hx₂⟩,
+    exact or.inr ⟨x, hx₁, hx₂⟩, },
+  { rintro (⟨x, hx₁, hx₂⟩ | ⟨x, hx₁, hx₂⟩),
+    exact ⟨x, or.inl hx₁, hx₂⟩,
+    exact ⟨x, or.inr hx₁, hx₂⟩, },
+end
+
+@[simp] lemma spec.sUnion_domain_eq_domain_sUnion {α : type_index} (c : set (spec α)) :
   ⋃₀ (spec.domain '' c) = spec.domain ⋃₀ c :=
 begin
   ext x,
@@ -156,6 +186,14 @@ lemma struct_perm.satisfies_mono {α : type_index} (π : struct_perm α) (σ ρ 
   π.satisfies ρ → π.satisfies σ :=
 λ hρ c hc, hρ c (hσρ hc)
 
+lemma struct_perm.satisfies_union_left {α : type_index} (π : struct_perm α) (σ ρ : spec α) :
+  π.satisfies (σ ∪ ρ) → π.satisfies σ :=
+λ h c hc, h c (set.mem_union_left _ hc)
+
+lemma struct_perm.satisfies_union_right {α : type_index} (π : struct_perm α) (σ ρ : spec α) :
+  π.satisfies (σ ∪ ρ) → π.satisfies ρ :=
+λ h c hc, h c (set.mem_union_right _ hc)
+
 /- There is an injection from the type of structural permutations to the type of specifications,
 in such a way that any structural permutation satisfies its specification. We construct this
 specification by simply drawing the graph of the permutation on atoms and near-litters. -/
@@ -208,6 +246,10 @@ lemma unary_spec.lower_lower {α β γ : type_index} (σ : unary_spec α)
   (σ.lower A).lower B = σ.lower (path.comp A B) :=
 by simp only [unary_spec.lower, support_condition.extend_path, set.mem_set_of_eq, path.comp_assoc]
 
+@[simp] lemma unary_spec.lower_union {α β : type_index} (σ τ : unary_spec α) (A : path α β) :
+  (σ ∪ τ).lower A = σ.lower A ∪ τ.lower A :=
+sorry
+
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
 def spec.lower {α β : type_index} (σ : spec α) (A : path (α : type_index) β) : spec β :=
@@ -223,6 +265,10 @@ lemma spec.lower_lower {α β γ : type_index} (σ : spec α)
   (A : path (α : type_index) β) (B : path (β : type_index) γ) :
   (σ.lower A).lower B = σ.lower (path.comp A B) :=
 by simp only [spec.lower, binary_condition.extend_path, set.mem_set_of_eq, path.comp_assoc]
+
+@[simp] lemma spec.lower_union {α β : type_index} (σ τ : spec α) (A : path α β) :
+  (σ ∪ τ).lower A = σ.lower A ∪ τ.lower A :=
+sorry
 
 /-- Lowering a specification corresponds exactly to forming the derivative of the corresponding
 structural permutation. -/
@@ -1354,27 +1400,83 @@ end
 lemma atom_union_non_flexible_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   spec.non_flexible_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall)) :=
-sorry
+begin
+  rintros β δ γ hγ hδ hγδ N₁ C t (ht | ht) ρ hρ,
+  { exact σ.property.forward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
+      (struct_perm.satisfies_union_left _ _ _ hρ), },
+  obtain ⟨d, hd⟩ := ht,
+  cases hd,
+end
 
 lemma atom_union_non_flexible_cond_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   spec.non_flexible_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall))⁻¹ :=
-sorry
+begin
+  rintros β δ γ hγ hδ hγδ N₁ C t (ht | ht) ρ hρ,
+  { exact σ.property.backward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
+      (struct_perm.satisfies_union_left _ _ _ hρ), },
+  obtain ⟨d, hd⟩ := ht,
+  cases hd,
+end
 
 lemma atom_union_support_closed_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall)).domain.support_closed B :=
-sorry
+begin
+  unfold unary_spec.support_closed,
+  intros β δ γ hγ hδ hγδ C t ht,
+  rw spec.domain_union at ht ⊢,
+  rw unary_spec.lower_union,
+  cases ht,
+  { exact supports_union_left (σ.property.forward.support_closed hγ hδ hγδ C t ht), },
+  obtain ⟨⟨atoms | Ns, C⟩, ⟨d, hd₁⟩, hd₂⟩ := ht,
+  { cases hd₂, },
+  { cases hd₁, },
+end
 
 lemma atom_union_support_closed_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall)).range.support_closed B :=
-sorry
+begin
+  unfold unary_spec.support_closed,
+  intros β δ γ hγ hδ hγδ C t ht,
+  rw spec.range_union at ht ⊢,
+  rw unary_spec.lower_union,
+  cases ht,
+  { convert supports_union_left (σ.property.backward.support_closed hγ hδ hγδ C t
+      (by { rw spec.inv_domain, exact ht })),
+    rw spec.inv_domain, },
+  obtain ⟨⟨atoms | Ns, C⟩, ⟨d, hd₁⟩, hd₂⟩ := ht,
+  { cases hd₂, },
+  { cases hd₁, },
+end
 
 lemma atom_union_flexible_cond (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain}) :
   spec.flexible_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall)) :=
-sorry
+begin
+  obtain (⟨hdom, hrge⟩ | ⟨hdom, hrge⟩) := σ.property.flexible_cond,
+  { refine spec.flexible_cond.co_large _ _,
+    { convert hdom, ext L, split,
+      { rintro ⟨C, hC₁, hC₂⟩, rw spec.domain_union at hC₂,
+        exact ⟨C, hC₁, λ h, hC₂ (set.mem_union_left _ h)⟩, },
+      { rintro ⟨C, hC₁, hC₂⟩, refine ⟨C, hC₁, λ h, _⟩,
+        rw spec.domain_union at h,
+        cases h,
+        { exact hC₂ h, },
+        { obtain ⟨d, ⟨e, hd₁⟩, hd₂⟩ := h, cases hd₁, cases hd₂, } } },
+    { convert hrge, ext L, split,
+      { rintro ⟨C, hC₁, hC₂⟩, rw spec.range_union at hC₂,
+        exact ⟨C, hC₁, λ h, hC₂ (set.mem_union_left _ h)⟩, },
+      { rintro ⟨C, hC₁, hC₂⟩, refine ⟨C, hC₁, λ h, _⟩,
+        rw spec.range_union at h,
+        cases h,
+        { exact hC₂ h, },
+        { obtain ⟨d, ⟨e, hd₁⟩, hd₂⟩ := h, cases hd₁, cases hd₂, } } } },
+  { refine spec.flexible_cond.all _ _,
+    { intros L C hL, rw spec.domain_union, exact or.inl (hdom L C hL), },
+    { intros L C hL, rw spec.range_union, exact or.inl (hrge L C hL), } },
+end
 
 /-- When we add the provided atoms from the atom map, we preserve allowability.
 
