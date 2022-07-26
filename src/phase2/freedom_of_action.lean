@@ -1778,11 +1778,33 @@ begin
   rw inv_inv,
 end
 
+variable (α)
+
+/-- The hypothesis that we are in the synthesised context at `α`.
+This allows us to combine a set of allowable permutations at all lower paths into an allowable
+permutation at level `α`
+This may not be the best way to phrase the assumption - the definition is subject to change when
+we actually create a proof of the proposition. -/
+def synthesised_context : Prop := Π (σ : allowable_partial_perm ⟨α, path.nil⟩)
+  (hσ₁ : σ.val.total)
+  (hσ₂ : σ.val.co_total)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α))
+  (lower_allowable_spec :
+    ∀ (B : proper_lt_index α), spec.allowable_spec (B : le_index α) (σ.val.lower B.path))
+  (exists_lower_allowable :
+    ∀ (B : proper_lt_index α), ∃ (π : allowable_path (B : le_index α)),
+      ((allowable_path_to_struct_perm (B : le_index α)) π).satisfies (σ.val.lower B.path)),
+  ∃ (π : allowable_path ⟨α, path.nil⟩),
+    ((allowable_path_to_struct_perm ⟨α, path.nil⟩) π).satisfies σ.val
+
+variable {α}
+
 /-- Any allowable partial permutation extends to an allowable permutation at level `α`, given that
 it is total and co-total. This is `total-allowable-partial-perm-actual` in the blueprint. -/
 lemma extends_to_allowable_of_total (σ : allowable_partial_perm ⟨α, path.nil⟩)
   (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total)
-  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α))
+  (syn : synthesised_context α) :
   ∃ (π : allowable_path ⟨α, path.nil⟩), (allowable_path_to_struct_perm _ π).satisfies σ.val :=
 begin
   have lower_allowable_spec :
@@ -1795,8 +1817,7 @@ begin
   have exists_lower_allowable : ∀ (B : proper_lt_index α), ∃ (π : allowable_path (B : le_index α)),
     (allowable_path_to_struct_perm (B : le_index α) π).satisfies (σ.val.lower B.path) :=
     λ B, foa B ⟨σ.val.lower B.path, lower_allowable_spec B⟩,
-  -- We need allowable.lean to compile for the rest of this proof.
-  sorry
+  exact syn σ hσ₁ hσ₂ foa lower_allowable_spec exists_lower_allowable,
 end
 
 end allowable_partial_perm
@@ -1804,7 +1825,8 @@ end allowable_partial_perm
 /-- The *freedom of action theorem*. If freedom of action holds at all lower levels and paths (all
 `B : lt_index` in our formulation), it holds at level `α`. -/
 theorem freedom_of_action_propagates
-  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α))
+  (syn : allowable_partial_perm.synthesised_context α) :
   freedom_of_action ⟨α, path.nil⟩ :=
 begin
   intro σ,
@@ -1814,7 +1836,7 @@ begin
       (set.eq_of_subset_of_subset (hρ τ (le_trans hσρ hτ) hτ).subset hτ.subset),
   have ρ_total := allowable_partial_perm.total_of_maximal ⟨α, path.nil⟩ ρ this foa,
   have ρ_co_total := allowable_partial_perm.co_total_of_maximal ⟨α, path.nil⟩ ρ this foa,
-  obtain ⟨π, hπ⟩ := ρ.extends_to_allowable_of_total ρ_total ρ_co_total foa,
+  obtain ⟨π, hπ⟩ := ρ.extends_to_allowable_of_total ρ_total ρ_co_total foa syn,
   exact ⟨π, struct_perm.satisfies_mono _ σ.val ρ.val hσρ.subset hπ⟩,
 end
 
