@@ -324,7 +324,7 @@ For now, we group the data assumed at each level, according to which constructio
 
   By \emph{core tangle data}, we will mean just $\All$, $\varphi$, $\tau$, and the $\All$-action on $\tau$ as above.  By \emph{incomplete tangle data}, we will mean all the above data except for the position functions $\iota$ and their properties.
 
-  When we assume this data at multiple levels, we will refer to the compomnents $\tau_\beta$, $\All_\beta$, and so on, and call their elements $\alpha$-tangles, etc.
+  When we assume this data at multiple levels, we will refer to the components $\tau_\beta$, $\All_\beta$, and so on, and call their elements $\alpha$-tangles, etc.
 \end{definition}
 
 There is standard core tangle data at level $-1$, and also the position function $\iota_{-1} : \tau_{-1} \to \mu$.  We will often refer to this uniformly with assumed tangle data at other levels: for instance, if we assume tangle data at all \emph{proper} levels $\beta < \alpha$, we may then refer to $\tau_\beta$ for all levels $\beta < \alpha$: for $\beta$ proper, this means the tangles of the assumed tangle data, while for $\beta = -1$ it means the fixed set of atoms $\tau_{-1}$.
@@ -348,14 +348,14 @@ An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \s
 \leanok
 We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $X_{\beta,\gamma} \subseteq \mathrm{Litter}$, as follows.
 
-For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $N^\circ$ of the minimal near-litter $N$ (under the ordering induced by $j_\beta \circ \iota_\beta : \NearLitter \to \tau_\beta \to \mu$) such that:
+For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $N^\circ$ of the minimal near-litter $N$ (under the ordering induced by $\iota_\beta \circ j_\beta : \NearLitter \to \tau_\beta \to \mu$) such that:
 \begin{itemize}
   \item $N^\circ\in X_{(\beta,\gamma)}$, i.e. $N^\circ = L_{(\beta,\gamma,i)}$, for some $i$;
   \item for each nearby near-litter $M \sim N$, $\iota_\gamma(j_\gamma(M)) >\iota_\beta(x)$;
   \item $[N] \neq f_{\beta,\gamma}(y)$, for each $y <_\beta x$.
 \end{itemize}
 
-[This can be decomposed slightly at both ends.  Firstly, since we know that $f_{\beta_\gamma}(x) = (\beta,\gamma,\chi)$ for some $\chi$, we could take the output just to be the component $\chi \in \mu$, and turn it into a litter later.  Secondly, $f_{\beta_\gamma}(x)$ depends on $x$ essentially just via its position $i_\beta(x) \in \mu$, so we could start by defining a function $g_{\beta,\gamma} : \mu \to \mathrm{Litter}$, and then take $f_{\beta,\gamma}$ as the composite $g_{\beta,\gamma} \circ \iota_\beta$.  I don’t think these will really make a difference either way, though.]
+[This can be decomposed slightly at both ends.  Firstly, since we know that $f_{\beta,\gamma}(x) = (\beta,\gamma,\chi)$ for some $\chi$, we could take the output just to be the component $\chi \in \mu$, and turn it into a litter later.  Secondly, $f_{\beta_\gamma}(x)$ depends on $x$ essentially just via its position $\iota_\beta(x) \in \mu$, so we could start by defining a function $g_{\beta,\gamma} : \mu \to \mathrm{Litter}$, and then take $f_{\beta,\gamma}$ as the composite $g_{\beta,\gamma} \circ \iota_\beta$.  I don’t think these will really make a difference either way, though.]
 
 [Notice that this only depends on a small fragment of the tangle data at $\beta$ and $\gamma$. In particular, it doesn’t depend on $\alpha$ nor on the tangle data at other levels. In the formalisation, it would be good to avoid it depending on more than it needs.]
 \end{definition}
@@ -383,16 +383,16 @@ Let $\gamma$ be a type index (not necessarily proper) below $\alpha$.
 
 For any code $(\alpha,\gamma,G)$, with $\delta$ a proper type index below $\alpha$ and distinct from $\gamma$, we define
 $A_\delta(\alpha,\gamma,G)$ as
-$$(\alpha,\delta,\{ j_\delta(N) \mid N \in \NearLitter,\, N \sim f_{\gamma,\delta}(b),\, b \in B \})$$
+$$(\alpha,\delta,\{ j_\delta(N) \mid N \in \NearLitter,\, N \sim f_{\gamma,\delta}(g),\, g \in G \})$$
 if the maps $f_{\gamma,\delta}$ are considered as valued in litters, or
-$$(\alpha,\delta,\{ j_\delta(N) \mid N \in f_{\gamma,\delta}(b),\, b \in B \})$$
+$$(\alpha,\delta,\{ j_\delta(N) \mid N \in f_{\gamma,\delta}(g),\, g \in G \})$$
 if they are taken as valued directly in local cardinals.
 
 We say that a code $c$ \emph{leads to} a code $d$ if $d$ is the image of $c$ under some A-map. We denote this $c \rightsquigarrow d$.
 
 (Here $j_\delta(N)$ is the “typed near-litters” map for level $\delta$, assumed in the tangle data.)
 
-[For the formalisation, each individual $A_\delta$ is probably best represented as a function $\mathcal{P}(\tau_(\gamma)) \to \mathcal{P}(\tau_\delta)$, rather than on “codes of the form $(\alpha,\gamma,G)$…”.  Also it could — and perhaps should, for flexibility later — have parameters just “$\gamma$, $\delta$, and their tangle data”, rather than “$\alpha$, tangle data everywhere below $\alpha$, and $\gamma,\delta < \alpha$”.]
+[For the formalisation, each individual $A_\delta$ is probably best represented as a function $\mathcal{P}(\tau_\gamma) \to \mathcal{P}(\tau_\delta)$, rather than on “codes of the form $(\alpha,\gamma,G)$…”.  Also it could — and perhaps should, for flexibility later — have parameters just “$\gamma$, $\delta$, and their tangle data”, rather than “$\alpha$, tangle data everywhere below $\alpha$, and $\gamma,\delta < \alpha$”.]
 \end{definition}
 
 \begin{lemma}
