@@ -586,12 +586,21 @@ lemma flexible_descends (he : extended_index (⟨β, B.path.comp A⟩ : le_index
 flexible L he → flexible L (A.comp he) :=
 begin
   intro hf,
-  have hs := unconstrained_of_flexible L he hf,
-  unfold flexible,
+  --have hs := unconstrained_of_flexible L he hf,
+  unfold flexible at hf ⊢,
   simp,
   intros hb hd hg hgb hdb hdg hp htp heq,
+  convert hf hgb hdb,
+  simp,
+  split,
+  { exact hdg, },
+  {
+    sorry, },
+  --rw heq at hf,
+  --unfold flexible at hf,
+  --simp at hf,
 
-  sorry,
+
 end
 
 /-- Descending down a proper path `A`, `μ`-many litters become flexible. -/
