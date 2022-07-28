@@ -1793,12 +1793,17 @@ begin
   obtain ⟨M', hM, symm, hsy, hsd⟩ := σ.prop.forward.near_litter_cond N N' A hN',
   have := (σ.prop.backward.one_to_one A).near_litter _ hL hM,
   subst this,
-  have : ∀ a : {a // a ∈ litter_set N.fst ∆ (N.snd : set atom)}, symm a = atom_value B σ A a.val ⟨_, hsy a, rfl⟩ := λ b, (σ.prop.backward.one_to_one A).atom _ (hsy b) (atom_value_spec B σ A b ⟨_, hsy b, rfl⟩),
+  have : ∀ a : {a // a ∈ litter_set N.fst ∆ (N.snd : set atom)}, symm a = atom_value B σ A a ⟨_, hsy a, rfl⟩ := λ b, (σ.prop.backward.one_to_one A).atom _ (hsy b) (atom_value_spec B σ A b ⟨_, hsy b, rfl⟩),
   have that := congr_arg set.range (funext this),
-  -- set f := λ (a : {a // a ∈ litter_set N.fst ∆ ↑(N.snd)}), atom_value B σ A ↑a ⟨_, hsy a, rfl⟩,
-  simp_rw ← subtype.val_eq_coe,
-  -- rw ← that,
-  sorry -- rw just doesn't right now
+  convert hN', clear hN',
+  obtain ⟨N', atoms, hN'⟩ := N',
+  dsimp only at hsd, subst hsd,
+  have : (near_litter_value B σ A N.fst.to_near_litter ⟨_, hL, heq⟩).fst = N',
+  { sorry },
+  subst this,
+  rw sigma.mk.inj_iff, split, refl, refine heq_of_eq _,
+  rw subtype.mk_eq_mk, refine congr_arg2 _ _ that.symm,
+  sorry
 end
 
 lemma near_litter_union_one_to_one_forward (hN : litter_set N.fst ≠ N.snd)
