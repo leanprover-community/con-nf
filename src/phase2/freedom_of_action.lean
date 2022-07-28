@@ -639,17 +639,11 @@ begin
   unfold flexible at hf ⊢,
   simp,
   intros hb hd hg hgb hdb hdg hp htp heq,
-  convert hf hgb hdb,
-  simp,
-  split,
-  { exact hdg, },
-  {
-    sorry, },
-  --rw heq at hf,
-  --unfold flexible at hf,
-  --simp at hf,
-
-
+  rw heq at hf,
+  simp at hf,
+  have h' := hf hgb hdb hdg,
+  --LEMMA IS FALSE?
+  sorry,
 end
 
 /-- Descending down a proper path `A`, `μ`-many litters become flexible. -/
@@ -707,7 +701,7 @@ begin
     { -- Postponing until we have proven `lower_flexible_co_large`.
       sorry },
   },
-  sorry { refine spec.flexible_cond.all _ _,
+  { refine spec.flexible_cond.all _ _,
     { intros L he hf,
       have hdom' := hdom L (A.comp he) _,
       { unfold spec.lower,
