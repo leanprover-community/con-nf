@@ -1941,13 +1941,39 @@ sorry
 
 lemma near_litter_union_flexible_cond (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain)
+  (image_not_flexible :
+    ∀ L, litter_set L = (near_litter_image B σ N A hN hNL ha).snd.val → ¬ flexible L A) :
   spec.flexible_cond B (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)}) :=
-sorry
+begin
+  obtain (⟨hdom, hrge⟩ | ⟨hdom, hrge⟩) := σ.property.flexible_cond,
+  { refine spec.flexible_cond.co_large _ _,
+    { convert hdom, ext L, split; rintro ⟨C, hC₁, hC₂⟩; refine ⟨C, hC₁, λ h, _⟩,
+      { rw spec.domain_union at hC₂, exact hC₂ (or.inl h), },
+      { rw spec.domain_union at h,
+        cases h,
+        { exact hC₂ h, },
+        { simp only [spec.domain, set.image_singleton, set.mem_singleton_iff,
+            binary_condition.domain, sum.elim_inr] at h,
+          cases h, exact hN rfl, } } },
+    { convert hrge, ext L, split; rintro ⟨C, hC₁, hC₂⟩; refine ⟨C, hC₁, λ h, _⟩,
+      { rw spec.range_union at hC₂, exact hC₂ (or.inl h), },
+      { rw spec.range_union at h,
+        cases h,
+        { exact hC₂ h, },
+        { simp only [spec.range, set.image_singleton, set.mem_singleton_iff,
+            binary_condition.range, sum.elim_inr, prod.mk.inj_iff] at h,
+          obtain ⟨h₁, h₂⟩ := h, refine image_not_flexible L _ hC₁, rw ← h₁, refl, } } } },
+  { refine spec.flexible_cond.all _ _,
+    { intros L C hL, rw spec.domain_union, exact or.inl (hdom L C hL), },
+    { intros L C hL, rw spec.range_union, exact or.inl (hrge L C hL), }, }
+end
 
 lemma near_litter_union_allowable (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain)
+  (image_not_flexible :
+    ∀ L, litter_set L = (near_litter_image B σ N A hN hNL ha).snd.val → ¬ flexible L A) :
   spec.allowable_spec B (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)}) := {
   forward := {
     one_to_one := near_litter_union_one_to_one_forward B σ N A hN hNL ha,
@@ -1964,7 +1990,7 @@ lemma near_litter_union_allowable (hN : litter_set N.fst ≠ N.snd)
     support_closed := by { rw spec.inv_domain,
       exact near_litter_union_support_closed_backward B σ N A hN hNL ha },
   },
-  flexible_cond := near_litter_union_flexible_cond B σ N A hN hNL ha,
+  flexible_cond := near_litter_union_flexible_cond B σ N A hN hNL ha image_not_flexible,
 }
 
 /-- We take the additional hypothesis that the near-litter that we're mapping do does not happen
@@ -1975,7 +2001,7 @@ lemma le_near_litter_union (hN : litter_set N.fst ≠ N.snd)
   (image_not_flexible :
     ∀ L, litter_set L = (near_litter_image B σ N A hN hNL ha).snd.val → ¬ flexible L A) :
   σ ≤ ⟨σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)},
-    near_litter_union_allowable B σ N A hN hNL ha⟩ := {
+    near_litter_union_allowable B σ N A hN hNL ha image_not_flexible⟩ := {
   subset := set.subset_union_left _ _,
   all_flex_domain := begin
     intros L N' C hN' hσ₁ hσ₂,
@@ -2002,13 +2028,13 @@ lemma le_near_litter_union (hN : litter_set N.fst ≠ N.snd)
     intros b₁ b₂ L hb₁ C hC₁ hC₂ c hc',
     cases hC₂,
     { exfalso, exact hC₁ hC₂, },
-    sorry,
+    { exfalso, simpa only [set.mem_singleton_iff, prod.mk.inj_iff, false_and] using hC₂, },
   end,
   all_atoms_range := begin
     intros b₁ b₂ L hb₁ C hC₁ hC₂ c hc',
     cases hC₂,
     { exfalso, exact hC₁ hC₂, },
-    sorry,
+    { exfalso, simpa only [set.mem_singleton_iff, prod.mk.inj_iff, false_and] using hC₂, },
   end,
 }
 
@@ -2025,6 +2051,8 @@ begin
   { exact ⟨_, le_near_litter_union B σ N A hN hNL ha image_not_flexible,
     ⟨_, set.mem_union_right _ rfl, rfl⟩⟩, },
   { -- Seek a contradiction (discuss this with Peter).
+    push_neg at image_not_flexible,
+    obtain ⟨L, hL₁, hL₂⟩ := image_not_flexible,
     sorry }
 end
 
