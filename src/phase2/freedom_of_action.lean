@@ -592,6 +592,9 @@ instance allowable_partial_perm.has_inv : has_inv (allowable_partial_perm B) :=
 instance : has_involutive_inv (allowable_partial_perm B) :=
 ⟨has_inv.inv, λ σ, by ext ⟨x | x, y⟩; simp [has_inv.inv]⟩
 
+lemma allowable_partial_perm.inv_def (σ : allowable_partial_perm B) :
+  σ⁻¹.val = (σ.val)⁻¹ := rfl
+
 /-! We prove the restriction lemma: if `σ` is a partial allowable permutation, then so is `σ`
 restricted to a lower path `A`. The proof should be mostly straightforward. The non-trivial bit is
 the "co-large or all" on flexible litters: in a proper restriction, `μ`-many non-flexible litters
@@ -1463,7 +1466,6 @@ lemma atom_union_support_closed_forward (hc : (sum.inr (a.fst.to_near_litter, N)
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
   (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)).domain.support_closed B :=
 begin
-  unfold unary_spec.support_closed,
   intros β δ γ hγ hδ hγδ C t ht,
   rw spec.domain_union at ht ⊢,
   rw unary_spec.lower_union,
@@ -1479,7 +1481,6 @@ lemma atom_union_support_closed_backward (hc : (sum.inr (a.fst.to_near_litter, N
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
   (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)).range.support_closed B :=
 begin
-  unfold unary_spec.support_closed,
   intros β δ γ hγ hδ hγδ C t ht,
   rw spec.range_union at ht ⊢,
   rw unary_spec.lower_union,
@@ -1803,32 +1804,76 @@ lemma near_litter_union_near_litter_cond_forward (hN : litter_set N.fst ≠ N.sn
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
   ∀ N₁ N₂ C, spec.near_litter_cond B
     (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)}) N₁ N₂ C :=
-sorry
+begin
+  rintros N₁ N₂ C (h | h),
+  { obtain ⟨M, hM₁, sd, hsd₁, hsd₂⟩ := σ.property.forward.near_litter_cond N₁ N₂ C h,
+    exact ⟨M, or.inl hM₁, sd, λ a, or.inl (hsd₁ a), hsd₂⟩, },
+  cases h,
+  obtain ⟨⟨atoms | ⟨N₃, N₄⟩, C⟩, hc₁, hc₂⟩ := hNL; cases hc₂,
+  refine ⟨N₄, or.inl hc₁, λ a, atom_value B σ A a (ha a a.property), _, _⟩,
+  { exact λ a, or.inl (atom_value_spec B σ A a (ha a a.property)), },
+  { suffices : near_litter_value B σ A N.fst.to_near_litter ⟨_, hc₁, rfl⟩ = N₄,
+    { convert rfl; rw this, },
+    have := near_litter_value_spec B σ A N.fst.to_near_litter ⟨_, hc₁, rfl⟩,
+    exact (σ.property.backward.one_to_one A).near_litter N.fst.to_near_litter this hc₁, }
+end
 
 lemma near_litter_union_near_litter_cond_backward (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
   ∀ N₁ N₂ C, spec.near_litter_cond B
     (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)})⁻¹ N₁ N₂ C :=
-sorry
+begin
+  rintros N₁ N₂ C (h | h),
+  { obtain ⟨M, hM₁, sd, hsd₁, hsd₂⟩ := σ.property.backward.near_litter_cond N₁ N₂ C h,
+    exact ⟨M, or.inl hM₁, sd, λ a, or.inl (hsd₁ a), hsd₂⟩, },
+  dsimp only [set.mem_singleton_iff] at h,
+  unfold has_inv.inv at h,
+  simp only [sum.elim_inr, prod.mk.inj_iff] at h,
+  cases h.left.left, have := h.left.right, subst this, cases h.right,
+  refine ⟨N, or.inl sorry, sorry⟩,
+end
 
 lemma near_litter_union_non_flexible_cond_forward (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
   spec.non_flexible_cond B (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)}) :=
-sorry
+begin
+  rintros β δ γ hγ hδ hγδ N₁ C t (ht | ht) ρ hρ,
+  { exact σ.property.forward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
+      (struct_perm.satisfies_union_left _ _ _ hρ), },
+  dsimp only [set.mem_singleton_iff] at ht,
+  cases ht, exfalso, exact hN rfl,
+end
 
 lemma near_litter_union_non_flexible_cond_backward (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
   spec.non_flexible_cond B (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)})⁻¹ :=
-sorry
+begin
+  rintros β δ γ hγ hδ hγδ N₁ C t (ht | ht) ρ hρ,
+  { exact σ.property.backward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
+      (struct_perm.satisfies_union_left _ _ _ hρ), },
+  unfold has_inv.inv at ht,
+  simp only [sum.elim_inr, set.mem_singleton_iff, prod.mk.inj_iff] at ht,
+  exfalso, -- This isn't true because N is never a litter.
+  sorry
+end
 
 lemma near_litter_union_support_closed_forward (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
   (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)}).domain.support_closed B :=
-sorry
+begin
+  intros β δ γ hγ hδ hγδ C t ht,
+  rw spec.domain_union at ht ⊢,
+  rw unary_spec.lower_union,
+  cases ht,
+  { exact supports_union_left (σ.property.forward.support_closed hγ hδ hγδ C t ht), },
+  simp only [spec.domain, binary_condition.domain, set.image_singleton,
+    set.mem_singleton_iff, sum.elim_inr, prod.mk.inj_iff] at ht,
+  exfalso, cases ht.left, exact hN rfl,
+end
 
 lemma near_litter_union_support_closed_backward (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
@@ -1864,9 +1909,13 @@ lemma near_litter_union_allowable (hN : litter_set N.fst ≠ N.snd)
   flexible_cond := near_litter_union_flexible_cond B σ N A hN hNL ha,
 }
 
+/-- We take the additional hypothesis that the near-litter that we're mapping do does not happen
+to be a flexible litter. This will always be true, but it is convenient to assume at this point. -/
 lemma le_near_litter_union (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain)
+  (image_not_flexible :
+    ∀ L, litter_set L = (near_litter_image B σ N A hN hNL ha).snd.val → ¬ flexible L A) :
   σ ≤ ⟨σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)},
     near_litter_union_allowable B σ N A hN hNL ha⟩ := {
   subset := set.subset_union_left _ _,
@@ -1881,16 +1930,15 @@ lemma le_near_litter_union (hN : litter_set N.fst ≠ N.snd)
     cases set.mem_or_mem_of_mem_union hσ₂,
     { exfalso, exact hσ₁ h, },
     { exfalso,
-      rw set.mem_singleton_iff at h, have the_congr := congr_arg prod.fst h,
+      rw set.mem_singleton_iff at h,
+      have : C = A,
+      { cases congr_arg prod.snd h, refl },
+      subst this,
+      have the_congr := congr_arg prod.fst h,
       have := congr_arg prod.snd (sum.inr.inj the_congr),
-      unfold near_litter_image at this,
-      unfold litter.to_near_litter at this,
-      rw sigma.ext_iff at this,
-      obtain ⟨hL₁, hL₂⟩ := this,
-      dsimp only at hL₁, subst hL₁,
-      simp only [subtype.val_eq_coe, heq_iff_eq] at hL₂,
-      -- TODO(zeramorphic): I'm not sure this is even provable.
-      sorry },
+      refine image_not_flexible L _ hN',
+      dsimp only at this, rw ← this,
+      refl, },
   end,
   all_atoms_domain := begin
     intros b₁ b₂ L hb₁ C hC₁ hC₂ c hc',
@@ -1906,22 +1954,28 @@ lemma le_near_litter_union (hN : litter_set N.fst ≠ N.snd)
   end,
 }
 
-/-- If everything that constrains a near litter lies in `σ`, we can add the atom to `σ`, giving a
-new allowable partial permutation `ρ ≥ σ`. -/
+/-- If everything that constrains a near litter lies in `σ`, we can add the near litter to `σ`,
+giving a new allowable partial permutation `ρ ≥ σ`. -/
 lemma exists_ge_near_litter (hN : litter_set N.fst ≠ N.snd)
   (hσ : ∀ c, c ≺ (⟨sum.inr N, A⟩ : support_condition B) → c ∈ σ.val.domain) :
   ∃ ρ ≥ σ, (⟨sum.inr N, A⟩ : support_condition B) ∈ ρ.val.domain :=
 begin
   have hNL := hσ (sum.inr N.fst.to_near_litter, A) (constrains.near_litter N hN A),
   have ha := λ a ha, hσ (sum.inl a, A) (constrains.symm_diff N a ha A),
-  exact ⟨_, le_near_litter_union B σ N A hN hNL ha, ⟨_, set.mem_union_right _ rfl, rfl⟩⟩,
+  by_cases image_not_flexible :
+    ∀ L, litter_set L = (near_litter_image B σ N A hN hNL ha).snd.val → ¬ flexible L A,
+  { exact ⟨_, le_near_litter_union B σ N A hN hNL ha image_not_flexible,
+    ⟨_, set.mem_union_right _ rfl, rfl⟩⟩, },
+  { -- Seek a contradiction (discuss this with Peter).
+    sorry }
 end
 
 end exists_ge_near_litter
 
+/-- Nothing constrains a flexible litter, so we don't have any hypothesis about the fact that all
+things that constrain it lie in `σ` already. -/
 lemma exists_ge_flexible (σ : allowable_partial_perm B) (L : litter) (A : extended_index B)
-  (hL : flexible L A)
-  (hσ : ∀ c, c ≺ (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) → c ∈ σ.val.domain) :
+  (hL : flexible L A) :
   ∃ ρ ≥ σ, (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain :=
 sorry
 
@@ -1951,7 +2005,7 @@ lemma total_of_maximal_aux (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ,
       dsimp only at hnl, rw subtype.coe_mk at hnl, subst hnl,
       by_cases flexible L A,
       { -- This litter is flexible.
-        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_flexible B σ L A h hind,
+        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_flexible B σ L A h,
         rw hσ ρ hρ₁ at hρ₂,
         exact hρ₂, },
       { -- This litter is non-flexible.
