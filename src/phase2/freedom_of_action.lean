@@ -1778,6 +1778,29 @@ private noncomputable def near_litter_image (hN : litter_set N.fst ≠ N.snd)
             (lt_of_le_of_lt mk_range_le N.snd.property))),
     end⟩
 
+lemma near_litter_image_spec (hNin : (sum.inr N, A) ∈ σ.val.domain)
+  (hN : litter_set N.fst ≠ N.snd)
+  (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) : (sum.inr (N, near_litter_image B σ N A hN hNL ha), A) ∈ σ.val :=
+begin
+  unfold near_litter_image,
+  obtain ⟨⟨_ | ⟨N, N'⟩, C⟩, hN', heq⟩ := hNin, { cases heq },
+  simp only [binary_condition.domain, sum.elim_inr, prod.mk.inj_iff] at heq,
+  obtain ⟨h1, h2⟩ := heq, subst h1, subst h2,
+  obtain ⟨⟨_ | ⟨L, M⟩, A⟩, hL, heq⟩ := hNL, { cases heq },
+  simp only [binary_condition.domain, sum.elim_inr, prod.mk.inj_iff] at heq,
+  obtain ⟨h1, h2⟩ := heq, subst h1, subst h2,
+  obtain ⟨M', hM, symm, hsy, hsd⟩ := σ.prop.forward.near_litter_cond N N' A hN',
+  have := (σ.prop.backward.one_to_one A).near_litter _ hL hM,
+  subst this,
+  have : ∀ a : {a // a ∈ litter_set N.fst ∆ (N.snd : set atom)}, symm a = atom_value B σ A a.val ⟨_, hsy a, rfl⟩ := λ b, (σ.prop.backward.one_to_one A).atom _ (hsy b) (atom_value_spec B σ A b ⟨_, hsy b, rfl⟩),
+  have that := congr_arg set.range (funext this),
+  -- set f := λ (a : {a // a ∈ litter_set N.fst ∆ ↑(N.snd)}), atom_value B σ A ↑a ⟨_, hsy a, rfl⟩,
+  simp_rw ← subtype.val_eq_coe,
+  -- rw ← that,
+  sorry -- rw just doesn't right now
+end
+
 lemma near_litter_union_one_to_one_forward (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
@@ -1816,10 +1839,11 @@ begin
   { simp only [set.mem_set_of_eq, subtype.val_eq_coe, set.union_singleton,
                set.mem_insert_iff, prod.mk.inj_iff] at hP hQ,
     obtain ⟨⟨h1, h2⟩, h3⟩ | hP := hP; obtain ⟨⟨h1', h2'⟩, h3'⟩ | hQ := hQ,
-    { simp at hP hQ },
-    { simp [has_inv.inv, near_litter_image] at hP ⊢,
-      sorry },
-    { sorry },
+    { simp at hP },
+    { exact (σ.prop.backward.one_to_one A).near_litter N
+        (near_litter_image_spec B σ N A ⟨_, hQ, rfl⟩ hN hNL ha) hQ },
+    { exact (σ.prop.backward.one_to_one A).near_litter N hP
+        (near_litter_image_spec B σ N A ⟨_, hP, rfl⟩ hN hNL ha) },
     { exact (σ.prop.backward.one_to_one C).near_litter M hP hQ } }
 end
 
