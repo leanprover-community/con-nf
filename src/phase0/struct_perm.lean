@@ -123,6 +123,17 @@ noncomputable def derivative : Π {β}, path α β → struct_perm α →* struc
 | _ path.nil := monoid_hom.id _
 | γ (path.cons p_αγ hβγ) := (lower $ le_of_lt hβγ).comp $ derivative p_αγ
 
+noncomputable def derivative_fun : Π {β}, path α β → struct_perm α → struct_perm β
+| _ path.nil :=id
+| γ (path.cons p_αγ hβγ) := (lower $ le_of_lt hβγ) ∘ derivative_fun p_αγ
+
+lemma derivative_to_fun {α: type_index}:∀ (β : type_index) (p : path α β),
+(derivative p).to_fun = derivative_fun p
+| _ path.nil := rfl
+| γ (path.cons p_αγ hβγ) := begin dsimp only [(derivative_fun), (derivative)],
+simp only [monoid_hom.to_fun_eq_coe], rw monoid_hom.coe_comp, congr,
+dsimp only [(coe_fn), (has_coe_to_fun.coe)], rw derivative_to_fun, end
+
 /-- The derivative along the empty path does nothing. -/
 lemma derivative_nil (π : struct_perm α) :
   derivative path.nil π = π :=
@@ -179,6 +190,77 @@ instance mul_action_pretangle : Π (α : Λ), mul_action (struct_perm α) (preta
   end
 }
 using_well_founded { dec_tac := `[assumption] }
+
+
+lemma struct_perm_def_bot : struct_perm ⊥ = near_litter_perm :=
+by unfold struct_perm
+
+lemma struct_perm_def_coe (α : Λ) : struct_perm ↑ α = Π β : type_index, β < α → struct_perm β :=
+by unfold struct_perm
+
+
+inductive conv_trick : Π {α1 : Type u}, α1 →α1 → Prop
+| eq : ∀ {α0 : Type u} (a0 b0 : α0), (α0 = struct_perm α
+∧ ∃ (a b: struct_perm α), a == a0 ∧ b== b0 ∧ (∀ (β : type_index)  (h2 : β < α), (derivative (path.cons path.nil h2)) a = (derivative (path.cons path.nil h2)) b )) →
+conv_trick a0 b0
+
+lemma eq_cast : ∀ (α : Λ)  (s1 : struct_perm α)  (β : type_index) (h : β < α ), derivative (path.cons path.nil h) s1 = ((cast  (struct_perm_def_coe α) s1) β h) |  α s1 β hβ := begin
+dsimp only [(coe_fn), (has_coe_to_fun.coe)],
+simp_rw derivative_to_fun,
+unfold derivative_fun,
+simp only [function.comp.right_id],
+unfold lower,
+dsimp only [(coe_fn), (has_coe_to_fun.coe)],
+apply eq.trans,
+apply congr, apply congr,
+refl,
+rw dite_eq_iff,
+rw or_iff_right,
+apply exists.intro,
+refl,
+exact (ne_of_lt hβ),
+by_contra,
+exact (ne_of_lt hβ) h.some,
+refl,
+dsimp only [(to_fun)],
+refl,
+end
+
+lemma struct_perm.ext : ∀ (α : Λ) (s1 s2 : struct_perm α) (h : ∀ (β : type_index) (h2 : β < α), derivative (path.cons path.nil h2) s1 = derivative (path.cons path.nil h2) s2), s1 = s2
+ :=begin
+ intros α s1 s2 h,
+have : conv_trick s1 s2,
+{
+  split,
+  simp only [exists_and_distrib_left, and_self_left],
+  split, refl,
+  use s1,
+  split, refl,
+  use s2,
+  split, refl,
+  exact h,
+},
+clear h,
+revert s1 s2,
+rw (struct_perm_def_coe α),
+intros s1 s2 h,
+cases h,
+funext,
+let h := h_ᾰ.right.some_spec.some_spec.right.right x x_1,
+rw eq_cast at h,
+rw eq_cast at h,
+have : ∀ (s: struct_perm α) (t: Π (β : type_index), β < ↑α → struct_perm β), s == t → cast (struct_perm_def_coe α) s = t,
+{
+  intros s t h,
+  rw ← heq_iff_eq,
+  apply heq.trans,
+  apply cast_heq,
+  exact h,
+},
+rw (this h_ᾰ.right.some) s1 h_ᾰ.right.some_spec.some_spec.left at h,
+rw (this h_ᾰ.right.some_spec.some) s2 h_ᾰ.right.some_spec.some_spec.right.left at h,
+exact h,
+end
 
 end struct_perm
 
