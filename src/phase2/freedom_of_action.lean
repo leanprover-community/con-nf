@@ -635,12 +635,21 @@ lemma flexible_descends (he : extended_index (⟨β, B.path.comp A⟩ : le_index
 flexible L he → flexible L (A.comp he) :=
 begin
   intro hf,
-  have hs := unconstrained_of_flexible L he hf,
-  unfold flexible,
+  --have hs := unconstrained_of_flexible L he hf,
+  unfold flexible at hf ⊢,
   simp,
   intros hb hd hg hgb hdb hdg hp htp heq,
+  convert hf hgb hdb,
+  simp,
+  split,
+  { exact hdg, },
+  {
+    sorry, },
+  --rw heq at hf,
+  --unfold flexible at hf,
+  --simp at hf,
 
-  sorry,
+
 end
 
 /-- Descending down a proper path `A`, `μ`-many litters become flexible. -/
@@ -1779,13 +1788,46 @@ lemma near_litter_union_one_to_one_forward (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
   spec.one_to_one_forward B (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)}) :=
-sorry
+begin
+  refine λ C, ⟨λ a b hb c hc, _, λ M P hP Q hQ, _⟩,
+  { simp only [set.mem_set_of_eq, subtype.val_eq_coe, set.union_singleton, set.mem_insert_iff,
+               prod.mk.inj_iff, false_and, false_or] at hb hc,
+    exact (σ.prop.forward.one_to_one C).atom a hb hc },
+  { simp only [set.mem_set_of_eq, subtype.val_eq_coe, set.union_singleton,
+               set.mem_insert_iff, prod.mk.inj_iff] at hP hQ,
+    obtain ⟨⟨h1, h2⟩, h3⟩ | hP := hP; obtain ⟨⟨h1', h2'⟩, h3'⟩ | hQ := hQ,
+    { exact h1.trans h1'.symm },
+    { subst h1, subst h2, subst h3,
+      -- have := (σ.prop.backward.one_to_one C).near_litter _ hQ (near_litter_value_spec B σ C Q ⟨_, hQ, rfl⟩),
+      -- simp at this,
+      obtain ⟨M, hM⟩ := σ.prop.forward.near_litter_cond _ _ C hQ,
+      simp [near_litter_image] at hM,
+
+      sorry },
+    { sorry },
+    { exact (σ.prop.forward.one_to_one C).near_litter M hP hQ } }
+end
 
 lemma near_litter_union_one_to_one_backward (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
   spec.one_to_one_forward B (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)})⁻¹ :=
-sorry
+begin
+  refine λ C, ⟨λ a b hb c hc, _, λ M P hP Q hQ, _⟩,
+  { simp only [set.mem_set_of_eq, subtype.val_eq_coe, set.union_singleton, set.mem_insert_iff,
+               prod.mk.inj_iff, false_and, false_or, set.mem_inv] at hb hc,
+    cases hb, cases hb,
+    cases hc, cases hc,
+    exact (σ.prop.backward.one_to_one C).atom a hb hc },
+  { simp only [set.mem_set_of_eq, subtype.val_eq_coe, set.union_singleton,
+               set.mem_insert_iff, prod.mk.inj_iff] at hP hQ,
+    obtain ⟨⟨h1, h2⟩, h3⟩ | hP := hP; obtain ⟨⟨h1', h2'⟩, h3'⟩ | hQ := hQ,
+    { simp at hP hQ },
+    { simp [has_inv.inv, near_litter_image] at hP ⊢,
+      sorry },
+    { sorry },
+    { exact (σ.prop.backward.one_to_one C).near_litter M hP hQ } }
+end
 
 lemma near_litter_union_atom_cond_forward (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
