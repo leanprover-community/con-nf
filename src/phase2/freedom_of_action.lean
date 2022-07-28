@@ -350,8 +350,6 @@ in the "freedom of action discussion".
 4. `⟨y, B : (γ < β) : A⟩ ≺ ⟨L, A⟩` for all paths `A : α ⟶ β` and `γ, δ < β` with `γ ≠ δ`,
     and `L = f_{γ,δ}^A(x)` for some `x ∈ τ_{γ:A}`, where `⟨y, B⟩` lies in the designated support
     `S_x` of `x`.
-    Note that for this to type check, we must constrain `γ : Λ` not `γ : type_index` - this point
-    may need revisiting later.
 -/
 @[mk_iff] inductive constrains : support_condition B → support_condition B → Prop
 | mem_litter (L : litter) (a ∈ litter_set L) (A : extended_index B) :
@@ -360,15 +358,14 @@ in the "freedom of action discussion".
     constrains ⟨sum.inr N.fst.to_near_litter, A⟩ ⟨sum.inr N, A⟩
 | symm_diff (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd) (A : extended_index B) :
     constrains ⟨sum.inl a, A⟩ ⟨sum.inr N, A⟩
-| f_map {β δ : Λ} {γ : type_index} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+| f_map ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
     (A : path (B : type_index) β)
     (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α))
     (c ∈ (designated_support_path t).carrier) :
     constrains
       ⟨c.fst, path.comp (path.cons A hγ) c.snd⟩
-      ⟨sum.inr (f_map_path
-        (proper_lt_index.mk' hδ (path.comp B.path A)) t)
-        .to_near_litter, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩
+      ⟨sum.inr (f_map_path hγ hδ t).to_near_litter,
+        path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩
 
 /-! We declare new notation for the "constrains" relation on support conditions. -/
 infix ` ≺ `:50 := constrains _ _
@@ -384,11 +381,10 @@ variables {α} {B}
 
 /-- A litter and extended index is *flexible* if it is not of the form `f_{γ,δ}^A(x)` for some
 `x ∈ τ_{γ:A}` with conditions defined as above. Hence, it is not constrained by anything. -/
-def flexible (L : litter) (A : extended_index B) : Prop := ∀ ⦃β δ : Λ⦄ ⦃γ : type_index⦄
-  (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
-  (A : path (B : type_index) β)
+def flexible (L : litter) (A : extended_index B) : Prop := ∀ ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄
+  (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (A : path (B : type_index) β)
   (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α)),
-L ≠ (f_map_path (proper_lt_index.mk' hδ (path.comp B.path A)) t)
+L ≠ (f_map_path hγ hδ t)
 
 /-- A litter and extended index is flexible only if it is not constrained by anything. -/
 lemma unconstrained_of_flexible (L : litter) (A : extended_index B) (h : flexible L A) :
@@ -429,12 +425,11 @@ struct_perm.mul_action
 /-- A unary specification is *support-closed* if whenever `⟨f_{γ,δ}^A(x), A⟩ ∈ σ`, `S_{γ:A}`
 supports `x`. -/
 def support_closed (σ : unary_spec B) : Prop :=
-∀ ⦃β δ : Λ⦄ ⦃γ : type_index⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
-  (A : path (B : type_index) β)
-  (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α)),
-  (⟨sum.inr (f_map_path (proper_lt_index.mk'
-      (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil) t)
-    .to_near_litter, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩
+∀ ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+    (A : path (B : type_index) β)
+    (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α)),
+  (⟨sum.inr (f_map_path hγ hδ t).to_near_litter,
+    path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩
       : support_condition B) ∈ σ →
       supports (allowable_path_to_struct_perm (lt_index.mk' hγ (path.comp B.path A) : le_index α))
         (σ.lower (path.cons A hγ)) t
@@ -531,15 +526,13 @@ core_tangle_data.allowable_action
 Whenever `σ` contains some condition `⟨⟨f_{γ,δ}^A(g), N⟩, [-1,δ,A]⟩`, then every allowable
 permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`. -/
 def non_flexible_cond (σ : spec B) : Prop :=
-∀ ⦃β δ : Λ⦄ ⦃γ : type_index⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (N : near_litter)
+∀ ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (N : near_litter)
   (A : path (B : type_index) β)
   (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α)),
-  (⟨sum.inr ⟨(f_map_path (proper_lt_index.mk'
-      (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil) t).to_near_litter,
+  (⟨sum.inr ⟨(f_map_path hγ hδ t).to_near_litter,
     N⟩, path.cons (path.cons A (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩ : binary_condition B) ∈ σ →
   ∀ (ρ : allowable_path B), (allowable_path_to_struct_perm _ ρ).satisfies σ →
-  N = (f_map_path (proper_lt_index.mk'
-          (hδ.trans_le (coe_le_coe.mp $ le_of_path (path.comp B.path A))) path.nil)
+  N = (f_map_path hγ hδ
         ((allowable_derivative_path ⟨β, _⟩ hγ (allowable_derivative_path_comp B A ρ)) • t)
       ).to_near_litter
 
@@ -2045,11 +2038,10 @@ lemma exists_ge_flexible (σ : allowable_partial_perm B) (L : litter) (A : exten
 sorry
 
 lemma exists_ge_non_flexible (σ : allowable_partial_perm B) (L : litter) (A : extended_index B)
-  (β δ : Λ) (γ : type_index)
-    (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
-    (C : path (B : type_index) β)
-    (t : tangle_path ((lt_index.mk' hγ (path.comp B.path C)) : le_index α))
-  (hL : L = (f_map_path (proper_lt_index.mk' hδ (path.comp B.path C)) t))
+  ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  (C : path (B : type_index) β)
+  (t : tangle_path ((lt_index.mk' hγ (path.comp B.path C)) : le_index α))
+  (hL : L = (f_map_path hγ hδ t))
   (hσ : ∀ c, c ≺ (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) → c ∈ σ.val.domain) :
   ∃ ρ ≥ σ, (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain :=
 sorry
@@ -2077,7 +2069,7 @@ lemma total_of_maximal_aux (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ,
         unfold flexible at h,
         push_neg at h,
         obtain ⟨β, δ, γ, hγ, hδ, hγδ, C, t, hL⟩ := h,
-        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flexible B σ L A β δ γ hγ hδ hγδ C t hL hind,
+        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flexible B σ L A hγ hδ hγδ C t hL hind,
         rw hσ ρ hρ₁ at hρ₂,
         exact hρ₂, }, },
     { -- This is a near-litter.

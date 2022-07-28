@@ -386,13 +386,17 @@ core_tangle_data.allowable_action
 def allowable_path_to_struct_perm (A : le_index α) : allowable_path A →* struct_perm A.index :=
 allowable_to_struct_perm
 
-def f_map_path {A : lt_index α} (B : proper_lt_index α) : tangle_path (A : le_index α) → litter :=
-f_map B.index
+def f_map_path {A : Λ} {A_path : path (α : type_index) A} ⦃γ : type_index⦄ ⦃δ : Λ⦄
+  (hγ : γ < A) (hδ : δ < A) : tangle_path (lt_index.mk' hγ A_path : le_index α) → litter :=
+f_map (proper_lt_index.mk' hδ A_path).index
 
-lemma f_map_path_position_raising {A : lt_index α} (B : proper_lt_index α)
-  (t : tangle_path (A : le_index α)) (N : set atom) (hN : is_near_litter (f_map_path B t) N) :
-  position t < position (to_tangle_path B ⟨f_map_path B t, N, hN⟩) :=
-f_map_position_raising B.index t N hN
+lemma f_map_path_position_raising {A : Λ} {A_path : path (α : type_index) A}
+  ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < A) (hδ : δ < A)
+  (t : tangle_path (lt_index.mk' hγ A_path : le_index α))
+  (N : set atom) (hN : is_near_litter (f_map_path hγ hδ t) N) :
+  position t <
+    position (to_tangle_path (proper_lt_index.mk' hδ A_path) ⟨f_map_path hγ hδ t, N, hN⟩) :=
+f_map_position_raising (proper_lt_index.mk' hδ A_path).index t N hN
 
 def typed_singleton_path (A : proper_lt_index α) : atom ↪ tangle_path (A : le_index α) :=
 typed_singleton
