@@ -382,9 +382,9 @@ variables {α} {B}
 /-- A litter and extended index is *flexible* if it is not of the form `f_{γ,δ}^A(x)` for some
 `x ∈ τ_{γ:A}` with conditions defined as above. Hence, it is not constrained by anything. -/
 def flexible (L : litter) (A : extended_index B) : Prop := ∀ ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄
-  (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (A : path (B : type_index) β)
-  (t : tangle_path ((lt_index.mk' hγ (path.comp B.path A)) : le_index α)),
-L ≠ (f_map_path hγ hδ t)
+  (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (C : path (B : type_index) β)
+  (t : tangle_path ((lt_index.mk' hγ (path.comp B.path C)) : le_index α)),
+L ≠ (f_map_path hγ hδ t) ∨ A ≠ path.cons (path.cons C $ coe_lt_coe.mpr hδ) (bot_lt_coe _)
 
 /-- A litter and extended index is flexible only if it is not constrained by anything. -/
 lemma unconstrained_of_flexible (L : litter) (A : extended_index B) (h : flexible L A) :
@@ -410,7 +410,9 @@ begin
   specialize h hγ hδ hγδ _ t,
   obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 h',
   simp only at hLN,
-  exact h (congr_arg sigma.fst hLN)
+  cases h,
+  { exact h (congr_arg sigma.fst hLN), },
+  { exact h hAA', }
 end
 
 namespace unary_spec
@@ -631,11 +633,11 @@ begin
   --have hs := unconstrained_of_flexible L he hf,
   unfold flexible at hf ⊢,
   simp,
-  intros hb hd hg hgb hdb hdg hp htp heq,
+  /- intros hb hd hg hgb hdb hdg hp htp heq,
   rw heq at hf,
   simp at hf,
   have h' := hf hgb hdb hdg,
-  --LEMMA IS FALSE?
+  --LEMMA IS FALSE? -/
   sorry,
 end
 
@@ -1995,7 +1997,8 @@ begin
         { exact hC₂ h, },
         { simp only [spec.range, set.image_singleton, set.mem_singleton_iff,
             binary_condition.range, sum.elim_inr, prod.mk.inj_iff] at h,
-          obtain ⟨h₁, h₂⟩ := h, refine image_not_flexible L.1 _ hC₁, rw ← h₁, refl, } } } },
+          obtain ⟨h₁, h₂⟩ := h, cases h₂,
+          refine image_not_flexible L.1 _ hC₁, rw ← h₁, refl, } } } },
   { refine spec.flexible_cond.all _ _,
     { intros L C hL, rw spec.domain_union, exact or.inl (hdom L C hL), },
     { intros L C hL, rw spec.range_union, exact or.inl (hrge L C hL), }, }
@@ -2328,14 +2331,79 @@ end
 
 end exists_ge_flexible
 
-lemma exists_ge_non_flexible (σ : allowable_partial_perm B) (L : litter) (A : extended_index B)
-  ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+section exists_ge_non_flexible
+
+variables {B} {σ : allowable_partial_perm B}
+  ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄
+
+/-- Since the designated support of `t` is included in `σ`, any allowable permutation `π'` that
+satisfies `σ` at the lower level gives the same result for the image of `f_map_path hγ hδ t`.
+This means that although `π` was chosen arbitrarily, its value is not important, and we could have
+chosen any other permutation and arrived at the same value for the image of `f_map_path hγ hδ t`.
+
+Don't prove this unless we need it - it sounds like an important mathematical point but potentially
+not for the formalisation itself. -/
+lemma non_flexible_union_unique (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  (C : path (B : type_index) β)
+  (t : tangle_path ((lt_index.mk' hγ (B.path.comp C)) : le_index α))
+  (π : allowable_path (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C) : le_index α))
+  (hπ : (allowable_path_to_struct_perm _ π).satisfies $ σ.val.lower (C.cons $ coe_lt_coe.mpr hδ)) :
+  ∀ (π' : allowable_path (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C) : le_index α))
+    (hπ' : (allowable_path_to_struct_perm _ π').satisfies $
+      σ.val.lower (C.cons $ coe_lt_coe.mpr hδ)),
+    struct_perm.derivative (path.cons path.nil $ bot_lt_coe _)
+      (allowable_path_to_struct_perm _ π) • (f_map_path hγ hδ t).to_near_litter =
+    struct_perm.derivative (path.cons path.nil $ bot_lt_coe _)
+      (allowable_path_to_struct_perm _ π') • (f_map_path hγ hδ t).to_near_litter :=
+sorry
+
+lemma non_flexible_union_allowable (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  (C : path (B : type_index) β)
+  (t : tangle_path ((lt_index.mk' hγ (B.path.comp C)) : le_index α))
+  (π : allowable_path (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C) : le_index α))
+  (hπ : (allowable_path_to_struct_perm _ π).satisfies $ σ.val.lower (C.cons $ coe_lt_coe.mpr hδ)) :
+  spec.allowable_spec B
+    (σ.val ∪ {(sum.inr ((f_map_path hγ hδ t).to_near_litter,
+      struct_perm.derivative (path.cons path.nil $ bot_lt_coe _)
+        (allowable_path_to_struct_perm _ π) • (f_map_path hγ hδ t).to_near_litter),
+      (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _))}) :=
+sorry
+
+lemma le_non_flexible_union (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  (C : path (B : type_index) β)
+  (t : tangle_path ((lt_index.mk' hγ (B.path.comp C)) : le_index α))
+  (π : allowable_path (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C) : le_index α))
+  (hπ : (allowable_path_to_struct_perm _ π).satisfies $ σ.val.lower (C.cons $ coe_lt_coe.mpr hδ)) :
+  σ ≤ ⟨_, non_flexible_union_allowable hγ hδ hγδ C t π hπ⟩ :=
+sorry
+
+lemma exists_ge_non_flexible (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
   (C : path (B : type_index) β)
   (t : tangle_path ((lt_index.mk' hγ (path.comp B.path C)) : le_index α))
-  (hL : L = (f_map_path hγ hδ t))
-  (hσ : ∀ c, c ≺ (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) → c ∈ σ.val.domain) :
-  ∃ ρ ≥ σ, (⟨sum.inr L.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain :=
-sorry
+  (hσ : ∀ c, c ≺ (sum.inr (f_map_path hγ hδ t).to_near_litter,
+    (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _)) →
+    c ∈ σ.val.domain)
+  (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
+  ∃ ρ ≥ σ, (sum.inr (f_map_path hγ hδ t).to_near_litter,
+    (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _)) ∈
+    ρ.val.domain :=
+begin
+  have hS : ∀ (c : support_condition γ), c ∈ (designated_support_path t).carrier →
+    (c.fst, (C.cons hγ).comp c.snd) ∈ σ.val.domain :=
+  λ (c : support_condition γ) (hc : c ∈ (designated_support_path t).carrier),
+    hσ ⟨c.fst, path.comp (path.cons C hγ) c.snd⟩ (constrains.f_map hγ hδ hγδ C t c hc),
+  have := lower_allowable B σ.val σ.property (C.cons $ coe_lt_coe.mpr hδ)
+    ((coe_lt_coe.mpr hδ).trans_le (le_of_path C)),
+  obtain ⟨π, hπ⟩ := foa (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C))
+    ⟨σ.val.lower (C.cons $ coe_lt_coe.mpr hδ), this⟩,
+  have := struct_perm.derivative (path.cons path.nil $ bot_lt_coe _)
+    (allowable_path_to_struct_perm _ π) • (f_map_path hγ hδ t).to_near_litter,
+  refine ⟨_, le_non_flexible_union hγ hδ hγδ C t π hπ, _⟩,
+  rw spec.domain_union,
+  right, simp only [spec.domain, set.image_singleton, set.mem_singleton_iff], refl,
+end
+
+end exists_ge_non_flexible
 
 lemma total_of_maximal_aux (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
@@ -2359,8 +2427,10 @@ lemma total_of_maximal_aux (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ,
       { -- This litter is non-flexible.
         unfold flexible at h,
         push_neg at h,
-        obtain ⟨β, δ, γ, hγ, hδ, hγδ, C, t, hL⟩ := h,
-        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flexible B σ L A hγ hδ hγδ C t hL hind,
+        obtain ⟨β, δ, γ, hγ, hδ, hγδ, C, t, hL, hA⟩ := h,
+        cases hA,
+        cases hL,
+        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flexible hγ hδ hγδ C t hind foa,
         rw hσ ρ hρ₁ at hρ₂,
         exact hρ₂, }, },
     { -- This is a near-litter.
