@@ -1777,26 +1777,42 @@ lemma near_litter_image_spec (hNin : (sum.inr N, A) ∈ σ.val.domain)
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) : (sum.inr (N, near_litter_image B σ N A hN hNL ha), A) ∈ σ.val :=
 begin
   unfold near_litter_image,
-  obtain ⟨⟨_ | ⟨N, N'⟩, C⟩, hN', heq⟩ := hNin, { cases heq },
+  obtain ⟨⟨_ | ⟨N, N'⟩, C⟩, hNN', heq⟩ := hNin, { cases heq },
   simp only [binary_condition.domain, sum.elim_inr, prod.mk.inj_iff] at heq,
   obtain ⟨h1, h2⟩ := heq, subst h1, subst h2,
   obtain ⟨⟨_ | ⟨L, M⟩, A⟩, hL, heq⟩ := hNL, { cases heq },
   simp only [binary_condition.domain, sum.elim_inr, prod.mk.inj_iff] at heq,
   obtain ⟨h1, h2⟩ := heq, subst h1, subst h2,
-  obtain ⟨M', hM, symm, hsy, hsd⟩ := σ.prop.forward.near_litter_cond N N' A hN',
+  obtain ⟨M', hM, symm, hsy, hsd⟩ := σ.prop.forward.near_litter_cond N N' A hNN',
   have := (σ.prop.backward.one_to_one A).near_litter _ hL hM,
   subst this,
-  have : ∀ a : {a // a ∈ litter_set N.fst ∆ (N.snd : set atom)}, symm a = atom_value B σ A a ⟨_, hsy a, rfl⟩ := λ b, (σ.prop.backward.one_to_one A).atom _ (hsy b) (atom_value_spec B σ A b ⟨_, hsy b, rfl⟩),
-  have that := congr_arg set.range (funext this),
-  convert hN', clear hN',
+  have : ∀ a, symm a = atom_value B σ A a ⟨_, hsy a, rfl⟩
+    := λ b, (σ.prop.backward.one_to_one A).atom _ (hsy b) (atom_value_spec B σ A b ⟨_, hsy b, rfl⟩),
+  have that := congr_arg set.range (funext this).symm,
+  convert hNN',
   obtain ⟨N', atoms, hN'⟩ := N',
   dsimp only at hsd, subst hsd,
+  have key : near_litter_value B σ A N.fst.to_near_litter ⟨_, hL, rfl⟩ = M :=
+    (σ.prop.backward.one_to_one A).near_litter _
+      (near_litter_value_spec B σ A N.fst.to_near_litter ⟨_, hL, rfl⟩) hL,
   have : (near_litter_value B σ A N.fst.to_near_litter ⟨_, hL, heq⟩).fst = N',
-  { sorry },
+  { rw key,
+    refine is_near_litter.unique M.2.2 _,
+    unfold is_near_litter is_near small at hN' ⊢,
+    rw ← symm_diff_assoc at hN',
+    have : ∀ (S T : set atom), # (S ∆ T : set atom) ≤ # (S ∪ T : set atom),
+    { unfold symm_diff,
+      intros S T,
+      refine cardinal.mk_le_mk_of_subset _,
+      simp only [set.sup_eq_union, set.union_subset_iff],
+      exact ⟨λ x hx, or.inl hx.1, λ x hx, or.inr hx.1⟩, },
+    specialize this (litter_set N' ∆ M.snd.val ∆ set.range symm) (set.range symm),
+    rw [symm_diff_assoc, symm_diff_self, symm_diff_bot] at this,
+    exact lt_of_le_of_lt
+      (this.trans (cardinal.mk_union_le _ _))
+      (cardinal.add_lt_of_lt κ_regular.aleph_0_le hN' $ lt_of_le_of_lt cardinal.mk_range_le N.2.2) },
   subst this,
-  rw sigma.mk.inj_iff, split, refl, refine heq_of_eq _,
-  rw subtype.mk_eq_mk, refine congr_arg2 _ _ that.symm,
-  sorry
+  exact sigma.mk.inj_iff.2 ⟨rfl, heq_of_eq $ subtype.mk_eq_mk.2 $ congr_arg2 _ (by rw key) that⟩
 end
 
 lemma near_litter_union_one_to_one_forward (hN : litter_set N.fst ≠ N.snd)
