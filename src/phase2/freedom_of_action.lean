@@ -2511,28 +2511,128 @@ lemma non_flexible_union_unique (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ 
       (allowable_path_to_struct_perm _ π') • (f_map_path hγ hδ t).to_near_litter :=
 sorry
 
-lemma non_flexible_union_allowable (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
-  (C : path (B : type_index) β)
+private noncomputable def new_non_flexible_constraint (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  {C : path (B : type_index) β}
   (t : tangle_path ((lt_index.mk' hγ (B.path.comp C)) : le_index α))
-  (π : allowable_path (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C) : le_index α))
+  {π : allowable_path (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C) : le_index α)}
   (hπ : (allowable_path_to_struct_perm _ π).satisfies $ σ.val.lower (C.cons $ coe_lt_coe.mpr hδ)) :
-  spec.allowable_spec B
-    (σ.val ∪ {(sum.inr ((f_map_path hγ hδ t).to_near_litter,
+    binary_condition B :=
+  (sum.inr ((f_map_path hγ hδ t).to_near_litter,
       struct_perm.derivative (path.cons path.nil $ bot_lt_coe _)
         (allowable_path_to_struct_perm _ π) • (f_map_path hγ hδ t).to_near_litter),
-      (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _))}) :=
+      (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _))
+
+variables (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  {C : path (B : type_index) β}
+  (t : tangle_path ((lt_index.mk' hγ (B.path.comp C)) : le_index α))
+  {π : allowable_path (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C) : le_index α)}
+  (hπ : (allowable_path_to_struct_perm _ π).satisfies $ σ.val.lower (C.cons $ coe_lt_coe.mpr hδ))
+
+lemma non_flexible_union_one_to_one_forward :
+  spec.one_to_one_forward B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
 sorry
 
-lemma le_non_flexible_union (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
-  (C : path (B : type_index) β)
-  (t : tangle_path ((lt_index.mk' hγ (B.path.comp C)) : le_index α))
-  (π : allowable_path (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C) : le_index α))
-  (hπ : (allowable_path_to_struct_perm _ π).satisfies $ σ.val.lower (C.cons $ coe_lt_coe.mpr hδ)) :
-  σ ≤ ⟨_, non_flexible_union_allowable hγ hδ hγδ C t π hπ⟩ :=
+lemma non_flexible_union_one_to_one_backward :
+  spec.one_to_one_forward B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ :=
 sorry
+
+lemma non_flexible_union_atom_cond_forward :
+  ∀ L C, spec.atom_cond B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) L C :=
+sorry
+
+lemma non_flexible_union_atom_cond_backward :
+  ∀ L C, spec.atom_cond B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ L C :=
+sorry
+
+lemma non_flexible_union_near_litter_cond_forward :
+  ∀ N₁ N₂ C, spec.near_litter_cond B
+    (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) N₁ N₂ C :=
+sorry
+
+lemma non_flexible_union_near_litter_cond_backward :
+  ∀ N₁ N₂ C, spec.near_litter_cond B
+    (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ N₁ N₂ C :=
+sorry
+
+lemma non_flexible_union_non_flexible_cond_forward :
+  spec.non_flexible_cond B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
+sorry
+
+lemma non_flexible_union_non_flexible_cond_backward :
+  spec.non_flexible_cond B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ :=
+sorry
+
+lemma non_flexible_union_support_closed_forward :
+  (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}).domain.support_closed B :=
+sorry
+
+lemma non_flexible_union_support_closed_backward :
+  (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}).range.support_closed B :=
+sorry
+
+lemma non_flexible_union_flexible_cond :
+  spec.flexible_cond B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
+sorry
+
+lemma non_flexible_union_allowable :
+  spec.allowable_spec B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) := {
+  forward := {
+    one_to_one := non_flexible_union_one_to_one_forward hγ hδ hγδ t hπ,
+    atom_cond := non_flexible_union_atom_cond_forward hγ hδ hγδ t hπ,
+    near_litter_cond := non_flexible_union_near_litter_cond_forward hγ hδ hγδ t hπ,
+    non_flexible_cond := non_flexible_union_non_flexible_cond_forward hγ hδ hγδ t hπ,
+    support_closed := non_flexible_union_support_closed_forward hγ hδ hγδ t hπ,
+  },
+  backward := {
+    one_to_one := non_flexible_union_one_to_one_backward hγ hδ hγδ t hπ,
+    atom_cond := non_flexible_union_atom_cond_backward hγ hδ hγδ t hπ,
+    near_litter_cond := non_flexible_union_near_litter_cond_backward hγ hδ hγδ t hπ,
+    non_flexible_cond := non_flexible_union_non_flexible_cond_backward hγ hδ hγδ t hπ,
+    support_closed := by { rw spec.inv_domain,
+      exact non_flexible_union_support_closed_backward hγ hδ hγδ t hπ },
+  },
+  flexible_cond := non_flexible_union_flexible_cond hγ hδ hγδ t hπ,
+}
+
+lemma le_non_flexible_union :
+  σ ≤ ⟨_, non_flexible_union_allowable hγ hδ hγδ t hπ⟩ := {
+  subset := set.subset_union_left _ _,
+  all_flex_domain := begin
+    rintros L N' C' hN' hσ₁ (hσ₂ | hσ₂),
+    { cases hσ₁ hσ₂, },
+    { simp only [new_non_flexible_constraint, set.mem_singleton_iff, prod.mk.inj_iff] at hσ₂,
+      exfalso,
+      cases hN' hγ hδ hγδ C t,
+      { exact h (litter.to_near_litter_inj hσ₂.left.left), },
+      { exact h hσ₂.right, } }
+  end,
+  all_flex_range := begin
+    rintros L N' C' hN' hσ₁ (hσ₂ | hσ₂),
+    { cases hσ₁ hσ₂, },
+    { simp only [new_non_flexible_constraint, set.mem_singleton_iff, prod.mk.inj_iff] at hσ₂,
+      exfalso,
+      cases hN' hγ hδ hγδ C t,
+      { -- This is the unpacked coherence condition on L and f.
+        -- We need to change C and t to be the correct parameters here.
+        sorry },
+      { exact h hσ₂.right, } }
+  end,
+  all_atoms_domain := begin
+    rintros a b L ha C hσ₁ (hσ₂ | hσ₂),
+    { cases hσ₁ hσ₂, },
+    { simpa only [new_non_flexible_constraint, set.mem_singleton_iff, prod.mk.inj_iff,
+        false_and] using hσ₂, }
+  end,
+  all_atoms_range := begin
+    rintros a b L ha C hσ₁ (hσ₂ | hσ₂),
+    { cases hσ₁ hσ₂, },
+    { simpa only [new_non_flexible_constraint, set.mem_singleton_iff, prod.mk.inj_iff,
+        false_and] using hσ₂, }
+  end,
+}
 
 lemma exists_ge_non_flexible (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
-  (C : path (B : type_index) β)
+  {C : path (B : type_index) β}
   (t : tangle_path ((lt_index.mk' hγ (path.comp B.path C)) : le_index α))
   (hσ : ∀ c, c ≺ (sum.inr (f_map_path hγ hδ t).to_near_litter,
     (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _)) →
@@ -2552,7 +2652,7 @@ begin
     ⟨σ.val.lower (C.cons $ coe_lt_coe.mpr hδ), this⟩,
   have := struct_perm.derivative (path.cons path.nil $ bot_lt_coe _)
     (allowable_path_to_struct_perm _ π) • (f_map_path hγ hδ t).to_near_litter,
-  refine ⟨_, le_non_flexible_union hγ hδ hγδ C t π hπ, _⟩,
+  refine ⟨_, le_non_flexible_union hγ hδ hγδ t hπ, _⟩,
   rw spec.domain_union,
   right, simp only [spec.domain, set.image_singleton, set.mem_singleton_iff], refl,
 end
@@ -2584,7 +2684,7 @@ lemma total_of_maximal_aux (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ,
         obtain ⟨β, δ, γ, hγ, hδ, hγδ, C, t, hL, hA⟩ := h,
         cases hA,
         cases hL,
-        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flexible hγ hδ hγδ C t hind foa,
+        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flexible hγ hδ hγδ t hind foa,
         rw hσ ρ hρ₁ at hρ₂,
         exact hρ₂, }, },
     { -- This is a near-litter.
