@@ -1140,6 +1140,8 @@ begin
           { intros hxσ hxc,
             refine hxσ _,
             refine ⟨_, _, _⟩,
+            sorry,
+            sorry,
             sorry, }, },
         { sorry, }, },
       { /- all case -/
