@@ -1440,7 +1440,49 @@ lemma atom_union_atom_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) 
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
   ∀ L C, spec.atom_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)) L C :=
-sorry
+begin
+  intros L C,
+  obtain hL | ⟨N, atom_map, h1, h2, h3⟩ := σ.prop.forward.atom_cond L C,
+  { by_cases a.fst ≠ L ∨ A ≠ C,
+    { refine spec.atom_cond.small _,
+      unfold small spec.domain,
+      rw set.image_union,
+      have : {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
+        binary_condition.domain '' σ.val ∪ binary_condition.domain '' set.range (atom_to_cond B σ a A N hsmall ha)} = {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
+        binary_condition.domain '' σ.val} ∪ {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈ binary_condition.domain '' set.range (atom_to_cond B σ a A N hsmall ha)},
+      { ext,
+        simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_union_eq, set.mem_image, set.mem_range, set_coe.exists],
+        split,
+        { rintro ⟨hL, h | h⟩,
+          { exact or.inl ⟨hL, h⟩ },
+          { exact or.inr ⟨hL, h⟩ } },
+        { rintro (⟨hL, h⟩ | ⟨hL, h⟩),
+          { exact ⟨hL, or.inl h⟩ },
+          { exact ⟨hL, or.inr h⟩ } } },
+      rw this,
+      convert lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le hL
+          (lt_of_eq_of_lt (cardinal.mk_emptyc _) κ_regular.pos)),
+      simp only [binary_condition.domain, subtype.val_eq_coe, set.mem_sep_eq,
+                 set.mem_image, set.mem_range, set_coe.exists,
+  prod.mk.inj_iff],
+      cases h,
+      { refine funext (λ x, eq_iff_iff.2 ⟨_, λ h, by cases h⟩),
+        rintro ⟨hx, ⟨⟨x', y⟩ | _, b⟩, ⟨_, ⟨ha, _⟩, hb1⟩, hb2, -⟩,
+        { simp only [atom_to_cond, sum.elim_inl, subtype.coe_mk, prod.mk.inj_iff] at hb1 hb2,
+          obtain ⟨⟨rfl, -⟩, -⟩ := hb1,
+          subst hb2,
+          exact pairwise_disjoint_litter_set a.fst L h ⟨ha, hx⟩, },
+        { cases hb1 } },
+      { ext,
+        refine ⟨_, λ hx, by cases hx⟩,
+        rintro ⟨hL, ⟨b1, b2⟩, ⟨_, _, h1⟩, -, h2⟩,
+        have := congr_arg prod.snd h1,
+        simp only [atom_to_cond] at h2 this,
+        exact h (this.trans h2) } },
+    { obtain ⟨haL, hAC⟩ := and_iff_not_or_not.2 h,
+      sorry } },
+  { exact spec.atom_cond.all N atom_map (or.inl h1) (λ a ha, or.inl (h2 a ha)) h3, }
+end
 
 lemma atom_union_atom_cond_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
