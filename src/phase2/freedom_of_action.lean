@@ -1037,11 +1037,9 @@ end
 lemma near_litter_cond_Union (hc : is_chain (≤) c) :
   ∀ N₁ N₂ A, spec.near_litter_cond B (⋃₀ (subtype.val '' c)) N₁ N₂ A :=
 begin
-  rintros N₁ N₂ A ⟨ρ, ⟨σ, hσ, hσρ⟩, hρ⟩,
-  subst hσρ,
-  have : σ.val ⊆ ⋃₀ (subtype.val '' c) := λ x h, ⟨σ, ⟨σ, hσ, rfl⟩, h⟩,
+  rintros N₁ N₂ A ⟨ρ, ⟨σ, hσ, rfl⟩, hρ⟩,
   obtain ⟨M, hM, symm_diff, h1, h2⟩ := σ.prop.forward.near_litter_cond N₁ N₂ A hρ,
-  exact ⟨M, this hM, symm_diff, λ a, this (h1 a), h2⟩,
+  exact ⟨M, ⟨σ, ⟨σ, hσ, rfl⟩, hM⟩, symm_diff, λ a, ⟨σ, ⟨σ, hσ, rfl⟩, h1 a⟩, h2⟩,
 end
 
 lemma flexible_cond_Union (hc : is_chain (≤) c) :
