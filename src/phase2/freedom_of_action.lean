@@ -2337,14 +2337,86 @@ private def new_inverse_flexible_litters
 {c | ∃ (L : litter) C hL₁ hL₂,
   c = (sum.inr (precise_litter_inverse_image hdom hrge L C hL₁ hL₂, L.to_near_litter), C)}
 
-lemma flexible_union_allowable
-  (hdom : #μ = #{L : litter × extended_index B |
+variables (hdom : #μ = #{L : litter × extended_index B |
     flexible L.1 L.2 ∧ (sum.inr L.1.to_near_litter, L.2) ∉ σ.val.domain})
   (hrge : #μ = #{L : litter × extended_index B |
-    flexible L.1 L.2 ∧ (sum.inr L.1.to_near_litter, L.2) ∉ σ.val.range}) :
-  spec.allowable_spec B
+    flexible L.1 L.2 ∧ (sum.inr L.1.to_near_litter, L.2) ∉ σ.val.range})
+
+lemma flexible_union_one_to_one_forward :
+  spec.one_to_one_forward B
     (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge) :=
 sorry
+
+lemma flexible_union_one_to_one_backward :
+  spec.one_to_one_forward B
+    (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge)⁻¹ :=
+sorry
+
+lemma flexible_union_atom_cond_forward :
+  ∀ L C, spec.atom_cond B
+    (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge) L C :=
+sorry
+
+lemma flexible_union_atom_cond_backward :
+  ∀ L C, spec.atom_cond B
+    (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge)⁻¹ L C :=
+sorry
+
+lemma flexible_union_near_litter_cond_forward :
+  ∀ N₁ N₂ C, spec.near_litter_cond B
+    (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge) N₁ N₂ C :=
+sorry
+
+lemma flexible_union_near_litter_cond_backward :
+  ∀ N₁ N₂ C, spec.near_litter_cond B
+    (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge)⁻¹ N₁ N₂ C :=
+sorry
+
+lemma flexible_union_non_flexible_cond_forward :
+  spec.non_flexible_cond B
+    (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge) :=
+sorry
+
+lemma flexible_union_non_flexible_cond_backward :
+  spec.non_flexible_cond B
+    (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge)⁻¹ :=
+sorry
+
+lemma flexible_union_support_closed_forward :
+  (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge)
+    .domain.support_closed B :=
+sorry
+
+lemma flexible_union_support_closed_backward :
+  (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge)
+    .range.support_closed B :=
+sorry
+
+lemma flexible_union_flexible_cond :
+  spec.flexible_cond B
+    (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge) :=
+sorry
+
+lemma flexible_union_allowable :
+  spec.allowable_spec B
+    (σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge) := {
+  forward := {
+    one_to_one := flexible_union_one_to_one_forward hdom hrge,
+    atom_cond := flexible_union_atom_cond_forward hdom hrge,
+    near_litter_cond := flexible_union_near_litter_cond_forward hdom hrge,
+    non_flexible_cond := flexible_union_non_flexible_cond_forward hdom hrge,
+    support_closed := flexible_union_support_closed_forward hdom hrge,
+  },
+  backward := {
+    one_to_one := flexible_union_one_to_one_backward hdom hrge,
+    atom_cond := flexible_union_atom_cond_backward hdom hrge,
+    near_litter_cond := flexible_union_near_litter_cond_backward hdom hrge,
+    non_flexible_cond := flexible_union_non_flexible_cond_backward hdom hrge,
+    support_closed := by { rw spec.inv_domain,
+      exact flexible_union_support_closed_backward hdom hrge },
+  },
+  flexible_cond := flexible_union_flexible_cond hdom hrge,
+}
 
 lemma le_flexible_union
   (hdom : #μ = #{L : litter × extended_index B |
@@ -2352,8 +2424,49 @@ lemma le_flexible_union
   (hrge : #μ = #{L : litter × extended_index B |
     flexible L.1 L.2 ∧ (sum.inr L.1.to_near_litter, L.2) ∉ σ.val.range}) :
   σ ≤ ⟨σ.val ∪ new_flexible_litters hdom hrge ∪ new_inverse_flexible_litters hdom hrge,
-    flexible_union_allowable hdom hrge⟩ :=
-sorry
+    flexible_union_allowable hdom hrge⟩ := {
+  subset := by { simp_rw set.union_assoc, exact set.subset_union_left _ _, },
+  all_flex_domain := begin
+    intros L N' C hN' hσ₁ hσ₂ L' C' hL',
+    split,
+    { rw [spec.domain_union, spec.domain_union],
+      by_cases (sum.inr L'.to_near_litter, C') ∈ σ.val.domain,
+      { exact or.inl (or.inl h), },
+      { exact or.inl (or.inr ⟨_, ⟨L', C', hL', h, rfl⟩, rfl⟩), } },
+    { rw [spec.range_union, spec.range_union],
+      by_cases (sum.inr L'.to_near_litter, C') ∈ σ.val.range,
+      { exact or.inl (or.inl h), },
+      { exact or.inr ⟨_, ⟨L', C', hL', h, rfl⟩, rfl⟩, } }
+  end,
+  all_flex_range := begin
+    intros L N' C hN' hσ₁ hσ₂ L' C' hL',
+    split,
+    { rw [spec.domain_union, spec.domain_union],
+      by_cases (sum.inr L'.to_near_litter, C') ∈ σ.val.domain,
+      { exact or.inl (or.inl h), },
+      { exact or.inl (or.inr ⟨_, ⟨L', C', hL', h, rfl⟩, rfl⟩), } },
+    { rw [spec.range_union, spec.range_union],
+      by_cases (sum.inr L'.to_near_litter, C') ∈ σ.val.range,
+      { exact or.inl (or.inl h), },
+      { exact or.inr ⟨_, ⟨L', C', hL', h, rfl⟩, rfl⟩, } }
+  end,
+  all_atoms_domain := begin
+    rintros a b L ha C hσ₁ ((hσ₂ | hσ₂) | hσ₂),
+    { cases hσ₁ hσ₂, },
+    { simpa only [new_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff,
+        false_and, exists_false] using hσ₂, },
+    { simpa only [new_inverse_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff,
+        false_and, exists_false] using hσ₂, }
+  end,
+  all_atoms_range := begin
+    rintros a b L ha C hσ₁ ((hσ₂ | hσ₂) | hσ₂),
+    { cases hσ₁ hσ₂, },
+    { simpa only [new_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff,
+        false_and, exists_false] using hσ₂, },
+    { simpa only [new_inverse_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff,
+        false_and, exists_false] using hσ₂, }
+  end,
+}
 
 /-- Nothing constrains a flexible litter, so we don't have any hypothesis about the fact that all
 things that constrain it lie in `σ` already. -/
