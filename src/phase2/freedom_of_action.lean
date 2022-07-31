@@ -585,7 +585,7 @@ instance allowable_partial_perm.has_inv : has_inv (allowable_partial_perm B) :=
 instance : has_involutive_inv (allowable_partial_perm B) :=
 ⟨has_inv.inv, λ σ, by ext ⟨x | x, y⟩; simp [has_inv.inv]⟩
 
-lemma allowable_partial_perm.inv_def (σ : allowable_partial_perm B) :
+@[simp] lemma allowable_partial_perm.inv_def (σ : allowable_partial_perm B) :
   σ⁻¹.val = (σ.val)⁻¹ := rfl
 
 /-! We prove the restriction lemma: if `σ` is a partial allowable permutation, then so is `σ`
@@ -2273,12 +2273,55 @@ lemma precise_atom_left_inverse
   (a : atom) (ha₁ : a ∈ litter_set L)
   (ha₂ : precise_atom_image hdom hrge L a ha₁ ∈ litter_set (rough_bijection hdom hrge L)) :
   precise_atom_inverse_image hdom hrge (rough_bijection hdom hrge L)
-    (precise_atom_image hdom hrge L a ha₁)
-    ha₂ = a :=
+    (precise_atom_image hdom hrge L a ha₁) ha₂ = a :=
 begin
   unfold precise_atom_inverse_image,
   unfold precise_atom_image,
-  split_ifs with h₁ h₂; sorry
+  split_ifs with h₁ h₂ h₂,
+  { exact atom_value_inv _ _ _ _ _, },
+  { exfalso,
+    unfold precise_atom_image at h₁,
+    classical, rw dif_neg h₂ at h₁,
+    exact (precise_atom_bijection hdom hrge L ⟨a, ha₁, h₂⟩).2.2 h₁, },
+  { exfalso,
+    unfold precise_atom_image at h₁,
+    classical, rw dif_pos h₂ at h₁,
+    exact h₁ (atom_value_spec_range _ _ _ _ _), },
+  { have precise := exists_eq_subtype_mk_iff.mp
+      ⟨_, equiv.left_inv (precise_atom_bijection hdom hrge L) ⟨a, ha₁, h₂⟩⟩,
+    have rough := equiv.left_inv (rough_bijection hdom hrge) L,
+    -- This is really easy to prove but requires some interesting manoeuvres.
+    -- Probably extract this out as a lemma.
+    sorry }
+end
+
+lemma precise_atom_right_inverse
+  (hdom : #μ = #{L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ.val.domain})
+  (hrge : #μ = #{L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ.val.range})
+  (L : {L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ.val.range})
+  (a : atom) (ha₁ : a ∈ litter_set L)
+  (ha₂ : precise_atom_inverse_image hdom hrge L a ha₁ ∈
+    litter_set ((rough_bijection hdom hrge).inv_fun L)) :
+  precise_atom_image hdom hrge ((rough_bijection hdom hrge).inv_fun L)
+    (precise_atom_inverse_image hdom hrge L a ha₁) ha₂ = a :=
+begin
+  unfold precise_atom_image,
+  unfold precise_atom_inverse_image,
+  split_ifs with h₁ h₂ h₂,
+  { simpa only [inv_inv] using atom_value_inv _ σ⁻¹ _ _ _, },
+  { exfalso,
+    unfold precise_atom_inverse_image at h₁,
+    classical, rw dif_neg h₂ at h₁,
+    refine ((precise_atom_bijection hdom hrge ((rough_bijection hdom hrge).inv_fun L)).inv_fun
+      ⟨a, _, h₂⟩).2.2 h₁,
+    convert ha₁, exact equiv.right_inv _ _, },
+  { exfalso,
+    unfold precise_atom_inverse_image at h₁,
+    classical, rw dif_pos h₂ at h₁,
+    have := (atom_value_spec_range _ σ⁻¹ _ _ _),
+    rw [allowable_partial_perm.inv_def, spec.inv_range] at this,
+    exact h₁ this, },
+  { sorry }
 end
 
 lemma precise_atom_image_range
