@@ -109,8 +109,8 @@ def near_litter : Type* := Σ i, {s // is_near_litter i s}
 def litter.to_near_litter (i : litter) : near_litter :=
 ⟨i, litter_set i, is_near_litter_litter_set i⟩
 
-lemma litter.to_near_litter_inj : injective litter.to_near_litter :=
-by { intros i j hij, cases hij, refl }
+lemma litter.to_near_litter_injective : injective litter.to_near_litter :=
+λ i j hij, by { cases hij, refl }
 
 /-- There are `μ` near-litters in total. -/
 @[simp] lemma mk_near_litter : #near_litter = #μ :=

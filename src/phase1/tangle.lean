@@ -1,5 +1,5 @@
+import group_theory.group_action.option
 import mathlib.group_action
-import mathlib.option
 import mathlib.pointwise
 import phase1.allowable
 
@@ -440,14 +440,6 @@ lemma coe_injective : injective (coe : new_tangle α → semitangle α) := subty
 end new_tangle
 
 namespace allowable_perm
-
-lemma _root_.supports.smul {s : set (support_condition α)} {t : semitangle α}
-  (f : allowable_perm α) (h : supports (to_struct_perm : allowable_perm α → struct_perm α) s t) :
-  supports (to_struct_perm : allowable_perm α → struct_perm α) (f • s) (f • t) :=
-λ g hg, begin
-  have := ball_image_iff.1 hg,
-  sorry
-end
 
 /-- Allowable permutations act on `α`-tangles. -/
 instance has_smul_new_tangle : has_smul (allowable_perm α) (new_tangle α) :=
