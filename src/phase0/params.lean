@@ -161,10 +161,7 @@ lemma card_Iio_lt (x : μ) : #(Iio x) < #μ := card_typein_lt (<) x μ_ord.symm
 lemma card_Iic_lt (x : μ) : #(Iic x) < #μ :=
 begin
   rw [←Iio_union_right, mk_union_of_disjoint, mk_singleton],
-  obtain h | h := le_or_lt ℵ₀ (#(Iio x)),
-  { convert card_Iio_lt x,
-    exact add_one_eq h },
-  { exact (add_lt_aleph_0 h one_lt_aleph_0).trans_le (κ_regular.aleph_0_le.trans κ_le_μ) },
+  { exact (add_one_le_succ _).trans_lt (μ_strong_limit.is_limit.2 _ $ card_Iio_lt x) },
   { simp }
 end
 

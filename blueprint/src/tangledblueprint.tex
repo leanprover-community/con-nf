@@ -38,9 +38,13 @@
 \newcommand{\Str}{\mathrm{Str}}
 \newcommand{\All}{\mathrm{All}}
 \newcommand{\Cond}{\mathrm{Cond}}
+\newcommand{\BiCond}{\mathrm{BiCond}}
 \newcommand{\TTT}{\mathrm{TTT}}
 \newcommand{\pathto}{\dashrightarrow}
 \newcommand{\symdiff}{\mathrel{\triangle}}
+\newcommand{\Path}{\mathrm{Path}}
+\newcommand{\op}{\mathrm{op}}
+\newcommand{\pow}{\mathcal{P}}
 
 \chapter{Phase 0: Preliminaries} \label{ch:preliminaries}
 
@@ -59,7 +63,7 @@ Throughout, we fix three parameters:
   \item $\mu$ may be any strong limit cardinal $>\kappa$ of cofinality $\geq \kappa$.
 \end{itemize}
 
-[Note: The assumptions on $\kappa$ and $\mu$ are essential for the construction of the model to work.  The assumptions on $\lambda$ are not needed for this model — everything probably works for an arbitrary well-founded strict partial order $\lambda$, and gives a model of $\TTT_\lambda$. The assumption that $\lambda$ is a limit ordinals is require afterwards, to convert the model of $\TTT_\lambda$ into a model of $\mathrm{TST} + \text{typical ambiguity}$.]
+[Note: The assumptions on $\kappa$ and $\mu$ are essential for the construction of the model to work.  The assumptions on $\lambda$ are not needed for this model — everything probably works for an arbitrary well-founded strict partial order $\lambda$, and gives a model of $\TTT_\lambda$. The assumption that $\lambda$ is a limit ordinal is required afterwards, to convert the model of $\TTT_\lambda$ into a model of $\mathrm{TST} + \text{typical ambiguity}$.]
 \end{definition}
 
 \begin{definition}
@@ -88,9 +92,11 @@ In many ways, $-1$ should be viewed as a type index on the same footing as other
 \uses{def:type-index}
 \leanok
 \lean{con_nf.extended_index}
-By a \emph{path}, we mean a path in the directed graph $(\lambda^\bot,<)$; that is, a nonempty finite strictly increasing sequence of type indices $\alpha_0 < \cdots < \alpha_k$.  A path is \emph{proper} if its source (least element) is proper.
+By a \emph{path}, we mean a path in the directed graph (aka quiver) $(\lambda^\bot,<)$; that is, a nonempty finite strictly increasing sequence of type indices $\alpha_0 < \cdots < \alpha_k$.  A path is \emph{proper} if its source (least element) is proper.
 
 We will write paths as $A : \beta \pathto \alpha$.  We will write path concatenation and extension as $\gamma;A$, $A;B$, and similar.
+
+These may be viewed as the arrows of the free category on $(\lambda^\bot,<)$.  We mostly avoid using this categorical packaging, to keep things elementary and avoid unnecessary dependencies; but we mention it occasionally in the blueprint, as $\Path(\lambda^\bot)$.
 
 [There may be some terminological inconsistency: In places, paths are called \emph{extended type indices}, and are considered as sets rather than sequences; also, they are sometimes taken to be decreasing instead of increasing.]
 \end{definition}
@@ -134,9 +140,9 @@ A \emph{near-litter} is a subset $N$ of $\tau_{-1}$ with small symmetric differe
 \uses{def:near-litter}
 \lean{con_nf.local_cardinal}
 \leanok
-For $i \in \Litter$, the $i$-th {\em local cardinal} $[L_i]$ is $\{N \subseteq \tau_{-1}:|N \symdiff L|<\kappa\}$.
+For $i \in \Litter$, the $i$-th {\em local cardinal} $[L_i]$ is $\{N \subseteq \tau_{-1}:|N \symdiff L_i|<\kappa\}$.
 
-For any near-litter $N$ (including litters), we write $[N]$ for the unique local cardinal that contains $N$. We introduce the notation $[N]^\circ$ for the litter belonging to the local cardinal $N$, with the tacit need to prove that there is only one.
+For any near-litter $N$ (including litters), we write $[N]$ for the unique local cardinal that contains $N$. We introduce the notation $[N]^\circ$ for the litter belonging to the local cardinal of $N$, with the tacit need to prove that there is only one.
 
 [Note: almost all roles played by local cardinals in the original text should be fulfilled in the formalisation by litter-indices $i \in \Litter$.]
 \end{definition}
@@ -211,9 +217,9 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
   \uses{def:structural-perm}
   \leanok
   \lean{con_nf.struct_perm.derivative}
-  Any path $A : \beta \to \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
+  Any path $A : \beta \pathto \alpha$ gives a group homomorphism $(-)_A : \Str_\alpha \to \Str_\beta$.
 
-  Moreover, this is functorial: they make $\Str$ into a functor $\mathrm{Path}(\Lambda)^\mathrm{op} \to \mathrm{Gp}$.
+  Moreover, this is functorial: they make $\Str$ into a functor $\Path(\lambda^\bot)^\op \to \mathrm{Gp}$.
 
   [TODO: this should also depend on “paths”, but they aren’t yet explicitly in the blueprint.]
 \end{definition}
@@ -229,9 +235,10 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
   \uses{def:near-litter,def:atoms-and-litters} % TODO: add def:paths upstream, and add it here.
   \lean{con_nf.support_condition}
   \leanok
-  Let $\alpha$ be a proper type index. An \emph{$\alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
+  Let $\alpha$ be a proper type index. An \emph{$\alpha$-support-condition} (or just \emph{$alpha$-condition}) is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter.
 
-  Type-theoretically, $\Cond := (\tau_{-1} + \NearLitter) \times \mathrm{Path}(-1,\alpha)$.
+  Type-theoretically, $\Cond_\alpha := (\tau_{-1} + \NearLitter) \times \mathrm{Path}(-1,\alpha)$.
+
   [It would suffice to use just litters here instead of near-litters; they give an equivalent notion of support, as shown later (“replacing near-litters with litters”).  That makes a few things simpler; but using near-litters lets us talk about the action, Def.~\ref{def:support-condition-action}, which seems algebraically cleaner.]
 \end{definition}
 
@@ -253,18 +260,6 @@ Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alp
 [NOTES for formalisation: Well-orderings are assumed here in some version of Randall’s note, but they almost certainly aren’t wanted in the basic definition of supports, as used in phase 1. Strong supports, as used in phase 2, are probably better viewed as a separate notion: a more elaborate data structure that can be used to “present” a support in a particularly good way.]
 \end{definition}
 
-\begin{lemma}
-\label {lem:count-supports}
-\uses{def:support}
-\lean{con_nf.mk_support_le}
-\leanok
-Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supports, and therefore at most $\mu$ supports for each $x \in \tau$.
-\end{lemma}
-\begin{proof}
-\uses{lem:count-near-litters}
-\leanok
-\end{proof}
-
 \begin{definition}
 \label{def:support-of}
   \uses{def:support,def:support-condition-action}
@@ -279,6 +274,18 @@ Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supp
   We say $x$ is \emph{symmetric} if it has some small support.
 \end{definition}
 
+\begin{lemma}
+  \label{lem:count-supports}
+  \uses{def:support-of}
+  \lean{con_nf.mk_support_le}
+  \leanok
+  Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supports, and therefore at most $\mu$ supports for each $x \in \tau$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:count-near-litters}
+  \leanok
+\end{proof}
+
 \chapter{Phase 1: The model construction} \label{ch:model-construction}
 
 In this chapter, we give almost the entire construction of the structure which will (eventually) be a model of tangled type theory.
@@ -292,11 +299,11 @@ Unfortunately, one piece of the data is harder to propagate --- essentially just
 For now, we group the data assumed at each level, according to which constructions it will be needed for.
 
 \begin{definition}
-  \label{def:phase-1-data}
+  \label{def:tangle-data}
   \uses{def:support-of,def:pretangle}
   \lean{con_nf.phase_1}
 
-  Fix a proper type index $\alpha$.  Then \emph{phase 1 data at $\alpha$} consists of:
+  Fix a proper type index $\alpha$.  Then \emph{tangle data at $\alpha$} consists of:
   \begin{enumerate}
     \item a group $\All$ (whose elements we call \emph{allowable permutations}), with a map $\varphi : \All \to \Str_\alpha$;
     \item a set $\tau$ (whose elements we call \emph{tangles}), equipped with an $\All$-action;
@@ -312,21 +319,23 @@ For now, we group the data assumed at each level, according to which constructio
       \item for each $x$ in $\tau_\alpha$ that is not a typed litter or singleton, $x$ comes later than all of its designated support -- explicitly, for each $(a,A)$ or $(N,A)$ in $S_x$, we must have $\iota_\alpha(j(N)), \iota_\alpha(k(a))<\iota_\alpha(x)$.
     \end{enumerate}
     [Note: to see these conditions are not unreasonable, note that each $x \in \tau$ has $<\mu$ many things that it must come after, and that the chains of these constraints are of depth at most 4: litters $<$ atoms $<$ other near-litters $<$ everything else.  This is said more carefully in \cref{lem:position-functions-propagate} below.]
-    \item [Optionally: An injection $\tau \to \Pretangle_\alpha$, equivariant with respect to the induced $\All$-action.  This may or may not be needed, depending on how the phase 2 data is organised.]
+    \item {[Optionally: An injection $\tau \to \Pretangle_\alpha$, equivariant with respect to the induced $\All$-action.  This may or may not be needed, depending on how the phase 2 data is organised.]}
   \end{enumerate}
+
+  By \emph{core tangle data}, we will mean just $\All$, $\varphi$, $\tau$, and the $\All$-action on $\tau$ as above.  By \emph{incomplete tangle data}, we will mean all the above data except for the position functions $\iota$ and their properties.
+
+  When we assume this data at multiple levels, we will refer to the components $\tau_\beta$, $\All_\beta$, and so on, and call their elements $\alpha$-tangles, etc.
 \end{definition}
 
-When we assume this data at multiple levels, we will refer to the compomnents $\tau_\beta$, $\All_\beta$, and so on, and call their elements $\alpha$-tangles, etc.
-
-Analogues of some of this data also exist at level $-1$, as the notation suggests: in particular, $\tau_{-1}$ and $\iota_{-1} : \tau_{-1} \to \mu$.  (But not the typed near-litters, or the further conditions on $\iota_{-1}$.) So, for instance, if we assume phase 1 data at all \emph{proper} levels $\beta < \alpha$, we may then refer to $\tau_\beta$ for all levels $\beta < \alpha$: for $\beta$ proper, this means the tangles of the assumed phase 1 data, while for $\beta = -1$ it means the fixed set of atoms $\tau_{-1}$.
+There is standard core tangle data at level $-1$, and also the position function $\iota_{-1} : \tau_{-1} \to \mu$.  We will often refer to this uniformly with assumed tangle data at other levels: for instance, if we assume tangle data at all \emph{proper} levels $\beta < \alpha$, we may then refer to $\tau_\beta$ for all levels $\beta < \alpha$: for $\beta$ proper, this means the tangles of the assumed tangle data, while for $\beta = -1$ it means the fixed set of atoms $\tau_{-1}$.
 
 \section{Phase 1a: Set codes and alternative extensions}
 
-In the following few constructions, we will fix a proper type index $\alpha$ and assume we have phase 1 data given for all proper $\beta < \alpha$. (In fact some results --- in particular, the $f$-maps, $A$-maps and their properties --- only need to refer to the data at certain earlier levels.)
+In most of the following few constructions, we will fix a proper type index $\alpha$ and assume we have tangle data given for all proper $\beta < \alpha$. (In fact some results --- in particular, the $f$-maps, $A$-maps and their properties --- only need to refer to the data at certain earlier levels.)
 
 \begin{definition}
 \label {def:code}
-\uses{def:phase-1-data}
+\uses{def:tangle-data}
 \lean{con_nf.code}
 \leanok
 An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \subseteq \tau_\gamma$. [The original set-theoretic implementation includes the $\alpha$, to keep codes at different levels disjoint.  In the type-theoretic implementation, the first component $\alpha$ is unnecessary.]
@@ -334,21 +343,21 @@ An $\alpha$-code is a triple $(\alpha,\gamma,G)$ where $\gamma<\alpha$ and $G \s
 
 \begin{definition}
 \label {def:f-map}
-\uses{def:phase-1-data}
+\uses{def:tangle-data}
 \lean{con_nf.f_map}
 \leanok
 We define, for all $\beta,\gamma < \alpha$, with $\gamma$ proper, a map $f_{\beta,\gamma}$ from $\tau_\beta$ to $X_{\beta,\gamma} \subseteq \mathrm{Litter}$, as follows.
 
-For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $N^\circ$ of the minimal near-litter $N$ (under the ordering induced by $j_\beta \circ \iota_\beta : \NearLitter \to \tau_\beta \to \mu$) such that:
+For $x \in \tau_\beta$, $f_{\beta,\gamma}(x)$ is the litter $N^\circ$ of the minimal near-litter $N$ (under the ordering induced by $\iota_\beta \circ j_\beta : \NearLitter \to \tau_\beta \to \mu$) such that:
 \begin{itemize}
   \item $N^\circ\in X_{(\beta,\gamma)}$, i.e. $N^\circ = L_{(\beta,\gamma,i)}$, for some $i$;
   \item for each nearby near-litter $M \sim N$, $\iota_\gamma(j_\gamma(M)) >\iota_\beta(x)$;
   \item $[N] \neq f_{\beta,\gamma}(y)$, for each $y <_\beta x$.
 \end{itemize}
 
-[This can be decomposed slightly at both ends.  Firstly, since we know that $f_{\beta_\gamma}(x) = (\beta,\gamma,\chi)$ for some $\chi$, we could take the output just to be the component $\chi \in \mu$, and turn it into a litter later.  Secondly, $f_{\beta_\gamma}(x)$ depends on $x$ essentially just via its position $i_\beta(x) \in \mu$, so we could start by defining a function $g_{\beta,\gamma} : \mu \to \mathrm{Litter}$, and then take $f_{\beta,\gamma}$ as the composite $g_{\beta,\gamma} \circ \iota_\beta$.  I don’t think these will really make a difference either way, though.]
+[This can be decomposed slightly at both ends.  Firstly, since we know that $f_{\beta,\gamma}(x) = (\beta,\gamma,\chi)$ for some $\chi$, we could take the output just to be the component $\chi \in \mu$, and turn it into a litter later.  Secondly, $f_{\beta_\gamma}(x)$ depends on $x$ essentially just via its position $\iota_\beta(x) \in \mu$, so we could start by defining a function $g_{\beta,\gamma} : \mu \to \mathrm{Litter}$, and then take $f_{\beta,\gamma}$ as the composite $g_{\beta,\gamma} \circ \iota_\beta$.  I don’t think these will really make a difference either way, though.]
 
-[Notice that this only depends on a small fragment of the phase 1 data at $\beta$ and $\gamma$. In particular, it doesn’t depend on $\alpha$ nor on the phase 1 data at other levels. In the formalisation, it would be good to avoid it depending on more than it needs.]
+[Notice that this only depends on a small fragment of the tangle data at $\beta$ and $\gamma$. In particular, it doesn’t depend on $\alpha$ nor on the tangle data at other levels. In the formalisation, it would be good to avoid it depending on more than it needs.]
 \end{definition}
 
 \begin{lemma}
@@ -374,16 +383,16 @@ Let $\gamma$ be a type index (not necessarily proper) below $\alpha$.
 
 For any code $(\alpha,\gamma,G)$, with $\delta$ a proper type index below $\alpha$ and distinct from $\gamma$, we define
 $A_\delta(\alpha,\gamma,G)$ as
-$$(\alpha,\delta,\{ j_\delta(N) \mid N \in \NearLitter,\, N \sim f_{\gamma,\delta}(b),\, b \in B \})$$
+$$(\alpha,\delta,\{ j_\delta(N) \mid N \in \NearLitter,\, N \sim f_{\gamma,\delta}(g),\, g \in G \})$$
 if the maps $f_{\gamma,\delta}$ are considered as valued in litters, or
-$$(\alpha,\delta,\{ j_\delta(N) \mid N \in f_{\gamma,\delta}(b),\, b \in B \})$$
+$$(\alpha,\delta,\{ j_\delta(N) \mid N \in f_{\gamma,\delta}(g),\, g \in G \})$$
 if they are taken as valued directly in local cardinals.
 
 We say that a code $c$ \emph{leads to} a code $d$ if $d$ is the image of $c$ under some A-map. We denote this $c \rightsquigarrow d$.
 
-(Here $j_\delta(N)$ is the “typed near-litters” map for level $\delta$, assumed in the phase 1 data.)
+(Here $j_\delta(N)$ is the “typed near-litters” map for level $\delta$, assumed in the tangle data.)
 
-[For the formalisation, each individual $A_\delta$ is probably best represented as a function $\mathcal{P}(\tau_(\gamma)) \to \mathcal{P}(\tau_\delta)$, rather than on “codes of the form $(\alpha,\gamma,G)$…”.  Also it could — and perhaps should, for flexibility later — have parameters just “$\gamma$, $\delta$, and their phase 1 data”, rather than “$\alpha$, phase 1 data everywhere below $\alpha$, and $\gamma,\delta < \alpha$”.]
+[For the formalisation, each individual $A_\delta$ is probably best represented as a function $\mathcal{P}(\tau_\gamma) \to \mathcal{P}(\tau_\delta)$, rather than on “codes of the form $(\alpha,\gamma,G)$…”.  Also it could — and perhaps should, for flexibility later — have parameters just “$\gamma$, $\delta$, and their tangle data”, rather than “$\alpha$, tangle data everywhere below $\alpha$, and $\gamma,\delta < \alpha$”.]
 \end{definition}
 
 \begin{lemma}
@@ -416,7 +425,7 @@ The relation $c \rightsquigarrow d$ on codes (“$c$ leads to $d$ under some $A$
 \begin{proof}
 \uses{lem:a-map-properties}
 \leanok
-  Consider the map $m$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the position function assumed in the phase 1 data.
+  Consider the map $m$ from codes to $\mu$ sending $(\alpha,\gamma,X)$ to $\min \iota_\gamma``X$, where $\iota_\gamma : \tau_\gamma \to \mu$ is the position function assumed in the tangle data.
 
   The definition of the functions $A_{\delta,\gamma}$ and the fact that $\iota f_{\gamma,\delta}(x) > \iota x $ ensure that $j(\alpha,\gamma,X) < j(A_\delta(\alpha,\gamma,X))$, for all suitable $\gamma,\delta,X$.
 
@@ -527,13 +536,13 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 
 \section{Phase 1b: Actual tangles: the model definition}
 
-  For the subsequent constructions of this section, we assume we are given phase 1 data for all $\beta < \alpha$.
+  For the subsequent constructions of this section, we assume we are given tangle data for all $\beta < \alpha$.
 
 \begin{definition}
 \label {def:semiallowable-perm}
 \lean{con_nf.semiallowable_perm}
 \leanok
-\uses{def:phase-1-data}
+\uses{def:tangle-data}
   A \emph{semi-allowable permutation} at level $\alpha$ is a family of allowable pemutations at all lower levels (including $-1$), $(\pi_\beta)_{\beta < \alpha} \in \prod_{\beta < \alpha} \All_\beta$.
 \end{definition}
 
@@ -557,6 +566,7 @@ Semi-allowable permutations act on $\alpha$-codes.
 \label {lem:coherence-unpacked}
 \uses{def:allowable-perm}
 \lean{con_nf.allowable_perm.coherence}
+\leanok
 A semi-allowable permutation $\pi$ is allowable just if
 $$f_{\gamma,\delta}(\pi_\gamma(g)) = [(\pi_\delta)_{-1}``f_{\gamma,\delta}(g)^\circ].$$
 holds for all $f_{\gamma,\delta}$ with $\gamma,\delta<\alpha$, and all $g \in \tau_\gamma$.
@@ -674,14 +684,14 @@ There is lots to be proven, but that is the entire description.
 
 [Note: this may not eventually be needed, depending on how the “coherence” in phase 2 is assumed.]
 
-For the subsequent constructions of this section, we assume we are given phase 1 data for all $\beta < \alpha$.
+For the subsequent constructions of this section, we assume we are given tangle data for all $\beta < \alpha$.
 
 \begin{definition}
   \label{def:embedding-into-pretangles}
-  \uses{def:semi-tangle,def:phase-1-data}
+  \uses{def:semi-tangle,def:tangle-data}
   \lean{con_nf.new_tangle.to_pretangle}
   \leanok
-  There is an evident injection $\tau_\alpha \to \Pretangle_\alpha$ (where $\tau_\alpha$ is constructed from the given phase 1 data).  Moreover, this commutes with the $\All_\alpha$-action.
+  There is an evident injection $\tau_\alpha \to \Pretangle_\alpha$ (where $\tau_\alpha$ is constructed from the given tangle data).  Moreover, this commutes with the $\All_\alpha$-action.
 \end{definition}
 
 \section{Review}
@@ -689,9 +699,9 @@ For the subsequent constructions of this section, we assume we are given phase 1
 Overall, we have now shown:
 
 \begin{definition}
-  \label{def:phase-1-propagates}
-  \uses{def:phase-1,def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,lem:tangle-action}
-  For a proper type index $\alpha \in \lambda$, given phase 1 data at all levels $\beta < \alpha$, then the constructions above provide \emph{most} components of phase 1 data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$ and its properties.
+  \label{def:tangle-data-propagates}
+  \uses{def:embedding-into-pretangles,def:typed-near-litter,def:typed-singleton,lem:tangle-action}
+  For a proper type index $\alpha \in \lambda$, given tangle data at all levels $\beta < \alpha$, then the constructions above provide \emph{most} components of tangle data at level $\alpha$ — everything except for the embedding $\iota_\alpha : \tau_\alpha \to \mu$ and its properties.
 
   [Note that to treat this as a \emph{definition}, in particular of the “designated supports” component, we are implicitly invoking the axiom of choice --- a priori we only know that there \emph{exists} some support for each new tangle.]
 \end{definition}
@@ -702,55 +712,282 @@ Overall, we have now shown:
 
 In this phase, we give the three hard theorems about the constructions of phase 1: strengthening supports, freedom of action, and constraining the number of tangles.
 
-These meet the major technical difficulty of the recursion: We need (it seems) to assume not just that we have sets of tangles etc at all earlier levels, but also that they fit together correctly, in the sense of being inductively defined at all levels by the constructions so far.  This is the reason why we need the major phase separation in the components of the recursion.
+These meet the major technical difficulty of the recursion: For each topic in phase 2, we need to assume something along the lines of tangle data at all earlier levels, and suitable connections between them”.  The tricky bit is structing the “…suitable connections…” cleanly.
 
-\section{Inductive assumptions: Coherent data at all lower levels}
+The greediest approach, which can’t fail to work, is to assume some form of “at every level, the tangle data is equal to what is constructed from the data at earlier levels, by the constructions of phase 1”.  This was used in previous versions, as “coherent tangle data”.  However, this is somewhat awkward to work with in formalisation.  A more cleanly-structured version is given by “freedom of action contexts”, \cref{def:foa-context}, which axiomatise just as much of the connection between earlier levels as the recursive construction needs to know.
+
+\section{Freedom of action context}
 
 \begin{definition}
-  \label{def:concrete-phase-1-data}
-  \uses{def:phase-1-data}
-  For a type index $\alpha$, \emph{concrete phase 1 data} at level $\alpha$ consists of a subset $\tau \subseteq \Pretangle_\alpha$ and a subgroup $\All \subseteq G_\alpha$, together with full phase 1 data on these.
+  \label{def:foa-context}
+  \uses{def:tangle-data}
+  A \emph{freedom of action context} at a proper type index $\alpha$ consists of:
 
-  Notes for formalisation:
+  \begin{enumerate}
+  \item for every $\beta$ and path $A : \beta \to \alpha$, core tangle data $\All_A$, $\tau_A$ etc at $\beta$;
+  \item for each such $\beta$, $A$, when $A$ a \emph{proper} path (equivalently, when $\beta < \alpha$), \emph{full} tangle data extending the given core data;
+  \item for $A : \beta \to \alpha$ and $\gamma < \beta$, a \emph{derivative} map $(-)_\gamma : \All_{A} \to \All_{\gamma;A}$, commuting with the maps $\All_\bullet \to \Str_\bullet$ and $(-)_{\gamma} : \Str_\beta \to \Str_\gamma$.
+  \end{enumerate}
+
+  Notes:
+  \begin{enumerate}
+  \item The name “freedom of action context” is very much a placeholder; it would be good to find a better name.
+  \item This can be repackaged several equivalent ways.  For instance, the quantification over paths could be re-grouped as “for each $\beta < \alpha$ and $A : \gamma \to \beta$, full tangle data at $\gamma$; and core tangle data at $\alpha$”.  This would avoid needing to say “full tangle data extending the given core data”, but would make access to the core data less uniform.
+  \item Viewed categorically, the assumed maps make $\All$ into a functor on the slice category $(\Path (\lambda,<)/\alpha)^\op \to \mathrm{Gp}$, making the maps $\All \to \Str$ a natural transformation.
+  \item The motivation for assuming just “core data” at $\alpha$ itself is that for the main constructions, we’ll be working in the inductive step of the recursion where we’re assuming the data is already available at lower levels, and by the constructions of phase 1, we can assume some but not all of it is available at the “current level”.
+  \item The motivation for parametrising the lower data not just by levels but by paths is so that when we synthesise this data at $\alpha$ from similar data at each $\beta < \alpha$, no coherence between the given data is required.
+  \end{enumerate}
+\end{definition}
+
+\begin{definition}
+  \label{def:restrict-foa-context}
+  \uses{def:foa-context}
+  Given a freedom of action context at $\alpha$ and a path $A : \beta \to \alpha$, we can restrict the context along $A$ to get a freedom of action context at $\beta$.
+  %
+  Moreover, this is functorial in $A$.
+\end{definition}
+
+\begin{definition}
+  \label{def:synthesise-foa-context}
+  \uses{def:foa-context,def:tangle-data-propagates}
+  Given $\alpha \in \lambda$, and a freedom of action context at each $\beta < \alpha$, together with extensions of their top-level core tangle data to full tangle data at each $\beta < \alpha$, there is a \emph{synthesised} freedom of action context at $\alpha$, with its top-level core tangle data given by the constructions of phase 1.
+\end{definition}
+
+\section{Freedom of action [new version]}
+
+A key technical lemma, used both for counting tangles and for proving that they satisfy comprehension, is the proof that allowable permutations act freely, in a suitable sense.
+
+Roughly, any consistent and locally small specification of values of derivatives of an allowable permutation at elements of type $-1$ can be realized.
+
+In order to state the theorem precisely, we must first set up a framework for discussing partial specifications of structural/allowable permutations.
+
+\begin{definition}
+  \label{def:binary-condition}
+  \uses{def:support-condition}
+  Let $\alpha$ be a proper type index. Recall that an \emph{$\alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter; the set of these was denoted $\Cond_\alpha := (\tau_{-1} + \NearLitter) \times \mathrm{Path}(-1,\alpha)$.
+
+  A \emph{binary condition} similarly consists of a pair of atoms or of near-litters, together with a path from $-1$ to $\alpha$:
+  \[ \BiCond_\alpha := (\tau_{-1}^2 + \NearLitter^2) \times \mathrm{Path}(-1,\alpha).\]
+\end{definition}
+
+\begin{definition}
+  \label{def:condition-functoriality}
+  \uses{def:binary-condition}
+  Paths act covariantly on binary conditions.  Explicitly, a path $A : \beta \to \alpha$ induces a map $(-)A \BiCond_\beta \to \BiCond_\alpha$, defined by $(x,B)A := (x,BA)$; and this preserves identities and composition.
+
+  Taking inverse images under these maps, paths act contravariantly on sets of binary conditions: a path $A : \beta \to \alpha$ induces $(-)_A : \pow(\BiCond_\alpha) \to \pow(\BiCond(\beta))$, given by $\sigma_A := \{ (x,y,B) \mid (x,y,BA) \in \sigma \}$.
+\end{definition}
+
+\begin{definition}
+  \label{def:conditions-from-perm}
+  \uses{def:binary-condition}
+  A binary condition $(x,y,A)$ is viewed as representing the condition “$\pi_A(x) = y$”.  Any $\alpha$-structural permutation $\pi$ thus induces a set of binary conditions, its \emph{graph}, $\{ (x,y,A) \in \BiCond_\alpha \mid \pi_A(x) = y \}$.  This gives an evident embedding $\Str_\alpha \to \pow(\BiCond_\alpha)$; we will notationally identify structural permutations with their graphs.
+
+  We say that a structural permutation $\pi$ \emph{extends} a set of binary conditions $\sigma$ if $\sigma \subseteq \pi$, viewing $\pi$ as its graph.  More generally, given any group with a map $\varphi : G \to \Str$ (e.g.\ the allowable permutations of some tangle data), we say $\pi \in G$ extends a set of binary conditions $\sigma$ if $\sigma \subseteq \varphi(\pi)$.
+\end{definition}
+
+\begin{proposition}
+  \label{prop:conditions-from-perm-restriction}
+  \uses{def:conditions-from-perm,def:condition-functoriality}
+  This identification of permutations respects the actions of paths.  That is, given a structural permutation $\pi$, the graph of the derivative $\pi_A$ is precisely the restriction along $A$ of the graph of $\pi$ (as our notational identification suggests).
+\end{proposition}
+
+\begin{definition}
+  \label{def:condition-dom-rge}
+  \uses{def:binary-condition}
+  Previously, we viewed $\alpha$-conditions $(x,A) \in \Cond_\alpha$ as representing the conditions $\pi_A(x) = x$, as used in supports (and under this view we could identify them with the binary conditions $(x,y,A)$).  In this section, we will more often view them as elements of the domain or range of a set of binary conditions.  Precisely, for a set $\sigma$ of binary conditions, we take $\dom \sigma := \{ (x,A) \mid (x,y,A) \in \sigma \}$, and similarly $\rge \sigma := \{ (y,A) \mid (x,y,a) \in \sigma \}$.
+
+  By a slight abuse of terminology, when working with sets of conditions, we will often say “litter” to mean “litter-with-path”, i.e.\ “condition of the form $(L,A)$”, and similarly for near-litter” and “atom”.
+\end{definition}
+
+\begin{definition}
+  \label{def:condition-total-1-1}
+  \uses{def:condition-dom-rge}
+  We extend standard properties of binary relations to sets of binary conditions:
+
+  Say a set of binary conditions $\sigma \subseteq \BiCond_\alpha$ is \emph{total} if its domain is $\Cond_\alpha$; co-total if its range is; and one-to-one if whenever $(x,y,A)$ and $(x',y',A')$ are in $\sigma$, $x = x'$ if and only if $y = y'$.
+
+  The \emph{dual} $\sigma^{-1}$ of a set of binary conditions is $\{ (y,x,A) \mid (x,y,A) \in \sigma \}$.
+\end{definition}
+
+\begin{proposition}
+  \label{prop:total-1-1-gives-perm}
+  \uses{def:condition-total-1-1,def:conditions-from-perm}
+  A set of binary conditions is the graph of a structural permutation precisely if it is one-to-one and total.
+
+  (NOTE: this may not be explicitly needed, but it is helpful to know, and should be a good warmup and definition-test ahead of the main freedom of action theorem, in particular \cref{prop:total-allowable-partial-perm-actual}.)
+\end{proposition}
+
+\begin{proposition}
+  \label{prop:total-1-1-restriction}
+  \uses{def:condition-total-1-1,def:condition-functoriality}
+  If a set of $\alpha$-conditions $\sigma$ is total (resp.\ co-total, 1-1) then so is its restriction $\sigma_A$ for any path $A : \beta \to \alpha$.
+\end{proposition}
+
+\begin{definition}
+  \label{def:flexible-condition}
+  \uses{def:foa-context}
+  Given a freedom of action context at a proper type index $\alpha$, a \emph{flexible litter} is a condition $(L,A)$, with $L$ a litter, such that $L$ is not in the image of any of the $f$-maps $f^A_{\gamma,\delta}$ (for any $\gamma,\delta < \beta \pathto^A \alpha$).
+\end{definition}
+
+\begin{definition}
+  \label{def:allowable-partial-perm}
+  \uses{def:condition-total-1-1,def:condition-functoriality,def:flexible-condition}
+  Assume a freedom of action context at a proper type index $\alpha$.
+
+  An \emph{allowable partial permutation} is a set $\sigma$ of binary $\alpha$-conditions satisfying the following properties:
+  \begin{enumerate}
+  \item It is one-to-one.
+  \item (Flexible litters:)  Either $\dom \sigma$ and $\rge \sigma$ both include all flexible litters, or else they both include \emph{co-$\mu$-many}, i.e.\ there are at least $\mu$-many flexible litters not in $\dom \sigma$, and dually for $\rge \sigma$.
+  \item (Atoms:) For each litter $(L,A)$ not in $\dom \sigma$, then $\dom \sigma$ contains $<\kappa$-many atoms $(x,A)$ with $x \in L$; and dually for $\rge(\sigma)$.  On the other hand, for each litter $(L,A) \in \dom \sigma$ (say $\sigma_A(L)$ is the unique near-litter such that $(L,\sigma_A(L),A) \in \sigma$), then either $\dom \sigma$ contains $<\kappa$-many atoms of $(L,A)$ and $\rge \sigma$ contains $<\kappa$-many atoms of $(M,A)$, or else $\dom \sigma$ contains all atoms of $(L,A)$ and their setwise image $\sigma_A''(L)$ is precisely $\sigma_A(L)$; and dually for each litter $(L,A) \in \rge \sigma$.
+  \item (Near-litters.) For each near-litter $(N,A) \in \dom \sigma$, its litter $(N^\circ,A)$ and all atoms $(x,A)$ from the symmetric difference $N \symdiff N^\circ$ are also in $A$, and $\sigma_A(N) = \sigma_A(N^\circ) \symdiff \sigma_A''(N \symdiff N^\circ)$; and dually for each near-litter in $\rge \sigma$.
+  \item (Non-flexible litters.) Whenever $\sigma$ contains some triple $(f^A_{\gamma,\delta}(x),N,(-1;\delta;A))$ (where $\gamma,\delta < \beta \pathto^A \alpha$, $\delta$ is proper, and $x \in \tau_{\gamma;A}$), then $(\dom \sigma)_{\gamma;A}$ supports $x$, and every allowable permutation $\rho \in \All_A$ extending $\sigma_A$ has $N = f^A_{\gamma,\delta}(\rho_\gamma x)$.  Dually, whenever $\sigma$ contains some $(N,f^A_{\gamma,\delta}(x),(-1;\delta;A))$, then $(\rge \sigma)_{\gamma;A}$ supports $x$, and any allowable $\rho$ extending $\sigma_A$ has $N = f^A_{\gamma,\delta}(\rho^{-1}_\gamma x)$ (note the inverse in this case).
+  \end{enumerate}
+
+  We will often refer to these conditions individually, as “the allowability condition for atoms”, etc.
+\end{definition}
+
+The motivation for allowable permutations is precisely to state the freedom of action property:
+
+\begin{definition}
+  \label{def:foa-property}
+  \uses{def:allowable-partial-perm,def:conditions-from-perm}
+  Given a freedom of action context at a proper type index $\alpha$, say that \emph{freedom of action holds} if for every allowable permutation $\sigma$, there is some allowable permutation $\pi \in \All_\alpha$ extending $\sigma$.
+\end{definition}
+
+\begin{theorem}
+  \label{thm:foa-propagates}
+  \uses{def:foa-property,def:synthesise-foa-context}
+  Suppose given, for each $\beta < \alpha$, a freedom of action context together with full tangle data at the top level; and such that for all their restrictions along any path $A : \gamma \to \beta$ (including identity paths), freedom of action holds.
+
+  Then freedom of action holds in the synthesised freedom of action context at $\alpha$ (i.e.\ with the tangles and allowable permutations at $\alpha$ defined by the constructions of phase 1).
+\end{theorem}
+
+\begin{proof}
+  \uses{prop:allowable-partial-perm-chain-union,lem:maximal-allowable-partial-perm-total,prop:total-allowable-partial-perm-actual}
+  The proof is quite lengthy, so we break it down into various lemmas.
+
+  In outline: We first define an ordering on allowable partial permutations (\cref{def:allowable-partial-perm-order}), show that it has unions of chains (\cref{prop:allowable-partial-perm-chain-union}), and so apply Zorn’s lemma to conclude that it has a maximal element above any element.  This is the easy part.  The main work then consists of showing that any maximal partial permutation is total and co-total (\cref{lem:maximal-allowable-partial-perm-total}), and hence is an allowable permutation (\cref{prop:total-allowable-partial-perm-actual}).
+
+  Most lemmas involved can (and should) be given in an arbitrary freedom-of-action context, not required to be the synthesised one.
+\end{proof}
+
+\begin{definition}
+  \label{def:allowable-partial-perm-order}
+  \uses{def:allowable-partial-perm}
+  Work in a freedom of action context at a proper type index $\alpha$.
+
+  Given allowable partial permutations $\sigma, \rho$, say that $\sigma \sqsubseteq \rho$ (“$\sigma$ \emph{carefully extends} $\rho$”) if:
+
+  \begin{enumerate}
+  \item $\sigma \subseteq \rho$;
+  \item if $\rho$ has any new flexible litter, then it has all of them (in both domain and range);
+  \item within each litter, if $\dom \rho$ has any new atom, then it must have all atoms in that litter (and hence must also have the litter); and dually.
+  \end{enumerate}
+\end{definition}
+
+\begin{proposition}
+  \label{prop:allowable-partial-perm-chain-union}
+  \uses{def:allowable-partial-perm-order}
+  $\sqsubseteq$ has upper bounds for chains, given by taking unions.  That is: given a set of allowable partial permutations that is a chain under $\sqsubseteq$, its union is again an allowable partial permutation, and carefully extends each element of the chain.  (Indeed, this gives a supremum for the chain, and so shows that $\sqsubseteq$ is chain-complete; but “upper bounds” is all we need in order to apply Zorn’s lemma.)
+\end{proposition}
+
+To prove that maximal allowable partial permutations are total, we will make use of a well-ordering on (unary) conditions:
+
+\begin{definition}
+  \label{def:constrains}
+  \uses{def:foa-context}
+  Fix a freedom of action context at $\alpha$. Then the relation \( \prec \)  on $\Cond_\alpha$, read as \emph{“constrains”}, is defined by:
   \begin{itemize}
-    \item The reason we use \emph{subsets} from here on is because we will soon impose equalities between these components, and subset equalities are much less nasty to deal with than type equalities.
-    \item To define this, we almost certainly want to factor out the types $\tau$ and $\All$ as parameters of the phase 1 data from the start.
-    \item We could avoid that “factoring out as a parameter” by assuming this concreteness already in the phase 1 data, i.e. positing $\tau$ as a subset of pretangles and $\All$ as a subgroup of $\Str_\alpha$ from the start.  At least for $\tau$, that seems a bit unnatural — it adds an entirely irrelevant extra assumption throughout phase 1.  For $\All$ it perhaps wouldn’t be so unnatural, since $\All$ does need to be assumed with at least a homomorphism to $\Str_\alpha$ anyway.
+    \item \( (L, A) \prec (x, A) \), whenever \( L \) is a litter and \( x \in L \); (an atom is constrained by the litter it belongs to);
+    \item \( (N^\circ, A) \prec (N, A) \) when \( N \) is a near-litter not equal to its corresponding litter \( N^\circ \);
+    \item \( (x, A) \prec (N, A) \) for $N$ as above and all \( x \in N\,\Delta\, N^\circ \);
+    \item \( (y, B:(\gamma<\beta):A) \prec (L, A) \) for all paths \( A \colon \beta \to \alpha \), and \( \gamma,\delta < \beta \), and \( L = f^A_{\gamma,\delta}(x), x \in \tau_{\gamma:A} \), and \( (y,B) \in S_x \), where \( S_x \subseteq \Cond_\gamma \) is the designated support of \( x \).
   \end{itemize}
 
-  The \emph{standard} concrete phase 1 data at level $-1$ are the defined $\tau_{-1} = \Pretangle_{-1}$ and $\All_{-1} = \Str_{-1}$.
+  Note: “$x$ constrains $y$” is effectively defined separately in the three cases that $y$ is an atom, a non-litter near-litter, or a non-flexible litter. Flexible litters are not constrained by anything.
+
+  Note: This relation is not transitive — that’s OK, it’s not intended to be!
 \end{definition}
 
-\begin{definition}
-  \label{def:concrete-phase-1-data-propagates}
-  \uses{def:concrete-phase-1-data,def:phase-1-propagates}
-  For a proper type index $\alpha \in \lambda$, given concrete phase 1 data at all levels $\beta < \alpha$, we get \emph{most} components of concrete phase 1 data at level $\alpha$.
+\begin{proposition}
+  \label{prop:constrains-well-founded}
+  \uses{def:constrains,lem:f-map-properties}
+  The relation \( \prec \) is well-founded.
+\end{proposition}
+\begin{proof}
+  By the conditions on orderings assumed in full tangle data, and the properties of $f$-maps, whenever some constraint \( (x, A) \prec (y,B) \) holds, we have \( \iota_A(x) < \iota_B(y) \) in \( \mu \).
+\end{proof}
 
-  In particular, the new set of $\alpha$-tangles $\tau_\alpha \subseteq \Pretangle_\alpha$ is the the image of the $\alpha$-tangles defined in phase 1, under their embedding into pretangles; and similarly for the allowable permutations.  (We could call these “concrete $\alpha$-tangles” and “abstract $\alpha$-tangles”, if we need to for disambiguation.)
-\end{definition}
+In order to make use of the inductive assumption that freedom of action holds at earlier levels, we will need a few notes about consquences of freedom of action, and about how the definitions of this section interact with restriction of the context.
 
-\begin{definition}
-  \label{def:coherent-phase-1-data}
-  \uses{def:concrete-phase-1-data-propagates}
-  For $\alpha \in \lambda + 1$, \emph{Phase 1 data below $\alpha$} consists of concrete phase 1 data at every level $\beta < \alpha$.  Say this is \emph{coherent} if it is standard at level $-1$, and at each proper type index $\beta < \gamma$, all components at level $\beta$ that \emph{could} have been induced from the data at lower levels $\gamma < \beta$ are, in fact, equal to what would have been induced that way.
+\begin{proposition}
+  \label{prop:restrict-allowable-partial-perm}
+  \uses{def:allowable-partial-perm,def:restrict-foa-context}
+  If $\sigma$ is an allowable permutation in a freedom of action context at $\alpha$, then for any $A : \beta \to \alpha$, the restriction $\sigma_A$ is again allowable in the context restricted along $A$.
+\end{proposition}
 
-  \begin{itemize}
-  \item Note we want to provide this definiton also for $\alpha = \lambda$!  I think this should be available in mathlib as \verb|with_top|.
-  \item We could unify “standard at level $-1$” with induced at proper type indices by generalising the definition of each component of the “induced concrete phase 1 data at $\alpha$” to include the case $\alpha = -1$,defining the induced data as the standard one in that case.  Is this more natural?  Will it make life easier?
-  \end{itemize}
+\begin{proof}
+  \uses{prop:total-1-1-restriction,prop:conditions-from-perm-restriction}
+  Hopefully straightforward, but probably a bit lengthy, using \cref{prop:total-1-1-restriction}, \cref{prop:conditions-from-perm-restriction}.
+\end{proof}
 
-  For $\alpha < \beta$, “phase 2 data below $\alpha$” can be restricted to “phase 2 data below $\beta$”.
+\begin{proposition}
+  \label{prop:allowable-partial-perm-action}
+  \uses{def:foa-property}
+  Given a freedom of action context at a proper type index $\alpha$, an allowable permuation $\sigma$, and an $\alpha$-tangle $x$ such that $\dom \sigma$ supports $x$:
+  \begin{enumerate}
+    \item if $\pi, \pi' \in \All_\alpha$ are allowable permutations extending $\sigma$, then $\pi x = \pi' x$;
+    \item if freedom of action holds, there is a unique $y \ in \tau_\alpha$ such that every allowable permutation $\pi$ extending $\sigma$ has $\pi x = y$; we denote this unique value by $\sigma x$.
+  \end{enumerate}
+\end{proposition}
 
-  Most constructions in phase 2 will assume coherent phase 1 data below $\alpha$, for some fixed $\alpha$.
+\begin{proof}
+  For the first part: given such $\pi, \pi'$, $(\pi^-1)\pi$ acts trivally on $\dom \sigma$, and hence fixes $x$.  The second part follows from the first together with the freedom of action property.
+\end{proof}
 
-  [Terminology: perhaps we should call this “phase 2 data at $\alpha$”?  That seems more consistent for the overall naming scheme, but “coherent phase 1 data below $\alpha$” seems clearer and more transparent in itself.  Maybe we should reconsider the naming scheme, so that it’s not in tension with clarity!]
-\end{definition}
+\begin{lemma}
+  \label{lem:maximal-allowable-partial-perm-total}
+  \uses{def:allowable-partial-perm-order}
+  Any allowable partial permutation that is maximal under $\sqsubseteq$ is total.
+\end{lemma}
+
+\begin{proof}
+  \uses{prop:allowable-partial-perm-action,prop:constrains-well-founded,prop:restrict-allowable-partial-perm}
+  This is the main hard work of the proof of \cref{thm:foa-propagates}, and should probably be broken down into separate lemmas.
+
+  It suffices to show the claim: For any allowable partial $\sigma$, and any $x$, if everything that constrains $x$ is in $\dom \sigma$, then there is some $\sigma' \sqsupseteq \sigma$ with $x \in \dom \sigma$.  (Given this claim and a maximal element $\sigma$, it follows by induction over “constrains” that $\dom \sigma$ is all of $\Cond_\alpha$. Co-totality follows dually.)
+
+  Proof of claim: Treat the 4 cases for $x$ separately.
+
+  \begin{enumerate}
+  \item A flexible litter $(L,A)$.  TO GIVE.
+  \item An atom $(x,A)$.  TO GIVE.
+  \item A non-litter near-litter $(N,A)$.  TO GIVE.
+  \item A non-flexible litter $(f^A_{\gamma,\delta}(x),-1;\delta;A)$.  TO GIVE.
+  \end{enumerate}
+
+  Note: The “straightforward” parts of checking allowability are fairly repetitive between the different cases here.  This is the sort of thing that — if just tackled greedily — could take a lot of time and create a lot of code duplication.  Probably good to write a few of these cases directly, but then see if they can be abstracted out as lemmas that can be re-used across cases.  For the near-litter and non-flexible litter conditions, the point is that these are of the form “if [thing $x$] is present, then [condition $P$ holds]”, where condition $P$ is something which is clearly preserved by subset-expansion (i.e. if $\sigma \subseteq \rho$ and $P$ holds for $\sigma$, then it holds for $\rho$). So when we expand $\sigma$ to $\rho$, these allowability conditions will still hold for all things that were already in $\sigma$ — we only need to check for any new things that were added in $\rho$.
+
+  We should also avoid code-duplication of checking dual conditions separately, probably by lemmas explicitly connecting each condition to its dual, or by explicitly making use of duals in the definition of the allowability conditions.
+\end{proof}
+
+\begin{proposition}
+  \label{prop:total-allowable-partial-perm-actual}
+  \uses{def:synthesise-foa-context,def:foa-property,}
+  In the synthesised freedom of action context at $\alpha$, any partial allowable permutation (at $\alpha$) that is total and co-total extends to an actual allowable permutation at $\alpha$.
+\end{proposition}
+
+\begin{proof}
+  \uses{prop:restrict-allowable-partial-perm,lem:coherence-unpacked}
+  Take $\sigma$ a total and co-total allowable partial permutation.  For each $\beta < \alpha$, $\sigma_\beta$ is again allowable, so by the assumption of FoA at earlier levels, $\sigma_\beta$ extends to an allowable permutation $\pi_\beta \in \All_\beta$. [If we assumed $\All \to \Str$ is injective, then $\pi_\beta$ is uniquely determined, since $\sigma_\beta$ is total and co-total.]  Together these $\pi_\beta$ comprise a semi-allowable permutation $\pi$ extending $\sigma$; the allowability condition for non-flexible litters ensures that the unpacked coherence condition holds, and hence by \cref{lem:coherence-unpacked}, $\pi$ is allowable.
+\end{proof}
 
 \section{Strong supports defined}
 
 NOTE: much of this section has not been updated since early in the formalisation, so may not match the current implementation and abstractions very closely.
 
-Throughout this section, fix some $\alpha \in \lambda + 1$, and assume coherent phase 1 data below $\alpha$. [Actually, perhaps this section doesn’t need the coherence and could be done in phase 1, i.e. working purely in a single level, assuming full phase 1 data is available at lower levels?  This should become clearer as it is formalised.]
+Throughout this section, fix some $\alpha \in \lambda + 1$, and assume a freedom of action context at $\alpha$.
 
 Treating supports as sets suffices for the model description, but we will need to analyze supports and orbits with more care, so it is better for purposes
 of the proof to equip supports with a well-orderings.
@@ -772,157 +1009,26 @@ This probably represents a chunk of formal verification work, as what is obvious
 % \end{comment}
 
 \begin{definition}
-\label {def:raise-lower-index}
-\uses{def:support-of}
-[Note: all this stuff — raising and lowering indices, and the results about repeatedly applying them to structural permutations, etc — is MUCH more clearly handled in algebraic language, using the category of paths, the functoriality of $\Str_\alpha$ and $\All_\alpha$ in paths, and maps between group actions, etc.]
-
-For any $\alpha$-support $S$ and an extended type index $C$ with minimum element greater than $\alpha$, we define $S^C$ as
-$\{((x,A\cup C,\gamma),(y,B\cup C,\delta)):((x,A,\gamma),(y,B,\delta)) \in S\}$.
-
-If $S$ is an $\alpha$-support and $\beta<\alpha$, $S_\beta$ is defined as the largest support $U$ such that $U^{\{\alpha\}} \subseteq S$ and $U$ is a $\beta$-support.
-\end{definition}
-
-\begin{definition}
-\label{def:strong-support}
-\uses{def:coherent-phase-1-data,def:raise-lower-index}
-A strong support is a support $S$ with certain additional properties.
-
-\begin{enumerate}
-\item  If $((\beta,-1,x),A,\gamma) \in S$ then $x$ is a singleton or a litter.
-
-\item  If $((\beta,-1,\{x\}),A,\gamma) \in S$, then $((\beta,-1,L),A,\gamma) <_S ((\beta,-1,\{x\}),A,\gamma)$, where $L$ is the litter containing $x$.
-
-\item  If $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$, where $\gamma<\delta$, then there is a $\gamma$-support $T$ of $y$ such that $T^{A \setminus \{\beta\}} \subseteq S$ and each element of the domain of $T^{A \setminus \{\beta\}}$ is $\leq_S ((\beta,-1,L),A)$.  Note that these conditions imply that there is an index-raised version of a strong $\gamma$-support of $y$ included in $T$.
-\end{enumerate}
+  \label{def:strong-support}
+  \uses{def:foa-context,def:constrains}
+  A \emph{strong support} is a support $S$ equipped with a well-ordering $\prec_S$, such that whenever $c \in S$ and $d$ constrains $c$, then $d \in S$ and $d \prec_S c$.
 \end{definition}
 
 \begin{lemma}
-\label {lem:strengthen-support}
-\uses{def:strong-support}
-Any support can be extended to a strong support.
+  \label{lem:strengthen-support}
+  \uses{def:strong-support}
+  Any support is a subset of some strong support (and hence any tangle is supported by some strong support).
 \end{lemma}
 
 \begin{proof}
-It should be straightforward to see that any $X$ with support $S$ has a support $S^\circ$ which satisfies the first condition.  Replace each element $((\beta,-1,x),A)$ of the domain of $S$ for which $x$ is a near-litter and not a litter with $((\beta,-1,x^\circ),A)$ and $((\beta,-1,\{y\}),A)$ for each $y$ in the symmetric difference of $x$ and $x^\circ$.
+  \uses{prop:constrains-well-founded}
+  Given a support $S$, take its down-closure of $\downarrow S$ under the “constrains” relation.
 
-We describe the process of extending a support to a strong support, assuming that it already satisfies the first condition.  Before each typed singleton element of the domain, insert the appropriate typed litter (removing an extra copy of it if it occurred later in the order).  This will only need to be done once for each typed singleton element.
+  First we need to check this has size $<\kappa$.  The “constrains” relation is well-founded, and each condition has $<\kappa$ (immediate) predecessors, so by induction, the down-closure of any singleton is of size $<kappa$. Then $ \downarrow S$ is the union of the down-closures of its singletons (down-closure under any relation preserves arbitrary unions); so it’s a union of $<\kappa$-many sets of size $<\kappa$.
 
-The condition $((\beta,-1,L),A,\delta) \in S$ and $[L]=f_{\gamma,\beta}(y)$ for $\gamma<\delta$ forces insertion of a $\gamma$-support for $y$.  Of course this might cause further insertions.  Notice that the third components of all inserted items will be $\leq \gamma <\delta$.  So it is not possible for an infinite regress of insertions to occur which would cause the extended support to fail to be a well-ordering.  (Of course, if an item is inserted which occurs later in the order, remove later occurrences).
+  Now “constrains” on $\downarrow S$ is a well-founded relation; and any well-founded relation can be extended to a well-ordering.  [This is a standard general theorem which is hopefully already in mathlib. If not, it can be proven probably most easily by Zorn’s lemma.]
 \end{proof}
 
-The third components in the elements of support domains seem actually to be necessary to ensure that strong supports can always be produced.  What the third component is doing is providing a comment on the index of the sub-support the element is required for.  There is another approach:  indexing the $f$ maps with $\alpha,\beta,\gamma$ instead of just $\beta,\gamma$ and requiring that ranges of $f$ maps with distinct indices be disjoint, which would require very straightforward modifications of the paper above, would ensure that we could tell the difference between insertions into an $\alpha$ support and insertions into a $\beta$-support for $\beta<\alpha$.  It seems that the added complexity is about the same with both approaches, and I have left it this way.  The approach used here also has the interesting effect that the extension over type $\gamma$ of a type $\alpha$ set is determined by its extension over type $\beta$ in a way which does not depend on $\alpha$;  it is interesting that this can be done.
-
-
-% \begin{comment}
-{\bf Note for the formal verification project:}  This should be ready to go.
-% \end{comment}
-
-\newpage
-\section{Freedom of action of allowable permutations}
-
-The practical application of strong supports is to the proof that allowable permutations act freely in a suitable sense, and in guiding applications of this theorem.
-
-We claim that any locally small specification of values of derivatives of an allowable permutation at elements of type $-1$ can be realized.
-
-We give an exact statement of what is meant, then we prove it.
-
-\begin{definition}
-\label {def:local-bijection}
-\uses{def:path,def:atoms-and-litters,def:small}
-\leanok
-\lean{con_nf.local_bijection}
-An $\alpha$-local bijection consists of: for each $\alpha$-extended type index (i.e.\ path $A : -1 \to \alpha$), a permutation $\pi^0_A$ of some subset $\dom(\pi^0_A) \subseteq \tau{-1}$, such that the intersection of $\dom(\pi^0_A)$ with any litter is small (including possibly empty).
-\end{definition}
-
-\begin{definition}
-\label{def:perm-exception}
-\uses{def:structural-perm-atoms}
-\leanok
-\lean{con_nf.near_litter_perm.exception}
-We say that $x$ is an {\em exception} of a near-litter permutation $\pi$ iff ($L$ being the litter containing $x$) either $\pi(x) \not\in (\pi``L)^\circ$ or $\pi^{-1}(x) \not\in ({\pi^{-1}}``L)^\circ$.
-\end{definition}
-
-\begin{description}
-\item[Stipulation:]  For each litter $L$ we specify a well-ordering $\leq_L$ of order type $\kappa$ with coordinated strict well-ordering $<_L$.  [In fact this is provided trivially by the current implementation of atoms.]
-\end{description}
-
-\begin{definition}
-  \label{def:flexible}
-  \uses{def:coherent-phase-1-data}
-  Given coherent part 1 data below $\alpha$, a path $A : \beta \to \alpha$, and a litter $L$, say $L$ is \emph{$A$-flexible} (or that the pair $(L,A)$ is \emph{flexible}) if $L$ is not in the range of $f_{\beta,\gamma}$, for any $\gamma < \alpha$.
-
-  (In particular, if $\beta = -1$, every such pair is flexible, since $f_{\gamma,\beta}$-maps is only defined for $\beta$ proper.)
-\end{definition}
-
-\begin{definition}
-  \label{def:freedom-of-action-statement}
-  \uses{def:perm-exception,def:local-bijection,def:flexible,def:allowable-perm-atoms}
-  Given coherent part 1 data below $\alpha$, say that \emph{freedom of action holds (at $\alpha$)} if: Given an $\alpha$-local bijection $\pi^0$ and a specification for each path $A : \beta \to \alpha$ a bijection of the $\beta$-flexible litters, there is a unique allowable permutation $\pi \in \All_\alpha$ such that:
-  \begin{enumerate}
-   \item $\pi{A}$ extends $\pi^0_{A}$ for each $A$;
-   \item for each path $A : \beta \to \alpha$ and $A$-flexible litter $L$, $\pi_A(j_\beta(L)) = j_\beta(N)$ for some $N$ near to $\chi_A(L)$;
-   \item The only exceptions of $\pi$ are $\pi^0$, and everywhere else, $\pi$ is order-preserving between litters.  That is: for each path $A : -1 \to \alpha$ and litter $L$, and writing $N$ for the near-litter $\pi_A``L$, the restriction of $\pi_A$ to $L \setminus \dom(\pi^0_A)$ is the unique bijection from $L \setminus \dom(\pi^0_A)$ to $N^\circ \setminus \rge(\pi^0_A)$ which is strictly increasing with respect to the (given/canonical) orders on $L$ and $N^\circ$.
-  \end{enumerate}
-
-  Note: Earlier versions of the note/blueprint stated the 3rd condition in terms of exceptions; recent versions of the note spell it out in more detail and add the “increasing” condition, which is necessary for the uniqueness in the theorem conclusion.  If there are any doubts, the current version of Randall’s note should be consulted!
-\end{definition}
-
-\begin{lemma}
-\label{lem:freedom-of-action-propagates}
-\uses{def:freedom-of-action-statement}
-Given coherent part 1 data below $\alpha$, if freedom of action holds at each level $\beta < \alpha$, then it holds at level $\alpha$.
-
-Note: I (Peter) have an alternative approach to freedom of action (slightly different in both statement and proof) which might possibly be easier to formalise, avoiding the dependence on strong supports in the proof.  Iff Randall approves it then I will add it in the blueprint as an alternative.  But it doesn’t change the overall structure of the main argument/recursion, so this doesn’t need to be worried about until the point of formalising the FoA theorem itself.
-\end{lemma}
-
-\begin{proof}
-  \uses{lem:strengthen-support}
-  [This proof is is substantially clarified in more recent versions of Randall’s note.]
-
-  We prove this by exhibiting a recursive procedure for computing $\pi$ and its derivatives along a strong support;  this succeeds because all objects have strong supports, and because computing all values of derivatives of $\pi$ on type $-1$ allows computation of all derivatives of $\pi$ at all types.
-
-For each extended type index, we specify a permutation $\chi_A$ of local cardinals $[L]$ is not of the form $f_{\gamma,\beta}(y)$ for any $\gamma<{\tt min}(A)$ and $y \in \tau_\gamma$.
-
-We consider an item $((\beta,-1,\{x\}),A,\gamma)$ and our aim is to compute $\pi_{A \cup \{-1\}}(x)$.  By hypothesis of the recursion, we have already
-computed $\pi_A$ at $((\beta,-1,L),A)$, where $L$ is the litter which contains $x$.
-
-There are two cases.  If $(A,x)$ is in the domain of $\pi^0$, we compute $\pi_{A \cup \{-1\}}(x) = \pi^0_A(x)$ and we are done.
-
-Otherwise we use the hypothesis of the recursion:  we compute $\pi_{A \cup \{-1\}}(x)$ for any $x$ in $L$ with $(A,x)$ not in the domain of $\pi_0$ using the fact that we have already computed $\pi_A(\beta,-1,L) = (\beta,-1,N)$:  we define $\pi_{A \cup \{-1\}}$ to agree with the unique bijective map from the
-elements of $L$ not in the domain of $\pi^0_A$ to the elements of $N^\circ$ not in the domain of $\pi^0_A$ which is strictly increasing in the sense that it sends larger objects in the sense of $<_L$ to larger objects in the sense of $<_{N^\circ}$.
-
-Now we consider items of the form $((\beta,-1,L),A,\delta)$ in the strong support where $L$ is a litter.
-
-If $[L]$ is not of the form $f_{\gamma,\beta}(y)$ for a $\gamma<{\tt min}(A)$ and $y \in \tau_\gamma$,
-we compute $\pi_A((\beta,-1,L))$ as $$(\beta,-1,{\pi^0_A}``L \cup (\chi_A([L])^\circ \setminus {\pi^0_A}``(\tau_{-1} \setminus L))):$$ we map
-$L$ to the near-litter in $\chi_A([L])$ with the exact modifications required by the local bijection.
-
-If $[L]$ is of the form $f_{\gamma,\beta}(y)$ for a $\gamma<{\tt min}(A)$ and $y \in \tau_\gamma$ then we proceed just as above but we take the action on $[L]$ from a different source:
-the coherence condition tells us that $[L]$ should be mapped to $f_{\gamma,\beta}(\pi_{A \setminus \{\beta\} \cup \{\gamma\}}(y))$, so we compute
-$\pi_A((\beta,-1,L))$ as $$(\beta,-1,{\pi^0_A}``L \cup (f_{\gamma,\beta}(\pi_{A \setminus \{\beta\} \cup \{\gamma\}}(y))^\circ \setminus {\pi^0_A}``(\tau_{-1}\setminus L))),$$  which is essentially the same idea but a bit more complex.
-
-The nasty recursive idea here is that we already know how to compute $\pi_{A \setminus \{\beta\} \cup \{\gamma\}}(y)$ from the embedded strong $\gamma$ support of $y$ because we assume as a hypothesis of the recursion that we already know how to carry out this computation for $\gamma$-supports, $\gamma<\alpha$.  The  local information we need about the $\gamma$ allowable permutation (the local bijection to be used and the relevant $\chi$ maps) is included in the information we are given initially about $\pi$ (though this data will have indices modified when used on the $\gamma$-support, of course).  Notice that we certainly do know how to do it for 0-supports, because the recursive clause will never be invoked if $\alpha=0$:  the rest of the procedure tells us what to do.
-
-Once we know how to carry out this calculation along any $\alpha$-strong support, we can compute the derivatives of $\pi$ on elements of type $-1$  along all type paths, and so compute the value of $\pi$ and all of its derivatives on all types.  The method of calculation clearly gives an allowable permutation without exceptions other than those dictated by the local bijection.
-\end{proof}
-
-% \begin{comment}
-{\bf Note for the formal verification project:}  This section is vitally important and should be ready to work on (once the model and the definition of strong support are handled).  Setting up the recursive definition of the computation may be nasty.
-% \end{comment}
-
-\begin{theorem}
-  \label{thm:freedom-of-action}
-  \uses{def:freedom-of-action-statement}
-  Given coherent phase 1 data below $\alpha$, it satisfies freedom of action at every level.
-\end{theorem}
-
-\begin{proof}
-  \uses{lem:freedom-of-action-propagates}
-  By induction over $\beta < \alpha$, using \cref{lem:freedom-of-action-propagates}.
-\end{proof}
-
-
-\newpage
 \section{Types are of size \texorpdfstring{$\mu$}{μ} (so the construction actually succeeds)}
 
 [Note: this section is treated MUCH more clearly in Randall’s more recent versions of the note — we should certainly pull in from that newer version before attempting to formalise the section.]
@@ -932,7 +1038,7 @@ that the construction actually succeeds at every type.
 
 \begin{definition}
 \label {def:coding-function}
-\uses{def:coherent-phase-1-data}
+\uses{def:foa-context}
 For any support $S$ and tangle $x$, we can define a function $\chi_{x,S}$ which sends $T=\pi(S)$ to $\pi(x)$ for every $T$ in the orbit of $S$ under
 the action of allowable permutations.  We call such functions {\em coding functions\/}.  Note that if $\pi[S]=\pi'[S]$ then $(\pi^{-1}\circ \pi')[S]= S$, so
 $(\pi^{-1}\circ \pi')(x)= x$, so $\pi(x)=\pi'(x)$, ensuring that the map $\chi_{x,S}$ for which we gave an implicit definition is well defined.
@@ -992,10 +1098,8 @@ Pulling out the main items from the discussion above, for formalisation targets:
 
 \begin{definition}
   \label{def:support-spec}
-  \uses{def:coherent-phase-1-data}
-  Fix coherent phase 1 data below $\alpha$.  A \emph{support-specification} is \ldots [this is quite long to define; we should get the text from more recent versions of Randall’s note]
-
-  [Perhaps the coherence is not needed?]
+  \uses{def:foa-context}
+  Fix a freedom of action context for $\alpha$.  A \emph{support-specification} is \ldots [this is quite long to define; we should get the text from more recent versions of Randall’s note]
 \end{definition}
 
 \begin{lemma}
@@ -1012,10 +1116,8 @@ Pulling out the main items from the discussion above, for formalisation targets:
 
 \begin{lemma}
   \label{lem:support-spec-realisation-unique}
-  \uses{def:support-spec-realisation,def:freedom-of-action-statement}
+  \uses{def:support-spec-realisation,def:freedom-of-action-statement-old}
   If freedom of action holds at $\alpha$, then realisations of a support specification are unique modulo the group action.  That is, for any two realisations $S, S'$ of a support specification $S$, there is some allowable permutation $\pi$ such that $\pi S = S'$.
-
-  [Note: we don’t need to explicitly assume freedom of action here: we could appeal to the \cref{thm:freedom-of-action} to know that it holds.  But the explicit assumption keeps things more modular, and avoids unnecessary dependency, which will be helpful in case it turns out the argument needs restructuring at any point.]
 \end{lemma}
 
 \begin{proof}
@@ -1045,8 +1147,6 @@ Now, everything that we did with supports, we repeat with coding functions.
   \label{def:coding-function-spec}
   \uses{def:support-spec,def:coding-function}
   A \emph{coding function specification} is \ldots [again, see recent versions of Randall’s note]
-
-  [Perhaps the coherence is not needed?]
 \end{definition}
 
 \begin{lemma}
@@ -1085,21 +1185,21 @@ Now, everything that we did with supports, we repeat with coding functions.
 
 \begin{corollary}
   \label{cor:count-tangles}
-  \uses{def:freedom-of-action-statement}
+  \uses{def:foa-property}
   There are $\mu$-many $\alpha$-tangles.
 \end{corollary}
 
 \begin{proof}
-  \uses{lem:count-supports,cor:count-coding-functions}
-  Every tangle can be obtained as a coding function (of which there are $<\mu$) applied to a support (of which there are $\mu$).
+  \uses{lem:strengthen-support,lem:count-supports,cor:count-coding-functions}
+  Every tangle can be obtained as a coding function (of which there are $<\mu$) applied to a strong support (of which there are $\mu$).
 \end{proof}
 
 This completes the proof that each type is of size $\mu$, which finally closes the loop on the recursion --- or very nearly so: we still have to show that the orderings can be chosen to satisfy the extra technical conditions required.
 
 \begin{lemma}
   \label{lem:position-functions-propagate}
-  \uses{def:freedom-of-action-statement}
-  Given coherent phase 1 data below $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:phase-1-data}:
+  \uses{def:foa-property}
+  Given a freedom of action context for $\alpha$ satisfying freedom of action at $\alpha$, we can choose supports $S(x)$ for all $\alpha$-tangles $x$ and a position function $\iota_\alpha : \tau_\alpha \to \mu$ satisfying the conditions demanded in \cref{def:tangle-data}:
   \begin{enumerate}
     \item for each litter $L$, the typed litter of $L$ precedes the typed singletons of all its elements $a \in L$ --- explicitly, $\iota(j(L)) < \iota(k(a))$;
     \item for each near-litter $N$ which is not a litter, $j(N)$ comes after its (typed) litter $j(N^\circ)$, and after (the typed singletons of) all elements of $N \symdiff N^\circ$;
@@ -1125,43 +1225,38 @@ This completes the proof that each type is of size $\mu$, which finally closes t
 
 \section{Completing the recursion}
 
-We can now wrap up the recursion.  It is a little subtle: to know that the recursion fits together right as we build it up, we need to pin it down some more, to make it uniquely determined.
-
-[A probably cleaner approach would be to state and prove a general principle of \emph{$\lambda$-dependent-choice}, (it might be already in mathlib), and apply that to choices of coherent data, avoiding the need for “very coherent”.  The current approach is effectively unwinding what a general proof of $\lambda$-DC would give, applied to this case.]
+We can now wrap up the recursion.
 
 \begin{definition}
-  \label{def:very-coherent-data}
-  \uses{lem:position-functions-propagate,thm:freedom-of-action}
-  For $\alpha \in \lambda + 1$, a choice of coherent phase 1 data below $\alpha$ is \emph{very coherent} if its ordering functions and designated supports at each level are the ones provided by \cref{lem:position-functions-propagate} applied to the earlier levels, using \cref{thm:freedom-of-action} to supply the assumption of freedom of action.
+  \label{def:main-recursion}
+  \uses{thm:foa-propagates,lem:position-functions-propagate}
+  For each $\alpha \in \lambda$, we have the following data:
+  \begin{enumerate}
+  \item a full freedom of action context $C_\alpha$ (whose components we write as $\All^\alpha_A$, $\tau^\alpha_A$, etc.),
+  \item such that each restruction $(C_\alpha)_A$ satisfies freedom of action,
+  \item and with $<\mu$-many coding functions at the top level.
+  \end{enumerate}
 
-  [This is sweeping a little under the rug. Both those theorems are stated as existentials, but they are used proof-relevantly here; so before this lemma, we must define “functions” that are just those theorems, wrung through the axiom of choice.  See also discusson above replacing this with an explicit principle of “dependent choice”.]
+  This data is defined by recursion on $\alpha$.  Given such data for each $\beta < \alpha$,
+  \begin{enumerate}
+  \item the core freedom of action context at $\alpha$ is synthesised by \cref{def:synthesise-foa-context} (i.e.\ using the constructions of phase 1 to give the core tangle data at the top level, and assembling the context at proper paths from the given lower contexts);
+  \item freedom of action at the top level follows by \cref{thm:foa-propagates};
+  \item the top-level coding functions are bounded by \cref{cor:count-coding-functions};
+  \item this allows us to complete the full tangle data at the top level, by \cref{lem:position-functions-propagate}.
+  \end{enumerate}
 \end{definition}
-
-\begin{lemma}
-  \label{lem:very-coherent-data-unique}
-  \uses{def:coherent-phase-1-data}
-  For any $\alpha$, very coherent data below $\alpha$ is unique (if it exists).
-
-  [Actually, we probably don’t need this: it effectively gets inlined in the main recursion.]
-\end{lemma}
-\begin{proof}
-  By induction on $\beta < \alpha$: all components of the data at level $\beta$ are either propositions, or the coherence condition fixes them in terms of earlier data.
-\end{proof}
-
-\begin{theorem}
-  \label{thm:main-recursion}
-  \uses{def:very-coherent-data}
-    For every $\alpha \in \lambda + 1$, there is a unique choice of very coherent data below $\alpha$.
-\end{theorem}
-\begin{proof}
-  By induction on $\beta < \alpha$: take the unique choice below each $\beta < \alpha$; extend each one up to give very coherent data up-to-and-including each $\beta < \alpha$; and then by uniqueness, these fit together to give very coherent data below $\alpha$.
-\end{proof}
 
 \newcommand{\Tangle}{\mathrm{Tangle}}
 \begin{definition}
   \label{def:tangle-completed}
-  \uses{thm:main-recursion}
-  The (genuine,definitive!) tangles are the substructure $\Tangle$ of $\Pretangle$ given by the unique choice of very coherent data up to $\lambda$, provided by \cref{thm:main-recursion}.
+  \uses{def:main-recursion}
+  The (actual, genuine, definitive!) tangles are the structure $\Tangle$ extracted from the freedom of action contexts defined in \cref{def:main-recursion} as follows:
+  \begin{enumerate}
+    \item $\tau_\alpha$ is the top-level tangles of the freedom of action context at $\alpha$;
+    \item “by construction” (i.e. by the defining clause of \cref{def:main-recursion}), $\tau_\alpha$ is constructed by \cref{def:tangle} from the tangles $\tau_\beta$ for $\beta < \alpha$; thus \cref{def:ttt-membership} gives a membership relation $\in_{\beta,\alpha}$ from $\tau_\beta$ to $\tau_\alpha$, for each $\beta < \alpha$.
+  \end{enumerate}
+
+  [Note: The definition of $\in_{\beta,\alpha}$ uses a type equality on $\tau_\alpha$, so may not be very nice to work with directly in subsequenet lemmas.  However, it’s hard to see how any approach to this inductively constructed structure could avoid such issues.  When we get to this stage, we can think about how to deal with this issue.]
 \end{definition}
 
 \newpage

@@ -1,4 +1,5 @@
 import phase0.struct_perm
+import phase0.support
 
 /-!
 # Phase 1 of the recursion
