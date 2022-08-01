@@ -754,6 +754,7 @@ begin
         },
       },
       {
+        --I'm not sure this part of the proof is even true anymore - Alex
         exact flexible_ascends _ _ _ L hf,
       },
     },
