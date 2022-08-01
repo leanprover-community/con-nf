@@ -38,7 +38,7 @@ class phase_1 (α : Λ) :=
 (smul_pretangle_inj : Π β hβ (π : allowable β hβ) (t : tangle β hβ),
   allowable_to_struct_perm β hβ π • pretangle_inj β hβ t = pretangle_inj β hβ (π • t))
 (typed_singleton : Π β hβ, atom ↪ tangle β hβ)
-(designated_support : Π β hβ (t : tangle β hβ), support (allowable_to_struct_perm β hβ) t)
+(designated_support : Π β hβ (t : tangle β hβ), support β (allowable β hβ) t)
 (litter_lt : Π β hβ (L : litter) (a ∈ litter_set L),
   of_tangle _ hβ (to_tangle β hβ L.to_near_litter) < of_tangle _ hβ (typed_singleton β _ a))
 (litter_lt_near_litter : Π β hβ (N : near_litter) (hN : litter_set N.fst ≠ N.snd),

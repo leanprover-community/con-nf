@@ -154,8 +154,16 @@ local attribute [semireducible] litter
 by simp_rw [litter, mk_prod, mk_type_index, lift_id, mul_assoc, mul_eq_right
   (κ_regular.aleph_0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_limit.ne_zero]
 
-/-- The domains of the f-maps. -/
-def ftarget (k l : Λ) : set litter := {i | i.1 = (k, l)}
+/-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
+lemma card_Iio_lt (x : μ) : #(Iio x) < #μ := card_typein_lt (<) x μ_ord.symm
+
+/-- Initial segments (sets of the form `{y | y ≤ x}`) have cardinality `< μ`. -/
+lemma card_Iic_lt (x : μ) : #(Iic x) < #μ :=
+begin
+  rw [←Iio_union_right, mk_union_of_disjoint, mk_singleton],
+  { exact (add_one_le_succ _).trans_lt (μ_strong_limit.is_limit.2 _ $ card_Iio_lt x) },
+  { simp }
+end
 
 /-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
 arbitrary type of cardinality `μ` and partitioning it into suitable sets of litters afterwards, we
