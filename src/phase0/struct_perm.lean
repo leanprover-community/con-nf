@@ -380,13 +380,31 @@ instance small_support.set_like (φ : H → struct_perm α) (x : τ) :
 -- end
 
 /-- There are at most `μ` small supports for a given `x : τ`. -/
-@[simp] lemma mk_support_le (φ : H → struct_perm α) (x : τ) : #(small_support φ x) ≤ #μ := sorry
--- begin
---   have : support φ x ≃ {S : potential_support α // supports φ S.carrier x},
---   { refine ⟨λ S, ⟨S.1, S.2⟩, λ S, ⟨S.1, S.2⟩, _, _⟩; intro x; dsimp; cases x; simp },
---   rw [cardinal.mk_congr this, ←mk_potential_support α],
---   exact mk_subtype_le _,
--- end
+@[simp] lemma mk_support_le (φ : H → struct_perm α) (x : τ) : #(small_support φ x) ≤ #μ :=
+ begin
+   have : small_support φ x ≃ {S : support φ x // small S.carrier},
+   { refine ⟨λ S, ⟨S.1, S.2⟩, λ S, ⟨S.1, S.2⟩, _, _⟩; intro x; dsimp; cases x; simp },
+   rw [cardinal.mk_congr this],-- ←mk_potential_support α],
+   unfold small,
+   obtain ⟨e⟩ := cardinal.eq.1 (mk_support_condition α),
+   have lt_cof_eq_μ : #{S : set (support_condition α) // #S < (#μ).ord.cof} = #μ,
+   { convert mk_subset_mk_lt_cof μ_strong_limit.2 using 1,
+     have := mk_subtype_of_equiv (λ S, # ↥S < (#μ).ord.cof) (equiv.set.congr e),
+     convert this using 1,
+     suffices : ∀ S, # ↥S = # ↥(set.congr e S), { simp_rw this },
+     intro S, rw cardinal.eq, exact ⟨equiv.image _ _⟩ },
+   rw ←lt_cof_eq_μ,
+   suffices : # {S : support φ x // # ↥(S.carrier) < # κ} ≤ # {S : support φ x// # ↥S < (# μ).ord.cof},
+   apply le_trans,
+   exact this,
+   apply @cardinal.mk_le_of_injective _ _ (λS  : { T : support φ x // # ↥T < (# μ).ord.cof}, (⟨S.1.carrier, by exact S.2⟩ : {S // # ↥S < (# μ).ord.cof})),
+   dsimp [(function.injective)], intros,
+   cases a₁, cases a₂, cases a₁_val, cases a₂_val,
+   simp only, simp only [subtype.coe_mk] at ᾰ, exact ᾰ,
+   apply cardinal.mk_subtype_mono,
+   intros,
+   exact ᾰ.trans_le κ_le_μ_cof,
+ end
 
 end support_declaration
 end con_nf
