@@ -1574,7 +1574,7 @@ begin
   intros L C,
   obtain hL | ⟨N, atom_map, h1, h2, h3⟩ := σ.prop.forward.atom_cond L C,
   { by_cases a.fst ≠ L ∨ A ≠ C,
-    { refine spec.atom_cond.small _,
+    sorry { refine spec.atom_cond.small _,
       unfold small spec.domain,
       rw set.image_union,
       have : {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
@@ -1608,8 +1608,28 @@ begin
         have := congr_arg prod.snd h1,
         simp only [atom_to_cond] at h2 this,
         exact h (this.trans h2) } },
-    sorry { obtain ⟨rfl, rfl⟩ := and_iff_not_or_not.2 h,
-      refine spec.atom_cond.all N _ _ _ _ , } },
+    { classical,
+      obtain ⟨rfl, rfl⟩ := and_iff_not_or_not.2 h,
+      refine spec.atom_cond.all N
+        (λ x, dite ((sum.inl x.val, A) ∈ σ.val.domain)
+          (λ hx, atom_value B σ A x hx)
+          (λ hx, (atom_map B σ a A N hsmall ha ⟨x.val, x.prop, hx⟩).val))
+        (or.inl ha) (λ y hy, _) (set.ext $ λ x, ⟨λ hx, _, λ hx, _⟩),
+      { by_cases (sum.inl y, A) ∈ σ.val.domain,
+        { rw dif_pos h,
+          exact or.inl (atom_value_spec B σ A y h) },
+        { rw dif_neg h,
+          exact or.inr ⟨⟨y, hy, h⟩, rfl⟩ } },
+      { sorry },
+      { obtain ⟨y, rfl⟩ := hx,
+        by_cases (sum.inl y.val, A) ∈ σ.val.domain,
+        { simp_rw dif_pos h,
+          sorry },
+        { simp_rw dif_neg h,
+          obtain ⟨c, hcy, hcN, hcnin⟩ := atom_to_cond_spec B σ a A N hsmall ha ⟨y.val, y.prop, h⟩,
+          simp only [atom_to_cond, prod.mk.inj_iff, eq_self_iff_true, true_and, and_true] at hcy,
+          rw ← hcy at hcN,
+          exact hcN } } } },
   { exact spec.atom_cond.all N atom_map (or.inl h1) (λ a ha, or.inl (h2 a ha)) h3, }
 end
 
