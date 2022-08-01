@@ -2568,7 +2568,7 @@ begin
   { refine spec.atom_cond.all N atom_map (or.inl $ or.inl h1) (λ a H, or.inl $ or.inl $ h2 a H) h3, }
 end
 
-lemma flexible_union_near_litter_cond_forward :
+lemma flexible_union_near_litter_cond :
   ∀ N₁ N₂ C, spec.near_litter_cond B
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) N₁ N₂ C :=
 sorry
