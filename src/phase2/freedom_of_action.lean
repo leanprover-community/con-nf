@@ -1,4 +1,4 @@
-import phase2.basic
+  import phase2.basic
 
 /-!
 # The freedom of action theorem
@@ -640,20 +640,21 @@ lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
   ∀ N₁ N₂ C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N₁ N₂ C :=
 λ N₁ N₂ C hN, hσ.forward.near_litter_cond N₁ N₂ (A.comp C) hN
 
-lemma flexible_descends (he : extended_index (⟨β, B.path.comp A⟩ : le_index α)) (L : litter) :
-flexible L (A.comp he) → flexible L he :=
+lemma flexible_descends (C : extended_index (⟨β, B.path.comp A⟩ : le_index α)) (L : litter) :
+flexible L (A.comp C) → flexible L C :=
 begin
   intro hf,
   unfold flexible at hf ⊢,
   simp at hf ⊢,
-  intros hb hd hg hgb hdb hdg hp htp heq,
-  rw heq at hf,
+  intros hb hd hg hgb hdb hdg hp htp,
   have h1 := hf hgb hdb hdg,
   --have h2 := h1 hp,
   sorry,
 end
 
 /-- Descending down a proper path `A`, `μ`-many litters become flexible. -/
+--make C a parameter?
+
 lemma lower_flexible_co_large (hβ : (B : type_index) ≠ β) :
   #{L : litter // ∃ (C : extended_index (⟨β, B.path.comp A⟩ : le_index α)),
     flexible L C ∧ ¬ flexible L (A.comp C)} = #μ :=
@@ -670,9 +671,10 @@ begin
   { obtain ⟨B_index, B⟩ := B,
     dsimp only [le_index_coe_def] at *,
     subst hβ,
-    rw [path_nil A, spec.lower_nil σ],
+    rw [path_eq_nil A, spec.lower_nil σ],
     rw path.comp_nil,
-    exact hσ.flexible_cond C, },
+    --exact hσ.flexible_cond C,
+    sorry, },
 
   -- The existing proof has been modified and simplified into the following structure.
 
@@ -2568,7 +2570,7 @@ begin
   { refine spec.atom_cond.all N atom_map (or.inl $ or.inl h1) (λ a H, or.inl $ or.inl $ h2 a H) h3, }
 end
 
-lemma flexible_union_near_litter_cond :
+lemma flexible_union_near_litter_cond_forward :
   ∀ N₁ N₂ C, spec.near_litter_cond B
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) N₁ N₂ C :=
 sorry
