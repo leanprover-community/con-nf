@@ -78,12 +78,56 @@ noncomputable! instance group : Π α, group (struct_perm α)
   @pi.group_Prop _ _ $ λ _ : β < ↑α, group β
 using_well_founded { dec_tac := `[assumption] }
 
+lemma struct_perm_def_bot : struct_perm ⊥ = near_litter_perm := -- = to_bot ?
+by unfold struct_perm
+
+lemma struct_perm_def_coe (α : Λ) : struct_perm ↑ α = (Π β : type_index, β < α → struct_perm β) :=
+by unfold struct_perm
+
+lemma cast_cancelling_2 : ∀ {α1 α2 } (h : α2 = α1) (a : α1), cast h (cast (eq.symm h) a) = a := begin
+intros α1 α2 h a,
+rw ← heq_iff_eq,
+apply heq.trans,
+apply cast_heq,
+apply cast_heq,
+end
+
 @[simps] def to_bot_iso : near_litter_perm ≃* struct_perm ⊥ :=
-{ map_mul' := sorry,
+{ map_mul' := begin
+intros p1 p2,
+dsimp only [(to_bot)],
+dsimp only [(*)],
+cases p1,
+cases p2,
+dsimp [(to_fun), (mul_one_class.mul), (monoid.mul), (div_inv_monoid.mul), (group.mul)],
+have : struct_perm.group ⊥ = _,
+unfold struct_perm.group,
+rw this,
+congr,
+all_goals{dsimp [(of_bot)], rw cast_cancelling_2}
+end,
   ..to_bot }
 
 @[simps] def to_coe_iso (α : Λ) : (Π β : type_index, β < α → struct_perm β) ≃* struct_perm α :=
-{ map_mul' := sorry,
+{ map_mul' := begin
+intros,
+dsimp only [(has_mul.mul), (mul_one_class.mul), (monoid.mul), (div_inv_monoid.mul)],
+have : struct_perm.group α = _,
+unfold struct_perm.group,
+rw this,
+congr,
+dsimp only [(*), (mul_one_class.mul), (monoid.mul), (div_inv_monoid.mul), (group.mul)],
+apply funext, intro i, apply funext, intro i_1,
+have : ∀ z : Π (β : type_index), β < ↑α → struct_perm β, of_coe (to_coe.to_fun z) i i_1 = z i i_1,
+{
+intro z,
+dsimp [(of_coe), (to_coe)],
+rw cast_cancelling_2,
+},
+convert (refl _),
+exact this x, exact this y,
+split, intro a, refl,
+end,
   ..to_coe }
 
 @[simp] lemma to_bot_one : to_bot 1 = 1 := to_bot_iso.map_one
@@ -143,12 +187,21 @@ by { unfold derivative, refl }
 lemma derivative_comp {β γ : type_index} (π : struct_perm α)
   (A : path (α : type_index) β) (B : path (β : type_index) γ) :
   derivative B (derivative A π) = derivative (path.comp A B) π :=
-sorry
+begin
+  intros,
+  induction B,
+  dsimp only [(derivative)],
+  simp only [monoid_hom.id_apply, path.comp_nil],
+  dsimp only [(derivative), (monoid_hom.comp)],
+  simp only [monoid_hom.coe_mk, function.comp_app, path.comp_cons],
+  rw B_ih,
+  dsimp [(derivative)],
+  refl,
+  end
 
 /-- The derivative map preserves multiplication. -/
 lemma derivative_mul {β} (π₁ π₂ : struct_perm α) (A : path (α : type_index) β) :
-  derivative A (π₁ * π₂) = derivative A π₁ * derivative A π₂ :=
-sorry
+  derivative A (π₁ * π₂) = derivative A π₁ * derivative A π₂ := by simp only [map_mul]
 
 section
 variables {X : Type*} [mul_action near_litter_perm X]
@@ -190,14 +243,6 @@ instance mul_action_pretangle : Π (α : Λ), mul_action (struct_perm α) (preta
   end
 }
 using_well_founded { dec_tac := `[assumption] }
-
-
-lemma struct_perm_def_bot : struct_perm ⊥ = near_litter_perm :=
-by unfold struct_perm
-
-lemma struct_perm_def_coe (α : Λ) : struct_perm ↑ α = Π β : type_index, β < α → struct_perm β :=
-by unfold struct_perm
-
 
 inductive conv_trick : Π {α1 : Type u}, α1 →α1 → Prop
 | eq : ∀ {α0 : Type u} (a0 b0 : α0), (α0 = struct_perm α
@@ -314,7 +359,8 @@ instance support.set_like (φ : H → struct_perm α) (x : τ) :
 instance small_support.set_like (φ : H → struct_perm α) (x : τ) :
   set_like (small_support φ x) (support_condition α) :=
 { coe := support.carrier ∘ small_support.to_support,
-  coe_injective' := λ s t h, by { cases s, cases t, congr', sorry } }
+  coe_injective' := λ s t h, by { cases s, cases t, congr', cases s__to_support,
+  cases t__to_support, simp only, simp only [function.comp_app] at h, exact h } }
 
 /-- There are `μ` supports for a given `x : τ`. -/
 @[simp] lemma mk_potential_support (φ : H → struct_perm α) (x : τ) : #(support φ x) = #μ := sorry
