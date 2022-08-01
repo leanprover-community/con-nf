@@ -1,4 +1,4 @@
-import phase2.basic
+  import phase2.basic
 
 /-!
 # The freedom of action theorem
@@ -616,16 +616,22 @@ lemma graph_struct_perm (σ : spec B) (hσ₁ : σ.one_to_one_forward B) (hσ₂
 
 /-- The allowability condition on atoms.
 In an absent litter, we must specify only `< κ`-many atoms.
-In a present litter, we can specify either `< κ`-many atoms, or all of the atoms in the litter, and
-in this case, almost all of them must be mapped to the right place.
+In a present litter, we can specify either `< κ`-many atoms and they are mapped to the right place,
+or all of the atoms in the litter, and their range is exactly the image of the litter.
 Note that the `small` constructor does not depend on whether the litter is present or absent. -/
 @[mk_iff] inductive atom_cond (σ : spec B) (L : litter) (A : extended_index B) : Prop
-| small : small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.domain} → atom_cond
-| all (N : near_litter) (atom_map : litter_set L → atom) :
-    (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ σ →
-    (∀ a ∈ litter_set L, (⟨sum.inl ⟨a, atom_map ⟨a, ‹_›⟩⟩, A⟩ : binary_condition B) ∈ σ) →
-    N.snd.val = set.range atom_map →
-    atom_cond
+| all
+    (N : near_litter) (hL : (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ σ)
+    (atom_map : litter_set L → atom) :
+  (∀ a ∈ litter_set L, (⟨sum.inl ⟨a, atom_map ⟨a, ‹_›⟩⟩, A⟩ : binary_condition B) ∈ σ) →
+  N.snd.val = set.range atom_map → atom_cond
+| small_out
+    (hL : (sum.inr L.to_near_litter, A) ∉ σ.domain) :
+  small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.domain} → atom_cond
+| small_in
+    (N : near_litter) (hL : (sum.inr (L.to_near_litter, N), A) ∈ σ) :
+  small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.domain} →
+  (∀ (a ∈ litter_set L) (b : atom), (sum.inl (a, b), A) ∈ σ → b ∈ N.snd.val) → atom_cond
 
 /-- The allowability condition on near-litters.
 If a near-litter is present, so are its litter and all atoms in the symmetric difference, and it is
@@ -741,38 +747,45 @@ lemma lower_atom_cond (hσ : σ.allowable_spec B) :
 begin
   intros L C,
   unfold spec.lower binary_condition.extend_path,
-  obtain hsmall | ⟨N, atom_map, h1, h2, h3⟩ := hσ.forward.atom_cond L (A.comp C),
-  { refine spec.atom_cond.small _,
-    convert hsmall,
+  obtain ⟨N, atom_map, h1, h2, h3⟩ | ⟨hL, hsmall⟩ | ⟨N, hL, hsmall, hmaps⟩ := hσ.forward.atom_cond L (A.comp C),
+  { exact spec.atom_cond.all N atom_map h1 h2 h3 },
+  refine spec.atom_cond.small_out _ _,
+  { convert hL using 1,
+    refine eq_iff_iff.2 ⟨_, _⟩; rintro ⟨⟨_ | ⟨x, y⟩, C⟩, hbin, hdom⟩; cases hdom,
+    { exact ⟨_, hbin, prod.mk.inj_iff.2 ⟨(prod.mk.inj hdom).1, rfl⟩⟩ },
+    { exact ⟨(sum.inr (L.to_near_litter, y), C), hbin, prod.mk.inj_iff.2 ⟨(prod.mk.inj hdom).1, rfl⟩⟩ } },
+  swap,
+  refine spec.atom_cond.small_in N hL _ hmaps,
+  all_goals { convert hsmall,
     unfold spec.domain binary_condition.domain,
     ext a,
-    simp,
+    simp only [set.mem_image, prod.mk.inj_iff],
     split; rintro ⟨⟨x, y⟩, hx1, hx2, hx3⟩,
     { exact ⟨⟨x, A.comp y⟩, hx1, hx2, by rw ← hx3⟩ },
     dsimp only at hx3,
     rw hx3 at hx1 hx2,
-    exact ⟨⟨x, C⟩, hx1, hx2, rfl⟩ },
-  { exact spec.atom_cond.all N atom_map h1 h2 h3 }
+    exact ⟨⟨x, C⟩, hx1, hx2, rfl⟩ }
 end
 
 lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
   ∀ N₁ N₂ C, (σ.lower A).near_litter_cond (le_index.mk β (path.comp B.path A)) N₁ N₂ C :=
 λ N₁ N₂ C hN, hσ.forward.near_litter_cond N₁ N₂ (A.comp C) hN
 
-lemma flexible_descends (he : extended_index (⟨β, B.path.comp A⟩ : le_index α)) (L : litter) :
-flexible L (A.comp he) → flexible L he :=
+lemma flexible_descends (C : extended_index (⟨β, B.path.comp A⟩ : le_index α)) (L : litter) :
+flexible L (A.comp C) → flexible L C :=
 begin
   intro hf,
   unfold flexible at hf ⊢,
   simp at hf ⊢,
-  intros hb hd hg hgb hdb hdg hp htp heq,
-  rw heq at hf,
+  intros hb hd hg hgb hdb hdg hp htp,
   have h1 := hf hgb hdb hdg,
   --have h2 := h1 hp,
   sorry,
 end
 
 /-- Descending down a proper path `A`, `μ`-many litters become flexible. -/
+--make C a parameter?
+
 lemma lower_flexible_co_large (hβ : (B : type_index) ≠ β) :
   #{L : litter // ∃ (C : extended_index (⟨β, B.path.comp A⟩ : le_index α)),
     flexible L C ∧ ¬ flexible L (A.comp C)} = #μ :=
@@ -789,9 +802,10 @@ begin
   { obtain ⟨B_index, B⟩ := B,
     dsimp only [le_index_coe_def] at *,
     subst hβ,
-    rw [path_nil A, spec.lower_nil σ],
+    rw [path_eq_nil A, spec.lower_nil σ],
     rw path.comp_nil,
-    exact hσ.flexible_cond C, },
+    --exact hσ.flexible_cond C,
+    sorry, },
 
   -- The existing proof has been modified and simplified into the following structure.
 
@@ -1715,7 +1729,20 @@ begin
           exact or.inl (atom_value_spec B σ A y h) },
         { rw dif_neg h,
           exact or.inr ⟨⟨y, hy, h⟩, rfl⟩ } },
-      { sorry },
+      { by_cases (sum.inl x, A) ∈ σ.val.range,
+        { obtain ⟨⟨⟨y, _⟩ | _, _⟩, hin, hxy⟩ := h; cases hxy,
+          have hya : y ∈ litter_set a.fst := sorry,
+          use ⟨y, hya⟩,
+          dsimp only,
+          have : (sum.inl y, A) ∈ σ.val.domain := ⟨_, hin, rfl⟩,
+          rw dif_pos this,
+          exact (σ.prop.backward.one_to_one A).atom y (atom_value_spec B σ A y ⟨_, hin, rfl⟩) hin },
+        { obtain ⟨d, hd⟩ := exists_atom_to_cond B σ a A N hsmall ha hx h,
+          use ⟨coe d, d.prop.1⟩,
+          dsimp only,
+          rw dif_neg d.prop.2,
+          simpa only [atom_to_cond, subtype.coe_eta, prod.mk.inj_iff,
+                      eq_self_iff_true, true_and, and_true] using hd, } },
       { obtain ⟨y, rfl⟩ := hx,
         by_cases (sum.inl y.val, A) ∈ σ.val.domain,
         { simp_rw dif_pos h,
@@ -2716,7 +2743,7 @@ begin
   { refine spec.atom_cond.all N atom_map (or.inl $ or.inl h1) (λ a H, or.inl $ or.inl $ h2 a H) h3, }
 end
 
-lemma flexible_union_near_litter_cond :
+lemma flexible_union_near_litter_cond_forward :
   ∀ N₁ N₂ C, spec.near_litter_cond B
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) N₁ N₂ C :=
 sorry
