@@ -1054,7 +1054,7 @@ begin
         (sum.inr L.to_near_litter, A) ∈ τ.val.domain) ∨
        ((sum.inr L.to_near_litter, A) ∉ ρ.val.range ∧
         (sum.inr L.to_near_litter, A) ∈ τ.val.range)) ∧ ρ ≤ τ),
-    sorry { obtain ⟨ρ, hρ, τ, hτ, L, A, hL, ⟨h, hρτ⟩⟩ := h,
+    { obtain ⟨ρ, hρ, τ, hτ, L, A, hL, ⟨h, hρτ⟩⟩ := h,
       have H : ∀ L' A', flexible L' A' →
           (⟨sum.inr L'.to_near_litter, A'⟩ : support_condition B) ∈ τ.val.domain ∧
           (⟨sum.inr L'.to_near_litter, A'⟩ : support_condition B) ∈ τ.val.range,
@@ -1089,7 +1089,7 @@ begin
                 (sum.inr L.to_near_litter, A) ∈ τ.val.domain) ∧
                ((sum.inr L.to_near_litter, A) ∈ ρ.val.range →
                 (sum.inr L.to_near_litter, A) ∈ τ.val.range),
-      sorry { intros ρ hρ τ hτ L A hL,
+      { intros ρ hρ τ hτ L A hL,
         split;
         intro Hτ;
         contrapose Hτ;
@@ -1121,9 +1121,11 @@ begin
             rw heq at Hτ,
             exact Hτ Hρ, }, }, },
       obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ₁.flexible_cond,
-      { /- co_large case -/
-        refine spec.flexible_cond.co_large _ _,
-        { convert hdom using 3,
+      { refine spec.flexible_cond.co_large _ _,
+        convert hdom using 3,
+        swap,
+        convert hrge using 3,
+        all_goals {
           ext,
           rw [set.mem_set_of, set.mem_set_of],
           rw and.congr_right_iff,
@@ -1137,15 +1139,40 @@ begin
             rw set.mem_image,
             use ⟨σ, hσ₁⟩,
             exact ⟨hσ₂, rfl⟩, },
-          { intros hxσ hxc,
-            refine hxσ _,
-            refine ⟨_, _, _⟩,
-            sorry,
-            sorry,
-            sorry, }, },
-        { sorry, }, },
-      { /- all case -/
-        sorry, }, }, },
+          intros hxσ hxc,
+          refine hxσ _,
+          obtain ⟨b, hb₁, hb₂⟩ := hxc,
+          rw set.mem_sUnion at hb₁,
+          obtain ⟨ρv, hρ, hbρ⟩ := hb₁,
+          rw set.mem_image at hρ,
+          obtain ⟨ρ, hρc, hρv⟩ := hρ,
+          rw ← hρv at hbρ,
+          clear hρv,
+        },
+        refine (H ρ hρc ⟨σ, hσ₁⟩ hσ₂ x.fst x.snd hx).right _,
+        unfold spec.range,
+        swap,
+        refine (H ρ hρc ⟨σ, hσ₁⟩ hσ₂ x.fst x.snd hx).left _,
+        unfold spec.domain,
+        all_goals {
+          rw set.mem_image,
+          exact ⟨b, hbρ, hb₂⟩,
+        }, },
+      { refine spec.flexible_cond.all _ _;
+        intros L A hL,
+        rename hdom h,
+        swap,
+        rename hrge h,
+        all_goals {
+          unfold spec.domain spec.range at ⊢ h,
+          specialize h L A hL,
+          refine set.mem_of_mem_of_subset h _,
+          refine set.image_subset _ _,
+          refine set.subset_sUnion_of_mem _,
+          rw set.mem_image,
+          use ⟨σ, hσ₁⟩,
+          exact ⟨hσ₂, rfl⟩,
+        }, }, }, },
 end
 
 -- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
