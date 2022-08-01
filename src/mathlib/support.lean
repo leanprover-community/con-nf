@@ -1,16 +1,32 @@
-import algebra.group.defs
-import data.set.basic
+import data.set.pointwise
 
-variables {α β γ δ : Type*} [has_smul α γ] [has_smul β δ]
+open_locale pointwise
 
-/-- A set `s` supports `c` if `a • c = c` whenever `f a • d = d` for all `d ∈ s`. -/
-def supports (f : α → β) (s : set δ) (c : γ) := ∀ a, (∀ d ∈ s, f a • d = d) → a • c = c
+section
+variables (G H : Type*) {α β : Type*} [has_smul G α] [has_smul G β] [has_smul H α] [has_smul H β]
+  [has_smul G H] [is_scalar_tower G H β]
 
-lemma supports_mono {f : α → β} {s t : set δ} (hst : s ⊆ t) {c : γ} (hc : supports f s c) :
-  supports f t c := λ a h, hc a (λ d hd, h d (hst hd))
+/-- A set `s` supports `b` if `g • b = b` whenever `g • a = a` for all `a ∈ s`. -/
+def supports (s : set α) (b : β) := ∀ g : G, (∀ ⦃a⦄, a ∈ s → g • a = a) → g • b = b
 
-lemma supports_union_left {f : α → β} {s t : set δ} {c : γ} (hc : supports f s c) :
-  supports f (s ∪ t) c := λ a h, hc a (λ d hd, h d (set.mem_union_left _ hd))
+variables {s t : set α} {b : β}
 
-lemma supports_union_right {f : α → β} {s t : set δ} {c : γ} (hc : supports f t c) :
-  supports f (s ∪ t) c := λ a h, hc a (λ d hd, h d (set.mem_union_right _ hd))
+lemma supports.mono (h : s ⊆ t) (hs : supports G s b) : supports G t b :=
+λ g hg, hs _ $ λ a ha, hg $ h ha
+
+lemma supports_of_mem {a : α} (ha : a ∈ s) : supports G s a := λ g h, h ha
+
+end
+
+variables {G H α β : Type*} [group H] [has_smul G α] [has_smul G β] [mul_action H α] [has_smul H β]
+  [has_smul G H] [is_scalar_tower G H β] {s t : set α} {b : β}
+
+lemma supports.smul [smul_comm_class G H β] [smul_comm_class G H α] (g : H) (h : supports G s b) :
+  supports G (g • s) (g • b) :=
+begin
+  rintro g' hg',
+  rw [smul_comm, h],
+  rintro a ha,
+  have := set.ball_image_iff.1 hg' a ha,
+  rwa [smul_comm, smul_left_cancel_iff] at this,
+end

@@ -1,7 +1,7 @@
 import group_theory.group_action.sum
 import logic.equiv.transfer_instance
 import mathlib.group_action
-import mathlib.support
+import mathlib.logic
 import phase0.index
 import phase0.litter
 import phase0.pretangle
@@ -15,7 +15,7 @@ tangles; we define these larger ambient groups in advance in order to set up the
 derivatives and so on independently of the recursion.
 -/
 
-open cardinal equiv quiver with_bot
+open cardinal equiv quiver quiver.path with_bot
 open_locale cardinal pointwise
 
 noncomputable theory
@@ -42,6 +42,9 @@ noncomputable! instance : Π α, inhabited (struct_perm α)
 | (α : Λ) := by { unfold struct_perm,
   exact @pi.inhabited _ _ (λ β, @pi.inhabited _ _ $ λ _ : β < ↑α, inhabited β) }
 using_well_founded { dec_tac := `[assumption] }
+
+lemma coe_def (α : Λ) : struct_perm ↑α = Π β : type_index, β < α → struct_perm β :=
+by unfold struct_perm
 
 /-- The "identity" equivalence between `near_litter_perm` and `struct_perm ⊥`. -/
 def to_bot : near_litter_perm ≃ struct_perm ⊥ := equiv.cast $ by { unfold struct_perm }
@@ -78,12 +81,34 @@ noncomputable! instance group : Π α, group (struct_perm α)
   @pi.group_Prop _ _ $ λ _ : β < ↑α, group β
 using_well_founded { dec_tac := `[assumption] }
 
+/--  The isomorphism between near-litter permutations and bottom structural permutations. This holds
+by definition of `struct_perm`. -/
 @[simps] def to_bot_iso : near_litter_perm ≃* struct_perm ⊥ :=
-{ map_mul' := sorry,
+{ map_mul' := λ a b, begin
+    rw [show struct_perm.group ⊥ = _, by unfold struct_perm.group],
+    congr,
+    all_goals { dsimp [to_bot, of_bot], rw [cast_cast, cast_eq] },
+  end,
   ..to_bot }
 
+/--  The isomorphism between the product of structural permutations under `α` and `α`-structural
+permutations. This holds by definition of `struct_perm`. -/
 @[simps] def to_coe_iso (α : Λ) : (Π β : type_index, β < α → struct_perm β) ≃* struct_perm α :=
-{ map_mul' := sorry,
+{ map_mul' := λ a b, begin
+    dsimp only [(has_mul.mul), (mul_one_class.mul), (monoid.mul), (div_inv_monoid.mul)],
+    have : struct_perm.group α = _,
+    unfold struct_perm.group,
+    rw this,
+    congr,
+    dsimp only [(*), (mul_one_class.mul), (monoid.mul), (div_inv_monoid.mul), (group.mul)],
+    apply funext, intro i, apply funext, intro i_1,
+    have : ∀ z : Π (β : type_index), β < ↑α → struct_perm β, of_coe (to_coe.to_fun z) i i_1 = z i i_1,
+    { intro z,
+      dsimp [of_coe, to_coe],
+      rw [cast_cast, cast_eq] },
+    convert rfl,
+    exact this _, exact this _,
+  end,
   ..to_coe }
 
 @[simp] lemma to_bot_one : to_bot 1 = 1 := to_bot_iso.map_one
@@ -120,24 +145,22 @@ to_bot_iso.symm.to_monoid_hom.comp $ lower bot_le
 
 /-- The derivative of a structural permutation at any lower level. -/
 noncomputable def derivative : Π {β}, path α β → struct_perm α →* struct_perm β
-| _ path.nil := monoid_hom.id _
-| γ (path.cons p_αγ hβγ) := (lower $ le_of_lt hβγ).comp $ derivative p_αγ
+| _ nil := monoid_hom.id _
+| γ (cons p_αγ hβγ) := (lower $ le_of_lt hβγ).comp $ derivative p_αγ
 
 /-- The derivative along the empty path does nothing. -/
-lemma derivative_nil (π : struct_perm α) :
-  derivative path.nil π = π :=
-by { unfold derivative, refl }
+@[simp] lemma derivative_nil (π : struct_perm α) : derivative nil π = π := rfl
 
 /-- The derivative map is functorial. -/
-lemma derivative_comp {β γ : type_index} (π : struct_perm α)
-  (A : path (α : type_index) β) (B : path (β : type_index) γ) :
-  derivative B (derivative A π) = derivative (path.comp A B) π :=
-sorry
+lemma derivative_derivative (π : struct_perm α) (p : path α β) :
+  ∀ {γ : type_index} (q : path β γ), derivative q (derivative p π) = derivative (p.comp q) π
+| _ nil := by simp only [derivative_nil, comp_nil]
+| γ (cons q f) := by simp only [comp_cons, derivative, monoid_hom.coe_comp, function.comp_app,
+  derivative_derivative]
 
 /-- The derivative map preserves multiplication. -/
 lemma derivative_mul {β} (π₁ π₂ : struct_perm α) (A : path (α : type_index) β) :
-  derivative A (π₁ * π₂) = derivative A π₁ * derivative A π₂ :=
-sorry
+  derivative A (π₁ * π₂) = derivative A π₁ * derivative A π₂ := by simp only [map_mul]
 
 section
 variables {X : Type*} [mul_action near_litter_perm X]
@@ -153,8 +176,8 @@ end
 
 -- TODO: Why can't the equation compiler handle my sorried proofs (the `funext` call breaks things)?
 instance mul_action_pretangle : Π (α : Λ), mul_action (struct_perm α) (pretangle α)
-| α := {
-  smul := λ π t, pretangle.mk (π • t.atom_extension) (λ β hβ, begin
+| α :=
+{ smul := λ π t, pretangle.mk (π • t.atom_extension) (λ β hβ, begin
     letI := mul_action_pretangle β,
     exact lower (coe_lt_coe.2 hβ).le π • t.extension β hβ,
   end),
@@ -176,89 +199,17 @@ instance mul_action_pretangle : Π (α : Λ), mul_action (struct_perm α) (preta
     sorry { refine funext (λ β, funext (λ hβ, _)),
       letI := mul_action_pretangle β,
       dsimp only, rw [lower_mul, mul_smul], simp }
-  end
-}
+  end }
 using_well_founded { dec_tac := `[assumption] }
 
+@[simp] lemma derivative_cons_nil (α : Λ) (f : struct_perm α) (β : type_index) (hβ : β < α) :
+  derivative (cons nil hβ) f = of_coe f β hβ :=
+by { unfold derivative lower, rw dif_neg hβ.ne, refl }
+
+lemma ext (α : Λ) (a b : struct_perm α)
+  (h : ∀ (β : type_index) (hβ : β < α), derivative (cons nil hβ) a = derivative (cons nil hβ) b) :
+  a = b :=
+of_coe.injective $ by { ext β hβ, simp_rw ←derivative_cons_nil, exact h _ _ }
+
 end struct_perm
-
-/-- A support condition is an atom or a near-litter together with an extended type index. -/
-@[derive [inhabited]]
-def support_condition (α : type_index) : Type u := (atom ⊕ near_litter) × extended_index α
-
-/-- There are `μ` support conditions. -/
-@[simp] lemma mk_support_condition (α : type_index) : #(support_condition α) = #μ :=
-begin
-  simp only [support_condition, mk_prod, mk_sum, mk_atom, lift_id, mk_near_litter],
-  rw add_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) le_rfl,
-  exact mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ)
-    (le_trans (mk_extended_index α) $ le_of_lt $ lt_trans Λ_lt_κ κ_lt_μ) (mk_ne_zero _),
-end
-
-instance struct_perm.mul_action {α : type_index} :
-  mul_action (struct_perm α) (support_condition α) := {
-  smul := λ π c, ⟨struct_perm.derivative c.snd π • c.fst, c.snd⟩,
-  one_smul := by { rintro ⟨atoms | Ns, A⟩; unfold has_smul.smul; simp },
-  mul_smul := begin
-    rintros π₁ π₂ ⟨atoms | Ns, A⟩; unfold has_smul.smul;
-    rw struct_perm.derivative_mul; dsimp; rw mul_smul,
-  end
-}
-
-section support_declaration
-
-variables {α : type_index} {H τ : Type u} [monoid H] [mul_action H τ]
-
-/-- A *support for `x`* is a potential support that supports `x`. -/
-structure support (φ : H → struct_perm α) (x : τ) :=
-(carrier : set (support_condition α))
-(supports : supports φ carrier x)
-
-/-- A potential support is a small set of support conditions. -/
-structure small_support (φ : H → struct_perm α) (x : τ) extends support φ x :=
-(small : small carrier)
-
-/-- An element of `τ` is *supported* if it has some (not necessarily small) support. -/
-def supported (φ : H → struct_perm α) (x : τ) : Prop := nonempty $ support φ x
-
-/-- An element of `τ` is *small-supported* if it has some small support. -/
-def small_supported (φ : H → struct_perm α) (x : τ) : Prop := nonempty $ small_support φ x
-
-instance support.set_like (φ : H → struct_perm α) (x : τ) :
-  set_like (support φ x) (support_condition α) :=
-{ coe := support.carrier,
-  coe_injective' := λ s t h, by { cases s, cases t, congr' } }
-
-instance small_support.set_like (φ : H → struct_perm α) (x : τ) :
-  set_like (small_support φ x) (support_condition α) :=
-{ coe := support.carrier ∘ small_support.to_support,
-  coe_injective' := λ s t h, by { cases s, cases t, congr', sorry } }
-
-/-- There are `μ` supports for a given `x : τ`. -/
-@[simp] lemma mk_potential_support (φ : H → struct_perm α) (x : τ) : #(support φ x) = #μ := sorry
--- begin
---   have : potential_support α ≃ {S : set (support_condition α) // small S},
---   { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.val, s.property⟩, _, _⟩; intro x; cases x; simp },
---   obtain ⟨e⟩ := cardinal.eq.1 (mk_support_condition α),
---   refine le_antisymm _ ⟨⟨λ m, ⟨{e.symm m}, by simp⟩, λ a b h, by { simp at h, exact h }⟩⟩,
---   have lt_cof_eq_μ : #{S : set (support_condition α) // #S < (#μ).ord.cof} = #μ,
---   { convert mk_subset_mk_lt_cof μ_strong_limit.2 using 1,
---     have := mk_subtype_of_equiv (λ S, # ↥S < (#μ).ord.cof) (equiv.set.congr e),
---     convert this using 1,
---     suffices : ∀ S, # ↥S = # ↥(set.congr e S), { simp_rw this },
---     intro S, rw cardinal.eq, exact ⟨equiv.image _ _⟩ },
---   rw [mk_congr this, ←lt_cof_eq_μ],
---   exact cardinal.mk_subtype_mono (λ S (h : _ < _), h.trans_le κ_le_μ_cof),
--- end
-
-/-- There are at most `μ` small supports for a given `x : τ`. -/
-@[simp] lemma mk_support_le (φ : H → struct_perm α) (x : τ) : #(small_support φ x) ≤ #μ := sorry
--- begin
---   have : support φ x ≃ {S : potential_support α // supports φ S.carrier x},
---   { refine ⟨λ S, ⟨S.1, S.2⟩, λ S, ⟨S.1, S.2⟩, _, _⟩; intro x; dsimp; cases x; simp },
---   rw [cardinal.mk_congr this, ←mk_potential_support α],
---   exact mk_subtype_le _,
--- end
-
-end support_declaration
 end con_nf
