@@ -1091,23 +1091,14 @@ begin
                 (sum.inr L.to_near_litter, A) ∈ τ.val.range),
       { intros ρ hρ τ hτ L A hL,
         split;
-        intro Hτ;
-        contrapose Hτ;
-        intro Hρ,
-        { specialize h τ hτ ρ hρ L A hL (or.inl ⟨Hτ, Hρ⟩),
-          refine h _,
-          cases hc hτ hρ _ with h₁ h₁,
-          { exact h₁, },
-          { obtain ⟨b, hb₁, hb₂⟩ := Hρ,
-            rw ← hb₂ at Hτ,
-            exfalso,
-            refine Hτ _,
-            use b,
-            exact ⟨h₁.1 hb₁, rfl⟩, },
-          { intro heq,
-            rw heq at Hτ,
-            exact Hτ Hρ, }, },
-        { specialize h τ hτ ρ hρ L A hL (or.inr ⟨Hτ, Hρ⟩),
+        all_goals {
+          intro Hτ,
+          contrapose Hτ,
+          intro Hρ, },
+        specialize h τ hτ ρ hρ L A hL (or.inl ⟨Hτ, Hρ⟩),
+        swap,
+        specialize h τ hτ ρ hρ L A hL (or.inr ⟨Hτ, Hρ⟩),
+        all_goals {
           refine h _,
           cases hc hτ hρ _ with h₁ h₁,
           { exact h₁, },
@@ -1127,8 +1118,7 @@ begin
         convert hrge using 3,
         all_goals {
           ext,
-          rw [set.mem_set_of, set.mem_set_of],
-          rw and.congr_right_iff,
+          rw [set.mem_set_of, set.mem_set_of, and.congr_right_iff],
           intro hx,
           split,
           { intros hxc hxσ,
