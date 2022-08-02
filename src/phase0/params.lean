@@ -241,5 +241,4 @@ lemma is_near.image (f : α → β) (h : is_near s t) : is_near (f '' s) (f '' t
 h.image.mono $ subset_image_symm_diff _ _ _
 
 end is_near
-
 end con_nf

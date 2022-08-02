@@ -36,6 +36,8 @@ universe u
 namespace con_nf
 variables [params.{u}]
 
+open code
+
 section A_map
 variables {α : Λ} {γ : Iio (α : type_index)} [core_tangle_data γ] [positioned_tangle_data γ]
   (β : Iio α) [core_tangle_data (β : Iio (α : type_index))]
@@ -161,10 +163,10 @@ variables [almost_tangle_cumul α] [tangle_cumul α] (γ : Iio (α : type_index)
   (c d : code α)
 
 /-- The A-map, phrased as a function on `α`-codes. -/
-noncomputable! def A_map_code (c : code α) : code α := ⟨β, A_map β c.elts⟩
+noncomputable! def A_map_code (c : code α) : code α := mk β (A_map β c.2)
 
-@[simp] lemma extension_A_map_code : (A_map_code β c).extension = β := rfl
-@[simp] lemma elts_A_map_code : (A_map_code β c).elts = A_map β c.elts := rfl
+@[simp] lemma extension_A_map_code : (A_map_code β c).1 = β := rfl
+@[simp] lemma elts_A_map_code : (A_map_code β c).2 = A_map β c.2 := rfl
 
 @[simp] lemma A_map_code_mk (s) : A_map_code β ⟨γ, s⟩ = ⟨β, A_map β s⟩ := rfl
 
@@ -177,10 +179,10 @@ alias A_map_code_is_empty ↔ _ code.is_empty.A_map_code
 
 attribute [protected] code.is_empty.A_map_code
 
-lemma A_map_code_inj_on : {c : code α | c.elts.nonempty}.inj_on (A_map_code β) :=
+lemma A_map_code_inj_on : {c : code α | c.2.nonempty}.inj_on (A_map_code β) :=
 begin
   rintro ⟨⟨γ, hγ⟩, s⟩ hs ⟨⟨δ, hδ⟩, t⟩ ht h,
-  have := (congr_arg_heq code.elts h).eq,
+  have := (congr_arg_heq sigma.snd h).eq,
   dsimp at this,
   have γ_eq_δ := congr_arg subtype.val (A_map_disjoint_range _ _ hs this),
   dsimp only at γ_eq_δ,
@@ -197,17 +199,17 @@ A_map_order _
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse A-map. -/
 @[mk_iff] inductive A_map_rel (c : code α) : code α → Prop
-| intro (β : Iio α) : c.extension ≠ β → A_map_rel (A_map_code β c)
+| intro (β : Iio α) : c.1 ≠ β → A_map_rel (A_map_code β c)
 
 infix ` ↝ `:62 := A_map_rel
 
-lemma A_map_rel_subsingleton (hc : c.elts.nonempty) : {d : code α | d ↝ c}.subsingleton :=
+lemma A_map_rel_subsingleton (hc : c.2.nonempty) : {d : code α | d ↝ c}.subsingleton :=
 begin
   intros d hd e he,
   simp only [A_map_rel_iff] at hd he,
   obtain ⟨⟨β, hβ⟩, -, rfl⟩ := hd,
   obtain ⟨⟨γ, hγ⟩, -, h⟩ := he,
-  have := congr_arg subtype.val ((code.ext_iff _ _).1 h).1,
+  have := congr_arg subtype.val (sigma.ext_iff.1 h).1,
   dsimp at this,
   rw coe_eq_coe at this,
   subst this,
@@ -216,7 +218,7 @@ begin
   exact A_map_nonempty.1 hc,
 end
 
-lemma A_map_rel_A_map_code (hd : d.elts.nonempty) (hdβ : d.extension ≠ β) :
+lemma A_map_rel_A_map_code (hd : d.2.nonempty) (hdβ : d.1 ≠ β) :
   c ↝ A_map_code β d ↔ c = d :=
 begin
   refine ⟨λ h, A_map_rel_subsingleton (by exact hd.A_map) h $ A_map_rel.intro _ hdβ, _⟩,
@@ -224,14 +226,14 @@ begin
   exact ⟨_, hdβ⟩,
 end
 
-lemma A_map_rel.nonempty_iff : c ↝ d → (c.elts.nonempty ↔ d.elts.nonempty) :=
+lemma A_map_rel.nonempty_iff : c ↝ d → (c.2.nonempty ↔ d.2.nonempty) :=
 by { rintro ⟨β, hcδ⟩, exact A_map_nonempty.symm }
 
 lemma A_map_rel_empty_empty (hγβ : γ ≠ β) : (⟨γ, ∅⟩ : code α) ↝ ⟨β, ∅⟩ :=
 (A_map_rel_iff _ _).2 ⟨β, hγβ, by simp⟩
 
-lemma eq_of_A_map_code {β γ : Iio α} (hc : c.elts.nonempty) (hcβ : c.extension ≠ β)
-  (hdγ : d.extension ≠ γ) (h : A_map_code β c = A_map_code γ d) : c = d :=
+lemma eq_of_A_map_code {β γ : Iio α} (hc : c.2.nonempty) (hcβ : c.1 ≠ β)
+  (hdγ : d.1 ≠ γ) (h : A_map_code β c = A_map_code γ d) : c = d :=
 begin
   refine A_map_rel_subsingleton (by exact hc.A_map) (A_map_rel.intro _ hcβ) _,
   simp_rw h,
@@ -241,7 +243,7 @@ end
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse A-map. -/
 @[mk_iff] inductive A_map_rel' (c : nonempty_code α) : nonempty_code α → Prop
-| intro (β : Iio α) : (c : code α).extension ≠ β →
+| intro (β : Iio α) : (c : code α).1 ≠ β →
   A_map_rel' ⟨A_map_code β c, c.2.A_map⟩
 
 @[simp] lemma A_map_rel_coe_coe {c d : nonempty_code α} : (c : code α) ↝ d ↔ A_map_rel' c d :=
@@ -269,7 +271,7 @@ begin
   obtain ⟨⟨β, hβ⟩, -, rfl⟩ := hd,
   obtain ⟨⟨γ, hγ⟩, -, h⟩ := he,
   rw subtype.ext_iff at h,
-  have := congr_arg subtype.val ((code.ext_iff _ _).1 h).1,
+  have := congr_arg subtype.val (sigma.ext_iff.1 h).1,
   dsimp at this,
   rw coe_eq_coe at this,
   subst this,

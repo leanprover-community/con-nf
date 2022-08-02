@@ -64,16 +64,16 @@ lemma is_odd_iff : c.is_odd ↔ ∃ d, d ↝ c ∧ d.is_even := (even_odd_iff _ 
 
 lemma is_even_of_forall_not (h : ∀ d, ¬ d ↝ c) : is_even c := is_even_iff.2 $ λ d hd, (h _ hd).elim
 
-@[simp] lemma is_even_of_eq_bot (c : code α) (hc : c.extension.1 = ⊥) : c.is_even :=
+@[simp] lemma is_even_of_eq_bot (c : code α) (hc : c.1.1 = ⊥) : c.is_even :=
 is_even_of_forall_not $ by { rintro d ⟨β, -⟩, exact coe_ne_bot hc }
 
-lemma is_even_bot (s : set atom) : is_even (⟨⊥, s⟩ : code α) := is_even_of_eq_bot _ rfl
+@[simp] lemma is_even_bot (s : set atom) : is_even (⟨⊥, s⟩ : code α) := is_even_of_eq_bot _ rfl
 
 lemma not_is_odd_bot (s : set atom) : ¬ is_odd (⟨⊥, s⟩ : code α) :=
 begin
   simp_rw [is_odd_iff, A_map_rel_iff],
   rintro ⟨d, ⟨γ, hdγ, h⟩, hd⟩,
-  exact bot_ne_coe (congr_arg (subtype.val ∘ code.extension) h),
+  exact bot_ne_mk_coe (congr_arg sigma.fst h),
 end
 
 @[simp] lemma is_even_empty_iff : is_even (⟨β, ∅⟩ : code α) ↔ (β : type_index) = ⊥ :=
@@ -128,32 +128,32 @@ lemma is_even_or_is_odd (c : code α) : c.is_even ∨ c.is_odd := by { rw ←not
 protected lemma _root_.con_nf.A_map_rel.is_odd (hc : c.is_even) (h : c ↝ d) : d.is_odd :=
 is_odd_iff.2 ⟨_, h, hc⟩
 
-protected lemma is_even.A_map_code (hc : c.is_even) (hcγ : c.extension ≠ γ) :
-  (A_map_code γ c).is_odd :=
+protected lemma is_even.A_map_code (hc : c.is_even) (hcγ : c.1 ≠ γ) : (A_map_code γ c).is_odd :=
 (A_map_rel.intro _ hcγ).is_odd hc
 
-protected lemma is_odd.A_map_code (hc : c.is_odd) (hc' : c.elts.nonempty) (hcγ : c.extension ≠ γ) :
+protected lemma is_odd.A_map_code (hc : c.is_odd) (hc' : c.2.nonempty) (hcγ : c.1 ≠ γ) :
   (A_map_code γ c).is_even :=
 is_even_iff.2 $ λ d hd, by rwa (A_map_rel_A_map_code _ hc' hcγ).1 hd
 
-protected lemma is_even.A_map_code_ne (hc : c.is_even) (hd : d.is_even) (hcγ : c.extension ≠ γ) :
+protected lemma is_even.A_map_code_ne (hc : c.is_even) (hd : d.is_even) (hcγ : c.1 ≠ γ) :
   A_map_code γ c ≠ d :=
 by { rintro rfl, exact hd.not_is_odd (hc.A_map_code hcγ) }
 
 lemma A_map_code_ne_bot {s} : A_map_code γ c ≠ ⟨⊥, s⟩ :=
-ne_of_apply_ne (subtype.val ∘ code.extension) coe_ne_bot
+ne_of_apply_ne (subtype.val ∘ sigma.fst) coe_ne_bot
 
-lemma A_map_code_ne_singleton {t} : A_map_code γ c ≠ ⟨β, {t}⟩ :=
+lemma A_map_code_ne_singleton {t} : A_map_code γ c ≠ mk β {t} :=
 begin
-  simp only [A_map_code, ne.def, eq_self_iff_true, heq_iff_eq, true_and],
+  simp only [A_map_code, ne.def, eq_self_iff_true, heq_iff_eq, true_and, sigma.ext_iff, fst_mk,
+    snd_mk],
   rintro ⟨rfl, h⟩,
   refine (cardinal.one_lt_aleph_0.trans_le $ κ_regular.aleph_0_le.trans κ_le_μ).not_le _,
   rw [←cardinal.mk_singleton t, ←h.eq],
   exact μ_le_mk_A_map (A_map_nonempty.1
-    (h.eq.symm ▸ singleton_nonempty _ : (A_map γ c.elts).nonempty)),
+    (h.eq.symm ▸ singleton_nonempty _ : (A_map γ c.2).nonempty)),
 end
 
-@[simp] lemma is_even_singleton (t) : (⟨β, {t}⟩ : code α).is_even :=
+@[simp] lemma is_even_singleton (t) : (mk β {t}).is_even :=
 begin
   refine is_even_of_forall_not (λ c hc, _),
   obtain ⟨γ, hc, h⟩ := (A_map_rel_iff _ _).1 hc,
@@ -165,12 +165,12 @@ end
 /-- Equivalence of codes. -/
 @[mk_iff] inductive equiv : code α → code α → Prop
 | refl (c) : equiv c c
-| A_map_left (c : code α) (hc : c.is_even) (β : Iio α) (hcβ : c.extension ≠ β) :
+| A_map_left (c : code α) (hc : c.is_even) (β : Iio α) (hcβ : c.1 ≠ β) :
   equiv (A_map_code β c) c
-| A_map_right (c : code α) (hc : c.is_even) (β : Iio α) (hcβ : c.extension ≠ β) :
+| A_map_right (c : code α) (hc : c.is_even) (β : Iio α) (hcβ : c.1 ≠ β) :
   equiv c (A_map_code β c)
-| A_map_A_map (c : code α) (hc : c.is_even) (β : Iio α) (hcβ : c.extension ≠ β) (γ : Iio α)
-  (hcγ : c.extension ≠ γ) :
+| A_map_A_map (c : code α) (hc : c.is_even) (β : Iio α) (hcβ : c.1 ≠ β) (γ : Iio α)
+  (hcγ : c.1 ≠ γ) :
     equiv (A_map_code β c) (A_map_code γ c)
 
 /-! We declare new notation for code equivalence. -/
@@ -206,7 +206,8 @@ lemma empty_empty : ∀ (β γ), (⟨β, ∅⟩ : code α) ≡ ⟨γ, ∅⟩
         simp only [A_map_empty] }
 
 protected lemma _root_.con_nf.code.is_empty.equiv (hc : c.is_empty) (hd : d.is_empty) : c ≡ d :=
-by { cases c, cases d, dsimp at hc hd, subst hc, subst hd, exact equiv.empty_empty _ _ }
+by { cases c, cases d, change c_fst = ∅ at hc, change d_fst = ∅ at hd, subst hc, subst hd,
+  exact equiv.empty_empty _ _ }
 
 lemma trans {c d e : code α} : c ≡ d → d ≡ e → c ≡ e :=
 begin
@@ -221,25 +222,25 @@ begin
   { rintro (rfl | ⟨hc', γ, hcγ, hce⟩ | ⟨hc', γ, hcγ, rfl⟩ |
       ⟨e, he, γ, hcγ, ε, heε, hce, rfl⟩),
     { exact A_map_right _ hc β hcβ },
-    { obtain h | h := c.elts.eq_empty_or_nonempty,
+    { obtain h | h := c.2.eq_empty_or_nonempty,
       { refine is_empty.equiv h _,
         rwa [←A_map_code_is_empty, ←hce, A_map_code_is_empty, code.is_empty] },
       { exact of_eq (eq_of_A_map_code h hcβ hcγ hce) } },
     { cases (hc.A_map_code hcβ).not_is_even hc' },
-    { obtain h | h := c.elts.eq_empty_or_nonempty,
+    { obtain h | h := c.2.eq_empty_or_nonempty,
       { refine is_empty.equiv h _,
         rwa [A_map_code_is_empty, ←A_map_code_is_empty, ←hce, A_map_code_is_empty, code.is_empty] },
       { rw eq_of_A_map_code h hcβ hcγ hce,
         exact A_map_right _ he _ heε } } },
   { rintro (rfl | ⟨he, γ, heγ, hde⟩ | ⟨hd', γ, -, rfl⟩ | ⟨e, he, ι, heι, κ, heκ, hde, rfl⟩),
     { exact A_map_A_map _ hd _ hdγ _ hdε },
-    { obtain h | h := e.elts.eq_empty_or_nonempty,
+    { obtain h | h := e.2.eq_empty_or_nonempty,
       { refine is_empty.equiv _ h,
         rwa [A_map_code_is_empty, ←A_map_code_is_empty, hde, A_map_code_is_empty, code.is_empty] },
       { rw eq_of_A_map_code h heγ hdε hde.symm,
         exact A_map_left _ hd _ hdγ } },
     { cases (hd.A_map_code hdε).not_is_even hd' },
-    { obtain h | h := d.elts.eq_empty_or_nonempty,
+    { obtain h | h := d.2.eq_empty_or_nonempty,
       { refine (is_empty.A_map_code h).equiv _,
         rwa [A_map_code_is_empty, ←A_map_code_is_empty, ←hde, A_map_code_is_empty, code.is_empty] },
       { have := eq_of_A_map_code h hdε heι hde,
@@ -250,13 +251,13 @@ end
 lemma equiv_equivalence : equivalence ((≡) : code α → code α → Prop) :=
 ⟨refl, symm, λ _ _ _, trans⟩
 
-lemma nonempty_iff : ∀ {c d : code α}, c ≡ d → (c.elts.nonempty ↔ d.elts.nonempty)
+lemma nonempty_iff : ∀ {c d : code α}, c ≡ d → (c.2.nonempty ↔ d.2.nonempty)
 | _ _ (refl _) := iff.rfl
 | _ _ (A_map_left c hc β h) := A_map_nonempty
 | _ _ (A_map_right c hc β h) := A_map_nonempty.symm
 | _ _ (A_map_A_map c hc β hcβ γ hcγ) := A_map_nonempty.trans A_map_nonempty.symm
 
-lemma ext : ∀ {c d : code α}, c ≡ d → c.extension = d.extension → c = d
+lemma ext : ∀ {c d : code α}, c ≡ d → c.1 = d.1 → c = d
 | _ _ (refl _) _ := rfl
 | _ _ (A_map_left c hc β h) H := (h H.symm).elim
 | _ _ (A_map_right c hc β h) H := (h H).elim
@@ -281,7 +282,7 @@ begin
 end
 
 lemma singleton_iff {g} :
-  c ≡ ⟨β, {g}⟩ ↔ c = ⟨β, {g}⟩ ∨ ∃ γ : Iio α, (c.extension : type_index) = some γ ∧ β ≠ γ ∧
+  c ≡ ⟨β, {g}⟩ ↔ c = ⟨β, {g}⟩ ∨ ∃ γ : Iio α, (c.1 : type_index) = some γ ∧ β ≠ γ ∧
     c = A_map_code γ ⟨β, {g}⟩ :=
 begin
   classical,
@@ -326,14 +327,14 @@ begin
   exact ⟨d, (equiv.A_map_right _ hd _ hdγ).trans (equiv.of_eq hc.symm), hd⟩,
 end
 
-protected lemma is_even.exists_equiv_extension_eq (heven : c.is_even) : ∃ d ≡ c, d.extension = γ :=
+protected lemma is_even.exists_equiv_extension_eq (heven : c.is_even) : ∃ d ≡ c, d.1 = γ :=
 begin
-  by_cases c.extension = γ,
+  by_cases c.1 = γ,
   { exact ⟨c, equiv.rfl, h⟩ },
   { exact ⟨A_map_code γ c, equiv.A_map_left _ heven _ h, rfl⟩ }
 end
 
-lemma exists_equiv_extension_eq : ∀ c : code α, ∃ d ≡ c, d.extension = γ :=
+lemma exists_equiv_extension_eq : ∀ c : code α, ∃ d ≡ c, d.1 = γ :=
 begin
   rintro ⟨β, s⟩,
   obtain rfl | hs := s.eq_empty_or_nonempty,
@@ -346,13 +347,13 @@ begin
   exact ⟨e, he.trans $ (equiv.A_map_right _ hd _ hdε).trans $ equiv.of_eq hc.symm, heγ⟩,
 end
 
-lemma equiv.unique : ∀ {c d : code α}, c ≡ d → c.extension = d.extension → c = d
+lemma equiv.unique : ∀ {c d : code α}, c ≡ d → c.1 = d.1 → c = d
 | c _ (equiv.refl _) _ := rfl
 | c _ (equiv.A_map_left d _ β hdβ) h := by cases hdβ h.symm
 | c _ (equiv.A_map_right d _ β hcβ) h := by cases hcβ h
 | c _ (equiv.A_map_A_map e he β _ γ _) h := by { have : β = γ := Iio.coe_injective h, subst this }
 
-lemma equiv_bot_subsingleton : ∀ d ≡ c, ∀ e ≡ c, d.extension = ⊥ → e.extension = ⊥ → d = e :=
+lemma equiv_bot_subsingleton : ∀ d ≡ c, ∀ e ≡ c, d.1 = ⊥ → e.1 = ⊥ → d = e :=
 λ d hdc e hec hd he, (hdc.trans hec.symm).unique (hd.trans he.symm)
 
 end code

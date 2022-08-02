@@ -1,5 +1,4 @@
 import phase0.support
-import mathlib.with_bot
 
 /-!
 # Phase 1 of the recursion
@@ -37,21 +36,48 @@ class core_tangle_data (α : type_index) :=
 (designated_support : by { haveI : mul_action allowable (support_condition α) :=
   mul_action.comp_hom _ allowable_to_struct_perm, exact Π t : tangle, small_support α allowable t })
 
-export core_tangle_data (tangle allowable allowable_to_struct_perm designated_support)
+export core_tangle_data (tangle allowable designated_support)
 attribute [instance] core_tangle_data.allowable_group core_tangle_data.allowable_action
 
 section
 variables (α : type_index) [core_tangle_data α]
+
+/-- The type of allowable permutations that we assume exists on `α`-tangles. -/
+def allowable : Type u := core_tangle_data.allowable α
+
+/-- Allowable permutations at level `α` forms a group with respect to function composition. Note
+that at this stage in the recursion, we have not established that the allowable permutations on
+`α`-tangles are actually (coercible to) functions, so we cannot compose them with the `∘` symbol; we
+must instead use group multiplication `*`. -/
+instance : group (allowable α) := core_tangle_data.allowable_group
 
 /-- Nonempty sets of tangles. -/
 abbreviation tangles : Type u := {s : set (tangle α) // s.nonempty}
 
 variables {α} {X : Type*} [mul_action (struct_perm α) X]
 
-instance : mul_action (allowable α) X := mul_action.comp_hom _ allowable_to_struct_perm
+namespace allowable
 
-@[simp] lemma allowable_to_struct_perm_smul (f : allowable α) (x : X) :
-  allowable_to_struct_perm f • x = f • x := rfl
+/-- Allowable permutations can be considered a subtype of structural permutations. However, we
+cannot write this explicitly in type theory, so instead we assume this monoid homomorphism from
+allowable permutations to structural permutations. This can be thought of as an inclusion map that
+preserves the group structure. This allows allowable permutations to act on pretangles. -/
+def to_struct_perm : allowable α →* struct_perm α := core_tangle_data.allowable_to_struct_perm
+
+instance : mul_action (allowable α) (tangle α) := core_tangle_data.allowable_action
+
+/-- Allowable permutations act on tangles. This action commutes with certain other operations; the
+exact conditions are given in `smul_to_tangle` and `smul_pretangle_inj`. -/
+instance : mul_action (allowable α) X := mul_action.comp_hom _ to_struct_perm
+
+@[simp] lemma to_struct_perm_smul (f : allowable α) (x : X) : f.to_struct_perm • x = f • x := rfl
+
+end allowable
+
+/-- For each tangle, we provide a small support for it. This is known as the designated support of
+the tangle. -/
+def designated_support (t : tangle α) : small_support α (allowable α) t :=
+core_tangle_data.designated_support _
 
 end
 
@@ -97,30 +123,6 @@ Later in the recursion, we will construct this type explicitly, but for now, we 
 that it exists.
 Fields in `tangle_data` give more information about this type. -/
 add_decl_doc core_tangle_data.tangle
-
-/-- The type of allowable permutations that we assume exists on `α`-tangles.
-This is given as a plain type, its action on `α`-tangles is given by `allowable_action`. -/
-add_decl_doc core_tangle_data.allowable
-
-/-- The type of allowable permutations at level `α` forms a group with respect to function
-composition. Note that at this stage in the recursion, we have not established that the allowable
-permutations on `α`-tangles are actually (coercible to) functions, so we cannot compose them with
-the `∘` symbol; we must instead use group multiplication `*`. -/
-add_decl_doc core_tangle_data.allowable_group
-
-/-- Allowable permutations can be considered a subtype of structural permutations. However, we
-cannot write this explicitly in type theory, so instead we assume this monoid homomorphism from
-allowable permutations to structural permutations. This can be thought of as an inclusion map that
-preserves the group structure. This allows allowable permutations to act on pretangles. -/
-add_decl_doc core_tangle_data.allowable_to_struct_perm
-
-/-- Allowable permutations act on tangles. This action commutes with certain other operations; the
-exact conditions are given in `smul_to_tangle` and `smul_pretangle_inj`. -/
-add_decl_doc core_tangle_data.allowable_action
-
-/-- For each tangle, we provide a small support for it. This is known as the designated support of
-the tangle. -/
-add_decl_doc core_tangle_data.designated_support
 
 /-- An injection from near-litters into level `α` tangles.
 These will be explicitly constructed as "typed near-litters", which are codes of the form
@@ -177,38 +179,7 @@ add_decl_doc tangle_data.support_le
 end define_tangle_data
 
 section instances
-variables {α : Λ}
-
-instance coe_Iio : has_coe_t (Iio α) (Iio (α : type_index)) := ⟨λ β, ⟨β.1, coe_lt_coe.2 β.2⟩⟩
-
-@[simp] lemma Iio.coe_mk (β : Λ) (hβ : β < α) :
-  ((⟨β, hβ⟩ : Iio α) : Iio (α : type_index)) = ⟨β, coe_lt_coe.2 hβ⟩ := rfl
-
-lemma Iio.coe_injective : injective (coe : Iio α → Iio (α : type_index)) :=
-begin
-  rintro ⟨β, hβ⟩ ⟨γ, hγ⟩ h,
-  simp only [Iio.coe_mk, subtype.mk_eq_mk] at h,
-  have := with_bot.coe_injective h,
-  subst this,
-end
-
-@[simp] lemma Iio.coe_inj {β γ : Iio α} : (β : Iio (α : type_index)) = γ ↔ β = γ :=
-Iio.coe_injective.eq_iff
-
-section bot
-variables {α} {β : Λ} {hβ : (β : type_index) ∈ Iio (α : type_index)}
-
-instance : has_bot (Iio (α : type_index)) := ⟨⟨⊥, bot_lt_coe _⟩⟩
-
-@[simp] lemma bot_ne_mk_coe : (⊥ : Iio (α : type_index)) ≠ ⟨β, hβ⟩ :=
-ne_of_apply_ne subtype.val bot_ne_coe
-
-@[simp] lemma mk_coe_ne_bot : (⟨β, hβ⟩ : Iio (α : type_index)) ≠ ⊥ :=
-ne_of_apply_ne subtype.val coe_ne_bot
-
-end bot
-
-variables (β : Iio α) [core_tangle_data (β : Iio (α : type_index))]
+variables {α : Λ} (β : Iio α) [core_tangle_data (β : Iio (α : type_index))]
 
 instance core_val : core_tangle_data β.val := ‹core_tangle_data β›
 instance core_coe_coe : core_tangle_data (β : Λ) := ‹core_tangle_data β›

@@ -1,4 +1,5 @@
 import mathlib.prod
+import group_theory.group_action.sigma
 import phase1.code_equiv
 
 /-!
@@ -13,56 +14,34 @@ noncomputable theory
 universe u
 
 namespace con_nf
-variables [params.{u}] {α β γ δ : Λ} [phase_1 α] {hβ : β < α}
-
-namespace allowable
-
-/-- Reinterpret an allowable permutation as a structural permutation. -/
-def to_struct_perm (hβ : β < α) : allowable β hβ →* struct_perm β :=
-phase_1.allowable_to_struct_perm _ _
-
-instance mul_action_tangle : mul_action (allowable β hβ) (tangle α β $ coe_lt_coe.2 hβ) :=
-phase_1.allowable_action _ _
-
-end allowable
-
-variables (α)
+variables [params.{u}] (α : Λ) [core_tangle_cumul α] (β : Iio (α : type_index))
 
 /-- A semi-allowable permutation is a `-1`-allowable permutation of atoms (a near-litter
 permutation) together with allowable permutations on all `γ < β`. This forms a group structure
 automatically. -/
-@[derive group] def semiallowable_perm : Type u := near_litter_perm × Π β (h : β < α), allowable β h
-
-instance near_litter_perm.mul_action_tangle (hβ : β < α) :
-  mul_action near_litter_perm (tangle α β $ coe_lt_coe.2 hβ) :=
-{ smul := λ f t, to_tangle _ _ $ f • sorry,
-  one_smul := sorry,
-  mul_smul := sorry }
+@[derive group] def semiallowable_perm : Type u := Π β : Iio (α : type_index), allowable β
 
 namespace semiallowable_perm
 variables {α} (π : semiallowable_perm α) (c : code α)
 
 /-- The allowable permutation at a lower level corresponding to a semi-allowable permutation. -/
-def to_allowable (hβ : β < α) : semiallowable_perm α →* allowable β hβ :=
-⟨λ f, f.2 β hβ, rfl, λ _ _, rfl⟩
+noncomputable! def to_allowable : semiallowable_perm α →* allowable β :=
+⟨λ f, f β, rfl, λ _ _, rfl⟩
 
 /-- Reinterpret a semi-allowable permutation as a structural permutation. -/
-def to_struct_perm : semiallowable_perm α →* struct_perm α :=
-{ to_fun := λ f, struct_perm.to_coe $ λ β hβ, match β, hβ with
-    | ⊥, _ := struct_perm.to_bot f.1
-    | (β : Λ), (hβ : ↑β < ↑α) := allowable.to_struct_perm (coe_lt_coe.1 hβ) $ to_allowable _ f
-  end,
+noncomputable! def to_struct_perm : semiallowable_perm α →* struct_perm α :=
+{ to_fun := λ f, struct_perm.to_coe $ λ β hβ, (f ⟨β, hβ⟩).to_struct_perm,
   map_one' := struct_perm.of_coe.injective $ funext $ λ β, funext $ λ hβ, match β, hβ with
     | ⊥, _ := by { simp only [struct_perm.of_coe_to_coe, struct_perm.of_coe_one, pi.one_apply],
       exact struct_perm.to_bot_one }
     | (β : Λ), (hβ : ↑β < ↑α) := by { simp only [struct_perm.of_coe_to_coe, struct_perm.of_coe_one,
-      pi.one_apply], exact (allowable.to_struct_perm _).map_one }
+      pi.one_apply], exact allowable.to_struct_perm.map_one }
   end,
   map_mul' := λ f g, struct_perm.of_coe.injective $ funext $ λ β, funext $ λ hβ, match β, hβ with
     | ⊥, _ := by { simp only [struct_perm.of_coe_to_coe, struct_perm.of_coe_mul, pi.mul_apply],
       exact struct_perm.to_bot_mul _ _ }
     | (β : Λ), (hβ : ↑β < ↑α) := by { simp only [struct_perm.of_coe_to_coe, struct_perm.of_coe_mul,
-      pi.mul_apply], exact (allowable.to_struct_perm _).map_mul _ _ }
+      pi.mul_apply], exact allowable.to_struct_perm.map_mul _ _ }
   end }
 
 section
@@ -76,66 +55,26 @@ mul_action.comp_hom _ to_struct_perm
 
 end
 
-instance mul_action_tangle' (hβ : β < α) :
-  mul_action (semiallowable_perm α) (phase_1.tangle β hβ) :=
-mul_action.comp_hom _ $ to_allowable hβ
+instance mul_action_tangle : mul_action (semiallowable_perm α) (tangle β) :=
+mul_action.comp_hom _ $ to_allowable β
 
-instance mul_action_tangle {β : type_index} (hβ : β < α) :
-  mul_action (semiallowable_perm α) (tangle α β hβ) :=
-{ smul := λ π, match β, hβ with
-    | ⊥, hβ := π.fst.atom_perm
-    | (β : Λ), hβ := (•) (π.snd β $ coe_lt_coe.1 hβ)
-  end,
-  one_smul := λ t, by { cases β, { refl }, { exact one_smul _ _ } },
-  mul_smul := λ f g t, by { cases β, { refl }, { exact mul_smul _ _ _ } } }
-
-@[simp] lemma smul_to_tangle (f : semiallowable_perm α) (N : near_litter) {β} (hβ : β < α) :
-  f • to_tangle β hβ N = to_tangle β hβ (f • N) :=
+@[simp] lemma smul_to_tangle [almost_tangle_cumul α] (f : semiallowable_perm α) (N : near_litter) :
+  f • (to_tangle N : tangle β) = to_tangle (f • N : tangle β) :=
 begin
   refine (smul_to_tangle _ _ (to_allowable hβ f) N).trans _,
   simp only [embedding_like.apply_eq_iff_eq],
   sorry -- ought to be refl
 end
 
-instance mul_action_code : mul_action (semiallowable_perm α) (code α) :=
-{ smul := λ π c,
-    ⟨c.extension, c.extension_lt,
-      rec_bot_coe
-      (λ none_lt, ((•) π.1 : set atom → set atom))
-      (λ γ γ_lt, (•) (π.snd γ $ coe_lt_coe.mp γ_lt))
-      c.extension c.extension_lt c.elts⟩,
-  one_smul := λ ⟨β, hβ, elts⟩, code.ext _ _ rfl $ begin
-    induction β using with_bot.rec_bot_coe,
-    { simp only [one_smul, prod.fst_one, rec_bot_coe_bot] },
-    { exact (one_smul _ _).heq }
-  end,
-  mul_smul := λ f g ⟨β, hβ, elts⟩, code.ext _ _ rfl $ begin
-    induction β using with_bot.rec_bot_coe,
-    { simp only [mul_smul, prod.fst_mul, rec_bot_coe_bot] },
-    { exact (mul_smul _ _ _).heq }
-  end }
+attribute [derive mul_action (semiallowable_perm α)] code
 
-lemma smul_code_def :
-  π • c =
-    ⟨c.extension, c.extension_lt,
-    rec_bot_coe
-      (λ none_lt elts, π.fst.atom_perm '' elts)
-    (λ γ γ_lt elts, (•) (π.snd γ $ coe_lt_coe.mp γ_lt) '' elts)
-      c.extension c.extension_lt c.elts⟩ := rfl
-
-@[simp] lemma extension_smul : (π • c).extension = c.extension := rfl
-@[simp] lemma elts_smul :
-  (π • c).elts = rec_bot_coe
-      (λ none_lt elts, π.fst.atom_perm '' elts)
-      (λ γ γ_lt elts, (•) (π.snd γ $ coe_lt_coe.mp γ_lt) '' elts)
-        c.extension c.extension_lt c.elts := rfl
+@[simp] lemma fst_smul : (π • c).1 = c.1 := rfl
+@[simp] lemma snd_smul : (π • c).2 = π • c.2 := rfl
 
 instance has_smul_nonempty_code : has_smul (semiallowable_perm α) (nonempty_code α) :=
-⟨λ π c, ⟨π • c, let ⟨⟨γ, hγ, G⟩, hG⟩ := c in
-  by induction γ using with_bot.rec_bot_coe; exact hG.image _⟩⟩
+⟨λ π c, ⟨π • c, c.2.image _⟩⟩
 
-@[simp, norm_cast] lemma coe_smul (c : nonempty_code α) :
-  (↑(π • c) : code α) = π • c := rfl
+@[simp, norm_cast] lemma coe_smul (c : nonempty_code α) : (↑(π • c) : code α) = π • c := rfl
 
 instance mul_action_nonempty_code : mul_action (semiallowable_perm α) (nonempty_code α) :=
 subtype.coe_injective.mul_action _ coe_smul
@@ -146,7 +85,7 @@ end semiallowable_perm
 equivalence. -/
 def allowable_perm := {π : semiallowable_perm α // ∀ X Y : code α, π • X ≡ π • Y ↔ X ≡ Y}
 
-namespace allowable_perm
+namespace allowable_perms
 variables {α} {f : allowable_perm α} {c d : code α}
 
 instance : has_coe (allowable_perm α) (semiallowable_perm α) := coe_subtype
