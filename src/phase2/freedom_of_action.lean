@@ -2217,7 +2217,8 @@ private noncomputable def near_litter_image (hN : litter_set N.fst ≠ N.snd)
 lemma near_litter_image_spec (hNin : (sum.inr N, A) ∈ σ.val.domain)
   (hN : litter_set N.fst ≠ N.snd)
   (hNL : (sum.inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) : (sum.inr (N, near_litter_image B σ N A hN hNL ha), A) ∈ σ.val :=
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (sum.inl a, A) ∈ σ.val.domain) :
+  (sum.inr (N, near_litter_image B σ N A hN hNL ha), A) ∈ σ.val :=
 begin
   unfold near_litter_image,
   obtain ⟨⟨_ | ⟨N, N'⟩, C⟩, hNN', heq⟩ := hNin, { cases heq },
@@ -2601,7 +2602,19 @@ end
 begin
   unfold rough_bijection.inv,
   simp only [equiv.to_fun_as_coe, equiv.coe_trans, comp_app, equiv.cast_apply],
-  sorry
+  rw ← subtype.heq_iff_coe_eq,
+  symmetry,
+  rw ← cast_eq_iff_heq,
+  symmetry,
+  rw ← equiv.eq_symm_apply,
+  symmetry,
+  refine subtype.coe_eq_of_eq_mk _,
+  { rw [inv_def, spec.inv_domain], refl, },
+  symmetry,
+  rw ← subtype.heq_iff_coe_eq _,
+  convert cast_heq _ _,
+  { rw [inv_def, spec.inv_range], intro L, refl, },
+  { rw [inv_def, spec.inv_domain], intro L, refl, },
 end
 
 @[simp] lemma rough_bijection.inv_inv (bij : rough_bijection σ A)
@@ -2763,6 +2776,18 @@ private def precise_litter_image
     convert small_of_not_mem_spec L using 1, rw cardinal.mk_sep, refl, },
 end⟩
 
+private lemma precise_litter_image_inj
+  (bij : rough_bijection σ A)
+  (L₁ L₂ : {L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ.val.domain})
+  (abij₁ : bij.precise_atom_bijection L₁) (abij₂ : bij.precise_atom_bijection L₂) :
+  precise_litter_image bij L₁ abij₁ = precise_litter_image bij L₂ abij₂ → L₁ = L₂ :=
+begin
+  intro h,
+  have := congr_arg sigma.fst h,
+  simpa only [precise_litter_image, subtype.coe_inj, equiv.to_fun_as_coe,
+    embedding_like.apply_eq_iff_eq] using this,
+end
+
 private def precise_litter_inverse_image
   (bij : rough_bijection σ A)
   (L : {L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ⁻¹.val.domain})
@@ -2805,7 +2830,40 @@ begin
         exists_false] using ha₁, }, },
   { rintros N M₁ ((hM₁ | hM₁) | hM₁) M₂ ((hM₂ | hM₂) | hM₂),
     { exact (σ.property.forward.one_to_one C).near_litter N hM₁ hM₂, },
-    all_goals { sorry } }
+    { exfalso,
+      obtain ⟨N', hN'₁, hN'₂⟩ := σ.property.backward.near_litter_cond _ _ C hM₁,
+      obtain ⟨L', hL'⟩ := hM₂, cases hL',
+      refine (bij.to_fun L').property.right ⟨_, hN'₁, _⟩,
+      congr', },
+    { exfalso,
+      obtain ⟨L', hL'⟩ := hM₂, cases hL',
+      refine (bij.to_fun L').property.right ⟨_, hM₁, _⟩,
+      congr', },
+    { exfalso,
+      sorry },
+    { obtain ⟨L₁, hL₁⟩ := hM₁, obtain ⟨L₂, hL₂⟩ := hM₂,
+      cases precise_litter_image_inj bij L₁ L₂ (abij L₁) (abij L₂)
+        ((prod.ext_iff.1 $ sum.inr_injective (prod.ext_iff.1 hL₁).1).2.symm.trans
+          (prod.ext_iff.1 $ sum.inr_injective (prod.ext_iff.1 hL₂).1).2),
+      cases hL₁, cases hL₂, refl, },
+    { obtain ⟨L₁, hL₁⟩ := hM₁, obtain ⟨L₂, hL₂⟩ := hM₂,
+      sorry },
+    { obtain ⟨L₁, hL₁⟩ := hM₁,
+      obtain ⟨N', hN'₁, hN'₂⟩ := σ.property.backward.near_litter_cond _ _ C hM₂,
+      sorry },
+    { sorry },
+    { obtain ⟨L₁, hL₁⟩ := hM₁, obtain ⟨L₂, hL₂⟩ := hM₂,
+      unfold precise_litter_inverse_image at hL₁ hL₂,
+      have := precise_litter_image_inj bij.inv _ _
+        (precise_atom_bijection.inv (abij L₁)) (precise_atom_bijection.inv (abij L₂)) _,
+      rw [subtype.mk_eq_mk, subtype.coe_inj, equiv.to_fun_as_coe,
+        embedding_like.apply_eq_iff_eq] at this,
+      cases this, cases hL₁, cases hL₂, refl,
+      { have := litter.to_near_litter_injective
+          ((prod.ext_iff.1 $ sum.inr_injective (prod.ext_iff.1 hL₁).1).2.symm.trans
+            (prod.ext_iff.1 $ sum.inr_injective (prod.ext_iff.1 hL₂).1).2),
+        rw [subtype.val_inj, equiv.to_fun_as_coe, embedding_like.apply_eq_iff_eq] at this,
+        cases this, refl, }, }, }
 end
 
 lemma flexible_union_atoms_eq (L : litter) (C : extended_index B) :
