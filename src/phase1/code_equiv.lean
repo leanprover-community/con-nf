@@ -281,9 +281,8 @@ begin
 end
 
 lemma singleton_iff {g} :
-  c ≡ ⟨β, {g}⟩ ↔
-    c = ⟨β, {g}⟩ ∨
-      ∃ (γ : Iio α) (hc : (c.extension : type_index) = some γ) (hβγ : β ≠ γ), c = A_map_code γ ⟨β, {g}⟩ :=
+  c ≡ ⟨β, {g}⟩ ↔ c = ⟨β, {g}⟩ ∨ ∃ γ : Iio α, (c.extension : type_index) = some γ ∧ β ≠ γ ∧
+    c = A_map_code γ ⟨β, {g}⟩ :=
 begin
   classical,
   refine ⟨λ h, _, _⟩,

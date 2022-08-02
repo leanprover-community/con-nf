@@ -106,34 +106,34 @@ instance mul_action (α) {m : monoid α} [Π i, mul_action α $ f i] :
 
 @[to_additive]
 instance mul_action' {g : I → Type*} {m : Π i, monoid (f i)} [Π i, mul_action (f i) (g i)] :
-  @mul_action (Π i, f i) (Π i : I, g i) (@pi.monoid_Prop I f m) :=
+  @mul_action (Π i, f i) (Π i : I, g i) (@pi_Prop.monoid I f m) :=
 { smul := (•),
   mul_smul := λ r s f, funext $ λ i, mul_smul _ _ _,
   one_smul := λ f, funext $ λ i, one_smul _ _ }
 
 instance distrib_mul_action (α) {m : monoid α} {n : ∀ i, add_monoid $ f i}
   [∀ i, distrib_mul_action α $ f i] :
-  @distrib_mul_action α (Π i : I, f i) m (@pi.add_monoid_Prop I f n) :=
+  @distrib_mul_action α (Π i : I, f i) m (@pi_Prop.add_monoid I f n) :=
 { smul_zero := λ c, funext $ λ i, smul_zero _,
   smul_add := λ c f g, funext $ λ i, smul_add _ _ _,
   ..pi_Prop.mul_action _ }
 
 instance distrib_mul_action' {g : I → Type*} {m : Π i, monoid (f i)} {n : Π i, add_monoid $ g i}
   [Π i, distrib_mul_action (f i) (g i)] :
-  @distrib_mul_action (Π i, f i) (Π i, g i) (@pi.monoid_Prop I f m) (@pi.add_monoid_Prop I g n) :=
+  @distrib_mul_action (Π i, f i) (Π i, g i) (@pi_Prop.monoid I f m) (@pi_Prop.add_monoid I g n) :=
 { smul_add := by { intros, ext x, apply smul_add },
   smul_zero := by { intros, ext x, apply smul_zero } }
 
 instance mul_distrib_mul_action (α) {m : monoid α} {n : Π i, monoid $ f i}
   [Π i, mul_distrib_mul_action α $ f i] :
-  @mul_distrib_mul_action α (Π i : I, f i) m (@pi.monoid_Prop I f n) :=
+  @mul_distrib_mul_action α (Π i : I, f i) m (@pi_Prop.monoid I f n) :=
 { smul_one := λ c, funext $ λ i, smul_one _,
   smul_mul := λ c f g, funext $ λ i, smul_mul' _ _ _,
   ..pi_Prop.mul_action _ }
 
 instance mul_distrib_mul_action' {g : I → Type*} {m : Π i, monoid (f i)} {n : Π i, monoid $ g i}
   [Π i, mul_distrib_mul_action (f i) (g i)] :
-  @mul_distrib_mul_action (Π i, f i) (Π i, g i) (@pi.monoid_Prop I f m) (@pi.monoid_Prop I g n) :=
+  @mul_distrib_mul_action (Π i, f i) (Π i, g i) (@pi_Prop.monoid I f m) (@pi_Prop.monoid I g n) :=
 { smul_mul := by { intros, ext x, apply smul_mul' },
   smul_one := by { intros, ext x, apply smul_one } }
 
@@ -141,13 +141,13 @@ end pi_Prop
 
 namespace function_Prop
 
-/-- Non-dependent version of `pi.has_smul`. Lean gets confused by the dependent instance if this
-is not present. -/
+/-- Non-dependent version of `pi_Prop.has_smul`. Lean gets confused by the dependent instance if
+this is not present. -/
 @[to_additive]
 instance has_smul {ι : Prop} {R M : Type*} [has_smul R M] : has_smul R (ι → M) := pi_Prop.has_smul
 
-/-- Non-dependent version of `pi.smul_comm_class`. Lean gets confused by the dependent instance if
-this is not present. -/
+/-- Non-dependent version of `pi_Prop.smul_comm_class`. Lean gets confused by the dependent instance
+if this is not present. -/
 @[to_additive]
 instance smul_comm_class {ι : Prop} {α β M : Type*} [has_smul α M] [has_smul β M]
   [smul_comm_class α β M] :

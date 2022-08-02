@@ -38,7 +38,8 @@ variables [params.{u}]
 
 section A_map
 variables {α : Λ} {γ : Iio (α : type_index)} [core_tangle_data γ] [positioned_tangle_data γ]
-  (β : Iio α) [core_tangle_data (β : Iio (α : type_index))] [positioned_tangle_data (β : Iio (α : type_index))] [almost_tangle_data β] [tangle_data β]
+  (β : Iio α) [core_tangle_data (β : Iio (α : type_index))]
+  [positioned_tangle_data (β : Iio (α : type_index))] [almost_tangle_data β] [tangle_data β]
 
 /-- The *alternative extension* map. For a set of tangles `G`, consider the code
 `(α, γ, G)`. We then construct the non-empty set `D` such that `(α, β, D)` is an alternative

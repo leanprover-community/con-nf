@@ -1,5 +1,4 @@
 import group_theory.group_action.option
-import mathlib.group_action
 import mathlib.pointwise
 import phase1.allowable
 

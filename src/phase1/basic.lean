@@ -237,7 +237,7 @@ instance bot.core_tangle_data : core_tangle_data ⊥ :=
   designated_support := λ a,
     { carrier := {to_condition (sum.inl a, quiver.path.nil)},
       supports := λ π, by simp only [mem_singleton_iff, has_smul.comp.smul,
-        mul_equiv.coe_to_monoid_hom, struct_perm.to_bot_iso_apply, equiv.to_fun_as_coe,
+        mul_equiv.coe_to_monoid_hom, struct_perm.coe_to_bot_iso, equiv.to_fun_as_coe,
         forall_eq, struct_perm.smul_to_condition, struct_perm.derivative_nil,
         struct_perm.to_bot_smul, sum.smul_inl, embedding_like.apply_eq_iff_eq, prod.mk.inj_iff,
         eq_self_iff_true, and_true, imp_self],
