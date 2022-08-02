@@ -1,6 +1,7 @@
 import mathlib.order
 import mathlib.well_founded
 import set_theory.cardinal.cofinality
+import set_theory.cardinal.continuum
 
 /-!
 # Parameters of the construction
@@ -55,22 +56,34 @@ export params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular Λ_lt_κ μ μr μwf μ
 /-- There exists a set of valid parameters for the model. The smallest such set is Λ, κ, μ = ℵ_0,
 ℵ_1, ℶ_{ω_1} -/
 
-
-/-
-
 def candid_κ : Type := Exists.some (quot.exists_rep (aleph 1))
 
 lemma def_candid_k : #(candid_κ) = aleph 1 :=
 Exists.some_spec (quot.exists_rep (aleph 1))
 
-def candid_μ : Type := Exists.some (quot.exists_rep (bet (omega 1)))
+def candid_μ : Type := Exists.some (quot.exists_rep (beth (ord (aleph 1))))
 
-lemma def_candid_μ : #(candid_μ) = bet (omega 1) :=
-Exists.some_spec (quot.exists_rep (aleph 1))
+lemma def_candid_μ : #(candid_μ) = beth (ord (aleph 1)) :=
+Exists.some_spec (quot.exists_rep (beth (ord (aleph 1))))
+
 
 lemma card_of_N : #ℕ = aleph_0 :=
 by symmetry; apply cardinal.lift_id
 
+def μ_lemma : ((λ α : Type, preimage (λ r : subtype (is_well_order α), @ordinal.type α r.1 r.2) {(⨅ r : subtype (is_well_order α), @ordinal.type α r.1 r.2)}) candid_μ).nonempty := begin
+simp only [subtype.val_eq_coe, set_of_eq_eq_singleton],
+rw set.preimage_singleton_nonempty,
+simp only [subtype.coe_mk, mem_range, subtype.exists],
+dsimp [(infi)],
+have := @Inf_mem ordinal _ (range (λ (r : subtype (is_well_order candid_μ)), @ordinal.type candid_μ r.1 r.2)),
+simp only [subtype.coe_mk, mem_range, subtype.exists] at this,
+have h2 := this _,
+exact h2,
+apply set.range_nonempty,
+end
+
+
+--lemma : ∀ σ : Type, well_ordering_rel σ = order.preimage embedding_to_cardinal _ (embedding_to_cardinal σ)
 example : params.{0} := { Λ := ℕ ,
   Λr := (<),
   Λwf := nat.lt.is_well_order,
@@ -88,24 +101,98 @@ example : params.{0} := { Λ := ℕ ,
         specialize key u,
         exact key,
       },
-      rw h3,
-      rw card_of_N,
-      rw ord_aleph_0,
-      rw h1,
+      rw [h3,card_of_N,ord_aleph_0,h1],
   end,
   Λ_limit := by rw card_of_N; exact is_limit_aleph_0,
   κ := candid_κ,
   κ_regular := by rw def_candid_k; exact is_regular_aleph_one,
   Λ_lt_κ := by rw def_candid_k; rw card_of_N; exact aleph_0_lt_aleph_one,
-  μ := _,
-  μr := _,
-  μwf := _,
-  μ_ord := _,
-  μ_strong_limit := _,
-  κ_lt_μ := _,
-  κ_le_μ_cof := _}-/
+  μ := candid_μ,
+  μr := (set.nonempty.some μ_lemma).1,
+  μwf := (set.nonempty.some μ_lemma).2,
+  μ_ord := begin
+  have := (set.nonempty.some_mem μ_lemma),
+  simp only [subtype.val_eq_coe, set_of_eq_eq_singleton, mem_preimage, mem_singleton_iff] at this,
+  dsimp [(μ_lemma)],
+  transitivity,
+  exact this,
+  clear this,
+  dsimp [(cardinal.ord), (quot.lift_on)],
+  have : # = quotient.mk,
+  refl,
+  rw this,
+  apply quot.lift_mk _ ord._proof_2,
+  end,
+  μ_strong_limit := begin
+  rw def_candid_μ,
+  apply cardinal.is_strong_limit_beth,
+  have := cardinal.ord_is_limit (cardinal.aleph_0_le_aleph 1),
+  unfold ordinal.is_limit at this,
+  apply this.2,
+  end,
+  κ_lt_μ := begin
+  rw [def_candid_k, def_candid_μ],
+  apply lt_of_le_of_lt,
+  exact aleph_one_le_continuum,
+  rw ← cardinal.two_power_aleph_0,
+  suffices : cardinal.beth 1 <cardinal.beth (aleph 1 ).ord,
+  convert this,
+  {
+  rw ← ordinal.succ_zero,
+  rw cardinal.beth_succ,
+  congr,
+  symmetry,
+  exact cardinal.beth_zero,
+  },
+  rw cardinal.beth_lt,
+  apply ordinal.is_limit.one_lt,
+  apply cardinal.ord_is_limit,
+  rw ← cardinal.aleph_zero,
+  rw cardinal.aleph_le,
+  exact zero_le_one,
+   end,
+  κ_le_μ_cof := begin
+  rw [def_candid_k, def_candid_μ],
+  let f : ordinal → ordinal := (λ o, (cardinal.beth o).ord),
+  have : ordinal.is_normal f,
+  {
+    dsimp [(f)],
+    split, intros,
+    rw cardinal.ord_lt_ord,
+    apply cardinal.beth_strict_mono,
+    refine order.lt_succ o,
+    intros,
+    dsimp only,
+    suffices : ∀ (b : ordinal), b ≤ o → (beth b).ord ≤ (beth o).ord,
+    split,
+    intros, exact le_trans (this b (le_of_lt H)) ᾰ_1,
+    intros,
+    rw cardinal.beth_limit ᾰ,
+    rw ordinal.supr_ord,
+    dsimp [(coe), (lift_t), (has_lift_t.lift), (coe_t), (has_coe_t.coe), (coe_b)],
+    let f := λ (i : ↥(Iio o)), (beth (@has_coe.coe ↥(Iio o) ordinal coe_subtype i)).ord,
+    apply conditionally_complete_lattice.cSup_le,
+    convert set.range_nonempty _,
+    {
+    dsimp [(Iio)],
+    use 1,
+    apply ordinal.is_limit.one_lt ᾰ,
+    },
+    dsimp [(upper_bounds), (Iio)],
+    intros,
+    rw ← ᾰ_2.some_spec,
+    apply ᾰ_1,
+    exact ᾰ_2.some.2,
+    dsimp [(bdd_above), (upper_bounds)],
+    use beth o,
+    simp only [set_coe.exists, mem_Iio, subtype.coe_mk, forall_exists_index, forall_apply_eq_imp_iff₂, mem_set_of_eq, beth_le],
+    intros, apply le_of_lt ᾰ_2,
+    intros, simp only [ord_le_ord, beth_le], exact ᾰ_1,
+  },
+  rw ordinal.is_normal.cof_eq this (cardinal.ord_is_limit (cardinal.aleph_0_le_aleph 1)),
+  exact cardinal.is_regular_aleph_one.2,
+  end}
 
-example : params := sorry
 
 variables [params.{u}] {α β : Type u}
 
