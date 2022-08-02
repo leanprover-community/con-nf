@@ -631,7 +631,7 @@ Note that the `small` constructor does not depend on whether the litter is prese
 | small_in
     (L' : near_litter) (hL : (sum.inr (L.to_near_litter, L'), A) ∈ σ) :
   small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.domain} →
-  (∀ (a ∈ litter_set L) (b : atom), (sum.inl (a, b), A) ∈ σ → b ∈ L'.snd.val) → atom_cond
+  (∀ ⦃a b : atom⦄ (hin : (sum.inl (a, b), A) ∈ σ), a ∈ litter_set L ↔ b ∈ L'.snd.val) → atom_cond
 
 /-- The allowability condition on near-litters.
 If a near-litter is present, so are its litter and all atoms in the symmetric difference, and it is
@@ -728,6 +728,8 @@ instance : has_involutive_inv (allowable_partial_perm B) :=
 
 @[simp] lemma allowable_partial_perm.inv_def (σ : allowable_partial_perm B) :
   σ⁻¹.val = (σ.val)⁻¹ := rfl
+
+lemma near_litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B) {N M N' M' : near_litter} (hN : (sum.inr (N, N'), A) ∈ σ.val) (hM : (sum.inr (M, M'), A) ∈ σ.val) : disjoint N.snd.val M.snd.val → disjoint N'.snd.val M'.snd.val := sorry
 
 /-! We prove the restriction lemma: if `σ` is a partial allowable permutation, then so is `σ`
 restricted to a lower path `A`. The proof should be mostly straightforward. The non-trivial bit is
@@ -1146,7 +1148,7 @@ begin
       { refine spec.atom_cond.all N _ atom_map _ h₃,
         { exact set.mem_sUnion_of_mem h₁ ⟨_, hσ₂, rfl⟩, },
         { exact λ a' ha', set.mem_sUnion_of_mem (h₂ a' ha') ⟨_, hσ₂, rfl⟩, }, },
-      { by_cases (sum.inr L.to_near_litter, A) ∈ spec.domain (⋃₀ (subtype.val '' c)),
+        { by_cases (sum.inr L.to_near_litter, A) ∈ spec.domain (⋃₀ (subtype.val '' c)),
         { obtain ⟨⟨_ | ⟨N₁, N₂⟩, C⟩, hc₁, hc₂⟩ := h; cases hc₂,
           refine spec.atom_cond.small_in N₂ hc₁ _ _,
           { rwa this, },
@@ -1201,25 +1203,25 @@ begin
         cases hb₂,
         { exact hρτ.all_flex_domain L N₂ C hL (λ Hρ', Hρ ⟨_, Hρ', rfl⟩) hb₁, },
         { exact hρτ.all_flex_range L N₁ C hL (λ Hρ', Hρ ⟨_, Hρ', rfl⟩) hb₁, }, },
-      refine spec.flexible_cond.all _ _;
-      intros L' hL';
-      specialize H L' hL';
-      cases H with H₁ H₂,
-      refine set.mem_of_subset_of_mem _ H₁, swap,
-      refine set.mem_of_subset_of_mem _ H₂,
-      all_goals {
-        intros sc hsc,
-        simp only [spec.domain, spec.range, subtype.val_eq_coe, set.sUnion_image, set.mem_image,
-                    set.mem_Union, exists_prop, subtype.exists, subtype.coe_mk,
-                    exists_and_distrib_right],
-        obtain ⟨bc, h₁, h₂⟩ := hsc,
-        use bc,
-        use τ.val,
-        split,
-        { use τ.prop,
-          rwa subtype.eta, },
-        { exact h₁, },
-        exact h₂, }, },
+        refine spec.flexible_cond.all _ _;
+        intros L' hL';
+        specialize H L' hL';
+        cases H with H₁ H₂,
+        refine set.mem_of_subset_of_mem _ H₁, swap,
+        refine set.mem_of_subset_of_mem _ H₂,
+        all_goals {
+          intros sc hsc,
+          simp only [spec.domain, spec.range, subtype.val_eq_coe, set.sUnion_image, set.mem_image,
+                     set.mem_Union, exists_prop, subtype.exists, subtype.coe_mk,
+                     exists_and_distrib_right],
+          obtain ⟨bc, h₁, h₂⟩ := hsc,
+          use bc,
+          use τ.val,
+          split,
+          { use τ.prop,
+            rwa subtype.eta, },
+          { exact h₁, },
+          exact h₂, }, },
     { push_neg at h,
       have H : ∀ (ρ : allowable_partial_perm B), ρ ∈ c → ∀ (τ : allowable_partial_perm B), τ ∈ c →
                ∀ (L : litter), flexible L C →
@@ -1712,7 +1714,7 @@ begin
   intros L C,
   obtain ⟨L', hL, atom_map, hin, himg⟩ | ⟨hL, hLsmall⟩ | ⟨L', hL, hLsmall, hmaps⟩ := σ.prop.forward.atom_cond L C,
   { exact spec.atom_cond.all L' (or.inl hL) atom_map (λ a ha, or.inl (hin a ha)) himg },
-  sorry { by_cases a.fst ≠ L ∨ A ≠ C,
+  { by_cases a.fst ≠ L ∨ A ≠ C,
     { refine spec.atom_cond.small_out _ _,
       { unfold spec.domain,
         rintro ⟨⟨_ | ⟨N, M⟩, D⟩, hin | hin, hdom⟩; cases hdom,
@@ -1755,7 +1757,7 @@ begin
     { obtain ⟨rfl, rfl⟩ := and_iff_not_or_not.2 h,
       cases hL ⟨_, ha, rfl⟩, } },
   { by_cases a.fst ≠ L ∨ A ≠ C,
-   { refine spec.atom_cond.small_in L' (or.inl hL) _ _,
+    { refine spec.atom_cond.small_in L' (or.inl hL) _ _,
       { unfold small spec.domain,
         rw set.image_union,
         have : {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
@@ -1789,12 +1791,13 @@ begin
           have := congr_arg prod.snd h1,
           simp only [atom_to_cond] at h2 this,
           exact h (this.trans h2) } },
-      { refine λ c hc d hcd, or.rec (λ h, hmaps c hc d h) _ hcd,
-        rintro ⟨c, hcond⟩, cases hcond,
-        obtain ⟨d, hdcond, hdN, hdnin⟩ := atom_to_cond_spec B σ a A N hsmall ha c,
-        unfold atom_to_cond at hdcond,
-        cases hdcond,
-        sorry } },
+      { refine λ c d hcdu, or.rec (@hmaps c d) _ hcdu,
+        rintro ⟨c, hcond⟩,
+        cases hcond,
+        simp only [ne.def, eq_self_iff_true, not_true, or_false] at h,
+        refine ⟨λ hc, by cases pairwise_disjoint_litter_set _ _ h ⟨c.prop.1, hc⟩, _⟩,
+        intro hL',
+        cases near_litter_image_disjoint B σ A ha hL (pairwise_disjoint_litter_set _ _ h) ⟨(atom_map B σ a A N hsmall ha c).prop.1, hL'⟩ } },
     { classical,
       obtain ⟨rfl, rfl⟩ := and_iff_not_or_not.2 h,
       obtain rfl := (σ.prop.backward.one_to_one A).near_litter _ ha hL,
@@ -1810,12 +1813,12 @@ begin
           exact or.inr ⟨⟨y, hy, h⟩, rfl⟩ } },
       { by_cases (sum.inl x, A) ∈ σ.val.range,
         { obtain ⟨⟨⟨y, _⟩ | _, _⟩, hin, hxy⟩ := h; cases hxy,
-          have hya : y ∈ litter_set a.fst := sorry,
+          have hya : y ∈ litter_set a.fst := (hmaps hin).2 hx,
           use ⟨y, hya⟩,
           dsimp only,
           have : (sum.inl y, A) ∈ σ.val.domain := ⟨_, hin, rfl⟩,
           rw dif_pos this,
-          exact (σ.prop.backward.one_to_one A).atom y (atom_value_spec B σ A y ⟨_, hin, rfl⟩) hin },
+          exact (σ.prop.backward.one_to_one A).atom y (atom_value_spec B σ A y ⟨_, hin, rfl⟩ ) hin },
         { obtain ⟨d, hd⟩ := exists_atom_to_cond B σ a A N hsmall ha hx h,
           use ⟨coe d, d.prop.1⟩,
           dsimp only,
@@ -1825,7 +1828,7 @@ begin
       { obtain ⟨y, rfl⟩ := hx,
         by_cases (sum.inl y.val, A) ∈ σ.val.domain,
         { simp_rw dif_pos h,
-          exact hmaps y.val y.prop _ (atom_value_spec B σ A y.val h) },
+          exact (hmaps $ atom_value_spec B σ A y.val h).1 y.prop },
         { simp_rw dif_neg h,
           obtain ⟨c, hcy, hcN, hcnin⟩ := atom_to_cond_spec B σ a A N hsmall ha ⟨y.val, y.prop, h⟩,
           simp only [atom_to_cond, prod.mk.inj_iff, eq_self_iff_true, true_and, and_true] at hcy,
