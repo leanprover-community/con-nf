@@ -1,5 +1,5 @@
-import phase0.struct_perm
 import phase0.support
+import mathlib.with_bot
 
 /-!
 # Phase 1 of the recursion
@@ -10,10 +10,13 @@ levels. Interaction will be introduced in phase 2.
 
 ## Main declarations
 
+* `con_nf.core_tangle_data`:
+* `con_nf.positioned_tangle_data`:
+* `con_nf.almost_tangle_data`:
 * `con_nf.tangle_data`: The data for the first phase of the recursion.
 -/
 
-open set with_bot
+open function set with_bot
 
 noncomputable theory
 
@@ -24,49 +27,70 @@ variable [params.{u}]
 
 section define_tangle_data
 
+/-- The motor of the initial recursion. This contains the data of tangles and allowable permutations
+for phase 1 of the recursion. -/
 class core_tangle_data (α : type_index) :=
-(tangle : Type u)
-(allowable : Type u)
+(tangle allowable : Type u)
 [allowable_group : group allowable]
 (allowable_to_struct_perm : allowable →* struct_perm α)
 [allowable_action : mul_action allowable tangle]
-(designated_support : Π (t : tangle), small_support allowable_to_struct_perm t)
+(designated_support : by { haveI : mul_action allowable (support_condition α) :=
+  mul_action.comp_hom _ allowable_to_struct_perm, exact Π t : tangle, small_support α allowable t })
 
-export core_tangle_data (allowable_to_struct_perm designated_support)
+export core_tangle_data (tangle allowable allowable_to_struct_perm designated_support)
 attribute [instance] core_tangle_data.allowable_group core_tangle_data.allowable_action
 
+section
+variables (α : type_index) [core_tangle_data α]
+
+/-- Nonempty sets of tangles. -/
+abbreviation tangles : Type u := {s : set (tangle α) // s.nonempty}
+
+variables {α} {X : Type*} [mul_action (struct_perm α) X]
+
+instance : mul_action (allowable α) X := mul_action.comp_hom _ allowable_to_struct_perm
+
+@[simp] lemma allowable_to_struct_perm_smul (f : allowable α) (x : X) :
+  allowable_to_struct_perm f • x = f • x := rfl
+
+end
+
+/-- The motor of the initial recursion. This contains the data of the position function. -/
 class positioned_tangle_data (α : type_index) [core : core_tangle_data α] :=
-(position : core.tangle ↪ μ)
+(position : tangle α ↪ μ)
 
 export positioned_tangle_data (position)
 
-variables (α : Λ) [core : core_tangle_data α]
+variables (α : Λ) [core_tangle_data α]
 
+/-- The motor of the initial recursion. This contains the data of the injection to  all the information needed for phase 1 of the
+recursion. Note that this is slightly different to the blueprint's formulation; here, we keep phase
+1 data *cumulatively*, for all previous iterations of the recursion at once. -/
 class almost_tangle_data :=
-(to_tangle : near_litter ↪ core.tangle)
-(smul_to_tangle : Π (π : core.allowable) N, π • to_tangle N =
-  to_tangle (allowable_to_struct_perm π • N))
-(pretangle_inj : core.tangle ↪ pretangle α)
-(smul_pretangle_inj : Π (π : core.allowable) (t : core.tangle),
-  allowable_to_struct_perm π • pretangle_inj t = pretangle_inj (π • t))
-(typed_singleton : atom ↪ core.tangle)
+(to_tangle : near_litter ↪ tangle α)
+(smul_to_tangle : Π (π : allowable α) N, π • to_tangle N = to_tangle (π • N))
+(pretangle_inj : tangle α ↪ pretangle α)
+(smul_pretangle_inj : Π (π : allowable α) (t : tangle α),
+  π • pretangle_inj t = pretangle_inj (π • t))
+(typed_singleton : atom ↪ tangle α)
 
 export almost_tangle_data (to_tangle typed_singleton)
 
 variables [almost_tangle_data α] [positioned_tangle_data α]
 
+/-- The motor of the initial recursion. This contains all the information needed for phase 1 of the
+recursion. -/
 class tangle_data :=
 (litter_lt : Π (L : litter) (a ∈ litter_set L),
-  position (to_tangle L.to_near_litter : core.tangle) < position (typed_singleton a : core.tangle))
+  position (to_tangle L.to_near_litter : tangle α) < position (typed_singleton a : tangle α))
 (litter_lt_near_litter : Π (N : near_litter),
-  position (to_tangle N.fst.to_near_litter : core.tangle) ≤ position (to_tangle N : core.tangle))
+  position (to_tangle N.fst.to_near_litter : tangle α) ≤ position (to_tangle N : tangle α))
 (symm_diff_lt_near_litter : Π (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd),
-  position (typed_singleton a : core.tangle) < position (to_tangle N : core.tangle))
-(support_le : Π (t : core.tangle) (c : support_condition α)
-  (hc : c ∈ designated_support t)
+  position (typed_singleton a : tangle α) < position (to_tangle N : tangle α))
+(support_le : Π (t : tangle α) (c : support_condition α) (hc : c ∈ designated_support t)
   (not_singleton : ∀ a, t ≠ typed_singleton a)
   (not_near_litter : ∀ (L : litter), t ≠ to_tangle L.to_near_litter),
-  position (c.fst.elim (typed_singleton) (to_tangle) : core.tangle) ≤ position t)
+  position (c.fst.elim (typed_singleton) (to_tangle) : tangle α) ≤ position t)
 
 /-- The type of tangles that we assume were constructed at stage `α`.
 Later in the recursion, we will construct this type explicitly, but for now, we will just assume
@@ -152,24 +176,54 @@ add_decl_doc tangle_data.support_le
 
 end define_tangle_data
 
-export core_tangle_data (tangle allowable allowable_to_struct_perm)
-export almost_tangle_data (to_tangle pretangle_inj typed_singleton)
-export positioned_tangle_data (position)
-
 section instances
+variables {α : Λ}
 
-instance coe_Iio (α : Λ) : has_coe (Iio α) (Iio (α : type_index)) :=
-⟨λ β, ⟨β.val, coe_lt_coe.mpr β.property⟩⟩
+instance coe_Iio : has_coe_t (Iio α) (Iio (α : type_index)) := ⟨λ β, ⟨β.1, coe_lt_coe.2 β.2⟩⟩
 
-variables (α : Λ) (β : Iio α) [core_tangle_data β] [positioned_tangle_data β]
+@[simp] lemma Iio.coe_mk (β : Λ) (hβ : β < α) :
+  ((⟨β, hβ⟩ : Iio α) : Iio (α : type_index)) = ⟨β, coe_lt_coe.2 hβ⟩ := rfl
+
+lemma Iio.coe_injective : injective (coe : Iio α → Iio (α : type_index)) :=
+begin
+  rintro ⟨β, hβ⟩ ⟨γ, hγ⟩ h,
+  simp only [Iio.coe_mk, subtype.mk_eq_mk] at h,
+  have := with_bot.coe_injective h,
+  subst this,
+end
+
+@[simp] lemma Iio.coe_inj {β γ : Iio α} : (β : Iio (α : type_index)) = γ ↔ β = γ :=
+Iio.coe_injective.eq_iff
+
+section bot
+variables {α} {β : Λ} {hβ : (β : type_index) ∈ Iio (α : type_index)}
+
+instance : has_bot (Iio (α : type_index)) := ⟨⟨⊥, bot_lt_coe _⟩⟩
+
+@[simp] lemma bot_ne_mk_coe : (⊥ : Iio (α : type_index)) ≠ ⟨β, hβ⟩ :=
+ne_of_apply_ne subtype.val bot_ne_coe
+
+@[simp] lemma mk_coe_ne_bot : (⟨β, hβ⟩ : Iio (α : type_index)) ≠ ⊥ :=
+ne_of_apply_ne subtype.val coe_ne_bot
+
+end bot
+
+variables (β : Iio α) [core_tangle_data (β : Iio (α : type_index))]
 
 instance core_val : core_tangle_data β.val := ‹core_tangle_data β›
 instance core_coe_coe : core_tangle_data (β : Λ) := ‹core_tangle_data β›
-instance core_coe_b : core_tangle_data (coe_b β : Iio (α : type_index)) := ‹core_tangle_data β›
-instance positioned_val : positioned_tangle_data β.val := ‹positioned_tangle_data β›
-instance positioned_coe_coe : positioned_tangle_data (β : Λ) := ‹positioned_tangle_data β›
-instance positioned_coe_b : positioned_tangle_data (coe_b β : Iio (α : type_index)) :=
-‹positioned_tangle_data β›
+
+section positioned_tangle_data
+variables [positioned_tangle_data (β : Iio (α : type_index))]
+
+instance positioned_val : positioned_tangle_data β.val := ‹positioned_tangle_data _›
+instance positioned_coe_coe : positioned_tangle_data (β : Λ) := ‹positioned_tangle_data _›
+
+end positioned_tangle_data
+
+variables [almost_tangle_data β]
+
+instance almost_val : almost_tangle_data β.val := ‹almost_tangle_data β›
 
 end instances
 
@@ -180,39 +234,59 @@ instance bot.core_tangle_data : core_tangle_data ⊥ :=
   allowable := near_litter_perm,
   allowable_to_struct_perm := struct_perm.to_bot_iso.to_monoid_hom,
   allowable_action := infer_instance,
-  designated_support := sorry }
+  designated_support := λ a,
+    { carrier := {to_condition (sum.inl a, quiver.path.nil)},
+      supports := λ π, by simp only [mem_singleton_iff, has_smul.comp.smul,
+        mul_equiv.coe_to_monoid_hom, struct_perm.to_bot_iso_apply, equiv.to_fun_as_coe,
+        forall_eq, struct_perm.smul_to_condition, struct_perm.derivative_nil,
+        struct_perm.to_bot_smul, sum.smul_inl, embedding_like.apply_eq_iff_eq, prod.mk.inj_iff,
+        eq_self_iff_true, and_true, imp_self],
+      small := small_singleton _ } }
 
+/-- The tangle data at the bottom level. -/
 def bot.positioned_tangle_data : positioned_tangle_data ⊥ := ⟨nonempty.some mk_atom.le⟩
 
-/-- The core tangle data up to phase `α`. -/
-abbreviation core_tangle_cumul (α : Λ) := Π β : Iio (α : type_index), core_tangle_data β
+variables (α : Λ)
 
-abbreviation positioned_tangle_cumul (α : Λ) [core : core_tangle_cumul α] :=
-Π β : Iio (α : type_index), @positioned_tangle_data _ β (core β)
+/-- The core tangle data below phase `α`. -/
+class core_tangle_cumul (α : Λ) := (data : Π β : Iio α, core_tangle_data β)
 
-abbreviation almost_tangle_cumul (α : Λ) [core : core_tangle_cumul α] :=
-Π β : Iio α, @almost_tangle_data _ β (core β)
+section core_tangle_cumul
+variables [core_tangle_cumul α]
 
-abbreviation tangle_cumul (α : Λ) [core : core_tangle_cumul α]
-  [pos : positioned_tangle_cumul α] [almost : almost_tangle_cumul α] :=
-Π β : Iio α, @tangle_data _ β (core β) (almost β) (pos β)
-
-instance core_tangle_cumul.to_core_tangle_data (α : Λ) [hα : core_tangle_cumul α] :
-  Π β : Iio (α : type_index), core_tangle_data β
+instance core_tangle_cumul.to_core_tangle_data : Π β : Iio (α : type_index), core_tangle_data β
 | ⟨⊥, h⟩ := bot.core_tangle_data
-| ⟨(β : Λ), hβ⟩ := hα ⟨β, hβ⟩
+| ⟨(β : Λ), hβ⟩ := core_tangle_cumul.data ⟨β, coe_lt_coe.1 hβ⟩
 
-section instances
+instance core_tangle_cumul.to_core_tangle_data' (β : Iio α) : core_tangle_data β :=
+show core_tangle_data (β : Iio (α : type_index)), by apply_instance
 
-variables (α : Λ) (β : Iio α) [core_tangle_cumul α]
-instance cumul_core : core_tangle_data β := ‹core_tangle_cumul α› β
-variable [positioned_tangle_cumul α]
-instance cumul_positioned : positioned_tangle_data β := ‹positioned_tangle_cumul α› β
-variable [almost_tangle_cumul α]
-instance cumul_almost : almost_tangle_data β := ‹almost_tangle_cumul α› β
-variable [tangle_cumul α]
-instance cumul_full : tangle_data β := ‹tangle_cumul α› β
+end core_tangle_cumul
 
-end instances
+/-- The positioned tangle data below phase `α`. -/
+class positioned_tangle_cumul (α : Λ) [core_tangle_cumul α] :=
+(data : Π β : Iio α, positioned_tangle_data β)
+
+section positioned_tangle_cumul
+variables [core_tangle_cumul α] [positioned_tangle_cumul α]
+
+instance positioned_tangle_cumul.to_positioned_tangle_data :
+  Π β : Iio (α : type_index), positioned_tangle_data β
+| ⟨⊥, h⟩ := bot.positioned_tangle_data
+| ⟨(β : Λ), hβ⟩ := positioned_tangle_cumul.data ⟨β, coe_lt_coe.1 hβ⟩
+
+instance positioned_tangle_cumul.to_positioned_tangle_data' (β : Iio α) :
+  positioned_tangle_data β :=
+show positioned_tangle_data (β : Iio (α : type_index)), by apply_instance
+
+end positioned_tangle_cumul
+
+/-- The almost tangle data below phase `α`. -/
+abbreviation almost_tangle_cumul (α : Λ) [core_tangle_cumul α] := Π β : Iio α, almost_tangle_data β
+
+/-- The tangle data below phase `α`. -/
+abbreviation tangle_cumul (α : Λ) [core_tangle_cumul α] [positioned_tangle_cumul α]
+  [almost_tangle_cumul α] :=
+Π β : Iio α, tangle_data β
 
 end con_nf

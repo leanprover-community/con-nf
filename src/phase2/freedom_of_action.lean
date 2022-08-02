@@ -3,6 +3,8 @@
 /-!
 # The freedom of action theorem
 
+In this file, we will state and prove the freedom of action theorem.
+
 We state the freedom of action condition at a particular proper type index `α`. Note that many of
 the definitions are in a slightly different form from the blueprint and paper. This is likely for
 one of two reasons:
@@ -14,6 +16,123 @@ one of two reasons:
     instead of the category `Paths(Λ, <)` as is seen in the blueprint. This means that paths are
     thought of as going "downwards" from `α` to `⊥` instead of upwards. Path composition is
     therefore reversed.
+
+For most of these proofs, we assume the phase 2 assumptions at `α`. However, since we often want to
+talk about allowable permutations and specifications at lower levels, we often have an ambient
+parameter `B : le_index α`, which can be thought of as a path from `α` to some lower index `B`.
+
+Often, when the blueprint or paper talks about an `α`-something, we will instead define it as a
+`B`-something for increased generality. This is most useful when stating and proving the restriction
+lemma and the condition on non-flexible litters.
+
+-----
+
+## Definitions
+
+### Specifications
+
+The freedom of action theorem concerns itself with completing *specifications* of allowable
+permutations into an actual allowable partial permutation that satisfies the specification. In
+particular, we define a specification as a set that specifies the images of certain atoms and
+near-litters under certain derivatives of a permutation. For example, a specification for an
+`B`-allowable permutation might specify that `π_A(a) = b` for `A` a `B`-extended index, and `a` and
+`b` atoms.
+
+We implement this in Lean by defining a specification as a set of binary conditions, where each
+binary condition specifies either an atom to be supplied to `π` and the atom it is to be mapped to,
+or a near-litter to be supplied and the near-litter it is to be mapped to, together with the
+`B`-extended index along which we take the derivative.
+
+We say that an allowable permutation `π` *satisfies* a given specification if all of the binary
+conditions in the specification are realised by the specification; that is, if a binary condition
+specifies `π_A(x) = y` then we must in fact have `π_A(x) = y` for this particular `π`.
+
+### Allowability
+
+We say that a specification is *allowable* (`allowable_spec`) if it satisfies a collection of
+relatively permissive conditions. Essentially, we need to ensure that there are no obvious local
+contradictions in the specification. For example, the one-to-one condition requires that if we
+specify `π_A(a) = b`, we cannot also specify `π_A(a) = c` for some `c ≠ b`, and we cannot specify
+`π_A(d) = b` for `d ≠ a` either.
+
+More details on these conditions are discussed in depth later.
+
+If a specification is allowable, we call it an *allowable partial permutation*
+(`allowable_partial_perm`).
+
+-----
+
+## The theorem itself
+
+We say that *freedom of action* holds along a path `B` if any partial allowable permutation `σ`
+admits an allowable permutation `π` that satisfies it. The freedom of action theorem, our goal in
+this file, states that if freedom of action holds along all proper paths `B`, and we are in the
+synthesised context produced by our constructions in phase 1 at `α`, then freedom of action holds
+at `α` (or more properly, at the nil path `α ⟶ α`).
+
+To prove the freedom of action theorem, we follow the following steps.
+
+1. We construct a preorder on the type of allowable partial permutations that satisfies some
+    technical conditions (`perm_le`). Now, suppose we have a particular allowable partial
+    permutation `σ`. We apply Zorn's lemma to this to generate another allowable partial permutation
+    `τ` which is maximal under `≤` (`perm_le`), such that `σ ≤ τ`.
+2. We prove that any allowable partial permutation `τ` which is maximal under `≤` is total and
+    co-total, in the sense that the specification defines where every atom and near-litter go, along
+    any derivative path.
+3. We then prove that a total and co-total allowable partial permutation can be synthesised into an
+    allowable permutation `π` given that we are in the synthesised context at `α`. This is precisely
+    the allowable permutation that we need to complete the proof.
+
+### Step 1: Zorn's lemma
+
+What we call `σ ≤ τ`, the blueprint calls `σ ⊑ τ`, saying that `τ` "carefully extends" `σ`.
+`σ ≤ τ` means that `σ ⊆ τ` as specifications, and:
+
+* if `τ` has any new `A`-flexible litter, then it has all (in both domain and range);
+* within each litter, if `τ.domain` has any new atom, then it must have all atoms in that litter
+    (and hence must also have the litter by allowability), and dually for the range.
+
+To prove that Zorn's lemma can be applied, we must show that for any chain `c` of allowable
+partial permutations, the union of the specifications in the chain is allowable, and carefully
+extends every element of the chain.
+
+The non-trivial part of this proof is the "small or all" conditions for atoms and flexible litters.
+Due to the particular construction of the preorder `≤`, if we add any atom (resp. flexible litter),
+we must add all of them.
+
+### Step 2: Totality
+
+By symmetry, it suffices to only consider totality. We construct the well-founded relation `≺`
+(read "constrains") on support conditions. Note that here, a support condition represents the
+expression `π_A(x)` without specifying what `x` maps to under `π`. Suppose `π_A(x)` is a support
+condition, and `S` is the set of conditions that constrain it; then informally we might say that
+if binary conditions associated with each element of `S` lie in `σ` (we say that `S` is a subset of
+the domain of `σ`) then we can uniquely determine where `x` is "supposed to" map to under `π`.
+More precisely, if `S` is a subset of the domain of `σ`, we can extend `σ` to an allowable partial
+permutation `τ ≥ σ` where `π_A(x)` is specified.
+
+We provide one proof for each of the four cases of what `x` may be:
+
+1. an atom;
+2. a near-litter;
+3. a *flexible* litter;
+4. a *non-flexible* litter.
+
+Informally, a flexible litter is one which is not the image of any f-map.
+
+Non-flexible litters are the image of some f-map, and so the unpacked coherence condition specifies
+what must happen to that litter, since any allowable permutation must commute with this f-map.
+Conversely, flexible litters are not constrained by anything. We therefore need to treat them quite
+differently when constructing the extended specification `τ`.
+
+Then, because `≺` is well-founded, any element can be added to an allowable partial permutation
+since inductively everything that transitively constrains it can also be added. So any `σ` that
+is maximal must be total.
+
+### Step 3: Synthesis into an allowable permutation
+
+This is not yet complete.
+
 -/
 
 open function quiver with_bot cardinal
@@ -497,16 +616,22 @@ lemma graph_struct_perm (σ : spec B) (hσ₁ : σ.one_to_one_forward B) (hσ₂
 
 /-- The allowability condition on atoms.
 In an absent litter, we must specify only `< κ`-many atoms.
-In a present litter, we can specify either `< κ`-many atoms, or all of the atoms in the litter, and
-in this case, almost all of them must be mapped to the right place.
+In a present litter, we can specify either `< κ`-many atoms and they are mapped to the right place,
+or all of the atoms in the litter, and their range is exactly the image of the litter.
 Note that the `small` constructor does not depend on whether the litter is present or absent. -/
 @[mk_iff] inductive atom_cond (σ : spec B) (L : litter) (A : extended_index B) : Prop
-| small : small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.domain} → atom_cond
-| all (N : near_litter) (atom_map : litter_set L → atom) :
-    (⟨sum.inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ σ →
-    (∀ a ∈ litter_set L, (⟨sum.inl ⟨a, atom_map ⟨a, ‹_›⟩⟩, A⟩ : binary_condition B) ∈ σ) →
-    N.snd.val = set.range atom_map →
-    atom_cond
+| all
+    (L' : near_litter) (hL : (⟨sum.inr ⟨L.to_near_litter, L'⟩, A⟩ : binary_condition B) ∈ σ)
+    (atom_map : litter_set L → atom) :
+  (∀ a ∈ litter_set L, (⟨sum.inl ⟨a, atom_map ⟨a, ‹_›⟩⟩, A⟩ : binary_condition B) ∈ σ) →
+  L'.snd.val = set.range atom_map → atom_cond
+| small_out
+    (hL : (sum.inr L.to_near_litter, A) ∉ σ.domain) :
+  small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.domain} → atom_cond
+| small_in
+    (L' : near_litter) (hL : (sum.inr (L.to_near_litter, L'), A) ∈ σ) :
+  small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.domain} →
+  (∀ (a ∈ litter_set L) (b : atom), (sum.inl (a, b), A) ∈ σ → b ∈ L'.snd.val) → atom_cond
 
 /-- The allowability condition on near-litters.
 If a near-litter is present, so are its litter and all atoms in the symmetric difference, and it is
@@ -622,18 +747,24 @@ lemma lower_atom_cond (hσ : σ.allowable_spec B) :
 begin
   intros L C,
   unfold spec.lower binary_condition.extend_path,
-  obtain hsmall | ⟨N, atom_map, h1, h2, h3⟩ := hσ.forward.atom_cond L (A.comp C),
-  { refine spec.atom_cond.small _,
-    convert hsmall,
+  obtain ⟨N, atom_map, h1, h2, h3⟩ | ⟨hL, hsmall⟩ | ⟨N, hL, hsmall, hmaps⟩ := hσ.forward.atom_cond L (A.comp C),
+  { exact spec.atom_cond.all N atom_map h1 h2 h3 },
+  refine spec.atom_cond.small_out _ _,
+  { convert hL using 1,
+    refine eq_iff_iff.2 ⟨_, _⟩; rintro ⟨⟨_ | ⟨x, y⟩, C⟩, hbin, hdom⟩; cases hdom,
+    { exact ⟨_, hbin, prod.mk.inj_iff.2 ⟨(prod.mk.inj hdom).1, rfl⟩⟩ },
+    { exact ⟨(sum.inr (L.to_near_litter, y), C), hbin, prod.mk.inj_iff.2 ⟨(prod.mk.inj hdom).1, rfl⟩⟩ } },
+  swap,
+  refine spec.atom_cond.small_in N hL _ hmaps,
+  all_goals { convert hsmall,
     unfold spec.domain binary_condition.domain,
     ext a,
-    simp,
+    simp only [set.mem_image, prod.mk.inj_iff],
     split; rintro ⟨⟨x, y⟩, hx1, hx2, hx3⟩,
     { exact ⟨⟨x, A.comp y⟩, hx1, hx2, by rw ← hx3⟩ },
     dsimp only at hx3,
     rw hx3 at hx1 hx2,
-    exact ⟨⟨x, C⟩, hx1, hx2, rfl⟩ },
-  { exact spec.atom_cond.all N atom_map h1 h2 h3 }
+    exact ⟨⟨x, C⟩, hx1, hx2, rfl⟩ }
 end
 
 lemma lower_near_litter_cond (hσ : σ.allowable_spec B) :
@@ -1353,6 +1484,12 @@ end values
 
 section exists_ge_atom
 
+/-!
+Suppose that we have an atom whose litter is specified in `σ`. We want to extend `σ` such that all
+of the atoms in this litter are now specified. To do this, we construct an arbitrary bijection of
+the unassigned atoms in the litter in the domain with the unassigned atoms in the litter's image.
+-/
+
 variables (σ : allowable_partial_perm B) (a : atom) (A : extended_index B) (N : near_litter)
 
 lemma atom_value_inj_range (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
@@ -1544,9 +1681,15 @@ lemma atom_union_atom_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) 
   ∀ L C, spec.atom_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)) L C :=
 begin
   intros L C,
-  obtain hL | ⟨N, atom_map, h1, h2, h3⟩ := σ.prop.forward.atom_cond L C,
-  { by_cases a.fst ≠ L ∨ A ≠ C,
-    sorry { refine spec.atom_cond.small _,
+  obtain ⟨L', hL, atom_map, hin, himg⟩ | ⟨hL, hLsmall⟩ | ⟨L', hL, hLsmall, hmaps⟩ := σ.prop.forward.atom_cond L C,
+  { exact spec.atom_cond.all L' (or.inl hL) atom_map (λ a ha, or.inl (hin a ha)) himg },
+  sorry { by_cases a.fst ≠ L ∨ A ≠ C,
+    { refine spec.atom_cond.small_out _ _,
+      { unfold spec.domain,
+        rintro ⟨⟨_ | ⟨N, M⟩, D⟩, hin | hin, hdom⟩; cases hdom,
+        { exact hL ⟨_, hin, rfl⟩ },
+        { unfold atom_to_cond at hin,
+          cases hin with _ hin, cases hin } },
       unfold small spec.domain,
       rw set.image_union,
       have : {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
@@ -1562,7 +1705,7 @@ begin
           { exact ⟨hL, or.inl h⟩ },
           { exact ⟨hL, or.inr h⟩ } } },
       rw this,
-      convert lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le hL
+      convert lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le hLsmall
           (lt_of_eq_of_lt (cardinal.mk_emptyc _) κ_regular.pos)),
       simp only [binary_condition.domain, subtype.val_eq_coe, set.mem_sep_eq,
                  set.mem_image, set.mem_range, set_coe.exists,
@@ -1580,13 +1723,57 @@ begin
         have := congr_arg prod.snd h1,
         simp only [atom_to_cond] at h2 this,
         exact h (this.trans h2) } },
+    { obtain ⟨rfl, rfl⟩ := and_iff_not_or_not.2 h,
+      cases hL ⟨_, ha, rfl⟩, } },
+  { by_cases a.fst ≠ L ∨ A ≠ C,
+   { refine spec.atom_cond.small_in L' (or.inl hL) _ _,
+      { unfold small spec.domain,
+        rw set.image_union,
+        have : {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
+          binary_condition.domain '' σ.val ∪ binary_condition.domain '' set.range (atom_to_cond B σ a A N hsmall ha)} = {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
+          binary_condition.domain '' σ.val} ∪ {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈ binary_condition.domain '' set.range (atom_to_cond B σ a A N hsmall ha)},
+        { ext,
+          simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_union_eq, set.mem_image, set.mem_range, set_coe.exists],
+          split,
+          { rintro ⟨hL, h | h⟩,
+            { exact or.inl ⟨hL, h⟩ },
+            { exact or.inr ⟨hL, h⟩ } },
+          { rintro (⟨hL, h⟩ | ⟨hL, h⟩),
+            { exact ⟨hL, or.inl h⟩ },
+            { exact ⟨hL, or.inr h⟩ } } },
+        rw this,
+        convert lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le hLsmall
+            (lt_of_eq_of_lt (cardinal.mk_emptyc _) κ_regular.pos)),
+        simp only [binary_condition.domain, subtype.val_eq_coe, set.mem_sep_eq,
+                  set.mem_image, set.mem_range, set_coe.exists,
+    prod.mk.inj_iff],
+        cases h,
+        { refine funext (λ x, eq_iff_iff.2 ⟨_, λ h, by cases h⟩),
+          rintro ⟨hx, ⟨⟨x', y⟩ | _, b⟩, ⟨_, ⟨ha, _⟩, hb1⟩, hb2, -⟩,
+          { simp only [atom_to_cond, sum.elim_inl, subtype.coe_mk, prod.mk.inj_iff] at hb1 hb2,
+            obtain ⟨⟨rfl, -⟩, -⟩ := hb1,
+            subst hb2,
+            exact pairwise_disjoint_litter_set a.fst L h ⟨ha, hx⟩, },
+          { cases hb1 } },
+        { refine set.ext (λ x, ⟨_, λ hx, by cases hx⟩),
+          rintro ⟨hL, ⟨b1, b2⟩, ⟨_, _, h1⟩, -, h2⟩,
+          have := congr_arg prod.snd h1,
+          simp only [atom_to_cond] at h2 this,
+          exact h (this.trans h2) } },
+      { refine λ c hc d hcd, or.rec (λ h, hmaps c hc d h) _ hcd,
+        rintro ⟨c, hcond⟩, cases hcond,
+        obtain ⟨d, hdcond, hdN, hdnin⟩ := atom_to_cond_spec B σ a A N hsmall ha c,
+        unfold atom_to_cond at hdcond,
+        cases hdcond,
+        sorry } },
     { classical,
       obtain ⟨rfl, rfl⟩ := and_iff_not_or_not.2 h,
-      refine spec.atom_cond.all N
+      obtain rfl := (σ.prop.backward.one_to_one A).near_litter _ ha hL,
+      refine spec.atom_cond.all N (or.inl ha)
         (λ x, dite ((sum.inl x.val, A) ∈ σ.val.domain)
           (λ hx, atom_value B σ A x hx)
           (λ hx, (atom_map B σ a A N hsmall ha ⟨x.val, x.prop, hx⟩).val))
-        (or.inl ha) (λ y hy, _) (set.ext $ λ x, ⟨λ hx, _, λ hx, _⟩),
+        (λ y hy, _) (set.ext $ λ x, ⟨λ hx, _, λ hx, _⟩),
       { by_cases (sum.inl y, A) ∈ σ.val.domain,
         { rw dif_pos h,
           exact or.inl (atom_value_spec B σ A y h) },
@@ -1609,13 +1796,12 @@ begin
       { obtain ⟨y, rfl⟩ := hx,
         by_cases (sum.inl y.val, A) ∈ σ.val.domain,
         { simp_rw dif_pos h,
-          sorry },
+          exact hmaps y.val y.prop _ (atom_value_spec B σ A y.val h) },
         { simp_rw dif_neg h,
           obtain ⟨c, hcy, hcN, hcnin⟩ := atom_to_cond_spec B σ a A N hsmall ha ⟨y.val, y.prop, h⟩,
           simp only [atom_to_cond, prod.mk.inj_iff, eq_self_iff_true, true_and, and_true] at hcy,
           rw ← hcy at hcN,
           exact hcN } } } },
-  { exact spec.atom_cond.all N atom_map (or.inl h1) (λ a ha, or.inl (h2 a ha)) h3, }
 end
 
 lemma atom_union_atom_cond_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
@@ -1966,6 +2152,12 @@ end exists_ge_atom
 
 section exists_ge_near_litter
 
+/-!
+Suppose that for a near-litter, its associated litter is already defined in `σ`, along with all of
+the atoms in the symmetric difference with that litter. Then, the place the litter is supposed to
+map to is already defined, and we simply add that to `σ`.
+-/
+
 variables (σ : allowable_partial_perm B) (N : near_litter) (A : extended_index B)
 
 lemma _root_.cardinal.mk_sdiff_le {α : Type u} (S T : set α) : #(S \ T : set α) ≤ #S :=
@@ -2313,6 +2505,23 @@ end
 end exists_ge_near_litter
 
 section exists_ge_flexible
+
+/-!
+When we want to add an `A`-flexible litter to `σ`, we will just add all of them in an arbitrary
+bijection. This will always exist because the sets are both of size `μ`. This will create a
+*rough bijection*. This is not necessarily compatible with `σ`, because we may already have
+specified where certain atoms in these litters are mapped to or from.
+
+To remedy this, for each `A`-flexible litter we create a *precise atom bijection* mapping all of the
+unassigned atoms in the domain of `σ` to all of the unassigned atoms in the range of `σ` in the
+litter obtained under the rough bijection.
+
+We extend `σ` by saying that each `A`-flexible litter is mapped to the image of the precise atom
+bijection map, together with the image of all of the atoms that were already specified. This is a
+near-litter, which is near to the litter obtained using the rough bijection. The same procedure is
+done in the reverse direction with the same bijections, so that all of the `A`-flexible litters are
+now defined in this new allowable partial permutation.
+-/
 
 variables {B} (σ : allowable_partial_perm B) (A : extended_index B)
 
@@ -2779,6 +2988,13 @@ end
 end exists_ge_flexible
 
 section exists_ge_non_flexible
+
+/-!
+For a non-flexible litter `L = f_{γδ}^A(t)`, assume the designated support for `t` already lies in
+`σ`. Then, look at `σ` restricted to `γ` - this is allowable by the restriction lemma, and by the
+inductive freedom of action assumption extends to `π'`, a `γ`-allowable permutation. We can map `t`
+using `π'` to find where `L` is supposed to be sent under `π`. We then add this result to `σ`.
+-/
 
 variables {B} {σ : allowable_partial_perm B}
   ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄

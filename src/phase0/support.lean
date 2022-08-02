@@ -19,6 +19,14 @@ variables [params.{u}] {α : type_index}
 @[derive [inhabited]]
 def support_condition (α : type_index) : Type u := (atom ⊕ near_litter) × extended_index α
 
+/-- The "identity" equivalence between `(atom ⊕ near_litter) × extended_index α` and
+`support_condition α`. -/
+def to_condition : (atom ⊕ near_litter) × extended_index α ≃ support_condition α := equiv.refl _
+
+/-- The "identity" equivalence between `support_condition α` and
+`(atom ⊕ near_litter) × extended_index α`. -/
+def of_condition : support_condition α ≃ (atom ⊕ near_litter) × extended_index α := equiv.refl _
+
 /-- There are `μ` support conditions. -/
 @[simp] lemma mk_support_condition (α : type_index) : #(support_condition α) = #μ :=
 begin
@@ -28,13 +36,20 @@ begin
     (le_trans (mk_extended_index α) $ le_of_lt $ lt_trans Λ_lt_κ κ_lt_μ) (mk_ne_zero _),
 end
 
+namespace struct_perm
+
 instance struct_perm.mul_action : mul_action (struct_perm α) (support_condition α) :=
-{ smul := λ π c, ⟨struct_perm.derivative c.snd π • c.fst, c.snd⟩,
+{ smul := λ π c, ⟨derivative c.snd π • c.fst, c.snd⟩,
   one_smul := by { rintro ⟨atoms | Ns, A⟩; unfold has_smul.smul; simp },
   mul_smul := begin
     rintro π₁ π₂ ⟨atoms | Ns, A⟩; unfold has_smul.smul;
-    rw struct_perm.derivative_mul; dsimp; rw mul_smul,
+    rw derivative_mul; dsimp; rw mul_smul,
   end }
+
+@[simp] lemma smul_to_condition (π : struct_perm α) (x : (atom ⊕ near_litter) × extended_index α) :
+  π • to_condition x = to_condition ⟨derivative x.2 π • x.1, x.2⟩ := rfl
+
+end struct_perm
 
 variables (G : Type*) (α) {τ : Type*} [has_smul G (support_condition α)] [has_smul G τ]
 
