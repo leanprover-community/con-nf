@@ -181,32 +181,58 @@ by { change to_near_litter_perm _ • _ = _ • _, rw to_near_litter_perm_to_bot
 
 end
 
+def smul : Π (α : Λ),  struct_perm α → pretangle α → pretangle α
+| α :=  λ π t, pretangle.mk (π • t.atom_extension) (λ (β : Λ) (hβ : β < α ), begin
+    letI := smul β,
+    exact smul β (lower (coe_lt_coe.2 hβ).le π) '' (t.extension β hβ),
+  end )
+using_well_founded { dec_tac := `[assumption] }
+
+def one_smul : ∀ α : Λ, ∀ (b : pretangle α), smul α 1 b = b
+| α :=  begin
+    intros,
+    convert pretangle.eta b,
+    unfold smul, congr,
+    exact mul_action.one_smul b.atom_extension,
+    funext, simp only [map_one], dsimp,
+    suffices : y ∈ (smul β 1 '' b.extension β hβ) =  (y ∈ b.extension β hβ),
+    exact this,
+    simp only [set.mem_image, one_smul, exists_eq_right],
+end
+using_well_founded { dec_tac := `[assumption] }
+
+def mul_smul : Π (α : Λ), ∀ (x y : struct_perm ↑α) (b : pretangle α), smul α  (x * y) b = smul α x (smul α y b) | α := begin
+intros π₁ π₂ t,
+ unfold smul, simp only [map_mul, pretangle.atom_extension_mk, pretangle.extension_mk],
+ apply congr,
+ apply congr,
+ refl,
+ apply mul_action.mul_smul,
+ funext,
+ dsimp only,
+ have hβ2 := (le_of_lt (coe_lt_coe.mpr hβ)),
+  suffices : ∀ x : pretangle β, smul β ((lower hβ2) π₁ * (lower hβ2) π₂) x = (smul β ((lower hβ2) π₁) ((smul β ((lower hβ2) π₂)) x)),
+  {
+    suffices : (λ S, smul β ((lower hβ2) π₁ * (lower hβ2) π₂) '' S) = λ S, (smul β ((lower hβ2) π₁) '' (smul β ((lower hβ2) π₂) '' S)),
+    have := congr this (eq.refl (t.extension β hβ)),
+    dsimp at this,
+    rw this_1,
+    dsimp [set.image],
+    ext,
+    simp only [set.mem_image, exists_exists_and_eq_and, set.mem_set_of_eq],
+    simp_rw this,
+  },
+ simp_rw mul_smul,
+ simp only [eq_self_iff_true, implies_true_iff],
+end
+using_well_founded { dec_tac := `[assumption] }
+
 -- TODO: Why can't the equation compiler handle my sorried proofs (the `funext` call breaks things)?
 instance mul_action_pretangle : Π (α : Λ), mul_action (struct_perm α) (pretangle α)
 | α :=
-{ smul := λ π t, pretangle.mk (π • t.atom_extension) (λ β hβ, begin
-    letI := mul_action_pretangle β,
-    exact lower (coe_lt_coe.2 hβ).le π • t.extension β hβ,
-  end),
-  one_smul := λ t, begin
-    unfold has_smul.smul,
-    convert pretangle.eta t,
-    { simp },
-    sorry { refine funext (λ β, funext (λ hβ, _)),
-      letI := mul_action_pretangle β, rw lower_one, dsimp only, unfold has_smul.smul,
-      convert set.image_id _,
-      ext t,
-      exact one_smul (struct_perm β) t }
-  end,
-  mul_smul := λ π₁ π₂ t, begin
-    unfold has_smul.smul, refine congr (congr rfl _) _,
-    { rw pretangle.atom_extension_mk, rw set.image_image, refine set.image_congr' (λ a, _),
-      rw [has_smul.comp.smul, has_smul.comp.smul, has_smul.comp.smul,
-        mul_hom_class.map_mul, mul_smul] },
-    sorry { refine funext (λ β, funext (λ hβ, _)),
-      letI := mul_action_pretangle β,
-      dsimp only, rw [lower_mul, mul_smul], simp }
-  end }
+{ smul := smul α,
+  one_smul := one_smul α,
+  mul_smul := mul_smul α}
 using_well_founded { dec_tac := `[assumption] }
 
 @[simp] lemma derivative_cons_nil (α : Λ) (f : struct_perm α) (β : type_index) (hβ : β < α) :
