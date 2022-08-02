@@ -375,6 +375,10 @@ by simp only [unary_spec.lower, support_condition.extend_path, set.mem_set_of_eq
   (σ ∪ τ).lower A = σ.lower A ∪ τ.lower A :=
 by ext ⟨x | x, y⟩; simp only [unary_spec.lower, set.mem_union_eq, set.mem_set_of_eq]
 
+@[simp] lemma unary_spec.sUnion_lower_eq_lower_sUnion {α β : type_index} (c : set (unary_spec α))
+  (A : path α β) : (⋃ (s ∈ c), unary_spec.lower s A) = unary_spec.lower (⋃₀ c) A :=
+by ext; simp only [unary_spec.lower, set.mem_Union, set.mem_set_of_eq, set.mem_sUnion]
+
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
 def spec.lower {α β : type_index} (σ : spec α) (A : path (α : type_index) β) : spec β :=
@@ -1304,10 +1308,32 @@ end
 -- Note: the non-flexible conditions can't be worked on yet, until allowable.lean compiles.
 
 lemma non_flexible_cond_Union (hc : is_chain (≤) c) :
-  spec.non_flexible_cond B ⋃₀ (subtype.val '' c) := sorry
+  spec.non_flexible_cond B ⋃₀ (subtype.val '' c) :=
+begin
+  rintro β γ δ hγ hδ hγδ N A t ⟨_, ⟨σ, hσ₁, rfl⟩, hσv⟩ π hπ,
+  refine σ.prop.forward.non_flexible_cond hγ hδ hγδ N A t hσv π _,
+  refine struct_perm.satisfies_mono _ _ _ (set.subset_sUnion_of_mem _) hπ,
+  simpa only [hσ₁, set.mem_image, subtype.exists, exists_and_distrib_right, exists_eq_right,
+              subtype.coe_eta, exists_prop, and_true] using σ.prop,
+end
 
 lemma domain_closed_Union (hc : is_chain (≤) c) :
-  unary_spec.support_closed B (spec.domain ⋃₀ (subtype.val '' c)) := sorry
+  unary_spec.support_closed B (spec.domain ⋃₀ (subtype.val '' c)) :=
+begin
+  unfold unary_spec.support_closed,
+  intros β γ δ hγ hδ hγδ A t h,
+  rw [← spec.sUnion_domain_eq_domain_sUnion, ← unary_spec.sUnion_lower_eq_lower_sUnion] at *,
+  rw set.mem_sUnion at h,
+  obtain ⟨_, ⟨_, ⟨σ, hσ₁, rfl⟩, rfl⟩, ⟨b, hb₁, hb₂⟩⟩ := h,
+  have hσ := σ.prop.forward.support_closed hγ hδ hγδ A t ⟨b, hb₁, hb₂⟩,
+  refine supports_mono _ hσ,
+  convert @set.subset_bUnion_of_mem (unary_spec B) _ _ _ (spec.domain σ) _ using 1,
+  refl,
+  simp only [subtype.val_eq_coe, set.mem_image, subtype.exists, subtype.coe_mk,
+              exists_and_distrib_right, exists_eq_right],
+  refine ⟨σ, ⟨σ.prop, _⟩, rfl⟩,
+  rwa subtype.coe_eta,
+end
 
 variables (hc : is_chain (≤) c)
 
