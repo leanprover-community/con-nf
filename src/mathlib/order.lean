@@ -23,15 +23,6 @@ variables {s}
 
 end set
 
-section canonically_ordered_comm_semiring
-variables [canonically_ordered_comm_semiring α] [covariant_class α α (+) (<)] [nontrivial α] {a : α}
-
-lemma odd.pos : odd a → 0 < a :=
-by { rintro ⟨a, rfl⟩,
-  exact add_pos_of_nonneg_of_pos (zero_le _) ((zero_le _).lt_of_ne zero_ne_one) }
-
-end canonically_ordered_comm_semiring
-
 section pairwise
 variables {a b : α} {r : α → α → Prop}
 

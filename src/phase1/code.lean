@@ -1,6 +1,6 @@
 import phase1.basic
 
-open set
+open set with_bot
 
 universe u
 
@@ -13,8 +13,7 @@ variables [params.{u}] (α : Λ) [core_tangle_cumul α] {β : Iio (α : type_ind
 (extension : Iio (α : type_index))
 (elts : set (tangle extension))
 
-lemma code.eq_of_elts_eq (γ : Iio (α : type_index)) (A B : set (tangle γ)) :
-  (⟨γ, A⟩ : code α) = ⟨γ, B⟩ ↔ A = B := by simp
+instance : inhabited (code α) := ⟨⟨⊥, ∅⟩⟩
 
 /-- Nonempty codes. -/
 abbreviation nonempty_code : Type u := {c : code α // c.elts.nonempty}
@@ -27,8 +26,7 @@ protected def is_empty (c : code α) : Prop := c.elts = ∅
 
 @[simp] lemma is_empty_mk : (⟨β, s⟩ : code α).is_empty ↔ s = ∅ := iff.rfl
 
-@[simp] lemma mk_inj : (⟨β, s⟩ : code α) = ⟨β, t⟩ ↔ s = t :=
-by rw [ext_iff, and_iff_right rfl, heq_iff_eq]
+lemma mk_inj : (⟨β, s⟩ : code α) = ⟨β, t⟩ ↔ s = t := by simp
 
 end code
 end con_nf

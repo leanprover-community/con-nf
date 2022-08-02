@@ -143,6 +143,10 @@ by { cases α, { refl }, { exact dif_pos rfl } }
 def to_near_litter_perm : struct_perm α →* near_litter_perm :=
 to_bot_iso.symm.to_monoid_hom.comp $ lower bot_le
 
+@[simp] lemma to_near_litter_perm_to_bot (f : near_litter_perm) :
+  (to_bot f).to_near_litter_perm = f :=
+by simp [to_near_litter_perm]
+
 /-- The derivative of a structural permutation at any lower level. -/
 noncomputable def derivative : Π {β}, path α β → struct_perm α →* struct_perm β
 | _ nil := monoid_hom.id _
@@ -171,6 +175,9 @@ mul_action.comp_hom _ to_near_litter_perm
 
 @[simp] lemma to_near_litter_perm_smul (f : struct_perm α) (x : X) :
   f.to_near_litter_perm • x = f • x := rfl
+
+@[simp] lemma to_bot_smul (f : near_litter_perm) (x : X) : to_bot f • x = f • x :=
+by { change to_near_litter_perm _ • _ = _ • _, rw to_near_litter_perm_to_bot }
 
 end
 
