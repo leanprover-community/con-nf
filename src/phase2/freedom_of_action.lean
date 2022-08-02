@@ -729,8 +729,6 @@ instance : has_involutive_inv (allowable_partial_perm B) :=
 @[simp] lemma allowable_partial_perm.inv_def (σ : allowable_partial_perm B) :
   σ⁻¹.val = (σ.val)⁻¹ := rfl
 
-lemma near_litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B) {N M N' M' : near_litter} (hN : (sum.inr (N, N'), A) ∈ σ.val) (hM : (sum.inr (M, M'), A) ∈ σ.val) : disjoint N.snd.val M.snd.val → disjoint N'.snd.val M'.snd.val := sorry
-
 /-! We prove the restriction lemma: if `σ` is a partial allowable permutation, then so is `σ`
 restricted to a lower path `A`. The proof should be mostly straightforward. The non-trivial bit is
 the "co-large or all" on flexible litters: in a proper restriction, `μ`-many non-flexible litters
@@ -1506,6 +1504,79 @@ noncomputable def near_litter_value_inj (σ : allowable_partial_perm B) (A : ext
   exact subtype.coe_inj.mp
     ((σ.property.forward.one_to_one A).near_litter (near_litter_value B σ A N₁ N₁.property) h₁ h₂),
 end⟩
+
+-- TODO: Rename this lemma.
+/-
+Philosophically, we really shouldn't need the condition `ha` to be true.
+Is this another result that we'll just have to assume as part of one-to-one conditions?
+-/
+lemma litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
+  {L₁ L₂ : litter} {N₁ N₂ : near_litter}
+  (hL₁ : (sum.inr (L₁.to_near_litter, N₁), A) ∈ σ.val)
+  (hL₂ : (sum.inr (L₂.to_near_litter, N₂), A) ∈ σ.val)
+  (a : atom)
+  (haN₁ : a ∈ N₁.snd.val)
+  (haN₂ : a ∈ N₂.snd.val)
+  (ha : (sum.inl a, A) ∈ σ.val.range) : L₁ = L₂ :=
+begin
+  obtain ⟨N, h₁, atom_map, h₂, h₃⟩ | ⟨h₁, h₂⟩ | ⟨N, hN, h₁, h₂⟩ :=
+    σ.property.forward.atom_cond L₁ A,
+  { cases (σ.property.backward.one_to_one A).near_litter _ hL₁ h₁,
+    rw h₃ at haN₁,
+    obtain ⟨a₁, ha₁⟩ := haN₁,
+    have map₁ := h₂ a₁ a₁.property,
+    rw subtype.coe_eta at map₁,
+    rw ha₁ at map₁,
+
+    obtain ⟨N', h₁', atom_map', h₂', h₃'⟩ | ⟨h₁', h₂'⟩ | ⟨N', hN', h₁', h₂'⟩ :=
+      σ.property.forward.atom_cond L₂ A,
+    { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ h₁',
+      rw h₃' at haN₂,
+      obtain ⟨a₂, ha₂⟩ := haN₂,
+      have map₂ := h₂' a₂ a₂.property,
+      rw subtype.coe_eta at map₂,
+      rw ha₂ at map₂,
+
+      obtain ⟨⟨a₁L, a₁⟩, ha₁'⟩ := a₁,
+      obtain ⟨⟨a₂L, a₂⟩, ha₂'⟩ := a₂,
+      cases (σ.property.forward.one_to_one A).atom a map₁ map₂, cases ha₁', cases ha₂', refl, },
+    { cases h₁' ⟨_, hL₂, rfl⟩, },
+    { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ hN',
+      have := h₂' (h₂ a₁ a₁.property),
+      rw subtype.coe_eta at this,
+      rw ha₁ at this,
+      obtain ⟨⟨a₁L, a₁⟩, ha₁'⟩ := a₁,
+      cases this.mpr haN₂, cases ha₁', refl, }, },
+  { cases h₁ ⟨_, hL₁, rfl⟩, },
+  { cases (σ.property.backward.one_to_one A).near_litter _ hL₁ hN,
+    obtain ⟨N', h₁', atom_map', h₂', h₃'⟩ | ⟨h₁', h₂'⟩ | ⟨N', hN', h₁', h₂'⟩ :=
+      σ.property.forward.atom_cond L₂ A,
+    { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ h₁',
+      rw h₃' at haN₂,
+      obtain ⟨a₂, ha₂⟩ := haN₂,
+      have map₂ := h₂' a₂ a₂.property,
+      rw subtype.coe_eta at map₂,
+      rw ha₂ at map₂,
+
+      have := h₂ (h₂' a₂ a₂.property),
+      rw subtype.coe_eta at this,
+      rw ha₂ at this,
+      obtain ⟨⟨a₂L, a₂⟩, ha₂'⟩ := a₂,
+      cases this.mpr haN₁, cases ha₂', refl, },
+    { cases h₁' ⟨_, hL₂, rfl⟩, },
+    { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ hN',
+      have := (atom_value_spec B σ⁻¹ A a (by simpa only [inv_def, spec.inv_domain] using ha)),
+      have t₁ := (h₂ this).mpr haN₁,
+      have t₂ := (h₂' this).mpr haN₂,
+      by_contradiction,
+      cases pairwise_disjoint_litter_set L₁ L₂ h ⟨t₁, t₂⟩, } }
+end
+
+lemma near_litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
+  {N M N' M' : near_litter}
+  (hN : (sum.inr (N, N'), A) ∈ σ.val) (hM : (sum.inr (M, M'), A) ∈ σ.val) :
+  disjoint N.snd.val M.snd.val → disjoint N'.snd.val M'.snd.val :=
+sorry
 
 end values
 
