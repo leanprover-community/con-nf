@@ -515,15 +515,40 @@ def flexible (L : litter) (A : extended_index B) : Prop := ∀ ⦃β : Λ⦄ ⦃
   (t : tangle_path ((lt_index.mk' hγ (path.comp B.path C)) : le_index α)),
 L ≠ (f_map_path hγ hδ t) ∨ A ≠ path.cons (path.cons C $ coe_lt_coe.mpr hδ) (bot_lt_coe _)
 
-@[simp] lemma mk_flexible_litters_at_index (A : extended_index B) : #{L : litter // flexible L A} = #μ :=
+local attribute [semireducible] litter
+@[simp] lemma mk_flexible_litters (A : extended_index B) : #{L : litter // flexible L A} = #μ :=
 begin
-  sorry,
+  by_cases ((B : type_index) = ⊥),
+  { have H : ∀ (L : litter), flexible L A,
+    { intro L,
+      unfold flexible,
+      intros β γ δ hγ hδ hγδ C,
+      have hγB := lt_of_lt_of_le hγ (le_of_path C),
+      exfalso,
+      rw h at hγB,
+      exact not_lt_bot hγB, },
+    rw ← mk_litter,
+    rw cardinal.eq,
+    exact ⟨⟨subtype.val, (λ L, ⟨L, H L⟩), (λ S, subtype.eta _ _), (λ L, rfl)⟩⟩, },
+  { refine le_antisymm _ _,
+    { rw ← mk_litter,
+      refine cardinal.mk_subtype_le _, },
+    { rw cardinal.le_def,
+      rw ← ne.def at h,
+      rw with_bot.ne_bot_iff_exists at h,
+      obtain ⟨B', hB'⟩ := h,
+      refine ⟨⟨(λ x, ⟨⟨⟨⊥, B'⟩, x⟩, _⟩), _⟩⟩,
+      { intros β γ δ hγ hδ hγδ C t,
+        left,
+        intro h,
+        sorry,
+        -- have := f_map_fst ⊥ (proper_lt_index.mk' hδ (B.path.comp C)).index t,
+        -- unfold f_map_path at h,
+        --rw ← h at this,
+      },
+      { sorry, }, }, },
 end
-
-@[simp] lemma mk_flexible_litters : #{x : litter × extended_index B // flexible x.fst x.snd} = #μ :=
-begin
-  sorry,
-end
+local attribute [irreducible] litter
 
 /-- A litter and extended index is flexible only if it is not constrained by anything. -/
 lemma unconstrained_of_flexible (L : litter) (A : extended_index B) (h : flexible L A) :
@@ -1192,7 +1217,7 @@ begin
     refine spec.flexible_cond.co_large _ _;
     simp only [set.image_empty, set.sUnion_empty, spec.domain_empty, spec.range_empty,
                set.mem_empty_eq, not_false_iff, and_true, set.coe_set_of,
-               mk_flexible_litters_at_index], },
+               mk_flexible_litters], },
   { by_cases h : (∃ (ρ : allowable_partial_perm B) (hρ : ρ ∈ c) (τ : allowable_partial_perm B)
       (hτ : τ ∈ c) L (hL : flexible L C),
       (((sum.inr L.to_near_litter, C) ∉ ρ.val.domain ∧
