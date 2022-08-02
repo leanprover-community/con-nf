@@ -2976,7 +2976,8 @@ sorry
 def abij_inv :
   Π (L : {L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ⁻¹.val.domain}),
     bij.inv.precise_atom_bijection L :=
-λ L, precise_atom_bijection.inv' (abij (bij.inv_fun ⟨L, sorry⟩))
+λ L, precise_atom_bijection.inv'
+  (abij (bij.inv_fun ⟨L, by simpa only [inv_def, spec.inv_domain] using L.property⟩))
 
 lemma new_flexible_litters_inv :
   (new_flexible_litters bij abij)⁻¹ = new_inverse_flexible_litters bij.inv (abij_inv bij abij) :=
