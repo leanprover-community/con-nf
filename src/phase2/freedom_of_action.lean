@@ -515,15 +515,40 @@ def flexible (L : litter) (A : extended_index B) : Prop := ∀ ⦃β : Λ⦄ ⦃
   (t : tangle_path ((lt_index.mk' hγ (path.comp B.path C)) : le_index α)),
 L ≠ (f_map_path hγ hδ t) ∨ A ≠ path.cons (path.cons C $ coe_lt_coe.mpr hδ) (bot_lt_coe _)
 
-@[simp] lemma mk_flexible_litters_at_index (A : extended_index B) : #{L : litter // flexible L A} = #μ :=
+local attribute [semireducible] litter
+@[simp] lemma mk_flexible_litters (A : extended_index B) : #{L : litter // flexible L A} = #μ :=
 begin
-  sorry,
+  by_cases ((B : type_index) = ⊥),
+  { have H : ∀ (L : litter), flexible L A,
+    { intro L,
+      unfold flexible,
+      intros β γ δ hγ hδ hγδ C,
+      have hγB := lt_of_lt_of_le hγ (le_of_path C),
+      exfalso,
+      rw h at hγB,
+      exact not_lt_bot hγB, },
+    rw ← mk_litter,
+    rw cardinal.eq,
+    exact ⟨⟨subtype.val, (λ L, ⟨L, H L⟩), (λ S, subtype.eta _ _), (λ L, rfl)⟩⟩, },
+  { refine le_antisymm _ _,
+    { rw ← mk_litter,
+      refine cardinal.mk_subtype_le _, },
+    { rw cardinal.le_def,
+      rw ← ne.def at h,
+      rw with_bot.ne_bot_iff_exists at h,
+      obtain ⟨B', hB'⟩ := h,
+      refine ⟨⟨(λ x, ⟨⟨⟨⊥, B'⟩, x⟩, _⟩), _⟩⟩,
+      { intros β γ δ hγ hδ hγδ C t,
+        left,
+        intro h,
+        sorry,
+        -- have := f_map_fst ⊥ (proper_lt_index.mk' hδ (B.path.comp C)).index t,
+        -- unfold f_map_path at h,
+        --rw ← h at this,
+      },
+      { sorry, }, }, },
 end
-
-@[simp] lemma mk_flexible_litters : #{x : litter × extended_index B // flexible x.fst x.snd} = #μ :=
-begin
-  sorry,
-end
+local attribute [irreducible] litter
 
 /-- A litter and extended index is flexible only if it is not constrained by anything. -/
 lemma unconstrained_of_flexible (L : litter) (A : extended_index B) (h : flexible L A) :
@@ -732,20 +757,6 @@ instance : has_involutive_inv (allowable_partial_perm B) :=
 
 @[simp] lemma allowable_partial_perm.inv_def (σ : allowable_partial_perm B) :
   σ⁻¹.val = (σ.val)⁻¹ := rfl
-
-lemma near_litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
-    {N M N' M' : near_litter}
-    (hN : (sum.inr (N, N'), A) ∈ σ.val)
-    (hM : (sum.inr (M, M'), A) ∈ σ.val) :
-  disjoint N.snd.val M.snd.val → disjoint N'.snd.val M'.snd.val :=
-sorry
-
-lemma litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
-    {L N : litter} {L' N' : near_litter}
-    (hL : (sum.inr (L.to_near_litter, L'), A) ∈ σ.val)
-    (hN : (sum.inr (N.to_near_litter, N'), A) ∈ σ.val) :
-  L ≠ N → disjoint L'.snd.val N'.snd.val :=
-λ hLN, near_litter_image_disjoint B σ A hL hN $ pairwise_disjoint_litter_set L N hLN
 
 /-! We prove the restriction lemma: if `σ` is a partial allowable permutation, then so is `σ`
 restricted to a lower path `A`. The proof should be mostly straightforward. The non-trivial bit is
@@ -1209,7 +1220,7 @@ begin
     refine spec.flexible_cond.co_large _ _;
     simp only [set.image_empty, set.sUnion_empty, spec.domain_empty, spec.range_empty,
                set.mem_empty_eq, not_false_iff, and_true, set.coe_set_of,
-               mk_flexible_litters_at_index], },
+               mk_flexible_litters], },
   { by_cases h : (∃ (ρ : allowable_partial_perm B) (hρ : ρ ∈ c) (τ : allowable_partial_perm B)
       (hτ : τ ∈ c) L (hL : flexible L C),
       (((sum.inr L.to_near_litter, C) ∉ ρ.val.domain ∧
@@ -1550,6 +1561,79 @@ noncomputable def near_litter_value_inj (σ : allowable_partial_perm B) (A : ext
     ((σ.property.forward.one_to_one A).near_litter (near_litter_value B σ A N₁ N₁.property) h₁ h₂),
 end⟩
 
+-- TODO: Rename this lemma.
+/-
+Philosophically, we really shouldn't need the condition `ha` to be true.
+Is this another result that we'll just have to assume as part of one-to-one conditions?
+-/
+lemma litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
+  {L₁ L₂ : litter} {N₁ N₂ : near_litter}
+  (hL₁ : (sum.inr (L₁.to_near_litter, N₁), A) ∈ σ.val)
+  (hL₂ : (sum.inr (L₂.to_near_litter, N₂), A) ∈ σ.val)
+  (a : atom)
+  (haN₁ : a ∈ N₁.snd.val)
+  (haN₂ : a ∈ N₂.snd.val)
+  (ha : (sum.inl a, A) ∈ σ.val.range) : L₁ = L₂ :=
+begin
+  obtain ⟨N, h₁, atom_map, h₂, h₃⟩ | ⟨h₁, h₂⟩ | ⟨N, hN, h₁, h₂⟩ :=
+    σ.property.forward.atom_cond L₁ A,
+  { cases (σ.property.backward.one_to_one A).near_litter _ hL₁ h₁,
+    rw h₃ at haN₁,
+    obtain ⟨a₁, ha₁⟩ := haN₁,
+    have map₁ := h₂ a₁ a₁.property,
+    rw subtype.coe_eta at map₁,
+    rw ha₁ at map₁,
+
+    obtain ⟨N', h₁', atom_map', h₂', h₃'⟩ | ⟨h₁', h₂'⟩ | ⟨N', hN', h₁', h₂'⟩ :=
+      σ.property.forward.atom_cond L₂ A,
+    { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ h₁',
+      rw h₃' at haN₂,
+      obtain ⟨a₂, ha₂⟩ := haN₂,
+      have map₂ := h₂' a₂ a₂.property,
+      rw subtype.coe_eta at map₂,
+      rw ha₂ at map₂,
+
+      obtain ⟨⟨a₁L, a₁⟩, ha₁'⟩ := a₁,
+      obtain ⟨⟨a₂L, a₂⟩, ha₂'⟩ := a₂,
+      cases (σ.property.forward.one_to_one A).atom a map₁ map₂, cases ha₁', cases ha₂', refl, },
+    { cases h₁' ⟨_, hL₂, rfl⟩, },
+    { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ hN',
+      have := h₂' (h₂ a₁ a₁.property),
+      rw subtype.coe_eta at this,
+      rw ha₁ at this,
+      obtain ⟨⟨a₁L, a₁⟩, ha₁'⟩ := a₁,
+      cases this.mpr haN₂, cases ha₁', refl, }, },
+  { cases h₁ ⟨_, hL₁, rfl⟩, },
+  { cases (σ.property.backward.one_to_one A).near_litter _ hL₁ hN,
+    obtain ⟨N', h₁', atom_map', h₂', h₃'⟩ | ⟨h₁', h₂'⟩ | ⟨N', hN', h₁', h₂'⟩ :=
+      σ.property.forward.atom_cond L₂ A,
+    { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ h₁',
+      rw h₃' at haN₂,
+      obtain ⟨a₂, ha₂⟩ := haN₂,
+      have map₂ := h₂' a₂ a₂.property,
+      rw subtype.coe_eta at map₂,
+      rw ha₂ at map₂,
+
+      have := h₂ (h₂' a₂ a₂.property),
+      rw subtype.coe_eta at this,
+      rw ha₂ at this,
+      obtain ⟨⟨a₂L, a₂⟩, ha₂'⟩ := a₂,
+      cases this.mpr haN₁, cases ha₂', refl, },
+    { cases h₁' ⟨_, hL₂, rfl⟩, },
+    { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ hN',
+      have := (atom_value_spec B σ⁻¹ A a (by simpa only [inv_def, spec.inv_domain] using ha)),
+      have t₁ := (h₂ this).mpr haN₁,
+      have t₂ := (h₂' this).mpr haN₂,
+      by_contradiction,
+      cases pairwise_disjoint_litter_set L₁ L₂ h ⟨t₁, t₂⟩, } }
+end
+
+lemma near_litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
+  {N M N' M' : near_litter}
+  (hN : (sum.inr (N, N'), A) ∈ σ.val) (hM : (sum.inr (M, M'), A) ∈ σ.val) :
+  disjoint N.snd.val M.snd.val → disjoint N'.snd.val M'.snd.val :=
+sorry
+
 end values
 
 /-! The next few lemmas are discussed in "FoA proof sketch completion". -/
@@ -1842,8 +1926,8 @@ begin
         cases hcond,
         simp only [ne.def, eq_self_iff_true, not_true, or_false] at h,
         refine ⟨λ hc, by cases pairwise_disjoint_litter_set _ _ h ⟨c.prop.1, hc⟩, _⟩,
-        intro h,
-        cases litter_image_disjoint B σ A ha hL h ⟨(atom_map B σ a A N hsmall ha c).prop.1, h⟩ } },
+        intro hL',
+        cases near_litter_image_disjoint B σ A ha hL (pairwise_disjoint_litter_set _ _ h) ⟨(atom_map B σ a A N hsmall ha c).prop.1, hL'⟩, } },
     { classical,
       obtain ⟨rfl, rfl⟩ := and_iff_not_or_not.2 h,
       obtain rfl := (σ.prop.backward.one_to_one A).near_litter _ ha hL,
