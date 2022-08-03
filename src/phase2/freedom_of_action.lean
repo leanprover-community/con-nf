@@ -3231,6 +3231,26 @@ lemma flexible_union_near_litter_cond :
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) N₁ N₂ C :=
 sorry
 
+lemma unpack_coh_cond ⦃β : Λ⦄
+  ⦃γ : type_index⦄
+  ⦃δ : Λ⦄
+  (hγβ : γ < ↑β)
+  (hδβ : δ < β)
+  (hδγ : γ ≠ ↑δ)
+  (hp : path ↑B ↑β)
+  (ht : tangle_path ↑(lt_index.mk' hγβ (B.path.comp hp)))
+  (hallp : allowable_path B ) :
+  (derivative ((hp.cons (coe_lt_coe.mpr hδβ)).cons (bot_lt_coe _)))
+        ((allowable_path_to_struct_perm B) hallp) •
+      (f_map_path hγβ hδβ ht).to_near_litter =
+    (f_map_path hγβ hδβ
+       (allowable_derivative_path {index := ↑β, path := B.path.comp hp} hγβ
+            (allowable_derivative_path_comp B hp hallp) •
+          ht)).to_near_litter :=
+begin
+  sorry,
+end
+
 lemma flexible_union_non_flexible_cond :
   spec.non_flexible_cond B
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) :=
@@ -3242,10 +3262,7 @@ begin
   have h := h1 _ hf,
   dsimp at h,
   rw ← h,
-
-  --we are left with the unpacked coherence condition, which is true and assumed in the
-  --inductive hypothesis.
-  sorry,
+  exact unpack_coh_cond hgb hdb hdg hp ht hallp,
 end
 
 lemma flexible_union_support_closed :
@@ -3502,7 +3519,16 @@ sorry
 
 lemma non_flexible_union_non_flexible_cond_forward :
   spec.non_flexible_cond B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
-sorry
+begin
+  unfold spec.non_flexible_cond,
+  intros hb hg hd hgb hdb hdg hNl hp ht hf hallp h1,
+  unfold struct_perm.satisfies at h1,
+  unfold struct_perm.satisfies_cond at h1,
+  have h := h1 _ hf,
+  dsimp at h,
+  rw ← h,
+  exact unpack_coh_cond hgb hdb hdg hp ht hallp,
+end
 
 lemma non_flexible_union_non_flexible_cond_backward :
   spec.non_flexible_cond B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ :=
