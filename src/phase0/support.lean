@@ -76,29 +76,12 @@ instance small_support.set_like (x : τ) : set_like (small_support α G x) (supp
 { coe := λ s, s.carrier,
   coe_injective' := λ s t h, by { obtain ⟨⟨_, _⟩, _⟩ := s, obtain ⟨⟨_, _⟩, _⟩ := t, congr' } }
 
-/-- There are `μ` supports for a given `x : τ`. -/
-@[simp] lemma mk_support (x : τ) : #(support α G x) = #μ := sorry
--- begin
---   have : potential_support α ≃ {S : set (support_condition α) // small S},
---   { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.val, s.property⟩, _, _⟩; intro x; cases x; simp },
---   obtain ⟨e⟩ := cardinal.eq.1 (mk_support_condition α),
---   refine le_antisymm _ ⟨⟨λ m, ⟨{e.symm m}, by simp⟩, λ a b h, by { simp at h, exact h }⟩⟩,
---   have lt_cof_eq_μ : #{S : set (support_condition α) // #S < (#μ).ord.cof} = #μ,
---   { convert mk_subset_mk_lt_cof μ_strong_limit.2 using 1,
---     have := mk_subtype_of_equiv (λ S, # ↥S < (#μ).ord.cof) (set.congr e),
---     convert this using 1,
---     suffices : ∀ S, # ↥S = # ↥(set.congr e S), { simp_rw this },
---     intro S, rw cardinal.eq, exact ⟨image _ _⟩ },
---   rw [mk_congr this, ←lt_cof_eq_μ],
---   exact cardinal.mk_subtype_mono (λ S (h : _ < _), h.trans_le κ_le_μ_cof),
--- end
-
 /-- There are at most `μ` small supports for a given `x : τ`. -/
 lemma mk_small_support_le (x : τ) : #(small_support α G x) ≤ #μ :=
  begin
    have : small_support α G x ≃ {S : support α G x // small (S : set (support_condition α))},
    { refine ⟨λ S, ⟨S.1, S.2⟩, λ S, ⟨S.1, S.2⟩, _, _⟩; intro x; dsimp; cases x; simp },
-   rw [cardinal.mk_congr this],-- ←mk_potential_support α],
+   rw [cardinal.mk_congr this],
    unfold small,
    obtain ⟨e⟩ := cardinal.eq.1 (mk_support_condition α),
    transitivity #{S : support α G x // #S < (#μ).ord.cof},
