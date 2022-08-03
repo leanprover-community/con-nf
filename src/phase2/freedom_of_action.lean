@@ -337,13 +337,43 @@ begin
 end
 
 /-- The map from structural permutations to their specifications is injective. -/
-lemma struct_perm.to_spec_injective (α : type_index) : injective (@struct_perm.to_spec _ α) :=
-begin
-  unfold injective,
+lemma struct_perm.to_spec_injective :∀ (α : type_index), injective (@struct_perm.to_spec _ α)
+| ⊥ := begin unfold injective,
   intros σ τ heq,
   unfold struct_perm.to_spec at heq,
-  sorry, -- lemmas which require derivatives can't be fully unsorried right now (I think)
+  dsimp [(set.range)] at heq,
+  rw set.ext_iff at heq,
+  simp only [prod.exists, set.mem_union_eq, set.mem_set_of_eq] at heq,
+  apply ext_bot,
+  intros,
+  specialize heq ⟨sum.inl ⟨a, σ • a⟩ , path.nil⟩,
+  simp only [prod.mk.inj_iff, exists_eq_right, derivative_nil, exists_eq_left, exists_false,
+  or_false, eq_self_iff_true, true_iff] at heq,
+  symmetry, exact heq, end
+| (α : Λ) := begin
+  unfold injective,
+  intros σ τ heq,
+  apply ext,
+  funext,
+  intros,
+  apply struct_perm.to_spec_injective β,
+  unfold struct_perm.to_spec at heq ⊢,
+  dsimp [(set.range)] at heq ⊢,
+  rw set.ext_iff at heq ⊢,
+  simp only [prod.exists, set.mem_union_eq, set.mem_set_of_eq] at heq ⊢,
+  intro x,
+  cases x,
+  specialize heq ⟨x_fst, (@path.cons type_index con_nf.quiver ↑α ↑α β path.nil hβ).comp x_snd⟩,
+  simp_rw derivative_derivative,
+  cases x_fst,
+  simp only [prod.mk.inj_iff, exists_eq_right, derivative_nil, exists_eq_left, exists_false,
+  or_false, eq_self_iff_true, true_iff] at heq ⊢,
+  exact heq,
+  simp only [derivative_cons_nil, prod.mk.inj_iff, exists_false, exists_eq_right, false_or] at heq ⊢,
+  exact heq,
 end
+using_well_founded { dec_tac := `[assumption] }
+
 
 /-- We can extend any support condition to one of a higher proper type index `α` by providing a path
 connecting the old extended index up to `α`. -/
@@ -409,11 +439,7 @@ simp only [set.mem_union_eq, set.mem_range, prod.exists, set.mem_set_of_eq],
 cases x,
 dsimp [(binary_condition.extend_path)],
 simp only [prod.mk.inj_iff, exists_eq_right],
-have : (derivative (A.comp x_snd)) π= (derivative x_snd) ((derivative A) π),
-{
-  sorry, -- problem with derivative def
-},
-rw this,
+rw derivative_derivative,
 end
 
 /-- A specification is total if it specifies where every element in its domain goes. -/
