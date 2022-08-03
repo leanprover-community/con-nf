@@ -15,7 +15,7 @@ tangles; we define these larger ambient groups in advance in order to set up the
 derivatives and so on independently of the recursion.
 -/
 
-open cardinal equiv quiver quiver.path with_bot
+open cardinal equiv quiver quiver.path set with_bot
 open_locale cardinal pointwise
 
 noncomputable theory
@@ -47,18 +47,18 @@ lemma coe_def (α : Λ) : struct_perm ↑α = Π β : type_index, β < α → st
 by unfold struct_perm
 
 /-- The "identity" equivalence between `near_litter_perm` and `struct_perm ⊥`. -/
-def to_bot : near_litter_perm ≃ struct_perm ⊥ := equiv.cast $ by { unfold struct_perm }
+def to_bot : near_litter_perm ≃ struct_perm ⊥ := equiv.cast $ by unfold struct_perm
 
 /-- The "identity" equivalence between `struct_perm ⊥` and `near_litter_perm`. -/
-def of_bot : struct_perm ⊥ ≃ near_litter_perm := equiv.cast $ by { unfold struct_perm }
+def of_bot : struct_perm ⊥ ≃ near_litter_perm := equiv.cast $ by unfold struct_perm
 
-/-- The "identity" equivalence between `Π β < α, struct_perm β)` and `struct_perm α`. -/
+/-- The "identity" equivalence between `Π β < α, struct_perm β` and `struct_perm α`. -/
 def to_coe : (Π β : type_index, β < α → struct_perm β) ≃ struct_perm α :=
-equiv.cast $ by { unfold struct_perm }
+equiv.cast $ by unfold struct_perm
 
-/-- The "identity" equivalence between `struct_perm α` and `Π β < α, struct_perm β)`. -/
+/-- The "identity" equivalence between `struct_perm α` and `Π β < α, struct_perm β`. -/
 def of_coe : struct_perm α ≃ Π β : type_index, β < α → struct_perm β :=
-equiv.cast $ by { unfold struct_perm }
+equiv.cast $ by unfold struct_perm
 
 @[simp] lemma to_bot_symm : to_bot.symm = of_bot := rfl
 @[simp] lemma of_bot_symm : of_bot.symm = to_bot := rfl
@@ -78,38 +78,28 @@ of_coe.injective.eq_iff
 noncomputable! instance group : Π α, group (struct_perm α)
 | ⊥ := of_bot.group
 | (α : Λ) := @equiv.group _ _ of_coe $ @pi.group _ _ $ λ β,
-  @pi.group_Prop _ _ $ λ _ : β < ↑α, group β
+  @pi_Prop.group _ _ $ λ _ : β < ↑α, group β
 using_well_founded { dec_tac := `[assumption] }
 
 /--  The isomorphism between near-litter permutations and bottom structural permutations. This holds
 by definition of `struct_perm`. -/
-@[simps] def to_bot_iso : near_litter_perm ≃* struct_perm ⊥ :=
-{ map_mul' := λ a b, begin
-    rw [show struct_perm.group ⊥ = _, by unfold struct_perm.group],
-    congr,
-    all_goals { dsimp [to_bot, of_bot], rw [cast_cast, cast_eq] },
-  end,
+def to_bot_iso : near_litter_perm ≃* struct_perm ⊥ :=
+{ map_mul' := λ a b,
+  by { rw [show struct_perm.group ⊥ = _, by unfold struct_perm.group], congr; simp },
   ..to_bot }
+
+@[simp] lemma coe_to_bot_iso : ⇑to_bot_iso = to_bot := rfl
+@[simp] lemma coe_to_bot_iso_symm : ⇑to_bot_iso.symm = of_bot := rfl
 
 /--  The isomorphism between the product of structural permutations under `α` and `α`-structural
 permutations. This holds by definition of `struct_perm`. -/
-@[simps] def to_coe_iso (α : Λ) : (Π β : type_index, β < α → struct_perm β) ≃* struct_perm α :=
-{ map_mul' := λ a b, begin
-    dsimp only [(has_mul.mul), (mul_one_class.mul), (monoid.mul), (div_inv_monoid.mul)],
-    have : struct_perm.group α = _,
-    unfold struct_perm.group,
-    rw this,
-    congr,
-    dsimp only [(*), (mul_one_class.mul), (monoid.mul), (div_inv_monoid.mul), (group.mul)],
-    apply funext, intro i, apply funext, intro i_1,
-    have : ∀ z : Π (β : type_index), β < ↑α → struct_perm β, of_coe (to_coe.to_fun z) i i_1 = z i i_1,
-    { intro z,
-      dsimp [of_coe, to_coe],
-      rw [cast_cast, cast_eq] },
-    convert rfl,
-    exact this _, exact this _,
-  end,
+def to_coe_iso (α : Λ) : (Π β : type_index, β < α → struct_perm β) ≃* struct_perm α :=
+{ map_mul' := λ a b,
+    by { rw [show struct_perm.group α = _, by unfold struct_perm.group], congr; simp },
   ..to_coe }
+
+@[simp] lemma coe_to_coe_iso (α : Λ) : ⇑(to_coe_iso α) = to_coe := rfl
+@[simp] lemma coe_to_coe_iso_symm (α : Λ) : ⇑(to_coe_iso α).symm = of_coe := rfl
 
 @[simp] lemma to_bot_one : to_bot 1 = 1 := to_bot_iso.map_one
 @[simp] lemma of_bot_one : of_bot 1 = 1 := to_bot_iso.symm.map_one
@@ -143,8 +133,8 @@ by { cases α, { refl }, { exact dif_pos rfl } }
 def to_near_litter_perm : struct_perm α →* near_litter_perm :=
 to_bot_iso.symm.to_monoid_hom.comp $ lower bot_le
 
-@[simp] lemma to_near_litter_perm_to_bot (f : near_litter_perm) :
-  (to_bot f).to_near_litter_perm = f :=
+@[simp] lemma coe_to_near_litter_perm :
+  (to_near_litter_perm : struct_perm ⊥ → near_litter_perm) = of_bot :=
 by simp [to_near_litter_perm]
 
 /-- The derivative of a structural permutation at any lower level. -/
@@ -177,63 +167,54 @@ mul_action.comp_hom _ to_near_litter_perm
   f.to_near_litter_perm • x = f • x := rfl
 
 @[simp] lemma to_bot_smul (f : near_litter_perm) (x : X) : to_bot f • x = f • x :=
-by { change to_near_litter_perm _ • _ = _ • _, rw to_near_litter_perm_to_bot }
+by { change to_near_litter_perm _ • _ = _ • _, rw [coe_to_near_litter_perm, of_bot_to_bot] }
+
+@[simp] lemma of_bot_smul (f : struct_perm ⊥) (x : X) : of_bot f • x = f • x :=
+by rw [←to_bot_smul, to_bot_of_bot]
 
 end
 
-def smul : Π (α : Λ),  struct_perm α → pretangle α → pretangle α
-| α :=  λ π t, pretangle.mk (π • t.atom_extension) (λ (β : Λ) (hβ : β < α ), begin
-    letI := smul β,
-    exact smul β (lower (coe_lt_coe.2 hβ).le π) '' (t.extension β hβ),
-  end )
+instance has_smul_pretangle : Π α : type_index, has_smul (struct_perm α) (pretangle α)
+| ⊥ := ⟨λ π t, pretangle.to_bot $ of_bot π • t.of_bot⟩
+| (α : Λ) := ⟨λ π t, pretangle.to_coe $ λ β (hβ : β < α),
+    by { haveI := has_smul_pretangle β, exact of_coe π β hβ • pretangle.of_coe t β hβ }⟩
 using_well_founded { dec_tac := `[assumption] }
 
-def one_smul : ∀ α : Λ, ∀ (b : pretangle α), smul α 1 b = b
-| α :=  begin
-    intros,
-    convert pretangle.eta b,
-    unfold smul, congr,
-    exact mul_action.one_smul b.atom_extension,
-    funext, simp only [map_one], dsimp,
-    suffices : y ∈ (smul β 1 '' b.extension β hβ) =  (y ∈ b.extension β hβ),
-    exact this,
-    simp only [set.mem_image, one_smul, exists_eq_right],
-end
+@[simp] lemma of_bot_smul_pretangle (π : struct_perm ⊥) (t : pretangle ⊥) :
+  (π • t).of_bot = of_bot π • t.of_bot := sorry
+
+@[simp] lemma to_bot_smul_pretangle (π : near_litter_perm) (t : atom) :
+   pretangle.to_bot (π • t) = to_bot π • pretangle.to_bot t :=
+pretangle.of_bot.injective $
+  by simp_rw [of_bot_smul_pretangle, of_bot_to_bot, pretangle.of_bot_to_bot]
+
+@[simp] lemma of_coe_smul_pretangle {α : Λ} (π : struct_perm α) (t : pretangle α) :
+  (π • t).of_coe = of_coe π • t.of_coe := sorry
+
+@[simp] lemma to_coe_smul_pretangle {α : Λ} (π : Π β : type_index, β < α → struct_perm β)
+  (t : Π β : type_index, β < α → set (pretangle β)) :
+  pretangle.to_coe (π • t) = to_coe π • pretangle.to_coe t :=
+pretangle.of_coe.injective $
+  by simp_rw [of_coe_smul_pretangle, of_coe_to_coe, pretangle.of_coe_to_coe]
+
+protected lemma one_smul : ∀ α (t : pretangle α), (1 : struct_perm α) • t = t
+| ⊥ := λ t, pretangle.of_bot.injective $ by simp
+| (α : Λ) := λ t, pretangle.of_coe.injective $
+    by { ext β hβ : 2, simp [←image_smul, one_smul β, image_id'] }
 using_well_founded { dec_tac := `[assumption] }
 
-def mul_smul : Π (α : Λ), ∀ (x y : struct_perm ↑α) (b : pretangle α), smul α  (x * y) b = smul α x (smul α y b) | α := begin
-intros π₁ π₂ t,
- unfold smul, simp only [map_mul, pretangle.atom_extension_mk, pretangle.extension_mk],
- apply congr,
- apply congr,
- refl,
- apply mul_action.mul_smul,
- funext,
- dsimp only,
- have hβ2 := (le_of_lt (coe_lt_coe.mpr hβ)),
-  suffices : ∀ x : pretangle β, smul β ((lower hβ2) π₁ * (lower hβ2) π₂) x = (smul β ((lower hβ2) π₁) ((smul β ((lower hβ2) π₂)) x)),
-  {
-    suffices : (λ S, smul β ((lower hβ2) π₁ * (lower hβ2) π₂) '' S) = λ S, (smul β ((lower hβ2) π₁) '' (smul β ((lower hβ2) π₂) '' S)),
-    have := congr this (eq.refl (t.extension β hβ)),
-    dsimp at this,
-    rw this_1,
-    dsimp [set.image],
-    ext,
-    simp only [set.mem_image, exists_exists_and_eq_and, set.mem_set_of_eq],
-    simp_rw this,
-  },
- simp_rw mul_smul,
- simp only [eq_self_iff_true, implies_true_iff],
-end
+protected lemma mul_smul :
+  ∀ α (π₁ π₂ : struct_perm α) (t : pretangle α), (π₁ * π₂) • t = π₁ • π₂ • t
+| ⊥ := λ π₁ π₂ t, pretangle.of_bot.injective $ by simp [mul_action.mul_smul]
+| (α : Λ) := λ π₁ π₂ t, pretangle.of_coe.injective $
+    by { ext β hβ : 2, simp only [of_coe_smul_pretangle, of_coe_mul, pi.smul_apply', pi.mul_apply,
+      pi_Prop.smul_apply', ←image_smul, image_image, ←mul_smul β], refl }
 using_well_founded { dec_tac := `[assumption] }
 
--- TODO: Why can't the equation compiler handle my sorried proofs (the `funext` call breaks things)?
-instance mul_action_pretangle : Π (α : Λ), mul_action (struct_perm α) (pretangle α)
-| α :=
-{ smul := smul α,
-  one_smul := one_smul α,
-  mul_smul := mul_smul α}
-using_well_founded { dec_tac := `[assumption] }
+instance mul_action_pretangle : mul_action (struct_perm α) (pretangle α) :=
+{ smul := (•),
+  one_smul := struct_perm.one_smul _,
+  mul_smul := struct_perm.mul_smul _ }
 
 @[simp] lemma derivative_cons_nil (α : Λ) (f : struct_perm α) (β : type_index) (hβ : β < α) :
   derivative (cons nil hβ) f = of_coe f β hβ :=

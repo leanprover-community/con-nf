@@ -184,9 +184,7 @@ noncomputable instance : linear_order type_index := linear_order_of_STO' (<)
 noncomputable instance : has_well_founded type_index := is_well_order.to_has_well_founded
 
 /-- The litters. This is the type indexing the partition of `atom`. -/
-@[derive inhabited, irreducible] def litter := (type_index × Λ) × μ
-
-local attribute [semireducible] litter
+@[derive inhabited] def litter := (type_index × Λ) × μ
 
 @[simp] lemma mk_litter : #litter = #μ :=
 by simp_rw [litter, mk_prod, mk_type_index, lift_id, mul_assoc, mul_eq_right
@@ -276,5 +274,4 @@ lemma is_near.image (f : α → β) (h : is_near s t) : is_near (f '' s) (f '' t
 h.image.mono $ subset_image_symm_diff _ _ _
 
 end is_near
-
 end con_nf
