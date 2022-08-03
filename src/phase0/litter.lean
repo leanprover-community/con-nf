@@ -41,6 +41,14 @@ cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, subtype.ext $ pr
 lemma pairwise_disjoint_litter_set : pairwise (disjoint on litter_set) :=
 λ i j h x hx, h $ hx.1.symm.trans hx.2
 
+lemma eq_of_mem_litter_set_of_mem_litter_set {a : atom} (hi : a ∈ litter_set i)
+  (hj : a ∈ litter_set j) : i = j :=
+pairwise_disjoint_litter_set.eq $ not_disjoint_iff.2 ⟨_, hi, hj⟩
+
+lemma litter_set_symm_diff_litter_set (h : i ≠ j) :
+  litter_set i ∆ litter_set j = litter_set i ∪ litter_set j :=
+(pairwise_disjoint_litter_set _ _ h).symm_diff_eq_sup
+
 /-- A `i`-near-litter is a set of small symmetric difference to the `i`-th litter. In other words,
 it is near the `i`-th litter.
 
@@ -54,6 +62,8 @@ Note that the type of litters is `set atom`, and the type of objects that can be
 is also `set atom`. There is therefore no type-level distinction between elements of a litter
 and elements of a near-litter. -/
 lemma is_near_litter_litter_set (i : litter) : is_near_litter i (litter_set i) := is_near_rfl
+
+@[simp] lemma is_near_litter_set : is_near (litter_set i) s ↔ is_near_litter i s := iff.rfl
 
 /-- If two sets are `i`-near-litters, they are near each other.
 This is because they are both near litter `i`, and nearness is transitive. -/
@@ -111,6 +121,9 @@ def litter.to_near_litter (i : litter) : near_litter :=
 
 lemma litter.to_near_litter_injective : injective litter.to_near_litter :=
 λ i j hij, by { cases hij, refl }
+
+lemma near_litter.val_injective : injective (λ N : near_litter, N.snd.val) :=
+by { rintro ⟨i, N₁, h₁⟩ ⟨j, N₂, h₂⟩ (rfl : N₁ = N₂), have := h₁.unique h₂, subst this }
 
 /-- There are `μ` near-litters in total. -/
 @[simp] lemma mk_near_litter : #near_litter = #μ :=
@@ -190,7 +203,7 @@ begin
   suffices : f' = g',
   { subst h,
     subst this },
-  ext i,
+  ext i : 1,
   exact is_near_litter_litter_set_iff.1 (((hf $ is_near_litter_litter_set _).trans $ by rw h).trans
     (hg $ is_near_litter_litter_set _).symm),
 end
