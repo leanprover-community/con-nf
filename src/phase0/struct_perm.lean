@@ -225,5 +225,16 @@ lemma ext (α : Λ) (a b : struct_perm α)
   a = b :=
 of_coe.injective $ by { ext β hβ, simp_rw ←derivative_cons_nil, exact h _ _ }
 
+lemma ext_bot (s1 s2 : struct_perm ⊥)
+  (h : ∀ (a : atom), s1 • a = s2 • a) :
+  s1 = s2 := begin
+  apply of_bot.injective,
+  apply near_litter_perm.ext,
+  apply perm.ext,
+  simp_rw ← of_bot_smul at h,
+  dsimp [(•)] at h,
+  exact h,
+  end
+
 end struct_perm
 end con_nf

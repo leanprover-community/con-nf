@@ -6,6 +6,9 @@ import phase1.code_equiv
 # Allowable permutations
 -/
 
+-- Note to whoever fixes this file: We may want to use `type_index` instead of `Λ` in some places
+-- now that supports are defined in these cases.
+
 open function set with_bot
 open_locale pointwise
 

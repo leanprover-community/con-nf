@@ -287,4 +287,3 @@ lemma support_le_path (A : proper_lt_index α) (t : tangle_path (A : le_index α
 tangle_data.support_le t c hc not_singleton not_near_litter
 
 end con_nf
-#lint
