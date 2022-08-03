@@ -3137,24 +3137,15 @@ lemma flexible_union_non_flexible_cond :
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) :=
 begin
   unfold spec.non_flexible_cond,
-  intros hb hg hd hgb hdb hdg hNl hp ht,
-  intros hf hallp h1,
+  intros hb hg hd hgb hdb hdg hNl hp ht hf hallp h1,
   unfold struct_perm.satisfies at h1,
   unfold struct_perm.satisfies_cond at h1,
+  have h := h1 _ hf,
+  dsimp at h,
+  rw ← h,
 
-  --obtain ⟨As|Ns,he⟩ := h1,
-  cases hf,
-  { cases hf,
-    { dsimp at hf,
-      sorry, },
-    { sorry, },
-  },
-    { sorry, },
-
-  --unfold rough_bijection at bij,
-  unfold new_inverse_flexible_litters at h1,
-  unfold new_flexible_litters at h1,
-  simp at h1,
+  --we are left with the unpacked coherence condition, which is true and assumed in the
+  --inductive hypothesis.
   sorry,
 end
 
