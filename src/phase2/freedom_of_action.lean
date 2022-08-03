@@ -1673,10 +1673,9 @@ begin
           rw this at hM₁,
           have M₁_eq_M₂ := (σ.property.forward.one_to_one A).near_litter _ hM₁ hM₂,
           dsimp only at M₁_eq_M₂, subst M₁_eq_M₂,
-          refine litter_set.near_iff _,
-          rw [gs₁, gs₂],
-          unfold is_near,
-          rw [symm_diff_left_comm, ← symm_diff_assoc, symm_diff_symm_diff_cancel_left],
+          refine is_near_litter_litter_set_iff.1 _,
+          unfold is_near_litter is_near,
+          rw [gs₁, gs₂, symm_diff_left_comm, ← symm_diff_assoc, symm_diff_symm_diff_cancel_left],
           refine lt_of_le_of_lt
             (cardinal.mk_le_mk_of_subset $ symm_diff_le_sup (set.range s₁) (set.range s₂)) _,
           refine lt_of_le_of_lt (cardinal.mk_union_le _ _) _,
