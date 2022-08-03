@@ -215,11 +215,11 @@ def to_le_index (A : proper_lt_index α) : le_index α :=
 def to_lt_index (A : proper_lt_index α) : lt_index α :=
 ⟨A.index, A.higher, coe_lt_coe.2 A.index_lt_higher, A.path'⟩
 
-instance has_coe_lt_index : has_coe_t (proper_lt_index α) (lt_index α) := ⟨to_lt_index⟩
+instance has_coe_lt_index : has_coe (proper_lt_index α) (lt_index α) := ⟨to_lt_index⟩
 
 /-- By forgetting the path that we took from `α` to the lower index `β`, we can recover the proper
 type index `β` that this `proper_lt_index` wraps. -/
-instance has_coe_Λ : has_coe_t (proper_lt_index α) Λ := ⟨index⟩
+instance has_coe_Λ : has_coe (proper_lt_index α) Λ := ⟨index⟩
 
 end proper_lt_index
 end con_nf
