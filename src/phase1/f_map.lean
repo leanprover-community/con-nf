@@ -16,8 +16,8 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-variables [params.{u}] (α : type_index) (β : Λ) [core_tangle_data α] [positioned_tangle_data α]
-variables [core_tangle_data β] [positioned_tangle_data β] [almost_tangle_data β] [tangle_data β]
+variables [params.{u}] (α : type_index) (β : Λ) [core_tangle_data β] [positioned_tangle_data β]
+  [almost_tangle_data β]
 
 /-!
 We now define the f-maps. We will do so in two stages; first, we define it as a function `μ → μ`,
@@ -34,8 +34,6 @@ each constraint only removes `< μ` elements from this candidate set.
 The following two lemmas will prove that for each constraint, we remove less than `μ` litters from
 our pool of potential litters.
 -/
-
-local attribute [semireducible] litter
 
 lemma mk_litters_inflationary_constraint' (x : μ) :
   #{N : (Σ i, {s // is_near_litter ⟨⟨α, β⟩, i⟩ s}) |
@@ -196,7 +194,7 @@ begin
   exact this.left _,
 end
 
-variables {α}
+variables {α} [core_tangle_data α] [positioned_tangle_data α]
 
 /-- The f-maps. -/
 noncomputable def f_map (a : tangle α) : litter :=
@@ -212,7 +210,9 @@ of `f_map` is correct.
 lemma f_map_injective : injective (f_map β : tangle α → litter) :=
 λ i j h, position.inj' $ f_map_core_injective α β (prod.ext_iff.1 h).2
 
+variable (α)
 @[simp] lemma f_map_fst (x : tangle α) : (f_map β x).fst = (α, β) := rfl
+variable {α}
 
 lemma f_map_range_eq {α₁ α₂ : type_index} [core_tangle_data α₁] [positioned_tangle_data α₁]
   [core_tangle_data α₂] [positioned_tangle_data α₂] {x : tangle α₁} {y : tangle α₂}
