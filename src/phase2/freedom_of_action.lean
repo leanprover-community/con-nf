@@ -439,11 +439,7 @@ simp only [set.mem_union_eq, set.mem_range, prod.exists, set.mem_set_of_eq],
 cases x,
 dsimp [(binary_condition.extend_path)],
 simp only [prod.mk.inj_iff, exists_eq_right],
-have : (derivative (A.comp x_snd)) π= (derivative x_snd) ((derivative A) π),
-{
-  sorry, -- problem with derivative def
-},
-rw this,
+rw derivative_derivative,
 end
 
 /-- A specification is total if it specifies where every element in its domain goes. -/
