@@ -16,8 +16,8 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-variables [params.{u}] (α : type_index) (β : Λ) [core_tangle_data α] [positioned_tangle_data α]
-variables [core_tangle_data β] [positioned_tangle_data β] [almost_tangle_data β] [tangle_data β]
+variables [params.{u}] (α : type_index) (β : Λ) [core_tangle_data β] [positioned_tangle_data β]
+  [almost_tangle_data β]
 
 /-!
 We now define the f-maps. We will do so in two stages; first, we define it as a function `μ → μ`,
@@ -34,8 +34,6 @@ each constraint only removes `< μ` elements from this candidate set.
 The following two lemmas will prove that for each constraint, we remove less than `μ` litters from
 our pool of potential litters.
 -/
-
-local attribute [semireducible] litter
 
 lemma mk_litters_inflationary_constraint' (x : μ) :
   #{N : (Σ i, {s // is_near_litter ⟨⟨α, β⟩, i⟩ s}) |
@@ -196,7 +194,7 @@ begin
   exact this.left _,
 end
 
-variables {α}
+variables {α} [core_tangle_data α] [positioned_tangle_data α]
 
 /-- The f-maps. -/
 noncomputable def f_map (a : tangle α) : litter :=

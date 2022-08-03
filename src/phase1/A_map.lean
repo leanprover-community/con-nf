@@ -41,7 +41,7 @@ open code
 section A_map
 variables {α : Λ} {γ : Iio (α : type_index)} [core_tangle_data γ] [positioned_tangle_data γ]
   (β : Iio α) [core_tangle_data (β : Iio (α : type_index))]
-  [positioned_tangle_data (β : Iio (α : type_index))] [almost_tangle_data β] [tangle_data β]
+  [positioned_tangle_data (β : Iio (α : type_index))] [almost_tangle_data β]
 
 /-- The *alternative extension* map. For a set of tangles `G`, consider the code
 `(α, γ, G)`. We then construct the non-empty set `D` such that `(α, β, D)` is an alternative
@@ -159,16 +159,15 @@ noncomputable def code_min_map (c : nonempty_code α) : μ := position $ min_tan
 lemma code_wf : well_founded (inv_image μr (code_min_map : nonempty_code α → μ)) :=
 inv_image.wf (code_min_map) μwf.wf
 
-variables [almost_tangle_cumul α] [tangle_cumul α] (γ : Iio (α : type_index)) (β : Iio α)
-  (c d : code α)
+variables [almost_tangle_cumul α] (γ : Iio (α : type_index)) (β : Iio α) (c d : code α)
 
 /-- The A-map, phrased as a function on `α`-codes. -/
 noncomputable! def A_map_code (c : code α) : code α := mk β (A_map β c.2)
 
-@[simp] lemma extension_A_map_code : (A_map_code β c).1 = β := rfl
-@[simp] lemma elts_A_map_code : (A_map_code β c).2 = A_map β c.2 := rfl
+@[simp] lemma fst_A_map_code : (A_map_code β c).1 = β := rfl
+@[simp] lemma snd_A_map_code : (A_map_code β c).2 = A_map β c.2 := rfl
 
-@[simp] lemma A_map_code_mk (s) : A_map_code β ⟨γ, s⟩ = ⟨β, A_map β s⟩ := rfl
+@[simp] lemma A_map_code_mk (s) : A_map_code β (mk γ s) = mk β (A_map β s) := rfl
 
 variables {β c d}
 
@@ -229,7 +228,7 @@ end
 lemma A_map_rel.nonempty_iff : c ↝ d → (c.2.nonempty ↔ d.2.nonempty) :=
 by { rintro ⟨β, hcδ⟩, exact A_map_nonempty.symm }
 
-lemma A_map_rel_empty_empty (hγβ : γ ≠ β) : (⟨γ, ∅⟩ : code α) ↝ ⟨β, ∅⟩ :=
+lemma A_map_rel_empty_empty (hγβ : γ ≠ β) : mk γ ∅ ↝ mk β ∅ :=
 (A_map_rel_iff _ _).2 ⟨β, hγβ, by simp⟩
 
 lemma eq_of_A_map_code {β γ : Iio α} (hc : c.2.nonempty) (hcβ : c.1 ≠ β)

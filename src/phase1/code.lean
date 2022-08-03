@@ -15,7 +15,7 @@ variables [params.{u}] (α : Λ) [core_tangle_cumul α] {β : Iio (α : type_ind
 abbreviation nonempty_code : Type u := {c : code α // c.2.nonempty}
 
 namespace code
-variables {α}
+variables {α} {c : code α}
 
 /-- Constructor for `code`. -/
 def mk : Π β : Iio (α : type_index), set (tangle β) → code α := sigma.mk
@@ -25,6 +25,8 @@ def mk : Π β : Iio (α : type_index), set (tangle β) → code α := sigma.mk
 
 /-- A code is empty if it has no element. -/
 protected def is_empty (c : code α) : Prop := c.2 = ∅
+
+protected lemma is_empty.eq : c.is_empty → c.2 = ∅ := id
 
 @[simp] lemma is_empty_mk : (mk β s).is_empty ↔ s = ∅ := iff.rfl
 

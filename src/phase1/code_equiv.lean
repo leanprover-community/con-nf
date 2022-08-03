@@ -35,9 +35,8 @@ open set with_bot
 universe u
 
 namespace con_nf
-variables [params.{u}] {α : Λ} {β : Iio (α : type_index)} {γ : Iio α} [core_tangle_data α]
-  [almost_tangle_data α] [positioned_tangle_data α] [tangle_data α] [core_tangle_cumul α]
-  [almost_tangle_cumul α] [positioned_tangle_cumul α] [tangle_cumul α]
+variables [params.{u}] {α : Λ} {β : Iio (α : type_index)} {γ : Iio α} [core_tangle_cumul α]
+  [almost_tangle_cumul α] [positioned_tangle_cumul α]
 
 namespace code
 variables {c d : code α}
@@ -67,33 +66,40 @@ lemma is_even_of_forall_not (h : ∀ d, ¬ d ↝ c) : is_even c := is_even_iff.2
 @[simp] lemma is_even_of_eq_bot (c : code α) (hc : c.1.1 = ⊥) : c.is_even :=
 is_even_of_forall_not $ by { rintro d ⟨β, -⟩, exact coe_ne_bot hc }
 
-@[simp] lemma is_even_bot (s : set atom) : is_even (⟨⊥, s⟩ : code α) := is_even_of_eq_bot _ rfl
+@[simp] lemma is_even_bot (s : set atom) : is_even (mk ⊥ s : code α) := is_even_of_eq_bot _ rfl
 
-lemma not_is_odd_bot (s : set atom) : ¬ is_odd (⟨⊥, s⟩ : code α) :=
+lemma not_is_odd_bot (s : set atom) : ¬ is_odd (mk ⊥ s : code α) :=
 begin
   simp_rw [is_odd_iff, A_map_rel_iff],
   rintro ⟨d, ⟨γ, hdγ, h⟩, hd⟩,
   exact bot_ne_mk_coe (congr_arg sigma.fst h),
 end
 
-@[simp] lemma is_even_empty_iff : is_even (⟨β, ∅⟩ : code α) ↔ (β : type_index) = ⊥ :=
+@[simp] lemma is_empty.is_even_iff (hc : c.is_empty) : is_even c ↔ (c.1 : type_index) = ⊥ :=
 begin
-  refine ⟨λ h, _, is_even_of_eq_bot ⟨β, ∅⟩⟩,
-  obtain ⟨_ | β, hβ⟩ := β,
+  refine ⟨λ h, _, is_even_of_eq_bot _⟩,
+  obtain ⟨⟨_ | β, hβ⟩, s⟩ := c,
   { refl },
   cases not_is_odd_bot _ (is_even_iff.1 h ⟨⟨⊥, _⟩, ∅⟩ _),
   convert A_map_rel.intro ⟨β, coe_lt_coe.1 hβ⟩ _; simp,
+  assumption,
 end
 
-@[simp] lemma is_odd_empty_iff : is_odd (⟨β, ∅⟩ : code α) ↔ (β : type_index) ≠ ⊥ :=
+@[simp] lemma is_empty.is_odd_iff (hc : c.is_empty) : is_odd c ↔ (c.1 : type_index) ≠ ⊥ :=
 begin
-  obtain ⟨β, hβ⟩ := β,
-  refine ⟨_, λ h, is_odd_iff.2 ⟨⟨⊥, ∅⟩, _, is_even_bot _⟩⟩,
+  obtain ⟨⟨β, hβ⟩, s⟩ := c,
+  refine ⟨_, λ h, is_odd_iff.2 ⟨mk ⊥ ∅, _, is_even_bot _⟩⟩,
   { rintro h (rfl : β = _),
-    exact not_is_odd_bot ∅ h },
+    exact not_is_odd_bot _ h },
   { lift β to Λ using h,
-    exact (A_map_rel_iff _ _).2 ⟨⟨β, coe_lt_coe.1 hβ⟩, bot_ne_mk_coe, by simp⟩ }
+    rw (show s = _, from hc.eq),
+    exact (A_map_rel_iff _ _).2 ⟨⟨β, coe_lt_coe.1 hβ⟩, bot_ne_mk_coe, by simpa using hc.eq⟩ }
 end
+
+@[simp] lemma is_even_empty_iff : is_even (mk β ∅) ↔ (β : type_index) = ⊥ :=
+is_empty.is_even_iff rfl
+
+@[simp] lemma is_odd_empty_iff : is_odd (mk β ∅) ↔ (β : type_index) ≠ ⊥ := is_empty.is_odd_iff rfl
 
 private lemma not_is_odd_nonempty : ∀ c : nonempty_code α, ¬ c.1.is_odd ↔ c.1.is_even
 | c := begin
@@ -102,20 +108,18 @@ private lemma not_is_odd_nonempty : ∀ c : nonempty_code α, ¬ c.1.is_odd ↔ 
   apply forall_congr (λ d, _),
   apply imp_congr_right (λ h, _),
   rw [iff.comm, ←not_iff_not, not_not],
-  obtain ⟨γ, els⟩ := d,
-  obtain rfl | hd := els.eq_empty_or_nonempty,
-  { rw [is_odd_empty_iff, is_even_empty_iff, not_not] },
-  { let : A_map_rel' ⟨⟨γ, els⟩, hd⟩ c := A_map_rel_coe_coe.1 h,
-    exact @not_is_odd_nonempty ⟨⟨γ, els⟩, hd⟩ }
+  obtain hd | hd := d.2.eq_empty_or_nonempty,
+  { rw [is_empty.is_odd_iff hd, is_empty.is_even_iff hd, not_not] },
+  { let : A_map_rel' ⟨d, hd⟩ c := A_map_rel_coe_coe.1 h,
+    exact @not_is_odd_nonempty ⟨d, hd⟩ }
 end
 using_well_founded { dec_tac := `[assumption] }
 
 @[simp] lemma not_is_odd : ¬ c.is_odd ↔ c.is_even :=
 begin
-  obtain ⟨β, els⟩ := c,
-  obtain rfl | hc := eq_empty_or_nonempty els,
-  { rw [is_odd_empty_iff, is_even_empty_iff, not_not] },
-  { exact not_is_odd_nonempty ⟨⟨β, els⟩, hc⟩ }
+  obtain hc | hc := c.2.eq_empty_or_nonempty,
+  { rw [is_empty.is_odd_iff hc, is_empty.is_even_iff hc, not_not] },
+  { exact not_is_odd_nonempty ⟨c, hc⟩ }
 end
 
 @[simp] lemma not_is_even : ¬ c.is_even ↔ c.is_odd := not_is_odd.symm.not_left
@@ -139,7 +143,7 @@ protected lemma is_even.A_map_code_ne (hc : c.is_even) (hd : d.is_even) (hcγ : 
   A_map_code γ c ≠ d :=
 by { rintro rfl, exact hd.not_is_odd (hc.A_map_code hcγ) }
 
-lemma A_map_code_ne_bot {s} : A_map_code γ c ≠ ⟨⊥, s⟩ :=
+lemma A_map_code_ne_bot {s} : A_map_code γ c ≠ mk ⊥ s :=
 ne_of_apply_ne (subtype.val ∘ sigma.fst) coe_ne_bot
 
 lemma A_map_code_ne_singleton {t} : A_map_code γ c ≠ mk β {t} :=
@@ -196,17 +200,17 @@ lemma empty_empty : ∀ (β γ), (⟨β, ∅⟩ : code α) ≡ ⟨γ, ∅⟩
 | ⟨⊥, _⟩ ⟨⊥, _⟩ := equiv.rfl
 | ⟨⊥, _⟩ ⟨(γ : Λ), hγ⟩ := by { convert A_map_right _ (is_even_bot _) ⟨_, coe_lt_coe.1 hγ⟩
       bot_ne_mk_coe,
-    simp only [A_map_empty] }
+    simp only [A_map_empty, snd_mk] }
 | ⟨(β : Λ), hβ⟩  ⟨⊥, _⟩ := by { convert A_map_left _ (is_even_bot _) ⟨_, coe_lt_coe.1 hβ⟩
       bot_ne_mk_coe,
-    simp only [A_map_empty] }
+    simp only [A_map_empty, snd_mk] }
 | ⟨(β : Λ), hβ⟩ ⟨(γ : Λ), hγ⟩ := by
   { convert A_map_A_map _ (is_even_bot ∅) ⟨_, coe_lt_coe.1 hβ⟩ bot_ne_mk_coe ⟨_, coe_lt_coe.1 hγ⟩
       bot_ne_mk_coe;
-        simp only [A_map_empty] }
+    simp only [A_map_empty, snd_mk] }
 
 protected lemma _root_.con_nf.code.is_empty.equiv (hc : c.is_empty) (hd : d.is_empty) : c ≡ d :=
-by { cases c, cases d, change c_fst = ∅ at hc, change d_fst = ∅ at hd, subst hc, subst hd,
+by { cases c, cases d, change c_snd = ∅ at hc, change d_snd = ∅ at hd, subst hc, subst hd,
   exact equiv.empty_empty _ _ }
 
 lemma trans {c d e : code α} : c ≡ d → d ≡ e → c ≡ e :=
@@ -264,26 +268,25 @@ lemma ext : ∀ {c d : code α}, c ≡ d → c.1 = d.1 → c = d
 | _ _ (A_map_A_map c hc β hcβ γ hcγ) H :=
   by { simp only [extension_A_map_code, Iio.coe_inj] at H, subst H }
 
-@[simp] lemma bot_left_iff {s} :
-  ⟨⊥, s⟩ ≡ c ↔ (⟨⊥, s⟩ : code α) = c ∨ ∃ β : Iio α, c = ⟨β, A_map β s⟩ :=
+@[simp] lemma bot_left_iff {s} : mk ⊥ s ≡ c ↔ mk ⊥ s = c ∨ ∃ β : Iio α, c = mk β (A_map β s) :=
 by simp [equiv_iff, A_map_code_ne_bot.symm, eq_comm]
 
-@[simp] lemma bot_right_iff {s} : c ≡ ⟨⊥, s⟩ ↔ c = ⟨⊥, s⟩ ∨ ∃ β : Iio α, c = ⟨β, A_map β s⟩ :=
+@[simp] lemma bot_right_iff {s} : c ≡ mk ⊥ s ↔ c = mk ⊥ s ∨ ∃ β : Iio α, c = mk β (A_map β s) :=
 by simp [equiv_iff, A_map_code_ne_bot.symm, eq_comm]
 
-@[simp] lemma bot_bot_iff {s t} : (⟨⊥, s⟩ : code α) ≡ ⟨⊥, t⟩ ↔ s = t :=
-by simp [equiv_iff, A_map_code_ne_bot.symm, eq_comm]
+@[simp] lemma bot_bot_iff {s t} : (mk ⊥ s : code α) ≡ mk ⊥ t ↔ s = t :=
+by simp [equiv_iff, A_map_code_ne_bot.symm, eq_comm, sigma.ext_iff]
 
 lemma singleton (hβγ : β ≠ γ) (g : tangle β) :
-  (⟨β, {g}⟩ : code α) ≡ ⟨γ, to_tangle '' local_cardinal (f_map γ g)⟩ :=
+  mk β {g} ≡ mk γ (to_tangle '' local_cardinal (f_map γ g)) :=
 begin
-  convert equiv.A_map_right ⟨β, {g}⟩ (is_even_singleton _) _ hβγ,
-  simp only [mem_singleton_iff, Union_Union_eq_left],
+  convert equiv.A_map_right (mk β {g}) (is_even_singleton _) _ hβγ,
+  simp only [snd_mk, mem_singleton_iff, Union_Union_eq_left],
 end
 
 lemma singleton_iff {g} :
-  c ≡ ⟨β, {g}⟩ ↔ c = ⟨β, {g}⟩ ∨ ∃ γ : Iio α, (c.1 : type_index) = some γ ∧ β ≠ γ ∧
-    c = A_map_code γ ⟨β, {g}⟩ :=
+  c ≡ mk β {g} ↔ c = mk β {g} ∨ ∃ γ : Iio α, (c.1 : type_index) = some γ ∧ β ≠ γ ∧
+    c = A_map_code γ (mk β {g}) :=
 begin
   classical,
   refine ⟨λ h, _, _⟩,
@@ -296,7 +299,7 @@ begin
   { rintro (rfl | ⟨γ, hc, hβγ, rfl⟩),
     { refl },
     { convert (singleton hβγ g).symm,
-      simp only [A_map_code, A_map_singleton, eq_self_iff_true, heq_iff_eq, and_self] } }
+      simp only [snd_mk, A_map_code, A_map_singleton, eq_self_iff_true, heq_iff_eq, and_self] } }
 end
 
 end equiv
@@ -305,7 +308,7 @@ lemma extension_eq_of_singleton_equiv_singleton {γ : Iio ↑α} {a b}
   (h : (⟨β, {a}⟩ : code α) ≡ ⟨γ, {b}⟩) : β = γ :=
 begin
   obtain h | ⟨ε, hc, hβε, hA⟩ := equiv.singleton_iff.1 h,
-  { exact ((ext_iff _ _).1 h).1 },
+  { exact (sigma.ext_iff.1 h).1 },
   { cases A_map_code_ne_singleton hA.symm }
 end
 

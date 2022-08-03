@@ -82,7 +82,7 @@ core_tangle_data.designated_support _
 end
 
 /-- The motor of the initial recursion. This contains the data of the position function. -/
-class positioned_tangle_data (α : type_index) [core : core_tangle_data α] :=
+class positioned_tangle_data (α : type_index) [core_tangle_data α] :=
 (position : tangle α ↪ μ)
 
 export positioned_tangle_data (position)
@@ -100,7 +100,23 @@ class almost_tangle_data :=
   π • pretangle_inj t = pretangle_inj (π • t))
 (typed_singleton : atom ↪ tangle α)
 
-export almost_tangle_data (to_tangle typed_singleton)
+export almost_tangle_data (to_tangle typed_singleton pretangle_inj)
+
+namespace allowable
+variables {α} [almost_tangle_data α]
+
+/-- The action of allowable permutations on tangles commutes with the `to_tangle` function mapping
+near-litters to typed near-litters. This is quite clear to see when representing tangles as codes,
+but since at this stage tangles are just a type, we have to state this condition explicitly. -/
+lemma smul_to_tangle (π : allowable α) (N : near_litter) :
+  π • (to_tangle N : tangle α) = to_tangle (π • N) := almost_tangle_data.smul_to_tangle _ _
+
+/-- The action of allowable permutations on tangles commutes with the `pretangle_inj` injection
+converting tangles into pretangles. -/
+lemma smul_pretangle_inj (π : allowable α) (t : tangle α) :
+  π • pretangle_inj t = pretangle_inj (π • t) := almost_tangle_data.smul_pretangle_inj _ _
+
+end allowable
 
 variables [almost_tangle_data α] [positioned_tangle_data α]
 
@@ -133,20 +149,11 @@ these typed near-litters explicitly, so we rely on this function instead. In the
 function `j`. -/
 add_decl_doc almost_tangle_data.to_tangle
 
-/-- The action of allowable permutations on tangles commutes with the `to_tangle` function mapping
-near-litters to typed near-litters. This is quite clear to see when representing tangles as codes,
-but since at this stage tangles are just a type, we have to state this condition explicitly. -/
-add_decl_doc almost_tangle_data.smul_to_tangle
-
 /-- Tangles can be considered a subtype of pretangles, which are tangles without extensionality and
 which are guaranteed to have a `-1`-extension. This injection can be seen as an inclusion map.
 Since pretangles have a membership relation, we can use this map to see the members of a tangle at
 any given level, by first converting it to a pretangle. -/
 add_decl_doc almost_tangle_data.pretangle_inj
-
-/-- The action of allowable permutations on tangles commutes with the `pretangle_inj` injection
-converting tangles into pretangles. -/
-add_decl_doc almost_tangle_data.smul_pretangle_inj
 
 /-- For any atom `a`, we can construct an `α`-tangle that has a `-1`-extension that contains exactly
 this atom. This is called a typed singleton. In the blueprint, this is the function `k`. -/
