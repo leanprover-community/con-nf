@@ -2797,18 +2797,29 @@ lemma flexible_union_near_litter_cond_forward :
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) N₁ N₂ C :=
 sorry
 
-
-
 lemma flexible_union_non_flexible_cond :
   spec.non_flexible_cond B
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) :=
 begin
-  unfold rough_bijection at bij,
-  unfold new_inverse_flexible_litters,
-  unfold new_flexible_litters,
   unfold spec.non_flexible_cond,
-  simp,
-  intros hb hg hd hgb hdb hdg hNl hp ht hbig1 hap hbig2,
+  intros hb hg hd hgb hdb hdg hNl hp ht,
+  intros hf hallp h1,
+  unfold struct_perm.satisfies at h1,
+  unfold struct_perm.satisfies_cond at h1,
+
+  --obtain ⟨As|Ns,he⟩ := h1,
+  cases hf,
+  { cases hf,
+    { dsimp at hf,
+      sorry, },
+    { sorry, },
+  },
+    { sorry, },
+
+  --unfold rough_bijection at bij,
+  unfold new_inverse_flexible_litters at h1,
+  unfold new_flexible_litters at h1,
+  simp at h1,
   sorry,
 end
 
