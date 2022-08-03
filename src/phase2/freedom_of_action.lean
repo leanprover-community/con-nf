@@ -2983,6 +2983,10 @@ by simp only [rough_bijection.inv', subtype.coe_mk]
     bij.inv_fun ⟨L, hL.1, by simpa only [inv_def, spec.inv_domain] using hL.2⟩ :=
 by simp only [rough_bijection.inv', subtype.coe_mk]
 
+lemma rough_bijection.inv'_inv {σ : allowable_partial_perm B}
+  {bij : rough_bijection A σ.val.domain σ.val.range} :
+  bij.inv'.inv == bij := sorry
+
 end rough_bijection
 
 variable {σ : allowable_partial_perm B}
@@ -3177,7 +3181,7 @@ private noncomputable def precise_litter_image
   (bij : rough_bijection A σ.val.domain σ.val.range)
   (L : {L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ.val.domain})
   (abij : bij.precise_atom_bijection L) : near_litter :=
-precise_litter_image_aux bij L abij (λ ⟨⟨a, ha⟩, ha'⟩, atom_value B σ A a ha')
+precise_litter_image_aux bij L abij (λ a, atom_value B σ A a.1 a.2)
   (begin
     convert small_of_rough_bijection bij L,
     ext a, split,
@@ -3194,7 +3198,7 @@ private noncomputable def precise_litter_inverse_image
   (abij : bij.inv.precise_atom_bijection L) :
   near_litter :=
 precise_litter_image_aux bij.inv L abij
-  (λ ⟨⟨a, ha⟩, ha'⟩, atom_value B σ⁻¹ A a (by simpa only [inv_def, spec.inv_domain] using ha'))
+  (λ a, atom_value B σ⁻¹ A a.1 (by simpa only [inv_def, spec.inv_domain] using a.2))
   (begin
     convert small_of_rough_bijection bij.inv'
       ⟨L.1, L.2.1, by simpa only [inv_def, spec.inv_domain] using L.2.2⟩,
@@ -3485,12 +3489,68 @@ def abij_inv :
     bij.inv'.precise_atom_bijection L :=
 λ L, (abij (bij.inv_fun ⟨L, by simpa only [inv_def, spec.inv_domain] using L.property⟩)).inv'
 
+-- There absolutely needs to be a better way to prove this.
 lemma new_flexible_litters_inv :
   (new_flexible_litters bij abij)⁻¹ = new_inverse_flexible_litters bij.inv' (abij_inv bij abij) :=
 begin
   ext ⟨_ | ⟨N₁, N₂⟩, C⟩,
   { simp only [has_inv.inv, new_flexible_litters, new_inverse_flexible_litters, set.mem_set_of_eq,
     prod.mk.inj_iff, sum.elim_inl, exists_false, false_and], },
+  split,
+  { rintro ⟨L, hL⟩, cases hL, clear hL,
+    refine ⟨⟨bij.to_fun L, (bij.to_fun L).2.1,
+      by simpa only [inv_def, spec.inv_domain] using (bij.to_fun L).2.2⟩, _⟩,
+    congr' 3,
+    { unfold precise_litter_inverse_image precise_litter_image_aux,
+      refine near_litter.val_injective _, dsimp only,
+      rw set.range_eq_iff,
+      split,
+      { intro a, refine ⟨⟨a, _⟩, _⟩,
+        { rw rough_bijection.inv'_to_fun, simp_rw subtype.coe_mk, rw subtype.coe_eta,
+          rw bij.left_inv, exact a.property, },
+        { dsimp only, congr' 1,
+          { rw [inv_def, spec.inv_range], },
+          { rw [inv_def, spec.inv_domain], },
+          { exact rough_bijection.inv'_inv, },
+          { rw subtype.heq_iff_coe_eq,
+            { rw rough_bijection.inv'_to_fun,
+              simp_rw subtype.coe_mk,
+              rw subtype.coe_eta,
+              rw bij.left_inv, },
+            { intro, rw [inv_def, spec.inv_range], refl, }, },
+          { sorry },
+          { refine hfunext _ _,
+            { sorry },
+            { intros a₁ a₂ h,
+              have : (a₁.val : atom) = a₂.val,
+              { rw subtype.heq_iff_coe_heq at h, rw subtype.heq_iff_coe_eq at h, exact h,
+                { intro,
+                  rw rough_bijection.inv'_to_fun,
+                  simp_rw subtype.coe_mk,
+                  rw subtype.coe_eta,
+                  rw bij.left_inv, },
+                { rw rough_bijection.inv'_to_fun,
+                  simp_rw subtype.coe_mk,
+                  rw subtype.coe_eta,
+                  rw bij.left_inv, },
+                { refine hfunext _ _,
+                  { rw rough_bijection.inv'_to_fun,
+                    simp_rw subtype.coe_mk,
+                    rw subtype.coe_eta,
+                    rw bij.left_inv, },
+                  { intros b₁ b₂ hb,
+                    have : b₁.val = b₂.val,
+                    { rw subtype.heq_iff_coe_eq at hb, exact hb,
+                      intro,
+                      rw rough_bijection.inv'_to_fun,
+                      simp_rw subtype.coe_mk,
+                      rw subtype.coe_eta,
+                      rw bij.left_inv, },
+                    rw this,
+                    rw [inv_def, spec.inv_range], } } },
+              simp_rw [this, inv_inv], refl, } } } },
+              sorry },
+          sorry },
   sorry,
 end
 
