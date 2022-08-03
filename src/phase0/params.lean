@@ -2,7 +2,6 @@ import mathlib.cardinal
 import mathlib.order
 import mathlib.well_founded
 import set_theory.cardinal.cofinality
-import set_theory.cardinal.continuum
 
 /-!
 # Parameters of the construction

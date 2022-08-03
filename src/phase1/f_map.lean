@@ -210,9 +210,7 @@ of `f_map` is correct.
 lemma f_map_injective : injective (f_map β : tangle α → litter) :=
 λ i j h, position.inj' $ f_map_core_injective α β (prod.ext_iff.1 h).2
 
-variable (α)
 @[simp] lemma f_map_fst (x : tangle α) : (f_map β x).fst = (α, β) := rfl
-variable {α}
 
 lemma f_map_range_eq {α₁ α₂ : type_index} [core_tangle_data α₁] [positioned_tangle_data α₁]
   [core_tangle_data α₂] [positioned_tangle_data α₂] {x : tangle α₁} {y : tangle α₂}

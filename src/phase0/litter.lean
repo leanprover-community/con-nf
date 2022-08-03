@@ -41,29 +41,13 @@ cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, subtype.ext $ pr
 lemma pairwise_disjoint_litter_set : pairwise (disjoint on litter_set) :=
 λ i j h x hx, h $ hx.1.symm.trans hx.2
 
-lemma litter_set.eq_of_mem_of_mem {i j : litter} {a : atom}
-  (hi : a ∈ litter_set i) (hj : a ∈ litter_set j) : i = j :=
-begin
-  obtain ⟨L, x⟩ := a, cases hi, cases hj, refl,
-end
+lemma eq_of_mem_litter_set_of_mem_litter_set {a : atom} (hi : a ∈ litter_set i)
+  (hj : a ∈ litter_set j) : i = j :=
+pairwise_disjoint_litter_set.eq $ not_disjoint_iff.2 ⟨_, hi, hj⟩
 
-lemma litter_set.symm_diff {i j : litter} (hij : i ≠ j) :
+lemma litter_set_symm_diff_litter_set (h : i ≠ j) :
   litter_set i ∆ litter_set j = litter_set i ∪ litter_set j :=
-begin
-  unfold symm_diff,
-  congr; ext; obtain ⟨L, x⟩ := x;
-  refine ⟨λ ⟨h₁, h₂⟩, h₁, λ h₁, ⟨h₁, _⟩⟩; cases h₁; intro h₂;
-  cases pairwise_disjoint_litter_set _ _ hij ⟨‹_›, ‹_›⟩,
-end
-
-lemma litter_set.near_iff {i j : litter} : is_near (litter_set i) (litter_set j) → i = j :=
-begin
-  contrapose,
-  intro h,
-  refine not_lt.mpr (le_of_eq _),
-  rw [litter_set.symm_diff h, cardinal.mk_union_of_disjoint (pairwise_disjoint_litter_set i j h),
-    mk_litter_set, mk_litter_set, cardinal.add_eq_self κ_regular.aleph_0_le],
-end
+(pairwise_disjoint_litter_set _ _ h).symm_diff_eq_sup
 
 /-- A `i`-near-litter is a set of small symmetric difference to the `i`-th litter. In other words,
 it is near the `i`-th litter.
@@ -78,6 +62,8 @@ Note that the type of litters is `set atom`, and the type of objects that can be
 is also `set atom`. There is therefore no type-level distinction between elements of a litter
 and elements of a near-litter. -/
 lemma is_near_litter_litter_set (i : litter) : is_near_litter i (litter_set i) := is_near_rfl
+
+@[simp] lemma is_near_litter_set : is_near (litter_set i) s ↔ is_near_litter i s := iff.rfl
 
 /-- If two sets are `i`-near-litters, they are near each other.
 This is because they are both near litter `i`, and nearness is transitive. -/
@@ -136,16 +122,8 @@ def litter.to_near_litter (i : litter) : near_litter :=
 lemma litter.to_near_litter_injective : injective litter.to_near_litter :=
 λ i j hij, by { cases hij, refl }
 
-lemma near_litter.val_injective : injective (λ (N : near_litter), N.snd.val) :=
-begin
-  intros N₁ N₂ h,
-  ext1,
-  { have := N₁.snd.property,
-    dsimp only at h,
-    rw h at this,
-    exact litter_set.near_iff (is_near.trans this N₂.snd.property.symm), },
-  { exact h, }
-end
+lemma near_litter.val_injective : injective (λ N : near_litter, N.snd.val) :=
+by { rintro ⟨i, N₁, h₁⟩ ⟨j, N₂, h₂⟩ (rfl : N₁ = N₂), have := h₁.unique h₂, subst this }
 
 /-- There are `μ` near-litters in total. -/
 @[simp] lemma mk_near_litter : #near_litter = #μ :=
@@ -225,7 +203,7 @@ begin
   suffices : f' = g',
   { subst h,
     subst this },
-  ext i,
+  ext i : 1,
   exact is_near_litter_litter_set_iff.1 (((hf $ is_near_litter_litter_set _).trans $ by rw h).trans
     (hg $ is_near_litter_litter_set _).symm),
 end
