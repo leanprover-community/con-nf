@@ -38,7 +38,7 @@ end
 
 namespace struct_perm
 
-instance struct_perm.mul_action : mul_action (struct_perm α) (support_condition α) :=
+instance mul_action_support_condition : mul_action (struct_perm α) (support_condition α) :=
 { smul := λ π c, ⟨derivative c.snd π • c.fst, c.snd⟩,
   one_smul := by { rintro ⟨atoms | Ns, A⟩; unfold has_smul.smul; simp },
   mul_smul := begin

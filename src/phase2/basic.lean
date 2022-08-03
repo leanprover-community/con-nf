@@ -1,210 +1,11 @@
-import phase1.tangle
+import phase1.f_map
 
 open function set with_bot quiver
 open_locale pointwise
 
-noncomputable theory
-
-universe u
-
-namespace con_nf
-variables [params.{u}] (α : Λ)
-
--- these instances will mess up defining phase 2 assumptions, so don't keep them in scope
--- [core_tangle_data α] [positioned_tangle_data α] [almost_tangle_data α] [tangle_data α]
-
-/- namespace nonempty_semitangle
-
-def to_pretangle (t : nonempty_semitangle α) : pretangle α :=
-pretangle.mk t.pref.atoms (λ β hβ, pretangle_inj β hβ ''
-  (t.exts β hβ : set (tangle α β $ coe_lt_coe.mpr hβ)))
-
-lemma to_pretangle_ne_empty (t : nonempty_semitangle α) :
-  to_pretangle α t ≠ pretangle.mk ∅ (λ β hβ, ∅) :=
-begin
-  by_cases hzero : ∃ β, β < α,
-  { obtain ⟨β, hβ⟩ := hzero,
-    intro h,
-    have := congr_arg pretangle.extension h,
-    rw pretangle.extension_mk at this,
-    have := congr_fun₂ this β hβ,
-    rw [to_pretangle, pretangle.extension_mk, set.image_eq_empty] at this,
-    exact (t.exts β hβ).property.ne_empty this },
-  { intro h,
-    have := congr_arg pretangle.atom_extension h,
-    rw [to_pretangle, pretangle.atom_extension_mk, pretangle.atom_extension_mk] at this,
-    obtain ⟨ts, ⟨atoms, rep, hA⟩ | ⟨β, hβ, rep, hA⟩⟩ := t,
-    { exact atoms.2.ne_empty this },
-    { exfalso, exact hzero ⟨β, hβ⟩ } }
-end
-
-lemma to_pretangle_injective : injective (to_pretangle α) :=
-begin
-  intros s t hst, unfold to_pretangle at hst,
-  by_cases h : is_min α,
-  { have := congr_arg pretangle.atom_extension hst,
-    rw [pretangle.atom_extension_mk, pretangle.atom_extension_mk] at this,
-    exact ext_zero _ _ h this },
-  { obtain ⟨β, hβ⟩ := not_is_min_iff.1 h,
-    have := congr_arg pretangle.extension hst,
-    rw [pretangle.extension_mk, pretangle.extension_mk] at this,
-    have := congr_fun₂ this β hβ,
-    rw set.image_eq_image (embedding.injective _) at this,
-    exact ext _ _ _ (subtype.coe_inj.mp this) }
-end
-
-end nonempty_semitangle
-
-namespace semitangle
-
-def to_pretangle : semitangle α → pretangle α
-| ⊥ := pretangle.mk ∅ (λ β hβ, ∅)
-| (t : nonempty_semitangle α) := nonempty_semitangle.to_pretangle α t
-
-lemma to_pretangle_injective : injective (to_pretangle α) :=
-begin
-  intros s t hst,
-  induction s using with_bot.rec_bot_coe; induction t using with_bot.rec_bot_coe,
-  { refl },
-  { exfalso, rw [to_pretangle, to_pretangle] at hst,
-    exact nonempty_semitangle.to_pretangle_ne_empty _ _ hst.symm },
-  { exfalso, rw [to_pretangle, to_pretangle] at hst,
-    exact nonempty_semitangle.to_pretangle_ne_empty _ _ hst },
-  { rw nonempty_semitangle.to_pretangle_injective α hst }
-end
-
-end semitangle
-
-namespace new_tangle
-
-def to_pretangle (t : new_tangle α) : pretangle α := semitangle.to_pretangle α t
-
-lemma to_pretangle_injective : injective (to_pretangle α) :=
-λ s t hst, subtype.coe_inj.mp (semitangle.to_pretangle_injective α hst)
-
-end new_tangle -/
-
 /-!
-We now intend to deal with the familiar tools from phase 1 along paths `A` from `α ⟶ β` down the
-TTT type hierarchy, instead of linearly level-by-level. We will construct three main definitions:
+# Typeclasses for phase 2
 
-* `le_index`: A type index `β`, together with a path down from `α` to level `β`.
-* `lt_index`: A type index `β`, together with a path down from `α`, to some level `γ`, and then
-    directly to level `β`. This enforces that the path obtained from composing `A` with this new
-    `γ ⟶ β` morphism is nontrivial by construction.
-* `proper_lt_index`: Like `lt_index` but the type index `β` is proper; that is, it lies in `Λ`.
-
-Each of these types is progressively more stringent, and they have natural coercions upwards (i.e.
-from `proper_lt_index` to `lt_index` to `le_index`, and the transitive coercion from
-`proper_lt_index` to `le_index`). They also have coercions to their index types (`type_index` in the
-first two cases, and `Λ` in the third).
-
-We will then proceed to define new API for many phase 1 constructions (tangles, f-maps, ...)
-that use these three types instead of `Λ`, `type_index`, and `Iio α`. All of the properties that
-were proven in phase 1 of course still hold for the functions under these new names - their
-functionality has not changed.
-
-These constructions are helpful for stating and proving the freedom-of-action theorem, since it
-allows for the possibility that the type of `β`-tangles (for instance) depends on the path downwards
-from `α` to `β`. In our actual construction, this does hold, since phase 1 is conducted entirely
-linearly, but this feature is not actually needed for defining and proving statements in most of
-phase 2, so we use this alternate formalisation.
--/
-
-/-- A type index `β`, together with a path down from `α` to level `β`. Hence, `β ≤ α`.
-This type is intended to be used in place of `β : type_index, β ≤ α` in phase 2. -/
-@[ext] structure le_index (α : Λ) :=
-(index : type_index)
-(path : path (α : type_index) index)
-
-/-- By forgetting the path that we took from `α` to the lower index `β`, we can recover the type
-index `β` that this `le_index` wraps. -/
-instance le_index.has_coe {α : Λ} : has_coe (le_index α) type_index := ⟨le_index.index⟩
-
-@[simp] lemma le_index_coe_def {α : Λ} (index : type_index) (path : path (α : type_index) index) :
-  ((⟨index, path⟩ : le_index α) : type_index) = index := rfl
-
-def le_index.cons {α : Λ} (A : le_index α) {γ : type_index} (hγ : γ < A.index) : le_index α :=
-⟨γ, path.cons A.path hγ⟩
-
-/-- A type index `β`, together with a path `A` down from `α` to level `γ` and then to level `β`.
-This enforces that the path obtained from composing `A` with this new `γ ⟶ β` morphism is
-nontrivial by construction. This type is intended to be used in place of `β : type_index, β < α`
-and `β : Iio (α : type_index)` in phase 2. -/
-@[ext] structure lt_index (α : Λ) :=
-(index : type_index)
-(higher : type_index)
-(index_lt : index < higher)
-(path' : path (α : type_index) higher)
-
-def lt_index.mk' {α : Λ} {index higher : type_index}
-  (index_lt : index < higher) (path' : path (α : type_index) higher) : lt_index α :=
-⟨index, higher, index_lt, path'⟩
-
-/-- A path compatible with the one from `le_index`, formed by composing the inner `path'` field
-with the morphism `higher ⟶ index`. By construction, this path is always nontrivial. -/
-def lt_index.path {α : Λ} (A : lt_index α) : path (α : type_index) A.index :=
-path.cons A.path' A.index_lt
-
-/-- An `lt_index` is not equal to its source `α`. This is the lemma that justifies the name
-`lt_index` as compared to `le_index`, which permits the trivial path `α ⟶ α`. -/
-lemma lt_index.ne {α : Λ} (A : lt_index α) : A.index ≠ α :=
-λ h, not_lt_of_le (by convert le_of_path A.path') A.index_lt
-
-/-- The natural coercion from `lt_index` to `le_index`. An analogous concept to `le_of_lt`. -/
-def lt_index.to_le_index {α : Λ} (A : lt_index α) : le_index α :=
-⟨A.index, A.path⟩
-
-instance lt_index.has_coe {α : Λ} : has_coe (lt_index α) (le_index α) :=
-⟨lt_index.to_le_index⟩
-
-/-- By forgetting the path that we took from `α` to the lower index `β`, we can recover the type
-index `β` that this `lt_index` wraps. -/
-instance lt_index.has_coe_to_type_index {α : Λ} : has_coe (lt_index α) type_index :=
-⟨lt_index.index⟩
-
-/-- A proper type index `β`, together with a path `A` down from `α` to level `γ` and then to level
-`β`. This enforces that the path obtained from composing `A` with this new `γ ⟶ β` morphism is
-nontrivial by construction. This type is intended to be used in phase of `β : Λ, β < α` and
-`β : Iio α` in phase 2. -/
-@[ext] structure proper_lt_index (α : Λ) :=
-(index : Λ)
-(higher : Λ)
-(index_lt : index < higher)
-(path' : path (α : type_index) higher)
-
-def proper_lt_index.mk' {α index higher : Λ}
-  (index_lt : index < higher) (path' : path (α : type_index) higher) : proper_lt_index α :=
-⟨index, higher, index_lt, path'⟩
-
-/-- A path compatible with the one from `le_index`, formed by composing the inner `path'` field
-with the morphism `higher ⟶ index`. By construction, this path is always nontrivial. -/
-def proper_lt_index.path {α : Λ} (A : proper_lt_index α) : path (α : type_index) A.index :=
-path.cons A.path' $ coe_lt_coe.mpr A.index_lt
-
-/-- An `proper_lt_index` is not equal to its source `α`. See also `lt_index.ne`. -/
-lemma proper_lt_index.ne {α : Λ} (A : proper_lt_index α) : A.index ≠ α :=
-λ h, not_lt_of_le (by convert coe_le_coe.mp (le_of_path A.path')) A.index_lt
-
-/-- The natural coercion from `proper_lt_index` to `le_index`.
-An analogous concept to `le_of_lt`, also converting `index: Λ` into a `type_index`. -/
-def proper_lt_index.to_le_index {α : Λ} (A : proper_lt_index α) : le_index α :=
-⟨A.index, A.path⟩
-
-/-- The natural coercion from `proper_lt_index` to `to_lt_index`, by converting `index : Λ` into a
-`type_index`. -/
-def proper_lt_index.to_lt_index {α : Λ} (A : proper_lt_index α) : lt_index α :=
-⟨A.index, A.higher, coe_lt_coe.mpr A.index_lt, A.path'⟩
-
-instance proper_lt_index.has_coe {α : Λ} : has_coe (proper_lt_index α) (lt_index α) :=
-⟨proper_lt_index.to_lt_index⟩
-
-/-- By forgetting the path that we took from `α` to the lower index `β`, we can recover the proper
-type index `β` that this `proper_lt_index` wraps. -/
-instance proper_lt_index.has_coe_to_lambda {α : Λ} : has_coe (proper_lt_index α) Λ :=
-⟨proper_lt_index.index⟩
-
-/-!
 We now proceed to make some assumptions that will be held throughout phase 2.
 We assume:
 
@@ -236,6 +37,15 @@ above, and they can be accessed easily through typeclass resolution.
 The only downside (that I can see!) to this approach is that we need to define our assumptions class
 in several steps so that we can write the relevant instances between writing all of our assumptions.
 -/
+
+noncomputable theory
+
+universe u
+
+namespace con_nf
+variables [params.{u}] (α : Λ)
+
+section
 
 /-- We assume core tangle data for all type indices less than (or equal to) `α`, along all paths. -/
 class phase_2_core_assumptions :=
@@ -326,8 +136,8 @@ class phase_2_assumptions :=
   allowable A.index → allowable (A.cons hγ).index)
 (allowable_derivative_comm : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index)
   (π : allowable A.index),
-  allowable_to_struct_perm (allowable_derivative A hγ π) =
-    struct_perm.derivative (path.cons path.nil hγ) (allowable_to_struct_perm π))
+  (allowable_derivative A hγ π).to_struct_perm =
+    struct_perm.derivative (path.cons path.nil hγ) π.to_struct_perm)
 
 /-- The derivative of a permutation along a particular path.
 Note that `allowable (A.cons hγ).index` is defeq to `allowable γ`, but by writing it in this form,
@@ -343,7 +153,9 @@ attribute [instance]
   phase_2_assumptions.lower_almost_tangle_data
   phase_2_assumptions.lower_tangle_data
 
-variables {α} [phase_2_assumptions α]
+end
+
+variables {α}
 
 /-! There are no additional names that could be used to refer to the instances
 `lower_almost_tangle_data` and `lower_tangle_data`, so no new instances need to be defined here. -/
@@ -356,16 +168,19 @@ also be defeq to each other.
 -/
 
 instance (A : le_index α) : mul_action (struct_perm A.index) (support_condition A) :=
-struct_perm.mul_action
+struct_perm.mul_action_support_condition
 
-def tangle_path (A : le_index α) : Type u := tangle A.index
+variables [phase_2_core_assumptions α]
 
-def to_tangle_path (A : proper_lt_index α) : near_litter ↪ tangle_path (A : le_index α) :=
-to_tangle
+/-- The type of tangles indexed by a path. This is a type synonym of `tangle`. -/
+@[nolint has_nonempty_instance] def tangle_path (A : le_index α) : Type u := tangle A.index
 
+/-- The type of allowable permutations indexed by a path. This is a type synonym of `allowable`. -/
 def allowable_path (A : le_index α) : Type u := allowable A.index
 
-instance (A : le_index α) : group (allowable_path A) := core_tangle_data.allowable_group
+instance (A : le_index α) : group (allowable_path A) := allowable.group _
+
+instance (A : le_index α) : inhabited (allowable_path A) := ⟨1⟩
 
 /-! Utility instances to let us write things in a nicer way. -/
 instance allowable_smul_le (A : le_index α) :
@@ -383,11 +198,60 @@ instance allowable_smul_cons {β γ : type_index} (A : path (α : type_index) β
   mul_action (allowable_path ⟨γ, A.cons hγ⟩) (tangle_path (lt_index.mk' hγ A : le_index α)) :=
 core_tangle_data.allowable_action
 
-def allowable_path_to_struct_perm (A : le_index α) : allowable_path A →* struct_perm A.index :=
-allowable_to_struct_perm
+/-- The designated support of a path-indexed tangle. -/
+def designated_support_path {A : le_index α} (t : tangle_path A) :
+  small_support A.index (allowable_path A) t := designated_support t
 
-def f_map_path {A : Λ} {A_path : path (α : type_index) A} ⦃γ : type_index⦄ ⦃δ : Λ⦄
-  (hγ : γ < A) (hδ : δ < A) : tangle_path (lt_index.mk' hγ A_path : le_index α) → litter :=
+namespace allowable_path
+variables {A : le_index α}
+
+/-- Reinterpret an allowable permutation as a structural permutation. -/
+def to_struct_perm : allowable_path A →* struct_perm A.index := allowable.to_struct_perm
+
+section
+variables {X : Type*} [mul_action (struct_perm A.index) X]
+
+instance : mul_action (allowable_path A) X := mul_action.comp_hom _ to_struct_perm
+
+@[simp] lemma smul_to_struct_perm (π : allowable_path A) (x : X) : π.to_struct_perm • x = π • x :=
+rfl
+
+end
+end allowable_path
+
+variables [phase_2_positioned_assumptions α] [phase_2_assumptions α]
+
+/-- The injection from near-litters to path-indexed tangles. -/
+def to_tangle_path (A : proper_lt_index α) : near_litter ↪ tangle_path (A : le_index α) :=
+to_tangle
+
+namespace allowable_path
+
+/-- The derivative of a path-indexed allowable permutation. -/
+def derivative : Π {A : le_index α} {γ : type_index} (hγ : γ < A.index),
+  allowable_path A → allowable_path (A.cons hγ) := phase_2_assumptions.allowable_derivative
+
+@[simp] lemma to_struct_perm_derivative : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index)
+  (π : allowable_path A),
+  (π.derivative hγ).to_struct_perm = struct_perm.derivative (path.nil.cons hγ) π.to_struct_perm :=
+phase_2_assumptions.allowable_derivative_comm
+
+/-- Computes the derivative of an allowable permutation along a path `B`. -/
+def derivative_comp (A : le_index α) :
+  Π {γ : type_index} (B : path A.index γ) (π : allowable_path A),
+    allowable_path ⟨γ, A.path.comp B⟩
+| _ path.nil π := by { convert π, rw path.comp_nil, ext, simp }
+| γ (path.cons B hγ) π := (derivative_comp B π).derivative hγ
+
+def derivative_nil_comp {β : type_index} (B : path (α : type_index) β)
+  (π : allowable_path ⟨α, path.nil⟩) : allowable_path ⟨β, B⟩ :=
+by { convert derivative_comp ⟨α, path.nil⟩ B π, rw path.nil_comp }
+
+end allowable_path
+
+/-- Path-indexed of the f-map. -/
+def f_map_path {A : Λ} {A_path : path (α : type_index) A} ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < A)
+  (hδ : δ < A) : tangle_path (lt_index.mk' hγ A_path : le_index α) → litter :=
 f_map (proper_lt_index.mk' hδ A_path).index
 
 lemma f_map_path_position_raising {A : Λ} {A_path : path (α : type_index) A}
@@ -398,32 +262,9 @@ lemma f_map_path_position_raising {A : Λ} {A_path : path (α : type_index) A}
     position (to_tangle_path (proper_lt_index.mk' hδ A_path) ⟨f_map_path hγ hδ t, N, hN⟩) :=
 f_map_position_raising (proper_lt_index.mk' hδ A_path).index t N hN
 
+/-- The typed singleton as a path-indexed tangle. -/
 def typed_singleton_path (A : proper_lt_index α) : atom ↪ tangle_path (A : le_index α) :=
 typed_singleton
-
-def designated_support_path {A : le_index α} (t : tangle_path A) :
-  small_support allowable_to_struct_perm t := designated_support t
-
-def allowable_derivative_path : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index),
-  allowable_path A → allowable_path (A.cons hγ) := phase_2_assumptions.allowable_derivative
-
-def allowable_derivative_path_comm : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index)
-  (π : allowable_path A),
-  allowable_to_struct_perm (allowable_derivative_path A hγ π) =
-    struct_perm.derivative (path.cons path.nil hγ) (allowable_to_struct_perm π) :=
-phase_2_assumptions.allowable_derivative_comm
-
-/-- Computes the derivative of an allowable permutation along a path `B`. -/
-def allowable_derivative_path_comp (A : le_index α) :
-  Π {γ : type_index} (B : path A.index γ) (π : allowable_path A),
-    allowable_path ⟨γ, path.comp A.path B⟩
-| _ path.nil π := by { convert π, rw path.comp_nil, ext, simp }
-| γ (path.cons B hγ) π :=
-    allowable_derivative_path ⟨_, path.comp A.path B⟩ hγ (allowable_derivative_path_comp B π)
-
-def allowable_derivative_nil_comp {β : type_index} (B : path (α : type_index) β)
-  (π : allowable_path ⟨α, path.nil⟩) : allowable_path ⟨β, B⟩ :=
-by { convert allowable_derivative_path_comp ⟨α, path.nil⟩ B π, rw path.nil_comp }
 
 lemma litter_lt_path (A : proper_lt_index α) (L : litter) (a ∈ litter_set L) :
   position (to_tangle_path A L.to_near_litter) < position (typed_singleton_path A a) :=
