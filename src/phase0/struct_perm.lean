@@ -174,14 +174,21 @@ by rw [←to_bot_smul, to_bot_of_bot]
 
 end
 
-instance has_smul_pretangle : Π α : type_index, has_smul (struct_perm α) (pretangle α)
-| ⊥ := ⟨λ π t, pretangle.to_bot $ of_bot π • t.of_bot⟩
-| (α : Λ) := ⟨λ π t, pretangle.to_coe $ λ β (hβ : β < α),
-    by { haveI := has_smul_pretangle β, exact of_coe π β hβ • pretangle.of_coe t β hβ }⟩
+def proto_smul : Π α : type_index, struct_perm α → pretangle α → pretangle α
+| ⊥ := λ π t, pretangle.to_bot $ of_bot π • t.of_bot
+| (α : Λ) := λ π t, pretangle.to_coe $ λ β (hβ : β < α), proto_smul β (of_coe π β hβ) '' (pretangle.of_coe t β hβ)
 using_well_founded { dec_tac := `[assumption] }
 
+instance has_smul_pretangle : Π α : type_index, has_smul (struct_perm α) (pretangle α) | α := ⟨proto_smul α⟩
+
 @[simp] lemma of_bot_smul_pretangle (π : struct_perm ⊥) (t : pretangle ⊥) :
-  (π • t).of_bot = of_bot π • t.of_bot := sorry
+  (π • t).of_bot = of_bot π • t.of_bot := begin
+dsimp [(struct_perm.has_smul_pretangle)],
+have : (proto_smul ⊥) = λ π t, pretangle.to_bot $ of_bot π • t.of_bot,
+unfold proto_smul,
+rw this,
+simp only [pretangle.of_bot_to_bot],
+end
 
 @[simp] lemma to_bot_smul_pretangle (π : near_litter_perm) (t : atom) :
    pretangle.to_bot (π • t) = to_bot π • pretangle.to_bot t :=
@@ -189,7 +196,12 @@ pretangle.of_bot.injective $
   by simp_rw [of_bot_smul_pretangle, of_bot_to_bot, pretangle.of_bot_to_bot]
 
 @[simp] lemma of_coe_smul_pretangle {α : Λ} (π : struct_perm α) (t : pretangle α) :
-  (π • t).of_coe = of_coe π • t.of_coe := sorry
+  (π • t).of_coe = of_coe π • t.of_coe := begin
+dsimp [(struct_perm.has_smul_pretangle)],
+unfold proto_smul,
+simp only [pretangle.of_coe_to_coe],
+refl,
+  end
 
 @[simp] lemma to_coe_smul_pretangle {α : Λ} (π : Π β : type_index, β < α → struct_perm β)
   (t : Π β : type_index, β < α → set (pretangle β)) :

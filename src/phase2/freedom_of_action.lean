@@ -3380,7 +3380,64 @@ sorry
 lemma flexible_union_flexible_cond :
   ∀ C, spec.flexible_cond B
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) C :=
-sorry
+begin
+  intro C,
+  by_cases (C = A),
+  { subst h,
+    refine spec.flexible_cond.all _ _,
+    { intros L hL,
+      by_cases h : ((sum.inr L.to_near_litter, C) ∈ σ.val.domain);
+      rw [spec.domain_union, spec.domain_union, set.mem_union, set.mem_union],
+      { left, left, exact h, },
+      { left, right,
+        unfold new_flexible_litters,
+        refine ⟨_, _, _⟩,
+        { exact (sum.inr (L.to_near_litter, precise_litter_image bij ⟨L, hL, h⟩
+                  (abij ⟨L, hL, h⟩)), C), },
+        { simp only [subtype.val_eq_coe, set.mem_set_of_eq, set_coe.exists, subtype.coe_mk,
+                      prod.mk.inj_iff, eq_self_iff_true, and_true, exists_and_distrib_left],
+          use L,
+          exact ⟨rfl, ⟨⟨hL, h⟩, rfl⟩⟩, },
+        { unfold binary_condition.domain,
+          rw sum.elim_inr, } } },
+    { intros L hL,
+      -- might want to switch naming around if it doesn't shorten code
+      by_cases h : ((sum.inr L.to_near_litter, C) ∈ σ.val.range);
+      rw [spec.range_union, spec.range_union, set.mem_union, set.mem_union],
+      { left, left, exact h, },
+      { right,
+        unfold new_inverse_flexible_litters,
+        refine ⟨_, _, _⟩,
+        { exact (sum.inr (precise_litter_inverse_image bij ⟨↑(bij.to_fun (bij.inv_fun ⟨L, hL, h⟩)), _⟩
+                  (precise_atom_bijection.inv (abij (bij.inv_fun ⟨L, hL, h⟩))),
+                  (bij.to_fun (bij.inv_fun ⟨L, hL, h⟩)).val.to_near_litter), C), },
+        { simp only [subtype.val_eq_coe, set.mem_set_of_eq, equiv.to_fun_as_coe, set_coe.exists,
+                      prod.mk.inj_iff, eq_self_iff_true, and_true],
+          refine ⟨(bij.inv_fun ⟨L, hL, h⟩), ⟨(bij.inv_fun ⟨L, hL, h⟩).prop, _⟩⟩,
+          rw subtype.coe_eta,
+          exact ⟨rfl, rfl⟩, },
+        { simp only [binary_condition.range, equiv.inv_fun_as_coe, equiv.to_fun_as_coe,
+                      equiv.apply_symm_apply, sum.elim_inr], } } } },
+  { obtain ⟨hdom, hrge⟩ := σ.prop.flexible_cond C,
+    { refine spec.flexible_cond.co_large _ _,
+      convert hdom, ext,
+      rw and.congr_right_iff,
+      intro hx,
+      rw not_iff_not,
+      rw [spec.domain_union, spec.domain_union, set.mem_union, set.mem_union],
+      split,
+      { rintro ((h | ⟨b, hb₁, hb₂⟩) | h),
+        { exact h, },
+        { unfold new_flexible_litters at hb₁,
+          rw set.mem_set_of at hb₁,
+          obtain ⟨⟨L, hL₁, hL₂⟩, beq⟩ := hb₁,
+          subst beq,
+          cases hb₂,
+          cases h rfl, },
+        { sorry, } },
+      {  } },
+    { sorry, } }
+end
 
 def abij_inv :
   Π (L : {L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ⁻¹.val.domain}),
