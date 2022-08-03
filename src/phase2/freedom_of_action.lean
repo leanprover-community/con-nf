@@ -3184,18 +3184,20 @@ lemma flexible_union_near_litter_cond :
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) N₁ N₂ C :=
 sorry
 
-
-
 lemma flexible_union_non_flexible_cond :
   spec.non_flexible_cond B
     (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij) :=
 begin
-  unfold rough_bijection at bij,
-  unfold new_inverse_flexible_litters,
-  unfold new_flexible_litters,
   unfold spec.non_flexible_cond,
-  simp,
-  intros hb hg hd hgb hdb hdg hNl hp ht hbig1 hap hbig2,
+  intros hb hg hd hgb hdb hdg hNl hp ht hf hallp h1,
+  unfold struct_perm.satisfies at h1,
+  unfold struct_perm.satisfies_cond at h1,
+  have h := h1 _ hf,
+  dsimp at h,
+  rw ← h,
+
+  --we are left with the unpacked coherence condition, which is true and assumed in the
+  --inductive hypothesis.
   sorry,
 end
 

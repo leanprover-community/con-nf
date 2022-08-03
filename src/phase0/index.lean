@@ -1,13 +1,48 @@
 import mathlib.quiver
+import mathlib.with_bot
 import phase0.params
 
-open cardinal quiver quiver.path with_bot
+open cardinal function quiver quiver.path set with_bot
 open_locale cardinal
 
 universe u
 
 namespace con_nf
-variables [params.{u}] {α : type_index}
+variables [params.{u}]
+
+section Iio
+variables {α β : Λ}
+
+instance coe_Iio : has_coe_t (Iio α) (Iio (α : type_index)) := ⟨λ β, ⟨β.1, coe_lt_coe.2 β.2⟩⟩
+
+@[simp] lemma Iio.coe_mk (β : Λ) (hβ : β < α) :
+  ((⟨β, hβ⟩ : Iio α) : Iio (α : type_index)) = ⟨β, coe_lt_coe.2 hβ⟩ := rfl
+
+lemma Iio.coe_injective : injective (coe : Iio α → Iio (α : type_index)) :=
+begin
+  rintro ⟨β, hβ⟩ ⟨γ, hγ⟩ h,
+  simp only [Iio.coe_mk, subtype.mk_eq_mk] at h,
+  have := with_bot.coe_injective h,
+  subst this,
+end
+
+@[simp] lemma Iio.coe_inj {β γ : Iio α} : (β : Iio (α : type_index)) = γ ↔ β = γ :=
+Iio.coe_injective.eq_iff
+
+variables {hβ : (β : type_index) ∈ Iio (α : type_index)}
+
+instance : has_bot (Iio (α : type_index)) := ⟨⟨⊥, bot_lt_coe _⟩⟩
+instance : inhabited (Iio (α : type_index)) := ⟨⊥⟩
+
+@[simp] lemma bot_ne_mk_coe : (⊥ : Iio (α : type_index)) ≠ ⟨β, hβ⟩ :=
+ne_of_apply_ne subtype.val bot_ne_coe
+
+@[simp] lemma mk_coe_ne_bot : (⟨β, hβ⟩ : Iio (α : type_index)) ≠ ⊥ :=
+ne_of_apply_ne subtype.val coe_ne_bot
+
+end Iio
+
+variables {α : type_index}
 
 /-- We define the type of paths from certain types to lower types as elements of this quiver. -/
 instance quiver : quiver type_index := ⟨(>)⟩

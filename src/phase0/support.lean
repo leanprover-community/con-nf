@@ -77,7 +77,7 @@ instance small_support.set_like (x : τ) : set_like (small_support α G x) (supp
   coe_injective' := λ s t h, by { obtain ⟨⟨_, _⟩, _⟩ := s, obtain ⟨⟨_, _⟩, _⟩ := t, congr' } }
 
 /-- There are `μ` supports for a given `x : τ`. -/
-@[simp] lemma mk_potential_support (x : τ) : #(support α G x) = #μ := sorry
+@[simp] lemma mk_support (x : τ) : #(support α G x) = #μ := sorry
 -- begin
 --   have : potential_support α ≃ {S : set (support_condition α) // small S},
 --   { refine ⟨λ s, ⟨s.carrier, s.small⟩, λ s, ⟨s.val, s.property⟩, _, _⟩; intro x; cases x; simp },
@@ -94,7 +94,7 @@ instance small_support.set_like (x : τ) : set_like (small_support α G x) (supp
 -- end
 
 /-- There are at most `μ` small supports for a given `x : τ`. -/
-@[simp] lemma mk_support_le (x : τ) : #(small_support α G x) ≤ #μ :=
+lemma mk_small_support_le (x : τ) : #(small_support α G x) ≤ #μ :=
  begin
    have : small_support α G x ≃ {S : support α G x // small (S : set (support_condition α))},
    { refine ⟨λ S, ⟨S.1, S.2⟩, λ S, ⟨S.1, S.2⟩, _, _⟩; intro x; dsimp; cases x; simp },
