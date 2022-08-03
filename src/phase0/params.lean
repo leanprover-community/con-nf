@@ -1,3 +1,4 @@
+import mathlib.cardinal
 import mathlib.order
 import mathlib.well_founded
 import set_theory.cardinal.cofinality
@@ -52,60 +53,35 @@ class params :=
 export params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular Λ_lt_κ μ μr μwf μ_ord μr μ_strong_limit κ_lt_μ
   κ_le_μ_cof)
 
-/-- There exists a set of valid parameters for the model. The smallest such set is Λ, κ, μ = ℵ_0,
-ℵ_1, ℶ_{ω_1} -/
+/-!
+### Explicit parameters
 
+There exists valid parameters for the model. The smallest parameters are
+* `Λ := ℵ_0`
+* `κ := ℵ_1`
+* `μ = ℶ_{ω_1}`.
+-/
 
-/-
-
-def candid_κ : Type := Exists.some (quot.exists_rep (aleph 1))
-
-lemma def_candid_k : #(candid_κ) = aleph 1 :=
-Exists.some_spec (quot.exists_rep (aleph 1))
-
-def candid_μ : Type := Exists.some (quot.exists_rep (bet (omega 1)))
-
-lemma def_candid_μ : #(candid_μ) = bet (omega 1) :=
-Exists.some_spec (quot.exists_rep (aleph 1))
-
-lemma card_of_N : #ℕ = aleph_0 :=
-by symmetry; apply cardinal.lift_id
-
-example : params.{0} := { Λ := ℕ ,
+example : params.{0} :=
+{ Λ := ℕ,
   Λr := (<),
-  Λwf := nat.lt.is_well_order,
-  Λ_ord := begin
-      have h1 : (ordinal.type has_lt.lt).lift = ordinal.omega,
-      by refl,
-      let u : ordinal := ordinal.type has_lt.lt,
-      have h2: ordinal.type has_lt.lt = u,
-      by refl,
-      rw h2,
-      have h3 : u = u.lift,
-      {
-        symmetry,
-        have key := ordinal.lift_id,
-        specialize key u,
-        exact key,
-      },
-      rw h3,
-      rw card_of_N,
-      rw ord_aleph_0,
-      rw h1,
-  end,
-  Λ_limit := by rw card_of_N; exact is_limit_aleph_0,
-  κ := candid_κ,
-  κ_regular := by rw def_candid_k; exact is_regular_aleph_one,
-  Λ_lt_κ := by rw def_candid_k; rw card_of_N; exact aleph_0_lt_aleph_one,
-  μ := _,
-  μr := _,
-  μwf := _,
-  μ_ord := _,
-  μ_strong_limit := _,
-  κ_lt_μ := _,
-  κ_le_μ_cof := _}-/
-
-example : params := sorry
+  Λwf := infer_instance,
+  Λ_ord := by simp only [mk_denumerable, ord_aleph_0, ordinal.type_nat_lt],
+  Λ_limit := by { rw mk_denumerable, exact is_limit_aleph_0 },
+  κ := (aleph 1).out,
+  κ_regular := by { rw mk_out, exact is_regular_aleph_one },
+  Λ_lt_κ := by { rw [mk_out, mk_denumerable], exact aleph_0_lt_aleph_one },
+  μ := (beth $ ord $ aleph 1).ord.out.α,
+  μr := (beth $ ord $ aleph 1).ord.out.r,
+  μwf := (beth $ ord $ aleph 1).ord.out.wo,
+  μ_ord := by simp,
+  μ_strong_limit := by simp [is_strong_limit_beth (ord_is_limit $ aleph_0_le_aleph 1).2],
+  κ_lt_μ := by { simp only [mk_out, mk_ordinal_out, card_ord], exact aleph_one_lt_beth_aleph_one },
+  κ_le_μ_cof := begin
+    simp only [mk_out, mk_ordinal_out, card_ord],
+    rw beth_normal.cof_eq (ord_is_limit $ aleph_0_le_aleph 1),
+    exact is_regular_aleph_one.2,
+  end }
 
 variables [params.{u}] {α β : Type u}
 
@@ -123,13 +99,13 @@ instance : has_well_founded μ := is_well_order.to_has_well_founded
 lemma κ_le_μ : #κ ≤ #μ := κ_lt_μ.le
 
 noncomputable instance : inhabited Λ :=
-@classical.inhabited_of_nonempty _ $ cardinal.mk_ne_zero_iff.1 Λ_limit.ne_zero
+@classical.inhabited_of_nonempty _ $ mk_ne_zero_iff.1 Λ_limit.ne_zero
 
 noncomputable instance : inhabited κ :=
-@classical.inhabited_of_nonempty _ $ cardinal.mk_ne_zero_iff.1 κ_regular.pos.ne'
+@classical.inhabited_of_nonempty _ $ mk_ne_zero_iff.1 κ_regular.pos.ne'
 
 noncomputable instance : inhabited μ :=
-@classical.inhabited_of_nonempty _ $ cardinal.mk_ne_zero_iff.1 μ_strong_limit.ne_zero
+@classical.inhabited_of_nonempty _ $ mk_ne_zero_iff.1 μ_strong_limit.ne_zero
 
 /-- Either the base type or a proper type index (an element of `Λ`).
 The base type is written `⊥`. -/
@@ -191,14 +167,11 @@ lemma small.lt : small s → #s < #κ := id
 
 /-- Singleton sets are small. -/
 @[simp] lemma small_singleton (x : α) : small ({x} : set α) :=
-begin
-  unfold small, simp,
-  exact lt_of_lt_of_le (one_lt_aleph_0) (is_regular.aleph_0_le κ_regular)
-end
+lt_of_eq_of_lt (mk_singleton _) (lt_of_lt_of_le one_lt_aleph_0 $ is_regular.aleph_0_le κ_regular)
 
 /-- Subsets of small sets are small.
 We say that the 'smallness' relation is monotonic. -/
-lemma small.mono (h : s ⊆ t) : small t → small s := (cardinal.mk_le_mk_of_subset h).trans_lt
+lemma small.mono (h : s ⊆ t) : small t → small s := (mk_le_mk_of_subset h).trans_lt
 
 /-- Unions of small subsets are small. -/
 lemma small.union (hs : small s) (ht : small t) : small (s ∪ t) :=
