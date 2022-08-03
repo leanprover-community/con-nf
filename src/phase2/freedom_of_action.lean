@@ -2931,6 +2931,18 @@ def rough_bijection.inv' {σ : allowable_partial_perm B}
   end
 }
 
+@[simp] lemma rough_bijection.inv'_to_fun {σ : allowable_partial_perm B}
+  {bij : rough_bijection A σ.val.domain σ.val.range} {L} :
+  (bij.inv'.to_fun L : litter) =
+    bij.inv_fun ⟨L, L.2.1, by simpa only [inv_def, spec.inv_domain] using L.2.2⟩ :=
+by simp only [rough_bijection.inv', subtype.coe_mk]
+
+@[simp] lemma rough_bijection.inv'_to_fun_mk {σ : allowable_partial_perm B}
+  {bij : rough_bijection A σ.val.domain σ.val.range} {L hL} :
+  (bij.inv'.to_fun ⟨L, hL⟩ : litter) =
+    bij.inv_fun ⟨L, hL.1, by simpa only [inv_def, spec.inv_domain] using hL.2⟩ :=
+by simp only [rough_bijection.inv', subtype.coe_mk]
+
 end rough_bijection
 
 variable {σ : allowable_partial_perm B}
@@ -2992,6 +3004,46 @@ def rough_bijection.precise_atom_bijection.inv
     rintro ⟨a, ha₁, ha₂⟩,
     simp only [subtype.coe_mk, equiv.to_fun_as_coe, equiv.inv_fun_as_coe, equiv.symm_apply_apply,
       subtype.mk_eq_mk],
+  end,
+}
+
+def rough_bijection.precise_atom_bijection.inv' {σ : allowable_partial_perm B}
+  {bij : rough_bijection A σ.val.domain σ.val.range}
+  {L : {L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ.val.range}}
+  (abij : bij.precise_atom_bijection (bij.inv_fun L)) :
+    bij.inv'.precise_atom_bijection
+      ⟨L, L.2.1, by simpa only [inv_def, spec.inv_domain] using L.2.2⟩ := {
+  to_fun := λ a, ⟨abij.inv_fun ⟨a,
+    by simpa only [equiv.inv_fun_as_coe, equiv.to_fun_as_coe, equiv.apply_symm_apply] using a.2.1,
+    by simpa only [inv_def, spec.inv_domain] using a.2.2⟩,
+    begin
+      convert (abij.inv_fun ⟨a, _, _⟩).2.1 using 2,
+      simp_rw [rough_bijection.inv'_to_fun_mk, subtype.coe_eta],
+    end,
+    begin
+      convert (abij.inv_fun ⟨a, _, _⟩).2.2 using 2,
+      rw [inv_def, spec.inv_range],
+    end⟩,
+  inv_fun := λ a, ⟨abij.to_fun ⟨a,
+    by simpa only [rough_bijection.inv'_to_fun_mk, subtype.coe_eta] using a.2.1,
+    by simpa only [inv_def, spec.inv_range] using a.2.2⟩,
+    begin
+      convert (abij.to_fun ⟨a, _, _⟩).2.1 using 2,
+      rw [bij.right_inv, subtype.coe_mk],
+    end,
+    begin
+      convert (abij.to_fun ⟨a, _, _⟩).2.2 using 2,
+      rw [inv_def, spec.inv_domain],
+    end⟩,
+  left_inv := begin
+    rintro ⟨a, ha₁, ha₂⟩,
+    simp only [subtype.coe_eta, subtype.coe_mk, equiv.inv_fun_as_coe, equiv.to_fun_as_coe,
+      equiv.apply_symm_apply, subtype.mk_eq_mk],
+  end,
+  right_inv := begin
+    rintro ⟨a, ha₁, ha₂⟩,
+    simp only [equiv.inv_fun_as_coe, equiv.to_fun_as_coe, subtype.coe_eta, subtype.coe_mk,
+      equiv.symm_apply_apply, subtype.mk_eq_mk],
   end,
 }
 
@@ -3124,6 +3176,13 @@ private lemma precise_litter_image_inj
   precise_litter_image bij L₁ abij₁ = precise_litter_image bij L₂ abij₂ → L₁ = L₂ :=
 precise_litter_image_aux_inj
 
+private lemma precise_litter_inverse_image_inj
+  {bij : rough_bijection A σ.val.domain σ.val.range}
+  {L₁ L₂ : {L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ.val.range}}
+  (abij₁ : bij.inv.precise_atom_bijection L₁) (abij₂ : bij.inv.precise_atom_bijection L₂) :
+  precise_litter_inverse_image bij L₁ abij₁ = precise_litter_inverse_image bij L₂ abij₂ → L₁ = L₂ :=
+sorry
+
 private def new_flexible_litters
   (bij : rough_bijection A σ.val.domain σ.val.range)
   (abij : ∀ L, bij.precise_atom_bijection L) :
@@ -3172,7 +3231,7 @@ begin
     { exfalso,
       sorry },
     { obtain ⟨L₁, hL₁⟩ := hM₁, obtain ⟨L₂, hL₂⟩ := hM₂,
-      cases precise_litter_image_inj bij L₁ L₂ (abij L₁) (abij L₂)
+      cases precise_litter_image_inj _ _
         ((prod.ext_iff.1 $ sum.inr_injective (prod.ext_iff.1 hL₁).1).2.symm.trans
           (prod.ext_iff.1 $ sum.inr_injective (prod.ext_iff.1 hL₂).1).2),
       cases hL₁, cases hL₂, refl, },
@@ -3184,10 +3243,8 @@ begin
     { sorry },
     { obtain ⟨L₁, hL₁⟩ := hM₁, obtain ⟨L₂, hL₂⟩ := hM₂,
       unfold precise_litter_inverse_image at hL₁ hL₂,
-      have := precise_litter_image_inj bij.inv _ _
-        (precise_atom_bijection.inv (abij L₁)) (precise_atom_bijection.inv (abij L₂)) _,
-      rw [subtype.mk_eq_mk, subtype.coe_inj, equiv.to_fun_as_coe,
-        embedding_like.apply_eq_iff_eq] at this,
+      have := precise_litter_inverse_image_inj (abij L₁).inv (abij L₂).inv _,
+      rw [equiv.to_fun_as_coe, embedding_like.apply_eq_iff_eq] at this,
       cases this, cases hL₁, cases hL₂, refl,
       { have := litter.to_near_litter_injective
           ((prod.ext_iff.1 $ sum.inr_injective (prod.ext_iff.1 hL₁).1).2.symm.trans
@@ -3327,97 +3384,26 @@ sorry
 
 def abij_inv :
   Π (L : {L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ σ⁻¹.val.domain}),
-    bij.inv.precise_atom_bijection L :=
-λ L, precise_atom_bijection.inv'
-  (abij (bij.inv_fun ⟨L, by simpa only [inv_def, spec.inv_domain] using L.property⟩))
-
-/- lemma new_flexible_litters_inv_aux
-  (L : litter)
-  (hL₁ : flexible L A)
-  (hL₂ : (sum.inr L.to_near_litter, A) ∉ σ.val.domain) :
-  set.range
-      (λ (a : litter_set L),
-         precise_atom_image bij ⟨L, _⟩ (abij ⟨L, _⟩) ↑a _) =
-    set.range
-      (λ
-       (a :
-         litter_set
-              ↑(bij.inv.to_fun ⟨↑(bij.to_fun ⟨L, _⟩), _⟩)),
-         precise_atom_image bij.inv.inv
-           ⟨↑(bij.inv.to_fun ⟨↑(bij.to_fun ⟨L, _⟩), _⟩), _⟩
-           (precise_atom_bijection.inv
-              (precise_atom_bijection.inv'
-                 (abij (bij.inv_fun ⟨↑(bij.to_fun ⟨L, _⟩), _⟩))))
-           ↑a
-           _) :=
-begin
-  admit,
-end -/
-
+    bij.inv'.precise_atom_bijection L :=
+λ L, (abij (bij.inv_fun ⟨L, by simpa only [inv_def, spec.inv_domain] using L.property⟩)).inv'
 
 lemma new_flexible_litters_inv :
-  (new_flexible_litters bij abij)⁻¹ = new_inverse_flexible_litters bij.inv (abij_inv bij abij) :=
+  (new_flexible_litters bij abij)⁻¹ = new_inverse_flexible_litters bij.inv' (abij_inv bij abij) :=
 begin
-  simp only [new_inverse_flexible_litters, new_flexible_litters, abij_inv,
-    has_inv.inv, subtype.val_eq_coe, set.mem_set_of_eq, set_coe.exists, subtype.coe_mk,
-    prod.mk.inj_iff, exists_and_distrib_right, precise_litter_inverse_image, precise_litter_image],
-  ext c,
-  split,
-  { rintro ⟨⟨L, ⟨hL₁, hL₂⟩, hc₁⟩, hc₂⟩,
-    obtain ⟨_ | ⟨N₁, N₂⟩, C⟩ := c; cases hc₁, cases hc₂,
-    clear hc₁ hc₂,
-    rw set.mem_set_of_eq,
-    refine ⟨bij.to_fun ⟨L, hL₁, hL₂⟩, ⟨(bij.to_fun ⟨L, hL₁, hL₂⟩).property.1, _⟩, _⟩,
-    { sorry, },
-    { congr' 3,
-      { refine sigma.ext _ _,
-        { simp_rw rough_bijection.inv_to_fun, refl, },
-        { rw subtype.heq_iff_coe_eq,
-          { dsimp only [subtype.coe_mk],
-            congr' 3,
-            { convert (rough_bijection.inv_to_fun bij _).symm, rw subtype.coe_mk, },
-            { refine hfunext _ _,
-              { congr' 2, convert (rough_bijection.inv_to_fun bij _).symm, rw subtype.coe_mk, },
-              { rintros ⟨a₁, ha₁⟩ ⟨a₂, ha₂⟩ h,
-                simp_rw subtype.coe_eta,
-                simp_rw bij.left_inv ⟨L, _⟩,
-                rw subtype.heq_iff_coe_eq at h,
-                { congr' 1,
-                  { rw inv_inv, },
-                  { rw rough_bijection.inv_inv, } } } } },
-          {  } } },
-          }, }
-  /- split,
-  { rintro ⟨⟨L, ⟨hL₁, hL₂⟩, hc₁⟩, hc₂⟩,
-    obtain ⟨_ | ⟨N₁, N₂⟩, C⟩ := c; cases hc₁, cases hc₂,
-    clear hc₁ hc₂,
-    -- rw set.mem_set_of_eq,
-    refine ⟨bij.to_fun ⟨L, hL₁, hL₂⟩, ⟨(bij.to_fun ⟨L, hL₁, hL₂⟩).property.1, _⟩, _⟩,
-    -- refine ⟨L, ⟨hL₁, _⟩, _⟩,
-    {
-      have := (bij.to_fun ⟨L, hL₁, hL₂⟩).property.2,
-      convert this,
-      ext ⟨a | N, C⟩,
-      sorry, sorry },
-    { congr' 3,
-      { unfold precise_litter_inverse_image precise_litter_image,
-        sorry, },
-      { sorry, } } },
-  { rintro ⟨L, ⟨hL₁, hL₂⟩, hc₁⟩,
-    obtain ⟨_ | ⟨N₁, N₂⟩, C⟩ := c; cases hc₁,
-    sorry
-    -- exact ⟨⟨L, ⟨hL₁, hL₂⟩, rfl⟩, rfl⟩,
-    }, -/
+  ext ⟨_ | ⟨N₁, N₂⟩, C⟩,
+  { simp only [has_inv.inv, new_flexible_litters, new_inverse_flexible_litters, set.mem_set_of_eq,
+    prod.mk.inj_iff, sum.elim_inl, exists_false, false_and], },
+  sorry,
 end
 
 lemma new_inverse_flexible_litters_inv :
-  (new_inverse_flexible_litters bij abij)⁻¹ = new_flexible_litters bij.inv (abij_inv bij abij) :=
+  (new_inverse_flexible_litters bij abij)⁻¹ = new_flexible_litters bij.inv' (abij_inv bij abij) :=
 sorry
 
 lemma forward_eq_backward :
   (σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij)⁻¹ =
-  σ⁻¹.val ∪ new_flexible_litters bij.inv (abij_inv bij abij) ∪
-    new_inverse_flexible_litters bij.inv (abij_inv bij abij) :=
+  σ⁻¹.val ∪ new_flexible_litters bij.inv' (abij_inv bij abij) ∪
+    new_inverse_flexible_litters bij.inv' (abij_inv bij abij) :=
 begin
   rw [spec.inv_union, spec.inv_union, inv_def, set.union_assoc, set.union_assoc,
     new_flexible_litters_inv, new_inverse_flexible_litters_inv],
@@ -3436,19 +3422,19 @@ lemma flexible_union_allowable :
   },
   backward := {
     one_to_one :=
-      by { convert flexible_union_one_to_one bij.inv (abij_inv bij abij),
+      by { convert flexible_union_one_to_one bij.inv' (abij_inv bij abij),
         rw forward_eq_backward bij abij, },
     atom_cond :=
-      by { convert flexible_union_atom_cond bij.inv (abij_inv bij abij),
+      by { convert flexible_union_atom_cond bij.inv' (abij_inv bij abij),
         rw forward_eq_backward bij abij, },
     near_litter_cond :=
-      by { convert flexible_union_near_litter_cond bij.inv (abij_inv bij abij),
+      by { convert flexible_union_near_litter_cond bij.inv' (abij_inv bij abij),
         rw forward_eq_backward bij abij, },
     non_flexible_cond :=
-      by { convert flexible_union_non_flexible_cond bij.inv (abij_inv bij abij),
+      by { convert flexible_union_non_flexible_cond bij.inv' (abij_inv bij abij),
         rw forward_eq_backward bij abij, },
     support_closed :=
-      by { convert flexible_union_support_closed bij.inv (abij_inv bij abij),
+      by { convert flexible_union_support_closed bij.inv' (abij_inv bij abij),
         rw forward_eq_backward bij abij, },
   },
   flexible_cond := flexible_union_flexible_cond bij abij,
@@ -3515,7 +3501,8 @@ begin
   { exact ⟨σ, le_rfl, h⟩, },
   obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := σ.property.flexible_cond A,
   swap, { exfalso, exact h (hdom L hL), },
-  have bij : σ.rough_bijection A := (cardinal.eq.mp $ eq.trans hdom.symm hrge).some,
+  have bij : rough_bijection A σ.val.domain σ.val.range :=
+    (cardinal.eq.mp $ eq.trans hdom.symm hrge).some,
   have abij : ∀ L, bij.precise_atom_bijection L,
   { refine λ L, (cardinal.eq.mp _).some,
     rw [cardinal.mk_sep, cardinal.mk_sep],
