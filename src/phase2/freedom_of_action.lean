@@ -1561,19 +1561,31 @@ noncomputable def near_litter_value_inj (σ : allowable_partial_perm B) (A : ext
     ((σ.property.forward.one_to_one A).near_litter (near_litter_value B σ A N₁ N₁.property) h₁ h₂),
 end⟩
 
--- TODO: Rename this lemma.
+lemma exists_mem_symm_diff_of_ne {α : Type*} {s t : set α} (h : s ≠ t) : ∃ a, a ∈ s ∆ t :=
+begin
+  cases set.eq_empty_or_nonempty (s ∆ t) with h₁ h₁,
+  { exfalso,
+    refine h _,
+    unfold symm_diff at h₁,
+    simp only [set.eq_empty_iff_forall_not_mem, set.sup_eq_union, set.mem_union_eq,
+      set.mem_diff] at h₁,
+    push_neg at h₁,
+    ext a,
+    exact ⟨λ h, (h₁ a).left h, λ h, (h₁ a).right h⟩, },
+  { exact h₁ }
+end
+
 /-
-Philosophically, we really shouldn't need the condition `ha` to be true.
-Is this another result that we'll just have to assume as part of one-to-one conditions?
+If the images of two litters under `σ` intersect, the litters must intersect, and therefore are
+equal. This is a rather technical result depending on various allowability conditions.
 -/
-lemma litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
+lemma litter_eq_of_image_inter (σ : allowable_partial_perm B) (A : extended_index B)
   {L₁ L₂ : litter} {N₁ N₂ : near_litter}
   (hL₁ : (sum.inr (L₁.to_near_litter, N₁), A) ∈ σ.val)
   (hL₂ : (sum.inr (L₂.to_near_litter, N₂), A) ∈ σ.val)
   (a : atom)
   (haN₁ : a ∈ N₁.snd.val)
-  (haN₂ : a ∈ N₂.snd.val)
-  (ha : (sum.inl a, A) ∈ σ.val.range) : L₁ = L₂ :=
+  (haN₂ : a ∈ N₂.snd.val) : L₁ = L₂ :=
 begin
   obtain ⟨N, h₁, atom_map, h₂, h₃⟩ | ⟨h₁, h₂⟩ | ⟨N, hN, h₁, h₂⟩ :=
     σ.property.forward.atom_cond L₁ A,
@@ -1621,13 +1633,53 @@ begin
       cases this.mpr haN₁, cases ha₂', refl, },
     { cases h₁' ⟨_, hL₂, rfl⟩, },
     { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ hN',
-      have := (atom_value_spec B σ⁻¹ A a (by simpa only [inv_def, spec.inv_domain] using ha)),
-      have t₁ := (h₂ this).mpr haN₁,
-      have t₂ := (h₂' this).mpr haN₂,
-      by_contradiction,
-      cases pairwise_disjoint_litter_set L₁ L₂ h ⟨t₁, t₂⟩, } }
+
+      obtain ⟨M₁, hM₁, s₁, hs₁, gs₁⟩ := σ.property.backward.near_litter_cond _ _ A hL₁,
+      obtain ⟨M₂, hM₂, s₂, hs₂, gs₂⟩ := σ.property.backward.near_litter_cond _ _ A hL₂,
+      dsimp only at gs₁ gs₂,
+
+      cases set.eq_empty_or_nonempty ((N₁.snd.val \ litter_set N₁.fst) ∩ N₂.snd) with hN₁ hN₁,
+      { cases set.eq_empty_or_nonempty ((N₂.snd.val \ litter_set N₂.fst) ∩ N₁.snd) with hN₂ hN₂,
+        { rw set.eq_empty_iff_forall_not_mem at hN₁ hN₂, specialize hN₁ a, specialize hN₂ a,
+          rw [set.mem_inter_iff, and_comm, set.mem_diff] at hN₁ hN₂,
+          push_neg at hN₁ hN₂, specialize hN₁ haN₂ haN₁, specialize hN₂ haN₁ haN₂,
+          have := litter_set.eq_of_mem_of_mem hN₁ hN₂,
+          rw this at hM₁,
+          have M₁_eq_M₂ := (σ.property.forward.one_to_one A).near_litter _ hM₁ hM₂,
+          dsimp only at M₁_eq_M₂, subst M₁_eq_M₂,
+          refine litter_set.near_iff _,
+          rw [gs₁, gs₂],
+          unfold is_near,
+          rw [symm_diff_left_comm, ← symm_diff_assoc, symm_diff_symm_diff_cancel_left],
+          refine lt_of_le_of_lt
+            (cardinal.mk_le_mk_of_subset $ symm_diff_le_sup (set.range s₁) (set.range s₂)) _,
+          refine lt_of_le_of_lt (cardinal.mk_union_le _ _) _,
+          refine cardinal.add_lt_of_lt κ_regular.aleph_0_le
+            (lt_of_le_of_lt cardinal.mk_range_le N₁.snd.property)
+            (lt_of_le_of_lt cardinal.mk_range_le N₂.snd.property), },
+        { obtain ⟨aN₂, haN₂, haN₂'⟩ := hN₂,
+          have := hs₂ ⟨aN₂, or.inr haN₂⟩,
+          exact litter_set.eq_of_mem_of_mem
+            ((h₂ this).symm.mp haN₂') ((h₂' this).symm.mp haN₂.left), } },
+      { obtain ⟨aN₁, haN₁, haN₁'⟩ := hN₁,
+          have := hs₁ ⟨aN₁, or.inr haN₁⟩,
+          exact litter_set.eq_of_mem_of_mem
+            ((h₂ this).symm.mp haN₁.left) ((h₂' this).symm.mp haN₁'), }, }, },
 end
 
+lemma litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
+  {L₁ L₂ : litter} {N₁ N₂ : near_litter}
+  (hN₁ : (sum.inr (L₁.to_near_litter, N₁), A) ∈ σ.val)
+  (hN₂ : (sum.inr (L₂.to_near_litter, N₂), A) ∈ σ.val) :
+  L₁ ≠ L₂ → disjoint N₁.snd.val N₂.snd.val :=
+begin
+  contrapose!,
+  rw set.not_disjoint_iff,
+  rintro ⟨a, ha₁, ha₂⟩,
+  exact litter_eq_of_image_inter B σ A hN₁ hN₂ a ha₁ ha₂,
+end
+
+-- An application of the near litter condition using litter_image_disjoint.
 lemma near_litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
   {N M N' M' : near_litter}
   (hN : (sum.inr (N, N'), A) ∈ σ.val) (hM : (sum.inr (M, M'), A) ∈ σ.val) :
