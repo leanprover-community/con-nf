@@ -982,6 +982,8 @@ def freedom_of_action : Prop := ∀ σ : allowable_partial_perm B,
 
 /-- If an allowable partial permutation `σ` supports some `α`-tangle `t`, any permutations extending
 `σ` must map `t` to the same value.
+TODO: Factor out the lemma: if two allowable partial perms agree on the support of t, they send
+it to the same place.
 TODO: Can this be proven only assuming the permutations are structural? -/
 lemma eq_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
   (ht : supports (allowable_path_to_struct_perm B) σ.val.domain t) (π₁ π₂ : allowable_path B)
