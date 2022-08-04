@@ -5,7 +5,7 @@ import phase0.struct_perm
 # Supports
 -/
 
-open cardinal equiv
+open cardinal equiv quiver
 open_locale cardinal
 
 noncomputable theory
@@ -45,6 +45,12 @@ instance mul_action_support_condition : mul_action (struct_perm α) (support_con
     rintro π₁ π₂ ⟨atoms | Ns, A⟩; unfold has_smul.smul;
     rw derivative_mul; dsimp; rw mul_smul,
   end }
+
+instance mul_action_support_condition' {B : le_index α} {β : Λ} {γ : type_index} {hγ : γ < β}
+  (A : path (B : type_index) β) :
+  mul_action (struct_perm ((lt_index.mk' hγ (B.path.comp A)) : le_index α).index)
+    (support_condition γ) :=
+struct_perm.mul_action_support_condition
 
 @[simp] lemma smul_to_condition (π : struct_perm α) (x : (atom ⊕ near_litter) × extended_index α) :
   π • to_condition x = to_condition ⟨derivative x.2 π • x.1, x.2⟩ := rfl
