@@ -45,7 +45,8 @@ instance : mul_action (allowable_path B) (word_support B) := {
   wf := begin have := @inv_image.is_well_founded _ _ S.r ⟨S.wo.wf⟩, convert (this _).wf, end },
   },
   one_smul := begin intros, cases b, unfold has_smul.smul, simp only [struct_perm.coe_to_near_litter_perm, map_one, inv_one, one_smul, eq_self_iff_true, true_and],
-  dsimp [(sum.map)], have backup: (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,have : (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,convert heq_of_eq _, rw mul_action.one_smul, clear b_wo,
+  dsimp [(sum.map)], have backup: (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,have : (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,
+  convert heq_of_eq _, rw mul_action.one_smul, clear b_wo,
   suffices : b_r == λ o1 o2, b_r (cast this o1) (cast this o2), exact this,
   revert b_r this, rw backup,
   intros, apply heq_of_eq, funext, refl, funext,
@@ -57,8 +58,12 @@ instance : mul_action (allowable_path B) (word_support B) := {
   cases c₂_val_fst,
   simp only [has_smul.comp.smul, sum.elim_inl, function.comp_app, struct_perm.of_bot_one, one_smul],
   simp only [has_smul.comp.smul, sum.elim_inr, function.comp_app, struct_perm.of_bot_one, one_smul],
-  end,
-  mul_smul := begin intros, cases b, unfold has_smul.smul, sorry end,
+   end,
+  mul_smul := begin intros, cases b, unfold has_smul.smul, simp only [prod.mk.inj_iff], split, dsimp [set.has_smul_set], apply mul_action.mul_smul,
+  apply heq.symm, convert heq_of_eq _, dsimp [(set.has_smul_set)], rw mul_action.mul_smul,
+--  let long_type := ↥(allowable_path.to_struct_perm x • {carrier := allowable_path.to_struct_perm y • {carrier := b_carrier, r := b_r, wo := b_wo}.carrier, r := λ (c₁ c₂ : ↥(⇑allowable_path.to_struct_perm y • {carrier := b_carrier, r := b_r, wo := b_wo}.carrier)), {carrier := b_carrier, r := b_r, wo := b_wo}.r ⟨(sum.map (has_smul.comp.smul struct_perm.to_near_litter_perm ((struct_perm.derivative ↑c₁.snd) (allowable_path.to_struct_perm y)⁻¹)) (has_smul.comp.smul struct_perm.to_near_litter_perm ((struct_perm.derivative ↑c₁.snd) (allowable_path.to_struct_perm y)⁻¹)) ↑c₁.fst, ↑c₁.snd), _⟩ ⟨(sum.map (has_smul.comp.smul struct_perm.to_near_litter_perm ((struct_perm.derivative ↑c₂.snd) (allowable_path.to_struct_perm y)⁻¹)) (has_smul.comp.smul struct_perm.to_near_litter_perm ((struct_perm.derivative ↑c₂.snd) (allowable_path.to_struct_perm y)⁻¹)) ↑c₂.fst, ↑c₂.snd), _⟩, wo := _}.carrier),
+  sorry,
+   end,
 }
 
 /-- We can lower a support to a lower proper type index with respect to a path
