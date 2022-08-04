@@ -134,8 +134,16 @@ is maximal must be total.
 This is not yet complete.
 -/
 
+namespace set
+variables {α : Type*} {s t : set α}
+
+@[simp] lemma symm_diff_nonempty : (s ∆ t).nonempty ↔ s ≠ t :=
+ne_empty_iff_nonempty.symm.trans symm_diff_eq_bot.not
+
+end set
+
 open cardinal function quiver set with_bot
-open_locale cardinal
+open_locale cardinal pointwise
 
 universe u
 
@@ -144,6 +152,9 @@ variables [params.{u}]
 
 open struct_perm
 
+section
+variables {α β γ : type_index}
+
 /-- A *binary condition* is like a support condition but uses either two atoms or two near-litters
 instead of one. A binary condition `⟨⟨x, y⟩, A⟩` represents the constraint `π_A(x) = y` on an
 allowable permutation. -/
@@ -151,17 +162,18 @@ allowable permutation. -/
 def binary_condition (α : type_index) : Type u :=
 ((atom × atom) ⊕ (near_litter × near_litter)) × extended_index α
 
-/-- The binary condition representing the inverse permutation. If `π_A(x) = y`,
-then `π_A⁻¹(y) = x`. -/
-instance (α : type_index) : has_inv (binary_condition α) :=
-⟨λ c, ⟨c.fst.elim (λ atoms, sum.inl ⟨atoms.2, atoms.1⟩) (λ Ns, sum.inr ⟨Ns.2, Ns.1⟩), c.snd⟩⟩
+/-- The binary condition representing the inverse permutation. If `π_A(x) = y`, then `π_A⁻¹(y) = x`.
+-/
+instance (α : type_index) : has_involutive_inv (binary_condition α) :=
+{ inv := λ c, ⟨c.1.map prod.swap prod.swap, c.2⟩,
+  inv_inv := by rintro ⟨⟨a₁, a₂⟩ | ⟨N₁, N₂⟩, i⟩; refl }
 
 /-- Converts a binary condition `⟨⟨x, y⟩, A⟩` into the support condition `⟨x, A⟩`. -/
-def binary_condition.domain {α : type_index} (cond : binary_condition α) : support_condition α :=
+def binary_condition.domain (cond : binary_condition α) : support_condition α :=
 ⟨cond.fst.elim (λ atoms, sum.inl atoms.fst) (λ Ns, sum.inr Ns.fst), cond.snd⟩
 
 /-- Converts a binary condition `⟨⟨x, y⟩, A⟩` into the support condition `⟨y, A⟩`. -/
-def binary_condition.range {α : type_index} (cond : binary_condition α) : support_condition α :=
+def binary_condition.range (cond : binary_condition α) : support_condition α :=
 ⟨cond.fst.elim (λ atoms, sum.inl atoms.snd) (λ Ns, sum.inr Ns.snd), cond.snd⟩
 
 /-- There are `μ` binary conditions. -/
@@ -187,51 +199,30 @@ namespace spec
 
 /-- The domain of a specification is the unary specification consisting of the domains of all
 binary conditions in the specification. -/
-def domain {α : type_index} (σ : spec α) : unary_spec α := binary_condition.domain '' σ
+def domain (σ : spec α) : unary_spec α := binary_condition.domain '' σ
 
 /-- The range of a specification is the unary specification consisting of the ranges of all
 binary conditions in the specification. -/
-def range {α : type_index} (σ : spec α) : unary_spec α := binary_condition.range '' σ
+protected def range (σ : spec α) : unary_spec α := binary_condition.range '' σ
 
-@[simp] lemma domain_empty {α : type_index} : (∅ : spec α).domain = ∅ := by simp [domain]
-@[simp] lemma range_empty {α : type_index} : (∅ : spec α).range = ∅ := by simp [range]
+@[simp] lemma domain_empty : (∅ : spec α).domain = ∅ := image_empty _
+@[simp] lemma range_empty : (∅ : spec α).range = ∅ := image_empty _
 
-@[simp] lemma domain_union {α : type_index} (σ τ : spec α) : (σ ∪ τ).domain = σ.domain ∪ τ.domain :=
-begin
-  ext c,
-  split,
-  { rintro ⟨x, hx₁ | hx₁, hx₂⟩,
-    exact or.inl ⟨x, hx₁, hx₂⟩,
-    exact or.inr ⟨x, hx₁, hx₂⟩ },
-  { rintro (⟨x, hx₁, hx₂⟩ | ⟨x, hx₁, hx₂⟩),
-    exact ⟨x, or.inl hx₁, hx₂⟩,
-    exact ⟨x, or.inr hx₁, hx₂⟩ },
-end
+@[simp] lemma domain_union (σ τ : spec α) : (σ ∪ τ).domain = σ.domain ∪ τ.domain :=
+image_union _ _ _
 
-@[simp] lemma range_union {α : type_index} (σ τ : spec α) : (σ ∪ τ).range = σ.range ∪ τ.range :=
-begin
-  ext c,
-  split,
-  { rintro ⟨x, hx₁ | hx₁, hx₂⟩,
-    exact or.inl ⟨x, hx₁, hx₂⟩,
-    exact or.inr ⟨x, hx₁, hx₂⟩ },
-  { rintro (⟨x, hx₁, hx₂⟩ | ⟨x, hx₁, hx₂⟩),
-    exact ⟨x, or.inl hx₁, hx₂⟩,
-    exact ⟨x, or.inr hx₁, hx₂⟩ },
-end
+@[simp] lemma range_union (σ τ : spec α) : (σ ∪ τ).range = σ.range ∪ τ.range := image_union _ _ _
 
-@[simp] lemma spec.sUnion_domain_eq_domain_sUnion {α : type_index} (c : set (spec α)) :
+@[simp] lemma sUnion_domain_eq_domain_sUnion (c : set (spec α)) :
   ⋃₀ (spec.domain '' c) = spec.domain ⋃₀ c :=
 begin
   ext x,
-  unfold spec.domain,
-  simp only [set.sUnion_image, set.mem_Union, set.mem_image, exists_prop, set.mem_sUnion],
-  exact ⟨λ ⟨σ, hσ, b, hbσ, hb⟩, ⟨b, ⟨σ, hσ, hbσ⟩, hb⟩,
-         λ ⟨b, ⟨σ, hσ, hbσ⟩, hb⟩, ⟨σ, hσ, b, hbσ, hb⟩⟩,
+  simp only [spec.domain, sUnion_image, mem_Union, mem_image, exists_prop, mem_sUnion],
+  exact ⟨λ ⟨σ, hσ, b, hbσ, hb⟩, ⟨b, ⟨σ, hσ, hbσ⟩, hb⟩, λ ⟨b, ⟨σ, hσ, hbσ⟩, hb⟩, ⟨σ, hσ, b, hbσ, hb⟩⟩,
 end
 
-/-- combined lemma for `spec.inv_domain` and `spec.inv_range`, since the proof is the same. -/
-lemma inv_domain_range {α : type_index} (σ : spec α) : σ⁻¹.domain = σ.range ∧ σ⁻¹.range = σ.domain :=
+/-- Combined lemma for `spec.inv_domain` and `spec.inv_range`, since the proof is the same. -/
+lemma inv_domain_range (σ : spec α) : σ⁻¹.domain = σ.range ∧ σ⁻¹.range = σ.domain :=
 begin
   split; ext x; split,
   all_goals
@@ -241,88 +232,66 @@ begin
     simpa only using hc }
 end
 
-lemma inv_domain {α : type_index} (σ : spec α) : σ⁻¹.domain = σ.range := (spec.inv_domain_range σ).1
-lemma inv_range {α : type_index} (σ : spec α) : σ⁻¹.range = σ.domain := (spec.inv_domain_range σ).2
+lemma inv_domain (σ : spec α) : σ⁻¹.domain = σ.range := (spec.inv_domain_range σ).1
+lemma inv_range (σ : spec α) : σ⁻¹.range = σ.domain := (spec.inv_domain_range σ).2
 
-lemma inv_union {α : type_index} (σ τ : spec α) : (σ ∪ τ)⁻¹ = σ⁻¹ ∪ τ⁻¹ :=
-begin
-  ext,
-  rw inv_mem_inv,
-  split; intro h; cases h,
-  { exact or.inl (spec.inv_mem_inv.2 h) },
-  { exact or.inr (spec.inv_mem_inv.2 h) },
-  { exact or.inl (spec.inv_mem_inv.1 h) },
-  { exact or.inr (spec.inv_mem_inv.1 h) }
-end
-
-lemma inl_mem_inv {α : type_index} (σ : spec α) (a₁ a₂ : atom) (A : extended_index α) :
+lemma inl_mem_inv (σ : spec α) (a₁ a₂ : atom) (A : extended_index α) :
   (sum.inl (a₁, a₂), A) ∈ σ⁻¹ ↔ (sum.inl (a₂, a₁), A) ∈ σ :=
-inv_mem_inv
+mem_inv
 
-lemma inr_mem_inv {α : type_index} (σ : spec α) (N₁ N₂ : near_litter) (A : extended_index α) :
+lemma inr_mem_inv (σ : spec α) (N₁ N₂ : near_litter) (A : extended_index α) :
   (sum.inr (N₁, N₂), A) ∈ σ⁻¹ ↔ (sum.inr (N₂, N₁), A) ∈ σ :=
-inv_mem_inv
+mem_inv
 
 end spec
 
 namespace struct_perm
 
 /-- A structural permutation *satisfies* a condition `⟨⟨x, y⟩, A⟩` if `π_A(x) = y`. -/
-def satisfies_cond {α : type_index} (π : struct_perm α) (c : binary_condition α) :=
+def satisfies_cond (π : struct_perm α) (c : binary_condition α) :=
 c.fst.elim
   (λ atoms, derivative c.snd π • atoms.fst = atoms.snd)
   (λ Ns, derivative c.snd π • Ns.fst = Ns.snd)
 
-@[simp] lemma satisfies_cond_atoms {α : type_index} (π : struct_perm α) (a b : atom)
+@[simp] lemma satisfies_cond_atoms (π : struct_perm α) (a b : atom)
   (A : extended_index α) : π.satisfies_cond ⟨sum.inl ⟨a, b⟩, A⟩ ↔ derivative A π • a = b :=
 iff.rfl
 
-@[simp] lemma satisfies_cond_near_litters {α : type_index} (π : struct_perm α)
+@[simp] lemma satisfies_cond_near_litters (π : struct_perm α)
   (M N : near_litter) (A : extended_index α) :
   π.satisfies_cond ⟨sum.inr ⟨M, N⟩, A⟩ ↔ derivative A π • M = N :=
 iff.rfl
 
 /-- A structural permutation *satisfies* a specification if for all conditions `⟨⟨x, y⟩, A⟩` in the
 specification, we have `π_A(x) = y`. -/
-def satisfies {α : type_index} (π : struct_perm α) (σ : spec α) : Prop :=
-∀ ⦃c⦄, c ∈ σ → π.satisfies_cond c
+def satisfies (π : struct_perm α) (σ : spec α) : Prop := ∀ ⦃c⦄, c ∈ σ → π.satisfies_cond c
 
-lemma satisfies_mono {α : type_index} (π : struct_perm α) (σ ρ : spec α) (hσρ : σ ⊆ ρ) :
+lemma satisfies.mono {π : struct_perm α} {σ ρ : spec α} (h : σ ⊆ ρ) :
   π.satisfies ρ → π.satisfies σ :=
-λ hρ c hc, hρ (hσρ hc)
+λ hρ c hc, hρ $ h hc
 
-lemma struct_perm.satisfies_union_left {α : type_index} (π : struct_perm α) (σ ρ : spec α) :
-  π.satisfies (σ ∪ ρ) → π.satisfies σ :=
-λ h c hc, h (set.mem_union_left _ hc)
-
-lemma struct_perm.satisfies_union_right {α : type_index} (π : struct_perm α) (σ ρ : spec α) :
-  π.satisfies (σ ∪ ρ) → π.satisfies ρ :=
-λ h c hc, h (set.mem_union_right _ hc)
-
-/- There is an injection from the type of structural permutations to the type of specifications,
+/-- There is an injection from the type of structural permutations to the type of specifications,
 in such a way that any structural permutation satisfies its specification. We construct this
 specification by simply drawing the graph of the permutation on atoms and near-litters. -/
-def struct_perm.to_spec {α : type_index} (π : struct_perm α) : spec α :=
-set.range (λ (x : atom × extended_index α),
-  ⟨sum.inl ⟨x.fst, derivative x.snd π • x.fst⟩, x.snd⟩) ∪
-set.range (λ (x : near_litter × extended_index α),
-  ⟨sum.inr ⟨x.fst, derivative x.snd π • x.fst⟩, x.snd⟩)
+def to_spec (π : struct_perm α) : spec α :=
+range (λ x : atom × extended_index α, ⟨sum.inl ⟨x.fst, derivative x.snd π • x.fst⟩, x.snd⟩) ∪
+range (λ x : near_litter × extended_index α, ⟨sum.inr ⟨x.fst, derivative x.snd π • x.fst⟩, x.snd⟩)
 
 /-- Any structural permutation satisfies its own specification. -/
-lemma struct_perm.satisfies_to_spec {α : type_index} (π : struct_perm α) : π.satisfies π.to_spec :=
+lemma satisfies_to_spec (π : struct_perm α) : π.satisfies π.to_spec :=
 begin
   rintro ⟨⟨x, y⟩ | ⟨x, y⟩, A⟩ hxy; cases hxy;
-  simpa only [set.mem_range, prod.mk.inj_iff, prod.exists, exists_eq_right, exists_eq_left,
+  simpa only [mem_range, prod.mk.inj_iff, prod.exists, exists_eq_right, exists_eq_left,
     sum.elim_inl, sum.elim_inr, false_and, exists_false] using hxy,
 end
 
 /-- The map from structural permutations to their specifications is injective. -/
-lemma struct_perm.to_spec_injective :∀ (α : type_index), injective (@struct_perm.to_spec _ α)
+lemma to_spec_injective :∀ (α : type_index), injective (@to_spec _ α)
 | ⊥ := λ σ τ h, begin
-  unfold struct_perm.to_spec at h,
-    dsimp [set.range] at h,
-    rw set.ext_iff at h,
-    simp only [prod.exists, set.mem_union_eq, set.mem_set_of_eq] at h,
+  unfold to_spec at h,
+    dsimp [range] at h,
+    rw ext_iff at h,
+    simp only [prod.exists, mem_union_eq, mem_set_of_eq] at h,
     apply ext_bot,
     intros,
     specialize h ⟨sum.inl ⟨a, σ • a⟩ , path.nil⟩,
@@ -330,11 +299,11 @@ lemma struct_perm.to_spec_injective :∀ (α : type_index), injective (@struct_p
       or_false, eq_self_iff_true, true_iff] at h,
     exact h.symm,
   end
-| (α : Λ) := λ σ τ h, struct_perm.ext _ _ _ $ λ β hβ, struct_perm.to_spec_injective β begin
-    unfold struct_perm.to_spec at h ⊢,
-    dsimp [set.range] at h ⊢,
-    rw set.ext_iff at h ⊢,
-    simp only [prod.exists, set.mem_union_eq, set.mem_set_of_eq] at h ⊢,
+| (α : Λ) := λ σ τ h, ext _ _ _ $ λ β hβ, to_spec_injective β begin
+    unfold to_spec at h ⊢,
+    dsimp [range] at h ⊢,
+    rw ext_iff at h ⊢,
+    simp only [prod.exists, mem_union_eq, mem_set_of_eq] at h ⊢,
     intro x,
     cases x,
     specialize h ⟨x_fst, (@path.cons type_index con_nf.quiver ↑α ↑α β path.nil hβ).comp x_snd⟩,
@@ -348,92 +317,96 @@ lemma struct_perm.to_spec_injective :∀ (α : type_index), injective (@struct_p
   end
 using_well_founded { dec_tac := `[assumption] }
 
+end struct_perm
 
 /-- We can extend any support condition to one of a higher proper type index `α` by providing a path
 connecting the old extended index up to `α`. -/
-def support_condition.extend_path {α β : type_index} (c : support_condition β)
-  (A : path (α : type_index) β) : support_condition α := ⟨c.fst, A.comp c.snd⟩
+def support_condition.extend_path (c : support_condition β) (A : path (α : type_index) β) :
+  support_condition α := ⟨c.fst, A.comp c.snd⟩
 
 /-- We can extend any binary condition to one of a higher proper type index `α` by providing a path
 connecting the old extended index up to `α`. -/
-def binary_condition.extend_path {α β : type_index} (c : binary_condition β) (A : path α β) :
-  binary_condition α := ⟨c.fst, A.comp c.snd⟩
+def binary_condition.extend_path (c : binary_condition β) (A : path α β) : binary_condition α :=
+⟨c.fst, A.comp c.snd⟩
+
+namespace unary_spec
 
 /-- We can lower a unary specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping support conditions whose paths begin with `A`. -/
-def unary_spec.lower {α β : type_index} (σ : unary_spec α) (A : path α β) : unary_spec β :=
-{c | c.extend_path A ∈ σ}
+def lower (σ : unary_spec α) (A : path α β) : unary_spec β := {c | c.extend_path A ∈ σ}
 
 /-- Lowering along the empty path does nothing. -/
-lemma unary_spec.lower_nil {α β γ : type_index} (σ : unary_spec α) : σ.lower path.nil = σ :=
+@[simp] lemma lower_nil (σ : unary_spec α) : σ.lower path.nil = σ :=
 by simp only
-  [unary_spec.lower, support_condition.extend_path, path.nil_comp, prod.mk.eta, set.set_of_mem_eq]
+  [unary_spec.lower, support_condition.extend_path, path.nil_comp, prod.mk.eta, set_of_mem_eq]
 
 /-- The lowering map is functorial. -/
-lemma unary_spec.lower_lower {α β γ : type_index} (σ : unary_spec α)
-  (A : path (α : type_index) β) (B : path (β : type_index) γ) :
-  (σ.lower A).lower B = σ.lower (path.comp A B) :=
-by simp only [unary_spec.lower, support_condition.extend_path, set.mem_set_of_eq, path.comp_assoc]
+@[simp] lemma lower_lower (σ : unary_spec α) (A : path α β) (B : path β γ) :
+  (σ.lower A).lower B = σ.lower (A.comp B) :=
+by simp only [unary_spec.lower, support_condition.extend_path, mem_set_of_eq, path.comp_assoc]
 
-@[simp] lemma unary_spec.lower_union {α β : type_index} (σ τ : unary_spec α) (A : path α β) :
+@[simp] lemma lower_union (σ τ : unary_spec α) (A : path α β) :
   (σ ∪ τ).lower A = σ.lower A ∪ τ.lower A :=
-by ext ⟨x | x, y⟩; simp only [unary_spec.lower, set.mem_union_eq, set.mem_set_of_eq]
+by ext ⟨x | x, y⟩; simp only [unary_spec.lower, mem_union_eq, mem_set_of_eq]
 
-@[simp] lemma unary_spec.sUnion_lower_eq_lower_sUnion {α β : type_index} (c : set (unary_spec α))
-  (A : path α β) : (⋃ (s ∈ c), unary_spec.lower s A) = unary_spec.lower (⋃₀ c) A :=
-by ext; simp only [unary_spec.lower, set.mem_Union, set.mem_set_of_eq, set.mem_sUnion]
+@[simp] lemma sUnion_lower_eq_lower_sUnion (c : set (unary_spec α)) (A : path α β) :
+  (⋃ (s ∈ c), unary_spec.lower s A) = unary_spec.lower (⋃₀ c) A :=
+by ext; simp only [unary_spec.lower, mem_Union, mem_set_of_eq, mem_sUnion]
+
+end unary_spec
+
+namespace spec
 
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
-def spec.lower {α β : type_index} (σ : spec α) (A : path α β) : spec β :=
-{c | c.extend_path A ∈ σ}
+def lower (σ : spec α) (A : path α β) : spec β := {c | c.extend_path A ∈ σ}
 
 /-- Lowering along the empty path does nothing. -/
-lemma spec.lower_nil {α : type_index} (σ : spec α) : σ.lower path.nil = σ :=
+@[simp] lemma lower_nil (σ : spec α) : σ.lower path.nil = σ :=
 by simp only
-  [spec.lower, binary_condition.extend_path, path.nil_comp, prod.mk.eta, set.set_of_mem_eq]
+  [spec.lower, binary_condition.extend_path, path.nil_comp, prod.mk.eta, set_of_mem_eq]
 
 /-- The lowering map is functorial. -/
-lemma spec.lower_lower {α β γ : type_index} (σ : spec α) (A : path α β) (B : path β γ) :
-  (σ.lower A).lower B = σ.lower (path.comp A B) :=
-by simp only [spec.lower, binary_condition.extend_path, set.mem_set_of_eq, path.comp_assoc]
+@[simp] lemma lower_lower (σ : spec α) (A : path α β) (B : path β γ) :
+  (σ.lower A).lower B = σ.lower (A.comp B) :=
+by simp only [lower, binary_condition.extend_path, mem_set_of_eq, path.comp_assoc]
 
-@[simp] lemma spec.lower_union {α β : type_index} (σ τ : spec α) (A : path α β) :
+@[simp] lemma lower_union (σ τ : spec α) (A : path α β) :
   (σ ∪ τ).lower A = σ.lower A ∪ τ.lower A :=
-by ext ⟨x | x, y⟩; simp only [spec.lower, set.mem_union_eq, set.mem_set_of_eq]
+by ext ⟨x | x, y⟩; simp only [spec.lower, mem_union_eq, mem_set_of_eq]
+
+end spec
 
 /-- Lowering a specification corresponds exactly to forming the derivative of the corresponding
 structural permutation. -/
-lemma struct_perm.spec_lower_eq_derivative {α β : type_index} (π : struct_perm α)
+lemma struct_perm.spec_lower_eq_derivative (π : struct_perm α)
   (A : path α β) : π.to_spec.lower A = (struct_perm.derivative A π).to_spec :=
 begin
-  dsimp only [(spec.lower), (struct_perm.to_spec)],
   ext,
-  simp only [set.mem_union_eq, set.mem_range, prod.exists, set.mem_set_of_eq],
+  simp only [spec.lower, struct_perm.to_spec, mem_union_eq, mem_range, prod.exists, mem_set_of_eq],
   cases x,
-  dsimp [(binary_condition.extend_path)],
-  simp only [prod.mk.inj_iff, exists_eq_right],
+  simp only [binary_condition.extend_path, prod.mk.inj_iff, exists_eq_right],
   rw derivative_derivative,
 end
 
 /-- A specification is total if it specifies where every element in its domain goes. -/
-def spec.total {α : type_index} (σ : spec α) : Prop := σ.domain = set.univ
+def spec.total (σ : spec α) : Prop := σ.domain = univ
 /-- A specification is co-total if it specifies where every element in its codomain came from. -/
-def spec.co_total {α : type_index} (σ : spec α) : Prop := σ.range = set.univ
+def spec.co_total (σ : spec α) : Prop := σ.range = univ
 
-lemma spec.co_total_of_inv_total {α : type_index} (σ : spec α) :
-  σ⁻¹.total → σ.co_total :=
+lemma spec.co_total_of_inv_total (σ : spec α) : σ⁻¹.total → σ.co_total :=
 begin
-  unfold has_inv.inv spec.total spec.co_total spec.domain spec.range binary_condition.domain binary_condition.range,
+  unfold has_inv.inv spec.total spec.co_total spec.domain spec.range binary_condition.domain
+    binary_condition.range,
   intro h,
-  rw set.eq_univ_iff_forall at h ⊢,
+  rw eq_univ_iff_forall at h ⊢,
   intro c,
   obtain ⟨⟨⟨x1, x2⟩ | ⟨x1, x2⟩, y⟩, hxy, hc⟩ := h c,
   { refine ⟨⟨sum.inl ⟨x2, x1⟩, y⟩, hxy, hc⟩ },
   { refine ⟨⟨sum.inr ⟨x2, x1⟩, y⟩, hxy, hc⟩ }
 end
 
-lemma spec.total_1_1_restriction {α β : type_index} (σ : spec α) (A : path α β) :
+lemma spec.total_1_1_restriction (σ : spec α) (A : path α β) :
   (σ.total → (σ.lower A).total) ∧ (σ.co_total → (σ.lower A).co_total) :=
 begin
   split,
@@ -442,8 +415,8 @@ begin
     unfold spec.total spec.co_total spec.lower spec.domain spec.range at hσ ⊢,
     ext,
     refine ⟨by simp, λ _, _⟩,
-    simp only [set.mem_image, set.mem_set_of_eq],
-    obtain ⟨y, ⟨hyσ, hy⟩⟩ := (set.ext_iff.1 hσ $ x.extend_path A).2 (set.mem_univ _),
+    simp only [mem_image, mem_set_of_eq],
+    obtain ⟨y, ⟨hyσ, hy⟩⟩ := (ext_iff.1 hσ $ x.extend_path A).2 (mem_univ _),
     set z : binary_condition β := ⟨y.fst, x.snd⟩,
     refine ⟨z, ⟨_, prod.ext_iff.2 ⟨(prod.ext_iff.1 hy).1, rfl⟩⟩⟩,
     have : y = z.extend_path A, -- probably can cut this
@@ -457,13 +430,15 @@ end
 
 /-- If we lower a total specification along a path, it is still total.
 This is one part of `total-1-1-restriction` in the blueprint. -/
-lemma spec.lower_total {α β : type_index} (σ : spec α) (A : path α β) :
+lemma spec.lower_total (σ : spec α) (A : path α β) :
   σ.total → (σ.lower A).total := (spec.total_1_1_restriction _ _).1
 
 /-- If we lower a co-total specification along a path, it is still co-total.
 This is one part of `total-1-1-restriction` in the blueprint. -/
-lemma spec.lower_co_total {α β : type_index} (σ : spec α) (A : path α β) :
+lemma spec.lower_co_total (σ : spec α) (A : path α β) :
   σ.co_total → (σ.lower A).co_total := (spec.total_1_1_restriction _ _).2
+
+end
 
 variables (α : Λ) [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
   [phase_2_assumptions α] (B : le_index α)
@@ -489,12 +464,12 @@ in the "freedom of action discussion".
     constrains ⟨sum.inl a, A⟩ ⟨sum.inr N, A⟩
 | f_map ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
     (A : path (B : type_index) β)
-    (t : tangle_path ((lt_index.mk' hγ (B.path.comp A)) : le_index α))
+    (t : tangle_path (lt_index.mk' hγ (B.path.comp A) : le_index α))
     (c ∈ (designated_support_path t).carrier) :
     constrains
       ⟨c.fst, path.comp (A.cons hγ) c.snd⟩
       ⟨sum.inr (f_map_path hγ hδ t).to_near_litter,
-        path.cons (A.cons (coe_lt_coe.mpr hδ)) (bot_lt_coe _)⟩
+        (A.cons (coe_lt_coe.mpr hδ)).cons (bot_lt_coe _)⟩
 
 /-! We declare new notation for the "constrains" relation on support conditions. -/
 infix ` ≺ `:50 := constrains _ _
@@ -585,7 +560,7 @@ supports `x`. -/
 def support_closed (σ : unary_spec B) : Prop :=
 ∀ ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
     (A : path (B : type_index) β)
-    (t : tangle_path ((lt_index.mk' hγ (B.path.comp A)) : le_index α)),
+    (t : tangle_path (lt_index.mk' hγ (B.path.comp A) : le_index α)),
   (⟨sum.inr (f_map_path hγ hδ t).to_near_litter, (A.cons $ coe_lt_coe.mpr hδ).cons $ bot_lt_coe _⟩
       : support_condition B) ∈ σ →
       supports (allowable_path (lt_index.mk' hγ (B.path.comp A) : le_index α))
@@ -643,7 +618,7 @@ Note that the `small` constructor does not depend on whether the litter is prese
     (L' : near_litter) (hL : (⟨sum.inr ⟨L.to_near_litter, L'⟩, A⟩ : binary_condition B) ∈ σ)
     (atom_map : litter_set L → atom) :
   (∀ a ∈ litter_set L, (⟨sum.inl ⟨a, atom_map ⟨a, ‹_›⟩⟩, A⟩ : binary_condition B) ∈ σ) →
-  L'.snd.val = set.range atom_map → atom_cond
+  L'.snd.val = range atom_map → atom_cond
 | small_out
     (hL : (sum.inr L.to_near_litter, A) ∉ σ.domain) :
   small {a ∈ litter_set L | (⟨sum.inl a, A⟩ : support_condition B) ∈ σ.domain} → atom_cond
@@ -660,7 +635,7 @@ def near_litter_cond (σ : spec B) (N₁ N₂ : near_litter) (A : extended_index
   ∃ M, (⟨sum.inr ⟨N₁.fst.to_near_litter, M⟩, A⟩ : binary_condition B) ∈ σ ∧
   ∃ (symm_diff : litter_set N₁.fst ∆ N₁.snd → atom),
     (∀ a : litter_set N₁.fst ∆ N₁.snd, (⟨sum.inl ⟨a, symm_diff a⟩, A⟩ : binary_condition B) ∈ σ) ∧
-  N₂.snd.val = M.snd.val ∆ set.range symm_diff
+  N₂.snd.val = M.snd.val ∆ range symm_diff
 
 /-- This is the allowability condition for flexible litters of a given extended index.
 Either all flexible litters are in both the domain and range (`all`), or there are `μ`-many not in
@@ -714,6 +689,8 @@ end spec
 variables (B)
 
 namespace spec
+
+example : has_involutive_inv (spec B) := _
 
 /-- The inverse of an allowable specification is allowable. -/
 lemma inv_allowable (σ : spec B) (hσ : σ.allowable_spec B) :
@@ -776,7 +753,7 @@ begin
   all_goals { convert hsmall,
     unfold spec.domain binary_condition.domain,
     ext a,
-    simp only [set.mem_image, prod.mk.inj_iff],
+    simp only [mem_image, prod.mk.inj_iff],
     split; rintro ⟨⟨x, y⟩, hx1, hx2, hx3⟩,
     { exact ⟨⟨x, A.comp y⟩, hx1, hx2, by rw ← hx3⟩ },
     dsimp only at hx3,
@@ -1003,7 +980,7 @@ instance has_le : has_le (allowable_partial_perm B) := ⟨perm_le B⟩
 /-! We now prove that the claimed preorder really is a preorder. -/
 
 lemma extends_refl (σ : allowable_partial_perm B) : σ ≤ σ :=
-⟨set.subset.rfl,
+⟨subrfl,
  λ _ _ _ _ h1 h2, by cases h1 h2,
  λ _ _ _ _ h1 h2, by cases h1 h2,
  λ _ _ _ _ _ h1 h2, by cases h1 h2,
@@ -1018,13 +995,13 @@ begin
     λ a b L hab A hnin hin, _, λ a b L hab A hnin hin, _⟩,
   { by_cases (sum.inr (L.to_near_litter, N), A) ∈ σ.val,
     { exact λ l hla,
-        ⟨set.image_subset binary_condition.domain hsub' (hflx_domain L N A hLA hnin h l hla).1,
-        set.image_subset binary_condition.range hsub' (hflx_domain L N A hLA hnin h l hla).2⟩ },
+        ⟨image_subset binary_condition.domain hsub' (hflx_domain L N A hLA hnin h l hla).1,
+        image_subset binary_condition.range hsub' (hflx_domain L N A hLA hnin h l hla).2⟩ },
     { exact hflx_domain' L N A hLA h hin } },
   { by_cases (sum.inr (N, L.to_near_litter), A) ∈ σ.val,
     { exact λ l hla,
-        ⟨set.image_subset binary_condition.domain hsub' (hflx_range L N A hLA hnin h l hla).1,
-        set.image_subset binary_condition.range hsub' (hflx_range L N A hLA hnin h l hla).2⟩ },
+        ⟨image_subset binary_condition.domain hsub' (hflx_range L N A hLA hnin h l hla).1,
+        image_subset binary_condition.range hsub' (hflx_range L N A hLA hnin h l hla).2⟩ },
     { exact hflx_range' L N A hLA h hin } },
   { by_cases (sum.inl (a, b), A) ∈ σ.val,
     { intros c hc,
@@ -1090,8 +1067,8 @@ begin
   intro A,
   split,
   all_goals { intros b x hx y hy,
-    rw set.mem_set_of at hx hy,
-    rw set.mem_sUnion at hx hy,
+    rw mem_set_of at hx hy,
+    rw mem_sUnion at hx hy,
     obtain ⟨σx, Hx, hx⟩ := hx,
     obtain ⟨σy, Hy, hy⟩ := hy,
     have hc' := is_subset_chain_of_is_chain B c hc Hx Hy,
@@ -1101,10 +1078,10 @@ begin
     swap,
     specialize hc' h,
     cases hc',
-    have hx' := set.mem_of_mem_of_subset hx hc',
+    have hx' := mem_of_mem_of_subset hx hc',
     obtain ⟨⟨σy,hσy⟩, Hy₁, rfl⟩ := Hy,
     swap,
-    have hy' := set.mem_of_mem_of_subset hy hc',
+    have hy' := mem_of_mem_of_subset hy hc',
     obtain ⟨⟨σx,hσx⟩, Hx₁, rfl⟩ := Hx },
   -- Note: there must be a better way of doing this below.
   exact (hσx.forward.one_to_one A).atom b hx hy',
@@ -1119,20 +1096,20 @@ lemma atom_cond_Union (hc : is_chain (≤) c) :
   ∀ L A, spec.atom_cond B (⋃₀ (subtype.val '' c)) L A :=
 begin
   intros L A,
-  rcases set.eq_empty_or_nonempty c with hemp | ⟨⟨σ, hσ₁⟩, hσ₂⟩,
+  rcases eq_empty_or_nonempty c with hemp | ⟨⟨σ, hσ₁⟩, hσ₂⟩,
   { refine spec.atom_cond.small_out _ _,
-    { simp only [hemp, set.sUnion_image, set.mem_empty_eq, set.Union_false, set.Union_empty,
+    { simp only [hemp, sUnion_image, mem_empty_eq, Union_false, Union_empty,
       spec.domain_empty, not_false_iff] },
-    { simp only [hemp, set.sUnion_image, set.mem_empty_eq, set.Union_false, set.Union_empty,
-      spec.domain_empty, set.sep_false, small_empty] } },
+    { simp only [hemp, sUnion_image, mem_empty_eq, Union_false, Union_empty,
+      spec.domain_empty, sep_false, small_empty] } },
   { by_cases h' : (∃ (ρ : allowable_partial_perm B) (hρ : ρ ∈ c) (τ : allowable_partial_perm B)
         (hτ : τ ∈ c) a b (ha : a ∈ litter_set L),
         (sum.inl (a, b), A) ∉ ρ.val ∧ (sum.inl (a, b), A) ∈ τ.val ∧ ρ ≤ τ),
     { obtain ⟨ρ, hρ, τ, hτ, a, b, ha, Hρ, Hτ, hρτ⟩ := h',
       obtain ⟨N, h₁, atom_map, h₂, h₃⟩ | ⟨h₁, h₂⟩ | ⟨N, h₁, h₂, h₃⟩ := τ.prop.forward.atom_cond L A,
       { refine spec.atom_cond.all N _ atom_map _ h₃,
-        { exact set.mem_sUnion_of_mem h₁ ⟨τ, hτ, rfl⟩ },
-        { exact λ a' ha', set.mem_sUnion_of_mem (h₂ a' ha') ⟨τ, hτ, rfl⟩ } },
+        { exact mem_sUnion_of_mem h₁ ⟨τ, hτ, rfl⟩ },
+        { exact λ a' ha', mem_sUnion_of_mem (h₂ a' ha') ⟨τ, hτ, rfl⟩ } },
       all_goals
       { exfalso,
         refine ne_of_lt h₂ _,
@@ -1154,14 +1131,14 @@ begin
       have : {a ∈ litter_set L | (sum.inl a, A) ∈ spec.domain (⋃₀ (subtype.val '' c))}
               = {a ∈ litter_set L | (sum.inl a, A) ∈ σ.domain},
       { ext a,
-        rw [set.mem_sep_iff, set.mem_sep_iff],
+        rw [mem_sep_iff, mem_sep_iff],
         refine and_congr_right (λ ha, ⟨_, _⟩),
         { rintro ⟨⟨⟨a', b⟩ | _, C⟩, ⟨_, ⟨ρ, hρ, rfl⟩, hb⟩, hab⟩; cases hab,
           refine ⟨_, H' ρ hρ _ hσ₂ a b ha hb, rfl⟩ },
         { exact λ ⟨b, hbσ, hba⟩, ⟨b, ⟨σ, ⟨_, hσ₂, rfl⟩, hbσ⟩, hba⟩ } },
       obtain ⟨N, h₁, atom_map, h₂, h₃⟩ | ⟨h₁, h₂⟩ | ⟨N, hN, h₁, h₂⟩ := hσ₁.forward.atom_cond L A,
       { exact spec.atom_cond.all N ⟨_, ⟨_, hσ₂, rfl⟩, h₁⟩ atom_map
-            (λ a' ha', set.mem_sUnion_of_mem (h₂ a' ha') ⟨_, hσ₂, rfl⟩) h₃ },
+            (λ a' ha', mem_sUnion_of_mem (h₂ a' ha') ⟨_, hσ₂, rfl⟩) h₃ },
       { by_cases (sum.inr L.to_near_litter, A) ∈ spec.domain (⋃₀ (subtype.val '' c)),
         { obtain ⟨⟨_ | ⟨N₁, N₂⟩, C⟩, hc₁, hc₂⟩ := h; cases hc₂,
           refine spec.atom_cond.small_in N₂ hc₁ (by rwa this) _,
@@ -1184,7 +1161,7 @@ begin
               sorry } } },
         { exact spec.atom_cond.small_out h (by rwa this) } },
       { refine spec.atom_cond.small_in N _ _ _,
-        { exact set.mem_sUnion_of_mem hN ⟨_, hσ₂, rfl⟩ },
+        { exact mem_sUnion_of_mem hN ⟨_, hσ₂, rfl⟩ },
         { rwa this },
         { rintro a' b ⟨τ, ⟨⟨τ, hτ⟩, hτc, hτeq⟩, hτa'⟩, cases hτeq,
           refine ⟨λ ha', (h₂ $ H' _ hτc _ hσ₂ a' b ha' hτa').1 ha', _⟩,
@@ -1203,11 +1180,11 @@ lemma flexible_cond_Union (hc : is_chain (≤) c) :
   ∀ C, spec.flexible_cond B (⋃₀ (subtype.val '' c)) C :=
 begin
   intro C,
-  rcases set.eq_empty_or_nonempty c with hemp | ⟨⟨σ, hσ₁⟩, hσ₂⟩,
+  rcases eq_empty_or_nonempty c with hemp | ⟨⟨σ, hσ₁⟩, hσ₂⟩,
   { rw hemp,
     refine spec.flexible_cond.co_large _ _;
-    simp only [set.image_empty, set.sUnion_empty, spec.domain_empty, spec.range_empty,
-               set.mem_empty_eq, not_false_iff, and_true, set.coe_set_of,
+    simp only [image_empty, sUnion_empty, spec.domain_empty, spec.range_empty,
+               mem_empty_eq, not_false_iff, and_true, coe_set_of,
                mk_flexible_litters] },
   { by_cases h : (∃ (ρ : allowable_partial_perm B) (hρ : ρ ∈ c) (τ : allowable_partial_perm B)
       (hτ : τ ∈ c) L (hL : flexible L C),
@@ -1227,12 +1204,12 @@ begin
         intros L' hL';
         specialize H L' hL';
         cases H with H₁ H₂,
-        refine set.mem_of_subset_of_mem _ H₁, swap,
-        refine set.mem_of_subset_of_mem _ H₂,
+        refine mem_of_subset_of_mem _ H₁, swap,
+        refine mem_of_subset_of_mem _ H₂,
         all_goals {
           intros sc hsc,
-          simp only [spec.domain, spec.range, subtype.val_eq_coe, set.sUnion_image, set.mem_image,
-                     set.mem_Union, exists_prop, subtype.exists, subtype.coe_mk,
+          simp only [spec.domain, spec.range, subtype.val_eq_coe, sUnion_image, mem_image,
+                     mem_Union, exists_prop, subtype.exists, subtype.coe_mk,
                      exists_and_distrib_right],
           obtain ⟨bc, h₁, h₂⟩ := hsc,
           use bc,
@@ -1275,25 +1252,25 @@ begin
         convert hdom using 3, swap, convert hrge using 3,
         all_goals {
           ext,
-          rw [set.mem_set_of, set.mem_set_of, and.congr_right_iff],
+          rw [mem_set_of, mem_set_of, and.congr_right_iff],
           intro hx,
           split,
           { refine λ hxc hxσ, hxc _,
-            refine set.mem_of_mem_of_subset hxσ (set.image_subset _ (set.subset_sUnion_of_mem _)),
-            rw set.mem_image,
+            refine mem_of_mem_of_subset hxσ (image_subset _ (subset_sUnion_of_mem _)),
+            rw mem_image,
             use ⟨σ, hσ₁⟩,
             exact ⟨hσ₂, rfl⟩ },
           refine λ hxσ hxc, hxσ _,
           obtain ⟨b, hb₁, hb₂⟩ := hxc,
-          rw set.mem_sUnion at hb₁,
+          rw mem_sUnion at hb₁,
           obtain ⟨ρv, hρ, hbρ⟩ := hb₁,
-          rw set.mem_image at hρ,
+          rw mem_image at hρ,
           obtain ⟨ρ, hρc, hρv⟩ := hρ,
         },
         refine (H ρ hρc ⟨σ, hσ₁⟩ hσ₂ x hx).right _, unfold spec.range, swap,
         refine (H ρ hρc ⟨σ, hσ₁⟩ hσ₂ x hx).left _, unfold spec.domain,
         all_goals {
-          rw set.mem_image,
+          rw mem_image,
           rw ← hρv at hbρ,
           exact ⟨b, hbρ, hb₂⟩,
         } },
@@ -1302,8 +1279,8 @@ begin
         rename hdom h', swap, rename hrge h',
         all_goals {
           specialize h' L hL,
-          refine set.mem_of_mem_of_subset h' (set.image_subset _ (set.subset_sUnion_of_mem _)),
-          rw set.mem_image,
+          refine mem_of_mem_of_subset h' (image_subset _ (subset_sUnion_of_mem _)),
+          rw mem_image,
           use ⟨σ, hσ₁⟩,
           exact ⟨hσ₂, rfl⟩,
         } } } },
@@ -1316,8 +1293,8 @@ lemma non_flexible_cond_Union (hc : is_chain (≤) c) :
 begin
   rintro β γ δ hγ hδ hγδ N A t ⟨_, ⟨σ, hσ₁, rfl⟩, hσv⟩ π hπ,
   refine σ.prop.forward.non_flexible_cond hγ hδ hγδ N A t hσv π _,
-  refine struct_perm.satisfies_mono _ _ _ (set.subset_sUnion_of_mem _) hπ,
-  simpa only [hσ₁, set.mem_image, subtype.exists, exists_and_distrib_right, exists_eq_right,
+  refine struct_perm.satisfies_mono _ _ _ (subset_sUnion_of_mem _) hπ,
+  simpa only [hσ₁, mem_image, subtype.exists, exists_and_distrib_right, exists_eq_right,
               subtype.coe_eta, exists_prop, and_true] using σ.prop,
 end
 
@@ -1327,12 +1304,12 @@ begin
   unfold unary_spec.support_closed,
   intros β γ δ hγ hδ hγδ A t h,
   rw [← spec.sUnion_domain_eq_domain_sUnion, ← unary_spec.sUnion_lower_eq_lower_sUnion] at *,
-  rw set.mem_sUnion at h,
+  rw mem_sUnion at h,
   obtain ⟨_, ⟨_, ⟨σ, hσ₁, rfl⟩, rfl⟩, b, hb₁, hb₂⟩ := h,
   refine (σ.prop.forward.support_closed hγ hδ hγδ A t ⟨b, hb₁, hb₂⟩).mono _ _,
-  convert @set.subset_bUnion_of_mem (unary_spec B) _ _ _ (spec.domain σ) _ using 1,
+  convert @subset_bUnion_of_mem (unary_spec B) _ _ _ (spec.domain σ) _ using 1,
   refl,
-  simp only [subtype.val_eq_coe, set.mem_image, subtype.exists, subtype.coe_mk,
+  simp only [subtype.val_eq_coe, mem_image, subtype.exists, subtype.coe_mk,
               exists_and_distrib_right, exists_eq_right],
   refine ⟨σ, ⟨σ.prop, _⟩, rfl⟩,
   rwa subtype.coe_eta,
@@ -1393,7 +1370,7 @@ lemma le_Union₂ (σ τ : allowable_partial_perm B)
   (hτ : τ ∈ c) : τ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
 begin
   have hsub : ∀ (t : allowable_partial_perm B) (ht : t ∈ c), t.val ⊆ ⋃₀ (subtype.val '' c) :=
-    λ t ht b hb, ⟨t.val, set.mem_image_of_mem _ ht, hb⟩,
+    λ t ht b hb, ⟨t.val, mem_image_of_mem _ ht, hb⟩,
   refine ⟨hsub τ hτ,
     λ L N A hLA hnin hin, _,
     λ L N A hLA hnin hin, _,
@@ -1410,12 +1387,12 @@ begin
     { cases hnin (hsub hρ) } },
   { have := hleq.2 L N A hLA hnin hρ,
     exact λ l hla, ⟨
-      set.image_subset binary_condition.domain (hsub σ hσ) (this l hla).1,
-      set.image_subset binary_condition.range (hsub σ hσ) (this l hla).2⟩ },
+      image_subset binary_condition.domain (hsub σ hσ) (this l hla).1,
+      image_subset binary_condition.range (hsub σ hσ) (this l hla).2⟩ },
   { have := hleq.3 L N A hLA hnin hρ,
     exact λ l hla, ⟨
-      set.image_subset binary_condition.domain (hsub σ hσ) (this l hla).1,
-      set.image_subset binary_condition.range (hsub σ hσ) (this l hla).2⟩ },
+      image_subset binary_condition.domain (hsub σ hσ) (this l hla).1,
+      image_subset binary_condition.range (hsub σ hσ) (this l hla).2⟩ },
   { obtain ⟨q, hq⟩ := hleq.4 a b L h A hnin hρ p hp,
     exact ⟨q, (hsub σ hσ) hq⟩ },
   { obtain ⟨q, hq⟩ := hleq.5 a b L h A hnin hρ p hp,
@@ -1425,7 +1402,7 @@ end
 lemma le_Union₁ (hcne : c.nonempty) (σ : allowable_partial_perm B)
   (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ}) :
   σ ≤ ⟨⋃₀ (subtype.val '' c), allowable_Union B c hc⟩ :=
-let ⟨τ, h⟩ := hcne in (set.set_of_app_iff.1 $ set.mem_def.1 $ hc₁ h).trans (le_Union₂ B c hc σ τ h)
+let ⟨τ, h⟩ := hcne in (set_of_app_iff.1 $ mem_def.1 $ hc₁ h).trans (le_Union₂ B c hc σ τ h)
 
 end zorn_setup
 
@@ -1548,24 +1525,8 @@ noncomputable def near_litter_value_inj (σ : allowable_partial_perm B) (A : ext
     ((σ.property.forward.one_to_one A).near_litter (near_litter_value B σ A N₁ N₁.property) h₁ h₂),
 end⟩
 
-lemma exists_mem_symm_diff_of_ne {α : Type*} {s t : set α} (h : s ≠ t) : ∃ a, a ∈ s ∆ t :=
-begin
-  cases set.eq_empty_or_nonempty (s ∆ t) with h₁ h₁,
-  { exfalso,
-    refine h _,
-    unfold symm_diff at h₁,
-    simp only [set.eq_empty_iff_forall_not_mem, set.sup_eq_union, set.mem_union_eq,
-      set.mem_diff] at h₁,
-    push_neg at h₁,
-    ext a,
-    exact ⟨λ h, (h₁ a).left h, λ h, (h₁ a).right h⟩ },
-  { exact h₁ }
-end
-
-/-
-If the images of two litters under `σ` intersect, the litters must intersect, and therefore are
-equal. This is a rather technical result depending on various allowability conditions.
--/
+/-- If the images of two litters under `σ` intersect, the litters must intersect, and therefore are
+equal. This is a rather technical result depending on various allowability conditions. -/
 lemma litter_eq_of_image_inter (σ : allowable_partial_perm B) (A : extended_index B)
   {L₁ L₂ : litter} {N₁ N₂ : near_litter}
   (hL₁ : (sum.inr (L₁.to_near_litter, N₁), A) ∈ σ.val)
@@ -1603,54 +1564,50 @@ begin
       obtain ⟨⟨a₁L, a₁⟩, ha₁'⟩ := a₁,
       cases this.mpr haN₂, cases ha₁', refl } },
   { cases h₁ ⟨_, hL₁, rfl⟩ },
-  { cases (σ.property.backward.one_to_one A).near_litter _ hL₁ hN,
-    obtain ⟨N', h₁', atom_map', h₂', h₃'⟩ | ⟨h₁', h₂'⟩ | ⟨N', hN', h₁', h₂'⟩ :=
-      σ.property.forward.atom_cond L₂ A,
-    { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ h₁',
-      rw h₃' at haN₂,
-      obtain ⟨a₂, ha₂⟩ := haN₂,
-      have map₂ := h₂' a₂ a₂.property,
-      rw subtype.coe_eta at map₂,
-      rw ha₂ at map₂,
+  cases (σ.property.backward.one_to_one A).near_litter _ hL₁ hN,
+  obtain ⟨N', h₁', atom_map', h₂', h₃'⟩ | ⟨h₁', h₂'⟩ | ⟨N', hN', h₁', h₂'⟩ :=
+    σ.property.forward.atom_cond L₂ A,
+  { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ h₁',
+    rw h₃' at haN₂,
+    obtain ⟨a₂, ha₂⟩ := haN₂,
+    have map₂ := h₂' a₂ a₂.property,
+    rw subtype.coe_eta at map₂,
+    rw ha₂ at map₂,
 
-      have := h₂ (h₂' a₂ a₂.property),
-      rw subtype.coe_eta at this,
-      rw ha₂ at this,
-      obtain ⟨⟨a₂L, a₂⟩, ha₂'⟩ := a₂,
-      cases this.mpr haN₁, cases ha₂', refl },
-    { cases h₁' ⟨_, hL₂, rfl⟩ },
-    { cases (σ.property.backward.one_to_one A).near_litter _ hL₂ hN',
-
-      obtain ⟨M₁, hM₁, s₁, hs₁, gs₁⟩ := σ.property.backward.near_litter_cond _ _ A hL₁,
-      obtain ⟨M₂, hM₂, s₂, hs₂, gs₂⟩ := σ.property.backward.near_litter_cond _ _ A hL₂,
-      dsimp only at gs₁ gs₂,
-
-      cases set.eq_empty_or_nonempty ((N₁.snd.val \ litter_set N₁.fst) ∩ N₂.snd) with hN₁ hN₁,
-      { cases set.eq_empty_or_nonempty ((N₂.snd.val \ litter_set N₂.fst) ∩ N₁.snd) with hN₂ hN₂,
-        { rw set.eq_empty_iff_forall_not_mem at hN₁ hN₂, specialize hN₁ a, specialize hN₂ a,
-          rw [set.mem_inter_iff, and_comm, set.mem_diff] at hN₁ hN₂,
-          push_neg at hN₁ hN₂, specialize hN₁ haN₂ haN₁, specialize hN₂ haN₁ haN₂,
-          have := eq_of_mem_litter_set_of_mem_litter_set hN₁ hN₂,
-          rw this at hM₁,
-          have M₁_eq_M₂ := (σ.property.forward.one_to_one A).near_litter _ hM₁ hM₂,
-          dsimp only at M₁_eq_M₂, subst M₁_eq_M₂,
-          refine is_near_litter_litter_set_iff.1 _,
-          unfold is_near_litter is_near,
-          rw [gs₁, gs₂, symm_diff_left_comm, ← symm_diff_assoc, symm_diff_symm_diff_cancel_left],
-          refine lt_of_le_of_lt
-            (cardinal.mk_le_mk_of_subset $ symm_diff_le_sup (set.range s₁) (set.range s₂)) _,
-          refine lt_of_le_of_lt (cardinal.mk_union_le _ _) _,
-          refine cardinal.add_lt_of_lt κ_regular.aleph_0_le
-            (lt_of_le_of_lt cardinal.mk_range_le N₁.snd.property)
-            (lt_of_le_of_lt cardinal.mk_range_le N₂.snd.property) },
-        { obtain ⟨aN₂, haN₂, haN₂'⟩ := hN₂,
-          have := hs₂ ⟨aN₂, or.inr haN₂⟩,
-          exact eq_of_mem_litter_set_of_mem_litter_set
-            ((h₂ this).symm.mp haN₂') ((h₂' this).symm.mp haN₂.left) } },
-      { obtain ⟨aN₁, haN₁, haN₁'⟩ := hN₁,
-          have := hs₁ ⟨aN₁, or.inr haN₁⟩,
-          exact eq_of_mem_litter_set_of_mem_litter_set
-            ((h₂ this).symm.mp haN₁.left) ((h₂' this).symm.mp haN₁') } } },
+    have := h₂ (h₂' a₂ a₂.property),
+    rw subtype.coe_eta at this,
+    rw ha₂ at this,
+    obtain ⟨⟨a₂L, a₂⟩, ha₂'⟩ := a₂,
+    cases this.mpr haN₁, cases ha₂', refl },
+  { cases h₁' ⟨_, hL₂, rfl⟩ },
+  cases (σ.property.backward.one_to_one A).near_litter _ hL₂ hN',
+  obtain ⟨M₁, hM₁, s₁, hs₁, gs₁⟩ := σ.property.backward.near_litter_cond _ _ A hL₁,
+  obtain ⟨M₂, hM₂, s₂, hs₂, gs₂⟩ := σ.property.backward.near_litter_cond _ _ A hL₂,
+  dsimp only at gs₁ gs₂,
+  cases eq_empty_or_nonempty ((N₁.snd.val \ litter_set N₁.fst) ∩ N₂.snd) with hN₁ hN₁,
+  { cases eq_empty_or_nonempty ((N₂.snd.val \ litter_set N₂.fst) ∩ N₁.snd) with hN₂ hN₂,
+    { rw eq_empty_iff_forall_not_mem at hN₁ hN₂, specialize hN₁ a, specialize hN₂ a,
+      rw [mem_inter_iff, and_comm, mem_diff] at hN₁ hN₂,
+      push_neg at hN₁ hN₂, specialize hN₁ haN₂ haN₁, specialize hN₂ haN₁ haN₂,
+      have := eq_of_mem_litter_set_of_mem_litter_set hN₁ hN₂,
+      rw this at hM₁,
+      have M₁_eq_M₂ := (σ.property.forward.one_to_one A).near_litter _ hM₁ hM₂,
+      dsimp only at M₁_eq_M₂, subst M₁_eq_M₂,
+      refine is_near_litter_litter_set_iff.1 _,
+      unfold is_near_litter is_near,
+      rw [gs₁, gs₂, symm_diff_left_comm, ← symm_diff_assoc, symm_diff_symm_diff_cancel_left],
+      refine ((cardinal.mk_le_mk_of_subset $ symm_diff_le_sup s₁.range s₂.range).trans $
+        cardinal.mk_union_le _ _).trans_lt _,
+      exact cardinal.add_lt_of_lt κ_regular.aleph_0_le
+        (cardinal.mk_range_le.trans_lt N₁.2.2) (cardinal.mk_range_le.trans_lt N₂.2.2) },
+    { obtain ⟨aN₂, haN₂, haN₂'⟩ := hN₂,
+      have := hs₂ ⟨aN₂, or.inr haN₂⟩,
+      exact eq_of_mem_litter_set_of_mem_litter_set
+        ((h₂ this).symm.mp haN₂') ((h₂' this).symm.mp haN₂.left) } },
+  { obtain ⟨aN₁, haN₁, haN₁'⟩ := hN₁,
+      have := hs₁ ⟨aN₁, or.inr haN₁⟩,
+      exact eq_of_mem_litter_set_of_mem_litter_set
+        ((h₂ this).symm.mp haN₁.left) ((h₂' this).symm.mp haN₁') }
 end
 
 lemma litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
@@ -1660,7 +1617,7 @@ lemma litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index 
   L₁ ≠ L₂ → disjoint N₁.snd.val N₂.snd.val :=
 begin
   contrapose!,
-  rw set.not_disjoint_iff,
+  rw not_disjoint_iff,
   rintro ⟨a, ha₁, ha₂⟩,
   exact litter_eq_of_image_inter B σ A hN₁ hN₂ a ha₁ ha₂,
 end
@@ -1689,11 +1646,11 @@ the unassigned atoms in the litter in the domain with the unassigned atoms in th
 variables (σ : allowable_partial_perm B) (a : atom) (A : extended_index B) (N : near_litter)
 
 lemma atom_value_inj_range (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  set.range (λ (b : {b : atom | b ∈ litter_set a.fst ∧ (sum.inl b, A) ∈ σ.val.domain}),
+  range (λ (b : {b : atom | b ∈ litter_set a.fst ∧ (sum.inl b, A) ∈ σ.val.domain}),
     (atom_value_inj B σ A) ⟨b.val, b.property.right⟩) =
   {b : atom | b ∈ N.snd.val ∧ (sum.inl b, A) ∈ σ.val.range} :=
 begin
-  rw set.range_eq_iff,
+  rw range_eq_iff,
   refine ⟨λ c, ⟨_, _⟩, λ c hc, _⟩,
   { dsimp only [atom_value_inj, subtype.coe_mk, embedding.coe_fn_mk],
     have := atom_value_spec B σ A c c.property.right,
@@ -1701,7 +1658,7 @@ begin
       σ.property.forward.atom_cond a.fst A,
     { cases (σ.property.backward.one_to_one A).near_litter _ ha h₁,
       rw h₃,
-      rw set.mem_range,
+      rw mem_range,
       refine ⟨⟨c, c.2.1⟩, _⟩,
       rw (σ.property.backward.one_to_one A).atom _ (h₂ c c.2.1) this, refl },
     { cases h₁ ⟨_, ha, rfl⟩ },
@@ -1787,7 +1744,7 @@ begin
   have h₁ : #↥{a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain} = #κ,
   { cases le_iff_eq_or_lt.mp (cardinal.mk_le_mk_of_subset (show
       {a' ∈ litter_set a.fst | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.domain}
-        ⊆ litter_set a.fst, by simp only [set.sep_subset])),
+        ⊆ litter_set a.fst, by simp only [sep_subset])),
     { rw [h, mk_litter_set] },
     { rw mk_litter_set at h,
       exfalso, refine (ne_of_lt $ cardinal.add_lt_of_lt κ_regular.aleph_0_le hsmall h) _,
@@ -1801,7 +1758,7 @@ begin
   have h₂ : #↥{a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.range} = #κ,
   { cases le_iff_eq_or_lt.mp (cardinal.mk_le_mk_of_subset (show
       {a' ∈ N.snd.val | (⟨sum.inl a', A⟩ : support_condition B) ∉ σ.val.range}
-        ⊆ N.snd.val, by simp only [set.sep_subset])),
+        ⊆ N.snd.val, by simp only [sep_subset])),
     { rw [h, N.snd.property.mk_eq_κ] },
     { rw N.snd.property.mk_eq_κ at h,
       exfalso, refine (ne_of_lt $ cardinal.add_lt_of_lt κ_regular.aleph_0_le h₂' h) _,
@@ -1863,19 +1820,19 @@ lemma exists_atom_to_cond (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, 
   {c : atom} (hc₁ : c ∈ N.snd.val) (hc₂ : (sum.inl c, A) ∉ σ.val.range) :
   ∃ d, atom_to_cond B σ a A N hsmall ha d = (sum.inl (d, c), A) :=
 begin
-  obtain ⟨d, hd⟩ : (⟨c, hc₁, hc₂⟩ : ↥{a' ∈ N.snd.val | _}) ∈ set.range (atom_map B σ a A N hsmall ha),
-  { rw equiv.range_eq_univ, exact set.mem_univ _ },
+  obtain ⟨d, hd⟩ : (⟨c, hc₁, hc₂⟩ : ↥{a' ∈ N.snd.val | _}) ∈ range (atom_map B σ a A N hsmall ha),
+  { rw equiv.range_eq_univ, exact mem_univ _ },
   refine ⟨d, _⟩, unfold atom_to_cond, rw hd, refl,
 end
 
 lemma atom_union_one_to_one_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  spec.one_to_one_forward B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)) :=
+  spec.one_to_one_forward B (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha)) :=
 begin
   refine λ C, ⟨λ b p hp q hq, _, λ N' M hM M' hM', _⟩,
-  { simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_set_of_eq,
-               set.mem_union_eq, set.mem_range, set_coe.exists] at hp hq,
+  { simp only [subtype.val_eq_coe, mem_sep_eq, mem_set_of_eq,
+               mem_union_eq, mem_range, set_coe.exists] at hp hq,
     obtain hp | ⟨x, ⟨hxa, hxσ⟩, hx⟩ := hp; obtain hq | ⟨y, ⟨hya, hyσ⟩, hy⟩ := hq,
     { exact (σ.prop.forward.one_to_one C).atom b hp hq },
     { obtain ⟨c, hcond, hc, hcnin⟩ := atom_to_cond_spec B σ a A N hsmall ha ⟨y, hya, hyσ⟩,
@@ -1885,8 +1842,8 @@ begin
       cases hx.symm.trans hcond,
       cases hcnin ⟨_, hq, rfl⟩ },
     { exact (atom_to_cond_eq' B σ a A _ hsmall ha hx hy).1 } },
-  simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_set_of_eq,
-             set.mem_union_eq, set.mem_range, set_coe.exists] at hM hM',
+  simp only [subtype.val_eq_coe, mem_sep_eq, mem_set_of_eq,
+             mem_union_eq, mem_range, set_coe.exists] at hM hM',
   obtain hM | ⟨x, ⟨hxa, hxσ⟩, hx⟩ := hM,
   { obtain hM' | ⟨y, ⟨hya, hyσ⟩, hy⟩ := hM',
     { exact (σ.prop.forward.one_to_one C).near_litter N' hM hM' },
@@ -1899,11 +1856,11 @@ end
 lemma atom_union_one_to_one_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  spec.one_to_one_forward B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha))⁻¹ :=
+  spec.one_to_one_forward B (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha))⁻¹ :=
 begin
   refine λ C, ⟨λ b p hp q hq, _, λ N' M hM M' hM', _⟩,
-  { simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_set_of_eq,
-               set.mem_union_eq, set.mem_range, set_coe.exists, set.mem_inv] at hp hq,
+  { simp only [subtype.val_eq_coe, mem_sep_eq, mem_set_of_eq,
+               mem_union_eq, mem_range, set_coe.exists, mem_inv] at hp hq,
     obtain hp | ⟨x, ⟨hxa, hxσ⟩, hx⟩ := hp; obtain hq | ⟨y, ⟨hya, hyσ⟩, hy⟩ := hq,
     { exact (σ.prop.backward.one_to_one C).atom b hp hq },
     { obtain ⟨⟨h1, h2⟩, h3⟩ := hy, -- auto subst what???
@@ -1921,7 +1878,7 @@ end
 lemma atom_union_atom_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  ∀ L C, spec.atom_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)) L C :=
+  ∀ L C, spec.atom_cond B (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha)) L C :=
 begin
   intros L C,
   obtain ⟨L', hL, atom_map, hin, himg⟩ | ⟨hL, hLsmall⟩ | ⟨L', hL, hLsmall, hmaps⟩ := σ.prop.forward.atom_cond L C,
@@ -1934,13 +1891,13 @@ begin
         { unfold atom_to_cond at hin,
           cases hin with _ hin, cases hin } },
       unfold small spec.domain,
-      rw set.image_union,
+      rw image_union,
       have : {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
-        binary_condition.domain '' σ.val ∪ binary_condition.domain '' set.range (atom_to_cond B σ a A N hsmall ha)} = {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
+        binary_condition.domain '' σ.val ∪ binary_condition.domain '' range (atom_to_cond B σ a A N hsmall ha)} = {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
           binary_condition.domain '' σ.val} ∪ {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
-            binary_condition.domain '' set.range (atom_to_cond B σ a A N hsmall ha)},
+            binary_condition.domain '' range (atom_to_cond B σ a A N hsmall ha)},
       { ext,
-        simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_union_eq, set.mem_image, set.mem_range, set_coe.exists],
+        simp only [subtype.val_eq_coe, mem_sep_eq, mem_union_eq, mem_image, mem_range, set_coe.exists],
         split,
         { rintro ⟨hL, h | h⟩,
           { exact or.inl ⟨hL, h⟩ },
@@ -1951,8 +1908,8 @@ begin
       rw this,
       convert lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le
         hLsmall $ lt_of_eq_of_lt (cardinal.mk_emptyc _) κ_regular.pos),
-      simp only [binary_condition.domain, subtype.val_eq_coe, set.mem_sep_eq,
-                 set.mem_image, set.mem_range, set_coe.exists,
+      simp only [binary_condition.domain, subtype.val_eq_coe, mem_sep_eq,
+                 mem_image, mem_range, set_coe.exists,
   prod.mk.inj_iff],
       cases h,
       { refine funext (λ x, eq_iff_iff.2 ⟨_, λ h, by cases h⟩),
@@ -1962,7 +1919,7 @@ begin
           subst hb2,
           exact pairwise_disjoint_litter_set a.fst L h ⟨ha, hx⟩ },
         { cases hb1 } },
-      { refine set.ext (λ x, ⟨_, λ hx, by cases hx⟩),
+      { refine ext (λ x, ⟨_, λ hx, by cases hx⟩),
         rintro ⟨hL, ⟨b1, b2⟩, ⟨_, _, h1⟩, -, h2⟩,
         have := congr_arg prod.snd h1,
         simp only [atom_to_cond] at h2 this,
@@ -1972,14 +1929,14 @@ begin
   { by_cases a.fst ≠ L ∨ A ≠ C,
     { refine spec.atom_cond.small_in L' (or.inl hL) _ _,
       { unfold small spec.domain,
-        rw set.image_union,
+        rw image_union,
         have : {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
           binary_condition.domain '' σ.val ∪ binary_condition.domain ''
-            set.range (atom_to_cond B σ a A N hsmall ha)} = {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
+            range (atom_to_cond B σ a A N hsmall ha)} = {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
               binary_condition.domain '' σ.val} ∪ {a_1 ∈ litter_set L | (sum.inl a_1, C) ∈
-                binary_condition.domain '' set.range (atom_to_cond B σ a A N hsmall ha)},
+                binary_condition.domain '' range (atom_to_cond B σ a A N hsmall ha)},
         { ext,
-          simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_union_eq, set.mem_image, set.mem_range, set_coe.exists],
+          simp only [subtype.val_eq_coe, mem_sep_eq, mem_union_eq, mem_image, mem_range, set_coe.exists],
           split,
           { rintro ⟨hL, h | h⟩,
             { exact or.inl ⟨hL, h⟩ },
@@ -1990,8 +1947,8 @@ begin
         rw this,
         convert lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le hLsmall
             (lt_of_eq_of_lt (cardinal.mk_emptyc _) κ_regular.pos)),
-        simp only [binary_condition.domain, subtype.val_eq_coe, set.mem_sep_eq,
-                  set.mem_image, set.mem_range, set_coe.exists,
+        simp only [binary_condition.domain, subtype.val_eq_coe, mem_sep_eq,
+                  mem_image, mem_range, set_coe.exists,
     prod.mk.inj_iff],
         cases h,
         { refine funext (λ x, eq_iff_iff.2 ⟨_, λ h, by cases h⟩),
@@ -2001,7 +1958,7 @@ begin
             subst hb2,
             exact pairwise_disjoint_litter_set a.fst L h ⟨ha, hx⟩ },
           { cases hb1 } },
-        { refine set.ext (λ x, ⟨_, λ hx, by cases hx⟩),
+        { refine ext (λ x, ⟨_, λ hx, by cases hx⟩),
           rintro ⟨hL, ⟨b1, b2⟩, ⟨_, _, h1⟩, -, h2⟩,
           have := congr_arg prod.snd h1,
           simp only [atom_to_cond] at h2 this,
@@ -2020,7 +1977,7 @@ begin
         (λ x, dite ((sum.inl x.val, A) ∈ σ.val.domain)
           (λ hx, atom_value B σ A x hx)
           (λ hx, (atom_map B σ a A N hsmall ha ⟨x.val, x.prop, hx⟩).val))
-        (λ y hy, _) (set.ext $ λ x, ⟨λ hx, _, λ hx, _⟩),
+        (λ y hy, _) (ext $ λ x, ⟨λ hx, _, λ hx, _⟩),
       { by_cases (sum.inl y, A) ∈ σ.val.domain,
         { rw dif_pos h,
           exact or.inl (atom_value_spec B σ A y h) },
@@ -2054,7 +2011,7 @@ end
 lemma atom_union_atom_cond_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  ∀ L C, spec.atom_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha))⁻¹ L C :=
+  ∀ L C, spec.atom_cond B (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha))⁻¹ L C :=
 begin
   intros L C,
   obtain ⟨L', hL, atom_map, hin, himg⟩ | ⟨hL, hLsmall⟩ | ⟨L', hL, hLsmall, hmaps⟩ := σ.prop.backward.atom_cond L C,
@@ -2067,13 +2024,13 @@ begin
         cases hb.some_spec },
         rw spec.inv_domain at hLsmall ⊢,
         unfold spec.range,
-        rw set.image_union,
+        rw image_union,
         have : {a_1 ∈ litter_set N.fst | (sum.inl a_1, C) ∈
-          binary_condition.range '' σ.val ∪ binary_condition.range '' set.range (atom_to_cond B σ a A N hsmall ha)} = {a_1 ∈ litter_set N.fst | (sum.inl a_1, C) ∈
+          binary_condition.range '' σ.val ∪ binary_condition.range '' range (atom_to_cond B σ a A N hsmall ha)} = {a_1 ∈ litter_set N.fst | (sum.inl a_1, C) ∈
             binary_condition.range '' σ.val} ∪ {a_1 ∈ litter_set N.fst | (sum.inl a_1, C) ∈
-              binary_condition.range '' set.range (atom_to_cond B σ a A N hsmall ha)},
+              binary_condition.range '' range (atom_to_cond B σ a A N hsmall ha)},
         { ext,
-          simp only [subtype.val_eq_coe, set.mem_sep_eq, set.mem_union_eq, set.mem_image, set.mem_range, set_coe.exists],
+          simp only [subtype.val_eq_coe, mem_sep_eq, mem_union_eq, mem_image, mem_range, set_coe.exists],
           split,
           { rintro ⟨hL, h | h⟩,
             { exact or.inl ⟨hL, h⟩ },
@@ -2089,7 +2046,7 @@ begin
           cases hL ⟨_, (σ.prop.backward.near_litter_cond N a.fst.to_near_litter A ha).some_spec.1, rfl⟩ },
         { convert lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le
               hLsmall $ lt_of_eq_of_lt (cardinal.mk_emptyc _) κ_regular.pos),
-          refine set.ext (λ x, ⟨_, λ hx, hx.rec _⟩),
+          refine ext (λ x, ⟨_, λ hx, hx.rec _⟩),
           rintro ⟨-, ⟨_, _⟩, ⟨_, hb⟩, hx⟩,
           unfold atom_to_cond at hb,
           cases hb, cases hx, cases h rfl } },
@@ -2101,7 +2058,7 @@ lemma atom_union_near_litter_cond_forward (hc : (sum.inr (a.fst.to_near_litter, 
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
   ∀ N₁ N₂ C,
-    spec.near_litter_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)) N₁ N₂ C :=
+    spec.near_litter_cond B (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha)) N₁ N₂ C :=
 begin
   rintro N₁ N₂ C (h | h),
   { obtain ⟨M, hM₁, sd, hsd₁, hsd₂⟩ := σ.property.forward.near_litter_cond N₁ N₂ C h,
@@ -2114,7 +2071,7 @@ lemma atom_union_near_litter_cond_backward (hc : (sum.inr (a.fst.to_near_litter,
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
   ∀ N₁ N₂ C,
-    spec.near_litter_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha))⁻¹ N₁ N₂ C :=
+    spec.near_litter_cond B (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha))⁻¹ N₁ N₂ C :=
 begin
   rintro N₁ N₂ C (h | h),
   { obtain ⟨M, hM₁, sd, hsd₁, hsd₂⟩ := σ.property.backward.near_litter_cond N₁ N₂ C h,
@@ -2126,11 +2083,11 @@ end
 lemma atom_union_non_flexible_cond_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  spec.non_flexible_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)) :=
+  spec.non_flexible_cond B (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha)) :=
 begin
   rintro β δ γ hγ hδ hγδ N₁ C t (ht | ht) ρ hρ,
   { exact σ.property.forward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
-      (struct_perm.satisfies_union_left _ _ _ hρ) },
+      (hρ.mono $ subset_union_left _ _) },
   obtain ⟨d, hd⟩ := ht,
   cases hd,
 end
@@ -2138,7 +2095,7 @@ end
 lemma atom_union_non_flexible_cond_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  spec.non_flexible_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha))⁻¹ :=
+  spec.non_flexible_cond B (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha))⁻¹ :=
 begin
   rintro β δ γ hγ hδ hγδ N₁ C t (ht | ht) ρ hρ,
   { exact σ.property.backward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
@@ -2150,7 +2107,7 @@ end
 lemma atom_union_support_closed_forward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)).domain.support_closed B :=
+  (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha)).domain.support_closed B :=
 begin
   intros β δ γ hγ hδ hγδ C t ht,
   rw spec.domain_union at ht ⊢,
@@ -2165,7 +2122,7 @@ end
 lemma atom_union_support_closed_backward (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)).range.support_closed B :=
+  (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha)).range.support_closed B :=
 begin
   intros β δ γ hγ hδ hγδ C t ht,
   rw spec.range_union at ht ⊢,
@@ -2182,14 +2139,14 @@ end
 lemma atom_union_flexible_cond (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  ∀ C, spec.flexible_cond B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)) C :=
+  ∀ C, spec.flexible_cond B (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha)) C :=
 begin
   intro C,
   obtain (⟨hdom, hrge⟩ | ⟨hdom, hrge⟩) := σ.property.flexible_cond C,
   { refine spec.flexible_cond.co_large _ _,
     { convert hdom, ext L, split,
       { rintro ⟨hC₁, hC₂⟩, rw spec.domain_union at hC₂,
-        exact ⟨hC₁, λ h, hC₂ (set.mem_union_left _ h)⟩ },
+        exact ⟨hC₁, λ h, hC₂ (mem_union_left _ h)⟩ },
       { rintro ⟨hC₁, hC₂⟩, refine ⟨hC₁, λ h, _⟩,
         rw spec.domain_union at h,
         cases h,
@@ -2197,7 +2154,7 @@ begin
         { obtain ⟨d, ⟨e, hd₁⟩, hd₂⟩ := h, cases hd₁, cases hd₂ } } },
     { convert hrge, ext L, split,
       { rintro ⟨hC₁, hC₂⟩, rw spec.range_union at hC₂,
-        exact ⟨hC₁, λ h, hC₂ (set.mem_union_left _ h)⟩ },
+        exact ⟨hC₁, λ h, hC₂ (mem_union_left _ h)⟩ },
       { rintro ⟨hC₁, hC₂⟩, refine ⟨hC₁, λ h, _⟩,
         rw spec.range_union at h,
         cases h,
@@ -2217,7 +2174,7 @@ broken. -/
 lemma atom_union_allowable (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  spec.allowable_spec B (σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha)) :=
+  spec.allowable_spec B (σ.val ∪ range (atom_to_cond B σ a A N hsmall ha)) :=
 { forward :=
   { one_to_one := atom_union_one_to_one_forward B σ a A N hc hsmall ha,
     atom_cond := atom_union_atom_cond_forward B σ a A N hc hsmall ha,
@@ -2238,9 +2195,9 @@ lemma atom_union_all_atoms_domain (hc : (sum.inr (a.fst.to_near_litter, N), A) �
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) (b₁ b₂ : atom)
   (L : litter) (hb₁ : b₁ ∈ litter_set L) (C : extended_index B)
   (hσ : (⟨sum.inl ⟨b₁, b₂⟩, C⟩ : binary_condition B) ∈
-    set.range (atom_to_cond B σ a A N hsmall ha)) :
+    range (atom_to_cond B σ a A N hsmall ha)) :
   ∀ c ∈ litter_set L, ∃ d, (⟨sum.inl ⟨c, d⟩, C⟩ : binary_condition B) ∈
-    σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha) :=
+    σ.val ∪ range (atom_to_cond B σ a A N hsmall ha) :=
 begin
   intros c hc,
   by_cases (⟨sum.inl c, C⟩ : support_condition B) ∈ σ.val.domain,
@@ -2268,7 +2225,7 @@ lemma atom_union_mem (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (b₁ b₂ : atom) (C : extended_index B)
   (hσ : (⟨sum.inl ⟨b₁, b₂⟩, C⟩ : binary_condition B) ∈
-    set.range (atom_to_cond B σ a A N hsmall ha)) :
+    range (atom_to_cond B σ a A N hsmall ha)) :
   b₂ ∈ (N.snd : set atom) :=
 begin
   obtain ⟨d, hd⟩ := hσ,
@@ -2284,7 +2241,7 @@ begin
     rw (atom_to_cond_eq B σ a A N hsmall ha hd he).left,
     rw (atom_union_one_to_one_backward B σ a A N hc hsmall ha A).near_litter
       a.fst.to_near_litter (or.inl hc) h₁,
-    exact ((set.range_eq_iff _ _).mp h₃.symm).left _ },
+    exact ((range_eq_iff _ _).mp h₃.symm).left _ },
   { cases h₁ _, rw spec.domain_union, exact or.inl ⟨_, ha, rfl⟩ },
   { have : A = C,
     { cases hd, refl },
@@ -2301,12 +2258,12 @@ lemma atom_union_mem' (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (b₁ b₂ : atom) (C : extended_index B)
-  (hσ : (⟨sum.inl ⟨b₁, b₂⟩, C⟩ : binary_condition B) ∈ set.range (atom_to_cond B σ a A N hsmall ha))
+  (hσ : (⟨sum.inl ⟨b₁, b₂⟩, C⟩ : binary_condition B) ∈ range (atom_to_cond B σ a A N hsmall ha))
   (c : atom) (hc₁ : c ∈ litter_set b₂.fst) (hc₂ : (sum.inl c, A) ∉ σ.val.range) :
   c ∈ (N.snd : set atom) :=
 begin
   contrapose hc₂,
-  rw set.not_not_mem,
+  rw not_not_mem,
 
   suffices hb₂ : b₂.fst = N.fst,
   { rw hb₂ at hc₁,
@@ -2336,9 +2293,9 @@ lemma atom_union_all_atoms_range (hc : (sum.inr (a.fst.to_near_litter, N), A) �
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) (b₁ b₂ : atom)
   (L : litter) (hb₂ : b₂ ∈ litter_set L) (C : extended_index B)
   (hσ : (⟨sum.inl ⟨b₁, b₂⟩, C⟩ : binary_condition B) ∈
-    set.range (atom_to_cond B σ a A N hsmall ha)) :
+    range (atom_to_cond B σ a A N hsmall ha)) :
   ∀ c ∈ litter_set L, ∃ d, (⟨sum.inl ⟨d, c⟩, C⟩ : binary_condition B) ∈
-    σ.val ∪ set.range (atom_to_cond B σ a A N hsmall ha) :=
+    σ.val ∪ range (atom_to_cond B σ a A N hsmall ha) :=
 begin
   have b₂_mem := atom_union_mem B σ a A N hc hsmall ha _ _ _ hσ,
   obtain ⟨d, hd⟩ := hσ,
@@ -2389,19 +2346,19 @@ lemma le_atom_union (hc : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (hsmall : small {a ∈ litter_set a.fst | (sum.inl a, A) ∈ σ.val.domain})
   (ha : (sum.inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
   σ ≤ ⟨σ.val ∪
-    set.range (atom_to_cond B σ a A N hsmall ha), atom_union_allowable B σ a A N hc hsmall ha⟩ := {
-  subset := set.subset_union_left _ _,
+    range (atom_to_cond B σ a A N hsmall ha), atom_union_allowable B σ a A N hc hsmall ha⟩ := {
+  subset := subset_union_left _ _,
   all_flex_domain := begin
     intros L N' C hN' hσ₁ hσ₂,
-    cases set.mem_or_mem_of_mem_union hσ₂,
+    cases mem_or_mem_of_mem_union hσ₂,
     { exfalso, exact hσ₁ h },
-    simpa only [atom_to_cond, set.mem_range, prod.mk.inj_iff, false_and, exists_false] using h,
+    simpa only [atom_to_cond, mem_range, prod.mk.inj_iff, false_and, exists_false] using h,
   end,
   all_flex_range := begin
     intros L N' C hN' hσ₁ hσ₂,
-    cases set.mem_or_mem_of_mem_union hσ₂,
+    cases mem_or_mem_of_mem_union hσ₂,
     { exfalso, exact hσ₁ h },
-    simpa only [atom_to_cond, set.mem_range, prod.mk.inj_iff, false_and, exists_false] using h,
+    simpa only [atom_to_cond, mem_range, prod.mk.inj_iff, false_and, exists_false] using h,
   end,
   all_atoms_domain := begin
     intros b₁ b₂ L hb₁ C hC₁ hC₂ c hc',
@@ -2430,7 +2387,7 @@ begin
   swap, { exfalso, exact haσ ⟨_, hσ₂ a rfl, rfl⟩ },
   have := equiv_not_mem_atom B σ a A N hsmall hc₁,
   exact ⟨_, le_atom_union B σ a A N hc₁ hsmall hc₁, _,
-    set.mem_union_right _ ⟨⟨a, rfl, haσ⟩, rfl⟩, rfl⟩,
+    mem_union_right _ ⟨⟨a, rfl, haσ⟩, rfl⟩, rfl⟩,
 end
 
 end exists_ge_atom
@@ -2454,15 +2411,15 @@ private noncomputable def near_litter_image (hN : litter_set N.fst ≠ N.snd)
     near_litter :=
   ⟨(near_litter_value B σ A N.fst.to_near_litter hNL).fst,
     (near_litter_value B σ A N.fst.to_near_litter hNL).snd.val ∆
-      set.range (λ (a : {a // a ∈ litter_set N.fst ∆ ↑(N.snd)}),
+      range (λ (a : {a // a ∈ litter_set N.fst ∆ ↑(N.snd)}),
         atom_value B σ A a (ha a a.property)),
     begin
       rw [is_near_litter, is_near, small, ← symm_diff_assoc],
-      exact lt_of_le_of_lt (mk_union_le _ _)
+      exact (mk_union_le _ _).trans_lt
         (add_lt_of_lt κ_regular.aleph_0_le
-          (lt_of_le_of_lt (cardinal.mk_sdiff_le _ _)
+          (lt_of_le_of_lt (mk_le_mk_of_subset $ sdiff_subset_self _)
             (near_litter_value B σ A N.fst.to_near_litter hNL).snd.property)
-          (lt_of_le_of_lt (cardinal.mk_sdiff_le _ _)
+          (lt_of_le_of_lt (mk_le_mk_of_subset $ mk_sdiff_le _ _)
             (lt_of_le_of_lt mk_range_le N.snd.property))),
     end⟩
 
@@ -2484,7 +2441,7 @@ begin
   subst this,
   have : ∀ a, symm a = atom_value B σ A a ⟨_, hsy a, rfl⟩
     := λ b, (σ.prop.backward.one_to_one A).atom _ (hsy b) (atom_value_spec B σ A b ⟨_, hsy b, rfl⟩),
-  have that := congr_arg set.range (funext this).symm,
+  have that := congr_arg range (funext this).symm,
   convert hNN',
   obtain ⟨N', atoms, hN'⟩ := N',
   dsimp only at hsd, subst hsd,
@@ -2500,9 +2457,9 @@ begin
     { unfold symm_diff,
       intros S T,
       refine cardinal.mk_le_mk_of_subset _,
-      simp only [set.sup_eq_union, set.union_subset_iff],
+      simp only [sup_eq_union, union_subset_iff],
       exact ⟨λ x hx, or.inl hx.1, λ x hx, or.inr hx.1⟩ },
-    specialize this (litter_set N' ∆ M.snd.val ∆ set.range symm) (set.range symm),
+    specialize this (litter_set N' ∆ M.snd.val ∆ range symm) (range symm),
     rw [symm_diff_assoc, symm_diff_self, symm_diff_bot] at this,
     exact lt_of_le_of_lt
       (this.trans (cardinal.mk_union_le _ _))
@@ -2538,11 +2495,11 @@ lemma near_litter_union_one_to_one_forward (hN : litter_set N.fst ≠ N.snd)
   spec.one_to_one_forward B (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)}) :=
 begin
   refine λ C, ⟨λ a b hb c hc, _, λ M P hP Q hQ, _⟩,
-  { simp only [set.mem_set_of_eq, subtype.val_eq_coe, set.union_singleton, set.mem_insert_iff,
+  { simp only [mem_set_of_eq, subtype.val_eq_coe, union_singleton, mem_insert_iff,
                prod.mk.inj_iff, false_and, false_or] at hb hc,
     exact (σ.prop.forward.one_to_one C).atom a hb hc },
-  { simp only [set.mem_set_of_eq, subtype.val_eq_coe, set.union_singleton,
-               set.mem_insert_iff, prod.mk.inj_iff] at hP hQ,
+  { simp only [mem_set_of_eq, subtype.val_eq_coe, union_singleton,
+               mem_insert_iff, prod.mk.inj_iff] at hP hQ,
     obtain ⟨⟨h1, h2⟩, h3⟩ | hP := hP; obtain ⟨⟨h1', h2'⟩, h3'⟩ | hQ := hQ,
     { exact h1.trans h1'.symm },
     { subst h1, subst h2, subst h3,
@@ -2558,13 +2515,13 @@ lemma near_litter_union_one_to_one_backward (hN : litter_set N.fst ≠ N.snd)
   spec.one_to_one_forward B (σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)})⁻¹ :=
 begin
   refine λ C, ⟨λ a b hb c hc, _, λ M P hP Q hQ, _⟩,
-  { simp only [set.mem_set_of_eq, subtype.val_eq_coe, set.union_singleton, set.mem_insert_iff,
-               prod.mk.inj_iff, false_and, false_or, set.mem_inv] at hb hc,
+  { simp only [mem_set_of_eq, subtype.val_eq_coe, union_singleton, mem_insert_iff,
+               prod.mk.inj_iff, false_and, false_or, mem_inv] at hb hc,
     cases hb, cases hb,
     cases hc, cases hc,
     exact (σ.prop.backward.one_to_one C).atom a hb hc },
-  { simp only [set.mem_set_of_eq, subtype.val_eq_coe, set.union_singleton,
-               set.mem_insert_iff, prod.mk.inj_iff] at hP hQ,
+  { simp only [mem_set_of_eq, subtype.val_eq_coe, union_singleton,
+               mem_insert_iff, prod.mk.inj_iff] at hP hQ,
     obtain ⟨⟨h1, h2⟩, h3⟩ | hP := hP; obtain ⟨⟨h1', h2'⟩, h3'⟩ | hQ := hQ,
     { simp at hP },
     { exact (σ.prop.backward.one_to_one A).near_litter N
@@ -2585,16 +2542,16 @@ begin
   refine spec.atom_cond.small_out _ _,
   { rintro ⟨⟨_ | ⟨N, M⟩, _⟩, hb, hdom⟩; cases hdom,
     refine or.rec (λ h, hL ⟨_, h, rfl⟩) (λ h, _) hb,
-    cases set.mem_singleton_iff.1 h,
+    cases mem_singleton_iff.1 h,
     simpa only using hN },
   swap,
   refine spec.atom_cond.small_in L' (or.inl hL) _
       (λ a b hab, or.rec (λ h, hmaps h) (λ h, by cases h) hab),
   all_goals { convert hLsmall using 1,
-    refine set.ext (λ x, ⟨λ hx, ⟨hx.1, _⟩, λ hx, ⟨hx.1, _⟩⟩),
+    refine ext (λ x, ⟨λ hx, ⟨hx.1, _⟩, λ hx, ⟨hx.1, _⟩⟩),
     { obtain ⟨b, hb, hdom⟩ := hx.2,
       refine ⟨b, or.rec id (λ h, _) hb, hdom⟩,
-      cases set.mem_singleton_iff.1 h,
+      cases mem_singleton_iff.1 h,
       cases hdom },
     { obtain ⟨-, b, hb, hdom⟩ := hx,
       refine ⟨b, or.inl hb, hdom⟩ } }
@@ -2612,27 +2569,27 @@ begin
     refine spec.atom_cond.small_out _ _,
     { rintro ⟨⟨_ | ⟨N, M⟩, _⟩, hb, hdom⟩; cases hdom,
       refine or.rec (λ h, hL ⟨_, h, rfl⟩) (λ h, _) hb,
-      simp only [has_inv.inv, set.mem_singleton_iff, sum.elim_inr, prod.mk.inj_iff] at h,
+      simp only [has_inv.inv, mem_singleton_iff, sum.elim_inr, prod.mk.inj_iff] at h,
       obtain ⟨⟨rfl, hLM : L.to_near_litter = near_litter_image B σ M A hN hNL ha⟩, rfl⟩ := h,
       rw hLM at hL,
       sorry },
     convert hLsmall using 1,
-    refine set.ext (λ x, ⟨λ hx, ⟨hx.1, _⟩, λ hx, ⟨hx.1, _⟩⟩),
+    refine ext (λ x, ⟨λ hx, ⟨hx.1, _⟩, λ hx, ⟨hx.1, _⟩⟩),
     { obtain ⟨b, hb, hdom⟩ := hx.2,
       refine ⟨b, or.rec id (λ h, _) hb, hdom⟩,
       obtain ⟨⟨_, _⟩ | ⟨_, _⟩, _⟩ := b;
-      simp only [set.mem_singleton_iff, has_inv.inv, sum.elim_inl, sum.elim_inr] at h; cases h,
+      simp only [mem_singleton_iff, has_inv.inv, sum.elim_inl, sum.elim_inr] at h; cases h,
       cases hdom },
     { obtain ⟨-, b, hb, hdom⟩ := hx,
       refine ⟨b, or.inl hb, hdom⟩ } },
   { refine spec.atom_cond.small_in L' (or.inl hL) _
       (λ a b hab, or.rec (λ h, hmaps h) (λ h, by cases h) hab),
     convert hLsmall using 1,
-    refine set.ext (λ x, ⟨λ hx, ⟨hx.1, _⟩, λ hx, ⟨hx.1, _⟩⟩),
+    refine ext (λ x, ⟨λ hx, ⟨hx.1, _⟩, λ hx, ⟨hx.1, _⟩⟩),
     { obtain ⟨b, hb, hdom⟩ := hx.2,
       refine ⟨b, or.rec id (λ h, _) hb, hdom⟩,
       obtain ⟨⟨_, _⟩ | ⟨_, _⟩, _⟩ := b;
-      simp only [set.mem_singleton_iff, has_inv.inv, sum.elim_inl, sum.elim_inr] at h; cases h,
+      simp only [mem_singleton_iff, has_inv.inv, sum.elim_inl, sum.elim_inr] at h; cases h,
       cases hdom },
     { obtain ⟨-, b, hb, hdom⟩ := hx,
       refine ⟨b, or.inl hb, hdom⟩ } }
@@ -2666,7 +2623,7 @@ begin
   rintro N₁ N₂ C (h | h),
   { obtain ⟨M, hM₁, sd, hsd₁, hsd₂⟩ := σ.property.backward.near_litter_cond N₁ N₂ C h,
     exact ⟨M, or.inl hM₁, sd, λ a, or.inl (hsd₁ a), hsd₂⟩ },
-  dsimp only [set.mem_singleton_iff] at h,
+  dsimp only [mem_singleton_iff] at h,
   unfold has_inv.inv at h,
   simp only [sum.elim_inr, prod.mk.inj_iff] at h,
   cases h.left.left, have := h.left.right, subst this, cases h.right,
@@ -2681,7 +2638,7 @@ begin
   rintro β δ γ hγ hδ hγδ N₁ C t (ht | ht) ρ hρ,
   { exact σ.property.forward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
       (struct_perm.satisfies_union_left _ _ _ hρ) },
-  dsimp only [set.mem_singleton_iff] at ht,
+  dsimp only [mem_singleton_iff] at ht,
   cases ht, exfalso, exact hN rfl,
 end
 
@@ -2694,7 +2651,7 @@ begin
   { exact σ.property.backward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
       (struct_perm.satisfies_union_left _ _ _ hρ) },
   unfold has_inv.inv at ht,
-  simp only [sum.elim_inr, set.mem_singleton_iff, prod.mk.inj_iff] at ht,
+  simp only [sum.elim_inr, mem_singleton_iff, prod.mk.inj_iff] at ht,
   exfalso, -- This isn't true because N is never a litter.
   sorry
 end
@@ -2709,8 +2666,8 @@ begin
   rw unary_spec.lower_union,
   cases ht,
   { exact (σ.property.forward.support_closed hγ hδ hγδ C t ht).mono _ (subset_union_left _ _) },
-  simp only [spec.domain, binary_condition.domain, set.image_singleton,
-    set.mem_singleton_iff, sum.elim_inr, prod.mk.inj_iff] at ht,
+  simp only [spec.domain, binary_condition.domain, image_singleton,
+    mem_singleton_iff, sum.elim_inr, prod.mk.inj_iff] at ht,
   exfalso, cases ht.left, exact hN rfl,
 end
 
@@ -2735,7 +2692,7 @@ begin
       { rw spec.domain_union at h,
         cases h,
         { exact hC₂ h },
-        { simp only [spec.domain, set.image_singleton, set.mem_singleton_iff,
+        { simp only [spec.domain, image_singleton, mem_singleton_iff,
             binary_condition.domain, sum.elim_inr] at h,
           cases h, exact hN rfl } } },
     { convert hrge, ext L, split; rintro ⟨hC₁, hC₂⟩; refine ⟨hC₁, λ h, _⟩,
@@ -2743,7 +2700,7 @@ begin
       { rw spec.range_union at h,
         cases h,
         { exact hC₂ h },
-        { simp only [spec.range, set.image_singleton, set.mem_singleton_iff,
+        { simp only [spec.range, image_singleton, mem_singleton_iff,
             binary_condition.range, sum.elim_inr, prod.mk.inj_iff] at h,
           obtain ⟨h₁, h₂⟩ := h, cases h₂,
           refine image_not_flexible L _ hC₁, rw ← h₁, refl } } } },
@@ -2782,19 +2739,19 @@ lemma le_near_litter_union (hN : litter_set N.fst ≠ N.snd)
     ∀ L, litter_set L = (near_litter_image B σ N A hN hNL ha).snd.val → ¬ flexible L A) :
   σ ≤ ⟨σ.val ∪ {(sum.inr (N, near_litter_image B σ N A hN hNL ha), A)},
     near_litter_union_allowable B σ N A hN hNL ha image_not_flexible⟩ := {
-  subset := set.subset_union_left _ _,
+  subset := subset_union_left _ _,
   all_flex_domain := begin
     intros L N' C hN' hσ₁ hσ₂,
-    cases set.mem_or_mem_of_mem_union hσ₂,
+    cases mem_or_mem_of_mem_union hσ₂,
     { exfalso, exact hσ₁ h },
     { exfalso, cases h, exact hN rfl },
   end,
   all_flex_range := begin
     intros L N' C hN' hσ₁ hσ₂,
-    cases set.mem_or_mem_of_mem_union hσ₂,
+    cases mem_or_mem_of_mem_union hσ₂,
     { exfalso, exact hσ₁ h },
     { exfalso,
-      rw set.mem_singleton_iff at h,
+      rw mem_singleton_iff at h,
       have : C = A,
       { cases congr_arg prod.snd h, refl },
       subst this,
@@ -2808,13 +2765,13 @@ lemma le_near_litter_union (hN : litter_set N.fst ≠ N.snd)
     intros b₁ b₂ L hb₁ C hC₁ hC₂ c hc',
     cases hC₂,
     { exfalso, exact hC₁ hC₂ },
-    { exfalso, simpa only [set.mem_singleton_iff, prod.mk.inj_iff, false_and] using hC₂ },
+    { exfalso, simpa only [mem_singleton_iff, prod.mk.inj_iff, false_and] using hC₂ },
   end,
   all_atoms_range := begin
     intros b₁ b₂ L hb₁ C hC₁ hC₂ c hc',
     cases hC₂,
     { exfalso, exact hC₁ hC₂ },
-    { exfalso, simpa only [set.mem_singleton_iff, prod.mk.inj_iff, false_and] using hC₂ },
+    { exfalso, simpa only [mem_singleton_iff, prod.mk.inj_iff, false_and] using hC₂ },
   end }
 
 /-- If everything that constrains a near litter lies in `σ`, we can add the near litter to `σ`,
@@ -2828,7 +2785,7 @@ begin
   by_cases image_not_flexible :
     ∀ L, litter_set L = (near_litter_image B σ N A hN hNL ha).snd.val → ¬ flexible L A,
   { exact ⟨_, le_near_litter_union B σ N A hN hNL ha image_not_flexible,
-    ⟨_, set.mem_union_right _ rfl, rfl⟩⟩ },
+    ⟨_, mem_union_right _ rfl, rfl⟩⟩ },
   { -- Seek a contradiction (discuss this with Peter).
     push_neg at image_not_flexible,
     obtain ⟨L, hL₁, hL₂⟩ := image_not_flexible,
@@ -3041,9 +2998,9 @@ lemma precise_atom_image_range {dom rge} (bij : rough_bijection A dom rge)
   (L : {L : litter | flexible L A ∧ (sum.inr L.to_near_litter, A) ∉ dom})
   (abij : bij.precise_atom_bijection L)
   (atom_value : {a : litter_set L // (sum.inl a.val, A) ∈ dom} → atom) :
-  set.range (λ (a : litter_set L), precise_atom_image bij L abij atom_value a a.property) =
+  range (λ (a : litter_set L), precise_atom_image bij L abij atom_value a a.property) =
     (litter_set (bij.to_fun L) ∩ {a | (sum.inl a, A) ∉ rge}) ∪
-    set.range atom_value :=
+    range atom_value :=
 begin
   unfold precise_atom_image,
   ext a,
@@ -3054,7 +3011,7 @@ begin
     { rw ← hb,
       exact or.inl (abij.to_fun ⟨b, _⟩).property } },
   rintro (⟨ha₁, ha₂⟩ | ⟨b, hb⟩),
-  { rw set.mem_set_of at ha₂,
+  { rw mem_set_of at ha₂,
     set b := abij.inv_fun ⟨a, ha₁, ha₂⟩ with hb,
     refine ⟨⟨b, b.property.left⟩, _⟩,
     dsimp only,
@@ -3077,14 +3034,14 @@ private def precise_litter_image_aux {dom rge} (bij : rough_bijection A dom rge)
   (h₁ : # ↥(litter_set ↑(bij.to_fun L) \ {a : atom | (sum.inl a, A) ∉ rge}) < # κ)
   (h₂ : # {a : litter_set L // (sum.inl a.val, A) ∈ dom} < # κ) : near_litter :=
 ⟨(bij.to_fun L),
-  set.range (λ (a : litter_set L), precise_atom_image bij L abij atom_value a a.property),
+  range (λ (a : litter_set L), precise_atom_image bij L abij atom_value a a.property),
   begin
     rw precise_atom_image_range,
     unfold is_near_litter is_near small symm_diff,
     refine (cardinal.mk_union_le _ _).trans_lt (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
-    { rw [← set.sup_eq_union, sdiff_sup, ← set.inf_eq_inter, sdiff_inf_self_left],
-      exact lt_of_le_of_lt (cardinal.mk_le_mk_of_subset $ set.inter_subset_left _ _) h₁ },
-    { rw [← set.sup_eq_union, sup_sdiff, ← set.inf_eq_inter, inf_sdiff, sdiff_self, bot_inf_eq,
+    { rw [← sup_eq_union, sdiff_sup, ← inf_eq_inter, sdiff_inf_self_left],
+      exact lt_of_le_of_lt (cardinal.mk_le_mk_of_subset $ inter_subset_left _ _) h₁ },
+    { rw [← sup_eq_union, sup_sdiff, ← inf_eq_inter, inf_sdiff, sdiff_self, bot_inf_eq,
         bot_sup_eq],
       refine lt_of_le_of_lt (cardinal.mk_le_mk_of_subset $ @sdiff_le _ _ (litter_set _) _) _,
       exact lt_of_le_of_lt cardinal.mk_range_le h₂ },
@@ -3113,7 +3070,7 @@ precise_litter_image_aux bij L abij (λ a, atom_value B σ A a.1 a.2)
   (begin
     convert small_of_rough_bijection bij L,
     ext a, split,
-    { rintro ⟨ha₁, ha₂⟩, simp only [set.mem_set_of_eq, set.not_not_mem] at ha₂, exact ⟨ha₁, ha₂⟩ },
+    { rintro ⟨ha₁, ha₂⟩, simp only [mem_set_of_eq, not_not_mem] at ha₂, exact ⟨ha₁, ha₂⟩ },
     { rintro ⟨ha₁, ha₂⟩, exact ⟨ha₁, function.eval ha₂⟩ }
   end)
   (begin
@@ -3131,7 +3088,7 @@ precise_litter_image_aux bij.inv L abij
     convert small_of_rough_bijection bij.inv'
       ⟨L.1, L.2.1, by simpa only [inv_def, spec.inv_domain] using L.2.2⟩,
     ext a, split,
-    { rintro ⟨ha₁, ha₂⟩, simp only [set.mem_set_of_eq, set.not_not_mem] at ha₂,
+    { rintro ⟨ha₁, ha₂⟩, simp only [mem_set_of_eq, not_not_mem] at ha₂,
       sorry /- exact ⟨ha₁, ha₂⟩, -/ },
     { rintro ⟨ha₁, ha₂⟩,
       sorry /- exact ⟨ha₁, function.eval ha₂⟩, -/ }
@@ -3177,13 +3134,13 @@ begin
   { rintro b a₁ ((ha₁ | ha₁) | ha₁) a₂ ha₂,
     { obtain ((ha₂ | ha₂) | ha₂) := ha₂,
       { exact (σ.property.forward.one_to_one C).atom b ha₁ ha₂ },
-      { simpa only [new_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff, false_and,
+      { simpa only [new_flexible_litters, mem_set_of_eq, prod.mk.inj_iff, false_and,
           exists_false] using ha₂ },
-      { simpa only [new_inverse_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff, false_and,
+      { simpa only [new_inverse_flexible_litters, mem_set_of_eq, prod.mk.inj_iff, false_and,
           exists_false] using ha₂ } },
-    { simpa only [new_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff, false_and,
+    { simpa only [new_flexible_litters, mem_set_of_eq, prod.mk.inj_iff, false_and,
           exists_false] using ha₁ },
-    { simpa only [new_inverse_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff, false_and,
+    { simpa only [new_inverse_flexible_litters, mem_set_of_eq, prod.mk.inj_iff, false_and,
         exists_false] using ha₁ } },
   { rintro N M₁ ((hM₁ | hM₁) | hM₁) M₂ ((hM₂ | hM₂) | hM₂),
     { exact (σ.property.forward.one_to_one C).near_litter N hM₁ hM₂ },
@@ -3228,8 +3185,8 @@ lemma flexible_union_atoms_eq (L : litter) (C : extended_index B) :
 begin
   ext a,
   simp only [spec.domain_union, new_flexible_litters, new_inverse_flexible_litters,
-    subtype.val_eq_coe, set.mem_set_of_eq, set_coe.exists, subtype.coe_mk, equiv.to_fun_as_coe,
-    set.mem_union_eq, set.mem_sep_iff],
+    subtype.val_eq_coe, mem_set_of_eq, set_coe.exists, subtype.coe_mk, equiv.to_fun_as_coe,
+    mem_union_eq, mem_sep_iff],
   refine and_congr_right (λ ha, ⟨_, λ h, or.inl $ or.inl h⟩),
   rintro ((h | ⟨⟨as | Ns, C⟩, ⟨L, hL, hc⟩, h⟩) | ⟨⟨as | Ns, C⟩, ⟨L, hL, hc⟩, h⟩),
   { exact h },
@@ -3285,11 +3242,11 @@ begin
         { obtain ⟨_, ⟨L', rfl⟩, h₁⟩ := h₁, cases h₁, cases h rfl },
         { obtain ⟨_, ⟨L', rfl⟩, h₁⟩ := h₁, cases congr_arg prod.snd h₁, cases h rfl } },
       convert h₂ using 1,
-      refine set.ext (λ a, ⟨_, λ ha, ⟨ha.1, _⟩⟩),
+      refine ext (λ a, ⟨_, λ ha, ⟨ha.1, _⟩⟩),
       { rintro ⟨hL, ⟨⟨x, y⟩ | _, b⟩, (hxy | hxy) | hxy, ha⟩; cases ha,
         { exact ⟨hL, _, hxy, rfl⟩ },
         all_goals { obtain ⟨_, _, _, _, h⟩ := hxy } },
-      { simp only [spec.domain_union, set.mem_union_eq],
+      { simp only [spec.domain_union, mem_union_eq],
         exact or.inl (or.inl ha.2) } } },
   { refine spec.atom_cond.small_in N (or.inl $ or.inl hN) _ _,
     { rw flexible_union_atoms_eq, exact h₁ },
@@ -3350,14 +3307,14 @@ begin
     refine spec.flexible_cond.all _ _,
     { intros L hL,
       by_cases h : ((sum.inr L.to_near_litter, C) ∈ σ.val.domain);
-      rw [spec.domain_union, spec.domain_union, set.mem_union, set.mem_union],
+      rw [spec.domain_union, spec.domain_union, mem_union, mem_union],
       { left, left, exact h },
       { left, right,
         unfold new_flexible_litters,
         refine ⟨_, _, _⟩,
         { exact (sum.inr (L.to_near_litter, precise_litter_image bij ⟨L, hL, h⟩
                   (abij ⟨L, hL, h⟩)), C) },
-        { simp only [subtype.val_eq_coe, set.mem_set_of_eq, set_coe.exists, subtype.coe_mk,
+        { simp only [subtype.val_eq_coe, mem_set_of_eq, set_coe.exists, subtype.coe_mk,
                       prod.mk.inj_iff, eq_self_iff_true, and_true, exists_and_distrib_left],
           use L,
           exact ⟨rfl, ⟨⟨hL, h⟩, rfl⟩⟩ },
@@ -3366,7 +3323,7 @@ begin
     { intros L hL,
       -- might want to switch naming around if it doesn't shorten code
       by_cases h : ((sum.inr L.to_near_litter, C) ∈ σ.val.range);
-      rw [spec.range_union, spec.range_union, set.mem_union, set.mem_union],
+      rw [spec.range_union, spec.range_union, mem_union, mem_union],
       { left, left, exact h },
       { right,
         unfold new_inverse_flexible_litters,
@@ -3374,7 +3331,7 @@ begin
         { exact (sum.inr (precise_litter_inverse_image bij (bij.to_fun (bij.inv_fun ⟨L, hL, h⟩))
             (abij (bij.inv_fun ⟨L, hL, h⟩)).inv,
             (bij.to_fun (bij.inv_fun ⟨L, hL, h⟩)).1.to_near_litter), C) },
-        { simp only [subtype.val_eq_coe, set.mem_set_of_eq, equiv.to_fun_as_coe, set_coe.exists,
+        { simp only [subtype.val_eq_coe, mem_set_of_eq, equiv.to_fun_as_coe, set_coe.exists,
                       prod.mk.inj_iff, eq_self_iff_true, and_true],
           refine ⟨(bij.inv_fun ⟨L, hL, h⟩), ⟨(bij.inv_fun ⟨L, hL, h⟩).prop, _⟩⟩,
           rw subtype.coe_eta,
@@ -3387,12 +3344,12 @@ begin
         rw and.congr_right_iff,
         intro hx,
         rw not_iff_not,
-        rw [spec.domain_union, spec.domain_union, set.mem_union, set.mem_union],
+        rw [spec.domain_union, spec.domain_union, mem_union, mem_union],
         split,
         { rintro ((h | ⟨b, hb₁, hb₂⟩) | h),
           { exact h },
           { unfold new_flexible_litters at hb₁,
-            rw set.mem_set_of at hb₁,
+            rw mem_set_of at hb₁,
             obtain ⟨⟨L, hL₁, hL₂⟩, beq⟩ := hb₁,
             subst beq,
             cases hb₂,
@@ -3413,7 +3370,7 @@ lemma new_flexible_litters_inv :
   (new_flexible_litters bij abij)⁻¹ = new_inverse_flexible_litters bij.inv' (abij_inv bij abij) :=
 begin
   ext ⟨_ | ⟨N₁, N₂⟩, C⟩,
-  { simp only [has_inv.inv, new_flexible_litters, new_inverse_flexible_litters, set.mem_set_of_eq,
+  { simp only [has_inv.inv, new_flexible_litters, new_inverse_flexible_litters, mem_set_of_eq,
     prod.mk.inj_iff, sum.elim_inl, exists_false, false_and] },
   split,
   { rintro ⟨L, hL⟩, cases hL, clear hL,
@@ -3422,7 +3379,7 @@ begin
     congr' 3,
     { unfold precise_litter_inverse_image precise_litter_image_aux,
       refine near_litter.val_injective _, dsimp only,
-      rw set.range_eq_iff,
+      rw range_eq_iff,
       split,
       { intro a, refine ⟨⟨a, _⟩, _⟩,
         { rw rough_bijection.inv'_to_fun, simp_rw subtype.coe_mk, rw subtype.coe_eta,
@@ -3482,9 +3439,9 @@ lemma forward_eq_backward :
   σ⁻¹.val ∪ new_flexible_litters bij.inv' (abij_inv bij abij) ∪
     new_inverse_flexible_litters bij.inv' (abij_inv bij abij) :=
 begin
-  rw [spec.inv_union, spec.inv_union, inv_def, set.union_assoc, set.union_assoc,
+  rw [spec.inv_union, spec.inv_union, inv_def, union_assoc, union_assoc,
     new_flexible_litters_inv, new_inverse_flexible_litters_inv],
-  congr' 1, rw set.union_comm,
+  congr' 1, rw union_comm,
 end
 
 lemma flexible_union_allowable :
@@ -3520,7 +3477,7 @@ lemma flexible_union_allowable :
 lemma le_flexible_union :
   σ ≤ ⟨σ.val ∪ new_flexible_litters bij abij ∪ new_inverse_flexible_litters bij abij,
     flexible_union_allowable bij abij⟩ := {
-  subset := by { simp_rw set.union_assoc, exact set.subset_union_left _ _ },
+  subset := by { simp_rw union_assoc, exact subset_union_left _ _ },
   all_flex_domain := begin
     intros L N' C hN' hσ₁ hσ₂ L' hL',
     split,
@@ -3554,17 +3511,17 @@ lemma le_flexible_union :
   all_atoms_domain := begin
     rintro a b L ha C hσ₁ ((hσ₂ | hσ₂) | hσ₂),
     { cases hσ₁ hσ₂ },
-    { simpa only [new_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff,
+    { simpa only [new_flexible_litters, mem_set_of_eq, prod.mk.inj_iff,
         false_and, exists_false] using hσ₂ },
-    { simpa only [new_inverse_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff,
+    { simpa only [new_inverse_flexible_litters, mem_set_of_eq, prod.mk.inj_iff,
         false_and, exists_false] using hσ₂ }
   end,
   all_atoms_range := begin
     rintro a b L ha C hσ₁ ((hσ₂ | hσ₂) | hσ₂),
     { cases hσ₁ hσ₂ },
-    { simpa only [new_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff,
+    { simpa only [new_flexible_litters, mem_set_of_eq, prod.mk.inj_iff,
         false_and, exists_false] using hσ₂ },
-    { simpa only [new_inverse_flexible_litters, set.mem_set_of_eq, prod.mk.inj_iff,
+    { simpa only [new_inverse_flexible_litters, mem_set_of_eq, prod.mk.inj_iff,
         false_and, exists_false] using hσ₂ }
   end,
 }
@@ -3723,11 +3680,11 @@ lemma non_flexible_union_allowable :
   flexible_cond := non_flexible_union_flexible_cond hγ hδ hγδ t hπ }
 
 lemma le_non_flexible_union : σ ≤ ⟨_, non_flexible_union_allowable hγ hδ hγδ t hπ⟩ :=
-{ subset := set.subset_union_left _ _,
+{ subset := subset_union_left _ _,
   all_flex_domain := begin
     rintro L N' C' hN' hσ₁ (hσ₂ | hσ₂),
     { cases hσ₁ hσ₂ },
-    { simp only [new_non_flexible_constraint, set.mem_singleton_iff, prod.mk.inj_iff] at hσ₂,
+    { simp only [new_non_flexible_constraint, mem_singleton_iff, prod.mk.inj_iff] at hσ₂,
       exfalso,
       cases hN' hγ hδ hγδ C t,
       { exact h (litter.to_near_litter_inj hσ₂.left.left) },
@@ -3736,7 +3693,7 @@ lemma le_non_flexible_union : σ ≤ ⟨_, non_flexible_union_allowable hγ hδ 
   all_flex_range := begin
     rintro L N' C' hN' hσ₁ (hσ₂ | hσ₂),
     { cases hσ₁ hσ₂ },
-    { simp only [new_non_flexible_constraint, set.mem_singleton_iff, prod.mk.inj_iff] at hσ₂,
+    { simp only [new_non_flexible_constraint, mem_singleton_iff, prod.mk.inj_iff] at hσ₂,
       exfalso,
       cases hN' hγ hδ hγδ C t,
       { -- This is the unpacked coherence condition on L and f.
@@ -3747,13 +3704,13 @@ lemma le_non_flexible_union : σ ≤ ⟨_, non_flexible_union_allowable hγ hδ 
   all_atoms_domain := begin
     rintro a b L ha C hσ₁ (hσ₂ | hσ₂),
     { cases hσ₁ hσ₂ },
-    { simpa only [new_non_flexible_constraint, set.mem_singleton_iff, prod.mk.inj_iff,
+    { simpa only [new_non_flexible_constraint, mem_singleton_iff, prod.mk.inj_iff,
         false_and] using hσ₂ }
   end,
   all_atoms_range := begin
     rintro a b L ha C hσ₁ (hσ₂ | hσ₂),
     { cases hσ₁ hσ₂ },
-    { simpa only [new_non_flexible_constraint, set.mem_singleton_iff, prod.mk.inj_iff,
+    { simpa only [new_non_flexible_constraint, mem_singleton_iff, prod.mk.inj_iff,
         false_and] using hσ₂ }
   end }
 
@@ -3779,7 +3736,7 @@ begin
      • (f_map_path hγ hδ t).to_near_litter,
   refine ⟨_, le_non_flexible_union hγ hδ hγδ t hπ, _⟩,
   rw spec.domain_union,
-  right, simp only [spec.domain, set.image_singleton, set.mem_singleton_iff], refl,
+  right, simp only [spec.domain, image_singleton, mem_singleton_iff], refl,
 end
 
 end exists_ge_non_flexible
@@ -3822,7 +3779,7 @@ using_well_founded { dec_tac := `[assumption] }
 /-- Any maximal allowable partial permutation under `≤` is total. -/
 lemma total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) : σ.val.total :=
-set.eq_univ_of_forall (total_of_maximal_aux B σ hσ foa)
+eq_univ_of_forall (total_of_maximal_aux B σ hσ foa)
 
 /-- Any maximal allowable partial permutation under `≤` is co-total. -/
 lemma co_total_of_maximal (σ : allowable_partial_perm B) (hσ : ∀ ρ ≥ σ, ρ = σ)
@@ -3888,7 +3845,7 @@ begin
   obtain ⟨ρ, -, hσρ, hρ⟩ := allowable_partial_perm.maximal_perm ⟨α, path.nil⟩ σ,
   have : ∀ (τ : allowable_partial_perm ⟨α, path.nil⟩), τ ≥ ρ → τ = ρ :=
     λ τ hτ, subtype.val_inj.mp
-      (set.eq_of_subset_of_subset (hρ τ (le_trans hσρ hτ) hτ).subset hτ.subset),
+      (eq_of_subset_of_subset (hρ τ (le_trans hσρ hτ) hτ).subset hτ.subset),
   have ρ_total := allowable_partial_perm.total_of_maximal ⟨α, path.nil⟩ ρ this foa,
   have ρ_co_total := allowable_partial_perm.co_total_of_maximal ⟨α, path.nil⟩ ρ this foa,
   obtain ⟨π, hπ⟩ := ρ.extends_to_allowable_of_total ρ_total ρ_co_total foa syn,
