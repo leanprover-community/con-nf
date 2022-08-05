@@ -23,8 +23,8 @@ structure strong_support extends word_support B :=
 structure small_strong_support extends strong_support B :=
 (small : small carrier)
 
-instance : mul_action (allowable_path B) (word_support B) := {
-  smul := λ π S, {
+
+def proto_smul : allowable_path B → word_support B → word_support B := λ π S, {
     carrier := (π.to_struct_perm) • S.carrier,
     r := λ c₁ c₂, begin
       refine S.r ⟨(π.to_struct_perm)⁻¹ • c₁, _⟩
@@ -43,27 +43,43 @@ instance : mul_action (allowable_path B) (word_support B) := {
   irrefl := begin intros, apply S.wo.irrefl, end,
   trans := begin intros,apply S.wo.trans, apply ᾰ, apply ᾰ_1 end,
   wf := begin have := @inv_image.is_well_founded _ _ S.r ⟨S.wo.wf⟩, convert (this _).wf, end },
-  },
-  one_smul := begin intros, cases b, unfold has_smul.smul, simp only [struct_perm.coe_to_near_litter_perm, map_one, inv_one, one_smul, eq_self_iff_true, true_and],
+  }
+
+instance : mul_action (allowable_path B) (word_support B) := {
+  smul := proto_smul B,
+  one_smul := begin intros, cases b, dsimp[(proto_smul)], simp only [struct_perm.coe_to_near_litter_perm, map_one, inv_one, one_smul, eq_self_iff_true, true_and],
   dsimp [(sum.map)], have backup: (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,have : (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,
   convert heq_of_eq _, rw mul_action.one_smul, clear b_wo,
   suffices : b_r == λ o1 o2, b_r (cast this o1) (cast this o2), exact this,
   revert b_r this, rw backup,
   intros, apply heq_of_eq, funext, refl, funext,
   cases c₁, cases c₂, cases c₁_val, cases c₂_val,
-  simp only [subtype.coe_mk, one_smul, eq_self_iff_true, set_coe_cast], congr,
-  cases c₁_val_fst,
-  simp only [has_smul.comp.smul, sum.elim_inl, function.comp_app, struct_perm.of_bot_one, one_smul],
-  simp only [has_smul.comp.smul, sum.elim_inr, function.comp_app, struct_perm.of_bot_one, one_smul],
-  cases c₂_val_fst,
-  simp only [has_smul.comp.smul, sum.elim_inl, function.comp_app, struct_perm.of_bot_one, one_smul],
-  simp only [has_smul.comp.smul, sum.elim_inr, function.comp_app, struct_perm.of_bot_one, one_smul],
-   end,
-  mul_smul := begin intros, cases b, unfold has_smul.smul, simp only [prod.mk.inj_iff], split, dsimp [set.has_smul_set], apply mul_action.mul_smul,
-  apply heq.symm, convert heq_of_eq _, dsimp [(set.has_smul_set)], rw mul_action.mul_smul,
---  let long_type := ↥(allowable_path.to_struct_perm x • {carrier := allowable_path.to_struct_perm y • {carrier := b_carrier, r := b_r, wo := b_wo}.carrier, r := λ (c₁ c₂ : ↥(⇑allowable_path.to_struct_perm y • {carrier := b_carrier, r := b_r, wo := b_wo}.carrier)), {carrier := b_carrier, r := b_r, wo := b_wo}.r ⟨(sum.map (has_smul.comp.smul struct_perm.to_near_litter_perm ((struct_perm.derivative ↑c₁.snd) (allowable_path.to_struct_perm y)⁻¹)) (has_smul.comp.smul struct_perm.to_near_litter_perm ((struct_perm.derivative ↑c₁.snd) (allowable_path.to_struct_perm y)⁻¹)) ↑c₁.fst, ↑c₁.snd), _⟩ ⟨(sum.map (has_smul.comp.smul struct_perm.to_near_litter_perm ((struct_perm.derivative ↑c₂.snd) (allowable_path.to_struct_perm y)⁻¹)) (has_smul.comp.smul struct_perm.to_near_litter_perm ((struct_perm.derivative ↑c₂.snd) (allowable_path.to_struct_perm y)⁻¹)) ↑c₂.fst, ↑c₂.snd), _⟩, wo := _}.carrier),
-  sorry,
-   end,
+  simp only [subtype.coe_mk, one_smul, eq_self_iff_true, set_coe_cast],
+  end,
+  mul_smul := begin intros, cases b, dsimp[(proto_smul)], simp only [prod.mk.inj_iff], split, apply mul_action.mul_smul,
+  simp only [map_mul, mul_inv_rev],
+  have h: ↥((x * y) • b_carrier) = ↥(x • y • b_carrier), rw mul_action.mul_smul,
+  have h2: ↥((x * y) • b_carrier) = ↥(x • y • b_carrier) , rw mul_action.mul_smul,
+  let f : ↥((x * y) • b_carrier) → ↥((x * y) • b_carrier) → Prop := (λ c₁ c₂ : ↥((x * y) • b_carrier), _),
+  let g : ↥(x • y • b_carrier) → ↥(x • y • b_carrier) → Prop := λ d₁ d₂ : ↥(x • y • b_carrier), f (cast (eq.symm h) d₁) (cast (eq.symm h) d₂),
+  suffices : (λ (c₁ c₂ : ↥((x * y) • b_carrier)), g (cast (h2) c₁) (cast (h2) c₂))== _,
+  dsimp [(g)] at this,
+  simp only [eq_self_iff_true, subtype.val_eq_coe, cast_cast, set_coe_cast, subtype.coe_eta] at this,
+  exact this, revert h2, rw h, intro h2, apply heq_of_eq, funext,  dsimp [(g), (f)],
+  have : ∀ c : ↥(x • y • b_carrier), (↑(cast (eq.symm h) c) : support_condition ↑B)= ↑c, intros,
+  have h2 :((x * y) • b_carrier) = (x • y • b_carrier), rw mul_action.mul_smul,
+  clear g,
+  cases c,
+  simp only [subtype.coe_mk],
+  revert c_property h,
+  rw ← h2,
+  intros,
+  simp only [set_coe_cast, subtype.coe_mk],
+  apply congr, apply congr,
+  refl,
+  simp only, rw mul_action.mul_smul, apply congr, refl, apply congr, refl, exact this c₁,
+  simp only, rw mul_action.mul_smul, apply congr, refl, apply congr, refl, exact this c₂,
+end,
 }
 
 /-- We can lower a support to a lower proper type index with respect to a path
