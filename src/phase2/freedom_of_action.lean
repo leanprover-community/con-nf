@@ -884,10 +884,27 @@ begin
 end
 
 lemma lower_non_flexible_cond (hσ : σ.allowable B) :
-  (σ.lower A).non_flexible_cond (le_index.mk β (B.path.comp A)) := sorry
+  (σ.lower A).non_flexible_cond (le_index.mk β (B.path.comp A)) :=
+begin
+  unfold spec.non_flexible_cond,
+  intros hb hg hd hgb hdb hgd hNl hp ht h1 hallp h2,
+
+  unfold struct_perm.satisfies at h2,
+  unfold struct_perm.satisfies_cond at h2,
+  have h := h2 h1,
+  simp at h,
+  rw ← h,
+  --repeat unpacked_coherence lemma,
+  sorry,
+end
 
 lemma lower_domain_closed (hσ : σ.allowable B) :
-  (σ.lower A).domain.support_closed (le_index.mk β (B.path.comp A)) := sorry
+  (σ.lower A).domain.support_closed (le_index.mk β (B.path.comp A)) :=
+  begin
+    unfold unary_spec.support_closed,
+    intros hb hg hd hgb hdb hgd hp ht h1 hallp hsup,
+    refine hsup _ ht,
+  end
 
 protected lemma spec.allowable.lower (hσ : σ.allowable B) ⦃β : Λ⦄ (A : path (B : type_index) β)
   (hβ : (β : type_index) < B) :
