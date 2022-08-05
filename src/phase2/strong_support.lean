@@ -23,9 +23,10 @@ structure strong_support extends word_support B :=
 structure small_strong_support extends strong_support B :=
 (small : small carrier)
 
-instance : mul_action (allowable_path B) (word_support B) := {
-  smul := λ π S, {
-    carrier := (π.to_struct_perm) • S.carrier,
+
+def proto_smul : allowable_path B → word_support B → word_support B :=
+λ π S,
+{ carrier := (π.to_struct_perm) • S.carrier,
     r := λ c₁ c₂, begin
       refine S.r ⟨(π.to_struct_perm)⁻¹ • c₁, _⟩
         ⟨(π.to_struct_perm)⁻¹ • c₂, _⟩;
@@ -35,30 +36,49 @@ instance : mul_action (allowable_path B) (word_support B) := {
   wo := { trichotomous := begin intros,
     have : ∀ c₁ : ↥(allowable_path.to_struct_perm π • S.carrier), (allowable_path.to_struct_perm π)⁻¹ • ↑c₁ ∈ S.carrier,
     intro c₁, rw [← set.mem_inv_smul_set_iff, inv_inv], exact c₁.property,
-    have : a = b ↔ (⟨(allowable_path.to_struct_perm π)⁻¹ • ↑a, this a⟩ :  {x // x ∈ S.carrier})
-                   =(⟨(allowable_path.to_struct_perm π)⁻¹ • ↑b, this b⟩  :  {x // x ∈ S.carrier}),
-    {split, intro h, subst h, intro h, cases a, cases b,
-    simp only [smul_left_cancel_iff, subtype.coe_mk] at h, subst h},
+    have : a = b ↔ (⟨(allowable_path.to_struct_perm π)⁻¹ • ↑a, this a⟩ : {x // x ∈ S.carrier})
+                   = (⟨(allowable_path.to_struct_perm π)⁻¹ • ↑b, this b⟩ : {x // x ∈ S.carrier}),
+    { simp [subtype.coe_inj] },
     rw this, apply S.wo.trichotomous, end,
   irrefl := begin intros, apply S.wo.irrefl, end,
   trans := begin intros,apply S.wo.trans, apply ᾰ, apply ᾰ_1 end,
-  wf := begin have := @inv_image.is_well_founded _ _ S.r ⟨S.wo.wf⟩, convert (this _).wf, end },
-  },
-  one_smul := begin intros, cases b, unfold has_smul.smul, simp only [struct_perm.coe_to_near_litter_perm, map_one, inv_one, one_smul, eq_self_iff_true, true_and],
-  dsimp [(sum.map)], have backup: (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,have : (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,convert heq_of_eq _, rw mul_action.one_smul, clear b_wo,
+  wf := begin have := @inv_image.is_well_founded _ _ S.r ⟨S.wo.wf⟩, convert (this _).wf, end } }
+
+instance : mul_action (allowable_path B) (word_support B) :=
+{ smul := proto_smul B,
+  one_smul := begin intros, cases b, dsimp [proto_smul], simp only [struct_perm.coe_to_near_litter_perm, map_one, inv_one, one_smul, eq_self_iff_true, true_and],
+  dsimp [(sum.map)], have backup: (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,have : (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,
+  convert heq_of_eq _, rw mul_action.one_smul, clear b_wo,
   suffices : b_r == λ o1 o2, b_r (cast this o1) (cast this o2), exact this,
   revert b_r this, rw backup,
   intros, apply heq_of_eq, funext, refl, funext,
   cases c₁, cases c₂, cases c₁_val, cases c₂_val,
-  simp only [subtype.coe_mk, one_smul, eq_self_iff_true, set_coe_cast], congr,
-  cases c₁_val_fst,
-  simp only [has_smul.comp.smul, sum.elim_inl, function.comp_app, struct_perm.of_bot_one, one_smul],
-  simp only [has_smul.comp.smul, sum.elim_inr, function.comp_app, struct_perm.of_bot_one, one_smul],
-  cases c₂_val_fst,
-  simp only [has_smul.comp.smul, sum.elim_inl, function.comp_app, struct_perm.of_bot_one, one_smul],
-  simp only [has_smul.comp.smul, sum.elim_inr, function.comp_app, struct_perm.of_bot_one, one_smul],
+  simp only [subtype.coe_mk, one_smul, eq_self_iff_true, set_coe_cast],
   end,
-  mul_smul := begin intros, cases b, unfold has_smul.smul, sorry end,
+  mul_smul := begin intros, cases b, dsimp[proto_smul], simp only [prod.mk.inj_iff], split, apply mul_action.mul_smul,
+  simp only [map_mul, mul_inv_rev],
+  have h: ↥((x * y) • b_carrier) = ↥(x • y • b_carrier), rw mul_action.mul_smul,
+  have h2: ↥((x * y) • b_carrier) = ↥(x • y • b_carrier) , rw mul_action.mul_smul,
+  let f : ↥((x * y) • b_carrier) → ↥((x * y) • b_carrier) → Prop := (λ c₁ c₂ : ↥((x * y) • b_carrier), _),
+  let g : ↥(x • y • b_carrier) → ↥(x • y • b_carrier) → Prop := λ d₁ d₂ : ↥(x • y • b_carrier), f (cast (eq.symm h) d₁) (cast (eq.symm h) d₂),
+  suffices : (λ (c₁ c₂ : ↥((x * y) • b_carrier)), g (cast (h2) c₁) (cast (h2) c₂))== _,
+  dsimp [(g)] at this,
+  simp only [eq_self_iff_true, subtype.val_eq_coe, cast_cast, set_coe_cast, subtype.coe_eta] at this,
+  exact this, revert h2, rw h, intro h2, apply heq_of_eq, funext,  dsimp [(g), (f)],
+  have : ∀ c : ↥(x • y • b_carrier), (↑(cast (eq.symm h) c) : support_condition ↑B)= ↑c, intros,
+  have h2 :((x * y) • b_carrier) = (x • y • b_carrier), rw mul_action.mul_smul,
+  clear g,
+  cases c,
+  simp only [subtype.coe_mk],
+  revert c_property h,
+  rw ← h2,
+  intros,
+  simp only [set_coe_cast, subtype.coe_mk],
+  apply congr, apply congr,
+  refl,
+  simp only, rw mul_action.mul_smul, apply congr, refl, apply congr, refl, exact this c₁,
+  simp only, rw mul_action.mul_smul, apply congr, refl, apply congr, refl, exact this c₂,
+end,
 }
 
 /-- We can lower a support to a lower proper type index with respect to a path
@@ -90,15 +110,14 @@ def strong_support.lower {β : type_index} (S : strong_support B) (A : path B.in
 
 /-- Any small support can be 'strengthened' into a strong support that is also small.
 Check the blueprint for more information. -/
-lemma strengthen_small_support (t : tangle_path B)
-  (S : small_support (allowable_path_to_struct_perm B) t) :
-  ∃ (T : small_strong_support B), S.carrier ⊆ T.carrier :=
+lemma strengthen_small_support (t : tangle_path B) (S : small_support B (allowable_path B) t) :
+  ∃ T : small_strong_support B, S.carrier ⊆ T.carrier :=
 sorry
 
 /-- There exists a small strong support for any tangle, along any path. -/
 lemma exists_strong_support (t : tangle_path B) :
-  ∃ (T : small_strong_support B), supports (allowable_path_to_struct_perm B) T.carrier t :=
+  ∃ (T : small_strong_support B), supports (allowable_path B) T.carrier t :=
 let ⟨T, hT⟩ := strengthen_small_support B t (designated_support_path t) in
-⟨T, supports_mono hT (designated_support_path t).supports⟩
+⟨T, (designated_support_path t).supports.mono hT⟩
 
 end con_nf
