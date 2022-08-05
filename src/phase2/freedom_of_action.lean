@@ -1259,13 +1259,10 @@ begin
   simp_rw [spec.domain_sUnion, unary_spec.lower_Union],
   obtain ⟨_, ⟨σ, hσ₁, rfl⟩, hσ₂⟩ := h,
   refine (σ.prop.forward.support_closed hγ hδ hγδ A t hσ₂).mono _,
-  sorry
-  -- convert @subset_bUnion_of_mem (unary_spec B) _ _ _ (spec.domain σ) _ using 1,
-  -- refl,
-  -- simp only [subtype.val_eq_coe, mem_image, subtype.exists, subtype.coe_mk,
-  --             exists_and_distrib_right, exists_eq_right],
-  -- refine ⟨σ, ⟨σ.prop, _⟩, rfl⟩,
-  -- rwa subtype.coe_eta,
+  convert @subset_bUnion_of_mem (unary_spec B) _ (spec.domain ∘ subtype.val '' c)
+      (λ i, i.lower $ A.cons hγ) (spec.domain σ) _ using 1,
+  { simp only [mem_image, Union_exists, bUnion_and', Union_Union_eq_right] },
+  { exact ⟨σ, hσ₁, rfl⟩, }
 end
 
 variables (hc : is_chain (≤) c)
@@ -2149,10 +2146,9 @@ begin
   { have : A = C,
     { cases hd, refl },
     subst this,
-    sorry
-    -- have := h₃ d d.property.left b₂ (or.inr ⟨d, hd⟩),
-    -- rwa (atom_union_one_to_one_backward σ a A N hc hsmall ha A).near_litter
-    --   a.fst.to_near_litter (or.inl hc) h₁
+    have := (h₃ (or.inr ⟨d, hd⟩)).1 d.property.left,
+    rwa (atom_union_one_to_one_backward σ a A N hc hsmall ha A).near_litter
+       a.fst.to_near_litter (or.inl hc) h₁
   }
 end
 
@@ -2602,8 +2598,8 @@ begin
           binary_condition.range_mk, prod.mk.inj_iff, exists_eq_right_right, sum.exists,
           sum.map_inl, and_false, exists_false, sum.map_inr, exists_eq_right, false_or,
           mem_singleton_iff, false_and, and_self, exists_and_distrib_right, exists_eq_left] at h,
-        obtain ⟨N', (h |⟨⟨rfl, h⟩, rfl⟩)⟩ := h,
-        { sorry }, --exact hC₂ h
+        obtain ⟨N', (h | ⟨⟨rfl, h⟩, rfl⟩)⟩ := h,
+        { exact hC₂ ⟨_, h, rfl⟩ },
         refine image_not_flexible L _ hC₁,
         rw ←h,
         refl } } },
@@ -2940,7 +2936,10 @@ precise_litter_image_aux bij.symm L abij
       ⟨L.1, L.2.1, by simpa only [val_inv, spec.domain_inv] using L.2.2⟩,
     ext a, split,
     { rintro ⟨ha₁, ha₂⟩, simp only [mem_set_of_eq, not_not_mem] at ha₂,
-      sorry /- exact ⟨ha₁, ha₂⟩, -/ },
+      refine ⟨_, by rwa [val_inv, spec.range_inv]⟩,
+      rw [← equiv.symm_symm bij.inv'],
+      convert ha₁ using 2,
+      sorry },
     { rintro ⟨ha₁, ha₂⟩,
       sorry /- exact ⟨ha₁, function.eval ha₂⟩, -/ }
   end)
@@ -3554,9 +3553,8 @@ lemma total_of_is_max_aux (σ : allowable_partial_perm B) (hσ : is_max σ)
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
   Π (c : support_condition B), c ∈ σ.val.domain
 | ⟨sum.inl a, A⟩ := begin
-    obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_atom σ a A (λ c hc, total_of_is_max_aux c),
-    sorry
-    -- exact (hσ hρ₁).subset hρ₂,
+    obtain ⟨ρ, hρ, b, hb, hdom⟩ := exists_ge_atom σ a A (λ c hc, total_of_is_max_aux c),
+    exact ⟨b, (hσ hρ).subset hb, hdom⟩
   end
 | ⟨sum.inr N, A⟩ := begin
     by_cases hnl : litter_set N.fst = N.snd,
