@@ -94,8 +94,20 @@ def word_support.lower {β : type_index} (S : word_support B) (A : path B.index 
 /-- The lowering operation reflects the constrains `≺` relation. -/
 lemma lower_constrains {β : type_index} (A : path B.index β)
   (c d : support_condition (⟨β, B.path.comp A⟩ : le_index α)) :
-  c ≺ d → d.extend_path A ≺ c.extend_path A :=
-sorry
+  c ≺ d → c.extend_path A ≺ d.extend_path A :=
+begin
+intro h, dsimp [(support_condition.extend_path)], cases h,
+simp only, apply con_nf.constrains.mem_litter, exact h_H,
+simp only, apply con_nf.constrains.near_litter, exact h_hN,
+simp only, apply con_nf.constrains.symm_diff, exact h_H,
+dsimp [(le_index.path)] at *, revert h_t h_c, rw path.comp_assoc, intros,
+have := con_nf.constrains.f_map h_hγ h_hδ h_hγδ (A.comp h_A) h_t h_c _,
+have h2 : ((A.comp h_A).cons h_hγ).comp h_c.snd = A.comp ((h_A.cons h_hγ).comp h_c.snd),
+{rw ← path.comp_cons, rw path.comp_assoc},
+rw h2 at this,
+exact this,
+exact h_H,
+end
 
 /-- The lowering of a strong support is strong. This is proven with the above lemma. -/
 lemma lower_strong {β : type_index} (S : strong_support B) (A : path B.index β) :
