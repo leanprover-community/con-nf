@@ -11,10 +11,12 @@ def supports (s : set α) (b : β) := ∀ g : G, (∀ ⦃a⦄, a ∈ s → g •
 
 variables {s t : set α} {b : β}
 
+lemma supports_of_mem {a : α} (ha : a ∈ s) : supports G s a := λ g h, h ha
+
+variables {G}
+
 lemma supports.mono (h : s ⊆ t) (hs : supports G s b) : supports G t b :=
 λ g hg, hs _ $ λ a ha, hg $ h ha
-
-lemma supports_of_mem {a : α} (ha : a ∈ s) : supports G s a := λ g h, h ha
 
 end
 
