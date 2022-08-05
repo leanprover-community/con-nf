@@ -648,7 +648,7 @@ This code is obviously even [though this isn’t really necessary, thanks to Lem
 \uses{def:tangle}
 \lean{symmetric_singleton}
 \leanok
-For any symmetric $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$. In particular, this works for each atom $a \in \tau_{-a}$.
+For any symmetric $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$. In particular, this works for each atom $a \in \tau_{-1}$.
 \end{lemma}
 
 \begin{proof}
@@ -725,7 +725,7 @@ The greediest approach, which can’t fail to work, is to assume some form of �
 
   \begin{enumerate}
   \item for every $\beta$ and path $A : \beta \to \alpha$, core tangle data $\All_A$, $\tau_A$ etc at $\beta$;
-  \item for each such $\beta$, $A$, when $A$ a \emph{proper} path (equivalently, when $\beta < \alpha$), \emph{full} tangle data extending the given core data;
+  \item for each such $\beta$, $A$, when $A$ is a \emph{non-trivial} path (equivalently, when $\beta < \alpha$), \emph{full} tangle data extending the given core data;
   \item for $A : \beta \to \alpha$ and $\gamma < \beta$, a \emph{derivative} map $(-)_\gamma : \All_{A} \to \All_{\gamma;A}$, commuting with the maps $\All_\bullet \to \Str_\bullet$ and $(-)_{\gamma} : \Str_\beta \to \Str_\gamma$.
   \end{enumerate}
 
@@ -773,7 +773,7 @@ In order to state the theorem precisely, we must first set up a framework for di
 \begin{definition}
   \label{def:condition-functoriality}
   \uses{def:binary-condition}
-  Paths act covariantly on binary conditions.  Explicitly, a path $A : \beta \to \alpha$ induces a map $(-)A \BiCond_\beta \to \BiCond_\alpha$, defined by $(x,B)A := (x,BA)$; and this preserves identities and composition.
+  Paths act covariantly on binary conditions.  Explicitly, a path $A : \beta \to \alpha$ induces a map $(-)_A:\BiCond_\beta \to \BiCond_\alpha$, defined by $(x,B)_A := (x,B;A)$; and this preserves identities and composition.
 
   Taking inverse images under these maps, paths act contravariantly on sets of binary conditions: a path $A : \beta \to \alpha$ induces $(-)_A : \pow(\BiCond_\alpha) \to \pow(\BiCond(\beta))$, given by $\sigma_A := \{ (x,y,B) \mid (x,y,BA) \in \sigma \}$.
 \end{definition}
