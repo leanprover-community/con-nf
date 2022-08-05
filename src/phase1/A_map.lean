@@ -55,10 +55,10 @@ variables {β}
 begin
   simp only [A_map, and_comm, mem_image, mem_Union, exists_prop],
   split,
-  { rintro ⟨⟨i, N, hN⟩, rfl, t, ⟨ht₁, ht₂⟩, ht₃⟩,
-    exact ⟨t, ht₃, N, hN, rfl⟩ },
-  { rintro ⟨t, ht, N, hN, rfl⟩,
-    exact ⟨⟨f_map β t, N, hN⟩, rfl, t, rfl, ht⟩ }
+  { rintro ⟨⟨i, N, hN⟩, rfl, t, ht₁, ⟨rfl, ht₂⟩⟩,
+    exact ⟨t, ht₁, N, _, rfl⟩, },
+  { rintro ⟨t, ht, N, hN, rfl⟩, cases hN,
+    exact ⟨⟨f_map β t, N, _⟩, rfl, t, ht, rfl⟩, }
 end
 
 
