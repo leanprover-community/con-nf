@@ -5,11 +5,11 @@ open set with_bot
 universe u
 
 namespace con_nf
-variables [params.{u}] (α : Λ) [core_tangle_cumul α] {β : Iio (α : type_index)}
+variables [params.{u}] (α : Λ) [core_tangle_cumul α] {β : Iio_index α}
   {s t : set (tangle β)}
 
 /-- An `α` code is a type index `β < α` together with a set of tangles of type `β`. -/
-@[derive inhabited] def code : Type u := Σ β : Iio (α : type_index), set (tangle β)
+@[derive inhabited] def code : Type u := Σ β : Iio_index α, set (tangle β)
 
 /-- Nonempty codes. -/
 abbreviation nonempty_code : Type u := {c : code α // c.2.nonempty}
@@ -18,10 +18,10 @@ namespace code
 variables {α} {c : code α}
 
 /-- Constructor for `code`. -/
-def mk : Π β : Iio (α : type_index), set (tangle β) → code α := sigma.mk
+def mk : Π β : Iio_index α, set (tangle β) → code α := sigma.mk
 
-@[simp] lemma fst_mk (β : Iio (α : type_index)) (s : set (tangle β)) : (mk β s).1 = β := rfl
-@[simp] lemma snd_mk (β : Iio (α : type_index)) (s : set (tangle β)) : (mk β s).2 = s := rfl
+@[simp] lemma fst_mk (β : Iio_index α) (s : set (tangle β)) : (mk β s).1 = β := rfl
+@[simp] lemma snd_mk (β : Iio_index α) (s : set (tangle β)) : (mk β s).2 = s := rfl
 
 /-- A code is empty if it has no element. -/
 protected def is_empty (c : code α) : Prop := c.2 = ∅

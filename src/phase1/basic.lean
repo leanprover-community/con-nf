@@ -186,13 +186,13 @@ add_decl_doc tangle_data.support_le
 end define_tangle_data
 
 section instances
-variables {α : Λ} (β : Iio α) [core_tangle_data (β : Iio (α : type_index))]
+variables {α : Λ} (β : Iio α) [core_tangle_data (Iio_coe β)]
 
 instance core_val : core_tangle_data β.val := ‹core_tangle_data β›
 instance core_coe_coe : core_tangle_data (β : Λ) := ‹core_tangle_data β›
 
 section positioned_tangle_data
-variables [positioned_tangle_data (β : Iio (α : type_index))]
+variables [positioned_tangle_data (Iio_coe β)]
 
 instance positioned_val : positioned_tangle_data β.val := ‹positioned_tangle_data _›
 instance positioned_coe_coe : positioned_tangle_data (β : Λ) := ‹positioned_tangle_data _›
@@ -232,12 +232,12 @@ class core_tangle_cumul (α : Λ) := (data : Π β : Iio α, core_tangle_data β
 section core_tangle_cumul
 variables [core_tangle_cumul α]
 
-instance core_tangle_cumul.to_core_tangle_data : Π β : Iio (α : type_index), core_tangle_data β
+instance core_tangle_cumul.to_core_tangle_data : Π β : Iio_index α, core_tangle_data β
 | ⟨⊥, h⟩ := bot.core_tangle_data
 | ⟨(β : Λ), hβ⟩ := core_tangle_cumul.data ⟨β, coe_lt_coe.1 hβ⟩
 
 instance core_tangle_cumul.to_core_tangle_data' (β : Iio α) : core_tangle_data β :=
-show core_tangle_data (β : Iio (α : type_index)), by apply_instance
+show core_tangle_data (Iio_coe β), by apply_instance
 
 end core_tangle_cumul
 
@@ -249,13 +249,13 @@ section positioned_tangle_cumul
 variables [core_tangle_cumul α] [positioned_tangle_cumul α]
 
 instance positioned_tangle_cumul.to_positioned_tangle_data :
-  Π β : Iio (α : type_index), positioned_tangle_data β
+  Π β : Iio_index α, positioned_tangle_data β
 | ⟨⊥, h⟩ := bot.positioned_tangle_data
 | ⟨(β : Λ), hβ⟩ := positioned_tangle_cumul.data ⟨β, coe_lt_coe.1 hβ⟩
 
 instance positioned_tangle_cumul.to_positioned_tangle_data' (β : Iio α) :
   positioned_tangle_data β :=
-show positioned_tangle_data (β : Iio (α : type_index)), by apply_instance
+show positioned_tangle_data (Iio_coe β), by apply_instance
 
 end positioned_tangle_cumul
 

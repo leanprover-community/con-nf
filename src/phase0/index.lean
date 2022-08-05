@@ -12,12 +12,16 @@ variables [params.{u}]
 section Iio
 variables {α β : Λ}
 
-instance coe_Iio : has_coe_t (Iio α) (Iio (α : type_index)) := ⟨λ β, ⟨β.1, coe_lt_coe.2 β.2⟩⟩
+abbreviation Iio_index (α : Λ) := Iio (α : type_index)
+
+instance coe_Iio : has_coe_t (Iio α) (Iio_index α) := ⟨λ β, ⟨β.1, coe_lt_coe.2 β.2⟩⟩
+
+abbreviation Iio_coe : Iio α → Iio_index α := coe
 
 @[simp] lemma Iio.coe_mk (β : Λ) (hβ : β < α) :
-  ((⟨β, hβ⟩ : Iio α) : Iio (α : type_index)) = ⟨β, coe_lt_coe.2 hβ⟩ := rfl
+  ((⟨β, hβ⟩ : Iio α) : Iio_index α) = ⟨β, coe_lt_coe.2 hβ⟩ := rfl
 
-lemma Iio.coe_injective : injective (coe : Iio α → Iio (α : type_index)) :=
+lemma Iio.coe_injective : injective (coe : Iio α → Iio_index α) :=
 begin
   rintro ⟨β, hβ⟩ ⟨γ, hγ⟩ h,
   simp only [Iio.coe_mk, subtype.mk_eq_mk] at h,
@@ -25,18 +29,18 @@ begin
   subst this,
 end
 
-@[simp] lemma Iio.coe_inj {β γ : Iio α} : (β : Iio (α : type_index)) = γ ↔ β = γ :=
+@[simp] lemma Iio.coe_inj {β γ : Iio α} : Iio_coe β = γ ↔ β = γ :=
 Iio.coe_injective.eq_iff
 
-variables {hβ : (β : type_index) ∈ Iio (α : type_index)}
+variables {hβ : (β : type_index) ∈ Iio_index α}
 
-instance : has_bot (Iio (α : type_index)) := ⟨⟨⊥, bot_lt_coe _⟩⟩
-instance : inhabited (Iio (α : type_index)) := ⟨⊥⟩
+instance : has_bot (Iio_index α) := ⟨⟨⊥, bot_lt_coe _⟩⟩
+instance : inhabited (Iio_index α) := ⟨⊥⟩
 
-@[simp] lemma bot_ne_mk_coe : (⊥ : Iio (α : type_index)) ≠ ⟨β, hβ⟩ :=
+@[simp] lemma bot_ne_mk_coe : (⊥ : Iio_index α) ≠ ⟨β, hβ⟩ :=
 ne_of_apply_ne subtype.val bot_ne_coe
 
-@[simp] lemma mk_coe_ne_bot : (⟨β, hβ⟩ : Iio (α : type_index)) ≠ ⊥ :=
+@[simp] lemma mk_coe_ne_bot : (⟨β, hβ⟩ : Iio_index α) ≠ ⊥ :=
 ne_of_apply_ne subtype.val coe_ne_bot
 
 end Iio
@@ -142,7 +146,7 @@ end le_index
 /-- A type index `β`, together with a path `A` down from `α` to level `γ` and then to level `β`.
 This enforces that the path obtained from composing `A` with this new `γ ⟶ β` morphism is
 nontrivial by construction. This type is intended to be used in place of `β : type_index, β < α`
-and `β : Iio (α : type_index)` in phase 2. -/
+and `β : Iio_index α` in phase 2. -/
 @[ext] structure lt_index (α : type_index) :=
 (index : type_index)
 (higher : type_index)

@@ -24,12 +24,12 @@ inductive preferred_extension (α : Λ) : Type u
 | base_extension : set atom → preferred_extension
 -/
 
-variables (α : Λ) [core_tangle_cumul α] {β : Iio (α : type_index)} {γ : Iio α}
+variables (α : Λ) [core_tangle_cumul α] {β : Iio_index α} {γ : Iio α}
 
 namespace semitangle
 
 /-- The possible extensions of a nonempty semitangle. -/
-abbreviation extension := Π β : Iio α, tangles (β : Iio (α : type_index))
+abbreviation extension := Π β : Iio α, tangles (β : Iio_index α)
 
 namespace extension
 variables {α} [positioned_tangle_cumul α] [almost_tangle_cumul α]
@@ -38,7 +38,7 @@ variables {α} [positioned_tangle_cumul α] [almost_tangle_cumul α]
 protected def A_map (s : tangles β) : extension α :=
 λ γ, if hγβ : ↑γ = β then by { subst hγβ, exact s } else ⟨A_map γ _, s.2.A_map⟩
 
-@[simp] lemma A_map_self (s : tangles (γ : Iio (α : type_index))) : extension.A_map s γ = s :=
+@[simp] lemma A_map_self (s : tangles $ Iio_coe γ) : extension.A_map s γ = s :=
 dif_pos rfl
 
 lemma A_map_of_ne (s : tangles β) (hγβ : ↑γ ≠ β) : extension.A_map s γ = ⟨A_map γ _, s.2.A_map⟩ :=
@@ -52,12 +52,12 @@ variables [positioned_tangle_cumul α] [almost_tangle_cumul α]
 relating each extension of the semitangle. -/
 @[nolint has_nonempty_instance] inductive preference (exts : extension α)
 | base (atoms : tangles ⊥) :
-    (mk ⊥ (atoms : set $ tangle (⊥ : Iio (α : type_index)))).is_even →
-      (∀ γ, A_map γ (atoms : set $ tangle (⊥ : Iio (α : type_index))) = (exts γ).val) → preference
+    (mk ⊥ (atoms : set $ tangle (⊥ : Iio_index α))).is_even →
+      (∀ γ, A_map γ (atoms : set $ tangle (⊥ : Iio_index α)) = (exts γ).val) → preference
 | proper (β : Iio α) :
-    (mk β (show tangles (β : Iio (α : type_index)), from exts β) : code α).is_even →
+    (mk β (show tangles $ Iio_coe β, from exts β) : code α).is_even →
       (∀ γ, β ≠ γ →
-        A_map γ (show set (tangle (β : Iio (α : type_index))), from (exts β).val) = (exts γ).val) →
+        A_map γ (show set (tangle $ Iio_coe β), from (exts β).val) = (exts γ).val) →
           preference
 
 variables {α} {members : extension α}
@@ -93,14 +93,14 @@ notation t ` ∈ₙₛₜ `:50 s:50 := mem t s
 /-- The even code associated to a nonempty semitangle. -/
 def repr_code : nonempty_semitangle α → nonempty_code α
 | ⟨exts, preference.base atoms rep hA⟩ := ⟨⟨⊥, atoms⟩, atoms.2⟩
-| ⟨exts, preference.proper β rep hA⟩ := ⟨⟨β, show tangles (β : Iio (α : type_index)), from exts β⟩, (exts β).2⟩
+| ⟨exts, preference.proper β rep hA⟩ := ⟨⟨β, show tangles $ Iio_coe β, from exts β⟩, (exts β).2⟩
 
 @[simp] lemma repr_code_base (exts : extension α) (atoms rep hA) :
   repr_code ⟨exts, preference.base atoms rep hA⟩ = ⟨⟨⊥, atoms⟩, atoms.2⟩ := rfl
 
 @[simp] lemma repr_code_proper (exts : extension α) (β rep hA) :
   repr_code ⟨exts, preference.proper β rep hA⟩ =
-    ⟨⟨β, show tangles (β : Iio (α : type_index)), from exts β⟩, (exts β).2⟩ := rfl
+    ⟨⟨β, show tangles $ Iio_coe β, from exts β⟩, (exts β).2⟩ := rfl
 
 lemma repr_code_spec : Π (s : nonempty_semitangle α), (repr_code s : code α).is_even
 | ⟨exts, preference.proper β rep hA⟩ := rep
@@ -108,7 +108,7 @@ lemma repr_code_spec : Π (s : nonempty_semitangle α), (repr_code s : code α).
 
 lemma repr_code_members_ne :
   Π (s : nonempty_semitangle α) (γ : Iio α) (hcγ : (repr_code s : code α).1 ≠ γ),
-  (A_map_code γ (repr_code s)).2 = (s.exts γ : set (tangle (γ : Iio (α : type_index))))
+  (A_map_code γ (repr_code s)).2 = (s.exts γ : set (tangle $ Iio_coe γ))
 | ⟨exts, preference.proper β rep hA⟩ γ hcγ := hA _ $ ne_of_apply_ne coe hcγ
 | ⟨exts, preference.base atoms rep hA⟩ γ hcγ := hA _
 
@@ -320,13 +320,13 @@ begin
   exact smul_A_map _ _ (ne.symm h),
 end
 
-lemma smul_aux₁ {s : set $ tangle (⊥ : Iio (α : type_index))} (h : ∀ γ, A_map γ s = e γ) (γ) :
+lemma smul_aux₁ {s : set $ tangle (⊥ : Iio_index α)} (h : ∀ γ, A_map γ s = e γ) (γ) :
   A_map γ (f • s) = f • e γ :=
 by rw [←h γ, smul_A_map _ _ bot_ne_mk_coe]
 
-lemma smul_aux₂ (h : ∀ δ, γ ≠ δ → A_map δ (e γ : set $ tangle (γ : Iio (α : type_index))) = ↑(e δ))
+lemma smul_aux₂ (h : ∀ δ, γ ≠ δ → A_map δ (e γ : set $ tangle $ Iio_coe γ) = ↑(e δ))
   (δ) (hγδ : γ ≠ δ) :
-  A_map δ (f • (e γ : set $ tangle (γ : Iio (α : type_index)))) = f • ↑(e δ) :=
+  A_map δ (f • (e γ : set $ tangle $ Iio_coe γ)) = f • ↑(e δ) :=
 by rw [←smul_A_map _ _ (Iio.coe_injective.ne hγδ), h _ hγδ]
 
 /-- Allowable permutations act on nonempty semitangles. -/
@@ -383,7 +383,7 @@ lemma code.equiv.small_supported_iff (hcd : c ≡ d) :
   small_supported α (allowable_perm α) c ↔ small_supported α (allowable_perm α) d :=
 ⟨λ ⟨⟨⟨s, h⟩, hs⟩⟩, ⟨⟨⟨s, hcd.supports h⟩, hs⟩⟩, λ ⟨⟨⟨s, h⟩, hs⟩⟩, ⟨⟨⟨s, hcd.symm.supports h⟩, hs⟩⟩⟩
 
-@[simp] lemma smul_intro (f : allowable_perm α) (s : tangles (γ : Iio (α : type_index))) (hs) :
+@[simp] lemma smul_intro (f : allowable_perm α) (s : tangles $ Iio_coe γ) (hs) :
   f • intro s hs = intro (f • s) (by cases γ; exact hs.smul) :=
 begin
   sorry
@@ -399,7 +399,7 @@ end
 /-- For any near-litter `N`, the code `(α, -1, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
 def typed_near_litter (N : near_litter) : new_tangle α :=
-⟨some $ intro ⟨(show set (tangle (⊥ : Iio (α : type_index))), from N.2.1), N.2.2.nonempty⟩ $
+⟨some $ intro ⟨(show set (tangle (⊥ : Iio_index α)), from N.2.1), N.2.2.nonempty⟩ $
   code.is_even_bot _, ⟨⟨⟨{(sum.inr N, default)}, λ f h, begin
   dsimp at ⊢ h,
   -- rw smul_intro,

@@ -17,14 +17,14 @@ noncomputable theory
 universe u
 
 namespace con_nf
-variables [params.{u}] (α : Λ) [core_tangle_cumul α] (β : Iio (α : type_index)) (γ : Iio α)
+variables [params.{u}] (α : Λ) [core_tangle_cumul α] (β : Iio_index α) (γ : Iio α)
 
 open code
 
 /-- A semi-allowable permutation is a `-1`-allowable permutation of atoms (a near-litter
 permutation) together with allowable permutations on all `γ < β`. This forms a group structure
 automatically. -/
-@[derive group] def semiallowable_perm : Type u := Π β : Iio (α : type_index), allowable β
+@[derive group] def semiallowable_perm : Type u := Π β : Iio_index α, allowable β
 
 namespace semiallowable_perm
 variables {α} (π : semiallowable_perm α) (c : code α)
@@ -64,7 +64,7 @@ instance mul_action_tangle : mul_action (semiallowable_perm α) (tangle β) :=
 mul_action.comp_hom _ $ to_allowable β
 
 instance mul_action_tangle' : mul_action (semiallowable_perm α) (tangle (γ : Λ)) :=
-show mul_action (semiallowable_perm α) (tangle (γ : Iio (α : type_index))), from infer_instance
+show mul_action (semiallowable_perm α) (tangle $ Iio_coe γ), from infer_instance
 
 @[simp] lemma to_allowable_smul (f : semiallowable_perm α) (t : tangle β) :
   to_allowable β f • t = f • t := rfl

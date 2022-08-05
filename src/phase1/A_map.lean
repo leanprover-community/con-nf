@@ -39,18 +39,18 @@ variables [params.{u}]
 open code
 
 section A_map
-variables {α : Λ} {γ : Iio (α : type_index)} [core_tangle_data γ] [positioned_tangle_data γ]
-  (β : Iio α) [core_tangle_data (β : Iio (α : type_index))]
-  [positioned_tangle_data (β : Iio (α : type_index))] [almost_tangle_data β]
+variables {α : Λ} {γ : Iio_index α} [core_tangle_data γ] [positioned_tangle_data γ]
+  (β : Iio α) [core_tangle_data (Iio_coe β)]
+  [positioned_tangle_data (Iio_coe β)] [almost_tangle_data β]
 
 /-- The *alternative extension* map. For a set of tangles `G`, consider the code
 `(α, γ, G)`. We then construct the non-empty set `D` such that `(α, β, D)` is an alternative
 extension of the same object in TTT. -/
-def A_map (s : set (tangle γ)) : set (tangle (β : Iio (α : type_index))) := to_tangle '' ⋃ t ∈ s, local_cardinal (f_map β t)
+def A_map (s : set (tangle γ)) : set (tangle $ Iio_coe β) := to_tangle '' ⋃ t ∈ s, local_cardinal (f_map β t)
 
 variables {β}
 
-@[simp] lemma mem_A_map {t : tangle (β : Iio (α : type_index))} {s : set (tangle γ)} :
+@[simp] lemma mem_A_map {t : tangle $ Iio_coe β} {s : set (tangle γ)} :
   t ∈ A_map β s ↔ ∃ (t' ∈ s) N (hN : is_near_litter (f_map β t') N), to_tangle ⟨_, N, hN⟩ = t :=
 begin
   simp only [A_map, and_comm, mem_image, mem_Union, exists_prop],
@@ -99,12 +99,12 @@ begin
 end
 
 lemma A_map_injective :
-  injective (A_map β : set (tangle γ) → set (tangle (β : Iio (α : type_index)))) :=
+  injective (A_map β : set (tangle γ) → set (tangle $ Iio_coe β)) :=
 to_tangle.injective.image_injective.comp $ pairwise.bUnion_injective
   (λ x y h, local_cardinal_disjoint _ _ $ (f_map_injective _).ne h) $
   λ _, local_cardinal_nonempty _
 
-variables {δ : Iio (α : type_index)} [core_tangle_data δ] [positioned_tangle_data δ]
+variables {δ : Iio_index α} [core_tangle_data δ] [positioned_tangle_data δ]
 
 lemma A_map_disjoint_range (c : set (tangle γ)) (d : set (tangle δ)) (hc : c.nonempty)
   (h : A_map β c = A_map β d) : γ = δ :=
@@ -159,7 +159,7 @@ noncomputable def code_min_map (c : nonempty_code α) : μ := position $ min_tan
 lemma code_wf : well_founded (inv_image μr (code_min_map : nonempty_code α → μ)) :=
 inv_image.wf (code_min_map) μwf.wf
 
-variables [almost_tangle_cumul α] (γ : Iio (α : type_index)) (β : Iio α) (c d : code α)
+variables [almost_tangle_cumul α] (γ : Iio_index α) (β : Iio α) (c d : code α)
 
 /-- The A-map, phrased as a function on `α`-codes. -/
 noncomputable! def A_map_code (c : code α) : code α := mk β (A_map β c.2)

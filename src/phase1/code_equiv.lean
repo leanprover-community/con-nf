@@ -35,7 +35,7 @@ open set with_bot
 universe u
 
 namespace con_nf
-variables [params.{u}] {α : Λ} {β : Iio (α : type_index)} {γ : Iio α} [core_tangle_cumul α]
+variables [params.{u}] {α : Λ} {β : Iio_index α} {γ : Iio α} [core_tangle_cumul α]
   [almost_tangle_cumul α] [positioned_tangle_cumul α]
 
 namespace code
