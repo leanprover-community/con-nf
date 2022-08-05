@@ -1,5 +1,7 @@
 import phase2.freedom_of_action
 
+noncomputable theory
+
 open quiver
 open_locale pointwise
 
@@ -23,8 +25,7 @@ structure strong_support extends word_support B :=
 structure small_strong_support extends strong_support B :=
 (small : small carrier)
 
-
-def proto_smul : allowable_path B → word_support B → word_support B :=
+noncomputable! def proto_smul : allowable_path B → word_support B → word_support B :=
 λ π S,
 { carrier := (π.to_struct_perm) • S.carrier,
     r := λ c₁ c₂, begin
@@ -44,7 +45,7 @@ def proto_smul : allowable_path B → word_support B → word_support B :=
   trans := begin intros,apply S.wo.trans, apply ᾰ, apply ᾰ_1 end,
   wf := begin have := @inv_image.is_well_founded _ _ S.r ⟨S.wo.wf⟩, convert (this _).wf, end } }
 
-instance : mul_action (allowable_path B) (word_support B) :=
+noncomputable! instance : mul_action (allowable_path B) (word_support B) :=
 { smul := proto_smul B,
   one_smul := begin intros, cases b, dsimp [proto_smul], simp only [struct_perm.coe_to_near_litter_perm, map_one, inv_one, one_smul, eq_self_iff_true, true_and],
   dsimp [(sum.map)], have backup: (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,have : (↥((1 : allowable_path B) • b_carrier) : Type u) = (↥b_carrier : Type u), rw mul_action.one_smul,
