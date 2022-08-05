@@ -11,6 +11,12 @@ The purpose of this community-owned repository is to *digitise* some mathematica
 
 Much of the project infrastructure has been adapted from the [sphere eversion project](https://leanprover-community.github.io/sphere-eversion/), the [liquid tensor experiment](https://leanprover-community.github.io/lean-liquid/), and the [unit fractions project](https://github.com/b-mehta/unit-fractions/).
 
+## Current progress
+
+The project is not yet finished. The following table details live which files are unfinished, and how many 'sorries' (unproven statements) remain in each file.
+
+{% include sorries.md %}
+
 ## The source
 
 The definitions, theorems and proofs in this repository are taken from Randall Holmes [untangled.pdf](https://randall-holmes.github.io/Nfproof/untangled.pdf), claiming to prove the consistency of Quine's New Foundations axiom system.

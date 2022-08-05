@@ -35,3 +35,4 @@ def ci(ctx):
     subprocess.run(["leanproject", "build"], env=env, check=True)
     # Call these tasks afterwards.
     subprocess.run(["inv", "all", "html"], env=env, check=True)
+    subprocess.run(["python3", "scripts/count_sorry.py"], env=env, check=True)
