@@ -900,11 +900,10 @@ end
 
 lemma lower_domain_closed (hσ : σ.allowable B) :
   (σ.lower A).domain.support_closed (le_index.mk β (B.path.comp A)) :=
-  begin
-    unfold unary_spec.support_closed,
-    intros hb hg hd hgb hdb hgd hp ht h1 hallp hsup,
-    refine hsup _ ht,
-  end
+begin
+  intros hb hg hd hgb hdb hgd p t h1 π hsup,
+  sorry
+end
 
 protected lemma spec.allowable.lower (hσ : σ.allowable B) ⦃β : Λ⦄ (A : path (B : type_index) β)
   (hβ : (β : type_index) < B) :

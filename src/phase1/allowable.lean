@@ -69,18 +69,6 @@ show mul_action (semiallowable_perm α) (tangle (γ : Iio (α : type_index))), f
 @[simp] lemma to_allowable_smul (f : semiallowable_perm α) (t : tangle β) :
   to_allowable β f • t = f • t := rfl
 
-/- This looks false because the LHS goes through the `α → β → ⊥` path while the RHS goes through the
-`α → ⊥` path. -/
-@[simp] lemma to_allowable_smul_near_litter (f : semiallowable_perm α) (N : near_litter) :
-  to_allowable β f • N = f • N := sorry
-
-@[simp] lemma smul_to_tangle [almost_tangle_cumul α] (f : semiallowable_perm α) (N : near_litter) :
-  f • (to_tangle N : tangle (γ : Λ)) = to_tangle (f • N) :=
-begin
-  refine ((to_allowable (γ : Iio (α : type_index)) f).smul_to_tangle N).trans _,
-  rw to_allowable_smul_near_litter,
-end
-
 attribute [derive mul_action (semiallowable_perm α)] code
 
 @[simp] lemma fst_smul : (π • c).1 = c.1 := rfl

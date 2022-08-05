@@ -266,7 +266,7 @@ lemma ext : ∀ {c d : code α}, c ≡ d → c.1 = d.1 → c = d
 | _ _ (A_map_left c hc β h) H := (h H.symm).elim
 | _ _ (A_map_right c hc β h) H := (h H).elim
 | _ _ (A_map_A_map c hc β hcβ γ hcγ) H :=
-  by { simp only [extension_A_map_code, Iio.coe_inj] at H, subst H }
+  by { simp only [fst_A_map_code, Iio.coe_inj] at H, subst H }
 
 @[simp] lemma bot_left_iff {s} : mk ⊥ s ≡ c ↔ mk ⊥ s = c ∨ ∃ β : Iio α, c = mk β (A_map β s) :=
 by simp [equiv_iff, A_map_code_ne_bot.symm, eq_comm]
