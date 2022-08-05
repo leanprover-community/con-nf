@@ -134,24 +134,6 @@ is maximal must be total.
 This is not yet complete.
 -/
 
-namespace set
-variables {α β : Type*} {s t : set α}
-
-@[simp] lemma symm_diff_nonempty : (s ∆ t).nonempty ↔ s ≠ t :=
-ne_empty_iff_nonempty.symm.trans symm_diff_eq_bot.not
-
-lemma image_sUnion (f : α → β) (S : set (set α)) : f '' ⋃₀ S = ⋃ s ∈ S, f '' s :=
-by rw [sUnion_eq_bUnion, image_Union₂]
-
-variables [has_involutive_inv α]
-
-open_locale pointwise
-
-@[simp, to_additive] lemma inv_sUnion (S : set (set α)) : (⋃₀ S)⁻¹ = ⋃ s ∈ S, s⁻¹ :=
-by simp_rw [←image_inv, image_sUnion]
-
-end set
-
 noncomputable theory
 
 open cardinal function quiver set with_bot

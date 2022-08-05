@@ -1,9 +1,18 @@
 import data.set.pointwise
+import mathlib.order
 
 open_locale pointwise
 
 namespace set
 variables {α β : Type*}
+
+section has_involutive_inv
+variables [has_involutive_inv α]  {s t : set α}
+
+@[simp, to_additive] lemma inv_sUnion (S : set (set α)) : (⋃₀ S)⁻¹ = ⋃ s ∈ S, s⁻¹ :=
+by simp_rw [←image_inv, image_sUnion]
+
+end has_involutive_inv
 
 section has_smul
 variables [has_smul α β]

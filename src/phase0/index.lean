@@ -1,5 +1,4 @@
 import mathlib.quiver
-import mathlib.with_bot
 import phase0.params
 
 open cardinal function quiver quiver.path set with_bot

@@ -16,10 +16,16 @@ lemma subset_image_symm_diff : (f '' s) ∆ (f '' t) ⊆ f '' s ∆ t :=
 (union_subset_union (subset_image_diff _ _ _) $ subset_image_diff _ _ _).trans
   (image_union _ _ _).superset
 
-variables {s}
+variables {s t}
 
 @[simp] lemma compl_eq_empty : sᶜ = ∅ ↔ s = univ := compl_eq_bot
 @[simp] lemma compl_eq_univ : sᶜ = univ ↔ s = ∅ := compl_eq_top
+
+@[simp] lemma symm_diff_nonempty : (s ∆ t).nonempty ↔ s ≠ t :=
+ne_empty_iff_nonempty.symm.trans symm_diff_eq_bot.not
+
+lemma image_sUnion (f : α → β) (S : set (set α)) : f '' ⋃₀ S = ⋃ s ∈ S, f '' s :=
+by rw [sUnion_eq_bUnion, image_Union₂]
 
 end set
 

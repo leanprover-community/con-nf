@@ -1,6 +1,6 @@
 import mathlib.cardinal
 import mathlib.order
-import mathlib.well_founded
+import mathlib.with_bot
 import set_theory.cardinal.cofinality
 
 /-!
