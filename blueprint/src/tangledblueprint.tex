@@ -245,7 +245,7 @@ We also set up a sequence of groups that act on pretangles; subgroups of these w
 \begin{definition}
 \label{def:support-condition-action}
 \uses{def:structural-perm-derivative,def:support-condition}
-\lean{con_nf.con_nf.support_condition.mul_action_2}
+\lean{con_nf.struct_perm.mul_action_support_condition}
 \leanok
 Structural permutations act on support conditions.
 \end{definition}
@@ -253,7 +253,7 @@ Structural permutations act on support conditions.
 \begin{definition}
 \label{def:support}
 \uses{def:support-condition}
-\lean{con_nf.potential_support}
+\lean{con_nf.support}
 \leanok
 Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alpha$-support-conditions.  (A little more pedantically, one could call these something like “potential small supports”: they become actual supports once they support some element.)
 
@@ -263,7 +263,7 @@ Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alp
 \begin{definition}
 \label{def:support-of}
   \uses{def:support,def:support-condition-action}
-  \lean{con_nf.support}
+  \lean{con_nf.small_support}
   \leanok
   Suppose $\varphi : H \to \Str_\alpha$ is any group homomorphism, and $\tau$ is a set equipped with an $H$-action.
 
@@ -277,7 +277,7 @@ Let $\alpha$ be a proper type index. An $\alpha$-support is a small set of $\alp
 \begin{lemma}
   \label{lem:count-supports}
   \uses{def:support-of}
-  \lean{con_nf.mk_support_le}
+  \lean{con_nf.mk_small_support_le}
   \leanok
   Because the cofinality of $\mu$ is $\geq \kappa$, there are $\mu$ potential supports, and therefore at most $\mu$ supports for each $x \in \tau$.
 \end{lemma}
@@ -301,7 +301,8 @@ For now, we group the data assumed at each level, according to which constructio
 \begin{definition}
   \label{def:tangle-data}
   \uses{def:support-of,def:pretangle}
-  \lean{con_nf.phase_1}
+  \lean{con_nf.tangle_data}
+  \leanok
 
   Fix a proper type index $\alpha$.  Then \emph{tangle data at $\alpha$} consists of:
   \begin{enumerate}
@@ -417,7 +418,7 @@ NB: The disjointness of ranges depends on excluding the empty set --- either fro
 \begin{lemma}
 \label{lem:a-map-wf}
 \uses{def:a-map}
-\lean{con_nf.A_map_rel_well_founded}
+\lean{con_nf.A_map_rel'_well_founded}
 \leanok
 The relation $c \rightsquigarrow d$ on codes (“$c$ leads to $d$ under some $A$-map”) is well-founded.
 \end{lemma}
@@ -549,7 +550,7 @@ For all proper type indices $\beta < \alpha$, $\beta$-tangles $x$, and $\alpha$-
 \begin{definition}
 \label{def:code-action}
 \uses{def:code,def:semiallowable-perm}
-\lean{con_nf.semiallowable_perm.mul_action_code}
+\lean{con_nf.code.mul_action}
 \leanok
 Semi-allowable permutations act on $\alpha$-codes.
 \end{definition}
@@ -565,7 +566,7 @@ Semi-allowable permutations act on $\alpha$-codes.
 \begin{lemma}
 \label {lem:coherence-unpacked}
 \uses{def:allowable-perm}
-\lean{con_nf.allowable_perm.coherence}
+\lean{con_nf.allowable_perm.smul_f_map}
 \leanok
 A semi-allowable permutation $\pi$ is allowable just if
 $$f_{\gamma,\delta}(\pi_\gamma(g)) = [(\pi_\delta)_{-1}``f_{\gamma,\delta}(g)^\circ].$$
@@ -618,13 +619,10 @@ We take the set of $\alpha$-tangles, $\tau_\alpha$, to be the set of \emph{symme
 \begin{lemma}
 \label{lem:supportedness-equiv}
 \uses{def:support-of,def:allowable-perm}
-\lean{con_nf.code.equiv.symmetric_iff}
-\leanok
 If $X \subseteq \tau_\beta$, $Y \subseteq \tau_\gamma$, and $(\alpha,\beta,X) \equiv_\alpha (\alpha,\gamma,Y)$, then (under the action of allowable permutations on codes) a set $S$ of conditions supports $\beta$ if and only if it supports $\gamma$.  In particular,  $(\alpha,\beta,X)$ has some small support if and only if $(\alpha,\gamma,Y)$ does.
 \end{lemma}
 
 \begin{proof}
-\leanok
   Immediate from the definition of allowable permutations.
 \end{proof}
 
@@ -646,7 +644,7 @@ This code is obviously even [though this isn’t really necessary, thanks to Lem
 \begin{lemma}
 \label{def:typed-singleton}
 \uses{def:tangle}
-\lean{symmetric_singleton}
+\lean{con_nf.small_supported_singleton}
 \leanok
 For any symmetric $b \in \tau_\beta$, $(\alpha,\beta,\{b\}) \in \tau_\alpha$. In particular, this works for each atom $a \in \tau_{-1}$.
 \end{lemma}
@@ -660,7 +658,7 @@ Take a $\beta$-support for $b$, and extend all the paths in it at the top by the
 \begin{lemma}
 \label {lem:small-subsets-closure}
 \uses{def:tangle}
-\lean{con_nf.symmetric_set}
+\lean{con_nf.small_supported_set}
 \leanok
 It should also be evident that $(\alpha,\beta,B)$ will always be symmetric if $|B|<\kappa$ [take the union of the $\beta$-supports of elements of $B$ and add $\alpha$ to all the second components of elements of this union]:  all small subsets of a type are realized in each higher type.
 \end{lemma}
@@ -689,8 +687,6 @@ For the subsequent constructions of this section, we assume we are given tangle 
 \begin{definition}
   \label{def:embedding-into-pretangles}
   \uses{def:semi-tangle,def:tangle-data}
-  \lean{con_nf.new_tangle.to_pretangle}
-  \leanok
   There is an evident injection $\tau_\alpha \to \Pretangle_\alpha$ (where $\tau_\alpha$ is constructed from the given tangle data).  Moreover, this commutes with the $\All_\alpha$-action.
 \end{definition}
 
@@ -721,6 +717,8 @@ The greediest approach, which can’t fail to work, is to assume some form of �
 \begin{definition}
   \label{def:foa-context}
   \uses{def:tangle-data}
+  \lean{con_nf.phase_2_assumptions}
+  \leanok
   A \emph{freedom of action context} at a proper type index $\alpha$ consists of:
 
   \begin{enumerate}
@@ -742,9 +740,12 @@ The greediest approach, which can’t fail to work, is to assume some form of �
 \begin{definition}
   \label{def:restrict-foa-context}
   \uses{def:foa-context}
+  \leanok
   Given a freedom of action context at $\alpha$ and a path $A : \beta \to \alpha$, we can restrict the context along $A$ to get a freedom of action context at $\beta$.
   %
   Moreover, this is functorial in $A$.
+  %
+  Note, in the Lean implementation, instead of `restricting along $A$', we parametrise many of our functions by a parameter $B$, which is some path from a type index to $\alpha$.
 \end{definition}
 
 \begin{definition}
@@ -764,6 +765,8 @@ In order to state the theorem precisely, we must first set up a framework for di
 \begin{definition}
   \label{def:binary-condition}
   \uses{def:support-condition}
+  \lean{con_nf.binary_condition}
+  \leanok
   Let $\alpha$ be a proper type index. Recall that an \emph{$\alpha$-condition} is a pair $(x,A)$, where $A$ is a path from $-1$ to $\alpha$ (aka an extended type index) and $x$ is either an atom or a near-litter; the set of these was denoted $\Cond_\alpha := (\tau_{-1} + \NearLitter) \times \mathrm{Path}(-1,\alpha)$.
 
   A \emph{binary condition} similarly consists of a pair of atoms or of near-litters, together with a path from $-1$ to $\alpha$:
@@ -773,28 +776,43 @@ In order to state the theorem precisely, we must first set up a framework for di
 \begin{definition}
   \label{def:condition-functoriality}
   \uses{def:binary-condition}
+  \lean{con_nf.spec.lower}
+  \leanok
   Paths act covariantly on binary conditions.  Explicitly, a path $A : \beta \to \alpha$ induces a map $(-)_A:\BiCond_\beta \to \BiCond_\alpha$, defined by $(x,B)_A := (x,B;A)$; and this preserves identities and composition.
 
   Taking inverse images under these maps, paths act contravariantly on sets of binary conditions: a path $A : \beta \to \alpha$ induces $(-)_A : \pow(\BiCond_\alpha) \to \pow(\BiCond(\beta))$, given by $\sigma_A := \{ (x,y,B) \mid (x,y,BA) \in \sigma \}$.
 \end{definition}
 
 \begin{definition}
-  \label{def:conditions-from-perm}
+  \label{def:struct-perm-graph}
   \uses{def:binary-condition}
+  \lean{con_nf.struct_perm.to_spec}
+  \leanok
   A binary condition $(x,y,A)$ is viewed as representing the condition “$\pi_A(x) = y$”.  Any $\alpha$-structural permutation $\pi$ thus induces a set of binary conditions, its \emph{graph}, $\{ (x,y,A) \in \BiCond_\alpha \mid \pi_A(x) = y \}$.  This gives an evident embedding $\Str_\alpha \to \pow(\BiCond_\alpha)$; we will notationally identify structural permutations with their graphs.
+\end{definition}
 
+\begin{definition}
+  \label{def:struct-perm-extends}
+  \uses{def:binary-condition}
+  \lean{con_nf.struct_perm.satisfies}
+  \leanok
   We say that a structural permutation $\pi$ \emph{extends} a set of binary conditions $\sigma$ if $\sigma \subseteq \pi$, viewing $\pi$ as its graph.  More generally, given any group with a map $\varphi : G \to \Str$ (e.g.\ the allowable permutations of some tangle data), we say $\pi \in G$ extends a set of binary conditions $\sigma$ if $\sigma \subseteq \varphi(\pi)$.
 \end{definition}
 
 \begin{proposition}
   \label{prop:conditions-from-perm-restriction}
-  \uses{def:conditions-from-perm,def:condition-functoriality}
+  \uses{def:struct-perm-graph,def:condition-functoriality}
+  \lean{con_nf.struct_perm.spec_lower_eq_derivative}
+  \leanok
   This identification of permutations respects the actions of paths.  That is, given a structural permutation $\pi$, the graph of the derivative $\pi_A$ is precisely the restriction along $A$ of the graph of $\pi$ (as our notational identification suggests).
 \end{proposition}
+\begin{proof}\leanok\end{proof}
 
 \begin{definition}
   \label{def:condition-dom-rge}
   \uses{def:binary-condition}
+  \lean{con_nf.spec.domain}
+  \leanok
   Previously, we viewed $\alpha$-conditions $(x,A) \in \Cond_\alpha$ as representing the conditions $\pi_A(x) = x$, as used in supports (and under this view we could identify them with the binary conditions $(x,y,A)$).  In this section, we will more often view them as elements of the domain or range of a set of binary conditions.  Precisely, for a set $\sigma$ of binary conditions, we take $\dom \sigma := \{ (x,A) \mid (x,y,A) \in \sigma \}$, and similarly $\rge \sigma := \{ (y,A) \mid (x,y,a) \in \sigma \}$.
 
   By a slight abuse of terminology, when working with sets of conditions, we will often say “litter” to mean “litter-with-path”, i.e.\ “condition of the form $(L,A)$”, and similarly for near-litter” and “atom”.
@@ -803,6 +821,8 @@ In order to state the theorem precisely, we must first set up a framework for di
 \begin{definition}
   \label{def:condition-total-1-1}
   \uses{def:condition-dom-rge}
+  \lean{con_nf.spec.total}
+  \leanok
   We extend standard properties of binary relations to sets of binary conditions:
 
   Say a set of binary conditions $\sigma \subseteq \BiCond_\alpha$ is \emph{total} if its domain is $\Cond_\alpha$; co-total if its range is; and one-to-one if whenever $(x,y,A)$ and $(x',y',A')$ are in $\sigma$, $x = x'$ if and only if $y = y'$.
@@ -812,7 +832,9 @@ In order to state the theorem precisely, we must first set up a framework for di
 
 \begin{proposition}
   \label{prop:total-1-1-gives-perm}
-  \uses{def:condition-total-1-1,def:conditions-from-perm}
+  \uses{def:condition-total-1-1,def:struct-perm-graph}
+  \lean{con_nf.spec.graph_struct_perm}
+  \leanok
   A set of binary conditions is the graph of a structural permutation precisely if it is one-to-one and total.
 
   (NOTE: this may not be explicitly needed, but it is helpful to know, and should be a good warmup and definition-test ahead of the main freedom of action theorem, in particular \cref{prop:total-allowable-partial-perm-actual}.)
@@ -827,12 +849,16 @@ In order to state the theorem precisely, we must first set up a framework for di
 \begin{definition}
   \label{def:flexible-condition}
   \uses{def:foa-context}
+  \lean{con_nf.flexible}
+  % not \leanok until we can verify the definition is actually completely true
   Given a freedom of action context at a proper type index $\alpha$, a \emph{flexible litter} is a condition $(L,A)$, with $L$ a litter, such that $L$ is not in the image of any of the $f$-maps $f^A_{\gamma,\delta}$ (for any $\gamma,\delta < \beta \pathto^A \alpha$).
 \end{definition}
 
 \begin{definition}
   \label{def:allowable-partial-perm}
   \uses{def:condition-total-1-1,def:condition-functoriality,def:flexible-condition}
+  \lean{con_nf.spec.allowable}
+  \leanok
   Assume a freedom of action context at a proper type index $\alpha$.
 
   An \emph{allowable partial permutation} is a set $\sigma$ of binary $\alpha$-conditions satisfying the following properties:
@@ -851,13 +877,17 @@ The motivation for allowable permutations is precisely to state the freedom of a
 
 \begin{definition}
   \label{def:foa-property}
-  \uses{def:allowable-partial-perm,def:conditions-from-perm}
+  \uses{def:allowable-partial-perm,def:struct-perm-graph,def:struct-perm-extends}
+  \lean{con_nf.freedom_of_action}
+  \leanok
   Given a freedom of action context at a proper type index $\alpha$, say that \emph{freedom of action holds} if for every allowable permutation $\sigma$, there is some allowable permutation $\pi \in \All_\alpha$ extending $\sigma$.
 \end{definition}
 
 \begin{theorem}
   \label{thm:foa-propagates}
   \uses{def:foa-property,def:synthesise-foa-context}
+  \lean{con_nf.freedom_of_action_propagates}
+  \leanok
   Suppose given, for each $\beta < \alpha$, a freedom of action context together with full tangle data at the top level; and such that for all their restrictions along any path $A : \gamma \to \beta$ (including identity paths), freedom of action holds.
 
   Then freedom of action holds in the synthesised freedom of action context at $\alpha$ (i.e.\ with the tangles and allowable permutations at $\alpha$ defined by the constructions of phase 1).
@@ -865,6 +895,7 @@ The motivation for allowable permutations is precisely to state the freedom of a
 
 \begin{proof}
   \uses{prop:allowable-partial-perm-chain-union,lem:maximal-allowable-partial-perm-total,prop:total-allowable-partial-perm-actual}
+  \leanok
   The proof is quite lengthy, so we break it down into various lemmas.
 
   In outline: We first define an ordering on allowable partial permutations (\cref{def:allowable-partial-perm-order}), show that it has unions of chains (\cref{prop:allowable-partial-perm-chain-union}), and so apply Zorn’s lemma to conclude that it has a maximal element above any element.  This is the easy part.  The main work then consists of showing that any maximal partial permutation is total and co-total (\cref{lem:maximal-allowable-partial-perm-total}), and hence is an allowable permutation (\cref{prop:total-allowable-partial-perm-actual}).
@@ -875,6 +906,8 @@ The motivation for allowable permutations is precisely to state the freedom of a
 \begin{definition}
   \label{def:allowable-partial-perm-order}
   \uses{def:allowable-partial-perm}
+  \lean{con_nf.allowable_partial_perm.perm_le}
+  \leanok
   Work in a freedom of action context at a proper type index $\alpha$.
 
   Given allowable partial permutations $\sigma, \rho$, say that $\sigma \sqsubseteq \rho$ (“$\sigma$ \emph{carefully extends} $\rho$”) if:
@@ -889,6 +922,8 @@ The motivation for allowable permutations is precisely to state the freedom of a
 \begin{proposition}
   \label{prop:allowable-partial-perm-chain-union}
   \uses{def:allowable-partial-perm-order}
+  \lean{con_nf.allowable_partial_perm.allowable_Union}
+  \leanok
   $\sqsubseteq$ has upper bounds for chains, given by taking unions.  That is: given a set of allowable partial permutations that is a chain under $\sqsubseteq$, its union is again an allowable partial permutation, and carefully extends each element of the chain.  (Indeed, this gives a supremum for the chain, and so shows that $\sqsubseteq$ is chain-complete; but “upper bounds” is all we need in order to apply Zorn’s lemma.)
 \end{proposition}
 
@@ -897,6 +932,8 @@ To prove that maximal allowable partial permutations are total, we will make use
 \begin{definition}
   \label{def:constrains}
   \uses{def:foa-context}
+  \lean{con_nf.constrains}
+  % not \leanok until we fix the wf condition!
   Fix a freedom of action context at $\alpha$. Then the relation \( \prec \)  on $\Cond_\alpha$, read as \emph{“constrains”}, is defined by:
   \begin{itemize}
     \item \( (L, A) \prec (x, A) \), whenever \( L \) is a litter and \( x \in L \); (an atom is constrained by the litter it belongs to);
@@ -913,9 +950,12 @@ To prove that maximal allowable partial permutations are total, we will make use
 \begin{proposition}
   \label{prop:constrains-well-founded}
   \uses{def:constrains,lem:f-map-properties}
+  \lean{con_nf.constrains_wf}
+  \leanok
   The relation \( \prec \) is well-founded.
 \end{proposition}
 \begin{proof}
+  % not \leanok until we fix the constrains relation to actually be wf
   By the conditions on orderings assumed in full tangle data, and the properties of $f$-maps, whenever some constraint \( (x, A) \prec (y,B) \) holds, we have \( \iota_A(x) < \iota_B(y) \) in \( \mu \).
 \end{proof}
 
@@ -924,31 +964,38 @@ In order to make use of the inductive assumption that freedom of action holds at
 \begin{proposition}
   \label{prop:restrict-allowable-partial-perm}
   \uses{def:allowable-partial-perm,def:restrict-foa-context}
+  \lean{con_nf.spec.allowable.lower}
+  \leanok
   If $\sigma$ is an allowable permutation in a freedom of action context at $\alpha$, then for any $A : \beta \to \alpha$, the restriction $\sigma_A$ is again allowable in the context restricted along $A$.
 \end{proposition}
 
 \begin{proof}
   \uses{prop:total-1-1-restriction,prop:conditions-from-perm-restriction}
+  % not \leanok until we fix lower_flexible_cond
   Hopefully straightforward, but probably a bit lengthy, using \cref{prop:total-1-1-restriction}, \cref{prop:conditions-from-perm-restriction}.
 \end{proof}
 
 \begin{proposition}
   \label{prop:allowable-partial-perm-action}
   \uses{def:foa-property}
+  \lean{con_nf.exists_tangle_of_supports}
+  \leanok
   Given a freedom of action context at a proper type index $\alpha$, an allowable permuation $\sigma$, and an $\alpha$-tangle $x$ such that $\dom \sigma$ supports $x$:
   \begin{enumerate}
     \item if $\pi, \pi' \in \All_\alpha$ are allowable permutations extending $\sigma$, then $\pi x = \pi' x$;
-    \item if freedom of action holds, there is a unique $y \ in \tau_\alpha$ such that every allowable permutation $\pi$ extending $\sigma$ has $\pi x = y$; we denote this unique value by $\sigma x$.
+    \item if freedom of action holds, there is a unique $y \in \tau_\alpha$ such that every allowable permutation $\pi$ extending $\sigma$ has $\pi x = y$; we denote this unique value by $\sigma x$.
   \end{enumerate}
 \end{proposition}
 
 \begin{proof}
-  For the first part: given such $\pi, \pi'$, $(\pi^-1)\pi$ acts trivally on $\dom \sigma$, and hence fixes $x$.  The second part follows from the first together with the freedom of action property.
+  For the first part: given such $\pi, \pi'$, $(\pi^{-1})\pi$ acts trivally on $\dom \sigma$, and hence fixes $x$.  The second part follows from the first together with the freedom of action property.
 \end{proof}
 
 \begin{lemma}
   \label{lem:maximal-allowable-partial-perm-total}
   \uses{def:allowable-partial-perm-order}
+  \lean{con_nf.allowable_partial_perm.total_of_is_max}
+  \leanok
   Any allowable partial permutation that is maximal under $\sqsubseteq$ is total.
 \end{lemma}
 
@@ -974,7 +1021,9 @@ In order to make use of the inductive assumption that freedom of action holds at
 
 \begin{proposition}
   \label{prop:total-allowable-partial-perm-actual}
-  \uses{def:synthesise-foa-context,def:foa-property,}
+  \uses{def:synthesise-foa-context,def:foa-property}
+  \lean{con_nf.allowable_partial_perm.extends_to_allowable_of_total}
+  \leanok
   In the synthesised freedom of action context at $\alpha$, any partial allowable permutation (at $\alpha$) that is total and co-total extends to an actual allowable permutation at $\alpha$.
 \end{proposition}
 

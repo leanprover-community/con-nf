@@ -432,6 +432,8 @@ begin
     convert hyσ, rw ← this },
 end
 
+-- TODO: Why are these two lemmas' names so different-looking now?
+
 /-- If we lower a total specification along a path, it is still total.
 This is one part of `total-1-1-restriction` in the blueprint. -/
 protected lemma total.lower (σ : spec α) (A : path α β) :
