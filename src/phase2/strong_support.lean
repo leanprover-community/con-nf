@@ -128,7 +128,11 @@ lemma lower_strong {β : type_index} (S : strong_support B) (A : path B.index β
   ∀ c (hc : c ∈ (S.to_word_support.lower B A).carrier), ∀ d ≺ c,
   ∃ (hd : d ∈ (S.to_word_support.lower B A).carrier),
     (S.to_word_support.lower B A).r ⟨d, hd⟩ ⟨c, hc⟩ :=
-sorry
+begin
+intros,
+dsimp [(le_index.path)] at *,
+exact S.strong (c.extend_path A) hc (d.extend_path A) (lower_constrains _ _ _ _ H),
+end
 
 /-- Since the lowering of any strong support is strong, we keep track of this fact here. -/
 def strong_support.lower {β : type_index} (S : strong_support B) (A : path B.index β) :
