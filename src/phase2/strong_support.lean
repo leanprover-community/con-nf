@@ -95,7 +95,7 @@ def word_support.lower {β : type_index} (S : word_support B) (A : path B.index 
   cases a, cases b, cases a_val, cases b_val, simp only [subtype.coe_mk] at h,
   have h_len: (a_val_snd).length = (b_val_snd).length,
   rw [← add_right_inj, ← path.length_distrib, ← path.length_distrib, h.right],
-  have := h.left, subst this, have := (quiver.path.comp_inj A A a_val_snd b_val_snd h_len).left, subst this},
+  have := h.left, subst this, have := (quiver.path.comp_inj A A a_val_snd b_val_snd h_len h.right).right, subst this},
   rw this, apply S.wo.trichotomous, end,
   irrefl := begin intros, apply S.wo.irrefl, end,
   trans := begin intros,apply S.wo.trans, apply ᾰ, apply ᾰ_1 end,
