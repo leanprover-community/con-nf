@@ -88,7 +88,16 @@ def word_support.lower {β : type_index} (S : word_support B) (A : path B.index 
   word_support ⟨β, B.path.comp A⟩ := {
   carrier := {c | c.extend_path A ∈ S.carrier},
   r := λ c₁ c₂, S.r ⟨c₁.val.extend_path A, c₁.property⟩ ⟨c₂.val.extend_path A, c₂.property⟩,
-  wo := sorry,
+  wo := { trichotomous := begin intros,
+  have : a=b ↔ (⟨a.val.extend_path A, _⟩ : {x // x ∈ S.carrier}) = ⟨b.val.extend_path A, _⟩,
+  {split, intro h, simp only [subtype.val_eq_coe], rw h, intro h, simp only [subtype.val_eq_coe] at h,
+  dsimp [(support_condition.extend_path)] at h, simp only [prod.mk.inj_iff] at h,
+  cases a, cases b, cases a_val, cases b_val, simp only [subtype.coe_mk] at h,
+  have := h.left, subst this, have := (quiver.path.comp_inj A A a_val_snd b_val_snd h.right).left, subst this},
+  rw this, apply S.wo.trichotomous, end,
+  irrefl := begin intros, apply S.wo.irrefl, end,
+  trans := begin intros,apply S.wo.trans, apply ᾰ, apply ᾰ_1 end,
+  wf := begin have := @inv_image.is_well_founded _ _ S.r ⟨S.wo.wf⟩, convert (this _).wf, end },
 }
 
 /-- The lowering operation reflects the constrains `≺` relation. -/
