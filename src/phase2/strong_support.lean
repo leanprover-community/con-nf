@@ -184,8 +184,36 @@ sorry
 
 /-- There are only `<κ`-many things that recursively constrain any given support condition.
 This is because `constrains` is well-founded and each condition has `<κ` immediate predecessors. -/
-lemma constrains_small (c : support_condition B) : small {d | d ≺≺ c} :=
-sorry
+lemma constrains_small : ∀ (c : support_condition B), small {d | d ≺≺ c}
+| c := begin
+  -- lemmas that probably exist but i don't know the names of
+  have cases_tail_iff : ∀ x, {d : support_condition B | d ≺≺ x} = {d | d = x ∨ (∃ e, d ≺≺ e ∧ e ≺ x)},
+  { refine λ x, set.ext (λ d, _),
+    dsimp,
+    rw refl_trans_gen.cases_tail_iff (constrains α B),
+    split; exact λ hx, or.rec (λ h, or.inl h.symm) (λ h, or.inr h) hx },
+  have eq_union : ∀ (p q : support_condition B → Prop), {d | p d ∨ q d} = {d | p d} ∪ {d | q d},
+  { refine λ p q, set.ext (λ d, _),
+    dsimp only,
+    refl, },
+  have eq_Union : {d : support_condition B | ∃ (e : support_condition B), d ≺≺ e ∧ e ≺ c} =
+      ⋃ (e : {e : support_condition B // e ≺ c}), {d : support_condition B | d ≺≺ e.val},
+  { ext,
+    simp only [set.mem_set_of_eq, set.mem_Union, exists_prop],
+    split; rintro ⟨e, he⟩,
+    { exact ⟨⟨e, he.2⟩, he.1⟩ },
+    { exact ⟨e.val, he, e.prop⟩ } },
+
+  unfold small at ⊢,
+  rw [cases_tail_iff, eq_union, eq_Union],
+  refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le
+      (lt_of_eq_of_lt (by rw [set.set_of_eq_eq_singleton, mk_singleton]) $ lt_of_lt_of_le
+        one_lt_aleph_0 κ_regular.aleph_0_le) $ lt_of_le_of_lt cardinal.mk_Union_le_sum_mk _),
+  refine cardinal.sum_lt_of_is_regular κ_regular (mk_constrains c) _,
+  rintro ⟨e, he⟩,
+  exact constrains_small e,
+end
+using_well_founded { dec_tac := `[assumption] }
 
 /-- An application of the above lemma, since there are only `<κ`-many support conditions in `S`. -/
 lemma small_support.closure_small {t : tangle_path B} (S : small_support B (allowable_path B) t) :
