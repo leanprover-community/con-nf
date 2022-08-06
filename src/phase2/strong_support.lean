@@ -2,8 +2,8 @@ import phase2.freedom_of_action
 
 noncomputable theory
 
-open quiver
-open_locale pointwise
+open cardinal quiver relation
+open_locale cardinal pointwise
 
 universe u
 
@@ -22,7 +22,10 @@ structure word_support :=
 structure strong_support extends word_support B :=
 (strong : ∀ c (hc : c ∈ carrier), ∀ d ≺ c, ∃ (hd : d ∈ carrier), r ⟨d, hd⟩ ⟨c, hc⟩)
 
-structure small_strong_support extends strong_support B :=
+/-- A small strong support is a strong support which supports some tangle `t`, and contains only
+a small amount of support conditions. -/
+structure small_strong_support {B : le_index α} (t : tangle_path B) extends strong_support B :=
+(supports : supports (allowable_path B) carrier t)
 (small : small carrier)
 
 noncomputable! def proto_smul : allowable_path B → word_support B → word_support B :=
@@ -132,16 +135,97 @@ def strong_support.lower {β : type_index} (S : strong_support B) (A : path B.in
   strong_support ⟨β, B.path.comp A⟩ :=
 ⟨S.to_word_support.lower B A, lower_strong B S A⟩
 
+infix ` ≺≺ `:50 := (refl_trans_gen $ constrains _ _)
+
+variable {B}
+
+namespace potential_support
+
+/-- The down-closure of a set of support conditions under the `constrains` relation.
+Everything that (recursively) constrains a condition in `S` is included in its down-closure. -/
+def closure (S : set (support_condition B)) : set (support_condition B) :=
+⋃ c ∈ S, {d | d ≺≺ c}
+
+lemma mem_closure_iff (S : set (support_condition B)) : ∀ c, c ∈ closure S ↔ ∃ d ∈ S, c ≺≺ d :=
+begin
+  intro c,
+  split,
+  { intro hc, obtain ⟨T, ⟨d, rfl⟩, hcT⟩ := hc,
+    dsimp only at hcT, simp only [set.mem_Union, set.mem_set_of_eq, exists_prop] at hcT,
+    exact ⟨d, hcT.1, hcT.2⟩, },
+  { rintro ⟨d, hdS, hdc⟩,
+    exact ⟨_, ⟨d, rfl⟩, ⟨_, ⟨hdS, rfl⟩, hdc⟩⟩, },
+end
+
+/-- The closure of a potential support is a superset of the original potential support. -/
+lemma subset_closure (S : set (support_condition B)) : S ⊆ closure S :=
+begin
+  intros c hc,
+  rw mem_closure_iff,
+  exact ⟨c, hc, refl_trans_gen.refl⟩,
+end
+
+/-- The down-closure of a set that supports a tangle also supports that tangle. This is because
+being a support is preserved under set union. -/
+lemma closure_supports (t : tangle_path B) (S : support B (allowable_path B) t) :
+  supports (allowable_path B) (closure S.carrier) t :=
+supports.mono (subset_closure S) S.supports
+
+end potential_support
+
+/-- This really should be computable. However, Lean's computability checker is a bit broken. -/
+noncomputable! def support.closure {t : tangle_path B} (S : support B (allowable_path B) t) :
+  support B (allowable_path B) t :=
+⟨potential_support.closure S, potential_support.closure_supports t S⟩
+
+/-- Each condition has `<κ`-many immediate predecessors. -/
+lemma mk_constrains (c : support_condition B) : small {d | d ≺ c} :=
+sorry
+
+/-- There are only `<κ`-many things that recursively constrain any given support condition.
+This is because `constrains` is well-founded and each condition has `<κ` immediate predecessors. -/
+lemma constrains_small (c : support_condition B) : small {d | d ≺≺ c} :=
+sorry
+
+/-- An application of the above lemma, since there are only `<κ`-many support conditions in `S`. -/
+lemma small_support.closure_small {t : tangle_path B} (S : small_support B (allowable_path B) t) :
+  small S.to_support.closure.carrier :=
+sorry
+
+/-- Any well-founded relation can be extended to a well-ordering on that type. Hopefully this is
+already in mathlib, but I couldn't find it.
+Check the blueprint for more information (Lemma 3.26). -/
+lemma well_order_of_well_founded {α : Type*} {r : α → α → Prop} (wf : well_founded r) :
+  ∃ s ≥ r, is_well_order α s :=
+sorry
+
 /-- Any small support can be 'strengthened' into a strong support that is also small.
 Check the blueprint for more information. -/
 lemma strengthen_small_support (t : tangle_path B) (S : small_support B (allowable_path B) t) :
-  ∃ T : small_strong_support B, S.carrier ⊆ T.carrier :=
-sorry
+  ∃ T : small_strong_support t, S.carrier ⊆ T.carrier :=
+begin
+  refine ⟨_, _⟩,
+  refine_struct {
+    carrier := S.to_support.closure.carrier,
+    r := (well_order_of_well_founded (inv_image.wf _ (constrains_wf α B))).some,
+    wo := (well_order_of_well_founded (inv_image.wf _ (constrains_wf α B))).some_spec.some_spec,
+    supports := S.to_support.closure.supports,
+    small := small_support.closure_small S,
+  },
+  { -- The `strong` condition remains to be shown.
+    intros c hc d hd,
+    split,
+    refine (well_order_of_well_founded
+        (inv_image.wf subtype.val (constrains_wf α B))).some_spec.some ⟨d, _⟩ ⟨c, hc⟩ hd,
+    unfold support.closure at hc ⊢,
+    rw potential_support.mem_closure_iff at hc ⊢,
+    obtain ⟨e, he₁, he₂⟩ := hc,
+    exact ⟨e, he₁, refl_trans_gen.head hd he₂⟩, },
+  { exact potential_support.subset_closure _, },
+end
 
 /-- There exists a small strong support for any tangle, along any path. -/
-lemma exists_strong_support (t : tangle_path B) :
-  ∃ (T : small_strong_support B), supports (allowable_path B) T.carrier t :=
-let ⟨T, hT⟩ := strengthen_small_support B t (designated_support_path t) in
-⟨T, (designated_support_path t).supports.mono hT⟩
+lemma exists_strong_support (t : tangle_path B) : nonempty (small_strong_support t) :=
+⟨(strengthen_small_support t (designated_support_path t)).some⟩
 
 end con_nf
