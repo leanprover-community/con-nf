@@ -1168,6 +1168,11 @@ instance : preorder (allowable_partial_perm B) :=
   le_refl := extends_refl,
   le_trans := extends_trans }
 
+lemma domain_subset_of_le {σ τ : allowable_partial_perm B} (hστ : σ ≤ τ) :
+  σ.val.domain ⊆ τ.val.domain := sorry
+lemma range_subset_of_le {σ τ : allowable_partial_perm B} (hστ : σ ≤ τ) :
+  σ.val.range ⊆ τ.val.range := sorry
+
 /-- A condition required later. -/
 lemma inv_mono : monotone (@has_inv.inv (allowable_partial_perm B) _) :=
 begin
@@ -3635,32 +3640,32 @@ variables (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) {C : path (B : typ
   (hπ : π.to_struct_perm.satisfies $ σ.val.lower (C.cons $ coe_lt_coe.mpr hδ))
 
 lemma non_flexible_union_one_to_one_forward :
-  spec.one_to_one_forward (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
+  spec.one_to_one_forward (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
 sorry
 
 lemma non_flexible_union_one_to_one_backward :
-  spec.one_to_one_forward (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ :=
+  spec.one_to_one_forward (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ :=
 sorry
 
 lemma non_flexible_union_atom_cond_forward :
-  ∀ L C, spec.atom_cond (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) L C :=
+  ∀ L C, spec.atom_cond (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}) L C :=
 sorry
 
 lemma non_flexible_union_atom_cond_backward :
-  ∀ L C, spec.atom_cond (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ L C :=
+  ∀ L C, spec.atom_cond (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ L C :=
 sorry
 
 lemma non_flexible_union_near_litter_cond_forward :
-  ∀ N₁ N₂ C, spec.near_litter_cond (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) N₁ N₂ C :=
+  ∀ N₁ N₂ C, spec.near_litter_cond (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}) N₁ N₂ C :=
 sorry
 
 lemma non_flexible_union_near_litter_cond_backward :
   ∀ N₁ N₂ C,
-    spec.near_litter_cond (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ N₁ N₂ C :=
+    spec.near_litter_cond (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ N₁ N₂ C :=
 sorry
 
 lemma non_flexible_union_non_flexible_cond_forward :
-  spec.non_flexible_cond B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
+  spec.non_flexible_cond B (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
 begin
   intros hb hg hd hgb hdb hdg hNl hp ht hf π h1,
   unfold struct_perm.satisfies at h1,
@@ -3673,23 +3678,23 @@ begin
 end
 
 lemma non_flexible_union_non_flexible_cond_backward :
-  spec.non_flexible_cond B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ :=
+  spec.non_flexible_cond B (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ :=
 sorry
 
 lemma non_flexible_union_support_closed_forward :
-  (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}).domain.support_closed B :=
+  (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}).domain.support_closed B :=
 sorry
 
 lemma non_flexible_union_support_closed_backward :
-  (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}).range.support_closed B :=
+  (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}).range.support_closed B :=
 sorry
 
 lemma non_flexible_union_flexible_cond :
-  ∀ C, spec.flexible_cond B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) C :=
+  ∀ C, spec.flexible_cond B (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}) C :=
 sorry
 
 lemma non_flexible_union_allowable :
-  spec.allowable B (σ.val ∪ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
+  spec.allowable B (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
 { forward :=
   { one_to_one := non_flexible_union_one_to_one_forward hγ hδ hγδ t hπ,
     atom_cond := non_flexible_union_atom_cond_forward hγ hδ hγδ t hπ,
@@ -3706,11 +3711,12 @@ lemma non_flexible_union_allowable :
   flexible_cond := non_flexible_union_flexible_cond hγ hδ hγδ t hπ }
 
 lemma le_non_flexible_union : σ ≤ ⟨_, non_flexible_union_allowable hγ hδ hγδ t hπ⟩ :=
-{ subset := subset_union_left _ _,
+{ le := le_sup_left,
   all_flex_domain := begin
     rintro L N' C' hN' hσ₁ (hσ₂ | hσ₂),
     { cases hσ₁ hσ₂ },
-    { simp only [new_non_flexible_constraint, mem_singleton_iff, prod.mk.inj_iff] at hσ₂,
+    { simp only [new_non_flexible_constraint, set_like.mem_coe, spec.mem_singleton,
+        prod.mk.inj_iff] at hσ₂,
       exfalso,
       cases hN' hγ hδ hγδ C t,
       { exact h (litter.to_near_litter_injective hσ₂.left.left) },
@@ -3719,7 +3725,8 @@ lemma le_non_flexible_union : σ ≤ ⟨_, non_flexible_union_allowable hγ hδ 
   all_flex_range := begin
     rintro L N' C' hN' hσ₁ (hσ₂ | hσ₂),
     { cases hσ₁ hσ₂ },
-    { simp only [new_non_flexible_constraint, mem_singleton_iff, prod.mk.inj_iff] at hσ₂,
+    { simp only [new_non_flexible_constraint, set_like.mem_coe, spec.mem_singleton,
+        prod.mk.inj_iff] at hσ₂,
       exfalso,
       cases hN' hγ hδ hγδ C t,
       { -- This is the unpacked coherence condition on L and f.
@@ -3730,14 +3737,14 @@ lemma le_non_flexible_union : σ ≤ ⟨_, non_flexible_union_allowable hγ hδ 
   all_atoms_domain := begin
     rintro a b L ha C hσ₁ (hσ₂ | hσ₂),
     { cases hσ₁ hσ₂ },
-    { simpa only [new_non_flexible_constraint, mem_singleton_iff, prod.mk.inj_iff,
-        false_and] using hσ₂ }
+    { simpa only [new_non_flexible_constraint, set_like.mem_coe, spec.mem_singleton,
+        prod.mk.inj_iff, false_and] using hσ₂ }
   end,
   all_atoms_range := begin
     rintro a b L ha C hσ₁ (hσ₂ | hσ₂),
     { cases hσ₁ hσ₂ },
-    { simpa only [new_non_flexible_constraint, mem_singleton_iff, prod.mk.inj_iff,
-        false_and] using hσ₂ }
+    { simpa only [new_non_flexible_constraint, set_like.mem_coe, spec.mem_singleton,
+        prod.mk.inj_iff, false_and] using hσ₂ }
   end }
 
 lemma exists_ge_non_flexible (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) {C : path (B : type_index) β}
@@ -3770,8 +3777,8 @@ lemma total_of_is_max_aux (σ : allowable_partial_perm B) (hσ : is_max σ)
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
   Π (c : support_condition B), c ∈ σ.val.domain
 | ⟨inl a, A⟩ := begin
-    obtain ⟨ρ, hρ, b, hb, hdom⟩ := exists_ge_atom σ a A (λ c hc, total_of_is_max_aux c),
-    exact ⟨b, (hσ hρ).subset hb, hdom⟩
+    obtain ⟨ρ, hσρ, hρ⟩ := exists_ge_atom σ a A (λ c hc, total_of_is_max_aux c),
+    exact domain_subset_of_le (hσ hσρ) hρ,
   end
 | ⟨inr N, A⟩ := begin
     by_cases hnl : litter_set N.fst = N.snd,
@@ -3809,7 +3816,7 @@ using_well_founded { dec_tac := `[assumption] }
 /-- Any maximal allowable partial permutation under `≤` is total. -/
 lemma total_of_is_max (σ : allowable_partial_perm B) (hσ : is_max σ)
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) : σ.val.total :=
-eq_univ_of_forall (total_of_is_max_aux σ hσ foa)
+total_of_is_max_aux σ hσ foa
 
 /-- Any maximal allowable partial permutation under `≤` is co-total. -/
 lemma co_total_of_is_max (σ : allowable_partial_perm B) (hσ : is_max σ)
@@ -3867,7 +3874,7 @@ begin
   have ρ_total := allowable_partial_perm.total_of_is_max ρ this foa,
   have ρ_co_total := allowable_partial_perm.co_total_of_is_max ρ this foa,
   obtain ⟨π, hπ⟩ := ρ.extends_to_allowable_of_total ρ_total ρ_co_total foa syn,
-  exact ⟨π, hπ.mono hσρ.subset⟩,
+  exact ⟨π, hπ.mono hσρ.le⟩,
 end
 
 end con_nf
