@@ -1,4 +1,4 @@
-import phase2.freedom_of_action
+import phase2.freedom_of_action.constrains
 
 noncomputable theory
 
@@ -139,7 +139,7 @@ def strong_support.lower {β : type_index} (S : strong_support B) (A : path B.in
   strong_support ⟨β, B.path.comp A⟩ :=
 ⟨S.to_word_support.lower B A, lower_strong B S A⟩
 
-infix ` ≺≺ `:50 := (refl_trans_gen $ constrains _ _)
+infix ` ≺≺ `:50 := (refl_trans_gen $ constrains _)
 
 variable {B}
 
@@ -194,7 +194,7 @@ lemma constrains_small : ∀ (c : support_condition B), small {d | d ≺≺ c}
   have cases_tail_iff : ∀ x, {d : support_condition B | d ≺≺ x} = {d | d = x ∨ (∃ e, d ≺≺ e ∧ e ≺ x)},
   { refine λ x, set.ext (λ d, _),
     dsimp,
-    rw refl_trans_gen.cases_tail_iff (constrains α B),
+    rw refl_trans_gen.cases_tail_iff (constrains B),
     split; exact λ hx, or.rec (λ h, or.inl h.symm) (λ h, or.inr h) hx },
   have eq_union : ∀ (p q : support_condition B → Prop), {d | p d ∨ q d} = {d | p d} ∪ {d | q d},
   { refine λ p q, set.ext (λ d, _),
@@ -239,8 +239,8 @@ begin
   refine ⟨_, _⟩,
   refine_struct {
     carrier := S.to_support.closure.carrier,
-    r := (well_order_of_well_founded (inv_image.wf _ (constrains_wf α B))).some,
-    wo := (well_order_of_well_founded (inv_image.wf _ (constrains_wf α B))).some_spec.some_spec,
+    r := (well_order_of_well_founded (inv_image.wf _ (constrains_wf B))).some,
+    wo := (well_order_of_well_founded (inv_image.wf _ (constrains_wf B))).some_spec.some_spec,
     supports := S.to_support.closure.supports,
     small := small_support.closure_small S,
   },
@@ -248,7 +248,7 @@ begin
     intros c hc d hd,
     split,
     refine (well_order_of_well_founded
-        (inv_image.wf subtype.val (constrains_wf α B))).some_spec.some ⟨d, _⟩ ⟨c, hc⟩ hd,
+        (inv_image.wf subtype.val (constrains_wf B))).some_spec.some ⟨d, _⟩ ⟨c, hc⟩ hd,
     unfold support.closure at hc ⊢,
     rw potential_support.mem_closure_iff at hc ⊢,
     obtain ⟨e, he₁, he₂⟩ := hc,
