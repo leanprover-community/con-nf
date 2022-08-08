@@ -184,7 +184,58 @@ noncomputable! def support.closure {t : tangle_path B} (S : support B (allowable
 
 /-- Each condition has `<κ`-many immediate predecessors. -/
 lemma mk_constrains (c : support_condition B) : small {d | d ≺ c} :=
-sorry
+begin
+  have iff_imp_set_eq : ∀ (p q : support_condition B → Prop), (∀ d, p d ↔ q d) → {d | p d} = {d | q d} := λ p q h, set.ext (λ d, ⟨λ hd, (h d).1 hd, λ hd, (h d).2 hd⟩),
+  have := λ d, constrains_iff B d c,
+  specialize iff_imp_set_eq (λ d, d ≺ c) _ this,
+  dsimp only at iff_imp_set_eq,
+  rw iff_imp_set_eq,
+  clear this iff_imp_set_eq,
+
+  obtain ⟨c | c, C⟩ := c,
+  { simp only [prod.mk.inj_iff, exists_eq_right_right', false_and, and_false, exists_false, or_false],
+    convert lt_of_eq_of_lt (mk_singleton _) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le) using 1,
+    swap, exact (sum.inr c.fst.to_near_litter, C),
+    ext,
+    refine ⟨_, λ hx, ⟨_, rfl, hx⟩⟩,
+    rintro ⟨_, h1, h⟩,
+    cases h1,
+    exact set.mem_singleton_iff.2 h },
+  { have eq_union : ∀ (p q : support_condition B → Prop), {d | p d ∨ q d} = {d | p d} ∪ {d | q d},
+    { refine λ p q, set.ext (λ d, _),
+      dsimp only,
+      refl, },
+    rw [eq_union, eq_union, eq_union],
+    clear eq_union,
+
+    unfold small,
+    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
+    { simp only [prod.mk.inj_iff, false_and, and_false, exists_false, set.set_of_false, mk_emptyc],
+      exact lt_of_lt_of_le cardinal.aleph_0_pos κ_regular.aleph_0_le },
+    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
+    { by_cases litter_set c.fst = c.snd,
+      { simp only [ne.def, prod.mk.inj_iff, exists_eq_right_right', set.coe_set_of],
+        refine lt_of_eq_of_lt (cardinal.mk_emptyc_iff.2 _) (lt_of_lt_of_le aleph_0_pos κ_regular.aleph_0_le),
+        refine set.ext (λ x, ⟨_, λ h, h.rec _⟩),
+        rintro ⟨hnot, -⟩,
+        exact hnot h },
+      { convert lt_of_eq_of_lt (mk_singleton _) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le) using 3,
+        swap, exact (sum.inr c.fst.to_near_litter, C),
+        refine set.ext (λ x, ⟨_, λ hx, ⟨c, h, C, hx, rfl⟩⟩),
+        rintro ⟨_, _, _, ⟨⟩, ⟨⟩⟩,
+        exact rfl } },
+    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
+    { convert lt_of_le_of_lt (@cardinal.mk_image_le _ _ _ _) c.snd.prop using 4,
+      swap, exact λ a, (sum.inl a, C),
+      refine funext (λ x, eq_iff_iff.2 _),
+      cases x with x A,
+      split,
+      { rintro ⟨_, a, ha, _, ⟨⟩, ⟨⟩⟩,
+        exact ⟨a, ha, rfl⟩ },
+      { rintro ⟨a, ha, ⟨⟩⟩,
+        exact ⟨c, a, ha, C, rfl, rfl⟩ } },
+    sorry }
+end
 
 /-- There are only `<κ`-many things that recursively constrain any given support condition.
 This is because `constrains` is well-founded and each condition has `<κ` immediate predecessors. -/
