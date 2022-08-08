@@ -336,19 +336,15 @@ lemma to_spec_injective :∀ (α : type_index), injective (@to_spec _ α)
 | (α : Λ) := λ σ τ h, of_coe.injective $ funext $ λ β, funext $ λ hβ, to_spec_injective β $
     set_like.ext $ begin
     rintro ⟨x_fst, x_snd⟩,
-    sorry
-    -- simp only [to_spec, embedding_like.apply_eq_iff_eq, ext_iff] at ⊢ h,
-    -- specialize h ⟨x_fst, (@path.cons type_index con_nf.quiver ↑α ↑α β path.nil hβ).comp x_snd⟩,
-    -- simp only [spec.equiv_set, prod.mk.inj_iff, exists_eq_right, prod.exists, mem_union_eq, mem_range, equiv.coe_fn_symm_mk, ←derivative_derivative, derivative_cons_nil] at h ⊢,
-    -- cases x_fst,
-    -- exact h,
-    -- rw ext_iff at h ⊢,
-    -- simp only [prod.exists, mem_union_eq, mem_set_of_eq] at h ⊢,
-    -- rintro ⟨x_fst, x_snd⟩,
-    -- specialize h ⟨x_fst, (@path.cons type_index con_nf.quiver ↑α ↑α β path.nil hβ).comp x_snd⟩,
-    -- simp_rw derivative_derivative,
-    -- simpa only [derivative_cons_nil, prod.mk.inj_iff, exists_false, exists_eq_right, false_or]
-    --   using h,
+    simp only [to_spec, embedding_like.apply_eq_iff_eq, ext_iff] at h ⊢,
+    specialize h ⟨x_fst, (@path.cons type_index con_nf.quiver ↑α ↑α β path.nil hβ).comp x_snd⟩,
+    simp only [spec.equiv_set, prod.mk.inj_iff, exists_eq_right, prod.exists, mem_union_eq,
+               mem_range, equiv.coe_fn_symm_mk, ←derivative_derivative, derivative_cons_nil] at h ⊢,
+    cases x_fst,
+    { simpa only [spec.mem_mk, mem_union_eq, mem_range, prod.mk.inj_iff, prod.exists,
+                  exists_eq_right, exists_false, or_false] using h },
+    { simpa only [prod.exists, spec.mem_mk, mem_union_eq, mem_set_of_eq, mem_range,
+                  prod.mk.inj_iff, prod.exists, exists_false, exists_eq_right, false_or] using h }
   end
 using_well_founded { dec_tac := `[assumption] }
 
