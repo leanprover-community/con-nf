@@ -7,7 +7,7 @@ universe u
 namespace con_nf
 
 variables [params.{u}] {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] (B : le_index α)
+  [typed_positions.{}] [phase_2_assumptions α] (B : le_index α)
 
 -- TODO: This is an incomplete definition - I'm (zeramorphic) not sure exactly what the parameters
 -- to these intro rules should be.

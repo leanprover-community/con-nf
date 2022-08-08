@@ -27,7 +27,7 @@ variables [params.{u}]
 open struct_perm
 
 variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] {B : le_index α}
+  [typed_positions.{}] [phase_2_assumptions α] {B : le_index α}
 
 /-- A litter and extended index is *flexible* if it is not of the form `f_{γ,δ}^A(x)` for some
 `x ∈ τ_{γ:A}` with conditions defined as above. Hence, it is not constrained by anything. -/
