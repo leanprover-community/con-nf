@@ -278,7 +278,7 @@ by simp [equiv_iff, A_map_code_ne_bot.symm, eq_comm]
 by simp [equiv_iff, A_map_code_ne_bot.symm, eq_comm, sigma.ext_iff]
 
 lemma singleton (hβγ : β ≠ γ) (g : tangle β) :
-  mk β {g} ≡ mk γ (to_tangle '' local_cardinal (f_map γ g)) :=
+  mk β {g} ≡ mk γ (typed_near_litter '' local_cardinal (f_map γ g)) :=
 begin
   convert equiv.A_map_right (mk β {g}) (is_even_singleton _) _ hβγ,
   simp only [snd_mk, mem_singleton_iff, Union_Union_eq_left],

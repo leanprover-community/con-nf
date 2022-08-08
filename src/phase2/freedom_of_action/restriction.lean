@@ -22,7 +22,7 @@ variables [params.{u}]
 open struct_perm spec
 
 variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] {B : le_index α}
+  [typed_positions.{}] [phase_2_assumptions α] {B : le_index α}
 
 section lower
 variables {σ : spec B} {β : Λ} (A : path (B : type_index) β) (hβ : (β : type_index) < B)
@@ -172,11 +172,28 @@ begin
   sorry,
 end
 
+/--
+This proof is painful because we need to show in many places that path composition is associative.
+Does anyone have any better ideas for how to complete this proof?
+-/
 lemma lower_domain_closed (hσ : σ.allowable B) :
   (σ.lower A).domain.support_closed (le_index.mk β (B.path.comp A)) :=
 begin
-  intros hb hg hd hgb hdb hgd p t h1 π hsup,
-  sorry
+  intros β' γ' δ' hγ' hδ' hγδ' C t ht π hsup,
+  convert hσ.forward.support_closed hγ' hδ' hγδ' (A.comp C) (cast _ t) _ (cast _ π) (cast _ hsup)
+    using 1; dsimp only,
+  { rw quiver.path.comp_assoc, },
+  { congr' 1,
+    { rw quiver.path.comp_assoc, },
+    { sorry, },
+    { sorry, },
+    { sorry, },
+    { sorry, } },
+  { rw ← cast_eq_iff_heq, },
+  { rw quiver.path.comp_assoc, },
+  { sorry },
+  { rw quiver.path.comp_assoc, },
+  { refine pi_congr _, intro c, sorry },
 end
 
 namespace spec

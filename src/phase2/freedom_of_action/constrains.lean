@@ -17,7 +17,7 @@ variables [params.{u}]
 open struct_perm
 
 variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] (B : le_index α)
+  [typed_positions.{}] [phase_2_assumptions α] (B : le_index α)
 
 /--
 Support conditions can be said to *constrain* each other in a number of ways. This is discussed
@@ -80,7 +80,7 @@ begin
 end
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,
-then `x < y` in `µ`, under the `to_tangle_path` or `typed_singleton_path` maps. -/
+then `x < y` in `µ`, under the `typed_near_litter_path` or `typed_singleton_path` maps. -/
 lemma constrains_wf : well_founded (constrains B) := sorry
 
 instance : has_well_founded (support_condition B) := ⟨constrains B, constrains_wf B⟩

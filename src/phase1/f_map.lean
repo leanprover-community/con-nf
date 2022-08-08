@@ -6,7 +6,7 @@ import phase1.basic
 Consider a code `(α, γ, G)`. We are interested in the alternative extensions of this object at
 different proper type indices `δ : Λ`. We will define the function `A_δ` which will map the code
 `(α, γ, G)` to a new code `(α, δ, D)`. The elements of `D` are produced by the so-called f-maps.
-In particular, elements of `D` are of the form `to_tangle M` where `M` is a near-litter to some
+In particular, elements of `D` are of the form `typed_near_litter M` where `M` is a near-litter to some
 litter `N`, which in turn is given by an f-map.
 -/
 
@@ -37,10 +37,10 @@ our pool of potential litters.
 
 lemma mk_litters_inflationary_constraint' (x : μ) :
   #{N : (Σ i, {s // is_near_litter ⟨⟨α, β⟩, i⟩ s}) |
-    position (to_tangle ⟨⟨⟨α, β⟩, N.fst⟩, N.snd⟩ : tangle β) ≤ x} < #μ :=
+    position (typed_near_litter ⟨⟨⟨α, β⟩, N.fst⟩, N.snd⟩ : tangle β) ≤ x} < #μ :=
 begin
   refine (mk_le_of_injective _).trans_lt (card_Iic_lt x),
-  { exact λ N, ⟨position (to_tangle ⟨⟨⟨α, β⟩, N.1.1⟩, N.1.2⟩), N.2⟩ },
+  { exact λ N, ⟨position (typed_near_litter ⟨⟨⟨α, β⟩, N.1.1⟩, N.1.2⟩), N.2⟩ },
   rintro ⟨⟨i, N⟩, hN⟩ ⟨⟨j, M⟩, hM⟩ h,
   simp only [subtype.mk_eq_mk, embedding_like.apply_eq_iff_eq, prod.mk.inj_iff, eq_self_iff_true,
     true_and] at h,
@@ -49,16 +49,16 @@ begin
 end
 
 /-- One of the constraints in defining the f-maps is that for all near-litters to the result litter
-`N`, they are positioned higher than `x` in `μ` (under `to_tangle`). We show that there are less
+`N`, they are positioned higher than `x` in `μ` (under `typed_near_litter`). We show that there are less
 than `μ` litters that do *not* satisfy this constraint. -/
 lemma mk_litters_inflationary_constraint (x : μ) :
   #{i : μ | ∃ N : {s // is_near_litter ⟨⟨α, β⟩, i⟩ s},
-    position (to_tangle ⟨⟨⟨α, β⟩, i⟩, N⟩ : tangle β) ≤ x} < #μ :=
+    position (typed_near_litter ⟨⟨⟨α, β⟩, i⟩, N⟩ : tangle β) ≤ x} < #μ :=
 begin
   suffices : #{i : μ | ∃ N : {s // is_near_litter ⟨⟨α, β⟩, i⟩ s},
-    position (to_tangle ⟨⟨⟨α, β⟩, i⟩, N⟩) ≤ x}
+    position (typed_near_litter ⟨⟨⟨α, β⟩, i⟩, N⟩) ≤ x}
     ≤ #{N : (Σ i, {s // is_near_litter ⟨⟨α, β⟩, i⟩ s}) |
-    position (to_tangle ⟨⟨⟨α, β⟩, N.fst⟩, N.snd⟩) ≤ x},
+    position (typed_near_litter ⟨⟨⟨α, β⟩, N.fst⟩, N.snd⟩) ≤ x},
   { exact this.trans_lt (mk_litters_inflationary_constraint' _ _ _) },
   refine ⟨⟨λ i, ⟨⟨i, i.2.some⟩, i.2.some_spec⟩, _⟩⟩,
   rintro ⟨i, N, hN⟩ ⟨j, M, hM⟩ hij,
@@ -85,7 +85,7 @@ their internal structure.
 
 private def f_map_generator (x : μ) (R : Π y < x, μ) : set μ :=
 {i | (∀ N : {s // is_near_litter ⟨⟨α, β⟩, i⟩ s},
-  x < position (to_tangle ⟨⟨⟨α, β⟩, i⟩, N⟩ : tangle β))
+  x < position (typed_near_litter ⟨⟨⟨α, β⟩, i⟩, N⟩ : tangle β))
     ∧ ∀ y (H : y < x), R y H ≠ i}
 
 private def pre_f_map_result_is_viable (x : μ) (R : Π y < x, μ) : Prop :=
@@ -154,7 +154,7 @@ noncomputable def f_map_core : Π (x : μ), f_map_result α β x
     (ne_empty_iff_nonempty.1 $ λ h, lt_irrefl (#μ) $ lt_of_eq_of_lt _ _),
   -- We need to explicitly specify which intermediate cardinal to use in the transitivity
   -- argument; the elaborator can't determine it at this point.
-  exact #{i | (∃ N, position (to_tangle ⟨((α, β), i), N⟩ : tangle β) ≤ x)
+  exact #{i | (∃ N, position (typed_near_litter ⟨((α, β), i), N⟩ : tangle β) ≤ x)
     ∨ ∃ y H, f_map_core' y H = i},
   { rw ←mk_univ,
     congr,
@@ -186,7 +186,7 @@ end
 
 private lemma f_map_core_position_raising (x : μ) (N : set atom)
   (hN : is_near_litter ⟨⟨α, β⟩, (f_map_core α β x).val x le_rfl⟩ N) :
-  x < position (to_tangle ⟨⟨⟨α, β⟩, (f_map_core α β x).val x le_rfl⟩, N, hN⟩ : tangle β) :=
+  x < position (typed_near_litter ⟨⟨⟨α, β⟩, (f_map_core α β x).val x le_rfl⟩, N, hN⟩ : tangle β) :=
 begin
   have snd := (f_map_core α β x).prop.some.snd x le_rfl,
   have := set.nonempty.some_mem ((f_map_core α β x).prop.some.fst x le_rfl),
@@ -218,7 +218,7 @@ lemma f_map_range_eq {α₁ α₂ : type_index} [core_tangle_data α₁] [positi
 congr_arg (prod.fst ∘ prod.fst) h
 
 lemma f_map_position_raising (x : tangle α) (N : set atom) (hN : is_near_litter (f_map β x) N) :
-  position x < position (to_tangle ⟨f_map β x, N, hN⟩ : tangle β) :=
+  position x < position (typed_near_litter ⟨f_map β x, N, hN⟩ : tangle β) :=
 f_map_core_position_raising α β (position x) N hN
 
 end con_nf
