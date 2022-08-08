@@ -222,7 +222,18 @@ using_well_founded { dec_tac := `[assumption] }
 /-- An application of the above lemma, since there are only `<κ`-many support conditions in `S`. -/
 lemma small_support.closure_small {t : tangle_path B} (S : small_support B (allowable_path B) t) :
   small S.to_support.closure.carrier :=
-sorry
+begin
+unfold support.closure, unfold potential_support.closure, dsimp only [(small)],
+apply lt_of_le_of_lt,
+apply cardinal.mk_bUnion_le,
+apply cardinal.mul_lt_of_lt,
+apply le_of_lt, apply lt_of_le_of_lt,
+exact Λ_limit.aleph_0_le,
+exact Λ_lt_κ,
+exact S.2,
+apply cardinal.supr_lt_of_is_regular κ_regular,
+exact S.2, intros, apply constrains_small,
+end
 
 /-- Any well-founded relation can be extended to a well-ordering on that type. Hopefully this is
 already in mathlib, but I couldn't find it.
