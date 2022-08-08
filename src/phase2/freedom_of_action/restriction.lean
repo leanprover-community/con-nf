@@ -44,7 +44,7 @@ begin
     { exact ⟨(inr (L.to_near_litter, y), C), hbin, rfl⟩ } },
   swap,
   refine spec.atom_cond.small_in N hL _ hmaps,
-  all_goals { simpa using hsmall },
+  all_goals { convert hsmall, sorry },
 end
 
 lemma lower_near_litter_cond (hσ : σ.allowable B) (N₁ N₂ C) :

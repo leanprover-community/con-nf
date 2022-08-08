@@ -142,7 +142,8 @@ by simp only [new_near_litter_cond, mem_sup, mem_mk, spec.mem_singleton]
 begin
   simp only [new_near_litter_cond, subtype.val_eq_coe, spec.mem_inv, mem_sup,
     mem_mk, mem_singleton_iff],
-  rw [spec.mem_singleton, inv_eq_iff_inv_eq, binary_condition.inv_def, sum.map_inr, prod.swap],
+  rw [spec.mem_singleton, inv_eq_iff_inv_eq, binary_condition.inv_def, binary_condition.inv_def,
+    sum.map_inr, prod.swap],
   exact ⟨λ h, or.elim h or.inl (λ h, or.inr h.symm), λ h, or.elim h or.inl (λ h, or.inr h.symm)⟩,
 end
 
@@ -328,7 +329,8 @@ begin
     exists_eq_right_right, sum.exists, exists_false, sum.map_inr, exists_and_distrib_right,
     exists_eq_right, false_or, map_inl, and_false] at ht,
   obtain ⟨N', ht⟩ := ht, cases ht,
-  cases hN rfl,
+  sorry
+  -- cases hN rfl,
 end
 
 lemma near_litter_union_support_closed_backward (hN : litter_set N.fst ≠ N.snd)
@@ -357,7 +359,9 @@ begin
           exact hN rfl } } },
     { convert hrge, ext L, split; rintro ⟨hC₁, hC₂⟩; refine ⟨hC₁, λ h, _⟩,
       { rw spec.range_sup at hC₂, exact hC₂ (or.inl h) },
-      { simp only [subtype.val_eq_coe, spec.mem_range, prod.exists, binary_condition.range_mk,
+      { simp only [subtype.val_eq_coe, spec.mem_range] at h,
+        sorry
+        /- simp only [prod.exists, binary_condition.range_mk,
           prod.mk.inj_iff, exists_eq_right_right, sum.exists, sum.map_inl, and_false, exists_false,
           sum.map_inr, exists_eq_right, false_or, mem_sup] at h,
         obtain ⟨N', (h | h)⟩ := h,
@@ -367,7 +371,7 @@ begin
         cases h.2,
         refine image_not_flexible L _ hC₁,
         rw ←h.1.2,
-        refl, } } },
+        refl, -/ } } },
   { refine spec.flexible_cond.all (λ L hL, _) (λ L hL, _),
     { rw spec.domain_sup, exact or.inl (hdom L hL) },
     { rw spec.range_sup, exact or.inl (hrge L hL) } }

@@ -427,7 +427,7 @@ set_like.ext $ λ _, by simp only [binary_condition.extend_path, path.comp_assoc
 set_like.ext $ λ _, by simp only [mem_lower, mem_sup]
 
 @[simp] lemma lower_inv (σ : spec α) (A : path α β) : σ⁻¹.lower A = (σ.lower A)⁻¹ :=
-set_like.ext $ λ _, by simp
+set_like.ext $ λ _, by simpa only [mem_lower, mem_inv, binary_condition.inv_def]
 
 end spec
 
