@@ -38,10 +38,39 @@ variables {α β γ : type_index}
 /-- A *binary condition* is like a support condition but uses either two atoms or two near-litters
 instead of one. A binary condition `⟨⟨x, y⟩, A⟩` represents the constraint `π_A(x) = y` on an
 allowable permutation. -/
-abbreviation binary_condition (α : type_index) : Type u :=
+def binary_condition (α : type_index) : Type u :=
 ((atom × atom) ⊕ (near_litter × near_litter)) × extended_index α
 
 namespace binary_condition
+
+/-- The "identity" equivalence between
+`(atom × atom ⊕ near_litter × near_litter) × extended_index α` and
+`binary_condition α`. -/
+def to_condition : (atom × atom ⊕ near_litter × near_litter) × extended_index α
+  ≃ binary_condition α := equiv.refl _
+
+/-- The "identity" equivalence between `binary_condition α` and
+`(atom × atom ⊕ near_litter × near_litter) × extended_index α`. -/
+def of_condition : binary_condition α ≃
+  (atom × atom ⊕ near_litter × near_litter) × extended_index α := equiv.refl _
+
+noncomputable instance struct_perm_mul_action : mul_action (struct_perm α) (binary_condition α) :=
+{ smul := λ π c, ⟨derivative c.snd π • c.fst, c.snd⟩,
+  one_smul := by { rintro ⟨atoms | Ns, A⟩; unfold has_smul.smul; simp },
+  mul_smul := begin
+    rintro π₁ π₂ ⟨atoms | Ns, A⟩; unfold has_smul.smul;
+    rw derivative_mul; dsimp; rw [mul_smul, mul_smul],
+  end }
+
+noncomputable instance struct_perm_mul_action' {B : le_index α}
+  {β : Λ} {γ : type_index} {hγ : γ < β} (A : path (B : type_index) β) :
+  mul_action (struct_perm ((lt_index.mk' hγ (B.path.comp A)) : le_index α).index)
+    (binary_condition γ) :=
+binary_condition.struct_perm_mul_action
+
+@[simp] lemma smul_to_condition (π : struct_perm α)
+  (x : (atom × atom ⊕ near_litter × near_litter) × extended_index α) :
+  π • to_condition x = to_condition ⟨derivative x.2 π • x.1, x.2⟩ := rfl
 
 /-- The binary condition representing the inverse permutation. If `π_A(x) = y`, then `π_A⁻¹(y) = x`.
 -/
@@ -49,8 +78,8 @@ instance (α : type_index) : has_involutive_inv (binary_condition α) :=
 { inv := λ c, ⟨c.1.map prod.swap prod.swap, c.2⟩,
   inv_inv := by rintro ⟨⟨a₁, a₂⟩ | ⟨N₁, N₂⟩, i⟩; refl }
 
-@[simp] lemma inv_mk (x : (atom × atom) ⊕ (near_litter × near_litter)) (i : extended_index α) :
-  (x, i)⁻¹ = (x.map prod.swap prod.swap, i) := rfl
+@[simp] lemma inv_def (c : binary_condition α) :
+  c⁻¹ = ⟨c.1.map prod.swap prod.swap, c.2⟩ := rfl
 
 /-- Converts a binary condition `⟨⟨x, y⟩, A⟩` into the support condition `⟨x, A⟩`. -/
 def domain : binary_condition α → support_condition α := prod.map (sum.map prod.fst prod.fst) id
@@ -76,8 +105,8 @@ end binary_condition
 lemma mk_binary_condition (α : type_index) : #(binary_condition α) = #μ :=
 begin
   have h := μ_strong_limit.is_limit.aleph_0_le,
-  rw [← cardinal.mul_def, ← cardinal.add_def, ← cardinal.mul_def, ← cardinal.mul_def, mk_atom,
-      mk_near_litter, cardinal.mul_eq_self h, cardinal.add_eq_self h],
+  rw [binary_condition, ← cardinal.mul_def, ← cardinal.add_def, ← cardinal.mul_def,
+      ← cardinal.mul_def, mk_atom, mk_near_litter, cardinal.mul_eq_self h, cardinal.add_eq_self h],
   exact cardinal.mul_eq_left h (le_trans (mk_extended_index α) (le_of_lt (lt_trans Λ_lt_κ κ_lt_μ)))
       (mk_extended_index_ne_zero α),
 end

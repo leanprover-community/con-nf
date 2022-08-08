@@ -572,7 +572,7 @@ lemma new_flexible_litters_inv :
   (bij.new_flexible_litters abij)⁻¹ = bij.inv.new_inverse_flexible_litters (abij_inv bij abij) :=
 begin
   ext ⟨_ | ⟨N₁, N₂⟩, C⟩,
-  { simp only [binary_condition.inv_mk, new_flexible_litters, new_inverse_flexible_litters,
+  { simp only [binary_condition.inv_def, new_flexible_litters, new_inverse_flexible_litters,
       mem_set_of_eq, prod.mk.inj_iff, exists_false, false_and, map_inl, and_false, mem_mk,
       spec.mem_inv], },
   rw [inr_mem_inv, prod.swap, mem_new_flexible_litters, mem_new_inverse_flexible_litters],

@@ -142,7 +142,7 @@ by simp only [new_near_litter_cond, mem_sup, mem_mk, spec.mem_singleton]
 begin
   simp only [new_near_litter_cond, subtype.val_eq_coe, spec.mem_inv, mem_sup,
     mem_mk, mem_singleton_iff],
-  rw [spec.mem_singleton, inv_eq_iff_inv_eq, binary_condition.inv_mk, sum.map_inr, prod.swap],
+  rw [spec.mem_singleton, inv_eq_iff_inv_eq, binary_condition.inv_def, sum.map_inr, prod.swap],
   exact ⟨λ h, or.elim h or.inl (λ h, or.inr h.symm), λ h, or.elim h or.inl (λ h, or.inr h.symm)⟩,
 end
 
@@ -308,7 +308,7 @@ begin
   rintro β δ γ hγ hδ hγδ N₁ C t (ht | ht) ρ hρ,
   { exact σ.property.backward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
       (hρ.mono $ subset_union_left _ _) },
-  simp only [binary_condition.inv_mk, sum.map_inr, prod.swap_prod_mk, mem_singleton_iff,
+  simp only [binary_condition.inv_def, sum.map_inr, prod.swap_prod_mk, mem_singleton_iff,
     prod.mk.inj_iff] at ht,
   exfalso, -- This isn't true because N is never a litter.
   sorry
