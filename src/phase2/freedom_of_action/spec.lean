@@ -275,10 +275,14 @@ mem_inv
 mem_inv
 
 lemma sup_inv (σ τ : spec α) : (σ ⊔ τ)⁻¹ = σ⁻¹ ⊔ τ⁻¹ :=
-sorry
+by { ext, simp only [mem_inv, mem_sup] }
 
 lemma Sup_inv (S : set (spec α)) : (Sup S)⁻¹ = Sup (has_inv.inv '' S) :=
-sorry
+begin
+  ext,
+  simp only [mem_inv, mem_Sup, exists_prop, image_inv, set.mem_inv],
+  split; rintro ⟨σ, h⟩; exact ⟨σ⁻¹, by simp only [h, inv_inv, mem_inv, and_self]⟩,
+end
 
 end spec
 
@@ -437,8 +441,20 @@ begin
     mem_set_of_eq],
   cases c,
   simp only [binary_condition.extend_path, prod.mk.inj_iff, exists_eq_right],
-  sorry
-  -- rw derivative_derivative,
+  split; rintro (⟨⟨s, D⟩, h⟩ | ⟨⟨s, D⟩, h⟩),
+
+  refine or.inl ⟨(s, c_snd), _⟩,
+  swap 2,
+  refine or.inr ⟨(s, c_snd), _⟩,
+  swap 3,
+  refine or.inl ⟨(s, A.comp c_snd), _⟩,
+  swap 4,
+  refine or.inr ⟨(s, A.comp c_snd), _⟩,
+  all_goals { dsimp only at h ⊢,
+    try { rw derivative_derivative },
+    try { rw derivative_derivative at h },
+    cases h,
+    refl },
 end
 
 namespace spec
