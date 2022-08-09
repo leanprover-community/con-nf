@@ -77,23 +77,23 @@ begin
   refine ⟨hsub.trans hsub', λ L N A hLA hnin hin, _, λ L N A hLA hnin hin, _,
     λ a b L hab A hnin hin, _, λ a b L hab A hnin hin, _⟩,
   { by_cases (inr (L.to_near_litter, N), A) ∈ σ.val,
-    { sorry
-      -- exact λ l hla,
-      --   ⟨image_subset binary_condition.domain hsub' (hflx_domain L N A hLA hnin h l hla).1,
-      --   image_subset binary_condition.range hsub' (hflx_domain L N A hLA hnin h l hla).2⟩
-      },
+    { intros l hla,
+      have := hflx_domain L N A hLA hnin h l hla,
+      rw [spec.mem_domain, spec.mem_range] at this ⊢,
+      obtain ⟨⟨b, hb, hdom⟩, ⟨c, hc, hrge⟩⟩ := this,
+      exact ⟨⟨b, hsub' hb, hdom⟩, ⟨c, hsub' hc, hrge⟩⟩ },
     { exact hflx_domain' L N A hLA h hin } },
   { by_cases (inr (N, L.to_near_litter), A) ∈ σ.val,
-    { sorry
-      -- exact λ l hla,
-      --   ⟨image_subset binary_condition.domain hsub' (hflx_range L N A hLA hnin h l hla).1,
-      --   image_subset binary_condition.range hsub' (hflx_range L N A hLA hnin h l hla).2⟩
-      },
+    { intros l hla,
+      have := hflx_range L N A hLA hnin h l hla,
+      rw [spec.mem_domain, spec.mem_range] at this ⊢,
+      obtain ⟨⟨b, hb, hdom⟩, ⟨c, hc, hrge⟩⟩ := this,
+      exact ⟨⟨b, hsub' hb, hdom⟩, ⟨c, hsub' hc, hrge⟩⟩ },
     { exact hflx_range' L N A hLA h hin } },
   { by_cases (inl (a, b), A) ∈ σ.val,
     { intros c hc,
       obtain ⟨d, hd⟩ := hatom_domain a b L hab A hnin h c hc,
-      refine ⟨d, hsub' hd⟩ },
+      exact ⟨d, hsub' hd⟩ },
     { exact hatom_domain' a b L hab A h hin } },
   { by_cases (inl (a, b), A) ∈ σ.val,
     { intros c hc,
@@ -108,9 +108,21 @@ instance : preorder (allowable_partial_perm B) :=
   le_trans := extends_trans }
 
 lemma domain_subset_of_le {σ τ : allowable_partial_perm B} (hστ : σ ≤ τ) :
-  σ.val.domain ⊆ τ.val.domain := sorry
+  σ.val.domain ⊆ τ.val.domain :=
+begin
+  rintros x hx,
+  rw spec.mem_domain at hx ⊢,
+  obtain ⟨b, hb, hdom⟩ := hx,
+  exact ⟨b, hστ.le hb, hdom⟩,
+end
 lemma range_subset_of_le {σ τ : allowable_partial_perm B} (hστ : σ ≤ τ) :
-  σ.val.range ⊆ τ.val.range := sorry
+  σ.val.range ⊆ τ.val.range :=
+begin
+  rintros x hx,
+  rw spec.mem_range at hx ⊢,
+  obtain ⟨b, hb, hdom⟩ := hx,
+  exact ⟨b, hστ.le hb, hdom⟩,
+end
 
 /-- A condition required later. -/
 lemma inv_mono : monotone (@has_inv.inv (allowable_partial_perm B) _) :=
@@ -383,14 +395,20 @@ begin
     { rintro rfl, exact hnin hLρ, },
     obtain ⟨hsub, -, -, -⟩ | hleq := hc hρc hτ hneq,
     { cases hnin (hsub hLρ) } },
-  { have := hleq.2 L N A hLA hnin hLρ,
-    sorry /- exact λ l hla, ⟨
-      image_subset binary_condition.domain (hsub ρ hρc) (this l hla).1,
-      image_subset binary_condition.range (hsub ρ hρc) (this l hla).2⟩ -/ },
-  { have := hleq.3 L N A hLA hnin hLρ,
-    sorry /- exact λ l hla, ⟨
-      image_subset binary_condition.domain (hsub ρ hρc) (this l hla).1,
-      image_subset binary_condition.range (hsub ρ hρc) (this l hla).2⟩ -/ },
+  { intros l hla,
+    have := hleq.2 L N A hLA hnin hLρ l hla,
+    refine ⟨⟨_, ⟨ρ, set.ext $ λ x, ⟨_, _⟩⟩, this.1⟩, ⟨_, ⟨ρ, set.ext $ λ x, ⟨_, _⟩⟩, this.2⟩⟩,
+    { rintro ⟨_, ⟨_, rfl⟩, hx⟩, exact hx },
+    { rintro hx, exact ⟨_, ⟨⟨_, hρc, rfl⟩, rfl⟩, hx⟩ },
+    { rintro ⟨_, ⟨_, rfl⟩, hx⟩, exact hx },
+    { rintro hx, exact ⟨_, ⟨⟨_, hρc, rfl⟩, rfl⟩, hx⟩ } },
+  { intros l hla,
+    have := hleq.3 L N A hLA hnin hLρ l hla,
+    refine ⟨⟨_, ⟨ρ, set.ext $ λ x, ⟨_, _⟩⟩, this.1⟩, ⟨_, ⟨ρ, set.ext $ λ x, ⟨_, _⟩⟩, this.2⟩⟩,
+    { rintro ⟨_, ⟨_, rfl⟩, hx⟩, exact hx },
+    { rintro hx, exact ⟨_, ⟨⟨_, hρc, rfl⟩, rfl⟩, hx⟩ },
+    { rintro ⟨_, ⟨_, rfl⟩, hx⟩, exact hx },
+    { rintro hx, exact ⟨_, ⟨⟨_, hρc, rfl⟩, rfl⟩, hx⟩ } },
   { obtain ⟨q, hq⟩ := hleq.4 a b L h A hnin hLρ p hp,
     exact ⟨q, (hsub ρ hρc) hq⟩ },
   { obtain ⟨q, hq⟩ := hleq.5 a b L h A hnin hLρ p hp,
