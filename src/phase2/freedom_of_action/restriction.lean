@@ -57,9 +57,9 @@ begin
   intro hf,
   unfold flexible at hf ⊢,
   simp at hf ⊢,
-  intros hb hd hg hgb hdb hdg hp htp,
-  have h1 := hf hgb hdb hdg,
-  --have h2 := h1 hp,
+  intros b d g hgb hdb hdg p t,
+  have h1 := hf hgb hdb hdg (A.comp p),
+  --wants to be t next, but will need to apply a conversion lemma to make lean see path_assoc.,
   sorry,
 end
 
@@ -157,6 +157,23 @@ begin
       } } }, -/
 end
 
+/-lemma unpack_coh_cond ⦃β : Λ⦄
+  ⦃γ : type_index⦄
+  ⦃δ : Λ⦄
+  (hγβ : γ < ↑β)
+  (hδβ : δ < β)
+  (hδγ : γ ≠ ↑δ)
+  (p : path ↑B ↑β)
+  (t : tangle_path ↑(lt_index.mk' hγβ (B.path.comp p)))
+  (π : allowable_path B) :
+    derivative ((p.cons $ coe_lt_coe.mpr hδβ).cons (bot_lt_coe _)) π.to_struct_perm •
+    (f_map_path hγβ hδβ t).to_near_litter =
+    (f_map_path hγβ hδβ $ (π.derivative_comp B p).derivative hγβ
+    {index := ↑β, path := B.path.comp p} • t).to_near_litter :=
+begin
+   sorry,
+end-/
+
 lemma lower_non_flexible_cond (hσ : σ.allowable B) :
   (σ.lower A).non_flexible_cond (le_index.mk β (B.path.comp A)) :=
 begin
@@ -169,6 +186,12 @@ begin
   simp at h,
   rw ← h,
   --repeat unpacked_coherence lemma,
+  --ok, I prove directly, but will refactor into a lemma later.
+
+  --need to apply phase_2_assumptions.allowable_derivative_comm,
+  unfold litter.to_near_litter,
+
+
   sorry,
 end
 
