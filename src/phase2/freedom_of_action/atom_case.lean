@@ -461,44 +461,16 @@ begin
         refine spec.atom_cond.small_out (λ h, or.rec hL (λ hb, by cases hb.some_spec) h) _,
         rw spec.domain_inv at hLsmall ⊢,
         rw spec.range_sup,
-        have : {a_1 ∈ litter_set N.fst | (inl a_1, C) ∈ σ.val.range ∪
-          ({carrier := range (atom_to_cond σ a A N hsmall ha), domain := range (λ (b : ↥{a' ∈ litter_set a.fst | (inl a', A) ∉ σ.val.domain}), (inl (@subtype.val atom _ b), A)), range := range (λ (b : ↥{a' ∈ litter_set a.fst | (inl a', A) ∉ σ.val.domain}), (inl ↑((atom_map σ a A N hsmall ha) b), A)), image_domain' := _, image_range' := _} : spec B).range} =
-            {a_1 ∈ litter_set N.fst | (inl a_1, C) ∈
-            σ.val.range} ∪ {a_1 ∈ litter_set N.fst | (inl a_1, C) ∈
-              binary_condition.range '' range (atom_to_cond σ a A N hsmall ha)},
-        { ext,
-          simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and, mem_sep_eq, mem_union_eq,
-                    spec.mem_range, mem_image, set.mem_range, set_coe.exists],
-          split,
-          { rintro ⟨hL, h | h⟩,
-            { exact or.inl ⟨hL, h⟩ },
-            obtain ⟨a_1, h_1, h_2⟩ := h,
-            exact or.inr
-              ⟨hL, atom_to_cond σ a A N hsmall ha
-                ⟨a_1, by simpa only
-                    [subtype.val_eq_coe, mem_domain, not_exists, not_and, mem_sep_eq] using h_1⟩,
-                ⟨a_1, h_1, rfl⟩, h_2⟩ },
-          { rintro (⟨hL, h⟩ | ⟨hL, h⟩),
-            { exact ⟨hL, or.inl h⟩ },
-            split,
-            exact hL,
-            obtain ⟨a_1, h_1, h_2⟩ := h,
-            dsimp [(atom_to_cond)] at h_1,
-            obtain ⟨a_2, h_1_h, h_1_2 ⟩ := h_1,
-            refine or.inr ⟨a_2, h_1_h, _⟩,
-            rw ← h_2,
-            obtain ⟨⟨b1, b2⟩ | ⟨b1, b2⟩, D⟩ := a_1,
-            { simp only [binary_condition.range_mk, map_inl, prod.mk.inj_iff],
-              simp only [prod.mk.inj_iff] at h_1_2,
-              exact ⟨h_1_2.left.right, h_1_2.right⟩ },
-            { cases h_1_2 }, } },
-        rw this,
-        clear this,
         convert (cardinal.mk_union_le _ _).trans_lt (cardinal.add_lt_of_lt κ_regular.aleph_0_le
             hLsmall $ (cardinal.mk_emptyc _).trans_lt κ_regular.pos),
-        refine ext (λ x, ⟨_, λ hx, hx.rec _⟩),
-        rintro ⟨-, ⟨_, _⟩, ⟨_, ⟨⟩⟩, ⟨⟩⟩,
-        exact h rfl } },
+        ext,
+        split,
+        { rintro ⟨hxL, hxrge | hxrge⟩,
+          { exact or.inl ⟨hxL, hxrge⟩ },
+          exact or.inr (h (prod.eq_iff_fst_eq_snd_eq.1 hxrge.some_spec).2) },
+        { rintro (⟨hxL, hxrge⟩ | h),
+          { exact ⟨hxL, or.inl hxrge⟩ },
+          cases h, } } },
     { by_cases A = C,
       { subst h,
         sorry },
@@ -517,7 +489,17 @@ begin
         { rintro (⟨hxL, hxrge⟩ | h),
           { exact ⟨hxL, or.inl hxrge⟩ },
           cases h, } } } },
-  { sorry }
+  { by_cases A = C,
+    { subst h,
+      sorry},
+    { refine spec.atom_cond.small_in L' (or.inl hL) _ _,
+      { convert hLsmall using 2,
+        refine funext (λ x, eq_iff_iff.2 ⟨λ hx, or.rec id _ hx, or.inl⟩),
+        rintro ⟨_, ⟨⟩⟩,
+        cases h rfl },
+      { rintros a b (hab | ⟨_, ⟨⟩⟩),
+        { exact hmaps hab },
+        cases h rfl } } }
 end
 
 lemma atom_union_near_litter_cond_forward
