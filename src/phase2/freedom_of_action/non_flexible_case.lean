@@ -105,7 +105,13 @@ sorry
 
 lemma non_flexible_union_support_closed_forward :
   (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}).domain.support_closed B :=
-sorry
+begin
+  unfold unary_spec.support_closed,
+  simp,
+  intros b d g hdb hgb hdg p t2 Nl h1 hPi hsup,
+  --see hsup and goal; use similar construction to in restriction.lean.
+  sorry,
+end
 
 lemma non_flexible_union_support_closed_backward :
   (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}).range.support_closed B :=
