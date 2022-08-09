@@ -9,7 +9,7 @@ universe u
 
 namespace con_nf
 variables [params.{u}] {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] (B : le_index α)
+  [typed_positions.{}] [phase_2_assumptions α] (B : le_index α)
 
 /-- A support `carrier` with a well-order `r` is called a *well-ordered support*. -/
 structure word_support :=
@@ -184,7 +184,58 @@ noncomputable! def support.closure {t : tangle_path B} (S : support B (allowable
 
 /-- Each condition has `<κ`-many immediate predecessors. -/
 lemma mk_constrains (c : support_condition B) : small {d | d ≺ c} :=
-sorry
+begin
+  have iff_imp_set_eq : ∀ (p q : support_condition B → Prop), (∀ d, p d ↔ q d) → {d | p d} = {d | q d} := λ p q h, set.ext (λ d, ⟨λ hd, (h d).1 hd, λ hd, (h d).2 hd⟩),
+  have := λ d, constrains_iff B d c,
+  specialize iff_imp_set_eq (λ d, d ≺ c) _ this,
+  dsimp only at iff_imp_set_eq,
+  rw iff_imp_set_eq,
+  clear this iff_imp_set_eq,
+
+  obtain ⟨c | c, C⟩ := c,
+  { simp only [prod.mk.inj_iff, exists_eq_right_right', false_and, and_false, exists_false, or_false],
+    convert lt_of_eq_of_lt (mk_singleton _) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le) using 1,
+    swap, exact (sum.inr c.fst.to_near_litter, C),
+    ext,
+    refine ⟨_, λ hx, ⟨_, rfl, hx⟩⟩,
+    rintro ⟨_, h1, h⟩,
+    cases h1,
+    exact set.mem_singleton_iff.2 h },
+  { have eq_union : ∀ (p q : support_condition B → Prop), {d | p d ∨ q d} = {d | p d} ∪ {d | q d},
+    { refine λ p q, set.ext (λ d, _),
+      dsimp only,
+      refl, },
+    rw [eq_union, eq_union, eq_union],
+    clear eq_union,
+
+    unfold small,
+    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
+    { simp only [prod.mk.inj_iff, false_and, and_false, exists_false, set.set_of_false, mk_emptyc],
+      exact lt_of_lt_of_le cardinal.aleph_0_pos κ_regular.aleph_0_le },
+    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
+    { by_cases litter_set c.fst = c.snd,
+      { simp only [ne.def, prod.mk.inj_iff, exists_eq_right_right', set.coe_set_of],
+        refine lt_of_eq_of_lt (cardinal.mk_emptyc_iff.2 _) (lt_of_lt_of_le aleph_0_pos κ_regular.aleph_0_le),
+        refine set.ext (λ x, ⟨_, λ h, h.rec _⟩),
+        rintro ⟨hnot, -⟩,
+        exact hnot h },
+      { convert lt_of_eq_of_lt (mk_singleton _) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le) using 3,
+        swap, exact (sum.inr c.fst.to_near_litter, C),
+        refine set.ext (λ x, ⟨_, λ hx, ⟨c, h, C, hx, rfl⟩⟩),
+        rintro ⟨_, _, _, ⟨⟩, ⟨⟩⟩,
+        exact rfl } },
+    refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
+    { convert lt_of_le_of_lt (@cardinal.mk_image_le _ _ _ _) c.snd.prop using 4,
+      swap, exact λ a, (sum.inl a, C),
+      refine funext (λ x, eq_iff_iff.2 _),
+      cases x with x A,
+      split,
+      { rintro ⟨_, a, ha, _, ⟨⟩, ⟨⟩⟩,
+        exact ⟨a, ha, rfl⟩ },
+      { rintro ⟨a, ha, ⟨⟩⟩,
+        exact ⟨c, a, ha, C, rfl, rfl⟩ } },
+    sorry }
+end
 
 /-- There are only `<κ`-many things that recursively constrain any given support condition.
 This is because `constrains` is well-founded and each condition has `<κ` immediate predecessors. -/
@@ -222,25 +273,89 @@ using_well_founded { dec_tac := `[assumption] }
 /-- An application of the above lemma, since there are only `<κ`-many support conditions in `S`. -/
 lemma small_support.closure_small {t : tangle_path B} (S : small_support B (allowable_path B) t) :
   small S.to_support.closure.carrier :=
-begin
-unfold support.closure, unfold potential_support.closure, dsimp only [(small)],
-apply lt_of_le_of_lt,
-apply cardinal.mk_bUnion_le,
-apply cardinal.mul_lt_of_lt,
-apply le_of_lt, apply lt_of_le_of_lt,
-exact Λ_limit.aleph_0_le,
-exact Λ_lt_κ,
-exact S.2,
-apply cardinal.supr_lt_of_is_regular κ_regular,
-exact S.2, intros, apply constrains_small,
-end
+lt_of_le_of_lt (cardinal.mk_bUnion_le _ _) (cardinal.mul_lt_of_lt κ_regular.aleph_0_le S.2 $
+  cardinal.supr_lt_of_is_regular κ_regular S.2 $ λ x, constrains_small x)
 
 /-- Any well-founded relation can be extended to a well-ordering on that type. Hopefully this is
 already in mathlib, but I couldn't find it.
 Check the blueprint for more information (Lemma 3.26). -/
 lemma well_order_of_well_founded {α : Type*} {r : α → α → Prop} (wf : well_founded r) :
   ∃ s ≥ r, is_well_order α s :=
-sorry
+begin
+  have wo_po: partial_order {x : set α × (α → α → Prop) // is_well_order x.1 (λ a1 a2, x.2 a1 a2) ∧ x.2 ≥ r ∧ ∀ y1 y2, (y1 ∉ x.1 ∨ y2 ∉ x.1) → (x.2 y1 y2) = true} := {
+    le := (λ x1 x2, x1.1.1 ⊆ x2.1.1 ∧ (∀ y1 y2 ∈ x1.1.1, x2.1.2 y1 y2 = x1.1.2 y1 y2) ∧ (∀ y1 ∈ x1.1.1, ∀ y2 ∈ x2.1.1 \ x1.1.1, x2.1.2 y1 y2) ),
+    lt := (λ x1 x2, x1.1.1 ≠ x2.1.1 ∧ x1.1.1 ⊆ x2.1.1 ∧ (∀ y1 y2 ∈ x1.1.1, x2.1.2 y1 y2 = x1.1.2 y1 y2) ∧ ∀ y1 ∈ x1.1.1, ∀ y2 ∈ x2.1.1 \ x1.1.1, x2.1.2 y1 y2 ),
+    le_refl := begin intros, unfold has_le.le, simp only [eq_iff_iff, iff_self, set.diff_self, set.mem_empty_eq, is_empty.forall_iff, implies_true_iff, and_true], end,
+    le_trans := begin unfold has_le.le, intros a b c h1 h2, split,
+    exact set.subset.trans h1.1 h2.1, split, intros, apply eq.trans,
+    apply h2.2.1 y1 (set.mem_of_subset_of_mem h1.1 H) y2 (set.mem_of_subset_of_mem h1.1 H_1),
+    apply h1.2.1 y1 H y2 H_1,
+    intros,
+    by_cases h3 : y2 ∈ b.val.fst,
+    rw h2.2.1 y1 (set.mem_of_subset_of_mem h1.1 H) y2 h3,
+    apply h1.2.2 y1 H y2 (set.mem_diff_of_mem h3 (set.not_mem_of_mem_diff H_1)),
+    apply h2.2.2 y1 (set.mem_of_subset_of_mem h1.1 H) y2 (set.mem_diff_of_mem (set.mem_of_mem_diff H_1) h3),
+    end,
+    lt_iff_le_not_le := begin intros, unfold has_lt.lt, split, intro h, split, exact h.right,
+    unfold has_le.le, by_contra h2, apply h.left, apply set.subset.antisymm h.2.1 h2.1,
+    intro h, split, by_contra h2,
+    cases a, cases b, cases a_val, cases b_val, simp only at h2, subst h2, apply h.right, unfold has_le.le at h ⊢,
+    simp only at h ⊢, split, apply set.subset.refl, split, intros, apply eq.symm, apply h.1.2.1 y1 H y2 H_1,
+    simp only [set.diff_self, set.mem_empty_eq, is_empty.forall_iff, implies_true_iff], exact h.1,
+    end,
+    le_antisymm := begin intros a b h1 h2, cases a, cases b, cases a_val, cases b_val, simp only [prod.mk.inj_iff],
+     have : a_val_fst = b_val_fst, apply (set.subset.antisymm h1.1 h2.1), subst this, split, refl,
+    ext, by_cases (x ∉ a_val_fst ∨ x_1 ∉ a_val_fst), simp only at a_property b_property, rw [(a_property.2.2 x x_1 h), (b_property.2.2 x x_1 h)],
+    push_neg at h, dsimp only [(has_le.le)] at h1 h2, rw h1.2.1 x h.left x_1 h.right,  end
+  },
+  have :=  @zorn_nonempty_partial_order₀ _ wo_po set.univ
+  begin
+  intros,
+  sorry, -- chain condition
+  end
+  begin
+  have :  is_well_order ↥(((∅ : set α), (λ a b, true : α → α → Prop)).fst) (λ (a1 a2 : ↥(((∅ : set α),
+  (λ a b, true : α → α → Prop)).fst)), ((∅ : set α), (λ a b, true : α → α → Prop)).snd ↑a1 ↑a2) ∧
+    (((∅ : set α)), (λ a b, true : α → α → Prop)).snd ≥ r ∧ ∀ (y1 y2 : α), y1 ∉ ((∅ : set α),
+    (λ a b, true : α → α → Prop)).fst ∨ y2 ∉ ((∅ : set α), (λ a b, true : α → α → Prop)).fst → ((∅ : set α), (λ a b, true : α → α → Prop)).snd y1 y2 = true,
+  { split,
+    apply @is_empty.is_well_order _ _,
+    simp only, rw @set.is_empty_coe_sort α ∅, simp only, split, dsimp [(≥)], intros i i2, rw le_Prop_eq, simp only, simp only [implies_true_iff],
+    intros, refl, },
+  exact ⟨({}, (λ a b, true : α → α → Prop)), this ⟩,
+  end
+  (by simp only [set.mem_univ]),
+  obtain ⟨s, hs₁, rs, hs₂⟩ := this,
+  cases s, cases s_val,
+  use s_val_snd,
+  split,
+  exact s_property.right.left,
+  simp only at s_property,
+  have all_type : ∀ a : α, ∃ b : ↥(s_val_fst), a = b, {by_contra, push_neg at h, obtain ⟨ha, hb ⟩ := h,
+  have : ha ∉ s_val_fst, by_contra h2, specialize hb ⟨ha, h2⟩, apply hb, refl,
+  sorry, -- Maximal subset contains all elements
+  },
+  have coe_inj :∀ a b, ((all_type a).some  =(all_type b).some) ↔ ((↑(all_type a).some : α ) = ↑(all_type b).some),
+  intros a b, split, intro h,rw h, obtain ⟨a1, a2⟩ := (all_type a).some,
+  obtain ⟨b1, b2⟩ := (all_type b).some, intro h, simp only [subtype.mk_eq_mk], simp only [subtype.coe_mk] at h, exact h,
+  refine_struct({..} : is_well_order α s_val_snd),
+  intros, rw (all_type a).some_spec, rw (all_type b).some_spec,
+  have := s_property.1.trichotomous, specialize this (all_type a).some (all_type b).some, simp only at this,
+  rw ← coe_inj a b, exact this,
+  intros, rw (all_type a).some_spec,
+  have := s_property.1.irrefl, specialize this (all_type a).some, simp only at this, exact this,
+  intros a b c h1 h2, rw (all_type a).some_spec at h1 ⊢, rw (all_type b).some_spec at h1 h2, rw (all_type c).some_spec at h2 ⊢,
+  have := s_property.1.trans, specialize this (all_type a).some (all_type b).some (all_type c).some, simp only at this, exact this h1 h2,
+  split, intros,
+  have : ∀ (b : ↥(s_val_fst)) (a' : α), a' = b → acc s_val_snd a',
+  intro b,
+  have := well_founded.induction s_property.1.wf b,
+  apply this,
+  intros, split, intros,
+  apply ᾰ (all_type y).some _ y,
+  exact (all_type y).some_spec, rw [← (all_type y).some_spec, ← ᾰ_1], exact ᾰ_2,
+  exact this (all_type a).some a (all_type a).some_spec,
+end
 
 /-- Any small support can be 'strengthened' into a strong support that is also small.
 Check the blueprint for more information. -/

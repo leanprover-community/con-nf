@@ -38,10 +38,39 @@ variables {α β γ : type_index}
 /-- A *binary condition* is like a support condition but uses either two atoms or two near-litters
 instead of one. A binary condition `⟨⟨x, y⟩, A⟩` represents the constraint `π_A(x) = y` on an
 allowable permutation. -/
-abbreviation binary_condition (α : type_index) : Type u :=
+def binary_condition (α : type_index) : Type u :=
 ((atom × atom) ⊕ (near_litter × near_litter)) × extended_index α
 
 namespace binary_condition
+
+/-- The "identity" equivalence between
+`(atom × atom ⊕ near_litter × near_litter) × extended_index α` and
+`binary_condition α`. -/
+def to_condition : (atom × atom ⊕ near_litter × near_litter) × extended_index α
+  ≃ binary_condition α := equiv.refl _
+
+/-- The "identity" equivalence between `binary_condition α` and
+`(atom × atom ⊕ near_litter × near_litter) × extended_index α`. -/
+def of_condition : binary_condition α ≃
+  (atom × atom ⊕ near_litter × near_litter) × extended_index α := equiv.refl _
+
+noncomputable instance struct_perm_mul_action : mul_action (struct_perm α) (binary_condition α) :=
+{ smul := λ π c, ⟨derivative c.snd π • c.fst, c.snd⟩,
+  one_smul := by { rintro ⟨atoms | Ns, A⟩; unfold has_smul.smul; simp },
+  mul_smul := begin
+    rintro π₁ π₂ ⟨atoms | Ns, A⟩; unfold has_smul.smul;
+    rw derivative_mul; dsimp; rw [mul_smul, mul_smul],
+  end }
+
+noncomputable instance struct_perm_mul_action' {B : le_index α}
+  {β : Λ} {γ : type_index} {hγ : γ < β} (A : path (B : type_index) β) :
+  mul_action (struct_perm ((lt_index.mk' hγ (B.path.comp A)) : le_index α).index)
+    (binary_condition γ) :=
+binary_condition.struct_perm_mul_action
+
+@[simp] lemma smul_to_condition (π : struct_perm α)
+  (x : (atom × atom ⊕ near_litter × near_litter) × extended_index α) :
+  π • to_condition x = to_condition ⟨derivative x.2 π • x.1, x.2⟩ := rfl
 
 /-- The binary condition representing the inverse permutation. If `π_A(x) = y`, then `π_A⁻¹(y) = x`.
 -/
@@ -49,8 +78,8 @@ instance (α : type_index) : has_involutive_inv (binary_condition α) :=
 { inv := λ c, ⟨c.1.map prod.swap prod.swap, c.2⟩,
   inv_inv := by rintro ⟨⟨a₁, a₂⟩ | ⟨N₁, N₂⟩, i⟩; refl }
 
-@[simp] lemma inv_mk (x : (atom × atom) ⊕ (near_litter × near_litter)) (i : extended_index α) :
-  (x, i)⁻¹ = (x.map prod.swap prod.swap, i) := rfl
+@[simp] lemma inv_def (c : binary_condition α) :
+  c⁻¹ = ⟨c.1.map prod.swap prod.swap, c.2⟩ := rfl
 
 /-- Converts a binary condition `⟨⟨x, y⟩, A⟩` into the support condition `⟨x, A⟩`. -/
 def domain : binary_condition α → support_condition α := prod.map (sum.map prod.fst prod.fst) id
@@ -76,8 +105,8 @@ end binary_condition
 lemma mk_binary_condition (α : type_index) : #(binary_condition α) = #μ :=
 begin
   have h := μ_strong_limit.is_limit.aleph_0_le,
-  rw [← cardinal.mul_def, ← cardinal.add_def, ← cardinal.mul_def, ← cardinal.mul_def, mk_atom,
-      mk_near_litter, cardinal.mul_eq_self h, cardinal.add_eq_self h],
+  rw [binary_condition, ← cardinal.mul_def, ← cardinal.add_def, ← cardinal.mul_def,
+      ← cardinal.mul_def, mk_atom, mk_near_litter, cardinal.mul_eq_self h, cardinal.add_eq_self h],
   exact cardinal.mul_eq_left h (le_trans (mk_extended_index α) (le_of_lt (lt_trans Λ_lt_κ κ_lt_μ)))
       (mk_extended_index_ne_zero α),
 end
@@ -246,10 +275,14 @@ mem_inv
 mem_inv
 
 lemma sup_inv (σ τ : spec α) : (σ ⊔ τ)⁻¹ = σ⁻¹ ⊔ τ⁻¹ :=
-sorry
+by { ext, simp only [mem_inv, mem_sup] }
 
 lemma Sup_inv (S : set (spec α)) : (Sup S)⁻¹ = Sup (has_inv.inv '' S) :=
-sorry
+begin
+  ext,
+  simp only [mem_inv, mem_Sup, exists_prop, image_inv, set.mem_inv],
+  split; rintro ⟨σ, h⟩; exact ⟨σ⁻¹, by simp only [h, inv_inv, mem_inv, and_self]⟩,
+end
 
 end spec
 
@@ -293,7 +326,7 @@ begin
 end
 
 /-- The map from structural permutations to their specifications is injective. -/
-lemma to_spec_injective :∀ (α : type_index), injective (@to_spec _ α)
+lemma to_spec_injective : ∀ (α : type_index), injective (@to_spec _ α)
 | ⊥ := λ σ τ h, ext_bot _ _ $ λ a, begin
     simp only [to_spec, embedding_like.apply_eq_iff_eq, ext_iff] at h,
     simpa only [prod.mk.inj_iff, exists_eq_right, derivative_nil, exists_eq_left, exists_false,
@@ -303,19 +336,15 @@ lemma to_spec_injective :∀ (α : type_index), injective (@to_spec _ α)
 | (α : Λ) := λ σ τ h, of_coe.injective $ funext $ λ β, funext $ λ hβ, to_spec_injective β $
     set_like.ext $ begin
     rintro ⟨x_fst, x_snd⟩,
-    sorry
-    -- simp only [to_spec, embedding_like.apply_eq_iff_eq, ext_iff] at ⊢ h,
-    -- specialize h ⟨x_fst, (@path.cons type_index con_nf.quiver ↑α ↑α β path.nil hβ).comp x_snd⟩,
-    -- simp only [spec.equiv_set, prod.mk.inj_iff, exists_eq_right, prod.exists, mem_union_eq, mem_range, equiv.coe_fn_symm_mk, ←derivative_derivative, derivative_cons_nil] at h ⊢,
-    -- cases x_fst,
-    -- exact h,
-    -- rw ext_iff at h ⊢,
-    -- simp only [prod.exists, mem_union_eq, mem_set_of_eq] at h ⊢,
-    -- rintro ⟨x_fst, x_snd⟩,
-    -- specialize h ⟨x_fst, (@path.cons type_index con_nf.quiver ↑α ↑α β path.nil hβ).comp x_snd⟩,
-    -- simp_rw derivative_derivative,
-    -- simpa only [derivative_cons_nil, prod.mk.inj_iff, exists_false, exists_eq_right, false_or]
-    --   using h,
+    simp only [to_spec, embedding_like.apply_eq_iff_eq, ext_iff] at h ⊢,
+    specialize h ⟨x_fst, (@path.cons type_index con_nf.quiver ↑α ↑α β path.nil hβ).comp x_snd⟩,
+    simp only [spec.equiv_set, prod.mk.inj_iff, exists_eq_right, prod.exists, mem_union_eq,
+               mem_range, equiv.coe_fn_symm_mk, ←derivative_derivative, derivative_cons_nil] at h ⊢,
+    cases x_fst,
+    { simpa only [spec.mem_mk, mem_union_eq, mem_range, prod.mk.inj_iff, prod.exists,
+                  exists_eq_right, exists_false, or_false] using h },
+    { simpa only [prod.exists, spec.mem_mk, mem_union_eq, mem_set_of_eq, mem_range,
+                  prod.mk.inj_iff, prod.exists, exists_false, exists_eq_right, false_or] using h }
   end
 using_well_founded { dec_tac := `[assumption] }
 
@@ -394,7 +423,7 @@ set_like.ext $ λ _, by simp only [binary_condition.extend_path, path.comp_assoc
 set_like.ext $ λ _, by simp only [mem_lower, mem_sup]
 
 @[simp] lemma lower_inv (σ : spec α) (A : path α β) : σ⁻¹.lower A = (σ.lower A)⁻¹ :=
-set_like.ext $ λ _, by simp
+set_like.ext $ λ _, by simpa only [mem_lower, mem_inv, binary_condition.inv_def]
 
 end spec
 
@@ -408,8 +437,20 @@ begin
     mem_set_of_eq],
   cases c,
   simp only [binary_condition.extend_path, prod.mk.inj_iff, exists_eq_right],
-  sorry
-  -- rw derivative_derivative,
+  split; rintro (⟨⟨s, D⟩, h⟩ | ⟨⟨s, D⟩, h⟩),
+
+  refine or.inl ⟨(s, c_snd), _⟩,
+  swap 2,
+  refine or.inr ⟨(s, c_snd), _⟩,
+  swap 3,
+  refine or.inl ⟨(s, A.comp c_snd), _⟩,
+  swap 4,
+  refine or.inr ⟨(s, A.comp c_snd), _⟩,
+  all_goals { dsimp only at h ⊢,
+    try { rw derivative_derivative },
+    try { rw derivative_derivative at h },
+    cases h,
+    refl },
 end
 
 namespace spec

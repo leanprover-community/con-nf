@@ -22,7 +22,7 @@ variables [params.{u}]
 open struct_perm spec
 
 variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] {B : le_index α}
+  [typed_positions.{}] [phase_2_assumptions α] {B : le_index α}
 
 variables {B} {σ : allowable_partial_perm B} ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄
 

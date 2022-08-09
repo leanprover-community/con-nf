@@ -158,9 +158,9 @@ end
 @[simp] lemma fst_smul_near_litter (f : allowable_perm α) (N : near_litter) : (f • N).1 = f • N.1 :=
 rfl
 
-@[simp] lemma smul_to_tangle (f : allowable_perm α) (N : near_litter) :
-  f • (to_tangle N : tangle (γ : Λ)) = to_tangle (f • N) :=
-sorry -- smul_to_tangle β hβ (semiallowable_perm.to_allowable hβ f.1) N
+@[simp] lemma smul_typed_near_litter (f : allowable_perm α) (N : near_litter) :
+  f • (typed_near_litter N : tangle (γ : Λ)) = typed_near_litter (f • N) :=
+sorry -- smul_typed_near_litter β hβ (semiallowable_perm.to_allowable hβ f.1) N
 
 @[simp] lemma fst_smul (f : allowable_perm α) (c : code α) : (f • c).1 = c.1 := rfl
 @[simp] lemma snd_smul (f : allowable_perm α) (c : code α) : (f • c).2 = f • c.2 := rfl
@@ -205,8 +205,8 @@ begin
   --     unfold A_map at hA,
   --     unfold has_smul.smul at hA,
   --     simp only [mem_image, mem_singleton_iff, exists_eq_left, Union_Union_eq_right] at hA,
-  --     rw [set.image_image, smul_to_tangle_aux, set.image_comp,
-  --       set.image_eq_image (embedding.injective $ to_tangle δ _)] at hA,
+  --     rw [set.image_image, smul_typed_near_litter_aux, set.image_comp,
+  --       set.image_eq_image (embedding.injective $ typed_near_litter δ _)] at hA,
   --     simp_rw ← smul_to_near_litter_perm π at hA,
   --     rw [image_smul, near_litter_perm.smul_local_cardinal, local_cardinal_injective.eq_iff] at hA,
   --     convert hA.symm using 1,
@@ -222,8 +222,8 @@ begin
   --   dsimp at hA,
   --   rw [code.mk_inj, ← set.image_smul, set.image_image] at hA,
   --   unfold A_map at hA,
-  --   rw [smul_to_tangle_aux, set.image_comp,
-  --     set.image_eq_image (embedding.injective $ to_tangle δ _)] at hA,
+  --   rw [smul_typed_near_litter_aux, set.image_comp,
+  --     set.image_eq_image (embedding.injective $ typed_near_litter δ _)] at hA,
   --   simp_rw ← smul_to_near_litter_perm π at hA,
   --   rw [image_smul, near_litter_perm.smul_local_cardinal] at hA,
   --   simp only [smul_to_litter_perm, mem_singleton_iff, Union_Union_eq_left] at hA,
@@ -238,7 +238,7 @@ begin
   dsimp only [(•)],
   simp only [image, A_map, has_smul.comp.smul, mem_image, mem_Union, exists_prop,
     exists_exists_and_eq_and, mem_set_of_eq, Union_exists, bUnion_and', Union_Union_eq_right,
-    ←smul_f_map hβγ, mem_local_cardinal, coe_hom_apply, coe_smul, smul_to_tangle],
+    ←smul_f_map hβγ, mem_local_cardinal, coe_hom_apply, coe_smul, smul_typed_near_litter],
   refine (mul_action.to_perm π).exists_congr_left.trans _,
   simp [inv_smul_eq_iff],
 end

@@ -32,7 +32,7 @@ namespace allowable_partial_perm
 variables [params.{u}]
 
 variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] {B : le_index α}
+  [typed_positions.{}] [phase_2_assumptions α] {B : le_index α}
 
 open spec
 

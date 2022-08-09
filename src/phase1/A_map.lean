@@ -46,12 +46,12 @@ variables {α : Λ} {γ : Iio_index α} [core_tangle_data γ] [positioned_tangle
 /-- The *alternative extension* map. For a set of tangles `G`, consider the code
 `(α, γ, G)`. We then construct the non-empty set `D` such that `(α, β, D)` is an alternative
 extension of the same object in TTT. -/
-def A_map (s : set (tangle γ)) : set (tangle $ Iio_coe β) := to_tangle '' ⋃ t ∈ s, local_cardinal (f_map β t)
+def A_map (s : set (tangle γ)) : set (tangle $ Iio_coe β) := typed_near_litter '' ⋃ t ∈ s, local_cardinal (f_map β t)
 
 variables {β}
 
 @[simp] lemma mem_A_map {t : tangle $ Iio_coe β} {s : set (tangle γ)} :
-  t ∈ A_map β s ↔ ∃ (t' ∈ s) N (hN : is_near_litter (f_map β t') N), to_tangle ⟨_, N, hN⟩ = t :=
+  t ∈ A_map β s ↔ ∃ (t' ∈ s) N (hN : is_near_litter (f_map β t') N), typed_near_litter ⟨_, N, hN⟩ = t :=
 begin
   simp only [A_map, and_comm, mem_image, mem_Union, exists_prop],
   split,
@@ -66,7 +66,7 @@ end
 by simp only [A_map, Union_false, Union_empty, image_empty]
 
 @[simp] lemma A_map_singleton (t) :
-  A_map β ({t} : set (tangle γ)) = to_tangle '' local_cardinal (f_map β t) :=
+  A_map β ({t} : set (tangle γ)) = typed_near_litter '' local_cardinal (f_map β t) :=
 by simp only [A_map, mem_singleton_iff, Union_Union_eq_left]
 
 variables {β γ} {s : set (tangle γ)} {t : tangle γ}
@@ -87,7 +87,7 @@ end
 @[simp] lemma A_map_nonempty : (A_map β s).nonempty ↔ s.nonempty :=
 by simp_rw [←ne_empty_iff_nonempty, ne.def, A_map_eq_empty]
 
-lemma subset_A_map (ht : t ∈ s) : to_tangle '' local_cardinal (f_map β t) ⊆ A_map β s :=
+lemma subset_A_map (ht : t ∈ s) : typed_near_litter '' local_cardinal (f_map β t) ⊆ A_map β s :=
 image_subset _ $ subset_Union₂ t ht
 
 lemma μ_le_mk_A_map : s.nonempty → #μ ≤ #(A_map β s) :=
@@ -95,12 +95,12 @@ begin
   rintro ⟨t, ht⟩,
   refine (cardinal.mk_le_mk_of_subset $ subset_A_map ht).trans_eq' _,
   rw [cardinal.mk_image_eq, mk_local_cardinal],
-  exact to_tangle.inj',
+  exact typed_near_litter.inj',
 end
 
 lemma A_map_injective :
   injective (A_map β : set (tangle γ) → set (tangle $ Iio_coe β)) :=
-to_tangle.injective.image_injective.comp $ pairwise.bUnion_injective
+typed_near_litter.injective.image_injective.comp $ pairwise.bUnion_injective
   (λ x y h, local_cardinal_disjoint _ _ $ (f_map_injective _).ne h) $
   λ _, local_cardinal_nonempty _
 
@@ -110,7 +110,7 @@ lemma A_map_disjoint_range (c : set (tangle γ)) (d : set (tangle δ)) (hc : c.n
   (h : A_map β c = A_map β d) : γ = δ :=
 begin
   obtain ⟨b, hb⟩ := hc,
-  have := (subset_Union₂ b hb).trans (to_tangle.injective.image_injective h).subset,
+  have := (subset_Union₂ b hb).trans (typed_near_litter.injective.image_injective h).subset,
   obtain ⟨i, -, hi⟩ := mem_Union₂.1 (this (f_map _ b).to_near_litter_mem_local_cardinal),
   exact subtype.coe_injective (f_map_range_eq _ hi),
 end

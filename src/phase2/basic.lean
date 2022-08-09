@@ -129,7 +129,7 @@ phase_2_positioned_assumptions.lower_positioned_tangle_data (A : lt_index α)
 /-- Along with `phase_2_core_assumptions` and `phase_2_positioned_assumptions`, this is the class
 containing the assumptions we take for phase 2 of the recursion. In this class, we assume full
 tangle data for all proper type indices `β < α` along all paths. -/
-class phase_2_assumptions :=
+class phase_2_assumptions [typed_positions] :=
 [lower_almost_tangle_data : Π (A : proper_lt_index α), almost_tangle_data A.index]
 [lower_tangle_data : Π (A : proper_lt_index α), tangle_data A.index]
 (allowable_derivative : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index),
@@ -219,11 +219,11 @@ rfl
 end
 end allowable_path
 
-variables [phase_2_positioned_assumptions α] [phase_2_assumptions α]
+variables [phase_2_positioned_assumptions α] [typed_positions.{}] [phase_2_assumptions α]
 
 /-- The injection from near-litters to path-indexed tangles. -/
-def to_tangle_path (A : proper_lt_index α) : near_litter ↪ tangle_path (A : le_index α) :=
-to_tangle
+def typed_near_litter_path (A : proper_lt_index α) : near_litter ↪ tangle_path (A : le_index α) :=
+typed_near_litter
 
 namespace allowable_path
 
@@ -259,31 +259,18 @@ lemma f_map_path_position_raising {A : Λ} {A_path : path (α : type_index) A}
   (t : tangle_path (lt_index.mk' hγ A_path : le_index α))
   (N : set atom) (hN : is_near_litter (f_map_path hγ hδ t) N) :
   position t <
-    position (to_tangle_path (proper_lt_index.mk' hδ A_path) ⟨f_map_path hγ hδ t, N, hN⟩) :=
+    position (typed_near_litter_path (proper_lt_index.mk' hδ A_path) ⟨f_map_path hγ hδ t, N, hN⟩) :=
 f_map_position_raising (proper_lt_index.mk' hδ A_path).index t N hN
 
 /-- The typed singleton as a path-indexed tangle. -/
 def typed_singleton_path (A : proper_lt_index α) : atom ↪ tangle_path (A : le_index α) :=
 typed_singleton
 
-lemma litter_lt_path (A : proper_lt_index α) (L : litter) (a ∈ litter_set L) :
-  position (to_tangle_path A L.to_near_litter) < position (typed_singleton_path A a) :=
-tangle_data.litter_lt L a ‹_›
-
-lemma litter_lt_near_litter_path (A : proper_lt_index α) (N : near_litter) :
-  position (to_tangle_path A N.fst.to_near_litter) ≤ position (to_tangle_path A N) :=
-tangle_data.litter_lt_near_litter N
-
-lemma symm_diff_lt_near_litter_path (A : proper_lt_index α) (N : near_litter)
-  (a ∈ litter_set N.fst ∆ N.snd) :
-  position (typed_singleton_path A a) < position (to_tangle_path A N) :=
-tangle_data.symm_diff_lt_near_litter N a ‹_›
-
 lemma support_le_path (A : proper_lt_index α) (t : tangle_path (A : le_index α))
   (c : support_condition A) (hc : c ∈ designated_support_path t)
   (not_singleton : ∀ a, t ≠ typed_singleton a)
-  (not_near_litter : ∀ (L : litter), t ≠ to_tangle L.to_near_litter) :
-  position (c.fst.elim (typed_singleton_path A) (to_tangle_path A)) ≤ position t :=
+  (not_near_litter : ∀ (L : litter), t ≠ typed_near_litter L.to_near_litter) :
+  position (c.fst.elim (typed_singleton_path A) (typed_near_litter_path A)) ≤ position t :=
 tangle_data.support_le t c hc not_singleton not_near_litter
 
 end con_nf

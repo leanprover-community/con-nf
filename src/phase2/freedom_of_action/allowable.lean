@@ -27,7 +27,7 @@ variables [params.{u}]
 open struct_perm
 
 variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [phase_2_assumptions α] {B : le_index α}
+  [typed_positions.{}] [phase_2_assumptions α] {B : le_index α}
 
 /-- A litter and extended index is *flexible* if it is not of the form `f_{γ,δ}^A(x)` for some
 `x ∈ τ_{γ:A}` with conditions defined as above. Hence, it is not constrained by anything. -/
@@ -37,6 +37,9 @@ def flexible (L : litter) (A : extended_index B) : Prop :=
   (t : tangle_path ((lt_index.mk' hγ (B.path.comp C)) : le_index α)),
     L ≠ f_map_path hγ hδ t ∨ A ≠ (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _)
 
+/-- There are `μ`-many `A`-flexible litters for each extended index `A`. In fact, we can do better
+than this - for each proper path `C` from some `β` to `B`, there are `μ`-many `C.comp A`-flexible
+litters that are not `A`-flexible. However, at the moment, we don't need this fact. -/
 @[simp] lemma mk_flexible_litters (A : extended_index B) : #{L : litter // flexible L A} = #μ :=
 begin
   by_cases (B : type_index) = ⊥,
@@ -61,12 +64,14 @@ begin
     refine ⟨⟨λ x, ⟨⟨⟨⊥, B'⟩, x⟩, λ β γ δ hγ hδ hγδ C t, _⟩, _⟩⟩,
     { left,
       intro h,
-      sorry,
-      -- have := f_map_fst ⊥ (proper_lt_index.mk' hδ (B.path.comp C)).index t,
-      -- unfold f_map_path at h,
-      --rw ← h at this,
-    },
-    { sorry } }
+      unfold f_map_path at h,
+      have := f_map_fst (proper_lt_index.mk' hδ (B.path.comp C)).index t,
+      rw ← h at this,
+      simp only [prod.mk.inj_iff] at this,
+      cases this.2,
+      refine not_lt_of_ge (le_of_path C) _,
+      rw ← hB', exact coe_lt_coe.mpr hδ, },
+    { intros x y h, cases h, refl, } }
 end
 local attribute [irreducible] litter
 
@@ -260,15 +265,35 @@ def freedom_of_action : Prop :=
 
 variable {B}
 
+lemma eq_of_support_eq (t : tangle_path B) (S : support B (allowable_path B) t)
+  (π₁ π₂ : allowable_path B) (hπ : ∀ c ∈ S, π₁ • c = π₂ • c) : π₁ • t = π₂ • t :=
+begin
+  have := S.supports (π₂⁻¹ * π₁) _,
+  rw [mul_smul, inv_smul_eq_iff] at this, exact this,
+  intros c hc,
+  rw [mul_smul, inv_smul_eq_iff], exact hπ c hc,
+end
+
 /-- If an allowable partial permutation `σ` supports some `α`-tangle `t`, any permutations extending
-`σ` must map `t` to the same value.
-TODO: Factor out the lemma: if two allowable partial perms agree on the support of t, they send
-it to the same place.
-TODO: Can this be proven only assuming the permutations are structural? -/
+`σ` must map `t` to the same value. -/
 lemma eq_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
   (ht : supports (allowable_path B) σ.val.domain t) (π₁ π₂ : allowable_path B)
   (hπ₁ : π₁.to_struct_perm.satisfies σ.val) (hπ₂ : π₂.to_struct_perm.satisfies σ.val) :
-  π₁ • t = π₂ • t := sorry
+  π₁ • t = π₂ • t :=
+begin
+  refine eq_of_support_eq t ⟨σ.val.domain, ht⟩ π₁ π₂ _,
+  intros c hc,
+  change c ∈ σ.val.domain at hc, rw mem_domain at hc,
+  obtain ⟨⟨⟨a₁, a₂⟩ | ⟨N₁, N₂⟩, C⟩, hd, rfl⟩ := hc;
+  { specialize hπ₁ hd, specialize hπ₂ hd,
+    unfold satisfies_cond at hπ₁ hπ₂,
+    simp only [sum.elim_inl, sum.elim_inr] at hπ₁ hπ₂,
+    simp only [binary_condition.domain_mk, map_inl, map_inr],
+    rw prod.eq_iff_fst_eq_snd_eq, split,
+    { simp only [has_smul.smul, has_smul.comp.smul, map_inl, map_inr],
+      exact hπ₁.trans hπ₂.symm, },
+    { refl, } },
+end
 
 /-- The action lemma. If freedom of action holds, and `σ` is any allowable partial permutation
 that supports some `α`-tangle `t`, then there exists a unique `α`-tangle `σ(t)` such that every
