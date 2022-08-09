@@ -85,6 +85,10 @@ instance proper_lt_index_coe_coe_core_tangle_data (A : proper_lt_index α) :
   core_tangle_data (A : le_index α).index :=
 phase_2_core_assumptions.lower_core_tangle_data (A : le_index α)
 
+instance allowable_action_lt (A : le_index α) {β : type_index} (hβ : β < A) :
+mul_action (allowable (A.cons hβ).index) (tangle (lt_index.mk' hβ A.path).index) :=
+core_tangle_data.allowable_action
+
 /-- We assume positioned tangle data for all type indices strictly less than `α`,
 along all paths. -/
 class phase_2_positioned_assumptions :=
@@ -138,6 +142,11 @@ class phase_2_assumptions [typed_positions] :=
   (π : allowable A.index),
   (allowable_derivative A hγ π).to_struct_perm =
     struct_perm.derivative (path.cons path.nil hγ) π.to_struct_perm)
+(smul_f_map {β : Λ} (A : path (α : type_index) β) {γ : type_index} {δ : Λ}
+  (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  (π : allowable (le_index.mk β A).index) (t : tangle (lt_index.mk' hγ A).index) :
+  π • f_map (proper_lt_index.mk' hδ A).index t =
+    f_map (proper_lt_index.mk' hδ A).index (allowable_derivative ⟨β, A⟩ hγ π • t))
 
 /-- The derivative of a permutation along a particular path.
 Note that `allowable (A.cons hγ).index` is defeq to `allowable γ`, but by writing it in this form,
@@ -148,6 +157,9 @@ add_decl_doc phase_2_assumptions.allowable_derivative
 The term `path.cons path.nil hγ` is the singleton path `A.index ⟶ γ`.
 TODO: Should we refactor `struct_perm.derivative` to use singleton paths as well? -/
 add_decl_doc phase_2_assumptions.allowable_derivative_comm
+
+/-- The unpacked coherence condition. -/
+add_decl_doc phase_2_assumptions.smul_f_map
 
 attribute [instance]
   phase_2_assumptions.lower_almost_tangle_data
@@ -221,10 +233,6 @@ end allowable_path
 
 variables [phase_2_positioned_assumptions α] [typed_positions.{}] [phase_2_assumptions α]
 
-/-- The injection from near-litters to path-indexed tangles. -/
-def typed_near_litter_path (A : proper_lt_index α) : near_litter ↪ tangle_path (A : le_index α) :=
-typed_near_litter
-
 namespace allowable_path
 
 /-- The derivative of a path-indexed allowable permutation. -/
@@ -254,6 +262,14 @@ def f_map_path {A : Λ} {A_path : path (α : type_index) A} ⦃γ : type_index�
   (hδ : δ < A) : tangle_path (lt_index.mk' hγ A_path : le_index α) → litter :=
 f_map (proper_lt_index.mk' hδ A_path).index
 
+/-- The injection from near-litters to path-indexed tangles. -/
+def typed_near_litter_path (A : proper_lt_index α) : near_litter ↪ tangle_path (A : le_index α) :=
+typed_near_litter
+
+/-- The typed singleton as a path-indexed tangle. -/
+def typed_singleton_path (A : proper_lt_index α) : atom ↪ tangle_path (A : le_index α) :=
+typed_singleton
+
 lemma f_map_path_position_raising {A : Λ} {A_path : path (α : type_index) A}
   ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < A) (hδ : δ < A)
   (t : tangle_path (lt_index.mk' hγ A_path : le_index α))
@@ -262,9 +278,16 @@ lemma f_map_path_position_raising {A : Λ} {A_path : path (α : type_index) A}
     position (typed_near_litter_path (proper_lt_index.mk' hδ A_path) ⟨f_map_path hγ hδ t, N, hN⟩) :=
 f_map_position_raising (proper_lt_index.mk' hδ A_path).index t N hN
 
-/-- The typed singleton as a path-indexed tangle. -/
-def typed_singleton_path (A : proper_lt_index α) : atom ↪ tangle_path (A : le_index α) :=
-typed_singleton
+instance allowable_path_action_lt (A : le_index α) {β : type_index} (hβ : β < A) :
+mul_action (allowable_path (A.cons hβ)) (tangle_path (lt_index.mk' hβ A.path : le_index α)) :=
+core_tangle_data.allowable_action
+
+/-- The unpacked coherence condition, given in terms of the phase 2 constructions. -/
+def smul_f_map_path {β : Λ} (A : path (α : type_index) β) {γ : type_index} {δ : Λ}
+  (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  (π : allowable_path (le_index.mk β A)) (t : tangle_path (lt_index.mk' hγ A : le_index α)) :
+  π • f_map_path hγ hδ t = f_map_path hγ hδ (π.derivative hγ • t) :=
+phase_2_assumptions.smul_f_map A hγ hδ hγδ π t
 
 lemma support_le_path (A : proper_lt_index α) (t : tangle_path (A : le_index α))
   (c : support_condition A) (hc : c ∈ designated_support_path t)

@@ -155,7 +155,7 @@ and `β : Iio_index α` in phase 2. -/
 
 namespace lt_index
 
-/-- A constructor for `proper_lt_index` with less explicit arguments. -/
+/-- A constructor for `lt_index` with less explicit arguments. -/
 def mk' {index higher : type_index} (index_lt : index < higher)
   (path' : path (α : type_index) higher) : lt_index α :=
 ⟨index, higher, index_lt, path'⟩
