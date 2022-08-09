@@ -34,10 +34,8 @@ lemma total_of_is_max_aux (σ : allowable_partial_perm B) (hσ : is_max σ)
       by_cases flexible L A,
       { -- This litter is flexible.
         obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_flexible σ h,
-        sorry
-        -- rw hσ ρ hρ₁ at hρ₂,
-        -- exact hρ₂
-        },
+        unfold has_le.le at hρ₁,
+        rwa hρ₁.le.antisymm (hσ hρ₁).le },
       { -- This litter is non-flexible.
         unfold flexible at h,
         push_neg at h,
@@ -45,16 +43,12 @@ lemma total_of_is_max_aux (σ : allowable_partial_perm B) (hσ : is_max σ)
         cases hA,
         cases hL,
         obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flexible hγ hδ hγδ t hind foa,
-        sorry
-        -- rw hσ ρ hρ₁ at hρ₂,
-        -- exact hρ₂
-        } },
+        rw ge_iff_le at hρ₁,
+        rwa hρ₁.le.antisymm (hσ hρ₁).le } },
     { -- This is a near-litter.
       obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_near_litter σ N A hnl (λ c hc, total_of_is_max_aux c),
-      sorry
-      -- rw hσ ρ hρ₁ at hρ₂,
-      -- exact hρ₂
-    }
+      rw ge_iff_le at hρ₁,
+      rwa hρ₁.le.antisymm (hσ hρ₁).le }
   end
 using_well_founded { dec_tac := `[assumption] }
 

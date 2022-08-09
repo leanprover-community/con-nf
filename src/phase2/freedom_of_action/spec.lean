@@ -326,7 +326,7 @@ begin
 end
 
 /-- The map from structural permutations to their specifications is injective. -/
-lemma to_spec_injective :∀ (α : type_index), injective (@to_spec _ α)
+lemma to_spec_injective : ∀ (α : type_index), injective (@to_spec _ α)
 | ⊥ := λ σ τ h, ext_bot _ _ $ λ a, begin
     simp only [to_spec, embedding_like.apply_eq_iff_eq, ext_iff] at h,
     simpa only [prod.mk.inj_iff, exists_eq_right, derivative_nil, exists_eq_left, exists_false,
