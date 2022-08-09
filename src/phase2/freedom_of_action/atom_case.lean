@@ -447,16 +447,22 @@ begin
     σ.prop.backward.atom_cond L C,
   { exact spec.atom_cond.all L' (or.inl hL) atom_map (λ a H, or.inl $ hin a H) himg },
   { by_cases N.fst = L,
-    { have :  σ.new_atom_conds a A N hsmall ha = {carrier := range (atom_to_cond σ a A N hsmall ha), domain := _ , range := _, image_domain' := _, image_range' := _},
-      refl,
-      rw this,
-      clear this,
-      subst h,
-      refine spec.atom_cond.small_out _ _,
-      {
-        rintro ⟨h⟩, exact hL h,
-        obtain hb := ᾰ,
-        cases hb.some_spec },
+    { subst h,
+      by_cases A = C,
+      { subst h,
+        have := (σ.prop.backward.near_litter_cond N a.fst.to_near_litter A ha),
+        simp only [inr_mem_inv, prod.swap_prod_mk, inl_mem_inv, set_coe.forall, subtype.coe_mk, subtype.val_eq_coe] at this,
+        dsimp [(domain)] at hL,
+        rw con_nf.spec.mem_range at hL,
+        cases hL ⟨(inr (this.some, N.fst.to_near_litter), A),
+            this.some_spec.1, by simp only [binary_condition.range_mk, map_inr]⟩ },
+      { have : σ.new_atom_conds a A N hsmall ha =
+            { carrier := range (atom_to_cond σ a A N hsmall ha),
+              domain := _ , range := _,
+              image_domain' := _, image_range' := _ } := rfl,
+        rw this,
+        clear this,
+        refine spec.atom_cond.small_out (λ h, or.rec hL (λ hb, by cases hb.some_spec) h) _,
         rw spec.domain_inv at hLsmall ⊢,
         rw spec.range_sup,
         have : {a_1 ∈ litter_set N.fst | (inl a_1, C) ∈ σ.val.range ∪
@@ -492,22 +498,13 @@ begin
             { cases h_1_2 }, } },
         rw this,
         clear this,
-        by_cases A = C,
-        { subst h,
-          refine (cardinal.mk_union_le _ _).trans_lt (cardinal.add_lt_of_lt κ_regular.aleph_0_le
-            hLsmall _),
-          unfold atom_to_cond,
-          have := (σ.prop.backward.near_litter_cond N a.fst.to_near_litter A ha),
-          simp only [inr_mem_inv, prod.swap_prod_mk, inl_mem_inv, set_coe.forall, subtype.coe_mk, subtype.val_eq_coe] at this,
-          exfalso, apply hL, dsimp [(domain)], rw con_nf.spec.mem_range, use (inr (this.some, N.fst.to_near_litter), A),
-          split, exact this.some_spec.1, simp only [binary_condition.range_mk, map_inr], },
-        { convert (cardinal.mk_union_le _ _).trans_lt (cardinal.add_lt_of_lt κ_regular.aleph_0_le
-              hLsmall $ (cardinal.mk_emptyc _).trans_lt κ_regular.pos),
-          refine ext (λ x, ⟨_, λ hx, hx.rec _⟩),
-          rintro ⟨-, ⟨_, _⟩, ⟨_, ⟨⟩⟩, ⟨⟩⟩,
-          cases h rfl } },
-    { sorry,  } },
-    { sorry,  },
+        convert (cardinal.mk_union_le _ _).trans_lt (cardinal.add_lt_of_lt κ_regular.aleph_0_le
+            hLsmall $ (cardinal.mk_emptyc _).trans_lt κ_regular.pos),
+        refine ext (λ x, ⟨_, λ hx, hx.rec _⟩),
+        rintro ⟨-, ⟨_, _⟩, ⟨_, ⟨⟩⟩, ⟨⟩⟩,
+        exact h rfl } },
+    { sorry } },
+  { sorry }
 end
 
 lemma atom_union_near_litter_cond_forward
