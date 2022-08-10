@@ -174,25 +174,35 @@ begin
    sorry,
 end-/
 
+/-(allowable_derivative_comm : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index)
+  (π : allowable A.index),
+  (allowable_derivative A hγ π).to_struct_perm =
+    struct_perm.derivative (path.cons path.nil hγ) π.to_struct_perm)-/
+
 lemma lower_non_flexible_cond (hσ : σ.allowable B) :
   (σ.lower A).non_flexible_cond (le_index.mk β (B.path.comp A)) :=
 begin
   unfold spec.non_flexible_cond,
-  intros hb hg hd hgb hdb hgd hNl hp ht h1 hallp h2,
+  intros b g d hgb hdb hgd Nl p t h1 π' h2,
 
   unfold struct_perm.satisfies at h2,
   unfold struct_perm.satisfies_cond at h2,
   have h := h2 h1,
   simp at h,
   rw ← h,
+
   --repeat unpacked_coherence lemma,
   --ok, I prove directly, but will refactor into a lemma later.
 
-  --need to apply phase_2_assumptions.allowable_derivative_comm,
-  unfold litter.to_near_litter,
+  --this works nicely
+  have hc := smul_f_map_path ((B.path.comp A).comp p) hgb hdb hgd
+  (π'.derivative_comp {index := β, path := B.path.comp A} p) t,
+  rw ← hc,
 
-
-  sorry,
+  --this part in progress; am trying to work out the difference between
+  --allowable and allowable_path, and if it matters
+  have := phase_2_assumptions.allowable_derivative_comm
+  ({index := β, path := (B.path.comp A)}) _ π'; sorry,
 end
 
 /--
