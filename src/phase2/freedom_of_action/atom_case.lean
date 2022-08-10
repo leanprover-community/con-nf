@@ -165,6 +165,7 @@ private noncomputable def atom_to_cond
     binary_condition B :=
 λ b, (inl ⟨b, atom_map σ a A N hsmall ha b⟩, A)
 
+
 lemma atom_to_cond_spec (hsmall : small {a ∈ litter_set a.fst | (inl a, A) ∈ σ.val.domain})
   (ha : (inr (a.fst.to_near_litter, N), A) ∈ σ.val)
   (b) : ∃ c, atom_to_cond σ a A N hsmall ha b = (inl (b, c), A) ∧
@@ -256,6 +257,18 @@ begin
   { rintro ⟨h₁, h₂⟩, cases h₂, refine ⟨rfl, h₁.prop.1, h₁.prop.2, _⟩, rw subtype.eta, refl, },
   { rintro ⟨rfl, hb₁, hb₂, rfl⟩, exact ⟨⟨b, hb₁, hb₂⟩, rfl⟩, },
 end
+
+@[simp] lemma inr_mem_new_atom_conds
+  {hsmall : small {a ∈ litter_set a.fst | (inl a, A) ∈ σ.val.domain}}
+  {ha : (inr (a.fst.to_near_litter, N), A) ∈ σ.val}
+  (l1 l2 : near_litter) (C : extended_index B) :
+  (sum.inr (l1, l2), C) ∈ new_atom_conds σ a A N hsmall ha ↔ false :=
+begin
+  split,
+  { rintro ⟨h₁, h₂⟩, cases h₂},
+  { rintro ⟨rfl, hb₁, hb₂, rfl⟩},
+end
+
 
 lemma atom_union_one_to_one_forward
   (hsmall : small {a ∈ litter_set a.fst | (inl a, A) ∈ σ.val.domain})
@@ -473,7 +486,43 @@ begin
           cases h, } } },
     { by_cases A = C,
       { subst h,
-        sorry },
+
+       refine spec.atom_cond.small_out _ _,
+        rintro (hnin | hnin),
+          { exact hL hnin },
+        simp only [spec.mem_range] at hnin,
+        obtain ⟨⟨⟨a1,a2⟩ | ⟨l1, l2⟩ , ei⟩, h1, h2 ⟩ := hnin,
+        simp only [binary_condition.range_mk, map_inl, prod.mk.inj_iff, false_and] at h2, exact h2,
+        simp only [inr_mem_new_atom_conds] at h1, exact h1,
+        simp only [subtype.val_eq_coe, domain_inv, range_sup, mem_union_eq],
+        convert (cardinal.mk_union_le _ _).trans_lt (cardinal.add_lt_of_lt κ_regular.aleph_0_le
+            hLsmall $ (_ : cardinal.mk (coe_sort{a_1 ∈ litter_set L |(inl a_1, A) ∈ (σ.new_atom_conds a A N hsmall ha).range}) < #κ)),
+        ext,
+        split,
+        { rintro ⟨hxL, hxrge | hxrge⟩,
+          { exact or.inl ⟨hxL, hxrge⟩ },
+          exact or.inr ⟨hxL, hxrge⟩ },
+        { rintro (⟨hxL, hxrge⟩ | h),
+          { exact ⟨hxL, or.inl hxrge⟩ },
+          cases h, simp only [mem_sep_eq], exact ⟨h_left, or.inr h_right⟩ },
+          suffices : {a_1 ∈ litter_set L | (inl a_1, A) ∈ (σ.new_atom_conds a A N hsmall ha).range} ⊆ N.2 ∩ litter_set L,
+          apply lt_of_le_of_lt, apply cardinal.mk_le_mk_of_subset this,
+          {
+            suffices : (↑(N.snd) ∩ litter_set L) ⊆ (litter_set N.fst ∆ (N.snd.val)),
+            apply lt_of_le_of_lt, apply cardinal.mk_le_mk_of_subset this,
+            exact N.2.2,
+            dsimp [(∆)], rw set.subset_def, intros x hx, refine or.inr ⟨hx.1, _ ⟩, by_contra h3,
+            apply pairwise_disjoint_litter_set N.fst L h ⟨h3, hx.2 ⟩,
+          },
+          simp only [spec.mem_range, subset_inter_iff, sep_subset, and_true],
+          intros a2 ha2, simp only [mem_sep_eq] at ha2, obtain ⟨_, cond, hcond, hcond2 ⟩ := ha2,
+          obtain ⟨ ⟨ a3, a2_2⟩, A_2⟩ := cond, simp only [mem_domain, subtype.val_eq_coe, not_exists, not_and, inl_mem_new_atom_conds] at hcond,
+          obtain ⟨_, h, _, h2⟩ := hcond,
+          simp only [binary_condition.range_mk, map_inl, prod.mk.inj_iff] at hcond2,
+          rw [← hcond2.left, h2], exact ((atom_map σ a A N hsmall ha _).property).1,
+          simp only [binary_condition.range_mk, map_inr, prod.mk.inj_iff, false_and] at hcond2,
+          exfalso, exact hcond2,
+         },
       { refine spec.atom_cond.small_out _ _,
         { rintro (hnin | hnin),
           { exact hL hnin },
@@ -491,7 +540,7 @@ begin
           cases h, } } } },
   { by_cases A = C,
     { subst h,
-      sorry},
+     sorry, },
     { refine spec.atom_cond.small_in L' (or.inl hL) _ _,
       { convert hLsmall using 2,
         refine funext (λ x, eq_iff_iff.2 ⟨λ hx, or.rec id _ hx, or.inl⟩),
@@ -825,11 +874,9 @@ begin
     (constrains.mem_litter a.fst a rfl _),
   rw mem_domain at h,
   obtain ⟨⟨_ | ⟨_, N⟩, A⟩, hc₁, hc₂⟩ := h; cases hc₂,
-  sorry
-  -- obtain hsmall | ⟨N', atom_map, hσ₁, hσ₂, hN'⟩ := σ.property.forward.atom_cond a.fst A,
-  -- swap, { cases haσ ⟨_, hσ₂ a rfl, rfl⟩ },
-  -- have := equiv_not_mem_atom σ a A N hsmall hc₁,
-  -- exact ⟨_, le_atom_union σ a A N hc₁ hsmall hc₁, _, mem_union_right _ ⟨⟨a, rfl, haσ⟩, rfl⟩, rfl⟩,
+  obtain ⟨N', atom_map, hσ₁, hσ₂, hN'⟩ | ⟨ hL, hsmall⟩ | ⟨L', hL, hsmall, hequiv⟩:= σ.property.forward.atom_cond a.fst A,
+  { exfalso, apply haσ, simp only [subtype.val_eq_coe, mem_domain], exact ⟨_, ⟨hσ₂ a rfl, rfl⟩⟩ },
+  all_goals {exact ⟨_, le_atom_union σ a A N hsmall hc₁, mem_union_right _ ⟨⟨a, rfl, haσ⟩, rfl⟩ ⟩},
 end
 
 end allowable_partial_perm
