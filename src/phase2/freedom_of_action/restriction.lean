@@ -201,6 +201,10 @@ begin
 
   --this part in progress; am trying to work out the difference between
   --allowable and allowable_path, and if it matters
+
+  have g1 := allowable_path.smul_to_struct_perm π' (f_map_path hgb hdb t),
+  --I now need associativity of the action and 'to_near_litter' to make progress
+
   have := phase_2_assumptions.allowable_derivative_comm
   ({index := β, path := (B.path.comp A)}) _ π'; sorry,
 end
