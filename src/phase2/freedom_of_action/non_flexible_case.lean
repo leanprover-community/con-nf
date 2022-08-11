@@ -129,7 +129,49 @@ end
 
 lemma non_flexible_union_one_to_one_backward :
   spec.one_to_one_forward (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ})⁻¹ :=
-sorry
+begin
+  rw sup_inv,
+  intro A, split,
+  { rintros b c (hc | hc) d (hd | hd),
+    { exact (σ.property.backward.one_to_one A).atom b hc hd, },
+    { simpa only [coe_inv, coe_singleton, inv_singleton, binary_condition.inv_def,
+        mem_singleton_iff, prod.mk.inj_iff, new_non_flexible_constraint, sum.map_inr,
+        false_and] using hd, },
+    { simpa only [coe_inv, coe_singleton, inv_singleton, binary_condition.inv_def,
+        mem_singleton_iff, prod.mk.inj_iff, new_non_flexible_constraint, sum.map_inr,
+        false_and] using hc, },
+    { simpa only [coe_inv, coe_singleton, inv_singleton, binary_condition.inv_def,
+        mem_singleton_iff, prod.mk.inj_iff, new_non_flexible_constraint, sum.map_inr,
+        false_and] using hc, }, },
+  { rintros N M₁ (hM₁ | hM₁) M₂ (hM₂ | hM₂),
+    { exact (σ.property.backward.one_to_one A).near_litter N hM₁ hM₂, },
+    { simp only [coe_inv, coe_singleton, set.mem_inv, mem_singleton_iff, binary_condition.inv_def,
+        sum.map_inr, prod.swap, new_non_flexible_constraint, prod.mk.inj_iff] at hM₂,
+      transitivity struct_perm.derivative (path.nil.cons $ bot_lt_coe _) π.to_struct_perm • N,
+      { cases hM₂.2,
+        have := hπ (_ : (inr (N, M₁),
+          path.nil.cons
+            (show (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C)).index ⟶ ⊥, from bot_lt_coe δ))
+          ∈ _),
+        { dsimp only [satisfies_cond, sum.elim_inr] at this, rw ← this, },
+        { exact hM₁, } },
+      { rw [hM₂.1.1, hM₂.1.2], } },
+    { simp only [coe_inv, coe_singleton, set.mem_inv, mem_singleton_iff, binary_condition.inv_def,
+        sum.map_inr, prod.swap, new_non_flexible_constraint, prod.mk.inj_iff] at hM₁,
+      transitivity struct_perm.derivative (path.nil.cons $ bot_lt_coe _) π.to_struct_perm • N,
+      { rw [hM₁.1.1, hM₁.1.2], },
+      { cases hM₁.2,
+        have := hπ (_ : (inr (N, M₂),
+          path.nil.cons
+            (show (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C)).index ⟶ ⊥, from bot_lt_coe δ))
+          ∈ _),
+        { dsimp only [satisfies_cond, sum.elim_inr] at this, rw ← this, },
+        { exact hM₂, } }, },
+    { simp only [coe_inv, coe_singleton, inv_singleton, binary_condition.inv_def,
+        mem_singleton_iff, prod.mk.inj_iff, new_non_flexible_constraint, map_inr, prod.swap]
+        at hM₁ hM₂,
+      rw hM₁.1.1, rw hM₂.1.1, } },
+end
 
 lemma non_flexible_union_atom_cond_forward :
   ∀ L C, spec.atom_cond (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}) L C :=
