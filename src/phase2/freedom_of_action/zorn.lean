@@ -179,6 +179,73 @@ begin
   exact (hσx.forward.one_to_one A).near_litter b hx hy,
 end
 
+
+lemma useful_lemma {a' b: atom} {τ: spec ↑B} {A : extended_index ↑B} {L : litter} {N': near_litter} (hτ: spec.allowable B τ) (hτa': (sum.inl (a', b), A) ∈ τ)
+(hb: b ∈ N'.snd.val) ( hN : (inr (L.to_near_litter, N'), A) ∈ τ) : a' ∈ litter_set L := begin
+        have hτa := hτa',
+        obtain ⟨M, ⟨hM, ⟨M_symm_diff, hM2,hM3⟩ ⟩ ⟩ := (hτ.backward.near_litter_cond N' L.to_near_litter A hN),
+        simp only [subtype.coe_mk, inl_mem_inv, prod.swap_prod_mk] at hM2,
+        dsimp [(litter.to_near_litter)] at hM3,rw hM3,rw symm_diff_def,
+        have ha2 : b∈ litter_set N'.fst → a' ∉ range M_symm_diff,
+        { intro hz, by_contra ha2,
+          simp only [set.mem_range, set_coe.exists] at ha2,
+          obtain ⟨z_2, hz_2, hz_2_2⟩ := ha2,
+          have := hM2 ⟨z_2, hz_2⟩, rw hz_2_2 at this,
+          have := (hτ.backward.one_to_one A).atom _ this hτa, subst this,
+          cases hz_2, exact (set.not_mem_of_mem_diff hz_2) hb,
+          exact (set.not_mem_of_mem_diff hz_2) hz},
+          by_cases ha: a' ∈ M.snd.val,
+        {
+          obtain ⟨L', hL, atom_map, hall, hall2⟩ | ⟨ha, hL, hsmall_out⟩ | ⟨L', hL, hsmall_in, hsmall_in2⟩ := hτ.backward.atom_cond N'.fst A,
+          {
+          have ha0:=ha,
+          have := (hτ.forward.one_to_one A).near_litter _ hM hL, simp only at this, subst this,
+          rw hall2 at ha,
+          simp only [set.mem_range, set_coe.exists] at ha, obtain ⟨z, hz, hz2⟩ := ha,
+          have := hall z hz, rw hz2 at this,
+          have := (hτ.backward.one_to_one A).atom _ this hτa, subst this,
+          exact or.inl ⟨ha0, ha2 hz⟩,
+          },
+          {
+            simp only [domain_inv, spec.mem_range, not_exists, not_and] at ha,
+            have := ha _ hM, simp only [binary_condition.inv_def, map_inr, prod.swap_prod_mk, binary_condition.range_mk, eq_self_iff_true, not_true] at this,
+            exfalso, exact this,
+          },
+          {
+          have := (hτ.forward.one_to_one A).near_litter _ hM hL, simp only at this, subst this,
+          exact or.inl ⟨ha, ha2 ((hsmall_in2 hτa).mpr ha)⟩,
+          }
+        },
+        {
+        by_cases hb2 :  a' ∈ range M_symm_diff,
+        {
+          exact or.inr ⟨hb2, ha⟩,
+
+        },
+        {
+        have hb3 : b∈ litter_set N'.fst,{by_contra hb3,
+        have := (hτ.forward.one_to_one A).atom _ (hM2 ⟨ b, (or.inr ⟨hb, hb3⟩)⟩) hτa,
+        exact hb2 ⟨_, this⟩,
+        },
+        exfalso,
+        obtain ⟨L', hL, atom_map, hall, hall2⟩ | ⟨ha, hL, hsmall_out⟩ | ⟨L', hL, hsmall_in, hsmall_in2⟩ := hτ.backward.atom_cond N'.fst A,
+          {
+          have := (hτ.forward.one_to_one A).near_litter _ hM hL, simp only at this, subst this,
+          have := (hτ.forward.one_to_one A).atom _ (hall b hb3) hτa, subst this,
+          rw hall2 at ha, simp only [mem_range_self, not_true] at ha, exact ha,
+          },
+          {
+            simp only [domain_inv, spec.mem_range, not_exists, not_and] at ha,
+            have := ha _ hM, simp only [binary_condition.inv_def, map_inr, prod.swap_prod_mk, binary_condition.range_mk, eq_self_iff_true, not_true] at this,
+            exact this,
+          },
+          {
+          have := (hτ.forward.one_to_one A).near_litter _ hM hL, simp only at this, subst this,
+          exact ha ((hsmall_in2 hτa).mp hb3),
+          } } }
+
+end
+
 lemma atom_cond_Union (hc : is_chain (≤) c) (L A) : spec.atom_cond (Sup (subtype.val '' c)) L A :=
 begin
   obtain rfl | ⟨⟨σ, hσ₁⟩, hσ₂⟩ := c.eq_empty_or_nonempty,
@@ -239,16 +306,37 @@ begin
       { cases h₁' (mem_domain.2 ⟨_, hρN₂, rfl⟩) },
       { rw [(hρ.backward.one_to_one A).near_litter _ hρN₂ hN'],
         refine ⟨λ ha', (h₂' $ H' _ hτc _ hρc _ _ ha' hτa').1 ha', λ hb, _⟩,
-        sorry } },
+        have : (@has_le.le (allowable_partial_perm B) allowable_partial_perm.has_le ⟨τ, hτ⟩ ⟨ρ, hρ⟩) → a' ∈ litter_set L,
+        {intro h, exact (h₂' (h.le hτa')).mpr hb},
+
+        by_cases h_eq :(⟨τ, hτ⟩ : allowable_partial_perm B) = ⟨ρ, hρ⟩,
+        exact this (le_of_eq h_eq),
+        have hchain := hc hτc hρc h_eq,
+        cases hchain,
+        exact this hchain,
+        have := hchain.le hN',
+        exact useful_lemma hτ hτa' hb this,} },
     { exact spec.atom_cond.small_out h (by rwa this) } },
   { refine spec.atom_cond.small_in N _ _ _,
     { exact mem_Sup.2 ⟨_, mem_image_of_mem _ hσ₂, hN⟩ },
     { rwa this },
     simp_rw mem_Sup,
     rintro a' b ⟨_, ⟨⟨τ, hτ⟩, hτc, rfl⟩, hτa'⟩,
+
     refine ⟨λ ha', (h₂ $ H' _ hτc _ hσ₂ a' b ha' hτa').1 ha', _⟩,
-    sorry }
+    intro hb,
+    have : (@has_le.le (allowable_partial_perm B) allowable_partial_perm.has_le ⟨τ, hτ⟩ ⟨σ, hσ₁⟩) → a' ∈ litter_set L,
+    {intro h, have := (h.le hτa'), exact (h₂ this).mpr hb},
+    by_cases h_eq :(⟨τ, hτ⟩ : allowable_partial_perm B) = ⟨σ, hσ₁⟩,
+    exact this (le_of_eq h_eq),
+    have hchain := hc hτc hσ₂ h_eq,
+    cases hchain,
+    exact this hchain,
+    have := hchain.le hN,
+    apply useful_lemma hτ hτa' hb this,
+    }
 end
+
 
 lemma near_litter_cond_Union (hc : is_chain (≤) c) (N₁ N₂ A) :
   (Sup (subtype.val '' c)).near_litter_cond N₁ N₂ A :=
