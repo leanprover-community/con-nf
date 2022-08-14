@@ -39,9 +39,7 @@ lemma total_of_is_max_aux (σ : allowable_partial_perm B) (hσ : is_max σ)
       { -- This litter is non-flexible.
         unfold flexible at h,
         push_neg at h,
-        obtain ⟨β, δ, γ, hγ, hδ, hγδ, C, t, hL, hA⟩ := h,
-        cases hA,
-        cases hL,
+        obtain ⟨β, δ, γ, hγ, hδ, hγδ, C, rfl, t, rfl⟩ := h,
         obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flexible hγ hδ hγδ t hind foa,
         rw ge_iff_le at hρ₁,
         rwa hρ₁.le.antisymm (hσ hρ₁).le } },

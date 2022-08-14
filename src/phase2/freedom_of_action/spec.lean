@@ -211,19 +211,19 @@ by { intro h, rw mem_range, exact ⟨_, h, rfl⟩ }
 
 lemma inl_mem_domain {σ : spec α} {a : atom × atom} {A : extended_index α} :
   (inl a, A) ∈ σ → (inl a.1, A) ∈ σ.domain :=
-by { intro h, rw mem_domain, exact ⟨_, h, rfl⟩ }
+mem_domain_of_mem
 
 lemma inr_mem_domain {σ : spec α} {N : near_litter × near_litter} {A : extended_index α} :
   (inr N, A) ∈ σ → (inr N.1, A) ∈ σ.domain :=
-by { intro h, rw mem_domain, exact ⟨_, h, rfl⟩ }
+mem_domain_of_mem
 
 lemma inl_mem_range {σ : spec α} {a : atom × atom} {A : extended_index α} :
   (inl a, A) ∈ σ → (inl a.2, A) ∈ σ.range :=
-by { intro h, rw mem_range, exact ⟨_, h, rfl⟩ }
+mem_range_of_mem
 
 lemma inr_mem_range {σ : spec α} {N : near_litter × near_litter} {A : extended_index α} :
   (inr N, A) ∈ σ → (inr N.2, A) ∈ σ.range :=
-by { intro h, rw mem_range, exact ⟨_, h, rfl⟩ }
+mem_range_of_mem
 
 @[simp] lemma domain_bot : (⊥ : spec α).domain = ∅ := rfl
 @[simp] lemma range_bot : (⊥ : spec α).range = ∅ := rfl

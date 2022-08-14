@@ -33,9 +33,10 @@ variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumption
 `x ∈ τ_{γ:A}` with conditions defined as above. Hence, it is not constrained by anything. -/
 def flexible (L : litter) (A : extended_index B) : Prop :=
 ∀ ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄
-  (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (C : path (B : type_index) β)
+  (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  (C : path (B : type_index) β) (hC : A = (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _))
   (t : tangle_path ((lt_index.mk' hγ (B.path.comp C)) : le_index α)),
-    L ≠ f_map_path hγ hδ t ∨ A ≠ (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _)
+    L ≠ f_map_path hγ hδ t
 
 /-- There are `μ`-many `A`-flexible litters for each extended index `A`. In fact, we can do better
 than this - for each proper path `C` from some `β` to `B`, there are `μ`-many `C.comp A`-flexible
@@ -61,9 +62,8 @@ begin
     rw ← ne.def at h,
     rw with_bot.ne_bot_iff_exists at h,
     obtain ⟨B', hB'⟩ := h,
-    refine ⟨⟨λ x, ⟨⟨⟨⊥, B'⟩, x⟩, λ β γ δ hγ hδ hγδ C t, _⟩, _⟩⟩,
-    { left,
-      intro h,
+    refine ⟨⟨λ x, ⟨⟨⟨⊥, B'⟩, x⟩, λ β γ δ hγ hδ hγδ C hC t, _⟩, _⟩⟩,
+    { intro h,
       unfold f_map_path at h,
       have := f_map_fst (proper_lt_index.mk' hδ (B.path.comp C)).index t,
       rw ← h at this,
@@ -191,7 +191,7 @@ def non_flexible_cond (σ : spec B) : Prop :=
   (⟨inr ⟨(f_map_path hγ hδ t).to_near_litter,
     N⟩, (A.cons $ coe_lt_coe.mpr hδ).cons $ bot_lt_coe _⟩ : binary_condition B) ∈ σ →
   ∀ (ρ : allowable_path B), ρ.to_struct_perm.satisfies σ →
-  N = (f_map_path hγ hδ $ (ρ.derivative_comp B A).derivative hγ • t).to_near_litter
+  N.fst = f_map_path hγ hδ ((ρ.derivative_comp B A).derivative hγ • t)
 
 /-- A specification is *allowable* in the forward direction if it satisfies the following
 conditions. -/

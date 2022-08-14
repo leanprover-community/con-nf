@@ -71,12 +71,10 @@ begin
     simp only at hLN,
     rw ← hLN, refl },
     unfold extended_index at A,
-  specialize h hγ hδ hγδ _ t,
-  obtain ⟨hLN, hAA'⟩ := prod.mk.inj_iff.1 h',
-  simp only at hLN,
-  cases h,
-  { exact h (congr_arg sigma.fst hLN) },
-  { exact h hAA' }
+  refine h hγ hδ hγδ _ _ t _,
+  cases h', refl,
+  simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff] at h',
+  exact h'.1,
 end
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,

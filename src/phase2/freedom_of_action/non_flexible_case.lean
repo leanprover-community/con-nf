@@ -249,10 +249,7 @@ lemma le_non_flexible_union : σ ≤ ⟨_, non_flexible_union_allowable hγ hδ 
     { cases hσ₁ hσ₂ },
     { simp only [new_non_flexible_constraint, set_like.mem_coe, spec.mem_singleton,
         prod.mk.inj_iff] at hσ₂,
-      exfalso,
-      cases hN' hγ hδ hγδ C t,
-      { exact h (litter.to_near_litter_injective hσ₂.left.left) },
-      { exact h hσ₂.right } }
+      cases hN' hγ hδ hγδ C hσ₂.2 t (litter.to_near_litter_injective hσ₂.left.left), }
   end,
   all_flex_range := begin
     rintro L N' C' hN' hσ₁ (hσ₂ | hσ₂),
@@ -260,11 +257,10 @@ lemma le_non_flexible_union : σ ≤ ⟨_, non_flexible_union_allowable hγ hδ 
     { simp only [new_non_flexible_constraint, set_like.mem_coe, spec.mem_singleton,
         prod.mk.inj_iff] at hσ₂,
       exfalso,
-      cases hN' hγ hδ hγδ C t,
-      { -- This is the unpacked coherence condition on L and f.
-        -- We need to change C and t to be the correct parameters here.
-        sorry },
-      { exact h hσ₂.right } }
+      refine hN' hγ hδ hγδ C hσ₂.2 t _,
+      -- This is the unpacked coherence condition on L and f.
+      -- We need to change C and t to be the correct parameters here.
+      sorry }
   end,
   all_atoms_domain := begin
     rintro a b L ha C hσ₁ (hσ₂ | hσ₂),
