@@ -1,7 +1,7 @@
 *.olean
 /_target
 /leanpkg.path
-
+/doc-gen
 
 decls.pickle
 decls.yaml

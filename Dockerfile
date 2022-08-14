@@ -18,6 +18,11 @@ RUN git clone https://github.com/PatrickMassot/leanblueprint.git
 RUN python3.9 -m pip install ./leanblueprint
 RUN rm -rf ./leanblueprint
 
+# Install doc-gen
+RUN git clone https://github.com/leanprover-community/doc-gen.git
+RUN python3.9 -m pip install -r ./doc-gen/requirements.txt
+RUN rm -rf ./doc-gen
+
 # Install lean
 RUN curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf \
   | sh -s -- --default-toolchain none -y
