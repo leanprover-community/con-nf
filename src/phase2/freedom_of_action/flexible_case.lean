@@ -485,7 +485,16 @@ end
 lemma flexible_union_support_closed :
   (σ.val ⊔ bij.new_flexible_litters abij ⊔ bij.new_inverse_flexible_litters abij')
     .domain.support_closed B :=
-sorry
+begin
+  unfold unary_spec.support_closed,
+  intros b g d hgb hdb hgd p t h1 π hsup,
+
+  --What I want to do: apply t to hsup, using h1 to prove the condition in hsup, done.
+  --Issue; t is a tangle, and hsup is about support conditions. Need a conversion lemma.
+  --See lower_domain_closed in restriction.lean; issue is also present there.
+
+  sorry,
+end
 
 lemma flexible_union_flexible_cond (C) :
   spec.flexible_cond B
