@@ -201,8 +201,7 @@ lemma precise_litter_image_eq_symm
   {bij : rough_bijection A σ.val.domain σ.val.range}
   {abij : Π L, precise_atom_bijection L (bij L)}
   {abij' : Π L, precise_atom_bijection (bij.inv L) L}
-  (habij : ∀ L a, (abij' (bij L)).to_fun a =
-    (abij L).to_fun ⟨a, by simpa only [rough_bijection.inv_coe] using a.2⟩)
+  (habij : ∀ L a, (equiv.symm (abij' (bij L)) a).val = (equiv.symm (abij L) a).val)
   {L₁ : ↥{L : litter | flexible L A ∧ (inr L.to_near_litter, A) ∉ σ.val.domain}}
   {L₂ : ↥{L : litter | flexible L A ∧ (inr L.to_near_litter, A) ∉ σ.val.range}} :
   bij.precise_litter_image L₁ (abij L₁) = L₂.val.to_near_litter →
@@ -236,8 +235,7 @@ begin
         rw equiv.to_fun_as_coe,
         rw equiv.to_fun_as_coe,
         have := subtype.coe_inj.mpr (equiv.symm_apply_apply (abij L₁) ⟨c, c.2, h⟩),
-        rw subtype.coe_mk at this, convert this using 1,
-        sorry },
+        rw subtype.coe_mk at this, convert this using 1, exact habij _ _, },
       { exact ((abij L₁).to_fun ⟨c, c.2, h⟩).property.2, } } },
   { intros b hb,
     have := h₁ ⟨b, hb⟩,
@@ -256,8 +254,7 @@ begin
         rw equiv.to_fun_as_coe,
         rw equiv.to_fun_as_coe,
         have := subtype.coe_inj.mpr (equiv.symm_apply_apply (abij L₁) ⟨b, hb, h⟩),
-        rw subtype.coe_mk at this, convert this using 1,
-        sorry },
+        rw subtype.coe_mk at this, convert this using 1, exact habij _ _, },
       { exact ((abij L₁).to_fun ⟨b, hb, h⟩).property.2, } } }
 end
 
@@ -266,7 +263,13 @@ lemma precise_litter_image_inj {bij : rough_bijection A σ.val.domain σ.val.ran
   (abij₁ : precise_atom_bijection L₁ (bij L₁))
   (abij₂ : precise_atom_bijection L₂ (bij L₂)) :
   precise_litter_image bij L₁ abij₁ = precise_litter_image bij L₂ abij₂ → L₁ = L₂ :=
-sorry
+begin
+  intro h,
+  unfold precise_litter_image at h,
+  have := congr_arg sigma.fst h,
+  rw [subtype.coe_inj, embedding_like.apply_eq_iff_eq] at this,
+  exact this,
+end
 
 def new_flexible_litters (bij : rough_bijection A σ.val.domain σ.val.range)
   (abij : ∀ L, precise_atom_bijection L (bij L)) : spec B := {
@@ -324,8 +327,7 @@ variables (bij : rough_bijection A σ.val.domain σ.val.range)
   (abij' : ∀ L, precise_atom_bijection (bij.inv L) L)
 
 lemma flexible_union_one_to_one
-  (habij : ∀ L a, (abij' (bij L)).to_fun a =
-    (abij L).to_fun ⟨a, by simpa only [rough_bijection.inv_coe] using a.2⟩) :
+  (habij : ∀ L a, (equiv.symm (abij' (bij L)) a).val = (equiv.symm (abij L) a).val) :
   spec.one_to_one_forward
     (σ.val ⊔ bij.new_flexible_litters abij ⊔ bij.new_inverse_flexible_litters abij') :=
 begin
@@ -559,8 +561,8 @@ begin
 end
 
 lemma flexible_union_allowable
-  (habij : ∀ L a, (abij' (bij L)).to_fun a =
-    (abij L).to_fun ⟨a, by simpa only [rough_bijection.inv_coe] using a.2⟩) :
+  (habij : ∀ L a, (equiv.symm (abij' (bij L)) a).val = (equiv.symm (abij L) a).val)
+  (habij' : ∀ L a, ((abij (bij.inv L)).to_fun a).val = ((abij' L).to_fun a).val) :
   spec.allowable B
     (σ.val ⊔ bij.new_flexible_litters abij ⊔ bij.new_inverse_flexible_litters abij') :=
 { forward :=
@@ -571,8 +573,9 @@ lemma flexible_union_allowable
     support_closed := flexible_union_support_closed bij abij abij' },
   backward :=
   { one_to_one :=
-      by { convert flexible_union_one_to_one bij.inv _ _ sorry,
-        rw forward_eq_backward bij abij abij' },
+      by { convert flexible_union_one_to_one bij.inv _ _ _,
+        rw forward_eq_backward bij abij abij',
+        exact habij', },
     atom_cond :=
       by { convert flexible_union_atom_cond bij.inv _ _,
         rw forward_eq_backward bij abij abij' },
@@ -590,10 +593,10 @@ lemma flexible_union_allowable
 }
 
 lemma le_flexible_union
-  (habij : ∀ L a, (abij' (bij L)).to_fun a =
-    (abij L).to_fun ⟨a, by simpa only [rough_bijection.inv_coe] using a.2⟩) :
+  (habij : ∀ L a, (equiv.symm (abij' (bij L)) a).val = (equiv.symm (abij L) a).val)
+  (habij' : ∀ L a, ((abij (bij.inv L)).to_fun a).val = ((abij' L).to_fun a).val) :
   σ ≤ ⟨σ.val ⊔ bij.new_flexible_litters abij ⊔ bij.new_inverse_flexible_litters abij',
-    flexible_union_allowable bij abij abij' habij⟩ :=
+    flexible_union_allowable bij abij abij' habij habij'⟩ :=
 { le := by { simp_rw sup_assoc, exact le_sup_left },
   all_flex_domain := λ L N' C hN' hσ₁ hσ₂ L' hL', begin
     split,
@@ -684,15 +687,41 @@ begin
       rw mk_litter_set at this, symmetry,
       refine cardinal.eq_of_add_eq_of_aleph_0_le this _ κ_regular.aleph_0_le,
       convert (small_of_rough_bijection bij L) using 1, rw cardinal.mk_sep } },
-  have abij' : ∀ L, precise_atom_bijection (bij.inv L) L,
-  { sorry },
-  have habij : ∀ L a, (abij' (bij L)).to_fun a =
-    (abij L).to_fun ⟨a, by simpa only [rough_bijection.inv_coe] using a.2⟩,
-  { sorry },
-  refine ⟨_, le_flexible_union bij abij abij' habij, _⟩,
+  set abij' : ∀ L, precise_atom_bijection (bij.inv L) L := λ L, (abij (bij.inv L)).trans {
+    to_fun := λ a, ⟨a,
+      by simpa only [rough_bijection.inv, subtype.val_eq_coe, equiv.apply_symm_apply] using a.2.1,
+      a.2.2⟩,
+    inv_fun := λ a, ⟨a,
+      by simpa only [rough_bijection.inv, subtype.val_eq_coe, equiv.apply_symm_apply] using a.2.1,
+      a.2.2⟩,
+    left_inv := by intro a; rw [← subtype.coe_inj, subtype.coe_mk]; refl,
+    right_inv := by intro a; rw [← subtype.coe_inj, subtype.coe_mk]; refl,
+  } with abij'_def,
+  have habij₁ : ∀ L, (abij' (bij L)).trans (abij L).symm = equiv.subtype_equiv_prop _,
+  sorry { intro L, ext1 a, rw equiv.trans_apply, rw abij'_def,
+    simp only [equiv.coe_trans, equiv.coe_fn_mk, function.comp_app],
+    have := (abij (bij.inv (bij L))).left_inv a, convert this using 1,
+    { rw rough_bijection.inv_coe, },
+    { unfold equiv.symm, dsimp only [equiv.coe_fn_mk], congr' 1,
+      { rw rough_bijection.inv_coe, },
+      { rw rough_bijection.inv_coe, },
+      { rw rough_bijection.inv_coe, },
+      { rw subtype.heq_iff_coe_eq _, refl,
+        intro, rw rough_bijection.inv_coe, refl, }, },
+    { rw subtype.heq_iff_coe_eq _, refl,
+      intro, rw rough_bijection.inv_coe, refl, } },
+  have habij₂ : ∀ L a, ((equiv.symm (abij' (bij L))).trans
+    ((abij' (bij L)).trans (abij L).symm) a).val = (equiv.symm (abij L) a).val,
+  { intros L a, rw ← equiv.trans_assoc, rw equiv.symm_trans_self, refl, },
+  have habij : ∀ L a, (equiv.symm (abij' (bij L)) a).val = (equiv.symm (abij L) a).val,
+  { intros L a, rw [← habij₂, habij₁], refl, },
+  have habij' : ∀ L a, ((abij (bij.inv L)).to_fun a).val = ((abij' L).to_fun a).val,
+  { intros L a, refl, },
+  refine ⟨_, le_flexible_union bij abij abij' habij habij', _⟩,
   rw [spec.domain_sup, spec.domain_sup],
   left, right,
   exact ⟨⟨L, hL, ‹_›⟩, rfl⟩,
+  { ext, rw rough_bijection.inv_coe, refl },
 end
 
 end allowable_partial_perm
