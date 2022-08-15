@@ -310,8 +310,12 @@ begin
   },
   have :=  @zorn_nonempty_partial_order₀ _ wo_po set.univ
   begin
-  intros,
-  sorry, -- chain condition
+
+  intros c hc hc2 y hy,
+  {
+    --use ⟨ set.Union (λ p, p.1.1.1: c → set α), (λ a a', ∃ x : c, a ∈ x.1.1.1 ∧ a' ∈ x.1.1.1 ∧ x.1.1.2 a a' ∨ (∀ x : c, ¬ (a ∈ x.1.1.1 ∧ a' ∈ x.1.1.1)))⟩,
+    sorry,
+  }
   end
   begin
   have :  is_well_order ↥(((∅ : set α), (λ a b, true : α → α → Prop)).fst) (λ (a1 a2 : ↥(((∅ : set α),
