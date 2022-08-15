@@ -232,12 +232,115 @@ begin
   exact litter_eq_of_image_inter σ A hN₁ hN₂ a ha₁ ha₂,
 end
 
+lemma litter_ne_of_disjoint {N M : near_litter} (h : disjoint N.2.1 M.2.1) : N.1 ≠ M.1 :=
+begin
+by_contra h2, cases N, cases M, simp only at h h2, subst h2,
+have : litter_set N_fst ⊆ (litter_set N_fst ∆ N_snd.val) ∪(litter_set N_fst ∆ M_snd.val),
+{intros x hx, simp only [subtype.val_eq_coe, mem_union_eq], by_contra h3, push_neg at h3,
+rw ← symm_diff_symm_diff_cancel_right (litter_set N_fst) N_snd.val at h,
+rw ← symm_diff_symm_diff_cancel_right (litter_set N_fst) M_snd.val at h,
+apply @h x, rw [symm_diff_comm _ ↑N_snd,symm_diff_comm _ ↑M_snd] at h3,
+exact ⟨or.inr ⟨hx, h3.left⟩, or.inr ⟨hx, h3.right⟩⟩,
+},
+have := lt_of_le_of_lt (le_trans (cardinal.mk_le_mk_of_subset this) (cardinal.mk_union_le _ _))
+(cardinal.add_lt_of_lt κ_regular.aleph_0_le N_snd.property M_snd.property),
+have h2:= N_fst.to_near_litter.2.property, dsimp [(litter.to_near_litter)] at h2,
+rw is_near_litter.mk_eq_κ h2 at this,
+simp only [lt_self_iff_false] at this, exact this,
+end
+
 -- An application of the near litter condition using litter_image_disjoint.
 lemma near_litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
   {N M N' M' : near_litter}
   (hN : (inr (N, N'), A) ∈ σ.val) (hM : (inr (M, M'), A) ∈ σ.val) :
   disjoint N.snd.val M.snd.val → disjoint N'.snd.val M'.snd.val :=
-sorry
+begin
+intro hdisj,
+have h:∀ (L : litter) (L' : near_litter) (h : (inr (L.to_near_litter, L'), A) ∈ σ.val) (a b : atom) (hab : (inl (a, b), A) ∈ σ.val ), a ∈ litter_set L ↔ b ∈ L'.2.1,
+{
+  intros,
+   obtain ⟨L'', hL, atom_map, hall, hall2⟩ | ⟨ha, hL, hsmall_out⟩ | ⟨L'', hL, hsmall_in, hsmall_in2⟩ := σ.property.forward.atom_cond L A,
+   {
+    have := (σ.property.backward.one_to_one A).near_litter _ h hL, subst this,
+    rw hall2, unfold range, simp only [set_coe.exists, mem_set_of_eq],
+    split, intro ha,  have := hall a ha,
+    have := (σ.property.backward.one_to_one A).atom _ hab this, subst this, exact ⟨_, ha, rfl ⟩,
+    rintros ⟨x, hx, hx2⟩, have := hall x hx, rw hx2 at this,
+    have := (σ.property.forward.one_to_one A).atom _ hab this, subst this, exact hx,
+   },
+   {
+    simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and] at ha,
+    have := ha _ h, simp only [binary_condition.domain_mk, map_inr, eq_self_iff_true, not_true] at this,
+    exfalso, exact this,
+   },
+   {
+    have := (σ.property.backward.one_to_one A).near_litter _ h hL, subst this,
+    exact hsmall_in2 hab,
+   }
+},
+have h2 : ∀  {N M N' M' Nf' Mf' : near_litter}
+  (hN : (inr (N, N'), A) ∈ σ.val) (hN2 : (inr (N.fst.to_near_litter, Nf'), A) ∈ σ.val)
+  (hM : (inr (M, M'), A) ∈ σ.val) (hM2 : (inr (M.fst.to_near_litter, Mf'), A) ∈ σ.val)
+  (hdisj : disjoint N.snd.val M.snd.val) (a b: atom)  (hab : (inl (a, b), A) ∈ σ.val )
+  (hb1 : b ∈ (N'.2.1 \ Nf'.2.1)) (hb2 : b ∈ (Mf'.2.1 ∩ M'.2.1)), false,
+  {
+    clear hdisj hN hM N M N' M',
+    intros,
+    obtain ⟨Nf'', hNf'', ⟨symm_diff_N, ⟨hsdN1, hsdN2⟩⟩ ⟩ := σ.property.forward.near_litter_cond _ _ _ hN,
+    have := (σ.property.backward.one_to_one A).near_litter _ hN2 hNf'', subst this,
+    obtain ⟨Mf'', hMf'', ⟨symm_diff_M, ⟨hsdM1, hsdM2⟩⟩ ⟩ := σ.property.forward.near_litter_cond _ _ _ hM,
+    have := (σ.property.backward.one_to_one A).near_litter _ hM2 hMf'', subst this,
+    have ha3 := hb1, rw [hsdN2, symm_diff_def, sup_eq_union, set.union_diff_distrib] at ha3,
+    simp only [subtype.val_eq_coe, sdiff_sdiff_self, bot_eq_empty, sdiff_idem, empty_union, mem_diff, set.mem_range, set_coe.exists] at ha3,
+    obtain ⟨⟨c, hc1, hc2⟩, _⟩ := ha3, have := (hsdN1 ⟨c, hc1⟩), rw hc2 at this, rw ← subtype.val_eq_coe at this, simp only at this,
+    have := (σ.property.forward.one_to_one A).atom _ hab this, subst this,
+    cases hc1,
+    exact (not_mem_of_mem_diff hb1) ((h N.fst Nf' hN2 a b hab).mp (mem_of_mem_diff hc1)),
+    have := (h M.fst Mf' hM2 a b hab).mpr (hb2.1),
+    have : a ∈ litter_set M.fst ∆ ↑(M.snd),
+    {
+      by_cases ha : a ∈ ↑(M.snd),
+      exfalso, exact hdisj ⟨mem_of_mem_diff hc1, ha⟩,
+      exact or.inl ⟨this, ha⟩,
+    },
+    have := hsdM1 ⟨a, this⟩, rw ← subtype.val_eq_coe at this, simp only at this,
+    have := (σ.property.backward.one_to_one A).atom _ hab this, subst this,
+    rw hsdM2 at hb2,
+    obtain ⟨hb3, hb4⟩ := hb2,
+    cases hb4,
+    have := not_mem_of_mem_diff hb4, simp only [mem_range_self, not_true] at this, exact this,
+    exact (not_mem_of_mem_diff hb4) hb3,
+  },
 
+rintros b ⟨hb1, hb2⟩,
+obtain ⟨Nf', hNf', ⟨symm_diff_N, ⟨hsdN1,hsdN2⟩⟩⟩ := σ.property.forward.near_litter_cond _ _ _ hN,
+obtain ⟨Mf', hMf', ⟨symm_diff_M, ⟨hsdM1,hsdM2⟩⟩⟩ := σ.property.forward.near_litter_cond _ _ _ hM,
+by_cases hb3 : b ∈ Nf'.2.1, all_goals {by_cases hb4 : b ∈ Mf'.2.1},
+{refine (litter_image_disjoint σ A hNf' hMf' _) ⟨hb3, hb4⟩,
+exact litter_ne_of_disjoint hdisj,
+},
+{have := hb2, rw hsdM2 at this, cases this, exact hb4 (mem_of_mem_diff this), have := this.1,
+simp only [set.mem_range, set_coe.exists] at this, obtain ⟨a, ha1, ha2⟩  := this,
+have hab := hsdM1 ⟨a, ha1⟩, rw ha2 at hab,
+exact h2 hM hMf' hN hNf' (disjoint.symm hdisj) a b hab ⟨hb2, hb4⟩ ⟨hb3, hb1⟩,
+},
+{have := hb1, rw hsdN2 at this, cases this, exact hb3 (mem_of_mem_diff this), have := this.1,
+simp only [set.mem_range, set_coe.exists] at this, obtain ⟨a, ha1, ha2⟩  := this,
+have hab := hsdN1 ⟨a, ha1⟩, rw ha2 at hab,
+exact h2 hN hNf' hM hMf' hdisj a b hab ⟨hb1, hb3⟩ ⟨hb4, hb2⟩,
+},
+{
+have := hb2, rw hsdM2 at this, cases this, exact hb4 (mem_of_mem_diff this), have := this.1,
+simp only [set.mem_range, set_coe.exists] at this, obtain ⟨a, ha1, ha2⟩  := this, clear this,
+have := hb1, rw hsdN2 at this, cases this, exact hb3 (mem_of_mem_diff this), have := this.1,
+simp only [set.mem_range, set_coe.exists] at this, obtain ⟨a', ha'1, ha'2⟩  := this,
+have hab := (hsdM1 ⟨a, ha1⟩), have ha'b := (hsdN1 ⟨a', ha'1⟩), rw ha2 at hab, rw ha'2 at ha'b,
+rw ← subtype.val_eq_coe at hab ha'b, simp only at hab ha'b,
+have := (σ.property.forward.one_to_one A).atom _ hab ha'b, subst this,
+cases ha1, exact hb4 ((h M.fst Mf' hMf' a b hab).mp ha1.1),
+cases ha'1, exact hb3 ((h N.fst Nf' hNf' a b hab).mp ha'1.1),
+exact hdisj ⟨ha'1.1, ha1.1⟩,
+}
+end
 end allowable_partial_perm
 end con_nf
