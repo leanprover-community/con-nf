@@ -249,7 +249,7 @@ namespace allowable_partial_perm
 
 instance has_inv : has_inv (allowable_partial_perm B) := ⟨λ σ, ⟨σ.val⁻¹, σ.2.inv⟩⟩
 
-@[simp] lemma val_inv (π : allowable_partial_perm B) : π⁻¹.val= π.val⁻¹ := rfl
+@[simp] lemma val_inv (π : allowable_partial_perm B) : π⁻¹.val = π.val⁻¹ := rfl
 
 instance : has_involutive_inv (allowable_partial_perm B) :=
 subtype.val_injective.has_involutive_inv _ val_inv
