@@ -328,5 +328,8 @@ begin
     { ext; simp_rw smul_fst; dsimp only [(•)]; simp } }
 end
 
+@[simp] lemma smul_to_near_litter_eq (π : near_litter_perm) (L : litter) :
+  (π • L.to_near_litter).fst = π • L := rfl
+
 end near_litter_perm
 end con_nf

@@ -145,7 +145,8 @@ class phase_2_assumptions [typed_positions] :=
 (smul_f_map {β : Λ} (A : path (α : type_index) β) {γ : type_index} {δ : Λ}
   (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
   (π : allowable (le_index.mk β A).index) (t : tangle (lt_index.mk' hγ A).index) :
-  π • f_map (proper_lt_index.mk' hδ A).index t =
+  (allowable_derivative (le_index.mk β A) (coe_lt_coe.mpr hδ) π) •
+    f_map (proper_lt_index.mk' hδ A).index t =
     f_map (proper_lt_index.mk' hδ A).index (allowable_derivative ⟨β, A⟩ hγ π • t))
 
 /-- The derivative of a permutation along a particular path.
@@ -255,6 +256,21 @@ def derivative_nil_comp {β : type_index} (B : path (α : type_index) β)
   (π : allowable_path ⟨α, path.nil⟩) : allowable_path ⟨β, B⟩ :=
 by { convert derivative_comp ⟨α, path.nil⟩ B π, rw path.nil_comp }
 
+@[simp] lemma to_struct_perm_derivative_comp : Π (A : le_index α)
+  {γ : type_index} (B : path A.index γ) (π : allowable_path A),
+  (π.derivative_comp _ B).to_struct_perm = struct_perm.derivative B π.to_struct_perm :=
+sorry
+
+@[simp] lemma smul_derivative_bot {A : le_index α} (π : allowable_path A) (h : (⊥ : type_index) < A)
+  {X : Type*} [mul_action near_litter_perm X] (x : X) :
+  (π.derivative h) • x = π • x :=
+begin
+  unfold has_smul.smul has_smul.comp.smul struct_perm.to_near_litter_perm,
+  simp only [monoid_hom.coe_comp, mul_equiv.coe_to_monoid_hom, struct_perm.coe_to_bot_iso_symm,
+    struct_perm.of_bot_smul, to_struct_perm_derivative],
+  refl,
+end
+
 end allowable_path
 
 /-- Path-indexed of the f-map. -/
@@ -286,7 +302,8 @@ core_tangle_data.allowable_action
 def smul_f_map_path {β : Λ} (A : path (α : type_index) β) {γ : type_index} {δ : Λ}
   (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
   (π : allowable_path (le_index.mk β A)) (t : tangle_path (lt_index.mk' hγ A : le_index α)) :
-  π • f_map_path hγ hδ t = f_map_path hγ hδ (π.derivative hγ • t) :=
+  (π.derivative $ coe_lt_coe.mpr hδ) • f_map_path hγ hδ t =
+  f_map_path hγ hδ (π.derivative hγ • t) :=
 phase_2_assumptions.smul_f_map A hγ hδ hγδ π t
 
 lemma support_le_path (A : proper_lt_index α) (t : tangle_path (A : le_index α))
