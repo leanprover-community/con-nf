@@ -157,56 +157,23 @@ begin
       } } }, -/
 end
 
-/-lemma unpack_coh_cond ⦃β : Λ⦄
-  ⦃γ : type_index⦄
-  ⦃δ : Λ⦄
-  (hγβ : γ < ↑β)
-  (hδβ : δ < β)
-  (hδγ : γ ≠ ↑δ)
-  (p : path ↑B ↑β)
-  (t : tangle_path ↑(lt_index.mk' hγβ (B.path.comp p)))
-  (π : allowable_path B) :
-    derivative ((p.cons $ coe_lt_coe.mpr hδβ).cons (bot_lt_coe _)) π.to_struct_perm •
-    (f_map_path hγβ hδβ t).to_near_litter =
-    (f_map_path hγβ hδβ $ (π.derivative_comp B p).derivative hγβ
-    {index := ↑β, path := B.path.comp p} • t).to_near_litter :=
-begin
-   sorry,
-end-/
-
-/-(allowable_derivative_comm : Π (A : le_index α) {γ : type_index} (hγ : γ < A.index)
-  (π : allowable A.index),
-  (allowable_derivative A hγ π).to_struct_perm =
-    struct_perm.derivative (path.cons path.nil hγ) π.to_struct_perm)-/
-
 lemma lower_non_flexible_cond (hσ : σ.allowable B) :
   (σ.lower A).non_flexible_cond (le_index.mk β (B.path.comp A)) :=
 begin
   unfold spec.non_flexible_cond,
-  intros b g d hgb hdb hgd Nl p t h1 π' h2,
-
-  unfold struct_perm.satisfies at h2,
-  unfold struct_perm.satisfies_cond at h2,
-  have h := h2 h1,
-  simp at h,
+  intros β' γ δ hγ hδ hγδ N C t hf π hπ,
+  unfold struct_perm.satisfies struct_perm.satisfies_cond at hπ,
+  have h := hπ hf,
+  dsimp only [sum.elim_inr] at h,
   rw ← h,
-
-  --repeat unpacked_coherence lemma,
-  --ok, I prove directly, but will refactor into a lemma later.
-
-  --this works nicely
-  have hc := smul_f_map_path ((B.path.comp A).comp p) hgb hdb hgd
-  (π'.derivative_comp {index := β, path := B.path.comp A} p) t,
-  rw ← hc,
-
-  --this part in progress; am trying to work out the difference between
-  --allowable and allowable_path, and if it matters
-
-  have g1 := allowable_path.smul_to_struct_perm π' (f_map_path hgb hdb t),
-  --I now need associativity of the action and 'to_near_litter' to make progress
-
-  have := phase_2_assumptions.allowable_derivative_comm
-  ({index := β, path := (B.path.comp A)}) _ π'; sorry,
+  rw ← smul_f_map_path ((B.path.comp A).comp C) hγ hδ hγδ _ t,
+  convert near_litter_perm.smul_to_near_litter_eq _ _ using 1,
+  unfold to_near_litter_perm,
+  simp only [lower_self, monoid_hom.comp_id, allowable_path.to_struct_perm_derivative_comp,
+    mul_equiv.coe_to_monoid_hom, coe_to_bot_iso_symm, of_bot_smul],
+  rw [← allowable_path.to_struct_perm_derivative_comp, allowable_path.smul_to_struct_perm,
+    allowable_path.derivative_comp, allowable_path.derivative_comp,
+    allowable_path.smul_derivative_bot],
 end
 
 /--

@@ -193,14 +193,20 @@ sorry
 lemma non_flexible_union_non_flexible_cond_forward :
   spec.non_flexible_cond B (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}) :=
 begin
-  intros hb hg hd hgb hdb hdg hNl hp ht hf π h1,
-  unfold struct_perm.satisfies at h1,
-  unfold struct_perm.satisfies_cond at h1,
-  have h := h1 hf,
-  dsimp at h,
+  unfold spec.non_flexible_cond,
+  intros β γ δ hγ hδ hγδ N C t hf π hπ,
+  unfold struct_perm.satisfies struct_perm.satisfies_cond at hπ,
+  have h := hπ hf,
+  dsimp only [sum.elim_inr] at h,
   rw ← h,
-  sorry
-  -- exact unpack_coh_cond hgb hdb hdg hp ht π,
+  rw ← smul_f_map_path (B.path.comp C) hγ hδ hγδ _ t,
+  convert near_litter_perm.smul_to_near_litter_eq _ _ using 1,
+  unfold to_near_litter_perm,
+  simp only [lower_self, monoid_hom.comp_id, allowable_path.to_struct_perm_derivative_comp,
+    mul_equiv.coe_to_monoid_hom, coe_to_bot_iso_symm, of_bot_smul],
+  rw [← allowable_path.to_struct_perm_derivative_comp, allowable_path.smul_to_struct_perm,
+    allowable_path.derivative_comp, allowable_path.derivative_comp,
+    allowable_path.smul_derivative_bot],
 end
 
 lemma non_flexible_union_non_flexible_cond_backward :
