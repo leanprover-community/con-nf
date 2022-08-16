@@ -454,10 +454,68 @@ begin
     exact h₂ hab }
 end
 
+lemma mem_domain_of_mem_symm_diff
+  (L : {L : litter | flexible L A ∧ (inr L.to_near_litter, A) ∉ σ.val.range})
+  (a : atom)
+  (ha : a ∈ litter_set (bij.inv L) ∆ (bij.inv.precise_litter_image L (equiv.symm (abij' L))).snd) :
+  (inl a, A) ∈ σ.val.domain :=
+begin
+  rw precise_litter_image at ha,
+  simp only at ha,
+  rw subtype.coe_mk at ha,
+  simp_rw precise_atom_image at ha,
+  by_contradiction,
+  obtain ⟨ha₁, ha₂⟩ | ⟨ha₁, ha₂⟩ := ha,
+  { rw set.mem_range at ha₂, push_neg at ha₂,
+    have := ha₂ ⟨((abij' L).to_fun ⟨a, ha₁, h⟩).val, ((abij' L).to_fun ⟨a, ha₁, h⟩).property.1⟩,
+    classical,
+    rw dif_neg at this,
+    { refine this _,
+      generalize_proofs,
+      simp only [subtype.coe_mk, equiv.to_fun_as_coe, subtype.val_eq_coe, subtype.coe_eta,
+        equiv.symm_apply_apply], },
+    exact ((abij' L).to_fun ⟨a, ha₁, h⟩).property.2, },
+  { obtain ⟨b, hb⟩ := ha₁,
+    dsimp only at hb,
+    split_ifs at hb with h' h',
+    { have := atom_value_spec σ⁻¹ A b h',
+      simp_rw subtype.coe_mk at hb, rw hb at this,
+      rw mem_domain at h,
+      exact h ⟨_, this, rfl⟩, },
+    { rw ← hb at ha₂,
+      cases ha₂ ((abij' L).symm ⟨b, b.2, h'⟩).property.1, } },
+end
+
 lemma flexible_union_near_litter_cond :
   ∀ N₁ N₂ C, spec.near_litter_cond
     (σ.val ⊔ bij.new_flexible_litters abij ⊔ bij.new_inverse_flexible_litters abij') N₁ N₂ C :=
-sorry
+begin
+  rintros N₁ N₂ C ((h | h) | h),
+  { obtain ⟨M, hM, s, hs₁, hs₂⟩ := σ.property.forward.near_litter_cond N₁ N₂ C h,
+    exact ⟨M, (or.inl (or.inl hM)), s, λ h, or.inl (or.inl $ hs₁ h), hs₂⟩, },
+  { rw [set_like.mem_coe, mem_new_flexible_litters] at h,
+    obtain ⟨L, hL⟩ := h,
+    refine ⟨N₂, or.inl (or.inr _), _⟩,
+    { rw [set_like.mem_coe, mem_new_flexible_litters],
+      cases hL, exact ⟨_, rfl⟩, },
+    refine ⟨λ a, arbitrary atom, _, _⟩,
+    { rintro ⟨a, ha⟩, cases hL,
+      simpa only [subtype.coe_mk, symm_diff_self, bot_eq_empty, mem_empty_eq] using ha, },
+    { symmetry, rw symm_diff_eq_left, rw bot_eq_empty, rw set.range_eq_empty_iff,
+      split, rintro ⟨a, ha⟩, cases hL,
+      simpa only [subtype.coe_mk, symm_diff_self, bot_eq_empty, mem_empty_eq] using ha, } },
+  { rw [set_like.mem_coe, mem_new_inverse_flexible_litters] at h,
+    obtain ⟨L, hL⟩ := h,
+    refine ⟨bij.precise_litter_image (bij.inv L) (abij (bij.inv L)), _, _⟩,
+    { refine or.inl (or.inr _),
+      rw [set_like.mem_coe, mem_new_flexible_litters],
+      refine ⟨bij.inv L, _⟩, cases hL, refl, },
+    refine ⟨λ a, atom_value σ A a _, _, _⟩,
+    { cases hL, exact mem_domain_of_mem_symm_diff bij abij' L a a.2, },
+    { intro a, cases hL, refine or.inl (or.inl $ atom_value_spec σ A a _), },
+    { simp only [subtype.val_eq_coe, prod.mk.inj_iff] at hL,
+      sorry } }
+end
 
 -- lemma unpack_coh_cond ⦃β : Λ⦄
 --   ⦃γ : type_index⦄
@@ -731,7 +789,7 @@ begin
     right_inv := by intro a; rw [← subtype.coe_inj, subtype.coe_mk]; refl,
   } with abij'_def,
   have habij₁ : ∀ L, (abij' (bij L)).trans (abij L).symm = equiv.subtype_equiv_prop _,
-  sorry { intro L, ext1 a, rw equiv.trans_apply, rw abij'_def,
+  { intro L, ext1 a, rw equiv.trans_apply, rw abij'_def,
     simp only [equiv.coe_trans, equiv.coe_fn_mk, function.comp_app],
     have := (abij (bij.inv (bij L))).left_inv a, convert this using 1,
     { rw rough_bijection.inv_coe, },
