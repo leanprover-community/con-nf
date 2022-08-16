@@ -318,6 +318,12 @@ begin
   { rintro ⟨L, hL⟩, refine ⟨L, _⟩, rw hL, refl, },
 end
 
+lemma precise_litter_image_flexible (bij : rough_bijection A σ.val.domain σ.val.range)
+  (L : {L : litter | flexible L A ∧ (inr L.to_near_litter, A) ∉ σ.val.domain})
+  (abij : precise_atom_bijection L (bij L)) :
+  flexible (precise_litter_image bij L abij).1 A :=
+(bij L).property.1
+
 end rough_bijection
 
 open rough_bijection
@@ -495,13 +501,25 @@ lemma flexible_union_support_closed :
     .domain.support_closed B :=
 begin
   unfold unary_spec.support_closed,
-  intros b g d hgb hdb hgd p t h1 π hsup,
-
-  --What I want to do: apply t to hsup, using h1 to prove the condition in hsup, done.
-  --Issue; t is a tangle, and hsup is about support conditions. Need a conversion lemma.
-  --See lower_domain_closed in restriction.lean; issue is also present there.
-
-  sorry,
+  rintros β γ δ hγ hδ hγδ C t ht π hsupp,
+  rw [domain_sup, domain_sup] at ht hsupp,
+  obtain ((ht | ht) | ht) := ht,
+  { refine σ.property.forward.support_closed hγ hδ hγδ C t ht _ _,
+    intros a ha, exact hsupp (or.inl (or.inl ha)), },
+  { exfalso,
+    simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and, mem_set_of_eq,
+      mem_new_flexible_litters, set_coe.exists, subtype.coe_mk] at ht,
+    obtain ⟨c, ⟨L, ⟨hL₁, hL₂⟩, rfl⟩, hc⟩ := ht,
+    simp only [binary_condition.domain_mk, map_inr, prod.mk.inj_iff,
+      litter.to_near_litter_injective.eq_iff] at hc,
+    refine hL₁ hγ hδ hγδ C hc.2 t hc.1, },
+  { exfalso,
+    simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and, mem_set_of_eq,
+      mem_new_inverse_flexible_litters, set_coe.exists, subtype.coe_mk] at ht,
+    obtain ⟨c, ⟨L, ⟨hL₁, hL₂⟩, rfl⟩, hc⟩ := ht,
+    simp only [binary_condition.domain_mk, map_inr, prod.mk.inj_iff] at hc,
+    have h := precise_litter_image_flexible bij.inv ⟨L, hL₁, hL₂⟩ (abij' ⟨L, hL₁, hL₂⟩).symm,
+    refine h hγ hδ hγδ C hc.2 t (congr_arg sigma.fst hc.1), },
 end
 
 lemma flexible_union_flexible_cond (C) :
