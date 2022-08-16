@@ -91,30 +91,12 @@ end
 lemma near_litter_image_spec_reverse (hN : litter_set N.fst ≠ N.snd)
   (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain)
-  (hNin : (inr (near_litter_image σ N A hN hNL ha), A) ∈
-    σ.val.range) : (inr (N, near_litter_image σ N A hN hNL ha), A) ∈ σ.val :=
+  (P : near_litter)
+  (hP : (inr (P, near_litter_image σ N A hN hNL ha), A) ∈ σ.val) :
+    P = N :=
 begin
-  refine near_litter_image_spec σ N A _ hN hNL ha,
-  rw mem_domain at hNL, rw spec.mem_range at hNin,
-  obtain ⟨⟨_ | ⟨M, M'⟩, A⟩, hM, hMr⟩ := hNin,
-  { cases hMr },
-  simp only [binary_condition.range, sum.elim_inr, prod.mk.inj_iff] at hMr,
-  obtain ⟨rfl, rfl⟩ := hMr, clear hMr,
-  convert inr_mem_domain hM,
-  -- simp only [binary_condition.domain, sum.elim_inr, prod.mk.inj_iff, eq_self_iff_true, and_true],
-  obtain ⟨P, hP, symm, hsy, hsd⟩ := σ.prop.forward.near_litter_cond M _ A hM,
-  have := (σ.prop.backward.one_to_one A).near_litter M hM
-    (near_litter_image_spec σ M A (inr_mem_domain hM) _ (inr_mem_domain hP) $
-      λ a ha, inl_mem_domain (hsy ⟨a, ha⟩)),
-  { sorry },
-  { /- intro H,
-    have : near_litter_image σ N A hN hNL ha = near_litter_value σ A M (inr_mem_domain hM) :=
-      (σ.prop.backward.one_to_one A).near_litter M hM
-        (near_litter_value_spec σ A M (inr_mem_domain hM)),
-    unfold near_litter_image at this,
-    rw [← sigma.eta (near_litter_value σ A M ⟨_, hM, rfl⟩), sigma.mk.inj_iff] at this,
-    obtain ⟨h1, h2⟩ := this, -/
-    sorry }
+  -- I'm pretty certain this has to be true but can't find any easy way to prove it.
+  sorry
 end
 
 noncomputable def new_near_litter_cond
@@ -159,11 +141,9 @@ begin
   { simp only [new_near_litter_cond, spec.mem_mk, subtype.val_eq_coe, mem_set_of_eq, mem_sup,
       mem_singleton_iff, prod.mk.inj_iff] at hP hQ,
     obtain hP | ⟨⟨rfl, rfl⟩, rfl⟩ := hP; obtain hQ | ⟨⟨rfl, h₂⟩, h₃⟩ := hQ,
-    { exact (σ.prop.forward.one_to_one C).near_litter M hP hQ },
-    { sorry /- exact (σ.prop.forward.one_to_one C).near_litter _
-        (near_litter_image_spec_reverse σ P C hN hNL ha (inr_mem_domain hP)) hP -/ },
-    { sorry /- exact (σ.prop.forward.one_to_one C).near_litter _
-        hP (near_litter_image_spec_reverse σ Q C hN hNL ha ⟨_, hP, rfl⟩) -/ },
+    { exact (σ.property.forward.one_to_one C).near_litter M hP hQ },
+    { exact near_litter_image_spec_reverse σ N A hN hNL ha P hP, },
+    { exact (near_litter_image_spec_reverse σ N A hN hNL ha Q hQ).symm, },
     { refl }, }
 end
 
@@ -178,14 +158,13 @@ begin
       prod.swap_prod_mk, prod.mk.inj_iff, false_and, or_false] at hb hc,
     exact (σ.prop.backward.one_to_one C).atom a hb hc },
   { rw [mem_set_of, mem_new_near_litter_cond_inv_iff] at hP hQ,
-    sorry
-    /- obtain ⟨⟨h1, h2⟩, h3⟩ | hP := hP; obtain ⟨⟨h1', h2'⟩, h3'⟩ | hQ := hQ,
-    { simp at hP },
-    { exact (σ.prop.backward.one_to_one A).near_litter N
-        (near_litter_image_spec σ N A ⟨_, hQ, rfl⟩ hN hNL ha) hQ },
-    { exact (σ.prop.backward.one_to_one A).near_litter N hP
-        (near_litter_image_spec σ N A ⟨_, hP, rfl⟩ hN hNL ha) },
-    { exact (σ.prop.backward.one_to_one C).near_litter M hP hQ } -/ }
+    obtain hP | ⟨⟨rfl, rfl⟩, rfl⟩ := hP; obtain hQ | ⟨⟨rfl, h₂⟩, h₃⟩ := hQ,
+    { exact (σ.property.backward.one_to_one C).near_litter M hP hQ },
+    { exact ((σ.property.backward.one_to_one A).near_litter _
+        (near_litter_image_spec σ N A (inr_mem_range hP) hN hNL ha) hP).symm, },
+    { exact ((σ.property.backward.one_to_one A).near_litter _
+        (near_litter_image_spec σ N A (inr_mem_range hQ) hN hNL ha) hQ), },
+    { refl, }, }
 end
 
 lemma near_litter_union_atom_cond_forward (hN : litter_set N.fst ≠ N.snd)

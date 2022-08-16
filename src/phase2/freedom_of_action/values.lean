@@ -126,15 +126,21 @@ lemma near_litter_value_spec_range (σ : allowable_partial_perm B) (A : extended
   (inr (near_litter_value σ A N hN), A) ∈ σ.val.range :=
 spec.mem_range.2 ⟨(inr (N, near_litter_value σ A N hN), A), near_litter_value_spec σ A N hN, rfl⟩
 
+lemma near_litter_value_injective (σ : allowable_partial_perm B) (A : extended_index B) :
+  ∀ N₁ hN₁ N₂ hN₂, near_litter_value σ A N₁ hN₁ = near_litter_value σ A N₂ hN₂ → N₁ = N₂ :=
+begin
+  intros N₁ hN₁ N₂ hN₂ hN,
+  have h₁ := near_litter_value_spec σ A N₁ hN₁,
+  have h₂ := near_litter_value_spec σ A N₂ hN₂,
+  rw ← hN at h₂,
+  exact (σ.property.forward.one_to_one A).near_litter _ h₁ h₂,
+end
+
 noncomputable def near_litter_value_inj (σ : allowable_partial_perm B) (A : extended_index B) :
   {N | (inr N, A) ∈ σ.val.domain} ↪ near_litter :=
 ⟨λ N, near_litter_value σ A N.val N.property, begin
   intros N₁ N₂ hN,
-  have h₁ := near_litter_value_spec σ A N₁ N₁.property,
-  have h₂ := near_litter_value_spec σ A N₂ N₂.property,
-  dsimp at hN, rw ← hN at h₂,
-  exact subtype.coe_inj.mp
-    ((σ.property.forward.one_to_one A).near_litter (near_litter_value σ A N₁ N₁.property) h₁ h₂),
+  exact subtype.coe_inj.mp (near_litter_value_injective _ _ _ _ _ _ hN),
 end⟩
 
 /-- If the images of two litters under `σ` intersect, the litters must intersect, and therefore are
