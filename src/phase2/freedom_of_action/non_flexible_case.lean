@@ -213,17 +213,36 @@ lemma non_flex_union_non_flex_cond_backward :
   spec.non_flex_cond B (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ})⁻¹ :=
 sorry
 
-lemma non_flex_union_support_closed_forward :
+lemma non_flex_union_support_closed_forward
+  (hS : ∀ (c : support_condition γ), c ∈ designated_support_path t →
+    (c.fst, (C.cons hγ).comp c.snd) ∈ σ.val.domain) :
   (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}).domain.support_closed B :=
 begin
-  unfold unary_spec.support_closed,
-  simp,
-  intros b d g hdb hgb hdg p t2 Nl h1 hPi hsup,
-  --see hsup and goal; use similar construction to in restriction.lean.
-  sorry,
+  intros β' γ' δ' hγ' hδ' hγδ' A' t' ht',
+  rw domain_sup at ht',
+  cases ht',
+  { exact supports.mono (subset_union_left _ _)
+      (σ.property.forward.support_closed hγ' hδ' hγδ' A' t' ht'), },
+  rw [domain_singleton, set.mem_singleton_iff] at ht',
+  unfold new_non_flex_constraint at ht',
+  simp only [binary_condition.domain_mk, map_inr, prod.mk.inj_iff] at ht',
+  have cons_inj₁ := path.cons.inj ht'.2,
+  cases cons_inj₁.1,
+  have cons_inj₂ := path.cons.inj (eq_of_heq cons_inj₁.2.1),
+  cases cons_inj₂.1,
+  cases eq_of_heq cons_inj₂.2.1,
+  have := f_map_path_injective (litter.to_near_litter_injective ht'.1),
+  cases this.1,
+  cases eq_of_heq this.2,
+  refine supports.mono (subset_union_left _ _) _,
+  refine supports.mono _ (designated_support_path t).supports,
+  intros c hc,
+  exact hS c hc,
 end
 
-lemma non_flex_union_support_closed_backward :
+lemma non_flex_union_support_closed_backward
+  (hS : ∀ (c : support_condition γ), c ∈ designated_support_path t →
+    (c.fst, (C.cons hγ).comp c.snd) ∈ σ.val.domain) :
   (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}).range.support_closed B :=
 sorry
 
@@ -231,24 +250,29 @@ lemma non_flex_union_flex_cond :
   ∀ C, spec.flex_cond B (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) C :=
 sorry
 
-lemma non_flex_union_allowable :
+lemma non_flex_union_allowable
+  (hS : ∀ (c : support_condition γ), c ∈ designated_support_path t →
+    (c.fst, (C.cons hγ).comp c.snd) ∈ σ.val.domain) :
   spec.allowable B (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) :=
 { forward :=
   { one_to_one := non_flex_union_one_to_one_forward hγ hδ hγδ t hπ,
     atom_cond := non_flex_union_atom_cond_forward hγ hδ hγδ t hπ,
     near_litter_cond := non_flex_union_near_litter_cond_forward hγ hδ hγδ t hπ,
     non_flex_cond := non_flex_union_non_flex_cond_forward hγ hδ hγδ t hπ,
-    support_closed := non_flex_union_support_closed_forward hγ hδ hγδ t hπ },
+    support_closed := non_flex_union_support_closed_forward hγ hδ hγδ t hπ hS },
   backward :=
   { one_to_one := non_flex_union_one_to_one_backward hγ hδ hγδ t hπ,
     atom_cond := non_flex_union_atom_cond_backward hγ hδ hγδ t hπ,
     near_litter_cond := non_flex_union_near_litter_cond_backward hγ hδ hγδ t hπ,
     non_flex_cond := non_flex_union_non_flex_cond_backward hγ hδ hγδ t hπ,
     support_closed := by { rw spec.domain_inv,
-      exact non_flex_union_support_closed_backward hγ hδ hγδ t hπ } },
+      exact non_flex_union_support_closed_backward hγ hδ hγδ t hπ hS } },
   flex_cond := non_flex_union_flex_cond hγ hδ hγδ t hπ }
 
-lemma le_non_flex_union : σ ≤ ⟨_, non_flex_union_allowable hγ hδ hγδ t hπ⟩ :=
+lemma le_non_flex_union
+  (hS : ∀ (c : support_condition γ), c ∈ designated_support_path t →
+    (c.fst, (C.cons hγ).comp c.snd) ∈ σ.val.domain) :
+  σ ≤ ⟨_, non_flex_union_allowable hγ hδ hγδ t hπ hS⟩ :=
 { le := le_sup_left,
   all_flex_domain := begin
     rintro L N' C' hN' hσ₁ (hσ₂ | hσ₂),
@@ -291,16 +315,15 @@ lemma exists_ge_non_flex (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) {C 
     (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _)) ∈
     ρ.val.domain :=
 begin
-  have hS : ∀ (c : support_condition γ), c ∈ (designated_support_path t).carrier →
+  have hS : ∀ (c : support_condition γ), c ∈ designated_support_path t →
     (c.fst, (C.cons hγ).comp c.snd) ∈ σ.val.domain :=
-  λ (c : support_condition γ) (hc : c ∈ (designated_support_path t).carrier),
-    hσ ⟨c.fst, path.comp (path.cons C hγ) c.snd⟩ (constrains.f_map hγ hδ hγδ C t c hc),
+  λ c hc, hσ ⟨c.fst, path.comp (path.cons C hγ) c.snd⟩ (constrains.f_map hγ hδ hγδ C t c hc),
   have := σ.2.lower (C.cons $ coe_lt_coe.2 hδ) ((coe_lt_coe.2 hδ).trans_le (le_of_path C)),
   obtain ⟨π, hπ⟩ := foa (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C))
     ⟨σ.val.lower (C.cons $ coe_lt_coe.mpr hδ), this⟩,
   have := struct_perm.derivative (path.nil.cons $ bot_lt_coe _) π.to_struct_perm
      • (f_map_path hγ hδ t).to_near_litter,
-  refine ⟨_, le_non_flex_union hγ hδ hγδ t hπ, _⟩,
+  refine ⟨_, le_non_flex_union hγ hδ hγδ t hπ hS, _⟩,
   rw spec.domain_sup,
   right, simpa only [spec.domain, image_singleton, mem_singleton_iff],
 end

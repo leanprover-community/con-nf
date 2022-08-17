@@ -361,6 +361,17 @@ begin
   exact tangle_path.lt_index_assoc.heq t,
 end
 
+lemma f_map_path_injective {A : Λ} {A_path : path (α : type_index) A} ⦃γ₁ γ₂ : type_index⦄ ⦃δ : Λ⦄
+  {hγ₁ : γ₁ < A} {hγ₂ : γ₂ < A} {hδ : δ < A}
+  {t₁ : tangle_path (lt_index.mk' hγ₁ A_path : le_index α)}
+  {t₂ : tangle_path (lt_index.mk' hγ₂ A_path : le_index α)} :
+  f_map_path hγ₁ hδ t₁ = f_map_path hγ₂ hδ t₂ → γ₁ = γ₂ ∧ t₁ == t₂ :=
+begin
+  intro h,
+  cases f_map_range_eq _ h,
+  exact ⟨rfl, heq_of_eq (f_map_injective (proper_lt_index.mk' hδ A_path).index h)⟩,
+end
+
 /-- The injection from near-litters to path-indexed tangles. -/
 def typed_near_litter_path (A : proper_lt_index α) : near_litter ↪ tangle_path (A : le_index α) :=
 typed_near_litter
