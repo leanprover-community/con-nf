@@ -290,6 +290,9 @@ rfl
 
 end
 
+lemma smul_near_litter_fst (π : allowable_path A) (N : near_litter) :
+  (π • N).fst = π • N.fst := rfl
+
 lemma lt_index_assoc_smul_support_condition {β γ δ ε : type_index} {A : path (α : type_index) β}
   {B : path β γ} {C : path γ δ} {h : ε < δ}
   (π : allowable_path (lt_index.mk' h ((A.comp B).comp C) : le_index α))
@@ -399,6 +402,15 @@ def smul_f_map_path {β : Λ} (A : path (α : type_index) β) {γ : type_index} 
   (π.derivative $ coe_lt_coe.mpr hδ) • f_map_path hγ hδ t =
   f_map_path hγ hδ (π.derivative hγ • t) :=
 phase_2_assumptions.smul_f_map A hγ hδ hγδ π t
+
+lemma smul_tangle_eq_iff_smul_f_map_eq {β : Λ} (A : path (α : type_index) β)
+  {γ : type_index} {δ : Λ} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
+  (π : allowable_path (le_index.mk β A))
+  (t : tangle_path (lt_index.mk' hγ A : le_index α)) :
+  (π.derivative $ with_bot.coe_lt_coe.mpr hδ) • f_map_path hγ hδ t = f_map_path hγ hδ t :=
+begin
+  rw smul_f_map_path,
+end
 
 lemma support_le_path (A : proper_lt_index α) (t : tangle_path (A : le_index α))
   (c : support_condition A) (hc : c ∈ designated_support_path t)
