@@ -45,6 +45,50 @@ private noncomputable def near_litter_image (hN : litter_set N.fst ≠ N.snd)
             (lt_of_le_of_lt mk_range_le N.snd.property))),
     end⟩
 
+/-- The `near_litter_image` of a near-litter behaves like it should under `σ`. -/
+lemma near_litter_image_atom_spec (hN : litter_set N.fst ≠ N.snd)
+  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain)
+  (a b : atom) (h : (inl (a, b), A) ∈ σ.val) :
+  b ∈ (near_litter_image σ N A hN hNL ha).2.val ↔ a ∈ N.snd.val :=
+begin
+  split,
+  { rintro (⟨h₁, h₂⟩ | ⟨⟨c, hc⟩, hb⟩),
+    { rw mem_value_iff_value_mem (inl_mem_range h) at h₁,
+      rw atom_value_eq_of_mem_inv h at h₁,
+      contrapose! h₂,
+      refine ⟨⟨a, or.inl ⟨h₁, h₂⟩⟩, _⟩,
+      dsimp only,
+      rw atom_value_eq_of_mem,
+      exact h, },
+    { dsimp only at hc,
+      rw ← atom_value_eq_of_mem h at hc,
+      cases atom_value_injective hc,
+      contrapose! hb,
+      rw mem_value_iff_value_mem (inl_mem_range h),
+      rw atom_value_eq_of_mem_inv h,
+      cases c.property with hcp hcp,
+      { exact hcp.1, },
+      { cases hb hcp.1, } } },
+  { intro ha,
+    by_cases haN : a ∈ litter_set N.fst,
+    { left, split,
+      { rw mem_value_iff_value_mem (inl_mem_range h),
+        rw atom_value_eq_of_mem_inv h,
+      exact haN, },
+      { rintro ⟨c, hc⟩,
+        rw ← atom_value_eq_of_mem h at hc,
+        cases atom_value_injective hc,
+        cases c.property with hcp hcp,
+        { exact hcp.2 ha, },
+        { exact hcp.2 haN, }, } },
+    { right,
+      refine ⟨⟨⟨a, or.inr ⟨ha, haN⟩⟩, atom_value_eq_of_mem h⟩, _⟩,
+      rw mem_value_iff_value_mem (inl_mem_range h),
+      rw atom_value_eq_of_mem_inv h,
+      exact haN, } }
+end
+
 lemma near_litter_image_spec (hNin : (inr N, A) ∈ σ.val.domain)
   (hN : litter_set N.fst ≠ N.snd)
   (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
@@ -207,33 +251,64 @@ begin
   intros L C,
   obtain ⟨L', hL, atom_map, hin, himg⟩ | ⟨hL, hLsmall⟩ | ⟨L', hL, hLsmall, hmaps⟩ := σ⁻¹.prop.forward.atom_cond L C,
   { exact spec.atom_cond.all L' (or.inl hL) atom_map (λ a H, or.inl $ hin a H) himg },
-  sorry {
+  { by_cases hLN : A = C ∧ L.to_near_litter = near_litter_image σ N A hN hNL ha,
+    { refine spec.atom_cond.small_in N _ _ _,
+      { rw mem_new_near_litter_cond_inv_iff, right, rw hLN.2, simp_rw hLN.1, },
+      { convert hLsmall,
+        ext a,
+        simp_rw [spec.mem_domain, spec.mem_inv, mem_new_near_litter_cond_iff],
+        split,
+        { rintro ⟨⟨as | Ns, C⟩, hc₁, hc₂⟩; cases hc₂,
+          cases hc₁,
+          exact ⟨⟨inl as, C⟩, hc₁, hc₂⟩,
+          cases hc₁, },
+        { rintro ⟨c, hc₁, hc₂⟩,
+          exact ⟨c, or.inl hc₁, hc₂⟩, } },
+      { intros a b,
+        rw mem_new_near_litter_cond_inv_iff,
+        rintro (h | h),
+        { cases hLN.1,
+          rw ← near_litter_image_atom_spec σ N A hN hNL ha b a h,
+          rw ← hLN.2,
+          refl, },
+        { cases h, } } },
     refine spec.atom_cond.small_out _ _,
-    { rintro ⟨⟨_ | ⟨N, M⟩, _⟩, hb, hdom⟩; cases hdom,
-      refine or.rec (λ h, hL ⟨_, h, rfl⟩) (λ h, _) hb,
-      simp only [has_inv.inv, mem_singleton_iff, sum.elim_inr, prod.mk.inj_iff] at h,
+    { rw mem_domain,
+      rintro ⟨⟨_ | ⟨N, M⟩, _⟩, hb, hdom⟩; cases hdom,
+      refine or.rec (λ h, hL (inr_mem_range h)) (λ h, _) hb,
+      rw new_near_litter_cond at h,
+      simp only [binary_condition.inv_def, map_inr, prod.swap_prod_mk, coe_singleton,
+        mem_singleton_iff, prod.mk.inj_iff] at h,
       obtain ⟨⟨rfl, hLM : L.to_near_litter = near_litter_image σ M A hN hNL ha⟩, rfl⟩ := h,
-      rw hLM at hL,
-      sorry },
+      push_neg at hLN,
+      exact hLN rfl hLM, },
     convert hLsmall using 1,
     refine ext (λ x, ⟨λ hx, ⟨hx.1, _⟩, λ hx, ⟨hx.1, _⟩⟩),
-    { obtain ⟨b, hb, hdom⟩ := hx.2,
+    { have := hx.2,
+      rw mem_domain at this ⊢,
+      obtain ⟨b, hb, hdom⟩ := this,
       refine ⟨b, or.rec id (λ h, _) hb, hdom⟩,
       obtain ⟨⟨_, _⟩ | ⟨_, _⟩, _⟩ := b;
       simp only [mem_singleton_iff, has_inv.inv, sum.elim_inl, sum.elim_inr] at h; cases h,
       cases hdom },
-    { obtain ⟨-, b, hb, hdom⟩ := hx,
+    { have := hx.2,
+      rw mem_domain at this ⊢,
+      obtain ⟨b, hb, hdom⟩ := this,
       refine ⟨b, or.inl hb, hdom⟩ } },
-  sorry { refine spec.atom_cond.small_in L' (or.inl hL) _
+  { refine spec.atom_cond.small_in L' (or.inl hL) _
       (λ a b hab, or.rec (λ h, hmaps h) (λ h, by cases h) hab),
     convert hLsmall using 1,
     refine ext (λ x, ⟨λ hx, ⟨hx.1, _⟩, λ hx, ⟨hx.1, _⟩⟩),
-    { obtain ⟨b, hb, hdom⟩ := hx.2,
+    { have := hx.2,
+      rw mem_domain at this ⊢,
+      obtain ⟨b, hb, hdom⟩ := this,
       refine ⟨b, or.rec id (λ h, _) hb, hdom⟩,
       obtain ⟨⟨_, _⟩ | ⟨_, _⟩, _⟩ := b;
       simp only [mem_singleton_iff, has_inv.inv, sum.elim_inl, sum.elim_inr] at h; cases h,
       cases hdom },
-    { obtain ⟨-, b, hb, hdom⟩ := hx,
+    { have := hx.2,
+      rw mem_domain at this ⊢,
+      obtain ⟨b, hb, hdom⟩ := this,
       refine ⟨b, or.inl hb, hdom⟩ } }
 end
 

@@ -55,20 +55,29 @@ lemma atom_value_spec_range (σ : allowable_spec B) (A : extended_index B) (b : 
   (inl (atom_value σ A b hb), A) ∈ σ.val.range :=
 spec.mem_range.2 ⟨(inl (b, atom_value σ A b hb), A), atom_value_spec σ A b hb, rfl⟩
 
-@[simp] lemma atom_value_eq_of_mem (σ : allowable_spec B) (A : extended_index B)
-  (a b : atom) (hab : (inl (a, b), A) ∈ σ.val) :
+@[simp] lemma atom_value_eq_of_mem {σ : allowable_spec B} {A : extended_index B}
+  {a b : atom} (hab : (inl (a, b), A) ∈ σ.val) :
   atom_value σ A a (mem_domain.2 ⟨_, hab, rfl⟩) = b :=
 (σ.property.backward.one_to_one A).atom a (atom_value_spec σ A a $ mem_domain.2 ⟨_, hab, rfl⟩) hab
 
+@[simp] lemma atom_value_eq_of_mem_inv {σ : allowable_spec B} {A : extended_index B}
+  {a b : atom} (hab : (inl (a, b), A) ∈ σ.val) :
+  atom_value σ⁻¹ A b (inl_mem_range hab) = a :=
+(σ.property.forward.one_to_one A).atom b (atom_value_spec σ⁻¹ A b $ (inl_mem_range hab)) hab
+
+lemma atom_value_injective {σ : allowable_spec B} {A : extended_index B}
+  {b₁ b₂ : atom} {hb₁ : (inl b₁, A) ∈ σ.val.domain} {hb₂ : (inl b₂, A) ∈ σ.val.domain} :
+  σ.atom_value A b₁ hb₁ = σ.atom_value A b₂ hb₂ → b₁ = b₂ :=
+begin
+  have h₁ := atom_value_spec σ A b₁ hb₁,
+  have h₂ := atom_value_spec σ A b₂ hb₂,
+  intro hb, rw ← hb at h₂,
+  exact (σ.property.forward.one_to_one A).atom (atom_value σ A b₁ hb₁) h₁ h₂,
+end
+
 noncomputable def atom_value_inj (σ : allowable_spec B) (A : extended_index B) :
   {b | (inl b, A) ∈ σ.val.domain} ↪ atom :=
-⟨λ b, atom_value σ A b.val b.property, λ b₁ b₂ hb, begin
-  have h₁ := atom_value_spec σ A b₁ b₁.property,
-  have h₂ := atom_value_spec σ A b₂ b₂.property,
-  dsimp at hb, rw ← hb at h₂,
-  exact subtype.coe_inj.mp
-    ((σ.property.forward.one_to_one A).atom (atom_value σ A b₁ b₁.property) h₁ h₂),
-end⟩
+⟨λ b, atom_value σ A b.val b.property, λ b₁ b₂ hb, subtype.coe_injective (atom_value_injective hb)⟩
 
 lemma atom_value_mem_inv (σ : allowable_spec B) (A : extended_index B) (b : atom)
   (hb : (inl b, A) ∈ σ.val.domain) :
@@ -348,5 +357,18 @@ cases ha'1, exact hb3 ((h N.fst Nf' hNf' a b hab).mp ha'1.1),
 exact hdisj ⟨ha'1.1, ha1.1⟩,
 }
 end
+
+-- Whoever's proving this, first factor out the one-directional lemma.
+-- Then it should follow from symmetry and involutivity.
+lemma value_mem_value_iff_mem {σ : allowable_spec B} {A : extended_index B}
+  {a : atom} (ha : (inl a, A) ∈ σ.val.domain) {N : near_litter} (hN : (inr N, A) ∈ σ.val.domain) :
+  σ.atom_value A a ha ∈ (σ.near_litter_value A N hN).2.val ↔ a ∈ N.2.val :=
+sorry
+
+lemma mem_value_iff_value_mem {σ : allowable_spec B} {A : extended_index B}
+  {a : atom} (ha : (inl a, A) ∈ σ.val.range) {N : near_litter} (hN : (inr N, A) ∈ σ.val.domain) :
+  a ∈ (σ.near_litter_value A N hN).2.val ↔ σ⁻¹.atom_value A a ha ∈ N.2.val :=
+sorry
+
 end allowable_spec
 end con_nf
