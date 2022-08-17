@@ -407,9 +407,13 @@ lemma smul_tangle_eq_iff_smul_f_map_eq {β : Λ} (A : path (α : type_index) β)
   {γ : type_index} {δ : Λ} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
   (π : allowable_path (le_index.mk β A))
   (t : tangle_path (lt_index.mk' hγ A : le_index α)) :
+  (π.derivative hγ) • t = t ↔
   (π.derivative $ with_bot.coe_lt_coe.mpr hδ) • f_map_path hγ hδ t = f_map_path hγ hδ t :=
 begin
-  rw smul_f_map_path,
+  rw smul_f_map_path _ _ _ hγδ,
+  split,
+  { intro h, rw h, },
+  { intro h, have := f_map_path_injective h, exact eq_of_heq this.2, },
 end
 
 lemma support_le_path (A : proper_lt_index α) (t : tangle_path (A : le_index α))
