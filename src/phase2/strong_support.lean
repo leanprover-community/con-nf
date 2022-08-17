@@ -44,7 +44,6 @@ noncomputable! def proto_smul : allowable_path B → word_support B → word_sup
                    = (⟨(allowable_path.to_struct_perm π)⁻¹ • ↑b, this b⟩ : {x // x ∈ S.carrier}),
     { simp [subtype.coe_inj] },
     rw this, apply S.wo.trichotomous, end,
-  irrefl := begin intros, apply S.wo.irrefl, end,
   trans := begin intros,apply S.wo.trans, apply ᾰ, apply ᾰ_1 end,
   wf := begin have := @inv_image.is_well_founded _ _ S.r ⟨S.wo.wf⟩, convert (this _).wf, end } }
 
@@ -100,7 +99,6 @@ def word_support.lower {β : type_index} (S : word_support B) (A : path B.index 
   rw [← add_right_inj, ← path.length_distrib, ← path.length_distrib, h.right],
   have := h.left, subst this, have := (quiver.path.comp_inj A A a_val_snd b_val_snd h_len h.right).right, subst this},
   rw this, apply S.wo.trichotomous, end,
-  irrefl := begin intros, apply S.wo.irrefl, end,
   trans := begin intros,apply S.wo.trans, apply ᾰ, apply ᾰ_1 end,
   wf := begin have := @inv_image.is_well_founded _ _ S.r ⟨S.wo.wf⟩, convert (this _).wf, end },
 }
@@ -347,7 +345,10 @@ begin
   have := s_property.1.trichotomous, specialize this (all_type a).some (all_type b).some, simp only at this,
   rw ← coe_inj a b, exact this,
   intros, rw (all_type a).some_spec,
-  have := s_property.1.irrefl, specialize this (all_type a).some, simp only at this, exact this,
+  -- I can't figure out what's going on in this proof, the names are confusing and there is little
+  -- structure aided by brackets, so I can't fix this right now
+  sorry, sorry
+  /- have := s_property.1.irrefl, specialize this (all_type a).some, simp only at this, exact this,
   intros a b c h1 h2, rw (all_type a).some_spec at h1 ⊢, rw (all_type b).some_spec at h1 h2, rw (all_type c).some_spec at h2 ⊢,
   have := s_property.1.trans, specialize this (all_type a).some (all_type b).some (all_type c).some, simp only at this, exact this h1 h2,
   split, intros,
@@ -358,7 +359,7 @@ begin
   intros, split, intros,
   apply ᾰ (all_type y).some _ y,
   exact (all_type y).some_spec, rw [← (all_type y).some_spec, ← ᾰ_1], exact ᾰ_2,
-  exact this (all_type a).some a (all_type a).some_spec,
+  exact this (all_type a).some a (all_type a).some_spec, -/
 end
 
 /-- Any small support can be 'strengthened' into a strong support that is also small.

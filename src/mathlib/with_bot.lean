@@ -16,7 +16,6 @@ begin
   apply_instance
 end
 
-instance [preorder α] [is_well_order α (<)] :  is_well_order (with_bot α) (<) :=
-⟨well_founded_lt ‹is_well_order α (<)›.2⟩
+instance [preorder α] [is_well_order α (<)] : is_well_order (with_bot α) (<) := {}
 
 end with_bot

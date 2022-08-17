@@ -126,7 +126,7 @@ of nonempty sets.
 variable {γ}
 
 lemma well_founded_position : well_founded (λ a b : tangle γ, position a < position b) :=
-inv_image.wf _ is_well_order.wf
+inv_image.wf _ is_well_founded.wf
 
 /-- The minimum tangle of a nonempty set of tangles. -/
 noncomputable def min_tangle (c : tangles γ) : tangle γ :=
