@@ -402,7 +402,13 @@ variables {A : path α β} {σ : spec α} {c : binary_condition β}
 
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
-def lower (A : path α β) (σ : spec α) : spec β := equiv_set.symm {c | c.extend_path A ∈ σ}
+def lower (A : path α β) (σ : spec α) : spec β := {
+  carrier := {c | c.extend_path A ∈ σ},
+  domain := {c | c.extend_path A ∈ σ.domain},
+  range := {c | c.extend_path A ∈ σ.range},
+  image_domain' := sorry,
+  image_range' := sorry,
+}
 
 @[simp] lemma coe_lower (A : path α β) (σ : spec α) :
   (σ.lower A : set (binary_condition β)) = {c | c.extend_path A ∈ σ} := rfl

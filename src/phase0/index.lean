@@ -116,10 +116,6 @@ instance (α : type_index) : inhabited (extended_index α) := ⟨α.extend⟩
 /-- There exists an `α`-extended type index. --/
 lemma mk_extended_index_ne_zero (α : type_index) : #(extended_index α) ≠ 0 := cardinal.mk_ne_zero _
 
-/-- For our purposes, we let any monoid act trivially on extended type indices. -/
-instance {M : Type*} [monoid M] : mul_action M (extended_index α) :=
-{ smul := λ _, id, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
-
 /-- A type index `β`, together with a path down from `α` to level `β`. Hence, `β ≤ α`.
 This type is intended to be used in place of `β : type_index, β ≤ α` in phase 2. -/
 @[ext, protect_proj] structure le_index (α : type_index) :=

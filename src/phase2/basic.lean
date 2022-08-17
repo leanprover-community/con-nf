@@ -188,8 +188,37 @@ variables [phase_2_core_assumptions α]
 /-- The type of tangles indexed by a path. This is a type synonym of `tangle`. -/
 @[nolint has_nonempty_instance] def tangle_path (A : le_index α) : Type u := tangle A.index
 
+/-- The equivalence between tangles accessed via different, equal, paths. Many functions, such as
+`f_map_path`, are invariant under this map. -/
+def tangle_path.lt_index_assoc {β γ δ ε : type_index} {A : path (α : type_index) β}
+  {B : path β γ} {C : path γ δ} {h : ε < δ} :
+  tangle_path (lt_index.mk' h ((A.comp B).comp C) : le_index α) ≃
+  tangle_path (lt_index.mk' h (A.comp (B.comp C)) : le_index α) :=
+equiv.cast (by rw path.comp_assoc)
+
+lemma tangle_path.lt_index_assoc.heq {β γ δ ε : type_index} {A : path (α : type_index) β}
+  {B : path β γ} {C : path γ δ} {h : ε < δ}
+  (t : tangle_path (lt_index.mk' h ((A.comp B).comp C) : le_index α)) :
+  t.lt_index_assoc == t :=
+by simp only [tangle_path.lt_index_assoc, equiv.cast_apply, cast_heq]
+
 /-- The type of allowable permutations indexed by a path. This is a type synonym of `allowable`. -/
 def allowable_path (A : le_index α) : Type u := allowable A.index
+
+/-- The equivalence between allowable permutations accessed via different, equal, paths.
+Many operations, such as scalar multiplication on tangles and support conditions, are invariant
+under this map. -/
+def allowable_path.lt_index_assoc {β γ δ ε : type_index} {A : path (α : type_index) β}
+  {B : path β γ} {C : path γ δ} {h : ε < δ} :
+  allowable_path (lt_index.mk' h ((A.comp B).comp C) : le_index α) ≃
+  allowable_path (lt_index.mk' h (A.comp (B.comp C)) : le_index α) :=
+equiv.cast (by rw path.comp_assoc)
+
+lemma allowable_path.lt_index_assoc.heq {β γ δ ε : type_index} {A : path (α : type_index) β}
+  {B : path β γ} {C : path γ δ} {h : ε < δ}
+  (π : allowable_path (lt_index.mk' h ((A.comp B).comp C) : le_index α)) :
+  π.lt_index_assoc == π :=
+by simp only [allowable_path.lt_index_assoc, equiv.cast_apply, cast_heq]
 
 instance (A : le_index α) : group (allowable_path A) := allowable.group _
 
@@ -211,6 +240,23 @@ instance allowable_smul_cons {β γ : type_index} (A : path (α : type_index) β
   mul_action (allowable_path ⟨γ, A.cons hγ⟩) (tangle_path (lt_index.mk' hγ A : le_index α)) :=
 core_tangle_data.allowable_action
 
+lemma allowable_path.lt_index_assoc_smul {β γ δ ε : type_index} {A : path (α : type_index) β}
+  {B : path β γ} {C : path γ δ} {h : ε < δ}
+  (π : allowable_path (lt_index.mk' h ((A.comp B).comp C) : le_index α))
+  (t₁ t₂ : tangle_path (lt_index.mk' h ((A.comp B).comp C) : le_index α)) :
+  π.lt_index_assoc • t₁.lt_index_assoc = t₂.lt_index_assoc ↔ π • t₁ = t₂ :=
+begin
+  congr' 2,
+  rw path.comp_assoc,
+  { congr' 1,
+    rw path.comp_assoc,
+    rw path.comp_assoc,
+    { congr' 1; rw path.comp_assoc, },
+    exact allowable_path.lt_index_assoc.heq π,
+    exact tangle_path.lt_index_assoc.heq t₁, },
+  exact tangle_path.lt_index_assoc.heq t₂,
+end
+
 /-- The designated support of a path-indexed tangle. -/
 def designated_support_path {A : le_index α} (t : tangle_path A) :
   small_support A.index (allowable_path A) t := designated_support t
@@ -221,6 +267,19 @@ variables {A : le_index α}
 /-- Reinterpret an allowable permutation as a structural permutation. -/
 def to_struct_perm : allowable_path A →* struct_perm A.index := allowable.to_struct_perm
 
+lemma to_struct_perm.lt_index_assoc {β γ δ ε : type_index} {A : path (α : type_index) β}
+  {B : path β γ} {C : path γ δ} {h : ε < δ}
+  (π : allowable_path (lt_index.mk' h ((A.comp B).comp C) : le_index α)) :
+  π.lt_index_assoc.to_struct_perm = π.to_struct_perm :=
+begin
+  unfold_coes,
+  congr' 1,
+  rw path.comp_assoc,
+  rw path.comp_assoc,
+  { congr' 1, rw path.comp_assoc, },
+  exact allowable_path.lt_index_assoc.heq π,
+end
+
 section
 variables {X : Type*} [mul_action (struct_perm A.index) X]
 
@@ -230,6 +289,20 @@ instance : mul_action (allowable_path A) X := mul_action.comp_hom _ to_struct_pe
 rfl
 
 end
+
+lemma lt_index_assoc_smul_support_condition {β γ δ ε : type_index} {A : path (α : type_index) β}
+  {B : path β γ} {C : path γ δ} {h : ε < δ}
+  (π : allowable_path (lt_index.mk' h ((A.comp B).comp C) : le_index α))
+  (c : support_condition ε) :
+  π.lt_index_assoc • c = π • c :=
+begin
+  unfold has_smul.smul has_smul.comp.smul,
+  obtain ⟨a | N, D⟩ := c;
+  simp only [has_smul.comp.smul, struct_perm.coe_to_near_litter_perm, sum.map_inl, sum.map_inr,
+    struct_perm.of_bot_smul, prod.mk.inj_iff, eq_self_iff_true,
+    and_true, to_struct_perm.lt_index_assoc],
+end
+
 end allowable_path
 
 variables [phase_2_positioned_assumptions α] [typed_positions.{}] [phase_2_assumptions α]
@@ -277,6 +350,16 @@ end allowable_path
 def f_map_path {A : Λ} {A_path : path (α : type_index) A} ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < A)
   (hδ : δ < A) : tangle_path (lt_index.mk' hγ A_path : le_index α) → litter :=
 f_map (proper_lt_index.mk' hδ A_path).index
+
+lemma f_map_path_assoc {δ ζ : Λ} {β γ ε : type_index} (A : path (α : type_index) β)
+  (B : path β γ) (C : path γ δ) (hε : ε < δ) (hζ : ζ < δ)
+  (t : tangle_path (lt_index.mk' hε ((A.comp B).comp C) : le_index α)) :
+  f_map_path hε hζ (t.lt_index_assoc) = f_map_path hε hζ t :=
+begin
+  unfold f_map_path,
+  congr' 1; try { rw path.comp_assoc },
+  exact tangle_path.lt_index_assoc.heq t,
+end
 
 /-- The injection from near-litters to path-indexed tangles. -/
 def typed_near_litter_path (A : proper_lt_index α) : near_litter ↪ tangle_path (A : le_index α) :=

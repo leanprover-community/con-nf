@@ -35,16 +35,8 @@ begin
   obtain ⟨N, atom_map, h1, h2, h3⟩ | ⟨hL, hsmall⟩ | ⟨N, hL, hsmall, hmaps⟩ :=
     hσ.forward.atom_cond L (A.comp C),
   { exact spec.atom_cond.all N atom_map h1 h2 h3 },
-  refine spec.atom_cond.small_out _ _,
-  { convert hL using 1,
-    refine iff.to_eq _,
-    simp_rw mem_domain,
-    split; rintro ⟨⟨_ | ⟨x, y⟩, C⟩, hbin,  ⟨⟩⟩,
-    { exact ⟨_, hbin, rfl⟩ },
-    { exact ⟨(inr (L.to_near_litter, y), C), hbin, rfl⟩ } },
-  swap,
-  refine spec.atom_cond.small_in N hL _ hmaps,
-  all_goals { convert hsmall, sorry },
+  exact spec.atom_cond.small_out hL hsmall,
+  exact spec.atom_cond.small_in N hL hsmall hmaps,
 end
 
 lemma lower_near_litter_cond (hσ : σ.allowable B) (N₁ N₂ C) :
@@ -57,10 +49,10 @@ begin
   intro hf,
   unfold flexible at hf ⊢,
   simp at hf ⊢,
-  intros b d g hgb hdb hdg p t,
-  have h1 := hf hgb hdb hdg (A.comp p),
-  --wants to be t next, but will need to apply a conversion lemma to make lean see path_assoc.,
-  sorry,
+  intros β γ δ hγ hδ hγδ D hC t,
+  have h := hf hγ hδ hγδ (A.comp D) _ (t.lt_index_assoc),
+  rwa f_map_path_assoc at h,
+  rw hC, rw path.comp_cons, refl,
 end
 
 /-- Descending down a proper path `A`, `μ`-many litters become flexible. -/
@@ -176,28 +168,19 @@ begin
     allowable_path.smul_derivative_bot],
 end
 
-/--
-This proof is painful because we need to show in many places that path composition is associative.
-Does anyone have any better ideas for how to complete this proof?
--/
 lemma lower_domain_closed (hσ : σ.allowable B) :
   (σ.lower A).domain.support_closed (le_index.mk β (B.path.comp A)) :=
 begin
   intros β' γ' δ' hγ' hδ' hγδ' C t ht π hsup,
-  convert hσ.forward.support_closed hγ' hδ' hγδ' (A.comp C) (cast _ t) _ (cast _ π) (cast _ hsup)
-    using 1; dsimp only,
-  { rw quiver.path.comp_assoc, },
-  { congr' 1,
-    { rw quiver.path.comp_assoc, },
-    { sorry, },
-    { sorry, },
-    { sorry, },
-    { sorry, } },
-  { rw ← cast_eq_iff_heq, },
-  { rw quiver.path.comp_assoc, },
-  { sorry },
-  { rw quiver.path.comp_assoc, },
-  { refine pi_congr _, intro c, sorry },
+  have := hσ.forward.support_closed hγ' hδ' hγδ' (A.comp C)
+    (t.lt_index_assoc) _ (π.lt_index_assoc) _,
+  rwa allowable_path.lt_index_assoc_smul at this,
+  rwa f_map_path_assoc,
+  rintros c hc,
+  have := @hsup c _,
+  { rwa allowable_path.lt_index_assoc_smul_support_condition, },
+  { rwa [unary_spec.lower, set.mem_set_of, ← path.comp_cons, support_condition.extend_path,
+      path.comp_assoc] at hc, }
 end
 
 namespace spec
