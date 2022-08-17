@@ -13,12 +13,12 @@ variables [params.{u}]
 variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
   [typed_positions.{}] [phase_2_assumptions α] {B : le_index α}
 
-namespace allowable_partial_perm
+namespace allowable_spec
 
 open struct_perm spec
 
 
-lemma total_of_is_max_aux (σ : allowable_partial_perm B) (hσ : is_max σ)
+lemma total_of_is_max_aux (σ : allowable_spec B) (hσ : is_max σ)
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) :
   Π (c : support_condition B), c ∈ σ.val.domain
 | ⟨inl a, A⟩ := begin
@@ -31,16 +31,16 @@ lemma total_of_is_max_aux (σ : allowable_partial_perm B) (hσ : is_max σ)
       have hind : ∀ c (hc : c ≺ ⟨inr N, A⟩), c ∈ σ.val.domain := λ c hc, total_of_is_max_aux c,
       obtain ⟨L, N, hN⟩ := N,
       dsimp only at hnl, rw subtype.coe_mk at hnl, subst hnl,
-      by_cases flexible L A,
+      by_cases flex L A,
       { -- This litter is flexible.
-        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_flexible σ h,
+        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_flex σ h,
         unfold has_le.le at hρ₁,
         rwa hρ₁.le.antisymm (hσ hρ₁).le },
       { -- This litter is non-flexible.
-        unfold flexible at h,
+        unfold flex at h,
         push_neg at h,
         obtain ⟨β, δ, γ, hγ, hδ, hγδ, C, rfl, t, rfl⟩ := h,
-        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flexible hγ hδ hγδ t hind foa,
+        obtain ⟨ρ, hρ₁, hρ₂⟩ := exists_ge_non_flex hγ hδ hγδ t hind foa,
         rw ge_iff_le at hρ₁,
         rwa hρ₁.le.antisymm (hσ hρ₁).le } },
     { -- This is a near-litter.
@@ -51,12 +51,12 @@ lemma total_of_is_max_aux (σ : allowable_partial_perm B) (hσ : is_max σ)
 using_well_founded { dec_tac := `[assumption] }
 
 /-- Any maximal allowable partial permutation under `≤` is total. -/
-lemma total_of_is_max (σ : allowable_partial_perm B) (hσ : is_max σ)
+lemma total_of_is_max (σ : allowable_spec B) (hσ : is_max σ)
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) : σ.val.total :=
 total_of_is_max_aux σ hσ foa
 
 /-- Any maximal allowable partial permutation under `≤` is co-total. -/
-lemma co_total_of_is_max (σ : allowable_partial_perm B) (hσ : is_max σ)
+lemma co_total_of_is_max (σ : allowable_spec B) (hσ : is_max σ)
   (foa : ∀ B : lt_index α, freedom_of_action (B : le_index α)) : σ.val.co_total :=
 (total_of_is_max σ⁻¹ (λ ρ hρ, by { rw [←inv_le_inv, inv_inv] at ⊢ hρ, exact hσ hρ }) foa).of_inv
 
@@ -67,7 +67,7 @@ This allows us to combine a set of allowable permutations at all lower paths int
 permutation at level `α`
 This may not be the best way to phrase the assumption - the definition is subject to change when
 we actually create a proof of the proposition. -/
-def synthesised_context : Prop := Π (σ : allowable_partial_perm ⟨α, path.nil⟩)
+def synthesised_context : Prop := Π (σ : allowable_spec ⟨α, path.nil⟩)
   (hσ₁ : σ.val.total)
   (hσ₂ : σ.val.co_total)
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α))
@@ -81,7 +81,7 @@ variables {α}
 
 /-- Any allowable partial permutation extends to an allowable permutation at level `α`, given that
 it is total and co-total. This is `total-allowable-partial-perm-actual` in the blueprint. -/
-lemma extends_to_allowable_of_total (σ : allowable_partial_perm ⟨α, path.nil⟩)
+lemma extends_to_allowable_of_total (σ : allowable_spec ⟨α, path.nil⟩)
   (hσ₁ : σ.val.total) (hσ₂ : σ.val.co_total)
   (foa : ∀ (B : lt_index α), freedom_of_action (B : le_index α)) (syn : synthesised_context α) :
   ∃ π : allowable_path ⟨α, path.nil⟩, π.to_struct_perm.satisfies σ.val :=
@@ -97,19 +97,19 @@ begin
   exact syn σ hσ₁ hσ₂ foa lower_allowable exists_lower_allowable,
 end
 
-end allowable_partial_perm
+end allowable_spec
 
 /-- The *freedom of action theorem*. If freedom of action holds at all lower levels and paths (all
 `B : lt_index` in our formulation), it holds at level `α`. -/
 theorem freedom_of_action_propagates (foa : ∀ B : lt_index α, freedom_of_action (B : le_index α))
-  (syn : allowable_partial_perm.synthesised_context α) :
+  (syn : allowable_spec.synthesised_context α) :
   freedom_of_action ⟨α, path.nil⟩ :=
 begin
   intro σ,
   obtain ⟨ρ, -, hσρ, hρ⟩ := σ.maximal_perm,
   have : is_max ρ := λ τ hτ, hρ τ (hσρ.trans hτ) hτ,
-  have ρ_total := allowable_partial_perm.total_of_is_max ρ this foa,
-  have ρ_co_total := allowable_partial_perm.co_total_of_is_max ρ this foa,
+  have ρ_total := allowable_spec.total_of_is_max ρ this foa,
+  have ρ_co_total := allowable_spec.co_total_of_is_max ρ this foa,
   obtain ⟨π, hπ⟩ := ρ.extends_to_allowable_of_total ρ_total ρ_co_total foa syn,
   exact ⟨π, hπ.mono hσρ.le⟩,
 end

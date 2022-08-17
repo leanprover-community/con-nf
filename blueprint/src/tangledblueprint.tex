@@ -906,7 +906,7 @@ The motivation for allowable permutations is precisely to state the freedom of a
 \begin{definition}
   \label{def:allowable-partial-perm-order}
   \uses{def:allowable-partial-perm}
-  \lean{con_nf.allowable_partial_perm.perm_le}
+  \lean{con_nf.allowable_spec.perm_le}
   \leanok
   Work in a freedom of action context at a proper type index $\alpha$.
 
@@ -922,7 +922,7 @@ The motivation for allowable permutations is precisely to state the freedom of a
 \begin{proposition}
   \label{prop:allowable-partial-perm-chain-union}
   \uses{def:allowable-partial-perm-order}
-  \lean{con_nf.allowable_partial_perm.allowable_Union}
+  \lean{con_nf.allowable_spec.allowable_Union}
   \leanok
   $\sqsubseteq$ has upper bounds for chains, given by taking unions.  That is: given a set of allowable partial permutations that is a chain under $\sqsubseteq$, its union is again an allowable partial permutation, and carefully extends each element of the chain.  (Indeed, this gives a supremum for the chain, and so shows that $\sqsubseteq$ is chain-complete; but “upper bounds” is all we need in order to apply Zorn’s lemma.)
 \end{proposition}
@@ -971,7 +971,7 @@ In order to make use of the inductive assumption that freedom of action holds at
 
 \begin{proof}
   \uses{prop:total-1-1-restriction,prop:conditions-from-perm-restriction}
-  % not \leanok until we fix lower_flexible_cond
+  % not \leanok until we fix lower_flex_cond
   Hopefully straightforward, but probably a bit lengthy, using \cref{prop:total-1-1-restriction}, \cref{prop:conditions-from-perm-restriction}.
 \end{proof}
 
@@ -994,7 +994,7 @@ In order to make use of the inductive assumption that freedom of action holds at
 \begin{lemma}
   \label{lem:maximal-allowable-partial-perm-total}
   \uses{def:allowable-partial-perm-order}
-  \lean{con_nf.allowable_partial_perm.total_of_is_max}
+  \lean{con_nf.allowable_spec.total_of_is_max}
   \leanok
   Any allowable partial permutation that is maximal under $\sqsubseteq$ is total.
 \end{lemma}
@@ -1022,7 +1022,7 @@ In order to make use of the inductive assumption that freedom of action holds at
 \begin{proposition}
   \label{prop:total-allowable-partial-perm-actual}
   \uses{def:synthesise-foa-context,def:foa-property}
-  \lean{con_nf.allowable_partial_perm.extends_to_allowable_of_total}
+  \lean{con_nf.allowable_spec.extends_to_allowable_of_total}
   \leanok
   In the synthesised freedom of action context at $\alpha$, any partial allowable permutation (at $\alpha$) that is total and co-total extends to an actual allowable permutation at $\alpha$.
 \end{proposition}

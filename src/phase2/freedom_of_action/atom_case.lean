@@ -16,7 +16,7 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-namespace allowable_partial_perm
+namespace allowable_spec
 
 variables [params.{u}]
 
@@ -25,7 +25,7 @@ open struct_perm spec
 variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
   [typed_positions.{}] [phase_2_assumptions α] {B : le_index α}
 
-variables (σ : allowable_partial_perm B) (a : atom) (A : extended_index B) (N : near_litter)
+variables (σ : allowable_spec B) (a : atom) (A : extended_index B) (N : near_litter)
 
 lemma atom_value_inj_range (ha : (inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
   range (λ b : {b : atom | b ∈ litter_set a.fst ∧ (inl b, A) ∈ σ.val.domain},
@@ -779,25 +779,25 @@ begin
   cases hd,
 end
 
-lemma atom_union_non_flexible_cond_forward
+lemma atom_union_non_flex_cond_forward
   (hsmall : small {a ∈ litter_set a.fst | (inl a, A) ∈ σ.val.domain})
   (ha : (inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  spec.non_flexible_cond B (σ.val ⊔ new_atom_conds σ a A N hsmall ha) :=
+  spec.non_flex_cond B (σ.val ⊔ new_atom_conds σ a A N hsmall ha) :=
 begin
   rintro β δ γ hγ hδ hγδ N₁ C t (ht | ht) ρ hρ,
-  { exact σ.property.forward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
+  { exact σ.property.forward.non_flex_cond hγ hδ hγδ N₁ C t ht ρ
       (hρ.mono $ subset_union_left _ _) },
   obtain ⟨d, hd⟩ := ht,
   cases hd,
 end
 
-lemma atom_union_non_flexible_cond_backward
+lemma atom_union_non_flex_cond_backward
   (hsmall : small {a ∈ litter_set a.fst | (inl a, A) ∈ σ.val.domain})
   (ha : (inr (a.fst.to_near_litter, N), A) ∈ σ.val) :
-  spec.non_flexible_cond B (σ.val ⊔ new_atom_conds σ a A N hsmall ha)⁻¹ :=
+  spec.non_flex_cond B (σ.val ⊔ new_atom_conds σ a A N hsmall ha)⁻¹ :=
 begin
   rintro β δ γ hγ hδ hγδ N₁ C t (ht | ⟨d, ⟨⟩⟩) ρ hρ,
-  exact σ.property.backward.non_flexible_cond hγ hδ hγδ N₁ C t ht ρ
+  exact σ.property.backward.non_flex_cond hγ hδ hγδ N₁ C t ht ρ
       (hρ.mono $ subset_union_left _ _),
 end
 
@@ -826,13 +826,13 @@ begin
     (subset_union_left _ _),
 end
 
-lemma atom_union_flexible_cond
+lemma atom_union_flex_cond
   (hsmall : small {a ∈ litter_set a.fst | (inl a, A) ∈ σ.val.domain})
   (ha : (inr (a.fst.to_near_litter, N), A) ∈ σ.val) (C) :
-  spec.flexible_cond B (σ.val ⊔ new_atom_conds σ a A N hsmall ha) C :=
+  spec.flex_cond B (σ.val ⊔ new_atom_conds σ a A N hsmall ha) C :=
 begin
-  obtain (⟨hdom, hrge⟩ | ⟨hdom, hrge⟩) := σ.property.flexible_cond C,
-  { refine spec.flexible_cond.co_large _ _,
+  obtain (⟨hdom, hrge⟩ | ⟨hdom, hrge⟩) := σ.property.flex_cond C,
+  { refine spec.flex_cond.co_large _ _,
     { convert hdom,
       ext L,
       rw spec.domain_sup,
@@ -845,7 +845,7 @@ begin
       refine and_congr_right' ⟨λ hC h, hC $ mem_union_left _ h, λ hC, _⟩,
       rintro (h | ⟨_, ⟨_, ⟨⟩⟩, ⟨⟩⟩),
       exact hC h } },
-  { refine spec.flexible_cond.all (λ L hL, _) (λ L hL, _),
+  { refine spec.flex_cond.all (λ L hL, _) (λ L hL, _),
     { rw spec.domain_sup,
       exact or.inl (hdom L hL) },
     { rw spec.range_sup,
@@ -866,16 +866,16 @@ lemma atom_union_allowable
   { one_to_one := atom_union_one_to_one_forward σ a A N hsmall ha,
     atom_cond := atom_union_atom_cond_forward σ a A N hsmall ha,
     near_litter_cond := atom_union_near_litter_cond_forward σ a A N hsmall ha,
-    non_flexible_cond := atom_union_non_flexible_cond_forward σ a A N hsmall ha,
+    non_flex_cond := atom_union_non_flex_cond_forward σ a A N hsmall ha,
     support_closed := atom_union_support_closed_forward σ a A N hsmall ha },
   backward :=
   { one_to_one := atom_union_one_to_one_backward σ a A N hsmall ha,
     atom_cond := atom_union_atom_cond_backward σ a A N hsmall ha,
     near_litter_cond := atom_union_near_litter_cond_backward σ a A N hsmall ha,
-    non_flexible_cond := atom_union_non_flexible_cond_backward σ a A N hsmall ha,
+    non_flex_cond := atom_union_non_flex_cond_backward σ a A N hsmall ha,
     support_closed := by { rw spec.domain_inv,
       exact atom_union_support_closed_backward σ a A N hsmall ha } },
-  flexible_cond := atom_union_flexible_cond σ a A N hsmall ha }
+  flex_cond := atom_union_flex_cond σ a A N hsmall ha }
 
 lemma atom_union_all_atoms_domain
   (hsmall : small {a ∈ litter_set a.fst | (inl a, A) ∈ σ.val.domain})
@@ -1081,5 +1081,5 @@ begin
   all_goals {exact ⟨_, le_atom_union σ a A N hsmall hc₁, mem_union_right _ ⟨⟨a, rfl, haσ⟩, rfl⟩ ⟩},
 end
 
-end allowable_partial_perm
+end allowable_spec
 end con_nf

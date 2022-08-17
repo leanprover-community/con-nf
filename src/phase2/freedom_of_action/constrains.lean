@@ -51,7 +51,7 @@ in the "freedom of action discussion".
 infix ` ≺ `:50 := constrains _
 
 /-- A litter and extended index is flexible only if it is not constrained by anything. -/
-lemma unconstrained_of_flexible (L : litter) (A : extended_index B) (h : flexible L A) :
+lemma unconstrained_of_flex (L : litter) (A : extended_index B) (h : flex L A) :
 ∀ c, ¬ c ≺ ⟨inr L.to_near_litter, A⟩ :=
 begin
   intros c hc,
