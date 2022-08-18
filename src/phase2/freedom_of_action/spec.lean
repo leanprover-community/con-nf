@@ -406,8 +406,30 @@ def lower (A : path α β) (σ : spec α) : spec β := {
   carrier := {c | c.extend_path A ∈ σ},
   domain := {c | c.extend_path A ∈ σ.domain},
   range := {c | c.extend_path A ∈ σ.range},
-  image_domain' := sorry,
-  image_range' := sorry,
+  image_domain' := set.ext $ λ x, begin
+    split,
+    { rintro ⟨⟨_, C⟩, hx, rfl⟩,
+      exact mem_domain.2 ⟨_, hx, rfl⟩ },
+    { intro hx,
+      cases x with x C,
+      simp only [mem_domain, mem_set_of_eq] at hx,
+      obtain ⟨⟨b, _⟩, hb, hdom⟩ := hx,
+      simp only [support_condition.extend_path, binary_condition.domain, prod.map_mk, id.def, prod.mk.inj_iff] at hdom,
+      cases hdom.2,
+      exact ⟨⟨b, C⟩, hb, by simp only [binary_condition.domain, prod.map_mk, id.def, prod.mk.inj_iff, eq_self_iff_true, and_true, hdom]⟩, }
+  end,
+  image_range' := set.ext $ λ x, begin
+    split,
+    { rintro ⟨⟨_, C⟩, hx, rfl⟩,
+      exact mem_range.2 ⟨_, hx, rfl⟩ },
+    { intro hx,
+      cases x with x C,
+      simp only [mem_range, mem_set_of_eq] at hx,
+      obtain ⟨⟨b, _⟩, hb, hdom⟩ := hx,
+      simp only [support_condition.extend_path, binary_condition.range, prod.map_mk, id.def, prod.mk.inj_iff] at hdom,
+      cases hdom.2,
+      exact ⟨⟨b, C⟩, hb, by simp only [binary_condition.range, prod.map_mk, id.def, prod.mk.inj_iff, eq_self_iff_true, and_true, hdom]⟩, }
+  end,
 }
 
 @[simp] lemma coe_lower (A : path α β) (σ : spec α) :
