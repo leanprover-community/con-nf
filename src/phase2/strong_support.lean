@@ -337,29 +337,25 @@ begin
   have : ha ∉ s_val_fst, by_contra h2, specialize hb ⟨ha, h2⟩, apply hb, refl,
   sorry, -- Maximal subset contains all elements
   },
-  have coe_inj :∀ a b, ((all_type a).some  =(all_type b).some) ↔ ((↑(all_type a).some : α ) = ↑(all_type b).some),
-  intros a b, split, intro h,rw h, obtain ⟨a1, a2⟩ := (all_type a).some,
-  obtain ⟨b1, b2⟩ := (all_type b).some, intro h, simp only [subtype.mk_eq_mk], simp only [subtype.coe_mk] at h, exact h,
+  have coe_inj :∀ a b : α, ∀ a' b' : ↥s_val_fst, (a = ↑a') → (b = b') → ((a' = b') ↔ (a = b)),
+  {intros a b a' b' h1 h2, split, intro h3, rw [h3, ← h2] at h1, exact h1,
+   intro h, rw [h1, h2] at h, obtain ⟨a'', ha'⟩ := a', obtain ⟨b'', hb'⟩ := b',
+   simp only [subtype.mk_eq_mk], simp only [subtype.coe_mk] at h, exact h},
   refine_struct({..} : is_well_order α s_val_snd),
-  intros, rw (all_type a).some_spec, rw (all_type b).some_spec,
-  have := s_property.1.trichotomous, specialize this (all_type a).some (all_type b).some, simp only at this,
-  rw ← coe_inj a b, exact this,
-  intros, rw (all_type a).some_spec,
-  -- I can't figure out what's going on in this proof, the names are confusing and there is little
-  -- structure aided by brackets, so I can't fix this right now
-  sorry, sorry
-  /- have := s_property.1.irrefl, specialize this (all_type a).some, simp only at this, exact this,
-  intros a b c h1 h2, rw (all_type a).some_spec at h1 ⊢, rw (all_type b).some_spec at h1 h2, rw (all_type c).some_spec at h2 ⊢,
-  have := s_property.1.trans, specialize this (all_type a).some (all_type b).some (all_type c).some, simp only at this, exact this h1 h2,
-  split, intros,
+  {intros,
+  obtain ⟨a', ha⟩ := all_type a, obtain ⟨b', hb⟩ := all_type b,
+  rw [ha, hb], have := s_property.1.trichotomous, specialize this a' b', simp only at this,
+  rw [← ha, ← hb,← coe_inj a b a' b' ha hb, ha, hb], exact this},
+  {intros a b c h1 h2, obtain ⟨a', ha⟩ := all_type a, obtain ⟨b', hb⟩ := all_type b, obtain ⟨c', hc⟩ := all_type c,
+  rw ha,
+  have := s_property.1.trans, have := this a' b' c', simp only at this, rw [← ha, ← hb, ← hc] at this,
+  rw ← ha, exact this h1 h2},
+  {split, intros,
   have : ∀ (b : ↥(s_val_fst)) (a' : α), a' = b → acc s_val_snd a',
-  intro b,
-  have := well_founded.induction s_property.1.wf b,
-  apply this,
-  intros, split, intros,
-  apply ᾰ (all_type y).some _ y,
-  exact (all_type y).some_spec, rw [← (all_type y).some_spec, ← ᾰ_1], exact ᾰ_2,
-  exact this (all_type a).some a (all_type a).some_spec, -/
+  {intro b, have := well_founded.induction s_property.1.wf b, apply this, intros, split, intros,
+  apply ᾰ (all_type y).some _ y, exact (all_type y).some_spec, rw [← (all_type y).some_spec, ← ᾰ_1],
+  exact ᾰ_2, },
+  exact this (all_type a).some a (all_type a).some_spec}
 end
 
 /-- Any small support can be 'strengthened' into a strong support that is also small.
