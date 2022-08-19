@@ -183,12 +183,47 @@ sorry
 
 lemma non_flex_union_near_litter_cond_forward :
   ∀ N₁ N₂ C, spec.near_litter_cond (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) N₁ N₂ C :=
-sorry
+begin
+  rintros _ _ A (hin | hin),
+  { obtain ⟨M, hMin, diff, hdin, hdiff⟩ := σ.prop.forward.near_litter_cond _ _ A hin,
+    refine ⟨M, or.inl hMin, diff, λ a, or.inl $ hdin a, hdiff⟩ },
+
+  simp only [coe_singleton, mem_singleton_iff, inr_eq_new_non_flex_constraint,
+             derivative_cons_nil, prod.mk.inj_iff] at hin,
+  obtain ⟨⟨rfl, rfl⟩, rfl⟩ := hin,
+
+  have symm_diff_empty : ∀ L : litter,
+      (litter_set L.to_near_litter.fst) ∆ L.to_near_litter.snd = ∅ := λ L, symm_diff_self _,
+  have diff : ↥(litter_set (f_map_path hγ hδ t).to_near_litter.fst ∆
+                ↑((f_map_path hγ hδ t).to_near_litter.snd)) → atom,
+  { rintro ⟨x, hx⟩,
+    rw symm_diff_empty at hx,
+    exact false.rec _ hx },
+  have empty_range : range diff = ⊥,
+  { refine set.ext (λ x, ⟨_, λ hx, hx.rec _⟩),
+    rintro ⟨⟨y, hy⟩, hx⟩,
+    rwa symm_diff_empty at hy },
+
+  refine ⟨_, or.inr rfl, diff, _, _⟩,
+  { rintro ⟨x, hx⟩,
+    rw symm_diff_empty at hx,
+    exact false.rec _ hx, },
+  { rw [empty_range, symm_diff_bot],
+    exact rfl, }
+end
 
 lemma non_flex_union_near_litter_cond_backward :
   ∀ N₁ N₂ C,
     spec.near_litter_cond (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ})⁻¹ N₁ N₂ C :=
-sorry
+begin
+  rintros _ _ A (hin | hin),
+  { obtain ⟨M, hMin, diff, hdin, hdiff⟩ := σ.prop.backward.near_litter_cond _ _ A hin,
+    refine ⟨M, or.inl hMin, diff, λ a, or.inl $ hdin a, hdiff⟩ },
+  simp only [binary_condition.inv_def, map_inr, prod.swap_prod_mk, coe_singleton, mem_singleton_iff,
+             inr_eq_new_non_flex_constraint, derivative_cons_nil, prod.mk.inj_iff] at hin,
+  obtain ⟨⟨rfl, rfl⟩, rfl⟩ := hin,
+  sorry
+end
 
 lemma non_flex_union_non_flex_cond_forward :
   spec.non_flex_cond B (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) :=
