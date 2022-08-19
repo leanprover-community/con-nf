@@ -262,9 +262,17 @@ instance : has_involutive_inv (spec α) :=
   inv_inv := by { rintro ⟨_, _, _, _, _⟩, simp } }
 
 @[simp] lemma mem_inv : c ∈ σ⁻¹ ↔ c⁻¹ ∈ σ := iff.rfl
+@[simp] lemma inv_mem_inv : c⁻¹ ∈ σ⁻¹ ↔ c ∈ σ :=
+⟨λ h, by rwa [mem_inv, inv_inv] at h, λ h, by rwa [mem_inv, inv_inv]⟩
 @[simp] lemma coe_inv (σ : spec α) : (↑(σ⁻¹) : set $ binary_condition α) = σ⁻¹ := rfl
 @[simp] lemma domain_inv (σ : spec α) : σ⁻¹.domain = σ.range := rfl
 @[simp] lemma range_inv (σ : spec α) : σ⁻¹.range = σ.domain := rfl
+
+lemma le_iff_subset (σ τ : spec α) : σ ≤ τ ↔ σ.carrier ⊆ τ.carrier := iff.rfl
+
+@[simp] lemma inv_le_inv (σ τ : spec α) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
+⟨λ h x hx, inv_mem_inv.mp (h (inv_mem_inv.mpr hx)),
+  λ h x hx, inv_mem_inv.mp (h (inv_mem_inv.mpr hx))⟩
 
 @[simp] lemma inl_mem_inv (σ : spec α) (a : atom × atom) (A : extended_index α) :
   (inl a, A) ∈ σ⁻¹ ↔ (inl a.swap, A) ∈ σ :=

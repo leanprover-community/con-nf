@@ -172,6 +172,9 @@ by { change to_near_litter_perm _ • _ = _ • _, rw [coe_to_near_litter_perm, 
 @[simp] lemma of_bot_smul (f : struct_perm ⊥) (x : X) : of_bot f • x = f • x :=
 by rw [←to_bot_smul, to_bot_of_bot]
 
+lemma smul_near_litter_fst (π : struct_perm α) (N : near_litter) :
+  (π • N).fst = π • N.fst := rfl
+
 end
 
 def proto_smul : Π α : type_index, struct_perm α → pretangle α → pretangle α

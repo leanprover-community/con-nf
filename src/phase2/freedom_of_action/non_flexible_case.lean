@@ -32,7 +32,10 @@ This means that although `π` was chosen arbitrarily, its value is not important
 chosen any other permutation and arrived at the same value for the image of `f_map_path hγ hδ t`.
 
 Don't prove this unless we need it - it sounds like an important mathematical point but potentially
-not for the formalisation itself. -/
+not for the formalisation itself.
+
+TODO: I think this is broken - we should only be talking about `(B.path.comp C)`-allowable
+permutations, not that with `hδ` on the bottom. -/
 lemma non_flex_union_unique (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
   (C : path (B : type_index) β)
   (t : tangle_path ((lt_index.mk' hγ (B.path.comp C)) : le_index α))
@@ -209,9 +212,36 @@ begin
     allowable_path.smul_derivative_bot],
 end
 
-lemma non_flex_union_non_flex_cond_backward :
+lemma non_flex_union_non_flex_cond_backward
+  (hS : ∀ (c : support_condition γ), c ∈ designated_support_path t →
+    (c.fst, (C.cons hγ).comp c.snd) ∈ σ.val.domain) :
   spec.non_flex_cond B (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ})⁻¹ :=
-sorry
+begin
+  intros β' γ' δ' hγ' hδ' hγδ' N C' t' ht' π' hπ',
+  rw inr_mem_inv at ht', dsimp only [prod.swap] at ht',
+  cases ht',
+  { refine σ.property.backward.non_flex_cond hγ' hδ' hγδ' N C' t' ht' π' _,
+    refine satisfies.mono _ hπ',
+    rw spec.inv_le_inv,
+    exact le_sup_left, },
+  { simp only [set_like.mem_coe, mem_new_non_flex_constraint, prod.mk.inj_iff] at ht',
+
+    cases ht'.2,
+    intros h₁ h₂,
+    cases h₁,
+    cases h₂,
+
+    -- Appeal to `non_flex_union_unique hγ hδ hγδ C t π hπ`.
+    -- However, this is currently broken.
+    rw ← smul_f_map_path _ _ _ hγδ',
+    rw [ht'.1.1, ← inv_smul_eq_iff.mpr ht'.1.2, struct_perm.smul_near_litter_fst],
+    have := congr_arg sigma.fst ht'.1.2,
+    rw [struct_perm.smul_near_litter_fst,
+      litter.to_near_litter_fst, litter.to_near_litter_fst] at this,
+    rw ← allowable_path.to_struct_perm_derivative _ _ π at this,
+    rw allowable_path.smul_to_struct_perm at this,
+    sorry }
+end
 
 lemma non_flex_union_support_closed_forward
   (hS : ∀ (c : support_condition γ), c ∈ designated_support_path t →
@@ -264,7 +294,7 @@ lemma non_flex_union_allowable
   { one_to_one := non_flex_union_one_to_one_backward hγ hδ hγδ t hπ,
     atom_cond := non_flex_union_atom_cond_backward hγ hδ hγδ t hπ,
     near_litter_cond := non_flex_union_near_litter_cond_backward hγ hδ hγδ t hπ,
-    non_flex_cond := non_flex_union_non_flex_cond_backward hγ hδ hγδ t hπ,
+    non_flex_cond := non_flex_union_non_flex_cond_backward hγ hδ hγδ t hπ hS,
     support_closed := by { rw spec.domain_inv,
       exact non_flex_union_support_closed_backward hγ hδ hγδ t hπ hS } },
   flex_cond := non_flex_union_flex_cond hγ hδ hγδ t hπ }
@@ -321,8 +351,6 @@ begin
   have := σ.2.lower (C.cons $ coe_lt_coe.2 hδ) ((coe_lt_coe.2 hδ).trans_le (le_of_path C)),
   obtain ⟨π, hπ⟩ := foa (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C))
     ⟨σ.val.lower (C.cons $ coe_lt_coe.mpr hδ), this⟩,
-  have := struct_perm.derivative (path.nil.cons $ bot_lt_coe _) π.to_struct_perm
-     • (f_map_path hγ hδ t).to_near_litter,
   refine ⟨_, le_non_flex_union hγ hδ hγδ t hπ hS, _⟩,
   rw spec.domain_sup,
   right, simpa only [spec.domain, image_singleton, mem_singleton_iff],
