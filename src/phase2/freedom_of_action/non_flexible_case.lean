@@ -183,7 +183,34 @@ sorry
 
 lemma non_flexible_union_near_litter_cond_forward :
   ∀ N₁ N₂ C, spec.near_litter_cond (σ.val ⊔ {new_non_flexible_constraint hγ hδ hγδ t hπ}) N₁ N₂ C :=
-sorry
+begin
+  intros N₁ N₂ C' h,
+  obtain (h | h) := h,
+  { obtain ⟨M, hM, s, hs₁, hs₂⟩ := σ.prop.forward.near_litter_cond N₁ N₂ C' h,
+    exact ⟨M, or.inl hM, s, λ a, or.inl (hs₁ a), hs₂⟩, },
+  simp only [coe_singleton, mem_singleton_iff, inr_eq_new_non_flexible_constraint,
+             derivative_cons_nil, prod.mk.inj_iff] at h,
+  obtain ⟨⟨hN₁, hN₂⟩, hC'⟩ := h,
+  simp only [subtype.val_eq_coe, mem_sup, mem_new_non_flexible_constraint, derivative_cons_nil,
+             prod.mk.inj_iff, false_and, or_false, set_coe.forall, subtype.coe_mk],
+  refine ⟨N₂, ⟨or.inr ⟨⟨_, hN₂⟩, hC'⟩, _⟩⟩,
+  { rw [hN₁, litter.to_near_litter_fst], },
+  refine ⟨λ a, arbitrary atom, _, _⟩,
+  { intros a ha,
+    rw hN₁ at ha,
+    simp_rw [litter.to_near_litter_fst, litter.to_near_litter_snd] at ha,
+    simp only [subtype.coe_mk, symm_diff_self, bot_eq_empty, mem_empty_eq] at ha,
+    exfalso, exact ha, },
+  { unfold range,
+    rw [eq_comm, symm_diff_eq_iff_sdiff_eq (le_of_eq rfl)],
+    simp only [diff_self, set_coe.exists, exists_prop, exists_and_distrib_right],
+    rw [eq_comm, set.eq_empty_iff_forall_not_mem],
+    rintros a ⟨⟨b, hb⟩, ha⟩,
+    rw hN₁ at hb,
+    simp_rw [litter.to_near_litter_fst, litter.to_near_litter_snd] at hb,
+    simp only [subtype.coe_mk, symm_diff_self, bot_eq_empty, mem_empty_eq] at hb,
+    exact hb, }
+end
 
 lemma non_flexible_union_near_litter_cond_backward :
   ∀ N₁ N₂ C,
