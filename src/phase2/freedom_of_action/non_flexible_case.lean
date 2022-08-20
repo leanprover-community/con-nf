@@ -313,7 +313,49 @@ sorry
 
 lemma non_flex_union_flex_cond :
   ∀ C, spec.flex_cond B (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) C :=
-sorry
+begin
+  intro C',
+  obtain (⟨hdom, hrge⟩ | ⟨hdom, hrge⟩) := σ.prop.flex_cond C',
+  { refine flex_cond.co_large _ _,
+    { convert hdom, ext L, split; rintro ⟨hC'₁, hC'₂⟩; refine ⟨hC'₁, λ h, _⟩,
+      { rw domain_sup at hC'₂, exact hC'₂ (or.inl h), },
+      { rw domain_sup at h,
+        cases h,
+        { exact hC'₂ h, },
+        { rw mem_domain at h,
+          obtain ⟨c, hc₁, hc₂⟩ := h,
+          rw mem_new_non_flex_constraint at hc₁, subst hc₁,
+          simp only [binary_condition.domain_mk, map_inr, prod.mk.inj_iff] at hc₂,
+          obtain ⟨hc₂, hc₃⟩ := hc₂,
+          rw ←litter.to_near_litter_injective hc₂ at *,
+          exact hC'₁ hγ hδ hγδ C (eq.symm hc₃) t rfl, } } },
+    { convert hrge, ext L, split; rintro ⟨hC'₁, hC'₂⟩; refine ⟨hC'₁, λ h, _⟩,
+      { rw range_sup at hC'₂, exact hC'₂ (or.inl h), },
+      { rw spec.mem_range at h,
+        obtain ⟨⟨_ | ⟨N₁, N₂⟩, D⟩, hc₁, hc₂⟩ := h; cases hc₂,
+        clear hc₂, -- hc₂ simplifies to true
+        rw mem_sup at hc₁,
+        cases hc₁,
+        { rw spec.mem_range at hC'₂,
+          exact hC'₂ ⟨_, hc₁, rfl⟩, },
+        rw mem_new_non_flex_constraint at hc₁,
+        rw prod.mk.inj_iff at hc₁,
+        obtain ⟨hN₁, hC'₃⟩ := hc₁,
+        simp only [prod.mk.inj_iff] at hN₁,
+        obtain ⟨hN₁, h⟩ := hN₁,
+        rw ←of_bot_smul at h,
+        rw sigma.ext_iff at h,
+        obtain ⟨h₁, h₂⟩ := h,
+        rw near_litter_perm.smul_to_near_litter_eq at h₁,
+        dsimp only at h₁ h₂, -- remove?
+        rw of_bot_smul at h₁,
+        unfold satisfies at hπ,
+        unfold satisfies_cond at hπ,
+        sorry, } } },
+  { refine spec.flex_cond.all (λ L hL, _) (λ L hL, _),
+    { rw spec.domain_sup, exact or.inl (hdom L hL), },
+    { rw spec.range_sup, exact or.inl (hrge L hL), } }
+end
 
 lemma non_flex_union_allowable
   (hS : ∀ (c : support_condition γ), c ∈ designated_support_path t →
