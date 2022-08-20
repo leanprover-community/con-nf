@@ -11,7 +11,7 @@ We define a preorder on partial allowable permutations.
 * within each litter, if `ρ.domain` has any new atom, then it must have all
     atoms in that litter (and hence must also have the litter), and dually for the range.
 
-Note that the second condition is exactly the condition in `spec.flexible_cond.all`.
+Note that the second condition is exactly the condition in `spec.flex_cond.all`.
 
 To prove that Zorn's lemma can be applied, we must show that for any chain `c` of allowable
 partial permutations, the union of the specifications in the chain is allowable, and carefully
@@ -27,7 +27,7 @@ open set sum
 universe u
 
 namespace con_nf
-namespace allowable_partial_perm
+namespace allowable_spec
 
 variables [params.{u}]
 
@@ -36,18 +36,18 @@ variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumption
 
 open spec
 
-structure perm_le (σ ρ : allowable_partial_perm B) : Prop :=
+structure perm_le (σ ρ : allowable_spec B) : Prop :=
 (le : σ.val ≤ ρ.val)
-(all_flex_domain (L : litter) (N : near_litter) (A : extended_index B) (hL : flexible L A)
+(all_flex_domain (L : litter) (N : near_litter) (A : extended_index B) (hL : flex L A)
   (hσ : (⟨inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∉ σ.val)
   (hρ : (⟨inr ⟨L.to_near_litter, N⟩, A⟩ : binary_condition B) ∈ ρ.val) :
-  (∀ L', flexible L' A →
+  (∀ L', flex L' A →
     (⟨inr L'.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain ∧
     (⟨inr L'.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.range))
-(all_flex_range (L : litter) (N : near_litter) (A : extended_index B) (hL : flexible L A)
+(all_flex_range (L : litter) (N : near_litter) (A : extended_index B) (hL : flex L A)
   (hσ : (⟨inr ⟨N, L.to_near_litter⟩, A⟩ : binary_condition B) ∉ σ.val)
   (hρ : (⟨inr ⟨N, L.to_near_litter⟩, A⟩ : binary_condition B) ∈ ρ.val) :
-  (∀ L', flexible L' A →
+  (∀ L', flex L' A →
     (⟨inr L'.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.domain ∧
     (⟨inr L'.to_near_litter, A⟩ : support_condition B) ∈ ρ.val.range))
 (all_atoms_domain (a b : atom) (L : litter) (ha : a ∈ litter_set L) (A : extended_index B)
@@ -59,18 +59,18 @@ structure perm_le (σ ρ : allowable_partial_perm B) : Prop :=
   (hρ : (⟨inl ⟨a, b⟩, A⟩ : binary_condition B) ∈ ρ.val) :
   ∀ c ∈ litter_set L, ∃ d, (⟨inl ⟨d, c⟩, A⟩ : binary_condition B) ∈ ρ.val)
 
-instance has_le : has_le (allowable_partial_perm B) := ⟨perm_le⟩
+instance has_le : has_le (allowable_spec B) := ⟨perm_le⟩
 
 /-! We now prove that the claimed preorder really is a preorder. -/
 
-lemma extends_refl (σ : allowable_partial_perm B) : σ ≤ σ :=
+lemma extends_refl (σ : allowable_spec B) : σ ≤ σ :=
 ⟨subset.rfl,
  λ _ _ _ _ h1 h2, by cases h1 h2,
  λ _ _ _ _ h1 h2, by cases h1 h2,
  λ _ _ _ _ _ h1 h2, by cases h1 h2,
  λ _ _ _ _ _ h1 h2, by cases h1 h2⟩
 
-lemma extends_trans (ρ σ τ : allowable_partial_perm B) (h₁ : ρ ≤ σ) (h₂ : σ ≤ τ) : ρ ≤ τ :=
+lemma extends_trans (ρ σ τ : allowable_spec B) (h₁ : ρ ≤ σ) (h₂ : σ ≤ τ) : ρ ≤ τ :=
 begin
   obtain ⟨hsub, hflx_domain, hflx_range, hatom_domain, hatom_range⟩ := h₁,
   obtain ⟨hsub', hflx_domain', hflx_range', hatom_domain', hatom_range'⟩ := h₂,
@@ -102,12 +102,12 @@ begin
     { exact hatom_range' a b L hab A h hin } }
 end
 
-instance : preorder (allowable_partial_perm B) :=
+instance : preorder (allowable_spec B) :=
 { le := perm_le,
   le_refl := extends_refl,
   le_trans := extends_trans }
 
-lemma domain_subset_of_le {σ τ : allowable_partial_perm B} (hστ : σ ≤ τ) :
+lemma domain_subset_of_le {σ τ : allowable_spec B} (hστ : σ ≤ τ) :
   σ.val.domain ⊆ τ.val.domain :=
 begin
   rintros x hx,
@@ -115,7 +115,7 @@ begin
   obtain ⟨b, hb, hdom⟩ := hx,
   exact ⟨b, hστ.le hb, hdom⟩,
 end
-lemma range_subset_of_le {σ τ : allowable_partial_perm B} (hστ : σ ≤ τ) :
+lemma range_subset_of_le {σ τ : allowable_spec B} (hστ : σ ≤ τ) :
   σ.val.range ⊆ τ.val.range :=
 begin
   rintros x hx,
@@ -125,7 +125,7 @@ begin
 end
 
 /-- A condition required later. -/
-lemma inv_mono : monotone (@has_inv.inv (allowable_partial_perm B) _) :=
+lemma inv_mono : monotone (@has_inv.inv (allowable_spec B) _) :=
 begin
   rintro σ τ ⟨h1, h2, h3, h4, h5⟩,
   refine ⟨λ x h, h1 h,
@@ -135,7 +135,7 @@ begin
   exacts [(h3 L N hLA hnin hin L' A' hLA').symm, (h2 L N hLA hnin hin L' A' hLA').symm],
 end
 
-@[simp] lemma inv_le_inv (σ τ : allowable_partial_perm B) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
+@[simp] lemma inv_le_inv (σ τ : allowable_spec B) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
 ⟨λ h, by simpa only [inv_inv] using inv_mono h, λ h, inv_mono h⟩
 
 section zorn_setup
@@ -147,7 +147,7 @@ then we show it extends all elements in the chain.
 Non-trivial bit: the "small or all" conditions — these are enforced by the "if adding any, add all"
 parts of the definition of ≤. -/
 
-variables {c : set (allowable_partial_perm B)}
+variables {c : set (allowable_spec B)}
 
 lemma is_subset_chain_of_is_chain : is_chain (≤) c → is_chain (≤) (subtype.val '' c) :=
 is_chain.image _ _ _ $ λ _ _, perm_le.le
@@ -253,7 +253,7 @@ begin
     { simp only [image_empty, Sup_empty, not_mem_empty, spec.domain_bot, not_false_iff] },
     { simp only [image_empty, Sup_empty, not_mem_empty, spec.domain_bot, sep_false,
         small_empty] } },
-  by_cases h' : ∃ (ρ : allowable_partial_perm B) (hρ : ρ ∈ c) (τ : allowable_partial_perm B)
+  by_cases h' : ∃ (ρ : allowable_spec B) (hρ : ρ ∈ c) (τ : allowable_spec B)
       (hτ : τ ∈ c) a b (ha : a ∈ litter_set L),
       (inl (a, b), A) ∉ ρ.val ∧ (inl (a, b), A) ∈ τ.val ∧ ρ ≤ τ,
   { obtain ⟨ρ, hρ, τ, hτ, a, b, ha, Hρ, Hτ, hρτ⟩ := h',
@@ -269,7 +269,7 @@ begin
       cases hρτ.all_atoms_domain a b L ha A Hρ Hτ a' ha' with d hd,
       exact mem_domain.2 ⟨_, hd, rfl⟩ } },
   push_neg at h',
-  have H' : ∀ (ρ : allowable_partial_perm B), ρ ∈ c → ∀ (τ : allowable_partial_perm B),
+  have H' : ∀ (ρ : allowable_spec B), ρ ∈ c → ∀ (τ : allowable_spec B),
               τ ∈ c → ∀ (a b : atom), a ∈ litter_set L →
               (inl (a, b), A) ∈ ρ.val → (inl (a, b), A) ∈ τ.val,
   { refine λ ρ hρ τ hτ a b ha Hρ, of_not_not (λ Hτ, _),
@@ -306,10 +306,10 @@ begin
       { cases h₁' (mem_domain.2 ⟨_, hρN₂, rfl⟩) },
       { rw [(hρ.backward.one_to_one A).near_litter _ hρN₂ hN'],
         refine ⟨λ ha', (h₂' $ H' _ hτc _ hρc _ _ ha' hτa').1 ha', λ hb, _⟩,
-        have : (@has_le.le (allowable_partial_perm B) allowable_partial_perm.has_le ⟨τ, hτ⟩ ⟨ρ, hρ⟩) → a' ∈ litter_set L,
+        have : (@has_le.le (allowable_spec B) allowable_spec.has_le ⟨τ, hτ⟩ ⟨ρ, hρ⟩) → a' ∈ litter_set L,
         {intro h, exact (h₂' (h.le hτa')).mpr hb},
 
-        by_cases h_eq :(⟨τ, hτ⟩ : allowable_partial_perm B) = ⟨ρ, hρ⟩,
+        by_cases h_eq :(⟨τ, hτ⟩ : allowable_spec B) = ⟨ρ, hρ⟩,
         exact this (le_of_eq h_eq),
         have hchain := hc hτc hρc h_eq,
         cases hchain,
@@ -325,9 +325,9 @@ begin
 
     refine ⟨λ ha', (h₂ $ H' _ hτc _ hσ₂ a' b ha' hτa').1 ha', _⟩,
     intro hb,
-    have : (@has_le.le (allowable_partial_perm B) allowable_partial_perm.has_le ⟨τ, hτ⟩ ⟨σ, hσ₁⟩) → a' ∈ litter_set L,
+    have : (@has_le.le (allowable_spec B) allowable_spec.has_le ⟨τ, hτ⟩ ⟨σ, hσ₁⟩) → a' ∈ litter_set L,
     {intro h, have := (h.le hτa'), exact (h₂ this).mpr hb},
-    by_cases h_eq :(⟨τ, hτ⟩ : allowable_partial_perm B) = ⟨σ, hσ₁⟩,
+    by_cases h_eq :(⟨τ, hτ⟩ : allowable_spec B) = ⟨σ, hσ₁⟩,
     exact this (le_of_eq h_eq),
     have hchain := hc hτc hσ₂ h_eq,
     cases hchain,
@@ -349,21 +349,21 @@ begin
     ⟨σ, mem_image_of_mem _ hσ, h1 a⟩, h2⟩,
 end
 
-lemma flexible_cond_Union (hc : is_chain (≤) c) (C : extended_index B) :
-  (Sup (subtype.val '' c)).flexible_cond B C :=
+lemma flex_cond_Union (hc : is_chain (≤) c) (C : extended_index B) :
+  (Sup (subtype.val '' c)).flex_cond B C :=
 begin
   obtain rfl | ⟨⟨σ, hσ₁⟩, hσ₂⟩ := c.eq_empty_or_nonempty,
-  { refine spec.flexible_cond.co_large _ _;
+  { refine spec.flex_cond.co_large _ _;
     simp only [image_empty, Sup_empty, spec.domain_bot, spec.range_bot, mem_empty_eq,
-      not_false_iff, and_true, coe_set_of, mk_flexible_litters] },
-  by_cases h : ∃ (ρ : allowable_partial_perm B) (hρ : ρ ∈ c) (τ : allowable_partial_perm B)
-    (hτ : τ ∈ c) L (hL : flexible L C),
+      not_false_iff, and_true, coe_set_of, mk_flex_litters] },
+  by_cases h : ∃ (ρ : allowable_spec B) (hρ : ρ ∈ c) (τ : allowable_spec B)
+    (hτ : τ ∈ c) L (hL : flex L C),
     (((inr L.to_near_litter, C) ∉ ρ.val.domain ∧
       (inr L.to_near_litter, C) ∈ τ.val.domain) ∨
       ((inr L.to_near_litter, C) ∉ ρ.val.range ∧
       (inr L.to_near_litter, C) ∈ τ.val.range)) ∧ ρ ≤ τ,
   { obtain ⟨ρ, hρ, τ, hτ, L, hL, ⟨h, hρτ⟩⟩ := h,
-    have H : ∀ L', flexible L' C →
+    have H : ∀ L', flex L' C →
         (⟨inr L'.to_near_litter, C⟩ : support_condition B) ∈ τ.val.domain ∧
         (⟨inr L'.to_near_litter, C⟩ : support_condition B) ∈ τ.val.range,
     { simp_rw [mem_domain, spec.mem_range] at h,
@@ -371,15 +371,15 @@ begin
       cases hb₂,
       { exact hρτ.all_flex_domain L N₂ C hL (λ Hρ', Hρ ⟨_, Hρ', rfl⟩) hb₁ },
       { exact hρτ.all_flex_range L N₁ C hL (λ Hρ', Hρ ⟨_, Hρ', rfl⟩) hb₁ } },
-    refine spec.flexible_cond.all _ _;
+    refine spec.flex_cond.all _ _;
     intros L' hL';
     obtain ⟨H₁, H₂⟩ := H L' hL';
     simp only [spec.domain_Sup, spec.range_Sup];
     exact mem_Union₂_of_mem (mem_image_of_mem _ hτ) ‹_› },
   push_neg at h,
-  have := hσ₁.flexible_cond C,
-  have H : ∀ (ρ : allowable_partial_perm B), ρ ∈ c → ∀ (τ : allowable_partial_perm B), τ ∈ c →
-            ∀ (L : litter), flexible L C →
+  have := hσ₁.flex_cond C,
+  have H : ∀ (ρ : allowable_spec B), ρ ∈ c → ∀ (τ : allowable_spec B), τ ∈ c →
+            ∀ (L : litter), flex L C →
             ((inr L.to_near_litter, C) ∈ ρ.val.domain →
             (inr L.to_near_litter, C) ∈ τ.val.domain) ∧
             ((inr L.to_near_litter, C) ∈ ρ.val.range →
@@ -398,8 +398,8 @@ begin
         obtain ⟨b, hb₁, hb₂⟩ := Hρ,
         rw ←hb₂ at Hτ,
         cases Hτ (mem_image_of_mem _ $ h₁.1 hb₁) } } },
-  obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ₁.flexible_cond C,
-  { refine spec.flexible_cond.co_large _ _,
+  obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ₁.flex_cond C,
+  { refine spec.flex_cond.co_large _ _,
     convert hdom using 3, swap, convert hrge using 3,
     all_goals
     { ext,
@@ -408,18 +408,18 @@ begin
       rintro hxσ ⟨_, ⟨_, rfl⟩, ρ, ⟨⟨ρ, hρ₁, rfl⟩, rfl⟩, hρ₂⟩ },
     exact hxσ ((H ρ hρ₁ ⟨σ, hσ₁⟩ hσ₂ x hx).2 hρ₂),
     exact hxσ ((H ρ hρ₁ ⟨σ, hσ₁⟩ hσ₂ x hx).1 hρ₂), },
-  { refine spec.flexible_cond.all (λ L hL, _) (λ L hL, _),
+  { refine spec.flex_cond.all (λ L hL, _) (λ L hL, _),
     { refine ⟨σ.domain, ⟨σ, Union_eq_true ⟨_, hσ₂, rfl⟩⟩, hdom L hL⟩, },
     { refine ⟨σ.range, ⟨σ, Union_eq_true ⟨_, hσ₂, rfl⟩⟩, hrge L hL⟩, } }
 end
 
-lemma non_flexible_cond_Union (hc : is_chain (≤) c) :
-  (Sup $ subtype.val '' c).non_flexible_cond B :=
+lemma non_flex_cond_Union (hc : is_chain (≤) c) :
+  (Sup $ subtype.val '' c).non_flex_cond B :=
 begin
   rintro β γ δ hγ hδ hγδ N A t hσ π hπ,
   rw mem_Sup at hσ,
   obtain ⟨_, ⟨σ, hσ₁, rfl⟩, hσ₂⟩ := hσ,
-  exact σ.property.forward.non_flexible_cond hγ hδ hγδ N A t hσ₂ π (hπ.mono $ le_Sup ⟨σ, hσ₁, rfl⟩),
+  exact σ.property.forward.non_flex_cond hγ hδ hγδ N A t hσ₂ π (hπ.mono $ le_Sup ⟨σ, hσ₁, rfl⟩),
 end
 
 lemma domain_closed_Union (hc : is_chain (≤) c) :
@@ -442,7 +442,7 @@ variables (hc : is_chain (≤) c)
 lemma allowable_Union : (Sup $ subtype.val '' c).allowable B :=
 have c_inv_chain : is_chain (≤) (has_inv.inv '' c) := hc.image _ _ _ inv_mono,
 have Union_rw : (Sup (subtype.val '' c))⁻¹ = Sup (subtype.val ''
-  ((λ σ : allowable_partial_perm B, ⟨σ.val⁻¹, σ.2.inv⟩) '' c)) := begin
+  ((λ σ : allowable_spec B, ⟨σ.val⁻¹, σ.2.inv⟩) '' c)) := begin
     rw Sup_inv, congr' 1, ext σ,
     simp only [allowable_inv, subtype.val_eq_coe, image_inv, set.mem_inv, mem_image, subtype.exists,
       subtype.coe_mk, exists_and_distrib_right, exists_eq_right, exists_prop,
@@ -456,20 +456,20 @@ have Union_rw : (Sup (subtype.val '' c))⁻¹ = Sup (subtype.val ''
   { one_to_one := one_to_one_Union hc,
     atom_cond := atom_cond_Union hc,
     near_litter_cond := near_litter_cond_Union hc,
-    non_flexible_cond := non_flexible_cond_Union hc,
+    non_flex_cond := non_flex_cond_Union hc,
     support_closed := domain_closed_Union hc },
   backward :=
   { one_to_one := by { rw Union_rw, exact one_to_one_Union c_inv_chain },
     atom_cond := by { rw Union_rw, exact atom_cond_Union c_inv_chain },
     near_litter_cond := by { rw Union_rw, exact near_litter_cond_Union c_inv_chain },
-    non_flexible_cond := by { rw Union_rw, exact non_flexible_cond_Union c_inv_chain },
+    non_flex_cond := by { rw Union_rw, exact non_flex_cond_Union c_inv_chain },
     support_closed := by { rw Union_rw, exact domain_closed_Union c_inv_chain } },
-  flexible_cond := flexible_cond_Union hc }
+  flex_cond := flex_cond_Union hc }
 
-lemma le_Union₂ (σ τ : allowable_partial_perm B) (hτ : τ ∈ c) :
+lemma le_Union₂ (σ τ : allowable_spec B) (hτ : τ ∈ c) :
   τ ≤ ⟨Sup (subtype.val '' c), allowable_Union hc⟩ :=
 begin
-  have hsub : ∀ (t : allowable_partial_perm B) (ht : t ∈ c), t.val ≤ Sup (subtype.val '' c),
+  have hsub : ∀ (t : allowable_spec B) (ht : t ∈ c), t.val ≤ Sup (subtype.val '' c),
   { intros t ht b hb,
     exact ⟨t.val, ⟨t.val, Union_eq_true ⟨t, ht, rfl⟩⟩, hb⟩, },
   refine ⟨hsub τ hτ,
@@ -503,8 +503,8 @@ begin
     exact ⟨q, (hsub ρ hρc) hq⟩ }
 end
 
-lemma le_Union₁ (hcne : c.nonempty) (σ : allowable_partial_perm B)
-  (hc₁ : c ⊆ {ρ : allowable_partial_perm B | σ ≤ ρ}) :
+lemma le_Union₁ (hcne : c.nonempty) (σ : allowable_spec B)
+  (hc₁ : c ⊆ {ρ : allowable_spec B | σ ≤ ρ}) :
   σ ≤ ⟨Sup (subtype.val '' c), allowable_Union hc⟩ :=
 let ⟨τ, h⟩ := hcne in (set_of_app_iff.1 $ mem_def.1 $ hc₁ h).trans (le_Union₂ hc σ τ h)
 
@@ -512,9 +512,9 @@ end zorn_setup
 
 /-- There is a maximal allowable partial permutation extending any given allowable partial
 permutation. This result is due to Zorn's lemma. -/
-lemma maximal_perm (σ : allowable_partial_perm B) :
-  ∃ (m : allowable_partial_perm B) (H : m ∈ {ρ : allowable_partial_perm B | σ ≤ ρ}), σ ≤ m ∧
-    ∀ (z : allowable_partial_perm B), z ∈ {ρ : allowable_partial_perm B | σ ≤ ρ} →
+lemma maximal_perm (σ : allowable_spec B) :
+  ∃ (m : allowable_spec B) (H : m ∈ {ρ : allowable_spec B | σ ≤ ρ}), σ ≤ m ∧
+    ∀ (z : allowable_spec B), z ∈ {ρ : allowable_spec B | σ ≤ ρ} →
     m ≤ z → z ≤ m :=
 zorn_nonempty_preorder₀ {ρ | σ ≤ ρ}
   (λ c hc₁ hc₂ τ hτ,
@@ -523,5 +523,5 @@ zorn_nonempty_preorder₀ {ρ | σ ≤ ρ}
       λ τ, le_Union₂ hc₂ σ τ⟩)
   σ (le_refl σ)
 
-end allowable_partial_perm
+end allowable_spec
 end con_nf

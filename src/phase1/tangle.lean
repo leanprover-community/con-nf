@@ -13,7 +13,7 @@ universe u
 namespace con_nf
 variables [params.{u}]
 
-open code
+open code Iio_index
 
 /-
 /-- A pretangle has a preferred extension, which is either a proper type `β : Λ`,

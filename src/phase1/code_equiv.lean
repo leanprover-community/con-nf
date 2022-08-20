@@ -38,6 +38,8 @@ namespace con_nf
 variables [params.{u}] {α : Λ} {β : Iio_index α} {γ : Iio α} [core_tangle_cumul α]
   [almost_tangle_cumul α] [positioned_tangle_cumul α]
 
+open Iio_index
+
 namespace code
 variables {c d : code α}
 

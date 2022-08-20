@@ -14,8 +14,8 @@ variables [params.{u}] {α : Λ} [phase_2_core_assumptions α] [phase_2_position
 inductive label (S : word_support B)
 | atom (L : S.carrier) (A : extended_index B) : label
 | near_litter : label
-| flexible_litter : label
-| non_flexible_litter ⦃β δ : Λ⦄ ⦃γ : type_index⦄
+| flex_litter : label
+| non_flex_litter ⦃β δ : Λ⦄ ⦃γ : type_index⦄
   (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
   (C : path (α : type_index) β) (t : tangle_path ((lt_index.mk' hγ C) : le_index α)) : label
 

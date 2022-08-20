@@ -9,17 +9,24 @@ universe u
 namespace con_nf
 variables [params.{u}]
 
-section Iio
+section Iio_Iic
 variables {α β : Λ}
 
 abbreviation Iio_index (α : Λ) := Iio (α : type_index)
+abbreviation Iic_index (α : Λ) := Iic (α : type_index)
+
+instance coe_Iio_Iic : has_coe_t (Iio α) (Iic α) := ⟨λ β, ⟨β.1, le_of_lt β.2⟩⟩
 
 instance coe_Iio : has_coe_t (Iio α) (Iio_index α) := ⟨λ β, ⟨β.1, coe_lt_coe.2 β.2⟩⟩
+instance coe_Iic : has_coe_t (Iic α) (Iic_index α) := ⟨λ β, ⟨β.1, coe_le_coe.2 β.2⟩⟩
 
 abbreviation Iio_coe : Iio α → Iio_index α := coe
+abbreviation Iic_coe : Iic α → Iic_index α := coe
 
 @[simp] lemma Iio.coe_mk (β : Λ) (hβ : β < α) :
   ((⟨β, hβ⟩ : Iio α) : Iio_index α) = ⟨β, coe_lt_coe.2 hβ⟩ := rfl
+@[simp] lemma Iic.coe_mk (β : Λ) (hβ : β ≤ α) :
+  ((⟨β, hβ⟩ : Iic α) : Iic_index α) = ⟨β, coe_le_coe.2 hβ⟩ := rfl
 
 lemma Iio.coe_injective : injective (coe : Iio α → Iio_index α) :=
 begin
@@ -28,22 +35,46 @@ begin
   have := with_bot.coe_injective h,
   subst this,
 end
+lemma Iic.coe_injective : injective (coe : Iic α → Iic_index α) :=
+begin
+  rintro ⟨β, hβ⟩ ⟨γ, hγ⟩ h,
+  simp only [Iic.coe_mk, subtype.mk_eq_mk] at h,
+  have := with_bot.coe_injective h,
+  subst this,
+end
 
 @[simp] lemma Iio.coe_inj {β γ : Iio α} : Iio_coe β = γ ↔ β = γ :=
 Iio.coe_injective.eq_iff
+@[simp] lemma Iic.coe_inj {β γ : Iic α} : Iic_coe β = γ ↔ β = γ :=
+Iic.coe_injective.eq_iff
 
+section Iio_index
 variables {hβ : (β : type_index) ∈ Iio_index α}
 
 instance : has_bot (Iio_index α) := ⟨⟨⊥, bot_lt_coe _⟩⟩
 instance : inhabited (Iio_index α) := ⟨⊥⟩
 
-@[simp] lemma bot_ne_mk_coe : (⊥ : Iio_index α) ≠ ⟨β, hβ⟩ :=
+@[simp] lemma Iio_index.bot_ne_mk_coe : (⊥ : Iio_index α) ≠ ⟨β, hβ⟩ :=
 ne_of_apply_ne subtype.val bot_ne_coe
 
-@[simp] lemma mk_coe_ne_bot : (⟨β, hβ⟩ : Iio_index α) ≠ ⊥ :=
+@[simp] lemma Iio_index.mk_coe_ne_bot : (⟨β, hβ⟩ : Iio_index α) ≠ ⊥ :=
 ne_of_apply_ne subtype.val coe_ne_bot
+end Iio_index
 
-end Iio
+section Iic_index
+variables {hβ : (β : type_index) ∈ Iic_index α}
+
+instance : has_bot (Iic_index α) := ⟨⟨⊥, bot_le⟩⟩
+instance : inhabited (Iic_index α) := ⟨⊥⟩
+
+@[simp] lemma Iic_index.bot_ne_mk_coe : (⊥ : Iic_index α) ≠ ⟨β, hβ⟩ :=
+ne_of_apply_ne subtype.val bot_ne_coe
+
+@[simp] lemma Iic_index.mk_coe_ne_bot : (⟨β, hβ⟩ : Iic_index α) ≠ ⊥ :=
+ne_of_apply_ne subtype.val coe_ne_bot
+end Iic_index
+
+end Iio_Iic
 
 /-!
 We now intend to deal with the familiar tools from phase 1 along paths `A` from `α ⟶ β` down the
@@ -115,10 +146,6 @@ instance (α : type_index) : inhabited (extended_index α) := ⟨α.extend⟩
 
 /-- There exists an `α`-extended type index. --/
 lemma mk_extended_index_ne_zero (α : type_index) : #(extended_index α) ≠ 0 := cardinal.mk_ne_zero _
-
-/-- For our purposes, we let any monoid act trivially on extended type indices. -/
-instance {M : Type*} [monoid M] : mul_action M (extended_index α) :=
-{ smul := λ _, id, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
 /-- A type index `β`, together with a path down from `α` to level `β`. Hence, `β ≤ α`.
 This type is intended to be used in place of `β : type_index, β ≤ α` in phase 2. -/

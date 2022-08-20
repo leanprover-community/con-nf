@@ -22,7 +22,7 @@ variables [params.{u}]
 open struct_perm spec
 
 variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [typed_positions.{}] [phase_2_assumptions α] {B : le_index α}
+  [typed_positions.{}] [phase_2_assumptions α] {B : le_index α} {L : litter}
 
 section lower
 variables {σ : spec B} {β : Λ} (A : path (B : type_index) β) (hβ : (β : type_index) < B)
@@ -35,47 +35,34 @@ begin
   obtain ⟨N, atom_map, h1, h2, h3⟩ | ⟨hL, hsmall⟩ | ⟨N, hL, hsmall, hmaps⟩ :=
     hσ.forward.atom_cond L (A.comp C),
   { exact spec.atom_cond.all N atom_map h1 h2 h3 },
-  refine spec.atom_cond.small_out _ _,
-  { convert hL using 1,
-    refine iff.to_eq _,
-    simp_rw mem_domain,
-    split; rintro ⟨⟨_ | ⟨x, y⟩, C⟩, hbin,  ⟨⟩⟩,
-    { exact ⟨_, hbin, rfl⟩ },
-    { exact ⟨(inr (L.to_near_litter, y), C), hbin, rfl⟩ } },
-  swap,
-  refine spec.atom_cond.small_in N hL _ hmaps,
-  all_goals { convert hsmall, sorry },
+  exact spec.atom_cond.small_out hL hsmall,
+  exact spec.atom_cond.small_in N hL hsmall hmaps,
 end
 
 lemma lower_near_litter_cond (hσ : σ.allowable B) (N₁ N₂ C) :
   (σ.lower A).near_litter_cond N₁ N₂ C :=
 hσ.forward.near_litter_cond _ _ _
 
-lemma flexible.of_comp (C : extended_index (⟨β, B.path.comp A⟩ : le_index α)) {L : litter} :
-  flexible L (A.comp C) → flexible L C :=
+lemma flexible.of_comp (C : extended_index (⟨β, B.path.comp A⟩ : le_index α)) :
+  flex L (A.comp C) → flex L C :=
 begin
-  intro hf,
-  unfold flexible at hf ⊢,
-  simp at hf ⊢,
-  intros b d g hgb hdb hdg p t,
-  have h1 := hf hgb hdb hdg (A.comp p),
-  --wants to be t next, but will need to apply a conversion lemma to make lean see path_assoc.,
-  sorry,
+  rintro hf β γ δ hγ hδ hγδ D rfl t,
+  simpa only [f_map_path_assoc] using hf hγ hδ hγδ (A.comp D) rfl t.lt_index_assoc,
 end
 
 /-- Descending down a proper path `A`, `μ`-many litters become flexible. -/
 --make C a parameter?
-lemma lower_flexible_co_large (hβ : (B : type_index) ≠ β) :
+lemma lower_flex_co_large (hβ : (B : type_index) ≠ β) :
   #{L : litter // ∃ (C : extended_index (⟨β, B.path.comp A⟩ : le_index α)),
-    flexible L C ∧ ¬ flexible L (A.comp C)} = #μ :=
+    flex L C ∧ ¬ flex L (A.comp C)} = #μ :=
 begin
   refine le_antisymm _ _,
   { rw ← mk_litter, exact mk_subtype_le _ },
   sorry
 end
 
-lemma lower_flexible_cond (hσ : σ.allowable B) (C : extended_index β) :
-  (σ.lower A).flexible_cond (le_index.mk β (B.path.comp A)) C :=
+lemma lower_flex_cond (hσ : σ.allowable B) (C : extended_index β) :
+  (σ.lower A).flex_cond (le_index.mk β (B.path.comp A)) C :=
 begin
   by_cases hβ : (B : type_index) = β,
   { obtain ⟨B_index, B⟩ := B,
@@ -83,12 +70,12 @@ begin
     subst hβ,
     rw [path_eq_nil A, spec.lower_nil σ],
     rw path.comp_nil,
-    exact hσ.flexible_cond C },
+    exact hσ.flex_cond C },
 
   -- The existing proof has been modified and simplified into the following structure.
 
-  obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ.flexible_cond (A.comp C),
-  { refine spec.flexible_cond.co_large _ _,
+  obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := hσ.flex_cond (A.comp C),
+  { refine spec.flex_cond.co_large _ _,
     { refine le_antisymm _ _,
       { rw hdom, refine mk_subtype_mono _,
         -- This should be an approachable goal, solvable with `flexible.of_comp`.
@@ -97,13 +84,13 @@ begin
     { -- Same thing here.
       sorry },
   },
-  { refine spec.flexible_cond.co_large _ _,
+  { refine spec.flex_cond.co_large _ _,
     -- Why are these goals true?
     -- We shouldn't try to solve these without a firm understanding of the mathematical proof.
     -- It's possible the definition is not quite correct.
     sorry, sorry },
 
-  /- { refine spec.flexible_cond.all _ _,
+  /- { refine spec.flex_cond.all _ _,
     { intros L hf,
       have hdom' := hdom L _,
       { unfold spec.lower,
@@ -157,10 +144,10 @@ begin
       } } }, -/
 end
 
-lemma lower_non_flexible_cond (hσ : σ.allowable B) :
-  (σ.lower A).non_flexible_cond (le_index.mk β (B.path.comp A)) :=
+lemma lower_non_flex_cond (hσ : σ.allowable B) :
+  (σ.lower A).non_flex_cond (le_index.mk β (B.path.comp A)) :=
 begin
-  unfold spec.non_flexible_cond,
+  unfold spec.non_flex_cond,
   intros β' γ δ hγ hδ hγδ N C t hf π hπ,
   unfold struct_perm.satisfies struct_perm.satisfies_cond at hπ,
   have h := hπ hf,
@@ -176,28 +163,19 @@ begin
     allowable_path.smul_derivative_bot],
 end
 
-/--
-This proof is painful because we need to show in many places that path composition is associative.
-Does anyone have any better ideas for how to complete this proof?
--/
 lemma lower_domain_closed (hσ : σ.allowable B) :
   (σ.lower A).domain.support_closed (le_index.mk β (B.path.comp A)) :=
 begin
   intros β' γ' δ' hγ' hδ' hγδ' C t ht π hsup,
-  convert hσ.forward.support_closed hγ' hδ' hγδ' (A.comp C) (cast _ t) _ (cast _ π) (cast _ hsup)
-    using 1; dsimp only,
-  { rw quiver.path.comp_assoc, },
-  { congr' 1,
-    { rw quiver.path.comp_assoc, },
-    { sorry, },
-    { sorry, },
-    { sorry, },
-    { sorry, } },
-  { rw ← cast_eq_iff_heq, },
-  { rw quiver.path.comp_assoc, },
-  { sorry },
-  { rw quiver.path.comp_assoc, },
-  { refine pi_congr _, intro c, sorry },
+  have := hσ.forward.support_closed hγ' hδ' hγδ' (A.comp C)
+    (t.lt_index_assoc) _ (π.lt_index_assoc) _,
+  rwa allowable_path.lt_index_assoc_smul at this,
+  rwa f_map_path_assoc,
+  rintros c hc,
+  have := @hsup c _,
+  { rwa allowable_path.lt_index_assoc_smul_support_condition, },
+  { rwa [unary_spec.lower, set.mem_set_of, ← path.comp_cons, support_condition.extend_path,
+      path.comp_assoc] at hc, }
 end
 
 namespace spec
@@ -209,15 +187,15 @@ protected lemma allowable.lower (hσ : σ.allowable B) ⦃β : Λ⦄ (A : path (
   { one_to_one := lower_one_to_one_forward A hσ,
     atom_cond := lower_atom_cond A hσ,
     near_litter_cond := lower_near_litter_cond A hσ,
-    non_flexible_cond := lower_non_flexible_cond A hσ,
+    non_flex_cond := lower_non_flex_cond A hσ,
     support_closed := lower_domain_closed A hσ },
   backward :=
   { one_to_one := by { rw ←lower_inv, exact lower_one_to_one_forward A hσ.inv },
     atom_cond := by { rw ←lower_inv, exact lower_atom_cond A hσ.inv },
     near_litter_cond := by { rw ←lower_inv, exact lower_near_litter_cond A hσ.inv },
-    non_flexible_cond := by { rw ←lower_inv, exact lower_non_flexible_cond A hσ.inv },
+    non_flex_cond := by { rw ←lower_inv, exact lower_non_flex_cond A hσ.inv },
     support_closed := by { rw ←lower_inv, exact lower_domain_closed A hσ.inv } },
-  flexible_cond := lower_flexible_cond A hσ }
+  flex_cond := lower_flex_cond A hσ }
 
 end spec
 end lower

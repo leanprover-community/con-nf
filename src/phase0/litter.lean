@@ -119,13 +119,7 @@ def near_litter : Type* := Σ i, {s // is_near_litter i s}
 def litter.to_near_litter (i : litter) : near_litter :=
 ⟨i, litter_set i, is_near_litter_litter_set i⟩
 
-@[simp] lemma litter.to_near_litter_fst (i : litter) :
-  i.to_near_litter.fst = i :=
-by unfold litter.to_near_litter
-
-@[simp] lemma litter.to_near_litter_snd (i : litter) :
-  i.to_near_litter.snd = ⟨litter_set i, is_near_litter_litter_set i⟩ :=
-by refl
+@[simp] lemma litter.to_near_litter_fst (i : litter) : i.to_near_litter.fst = i := rfl
 
 lemma litter.to_near_litter_injective : injective litter.to_near_litter :=
 λ i j hij, by { cases hij, refl }

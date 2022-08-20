@@ -262,9 +262,17 @@ instance : has_involutive_inv (spec α) :=
   inv_inv := by { rintro ⟨_, _, _, _, _⟩, simp } }
 
 @[simp] lemma mem_inv : c ∈ σ⁻¹ ↔ c⁻¹ ∈ σ := iff.rfl
+@[simp] lemma inv_mem_inv : c⁻¹ ∈ σ⁻¹ ↔ c ∈ σ :=
+⟨λ h, by rwa [mem_inv, inv_inv] at h, λ h, by rwa [mem_inv, inv_inv]⟩
 @[simp] lemma coe_inv (σ : spec α) : (↑(σ⁻¹) : set $ binary_condition α) = σ⁻¹ := rfl
 @[simp] lemma domain_inv (σ : spec α) : σ⁻¹.domain = σ.range := rfl
 @[simp] lemma range_inv (σ : spec α) : σ⁻¹.range = σ.domain := rfl
+
+lemma le_iff_subset (σ τ : spec α) : σ ≤ τ ↔ σ.carrier ⊆ τ.carrier := iff.rfl
+
+@[simp] lemma inv_le_inv (σ τ : spec α) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
+⟨λ h x hx, inv_mem_inv.mp (h (inv_mem_inv.mpr hx)),
+  λ h x hx, inv_mem_inv.mp (h (inv_mem_inv.mpr hx))⟩
 
 @[simp] lemma inl_mem_inv (σ : spec α) (a : atom × atom) (A : extended_index α) :
   (inl a, A) ∈ σ⁻¹ ↔ (inl a.swap, A) ∈ σ :=
@@ -402,7 +410,35 @@ variables {A : path α β} {σ : spec α} {c : binary_condition β}
 
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
-def lower (A : path α β) (σ : spec α) : spec β := equiv_set.symm {c | c.extend_path A ∈ σ}
+def lower (A : path α β) (σ : spec α) : spec β := {
+  carrier := {c | c.extend_path A ∈ σ},
+  domain := {c | c.extend_path A ∈ σ.domain},
+  range := {c | c.extend_path A ∈ σ.range},
+  image_domain' := set.ext $ λ x, begin
+    split,
+    { rintro ⟨⟨_, C⟩, hx, rfl⟩,
+      exact mem_domain.2 ⟨_, hx, rfl⟩ },
+    { intro hx,
+      cases x with x C,
+      simp only [mem_domain, mem_set_of_eq] at hx,
+      obtain ⟨⟨b, _⟩, hb, hdom⟩ := hx,
+      simp only [support_condition.extend_path, binary_condition.domain, prod.map_mk, id.def, prod.mk.inj_iff] at hdom,
+      cases hdom.2,
+      exact ⟨⟨b, C⟩, hb, by simp only [binary_condition.domain, prod.map_mk, id.def, prod.mk.inj_iff, eq_self_iff_true, and_true, hdom]⟩, }
+  end,
+  image_range' := set.ext $ λ x, begin
+    split,
+    { rintro ⟨⟨_, C⟩, hx, rfl⟩,
+      exact mem_range.2 ⟨_, hx, rfl⟩ },
+    { intro hx,
+      cases x with x C,
+      simp only [mem_range, mem_set_of_eq] at hx,
+      obtain ⟨⟨b, _⟩, hb, hdom⟩ := hx,
+      simp only [support_condition.extend_path, binary_condition.range, prod.map_mk, id.def, prod.mk.inj_iff] at hdom,
+      cases hdom.2,
+      exact ⟨⟨b, C⟩, hb, by simp only [binary_condition.range, prod.map_mk, id.def, prod.mk.inj_iff, eq_self_iff_true, and_true, hdom]⟩, }
+  end,
+}
 
 @[simp] lemma coe_lower (A : path α β) (σ : spec α) :
   (σ.lower A : set (binary_condition β)) = {c | c.extend_path A ∈ σ} := rfl

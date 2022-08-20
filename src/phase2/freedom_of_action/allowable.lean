@@ -13,7 +13,7 @@ specify `π_A(a) = b`, we cannot also specify `π_A(a) = c` for some `c ≠ b`, 
 More details on these conditions are discussed in depth later.
 
 If a specification is allowable, we call it an *allowable partial permutation*
-(`allowable_partial_perm`).
+(`allowable_spec`).
 -/
 
 open quiver set sum with_bot
@@ -31,7 +31,7 @@ variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumption
 
 /-- A litter and extended index is *flexible* if it is not of the form `f_{γ,δ}^A(x)` for some
 `x ∈ τ_{γ:A}` with conditions defined as above. Hence, it is not constrained by anything. -/
-def flexible (L : litter) (A : extended_index B) : Prop :=
+def flex (L : litter) (A : extended_index B) : Prop :=
 ∀ ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄
   (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
   (C : path (B : type_index) β) (hC : A = (C.cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _))
@@ -41,17 +41,14 @@ def flexible (L : litter) (A : extended_index B) : Prop :=
 /-- There are `μ`-many `A`-flexible litters for each extended index `A`. In fact, we can do better
 than this - for each proper path `C` from some `β` to `B`, there are `μ`-many `C.comp A`-flexible
 litters that are not `A`-flexible. However, at the moment, we don't need this fact. -/
-@[simp] lemma mk_flexible_litters (A : extended_index B) : #{L : litter // flexible L A} = #μ :=
+@[simp] lemma mk_flex_litters (A : extended_index B) : #{L : litter // flex L A} = #μ :=
 begin
   by_cases (B : type_index) = ⊥,
-  { have H : ∀ (L : litter), flexible L A,
-    { intro L,
-      unfold flexible,
-      intros β γ δ hγ hδ hγδ C,
+  { have H : ∀ L, flex L A,
+    { intros L β γ δ hγ hδ hγδ C,
       have hγB := lt_of_lt_of_le hγ (le_of_path C),
-      exfalso,
       rw h at hγB,
-      exact not_lt_bot hγB },
+      cases not_lt_bot hγB },
     rw ← mk_litter,
     rw cardinal.eq,
     exact ⟨⟨subtype.val, (λ L, ⟨L, H L⟩), (λ S, subtype.eta _ _), (λ L, rfl)⟩⟩ },
@@ -164,18 +161,18 @@ variables (B) {σ : spec B} {A : extended_index B}
 /-- This is the allowability condition for flexible litters of a given extended index.
 Either all flexible litters are in both the domain and range (`all`), or there are `μ`-many not in
 the domain and `μ`-many not in the range. -/
-@[mk_iff] inductive flexible_cond (σ : spec B) (A : extended_index B) : Prop
+@[mk_iff] inductive flex_cond (σ : spec B) (A : extended_index B) : Prop
 | co_large :
-  #μ = #{L | flexible L A ∧ (inr L.to_near_litter, A) ∉ σ.domain} →
-  #μ = #{L | flexible L A ∧ (inr L.to_near_litter, A) ∉ σ.range} →
-  flexible_cond
+  #μ = #{L | flex L A ∧ (inr L.to_near_litter, A) ∉ σ.domain} →
+  #μ = #{L | flex L A ∧ (inr L.to_near_litter, A) ∉ σ.range} →
+  flex_cond
 | all :
-  (∀ L, flexible L A → (inr L.to_near_litter, A) ∈ σ.domain) →
-  (∀ L, flexible L A → (inr L.to_near_litter, A) ∈ σ.range) →
-  flexible_cond
+  (∀ L, flex L A → (inr L.to_near_litter, A) ∈ σ.domain) →
+  (∀ L, flex L A → (inr L.to_near_litter, A) ∈ σ.range) →
+  flex_cond
 
 -- TODO: This instance feels unnecessary and really shouldn't be needed.
--- Is there a better way of writing `non_flexible_cond` so that the instance is inferred?
+-- Is there a better way of writing `non_flex_cond` so that the instance is inferred?
 instance (β : Λ) (γ : type_index) (hγ : γ < β) (A : path (B : type_index) β) :
 mul_action (allowable_path (le_index.cons ⟨β, B.path.comp A⟩ hγ))
   (tangle_path (lt_index.mk' hγ (B.path.comp A) : le_index α)) :=
@@ -184,7 +181,7 @@ core_tangle_data.allowable_action
 /-- The allowability condition on non-flexible litters.
 Whenever `σ` contains some condition `⟨⟨f_{γ,δ}^A(g), N⟩, [-1,δ,A]⟩`, then every allowable
 permutation extending `σ` has `N = f_{γ,δ}^A(ρ • g)`. -/
-def non_flexible_cond (σ : spec B) : Prop :=
+def non_flex_cond (σ : spec B) : Prop :=
 ∀ ⦃β : Λ⦄ ⦃γ : type_index⦄ ⦃δ : Λ⦄ (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ) (N : near_litter)
   (A : path (B : type_index) β)
   (t : tangle_path ((lt_index.mk' hγ (B.path.comp A)) : le_index α)),
@@ -199,14 +196,14 @@ structure forward_allowable (σ : spec B) : Prop :=
 (one_to_one : σ.one_to_one_forward)
 (atom_cond : ∀ L A, σ.atom_cond L A)
 (near_litter_cond : ∀ N₁ N₂ A, σ.near_litter_cond N₁ N₂ A)
-(non_flexible_cond : σ.non_flexible_cond B)
+(non_flex_cond : σ.non_flex_cond B)
 (support_closed : σ.domain.support_closed B)
 
 /-- A specification is *allowable* if it is allowable in the forward and backward directions. -/
 protected structure allowable (σ : spec B) : Prop :=
 (forward : σ.forward_allowable B)
 (backward : σ⁻¹.forward_allowable B)
-(flexible_cond : ∀ A, σ.flexible_cond B A)
+(flex_cond : ∀ A, σ.flex_cond B A)
 
 @[simp] lemma Union_eq_true {α : Type*} {p : Prop} {s : set α} (h : p) :
   (⋃ (h : p), s) = s :=
@@ -218,18 +215,18 @@ by { classical, rw Union_eq_if, rwa if_neg, }
 
 variables {B}
 
-lemma flexible_cond.inv : σ.flexible_cond B A → σ⁻¹.flexible_cond B A
-| (flexible_cond.co_large h₀ h₁) := flexible_cond.co_large (by rwa domain_inv) (by rwa range_inv)
-| (flexible_cond.all h₀ h₁) := flexible_cond.all (by rwa domain_inv) (by rwa range_inv)
+lemma flex_cond.inv : σ.flex_cond B A → σ⁻¹.flex_cond B A
+| (flex_cond.co_large h₀ h₁) := flex_cond.co_large (by rwa domain_inv) (by rwa range_inv)
+| (flex_cond.all h₀ h₁) := flex_cond.all (by rwa domain_inv) (by rwa range_inv)
 
-@[simp] lemma flexible_cond_inv : σ⁻¹.flexible_cond B A ↔ σ.flexible_cond B A :=
-⟨λ h, by simpa only [inv_inv] using h.inv, flexible_cond.inv⟩
+@[simp] lemma flex_cond_inv : σ⁻¹.flex_cond B A ↔ σ.flex_cond B A :=
+⟨λ h, by simpa only [inv_inv] using h.inv, flex_cond.inv⟩
 
 /-- The inverse of an allowable specification is allowable. -/
 lemma allowable.inv (hσ : σ.allowable B) : σ⁻¹.allowable B :=
 { forward := hσ.backward,
   backward := by { rw inv_inv, exact hσ.forward },
-  flexible_cond := λ A, (hσ.flexible_cond A).inv }
+  flex_cond := λ A, (hσ.flex_cond A).inv }
 
 @[simp] lemma allowable_inv : σ⁻¹.allowable B ↔ σ.allowable B :=
 ⟨λ h, by simpa only [inv_inv] using h.inv, allowable.inv⟩
@@ -241,27 +238,27 @@ open spec
 variables (B)
 
 /-- An *allowable partial permutation* is a specification that is allowable as defined above. -/
-def allowable_partial_perm := {σ : spec B // σ.allowable B}
+def allowable_spec := {σ : spec B // σ.allowable B}
 
 variables {B}
 
-namespace allowable_partial_perm
+namespace allowable_spec
 
-instance has_inv : has_inv (allowable_partial_perm B) := ⟨λ σ, ⟨σ.val⁻¹, σ.2.inv⟩⟩
+instance has_inv : has_inv (allowable_spec B) := ⟨λ σ, ⟨σ.val⁻¹, σ.2.inv⟩⟩
 
-@[simp] lemma val_inv (π : allowable_partial_perm B) : π⁻¹.val = π.val⁻¹ := rfl
+@[simp] lemma val_inv (π : allowable_spec B) : π⁻¹.val = π.val⁻¹ := rfl
 
-instance : has_involutive_inv (allowable_partial_perm B) :=
+instance : has_involutive_inv (allowable_spec B) :=
 subtype.val_injective.has_involutive_inv _ val_inv
 
-end allowable_partial_perm
+end allowable_spec
 
 variable (B)
 
 /-- We say that *freedom of action* holds along a path `B` if any partial allowable permutation `σ`
 admits an allowable permutation `π` extending it. -/
 def freedom_of_action : Prop :=
-∀ σ : allowable_partial_perm B, ∃ π : allowable_path B, π.to_struct_perm.satisfies σ.val
+∀ σ : allowable_spec B, ∃ π : allowable_path B, π.to_struct_perm.satisfies σ.val
 
 variable {B}
 
@@ -276,7 +273,7 @@ end
 
 /-- If an allowable partial permutation `σ` supports some `α`-tangle `t`, any permutations extending
 `σ` must map `t` to the same value. -/
-lemma eq_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
+lemma eq_of_supports (σ : allowable_spec B) (t : tangle_path B)
   (ht : supports (allowable_path B) σ.val.domain t) (π₁ π₂ : allowable_path B)
   (hπ₁ : π₁.to_struct_perm.satisfies σ.val) (hπ₂ : π₂.to_struct_perm.satisfies σ.val) :
   π₁ • t = π₂ • t :=
@@ -301,7 +298,7 @@ allowable permutation `π` extending `σ` maps `t` to `σ(t)`.
 
 Freedom of action gives some extension `π`, and hence some candidate value; the support condition
 implies that any two extensions agree. We use the above lemma for the second part. -/
-lemma exists_tangle_of_supports (σ : allowable_partial_perm B) (t : tangle_path B)
+lemma exists_tangle_of_supports (σ : allowable_spec B) (t : tangle_path B)
   (foa : freedom_of_action B) (ht : supports (allowable_path B) σ.val.domain t) :
   ∃ s, ∀ π : allowable_path B, π.to_struct_perm.satisfies σ.val → π • t = s :=
 ⟨(foa σ).some • t, λ π₁ hπ₁, eq_of_supports σ t ht π₁ (foa σ).some hπ₁ (foa σ).some_spec⟩

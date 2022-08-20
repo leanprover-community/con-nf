@@ -14,7 +14,7 @@ open set sum
 universe u
 
 namespace con_nf
-namespace allowable_partial_perm
+namespace allowable_spec
 
 variables [params.{u}]
 
@@ -25,7 +25,7 @@ open spec
 
 /-- Gets the value that a given input atom `b` is mapped to
 under any allowable `π` extending `σ`. -/
-noncomputable def atom_value (σ : allowable_partial_perm B) (A : extended_index B)
+noncomputable def atom_value (σ : allowable_spec B) (A : extended_index B)
   (b : atom) (hb : (inl b, A) ∈ σ.val.domain) : atom :=
 @sum.rec _ _ (λ (c : atom × atom ⊕ near_litter × near_litter),
   c.elim (λ atoms, inl atoms.fst) (λ Ns, inr Ns.fst) = inl b → atom)
@@ -33,7 +33,7 @@ noncomputable def atom_value (σ : allowable_partial_perm B) (A : extended_index
   (mem_domain.mp hb).some.1
   (congr_arg prod.fst (mem_domain.mp hb).some_spec.2)
 
-lemma atom_value_spec (σ : allowable_partial_perm B) (A : extended_index B) (b : atom)
+lemma atom_value_spec (σ : allowable_spec B) (A : extended_index B) (b : atom)
   (hb : (inl b, A) ∈ σ.val.domain) :
   (inl (b, atom_value σ A b hb), A) ∈ σ.val :=
 begin
@@ -50,32 +50,41 @@ begin
   { cases hc₂ }
 end
 
-lemma atom_value_spec_range (σ : allowable_partial_perm B) (A : extended_index B) (b : atom)
+lemma atom_value_spec_range (σ : allowable_spec B) (A : extended_index B) (b : atom)
   (hb : (inl b, A) ∈ σ.val.domain) :
   (inl (atom_value σ A b hb), A) ∈ σ.val.range :=
 spec.mem_range.2 ⟨(inl (b, atom_value σ A b hb), A), atom_value_spec σ A b hb, rfl⟩
 
-@[simp] lemma atom_value_eq_of_mem (σ : allowable_partial_perm B) (A : extended_index B)
-  (a b : atom) (hab : (inl (a, b), A) ∈ σ.val) :
+@[simp] lemma atom_value_eq_of_mem {σ : allowable_spec B} {A : extended_index B}
+  {a b : atom} (hab : (inl (a, b), A) ∈ σ.val) :
   atom_value σ A a (mem_domain.2 ⟨_, hab, rfl⟩) = b :=
 (σ.property.backward.one_to_one A).atom a (atom_value_spec σ A a $ mem_domain.2 ⟨_, hab, rfl⟩) hab
 
-noncomputable def atom_value_inj (σ : allowable_partial_perm B) (A : extended_index B) :
-  {b | (inl b, A) ∈ σ.val.domain} ↪ atom :=
-⟨λ b, atom_value σ A b.val b.property, λ b₁ b₂ hb, begin
-  have h₁ := atom_value_spec σ A b₁ b₁.property,
-  have h₂ := atom_value_spec σ A b₂ b₂.property,
-  dsimp at hb, rw ← hb at h₂,
-  exact subtype.coe_inj.mp
-    ((σ.property.forward.one_to_one A).atom (atom_value σ A b₁ b₁.property) h₁ h₂),
-end⟩
+@[simp] lemma atom_value_eq_of_mem_inv {σ : allowable_spec B} {A : extended_index B}
+  {a b : atom} (hab : (inl (a, b), A) ∈ σ.val) :
+  atom_value σ⁻¹ A b (inl_mem_range hab) = a :=
+(σ.property.forward.one_to_one A).atom b (atom_value_spec σ⁻¹ A b $ (inl_mem_range hab)) hab
 
-lemma atom_value_mem_inv (σ : allowable_partial_perm B) (A : extended_index B) (b : atom)
+lemma atom_value_injective {σ : allowable_spec B} {A : extended_index B}
+  {b₁ b₂ : atom} {hb₁ : (inl b₁, A) ∈ σ.val.domain} {hb₂ : (inl b₂, A) ∈ σ.val.domain} :
+  σ.atom_value A b₁ hb₁ = σ.atom_value A b₂ hb₂ → b₁ = b₂ :=
+begin
+  have h₁ := atom_value_spec σ A b₁ hb₁,
+  have h₂ := atom_value_spec σ A b₂ hb₂,
+  intro hb, rw ← hb at h₂,
+  exact (σ.property.forward.one_to_one A).atom (atom_value σ A b₁ hb₁) h₁ h₂,
+end
+
+noncomputable def atom_value_inj (σ : allowable_spec B) (A : extended_index B) :
+  {b | (inl b, A) ∈ σ.val.domain} ↪ atom :=
+⟨λ b, atom_value σ A b.val b.property, λ b₁ b₂ hb, subtype.coe_injective (atom_value_injective hb)⟩
+
+lemma atom_value_mem_inv (σ : allowable_spec B) (A : extended_index B) (b : atom)
   (hb : (inl b, A) ∈ σ.val.domain) :
   (inl (atom_value σ A b hb, b), A) ∈ σ⁻¹.val :=
 atom_value_spec σ A b hb
 
-lemma atom_value_mem_range (σ : allowable_partial_perm B) (A : extended_index B) (b : atom)
+lemma atom_value_mem_range (σ : allowable_spec B) (A : extended_index B) (b : atom)
   (hb : (inl b, A) ∈ σ.val.domain) :
   (inl (atom_value σ A b hb), A) ∈ σ.val.range :=
 begin
@@ -84,18 +93,18 @@ begin
 end
 
 /-- Composing the `atom_value` operation with the inverse permutation does nothing. -/
-lemma atom_value_inv (σ : allowable_partial_perm B) (A : extended_index B) (b : atom)
+lemma atom_value_inv (σ : allowable_spec B) (A : extended_index B) (b : atom)
   (hb : (inl b, A) ∈ σ.val.domain) :
   atom_value σ⁻¹ A (atom_value σ A b hb) (atom_value_mem_range σ A b hb) = b :=
 begin
   have := atom_value_spec σ⁻¹ A (atom_value σ A b hb) (atom_value_mem_range σ A b hb),
-  simp_rw [allowable_partial_perm.val_inv, spec.inl_mem_inv] at this,
+  simp_rw [allowable_spec.val_inv, spec.inl_mem_inv] at this,
   exact (σ.property.forward.one_to_one A).atom _ this (atom_value_spec σ A b hb),
 end
 
 /-- Gets the value that a given input near litter `N` is mapped to
 under any allowable `π` extending `σ`. -/
-noncomputable def near_litter_value (σ : allowable_partial_perm B) (A : extended_index B)
+noncomputable def near_litter_value (σ : allowable_spec B) (A : extended_index B)
   (N : near_litter) (hb : (inr N, A) ∈ σ.val.domain) : near_litter :=
 @sum.rec _ _ (λ (c : atom × atom ⊕ near_litter × near_litter),
   c.elim (λ atoms, inl atoms.fst) (λ Ns, inr Ns.fst) = inr N → near_litter)
@@ -103,7 +112,7 @@ noncomputable def near_litter_value (σ : allowable_partial_perm B) (A : extende
   (mem_domain.mp hb).some.1
   (congr_arg prod.fst (mem_domain.mp hb).some_spec.2)
 
-lemma near_litter_value_spec (σ : allowable_partial_perm B) (A : extended_index B) (N : near_litter)
+lemma near_litter_value_spec (σ : allowable_spec B) (A : extended_index B) (N : near_litter)
   (hN : (inr N, A) ∈ σ.val.domain) :
   (inr (N, near_litter_value σ A N hN), A) ∈ σ.val :=
 begin
@@ -121,25 +130,31 @@ begin
   exact (σ.property.backward.one_to_one A).near_litter N hc₁ hd₁,
 end
 
-lemma near_litter_value_spec_range (σ : allowable_partial_perm B) (A : extended_index B)
+lemma near_litter_value_spec_range (σ : allowable_spec B) (A : extended_index B)
   (N : near_litter) (hN : (inr N, A) ∈ σ.val.domain) :
   (inr (near_litter_value σ A N hN), A) ∈ σ.val.range :=
 spec.mem_range.2 ⟨(inr (N, near_litter_value σ A N hN), A), near_litter_value_spec σ A N hN, rfl⟩
 
-noncomputable def near_litter_value_inj (σ : allowable_partial_perm B) (A : extended_index B) :
+lemma near_litter_value_injective (σ : allowable_spec B) (A : extended_index B) :
+  ∀ N₁ hN₁ N₂ hN₂, near_litter_value σ A N₁ hN₁ = near_litter_value σ A N₂ hN₂ → N₁ = N₂ :=
+begin
+  intros N₁ hN₁ N₂ hN₂ hN,
+  have h₁ := near_litter_value_spec σ A N₁ hN₁,
+  have h₂ := near_litter_value_spec σ A N₂ hN₂,
+  rw ← hN at h₂,
+  exact (σ.property.forward.one_to_one A).near_litter _ h₁ h₂,
+end
+
+noncomputable def near_litter_value_inj (σ : allowable_spec B) (A : extended_index B) :
   {N | (inr N, A) ∈ σ.val.domain} ↪ near_litter :=
 ⟨λ N, near_litter_value σ A N.val N.property, begin
   intros N₁ N₂ hN,
-  have h₁ := near_litter_value_spec σ A N₁ N₁.property,
-  have h₂ := near_litter_value_spec σ A N₂ N₂.property,
-  dsimp at hN, rw ← hN at h₂,
-  exact subtype.coe_inj.mp
-    ((σ.property.forward.one_to_one A).near_litter (near_litter_value σ A N₁ N₁.property) h₁ h₂),
+  exact subtype.coe_inj.mp (near_litter_value_injective _ _ _ _ _ _ hN),
 end⟩
 
 /-- If the images of two litters under `σ` intersect, the litters must intersect, and therefore are
 equal. This is a rather technical result depending on various allowability conditions. -/
-lemma litter_eq_of_image_inter (σ : allowable_partial_perm B) (A : extended_index B)
+lemma litter_eq_of_image_inter (σ : allowable_spec B) (A : extended_index B)
   {L₁ L₂ : litter} {N₁ N₂ : near_litter}
   (hL₁ : (inr (L₁.to_near_litter, N₁), A) ∈ σ.val)
   (hL₂ : (inr (L₂.to_near_litter, N₂), A) ∈ σ.val)
@@ -220,7 +235,7 @@ begin
         ((h₂ this).symm.mp haN₁.left) ((h₂' this).symm.mp haN₁') }
 end
 
-lemma litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
+lemma litter_image_disjoint (σ : allowable_spec B) (A : extended_index B)
   {L₁ L₂ : litter} {N₁ N₂ : near_litter}
   (hN₁ : (inr (L₁.to_near_litter, N₁), A) ∈ σ.val)
   (hN₂ : (inr (L₂.to_near_litter, N₂), A) ∈ σ.val) :
@@ -250,7 +265,7 @@ simp only [lt_self_iff_false] at this, exact this,
 end
 
 -- An application of the near litter condition using litter_image_disjoint.
-lemma near_litter_image_disjoint (σ : allowable_partial_perm B) (A : extended_index B)
+lemma near_litter_image_disjoint (σ : allowable_spec B) (A : extended_index B)
   {N M N' M' : near_litter}
   (hN : (inr (N, N'), A) ∈ σ.val) (hM : (inr (M, M'), A) ∈ σ.val) :
   disjoint N.snd.val M.snd.val → disjoint N'.snd.val M'.snd.val :=
@@ -342,5 +357,18 @@ cases ha'1, exact hb3 ((h N.fst Nf' hNf' a b hab).mp ha'1.1),
 exact hdisj ⟨ha'1.1, ha1.1⟩,
 }
 end
-end allowable_partial_perm
+
+-- Whoever's proving this, first factor out the one-directional lemma.
+-- Then it should follow from symmetry and involutivity.
+lemma value_mem_value_iff_mem {σ : allowable_spec B} {A : extended_index B}
+  {a : atom} (ha : (inl a, A) ∈ σ.val.domain) {N : near_litter} (hN : (inr N, A) ∈ σ.val.domain) :
+  σ.atom_value A a ha ∈ (σ.near_litter_value A N hN).2.val ↔ a ∈ N.2.val :=
+sorry
+
+lemma mem_value_iff_value_mem {σ : allowable_spec B} {A : extended_index B}
+  {a : atom} (ha : (inl a, A) ∈ σ.val.range) {N : near_litter} (hN : (inr N, A) ∈ σ.val.domain) :
+  a ∈ (σ.near_litter_value A N hN).2.val ↔ σ⁻¹.atom_value A a ha ∈ N.2.val :=
+sorry
+
+end allowable_spec
 end con_nf
