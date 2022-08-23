@@ -178,7 +178,39 @@ end
 
 lemma non_flex_union_atom_cond_forward :
   ∀ L C, spec.atom_cond (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) L C :=
-sorry
+begin
+  rintros L C',
+  obtain (⟨L', hL, atom_map, hin, himg⟩ | ⟨hL, hLsmall⟩ | ⟨L', hL, hLsmall, hmaps⟩) := σ.prop.forward.atom_cond L C',
+  { exact spec.atom_cond.all L' (or.inl hL) atom_map (λ a H, or.inl $ hin a H) himg, },
+  refine spec.atom_cond.small_out _ _,
+  { rw mem_domain,
+    rintro ⟨⟨_ | ⟨N, M⟩, _⟩, hb, hdom⟩; cases hdom,
+    refine or.rec (hL ∘ inr_mem_domain) (λ h, _) hb,
+    clear hb,
+    simp only [set_like.mem_coe, mem_new_non_flex_constraint, prod.mk.inj_iff] at h,
+    obtain ⟨⟨hL', hM⟩, hC'⟩ := h,
+    clear hdom hM M,
+    replace hL' := litter.to_near_litter_injective hL',
+    refine hL _,
+    rw mem_domain,
+    sorry, },
+  swap,
+  refine spec.atom_cond.small_in L' (or.inl hL) _
+      (λ a b hab, or.rec (λ h, hmaps h) (λ h, by cases h) hab),
+  all_goals { convert hLsmall using 1,
+    refine ext (λ x, ⟨λ hx, ⟨hx.1, _⟩, λ hx, ⟨hx.1, _⟩⟩),
+    { have := hx.2,
+      rw mem_domain at this,
+      obtain ⟨b, hb, hdom⟩ := this,
+      cases hb,
+      { obtain ⟨as | Ns, C⟩ := b; cases hdom, convert inl_mem_domain hb, },
+      { rw [set_like.mem_coe, mem_new_non_flex_constraint] at hb,
+        cases hb, cases hdom, } },
+    { have := hx.2,
+      rw mem_domain at this,
+      obtain ⟨⟨as | Ns, C⟩, hb, hdom⟩ := this; cases hdom,
+      exact or.inl (mem_domain_of_mem hb), } }
+end
 
 lemma non_flex_union_atom_cond_backward :
   ∀ L C, spec.atom_cond (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ})⁻¹ L C :=
@@ -309,7 +341,27 @@ lemma non_flex_union_support_closed_backward
   (hS : ∀ (c : support_condition γ), c ∈ designated_support_path t →
     (c.fst, (C.cons hγ).comp c.snd) ∈ σ.val.domain) :
   (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}).range.support_closed B :=
-sorry
+begin
+  intros β' γ' δ' hγ' hδ' hγδ' A' t' ht',
+  rw range_sup at ht',
+  cases ht',
+  { exact supports.mono (subset_union_left _ _)
+      (σ.property.backward.support_closed hγ' hδ' hγδ' A' t' ht'), },
+  rw [range_singleton, set.mem_singleton_iff] at ht',
+  unfold new_non_flex_constraint at ht',
+  simp only [binary_condition.range_mk, map_inr, prod.mk.inj_iff] at ht',
+  have cons_inj₁ := path.cons.inj ht'.2,
+  cases cons_inj₁.1,
+  have cons_inj₂ := path.cons.inj (eq_of_heq cons_inj₁.2.1),
+  cases cons_inj₂.1,
+  cases eq_of_heq cons_inj₂.2.1,
+  rw [←(allowable_path.to_struct_perm_derivative (lt_index.mk' _ (B.path.comp C)).to_le_index
+      (bot_lt_coe δ) π), allowable_path.smul_to_struct_perm,
+      allowable_path.smul_derivative_bot] at ht',
+  -- Here we encounter the same problem as in non_flex_union_flex_cond -- π is 'too low' to progress
+  -- in the same way as above.
+  sorry,
+end
 
 lemma non_flex_union_flex_cond :
   ∀ C, spec.flex_cond B (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) C :=
@@ -333,32 +385,21 @@ begin
       { rw range_sup at hC'₂, exact hC'₂ (or.inl h), },
       { rw spec.mem_range at h,
         obtain ⟨⟨_ | ⟨N₁, N₂⟩, D⟩, hc₁, hc₂⟩ := h; cases hc₂,
-        clear hc₂, -- hc₂ simplifies to true
         rw mem_sup at hc₁,
         cases hc₁,
         { rw spec.mem_range at hC'₂,
           exact hC'₂ ⟨_, hc₁, rfl⟩, },
-        rw mem_new_non_flex_constraint at hc₁,
-        rw prod.mk.inj_iff at hc₁,
-        obtain ⟨hN₁, hC'₃⟩ := hc₁,
-        simp only [prod.mk.inj_iff] at hN₁,
-        obtain ⟨hN₁, h⟩ := hN₁,
-        clear hN₁ N₁, -- these hyps are useless, so remove them
-        -- from here, we must use h and hC'₃ to reach a contradiction.
-
-        rw ←(allowable_path.to_struct_perm_derivative (lt_index.mk' _ (B.path.comp C)).to_le_index
-             (bot_lt_coe δ) π) at h,
-        rw allowable_path.smul_to_struct_perm at h,
-        rw allowable_path.smul_derivative_bot at h,
-
-        rw sigma.ext_iff at h, dsimp only at h, obtain ⟨h₁, h₂⟩ := h,
-        rw allowable_path.smul_near_litter_fst at h₁,
-        rw litter.to_near_litter_fst at h₁,
-
+        rw [mem_new_non_flex_constraint, prod.mk.inj_iff] at hc₁,
+        obtain ⟨this, hC'₃⟩ := hc₁,
+        simp only [prod.mk.inj_iff] at this,
+        obtain ⟨hN₁, this⟩ := this,
+        rw [←(allowable_path.to_struct_perm_derivative (lt_index.mk' _ (B.path.comp C)).to_le_index
+             (bot_lt_coe δ) π), allowable_path.smul_to_struct_perm,
+             allowable_path.smul_derivative_bot, sigma.ext_iff] at this,
+        obtain ⟨h₁, h₂⟩ := this,
+        rw [allowable_path.smul_near_litter_fst, litter.to_near_litter_fst] at h₁,
         -- I'd like to appeal to smul_f_map_path, but here π is too low to work with, at level δ
         -- rather than β. How to progress?
-        have H := smul_f_map_path (B.path.comp C) hγ hδ hγδ _ t, -- we can't easily fill the _!
-        sorry,
         sorry, } } },
   { refine spec.flex_cond.all (λ L hL, _) (λ L hL, _),
     { rw spec.domain_sup, exact or.inl (hdom L hL), },
