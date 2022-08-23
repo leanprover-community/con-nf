@@ -358,6 +358,7 @@ begin
         -- I'd like to appeal to smul_f_map_path, but here π is too low to work with, at level δ
         -- rather than β. How to progress?
         have H := smul_f_map_path (B.path.comp C) hγ hδ hγδ _ t, -- we can't easily fill the _!
+        sorry,
         sorry, } } },
   { refine spec.flex_cond.all (λ L hL, _) (λ L hL, _),
     { rw spec.domain_sup, exact or.inl (hdom L hL), },
