@@ -79,69 +79,19 @@ begin
     { refine le_antisymm _ _,
       { rw hdom, refine mk_subtype_mono _,
         -- This should be an approachable goal, solvable with `flexible.of_comp`.
-        sorry },
+        rintros x ⟨hflx, hx⟩,
+        exact ⟨flexible.of_comp A C hflx, hx⟩ },
       { rw ← mk_litter, exact mk_subtype_le _ } },
     { -- Same thing here.
-      sorry },
+      exact le_antisymm
+        (le_of_eq_of_le hrge $ cardinal.mk_subtype_mono $ λ x hx, ⟨flexible.of_comp A C hx.1, hx.2⟩)
+        (le_of_le_of_eq (cardinal.mk_subtype_le _) mk_litter), },
   },
   { refine spec.flex_cond.co_large _ _,
     -- Why are these goals true?
     -- We shouldn't try to solve these without a firm understanding of the mathematical proof.
     -- It's possible the definition is not quite correct.
     sorry, sorry },
-
-  /- { refine spec.flex_cond.all _ _,
-    { intros L hf,
-      have hdom' := hdom L _,
-      { unfold spec.lower,
-        unfold binary_condition.extend_path,
-        unfold spec.domain at hdom' ⊢,
-        dsimp at hdom' ⊢,
-        obtain ⟨x, hx_1, hx_2⟩ := hdom',
-        refine ⟨⟨x.fst, C⟩,_,_⟩,
-        { obtain ⟨atoms | Ns, he'⟩ := x,
-          { unfold binary_condition.domain at hx_2,
-            simp at hx_2,
-            exfalso,
-            exact hx_2  },
-          { unfold binary_condition.domain at hx_2,
-            simp at hx_2 ⊢,
-            obtain ⟨hx_2,hx_3⟩ := hx_2,
-            rw hx_3 at hx_1,
-            exact hx_1 } },
-        { unfold binary_condition.domain at hx_2 ⊢,
-          simp at hx_2 ⊢,
-          exact and.elim_left hx_2 } },
-      {
-        sorry
-        -- exact flexible.of_comp _ _ _ L hf,
-      } },
-    { intros L hf,
-      have hrge' := hrge L _,
-      { unfold spec.lower,
-        unfold binary_condition.extend_path,
-        unfold spec.range at hrge' ⊢,
-        dsimp at hrge' ⊢,
-        obtain ⟨x, hx_1, hx_2⟩ := hrge',
-        refine ⟨⟨x.fst, C⟩,_,_⟩,
-        { obtain ⟨atoms | Ns, he'⟩ := x,
-          { unfold binary_condition.range at hx_2,
-            simp at hx_2,
-            exfalso,
-            exact hx_2 },
-          { unfold binary_condition.range at hx_2,
-            simp at hx_2 ⊢,
-            obtain ⟨hx_2,hx_3⟩ := hx_2,
-            rw hx_3 at hx_1,
-            exact hx_1 } },
-        { unfold binary_condition.range at hx_2 ⊢,
-          simp at hx_2 ⊢,
-          obtain ⟨hx_2,hx_3⟩ := hx_2,
-          exact hx_2 } },
-      {
-        sorry
-        -- exact flexible.of_comp _ _ _ L hf,
-      } } }, -/
 end
 
 lemma lower_non_flex_cond (hσ : σ.allowable B) :
