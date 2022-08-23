@@ -335,7 +335,23 @@ by { convert derivative_comp ⟨α, path.nil⟩ B π, rw path.nil_comp }
 @[simp] lemma to_struct_perm_derivative_comp : Π (A : le_index α)
   {γ : type_index} (B : path A.index γ) (π : allowable_path A),
   (π.derivative_comp _ B).to_struct_perm = struct_perm.derivative B π.to_struct_perm :=
-sorry
+begin
+intros,
+induction B,
+{
+dsimp [(derivative_comp)], revert π,
+suffices : ∀ (h : allowable_path A = allowable_path {index := A.index, path := A.path}) (π : allowable_path A), to_struct_perm (cast h π) = to_struct_perm π,
+{apply this},
+{dsimp [(derivative_comp), (allowable_path)], cases A, dsimp only, intros h π, refl}
+},
+{
+dsimp [(derivative_comp), (struct_perm.derivative)], rw ← B_ih,
+have := to_struct_perm_derivative {index := B_b, path := A.path.comp B_ᾰ} B_ᾰ_1 (derivative_comp A B_ᾰ π),
+rw this,
+dsimp only,
+congr, dsimp [(struct_perm.derivative)], simp only [monoid_hom.comp_id],
+}
+end
 
 @[simp] lemma smul_derivative_bot {A : le_index α} (π : allowable_path A) (h : (⊥ : type_index) < A)
   {X : Type*} [mul_action near_litter_perm X] (x : X) :
