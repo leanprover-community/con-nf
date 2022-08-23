@@ -343,14 +343,21 @@ begin
         obtain ⟨hN₁, hC'₃⟩ := hc₁,
         simp only [prod.mk.inj_iff] at hN₁,
         obtain ⟨hN₁, h⟩ := hN₁,
-        rw ←of_bot_smul at h,
-        rw sigma.ext_iff at h,
-        obtain ⟨h₁, h₂⟩ := h,
-        rw near_litter_perm.smul_to_near_litter_eq at h₁,
-        dsimp only at h₁ h₂, -- remove?
-        rw of_bot_smul at h₁,
-        unfold satisfies at hπ,
-        unfold satisfies_cond at hπ,
+        clear hN₁ N₁, -- these hyps are useless, so remove them
+        -- from here, we must use h and hC'₃ to reach a contradiction.
+
+        rw ←(allowable_path.to_struct_perm_derivative (lt_index.mk' _ (B.path.comp C)).to_le_index
+             (bot_lt_coe δ) π) at h,
+        rw allowable_path.smul_to_struct_perm at h,
+        rw allowable_path.smul_derivative_bot at h,
+
+        rw sigma.ext_iff at h, dsimp only at h, obtain ⟨h₁, h₂⟩ := h,
+        rw allowable_path.smul_near_litter_fst at h₁,
+        rw litter.to_near_litter_fst at h₁,
+
+        -- I'd like to appeal to smul_f_map_path, but here π is too low to work with, at level δ
+        -- rather than β. How to progress?
+        have H := smul_f_map_path (B.path.comp C) hγ hδ hγδ _ t, -- we can't easily fill the _!
         sorry, } } },
   { refine spec.flex_cond.all (λ L hL, _) (λ L hL, _),
     { rw spec.domain_sup, exact or.inl (hdom L hL), },
