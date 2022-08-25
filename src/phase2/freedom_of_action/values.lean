@@ -358,17 +358,126 @@ exact hdisj ⟨ha'1.1, ha1.1⟩,
 }
 end
 
--- Whoever's proving this, first factor out the one-directional lemma.
--- Then it should follow from symmetry and involutivity.
 lemma value_mem_value_iff_mem {σ : allowable_spec B} {A : extended_index B}
   {a : atom} (ha : (inl a, A) ∈ σ.val.domain) {N : near_litter} (hN : (inr N, A) ∈ σ.val.domain) :
   σ.atom_value A a ha ∈ (σ.near_litter_value A N hN).2.val ↔ a ∈ N.2.val :=
-sorry
+begin
+revert σ a N,
+suffices : ∀ {σ : allowable_spec B} {a : atom} {N : near_litter} (ha : (inl a, A) ∈ σ.val.domain) (hN : (inr N, A) ∈ σ.val.domain) (h : σ.atom_value A a ha ∈ (σ.near_litter_value A N hN).snd.val), a ∈ N.snd.val,
+{
+  intros, split, apply this,
+  intro h,
+  specialize @this σ⁻¹ (σ.atom_value A a ha) (σ.near_litter_value A N hN) _ _ _,
+  apply atom_value_spec_range, apply near_litter_value_spec_range,
+  rw atom_value_eq_of_mem_inv,
+  have : σ⁻¹.near_litter_value A (σ.near_litter_value A N hN) _ = N,
+  {
+   apply (σ.property.forward.one_to_one A).near_litter,
+   simp only [ mem_set_of_eq], apply near_litter_value_spec σ⁻¹ A (σ.near_litter_value A N hN),
+   simp only [mem_set_of_eq],
+   apply near_litter_value_spec,
+  },
+  rw this,
+  exact h,
+  apply atom_value_spec,
+  exact this,
+},
+intros,
+simp only [subtype.val_eq_coe, mem_domain] at hN,
+obtain ⟨⟨⟨_, _⟩ | ⟨N', N₂⟩, A'⟩, hcond, hcond2⟩ :=hN, {simp only [binary_condition.domain_mk,
+map_inl, prod.mk.inj_iff, false_and] at hcond2, exfalso, exact hcond2,},
+simp only [binary_condition.domain_mk, map_inr, prod.mk.inj_iff] at hcond2,
+obtain ⟨rfl, rfl⟩ := hcond2,
+obtain ⟨M, ⟨hM, ⟨sd,hsd1,hsd2⟩ ⟩ ⟩ :=  σ.property.forward.near_litter_cond N' N₂ A' hcond,
+have : σ.near_litter_value A' N' hN = N₂,
+rw ← (σ.property.backward.one_to_one A').near_litter _ (near_litter_value_spec σ A' N' hN) hcond, refl,
+rw [this,hsd2] at h,
+
+by_cases ha2 : a ∈ litter_set (N'.fst),
+{
+--have : σ.atom_value A' a ha ∈ M.smd.val
+by_contra h4,
+obtain ⟨N₃, h3, atom_map, ham, ham2⟩ | ⟨hL, h2⟩ | ⟨L', hL, h2, h3⟩ := σ.property.forward.atom_cond N'.1 A',
+{
+obtain rfl := (σ.property.backward.one_to_one A').near_litter _ hM h3,
+rw ham2 at h,
+cases h, all_goals {have h := h.2, dsimp[(range)] at h, push_neg at h_1},
+{
+  have := (σ.property.backward.one_to_one A').atom _ (atom_value_spec σ A' a ha) (hsd1 ⟨a, or.inl ⟨ha2, h4⟩⟩),--⟨a, or.inl ⟨ha2, h4⟩⟩
+specialize h_1 ⟨a, or.inl ⟨ha2, h4⟩⟩,
+exact h_1 (eq.symm this),
+},
+{
+have := (σ.property.backward.one_to_one A').atom _ (atom_value_spec σ A' a ha) (ham a ha2),--⟨a, or.inl ⟨ha2, h4⟩⟩
+specialize h_1 ⟨a, ha2⟩,
+exact h_1 (eq.symm this),
+}
+},
+{
+simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and] at hL,
+specialize hL _ hM,
+simp only [binary_condition.domain_mk, map_inr, eq_self_iff_true, not_true] at hL, exact hL,
+},
+{
+obtain rfl := (σ.property.backward.one_to_one A').near_litter _ hM hL,
+have : σ.atom_value A' a ha ∉ range sd,
+{
+cases h,
+exact h.2,
+exfalso, exact h.2 ((h3 (atom_value_spec σ A' a ha)).mp ha2)
+},
+dsimp[(range)] at this, push_neg at this_1,
+have h5:= (σ.property.backward.one_to_one A').atom _ (atom_value_spec σ A' a ha) (hsd1 ⟨a, or.inl ⟨ha2, h4⟩⟩),--⟨a, or.inl ⟨ha2, h4⟩⟩
+specialize this_1 ⟨a, or.inl ⟨ha2, h4⟩⟩,
+exact this_1 (eq.symm h5),
+}
+
+},
+{suffices : σ.atom_value A' a ha ∈ range sd,
+{simp only [set.mem_range, set_coe.exists] at this,
+obtain ⟨a', ha', ha'2⟩ := this,
+specialize hsd1 ⟨a', ha'⟩, rw ha'2 at hsd1, simp only [subtype.coe_mk, subtype.val_eq_coe] at hsd1,
+obtain rfl := (σ.property.forward.one_to_one A').atom _ (atom_value_spec σ A' a ha) hsd1,
+rw symm_diff_def at ha',
+cases ha',
+exfalso, exact ha2 ha'_1.1,
+exact ha'_1.1,
+},
+cases h,
+{exfalso,
+obtain ⟨N₃, h3, atom_map, ham, ham2⟩ | ⟨hL, h2⟩ | ⟨L', hL, h2, h3⟩ := σ.property.forward.atom_cond N'.1 A',
+{
+obtain rfl := (σ.property.backward.one_to_one A').near_litter _ h3 hM,
+rw ham2 at h, have h := h.1,
+simp only [set.mem_range, set_coe.exists] at h,
+obtain ⟨a', ha', ha'2⟩ := h,
+specialize ham a' ha',
+rw ha'2 at ham,
+obtain rfl := (σ.property.forward.one_to_one A').atom _ (atom_value_spec σ A' a ha) ham,
+exact ha2 ha',
+},
+{
+simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and] at hL,
+specialize hL _ hM,
+simp only [binary_condition.domain_mk, map_inr, eq_self_iff_true, not_true] at hL, exact hL,
+},
+{
+obtain rfl := (σ.property.backward.one_to_one A').near_litter _ hM hL,
+exact ha2 ((h3 (atom_value_spec σ A' a ha)).mpr h.1),
+}
+},
+exact h.1,
+}
+end
 
 lemma mem_value_iff_value_mem {σ : allowable_spec B} {A : extended_index B}
   {a : atom} (ha : (inl a, A) ∈ σ.val.range) {N : near_litter} (hN : (inr N, A) ∈ σ.val.domain) :
-  a ∈ (σ.near_litter_value A N hN).2.val ↔ σ⁻¹.atom_value A a ha ∈ N.2.val :=
-sorry
+  a ∈ (σ.near_litter_value A N hN).2.val ↔ σ⁻¹.atom_value A a ha ∈ N.2.val := begin
+  suffices : (σ.atom_value A (σ⁻¹.atom_value A a ha) (atom_value_mem_range σ⁻¹ A a ha)) ∈
+  (σ.near_litter_value A N hN).snd.val ↔ σ⁻¹.atom_value A a ha ∈ N.snd.val,
+  convert this, symmetry, convert atom_value_inv σ⁻¹ A a ha,  simp only [inv_inv],
+  apply value_mem_value_iff_mem,
+end
 
 end allowable_spec
 end con_nf
