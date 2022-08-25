@@ -21,7 +21,7 @@ done in the reverse direction with the same bijections, so that all of the `A`-f
 now defined in this new allowable partial permutation.
 -/
 
-open set sum
+open cardinal set sum
 open_locale cardinal
 
 universe u
@@ -171,19 +171,19 @@ def precise_litter_image (bij : rough_bijection A σ.val.domain σ.val.range)
   begin
     rw precise_atom_image_range,
     unfold is_near_litter is_near small symm_diff,
-    refine (cardinal.mk_union_le _ _).trans_lt (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
+    refine (mk_union_le _ _).trans_lt (add_lt_of_lt κ_regular.aleph_0_le _ _),
     { rw [← sup_eq_union, sdiff_sup, ← inf_eq_inter, sdiff_inf_self_left],
-      refine lt_of_le_of_lt (cardinal.mk_le_mk_of_subset $ inter_subset_left _ _) _,
+      refine lt_of_le_of_lt (mk_le_mk_of_subset $ inter_subset_left _ _) _,
       convert small_of_rough_bijection bij L,
       ext a,
       split,
       { rintro ⟨ha₁, ha₂⟩, simp only [mem_set_of_eq, not_not_mem] at ha₂, exact ⟨ha₁, ha₂⟩ },
       { rintro ⟨ha₁, ha₂⟩, exact ⟨ha₁, function.eval ha₂⟩ } },
-    { rw [← sup_eq_union, sup_sdiff, ← inf_eq_inter, inf_sdiff, sdiff_self, bot_inf_eq,
-        bot_sup_eq],
-      refine lt_of_le_of_lt (cardinal.mk_le_mk_of_subset $ @sdiff_le _ _ (litter_set _) _) _,
-      refine lt_of_le_of_lt cardinal.mk_range_le _,
-      convert small_of_not_mem_spec L using 1, rw cardinal.mk_sep, refl },
+    { rw [← sup_eq_union, sup_sdiff, ← inf_eq_inter, inf_sdiff, sdiff_self, bot_inf_eq, bot_sup_eq],
+      refine ((mk_le_mk_of_subset $ diff_subset _ _).trans mk_range_le).trans_lt _,
+      convert small_of_not_mem_spec L using 1,
+      rw mk_sep,
+      refl }
 end⟩
 
 lemma precise_litter_image_not_mem (bij : rough_bijection A σ.val.domain σ.val.range)
@@ -763,21 +763,21 @@ begin
   { exact ⟨σ, le_rfl, h⟩ },
   obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := σ.property.flex_cond A,
   swap, { cases h (hdom L hL) },
-  have bij : rough_bijection A σ.val.domain σ.val.range :=
-    (cardinal.eq.mp $ eq.trans hdom.symm hrge).some,
+  obtain ⟨bij⟩ :nonempty (rough_bijection A σ.val.domain σ.val.range) :=
+    cardinal.eq.1 (hdom.symm.trans hrge),
   have abij : ∀ L, precise_atom_bijection L (bij L),
-  { refine λ L, (cardinal.eq.mp _).some,
-    rw [cardinal.mk_sep, cardinal.mk_sep],
+  { refine λ L, (cardinal.eq.1 _).some,
+    rw [mk_sep, mk_sep],
     transitivity #κ,
-    { have := cardinal.mk_sum_compl {a : litter_set L | (inl a.val, A) ∈ σ.val.domain},
+    { have := mk_sum_compl {a : litter_set L | (inl a.val, A) ∈ σ.val.domain},
       rw mk_litter_set at this,
-      refine cardinal.eq_of_add_eq_of_aleph_0_le this _ κ_regular.aleph_0_le,
-      convert (small_of_not_mem_spec L) using 1, rw cardinal.mk_sep },
-    { have := cardinal.mk_sum_compl
+      refine eq_of_add_eq_of_aleph_0_le this _ κ_regular.aleph_0_le,
+      convert (small_of_not_mem_spec L) using 1, rw mk_sep },
+    { have := mk_sum_compl
         {a : litter_set (bij L) | (inl a.val, A) ∈ σ.val.range},
       rw mk_litter_set at this, symmetry,
-      refine cardinal.eq_of_add_eq_of_aleph_0_le this _ κ_regular.aleph_0_le,
-      convert (small_of_rough_bijection bij L) using 1, rw cardinal.mk_sep } },
+      refine eq_of_add_eq_of_aleph_0_le this _ κ_regular.aleph_0_le,
+      convert (small_of_rough_bijection bij L) using 1, rw mk_sep } },
   set abij' : ∀ L, precise_atom_bijection (bij.inv L) L := λ L, (abij (bij.inv L)).trans {
     to_fun := λ a, ⟨a,
       by simpa only [rough_bijection.inv, subtype.val_eq_coe, equiv.apply_symm_apply] using a.2.1,
