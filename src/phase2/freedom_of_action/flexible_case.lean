@@ -597,7 +597,7 @@ begin
       { right,
         refine ⟨⟨L, hL, h⟩, _⟩,
         simp only [equiv.inv_fun_as_coe, equiv.apply_symm_apply], } } },
-  { obtain ⟨hdom, hrge⟩ := σ.prop.flex_cond C,
+  { obtain ⟨hdom, hrge⟩ | ⟨hdom, hrge⟩ := σ.prop.flex_cond C,
     { refine spec.flex_cond.co_large _ _,
       { convert hdom, ext,
         rw and.congr_right_iff,
@@ -609,7 +609,7 @@ begin
           { exact h },
           { cases hL, cases h rfl },
           { cases congr_arg prod.snd hL, cases h rfl } },
-        { sorry } },
+        { exact or.inl ∘ or.inl } },
       { sorry } },
     { sorry } }
 end

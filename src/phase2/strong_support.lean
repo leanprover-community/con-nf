@@ -206,10 +206,13 @@ begin
     rw [eq_union, eq_union, eq_union],
     clear eq_union,
 
+    -- litter and its atoms
     unfold small,
     refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
     { simp only [prod.mk.inj_iff, false_and, and_false, exists_false, set.set_of_false, mk_emptyc],
       exact lt_of_lt_of_le cardinal.aleph_0_pos κ_regular.aleph_0_le },
+
+    -- near-litter and its litter
     refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
     { by_cases litter_set c.fst = c.snd,
       { simp only [ne.def, prod.mk.inj_iff, exists_eq_right_right', set.coe_set_of],
@@ -222,6 +225,8 @@ begin
         refine set.ext (λ x, ⟨_, λ hx, ⟨c, h, C, hx, rfl⟩⟩),
         rintro ⟨_, _, _, ⟨⟩, ⟨⟩⟩,
         exact rfl } },
+
+    -- atom and its near-litters
     refine lt_of_le_of_lt (cardinal.mk_union_le _ _) (cardinal.add_lt_of_lt κ_regular.aleph_0_le _ _),
     { convert lt_of_le_of_lt (@cardinal.mk_image_le _ _ _ _) c.snd.prop using 4,
       swap, exact λ a, (sum.inl a, C),
@@ -232,7 +237,75 @@ begin
         exact ⟨a, ha, rfl⟩ },
       { rintro ⟨a, ha, ⟨⟩⟩,
         exact ⟨c, a, ha, C, rfl, rfl⟩ } },
-    sorry }
+
+    -- litter and its f-map
+    have tangle_path_unique : ∀ (β : Λ) (γ : type_index) (δ : Λ) (hγ : γ < β) (hδ : δ < β) (A : path (B : type_index) β), {t : tangle_path (lt_index.mk' hγ (B.path.comp A) : le_index α) | ((sum.inr c : atom ⊕ near_litter), C) = (sum.inr (f_map_path hγ hδ t).to_near_litter, (A.cons (with_bot.coe_lt_coe.2 hδ)).cons (with_bot.bot_lt_coe δ))}.subsingleton,
+    { rintros β γ δ hγ hδ A t ht t' ht',
+      obtain ⟨-, hheq⟩ := f_map_path_injective (litter.to_near_litter_injective
+        (sum.inr.inj (prod.eq_iff_fst_eq_snd_eq.1 $ ht.symm.trans ht').1)),
+      exact eq_of_heq hheq },
+    have small_carrier : ∀ (β : Λ) (γ : type_index) (δ : Λ) (hγ : γ < β) (hδ : δ < β) (A : path (B : type_index) β) (t : tangle_path (lt_index.mk' hγ (B.path.comp A) : le_index α)), small ((designated_support_path t).to_support.carrier) := λ _ _ _ _ _ _ t, (designated_support_path t).small,
+    have image_of : ∀ (β : Λ) (γ : type_index) (δ : Λ) (hγ : γ < β) (hδ : δ < β) (A : path (B : type_index) β), {d :
+   support_condition ↑B | ∃ (t : tangle_path ↑(lt_index.mk' hγ (B.path.comp A)))
+   (c_1 : support_condition (lt_index.mk' hγ (B.path.comp A) : le_index α).index),
+   c_1 ∈ (designated_support_path t).to_support.carrier ∧
+     d = (prod.fst c_1, (A.cons hγ).comp c_1.snd) ∧
+       ((sum.inr c : atom ⊕ near_litter), C) = (sum.inr (f_map_path hγ hδ t).to_near_litter, (A.cons (with_bot.coe_lt_coe.2 hδ)).cons (with_bot.bot_lt_coe δ))} = (λ d, (prod.fst d, (A.cons hγ).comp d.snd)) '' ⋃₀ ((λ x : tangle_path (lt_index.mk' hγ (B.path.comp A) : le_index α), (designated_support_path x).to_support.carrier) '' {t : tangle_path (lt_index.mk' hγ (B.path.comp A) : le_index α) | ((sum.inr c : atom ⊕ near_litter), C) = (sum.inr (f_map_path hγ hδ t).to_near_litter, (A.cons (with_bot.coe_lt_coe.2 hδ)).cons (with_bot.bot_lt_coe δ))}),
+    { intros _ _ _ _ _ _,
+      ext ⟨x, y⟩,
+      split,
+      { rintro ⟨t, e, he, ⟨⟩, hc⟩,
+        exact ⟨_, ⟨_, ⟨_, hc, rfl⟩, he⟩, rfl⟩, },
+      { rintro ⟨_, ⟨_, ⟨_, hc, ⟨⟩⟩, he⟩, ⟨⟩⟩,
+        exact ⟨_, _, he, rfl, hc⟩, }, },
+    have type_index_lt_κ := lt_of_eq_of_lt mk_type_index Λ_lt_κ,
+
+    have exists_Union : ∀ T (p : support_condition B → T → Prop), {d | ∃ a, p d a} = ⋃ a, {d | p d a},
+    { refine λ _ p, set.ext (λ x, ⟨_, _⟩),
+      { rintro ⟨a, hx⟩,
+        exact ⟨_, ⟨a, rfl⟩, hx⟩, },
+      { rintro ⟨_, ⟨a, rfl⟩, hx⟩,
+        exact ⟨a, hx⟩, } },
+    have exists_Prop : ∀ ⦃T : Prop⦄ ⦃p : support_condition B → T → Prop⦄, (∀ a, #{d | p d a} < #κ) → #{d | ∃ a, p d a} < #κ,
+    { intros _ p h,
+      by_cases a : T,
+      { refine lt_of_eq_of_lt _ (h a),
+        convert rfl using 4,
+        ext,
+        refine ⟨λ hx, ⟨a, hx⟩, _⟩,
+        rintro ⟨a', hx⟩,
+        obtain rfl : a = a' := rfl,
+        exact hx },
+      { convert (cardinal.mk_emptyc _).trans_lt κ_regular.pos using 3,
+        ext,
+        exact ⟨λ hx, a hx.some, λ f, f.rec _⟩, } },
+    have eq_inter : ∀ (p q : support_condition B → Prop), {d | p d ∧ q d} = {d | p d} ∩ {d | q d},
+    { refine λ p q, set.ext (λ d, _),
+      dsimp only,
+      refl, },
+
+    rw exists_Union,
+    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk (cardinal.sum_lt_of_is_regular κ_regular Λ_lt_κ $ λ β, _),
+    rw exists_Union,
+    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk (cardinal.sum_lt_of_is_regular κ_regular type_index_lt_κ $ λ γ, _),
+    rw exists_Union,
+    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk (cardinal.sum_lt_of_is_regular κ_regular Λ_lt_κ $ λ δ, _),
+    refine exists_Prop (λ hγ, _),
+    refine exists_Prop (λ hδ, _),
+    rw eq_inter,
+    refine lt_of_le_of_lt (cardinal.mk_le_mk_of_subset $ set.inter_subset_right _ _) _,
+    rw exists_Union,
+    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk (cardinal.sum_lt_of_is_regular κ_regular _ $ λ A, _),
+    { sorry },
+    rw image_of,
+    refine lt_of_le_of_lt mk_image_le (lt_of_le_of_lt (mk_sUnion_le _) $ mul_lt_of_lt κ_regular.aleph_0_le _ _),
+    { refine lt_of_le_of_lt mk_image_le _,
+      exact lt_of_le_of_lt (le_one_iff_subsingleton.2 $ (set.subsingleton_coe _).2 $ tangle_path_unique β γ δ hγ hδ A) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le), },
+    refine supr_lt_of_is_regular κ_regular _ _,
+    { refine lt_of_le_of_lt mk_image_le _,
+      exact lt_of_le_of_lt (le_one_iff_subsingleton.2 $ (set.subsingleton_coe _).2 $ tangle_path_unique β γ δ hγ hδ A) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le), },
+    rintro ⟨s, ⟨t, ht, rfl⟩⟩,
+    exact small_carrier β γ δ hγ hδ A t, }
 end
 
 /-- There are only `<κ`-many things that recursively constrain any given support condition.
