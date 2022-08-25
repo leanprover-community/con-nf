@@ -205,7 +205,24 @@ private lemma mk_path_n_lt_kappa : ∀ (A B : type_index) (n : ℕ), #{p : path 
     { rintro ⟨⟩, } }
 end
 | A B (nat.succ N) := begin
-  sorry
+  have : {p : path A B // p.length = N.succ} ≃ Σ (C : type_index), {q : path A C // q.length = N ∧ hom C B},
+  { refine ⟨_, _, _, _⟩,
+    { rintro ⟨⟨⟩ | ⟨C, _, q, hhom⟩, hp⟩,
+      { cases hp },
+      { simp only [path.length_cons, nat.add_one] at hp,
+        refine ⟨C, q, hp, hhom⟩, } },
+    { rintro ⟨C, q, hp, hhom⟩,
+      refine ⟨q.cons hhom, _⟩,
+      rw [← nat.add_one, ← hp, path.length_cons], },
+  { rintro ⟨p, hp⟩,
+    cases p,
+    { cases hp },
+    simp only [eq_self_iff_true, heq_iff_eq, and_self] },
+  { rintro ⟨C, q, hq, hhom⟩,
+    simp only [eq_self_iff_true, heq_iff_eq, and_self] }, },
+  rw [mk_congr this, mk_sigma _],refine sum_lt_of_is_regular κ_regular (lt_of_eq_of_lt mk_type_index Λ_lt_κ) _,
+  intro C,
+  refine lt_of_le_of_lt (mk_subtype_mono $ λ x, and.left) (mk_path_n_lt_kappa A C N),
 end
 
 private lemma mk_path_lt_kappa {B β : type_index} : cardinal.mk (@path type_index _ B β) < #κ :=
@@ -213,8 +230,9 @@ begin
   have : (Σ (n : ℕ), {p : path B β // p.length = n}) ≃ path B β,
   { refine ⟨λ p, p.snd.val, λ p, ⟨p.length, p, rfl⟩, _, λ p, rfl⟩,
     rintro ⟨n, p, rfl⟩, refl },
-  rw [← mk_congr this, mk_sigma _],
-  sorry --refine sum_lt_of_is_regular κ_regular _ mk_path_n_lt_kappa,
+  set f := λ n, {p : path B β // p.length = n},
+  rw [← mk_congr this, mk_sigma f],
+  sorry--refine @sum_lt_of_is_regular nat _ κ κ_regular _ _,
 end
 
 /-- Each condition has `<κ`-many immediate predecessors. -/
