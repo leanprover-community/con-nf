@@ -180,6 +180,43 @@ noncomputable! def support.closure {t : tangle_path B} (S : support B (allowable
   support B (allowable_path B) t :=
 ⟨potential_support.closure S, potential_support.closure_supports t S⟩
 
+private lemma mk_path_n_lt_kappa : ∀ (A B : type_index) (n : ℕ), #{p : path A B // p.length = n} < #κ
+| A B 0 := begin
+  by_cases A = B,
+  { subst h,
+    convert lt_of_eq_of_lt (mk_singleton $ @path.nil _ _ A) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le) using 3,
+    ext,
+    split,
+    { intro hx,
+      cases x,
+      { exact set.mem_singleton _, },
+      { rw path.length_cons at hx,
+        cases hx } },
+    { rintro ⟨⟩,
+      exact path.length_nil, } },
+  { convert lt_of_eq_of_lt (mk_emptyc $ @path _ _ A B) (lt_of_lt_of_le aleph_0_pos κ_regular.aleph_0_le) using 3,
+    ext,
+    split,
+    { intro hx,
+      cases x,
+      { exact h rfl, },
+      { rw path.length_cons at hx,
+        cases hx } },
+    { rintro ⟨⟩, } }
+end
+| A B (nat.succ N) := begin
+  sorry
+end
+
+private lemma mk_path_lt_kappa {B β : type_index} : cardinal.mk (@path type_index _ B β) < #κ :=
+begin
+  have : (Σ (n : ℕ), {p : path B β // p.length = n}) ≃ path B β,
+  { refine ⟨λ p, p.snd.val, λ p, ⟨p.length, p, rfl⟩, _, λ p, rfl⟩,
+    rintro ⟨n, p, rfl⟩, refl },
+  rw [← mk_congr this, mk_sigma _],
+  sorry --refine sum_lt_of_is_regular κ_regular _ mk_path_n_lt_kappa,
+end
+
 /-- Each condition has `<κ`-many immediate predecessors. -/
 lemma mk_constrains (c : support_condition B) : small {d | d ≺ c} :=
 begin
@@ -295,15 +332,16 @@ begin
     rw eq_inter,
     refine lt_of_le_of_lt (cardinal.mk_le_mk_of_subset $ set.inter_subset_right _ _) _,
     rw exists_Union,
-    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk (cardinal.sum_lt_of_is_regular κ_regular _ $ λ A, _),
-    { sorry },
+    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk (cardinal.sum_lt_of_is_regular κ_regular mk_path_lt_kappa $ λ A, _),
     rw image_of,
     refine lt_of_le_of_lt mk_image_le (lt_of_le_of_lt (mk_sUnion_le _) $ mul_lt_of_lt κ_regular.aleph_0_le _ _),
     { refine lt_of_le_of_lt mk_image_le _,
-      exact lt_of_le_of_lt (le_one_iff_subsingleton.2 $ (set.subsingleton_coe _).2 $ tangle_path_unique β γ δ hγ hδ A) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le), },
+      exact lt_of_le_of_lt (le_one_iff_subsingleton.2 $ (set.subsingleton_coe _).2 $
+          tangle_path_unique β γ δ hγ hδ A) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le), },
     refine supr_lt_of_is_regular κ_regular _ _,
     { refine lt_of_le_of_lt mk_image_le _,
-      exact lt_of_le_of_lt (le_one_iff_subsingleton.2 $ (set.subsingleton_coe _).2 $ tangle_path_unique β γ δ hγ hδ A) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le), },
+      exact lt_of_le_of_lt (le_one_iff_subsingleton.2 $ (set.subsingleton_coe _).2 $
+          tangle_path_unique β γ δ hγ hδ A) (lt_of_lt_of_le one_lt_aleph_0 κ_regular.aleph_0_le), },
     rintro ⟨s, ⟨t, ht, rfl⟩⟩,
     exact small_carrier β γ δ hγ hδ A t, }
 end
