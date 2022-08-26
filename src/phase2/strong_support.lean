@@ -230,9 +230,10 @@ begin
   have : (Σ (n : ℕ), {p : path B β // p.length = n}) ≃ path B β,
   { refine ⟨λ p, p.snd.val, λ p, ⟨p.length, p, rfl⟩, _, λ p, rfl⟩,
     rintro ⟨n, p, rfl⟩, refl },
-  set f := λ n, {p : path B β // p.length = n},
-  rw [← mk_congr this, mk_sigma f],
-  sorry--refine @sum_lt_of_is_regular nat _ κ κ_regular _ _,
+  rw [← mk_congr this, mk_sigma _],
+  refine sum_lt_lift_of_is_regular κ_regular _ (mk_path_n_lt_kappa _ _),
+  rw [mk_denumerable, lift_aleph_0],
+  exact lt_of_le_of_lt Λ_limit.aleph_0_le Λ_lt_κ
 end
 
 /-- Each condition has `<κ`-many immediate predecessors. -/
