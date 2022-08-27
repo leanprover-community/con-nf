@@ -290,6 +290,42 @@ begin
         exact ⟨c, a, ha, C, rfl, rfl⟩ } },
 
     -- litter and its f-map
+    ---- extracting vars
+    have exists_Union : ∀ T (p : support_condition B → T → Prop), {d | ∃ a, p d a} = ⋃ a, {d | p d a},
+    { refine λ _ p, set.ext (λ x, ⟨_, _⟩),
+      { rintro ⟨a, hx⟩,
+        exact ⟨_, ⟨a, rfl⟩, hx⟩, },
+      { rintro ⟨_, ⟨a, rfl⟩, hx⟩,
+        exact ⟨a, hx⟩, } },
+    have exists_Prop : ∀ ⦃T : Prop⦄ ⦃p : support_condition B → T → Prop⦄, (∀ a, #{d | p d a} < #κ) → #{d | ∃ a, p d a} < #κ,
+    { intros _ p h,
+      by_cases a : T,
+      { convert lt_of_eq_of_lt rfl (h a) using 3,
+        exact set.ext (λ x, ⟨λ a'hx, a'hx.some_spec, λ hx, ⟨a, hx⟩⟩) },
+      { convert (cardinal.mk_emptyc _).trans_lt κ_regular.pos using 3,
+        exact set.ext (λ x, ⟨λ hx, a hx.some, λ f, f.rec _⟩), } },
+    have eq_inter : ∀ (p q : support_condition B → Prop), {d | p d ∧ q d} = {d | p d} ∩ {d | q d} :=
+      λ p q, set.ext (λ d, by refl),
+    have type_index_lt_κ := lt_of_eq_of_lt mk_type_index Λ_lt_κ,
+
+    rw exists_Union,
+    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk
+      (cardinal.sum_lt_of_is_regular κ_regular Λ_lt_κ $ λ β, _),
+    rw exists_Union,
+    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk
+      (cardinal.sum_lt_of_is_regular κ_regular type_index_lt_κ $ λ γ, _),
+    rw exists_Union,
+    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk
+      (cardinal.sum_lt_of_is_regular κ_regular Λ_lt_κ $ λ δ, _),
+    refine exists_Prop (λ hγ, _),
+    refine exists_Prop (λ hδ, _),
+    rw eq_inter,
+    refine lt_of_le_of_lt (cardinal.mk_le_mk_of_subset $ set.inter_subset_right _ _) _,
+    rw exists_Union,
+    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk
+      (cardinal.sum_lt_of_is_regular κ_regular (mk_path_lt_regular (#κ) κ_regular Λ_lt_κ) $ λ A, _),
+
+    ---- small supports are in fact small
     have tangle_path_unique : ∀ (β : Λ) (γ : type_index) (δ : Λ) (hγ : γ < β) (hδ : δ < β) (A : path (B : type_index) β), {t : tangle_path (lt_index.mk' hγ (B.path.comp A) : le_index α) | ((sum.inr c : atom ⊕ near_litter), C) = (sum.inr (f_map_path hγ hδ t).to_near_litter, (A.cons (with_bot.coe_lt_coe.2 hδ)).cons (with_bot.bot_lt_coe δ))}.subsingleton,
     { intros β γ δ hγ hδ A t ht t' ht',
       obtain ⟨-, hheq⟩ := f_map_path_injective (litter.to_near_litter_injective
@@ -308,41 +344,6 @@ begin
         exact ⟨_, ⟨_, ⟨_, hc, rfl⟩, he⟩, rfl⟩, },
       { rintro ⟨_, ⟨_, ⟨_, hc, ⟨⟩⟩, he⟩, ⟨⟩⟩,
         exact ⟨_, _, he, rfl, hc⟩, }, },
-    have type_index_lt_κ := lt_of_eq_of_lt mk_type_index Λ_lt_κ,
-
-    have exists_Union : ∀ T (p : support_condition B → T → Prop), {d | ∃ a, p d a} = ⋃ a, {d | p d a},
-    { refine λ _ p, set.ext (λ x, ⟨_, _⟩),
-      { rintro ⟨a, hx⟩,
-        exact ⟨_, ⟨a, rfl⟩, hx⟩, },
-      { rintro ⟨_, ⟨a, rfl⟩, hx⟩,
-        exact ⟨a, hx⟩, } },
-    have exists_Prop : ∀ ⦃T : Prop⦄ ⦃p : support_condition B → T → Prop⦄, (∀ a, #{d | p d a} < #κ) → #{d | ∃ a, p d a} < #κ,
-    { intros _ p h,
-      by_cases a : T,
-      { convert lt_of_eq_of_lt rfl (h a) using 3,
-        exact set.ext (λ x, ⟨λ a'hx, a'hx.some_spec, λ hx, ⟨a, hx⟩⟩) },
-      { convert (cardinal.mk_emptyc _).trans_lt κ_regular.pos using 3,
-        exact set.ext (λ x, ⟨λ hx, a hx.some, λ f, f.rec _⟩), } },
-    have eq_inter : ∀ (p q : support_condition B → Prop), {d | p d ∧ q d} = {d | p d} ∩ {d | q d} :=
-      λ p q, set.ext (λ d, by refl),
-
-    ---- extracting vars
-    rw exists_Union,
-    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk
-      (cardinal.sum_lt_of_is_regular κ_regular Λ_lt_κ $ λ β, _),
-    rw exists_Union,
-    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk
-      (cardinal.sum_lt_of_is_regular κ_regular type_index_lt_κ $ λ γ, _),
-    rw exists_Union,
-    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk
-      (cardinal.sum_lt_of_is_regular κ_regular Λ_lt_κ $ λ δ, _),
-    refine exists_Prop (λ hγ, _),
-    refine exists_Prop (λ hδ, _),
-    rw eq_inter,
-    refine lt_of_le_of_lt (cardinal.mk_le_mk_of_subset $ set.inter_subset_right _ _) _,
-    rw exists_Union,
-    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk
-      (cardinal.sum_lt_of_is_regular κ_regular (mk_path_lt_regular (#κ) κ_regular Λ_lt_κ) $ λ A, _),
 
     rw image_of,
     refine lt_of_le_of_lt mk_image_le
