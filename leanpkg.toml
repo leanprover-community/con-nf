@@ -1,8 +1,8 @@
 [package]
 name = "con-nf"
 version = "0.1"
-lean_version = "leanprover-community/lean:3.47.0"
+lean_version = "leanprover-community/lean:3.48.0"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "13618c1c5af6573d6974330af2a9010d6275e680"}
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "616e6ef39709c8b1a7e9e226413ac7660a27871b"}
