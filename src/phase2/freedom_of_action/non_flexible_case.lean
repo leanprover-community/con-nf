@@ -264,19 +264,18 @@ lemma non_flex_union_non_flex_cond_forward :
   spec.non_flex_cond B (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) :=
 begin
   unfold spec.non_flex_cond,
-  intros β γ δ hγ hδ hγδ N C t hf π hπ,
-  unfold struct_perm.satisfies struct_perm.satisfies_cond at hπ,
-  have h := hπ hf,
-  dsimp only [sum.elim_inr] at h,
-  rw ← h,
-  rw ← smul_f_map_path (B.path.comp C) hγ hδ hγδ _ t,
-  convert near_litter_perm.smul_to_near_litter_eq _ _ using 1,
-  unfold to_near_litter_perm,
-  simp only [lower_self, monoid_hom.comp_id, allowable_path.to_struct_perm_derivative_comp,
-    mul_equiv.coe_to_monoid_hom, coe_to_bot_iso_symm, of_bot_smul],
-  rw [← allowable_path.to_struct_perm_derivative_comp, allowable_path.smul_to_struct_perm,
-    allowable_path.derivative_comp, allowable_path.derivative_comp,
-    allowable_path.smul_derivative_bot],
+  intros β' γ' δ' hγ' hδ' hγδ' N' C' t' ht' π' hπ',
+  cases ht',
+  { refine σ.property.forward.non_flex_cond hγ' hδ' hγδ' N' C' t' ht' π' _,
+    refine struct_perm.satisfies.mono _ hπ',
+    rw lower_sup,
+    exact le_sup_left, },
+  rw [set_like.mem_coe, mem_new_non_flex_constraint] at ht',
+  simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff] at ht',
+  rw ht'.1.2,
+  rw ← ht'.1.1,
+  -- Once again, we need the unpacked coherence condition.
+  sorry
 end
 
 lemma non_flex_union_non_flex_cond_backward
@@ -289,7 +288,7 @@ begin
   cases ht',
   { refine σ.property.backward.non_flex_cond hγ' hδ' hγδ' N C' t' ht' π' _,
     refine satisfies.mono _ hπ',
-    rw spec.inv_le_inv,
+    rw [lower_inv, lower_inv, lower_sup, spec.inv_le_inv],
     exact le_sup_left, },
   { simp only [set_like.mem_coe, mem_new_non_flex_constraint, prod.mk.inj_iff] at ht',
 
@@ -300,13 +299,8 @@ begin
 
     -- Appeal to `non_flex_union_unique hγ hδ hγδ C t π hπ`.
     -- However, this is currently broken.
-    rw ← smul_f_map_path _ _ _ hγδ',
-    rw [ht'.1.1, ← inv_smul_eq_iff.mpr ht'.1.2, struct_perm.smul_near_litter_fst],
-    have := congr_arg sigma.fst ht'.1.2,
-    rw [struct_perm.smul_near_litter_fst,
-      litter.to_near_litter_fst, litter.to_near_litter_fst] at this,
-    rw ← allowable_path.to_struct_perm_derivative _ _ π at this,
-    rw allowable_path.smul_to_struct_perm at this,
+    rw ht'.1.1,
+    rw litter.to_near_litter_fst,
     sorry }
 end
 

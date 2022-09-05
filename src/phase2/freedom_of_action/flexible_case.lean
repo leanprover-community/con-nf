@@ -517,41 +517,27 @@ begin
       sorry } }
 end
 
--- lemma unpack_coh_cond ⦃β : Λ⦄
---   ⦃γ : type_index⦄
---   ⦃δ : Λ⦄
---   (hγβ : γ < ↑β)
---   (hδβ : δ < β)
---   (hδγ : γ ≠ ↑δ)
---   (p : path ↑B ↑β)
---   (t : tangle_path ↑(lt_index.mk' hγβ (B.path.comp p)))
---   (π : allowable_path B) :
---   derivative ((p.cons $ coe_lt_coe.mpr hδβ).cons (bot_lt_coe _)) π.to_struct_perm •
---       (f_map_path hγβ hδβ t).to_near_litter =
---     (f_map_path hγβ hδβ $ (π.derivative_comp B p).derivative hγβ
---       {index := ↑β, path := B.path.comp p} • t).to_near_litter :=
--- begin
---   sorry,
--- end
-
 lemma flex_union_non_flex_cond :
   spec.non_flex_cond B
     (σ.val ⊔ bij.new_flex_litters abij ⊔ bij.new_inverse_flex_litters abij') :=
 begin
   unfold spec.non_flex_cond,
-  intros β γ δ hγ hδ hγδ N C t hf π hπ,
+  intros β γ δ hγ hδ hγδ N C t ht π hπ,
   unfold struct_perm.satisfies struct_perm.satisfies_cond at hπ,
-  have h := hπ hf,
-  dsimp only [sum.elim_inr] at h,
-  rw ← h,
-  rw ← smul_f_map_path (B.path.comp C) hγ hδ hγδ _ t,
-  convert near_litter_perm.smul_to_near_litter_eq _ _ using 1,
-  unfold to_near_litter_perm,
-  simp only [lower_self, monoid_hom.comp_id, allowable_path.to_struct_perm_derivative_comp,
-    mul_equiv.coe_to_monoid_hom, coe_to_bot_iso_symm, of_bot_smul],
-  rw [← allowable_path.to_struct_perm_derivative_comp, allowable_path.smul_to_struct_perm,
-    allowable_path.derivative_comp, allowable_path.derivative_comp,
-    allowable_path.smul_derivative_bot],
+  obtain ((ht | ht) | ht) := ht,
+  { refine σ.property.forward.non_flex_cond hγ hδ hγδ N C t ht π _,
+    refine satisfies.mono _ hπ,
+    rw [lower_sup, lower_sup, sup_assoc],
+    exact le_sup_left, },
+  { obtain ⟨L, hL⟩ := ht,
+    simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff] at hL,
+    cases L.2.1 hγ hδ hγδ C hL.2.symm t hL.1.1.symm, },
+  { rw [set_like.mem_coe, mem_new_inverse_flex_litters] at ht,
+    obtain ⟨L, hL⟩ := ht,
+    simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff] at hL,
+    have := precise_litter_image_flex bij.inv L (abij' L).symm,
+    rw [← hL.1.1, litter.to_near_litter_fst] at this,
+    cases this hγ hδ hγδ C hL.2.symm t rfl, },
 end
 
 lemma flex_union_support_closed :

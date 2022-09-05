@@ -419,7 +419,8 @@ begin
   rintro β γ δ hγ hδ hγδ N A t hσ π hπ,
   rw mem_Sup at hσ,
   obtain ⟨_, ⟨σ, hσ₁, rfl⟩, hσ₂⟩ := hσ,
-  exact σ.property.forward.non_flex_cond hγ hδ hγδ N A t hσ₂ π (hπ.mono $ le_Sup ⟨σ, hσ₁, rfl⟩),
+  sorry
+  -- exact σ.property.forward.non_flex_cond hγ hδ hγδ N A t hσ₂ π (hπ.mono $ le_Sup ⟨σ, hσ₁, rfl⟩),
 end
 
 lemma domain_closed_Union (hc : is_chain (≤) c) :

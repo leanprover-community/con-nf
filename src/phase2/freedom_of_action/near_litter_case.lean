@@ -367,22 +367,20 @@ begin
       (hρ.mono $ subset_union_left _ _) },
   simp only [prod.mk.inj_iff] at ht,
   cases ht.1.2,
-  rw ← smul_f_map_path _ _ _ hγδ,
-  have := congr_arg sigma.fst ht.1.1,
-  unfold litter.to_near_litter at this,
-  dsimp only at this,
-  rw this,
-  unfold near_litter_image,
-  dsimp only,
-  rw ← allowable_path.smul_near_litter_fst,
-  have := @hρ (inr (σ.near_litter_value A N.fst.to_near_litter hNL, N.fst.to_near_litter), A)
-    (by rw sup_inv; left; exact near_litter_value_spec _ _ _ hNL),
-  cases ht.2,
-  rw [satisfies_cond_near_litters, ← allowable_path.to_struct_perm_derivative_comp,
-    allowable_path.smul_to_struct_perm, allowable_path.derivative_comp,
-    allowable_path.derivative_comp, allowable_path.smul_derivative_bot] at this,
-  rw this,
-  refl,
+  have ht' := congr_arg sigma.fst ht.1.1,
+  unfold litter.to_near_litter at ht',
+  unfold near_litter_image at ht',
+  dsimp only at ht',
+  sorry
+  -- rw ← allowable_path.smul_near_litter_fst at this,
+  -- have := @hρ (inr (σ.near_litter_value A N.fst.to_near_litter hNL, N.fst.to_near_litter), A)
+  --   (by rw sup_inv; left; exact near_litter_value_spec _ _ _ hNL),
+  -- cases ht.2,
+  -- rw [satisfies_cond_near_litters, ← allowable_path.to_struct_perm_derivative_comp,
+  --   allowable_path.smul_to_struct_perm, allowable_path.derivative_comp,
+  --   allowable_path.derivative_comp, allowable_path.smul_derivative_bot] at this,
+  -- rw this,
+  -- refl,
 end
 
 lemma near_litter_union_support_closed_forward (hN : litter_set N.fst ≠ N.snd)

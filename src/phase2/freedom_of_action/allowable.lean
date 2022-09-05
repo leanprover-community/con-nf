@@ -187,8 +187,8 @@ def non_flex_cond (σ : spec B) : Prop :=
   (t : tangle_path ((lt_index.mk' hγ (B.path.comp A)) : le_index α)),
   (⟨inr ⟨(f_map_path hγ hδ t).to_near_litter,
     N⟩, (A.cons $ coe_lt_coe.mpr hδ).cons $ bot_lt_coe _⟩ : binary_condition B) ∈ σ →
-  ∀ (ρ : allowable_path B), ρ.to_struct_perm.satisfies σ →
-  N.fst = f_map_path hγ hδ ((ρ.derivative_comp B A).derivative hγ • t)
+  ∀ (ρ : allowable_path (lt_index.mk' hγ (B.path.comp A) : le_index α)),
+    ρ.to_struct_perm.satisfies (lower (A.cons hγ) σ) → N.fst = f_map_path hγ hδ (ρ • t)
 
 /-- A specification is *allowable* in the forward direction if it satisfies the following
 conditions. -/

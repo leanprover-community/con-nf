@@ -100,7 +100,9 @@ begin
   unfold spec.non_flex_cond,
   intros β' γ δ hγ hδ hγδ N C t hf π hπ,
   unfold struct_perm.satisfies struct_perm.satisfies_cond at hπ,
-  have h := hπ hf,
+  simp_rw [lower_lower] at hπ,
+  sorry
+  /- have h := @hπ (inr ((f_map_path hγ hδ t).to_near_litter, N), (C.cons (with_bot.coe_lt_coe.mpr hδ)).cons (with_bot.bot_lt_coe _)) _,
   dsimp only [sum.elim_inr] at h,
   rw ← h,
   rw ← smul_f_map_path ((B.path.comp A).comp C) hγ hδ hγδ _ t,
@@ -110,7 +112,7 @@ begin
     mul_equiv.coe_to_monoid_hom, coe_to_bot_iso_symm, of_bot_smul],
   rw [← allowable_path.to_struct_perm_derivative_comp, allowable_path.smul_to_struct_perm,
     allowable_path.derivative_comp, allowable_path.derivative_comp,
-    allowable_path.smul_derivative_bot],
+    allowable_path.smul_derivative_bot], -/
 end
 
 lemma lower_domain_closed (hσ : σ.allowable B) :
