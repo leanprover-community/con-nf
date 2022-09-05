@@ -1,26 +1,26 @@
 FROM texlive/texlive:latest
 
-# Install Python 3.11
+# Install Python 3.10
 RUN apt update
 RUN apt install software-properties-common -y
 RUN apt install --reinstall ca-certificates
 RUN apt install dirmngr --install-recommends -y
 RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt install python3.11 python3.11-dev python3-pip -y
+RUN apt install python3.10 python3.10-dev python3-pip -y
 
 # Install blueprint dependencies
-RUN python3.11 -m pip install mathlibtools invoke
+RUN python3.10 -m pip install mathlibtools invoke
 RUN apt install graphviz libgraphviz-dev pandoc -y
 RUN git clone https://github.com/plastex/plastex.git
-RUN python3.11 -m pip install ./plastex
+RUN python3.10 -m pip install ./plastex
 RUN rm -rf ./plastex
 RUN git clone https://github.com/PatrickMassot/leanblueprint.git
-RUN python3.11 -m pip install ./leanblueprint
+RUN python3.10 -m pip install ./leanblueprint
 RUN rm -rf ./leanblueprint
 
 # Install doc-gen
 RUN git clone https://github.com/leanprover-community/doc-gen.git
-RUN python3.11 -m pip install -r ./doc-gen/requirements.txt
+RUN python3.10 -m pip install -r ./doc-gen/requirements.txt
 RUN rm -rf ./doc-gen
 
 # Install lean
