@@ -274,8 +274,23 @@ begin
   simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff] at ht',
   rw ht'.1.2,
   rw ← ht'.1.1,
-  -- Once again, we need the unpacked coherence condition.
-  sorry
+  rw ← smul_f_map_path _ _ _ hγδ',
+  rw struct_perm.smul_near_litter_fst,
+  cases ht'.2, rintros h₁ h₂, cases h₁, cases h₂,
+  have := @hπ' (inr ((f_map_path hγ hδ t).to_near_litter,
+      struct_perm.derivative (path.nil.cons $ bot_lt_coe _)
+        π.to_struct_perm • (f_map_path hγ hδ t).to_near_litter),
+      ((path.nil : path (β : type_index) β).cons $ coe_lt_coe.mpr hδ).cons (bot_lt_coe _)) _,
+  rw satisfies_cond_near_litters at this,
+  have := congr_arg sigma.fst this,
+  rw [struct_perm.smul_near_litter_fst, struct_perm.smul_near_litter_fst] at this,
+  rw [ht'.1.1, ← this, ← allowable_path.smul_derivative_bot,
+    ← allowable_path.to_struct_perm_derivative_comp ⟨β, B.path.comp C⟩,
+    allowable_path.smul_to_struct_perm],
+  refl,
+  { right,
+    rw [set_like.mem_coe, spec.mem_singleton],
+    refl, },
 end
 
 lemma non_flex_union_non_flex_cond_backward

@@ -360,7 +360,7 @@ lemma near_litter_union_non_flex_cond_backward (hN : litter_set N.fst ≠ N.snd)
   (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
   spec.non_flex_cond B (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ :=
 begin
-  rintro β δ γ hγ hδ hγδ N₁ C t ht ρ hρ,
+  rintro β γ δ hγ hδ hγδ N₁ C t ht ρ hρ,
   rw mem_new_near_litter_cond_inv_iff at ht,
   cases ht,
   { exact σ.property.backward.non_flex_cond hγ hδ hγδ N₁ C t ht ρ
@@ -371,16 +371,25 @@ begin
   unfold litter.to_near_litter at ht',
   unfold near_litter_image at ht',
   dsimp only at ht',
-  sorry
-  -- rw ← allowable_path.smul_near_litter_fst at this,
-  -- have := @hρ (inr (σ.near_litter_value A N.fst.to_near_litter hNL, N.fst.to_near_litter), A)
-  --   (by rw sup_inv; left; exact near_litter_value_spec _ _ _ hNL),
-  -- cases ht.2,
-  -- rw [satisfies_cond_near_litters, ← allowable_path.to_struct_perm_derivative_comp,
-  --   allowable_path.smul_to_struct_perm, allowable_path.derivative_comp,
-  --   allowable_path.derivative_comp, allowable_path.smul_derivative_bot] at this,
-  -- rw this,
-  -- refl,
+  cases ht.2,
+  have := @hρ (inr (σ.near_litter_value
+    ((C.cons (with_bot.coe_lt_coe.mpr hδ)).cons (with_bot.bot_lt_coe _)) N.fst.to_near_litter hNL,
+    N.fst.to_near_litter),
+    ((quiver.path.nil : quiver.path (β : type_index) β).cons (with_bot.coe_lt_coe.mpr hδ)).cons (with_bot.bot_lt_coe _)) _,
+  rw satisfies_cond_near_litters at this,
+  have := (near_litter_perm.smul_fst _ _).symm.trans (congr_arg sigma.fst this),
+  rw [← allowable_path.to_struct_perm_derivative_comp ⟨β, B.path.comp C⟩,
+    allowable_path.derivative_comp, to_near_litter_perm_smul,
+    allowable_path.smul_to_struct_perm] at this,
+  rw [← smul_f_map_path _ _ _ hγδ, ht', ← allowable_path.smul_derivative_bot
+    (ρ.derivative (with_bot.coe_lt_coe.mpr hδ)) (with_bot.bot_lt_coe δ)],
+  exact this.symm,
+  { have := near_litter_value_spec σ
+      ((C.cons (with_bot.coe_lt_coe.mpr hδ)).cons (with_bot.bot_lt_coe _))
+      N.fst.to_near_litter hNL,
+    rw lower_inv,
+    rw inr_mem_inv,
+    exact or.inl this, },
 end
 
 lemma near_litter_union_support_closed_forward (hN : litter_set N.fst ≠ N.snd)
