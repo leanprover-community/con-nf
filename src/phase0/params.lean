@@ -90,8 +90,8 @@ explicitly write `Λwf` everywhere, we declare it as an instance. -/
 instance : is_well_order Λ Λr := Λwf
 instance : is_well_order μ μr := μwf
 /-- We can deduce from the well-ordering `Λwf` that `Λ` is linearly ordered. -/
-instance : linear_order Λ := linear_order_of_STO' Λr
-instance : linear_order μ := linear_order_of_STO' μr
+instance : linear_order Λ := linear_order_of_STO Λr
+instance : linear_order μ := linear_order_of_STO μr
 /-- We deduce that `Λ` has a well-founded relation. -/
 instance : has_well_founded Λ := is_well_order.to_has_well_founded
 instance : has_well_founded μ := is_well_order.to_has_well_founded
@@ -118,7 +118,7 @@ mk_option.trans $ add_eq_left Λ_limit.aleph_0_le $ one_le_aleph_0.trans Λ_limi
 /- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
 This allows well founded recursion on type indices. -/
 
-noncomputable instance : linear_order type_index := linear_order_of_STO' (<)
+noncomputable instance : linear_order type_index := linear_order_of_STO (<)
 noncomputable instance : has_well_founded type_index := is_well_order.to_has_well_founded
 
 /-- The litters. This is the type indexing the partition of `atom`. -/
