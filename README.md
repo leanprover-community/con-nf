@@ -6,7 +6,7 @@
 
 The purpose of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer implementation of a logical theory (such as set theory or type theory).
 
-Much of the project infrastructure has been adapted from the [sphere eversion project](https://leanprover-community.github.io/sphere-eversion/), the [liquid tensor experiment](https://leanprover-community.github.io/lean-liquid/), and the [unit fractions project](https://github.com/b-mehta/unit-fractions/).
+Much of the project infrastructure has been adapted from the [sphere eversion project](https://leanprover-community.github.io/sphere-eversion/), the [liquid tensor experiment](https://github.com/leanprover-community/liquid/), and the [unit fractions project](https://github.com/b-mehta/unit-fractions/).
 
 ## The source
 
