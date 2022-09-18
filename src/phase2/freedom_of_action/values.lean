@@ -9,7 +9,7 @@ allowable permutation satisfying the specification. This API allows us to retrie
 Since this data is behind existentials, many of the definitions are noncomputable.
 -/
 
-open set sum
+open cardinal set sum
 
 universe u
 
@@ -221,10 +221,9 @@ begin
       refine is_near_litter_litter_set_iff.1 _,
       unfold is_near_litter is_near,
       rw [gs₁, gs₂, symm_diff_left_comm, ← symm_diff_assoc, symm_diff_symm_diff_cancel_left],
-      refine ((cardinal.mk_le_mk_of_subset $ symm_diff_le_sup (range s₁) $ range s₂).trans $
-        cardinal.mk_union_le _ _).trans_lt _,
-      exact cardinal.add_lt_of_lt κ_regular.aleph_0_le
-        (cardinal.mk_range_le.trans_lt N₁.2.2) (cardinal.mk_range_le.trans_lt N₂.2.2) },
+      refine ((mk_le_mk_of_subset symm_diff_subset_union).trans $ mk_union_le _ _).trans_lt _,
+      exact add_lt_of_lt κ_regular.aleph_0_le (mk_range_le.trans_lt N₁.2.2)
+        (mk_range_le.trans_lt N₂.2.2) },
     { obtain ⟨aN₂, haN₂, haN₂'⟩ := hN₂,
       have := hs₂ ⟨aN₂, or.inr haN₂⟩,
       exact eq_of_mem_litter_set_of_mem_litter_set
@@ -257,8 +256,8 @@ rw ← symm_diff_symm_diff_cancel_right (litter_set N_fst) M_snd.val at h,
 apply @h x, rw [symm_diff_comm _ ↑N_snd,symm_diff_comm _ ↑M_snd] at h3,
 exact ⟨or.inr ⟨hx, h3.left⟩, or.inr ⟨hx, h3.right⟩⟩,
 },
-have := lt_of_le_of_lt (le_trans (cardinal.mk_le_mk_of_subset this) (cardinal.mk_union_le _ _))
-(cardinal.add_lt_of_lt κ_regular.aleph_0_le N_snd.property M_snd.property),
+have := lt_of_le_of_lt (le_trans (mk_le_mk_of_subset this) (mk_union_le _ _))
+(add_lt_of_lt κ_regular.aleph_0_le N_snd.property M_snd.property),
 have h2:= N_fst.to_near_litter.2.property, dsimp [(litter.to_near_litter)] at h2,
 rw is_near_litter.mk_eq_κ h2 at this,
 simp only [lt_self_iff_false] at this, exact this,
