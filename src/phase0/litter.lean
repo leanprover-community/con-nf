@@ -33,6 +33,8 @@ is `i`. However, as noted above, the definition can be viewed as opaque, since i
 the only interesting feature. -/
 def litter_set (i : litter) : set atom := {p | p.1 = i}
 
+@[simp] lemma mem_litter_set {a : atom} {i : litter} : a ∈ litter_set i ↔ a.1 = i := iff.rfl
+
 /-- Each litter has cardinality `κ`. -/
 @[simp] lemma mk_litter_set (i : litter) : #(litter_set i) = #κ :=
 cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, subtype.ext $ prod.ext x.2.symm rfl, λ k, rfl⟩⟩
@@ -321,13 +323,12 @@ by { dsimp only [(•)], simp }
   π • local_cardinal i = local_cardinal (π • i) :=
 begin
   ext M,
-  unfold local_cardinal,
-  unfold has_smul.smul,
-  dsimp, split,
+  unfold local_cardinal has_smul.smul,
+  dsimp,
+  refine ⟨_, λ h, ⟨π⁻¹ • M, _, _⟩⟩,
   { rintro ⟨N, hN₁, hN₂⟩, rw [← hN₂, ← hN₁] },
-  { intro h, refine ⟨π⁻¹ • M, _, _⟩,
-    { rw [smul_fst, h], unfold has_smul.smul, simp },
-    { ext; simp_rw smul_fst; dsimp only [(•)]; simp } }
+  { rw [smul_fst, h], unfold has_smul.smul, simp },
+  { ext; simp_rw smul_fst; dsimp only [(•)]; simp }
 end
 
 @[simp] lemma smul_to_near_litter_eq (π : near_litter_perm) (L : litter) :

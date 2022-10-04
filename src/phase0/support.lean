@@ -93,6 +93,9 @@ instance small_support.set_like (x : τ) : set_like (small_support α G x) (supp
 { coe := λ s, s.carrier,
   coe_injective' := λ s t h, by { obtain ⟨⟨_, _⟩, _⟩ := s, obtain ⟨⟨_, _⟩, _⟩ := t, congr' } }
 
+@[simp] lemma support.carrier_eq_coe {x : τ} {s : support α G x} : s.carrier = s := rfl
+@[simp] lemma small_support.carrier_eq_coe {x : τ} {s : small_support α G x} : s.carrier = s := rfl
+
 /-- There are at most `μ` small supports for a given `x : τ`. -/
 lemma mk_small_support_le (x : τ) : #(small_support α G x) ≤ #μ :=
  begin

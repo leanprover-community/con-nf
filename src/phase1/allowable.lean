@@ -210,7 +210,7 @@ begin
   --     simp_rw ← smul_to_near_litter_perm π at hA,
   --     rw [image_smul, near_litter_perm.smul_local_cardinal, local_cardinal_injective.eq_iff] at hA,
   --     convert hA.symm using 1,
-  --     rw smul_to_litter_perm π, refl, },
+  --     rw smul_to_litter_perm π, refl },
   --   { cases h₁ } },
   -- { dsimp at equiv,
   --   rw [code.equiv.comm, smul_set_singleton, code.equiv.singleton_iff] at equiv,
@@ -235,7 +235,7 @@ lemma smul_A_map (π : allowable_perm α) (s : set (tangle β)) (hβγ : β ≠ 
   π • A_map γ s = A_map γ (π • s) :=
 begin
   ext,
-  dsimp only [(•)],
+  dsimp only [•],
   simp only [image, A_map, has_smul.comp.smul, mem_image, mem_Union, exists_prop,
     exists_exists_and_eq_and, mem_set_of_eq, Union_exists, bUnion_and', Union_Union_eq_right,
     ←smul_f_map hβγ, mem_local_cardinal, coe_hom_apply, coe_smul, smul_typed_near_litter],

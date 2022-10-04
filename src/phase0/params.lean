@@ -83,7 +83,7 @@ example : params.{0} :=
     exact is_regular_aleph_one.2,
   end }
 
-variables [params.{u}] {α β : Type u}
+variables [params.{u}] {ι α β : Type u}
 
 /-- To allow Lean's type checker to see that the ordering `Λr` is a well-ordering without having to
 explicitly write `Λwf` everywhere, we declare it as an instance. -/
@@ -162,12 +162,11 @@ def small (s : set α) := #s < #κ
 
 lemma small.lt : small s → #s < #κ := id
 
-/-- The empty set is small. -/
-@[simp] lemma small_empty : small (∅ : set α) := by { rw [small, mk_emptyc], exact κ_regular.pos }
+lemma _root_.set.subsingleton.small {α : Type*} {s : set α} (hs : s.subsingleton) : small s :=
+hs.cardinal_mk_le_one.trans_lt $ one_lt_aleph_0.trans_le κ_regular.aleph_0_le
 
-/-- Singleton sets are small. -/
-@[simp] lemma small_singleton (x : α) : small ({x} : set α) :=
-lt_of_eq_of_lt (mk_singleton _) (lt_of_lt_of_le one_lt_aleph_0 $ is_regular.aleph_0_le κ_regular)
+@[simp] lemma small_empty : small (∅ : set α) := subsingleton_empty.small
+@[simp] lemma small_singleton (x : α) : small ({x} : set α) := subsingleton_singleton.small
 
 /-- Subsets of small sets are small.
 We say that the 'smallness' relation is monotonic. -/
@@ -176,6 +175,18 @@ lemma small.mono (h : s ⊆ t) : small t → small s := (mk_le_mk_of_subset h).t
 /-- Unions of small subsets are small. -/
 lemma small.union (hs : small s) (ht : small t) : small (s ∪ t) :=
 (mk_union_le _ _).trans_lt $ add_lt_of_lt κ_regular.aleph_0_le hs ht
+
+lemma small_Union (hι : #ι < #κ) {f : ι → set α} (hf : ∀ i, small (f i)) : small (⋃ i, f i) :=
+(mk_Union_le _).trans_lt $ mul_lt_of_lt κ_regular.aleph_0_le hι $
+  supr_lt_of_is_regular κ_regular hι hf
+
+lemma small_Union_Prop {p : Prop} {f : p → set α} (hf : ∀ i, small (f i)) : small (⋃ i, f i) :=
+by by_cases p; simp [h, hf _]
+
+protected lemma small.bUnion {s : set ι} (hs : small s) {f : ι → set α}
+  (hf : ∀ i ∈ s, small (f i)) : small (⋃ i ∈ s, f i) :=
+(mk_bUnion_le _ _).trans_lt $ mul_lt_of_lt κ_regular.aleph_0_le hs $
+  supr_lt_of_is_regular κ_regular hs $ λ i, hf _ i.2
 
 /-- The image of a small set under any function `f` is small. -/
 lemma small.image : small s → small (f '' s) := mk_image_le.trans_lt
