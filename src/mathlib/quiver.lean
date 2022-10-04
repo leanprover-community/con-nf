@@ -1,5 +1,6 @@
 import combinatorics.quiver.path
 import data.list.basic
+import mathlib.logic
 
 open function quiver quiver.path
 
@@ -18,39 +19,46 @@ The list contains `a` at its head, but not `b` a priori. -/
 lemma eq_of_length_zero (p : path a b) (hzero : p.length = 0) : a = b :=
 by { cases p, { refl }, { cases nat.succ_ne_zero _ hzero } }
 
-@[simp] lemma length_distrib (p1 : path a b) (p2 : path b c) :
-(p1.comp p2).length = p1.length + p2.length := begin
-induction p2, simp only [comp_nil, length_nil, add_zero],
-simp only [comp_cons, length_cons], rw p2_ih, refl,
+@[simp] lemma length_comp (p : path a b) :
+  ∀ {c} (q : path b c), (p.comp q).length = p.length + q.length
+| c nil := rfl
+| c (cons q h) := congr_arg nat.succ q.length_comp
+
+lemma comp_inj {p₁ p₂ : path a b} {q₁ q₂ : path b c} (hq : q₁.length = q₂.length) :
+  p₁.comp q₁ = p₂.comp q₂ ↔ p₁ = p₂ ∧ q₁ = q₂ :=
+begin
+  refine ⟨λ h, _, by { rintro ⟨rfl, rfl⟩, refl }⟩,
+  induction q₁ with d₁ e₁ q₁ f₁ ih generalizing q₂; obtain _ | ⟨d₂, e₂, q₂, f₂⟩ := q₂,
+  { exact ⟨h, rfl⟩ },
+  { cases hq },
+  { cases hq },
+  simp only [comp_cons] at h,
+  obtain rfl := h.1,
+  obtain ⟨rfl, rfl⟩ := ih (nat.succ_injective hq) h.2.1.eq,
+  rw h.2.2.eq,
+  exact ⟨rfl, rfl⟩,
 end
 
-lemma comp_inj (p1 p2 : path a b) (q1 q2 : path b c) (h : q1.length = q2.length) (h_eq : p1.comp q1 = p2.comp q2) : p1 = p2 ∧ q1 = q2 := begin
-intros,
-refine @nat.le_induction (λ l, ∀ (a b c : V) (p1 p2 : path a b) (q1 q2 : path b c) (h : q1.length = q2.length) (h2 : q1.length = l)  (h_eq : p1.comp q1 = p2.comp q2), p1 = p2 ∧ q1 = q2) 0 _ _ (q1.length) (nat.zero_le q1.length) _ _ _ p1 p2 q1 q2 h (eq.refl _) h_eq,
-intros,
-cases q1_1,cases q2_1,
-simp only [comp_nil] at h_eq_1, rw h_eq_1, simp only [eq_self_iff_true, and_self],
-dsimp [(length)] at h_1, have := eq.symm h_1, exfalso, simp only [nat.succ_ne_zero] at this, exact this,
-dsimp [(length)] at h2, exfalso, simp only [nat.succ_ne_zero] at h2, exact h2,
-intros,
-cases q1_1, cases q2_1,
-simp only [comp_nil] at h_eq_1, rw h_eq_1, simp only [eq_self_iff_true, and_self],
-simp only [length_nil, length_cons] at h_1, have := eq.symm h_1, exfalso, simp only [nat.succ_ne_zero] at this, exact this,
-cases q2_1,
-simp only [length_nil, length_cons] at h_1,exfalso, simp only [nat.succ_ne_zero] at h_1, exact h_1,
-simp only [comp_cons] at h_eq_1,
-have := h_eq_1.left, subst this,
-simp only [(heq_iff_eq)] at h_eq_1,
-have := h_eq_1.right.right, subst this,
-simp only [length_cons, add_left_inj] at h_1,
-simp only [length_cons, add_left_inj] at h2,
-have := ᾰ_1 a_1 b_1 q1_1_b p1_1 p2_1 q1_1_ᾰ q2_1_ᾰ h_1 h2 h_eq_1.right.left,
-rw this.left, rw this.right, simp only [eq_self_iff_true, heq_iff_eq, and_self],
-end
+lemma comp_inj' {p₁ p₂ : path a b} {q₁ q₂ : path b c} (h : p₁.length = p₂.length) :
+  p₁.comp q₁ = p₂.comp q₂ ↔ p₁ = p₂ ∧ q₁ = q₂ :=
+⟨λ h_eq, (comp_inj $ add_left_injective p₁.length $
+  by simpa [h] using congr_arg length h_eq).1 h_eq, by { rintro ⟨rfl, rfl⟩, refl }⟩
+
+lemma comp_injective_left (q : path b c) : injective (λ p : path a b, p.comp q) :=
+λ p₁ p₂ h, ((comp_inj rfl).1 h).1
+
+lemma comp_injective_right (p : path a b) : injective (p.comp : path b c → path a c) :=
+λ q₁ q₂ h, ((comp_inj' rfl).1 h).2
+
+@[simp] lemma comp_inj_left {p₁ p₂ : path a b} {q : path b c} : p₁.comp q = p₂.comp q ↔ p₁ = p₂ :=
+q.comp_injective_left.eq_iff
+
+@[simp] lemma comp_inj_right {p : path a b} {q₁ q₂ : path b c} : p.comp q₁ = p.comp q₂ ↔ q₁ = q₂ :=
+p.comp_injective_right.eq_iff
 
 @[simp] lemma to_list_comp (p : path a b) :
   ∀ {c : V} (q : path b c), (p.comp q).to_list = q.to_list ++ p.to_list
-| c nil := by simp
+| c nil := rfl
 | c (@cons _ _ _ d _ q f) := by simp [to_list_comp]
 
 end sort
