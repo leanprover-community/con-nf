@@ -73,7 +73,93 @@
 
     \[ \qty{x\mid x \not\in x} \text{ is not well-formed};\quad \qty{x\in \mathcal U\mid x \not\in x} \text{ is well-formed} \]
 
-    Russell's paradox no longer works.
+    Russell's paradox no longer works:
+
+    \[ R := \qty{x\in\mathcal U\mid x \not\in x} \implies R \not\in \mathcal U \]
 \end{frame}
+\begin{frame}{A different fix}
+    Perhaps the real problem with the Russell class is not that we are quantifying over all sets, but that the formula \( x \not\in x \) fundamentally does not make sense.
+
+    \medskip
+
+    Quine (1937) suggested we might be allowed to quantify over all sets without leading to contradictions if we are only allowed to use certain formulas.
+\end{frame}
+\begin{frame}{Stratification}
+    \begin{definition}
+        A formula \( \phi \) is \emph{stratified} if we can annotate each variable in \( \phi \) with an index in \( \mathbb N \) such that
+        \begin{itemize}
+            \item if \( x = y \) appears in \( \phi \), the indices on \( x \) and \( y \) are the same; and
+            \item if \( x \in y \) appears in \( \phi \), the index on \( y \) is one higher than the index on \( x \).
+        \end{itemize}
+    \end{definition}
+    We will annotate indices with superscripts, so we can write
+    \[ x^n = y^n;\quad x^n \in y^{n+1} \]
+\end{frame}
+% Each index refers to a "universe" of sets at level n
+\begin{frame}{Examples}
+    These formulas are stratified:
+    \begin{enumerate}
+        \item \( x^1 \in y^2 \wedge y^2 \in z^3 \wedge z^3 = w^3 \)
+        \item extensionality: \( \forall x^2.\, \forall y^2.\, (\forall z^1.\, z^1 \in y^1 \iff z^1 \in y^2) \implies x^2 = y^2 \)
+        \item power set: \( \forall x^2.\, \exists y^3.\, \forall z^2.\, (\forall a^1.\, a^1 \in z^2 \implies a^1 \in x^2) \implies z^2 \in y^3 \)
+    \end{enumerate}
+    These formulas are not stratified:
+    \begin{enumerate}
+        \setcounter{enumi}{3}
+        \item \( x \in x \)
+        \item \( x = y \wedge x \in y \)
+    \end{enumerate}
+    NF is the theory with the axioms of ZF, except set comprehension is allowed over the whole universe, but restricted to stratified formulas.
+\end{frame}
+
+% We don't *need* to stratify each formula to use it, or even use a consistent stratification across formulae, we just need to show it can be done.
+
+\section{Features of NF}
+
+\begin{frame}{The universe}
+    Most things that work in ZF also work in NF, because most of the formulas we care about are stratified, but there are a few exceptions.
+
+    \medskip
+
+    The formula \( x^1 = x^1 \) is stratified, so the universe set \( \qty{x\mid x^1 = x^1} \) exists. However, the Russell class doesn't exist, because the formula \( x \not\in x \) is unstratified.
+
+    \medskip
+
+    For a set \( x \), the formula \( y^1 \not\in x^2 \) is stratified, so the universal set complement \( \qty{y\mid y^1 \not\in x^2} \) exists. In fact, NF forms a Boolean algebra.
+\end{frame}
+\begin{frame}{Cardinals}
+    Cardinals in ZF are equivalence classes of equinumerous sets.
+    \[ 1 \text{ is the class of sets } x \text{ where } x \simeq \qty{\varnothing} \]
+    In NF, cardinals can be represented as the set of all sets of a given size.
+    \[ 1 = \qty{x\mid \exists y^1.\, y^1 \in x^2 \wedge \forall z^1 \in x^2.\, z^1 = y^1} \]
+\end{frame}
+\begin{frame}{Choice}
+    NF disproves the axiom of choice.
+
+    \medskip
+
+    However, a weakened form of the axiom of choice (for example, one that only operates on well-founded sets) may still work well with NF.
+\end{frame}
+
+\section{Our goal}
+
+\begin{frame}{Is NF consistent?}
+    We say that NF is \emph{consistent} if there is no formula \( \phi \) such that \( \phi \) is true and \( \neg\phi \) is also true; i.e.\, there are no contradictions.
+
+    Holmes (2010) proved that NF is consistent.
+
+    \begin{proof}[Proof sketch]
+        NF is consistent if and only if \emph{tangled type theory} (TTT) is consistent.
+        We can build a model of TTT, hence TTT is consistent.
+    \end{proof}
+
+    The proof that we can build a model of TTT is difficult to understand and so hard to trust. Our goal is to \emph{formalise} this part of the proof.
+    % Yaël, hopefully you can write some stuff to follow!
+    % I'm not sure how long this is all going to take to present, I may cut out significant chunks of the above - I'll do some practice over the next few days.
+\end{frame}
+
+% might want to say things like what is lean, why can we trust it, what are our results, where did we get stuck?
+
+% I should probably write some kind of conclusion like "further work needed, no definitive conclusion"
 
 \end{document}
