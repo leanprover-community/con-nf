@@ -1,0 +1,79 @@
+\documentclass[xcolor=dvipsnames]{beamer}
+
+\usepackage[UKenglish]{babel}
+
+\usefonttheme{professionalfonts}
+\usepackage{fontspec}
+\setromanfont{TeX Gyre Pagella}
+\setsansfont{Lato}
+
+\usepackage{mathtools}
+
+\usepackage{unicode-math}
+\setmathfont{TeX Gyre Pagella Math}
+
+\usepackage{physics}
+
+\usepackage{pgfpages}
+%\setbeameroption{show notes on second screen=right}
+
+\definecolor{UBCblue}{rgb}{0.04706, 0.13725, 0.26667}
+\definecolor{UBCgreen}{rgb}{0.04706, 0.26667, 0.13725}
+
+\usecolortheme[named=UBCblue]{structure}
+\setbeamertemplate{blocks}[rounded]%[shadow=true]
+\setbeamercolor{block title}{bg=UBCblue, fg=white}
+\setbeamercolor{block body}{bg=UBCblue!20}
+\setbeamercolor{block title example}{bg=UBCgreen, fg=white}
+\setbeamercolor{block body example}{bg=UBCgreen!20}
+
+% https://tex.stackexchange.com/a/306662
+\makeatletter
+\def\beamer@framenotesbegin{% at beginning of slide
+     \usebeamercolor[fg]{normal text}
+      \gdef\beamer@noteitems{}%
+      \gdef\beamer@notes{}%
+}
+\makeatother
+
+\usetheme{Dresden}
+\useoutertheme{miniframes} % Alternatively: miniframes, infolines, split
+\useinnertheme{circles}
+\usefonttheme{professionalfonts}
+
+\title{The consistency of New Foundations}
+\subtitle{An alternative foundation for set theory}
+\author{Sky Wilshaw, Ya\"el Dillies}
+\institute{University of Cambridge}
+\date{10th October 2022}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+    \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{What is NF?}
+
+\begin{frame}{Set theory and axioms}
+    Set theory is used as a foundation for modern mathematics.
+
+    \medskip
+
+    We need to be careful about what we allow to be a set, otherwise we can get paradoxes.
+
+    \[ R := \qty{x\mid x\not\in x};\quad R \in R \iff R \not\in R \]
+\end{frame}
+\begin{frame}{Zermelo-Fr\"ankel set theory}
+    ZF(C) avoids this paradox by restricting set comprehension to only allow specification of subsets of a set that already exists.
+
+    \[ \qty{x\mid x \not\in x} \text{ is not well-formed};\quad \qty{x\in \mathcal U\mid x \not\in x} \text{ is well-formed} \]
+
+    Russell's paradox no longer works.
+\end{frame}
+
+\end{document}
