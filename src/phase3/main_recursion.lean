@@ -85,7 +85,7 @@ begin
   refine_struct ({ Λ := Λ, Λ_preorder := infer_instance, .. } : ttt_model.{u}),
   { intro α,
     exact @tangle _ (⟨α, le_rfl⟩ : Iic_index α)
-      (@core_tangle_cumul'.data _ _ _ (main_recursion α).core_tangle_cumul' ⟨α, le_rfl⟩), },
+      (@core_tangle_cumul'.data _ _ _ (main_recursion α).core_tangle_cumul' ⟨α, le_rfl⟩) },
   all_goals { sorry }
 end
 

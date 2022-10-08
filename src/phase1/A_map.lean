@@ -133,11 +133,11 @@ noncomputable def min_tangle (c : tangles γ) : tangle γ :=
 well_founded_position.min c.1 c.2
 
 lemma min_tangle_mem (c : tangles γ) : min_tangle c ∈ c.val :=
-well_founded.min_mem _ c.val c.property
+well_founded.min_mem _ c.val c.prop
 
 lemma min_tangle_le (c : tangles γ) {x} (hx : x ∈ c.1) :
   position (min_tangle c) ≤ position x :=
-not_lt.1 $ well_founded_position.not_lt_min c.val c.property hx
+not_lt.1 $ well_founded_position.not_lt_min c.val c.prop hx
 
 lemma A_map_order (c : tangles γ) :
   position (min_tangle c) < position (min_tangle ⟨A_map β c.1, c.2.A_map⟩) :=

@@ -89,16 +89,16 @@ lemma non_flex_union_one_to_one_forward :
   spec.one_to_one_forward (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) :=
 begin
   intro A, split,
-  { rintros b c (hc | hc) d (hd | hd),
-    { exact (σ.property.forward.one_to_one A).atom b hc hd, },
+  { rintro b c (hc | hc) d (hd | hd),
+    { exact (σ.prop.forward.one_to_one A).atom b hc hd },
     { simpa only [coe_singleton, mem_singleton_iff, inl_eq_new_non_flex_constraint]
-        using hd, },
+        using hd },
     { simpa only [coe_singleton, mem_singleton_iff, inl_eq_new_non_flex_constraint]
-        using hc, },
+        using hc },
     { simpa only [coe_singleton, mem_singleton_iff, inl_eq_new_non_flex_constraint]
-        using hc, }, },
-  { rintros N M₁ (hM₁ | hM₁) M₂ (hM₂ | hM₂),
-    { exact (σ.property.forward.one_to_one A).near_litter N hM₁ hM₂, },
+        using hc } },
+  { rintro N M₁ (hM₁ | hM₁) M₂ (hM₂ | hM₂),
+    { exact (σ.prop.forward.one_to_one A).near_litter N hM₁ hM₂ },
     { simp only [coe_singleton, mem_singleton_iff, inr_eq_new_non_flex_constraint,
         prod.mk.inj_iff] at hM₂,
       transitivity struct_perm.derivative (path.nil.cons $ bot_lt_coe _) π⁻¹.to_struct_perm • N,
@@ -109,13 +109,13 @@ begin
           ∈ _),
         { dsimp only [satisfies_cond, sum.elim_inr] at this, rw ← this,
           rw ← mul_smul,
-          simp only [map_inv, inv_mul_self, one_smul], },
-        { exact hM₁, } },
-      { rw [map_inv, map_inv, inv_smul_eq_iff, hM₂.1.1, hM₂.1.2], } },
+          simp only [map_inv, inv_mul_self, one_smul] },
+        { exact hM₁ } },
+      { rw [map_inv, map_inv, inv_smul_eq_iff, hM₂.1.1, hM₂.1.2] } },
     { simp only [coe_singleton, mem_singleton_iff, inr_eq_new_non_flex_constraint,
         prod.mk.inj_iff] at hM₁,
       transitivity struct_perm.derivative (path.nil.cons $ bot_lt_coe _) π⁻¹.to_struct_perm • N,
-      { rw [map_inv, map_inv, eq_inv_smul_iff, hM₁.1.1, hM₁.1.2], },
+      { rw [map_inv, map_inv, eq_inv_smul_iff, hM₁.1.1, hM₁.1.2] },
       { cases hM₁.2,
         have := hπ (_ : (inr (M₂, N),
           path.nil.cons
@@ -123,11 +123,11 @@ begin
           ∈ _),
         { dsimp only [satisfies_cond, sum.elim_inr] at this, rw ← this,
           rw ← mul_smul,
-          simp only [map_inv, inv_mul_self, one_smul], },
-        { exact hM₂, } } },
+          simp only [map_inv, inv_mul_self, one_smul] },
+        { exact hM₂ } } },
     { simp only [coe_singleton, mem_singleton_iff, inr_eq_new_non_flex_constraint,
         prod.mk.inj_iff] at hM₁ hM₂,
-      rw hM₁.1.1, rw hM₂.1.1, } },
+      rw hM₁.1.1, rw hM₂.1.1 } },
 end
 
 lemma non_flex_union_one_to_one_backward :
@@ -135,19 +135,19 @@ lemma non_flex_union_one_to_one_backward :
 begin
   rw sup_inv,
   intro A, split,
-  { rintros b c (hc | hc) d (hd | hd),
-    { exact (σ.property.backward.one_to_one A).atom b hc hd, },
+  { rintro b c (hc | hc) d (hd | hd),
+    { exact (σ.prop.backward.one_to_one A).atom b hc hd },
     { simpa only [coe_inv, coe_singleton, inv_singleton, binary_condition.inv_def,
         mem_singleton_iff, prod.mk.inj_iff, new_non_flex_constraint, sum.map_inr,
-        false_and] using hd, },
+        false_and] using hd },
     { simpa only [coe_inv, coe_singleton, inv_singleton, binary_condition.inv_def,
         mem_singleton_iff, prod.mk.inj_iff, new_non_flex_constraint, sum.map_inr,
-        false_and] using hc, },
+        false_and] using hc },
     { simpa only [coe_inv, coe_singleton, inv_singleton, binary_condition.inv_def,
         mem_singleton_iff, prod.mk.inj_iff, new_non_flex_constraint, sum.map_inr,
-        false_and] using hc, }, },
-  { rintros N M₁ (hM₁ | hM₁) M₂ (hM₂ | hM₂),
-    { exact (σ.property.backward.one_to_one A).near_litter N hM₁ hM₂, },
+        false_and] using hc } },
+  { rintro N M₁ (hM₁ | hM₁) M₂ (hM₂ | hM₂),
+    { exact (σ.prop.backward.one_to_one A).near_litter N hM₁ hM₂ },
     { simp only [coe_inv, coe_singleton, set.mem_inv, mem_singleton_iff, binary_condition.inv_def,
         sum.map_inr, prod.swap, new_non_flex_constraint, prod.mk.inj_iff] at hM₂,
       transitivity struct_perm.derivative (path.nil.cons $ bot_lt_coe _) π.to_struct_perm • N,
@@ -156,32 +156,32 @@ begin
           path.nil.cons
             (show (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C)).index ⟶ ⊥, from bot_lt_coe δ))
           ∈ _),
-        { dsimp only [satisfies_cond, sum.elim_inr] at this, rw ← this, },
-        { exact hM₁, } },
-      { rw [hM₂.1.1, hM₂.1.2], } },
+        { dsimp only [satisfies_cond, sum.elim_inr] at this, rw ← this },
+        { exact hM₁ } },
+      { rw [hM₂.1.1, hM₂.1.2] } },
     { simp only [coe_inv, coe_singleton, set.mem_inv, mem_singleton_iff, binary_condition.inv_def,
         sum.map_inr, prod.swap, new_non_flex_constraint, prod.mk.inj_iff] at hM₁,
       transitivity struct_perm.derivative (path.nil.cons $ bot_lt_coe _) π.to_struct_perm • N,
-      { rw [hM₁.1.1, hM₁.1.2], },
+      { rw [hM₁.1.1, hM₁.1.2] },
       { cases hM₁.2,
         have := hπ (_ : (inr (N, M₂),
           path.nil.cons
             (show (lt_index.mk' (coe_lt_coe.mpr hδ) (B.path.comp C)).index ⟶ ⊥, from bot_lt_coe δ))
           ∈ _),
-        { dsimp only [satisfies_cond, sum.elim_inr] at this, rw ← this, },
-        { exact hM₂, } }, },
+        { dsimp only [satisfies_cond, sum.elim_inr] at this, rw ← this },
+        { exact hM₂ } } },
     { simp only [coe_inv, coe_singleton, inv_singleton, binary_condition.inv_def,
         mem_singleton_iff, prod.mk.inj_iff, new_non_flex_constraint, map_inr, prod.swap]
         at hM₁ hM₂,
-      rw hM₁.1.1, rw hM₂.1.1, } },
+      rw hM₁.1.1, rw hM₂.1.1 } },
 end
 
 lemma non_flex_union_atom_cond_forward :
   ∀ L C, spec.atom_cond (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) L C :=
 begin
-  rintros L C',
+  rintro L C',
   obtain (⟨L', hL, atom_map, hin, himg⟩ | ⟨hL, hLsmall⟩ | ⟨L', hL, hLsmall, hmaps⟩) := σ.prop.forward.atom_cond L C',
-  { exact spec.atom_cond.all L' (or.inl hL) atom_map (λ a H, or.inl $ hin a H) himg, },
+  { exact spec.atom_cond.all L' (or.inl hL) atom_map (λ a H, or.inl $ hin a H) himg },
   refine spec.atom_cond.small_out _ _,
   { rw mem_domain,
     rintro ⟨⟨_ | ⟨N, M⟩, _⟩, hb, hdom⟩; cases hdom,
@@ -193,7 +193,7 @@ begin
     replace hL' := litter.to_near_litter_injective hL',
     refine hL _,
     rw mem_domain,
-    sorry, },
+    sorry },
   swap,
   refine spec.atom_cond.small_in L' (or.inl hL) _
       (λ a b hab, or.rec (λ h, hmaps h) (λ h, by cases h) hab),
@@ -203,13 +203,13 @@ begin
       rw mem_domain at this,
       obtain ⟨b, hb, hdom⟩ := this,
       cases hb,
-      { obtain ⟨as | Ns, C⟩ := b; cases hdom, convert inl_mem_domain hb, },
+      { obtain ⟨as | Ns, C⟩ := b; cases hdom, convert inl_mem_domain hb },
       { rw [set_like.mem_coe, mem_new_non_flex_constraint] at hb,
-        cases hb, cases hdom, } },
+        cases hb, cases hdom } },
     { have := hx.2,
       rw mem_domain at this,
       obtain ⟨⟨as | Ns, C⟩, hb, hdom⟩ := this; cases hdom,
-      exact or.inl (mem_domain_of_mem hb), } }
+      exact or.inl (mem_domain_of_mem hb) } }
 end
 
 lemma non_flex_union_atom_cond_backward :
@@ -219,7 +219,7 @@ sorry
 lemma non_flex_union_near_litter_cond_forward :
   ∀ N₁ N₂ C, spec.near_litter_cond (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) N₁ N₂ C :=
 begin
-  rintros _ _ A (hin | hin),
+  rintro _ _ A (hin | hin),
   { obtain ⟨M, hMin, diff, hdin, hdiff⟩ := σ.prop.forward.near_litter_cond _ _ A hin,
     refine ⟨M, or.inl hMin, diff, λ a, or.inl $ hdin a, hdiff⟩ },
 
@@ -242,16 +242,16 @@ begin
   refine ⟨_, or.inr rfl, diff, _, _⟩,
   { rintro ⟨x, hx⟩,
     rw symm_diff_empty at hx,
-    exact false.rec _ hx, },
+    exact false.rec _ hx },
   { rw [empty_range, symm_diff_bot],
-    exact rfl, }
+    exact rfl }
 end
 
 lemma non_flex_union_near_litter_cond_backward :
   ∀ N₁ N₂ C,
     spec.near_litter_cond (σ.val ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ})⁻¹ N₁ N₂ C :=
 begin
-  rintros _ _ A (hin | hin),
+  rintro _ _ A (hin | hin),
   { obtain ⟨M, hMin, diff, hdin, hdiff⟩ := σ.prop.backward.near_litter_cond _ _ A hin,
     refine ⟨M, or.inl hMin, diff, λ a, or.inl $ hdin a, hdiff⟩ },
   simp only [binary_condition.inv_def, map_inr, prod.swap_prod_mk, coe_singleton, mem_singleton_iff,
@@ -266,17 +266,17 @@ begin
   unfold spec.non_flex_cond,
   intros β' γ' δ' hγ' hδ' hγδ' N' C' t' ht' π' hπ',
   cases ht',
-  { refine σ.property.forward.non_flex_cond hγ' hδ' hγδ' N' C' t' ht' π' _,
+  { refine σ.prop.forward.non_flex_cond hγ' hδ' hγδ' N' C' t' ht' π' _,
     refine struct_perm.satisfies.mono _ hπ',
     rw lower_sup,
-    exact le_sup_left, },
+    exact le_sup_left },
   rw [set_like.mem_coe, mem_new_non_flex_constraint] at ht',
   simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff] at ht',
   rw ht'.1.2,
   rw ← ht'.1.1,
   rw ← smul_f_map_path _ _ _ hγδ',
   rw struct_perm.smul_near_litter_fst,
-  cases ht'.2, rintros h₁ h₂, cases h₁, cases h₂,
+  cases ht'.2, rintro h₁ h₂, cases h₁, cases h₂,
   have := @hπ' (inr ((f_map_path hγ hδ t).to_near_litter,
       struct_perm.derivative (path.nil.cons $ bot_lt_coe _)
         π.to_struct_perm • (f_map_path hγ hδ t).to_near_litter),
@@ -290,7 +290,7 @@ begin
   refl,
   { right,
     rw [set_like.mem_coe, spec.mem_singleton],
-    refl, },
+    refl },
 end
 
 lemma non_flex_union_non_flex_cond_backward
@@ -301,10 +301,10 @@ begin
   intros β' γ' δ' hγ' hδ' hγδ' N C' t' ht' π' hπ',
   rw inr_mem_inv at ht', dsimp only [prod.swap] at ht',
   cases ht',
-  { refine σ.property.backward.non_flex_cond hγ' hδ' hγδ' N C' t' ht' π' _,
+  { refine σ.prop.backward.non_flex_cond hγ' hδ' hγδ' N C' t' ht' π' _,
     refine satisfies.mono _ hπ',
     rw [lower_inv, lower_inv, lower_sup, spec.inv_le_inv],
-    exact le_sup_left, },
+    exact le_sup_left },
   { simp only [set_like.mem_coe, mem_new_non_flex_constraint, prod.mk.inj_iff] at ht',
 
     cases ht'.2,
@@ -328,7 +328,7 @@ begin
   rw domain_sup at ht',
   cases ht',
   { exact supports.mono (subset_union_left _ _)
-      (σ.property.forward.support_closed hγ' hδ' hγδ' A' t' ht'), },
+      (σ.prop.forward.support_closed hγ' hδ' hγδ' A' t' ht') },
   rw [domain_singleton, set.mem_singleton_iff] at ht',
   unfold new_non_flex_constraint at ht',
   simp only [binary_condition.domain_mk, map_inr, prod.mk.inj_iff] at ht',
@@ -355,7 +355,7 @@ begin
   rw range_sup at ht',
   cases ht',
   { exact supports.mono (subset_union_left _ _)
-      (σ.property.backward.support_closed hγ' hδ' hγδ' A' t' ht'), },
+      (σ.prop.backward.support_closed hγ' hδ' hγδ' A' t' ht') },
   rw [range_singleton, set.mem_singleton_iff] at ht',
   unfold new_non_flex_constraint at ht',
   simp only [binary_condition.range_mk, map_inr, prod.mk.inj_iff] at ht',
@@ -379,25 +379,25 @@ begin
   obtain (⟨hdom, hrge⟩ | ⟨hdom, hrge⟩) := σ.prop.flex_cond C',
   { refine flex_cond.co_large _ _,
     { convert hdom, ext L, split; rintro ⟨hC'₁, hC'₂⟩; refine ⟨hC'₁, λ h, _⟩,
-      { rw domain_sup at hC'₂, exact hC'₂ (or.inl h), },
+      { rw domain_sup at hC'₂, exact hC'₂ (or.inl h) },
       { rw domain_sup at h,
         cases h,
-        { exact hC'₂ h, },
+        { exact hC'₂ h },
         { rw mem_domain at h,
           obtain ⟨c, hc₁, hc₂⟩ := h,
           rw mem_new_non_flex_constraint at hc₁, subst hc₁,
           simp only [binary_condition.domain_mk, map_inr, prod.mk.inj_iff] at hc₂,
           obtain ⟨hc₂, hc₃⟩ := hc₂,
           rw ←litter.to_near_litter_injective hc₂ at *,
-          exact hC'₁ hγ hδ hγδ C (eq.symm hc₃) t rfl, } } },
+          exact hC'₁ hγ hδ hγδ C (eq.symm hc₃) t rfl } } },
     { convert hrge, ext L, split; rintro ⟨hC'₁, hC'₂⟩; refine ⟨hC'₁, λ h, _⟩,
-      { rw range_sup at hC'₂, exact hC'₂ (or.inl h), },
+      { rw range_sup at hC'₂, exact hC'₂ (or.inl h) },
       { rw spec.mem_range at h,
         obtain ⟨⟨_ | ⟨N₁, N₂⟩, D⟩, hc₁, hc₂⟩ := h; cases hc₂,
         rw mem_sup at hc₁,
         cases hc₁,
         { rw spec.mem_range at hC'₂,
-          exact hC'₂ ⟨_, hc₁, rfl⟩, },
+          exact hC'₂ ⟨_, hc₁, rfl⟩ },
         rw [mem_new_non_flex_constraint, prod.mk.inj_iff] at hc₁,
         obtain ⟨this, hC'₃⟩ := hc₁,
         simp only [prod.mk.inj_iff] at this,
@@ -409,10 +409,10 @@ begin
         rw [allowable_path.smul_near_litter_fst, litter.to_near_litter_fst] at h₁,
         -- I'd like to appeal to smul_f_map_path, but here π is too low to work with, at level δ
         -- rather than β. How to progress?
-        sorry, } } },
+        sorry } } },
   { refine spec.flex_cond.all (λ L hL, _) (λ L hL, _),
-    { rw spec.domain_sup, exact or.inl (hdom L hL), },
-    { rw spec.range_sup, exact or.inl (hrge L hL), } }
+    { rw spec.domain_sup, exact or.inl (hdom L hL) },
+    { rw spec.range_sup, exact or.inl (hrge L hL) } }
 end
 
 lemma non_flex_union_allowable
@@ -444,7 +444,7 @@ lemma le_non_flex_union
     { cases hσ₁ hσ₂ },
     { simp only [new_non_flex_constraint, set_like.mem_coe, spec.mem_singleton,
         prod.mk.inj_iff] at hσ₂,
-      cases hN' hγ hδ hγδ C hσ₂.2 t (litter.to_near_litter_injective hσ₂.left.left), }
+      cases hN' hγ hδ hγδ C hσ₂.2 t (litter.to_near_litter_injective hσ₂.left.left) }
   end,
   all_flex_range := begin
     rintro L N' C' hN' hσ₁ (hσ₂ | hσ₂),

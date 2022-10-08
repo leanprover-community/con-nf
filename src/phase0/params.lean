@@ -76,7 +76,8 @@ example : params.{0} :=
   μwf := (beth $ ord $ aleph 1).ord.out.wo,
   μ_ord := by simp,
   μ_strong_limit := by simp [is_strong_limit_beth (ord_is_limit $ aleph_0_le_aleph 1).2],
-  κ_lt_μ := by { simp only [mk_out, mk_ordinal_out, card_ord], exact aleph_one_lt_beth_aleph_one },
+  κ_lt_μ := by { simp only [mk_out, mk_ordinal_out, card_ord],
+    exact (aleph_le_beth _).trans_lt (beth_strict_mono (ord_aleph_is_limit _).one_lt) },
   κ_le_μ_cof := begin
     simp only [mk_out, mk_ordinal_out, card_ord],
     rw beth_normal.cof_eq (ord_is_limit $ aleph_0_le_aleph 1),

@@ -71,7 +71,7 @@ lemma mk_litters_inj_constraint (x : μ) (f_map_core : Π (y < x), μ) :
   #{i : μ | ∃ y < x, f_map_core y ‹_› = i} < #μ :=
 begin
   have : {i | ∃ y < x, f_map_core y ‹_› = i}
-    = {i | ∃ (y : {y // y < x}), f_map_core y.val y.property = i} := by simp_rw subtype.exists,
+    = {i | ∃ (y : {y // y < x}), f_map_core y.val y.prop = i} := by simp_rw subtype.exists,
   rw this,
   exact mk_range_le.trans_lt (card_Iio_lt x),
 end
@@ -104,8 +104,8 @@ private def extend_result (x : μ) (h_lt : Π y < x, f_map_result α β y) : Π 
 private lemma f_map_result_coherent (x y : μ) (fx : f_map_result α β x) (fy : f_map_result α β y) :
   Π (z : μ), z ≤ x → z ≤ y → fx.val z ‹_› = fy.val z ‹_›
 | z hzx hzy := begin
-  rw (fx.property.some).snd z hzx,
-  rw (fy.property.some).snd z hzy,
+  rw (fx.prop.some).snd z hzx,
+  rw (fy.prop.some).snd z hzy,
   congr' with w hw,
   exact f_map_result_coherent w _ _,
 end

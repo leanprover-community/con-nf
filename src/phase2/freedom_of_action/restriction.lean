@@ -79,13 +79,13 @@ begin
     { refine le_antisymm _ _,
       { rw hdom, refine mk_subtype_mono _,
         -- This should be an approachable goal, solvable with `flexible.of_comp`.
-        rintros x ⟨hflx, hx⟩,
+        rintro x ⟨hflx, hx⟩,
         exact ⟨flexible.of_comp A C hflx, hx⟩ },
       { rw ← mk_litter, exact mk_subtype_le _ } },
     { -- Same thing here.
       exact le_antisymm
         (le_of_eq_of_le hrge $ cardinal.mk_subtype_mono $ λ x hx, ⟨flexible.of_comp A C hx.1, hx.2⟩)
-        (le_of_le_of_eq (cardinal.mk_subtype_le _) mk_litter), },
+        (le_of_le_of_eq (cardinal.mk_subtype_le _) mk_litter) },
   },
   { refine spec.flex_cond.co_large _ _,
     -- Why are these goals true?
@@ -123,11 +123,11 @@ begin
     (t.lt_index_assoc) _ (π.lt_index_assoc) _,
   rwa allowable_path.lt_index_assoc_smul at this,
   rwa f_map_path_assoc,
-  rintros c hc,
+  rintro c hc,
   have := @hsup c _,
-  { rwa allowable_path.lt_index_assoc_smul_support_condition, },
+  { rwa allowable_path.lt_index_assoc_smul_support_condition },
   { rwa [unary_spec.lower, set.mem_set_of, ← path.comp_cons, support_condition.extend_path,
-      path.comp_assoc] at hc, }
+      path.comp_assoc] at hc }
 end
 
 namespace spec

@@ -189,7 +189,7 @@ begin
   classical,
   unfold has_smul.smul,
   have equiv := code.equiv.singleton hβγ t,
-  rw ← π.property at equiv,
+  rw ← π.prop at equiv,
   simp only [subtype.val_eq_coe, rec_bot_coe_coe, image_smul, smul_set_singleton] at equiv,
   sorry,
   -- induction γ using with_bot.rec_bot_coe,
@@ -235,7 +235,7 @@ lemma smul_A_map (π : allowable_perm α) (s : set (tangle β)) (hβγ : β ≠ 
   π • A_map γ s = A_map γ (π • s) :=
 begin
   ext,
-  dsimp only [•],
+  dsimp only [(•)],
   simp only [image, A_map, has_smul.comp.smul, mem_image, mem_Union, exists_prop,
     exists_exists_and_eq_and, mem_set_of_eq, Union_exists, bUnion_and', Union_Union_eq_right,
     ←smul_f_map hβγ, mem_local_cardinal, coe_hom_apply, coe_smul, smul_typed_near_litter],

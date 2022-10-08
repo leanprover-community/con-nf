@@ -251,9 +251,9 @@ begin
   { congr' 1,
     rw path.comp_assoc,
     rw path.comp_assoc,
-    { congr' 1; rw path.comp_assoc, },
+    { congr' 1; rw path.comp_assoc },
     exact allowable_path.lt_index_assoc.heq π,
-    exact tangle_path.lt_index_assoc.heq t₁, },
+    exact tangle_path.lt_index_assoc.heq t₁ },
   exact tangle_path.lt_index_assoc.heq t₂,
 end
 
@@ -276,7 +276,7 @@ begin
   congr' 1,
   rw path.comp_assoc,
   rw path.comp_assoc,
-  { congr' 1, rw path.comp_assoc, },
+  { congr' 1, rw path.comp_assoc },
   exact allowable_path.lt_index_assoc.heq π,
 end
 
@@ -332,30 +332,30 @@ def derivative_nil_comp {β : type_index} (B : path (α : type_index) β)
   (π : allowable_path ⟨α, path.nil⟩) : allowable_path ⟨β, B⟩ :=
 by { convert derivative_comp ⟨α, path.nil⟩ B π, rw path.nil_comp }
 
-@[simp] lemma to_struct_perm_derivative_comp : Π (A : le_index α)
-  {γ : type_index} (B : path A.index γ) (π : allowable_path A),
-  (π.derivative_comp _ B).to_struct_perm = struct_perm.derivative B π.to_struct_perm :=
+@[simp] lemma to_struct_perm_derivative_comp :
+  Π (A : le_index α) {γ : type_index} (B : path A.index γ) (π : allowable_path A),
+    (π.derivative_comp _ B).to_struct_perm = struct_perm.derivative B π.to_struct_perm :=
 begin
-intros,
-induction B,
-{
-dsimp [(derivative_comp)], revert π,
-suffices : ∀ (h : allowable_path A = allowable_path {index := A.index, path := A.path}) (π : allowable_path A), to_struct_perm (cast h π) = to_struct_perm π,
-{apply this},
-{dsimp [(derivative_comp), (allowable_path)], cases A, dsimp only, intros h π, refl}
-},
-{
-dsimp [(derivative_comp), (struct_perm.derivative)], rw ← B_ih,
-have := to_struct_perm_derivative {index := B_b, path := A.path.comp B_ᾰ} B_ᾰ_1 (derivative_comp A B_ᾰ π),
-rw this,
-dsimp only,
-congr, dsimp [(struct_perm.derivative)], simp only [monoid_hom.comp_id],
-}
+  intros,
+  induction B,
+  { dsimp [derivative_comp],
+    revert π,
+    suffices : ∀ (h : allowable_path A = allowable_path {index := A.index, path := A.path})
+      (π : allowable_path A), to_struct_perm (cast h π) = to_struct_perm π,
+    { apply this},
+    { dsimp [derivative_comp, allowable_path], cases A, dsimp only, intros h π, refl } },
+  { dsimp [derivative_comp, struct_perm.derivative],
+    rw ← B_ih,
+    have := to_struct_perm_derivative {index := B_b, path := A.path.comp B_ᾰ} B_ᾰ_1 (derivative_comp A B_ᾰ π),
+    rw this,
+    dsimp only,
+    congr,
+    dsimp [struct_perm.derivative], simp only [monoid_hom.comp_id] }
 end
 
 @[simp] lemma smul_derivative_bot {A : le_index α} (π : allowable_path A) (h : (⊥ : type_index) < A)
   {X : Type*} [mul_action near_litter_perm X] (x : X) :
-  (π.derivative h) • x = π • x :=
+  π.derivative h • x = π • x :=
 begin
   unfold has_smul.smul has_smul.comp.smul struct_perm.to_near_litter_perm,
   simp only [monoid_hom.coe_comp, mul_equiv.coe_to_monoid_hom, struct_perm.coe_to_bot_iso_symm,
@@ -423,13 +423,13 @@ lemma smul_tangle_eq_iff_smul_f_map_eq {β : Λ} (A : path (α : type_index) β)
   {γ : type_index} {δ : Λ} (hγ : γ < β) (hδ : δ < β) (hγδ : γ ≠ δ)
   (π : allowable_path (le_index.mk β A))
   (t : tangle_path (lt_index.mk' hγ A : le_index α)) :
-  (π.derivative hγ) • t = t ↔
-  (π.derivative $ with_bot.coe_lt_coe.mpr hδ) • f_map_path hγ hδ t = f_map_path hγ hδ t :=
+  π.derivative hγ • t = t ↔
+  π.derivative (with_bot.coe_lt_coe.mpr hδ) • f_map_path hγ hδ t = f_map_path hγ hδ t :=
 begin
   rw smul_f_map_path _ _ _ hγδ,
   split,
-  { intro h, rw h, },
-  { intro h, have := f_map_path_injective h, exact eq_of_heq this.2, },
+  { intro h, rw h },
+  { intro h, have := f_map_path_injective h, exact eq_of_heq this.2 },
 end
 
 lemma support_le_path (A : proper_lt_index α) (t : tangle_path (A : le_index α))

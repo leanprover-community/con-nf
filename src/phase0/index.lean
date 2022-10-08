@@ -128,7 +128,7 @@ lemma path_eq_nil : ∀ p : path α α, p = nil
 /-- There are at most `Λ` `α`-extended type indices. -/
 @[simp] lemma mk_extended_index (α : type_index) : #(extended_index α) ≤ #Λ :=
 begin
-  refine le_trans ((cardinal.le_def _ _).2 ⟨path.to_list_embedding (α : type_index) ⊥⟩) _,
+  refine le_trans ((cardinal.le_def _ _).2 ⟨⟨to_list, to_list_injective (α : type_index) ⊥⟩⟩) _,
   convert mk_list_le_max _ using 1, simp, rw max_eq_right Λ_limit.aleph_0_le
 end
 

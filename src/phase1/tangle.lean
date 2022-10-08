@@ -208,14 +208,15 @@ begin
       dsimp at *,
       rw [hA₁ γ hβγ, h, ←hA₂ γ],
       exact code.equiv.A_map_left _ (code.is_even_bot _) γ bot_ne_mk_coe } },
-  { dsimp,
-    obtain rfl | hβγ := eq_or_ne β γ,
-    { obtain rfl | hδβ := eq_or_ne δ β,
-      { rw h },
-      { dsimp at *,
-        simp_rw [h, ←hA₂ _ hδβ],
-        exact code.equiv.A_map_left _ even₂ _ (Iio.coe_injective.ne hδβ) } },
-    sorry --timeout
+  sorry
+  -- { dsimp,
+  --   obtain rfl | hβγ := eq_or_ne β γ,
+  --   { obtain rfl | hδβ := eq_or_ne δ β,
+  --     { rw h },
+  --     { dsimp at *,
+  --       simp_rw [h, ←hA₂ _ hδβ],
+  --       exact code.equiv.A_map_left _ even₂ _ (Iio.coe_injective.ne hδβ) } },
+     --timeout
     -- obtain rfl | hδγ := eq_or_ne δ γ,
     -- { dsimp,
     --   simp_rw [←h, ←hA₁ _ hβγ],
@@ -223,8 +224,7 @@ begin
     -- refine (code.equiv.A_map_right _ even₁ γ $ Iio.coe_injective.ne hβγ).trans _,
     -- dsimp,
     -- rw [hA₁ γ hβγ, h, ←hA₂ γ hδγ],
-    -- exact code.equiv.A_map_left _ even₂ γ (Iio.coe_injective.ne hδγ)
-    }
+    -- exact code.equiv.A_map_left _ even₂ γ (Iio.coe_injective.ne hδγ) }
 end
 
 /-- Extensionality in tangled type theory. Two nonempty semitangles are equal if their
@@ -465,7 +465,7 @@ begin
     rw pretangle.extension_mk at this,
     have := congr_fun₂ this β hβ,
     rw [to_pretangle, pretangle.extension_mk, set.image_eq_empty] at this,
-    exact (t.exts β hβ).property.ne_empty this },
+    exact (t.exts β hβ).prop.ne_empty this },
   { intro h,
     have := congr_arg pretangle.atom_extension h,
     rw [to_pretangle, pretangle.atom_extension_mk, pretangle.atom_extension_mk] at this,

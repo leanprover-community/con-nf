@@ -67,8 +67,8 @@ begin
       simp only [prod.mk.inj_iff] at this,
       cases this.2,
       refine not_lt_of_ge (le_of_path C) _,
-      rw ← hB', exact coe_lt_coe.mpr hδ, },
-    { intros x y h, cases h, refl, } }
+      rw ← hB', exact coe_lt_coe.mpr hδ },
+    { intros x y h, cases h, refl } }
 end
 local attribute [irreducible] litter
 
@@ -120,11 +120,11 @@ begin
   { exact (ho $ A.comp he).near_litter hz (by assumption) (by assumption) }
 end
 
-/-- A specification is the graph of a structural permutation if it is one-to-one and total.
+/- A specification is the graph of a structural permutation if it is one-to-one and total.
 This is one direction of implication of `total-1-1-gives-perm` on the blueprint - the other
 direction may not be needed. We may also require `hσ₃ : σ.co_total` or
 `hσ₄ : σ⁻¹.one_to_one_forward` - but hopefully this isn't needed. -/
-lemma graph_struct_perm (σ : spec B) (hσ₁ : σ.one_to_one_forward) (hσ₂ : σ.total) :
+example (σ : spec B) (hσ₁ : σ.one_to_one_forward) (hσ₂ : σ.total) :
   ∃ (π : struct_perm B), π.to_spec = σ := sorry
 
 /-- The allowability condition on atoms.
@@ -205,14 +205,6 @@ protected structure allowable (σ : spec B) : Prop :=
 (backward : σ⁻¹.forward_allowable B)
 (flex_cond : ∀ A, σ.flex_cond B A)
 
-@[simp] lemma Union_eq_true {α : Type*} {p : Prop} {s : set α} (h : p) :
-  (⋃ (h : p), s) = s :=
-by { classical, rw Union_eq_if, rwa if_pos, }
-
-@[simp] lemma Union_eq_false {α : Type*} {p : Prop} {s : set α} (h : ¬p) :
-  (⋃ (h : p), s) = ∅ :=
-by { classical, rw Union_eq_if, rwa if_neg, }
-
 variables {B}
 
 lemma flex_cond.inv : σ.flex_cond B A → σ⁻¹.flex_cond B A
@@ -238,7 +230,7 @@ open spec
 variables (B)
 
 /-- An *allowable partial permutation* is a specification that is allowable as defined above. -/
-def allowable_spec := {σ : spec B // σ.allowable B}
+abbreviation allowable_spec := {σ : spec B // σ.allowable B}
 
 variables {B}
 
@@ -246,10 +238,10 @@ namespace allowable_spec
 
 instance has_inv : has_inv (allowable_spec B) := ⟨λ σ, ⟨σ.val⁻¹, σ.2.inv⟩⟩
 
-@[simp] lemma val_inv (π : allowable_spec B) : π⁻¹.val = π.val⁻¹ := rfl
+@[simp, norm_cast] lemma coe_inv (π : allowable_spec B) : (↑(π⁻¹) : spec B) = π⁻¹ := rfl
 
 instance : has_involutive_inv (allowable_spec B) :=
-subtype.val_injective.has_involutive_inv _ val_inv
+subtype.val_injective.has_involutive_inv _ coe_inv
 
 end allowable_spec
 
@@ -274,22 +266,23 @@ end
 /-- If an allowable partial permutation `σ` supports some `α`-tangle `t`, any permutations extending
 `σ` must map `t` to the same value. -/
 lemma eq_of_supports (σ : allowable_spec B) (t : tangle_path B)
-  (ht : supports (allowable_path B) σ.val.domain t) (π₁ π₂ : allowable_path B)
+  (ht : supports (allowable_path B) (σ : spec B).domain t) (π₁ π₂ : allowable_path B)
   (hπ₁ : π₁.to_struct_perm.satisfies σ.val) (hπ₂ : π₂.to_struct_perm.satisfies σ.val) :
   π₁ • t = π₂ • t :=
 begin
-  refine eq_of_support_eq t ⟨σ.val.domain, ht⟩ π₁ π₂ _,
+  refine eq_of_support_eq t ⟨(σ : spec B).domain, ht⟩ π₁ π₂ _,
   intros c hc,
-  change c ∈ σ.val.domain at hc, rw mem_domain at hc,
+  change c ∈ (σ : spec B).domain at hc, rw mem_domain at hc,
   obtain ⟨⟨⟨a₁, a₂⟩ | ⟨N₁, N₂⟩, C⟩, hd, rfl⟩ := hc;
-  { specialize hπ₁ hd, specialize hπ₂ hd,
+  { specialize hπ₁ hd,
+    specialize hπ₂ hd,
     unfold satisfies_cond at hπ₁ hπ₂,
     simp only [sum.elim_inl, sum.elim_inr] at hπ₁ hπ₂,
     simp only [binary_condition.domain_mk, map_inl, map_inr],
     rw prod.eq_iff_fst_eq_snd_eq, split,
     { simp only [has_smul.smul, has_smul.comp.smul, map_inl, map_inr],
-      exact hπ₁.trans hπ₂.symm, },
-    { refl, } },
+      exact hπ₁.trans hπ₂.symm },
+    { refl } }
 end
 
 /-- The action lemma. If freedom of action holds, and `σ` is any allowable partial permutation
@@ -299,7 +292,7 @@ allowable permutation `π` extending `σ` maps `t` to `σ(t)`.
 Freedom of action gives some extension `π`, and hence some candidate value; the support condition
 implies that any two extensions agree. We use the above lemma for the second part. -/
 lemma exists_tangle_of_supports (σ : allowable_spec B) (t : tangle_path B)
-  (foa : freedom_of_action B) (ht : supports (allowable_path B) σ.val.domain t) :
+  (foa : freedom_of_action B) (ht : supports (allowable_path B) (σ : spec B).domain t) :
   ∃ s, ∀ π : allowable_path B, π.to_struct_perm.satisfies σ.val → π • t = s :=
 ⟨(foa σ).some • t, λ π₁ hπ₁, eq_of_supports σ t ht π₁ (foa σ).some hπ₁ (foa σ).some_spec⟩
 

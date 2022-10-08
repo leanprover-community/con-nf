@@ -1,3 +1,4 @@
+import mathlib.pointwise
 import mathlib.transfer
 import phase2.basic
 import order.copy
@@ -33,11 +34,12 @@ variables [params.{u}]
 open struct_perm
 
 section
-variables {α β γ : type_index}
+variables {ι : Sort*} {α β γ : type_index}
 
 /-- A *binary condition* is like a support condition but uses either two atoms or two near-litters
 instead of one. A binary condition `⟨⟨x, y⟩, A⟩` represents the constraint `π_A(x) = y` on an
 allowable permutation. -/
+@[derive inhabited]
 def binary_condition (α : type_index) : Type u :=
 ((atom × atom) ⊕ (near_litter × near_litter)) × extended_index α
 
@@ -78,13 +80,14 @@ instance (α : type_index) : has_involutive_inv (binary_condition α) :=
 { inv := λ c, ⟨c.1.map prod.swap prod.swap, c.2⟩,
   inv_inv := by rintro ⟨⟨a₁, a₂⟩ | ⟨N₁, N₂⟩, i⟩; refl }
 
-@[simp] lemma inv_def (c : binary_condition α) :
-  c⁻¹ = ⟨c.1.map prod.swap prod.swap, c.2⟩ := rfl
+lemma inv_def (c : binary_condition α) : c⁻¹ = ⟨c.1.map prod.swap prod.swap, c.2⟩ := rfl
 
 /-- Converts a binary condition `⟨⟨x, y⟩, A⟩` into the support condition `⟨x, A⟩`. -/
+@[simps]
 def domain : binary_condition α → support_condition α := prod.map (sum.map prod.fst prod.fst) id
 
 /-- Converts a binary condition `⟨⟨x, y⟩, A⟩` into the support condition `⟨y, A⟩`. -/
+@[simps]
 def range : binary_condition α → support_condition α := prod.map (sum.map prod.snd prod.snd) id
 
 @[simp] lemma domain_mk (x : (atom × atom) ⊕ (near_litter × near_litter)) (A : extended_index α) :
@@ -93,11 +96,14 @@ def range : binary_condition α → support_condition α := prod.map (sum.map pr
 @[simp] lemma range_mk (x : (atom × atom) ⊕ (near_litter × near_litter)) (A : extended_index α) :
   range (x, A) = (x.map prod.snd prod.snd, A) := rfl
 
+lemma domain_apply (c : binary_condition α) : c.domain = (c.1.map prod.fst prod.fst, c.2) := rfl
+lemma range_apply (c : binary_condition α) : c.range = (c.1.map prod.snd prod.snd, c.2) := rfl
+
 @[simp] lemma domain_inv (c : binary_condition α) : c⁻¹.domain = c.range :=
-by obtain ⟨⟨_, _⟩ | ⟨_, _⟩, _⟩ := c; refl
+by obtain ⟨_ | _, _⟩ := c; refl
 
 @[simp] lemma range_inv (c : binary_condition α) : c⁻¹.range = c.domain :=
-by obtain ⟨⟨_, _⟩ | ⟨_, _⟩, _⟩ := c; refl
+by obtain ⟨_ | _, _⟩ := c; refl
 
 end binary_condition
 
@@ -127,6 +133,8 @@ structure spec (α : type_index) : Type u :=
 (image_domain' : binary_condition.domain '' carrier = domain)
 (image_range' : binary_condition.range '' carrier = range)
 
+instance : inhabited (spec α) := ⟨⟨∅, ∅, ∅, image_empty _, image_empty _⟩⟩
+
 namespace spec
 variables {σ τ : spec α} {c d : binary_condition α}
 
@@ -139,6 +147,7 @@ instance : set_like (spec α) (binary_condition α) :=
 
 @[ext] lemma ext : (∀ c, c ∈ σ ↔ c ∈ τ) → σ = τ := set_like.ext
 
+/-- The "identity" equivalence between `spec α` and `set (binary_condition α)`. -/
 @[simps] def equiv_set : spec α ≃ set (binary_condition α) :=
 { to_fun := coe,
   inv_fun := λ s, { carrier := s,
@@ -175,6 +184,9 @@ equiv_set.complete_distrib_lattice.copy
 @[simp] lemma coe_inf (σ τ : spec α) : (↑(σ ⊓ τ) : set $ binary_condition α) = σ ∩ τ := rfl
 @[simp] lemma coe_Sup (s : set $ spec α) : (↑(Sup s) : set $ binary_condition α) = ⋃ x ∈ s, ↑x :=
 rfl
+@[simp] lemma coe_supr (f : ι → spec α) : (↑(⨆ i, f i) : set $ binary_condition α) = ⨆ i, f i :=
+by { simp_rw [supr, coe_Sup, Sup_eq_supr],
+  exact equiv_set.supr_congr (λ _, supr_congr_Prop (by simp) $ λ _, rfl) }
 
 @[simp] lemma coe_mk (carrier : set (binary_condition α))
   (domain range : unary_spec α)
@@ -192,6 +204,7 @@ rfl
 @[simp] lemma mem_sup : c ∈ σ ⊔ τ ↔ c ∈ σ ∨ c ∈ τ := iff.rfl
 @[simp] lemma mem_inf : c ∈ σ ⊓ τ ↔ c ∈ σ ∧ c ∈ τ := iff.rfl
 @[simp] lemma mem_Sup {s : set $ spec α} : c ∈ Sup s ↔ ∃ σ ∈ s, c ∈ σ := mem_Union₂
+@[simp] lemma mem_supr {f : ι → spec α} : c ∈ (⨆ i, f i) ↔ ∃ i, c ∈ f i := by simp [supr]
 
 @[simp] lemma mem_domain {a : support_condition α} {σ : spec α} :
   a ∈ σ.domain ↔ ∃ cond : binary_condition α, cond ∈ σ ∧ cond.domain = a :=
@@ -231,8 +244,11 @@ mem_range_of_mem
 @[simp] lemma domain_sup (σ τ : spec α) : (σ ⊔ τ).domain = σ.domain ∪ τ.domain := rfl
 @[simp] lemma range_sup (σ τ : spec α) : (σ ⊔ τ).range = σ.range ∪ τ.range := rfl
 
-lemma domain_Sup (S : set (spec α)) : (Sup S).domain = ⋃ s ∈ S, domain s := rfl
-lemma range_Sup (S : set (spec α)) : (Sup S).range = ⋃ s ∈ S, spec.range s := rfl
+@[simp] lemma domain_Sup (S : set (spec α)) : (Sup S).domain = ⋃ s ∈ S, domain s := rfl
+@[simp] lemma range_Sup (S : set (spec α)) : (Sup S).range = ⋃ s ∈ S, spec.range s := rfl
+
+@[simp] lemma domain_supr (f : ι → spec α) : (⨆ i, f i).domain = ⋃ i, (f i).domain := by simp [supr]
+@[simp] lemma range_supr (f : ι → spec α) : (⨆ i, f i).range = ⋃ i, (f i).range := by simp [supr]
 
 instance : has_singleton (binary_condition α) (spec α) :=
 ⟨λ c, ⟨{c}, {c.domain}, {c.range}, image_singleton, image_singleton⟩⟩
@@ -262,8 +278,6 @@ instance : has_involutive_inv (spec α) :=
   inv_inv := by { rintro ⟨_, _, _, _, _⟩, simp } }
 
 @[simp] lemma mem_inv : c ∈ σ⁻¹ ↔ c⁻¹ ∈ σ := iff.rfl
-@[simp] lemma inv_mem_inv : c⁻¹ ∈ σ⁻¹ ↔ c ∈ σ :=
-⟨λ h, by rwa [mem_inv, inv_inv] at h, λ h, by rwa [mem_inv, inv_inv]⟩
 @[simp] lemma coe_inv (σ : spec α) : (↑(σ⁻¹) : set $ binary_condition α) = σ⁻¹ := rfl
 @[simp] lemma domain_inv (σ : spec α) : σ⁻¹.domain = σ.range := rfl
 @[simp] lemma range_inv (σ : spec α) : σ⁻¹.range = σ.domain := rfl
@@ -271,26 +285,16 @@ instance : has_involutive_inv (spec α) :=
 lemma le_iff_subset (σ τ : spec α) : σ ≤ τ ↔ σ.carrier ⊆ τ.carrier := iff.rfl
 
 @[simp] lemma inv_le_inv (σ τ : spec α) : σ⁻¹ ≤ τ⁻¹ ↔ σ ≤ τ :=
-⟨λ h x hx, inv_mem_inv.mp (h (inv_mem_inv.mpr hx)),
-  λ h x hx, inv_mem_inv.mp (h (inv_mem_inv.mpr hx))⟩
+(inv_involutive.to_perm _).forall_congr $ by simp
 
-@[simp] lemma inl_mem_inv (σ : spec α) (a : atom × atom) (A : extended_index α) :
-  (inl a, A) ∈ σ⁻¹ ↔ (inl a.swap, A) ∈ σ :=
-mem_inv
+@[simp] lemma inv_sup (σ τ : spec α) : (σ ⊔ τ)⁻¹ = σ⁻¹ ⊔ τ⁻¹ := set_like.coe_injective set.union_inv
 
-@[simp] lemma inr_mem_inv (σ : spec α) (N : near_litter × near_litter) (A : extended_index α) :
-  (inr N, A) ∈ σ⁻¹ ↔ (inr N.swap, A) ∈ σ :=
-mem_inv
+@[simp] lemma inv_Sup (S : set (spec α)) : (Sup S)⁻¹ = ⨆ s ∈ S, s⁻¹ :=
+set_like.coe_injective $ by simp
 
-lemma sup_inv (σ τ : spec α) : (σ ⊔ τ)⁻¹ = σ⁻¹ ⊔ τ⁻¹ :=
-by { ext, simp only [mem_inv, mem_sup] }
-
-lemma Sup_inv (S : set (spec α)) : (Sup S)⁻¹ = Sup (has_inv.inv '' S) :=
-begin
-  ext,
-  simp only [mem_inv, mem_Sup, exists_prop, image_inv, set.mem_inv],
-  split; rintro ⟨σ, h⟩; exact ⟨σ⁻¹, by simp only [h, inv_inv, mem_inv, and_self]⟩,
-end
+@[simp] lemma inv_supr (f : ι → spec α) : (⨆ i, f i)⁻¹ = ⨆ i, (f i)⁻¹ :=
+by { simp_rw [supr, inv_Sup, Sup_eq_supr],
+  exact (inv_involutive.to_perm _).supr_congr (λ _, supr_congr_Prop (by simp) $ λ _, rfl) }
 
 end spec
 
@@ -335,7 +339,7 @@ end
 
 /-- The map from structural permutations to their specifications is injective. -/
 lemma to_spec_injective : ∀ (α : type_index), injective (@to_spec _ α)
-| ⊥ := λ σ τ h, ext_bot _ _ $ λ a, begin
+| ⊥ := λ σ τ h, eq_of_smul_eq_smul $ λ a, begin
     simp only [to_spec, embedding_like.apply_eq_iff_eq, ext_iff] at h,
     simpa only [prod.mk.inj_iff, exists_eq_right, derivative_nil, exists_eq_left, exists_false,
       or_false, eq_self_iff_true, true_iff, prod.exists, mem_union_eq, mem_range, iff_true]
@@ -358,50 +362,82 @@ using_well_founded { dec_tac := `[assumption] }
 
 end struct_perm
 
+namespace support_condition
+variables {A : path α β} {B : path β γ} {c d : support_condition β}
+
 /-- We can extend any support condition to one of a higher proper type index `α` by providing a path
 connecting the old extended index up to `α`. -/
-def support_condition.extend_path (c : support_condition β) (A : path (α : type_index) β) :
-  support_condition α := ⟨c.fst, A.comp c.snd⟩
+@[simps] def extend_path (A : path α β) (c : support_condition β) : support_condition α :=
+⟨c.1, A.comp c.2⟩
+
+@[simp] lemma extend_path_nil : extend_path (path.nil : path α α) = id :=
+funext $ λ _, by rw [extend_path, path.nil_comp, prod.mk.eta, id]
+
+@[simp] lemma extend_path_extend_path (A : path α β) (B : path β γ) (c : support_condition γ) :
+  (c.extend_path B).extend_path A = c.extend_path (A.comp B) :=
+by simp_rw [extend_path, path.comp_assoc]
+
+@[simp] lemma extend_path_inj : c.extend_path A = d.extend_path A ↔ c = d :=
+by simp only [extend_path, prod.ext_iff, path.comp_inj_right]
+
+lemma extend_path_injective (A : path α β) : injective (extend_path A) := λ c d, extend_path_inj.1
+
+end support_condition
 
 namespace binary_condition
+variables {A : path α β} {B : path β γ} {c d : binary_condition β}
 
 /-- We can extend any binary condition to one of a higher proper type index `α` by providing a path
 connecting the old extended index up to `α`. -/
-def extend_path (c : binary_condition β) (A : path α β) : binary_condition α :=
-⟨c.fst, A.comp c.snd⟩
+@[simps] def extend_path (A : path α β) (c : binary_condition β) : binary_condition α :=
+(c.fst, A.comp c.snd)
+
+@[simp] lemma extend_path_nil : extend_path (path.nil : path α α) = id :=
+funext $ λ _, by rw [extend_path, path.nil_comp, prod.mk.eta, id]
+
+@[simp] lemma extend_path_extend_path (A : path α β) (B : path β γ) (c : binary_condition γ) :
+  (c.extend_path B).extend_path A = c.extend_path (A.comp B) :=
+by simp_rw [extend_path, path.comp_assoc]
 
 @[simp] lemma extend_path_inv (c : binary_condition β) (A : path α β) :
   c⁻¹.extend_path A = (c.extend_path A)⁻¹ := rfl
 
+@[simp] lemma extend_path_inj : c.extend_path A = d.extend_path A ↔ c = d :=
+by simp only [extend_path, prod.ext_iff, path.comp_inj_right]
+
+lemma extend_path_injective (A : path α β) : injective (extend_path A) := λ c d, extend_path_inj.1
+
 end binary_condition
 
 namespace unary_spec
+variables {A : path α β} {σ : unary_spec α} {c : support_condition β}
 
 /-- We can lower a unary specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping support conditions whose paths begin with `A`. -/
-def lower (σ : unary_spec α) (A : path α β) : unary_spec β := {c | c.extend_path A ∈ σ}
+def lower (A : path α β) (σ : unary_spec α) : unary_spec β := support_condition.extend_path A ⁻¹' σ
+
+@[simp] lemma mem_lower : c ∈ σ.lower A ↔ c.extend_path A ∈ σ := iff.rfl
 
 /-- Lowering along the empty path does nothing. -/
 @[simp] lemma lower_nil (σ : unary_spec α) : σ.lower path.nil = σ :=
-by simp only
-  [unary_spec.lower, support_condition.extend_path, path.nil_comp, prod.mk.eta, set_of_mem_eq]
+by simp only [lower, support_condition.extend_path_nil, preimage_id]
 
 /-- The lowering map is functorial. -/
 @[simp] lemma lower_lower (σ : unary_spec α) (A : path α β) (B : path β γ) :
   (σ.lower A).lower B = σ.lower (A.comp B) :=
-by simp only [unary_spec.lower, support_condition.extend_path, mem_set_of_eq, path.comp_assoc]
+by simp_rw [lower, preimage_preimage, support_condition.extend_path_extend_path]
 
 @[simp] lemma lower_union (σ τ : unary_spec α) (A : path α β) :
   (σ ∪ τ).lower A = σ.lower A ∪ τ.lower A :=
-by ext ⟨x | x, y⟩; simp only [unary_spec.lower, mem_union_eq, mem_set_of_eq]
+preimage_union
 
 @[simp] lemma lower_sUnion (c : set (unary_spec α)) (A : path α β) :
-  lower (⋃₀ c) A = ⋃ s ∈ c, lower s A :=
-by { ext, simp only [lower, mem_Union, mem_set_of_eq, mem_sUnion] }
+  lower A (⋃₀ c) = ⋃ s ∈ c, lower A s :=
+preimage_sUnion
 
 @[simp] lemma lower_Union {ι : Sort*} {f : ι → unary_spec α} (A : path α β) :
-  lower (⋃ i, f i) A = ⋃ i, lower (f i) A :=
-by { ext, simp only [lower, mem_Union, mem_set_of_eq] }
+  lower A (⋃ i, f i) = ⋃ i, lower A (f i) :=
+preimage_Union
 
 end unary_spec
 
@@ -410,40 +446,46 @@ variables {A : path α β} {σ : spec α} {c : binary_condition β}
 
 /-- We can lower a specification to a lower proper type index with respect to a path
 `A : α ⟶ β` by only keeping binary conditions whose paths begin with `A`. -/
-def lower (A : path α β) (σ : spec α) : spec β := {
-  carrier := {c | c.extend_path A ∈ σ},
-  domain := {c | c.extend_path A ∈ σ.domain},
-  range := {c | c.extend_path A ∈ σ.range},
-  image_domain' := set.ext $ λ x, begin
+def lower (A : path α β) (σ : spec α) : spec β :=
+{ carrier := binary_condition.extend_path A ⁻¹' σ,
+  domain := σ.domain.lower A,
+  range := σ.range.lower A,
+  image_domain' := set.ext $ λ c, begin
+    simp only [mem_image, mem_preimage, set_like.mem_coe, unary_spec.mem_lower, mem_domain],
     split,
-    { rintro ⟨⟨_, C⟩, hx, rfl⟩,
-      exact mem_domain.2 ⟨_, hx, rfl⟩ },
-    { intro hx,
-      cases x with x C,
-      simp only [mem_domain, mem_set_of_eq] at hx,
-      obtain ⟨⟨b, _⟩, hb, hdom⟩ := hx,
-      simp only [support_condition.extend_path, binary_condition.domain, prod.map_mk, id.def, prod.mk.inj_iff] at hdom,
-      cases hdom.2,
-      exact ⟨⟨b, C⟩, hb, by simp only [binary_condition.domain, prod.map_mk, id.def, prod.mk.inj_iff, eq_self_iff_true, and_true, hdom]⟩, }
+    { rintro ⟨c, hc, rfl⟩,
+      exact ⟨_, hc, rfl⟩ },
+    { rintro ⟨d, hd, h⟩,
+      simp only [prod.ext_iff, binary_condition.domain_fst, support_condition.extend_path_fst,
+        support_condition.extend_path_snd] at h,
+      refine ⟨(d.1, c.2), _, _⟩,
+      { simp [binary_condition.extend_path, ←h.2, hd] },
+      { simp only [h, binary_condition.domain_mk, prod.mk.eta] } }
   end,
-  image_range' := set.ext $ λ x, begin
+  image_range' := set.ext $ λ c, begin
+    simp only [mem_image, mem_preimage, set_like.mem_coe, unary_spec.mem_lower, mem_range],
     split,
-    { rintro ⟨⟨_, C⟩, hx, rfl⟩,
-      exact mem_range.2 ⟨_, hx, rfl⟩ },
-    { intro hx,
-      cases x with x C,
-      simp only [mem_range, mem_set_of_eq] at hx,
-      obtain ⟨⟨b, _⟩, hb, hdom⟩ := hx,
-      simp only [support_condition.extend_path, binary_condition.range, prod.map_mk, id.def, prod.mk.inj_iff] at hdom,
-      cases hdom.2,
-      exact ⟨⟨b, C⟩, hb, by simp only [binary_condition.range, prod.map_mk, id.def, prod.mk.inj_iff, eq_self_iff_true, and_true, hdom]⟩, }
-  end,
-}
-
-@[simp] lemma coe_lower (A : path α β) (σ : spec α) :
-  (σ.lower A : set (binary_condition β)) = {c | c.extend_path A ∈ σ} := rfl
+    { rintro ⟨c, hc, rfl⟩,
+      exact ⟨_, hc, rfl⟩ },
+    { rintro ⟨d, hd, h⟩,
+      simp only [prod.ext_iff, binary_condition.range_fst, support_condition.extend_path_fst,
+        support_condition.extend_path_snd] at h,
+      refine ⟨(d.1, c.2), _, _⟩,
+      { simp [binary_condition.extend_path, ←h.2, hd] },
+      { simp only [h, binary_condition.range_mk, prod.mk.eta] } }
+  end }
 
 @[simp] lemma mem_lower : c ∈ σ.lower A ↔ c.extend_path A ∈ σ := iff.rfl
+
+@[simp] lemma coe_lower (A : path α β) (σ : spec α) :
+  (σ.lower A : set (binary_condition β)) = binary_condition.extend_path A ⁻¹' σ := rfl
+
+@[simp] lemma domain_lower (A : path α β) (σ : spec α) : (σ.lower A).domain = σ.domain.lower A :=
+rfl
+
+@[simp] lemma range_lower (A : path α β) (σ : spec α) : (σ.lower A).range = σ.range.lower A := rfl
+
+lemma lower_mono : monotone (lower A) := λ σ τ h, preimage_mono $ preimage_mono h
 
 /-- Lowering along the empty path does nothing. -/
 @[simp] lemma lower_nil (σ : spec α) : σ.lower path.nil = σ :=
