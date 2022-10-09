@@ -137,14 +137,14 @@ Note that the `small` constructor does not depend on whether the litter is prese
     (L' : near_litter) (hL : (⟨inr ⟨L.to_near_litter, L'⟩, A⟩ : binary_condition β) ∈ σ)
     (atom_map : litter_set L → atom) :
   (∀ a ∈ litter_set L, (⟨inl ⟨a, atom_map ⟨a, ‹_›⟩⟩, A⟩ : binary_condition β) ∈ σ) →
-  L'.snd.val = range atom_map → atom_cond
+  ↑L' = range atom_map → atom_cond
 | small_out
     (hL : (inr L.to_near_litter, A) ∉ σ.domain) :
   small {a ∈ litter_set L | (⟨inl a, A⟩ : support_condition β) ∈ σ.domain} → atom_cond
 | small_in
     (L' : near_litter) (hL : (inr (L.to_near_litter, L'), A) ∈ σ) :
   small {a ∈ litter_set L | (⟨inl a, A⟩ : support_condition β) ∈ σ.domain} →
-  (∀ ⦃a b : atom⦄ (hin : (inl (a, b), A) ∈ σ), a ∈ litter_set L ↔ b ∈ L'.snd.val) → atom_cond
+  (∀ ⦃a b : atom⦄ (hin : (inl (a, b), A) ∈ σ), a ∈ litter_set L ↔ b ∈ L') → atom_cond
 
 /-- The allowability condition on near-litters.
 If a near-litter is present, so are its litter and all atoms in the symmetric difference, and it is
@@ -152,9 +152,9 @@ mapped to the right place. -/
 def near_litter_cond (σ : spec β) (N₁ N₂ : near_litter) (A : extended_index β) : Prop :=
 (⟨inr ⟨N₁, N₂⟩, A⟩ : binary_condition β) ∈ σ →
   ∃ M, (⟨inr ⟨N₁.fst.to_near_litter, M⟩, A⟩ : binary_condition β) ∈ σ ∧
-  ∃ (symm_diff : litter_set N₁.fst ∆ N₁.snd → atom),
-    (∀ a : litter_set N₁.fst ∆ N₁.snd, (⟨inl ⟨a, symm_diff a⟩, A⟩ : binary_condition β) ∈ σ) ∧
-  N₂.snd.val = M.snd.val ∆ range symm_diff
+  ∃ (symm_diff : litter_set N₁.fst ∆ N₁ → atom),
+    (∀ a : litter_set N₁.fst ∆ N₁, (⟨inl ⟨a, symm_diff a⟩, A⟩ : binary_condition β) ∈ σ) ∧
+  ↑N₂ = ↑M ∆ range symm_diff
 
 variables (B) {σ : spec B} {A : extended_index B}
 
@@ -236,7 +236,7 @@ variables {B}
 
 namespace allowable_spec
 
-instance has_inv : has_inv (allowable_spec B) := ⟨λ σ, ⟨σ.val⁻¹, σ.2.inv⟩⟩
+instance has_inv : has_inv (allowable_spec B) := ⟨λ σ, ⟨(σ : spec B)⁻¹, σ.2.inv⟩⟩
 
 @[simp, norm_cast] lemma coe_inv (π : allowable_spec B) : (↑(π⁻¹) : spec B) = π⁻¹ := rfl
 
@@ -250,7 +250,7 @@ variable (B)
 /-- We say that *freedom of action* holds along a path `B` if any partial allowable permutation `σ`
 admits an allowable permutation `π` extending it. -/
 def freedom_of_action : Prop :=
-∀ σ : allowable_spec B, ∃ π : allowable_path B, π.to_struct_perm.satisfies σ.val
+∀ σ : allowable_spec B, ∃ π : allowable_path B, π.to_struct_perm.satisfies (σ : spec B)
 
 variable {B}
 
@@ -267,7 +267,7 @@ end
 `σ` must map `t` to the same value. -/
 lemma eq_of_supports (σ : allowable_spec B) (t : tangle_path B)
   (ht : supports (allowable_path B) (σ : spec B).domain t) (π₁ π₂ : allowable_path B)
-  (hπ₁ : π₁.to_struct_perm.satisfies σ.val) (hπ₂ : π₂.to_struct_perm.satisfies σ.val) :
+  (hπ₁ : π₁.to_struct_perm.satisfies (σ : spec B)) (hπ₂ : π₂.to_struct_perm.satisfies (σ : spec B)) :
   π₁ • t = π₂ • t :=
 begin
   refine eq_of_support_eq t ⟨(σ : spec B).domain, ht⟩ π₁ π₂ _,
@@ -293,7 +293,7 @@ Freedom of action gives some extension `π`, and hence some candidate value; the
 implies that any two extensions agree. We use the above lemma for the second part. -/
 lemma exists_tangle_of_supports (σ : allowable_spec B) (t : tangle_path B)
   (foa : freedom_of_action B) (ht : supports (allowable_path B) (σ : spec B).domain t) :
-  ∃ s, ∀ π : allowable_path B, π.to_struct_perm.satisfies σ.val → π • t = s :=
+  ∃ s, ∀ π : allowable_path B, π.to_struct_perm.satisfies (σ : spec B) → π • t = s :=
 ⟨(foa σ).some • t, λ π₁ hπ₁, eq_of_supports σ t ht π₁ (foa σ).some hπ₁ (foa σ).some_spec⟩
 
 end con_nf

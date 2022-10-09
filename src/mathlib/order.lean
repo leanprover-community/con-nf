@@ -1,5 +1,6 @@
 import algebra.parity
 import order.symm_diff
+import order.zorn
 
 /-!
 # Order theoretic results
@@ -60,5 +61,48 @@ lemma pairwise.bUnion_injective (h₀ : pairwise (disjoint on f)) (h₁ : ∀ i,
   injective (λ s : set ι, ⋃ i ∈ s, f i) :=
 λ s t h, (h₀.subset_of_bUnion_subset_bUnion (λ _ _, h₁ _) $ h.subset).antisymm $
   h₀.subset_of_bUnion_subset_bUnion (λ _ _, h₁ _) $ h.superset
+
+end
+
+section
+variables [boolean_algebra α] {a b c : α}
+
+lemma disjoint.le_symm_diff_sup_symm_diff_left (h : disjoint a b) : c ≤ a ∆ c ⊔ b ∆ c :=
+begin
+  transitivity c \ (a ⊓ b),
+  { rw [h.eq_bot, sdiff_bot] },
+  { rw sdiff_inf,
+    exact sup_le_sup le_sup_right le_sup_right }
+end
+
+lemma disjoint.le_symm_diff_sup_symm_diff_right (h : disjoint b c) : a ≤ a ∆ b ⊔ a ∆ c :=
+by { simp_rw symm_diff_comm a, exact h.le_symm_diff_sup_symm_diff_left }
+
+end
+
+namespace set
+variables {s t u : set α}
+
+lemma subset_symm_diff_union_symm_diff_left (h : disjoint s t) : u ≤ s ∆ u ⊔ t ∆ u :=
+h.le_symm_diff_sup_symm_diff_left
+
+lemma subset_symm_diff_union_symm_diff_right (h : disjoint t u) : s ≤ s ∆ t ⊔ s ∆ u :=
+h.le_symm_diff_sup_symm_diff_right
+
+end set
+
+section
+variables [preorder α]
+
+open set
+
+theorem zorn_Ici₀ (a : α)
+  (ih : ∀ c ⊆ Ici a, is_chain (≤) c → ∀ y ∈ c, ∃ ub, a ≤ ub ∧ ∀ z ∈ c, z ≤ ub) (x : α)
+  (hax : a ≤ x) :
+  ∃ m, x ≤ m ∧ ∀ z, m ≤ z → z ≤ m :=
+begin
+  obtain ⟨m, hma, hxm, hm⟩ := zorn_nonempty_preorder₀ (Ici a) (by simpa using ih) x hax,
+  exact ⟨m, hxm, λ z hmz, hm _ (hax.trans $ hxm.trans hmz) hmz⟩,
+end
 
 end

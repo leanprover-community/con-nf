@@ -67,13 +67,13 @@ begin
 end
 
 /-- Only `< μ` elements of `μ` have been hit so far by f_map_core. -/
-lemma mk_litters_inj_constraint (x : μ) (f_map_core : Π (y < x), μ) :
+lemma mk_litters_inj_constraint (x : μ) (f_map_core : Π y < x, μ) :
   #{i : μ | ∃ y < x, f_map_core y ‹_› = i} < #μ :=
 begin
-  have : {i | ∃ y < x, f_map_core y ‹_› = i}
-    = {i | ∃ (y : {y // y < x}), f_map_core y.val y.prop = i} := by simp_rw subtype.exists,
-  rw this,
-  exact mk_range_le.trans_lt (card_Iio_lt x),
+  have : #{i | ∃ y : {y // y < x}, f_map_core y y.prop = i} < #μ :=
+    mk_range_le.trans_lt (card_Iio_lt x),
+  simp_rw subtype.exists at this,
+  exact this,
 end
 
 /-!
@@ -104,8 +104,8 @@ private def extend_result (x : μ) (h_lt : Π y < x, f_map_result α β y) : Π 
 private lemma f_map_result_coherent (x y : μ) (fx : f_map_result α β x) (fy : f_map_result α β y) :
   Π (z : μ), z ≤ x → z ≤ y → fx.val z ‹_› = fy.val z ‹_›
 | z hzx hzy := begin
-  rw (fx.prop.some).snd z hzx,
-  rw (fy.prop.some).snd z hzy,
+  rw fx.2.some.2 z hzx,
+  rw fy.2.some.2 z hzy,
   congr' with w hw,
   exact f_map_result_coherent w _ _,
 end
@@ -117,9 +117,8 @@ private noncomputable def mk_f_map_result (x : μ) (h_lt : Π y < x, f_map_resul
   f_map_result α β x :=
 ⟨λ y hy, dite (x = y) (λ h, hx.some) (λ h, (h_lt y $ hy.lt_of_ne' h).val y le_rfl),
 ⟨⟨λ y hy, begin
-  by_cases x = y,
-  { subst h,
-    convert hx,
+  obtain rfl | h := eq_or_ne x y,
+  { convert hx,
     unfold extend_result,
     ext z hz,
     rw dif_neg hz.ne' },
@@ -136,8 +135,10 @@ end, λ y hy, begin
     rw dif_neg hz.ne',
     refl },
   { convert ((h_lt y _).prop.some).snd y le_rfl,
-    ext z hz, split_ifs with h₁,
-    { exfalso, rw h₁ at hy, exact not_lt_of_ge hy hz },
+    ext z hz,
+    split_ifs with h₁,
+    { rw h₁ at hy,
+      cases hy.not_lt hz },
     { exact f_map_result_coherent α β z y (h_lt z _) (h_lt y _) z le_rfl _ } }
 end⟩⟩⟩
 

@@ -28,29 +28,29 @@ variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumption
 variables (σ : allowable_spec B) (N : near_litter) (A : extended_index B)
 
 private noncomputable def near_litter_image (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
     near_litter :=
-  ⟨(near_litter_value σ A N.fst.to_near_litter hNL).fst,
-    (near_litter_value σ A N.fst.to_near_litter hNL).snd.val ∆
-      range (λ (a : {a // a ∈ litter_set N.fst ∆ ↑(N.snd)}),
-        atom_value σ A a (ha a a.prop)),
-    begin
-      rw [is_near_litter, is_near, small, ← symm_diff_assoc],
-      exact (mk_union_le _ _).trans_lt
-        (add_lt_of_lt κ_regular.aleph_0_le
-          (lt_of_le_of_lt (mk_le_mk_of_subset $ diff_subset _ _)
-            (near_litter_value σ A N.fst.to_near_litter hNL).snd.prop)
-          (lt_of_le_of_lt (mk_le_mk_of_subset $ diff_subset _ _)
-            (lt_of_le_of_lt mk_range_le N.snd.prop))),
-    end⟩
+⟨(near_litter_value σ A N.fst.to_near_litter hNL).fst,
+  (near_litter_value σ A N.fst.to_near_litter hNL) ∆
+    range (λ (a : {a // a ∈ litter_set N.fst ∆ ↑(N.snd)}),
+      atom_value σ A a (ha a a.prop)),
+  begin
+    rw [is_near_litter, is_near, small, ← symm_diff_assoc],
+    exact (mk_union_le _ _).trans_lt
+      (add_lt_of_lt κ_regular.aleph_0_le
+        (lt_of_le_of_lt (mk_le_mk_of_subset $ diff_subset _ _)
+          (near_litter_value σ A N.fst.to_near_litter hNL).snd.prop)
+        (lt_of_le_of_lt (mk_le_mk_of_subset $ diff_subset _ _)
+          (lt_of_le_of_lt mk_range_le N.snd.prop))),
+  end⟩
 
 /-- The `near_litter_image` of a near-litter behaves like it should under `σ`. -/
 lemma near_litter_image_atom_spec (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain)
-  (a b : atom) (h : (inl (a, b), A) ∈ σ.val) :
-  b ∈ (near_litter_image σ N A hN hNL ha).2.val ↔ a ∈ N.snd.val :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain)
+  (a b : atom) (h : (inl (a, b), A) ∈ (σ : spec B)) :
+  b ∈ (near_litter_image σ N A hN hNL ha).2.val ↔ a ∈ (N.2 : set atom) :=
 begin
   split,
   { rintro (⟨h₁, h₂⟩ | ⟨⟨c, hc⟩, hb⟩),
@@ -89,11 +89,11 @@ begin
       exact haN } }
 end
 
-lemma near_litter_image_spec (hNin : (inr N, A) ∈ σ.val.domain)
+lemma near_litter_image_spec (hNin : (inr N, A) ∈ (σ : spec B).domain)
   (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
-  (inr (N, near_litter_image σ N A hN hNL ha), A) ∈ σ.val :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
+  (inr (N, near_litter_image σ N A hN hNL ha), A) ∈ (σ : spec B) :=
 begin
   unfold near_litter_image,
   rw mem_domain at hNin hNL,
@@ -123,7 +123,7 @@ begin
       refine cardinal.mk_le_mk_of_subset _,
       simp only [sup_eq_union, union_subset_iff],
       exact ⟨λ x hx, or.inl hx.1, λ x hx, or.inr hx.1⟩ },
-    specialize this (litter_set N' ∆ M.snd.val ∆ range symm) (range symm),
+    specialize this (litter_set N' ∆ M.snd ∆ range symm) (range symm),
     rw [symm_diff_assoc, symm_diff_self, symm_diff_bot] at this,
     exact (this.trans $ cardinal.mk_union_le _ _).trans_lt (cardinal.add_lt_of_lt
       κ_regular.aleph_0_le hN' $ cardinal.mk_range_le.trans_lt N.2.2) },
@@ -133,10 +133,10 @@ begin
 end
 
 lemma near_litter_image_spec_reverse (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain)
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain)
   (P : near_litter)
-  (hP : (inr (P, near_litter_image σ N A hN hNL ha), A) ∈ σ.val) :
+  (hP : (inr (P, near_litter_image σ N A hN hNL ha), A) ∈ (σ : spec B)) :
     P = N :=
 begin
   -- I'm pretty certain this has to be true but can't find any easy way to prove it.
@@ -145,38 +145,37 @@ end
 
 noncomputable def new_near_litter_cond
   (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) : spec B :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) : spec B :=
 {(inr (N, near_litter_image σ N A hN hNL ha), A)}
 
 @[simp] lemma mem_new_near_litter_cond_iff
   (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain)
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain)
   (c : binary_condition B) :
-  c ∈ σ.val ⊔ new_near_litter_cond σ N A hN hNL ha ↔
-    c ∈ σ.val ∨ c = (inr (N, near_litter_image σ N A hN hNL ha), A) :=
+  c ∈ (σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha ↔
+    c ∈ (σ : spec B) ∨ c = (inr (N, near_litter_image σ N A hN hNL ha), A) :=
 by simp only [new_near_litter_cond, mem_sup, mem_mk, spec.mem_singleton]
 
 @[simp] lemma mem_new_near_litter_cond_inv_iff
   (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain)
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain)
   (c : binary_condition B) :
-  c ∈ (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ ↔
-    c ∈ σ.val⁻¹ ∨ c = (inr (near_litter_image σ N A hN hNL ha, N), A) :=
+  c ∈ ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ ↔
+    c ∈ (σ : spec B)⁻¹ ∨ c = (inr (near_litter_image σ N A hN hNL ha, N), A) :=
 begin
-  simp only [new_near_litter_cond, subtype.val_eq_coe, spec.mem_inv, mem_sup,
-    mem_mk, mem_singleton_iff],
+  simp only [new_near_litter_cond, spec.mem_inv, mem_sup, mem_mk, mem_singleton_iff],
   rw [spec.mem_singleton, inv_eq_iff_inv_eq, binary_condition.inv_def, binary_condition.inv_def,
     sum.map_inr, prod.swap],
   exact ⟨λ h, or.elim h or.inl (λ h, or.inr h.symm), λ h, or.elim h or.inl (λ h, or.inr h.symm)⟩,
 end
 
 lemma near_litter_union_one_to_one_forward (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
-  spec.one_to_one_forward (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha) :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
+  spec.one_to_one_forward ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha) :=
 begin
   refine λ C, ⟨λ a b hb c hc, _, λ M P hP Q hQ, _⟩,
   { rw [mem_set_of, mem_new_near_litter_cond_iff] at hb hc,
@@ -192,9 +191,9 @@ begin
 end
 
 lemma near_litter_union_one_to_one_backward (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
-  spec.one_to_one_forward (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
+  spec.one_to_one_forward ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ :=
 begin
   refine λ C, ⟨λ a b hb c hc, _, λ M P hP Q hQ, _⟩,
   { rw [mem_set_of, mem_new_near_litter_cond_inv_iff] at hb hc,
@@ -212,9 +211,9 @@ begin
 end
 
 lemma near_litter_union_atom_cond_forward (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
-  ∀ L C, spec.atom_cond (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha) L C :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
+  ∀ L C, spec.atom_cond ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha) L C :=
 begin
   intros L C,
   obtain ⟨L', hL, atom_map, hin, himg⟩ | ⟨hL, hLsmall⟩ | ⟨L', hL, hLsmall, hmaps⟩ := σ.prop.forward.atom_cond L C,
@@ -244,15 +243,15 @@ begin
 end
 
 lemma near_litter_union_atom_cond_backward (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
-  ∀ L C, spec.atom_cond (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ L C :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
+  ∀ L C, spec.atom_cond ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ L C :=
 begin
   intros L C,
   obtain ⟨L', hL, atom_map, hin, himg⟩ | ⟨hL, hLsmall⟩ | ⟨L', hL, hLsmall, hmaps⟩ := σ⁻¹.prop.forward.atom_cond L C,
   { exact spec.atom_cond.all L' (or.inl hL) atom_map (λ a H, or.inl $ hin a H) himg },
   { by_cases hLN : A = C ∧ L.to_near_litter = near_litter_image σ N A hN hNL ha,
-    { refine spec.atom_cond.small_in N _ _ _,
+    { refine spec.atom_cond.small_in N _ _ (λ a b, _),
       { rw mem_new_near_litter_cond_inv_iff, right, rw hLN.2, simp_rw hLN.1 },
       { convert hLsmall,
         ext a,
@@ -264,14 +263,13 @@ begin
           cases hc₁ },
         { rintro ⟨c, hc₁, hc₂⟩,
           exact ⟨c, or.inl hc₁, hc₂⟩ } },
-      { intros a b,
-        rw mem_new_near_litter_cond_inv_iff,
-        rintro (h | h),
-        { cases hLN.1,
-          rw ← near_litter_image_atom_spec σ N A hN hNL ha b a h,
-          rw ← hLN.2,
-          refl },
-        { cases h } } },
+      rw mem_new_near_litter_cond_inv_iff,
+      rintro (h | ⟨⟩),
+      { cases hLN.1,
+        rw ← near_litter_image_atom_spec σ N A hN hNL ha b a h,
+        rw ← hLN.2,
+        refl },
+      { refl } },
     refine spec.atom_cond.small_out _ _,
     { rw mem_domain,
       rintro ⟨⟨_ | ⟨N, M⟩, _⟩, hb, hdom⟩; cases hdom,
@@ -313,10 +311,10 @@ begin
 end
 
 lemma near_litter_union_near_litter_cond_forward (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
   ∀ N₁ N₂ C, spec.near_litter_cond
-    (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha) N₁ N₂ C :=
+    ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha) N₁ N₂ C :=
 begin
   rintro N₁ N₂ C (h | h),
   { obtain ⟨M, hM₁, sd, hsd₁, hsd₂⟩ := σ.prop.forward.near_litter_cond N₁ N₂ C h,
@@ -333,10 +331,10 @@ begin
 end
 
 lemma near_litter_union_near_litter_cond_backward (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
   ∀ N₁ N₂ C, spec.near_litter_cond
-    (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ N₁ N₂ C :=
+    ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ N₁ N₂ C :=
 begin
   rintro N₁ N₂ C (h | h),
   { obtain ⟨M, hM₁, sd, hsd₁, hsd₂⟩ := σ.prop.backward.near_litter_cond N₁ N₂ C h,
@@ -345,9 +343,9 @@ begin
 end
 
 lemma near_litter_union_non_flex_cond_forward (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
-  spec.non_flex_cond B (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha) :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
+  spec.non_flex_cond B ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha) :=
 begin
   rintro β δ γ hγ hδ hγδ N₁ C t (ht | ht) ρ hρ,
   { exact σ.prop.forward.non_flex_cond hγ hδ hγδ N₁ C t ht ρ
@@ -356,9 +354,9 @@ begin
 end
 
 lemma near_litter_union_non_flex_cond_backward (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
-  spec.non_flex_cond B (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
+  spec.non_flex_cond B ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha)⁻¹ :=
 begin
   rintro β γ δ hγ hδ hγδ N₁ C t ht ρ hρ,
   rw mem_new_near_litter_cond_inv_iff at ht,
@@ -392,9 +390,9 @@ begin
 end
 
 lemma near_litter_union_support_closed_forward (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
-  (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha).domain.support_closed B :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
+  ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha).domain.support_closed B :=
 begin
   intros β δ γ hγ hδ hγδ C t ht,
   rw mem_domain at ht,
@@ -408,9 +406,9 @@ begin
 end
 
 lemma near_litter_union_support_closed_backward (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain) :
-  (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha).range.support_closed B :=
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain) :
+  ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha).range.support_closed B :=
 begin
   intros β δ γ hγ hδ hγδ C t ht,
   rw spec.mem_range at ht,
@@ -425,11 +423,11 @@ begin
 end
 
 lemma near_litter_union_flex_cond (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain)
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain)
   (image_not_flex :
-    ∀ L, litter_set L = (near_litter_image σ N A hN hNL ha).snd.val → ¬ flex L A) (C) :
-  spec.flex_cond B (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha) C :=
+    ∀ L, litter_set L = (near_litter_image σ N A hN hNL ha).snd → ¬ flex L A) (C) :
+  spec.flex_cond B ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha) C :=
 begin
   obtain (⟨hdom, hrge⟩ | ⟨hdom, hrge⟩) := σ.prop.flex_cond C,
   { refine spec.flex_cond.co_large _ _,
@@ -459,11 +457,11 @@ begin
 end
 
 lemma near_litter_union_allowable (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain)
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain)
   (image_not_flex :
-    ∀ L, litter_set L = (near_litter_image σ N A hN hNL ha).snd.val → ¬ flex L A) :
-  spec.allowable B (σ.val ⊔ new_near_litter_cond σ N A hN hNL ha) :=
+    ∀ L, litter_set L = (near_litter_image σ N A hN hNL ha) → ¬ flex L A) :
+  spec.allowable B ((σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha) :=
 { forward :=
   { one_to_one := near_litter_union_one_to_one_forward σ N A hN hNL ha,
     atom_cond := near_litter_union_atom_cond_forward σ N A hN hNL ha,
@@ -482,11 +480,11 @@ lemma near_litter_union_allowable (hN : litter_set N.fst ≠ N.snd)
 /-- We take the additional hypothesis that the near-litter that we're mapping do does not happen
 to be a flexible litter. This will always be true, but it is convenient to assume at this point. -/
 lemma le_near_litter_union (hN : litter_set N.fst ≠ N.snd)
-  (hNL : (inr N.fst.to_near_litter, A) ∈ σ.val.domain)
-  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ σ.val.domain)
+  (hNL : (inr N.fst.to_near_litter, A) ∈ (σ : spec B).domain)
+  (ha : ∀ (a : atom), a ∈ litter_set N.fst ∆ ↑(N.snd) → (inl a, A) ∈ (σ : spec B).domain)
   (image_not_flex :
-    ∀ L, litter_set L = (near_litter_image σ N A hN hNL ha).snd.val → ¬ flex L A) :
-  σ ≤ ⟨σ.val ⊔ new_near_litter_cond σ N A hN hNL ha,
+    ∀ L, litter_set L = (near_litter_image σ N A hN hNL ha) → ¬ flex L A) :
+  σ ≤ ⟨(σ : spec B) ⊔ new_near_litter_cond σ N A hN hNL ha,
     near_litter_union_allowable σ N A hN hNL ha image_not_flex⟩ := {
   le := subset_union_left _ _,
   all_flex_domain := begin
@@ -521,13 +519,13 @@ lemma le_near_litter_union (hN : litter_set N.fst ≠ N.snd)
 /-- If everything that constrains a near litter lies in `σ`, we can add the near litter to `σ`,
 giving a new allowable partial permutation `ρ ≥ σ`. -/
 lemma exists_ge_near_litter (hN : litter_set N.fst ≠ N.snd)
-  (hσ : ∀ c, c ≺ (⟨inr N, A⟩ : support_condition B) → c ∈ σ.val.domain) :
+  (hσ : ∀ c, c ≺ (⟨inr N, A⟩ : support_condition B) → c ∈ (σ : spec B).domain) :
   ∃ ρ ≥ σ, (⟨inr N, A⟩ : support_condition B) ∈ ρ.val.domain :=
 begin
   have hNL := hσ (inr N.fst.to_near_litter, A) (constrains.near_litter N hN A),
   have ha := λ a ha, hσ (inl a, A) (constrains.symm_diff N a ha A),
   by_cases image_not_flex :
-    ∀ L, litter_set L = (near_litter_image σ N A hN hNL ha).snd.val → ¬ flex L A,
+    ∀ L, litter_set L = (near_litter_image σ N A hN hNL ha) → ¬ flex L A,
   { refine ⟨_, le_near_litter_union σ N A hN hNL ha image_not_flex, _⟩,
     rw mem_domain,
     refine ⟨_, mem_union_right _ rfl, rfl⟩ },

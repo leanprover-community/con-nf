@@ -126,8 +126,8 @@ begin
   rintro c hc,
   have := @hsup c _,
   { rwa allowable_path.lt_index_assoc_smul_support_condition },
-  { rwa [unary_spec.lower, set.mem_set_of, ← path.comp_cons, support_condition.extend_path,
-      path.comp_assoc] at hc }
+  { rwa [unary_spec.mem_lower, ← path.comp_cons, support_condition.extend_path, path.comp_assoc]
+    at hc }
 end
 
 namespace spec

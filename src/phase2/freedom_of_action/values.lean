@@ -1,4 +1,5 @@
 import phase2.freedom_of_action.allowable
+import tactic.by_contra
 
 /-!
 # Value API for allowable partial permutations
@@ -9,17 +10,45 @@ allowable permutation satisfying the specification. This API allows us to retrie
 Since this data is behind existentials, many of the definitions are noncomputable.
 -/
 
+section
+variables {α : Type*} [generalized_boolean_algebra α]
+
+@[simp] lemma inf_symm_diff_left (a b : α) : a ⊓ a ∆ b = a \ b :=
+by rw [(∆), inf_sup_left, inf_of_le_right sdiff_le, inf_sdiff_self_right, sup_bot_eq]
+
+@[simp] lemma inf_symm_diff_right (a b : α) : a ⊓ b ∆ a = a \ b :=
+by rw [symm_diff_comm, inf_symm_diff_left]
+
+@[simp] lemma symm_diff_inf_left (a b : α) : a ∆ b ⊓ a = a \ b :=
+by rw [inf_comm, inf_symm_diff_left]
+
+@[simp] lemma symm_diff_inf_right (a b : α) : b ∆ a ⊓ a = a \ b :=
+by rw [inf_comm, inf_symm_diff_right]
+
+end
+
+namespace set
+variables {α : Type*} {s t : set α}
+
+lemma symm_diff_of_subset : s ⊆ t → s ∆ t = t \ s := @symm_diff_of_le (set α) _ _ _
+lemma symm_diff_of_superset : t ⊆ s → s ∆ t = s \ t := @symm_diff_of_ge (set α) _ _ _
+
+@[simp] lemma inter_symm_diff_left (s t : set α) : s ∩ s ∆ t = s \ t := inf_symm_diff_left _ _
+@[simp] lemma inter_symm_diff_right (s t : set α) : s ∩ t ∆ s = s \ t := inf_symm_diff_right _ _
+@[simp] lemma symm_diff_inter_left (s t : set α) : s ∆ t ∩ s = s \ t := symm_diff_inf_left _ _
+@[simp] lemma symm_diff_inter_right (s t : set α) : t ∆ s ∩ s = s \ t := symm_diff_inf_right _ _
+
+end set
+
 open cardinal set sum
 
 universe u
 
 namespace con_nf
 namespace allowable_spec
-
-variables [params.{u}]
-
-variables {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
-  [typed_positions.{}] [phase_2_assumptions α] {B : le_index α}
+variables [params.{u}] {α : Λ} [phase_2_core_assumptions α] [phase_2_positioned_assumptions α]
+  [typed_positions.{}] [phase_2_assumptions α] {B : le_index α} {L₁ L₂ : litter}
+  {M₁ M₂ N₁ N₂ : near_litter} {a b : atom}
 
 open spec
 
@@ -56,23 +85,24 @@ lemma atom_value_spec_range (σ : allowable_spec B) (A : extended_index B) (b : 
 spec.mem_range.2 ⟨(inl (b, atom_value σ A b hb), A), atom_value_spec σ A b hb, rfl⟩
 
 @[simp] lemma atom_value_eq_of_mem {σ : allowable_spec B} {A : extended_index B}
-  {a b : atom} (hab : (inl (a, b), A) ∈ (σ : spec B)) :
+  (hab : (inl (a, b), A) ∈ (σ : spec B)) :
   atom_value σ A a (mem_domain.2 ⟨_, hab, rfl⟩) = b :=
 (σ.prop.backward.one_to_one A).atom a (atom_value_spec σ A a $ mem_domain.2 ⟨_, hab, rfl⟩) hab
 
 @[simp] lemma atom_value_eq_of_mem_inv {σ : allowable_spec B} {A : extended_index B}
-  {a b : atom} (hab : (inl (a, b), A) ∈ (σ : spec B)) :
+  (hab : (inl (a, b), A) ∈ (σ : spec B)) :
   atom_value σ⁻¹ A b (inl_mem_range hab) = a :=
 (σ.prop.forward.one_to_one A).atom b (atom_value_spec σ⁻¹ A b $ (inl_mem_range hab)) hab
 
 lemma atom_value_injective {σ : allowable_spec B} {A : extended_index B}
-  {b₁ b₂ : atom} {hb₁ : (inl b₁, A) ∈ (σ : spec B).domain} {hb₂ : (inl b₂, A) ∈ (σ : spec B).domain} :
-  σ.atom_value A b₁ hb₁ = σ.atom_value A b₂ hb₂ → b₁ = b₂ :=
+  {ha : (inl a, A) ∈ (σ : spec B).domain} {hb : (inl b, A) ∈ (σ : spec B).domain} :
+  σ.atom_value A a ha = σ.atom_value A b hb → a = b :=
 begin
-  have h₁ := atom_value_spec σ A b₁ hb₁,
-  have h₂ := atom_value_spec σ A b₂ hb₂,
-  intro hb, rw ← hb at h₂,
-  exact (σ.prop.forward.one_to_one A).atom (atom_value σ A b₁ hb₁) h₁ h₂,
+  have h₁ := atom_value_spec σ A a ha,
+  have h₂ := atom_value_spec σ A b hb,
+  intro hb,
+  rw ← hb at h₂,
+  exact (σ.prop.forward.one_to_one A).atom (atom_value σ A a ha) h₁ h₂,
 end
 
 noncomputable def atom_value_inj (σ : allowable_spec B) (A : extended_index B) :
@@ -127,15 +157,15 @@ begin
   exact (σ.prop.backward.one_to_one A).near_litter N hc₁ hd₁,
 end
 
-lemma near_litter_value_spec_range (σ : allowable_spec B) (A : extended_index B)
-  (N : near_litter) (hN : (inr N, A) ∈ (σ : spec B).domain) :
+lemma near_litter_value_spec_range (σ : allowable_spec B) (A : extended_index B) (N : near_litter)
+  (hN : (inr N, A) ∈ (σ : spec B).domain) :
   (inr (near_litter_value σ A N hN), A) ∈ (σ : spec B).range :=
 spec.mem_range.2 ⟨(inr (N, near_litter_value σ A N hN), A), near_litter_value_spec σ A N hN, rfl⟩
 
 lemma near_litter_value_injective (σ : allowable_spec B) (A : extended_index B) :
-  ∀ N₁ hN₁ N₂ hN₂, near_litter_value σ A N₁ hN₁ = near_litter_value σ A N₂ hN₂ → N₁ = N₂ :=
+  ∀ hN₁ hN₂, near_litter_value σ A N₁ hN₁ = near_litter_value σ A N₂ hN₂ → N₁ = N₂ :=
 begin
-  intros N₁ hN₁ N₂ hN₂ hN,
+  intros hN₁ hN₂ hN,
   have h₁ := near_litter_value_spec σ A N₁ hN₁,
   have h₂ := near_litter_value_spec σ A N₂ hN₂,
   rw ← hN at h₂,
@@ -146,23 +176,20 @@ noncomputable def near_litter_value_inj (σ : allowable_spec B) (A : extended_in
   {N | (inr N, A) ∈ (σ : spec B).domain} ↪ near_litter :=
 ⟨λ N, near_litter_value σ A N.val N.prop, begin
   intros N₁ N₂ hN,
-  exact subtype.coe_inj.mp (near_litter_value_injective _ _ _ _ _ _ hN),
+  exact subtype.coe_inj.mp (near_litter_value_injective _ _ _ _ hN),
 end⟩
 
 /-- If the images of two litters under `σ` intersect, the litters must intersect, and therefore are
 equal. This is a rather technical result depending on various allowability conditions. -/
 lemma litter_eq_of_image_inter (σ : allowable_spec B) (A : extended_index B)
-  {L₁ L₂ : litter} {N₁ N₂ : near_litter}
   (hL₁ : (inr (L₁.to_near_litter, N₁), A) ∈ (σ : spec B))
   (hL₂ : (inr (L₂.to_near_litter, N₂), A) ∈ (σ : spec B))
-  (a : atom)
-  (haN₁ : a ∈ N₁.snd.val)
-  (haN₂ : a ∈ N₂.snd.val) : L₁ = L₂ :=
+  (a : atom) (haN₁ : a ∈ N₁) (haN₂ : a ∈ N₂) : L₁ = L₂ :=
 begin
   obtain ⟨N, h₁, atom_map, h₂, h₃⟩ | ⟨h₁, h₂⟩ | ⟨N, hN, h₁, h₂⟩ :=
     σ.prop.forward.atom_cond L₁ A,
   { cases (σ.prop.backward.one_to_one A).near_litter _ hL₁ h₁,
-    rw h₃ at haN₁,
+    rw [←set_like.mem_coe, h₃] at haN₁,
     obtain ⟨a₁, ha₁⟩ := haN₁,
     have map₁ := h₂ a₁ a₁.prop,
     rw subtype.coe_eta at map₁,
@@ -171,7 +198,7 @@ begin
     obtain ⟨N', h₁', atom_map', h₂', h₃'⟩ | ⟨h₁', h₂'⟩ | ⟨N', hN', h₁', h₂'⟩ :=
       σ.prop.forward.atom_cond L₂ A,
     { cases (σ.prop.backward.one_to_one A).near_litter _ hL₂ h₁',
-      rw h₃' at haN₂,
+      rw [←set_like.mem_coe, h₃'] at haN₂,
       obtain ⟨a₂, ha₂⟩ := haN₂,
       have map₂ := h₂' a₂ a₂.prop,
       rw subtype.coe_eta at map₂,
@@ -191,7 +218,7 @@ begin
   obtain ⟨N', h₁', atom_map', h₂', h₃'⟩ | ⟨h₁', h₂'⟩ | ⟨N', hN', h₁', h₂'⟩ :=
     σ.prop.forward.atom_cond L₂ A,
   { cases (σ.prop.backward.one_to_one A).near_litter _ hL₂ h₁',
-    rw h₃' at haN₂,
+    rw [←set_like.mem_coe, h₃'] at haN₂,
     obtain ⟨a₂, ha₂⟩ := haN₂,
     have map₂ := h₂' a₂ a₂.prop,
     rw subtype.coe_eta at map₂,
@@ -206,8 +233,8 @@ begin
   obtain ⟨M₁, hM₁, s₁, hs₁, gs₁⟩ := σ.prop.backward.near_litter_cond _ _ A hL₁,
   obtain ⟨M₂, hM₂, s₂, hs₂, gs₂⟩ := σ.prop.backward.near_litter_cond _ _ A hL₂,
   dsimp only at gs₁ gs₂,
-  cases eq_empty_or_nonempty ((N₁.snd.val \ litter_set N₁.fst) ∩ N₂.snd) with hN₁ hN₁,
-  { cases eq_empty_or_nonempty ((N₂.snd.val \ litter_set N₂.fst) ∩ N₁.snd) with hN₂ hN₂,
+  cases eq_empty_or_nonempty (↑N₁ \ litter_set N₁.fst ∩ N₂) with hN₁ hN₁,
+  { cases eq_empty_or_nonempty (↑N₂ \ litter_set N₂.fst ∩ N₁) with hN₂ hN₂,
     { rw eq_empty_iff_forall_not_mem at hN₁ hN₂, specialize hN₁ a, specialize hN₂ a,
       rw [mem_inter_iff, and_comm, mem_diff] at hN₁ hN₂,
       push_neg at hN₁ hN₂, specialize hN₁ haN₂ haN₁, specialize hN₂ haN₁ haN₂,
@@ -217,25 +244,23 @@ begin
       dsimp only at M₁_eq_M₂, subst M₁_eq_M₂,
       refine is_near_litter_litter_set_iff.1 _,
       unfold is_near_litter is_near,
+      simp only [near_litter.coe_mk, subtype.coe_mk] at gs₁ gs₂,
       rw [gs₁, gs₂, symm_diff_left_comm, ← symm_diff_assoc, symm_diff_symm_diff_cancel_left],
-      refine ((mk_le_mk_of_subset symm_diff_subset_union).trans $ mk_union_le _ _).trans_lt _,
-      exact add_lt_of_lt κ_regular.aleph_0_le (mk_range_le.trans_lt N₁.2.2)
-        (mk_range_le.trans_lt N₂.2.2) },
+      exact small.symm_diff (mk_range_le.trans_lt N₁.2.2) (mk_range_le.trans_lt N₂.2.2) },
     { obtain ⟨aN₂, haN₂, haN₂'⟩ := hN₂,
       have := hs₂ ⟨aN₂, or.inr haN₂⟩,
       exact eq_of_mem_litter_set_of_mem_litter_set
         ((h₂ this).symm.mp haN₂') ((h₂' this).symm.mp haN₂.left) } },
   { obtain ⟨aN₁, haN₁, haN₁'⟩ := hN₁,
-      have := hs₁ ⟨aN₁, or.inr haN₁⟩,
-      exact eq_of_mem_litter_set_of_mem_litter_set
-        ((h₂ this).symm.mp haN₁.left) ((h₂' this).symm.mp haN₁') }
+    have := hs₁ ⟨aN₁, or.inr haN₁⟩,
+    exact eq_of_mem_litter_set_of_mem_litter_set
+      ((h₂ this).symm.mp haN₁.left) ((h₂' this).symm.mp haN₁') }
 end
 
 lemma litter_image_disjoint (σ : allowable_spec B) (A : extended_index B)
-  {L₁ L₂ : litter} {N₁ N₂ : near_litter}
   (hN₁ : (inr (L₁.to_near_litter, N₁), A) ∈ (σ : spec B))
   (hN₂ : (inr (L₂.to_near_litter, N₂), A) ∈ (σ : spec B)) :
-  L₁ ≠ L₂ → disjoint N₁.snd.val N₂.snd.val :=
+  L₁ ≠ L₂ → disjoint (N₁ : set atom) N₂ :=
 begin
   contrapose!,
   rw not_disjoint_iff,
@@ -243,71 +268,66 @@ begin
   exact litter_eq_of_image_inter σ A hN₁ hN₂ a ha₁ ha₂,
 end
 
-lemma litter_ne_of_disjoint {N M : near_litter} (h : disjoint N.2.1 M.2.1) : N.1 ≠ M.1 :=
+lemma not_small_litter_set (i : litter) : ¬ small (litter_set i) := by simp [small]
+
+lemma litter_ne_of_disjoint (h : disjoint (N₁ : set atom) N₂) : N₁.1 ≠ N₂.1 :=
 begin
-by_contra h2, cases N, cases M, simp only at h h2, subst h2,
-have : litter_set N_fst ⊆ (litter_set N_fst ∆ N_snd.val) ∪(litter_set N_fst ∆ M_snd.val),
-{intros x hx, simp only [subtype.val_eq_coe, mem_union_eq], by_contra h3, push_neg at h3,
-rw ← symm_diff_symm_diff_cancel_right (litter_set N_fst) N_snd.val at h,
-rw ← symm_diff_symm_diff_cancel_right (litter_set N_fst) M_snd.val at h,
-apply @h x, rw [symm_diff_comm _ ↑N_snd,symm_diff_comm _ ↑M_snd] at h3,
-exact ⟨or.inr ⟨hx, h3.left⟩, or.inr ⟨hx, h3.right⟩⟩,
-},
-have := lt_of_le_of_lt (le_trans (mk_le_mk_of_subset this) (mk_union_le _ _))
-(add_lt_of_lt κ_regular.aleph_0_le N_snd.prop M_snd.prop),
-have h2:= N_fst.to_near_litter.2.prop, dsimp [litter.to_near_litter] at h2,
-rw is_near_litter.mk_eq_κ h2 at this,
-simp only [lt_self_iff_false] at this, exact this,
+  obtain ⟨i, s⟩ := N₁,
+  obtain ⟨_, t⟩ := N₂,
+  dsimp at ⊢ h,
+  rintro rfl,
+  exact not_small_litter_set _
+    ((s.prop.union t.prop).mono $ subset_symm_diff_union_symm_diff_right h),
 end
 
--- An application of the near litter condition using litter_image_disjoint.
+/-- An application of the near litter condition using `litter_image_disjoint`. -/
 lemma near_litter_image_disjoint (σ : allowable_spec B) (A : extended_index B)
   {N M N' M' : near_litter}
   (hN : (inr (N, N'), A) ∈ (σ : spec B)) (hM : (inr (M, M'), A) ∈ (σ : spec B)) :
-  disjoint N.snd.val M.snd.val → disjoint N'.snd.val M'.snd.val :=
+  disjoint (N : set atom) M → disjoint (N' : set atom) M' :=
 begin
-intro hdisj,
-have h:∀ (L : litter) (L' : near_litter) (h : (inr (L.to_near_litter, L'), A) ∈ σ.val) (a b : atom)
-  (hab : (inl (a, b), A) ∈ (σ : spec B) ), a ∈ litter_set L ↔ b ∈ L'.2.1,
-{ intros,
-   obtain ⟨L'', hL, atom_map, hall, hall2⟩ | ⟨ha, hL, hsmall_out⟩ | ⟨L'', hL, hsmall_in, hsmall_in2⟩
-     := σ.prop.forward.atom_cond L A,
-   { have := (σ.prop.backward.one_to_one A).near_litter _ h hL,
-    subst this,
-    rw hall2,
-    unfold range,
-    simp only [set_coe.exists, mem_set_of_eq],
-    refine ⟨λ ha, _, _⟩,
-    { have := hall a ha,
-      have := (σ.prop.backward.one_to_one A).atom _ hab this,
+  intro hdisj,
+  have h : ∀ (L : litter) (L' : near_litter) (h : (inr (L.to_near_litter, L'), A) ∈ (σ : spec B))
+    (a b : atom) (hab : (inl (a, b), A) ∈ (σ : spec B)), a ∈ litter_set L ↔ b ∈ L',
+  { intros,
+    obtain ⟨L'', hL, atom_map, hall, hall2⟩ | ⟨ha, hL, hsmall_out⟩ | ⟨L'', hL, hsmall_in, hsmall_in2⟩
+      := σ.prop.forward.atom_cond L A,
+    { have := (σ.prop.backward.one_to_one A).near_litter _ h hL,
       subst this,
-      exact ⟨_, ha, rfl⟩ },
-    rintro ⟨x, hx, hx2⟩,
-    have := hall x hx,
-    rw hx2 at this,
-    have := (σ.prop.forward.one_to_one A).atom _ hab this,
-    subst this,
-    exact hx },
-   { simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and] at ha,
-    have := ha _ h,
-    simp only [binary_condition.domain_mk, map_inr, eq_self_iff_true, not_true] at this,
-    cases this },
-   { have := (σ.prop.backward.one_to_one A).near_litter _ h hL,
-     subst this,
-    exact hsmall_in2 hab } },
-  have h2 : ∀ {N M N' M' Nf' Mf' : near_litter} (hN : (inr (N, N'), A) ∈ (σ : spec B))
-    (hN2 : (inr (N.fst.to_near_litter, Nf'), A) ∈ (σ : spec B))
+      rw [←set_like.mem_coe, hall2],
+      unfold range,
+      simp only [set_coe.exists, mem_set_of_eq],
+      refine ⟨λ ha, _, _⟩,
+      { have := hall a ha,
+        have := (σ.prop.backward.one_to_one A).atom _ hab this,
+        subst this,
+        exact ⟨_, ha, rfl⟩ },
+      rintro ⟨x, hx, hx2⟩,
+      have := hall x hx,
+      rw hx2 at this,
+      have := (σ.prop.forward.one_to_one A).atom _ hab this,
+      subst this,
+      exact hx },
+    { simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and] at ha,
+      have := ha _ h,
+      simp only [binary_condition.domain_mk, map_inr, eq_self_iff_true, not_true] at this,
+      cases this },
+    { have := (σ.prop.backward.one_to_one A).near_litter _ h hL,
+      subst this,
+      exact hsmall_in2 hab } },
+  have h2 : ∀ {N M N' M' Nf Mf : near_litter} (hN : (inr (N, N'), A) ∈ (σ : spec B))
+    (hN2 : (inr (N.fst.to_near_litter, Nf), A) ∈ (σ : spec B))
     (hM : (inr (M, M'), A) ∈ (σ : spec B))
-    (hM2 : (inr (M.fst.to_near_litter, Mf'), A) ∈ (σ : spec B))
-    (hdisj : disjoint N.snd.val M.snd.val) (a b : atom) (hab : (inl (a, b), A) ∈ (σ : spec B))
-    (hb1 : b ∈ N'.2.1 \ Nf'.2.1) (hb2 : b ∈ Mf'.2.1 ∩ M'.2.1), false,
+    (hM2 : (inr (M.fst.to_near_litter, Mf), A) ∈ (σ : spec B))
+    (hdisj : disjoint (N.2 : set atom) M) (a b : atom) (hab : (inl (a, b), A) ∈ (σ : spec B))
+    (hb1 : b ∈ (N' : set atom) \ Nf) (hb2 : b ∈ (Mf : set atom) ∩ M'), false,
   { clear hdisj hN hM N M N' M',
     intros,
-    obtain ⟨Nf'', hNf'', symm_diff_N, hsdN1, hsdN2⟩ := σ.prop.forward.near_litter_cond _ _ _ hN,
-    have := (σ.prop.backward.one_to_one A).near_litter _ hN2 hNf'',
+    obtain ⟨Nf', hNf', symm_diff_N, hsdN1, hsdN2⟩ := σ.prop.forward.near_litter_cond _ _ _ hN,
+    have := (σ.prop.backward.one_to_one A).near_litter _ hN2 hNf',
     subst this,
-    obtain ⟨Mf'', hMf'', symm_diff_M, hsdM1, hsdM2⟩ := σ.prop.forward.near_litter_cond _ _ _ hM,
-    have := (σ.prop.backward.one_to_one A).near_litter _ hM2 hMf'',
+    obtain ⟨Mf', hMf', symm_diff_M, hsdM1, hsdM2⟩ := σ.prop.forward.near_litter_cond _ _ _ hM,
+    have := (σ.prop.backward.one_to_one A).near_litter _ hM2 hMf',
     subst this,
     have ha3 := hb1,
     rw [hsdN2, symm_diff_def, sup_eq_union, set.union_diff_distrib] at ha3,
@@ -318,54 +338,49 @@ have h:∀ (L : litter) (L' : near_litter) (h : (inr (L.to_near_litter, L'), A) 
     rw hc2 at this,
     rw ← subtype.val_eq_coe at this,
     simp only at this,
-    have := (σ.prop.forward.one_to_one A).atom _ hab this,
-    subst this,
+    obtain rfl := (σ.prop.forward.one_to_one A).atom _ hab this,
     cases hc1,
-    exact not_mem_of_mem_diff hb1 ((h N.fst Nf' hN2 a b hab).mp (mem_of_mem_diff hc1)),
-    have := (h M.fst Mf' hM2 a b hab).mpr (hb2.1),
-    have : a ∈ litter_set M.fst ∆ ↑(M.snd),
-    { by_cases ha : a ∈ ↑(M.snd),
+    exact hb1.2 ((h N.fst Nf hN2 a b hab).mp hc1.1),
+    have := (h M.fst Mf hM2 a b hab).mpr (hb2.1),
+    have : a ∈ litter_set M.fst ∆ M,
+    { by_cases ha : a ∈ M,
       cases hdisj ⟨mem_of_mem_diff hc1, ha⟩,
       exact or.inl ⟨this, ha⟩ },
     have := hsdM1 ⟨a, this⟩,
     rw ← subtype.val_eq_coe at this,
     simp only at this,
-    have := (σ.prop.backward.one_to_one A).atom _ hab this,
-    subst this,
-    rw hsdM2 at hb2,
-    obtain ⟨hb3, hb4⟩ := hb2,
-    cases hb4,
-    simpa only [mem_range_self, not_true] using not_mem_of_mem_diff hb4,
-    exact not_mem_of_mem_diff hb4 hb3 },
+    obtain rfl := (σ.prop.backward.one_to_one A).atom _ hab this,
+    rw [hsdM2, inter_symm_diff_left] at hb2,
+    exact hb2.2 (mem_range_self _) },
   rintro b ⟨hb1, hb2⟩,
-  obtain ⟨Nf', hNf', symm_diff_N, hsdN1, hsdN2⟩ := σ.prop.forward.near_litter_cond _ _ _ hN,
-  obtain ⟨Mf', hMf', symm_diff_M, hsdM1, hsdM2⟩ := σ.prop.forward.near_litter_cond _ _ _ hM,
-  by_cases hb3 : b ∈ Nf'.2.1; by_cases hb4 : b ∈ Mf'.2.1,
-  { refine (litter_image_disjoint σ A hNf' hMf' _) ⟨hb3, hb4⟩,
+  obtain ⟨Nf, hNf, symm_diff_N, hsdN1, hsdN2⟩ := σ.prop.forward.near_litter_cond _ _ _ hN,
+  obtain ⟨Mf, hMf, symm_diff_M, hsdM1, hsdM2⟩ := σ.prop.forward.near_litter_cond _ _ _ hM,
+  by_cases hb3 : b ∈ Nf; by_cases hb4 : b ∈ Mf,
+  { refine (litter_image_disjoint σ A hNf hMf _) ⟨hb3, hb4⟩,
     exact litter_ne_of_disjoint hdisj },
   { have := hb2, rw hsdM2 at this,
     cases this,
-    exact hb4 (mem_of_mem_diff this),
+    exact hb4 this.1,
     have := this.1,
     simp only [set.mem_range, set_coe.exists] at this,
     obtain ⟨a, ha1, ha2⟩ := this,
     have hab := hsdM1 ⟨a, ha1⟩, rw ha2 at hab,
-    exact h2 hM hMf' hN hNf' (disjoint.symm hdisj) a b hab ⟨hb2, hb4⟩ ⟨hb3, hb1⟩ },
+    exact h2 hM hMf hN hNf (disjoint.symm hdisj) a b hab ⟨hb2, hb4⟩ ⟨hb3, hb1⟩ },
   { have := hb1, rw hsdN2 at this,
-    cases this, exact hb3 (mem_of_mem_diff this),
+    cases this, exact hb3 this.1,
     have := this.1,
     simp only [set.mem_range, set_coe.exists] at this,
     obtain ⟨a, ha1, ha2⟩  := this,
     have hab := hsdN1 ⟨a, ha1⟩,
     rw ha2 at hab,
-    exact h2 hN hNf' hM hMf' hdisj a b hab ⟨hb1, hb3⟩ ⟨hb4, hb2⟩ },
+    exact h2 hN hNf hM hMf hdisj a b hab ⟨hb1, hb3⟩ ⟨hb4, hb2⟩ },
   have := hb2,
   rw hsdM2 at this,
   cases this,
-  exact hb4 (mem_of_mem_diff this),
+  exact hb4 this.1,
   have := this.1,
   simp only [set.mem_range, set_coe.exists] at this,
-  obtain ⟨a, ha1, ha2⟩ := this,
+  obtain ⟨a, ha1, rfl⟩ := this,
   clear this,
   have := hb1,
   rw hsdN2 at this,
@@ -383,9 +398,9 @@ have h:∀ (L : litter) (L' : near_litter) (h : (inr (L.to_near_litter, L'), A) 
   have := (σ.prop.forward.one_to_one A).atom _ hab ha'b,
   subst this,
   cases ha1,
-  exact hb4 ((h M.fst Mf' hMf' a b hab).mp ha1.1),
+  exact hb4 ((h M.fst Mf hMf a b hab).mp ha1.1),
   cases ha'1,
-  exact hb3 ((h N.fst Nf' hNf' a b hab).mp ha'1.1),
+  exact hb3 ((h N.fst Nf hNf a b hab).mp ha'1.1),
   exact hdisj ⟨ha'1.1, ha1.1⟩,
 end
 
@@ -397,7 +412,7 @@ begin
   revert σ a N,
   suffices : ∀ {σ : allowable_spec B} {a : atom} {N : near_litter}
     (ha : (inl a, A) ∈ (σ : spec B).domain) (hN : (inr N, A) ∈ (σ : spec B).domain)
-    (h : σ.atom_value A a ha ∈ (σ.near_litter_value A N hN).snd.val), a ∈ N.snd.val,
+    (h : σ.atom_value A a ha ∈ (σ.near_litter_value A N hN)), a ∈ (N.2 : set atom),
   { intros,
     refine ⟨this _ _, λ h, _⟩,
     specialize @this σ⁻¹ (σ.atom_value A a ha) (σ.near_litter_value A N hN) _ _ _,
@@ -424,7 +439,7 @@ begin
   rw ← (σ.prop.backward.one_to_one A').near_litter _ (near_litter_value_spec σ A' N' hN) hcond, refl,
   rw [this,hsd2] at h,
   by_cases ha2 : a ∈ litter_set (N'.fst),
-  { --have : σ.atom_value A' a ha ∈ M.smd.val
+  { --have : σ.atom_value A' a ha ∈ M
     by_contra h4,
     obtain ⟨N₃, h3, atom_map, ham, ham2⟩ | ⟨hL, h2⟩ | ⟨L', hL, h2, h3⟩ :=
       σ.prop.forward.atom_cond N'.1 A',
@@ -488,7 +503,7 @@ lemma mem_value_iff_value_mem {σ : allowable_spec B} {A : extended_index B} {a 
   a ∈ (σ.near_litter_value A N hN).2.val ↔ σ⁻¹.atom_value A a ha ∈ N.2.val :=
 begin
   suffices : (σ.atom_value A (σ⁻¹.atom_value A a ha) (atom_value_mem_range σ⁻¹ A a ha)) ∈
-  (σ.near_litter_value A N hN).snd.val ↔ σ⁻¹.atom_value A a ha ∈ N.snd.val,
+  (σ.near_litter_value A N hN) ↔ σ⁻¹.atom_value A a ha ∈ (N.2 : set atom),
   convert this, symmetry, convert atom_value_inv σ⁻¹ A a ha,  simp only [inv_inv],
   apply value_mem_value_iff_mem,
 end

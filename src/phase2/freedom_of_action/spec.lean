@@ -76,11 +76,17 @@ binary_condition.struct_perm_mul_action
 
 /-- The binary condition representing the inverse permutation. If `π_A(x) = y`, then `π_A⁻¹(y) = x`.
 -/
+@[simps]
 instance (α : type_index) : has_involutive_inv (binary_condition α) :=
 { inv := λ c, ⟨c.1.map prod.swap prod.swap, c.2⟩,
   inv_inv := by rintro ⟨⟨a₁, a₂⟩ | ⟨N₁, N₂⟩, i⟩; refl }
 
 lemma inv_def (c : binary_condition α) : c⁻¹ = ⟨c.1.map prod.swap prod.swap, c.2⟩ := rfl
+
+@[simp] lemma inv_mk (x : (atom × atom) ⊕ (near_litter × near_litter)) (A : extended_index α) :
+  @has_inv.inv (binary_condition α) _ (x, A) = (x.map prod.swap prod.swap, A) := rfl
+@[simp] lemma inv_fst (c : binary_condition α) : c⁻¹.1 = c.1.map prod.swap prod.swap := rfl
+@[simp] lemma inv_snd (c : binary_condition α) : c⁻¹.2 = c.2 := rfl
 
 /-- Converts a binary condition `⟨⟨x, y⟩, A⟩` into the support condition `⟨x, A⟩`. -/
 @[simps]
@@ -342,7 +348,7 @@ lemma to_spec_injective : ∀ (α : type_index), injective (@to_spec _ α)
 | ⊥ := λ σ τ h, eq_of_smul_eq_smul $ λ a, begin
     simp only [to_spec, embedding_like.apply_eq_iff_eq, ext_iff] at h,
     simpa only [prod.mk.inj_iff, exists_eq_right, derivative_nil, exists_eq_left, exists_false,
-      or_false, eq_self_iff_true, true_iff, prod.exists, mem_union_eq, mem_range, iff_true]
+      or_false, eq_self_iff_true, true_iff, prod.exists, mem_union, mem_range, iff_true]
         using h ⟨inl ⟨a, τ • a⟩ , path.nil⟩,
   end
 | (α : Λ) := λ σ τ h, of_coe.injective $ funext $ λ β, funext $ λ hβ, to_spec_injective β $
@@ -350,12 +356,12 @@ lemma to_spec_injective : ∀ (α : type_index), injective (@to_spec _ α)
     rintro ⟨x_fst, x_snd⟩,
     simp only [to_spec, embedding_like.apply_eq_iff_eq, ext_iff] at h ⊢,
     specialize h ⟨x_fst, (@path.cons type_index con_nf.quiver ↑α ↑α β path.nil hβ).comp x_snd⟩,
-    simp only [spec.equiv_set, prod.mk.inj_iff, exists_eq_right, prod.exists, mem_union_eq,
+    simp only [spec.equiv_set, prod.mk.inj_iff, exists_eq_right, prod.exists, mem_union,
                mem_range, equiv.coe_fn_symm_mk, ←derivative_derivative, derivative_cons_nil] at h ⊢,
     cases x_fst,
-    { simpa only [spec.mem_mk, mem_union_eq, mem_range, prod.mk.inj_iff, prod.exists,
+    { simpa only [spec.mem_mk, mem_union, mem_range, prod.mk.inj_iff, prod.exists,
                   exists_eq_right, exists_false, or_false] using h },
-    { simpa only [prod.exists, spec.mem_mk, mem_union_eq, mem_set_of_eq, mem_range,
+    { simpa only [prod.exists, spec.mem_mk, mem_union, mem_set_of_eq, mem_range,
                   prod.mk.inj_iff, prod.exists, exists_false, exists_eq_right, false_or] using h }
   end
 using_well_founded { dec_tac := `[assumption] }
@@ -511,7 +517,7 @@ lemma struct_perm.spec_lower_eq_derivative (π : struct_perm α) (A : path α β
   π.to_spec.lower A = (struct_perm.derivative A π).to_spec :=
 begin
   ext,
-  simp only [spec.mem_lower, struct_perm.to_spec, mem_union_eq, mem_range, prod.exists,
+  simp only [spec.mem_lower, struct_perm.to_spec, mem_union, mem_range, prod.exists,
     mem_set_of_eq],
   cases c,
   simp only [binary_condition.extend_path, prod.mk.inj_iff, exists_eq_right],

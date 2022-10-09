@@ -169,13 +169,15 @@ hs.cardinal_mk_le_one.trans_lt $ one_lt_aleph_0.trans_le κ_regular.aleph_0_le
 @[simp] lemma small_empty : small (∅ : set α) := subsingleton_empty.small
 @[simp] lemma small_singleton (x : α) : small ({x} : set α) := subsingleton_singleton.small
 
-/-- Subsets of small sets are small.
-We say that the 'smallness' relation is monotonic. -/
+/-- Subsets of small sets are small. We say that the 'smallness' relation is monotone. -/
 lemma small.mono (h : s ⊆ t) : small t → small s := (mk_le_mk_of_subset h).trans_lt
 
 /-- Unions of small subsets are small. -/
 lemma small.union (hs : small s) (ht : small t) : small (s ∪ t) :=
 (mk_union_le _ _).trans_lt $ add_lt_of_lt κ_regular.aleph_0_le hs ht
+
+lemma small.symm_diff (hs : small s) (ht : small t) : small (s ∆ t) :=
+(hs.union ht).mono symm_diff_subset_union
 
 lemma small_Union (hι : #ι < #κ) {f : ι → set α} (hf : ∀ i, small (f i)) : small (⋃ i, f i) :=
 (mk_Union_le _).trans_lt $ mul_lt_of_lt κ_regular.aleph_0_le hι $

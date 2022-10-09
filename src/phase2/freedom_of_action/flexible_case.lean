@@ -381,7 +381,7 @@ begin
   ext a,
   simp only [spec.domain_sup, new_flex_litters, new_inverse_flex_litters,
     subtyp(e : spec B)_eq_coe, mem_set_of_eq, set_coe.exists, subtype.coe_mk, equiv.to_fun_as_coe,
-    mem_union_eq, mem_sep_iff],
+    mem_union, mem_sep_iff],
   refine and_congr_right (λ ha, ⟨_, λ h, or.inl $ or.inl h⟩),
   rintro ((h | ⟨L, hL, hc⟩) | ⟨L, hL, hc⟩),
   { exact h },

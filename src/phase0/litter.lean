@@ -1,5 +1,6 @@
 import mathlib.cardinal
 import mathlib.equiv
+import mathlib.logic
 import phase0.params
 
 /-!
@@ -17,7 +18,7 @@ considered opaque, as we only care about the fact that their cardinality is `κ`
 -/
 
 open cardinal cardinal.is_regular equiv equiv.perm function set
-open_locale cardinal
+open_locale cardinal pointwise
 
 universe u
 
@@ -117,17 +118,39 @@ end
 /-- The type of near-litters. -/
 def near_litter : Type* := Σ i, {s // is_near_litter i s}
 
+namespace near_litter
+variables {N₁ N₂ : near_litter}
+
+instance : set_like near_litter atom :=
+{ coe := λ N, N.2,
+  coe_injective' :=
+    by { rintro ⟨i, N₁, h₁⟩ ⟨j, N₂, h₂⟩ (rfl : N₁ = N₂), have := h₁.unique h₂, subst this } }
+
+@[simp] lemma coe_mk (i : litter) (s : {s // is_near_litter i s}) :
+  @coe near_litter (set atom) _ ⟨i, s⟩ = s := rfl
+
+@[ext] lemma ext (h₁ : N₁.1 = N₂.1) (h₂ : (N₁ : set atom) = N₂) : N₁ = N₂ :=
+by { cases N₁, cases N₂, dsimp at h₁, subst h₁, rw set_like.coe_injective h₂ }
+
+/-- Reinterprety a near-litter as a product of a litter and a set of atoms. -/
+@[simps]
+def to_prod (N : near_litter) : litter × set atom := (N.1, N.2)
+
+lemma to_prod_injective : injective to_prod :=
+by { rintro ⟨i, s⟩ ⟨j, t⟩ h, rw prod.ext_iff at h, exact ext h.1 h.2 }
+
+end near_litter
+
 /-- Consider a litter as a near-litter. -/
 def litter.to_near_litter (i : litter) : near_litter :=
 ⟨i, litter_set i, is_near_litter_litter_set i⟩
+
+noncomputable instance : inhabited near_litter := ⟨(default : litter).to_near_litter⟩
 
 @[simp] lemma litter.to_near_litter_fst (i : litter) : i.to_near_litter.fst = i := rfl
 
 lemma litter.to_near_litter_injective : injective litter.to_near_litter :=
 λ i j hij, by { cases hij, refl }
-
-lemma near_litter.val_injective : injective (λ N : near_litter, N.snd.val) :=
-by { rintro ⟨i, N₁, h₁⟩ ⟨j, N₂, h₂⟩ (rfl : N₁ = N₂), have := h₁.unique h₂, subst this }
 
 /-- There are `μ` near-litters in total. -/
 @[simp] lemma mk_near_litter : #near_litter = #μ :=
@@ -307,32 +330,26 @@ instance : mul_action near_litter_perm atom :=
 instance : mul_action near_litter_perm litter :=
 { smul := λ f, f.litter_perm, one_smul := λ _, rfl, mul_smul := λ _ _ _, rfl }
 
+lemma near_smul (f : near_litter_perm) (h : is_near_litter i s) : is_near_litter (f • i) (f • s) :=
+by { convert f.near h, exact (preimage_inv _ _).symm }
+
+instance : has_smul near_litter_perm near_litter :=
+⟨λ f N, ⟨f • N.1, f • N, f.near_smul N.2.2⟩⟩
+
+@[simp] lemma to_prod_smul (f : near_litter_perm) (N : near_litter) :
+  (f • N).to_prod = f • N.to_prod := rfl
+
 /-- Near-litter permutations act on near-litters. -/
 instance : mul_action near_litter_perm near_litter :=
-{ smul := λ f N, ⟨f.litter_perm N.1, ⇑(f.atom_perm)⁻¹ ⁻¹' N.2, f.near N.2.2⟩,
-  one_smul := λ _, sigma.ext rfl $ by simp,
-  mul_smul := λ _ _ _, rfl }
-
-open_locale pointwise
+near_litter.to_prod_injective.mul_action _ to_prod_smul
 
 @[simp] lemma smul_fst (π : near_litter_perm) (N : near_litter) : (π • N).fst = π • N.fst := rfl
-@[simp] lemma smul_snd (π : near_litter_perm) (N : near_litter) : (π • N).snd.val = π • N.snd.val :=
-by { dsimp only [(•)], simp }
+@[simp] lemma coe_smul (π : near_litter_perm) (N : near_litter) :
+  (↑(π • N) : set atom) = π • N := rfl
 
 @[simp] lemma smul_local_cardinal (π : near_litter_perm) (i : litter) :
   π • local_cardinal i = local_cardinal (π • i) :=
-begin
-  ext M,
-  unfold local_cardinal has_smul.smul,
-  dsimp,
-  refine ⟨_, λ h, ⟨π⁻¹ • M, _, _⟩⟩,
-  { rintro ⟨N, hN₁, hN₂⟩, rw [← hN₂, ← hN₁] },
-  { rw [smul_fst, h], unfold has_smul.smul, simp },
-  { ext; simp_rw smul_fst; dsimp only [(•)]; simp }
-end
-
-@[simp] lemma smul_to_near_litter_eq (π : near_litter_perm) (L : litter) :
-  (π • L.to_near_litter).fst = π • L := rfl
+by { ext N, simp [mem_smul_set, ←eq_inv_smul_iff] }
 
 end near_litter_perm
 end con_nf
