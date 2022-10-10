@@ -10,6 +10,14 @@ inductive freedom of action assumption extends to `π'`, a `γ`-allowable permut
 using `π'` to find where `L` is supposed to be sent under `π`. We then add this result to `σ`.
 -/
 
+namespace set
+variables {α : Type*} (s : set α)
+
+@[simp] lemma empty_symm_diff : ∅ ∆ s = s := bot_symm_diff _
+@[simp] lemma symm_diff_empty : s ∆ ∅ = s := symm_diff_bot _
+
+end set
+
 open quiver set sum with_bot
 
 universe u
@@ -171,10 +179,10 @@ begin
       ∈ _),
     { dsimp only [satisfies_cond, sum.elim_inr] at this, rw ← this },
     { exact hM₂ } },
-  { squeeze_simp [coe_inv, coe_singleton, inv_singleton, binary_condition.inv_def,
-      mem_singleton_iff, prod.mk.inj_iff, new_non_flex_constraint, map_inr, prod.swap]
+  { simp only [coe_singleton, inv_singleton, binary_condition.inv_def, mem_singleton_iff,
+    prod.mk.inj_iff, new_non_flex_constraint, map_inr, prod.swap, derivative_cons_nil, spec.coe_inv]
       at hM₁ hM₂,
-    rw hM₁.1.1, rw hM₂.1.1 }
+    rw [hM₁.1.1, hM₂.1.1] }
 end
 
 lemma non_flex_union_atom_cond_forward :
@@ -218,34 +226,18 @@ lemma non_flex_union_atom_cond_backward :
 sorry
 
 lemma non_flex_union_near_litter_cond_forward :
-  ∀ N₁ N₂ C, spec.near_litter_cond ((σ : spec B) ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) N₁ N₂ C :=
+  ∀ N₁ N₂ C,
+    spec.near_litter_cond ((σ : spec B) ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ}) N₁ N₂ C :=
 begin
   rintro _ _ A (hin | hin),
   { obtain ⟨M, hMin, diff, hdin, hdiff⟩ := σ.prop.forward.near_litter_cond _ _ A hin,
-    refine ⟨M, or.inl hMin, diff, λ a, or.inl $ hdin a, hdiff⟩ },
-
-  simp only [coe_singleton, mem_singleton_iff, inr_eq_new_non_flex_constraint,
-             derivative_cons_nil, prod.mk.inj_iff] at hin,
+    exact ⟨M, or.inl hMin, diff, λ a, or.inl $ hdin a, hdiff⟩ },
+  simp only [coe_singleton, mem_singleton_iff, inr_eq_new_non_flex_constraint, derivative_cons_nil,
+    prod.mk.inj_iff] at hin,
   obtain ⟨⟨rfl, rfl⟩, rfl⟩ := hin,
-
-  have symm_diff_empty : ∀ L : litter,
-      (litter_set L.to_near_litter.fst) ∆ L.to_near_litter.snd = ∅ := λ L, symm_diff_self _,
-  have diff : ↥(litter_set (f_map_path hγ hδ t).to_near_litter.fst ∆
-                ↑((f_map_path hγ hδ t).to_near_litter.snd)) → atom,
-  { rintro ⟨x, hx⟩,
-    rw symm_diff_empty at hx,
-    exact false.rec _ hx },
-  have empty_range : range diff = ⊥,
-  { refine set.ext (λ x, ⟨_, λ hx, hx.rec _⟩),
-    rintro ⟨⟨y, hy⟩, hx⟩,
-    rwa symm_diff_empty at hy },
-
-  refine ⟨_, or.inr rfl, diff, _, _⟩,
-  { rintro ⟨x, hx⟩,
-    rw symm_diff_empty at hx,
-    exact false.rec _ hx },
-  { rw [empty_range, symm_diff_bot],
-    exact rfl }
+  haveI : ∀ L : litter, is_empty ↥(litter_set L.to_near_litter.1 ∆ L.to_near_litter) :=
+    λ L, is_empty_coe_sort.2 (symm_diff_self _),
+  exact ⟨_, or.inr rfl, is_empty_elim, is_empty_elim, by simp [range_eq_empty]⟩,
 end
 
 lemma non_flex_union_near_litter_cond_backward :
@@ -300,15 +292,14 @@ lemma non_flex_union_non_flex_cond_backward
   spec.non_flex_cond B ((σ : spec B) ⊔ {new_non_flex_constraint hγ hδ hγδ t hπ})⁻¹ :=
 begin
   intros β' γ' δ' hγ' hδ' hγδ' N C' t' ht' π' hπ',
-  rw mem_inv at ht', dsimp only [prod.swap] at ht',
-  cases ht',
-  { refine σ.prop.backward.non_flex_cond hγ' hδ' hγδ' N C' t' ht' π' _,
-    refine satisfies.mono _ hπ',
+  simp only [spec.mem_inv, mem_sup, binary_condition.inv_mk, map_inr, prod.swap_prod_mk,
+    mem_new_non_flex_constraint, derivative_cons_nil, prod.mk.inj_iff] at ht',
+  obtain ht' | ⟨⟨rfl, ht'⟩, hC⟩ := ht',
+  { refine σ.prop.backward.non_flex_cond hγ' hδ' hγδ' N C' t' ht' π' (hπ'.mono _),
     rw [lower_inv, lower_inv, lower_sup, spec.inv_le_inv],
     exact le_sup_left },
-  { simp only [set_like.mem_coe, mem_new_non_flex_constraint, prod.mk.inj_iff] at ht',
-
-    cases ht'.2,
+  sorry
+  { cases ht'.2,
     intros h₁ h₂,
     cases h₁,
     cases h₂,
@@ -316,8 +307,7 @@ begin
     -- Appeal to `non_flex_union_unique hγ hδ hγδ C t π hπ`.
     -- However, this is currently broken.
     rw ht'.1.1,
-    rw litter.to_near_litter_fst,
-    sorry }
+    rw litter.to_near_litter_fst }
 end
 
 lemma non_flex_union_support_closed_forward

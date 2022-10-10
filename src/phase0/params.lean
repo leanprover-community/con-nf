@@ -1,4 +1,3 @@
-import mathlib.cardinal
 import mathlib.order
 import mathlib.with_bot
 import set_theory.cardinal.cofinality

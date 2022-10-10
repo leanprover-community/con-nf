@@ -1,4 +1,3 @@
-import mathlib.cardinal
 import mathlib.equiv
 import mathlib.logic
 import phase0.params
@@ -141,16 +140,20 @@ by { rintro ⟨i, s⟩ ⟨j, t⟩ h, rw prod.ext_iff at h, exact ext h.1 h.2 }
 
 end near_litter
 
+namespace litter
+
 /-- Consider a litter as a near-litter. -/
-def litter.to_near_litter (i : litter) : near_litter :=
-⟨i, litter_set i, is_near_litter_litter_set i⟩
+def to_near_litter (i : litter) : near_litter := ⟨i, litter_set i, is_near_litter_litter_set i⟩
 
 noncomputable instance : inhabited near_litter := ⟨(default : litter).to_near_litter⟩
 
-@[simp] lemma litter.to_near_litter_fst (i : litter) : i.to_near_litter.fst = i := rfl
+@[simp] lemma to_near_litter_fst (i : litter) : i.to_near_litter.fst = i := rfl
+@[simp] lemma coe_to_near_litter (i : litter) : (i.to_near_litter : set atom) = litter_set i := rfl
 
-lemma litter.to_near_litter_injective : injective litter.to_near_litter :=
+lemma to_near_litter_injective : injective litter.to_near_litter :=
 λ i j hij, by { cases hij, refl }
+
+end litter
 
 /-- There are `μ` near-litters in total. -/
 @[simp] lemma mk_near_litter : #near_litter = #μ :=

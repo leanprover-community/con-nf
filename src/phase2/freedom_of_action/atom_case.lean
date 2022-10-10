@@ -30,7 +30,7 @@ variables (σ : allowable_spec B) (a : atom) (A : extended_index B) (N : near_li
 lemma atom_value_inj_range (ha : (inr (a.fst.to_near_litter, N), A) ∈ (σ : spec B)) :
   range (λ b : {b : atom | b ∈ litter_set a.fst ∧ (inl b, A) ∈ (σ : spec B).domain},
     (atom_value_inj σ A) ⟨b.val, b.prop.right⟩) =
-  {b : atom | b ∈ (N.2 : set atom) ∧ (inl b, A) ∈ (σ : spec B).range} :=
+  {b : atom | b ∈ N ∧ (inl b, A) ∈ (σ : spec B).range} :=
 begin
   rw range_eq_iff,
   refine ⟨λ c, ⟨_, _⟩, λ c hc, _⟩,
@@ -39,7 +39,7 @@ begin
     obtain ⟨N', h₁, atom_map, h₂, h₃⟩ | ⟨h₁, h₂⟩ | ⟨N', hN, h₁, h₂⟩ :=
       σ.prop.forward.atom_cond a.fst A,
     { cases (σ.prop.backward.one_to_one A).near_litter _ ha h₁,
-      rw [h₃, set.mem_range],
+      rw [←set_like.mem_coe, h₃, set.mem_range],
       refine ⟨⟨c, c.2.1⟩, _⟩,
       rw (σ.prop.backward.one_to_one A).atom _ (h₂ c c.2.1) this,
       refl },
@@ -53,7 +53,7 @@ begin
   refine ⟨⟨a₁, _, inl_mem_domain hd₁⟩, (σ.prop.backward.one_to_one A).atom a₁
     (atom_value_spec σ A a₁ (inl_mem_domain hd₁)) hd₁⟩,
   obtain ⟨M, hM, s, hs₁, hs₂⟩ := σ.prop.backward.near_litter_cond _ _ _ ha,
-  dsimp only at hs₂,
+  dsimp at hs₂,
   by_cases c ∈ litter_set N.fst,
   { obtain ⟨N', h₁, atom_map, h₂, h₃⟩ | ⟨h₁, h₂⟩ | ⟨N', hN, h₁, h₂⟩ :=
       σ.prop.backward.atom_cond N.fst A,
@@ -68,7 +68,8 @@ begin
       obtain ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩ := d.prop,
       { exact h₂ hc },
       { exact h₂ h } },
-    { rw mem_domain at h₁, cases h₁ ⟨_, hM, rfl⟩ },
+    { rw mem_domain at h₁,
+      cases h₁ ⟨_, hM, rfl⟩ },
     { cases (σ.prop.forward.one_to_one A).near_litter _ hM hN,
       rw hs₂,
       refine or.inl ⟨(h₂ hd₁).mp h, _⟩,
@@ -93,8 +94,7 @@ begin
     exact h d.prop },
   { rw mem_domain at h₁, cases h₁ ⟨_, hM, rfl⟩ },
   { cases (σ.prop.forward.one_to_one A).near_litter _ hM hN,
-    rw ← h₂ hd₁,
-    exact h }
+    rwa [set_like.mem_coe, ←h₂ hd₁] }
 end
 
 /-- The domain and range of an allowable partial permutation, restricted to a given litter, are
@@ -241,35 +241,31 @@ def new_atom_conds (hsmall : small {a ∈ litter_set a.fst | (inl a, A) ∈ (σ 
     obtain ⟨c, hc⟩ := atom_to_cond_spec σ a A N hsmall ha ⟨x_1, this⟩,
     rw hc.left,
     rw ← hx.2,
-    simp only [subtype.coe_mk, binary_condition.domain_mk, map_inl],
+    refl,
   end,
-  image_range' := begin ext, simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and, mem_sep_iff, mem_image, set.mem_range, set_coe.exists],
-  split, intro h, obtain ⟨x_1, ⟨⟨a,⟨h, h2⟩⟩, h3⟩⟩ := h, use a, split,
-  dsimp [atom_to_cond] at h2,
-  cases x_1,
-  simp only [binary_condition.range_mk] at h3,
-  rw ← h3,
-  simp only [prod.mk.inj_iff] at h2 ⊢,
-  split,
-  cases x_1_fst,
-  simp only [map_inl] at h2 ⊢,
-  rw ← h2.left,
-  simp only,
-  refl,
-  simp only [map_inl] at h2,
-  { cases h2.left} ,
-  exact h2.right,
-  exact h,
-  intro h,
-  obtain ⟨a, h, h2⟩ := h, cases x, simp only [prod.mk.inj_iff] at h2, cases x_fst,
-  swap, simp only at h2, cases h2.left, refine ⟨(inl (a, x_fst), A), a, h, _⟩,
-  dsimp [atom_to_cond],
-  simp only [map_inl] at h2,
-  rw ← h2.left,
-  refl,
-  simp only [binary_condition.range_mk, map_inl, prod.mk.inj_iff, eq_self_iff_true, true_and],
-  exact h2.right,
- end }
+  image_range' := begin
+    ext,
+    simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and, mem_sep_iff, mem_image,
+      set.mem_range, set_coe.exists],
+    split,
+    { rintro ⟨x, ⟨a, h, h2⟩, rfl⟩,
+      refine ⟨a, h, _⟩,
+      dsimp [atom_to_cond] at h2,
+      cases x,
+      simp only [prod.mk.inj_iff, binary_condition.range_mk] at h2 ⊢,
+      refine ⟨_, h2.2⟩,
+      cases x_fst,
+      { simp only [map_inl] at h2 ⊢,
+        rw ←h2.1,
+        refl },
+      { simp only [map_inl] at h2,
+        cases h2.left } },
+    rintro ⟨b, h, rfl⟩,
+    refine ⟨(inl (a, atom_map σ a A N hsmall ha ⟨b, h.1, _⟩), A), ⟨a, ⟨rfl, _⟩, _⟩, _⟩; sorry
+    -- dsimp [atom_to_cond],
+    -- refl,
+    -- simp only [binary_condition.range_mk, map_inl, prod.mk.inj_iff, eq_self_iff_true, true_and],
+  end }
 
 @[simp] lemma inl_mem_new_atom_conds
   {hsmall : small {a ∈ litter_set a.fst | (inl a, A) ∈ (σ : spec B).domain}}
@@ -280,8 +276,13 @@ def new_atom_conds (hsmall : small {a ∈ litter_set a.fst | (inl a, A) ∈ (σ 
       c = atom_map σ a A N hsmall ha ⟨b, hb₁, hb₂⟩ :=
 begin
   split,
-  { rintro ⟨h₁, h₂⟩, cases h₂, refine ⟨rfl, h₁.prop.1, h₁.prop.2, _⟩, rw subtype.eta, refl },
-  { rintro ⟨rfl, hb₁, hb₂, rfl⟩, exact ⟨⟨b, hb₁, hb₂⟩, rfl⟩ },
+  { rintro ⟨h₁, h₂⟩,
+    cases h₂,
+    refine ⟨rfl, h₁.prop.1, h₁.prop.2, _⟩,
+    rw subtype.eta,
+    refl },
+  { rintro ⟨rfl, hb₁, hb₂, rfl⟩,
+    exact ⟨⟨b, hb₁, hb₂⟩, rfl⟩ },
 end
 
 @[simp] lemma inr_mem_new_atom_conds
@@ -478,10 +479,11 @@ begin  {
           exact hcN } } } },
 }end
 
-private lemma technical_lemma  (x: ↥(litter_set N.fst)) (hx: (inl x.val, A) ∉ (σ : spec B).range) (hM_sd: ↥(litter_set N.fst ∆ ↑(N.snd)) → atom)
-(hM3: ∀ (a : ↥(litter_set N.fst ∆ ↑(N.snd))), (inl (↑a, hM_sd a), A) ∈ ((σ : spec B))⁻¹) : x.val ∈ (N.2 : set atom) := begin
+private lemma technical_lemma (x : litter_set N.1) (hx : (inl x.1, A) ∉ (σ : spec B).range)
+  (hM_sd : ↥(litter_set N.1 ∆ N) → atom)
+(hM3: ∀ (a : ↥(litter_set N.fst ∆ N)), (inl (↑a, hM_sd a), A) ∈ ((σ : spec B))⁻¹) : x.val ∈ (N.2 : set atom) := begin
           suffices : x.val ∉ litter_set N.fst ∆ (N.2 : set atom),
-          dsimp [∆)] at this, rw [← subtype.val_eq_coe, (eq_true_intro x.prop] at this,
+          dsimp [(∆)] at this, rw [← subtype.val_eq_coe, eq_true_intro x.prop] at this,
           simp only [subtype.val_eq_coe, true_and, not_true, and_false, or_false, not_not_mem] at this,
           exact this,
           by_contra,
@@ -506,7 +508,7 @@ begin
 end
 
 private lemma useful {a : atom} {L' : near_litter} {N : near_litter}
-  (hM_sd : ↥(litter_set N.fst ∆ ↑(N.snd)) → atom)
+  (hM_sd : ↥(litter_set N.fst ∆ N) → atom)
   (hM4 : litter_set a.fst = ↑(L'.snd) ∆ range hM_sd) : a.fst = L'.fst :=
 begin
   have := L'.2.prop,
@@ -582,7 +584,7 @@ begin
           suffices : {a_1 ∈ litter_set L | (inl a_1, A) ∈ (σ.new_atom_conds a A N hsmall ha).range} ⊆ N.2 ∩ litter_set L,
           apply lt_of_le_of_lt, apply mk_le_mk_of_subset this,
           {
-            suffices : (↑(N.snd) ∩ litter_set L) ⊆ (litter_set N.fst ∆ ((N.2 : set atom))),
+            suffices : (N ∩ litter_set L) ⊆ (litter_set N.fst ∆ ((N.2 : set atom))),
             apply lt_of_le_of_lt, apply mk_le_mk_of_subset this,
             exact N.2.2,
             dsimp [∆], rw set.subset_def, intros x hx, refine or.inr ⟨hx.1, _ ⟩, by_contra h3,
@@ -752,7 +754,7 @@ begin
       rw hy at hc1, simp only [prod.mk.inj_iff, eq_self_iff_true, and_true] at hc1,
       obtain ⟨rfl, rfl⟩ := hc1,
       split, intro ha_1,
-      have : a_1 ∈ litter_set N.fst ∆ ↑(N.snd),
+      have : a_1 ∈ litter_set N.fst ∆ N,
       {rw symm_diff_def,
       apply or.inr, split, exact hc2.left, by_contra, exact h2 (eq_of_mem_litter_set_of_mem_litter_set ha_1 h),
       },

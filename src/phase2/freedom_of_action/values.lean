@@ -382,11 +382,10 @@ begin
   simp only [set.mem_range, set_coe.exists] at this,
   obtain ⟨a, ha1, rfl⟩ := this,
   clear this,
-  have := hb1,
-  rw hsdN2 at this,
-  cases this,
-  exact hb3 (mem_of_mem_diff this),
-  have := this.1,
+  rw hsdN2 at hb1,
+  cases hb1,
+  exact hb3 hb1.1,
+  have := hb1.1,
   simp only [set.mem_range, set_coe.exists] at this,
   obtain ⟨a', ha'1, ha'2⟩ := this,
   have hab := hsdM1 ⟨a, ha1⟩,
@@ -407,7 +406,7 @@ end
 lemma value_mem_value_iff_mem {σ : allowable_spec B} {A : extended_index B} {a : atom}
   (ha : (inl a, A) ∈ (σ : spec B).domain) {N : near_litter}
   (hN : (inr N, A) ∈ (σ : spec B).domain) :
-  σ.atom_value A a ha ∈ (σ.near_litter_value A N hN).2.val ↔ a ∈ N.2.val :=
+  σ.atom_value A a ha ∈ σ.near_litter_value A N hN ↔ a ∈ N :=
 begin
   revert σ a N,
   suffices : ∀ {σ : allowable_spec B} {a : atom} {N : near_litter}
@@ -500,11 +499,14 @@ end
 
 lemma mem_value_iff_value_mem {σ : allowable_spec B} {A : extended_index B} {a : atom}
   (ha : (inl a, A) ∈ (σ : spec B).range) {N : near_litter} (hN : (inr N, A) ∈ (σ : spec B).domain) :
-  a ∈ (σ.near_litter_value A N hN).2.val ↔ σ⁻¹.atom_value A a ha ∈ N.2.val :=
+  a ∈ σ.near_litter_value A N hN ↔ σ⁻¹.atom_value A a ha ∈ N :=
 begin
-  suffices : (σ.atom_value A (σ⁻¹.atom_value A a ha) (atom_value_mem_range σ⁻¹ A a ha)) ∈
-  (σ.near_litter_value A N hN) ↔ σ⁻¹.atom_value A a ha ∈ (N.2 : set atom),
-  convert this, symmetry, convert atom_value_inv σ⁻¹ A a ha,  simp only [inv_inv],
+  suffices : σ.atom_value A (σ⁻¹.atom_value A a ha) (atom_value_mem_range σ⁻¹ A a ha)
+    ∈ σ.near_litter_value A N hN ↔ σ⁻¹.atom_value A a ha ∈ N,
+  convert this,
+  symmetry,
+  convert atom_value_inv σ⁻¹ A a ha,
+  simp only [inv_inv],
   apply value_mem_value_iff_mem,
 end
 
