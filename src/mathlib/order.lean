@@ -89,6 +89,11 @@ h.le_symm_diff_sup_symm_diff_left
 lemma subset_symm_diff_union_symm_diff_right (h : disjoint t u) : s ≤ s ∆ t ⊔ s ∆ u :=
 h.le_symm_diff_sup_symm_diff_right
 
+variables (s)
+
+@[simp] lemma empty_symm_diff : ∅ ∆ s = s := bot_symm_diff _
+@[simp] lemma symm_diff_empty : s ∆ ∅ = s := symm_diff_bot _
+
 end set
 
 section

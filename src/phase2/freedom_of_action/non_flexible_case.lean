@@ -10,14 +10,6 @@ inductive freedom of action assumption extends to `π'`, a `γ`-allowable permut
 using `π'` to find where `L` is supposed to be sent under `π`. We then add this result to `σ`.
 -/
 
-namespace set
-variables {α : Type*} (s : set α)
-
-@[simp] lemma empty_symm_diff : ∅ ∆ s = s := bot_symm_diff _
-@[simp] lemma symm_diff_empty : s ∆ ∅ = s := symm_diff_bot _
-
-end set
-
 open quiver set sum with_bot
 
 universe u

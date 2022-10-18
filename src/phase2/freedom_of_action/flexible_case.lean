@@ -91,8 +91,7 @@ bijection defined above. We construct a bijection between the atoms not yet spec
 def precise_atom_bijection
   (L₁ : {L : litter | flex L A ∧ (inr L.to_near_litter, A) ∉ dom})
   (L₂ : {L : litter | flex L A ∧ (inr L.to_near_litter, A) ∉ rge}) :=
-↥{a ∈ litter_set L₁ | (inl a, A) ∉ dom} ≃
-  ↥{a ∈ litter_set L₂ | (inl a, A) ∉ rge}
+↥{a ∈ litter_set L₁ | (inl a, A) ∉ dom} ≃ ↥{a ∈ litter_set L₂ | (inl a, A) ∉ rge}
 
 namespace precise_atom_bijection
 
@@ -110,7 +109,7 @@ noncomputable def precise_atom_image {σ} (bij : rough_bijection A σ)
   {L : {L : litter | flex L A ∧ (inr L.to_near_litter, A) ∉ dom}}
   {L' : {L : litter | flex L A ∧ (inr L.to_near_litter, A) ∉ rge}}
   (abij : precise_atom_bijection L L')
-  (atom_value : {a : litter_set L // (inl (a : spec B), A) ∈ dom} → atom)
+  (atom_value : {a : litter_set L // (inl (a : atom), A) ∈ dom} → atom)
   (a : atom) (ha : a ∈ litter_set L) : atom :=
 @dite _ ((inl a, A) ∈ dom) (classical.dec _)
   (λ h, atom_value ⟨⟨a, ha⟩, h⟩)
@@ -120,7 +119,7 @@ lemma precise_atom_image_range {dom rge} (bij : rough_bijection A σ)
   {L : {L : litter | flex L A ∧ (inr L.to_near_litter, A) ∉ dom}}
   {L' : {L : litter | flex L A ∧ (inr L.to_near_litter, A) ∉ rge}}
   (abij : precise_atom_bijection L L')
-  (atom_value : {a : litter_set L // (inl (a : spec B), A) ∈ dom} → atom) :
+  (atom_value : {a : litter_set L // (inl (a : atom), A) ∈ dom} → atom) :
   range (λ a : litter_set L, precise_atom_image bij abij atom_value a a.prop) =
     (litter_set L' ∩ {a | (inl a, A) ∉ rge}) ∪ range atom_value :=
 begin
@@ -191,8 +190,8 @@ lemma precise_litter_image_eq_symm
   (habij : ∀ L a, (equiv.symm (abij' (bij L)) a() : spec B) = (equiv.symm (abij L) a() : spec B))
   {L₁ : ↥{L : litter | flex L A ∧ (inr L.to_near_litter, A) ∉ (σ : spec B).domain}}
   {L₂ : ↥{L : litter | flex L A ∧ (inr L.to_near_litter, A) ∉ (σ : spec B).range}} :
-  bij.precise_litter_image L₁ (abij L₁) = L(₂ : spec B).to_near_litter →
-  L(₁ : spec B).to_near_litter = bij.inv.precise_litter_image L₂ (equiv.symm $ abij' L₂) :=
+  bij.precise_litter_image L₁ (abij L₁) = L₂.to_near_litter →
+  (L₁ : atom).to_near_litter = bij.inv.precise_litter_image L₂ (equiv.symm $ abij' L₂) :=
 begin
   intro h,
   have : L₂ = bij L₁,
@@ -267,14 +266,16 @@ def new_flex_litters (bij : rough_bijection A σ)
   range := {c | ∃ (L : {L : litter | flex L A ∧ (inr L.to_near_litter, A) ∉ (σ : spec B).domain}),
     c = (inr (precise_litter_image bij L (abij L)), A)},
   image_domain' := begin
-    ext c, simp only [subtyp(e : spec B)_eq_coe, mem_domain, not_exists, not_and, mem_set_of_eq,
-      set_coe.exists, subtype.coe_mk, mem_image, exists_prop],
+    ext c,
+    simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and, mem_set_of_eq, set_coe.exists,
+      subtype.coe_mk, mem_image, exists_prop],
     split,
     { rintro ⟨d, ⟨L, ⟨hL₁, hL₂⟩, rfl⟩, rfl⟩, exact ⟨L, ⟨hL₁, hL₂⟩, rfl⟩ },
     { rintro ⟨L, ⟨hL₁, hL₂⟩, rfl⟩, exact ⟨_, ⟨L, ⟨hL₁, hL₂⟩, rfl⟩, rfl⟩ },
   end,
   image_range' := begin
-    ext c, simp only [subtyp(e : spec B)_eq_coe, mem_domain, not_exists, not_and, mem_set_of_eq,
+    ext c,
+    simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and, mem_set_of_eq,
       set_coe.exists, subtype.coe_mk, mem_image],
     split,
     { rintro ⟨d, ⟨L, ⟨hL₁, hL₂⟩, rfl⟩, rfl⟩, exact ⟨L, ⟨hL₁, hL₂⟩, rfl⟩ },

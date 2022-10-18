@@ -1,5 +1,4 @@
 import phase2.freedom_of_action.allowable
-import tactic.by_contra
 
 /-!
 # Value API for allowable partial permutations
@@ -129,8 +128,8 @@ begin
   exact (σ.prop.forward.one_to_one A).atom _ this (atom_value_spec σ A b hb),
 end
 
-/-- Gets the value that a given input near litter `N` is mapped to
-under any allowable `π` extending `σ`. -/
+/-- Gets the value that a given input near litter `N` is mapped to under any allowable `π` extending
+`σ`. -/
 noncomputable def near_litter_value (σ : allowable_spec B) (A : extended_index B)
   (N : near_litter) (hb : (inr N, A) ∈ (σ : spec B).domain) : near_litter :=
 @sum.rec _ _ (λ (c : atom × atom ⊕ near_litter × near_litter),
@@ -374,14 +373,12 @@ begin
     have hab := hsdN1 ⟨a, ha1⟩,
     rw ha2 at hab,
     exact h2 hN hNf hM hMf hdisj a b hab ⟨hb1, hb3⟩ ⟨hb4, hb2⟩ },
-  have := hb2,
-  rw hsdM2 at this,
-  cases this,
-  exact hb4 this.1,
-  have := this.1,
-  simp only [set.mem_range, set_coe.exists] at this,
-  obtain ⟨a, ha1, rfl⟩ := this,
-  clear this,
+  rw hsdM2 at hb2,
+  cases hb2,
+  { exact hb4 hb2.1 },
+  simp only [mem_diff, set.mem_range, set_coe.exists] at hb2,
+  obtain ⟨a, ha1, rfl⟩ := hb2.1,
+  clear hb2,
   rw hsdN2 at hb1,
   cases hb1,
   exact hb3 hb1.1,
@@ -390,17 +387,14 @@ begin
   obtain ⟨a', ha'1, ha'2⟩ := this,
   have hab := hsdM1 ⟨a, ha1⟩,
   have ha'b := hsdN1 ⟨a', ha'1⟩,
-  rw ha2 at hab,
   rw ha'2 at ha'b,
   rw ← subtype.val_eq_coe at hab ha'b,
-  simp only at hab ha'b,
-  have := (σ.prop.forward.one_to_one A).atom _ hab ha'b,
-  subst this,
+  obtain rfl : a = a' := (σ.prop.forward.one_to_one A).atom _ hab ha'b,
   cases ha1,
-  exact hb4 ((h M.fst Mf hMf a b hab).mp ha1.1),
+  { exact hb4 ((h M.fst Mf hMf a _ hab).mp ha1.1) },
   cases ha'1,
-  exact hb3 ((h N.fst Nf hNf a b hab).mp ha'1.1),
-  exact hdisj ⟨ha'1.1, ha1.1⟩,
+  { exact hb3 ((h N.fst Nf hNf a _ hab).mp ha'1.1) },
+  { exact hdisj ⟨ha'1.1, ha1.1⟩ }
 end
 
 lemma value_mem_value_iff_mem {σ : allowable_spec B} {A : extended_index B} {a : atom}
@@ -411,7 +405,7 @@ begin
   revert σ a N,
   suffices : ∀ {σ : allowable_spec B} {a : atom} {N : near_litter}
     (ha : (inl a, A) ∈ (σ : spec B).domain) (hN : (inr N, A) ∈ (σ : spec B).domain)
-    (h : σ.atom_value A a ha ∈ (σ.near_litter_value A N hN)), a ∈ (N.2 : set atom),
+    (h : σ.atom_value A a ha ∈ (σ.near_litter_value A N hN)), a ∈ N,
   { intros,
     refine ⟨this _ _, λ h, _⟩,
     specialize @this σ⁻¹ (σ.atom_value A a ha) (σ.near_litter_value A N hN) _ _ _,
@@ -428,20 +422,20 @@ begin
     apply atom_value_spec,
     exact this },
   intros,
-  simp only [subtype.val_eq_coe, mem_domain] at hN,
-  obtain ⟨⟨⟨_, _⟩ | ⟨N', N₂⟩, A'⟩, hcond, hcond2⟩ :=hN, {simp only [binary_condition.domain_mk,
-  map_inl, prod.mk.inj_iff, false_and] at hcond2, exfalso, exact hcond2,},
-  simp only [binary_condition.domain_mk, map_inr, prod.mk.inj_iff] at hcond2,
-  obtain ⟨rfl, rfl⟩ := hcond2,
-  obtain ⟨M, ⟨hM, ⟨sd,hsd1,hsd2⟩ ⟩ ⟩ :=  σ.prop.forward.near_litter_cond N' N₂ A' hcond,
-  have : σ.near_litter_value A' N' hN = N₂,
-  rw ← (σ.prop.backward.one_to_one A').near_litter _ (near_litter_value_spec σ A' N' hN) hcond, refl,
-  rw [this,hsd2] at h,
-  by_cases ha2 : a ∈ litter_set (N'.fst),
+  simp only [mem_domain, prod.ext_iff, binary_condition.domain_fst, binary_condition.domain_snd]
+    at hN,
+  obtain ⟨⟨⟨_, _⟩ | ⟨_, N'⟩, A'⟩, hcond, ⟨⟩, rfl⟩ := hN,
+  dsimp at ha hN,
+  obtain ⟨M, hM, sd, hsd1, hsd2⟩ :=  σ.prop.forward.near_litter_cond _ _ A' hcond,
+  obtain rfl : σ.near_litter_value A' _ hN = N',
+  { rw ← (σ.prop.backward.one_to_one A').near_litter _ (near_litter_value_spec σ A' _ hN) hcond,
+    refl },
+  rw [←set_like.mem_coe, hsd2] at h,
+  by_cases ha2 : a ∈ litter_set N.1,
   { --have : σ.atom_value A' a ha ∈ M
     by_contra h4,
     obtain ⟨N₃, h3, atom_map, ham, ham2⟩ | ⟨hL, h2⟩ | ⟨L', hL, h2, h3⟩ :=
-      σ.prop.forward.atom_cond N'.1 A',
+      σ.prop.forward.atom_cond N.1 A',
     { obtain rfl := (σ.prop.backward.one_to_one A').near_litter _ hM h3,
       rw ham2 at h,
       cases h, all_goals {have h := h.2, dsimp[(range)] at h, push_neg at h_1},
@@ -454,19 +448,18 @@ begin
       specialize h_1 ⟨a, ha2⟩,
       exact h_1 (eq.symm this) },
     { simp only [subtype.val_eq_coe, mem_domain, not_exists, not_and] at hL,
-      specialize hL _ hM,
-      simpa only [binary_condition.domain_mk, map_inr, eq_self_iff_true, not_true] using hL },
+      exact hL _ hM rfl },
     { obtain rfl := (σ.prop.backward.one_to_one A').near_litter _ hM hL,
       have : σ.atom_value A' a ha ∉ range sd,
       { cases h,
         exact h.2,
         cases h.2 ((h3 (atom_value_spec σ A' a ha)).mp ha2) },
-      dsimp [(range)] at this,
-      push_neg at this_1,
+      dsimp [range] at this,
+      push_neg at this,
       have h5 := (σ.prop.backward.one_to_one A').atom _ (atom_value_spec σ A' a ha)
         (hsd1 ⟨a, or.inl ⟨ha2, h4⟩⟩), --⟨a, or.inl ⟨ha2, h4⟩⟩
-      specialize this_1 ⟨a, or.inl ⟨ha2, h4⟩⟩,
-      exact this_1 h5.symm } },
+      specialize this ⟨a, or.inl ⟨ha2, h4⟩⟩,
+      exact this h5.symm } },
   suffices : σ.atom_value A' a ha ∈ range sd,
   { simp only [set.mem_range, set_coe.exists] at this,
     obtain ⟨a', ha', ha'2⟩ := this,
@@ -480,7 +473,7 @@ begin
   cases h,
   { exfalso,
     obtain ⟨N₃, h3, atom_map, ham, ham2⟩ | ⟨hL, h2⟩ | ⟨L', hL, h2, h3⟩ :=
-      σ.prop.forward.atom_cond N'.1 A',
+      σ.prop.forward.atom_cond N.1 A',
     { obtain rfl := (σ.prop.backward.one_to_one A').near_litter _ h3 hM,
       rw ham2 at h, have h := h.1,
       simp only [set.mem_range, set_coe.exists] at h,
