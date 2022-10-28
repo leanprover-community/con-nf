@@ -1,4 +1,4 @@
-import data.set.pointwise
+import data.set.pointwise.basic
 
 open_locale pointwise
 

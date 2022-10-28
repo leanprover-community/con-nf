@@ -230,7 +230,7 @@ private lemma mk_path_n_lt_regular (c : cardinal) (hc : c.is_regular) (hcΛ : #�
 end
 | A B (nat.succ N) := begin
   have : {p : path A B // p.length = N.succ} ≃ Σ (C : type_index), {q : path A C // q.length = N ∧ hom C B},
-  { refine ⟨_, _, _, _⟩,
+  sorry { refine ⟨_, _, _, _⟩,
     { rintro ⟨⟨⟩ | ⟨C, _, q, hhom⟩, hp⟩,
       { cases hp },
       { simp only [path.length_cons, nat.add_one] at hp,
@@ -253,7 +253,7 @@ private lemma mk_path_lt_regular {c : cardinal} (hc : c.is_regular) (hcΛ : #Λ 
   {B β : type_index} : #(@path type_index _ B β) < c :=
 begin
   have : (Σ (n : ℕ), {p : path B β // p.length = n}) ≃ path B β,
-  { refine ⟨λ p, p, λ p, ⟨p.length, p, rfl⟩, _, λ p, rfl⟩,
+  sorry { refine ⟨λ p, p, λ p, ⟨p.length, p, rfl⟩, _, λ p, rfl⟩,
     rintro ⟨n, p, rfl⟩, refl },
   rw [←mk_congr this, mk_sigma _],
   refine sum_lt_lift_of_is_regular hc _ (mk_path_n_lt_regular c hc hcΛ _ _),

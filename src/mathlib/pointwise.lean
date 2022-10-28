@@ -1,4 +1,4 @@
-import data.set.pointwise
+import data.set.pointwise.basic
 import mathlib.order
 
 open_locale pointwise

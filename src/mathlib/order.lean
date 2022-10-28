@@ -37,33 +37,6 @@ by rw [sUnion_eq_bUnion, image_Union₂]
 
 end set
 
-section pairwise
-variables {a b : α} {r : α → α → Prop}
-
-protected lemma pairwise.eq (h : pairwise r) : ¬ r a b → a = b := not_imp_comm.1 $ h _ _
-
-end pairwise
-
-section
-variables {f : ι → set α} {s t : set ι}
-
-lemma pairwise.subset_of_bUnion_subset_bUnion (h₀ : pairwise (disjoint on f))
-  (h₁ : ∀ i ∈ s, (f i).nonempty) (h : (⋃ i ∈ s, f i) ⊆ ⋃ i ∈ t, f i) :
-  s ⊆ t :=
-begin
-  rintro i hi,
-  obtain ⟨a, hai⟩ := h₁ i hi,
-  obtain ⟨j, hj, haj⟩ := mem_Union₂.1 (h $ mem_Union₂_of_mem hi hai),
-  rwa h₀.eq (not_disjoint_iff.2 ⟨a, hai, haj⟩),
-end
-
-lemma pairwise.bUnion_injective (h₀ : pairwise (disjoint on f)) (h₁ : ∀ i, (f i).nonempty) :
-  injective (λ s : set ι, ⋃ i ∈ s, f i) :=
-λ s t h, (h₀.subset_of_bUnion_subset_bUnion (λ _ _, h₁ _) $ h.subset).antisymm $
-  h₀.subset_of_bUnion_subset_bUnion (λ _ _, h₁ _) $ h.superset
-
-end
-
 section
 variables [boolean_algebra α] {a b c : α}
 
@@ -95,19 +68,3 @@ variables (s)
 @[simp] lemma symm_diff_empty : s ∆ ∅ = s := symm_diff_bot _
 
 end set
-
-section
-variables [preorder α]
-
-open set
-
-theorem zorn_Ici₀ (a : α)
-  (ih : ∀ c ⊆ Ici a, is_chain (≤) c → ∀ y ∈ c, ∃ ub, a ≤ ub ∧ ∀ z ∈ c, z ≤ ub) (x : α)
-  (hax : a ≤ x) :
-  ∃ m, x ≤ m ∧ ∀ z, m ≤ z → z ≤ m :=
-begin
-  obtain ⟨m, hma, hxm, hm⟩ := zorn_nonempty_preorder₀ (Ici a) (by simpa using ih) x hax,
-  exact ⟨m, hxm, λ z hmz, hm _ (hax.trans $ hxm.trans hmz) hmz⟩,
-end
-
-end
