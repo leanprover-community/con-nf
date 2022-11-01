@@ -1,4 +1,4 @@
-import mathlib.well_founded
+import order.extension.well
 import phase2.freedom_of_action.constrains
 
 noncomputable theory
