@@ -85,7 +85,7 @@ begin
 end
 
 @[simp] lemma A_map_nonempty : (A_map β s).nonempty ↔ s.nonempty :=
-by simp_rw [←ne_empty_iff_nonempty, ne.def, A_map_eq_empty]
+by simp_rw [nonempty_iff_ne_empty, ne.def, A_map_eq_empty]
 
 lemma subset_A_map (ht : t ∈ s) : typed_near_litter '' local_cardinal (f_map β t) ⊆ A_map β s :=
 image_subset _ $ subset_Union₂ t ht
@@ -101,8 +101,7 @@ end
 lemma A_map_injective :
   injective (A_map β : set (tangle γ) → set (tangle $ Iio_coe β)) :=
 typed_near_litter.injective.image_injective.comp $ pairwise.bUnion_injective
-  (λ x y h, local_cardinal_disjoint _ _ $ (f_map_injective _).ne h) $
-  λ _, local_cardinal_nonempty _
+  (λ x y h, local_cardinal_disjoint $ (f_map_injective _).ne h) $ λ _, local_cardinal_nonempty _
 
 variables {δ : Iio_index α} [core_tangle_data δ] [positioned_tangle_data δ]
 

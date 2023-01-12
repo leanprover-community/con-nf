@@ -1,11 +1,11 @@
-import mathlib.support
+import group_theory.group_action.support
 import phase0.struct_perm
 
 /-!
 # Supports
 -/
 
-open cardinal equiv quiver
+open cardinal equiv mul_action quiver
 open_locale cardinal
 
 noncomputable theory

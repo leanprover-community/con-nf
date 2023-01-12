@@ -1,6 +1,4 @@
-import algebra.parity
-import order.symm_diff
-import order.zorn
+import data.set.lattice
 
 /-!
 # Order theoretic results

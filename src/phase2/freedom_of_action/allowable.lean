@@ -16,7 +16,7 @@ If a specification is allowable, we call it an *allowable partial permutation*
 (`allowable_spec`).
 -/
 
-open quiver set sum with_bot
+open mul_action quiver set sum with_bot
 open_locale cardinal
 
 universe u

@@ -152,7 +152,7 @@ tangles to litters. This gives two benefits:
 noncomputable def f_map_core : Π (x : μ), f_map_result α β x
 | x := let f_map_core' := λ (y < x), (f_map_core y).val y le_rfl in begin
   refine mk_f_map_result α β x (λ y hy, f_map_core y)
-    (ne_empty_iff_nonempty.1 $ λ h, lt_irrefl (#μ) $ lt_of_eq_of_lt _ _),
+    (nonempty_iff_ne_empty.2 $ λ h, lt_irrefl (#μ) $ lt_of_eq_of_lt _ _),
   -- We need to explicitly specify which intermediate cardinal to use in the transitivity
   -- argument; the elaborator can't determine it at this point.
   exact #{i | (∃ N, position (typed_near_litter ⟨((α, β), i), N⟩ : tangle β) ≤ x)

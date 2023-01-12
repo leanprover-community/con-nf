@@ -222,7 +222,7 @@ lemma is_near_comm : is_near s t ↔ is_near t s := ⟨is_near.symm, is_near.sym
 
 /-- If two sets are near each other, then their images under an arbitrary function are also near. -/
 lemma is_near.image (f : α → β) (h : is_near s t) : is_near (f '' s) (f '' t) :=
-h.image.mono $ subset_image_symm_diff _ _ _
+h.image.mono subset_image_symm_diff
 
 end is_near
 end con_nf

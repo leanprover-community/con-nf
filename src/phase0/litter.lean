@@ -1,3 +1,4 @@
+import data.set.pointwise.smul
 import mathlib.equiv
 import mathlib.logic
 import phase0.params
@@ -41,7 +42,7 @@ cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, subtype.ext $ pr
 
 /-- Two litters with different indices are disjoint. -/
 lemma pairwise_disjoint_litter_set : pairwise (disjoint on litter_set) :=
-λ i j h x hx, h $ hx.1.symm.trans hx.2
+λ i j h, disjoint_left.2 $ λ x hi hj, h $ hi.symm.trans hj
 
 lemma eq_of_mem_litter_set_of_mem_litter_set {a : atom} (hi : a ∈ litter_set i)
   (hj : a ∈ litter_set j) : i = j :=
@@ -49,7 +50,7 @@ pairwise_disjoint_litter_set.eq $ not_disjoint_iff.2 ⟨_, hi, hj⟩
 
 lemma litter_set_symm_diff_litter_set (h : i ≠ j) :
   litter_set i ∆ litter_set j = litter_set i ∪ litter_set j :=
-(pairwise_disjoint_litter_set _ _ h).symm_diff_eq_sup
+(pairwise_disjoint_litter_set h).symm_diff_eq_sup
 
 /-- A `i`-near-litter is a set of small symmetric difference to the `i`-th litter. In other words,
 it is near the `i`-th litter.
@@ -88,7 +89,7 @@ begin
   { by_contra',
     refine ((mk_litter_set i).symm.trans_le $ mk_le_mk_of_subset _).not_lt h,
     change litter_set i ≤ _,
-    exact (le_symm_diff_iff_left _ _).2 (pairwise_disjoint_litter_set _ _ this) },
+    exact (le_symm_diff_iff_left _ _).2 (pairwise_disjoint_litter_set this) },
   { rintro rfl,
     exact is_near_litter_litter_set _ }
 end
@@ -170,15 +171,15 @@ lemma local_cardinal_nonempty (i : litter) : (local_cardinal i).nonempty :=
 ⟨⟨i, litter_set _, is_near_litter_litter_set _⟩, rfl⟩
 
 lemma local_cardinal_disjoint : pairwise (disjoint on local_cardinal) :=
-λ i j h N hN, h $ hN.1.symm.trans hN.2
+λ i j h, disjoint_left.2 $ λ N hi hj, h $ hi.symm.trans hj
 
 lemma local_cardinal_injective : injective local_cardinal :=
 begin
   intros i j hij,
   by_contradiction,
-  have := local_cardinal_disjoint i j h,
-  rw [(on), disjoint, hij, inf_idem, le_bot_iff, bot_eq_empty, ← not_nonempty_iff_eq_empty] at this,
-  exact this (local_cardinal_nonempty _)
+  have := (local_cardinal_disjoint h).inter_eq,
+  rw [hij, inter_self] at this,
+  exact (local_cardinal_nonempty _).ne_empty this,
 end
 
 lemma litter.to_near_litter_mem_local_cardinal (i : litter) : i.to_near_litter ∈ local_cardinal i :=
@@ -206,7 +207,7 @@ image under the permutation (`atom_perm`) is near the litter that `i` is mapped 
 permutation (`litter_perm`).
 
 The definition `⇑atom_perm⁻¹ ⁻¹' s` is used instead of `⇑atom_perm '' s` because it has better
-definitional properties. For instance, `x in atom_perm⁻¹ ⁻¹' s` is definitionally equal to
+definitional properties. For instance, `x ∈ atom_perm⁻¹ ⁻¹' s` is definitionally equal to
 `atom_perm x ∈ s`.
 -/
 structure near_litter_perm : Type u :=

@@ -1,10 +1,10 @@
 import order.extension.well
 import phase2.freedom_of_action.constrains
 
-noncomputable theory
-
-open cardinal quiver relation set
+open cardinal mul_action quiver relation set
 open_locale cardinal pointwise
+
+noncomputable theory
 
 universe u
 

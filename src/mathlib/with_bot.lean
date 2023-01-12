@@ -1,4 +1,4 @@
-import order.bounded_order
+import order.with_bot
 
 open function
 
