@@ -70,53 +70,37 @@ end struct_perm
 
 variables (G : Type*) (α) {τ : Type*} [has_smul G (support_condition α)] [has_smul G τ]
 
-/-- A *support for `x`* is a potential support that supports `x`. -/
 structure support (x : τ) :=
 (carrier : set (support_condition α))
+(small : small carrier)
 (supports : supports G carrier x)
 
-/-- A potential support is a small set of support conditions. -/
-structure small_support (x : τ) extends support α G x :=
-(small : small carrier)
-
-/-- An element of `τ` is *supported* if it has some (not necessarily small) support. -/
+/-- An element of `τ` is *supported* if it has some support. -/
 def supported (x : τ) : Prop := nonempty $ support α G x
-
-/-- An element of `τ` is *small-supported* if it has some small support. -/
-def small_supported (x : τ) : Prop := nonempty $ small_support α G x
 
 instance support.set_like (x : τ) : set_like (support α G x) (support_condition α) :=
 { coe := support.carrier,
   coe_injective' := λ s t h, by { cases s, cases t, congr' } }
 
-instance small_support.set_like (x : τ) : set_like (small_support α G x) (support_condition α) :=
-{ coe := λ s, s.carrier,
-  coe_injective' := λ s t h, by { obtain ⟨⟨_, _⟩, _⟩ := s, obtain ⟨⟨_, _⟩, _⟩ := t, congr' } }
-
 @[simp] lemma support.carrier_eq_coe {x : τ} {s : support α G x} : s.carrier = s := rfl
-@[simp] lemma small_support.carrier_eq_coe {x : τ} {s : small_support α G x} : s.carrier = s := rfl
 
-/-- There are at most `μ` small supports for a given `x : τ`. -/
-lemma mk_small_support_le (x : τ) : #(small_support α G x) ≤ #μ :=
- begin
-   have : small_support α G x ≃ {S : support α G x // small (S : set (support_condition α))},
-   { refine ⟨λ S, ⟨S.1, S.2⟩, λ S, ⟨S.1, S.2⟩, _, _⟩; intro x; dsimp; cases x; simp },
-   rw [cardinal.mk_congr this],
-   unfold small,
-   obtain ⟨e⟩ := cardinal.eq.1 (mk_support_condition α),
-   transitivity #{S : support α G x // #S < (#μ).ord.cof},
-   { exact cardinal.mk_subtype_mono (λ _, κ_le_μ_cof.trans_lt') },
-   transitivity #{S : set (support_condition α) // #S < (#μ).ord.cof},
-   { apply @cardinal.mk_le_of_injective _ _ (λ S : {T : support α G x // #T < (#μ).ord.cof},
-      (⟨S.1.carrier, S.2⟩ : {S // #↥S < (#μ).ord.cof})),
-    rintro ⟨⟨s₁, _⟩, h₁⟩ ⟨⟨s₂, _⟩, h₂⟩ h,
-    simp only [subtype.coe_mk] at h,
-    subst h },
-  convert (mk_subset_mk_lt_cof μ_strong_limit.2).le using 1,
-  have := mk_subtype_of_equiv (λ S, # ↥S < (#μ).ord.cof) (set.congr e),
-  convert this using 1,
-  have : ∀ S, # ↥S = # ↥(set.congr e S) := λ S, cardinal.eq.2 ⟨image _ _⟩,
-  simp_rw this,
+/-- There are at most `μ` supports for a given `x : τ`. -/
+lemma mk_support_le (x : τ) : #(support α G x) ≤ #μ :=
+begin
+  transitivity #{s : set μ // small s},
+  transitivity #{S : set (support_condition α) // small S},
+  { refine ⟨⟨λ s, ⟨s.carrier, s.small⟩, λ s t h, _⟩⟩,
+    simpa only [subtype.mk_eq_mk, support.carrier_eq_coe, set_like.coe_set_eq] using h, },
+  { convert le_of_eq
+      (mk_subtype_of_equiv _ (equiv.set.congr (cardinal.eq.mp (mk_support_condition α)).some)),
+    ext s,
+    split,
+    { exact small.image, },
+    { intro h,
+      rw ← symm_apply_apply (equiv.set.congr (cardinal.eq.mp (mk_support_condition α)).some) s,
+      exact h.image, }, },
+  { rw ← mk_subset_mk_lt_cof μ_strong_limit.2,
+    refine mk_subtype_mono (λ s hs, lt_of_lt_of_le hs κ_le_μ_cof), },
 end
 
 end con_nf
