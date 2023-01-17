@@ -34,63 +34,64 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-variables [params.{u}]
+variables [params.{u}] [position_data.{}]
 
 open code
 
 section A_map
 variables {α : Λ} {γ : Iio_index α} [core_tangle_data γ] [positioned_tangle_data γ]
-  (β : Iio α) [core_tangle_data (Iio_coe β)]
-  [positioned_tangle_data (Iio_coe β)] [almost_tangle_data β]
+  {β : Iio α} [core_tangle_data (Iio_coe β)]
+  [positioned_tangle_data (Iio_coe β)] [almost_tangle_data β] (hγβ : (γ : type_index) ≠ (β : Λ))
 
 /-- The *alternative extension* map. For a set of tangles `G`, consider the code
 `(α, γ, G)`. We then construct the non-empty set `D` such that `(α, β, D)` is an alternative
 extension of the same object in TTT. -/
-def A_map (s : set (tangle γ)) : set (tangle $ Iio_coe β) := typed_near_litter '' ⋃ t ∈ s, local_cardinal (f_map β t)
+def A_map (s : set (tangle γ)) : set (tangle $ Iio_coe β) :=
+typed_near_litter '' ⋃ t ∈ s, local_cardinal (f_map hγβ t)
 
-variables {β}
+variables {β} {hγβ}
 
-@[simp] lemma mem_A_map {t : tangle $ Iio_coe β} {s : set (tangle γ)} :
-  t ∈ A_map β s ↔ ∃ (t' ∈ s) N (hN : is_near_litter (f_map β t') N), typed_near_litter ⟨_, N, hN⟩ = t :=
+@[simp] lemma mem_A_map {t : tangle $ Iio_coe β}
+  {s : set (tangle γ)} : t ∈ A_map hγβ s ↔
+    ∃ (t' ∈ s) N (hN : is_near_litter (f_map hγβ t') N), typed_near_litter ⟨_, N, hN⟩ = t :=
 begin
   simp only [A_map, and_comm, mem_image, mem_Union, exists_prop],
   split,
   { rintro ⟨⟨i, N, hN⟩, rfl, t, ht₁, ⟨rfl, ht₂⟩⟩,
     exact ⟨t, ht₁, N, _, rfl⟩ },
   { rintro ⟨t, ht, N, hN, rfl⟩, cases hN,
-    exact ⟨⟨f_map β t, N, _⟩, rfl, t, ht, rfl⟩ }
+    exact ⟨⟨f_map hγβ t, N, _⟩, rfl, t, ht, rfl⟩ }
 end
 
-
-@[simp] lemma A_map_empty : A_map β (∅ : set (tangle γ)) = ∅ :=
+@[simp] lemma A_map_empty : A_map hγβ (∅ : set (tangle γ)) = ∅ :=
 by simp only [A_map, Union_false, Union_empty, image_empty]
 
 @[simp] lemma A_map_singleton (t) :
-  A_map β ({t} : set (tangle γ)) = typed_near_litter '' local_cardinal (f_map β t) :=
+  A_map hγβ ({t} : set (tangle γ)) = typed_near_litter '' local_cardinal (f_map hγβ t) :=
 by simp only [A_map, mem_singleton_iff, Union_Union_eq_left]
 
-variables {β γ} {s : set (tangle γ)} {t : tangle γ}
+variables {s : set (tangle γ)} {t : tangle γ}
 
-lemma _root_.set.nonempty.A_map (h : s.nonempty) : (A_map β s).nonempty :=
+lemma _root_.set.nonempty.A_map (h : s.nonempty) : (A_map hγβ s).nonempty :=
 begin
   refine (nonempty_bUnion.2 _).image _,
-  exact h.imp (λ t ht, ⟨ht, ⟨f_map β _, litter_set _, is_near_litter_litter_set _⟩, rfl⟩),
+  exact h.imp (λ t ht, ⟨ht, ⟨f_map hγβ _, litter_set _, is_near_litter_litter_set _⟩, rfl⟩),
 end
 
-@[simp] lemma A_map_eq_empty : A_map β s = ∅ ↔ s = ∅ :=
+@[simp] lemma A_map_eq_empty : A_map hγβ s = ∅ ↔ s = ∅ :=
 begin
   refine ⟨λ h, not_nonempty_iff_eq_empty.1 $ λ hs, hs.A_map.ne_empty h, _⟩,
   rintro rfl,
   exact A_map_empty,
 end
 
-@[simp] lemma A_map_nonempty : (A_map β s).nonempty ↔ s.nonempty :=
+@[simp] lemma A_map_nonempty : (A_map hγβ s).nonempty ↔ s.nonempty :=
 by simp_rw [nonempty_iff_ne_empty, ne.def, A_map_eq_empty]
 
-lemma subset_A_map (ht : t ∈ s) : typed_near_litter '' local_cardinal (f_map β t) ⊆ A_map β s :=
+lemma subset_A_map (ht : t ∈ s) : typed_near_litter '' local_cardinal (f_map hγβ t) ⊆ A_map hγβ s :=
 image_subset _ $ subset_Union₂ t ht
 
-lemma μ_le_mk_A_map : s.nonempty → #μ ≤ #(A_map β s) :=
+lemma μ_le_mk_A_map : s.nonempty → #μ ≤ #(A_map hγβ s) :=
 begin
   rintro ⟨t, ht⟩,
   refine (cardinal.mk_le_mk_of_subset $ subset_A_map ht).trans_eq' _,
@@ -98,20 +99,21 @@ begin
   exact typed_near_litter.inj',
 end
 
-lemma A_map_injective :
-  injective (A_map β : set (tangle γ) → set (tangle $ Iio_coe β)) :=
+lemma A_map_injective : injective (A_map hγβ) :=
 typed_near_litter.injective.image_injective.comp $ pairwise.bUnion_injective
   (λ x y h, local_cardinal_disjoint $ (f_map_injective _).ne h) $ λ _, local_cardinal_nonempty _
 
 variables {δ : Iio_index α} [core_tangle_data δ] [positioned_tangle_data δ]
+  {hδβ : (δ : type_index) ≠ (β : Λ)}
 
-lemma A_map_disjoint_range (c : set (tangle γ)) (d : set (tangle δ)) (hc : c.nonempty)
-  (h : A_map β c = A_map β d) : γ = δ :=
+lemma A_map_disjoint_range {hδβ} (c : set (tangle γ)) (d : set (tangle δ)) (hc : c.nonempty)
+  (h : A_map hγβ c = A_map hδβ d) : γ = δ :=
 begin
   obtain ⟨b, hb⟩ := hc,
   have := (subset_Union₂ b hb).trans (typed_near_litter.injective.image_injective h).subset,
   obtain ⟨i, -, hi⟩ := mem_Union₂.1 (this (f_map _ b).to_near_litter_mem_local_cardinal),
-  exact subtype.coe_injective (f_map_range_eq _ hi),
+  refine subtype.coe_injective _,
+  exact (f_map_β hγβ b).trans ((congr_arg litter.β hi).trans (f_map_β hδβ i)),
 end
 
 /-!
@@ -139,11 +141,11 @@ lemma min_tangle_le (c : tangles γ) {x} (hx : x ∈ c.1) :
 not_lt.1 $ well_founded_position.not_lt_min c.val c.prop hx
 
 lemma A_map_order (c : tangles γ) :
-  position (min_tangle c) < position (min_tangle ⟨A_map β c.1, c.2.A_map⟩) :=
+  position (min_tangle c) < position (min_tangle ⟨A_map hγβ c.1, c.2.A_map⟩) :=
 begin
-  obtain ⟨t, ht, s, hs, h⟩ := (mem_A_map).1 (min_tangle_mem ⟨A_map β c.1, c.2.A_map⟩),
+  obtain ⟨t, ht, s, hs, h⟩ := mem_A_map.1 (min_tangle_mem ⟨A_map hγβ c.1, c.2.A_map⟩),
   rw ←h,
-  exact (min_tangle_le c ht).trans_lt (f_map_position_raising β t s hs),
+  refine (min_tangle_le c ht).trans_lt (f_map_position hγβ t _ hs),
 end
 
 end A_map
@@ -158,19 +160,22 @@ noncomputable def code_min_map (c : nonempty_code α) : μ := position $ min_tan
 lemma code_wf : well_founded (inv_image μr (code_min_map : nonempty_code α → μ)) :=
 inv_image.wf (code_min_map) μwf.wf
 
-variables [almost_tangle_cumul α] (γ : Iio_index α) (β : Iio α) (c d : code α)
+variables [almost_tangle_cumul α] {γ : Iio_index α} {β : Iio α} (c d : code α)
+  (hcβ : (c.fst : type_index) ≠ (β : Λ))
 
 /-- The A-map, phrased as a function on `α`-codes. -/
-noncomputable! def A_map_code (c : code α) : code α := mk β (A_map β c.2)
+noncomputable! def A_map_code (c : code α) (hcβ : (c.fst : type_index) ≠ (β : Λ)) : code α :=
+mk β (A_map hcβ c.2)
 
-@[simp] lemma fst_A_map_code : (A_map_code β c).1 = β := rfl
-@[simp] lemma snd_A_map_code : (A_map_code β c).2 = A_map β c.2 := rfl
+@[simp] lemma fst_A_map_code : (A_map_code c hcβ).1 = β := rfl
+@[simp] lemma snd_A_map_code : (A_map_code c hcβ).2 = A_map hcβ c.2 := rfl
 
-@[simp] lemma A_map_code_mk (s) : A_map_code β (mk γ s) = mk β (A_map β s) := rfl
+@[simp] lemma A_map_code_mk (hγβ : (γ : type_index) ≠ (β : Λ)) (s) :
+  A_map_code (mk γ s) hγβ = mk β (A_map hγβ s) := rfl
 
 variables {β c d}
 
-@[simp] lemma A_map_code_is_empty : (A_map_code β c).is_empty ↔ c.is_empty :=
+@[simp] lemma A_map_code_is_empty : (A_map_code c hcβ).is_empty ↔ c.is_empty :=
 by { cases c, exact A_map_eq_empty }
 
 alias A_map_code_is_empty ↔ _ code.is_empty.A_map_code
@@ -190,14 +195,14 @@ end
 
 variables (β)
 
-lemma A_map_code_order (c : nonempty_code α) :
-  code_min_map c < code_min_map ⟨A_map_code β c.1, c.2.A_map⟩ :=
+lemma A_map_code_order (c : nonempty_code α) (hcβ : (c.1.fst : type_index) ≠ (β : Λ)) :
+  code_min_map c < code_min_map ⟨A_map_code c.1 hcβ, c.2.A_map⟩ :=
 A_map_order _
 
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse A-map. -/
 @[mk_iff] inductive A_map_rel (c : code α) : code α → Prop
-| intro (β : Iio α) : c.1 ≠ β → A_map_rel (A_map_code β c)
+| intro (β : Iio α) (hcβ : (c.fst : type_index) ≠ (β : Λ)) : A_map_rel (A_map_code c hcβ)
 
 infix ` ↝ `:62 := A_map_rel
 
@@ -216,8 +221,8 @@ begin
   exact A_map_nonempty.1 hc,
 end
 
-lemma A_map_rel_A_map_code (hd : d.2.nonempty) (hdβ : d.1 ≠ β) :
-  c ↝ A_map_code β d ↔ c = d :=
+lemma A_map_rel_A_map_code (hd : d.2.nonempty) (hdβ : (d.fst : type_index) ≠ (β : Λ)) :
+  c ↝ A_map_code d hdβ ↔ c = d :=
 begin
   refine ⟨λ h, A_map_rel_subsingleton (by exact hd.A_map) h $ A_map_rel.intro _ hdβ, _⟩,
   rintro rfl,

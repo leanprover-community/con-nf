@@ -115,16 +115,15 @@ such that we could run out of available values for the function.
 variables [params.{u}] {β : type_index} {γ : Λ}
   [core_tangle_data β] [positioned_tangle_data β]
   [position_data.{}] [core_tangle_data γ]
-  [positioned_tangle_data γ] [almost_tangle_data γ] [tangle_data γ]
+  [positioned_tangle_data γ] [almost_tangle_data γ]
   (hβγ : β ≠ γ)
 
 /-- The requirements to be satisfied by the f-maps.
 If `f_map_condition` applied to a litter indexed by `i` is true,
 then `i` is *not* a valid output to `f_map x`. -/
 inductive f_map_condition (x : tangle β) (i : μ) : Prop
-| any :
-  position (typed_near_litter (litter.to_near_litter ⟨i, β, γ, hβγ⟩) : tangle γ) ≤
-    position x →
+| any (N : set atom) (hN : is_near_litter ⟨i, β, γ, hβγ⟩ N) :
+  position (typed_near_litter ⟨⟨i, β, γ, hβγ⟩, N, hN⟩ : tangle γ) ≤ position x →
   f_map_condition
 | bot (a : atom) :
   β = ⊥ → -- this condition should only trigger for type `-1`
@@ -173,22 +172,23 @@ begin
   have h₁ := mk_inv_image_lt x,
   have h₂ : #{i // f_map_condition hβγ x i} < #μ,
   { have : ∀ i, f_map_condition hβγ x i →
-      position (typed_near_litter (litter.to_near_litter ⟨i, β, γ, hβγ⟩) : tangle γ) ≤ position x ∨
+      (∃ (N : set atom) (hN : is_near_litter ⟨i, β, γ, hβγ⟩ N),
+        position (typed_near_litter ⟨_, N, hN⟩ : tangle γ) ≤ position x) ∨
       β = ⊥ ∧ ∃ (a : atom), a == x ∧
         position (typed_near_litter (litter.to_near_litter ⟨i, β, γ, hβγ⟩) : tangle γ) ≤
           typed_singleton_position a,
     { intros i hi,
-      obtain _ | ⟨a, h₁, h₂, h₃⟩ := hi,
-      { left, assumption, },
+      obtain ⟨N, hN₁, hN₂⟩ | ⟨a, h₁, h₂, h₃⟩ := hi,
+      { left, exact ⟨N, hN₁, hN₂⟩, },
       { right, refine ⟨h₁, a, h₂, _⟩, simp_rw h₁, exact h₃, }, },
     refine lt_of_le_of_lt (mk_subtype_mono this) _,
     refine lt_of_le_of_lt (mk_union_le _ _) _,
     refine add_lt_of_lt μ_strong_limit.is_limit.aleph_0_le _ _,
     { refine lt_of_le_of_lt _ (mk_inv_image_le γ x),
-      refine ⟨⟨λ i, ⟨_, i.prop⟩, _⟩⟩,
+      refine ⟨⟨λ i, ⟨_, i.prop.some_spec.some_spec⟩, _⟩⟩,
       intros i j h,
-      simp only [embedding_like.apply_eq_iff_eq, litter.to_near_litter_injective.eq_iff] at h,
-      exact subtype.coe_inj.mp h.1, },
+      simp only [embedding_like.apply_eq_iff_eq] at h,
+      exact subtype.coe_inj.mp h.1.1, },
     { by_cases β = ⊥ ∧ ∃ (a : atom), a == x,
       { obtain ⟨hβ, a, hax⟩ := h,
         refine lt_of_le_of_lt _ (card_Iic_lt (typed_singleton_position a)),
@@ -229,14 +229,13 @@ end
 lemma f_map_not_mem_deny (x : tangle β) : (f_map hβγ x).ν ∉ {i | f_map_condition hβγ x i} :=
 choose_wf_not_mem_deny x
 
-lemma f_map_position (x : tangle β) :
-  position x <
-  position (typed_near_litter (f_map hβγ x).to_near_litter : tangle γ) :=
+lemma f_map_position (x : tangle β) (N : set atom) (h : is_near_litter (f_map hβγ x) N) :
+  position x < position (typed_near_litter ⟨_, N, h⟩ : tangle γ) :=
 begin
   have := f_map_not_mem_deny hβγ x,
   contrapose! this,
   unfreezingI { induction β using with_bot.rec_bot_coe };
-  exact f_map_condition.any this,
+  exact f_map_condition.any _ h this,
 end
 
 lemma typed_singleton_position_lt_f_map (x : tangle ⊥) :
