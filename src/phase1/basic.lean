@@ -89,7 +89,7 @@ export positioned_tangle_data (position)
 
 variables (α : Λ) [core_tangle_data α]
 
-/-- The motor of the initial recursion. This contains the data of the injection to  all the
+/-- The motor of the initial recursion. This contains the data of the injection to all the
 information needed for phase 1 of the recursion. -/
 class almost_tangle_data :=
 (typed_near_litter : near_litter ↪ tangle α)
@@ -119,7 +119,14 @@ lemma smul_pretangle_inj (π : allowable α) (t : tangle α) :
 
 end allowable
 
-variables [almost_tangle_data α] [positioned_tangle_data α]
+/-- The position of a typed singleton in the position function at any level.
+This is part of the `γ = -1` fix. -/
+class position_data :=
+(typed_singleton_position : atom ↪ μ)
+
+export position_data (typed_singleton_position)
+
+variables [almost_tangle_data α] [positioned_tangle_data α] [position_data.{}]
 
 /-- The motor of the initial recursion. This contains all the information needed for phase 1 of the
 recursion. -/
@@ -226,7 +233,7 @@ instance bot.core_tangle_data : core_tangle_data ⊥ :=
       small := small_singleton _ } }
 
 /-- The tangle data at the bottom level. -/
-def bot.positioned_tangle_data : positioned_tangle_data ⊥ := ⟨nonempty.some mk_atom.le⟩
+instance bot.positioned_tangle_data : positioned_tangle_data ⊥ := ⟨nonempty.some mk_atom.le⟩
 
 variables (α : Λ)
 
@@ -268,6 +275,6 @@ abbreviation almost_tangle_cumul (α : Λ) [core_tangle_cumul α] := Π β : Iio
 
 /-- The tangle data below phase `α`. -/
 abbreviation tangle_cumul (α : Λ) [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [almost_tangle_cumul α] := Π β : Iio α, tangle_data β
+  [position_data.{}] [almost_tangle_cumul α] := Π β : Iio α, tangle_data β
 
 end con_nf

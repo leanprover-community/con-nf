@@ -177,10 +177,6 @@ We will prove that all types constructed in our model have cardinality equal to 
 by simp_rw [atom, mk_prod, lift_id, mk_litter,
   mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) κ_le_μ κ_regular.pos.ne']
 
-/-- The position of a typed singleton in the position function at any level.
-This is part of the `γ = -1` fix. -/
-def typed_singleton_position : atom ↪ μ := nonempty.some mk_atom.le
-
 section small
 variables {f : α → β} {s t : set α}
 
