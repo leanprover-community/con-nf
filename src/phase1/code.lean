@@ -20,6 +20,8 @@ variables {α} {c : code α}
 /-- Constructor for `code`. -/
 def mk : Π β : Iio_index α, set (tangle β) → code α := sigma.mk
 
+lemma mk_def : mk β s = ⟨β, s⟩ := rfl
+
 @[simp] lemma fst_mk (β : Iio_index α) (s : set (tangle β)) : (mk β s).1 = β := rfl
 @[simp] lemma snd_mk (β : Iio_index α) (s : set (tangle β)) : (mk β s).2 = s := rfl
 
