@@ -84,7 +84,8 @@ subtype.coe_injective.mul_action _ coe_smul
 
 end semiallowable_perm
 
-variables [positioned_tangle_cumul α] [almost_tangle_cumul α] [core_tangle_data α]
+variables [position_data.{}] [positioned_tangle_cumul α] [almost_tangle_cumul α]
+  [core_tangle_data α]
 
 /-- An allowable permutation is a semi-allowable permutation whose action on code preserves
 equivalence. -/
@@ -170,7 +171,7 @@ lemma _root_.con_nf.code.equiv.smul : c ≡ d → f • c ≡ f • d := (f.2 _ 
 
 noncomputable! instance has_smul_support :
   has_smul (allowable_perm α) (support α (allowable_perm α) c) :=
-⟨λ f s, ⟨f • s, sorry⟩⟩ -- s.2.smul _
+⟨λ f s, ⟨f • (s : set (support_condition α)), sorry, sorry⟩⟩ -- s.2.smul _
 
 @[simp] lemma coe_smul_support (f : allowable_perm α) (s : support α (allowable_perm α) c) :
   (↑(f • s) : set (support_condition α)) = f • s := rfl
@@ -184,7 +185,7 @@ namespace allowable_perm
 variables {β γ}
 
 lemma smul_f_map (hβγ : β ≠ γ) (π : allowable_perm α) (t : tangle β) :
-  π • f_map γ t = f_map γ (π • t) :=
+  π • f_map (coe_ne hβγ) t = f_map (coe_ne hβγ) (π • t) :=
 begin
   classical,
   unfold has_smul.smul,
@@ -232,7 +233,7 @@ begin
 end
 
 lemma smul_A_map (π : allowable_perm α) (s : set (tangle β)) (hβγ : β ≠ γ) :
-  π • A_map γ s = A_map γ (π • s) :=
+  π • A_map hβγ s = A_map hβγ (π • s) :=
 begin
   ext,
   dsimp only [(•)],
@@ -245,8 +246,7 @@ end
 
 lemma smul_A_map_code (π : allowable_perm α) (hc : c.1 ≠ γ) :
   π • A_map_code γ c = A_map_code γ (π • c) :=
-by simp only [sigma.ext_iff, smul_A_map _ _ hc, fst_smul, fst_A_map_code,
-  eq_self_iff_true, snd_smul, snd_A_map_code, heq_iff_eq, and_self]
+by simp only [A_map_code_ne γ c hc, A_map_code_ne γ (π • c) hc, smul_A_map, snd_smul, smul_mk]
 
 end allowable_perm
 
