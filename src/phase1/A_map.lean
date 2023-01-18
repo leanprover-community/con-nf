@@ -247,6 +247,12 @@ begin
   rw A_map_injective this,
 end
 
+lemma μ_le_mk_A_map_code (c : code α) (hcβ : c.1 ≠ β) : c.2.nonempty → #μ ≤ #(A_map_code β c).2 :=
+begin
+  rw A_map_code_ne β c hcβ,
+  exact μ_le_mk_A_map,
+end
+
 variables (β)
 
 lemma A_map_code_order (c : nonempty_code α) (hcβ : c.1.1 ≠ β) :
