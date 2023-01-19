@@ -88,7 +88,7 @@ end semiallowable_perm
 variables [position_data.{}] [positioned_tangle_cumul α] [almost_tangle_cumul α]
   [core_tangle_data α]
 
-/-- An allowable permutation is a semi-allowable permutation whose action on code preserves
+/-- An allowable permutation is a semi-allowable permutation whose action on codes preserves
 equivalence. -/
 def allowable_perm := {π : semiallowable_perm α // ∀ X Y : code α, π • X ≡ π • Y ↔ X ≡ Y}
 
@@ -159,6 +159,8 @@ end
 
 @[simp] lemma fst_smul_near_litter (f : allowable_perm α) (N : near_litter) : (f • N).1 = f • N.1 :=
 rfl
+@[simp] lemma snd_smul_near_litter (f : allowable_perm α) (N : near_litter) :
+  ((f • N).2 : set atom) = f • ↑N.2 := rfl
 
 @[simp] lemma smul_typed_near_litter (f : allowable_perm α) (N : near_litter) :
   f • (typed_near_litter N : tangle (γ : Λ)) =
@@ -252,7 +254,7 @@ by simp only [A_map_code_ne γ c hc, A_map_code_ne γ (π • c) hc, smul_A_map,
 
 end allowable_perm
 
-@[simp] lemma A_map_rel.smul : c ↝ d → f • c ↝ f • d :=
+lemma A_map_rel.smul : c ↝ d → f • c ↝ f • d :=
 by { rintro ⟨γ, hγ⟩, exact (A_map_rel_iff _ _).2 ⟨_, hγ, f.smul_A_map_code hγ⟩ }
 
 @[simp] lemma smul_A_map_rel : f • c ↝ f • d ↔ c ↝ d :=
