@@ -165,6 +165,9 @@ inv_image.wf (code_min_map) μwf.wf
 
 variables [almost_tangle_cumul α] (γ : Iio_index α) (β : Iio α) (c d : code α)
 
+noncomputable! def extension {β : Iio α} (s : set (tangle β)) (γ : Iio α) : set (tangle γ) :=
+(A_map_code γ (mk β s)).snd
+
 /-- The A-map, phrased as a function on `α`-codes, but if the code's level matches `β`, this is the
 identity function. This is written in a weird way in order to make `(A_map_code β c).1` defeq
 to `β`. -/

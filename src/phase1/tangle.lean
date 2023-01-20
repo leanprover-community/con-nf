@@ -19,30 +19,23 @@ variables (α : Λ) [core_tangle_cumul α] {β : Iio_index α} {γ : Iio α}
 
 namespace semitangle
 
-/-- The possible extensions of a nonempty semitangle. -/
-abbreviation extension := Π β : Iio α, tangles (β : Iio_index α)
-
-namespace extension
+section extension
 variables {α} [positioned_tangle_cumul α] [almost_tangle_cumul α]
 
 /-- The extensions for a code. -/
-protected noncomputable! def extn (s : tangles β) : extension α :=
-λ γ, ⟨(A_map_code γ (mk β s)).snd, A_map_code_nonempty.mpr s.2⟩
+noncomputable! def extn {β : Iio α} (s : set (tangle β)) (γ : Iio α) : set (tangle γ) :=
+(A_map_code γ (mk β s)).snd
 
 @[simp] lemma extn_self (s : tangles $ Iio_coe γ) : extension.extn s γ = s :=
 begin
   unfold extension.extn,
-  refine subtype.ext _,
-  simp only [subtype.coe_mk],
   have := A_map_code_mk_eq γ s,
   rw sigma.ext_iff at this,
   exact this.2.eq,
 end
 
-lemma extn_of_ne (s : tangles β) (hβγ : β ≠ γ) : extension.extn s γ = ⟨A_map hβγ _, s.2.A_map⟩ :=
+lemma extn_of_ne (s : tangles β) (hβγ : β ≠ γ) : extension.extn s γ = A_map hβγ s :=
 begin
-  refine subtype.ext _,
-  simp only [subtype.coe_mk],
   have := A_map_code_mk_ne β γ hβγ s,
   rw sigma.ext_iff at this,
   exact this.2.eq,
@@ -55,9 +48,9 @@ variables [positioned_tangle_cumul α] [almost_tangle_cumul α]
 /-- Keeps track of the preferred extension of a semitangle, along with coherence conditions
 relating each extension of the semitangle. -/
 @[nolint has_nonempty_instance] inductive preference (exts : extension α)
-| base (atoms : tangles ⊥) :
-    (mk ⊥ (atoms : set $ tangle (⊥ : Iio_index α))).is_even →
-      (∀ γ, A_map bot_ne_coe (atoms : set $ tangle (⊥ : Iio_index α)) = (exts γ).val) → preference
+| base (atoms : set (tangle (⊥ : Iio_index α))) :
+    (mk ⊥ atoms).is_even →
+      (∀ γ, A_map bot_ne_coe atoms = exts γ) → preference
 | proper (β : Iio α) :
     (mk β (show tangles $ Iio_coe β, from exts β) : code α).is_even →
       (∀ (γ : Iio α) (hβγ : Iio_coe β ≠ γ),
