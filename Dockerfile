@@ -12,7 +12,7 @@ WORKDIR /py/Python-3.10.0
 RUN ./configure
 RUN make
 RUN make altinstall
-WORKDIR /py
+WORKDIR /
 
 # Install blueprint dependencies
 RUN python3.10 -m pip install mathlibtools invoke
