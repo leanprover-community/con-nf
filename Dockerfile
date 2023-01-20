@@ -1,12 +1,17 @@
 FROM texlive/texlive:latest
 
 # Install Python 3.10
-RUN apt update
-RUN apt install software-properties-common -y
-RUN apt install --reinstall ca-certificates
-RUN apt install dirmngr --install-recommends -y
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt install python3.10 python3.10-dev python3-pip -y
+WORKDIR /py
+RUN apt update && apt install -y build-essential zlib1g-dev libncurses5-dev \
+  libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev \
+  libsqlite3-dev wget libbz2-dev
+RUN wget https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz
+RUN tar -xf Python-3.10.*.tgz
+WORKDIR /py/Python-3.10.0
+RUN ./configure
+RUN make
+RUN make altinstall
+WORKDIR /py
 
 # Install blueprint dependencies
 RUN python3.10 -m pip install mathlibtools invoke
