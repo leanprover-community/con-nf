@@ -90,17 +90,15 @@ begin
   transitivity #{s : set μ // small s},
   transitivity #{S : set (support_condition α) // small S},
   { refine ⟨⟨λ s, ⟨s.carrier, s.small⟩, λ s t h, _⟩⟩,
-    simpa only [subtype.mk_eq_mk, support.carrier_eq_coe, set_like.coe_set_eq] using h, },
+    simpa only [subtype.mk_eq_mk, support.carrier_eq_coe, set_like.coe_set_eq] using h },
   { convert le_of_eq
       (mk_subtype_of_equiv _ (equiv.set.congr (cardinal.eq.mp (mk_support_condition α)).some)),
     ext s,
-    split,
-    { exact small.image, },
-    { intro h,
-      rw ← symm_apply_apply (equiv.set.congr (cardinal.eq.mp (mk_support_condition α)).some) s,
-      exact h.image, }, },
+    refine ⟨small.image, λ h, _⟩,
+    rw ← symm_apply_apply (equiv.set.congr (cardinal.eq.mp $ mk_support_condition α).some) s,
+    exact h.image },
   { rw ← mk_subset_mk_lt_cof μ_strong_limit.2,
-    refine mk_subtype_mono (λ s hs, lt_of_lt_of_le hs κ_le_μ_cof), },
+    exact mk_subtype_mono (λ s hs, lt_of_lt_of_le hs κ_le_μ_cof) }
 end
 
 end con_nf

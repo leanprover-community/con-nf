@@ -32,20 +32,12 @@ The f-maps that we will construct indeed satisfy these conditions.
 
 variables {α β : Type u} {r : α → α → Prop}
 
-lemma compl_nonempty_of_le {s : set β} (h : #s < #β) : sᶜ.nonempty :=
-begin
-  rw set.nonempty_iff_ne_empty,
-  by_contra h',
-  rw compl_eq_empty at h',
-  simpa only [h', mk_univ, lt_self_iff_false] using h,
-end
-
 /-- Noncomputably chooses an element of `β \ s`, given `#s < #β`. -/
 noncomputable def some_of_mk_lt (s : set β) (h : #s < #β) : β :=
-(compl_nonempty_of_le h).some
+(nonempty_compl_of_mk_lt_mk h).some
 
 lemma some_of_mk_lt_spec {s : set β} {h : #s < #β} : some_of_mk_lt s h ∉ s :=
-(compl_nonempty_of_le h).some_spec
+(nonempty_compl_of_mk_lt_mk h).some_spec
 
 lemma mk_image₂_le {p : α → Prop} (f : Π x, p x → β) : #{y // ∃ z h, f z h = y} ≤ #{x // p x} :=
 ⟨⟨λ y, ⟨y.prop.some, y.prop.some_spec.some⟩, begin
@@ -98,9 +90,9 @@ lemma choose_wf_injective [is_well_order α r] {deny : α → set β}
 begin
   intros x₁ x₂ h,
   obtain hx | hx | hx := (is_well_order.is_trichotomous r).trichotomous x₁ x₂,
-  { cases choose_wf_ne_of_r x₁ x₂ hx h, },
-  { exact hx, },
-  { cases choose_wf_ne_of_r x₂ x₁ hx h.symm, },
+  { cases choose_wf_ne_of_r x₁ x₂ hx h },
+  { exact hx },
+  { cases choose_wf_ne_of_r x₂ x₁ hx h.symm },
 end
 
 end choose_wf
@@ -138,10 +130,10 @@ begin
   { intros x y,
     have := lt_trichotomy (position x) (position y),
     rw embedding_like.apply_eq_iff_eq at this,
-    exact this, },
+    exact this },
   { intros x y z,
-    exact lt_trans, },
-  { exact inv_image.wf _ μwf.wf, },
+    exact lt_trans },
+  { exact inv_image.wf _ μwf.wf },
 end
 
 variable (γ)
@@ -179,8 +171,8 @@ begin
           typed_singleton_position a,
     { intros i hi,
       obtain ⟨N, hN₁, hN₂⟩ | ⟨a, h₁, h₂, h₃⟩ := hi,
-      { left, exact ⟨N, hN₁, hN₂⟩, },
-      { right, refine ⟨h₁, a, h₂, _⟩, simp_rw h₁, exact h₃, }, },
+      { left, exact ⟨N, hN₁, hN₂⟩ },
+      { right, refine ⟨h₁, a, h₂, _⟩, simp_rw h₁, exact h₃ } },
     refine lt_of_le_of_lt (mk_subtype_mono this) _,
     refine lt_of_le_of_lt (mk_union_le _ _) _,
     refine add_lt_of_lt μ_strong_limit.is_limit.aleph_0_le _ _,
@@ -188,7 +180,7 @@ begin
       refine ⟨⟨λ i, ⟨_, i.prop.some_spec.some_spec⟩, _⟩⟩,
       intros i j h,
       simp only [embedding_like.apply_eq_iff_eq] at h,
-      exact subtype.coe_inj.mp h.1.1, },
+      exact subtype.coe_inj.mp h.1.1 },
     { by_cases β = ⊥ ∧ ∃ (a : atom), a == x,
       { obtain ⟨hβ, a, hax⟩ := h,
         refine lt_of_le_of_lt _ (card_Iic_lt (typed_singleton_position a)),
@@ -196,15 +188,15 @@ begin
           (typed_near_litter (litter.to_near_litter ⟨i, β, γ, hβγ⟩) : tangle γ), _⟩, _⟩⟩,
         { obtain ⟨i, _, b, hb, _⟩ := i,
           rw eq_of_heq (hax.trans hb.symm),
-          assumption, },
+          assumption },
         { intros i j h,
           simp only [subtype.mk_eq_mk, embedding_like.apply_eq_iff_eq,
             litter.to_near_litter_injective.eq_iff] at h,
-          exact subtype.coe_inj.mp h.1, }, },
+          exact subtype.coe_inj.mp h.1 } },
       { refine lt_of_eq_of_lt _ (lt_of_lt_of_le aleph_0_pos μ_strong_limit.is_limit.aleph_0_le),
         rw [mk_eq_zero_iff, is_empty_coe_sort, set.eq_empty_iff_forall_not_mem],
         rintros i ⟨hb, a, ha, _⟩,
-        exact h ⟨hb, a, ha⟩, }, }, },
+        exact h ⟨hb, a, ha⟩ } } },
   exact add_lt_of_lt μ_strong_limit.is_limit.aleph_0_le h₁ h₂,
 end
 

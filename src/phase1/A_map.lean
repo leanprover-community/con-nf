@@ -43,13 +43,7 @@ variables {α : Λ} {γ : Iio_index α} [core_tangle_data γ] [positioned_tangle
   {β : Iio α} [core_tangle_data (Iio_coe β)]
   [positioned_tangle_data (Iio_coe β)] [almost_tangle_data β] (hγβ : γ ≠ β)
 
-lemma coe_ne (hγβ : γ ≠ β) : (γ : type_index) ≠ (β : Λ) :=
-begin
-  contrapose! hγβ,
-  ext,
-  rw hγβ,
-  refl,
-end
+lemma coe_ne : γ ≠ β → (γ : type_index) ≠ (β : Λ) := subtype.coe_injective.ne
 
 /-- The *alternative extension* map. For a set of tangles `G`, consider the code
 `(α, γ, G)`. We then construct the non-empty set `D` such that `(α, β, D)` is an alternative
@@ -180,9 +174,9 @@ mk β $ if hcβ : c.1 = β then cast (by rw hcβ) c.2 else A_map hcβ c.2
 lemma A_map_code_eq (hcβ : c.1 = β) : A_map_code β c = c :=
 begin
   rw [A_map_code, dif_pos hcβ],
-  ext1,
-  { exact hcβ.symm, },
-  { simp only [snd_mk, cast_heq], },
+  ext : 1,
+  { exact hcβ.symm },
+  { simp only [snd_mk, cast_heq] },
 end
 
 lemma A_map_code_ne (hcβ : c.1 ≠ β) : A_map_code β c = mk β (A_map hcβ c.2) :=
@@ -194,22 +188,16 @@ by rw [A_map_code, dif_neg hcβ]
 begin
   have := A_map_code_ne β c hcβ,
   rw sigma.ext_iff at this,
-  exact eq_of_heq this.2,
+  exact this.2.eq,
 end
 
 @[simp] lemma A_map_code_mk_eq (s) :
   A_map_code β (mk β s) = mk β s :=
-begin
-  rw [A_map_code_eq],
-  refl,
-end
+by { rw A_map_code_eq, refl }
 
 @[simp] lemma A_map_code_mk_ne (hγβ : γ ≠ β) (s) :
   A_map_code β (mk γ s) = mk β (A_map hγβ s) :=
-begin
-  rw A_map_code_ne β (mk γ s) hγβ,
-  refl,
-end
+by { rw A_map_code_ne β (mk γ s) hγβ, refl }
 
 variables {β c d}
 
@@ -218,18 +206,13 @@ begin
   obtain ⟨γ, s⟩ := c,
   by_cases γ = β,
   { rw A_map_code_eq,
-    exact h, },
+    exact h },
   { rw A_map_code_ne,
-    exact A_map_eq_empty h, },
+    exact A_map_eq_empty h }
 end
 
 @[simp] lemma A_map_code_nonempty : (A_map_code β c).2.nonempty ↔ c.2.nonempty :=
-begin
-  have := A_map_code_is_empty,
-  rw [← not_iff_not, code.is_empty, code.is_empty,
-    ← ne.def, ← ne.def, ← set.nonempty_iff_ne_empty, ← set.nonempty_iff_ne_empty] at this,
-  exact this,
-end
+by { simp_rw nonempty_iff_ne_empty, exact A_map_code_is_empty.not }
 
 alias A_map_code_is_empty ↔ _ code.is_empty.A_map_code
 
@@ -241,17 +224,12 @@ begin
   rw [A_map_code_ne _ _ hγβ, A_map_code_ne _ _ hδβ] at h,
   have := (congr_arg_heq sigma.snd h).eq,
   dsimp only at this,
-  have γ_eq_δ := congr_arg subtype.val (A_map_disjoint_range _ _ hs this),
-  dsimp only at γ_eq_δ,
-  subst γ_eq_δ,
+  obtain rfl : γ = δ := congr_arg subtype.val (A_map_disjoint_range _ _ hs this),
   rw A_map_injective this,
 end
 
 lemma μ_le_mk_A_map_code (c : code α) (hcβ : c.1 ≠ β) : c.2.nonempty → #μ ≤ #(A_map_code β c).2 :=
-begin
-  rw A_map_code_ne β c hcβ,
-  exact μ_le_mk_A_map,
-end
+by { rw A_map_code_ne β c hcβ, exact μ_le_mk_A_map }
 
 variables (β)
 
@@ -267,9 +245,9 @@ end
 
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse A-map. Note that we require the A-map to actually change the data, by requiring
-that `c.fst ≠ β`. -/
+that `c.1 ≠ β`. -/
 @[mk_iff] inductive A_map_rel (c : code α) : code α → Prop
-| intro (β : Iio α) : c.fst ≠ β → A_map_rel (A_map_code β c)
+| intro (β : Iio α) : c.1 ≠ β → A_map_rel (A_map_code β c)
 
 infix ` ↝ `:62 := A_map_rel
 
@@ -297,14 +275,14 @@ begin
 end
 
 lemma A_map_rel.nonempty_iff : c ↝ d → (c.2.nonempty ↔ d.2.nonempty) :=
-by { rintro ⟨β, hcβ⟩, exact A_map_code_nonempty.symm, }
+by { rintro ⟨β, hcβ⟩, exact A_map_code_nonempty.symm }
 
 lemma A_map_rel_empty_empty (hγβ : γ ≠ β) : mk γ ∅ ↝ mk β ∅ :=
 (A_map_rel_iff _ _).2 ⟨β, hγβ, begin
-  ext1,
-  refl,
-  refine heq_of_eq _,
-  simp only [snd_mk, snd_A_map_code _ (mk γ ∅) hγβ, A_map_empty],
+  ext : 1,
+  { refl },
+  { refine heq_of_eq _,
+    simp only [snd_mk, snd_A_map_code _ (mk γ ∅) hγβ, A_map_empty] }
 end⟩
 
 lemma eq_of_A_map_code {β γ : Iio α} (hc : c.2.nonempty) (hcβ : c.1 ≠ β)

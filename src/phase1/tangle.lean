@@ -135,7 +135,7 @@ begin
     refine not_ne_iff.1 (λ hβγ, even₂.A_map_code_ne even₁ (Iio.coe_injective.ne hβγ.symm) $
       sigma.ext_iff.2 ⟨rfl, heq_of_eq _⟩),
     rw snd_A_map_code,
-    exact hA₂ β (λ h, hβγ.symm (Iio.coe_injective h)), }
+    exact hA₂ β (λ h, hβγ.symm (Iio.coe_injective h)) }
 end
 
 /-- One useful form of extensionality in tangled type theory. Two nonempty semitangles are equal if
@@ -210,7 +210,7 @@ begin
     { refine (code.equiv.A_map_right _ (code.is_even_bot _) γ bot_ne_mk_coe).trans _,
       simp only [ne.def, Iio_index.bot_ne_coe, not_false_iff, A_map_code_mk_ne],
       rw [hA₁ γ, h, ←hA₂ γ (Iio.coe_injective.ne hδγ), ← A_map_code_mk_ne],
-      exact code.equiv.A_map_left _ even₂ γ (Iio.coe_injective.ne hδγ), } },
+      exact code.equiv.A_map_left _ even₂ γ (Iio.coe_injective.ne hδγ) } },
   { simp only [repr_code_proper, subtype.coe_mk, repr_code_base],
     obtain rfl | hβγ := eq_or_ne β γ,
     { dsimp only [mem_Iio, ne.def, subtype.val_eq_coe, set_coe.forall] at *,
@@ -220,7 +220,7 @@ begin
       dsimp only [mem_Iio, ne.def, subtype.val_eq_coe, set_coe.forall] at *,
       rw A_map_code_mk_ne _ _ (Iio.coe_injective.ne hβγ),
       rw [hA₁ γ (Iio.coe_injective.ne hβγ), h, ←hA₂ γ],
-      exact code.equiv.A_map_left _ (code.is_even_bot _) γ bot_ne_mk_coe, } },
+      exact code.equiv.A_map_left _ (code.is_even_bot _) γ bot_ne_mk_coe } },
   { simp only [repr_code_proper, subtype.coe_mk],
     obtain rfl | hβγ := eq_or_ne β γ,
     { obtain rfl | hδβ := eq_or_ne δ β,
@@ -240,7 +240,7 @@ begin
     rw A_map_code_ne,
     rw [code.snd_mk, hA₁ γ (Iio.coe_injective.ne hβγ), h, ←hA₂ γ (Iio.coe_injective.ne hδγ)],
     rw ← this,
-    exact code.equiv.A_map_left _ even₂ γ (Iio.coe_injective.ne hδγ), }
+    exact code.equiv.A_map_left _ even₂ γ (Iio.coe_injective.ne hδγ) }
 end
 
 /-- Extensionality in tangled type theory. Two nonempty semitangles are equal if their
@@ -352,9 +352,9 @@ by simpa only [smul_A_map] using congr_arg (λ c, f • c) (h δ hγδ)
 instance : has_smul (allowable_perm α) (nonempty_semitangle α) :=
 { smul := λ f t, ⟨f • t.exts, begin
     obtain ⟨exts, ⟨s, ht, h⟩ | ⟨γ, ht, h⟩⟩ := t,
-    { exact preference.base (f • s) (code.is_even_bot _) (smul_aux₁ h), },
+    { exact preference.base (f • s) (code.is_even_bot _) (smul_aux₁ h) },
     { exact preference.proper _ ht.smul (smul_aux₂ h) }
-    end⟩, }
+    end⟩ }
 
 @[simp] lemma members_smul (f : allowable_perm α) (s : nonempty_semitangle α) :
   (f • s).exts = f • s.exts := rfl
@@ -374,26 +374,26 @@ instance mul_action_nonempty_semitangle : mul_action (allowable_perm α) (nonemp
       simp only [one_smul, eq_self_iff_true, true_and],
       refine preference.base_heq_base _ _,
       rw one_smul,
-      ext1,
+      ext : 1,
       refine (coe_smul_nonempty _ _).trans _,
-      rw one_smul, },
+      rw one_smul },
     { rw smul_proper,
       simp only [one_smul, eq_self_iff_true, true_and],
       refine semitangle.preference.proper_heq_proper _ rfl,
-      rw one_smul, },
+      rw one_smul },
   end,
   mul_smul := begin
     rintro f g ⟨exts, ⟨s, ht, h⟩ | ⟨γ, ht, h⟩⟩,
     { simp only [smul_base, mul_smul, eq_self_iff_true, true_and],
       refine preference.base_heq_base _ _,
       rw mul_smul,
-      ext1,
+      ext : 1,
       refine (coe_smul_nonempty _ _).trans _,
       rw mul_smul,
-      refl, },
+      refl },
     { simp only [smul_proper, mul_smul, eq_self_iff_true, true_and],
       refine semitangle.preference.proper_heq_proper _ rfl,
-      rw mul_smul, },
+      rw mul_smul },
   end
 }
 
@@ -436,11 +436,11 @@ begin
   { simp only [intro, allowable_perm.smul_base, allowable_perm.smul_extn,
       eq_self_iff_true, true_and],
     refine preference.base_heq_base _ rfl,
-    rw allowable_perm.smul_extn, },
+    rw allowable_perm.smul_extn },
   { simp only [intro, allowable_perm.smul_proper, allowable_perm.smul_extn,
       eq_self_iff_true, true_and],
     refine preference.proper_heq_proper _ rfl,
-    rw allowable_perm.smul_extn, }
+    rw allowable_perm.smul_extn }
 end
 
 -- TODO: Move next two lemmas elsewhere.
@@ -463,8 +463,7 @@ end
 This is called a *typed near litter*. -/
 def new_typed_near_litter (N : near_litter) : new_tangle α :=
 ⟨some $ intro ⟨(show set (tangle (⊥ : Iio_index α)), from N.2.1), N.2.2.nonempty⟩ $
-  code.is_even_bot _, ⟨⟨{(sum.inr N, default)}, small_singleton _, begin
-    intros π h,
+  code.is_even_bot _, ⟨⟨{(sum.inr N, default)}, small_singleton _, λ π h, begin
     simp only [subtype.val_eq_coe, option.smul_some, smul_intro, option.some_inj],
     have := show (struct_perm.lower (bot_lt_coe α).le (semiallowable_perm.to_struct_perm ↑π)) •
       sum.inr N = sum.inr N, from congr_arg prod.fst (h rfl),
@@ -472,60 +471,50 @@ def new_typed_near_litter (N : near_litter) : new_tangle α :=
     have : π • N = N := this,
     conv_rhs { rw ← this },
     congr' 1,
-    ext1,
+    ext : 1,
     simp only [coe_smul_nonempty, subtype.coe_mk, allowable_perm.snd_smul_near_litter],
     unfold has_smul.smul has_smul.comp.smul,
     simp only [semiallowable_perm.to_allowable_bot (allowable_perm.coe_hom π)],
   end⟩⟩⟩
-
 
 /-- For any supported tangle `x`, the code `(α, β, {x})` is a tangle at level `α`. -/
 def supported_singleton (x : tangle β) (supp : supported α (allowable_perm α) x) :
   new_tangle α :=
 ⟨some $ intro ⟨{x}, singleton_nonempty _⟩ (code.is_even_singleton _), begin
   unfreezingI { obtain ⟨s, hs₁, hs₂⟩ := supp },
-  refine ⟨⟨s, hs₁, _⟩⟩,
-  intros π h,
+  refine ⟨⟨s, hs₁, λ π h, _⟩⟩,
   conv_rhs { rw ← hs₂ π h },
   simp only [smul_set_singleton, smul_nonempty_mk, option.smul_some, smul_intro],
   refl,
 end⟩
 
-/-- For any small set `B` of supported `β`-tangles,
-the code `(α, β, B)` is a tangle at level `α` if it is even. -/
+/-- For any small set `B` of supported `β`-tangles, the code `(α, β, B)` is a tangle at level `α` if
+it is even. -/
 def supported_set (s : tangles β) (hs : small (s : set $ tangle β)) (hc : (mk β s).is_even)
   (symm : ∀ b ∈ (s : set $ tangle β), supported α (allowable_perm α) b) :
   new_tangle α :=
 ⟨some $ intro s hc, begin
   have symm : Π b ∈ (s : set $ tangle β), support α (allowable_perm α) b,
-  { intros b hb, exact (symm b hb).some, },
-  refine ⟨⟨⋃ b ∈ (s : set $ tangle β), symm b ‹_›, _, _⟩⟩,
-  { rw bUnion_eq_Union,
-    refine lt_of_le_of_lt cardinal.mk_Union_le_sum_mk _,
-    exact cardinal.sum_lt_of_is_regular κ_regular hs (λ i, (symm i i.prop).small), },
-  { intros π h,
-    suffices : π • s = s,
-    { simp only [option.smul_some, smul_intro, option.some_inj, this] },
-    have : ∀ x ∈ (s : set $ tangle β), π • x = x,
-    { intros x hx,
-      refine (symm x hx).supports π _,
-      intros a ha,
-      refine h _,
-      simp only [mem_Union, set_like.mem_coe],
-      refine ⟨x, hx, ha⟩, },
-    ext1, ext1,
-    split,
-    { intro hx,
-      have := this (π⁻¹ • x) _,
-      { rw smul_inv_smul at this,
-        rw this,
-        rw ← mem_smul_set_iff_inv_smul_mem,
-        exact hx, },
-      { rw ← mem_smul_set_iff_inv_smul_mem,
-        exact hx } },
-    { intro hx,
-      rw ← this x hx,
-      exact smul_mem_smul_set hx, } },
+  { intros b hb, exact (symm b hb).some },
+  refine ⟨⟨⋃ b ∈ (s : set $ tangle β), symm b ‹_›, hs.bUnion (λ i hi, (symm _ _).small), λ π h, _⟩⟩,
+  suffices : π • s = s,
+  { simp only [option.smul_some, smul_intro, option.some_inj, this] },
+  have : ∀ x ∈ (s : set $ tangle β), π • x = x,
+  { intros x hx,
+    refine (symm x hx).supports π _,
+    intros a ha,
+    refine h _,
+    simp only [mem_Union, set_like.mem_coe],
+    refine ⟨x, hx, ha⟩ },
+  ext : 2,
+  refine ⟨λ hx, _, λ hx, _⟩,
+  { have := this (π⁻¹ • x) _,
+    { rw smul_inv_smul at this,
+      rw this,
+      rwa ←mem_smul_set_iff_inv_smul_mem },
+    { rwa ←mem_smul_set_iff_inv_smul_mem } },
+  { rw ← this x hx,
+    exact smul_mem_smul_set hx }
 end⟩
 
 variables {α}
@@ -547,11 +536,11 @@ instance has_smul_new_tangle : has_smul (allowable_perm α) (new_tangle α) :=
   intros σ h,
   have := s.supports (π⁻¹ * σ * π) _,
   { conv_rhs { rw [← subtype.val_eq_coe, ← this, ← mul_smul, ← mul_assoc, ← mul_assoc,
-      mul_inv_self, one_mul, mul_smul], },
-    refl, },
+      mul_inv_self, one_mul, mul_smul] },
+    refl },
   { intros a ha,
     rw [mul_smul, mul_smul, inv_smul_eq_iff],
-    exact h (smul_mem_smul_set ha), },
+    exact h (smul_mem_smul_set ha) },
 end }⟩⟩
 
 @[simp, norm_cast] lemma coe_smul_new_tangle (f : allowable_perm α) (t : new_tangle α) :

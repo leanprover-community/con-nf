@@ -173,19 +173,6 @@ allowable.smul_typed_near_litter _ _
 
 lemma _root_.con_nf.code.equiv.smul : c ≡ d → f • c ≡ f • d := (f.2 _ _).2
 
--- This shouldn't be an instance: if `s` supports `c`, `f • s` supports `f • c`, not `c`.
--- noncomputable! instance has_smul_support :
---   has_smul (allowable_perm α) (support α (allowable_perm α) c) :=
--- ⟨λ f s, ⟨f • (s : set (support_condition α)), s.small.image, begin
---   have := s.supports,
--- end⟩⟩ -- s.2.smul _
-
--- @[simp] lemma coe_smul_support (f : allowable_perm α) (s : support α (allowable_perm α) c) :
---   (↑(f • s) : set (support_condition α)) = f • s := rfl
-
--- instance mul_action_support : mul_action (allowable_perm α) (support α (allowable_perm α) c) :=
--- set_like.coe_injective.mul_action _ coe_smul_support
-
 end allowable_perm
 
 namespace allowable_perm
@@ -200,10 +187,10 @@ begin
   simp only [subtype.val_eq_coe, rec_bot_coe_coe, image_smul, smul_set_singleton] at equiv,
   simp only [code.equiv_iff] at equiv,
   obtain a | ⟨heven, ε, hε, hA⟩ | ⟨heven, ε, hε, hA⟩ | ⟨c, heven, ε, hε, ζ, hζ, h₁, h₂⟩ := equiv,
-  { cases hβγ.symm (congr_arg sigma.fst a), },
+  { cases hβγ.symm (congr_arg sigma.fst a) },
   { simp_rw [semiallowable_perm.smul_mk, smul_set_singleton] at hA,
     cases A_map_code_ne_singleton _ hA.symm,
-    exact hβγ.symm, },
+    exact hβγ.symm },
   { have := congr_arg sigma.fst hA,
     simp only [semiallowable_perm.smul_mk, fst_A_map_code, fst_mk, Iio.coe_inj] at this,
     subst this,
@@ -221,12 +208,12 @@ begin
       allowable.to_struct_perm_smul] at this,
     rw mem_local_cardinal at hN₁,
     rw hN₁ at this,
-    exact this, },
+    exact this },
   { have := congr_arg sigma.fst h₁,
     simp only [coe_smul, smul_mk, fst_mk, fst_A_map_code] at this,
     subst this,
     simp only [coe_smul, smul_mk, smul_set_singleton] at h₁,
-    cases A_map_code_ne_singleton hε h₁.symm, }
+    cases A_map_code_ne_singleton hε h₁.symm }
 end
 
 lemma smul_A_map (π : allowable_perm α) (s : set (tangle β)) (hβγ : β ≠ γ) :
@@ -239,13 +226,13 @@ begin
   { rintro ⟨N, ⟨y, y_mem, y_fmap⟩, rfl⟩,
     refine ⟨(π : semiallowable_perm α) γ • N, ⟨y, y_mem, _⟩, rfl⟩,
     rw ← y_fmap,
-    refl, },
+    refl },
   { rintro ⟨N, ⟨y, y_mem, y_fmap⟩, rfl⟩,
     refine ⟨((π : semiallowable_perm α) γ)⁻¹ • N, ⟨y, y_mem, _⟩, _⟩,
     { change _ • N.fst = _,
       simp only [y_fmap, map_inv, inv_smul_eq_iff],
-      refl, },
-    { simp only [smul_inv_smul], } },
+      refl },
+    { simp only [smul_inv_smul] } },
 end
 
 lemma smul_A_map_code (π : allowable_perm α) (hc : c.1 ≠ γ) :

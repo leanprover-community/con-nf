@@ -130,7 +130,7 @@ variables [almost_tangle_data α] [positioned_tangle_data α] [position_data.{}]
 
 /-- The motor of the initial recursion. This contains all the information needed for phase 1 of the
 recursion. -/
-class tangle_data :=
+class tangle_data : Prop :=
 (typed_singleton_position_eq : ∀ (a : atom),
   position (typed_singleton a : tangle α) = typed_singleton_position a)
 (litter_lt : ∀ (L : litter) (a ∈ litter_set L),
