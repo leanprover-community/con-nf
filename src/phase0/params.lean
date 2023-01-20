@@ -1,3 +1,4 @@
+import mathlib.cardinal
 import mathlib.order
 import mathlib.with_bot
 import set_theory.cardinal.cofinality
@@ -122,11 +123,30 @@ noncomputable instance : linear_order type_index := linear_order_of_STO (<)
 noncomputable instance : has_well_founded type_index := is_well_order.to_has_well_founded
 
 /-- The litters. This is the type indexing the partition of `atom`. -/
-@[derive inhabited] def litter := (type_index × Λ) × μ
+structure litter :=
+(ν : μ)
+(β : type_index)
+(γ : Λ)
+(β_ne_γ : β ≠ γ)
+
+instance : inhabited litter :=
+⟨⟨arbitrary μ, ⊥, arbitrary Λ, with_bot.bot_ne_coe⟩⟩
+
+/-- Litters are equivalent to a subtype of a product type. -/
+def litter_equiv : litter ≃ {a : μ × type_index × Λ // a.2.1 ≠ a.2.2} :=
+{ to_fun := λ L, ⟨⟨L.ν, L.β, L.γ⟩, L.β_ne_γ⟩,
+  inv_fun := λ L, ⟨L.val.1, L.val.2.1, L.val.2.2, L.prop⟩,
+  left_inv := by rintro ⟨ν, β, γ, h⟩; refl,
+  right_inv := by rintro ⟨⟨ν, β, γ⟩, h⟩; refl }
 
 @[simp] lemma mk_litter : #litter = #μ :=
-by simp_rw [litter, mk_prod, mk_type_index, lift_id, mul_assoc, mul_eq_right
-  (κ_regular.aleph_0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_limit.ne_zero]
+begin
+  refine litter_equiv.cardinal_eq.trans (le_antisymm ((cardinal.mk_subtype_le _).trans_eq _)
+    ⟨⟨λ ν, ⟨⟨ν, ⊥, arbitrary Λ⟩, with_bot.bot_ne_coe⟩, λ ν₁ ν₂, congr_arg $ prod.fst ∘ subtype.val⟩⟩),
+  have := mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le)
+    Λ_limit.ne_zero,
+  simp only [mk_prod, lift_id, mk_type_index, mul_eq_self Λ_limit.aleph_0_le, this],
+end
 
 /-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
 lemma card_Iio_lt (x : μ) : #(Iio x) < #μ := card_typein_lt (<) x μ_ord.symm
@@ -185,10 +205,10 @@ lemma small_Union (hι : #ι < #κ) {f : ι → set α} (hf : ∀ i, small (f i)
 lemma small_Union_Prop {p : Prop} {f : p → set α} (hf : ∀ i, small (f i)) : small (⋃ i, f i) :=
 by by_cases p; simp [h, hf _]
 
-protected lemma small.bUnion {s : set ι} (hs : small s) {f : ι → set α}
-  (hf : ∀ i ∈ s, small (f i)) : small (⋃ i ∈ s, f i) :=
-(mk_bUnion_le _ _).trans_lt $ mul_lt_of_lt κ_regular.aleph_0_le hs $
-  supr_lt_of_is_regular κ_regular hs $ λ i, hf _ i.2
+protected lemma small.bUnion {s : set ι} (hs : small s) {f : Π i ∈ s, set α}
+  (hf : ∀ i (hi : i ∈ s), small (f i hi)) : small (⋃ i (hi : i ∈ s), f i hi) :=
+(mk_bUnion_le' _ _).trans_lt $ mul_lt_of_lt κ_regular.aleph_0_le hs $
+  supr_lt_of_is_regular κ_regular hs $ λ i, hf _ _
 
 /-- The image of a small set under any function `f` is small. -/
 lemma small.image : small s → small (f '' s) := mk_image_le.trans_lt

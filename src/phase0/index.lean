@@ -59,6 +59,13 @@ ne_of_apply_ne subtype.val bot_ne_coe
 
 @[simp] lemma Iio_index.mk_coe_ne_bot : (⟨β, hβ⟩ : Iio_index α) ≠ ⊥ :=
 ne_of_apply_ne subtype.val coe_ne_bot
+
+@[simp] lemma Iio_index.bot_ne_coe {β : Iio α} : ⊥ ≠ (β : Iio_index α) :=
+ne_of_apply_ne subtype.val bot_ne_coe
+
+@[simp] lemma Iio_index.coe_ne_bot {β : Iio α} : (β : Iio_index α) ≠ ⊥ :=
+ne_of_apply_ne subtype.val coe_ne_bot
+
 end Iio_index
 
 section Iic_index

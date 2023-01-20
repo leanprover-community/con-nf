@@ -34,7 +34,7 @@ class core_tangle_data (α : type_index) :=
 (allowable_to_struct_perm : allowable →* struct_perm α)
 [allowable_action : mul_action allowable tangle]
 (designated_support : by { haveI : mul_action allowable (support_condition α) :=
-  mul_action.comp_hom _ allowable_to_struct_perm, exact Π t : tangle, small_support α allowable t })
+  mul_action.comp_hom _ allowable_to_struct_perm, exact Π t : tangle, support α allowable t })
 
 export core_tangle_data (tangle allowable designated_support)
 attribute [instance] core_tangle_data.allowable_group core_tangle_data.allowable_action
@@ -76,7 +76,7 @@ end allowable
 
 /-- For each tangle, we provide a small support for it. This is known as the designated support of
 the tangle. -/
-def designated_support (t : tangle α) : small_support α (allowable α) t :=
+def designated_support (t : tangle α) : support α (allowable α) t :=
 core_tangle_data.designated_support _
 
 end
@@ -87,26 +87,10 @@ class positioned_tangle_data (α : type_index) [core_tangle_data α] :=
 
 export positioned_tangle_data (position)
 
-/-- Information about the positions of each typed near-litter and typed singleton. In our
-construction, the positions of typed near-litters and typed singletons do not depend on the level
-of our model, so we keep the information in a separate class. -/
-class typed_positions :=
-(typed_near_litter_position : near_litter ↪ μ)
-(typed_singleton_position : atom ↪ μ)
-(litter_lt : ∀ (L : litter) (a ∈ litter_set L),
-  typed_near_litter_position L.to_near_litter < typed_singleton_position a)
-(litter_lt_near_litter : ∀ (N : near_litter),
-  typed_near_litter_position N.fst.to_near_litter ≤ typed_near_litter_position N)
-(symm_diff_lt_near_litter : ∀ (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd),
-  typed_singleton_position a < typed_near_litter_position N)
-
-export typed_positions (typed_near_litter_position typed_singleton_position)
-
 variables (α : Λ) [core_tangle_data α]
 
-/-- The motor of the initial recursion. This contains the data of the injection to  all the information needed for phase 1 of the
-recursion. Note that this is slightly different to the blueprint's formulation; here, we keep phase
-1 data *cumulatively*, for all previous iterations of the recursion at once. -/
+/-- The motor of the initial recursion. This contains the data of the injection to all the
+information needed for phase 1 of the recursion. -/
 class almost_tangle_data :=
 (typed_near_litter : near_litter ↪ tangle α)
 (smul_typed_near_litter :
@@ -135,15 +119,27 @@ lemma smul_pretangle_inj (π : allowable α) (t : tangle α) :
 
 end allowable
 
-variables [almost_tangle_data α] [positioned_tangle_data α]
+/-- The position of a typed singleton in the position function at any level.
+This is part of the `γ = -1` fix. -/
+class position_data :=
+(typed_singleton_position : atom ↪ μ)
+
+export position_data (typed_singleton_position)
+
+variables [almost_tangle_data α] [positioned_tangle_data α] [position_data.{}]
 
 /-- The motor of the initial recursion. This contains all the information needed for phase 1 of the
 recursion. -/
-class tangle_data [typed_positions] :=
-(typed_near_litter_position_eq : ∀ (N : near_litter),
-  position (typed_near_litter N : tangle α) = typed_near_litter_position N)
+class tangle_data : Prop :=
 (typed_singleton_position_eq : ∀ (a : atom),
   position (typed_singleton a : tangle α) = typed_singleton_position a)
+(litter_lt : ∀ (L : litter) (a ∈ litter_set L),
+  position (typed_near_litter L.to_near_litter : tangle α) < typed_singleton_position a)
+(litter_lt_near_litter : ∀ (N : near_litter),
+  position (typed_near_litter N.fst.to_near_litter : tangle α) ≤
+    position (typed_near_litter N : tangle α))
+(symm_diff_lt_near_litter : ∀ (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd),
+  typed_singleton_position a < position (typed_near_litter N : tangle α))
 (support_le : Π (t : tangle α) (c : support_condition α) (hc : c ∈ designated_support t)
   (not_singleton : ∀ a, t ≠ typed_singleton a)
   (not_near_litter : ∀ (L : litter), t ≠ typed_near_litter L.to_near_litter),
@@ -183,14 +179,14 @@ Conditions satisfied by this injection are given in `litter_lt`, `litter_lt_near
 add_decl_doc positioned_tangle_data.position
 
 /-- Each typed litter `L` precedes the typed singletons of all of its elements `a ∈ L`. -/
-add_decl_doc typed_positions.litter_lt
+add_decl_doc tangle_data.litter_lt
 
 /-- Each near litter `N` which is not a litter comes later than its associated liter `L = N°`. -/
-add_decl_doc typed_positions.litter_lt_near_litter
+add_decl_doc tangle_data.litter_lt_near_litter
 
 /-- Each near litter `N` comes after all elements in the symmetric difference `N ∆ N°` (which is
 a small set by construction). Note that if `N` is a litter, this condition is vacuously true. -/
-add_decl_doc typed_positions.symm_diff_lt_near_litter
+add_decl_doc tangle_data.symm_diff_lt_near_litter
 
 /-- For all tangles `t` that are not typed singletons and not typed litters, `t` comes later than
 all of the support conditions in its designated support. That is, if an atom `a` is in the
@@ -237,7 +233,7 @@ instance bot.core_tangle_data : core_tangle_data ⊥ :=
       small := small_singleton _ } }
 
 /-- The tangle data at the bottom level. -/
-def bot.positioned_tangle_data : positioned_tangle_data ⊥ := ⟨nonempty.some mk_atom.le⟩
+instance bot.positioned_tangle_data : positioned_tangle_data ⊥ := ⟨nonempty.some mk_atom.le⟩
 
 variables (α : Λ)
 
@@ -279,7 +275,6 @@ abbreviation almost_tangle_cumul (α : Λ) [core_tangle_cumul α] := Π β : Iio
 
 /-- The tangle data below phase `α`. -/
 abbreviation tangle_cumul (α : Λ) [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [almost_tangle_cumul α] [typed_positions] :=
-Π β : Iio α, tangle_data β
+  [position_data.{}] [almost_tangle_cumul α] := Π β : Iio α, tangle_data β
 
 end con_nf

@@ -3,11 +3,11 @@ import phase1.basic
 /-!
 # f-maps
 
-Consider a code `(α, γ, G)`. We are interested in the alternative extensions of this object at
+Consider a code `(β, γ, G)`. We are interested in the alternative extensions of this object at
 different proper type indices `δ : Λ`. We will define the function `A_δ` which will map the code
-`(α, γ, G)` to a new code `(α, δ, D)`. The elements of `D` are produced by the so-called f-maps.
-In particular, elements of `D` are of the form `typed_near_litter M` where `M` is a near-litter to some
-litter `N`, which in turn is given by an f-map.
+`(β, γ, G)` to a new code `(α, δ, D)`. The elements of `D` are produced by the so-called f-maps.
+In particular, elements of `D` are of the form `typed_near_litter M` where `M` is a near-litter to
+some litter `N`, which in turn is given by an f-map.
 -/
 
 open cardinal function set with_bot
@@ -16,210 +16,228 @@ open_locale cardinal
 universe u
 
 namespace con_nf
-variables [params.{u}] (α : type_index) (β : Λ) [core_tangle_data β] [positioned_tangle_data β]
-  [almost_tangle_data β]
+
+section choose_wf
 
 /-!
-We now define the f-maps. We will do so in two stages; first, we define it as a function `μ → μ`,
-(named `f_map_core`) and then raise it to be litter-valued and defined on tangles. This allows some
-nicer definitional properties, such as that the resulting litter is of the form `⟨⟨α, β⟩, χ⟩` for
-`χ : μ`.
+We construct the f-maps by first defining the auxiliary function `choose_wf`.
 
-The value of an f-map is defined as a litter that satisfies two conditions, the second and third
-bullet points on the blueprint (the first is a type-level condition that the resulting litter is of
-the form `⟨⟨α, β⟩, χ⟩`). In order to show that the f-maps are well-defined, we show that this set of
-candidate litters is non-empty. In particular, the set of all possible litters has size `μ`, and
-each constraint only removes `< μ` elements from this candidate set.
+Suppose we wish to construct a function `f : α → β` with the constraint that for each `α`,
+there is a predefined set of "denied" `β` values that it cannot take. Under some restrictions
+based on the cardinalities of the denied set, we can construct such a function.
+We can in addition require that `f` be injective if `α` has a well-order, which we will assume here.
 
-The following two lemmas will prove that for each constraint, we remove less than `μ` litters from
-our pool of potential litters.
+The f-maps that we will construct indeed satisfy these conditions.
 -/
 
-lemma mk_litters_inflationary_constraint' (x : μ) :
-  #{N : (Σ i, {s // is_near_litter ⟨⟨α, β⟩, i⟩ s}) |
-    position (typed_near_litter ⟨⟨⟨α, β⟩, N.fst⟩, N.snd⟩ : tangle β) ≤ x} < #μ :=
+variables {α β : Type u} {r : α → α → Prop}
+
+/-- Noncomputably chooses an element of `β \ s`, given `#s < #β`. -/
+noncomputable def some_of_mk_lt (s : set β) (h : #s < #β) : β :=
+(nonempty_compl_of_mk_lt_mk h).some
+
+lemma some_of_mk_lt_spec {s : set β} {h : #s < #β} : some_of_mk_lt s h ∉ s :=
+(nonempty_compl_of_mk_lt_mk h).some_spec
+
+lemma mk_image₂_le {p : α → Prop} (f : Π x, p x → β) : #{y // ∃ z h, f z h = y} ≤ #{x // p x} :=
+⟨⟨λ y, ⟨y.prop.some, y.prop.some_spec.some⟩, begin
+  intros y₁ y₂ h,
+  simp only at h,
+  have := y₁.prop.some_spec.some_spec,
+  simp_rw h at this,
+  rw y₂.prop.some_spec.some_spec at this,
+  simp only [subtype.coe_inj] at this,
+  exact this.symm,
+end⟩⟩
+
+noncomputable def choose_wf_core (deny : α → set β)
+  (h : ∀ x, #{y // r y x} + #(deny x) < #β) (x : α) (f : Π (y : α), r y x → β) : β :=
 begin
-  refine (mk_le_of_injective _).trans_lt (card_Iic_lt x),
-  { exact λ N, ⟨position (typed_near_litter ⟨⟨⟨α, β⟩, N.1.1⟩, N.1.2⟩), N.2⟩ },
-  rintro ⟨⟨i, N⟩, hN⟩ ⟨⟨j, M⟩, hM⟩ h,
-  simp only [subtype.mk_eq_mk, embedding_like.apply_eq_iff_eq, prod.mk.inj_iff, eq_self_iff_true,
-    true_and] at h,
-  obtain ⟨rfl, rfl⟩ := h,
-  refl,
+  refine some_of_mk_lt ({z | ∃ y h, f y h = z} ∪ deny x) _,
+  refine lt_of_le_of_lt (mk_union_le _ _) _,
+  exact lt_of_le_of_lt (add_le_add_right (mk_image₂_le _) _) (h x),
 end
 
-/-- One of the constraints in defining the f-maps is that for all near-litters to the result litter
-`N`, they are positioned higher than `x` in `μ` (under `typed_near_litter`). We show that there are less
-than `μ` litters that do *not* satisfy this constraint. -/
-lemma mk_litters_inflationary_constraint (x : μ) :
-  #{i : μ | ∃ N : {s // is_near_litter ⟨⟨α, β⟩, i⟩ s},
-    position (typed_near_litter ⟨⟨⟨α, β⟩, i⟩, N⟩ : tangle β) ≤ x} < #μ :=
+lemma choose_wf_core_spec {deny : α → set β}
+  {h : ∀ x, #{y // r y x} + #(deny x) < #β} (x : α) (f : Π (y : α), r y x → β) :
+  choose_wf_core deny h x f ∉ {z | ∃ y h, f y h = z} ∪ deny x :=
+some_of_mk_lt_spec
+
+/-- Constructs an injective function `f` such that `f x ∉ deny x`. -/
+noncomputable def choose_wf [hwf : is_well_order α r] (deny : α → set β)
+  (h : ∀ x, #{y // r y x} + #(deny x) < #β) : α → β :=
+hwf.to_is_well_founded.wf.fix (choose_wf_core deny h)
+
+lemma choose_wf_spec [hwf : is_well_order α r] {deny : α → set β}
+  {h : ∀ x, #{y // r y x} + #(deny x) < #β} (x : α) :
+  choose_wf deny h x ∉ ({z | ∃ y (hy : r y x), choose_wf deny h y = z} ∪ deny x) :=
 begin
-  suffices : #{i : μ | ∃ N : {s // is_near_litter ⟨⟨α, β⟩, i⟩ s},
-    position (typed_near_litter ⟨⟨⟨α, β⟩, i⟩, N⟩) ≤ x}
-    ≤ #{N : (Σ i, {s // is_near_litter ⟨⟨α, β⟩, i⟩ s}) |
-    position (typed_near_litter ⟨⟨⟨α, β⟩, N.fst⟩, N.snd⟩) ≤ x},
-  { exact this.trans_lt (mk_litters_inflationary_constraint' _ _ _) },
-  refine ⟨⟨λ i, ⟨⟨i, i.2.some⟩, i.2.some_spec⟩, _⟩⟩,
-  rintro ⟨i, N, hN⟩ ⟨j, M, hM⟩ hij,
-  simp_rw subtype.mk_eq_mk at hij ⊢,
-  exact hij.1,
+  rw [choose_wf, well_founded.fix_eq],
+  exact choose_wf_core_spec x _,
 end
 
-/-- Only `< μ` elements of `μ` have been hit so far by f_map_core. -/
-lemma mk_litters_inj_constraint (x : μ) (f_map_core : Π y < x, μ) :
-  #{i : μ | ∃ y < x, f_map_core y ‹_› = i} < #μ :=
+lemma choose_wf_not_mem_deny [is_well_order α r] {deny : α → set β}
+  {h : ∀ x, #{y // r y x} + #(deny x) < #β} (x : α) : choose_wf deny h x ∉ deny x :=
+λ h', choose_wf_spec x (mem_union_right _ h')
+
+lemma choose_wf_ne_of_r [is_well_order α r] {deny : α → set β}
+  {h : ∀ x, #{y // r y x} + #(deny x) < #β} (x₁ x₂ : α) (hx : r x₁ x₂) :
+    choose_wf deny h x₁ ≠ choose_wf deny h x₂ :=
+λ hx', not_mem_subset (subset_union_left _ _) (choose_wf_spec x₂) ⟨x₁, hx, hx'⟩
+
+lemma choose_wf_injective [is_well_order α r] {deny : α → set β}
+  {h : ∀ x, #{y // r y x} + #(deny x) < #β} : injective (choose_wf deny h) :=
 begin
-  have : #{i | ∃ y : {y // y < x}, f_map_core y y.prop = i} < #μ :=
-    mk_range_le.trans_lt (card_Iio_lt x),
-  simp_rw subtype.exists at this,
-  exact this,
+  intros x₁ x₂ h,
+  obtain hx | hx | hx := (is_well_order.is_trichotomous r).trichotomous x₁ x₂,
+  { cases choose_wf_ne_of_r x₁ x₂ hx h },
+  { exact hx },
+  { cases choose_wf_ne_of_r x₂ x₁ hx h.symm },
+end
+
+end choose_wf
+
+/-!
+We construct the f-maps by constructing a set of image values to deny, and then choosing
+arbitrarily from the remaining set. This uses the `choose_wf` results.
+The majority of this section is spent proving that the set of values to deny isn't "too large",
+such that we could run out of available values for the function.
+-/
+
+variables [params.{u}] {β : type_index} {γ : Λ}
+  [core_tangle_data β] [positioned_tangle_data β]
+  [position_data.{}] [core_tangle_data γ]
+  [positioned_tangle_data γ] [almost_tangle_data γ]
+  (hβγ : β ≠ γ)
+
+/-- The requirements to be satisfied by the f-maps.
+If `f_map_condition` applied to a litter indexed by `i` is true,
+then `i` is *not* a valid output to `f_map x`. -/
+inductive f_map_condition (x : tangle β) (i : μ) : Prop
+| any (N : set atom) (hN : is_near_litter ⟨i, β, γ, hβγ⟩ N) :
+  position (typed_near_litter ⟨⟨i, β, γ, hβγ⟩, N, hN⟩ : tangle γ) ≤ position x →
+  f_map_condition
+| bot (a : atom) :
+  β = ⊥ → -- this condition should only trigger for type `-1`
+  a == x → -- using `heq` instead of induction on `β` or the instance deals with many annoyances
+  position (typed_near_litter (litter.to_near_litter ⟨i, ⊥, γ, bot_ne_coe⟩) : tangle γ) ≤
+    typed_singleton_position a →
+  f_map_condition
+
+instance : is_well_order (tangle β) (inv_image (<) position) :=
+begin
+  refine { .. },
+  { intros x y,
+    have := lt_trichotomy (position x) (position y),
+    rw embedding_like.apply_eq_iff_eq at this,
+    exact this },
+  { intros x y z,
+    exact lt_trans },
+  { exact inv_image.wf _ μwf.wf },
+end
+
+variable (γ)
+
+lemma mk_inv_image_lt (x : tangle β) : #{y // inv_image (<) position y x} < #μ :=
+begin
+  refine lt_of_le_of_lt _ (show #{y // y < position x} < #μ, from card_Iio_lt _),
+  refine ⟨⟨λ y, ⟨_, y.prop⟩, _⟩⟩,
+  intros y₁ y₂ h,
+  simp only [embedding_like.apply_eq_iff_eq, subtype.coe_inj] at h,
+  exact h,
+end
+
+lemma mk_inv_image_le (x : tangle β) : #{y : tangle γ // position y ≤ position x} < #μ :=
+begin
+  refine lt_of_le_of_lt _ (show #{y // y ≤ position x} < #μ, from card_Iic_lt _),
+  refine ⟨⟨λ y, ⟨_, y.prop⟩, _⟩⟩,
+  intros y₁ y₂ h,
+  simp only [embedding_like.apply_eq_iff_eq, subtype.coe_inj] at h,
+  exact h,
+end
+
+variable {γ}
+
+lemma mk_f_map_deny (hβγ : β ≠ γ) (x : tangle β) :
+  #{y // inv_image (<) position y x} + #{i // f_map_condition hβγ x i} < #μ :=
+begin
+  have h₁ := mk_inv_image_lt x,
+  have h₂ : #{i // f_map_condition hβγ x i} < #μ,
+  { have : ∀ i, f_map_condition hβγ x i →
+      (∃ (N : set atom) (hN : is_near_litter ⟨i, β, γ, hβγ⟩ N),
+        position (typed_near_litter ⟨_, N, hN⟩ : tangle γ) ≤ position x) ∨
+      β = ⊥ ∧ ∃ (a : atom), a == x ∧
+        position (typed_near_litter (litter.to_near_litter ⟨i, β, γ, hβγ⟩) : tangle γ) ≤
+          typed_singleton_position a,
+    { intros i hi,
+      obtain ⟨N, hN₁, hN₂⟩ | ⟨a, h₁, h₂, h₃⟩ := hi,
+      { left, exact ⟨N, hN₁, hN₂⟩ },
+      { right, refine ⟨h₁, a, h₂, _⟩, simp_rw h₁, exact h₃ } },
+    refine lt_of_le_of_lt (mk_subtype_mono this) _,
+    refine lt_of_le_of_lt (mk_union_le _ _) _,
+    refine add_lt_of_lt μ_strong_limit.is_limit.aleph_0_le _ _,
+    { refine lt_of_le_of_lt _ (mk_inv_image_le γ x),
+      refine ⟨⟨λ i, ⟨_, i.prop.some_spec.some_spec⟩, _⟩⟩,
+      intros i j h,
+      simp only [embedding_like.apply_eq_iff_eq] at h,
+      exact subtype.coe_inj.mp h.1.1 },
+    { by_cases β = ⊥ ∧ ∃ (a : atom), a == x,
+      { obtain ⟨hβ, a, hax⟩ := h,
+        refine lt_of_le_of_lt _ (card_Iic_lt (typed_singleton_position a)),
+        refine ⟨⟨λ i, ⟨position
+          (typed_near_litter (litter.to_near_litter ⟨i, β, γ, hβγ⟩) : tangle γ), _⟩, _⟩⟩,
+        { obtain ⟨i, _, b, hb, _⟩ := i,
+          rw eq_of_heq (hax.trans hb.symm),
+          assumption },
+        { intros i j h,
+          simp only [subtype.mk_eq_mk, embedding_like.apply_eq_iff_eq,
+            litter.to_near_litter_injective.eq_iff] at h,
+          exact subtype.coe_inj.mp h.1 } },
+      { refine lt_of_eq_of_lt _ (lt_of_lt_of_le aleph_0_pos μ_strong_limit.is_limit.aleph_0_le),
+        rw [mk_eq_zero_iff, is_empty_coe_sort, set.eq_empty_iff_forall_not_mem],
+        rintros i ⟨hb, a, ha, _⟩,
+        exact h ⟨hb, a, ha⟩ } } },
+  exact add_lt_of_lt μ_strong_limit.is_limit.aleph_0_le h₁ h₂,
 end
 
 /-!
-To keep track of the hypotheses that went into creating the f-maps, we create a few structures to
-store the result of the f-map as well as the conditions on their values.
-These definitions are private so that we just use the intended properties of the f-maps, instead of
-their internal structure.
+We're done with proving technical results, now we can define the f-maps.
 -/
-
-private def f_map_generator (x : μ) (R : Π y < x, μ) : set μ :=
-{i | (∀ N : {s // is_near_litter ⟨⟨α, β⟩, i⟩ s},
-  x < position (typed_near_litter ⟨⟨⟨α, β⟩, i⟩, N⟩ : tangle β))
-    ∧ ∀ y (H : y < x), R y H ≠ i}
-
-private def pre_f_map_result_is_viable (x : μ) (R : Π y < x, μ) : Prop :=
-∀ y ≤ x, (f_map_generator α β y $ λ z hz, R z $ hz.trans_le H).nonempty
-
-private def pre_f_map_result_is_allowed (x : μ) (R : Π y ≤ x, μ) :=
-Σ' hv : pre_f_map_result_is_viable α β x (λ z hz, R z hz.le), ∀ y ≤ x, R y ‹_› = (hv y ‹_›).some
-
-private def f_map_result (x : μ) : Type u :=
-{R : Π y ≤ x, μ // nonempty (pre_f_map_result_is_allowed α β x R)}
-
-private def extend_result (x : μ) (h_lt : Π y < x, f_map_result α β y) : Π y < x, μ :=
-λ y hy, (h_lt y hy).val y le_rfl
-
-/-- By construction, all the `f_map_result`s have matching output values, where they are defined. -/
-private lemma f_map_result_coherent (x y : μ) (fx : f_map_result α β x) (fy : f_map_result α β y) :
-  Π (z : μ), z ≤ x → z ≤ y → fx.val z ‹_› = fy.val z ‹_›
-| z hzx hzy := begin
-  rw fx.2.some.2 z hzx,
-  rw fy.2.some.2 z hzy,
-  congr' with w hw,
-  exact f_map_result_coherent w _ _,
-end
-using_well_founded { dec_tac := `[exact psigma.lex.left _ _ ‹_›] }
-
-/-- We can recursively construct the (unique) `f_map_result` for arbitrary `x`. -/
-private noncomputable def mk_f_map_result (x : μ) (h_lt : Π y < x, f_map_result α β y)
-  (hx : (f_map_generator α β x $ extend_result α β x h_lt).nonempty) :
-  f_map_result α β x :=
-⟨λ y hy, dite (x = y) (λ h, hx.some) (λ h, (h_lt y $ hy.lt_of_ne' h).val y le_rfl),
-⟨⟨λ y hy, begin
-  obtain rfl | h := eq_or_ne x y,
-  { convert hx,
-    unfold extend_result,
-    ext z hz,
-    rw dif_neg hz.ne' },
-  { convert (h_lt y $ hy.lt_of_ne' h).prop.some.fst y le_rfl,
-    ext z hz,
-    dsimp,
-    rw dif_neg (hz.trans_le hy).ne',
-    exact f_map_result_coherent α β z y (h_lt z _) (h_lt y _) z le_rfl _ }
-end, λ y hy, begin
-  dsimp,
-  split_ifs,
-  { subst h,
-    congr' with z hz,
-    rw dif_neg hz.ne',
-    refl },
-  { convert ((h_lt y _).prop.some).snd y le_rfl,
-    ext z hz,
-    split_ifs with h₁,
-    { rw h₁ at hy,
-      cases hy.not_lt hz },
-    { exact f_map_result_coherent α β z y (h_lt z _) (h_lt y _) z le_rfl _ } }
-end⟩⟩⟩
-
-/-- The core of the definition for the f-maps. This is essentially the definition as in the
-blueprint, except that it is defined as a function from `μ` to `f_map_result` instead of from
-tangles to litters. This gives two benefits:
-1. We preserve the hypotheses of the construction. This allows us to easily derive properties of the
-  `f_map` function later.
-2. Given the conversion functions in `tangle_data`, it is an easy translation into the true `f_map`
-  as required. -/
-noncomputable def f_map_core : Π (x : μ), f_map_result α β x
-| x := let f_map_core' := λ (y < x), (f_map_core y).val y le_rfl in begin
-  refine mk_f_map_result α β x (λ y hy, f_map_core y)
-    (nonempty_iff_ne_empty.2 $ λ h, lt_irrefl (#μ) $ lt_of_eq_of_lt _ _),
-  -- We need to explicitly specify which intermediate cardinal to use in the transitivity
-  -- argument; the elaborator can't determine it at this point.
-  exact #{i | (∃ N, position (typed_near_litter ⟨((α, β), i), N⟩ : tangle β) ≤ x)
-    ∨ ∃ y H, f_map_core' y H = i},
-  { rw ←mk_univ,
-    congr,
-    rw [eq_comm, ←compl_eq_empty],
-    simp_rw [compl_set_of, not_or_distrib, not_exists, not_le],
-    exact h },
-  { exact (mk_union_le _ _).trans_lt (add_lt_of_lt (κ_regular.aleph_0_le.trans κ_le_μ)
-      (mk_litters_inflationary_constraint α β x) $ mk_litters_inj_constraint x f_map_core') }
-end
-using_well_founded { dec_tac := `[assumption] }
-
-private lemma f_map_core_injective : injective $ λ x, (f_map_core α β x).val x le_rfl :=
-begin
-  intros i j h,
-  wlog : i ≤ j using i j,
-  dsimp at h,
-  by_contradiction i_ne_j,
-  have i_lt_j := lt_of_le_of_ne case i_ne_j,
-  have snd := (f_map_core α β j).prop.some.snd j le_rfl,
-  simp_rw subtype.val_eq_coe at snd,
-  rw snd at h,
-  have := set.nonempty.some_mem ((f_map_core α β j).prop.some.fst j le_rfl),
-  dsimp at this,
-  rw ← h at this,
-  unfold f_map_generator at this,
-  simp at this,
-  exact this.right i i_lt_j (f_map_result_coherent α β _ _ _ _ _ _ _),
-end
-
-private lemma f_map_core_position_raising (x : μ) (N : set atom)
-  (hN : is_near_litter ⟨⟨α, β⟩, (f_map_core α β x).val x le_rfl⟩ N) :
-  x < position (typed_near_litter ⟨⟨⟨α, β⟩, (f_map_core α β x).val x le_rfl⟩, N, hN⟩ : tangle β) :=
-begin
-  have snd := (f_map_core α β x).prop.some.snd x le_rfl,
-  have := set.nonempty.some_mem ((f_map_core α β x).prop.some.fst x le_rfl),
-  rw ← snd at this,
-  exact this.left _,
-end
-
-variables {α} [core_tangle_data α] [positioned_tangle_data α]
 
 /-- The f-maps. -/
-noncomputable def f_map (a : tangle α) : litter :=
-⟨⟨α, β⟩, (f_map_core α β (position a)).val (position a) le_rfl⟩
+noncomputable def f_map (x : tangle β) : litter :=
+⟨choose_wf (f_map_condition hβγ) (mk_f_map_deny hβγ) x, β, γ, hβγ⟩
 
-/-!
-The f-maps have a number of useful properties.
-This is `f-map-properties` in the blueprint.
-Now that these properties have all been proven, we can be (relatively) certain that the definition
-of `f_map` is correct.
--/
+@[simp] lemma f_map_β (x : tangle β) : (f_map hβγ x).β = β := rfl
+@[simp] lemma f_map_γ (x : tangle β) : (f_map hβγ x).γ = γ := rfl
 
-lemma f_map_injective : injective (f_map β : tangle α → litter) :=
-λ i j h, position.inj' $ f_map_core_injective α β (prod.ext_iff.1 h).2
+lemma f_map_injective : injective (f_map hβγ) :=
+begin
+  intros x y h,
+  simp only [f_map, choose_wf_injective.eq_iff, eq_self_iff_true, and_true] at h,
+  exact h,
+end
 
-@[simp] lemma f_map_fst (x : tangle α) : (f_map β x).fst = (α, β) := rfl
+lemma f_map_not_mem_deny (x : tangle β) : (f_map hβγ x).ν ∉ {i | f_map_condition hβγ x i} :=
+choose_wf_not_mem_deny x
 
-lemma f_map_range_eq {α₁ α₂ : type_index} [core_tangle_data α₁] [positioned_tangle_data α₁]
-  [core_tangle_data α₂] [positioned_tangle_data α₂] {x : tangle α₁} {y : tangle α₂}
-  (h : f_map β x = f_map β y) : α₁ = α₂ :=
-congr_arg (prod.fst ∘ prod.fst) h
+lemma f_map_position (x : tangle β) (N : set atom) (h : is_near_litter (f_map hβγ x) N) :
+  position x < position (typed_near_litter ⟨_, N, h⟩ : tangle γ) :=
+begin
+  have := f_map_not_mem_deny hβγ x,
+  contrapose! this,
+  unfreezingI { induction β using with_bot.rec_bot_coe };
+  exact f_map_condition.any _ h this,
+end
 
-lemma f_map_position_raising (x : tangle α) (N : set atom) (hN : is_near_litter (f_map β x) N) :
-  position x < position (typed_near_litter ⟨f_map β x, N, hN⟩ : tangle β) :=
-f_map_core_position_raising α β (position x) N hN
+lemma typed_singleton_position_lt_f_map (x : tangle ⊥) :
+  typed_singleton_position x <
+  position (typed_near_litter
+    (f_map (bot_ne_coe : (⊥ : type_index) ≠ γ) x).to_near_litter : tangle γ) :=
+begin
+  have := f_map_not_mem_deny (bot_ne_coe : (⊥ : type_index) ≠ γ) x,
+  contrapose! this,
+  exact f_map_condition.bot x rfl heq.rfl this,
+end
 
 end con_nf

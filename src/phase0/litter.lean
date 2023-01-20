@@ -139,6 +139,10 @@ def to_prod (N : near_litter) : litter × set atom := (N.1, N.2)
 lemma to_prod_injective : injective to_prod :=
 by { rintro ⟨i, s⟩ ⟨j, t⟩ h, rw prod.ext_iff at h, exact ext h.1 h.2 }
 
+@[simp] protected lemma is_near_litter (N : near_litter) (i : litter) :
+  is_near_litter i N ↔ N.fst = i :=
+⟨is_near_litter.unique N.snd.prop, by { rintro rfl, exact N.2.2 }⟩
+
 end near_litter
 
 namespace litter
