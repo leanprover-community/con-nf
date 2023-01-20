@@ -26,16 +26,27 @@ namespace extension
 variables {α} [positioned_tangle_cumul α] [almost_tangle_cumul α]
 
 /-- The extensions for a code. -/
-protected def extn (s : tangles β) : extension α :=
-λ γ, if hβγ : β = γ then by { subst hβγ, exact s } else ⟨A_map hβγ _, s.2.A_map⟩
--- Alternative implementation:
--- λ γ, ⟨(A_map_code γ (mk β s)).snd, A_map_code_nonempty.mpr s.2⟩
+protected noncomputable! def extn (s : tangles β) : extension α :=
+λ γ, ⟨(A_map_code γ (mk β s)).snd, A_map_code_nonempty.mpr s.2⟩
 
 @[simp] lemma extn_self (s : tangles $ Iio_coe γ) : extension.extn s γ = s :=
-dif_pos rfl
+begin
+  unfold extension.extn,
+  refine subtype.ext _,
+  simp only [subtype.coe_mk],
+  have := A_map_code_mk_eq γ s,
+  rw sigma.ext_iff at this,
+  exact this.2.eq,
+end
 
 lemma extn_of_ne (s : tangles β) (hβγ : β ≠ γ) : extension.extn s γ = ⟨A_map hβγ _, s.2.A_map⟩ :=
-dif_neg hβγ
+begin
+  refine subtype.ext _,
+  simp only [subtype.coe_mk],
+  have := A_map_code_mk_ne β γ hβγ s,
+  rw sigma.ext_iff at this,
+  exact this.2.eq,
+end
 
 end extension
 
@@ -328,12 +339,23 @@ variables {f : allowable_perm α} {e : extension α}
   f • extension.extn s = extension.extn (f • s) :=
 begin
   funext γ,
-  dsimp [extension.extn],
-  split_ifs,
-  { subst h },
-  rw ← subtype.coe_inj,
-  simp only [smul_nonempty_mk, subtype.coe_mk],
-  exact smul_A_map _ _ h,
+  simp only [extension.extn, pi.smul_apply, smul_nonempty_mk],
+  by_cases β = γ,
+  { subst h,
+    have h₁ := congr_arg (λ a, f • a) (A_map_code_mk_eq γ s),
+    dsimp only at h₁,
+    have h₂ := A_map_code_mk_eq γ (f • s),
+    conv_rhs at h₂ { rw ← smul_mk },
+    rw ← h₂ at h₁,
+    rw sigma.ext_iff at h₁,
+    exact h₁.2.eq, },
+  { have h₁ := congr_arg (λ a, f • a) (A_map_code_mk_ne β γ h s),
+    dsimp only at h₁,
+    have h₂ := A_map_code_mk_ne β γ h (f • s),
+    rw [smul_mk, smul_A_map] at h₁,
+    rw ← h₂ at h₁,
+    rw sigma.ext_iff at h₁,
+    exact h₁.2.eq, },
 end
 
 set_option trace.simp_lemmas true

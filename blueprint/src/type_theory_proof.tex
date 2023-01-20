@@ -1,0 +1,410 @@
+\documentclass{article}
+
+\usepackage{util}
+
+\title{Con(NF)}
+\author{Sky Wilshaw}
+
+\begin{document}
+
+\maketitle
+
+\section{Setup}
+
+\subsection{Model parameters}
+
+\begin{definition}
+    If \( \alpha \) is a type, \( \# \alpha \) is the cardinal representing the size of \( \alpha \).
+    If \( \kappa \) is a cardinal, \( \mathsf{ord}(\kappa) \) is the ordinal given by \( \kappa \).
+    Both of these operations are applied implicitly where required.
+\end{definition}
+\begin{param}
+    Let \( \lambda \) be the type of \emph{proper type indices} with a well-ordering \( <_\lambda \).
+    Assume that the order type of \( <_\lambda \) is \( \mathsf{ord}(\#\lambda) \), and \( \#\lambda \) is a limit cardinal.
+    Let \( \kappa \) be a type where \( \#\kappa \) is an uncountable regular cardinal strictly larger than \( \#\lambda \).
+    Let \( \mu \) be a type with a well-ordering \( <_\mu \).
+    Assume that the order type of \( <_\mu \) is \( \mathsf{ord}(\#\mu) \).
+    Assume that \( \#\mu \) is a strong limit cardinal creater than \( \#\kappa \), and \( \#\mu \) has cofinality at least \( \#\kappa \).
+\end{param}
+\begin{remark}
+    These parameters can be satisfied with \( \lambda = \mathbb N \), \( \#\kappa = \aleph_1 \), \( \#\mu = \beth_{\omega_1} \).
+\end{remark}
+\begin{definition}
+    A \emph{type index} is an element of \( \lambda \), or the symbol \( \bot \), representing a base type (also called `type \( -1 \)') below all types.
+    The type of type indices is denoted \( \lambda^\bot \).
+\end{definition}
+\begin{lemma}
+    Type indices are well-ordered with \( \bot \le \alpha \) for all \( \alpha : \lambda^\bot \), and \( \#\lambda^\bot = \#\lambda \).
+\end{lemma}
+\begin{definition}
+    A \emph{litter} is a structure with
+    \begin{itemize}
+        \item an \emph{index} \( \nu : \mu \);
+        \item a \emph{source type index} \( \beta : \lambda^\bot \);
+        \item a \emph{target proper type index} \( \gamma : \lambda \);
+        \item such that \( \beta \neq \gamma \).
+    \end{itemize}
+\end{definition}
+\begin{lemma}
+    There are \( \#\mu \) litters.
+\end{lemma}
+\begin{definition}
+    An \emph{atom} is a litter together with an index in \( \kappa \).
+\end{definition}
+\begin{lemma}
+    There are \( \#\mu \) atoms.
+\end{lemma}
+\begin{definition}
+    A type or a set is \emph{small} if its cardinality is strictly smaller than \( \#\kappa \).
+    Two sets are \emph{near} if their symmetric difference is small.
+\end{definition}
+
+\subsection{Pretangles}
+
+\begin{definition}
+    Let \( \alpha : \lambda^\bot \) be a type index.
+    An \emph{\( \alpha \)-pretangle} is
+    \begin{itemize}
+        \item if \( \alpha = \bot \), an atom;
+        \item otherwise, for each \( \beta : \lambda^\bot \) such that \( \beta < \alpha \), a set of \( \beta \)-pretangles.
+    \end{itemize}
+    We define \( \tau_\alpha^\star \) to be the type of \( \alpha \)-pretangles.
+\end{definition}
+\begin{definition}
+    Let \( \beta < \alpha \) be type indices.
+    Then there is a membership relation betweeen \( \tau_\beta^\star \) and \( \tau_\alpha^\star \).
+\end{definition}
+
+\subsection{Type indices}
+
+\begin{definition}
+    Let \( \alpha : \lambda \).
+    We define the type \( \lambda_\alpha \) of proper type indices strictly below \( \alpha \), and \( \lambda_\alpha^\bot \) of type indices strictly below \( \alpha \).
+\end{definition}
+\begin{definition}
+    A quiver structure is defined on \( \lambda^\bot \) by defining \( \alpha \longrightarrow \beta \) if \( \beta < \alpha \).
+    An \emph{\( \alpha \)-extended index} is a path in this quiver from \( \alpha \) to \( \bot \).
+\end{definition}
+\begin{remark}
+    Paths are implemented like `snoc-lists'; extracting the last segment of a path is easy, and extracting the first is more difficult.
+\end{remark}
+\begin{lemma}
+    There are at most \( \#\lambda \) \( \alpha \)-extended indices.
+\end{lemma}
+
+\subsection{Structural permutations}
+
+\begin{definition}
+    An \emph{\( \alpha \)-structural permutation} is
+    \begin{itemize}
+        \item if \( \alpha = \bot \), a near-litter permutation;
+        \item otherwise, a dependent product such that for each \( \beta : \lambda^\bot \) with \( \beta < \alpha \), we have a \( \beta \)-structural permutation.
+    \end{itemize}
+    The type of \( \alpha \)-structural permutations is written \( S_\alpha \).
+\end{definition}
+\begin{remark}
+    This is a type constructed with well-founded recursion.
+    It requires many lemmas to use effectively, such as an explicit equivalence between \( \bot \)-structural permutations and near-litter permutations.
+\end{remark}
+\begin{lemma}
+    \( \alpha \)-structural permutations form a group, which acts on \( \tau_\alpha^\star \).
+    For \( \beta < \alpha \), there is a natural group homomorphism from \( S_\alpha \) to \( S_\beta \), called the \emph{derivative map}.
+    This derivative map can be used on paths in the quiver on type indices, and it is functorial and preserves multiplication.
+    If \( \pi \) is an \( \alpha \)-structural permutation, we write \( \pi_A \) for the \( A \)-derivative of \( \pi \), where \( A \) is a path from \( \alpha \) to \( \beta \) in \( \lambda^\bot \).
+\end{lemma}
+
+\subsection{Litters}
+
+\begin{definition}
+    The \emph{litter set} corresponding to a litter \( L \) is the set of atoms \( a = (L', i) \) where \( L = L' \).
+\end{definition}
+\begin{lemma}
+    The litter sets are pairwise disjoint and have cardinality \( \#\kappa \).
+\end{lemma}
+\begin{definition}
+    A set \( N \) \emph{is a near-litter} to a litter \( L \) if it has small symmetric difference from the litter set of \( L \).
+    A \emph{near-litter} is a litter \( L \) together with a set \( N \) that is a near-litter to \( L \).
+\end{definition}
+\begin{remark}
+    We keep track of the litter that a given near-litter is near to in the type.
+    The notation \( N^\circ \) refers to this litter; this is not a computation but an extraction of data.
+\end{remark}
+\begin{definition}
+    The \emph{local cardinal} of a litter \( L \) is the set of near-litters \( N \) such that \( N^\circ = L \).
+\end{definition}
+\begin{lemma}
+    There are \( \#\mu \) near-litters to any given litter.
+    Alternatively, each local cardinal has cardinality \( \#\mu \).
+    In particular, there are \( \#\mu \) near-litters.
+\end{lemma}
+\begin{definition}
+    A \emph{near-litter permutation} is
+    \begin{itemize}
+        \item a permutation \( \pi_a \colon \mathsf{atom} \to \mathsf{atom} \);
+        \item a permutation \( \pi_\ell \colon \mathsf{litter} \to \mathsf{litter} \);
+        \item such that if \( N \) is a near-litter to \( L \), the pointwise image of \( \pi_a \) on \( N \) is a near-litter to \( \pi_\ell(L) \).
+    \end{itemize}
+\end{definition}
+\begin{remark}
+    We track the litter permutation associated to a near-litter permutation explicitly for convenience.
+\end{remark}
+\begin{lemma}
+    Near-litter permutations form a group, with actions on atoms, litters, and near-litters.
+\end{lemma}
+
+\subsection{Supports}
+
+\begin{definition}
+    An \emph{\( \alpha \)-support condition} is an atom or a near litter, together with an \( \alpha \)-extended index.
+\end{definition}
+\begin{lemma}
+    There are \( \#\mu \) \( \alpha \)-support conditions.
+    \( \alpha \)-structural permutations act on \( \alpha \)-support conditions by setting \( \pi(x, A) = (\pi_A(x), A) \).
+\end{lemma}
+\begin{definition}
+    Let \( \tau \) be a type, and \( G \) be a group that has multiplicative actions on \( \alpha \)-support conditions and \( \tau \).
+    A \emph{support for \( x \)} is
+    \begin{itemize}
+        \item a small \emph{carrier set} of \( \alpha \)-support conditions;
+        \item such that if the action of \( G \) fixes each element of the carrier, the action of \( G \) also fixes \( x \).
+    \end{itemize}
+    An element of \( \tau \) is \emph{supported} if it has some support.
+\end{definition}
+\begin{remark}
+    The group \( G \) will be instantiated with structural permutations and allowable permutations.
+    The type \( \tau \) will be instantiated with the types of tangles we obtain from the inductive hypothesis and the types of tangles we construct explicitly.
+\end{remark}
+\begin{lemma}
+    There are at most \( \#\mu \) supports for a given \( x : \tau \).
+\end{lemma}
+
+\section{Tangle construction}
+
+\subsection{Inductive hypotheses}
+
+\begin{definition}
+    Let \( \alpha : \lambda^\bot \).
+    \emph{Core tangle data at level \( \alpha \)} is
+    \begin{itemize}
+        \item a type of \emph{tangles} \( \tau_\alpha \);
+        \item a type of \emph{allowable permutations} \( A_\alpha \);
+        \item such that \( A_\alpha \) is a group;
+        \item a group homomorphism \( A_\alpha \to S_\alpha \);
+        \item a group action of \( A_\alpha \) on \( \tau_\alpha \);
+        \item for each \( t : \tau_\alpha \), a support for \( t \) under the action of \( A_\alpha \), called its \emph{designated support}.
+    \end{itemize}
+\end{definition}
+\begin{remark}
+    The homomorphism \( A_\alpha \to S_\alpha \) is applied implicitly where needed.
+\end{remark}
+\begin{definition}
+    Let \( \alpha : \lambda^\bot \), and suppose we have core tangle data at \( \alpha \).
+    \emph{Positioned tangle data at level \( \alpha \)} is an injective \emph{position} function \( \iota_\alpha \colon \tau_\alpha \to \mu \).
+\end{definition}
+\begin{remark}
+    This is separated from core tangle data because, while core tangle data is quite easy to construct at a given level, constructing the positioned tangle data requires the freedom of action theorem.
+\end{remark}
+\begin{definition}
+    Let \( \alpha : \lambda \), and suppose we have core tangle data at \( \alpha \).
+    \emph{Almost tangle data at level \( \alpha \)} (rename this!) is
+    \begin{itemize}
+        \item an injection \( a_\alpha \) from the type of atoms into \( \tau_\alpha \) called the \emph{typed atom map};
+        \item an injection \( N_\alpha \) from the type of near-litters to \( \tau_\alpha \) called the \emph{typed near-litter map};
+        \item an injection \( p_\alpha \) from \( \tau_\alpha \) to the type of pretangles \( \tau_\alpha^\star \);
+        \item where all such maps are equivariant with respect to \( A_\alpha \).
+    \end{itemize}
+\end{definition}
+\begin{definition}
+    If we have almost tangle data at \( \beta \) and \( \alpha \) where \( \beta < \alpha \), there is a membership relation between \( \tau_\beta \) and \( \tau_\alpha \) by mapping them to \( \tau_\beta^\star \) and \( \tau_\alpha^\star \), which has such a membership relation.
+\end{definition}
+\begin{definition}
+    \emph{Position data} is an injection \( \iota_a \) from the type of atoms into \( \mu \).
+\end{definition}
+\begin{remark}
+    This is the position of a typed singleton in the position function at any level.
+\end{remark}
+\begin{definition}
+    Let \( \alpha : \lambda \), and suppose we have core tangle data, positioned tangle data, and almost tangle data at \( \alpha \), as well as position data.
+    Then, \emph{tangle data at level \( \alpha \)} is
+    \begin{itemize}
+        \item for each atom \( a \), a proof that \( \iota_\alpha(a_\alpha(a)) = \iota_a(a) \);
+        \item for each atom \( a \), a proof that \( \iota_\alpha(N_\alpha(L)) < \iota_a(a) \) where \( a \) is contained in the litter set of \( L \);
+        \item for each near-litter \( N \), a proof that \( \iota_\alpha(N_\alpha(N^\circ)) \leq \iota_\alpha(N_\alpha(N)) \);
+        \item for each near-litter \( N \) and atom \( a \in N\,\triangle\,N^\circ \), a proof that \( \iota_a(a) < \iota_\alpha(N_\alpha(N)) \);
+        \item for each \( t : \tau_\alpha \) that is not a typed singleton or typed near-litter, and each support condition \( (x,A) \) in the designated support of \( t \), a proof that \( \iota_\alpha(a_\alpha(x)) \leq \iota_\alpha(t) \) or \( \iota_\alpha(N_\alpha(x)) \leq \iota_\alpha(t) \) depending on the value of \( x \).
+        \item and some other conditions that aren't completely solidified yet (at least in type theory).
+    \end{itemize}
+    TODO: We probably want to put the typed near litter position function into the position data, so that we can keep track of it independent of \( \alpha \).
+
+    Note on `condition 4' from \texttt{retangled.pdf}: if we have to enforce the \( \iota_\ast(X_\alpha) \geq \iota_\ast(X_0) \) condition, this would probably add quite a lot of complexity, because we don't currently have the ability to take sets \( X_0 \) and turn them into things in \( X_\alpha \).
+\end{definition}
+\begin{remark}
+    This will be constructed for all proper type indices \( \alpha \).
+\end{remark}
+\begin{definition}
+    We have core and positioned tangle data for \( \bot \) as follows.
+    \begin{itemize}
+        \item \( \tau_\bot \) is the type of atoms;
+        \item \( A_\bot \) is the type of near-litter permutations;
+        \item the designated support of each atom is \( \qty{(a, \mathsf{nil})} \);
+        \item the position function is arbitrary.
+    \end{itemize}
+\end{definition}
+\begin{definition}
+    Let \( \alpha : \lambda \).
+    \emph{Cumulative (core, positioned, almost) tangle data below level \( \alpha \)} is (core, positioned, almost) tangle data at all proper type indices below level \( \alpha \).
+\end{definition}
+\begin{ih}
+    Suppose we are constructing tangles at level \( \alpha \).
+    We assume that we have cumulative tangle data (of all kinds) below level \( \alpha \).
+\end{ih}
+\begin{remark}
+    When accessing the tangle data in proofs, we want to ensure that \( \tau_\bot \) is always known to be the type of atoms, and \( A_\bot \) is always known to be the type of near-litter permutations.
+    To enforce this, the accessor functions for tangle data at \( \beta \) first checks if \( \beta = \bot \); if this is true, we return the known tangle data at \( \bot \), and otherwise, we return the instance from the cumulative tangle data assumption.
+\end{remark}
+
+\subsection{Codes}
+
+\begin{definition}
+    An \emph{\( \alpha \)-code} is a type index \( \beta : \lambda_\alpha \) and a set of \( \beta \)-tangles.
+\end{definition}
+
+\subsection{\( f \)-maps}
+
+\begin{lemma}
+    Let \( \alpha, \beta \) be types, where \( \alpha \) is well-ordered.
+    Let \( D \colon \alpha \to \mathcal P \beta \) assign a \emph{denied set} to each element of \( \alpha \).
+    Suppose that for each \( x : \alpha \), \( \#\qty{y \mid y < x} + \#(D (x)) < \#\beta \).
+    Then, there is an injective function \( f \colon \alpha \to \beta \) such that \( f(x) \not\in D(x) \) for each \( x : \alpha \).
+\end{lemma}
+\begin{proof}
+    We explicitly construct such a function.
+    Let \( x \in \alpha \).
+    The set \( \qty{f(y) \mid y < x} \cup D(x) \) has cardinality strictly smaller than \( \#\beta \), so there exists an element of \( \beta \) outside this set that we will assign to \( f(x) \).
+\end{proof}
+In this section, let \( \beta : \lambda^\bot, \gamma : \lambda \), and suppose we have positioned tangle data at \( \beta \) and positioned and almost tangle data at \( \gamma \), with \( \beta \neq \gamma \).
+\begin{definition}
+    Let \( i : \mu \) and \( t : \tau_\beta \).
+    We say that \( i \) is \emph{\( f \)-denied} by \( t \) if
+    \begin{itemize}
+        \item there is a near-litter \( N \) to the litter \( \langle i, \beta, \gamma \rangle \) such that \( \iota_\gamma(N_\gamma(N)) \leq \iota_\beta(t) \); or
+        \item \( \beta = \bot \) and \( \iota_\gamma(N_\gamma(\langle i, \bot, \gamma \rangle)) \leq \iota_a(t) \).
+    \end{itemize}
+\end{definition}
+\begin{lemma}
+    Let \( t : \tau_\beta \).
+    Then,
+    \[ \#\qty{s \mid \iota_\beta(s) < \iota_\beta(t)} + \#\qty{i \mid i \text{ is \( f \)-denied by } t} < \#\mu \]
+\end{lemma}
+\begin{definition}
+    The function \( f_{\beta,\gamma} \colon \tau_\beta \to \mathsf{litter} \) is defined by \( \langle f, \beta, \gamma \rangle \) where \( f \colon \tau_\beta \to \mu \) is an injective function constructed using the above lemma such that \( f(x) \) is not \( f \)-denied by \( x \) for each \( x \).
+\end{definition}
+\begin{lemma}
+    For \( t : \tau_\beta \) and \( N \) a near-litter to \( f_{\beta,\gamma}(t) \), we have \( \iota_\beta(x) < \iota_\gamma(N_\gamma(N)) \).
+    If \( \beta = \bot \), we also have \( \iota_a(t) < \iota_\gamma(N_\gamma(f_{\bot,\gamma}(a))) \).
+\end{lemma}
+
+\subsection{\( A \)-maps}
+
+Let \( \alpha : \lambda, \beta : \lambda_\alpha, \gamma : \lambda^\bot_\alpha, \beta \neq \gamma \).
+Suppose we have positioned tangle data at \( \gamma \) and positioned and almost tangle data at \( \beta \).
+\begin{definition}
+    The function \( A_{\gamma,\beta} \colon \mathcal P \tau_\gamma \to \mathcal P \tau_\beta \) is defined by
+    \[ A_{\gamma,\beta}(S) = \qty{N_\beta(N) \mid N \in \bigcup_{t \in S} \qty[f_{\gamma,\beta}(t)]} \]
+    where \( [L] \) denotes the local cardinal of \( L \).
+\end{definition}
+\begin{lemma}
+    The \( A_{\gamma,\beta} \) for varying \( \gamma \) are injective and have disjoint ranges.
+\end{lemma}
+\begin{lemma}
+    Let \( S : \mathcal P \tau_\gamma \) be a nonempty set of \( \gamma \)-tangles.
+    Then, \( \min_{t \in S} \iota_\gamma(t) < \min_{t \in A_{\gamma,\beta}(S)} \iota_\beta(t) \).
+\end{lemma}
+\begin{definition}
+    Let \( A_\beta \) be the function from \( \alpha \)-codes to \( \alpha \)-codes given by \( A_\beta(\gamma, S) = (\beta, A_{\gamma,\beta}(S)) \) if \( \gamma \neq \beta \), and the identity function otherwise.
+\end{definition}
+\begin{definition}
+    If \( c = (\beta, S) \) is an \( \alpha \)-code, we define the \emph{code position} to be \( \iota_c(c) = \min_{t \in S} \iota_\beta(t) \).
+\end{definition}
+\begin{lemma}
+    Let \( c \) be an \( \alpha \)-code.
+    Then, \( \iota_c(c) < \iota_c(A_\beta(c)) \).
+\end{lemma}
+\begin{definition}
+    We define the relation \( \leadsto \) on \( \alpha \)-codes by defining \( c \leadsto A_\beta(c) \) when \( c = (\gamma, S)\) and \( \beta \neq \gamma \).
+\end{definition}
+\begin{lemma}
+    If \( d_1, d_2 \leadsto c \), then \( d_1 = d_2 \).
+    If \( c \leadsto d_1, d_2 \), then \( d_1 = d_2 \).
+    The relation \( \leadsto \) is well-founded.
+\end{lemma}
+
+\subsection{Equivalence of codes}
+
+\begin{definition}
+    We define inductively that an \( \alpha \)-code \( c \) is
+    \begin{itemize}
+        \item \emph{even} if for all \( d \leadsto c \), \( d \) is odd;
+        \item \emph{odd} if there exists \( d \leadsto c \) such that \( d \) is even.
+    \end{itemize}
+\end{definition}
+\begin{lemma}
+    The map \( A_\beta \) swaps the parity of a code \( (\gamma, S) \) if \( \beta \neq \gamma \).
+    Empty codes are even if and only if their extension is \( \bot \).
+    Singleton codes are even.
+\end{lemma}
+\begin{definition}
+    We define the relation of \emph{equivalence} between \( \alpha \)-codes inductively by
+    \begin{itemize}
+        \item \( c \equiv c \);
+        \item \( A_\beta(c) \equiv c \) where \( c = (\gamma, S) \) and \( \beta \neq \gamma \);
+        \item \( c \equiv A_\beta(c) \) where \( c = (\gamma, S) \) and \( \beta \neq \gamma \); or
+        \item \( A_\beta(c) \equiv A_\gamma(c) \) where \( c = (\delta, S) \) and \( \beta \neq \delta, \gamma \neq \delta \).
+    \end{itemize}
+\end{definition}
+\begin{lemma}
+    This is an equivalence relation.
+    All empty codes are equivalent.
+    If \( (\gamma, S) \equiv (\gamma, T) \) then \( S = T \).
+    There exists exactly one even code in any equivalence class.
+\end{lemma}
+
+\subsection{Allowable permutations}
+
+% assumptions?
+
+\begin{definition}
+    An \emph{\( \alpha \)-semiallowable permutation} is a dependent product such that for each \( \beta : \lambda^\bot_\alpha \), we have a \( \beta \)-allowable permutation.
+    The type of \( \alpha \)-semiallowable permutations is written \( Q_\alpha \) (we probably want better naming than this).
+\end{definition}
+\begin{lemma}
+    There is a multiplicative action of \( Q_\alpha \) on \( \tau_\beta \) for all \( \beta : \lambda^\bot_\alpha \).
+    There is a natural homomorphism \( d_{\alpha,\beta} Q_\alpha \to A_\beta \) for each \( \beta : \lambda^\bot_\alpha \), and we write \( \pi_\beta = d_{\alpha,\beta}(\pi) \).
+    There is a homomorphism \( Q_\alpha \to S_\alpha \), giving it more multiplicative actions.
+    Semiallowable permutations act on \( \alpha \)-codes by \( \pi(\gamma, S) = (\gamma, \pi(S)) \).
+\end{lemma}
+\begin{definition}
+    An \emph{\( \alpha \)-allowable permutation} is an \( \alpha \)-semiallowable permutation whose action on codes preserves code equivalence, so \( c \equiv d \iff \pi(c) \equiv \pi(d) \).
+    The type is written \( P_\alpha \).
+\end{definition}
+\begin{lemma}
+    Allowable permutations act on everything that semiallowable permutations do.
+\end{lemma}
+\begin{theorem}[coherence of allowable permutations]
+    Let \( t : \tau_\beta \) and \( \beta \neq \gamma \), and let \( \pi : P_\alpha \).
+    Then,
+    \[ (\pi_\gamma)_\bot(f_{\beta,\gamma}(t)) = f_{\beta,\gamma}(\pi_\beta(t)) \]
+    Note that \( (\pi_\gamma)_\bot \) first computes the \( \beta \)-allowable permutation \( \pi_\gamma \) using the \( d_{\alpha,\gamma} \) map, then computes its \( \bot \)-derivative by interpreting \( \pi_\gamma \) as a \( \gamma \)-structural permutation; the latter coercion exists by the core tangle data inductive hypothesis.
+    Let \( S : \mathcal P \tau_\beta \).
+    Then,
+    \[ \pi_\gamma(A_{\beta,\gamma}(S)) = A_{\beta,\gamma}(\pi_\beta(S)) \]
+    Let \( c = (\gamma, S) \) be a code with \( \beta \neq \gamma \).
+    Then,
+    \[ \pi(A_\gamma(c)) = A_\gamma(\pi(c)) \]
+    If \( c \) and \( d \) are codes, then \( c \leadsto d \iff \pi(c) \leadsto \pi(d) \).
+    \( c \) is even if and only if \( \pi(c) \) is even.
+\end{theorem}
+
+\subsection{Tangles}
+
+\end{document}
