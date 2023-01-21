@@ -133,22 +133,22 @@ lemma well_founded_position : well_founded (λ a b : tangle γ, position a < pos
 inv_image.wf _ is_well_founded.wf
 
 /-- The minimum tangle of a nonempty set of tangles. -/
-noncomputable def min_tangle (c : tangles γ) : tangle γ :=
-well_founded_position.min c.1 c.2
+noncomputable def min_tangle (c : set (tangle γ)) (hc : c.nonempty) : tangle γ :=
+well_founded_position.min c hc
 
-lemma min_tangle_mem (c : tangles γ) : min_tangle c ∈ c.val :=
-well_founded.min_mem _ c.val c.prop
+lemma min_tangle_mem (c : set (tangle γ)) (hc : c.nonempty) : min_tangle c hc ∈ c :=
+well_founded.min_mem _ c hc
 
-lemma min_tangle_le (c : tangles γ) {x} (hx : x ∈ c.1) :
-  position (min_tangle c) ≤ position x :=
-not_lt.1 $ well_founded_position.not_lt_min c.val c.prop hx
+lemma min_tangle_le (c : set (tangle γ)) (hc : c.nonempty) {x} (hx : x ∈ c) :
+  position (min_tangle c hc) ≤ position x :=
+not_lt.1 $ well_founded_position.not_lt_min c hc hx
 
-lemma A_map_order (c : tangles γ) :
-  position (min_tangle c) < position (min_tangle ⟨A_map hγβ c.1, c.2.A_map⟩) :=
+lemma A_map_order (c : set (tangle γ)) (hc : c.nonempty) :
+  position (min_tangle c hc) < position (min_tangle (A_map hγβ c) hc.A_map) :=
 begin
-  obtain ⟨t, ht, s, hs, h⟩ := mem_A_map.1 (min_tangle_mem ⟨A_map hγβ c.1, c.2.A_map⟩),
+  obtain ⟨t, ht, s, hs, h⟩ := mem_A_map.1 (min_tangle_mem (A_map hγβ c) hc.A_map),
   rw ←h,
-  refine (min_tangle_le c ht).trans_lt (f_map_position (coe_ne hγβ) t _ hs),
+  refine (min_tangle_le c hc ht).trans_lt (f_map_position (coe_ne hγβ) t _ hs),
 end
 
 end A_map
@@ -157,33 +157,48 @@ section A_map_code
 variables {α : Λ} [core_tangle_cumul α] [positioned_tangle_cumul α]
 
 /-- Tool that lets us use well-founded recursion on codes via `μ`. -/
-noncomputable def code_min_map (c : nonempty_code α) : μ := position $ min_tangle ⟨_, c.prop⟩
+noncomputable def code_min_map (c : nonempty_code α) : μ := position $ min_tangle _ c.prop
 
 /-- The pullback `<` relation on codes is well-founded. -/
 lemma code_wf : well_founded (inv_image μr (code_min_map : nonempty_code α → μ)) :=
 inv_image.wf (code_min_map) μwf.wf
 
-variables [almost_tangle_cumul α] (γ : Iio_index α) (β : Iio α) (c d : code α)
+section extension
 
-noncomputable! def extension {β : Iio α} (s : set (tangle β)) (γ : Iio α) : set (tangle γ) :=
-(A_map_code γ (mk β s)).snd
+variables [almost_tangle_cumul α] {β : Iio_index α}
+
+/-- The A-map, phrased as a function on sets of `γ`-tangles, but if `γ = β`, this is the
+identity function. This is the true alternative extension map. -/
+def extension (s : set (tangle β)) (γ : Iio α) : set (tangle γ) :=
+if hβγ : β = γ then cast (by rw hβγ; refl) s else A_map hβγ s
+
+@[simp] lemma extension_self {γ : Iio α} (s : set (tangle (Iio_coe γ))) : extension s γ = s :=
+dif_pos rfl
+
+variables (s : set (tangle β)) (γ : Iio α)
+
+@[simp] lemma extension_eq (hβγ : β = γ) : extension s γ = cast (by rw hβγ; refl) s := dif_pos hβγ
+@[simp] lemma extension_ne (hβγ : β ≠ γ) : extension s γ = A_map hβγ s := dif_neg hβγ
+
+end extension
+
+variables [almost_tangle_cumul α] (γ : Iio_index α) (β : Iio α) (c d : code α)
 
 /-- The A-map, phrased as a function on `α`-codes, but if the code's level matches `β`, this is the
 identity function. This is written in a weird way in order to make `(A_map_code β c).1` defeq
 to `β`. -/
-noncomputable! def A_map_code (c : code α) : code α :=
-mk β $ if hcβ : c.1 = β then cast (by rw hcβ) c.2 else A_map hcβ c.2
+def A_map_code (c : code α) : code α := mk β (extension c.2 β)
 
 lemma A_map_code_eq (hcβ : c.1 = β) : A_map_code β c = c :=
 begin
-  rw [A_map_code, dif_pos hcβ],
+  rw [A_map_code, extension_eq _ _ hcβ],
   ext : 1,
   { exact hcβ.symm },
   { simp only [snd_mk, cast_heq] },
 end
 
 lemma A_map_code_ne (hcβ : c.1 ≠ β) : A_map_code β c = mk β (A_map hcβ c.2) :=
-by rw [A_map_code, dif_neg hcβ]
+by rw [A_map_code, extension_ne _ _ hcβ]
 
 @[simp] lemma fst_A_map_code : (A_map_code β c).1 = β := rfl
 
@@ -241,7 +256,7 @@ lemma A_map_code_order (c : nonempty_code α) (hcβ : c.1.1 ≠ β) :
 begin
   unfold code_min_map,
   have := A_map_code_ne β c hcβ,
-  convert A_map_order ⟨c.1.2, c.2⟩ using 1,
+  convert A_map_order c.1.2 c.2 using 1,
   congr,
   exact snd_A_map_code β c hcβ,
 end

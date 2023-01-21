@@ -63,7 +63,10 @@ end
 instance mul_action_tangle : mul_action (semiallowable_perm α) (tangle β) :=
 mul_action.comp_hom _ $ to_allowable β
 
-instance mul_action_tangle' : mul_action (semiallowable_perm α) (tangle (γ : Λ)) :=
+instance mul_action_tangle' {β : Iio α} : mul_action (semiallowable_perm α) (tangle β) :=
+show mul_action (semiallowable_perm α) (tangle $ Iio_coe β), from infer_instance
+
+instance mul_action_tangle'' : mul_action (semiallowable_perm α) (tangle (γ : Λ)) :=
 show mul_action (semiallowable_perm α) (tangle $ Iio_coe γ), from infer_instance
 
 @[simp] lemma to_allowable_smul (f : semiallowable_perm α) (t : tangle β) :

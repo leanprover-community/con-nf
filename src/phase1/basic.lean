@@ -51,9 +51,6 @@ that at this stage in the recursion, we have not established that the allowable 
 must instead use group multiplication `*`. -/
 instance : group (allowable α) := core_tangle_data.allowable_group
 
-/-- Nonempty sets of tangles. -/
-abbreviation tangles : Type u := {s : set (tangle α) // s.nonempty}
-
 variables {α} {X : Type*} [mul_action (struct_perm α) X]
 
 namespace allowable
