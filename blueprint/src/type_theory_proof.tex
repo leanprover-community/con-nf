@@ -140,7 +140,7 @@
 \begin{definition}
     A \emph{near-litter permutation} is
     \begin{itemize}
-        \item a permutation \( \pi_a \colon \mathsf{atom} \to \mathsf{atom} \);
+        \item a permutation \( \pi_a \colon \tau_\bot \to \tau_\bot \);
         \item a permutation \( \pi_\ell \colon \mathsf{litter} \to \mathsf{litter} \);
         \item such that if \( N \) is a near-litter to \( L \), the pointwise image of \( \pi_a \) on \( N \) is a near-litter to \( \pi_\ell(L) \).
     \end{itemize}
@@ -321,7 +321,10 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
     Then, \( \min_{t \in S} \iota_\gamma(t) < \min_{t \in A_{\gamma,\beta}(S)} \iota_\beta(t) \).
 \end{lemma}
 \begin{definition}
-    Let \( A_\beta \) be the function from \( \alpha \)-codes to \( \alpha \)-codes given by \( A_\beta(\gamma, S) = (\beta, A_{\gamma,\beta}(S)) \) if \( \gamma \neq \beta \), and the identity function otherwise.
+    We define the \emph{extension function} \( E_{\beta,\gamma} \colon \mathcal P \tau_\beta \to \mathcal P \tau_\gamma \) by \( A_{\beta,\gamma} \) if \( \beta \neq \gamma \), and the identity function otherwise.
+\end{definition}
+\begin{definition}
+    Let \( A_\beta \) be the function from \( \alpha \)-codes to \( \alpha \)-codes given by \( A_\beta(\gamma, S) = (\beta, E_{\gamma,\beta}(S)) \).
 \end{definition}
 \begin{definition}
     If \( c = (\beta, S) \) is an \( \alpha \)-code, we define the \emph{code position} to be \( \iota_c(c) = \min_{t \in S} \iota_\beta(t) \).
@@ -379,7 +382,7 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
 \end{definition}
 \begin{lemma}
     There is a multiplicative action of \( Q_\alpha \) on \( \tau_\beta \) for all \( \beta : \lambda^\bot_\alpha \).
-    There is a natural homomorphism \( d_{\alpha,\beta} Q_\alpha \to A_\beta \) for each \( \beta : \lambda^\bot_\alpha \), and we write \( \pi_\beta = d_{\alpha,\beta}(\pi) \).
+    There is a natural homomorphism \( d_{\alpha,\beta} \colon Q_\alpha \to A_\beta \) for each \( \beta : \lambda^\bot_\alpha \), and we write \( \pi_\beta = d_{\alpha,\beta}(\pi) \).
     There is a homomorphism \( Q_\alpha \to S_\alpha \), giving it more multiplicative actions.
     Semiallowable permutations act on \( \alpha \)-codes by \( \pi(\gamma, S) = (\gamma, \pi(S)) \).
 \end{lemma}
@@ -406,5 +409,44 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
 \end{theorem}
 
 \subsection{Tangles}
+
+\begin{definition}
+    An \emph{extension collection} is a dependent product such that for each \( \beta : \lambda_\alpha \). we have a set of \( \beta \)-tangles.
+    We write \( e_\beta \) for this set of \( \beta \)-tangles, where \( e \) is the extension collection.
+\end{definition}
+\begin{definition}
+    A \emph{preference} of an extension collection \( e \) is
+    \begin{itemize}
+        \item a set of atoms \( X : \mathcal P \tau_\bot \) such that for all \( \gamma : \lambda_\alpha \), we have \( A_{\bot,\gamma}(X) = e_\gamma \); or
+        \item a proper type index \( \beta : \lambda_\alpha \) such that \( (\beta, e_\beta) \) is an even code, and for all \( \gamma : \lambda_\alpha \) where \( \beta \neq \gamma \), \( A_{\beta,\gamma}(e_\beta) = e_\gamma \).
+    \end{itemize}
+\end{definition}
+\begin{definition}
+    A \emph{semitangle} is an extension collection with a preference.
+    If \( s = (e, p) \) is a semitangle, we write \( s_\gamma \) to abbreviate \( e_\gamma \), and \( s_{\mathsf{pref}} \) for \( p \).
+    % TODO: \iota_a and \iota_c using mathsf?
+\end{definition}
+\begin{lemma}
+    There is a membership relation between \( \gamma \)-tangles and \( \alpha \)-semitangles, for all \( \gamma : \lambda_\alpha \), by considering its extension collection.
+    Each semitangle has an even code representing it, and every even code gives a semitangle.
+\end{lemma}
+\begin{theorem}
+    Semitangles are extensional at \emph{each} \( \gamma : \lambda_\alpha \).
+    More precisely, if \( s_1, s_2 \) are semitangles and \( \gamma : \lambda_\alpha \), then \( (s_1)_\gamma = (s_2)_\gamma \) implies \( s_1 = s_2 \).
+    In addition, if \( \alpha = 0 \), semitangles are extensional at level \( \bot \).
+\end{theorem}
+\begin{lemma}
+    There is a multiplicative action of allowable permutations on semitangles.
+    Allowable permutations commute with taking extensions of semitangles, and with the membership relation.
+\end{lemma}
+\begin{definition}
+    An \emph{\( \alpha \)-new tangle} is a semitangle that is supported under the action of \( \alpha \)-allowable permutations.
+\end{definition}
+\begin{lemma}
+    There are new tangles representing typed near-litters, typed singletons, and typed small sets of supported \( \beta \)-tangles for \( \beta : \lambda_\alpha^\bot \).
+\end{lemma}
+\begin{lemma}
+    Allowable permutations act on new tangles.
+\end{lemma}
 
 \end{document}
