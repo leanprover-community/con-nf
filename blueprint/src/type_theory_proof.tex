@@ -84,6 +84,7 @@
 \begin{definition}
     A quiver structure is defined on \( \lambda^\bot \) by defining \( \alpha \longrightarrow \beta \) if \( \beta < \alpha \).
     An \emph{\( \alpha \)-extended index} is a path in this quiver from \( \alpha \) to \( \bot \).
+    If \( A \) is a path from \( \alpha \) to \( \beta \) and \( B \) is a path from \( \beta \) to \( \gamma \), we denote their \emph{composition} by \( A \gg B \), a path from \( \alpha \) to \( \gamma \).
 \end{definition}
 \begin{remark}
     Paths are implemented like `snoc-lists'; extracting the last segment of a path is easy, and extracting the first is more difficult.
@@ -92,31 +93,11 @@
     There are at most \( \#\lambda \) \( \alpha \)-extended indices.
 \end{lemma}
 
-\subsection{Structural permutations}
-
-\begin{definition}
-    An \emph{\( \alpha \)-structural permutation} is
-    \begin{itemize}
-        \item if \( \alpha = \bot \), a near-litter permutation;
-        \item otherwise, a dependent product such that for each \( \beta : \lambda^\bot \) with \( \beta < \alpha \), we have a \( \beta \)-structural permutation.
-    \end{itemize}
-    The type of \( \alpha \)-structural permutations is written \( S_\alpha \).
-\end{definition}
-\begin{remark}
-    This is a type constructed with well-founded recursion.
-    It requires many lemmas to use effectively, such as an explicit equivalence between \( \bot \)-structural permutations and near-litter permutations.
-\end{remark}
-\begin{lemma}
-    \( \alpha \)-structural permutations form a group, which acts on \( \tau_\alpha^\star \).
-    For \( \beta < \alpha \), there is a natural group homomorphism from \( S_\alpha \) to \( S_\beta \), called the \emph{derivative map}.
-    This derivative map can be used on paths in the quiver on type indices, and it is functorial and preserves multiplication.
-    If \( \pi \) is an \( \alpha \)-structural permutation, we write \( \pi_A \) for the \( A \)-derivative of \( \pi \), where \( A \) is a path from \( \alpha \) to \( \beta \) in \( \lambda^\bot \).
-\end{lemma}
-
 \subsection{Litters}
 
 \begin{definition}
     The \emph{litter set} corresponding to a litter \( L \) is the set of atoms \( a = (L', i) \) where \( L = L' \).
+    We transparently cast litters to litter sets as necessary (but not in reverse).
 \end{definition}
 \begin{lemma}
     The litter sets are pairwise disjoint and have cardinality \( \#\kappa \).
@@ -150,6 +131,27 @@
 \end{remark}
 \begin{lemma}
     Near-litter permutations form a group, with actions on atoms, litters, and near-litters.
+\end{lemma}
+
+\subsection{Structural permutations}
+
+\begin{definition}
+    An \emph{\( \alpha \)-structural permutation} is
+    \begin{itemize}
+        \item if \( \alpha = \bot \), a near-litter permutation;
+        \item otherwise, a dependent product such that for each \( \beta : \lambda^\bot \) with \( \beta < \alpha \), we have a \( \beta \)-structural permutation.
+    \end{itemize}
+    The type of \( \alpha \)-structural permutations is written \( S_\alpha \).
+\end{definition}
+\begin{remark}
+    This is a type constructed with well-founded recursion.
+    It requires many lemmas to use effectively, such as an explicit equivalence between \( \bot \)-structural permutations and near-litter permutations.
+\end{remark}
+\begin{lemma}
+    \( \alpha \)-structural permutations form a group, which acts on \( \tau_\alpha^\star \).
+    For \( \beta < \alpha \), there is a natural group homomorphism from \( S_\alpha \) to \( S_\beta \), called the \emph{derivative map}.
+    This derivative map can be used on paths in the quiver on type indices, and it is functorial and preserves multiplication.
+    If \( \pi \) is an \( \alpha \)-structural permutation, we write \( \pi_A \) for the \( A \)-derivative of \( \pi \), where \( A \) is a path from \( \alpha \) to \( \beta \) in \( \lambda^\bot \).
 \end{lemma}
 
 \subsection{Supports}
@@ -448,5 +450,262 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
 \begin{lemma}
     Allowable permutations act on new tangles.
 \end{lemma}
+
+\section{Freedom of action}
+
+\subsection{Strong supports}
+
+\begin{definition}
+    We define the relation \( \prec \) on support conditions by
+    \begin{itemize}
+        \item \( (L, A) \prec (x, A) \) where \( x \) is an element of the litter set of \( L \);
+        \item \( (N^\circ, A) \prec (N, A) \) where \( N \) is a near-litter that is not a litter;
+        \item \( (a, A) \prec (N, A) \) where \( a \in N\,\triangle\,N^\circ \) and \( N \) is a near-litter;
+        \item
+            if \( A \) is a path from \( \alpha \) to \( \beta \),
+            \( t : \tau_\gamma \) is a \( \gamma \)-tangle where \( \gamma : \lambda^\bot \) and \( \gamma < \beta \),
+            \( (x, B) \) is an element of the designated \( \gamma \)-support of \( t \),
+            and \( \delta < \beta \) is a proper type index not equal to \( \gamma \),
+            then
+            \[ (x, A \gg (\beta \longrightarrow \gamma) \gg B) \prec (f_{\gamma,\delta}(t), A \gg (\beta \longrightarrow \delta) \gg (\delta \longrightarrow \bot)) \]
+        \item if \( A \) is a path from \( \alpha \) to \( \beta \), \( \gamma < \beta \) is a proper type index, and \( a : \tau_\bot \) is an atom, then
+        \[ (a, A \gg (\beta \longrightarrow \bot)) \prec (f_{\bot,\delta}(a), A \gg (\beta \longrightarrow \delta) \gg (\delta \longrightarrow \bot)) \]
+    \end{itemize}
+\end{definition}
+\begin{definition}
+    We define a well-ordering on support conditions by \( (x, A) < (y, B) \) where \( \iota(x) < \iota(y) \) under the appropriate typed singleton or typed near-litter map, but if \( \iota(x) = \iota(y) \), we say \( (x, A) < (y, B) \) if \( A < B \) for a fixed well-ordering of extended type indices.
+\end{definition}
+\begin{lemma}
+    \( \prec \) is well-founded, because \( (x, A) \prec (y, B) \) implies \( (x, A) < (y, B) \).
+\end{lemma}
+\begin{lemma}
+    Suppose \( x : \tau_\alpha \) is supported.
+    Then \( x \) has a support \( S \) such that if \( (N_1, A), (N_2, A) \in S \) are near-litter support conditions, we have \( N_1 \cap N_2 = \varnothing \).
+    We call such supports \emph{disjoint supports}.
+\end{lemma}
+\begin{definition}
+    A support \( S \) is \emph{strong} if
+    \begin{itemize}
+        \item it is a disjoint support; and
+        \item \( c \prec d \) and \( d \in S \) implies \( c \in S \).
+    \end{itemize}
+\end{definition}
+\begin{lemma}
+    If \( (N, A) \in S \) is a near-litter support condition in a strong support, then \( N \) is the litter set of some litter.
+    TODO: Is it convenient to have a different type where the fact that \( N \) is a litter is known?
+\end{lemma}
+\begin{lemma}
+    Any support can be converted into a strong support in \( \omega \) stages of adding missing items, adding a small collection of new items at each stage.
+\end{lemma}
+
+\subsection{Approximations}
+
+\begin{definition}
+    Let \( \alpha \) be a type.
+    A \emph{local permutation} of \( \alpha \) is
+    \begin{itemize}
+        \item a pair of functions \( f, g \colon \alpha \to \alpha \);
+        \item a \emph{domain} set of elements \( A : \mathcal P \alpha \);
+        \item a proof that \( f(A) \subseteq A \) and \( g(A) \subseteq A \);
+        \item a proof that \( g(f(a)) = a = f(g(a)) \) for all \( a \in A \).
+    \end{itemize}
+    If \( \pi^0 \) is a local permutation, then we write \( \dom \pi^0 \) for \( A \), \( \pi^0(a) \) for \( f(a) \), and \( (\pi^0)^{-1}(a) \) for \( g(a) \).
+    % similar to mathlib3's logic.equiv.local_equiv
+\end{definition}
+\begin{definition}
+    A \emph{sublitter} is a litter \( L \) together with a subset \( S \) of the litter set of \( L \), such that \( L \setminus S \) is small (interpreting \( L \) as its litter set).
+\end{definition}
+\begin{remark}
+    All sublitters are near-litters, and we interpret them as such.
+    For instance, we use \( S^\circ \) to denote the litter associated to a sublitter.
+\end{remark}
+\begin{definition}
+    A \emph{near-litter approximation} is
+    \begin{itemize}
+        \item a local permutation \( \pi^0_a \) of atoms;
+        \item a local permutation \( \pi^0_\ell \) of litters;
+        \item a local permutation \( \pi^0_s \) of sublitters;
+        \item such that \( S \in \dom \pi^0_s \) implies \( S^\circ \in \dom \pi^0_\ell \);
+        % \item if \( S \in \dom \pi^0_s \), then \( \pi^0_s(S)^\circ = \pi^0_\ell(S^\circ) \);
+        \item if \( a \in \dom \pi^0_a \) and \( S \in \dom \pi^0_s \), then \( a \not\in S \);
+        \item if \( \#(\dom \pi^0_a \cap L) = \#\kappa \) for some litter \( L \), then all atoms in the litter set of \( L \) lie in \( \dom \pi^0_a \);
+        \item if \( S \in \dom \pi^0_s \) and \( a \) is in the litter set of \( S^\circ \), then \( a \in \dom \pi^0_a \) if and only if \( a \not\in S \).
+    \end{itemize}
+\end{definition}
+\begin{remark}
+    This definition is independent of our parameters at this level of the construction; it could have even been defined before core tangle data.
+    Near-litter approximations can also act on litters pointwise to produce near-litters.
+\end{remark}
+\begin{definition}
+    Let \( \pi^0_a \) be a local permutation of atoms and \( \pi^0_\ell \) be a local permutation of litters.
+    Suppose that \( \dom \pi^0_a \) is small.
+    Then, the approximation \emph{generated by} \( \pi^0_a \) and \( \pi^0_\ell \) is a near-litter approximation where its local permutations of atoms and litters are exactly \( \pi^0_a \) and \( \pi^0_\ell \) respectively, and its local permutation of sublitters is a suitable local permutation that satisfies the requirements.
+    % The appropriate \( \pi^0_s \) exists because of smallness of \( \dom \pi^0_a \).
+\end{definition}
+\begin{definition}
+    A near-litter permutation \( \pi : S_\bot \) has \emph{exception} \( a : \tau_\bot \) if \( \pi(x) \not\in \pi_\ell(L) \) or \( \pi^{-1}(x) \not\in \pi^{-1}_\ell(L) \), where \( a \) lies in the litter set of \( L \).
+\end{definition}
+\begin{definition}
+    A near-litter approximation \( \pi^0 \) \emph{approximates} a near-litter permutation \( \pi : S_\bot \) if
+    \begin{itemize}
+        \item \( a \in \dom \pi^0_a \) implies \( \pi^0_a(a) = \pi_a(a) \);
+        \item \( L \in \dom \pi^0_\ell \) implies \( \pi^0_\ell(L) = \pi_\ell(L) \); and
+        \item \( S \in \dom \pi^0_s \) implies \( \pi^0_s(S) = \pi_a(S) \).
+    \end{itemize}
+    In addition, we say that \( \pi^0 \) \emph{exactly approximates} \( \pi \) if
+    \begin{itemize}
+        \item \( \pi^0 \) approximates \( \pi \); and
+        \item if \( a \) is an exception of \( \pi \), then \( a \in \dom \pi^0 \).
+    \end{itemize}
+\end{definition}
+\begin{definition}
+    A \emph{\( \beta \)-approximation} is a product that assigns a near-litter approximation to each \( \beta \)-extended index.
+    We write \( \pi^0_A \) for the near-litter approximation given by the \( \beta \)-extended index \( A \).
+    A \( \beta \)-approximation \( \pi^0 \) \emph{(exactly) approximates} a \( \beta \)-structural permutation \( \pi : S_\beta \) if \( \pi^0_A \) (exactly) approximates \( \pi_A \) for all \( A \).
+\end{definition}
+\begin{definition}
+    A litter \( L \) is \emph{\( A \)-inflexible} if \( A = B \gg (\beta \longrightarrow \delta) \gg (\delta \longrightarrow \bot) \), and there exists \( \gamma : \lambda^\bot \) with \( \gamma < \beta \) and \( \gamma \neq \delta \), and we have \( t : \tau_\gamma \) such that \( L = f_{\gamma,\delta}(t) \).
+    A litter is \( A \)-flexible if it is not \( A \)-inflexible.
+\end{definition}
+\begin{definition}
+    An \emph{\( A \)-free near-litter approximation} is a near-litter approximation \( \pi^0 \) such that
+    \begin{itemize}
+        \item \( \#(\dom \pi^0_a \cap L) < \#\kappa \) for each litter \( L \); and
+        \item if \( L \in \dom \pi^0_\ell \), \( L \) is \( A \)-flexible.
+    \end{itemize}
+    A \emph{\( \beta \)-free approximation} \( \beta \)-approximation \( \pi^0 \) where \( \pi^0_A \) is \( A \)-free for each \( A \).
+\end{definition}
+\begin{definition}
+    If \( \pi^0, \rho^0 \) are near-litter approximations, then we say \( \pi^0 \) \emph{extends} \( \rho^0 \) if the domains of \( \rho^0 \) are contained inside the domains of \( \pi^0 \), and the functions \( \pi^0_a, \pi^0_\ell, \pi^0_s \) agree on the domains of \( \rho^0 \).
+    If \( \pi^0, \rho^0 \) are \( \beta \)-approximations, \( \pi^0 \) extends \( \rho^0 \) if \( \pi^0_A \) extends \( \rho^0_A \) for all \( A \).
+\end{definition}
+
+\subsection{Freedom of action}
+
+\begin{definition}
+    Let \( S_1, S_2 \) be sublitters.
+    We define \( \pi_{S_1,S_2} \) to be an arbitrary bijection between the two sublitters, which exists as they both have cardinality \( \#\kappa \).
+\end{definition}
+\begin{definition}
+    Let \( \pi^0 \) be a free near-litter approximation.
+    Its \emph{\( A \)-flexible litter completion} is the free near-litter approximation \( \rho^0 \) given by
+    \begin{itemize}
+        \item \( \rho^0_a = \pi^0_a \);
+        \item \( \rho^0_\ell \) is the local approximation of litters extending \( \pi^0_\ell \) that acts as the identity on all \( A \)-flexible litters not in \( \dom \pi^0_\ell \);
+        \item \( \rho^0_s \) is the extension of \( \pi^0_s \) given by defining \( \rho^0_s(S) = S \) where \( S = L \setminus \dom \pi^0_a \) for each \( A \)-flexible litter \( L \) not in \( \dom \pi^0_\ell \).
+    \end{itemize}
+\end{definition}
+\begin{ih}
+    Let \( \pi^0 \) be a \( \beta \)-approximation, and let \( c \) be a \( \beta \)-support condition.
+    A \emph{\( c \)-hypothesis} \( H \) is
+    \begin{itemize}
+        \item a dependent product \( H_a \) such that for each atom \( a \) and \( \beta \)-extended index \( A \), if \( (a, A) \prec c \), we have an atom;
+        \item a dependent product \( H_n \) such that for each near-litter \( N \) and \( \beta \)-extended index \( A \), if \( (N, A) \prec c \), we have a near-litter.
+    \end{itemize}
+\end{ih}
+\begin{definition}
+    Let \( \pi^0 \) be a \( \beta \)-approximation, let \( a \) be an atom, \( A \) be a \( \beta \)-extended index, and let \( H \) be an \( (a, A) \)-hypothesis.
+    Then, the \emph{atom completion} of \( \pi^0 \) at \( a \) is defined by
+    \[ \begin{cases}
+        (\pi^0_A)_a(a) & \text{if } a \in \dom (\pi^0_A)_a \\
+        \pi_{L \setminus \dom (\pi^0_A)_a, H_n(L, A) \setminus \dom (\pi^0_A)_a}(a) & \text{otherwise}
+    \end{cases} \]
+    Note: Can we really be sure that \( H_n(L, A) \setminus \dom (\pi^0_A)_a \) is a sublitter?
+    In \texttt{retangled.pdf}, this is the assumption that \( M^- \subseteq \pi_A(L)^\circ \).
+\end{definition}
+\begin{definition}
+    Let \( \pi^0_a \) be a local permutation of atoms with small domain.
+    The \emph{\( A \)-derived approximation} of \( \pi^0_a \) with respect to \( \pi^0 \) is the near-litter approximation generated by \( \pi^0_a \) and \( \pi^0_\ell \), where \( \pi^0_\ell \) is the local permutation of litters of the \( A \)-flexible litter completion of \( \pi^0 \).
+\end{definition}
+\begin{definition}
+    Let \( \mathcal A \colon \mathcal P (\tau_\bot \times \tau_\bot) \) be a small set of pairs of atoms, where atoms may appear at most once as the first entry and the second entry (set-theoretically, \( \mathcal A \) is an injective partial function from the type of atoms to itself).
+    Let \( L \) be a litter that none of the atoms in \( \mathcal A \) are contained within.
+    We define the atom permutation \emph{generated by} \( \mathcal A \) using \( L \) to be a local permutation \( \pi^0_a \) of atoms such that
+    \begin{itemize}
+        \item \( \dom \pi^0_a \subset \pi_1(\mathcal A) \cup \pi_2(\mathcal A) \cup L \);
+        \item \( \#(\dom \pi^0_a) < \#\kappa \);
+        \item \( (a, b) \in \mathcal A \implies \pi^0_a(a) = b \).
+    \end{itemize}
+\end{definition}
+\begin{definition}
+    TODO: Fix this! Atoms are handled wrongly.
+    Maybe it can be simplified by first casting to sublitters with suitable properties.
+
+    Let \( T \) be a strong \( \gamma \)-support.
+    For each \( \gamma \)-extended index \( A \),
+    \begin{itemize}
+        \item Let \( \mathcal L \) be the set of \( A \)-flexible litters \( L \) such that \( (L, A) \in T \).
+        \item For each element \( L \) of \( \mathcal L \), we find its precise image \( N_L \) of \( L \) under the \( A \)-flexible litter completion of \( \pi^0 \).
+        \item Let \( \mathcal A = \bigcup_{L \in \mathcal L} \qty{(a, \pi(a)) \mid a \in L, \pi(a) \not\in N_L^\circ} \), where \( \pi(a) \) refers to the \( A \)-flexible litter completion of \( \pi^0 \).
+        \item Then, define
+        \[ \mathcal A_1 = \bigcup_{L \in \mathcal L} N_L \setminus N_L^\circ;\quad \mathcal A_2 = \bigcup_{L \in \mathcal L} N_L^\circ \setminus N_L \]
+        Then, \( \mathcal A_2 \setminus \mathcal A_1 \) is the set of atoms contained in litters near the image of \( T \), but not contained in the image of \( T \) itself.
+        \item Let \( L_1, L_2 \) be litters disjoint from the \( L \) and \( N_L \).
+        \item Let \( \mathcal A^+ \) be the union of \( \mathcal A \) with elements of the form \( (a, b) \) where \( a \in L_1 \) and \( b \in \mathcal A_2 \setminus \mathcal A_1 \).
+        \item Let \( \pi^0_a \) be the atom permutation generated by \( \mathcal A^+ \) using \( L_2 \), and let \( \pi^0 \) be its \( A \)-derived approximation.
+    \end{itemize}
+    The resulting \( \pi^0 \) are combined to form a \( \gamma \)-approximation called the \emph{derived approximation} of \( T \).
+\end{definition}
+\begin{remark}
+    The construction shown above is quite arduous, but it does constructively prove the existence of the required \( \gamma \)-approximation.
+    Is there a better method?
+\end{remark}
+\begin{lemma}
+    Derived approximations of strong supports are free.
+    % TODO: We need an injectivity assumption on the hypothesis.
+    % We can do without it, though, by just using the empty approximation if injectivity doesn't hold, although this will never occur in practice.
+\end{lemma}
+\begin{definition}
+    We say \emph{freedom of action holds at level \( \gamma \)} if every \( \gamma \)-free approximation exactly approximates some \( \gamma \)-allowable permutation.
+\end{definition}
+\begin{definition}
+    Let \( L \) be an \( A \)-inflexible litter, so \( A = B \gg (\beta \longrightarrow \delta) \gg (\delta \longrightarrow \bot) \), and \( L = f_{\gamma,\delta}(t) \) for some \( \gamma : \lambda^\bot \) with \( \gamma < \beta \) and \( \gamma \neq \delta \).
+    Suppose freedom of action holds at level \( \gamma \).
+    Then, the \emph{\( A \)-inflexible litter completion} of \( \pi^0 \) at \( L \) is defined to be
+    \[ \begin{cases}
+        f_{\bot,\delta}(H_a(t, B \gg (\beta \longrightarrow \bot))) & \text{if } \gamma = \bot \\
+        f_{\gamma,\delta}(\pi'_{B \gg (\beta \longrightarrow \gamma)}(t)) & \text{otherwise}
+    \end{cases} \]
+    where \( \pi' \) is a \( \gamma \)-allowable permutation given by applying the freedom of action theorem to the \( \gamma \)-allowable approximation derived from a strong \( \gamma \)-support of \( t \).
+\end{definition}
+\begin{definition}
+    Let \( L \) be a litter.
+    The \emph{\( A \)-litter completion} of \( \pi^0 \) at \( L \) is
+    \begin{itemize}
+        \item the image of \( L \) under the \( A \)-flexible litter completion if \( L \) is \( A \)-flexible;
+        \item the image of \( L \) under the \( A \)-inflexible litter completion if \( L \) is \( A \)-inflexible.
+    \end{itemize}
+\end{definition}
+\begin{definition}
+    Let \( S \) be a sublitter.
+    Let \( S_1 = S^\circ \setminus \dom \pi^0_a \) be the largest sublitter of \( S^\circ \) containing no atom in the domain of \( \pi^0_a \).
+    Let \( S_2 = L \setminus \dom \pi^0_a \) be the largest sublitter of the \( A \)-litter completion of \( \pi^0 \) at \( S^\circ \) containing no atom in the domain of \( \pi^0_a \).
+    Then, the \emph{\( A \)-sublitter completion} of \( \pi^0 \) at \( S \) is
+    \[ (S_2 \cup \pi^0_A(S \setminus S_1)) \setminus \pi_{S_1,S_2}(S_1 \setminus S) \]
+\end{definition}
+\begin{definition}
+    Let \( N \) be a near-litter, and \( H \) be an \( (N, A) \)-hypothesis.
+    The \emph{\( A \)-near-litter completion} of \( \pi^0 \) at \( N \) is the union of the \( A \)-sublitter completion of \( N \cap N^\circ \), together with the images of each atom in \( N \setminus N^\circ \) obtained from the hypothesis.
+\end{definition}
+\begin{definition}
+    Let \( \pi^0 \) be a \( \beta \)-approximation, and suppose freedom of action holds at all \( \gamma < \beta \).
+    The \emph{completed action} of \( \pi^0 \) is
+    \begin{itemize}
+        \item a function on an atom \( a \) and a \( \beta \)-extended index \( A \), which returns the atom completion of \( \pi^0 \) on \( a \);
+        \item a function on a near-litter \( N \) and a \( \beta \)-extended index \( A \), which returns the \( A \)-near-litter completion of \( \pi^0 \) at \( N \).
+    \end{itemize}
+\end{definition}
+\begin{remark}
+    This definition is constructed by well-founded recursion on the type of support conditions.
+\end{remark}
+\begin{lemma}
+    The completed action of a free \( \beta \)-approximation \( \pi^0 \) is the image of an allowable permutation.
+\end{lemma}
+\begin{remark}
+    This requires an inductive hypothesis in the main recursion which has not yet been defined.
+\end{remark}
+\begin{theorem}
+    Freedom of action holds at every level \( \beta < \alpha \).
+\end{theorem}
 
 \end{document}
