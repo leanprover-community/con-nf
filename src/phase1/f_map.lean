@@ -121,7 +121,7 @@ inductive f_map_condition (x : tangle β) (i : μ) : Prop
   β = ⊥ → -- this condition should only trigger for type `-1`
   a == x → -- using `heq` instead of induction on `β` or the instance deals with many annoyances
   position (typed_near_litter (litter.to_near_litter ⟨i, ⊥, γ, bot_ne_coe⟩) : tangle γ) ≤
-    typed_singleton_position a →
+    typed_atom_position a →
   f_map_condition
 
 instance : is_well_order (tangle β) (inv_image (<) position) :=
@@ -168,7 +168,7 @@ begin
         position (typed_near_litter ⟨_, N, hN⟩ : tangle γ) ≤ position x) ∨
       β = ⊥ ∧ ∃ (a : atom), a == x ∧
         position (typed_near_litter (litter.to_near_litter ⟨i, β, γ, hβγ⟩) : tangle γ) ≤
-          typed_singleton_position a,
+          typed_atom_position a,
     { intros i hi,
       obtain ⟨N, hN₁, hN₂⟩ | ⟨a, h₁, h₂, h₃⟩ := hi,
       { left, exact ⟨N, hN₁, hN₂⟩ },
@@ -183,7 +183,7 @@ begin
       exact subtype.coe_inj.mp h.1.1 },
     { by_cases β = ⊥ ∧ ∃ (a : atom), a == x,
       { obtain ⟨hβ, a, hax⟩ := h,
-        refine lt_of_le_of_lt _ (card_Iic_lt (typed_singleton_position a)),
+        refine lt_of_le_of_lt _ (card_Iic_lt (typed_atom_position a)),
         refine ⟨⟨λ i, ⟨position
           (typed_near_litter (litter.to_near_litter ⟨i, β, γ, hβγ⟩) : tangle γ), _⟩, _⟩⟩,
         { obtain ⟨i, _, b, hb, _⟩ := i,
@@ -230,8 +230,8 @@ begin
   exact f_map_condition.any _ h this,
 end
 
-lemma typed_singleton_position_lt_f_map (x : tangle ⊥) :
-  typed_singleton_position x <
+lemma typed_atom_position_lt_f_map (x : tangle ⊥) :
+  typed_atom_position x <
   position (typed_near_litter
     (f_map (bot_ne_coe : (⊥ : type_index) ≠ γ) x).to_near_litter : tangle γ) :=
 begin

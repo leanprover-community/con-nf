@@ -456,9 +456,9 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
 \subsection{Strong supports}
 
 \begin{definition}
-    We define the relation \( \prec \) on support conditions by
+    We define the relation \( \prec \) on \( \alpha \)-support conditions by
     \begin{itemize}
-        \item \( (L, A) \prec (x, A) \) where \( x \) is an element of the litter set of \( L \);
+        \item \( (L, A) \prec (a, A) \) where \( a \) is an element of the litter set of \( L \);
         \item \( (N^\circ, A) \prec (N, A) \) where \( N \) is a near-litter that is not a litter;
         \item \( (a, A) \prec (N, A) \) where \( a \in N\,\triangle\,N^\circ \) and \( N \) is a near-litter;
         \item
@@ -492,10 +492,12 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
 \end{definition}
 \begin{lemma}
     If \( (N, A) \in S \) is a near-litter support condition in a strong support, then \( N \) is the litter set of some litter.
-    TODO: Is it convenient to have a different type where the fact that \( N \) is a litter is known?
+    % TODO: Is it convenient to have a different type where the fact that \( N \) is a litter is known?
+    % I don't think it is any more, but I'll keep the note as a comment anyway.
 \end{lemma}
 \begin{lemma}
-    Any support can be converted into a strong support in \( \omega \) stages of adding missing items, adding a small collection of new items at each stage.
+    Any support can be converted into a strong support.
+    % in \( \omega \) stages of adding missing items, adding a small collection of new items at each stage.
 \end{lemma}
 
 \subsection{Approximations}
@@ -526,14 +528,15 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
         \item a local permutation \( \pi^0_\ell \) of litters;
         \item a local permutation \( \pi^0_s \) of sublitters;
         \item such that \( S \in \dom \pi^0_s \) implies \( S^\circ \in \dom \pi^0_\ell \);
-        % \item if \( S \in \dom \pi^0_s \), then \( \pi^0_s(S)^\circ = \pi^0_\ell(S^\circ) \);
-        \item if \( a \in \dom \pi^0_a \) and \( S \in \dom \pi^0_s \), then \( a \not\in S \);
-        \item if \( \#(\dom \pi^0_a \cap L) = \#\kappa \) for some litter \( L \), then all atoms in the litter set of \( L \) lie in \( \dom \pi^0_a \);
+        \item if \( S \in \dom \pi^0_s \), then \( \pi^0_s(S)^\circ = \pi^0_\ell(S^\circ) \);
+        % \item if \( a \in \dom \pi^0_a \) and \( S \in \dom \pi^0_s \), then \( a \not\in S \);
+        \item if \( \#(\dom \pi^0_a \cap L) = \#\kappa \) for some litter \( L \), then \( L \subseteq \dom \pi^0_a \);
         \item if \( S \in \dom \pi^0_s \) and \( a \) is in the litter set of \( S^\circ \), then \( a \in \dom \pi^0_a \) if and only if \( a \not\in S \).
     \end{itemize}
 \end{definition}
 \begin{remark}
     This definition is independent of our parameters at this level of the construction; it could have even been defined before core tangle data.
+    The last condition ensures that if \( S_1, S_2 \) have \( S_1^\circ = S_2^\circ \), then at most one of \( S_1, S_2 \) can live in \( \dom \pi^0_s \).
 \end{remark}
 \begin{definition}
     Let \( \pi^0_a \) be a local permutation of atoms and \( \pi^0_\ell \) be a local permutation of litters.
@@ -542,7 +545,7 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
     % The appropriate \( \pi^0_s \) exists because of smallness of \( \dom \pi^0_a \).
 \end{definition}
 \begin{definition}
-    A near-litter permutation \( \pi : S_\bot \) has \emph{exception} \( a : \tau_\bot \) if \( \pi(x) \not\in \pi_\ell(L) \) or \( \pi^{-1}(x) \not\in \pi^{-1}_\ell(L) \), where \( a \) lies in the litter set of \( L \).
+    A near-litter permutation \( \pi : S_\bot \) has \emph{exception} \( a : \tau_\bot \) if \( \pi_a(a) \not\in \pi_\ell(L) \) or \( \pi^{-1}_a(a) \not\in \pi^{-1}_\ell(L) \), where \( a \) lies in the litter set of \( L \).
 \end{definition}
 \begin{definition}
     A near-litter approximation \( \pi^0 \) \emph{approximates} a near-litter permutation \( \pi : S_\bot \) if
@@ -554,7 +557,7 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
     In addition, we say that \( \pi^0 \) \emph{exactly approximates} \( \pi \) if
     \begin{itemize}
         \item \( \pi^0 \) approximates \( \pi \); and
-        \item if \( a \) is an exception of \( \pi \), then \( a \in \dom \pi^0 \).
+        \item if \( a \) is an exception of \( \pi \), then \( a \in \dom \pi^0_a \).
     \end{itemize}
 \end{definition}
 \begin{definition}
@@ -575,7 +578,7 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
     A \emph{\( \beta \)-free approximation} \( \beta \)-approximation \( \pi^0 \) where \( \pi^0_A \) is \( A \)-free for each \( A \).
 \end{definition}
 \begin{definition}
-    If \( \pi^0, \rho^0 \) are near-litter approximations, then we say \( \pi^0 \) \emph{extends} \( \rho^0 \) if the domains of \( \rho^0 \) are contained inside the domains of \( \pi^0 \), and the functions \( \pi^0_a, \pi^0_\ell, \pi^0_s \) agree on the domains of \( \rho^0 \).
+    If \( \pi^0, \rho^0 \) are near-litter approximations, then we say \( \pi^0 \) \emph{extends} \( \rho^0 \) if the domains of \( \rho^0 \) are contained inside the domains of \( \pi^0 \), and the functions \( \pi^0_a, \pi^0_\ell, \pi^0_s \) agree with \( \rho^0_a, \rho^0_\ell, \rho^0_s \) on the domain of \( \rho^0 \).
     If \( \pi^0, \rho^0 \) are \( \beta \)-approximations, \( \pi^0 \) extends \( \rho^0 \) if \( \pi^0_A \) extends \( \rho^0_A \) for all \( A \).
 \end{definition}
 
@@ -607,10 +610,9 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
     Then, the \emph{atom completion} of \( \pi^0 \) at \( a \) is defined by
     \[ \begin{cases}
         (\pi^0_A)_a(a) & \text{if } a \in \dom (\pi^0_A)_a \\
-        \pi_{L \setminus \dom (\pi^0_A)_a, H_n(L, A) \setminus \dom (\pi^0_A)_a}(a) & \text{otherwise}
+        \pi_{L \setminus \dom (\pi^0_A)_a, H_n(L, A)^\circ \setminus \dom (\pi^0_A)_a}(a) & \text{otherwise}
     \end{cases} \]
-    Note: Can we really be sure that \( H_n(L, A) \setminus \dom (\pi^0_A)_a \) is a sublitter?
-    In \texttt{retangled.pdf}, this is the assumption that \( M^- \subseteq \pi_A(L)^\circ \).
+    TODO: Check that \( H_n(L, A)^\circ \), not \( H_n(L, A) \), is the correct interpretation of the paper.
 \end{definition}
 \begin{definition}
     Let \( \pi^0_a \) be a local permutation of atoms with small domain.
@@ -645,16 +647,12 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
     The construction shown above is quite arduous, but it does constructively prove the existence of the required \( \gamma \)-approximation.
     Is there a better method?
 \end{remark}
-\begin{lemma}
-    Derived approximations of strong supports are free.
-    % TODO: We need an injectivity assumption on the hypothesis.
-    % We can do without it, though, by just using the empty approximation if injectivity doesn't hold, although this will never occur in practice.
-\end{lemma}
 \begin{definition}
     We say \emph{freedom of action holds at level \( \gamma \)} if every \( \gamma \)-free approximation exactly approximates some \( \gamma \)-allowable permutation.
 \end{definition}
 \begin{definition}
     Let \( L \) be an \( A \)-inflexible litter, so \( A = B \gg (\beta \longrightarrow \delta) \gg (\delta \longrightarrow \bot) \), and \( L = f_{\gamma,\delta}(t) \) for some \( \gamma : \lambda^\bot \) with \( \gamma < \beta \) and \( \gamma \neq \delta \).
+    Let \( H \) be an \( (L, A) \)-hypothesis.
     Suppose freedom of action holds at level \( \gamma \).
     Then, the \emph{\( A \)-inflexible litter completion} of \( \pi^0 \) at \( L \) is defined to be
     \[ \begin{cases}
@@ -663,6 +661,12 @@ Suppose we have positioned tangle data at \( \gamma \) and positioned and almost
     \end{cases} \]
     where \( \pi' \) is a \( \gamma \)-allowable permutation given by applying the freedom of action theorem to the \( \gamma \)-allowable approximation derived from a strong \( \gamma \)-support of \( t \).
 \end{definition}
+\begin{remark}
+    To use the freedom of action theorem above, we need to assume that the derived \( \gamma \)-allowable approximation is free.
+    This can't be proven inside the recursion, but fortunately we don't actually need the result here.
+    We can define \( \pi' \) to be the result of applying the freedom of action theorem if the hypotheses are satisfied, or the identity \( \gamma \)-allowable permutation otherwise.
+    The latter case will never actually occur, but it allows us to defer the proof of this fact until later.
+\end{remark}
 \begin{definition}
     Let \( L \) be a litter.
     The \emph{\( A \)-litter completion} of \( \pi^0 \) at \( L \) is
