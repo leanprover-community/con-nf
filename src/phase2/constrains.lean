@@ -32,7 +32,7 @@ noncomputable instance : linear_order (extended_index α) := linear_order_of_STO
 end extended_index
 
 variables {α : Λ} [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [position_data.{}] [almost_tangle_cumul α] [tangle_cumul α] {β : Iio α}
+  [position_data.{}] [almost_tangle_cumul α] [tangle_cumul α] {β : Λ}
 
 lemma coe_ne' {γ : Iio α} {β : Iio α} : γ ≠ β → (γ : Λ) ≠ (β : Λ) :=
 by contrapose!; simp only [subtype.coe_inj, imp_self]
@@ -45,7 +45,7 @@ begin
   simpa only [coe_coe, subtype.coe_mk, coe_lt_coe, subtype.mk_lt_mk] using h,
 end
 
-variable (β)
+variables (α) (β)
 
 /--
 Support conditions can be said to *constrain* each other in a number of ways. This is discussed
@@ -58,8 +58,8 @@ in the "freedom of action discussion".
     `δ, ε < γ` with `δ ≠ ε`, `t ∈ τ_γ`, where `⟨x, B⟩` lies in the designated `δ`-support of `t`.
 -/
 @[mk_iff] inductive constrains : support_condition β → support_condition β → Prop
-| mem_litter (L : litter) (a ∈ litter_set L) (A : extended_index β) :
-    constrains ⟨inr L.to_near_litter, A⟩ ⟨inl a, A⟩
+| atom (a : atom) (A : extended_index β) :
+    constrains ⟨inr a.1.to_near_litter, A⟩ ⟨inl a, A⟩
 | near_litter (N : near_litter) (hN : litter_set N.fst ≠ N.snd) (A : extended_index β) :
     constrains ⟨inr N.fst.to_near_litter, A⟩ ⟨inr N, A⟩
 | symm_diff (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd) (A : extended_index β) :
@@ -78,7 +78,7 @@ in the "freedom of action discussion".
         (A.cons (coe_lt hε)).cons (bot_lt_coe _)⟩
 
 /-! We declare new notation for the "constrains" relation on support conditions. -/
-infix ` ≺ `:50 := constrains _
+notation c ` ≺[`:50 α `] ` d:50 := constrains α _ c d
 
 instance : has_lt (support_condition β) :=
 ⟨prod.lex (inv_image (<) (λ c, c.elim typed_atom_position typed_near_litter_position)) (<)⟩
@@ -86,13 +86,13 @@ instance : has_lt (support_condition β) :=
 instance : is_well_founded (support_condition β) (<) :=
 prod.lex.is_well_founded
 
-lemma constrains_subrelation : subrelation (constrains β) (<) :=
+lemma constrains_subrelation : subrelation (constrains α β) (<) :=
 begin
   rintros c d h,
-  obtain (⟨L, a, ha, A⟩ | ⟨N, hN, A⟩ | ⟨N, a, ha, A⟩ |
+  obtain (⟨a, A⟩ | ⟨N, hN, A⟩ | ⟨N, a, ha, A⟩ |
     ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩) := h;
   left,
-  { exact litter_lt L a ha, },
+  { exact litter_lt a.1 a rfl, },
   { refine litter_lt_near_litter N _,
     contrapose! hN,
     rw ← hN,
@@ -110,9 +110,17 @@ end
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,
 then `x < y` in `µ`, under the `typed_near_litter` or `typed_atom` maps. -/
-lemma constrains_wf : well_founded (constrains β) :=
-subrelation.wf (constrains_subrelation β) (is_well_founded.to_has_well_founded _).wf
+lemma constrains_wf : well_founded (constrains α β) :=
+subrelation.wf (constrains_subrelation α β) (is_well_founded.to_has_well_founded _).wf
 
-instance : has_well_founded (support_condition β) := ⟨constrains β, constrains_wf β⟩
+instance : has_well_founded (support_condition β) := ⟨constrains α β, constrains_wf α β⟩
+
+@[simp] lemma constrains_atom {c : support_condition β} {a : atom} {A : extended_index β} :
+  c ≺[α] ⟨inl a, A⟩ ↔ c = ⟨inr a.1.to_near_litter, A⟩ :=
+begin
+  split,
+  { rintro ⟨⟩, refl, },
+  { rintro rfl, exact constrains.atom a A, },
+end
 
 end con_nf
