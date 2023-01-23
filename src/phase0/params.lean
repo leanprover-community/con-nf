@@ -203,6 +203,9 @@ lemma small.union (hs : small s) (ht : small t) : small (s ∪ t) :=
 lemma small.symm_diff (hs : small s) (ht : small t) : small (s ∆ t) :=
 (hs.union ht).mono symm_diff_subset_union
 
+lemma small.symm_diff_iff (hs : small s) : small t ↔ small (s ∆ t) :=
+⟨hs.symm_diff, λ ht, by simpa only [symm_diff_symm_diff_self'] using ht.symm_diff hs⟩
+
 lemma small_Union (hι : #ι < #κ) {f : ι → set α} (hf : ∀ i, small (f i)) : small (⋃ i, f i) :=
 (mk_Union_le _).trans_lt $ mul_lt_of_lt κ_regular.aleph_0_le hι $
   supr_lt_of_is_regular κ_regular hι hf
@@ -248,6 +251,29 @@ lemma is_near_comm : is_near s t ↔ is_near t s := ⟨is_near.symm, is_near.sym
 /-- If two sets are near each other, then their images under an arbitrary function are also near. -/
 lemma is_near.image (f : α → β) (h : is_near s t) : is_near (f '' s) (f '' t) :=
 h.image.mono subset_image_symm_diff
+
+lemma is_near_of_small (hs : small s) (ht : small t) : is_near s t :=
+small.symm_diff hs ht
+
+lemma small.is_near_iff (hs : small s) : small t ↔ is_near s t :=
+hs.symm_diff_iff
+
+lemma is_near.κ_le (h : is_near s t) (hs : #κ ≤ #s) : #κ ≤ #(t : set α) :=
+begin
+  by_contradiction ht,
+  rw not_le at ht,
+  have := h.symm,
+  rw ← small.is_near_iff ht at this,
+  exact (lt_iff_not_ge _ _).mp this hs,
+end
+
+lemma is_near.mk_inter (h : is_near s t) (hs : #κ ≤ #s) : #κ ≤ #(s ∩ t : set α) :=
+begin
+  rw [is_near, symm_diff_eq_sup_sdiff_inf] at h,
+  exact le_of_not_gt (λ hst, lt_irrefl _
+    (((hs.trans (mk_le_mk_of_subset (subset_union_left _ _))).trans
+    (le_mk_diff_add_mk (s ∪ t) (s ∩ t))).trans_lt (add_lt_of_lt κ_regular.aleph_0_le h hst))),
+end
 
 end is_near
 end con_nf

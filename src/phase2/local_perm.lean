@@ -5,7 +5,7 @@ open function set
 
 variables {α : Type*}
 
-/-- A local permutation between a subset `domain` of `α`. The (global) maps `to_fun : α → α` and
+/-- A local permutation of a subset `domain` of `α`. The (global) maps `to_fun : α → α` and
 `inv_fun : α → α` map `domain` to itself, and are inverse to each other there. The values of
 `to_fun` and `inv_fun` outside of `domain` are irrelevant. -/
 structure local_perm (α : Type*) :=
@@ -105,8 +105,8 @@ lemma copy_eq (π : local_perm α) (f : α → α) (hf : ⇑π = f) (g : α → 
   π.copy f hf g hg s hs = π :=
 by { substs f g s, cases π, refl }
 
-/-- Associating to a local_perm an equiv between the domain and itself. -/
-protected def to_equiv : equiv (π.domain) (π.domain) :=
+/-- Associating to a local_perm a permutation of the domain. -/
+protected def to_perm : equiv.perm (π.domain) :=
 { to_fun := λ x, ⟨π x, π.map_domain x.mem⟩,
   inv_fun := λ y, ⟨π.symm y, π.symm.map_domain y.mem⟩,
   left_inv := λ ⟨x, hx⟩, subtype.eq $ π.left_inv hx,
@@ -280,6 +280,20 @@ begin
     rw [symm_domain, t],
     exact mem_univ _ }
 end
+
+/-- We define a preorder on local permutations by saying `π ≤ π'` if the domain of `π` is contained
+in the domain of `π'`, and the permutations agree on the domain of `π`. -/
+instance : preorder (local_perm α) := {
+  le := λ π π', π.domain ⊆ π'.domain ∧ π.domain.eq_on π π',
+  le_refl := λ a, ⟨subset_rfl, eq_on_refl _ _⟩,
+  le_trans := λ a b c hab hbc, ⟨hab.1.trans hbc.1, hab.2.trans (hbc.2.mono hab.1)⟩,
+}
+
+lemma domain_subset_domain_of_le {π π' : local_perm α} (h : π ≤ π') : π.domain ⊆ π'.domain := h.1
+lemma eq_on_domain_of_le {π π' : local_perm α} (h : π ≤ π') : π.domain.eq_on π π' := h.2
+lemma le_of_eq_on_source {π π' : local_perm α} (h : π ≈ π') : π ≤ π' := ⟨subset_of_eq h.1, h.2⟩
+lemma apply_eq_of_le {π π' : local_perm α} (h : π ≤ π') {x : α} (hx : x ∈ π.domain) : π' x = π x :=
+(eq_on_domain_of_le h hx).symm
 
 end local_perm
 
