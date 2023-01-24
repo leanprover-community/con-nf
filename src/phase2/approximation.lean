@@ -2,7 +2,7 @@ import phase2.constrains
 import phase2.local_perm
 import phase2.sublitter
 
-open set
+open set sum
 open_locale cardinal pointwise
 
 universe u
@@ -13,25 +13,14 @@ variable [params.{u}]
 @[ext] structure near_litter_approx :=
 (atom_perm : local_perm atom)
 (litter_perm : local_perm litter)
-(sublitter_perm : local_perm sublitter)
-(sublitter_domain : ∀ ⦃S : sublitter⦄, S ∈ sublitter_perm.domain → S.litter ∈ litter_perm.domain)
-(map_sublitter' : ∀ ⦃S : sublitter⦄, S ∈ sublitter_perm.domain →
-  (sublitter_perm S).litter = litter_perm S.litter)
-(atoms_cover_large : ∀ ⦃L : litter⦄, #(atom_perm.domain ∩ litter_set L : set atom) = #κ →
-  litter_set L ⊆ atom_perm.domain)
-(atoms_cover_diff : ∀ ⦃S : sublitter⦄, S ∈ sublitter_perm.domain →
-  ∀ a ∈ litter_set S.litter, (a ∈ atom_perm.domain ↔ a ∉ S))
+(domain_small : ∀ L, small (litter_set L ∩ atom_perm.domain))
 
 namespace near_litter_approx
 
 instance : has_smul near_litter_approx atom := ⟨λ π, π.atom_perm⟩
 instance : has_smul near_litter_approx litter := ⟨λ π, π.litter_perm⟩
-instance : has_smul near_litter_approx sublitter := ⟨λ π, π.sublitter_perm⟩
 
 variables (π : near_litter_approx)
-
-@[simp] lemma map_sublitter (S : sublitter) (h : S ∈ π.sublitter_perm.domain) :
-  (π • S).litter = π • S.litter := π.map_sublitter' h
 
 lemma smul_eq_smul_atom {a₁ a₂ : atom}
   (h₁ : a₁ ∈ π.atom_perm.domain) (h₂ : a₂ ∈ π.atom_perm.domain) :
@@ -49,33 +38,14 @@ begin
   rw [← π.litter_perm.eq_symm_apply h₁ (π.litter_perm.map_domain h₂), local_perm.left_inv _ h₂],
 end
 
-lemma smul_eq_smul_sublitter {S₁ S₂ : sublitter}
-  (h₁ : S₁ ∈ π.sublitter_perm.domain) (h₂ : S₂ ∈ π.sublitter_perm.domain) :
-  π • S₁ = π • S₂ ↔ S₁ = S₂ :=
-begin
-  unfold has_smul.smul,
-  rw [← π.sublitter_perm.eq_symm_apply h₁ (π.sublitter_perm.map_domain h₂),
-    local_perm.left_inv _ h₂],
-end
-
 def symm : near_litter_approx := {
   atom_perm := π.atom_perm.symm,
   litter_perm := π.litter_perm.symm,
-  sublitter_perm := π.sublitter_perm.symm,
-  sublitter_domain := π.sublitter_domain,
-  map_sublitter' := λ S h, begin
-    rw ← π.smul_eq_smul_litter
-      (π.sublitter_domain (π.sublitter_perm.symm.map_domain h))
-      (π.litter_perm.symm.map_domain (π.sublitter_domain h)),
-    have := π.map_sublitter (π.sublitter_perm.symm S) (π.sublitter_perm.symm.map_domain h),
-    unfold has_smul.smul at this ⊢,
-    rw [local_perm.right_inv] at this,
-    rw [← this, local_perm.right_inv _ (π.sublitter_domain h)],
-    exact h,
-  end,
-  atoms_cover_large := π.atoms_cover_large,
-  atoms_cover_diff := π.atoms_cover_diff,
+  domain_small := π.domain_small,
 }
+
+@[simp] lemma symm_atom_perm : π.symm.atom_perm = π.atom_perm.symm := rfl
+@[simp] lemma symm_litter_perm : π.symm.litter_perm = π.litter_perm.symm := rfl
 
 @[simp] lemma left_inv_atom {a} : a ∈ π.atom_perm.domain → π.symm • π • a = a :=
 π.atom_perm.left_inv
@@ -83,17 +53,11 @@ def symm : near_litter_approx := {
 @[simp] lemma left_inv_litter {L} : L ∈ π.litter_perm.domain → π.symm • π • L = L :=
 π.litter_perm.left_inv
 
-@[simp] lemma left_inv_sublitter {S} : S ∈ π.sublitter_perm.domain → π.symm • π • S = S :=
-π.sublitter_perm.left_inv
-
 @[simp] lemma right_inv_atom {a} : a ∈ π.atom_perm.domain → π • π.symm • a = a :=
 π.atom_perm.right_inv
 
 @[simp] lemma right_inv_litter {L} : L ∈ π.litter_perm.domain → π • π.symm • L = L :=
 π.litter_perm.right_inv
-
-@[simp] lemma right_inv_sublitter {S} : S ∈ π.sublitter_perm.domain → π • π.symm • S = S :=
-π.sublitter_perm.right_inv
 
 lemma eq_symm_apply_atom {a₁ a₂} : a₁ ∈ π.atom_perm.domain → a₂ ∈ π.atom_perm.domain →
   (a₁ = π.symm • a₂ ↔ π • a₁ = a₂) := π.atom_perm.eq_symm_apply
@@ -101,114 +65,84 @@ lemma eq_symm_apply_atom {a₁ a₂} : a₁ ∈ π.atom_perm.domain → a₂ ∈
 lemma eq_symm_apply_litter {L₁ L₂} : L₁ ∈ π.litter_perm.domain → L₂ ∈ π.litter_perm.domain →
   (L₁ = π.symm • L₂ ↔ π • L₁ = L₂) := π.litter_perm.eq_symm_apply
 
-lemma eq_symm_apply_sublitter {S₁ S₂} : S₁ ∈ π.sublitter_perm.domain →
-  S₂ ∈ π.sublitter_perm.domain → (S₁ = π.symm • S₂ ↔ π • S₁ = S₂) := π.sublitter_perm.eq_symm_apply
+section generate
 
-def generate_sublitter (atom_perm : local_perm atom) (litter_perm : local_perm litter)
-  (h : small atom_perm.domain) (S : sublitter) : sublitter := {
-  litter := litter_perm S.litter,
-  carrier := litter_set (litter_perm S.litter) ∩
-    (atom_perm.domainᶜ ∪ atom_perm '' (S ∩ atom_perm.domain)),
-  subset := inter_subset_left _ _,
-  diff_small := begin
-    rw [diff_self_inter, ← diff_diff],
-    refine small.mono (diff_subset _ _) _,
-    rw diff_compl,
-    exact small.mono (inter_subset_right _ _) h,
-  end,
+variables (π)
+
+def generate_sublitter (S : sublitter) : sublitter := {
+  litter := π • S.litter,
+  carrier := litter_set (π • S.litter) \ π.atom_perm.domain,
+  subset := diff_subset _ _,
+  diff_small := by simpa only [sdiff_sdiff_right_self, inf_eq_inter] using π.domain_small (π • S.litter),
 }
 
-def generate_sublitter_domain (atom_domain : set atom) (litter_domain : set litter) :
-  set sublitter :=
-{S | S.litter ∈ litter_domain ∧ ∀ a ∈ litter_set S.litter, (a ∈ atom_domain ↔ a ∉ S)}
+def sublitter_domain : set sublitter :=
+{S | S.litter ∈ π.litter_perm.domain ∧ (S : set atom) = litter_set S.litter \ π.atom_perm.domain}
 
-lemma generate_sublitter_mem_domain (atom_perm : local_perm atom) (litter_perm : local_perm litter)
-  (h : small atom_perm.domain) ⦃S : sublitter⦄
-  (hS : S ∈ generate_sublitter_domain atom_perm.domain litter_perm.domain) :
-  generate_sublitter atom_perm litter_perm h S ∈
-    generate_sublitter_domain atom_perm.domain litter_perm.domain :=
+lemma mem_sublitter_domain (S : sublitter) (h : S ∈ π.sublitter_domain) :
+  (S : set atom) = litter_set S.litter \ π.atom_perm.domain :=
+h.2
+
+lemma generate_sublitter_mem_domain ⦃S : sublitter⦄ (h : S ∈ sublitter_domain π) :
+  generate_sublitter π S ∈ sublitter_domain π :=
+⟨π.litter_perm.map_domain h.1, rfl⟩
+
+lemma generate_sublitter_left_inv ⦃S : sublitter⦄ (h : S ∈ sublitter_domain π) :
+  generate_sublitter π.symm (generate_sublitter π S) = S :=
 begin
-  obtain ⟨h₁, h₂⟩ := hS,
-  refine ⟨litter_perm.map_domain h₁, λ a ha, _⟩,
-  simp only [generate_sublitter, sublitter.mem_mk, mem_inter_iff, mem_litter_set,
-    mem_union, mem_compl_iff, mem_image, set_like.mem_coe, not_and, not_or_distrib],
-  refine ⟨_, λ h, of_not_not (h ha).1⟩,
-  intros ha₁ ha₂,
-  simp only [ha₁, not_true, not_false_iff, not_exists, not_and, true_and, and_imp],
-  intros b hb₁ hb₂ hb₃,
-  have := h₂ b (sublitter.mem_litter_set_of_mem hb₁),
-  simp only [hb₁, not_true, iff_false] at this,
-  exact this hb₂,
+  ext : 1,
+  simp only [h.2, generate_sublitter, symm_atom_perm, local_perm.symm_domain, sublitter.coe_mk,
+    π.left_inv_litter h.1],
 end
-
-lemma generate_sublitter_left_inv (atom_perm : local_perm atom) (litter_perm : local_perm litter)
-  (h : small atom_perm.domain) ⦃S : sublitter⦄
-  (hS : S ∈ generate_sublitter_domain atom_perm.domain litter_perm.domain) :
-  generate_sublitter atom_perm.symm litter_perm.symm h
-    (generate_sublitter atom_perm litter_perm h S) = S :=
-begin
-  obtain ⟨hS₁, hS₂⟩ := hS,
-  ext a : 2,
-  simp only [generate_sublitter, local_perm.symm_domain, sublitter.coe_mk, mem_inter_iff,
-    mem_litter_set, mem_union, mem_compl_iff, mem_image, set_like.mem_coe],
-  split,
-  { rintro ⟨ha, hdom | ⟨b, ⟨⟨hb₁, hb₂ | ⟨c, ⟨hc₁, hc₂⟩, rfl⟩⟩, hb₃⟩, rfl⟩⟩,
-    { rw [hS₂, not_not] at hdom,
-      exact hdom,
-      rw local_perm.left_inv at ha,
-      exact ha,
-      exact hS₁, },
-    { cases hb₂ hb₃, },
-    { rw local_perm.left_inv at ⊢,
-      exact hc₁,
-      exact hc₂, }, },
-  { intro ha₁,
-    split,
-    { rw local_perm.left_inv,
-      exact sublitter.fst_eq_of_mem ha₁,
-      exact hS₁, },
-    refine not_or_of_imp (λ ha₂, _),
-    rw hS₂ a (sublitter.mem_litter_set_of_mem ha₁) at ha₂,
-    cases ha₂ ha₁, },
-end
-
-def generate_sublitter_perm (atom_perm : local_perm atom) (litter_perm : local_perm litter)
-  (h : small atom_perm.domain) : local_perm sublitter := {
-  to_fun := generate_sublitter atom_perm litter_perm h,
-  inv_fun := generate_sublitter atom_perm.symm litter_perm.symm h,
-  domain := generate_sublitter_domain atom_perm.domain litter_perm.domain,
-  to_fun_domain' := generate_sublitter_mem_domain atom_perm litter_perm h,
-  inv_fun_domain' := generate_sublitter_mem_domain atom_perm.symm litter_perm.symm h,
-  left_inv' := generate_sublitter_left_inv atom_perm litter_perm h,
-  right_inv' := generate_sublitter_left_inv atom_perm.symm litter_perm.symm h,
-}
 
 /-- Generates the unique near-litter approximation given by an atom local permutation and a
 near-litter local permutation. This uniqueness is only up to evaluating everything on the domain
-of the permutation.. -/
-def generate (atom_perm : local_perm atom) (litter_perm : local_perm litter)
-  (h : small atom_perm.domain) : near_litter_approx := {
-  atom_perm := atom_perm,
-  litter_perm := litter_perm,
-  sublitter_perm := generate_sublitter_perm atom_perm litter_perm h,
-  sublitter_domain := λ S hS, hS.1,
-  map_sublitter' := λ S hS, rfl,
-  atoms_cover_large := λ L h₂, false.elim $ ne_of_lt (small.mono (inter_subset_left _ _) h) h₂,
-  atoms_cover_diff := λ S hS, hS.2,
+of the permutation. -/
+def generate_sublitter_perm : local_perm sublitter := {
+  to_fun := generate_sublitter π,
+  inv_fun := generate_sublitter π.symm,
+  domain := sublitter_domain π,
+  to_fun_domain' := generate_sublitter_mem_domain π,
+  inv_fun_domain' := generate_sublitter_mem_domain π.symm,
+  left_inv' := generate_sublitter_left_inv π,
+  right_inv' := generate_sublitter_left_inv π.symm,
 }
 
-@[simp] lemma generate_symm (atom_perm : local_perm atom) (litter_perm : local_perm litter)
-  (h : small atom_perm.domain) :
-  (generate atom_perm litter_perm h).symm = generate atom_perm.symm litter_perm.symm h := rfl
+@[simp] lemma generate_symm :
+  (generate_sublitter_perm π).symm = generate_sublitter_perm π.symm := rfl
 
-lemma sublitter_coe_eq_of_mem_domain (S : sublitter) (h : S ∈ π.sublitter_perm.domain) :
-  (S : set atom) = litter_set S.litter \ π.atom_perm.domain :=
+@[simp] lemma generate_sublitter_perm_domain :
+  (generate_sublitter_perm π).domain = sublitter_domain π := rfl
+
+@[simp] lemma generate_sublitter_apply (S : sublitter) :
+  generate_sublitter_perm π S = generate_sublitter π S := rfl
+
+instance : has_smul near_litter_approx sublitter := ⟨λ π, π.generate_sublitter_perm⟩
+
+@[simp] lemma smul_sublitter (S : sublitter) :
+  (π • S).litter = π • S.litter := rfl
+
+lemma smul_eq_smul_sublitter {S₁ S₂ : sublitter}
+  (h₁ : S₁ ∈ sublitter_domain π) (h₂ : S₂ ∈ sublitter_domain π) :
+  π • S₁ = π • S₂ ↔ S₁ = S₂ :=
 begin
-  ext a,
-  have := π.atoms_cover_diff h a,
-  exact ⟨λ h, ⟨sublitter.fst_eq_of_mem h, (this (sublitter.fst_eq_of_mem h)).not_left.mpr h⟩,
-    λ h, (this h.1).not_left.mp h.2⟩,
+  unfold has_smul.smul,
+  rw [← π.generate_sublitter_perm.eq_symm_apply h₁ (π.generate_sublitter_perm.map_domain h₂),
+    local_perm.left_inv _ _],
+  exact h₂,
 end
+
+@[simp] lemma left_inv_sublitter {S} : S ∈ π.sublitter_domain → π.symm • π • S = S :=
+π.generate_sublitter_perm.left_inv
+
+@[simp] lemma right_inv_sublitter {S} : S ∈ π.sublitter_domain → π • π.symm • S = S :=
+π.generate_sublitter_perm.right_inv
+
+lemma eq_symm_apply_sublitter {S₁ S₂} : S₁ ∈ π.sublitter_domain →
+  S₂ ∈ π.sublitter_domain → (S₁ = π.symm • S₂ ↔ π • S₁ = S₂) :=
+π.generate_sublitter_perm.eq_symm_apply
+
+end generate
 
 def is_exception (π : near_litter_perm) (a : atom) : Prop :=
 π • a ∉ litter_set (π • a.1) ∨ π⁻¹ • a ∉ litter_set (π⁻¹ • a.1)
@@ -216,17 +150,16 @@ def is_exception (π : near_litter_perm) (a : atom) : Prop :=
 @[mk_iff] structure approximates (π₀ : near_litter_approx) (π : near_litter_perm) : Prop :=
 (map_atom : ∀ a, a ∈ π₀.atom_perm.domain → π₀ • a = π • a)
 (map_litter : ∀ L, L ∈ π₀.litter_perm.domain → π₀ • L = π • L)
-(map_sublitter : ∀ S, S ∈ π₀.sublitter_perm.domain → (↑(π₀ • S) : set _) = π • (S : set atom))
+(map_sublitter : ∀ S, S ∈ π₀.sublitter_domain → (↑(π₀ • S) : set _) = π • (S : set atom))
 
 @[mk_iff] structure exactly_approximates (π₀ : near_litter_approx) (π : near_litter_perm)
   extends approximates π₀ π : Prop :=
 (exception_mem : ∀ a, is_exception π a → a ∈ π₀.atom_perm.domain)
 
 instance : preorder near_litter_approx := {
-  le := λ π π', π.atom_perm ≤ π'.atom_perm ∧
-    π.litter_perm ≤ π'.litter_perm ∧ π.sublitter_perm ≤ π'.sublitter_perm,
-  le_refl := λ π, ⟨le_rfl, le_rfl, le_rfl⟩,
-  le_trans := λ _ _ _ h₁ h₂, ⟨h₁.1.trans h₂.1, h₁.2.1.trans h₂.2.1, h₁.2.2.trans h₂.2.2⟩,
+  le := λ π π', π.atom_perm ≤ π'.atom_perm ∧ π.litter_perm ≤ π'.litter_perm,
+  le_refl := λ π, ⟨le_rfl, le_rfl⟩,
+  le_trans := λ _ _ _ h₁ h₂, ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩,
 }
 
 section free
@@ -245,7 +178,6 @@ variables (α : Λ) [core_tangle_cumul α] [positioned_tangle_cumul α]
 def flexible (L : litter) (A : extended_index β) : Prop := ¬inflexible α L A
 
 @[mk_iff] structure free (π : near_litter_approx) (A : extended_index β) : Prop :=
-(mk_lt : ∀ L, small (π.atom_perm.domain ∩ litter_set L))
 (flex : ∀ L ∈ π.litter_perm.domain, flexible α L A)
 
 end free
@@ -257,18 +189,61 @@ end near_litter_approx
 def struct_approx (β : type_index) := extended_index β → near_litter_approx
 
 namespace struct_approx
-variable {β : type_index}
 
-def approximates (π₀ : struct_approx β) (π : struct_perm β) : Prop :=
+-- TODO: Could refactor struct_perm as a map `extended_index β → near_litter_perm`.
+
+def approximates {β : type_index} (π₀ : struct_approx β) (π : struct_perm β) : Prop :=
 ∀ A, (π₀ A).approximates (struct_perm.of_bot $ struct_perm.derivative A π)
 
-def exactly_approximates (π₀ : struct_approx β) (π : struct_perm β) : Prop :=
+def exactly_approximates {β : type_index} (π₀ : struct_approx β) (π : struct_perm β) : Prop :=
 ∀ A, (π₀ A).exactly_approximates (struct_perm.of_bot $ struct_perm.derivative A π)
 
-variables (α : Λ) [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [position_data.{}] [almost_tangle_cumul α]
+variables {α : Λ} [core_tangle_cumul α] [positioned_tangle_cumul α]
+  [position_data.{}] [almost_tangle_cumul α] [tangle_cumul α]
 
 def free {β : Iio α} (π₀ : struct_approx β) : Prop := ∀ A, (π₀ A).free α A
+
+/-- The inductive hypothesis used to construct the induced action of an approximation in the
+freedom of action theorem. -/
+structure hypothesis {β : Iio α} (c : support_condition β) :=
+(atom_image : Π a A, ⟨inl a, A⟩ ≺[α] c → atom)
+(near_litter_image : Π N A, ⟨inr N, A⟩ ≺[α] c → near_litter)
+
+namespace hypothesis
+variable {β : Iio α}
+
+def fix_map :
+  (psum (Σ' (_ : atom), extended_index β) (Σ' (_ : near_litter), extended_index β)) →
+  support_condition β
+| (psum.inl ⟨a, A⟩) := ⟨inl a, A⟩
+| (psum.inr ⟨N, A⟩) := ⟨inr N, A⟩
+
+def fix_wf : has_well_founded
+  (psum (Σ' (_ : atom), extended_index β) (Σ' (_ : near_litter), extended_index β)) :=
+⟨inv_image (constrains α β) fix_map, inv_image.wf _ (constrains_wf α β)⟩
+
+/-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.
+This is used to compute the induced action of an approximation on all atoms and near-litters. -/
+noncomputable! mutual def fix_atom, fix_near_litter
+  (Fa : Π a (A : extended_index β), hypothesis ⟨inl a, A⟩ → atom)
+  (FN : Π N (A : extended_index β), hypothesis ⟨inr N, A⟩ → near_litter)
+with fix_atom : atom → extended_index β → atom
+| a A := Fa a A ⟨λ b B hb, fix_atom b B, λ N B hb, fix_near_litter N B⟩
+with fix_near_litter : near_litter → extended_index β → near_litter
+| N A := FN N A ⟨λ b B hb, fix_atom b B, λ N B hb, fix_near_litter N B⟩
+using_well_founded { rel_tac := λ _ _, `[exact (fix_wf)], dec_tac := `[exact hb] }
+
+lemma fix_atom_eq (Fa FN) (a : atom) (A : extended_index β) :
+  fix_atom Fa FN a A =
+  Fa a A ⟨λ b B hb, fix_atom Fa FN b B, λ N B hb, fix_near_litter Fa FN N B⟩ :=
+by rw fix_atom
+
+lemma fix_near_litter_eq (Fa FN) (N : near_litter) (A : extended_index β) :
+  fix_near_litter Fa FN N A =
+  FN N A ⟨λ b B hb, fix_atom Fa FN b B, λ N B hb, fix_near_litter Fa FN N B⟩ :=
+by rw fix_near_litter
+
+end hypothesis
 
 end struct_approx
 

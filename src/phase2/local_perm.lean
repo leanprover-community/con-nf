@@ -123,6 +123,101 @@ by conv_lhs { rw [← image_domain_eq_domain, ball_image_iff] }
 lemma exists_mem_domain {p : α → Prop} : (∃ y ∈ π.domain, p y) ↔ ∃ x ∈ π.domain, p (π x) :=
 by conv_lhs { rw [← image_domain_eq_domain, bex_image_iff] }
 
+def is_stable (s : set α) : Prop := ∀ ⦃x⦄, x ∈ π.domain → (π x ∈ s ↔ x ∈ s)
+
+namespace is_stable
+
+variables {π} {s : set α} {x y : α}
+
+lemma apply_mem_iff (h : π.is_stable s) (hx : x ∈ π.domain) : π x ∈ s ↔ x ∈ s := h hx
+
+lemma symm_apply_mem_iff (h : π.is_stable s) : ∀ ⦃y⦄, y ∈ π.domain → (π.symm y ∈ s ↔ y ∈ s) :=
+π.forall_mem_domain.mpr $ λ x hx, by rw [π.left_inv hx, h hx]
+
+protected lemma symm (h : π.is_stable s) : π.symm.is_stable s := h.symm_apply_mem_iff
+
+@[simp] lemma symm_iff : π.symm.is_stable s ↔ π.is_stable s := ⟨λ h, h.symm, λ h, h.symm⟩
+
+protected lemma maps_to (h : π.is_stable s) : maps_to π (π.domain ∩ s) (π.domain ∩ s) :=
+λ x hx, ⟨π.maps_to hx.1, (h hx.1).2 hx.2⟩
+
+lemma symm_maps_to (h : π.is_stable s) : maps_to π.symm (π.domain ∩ s) (π.domain ∩ s) :=
+h.symm.maps_to
+
+/-- Restrict a `local_perm` to a stable subset. -/
+@[simps {fully_applied := ff}] def restr (h : π.is_stable s) : local_perm α :=
+{ to_fun := π,
+  inv_fun := π.symm,
+  domain := π.domain ∩ s,
+  to_fun_domain' := h.maps_to,
+  inv_fun_domain' := h.symm_maps_to,
+  left_inv' := π.left_inv_on.mono (inter_subset_left _ _),
+  right_inv' := π.right_inv_on.mono (inter_subset_left _ _) }
+
+lemma image_eq (h : π.is_stable s) : π '' (π.domain ∩ s) = π.domain ∩ s :=
+h.restr.image_domain_eq_domain
+
+lemma symm_image_eq (h : π.is_stable s) : π.symm '' (π.domain ∩ s) = π.domain ∩ s :=
+h.symm.image_eq
+
+lemma iff_preimage_eq : π.is_stable s ↔ π.domain ∩ π ⁻¹' s = π.domain ∩ s :=
+by simp only [is_stable, set.ext_iff, mem_inter_iff, and.congr_right_iff, mem_preimage]
+
+alias iff_preimage_eq ↔ preimage_eq of_preimage_eq
+
+lemma iff_symm_preimage_eq : π.is_stable s ↔ π.domain ∩ π.symm ⁻¹' s = π.domain ∩ s :=
+symm_iff.symm.trans iff_preimage_eq
+
+alias iff_symm_preimage_eq ↔ symm_preimage_eq of_symm_preimage_eq
+
+-- lemma of_image_eq (h : π '' (π.domain ∩ s) = π.domain ∩ s) : π.is_stable s :=
+-- of_symm_preimage_eq $ eq.trans (of_symm_preimage_eq rfl).image_eq.symm h
+
+-- lemma of_symm_image_eq (h : π.symm '' (π.domain ∩ s) = π.domain ∩ s) : π.is_stable s :=
+-- of_preimage_eq $ eq.trans (of_preimage_eq rfl).symm_image_eq.symm h
+
+protected lemma compl (h : π.is_stable s) : π.is_stable sᶜ :=
+λ x hx, not_congr (h hx)
+
+protected lemma inter {s'} (h : π.is_stable s) (h' : π.is_stable s') :
+  π.is_stable (s ∩ s') :=
+λ x hx, and_congr (h hx) (h' hx)
+
+protected lemma union {s'} (h : π.is_stable s) (h' : π.is_stable s') :
+  π.is_stable (s ∪ s') :=
+λ x hx, or_congr (h hx) (h' hx)
+
+protected lemma diff {s'} (h : π.is_stable s) (h' : π.is_stable s') :
+  π.is_stable (s \ s') :=
+h.inter h'.compl
+
+lemma left_inv_on_piecewise {π' : local_perm α} [Π i, decidable (i ∈ s)]
+  (h : π.is_stable s) (h' : π'.is_stable s) :
+  left_inv_on (s.piecewise π.symm π'.symm) (s.piecewise π π') (s.ite π.domain π'.domain) :=
+begin
+  rintro x (⟨he, hs⟩ | ⟨he, hs : x ∉ s⟩),
+  { rw [piecewise_eq_of_mem _ _ _ hs, piecewise_eq_of_mem _ _ _ ((h he).2 hs), π.left_inv he], },
+  { rw [piecewise_eq_of_not_mem _ _ _ hs, piecewise_eq_of_not_mem _ _ _ ((h'.compl he).2 hs),
+      π'.left_inv he] }
+end
+
+lemma inter_eq_of_inter_eq_of_eq_on {π' : local_perm α} (h : π.is_stable s)
+  (h' : π'.is_stable s) (hs : π.domain ∩ s = π'.domain ∩ s) (Heq : eq_on π π' (π.domain ∩ s)) :
+  π.domain ∩ s = π'.domain ∩ s :=
+by rw [← h.image_eq, ← h'.image_eq, ← hs, Heq.image_eq]
+
+lemma symm_eq_on_of_inter_eq_of_eq_on {π' : local_perm α} (h : π.is_stable s)
+  (hs : π.domain ∩ s = π'.domain ∩ s) (Heq : eq_on π π' (π.domain ∩ s)) :
+  eq_on π.symm π'.symm (π.domain ∩ s) :=
+begin
+  rw [← h.image_eq],
+  rintros y ⟨x, hx, rfl⟩,
+  have hx' := hx, rw hs at hx',
+  rw [π.left_inv hx.1, Heq hx, π'.left_inv hx'.1]
+end
+
+end is_stable
+
 lemma image_domain_inter_eq' (s : set α) :
   π '' (π.domain ∩ s) = π.domain ∩ π.symm ⁻¹' s :=
 by rw [inter_comm, π.left_inv_on.image_inter', image_domain_eq_domain, inter_comm]
@@ -291,9 +386,73 @@ instance : preorder (local_perm α) := {
 
 lemma domain_subset_domain_of_le {π π' : local_perm α} (h : π ≤ π') : π.domain ⊆ π'.domain := h.1
 lemma eq_on_domain_of_le {π π' : local_perm α} (h : π ≤ π') : π.domain.eq_on π π' := h.2
-lemma le_of_eq_on_source {π π' : local_perm α} (h : π ≈ π') : π ≤ π' := ⟨subset_of_eq h.1, h.2⟩
+lemma le_of_eq_on_domain {π π' : local_perm α} (h : π ≈ π') : π ≤ π' := ⟨subset_of_eq h.1, h.2⟩
 lemma apply_eq_of_le {π π' : local_perm α} (h : π ≤ π') {x : α} (hx : x ∈ π.domain) : π' x = π x :=
 (eq_on_domain_of_le h hx).symm
+
+section piecewise
+variables (π) (π' : local_perm α) [Π (j : α), decidable (j ∈ π.domain)]
+  {h : disjoint π.domain π'.domain}
+
+def piecewise (h : disjoint π.domain π'.domain) : local_perm α := {
+  to_fun := π.domain.piecewise π π',
+  inv_fun := π.domain.piecewise π.symm π'.symm,
+  domain := π.domain ∪ π'.domain,
+  to_fun_domain' := begin
+    rintro x (hx | hx),
+    { rw piecewise_eq_on π.domain π π' hx,
+      exact or.inl (π.map_domain hx), },
+    { rw piecewise_eq_on_compl π.domain π π' (disjoint_right.mp h hx),
+      exact or.inr (π'.map_domain hx), },
+  end,
+  inv_fun_domain' := begin
+    rintro x (hx | hx),
+    { rw piecewise_eq_on π.domain π.symm π'.symm hx,
+      exact or.inl (π.symm.map_domain hx), },
+    { rw piecewise_eq_on_compl π.domain π.symm π'.symm (disjoint_right.mp h hx),
+      exact or.inr (π'.symm.map_domain hx), },
+  end,
+  left_inv' := begin
+    rintro x (hx | hx),
+    { rw [piecewise_eq_on π.domain π π' hx,
+        piecewise_eq_on π.domain π.symm π'.symm (π.map_domain hx),
+        π.left_inv hx], },
+    { rw [piecewise_eq_on_compl π.domain π π' (disjoint_right.mp h hx),
+        piecewise_eq_on_compl π.domain π.symm π'.symm (disjoint_right.mp h (π'.map_domain hx)),
+        π'.left_inv hx], },
+  end,
+  right_inv' := begin
+    rintro x (hx | hx),
+    { rw [piecewise_eq_on π.domain π.symm π'.symm hx,
+        piecewise_eq_on π.domain π π' (π.symm.map_domain hx),
+        π.right_inv hx], },
+    { rw [piecewise_eq_on_compl π.domain π.symm π'.symm (disjoint_right.mp h hx),
+        piecewise_eq_on_compl π.domain π π' (disjoint_right.mp h (π'.symm.map_domain hx)),
+        π'.right_inv hx], },
+  end,
+}
+
+variables {π π' h}
+
+@[simp] lemma piecewise_domain : (piecewise π π' h).domain = π.domain ∪ π'.domain := rfl
+lemma mem_piecewise_domain_left {x : α} (hx : x ∈ π.domain) : x ∈ (piecewise π π' h).domain :=
+mem_union_left _ hx
+lemma mem_piecewise_domain_right {x : α} (hx : x ∈ π'.domain) : x ∈ (piecewise π π' h).domain :=
+mem_union_right _ hx
+
+lemma piecewise_apply_eq_left {x : α} (hx : x ∈ π.domain) : piecewise π π' h x = π x :=
+piecewise_eq_on _ _ _ hx
+
+lemma piecewise_apply_eq_right {x : α} (hx : x ∈ π'.domain) : piecewise π π' h x = π' x :=
+piecewise_eq_on_compl _ _ _ (disjoint_right.mp h hx)
+
+lemma le_piecewise_left : π ≤ piecewise π π' h :=
+⟨subset_union_left _ _, λ x hx, (piecewise_apply_eq_left hx).symm⟩
+
+lemma le_piecewise_right : π' ≤ piecewise π π' h :=
+⟨subset_union_right _ _, λ x hx, (piecewise_apply_eq_right hx).symm⟩
+
+end piecewise
 
 end local_perm
 
