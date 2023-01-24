@@ -1,17 +1,16 @@
 import phase2.approximation
 
 open set
-open_locale cardinal classical
+open_locale classical
 
 universe u
 
 namespace con_nf
-variables [params.{u}] {α : Λ} [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [position_data.{}] [almost_tangle_cumul α]
+variables [params.{u}] (α : Λ) [core_tangle_cumul α] [positioned_tangle_cumul α]
+  [position_data.{}] [almost_tangle_cumul α] {β : type_index}
+  (π : near_litter_approx) (A : extended_index β)
 
 namespace near_litter_approx
-
-variables (α) {β : type_index} (π : near_litter_approx) (A : extended_index β)
 
 def id_on_flexible : local_perm litter := {
   to_fun := id,

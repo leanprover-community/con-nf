@@ -69,12 +69,23 @@ section generate
 
 variables (π)
 
-def generate_sublitter (S : sublitter) : sublitter := {
-  litter := π • S.litter,
-  carrier := litter_set (π • S.litter) \ π.atom_perm.domain,
+/-- Gives the largest sublitter of `π` on which `π.atom_perm` is not defined. -/
+def largest_sublitter (L : litter) : sublitter := {
+  litter := L,
+  carrier := litter_set L \ π.atom_perm.domain,
   subset := diff_subset _ _,
-  diff_small := by simpa only [sdiff_sdiff_right_self, inf_eq_inter] using π.domain_small (π • S.litter),
+  diff_small := by simpa only [sdiff_sdiff_right_self, inf_eq_inter] using π.domain_small L,
 }
+
+@[simp] lemma largest_sublitter_litter (L : litter) : (π.largest_sublitter L).litter = L := rfl
+@[simp] lemma coe_largest_sublitter (L : litter) :
+  (π.largest_sublitter L : set atom) = litter_set L \ π.atom_perm.domain := rfl
+
+lemma mem_largest_sublitter_of_not_mem_domain (a : atom) (h : a ∉ π.atom_perm.domain) :
+  a ∈ π.largest_sublitter a.1 := ⟨rfl, h⟩
+
+/-- Computes the action of `π` on this sublitter, assuming it is in `sublitter_domain`. -/
+def generate_sublitter (S : sublitter) : sublitter := π.largest_sublitter (π • S.litter)
 
 def sublitter_domain : set sublitter :=
 {S | S.litter ∈ π.litter_perm.domain ∧ (S : set atom) = litter_set S.litter \ π.atom_perm.domain}
@@ -91,8 +102,8 @@ lemma generate_sublitter_left_inv ⦃S : sublitter⦄ (h : S ∈ sublitter_domai
   generate_sublitter π.symm (generate_sublitter π S) = S :=
 begin
   ext : 1,
-  simp only [h.2, generate_sublitter, symm_atom_perm, local_perm.symm_domain, sublitter.coe_mk,
-    π.left_inv_litter h.1],
+  simp only [h.2, largest_sublitter, generate_sublitter, symm_atom_perm, local_perm.symm_domain,
+    sublitter.coe_mk, π.left_inv_litter h.1],
 end
 
 /-- Generates the unique near-litter approximation given by an atom local permutation and a
@@ -212,6 +223,12 @@ structure hypothesis {β : Iio α} (c : support_condition β) :=
 namespace hypothesis
 variable {β : Iio α}
 
+/-- Two hypotheses are compatible if they agree everywhere that they are both defined. -/
+@[mk_iff] structure compatible {c d : support_condition β}
+  (Hc : hypothesis c) (Hd : hypothesis d) : Prop :=
+(atom_compatible : ∀ a A hc hd, Hc.atom_image a A hc = Hd.atom_image a A hd)
+(near_litter_compatible : ∀ N A hc hd, Hc.near_litter_image N A hc = Hd.near_litter_image N A hd)
+
 def fix_map :
   (psum (Σ' (_ : atom), extended_index β) (Σ' (_ : near_litter), extended_index β)) →
   support_condition β
@@ -231,7 +248,7 @@ with fix_atom : atom → extended_index β → atom
 | a A := Fa a A ⟨λ b B hb, fix_atom b B, λ N B hb, fix_near_litter N B⟩
 with fix_near_litter : near_litter → extended_index β → near_litter
 | N A := FN N A ⟨λ b B hb, fix_atom b B, λ N B hb, fix_near_litter N B⟩
-using_well_founded { rel_tac := λ _ _, `[exact (fix_wf)], dec_tac := `[exact hb] }
+using_well_founded { rel_tac := λ _ _, `[exact fix_wf], dec_tac := `[exact hb] }
 
 lemma fix_atom_eq (Fa FN) (a : atom) (A : extended_index β) :
   fix_atom Fa FN a A =
