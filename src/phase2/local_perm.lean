@@ -3,7 +3,7 @@ import logic.equiv.defs
 
 open function set
 
-variables {α : Type*}
+variable {α : Type*}
 
 /-- A local permutation of a subset `domain` of `α`. The (global) maps `to_fun : α → α` and
 `inv_fun : α → α` map `domain` to itself, and are inverse to each other there. The values of

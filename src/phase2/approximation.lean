@@ -217,8 +217,8 @@ def free {β : Iio α} (π₀ : struct_approx β) : Prop := ∀ A, (π₀ A).fre
 /-- The inductive hypothesis used to construct the induced action of an approximation in the
 freedom of action theorem. -/
 structure hypothesis {β : Iio α} (c : support_condition β) :=
-(atom_image : Π a A, ⟨inl a, A⟩ ≺[α] c → atom)
-(near_litter_image : Π N A, ⟨inr N, A⟩ ≺[α] c → near_litter)
+(atom_image : Π a A, (relation.trans_gen (constrains α β)) ⟨inl a, A⟩ c → atom)
+(near_litter_image : Π N A, (relation.trans_gen (constrains α β)) ⟨inr N, A⟩ c → near_litter)
 
 namespace hypothesis
 variable {β : Iio α}
@@ -237,7 +237,8 @@ def fix_map :
 
 def fix_wf : has_well_founded
   (psum (Σ' (_ : atom), extended_index β) (Σ' (_ : near_litter), extended_index β)) :=
-⟨inv_image (constrains α β) fix_map, inv_image.wf _ (constrains_wf α β)⟩
+⟨inv_image (relation.trans_gen (constrains α β)) fix_map,
+  inv_image.wf _ (constrains_wf α β).trans_gen⟩
 
 /-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.
 This is used to compute the induced action of an approximation on all atoms and near-litters. -/

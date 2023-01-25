@@ -67,7 +67,7 @@ in the "freedom of action discussion".
 | f_map ⦃γ : Iio α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : δ < γ) (hε : ε < γ) (hδε : δ ≠ ε)
     (A : path (β : type_index) γ) (t : tangle δ) (c ∈ (designated_support t).carrier) :
     constrains
-      ⟨c.fst, path.comp (A.cons (coe_lt hδ)) c.snd⟩
+      ⟨c.fst, (A.cons (coe_lt hδ)).comp c.snd⟩
       ⟨inr (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter,
         (A.cons (coe_lt hε)).cons (bot_lt_coe _)⟩
 | f_map_bot ⦃γ : Iio α⦄ ⦃ε : Iio α⦄ (hε : ε < γ)
@@ -91,8 +91,7 @@ variable [tangle_cumul α]
 lemma constrains_subrelation : subrelation (constrains α β) (<) :=
 begin
   rintros c d h,
-  obtain (⟨a, A⟩ | ⟨N, hN, A⟩ | ⟨N, a, ha, A⟩ |
-    ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩) := h;
+  obtain (⟨a, A⟩ | ⟨N, hN, A⟩ | ⟨N, a, ha, A⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩) := h;
   left,
   { exact litter_lt a.1 a rfl, },
   { refine litter_lt_near_litter N _,
@@ -117,12 +116,46 @@ subrelation.wf (constrains_subrelation α β) (is_well_founded.to_has_well_found
 
 instance : has_well_founded (support_condition β) := ⟨constrains α β, constrains_wf α β⟩
 
+variable {α}
+
 @[simp] lemma constrains_atom {c : support_condition β} {a : atom} {A : extended_index β} :
   c ≺[α] ⟨inl a, A⟩ ↔ c = ⟨inr a.1.to_near_litter, A⟩ :=
 begin
   split,
   { rintro ⟨⟩, refl, },
   { rintro rfl, exact constrains.atom a A, },
+end
+
+/-- The constrains relation is stable under composition of paths. -/
+lemma constrains_comp {β γ : Λ} {c d : support_condition γ} (h : c ≺[α] d)
+  (B : path (β : type_index) γ) : ⟨c.fst, B.comp c.snd⟩ ≺[α] ⟨d.fst, B.comp d.snd⟩ :=
+begin
+  obtain (⟨a, A⟩ | ⟨N, hN, A⟩ | ⟨N, a, ha, A⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩) := h,
+  { exact constrains.atom _ _, },
+  { exact constrains.near_litter _ hN _, },
+  { exact constrains.symm_diff _ _ ha _, },
+  { rw [path.comp_cons, ← path.comp_assoc, path.comp_cons],
+    exact constrains.f_map hδ hε hδε (B.comp A) t c hc, },
+  { rw path.comp_cons,
+    exact constrains.f_map_bot hδ (B.comp A) a, },
+end
+
+lemma refl_trans_gen_constrains_comp {β γ : Λ} {c d : support_condition γ}
+  (h : relation.refl_trans_gen (constrains α γ) c d) (B : path (β : type_index) γ) :
+  relation.refl_trans_gen (constrains α β) ⟨c.fst, B.comp c.snd⟩ ⟨d.fst, B.comp d.snd⟩ :=
+begin
+  induction h with e f hce hef ih,
+  exact relation.refl_trans_gen.refl,
+  exact relation.refl_trans_gen.tail ih (constrains_comp hef B),
+end
+
+lemma trans_gen_constrains_comp {β γ : Λ} {c d : support_condition γ}
+  (h : relation.trans_gen (constrains α γ) c d) (B : path (β : type_index) γ) :
+  relation.trans_gen (constrains α β) ⟨c.fst, B.comp c.snd⟩ ⟨d.fst, B.comp d.snd⟩ :=
+begin
+  induction h with e hce e f hce hef ih,
+  exact relation.trans_gen.single (constrains_comp hce B),
+  exact relation.trans_gen.tail ih (constrains_comp hef B),
 end
 
 end con_nf
