@@ -337,7 +337,7 @@ def litter_completion_atom_map_core_domain (B : extended_index δ) : set atom :=
   preimage_litter_subset hδ hε hδε H B ∪
   ⋃ L h, mapped_outside_subset hδ hε hδε H L B h
 
-lemma litter_completion_atom_map_domain_small (B : extended_index δ) :
+lemma litter_completion_atom_map_core_domain_small (B : extended_index δ) :
   small (litter_completion_atom_map_core_domain hδ hε hδε H B) :=
 begin
   refine small.union (small.union _ _) _,
@@ -365,8 +365,9 @@ begin
   rw mk_litter_set,
   refine le_trans (mk_subtype_mono symm_diff_subset_union) (le_trans (mk_union_le _ _) _),
   refine add_le_of_le κ_regular.aleph_0_le _ _,
-  exact le_of_lt (litter_completion_atom_map_domain_small hδ hε hδε H B),
-  exact le_trans mk_image_le (le_of_lt (litter_completion_atom_map_domain_small hδ hε hδε H B)),
+  exact le_of_lt (litter_completion_atom_map_core_domain_small hδ hε hδε H B),
+  exact le_trans mk_image_le (le_of_lt
+    (litter_completion_atom_map_core_domain_small hδ hε hδε H B)),
 end
 
 /-- Any atom in the image of the completed atom map is either in a banned litter, or it's being
@@ -447,7 +448,54 @@ then
     (litter_completion_atom_map_domain_disjoint hδ hε hδε H B)
     h
 else
-  local_perm.refl atom
+  local_perm.of_set ∅
+
+lemma sandbox_subset_small (B : extended_index δ) : small (local_perm.sandbox_subset
+  (mk_litter_completion_atom_map_domain hδ hε hδε H B)
+  (le_of_le_of_eq κ_regular.aleph_0_le (mk_litter_set _).symm)) :=
+begin
+  rw small,
+  rw cardinal.mk_congr (local_perm.sandbox_subset_equiv _ _),
+  simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph_0, lift_uzero, lift_id],
+  refine add_lt_of_lt κ_regular.aleph_0_le _ _;
+    refine (mul_lt_of_lt κ_regular.aleph_0_le (lt_of_le_of_lt Λ_limit.aleph_0_le Λ_lt_κ) _);
+    refine lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _,
+  { exact litter_completion_atom_map_core_domain_small hδ hε hδε H B, },
+  { exact lt_of_le_of_lt mk_image_le
+      (litter_completion_atom_map_core_domain_small hδ hε hδε H B), },
+end
+
+lemma litter_completion_atom_map_domain (B : extended_index δ) :
+  (litter_completion_atom_map hδ hε hδε H B).domain ⊆
+    (litter_completion_atom_map_core_domain hδ hε hδε H B) ∪
+    (litter_completion_atom_map_core hδ hε hδε H B ''
+      litter_completion_atom_map_core_domain hδ hε hδε H B) ∪
+    (local_perm.sandbox_subset
+      (mk_litter_completion_atom_map_domain hδ hε hδε H B)
+      (le_of_le_of_eq κ_regular.aleph_0_le (mk_litter_set _).symm)) :=
+begin
+  rw litter_completion_atom_map,
+  split_ifs,
+  { refl, },
+  { exact empty_subset _, },
+end
+
+lemma litter_completion_atom_map_domain_small (B : extended_index δ) :
+  small (litter_completion_atom_map hδ hε hδε H B).domain :=
+small.mono (litter_completion_atom_map_domain hδ hε hδε H B)
+  (small.union (small.union
+      (litter_completion_atom_map_core_domain_small hδ hε hδε H B)
+      (lt_of_le_of_lt mk_image_le
+        (litter_completion_atom_map_core_domain_small hδ hε hδε H B)))
+    (sandbox_subset_small hδ hε hδε H B))
+
+noncomputable def litter_completion_index (π : near_litter_approx) (B : extended_index δ) :
+  near_litter_approx := {
+  atom_perm := litter_completion_atom_map hδ hε hδε H B,
+  litter_perm := π.flexible_completion_litter_perm α ((A.cons (coe_lt hε)).cons (bot_lt_coe _)),
+  domain_small := λ L, small.mono (inter_subset_right _ _)
+    (litter_completion_atom_map_domain_small hδ hε hδε H B),
+}
 
 end struct_approx
 
