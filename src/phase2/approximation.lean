@@ -1,5 +1,5 @@
+import mathlib.logic.equiv.local_perm
 import phase2.constrains
-import phase2.local_perm
 import phase2.sublitter
 
 open set sum

@@ -1,5 +1,5 @@
 import set_theory.cardinal.ordinal
-import phase2.local_perm
+import mathlib.logic.equiv.local_perm
 
 namespace local_perm
 
