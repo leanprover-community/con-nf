@@ -11,8 +11,7 @@ open mul_action quiver set sum with_bot
 open_locale cardinal
 
 namespace con_nf
-variables [params.{u}] (α : Λ) [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [position_data.{}] [almost_tangle_cumul α] [tangle_cumul α]
+variables [params.{u}] (α : Λ) [position_data.{}] [phase_2_assumptions α]
 
 variables (β : Λ) (G : Type*) {τ : Type*} [has_smul G (support_condition β)] [has_smul G τ]
 

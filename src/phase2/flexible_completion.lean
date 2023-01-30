@@ -6,8 +6,7 @@ open_locale classical
 universe u
 
 namespace con_nf
-variables [params.{u}] (α : Λ) [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [position_data.{}] [almost_tangle_cumul α] {β : type_index}
+variables [params.{u}] (α : Λ) [position_data.{}] [phase_2_assumptions α] {β : type_index}
   (π : near_litter_approx) (A : extended_index β)
 
 namespace near_litter_approx

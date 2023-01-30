@@ -6,8 +6,8 @@ open_locale classical
 universe u
 
 namespace con_nf
-variables [params.{u}] {α : Λ} [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [position_data.{}] [almost_tangle_cumul α] [tangle_cumul α] {β : Iio α} (π : struct_approx β)
+variables [params.{u}] {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α}
+  (π : struct_approx β)
 
 namespace struct_approx
 

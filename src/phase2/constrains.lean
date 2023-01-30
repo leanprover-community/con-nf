@@ -1,5 +1,6 @@
 import order.extension.well
 import phase1.A_map
+import phase2.basic
 
 /-!
 # Constraints
@@ -31,8 +32,7 @@ noncomputable instance : linear_order (extended_index α) := linear_order_of_STO
 
 end extended_index
 
-variables {α : Λ} [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [position_data.{}] [almost_tangle_cumul α] {β : Λ}
+variables {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Λ}
 
 lemma coe_ne' {γ : Iio α} {β : Iio α} : γ ≠ β → (γ : Λ) ≠ (β : Λ) :=
 by contrapose!; simp only [subtype.coe_inj, imp_self]
@@ -85,8 +85,6 @@ instance : has_lt (support_condition β) :=
 
 instance : is_well_founded (support_condition β) (<) :=
 prod.lex.is_well_founded
-
-variable [tangle_cumul α]
 
 lemma constrains_subrelation : subrelation (constrains α β) (<) :=
 begin

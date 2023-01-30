@@ -10,8 +10,7 @@ universe u
 namespace con_nf
 
 namespace struct_approx
-variables [params.{u}] {α : Λ} [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [position_data.{}] [almost_tangle_cumul α] [tangle_cumul α] {β : Iio α}
+variables [params.{u}] {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α}
   {γ δ ε : Iio α} (hδ : δ < γ) (hε : ε < γ) (hδε : δ ≠ ε)
   {A : path (β : type_index) γ} {t : tangle δ}
   (H : hypothesis ⟨inr (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter,
@@ -496,6 +495,72 @@ noncomputable def litter_completion_index (π : near_litter_approx) (B : extende
   domain_small := λ L, small.mono (inter_subset_right _ _)
     (litter_completion_atom_map_domain_small hδ hε hδε H B),
 }
+
+noncomputable def inflexible_litter_completion (π : struct_approx δ) : struct_approx δ :=
+λ B, litter_completion_index hδ hε hδε H (π B) B
+
+/-- We say *freedom of action* holds at level `β` if every `β`-free structural approximation
+exactly approximates some `β`-allowable permutation. -/
+def freedom_of_action (β : Iio α) : Prop :=
+∀ (π₀ : struct_approx β), π₀.free → ∃ (π : allowable β), π₀.exactly_approximates π.to_struct_perm
+
+/-- A proof-relevant statement that `L` is `A`-inflexible (excluding `ε = ⊥`). -/
+structure inflexible_coe (L : litter) (A : extended_index β) :=
+(γ δ ε : Iio α) (hδ : δ < γ) (hε : ε < γ) (hδε : δ ≠ ε)
+(B : quiver.path (β : type_index) γ) (t : tangle δ) (c : support_condition δ)
+(hc : c ∈ (designated_support t).carrier)
+(hL : L = f_map (with_bot.coe_ne_coe.mpr $ coe_ne' hδε) t)
+(hA : A = (B.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
+
+/-- A proof-relevant statement that `L` is `A`-inflexible, where `ε = ⊥`. -/
+structure inflexible_bot (L : litter) (A : extended_index β) :=
+(γ ε : Iio α) (hε : ε < γ)
+(B : quiver.path (β : type_index) γ) (a : atom)
+(hL : L = f_map (show (⊥ : type_index) ≠ (ε : Λ), from with_bot.bot_ne_coe) a)
+(hA : A = (B.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
+
+lemma inflexible_coe.δ_lt_β {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
+  h.δ < β :=
+h.hδ.trans_le (show _, from with_bot.coe_le_coe.mp (le_of_path h.B))
+
+-- TODO: Move!
+instance {δ : Iio α} : mul_action (allowable δ) (tangle (δ : Λ)) :=
+show mul_action (allowable δ) (tangle δ), from infer_instance
+
+def litter_hypothesis {L : litter} {A : extended_index β}
+  (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A) :
+  hypothesis ⟨inr (f_map (coe_ne_coe.mpr $ coe_ne' h.hδε) h.t).to_near_litter,
+    (h.B.cons (coe_lt h.hε)).cons (bot_lt_coe _)⟩ := {
+  atom_image := λ a A ha, H.atom_image a A (by rwa [← h.hL, ← h.hA] at ha),
+  near_litter_image := λ a A ha, H.near_litter_image a A (by rwa [← h.hL, ← h.hA] at ha),
+}
+
+lemma inflexible_bot.constrains {L : litter} {A : extended_index β} (h : inflexible_bot L A) :
+  relation.trans_gen (constrains α β) (inl h.a, (h.B.cons (with_bot.bot_lt_coe _))) (inr L.to_near_litter, A) :=
+begin
+  have := constrains.f_map_bot h.hε h.B h.a,
+  rw [← h.hL, ← h.hA] at this,
+  exact relation.trans_gen.single this,
+end
+
+noncomputable def litter_completion (π : struct_approx β) (hfoa : ∀ γ < β, freedom_of_action γ)
+  (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩) : litter :=
+if h : nonempty (inflexible_coe L A) then
+  if hf : (inflexible_litter_completion _ _ _ (litter_hypothesis H h.some) _).free then
+    f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.some.hδε)
+      ((hfoa h.some.δ h.some.δ_lt_β
+        (inflexible_litter_completion h.some.hδ h.some.hε h.some.hδε
+          (litter_hypothesis H h.some)
+          (λ B, π (path.cons (path.cons h.some.B (coe_lt h.some.hδ))
+            (with_bot.bot_lt_coe h.some.δ))))
+        hf).some • h.some.t)
+  else
+    L
+else if h : nonempty (inflexible_bot L A) then
+  f_map (show (⊥ : type_index) ≠ (h.some.ε : Λ), from with_bot.bot_ne_coe)
+    (H.atom_image h.some.a (h.some.B.cons (with_bot.bot_lt_coe _)) h.some.constrains)
+else
+  near_litter_approx.flexible_completion α (π A) A • L
 
 end struct_approx
 

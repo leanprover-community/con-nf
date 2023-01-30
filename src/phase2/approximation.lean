@@ -175,14 +175,19 @@ instance : preorder near_litter_approx := {
 
 section free
 
-variables (α : Λ) [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [position_data.{}] [almost_tangle_cumul α] {β : type_index}
+variables (α : Λ) [position_data.{}] [phase_2_assumptions α] {β : type_index}
 
 /-- A litter is *inflexible* if it is the image of some f-map. -/
 @[mk_iff] inductive _root_.con_nf.inflexible : litter → extended_index β → Prop
-| mk ⦃γ : Iio α⦄ ⦃ε : Iio α⦄ (hε : ε < γ)
+| mk_coe ⦃γ : Iio α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : δ < γ) (hε : ε < γ) (hδε : δ ≠ ε)
+    (A : quiver.path (β : type_index) γ) (t : tangle δ) (c ∈ (designated_support t).carrier) :
+    _root_.con_nf.inflexible
+      (f_map (with_bot.coe_ne_coe.mpr $ coe_ne' hδε) t)
+      ((A.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
+| mk_bot ⦃γ : Iio α⦄ ⦃ε : Iio α⦄ (hε : ε < γ)
     (A : quiver.path (β : type_index) γ) (a : atom) :
-    _root_.con_nf.inflexible (f_map (show (⊥ : type_index) ≠ (ε : Λ), from with_bot.bot_ne_coe) a)
+    _root_.con_nf.inflexible
+      (f_map (show (⊥ : type_index) ≠ (ε : Λ), from with_bot.bot_ne_coe) a)
       ((A.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
 
 /-- A litter is *flexible* if it is not the image of any f-map. -/
@@ -209,8 +214,7 @@ def approximates {β : type_index} (π₀ : struct_approx β) (π : struct_perm 
 def exactly_approximates {β : type_index} (π₀ : struct_approx β) (π : struct_perm β) : Prop :=
 ∀ A, (π₀ A).exactly_approximates (struct_perm.of_bot $ struct_perm.derivative A π)
 
-variables {α : Λ} [core_tangle_cumul α] [positioned_tangle_cumul α]
-  [position_data.{}] [almost_tangle_cumul α] [tangle_cumul α]
+variables {α : Λ} [position_data.{}] [phase_2_assumptions α]
 
 def free {β : Iio α} (π₀ : struct_approx β) : Prop := ∀ A, (π₀ A).free α A
 
