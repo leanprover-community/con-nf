@@ -6,7 +6,7 @@ open_locale classical
 universe u
 
 namespace con_nf
-variables [params.{u}] {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α}
+variables [params.{u}] {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iic α}
   (π : struct_approx β)
 
 namespace struct_approx

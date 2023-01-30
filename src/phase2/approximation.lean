@@ -179,12 +179,12 @@ variables (α : Λ) [position_data.{}] [phase_2_assumptions α] {β : type_index
 
 /-- A litter is *inflexible* if it is the image of some f-map. -/
 @[mk_iff] inductive _root_.con_nf.inflexible : litter → extended_index β → Prop
-| mk_coe ⦃γ : Iio α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : δ < γ) (hε : ε < γ) (hδε : δ ≠ ε)
+| mk_coe ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
     (A : quiver.path (β : type_index) γ) (t : tangle δ) (c ∈ (designated_support t).carrier) :
     _root_.con_nf.inflexible
       (f_map (with_bot.coe_ne_coe.mpr $ coe_ne' hδε) t)
       ((A.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
-| mk_bot ⦃γ : Iio α⦄ ⦃ε : Iio α⦄ (hε : ε < γ)
+| mk_bot ⦃γ : Iic α⦄ ⦃ε : Iio α⦄ (hε : (ε : Λ) < γ)
     (A : quiver.path (β : type_index) γ) (a : atom) :
     _root_.con_nf.inflexible
       (f_map (show (⊥ : type_index) ≠ (ε : Λ), from with_bot.bot_ne_coe) a)
@@ -216,16 +216,16 @@ def exactly_approximates {β : type_index} (π₀ : struct_approx β) (π : stru
 
 variables {α : Λ} [position_data.{}] [phase_2_assumptions α]
 
-def free {β : Iio α} (π₀ : struct_approx β) : Prop := ∀ A, (π₀ A).free α A
+def free {β : Iic α} (π₀ : struct_approx β) : Prop := ∀ A, (π₀ A).free α A
 
 /-- The inductive hypothesis used to construct the induced action of an approximation in the
 freedom of action theorem. -/
-structure hypothesis {β : Iio α} (c : support_condition β) :=
+structure hypothesis {β : Iic α} (c : support_condition β) :=
 (atom_image : Π a A, (relation.trans_gen (constrains α β)) ⟨inl a, A⟩ c → atom)
 (near_litter_image : Π N A, (relation.trans_gen (constrains α β)) ⟨inr N, A⟩ c → near_litter)
 
 namespace hypothesis
-variable {β : Iio α}
+variable {β : Iic α}
 
 /-- Two hypotheses are compatible if they agree everywhere that they are both defined. -/
 @[mk_iff] structure compatible {c d : support_condition β}

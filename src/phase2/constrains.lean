@@ -37,7 +37,7 @@ variables {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Λ}
 lemma coe_ne' {γ : Iio α} {β : Iio α} : γ ≠ β → (γ : Λ) ≠ (β : Λ) :=
 by contrapose!; simp only [subtype.coe_inj, imp_self]
 
-lemma coe_lt {γ : Iio α} {β : Iio α} : γ < β → (γ : type_index) < (β : type_index) :=
+lemma coe_lt {γ : Iio α} {β : Iic α} : (γ : Λ) < β → (γ : type_index) < (β : type_index) :=
 begin
   intro h,
   cases β,
@@ -64,13 +64,13 @@ in the "freedom of action discussion".
     constrains ⟨inr N.fst.to_near_litter, A⟩ ⟨inr N, A⟩
 | symm_diff (N : near_litter) (a ∈ litter_set N.fst ∆ N.snd) (A : extended_index β) :
     constrains ⟨inl a, A⟩ ⟨inr N, A⟩
-| f_map ⦃γ : Iio α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : δ < γ) (hε : ε < γ) (hδε : δ ≠ ε)
+| f_map ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
     (A : path (β : type_index) γ) (t : tangle δ) (c ∈ (designated_support t).carrier) :
     constrains
       ⟨c.fst, (A.cons (coe_lt hδ)).comp c.snd⟩
       ⟨inr (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter,
         (A.cons (coe_lt hε)).cons (bot_lt_coe _)⟩
-| f_map_bot ⦃γ : Iio α⦄ ⦃ε : Iio α⦄ (hε : ε < γ)
+| f_map_bot ⦃γ : Iic α⦄ ⦃ε : Iio α⦄ (hε : (ε : Λ) < γ)
     (A : path (β : type_index) γ) (a : atom) :
     constrains
       ⟨inl a, A.cons (bot_lt_coe _)⟩

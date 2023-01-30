@@ -55,8 +55,8 @@ begin
       { rintro ⟨a', h₁, h₂⟩,
         exact ⟨N, a', h₁, h₂, rfl⟩, } },
     { simp only [mem_set_of_eq, prod.mk.inj_iff, false_and, and_false, exists_false], }, },
-  { by_cases ∃ ⦃γ : Iio α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : δ < γ) (hε : ε < γ) (hδε : δ ≠ ε)
-      (B : path (β : type_index) γ) (t : tangle δ),
+  { by_cases ∃ ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ)
+      (hδε : δ ≠ ε) (B : path (β : type_index) γ) (t : tangle δ),
       N = (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter ∧
       A = (B.cons (coe_lt hε)).cons (bot_lt_coe _),
     { obtain ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ := h,
