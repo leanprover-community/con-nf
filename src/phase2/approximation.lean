@@ -84,6 +84,9 @@ def largest_sublitter (L : litter) : sublitter := {
 lemma mem_largest_sublitter_of_not_mem_domain (a : atom) (h : a ∉ π.atom_perm.domain) :
   a ∈ π.largest_sublitter a.1 := ⟨rfl, h⟩
 
+lemma not_mem_domain_of_mem_largest_sublitter {a : atom} {L : litter}
+  (h : a ∈ π.largest_sublitter L) : a ∉ π.atom_perm.domain := h.2
+
 /-- Computes the action of `π` on this sublitter, assuming it is in `sublitter_domain`. -/
 def generate_sublitter (S : sublitter) : sublitter := π.largest_sublitter (π • S.litter)
 

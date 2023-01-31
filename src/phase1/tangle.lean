@@ -383,7 +383,7 @@ end
 lemma allowable_to_struct_perm_bot (π : allowable (⊥ : Iio_index α)) :
   core_tangle_data.allowable_to_struct_perm π = struct_perm.to_bot_iso.to_monoid_hom π := rfl
 
-lemma _root_.semiallowable_perm.to_allowable_bot (π : semiallowable_perm α) :
+lemma _root_.con_nf.semiallowable_perm.to_allowable_bot (π : semiallowable_perm α) :
   semiallowable_perm.to_allowable ⊥ π = struct_perm.to_near_litter_perm
     (semiallowable_perm.to_struct_perm π) :=
 begin

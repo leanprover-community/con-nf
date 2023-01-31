@@ -540,17 +540,24 @@ begin
   exact relation.trans_gen.single this,
 end
 
+class freedom_of_action_hypothesis (β : Iic α) :=
+(freedom_of_action_of_lt : ∀ γ < β, freedom_of_action γ)
+
+export freedom_of_action_hypothesis (freedom_of_action_of_lt)
+
+variable [freedom_of_action_hypothesis β]
+
 -- TODO: Move!
 instance {δ : Iio α} : mul_action (allowable (δ : Iic α)) (tangle (δ : Λ)) :=
 show mul_action (allowable δ) (tangle δ), from infer_instance
 
-noncomputable def litter_completion (π : struct_approx β) (hfoa : ∀ γ < β, freedom_of_action γ)
+noncomputable def litter_completion (π : struct_approx β)
   (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩) : litter :=
 if h : nonempty (inflexible_coe L A) then
   if hf : @struct_approx.free _ _ _ _ (h.some.δ : Iic α)
     (inflexible_litter_completion _ _ _ (litter_hypothesis H h.some) _) then
     f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.some.hδε)
-      ((hfoa h.some.δ h.some.δ_lt_β
+      ((freedom_of_action_of_lt (h.some.δ : Iic α) h.some.δ_lt_β
         (inflexible_litter_completion h.some.hδ h.some.hε h.some.hδε
           (litter_hypothesis H h.some)
           (λ B, π (path.cons (path.cons h.some.B (coe_lt h.some.hδ))
