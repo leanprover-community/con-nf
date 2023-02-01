@@ -507,10 +507,26 @@ def freedom_of_action (β : Iic α) : Prop :=
 /-- A proof-relevant statement that `L` is `A`-inflexible (excluding `ε = ⊥`). -/
 structure inflexible_coe (L : litter) (A : extended_index β) :=
 (γ : Iic α) (δ ε : Iio α) (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
-(B : quiver.path (β : type_index) γ) (t : tangle δ) (c : support_condition δ)
-(hc : c ∈ (designated_support t).carrier)
+(B : quiver.path (β : type_index) γ) (t : tangle δ)
 (hL : L = f_map (with_bot.coe_ne_coe.mpr $ coe_ne' hδε) t)
 (hA : A = (B.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
+
+instance (L : litter) (A : extended_index β) : subsingleton (inflexible_coe L A) :=
+begin
+  constructor,
+  rintros ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, rfl, rfl⟩
+    ⟨γ₂, δ₂, ε₂, hδ₂, hε₂, hδε₂, B₂, t₂, hL₂, hA₂⟩,
+  cases subtype.coe_injective (coe_eq_coe.mp (path.obj_eq_of_cons_eq_cons hA₂)),
+  cases subtype.coe_injective (coe_eq_coe.mp (path.obj_eq_of_cons_eq_cons
+    (path.heq_of_cons_eq_cons hA₂).eq)),
+  cases (path.heq_of_cons_eq_cons (path.heq_of_cons_eq_cons hA₂).eq).eq,
+  have h₁ := f_map_β (with_bot.coe_ne_coe.mpr $ coe_ne' hδε₁) t₁,
+  have h₂ := f_map_β (with_bot.coe_ne_coe.mpr $ coe_ne' hδε₂) t₂,
+  rw [hL₂, h₂] at h₁,
+  cases subtype.coe_injective (coe_eq_coe.mp h₁),
+  cases f_map_injective _ hL₂,
+  refl,
+end
 
 /-- A proof-relevant statement that `L` is `A`-inflexible, where `ε = ⊥`. -/
 structure inflexible_bot (L : litter) (A : extended_index β) :=
@@ -518,6 +534,28 @@ structure inflexible_bot (L : litter) (A : extended_index β) :=
 (B : quiver.path (β : type_index) γ) (a : atom)
 (hL : L = f_map (show (⊥ : type_index) ≠ (ε : Λ), from with_bot.bot_ne_coe) a)
 (hA : A = (B.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
+
+instance (L : litter) (A : extended_index β) : subsingleton (inflexible_bot L A) :=
+begin
+  constructor,
+  rintros ⟨γ₁, ε₁, hε₁, B₁, a₁, rfl, rfl⟩ ⟨γ₂, ε₂, hε₂, B₂, a₂, hL₂, hA₂⟩,
+  cases subtype.coe_injective (coe_eq_coe.mp (path.obj_eq_of_cons_eq_cons hA₂)),
+  cases subtype.coe_injective (coe_eq_coe.mp (path.obj_eq_of_cons_eq_cons
+    (path.heq_of_cons_eq_cons hA₂).eq)),
+  cases (path.heq_of_cons_eq_cons (path.heq_of_cons_eq_cons hA₂).eq).eq,
+  cases f_map_injective _ hL₂,
+  refl,
+end
+
+lemma inflexible_bot_inflexible_coe {L : litter} {A : extended_index β} :
+  inflexible_bot L A → inflexible_coe L A → false :=
+begin
+  rintros ⟨γ₁, ε₁, hε₁, B₁, a₁, rfl, rfl⟩ ⟨γ₂, δ₂, ε₂, hδ₂, hε₂, hδε₂, B₂, t₂, hL₂, hA₂⟩,
+  have h₁ := f_map_β (show (⊥ : type_index) ≠ (ε₁ : Λ), from with_bot.bot_ne_coe) a₁,
+  have h₂ := f_map_β (with_bot.coe_ne_coe.mpr $ coe_ne' hδε₂) t₂,
+  rw [hL₂, h₂] at h₁,
+  cases h₁,
+end
 
 lemma inflexible_coe.δ_lt_β {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
   (h.δ : Λ) < β :=

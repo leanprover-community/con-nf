@@ -183,7 +183,7 @@ variables (α : Λ) [position_data.{}] [phase_2_assumptions α] {β : type_index
 /-- A litter is *inflexible* if it is the image of some f-map. -/
 @[mk_iff] inductive _root_.con_nf.inflexible : litter → extended_index β → Prop
 | mk_coe ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
-    (A : quiver.path (β : type_index) γ) (t : tangle δ) (c ∈ (designated_support t).carrier) :
+    (A : quiver.path (β : type_index) γ) (t : tangle δ) :
     _root_.con_nf.inflexible
       (f_map (with_bot.coe_ne_coe.mpr $ coe_ne' hδε) t)
       ((A.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
@@ -194,7 +194,7 @@ variables (α : Λ) [position_data.{}] [phase_2_assumptions α] {β : type_index
       ((A.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
 
 /-- A litter is *flexible* if it is not the image of any f-map. -/
-def flexible (L : litter) (A : extended_index β) : Prop := ¬inflexible α L A
+def _root_.con_nf.flexible (L : litter) (A : extended_index β) : Prop := ¬inflexible α L A
 
 @[mk_iff] structure free (π : near_litter_approx) (A : extended_index β) : Prop :=
 (flex : ∀ L ∈ π.litter_perm.domain, flexible α L A)
