@@ -491,7 +491,7 @@ small.mono (litter_completion_atom_map_domain hδ hε hδε H B)
 noncomputable def litter_completion_index (π : near_litter_approx) (B : extended_index δ) :
   near_litter_approx := {
   atom_perm := litter_completion_atom_map hδ hε hδε H B,
-  litter_perm := π.flexible_completion_litter_perm α ((A.cons (coe_lt hε)).cons (bot_lt_coe _)),
+  litter_perm := π.flexible_completion_litter_perm α B,
   domain_small := λ L, small.mono (inter_subset_right _ _)
     (litter_completion_atom_map_domain_small hδ hε hδε H B),
 }
@@ -589,20 +589,25 @@ variable [freedom_of_action_hypothesis β]
 instance {δ : Iio α} : mul_action (allowable (δ : Iic α)) (tangle (δ : Λ)) :=
 show mul_action (allowable δ) (tangle δ), from infer_instance
 
-noncomputable def litter_completion (π : struct_approx β)
+lemma litter_approx_free (π : struct_approx β) (hπ : π.free) {L : litter} {A : extended_index β}
+  (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A) :
+  @struct_approx.free _ _ _ _ (h.δ : Iic α)
+  (inflexible_litter_completion h.hδ h.hε h.hδε
+    (litter_hypothesis H h)
+    (λ B, π ((h.B.cons $ coe_lt h.hδ).comp B))) :=
+begin
+  intros B L' hL',
+  cases hL',
+  exact flexible_of_comp_flexible (hπ _ L' hL'),
+  exact hL'.1,
+end
+
+noncomputable def litter_completion (π : struct_approx β) (hπ : π.free)
   (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩) : litter :=
 if h : nonempty (inflexible_coe L A) then
-  if hf : @struct_approx.free _ _ _ _ (h.some.δ : Iic α)
-    (inflexible_litter_completion _ _ _ (litter_hypothesis H h.some) _) then
-    f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.some.hδε)
-      ((freedom_of_action_of_lt (h.some.δ : Iic α) h.some.δ_lt_β
-        (inflexible_litter_completion h.some.hδ h.some.hε h.some.hδε
-          (litter_hypothesis H h.some)
-          (λ B, π (path.cons (path.cons h.some.B (coe_lt h.some.hδ))
-            (with_bot.bot_lt_coe h.some.δ))))
-        hf).some • h.some.t)
-  else
-    L
+  f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.some.hδε)
+  ((freedom_of_action_of_lt (h.some.δ : Iic α) h.some.δ_lt_β _
+    (π.litter_approx_free hπ H h.some)).some • h.some.t)
 else if h : nonempty (inflexible_bot L A) then
   f_map (show (⊥ : type_index) ≠ (h.some.ε : Λ), from with_bot.bot_ne_coe)
     (H.atom_image h.some.a (h.some.B.cons (with_bot.bot_lt_coe _)) h.some.constrains)
