@@ -204,7 +204,6 @@ def is_exception (π : near_litter_perm) (a : atom) : Prop :=
 @[mk_iff] structure approximates (π₀ : near_litter_approx) (π : near_litter_perm) : Prop :=
 (map_atom : ∀ a, a ∈ π₀.atom_perm.domain → π₀ • a = π • a)
 (map_litter : ∀ L, L ∈ π₀.litter_perm.domain → π₀ • L = π • L)
-(map_sublitter : ∀ S, S ∈ π₀.sublitter_domain → (↑(π₀ • S) : set _) = π • (S : set atom))
 
 @[mk_iff] structure exactly_approximates (π₀ : near_litter_approx) (π : near_litter_perm)
   extends approximates π₀ π : Prop :=

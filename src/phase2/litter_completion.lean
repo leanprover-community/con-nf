@@ -386,27 +386,30 @@ begin
     exact or.inl (banned_litter.support_litter L hL), },
 end
 
-/-- Any atom in the image of the completed atom map is either in a banned litter, or it's
-the dummy value assigned to atoms not in the domain. -/
+/-- Any atom in the image of the completed atom map is in a banned litter. -/
 lemma banned_of_mem_image_litter_completion_atom_map_core_domain (B : extended_index δ) (a : atom)
   (h : a ∈ litter_completion_atom_map_core hδ hε hδε H B ''
     litter_completion_atom_map_core_domain hδ hε hδε H B) :
-  banned_litter hδ hε hδε H B a.1 ∨ a = ⟨preimage_litter hδ hε hδε H B, arbitrary κ⟩ :=
+  banned_litter hδ hε hδε H B a.1 :=
 begin
   obtain ⟨a, h, rfl⟩ := h,
   rw litter_completion_atom_map_core,
   split_ifs with h₁ h₂ h₃,
-  { exact or.inl (banned_litter.map_atom _ _), },
+  { exact (banned_litter.map_atom _ _), },
   { obtain ⟨L, hL₁, hL₂⟩ := (preimage_litter_equiv hδ hε hδε H B ⟨a, h₂⟩).prop.mem_map,
     rw mem_litter_set at hL₂,
     rw hL₂,
-    exact or.inl (banned_litter.map_litter _ _), },
-  { refine or.inl (banned_litter.map_diff _ h₃.some_spec.some _ _),
+    exact (banned_litter.map_litter _ _), },
+  { refine (banned_litter.map_diff _ h₃.some_spec.some _ _),
     exact ⟨(mapped_outside_equiv hδ hε hδε H h₃.some B h₃.some_spec.some
         ⟨a, h₃.some_spec.some_spec⟩).prop.mem_map,
       (mapped_outside_equiv hδ hε hδε H h₃.some B h₃.some_spec.some
         ⟨a, h₃.some_spec.some_spec⟩).prop.not_mem_map⟩, },
-  { exact or.inr rfl, },
+  { obtain ((h | h) | h) := h,
+    cases h₁ h,
+    cases h₂ h,
+    simp only [mem_Union] at h,
+    cases h₃ h, },
 end
 
 lemma litter_completion_atom_map_domain_disjoint (B : extended_index δ) :
@@ -426,10 +429,7 @@ begin
     { have := preimage_litter_subset_subset B h,
       rw [mem_litter_set, ha₂] at this,
       exact sandbox_litter_ne_preimage_litter hδ hε hδε H B this, }, },
-  { cases banned_of_mem_image_litter_completion_atom_map_core_domain hδ hε hδε H B a ha₁,
-    { exact hnb h, },
-    { rw h at ha₂,
-      exact sandbox_litter_ne_preimage_litter hδ hε hδε H B ha₂.symm, }, },
+  { exact hnb (banned_of_mem_image_litter_completion_atom_map_core_domain hδ hε hδε H B a ha₁), },
 end
 
 /-- We can't prove `h` without knowing facts about the hypothesis `H`. We defer this proof to later,
@@ -528,7 +528,7 @@ begin
   refl,
 end
 
-/-- A proof-relevant statement that `L` is `A`-inflexible, where `ε = ⊥`. -/
+/-- A proof-relevant statement that `L` is `A`-inflexible, where `δ = ⊥`. -/
 structure inflexible_bot (L : litter) (A : extended_index β) :=
 (γ : Iic α) (ε : Iio α) (hε : (ε : Λ) < γ)
 (B : quiver.path (β : type_index) γ) (a : atom)

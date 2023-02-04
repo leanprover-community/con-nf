@@ -179,50 +179,8 @@ lemma constrains_closure_small {S : set (support_condition β)} (h : small S) :
   small (constrains_closure α S) :=
 lt_of_le_of_lt (cardinal.mk_subtype_le_of_subset (λ c hc, hc.2)) (constrains_closure_small' α h)
 
-/-- We need a hypothesis on the action of `G` on support conditions. -/
-lemma constrains_closure_supports {S : set (support_condition β)} (h : supports G S x) :
-  supports G (constrains_closure α S) x :=
-sorry
-
-/-- This actually is false.
-Consider the case where `c` has some near-litter in a designated support, and `d` is an inflexible
-litter. Of course, the litter near the near-litter referenced by `c` is in `S`.  -/
-lemma constrains_closure_closed {S : set (support_condition β)} :
-  ∀ c d : support_condition β, c ≺[α] d →
-  d ∈ constrains_closure α S → c ∈ constrains_closure α S :=
-begin
-  rintros ⟨c, A⟩ d hcd ⟨hd₁, e, he, hd₂⟩,
-  split,
-  { intros N hN,
-    cases hN,
-    obtain ⟨L, N, hN⟩ := N,
-    obtain ⟨a | N', B⟩ := d,
-    { rw constrains_atom at hcd,
-      cases hcd,
-      refl, },
-    { rw constrains_iff at hcd,
-      obtain _ | _ | _ | _ | _ := hcd,
-      { simpa only [prod.mk.inj_iff, false_and, and_false, exists_false] using hcd, },
-      { simp only [prod.mk.inj_iff, exists_eq_right_right'] at hcd,
-        cases hcd.2.1,
-        refl, },
-      { simpa only [prod.mk.inj_iff, false_and, exists_false, and_false] using hcd, },
-      { sorry },
-      { sorry }, }, },
-  { exact ⟨e, he, relation.refl_trans_gen.trans
-    (relation.refl_trans_gen.tail relation.refl_trans_gen.refl hcd) hd₂⟩, },
-end
-
 lemma constrains_closure_litter_set_eq {S : set (support_condition β)} :
   ∀ N A, (⟨inr N, A⟩ : support_condition β) ∈ constrains_closure α S → litter_set N.fst = N.snd :=
 λ N A h, h.1 N rfl
-
-def support.strengthen (S : support β G x) : strong_support α β G x := {
-  carrier := constrains_closure α S,
-  small := constrains_closure_small α S.small,
-  supports := constrains_closure_supports α S.supports,
-  closed := constrains_closure_closed α,
-  litter_set_eq := constrains_closure_litter_set_eq α,
-}
 
 end con_nf
