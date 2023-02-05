@@ -144,11 +144,8 @@ lemma complete_litter_map_eq_of_inflexible_coe (hπ : π.free) {L : litter} {A :
     ((freedom_of_action_of_lt (h.δ : Iic α) h.δ_lt_β _
       (π.litter_approx_free hπ (π.foa_hypothesis hπ) h)).some • h.t) :=
 begin
-  rw [complete_litter_map_eq, complete_near_litter_map_eq],
-  rw near_litter_completion,
-  dsimp only,
-  have : nonempty (inflexible_coe L.to_near_litter.fst A) := ⟨h⟩,
-  rw [litter_completion, dif_pos this],
+  have : nonempty (inflexible_coe L A) := ⟨h⟩,
+  rw [complete_litter_map_eq, litter_completion, dif_pos this],
   cases subsingleton.elim this.some h,
   refl,
 end
@@ -160,12 +157,9 @@ lemma complete_litter_map_eq_of_inflexible_bot {L : litter} {A : extended_index 
   f_map (show (⊥ : type_index) ≠ (h.ε : Λ), from with_bot.bot_ne_coe)
     (π.complete_atom_map hπ h.a (h.B.cons (with_bot.bot_lt_coe _))) :=
 begin
-  rw [complete_litter_map_eq, complete_near_litter_map_eq, near_litter_completion],
-  dsimp only,
-  have h₁ : ¬nonempty (inflexible_coe L.to_near_litter.fst A) :=
-    λ h', inflexible_bot_inflexible_coe h h'.some,
-  have h₂ : nonempty (inflexible_bot L.to_near_litter.fst A) := ⟨h⟩,
-  rw [litter_completion, dif_neg h₁, dif_pos h₂],
+  have h₁ : ¬nonempty (inflexible_coe L A) := λ h', inflexible_bot_inflexible_coe h h'.some,
+  have h₂ : nonempty (inflexible_bot L A) := ⟨h⟩,
+  rw [complete_litter_map_eq, litter_completion, dif_neg h₁, dif_pos h₂],
   cases subsingleton.elim h₂.some h,
   refl,
 end
@@ -174,14 +168,9 @@ end
 lemma complete_litter_map_eq_of_flexible {L : litter} {A : extended_index β}
   (h₁ : inflexible_bot L A → false) (h₂ : inflexible_coe L A → false) :
   π.complete_litter_map hπ L A = near_litter_approx.flexible_completion α (π A) A • L :=
-begin
-  rw [complete_litter_map_eq, complete_near_litter_map_eq, near_litter_completion],
-  dsimp only,
-  rw [litter_completion,
-    dif_neg (show ¬nonempty (inflexible_coe L.to_near_litter.fst A), from λ h, h₂ h.some),
-    dif_neg (show ¬nonempty (inflexible_bot L.to_near_litter.fst A), from λ h, h₁ h.some)],
-  refl,
-end
+by rw [complete_litter_map_eq, litter_completion,
+    dif_neg (show ¬nonempty (inflexible_coe L A), from λ h, h₂ h.some),
+    dif_neg (show ¬nonempty (inflexible_bot L A), from λ h, h₁ h.some)]
 
 /-!
 Lemmas about the proof-relevant `inflexible_*` objects.
