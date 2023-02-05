@@ -48,7 +48,8 @@ lemma complete_near_litter_map_eq :
 hypothesis.fix_near_litter_eq _ _ _ _
 
 lemma complete_litter_map_eq :
-  π.complete_litter_map hπ L A = (π.complete_near_litter_map hπ L.to_near_litter A).1 := rfl
+  π.complete_litter_map hπ L A = π.litter_completion hπ L A (π.foa_hypothesis hπ) :=
+by rw [complete_litter_map, complete_near_litter_map_eq]; refl
 
 @[simp] lemma foa_hypothesis_atom_image {c : support_condition β}
   (h : relation.trans_gen (constrains α β) (inl a, A) c) :
