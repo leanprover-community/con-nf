@@ -312,6 +312,9 @@ conditions lie in the domain of `π` and all near-litter support conditions are 
 (near_litter_mem_domain : ∀ (N : near_litter) B, (inr N, B) ∈ S → N.1 ∈ (π₀ B).litter_perm.domain)
 (eq_to_near_litter : ∀ (N : near_litter) B, (inr N, B) ∈ S → N = N.fst.to_near_litter)
 
+-- TODO: The following lemma can be cleaned up quite a lot by factoring out little lemmas about
+-- exceptions to permutations.
+
 /-- If two allowable permutations exactly approximate some structural approximation, then their
 actions agree on everything that the structural approximation supports. -/
 lemma smul_eq_smul_of_exactly_approximates {β : Iic α} (π₀ : struct_approx β) (π₁ π₂ : allowable β)

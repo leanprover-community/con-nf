@@ -319,8 +319,9 @@ begin
       } (λ B, π ((B₁.cons $ coe_lt hδ₁).comp B))) _,
     { have := supported_perm_spec π hπ ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩
         (π.foa_hypothesis hπ),
-      have := inflexible_support_supports_tangle ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩, },
-    sorry, },
+      have := inflexible_support_supports_tangle ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩,
+      sorry, },
+    { sorry, }, },
   { cases ne_of_inflexible_coe_of_not_inflexible H h₁'.some (λ h, h₂ ⟨h⟩) (λ h, h₂' ⟨h⟩) h, },
   { cases ne_of_inflexible_coe_of_not_inflexible H h₂'.some (λ h, h₁ ⟨h⟩) (λ h, h₁' ⟨h⟩) h.symm, },
   { rw [complete_litter_map_eq_of_flexible, complete_litter_map_eq_of_flexible,
