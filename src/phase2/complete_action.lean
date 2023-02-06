@@ -141,8 +141,7 @@ First, we unfold the definition of the completed action.
 lemma complete_litter_map_eq_of_inflexible_coe (hπ : π.free) {L : litter} {A : extended_index β}
   (h : inflexible_coe L A) :
   π.complete_litter_map hπ L A = f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.hδε)
-    ((freedom_of_action_of_lt (h.δ : Iic α) h.δ_lt_β _
-      (π.litter_approx_free hπ (π.foa_hypothesis hπ) h)).some • h.t) :=
+    (supported_perm π hπ h (π.foa_hypothesis hπ) • h.t) :=
 begin
   have : nonempty (inflexible_coe L A) := ⟨h⟩,
   rw [complete_litter_map_eq, litter_completion, dif_pos this],
@@ -169,8 +168,8 @@ lemma complete_litter_map_eq_of_flexible {L : litter} {A : extended_index β}
   (h₁ : inflexible_bot L A → false) (h₂ : inflexible_coe L A → false) :
   π.complete_litter_map hπ L A = near_litter_approx.flexible_completion α (π A) A • L :=
 by rw [complete_litter_map_eq, litter_completion,
-    dif_neg (show ¬nonempty (inflexible_coe L A), from λ h, h₂ h.some),
-    dif_neg (show ¬nonempty (inflexible_bot L A), from λ h, h₁ h.some)]
+  dif_neg (show ¬nonempty (inflexible_coe L A), from λ h, h₂ h.some),
+  dif_neg (show ¬nonempty (inflexible_bot L A), from λ h, h₁ h.some)]
 
 /-!
 Lemmas about the proof-relevant `inflexible_*` objects.
@@ -213,12 +212,131 @@ begin
     exact h₁.2 h.some, },
 end
 
+lemma ne_of_inflexible_bot_of_not_inflexible_bot {c : support_condition β} (H : π.foa_props hπ c)
+  {L₁ L₂ : litter} {A : extended_index β}
+  (hL₁ : inflexible_bot L₁ A) (hL₂ : inflexible_bot L₂ A → false) :
+  π.complete_litter_map hπ L₁ A ≠ π.complete_litter_map hπ L₂ A :=
+begin
+  obtain ⟨γ₁, ε₁, hγε₁, B₁, a₁, hL₁, hA₁⟩ := hL₁,
+  rw complete_litter_map_eq_of_inflexible_bot ⟨γ₁, ε₁, hγε₁, B₁, a₁, hL₁, hA₁⟩,
+  by_cases h₂ : nonempty (inflexible_coe L₂ A),
+  { obtain ⟨⟨γ₂, δ₂, ε₂, hδ₂, hε₂, hδε₂, B₂, t₂, hL₂, hB₂⟩⟩ := h₂,
+    rw complete_litter_map_eq_of_inflexible_coe hπ ⟨γ₂, δ₂, ε₂, hδ₂, hε₂, hδε₂, B₂, t₂, hL₂, hB₂⟩,
+    intro h,
+    have := congr_arg litter.β h,
+    simp only [f_map, bot_ne_coe] at this,
+    exact this, },
+  { have flex := flexible_iff_not_inflexible_bot_coe.mpr ⟨hL₂, λ h, h₂ ⟨h⟩⟩,
+    rw complete_litter_map_eq_of_flexible hL₂ (λ h, h₂ ⟨h⟩),
+    intro h,
+    have : L₂ ∈ ((π A).flexible_completion α A).litter_perm.domain :=
+      by rwa near_litter_approx.flexible_completion_litter_perm_domain_free _ _ _ (hπ A),
+    have := ((π A).flexible_completion α A).litter_perm.map_domain this,
+    rw [near_litter_approx.smul_litter_eq, ← h,
+      near_litter_approx.flexible_completion_litter_perm_domain_free _ _ _ (hπ A)] at this,
+    refine this _,
+    have := inflexible.mk_bot hγε₁ B₁ _,
+    rw ← hA₁ at this,
+    exact this, },
+end
+
+lemma ne_of_inflexible_coe_of_not_inflexible {c : support_condition β} (H : π.foa_props hπ c)
+  {L₁ L₂ : litter} {A : extended_index β}
+  (hL₁ : inflexible_coe L₁ A)
+  (hL₂ : inflexible_bot L₂ A → false) (hL₂' : inflexible_coe L₂ A → false) :
+  π.complete_litter_map hπ L₁ A ≠ π.complete_litter_map hπ L₂ A :=
+begin
+  rw complete_litter_map_eq_of_inflexible_coe hπ hL₁,
+  have flex := flexible_iff_not_inflexible_bot_coe.mpr ⟨hL₂, hL₂'⟩,
+  rw complete_litter_map_eq_of_flexible hL₂ hL₂',
+  intro h,
+  have : L₂ ∈ ((π A).flexible_completion α A).litter_perm.domain :=
+    by rwa near_litter_approx.flexible_completion_litter_perm_domain_free _ _ _ (hπ A),
+  have := ((π A).flexible_completion α A).litter_perm.map_domain this,
+  rw [near_litter_approx.smul_litter_eq, ← h,
+    near_litter_approx.flexible_completion_litter_perm_domain_free _ _ _ (hπ A)] at this,
+  refine this _,
+  obtain ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩ := hL₁,
+  have := inflexible.mk_coe hδ₁ hε₁ hδε₁ B₁ _,
+  rw ← hA₁ at this,
+  exact this,
+end
+
 lemma litter_injective_extends {c : support_condition β} (H : π.foa_props hπ c)
   {L₁ L₂ : litter} {A : extended_index β}
-  (hac : (relation.refl_trans_gen (constrains α β)) ⟨inr L₁.to_near_litter, A⟩ c)
-  (hbc : (relation.refl_trans_gen (constrains α β)) ⟨inr L₂.to_near_litter, A⟩ c)
+  (hcL₁ : (relation.refl_trans_gen (constrains α β)) ⟨inr L₁.to_near_litter, A⟩ c)
+  (hcL₂ : (relation.refl_trans_gen (constrains α β)) ⟨inr L₂.to_near_litter, A⟩ c)
   (h : π.complete_litter_map hπ L₁ A = π.complete_litter_map hπ L₂ A) :
-  L₁ = L₂ := sorry
+  L₁ = L₂ :=
+begin
+  by_cases h₁ : nonempty (inflexible_bot L₁ A);
+  by_cases h₂ : nonempty (inflexible_bot L₂ A),
+  { obtain ⟨⟨γ₁, ε₁, hγε₁, B₁, a₁, hL₁, hA₁⟩⟩ := h₁,
+    obtain ⟨⟨γ₂, ε₂, hγε₂, B₂, a₂, hL₂, hA₂⟩⟩ := h₂,
+    rw hA₁ at hA₂,
+    cases subtype.coe_injective (coe_injective (path.obj_eq_of_cons_eq_cons hA₂)),
+    cases subtype.coe_injective (coe_injective (path.obj_eq_of_cons_eq_cons
+      (path.heq_of_cons_eq_cons hA₂).eq)),
+    cases (path.heq_of_cons_eq_cons (path.heq_of_cons_eq_cons hA₂).eq).eq,
+    rw [complete_litter_map_eq_of_inflexible_bot ⟨γ₁, ε₁, hγε₁, B₁, a₁, hL₁, hA₁⟩,
+      complete_litter_map_eq_of_inflexible_bot ⟨γ₁, ε₁, hγε₁, B₁, a₂, hL₂, hA₁⟩] at h,
+    cases H.atom_injective _ _ _ _ _ (f_map_injective bot_ne_coe h),
+    rw [hL₁, hL₂],
+    { have := constrains.f_map_bot hγε₁ B₁ a₁,
+      rw [← hL₁, ← hA₁] at this,
+      exact relation.trans_gen.trans_left (relation.trans_gen.single this) hcL₁, },
+    { have := constrains.f_map_bot hγε₁ B₁ a₂,
+      rw [← hL₂, ← hA₁] at this,
+      exact relation.trans_gen.trans_left (relation.trans_gen.single this) hcL₂, }, },
+  { cases ne_of_inflexible_bot_of_not_inflexible_bot H h₁.some (λ h, h₂ ⟨h⟩) h, },
+  { cases ne_of_inflexible_bot_of_not_inflexible_bot H h₂.some (λ h, h₁ ⟨h⟩) h.symm, },
+  by_cases h₁' : nonempty (inflexible_coe L₁ A);
+  by_cases h₂' : nonempty (inflexible_coe L₂ A),
+  { obtain ⟨⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩⟩ := h₁',
+    obtain ⟨⟨γ₂, δ₂, ε₂, hδ₂, hε₂, hδε₂, B₂, t₂, hL₂, hA₂⟩⟩ := h₂',
+    rw hA₁ at hA₂,
+    cases subtype.coe_injective (coe_injective (path.obj_eq_of_cons_eq_cons hA₂)),
+    cases subtype.coe_injective (coe_injective (path.obj_eq_of_cons_eq_cons
+      (path.heq_of_cons_eq_cons hA₂).eq)),
+    cases (path.heq_of_cons_eq_cons (path.heq_of_cons_eq_cons hA₂).eq).eq,
+    rw [complete_litter_map_eq_of_inflexible_coe hπ ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩,
+      complete_litter_map_eq_of_inflexible_coe hπ ⟨γ₁, δ₂, ε₁, hδ₂, hε₁, hδε₂, B₁, t₂, hL₂, hA₁⟩]
+      at h,
+    have := congr_arg litter.β h,
+    cases subtype.coe_injective (coe_injective this),
+    rw [hL₁, hL₂],
+    refine congr_arg _ _,
+    have := f_map_injective _ h,
+    obtain ⟨ρ, hρ⟩ := freedom_of_action_of_lt (δ₁ : Iic α)
+      (hδ₁.trans_le (show _, from with_bot.coe_le_coe.mp (le_of_path B₁)))
+      (supported_action {
+        carrier := inflexible_support ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩ ∪
+          inflexible_support ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₂, hL₂, hA₁⟩,
+        small := small.union (inflexible_support_small _) (inflexible_support_small _),
+        atom_image := λ a B h, π.complete_atom_map hπ a ((B₁.cons $ coe_lt hδ₁).comp B),
+        near_litter_image := λ N B h, π.complete_near_litter_map hπ N
+          ((B₁.cons $ coe_lt hδ₁).comp B),
+      } (λ B, π ((B₁.cons $ coe_lt hδ₁).comp B))) _,
+    { have := supported_perm_spec π hπ ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩
+        (π.foa_hypothesis hπ),
+      have := inflexible_support_supports_tangle ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩, },
+    sorry, },
+  { cases ne_of_inflexible_coe_of_not_inflexible H h₁'.some (λ h, h₂ ⟨h⟩) (λ h, h₂' ⟨h⟩) h, },
+  { cases ne_of_inflexible_coe_of_not_inflexible H h₂'.some (λ h, h₁ ⟨h⟩) (λ h, h₁' ⟨h⟩) h.symm, },
+  { rw [complete_litter_map_eq_of_flexible, complete_litter_map_eq_of_flexible,
+      near_litter_approx.smul_eq_smul_litter] at h,
+    exact h,
+    rw [near_litter_approx.flexible_completion_litter_perm_domain_free _ _ _ (hπ A),
+      mem_set_of, flexible_iff_not_inflexible_bot_coe],
+    exact ⟨λ h, h₁ ⟨h⟩, λ h, h₁' ⟨h⟩⟩,
+    rw [near_litter_approx.flexible_completion_litter_perm_domain_free _ _ _ (hπ A),
+      mem_set_of, flexible_iff_not_inflexible_bot_coe],
+    exact ⟨λ h, h₂ ⟨h⟩, λ h, h₂' ⟨h⟩⟩,
+    exact λ h, h₂ ⟨h⟩,
+    exact λ h, h₂' ⟨h⟩,
+    exact λ h, h₁ ⟨h⟩,
+    exact λ h, h₁' ⟨h⟩, },
+end
 
 end struct_approx
 

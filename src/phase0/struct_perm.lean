@@ -105,6 +105,8 @@ def to_coe_iso (α : Λ) : (Π β : type_index, β < α → struct_perm β) ≃*
 @[simp] lemma of_bot_one : of_bot 1 = 1 := to_bot_iso.symm.map_one
 @[simp] lemma to_bot_mul (a b) : to_bot (a * b) = to_bot a * to_bot b := to_bot_iso.map_mul _ _
 @[simp] lemma of_bot_mul (a b) : of_bot (a * b) = of_bot a * of_bot b := to_bot_iso.symm.map_mul _ _
+@[simp] lemma to_bot_inv (a) : to_bot a⁻¹ = (to_bot a)⁻¹ := to_bot_iso.map_inv _
+@[simp] lemma of_bot_inv (a) : of_bot a⁻¹ = (of_bot a)⁻¹ := to_bot_iso.symm.map_inv _
 
 @[simp] lemma to_coe_one : (to_coe 1 : struct_perm α) = 1 := (to_coe_iso α).map_one
 @[simp] lemma of_coe_one : of_coe (1 : struct_perm α) = 1 := (to_coe_iso α).symm.map_one

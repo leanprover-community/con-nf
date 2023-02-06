@@ -62,6 +62,9 @@ instance : has_smul near_litter_approx litter := ⟨λ π, π.litter_perm⟩
 
 variables (π : near_litter_approx)
 
+lemma smul_atom_eq {a : atom} : π.atom_perm a = π • a := rfl
+lemma smul_litter_eq {L : litter} : π.litter_perm L = π • L := rfl
+
 lemma smul_eq_smul_atom {a₁ a₂ : atom}
   (h₁ : a₁ ∈ π.atom_perm.domain) (h₂ : a₂ ∈ π.atom_perm.domain) :
   π • a₁ = π • a₂ ↔ a₁ = a₂ :=
@@ -98,6 +101,28 @@ def symm : near_litter_approx := {
 
 @[simp] lemma right_inv_litter {L} : L ∈ π.litter_perm.domain → π • π.symm • L = L :=
 π.litter_perm.right_inv
+
+lemma symm_smul_atom_eq_iff {a b} :
+  a ∈ π.atom_perm.domain → b ∈ π.atom_perm.domain → (π.symm • a = b ↔ a = π • b) :=
+begin
+  intros ha hb,
+  split,
+  { rintro rfl,
+    exact (π.right_inv_atom ha).symm, },
+  { rintro rfl,
+    exact π.left_inv_atom hb, },
+end
+
+lemma symm_smul_litter_eq_iff {L₁ L₂} :
+  L₁ ∈ π.litter_perm.domain → L₂ ∈ π.litter_perm.domain → (π.symm • L₁ = L₂ ↔ L₁ = π • L₂) :=
+begin
+  intros hL₁ hL₂,
+  split,
+  { rintro rfl,
+    exact (π.right_inv_litter hL₁).symm, },
+  { rintro rfl,
+    exact π.left_inv_litter hL₂, },
+end
 
 lemma eq_symm_apply_atom {a₁ a₂} : a₁ ∈ π.atom_perm.domain → a₂ ∈ π.atom_perm.domain →
   (a₁ = π.symm • a₂ ↔ π • a₁ = a₂) := π.atom_perm.eq_symm_apply
@@ -205,9 +230,47 @@ def is_exception (π : near_litter_perm) (a : atom) : Prop :=
 (map_atom : ∀ a, a ∈ π₀.atom_perm.domain → π₀ • a = π • a)
 (map_litter : ∀ L, L ∈ π₀.litter_perm.domain → π₀ • L = π • L)
 
+lemma approximates.symm_map_atom {π₀ : near_litter_approx} {π : near_litter_perm}
+  (hπ : π₀.approximates π) (a : atom) (ha : a ∈ π₀.atom_perm.domain) : π₀.symm • a = π⁻¹ • a :=
+begin
+  have := hπ.map_atom (π₀.symm • a) (π₀.symm.atom_perm.map_domain ha),
+  rw ← inv_smul_eq_iff at this,
+  rw [← this, smul_left_cancel_iff],
+  exact (π₀.atom_perm).right_inv ha,
+end
+
+lemma approximates.symm_map_litter {π₀ : near_litter_approx} {π : near_litter_perm}
+  (hπ : π₀.approximates π) (L : litter) (hL : L ∈ π₀.litter_perm.domain) : π₀.symm • L = π⁻¹ • L :=
+begin
+  have := hπ.map_litter (π₀.symm • L) (π₀.symm.litter_perm.map_domain hL),
+  rw ← inv_smul_eq_iff at this,
+  rw [← this, smul_left_cancel_iff],
+  exact (π₀.litter_perm).right_inv hL,
+end
+
 @[mk_iff] structure exactly_approximates (π₀ : near_litter_approx) (π : near_litter_perm)
   extends approximates π₀ π : Prop :=
 (exception_mem : ∀ a, is_exception π a → a ∈ π₀.atom_perm.domain)
+
+lemma exactly_approximates.of_is_exception {π₀ : near_litter_approx} {π : near_litter_perm}
+  (hπ : π₀.exactly_approximates π) (a : atom) (ha : a.1 ∈ π₀.litter_perm.domain) :
+  is_exception π a → π₀ • a ∉ litter_set (π₀ • a.1) ∨ π₀.symm • a ∉ litter_set (π₀.symm • a.1) :=
+begin
+  intro h,
+  rw [hπ.map_litter a.fst ha, hπ.symm_map_litter a.fst ha,
+    hπ.map_atom a (hπ.exception_mem a h), hπ.symm_map_atom a (hπ.exception_mem a h)],
+  exact h,
+end
+
+lemma exactly_approximates.mem_litter_set {π₀ : near_litter_approx} {π : near_litter_perm}
+  (hπ : π₀.exactly_approximates π) (a : atom) (ha : a ∉ π₀.atom_perm.domain) :
+  π • a ∈ litter_set (π • a.1) :=
+by contrapose! ha; exact hπ.exception_mem _ (or.inl ha)
+
+lemma exactly_approximates.mem_litter_set_inv {π₀ : near_litter_approx} {π : near_litter_perm}
+  (hπ : π₀.exactly_approximates π) (a : atom) (ha : a ∉ π₀.atom_perm.domain) :
+  π⁻¹ • a ∈ litter_set (π⁻¹ • a.1) :=
+by contrapose! ha; exact hπ.exception_mem _ (or.inr ha)
 
 instance : preorder near_litter_approx := {
   le := λ π π', π.atom_perm ≤ π'.atom_perm ∧ π.litter_perm ≤ π'.litter_perm,
@@ -236,6 +299,114 @@ def exactly_approximates {β : type_index} (π₀ : struct_approx β) (π : stru
 ∀ A, (π₀ A).exactly_approximates (struct_perm.of_bot $ struct_perm.derivative A π)
 
 variables {α : Λ} [position_data.{}] [phase_2_assumptions α]
+
+-- TODO: Refactor `N = N.fst.to_near_litter` and `litter_set N.fst = N.snd` into a predicate with
+-- some nice lemmas.
+
+/-- A structural approximation `π` *supports* a set of support conditions if all of the support
+conditions lie in the domain of `π` and all near-litter support conditions are litters. -/
+@[mk_iff] structure supports {β : Iic α} (π₀ : struct_approx β) (S : set (support_condition β)) :
+  Prop :=
+(atom_mem_domain : ∀ a B, (inl a, B) ∈ S → a ∈ (π₀ B).atom_perm.domain)
+(atom_fst_mem_domain : ∀ (a : atom) B, (inl a, B) ∈ S → a.1 ∈ (π₀ B).litter_perm.domain)
+(near_litter_mem_domain : ∀ (N : near_litter) B, (inr N, B) ∈ S → N.1 ∈ (π₀ B).litter_perm.domain)
+(eq_to_near_litter : ∀ (N : near_litter) B, (inr N, B) ∈ S → N = N.fst.to_near_litter)
+
+/-- If two allowable permutations exactly approximate some structural approximation, then their
+actions agree on everything that the structural approximation supports. -/
+lemma smul_eq_smul_of_exactly_approximates {β : Iic α} (π₀ : struct_approx β) (π₁ π₂ : allowable β)
+  (hπ₁ : π₀.exactly_approximates π₁.to_struct_perm)
+  (hπ₂ : π₀.exactly_approximates π₂.to_struct_perm)
+  (S : set (support_condition β)) (t : tangle β)
+  (hS : π₀.supports S) (ht : mul_action.supports (allowable β) S t) :
+  π₁ • t = π₂ • t :=
+begin
+  have := ht (π₂⁻¹ * π₁) _,
+  { rw [mul_smul, inv_smul_eq_iff] at this,
+    exact this, },
+  intros c hc,
+  obtain ⟨a | N, B⟩ := c,
+  { refine prod.ext _ rfl,
+    dsimp only,
+    refine congr_arg sum.inl _,
+    have h₁ := (hπ₁ B).map_atom a (hS.atom_mem_domain a B hc),
+    have h₂ := (hπ₂ B).map_atom a (hS.atom_mem_domain a B hc),
+    rw h₁ at h₂,
+    simp only [struct_perm.of_bot_smul] at h₂,
+    simp only [map_mul, map_inv, mul_smul, h₂, inv_smul_smul], },
+  { refine prod.ext _ rfl,
+    dsimp only,
+    refine congr_arg sum.inr _,
+    have h₁ := (hπ₁ B).map_litter N.fst (hS.near_litter_mem_domain N B
+      (hS.eq_to_near_litter N B hc ▸ hc)),
+    have h₂ := (hπ₂ B).map_litter N.fst (hS.near_litter_mem_domain N B
+      (hS.eq_to_near_litter N B hc ▸ hc)),
+    rw h₁ at h₂,
+    simp only [struct_perm.of_bot_smul] at h₂,
+    rw hS.eq_to_near_litter N B hc,
+    have : (struct_perm.derivative (inr N.fst.to_near_litter, B).snd)
+      (allowable.to_struct_perm (π₂⁻¹ * π₁)) • N.fst = N.fst,
+    { simp only [map_mul, map_inv, mul_smul, litter.to_near_litter_fst],
+      change _ • (_ • _) = _,
+      simp only [litter.to_near_litter_fst, struct_perm.to_near_litter_perm_smul, h₂,
+        inv_smul_smul], },
+    ext : 1,
+    { exact this, },
+    ext a : 1,
+    rw [← struct_perm.of_bot_smul, near_litter_perm.coe_smul, struct_perm.of_bot_smul],
+    simp only [map_mul, map_inv, mem_smul_set, litter.coe_to_near_litter, mem_litter_set],
+    simp only [mul_smul, inv_smul_eq_iff] at h₂ ⊢,
+    by_cases a ∈ (π₀ B).atom_perm.domain,
+    { split,
+      { rintro ⟨b, hb₁, hb₂⟩,
+        have h₁ := (hπ₁ B).map_atom a h,
+        have h₂ := (hπ₂ B).map_atom a h,
+        rw struct_perm.of_bot_smul at h₁ h₂,
+        rw [← h₂, h₁, smul_left_cancel_iff] at hb₂,
+        rw [← hb₂, hb₁], },
+      { intro ha,
+        refine ⟨a, ha, _⟩,
+        have h₁ := (hπ₁ B).map_atom a h,
+        have h₂ := (hπ₂ B).map_atom a h,
+        rw struct_perm.of_bot_smul at h₁ h₂,
+        rw [← h₂, h₁], }, },
+    { split,
+      { rintro ⟨b, hb₁, hb₂⟩,
+        have hb : b ∉ (π₀ B).atom_perm.domain,
+        { contrapose! h,
+          have h₁ := (hπ₁ B).map_atom b h,
+          have h₂ := (hπ₂ B).map_atom b h,
+          rw struct_perm.of_bot_smul at h₁ h₂,
+          rw [← h₁, h₂, smul_left_cancel_iff] at hb₂,
+          rw ← hb₂,
+          exact h, },
+        have h₁' := (hπ₁ B).mem_litter_set b hb,
+        have h₂' := (hπ₂ B).mem_litter_set a h,
+        rw [struct_perm.of_bot_smul, struct_perm.of_bot_smul] at h₁' h₂',
+        rw hb₂ at h₁',
+        have := eq_of_mem_litter_set_of_mem_litter_set h₁' h₂',
+        rw [hb₁, h₂, smul_left_cancel_iff] at this,
+        exact this.symm, },
+      { intro ha,
+        refine ⟨struct_perm.derivative B (allowable.to_struct_perm (π₁⁻¹ * π₂)) • a, _, _⟩,
+        simp only [map_mul, map_inv, mul_smul],
+        have h₁' := (hπ₁ B).mem_litter_set_inv
+          (struct_perm.derivative B (allowable.to_struct_perm π₂) • a) _,
+        have h₂' := (hπ₂ B).mem_litter_set a h,
+        simp only [← struct_perm.of_bot_inv, struct_perm.of_bot_smul] at h₁' h₂',
+        rw mem_litter_set at h₁' h₂',
+        rw [h₁', h₂', inv_smul_eq_iff, h₂, ha],
+        { contrapose! h,
+          have h₁ := (hπ₁ B).symm_map_atom _ h,
+          have h₂ := (hπ₂ B).symm_map_atom _ h,
+          rw [← struct_perm.of_bot_inv, struct_perm.of_bot_smul, inv_smul_smul, h₁,
+            inv_smul_eq_iff, struct_perm.of_bot_smul] at h₂,
+          rw [h₂, ← struct_perm.of_bot_inv, struct_perm.of_bot_smul, inv_smul_smul] at h₁,
+          rw [← h₁, ← h₂],
+          exact (π₀ B).symm.atom_perm.map_domain h, },
+        { rw [map_mul, map_mul, map_inv, mul_smul, smul_smul,
+            map_inv, mul_right_inv, one_smul], }, }, }, },
+end
 
 def free {β : Iic α} (π₀ : struct_approx β) : Prop := ∀ A, (π₀ A).free α A
 

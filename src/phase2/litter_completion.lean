@@ -93,30 +93,57 @@ export freedom_of_action_hypothesis (freedom_of_action_of_lt)
 
 variable [freedom_of_action_hypothesis β]
 
--- TODO: Move!
-instance {δ : Iio α} : mul_action (allowable (δ : Iic α)) (tangle (δ : Λ)) :=
-show mul_action (allowable δ) (tangle δ), from infer_instance
+def inflexible_support {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
+  set (support_condition h.δ) :=
+{c | relation.trans_gen (constrains α β)
+  (c.1, (h.B.cons (coe_lt h.hδ)).comp c.2)
+  (inr (f_map (coe_ne_coe.mpr $ coe_ne' h.hδε) h.t).to_near_litter,
+    (h.B.cons (coe_lt h.hε)).cons (bot_lt_coe _))}
+
+lemma inflexible_support_small {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
+  small (inflexible_support h) :=
+begin
+  have := constrains_closure_small' α (small_singleton
+    (inr (f_map (coe_ne_coe.mpr $ coe_ne' h.hδε) h.t).to_near_litter,
+      (h.B.cons (coe_lt h.hε)).cons (bot_lt_coe _))),
+  simp only [mem_singleton_iff, exists_prop, exists_eq_left] at this,
+  refine lt_of_le_of_lt _ this,
+  refine ⟨⟨λ c, ⟨_, c.prop.to_refl⟩, λ c d h, _⟩⟩,
+  simp only [subtype.mk_eq_mk, prod.mk.inj_iff, path.comp_inj_right] at h,
+  ext,
+  exact h.1,
+  exact h.2,
+end
+
+lemma inflexible_support_supports_tangle {L : litter} {A : extended_index β}
+  (h : inflexible_coe L A) : mul_action.supports (allowable h.δ) (inflexible_support h) h.t :=
+λ π hπ, (designated_support h.t).supports π
+  (λ c hc, hπ (relation.trans_gen.single $ constrains.f_map h.hδ h.hε h.hδε _ _ _ hc))
+
+lemma inflexible_support_supports {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
+  ∀ ⦃π : allowable h.γ⦄, (∀ c ∈ inflexible_support h,
+    (allowable_derivative h.γ (h.δ : Iio_index α) (coe_lt h.hδ) π) • c = c) →
+  allowable_derivative h.γ h.ε (coe_lt h.hε) π • L = L :=
+begin
+  intros π hπ,
+  have := smul_f_map (Iio_coe h.δ) h.ε (coe_lt h.hδ) h.hε (Iio.coe_injective.ne h.hδε) π h.t,
+  rw inflexible_support_supports_tangle h _ hπ at this,
+  -- The `convert` and other nonsense won't be needed in Lean 4.
+  convert this;
+  { refine h.hL.trans _,
+    congr;
+    ext;
+    refl, },
+end
 
 def inflexible_support_map {L : litter} {A : extended_index β}
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A) : support_map h.δ := {
-  carrier := {c | relation.trans_gen (constrains α β)
-    (c.1, (h.B.cons (coe_lt h.hδ)).comp c.2)
-    (inr (f_map (coe_ne_coe.mpr $ coe_ne' h.hδε) h.t).to_near_litter,
-      (h.B.cons (coe_lt h.hε)).cons (bot_lt_coe _))},
-  small := begin
-    have := constrains_closure_small' α (small_singleton
-      (inr (f_map (coe_ne_coe.mpr $ coe_ne' h.hδε) h.t).to_near_litter,
-        (h.B.cons (coe_lt h.hε)).cons (bot_lt_coe _))),
-    simp only [mem_singleton_iff, exists_prop, exists_eq_left] at this,
-    refine lt_of_le_of_lt _ this,
-    refine ⟨⟨λ c, ⟨_, c.prop.to_refl⟩, λ c d h, _⟩⟩,
-    simp only [subtype.mk_eq_mk, prod.mk.inj_iff, path.comp_inj_right] at h,
-    ext, exact h.1, exact h.2,
-  end,
+  carrier := inflexible_support h,
+  small := inflexible_support_small h,
   atom_image := λ a B ha, H.atom_image a ((h.B.cons (coe_lt h.hδ)).comp B)
-    (by rwa [← h.hL, ← h.hA] at ha),
+    (by rwa [inflexible_support, ← h.hL, ← h.hA] at ha),
   near_litter_image := λ N B hN, H.near_litter_image N ((h.B.cons (coe_lt h.hδ)).comp B)
-    (by rwa [← h.hL, ← h.hA] at hN),
+    (by rwa [inflexible_support, ← h.hL, ← h.hA] at hN),
 }
 
 lemma litter_approx_free (π : struct_approx β) (hπ : π.free) {L : litter} {A : extended_index β}
@@ -130,12 +157,22 @@ begin
   exact hL'.1,
 end
 
+noncomputable def supported_perm (π : struct_approx β) (hπ : π.free)
+  {L : litter} {A : extended_index β} (h : inflexible_coe L A)
+  (H : hypothesis ⟨inr L.to_near_litter, A⟩) : allowable h.δ :=
+(freedom_of_action_of_lt (h.δ : Iic α) h.δ_lt_β _ (π.litter_approx_free hπ H h)).some
+
+lemma supported_perm_spec (π : struct_approx β) (hπ : π.free)
+  {L : litter} {A : extended_index β} (h : inflexible_coe L A)
+  (H : hypothesis ⟨inr L.to_near_litter, A⟩) :
+  (supported_action (inflexible_support_map H h) (λ B, π ((h.B.cons $ coe_lt h.hδ).comp B)))
+    .exactly_approximates (supported_perm π hπ h H).to_struct_perm :=
+(freedom_of_action_of_lt (h.δ : Iic α) h.δ_lt_β _ (π.litter_approx_free hπ H h)).some_spec
+
 noncomputable def litter_completion (π : struct_approx β) (hπ : π.free)
   (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩) : litter :=
 if h : nonempty (inflexible_coe L A) then
-  f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.some.hδε)
-  ((freedom_of_action_of_lt (h.some.δ : Iic α) h.some.δ_lt_β _
-    (π.litter_approx_free hπ H h.some)).some • h.some.t)
+  f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.some.hδε) (supported_perm π hπ h.some H • h.some.t)
 else if h : nonempty (inflexible_bot L A) then
   f_map (show (⊥ : type_index) ≠ (h.some.ε : Λ), from with_bot.bot_ne_coe)
     (H.atom_image h.some.a (h.some.B.cons (with_bot.bot_lt_coe _)) h.some.constrains)
