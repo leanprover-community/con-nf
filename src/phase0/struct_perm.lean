@@ -174,6 +174,12 @@ by { change to_near_litter_perm _ • _ = _ • _, rw [coe_to_near_litter_perm, 
 @[simp] lemma of_bot_smul (f : struct_perm ⊥) (x : X) : of_bot f • x = f • x :=
 by rw [←to_bot_smul, to_bot_of_bot]
 
+@[simp] lemma to_bot_inv_smul (f : near_litter_perm) (x : X) : (to_bot f)⁻¹ • x = f⁻¹ • x :=
+by rw [inv_smul_eq_iff, to_bot_smul, smul_inv_smul]
+
+@[simp] lemma of_bot_inv_smul (f : struct_perm ⊥) (x : X) : (of_bot f)⁻¹ • x = f⁻¹ • x :=
+by rw [inv_smul_eq_iff, of_bot_smul, smul_inv_smul]
+
 lemma smul_near_litter_fst (π : struct_perm α) (N : near_litter) : (π • N).fst = π • N.fst := rfl
 
 end

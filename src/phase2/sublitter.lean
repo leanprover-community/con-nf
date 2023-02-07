@@ -47,6 +47,8 @@ instance : set_like sublitter atom :=
 lemma mk_eq_κ (S : sublitter) : #S = #κ := S.mk_S_eq_κ
 lemma mk_eq_κ' (S : sublitter) : #(S : set atom) = #κ := S.mk_S_eq_κ
 
+@[simp] lemma carrier_eq_coe {S : sublitter} : S.carrier = S := rfl
+
 @[simp] lemma coe_mk (L S subset diff_small) :
   @coe sublitter (set atom) _ ⟨L, S, subset, diff_small⟩ = S := rfl
 

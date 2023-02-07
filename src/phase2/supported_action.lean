@@ -13,7 +13,7 @@ variables [params.{u}] {α : Λ} [position_data.{}] [phase_2_assumptions α] {β
 
 /-- A support, together with values of an allowable permutation on that support. See also
 `hypothesis` for a different formulation of similar data. -/
-structure support_map (δ : Iio α) :=
+@[ext] structure support_map (δ : Iio α) :=
 (carrier : set (support_condition δ))
 (small : small carrier)
 (atom_image : Π a B, (inl a, B) ∈ carrier → atom)
@@ -320,6 +320,44 @@ begin
     (supported_action_atom_map_core_domain_small M B)),
 end
 
+lemma supported_action_eq_of_mem_support_map {B : extended_index δ} {a : atom}
+  (h : (inl a, B) ∈ M) : supported_action_atom_map_core M B a = M.atom_image a B h :=
+by rw [supported_action_atom_map_core, dif_pos h]
+
+lemma supported_action_eq_of_mem_preimage_litter_subset {B : extended_index δ} {a : atom}
+  (h : a ∈ preimage_litter_subset M B) :
+  supported_action_atom_map_core M B a = preimage_litter_equiv M B ⟨a, h⟩ :=
+begin
+  rw [supported_action_atom_map_core, dif_neg, dif_pos h],
+  intro h',
+  have := preimage_litter_not_banned M B,
+  rw banned_litter_iff at this,
+  push_neg at this,
+  exact this.1 a h' (preimage_litter_subset_subset B h).symm,
+end
+
+lemma supported_action_eq_of_mem_mapped_outside_subset {B : extended_index δ} {a : atom}
+  {L h} (h' : a ∈ mapped_outside_subset M L B h) :
+  supported_action_atom_map_core M B a = mapped_outside_equiv M L B h ⟨a, h'⟩ :=
+begin
+  have : ∃ L h, a ∈ mapped_outside_subset M L B h := ⟨L, h, h'⟩,
+  rw [supported_action_atom_map_core, dif_neg, dif_neg, dif_pos this],
+  { cases eq_of_mem_litter_set_of_mem_litter_set
+      (mapped_outside_subset_subset _ _ h h')
+      (mapped_outside_subset_subset _ _ this.some_spec.some this.some_spec.some_spec),
+    refl, },
+  { intro h'',
+    have := eq_of_mem_litter_set_of_mem_litter_set
+      (mapped_outside_subset_subset _ _ h h')
+      (preimage_litter_subset_subset _ h''),
+    rw this at h,
+    have := preimage_litter_not_banned M B,
+    rw banned_litter_iff at this,
+    push_neg at this,
+    cases this.2.1 h, },
+  { exact ((mapped_outside_subset_spec _ _ h).1 h').2, },
+end
+
 /-- Any atom in the image of the completed atom map is either in a banned litter, or it's being
 mapped to an atom without preimage. -/
 lemma banned_of_mem_supported_action_atom_map_core_domain (B : extended_index δ) (a : atom)
@@ -383,12 +421,61 @@ begin
   { exact hnb (banned_of_mem_image_supported_action_atom_map_core_domain M B a ha₁), },
 end
 
+lemma supported_action_inj_on (B : extended_index δ)
+  (hM₁ : ∀ a ha b hb, M.atom_image a B ha = M.atom_image b B hb → a = b)
+  (hM₂ : ∀ (L₁ : litter) hL₁ (L₂ : litter) hL₂,
+    ((M.near_litter_image L₁.to_near_litter B hL₁ : set atom) ∩
+      (M.near_litter_image L₂.to_near_litter B hL₂)).nonempty → L₁ = L₂) :
+  inj_on (supported_action_atom_map_core M B) (supported_action_atom_map_core_domain M B) :=
+begin
+  rintros a ((ha | ha) | ⟨_, ⟨L, rfl⟩, ⟨_, ⟨hL, rfl⟩, ha⟩⟩)
+    b ((hb | hb) | ⟨_, ⟨L', rfl⟩, ⟨_, ⟨hL', rfl⟩, hb⟩⟩) hab,
+  { rw [supported_action_eq_of_mem_support_map _ ha,
+      supported_action_eq_of_mem_support_map _ hb] at hab,
+    exact hM₁ a ha b hb hab, },
+  { rw [supported_action_eq_of_mem_support_map _ ha,
+      supported_action_eq_of_mem_preimage_litter_subset _ hb] at hab,
+    obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab.symm,
+    cases hab.not_mem_domain a ha rfl, },
+  { rw [supported_action_eq_of_mem_support_map _ ha,
+      supported_action_eq_of_mem_mapped_outside_subset _ hb] at hab,
+    obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab.symm,
+    cases hab.not_mem_domain a ha rfl, },
+  { rw [supported_action_eq_of_mem_preimage_litter_subset _ ha,
+      supported_action_eq_of_mem_support_map _ hb] at hab,
+    obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab,
+    cases hab.not_mem_domain b hb rfl, },
+  { rw [supported_action_eq_of_mem_preimage_litter_subset _ ha,
+      supported_action_eq_of_mem_preimage_litter_subset _ hb,
+      subtype.coe_inj, embedding_like.apply_eq_iff_eq] at hab,
+    exact subtype.coe_inj.mpr hab, },
+  { rw [supported_action_eq_of_mem_preimage_litter_subset _ ha,
+      supported_action_eq_of_mem_mapped_outside_subset _ hb] at hab,
+    obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab,
+    cases without_preimage.not_mapped_outside hab _ hL'
+      (mapped_outside_equiv M L' B hL' ⟨b, hb⟩).prop, },
+  { rw [supported_action_eq_of_mem_mapped_outside_subset _ ha,
+      supported_action_eq_of_mem_support_map _ hb] at hab,
+    obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab,
+    cases hab.not_mem_domain b hb rfl, },
+  { rw [supported_action_eq_of_mem_mapped_outside_subset _ ha,
+      supported_action_eq_of_mem_preimage_litter_subset _ hb] at hab,
+    obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab.symm,
+    cases without_preimage.not_mapped_outside hab _ hL
+      (mapped_outside_equiv M L B hL ⟨a, ha⟩).prop, },
+  { rw [supported_action_eq_of_mem_mapped_outside_subset _ ha,
+      supported_action_eq_of_mem_mapped_outside_subset _ hb] at hab,
+    cases hM₂ _ hL _ hL' _,
+    { simp only [subtype.coe_inj, embedding_like.apply_eq_iff_eq] at hab,
+      exact hab, },
+    obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab,
+    exact ⟨_, hab.1, (mapped_outside_equiv M L' B hL' ⟨b, hb⟩).prop.1⟩, },
+end
+
 /-- We can't prove `h` without knowing facts about the hypothesis `H`. We defer this proof to later,
 at which point we will know many facts about the hypothesis. -/
 noncomputable def supported_action_atom_map (B : extended_index δ) : local_perm atom :=
-if h : inj_on (supported_action_atom_map_core M B)
-  (supported_action_atom_map_core_domain M B)
-then
+if h : _ ∧ _ then
   local_perm.complete
     (supported_action_atom_map_core M B)
     (supported_action_atom_map_core_domain M B)
@@ -396,7 +483,7 @@ then
     (mk_supported_action_atom_map_domain M B)
     (le_of_le_of_eq κ_regular.aleph_0_le (mk_litter_set _).symm)
     (supported_action_atom_map_domain_disjoint M B)
-    h
+    (supported_action_inj_on M B h.1 h.2)
 else
   local_perm.of_set ∅
 

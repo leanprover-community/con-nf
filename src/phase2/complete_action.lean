@@ -262,6 +262,230 @@ begin
   exact this,
 end
 
+noncomputable def support_map_union {π : struct_approx β} (hπ) {γ : Iic α} {δ ε : Iio α}
+  {B : path (β : type_index) γ} {t₁ t₂ : tangle δ} {L₁ L₂ A} (hδ hε hδε hL₁ hL₂ hA) :
+  support_map δ := {
+  carrier := inflexible_support (⟨γ, δ, ε, hδ, hε, hδε, B, t₁, hL₁, hA⟩ : inflexible_coe L₁ A) ∪
+    inflexible_support (⟨γ, δ, ε, hδ, hε, hδε, B, t₂, hL₂, hA⟩ : inflexible_coe L₂ A),
+  small := small.union (inflexible_support_small _) (inflexible_support_small _),
+  atom_image := λ a C h, π.complete_atom_map hπ a ((B.cons $ coe_lt hδ).comp C),
+  near_litter_image := λ N C h, π.complete_near_litter_map hπ N
+    ((B.cons $ coe_lt hδ).comp C),
+}
+
+lemma support_map_union_symm {π : struct_approx β} (hπ : π.free) {γ : Iic α} {δ ε : Iio α}
+  {B : path (β : type_index) γ} {t₁ t₂ : tangle δ} {L₁ L₂ A} (hδ) (hε : (ε : Λ) < γ) (hδε)
+  (hL₁ : L₁ = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t₁)
+  (hL₂ : L₂ = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t₂)
+  (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)) :
+  support_map_union hπ hδ hε hδε hL₁ hL₂ hA = support_map_union hπ hδ hε hδε hL₂ hL₁ hA :=
+begin
+  rw [support_map_union, support_map_union],
+  simp only,
+  refine ⟨_, _, _⟩,
+  { rw union_comm, },
+  { ext, refl, intros a b h, cases h,
+    ext, refl, intros A A' h, cases h,
+    ext, rw union_comm, intros b b' h, refl, },
+  { ext, refl, intros a b h, cases h,
+    ext, refl, intros A A' h, cases h,
+    ext, rw union_comm, intros b b' h, refl, },
+end
+
+lemma support_map_union_free {π : struct_approx β} (hπ : π.free) {γ : Iic α} {δ ε : Iio α}
+  {B : path (β : type_index) γ} {t₁ t₂ : tangle δ} {L₁ L₂ A} (hδ) (hε : (ε : Λ) < γ) (hδε)
+  (hL₁ : L₁ = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t₁)
+  (hL₂ : L₂ = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t₂)
+  (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)) :
+  (show struct_approx (δ : Iic α), from supported_action (support_map_union hπ hδ hε hδε hL₁ hL₂ hA)
+    (λ (C : extended_index δ), π ((B.cons $ coe_lt hδ).comp C))).free :=
+λ C L, or.rec (flexible_of_comp_flexible ∘ hπ _ L) and.left
+
+-- TODO: Rename the following few lemmas.
+
+lemma atom_image_inj_on {π : struct_approx β} (hπ : π.free)
+  {c : support_condition β} (H : π.foa_props hπ c) {γ : Iic α} {δ ε : Iio α}
+  {B : path (β : type_index) γ} {t : tangle δ} {L A} (hδ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (hL : L = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t)
+  (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _))
+  (hcL : (relation.refl_trans_gen (constrains α β)) ⟨inr L.to_near_litter, A⟩ c) (C a ha b hb)
+  (hab : (inflexible_support_map (π.foa_hypothesis hπ)
+    ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩).atom_image a C ha =
+  (inflexible_support_map (π.foa_hypothesis hπ)
+    ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩).atom_image b C hb) :
+  a = b :=
+begin
+  unfold inflexible_support_map at hab,
+  simp only [foa_hypothesis_atom_image] at hab,
+  refine H.atom_injective _ _ _ _ _ hab,
+  { refine ha.trans_left (_),
+    rw [hL, hA] at hcL,
+    exact hcL, },
+  { refine hb.trans_left (_),
+    rw [hL, hA] at hcL,
+    exact hcL, },
+end
+
+lemma near_litter_image_inj_on {π : struct_approx β} (hπ : π.free)
+  {c : support_condition β} (H : π.foa_props hπ c) {γ : Iic α} {δ ε : Iio α}
+  {B : path (β : type_index) γ} {t : tangle δ} {L A} (hδ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (hL : L = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t)
+  (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _))
+  (hcL : (relation.refl_trans_gen (constrains α β)) ⟨inr L.to_near_litter, A⟩ c)
+  (C) (L₁ : litter) (hL₁) (L₂ : litter) (hL₂)
+  (hL : (((inflexible_support_map (π.foa_hypothesis hπ)
+    ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩).near_litter_image L₁.to_near_litter C hL₁ : set atom) ∩
+  (inflexible_support_map (π.foa_hypothesis hπ)
+    ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩).near_litter_image L₂.to_near_litter C hL₂).nonempty) :
+  L₁ = L₂ :=
+begin
+  unfold inflexible_support_map at hL,
+  simp only [foa_hypothesis_near_litter_image] at hL,
+  obtain ⟨a, ha₁, ha₂⟩ := hL,
+  simp only [complete_near_litter_map_eq] at ha₁ ha₂,
+  obtain ⟨ha₁ | ha₁, ha₃⟩ := ha₁;
+  obtain ⟨ha₂ | ha₂, ha₄⟩ := ha₂,
+  { have := eq_of_mem_litter_set_of_mem_litter_set
+      (sublitter.subset _ ha₁) (sublitter.subset _ ha₂),
+    simp only [near_litter_hypothesis_eq, near_litter_approx.largest_sublitter_litter] at this,
+    refine H.litter_injective L₁ L₂ ((B.cons $ coe_lt hδ).comp C) _ _ _,
+    { refine hL₁.trans_left _,
+      rw [hL, hA] at hcL,
+      exact hcL, },
+    { refine hL₂.trans_left _,
+      rw [hL, hA] at hcL,
+      exact hcL, },
+    { rw [complete_litter_map_eq, complete_litter_map_eq],
+      exact this, }, },
+  { obtain ⟨b, hb, rfl⟩ := ha₂,
+    have : b ∈ (π ((B.cons $ coe_lt hδ).comp C)).atom_perm.domain,
+    -- TODO: Factor out this block.
+    { contrapose! hb,
+      intro h,
+      simp only [litter.coe_to_near_litter, litter.to_near_litter_fst,
+        near_litter_approx.coe_largest_sublitter, sdiff_sdiff_right_self, inf_eq_inter,
+        mem_inter_iff, mem_litter_set] at h,
+      exact hb h.2, },
+    have := (π ((B.cons $ coe_lt hδ).comp C)).atom_perm.map_domain this,
+    cases near_litter_approx.not_mem_domain_of_mem_largest_sublitter _ ha₁ this, },
+  { obtain ⟨b, hb, rfl⟩ := ha₁,
+    have : b ∈ (π ((B.cons $ coe_lt hδ).comp C)).atom_perm.domain,
+    { contrapose! hb,
+      intro h,
+      simp only [litter.coe_to_near_litter, litter.to_near_litter_fst,
+        near_litter_approx.coe_largest_sublitter, sdiff_sdiff_right_self, inf_eq_inter,
+        mem_inter_iff, mem_litter_set] at h,
+      exact hb h.2, },
+    have := (π ((B.cons $ coe_lt hδ).comp C)).atom_perm.map_domain this,
+    cases near_litter_approx.not_mem_domain_of_mem_largest_sublitter _ ha₂ this, },
+  { obtain ⟨b, hb₁, hb₂⟩ := ha₁,
+    obtain ⟨c, hc₁, hc₂⟩ := ha₂,
+    have hb : b ∈ (π ((B.cons $ coe_lt hδ).comp C)).atom_perm.domain,
+    { contrapose! hb₁,
+      intro h,
+      simp only [litter.coe_to_near_litter, litter.to_near_litter_fst,
+        near_litter_approx.coe_largest_sublitter, sdiff_sdiff_right_self, inf_eq_inter,
+        mem_inter_iff, mem_litter_set] at h,
+      exact hb₁ h.2, },
+    have hc : c ∈ (π ((B.cons $ coe_lt hδ).comp C)).atom_perm.domain,
+    { contrapose! hc₁,
+      intro h,
+      simp only [litter.coe_to_near_litter, litter.to_near_litter_fst,
+        near_litter_approx.coe_largest_sublitter, sdiff_sdiff_right_self, inf_eq_inter,
+        mem_inter_iff, mem_litter_set] at h,
+      exact hc₁ h.2, },
+    rw ← hc₂ at hb₂,
+    cases (π ((B.cons $ coe_lt hδ).comp C)).atom_perm.inj_on hb hc hb₂,
+    simp only [litter.coe_to_near_litter, litter.to_near_litter_fst, mem_diff,
+      mem_litter_set] at hb₁ hc₁,
+    exact hb₁.1.symm.trans hc₁.1, },
+end
+
+lemma supported_action_atom_map_eq {π : struct_approx β} (hπ : π.free)
+  {c : support_condition β} (H : π.foa_props hπ c) {γ : Iic α} {δ ε : Iio α}
+  {B : path (β : type_index) γ} {t : tangle δ} {L A} (hδ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (hL : L = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t)
+  (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _))
+  (hcL : (relation.refl_trans_gen (constrains α β)) ⟨inr L.to_near_litter, A⟩ c) (C) :
+  supported_action_atom_map
+    (inflexible_support_map (π.foa_hypothesis hπ) ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩)
+    C =
+  local_perm.complete
+    (supported_action_atom_map_core
+      (inflexible_support_map (π.foa_hypothesis hπ) ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩) C)
+    (supported_action_atom_map_core_domain _ C)
+    (litter_set $ sandbox_litter _ C)
+    (mk_supported_action_atom_map_domain _ C)
+    (le_of_le_of_eq κ_regular.aleph_0_le (mk_litter_set _).symm)
+    (supported_action_atom_map_domain_disjoint _ C)
+    (supported_action_inj_on _ C
+      (atom_image_inj_on hπ H hδ hε hδε hL hA hcL C)
+      (near_litter_image_inj_on hπ H hδ hε hδε hL hA hcL C)) :=
+by rw [supported_action_atom_map, dif_pos];
+  exact ⟨atom_image_inj_on hπ H hδ hε hδε hL hA hcL C,
+    near_litter_image_inj_on hπ H hδ hε hδε hL hA hcL C⟩
+
+lemma inflexible_support_supports' {π : struct_approx β} (hπ : π.free)
+  {c : support_condition β} (H : π.foa_props hπ c) {γ : Iic α} {δ ε : Iio α}
+  {B : path (β : type_index) γ} {t : tangle δ} {L A} (hδ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (hL : L = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t)
+  (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _))
+  (hcL : relation.refl_trans_gen (constrains α ↑β) (inr L.to_near_litter, A) c) :
+  (show struct_approx (δ : Iic α), from supported_action
+    (inflexible_support_map (π.foa_hypothesis hπ) ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩)
+    (λ (C : extended_index (δ : Iic α)), π ((B.cons $ coe_lt hδ).comp C))).supports
+  (inflexible_support ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩) :=
+begin
+  constructor,
+  { intros a C ha,
+    rw inflexible_support at ha,
+    simp only [supported_action, supported_action_index],
+    rw [supported_action_atom_map_eq hπ H _ _ _ _ _ hcL, local_perm.complete_domain_eq],
+    exact or.inl (or.inl (or.inl (or.inl ha))), },
+  { intros N C hN,
+    rw inflexible_support at hN,
+    simp only [supported_action, supported_action_index],
+    -- TODO: Filter to only flexible litter support conditions.
+    sorry, },
+  { intros N C hN,
+    sorry, },
+end
+
+lemma support_map_union_supports {π : struct_approx β} (hπ : π.free) {γ : Iic α} {δ ε : Iio α}
+  {B : path (β : type_index) γ} {t₁ t₂ : tangle δ} {L₁ L₂ A} (hδ) (hε : (ε : Λ) < γ) (hδε)
+  (hL₁ : L₁ = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t₁)
+  (hL₂ : L₂ = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t₂)
+  (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)) : supports
+  (λ (D : extended_index (δ : Iic α)),
+     supported_action (support_map_union hπ hδ hε hδε hL₁ hL₂ hA)
+       (λ (C : extended_index δ), π ((B.cons $ coe_lt hδ).comp C)) D)
+  (inflexible_support ⟨γ, δ, ε, hδ, hε, hδε, B, t₁, hL₁, hA⟩) :=
+begin
+  sorry
+end
+
+lemma inflexible_support_supports'' {π : struct_approx β} (hπ : π.free) {γ : Iic α} {δ ε : Iio α}
+  {B : path (β : type_index) γ} {t : tangle δ} {L A} (hδ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (hL : L = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t)
+  (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)) :
+mul_action.supports (allowable δ) (inflexible_support ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩) t :=
+sorry
+
+lemma inflexible_support_map_smul_eq_smul {π : struct_approx β} (hπ : π.free) {γ : Iic α}
+  {δ ε : Iio α} {B : path (β : type_index) γ} {t₁ t₂ : tangle δ} {L₁ L₂ A}
+  (hδ) (hε : (ε : Λ) < γ) (hδε)
+  (hL₁ : L₁ = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t₁)
+  (hL₂ : L₂ = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t₂)
+  (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _))
+  (c : support_condition (δ : Iic α))
+  (hc : c ∈ inflexible_support ⟨γ, δ, ε, hδ, hε, hδε, B, t₁, hL₁, hA⟩) :
+  (show struct_approx (δ : Iic α), from λ (D : extended_index δ),
+    supported_action (support_map_union hπ hδ hε hδε hL₁ hL₂ hA)
+      (λ (C : extended_index (δ : Iic α)), π ((B.cons $ coe_lt hδ).comp D)) D) • c =
+  (show struct_approx (δ : Iic α), from supported_action
+    (inflexible_support_map (π.foa_hypothesis hπ) ⟨γ, δ, ε, hδ, hε, hδε, B, t₁, hL₁, hA⟩)
+    (λ (C : extended_index δ), π ((B.cons $ coe_lt hδ).comp C))) • c := sorry
+
 lemma litter_injective_extends {c : support_condition β} (H : π.foa_props hπ c)
   {L₁ L₂ : litter} {A : extended_index β}
   (hcL₁ : (relation.refl_trans_gen (constrains α β)) ⟨inr L₁.to_near_litter, A⟩ c)
@@ -306,22 +530,33 @@ begin
     cases subtype.coe_injective (coe_injective this),
     rw [hL₁, hL₂],
     refine congr_arg _ _,
-    have := f_map_injective _ h,
     obtain ⟨ρ, hρ⟩ := freedom_of_action_of_lt (δ₁ : Iic α)
       (hδ₁.trans_le (show _, from with_bot.coe_le_coe.mp (le_of_path B₁)))
-      (supported_action {
-        carrier := inflexible_support ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩ ∪
-          inflexible_support ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₂, hL₂, hA₁⟩,
-        small := small.union (inflexible_support_small _) (inflexible_support_small _),
-        atom_image := λ a B h, π.complete_atom_map hπ a ((B₁.cons $ coe_lt hδ₁).comp B),
-        near_litter_image := λ N B h, π.complete_near_litter_map hπ N
-          ((B₁.cons $ coe_lt hδ₁).comp B),
-      } (λ B, π ((B₁.cons $ coe_lt hδ₁).comp B))) _,
-    { have := supported_perm_spec π hπ ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩
-        (π.foa_hypothesis hπ),
-      have := inflexible_support_supports_tangle ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩,
-      sorry, },
-    { sorry, }, },
+      (supported_action (support_map_union hπ hδ₁ hε₁ hδε₁ hL₁ hL₂ hA₁)
+        (λ B, π ((B₁.cons $ coe_lt hδ₁).comp B)))
+      (support_map_union_free hπ hδ₁ hε₁ hδε₁ hL₁ hL₂ hA₁),
+    have left := smul_eq_smul_of_exactly_approximates hρ
+      (supported_perm_spec π hπ ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩
+        (π.foa_hypothesis hπ))
+      (inflexible_support ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩) t₁
+      (support_map_union_supports hπ hδ₁ hε₁ hδε₁ hL₁ hL₂ hA₁)
+      (inflexible_support_supports' hπ H hδ₁ hε₁ hδε₁ hL₁ hA₁ hcL₁)
+      (inflexible_support_supports'' hπ hδ₁ hε₁ hδε₁ hL₁ hA₁)
+      (inflexible_support_map_smul_eq_smul hπ hδ₁ hε₁ hδε₁ hL₁ hL₂ hA₁),
+    have right := smul_eq_smul_of_exactly_approximates hρ
+      (supported_perm_spec π hπ ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₂, hL₂, hA₁⟩
+        (π.foa_hypothesis hπ))
+      (inflexible_support ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₂, hL₂, hA₁⟩) t₂
+      (by rw support_map_union_symm; exact support_map_union_supports hπ hδ₁ hε₁ hδε₁ hL₂ hL₁ hA₁)
+      (inflexible_support_supports' hπ H hδ₁ hε₁ hδε₁ hL₂ hA₁ hcL₂)
+      (inflexible_support_supports'' hπ hδ₁ hε₁ hδε₁ hL₂ hA₁) _,
+    have := f_map_injective (coe_ne_coe.mpr $ coe_ne' hδε₁) h,
+    rw [← left, ← right, smul_left_cancel_iff] at this,
+    exact this,
+    intros c hc,
+    have := inflexible_support_map_smul_eq_smul hπ hδ₁ hε₁ hδε₁ hL₂ hL₁ hA₁ c hc,
+    rw support_map_union_symm at this,
+    exact this, },
   { cases ne_of_inflexible_coe_of_not_inflexible H h₁'.some (λ h, h₂ ⟨h⟩) (λ h, h₂' ⟨h⟩) h, },
   { cases ne_of_inflexible_coe_of_not_inflexible H h₂'.some (λ h, h₁ ⟨h⟩) (λ h, h₁' ⟨h⟩) h.symm, },
   { rw [complete_litter_map_eq_of_flexible, complete_litter_map_eq_of_flexible,
