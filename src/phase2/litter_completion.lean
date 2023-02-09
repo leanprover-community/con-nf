@@ -1,4 +1,4 @@
-import phase2.strong_support
+import phase2.reduction
 import phase2.supported_action
 
 open quiver set sum with_bot
@@ -24,8 +24,8 @@ def freedom_of_action (β : Iic α) : Prop :=
 structure inflexible_coe (L : litter) (A : extended_index β) :=
 (γ : Iic α) (δ ε : Iio α) (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
 (B : quiver.path (β : type_index) γ) (t : tangle δ)
-(hL : L = f_map (with_bot.coe_ne_coe.mpr $ coe_ne' hδε) t)
-(hA : A = (B.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
+(hL : L = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t)
+(hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _))
 
 instance (L : litter) (A : extended_index β) : subsingleton (inflexible_coe L A) :=
 begin
@@ -36,8 +36,8 @@ begin
   cases subtype.coe_injective (coe_eq_coe.mp (path.obj_eq_of_cons_eq_cons
     (path.heq_of_cons_eq_cons hA₂).eq)),
   cases (path.heq_of_cons_eq_cons (path.heq_of_cons_eq_cons hA₂).eq).eq,
-  have h₁ := f_map_β (with_bot.coe_ne_coe.mpr $ coe_ne' hδε₁) t₁,
-  have h₂ := f_map_β (with_bot.coe_ne_coe.mpr $ coe_ne' hδε₂) t₂,
+  have h₁ := f_map_β (coe_ne_coe.mpr $ coe_ne' hδε₁) t₁,
+  have h₂ := f_map_β (coe_ne_coe.mpr $ coe_ne' hδε₂) t₂,
   rw [hL₂, h₂] at h₁,
   cases subtype.coe_injective (coe_eq_coe.mp h₁),
   cases f_map_injective _ hL₂,
@@ -48,8 +48,8 @@ end
 structure inflexible_bot (L : litter) (A : extended_index β) :=
 (γ : Iic α) (ε : Iio α) (hε : (ε : Λ) < γ)
 (B : quiver.path (β : type_index) γ) (a : atom)
-(hL : L = f_map (show (⊥ : type_index) ≠ (ε : Λ), from with_bot.bot_ne_coe) a)
-(hA : A = (B.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
+(hL : L = f_map (show (⊥ : type_index) ≠ (ε : Λ), from bot_ne_coe) a)
+(hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _))
 
 instance (L : litter) (A : extended_index β) : subsingleton (inflexible_bot L A) :=
 begin
@@ -67,19 +67,19 @@ lemma inflexible_bot_inflexible_coe {L : litter} {A : extended_index β} :
   inflexible_bot L A → inflexible_coe L A → false :=
 begin
   rintros ⟨γ₁, ε₁, hε₁, B₁, a₁, rfl, rfl⟩ ⟨γ₂, δ₂, ε₂, hδ₂, hε₂, hδε₂, B₂, t₂, hL₂, hA₂⟩,
-  have h₁ := f_map_β (show (⊥ : type_index) ≠ (ε₁ : Λ), from with_bot.bot_ne_coe) a₁,
-  have h₂ := f_map_β (with_bot.coe_ne_coe.mpr $ coe_ne' hδε₂) t₂,
+  have h₁ := f_map_β (show (⊥ : type_index) ≠ (ε₁ : Λ), from bot_ne_coe) a₁,
+  have h₂ := f_map_β (coe_ne_coe.mpr $ coe_ne' hδε₂) t₂,
   rw [hL₂, h₂] at h₁,
   cases h₁,
 end
 
 lemma inflexible_coe.δ_lt_β {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
   (h.δ : Λ) < β :=
-h.hδ.trans_le (show _, from with_bot.coe_le_coe.mp (le_of_path h.B))
+h.hδ.trans_le (show _, from coe_le_coe.mp (le_of_path h.B))
 
 lemma inflexible_bot.constrains {L : litter} {A : extended_index β} (h : inflexible_bot L A) :
   relation.trans_gen (constrains α β)
-    (inl h.a, (h.B.cons (with_bot.bot_lt_coe _))) (inr L.to_near_litter, A) :=
+    (inl h.a, (h.B.cons (bot_lt_coe _))) (inr L.to_near_litter, A) :=
 begin
   have := constrains.f_map_bot h.hε h.B h.a,
   rw [← h.hL, ← h.hA] at this,
@@ -95,55 +95,134 @@ variable [freedom_of_action_hypothesis β]
 
 def inflexible_support {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
   set (support_condition h.δ) :=
-{c | relation.trans_gen (constrains α β)
-  (c.1, (h.B.cons (coe_lt h.hδ)).comp c.2)
-  (inr (f_map (coe_ne_coe.mpr $ coe_ne' h.hδε) h.t).to_near_litter,
-    (h.B.cons (coe_lt h.hε)).cons (bot_lt_coe _))}
+(λ c, (c.1, (h.B.cons (coe_lt h.hδ)).comp c.2)) ⁻¹'
+reduction α {(inr (f_map (coe_ne_coe.mpr $ coe_ne' h.hδε) h.t).to_near_litter,
+  (h.B.cons (coe_lt h.hε)).cons (bot_lt_coe _))}
 
 lemma inflexible_support_small {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
   small (inflexible_support h) :=
 begin
-  have := constrains_closure_small' α (small_singleton
-    (inr (f_map (coe_ne_coe.mpr $ coe_ne' h.hδε) h.t).to_near_litter,
-      (h.B.cons (coe_lt h.hε)).cons (bot_lt_coe _))),
-  simp only [mem_singleton_iff, exists_prop, exists_eq_left] at this,
-  refine lt_of_le_of_lt _ this,
-  refine ⟨⟨λ c, ⟨_, c.prop.to_refl⟩, λ c d h, _⟩⟩,
-  simp only [subtype.mk_eq_mk, prod.mk.inj_iff, path.comp_inj_right] at h,
-  ext,
-  exact h.1,
-  exact h.2,
+  have := reduction_small α (small_singleton _),
+  refine lt_of_le_of_lt ((cardinal.mk_preimage_of_injective _ _ _)) this,
+  intros c d h,
+  simp only [prod.mk.inj_iff, path.comp_inj_right] at h,
+  exact prod.ext h.1 h.2,
+end
+
+lemma inflexible_support_supports_f_map {π : allowable β} {γ : Iic α} {δ ε : Iio α}
+  (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  {B : path (β : type_index) γ} {t : tangle δ}
+  (hπ : ∀ ⦃a : support_condition ↑β⦄,
+    a ≺[α] (inr (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter,
+      (B.cons (coe_lt hε)).cons (bot_lt_coe _)) → π • a = a)
+  (hc : (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter.is_litter →
+    inflexible α (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t)
+      ((B.cons (coe_lt hε)).cons (bot_lt_coe _))) :
+  (allowable.derivative (show path ((β : Iic_index α) : type_index) (ε : Iic_index α),
+      from B.cons (coe_lt hε)) π : allowable (ε : Iic_index α)) •
+    f_map (coe_ne_coe.mpr $ coe_ne' hδε) t =
+    f_map (coe_ne_coe.mpr $ coe_ne' hδε) t :=
+begin
+  have h₁ := allowable.derivative_cons (show path ((β : Iic_index α) : type_index)
+    (γ : Iic_index α), from B) (coe_lt hε),
+  have h₂ := @smul_f_map _ _ _ _ (γ : Iic_index α) (δ : Iio_index α) ε
+    (coe_lt hδ) (coe_lt hε) (Iio.coe_injective.ne hδε)
+    (allowable.derivative (show path ((β : Iic_index α) : type_index)
+      (γ : Iic_index α), from B) π) t,
+  rw h₁,
+  refine h₂.trans (congr_arg _ _),
+  refine (designated_support t).supports _ (λ c hc, _),
+  have := congr_arg prod.fst (hπ (constrains.f_map hδ hε hδε B t c hc)),
+  obtain ⟨c, C⟩ := c,
+  refine prod.ext (eq.trans _ this) rfl,
+  rw ← allowable.to_struct_perm_smul at this ⊢,
+  rw [← phase_2_assumptions.allowable_derivative_eq, ← allowable.derivative_to_struct_perm],
+  change _ • _ = _ • _,
+  simp only [struct_perm.derivative_derivative, path.comp_cons, path.comp_nil],
+end
+
+/-
+lemma inflexible_support_supports_condition'
+  (π : allowable β) (c : support_condition β) (hc : ¬reduced α c)
+  (hπ : ∀ ⦃a : support_condition β⦄, a ≺[α] c → π • a = a) :
+  π • c = c :=
+begin
+  obtain ⟨a | N, A⟩ := c,
+  { cases hc (reduced.mk_atom a A), },
+  refine prod.ext _ rfl,
+  change inr _ = inr _,
+  refine congr_arg inr _,
+  rw [not_reduced_iff] at hc,
+  by_cases N.is_litter,
+  { obtain ⟨L, rfl⟩ := h.exists_litter_eq,
+    rw litter.to_near_litter_fst at *,
+    have := hc (near_litter.is_litter.mk _),
+    rw inflexible_iff at this,
+    obtain (⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ | this') := this,
+    { have := struct_perm.derivative_derivative π.to_struct_perm
+        (B.cons (coe_lt hε)) (path.nil.cons (bot_lt_coe _)),
+      rw [path.comp_cons, path.comp_nil] at this,
+      rw ← this,
+      rw @allowable.derivative_to_struct_perm _ _ _ _ (β : Iic_index α) (ε : Iic_index α)
+        (B.cons $ coe_lt hε) π,
+      rw [struct_perm.derivative_bot_smul, allowable.to_struct_perm_smul],
+      have := inflexible_support_supports_f_map hδ hε hδε hπ hc,
+      sorry, }, },
+end
+
+lemma inflexible_support_supports_condition {L : litter} {A : extended_index ↑β}
+  (h : inflexible_coe L A) (π : allowable h.δ)
+  (hπ : ∀ ⦃a : support_condition ↑(h.δ)⦄, a ∈ inflexible_support h → π • a = a)
+  (c : support_condition ↑(h.δ))
+  (hc : c ∈ (designated_support h.t).carrier) :
+  π • c = c :=
+begin
+  sorry
 end
 
 lemma inflexible_support_supports_tangle {L : litter} {A : extended_index β}
   (h : inflexible_coe L A) : mul_action.supports (allowable h.δ) (inflexible_support h) h.t :=
-λ π hπ, (designated_support h.t).supports π
-  (λ c hc, hπ (relation.trans_gen.single $ constrains.f_map h.hδ h.hε h.hδε _ _ _ hc))
+λ π hπ, (designated_support h.t).supports π (inflexible_support_supports_condition h π hπ)
+-/
 
-lemma inflexible_support_supports {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
-  ∀ ⦃π : allowable h.γ⦄, (∀ c ∈ inflexible_support h,
-    (allowable_derivative h.γ (h.δ : Iio_index α) (coe_lt h.hδ) π) • c = c) →
-  allowable_derivative h.γ h.ε (coe_lt h.hε) π • L = L :=
-begin
-  intros π hπ,
-  have := smul_f_map (Iio_coe h.δ) h.ε (coe_lt h.hδ) h.hε (Iio.coe_injective.ne h.hδε) π h.t,
-  rw inflexible_support_supports_tangle h _ hπ at this,
-  -- The `convert` and other nonsense won't be needed in Lean 4.
-  convert this;
-  { refine h.hL.trans _,
-    congr;
-    ext;
-    refl, },
-end
+-- lemma inflexible_support_supports {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
+--   ∀ ⦃π : allowable (h.γ : Iic_index α)⦄, (∀ c ∈ inflexible_support h,
+--     (allowable_derivative (h.γ : Iic_index α) (h.δ : Iio_index α) (coe_lt h.hδ) π) • c = c) →
+--   allowable_derivative (h.γ : Iic_index α) h.ε (coe_lt h.hε) π • L = L :=
+-- begin
+--   intros π hπ,
+--   have := smul_f_map (Iio_coe h.δ) h.ε (coe_lt h.hδ) h.hε (Iio.coe_injective.ne h.hδε) π h.t,
+--   rw inflexible_support_supports_tangle h _ hπ at this,
+--   -- The `convert` and other nonsense won't be needed in Lean 4.
+--   convert this;
+--   { refine h.hL.trans _,
+--     congr;
+--     ext;
+--     refl, },
+-- end
 
 def inflexible_support_map {L : litter} {A : extended_index β}
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A) : support_map h.δ := {
   carrier := inflexible_support h,
   small := inflexible_support_small h,
   atom_image := λ a B ha, H.atom_image a ((h.B.cons (coe_lt h.hδ)).comp B)
-    (by rwa [inflexible_support, ← h.hL, ← h.hA] at ha),
+    (begin
+      rw [inflexible_support, ← h.hL, ← h.hA, reduction_singleton_of_not_reduced] at ha,
+      exact ha.1,
+      rintro (_ | ⟨_, _, hL⟩),
+      have := inflexible.mk_coe h.hδ h.hε h.hδε h.B h.t,
+      rw [← h.hL, ← h.hA] at this,
+      exact hL this,
+    end),
   near_litter_image := λ N B hN, H.near_litter_image N ((h.B.cons (coe_lt h.hδ)).comp B)
-    (by rwa [inflexible_support, ← h.hL, ← h.hA] at hN),
+    (begin
+      rw [inflexible_support, ← h.hL, ← h.hA, reduction_singleton_of_not_reduced] at hN,
+      exact hN.1,
+      rintro (_ | ⟨_, _, hL⟩),
+      have := inflexible.mk_coe h.hδ h.hε h.hδε h.B h.t,
+      rw [← h.hL, ← h.hA] at this,
+      exact hL this,
+    end),
 }
 
 lemma litter_approx_free (π : struct_approx β) (hπ : π.free) {L : litter} {A : extended_index β}
@@ -172,10 +251,10 @@ lemma supported_perm_spec (π : struct_approx β) (hπ : π.free)
 noncomputable def litter_completion (π : struct_approx β) (hπ : π.free)
   (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩) : litter :=
 if h : nonempty (inflexible_coe L A) then
-  f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.some.hδε) (supported_perm π hπ h.some H • h.some.t)
+  f_map (coe_ne_coe.mpr $ coe_ne' h.some.hδε) (supported_perm π hπ h.some H • h.some.t)
 else if h : nonempty (inflexible_bot L A) then
-  f_map (show (⊥ : type_index) ≠ (h.some.ε : Λ), from with_bot.bot_ne_coe)
-    (H.atom_image h.some.a (h.some.B.cons (with_bot.bot_lt_coe _)) h.some.constrains)
+  f_map (show (⊥ : type_index) ≠ (h.some.ε : Λ), from bot_ne_coe)
+    (H.atom_image h.some.a (h.some.B.cons (bot_lt_coe _)) h.some.constrains)
 else
   near_litter_approx.flexible_completion α (π A) A • L
 

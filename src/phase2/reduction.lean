@@ -1,8 +1,7 @@
-import phase2.constrains
+import phase2.flexible
 
 /-!
-# Strong supports
-A support is *strong* if its near-litters are disjoint, and it is downward-closed under `≺`.
+# Reductions of supports
 -/
 
 universe u
@@ -15,15 +14,57 @@ variables [params.{u}] (α : Λ) [position_data.{}] [phase_2_assumptions α]
 
 variables (β : Λ) (G : Type*) {τ : Type*} [has_smul G (support_condition β)] [has_smul G τ]
 
-structure strong_support (x : τ) extends support β G x :=
-(closed : ∀ c d : support_condition β, c ≺[α] d → d ∈ carrier → c ∈ carrier)
-(litter_set_eq : ∀ N A, (⟨inr N, A⟩ : support_condition β) ∈ carrier → litter_set N.fst = N.snd)
-
 variables {β G} {x : τ}
 
-def constrains_closure (S : set (support_condition β)) : set (support_condition β) :=
-{c | (∀ N : near_litter, c.1 = inr N → litter_set N.fst = N.snd) ∧
-  ∃ d ∈ S, relation.refl_trans_gen (constrains α β) c d}
+inductive near_litter.is_litter : near_litter → Prop
+| mk (L : litter) : near_litter.is_litter L.to_near_litter
+
+lemma near_litter.is_litter.eq_fst_to_near_litter {N : near_litter} (h : N.is_litter) :
+  N = N.fst.to_near_litter := by cases h; refl
+
+lemma near_litter.is_litter.litter_set_eq {N : near_litter} (h : N.is_litter) :
+  litter_set N.fst = N.snd := by cases h; refl
+
+lemma near_litter.is_litter.exists_litter_eq {N : near_litter} (h : N.is_litter) :
+  ∃ (L : litter), N = L.to_near_litter := by obtain ⟨L⟩ := h; exact ⟨L, rfl⟩
+
+/-- A support condition is *reduced* if it is an atom or a flexible litter. -/
+@[mk_iff] inductive reduced {β : type_index} : support_condition β → Prop
+| mk_atom (a : atom) (B : extended_index β) : reduced (inl a, B)
+| mk_litter (L : litter) (B : extended_index β) :
+    flexible α L B → reduced (inr L.to_near_litter, B)
+
+lemma not_reduced_iff {β : type_index} {N : near_litter} {B : extended_index β} :
+  ¬reduced α (inr N, B) ↔ (N.is_litter → inflexible α N.fst B) :=
+begin
+  rw [imp_iff_not_or, ← not_flexible_iff, ← not_and_distrib, not_iff_not],
+  split,
+  { rintro (_ | ⟨L, hL₁, hL₂⟩),
+    exact ⟨near_litter.is_litter.mk L, hL₂⟩, },
+  { intro h,
+    rw h.1.eq_fst_to_near_litter,
+    exact reduced.mk_litter N.1 B h.2, },
+end
+
+/-- The *reduction* of a set of support conditions is the downward closure of the set under
+the constrains relation, but we only keep reduced conditions. -/
+def reduction (S : set (support_condition β)) : set (support_condition β) :=
+{c | ∃ d ∈ S, relation.refl_trans_gen (constrains α β) c d} ∩ {c | reduced α c}
+
+lemma reduction_singleton (c : support_condition β) :
+  reduction α {c} = ({c} ∪ {d | relation.trans_gen (constrains α β) d c}) ∩ {d | reduced α d} :=
+by simp only [reduction, mem_singleton_iff, exists_prop, exists_eq_left,
+  relation.refl_trans_gen_iff_eq_or_trans_gen, set_of_or, set_of_eq_eq_singleton']
+
+lemma reduction_singleton_of_not_reduced (c : support_condition β) (hc : ¬reduced α c) :
+  reduction α {c} = {d | relation.trans_gen (constrains α β) d c} ∩ {d | reduced α d} :=
+begin
+  simp only [reduction_singleton, inter_distrib_right, union_eq_right_iff_subset,
+    subset_inter_iff, inter_subset_right, and_true],
+  rintros d ⟨hd, hd'⟩,
+  cases hd,
+  cases hc hd',
+end
 
 lemma small_constrains (c : support_condition β) : small {d | d ≺[α] c} :=
 begin
@@ -97,29 +138,29 @@ begin
     refl, },
 end
 
-def nth_constrains_closure (S : set (support_condition β)) : ℕ → set (support_condition β)
+def nth_reduction (S : set (support_condition β)) : ℕ → set (support_condition β)
 | 0 := S
-| (n + 1) := {c | ∃ d, d ∈ nth_constrains_closure n ∧ c ≺[α] d}
+| (n + 1) := {c | ∃ d, d ∈ nth_reduction n ∧ c ≺[α] d}
 
-lemma small_nth_constrains_closure {S : set (support_condition β)} {n : ℕ} (h : small S) :
-  small (nth_constrains_closure α S n) :=
+lemma small_nth_reduction {S : set (support_condition β)} {n : ℕ} (h : small S) :
+  small (nth_reduction α S n) :=
 begin
   induction n with n hn,
   exact h,
-  rw nth_constrains_closure,
+  rw nth_reduction,
   simp_rw [← exists_prop, subtype.exists', set_of_exists],
   refine small_Union hn _,
   rintro ⟨c, hc⟩,
   exact small_constrains α c,
 end
 
-lemma mem_nth_constrains_closure_iff {S : set (support_condition β)} {n : ℕ}
+lemma mem_nth_reduction_iff {S : set (support_condition β)} {n : ℕ}
   {c : support_condition β} :
-  c ∈ nth_constrains_closure α S n ↔
+  c ∈ nth_reduction α S n ↔
   ∃ l, list.chain (constrains α β) c l ∧ l.length = n ∧ (c :: l).last (list.cons_ne_nil _ _) ∈ S :=
 begin
   induction n with n hn generalizing c,
-  { rw nth_constrains_closure,
+  { rw nth_reduction,
     split,
     { intro h,
       exact ⟨[], list.chain.nil, rfl, h⟩, },
@@ -127,7 +168,7 @@ begin
       rw list.length_eq_zero at h₂,
       cases h₂,
       exact h₃, }, },
-  { simp only [nth_constrains_closure, mem_set_of_eq],
+  { simp only [nth_reduction, mem_set_of_eq],
     split,
     { rintro ⟨d, hd₁, hd₂⟩,
       obtain ⟨l, hl₁, hl₂, hl₃⟩ := hn.mp hd₁,
@@ -143,31 +184,31 @@ begin
       exact ⟨d, this, hcd⟩, }, },
 end
 
-lemma constrains_closure_eq_Union {S : set (support_condition β)} :
-  {c | ∃ d ∈ S, relation.refl_trans_gen (constrains α β) c d} = ⋃ n, nth_constrains_closure α S n :=
+lemma reduction_eq_Union {S : set (support_condition β)} :
+  {c | ∃ d ∈ S, relation.refl_trans_gen (constrains α β) c d} = ⋃ n, nth_reduction α S n :=
 begin
   refine subset_antisymm _ _,
   { rintros c ⟨d, hdS, hd⟩,
     obtain ⟨l, hl, rfl⟩ := list.exists_chain_of_relation_refl_trans_gen hd,
     rw mem_Union,
     refine ⟨l.length, _⟩,
-    rw mem_nth_constrains_closure_iff,
+    rw mem_nth_reduction_iff,
     refine ⟨l, hl, rfl, hdS⟩, },
   { intros c hc,
     rw mem_Union at hc,
     obtain ⟨i, hc⟩ := hc,
-    rw mem_nth_constrains_closure_iff at hc,
+    rw mem_nth_reduction_iff at hc,
     obtain ⟨l, hl₁, hl₂, hl₃⟩ := hc,
     exact ⟨(c :: l).last (list.cons_ne_nil _ _), hl₃,
       list.relation_refl_trans_gen_of_exists_chain l hl₁ rfl⟩, },
 end
 
-lemma constrains_closure_small' {S : set (support_condition β)} (h : small S) :
+lemma reduction_small' {S : set (support_condition β)} (h : small S) :
   small {c | ∃ d ∈ S, relation.refl_trans_gen (constrains α β) c d} :=
 begin
-  rw constrains_closure_eq_Union,
-  have : small ⋃ (n : ulift ℕ), nth_constrains_closure α S n.down,
-  { refine small_Union _ (λ _, small_nth_constrains_closure α h),
+  rw reduction_eq_Union,
+  have : small ⋃ (n : ulift ℕ), nth_reduction α S n.down,
+  { refine small_Union _ (λ _, small_nth_reduction α h),
     rw cardinal.mk_denumerable,
     exact Λ_limit.aleph_0_le.trans_lt Λ_lt_κ, },
   { convert this using 1,
@@ -175,12 +216,8 @@ begin
     simp only [mem_Union, ulift.exists], },
 end
 
-lemma constrains_closure_small {S : set (support_condition β)} (h : small S) :
-  small (constrains_closure α S) :=
-lt_of_le_of_lt (cardinal.mk_subtype_le_of_subset (λ c hc, hc.2)) (constrains_closure_small' α h)
-
-lemma constrains_closure_litter_set_eq {S : set (support_condition β)} :
-  ∀ N A, (⟨inr N, A⟩ : support_condition β) ∈ constrains_closure α S → litter_set N.fst = N.snd :=
-λ N A h, h.1 N rfl
+lemma reduction_small {S : set (support_condition β)} (h : small S) :
+  small (reduction α S) :=
+lt_of_le_of_lt (cardinal.mk_subtype_le_of_subset (λ c hc, hc.1)) (reduction_small' α h)
 
 end con_nf

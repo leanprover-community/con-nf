@@ -180,6 +180,9 @@ by rw [inv_smul_eq_iff, to_bot_smul, smul_inv_smul]
 @[simp] lemma of_bot_inv_smul (f : struct_perm ⊥) (x : X) : (of_bot f)⁻¹ • x = f⁻¹ • x :=
 by rw [inv_smul_eq_iff, of_bot_smul, smul_inv_smul]
 
+@[simp] lemma derivative_bot_smul {α : Λ} (f : struct_perm α) (x : X) :
+  struct_perm.derivative (nil.cons (bot_lt_coe α)) f • x = f • x := rfl
+
 lemma smul_near_litter_fst (π : struct_perm α) (N : near_litter) : (π • N).fst = π • N.fst := rfl
 
 end
@@ -240,7 +243,7 @@ instance mul_action_pretangle : mul_action (struct_perm α) (pretangle α) :=
   one_smul := struct_perm.one_smul _,
   mul_smul := struct_perm.mul_smul _ }
 
-@[simp] lemma derivative_cons_nil (α : Λ) (f : struct_perm α) (β : type_index) (hβ : β < α) :
+lemma derivative_cons_nil (α : Λ) (f : struct_perm α) (β : type_index) (hβ : β < α) :
   derivative (cons nil hβ) f = of_coe f β hβ :=
 by { unfold derivative lower, rw dif_neg hβ.ne, refl }
 

@@ -132,6 +132,61 @@ lemma path_eq_nil : ∀ p : path α α, p = nil
 | nil := rfl
 | (cons p f) := ((le_of_path p).not_lt f).elim
 
+/-! The next few results won't be needed in the same way in Lean 4. -/
+
+def path.Iic_rec' {α : Λ} {β : Iic_index α}
+  (motive : Π (γ : type_index), path (β : type_index) γ → Sort*) :
+  motive β nil → (Π (γ δ : type_index) (hγ : γ ≤ α) (hδ : δ ≤ α) (A : path (β : type_index) γ)
+    (h : δ < γ), motive γ A → motive δ (A.cons h)) →
+  Π (γ : Iic_index α) (A : path (β : type_index) γ),
+  motive (⟨γ, (le_of_path A).trans β.prop⟩ : Iic_index α) A :=
+λ hn hc γ, path.rec hn
+  (λ γ δ A h, hc γ δ ((le_of_path A).trans β.prop) ((le_of_path (A.cons h)).trans β.prop) A h)
+
+def motive_equiv {α : Λ} {β : Iic_index α}
+  {motive : Π (γ : Iic_index α), path (β : type_index) γ → Sort*}
+  {γ : Iic_index α} {A : path (β : type_index) γ} :
+  motive (⟨γ, γ.prop⟩ : Iic_index α) A ≃ motive γ A :=
+equiv.cast (by cases γ; refl)
+
+/-- An induction principle for paths that allows us to use `Iic_index α` instead of needing to
+define the motive for all `type_index`. -/
+@[elab_as_eliminator]
+def path.Iic_rec {α : Λ} {β : Iic_index α}
+  {motive : Π (γ : Iic_index α), path (β : type_index) γ → Sort*} :
+  motive β nil → (Π (γ δ : Iic_index α) (A : path (β : type_index) γ) (h : δ < γ),
+    motive γ A → motive δ (A.cons h)) →
+  Π (γ : Iic_index α) (A : path (β : type_index) γ), motive γ A :=
+λ hn hc γ A, motive_equiv (motive_equiv (show _, from
+  path.Iic_rec' (λ γ A, motive ⟨γ, (le_of_path A).trans β.prop⟩ A)
+  (motive_equiv.symm hn)
+  (λ γ δ hγ hδ A h, hc ⟨γ, (le_of_path A).trans β.prop⟩
+    ⟨δ, (le_of_path (A.cons h)).trans β.prop⟩ A h)
+  γ A))
+
+@[simp] lemma path.Iic_rec_nil {α : Λ} {β : Iic_index α}
+  {motive : Π (γ : Iic_index α), path (β : type_index) γ → Sort*} {hn : motive β nil} {hc} :
+  @path.Iic_rec _ _ _ motive hn hc β nil = hn :=
+begin
+  rw [path.Iic_rec, path.Iic_rec'],
+  simp only [subtype.coe_mk, motive_equiv, equiv.cast_symm, equiv.cast_apply, cast_cast, cast_eq],
+end
+
+@[simp] lemma path.Iic_rec_cons {α : Λ} {β : Iic_index α}
+  {motive : Π (γ : Iic_index α), path (β : type_index) γ → Sort*}
+  {hn : motive β nil} {hc} (γ δ : Iic_index α) (A : path (β : type_index) γ) (h : δ < γ) :
+  @path.Iic_rec _ _ _ motive hn hc δ (A.cons h) = hc γ δ A h (path.Iic_rec hn hc γ A) :=
+begin
+  rw [path.Iic_rec, path.Iic_rec'],
+  dsimp only [subtype.coe_mk, motive_equiv],
+  simp only [equiv.cast_refl, equiv.cast_symm, equiv.cast_apply, equiv.coe_refl, id.def],
+  rw cast_eq_iff_heq,
+  congr,
+  rw subtype.coe_eta,
+  rw subtype.coe_eta,
+  exact (cast_heq _ _).symm,
+end
+
 /-- There are at most `Λ` `α`-extended type indices. -/
 @[simp] lemma mk_extended_index (α : type_index) : #(extended_index α) ≤ #Λ :=
 begin

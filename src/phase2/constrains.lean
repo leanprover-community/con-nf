@@ -42,7 +42,7 @@ begin
   intro h,
   cases β,
   cases γ,
-  simpa only [coe_coe, subtype.coe_mk, coe_lt_coe, subtype.mk_lt_mk] using h,
+  exact coe_lt_coe.mpr h,
 end
 
 variables (α) (β)

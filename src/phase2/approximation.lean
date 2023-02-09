@@ -1,5 +1,5 @@
 import mathlib.logic.equiv.local_perm
-import phase2.constrains
+import phase2.flexible
 import phase2.sublitter
 
 open set sum
@@ -9,46 +9,6 @@ universe u
 
 namespace con_nf
 variable [params.{u}]
-
--- TODO: Factor this out into a file.
-section flexible
-variables (α : Λ) [position_data.{}] [phase_2_assumptions α] {β : type_index}
-
-/-- A litter is *inflexible* if it is the image of some f-map. -/
-@[mk_iff] inductive inflexible : litter → extended_index β → Prop
-| mk_coe ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
-    (A : quiver.path (β : type_index) γ) (t : tangle δ) :
-    inflexible
-      (f_map (with_bot.coe_ne_coe.mpr $ coe_ne' hδε) t)
-      ((A.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
-| mk_bot ⦃γ : Iic α⦄ ⦃ε : Iio α⦄ (hε : (ε : Λ) < γ)
-    (A : quiver.path (β : type_index) γ) (a : atom) :
-    inflexible
-      (f_map (show (⊥ : type_index) ≠ (ε : Λ), from with_bot.bot_ne_coe) a)
-      ((A.cons (coe_lt hε)).cons (with_bot.bot_lt_coe _))
-
-/-- A litter is *flexible* if it is not the image of any f-map. -/
-def flexible (L : litter) (A : extended_index β) : Prop := ¬inflexible α L A
-
-variable {α}
-
-lemma inflexible.comp {γ : type_index} {L : litter} {A : extended_index γ}
-  (h : inflexible α L A) (B : quiver.path β γ) : inflexible α L (B.comp A) :=
-begin
-  induction h,
-  refine inflexible.mk_coe _ _ _ _ _,
-  assumption,
-  exact inflexible.mk_bot _ _ _,
-end
-
-@[simp] lemma not_flexible_iff {L : litter} {A : extended_index β} :
-  ¬flexible α L A ↔ inflexible α L A := not_not
-
-lemma flexible_of_comp_flexible {γ : type_index} {L : litter} {A : extended_index γ}
-  {B : quiver.path β γ} (h : flexible α L (B.comp A)) : flexible α L A :=
-λ h', h (h'.comp B)
-
-end flexible
 
 @[ext] structure near_litter_approx :=
 (atom_perm : local_perm atom)
@@ -348,6 +308,9 @@ conditions lie in the domain of `π` and all near-litter support conditions are 
 instance has_smul_support_condition {β : Iic α} :
   has_smul (struct_approx β) (support_condition β) :=
 ⟨λ π c, ⟨π c.snd • c.fst, c.snd⟩⟩
+
+lemma smul_support_condition_eq {β : Iic α} (π : struct_approx β) (c : support_condition β) :
+  π • c = ⟨π c.snd • c.fst, c.snd⟩ := rfl
 
 lemma smul_eq_of_supports {β : Iic α} {π₀ : struct_approx β} {π : allowable β}
   (hπ : π₀.exactly_approximates π.to_struct_perm)
