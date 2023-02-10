@@ -305,11 +305,11 @@ conditions lie in the domain of `π` and all near-litter support conditions are 
 (near_litter_mem_domain : ∀ (N : near_litter) B, (inr N, B) ∈ S → N.1 ∈ (π₀ B).litter_perm.domain)
 (eq_to_near_litter : ∀ (N : near_litter) B, (inr N, B) ∈ S → N = N.fst.to_near_litter)
 
-instance has_smul_support_condition {β : Iic α} :
+instance has_smul_support_condition {β : type_index} :
   has_smul (struct_approx β) (support_condition β) :=
 ⟨λ π c, ⟨π c.snd • c.fst, c.snd⟩⟩
 
-lemma smul_support_condition_eq {β : Iic α} (π : struct_approx β) (c : support_condition β) :
+lemma smul_support_condition_eq {β : type_index} (π : struct_approx β) (c : support_condition β) :
   π • c = ⟨π c.snd • c.fst, c.snd⟩ := rfl
 
 lemma smul_eq_of_supports {β : Iic α} {π₀ : struct_approx β} {π : allowable β}

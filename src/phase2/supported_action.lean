@@ -421,18 +421,20 @@ begin
   { exact hnb (banned_of_mem_image_supported_action_atom_map_core_domain M B a ha₁), },
 end
 
-lemma supported_action_inj_on (B : extended_index δ)
-  (hM₁ : ∀ a ha b hb, M.atom_image a B ha = M.atom_image b B hb → a = b)
-  (hM₂ : ∀ (L₁ : litter) hL₁ (L₂ : litter) hL₂,
-    ((M.near_litter_image L₁.to_near_litter B hL₁ : set atom) ∩
-      (M.near_litter_image L₂.to_near_litter B hL₂)).nonempty → L₁ = L₂) :
+structure support_map.injective (B : extended_index δ) : Prop :=
+(atom_injective : ∀ a ha b hb, M.atom_image a B ha = M.atom_image b B hb → a = b)
+(near_litter_injective : ∀ (L₁ : litter) hL₁ (L₂ : litter) hL₂,
+  ((M.near_litter_image L₁.to_near_litter B hL₁ : set atom) ∩
+    (M.near_litter_image L₂.to_near_litter B hL₂)).nonempty → L₁ = L₂)
+
+lemma supported_action_inj_on (B : extended_index δ) (hM : M.injective B) :
   inj_on (supported_action_atom_map_core M B) (supported_action_atom_map_core_domain M B) :=
 begin
   rintros a ((ha | ha) | ⟨_, ⟨L, rfl⟩, ⟨_, ⟨hL, rfl⟩, ha⟩⟩)
     b ((hb | hb) | ⟨_, ⟨L', rfl⟩, ⟨_, ⟨hL', rfl⟩, hb⟩⟩) hab,
   { rw [supported_action_eq_of_mem_support_map _ ha,
       supported_action_eq_of_mem_support_map _ hb] at hab,
-    exact hM₁ a ha b hb hab, },
+    exact hM.atom_injective a ha b hb hab, },
   { rw [supported_action_eq_of_mem_support_map _ ha,
       supported_action_eq_of_mem_preimage_litter_subset _ hb] at hab,
     obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab.symm,
@@ -465,7 +467,7 @@ begin
       (mapped_outside_equiv M L B hL ⟨a, ha⟩).prop, },
   { rw [supported_action_eq_of_mem_mapped_outside_subset _ ha,
       supported_action_eq_of_mem_mapped_outside_subset _ hb] at hab,
-    cases hM₂ _ hL _ hL' _,
+    cases hM.near_litter_injective _ hL _ hL' _,
     { simp only [subtype.coe_inj, embedding_like.apply_eq_iff_eq] at hab,
       exact hab, },
     obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab,
@@ -475,7 +477,7 @@ end
 /-- We can't prove `h` without knowing facts about the hypothesis `H`. We defer this proof to later,
 at which point we will know many facts about the hypothesis. -/
 noncomputable def supported_action_atom_map (B : extended_index δ) : local_perm atom :=
-if h : _ ∧ _ then
+if h : M.injective B then
   local_perm.complete
     (supported_action_atom_map_core M B)
     (supported_action_atom_map_core_domain M B)
@@ -483,7 +485,7 @@ if h : _ ∧ _ then
     (mk_supported_action_atom_map_domain M B)
     (le_of_le_of_eq κ_regular.aleph_0_le (mk_litter_set _).symm)
     (supported_action_atom_map_domain_disjoint M B)
-    (supported_action_inj_on M B h.1 h.2)
+    (supported_action_inj_on M B h)
 else
   local_perm.of_set ∅
 
@@ -536,6 +538,19 @@ noncomputable def supported_action_index (π : near_litter_approx) (B : extended
 
 noncomputable def supported_action (π : struct_approx δ) : struct_approx δ :=
 λ B, supported_action_index M (π B) B
+
+lemma supported_action_smul_atom_eq (π : struct_approx δ) (a : atom) (B : extended_index δ)
+  (ha : (inl a, B) ∈ M) (hM : M.injective B) :
+  supported_action M π B • a = M.atom_image a B ha :=
+begin
+  dsimp only [supported_action, supported_action_index, supported_action_atom_map,
+    ← near_litter_approx.smul_atom_eq],
+  rw [dif_pos hM, local_perm.complete_apply_eq, supported_action_atom_map_core, dif_pos ha],
+  exact or.inl (or.inl ha),
+end
+
+lemma supported_action_smul_litter_eq (π : struct_approx δ) (L : litter) (B : extended_index δ) :
+  supported_action M π B • L = (π B).flexible_completion_litter_perm α B L := rfl
 
 end struct_approx
 
