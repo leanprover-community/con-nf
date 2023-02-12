@@ -294,16 +294,13 @@ def exactly_approximates {β : type_index} (π₀ : struct_approx β) (π : stru
 
 variables {α : Λ} [position_data.{}] [phase_2_assumptions α]
 
--- TODO: Refactor `N = N.fst.to_near_litter` and `litter_set N.fst = N.snd` into a predicate with
--- some nice lemmas.
-
 /-- A structural approximation `π` *supports* a set of support conditions if all of the support
 conditions lie in the domain of `π` and all near-litter support conditions are litters. -/
 @[mk_iff] structure supports {β : Iic α} (π₀ : struct_approx β) (S : set (support_condition β)) :
   Prop :=
 (atom_mem_domain : ∀ a B, (inl a, B) ∈ S → a ∈ (π₀ B).atom_perm.domain)
 (near_litter_mem_domain : ∀ (N : near_litter) B, (inr N, B) ∈ S → N.1 ∈ (π₀ B).litter_perm.domain)
-(eq_to_near_litter : ∀ (N : near_litter) B, (inr N, B) ∈ S → N = N.fst.to_near_litter)
+(is_litter : ∀ (N : near_litter) B, (inr N, B) ∈ S → N.is_litter)
 
 instance has_smul_support_condition {β : type_index} :
   has_smul (struct_approx β) (support_condition β) :=
@@ -326,7 +323,7 @@ begin
   refine congr_arg inr _,
   ext : 1,
   exact (hπ A).map_litter N.fst (hS.near_litter_mem_domain N A hc),
-  rw hS.eq_to_near_litter N A hc,
+  rw (hS.is_litter N A hc).eq_fst_to_near_litter,
   ext a : 1,
   simp only [near_litter_approx.smul_near_litter_coe, litter.to_near_litter_fst,
     near_litter_approx.coe_largest_sublitter, litter.coe_to_near_litter, sdiff_sdiff_right_self,

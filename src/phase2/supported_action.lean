@@ -21,6 +21,31 @@ variables [params.{u}] {α : Λ} [position_data.{}] [phase_2_assumptions α] {β
 
 instance : has_mem (support_condition δ) (support_map δ) := ⟨λ c M, c ∈ M.carrier⟩
 
+@[mk_iff] structure support_map.le (M M' : support_map δ) : Prop :=
+(carrier_subset : M.carrier ⊆ M'.carrier)
+(map_atom : ∀ a B (h : (inl a, B) ∈ M.carrier),
+  M.atom_image a B h = M'.atom_image a B (mem_of_mem_of_subset h carrier_subset))
+(map_near_litter : ∀ N B (h : (inr N, B) ∈ M.carrier),
+  M.near_litter_image N B h = M'.near_litter_image N B (mem_of_mem_of_subset h carrier_subset))
+
+instance : partial_order (support_map δ) := {
+  le := support_map.le,
+  le_refl := λ M, ⟨subset.rfl, λ _ _ _, rfl, λ _ _ _, rfl⟩,
+  le_trans := λ M₁ M₂ M₃ h₁ h₂,
+    ⟨subset.trans h₁.carrier_subset h₂.carrier_subset,
+    λ a B h, (h₁.map_atom a B h).trans (h₂.map_atom a B (h₁.carrier_subset h)),
+    λ N B h, (h₁.map_near_litter N B h).trans (h₂.map_near_litter N B (h₁.carrier_subset h))⟩,
+  le_antisymm := begin
+    rintro ⟨S₁, hS₁, a₁, N₁⟩ ⟨S₂, hS₂, a₂, N₂⟩ h h',
+    cases subset.antisymm h.carrier_subset h'.carrier_subset,
+    simp only [eq_self_iff_true, heq_iff_eq, true_and],
+    split;
+    funext,
+    exact h.map_atom _ _ _,
+    exact h.map_near_litter _ _ _,
+  end,
+}
+
 variable (M : support_map δ)
 
 /-- A litter that is not allowed to be used as a sandbox because it appears somewhere that

@@ -224,6 +224,18 @@ begin
   { exact λ x, rfl }
 end
 
+inductive near_litter.is_litter : near_litter → Prop
+| mk (L : litter) : near_litter.is_litter L.to_near_litter
+
+lemma near_litter.is_litter.eq_fst_to_near_litter {N : near_litter} (h : N.is_litter) :
+  N = N.fst.to_near_litter := by cases h; refl
+
+lemma near_litter.is_litter.litter_set_eq {N : near_litter} (h : N.is_litter) :
+  litter_set N.fst = N.snd := by cases h; refl
+
+lemma near_litter.is_litter.exists_litter_eq {N : near_litter} (h : N.is_litter) :
+  ∃ (L : litter), N = L.to_near_litter := by obtain ⟨L⟩ := h; exact ⟨L, rfl⟩
+
 /--
 A near-litter permutation is a permutation of the base type which sends near-litters to
 near-litters. It turns out that the images of near-litters near the same litter are themselves near

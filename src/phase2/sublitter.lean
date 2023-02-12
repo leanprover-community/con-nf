@@ -145,7 +145,8 @@ def order_iso.subtype_iso {α β : Type*} [has_le α] [has_le β] (e : α ≃o �
   subtype.mk_le_mk, order_iso.le_iff_le, subtype.coe_le_coe, iff_self, subtype.forall,
   implies_true_iff]⟩
 
-/-- There is a unique order isomorphism between corresponding subtypes of a well-order. -/
+/-- There is a unique order isomorphism between corresponding subtypes of a well-order.
+TODO: Can prove this without specialising to subtypes. -/
 lemma order_iso.unique {α β : Type*}
   [linear_order α] [αwf : well_founded ((<) : α → α → Prop)]
   [linear_order β] [βwf : well_founded ((<) : β → β → Prop)]

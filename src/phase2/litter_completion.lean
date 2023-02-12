@@ -15,10 +15,19 @@ variables [params.{u}] {α : Λ} [position_data.{}] [phase_2_assumptions α] {β
   (H : hypothesis ⟨inr (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter,
     (A.cons (coe_lt hε)).cons (bot_lt_coe _)⟩)
 
-/-- We say *freedom of action* holds at level `β` if every `β`-free structural approximation
-exactly approximates some `β`-allowable permutation. -/
-def freedom_of_action (β : Iic α) : Prop :=
-∀ (π₀ : struct_approx β), π₀.free → ∃ (π : allowable β), π₀.exactly_approximates π.to_struct_perm
+def lawful_atom_map (π₀ : struct_approx β) (π : allowable β) : Prop :=
+∀ (a : atom) (A : extended_index β) (h : a ∉ (π₀ A).atom_perm.domain),
+  struct_perm.derivative A π.to_struct_perm • a =
+  ((π₀ A).largest_sublitter a.1).order_iso
+  ((π₀ A).largest_sublitter (struct_perm.derivative A π.to_struct_perm • a.1))
+  ⟨a, (π₀ A).mem_largest_sublitter_of_not_mem_domain a h⟩
+
+/-- The inductive hypothesis used for proving freedom of action:
+Every free approximation exactly approximates some allowable permutation, and its action on atoms
+not in the domain of the approximation is given by the order isomorphism between sublitters. -/
+def foa_ih (β : Iic α) : Prop :=
+∀ (π₀ : struct_approx β), π₀.free →
+  ∃ (π : allowable β), π₀.exactly_approximates π.to_struct_perm ∧ π₀.lawful_atom_map π
 
 /-- A proof-relevant statement that `L` is `A`-inflexible (excluding `ε = ⊥`). -/
 structure inflexible_coe (L : litter) (A : extended_index β) :=
@@ -87,7 +96,7 @@ begin
 end
 
 class freedom_of_action_hypothesis (β : Iic α) :=
-(freedom_of_action_of_lt : ∀ γ < β, freedom_of_action γ)
+(freedom_of_action_of_lt : ∀ γ < β, foa_ih γ)
 
 export freedom_of_action_hypothesis (freedom_of_action_of_lt)
 
@@ -236,17 +245,131 @@ begin
   exact hL'.1,
 end
 
+noncomputable def supported_perm_of_support_map (π : struct_approx β) (hπ : π.free)
+  {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ) (S : support_map δ)
+  (hS : (show struct_approx (δ : Iic α), from supported_action S
+    (λ (C : extended_index δ), π ((B.cons $ coe_lt hδ).comp C))).free) : allowable δ :=
+(freedom_of_action_of_lt (δ : Iic α)
+  (hδ.trans_le (show _, from coe_le_coe.mp (le_of_path B))) _ hS).some
+
+lemma supported_perm_exactly_approximates (π : struct_approx β) (hπ : π.free)
+  {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ) (S : support_map δ)
+  (hS : (show struct_approx (δ : Iic α), from supported_action S
+    (λ (C : extended_index δ), π ((B.cons $ coe_lt hδ).comp C))).free) :
+  (supported_action S (λ C, π ((B.cons $ coe_lt hδ).comp C)))
+    .exactly_approximates (supported_perm_of_support_map π hπ hδ B S hS).to_struct_perm :=
+(freedom_of_action_of_lt (δ : Iic α)
+  (hδ.trans_le (show _, from coe_le_coe.mp (le_of_path B))) _ hS).some_spec.1
+
+lemma supported_perm_lawful_atom_map (π : struct_approx β) (hπ : π.free)
+  {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ) (S : support_map δ)
+  (hS : (show struct_approx (δ : Iic α), from supported_action S
+    (λ (C : extended_index δ), π ((B.cons $ coe_lt hδ).comp C))).free) :
+  (show struct_approx (δ : Iic α), from supported_action S
+    (λ C, π ((B.cons $ coe_lt hδ).comp C))).lawful_atom_map
+    (supported_perm_of_support_map π hπ hδ B S hS) :=
+(freedom_of_action_of_lt (δ : Iic α)
+  (hδ.trans_le (show _, from coe_le_coe.mp (le_of_path B))) _ hS).some_spec.2
+
 noncomputable def supported_perm (π : struct_approx β) (hπ : π.free)
   {L : litter} {A : extended_index β} (h : inflexible_coe L A)
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) : allowable h.δ :=
-(freedom_of_action_of_lt (h.δ : Iic α) h.δ_lt_β _ (π.litter_approx_free hπ H h)).some
+supported_perm_of_support_map π hπ h.hδ h.B _ (π.litter_approx_free hπ H h)
 
-lemma supported_perm_spec (π : struct_approx β) (hπ : π.free)
+lemma supported_perm_smul_atom_eq (π : struct_approx β) (hπ : π.free)
   {L : litter} {A : extended_index β} (h : inflexible_coe L A)
-  (H : hypothesis ⟨inr L.to_near_litter, A⟩) :
-  (supported_action (inflexible_support_map H h) (λ B, π ((h.B.cons $ coe_lt h.hδ).comp B)))
-    .exactly_approximates (supported_perm π hπ h H).to_struct_perm :=
-(freedom_of_action_of_lt (h.δ : Iic α) h.δ_lt_β _ (π.litter_approx_free hπ H h)).some_spec
+  (H : hypothesis ⟨inr L.to_near_litter, A⟩) (S : support_map h.δ)
+  (hS₁ : (show struct_approx (h.δ : Iic α), from
+    supported_action S (λ (B : extended_index h.δ), π ((h.B.cons $ coe_lt h.hδ).comp B))).free)
+  (hS₂ : inflexible_support_map H h ≤ S)
+  (d : support_condition h.δ)
+  (hd₁ : d ∈ designated_support h.t)
+  (B : extended_index h.δ)
+  (a : atom)
+  (ih : ∀ (y : support_condition h.δ),
+          y ≺[α] (inl a, B) →
+          (∃ (d : support_condition h.δ)
+             (H : d ∈ designated_support h.t),
+             relation.refl_trans_gen (constrains α h.δ) y d) →
+          π.supported_perm_of_support_map hπ h.hδ h.B S hS₁ • y =
+            π.supported_perm hπ h H • y)
+  (hd₂ : relation.refl_trans_gen (constrains α h.δ) (inl a, B) d) :
+  (struct_perm.derivative B)
+        (allowable.to_struct_perm
+           (π.supported_perm_of_support_map hπ h.hδ h.B S hS₁)) •
+      a =
+    (struct_perm.derivative B)
+        (allowable.to_struct_perm (π.supported_perm hπ h H)) •
+      a :=
+begin
+  admit,
+end
+
+lemma supported_perm_smul_near_litter_eq (π : struct_approx β) (hπ : π.free)
+  {L : litter} {A : extended_index β} (h : inflexible_coe L A)
+  (H : hypothesis ⟨inr L.to_near_litter, A⟩) (S : support_map h.δ)
+  (hS₁ : (show struct_approx (h.δ : Iic α), from
+    supported_action S (λ (B : extended_index h.δ), π ((h.B.cons $ coe_lt h.hδ).comp B))).free)
+  (hS₂ : inflexible_support_map H h ≤ S)
+  (d : support_condition h.δ)
+  (hd₁ : d ∈ designated_support h.t)
+  (B : extended_index h.δ)
+  (N : near_litter)
+  (ih : ∀ (y : support_condition h.δ),
+          y ≺[α] (inr N, B) →
+          (∃ (d : support_condition h.δ)
+             (H : d ∈ designated_support h.t),
+             relation.refl_trans_gen (constrains α h.δ) y d) →
+          π.supported_perm_of_support_map hπ h.hδ h.B S hS₁ • y =
+            π.supported_perm hπ h H • y)
+  (hd₂ : relation.refl_trans_gen (constrains α h.δ) (inr N, B) d) :
+  (struct_perm.derivative B)
+        (allowable.to_struct_perm
+           (π.supported_perm_of_support_map hπ h.hδ h.B S hS₁)) •
+      N =
+    (struct_perm.derivative B)
+        (allowable.to_struct_perm (π.supported_perm hπ h H)) •
+      N :=
+begin
+  admit,
+end
+
+lemma supported_perm_smul_condition_eq (π : struct_approx β) (hπ : π.free)
+  {L : litter} {A : extended_index β} (h : inflexible_coe L A)
+  (H : hypothesis ⟨inr L.to_near_litter, A⟩) (S : support_map h.δ)
+  (hS₁ : (show struct_approx (h.δ : Iic α), from
+    supported_action S (λ (B : extended_index h.δ), π ((h.B.cons $ coe_lt h.hδ).comp B))).free)
+  (hS₂ : inflexible_support_map H h ≤ S)
+  {c : support_condition h.δ} :
+  (∃ d ∈ designated_support h.t, relation.refl_trans_gen (constrains α h.δ) c d) →
+  supported_perm_of_support_map π hπ h.hδ h.B S hS₁ • c = supported_perm π hπ h H • c :=
+begin
+  refine (constrains_wf α h.δ).induction c _,
+  rintros c ih ⟨d, hd₁, hd₂⟩,
+  obtain ⟨a | N, B⟩ := c,
+  { refine prod.ext _ rfl,
+    change inl _ = inl _,
+    exact congr_arg inl (supported_perm_smul_atom_eq π hπ h H S hS₁ hS₂ d hd₁ B a ih hd₂), },
+  { refine prod.ext _ rfl,
+    change inr _ = inr _,
+    exact congr_arg inr (supported_perm_smul_near_litter_eq π hπ h H S hS₁ hS₂ d hd₁ B N ih hd₂), },
+end
+
+lemma supported_perm_smul_eq (π : struct_approx β) (hπ : π.free)
+  {L : litter} {A : extended_index β} (h : inflexible_coe L A)
+  (H : hypothesis ⟨inr L.to_near_litter, A⟩) (S : support_map h.δ)
+  (hS₁ : (show struct_approx (h.δ : Iic α), from
+    supported_action S (λ (B : extended_index h.δ), π ((h.B.cons $ coe_lt h.hδ).comp B))).free)
+  (hS₂ : inflexible_support_map H h ≤ S) :
+  supported_perm π hπ h H • h.t = supported_perm_of_support_map π hπ h.hδ h.B S hS₁ • h.t :=
+begin
+  rw [smul_eq_iff_eq_inv_smul, smul_smul],
+  symmetry,
+  refine (designated_support h.t).supports _ _,
+  intros c hc,
+  rw [mul_smul, inv_smul_eq_iff],
+  exact supported_perm_smul_condition_eq π hπ h H S hS₁ hS₂ ⟨c, hc, relation.refl_trans_gen.refl⟩,
+end
 
 noncomputable def litter_completion (π : struct_approx β) (hπ : π.free)
   (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩) : litter :=
