@@ -36,9 +36,12 @@ def litter_set (i : litter) : set atom := {p | p.1 = i}
 
 @[simp] lemma mem_litter_set {a : atom} {i : litter} : a ∈ litter_set i ↔ a.1 = i := iff.rfl
 
+def litter_set_equiv (L : litter) : litter_set L ≃ κ :=
+⟨λ x, x.1.2, λ k, ⟨(L, k), rfl⟩, λ x, subtype.ext $ prod.ext x.2.symm rfl, λ k, rfl⟩
+
 /-- Each litter has cardinality `κ`. -/
 @[simp] lemma mk_litter_set (i : litter) : #(litter_set i) = #κ :=
-cardinal.eq.2 ⟨⟨λ x, x.1.2, λ k, ⟨(i, k), rfl⟩, λ x, subtype.ext $ prod.ext x.2.symm rfl, λ k, rfl⟩⟩
+cardinal.eq.2 ⟨litter_set_equiv i⟩
 
 /-- Two litters with different indices are disjoint. -/
 lemma pairwise_disjoint_litter_set : pairwise (disjoint on litter_set) :=
@@ -51,6 +54,28 @@ pairwise_disjoint_litter_set.eq $ not_disjoint_iff.2 ⟨_, hi, hj⟩
 lemma litter_set_symm_diff_litter_set (h : i ≠ j) :
   litter_set i ∆ litter_set j = litter_set i ∪ litter_set j :=
 (pairwise_disjoint_litter_set h).symm_diff_eq_sup
+
+def litter_set_rel_iso (L : litter) : ((<) : litter_set L → litter_set L → Prop) ≃r κr :=
+begin
+  refine ⟨litter_set_equiv L, _⟩,
+  rintros ⟨⟨La, a⟩, ha⟩ ⟨⟨Lb, b⟩, hb⟩,
+  cases ha,
+  cases hb,
+  split,
+  { intro h,
+    exact prod.lex.right L h, },
+  { rintro (⟨_, _, hL⟩ | ⟨_, hab⟩),
+    cases lt_irrefl _ hL,
+    exact hab, },
+end
+
+noncomputable def litter_set_order_iso (L : litter) : litter_set L ≃o κ :=
+order_iso.of_rel_iso_lt (litter_set_rel_iso L)
+
+/-- The order type of a litter is `κ`. -/
+lemma litter.ordinal_type (L : litter) :
+  ordinal.type ((<) : litter_set L → litter_set L → Prop) = (#κ).ord :=
+by rw [← κ_ord, ordinal.type_eq]; exact ⟨litter_set_rel_iso L⟩
 
 /-- A `i`-near-litter is a set of small symmetric difference to the `i`-th litter. In other words,
 it is near the `i`-th litter.

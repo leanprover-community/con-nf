@@ -67,8 +67,7 @@ lemma complete_atom_map_eq_of_mem_domain {a} {A} (h : a ∈ (π A).atom_perm.dom
 by rw [complete_atom_map_eq, atom_completion, dif_pos h]
 
 lemma complete_atom_map_eq_of_not_mem_domain {a} {A} (h : a ∉ (π A).atom_perm.domain) :
-  π.complete_atom_map hπ a A = sublitter_bijection
-    ((π A).largest_sublitter a.1)
+  π.complete_atom_map hπ a A = ((π A).largest_sublitter a.1).order_iso
     ((π A).largest_sublitter (π.complete_litter_map hπ a.1 A))
     ⟨a, (π A).mem_largest_sublitter_of_not_mem_domain a h⟩ :=
 by rw [complete_atom_map_eq, atom_completion, dif_neg h]; refl
@@ -86,8 +85,8 @@ structure foa_props (π : struct_approx β) (hπ : π.free) (c : support_conditi
   π.complete_litter_map hπ L₁ B = π.complete_litter_map hπ L₂ B → L₁ = L₂)
 
 lemma eq_of_sublitter_bijection_apply_eq {π : near_litter_approx} {L₁ L₂ L₃ L₄ : litter} {a b} :
-  ((sublitter_bijection (π.largest_sublitter L₁) (π.largest_sublitter L₂)) a : atom) =
-  (sublitter_bijection (π.largest_sublitter L₃) (π.largest_sublitter L₄)) b →
+  ((π.largest_sublitter L₁).order_iso (π.largest_sublitter L₂) a : atom) =
+  (π.largest_sublitter L₃).order_iso (π.largest_sublitter L₄) b →
   L₁ = L₃ → L₂ = L₄ → (a : atom) = b :=
 begin
   rintros h₁ rfl rfl,
@@ -116,8 +115,7 @@ begin
       ((π A).atom_perm.map_domain hb), },
   { rw [complete_atom_map_eq_of_not_mem_domain ha, complete_atom_map_eq_of_not_mem_domain hb] at h,
     have h₁ := (subtype.coe_eq_iff.mp h).some.1,
-    have h₂ := (sublitter_bijection
-      ((π A).largest_sublitter b.1)
+    have h₂ := (((π A).largest_sublitter b.1).order_iso
       ((π A).largest_sublitter (π.complete_litter_map hπ b.1 A))
       ⟨b, (π A).mem_largest_sublitter_of_not_mem_domain b hb⟩).prop.1,
     have := H.litter_injective _ _ _
@@ -509,12 +507,12 @@ begin
   sorry,
 end
 
+-- This lemma is false. Note the π_{L,M} fix.
 lemma inflexible_support_supports'' {π : struct_approx β} (hπ : π.free) {γ : Iic α} {δ ε : Iio α}
   {B : path (β : type_index) γ} {t : tangle δ} {L A} (hδ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
   (hL : L = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t)
   (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)) :
 mul_action.supports (allowable δ) (inflexible_support ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩) t :=
--- Should be easy.
 sorry
 
 lemma litter_set_inter_eq_of_banned {π : struct_approx β} (hπ : π.free)

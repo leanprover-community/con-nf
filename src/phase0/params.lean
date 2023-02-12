@@ -42,7 +42,8 @@ class params :=
 (Λ : Type u) (Λr : Λ → Λ → Prop) [Λwf : is_well_order Λ Λr]
 (Λ_ord : ordinal.type Λr = (#Λ).ord)
 (Λ_limit : (#Λ).is_limit)
-(κ : Type u) (κ_regular : (#κ).is_regular)
+(κ : Type u) (κ_regular : (#κ).is_regular) (κr : κ → κ → Prop) [κwf : is_well_order κ κr]
+(κ_ord : ordinal.type κr = (#κ).ord)
 (Λ_lt_κ : #Λ < #κ)
 (μ : Type u) (μr : μ → μ → Prop) [μwf : is_well_order μ μr]
 (μ_ord : ordinal.type μr = (#μ).ord)
@@ -50,8 +51,8 @@ class params :=
 (κ_lt_μ : #κ < #μ)
 (κ_le_μ_cof : #κ ≤ (#μ).ord.cof)
 
-export params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular Λ_lt_κ μ μr μwf μ_ord μr μ_strong_limit κ_lt_μ
-  κ_le_μ_cof)
+export params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular κr κwf κ_ord Λ_lt_κ μ μr μwf μ_ord μr
+  μ_strong_limit κ_lt_μ κ_le_μ_cof)
 
 /-!
 ### Explicit parameters
@@ -68,9 +69,12 @@ example : params.{0} :=
   Λwf := infer_instance,
   Λ_ord := by simp only [mk_denumerable, ord_aleph_0, ordinal.type_nat_lt],
   Λ_limit := by { rw mk_denumerable, exact is_limit_aleph_0 },
-  κ := (aleph 1).out,
-  κ_regular := by { rw mk_out, exact is_regular_aleph_one },
-  Λ_lt_κ := by { rw [mk_out, mk_denumerable], exact aleph_0_lt_aleph_one },
+  κ := (aleph 1).ord.out.α,
+  κr := (aleph 1).ord.out.r,
+  κwf := (aleph 1).ord.out.wo,
+  κ_ord := by simp,
+  κ_regular := by { rw [mk_ordinal_out, card_ord], exact is_regular_aleph_one },
+  Λ_lt_κ := by { rw [mk_denumerable, mk_ordinal_out, card_ord], exact aleph_0_lt_aleph_one },
   μ := (beth $ ord $ aleph 1).ord.out.α,
   μr := (beth $ ord $ aleph 1).ord.out.r,
   μwf := (beth $ ord $ aleph 1).ord.out.wo,
@@ -89,12 +93,15 @@ variables [params.{u}] {ι α β : Type u}
 /-- To allow Lean's type checker to see that the ordering `Λr` is a well-ordering without having to
 explicitly write `Λwf` everywhere, we declare it as an instance. -/
 instance : is_well_order Λ Λr := Λwf
+instance : is_well_order κ κr := κwf
 instance : is_well_order μ μr := μwf
 /-- We can deduce from the well-ordering `Λwf` that `Λ` is linearly ordered. -/
 instance : linear_order Λ := linear_order_of_STO Λr
+instance : linear_order κ := linear_order_of_STO κr
 instance : linear_order μ := linear_order_of_STO μr
 /-- We deduce that `Λ` has a well-founded relation. -/
 instance : has_well_founded Λ := is_well_order.to_has_well_founded
+instance : has_well_founded κ := is_well_order.to_has_well_founded
 instance : has_well_founded μ := is_well_order.to_has_well_founded
 
 lemma κ_le_μ : #κ ≤ #μ := κ_lt_μ.le
@@ -133,11 +140,18 @@ instance : inhabited litter :=
 ⟨⟨arbitrary μ, ⊥, arbitrary Λ, with_bot.bot_ne_coe⟩⟩
 
 /-- Litters are equivalent to a subtype of a product type. -/
-def litter_equiv : litter ≃ {a : μ × type_index × Λ // a.2.1 ≠ a.2.2} :=
+def litter_equiv : litter ≃ {a : μ ×ₗ type_index ×ₗ Λ // a.2.1 ≠ a.2.2} :=
 { to_fun := λ L, ⟨⟨L.ν, L.β, L.γ⟩, L.β_ne_γ⟩,
   inv_fun := λ L, ⟨L.val.1, L.val.2.1, L.val.2.2, L.prop⟩,
   left_inv := by rintro ⟨ν, β, γ, h⟩; refl,
   right_inv := by rintro ⟨⟨ν, β, γ⟩, h⟩; refl }
+
+instance subtype.is_well_order {α : Type*} (p : α → Prop) [has_lt α] [is_well_order α (<)] :
+  is_well_order (subtype p) (<) :=
+rel_embedding.is_well_order (subtype.rel_embedding (<) p)
+
+instance lex.is_well_order {α β : Type*} [has_lt α] [has_lt β]
+  [is_well_order α (<)] [is_well_order β (<)] : is_well_order (α ×ₗ β) (<) := prod.lex.is_well_order
 
 @[simp] lemma mk_litter : #litter = #μ :=
 begin
@@ -145,7 +159,7 @@ begin
     ⟨⟨λ ν, ⟨⟨ν, ⊥, arbitrary Λ⟩, with_bot.bot_ne_coe⟩, λ ν₁ ν₂, congr_arg $ prod.fst ∘ subtype.val⟩⟩),
   have := mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le)
     Λ_limit.ne_zero,
-  simp only [mk_prod, lift_id, mk_type_index, mul_eq_self Λ_limit.aleph_0_le, this],
+  simp only [lex, mk_prod, lift_id, mk_type_index, mul_eq_self Λ_limit.aleph_0_le, this],
 end
 
 /-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
@@ -159,6 +173,15 @@ begin
   { simp }
 end
 
+instance : has_lt litter := ⟨litter_equiv ⁻¹'o (<)⟩
+
+/-- Litters are well-ordered. -/
+instance litter.is_well_order : is_well_order litter (<) :=
+rel_iso.is_well_order.preimage _ litter_equiv
+
+instance : linear_order litter := linear_order_of_STO (<)
+instance : has_well_founded litter := is_well_order.to_has_well_founded
+
 /-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
 arbitrary type of cardinality `μ` and partitioning it into suitable sets of litters afterwards, we
 define it as `litter × κ`, which has the correct cardinality and comes with a natural
@@ -167,6 +190,14 @@ partition.
 These are not 'atoms' in the ZFU, TTTU or NFU sense; they are simply the elements of the model which
 are in type `τ₋₁`. -/
 @[derive inhabited] def atom : Type* := litter × κ
+
+instance : has_lt atom := ⟨prod.lex (<) (<)⟩
+
+/-- Atoms are well-ordered. -/
+instance atom.is_well_order : is_well_order atom (<) := prod.lex.is_well_order
+
+instance : linear_order atom := linear_order_of_STO (<)
+instance : has_well_founded atom := is_well_order.to_has_well_founded
 
 /-- The cardinality of `τ₋₁` is the cardinality of `μ`.
 We will prove that all types constructed in our model have cardinality equal to `μ`. -/

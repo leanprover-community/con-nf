@@ -39,8 +39,7 @@ def near_litter_completion_map (π : struct_approx β) (hπ : π.free)
 (near_litter_approx.largest_sublitter (π A)
   (litter_completion π hπ N.1 A (near_litter_hypothesis N A H)) ∪
   (π A) • (N \ near_litter_approx.largest_sublitter (π A) N.1)) \
-  coe '' ((sublitter_bijection
-    (near_litter_approx.largest_sublitter (π A) N.1)
+  coe '' (((near_litter_approx.largest_sublitter (π A) N.1).order_iso
     (near_litter_approx.largest_sublitter (π A)
       (litter_completion π hπ N.1 A (near_litter_hypothesis N A H)))) '' {x | (x : atom) ∉ N})
 

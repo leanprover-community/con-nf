@@ -1,4 +1,3 @@
-import order.extension.well
 import phase1.A_map
 import phase2.basic
 
@@ -24,9 +23,8 @@ We construct a well-order on the type of extended indices.
 The details are unimportant, we probably don't actually need AC here.
 -/
 
-instance : has_lt (extended_index α) := ⟨(well_founded.exists_well_order_ge empty_wf).some⟩
-instance : is_well_order (extended_index α) (<) :=
-(well_founded.exists_well_order_ge empty_wf).some_spec.2
+instance : has_lt (extended_index α) := ⟨well_ordering_rel⟩
+instance : is_well_order (extended_index α) (<) := well_ordering_rel.is_well_order
 instance : has_well_founded (extended_index α) := is_well_order.to_has_well_founded
 noncomputable instance : linear_order (extended_index α) := linear_order_of_STO (<)
 
