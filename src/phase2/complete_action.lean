@@ -306,7 +306,7 @@ lemma atom_image_inj_on {π : struct_approx β} (hπ : π.free)
   {B : path (β : type_index) γ} {t : tangle δ} {L A} (hδ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
   (hL : L = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t)
   (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _))
-  (hcL : (relation.refl_trans_gen (constrains α β)) ⟨inr L.to_near_litter, A⟩ c) (C a ha b hb)
+  (hcL : (relation.refl_trans_gen (constrains α β)) ⟨inr L.to_near_litter, A⟩ c) (C a b ha hb)
   (hab : (inflexible_support_map (π.foa_hypothesis hπ)
     ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩).atom_image a C ha =
   (inflexible_support_map (π.foa_hypothesis hπ)
@@ -336,7 +336,7 @@ lemma near_litter_image_inj_on {π : struct_approx β} (hπ : π.free)
   (hL : L = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t)
   (hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _))
   (hcL : (relation.refl_trans_gen (constrains α β)) ⟨inr L.to_near_litter, A⟩ c)
-  (C) (L₁ : litter) (hL₁) (L₂ : litter) (hL₂)
+  (C) (L₁ L₂ : litter) (hL₁) (hL₂)
   (hL : (((inflexible_support_map (π.foa_hypothesis hπ)
     ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩).near_litter_image L₁.to_near_litter C hL₁ : set atom) ∩
   (inflexible_support_map (π.foa_hypothesis hπ)
@@ -605,13 +605,13 @@ begin
     rw [hL₁, hL₂],
     refine congr_arg _ _,
     have left := supported_perm_smul_eq π hπ ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, hL₁, hA₁⟩
-      (π.foa_hypothesis hπ) (support_map_union hπ hδ₁ hε₁ hδε₁ hL₁ hL₂ hA₁) _ _,
+      (π.foa_hypothesis hπ) (support_map_union hπ hδ₁ hε₁ hδε₁ hL₁ hL₂ hA₁) _ _ _,
     have right := supported_perm_smul_eq π hπ ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₂, hL₂, hA₁⟩
-      (π.foa_hypothesis hπ) (support_map_union hπ hδ₁ hε₁ hδε₁ hL₁ hL₂ hA₁) _ _,
+      (π.foa_hypothesis hπ) (support_map_union hπ hδ₁ hε₁ hδε₁ hL₁ hL₂ hA₁) _ _ _,
     have := (left.symm.trans (f_map_injective (coe_ne_coe.mpr $ coe_ne' hδε₁) h)).trans right,
     rw smul_left_cancel_iff at this,
     exact this,
-    -- Four goals to solve from here, which don't seem too hard.
+    -- Six goals to solve from here, which don't seem too hard.
     -- The main difficulty is now inside `supported_perm_smul_eq`.
     -- The above lemmas may no longer be useful.
     all_goals { sorry, } },
