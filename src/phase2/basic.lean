@@ -107,6 +107,30 @@ by rw [allowable.derivative, path.Iic_rec_nil]
   allowable.derivative (A.cons h) = (allowable_derivative γ δ h).comp (allowable.derivative A) :=
 by rw [allowable.derivative, path.Iic_rec_cons]
 
+lemma allowable.derivative_cons_apply {β γ δ : Iic_index α}
+  (A : quiver.path (β : type_index) γ) (h : δ < γ) (π : allowable β) :
+  allowable.derivative (A.cons h) π = allowable_derivative γ δ h (allowable.derivative A π) :=
+by rw [allowable.derivative_cons]; refl
+
+lemma allowable.derivative_eq {β γ : Iic_index α} (h : γ < β) :
+  allowable_derivative β γ h = allowable.derivative (quiver.path.nil.cons h) :=
+by rw [allowable.derivative_cons, allowable.derivative_nil, monoid_hom.comp_id]
+
+lemma allowable.derivative_derivative {β γ δ : Iic_index α}
+  (A : quiver.path (β : type_index) γ) (B : quiver.path (γ : type_index) δ) (π : allowable β) :
+  allowable.derivative B (allowable.derivative A π) = allowable.derivative (A.comp B) π :=
+begin
+  obtain ⟨γ, hγ⟩ := γ,
+  obtain ⟨δ, hδ⟩ := δ,
+  change quiver.path γ δ at B,
+  induction B with ε ζ B h ih,
+  { simp only [quiver.path.comp_nil, allowable.derivative_nil, monoid_hom.id_apply], },
+  { simp only [quiver.path.comp_cons],
+    rw allowable.derivative_cons (show quiver.path ((⟨γ, hγ⟩ : Iic_index α) : type_index)
+        ((⟨ε, le_trans (le_of_path B) hγ⟩ : Iic_index α) : type_index), from B),
+    simp only [monoid_hom.coe_comp, function.comp_app, ih, ← allowable.derivative_cons_apply], },
+end
+
 lemma allowable.derivative_to_struct_perm {β γ : Iic_index α} (A : quiver.path (β : type_index) γ)
   (π : allowable β) :
   struct_perm.derivative A π.to_struct_perm = (allowable.derivative A π).to_struct_perm :=
@@ -120,6 +144,11 @@ begin
       ← allowable_derivative_eq, ← ih π, struct_perm.derivative_derivative,
       quiver.path.comp_cons, quiver.path.comp_nil], },
 end
+
+lemma allowable.derivative_smul {β γ : Iic_index α} (A : quiver.path (β : type_index) γ)
+  (π : allowable β) {X : Type*} [mul_action (struct_perm γ) X] (x : X) :
+  allowable.derivative A π • x = struct_perm.derivative A π.to_struct_perm • x :=
+by rw allowable.derivative_to_struct_perm; refl
 
 lemma to_struct_perm_smul_f_map {β : Iic_index α} (γ : Iio_index α) (δ : Iio α)
   (hγ : (γ : type_index) < β) (hδ : (δ : type_index) < β) (hγδ : γ ≠ δ)

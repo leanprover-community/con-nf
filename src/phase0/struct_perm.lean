@@ -147,6 +147,10 @@ noncomputable def derivative : Π {β}, path α β → struct_perm α →* struc
 /-- The derivative along the empty path does nothing. -/
 @[simp] lemma derivative_nil (π : struct_perm α) : derivative nil π = π := rfl
 
+lemma derivative_cons (π : struct_perm α) (p : path α β) {γ : type_index} (h : γ < β) :
+  derivative (p.cons h) π = (derivative (path.nil.cons h)) (derivative p π) :=
+by simp only [derivative]; refl
+
 /-- The derivative map is functorial. -/
 lemma derivative_derivative (π : struct_perm α) (p : path α β) :
   ∀ {γ : type_index} (q : path β γ), derivative q (derivative p π) = derivative (p.comp q) π

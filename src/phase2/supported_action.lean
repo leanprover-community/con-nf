@@ -23,9 +23,9 @@ instance : has_mem (support_condition δ) (support_map δ) := ⟨λ c M, c ∈ M
 
 @[mk_iff] structure support_map.le (M M' : support_map δ) : Prop :=
 (carrier_subset : M.carrier ⊆ M'.carrier)
-(map_atom : ∀ a B (h : (inl a, B) ∈ M.carrier),
+(map_atom : ∀ ⦃a B⦄ (h : (inl a, B) ∈ M.carrier),
   M.atom_image a B h = M'.atom_image a B (mem_of_mem_of_subset h carrier_subset))
-(map_near_litter : ∀ N B (h : (inr N, B) ∈ M.carrier),
+(map_near_litter : ∀ ⦃N B⦄ (h : (inr N, B) ∈ M.carrier),
   M.near_litter_image N B h = M'.near_litter_image N B (mem_of_mem_of_subset h carrier_subset))
 
 instance : partial_order (support_map δ) := {
@@ -33,16 +33,16 @@ instance : partial_order (support_map δ) := {
   le_refl := λ M, ⟨subset.rfl, λ _ _ _, rfl, λ _ _ _, rfl⟩,
   le_trans := λ M₁ M₂ M₃ h₁ h₂,
     ⟨subset.trans h₁.carrier_subset h₂.carrier_subset,
-    λ a B h, (h₁.map_atom a B h).trans (h₂.map_atom a B (h₁.carrier_subset h)),
-    λ N B h, (h₁.map_near_litter N B h).trans (h₂.map_near_litter N B (h₁.carrier_subset h))⟩,
+    λ a B h, (h₁.map_atom h).trans (h₂.map_atom (h₁.carrier_subset h)),
+    λ N B h, (h₁.map_near_litter h).trans (h₂.map_near_litter (h₁.carrier_subset h))⟩,
   le_antisymm := begin
     rintro ⟨S₁, hS₁, a₁, N₁⟩ ⟨S₂, hS₂, a₂, N₂⟩ h h',
     cases subset.antisymm h.carrier_subset h'.carrier_subset,
     simp only [eq_self_iff_true, heq_iff_eq, true_and],
     split;
     funext,
-    exact h.map_atom _ _ _,
-    exact h.map_near_litter _ _ _,
+    exact h.map_atom _,
+    exact h.map_near_litter _,
   end,
 }
 
@@ -447,10 +447,20 @@ begin
 end
 
 structure support_map.injective (B : extended_index δ) : Prop :=
-(atom_injective : ∀ a ha b hb, M.atom_image a B ha = M.atom_image b B hb → a = b)
-(near_litter_injective : ∀ (L₁ : litter) hL₁ (L₂ : litter) hL₂,
+(atom_injective : ∀ ⦃a b⦄ ha hb, M.atom_image a B ha = M.atom_image b B hb → a = b)
+(near_litter_injective : ∀ ⦃L₁ L₂ : litter⦄ hL₁ hL₂,
   ((M.near_litter_image L₁.to_near_litter B hL₁ : set atom) ∩
     (M.near_litter_image L₂.to_near_litter B hL₂)).nonempty → L₁ = L₂)
+
+lemma support_map.injective.le {B : extended_index δ} {S T : support_map δ}
+  (hS : S.injective B) (hT : T ≤ S) : T.injective B :=
+begin
+  refine ⟨λ a b ha hb h, _, λ L₁ L₂ hL₁ hL₂ h, _⟩,
+  { exact hS.atom_injective (hT.carrier_subset ha) (hT.carrier_subset hb)
+      (((hT.map_atom ha).symm.trans h).trans (hT.map_atom hb)), },
+  { refine hS.near_litter_injective (hT.carrier_subset hL₁) (hT.carrier_subset hL₂) _,
+    rwa [← hT.map_near_litter hL₁, ← hT.map_near_litter hL₂], },
+end
 
 lemma supported_action_inj_on (B : extended_index δ) (hM : M.injective B) :
   inj_on (supported_action_atom_map_core M B) (supported_action_atom_map_core_domain M B) :=
@@ -459,7 +469,7 @@ begin
     b ((hb | hb) | ⟨_, ⟨L', rfl⟩, ⟨_, ⟨hL', rfl⟩, hb⟩⟩) hab,
   { rw [supported_action_eq_of_mem_support_map _ ha,
       supported_action_eq_of_mem_support_map _ hb] at hab,
-    exact hM.atom_injective a ha b hb hab, },
+    exact hM.atom_injective ha hb hab, },
   { rw [supported_action_eq_of_mem_support_map _ ha,
       supported_action_eq_of_mem_preimage_litter_subset _ hb] at hab,
     obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab.symm,
@@ -492,7 +502,7 @@ begin
       (mapped_outside_equiv M L B hL ⟨a, ha⟩).prop, },
   { rw [supported_action_eq_of_mem_mapped_outside_subset _ ha,
       supported_action_eq_of_mem_mapped_outside_subset _ hb] at hab,
-    cases hM.near_litter_injective _ hL _ hL' _,
+    cases hM.near_litter_injective hL hL' _,
     { simp only [subtype.coe_inj, embedding_like.apply_eq_iff_eq] at hab,
       exact hab, },
     obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp hab,
@@ -576,6 +586,18 @@ end
 
 lemma supported_action_smul_litter_eq (π : struct_approx δ) (L : litter) (B : extended_index δ) :
   supported_action M π B • L = (π B).flexible_completion_litter_perm α B L := rfl
+
+lemma supported_action_atom_perm_domain_eq {π : struct_approx δ}
+  {B : extended_index δ} (hM : M.injective B) :
+    (supported_action M π B).atom_perm.domain =
+    local_perm.complete_domain
+      (mk_supported_action_atom_map_domain M B)
+    (le_of_le_of_eq κ_regular.aleph_0_le (mk_litter_set _).symm) :=
+begin
+  dsimp only [supported_action, supported_action_index, supported_action_atom_map],
+  rw dif_pos hM,
+  refl,
+end
 
 end struct_approx
 
