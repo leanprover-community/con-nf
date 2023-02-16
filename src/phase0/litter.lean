@@ -157,7 +157,7 @@ instance : set_like near_litter atom :=
 @[ext] lemma ext (h₁ : N₁.1 = N₂.1) (h₂ : (N₁ : set atom) = N₂) : N₁ = N₂ :=
 by { cases N₁, cases N₂, dsimp at h₁, subst h₁, rw set_like.coe_injective h₂ }
 
-/-- Reinterprety a near-litter as a product of a litter and a set of atoms. -/
+/-- Reinterpret a near-litter as a product of a litter and a set of atoms. -/
 @[simps]
 def to_prod (N : near_litter) : litter × set atom := (N.1, N.2)
 
@@ -235,6 +235,16 @@ lemma near_litter.is_litter.litter_set_eq {N : near_litter} (h : N.is_litter) :
 
 lemma near_litter.is_litter.exists_litter_eq {N : near_litter} (h : N.is_litter) :
   ∃ (L : litter), N = L.to_near_litter := by obtain ⟨L⟩ := h; exact ⟨L, rfl⟩
+
+lemma near_litter.not_is_litter {N : near_litter} (h : ¬N.is_litter) :
+  litter_set N.fst ≠ N.snd :=
+begin
+  contrapose! h,
+  obtain ⟨L, S, hS⟩ := N,
+  simp only [subtype.coe_mk] at h,
+  cases h,
+  exact near_litter.is_litter.mk _,
+end
 
 /--
 A near-litter permutation is a permutation of the base type which sends near-litters to
@@ -395,6 +405,23 @@ near_litter.to_prod_injective.mul_action _ to_prod_smul
 @[simp] lemma smul_local_cardinal (π : near_litter_perm) (i : litter) :
   π • local_cardinal i = local_cardinal (π • i) :=
 by { ext N, simp [mem_smul_set, ←eq_inv_smul_iff] }
+
+@[simp] lemma near_litter.mem_snd_iff (N : near_litter) (a : atom) :
+  a ∈ (N.snd : set atom) ↔ a ∈ N := iff.rfl
+
+@[simp] lemma near_litter.not_mem_snd_iff (N : near_litter) (a : atom) :
+  a ∉ (N.snd : set atom) ↔ a ∉ N := iff.rfl
+
+lemma smul_near_litter_eq_smul_symm_diff_smul (π : near_litter_perm) (N : near_litter) :
+  (π • N : set atom) = (π • N.fst.to_near_litter) ∆ (π • (litter_set N.fst ∆ N.snd)) :=
+begin
+  ext a : 1,
+  simp only [litter.coe_to_near_litter, mem_symm_diff, mem_smul_set_iff_inv_smul_mem,
+    set_like.mem_coe, mem_litter_set, near_litter.mem_snd_iff, near_litter.not_mem_snd_iff],
+  by_cases (π⁻¹ • a).fst = N.fst;
+  simp only [h, eq_self_iff_true, true_and, and_true, not_true, and_false, false_and,
+    or_false, false_or, not_not, not_false_iff],
+end
 
 end near_litter_perm
 end con_nf

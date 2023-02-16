@@ -210,8 +210,7 @@ were not in the domain. -/
 @[mk_iff] structure mapped_outside (L : litter) (B : extended_index δ)
   (h : (inr L.to_near_litter, B) ∈ M) (a : atom) : Prop :=
 (mem_map : a ∈ (M.near_litter_image L.to_near_litter B h : set atom))
-(not_mem_map :
-  a ∉ litter_set (M.near_litter_image L.to_near_litter B h).1)
+(not_mem_map : a ∉ litter_set (M.near_litter_image L.to_near_litter B h).1)
 (not_mem_domain : ∀ b h, a ≠ M.atom_image b B h)
 
 /-- There are only `< κ`-many atoms in a litter `L` that are mapped outside the image litter,
@@ -462,6 +461,21 @@ begin
     rwa [← hT.map_near_litter hL₁, ← hT.map_near_litter hL₂], },
 end
 
+lemma support_map.banned_litter_of_le {S T : support_map δ} {L : litter} {B : extended_index δ}
+  (hL : banned_litter S B L) (h : S ≤ T) : banned_litter T B L :=
+begin
+  rw banned_litter_iff at hL ⊢,
+  obtain (⟨a, ha, hL⟩ | hL | ⟨a, ha, hL⟩ | ⟨N, hN, hL⟩ | ⟨N, hN, a, ha, hL⟩) := hL,
+  { exact or.inl ⟨a, h.carrier_subset ha, hL⟩, },
+  { exact or.inr (or.inl (h.carrier_subset hL)), },
+  { refine or.inr (or.inr (or.inl ⟨a, h.carrier_subset ha, _⟩)),
+    rwa h.map_atom at hL, },
+  { refine or.inr (or.inr (or.inr (or.inl ⟨N, h.carrier_subset hN, _⟩))),
+    rwa h.map_near_litter at hL, },
+  { refine or.inr (or.inr (or.inr (or.inr ⟨N, h.carrier_subset hN, a, _, hL⟩))),
+    rwa h.map_near_litter at ha, },
+end
+
 lemma supported_action_inj_on (B : extended_index δ) (hM : M.injective B) :
   inj_on (supported_action_atom_map_core M B) (supported_action_atom_map_core_domain M B) :=
 begin
@@ -574,6 +588,17 @@ noncomputable def supported_action_index (π : near_litter_approx) (B : extended
 noncomputable def supported_action (π : struct_approx δ) : struct_approx δ :=
 λ B, supported_action_index M (π B) B
 
+lemma supported_action_atom_perm_domain_eq {π : struct_approx δ}
+  {B : extended_index δ} (hM : M.injective B) :
+  (supported_action M π B).atom_perm.domain =
+  local_perm.complete_domain (mk_supported_action_atom_map_domain M B)
+    (le_of_le_of_eq κ_regular.aleph_0_le (mk_litter_set _).symm) :=
+begin
+  dsimp only [supported_action, supported_action_index, supported_action_atom_map],
+  rw dif_pos hM,
+  refl,
+end
+
 lemma supported_action_smul_atom_eq (π : struct_approx δ) (a : atom) (B : extended_index δ)
   (ha : (inl a, B) ∈ M) (hM : M.injective B) :
   supported_action M π B • a = M.atom_image a B ha :=
@@ -584,20 +609,23 @@ begin
   exact or.inl (or.inl ha),
 end
 
+lemma supported_action_symm_smul_atom_eq {π : struct_approx δ} {a b : atom} {B : extended_index δ}
+  (hb : (inl b, B) ∈ M) (hab : M.atom_image b B hb = a) (hM : M.injective B) :
+  (supported_action M π B).symm • a = b :=
+begin
+  rw ← supported_action_smul_atom_eq M π b B hb hM at hab,
+  rw near_litter_approx.symm_smul_atom_eq_iff,
+  exact hab.symm,
+  { rw ← hab,
+    refine (supported_action M π B).atom_perm.map_domain _,
+    rw supported_action_atom_perm_domain_eq M hM,
+    exact (or.inl (or.inl (or.inl (or.inl hb)))), },
+  { rw supported_action_atom_perm_domain_eq M hM,
+    exact (or.inl (or.inl (or.inl (or.inl hb)))), },
+end
+
 lemma supported_action_smul_litter_eq (π : struct_approx δ) (L : litter) (B : extended_index δ) :
   supported_action M π B • L = (π B).flexible_completion_litter_perm α B L := rfl
-
-lemma supported_action_atom_perm_domain_eq {π : struct_approx δ}
-  {B : extended_index δ} (hM : M.injective B) :
-    (supported_action M π B).atom_perm.domain =
-    local_perm.complete_domain
-      (mk_supported_action_atom_map_domain M B)
-    (le_of_le_of_eq κ_regular.aleph_0_le (mk_litter_set _).symm) :=
-begin
-  dsimp only [supported_action, supported_action_index, supported_action_atom_map],
-  rw dif_pos hM,
-  refl,
-end
 
 end struct_approx
 

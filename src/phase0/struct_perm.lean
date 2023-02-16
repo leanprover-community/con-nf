@@ -135,7 +135,7 @@ by { cases α, { refl }, { exact dif_pos rfl } }
 def to_near_litter_perm : struct_perm α →* near_litter_perm :=
 to_bot_iso.symm.to_monoid_hom.comp $ lower bot_le
 
-@[simp] lemma coe_to_near_litter_perm :
+lemma coe_to_near_litter_perm :
   (to_near_litter_perm : struct_perm ⊥ → near_litter_perm) = of_bot :=
 by simp [to_near_litter_perm]
 

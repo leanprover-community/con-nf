@@ -54,6 +54,7 @@ in the "freedom of action discussion".
 3. `⟨a, A⟩ ≺ ⟨N, A⟩` for all `a ∈ N ∆ N°`.
 4. `⟨x, A ≫ (γ ⟶ δ) ≫ B⟩ ≺ ⟨f_{γ,δ}(t), A ≫ (γ ⟶ ε) ≫ (ε ⟶ ⊥)⟩` for all paths `A : β ⟶ γ` and
     `δ, ε < γ` with `δ ≠ ε`, `t ∈ τ_γ`, where `⟨x, B⟩` lies in the designated `δ`-support of `t`.
+TODO: Refactor `near_litter` to use `¬N.is_litter`.
 -/
 @[mk_iff] inductive constrains : support_condition β → support_condition β → Prop
 | atom (a : atom) (A : extended_index β) :
