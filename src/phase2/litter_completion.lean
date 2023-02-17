@@ -528,13 +528,11 @@ begin
       rw [struct_perm.of_bot_smul, supported_action_smul_atom_eq, ← hbc,
         smul_left_cancel_iff] at this,
       cases this,
-      rw supported_action_atom_perm_domain_eq at hb',
+      rw supported_action_atom_perm_domain_eq _ hS' at hb',
       exact hb' (or.inl (or.inl (or.inl (or.inl hc)))),
       { exact hS', },
-      { exact hS', },
-      { rw supported_action_atom_perm_domain_eq,
-        exact or.inl (or.inl (or.inl (or.inl hc))),
-        exact hS', }, },
+      { rw supported_action_atom_perm_domain_eq _ hS',
+        exact or.inl (or.inl (or.inl (or.inl hc))), }, },
     have hpreimage' := this himage,
     clear this,
     obtain ⟨L', hL', hbL'⟩ := hpreimage',
@@ -546,21 +544,20 @@ begin
         (near_litter.inter_nonempty_of_fst_eq_fst
           (eq_of_mem_litter_set_of_mem_litter_set hlitter h)))) himage,
     have : (struct_perm.derivative C
-          (π.supported_perm_of_support_map hπ hδ B S hS).to_struct_perm •
-          ((mapped_outside_equiv S L' C hL').symm ⟨_, houtside⟩ : atom)) =
-        (struct_perm.derivative C
-          (π.supported_perm_of_support_map hπ hδ B S hS).to_struct_perm • b),
+        (π.supported_perm_of_support_map hπ hδ B S hS).to_struct_perm •
+        ((mapped_outside_equiv S L' C hL').symm ⟨_, houtside⟩ : atom)) =
+      struct_perm.derivative C
+        (π.supported_perm_of_support_map hπ hδ B S hS).to_struct_perm • b,
     { have := (supported_perm_of_support_map_exactly_approximates π hπ hδ B S hS C).map_atom _ _,
       rw struct_perm.of_bot_smul at this,
       rw ← this,
       rw supported_action_smul_mapped_outside_equiv,
       refl,
       { exact hS', },
-      { rw supported_action_atom_perm_domain_eq,
+      { rw supported_action_atom_perm_domain_eq _ hS',
         refine or.inl (or.inl (or.inr _)),
         simp only [mem_Union],
-        exact ⟨L', hL', ((mapped_outside_equiv S L' C hL').symm ⟨_, houtside⟩).prop⟩,
-        exact hS', }, },
+        exact ⟨L', hL', ((mapped_outside_equiv S L' C hL').symm ⟨_, houtside⟩).prop⟩, }, },
     rw smul_left_cancel_iff at this,
     rw ← this at hb,
     have := mapped_outside_subset_subset L' C hL'
@@ -570,7 +567,58 @@ begin
     have h₂ := banned_litter.support_litter L hL,
     rw this at h₂,
     contradiction, },
-  { sorry, },
+  { intro ha,
+    by_cases himage : ∃ (b : atom) (hb : (inl b, C) ∈ S.carrier),
+      struct_perm.derivative C (π.supported_perm_of_support_map hπ hδ B S hS).to_struct_perm • a =
+      S.atom_image b C hb,
+    { obtain ⟨b, hb, hab⟩ := himage,
+      have : a = b,
+      { have := (supported_perm_of_support_map_exactly_approximates π hπ hδ B S hS C).map_atom b _,
+        have := hab.trans ((supported_action_smul_atom_eq _ _ _ _ _ _).symm.trans this),
+        simp only [struct_perm.of_bot_smul, smul_left_cancel_iff] at this,
+        exact this,
+        exact hS',
+        rw supported_action_atom_perm_domain_eq _ hS',
+        exact or.inl (or.inl (or.inl (or.inl hb))), },
+      cases this,
+      refine ⟨(struct_perm.derivative C
+        (π.supported_perm_of_support_map hπ hδ B S hS).to_struct_perm)⁻¹ • a, _, _⟩,
+      { -- Need an assumption on S.
+        sorry, },
+      { rw smul_inv_smul, }, },
+    simp only [not_exists] at himage,
+    by_cases himage' : ∃ (b : atom) (hb : (inl b, C) ∈ S.carrier),
+      a = S.atom_image b C hb,
+    { obtain ⟨b, hb, hab⟩ := himage',
+      refine ⟨b, _, _⟩,
+      { -- Need an assumption on S.
+        sorry, },
+      { have := (supported_perm_of_support_map_exactly_approximates π hπ hδ B S hS C).map_atom b _,
+        have := hab.trans ((supported_action_smul_atom_eq _ _ _ _ _ _).symm.trans this),
+        rw struct_perm.of_bot_smul at this,
+        exact this.symm,
+        exact hS',
+        rw supported_action_atom_perm_domain_eq _ hS',
+        exact or.inl (or.inl (or.inl (or.inl hb))), }, },
+    by_cases houtside : mapped_outside S L C hL a,
+    { refine ⟨(mapped_outside_equiv S L C hL).symm ⟨_, houtside⟩,
+        mapped_outside_subset_subset L C hL
+          ((mapped_outside_equiv S L C hL).symm ⟨_, houtside⟩).prop, _⟩,
+      have := (supported_perm_of_support_map_exactly_approximates π hπ hδ B S hS C).map_atom _ _,
+      rw struct_perm.of_bot_smul at this,
+      rw [← this, supported_action_smul_mapped_outside_equiv],
+      refl,
+      exact hS',
+      rw supported_action_atom_perm_domain_eq _ hS',
+      refine or.inl (or.inl (or.inr _)),
+      simp only [mem_Union],
+      exact ⟨_, _, ((mapped_outside_equiv S L C hL).symm ⟨_, houtside⟩).prop⟩, },
+    { simp only [mapped_outside_iff, set_like.mem_coe, mem_litter_set, ne.def, not_and,
+        not_forall, not_not] at houtside,
+      have haL := not_not.mp (mt (houtside ha) (by simpa only using himage')),
+      refine ⟨_, _, smul_inv_smul _ _⟩,
+      -- Use `ha` and an assumption on S.
+      sorry, }, },
 end
 
 lemma supported_perm_smul_near_litter_eq (π : struct_approx β) (hπ : π.free)
