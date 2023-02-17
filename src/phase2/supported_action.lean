@@ -605,7 +605,7 @@ lemma supported_action_smul_atom_eq (π : struct_approx δ) (a : atom) (B : exte
 begin
   dsimp only [supported_action, supported_action_index, supported_action_atom_map,
     ← near_litter_approx.smul_atom_eq],
-  rw [dif_pos hM, local_perm.complete_apply_eq, supported_action_atom_map_core, dif_pos ha],
+  rw [dif_pos hM, local_perm.complete_apply_eq, supported_action_eq_of_mem_support_map],
   exact or.inl (or.inl ha),
 end
 
@@ -622,6 +622,33 @@ begin
     exact (or.inl (or.inl (or.inl (or.inl hb)))), },
   { rw supported_action_atom_perm_domain_eq M hM,
     exact (or.inl (or.inl (or.inl (or.inl hb)))), },
+end
+
+lemma supported_action_smul_preimage_litter_equiv (π : struct_approx δ)
+  (B : extended_index δ) (a : {a : atom // without_preimage M a B}) (hM : M.injective B) :
+  supported_action M π B • ((preimage_litter_equiv M B).symm a : atom) = a :=
+begin
+  dsimp only [supported_action, supported_action_index, supported_action_atom_map,
+    ← near_litter_approx.smul_atom_eq],
+  rw [dif_pos hM, local_perm.complete_apply_eq, supported_action_eq_of_mem_preimage_litter_subset],
+  { simp only [subtype.coe_eta, equiv.apply_symm_apply], },
+  { exact ((preimage_litter_equiv M B).symm a).prop, },
+  { exact or.inl (or.inr ((preimage_litter_equiv M B).symm a).prop), },
+end
+
+lemma supported_action_smul_mapped_outside_equiv (π : struct_approx δ)
+  (B : extended_index δ) {L : litter} {hL} (a : {a : atom // mapped_outside M L B hL a})
+  (hM : M.injective B) :
+  supported_action M π B • ((mapped_outside_equiv M L B hL).symm a : atom) = a :=
+begin
+  dsimp only [supported_action, supported_action_index, supported_action_atom_map,
+    ← near_litter_approx.smul_atom_eq],
+  rw [dif_pos hM, local_perm.complete_apply_eq, supported_action_eq_of_mem_mapped_outside_subset],
+  { simp only [subtype.coe_inj, subtype.coe_eta, equiv.apply_symm_apply], },
+  { exact ((mapped_outside_equiv M L B hL).symm a).prop, },
+  { refine or.inr _,
+    simp only [mem_Union],
+    exact ⟨L, hL, ((mapped_outside_equiv M L B hL).symm a).prop⟩, },
 end
 
 lemma supported_action_smul_litter_eq (π : struct_approx δ) (L : litter) (B : extended_index δ) :

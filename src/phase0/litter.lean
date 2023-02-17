@@ -246,6 +246,18 @@ begin
   exact near_litter.is_litter.mk _,
 end
 
+lemma near_litter.inter_nonempty_of_fst_eq_fst {N₁ N₂ : near_litter} (h : N₁.fst = N₂.fst) :
+  (N₁ ∩ N₂ : set atom).nonempty :=
+begin
+  by_contradiction h',
+  rw set.not_nonempty_iff_eq_empty at h',
+  have := N₁.2.prop,
+  simp_rw h at this,
+  have := small.mono (subset_union_left _ _) (N₂.2.prop.symm.trans this),
+  -- Easy to solve with a couple of lemmas such as `#N = #κ`.
+  sorry,
+end
+
 /--
 A near-litter permutation is a permutation of the base type which sends near-litters to
 near-litters. It turns out that the images of near-litters near the same litter are themselves near
