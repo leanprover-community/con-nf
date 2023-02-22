@@ -235,103 +235,6 @@ relation.trans_gen.tail'
   (refl_trans_gen_constrains_comp hd₂ _)
   (constrains.f_map h.hδ h.hε h.hδε h.B h.t d hd₁)
 
-/-
--- I think this is true now with the removal of `reduction`.
-lemma supported_perm_banned (π : struct_approx β) (hπ : π.free)
-  {L : litter} {A : extended_index β} (h : inflexible_coe L A)
-  (H : hypothesis ⟨inr L.to_near_litter, A⟩) (B : extended_index h.δ) (L' : litter)
-  (d : support_condition h.δ) (hd₁ : d ∈ designated_support h.t)
-  (hd₂ : relation.refl_trans_gen (constrains α h.δ) (inr L'.to_near_litter, B) d) :
-  banned_litter (inflexible_support_map H h) B L' :=
-sorry
-
--- False at the minute. Need more assumptions.
-lemma support_map_mem_of_mem_supported_action (π : struct_approx β) (hπ : π.free)
-  {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ) (S : support_map δ)
-  (hS : (show struct_approx (δ : Iic α), from supported_action S
-    (λ (C : extended_index δ), π ((B.cons $ coe_lt hδ).comp C))).free)
-  (C : extended_index δ)
-  (a : atom) (ha₁ : banned_litter S C a.fst)
-  (ha₂ : a ∈ (supported_action S
-    (λ (C : extended_index ↑δ), π ((B.cons $ coe_lt hδ).comp C)) C).atom_perm.domain) :
-  (inl a, C) ∈ S :=
-begin
-  obtain ((((h | h) | h) | h) | h) := supported_action_atom_map_domain _ _ ha₂,
-  { exact h, },
-  { have := preimage_litter_subset_subset _ h,
-    simp only [mem_litter_set] at this,
-    rw this at ha₁,
-    cases preimage_litter_not_banned _ _ ha₁, },
-  { simp only [mem_Union] at h,
-    obtain ⟨L, hL, ha⟩ := h,
-    cases mapped_outside_subset_subset _ _ hL ha,
-    -- This is false.
-    sorry, },
-  sorry,
-  sorry,
-end
-
-lemma supported_perm_of_support_map_smul_to_near_litter (π : struct_approx β) (hπ : π.free)
-  {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ) (S : support_map δ)
-  (hS : (show struct_approx (δ : Iic α), from supported_action S
-    (λ (C : extended_index δ), π ((B.cons $ coe_lt hδ).comp C))).free)
-  (C : extended_index δ) (L : litter) (hL : (inr L.to_near_litter, C) ∈ S) :
-  ((struct_perm.derivative C (π.supported_perm_of_support_map hπ hδ B S hS).to_struct_perm •
-    L.to_near_litter : near_litter) : set atom) =
-  (litter_set $ struct_perm.derivative C
-    (π.supported_perm_of_support_map hπ hδ B S hS).to_struct_perm • L) \
-  ({a | (inl a, C) ∈ S} ∪ {a | mapped_outside S L C hL a}) ∪
-  {b | ∃ a ha, a ∈ litter_set L ∧ b = S.atom_image a C ha} :=
-begin
-  ext a : 1,
-  simp only [mem_union, mem_diff, mem_litter_set, set_like.mem_coe, mem_set_of_eq],
-  by_cases hb : ∃ (b : atom) hb, b.fst = L ∧ a = S.atom_image b C hb,
-  { simp only [hb, or_true, iff_true],
-    obtain ⟨b, hb₁, hb₂, rfl⟩ := hb,
-    -- Need an assumption on `S`, that atoms in near-litters are mapped inside the images.
-    sorry },
-  simp only [hb, or_false],
-  simp only [exists_and_distrib_left, not_exists, not_and] at hb,
-  by_cases hbC : (inl a, C) ∈ S,
-  { simp only [hbC, not_true, and_false, iff_false, true_or],
-    rintro ⟨b, hb₁, hb₂⟩,
-    have : without_preimage S a C,
-    { constructor,
-      refine ⟨L, hL, _⟩,
-       },
-    -- Appeal to the preimage litter subset.
-    sorry },
-  simp only [hbC, false_or],
-  by_cases hbL : mapped_outside S L C hL a,
-  { simp only [hbL, not_true, and_false, iff_false],
-    rintro ⟨b, hb₁, hb₂⟩,
-    -- Appeal to the mapped outside subset.
-    sorry },
-  simp only [hbL, not_false_iff, and_true],
-  split,
-  { rintro ⟨b, hb₁, hb₂⟩,
-    simp only [litter.coe_to_near_litter, mem_litter_set] at hb₁,
-    have := (supported_perm_of_support_map_exactly_approximates
-      π hπ hδ B S hS C).mem_litter_set_inv a _,
-    simp only [hb₁, ← hb₂, struct_perm.to_near_litter_perm_smul, struct_perm.of_bot_inv_smul,
-      inv_smul_smul, mem_litter_set] at this,
-    simp only [this, ← hb₂, smul_inv_smul],
-    refl,
-    -- contrapose! hb',
-    -- refine support_map_mem_of_mem_supported_action π hπ h.hδ h.B S hS₁ C a _ hb',
-    sorry, },
-  { intro ha,
-    have := (supported_perm_of_support_map_exactly_approximates
-      π hπ hδ B S hS C).mem_litter_set_inv a _,
-    simp only [ha, mem_litter_set, struct_perm.of_bot_inv_smul, inv_smul_smul] at this,
-    refine ⟨_, this, _⟩,
-    simp only [struct_perm.to_near_litter_perm_smul, smul_inv_smul],
-    -- contrapose! hb',
-    -- refine support_map_mem_of_mem_supported_action π hπ h.hδ h.B S hS₁ C a _ hb',
-    sorry, },
-end
--/
-
 lemma supported_perm_smul_atom_eq (π : struct_approx β) (hπ : π.free)
   {L : litter} {A : extended_index β} (h : inflexible_coe L A)
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (S : support_map h.δ)
@@ -479,16 +382,6 @@ begin
     struct_perm.to_near_litter_perm_smul],
   split,
   { rintro ⟨b, hb, rfl⟩,
-    by_cases hb' :
-      b ∈ (supported_action S (λ C, π ((B.cons $ coe_lt hδ).comp C)) C).atom_perm.domain,
-    { have := (supported_perm_of_support_map_exactly_approximates π hπ hδ B S hS C).map_atom b hb',
-      rw struct_perm.of_bot_smul at this,
-      rw ← this,
-      -- Need an assumption on `S`.
-      sorry },
-    have hlitter := (supported_perm_of_support_map_exactly_approximates
-      π hπ hδ B S hS C).mem_litter_set b hb',
-    rw [hb, struct_perm.of_bot_smul, struct_perm.of_bot_smul, hL'] at hlitter,
     by_cases hpreimage : without_preimage S (struct_perm.derivative C
       (π.supported_perm_of_support_map hπ hδ B S hS).to_struct_perm • b) C,
     { by_contradiction,
@@ -517,9 +410,26 @@ begin
       contradiction, },
     rw without_preimage_iff at hpreimage,
     simp only [mem_litter_set, ne.def, not_and, not_forall, not_not, bex_imp_distrib] at hpreimage,
-    have := mt (hpreimage L hL hlitter),
-    clear hpreimage,
-    simp only [not_exists, not_forall, not_not] at this,
+    by_cases hb' : b ∈ supported_action_atom_map_core_domain S C,
+    { have := (supported_perm_of_support_map_exactly_approximates π hπ hδ B S hS C).map_atom b _,
+      rw struct_perm.of_bot_smul at this,
+      rw ← this,
+      clear this,
+      obtain ((hb' | hb') | hb') := hb',
+      { rw supported_action_smul_atom_eq _ _ _ _ hb' hS',
+        -- Need an assumption on `S`.
+        sorry },
+      { cases eq_of_mem_litter_set_of_mem_litter_set hb (preimage_litter_subset_subset C hb'),
+        cases preimage_litter_not_banned S C (banned_litter.support_litter _ hL), },
+      { simp only [mem_Union] at hb',
+        obtain ⟨L', hL', hbL'⟩ := hb',
+        cases eq_of_mem_litter_set_of_mem_litter_set hb
+          (mapped_outside_subset_subset L' C hL' hbL'),
+        rw supported_action_smul_of_mem_mapped_outside_subset _ _ _ hbL' hS',
+        exact (mapped_outside_equiv S L C hL' ⟨b, hbL'⟩).prop.mem_map, },
+      { rw supported_action_atom_perm_domain_eq,
+        exact or.inl (or.inl hb'),
+        exact hS', }, },
     have himage : ∀ (c : atom) (hc : (inl c, C) ∈ S.carrier),
       struct_perm.derivative C (π.supported_perm_of_support_map hπ hδ B S hS).to_struct_perm • b ≠
       S.atom_image c C hc,
@@ -528,14 +438,31 @@ begin
       rw [struct_perm.of_bot_smul, supported_action_smul_atom_eq, ← hbc,
         smul_left_cancel_iff] at this,
       cases this,
-      rw supported_action_atom_perm_domain_eq _ hS' at hb',
-      exact hb' (or.inl (or.inl (or.inl (or.inl hc)))),
+      exact hb' (or.inl (or.inl hc)),
       { exact hS', },
       { rw supported_action_atom_perm_domain_eq _ hS',
         exact or.inl (or.inl (or.inl (or.inl hc))), }, },
-    have hpreimage' := this himage,
-    clear this,
-    obtain ⟨L', hL', hbL'⟩ := hpreimage',
+    by_cases hb'' : b ∈
+      (supported_action S (λ C, π ((B.cons $ coe_lt hδ).comp C)) C).atom_perm.domain,
+    { rw supported_action_atom_perm_domain_eq at hb'',
+      obtain ((hb'' | hb'') | hb'') := hb'',
+      { cases hb' hb'', },
+      { rw mem_image at hb'',
+        obtain ⟨c, hc, hbc⟩ := hb'',
+        sorry,
+        -- obtain ⟨c, (hc | hc) | hc, hbc⟩ := hb'',
+        -- {  },
+         },
+      { cases eq_of_mem_litter_set_of_mem_litter_set hb (local_perm.sandbox_subset_subset _ _ hb''),
+        cases sandbox_litter_not_banned S C (banned_litter.support_litter _ hL), },
+      { exact hS', }, },
+    have hlitter := (supported_perm_of_support_map_exactly_approximates
+      π hπ hδ B S hS C).mem_litter_set b hb'',
+    rw [hb, struct_perm.of_bot_smul, struct_perm.of_bot_smul, hL'] at hlitter,
+    have := mt (hpreimage L hL hlitter),
+    clear hpreimage,
+    simp only [not_exists, not_forall, not_not] at this,
+    obtain ⟨L', hL', hbL'⟩ := this himage,
     by_cases hLL' : L = L',
     { cases hLL',
       exact hbL', },

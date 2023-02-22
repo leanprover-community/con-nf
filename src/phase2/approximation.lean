@@ -10,6 +10,10 @@ universe u
 namespace con_nf
 variable [params.{u}]
 
+/-!
+# Near-litter approximations
+-/
+
 @[ext] structure near_litter_approx :=
 (atom_perm : local_perm atom)
 (litter_perm : local_perm litter)
@@ -213,7 +217,7 @@ instance : has_smul near_litter_approx near_litter := ⟨generate_near_litter⟩
 
 end generate
 
-def is_exception (π : near_litter_perm) (a : atom) : Prop :=
+def _root_.con_nf.near_litter_perm.is_exception (π : near_litter_perm) (a : atom) : Prop :=
 π • a ∉ litter_set (π • a.1) ∨ π⁻¹ • a ∉ litter_set (π⁻¹ • a.1)
 
 @[mk_iff] structure approximates (π₀ : near_litter_approx) (π : near_litter_perm) : Prop :=
@@ -240,11 +244,11 @@ end
 
 @[mk_iff] structure exactly_approximates (π₀ : near_litter_approx) (π : near_litter_perm)
   extends approximates π₀ π : Prop :=
-(exception_mem : ∀ a, is_exception π a → a ∈ π₀.atom_perm.domain)
+(exception_mem : ∀ a, π.is_exception a → a ∈ π₀.atom_perm.domain)
 
 lemma exactly_approximates.of_is_exception {π₀ : near_litter_approx} {π : near_litter_perm}
   (hπ : π₀.exactly_approximates π) (a : atom) (ha : a.1 ∈ π₀.litter_perm.domain) :
-  is_exception π a → π₀ • a ∉ litter_set (π₀ • a.1) ∨ π₀.symm • a ∉ litter_set (π₀.symm • a.1) :=
+  π.is_exception a → π₀ • a ∉ litter_set (π₀ • a.1) ∨ π₀.symm • a ∉ litter_set (π₀.symm • a.1) :=
 begin
   intro h,
   rw [hπ.map_litter a.fst ha, hπ.symm_map_litter a.fst ha,
@@ -277,6 +281,10 @@ def free (α : Λ) [position_data.{}] [phase_2_assumptions α] {β : type_index}
 ∀ L ∈ π.litter_perm.domain, flexible α L A
 
 end near_litter_approx
+
+/-!
+# Structural approximations
+-/
 
 /-- A `β`-structural approximation is a product that assigns a near-litter approximation to each
 `β`-extended index. -/
@@ -374,6 +382,10 @@ begin
 end
 
 def free {β : Iic α} (π₀ : struct_approx β) : Prop := ∀ A, (π₀ A).free α A
+
+/-!
+# Induction on support conditions
+-/
 
 /-- The inductive hypothesis used to construct the induced action of an approximation in the
 freedom of action theorem. -/

@@ -651,6 +651,17 @@ begin
     exact ⟨L, hL, ((mapped_outside_equiv M L B hL).symm a).prop⟩, },
 end
 
+lemma supported_action_smul_of_mem_mapped_outside_subset (π : struct_approx δ)
+  (B : extended_index δ) {L : litter} {hL} {a : atom} (ha : a ∈ mapped_outside_subset M L B hL)
+  (hM : M.injective B) :
+  supported_action M π B • a = mapped_outside_equiv M L B hL ⟨a, ha⟩ :=
+begin
+  have := supported_action_smul_mapped_outside_equiv M π B
+    (mapped_outside_equiv M L B hL ⟨a, ha⟩) hM,
+  simp only [equiv.symm_apply_apply, subtype.coe_mk] at this,
+  exact this,
+end
+
 lemma supported_action_smul_litter_eq (π : struct_approx δ) (L : litter) (B : extended_index δ) :
   supported_action M π B • L = (π B).flexible_completion_litter_perm α B L := rfl
 
