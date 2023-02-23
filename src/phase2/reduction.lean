@@ -16,36 +16,23 @@ variables (β : Λ) (G : Type*) {τ : Type*} [has_smul G (support_condition β)]
 
 variables {β G} {x : τ}
 
-/-- A support condition is *reduced* if it is an atom or a flexible litter. -/
+/-- A support condition is *reduced* if it is an atom or a litter. -/
 @[mk_iff] inductive reduced {β : type_index} : support_condition β → Prop
 | mk_atom (a : atom) (B : extended_index β) : reduced (inl a, B)
-| mk_litter (L : litter) (B : extended_index β) :
-    flexible α L B → reduced (inr L.to_near_litter, B)
-
-lemma not_reduced_iff {β : type_index} {N : near_litter} {B : extended_index β} :
-  ¬reduced α (inr N, B) ↔ (N.is_litter → inflexible α N.fst B) :=
-begin
-  rw [imp_iff_not_or, ← not_flexible_iff, ← not_and_distrib, not_iff_not],
-  split,
-  { rintro (_ | ⟨L, hL₁, hL₂⟩),
-    exact ⟨near_litter.is_litter.mk L, hL₂⟩, },
-  { intro h,
-    rw h.1.eq_fst_to_near_litter,
-    exact reduced.mk_litter N.1 B h.2, },
-end
+| mk_litter (L : litter) (B : extended_index β) : reduced (inr L.to_near_litter, B)
 
 /-- The *reduction* of a set of support conditions is the downward closure of the set under
 the constrains relation, but we only keep reduced conditions. -/
 def reduction (S : set (support_condition β)) : set (support_condition β) :=
-{c | ∃ d ∈ S, relation.refl_trans_gen (constrains α β) c d} ∩ {c | reduced α c}
+{c | ∃ d ∈ S, relation.refl_trans_gen (constrains α β) c d} ∩ set_of reduced
 
 lemma reduction_singleton (c : support_condition β) :
-  reduction α {c} = ({c} ∪ {d | relation.trans_gen (constrains α β) d c}) ∩ {d | reduced α d} :=
+  reduction α {c} = ({c} ∪ {d | relation.trans_gen (constrains α β) d c}) ∩ set_of reduced :=
 by simp only [reduction, mem_singleton_iff, exists_prop, exists_eq_left,
   relation.refl_trans_gen_iff_eq_or_trans_gen, set_of_or, set_of_eq_eq_singleton']
 
-lemma reduction_singleton_of_not_reduced (c : support_condition β) (hc : ¬reduced α c) :
-  reduction α {c} = {d | relation.trans_gen (constrains α β) d c} ∩ {d | reduced α d} :=
+lemma reduction_singleton_of_not_reduced (c : support_condition β) (hc : ¬reduced c) :
+  reduction α {c} = {d | relation.trans_gen (constrains α β) d c} ∩ {d | reduced d} :=
 begin
   simp only [reduction_singleton, inter_distrib_right, union_eq_right_iff_subset,
     subset_inter_iff, inter_subset_right, and_true],

@@ -155,4 +155,28 @@ begin
   exact relation.trans_gen.tail ih (constrains_comp hef B),
 end
 
+lemma refl_trans_gen_near_litter {β : Λ} {N : near_litter} {B : extended_index β}
+  {c : support_condition β}
+  (h : relation.refl_trans_gen (constrains α β) (inr N, B) c) :
+  relation.refl_trans_gen (constrains α β) (inr N.1.to_near_litter, B) c :=
+begin
+  by_cases h' : N.is_litter,
+  { obtain ⟨L, rfl⟩ := h'.exists_litter_eq,
+    exact h, },
+  { exact relation.refl_trans_gen.head
+      (constrains.near_litter N (near_litter.not_is_litter h') B) h, },
+end
+
+lemma trans_gen_near_litter {β : Λ} {N : near_litter} {B : extended_index β}
+  {c : support_condition β}
+  (h : relation.trans_gen (constrains α β) c (inr N.1.to_near_litter, B)) :
+  relation.trans_gen (constrains α β) c (inr N, B) :=
+begin
+  by_cases h' : N.is_litter,
+  { obtain ⟨L, rfl⟩ := h'.exists_litter_eq,
+    exact h, },
+  { exact relation.trans_gen.tail h
+      (constrains.near_litter N (near_litter.not_is_litter h') B), },
+end
+
 end con_nf
