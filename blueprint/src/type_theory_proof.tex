@@ -909,4 +909,167 @@ We now aim to show that this complete action defines a \( \beta \)-allowable app
     Freedom of action holds at all levels \( \beta \leq \alpha \).
 \end{theorem}
 
+\section{Weak approximation discussion}
+
+\subsection{Definitions}
+
+\begin{definition}
+    A \emph{weak near-litter approximation} \( w \) is
+    \begin{itemize}
+        \item a partial function \( w_a \) from atoms to atoms with small domain,
+        \item a partial function \( w_\ell \) from litters to near-litters with small domain, such that
+        \item \( w_a \) is injective and no two images under \( w_\ell \) of distinct litters intersect, and
+        \item \( w_a(a) \in w_\ell(L) \iff a \in L \) wherever \( w_a(a) \) and \( w_\ell(L) \) are both defined.
+    \end{itemize}
+    A \emph{weak \( \beta \)-structural approximation} is a function assigning a weak near-litter approximation to each \( \beta \)-extended index.
+\end{definition}
+A weak near-litter approximation can be thought of as a near-litter approximation that may not have complete orbits in its domain.
+Note that we keep track of \emph{precise} images of litters, and therefore need the condition that \( w_a(a) \in w_\ell(L) \iff a \in L \).
+Non-weak near-litter approximations handle this by only defining a rough image of each litter.
+\begin{definition}
+    Let \( w \) be a weak near-litter permutation.
+    A litter \( L \) is \emph{banned} if any of the following hold.
+    \begin{itemize}
+        \item \( a \in \dom w_a \), and \( a \in L \);
+        \item \( L \in \dom w_\ell \);
+        \item \( w_a(a) \in L \) where \( a \in \dom w_a \);
+        \item \( w_\ell(L')^\circ = L \) where \( L' \in \dom w_\ell \);
+        \item \( a \in w_\ell(L') \setminus w_\ell(L')^\circ \), \( a \in L \), and \( L' \in \dom w_\ell \).
+    \end{itemize}
+\end{definition}
+Intuitively, a litter is banned if it interferes with \( w \).
+\begin{lemma}
+    There are only a small number of banned litters.
+\end{lemma}
+For each weak near-litter approximation, we define a \emph{sandbox litter} which is an arbitrarily chosen litter that is not banned.
+Already, we can define the completion of a weak near-litter approximation into a near-litter approximation.
+\begin{definition}
+    Let \( w \) be a weak near-litter approximation, and let \( p \) be a local permutation of litters.
+    Its \emph{completion} relative to \( p \) is the near-litter approximation \( c(w) \) with litter map \( p \) and atom map given by completing orbits of \( w_a \).
+\end{definition}
+Note that \( w_\ell \) plays no part in this definition.
+This is because near-litter approximations only need rough images of litters to be defined, and we know all of these \emph{a priori} without having to complete orbits of \( w_\ell \) somehow.
+Of course, later results will require some level of coherence between \( w_\ell \) and \( p \).
+
+\subsection{Weak near-litter approximations}
+
+This subsection is devoted to proving results about \( c(w) \), and in particular how it relates to an arbitrary near-litter permutation \( \pi \) that \( c(w) \) exactly approximates.
+We show that under sufficiently strong hypotheses, we have a large amount of control over the precise images of litters under the action of \( \pi \).
+Note that trivially \( \pi(a) = w_a(a) \) wherever the latter is defined, as \( c(w) \) approximates it, and \( \dom w_a \subseteq \dom c(w)_a \).
+\begin{definition}
+    We say that \( w \) is \emph{precise} at a litter \( L \) in its domain if
+    \begin{enumerate}
+        \item \( w_\ell(L) \,\triangle\, w_\ell(L)^\circ \subseteq \rge w_a \);
+        \item for all \( a \in \dom w_a \) with \( w_a(a) \in L \), we have \( w_a(a) \in \dom w_a \);
+        \item \( \dom w_a \cap w_\ell(L) \subseteq \rge w_a \).
+    \end{enumerate}
+\end{definition}
+The last two conditions can be abbreviated \( \dom w_a \cap w_\ell(L) = \rge w_a \cap w_\ell(L) \), although this statement is messier to work with in Lean.
+
+This is a sufficient condition to exactly determine the precise image of \( L \) under \( \pi \).
+These conditions are motivated as follows.
+\begin{enumerate}
+    \item Suppose an atom in \( w_\ell(L) \setminus w_\ell(L)^\circ \) were not mapped to by anything in \( \dom w_a \).
+    \( \pi \) could then map something from an arbitrary litter to this point, giving the wrong image.
+    Now suppose an atom in \( w_\ell(L)^\circ \setminus w_\ell(L) \) were not mapped to by anything in \( \dom w_a \)...
+    \item Suppose this condition were not true, so there was an atom \( a \) mapped inside \( L \), but the image of \( a \) under \( \pi \) is unspecified.
+    \( \pi \) will then map \( a \) to an arbitrary litter, but since it is inside \( L \), the image is supposed to be inside \( w_\ell(L) \).
+    \item If no inverse image for an atom \( a \in w_\ell(L) \) is specified, it could be assigned outside \( L \).
+\end{enumerate}
+\begin{lemma}
+    Let \( w \) be precise at \( L \in \dom w_\ell \).
+    Then, if \( \pi(L)^\circ = w_\ell(L)^\circ \), we have \( \pi(L) = w_\ell(L) \).
+\end{lemma}
+This result strengthens knowledge about rough images litters under of \( \pi \) into knowledge about precise images of \( \pi \).
+
+All of the work with the `mapped outside' and `without preimage' atoms goes directly into satisfying this condition.
+We aim to show that any weak near-litter permutation can be strengthened by adding atoms into its domain in such a way that it becomes precise.
+
+\subsection{Weak structural approximations}
+
+Define that a weak near-litter approximation is \emph{precise} if it is precise at all litters in its domain.
+Further define that a weak structural approximation if each weak near-litter approximation is precise.
+Let \( \pi \) be a \( \beta \)-structural permutation, and let \( c(w) \) exactly approximate \( \pi \).
+The previous results can then be stated as:
+\begin{itemize}
+    \item \( \pi_B(a) = w_B(a) \);
+    \item if \( w \) is precise, \( \pi_B(L)^\circ = w_B(L)^\circ \) implies \( \pi_B(L) = w_B(L) \).
+\end{itemize}
+Let \( w, v \) be weak \( \beta \)-structural approximations, let \( c(w) \) exactly approximate an allowable permutation \( \pi \), and let \( c(v) \) exactly approximate an allowable permutation \( \rho \).
+We aim to establish a sufficient condition for when \( \pi(t) = \rho(t) \) for some given \( t \in \tau_\beta \).
+Certainly, we will need that \( w \) and \( v \) are both defined on a support of \( t \).
+Since we want precise images of litters, we must first take the downward closure of the support under the `constrains' relation \( \prec \).
+\begin{definition}
+    A support condition is \emph{reduced} when it is an atom or a litter.
+    The \emph{reduction} of a set \( S \) of support conditions is the set of reduced conditions that transitively constrain an element of \( S \).
+\end{definition}
+One can easily see that if \( S \) is small, its reduction is small.
+\begin{definition}
+    We say \( w \) \emph{supports} \( t \in \tau_\beta \) if all atoms and litters in the reduction of its designated support lie in the domain of \( w \).
+\end{definition}
+Passing to the reduction before requiring it in the domain of a weak approximation allows us to force the precise images of transitively constrained litters to be specified.
+\begin{definition}
+    \( w \) and \( v \) are \emph{compatible} for \( t \in \tau_\beta \) if \( w \) and \( v \) support \( t \), and they agree on the reduction of the designated support of \( t \).
+\end{definition}
+In order to force \( \pi(t) = \rho(t) \), we will require that \( w \) and \( v \) are compatible for \( t \).
+
+There is another constraint that is not yet dealt with.
+Currently, different levels of weak approximations do not cohere; in particular, weak approximations do not know about \( f \)-maps.
+There is also no requirement that the images of litters agree with our local litter permutation \( p \) (which is now taken to be defined separately for each \( \beta \)-extended index).
+
+Note that \( w \) has an action on support conditions where the given atom or near-litter is in its domain.
+\begin{definition}
+    We say that \( w \) is \emph{coherent} if
+    \begin{itemize}
+        \item \( p_B(L) = w_B(L)^\circ \) whenever both are defined;
+        \item \( f_{\delta,\varepsilon}(\pi_{C \gg (\gamma \longrightarrow \delta)}(t)) = w_{C \gg (\gamma \longrightarrow \varepsilon) \gg (\varepsilon \longrightarrow \bot)}(f_{\delta,\varepsilon}(t))^\circ \) when \( C \) is a path from \( \beta \) to \( \gamma \) and \( t \in \tau_\delta \), given that the action of \( \pi \) agrees with the action of \( w \) on support conditions in the designated support of \( t \);
+        \item \( f_{\bot,\varepsilon}(\pi_{C \gg (\gamma \longrightarrow \bot)}(a)) = w_{C \gg (\gamma \longrightarrow \varepsilon) \gg (\varepsilon \longrightarrow \bot)}(a)^\circ \) when \( C \) is a path from \( \beta \) to \( \gamma \) and \( a \in \tau_\bot \), given that the actions of \( \pi \) and \( w \) on \( a \) agree.
+    \end{itemize}
+\end{definition}
+The weak structural approximations we create should all be coherent, and this should not be difficult to prove.
+Note that whether a weak approximation is precise is a statement about atoms at a given extended index; whether a weak approximation is coherent is a statement about litters across different extended indices.
+Arguably, the first condition could be separated into its own statement.
+\begin{lemma}
+    Let \( w \) be a weak \( \beta \)-structural approximation that is coherent.
+    Suppose further that for each \( B \), all \( B \)-flexible litters lie in \( \dom p \).
+    Let \( t \in \tau_\beta \) be a tangle that \( w \) supports.
+    Suppose that \( L \) is a litter such that the actions of \( \pi \) and \( w \) agree on every condition transitively constraining \( (L, B) \), and that \( L \) transitively constrains some element of the designated support of \( t \).
+    Then \( \pi_B(L) = w_B(L)^\circ \).
+\end{lemma}
+\begin{proof}
+    Case analysis on \( B \)-flexibility of \( L \); the result follows easily from coherence.
+    Proven in Lean modulo some annoying Lean-specific things.
+\end{proof}
+We now use the previous lemma about strengthening rough images into precise images.
+\begin{lemma}
+    Let \( w \) be a weak \( \beta \)-structural approximation that is precise and coherent.
+    Suppose further that for each \( B \), all \( B \)-flexible litters lie in \( \dom p \).
+    Let \( t \in \tau_\beta \) be a tangle that \( w \) supports.
+    Then the actions of \( \pi \) and \( w \) agree on all support conditions in the designated support of \( t \).
+\end{lemma}
+\begin{proof}
+    Induction on support conditions.
+    Not spelled out here, it's proven in Lean.
+\end{proof}
+\begin{theorem}
+    Let \( w, v \) be weak \( \beta \)-structural approximations that are precise and coherent, and are compatible for \( t \in \tau_\beta \).
+    Suppose further that for each \( B \), all \( B \)-flexible litters lie in \( \dom p \).
+    Then \( \pi(t) = \rho(t) \).
+\end{theorem}
+\begin{proof}
+    The allowable permutation \( \pi^{-1} \rho \) fixes each support condition in the designated support of \( t \).
+    Therefore, it fixes \( t \).
+\end{proof}
+The induced action on inflexible litters defined in the freedom of action theorem is \( c(w) \) for some \( w \).
+Suppose we have an inflexible litter which is the \( f \)-map of some \( t \in \tau_\beta \).
+By inductive hypothesis, we know the intended precise action on its designated support.
+This forms a weak \( \beta \)-structural approximation \( w \).
+Outside of the induction, we can prove \( w \) is coherent.
+Inside, we intend to extend this \( w \) to something precise; outside, we will observe that this extension does not break coherence.
+This extended \( w \) is completed and freedom of action is indctively applied to find \( \pi \).
+The above theorem then says that adding extra atoms and litters into the original \( w \) does not change the action of \( \pi \) on \( t \).
+
+This is all proven in Lean, ignoring some minor quirks to do with actions of \( \bot \)-allowable permutations versus near-litter permutations (which are clearly the same on paper).
+Notably, the near-litter injectivity condition was never used; it probably follows from the other assumptions.
+
 \end{document}
