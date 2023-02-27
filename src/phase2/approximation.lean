@@ -29,6 +29,16 @@ variables (π : near_litter_approx)
 lemma smul_atom_eq {a : atom} : π.atom_perm a = π • a := rfl
 lemma smul_litter_eq {L : litter} : π.litter_perm L = π • L := rfl
 
+@[simp] lemma mk_smul_atom {atom_perm : local_perm atom} {litter_perm : local_perm litter}
+  {domain_small : ∀ L, small (litter_set L ∩ atom_perm.domain)} {a : atom} :
+  { near_litter_approx . atom_perm := atom_perm,
+    litter_perm := litter_perm, domain_small := domain_small } • a = atom_perm a := rfl
+
+@[simp] lemma mk_smul_litter {atom_perm : local_perm atom} {litter_perm : local_perm litter}
+  {domain_small : ∀ L, small (litter_set L ∩ atom_perm.domain)} {L : litter} :
+  { near_litter_approx . atom_perm := atom_perm,
+    litter_perm := litter_perm, domain_small := domain_small } • L = litter_perm L := rfl
+
 lemma smul_eq_smul_atom {a₁ a₂ : atom}
   (h₁ : a₁ ∈ π.atom_perm.domain) (h₂ : a₂ ∈ π.atom_perm.domain) :
   π • a₁ = π • a₂ ↔ a₁ = a₂ :=

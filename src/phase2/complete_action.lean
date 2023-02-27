@@ -51,6 +51,9 @@ lemma complete_litter_map_eq :
   π.complete_litter_map hπ L A = π.litter_completion hπ L A (π.foa_hypothesis hπ) :=
 by rw [complete_litter_map, complete_near_litter_map_eq]; refl
 
+lemma complete_near_litter_map_fst_eq :
+  (π.complete_near_litter_map hπ L.to_near_litter A).1 = π.complete_litter_map hπ L A := rfl
+
 @[simp] lemma foa_hypothesis_atom_image {c : support_condition β}
   (h : relation.trans_gen (constrains α β) (inl a, A) c) :
   (π.foa_hypothesis hπ : hypothesis c).atom_image a A h = π.complete_atom_map hπ a A := rfl
@@ -137,14 +140,14 @@ First, we unfold the definition of the completed action.
 
 /-- A basic definition unfold. -/
 lemma complete_litter_map_eq_of_inflexible_coe (hπ : π.free) {L : litter} {A : extended_index β}
-  (h : inflexible_coe L A) :
+  (h : inflexible_coe L A) (hH : hypothesis_injective_inflexible (π.foa_hypothesis hπ) h) :
   π.complete_litter_map hπ L A = f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.hδε)
-    (supported_perm π hπ h (π.foa_hypothesis hπ) • h.t) :=
+    (hypothesised_allowable π hπ h (π.foa_hypothesis hπ) hH • h.t) :=
 begin
   have : nonempty (inflexible_coe L A) := ⟨h⟩,
   rw [complete_litter_map_eq, litter_completion, dif_pos this],
   cases subsingleton.elim this.some h,
-  refl,
+  rw dif_pos,
 end
 
 /-- A basic definition unfold. -/
@@ -210,6 +213,7 @@ begin
     exact h₁.2 h.some, },
 end
 
+/-
 lemma ne_of_inflexible_bot_of_not_inflexible_bot {c : support_condition β} (H : π.foa_props hπ c)
   {L₁ L₂ : litter} {A : extended_index β}
   (hL₁ : inflexible_bot L₁ A) (hL₂ : inflexible_bot L₂ A → false) :
@@ -259,7 +263,100 @@ begin
   rw ← hA₁ at this,
   exact this,
 end
+-/
 
+/-- Inflexible supports created from inflexible litters in other inflexible supports are nested. -/
+lemma hypothesis_injective_inflexible_comp {L : litter} {A : extended_index ↑β}
+  (h : inflexible_coe L A)
+  (hH : hypothesis_injective_inflexible (π.foa_hypothesis hπ) h)
+  {ρ : allowable h.δ}
+  (hρ : ((hypothesised_weak_struct_approx (π.foa_hypothesis hπ) h hH).complete
+    (litter_perm_below π h.hδ h.B)).exactly_approximates ρ.to_struct_perm)
+  (γ : Iic α) (δ ε : Iio α)
+  (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (C : path (h.δ : type_index) γ) (t : tangle δ)
+  (hL : (inr (f_map (subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t).to_near_litter,
+    (C.cons $ coe_lt hε).cons (bot_lt_coe _)) ∈ inflexible_support h)
+  (ih : ∀ (c : support_condition δ), c ∈ (designated_support t).carrier →
+    (ρ • show support_condition h.δ, from (c.fst, (C.cons $ coe_lt hδ).comp c.snd)) =
+    (hypothesised_weak_struct_approx (π.foa_hypothesis hπ) h hH).support_condition_map_or_else
+      (c.fst, (C.cons $ coe_lt hδ).comp c.snd)) :
+  hypothesis_injective_inflexible (π.foa_hypothesis hπ) ⟨γ, δ, ε, hδ, hε, hδε,
+    (h.B.cons (coe_lt h.hδ)).comp C, t, rfl, rfl⟩ :=
+begin
+  rw inflexible_support at hL,
+  constructor,
+  { intros a b B ha hb hab,
+    refine hH.atom_map_injective a b ((C.cons $ coe_lt hδ).comp B) _ _ _,
+    { -- TODO: Factor out this block.
+      simp only [inflexible_support, preimage_set_of_eq],
+      refine relation.trans_gen.trans _ hL,
+      rw [← path.comp_assoc, path.comp_cons],
+      exact ha, },
+    { simp only [inflexible_support, preimage_set_of_eq],
+      refine relation.trans_gen.trans _ hL,
+      rw [← path.comp_assoc, path.comp_cons],
+      exact hb, },
+    { simp only [foa_hypothesis_atom_image],
+      rw [← path.comp_assoc, path.comp_cons],
+      exact hab, }, },
+  { intros a L' B ha hL',
+    rw hH.atom_mem a L' ((C.cons $ coe_lt hδ).comp B),
+    { simp only [foa_hypothesis_atom_image, foa_hypothesis_near_litter_image],
+      rw [← path.comp_assoc, path.comp_cons], },
+    { simp only [inflexible_support, preimage_set_of_eq],
+      refine relation.trans_gen.trans _ hL,
+      rw [← path.comp_assoc, path.comp_cons],
+      exact ha, },
+    { simp only [inflexible_support, preimage_set_of_eq],
+      refine relation.trans_gen.trans _ hL,
+      rw [← path.comp_assoc, path.comp_cons],
+      exact hL', }, },
+end
+
+lemma hypothesised_weak_struct_approx_coherent {L : litter} {A : extended_index β}
+  (h : inflexible_coe L A) (hH : hypothesis_injective_inflexible (π.foa_hypothesis hπ) h) :
+  (hypothesised_weak_struct_approx (π.foa_hypothesis hπ) h hH).coherent
+    (litter_perm_below π h.hδ h.B) :=
+begin
+  rw litter_perm_below,
+  constructor,
+  { intros L' B hL' hflex,
+    simp only [hypothesised_weak_struct_approx_litter_map, foa_hypothesis_near_litter_image,
+      complete_near_litter_map_eq, near_litter_completion, near_litter_hypothesis_eq],
+    simp only [near_litter_approx.flexible_completion_litter_perm_domain'] at hflex,
+    rw litter_completion_of_flexible,
+    refl,
+    cases hflex,
+    { exact hπ _ _ hflex, },
+    { exact hflex, }, },
+  { intros ρ hρ γ δ ε hδ hε hδε C t hL ih,
+    simp only [hypothesised_weak_struct_approx_litter_map, path.comp_cons,
+      foa_hypothesis_near_litter_image, complete_near_litter_map_eq,
+      near_litter_completion_fst_eq, near_litter_hypothesis_eq],
+    have := litter_completion_of_inflexible_coe _ _ _ _ _ ⟨γ, δ, ε, hδ, hε, hδε, _, t, rfl, rfl⟩ _,
+    refine (this.trans _).symm,
+    { exact hypothesis_injective_inflexible_comp h hH hρ γ δ ε hδ hε hδε C t hL ih, },
+    refine congr_arg2 _ rfl _,
+    rw [← inv_smul_eq_iff, smul_smul],
+    refine (designated_support t).supports _ _,
+    intros c hc,
+    rw [mul_smul, inv_smul_eq_iff],
+    have := ih c hc,
+    simp only at this ⊢,
+    -- I think this is easy with the correct definition of litter completion map.
+    sorry, },
+  { intros ρ hρ γ ε hε C a hL ih,
+    simp only [hypothesised_weak_struct_approx_litter_map, path.comp_cons,
+      foa_hypothesis_near_litter_image, complete_near_litter_map_eq],
+    rw [ih, weak_near_litter_approx.atom_map_or_else_of_dom, near_litter_completion_fst_eq],
+    have := litter_completion_of_inflexible_bot _ _ _ _ _ ⟨γ,  ε, hε, _, a, rfl, rfl⟩,
+    refine (this.trans _).symm,
+    { sorry, },
+    { refl, }, },
+end
+
+/-
 noncomputable def support_map_union {π : struct_approx β} (hπ) {γ : Iic α} {δ ε : Iio α}
   {B : path (β : type_index) γ} {t₁ t₂ : tangle δ} {L₁ L₂ A} (hδ hε hδε hL₁ hL₂ hA) :
   support_map δ := {
@@ -556,6 +653,7 @@ begin
     exact λ h, h₁ ⟨h⟩,
     exact λ h, h₁' ⟨h⟩, },
 end
+-/
 
 end struct_approx
 

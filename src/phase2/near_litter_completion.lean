@@ -95,6 +95,11 @@ noncomputable def near_litter_completion (π : struct_approx β) (hπ : π.free)
   near_litter_completion_map π hπ N A H,
   near_litter_completion_map_is_near_litter π hπ N A H⟩
 
+@[simp] lemma near_litter_completion_fst_eq (π : struct_approx β) (hπ : π.free)
+  (N : near_litter) (A : extended_index β) (H : hypothesis ⟨inr N, A⟩) :
+  (π.near_litter_completion hπ N A H).1 =
+  litter_completion π hπ N.1 A (near_litter_hypothesis N A H) := rfl
+
 end struct_approx
 
 end con_nf

@@ -27,8 +27,8 @@ images of atoms in litters are mapped to atoms inside the corresponding near-lit
 (atom_map_dom_small : small atom_map.dom)
 (litter_map_dom_small : small litter_map.dom)
 (atom_map_injective : ∀ ⦃a b⦄ ha hb, (atom_map a).get ha = (atom_map b).get hb → a = b)
-(litter_map_injective : ∀ ⦃L₁ L₂ : litter⦄ hL₁ hL₂,
-  (((litter_map L₁).get hL₁ : set atom) ∩ (litter_map L₂).get hL₂).nonempty → L₁ = L₂)
+-- (litter_map_injective : ∀ ⦃L₁ L₂ : litter⦄ hL₁ hL₂,
+--   (((litter_map L₁).get hL₁ : set atom) ∩ (litter_map L₂).get hL₂).nonempty → L₁ = L₂)
 (atom_mem : ∀ (a : atom) ha L hL, a.1 = L ↔ (atom_map a).get ha ∈ (litter_map L).get hL)
 
 /-- A `β`-weak structural approximation is a product that assigns a weak near-litter approximation
@@ -416,7 +416,7 @@ noncomputable def support_condition_map_or_else (w : weak_struct_approx β) :
 
 def coherent_base (w : weak_struct_approx β) (litter_perm : extended_index β → local_perm litter) :
   Prop :=
-∀ L B hL, flexible α L B → litter_perm B L = (((w B).litter_map L).get hL).fst
+∀ L B hL, L ∈ (litter_perm B).domain → litter_perm B L = (((w B).litter_map L).get hL).fst
 
 def coherent_coe (w : weak_struct_approx β) (litter_perm : extended_index β → local_perm litter) :
   Prop :=
@@ -454,7 +454,7 @@ def coherent_bot (w : weak_struct_approx β) (litter_perm : extended_index β �
 (bot : w.coherent_bot litter_perm)
 
 lemma smul_litter_eq_of_supports (w : weak_struct_approx β)
-  (hw : w.precise) (hwc : w.coherent litter_perm)
+  (hwc : w.coherent litter_perm)
   (hl : ∀ B, {L | flexible α L B} ⊆ (litter_perm B).domain)
   {π : allowable β} (hπ : (w.complete litter_perm).exactly_approximates π.to_struct_perm)
   (t : tangle β) (h : w.supports t)
@@ -487,11 +487,20 @@ begin
       ← struct_perm.derivative_bot_smul, ← struct_perm.derivative_cons] at this,
     rw ← hwc.bot hπ γ ε hε C a _ hc,
     refine this.trans _,
+    swap 3,
+    refine congr_arg _ _,
+    swap 3,
+    { rw ← allowable.derivative_cons_apply,
+      rw ← allowable.derivative_smul
+        (show path ((β : Iic_index α) : type_index) ((⊥ : Iic_index α) : type_index),
+          from C.cons (bot_lt_coe _)) π a,
+      congr,
+      sorry, },
     all_goals { sorry, }, },
   { rw [← struct_perm.of_bot_smul, ← (hπ B).map_litter _ (hl B hflex)],
     refine ((w B).complete_smul_litter_eq L).trans _,
     exact hwc.base L B (h.litter_mem L B
-      ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩) hflex, },
+      ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩) (hl B hflex), },
 end
 
 lemma smul_support_condition_eq (w : weak_struct_approx β)
@@ -537,7 +546,7 @@ begin
       rw ← this.1 at hb₂,
       exact ⟨b, hb₁, hb₂⟩, },
     { exact ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩, }, },
-  refine w.smul_litter_eq_of_supports hw hwc hl hπ t h d hd B N.1 _ (refl_trans_gen_near_litter hc),
+  refine w.smul_litter_eq_of_supports hwc hl hπ t h d hd B N.1 _ (refl_trans_gen_near_litter hc),
   exact λ e he, ih e (trans_gen_near_litter he) d
     (relation.refl_trans_gen.trans he.to_refl (refl_trans_gen_near_litter hc)) hd,
 end
