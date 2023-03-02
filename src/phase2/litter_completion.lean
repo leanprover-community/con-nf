@@ -199,6 +199,7 @@ def hypothesised_weak_struct_approx {L : litter} {A : extended_index β}
     exact h,
   end,
   atom_map_injective := λ a b ha hb, hH.atom_map_injective a b B ha hb,
+  litter_map_injective := sorry,
   atom_mem := λ a ha L hL, hH.atom_mem a L B ha hL,
 }
 
