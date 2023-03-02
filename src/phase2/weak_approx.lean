@@ -27,8 +27,8 @@ images of atoms in litters are mapped to atoms inside the corresponding near-lit
 (atom_map_dom_small : small atom_map.dom)
 (litter_map_dom_small : small litter_map.dom)
 (atom_map_injective : ∀ ⦃a b⦄ ha hb, (atom_map a).get ha = (atom_map b).get hb → a = b)
--- (litter_map_injective : ∀ ⦃L₁ L₂ : litter⦄ hL₁ hL₂,
---   (((litter_map L₁).get hL₁ : set atom) ∩ (litter_map L₂).get hL₂).nonempty → L₁ = L₂)
+(litter_map_injective : ∀ ⦃L₁ L₂ : litter⦄ hL₁ hL₂,
+  (((litter_map L₁).get hL₁ : set atom) ∩ (litter_map L₂).get hL₂).nonempty → L₁ = L₂)
 (atom_mem : ∀ (a : atom) ha L hL, a.1 = L ↔ (atom_map a).get ha ∈ (litter_map L).get hL)
 
 /-- A `β`-weak structural approximation is a product that assigns a weak near-litter approximation
@@ -98,14 +98,27 @@ begin
       (this.trans L₂.prop.some_spec.some_spec.some_spec.2.symm), },
 end
 
-lemma not_banned_litter_nonempty : nonempty {L | ¬w.banned_litter L} :=
+lemma mk_not_banned_litter : #{L | ¬w.banned_litter L} = #μ :=
 begin
-  rw ← mk_ne_zero_iff,
-  intro h,
   have := mk_sum_compl {L | w.banned_litter L},
-  rw [compl_set_of, h, add_zero, mk_litter] at this,
-  exact κ_le_μ.not_lt (lt_of_eq_of_lt this.symm w.banned_litter_small),
+  rw [compl_set_of, mk_litter] at this,
+  rw [← this, add_eq_right],
+  { by_contra' h,
+    have h' := add_le_add (le_of_lt w.banned_litter_small) h.le,
+    rw this at h',
+    refine not_lt_of_le h' _,
+    refine cardinal.add_lt_of_lt μ_strong_limit.is_limit.aleph_0_le κ_lt_μ _,
+    exact lt_of_le_of_lt κ_regular.aleph_0_le κ_lt_μ, },
+  { by_contra' h,
+    have h' := add_le_add (le_of_lt w.banned_litter_small) h.le,
+    rw this at h',
+    refine not_lt_of_le h' _,
+    refine cardinal.add_lt_of_lt μ_strong_limit.is_limit.aleph_0_le κ_lt_μ _,
+    exact lt_trans w.banned_litter_small κ_lt_μ, },
 end
+
+lemma not_banned_litter_nonempty : nonempty {L | ¬w.banned_litter L} :=
+by simp only [← mk_ne_zero_iff, mk_not_banned_litter, ne.def, mk_ne_zero, not_false_iff]
 
 /-- The *sandbox litter* for a weak near-litter approximation is an arbitrarily chosen litter that
 isn't banned. -/
@@ -164,6 +177,13 @@ noncomputable def litter_map_or_else (L : litter) : near_litter :=
 lemma litter_map_or_else_of_dom {L : litter} (hL : (w.litter_map L).dom) :
   w.litter_map_or_else L = (w.litter_map L).get hL :=
 by rw [litter_map_or_else, part.get_or_else_of_dom]
+
+noncomputable def rough_litter_map_or_else (L : litter) : litter :=
+(w.litter_map_or_else L).1
+
+lemma rough_litter_map_or_else_of_dom {L : litter} (hL : (w.litter_map L).dom) :
+  w.rough_litter_map_or_else L = ((w.litter_map L).get hL).1 :=
+by rw [rough_litter_map_or_else, litter_map_or_else_of_dom]
 
 /-- The induced action of this weak approximation on near-litters. -/
 noncomputable def near_litter_map_or_else (N : near_litter) : near_litter :=
@@ -230,8 +250,8 @@ lemma complete_smul_atom_eq {a : atom} (ha : (w.atom_map a).dom) :
 /-- A weak approximation is precise at a litter in its domain if all atoms in the symmetric
 difference of its image are accounted for. -/
 @[mk_iff] structure precise_at {L : litter} (hL : (w.litter_map L).dom) : Prop :=
-(diff : ((w.litter_map L).get hL : set atom) ∆
-  litter_set ((w.litter_map L).get hL).1 ⊆ w.atom_map.ran)
+(diff : ((w.litter_map L).get hL : set atom) ∆ litter_set ((w.litter_map L).get hL).1 ⊆
+  w.atom_map.ran)
 (fwd : ∀ a ha, (w.atom_map a).get ha ∈ litter_set L → (w.atom_map ((w.atom_map a).get ha)).dom)
 (back : w.atom_map.dom ∩ (w.litter_map L).get hL ⊆ w.atom_map.ran)
 

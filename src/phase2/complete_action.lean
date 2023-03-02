@@ -344,7 +344,6 @@ begin
     rw [mul_smul, inv_smul_eq_iff],
     have := ih c hc,
     simp only at this ⊢,
-    -- I think this is easy with the correct definition of litter completion map.
     sorry, },
   { intros ρ hρ γ ε hε C a hL ih,
     simp only [hypothesised_weak_struct_approx_litter_map, path.comp_cons,
@@ -352,7 +351,8 @@ begin
     rw [ih, weak_near_litter_approx.atom_map_or_else_of_dom, near_litter_completion_fst_eq],
     have := litter_completion_of_inflexible_bot _ _ _ _ _ ⟨γ,  ε, hε, _, a, rfl, rfl⟩,
     refine (this.trans _).symm,
-    { sorry, },
+    { refine relation.trans_gen.trans _ hL,
+      exact relation.trans_gen.single (constrains.f_map_bot _ _ _), },
     { refl, }, },
 end
 

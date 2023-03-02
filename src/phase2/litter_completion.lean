@@ -267,7 +267,7 @@ noncomputable def hypothesised_allowable (π : struct_approx β) (hπ : π.free)
   allowable h.δ :=
 allowable_of_weak_struct_approx π hπ h.hδ h.B _ (hypothesised_weak_struct_approx_free π hπ H h hH)
 
-lemma supported_perm_exactly_approximates (π : struct_approx β) (hπ : π.free)
+lemma hypothesised_allowable_exactly_approximates (π : struct_approx β) (hπ : π.free)
   {L : litter} {A : extended_index β} (h : inflexible_coe L A)
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (hH : hypothesis_injective_inflexible H h) :
   ((hypothesised_weak_struct_approx H h hH).complete (litter_perm_below π h.hδ h.B))
