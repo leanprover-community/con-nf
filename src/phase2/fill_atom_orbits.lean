@@ -89,7 +89,7 @@ lemma mk_orbit_set (L : litter) :
   #(w.orbit_set L) = #(ℕ × w.need_backward_images ⊕ ℕ × w.need_forward_images) :=
 (le_mk_iff_exists_subset.mp (w.le_mk_diff_dom_ran L)).some_spec.2
 
-noncomputable def orbit_set_equiv (L : litter) :
+@[irreducible] noncomputable def orbit_set_equiv (L : litter) :
   w.orbit_set L ≃ ℕ × w.need_backward_images ⊕ ℕ × w.need_forward_images :=
 (cardinal.eq.mp (w.mk_orbit_set L)).some
 
@@ -119,92 +119,6 @@ begin
   rw [small, mk_orbit_set],
   exact w.need_images_small L,
 end
-
-lemma mk_dom_symm_diff_le :
-  #↥(w.litter_map.dom ∆ (w.rough_litter_map_or_else '' w.litter_map.dom)) ≤
-  #{L : litter | ¬w.banned_litter L} :=
-begin
-  rw mk_not_banned_litter,
-  refine le_trans (le_of_lt _) κ_le_μ,
-  exact small.symm_diff w.litter_map_dom_small w.litter_map_dom_small.image,
-end
-
-lemma aleph_0_le_not_banned_litter : ℵ₀ ≤ #{L | ¬w.banned_litter L} :=
-begin
-  rw mk_not_banned_litter,
-  exact μ_strong_limit.is_limit.aleph_0_le,
-end
-
-lemma disjoint_dom_not_banned_litter :
-  disjoint (w.litter_map.dom ∪ w.rough_litter_map_or_else '' w.litter_map.dom)
-    {L : litter | ¬w.banned_litter L} :=
-begin
-  simp only [set.disjoint_left, mem_union, pfun.mem_dom, mem_image, mem_set_of_eq, not_not],
-  rintros _ (⟨_, hL, rfl⟩ | ⟨L, ⟨_, hL, rfl⟩, rfl⟩),
-  { exact banned_litter.litter_dom _ hL, },
-  { rw w.rough_litter_map_or_else_of_dom hL,
-    exact banned_litter.litter_map _ hL, },
-end
-
-lemma rough_litter_map_or_else_inj_on : inj_on w.rough_litter_map_or_else w.litter_map.dom :=
-begin
-  intros L₁ hL₁ L₂ hL₂ h,
-  rw [w.rough_litter_map_or_else_of_dom hL₁, w.rough_litter_map_or_else_of_dom hL₂] at h,
-  exact w.litter_map_injective hL₁ hL₂ (near_litter.inter_nonempty_of_fst_eq_fst h),
-end
-
-/-- A local permutation on the set of litters that occur in the domain or range of `w`.
-This permutes both flexible and inflexible litters. -/
-noncomputable def litter_perm' : local_perm litter :=
-local_perm.complete
-  w.rough_litter_map_or_else
-  w.litter_map.dom
-  {L | ¬w.banned_litter L}
-  w.mk_dom_symm_diff_le
-  w.aleph_0_le_not_banned_litter
-  w.disjoint_dom_not_banned_litter
-  w.rough_litter_map_or_else_inj_on
-
-def id_on_banned : local_perm litter := {
-  to_fun := id,
-  inv_fun := id,
-  domain := {L | w.banned_litter L} \ w.litter_perm'.domain,
-  to_fun_domain' := λ L h, h,
-  inv_fun_domain' := λ L h, h,
-  left_inv' := λ L h, rfl,
-  right_inv' := λ L h, rfl,
-}
-
-noncomputable def litter_perm : local_perm litter :=
-local_perm.piecewise w.litter_perm' w.id_on_banned
-  (by rw ← set.subset_compl_iff_disjoint_left; exact λ L h, h.2)
-
-lemma litter_perm'_apply_eq (L : litter) (hL : L ∈ w.litter_map.dom) :
-  w.litter_perm' L = w.rough_litter_map_or_else L :=
-local_perm.complete_apply_eq _ _ _ hL
-
-lemma litter_perm_apply_eq (L : litter) (hL : L ∈ w.litter_map.dom) :
-  w.litter_perm L = w.rough_litter_map_or_else L :=
-begin
-  rw ← w.litter_perm'_apply_eq L hL,
-  exact local_perm.piecewise_apply_eq_left (or.inl (or.inl hL)),
-end
-
-lemma litter_perm'_domain_small : small w.litter_perm'.domain :=
-begin
-  refine small.union (small.union w.litter_map_dom_small w.litter_map_dom_small.image) _,
-  rw small,
-  rw cardinal.mk_congr (local_perm.sandbox_subset_equiv _ _),
-  simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph_0, lift_uzero, lift_id],
-  refine add_lt_of_lt κ_regular.aleph_0_le _ _;
-    refine (mul_lt_of_lt κ_regular.aleph_0_le (lt_of_le_of_lt Λ_limit.aleph_0_le Λ_lt_κ) _);
-    refine lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _,
-  exact w.litter_map_dom_small,
-  exact w.litter_map_dom_small.image,
-end
-
-lemma litter_perm_domain_small : small w.litter_perm.domain :=
-small.union w.litter_perm'_domain_small (small.mono (diff_subset _ _) w.banned_litter_small)
 
 noncomputable def next_forward_image (L : litter) (a : ℕ × w.need_forward_images) : atom :=
 (w.orbit_set_equiv (w.litter_perm L)).symm (inr (a.1 + 1, a.2))
@@ -420,19 +334,6 @@ begin
     { exact w.litter_map_dom_of_mem_next_image_core_domain ha, },
     { exact w.litter_map_dom_of_mem_next_image_core_domain hb, }, },
 end
-
-/-- Noncomputably eliminates a disjunction into a (possibly predicative) universe. -/
-noncomputable def _root_.or.elim' {α : Sort*} {p q : Prop}
-  (h : p ∨ q) (f : p → α) (g : q → α) : α :=
-if hp : p then f hp else g (h.resolve_left hp)
-
-lemma _root_.or.elim'_left {α : Sort*} {p q : Prop}
-  (h : p ∨ q) (f : p → α) (g : q → α) (hp : p) : h.elim' f g = f hp :=
-by rw [or.elim', dif_pos hp]
-
-lemma _root_.or.elim'_right {α : Sort*} {p q : Prop}
-  (h : p ∨ q) (f : p → α) (g : q → α) (hp : ¬p) : h.elim' f g = g (h.resolve_left hp) :=
-by rw [or.elim', dif_neg hp]
 
 def next_image_domain : set atom :=
 (w.need_forward_images ∩ {a | a.1 ∈ w.litter_perm.domain}) ∪ w.next_image_core_domain
