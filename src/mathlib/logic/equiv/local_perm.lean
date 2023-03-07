@@ -76,6 +76,13 @@ initialize_simps_projections local_perm (to_fun → apply, inv_fun → symm_appl
 @[simp] lemma inv_fun_as_coe : π.inv_fun = π.symm := rfl
 
 @[simp] lemma map_domain {x : α} (h : x ∈ π.domain) : π x ∈ π.domain := π.to_fun_domain' h
+@[simp] lemma iterate_domain {x : α} (h : x ∈ π.domain) {n : ℕ} : π^[n] x ∈ π.domain :=
+begin
+  induction n with n ih,
+  exact h,
+  rw function.iterate_succ',
+  exact π.map_domain ih,
+end
 
 @[simp] lemma left_inv {x : α} (h : x ∈ π.domain) : π.symm (π x) = x := π.left_inv' h
 @[simp] lemma right_inv {x : α} (h : x ∈ π.domain) : π (π.symm x) = x := π.right_inv' h

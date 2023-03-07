@@ -154,8 +154,8 @@ begin
 end
 
 /-- A local permutation on the set of litters that occur in the domain or range of `w`.
-This permutes flexible and inflexible litters. -/
-noncomputable def litter_perm : local_perm litter :=
+This permutes both flexible and inflexible litters. -/
+noncomputable def litter_perm' : local_perm litter :=
 local_perm.complete
   w.rough_litter_map_or_else
   w.litter_map.dom
@@ -165,11 +165,32 @@ local_perm.complete
   w.disjoint_dom_not_banned_litter
   w.rough_litter_map_or_else_inj_on
 
-lemma litter_perm_apply_eq (L : litter) (hL : L ∈ w.litter_map.dom) :
-  w.litter_perm L = w.rough_litter_map_or_else L :=
+def id_on_banned : local_perm litter := {
+  to_fun := id,
+  inv_fun := id,
+  domain := {L | w.banned_litter L} \ w.litter_perm'.domain,
+  to_fun_domain' := λ L h, h,
+  inv_fun_domain' := λ L h, h,
+  left_inv' := λ L h, rfl,
+  right_inv' := λ L h, rfl,
+}
+
+noncomputable def litter_perm : local_perm litter :=
+local_perm.piecewise w.litter_perm' w.id_on_banned
+  (by rw ← set.subset_compl_iff_disjoint_left; exact λ L h, h.2)
+
+lemma litter_perm'_apply_eq (L : litter) (hL : L ∈ w.litter_map.dom) :
+  w.litter_perm' L = w.rough_litter_map_or_else L :=
 local_perm.complete_apply_eq _ _ _ hL
 
-lemma litter_perm_domain_small : small w.litter_perm.domain :=
+lemma litter_perm_apply_eq (L : litter) (hL : L ∈ w.litter_map.dom) :
+  w.litter_perm L = w.rough_litter_map_or_else L :=
+begin
+  rw ← w.litter_perm'_apply_eq L hL,
+  exact local_perm.piecewise_apply_eq_left (or.inl (or.inl hL)),
+end
+
+lemma litter_perm'_domain_small : small w.litter_perm'.domain :=
 begin
   refine small.union (small.union w.litter_map_dom_small w.litter_map_dom_small.image) _,
   rw small,
@@ -181,6 +202,9 @@ begin
   exact w.litter_map_dom_small,
   exact w.litter_map_dom_small.image,
 end
+
+lemma litter_perm_domain_small : small w.litter_perm.domain :=
+small.union w.litter_perm'_domain_small (small.mono (diff_subset _ _) w.banned_litter_small)
 
 noncomputable def next_forward_image (L : litter) (a : ℕ × w.need_forward_images) : atom :=
 (w.orbit_set_equiv (w.litter_perm L)).symm (inr (a.1 + 1, a.2))
@@ -623,10 +647,22 @@ begin
 end
 
 lemma next_image_core_not_mem_ran
-  (a : atom) (ha : a ∈ w.next_image_core_domain) (hL : (w.litter_map a.fst).dom) :
+  (a : atom) (ha : a ∈ w.next_image_core_domain) :
   w.next_image_core a a.fst (w.mem_orbit_set_of_mem_next_image_core_domain ha) ∉ w.atom_map.ran :=
 begin
-  sorry,
+  rintro ⟨b, hb₁, hb₂⟩,
+  rw next_image_core at hb₂,
+  obtain ⟨a', ha'⟩ := (w.orbit_set_equiv a.fst).symm.surjective
+    ⟨a, w.mem_orbit_set_of_mem_next_image_core_domain ha⟩,
+  rw [← ha', equiv.apply_symm_apply] at hb₂,
+  obtain (⟨_ | n, a'⟩ | ⟨n, a'⟩) := a';
+  simp only [elim_inr, elim_inl, nat.nat_zero_eq_zero, next_backward_image, next_forward_image,
+    mk_mem_next_backward_image_domain, mk_mem_next_forward_image_domain,
+    function.iterate_one] at hb₂,
+  { exact a'.prop.2 ⟨b, hb₁, hb₂⟩, },
+  all_goals { have := w.orbit_set_subset _ ((w.orbit_set_equiv _).symm _).prop,
+    rw ← hb₂ at this,
+    exact this.2 (or.inr ⟨b, hb₁, rfl⟩), },
 end
 
 lemma next_image_core_atom_mem
@@ -643,29 +679,24 @@ begin
   rw mem_litter_set at ha',
   split,
   { rintro rfl,
-    have := not_mem_subset (hdiff _ hL) _,
+    have := not_mem_subset (hdiff _ hL) (w.next_image_core_not_mem_ran a ha),
     simp only [mem_symm_diff, set_like.mem_coe, mem_litter_set,
       not_or_distrib, not_and_distrib, not_not] at this,
     refine this.2.resolve_left (not_not.mpr _),
-    { rw ha',
-      rw w.litter_perm_apply_eq _ hL,
-      rw w.rough_litter_map_or_else_of_dom, },
-    { exact w.next_image_core_not_mem_ran a ha hL, }, },
+    rw ha',
+    rw w.litter_perm_apply_eq _ hL,
+    rw w.rough_litter_map_or_else_of_dom,  },
   { intro h,
-    sorry,
-    /- refine w.litter_map_injective _ hL _,
-    { sorry, },
-    { rw inter_nonempty,
-      refine ⟨_, _, h⟩,
-      rw w.litter_perm_apply_eq _ _ at ha',
-      rw rough_litter_map_or_else_of_dom at ha',
-      have := not_mem_subset (hdiff a.fst _) (w.next_image_core_not_mem_ran a ha _),
-      simp only [mem_symm_diff, mem_litter_set] at this,
-      rw ha' at this,
-      simp only [mem_symm_diff, set_like.mem_coe, mem_litter_set, not_or_distrib, not_and_distrib, not_not, ha'] at this,
-
-       }, -/
-        },
+    have hL' := w.litter_perm_apply_eq L hL,
+    rw w.rough_litter_map_or_else_of_dom hL at hL',
+    have := not_mem_subset (hdiff _ hL) (w.next_image_core_not_mem_ran a ha),
+    simp only [mem_symm_diff, set_like.mem_coe, mem_litter_set, not_not, h, true_and,
+      not_true, and_false, or_false] at this,
+    rw [ha', ← hL', ← local_perm.eq_symm_apply, local_perm.left_inv] at this,
+    exact this,
+    exact or.inl (or.inl (or.inl hL)),
+    exact w.litter_map_dom_of_mem_next_image_core_domain ha,
+    exact local_perm.map_domain _ (or.inl (or.inl (or.inl hL))), },
 end
 
 lemma orbit_set_equiv_atom_mem
@@ -698,9 +729,9 @@ begin
     rw [ha'.1, ← rough_litter_map_or_else_of_dom, ← litter_perm_apply_eq,
       ← local_perm.eq_symm_apply, local_perm.left_inv] at this,
     exact this,
-    { exact or.inl (or.inl hL), },
+    { exact or.inl (or.inl (or.inl hL)), },
     { exact ha.2, },
-    { exact w.litter_perm.map_domain (or.inl (or.inl hL)), },
+    { exact w.litter_perm.map_domain (or.inl (or.inl (or.inl hL))), },
     { exact hL, }, },
 end
 
@@ -750,6 +781,36 @@ begin
   exact ⟨a, subset_orbit_atom_map_dom ha, w.orbit_atom_map_eq_of_mem_dom _ _⟩,
 end
 
+lemma fst_mem_litter_perm_domain_of_mem_map ⦃L : litter⦄ (hL : (w.litter_map L).dom)
+  ⦃a : atom⦄ (ha : a ∈ (w.litter_map L).get hL) :
+  a.1 ∈ w.litter_perm.domain :=
+begin
+  by_cases a.1 = ((w.litter_map L).get hL).1,
+  { rw h,
+    refine or.inl (or.inl (or.inr ⟨L, hL, _⟩)),
+    rw rough_litter_map_or_else_of_dom, },
+  { by_cases h' : a.fst ∈ w.litter_perm'.domain,
+    exact or.inl h',
+    exact or.inr ⟨banned_litter.diff L hL a ⟨ha, h⟩, h'⟩, },
+end
+
+lemma fst_mem_litter_perm_domain_of_dom ⦃a : atom⦄ (ha : a ∈ w.atom_map.dom) :
+  a.fst ∈ w.litter_perm.domain :=
+begin
+  by_cases h' : a.fst ∈ w.litter_perm'.domain,
+  exact or.inl h',
+  exact or.inr ⟨banned_litter.atom_dom a ha, h'⟩,
+end
+
+lemma fst_mem_litter_perm_domain_of_ran ⦃a : atom⦄ (ha : a ∈ w.atom_map.ran) :
+  a.fst ∈ w.litter_perm.domain :=
+begin
+  by_cases h' : a.fst ∈ w.litter_perm'.domain,
+  exact or.inl h',
+  obtain ⟨b, hb, rfl⟩ := ha,
+  exact or.inr ⟨banned_litter.atom_map b hb, h'⟩,
+end
+
 lemma fill_atom_orbits_precise
   (hdiff : ∀ L hL, ((w.litter_map L).get hL : set atom) ∆ litter_set ((w.litter_map L).get hL).1 ⊆
     w.atom_map.ran) : precise (w.fill_atom_orbits hdiff) :=
@@ -757,7 +818,7 @@ begin
   intros L hL,
   constructor,
   { exact subset_trans (hdiff L hL) subset_orbit_atom_map_ran, },
-  sorry { intros a ha ha',
+  { intros a ha ha',
     simp only [fill_atom_orbits_atom_map, fill_atom_orbits_litter_map, mem_litter_set,
       orbit_atom_map_dom_iff] at *,
     obtain ha | ha | ha := ha,
@@ -767,7 +828,7 @@ begin
       intro hmap,
       have hfwd : (w.atom_map a).get ha ∈ w.need_forward_images := ⟨⟨a, _, rfl⟩, hmap⟩,
       refine or.inl ⟨hfwd, or.inl (or.inl _)⟩,
-      refine mem_of_eq_of_mem _ hL,
+      refine mem_of_eq_of_mem _ (or.inl hL),
       rw [← ha', this], },
     { refine or.inr (or.inr ⟨_, ⟨L, rfl⟩, _⟩),
       simp only [pfun.mem_dom, Union_exists, mem_Union, mem_image, mem_set_of_eq, set_coe.exists,
@@ -777,7 +838,7 @@ begin
           (w.orbit_atom_map_eq_of_need_forward_images a ha)).symm.trans ha',
         rw ← this,
         exact (w.orbit_set_subset _ ((w.orbit_set_equiv _).symm _).prop).1, },
-      refine ⟨⟨_, hL, rfl⟩, _, _⟩,
+      refine ⟨or.inl (or.inl (or.inl hL)), _, _⟩,
       { refine mem_of_eq_of_mem (w.orbit_atom_map_eq_of_need_forward_images a ha) _,
         rw haL,
         exact ((w.orbit_set_equiv _).symm _).prop, },
@@ -798,8 +859,8 @@ begin
       clear_value b,
       simp only [mem_set_of_eq] at hbL,
       rw ← hb at hbL,
-      -- have haL' := (w.orbit_set_subset _ a.prop).1,
-      -- rw mem_litter_set at haL',
+      have haL' := (w.orbit_set_subset _ a.prop).1,
+      rw mem_litter_set at haL',
       have := w.orbit_set_equiv_congr (w.mem_orbit_set_of_mem_next_image_core_domain _)
         (w.orbit_set_subset _ a.prop).1,
       rw subtype.coe_eta at this,
@@ -809,10 +870,135 @@ begin
         next_backward_image, next_forward_image] at hbL ⊢,
       { exact or.inl b.prop.1, },
       { refine or.inr (or.inr _),
-        refine ⟨_, ⟨w.litter_perm.symm^[n + 1] (b : atom).1, rfl⟩, _, ⟨_, rfl⟩, _⟩,
-        have := hbL.1,
-         }, }, },
-  { sorry, },
+        have hbL' := hbL.2,
+        symmetry' at hbL',
+        rw [function.iterate_succ_apply',
+          local_perm.eq_symm_apply _ hL' (w.litter_perm.symm.iterate_domain hbL.1)] at hbL',
+        refine ⟨_, ⟨w.litter_perm.symm^[n + 1] (b : atom).1, rfl⟩, _, ⟨_, rfl⟩,
+          ⟨(w.orbit_set_equiv (w.litter_perm (a : atom).1)).symm (inl (n, b)), _⟩, _⟩,
+        { exact w.litter_perm.symm.iterate_domain hbL.1, },
+        { rw ← hbL',
+          have := (((w.orbit_set_equiv (w.litter_perm (a : atom).1)).symm (inl (n, b)))).prop,
+          rw haL' at this ⊢,
+          exact this, },
+        { simp only [function.comp_app, mem_set_of_eq, subtype.coe_mk,
+            eq_self_iff_true, and_true],
+          rw [w.orbit_set_equiv_congr _ hbL'.symm,
+            w.orbit_set_equiv_congr _ (congr_arg w.litter_perm haL'.symm)],
+          simp only [subtype.coe_eta, equiv.apply_symm_apply, elim_inl],
+          exact ⟨hbL.1, rfl⟩, }, },
+      { refine or.inr (or.inr _),
+        refine ⟨_, ⟨w.litter_perm^[n + 2] (b : atom).1, rfl⟩, _, ⟨_, rfl⟩,
+          ⟨(w.orbit_set_equiv (w.litter_perm (a : atom).1)).symm (inr (n + 1, b)), _⟩, _⟩,
+        { exact w.litter_perm.iterate_domain hbL.1, },
+        { rw [function.iterate_succ_apply', hbL.2, haL'],
+          exact ((w.orbit_set_equiv _).symm _).prop, },
+        { simp only [function.comp_app, mem_set_of_eq,
+            subtype.coe_mk, eq_self_iff_true, and_true],
+          have := congr_arg w.litter_perm hbL.2,
+          rw ← function.iterate_succ_apply' w.litter_perm (n + 1) at this,
+          rw [w.orbit_set_equiv_congr _ this,
+            w.orbit_set_equiv_congr _ (congr_arg w.litter_perm haL'.symm)],
+          simp only [function.iterate_succ, function.comp_app, subtype.coe_eta,
+            equiv.apply_symm_apply, elim_inr],
+          exact ⟨hbL.1, rfl⟩, }, },
+      { refine ⟨_, ⟨L', rfl⟩, _, ⟨hL', rfl⟩, a, _, rfl⟩,
+        rw [mem_set_of_eq, ← hb],
+        exact hbL, }, }, },
+  { rw fill_atom_orbits_litter_map at hL,
+    rintros a ⟨ha₁ | ⟨ha₁, ha₁'⟩ | ha₁, ha₂⟩;
+    simp only [fill_atom_orbits_atom_map, fill_atom_orbits_litter_map, orbit_atom_map_dom,
+      mem_inter_iff, mem_union, set_like.mem_coe] at *,
+    { by_cases ha₃ : a ∈ w.atom_map.ran,
+      { obtain ⟨b, hb₁, hb₂⟩ := ha₃,
+        refine ⟨b, or.inl hb₁, _⟩,
+        rw orbit_atom_map_eq_of_mem_dom,
+        exact hb₂, },
+      { refine ⟨(w.orbit_set_equiv (w.litter_perm.symm a.1)).symm (inl (0, ⟨a, ha₁, ha₃⟩)), _, _⟩,
+        { refine or.inr (or.inr ⟨_, ⟨w.litter_perm.symm a.1, rfl⟩, _, ⟨_, rfl⟩, _⟩),
+          { exact w.litter_perm.symm.map_domain (fst_mem_litter_perm_domain_of_mem_map hL ha₂), },
+          refine ⟨_, _, rfl⟩,
+          simp only [mem_set_of_eq, equiv.apply_symm_apply, elim_inl],
+          exact ⟨fst_mem_litter_perm_domain_of_mem_map hL ha₂, rfl⟩, },
+        { rw [orbit_atom_map_eq_of_mem_next_image_core_domain, next_image_core],
+          have : (((w.orbit_set_equiv (w.litter_perm.symm a.fst)).symm)
+            (inl (0, ⟨a, _⟩)) : atom).fst = w.litter_perm.symm a.fst,
+          { exact (w.orbit_set_subset _ ((w.orbit_set_equiv _).symm _).prop).1,
+            exact ⟨ha₁, ha₃⟩, },
+          rw w.orbit_set_equiv_congr _ this,
+          simp only [equiv.apply_symm_apply, elim_inl, subtype.coe_eta, next_backward_image,
+            subtype.coe_mk], }, }, },
+    { obtain ⟨⟨b, hb₁, hb₂⟩, ha₁⟩ := ha₁,
+      rw ← hb₂,
+      refine ⟨b, or.inl hb₁, _⟩,
+      rw orbit_atom_map_eq_of_mem_dom, },
+    { obtain ⟨a', ha'⟩ := (w.orbit_set_equiv a.fst).symm.surjective
+        ⟨a, w.mem_orbit_set_of_mem_next_image_core_domain ha₁⟩,
+      obtain (⟨n, a'⟩ | ⟨_ | n, a'⟩) := a',
+      { have : ((w.orbit_set_equiv (w.litter_perm.symm^[n + 2] (a' : atom).fst)).symm
+          (inl (n + 1, a')) : atom) ∈ w.next_image_core_domain,
+        { refine ⟨_, ⟨w.litter_perm.symm^[n + 2] (a' : atom).fst, rfl⟩, _, ⟨_, rfl⟩, _⟩,
+          exact w.litter_perm.symm.iterate_domain (fst_mem_litter_perm_domain_of_dom a'.prop.1),
+          refine ⟨_, _, rfl⟩,
+          simp only [mem_set_of_eq, equiv.apply_symm_apply, elim_inl],
+          exact ⟨fst_mem_litter_perm_domain_of_dom a'.prop.1, rfl⟩, },
+        refine ⟨_, or.inr (or.inr this), _⟩,
+        rw orbit_atom_map_eq_of_mem_next_image_core_domain,
+        rw next_image_core,
+        have : (((w.orbit_set_equiv (w.litter_perm.symm^[n + 2] (a' : atom).fst)).symm)
+            (inl (n + 1, a')) : atom).fst = (w.litter_perm.symm^[n + 2] (a' : atom).fst) :=
+          (w.orbit_set_subset _ ((w.orbit_set_equiv _).symm _).prop).1,
+        rw w.orbit_set_equiv_congr _ this,
+        simp only [subtype.coe_eta, equiv.apply_symm_apply, elim_inl, next_backward_image],
+        have := congr_arg subtype.val ha',
+        simp only [subtype.val_eq_coe] at this,
+        rw ← this,
+        refine w.orbit_set_equiv_symm_congr _,
+        have := (w.orbit_set_subset _ ((w.orbit_set_equiv _).symm _).prop).1,
+        rw mem_litter_set at this,
+        rw this,
+        have := w.orbit_set_equiv_elim_of_mem_next_image_core_domain ha₁,
+        rw ← ha' at this,
+        simp only [equiv.apply_symm_apply, elim_inl, next_backward_image_domain,
+          function.comp_app, mem_set_of_eq] at this,
+        rw [← this.2, function.iterate_succ_apply', local_perm.right_inv],
+        exact w.litter_perm.symm.iterate_domain this.1, },
+      { have := w.orbit_set_equiv_elim_of_mem_next_image_core_domain ha₁,
+        rw ← ha' at this,
+        simp only [equiv.apply_symm_apply, elim_inr, next_forward_image_domain,
+          function.comp_app, mem_set_of_eq, function.iterate_one] at this,
+        refine ⟨a', or.inr (or.inl ⟨a'.prop, this.1⟩), _⟩,
+        rw [orbit_atom_map_eq_of_need_forward_images, w.orbit_set_equiv_symm_congr this.2,
+          subtype.coe_eta, ha'],
+        refl, },
+      { have : ((w.orbit_set_equiv (w.litter_perm^[n + 1] (a' : atom).fst)).symm
+          (inr (n, a')) : atom) ∈ w.next_image_core_domain,
+        { refine ⟨_, ⟨w.litter_perm^[n + 1] (a' : atom).fst, rfl⟩, _, ⟨_, rfl⟩, _⟩,
+          exact w.litter_perm.iterate_domain (fst_mem_litter_perm_domain_of_ran a'.prop.1),
+          refine ⟨_, _, rfl⟩,
+          simp only [mem_set_of_eq, equiv.apply_symm_apply, elim_inl],
+          exact ⟨fst_mem_litter_perm_domain_of_ran a'.prop.1, rfl⟩, },
+        refine ⟨_, or.inr (or.inr this), _⟩,
+        rw orbit_atom_map_eq_of_mem_next_image_core_domain,
+        rw next_image_core,
+        have : (((w.orbit_set_equiv (w.litter_perm^[n + 1] (a' : atom).fst)).symm)
+            (inr (n, a')) : atom).fst = (w.litter_perm^[n + 1] (a' : atom).fst) :=
+          (w.orbit_set_subset _ ((w.orbit_set_equiv _).symm _).prop).1,
+        rw w.orbit_set_equiv_congr _ this,
+        simp only [subtype.coe_eta, equiv.apply_symm_apply, elim_inl, next_backward_image],
+        have := congr_arg subtype.val ha',
+        simp only [subtype.val_eq_coe] at this,
+        rw ← this,
+        refine w.orbit_set_equiv_symm_congr _,
+        have := (w.orbit_set_subset _ ((w.orbit_set_equiv _).symm _).prop).1,
+        rw mem_litter_set at this,
+        rw this,
+        have := w.orbit_set_equiv_elim_of_mem_next_image_core_domain ha₁,
+        rw ← ha' at this,
+        simp only [equiv.apply_symm_apply, elim_inr, next_forward_image_domain,
+          function.comp_app, mem_set_of_eq] at this,
+        rw [← this.2, function.iterate_succ_apply', function.iterate_succ_apply',
+          function.iterate_succ_apply'], }, }, },
 end
 
 end weak_near_litter_approx
