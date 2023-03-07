@@ -355,6 +355,44 @@ begin
   exact ⟨a, subset_supported_action_atom_map_core_dom ha, w.supported_action_eq_of_dom _⟩,
 end
 
+lemma fill_atom_range_symm_diff_subset_ran
+  (L : litter) (hL : (w.fill_atom_range.litter_map L).dom) :
+  ((w.fill_atom_range.litter_map L).get hL : set atom) ∆ litter_set
+    ((w.fill_atom_range.litter_map L).get hL).fst ⊆ w.fill_atom_range.atom_map.ran :=
+begin
+  rintro a,
+  by_cases ha₁ : a ∈ w.atom_map.ran,
+  { obtain ⟨b, hb, rfl⟩ := ha₁,
+    exact λ _, ⟨b, or.inl hb, w.supported_action_eq_of_dom hb⟩, },
+  rintro (⟨ha₂, ha₃⟩ | ⟨ha₂, ha₃⟩),
+  { refine ⟨(w.mapped_outside_equiv L hL).symm ⟨a, ha₂, ha₃, ha₁⟩, _, _⟩,
+    { exact or.inr (or.inr ⟨L, hL, ((w.mapped_outside_equiv L hL).symm _).prop⟩), },
+    { simp only [fill_atom_range_atom_map],
+      refine (w.supported_action_eq_of_mem_mapped_outside_subset
+        ((w.mapped_outside_equiv L hL).symm _).prop).trans _,
+      simp only [subtype.coe_eta, equiv.apply_symm_apply, subtype.coe_mk], }, },
+  { by_cases ha₄ : ∀ (L' : litter) (hL' : (w.litter_map L').dom), a ∉ (w.litter_map L').get hL',
+    { refine ⟨w.preimage_litter_equiv.symm ⟨a, ⟨L, hL, ha₂⟩, ha₄, ha₁⟩, _, _⟩,
+      { exact or.inr (or.inl (w.preimage_litter_equiv.symm _).prop), },
+      { simp only [fill_atom_range_atom_map],
+        refine (w.supported_action_eq_of_mem_preimage_litter_subset
+          (w.preimage_litter_equiv.symm _).prop).trans _,
+        simp only [subtype.coe_eta, equiv.apply_symm_apply, subtype.coe_mk], }, },
+    { push_neg at ha₄,
+      obtain ⟨L', hL', ha₄⟩ := ha₄,
+      refine ⟨(w.mapped_outside_equiv L' hL').symm ⟨a, ha₄, _, ha₁⟩, _, _⟩,
+      { intro ha,
+        have := near_litter.inter_nonempty_of_fst_eq_fst
+          (eq_of_mem_litter_set_of_mem_litter_set ha₂ ha),
+        cases w.litter_map_injective hL hL' this,
+        exact ha₃ ha₄, },
+      { exact or.inr (or.inr ⟨L', hL', ((w.mapped_outside_equiv L' hL').symm _).prop⟩), },
+      { simp only [fill_atom_range_atom_map],
+        refine (w.supported_action_eq_of_mem_mapped_outside_subset
+          ((w.mapped_outside_equiv L' hL').symm _).prop).trans _,
+        simp only [subtype.coe_eta, equiv.apply_symm_apply, subtype.coe_mk], }, }, },
+end
+
 end weak_near_litter_approx
 
 end con_nf

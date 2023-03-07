@@ -300,6 +300,19 @@ begin
     { simp only [foa_hypothesis_atom_image],
       rw [← path.comp_assoc, path.comp_cons],
       exact hab, }, },
+  { intros L₁ L₂ B hL₁ hL₂ h,
+    refine hH.litter_map_injective L₁ L₂ ((C.cons $ coe_lt hδ).comp B) _ _ _,
+    { simp only [inflexible_support, preimage_set_of_eq],
+      refine relation.trans_gen.trans _ hL,
+      rw [← path.comp_assoc, path.comp_cons],
+      exact hL₁, },
+    { simp only [inflexible_support, preimage_set_of_eq],
+      refine relation.trans_gen.trans _ hL,
+      rw [← path.comp_assoc, path.comp_cons],
+      exact hL₂, },
+    { simp only [foa_hypothesis_near_litter_image] at h ⊢,
+      rw [← path.comp_assoc, path.comp_cons],
+      exact h, }, },
   { intros a L' B ha hL',
     rw hH.atom_mem a L' ((C.cons $ coe_lt hδ).comp B),
     { simp only [foa_hypothesis_atom_image, foa_hypothesis_near_litter_image],
@@ -355,6 +368,38 @@ begin
       exact relation.trans_gen.single (constrains.f_map_bot _ _ _), },
     { refl, }, },
 end
+
+/-
+def weak_struct_approx_union {L : litter} {A : extended_index β}
+  (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A)
+  (hH : hypothesis_injective_inflexible H h) : weak_struct_approx h.δ :=
+λ B, {
+  atom_map := λ a, ⟨(inl a, B) ∈ inflexible_support h,
+    λ ha, H.atom_image a ((h.B.cons (coe_lt h.hδ)).comp B)
+      (by rwa [inflexible_support, ← h.hL, ← h.hA] at ha)⟩,
+  litter_map := λ L, ⟨(inr L.to_near_litter, B) ∈ inflexible_support h,
+    λ hL, H.near_litter_image L.to_near_litter ((h.B.cons (coe_lt h.hδ)).comp B)
+      (by rwa [inflexible_support, ← h.hL, ← h.hA] at hL)⟩,
+  atom_map_dom_small := begin
+    simp only [pfun.dom_mk],
+    refine lt_of_le_of_lt _ (inflexible_support_small h),
+    refine ⟨⟨λ a, ⟨_, a.prop⟩, λ a b h, _⟩⟩,
+    simp only [subtype.mk_eq_mk, prod.mk.inj_iff, subtype.coe_inj, eq_self_iff_true, and_true] at h,
+    exact h,
+  end,
+  litter_map_dom_small := begin
+    simp only [pfun.dom_mk],
+    refine lt_of_le_of_lt _ (inflexible_support_small h),
+    refine ⟨⟨λ L, ⟨_, L.prop⟩, λ L₁ L₂ h, _⟩⟩,
+    simp only [subtype.mk_eq_mk, prod.mk.inj_iff, eq_self_iff_true, and_true,
+      litter.to_near_litter_injective.eq_iff, subtype.coe_inj] at h,
+    exact h,
+  end,
+  atom_map_injective := λ a b ha hb, hH.atom_map_injective a b B ha hb,
+  litter_map_injective := λ L₁ L₂ hL₁ hL₂, hH.litter_map_injective L₁ L₂ B hL₁ hL₂,
+  atom_mem := λ a ha L hL, hH.atom_mem a L B ha hL,
+}
+-/
 
 /-
 noncomputable def support_map_union {π : struct_approx β} (hπ) {γ : Iic α} {δ ε : Iio α}
