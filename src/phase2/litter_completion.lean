@@ -221,8 +221,7 @@ def hypothesised_weak_struct_approx {L : litter} {A : extended_index β}
 
 noncomputable def litter_perm_below (π : struct_approx β) {γ : Iic α} {δ : Iio α}
   (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ) : extended_index δ → local_perm litter :=
-λ C, (π ((B.cons (coe_lt hδ)).comp C)).flexible_completion_litter_perm α
-    ((B.cons (coe_lt hδ)).comp C)
+λ C, (π ((B.cons (coe_lt hδ)).comp C)).flexible_completion_litter_perm α C
 
 lemma hypothesised_weak_struct_approx_free (π : struct_approx β) (hπ : π.free) {L : litter}
   {A : extended_index β} (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A)
@@ -233,7 +232,7 @@ begin
   intros B L' hL',
   cases hL',
   { exact flexible_of_comp_flexible (hπ _ L' hL'), },
-  { exact flexible_of_comp_flexible hL'.1, },
+  { exact hL'.1, },
 end
 
 noncomputable def allowable_of_weak_struct_approx (π : struct_approx β) (hπ : π.free)

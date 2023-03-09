@@ -252,6 +252,21 @@ protected lemma small.bUnion {s : set ι} (hs : small s) {f : Π i ∈ s, set α
 /-- The image of a small set under any function `f` is small. -/
 lemma small.image : small s → small (f '' s) := mk_image_le.trans_lt
 
+/-- The preimage of a small set under an injective function `f` is small. -/
+lemma small.preimage {s : set β} (h : f.injective) : small s → small (f ⁻¹' s) :=
+(mk_preimage_of_injective f s h).trans_lt
+
+-- TODO: Convert random smallness manipulations into invocations of this lemma.
+/-- A set is small if its image under an injective function is contained in a small set. -/
+lemma small.image_subset {t : set β} (f : α → β) (h : f.injective) :
+  small t → f '' s ⊆ t → small s :=
+begin
+  intros h₁ h₂,
+  have := (small.mono h₂ h₁).preimage h,
+  rw [preimage_image_eq s h] at this,
+  exact this,
+end
+
 end small
 
 section is_near

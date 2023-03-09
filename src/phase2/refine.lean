@@ -45,13 +45,16 @@ variables {β : type_index} (w : weak_struct_approx β)
 
 noncomputable def refine : weak_struct_approx β := λ A, (w A).refine
 
+@[simp] lemma refine_apply {A : extended_index β} :
+  w.refine A = (w A).refine := rfl
+
 @[simp] lemma refine_atom_map {A : extended_index β} {a : atom} (ha : ((w A).atom_map a).dom) :
   (w A).refine.atom_map a = (w A).atom_map a := weak_near_litter_approx.refine_atom_map ha
 
 @[simp] lemma refine_litter_map {A : extended_index β} :
   (w A).refine.litter_map = (w A).litter_map := rfl
 
-lemma refine_precise {A : extended_index β} : precise w.refine :=
+lemma refine_precise : precise w.refine :=
 λ A, weak_near_litter_approx.refine_precise
 
 end weak_struct_approx
