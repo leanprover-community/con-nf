@@ -138,6 +138,18 @@ S.order_iso_κ.trans T.order_iso_κ.symm
 @[simp] lemma order_iso_apply_mem {S T : sublitter} (a : S) : (S.order_iso T a : atom) ∈ T :=
 (S.order_iso T a).prop
 
+@[simp] lemma order_iso_apply_fst_eq {S T : sublitter} (a : S) :
+  (S.order_iso T a : atom).1 = T.litter :=
+T.subset (S.order_iso T a).prop
+
+lemma order_iso_congr_left {S T U : sublitter} (h : S = T) (a : S) :
+  (S.order_iso U a : atom) = T.order_iso U ⟨a, by rw ← h; exact a.2⟩ :=
+by cases h; rw subtype.coe_eta
+
+lemma order_iso_congr_right {S T U : sublitter} (h : T = U) (a : S) :
+  (S.order_iso T a : atom) = S.order_iso U a :=
+by cases h; refl
+
 def order_iso.subtype_iso {α β : Type*} [has_le α] [has_le β] (e : α ≃o β)
   {p : α → Prop} {q : β → Prop} (hpq : ∀ a, p a ↔ q (e a)) :
   {a // p a} ≃o {b // q b} :=

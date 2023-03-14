@@ -148,6 +148,7 @@ begin
   simp only [struct_perm.derivative_derivative, path.comp_cons, path.comp_nil],
 end
 
+-- TODO: Does `litter_map_injective` follow from `atom_mem`?
 structure hypothesis_injective_inflexible {L : litter} {A : extended_index β}
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A) : Prop :=
 (atom_map_injective : ∀ a b B
@@ -170,6 +171,10 @@ structure hypothesis_injective_inflexible {L : litter} {A : extended_index β}
       (by rwa [inflexible_support, ← h.hL, ← h.hA] at ha) ∈
     H.near_litter_image L.to_near_litter ((h.B.cons (coe_lt h.hδ)).comp B)
       (by rwa [inflexible_support, ← h.hL, ← h.hA] at hL))
+(map_flexible : ∀ (L : litter) B (hL₁ : (inr L.to_near_litter, B) ∈ inflexible_support h)
+  (hL₂ : flexible α L B),
+  flexible α (H.near_litter_image L.to_near_litter ((h.B.cons (coe_lt h.hδ)).comp B)
+    (by rwa [inflexible_support, ← h.hL, ← h.hA] at hL₁)).1 B)
 
 def hypothesised_weak_struct_approx {L : litter} {A : extended_index β}
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A)
@@ -219,26 +224,23 @@ def hypothesised_weak_struct_approx {L : litter} {A : extended_index β}
       (by rwa [inflexible_support, ← h.hL, ← h.hA] at hL)
   } := rfl
 
-noncomputable def litter_perm_below (π : struct_approx β) {γ : Iic α} {δ : Iio α}
-  (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ) : extended_index δ → local_perm litter :=
-λ C, (π ((B.cons (coe_lt hδ)).comp C)).flexible_completion_litter_perm α C
-
 lemma hypothesised_weak_struct_approx_free (π : struct_approx β) (hπ : π.free) {L : litter}
   {A : extended_index β} (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A)
   (hH : hypothesis_injective_inflexible H h) :
   @struct_approx.free _ _ _ _ (h.δ : Iic α)
-  ((hypothesised_weak_struct_approx H h hH).refine.complete (litter_perm_below π h.hδ h.B)) :=
+  (hypothesised_weak_struct_approx H h hH).refine.complete :=
 begin
-  intros B L' hL',
-  cases hL',
-  { exact flexible_of_comp_flexible (hπ _ L' hL'), },
-  { exact hL'.1, },
+  rintros B L' ((hL' | ⟨L', hL', rfl⟩) | hL'),
+  { exact hL'.2, },
+  { rw weak_near_litter_approx.rough_litter_map_or_else_of_dom _ hL'.1,
+    exact hH.map_flexible L' B hL'.1 hL'.2, },
+  { exact (local_perm.sandbox_subset_subset _ _ hL').2, },
 end
 
 noncomputable def allowable_of_weak_struct_approx (π : struct_approx β) (hπ : π.free)
   {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ)
   (w : weak_struct_approx δ)
-  (hw : (show struct_approx (δ : Iic α), from w.complete (litter_perm_below π hδ B)).free) :
+  (hw : (show struct_approx (δ : Iic α), from w.complete).free) :
   allowable δ :=
 (freedom_of_action_of_lt (δ : Iic α)
   (hδ.trans_le (show _, from coe_le_coe.mp (le_of_path B))) _ hw).some
@@ -246,9 +248,8 @@ noncomputable def allowable_of_weak_struct_approx (π : struct_approx β) (hπ :
 lemma allowable_of_weak_struct_approx_exactly_approximates (π : struct_approx β) (hπ : π.free)
   {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ)
   (w : weak_struct_approx δ)
-  (hw : (show struct_approx (δ : Iic α), from w.complete (litter_perm_below π hδ B)).free) :
-  (w.complete (litter_perm_below π hδ B))
-    .exactly_approximates (allowable_of_weak_struct_approx π hπ hδ B w hw).to_struct_perm :=
+  (hw : (show struct_approx (δ : Iic α), from w.complete).free) :
+  w.complete.exactly_approximates (allowable_of_weak_struct_approx π hπ hδ B w hw).to_struct_perm :=
 (freedom_of_action_of_lt (δ : Iic α)
   (hδ.trans_le (show _, from coe_le_coe.mp (le_of_path B))) _ hw).some_spec
 
@@ -261,8 +262,8 @@ allowable_of_weak_struct_approx π hπ h.hδ h.B _ (hypothesised_weak_struct_app
 lemma hypothesised_allowable_exactly_approximates (π : struct_approx β) (hπ : π.free)
   {L : litter} {A : extended_index β} (h : inflexible_coe L A)
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (hH : hypothesis_injective_inflexible H h) :
-  ((hypothesised_weak_struct_approx H h hH).refine.complete (litter_perm_below π h.hδ h.B))
-    .exactly_approximates (hypothesised_allowable π hπ h H hH).to_struct_perm :=
+  (hypothesised_weak_struct_approx H h hH).refine.complete.exactly_approximates
+    (hypothesised_allowable π hπ h H hH).to_struct_perm :=
 allowable_of_weak_struct_approx_exactly_approximates π hπ h.hδ h.B _
   (hypothesised_weak_struct_approx_free π hπ H h hH)
 

@@ -1,6 +1,7 @@
 import phase2.constrains
 
 open set sum
+open_locale cardinal
 
 universe u
 
@@ -22,6 +23,21 @@ variables [params.{u}] (α : Λ) [position_data.{}] [phase_2_assumptions α] {β
 
 /-- A litter is *flexible* if it is not the image of any f-map. -/
 def flexible (L : litter) (A : extended_index β) : Prop := ¬inflexible α L A
+
+lemma mk_flexible (A : extended_index β) : #{L | flexible α L A} = #μ :=
+begin
+  refine le_antisymm ((cardinal.mk_subtype_le _).trans mk_litter.le) _,
+  refine ⟨⟨λ ν, ⟨⟨ν, ⊥, α, with_bot.bot_ne_coe⟩, _⟩, _⟩⟩,
+  { intro h,
+    rw inflexible_iff at h,
+    obtain (⟨γ, δ, ε, hδ, hε, hδε, A, t, h, rfl⟩ | ⟨γ, ε, hε, A, t, h, rfl⟩) := h,
+    all_goals { have := f_map_γ _ _,
+      rw ← h at this,
+      exact ne_of_lt ε.prop this.symm, }, },
+  { intros ν₁ ν₂ h,
+    simp only [subtype.mk_eq_mk, eq_self_iff_true, and_true] at h,
+    exact h, },
+end
 
 variable {α}
 

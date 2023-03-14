@@ -191,7 +191,7 @@ end
 @[simp] lemma mk_extended_index (α : type_index) : #(extended_index α) ≤ #Λ :=
 begin
   refine le_trans ((cardinal.le_def _ _).2 ⟨⟨to_list, to_list_injective (α : type_index) ⊥⟩⟩) _,
-  convert mk_list_le_max _ using 1, simp, rw max_eq_right Λ_limit.aleph_0_le
+  convert mk_list_le_max _ using 1, simp only [mk_type_index, max_eq_right, aleph_0_le_mk],
 end
 
 /-- If `β < γ`, we have a path directly between the two types in the opposite order.

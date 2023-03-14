@@ -216,6 +216,189 @@ noncomputable def near_litter_map_or_else (N : near_litter) : near_litter :=
     exact (w.litter_map_or_else N.fst).snd.prop.symm_diff (small.image N.2.prop),
   end⟩
 
+/-- A weak approximation is precise at a litter in its domain if all atoms in the symmetric
+difference of its image are accounted for. -/
+@[mk_iff] structure precise_at {L : litter} (hL : (w.litter_map L).dom) : Prop :=
+(diff : ((w.litter_map L).get hL : set atom) ∆ litter_set ((w.litter_map L).get hL).1 ⊆
+  w.atom_map.ran)
+(fwd : ∀ a ha, (w.atom_map a).get ha ∈ litter_set L → (w.atom_map ((w.atom_map a).get ha)).dom)
+(back : w.atom_map.dom ∩ (w.litter_map L).get hL ⊆ w.atom_map.ran)
+
+/-- A weak approximation is precise if it is precise at every litter in its domain. -/
+def precise : Prop := ∀ ⦃L⦄ (hL : (w.litter_map L).dom), w.precise_at hL
+
+/-!
+## Induced litter permutation
+-/
+
+lemma mk_dom_symm_diff_le :
+  #↥(w.litter_map.dom ∆ (w.rough_litter_map_or_else '' w.litter_map.dom)) ≤
+  #{L : litter | ¬w.banned_litter L} :=
+begin
+  rw mk_not_banned_litter,
+  refine le_trans (le_of_lt _) κ_le_μ,
+  exact small.symm_diff w.litter_map_dom_small w.litter_map_dom_small.image,
+end
+
+lemma aleph_0_le_not_banned_litter : ℵ₀ ≤ #{L | ¬w.banned_litter L} :=
+begin
+  rw mk_not_banned_litter,
+  exact μ_strong_limit.is_limit.aleph_0_le,
+end
+
+lemma disjoint_dom_not_banned_litter :
+  disjoint (w.litter_map.dom ∪ w.rough_litter_map_or_else '' w.litter_map.dom)
+    {L : litter | ¬w.banned_litter L} :=
+begin
+  simp only [set.disjoint_left, mem_union, pfun.mem_dom, mem_image, mem_set_of_eq, not_not],
+  rintros _ (⟨_, hL, rfl⟩ | ⟨L, ⟨_, hL, rfl⟩, rfl⟩),
+  { exact banned_litter.litter_dom _ hL, },
+  { rw w.rough_litter_map_or_else_of_dom hL,
+    exact banned_litter.litter_map _ hL, },
+end
+
+lemma rough_litter_map_or_else_inj_on : inj_on w.rough_litter_map_or_else w.litter_map.dom :=
+begin
+  intros L₁ hL₁ L₂ hL₂ h,
+  rw [w.rough_litter_map_or_else_of_dom hL₁, w.rough_litter_map_or_else_of_dom hL₂] at h,
+  exact w.litter_map_injective hL₁ hL₂ (near_litter.inter_nonempty_of_fst_eq_fst h),
+end
+
+/-- A local permutation on the set of litters that occur in the domain or range of `w`.
+This permutes both flexible and inflexible litters. -/
+noncomputable def litter_perm' : local_perm litter :=
+local_perm.complete
+  w.rough_litter_map_or_else
+  w.litter_map.dom
+  {L | ¬w.banned_litter L}
+  w.mk_dom_symm_diff_le
+  w.aleph_0_le_not_banned_litter
+  w.disjoint_dom_not_banned_litter
+  w.rough_litter_map_or_else_inj_on
+
+def id_on_banned (s : set litter) : local_perm litter := {
+  to_fun := id,
+  inv_fun := id,
+  domain := {L | w.banned_litter L} \ s,
+  to_fun_domain' := λ L h, h,
+  inv_fun_domain' := λ L h, h,
+  left_inv' := λ L h, rfl,
+  right_inv' := λ L h, rfl,
+}
+
+noncomputable def litter_perm : local_perm litter :=
+local_perm.piecewise w.litter_perm' (w.id_on_banned w.litter_perm'.domain)
+  (by rw ← set.subset_compl_iff_disjoint_left; exact λ L h, h.2)
+
+lemma litter_perm'_apply_eq (L : litter) (hL : L ∈ w.litter_map.dom) :
+  w.litter_perm' L = w.rough_litter_map_or_else L :=
+local_perm.complete_apply_eq _ _ _ hL
+
+lemma litter_perm_apply_eq (L : litter) (hL : L ∈ w.litter_map.dom) :
+  w.litter_perm L = w.rough_litter_map_or_else L :=
+begin
+  rw ← w.litter_perm'_apply_eq L hL,
+  exact local_perm.piecewise_apply_eq_left (or.inl (or.inl hL)),
+end
+
+lemma litter_perm'_domain_small : small w.litter_perm'.domain :=
+begin
+  refine small.union (small.union w.litter_map_dom_small w.litter_map_dom_small.image) _,
+  rw small,
+  rw cardinal.mk_congr (local_perm.sandbox_subset_equiv _ _),
+  simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph_0, lift_uzero, lift_id],
+  refine add_lt_of_lt κ_regular.aleph_0_le _ _;
+    refine (mul_lt_of_lt κ_regular.aleph_0_le (lt_of_le_of_lt Λ_limit.aleph_0_le Λ_lt_κ) _);
+    refine lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _,
+  exact w.litter_map_dom_small,
+  exact w.litter_map_dom_small.image,
+end
+
+lemma litter_perm_domain_small : small w.litter_perm.domain :=
+small.union w.litter_perm'_domain_small (small.mono (diff_subset _ _) w.banned_litter_small)
+
+variables {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α} {A : extended_index β}
+
+lemma mk_not_banned_litter_and_flexible : #{L | ¬w.banned_litter L ∧ flexible α L A} = #μ :=
+begin
+  refine le_antisymm ((mk_subtype_le _).trans mk_litter.le) _,
+  by_contra,
+  rw not_le at h,
+  have h₁ := cardinal.le_mk_diff_add_mk {L | flexible α L A} {L | w.banned_litter L},
+  rw [mk_flexible, diff_eq, inter_comm] at h₁,
+  have h₂ := add_lt_of_lt μ_strong_limit.is_limit.aleph_0_le h
+    (lt_trans w.banned_litter_small κ_lt_μ),
+  exact h₁.not_lt h₂,
+end
+
+lemma mk_dom_inter_flexible_symm_diff_le :
+  #↥((w.litter_map.dom ∩ {L | flexible α L A}) ∆
+    (w.rough_litter_map_or_else '' (w.litter_map.dom ∩ {L | flexible α L A}))) ≤
+  #{L : litter | ¬w.banned_litter L ∧ flexible α L A} :=
+begin
+  rw mk_not_banned_litter_and_flexible,
+  refine le_trans (le_of_lt _) κ_le_μ,
+  exact small.symm_diff
+    (small.mono (inter_subset_left _ _) w.litter_map_dom_small)
+    (small.mono (inter_subset_left _ _) w.litter_map_dom_small).image,
+end
+
+lemma aleph_0_le_not_banned_litter_and_flexible : ℵ₀ ≤ #{L | ¬w.banned_litter L ∧ flexible α L A} :=
+begin
+  rw mk_not_banned_litter_and_flexible,
+  exact μ_strong_limit.is_limit.aleph_0_le,
+end
+
+lemma disjoint_dom_inter_flexible_not_banned_litter :
+  disjoint ((w.litter_map.dom ∩ {L | flexible α L A})
+    ∪ w.rough_litter_map_or_else '' (w.litter_map.dom ∩ {L | flexible α L A}))
+    {L : litter | ¬w.banned_litter L ∧ flexible α L A} :=
+begin
+  refine disjoint_of_subset _ (inter_subset_left _ _) w.disjoint_dom_not_banned_litter,
+  rintros a (ha | ⟨b, hb, rfl⟩),
+  exact or.inl ha.1,
+  exact or.inr ⟨b, hb.1, rfl⟩,
+end
+
+lemma rough_litter_map_or_else_inj_on_dom_inter_flexible :
+  inj_on w.rough_litter_map_or_else (w.litter_map.dom ∩ {L | flexible α L A}) :=
+w.rough_litter_map_or_else_inj_on.mono (inter_subset_left _ _)
+
+noncomputable def flexible_litter_perm (A : extended_index β) :
+  local_perm litter :=
+local_perm.complete
+  w.rough_litter_map_or_else
+  (w.litter_map.dom ∩ {L | flexible α L A})
+  {L | ¬w.banned_litter L ∧ flexible α L A}
+  w.mk_dom_inter_flexible_symm_diff_le
+  w.aleph_0_le_not_banned_litter_and_flexible
+  w.disjoint_dom_inter_flexible_not_banned_litter
+  w.rough_litter_map_or_else_inj_on_dom_inter_flexible
+
+lemma flexible_litter_perm_apply_eq (L : litter)
+  (hL₁ : L ∈ w.litter_map.dom) (hL₂ : flexible α L A) :
+  w.flexible_litter_perm A L = w.rough_litter_map_or_else L :=
+local_perm.complete_apply_eq _ _ _ ⟨hL₁, hL₂⟩
+
+lemma flexible_litter_perm_domain_small : small (w.flexible_litter_perm A).domain :=
+begin
+  refine small.union (small.union _ _) _,
+  { exact w.litter_map_dom_small.mono (inter_subset_left _ _) },
+  { exact (w.litter_map_dom_small.mono (inter_subset_left _ _)).image, },
+  { rw small,
+    rw cardinal.mk_congr (local_perm.sandbox_subset_equiv _ _),
+    simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph_0, lift_uzero, lift_id],
+    refine add_lt_of_lt κ_regular.aleph_0_le _ _;
+      refine (mul_lt_of_lt κ_regular.aleph_0_le (lt_of_le_of_lt Λ_limit.aleph_0_le Λ_lt_κ) _);
+      refine lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _,
+    exact w.litter_map_dom_small.mono (inter_subset_left _ _),
+    exact (w.litter_map_dom_small.mono (inter_subset_left _ _)).image, },
+end
+
+/-!
+# Completed permutations
+-/
+
 /-- A local permutation induced by completing the orbits of atoms in a weak near-litter
 approximation. This function creates forward and backward images of atoms in the *sandbox litter*,
 a litter which is away from the domain and range of the approximation in question, so it should
@@ -251,9 +434,9 @@ small.union (small.union w.atom_map_dom_small
 /-- A near-litter approximation built from this weak near-litter approximation.
 Its action on atoms matches that of the weak approximation, and its rough action on litters
 matches the given litter permutation. -/
-noncomputable def complete (litter_perm : local_perm litter) : near_litter_approx := {
+noncomputable def complete (A : extended_index β) : near_litter_approx := {
   atom_perm := w.complete_atom_perm,
-  litter_perm := litter_perm,
+  litter_perm := w.flexible_litter_perm A,
   domain_small := λ L, small.mono (inter_subset_right _ _) w.complete_atom_perm_domain_small,
 }
 
@@ -264,30 +447,19 @@ lemma complete_atom_perm_apply_eq {a : atom} (ha : (w.atom_map a).dom) :
 by rwa [complete_atom_perm, local_perm.complete_apply_eq, atom_map_or_else_of_dom]
 
 lemma complete_smul_atom_eq {a : atom} (ha : (w.atom_map a).dom) :
-  w.complete litter_perm • a = (w.atom_map a).get ha := w.complete_atom_perm_apply_eq ha
+  w.complete A • a = (w.atom_map a).get ha := w.complete_atom_perm_apply_eq ha
 
 @[simp] lemma complete_smul_litter_eq (L : litter) :
-  w.complete litter_perm • L = litter_perm L := rfl
-
-/-- A weak approximation is precise at a litter in its domain if all atoms in the symmetric
-difference of its image are accounted for. -/
-@[mk_iff] structure precise_at {L : litter} (hL : (w.litter_map L).dom) : Prop :=
-(diff : ((w.litter_map L).get hL : set atom) ∆ litter_set ((w.litter_map L).get hL).1 ⊆
-  w.atom_map.ran)
-(fwd : ∀ a ha, (w.atom_map a).get ha ∈ litter_set L → (w.atom_map ((w.atom_map a).get ha)).dom)
-(back : w.atom_map.dom ∩ (w.litter_map L).get hL ⊆ w.atom_map.ran)
-
-/-- A weak approximation is precise if it is precise at every litter in its domain. -/
-def precise : Prop := ∀ ⦃L⦄ (hL : (w.litter_map L).dom), w.precise_at hL
+  w.complete A • L = w.flexible_litter_perm A L := rfl
 
 lemma smul_atom_eq
-  {π : near_litter_perm} (hπ : (w.complete litter_perm).exactly_approximates π)
+  {π : near_litter_perm} (hπ : (w.complete A).exactly_approximates π)
   {a : atom} (ha : (w.atom_map a).dom) :
   π • a = (w.atom_map a).get ha :=
 by rw [← hπ.map_atom a (or.inl (or.inl ha)), w.complete_smul_atom_eq ha]
 
 lemma smul_to_near_litter_eq_of_precise_at
-  {π : near_litter_perm} (hπ : (w.complete litter_perm).exactly_approximates π)
+  {π : near_litter_perm} (hπ : (w.complete A).exactly_approximates π)
   {L : litter} (hL : (w.litter_map L).dom) (hw : w.precise_at hL)
   (hπL : π • L = ((w.litter_map L).get hL).1) :
   π • L.to_near_litter = (w.litter_map L).get hL :=
@@ -306,7 +478,7 @@ begin
         rw [this, smul_inv_smul] at ha,
         exact ha, },
       rw ← hπ.symm_map_atom a (hπ.exception_mem _ h) at ha ⊢,
-      obtain ((hdom | hdom) | hdom) := (w.complete litter_perm).atom_perm.symm.map_domain
+      obtain ((hdom | hdom) | hdom) := (w.complete A).atom_perm.symm.map_domain
         (hπ.exception_mem _ h),
       { exact hdom, },
       { obtain ⟨c, hc₁, hc₂⟩ := hdom,
@@ -365,7 +537,7 @@ begin
 end
 
 lemma smul_near_litter_eq_of_precise_at
-  {π : near_litter_perm} (hπ : (w.complete litter_perm).exactly_approximates π)
+  {π : near_litter_perm} (hπ : (w.complete A).exactly_approximates π)
   {N : near_litter} (hN : (w.litter_map N.1).dom) (hw : w.precise_at hN)
   (hπL : π • N.1 = ((w.litter_map N.1).get hN).1) :
   ((π • N : near_litter) : set atom) = (w.litter_map N.1).get hN ∆ (π • (litter_set N.1 ∆ N)) :=
@@ -375,112 +547,21 @@ begin
   refl,
 end
 
-/-!
-## Induced litter permutation
--/
-
-lemma mk_dom_symm_diff_le :
-  #↥(w.litter_map.dom ∆ (w.rough_litter_map_or_else '' w.litter_map.dom)) ≤
-  #{L : litter | ¬w.banned_litter L} :=
-begin
-  rw mk_not_banned_litter,
-  refine le_trans (le_of_lt _) κ_le_μ,
-  exact small.symm_diff w.litter_map_dom_small w.litter_map_dom_small.image,
-end
-
-lemma aleph_0_le_not_banned_litter : ℵ₀ ≤ #{L | ¬w.banned_litter L} :=
-begin
-  rw mk_not_banned_litter,
-  exact μ_strong_limit.is_limit.aleph_0_le,
-end
-
-lemma disjoint_dom_not_banned_litter :
-  disjoint (w.litter_map.dom ∪ w.rough_litter_map_or_else '' w.litter_map.dom)
-    {L : litter | ¬w.banned_litter L} :=
-begin
-  simp only [set.disjoint_left, mem_union, pfun.mem_dom, mem_image, mem_set_of_eq, not_not],
-  rintros _ (⟨_, hL, rfl⟩ | ⟨L, ⟨_, hL, rfl⟩, rfl⟩),
-  { exact banned_litter.litter_dom _ hL, },
-  { rw w.rough_litter_map_or_else_of_dom hL,
-    exact banned_litter.litter_map _ hL, },
-end
-
-lemma rough_litter_map_or_else_inj_on : inj_on w.rough_litter_map_or_else w.litter_map.dom :=
-begin
-  intros L₁ hL₁ L₂ hL₂ h,
-  rw [w.rough_litter_map_or_else_of_dom hL₁, w.rough_litter_map_or_else_of_dom hL₂] at h,
-  exact w.litter_map_injective hL₁ hL₂ (near_litter.inter_nonempty_of_fst_eq_fst h),
-end
-
-/-- A local permutation on the set of litters that occur in the domain or range of `w`.
-This permutes both flexible and inflexible litters. -/
-noncomputable def litter_perm' : local_perm litter :=
-local_perm.complete
-  w.rough_litter_map_or_else
-  w.litter_map.dom
-  {L | ¬w.banned_litter L}
-  w.mk_dom_symm_diff_le
-  w.aleph_0_le_not_banned_litter
-  w.disjoint_dom_not_banned_litter
-  w.rough_litter_map_or_else_inj_on
-
-def id_on_banned : local_perm litter := {
-  to_fun := id,
-  inv_fun := id,
-  domain := {L | w.banned_litter L} \ w.litter_perm'.domain,
-  to_fun_domain' := λ L h, h,
-  inv_fun_domain' := λ L h, h,
-  left_inv' := λ L h, rfl,
-  right_inv' := λ L h, rfl,
-}
-
-noncomputable def litter_perm : local_perm litter :=
-local_perm.piecewise w.litter_perm' w.id_on_banned
-  (by rw ← set.subset_compl_iff_disjoint_left; exact λ L h, h.2)
-
-lemma litter_perm'_apply_eq (L : litter) (hL : L ∈ w.litter_map.dom) :
-  w.litter_perm' L = w.rough_litter_map_or_else L :=
-local_perm.complete_apply_eq _ _ _ hL
-
-lemma litter_perm_apply_eq (L : litter) (hL : L ∈ w.litter_map.dom) :
-  w.litter_perm L = w.rough_litter_map_or_else L :=
-begin
-  rw ← w.litter_perm'_apply_eq L hL,
-  exact local_perm.piecewise_apply_eq_left (or.inl (or.inl hL)),
-end
-
-lemma litter_perm'_domain_small : small w.litter_perm'.domain :=
-begin
-  refine small.union (small.union w.litter_map_dom_small w.litter_map_dom_small.image) _,
-  rw small,
-  rw cardinal.mk_congr (local_perm.sandbox_subset_equiv _ _),
-  simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph_0, lift_uzero, lift_id],
-  refine add_lt_of_lt κ_regular.aleph_0_le _ _;
-    refine (mul_lt_of_lt κ_regular.aleph_0_le (lt_of_le_of_lt Λ_limit.aleph_0_le Λ_lt_κ) _);
-    refine lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _,
-  exact w.litter_map_dom_small,
-  exact w.litter_map_dom_small.image,
-end
-
-lemma litter_perm_domain_small : small w.litter_perm.domain :=
-small.union w.litter_perm'_domain_small (small.mono (diff_subset _ _) w.banned_litter_small)
-
 end weak_near_litter_approx
 
 namespace weak_struct_approx
 
 section
 
-variables {β : type_index} (w : weak_struct_approx β)
-  {litter_perm : extended_index β → local_perm litter}
+def precise {β : type_index} (w : weak_struct_approx β) : Prop := ∀ B, (w B).precise
 
-noncomputable def complete (litter_perm : extended_index β → local_perm litter) : struct_approx β :=
-λ B, (w B).complete (litter_perm B)
+variables {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α} (w : weak_struct_approx β)
 
-def precise : Prop := ∀ B, (w B).precise
+noncomputable def complete : struct_approx β :=
+λ B, (w B).complete B
 
 lemma smul_atom_eq
-  {π : struct_perm β} (hπ : (w.complete litter_perm).exactly_approximates π)
+  {π : struct_perm β} (hπ : w.complete.exactly_approximates π)
   {a : atom} {B : extended_index β} (ha : ((w B).atom_map a).dom) :
   struct_perm.derivative B π • a = ((w B).atom_map a).get ha :=
 begin
@@ -490,7 +571,7 @@ begin
 end
 
 lemma smul_to_near_litter_eq_of_precise (hw : w.precise)
-  {π : struct_perm β} (hπ : (w.complete litter_perm).exactly_approximates π)
+  {π : struct_perm β} (hπ : w.complete.exactly_approximates π)
   {L : litter} {B : extended_index β} (hL : ((w B).litter_map L).dom)
   (hπL : struct_perm.derivative B π • L = (((w B).litter_map L).get hL).1) :
   struct_perm.derivative B π • L.to_near_litter = ((w B).litter_map L).get hL :=
@@ -503,7 +584,7 @@ begin
 end
 
 lemma smul_near_litter_eq_of_precise (hw : w.precise)
-  {π : struct_perm β} (hπ : (w.complete litter_perm).exactly_approximates π)
+  {π : struct_perm β} (hπ : w.complete.exactly_approximates π)
   {N : near_litter} {B : extended_index β} (hN : ((w B).litter_map N.1).dom)
   (hπL : struct_perm.derivative B π • N.1 = (((w B).litter_map N.1).get hN).1) :
   ((struct_perm.derivative B π • N : near_litter) : set atom) =
@@ -519,7 +600,6 @@ end
 end
 
 variables {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α}
-  {litter_perm : extended_index β → local_perm litter}
 
 /-- A weak structural approximation *supports* a tangle if it defines an image for everything
 in the reduction of its designated support. -/
@@ -546,13 +626,8 @@ noncomputable def support_condition_map_or_else (w : weak_struct_approx β) :
 | (inl a, B) := (inl ((w B).atom_map_or_else a), B)
 | (inr N, B) := (inr ((w B).near_litter_map_or_else N), B)
 
-def coherent_base (w : weak_struct_approx β) (litter_perm : extended_index β → local_perm litter) :
-  Prop :=
-∀ L B hL, L ∈ (litter_perm B).domain → litter_perm B L = (((w B).litter_map L).get hL).fst
-
-def coherent_coe (w : weak_struct_approx β) (litter_perm : extended_index β → local_perm litter) :
-  Prop :=
-∀ {π : allowable β} (hπ : (w.complete litter_perm).exactly_approximates π.to_struct_perm)
+def coherent_coe (w : weak_struct_approx β) : Prop :=
+∀ {π : allowable β} (hπ : w.complete.exactly_approximates π.to_struct_perm)
   (γ : Iic α) (δ ε : Iio α) (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
   (C : path (β : type_index) γ) (t : tangle δ) (hL)
   (hc : ∀ (c : support_condition δ), c ∈ (designated_support t).carrier →
@@ -566,9 +641,8 @@ def coherent_coe (w : weak_struct_approx β) (litter_perm : extended_index β �
     (((w ((C.cons (coe_lt hε)).cons (bot_lt_coe _))).litter_map
       (f_map (subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t)).get hL).fst
 
-def coherent_bot (w : weak_struct_approx β) (litter_perm : extended_index β → local_perm litter) :
-  Prop :=
-∀ {π : allowable β} (hπ : (w.complete litter_perm).exactly_approximates π.to_struct_perm)
+def coherent_bot (w : weak_struct_approx β) : Prop :=
+∀ {π : allowable β} (hπ : w.complete.exactly_approximates π.to_struct_perm)
   (γ : Iic α) (ε : Iio α) (hε : (ε : Λ) < γ)
   (C : path (β : type_index) γ) (a : tangle ⊥) (hL)
   (hc : struct_perm.derivative (C.cons (bot_lt_coe _)) π.to_struct_perm • a =
@@ -579,16 +653,13 @@ def coherent_bot (w : weak_struct_approx β) (litter_perm : extended_index β �
     (((w ((C.cons (coe_lt hε)).cons (bot_lt_coe _))).litter_map
       (f_map (show (⊥ : type_index) ≠ (ε : Λ), from bot_ne_coe) a)).get hL).fst
 
-@[mk_iff] structure coherent (w : weak_struct_approx β)
-  (litter_perm : extended_index β → local_perm litter) : Prop :=
-(base : w.coherent_base litter_perm)
-(coe : w.coherent_coe litter_perm)
-(bot : w.coherent_bot litter_perm)
+@[mk_iff] structure coherent (w : weak_struct_approx β) : Prop :=
+(coe : w.coherent_coe)
+(bot : w.coherent_bot)
 
 lemma smul_litter_eq_of_supports (w : weak_struct_approx β)
-  (hwc : w.coherent litter_perm)
-  (hl : ∀ B, {L | flexible α L B} ⊆ (litter_perm B).domain)
-  {π : allowable β} (hπ : (w.complete litter_perm).exactly_approximates π.to_struct_perm)
+  (hwc : w.coherent)
+  {π : allowable β} (hπ : w.complete.exactly_approximates π.to_struct_perm)
   (t : tangle β) (h : w.supports t)
   (d : support_condition β) (hd : d ∈ designated_support t)
   (B : extended_index β) (L : litter)
@@ -629,16 +700,17 @@ begin
       congr,
       sorry, },
     all_goals { sorry, }, },
-  { rw [← struct_perm.of_bot_smul, ← (hπ B).map_litter _ (hl B hflex)],
+  { have := h.litter_mem L B ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩,
+    rw [← struct_perm.of_bot_smul, ← (hπ B).map_litter _ (or.inl (or.inl ⟨this, hflex⟩))],
     refine ((w B).complete_smul_litter_eq L).trans _,
-    exact hwc.base L B (h.litter_mem L B
-      ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩) (hl B hflex), },
+    rw [(w B).flexible_litter_perm_apply_eq, (w B).rough_litter_map_or_else_of_dom],
+    exact this,
+    exact hflex, },
 end
 
 lemma smul_support_condition_eq (w : weak_struct_approx β)
-  (hw : w.precise) (hwc : w.coherent litter_perm)
-  (hl : ∀ B, {L | flexible α L B} ⊆ (litter_perm B).domain)
-  {π : allowable β} (hπ : (w.complete litter_perm).exactly_approximates π.to_struct_perm)
+  (hw : w.precise) (hwc : w.coherent)
+  {π : allowable β} (hπ : w.complete.exactly_approximates π.to_struct_perm)
   (t : tangle β) (h : w.supports t)
   (c d : support_condition β)
   (hc : relation.refl_trans_gen (constrains α β) c d)
@@ -678,17 +750,16 @@ begin
       rw ← this.1 at hb₂,
       exact ⟨b, hb₁, hb₂⟩, },
     { exact ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩, }, },
-  refine w.smul_litter_eq_of_supports hwc hl hπ t h d hd B N.1 _ (refl_trans_gen_near_litter hc),
+  refine w.smul_litter_eq_of_supports hwc hπ t h d hd B N.1 _ (refl_trans_gen_near_litter hc),
   exact λ e he, ih e (trans_gen_near_litter he) d
     (relation.refl_trans_gen.trans he.to_refl (refl_trans_gen_near_litter hc)) hd,
 end
 
 lemma smul_eq_smul_tangle (w v : weak_struct_approx β)
   (hw : w.precise) (hv : v.precise)
-  (hwc : w.coherent litter_perm) (hvc : v.coherent litter_perm)
-  (hl : ∀ B, {L | flexible α L B} ⊆ (litter_perm B).domain)
-  {πw πv : allowable β} (hπw : (w.complete litter_perm).exactly_approximates πw.to_struct_perm)
-  (hπv : (v.complete litter_perm).exactly_approximates πv.to_struct_perm)
+  (hwc : w.coherent) (hvc : v.coherent)
+  {πw πv : allowable β} (hπw : w.complete.exactly_approximates πw.to_struct_perm)
+  (hπv : v.complete.exactly_approximates πv.to_struct_perm)
   (t : tangle β) (h : compatible w v t) :
   πw • t = πv • t :=
 begin
@@ -698,8 +769,8 @@ begin
   intros c hc,
   rw [mul_smul, inv_smul_eq_iff],
   symmetry,
-  rw smul_support_condition_eq w hw hwc hl hπw t h.w_supports c c relation.refl_trans_gen.refl hc,
-  rw smul_support_condition_eq v hv hvc hl hπv t h.v_supports c c relation.refl_trans_gen.refl hc,
+  rw smul_support_condition_eq w hw hwc hπw t h.w_supports c c relation.refl_trans_gen.refl hc,
+  rw smul_support_condition_eq v hv hvc hπv t h.v_supports c c relation.refl_trans_gen.refl hc,
   obtain ⟨a | N, B⟩ := c,
   { simp only [support_condition_map_or_else, prod.mk.inj_iff, eq_self_iff_true, and_true],
     rw [(w B).atom_map_or_else_of_dom, (v B).atom_map_or_else_of_dom],

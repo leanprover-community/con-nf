@@ -1,7 +1,8 @@
+import phase2.atom_completion
 import phase2.near_litter_completion
 
 open function quiver set sum with_bot
-open_locale classical
+open_locale classical pointwise
 
 universe u
 
@@ -75,6 +76,334 @@ lemma complete_atom_map_eq_of_not_mem_domain {a} {A} (h : a ∉ (π A).atom_perm
     ⟨a, (π A).mem_largest_sublitter_of_not_mem_domain a h⟩ :=
 by rw [complete_atom_map_eq, atom_completion, dif_neg h]; refl
 
+/-!
+Lemmas about the proof-relevant `inflexible_*` objects.
+-/
+
+lemma inflexible_of_inflexible_bot {β : Iic α} {L : litter} {A : extended_index β}
+  (h : inflexible_bot L A) : inflexible α L A :=
+begin
+  have := inflexible.mk_bot h.hε h.B h.a,
+  rw [← h.hL, ← h.hA] at this,
+  exact this,
+end
+
+lemma inflexible_of_inflexible_coe {β : Iic α} {L : litter} {A : extended_index β}
+  (h : inflexible_coe L A) : inflexible α L A :=
+begin
+  have := inflexible.mk_coe h.hδ h.hε h.hδε h.B h.t,
+  rw [← h.hL, ← h.hA] at this,
+  exact this,
+end
+
+lemma inflexible_bot_or_inflexible_coe_of_inflexible {β : Iic α} {L : litter} {A : extended_index β}
+  (h : inflexible α L A) : nonempty (inflexible_bot L A) ∨ nonempty (inflexible_coe L A) :=
+begin
+  obtain ⟨hδ, hε, hδε, B, t⟩ | ⟨hε, B, a⟩ := h,
+  { refine or.inr ⟨⟨_, _, _, _, _, _, _, _, rfl, rfl⟩⟩,
+    assumption, },
+  { exact or.inl ⟨⟨_, _, _, _, _, rfl, rfl⟩⟩, },
+end
+
+lemma flexible_iff_not_inflexible_bot_coe {β : Iic α} {L : litter} {A : extended_index β} :
+  flexible α L A ↔ (inflexible_bot L A → false) ∧ (inflexible_coe L A → false) :=
+begin
+  split,
+  { intro h,
+    exact ⟨λ h', h (inflexible_of_inflexible_bot h'), λ h', h (inflexible_of_inflexible_coe h')⟩, },
+  { intros h₁ h₂,
+    cases inflexible_bot_or_inflexible_coe_of_inflexible h₂,
+    exact h₁.1 h.some,
+    exact h₁.2 h.some, },
+end
+
+@[simp] def near_litter_hypothesis_eq (N : near_litter) (A : extended_index β) :
+  near_litter_hypothesis N A (π.foa_hypothesis hπ) = (π.foa_hypothesis hπ) := rfl
+
+/-- A basic definition unfold. -/
+lemma complete_litter_map_eq_of_inflexible_coe (hπ : π.free) {L : litter} {A : extended_index β}
+  (h : inflexible_coe L A) (hH : hypothesis_injective_inflexible (π.foa_hypothesis hπ) h) :
+  π.complete_litter_map hπ L A = f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.hδε)
+    (hypothesised_allowable π hπ h (π.foa_hypothesis hπ) hH • h.t) :=
+begin
+  have : nonempty (inflexible_coe L A) := ⟨h⟩,
+  rw [complete_litter_map_eq, litter_completion, dif_pos this],
+  cases subsingleton.elim this.some h,
+  rw dif_pos,
+end
+
+/-- A basic definition unfold. -/
+lemma complete_litter_map_eq_of_inflexible_bot {L : litter} {A : extended_index β}
+  (h : inflexible_bot L A) :
+  π.complete_litter_map hπ L A =
+  f_map (show (⊥ : type_index) ≠ (h.ε : Λ), from with_bot.bot_ne_coe)
+    (π.complete_atom_map hπ h.a (h.B.cons (with_bot.bot_lt_coe _))) :=
+begin
+  have h₁ : ¬nonempty (inflexible_coe L A) := λ h', inflexible_bot_inflexible_coe h h'.some,
+  have h₂ : nonempty (inflexible_bot L A) := ⟨h⟩,
+  rw [complete_litter_map_eq, litter_completion, dif_neg h₁, dif_pos h₂],
+  cases subsingleton.elim h₂.some h,
+  refl,
+end
+
+/-- A basic definition unfold. -/
+lemma complete_litter_map_eq_of_flexible {L : litter} {A : extended_index β}
+  (h₁ : inflexible_bot L A → false) (h₂ : inflexible_coe L A → false) :
+  π.complete_litter_map hπ L A = near_litter_approx.flexible_completion α (π A) A • L :=
+by rw [complete_litter_map_eq, litter_completion,
+  dif_neg (show ¬nonempty (inflexible_coe L A), from λ h, h₂ h.some),
+  dif_neg (show ¬nonempty (inflexible_bot L A), from λ h, h₁ h.some)]
+
+/-- A basic definition unfold. -/
+lemma complete_litter_map_eq_of_flexible' {L : litter} {A : extended_index β}
+  (h : flexible α L A) :
+  π.complete_litter_map hπ L A = near_litter_approx.flexible_completion α (π A) A • L :=
+complete_litter_map_eq_of_flexible
+  (flexible_iff_not_inflexible_bot_coe.mp h).1
+  (flexible_iff_not_inflexible_bot_coe.mp h).2
+
+-- TODO: Move these notations earlier, and maybe consider different ones.
+notation c ` <[`:50 α `] ` d:50 := relation.trans_gen (constrains α _) c d
+notation c ` ≤[`:50 α `] ` d:50 := relation.refl_trans_gen (constrains α _) c d
+
+def trans_constrained (c d : support_condition β) : set (support_condition β) :=
+{e | e <[α] c} ∪ {e | e <[α] d}
+
+def refl_trans_constrained (c d : support_condition β) : set (support_condition β) :=
+{e | e ≤[α] c} ∪ {e | e ≤[α] d}
+
+/-- The inductive hypothesis used to prove that the induced action generated in the freedom of
+action theorem is lawful. We perform induction over two support conditions at once so that we can
+prove things like injectivity and surjectivity which consider two support conditions at once. -/
+structure foa_props {π : struct_approx β} (hπ : π.free) (c d : support_condition β) : Prop :=
+(atom_injective : ∀ a b (B : extended_index β),
+  (inl a, B) ∈ trans_constrained c d →
+  (inl b, B) ∈ trans_constrained c d →
+  π.complete_atom_map hπ a B = π.complete_atom_map hπ b B → a = b)
+(litter_injective : ∀ (L₁ L₂ : litter) (B : extended_index β),
+  (inr L₁.to_near_litter, B) ∈ trans_constrained c d →
+  (inr L₂.to_near_litter, B) ∈ trans_constrained c d →
+  π.complete_litter_map hπ L₁ B = π.complete_litter_map hπ L₂ B → L₁ = L₂)
+(map_flexible : ∀ (L : litter) {γ : Iic α} (A : path (β : type_index) γ) (B : extended_index γ)
+  (hL : (inr L.to_near_litter, A.comp B) ∈ trans_constrained c d)
+  (hflex : flexible α L B), flexible α (π.complete_litter_map hπ L (A.comp B)) B)
+
+lemma eq_of_sublitter_bijection_apply_eq {π : near_litter_approx} {L₁ L₂ L₃ L₄ : litter} {a b} :
+  ((π.largest_sublitter L₁).order_iso (π.largest_sublitter L₂) a : atom) =
+  (π.largest_sublitter L₃).order_iso (π.largest_sublitter L₄) b →
+  L₁ = L₃ → L₂ = L₄ → (a : atom) = b :=
+begin
+  rintros h₁ rfl rfl,
+  simp only [subtype.coe_inj, embedding_like.apply_eq_iff_eq] at h₁,
+  rw h₁,
+end
+
+lemma fst_trans_constrained {c d : support_condition β}
+  {a : atom} {A : extended_index β}
+  (hac : (inl a, A) ∈ refl_trans_constrained c d) :
+  (inr a.fst.to_near_litter, A) ∈ trans_constrained c d :=
+begin
+  cases hac,
+  exact or.inl (relation.trans_gen.head' (constrains.atom a A) hac),
+  exact or.inr (relation.trans_gen.head' (constrains.atom a A) hac),
+end
+
+/-- We show that injectivity of the atom map extends to atoms below the current support conditions
+`c` and `d`, given that certain properties hold for support conditions before `c` and `d`. -/
+lemma atom_injective_extends {c d : support_condition β} (H : foa_props hπ c d)
+  {a b : atom} {A : extended_index β}
+  (hac : (inl a, A) ∈ refl_trans_constrained c d)
+  (hbc : (inl b, A) ∈ refl_trans_constrained c d)
+  (h : π.complete_atom_map hπ a A = π.complete_atom_map hπ b A) :
+  a = b :=
+begin
+  by_cases ha : a ∈ (π A).atom_perm.domain;
+  by_cases hb : b ∈ (π A).atom_perm.domain,
+  { rw [complete_atom_map_eq_of_mem_domain ha, complete_atom_map_eq_of_mem_domain hb] at h,
+    exact (π A).atom_perm.inj_on ha hb h, },
+  { rw [complete_atom_map_eq_of_mem_domain ha, complete_atom_map_eq_of_not_mem_domain hb] at h,
+    cases (π A).not_mem_domain_of_mem_largest_sublitter ((subtype.coe_eq_iff.mp h.symm).some)
+      ((π A).atom_perm.map_domain ha), },
+  { rw [complete_atom_map_eq_of_not_mem_domain ha, complete_atom_map_eq_of_mem_domain hb] at h,
+    cases (π A).not_mem_domain_of_mem_largest_sublitter ((subtype.coe_eq_iff.mp h).some)
+      ((π A).atom_perm.map_domain hb), },
+  { rw [complete_atom_map_eq_of_not_mem_domain ha, complete_atom_map_eq_of_not_mem_domain hb] at h,
+    have h₁ := (subtype.coe_eq_iff.mp h).some.1,
+    have h₂ := (((π A).largest_sublitter b.1).order_iso
+      ((π A).largest_sublitter (π.complete_litter_map hπ b.1 A))
+      ⟨b, (π A).mem_largest_sublitter_of_not_mem_domain b hb⟩).prop.1,
+    have := H.litter_injective _ _ _
+      (fst_trans_constrained hac) (fst_trans_constrained hbc) (h₁.symm.trans h₂),
+    have := eq_of_sublitter_bijection_apply_eq h this (by rw this),
+    rw [set_like.coe_mk, set_like.coe_mk] at this,
+    exact this, },
+end
+
+lemma fst_mem_trans_constrained' {c d : support_condition β} {A : extended_index β} {a : atom}
+  (h : (inl a, A) ∈ trans_constrained c d) :
+  (inr a.fst.to_near_litter, A) ∈ trans_constrained c d :=
+begin
+  cases h,
+  exact or.inl (relation.trans_gen.head (constrains.atom a A) h),
+  exact or.inr (relation.trans_gen.head (constrains.atom a A) h),
+end
+
+lemma fst_mem_trans_constrained {c d : support_condition β} {A : extended_index β} {N : near_litter}
+  (hN : (inr N, A) ∈ trans_constrained c d) :
+  (inr N.fst.to_near_litter, A) ∈ trans_constrained c d :=
+begin
+  cases hN,
+  exact or.inl (trans_gen_near_litter' hN),
+  exact or.inr (trans_gen_near_litter' hN),
+end
+
+lemma fst_mem_trans_constrained_of_mem_symm_diff {c d : support_condition β}
+  {A : extended_index β} {N : near_litter} {a : atom} (h : a ∈ litter_set N.1 ∆ N)
+  (hN : (inr N, A) ∈ trans_constrained c d) :
+  (inr a.fst.to_near_litter, A) ∈ trans_constrained c d :=
+begin
+  obtain ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩ := h,
+  { rw mem_litter_set at h₁,
+    rw h₁,
+    exact fst_mem_trans_constrained hN, },
+  { cases hN,
+    { refine fst_mem_trans_constrained' (or.inl _),
+      exact relation.trans_gen.head (constrains.symm_diff N a (or.inr ⟨h₁, h₂⟩) A) hN, },
+    { refine fst_mem_trans_constrained' (or.inr _),
+      exact relation.trans_gen.head (constrains.symm_diff N a (or.inr ⟨h₁, h₂⟩) A) hN, }, },
+end
+
+lemma fst_mem_trans_constrained_of_mem {c d : support_condition β}
+  {A : extended_index β} {N : near_litter} {a : atom} (h : a ∈ N)
+  (hN : (inr N, A) ∈ trans_constrained c d) :
+  (inr a.fst.to_near_litter, A) ∈ trans_constrained c d :=
+begin
+  by_cases ha : a.1 = N.1,
+  { rw ha,
+    exact fst_mem_trans_constrained hN, },
+  { exact fst_mem_trans_constrained_of_mem_symm_diff (or.inr ⟨h, ha⟩) hN, },
+end
+
+lemma complete_atom_map_mem_complete_near_litter_map
+  {c d : support_condition β} (H : foa_props hπ c d)
+  {a : atom} {A : extended_index β} {N : near_litter} (h : a ∈ N)
+  (hN : (inr N, A) ∈ trans_constrained c d) :
+  π.complete_atom_map hπ a A ∈ π.complete_near_litter_map hπ N A :=
+begin
+  rw complete_near_litter_map_eq,
+  by_cases ha : a ∈ (π A).atom_perm.domain,
+  { rw complete_atom_map_eq_of_mem_domain ha,
+    refine or.inl ⟨or.inr ⟨a, ⟨h, ha⟩, rfl⟩, _⟩,
+    rintro ⟨_, ⟨b, rfl⟩, _, ⟨hb, rfl⟩, hab⟩,
+    simp only [foa_hypothesis_atom_image, mem_singleton_iff] at hab,
+    rw complete_atom_map_eq_of_not_mem_domain hb.2 at hab,
+    have := sublitter.order_iso_apply_mem _,
+    rw ← hab at this,
+    exact this.2 ((π A).atom_perm.map_domain ha), },
+  rw complete_atom_map_eq_of_not_mem_domain ha,
+  by_cases ha' : a.fst = N.1,
+  { refine or.inl ⟨or.inl _, _⟩,
+    { rw set_like.mem_coe,
+      convert sublitter.order_iso_apply_mem _ using 1,
+      rw [ha', near_litter_hypothesis_eq, complete_litter_map_eq], },
+    { rintro ⟨_, ⟨b, rfl⟩, _, ⟨hb, rfl⟩, hab⟩,
+      simp only [foa_hypothesis_atom_image, mem_singleton_iff] at hab,
+      rw complete_atom_map_eq_of_not_mem_domain hb.2 at hab,
+      have := H.litter_injective _ _ _
+        (fst_mem_trans_constrained hN) (fst_mem_trans_constrained_of_mem_symm_diff hb.1 hN) _,
+      { rw ← ha' at this,
+        rw [sublitter.order_iso_congr_left (congr_arg _ this) _,
+          sublitter.order_iso_congr_right (congr_arg _ (congr_arg2 _ this rfl)) _,
+          subtype.coe_inj, equiv_like.apply_eq_iff_eq] at hab,
+        simp only [set_like.coe_mk] at hab,
+        cases hab,
+        exact hb.1.elim (λ h', h'.2 h) (λ h', h'.2 ha'), },
+      have := order_iso_apply_eq hab,
+      simp only [near_litter_approx.largest_sublitter_litter, ha'] at this,
+      exact this, }, },
+  { refine or.inr ⟨⟨_, ⟨a, rfl⟩, _, ⟨⟨or.inr ⟨h, ha'⟩, ha⟩, rfl⟩, _⟩, _⟩,
+    { simp only [foa_hypothesis_atom_image, mem_singleton_iff],
+      rw complete_atom_map_eq_of_not_mem_domain, },
+    rintro (h' | ⟨b, ⟨hb₁, hb₂⟩, hb₃⟩),
+    { simp only [near_litter_hypothesis_eq, near_litter_approx.coe_largest_sublitter,
+        mem_diff, mem_litter_set, ← complete_litter_map_eq] at h',
+      have := sublitter.order_iso_apply_fst_eq _,
+      rw [h'.1, near_litter_approx.largest_sublitter_litter] at this,
+      exact ha' (H.litter_injective _ _ _
+        (fst_mem_trans_constrained hN) (fst_mem_trans_constrained_of_mem h hN) this).symm, },
+    { have := sublitter.order_iso_apply_mem _,
+      rw ← hb₃ at this,
+      exact this.2 ((π A).atom_perm.map_domain hb₂), }, },
+end
+
+@[simp] lemma near_litter_completion_map_eq {L : litter} {A : extended_index β} :
+  near_litter_completion_map π hπ L.to_near_litter A (π.foa_hypothesis hπ) =
+  (litter_set (π.litter_completion hπ L.to_near_litter.fst A (π.foa_hypothesis hπ)) \
+    (π A).atom_perm.domain) ∪
+  π A • (litter_set L ∩ (π A).atom_perm.domain) :=
+begin
+  simp only [near_litter_completion_map, set.symm_diff_def, near_litter_hypothesis_eq,
+    litter.coe_to_near_litter, litter.to_near_litter_fst, mem_union, mem_diff, mem_litter_set,
+    diff_self, mem_empty_iff_false, false_and, Union_neg', not_false_iff, Union_empty, diff_empty,
+    empty_diff, union_empty, near_litter_approx.coe_largest_sublitter],
+end
+
+lemma eq_of_mem_near_litter_completion_map {c d : support_condition β} (H : foa_props hπ c d)
+  {L₁ L₂ : litter} {A : extended_index β}
+  (hL₁ : (inr L₁.to_near_litter, A) ∈ trans_constrained c d)
+  (hL₂ : (inr L₂.to_near_litter, A) ∈ trans_constrained c d)
+  (a : atom)
+  (ha₁ : a ∈ near_litter_completion_map π hπ L₁.to_near_litter A (π.foa_hypothesis hπ))
+  (ha₂ : a ∈ near_litter_completion_map π hπ L₂.to_near_litter A (π.foa_hypothesis hπ)) :
+  L₁ = L₂ :=
+begin
+  rw near_litter_completion_map_eq at ha₁ ha₂,
+  obtain (⟨ha₁, ha₁'⟩ | ha₁) := ha₁;
+  obtain (⟨ha₂, ha₂'⟩ | ha₂) := ha₂,
+  { rw mem_litter_set at ha₁ ha₂,
+    rw ha₁ at ha₂,
+    refine H.litter_injective L₁ L₂ A hL₁ hL₂ _,
+    rw [complete_litter_map_eq, complete_litter_map_eq],
+    exact ha₂, },
+  { obtain ⟨b, hb, rfl⟩ := ha₂,
+    cases ha₁' ((π A).atom_perm.map_domain hb.2), },
+  { obtain ⟨b, hb, rfl⟩ := ha₁,
+    cases ha₂' ((π A).atom_perm.map_domain hb.2), },
+  { obtain ⟨b, hb, rfl⟩ := ha₁,
+    obtain ⟨c, hc, hc'⟩ := ha₂,
+    cases (π A).atom_perm.inj_on hc.2 hb.2 hc',
+    exact eq_of_mem_litter_set_of_mem_litter_set hb.1 hc.1, },
+end
+
+lemma eq_of_litter_map_inter_nonempty {c d : support_condition β} (H : foa_props hπ c d)
+  {L₁ L₂ : litter} {A : extended_index β}
+  (hL₁ : (inr L₁.to_near_litter, A) ∈ trans_constrained c d)
+  (hL₂ : (inr L₂.to_near_litter, A) ∈ trans_constrained c d)
+  (h : ((π.complete_near_litter_map hπ L₁.to_near_litter A : set atom) ∩
+    π.complete_near_litter_map hπ L₂.to_near_litter A).nonempty) : L₁ = L₂ :=
+begin
+  obtain ⟨a, ha₁, ha₂⟩ := h,
+  refine eq_of_mem_near_litter_completion_map H hL₁ hL₂ a _ _,
+  rwa complete_near_litter_map_eq at ha₁,
+  rwa complete_near_litter_map_eq at ha₂,
+end
+
+-- lemma hypothesis_injective_inflexible_comp {L : litter} {A : extended_index β}
+--   (γ : Iic α) (δ ε : Iio α)
+--   (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+--   (C : path (δ : type_index) γ) (t : tangle δ) :
+--   hypothesis_injective_inflexible (π.foa_hypothesis hπ)
+--     ⟨γ, δ, ε, hδ, hε, hδε, (C.cons (coe_lt hδ)).comp C, t, rfl, rfl⟩ :=
+-- begin
+-- end
+
+-- (map_flexible : ∀ (L : litter) B (hL₁ : (inr L.to_near_litter, B) ∈ inflexible_support h)
+--   (hL₂ : flexible α L B),
+--   flexible α (H.near_litter_image L.to_near_litter ((h.B.cons (coe_lt h.hδ)).comp B)
+--     (by rwa [inflexible_support, ← h.hL, ← h.hA] at hL₁)).1 B)
+
+/-
+
 /-- The inductive hypothesis used to prove that the induced action generated in the freedom of
 action theorem is lawful. This is to be proven by well-founded recursion on `c`. -/
 structure foa_props (π : struct_approx β) (hπ : π.free) (c : support_condition β) : Prop :=
@@ -130,105 +459,87 @@ begin
     exact this, },
 end
 
-/-!
-We now start proving properties of the litter map.
-First, we unfold the definition of the completed action.
--/
+lemma eq_of_litter_map_inter_nonempty {c : support_condition β} (H : π.foa_props hπ c)
+  {L₁ L₂ : litter} {A : extended_index β}
+  (hL₁ : relation.trans_gen (constrains α β) (inr L₁.to_near_litter, A) c)
+  (hL₂ : relation.trans_gen (constrains α β) (inr L₂.to_near_litter, A) c)
+  (h : (((π.foa_hypothesis hπ).near_litter_image L₁.to_near_litter A hL₁ : set atom) ∩
+    (π.foa_hypothesis hπ).near_litter_image L₂.to_near_litter A hL₂).nonempty) : ljnkafsdjhlksfd := sorry
 
-@[simp] def near_litter_hypothesis_eq (N : near_litter) (A : extended_index β) :
-  near_litter_hypothesis N A (π.foa_hypothesis hπ) = (π.foa_hypothesis hπ) := rfl
-
-/-- A basic definition unfold. -/
-lemma complete_litter_map_eq_of_inflexible_coe (hπ : π.free) {L : litter} {A : extended_index β}
-  (h : inflexible_coe L A) (hH : hypothesis_injective_inflexible (π.foa_hypothesis hπ) h) :
-  π.complete_litter_map hπ L A = f_map (with_bot.coe_ne_coe.mpr $ coe_ne' h.hδε)
-    (hypothesised_allowable π hπ h (π.foa_hypothesis hπ) hH • h.t) :=
+lemma hypothesis_injective_inflexible_hypothesis {c : support_condition β} (H : π.foa_props hπ c)
+  {L : litter} {A : extended_index β} (hL : inflexible_coe L A)
+  (hL' : relation.trans_gen (constrains α β) (inr L.to_near_litter, A) c) :
+  hypothesis_injective_inflexible (π.foa_hypothesis hπ) hL :=
 begin
-  have : nonempty (inflexible_coe L A) := ⟨h⟩,
-  rw [complete_litter_map_eq, litter_completion, dif_pos this],
-  cases subsingleton.elim this.some h,
-  rw dif_pos,
+  constructor,
+  { intros a b B ha hb h,
+    refine H.atom_injective a b _ _ _ h,
+    { rw [inflexible_support, ← hL.hL, ← hL.hA] at ha,
+      exact relation.trans_gen.trans ha hL', },
+    { rw [inflexible_support, ← hL.hL, ← hL.hA] at hb,
+      exact relation.trans_gen.trans hb hL', }, },
+  { intros L₁ L₂ B hL₁ hL₂ h,
+    refine H.litter_injective L₁ L₂ _ _ _ _,
+    {  }, },
 end
 
-/-- A basic definition unfold. -/
-lemma complete_litter_map_eq_of_inflexible_bot {L : litter} {A : extended_index β}
-  (h : inflexible_bot L A) :
-  π.complete_litter_map hπ L A =
-  f_map (show (⊥ : type_index) ≠ (h.ε : Λ), from with_bot.bot_ne_coe)
-    (π.complete_atom_map hπ h.a (h.B.cons (with_bot.bot_lt_coe _))) :=
+/-- The complete litter map sends flexible litters to flexible litters, even when the flexibility
+condition is tested along a lower path. -/
+lemma map_flexible {L : litter} {γ : Iio α} (B : path (β : type_index) γ) (C : extended_index γ)
+  (hL : flexible α L C) : flexible α (π.complete_litter_map hπ L (B.comp C)) C :=
 begin
-  have h₁ : ¬nonempty (inflexible_coe L A) := λ h', inflexible_bot_inflexible_coe h h'.some,
-  have h₂ : nonempty (inflexible_bot L A) := ⟨h⟩,
-  rw [complete_litter_map_eq, litter_completion, dif_neg h₁, dif_pos h₂],
-  cases subsingleton.elim h₂.some h,
-  refl,
+  by_cases flexible α L (B.comp C),
+  { rw complete_litter_map_eq_of_flexible' h,
+    have hdom := near_litter_approx.flexible_completion_litter_perm_domain_free
+      α (π (B.comp C)) (B.comp C) (hπ _),
+    have := local_perm.map_domain _,
+    rw hdom at this,
+    exact flexible_of_comp_flexible (this h), },
+  contrapose hL,
+  rw not_flexible_iff at h hL ⊢,
+  obtain (⟨⟨h⟩⟩ | ⟨⟨h⟩⟩) := inflexible_bot_or_inflexible_coe_of_inflexible h,
+  { rw complete_litter_map_eq_of_inflexible_bot h at hL,
+    rw inflexible_iff at hL ⊢,
+    obtain (⟨γ, δ, ε, hδ, hε, hδε, A, t, hL, rfl⟩ | ⟨γ₁, ε₁, hε₁, A₁, a₁, hL₁, hA₁⟩) := hL,
+    { have := f_map_β _ _,
+      rw hL at this,
+      rw f_map_β at this,
+      cases this, },
+    obtain ⟨γ₂, ε₂, hε₂, A₂, a₂, hL₂, hA₂⟩ := h,
+    { have := f_map_γ _ _,
+      rw hL₁ at this,
+      rw [f_map_γ, subtype.coe_injective.eq_iff] at this,
+      subst this,
+      have := f_map_injective _ hL₁,
+      subst this,
+      exact or.inr ⟨γ₁, ε₂, hε₁, A₁, a₂, hL₂, hA₁⟩, }, },
+  { rw complete_litter_map_eq_of_inflexible_coe hπ h at hL,
+    rw inflexible_iff at hL ⊢,
+    obtain (⟨γ, δ, ε, hδ, hε, hδε, A, t, hL, rfl⟩ | ⟨γ₁, ε₁, hε₁, A₁, a₁, hL₁, hA₁⟩) := hL,
+    { have := f_map_β _ _,
+      rw hL at this,
+      rw f_map_β at this,
+      cases this, },
+    obtain ⟨γ₂, ε₂, hε₂, A₂, a₂, hL₂, hA₂⟩ := h,
+    { have := f_map_γ _ _,
+      rw hL₁ at this,
+      rw [f_map_γ, subtype.coe_injective.eq_iff] at this,
+      subst this,
+      have := f_map_injective _ hL₁,
+      subst this,
+      exact or.inr ⟨γ₁, ε₂, hε₁, A₁, a₂, hL₂, hA₁⟩, }, },
 end
 
-/-- A basic definition unfold. -/
-lemma complete_litter_map_eq_of_flexible {L : litter} {A : extended_index β}
-  (h₁ : inflexible_bot L A → false) (h₂ : inflexible_coe L A → false) :
-  π.complete_litter_map hπ L A = near_litter_approx.flexible_completion α (π A) A • L :=
-by rw [complete_litter_map_eq, litter_completion,
-  dif_neg (show ¬nonempty (inflexible_coe L A), from λ h, h₂ h.some),
-  dif_neg (show ¬nonempty (inflexible_bot L A), from λ h, h₁ h.some)]
-
-/-!
-Lemmas about the proof-relevant `inflexible_*` objects.
--/
-
-lemma inflexible_of_inflexible_bot {L : litter} {A : extended_index β} (h : inflexible_bot L A) :
-  inflexible α L A :=
-begin
-  have := inflexible.mk_bot h.hε h.B h.a,
-  rw [← h.hL, ← h.hA] at this,
-  exact this,
-end
-
-lemma inflexible_of_inflexible_coe {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
-  inflexible α L A :=
-begin
-  have := inflexible.mk_coe h.hδ h.hε h.hδε h.B h.t,
-  rw [← h.hL, ← h.hA] at this,
-  exact this,
-end
-
-lemma inflexible_bot_or_inflexible_coe_of_inflexible {L : litter} {A : extended_index β}
-  (h : inflexible α L A) : nonempty (inflexible_bot L A) ∨ nonempty (inflexible_coe L A) :=
-begin
-  obtain ⟨hδ, hε, hδε, B, t⟩ | ⟨hε, B, a⟩ := h,
-  { refine or.inr ⟨⟨_, _, _, _, _, _, _, _, rfl, rfl⟩⟩,
-    assumption, },
-  { exact or.inl ⟨⟨_, _, _, _, _, rfl, rfl⟩⟩, },
-end
-
-lemma flexible_iff_not_inflexible_bot_coe {L : litter} {A : extended_index β} :
-  flexible α L A ↔ (inflexible_bot L A → false) ∧ (inflexible_coe L A → false) :=
-begin
-  split,
-  { intro h,
-    exact ⟨λ h', h (inflexible_of_inflexible_bot h'), λ h', h (inflexible_of_inflexible_coe h')⟩, },
-  { intros h₁ h₂,
-    cases inflexible_bot_or_inflexible_coe_of_inflexible h₂,
-    exact h₁.1 h.some,
-    exact h₁.2 h.some, },
-end
-
+-- TODO: This lemma is stated badly.
 /-- Inflexible supports created from inflexible litters in other inflexible supports are nested. -/
-lemma hypothesis_injective_inflexible_comp {L : litter} {A : extended_index ↑β}
+lemma hypothesis_injective_inflexible_comp {L : litter} {A : extended_index β}
   (h : inflexible_coe L A)
   (hH : hypothesis_injective_inflexible (π.foa_hypothesis hπ) h)
-  {ρ : allowable h.δ}
-  (hρ : ((hypothesised_weak_struct_approx (π.foa_hypothesis hπ) h hH).complete
-    (litter_perm_below π h.hδ h.B)).exactly_approximates ρ.to_struct_perm)
   (γ : Iic α) (δ ε : Iio α)
   (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
   (C : path (h.δ : type_index) γ) (t : tangle δ)
   (hL : (inr (f_map (subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t).to_near_litter,
-    (C.cons $ coe_lt hε).cons (bot_lt_coe _)) ∈ inflexible_support h)
-  (ih : ∀ (c : support_condition δ), c ∈ (designated_support t).carrier →
-    (ρ • show support_condition h.δ, from (c.fst, (C.cons $ coe_lt hδ).comp c.snd)) =
-    (hypothesised_weak_struct_approx (π.foa_hypothesis hπ) h hH).support_condition_map_or_else
-      (c.fst, (C.cons $ coe_lt hδ).comp c.snd)) :
+    (C.cons $ coe_lt hε).cons (bot_lt_coe _)) ∈ inflexible_support h):
   hypothesis_injective_inflexible (π.foa_hypothesis hπ) ⟨γ, δ, ε, hδ, hε, hδε,
     (h.B.cons (coe_lt h.hδ)).comp C, t, rfl, rfl⟩ :=
 begin
@@ -273,16 +584,19 @@ begin
       refine relation.trans_gen.trans _ hL,
       rw [← path.comp_assoc, path.comp_cons],
       exact hL', }, },
+  { have := hH.map_flexible,
+    -- asdlkfjasdl;kfj
+    intros L' B hL₁ hL₂,
+    exact map_flexible _ B hL₂, },
 end
 
 lemma hypothesised_weak_struct_approx_coherent {L : litter} {A : extended_index β}
   (h : inflexible_coe L A) (hH : hypothesis_injective_inflexible (π.foa_hypothesis hπ) h) :
-  (hypothesised_weak_struct_approx (π.foa_hypothesis hπ) h hH).refine.coherent
-    (litter_perm_below π h.hδ h.B) :=
+  (hypothesised_weak_struct_approx (π.foa_hypothesis hπ) h hH).refine.coherent :=
 begin
-  rw litter_perm_below,
+  -- rw litter_perm_below,
   constructor,
-  { intros L' B hL' hflex,
+  /- { intros L' B hL' hflex,
     simp only [hypothesised_weak_struct_approx_litter_map, foa_hypothesis_near_litter_image,
       complete_near_litter_map_eq, near_litter_completion, near_litter_hypothesis_eq,
       weak_struct_approx.refine_apply, weak_struct_approx.refine_litter_map],
@@ -291,7 +605,7 @@ begin
     refl,
     cases hflex,
     { exact hπ _ _ hflex, },
-    sorry { exact hflex, }, },
+    sorry { exact hflex, }, }, -/
   sorry { intros ρ hρ γ δ ε hδ hε hδε C t hL ih,
     simp only [hypothesised_weak_struct_approx_litter_map, path.comp_cons,
       foa_hypothesis_near_litter_image, complete_near_litter_map_eq,
@@ -375,14 +689,13 @@ noncomputable def trans_gen_struct_approx {c : support_condition β} (H : π.foa
 lemma trans_gen_struct_approx_coherent {c : support_condition β} (H : π.foa_props hπ c)
   {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ)
   (A : quiver.path (β : type_index) γ) :
-  (trans_gen_struct_approx H hδ A).refine.coherent (litter_perm_below π hδ A) :=
+  (trans_gen_struct_approx H hδ A).refine.coherent :=
 sorry
 
 lemma trans_gen_struct_approx_free {c : support_condition β} (H : π.foa_props hπ c)
   {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ)
   (A : quiver.path (β : type_index) γ) :
-(show struct_approx (δ : Iic α), from (trans_gen_struct_approx H hδ A).refine.complete
-  (π.litter_perm_below hδ A)).free := sorry
+(show struct_approx (δ : Iic α), from (trans_gen_struct_approx H hδ A).refine.complete).free := sorry
 
 /-
 noncomputable def support_map_union {π : struct_approx β} (hπ) {γ : Iic α} {δ ε : Iio α}
@@ -696,7 +1009,7 @@ begin
       (h.trans (complete_litter_map_eq_of_inflexible_coe hπ
         ⟨γ₁, δ₂, ε₁, hδ₂, hε₁, hδε₂, B₁, t₂, hL₂, hA₁⟩ _)),
     have := congr_arg litter.β h,
-    /- cases subtype.coe_injective (coe_injective this),
+    cases subtype.coe_injective (coe_injective this),
     rw [hL₁, hL₂],
     refine congr_arg _ _,
     have h₁ := weak_struct_approx.smul_eq_smul_tangle
@@ -725,7 +1038,7 @@ begin
     rw smul_left_cancel_iff at this,
     exact this,
     exact hπ,
-    exact trans_gen_struct_approx_free H hδ₁ B₁, -/
+    exact trans_gen_struct_approx_free H hδ₁ B₁,
     all_goals { sorry, },
     /- sorry,
     sorry,
@@ -755,6 +1068,7 @@ begin
     exact λ h, h₁' ⟨h⟩, },
 end
 
+-/
 end struct_approx
 
 end con_nf

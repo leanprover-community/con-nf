@@ -54,6 +54,8 @@ class params :=
 export params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular κr κwf κ_ord Λ_lt_κ μ μr μwf μ_ord μr
   μ_strong_limit κ_lt_μ κ_le_μ_cof)
 
+-- TODO: Remove the ordering on `κ`.
+
 /-!
 ### Explicit parameters
 
@@ -88,7 +90,53 @@ example : params.{0} :=
     exact is_regular_aleph_one.2,
   end }
 
+lemma no_max_order_of_ordinal_type_eq {α : Type u} [preorder α] [infinite α]
+  [is_well_order α (<)] (h : ordinal.type ((<) : α → α → Prop) = (#α).ord) :
+  no_max_order α :=
+begin
+  refine ⟨λ a, _⟩,
+  have := (ordinal.succ_lt_of_is_limit _).mpr (ordinal.typein_lt_type (<) a),
+  { obtain ⟨b, hb⟩ := ordinal.typein_surj (<) this,
+    refine ⟨b, _⟩,
+    have := order.lt_succ _,
+    rw [← hb, ordinal.typein_lt_typein] at this,
+    exact this,
+    apply_instance, },
+  { rw h,
+    exact cardinal.ord_is_limit (cardinal.infinite_iff.mp infer_instance), },
+end
+
+noncomputable def succ_order_of_is_well_order (α : Type u) [preorder α] [infinite α]
+  [inst : is_well_order α (<)] (h : ordinal.type ((<) : α → α → Prop) = (#α).ord) :
+  succ_order α := {
+  succ := inst.to_is_well_founded.wf.succ,
+  le_succ := λ a, le_of_lt (well_founded.lt_succ _
+    ((no_max_order_of_ordinal_type_eq h).exists_gt a)),
+  max_of_succ_le := λ a ha b hb,
+    (ha.not_lt (well_founded.lt_succ _ ((no_max_order_of_ordinal_type_eq h).exists_gt a))).elim,
+  succ_le_of_lt := begin
+    intros a b ha,
+    by_contradiction hb,
+    obtain (hab | hab | hab) :=
+      inst.to_is_trichotomous.trichotomous (inst.to_is_well_founded.wf.succ a) b,
+    { exact hb hab.le, },
+    { exact hb hab.le, },
+    { rw well_founded.lt_succ_iff ((no_max_order_of_ordinal_type_eq h).exists_gt a) at hab,
+      cases hab,
+      exact ha.not_lt hab,
+      exact ha.ne hab.symm, },
+  end,
+  le_of_lt_succ := begin
+    intros a b ha,
+    rw well_founded.lt_succ_iff ((no_max_order_of_ordinal_type_eq h).exists_gt _) at ha,
+    cases ha,
+    exact ha.le,
+    exact ha.le,
+  end,
+}
+
 variables [params.{u}] {ι α β : Type u}
+
 
 /-- To allow Lean's type checker to see that the ordering `Λr` is a well-ordering without having to
 explicitly write `Λwf` everywhere, we declare it as an instance. -/
@@ -114,6 +162,16 @@ noncomputable instance : inhabited κ :=
 
 noncomputable instance : inhabited μ :=
 @classical.inhabited_of_nonempty _ $ mk_ne_zero_iff.1 μ_strong_limit.ne_zero
+
+instance : infinite Λ := cardinal.infinite_iff.mpr Λ_limit.aleph_0_le
+instance : infinite κ := cardinal.infinite_iff.mpr κ_regular.aleph_0_le
+instance : infinite μ := cardinal.infinite_iff.mpr μ_strong_limit.is_limit.aleph_0_le
+
+instance : no_max_order Λ := no_max_order_of_ordinal_type_eq Λ_ord
+instance : no_max_order μ := no_max_order_of_ordinal_type_eq μ_ord
+
+noncomputable instance : succ_order Λ := succ_order_of_is_well_order Λ Λ_ord
+noncomputable instance : succ_order μ := succ_order_of_is_well_order μ μ_ord
 
 /-- Either the base type or a proper type index (an element of `Λ`).
 The base type is written `⊥`. -/
