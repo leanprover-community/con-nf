@@ -626,20 +626,24 @@ noncomputable def support_condition_map_or_else (w : weak_struct_approx β) :
 | (inl a, B) := (inl ((w B).atom_map_or_else a), B)
 | (inr N, B) := (inr ((w B).near_litter_map_or_else N), B)
 
-def coherent_coe (w : weak_struct_approx β) : Prop :=
+def coherent_coe (w : weak_struct_approx β) (t : tangle β) : Prop :=
 ∀ {π : allowable β} (hπ : w.complete.exactly_approximates π.to_struct_perm)
   (γ : Iic α) (δ ε : Iio α) (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
-  (C : path (β : type_index) γ) (t : tangle δ) (hL)
-  (hc : ∀ (c : support_condition δ), c ∈ (designated_support t).carrier →
+  (C : path (β : type_index) γ) (t' : tangle δ) (hL)
+  (hc₁ : ∃ (d : support_condition β), d ∈ (designated_support t).carrier ∧
+    relation.refl_trans_gen (constrains α β)
+    (inr (f_map (coe_ne_coe.mpr (coe_ne' hδε)) t').to_near_litter,
+      (C.cons (coe_lt hε)).cons (bot_lt_coe _)) d)
+  (hc₂ : ∀ (c : support_condition δ), c ∈ (designated_support t').carrier →
     π • (show support_condition β, from (c.fst, (C.cons (coe_lt hδ)).comp c.snd)) =
       w.support_condition_map_or_else (c.fst, (C.cons (coe_lt hδ)).comp c.snd)),
   f_map (subtype.coe_injective.ne (Iio.coe_injective.ne hδε))
       (show tangle δ, from
         (show allowable δ, from allowable_derivative (γ : Iic_index α) δ (coe_lt_coe.mpr hδ)
           (allowable.derivative
-            (show path ((β : Iic_index α) : type_index) (γ : Iic_index α), from C) π)) • t) =
+            (show path ((β : Iic_index α) : type_index) (γ : Iic_index α), from C) π)) • t') =
     (((w ((C.cons (coe_lt hε)).cons (bot_lt_coe _))).litter_map
-      (f_map (subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t)).get hL).fst
+      (f_map (subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t')).get hL).fst
 
 def coherent_bot (w : weak_struct_approx β) : Prop :=
 ∀ {π : allowable β} (hπ : w.complete.exactly_approximates π.to_struct_perm)
@@ -653,14 +657,13 @@ def coherent_bot (w : weak_struct_approx β) : Prop :=
     (((w ((C.cons (coe_lt hε)).cons (bot_lt_coe _))).litter_map
       (f_map (show (⊥ : type_index) ≠ (ε : Λ), from bot_ne_coe) a)).get hL).fst
 
-@[mk_iff] structure coherent (w : weak_struct_approx β) : Prop :=
-(coe : w.coherent_coe)
+@[mk_iff] structure coherent (w : weak_struct_approx β) (t : tangle β) : Prop :=
+(coe : w.coherent_coe t)
 (bot : w.coherent_bot)
 
 lemma smul_litter_eq_of_supports (w : weak_struct_approx β)
-  (hwc : w.coherent)
   {π : allowable β} (hπ : w.complete.exactly_approximates π.to_struct_perm)
-  (t : tangle β) (h : w.supports t)
+  (t : tangle β) (hwc : w.coherent t) (hws : w.supports t)
   (d : support_condition β) (hd : d ∈ designated_support t)
   (B : extended_index β) (L : litter)
   (ih : ∀ (e : support_condition β),
@@ -669,18 +672,18 @@ lemma smul_litter_eq_of_supports (w : weak_struct_approx β)
   (hc : relation.refl_trans_gen (constrains α β) (inr L.to_near_litter, B) d) :
   struct_perm.derivative B π.to_struct_perm • L =
   (((w B).litter_map L).get
-    (h.litter_mem L B ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩)).fst :=
+    (hws.litter_mem L B ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩)).fst :=
 begin
   by_cases hflex : inflexible α L B,
   rw inflexible_iff at hflex,
-  obtain (⟨γ, δ, ε, hδ, hε, hδε, C, t, rfl, rfl⟩ | ⟨γ, ε, hε, C, a, rfl, rfl⟩) := hflex,
-  { have hc := λ c hc, ih _ (relation.trans_gen.single $ constrains.f_map hδ hε hδε C t c hc),
+  obtain (⟨γ, δ, ε, hδ, hε, hδε, C, t', rfl, rfl⟩ | ⟨γ, ε, hε, C, a, rfl, rfl⟩) := hflex,
+  { have hc₂ := λ c hc, ih _ (relation.trans_gen.single $ constrains.f_map hδ hε hδε C t' c hc),
     have := smul_f_map (δ : Iio_index α) ε _ _ (Iio.coe_injective.ne hδε)
       (allowable.derivative
-        (show path ((β : Iic_index α) : type_index) (γ : Iic_index α), from C) π) t,
+        (show path ((β : Iic_index α) : type_index) (γ : Iic_index α), from C) π) t',
     rw [← allowable.derivative_cons_apply, allowable.derivative_smul,
       ← struct_perm.derivative_bot_smul, ← struct_perm.derivative_cons] at this,
-    refine this.trans (hwc.coe hπ γ δ ε hδ hε hδε C t _ hc), },
+    exact this.trans (hwc.coe hπ γ δ ε hδ hε hδε C t' _ ⟨d, hd, hc⟩ hc₂), },
   { have hc : (_, _) = (_, _) := ih _ (relation.trans_gen.single $ constrains.f_map_bot hε C a),
     simp only [smul_inl, prod.mk.inj_iff, eq_self_iff_true, and_true] at hc,
     have := smul_f_map (⊥ : Iio_index α) ε _ _ _
@@ -700,7 +703,7 @@ begin
       congr,
       sorry, },
     all_goals { sorry, }, },
-  { have := h.litter_mem L B ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩,
+  { have := hws.litter_mem L B ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩,
     rw [← struct_perm.of_bot_smul, ← (hπ B).map_litter _ (or.inl (or.inl ⟨this, hflex⟩))],
     refine ((w B).complete_smul_litter_eq L).trans _,
     rw [(w B).flexible_litter_perm_apply_eq, (w B).rough_litter_map_or_else_of_dom],
@@ -708,10 +711,9 @@ begin
     exact hflex, },
 end
 
-lemma smul_support_condition_eq (w : weak_struct_approx β)
-  (hw : w.precise) (hwc : w.coherent)
+lemma smul_support_condition_eq (w : weak_struct_approx β) (hw : w.precise)
   {π : allowable β} (hπ : w.complete.exactly_approximates π.to_struct_perm)
-  (t : tangle β) (h : w.supports t)
+  (t : tangle β) (hwc : w.coherent t) (hws : w.supports t)
   (c d : support_condition β)
   (hc : relation.refl_trans_gen (constrains α β) c d)
   (hd : d ∈ designated_support t) :
@@ -724,17 +726,17 @@ begin
   { refine prod.ext _ rfl,
     change inl _ = inl _,
     refine congr_arg inl _,
-    rw [w.smul_atom_eq hπ (h.atom_mem a B ⟨⟨d, hd, hc⟩, reduced.mk_atom a B⟩),
+    rw [w.smul_atom_eq hπ (hws.atom_mem a B ⟨⟨d, hd, hc⟩, reduced.mk_atom a B⟩),
       weak_near_litter_approx.atom_map_or_else_of_dom], },
   refine prod.ext _ rfl,
   change inr _ = inr _,
   refine congr_arg inr (set_like.coe_injective _),
   have ih' := λ e he, ih e (relation.trans_gen.single he) d
     (relation.refl_trans_gen.head he hc) hd,
-  rw w.smul_near_litter_eq_of_precise hw hπ (h.litter_mem N.1 B _) _,
+  rw w.smul_near_litter_eq_of_precise hw hπ (hws.litter_mem N.1 B _) _,
   { simp only [weak_near_litter_approx.near_litter_map_or_else,
       near_litter.coe_mk, subtype.coe_mk],
-    rw (w B).litter_map_or_else_of_dom (h.litter_mem N.1 B _),
+    rw (w B).litter_map_or_else_of_dom (hws.litter_mem N.1 B _),
     congr' 1,
     ext a : 1,
     rw [mem_smul_set, mem_image],
@@ -750,17 +752,17 @@ begin
       rw ← this.1 at hb₂,
       exact ⟨b, hb₁, hb₂⟩, },
     { exact ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩, }, },
-  refine w.smul_litter_eq_of_supports hwc hπ t h d hd B N.1 _ (refl_trans_gen_near_litter hc),
+  refine w.smul_litter_eq_of_supports hπ t hwc hws d hd B N.1 _ (refl_trans_gen_near_litter hc),
   exact λ e he, ih e (trans_gen_near_litter he) d
     (relation.refl_trans_gen.trans he.to_refl (refl_trans_gen_near_litter hc)) hd,
 end
 
 lemma smul_eq_smul_tangle (w v : weak_struct_approx β)
   (hw : w.precise) (hv : v.precise)
-  (hwc : w.coherent) (hvc : v.coherent)
+  (t : tangle β) (h : compatible w v t)
+  (hwc : w.coherent t) (hvc : v.coherent t)
   {πw πv : allowable β} (hπw : w.complete.exactly_approximates πw.to_struct_perm)
-  (hπv : v.complete.exactly_approximates πv.to_struct_perm)
-  (t : tangle β) (h : compatible w v t) :
+  (hπv : v.complete.exactly_approximates πv.to_struct_perm) :
   πw • t = πv • t :=
 begin
   rw [smul_eq_iff_eq_inv_smul, smul_smul],
@@ -769,8 +771,8 @@ begin
   intros c hc,
   rw [mul_smul, inv_smul_eq_iff],
   symmetry,
-  rw smul_support_condition_eq w hw hwc hπw t h.w_supports c c relation.refl_trans_gen.refl hc,
-  rw smul_support_condition_eq v hv hvc hπv t h.v_supports c c relation.refl_trans_gen.refl hc,
+  rw smul_support_condition_eq w hw hπw t hwc h.w_supports c c relation.refl_trans_gen.refl hc,
+  rw smul_support_condition_eq v hv hπv t hvc h.v_supports c c relation.refl_trans_gen.refl hc,
   obtain ⟨a | N, B⟩ := c,
   { simp only [support_condition_map_or_else, prod.mk.inj_iff, eq_self_iff_true, and_true],
     rw [(w B).atom_map_or_else_of_dom, (v B).atom_map_or_else_of_dom],
