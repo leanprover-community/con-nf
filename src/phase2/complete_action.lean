@@ -624,9 +624,156 @@ noncomputable def trans_gen_struct_approx {c d : support_condition β} (H : foa_
     get := λ hL, π.complete_near_litter_map hπ L.to_near_litter ((A.cons (coe_lt hδ)).comp B)
   } := rfl
 
+lemma trans_gen_struct_approx_coherent_aux₁ {c d : support_condition β} (H : foa_props hπ c d)
+  {γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (A : quiver.path (β : type_index) γ) (t : tangle δ)
+  (ht : (inr (f_map (coe_ne_coe.mpr (coe_ne' hδε)) t).to_near_litter,
+    (A.cons (coe_lt hε)).cons (bot_lt_coe _)) ∈ refl_trans_constrained c d)
+  {ρ : allowable δ}
+  {γ' : Iic α} {δ' ε' : Iio α} (hδ' : (δ' : Λ) < γ') (hε' : (ε' : Λ) < γ') (hδε' : δ' ≠ ε')
+  (B : path (δ : type_index) γ') (t' : tangle δ')
+  (hL : (((trans_gen_struct_approx H hδ A).refine
+      ((B.cons $ coe_lt hε').cons (bot_lt_coe _))).litter_map
+    (f_map (coe_ne_coe.mpr (coe_ne' hδε')) t')).dom)
+  (e : support_condition δ) (he : e ∈ (designated_support t).carrier)
+  (ih₁ : (inr (f_map (coe_ne_coe.mpr (coe_ne' hδε')) t').to_near_litter,
+    (B.cons $ coe_lt hε').cons (bot_lt_coe _)) ≤[α] e)
+  (C : extended_index ↑δ') (a : atom)
+  (haC : (inl a, ((A.cons $ coe_lt hδ).comp (B.cons $ coe_lt hδ')).comp C) <[α]
+    (inr (f_map (coe_ne_coe.mpr (coe_ne' hδε')) t').to_near_litter,
+      (((A.cons $ coe_lt hδ).comp B).cons $ coe_lt hε').cons (bot_lt_coe _)))
+  (ih₂ : struct_perm.derivative ((B.cons $ coe_lt hδ').comp C) (allowable.to_struct_perm ρ) • a =
+    (trans_gen_struct_approx H hδ A ((B.cons $ coe_lt hδ').comp C)).refine.atom_map_or_else a) :
+  struct_perm.derivative C
+    (allowable.to_struct_perm
+      (π.hypothesised_allowable hπ
+        ⟨γ', δ', ε', hδ', hε', hδε', (A.cons $ coe_lt hδ).comp B, t', rfl, rfl⟩
+        (π.foa_hypothesis hπ)
+        (hypothesis_injective_inflexible_of_mem_refl_trans_constrained H _
+          (mem_refl_trans_constrained_of_mem_trans_constrained hL)))) • a =
+  struct_perm.derivative C
+    (allowable.to_struct_perm
+        (allowable_derivative (γ' : Iic_index α) δ' (coe_lt_coe.mpr hδ')
+          ((allowable.derivative
+            (show path ((δ : Iic_index α) : type_index) (γ' : Iic_index α), from B)) ρ))) • a :=
+begin
+  have he' : (e.fst, (A.cons $ coe_lt hδ).comp e.snd) ∈ trans_constrained c d,
+  { refine trans_constrained_of_refl_trans_constrained_of_constrains ht _,
+    exact constrains.f_map hδ hε hδε _ _ _ he, },
+  have ha : ((trans_gen_struct_approx H hδ A ((B.cons $ coe_lt hδ').comp C)).atom_map a).dom,
+  { simp only [trans_gen_struct_approx_atom_map],
+    rw ← path.comp_assoc,
+    refine trans_constrained_trans _ haC.to_refl,
+    have := refl_trans_gen_constrains_comp ih₁ (A.cons $ coe_lt hδ),
+    simp only [path.comp_cons] at this,
+    exact trans_constrained_trans he' this, },
+  rw weak_near_litter_approx.atom_map_or_else_of_dom at ih₂,
+  swap,
+  { exact or.inl (or.inl ha), },
+  rw [← struct_perm.derivative_derivative, struct_perm.derivative_cons] at ih₂,
+  rw allowable.derivative_to_struct_perm
+    (show path ((δ : Iic_index α) : type_index) (γ' : Iic_index α), from B) at ih₂,
+  rw allowable.derivative_to_struct_perm
+    (show path ((γ' : Iic_index α) : type_index) (δ' : Iic_index α), from _) at ih₂,
+  refine eq.trans _ ih₂.symm,
+  rw weak_near_litter_approx.refine_atom_map_get ha,
+  refine (weak_struct_approx.smul_atom_eq _
+    (hypothesised_allowable_exactly_approximates π hπ
+    ⟨γ', δ', ε', hδ', hε', hδε', _, t', rfl, rfl⟩ (π.foa_hypothesis hπ)
+    (hypothesis_injective_inflexible_of_mem_refl_trans_constrained H _
+      (mem_refl_trans_constrained_of_mem_trans_constrained hL))) (or.inl (or.inl haC))).trans _,
+  refine (weak_near_litter_approx.refine_atom_map_get _).trans _,
+  simp only [hypothesised_weak_struct_approx_atom_map, foa_hypothesis_atom_image,
+    trans_gen_struct_approx_atom_map, path.comp_cons, ← path.comp_assoc],
+end
+
+lemma trans_gen_struct_approx_coherent_aux₂ {c d : support_condition β} (H : foa_props hπ c d)
+  {γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (A : quiver.path (β : type_index) γ) (t : tangle δ)
+  (ht : (inr (f_map (coe_ne_coe.mpr (coe_ne' hδε)) t).to_near_litter,
+    (A.cons (coe_lt hε)).cons (bot_lt_coe _)) ∈ refl_trans_constrained c d)
+  {ρ : allowable δ}
+  {γ' : Iic α} {δ' ε' : Iio α} (hδ' : (δ' : Λ) < γ') (hε' : (ε' : Λ) < γ') (hδε' : δ' ≠ ε')
+  (B : path (δ : type_index) γ') (t' : tangle δ')
+  (hL : (((trans_gen_struct_approx H hδ A).refine
+      ((B.cons $ coe_lt hε').cons (bot_lt_coe _))).litter_map
+    (f_map (coe_ne_coe.mpr (coe_ne' hδε')) t')).dom)
+  (e : support_condition δ) (he : e ∈ (designated_support t).carrier)
+  (ih₁ : (inr (f_map (coe_ne_coe.mpr (coe_ne' hδε')) t').to_near_litter,
+    (B.cons $ coe_lt hε').cons (bot_lt_coe _)) ≤[α] e)
+  (C : extended_index ↑δ') (N : near_litter)
+  (haC : (inr N, ((A.cons $ coe_lt hδ).comp (B.cons $ coe_lt hδ')).comp C) <[α]
+    (inr (f_map (coe_ne_coe.mpr (coe_ne' hδε')) t').to_near_litter,
+      (((A.cons $ coe_lt hδ).comp B).cons $ coe_lt hε').cons (bot_lt_coe _)))
+  (ih₂ : struct_perm.derivative ((B.cons $ coe_lt hδ').comp C) (allowable.to_struct_perm ρ) • N =
+    (trans_gen_struct_approx H hδ A
+      ((B.cons $ coe_lt hδ').comp C)).refine.near_litter_map_or_else N) :
+  struct_perm.derivative C
+    (allowable.to_struct_perm
+      (π.hypothesised_allowable hπ
+        ⟨γ', δ', ε', hδ', hε', hδε', (A.cons $ coe_lt hδ).comp B, t', rfl, rfl⟩
+        (π.foa_hypothesis hπ)
+        (hypothesis_injective_inflexible_of_mem_refl_trans_constrained H _
+          (mem_refl_trans_constrained_of_mem_trans_constrained hL)))) • N =
+  struct_perm.derivative C
+    (allowable.to_struct_perm
+        (allowable_derivative (γ' : Iic_index α) δ' (coe_lt_coe.mpr hδ')
+          ((allowable.derivative
+            (show path ((δ : Iic_index α) : type_index) (γ' : Iic_index α), from B)) ρ))) • N :=
+begin
+  have he' : (e.fst, (A.cons $ coe_lt hδ).comp e.snd) ∈ trans_constrained c d,
+  { refine trans_constrained_of_refl_trans_constrained_of_constrains ht _,
+    exact constrains.f_map hδ hε hδε _ _ _ he, },
+  have hN : ((trans_gen_struct_approx H hδ A ((B.cons $ coe_lt hδ').comp C)).litter_map N.fst).dom,
+  { simp only [trans_gen_struct_approx_litter_map],
+    rw ← path.comp_assoc,
+    refine trans_constrained_trans _ (trans_gen_near_litter' haC).to_refl,
+    have := refl_trans_gen_constrains_comp ih₁ (A.cons $ coe_lt hδ),
+    simp only [path.comp_cons] at this,
+    exact trans_constrained_trans he' this, },
+  have ha : ∀ a (ha : a ∈ litter_set N.fst ∆ N),
+    ((trans_gen_struct_approx H hδ A ((B.cons $ coe_lt hδ').comp C)).atom_map a).dom,
+  { intros a ha,
+    simp only [trans_gen_struct_approx_atom_map],
+    rw ← path.comp_assoc,
+    refine trans_constrained_trans _ (haC.head $ constrains.symm_diff N a ha _).to_refl,
+    have := refl_trans_gen_constrains_comp ih₁ (A.cons $ coe_lt hδ),
+    simp only [path.comp_cons] at this,
+    exact trans_constrained_trans he' this, },
+  rw weak_near_litter_approx.near_litter_map_or_else_of_dom at ih₂,
+  swap,
+  { exact hN, },
+  swap,
+  { exact λ a ha', or.inl (or.inl (ha a ha')), },
+  rw [← struct_perm.derivative_derivative, struct_perm.derivative_cons] at ih₂,
+  rw allowable.derivative_to_struct_perm
+    (show path ((δ : Iic_index α) : type_index) (γ' : Iic_index α), from B) at ih₂,
+  rw allowable.derivative_to_struct_perm
+    (show path ((γ' : Iic_index α) : type_index) (δ' : Iic_index α), from _) at ih₂,
+  refine eq.trans _ ih₂.symm,
+  rw ← set_like.coe_set_eq,
+  refine (near_litter_perm.smul_near_litter_eq_smul_symm_diff_smul _ _).trans _,
+  -- have := hypothesised_allowable_exactly_approximates π hπ
+  --   ⟨γ', δ', ε', hδ', hε', hδε', _, t', rfl, rfl⟩ (π.foa_hypothesis hπ)
+  --   (hypothesis_injective_inflexible_of_mem_refl_trans_constrained H _
+  --     (mem_refl_trans_constrained_of_mem_trans_constrained hL)),
+  -- have lhs := (this C).map_near_litter N.fst.to_near_litter _
+  --   (λ a h, h.elim (λ h, (h.2 h.1).elim) (λ h, (h.2 h.1).elim)),
+  -- rw ← set_like.coe_set_eq at lhs,
+  -- rw struct_perm.to_near_litter_perm_smul,
+  -- rw ← (show _ = struct_perm.derivative C _ • (N.fst.to_near_litter : set atom), from lhs),
+  -- clear lhs,
+  refine congr_arg2 _ _ _,
+  { have := weak_struct_approx.smul_to_near_litter_eq_of_precise,
+    all_goals { sorry }, },
+  { sorry, },
+end
+
 lemma trans_gen_struct_approx_coherent {c d : support_condition β} (H : foa_props hπ c d)
-  {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (A : quiver.path (β : type_index) γ)
-  (t : tangle δ) :
+  {γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (A : quiver.path (β : type_index) γ) (t : tangle δ)
+  (ht : (inr (f_map (coe_ne_coe.mpr (coe_ne' hδε)) t).to_near_litter,
+    (A.cons (coe_lt hε)).cons (bot_lt_coe _)) ∈ refl_trans_constrained c d) :
   (trans_gen_struct_approx H hδ A).refine.coherent t :=
 begin
   split,
@@ -645,25 +792,24 @@ begin
     intros f hf,
     rw [mul_smul, inv_smul_eq_iff],
     refine prod.ext _ rfl,
-    have := ih₂ f hf,
+    specialize ih₂ f hf,
     obtain ⟨a | N, C⟩ := f,
-    { have : (inl _, _) = (inl _, _) := this,
+    { have ih₂ : (inl _, _) = (inl _, _) := ih₂,
       change inl _ = inl _,
       simp only [prod.mk.inj_iff, weak_struct_approx.refine_apply,
-        eq_self_iff_true, and_true] at this ⊢,
-      rw weak_near_litter_approx.atom_map_or_else_of_dom at this,
-      swap,
-      { refine or.inl (or.inl _),
-        simp only [trans_gen_struct_approx_atom_map],
-        rw ← path.comp_assoc,
-        refine trans_constrained_of_constrains _ (constrains.f_map hδ' hε' hδε' _ _ _ hf),
-        have := refl_trans_gen_constrains_comp ih₁ (A.cons $ coe_lt hδ),
-        simp only [path.comp_cons] at this,
-        refine trans_constrained_trans _ this,
-        sorry, },
-      sorry, },
+        eq_self_iff_true, and_true] at ih₂ ⊢,
+      refine trans_gen_struct_approx_coherent_aux₁
+        H hδ hε hδε A t ht hδ' hε' hδε' B t' hL e he ih₁ C a _ ih₂,
+      exact relation.trans_gen.single (constrains.f_map hδ' hε' hδε' _ _ _ hf), },
+    { have ih₂ : (inr _, _) = (inr _, _) := ih₂,
+      change inr _ = inr _,
+      simp only [prod.mk.inj_iff, weak_struct_approx.refine_apply,
+        eq_self_iff_true, and_true] at ih₂ ⊢,
+      refine trans_gen_struct_approx_coherent_aux₂
+        H hδ hε hδε A t ht hδ' hε' hδε' B t' hL e he ih₁ C N _ ih₂,
+      exact relation.trans_gen.single (constrains.f_map hδ' hε' hδε' _ _ _ hf), }, },
+  { rintros ρ hρ γ' ε' hε' B a hL ih,
     sorry, },
-  sorry,
 end
 
 lemma trans_gen_struct_approx_free {c d : support_condition β} (H : foa_props hπ c d)
@@ -696,7 +842,7 @@ begin
       ⟨γ, δ, ε, hδ, hε, hδε, B, t₁, hL₁, hA⟩ _).refine
     (trans_gen_struct_approx H hδ B).refine
     (weak_struct_approx.refine_precise _) (weak_struct_approx.refine_precise _)
-    t₁ _ _ (trans_gen_struct_approx_coherent H hδ B t₁)
+    t₁ _ _ (trans_gen_struct_approx_coherent H hδ hε hδε B t₁ _)
     (π.hypothesised_allowable_exactly_approximates hπ
       ⟨γ, δ, ε, hδ, hε, hδε, B, t₁, hL₁, hA⟩ (π.foa_hypothesis hπ) _)
     (π.allowable_of_weak_struct_approx_exactly_approximates hπ hδ B _ _),

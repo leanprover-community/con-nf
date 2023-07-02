@@ -276,6 +276,54 @@ lemma exactly_approximates.mem_litter_set_inv {π₀ : near_litter_approx} {π :
   π⁻¹ • a ∈ litter_set (π⁻¹ • a.1) :=
 by contrapose! ha; exact hπ.exception_mem _ (or.inr ha)
 
+lemma exactly_approximates.map_near_litter {π₀ : near_litter_approx} {π : near_litter_perm}
+  (hπ : π₀.exactly_approximates π) (N : near_litter)
+  (h₁ : N.fst ∈ π₀.litter_perm.domain)
+  (h₂ : litter_set N.fst ∆ N ⊆ π₀.atom_perm.domain) :
+  π₀ • N = π • N :=
+begin
+  rw ← set_like.coe_set_eq,
+  rw smul_near_litter_coe,
+  ext a : 1,
+  simp only [coe_largest_sublitter, mem_union, mem_diff, mem_litter_set, near_litter_perm.coe_smul],
+  split,
+  { rintro (⟨ha₁, ha₂⟩ | ⟨b, ⟨hb₁, hb₂⟩, rfl⟩),
+    { rw [hπ.map_litter _ h₁, ← inv_smul_eq_iff] at ha₁,
+      have := (hπ.exception_mem a).mt ha₂,
+      simp only [near_litter_perm.is_exception, not_or_distrib, not_not,
+        mem_litter_set, eq_inv_smul_iff, ha₁] at this,
+      rw mem_smul_set_iff_inv_smul_mem,
+      contrapose! ha₂,
+      have h : π₀ • _ ∈ _ := π₀.atom_perm.map_domain (h₂ (or.inl ⟨this.2, ha₂⟩)),
+      rw [hπ.map_atom _ (h₂ (or.inl ⟨this.2, ha₂⟩)), smul_inv_smul] at h,
+      exact h, },
+    { simp only [mem_diff, mem_litter_set, not_and, not_not_mem] at hb₂,
+      suffices : b ∈ π₀.atom_perm.domain,
+      { rw hπ.map_atom _ this,
+        exact ⟨b, hb₁, rfl⟩, },
+      by_cases b.fst = N.fst,
+      { exact hb₂ h, },
+      { exact h₂ (or.inr ⟨hb₁, h⟩), }, }, },
+  { rintro ⟨b, hb, rfl⟩,
+    by_cases b ∈ π₀.atom_perm.domain,
+    { right,
+      refine ⟨b, ⟨hb, _⟩, hπ.map_atom b h⟩,
+      simp only [mem_diff, mem_litter_set, not_and, not_not_mem],
+      exact λ _, h, },
+    { left,
+      split,
+      { have := (@h₂ b).mt h,
+        simp only [mem_symm_diff, hb, mem_litter_set,
+          not_true, and_false, true_and, false_or, not_not] at this,
+        rw [hπ.map_litter _ h₁, ← this],
+        by_contra h',
+        exact h (hπ.exception_mem b (or.inl h')), },
+      { intro hb₁,
+        have hb₂ : π₀.symm • _ ∈ _ := π₀.symm.atom_perm.map_domain hb₁,
+        rw [hπ.symm_map_atom _ hb₁, inv_smul_smul] at hb₂,
+        exact h hb₂, }, }, },
+end
+
 instance : preorder near_litter_approx := {
   le := λ π π', π.atom_perm ≤ π'.atom_perm ∧ π.litter_perm ≤ π'.litter_perm,
   le_refl := λ π, ⟨le_rfl, le_rfl⟩,

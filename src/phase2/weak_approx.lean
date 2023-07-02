@@ -216,6 +216,38 @@ noncomputable def near_litter_map_or_else (N : near_litter) : near_litter :=
     exact (w.litter_map_or_else N.fst).snd.prop.symm_diff (small.image N.2.prop),
   end⟩
 
+lemma _root_.con_nf.small.pfun_image {α β : Type*} {s : set α} (h : small s) {f : α →. β} :
+  small (f.image s) :=
+begin
+  have : small (f '' s) := small.image h,
+  refine small.image_subset part.some part.some_injective this _,
+  rintro x ⟨y, ⟨z, hz₁, hz₂⟩, rfl⟩,
+  exact ⟨z, hz₁, part.eq_some_iff.mpr hz₂⟩,
+end
+
+lemma near_litter_map_or_else_of_dom {N : near_litter} (h₁ : (w.litter_map N.fst).dom)
+  (h₂ : ∀ a ∈ litter_set N.fst ∆ N, (w.atom_map a).dom) :
+  w.near_litter_map_or_else N =
+  ⟨((w.litter_map N.fst).get h₁).fst,
+    (w.litter_map N.fst).get h₁ ∆ (w.atom_map.image $ litter_set N.fst ∆ N),
+    begin
+      rw [is_near_litter, is_near, ← symm_diff_assoc],
+      exact ((w.litter_map N.fst).get h₁).snd.prop.symm_diff (small.pfun_image N.2.prop),
+    end⟩ :=
+begin
+  rw [← set_like.coe_set_eq, near_litter_map_or_else, near_litter.coe_mk,
+    subtype.coe_mk, w.litter_map_or_else_of_dom h₁],
+  refine congr_arg _ _,
+  ext a : 1,
+  split,
+  { rintro ⟨b, hb, rfl⟩,
+    rw w.atom_map_or_else_of_dom (h₂ b hb),
+    exact ⟨b, hb, part.get_mem (h₂ b hb)⟩, },
+  { rintro ⟨b, hb₁, hb₂, rfl⟩,
+    refine ⟨b, hb₁, _⟩,
+    rw w.atom_map_or_else_of_dom, },
+end
+
 /-- A weak approximation is precise at a litter in its domain if all atoms in the symmetric
 difference of its image are accounted for. -/
 @[mk_iff] structure precise_at {L : litter} (hL : (w.litter_map L).dom) : Prop :=

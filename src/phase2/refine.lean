@@ -32,6 +32,10 @@ begin
   exact w.supported_action_eq_of_dom ha,
 end
 
+@[simp] lemma refine_atom_map_get {a : atom} (ha : (w.atom_map a).dom) :
+  (w.refine.atom_map a).get (or.inl (or.inl ha)) = (w.atom_map a).get ha :=
+by simp only [refine_atom_map ha]
+
 @[simp] lemma refine_litter_map : w.refine.litter_map = w.litter_map := rfl
 
 lemma refine_precise : precise w.refine :=
@@ -50,6 +54,10 @@ noncomputable def refine : weak_struct_approx β := λ A, (w A).refine
 
 @[simp] lemma refine_atom_map {A : extended_index β} {a : atom} (ha : ((w A).atom_map a).dom) :
   (w A).refine.atom_map a = (w A).atom_map a := weak_near_litter_approx.refine_atom_map ha
+
+@[simp] lemma refine_atom_map_get {A : extended_index β} {a : atom} (ha : ((w A).atom_map a).dom) :
+  ((w A).refine.atom_map a).get (or.inl (or.inl ha)) = ((w A).atom_map a).get ha :=
+weak_near_litter_approx.refine_atom_map_get ha
 
 @[simp] lemma refine_litter_map {A : extended_index β} :
   (w A).refine.litter_map = (w A).litter_map := rfl
