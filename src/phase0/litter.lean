@@ -246,6 +246,23 @@ begin
   exact near_litter.is_litter.mk _,
 end
 
+@[simp] lemma mk_near_litter'' (N : near_litter) : #N = #κ :=
+begin
+  change #(N : set atom) = _,
+  rw ← symm_diff_symm_diff_cancel_right (litter_set N.fst) N,
+  refine le_antisymm _ _,
+  { refine (mk_le_mk_of_subset symm_diff_subset_union).trans _,
+    refine (mk_union_le _ _).trans _,
+    simp only [mk_litter_set, add_mk_eq_max', max_le_iff, le_refl, and_true],
+    rw symm_diff_comm,
+    exact le_of_lt N.2.2, },
+  { refine le_of_not_lt (λ (h : small _), _),
+    rw ← small.symm_diff_iff _ at h,
+    { simpa only [small, mk_litter_set, lt_self_iff_false] using h, },
+    { rw symm_diff_comm,
+      exact N.2.2, }, },
+end
+
 lemma near_litter.inter_nonempty_of_fst_eq_fst {N₁ N₂ : near_litter} (h : N₁.fst = N₂.fst) :
   (N₁ ∩ N₂ : set atom).nonempty :=
 begin
@@ -254,8 +271,12 @@ begin
   have := N₁.2.prop,
   simp_rw h at this,
   have := small.mono (subset_union_left _ _) (N₂.2.prop.symm.trans this),
-  -- Easy to solve with a couple of lemmas such as `#N = #κ`.
-  sorry,
+  have h : (N₂.snd : set atom) \ N₁.snd = N₂.snd,
+  { rwa [sdiff_eq_left, disjoint_iff_inter_eq_empty, inter_comm], },
+  rw h at this,
+  have : #N₂ < #κ := this,
+  rw mk_near_litter'' at this,
+  exact lt_irrefl #κ this,
 end
 
 /--
