@@ -250,7 +250,7 @@ end
 
 /-- A weak approximation is precise at a litter in its domain if all atoms in the symmetric
 difference of its image are accounted for. -/
-@[mk_iff] structure precise_at {L : litter} (hL : (w.litter_map L).dom) : Prop :=
+@[mk_iff] structure precise_at ⦃L : litter⦄ (hL : (w.litter_map L).dom) : Prop :=
 (diff : ((w.litter_map L).get hL : set atom) ∆ litter_set ((w.litter_map L).get hL).1 ⊆
   w.atom_map.ran)
 (fwd : ∀ a ha, (w.atom_map a).get ha ∈ litter_set L → (w.atom_map ((w.atom_map a).get ha)).dom)
@@ -685,7 +685,9 @@ def coherent_bot (w : weak_struct_approx β) : Prop :=
     (w (C.cons (bot_lt_coe _))).atom_map_or_else a),
   f_map (show ((⊥ : Iio_index α) : type_index) ≠ (ε : Iio_index α),
     from subtype.coe_injective.ne Iio_index.bot_ne_coe)
-      ((struct_perm.derivative (C.cons (bot_lt_coe _))) π.to_struct_perm • a) =
+      ((show allowable (⊥ : Iio_index α), from
+        (allowable.derivative (show path ((β : Iic_index α) : type_index) (⊥ : Iic_index α), from
+          C.cons (bot_lt_coe _))) π) • a) =
     (((w ((C.cons (coe_lt hε)).cons (bot_lt_coe _))).litter_map
       (f_map (show (⊥ : type_index) ≠ (ε : Λ), from bot_ne_coe) a)).get hL).fst
 
@@ -707,34 +709,25 @@ lemma smul_litter_eq_of_supports (w : weak_struct_approx β)
     (hws.litter_mem L B ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩)).fst :=
 begin
   by_cases hflex : inflexible α L B,
-  rw inflexible_iff at hflex,
-  obtain (⟨γ, δ, ε, hδ, hε, hδε, C, t', rfl, rfl⟩ | ⟨γ, ε, hε, C, a, rfl, rfl⟩) := hflex,
-  { have hc₂ := λ c hc, ih _ (relation.trans_gen.single $ constrains.f_map hδ hε hδε C t' c hc),
-    have := smul_f_map (δ : Iio_index α) ε _ _ (Iio.coe_injective.ne hδε)
-      (allowable.derivative
-        (show path ((β : Iic_index α) : type_index) (γ : Iic_index α), from C) π) t',
-    rw [← allowable.derivative_cons_apply, allowable.derivative_smul,
-      ← struct_perm.derivative_bot_smul, ← struct_perm.derivative_cons] at this,
-    exact this.trans (hwc.coe hπ γ δ ε hδ hε hδε C t' _ ⟨d, hd, hc⟩ hc₂), },
-  { have hc : (_, _) = (_, _) := ih _ (relation.trans_gen.single $ constrains.f_map_bot hε C a),
-    simp only [smul_inl, prod.mk.inj_iff, eq_self_iff_true, and_true] at hc,
-    have := smul_f_map (⊥ : Iio_index α) ε _ _ _
-      (allowable.derivative
-        (show path ((β : Iic_index α) : type_index) (γ : Iic_index α), from C) π) a,
-    rw [← allowable.derivative_cons_apply, allowable.derivative_smul,
-      ← struct_perm.derivative_bot_smul, ← struct_perm.derivative_cons] at this,
-    rw ← hwc.bot hπ γ ε hε C a _ hc,
-    refine this.trans _,
-    swap 3,
-    refine congr_arg _ _,
-    swap 3,
-    { rw ← allowable.derivative_cons_apply,
-      rw ← allowable.derivative_smul
-        (show path ((β : Iic_index α) : type_index) ((⊥ : Iic_index α) : type_index),
-          from C.cons (bot_lt_coe _)) π a,
-      congr,
-      sorry, },
-    all_goals { sorry, }, },
+  { rw inflexible_iff at hflex,
+    obtain (⟨γ, δ, ε, hδ, hε, hδε, C, t', rfl, rfl⟩ | ⟨γ, ε, hε, C, a, rfl, rfl⟩) := hflex,
+    { have hc₂ := λ c hc, ih _ (relation.trans_gen.single $ constrains.f_map hδ hε hδε C t' c hc),
+      have := smul_f_map (δ : Iio_index α) ε _ _ (Iio.coe_injective.ne hδε)
+        (allowable.derivative
+          (show path ((β : Iic_index α) : type_index) (γ : Iic_index α), from C) π) t',
+      rw [← allowable.derivative_cons_apply, allowable.derivative_smul,
+        ← struct_perm.derivative_bot_smul, ← struct_perm.derivative_cons] at this,
+      exact this.trans (hwc.coe hπ γ δ ε hδ hε hδε C t' _ ⟨d, hd, hc⟩ hc₂), },
+    { have hc : (_, _) = (_, _) := ih _ (relation.trans_gen.single $ constrains.f_map_bot hε C a),
+      simp only [smul_inl, prod.mk.inj_iff, eq_self_iff_true, and_true] at hc,
+      rw ← hwc.bot hπ γ ε hε C a _ hc,
+      have := smul_f_map (⊥ : Iio_index α) ε _ _ (by intro h; cases h)
+        (allowable.derivative
+          (show path ((β : Iic_index α) : type_index) (γ : Iic_index α), from C) π) a,
+      rw [← allowable.derivative_cons_apply, allowable.derivative_smul,
+        ← struct_perm.derivative_bot_smul, ← struct_perm.derivative_cons,
+        ← allowable.derivative_cons_apply] at this,
+      exact this, }, },
   { have := hws.litter_mem L B ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩,
     rw [← struct_perm.of_bot_smul, ← (hπ B).map_litter _ (or.inl (or.inl ⟨this, hflex⟩))],
     refine ((w B).complete_smul_litter_eq L).trans _,

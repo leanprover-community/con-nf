@@ -41,78 +41,6 @@ begin
   cases hc hd',
 end
 
-lemma small_constrains (c : support_condition β) : small {d | d ≺[α] c} :=
-begin
-  obtain ⟨a | N, A⟩ := c,
-  { simp only [constrains_atom, set_of_eq_eq_singleton, small_singleton], },
-  simp_rw constrains_iff,
-  refine small.union _ (small.union _ (small.union _ (small.union _ _)));
-    rw small_set_of,
-  { simp only [prod.mk.inj_iff, false_and, and_false,
-      exists_false, set_of_false, small_empty], },
-  { simp only [ne.def, prod.mk.inj_iff, exists_eq_right_right'],
-    by_cases litter_set N.fst = N.snd,
-    simp only [h, eq_self_iff_true, not_true, false_and, set_of_false, small_empty],
-    simp only [h, not_false_iff, true_and, set_of_eq_eq_singleton, small_singleton], },
-  { simp only [prod.mk.inj_iff, exists_eq_right_right'],
-    have : small {c : support_condition β | ∃ a, a ∈ litter_set N.fst ∆ N.snd ∧ c = (inl a, A)},
-    { refine lt_of_le_of_lt _ N.2.prop,
-      refine ⟨⟨λ c, ⟨_, c.2.some_spec.1⟩, _⟩⟩,
-      rintros ⟨c, hc⟩ ⟨d, hd⟩,
-      simp only [subtype.val_eq_coe, subtype.mk_eq_mk],
-      intro h,
-      rw [hc.some_spec.2, hd.some_spec.2, h], },
-    convert this using 1,
-    ext ⟨a | N, A⟩ : 1,
-    { simp only [mem_set_of_eq, prod.mk.inj_iff],
-      split,
-      { rintro ⟨_, a', h₁, h₂, rfl⟩,
-        exact ⟨a', h₁, h₂⟩, },
-      { rintro ⟨a', h₁, h₂⟩,
-        exact ⟨N, a', h₁, h₂, rfl⟩, } },
-    { simp only [mem_set_of_eq, prod.mk.inj_iff, false_and, and_false, exists_false], }, },
-  { by_cases ∃ ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ)
-      (hδε : δ ≠ ε) (B : path (β : type_index) γ) (t : tangle δ),
-      N = (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter ∧
-      A = (B.cons (coe_lt hε)).cons (bot_lt_coe _),
-    { obtain ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ := h,
-      refine lt_of_le_of_lt _ (designated_support t).small,
-      suffices : #{a : support_condition β | ∃ c : designated_support t,
-        a = ⟨c.val.fst, (B.cons (coe_lt hδ)).comp c.val.snd⟩} ≤ #(designated_support t),
-      { refine le_trans (cardinal.mk_subtype_le_of_subset _) this,
-        rintros x ⟨_, _, _, _, _, _, _, _, c, hc, rfl, h⟩,
-        simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff, f_map] at h,
-        cases subtype.coe_inj.mp (coe_inj.mp h.1.2.1),
-        cases subtype.coe_inj.mp h.1.2.2,
-        cases choose_wf_injective h.1.1,
-        cases subtype.coe_inj.mp (coe_inj.mp
-          (path.obj_eq_of_cons_eq_cons (path.heq_of_cons_eq_cons h.2).eq)),
-        cases (path.heq_of_cons_eq_cons (path.heq_of_cons_eq_cons h.2).eq).eq,
-        exact ⟨⟨c, hc⟩, rfl⟩, },
-      refine ⟨⟨λ a, a.prop.some, _⟩⟩,
-      intros a b h,
-      refine subtype.coe_inj.mp _,
-      simp only [subtype.val_eq_coe] at h,
-      rw [a.prop.some_spec, b.prop.some_spec],
-      simp only [h, subtype.val_eq_coe], },
-    { refine small_of_forall_not_mem _,
-      rintro x ⟨γ, δ, ε, hδ, hε, hδε, B, t, c, hN, rfl, hA⟩,
-      simp only [prod.mk.inj_iff] at hA,
-      refine h ⟨γ, δ, ε, hδ, hε, hδε, B, t, hA⟩, }, },
-  { refine subsingleton.small _,
-    rintros ⟨c, C⟩ ⟨γ, ε, hε, C', a, hc₁, hc₂⟩ ⟨d, D⟩ ⟨γ, ε, hε, D', b, hd₁, hd₂⟩,
-    simp only [prod.mk.inj_iff] at hc₁ hc₂ hd₁ hd₂,
-    rw [hc₁.1, hc₁.2, hd₁.1, hd₁.2],
-    rw [hc₂.1, hc₂.2, litter.to_near_litter_injective.eq_iff] at hd₂,
-    cases subtype.coe_inj.mp (coe_inj.mp (path.obj_eq_of_cons_eq_cons hd₂.2)),
-    cases subtype.coe_inj.mp (coe_inj.mp (path.obj_eq_of_cons_eq_cons
-      (path.heq_of_cons_eq_cons hd₂.2).eq)),
-    cases (path.heq_of_cons_eq_cons (path.heq_of_cons_eq_cons hd₂.2).eq).eq,
-    rw (f_map_injective bot_ne_coe).eq_iff at hd₂,
-    cases hd₂.1,
-    refl, },
-end
-
 def nth_reduction (S : set (support_condition β)) : ℕ → set (support_condition β)
 | 0 := S
 | (n + 1) := {c | ∃ d, d ∈ nth_reduction n ∧ c ≺[α] d}
@@ -126,7 +54,7 @@ begin
   simp_rw [← exists_prop, subtype.exists', set_of_exists],
   refine small_Union hn _,
   rintro ⟨c, hc⟩,
-  exact small_constrains α c,
+  exact small_constrains c,
 end
 
 lemma mem_nth_reduction_iff {S : set (support_condition β)} {n : ℕ}

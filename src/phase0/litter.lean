@@ -327,7 +327,7 @@ end⟩⟩
 instance : has_mul near_litter_perm :=
 ⟨λ f g, ⟨f.atom_perm * g.atom_perm, f.litter_perm * g.litter_perm, λ i s h, h.map.map⟩⟩
 
-/-- Dividing two permutations `f / g` can be interpreted as `f⁻¹ * g`. -/
+/-- Dividing two permutations `f / g` can be interpreted as `f * g⁻¹`. -/
 instance : has_div near_litter_perm :=
 ⟨λ f g, ⟨f.atom_perm / g.atom_perm, f.litter_perm / g.litter_perm,
   by { simp_rw [div_eq_mul_inv], exact (f * g⁻¹).near }⟩⟩
