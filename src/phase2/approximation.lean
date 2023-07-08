@@ -104,6 +104,12 @@ lemma eq_symm_apply_atom {a₁ a₂} : a₁ ∈ π.atom_perm.domain → a₂ ∈
 lemma eq_symm_apply_litter {L₁ L₂} : L₁ ∈ π.litter_perm.domain → L₂ ∈ π.litter_perm.domain →
   (L₁ = π.symm • L₂ ↔ π • L₁ = L₂) := π.litter_perm.eq_symm_apply
 
+lemma near_litter_domain_small (N : near_litter) : small ((N : set atom) ∩ π.atom_perm.domain) :=
+begin
+  rw [← symm_diff_symm_diff_cancel_left (litter_set N.fst) N, inter_symm_diff_distrib_right],
+  exact small.symm_diff (π.domain_small N.fst) (small.mono (inter_subset_left _ _) N.2.prop),
+end
+
 section generate
 
 variables (π)

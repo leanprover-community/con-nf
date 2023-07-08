@@ -53,6 +53,14 @@ begin
   exact λ L hL, hπ L hL,
 end
 
+lemma flexible_completion_smul_flexible (hπ : π.free α A) (L : litter) (hL : flexible α L A) :
+  flexible α (flexible_completion α π A • L) A :=
+begin
+  have := local_perm.map_domain (flexible_completion α π A).litter_perm,
+  rw flexible_completion_litter_perm_domain_free α π A hπ at this,
+  exact this hL,
+end
+
 end near_litter_approx
 
 end con_nf

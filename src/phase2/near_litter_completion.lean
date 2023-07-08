@@ -41,29 +41,6 @@ def near_litter_completion_map (π : struct_approx β) (hπ : π.free)
   ⋃ (a : atom) (ha : a ∈ (litter_set N.1 ∆ N) \ (π A).atom_perm.domain),
     {H.atom_image a A (relation.trans_gen.single (constrains.symm_diff N a ha.1 A))}
 
--- TODO: Move this lemma
-lemma near_litter_approx.near_litter_domain_small (π : near_litter_approx) (N : near_litter) :
-  small ((N : set atom) ∩ π.atom_perm.domain) :=
-begin
-  rw [← symm_diff_symm_diff_cancel_left (litter_set N.fst) N, inter_symm_diff_distrib_right],
-  exact small.symm_diff (π.domain_small N.fst) (small.mono (inter_subset_left _ _) N.2.prop),
-end
-
-/-
-lemma largest_sublitter_symm_diff_small (π : near_litter_approx) (N : near_litter) :
-  small ((π.largest_sublitter N.fst : set atom) ∆ N) :=
-begin
-  refine is_near_litter.near _ _,
-  exact N.fst,
-  exact (near_litter.is_near_litter (π.largest_sublitter N.fst).to_near_litter _).mpr rfl,
-  rw near_litter.is_near_litter,
-end
-
-lemma largest_sublitter_diff_small (π : near_litter_approx) (N : near_litter) :
-  small ((π.largest_sublitter N.fst : set atom) \ N) :=
-small.mono (subset_union_left _ _) (largest_sublitter_symm_diff_small π N)
--/
-
 lemma near_litter_completion_map_is_near_litter (π : struct_approx β)
   (hπ : π.free) (N : near_litter) (A : extended_index β) (H : hypothesis ⟨inr N, A⟩) :
   is_near_litter (π.litter_completion hπ N.fst A (near_litter_hypothesis N A H))

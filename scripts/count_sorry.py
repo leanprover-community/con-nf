@@ -32,5 +32,7 @@ for file in sorted(sorries.keys()):
     result += f"| {file} | {sorries[file]} |\n"
 
 print(result)
+if not os.path.exists("docs/_includes"):
+    os.makedirs("docs/_includes")
 with open("docs/_includes/sorries.md", "w") as f:
     f.write(result)

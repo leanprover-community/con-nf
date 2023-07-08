@@ -24,6 +24,9 @@ variables [params.{u}] (α : Λ) [position_data.{}] [phase_2_assumptions α] {β
 /-- A litter is *flexible* if it is not the image of any f-map. -/
 def flexible (L : litter) (A : extended_index β) : Prop := ¬inflexible α L A
 
+lemma flexible_cases (L : litter) (A : extended_index β) : inflexible α L A ∨ flexible α L A :=
+or_not
+
 lemma mk_flexible (A : extended_index β) : #{L | flexible α L A} = #μ :=
 begin
   refine le_antisymm ((cardinal.mk_subtype_le _).trans mk_litter.le) _,
