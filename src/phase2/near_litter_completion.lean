@@ -11,6 +11,8 @@ namespace struct_approx
 variables [params.{u}] {α : Λ} [position_data.{}] [phase_2_assumptions α]
   {β : Iic α} [freedom_of_action_hypothesis β]
 
+/-
+
 def near_litter_hypothesis (N : near_litter) (A : extended_index β) (H : hypothesis ⟨inr N, A⟩) :
   hypothesis ⟨inr N.1.to_near_litter, A⟩ := {
   atom_image := λ a B h, H.atom_image a B (begin
@@ -65,6 +67,8 @@ noncomputable def near_litter_completion (π : struct_approx β) (hπ : π.free)
   (N : near_litter) (A : extended_index β) (H : hypothesis ⟨inr N, A⟩) :
   (π.near_litter_completion hπ N A H).1 =
   litter_completion π hπ N.1 A (near_litter_hypothesis N A H) := rfl
+
+-/
 
 end struct_approx
 
