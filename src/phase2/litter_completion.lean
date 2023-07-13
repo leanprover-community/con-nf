@@ -176,9 +176,11 @@ structure hypothesis_injective_inflexible {L : litter} {A : extended_index β}
   flexible α (H.near_litter_image L.to_near_litter ((h.B.cons (coe_lt h.hδ)).comp B)
     (by rwa [inflexible_support, ← h.hL, ← h.hA] at hL₁)).1 B)
 
-def hypothesised_weak_struct_approx {L : litter} {A : extended_index β}
+/-
+
+def hypothesised_near_litter_action {L : litter} {A : extended_index β}
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A)
-  (hH : hypothesis_injective_inflexible H h) : weak_struct_approx h.δ :=
+  (hH : hypothesis_injective_inflexible H h) : near_litter_action h.δ :=
 λ B, {
   atom_map := λ a, ⟨(inl a, B) ∈ inflexible_support h,
     λ ha, H.atom_image a ((h.B.cons (coe_lt h.hδ)).comp B)
@@ -206,29 +208,29 @@ def hypothesised_weak_struct_approx {L : litter} {A : extended_index β}
   atom_mem := λ a ha L hL, hH.atom_mem a L B ha hL,
 }
 
-@[simp] lemma hypothesised_weak_struct_approx_atom_map {L : litter} {A : extended_index β}
+@[simp] lemma hypothesised_near_litter_action_atom_map {L : litter} {A : extended_index β}
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A)
   (hH : hypothesis_injective_inflexible H h) (B : extended_index h.δ) (a : atom) :
-  (hypothesised_weak_struct_approx H h hH B).atom_map a = {
+  (hypothesised_near_litter_action H h hH B).atom_map a = {
     dom := (inl a, B) ∈ inflexible_support h,
     get := λ ha, H.atom_image a ((h.B.cons (coe_lt h.hδ)).comp B)
       (by rwa [inflexible_support, ← h.hL, ← h.hA] at ha)
   } := rfl
 
-@[simp] lemma hypothesised_weak_struct_approx_litter_map {L : litter} {A : extended_index β}
+@[simp] lemma hypothesised_near_litter_action_litter_map {L : litter} {A : extended_index β}
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A)
   (hH : hypothesis_injective_inflexible H h) (B : extended_index h.δ) (L : litter) :
-  (hypothesised_weak_struct_approx H h hH B).litter_map L = {
+  (hypothesised_near_litter_action H h hH B).litter_map L = {
     dom := (inr L.to_near_litter, B) ∈ inflexible_support h,
     get := λ hL, H.near_litter_image L.to_near_litter ((h.B.cons (coe_lt h.hδ)).comp B)
       (by rwa [inflexible_support, ← h.hL, ← h.hA] at hL)
   } := rfl
 
-lemma hypothesised_weak_struct_approx_free (π : struct_approx β) (hπ : π.free) {L : litter}
+lemma hypothesised_near_litter_action_free (π : struct_approx β) (hπ : π.free) {L : litter}
   {A : extended_index β} (H : hypothesis ⟨inr L.to_near_litter, A⟩) (h : inflexible_coe L A)
   (hH : hypothesis_injective_inflexible H h) :
   @struct_approx.free _ _ _ _ (h.δ : Iic α)
-  (hypothesised_weak_struct_approx H h hH).refine.complete :=
+  (hypothesised_near_litter_action H h hH).refine.complete :=
 begin
   rintros B L' ((hL' | ⟨L', hL', rfl⟩) | hL'),
   { exact hL'.2, },
@@ -237,19 +239,19 @@ begin
   { exact (local_perm.sandbox_subset_subset _ _ hL').2, },
 end
 
-noncomputable def allowable_of_weak_struct_approx (π : struct_approx β) (hπ : π.free)
+noncomputable def allowable_of_near_litter_action (π : struct_approx β) (hπ : π.free)
   {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ)
-  (w : weak_struct_approx δ)
+  (w : near_litter_action δ)
   (hw : (show struct_approx (δ : Iic α), from w.complete).free) :
   allowable δ :=
 (freedom_of_action_of_lt (δ : Iic α)
   (hδ.trans_le (show _, from coe_le_coe.mp (le_of_path B))) _ hw).some
 
-lemma allowable_of_weak_struct_approx_exactly_approximates (π : struct_approx β) (hπ : π.free)
+lemma allowable_of_near_litter_action_exactly_approximates (π : struct_approx β) (hπ : π.free)
   {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (B : path (β : type_index) γ)
-  (w : weak_struct_approx δ)
+  (w : near_litter_action δ)
   (hw : (show struct_approx (δ : Iic α), from w.complete).free) :
-  w.complete.exactly_approximates (allowable_of_weak_struct_approx π hπ hδ B w hw).to_struct_perm :=
+  w.complete.exactly_approximates (allowable_of_near_litter_action π hπ hδ B w hw).to_struct_perm :=
 (freedom_of_action_of_lt (δ : Iic α)
   (hδ.trans_le (show _, from coe_le_coe.mp (le_of_path B))) _ hw).some_spec
 
@@ -257,15 +259,15 @@ noncomputable def hypothesised_allowable (π : struct_approx β) (hπ : π.free)
   {L : litter} {A : extended_index β} (h : inflexible_coe L A)
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (hH : hypothesis_injective_inflexible H h) :
   allowable h.δ :=
-allowable_of_weak_struct_approx π hπ h.hδ h.B _ (hypothesised_weak_struct_approx_free π hπ H h hH)
+allowable_of_near_litter_action π hπ h.hδ h.B _ (hypothesised_near_litter_action_free π hπ H h hH)
 
 lemma hypothesised_allowable_exactly_approximates (π : struct_approx β) (hπ : π.free)
   {L : litter} {A : extended_index β} (h : inflexible_coe L A)
   (H : hypothesis ⟨inr L.to_near_litter, A⟩) (hH : hypothesis_injective_inflexible H h) :
-  (hypothesised_weak_struct_approx H h hH).refine.complete.exactly_approximates
+  (hypothesised_near_litter_action H h hH).refine.complete.exactly_approximates
     (hypothesised_allowable π hπ h H hH).to_struct_perm :=
-allowable_of_weak_struct_approx_exactly_approximates π hπ h.hδ h.B _
-  (hypothesised_weak_struct_approx_free π hπ H h hH)
+allowable_of_near_litter_action_exactly_approximates π hπ h.hδ h.B _
+  (hypothesised_near_litter_action_free π hπ H h hH)
 
 -- TODO: Rename next few lemmas.
 -- TODO: Trim assumptions from lots of these little lemmas, then package into `variables`.
@@ -333,6 +335,8 @@ begin
   { rintro ⟨h'⟩,
     exact inflexible_bot_inflexible_coe h h', },
 end
+
+-/
 
 end struct_approx
 

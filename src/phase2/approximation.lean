@@ -445,6 +445,17 @@ begin
   exact hSπ c hc,
 end
 
+lemma smul_eq_smul_of_exactly_approximates' {β : Iio α}
+  {π₀ π₀' : struct_approx β} {π π' : allowable β}
+  (hπ : π₀.exactly_approximates π.to_struct_perm)
+  (hπ' : π₀'.exactly_approximates π'.to_struct_perm)
+  (S : set (support_condition β)) (t : tangle β)
+  (hS : (show struct_approx (β : Iic α), from π₀).supports S)
+  (hS' :(show struct_approx (β : Iic α), from π₀').supports S)
+  (ht : mul_action.supports (allowable β) S t)
+  (hSπ : ∀ c ∈ S, π₀ • c = π₀' • c) : π • t = π' • t :=
+@smul_eq_smul_of_exactly_approximates _ _ _ _ (β : Iic α) _ _ _ _ hπ hπ' S t hS hS' ht hSπ
+
 def free {β : Iic α} (π₀ : struct_approx β) : Prop := ∀ A, (π₀ A).free α A
 
 /-!

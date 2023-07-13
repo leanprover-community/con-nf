@@ -48,6 +48,8 @@ lemma complete_near_litter_map_eq :
   π.complete_near_litter_map hπ N A = π.near_litter_completion hπ N A (π.foa_hypothesis hπ) :=
 hypothesis.fix_near_litter_eq _ _ _ _
 
+/-
+
 lemma complete_litter_map_eq :
   π.complete_litter_map hπ L A = π.litter_completion hπ L A (π.foa_hypothesis hπ) :=
 by rw [complete_litter_map, complete_near_litter_map_eq]; refl
@@ -64,7 +66,11 @@ lemma complete_near_litter_map_fst_eq :
   (π.foa_hypothesis hπ : hypothesis c).near_litter_image N A h =
     π.complete_near_litter_map hπ N A := rfl
 
+-/
+
 end map_spec
+
+/-
 
 lemma complete_atom_map_eq_of_mem_domain {a} {A} (h : a ∈ (π A).atom_perm.domain) :
   π.complete_atom_map hπ a A = π A • a :=
@@ -586,7 +592,7 @@ end
 -- TODO: hypothesis_injective_inflexible_of_mem_refl_trans_constrained as a corollary to this.
 noncomputable def trans_gen_struct_approx {c d : support_condition β} (H : foa_props hπ c d)
   {γ : Iic α} {δ : Iio α} (hδ : (δ : Λ) < γ) (A : quiver.path (β : type_index) γ) :
-  weak_struct_approx δ :=
+  near_litter_action δ :=
 λ B, {
   atom_map := λ a, {
     dom := (inl a, (A.cons (coe_lt hδ)).comp B) ∈ trans_constrained c d,
@@ -753,9 +759,7 @@ lemma eq_of_hypothesised_allowable_smul_eq {c d : support_condition β} (H : foa
       (π.foa_hypothesis hπ)
       (hypothesis_injective_inflexible_of_mem_refl_trans_constrained H _ h₂) • t₂)) :
   t₁ = t₂ :=
-begin
-  sorry
-end
+sorry
 
 lemma litter_injective_extends {c d : support_condition β} (H : foa_props hπ c d)
   {L₁ L₂ : litter} {A : extended_index β}
@@ -815,6 +819,8 @@ begin
     refine congr_arg _ _,
     exact eq_of_hypothesised_allowable_smul_eq H hδ₁ hε₁ hδε₁ h₁ h₂ (f_map_injective _ h), },
 end
+
+-/
 
 end struct_approx
 
