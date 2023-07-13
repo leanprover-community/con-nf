@@ -1,3 +1,4 @@
+/-
 import phase2.atom_completion
 import phase2.near_litter_completion
 
@@ -48,8 +49,6 @@ lemma complete_near_litter_map_eq :
   π.complete_near_litter_map hπ N A = π.near_litter_completion hπ N A (π.foa_hypothesis hπ) :=
 hypothesis.fix_near_litter_eq _ _ _ _
 
-/-
-
 lemma complete_litter_map_eq :
   π.complete_litter_map hπ L A = π.litter_completion hπ L A (π.foa_hypothesis hπ) :=
 by rw [complete_litter_map, complete_near_litter_map_eq]; refl
@@ -66,11 +65,8 @@ lemma complete_near_litter_map_fst_eq :
   (π.foa_hypothesis hπ : hypothesis c).near_litter_image N A h =
     π.complete_near_litter_map hπ N A := rfl
 
--/
-
 end map_spec
 
-/-
 
 lemma complete_atom_map_eq_of_mem_domain {a} {A} (h : a ∈ (π A).atom_perm.domain) :
   π.complete_atom_map hπ a A = π A • a :=
@@ -820,8 +816,8 @@ begin
     exact eq_of_hypothesised_allowable_smul_eq H hδ₁ hε₁ hδε₁ h₁ h₂ (f_map_injective _ h), },
 end
 
--/
-
 end struct_approx
 
 end con_nf
+
+-/
