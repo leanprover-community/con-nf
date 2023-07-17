@@ -1,6 +1,9 @@
+import phase2.flexible
 import phase2.struct_action
 import phase2.fill_atom_range
 import phase2.fill_atom_orbits
+
+open set
 
 universe u
 
@@ -19,6 +22,9 @@ noncomputable def refine (hφ : φ.lawful) : near_litter_action :=
 φ.fill_atom_range.fill_atom_orbits (φ.fill_atom_range_lawful hφ)
 
 variables {φ} {hφ}
+
+lemma refine_lawful : (φ.refine hφ).lawful :=
+fill_atom_orbits_lawful _ _ (fill_atom_range_symm_diff_subset_ran hφ)
 
 @[simp] lemma refine_atom_map {a : atom} (ha : (φ.atom_map a).dom) :
   (φ.refine hφ).atom_map a = φ.atom_map a :=
@@ -50,6 +56,10 @@ variables {β : type_index} (φ : struct_action β) (hφ : φ.lawful)
 
 noncomputable def refine : struct_action β := λ A, (φ A).refine (hφ A)
 
+variables {φ} {hφ}
+
+lemma refine_lawful : (φ.refine hφ).lawful := λ A, near_litter_action.refine_lawful
+
 @[simp] lemma refine_apply {A : extended_index β} :
   φ.refine hφ A = (φ A).refine (hφ A) := rfl
 
@@ -66,6 +76,27 @@ near_litter_action.refine_atom_map_get ha
 
 lemma refine_precise : precise (φ.refine hφ) :=
 λ A, near_litter_action.refine_precise
+
+end struct_action
+
+namespace struct_action
+
+variables {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α}
+
+/-- Refine and complete this action into a structural approximation. -/
+noncomputable def rc (φ : struct_action β) (h : φ.lawful) : struct_approx β :=
+(φ.refine h).complete refine_lawful
+
+lemma rc_free (φ : struct_action β)
+  (h₁ : φ.lawful) (h₂ : φ.map_flexible) :
+  (show struct_approx (β : Iic α), from φ.rc h₁).free :=
+begin
+  rintros B L' ((hL' | ⟨L', hL', rfl⟩) | hL'),
+  { exact hL'.2, },
+  { rw near_litter_action.rough_litter_map_or_else_of_dom _ hL'.1,
+    exact h₂ L' B hL'.1 hL'.2, },
+  { exact (local_perm.sandbox_subset_subset _ _ hL').2, },
+end
 
 end struct_action
 

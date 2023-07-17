@@ -465,17 +465,11 @@ def free {β : Iic α} (π₀ : struct_approx β) : Prop := ∀ A, (π₀ A).fre
 /-- The inductive hypothesis used to construct the induced action of an approximation in the
 freedom of action theorem. -/
 structure hypothesis {β : Iic α} (c : support_condition β) :=
-(atom_image : Π a A, (relation.trans_gen (constrains α β)) ⟨inl a, A⟩ c → atom)
-(near_litter_image : Π N A, (relation.trans_gen (constrains α β)) ⟨inr N, A⟩ c → near_litter)
+(atom_image : Π a A, ⟨inl a, A⟩ <[α] c → atom)
+(near_litter_image : Π N A, ⟨inr N, A⟩ <[α] c → near_litter)
 
 namespace hypothesis
 variable {β : Iic α}
-
-/-- Two hypotheses are compatible if they agree everywhere that they are both defined. -/
-@[mk_iff] structure compatible {c d : support_condition β}
-  (Hc : hypothesis c) (Hd : hypothesis d) : Prop :=
-(atom_compatible : ∀ a A hc hd, Hc.atom_image a A hc = Hd.atom_image a A hd)
-(near_litter_compatible : ∀ N A hc hd, Hc.near_litter_image N A hc = Hd.near_litter_image N A hd)
 
 def fix_map :
   (psum (Σ' (_ : atom), extended_index β) (Σ' (_ : near_litter), extended_index β)) →

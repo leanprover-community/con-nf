@@ -12,7 +12,7 @@ open_locale cardinal
 namespace con_nf
 variables [params.{u}] (α : Λ) [position_data.{}] [phase_2_assumptions α]
 
-variables (β : Λ) (G : Type*) {τ : Type*} [has_smul G (support_condition β)] [has_smul G τ]
+variables {β : Λ} {G : Type*} {τ : Type*} [has_smul G (support_condition β)] [has_smul G τ]
 
 variables {β G} {x : τ}
 
@@ -24,10 +24,10 @@ variables {β G} {x : τ}
 /-- The *reduction* of a set of support conditions is the downward closure of the set under
 the constrains relation, but we only keep reduced conditions. -/
 def reduction (S : set (support_condition β)) : set (support_condition β) :=
-{c | ∃ d ∈ S, relation.refl_trans_gen (constrains α β) c d} ∩ set_of reduced
+{c | ∃ d ∈ S, c ≤[α] d} ∩ set_of reduced
 
 lemma reduction_singleton (c : support_condition β) :
-  reduction α {c} = ({c} ∪ {d | relation.trans_gen (constrains α β) d c}) ∩ set_of reduced :=
+  reduction α {c} = ({c} ∪ {d | d <[α] c}) ∩ set_of reduced :=
 by simp only [reduction, mem_singleton_iff, exists_prop, exists_eq_left,
   relation.refl_trans_gen_iff_eq_or_trans_gen, set_of_or, set_of_eq_eq_singleton']
 
@@ -88,7 +88,7 @@ begin
 end
 
 lemma reduction_eq_Union {S : set (support_condition β)} :
-  {c | ∃ d ∈ S, relation.refl_trans_gen (constrains α β) c d} = ⋃ n, nth_reduction α S n :=
+  {c | ∃ d ∈ S, c ≤[α] d} = ⋃ n, nth_reduction α S n :=
 begin
   refine subset_antisymm _ _,
   { rintros c ⟨d, hdS, hd⟩,
@@ -107,7 +107,7 @@ begin
 end
 
 lemma reduction_small' {S : set (support_condition β)} (h : small S) :
-  small {c | ∃ d ∈ S, relation.refl_trans_gen (constrains α β) c d} :=
+  small {c | ∃ d ∈ S, c ≤[α] d} :=
 begin
   rw reduction_eq_Union,
   have : small ⋃ (n : ulift ℕ), nth_reduction α S n.down,
@@ -117,6 +117,14 @@ begin
   { convert this using 1,
     ext x : 1,
     simp only [mem_Union, ulift.exists], },
+end
+
+lemma reduction_small'' {S : set (support_condition β)} (h : small S) :
+  small {c | ∃ d ∈ S, c <[α] d} :=
+begin
+  refine lt_of_le_of_lt (cardinal.mk_le_mk_of_subset _) (reduction_small' α h),
+  rintros c ⟨d, hd₁, hd₂⟩,
+  exact ⟨d, hd₁, hd₂.to_refl⟩,
 end
 
 lemma reduction_small {S : set (support_condition β)} (h : small S) :

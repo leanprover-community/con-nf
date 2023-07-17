@@ -78,68 +78,6 @@ lemma complete_atom_map_eq_of_not_mem_domain {a} {A} (h : a ∉ (π A).atom_perm
     ⟨a, (π A).mem_largest_sublitter_of_not_mem_domain a h⟩ :=
 by rw [complete_atom_map_eq, atom_completion, dif_neg h]; refl
 
-/-!
-Lemmas about the proof-relevant `inflexible_*` objects.
--/
-
-lemma inflexible_of_inflexible_bot {β : Iic α} {L : litter} {A : extended_index β}
-  (h : inflexible_bot L A) : inflexible α L A :=
-begin
-  have := inflexible.mk_bot h.hε h.B h.a,
-  rw [← h.hL, ← h.hA] at this,
-  exact this,
-end
-
-lemma inflexible_of_inflexible_coe {β : Iic α} {L : litter} {A : extended_index β}
-  (h : inflexible_coe L A) : inflexible α L A :=
-begin
-  have := inflexible.mk_coe h.hδ h.hε h.hδε h.B h.t,
-  rw [← h.hL, ← h.hA] at this,
-  exact this,
-end
-
-lemma inflexible_bot_or_inflexible_coe_of_inflexible {β : Iic α} {L : litter} {A : extended_index β}
-  (h : inflexible α L A) : nonempty (inflexible_bot L A) ∨ nonempty (inflexible_coe L A) :=
-begin
-  obtain ⟨hδ, hε, hδε, B, t⟩ | ⟨hε, B, a⟩ := h,
-  { refine or.inr ⟨⟨_, _, _, _, _, _, _, _, rfl, rfl⟩⟩,
-    assumption, },
-  { exact or.inl ⟨⟨_, _, _, _, _, rfl, rfl⟩⟩, },
-end
-
-lemma inflexible_iff_inflexible_bot_or_inflexible_coe
-  {β : Iic α} {L : litter} {A : extended_index β} :
-  inflexible α L A ↔ nonempty (inflexible_bot L A) ∨ nonempty (inflexible_coe L A) :=
-begin
-  split,
-  exact inflexible_bot_or_inflexible_coe_of_inflexible,
-  rintro (⟨⟨h⟩⟩ | ⟨⟨h⟩⟩),
-  exact inflexible_of_inflexible_bot h,
-  exact inflexible_of_inflexible_coe h,
-end
-
-lemma flexible_iff_not_inflexible_bot_coe {β : Iic α} {L : litter} {A : extended_index β} :
-  flexible α L A ↔ is_empty (inflexible_bot L A) ∧ is_empty (inflexible_coe L A) :=
-begin
-  split,
-  { intro h,
-    exact ⟨
-      ⟨λ h', h (inflexible_of_inflexible_bot h')⟩,
-      ⟨λ h', h (inflexible_of_inflexible_coe h')⟩
-    ⟩, },
-  { intros h₁ h₂,
-    cases inflexible_bot_or_inflexible_coe_of_inflexible h₂,
-    exact h₁.1.false h.some,
-    exact h₁.2.false h.some, },
-end
-
-lemma flexible_cases' {β : Iic α} (L : litter) (A : extended_index β) :
-  flexible α L A ∨ nonempty (inflexible_bot L A) ∨ nonempty (inflexible_coe L A) :=
-begin
-  rw [← inflexible_iff_inflexible_bot_or_inflexible_coe, or_comm],
-  exact flexible_cases α L A,
-end
-
 @[simp] def near_litter_hypothesis_eq (N : near_litter) (A : extended_index β) :
   near_litter_hypothesis N A (π.foa_hypothesis hπ) = (π.foa_hypothesis hπ) := rfl
 
@@ -186,10 +124,6 @@ lemma complete_litter_map_eq_of_flexible' {L : litter} {A : extended_index β}
 complete_litter_map_eq_of_flexible
   (flexible_iff_not_inflexible_bot_coe.mp h).1
   (flexible_iff_not_inflexible_bot_coe.mp h).2
-
--- TODO: Move these notations earlier, and maybe consider different ones.
-notation c ` <[`:50 α `] ` d:50 := relation.trans_gen (constrains α _) c d
-notation c ` ≤[`:50 α `] ` d:50 := relation.refl_trans_gen (constrains α _) c d
 
 def trans_constrained (c d : support_condition β) : set (support_condition β) :=
 {e | e <[α] c} ∪ {e | e <[α] d}

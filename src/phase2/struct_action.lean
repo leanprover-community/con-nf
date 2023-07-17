@@ -1,3 +1,4 @@
+import phase2.flexible
 import phase2.near_litter_action
 
 open cardinal quiver set sum with_bot
@@ -16,9 +17,15 @@ variable [params.{u}]
 index. -/
 def struct_action (β : type_index) := extended_index β → near_litter_action
 
-def struct_action.lawful {β : type_index} (φ : struct_action β) : Prop := ∀ B, (φ B).lawful
-
 namespace struct_action
+
+def lawful {β : type_index} (φ : struct_action β) : Prop := ∀ B, (φ B).lawful
+
+/-- This structural action maps flexible litters to flexible litters. -/
+def map_flexible {α : Λ} [position_data.{}] [phase_2_assumptions α]
+  {β : Iio α} (φ : struct_action β) : Prop :=
+∀ (L : litter) B hL,
+  flexible α L B → flexible α (((φ B).litter_map L).get hL).1 B
 
 section precise
 
@@ -101,9 +108,8 @@ def coherent_coe (φ : struct_action β) (hφ : φ.lawful) (t : tangle β) : Pro
   (γ : Iic α) (δ ε : Iio α) (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
   (C : path (β : type_index) γ) (t' : tangle δ) (hL)
   (hc₁ : ∃ (d : support_condition β), d ∈ (designated_support t).carrier ∧
-    relation.refl_trans_gen (constrains α β)
     (inr (f_map (coe_ne_coe.mpr (coe_ne' hδε)) t').to_near_litter,
-      (C.cons (coe_lt hε)).cons (bot_lt_coe _)) d)
+      (C.cons (coe_lt hε)).cons (bot_lt_coe _)) ≤[α] d)
   (hc₂ : ∀ (c : support_condition δ), c ∈ (designated_support t').carrier →
     π • (show support_condition β, from (c.fst, (C.cons (coe_lt hδ)).comp c.snd)) =
       φ.support_condition_map_or_else (c.fst, (C.cons (coe_lt hδ)).comp c.snd)),
@@ -139,9 +145,8 @@ lemma smul_litter_eq_of_supports (φ : struct_action β) (hφ : φ.lawful)
   (d : support_condition β) (hd : d ∈ designated_support t)
   (B : extended_index β) (L : litter)
   (ih : ∀ (e : support_condition β),
-    relation.trans_gen (constrains α β) e (inr L.to_near_litter, B) →
-    π • e = φ.support_condition_map_or_else e)
-  (hc : relation.refl_trans_gen (constrains α β) (inr L.to_near_litter, B) d) :
+    e <[α] (inr L.to_near_litter, B) → π • e = φ.support_condition_map_or_else e)
+  (hc : (inr L.to_near_litter, B) ≤[α] d) :
   struct_perm.derivative B π.to_struct_perm • L =
   (((φ B).litter_map L).get
     (hφs.litter_mem L B ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩)).fst :=
@@ -178,7 +183,7 @@ lemma smul_support_condition_eq (φ : struct_action β) (hφ : φ.lawful) (hφp 
   {π : allowable β} (hπ : (φ.complete hφ).exactly_approximates π.to_struct_perm)
   (t : tangle β) (hwc : φ.coherent hφ t) (hws : φ.supports t)
   (c d : support_condition β)
-  (hc : relation.refl_trans_gen (constrains α β) c d)
+  (hc : c ≤[α] d)
   (hd : d ∈ designated_support t) :
   π • c = φ.support_condition_map_or_else c :=
 begin

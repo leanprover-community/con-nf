@@ -137,9 +137,12 @@ begin
     exact constrains.f_map_bot hδ (B.comp A) a, },
 end
 
+notation c ` <[`:50 α `] ` d:50 := relation.trans_gen (constrains α _) c d
+notation c ` ≤[`:50 α `] ` d:50 := relation.refl_trans_gen (constrains α _) c d
+
 lemma refl_trans_gen_constrains_comp {β γ : Λ} {c d : support_condition γ}
-  (h : relation.refl_trans_gen (constrains α γ) c d) (B : path (β : type_index) γ) :
-  relation.refl_trans_gen (constrains α β) ⟨c.fst, B.comp c.snd⟩ ⟨d.fst, B.comp d.snd⟩ :=
+  (h : c ≤[α] d) (B : path (β : type_index) γ) :
+  ⟨c.fst, B.comp c.snd⟩ ≤[α] ⟨d.fst, B.comp d.snd⟩ :=
 begin
   induction h with e f hce hef ih,
   exact relation.refl_trans_gen.refl,
@@ -147,8 +150,8 @@ begin
 end
 
 lemma trans_gen_constrains_comp {β γ : Λ} {c d : support_condition γ}
-  (h : relation.trans_gen (constrains α γ) c d) (B : path (β : type_index) γ) :
-  relation.trans_gen (constrains α β) ⟨c.fst, B.comp c.snd⟩ ⟨d.fst, B.comp d.snd⟩ :=
+  (h : c <[α] d) (B : path (β : type_index) γ) :
+  ⟨c.fst, B.comp c.snd⟩ <[α] ⟨d.fst, B.comp d.snd⟩ :=
 begin
   induction h with e hce e f hce hef ih,
   exact relation.trans_gen.single (constrains_comp hce B),
@@ -156,9 +159,8 @@ begin
 end
 
 lemma refl_trans_gen_near_litter {β : Λ} {N : near_litter} {B : extended_index β}
-  {c : support_condition β}
-  (h : relation.refl_trans_gen (constrains α β) (inr N, B) c) :
-  relation.refl_trans_gen (constrains α β) (inr N.1.to_near_litter, B) c :=
+  {c : support_condition β} (h : (inr N, B) ≤[α] c) :
+  (inr N.1.to_near_litter, B) ≤[α] c :=
 begin
   by_cases h' : N.is_litter,
   { obtain ⟨L, rfl⟩ := h'.exists_litter_eq,
@@ -169,8 +171,8 @@ end
 
 lemma trans_gen_near_litter {β : Λ} {N : near_litter} {B : extended_index β}
   {c : support_condition β}
-  (h : relation.trans_gen (constrains α β) c (inr N.1.to_near_litter, B)) :
-  relation.trans_gen (constrains α β) c (inr N, B) :=
+  (h : c <[α] (inr N.1.to_near_litter, B)) :
+  c <[α] (inr N, B) :=
 begin
   by_cases h' : N.is_litter,
   { obtain ⟨L, rfl⟩ := h'.exists_litter_eq,
@@ -181,8 +183,8 @@ end
 
 lemma trans_gen_near_litter' {β : Λ} {N : near_litter} {B : extended_index β}
   {c : support_condition β}
-  (h : relation.trans_gen (constrains α β) (inr N, B) c) :
-  relation.trans_gen (constrains α β) (inr N.1.to_near_litter, B) c :=
+  (h : (inr N, B) <[α] c) :
+  (inr N.1.to_near_litter, B) <[α] c :=
 begin
   by_cases h' : N.is_litter,
   { obtain ⟨L, rfl⟩ := h'.exists_litter_eq,
