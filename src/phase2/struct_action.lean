@@ -81,11 +81,9 @@ variables {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α}
 /-- A structural action *supports* a tangle if it defines an image for everything
 in the reduction of its designated support. -/
 structure supports (φ : struct_action β) (t : tangle β) : Prop :=
-(atom_mem : ∀ a B, (inl a, B) ∈ reduction α (designated_support t : set (support_condition β)) →
-  ((φ B).atom_map a).dom)
+(atom_mem : ∀ a B, (inl a, B) ∈ reduced_support α t → ((φ B).atom_map a).dom)
 (litter_mem : ∀ (L : litter) B,
-  (inr L.to_near_litter, B) ∈ reduction α (designated_support t : set (support_condition β)) →
-  ((φ B).litter_map L).dom)
+  (inr L.to_near_litter, B) ∈ reduced_support α t → ((φ B).litter_map L).dom)
 
 /-- Two structural actions are *compatible* for a tangle if they both support the
 tangle and agree on the reduction of its designated support. -/
@@ -104,7 +102,7 @@ noncomputable def support_condition_map_or_else (φ : struct_action β) :
 | (inr N, B) := (inr ((φ B).near_litter_map_or_else N), B)
 
 def coherent_coe (φ : struct_action β) (hφ : φ.lawful) (t : tangle β) : Prop :=
-∀ {π : allowable β} (hπ : (φ.complete hφ).exactly_approximates π.to_struct_perm)
+∀ ⦃π : allowable β⦄ (hπ : (φ.complete hφ).exactly_approximates π.to_struct_perm)
   (γ : Iic α) (δ ε : Iio α) (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
   (C : path (β : type_index) γ) (t' : tangle δ) (hL)
   (hc₁ : ∃ (d : support_condition β), d ∈ (designated_support t).carrier ∧
@@ -122,7 +120,7 @@ def coherent_coe (φ : struct_action β) (hφ : φ.lawful) (t : tangle β) : Pro
       (f_map (subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t')).get hL).fst
 
 def coherent_bot (φ : struct_action β) (hφ : φ.lawful) : Prop :=
-∀ {π : allowable β} (hπ : (φ.complete hφ).exactly_approximates π.to_struct_perm)
+∀ ⦃π : allowable β⦄ (hπ : (φ.complete hφ).exactly_approximates π.to_struct_perm)
   (γ : Iic α) (ε : Iio α) (hε : (ε : Λ) < γ)
   (C : path (β : type_index) γ) (a : tangle ⊥) (hL)
   (hc : struct_perm.derivative (C.cons (bot_lt_coe _)) π.to_struct_perm • a =

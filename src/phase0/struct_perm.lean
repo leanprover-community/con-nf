@@ -172,6 +172,11 @@ mul_action.comp_hom _ to_near_litter_perm
 @[simp] lemma to_near_litter_perm_smul (f : struct_perm α) (x : X) :
   f.to_near_litter_perm • x = f • x := rfl
 
+/-- Needed as the previous lemma requires a `mul_action` and here we only have `has_smul`.
+We could generify instances but this might cause loops. -/
+@[simp] lemma to_near_litter_perm_smul_set (f : struct_perm α) (s : set X) :
+  f.to_near_litter_perm • s = f • s := rfl
+
 @[simp] lemma to_bot_smul (f : near_litter_perm) (x : X) : to_bot f • x = f • x :=
 by { change to_near_litter_perm _ • _ = _ • _, rw [coe_to_near_litter_perm, of_bot_to_bot] }
 

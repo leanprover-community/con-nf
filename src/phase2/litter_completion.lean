@@ -173,11 +173,19 @@ def ih_action {β : Iic α} {c : support_condition β} (H : hypothesis c) : stru
   end,
 }
 
+@[simp] lemma ih_action_atom_map {β : Iic α} {c : support_condition β} {H : hypothesis c}
+  {B : extended_index β} {a : atom} :
+  (ih_action H B).atom_map a = ⟨_, λ h, H.atom_image a B h⟩ := rfl
+
+@[simp] lemma ih_action_litter_map {β : Iic α} {c : support_condition β} {H : hypothesis c}
+  {B : extended_index β} {L : litter} :
+  (ih_action H B).litter_map L = ⟨_, λ h, H.near_litter_image L.to_near_litter B h⟩ := rfl
+
 def _root_.con_nf.struct_action.comp {β γ : type_index} (φ : struct_action β) (A : path β γ) :
   struct_action γ :=
 λ B, {
-  atom_map := λ a, (φ (A.comp B)).atom_map a,
-  litter_map := λ a, (φ (A.comp B)).litter_map a,
+  atom_map := (φ (A.comp B)).atom_map,
+  litter_map := (φ (A.comp B)).litter_map,
   atom_map_dom_small := begin
     refine small.image_subset id function.injective_id (φ (A.comp B)).atom_map_dom_small _,
     simp only [id.def, image_id'],
@@ -187,6 +195,14 @@ def _root_.con_nf.struct_action.comp {β γ : type_index} (φ : struct_action β
     simp only [id.def, image_id'],
   end,
 }
+
+@[simp] lemma _root_.con_nf.struct_action.comp_atom_map {β γ : type_index}
+  {φ : struct_action β} {A : path β γ} {B : extended_index γ} :
+  (φ.comp A B).atom_map = (φ (A.comp B)).atom_map := rfl
+
+@[simp] lemma _root_.con_nf.struct_action.comp_litter_map {β γ : type_index}
+  {φ : struct_action β} {A : path β γ} {B : extended_index γ} :
+  (φ.comp A B).litter_map = (φ (A.comp B)).litter_map := rfl
 
 variables {β : Iic α} [freedom_of_action_hypothesis β]
 
@@ -208,6 +224,15 @@ noncomputable def _root_.con_nf.struct_action.hypothesised_allowable
   allowable h.δ :=
 (φ.comp (h.B.cons (coe_lt h.hδ))).allowable
   (h.hδ.trans_le (show _, from coe_le_coe.mp (le_of_path h.B))) h₁ h₂
+
+lemma _root_.con_nf.struct_action.hypothesised_allowable_exactly_approximates
+  (φ : struct_action β)
+  {L : litter} {A : extended_index β} (h : inflexible_coe L A)
+  (h₁ : (φ.comp (h.B.cons (coe_lt h.hδ))).lawful)
+  (h₂ : (φ.comp (h.B.cons (coe_lt h.hδ))).map_flexible) :
+  ((φ.comp (h.B.cons (coe_lt h.hδ))).rc h₁).exactly_approximates
+    (φ.hypothesised_allowable h h₁ h₂).to_struct_perm :=
+(φ.comp (h.B.cons (coe_lt h.hδ))).allowable_exactly_approximates _ _ _
 
 noncomputable def litter_completion (π : struct_approx β)
   (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩) : litter :=

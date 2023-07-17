@@ -11,8 +11,6 @@ namespace struct_approx
 variables [params.{u}] {α : Λ} [position_data.{}] [phase_2_assumptions α]
   {β : Iic α} [freedom_of_action_hypothesis β]
 
-/-
-
 def near_litter_hypothesis (N : near_litter) (A : extended_index β) (H : hypothesis ⟨inr N, A⟩) :
   hypothesis ⟨inr N.1.to_near_litter, A⟩ := {
   atom_image := λ a B h, H.atom_image a B (begin
@@ -35,18 +33,18 @@ def near_litter_hypothesis (N : near_litter) (A : extended_index β) (H : hypoth
   end),
 }
 
-def near_litter_completion_map (π : struct_approx β) (hπ : π.free)
+def near_litter_completion_map (π : struct_approx β)
   (N : near_litter) (A : extended_index β) (H : hypothesis ⟨inr N, A⟩) : set atom :=
 (near_litter_approx.largest_sublitter (π A)
-  (litter_completion π hπ N.1 A (near_litter_hypothesis N A H)) ∪
+  (litter_completion π N.1 A (near_litter_hypothesis N A H)) ∪
   π A • (N ∩ (π A).atom_perm.domain)) ∆
   ⋃ (a : atom) (ha : a ∈ (litter_set N.1 ∆ N) \ (π A).atom_perm.domain),
     {H.atom_image a A (relation.trans_gen.single (constrains.symm_diff N a ha.1 A))}
 
 lemma near_litter_completion_map_is_near_litter (π : struct_approx β)
-  (hπ : π.free) (N : near_litter) (A : extended_index β) (H : hypothesis ⟨inr N, A⟩) :
-  is_near_litter (π.litter_completion hπ N.fst A (near_litter_hypothesis N A H))
-    (π.near_litter_completion_map hπ N A H) :=
+  (N : near_litter) (A : extended_index β) (H : hypothesis ⟨inr N, A⟩) :
+  is_near_litter (π.litter_completion N.fst A (near_litter_hypothesis N A H))
+    (π.near_litter_completion_map N A H) :=
 begin
   rw [near_litter_completion_map, is_near_litter, is_near, near_litter_approx.coe_largest_sublitter,
     ← symm_diff_assoc, symm_diff_comm, ← small.symm_diff_iff _],
@@ -57,18 +55,16 @@ begin
   { exact small.bUnion (small.mono (diff_subset _ _) N.2.prop) (λ _ _, small_singleton _), },
 end
 
-noncomputable def near_litter_completion (π : struct_approx β) (hπ : π.free)
+noncomputable def near_litter_completion (π : struct_approx β)
   (N : near_litter) (A : extended_index β) (H : hypothesis ⟨inr N, A⟩) : near_litter :=
-⟨litter_completion π hπ N.1 A (near_litter_hypothesis N A H),
-  near_litter_completion_map π hπ N A H,
-  near_litter_completion_map_is_near_litter π hπ N A H⟩
+⟨litter_completion π N.1 A (near_litter_hypothesis N A H),
+  near_litter_completion_map π N A H,
+  near_litter_completion_map_is_near_litter π N A H⟩
 
-@[simp] lemma near_litter_completion_fst_eq (π : struct_approx β) (hπ : π.free)
+@[simp] lemma near_litter_completion_fst_eq (π : struct_approx β)
   (N : near_litter) (A : extended_index β) (H : hypothesis ⟨inr N, A⟩) :
-  (π.near_litter_completion hπ N A H).1 =
-  litter_completion π hπ N.1 A (near_litter_hypothesis N A H) := rfl
-
--/
+  (π.near_litter_completion N A H).1 =
+  litter_completion π N.1 A (near_litter_hypothesis N A H) := rfl
 
 end struct_approx
 

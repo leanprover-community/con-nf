@@ -26,20 +26,13 @@ the constrains relation, but we only keep reduced conditions. -/
 def reduction (S : set (support_condition β)) : set (support_condition β) :=
 {c | ∃ d ∈ S, c ≤[α] d} ∩ set_of reduced
 
-lemma reduction_singleton (c : support_condition β) :
-  reduction α {c} = ({c} ∪ {d | d <[α] c}) ∩ set_of reduced :=
-by simp only [reduction, mem_singleton_iff, exists_prop, exists_eq_left,
-  relation.refl_trans_gen_iff_eq_or_trans_gen, set_of_or, set_of_eq_eq_singleton']
+lemma mem_reduction_of_reduced (S : set (support_condition β))
+  (c : support_condition β) (hc₁ : reduced c) (hc₂ : c ∈ S) : c ∈ reduction α S :=
+⟨⟨c, hc₂, relation.refl_trans_gen.refl⟩, hc₁⟩
 
-lemma reduction_singleton_of_not_reduced (c : support_condition β) (hc : ¬reduced c) :
-  reduction α {c} = {d | relation.trans_gen (constrains α β) d c} ∩ {d | reduced d} :=
-begin
-  simp only [reduction_singleton, inter_distrib_right, union_eq_right_iff_subset,
-    subset_inter_iff, inter_subset_right, and_true],
-  rintros d ⟨hd, hd'⟩,
-  cases hd,
-  cases hc hd',
-end
+lemma mem_reduction_of_reduced_constrains (S : set (support_condition β))
+  (c d : support_condition β) (hc : reduced c) (hcd : c ≺[α] d) (hd : d ∈ S) : c ∈ reduction α S :=
+⟨⟨d, hd, relation.refl_trans_gen.single hcd⟩, hc⟩
 
 def nth_reduction (S : set (support_condition β)) : ℕ → set (support_condition β)
 | 0 := S
@@ -130,5 +123,67 @@ end
 lemma reduction_small {S : set (support_condition β)} (h : small S) :
   small (reduction α S) :=
 lt_of_le_of_lt (cardinal.mk_subtype_le_of_subset (λ c hc, hc.1)) (reduction_small' α h)
+
+lemma reduction_designated_support_supports [core_tangle_data β] (t : tangle β) :
+  supports (allowable β) (reduction α (designated_support t : set (support_condition β))) t :=
+begin
+  intros π h₁,
+  refine (designated_support t).supports π _,
+  rintros ⟨a | N, B⟩ h₂,
+  { exact h₁ (mem_reduction_of_reduced α _ _ (reduced.mk_atom a B) h₂), },
+  { by_cases N.is_litter,
+    { obtain ⟨L, rfl⟩ := h.exists_litter_eq,
+      exact h₁ (mem_reduction_of_reduced α _ _ (reduced.mk_litter L B) h₂), },
+    { have h := near_litter.not_is_litter h,
+      have h₃ := congr_arg prod.fst (h₁ (mem_reduction_of_reduced_constrains α _ _ _
+        (reduced.mk_litter N.fst B) (constrains.near_litter N h B) h₂)),
+      have h₄ := λ a ha, congr_arg prod.fst (h₁ (mem_reduction_of_reduced_constrains α _ _ _
+        (reduced.mk_atom a B) (constrains.symm_diff N a ha B) h₂)),
+      refine prod.ext _ rfl,
+      change inr _ = inr _ at h₃,
+      change ∀ a ha, inl _ = inl _ at h₄,
+      change inr _ = inr _,
+      simp only at h₃ h₄ ⊢,
+      apply_fun set_like.coe at h₃,
+      refine set_like.coe_injective _,
+      refine (near_litter_perm.smul_near_litter_eq_smul_symm_diff_smul _ N).trans _,
+      change _ • (_ : set atom) = _ at h₃,
+      simp only [struct_perm.to_near_litter_perm_smul_set, h₃],
+      refine eq.trans _ (symm_diff_symm_diff_cancel_left (litter_set N.fst) _),
+      refine congr_arg _ _,
+      ext a : 1,
+      split,
+      { rintro ⟨b, hb, rfl⟩,
+        rw h₄ b hb,
+        exact hb, },
+      { intro ha,
+        refine ⟨a, ha, _⟩,
+        exact h₄ a ha, }, }, },
+end
+
+noncomputable! def reduced_support [core_tangle_data β] (t : tangle β) :
+  support β (allowable β) t := {
+  carrier := reduction α (designated_support t : set (support_condition β)),
+  small := reduction_small α (designated_support t).small,
+  supports := reduction_designated_support_supports α t,
+}
+
+lemma mem_reduced_support_iff [core_tangle_data β] (t : tangle β) (c : support_condition β) :
+  c ∈ reduced_support α t ↔ c ∈ reduction α (designated_support t : set (support_condition β)) :=
+iff.rfl
+
+lemma mem_reduction_designated_support {β γ : Iic α} {δ ε : Iio α}
+  (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (B : path (β : type_index) γ) (t : tangle δ)
+  (c : support_condition δ)
+  (h : c ∈ reduced_support α t) :
+  (c.fst, (B.cons (coe_lt hδ)).comp c.snd) <[α]
+  (inr (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter,
+    (B.cons (coe_lt hε)).cons (bot_lt_coe _)) :=
+begin
+  obtain ⟨⟨d, hd, hcd⟩, hc⟩ := h,
+  refine relation.trans_gen.tail' _ (constrains.f_map hδ hε hδε B t d hd),
+  exact refl_trans_gen_constrains_comp hcd _,
+end
 
 end con_nf

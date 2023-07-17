@@ -77,6 +77,13 @@ near_litter_action.refine_atom_map_get ha
 lemma refine_precise : precise (φ.refine hφ) :=
 λ A, near_litter_action.refine_precise
 
+lemma refine_supports {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α}
+  {t : tangle β} (φ : struct_action β) (hφ : φ.lawful) (h : φ.supports t) :
+  (φ.refine hφ).supports t := {
+  atom_mem := λ a B ha, or.inl (or.inl $ h.atom_mem a B ha),
+  litter_mem := h.litter_mem,
+}
+
 end struct_action
 
 namespace struct_action

@@ -123,6 +123,55 @@ begin
   { rintro rfl, exact constrains.atom a A, },
 end
 
+/-
+-- Probably not the statement we actually want to prove.
+lemma constrains_f_map {γ : Iio α} {δ : Iio α}
+  (h : (γ : type_index) ≠ δ) (B : extended_index δ) (t : tangle γ) {c : support_condition δ}
+  (hc : c ≺[α] (inr (f_map h t).to_near_litter, B)) :
+  ∃ β : Iic α, ∃ hβ : (γ : Λ) < β, ∃ A : path (δ : type_index) β, ∃ d : support_condition γ,
+    d ∈ designated_support t ∧ c = (d.fst, (A.cons (coe_lt hβ)).comp d.snd) :=
+begin
+  rw constrains_iff at hc,
+  obtain (hc | hc | hc | hc | hc) := hc,
+  { simp only [prod.mk.inj_iff, false_and, and_false, exists_false] at hc,
+    cases hc, },
+  { simp only [ne.def, prod.mk.inj_iff, exists_eq_right_right', litter.to_near_litter_fst] at hc,
+    cases hc.1 rfl, },
+  { simp only [prod.mk.inj_iff, exists_eq_right_right'] at hc,
+    obtain ⟨_, a, ha, hc, rfl⟩ := hc,
+    change a ∈ ((f_map h t).to_near_litter : set atom) ∆ (f_map h t).to_near_litter at ha,
+    simp only [symm_diff_self, bot_eq_empty, mem_empty_iff_false] at ha,
+    cases ha, },
+  { obtain ⟨γ', δ', ε', hδ', hε', hδε', A, t', c, hc₁, rfl, hc₂⟩ := hc,
+    simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff] at hc₂,
+    have : γ = δ',
+    { have h₁ := f_map_β h t,
+      rw hc₂.1 at h₁,
+      have h₂ := f_map_β _ t',
+      have := h₁.symm.trans h₂,
+      have := with_bot.coe_inj.mp this,
+      rw subtype.coe_inj at this,
+      exact this, },
+    subst this,
+    have : δ = ε',
+    { have h₁ := f_map_γ h t,
+      rw hc₂.1 at h₁,
+      have h₂ := f_map_γ _ t',
+      have := h₁.symm.trans h₂,
+      rw subtype.coe_inj at this,
+      exact this, },
+    subst this,
+    cases f_map_injective _ hc₂.1,
+    cases hc₂.2,
+    exact ⟨γ', hδ', A, c, hc₁, rfl⟩, },
+  { obtain ⟨γ', ε', hε', A, a, hc₁, hc₂⟩ := hc,
+    simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff] at hc₂,
+    have := f_map_β h t,
+    rw hc₂.1 at this,
+    have := this.symm.trans (f_map_β bot_ne_coe a),
+    cases this, },
+end -/
+
 /-- The constrains relation is stable under composition of paths. -/
 lemma constrains_comp {β γ : Λ} {c d : support_condition γ} (h : c ≺[α] d)
   (B : path (β : type_index) γ) : ⟨c.fst, B.comp c.snd⟩ ≺[α] ⟨d.fst, B.comp d.snd⟩ :=
