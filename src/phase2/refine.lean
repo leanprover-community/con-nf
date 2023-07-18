@@ -63,10 +63,9 @@ lemma refine_lawful : (φ.refine hφ).lawful := λ A, near_litter_action.refine_
 @[simp] lemma refine_apply {A : extended_index β} :
   φ.refine hφ A = (φ A).refine (hφ A) := rfl
 
-@[simp] lemma refine_atom_map {A : extended_index β} {a : atom} (ha : ((φ A).atom_map a).dom) :
+lemma refine_atom_map {A : extended_index β} {a : atom} (ha : ((φ A).atom_map a).dom) :
   ((φ A).refine (hφ A)).atom_map a = (φ A).atom_map a := near_litter_action.refine_atom_map ha
 
--- TODO: check confluence with previous lemma
 @[simp] lemma refine_atom_map_get {A : extended_index β} {a : atom} (ha : ((φ A).atom_map a).dom) :
   (((φ A).refine (hφ A)).atom_map a).get (or.inl (or.inl ha)) = ((φ A).atom_map a).get ha :=
 near_litter_action.refine_atom_map_get ha
@@ -93,6 +92,19 @@ variables {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α}
 /-- Refine and complete this action into a structural approximation. -/
 noncomputable def rc (φ : struct_action β) (h : φ.lawful) : struct_approx β :=
 (φ.refine h).complete refine_lawful
+
+lemma rc_smul_atom_eq {φ : struct_action β} {h : φ.lawful} {B : extended_index β}
+  {a : atom} (ha : ((φ B).atom_map a).dom) :
+  φ.rc h B • a = ((φ B).atom_map a).get ha :=
+begin
+  refine (near_litter_action.complete_smul_atom_eq _ _).trans _,
+  { exact or.inl (or.inl ha), },
+  { simp only [refine_apply, refine_atom_map ha], },
+end
+
+lemma rc_smul_litter_eq {φ : struct_action β} {hφ : φ.lawful}
+  {B : extended_index β} (L : litter) :
+  φ.rc hφ B • L = (φ.refine hφ B).flexible_litter_perm (refine_lawful B) B L := rfl
 
 lemma rc_free (φ : struct_action β)
   (h₁ : φ.lawful) (h₂ : φ.map_flexible) :
