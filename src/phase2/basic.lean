@@ -107,10 +107,26 @@ by rw [allowable.derivative, path.Iic_rec_nil]
   allowable.derivative (A.cons h) = (allowable_derivative γ δ h).comp (allowable.derivative A) :=
 by rw [allowable.derivative, path.Iic_rec_cons]
 
-lemma allowable.derivative_cons_apply {β γ δ : Iic_index α}
+lemma allowable.derivative_cons_apply (β γ δ : Iic_index α)
   (A : quiver.path (β : type_index) γ) (h : δ < γ) (π : allowable β) :
   allowable.derivative (A.cons h) π = allowable_derivative γ δ h (allowable.derivative A π) :=
 by rw [allowable.derivative_cons]; refl
+
+lemma allowable.derivative_cons_apply' (β : Iio α) (γ : Iic α) (δ : Iio α)
+  (A : quiver.path (β : type_index) γ) (h : (δ : type_index) < γ) (π : allowable β) :
+  @allowable.derivative _ _ _ _ (β : Iic_index α) (δ : Iic_index α) (A.cons h) π =
+  allowable_derivative (γ : Iic_index α) (δ : Iic_index α) h
+    (allowable.derivative
+      (show quiver.path ((β : Iic_index α) : type_index) (γ : Iic_index α), from A) π) :=
+by rw [← allowable.derivative_cons_apply]
+
+lemma allowable.derivative_cons_apply'' (β : Iio α) (γ : Iic α)
+  (A : quiver.path (β : type_index) γ) (π : allowable β) :
+  @allowable.derivative _ _ _ _ (β : Iic_index α) (⊥ : Iic_index α) (A.cons $ bot_lt_coe _) π =
+  allowable_derivative (γ : Iic_index α) (⊥ : Iic_index α) (bot_lt_coe _)
+    (allowable.derivative
+      (show quiver.path ((β : Iic_index α) : type_index) (γ : Iic_index α), from A) π) :=
+by rw [← allowable.derivative_cons_apply]; refl
 
 lemma allowable.derivative_eq {β γ : Iic_index α} (h : γ < β) :
   allowable_derivative β γ h = allowable.derivative (quiver.path.nil.cons h) :=
@@ -150,7 +166,36 @@ lemma allowable.derivative_smul {β γ : Iic_index α} (A : quiver.path (β : ty
   allowable.derivative A π • x = struct_perm.derivative A π.to_struct_perm • x :=
 by rw allowable.derivative_to_struct_perm; refl
 
-lemma to_struct_perm_smul_f_map {β : Iic_index α} (γ : Iio_index α) (δ : Iio α)
+-- TODO: Unify next three lemmas.
+@[simp] lemma allowable.derivative_bot_smul_atom (β : Iic α) (π : allowable β) (a : atom) :
+  allowable_derivative (Iic_coe β) ⊥ (bot_lt_coe β) π • a = π • a :=
+begin
+  refine eq.trans _ (struct_perm.derivative_bot_smul π.to_struct_perm a),
+  have := allowable_derivative_eq (Iic_coe β) ⊥ (bot_lt_coe _) π,
+  refine eq.trans _ (congr_arg2 (•) this.symm rfl),
+  refl,
+end
+
+@[simp] lemma allowable.derivative_bot_smul_litter (β : Iic α) (π : allowable β) (L : litter) :
+  allowable_derivative (Iic_coe β) ⊥ (bot_lt_coe β) π • L = π • L :=
+begin
+  refine eq.trans _ (struct_perm.derivative_bot_smul π.to_struct_perm L),
+  have := allowable_derivative_eq (Iic_coe β) ⊥ (bot_lt_coe _) π,
+  refine eq.trans _ (congr_arg2 (•) this.symm rfl),
+  refl,
+end
+
+@[simp] lemma allowable.derivative_bot_smul_near_litter (β : Iic α) (π : allowable β)
+  (N : near_litter) :
+  allowable_derivative (Iic_coe β) ⊥ (bot_lt_coe β) π • N = π • N :=
+begin
+  refine eq.trans _ (struct_perm.derivative_bot_smul π.to_struct_perm N),
+  have := allowable_derivative_eq (Iic_coe β) ⊥ (bot_lt_coe _) π,
+  refine eq.trans _ (congr_arg2 (•) this.symm rfl),
+  refl,
+end
+
+lemma to_struct_perm_smul_f_map (β : Iic_index α) (γ : Iio_index α) (δ : Iio α)
   (hγ : (γ : type_index) < β) (hδ : (δ : type_index) < β) (hγδ : γ ≠ δ)
   (π : allowable β) (t : tangle γ) :
   (struct_perm.derivative (quiver.path.nil.cons hδ) π.to_struct_perm) •

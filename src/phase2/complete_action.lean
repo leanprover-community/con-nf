@@ -442,6 +442,161 @@ begin
   exact relation.refl_trans_gen.single (constrains.f_map hδ hε hδε C t _ hc),
 end
 
+-- TODO: move to struct_perm
+@[simp] lemma _root_.con_nf.struct_perm.derivative_fst {α β : type_index} (π : struct_perm α)
+  (A : path α β) (N : near_litter) :
+  (struct_perm.derivative A π • N).fst = struct_perm.derivative A π • N.fst := rfl
+
+lemma to_struct_perm_bot : (allowable.to_struct_perm : allowable ⊥ → struct_perm ⊥) =
+  struct_perm.to_bot_iso.to_monoid_hom := rfl
+
+/-- I think it's quite a big deal that this isn't a defeq.
+We should probably refactor structural permutations to be like structural approximations,
+a function from extended indices to near-litter permutations. -/
+@[simp] lemma to_struct_perm_to_near_litter_perm (π : allowable ⊥) :
+  π.to_struct_perm.to_near_litter_perm = π :=
+begin
+  ext a : 2,
+  rw [to_struct_perm_bot, struct_perm.coe_to_near_litter_perm],
+  simp only [mul_equiv.coe_to_monoid_hom, struct_perm.coe_to_bot_iso, struct_perm.of_bot_to_bot],
+end
+
+lemma allowable_smul_support_condition_eq_precise {β : Iio α} (π₁ π₂ : allowable β)
+  (γ : Iic α) (δ ε : Iio α) (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  (A : path (β : type_index) γ) (t : tangle δ)
+  (h : ∀ d : support_condition β,
+    d ≤[α] (inr (f_map (with_bot.coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter,
+      (A.cons (coe_lt hε)).cons (bot_lt_coe _)) →
+    flex_reduced α d → π₁ • d = π₂ • d)
+  (N : near_litter) (B : extended_index δ) (hN : (inr N, B) ∈ designated_support t) :
+  struct_perm.derivative ((A.cons (coe_lt hδ)).comp B) π₁.to_struct_perm • N =
+  struct_perm.derivative ((A.cons (coe_lt hδ)).comp B) π₂.to_struct_perm • N :=
+begin
+  refine set_like.coe_injective _,
+  have := near_litter_perm.smul_near_litter_eq_smul_symm_diff_smul
+    (struct_perm.derivative ((A.cons (coe_lt hδ)).comp B) π₁.to_struct_perm).to_near_litter_perm N,
+  simp only [struct_perm.to_near_litter_perm_smul_set, litter.coe_to_near_litter] at this,
+  refine this.trans _,
+  clear this,
+  have := near_litter_perm.smul_near_litter_eq_smul_symm_diff_smul
+    (struct_perm.derivative ((A.cons (coe_lt hδ)).comp B) π₂.to_struct_perm).to_near_litter_perm N,
+  simp only [struct_perm.to_near_litter_perm_smul_set, litter.coe_to_near_litter] at this,
+  refine eq.trans _ this.symm,
+  clear this,
+  sorry,
+end
+
+-- TODO: make many of the uses of designated_support instead be flex_reduced_support
+-- then we can use following lemma and abolish the coherent_* defs
+
+lemma allowable_smul_support_condition_eq_core {β : Iio α} (π₁ π₂ : allowable β)
+  (x : near_litter × extended_index β)
+  (h : ∀ d : support_condition β, d ≤[α] (inr x.1, x.2) → flex_reduced α d → π₁ • d = π₂ • d) :
+  struct_perm.derivative x.2 π₁.to_struct_perm • x.1.fst =
+  struct_perm.derivative x.2 π₂.to_struct_perm • x.1.fst :=
+begin
+  revert h,
+  refine well_founded.induction (inv_image.wf _ (constrains_wf α β)) x _,
+  exact λ x : near_litter × extended_index β, (inr x.1, x.2),
+  clear x,
+  rintros ⟨N, A⟩ ih h,
+  by_cases hN : N.is_litter,
+  swap,
+  { refine ih (N.fst.to_near_litter, A)
+      (constrains.near_litter N (near_litter.not_is_litter hN) A) _,
+    intros d hd₁ hd₂,
+    refine h d _ hd₂,
+    exact relation.refl_trans_gen.tail hd₁
+      (constrains.near_litter N (near_litter.not_is_litter hN) A), },
+  obtain ⟨L, rfl⟩ := hN.exists_litter_eq,
+  clear hN,
+  have hL := flexible_cases α L A,
+  cases hL,
+  swap,
+  { have := h (inr L.to_near_litter, A) relation.refl_trans_gen.refl
+      (flex_reduced.mk_litter L A hL),
+    apply_fun prod.fst at this,
+    change inr _ = inr _ at this,
+    simp only at this,
+    apply_fun sigma.fst at this,
+    exact this, },
+  induction hL with γ δ ε hδ hε hδε A t γ ε hε A a,
+  { have := allowable.derivative_to_struct_perm
+      (show path ((β : Iic_index α) : type_index) (⊥ : Iic_index α),
+        from (A.cons (coe_lt _)).cons (bot_lt_coe _)),
+    rw [this, this, allowable.to_struct_perm_smul, allowable.to_struct_perm_smul],
+    simp only,
+    clear this,
+    simp only [allowable.derivative_cons_apply, allowable.derivative_cons_apply'],
+    refine (allowable.derivative_bot_smul_litter (ε : Iic α) _ _).trans _,
+    refine eq.trans _ (allowable.derivative_bot_smul_litter (ε : Iic α) _ _).symm,
+    refine (smul_f_map (Iio_coe δ) ε _ _ (λ h, hδε (Iio.coe_injective h)) _ t).trans _,
+    exact coe_lt_coe.mpr hδ,
+    refine eq.trans _ (smul_f_map (Iio_coe δ) ε _ _ (λ h, hδε (Iio.coe_injective h)) _ t).symm,
+    exact coe_lt_coe.mpr hδ,
+    refine congr_arg _ _,
+    rw [← inv_smul_eq_iff, smul_smul],
+    refine (designated_support t).supports _ _,
+    intros c hc,
+    rw [mul_smul, inv_smul_eq_iff],
+    refine prod.ext _ rfl,
+    obtain ⟨a | N, B⟩ := c,
+    { have := h (inl a, (A.cons (coe_lt hδ)).comp B)
+        (relation.refl_trans_gen.single $ constrains.f_map _ _ _ _ _ _ hc)
+        (flex_reduced.mk_atom _ _),
+      apply_fun prod.fst at this,
+      change _ • _  = _ • _ at this,
+      have hπ := allowable.derivative_smul
+        (show path ((β : Iic_index α) : type_index) (⊥ : Iic_index α),
+         from (A.cons (coe_lt hδ)).comp B),
+      rw [← hπ, ← hπ, ← allowable.derivative_derivative, ← allowable.derivative_derivative,
+        allowable.derivative_smul, allowable.derivative_smul] at this,
+      exact this, },
+    { change inr _ = inr _,
+      simp only,
+      have := allowable_smul_support_condition_eq_precise π₁ π₂ γ δ ε hδ hε hδε A t h N B hc,
+      have hπ := allowable.derivative_smul
+        (show path ((β : Iic_index α) : type_index) (⊥ : Iic_index α),
+         from (A.cons (coe_lt hδ)).comp B),
+      rw [← hπ, ← hπ, ← allowable.derivative_derivative, ← allowable.derivative_derivative,
+        allowable.derivative_smul, allowable.derivative_smul] at this,
+      exact this, }, },
+  { have := allowable.derivative_to_struct_perm
+      (show path ((β : Iic_index α) : type_index) (⊥ : Iic_index α),
+        from (A.cons (coe_lt _)).cons (bot_lt_coe _)),
+    rw [this, this, allowable.to_struct_perm_smul, allowable.to_struct_perm_smul],
+    simp only,
+    clear this,
+    simp only [allowable.derivative_cons_apply, allowable.derivative_cons_apply'],
+    refine (allowable.derivative_bot_smul_litter (ε : Iic α) _ _).trans _,
+    refine eq.trans _ (allowable.derivative_bot_smul_litter (ε : Iic α) _ _).symm,
+    refine (smul_f_map ⊥ ε _ _ _ _ a).trans _,
+    exact λ h, bot_ne_coe (congr_arg subtype.val h),
+    exact bot_lt_coe _,
+    refine eq.trans _ (smul_f_map ⊥ ε _ _ _ _ a).symm,
+    exact λ h, bot_ne_coe (congr_arg subtype.val h),
+    exact bot_lt_coe _,
+    refine congr_arg _ _,
+    have := h _ (relation.refl_trans_gen.single $ constrains.f_map_bot hε A a)
+      (flex_reduced.mk_atom a _),
+    apply_fun prod.fst at this,
+    change inl _ = inl _ at this,
+    simp only at this,
+    have hπ := allowable.derivative_smul
+      (show path ((β : Iic_index α) : type_index) (⊥ : Iic_index α), from (A.cons (bot_lt_coe _))),
+    rw [← hπ, ← hπ, allowable.derivative_cons_apply'', allowable.derivative_cons_apply''] at this,
+    simp only at this,
+    convert this,
+    all_goals { rw to_struct_perm_to_near_litter_perm, refl, }, },
+end
+
+lemma allowable_smul_support_condition_eq {β : Iio α} (π₁ π₂ : allowable β)
+  (N : near_litter) (A : extended_index β)
+  (h : ∀ d : support_condition β, d ≤[α] (inr N, A) → flex_reduced α d → π₁ • d = π₂ • d) :
+  struct_perm.derivative A π₁.to_struct_perm • N.fst =
+  struct_perm.derivative A π₂.to_struct_perm • N.fst :=
+allowable_smul_support_condition_eq_core π₁ π₂ (N, A) h
+
 lemma ih_action_coherent_coe
   {L : litter} {A : extended_index β}
   (h : inflexible_coe L A)
@@ -466,7 +621,12 @@ begin
     intros c hc,
     rw [mul_smul, inv_smul_eq_iff],
     refine prod.ext _ rfl,
-    refine eq.trans _ ((congr_arg prod.fst (ht c hc)).trans _),
+    clear ht,
+    sorry,
+    -- have hex := ((ih_action π.foa_hypothesis).hypothesised_allowable_exactly_approximates
+    --   inflex _ _ _),
+    --
+    /- refine eq.trans _ ((congr_arg prod.fst (ht c hc)).trans _),
     { rw ← allowable.derivative_cons_apply,
       change _ • _ = _ • _,
       rw [← allowable.derivative_to_struct_perm, struct_perm.derivative_derivative],
@@ -535,7 +695,7 @@ begin
             struct_action.refine_litter_map, struct_action.comp_litter_map,
             ih_action_litter_map, foa_hypothesis_near_litter_image],
           sorry, }, },
-      { sorry, }, }, },
+      { sorry, }, }, -/ },
 end
 
 lemma ih_action_coherent_bot

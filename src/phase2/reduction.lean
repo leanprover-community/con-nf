@@ -21,10 +21,21 @@ variables {β G} {x : τ}
 | mk_atom (a : atom) (B : extended_index β) : reduced (inl a, B)
 | mk_litter (L : litter) (B : extended_index β) : reduced (inr L.to_near_litter, B)
 
+/-- A support condition is *flex-reduced* if it is an atom or a flexible litter. -/
+@[mk_iff] inductive flex_reduced {β : type_index} : support_condition β → Prop
+| mk_atom (a : atom) (B : extended_index β) : flex_reduced (inl a, B)
+| mk_litter (L : litter) (B : extended_index β) :
+    flexible α L B → flex_reduced (inr L.to_near_litter, B)
+
 /-- The *reduction* of a set of support conditions is the downward closure of the set under
 the constrains relation, but we only keep reduced conditions. -/
 def reduction (S : set (support_condition β)) : set (support_condition β) :=
 {c | ∃ d ∈ S, c ≤[α] d} ∩ set_of reduced
+
+/-- The *flex-reduction* of a set of support conditions is the downward closure of the set under
+the constrains relation, but we only keep flex-reduced conditions. -/
+def flex_reduction (S : set (support_condition β)) : set (support_condition β) :=
+{c | ∃ d ∈ S, c ≤[α] d} ∩ set_of (flex_reduced α)
 
 lemma mem_reduction_of_reduced (S : set (support_condition β))
   (c : support_condition β) (hc₁ : reduced c) (hc₂ : c ∈ S) : c ∈ reduction α S :=
