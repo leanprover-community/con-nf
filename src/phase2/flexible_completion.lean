@@ -53,6 +53,16 @@ begin
   exact λ L hL, hπ L hL,
 end
 
+lemma flexible_completion_smul_eq (L : litter) :
+  flexible_completion α π A • L = flexible_completion_litter_perm α π A L := rfl
+
+lemma flexible_completion_smul_of_mem_domain (L : litter) (hL : L ∈ π.litter_perm.domain) :
+  flexible_completion α π A • L = π.litter_perm L :=
+begin
+  rw [flexible_completion_smul_eq, flexible_completion_litter_perm,
+    local_perm.piecewise_apply_eq_left hL],
+end
+
 lemma flexible_completion_smul_flexible (hπ : π.free α A) (L : litter) (hL : flexible α L A) :
   flexible α (flexible_completion α π A • L) A :=
 begin
