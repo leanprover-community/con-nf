@@ -596,23 +596,23 @@ begin
   exact ⟨c, q, h, rfl⟩,
 end
 
-lemma coherent {γ : Iio α} (A : path (β : type_index) γ) (ρ : allowable γ)
+lemma coherent {γ : Iio α} (A : path (β : type_index) γ)
   (N : near_litter) (B : extended_index γ) (c : support_condition β) (hc : (inr N, A.comp B) <[α] c)
   (hπ : ((ih_action π.foa_hypothesis).comp A).lawful)
+  (ρ : allowable γ)
   (h : (((ih_action (π.foa_hypothesis : hypothesis c)).comp A).rc hπ)
     .exactly_approximates ρ.to_struct_perm) :
   complete_near_litter_map π N (A.comp B) = struct_perm.derivative B ρ.to_struct_perm • N :=
 begin
-  revert hc ρ,
-  refine well_founded.induction (inv_image.wf _ (constrains_wf α γ)) N _,
-  { exact λ N, (inr N, B), },
-  clear N,
-  intros N ih hc ρ h,
+  revert A B N hc ρ,
+  refine well_founded.induction (inv_image.wf subtype.val Λwf.wf) γ _,
+  clear γ,
+  intros γ ih A B N hc ρ hπ h,
   have hdom : ((((ih_action π.foa_hypothesis).comp A B).refine (hπ B)).litter_map N.fst).dom :=
     trans_gen_near_litter' hc,
   suffices : complete_litter_map π N.fst (A.comp B) =
     struct_perm.derivative B ρ.to_struct_perm • N.fst,
-  sorry { refine set_like.coe_injective _,
+  { refine set_like.coe_injective _,
     refine eq.trans _ (near_litter_action.smul_near_litter_eq_of_precise_at
       _ (h B) hdom (near_litter_action.refine_precise _) this.symm).symm,
     rw complete_near_litter_map_eq' N (A.comp B),
@@ -637,16 +637,11 @@ begin
         exact relation.trans_gen.head (constrains.symm_diff N a ha _) hc, },
       { refine (or.inl (or.inl (or.inl (or.inl _)))),
         exact relation.trans_gen.head (constrains.symm_diff N a ha _) hc, }, }, },
-  by_cases hN : N.is_litter,
-  swap,
-  sorry { refine congr_arg sigma.fst (ih N.fst.to_near_litter _ _ ρ h),
-    { exact constrains.near_litter _ (near_litter.not_is_litter hN) _, },
-    { exact relation.trans_gen.head
-        (constrains.near_litter _ (near_litter.not_is_litter hN) _) hc, }, },
-  obtain ⟨L, rfl⟩ := hN.exists_litter_eq,
-  rw litter.to_near_litter_fst at hdom ⊢,
+  have hc' := trans_gen_near_litter' hc,
+  generalize hNL : N.fst = L,
+  rw hNL at hdom hc',
   obtain (hL | ⟨⟨hL⟩⟩ | ⟨⟨hL⟩⟩) := flexible_cases' L (A.comp B),
-  sorry { refine eq.trans _ ((h B).map_litter L _),
+  { refine eq.trans _ ((h B).map_litter L _),
     { rw struct_action.rc_smul_litter_eq,
       rw near_litter_action.flexible_litter_perm_apply_eq,
       swap, exact hdom,
@@ -654,7 +649,7 @@ begin
       exact (near_litter_action.rough_litter_map_or_else_of_dom _ hdom).symm, },
     { refine or.inl (or.inl _),
       refine ⟨hdom, flexible_of_comp_flexible hL⟩, }, },
-  sorry { rw complete_litter_map_eq_of_inflexible_bot hL,
+  { rw complete_litter_map_eq_of_inflexible_bot hL,
     obtain ⟨δ, ε, hε, C, a, rfl, hC⟩ := hL,
     cases B with ζ _ B hζ,
     cases path.obj_eq_of_cons_eq_cons hC,
@@ -675,10 +670,10 @@ begin
     refine congr_arg _ _,
     rw ← allowable.derivative_cons_apply,
     refine eq.trans _ (((h $ B.cons (bot_lt_coe _)).map_atom a (or.inl (or.inl (or.inl (or.inl
-      (relation.trans_gen.head (constrains.f_map_bot hε _ _) hc)))))).trans _),
+      (relation.trans_gen.head (constrains.f_map_bot hε _ _) hc')))))).trans _),
     { rw struct_action.rc_smul_atom_eq,
       refl,
-      exact relation.trans_gen.head (constrains.f_map_bot hε _ _) hc, },
+      exact relation.trans_gen.head (constrains.f_map_bot hε _ _) hc', },
     { have := allowable.to_struct_perm_smul
         (allowable.derivative (show path (γ : type_index) (⊥ : Iic_index α),
           from B.cons (bot_lt_coe _)) ρ) a,
@@ -696,7 +691,10 @@ begin
     cases path.obj_eq_of_cons_eq_cons hC,
     have hC' := eq_of_heq (path.heq_of_cons_eq_cons hC),
     by_cases hγζ : γ = ζ,
-    { sorry, },
+    { cases hγζ,
+      cases path_eq_nil B,
+      simp only [path.comp_cons, path.comp_nil] at hc hc' hC',
+      sorry, },
     obtain ⟨ι, B, hι, rfl⟩ := quiver.path.exists_eq_cons B
       (with_bot.coe_ne_coe.mpr (subtype.coe_injective.ne hγζ)),
     cases path.obj_eq_of_cons_eq_cons hC',
@@ -705,21 +703,33 @@ begin
     refine eq.trans _ (struct_perm.derivative_bot_smul _ _).symm,
     rw struct_perm.derivative_cons,
     rw allowable.derivative_to_struct_perm (show path (γ : type_index) (δ : Iic_index α), from B),
-    refine eq.trans _ (to_struct_perm_smul_f_map (δ : Iic_index α) ε ζ _ _ _
+    refine eq.trans _ (to_struct_perm_smul_f_map (δ : Iic_index α) ε ζ (coe_lt hε) _ _
       (allowable.derivative (show path (γ : type_index) (δ : Iic_index α), from B) ρ) t).symm,
-    { sorry, },
     { sorry, },
     refine congr_arg _ _,
     rw [← allowable.derivative_cons_apply, ← inv_smul_eq_iff, smul_smul],
     refine (designated_support t).supports _ _,
-    intros c hc,
+    intros c hct,
     rw [mul_smul, inv_smul_eq_iff],
     obtain ⟨a | M, D⟩ := c,
     { sorry, },
-    { /- have := ih M _ _ ρ h,
-      have := ih M _ _ (((ih_action π.foa_hypothesis).hypothesised_allowable
-        ⟨δ, ε, ζ, hε, hζ, hεζ, _, t, rfl, rfl⟩ _ _)), -/
-      sorry, }, },
+    { specialize ih ε (lt_of_lt_of_le hε (coe_le_coe.mp (le_of_path B)))
+        ((A.comp B).cons $ coe_lt hε) D M _,
+      { refine relation.trans_gen.head _ (trans_gen_near_litter' hc),
+        rw hNL,
+        rw [path.comp_cons, path.comp_cons],
+        exact constrains.f_map _ hζ _ _ t _ hct, },
+      have := ih (allowable.derivative (B.cons $ coe_lt hε) ρ) _ _,
+      rw ih (((ih_action π.foa_hypothesis).hypothesised_allowable
+        ⟨δ, ε, ζ, hε, hζ, hεζ, _, t, rfl, rfl⟩ _ _)) at this,
+      refine prod.ext _ rfl,
+      change inr _ = inr _,
+      simp only,
+      exact this,
+      { sorry, },
+      { sorry, },
+      { sorry, },
+      { sorry, }, }, },
 end
 
 lemma ih_action_coherent_coe
