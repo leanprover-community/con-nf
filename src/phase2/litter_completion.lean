@@ -74,6 +74,22 @@ lemma inflexible_coe.δ_lt_β {β : Iic α} {L : litter} {A : extended_index β}
   (h : inflexible_coe L A) : (h.δ : Λ) < β :=
 h.hδ.trans_le (show _, from coe_le_coe.mp (le_of_path h.B))
 
+def inflexible_coe.comp {β : Iic α} {γ : Iio α} {L : litter}
+  {A : path (β : type_index) γ} {B : extended_index (γ : Iic α)}
+  (h : inflexible_coe L B) : inflexible_coe L (A.comp B) := {
+  B := A.comp h.B,
+  hA := by rw [← path.comp_cons, ← path.comp_cons]; exact congr_arg2 _ rfl h.hA,
+  ..h
+}
+
+def inflexible_bot.comp {β : Iic α} {γ : Iio α} {L : litter}
+  {A : path (β : type_index) γ} {B : extended_index (γ : Iic α)}
+  (h : inflexible_bot L B) : inflexible_bot L (A.comp B) := {
+  B := A.comp h.B,
+  hA := by rw [← path.comp_cons, ← path.comp_cons]; exact congr_arg2 _ rfl h.hA,
+  ..h
+}
+
 lemma inflexible_bot.constrains {β : Iic α} {L : litter} {A : extended_index β}
   (h : inflexible_bot L A) : (inl h.a, (h.B.cons (bot_lt_coe _))) <[α] (inr L.to_near_litter, A) :=
 begin
@@ -133,7 +149,7 @@ begin
     exact h₁.2.false h.some, },
 end
 
-lemma flexible_cases' {β : Iic α} (L : litter) (A : extended_index β) :
+lemma flexible_cases' (β : Iic α) (L : litter) (A : extended_index β) :
   flexible α L A ∨ nonempty (inflexible_bot L A) ∨ nonempty (inflexible_coe L A) :=
 begin
   rw [← inflexible_iff_inflexible_bot_or_inflexible_coe, or_comm],

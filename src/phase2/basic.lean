@@ -200,7 +200,7 @@ lemma to_struct_perm_smul_f_map (β : Iic_index α) (γ : Iio_index α) (δ : Ii
   (π : allowable β) (t : tangle γ) :
   (struct_perm.derivative (quiver.path.nil.cons hδ) π.to_struct_perm) •
     f_map (subtype.coe_injective.ne hγδ) t =
-    f_map (subtype.coe_injective.ne hγδ) (allowable_derivative (β : Iic_index α) γ hγ π • t) :=
+    f_map (subtype.coe_injective.ne hγδ) (allowable_derivative β γ hγ π • t) :=
 begin
   rw allowable_derivative_eq β δ hδ π,
   exact smul_f_map γ δ hγ hδ hγδ π t,
