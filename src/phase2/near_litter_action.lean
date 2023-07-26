@@ -247,6 +247,61 @@ begin
     rw φ.atom_map_or_else_of_dom, },
 end
 
+/-!
+# Preorder structure
+-/
+
+/-- We define that `f ≤ g` if the domain of `f` is included in the domain of `g`, and
+they agree where they are defined. -/
+structure _root_.pfun.le {α β : Type*} (f g : α →. β) : Prop :=
+(dom_of_dom : ∀ a, (f a).dom → (g a).dom)
+(get_eq : ∀ a h, (f a).get h = (g a).get (dom_of_dom a h))
+
+instance {α β : Type*} : partial_order (α →. β) := {
+  le := pfun.le,
+  le_refl := λ f, ⟨λ a, id, λ a h, rfl⟩,
+  le_trans := λ f g h fg gh, ⟨
+    λ a ha, gh.dom_of_dom a (fg.dom_of_dom a ha),
+    λ a ha, (fg.get_eq a ha).trans (gh.get_eq a _),
+  ⟩,
+  le_antisymm := begin
+    intros f g h₁ h₂,
+    funext a,
+    refine part.ext' ⟨h₁.dom_of_dom a, h₂.dom_of_dom a⟩ _,
+    intros ha₁ ha₂,
+    exact h₁.get_eq a ha₁,
+  end,
+}
+
+instance : partial_order near_litter_action := {
+  le := λ π π', π.atom_map ≤ π'.atom_map ∧ π.litter_map ≤ π'.litter_map,
+  le_refl := λ π, ⟨le_rfl, le_rfl⟩,
+  le_trans := λ _ _ _ h₁ h₂, ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩,
+  le_antisymm := begin
+    intros π π' h₁ h₂,
+    ext : 1,
+    exact le_antisymm h₁.1 h₂.1,
+    exact le_antisymm h₁.2 h₂.2,
+  end,
+}
+
+lemma lawful.le {φ ψ : near_litter_action} (h : φ.lawful) (hψ : ψ ≤ φ) : ψ.lawful := {
+  atom_map_injective := begin
+    intros a b ha hb hab,
+    refine h.atom_map_injective (hψ.1.dom_of_dom a ha) (hψ.1.dom_of_dom b hb) _,
+    rwa [hψ.1.get_eq, hψ.1.get_eq] at hab,
+  end,
+  litter_map_injective := begin
+    intros L₁ L₂ h₁ h₂ h₁₂,
+    refine h.litter_map_injective (hψ.2.dom_of_dom L₁ h₁) (hψ.2.dom_of_dom L₂ h₂) _,
+    rwa [hψ.2.get_eq, hψ.2.get_eq] at h₁₂,
+  end,
+  atom_mem := begin
+    intros a ha L hL,
+    rw [h.atom_mem a (hψ.1.dom_of_dom a ha) L (hψ.2.dom_of_dom L hL), hψ.1.get_eq, hψ.2.get_eq],
+  end,
+}
+
 /-- An action is precise at a litter in its domain if all atoms in the symmetric
 difference of its image are accounted for. -/
 @[mk_iff] structure precise_at ⦃L : litter⦄ (hL : (φ.litter_map L).dom) : Prop :=

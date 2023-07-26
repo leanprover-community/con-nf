@@ -74,21 +74,52 @@ lemma inflexible_coe.δ_lt_β {β : Iic α} {L : litter} {A : extended_index β}
   (h : inflexible_coe L A) : (h.δ : Λ) < β :=
 h.hδ.trans_le (show _, from coe_le_coe.mp (le_of_path h.B))
 
-def inflexible_coe.comp {β : Iic α} {γ : Iio α} {L : litter}
-  {A : path (β : type_index) γ} {B : extended_index (γ : Iic α)}
-  (h : inflexible_coe L B) : inflexible_coe L (A.comp B) := {
+section comp
+
+variables {β : Iic α} {γ : Iio α} {L : litter} {B : extended_index (γ : Iic α)}
+
+def inflexible_coe.comp (h : inflexible_coe L B) (A : path (β : type_index) γ) :
+  inflexible_coe L (A.comp B) := {
   B := A.comp h.B,
   hA := by rw [← path.comp_cons, ← path.comp_cons]; exact congr_arg2 _ rfl h.hA,
   ..h
 }
 
-def inflexible_bot.comp {β : Iic α} {γ : Iio α} {L : litter}
-  {A : path (β : type_index) γ} {B : extended_index (γ : Iic α)}
-  (h : inflexible_bot L B) : inflexible_bot L (A.comp B) := {
+def inflexible_bot.comp (h : inflexible_bot L B) (A : path (β : type_index) γ) :
+  inflexible_bot L (A.comp B) := {
   B := A.comp h.B,
   hA := by rw [← path.comp_cons, ← path.comp_cons]; exact congr_arg2 _ rfl h.hA,
   ..h
 }
+
+@[simp] lemma inflexible_coe.comp_γ (h : inflexible_coe L B) (A : path (β : type_index) γ) :
+  (h.comp A).γ = h.γ := rfl
+
+@[simp] lemma inflexible_coe.comp_δ (h : inflexible_coe L B) (A : path (β : type_index) γ) :
+  (h.comp A).δ = h.δ := rfl
+
+@[simp] lemma inflexible_coe.comp_ε (h : inflexible_coe L B) (A : path (β : type_index) γ) :
+  (h.comp A).ε = h.ε := rfl
+
+@[simp] lemma inflexible_coe.comp_t (h : inflexible_coe L B) (A : path (β : type_index) γ) :
+  (h.comp A).t = h.t := rfl
+
+@[simp] lemma inflexible_coe.comp_B (h : inflexible_coe L B) (A : path (β : type_index) γ) :
+  (h.comp A).B = A.comp h.B := rfl
+
+@[simp] lemma inflexible_bot.comp_γ (h : inflexible_bot L B) (A : path (β : type_index) γ) :
+  (h.comp A).γ = h.γ := rfl
+
+@[simp] lemma inflexible_bot.comp_ε (h : inflexible_bot L B) (A : path (β : type_index) γ) :
+  (h.comp A).ε = h.ε := rfl
+
+@[simp] lemma inflexible_bot.comp_a (h : inflexible_bot L B) (A : path (β : type_index) γ) :
+  (h.comp A).a = h.a := rfl
+
+@[simp] lemma inflexible_bot.comp_B (h : inflexible_bot L B) (A : path (β : type_index) γ) :
+  (h.comp A).B = A.comp h.B := rfl
+
+end comp
 
 lemma inflexible_bot.constrains {β : Iic α} {L : litter} {A : extended_index β}
   (h : inflexible_bot L A) : (inl h.a, (h.B.cons (bot_lt_coe _))) <[α] (inr L.to_near_litter, A) :=
@@ -196,29 +227,6 @@ def ih_action {β : Iic α} {c : support_condition β} (H : hypothesis c) : stru
 @[simp] lemma ih_action_litter_map {β : Iic α} {c : support_condition β} {H : hypothesis c}
   {B : extended_index β} {L : litter} :
   (ih_action H B).litter_map L = ⟨_, λ h, H.near_litter_image L.to_near_litter B h⟩ := rfl
-
-def _root_.con_nf.struct_action.comp {β γ : type_index} (φ : struct_action β) (A : path β γ) :
-  struct_action γ :=
-λ B, {
-  atom_map := (φ (A.comp B)).atom_map,
-  litter_map := (φ (A.comp B)).litter_map,
-  atom_map_dom_small := begin
-    refine small.image_subset id function.injective_id (φ (A.comp B)).atom_map_dom_small _,
-    simp only [id.def, image_id'],
-  end,
-  litter_map_dom_small := begin
-    refine small.image_subset id function.injective_id (φ (A.comp B)).litter_map_dom_small _,
-    simp only [id.def, image_id'],
-  end,
-}
-
-@[simp] lemma _root_.con_nf.struct_action.comp_atom_map {β γ : type_index}
-  {φ : struct_action β} {A : path β γ} {B : extended_index γ} :
-  (φ.comp A B).atom_map = (φ (A.comp B)).atom_map := rfl
-
-@[simp] lemma _root_.con_nf.struct_action.comp_litter_map {β γ : type_index}
-  {φ : struct_action β} {A : path β γ} {B : extended_index γ} :
-  (φ.comp A B).litter_map = (φ (A.comp B)).litter_map := rfl
 
 variables {β : Iic α} [freedom_of_action_hypothesis β]
 

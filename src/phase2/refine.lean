@@ -3,7 +3,7 @@ import phase2.struct_action
 import phase2.fill_atom_range
 import phase2.fill_atom_orbits
 
-open set
+open quiver set
 
 universe u
 
@@ -106,8 +106,7 @@ lemma rc_smul_litter_eq {φ : struct_action β} {hφ : φ.lawful}
   {B : extended_index β} (L : litter) :
   φ.rc hφ B • L = (φ.refine hφ B).flexible_litter_perm (refine_lawful B) B L := rfl
 
-lemma rc_free (φ : struct_action β)
-  (h₁ : φ.lawful) (h₂ : φ.map_flexible) :
+lemma rc_free (φ : struct_action β) (h₁ : φ.lawful) (h₂ : φ.map_flexible) :
   (show struct_approx (β : Iic α), from φ.rc h₁).free :=
 begin
   rintros B L' ((hL' | ⟨L', hL', rfl⟩) | hL'),

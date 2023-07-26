@@ -107,6 +107,18 @@ def trans_constrained (c d : support_condition β) : set (support_condition β) 
 def refl_trans_constrained (c d : support_condition β) : set (support_condition β) :=
 {e | e ≤[α] c} ∪ {e | e ≤[α] d}
 
+lemma trans_constrained_symm (c d : support_condition β) :
+  trans_constrained c d = trans_constrained d c := union_comm _ _
+
+lemma refl_trans_constrained_symm (c d : support_condition β) :
+  refl_trans_constrained c d = refl_trans_constrained d c := union_comm _ _
+
+@[simp] lemma trans_constrained_self (c : support_condition β) :
+  trans_constrained c c = {e | e <[α] c} := union_self _
+
+@[simp] lemma refl_trans_constrained_self (c : support_condition β) :
+  refl_trans_constrained c c = {e | e ≤[α] c} := union_self _
+
 lemma mem_refl_trans_constrained_of_mem_trans_constrained {c d e : support_condition β}
   (he : e ∈ trans_constrained c d) : e ∈ refl_trans_constrained c d :=
 begin
@@ -199,6 +211,8 @@ begin
   { exact fst_mem_trans_constrained_of_mem_symm_diff (or.inr ⟨h, ha⟩) hN, },
 end
 
+-- TODO: Convert uses of `foa_props` into uses of
+-- `struct_action.lawful` and `struct_action.map_flexible`.
 /-- The inductive hypothesis used to prove that the induced action generated in the freedom of
 action theorem is lawful. We perform induction over two support conditions at once so that we can
 prove things like injectivity and surjectivity which consider two support conditions at once. -/
@@ -416,6 +430,38 @@ noncomputable def ihs_action (π : struct_approx β) (c d : support_condition β
   ⟨(inr L.to_near_litter, B) ∈ trans_constrained c d,
     λ h, π.complete_near_litter_map L.to_near_litter B⟩ := rfl
 
+lemma ihs_action_symm (π : struct_approx β) (c d : support_condition β) :
+  ihs_action π c d = ihs_action π d c :=
+begin
+  ext,
+  rw [ihs_action_atom_map, ihs_action_atom_map, trans_constrained_symm],
+  rw [ihs_action_litter_map, ihs_action_litter_map, trans_constrained_symm],
+end
+
+@[simp] lemma ihs_action_self (π : struct_approx β) (c : support_condition β) :
+  ihs_action π c c = ih_action (π.foa_hypothesis : hypothesis c) :=
+begin
+  ext,
+  { rw [ihs_action_atom_map, ih_action_atom_map, trans_constrained_self],
+    refl, },
+  { rw [ihs_action_litter_map, ih_action_litter_map, trans_constrained_self],
+    refl, },
+end
+
+lemma ih_action_le_ihs_action (π : struct_approx β) (c d : support_condition β) :
+  ih_action (π.foa_hypothesis : hypothesis c) ≤ ihs_action π c d :=
+λ B, ⟨⟨λ a, or.inl, λ a h, rfl⟩, ⟨λ L, or.inl, λ L h, rfl⟩⟩
+
+lemma ih_action_le {π : struct_approx β} {c d : support_condition β} (h : c ≤[α] d) :
+  ih_action (π.foa_hypothesis : hypothesis c) ≤ ih_action (π.foa_hypothesis : hypothesis d) :=
+begin
+  refine λ B, ⟨⟨_, λ a h, rfl⟩, ⟨_, λ L h, rfl⟩⟩,
+  { intros a ha,
+    exact relation.trans_gen.trans_left ha h, },
+  { intros a ha,
+    exact relation.trans_gen.trans_left ha h, },
+end
+
 lemma ih_action_supports {L : litter} {A : extended_index β} (h : inflexible_coe L A) :
   ((ih_action (π.foa_hypothesis : hypothesis ⟨inr L.to_near_litter, A⟩)).comp
     (h.B.cons (coe_lt h.hδ))).supports h.t := {
@@ -616,10 +662,10 @@ lemma coherent {γ : Iio α} (A : path (β : type_index) γ)
   (h : (((ihs_action π c d).comp A).rc hπ).exactly_approximates ρ.to_struct_perm) :
   complete_near_litter_map π N (A.comp B) = struct_perm.derivative B ρ.to_struct_perm • N :=
 begin
-  revert A B N hc ρ,
+  revert A B N c d hc hπ ρ,
   refine well_founded.induction (inv_image.wf subtype.val Λwf.wf) γ _,
   clear γ,
-  intros γ ih A B N hc ρ hπ h,
+  intros γ ih A B N c d hc hπ ρ h,
   have hdom : ((((ihs_action π c d).comp A B).refine (hπ B)).litter_map N.fst).dom :=
     or.inl (trans_gen_near_litter' hc),
   suffices : complete_litter_map π N.fst (A.comp B) =
@@ -661,7 +707,7 @@ begin
       exact (near_litter_action.rough_litter_map_or_else_of_dom _ hdom).symm, },
     { refine or.inl (or.inl _),
       refine ⟨hdom, hL⟩, }, },
-  { rw complete_litter_map_eq_of_inflexible_bot hL.comp,
+  { rw complete_litter_map_eq_of_inflexible_bot (hL.comp A),
     obtain ⟨δ, ε, hε, C, a, rfl, rfl⟩ := hL,
     rw struct_perm.derivative_cons,
     refine eq.trans _ (struct_perm.derivative_bot_smul _ _).symm,
@@ -687,8 +733,12 @@ begin
       ext π a : 4,
       change π.to_struct_perm.to_near_litter_perm.atom_perm a = π.atom_perm a,
       rw to_struct_perm_to_near_litter_perm, }, },
-  { rw complete_litter_map_eq_of_inflexible_coe hL.comp,
-    swap, sorry,
+  { rw complete_litter_map_eq_of_inflexible_coe (hL.comp A),
+    swap,
+    { rw [inflexible_coe.comp_B, ← path.comp_cons, ← struct_action.comp_comp],
+      refine struct_action.lawful.comp _ _,
+      refine (hπ.le (struct_action.le_comp (ih_action_le_ihs_action π c d) _)).le _,
+      exact struct_action.le_comp (ih_action_le hc'.to_refl) _, },
     swap, sorry,
     obtain ⟨δ, ε, ζ, hε, hζ, hεζ, C, t, rfl, rfl⟩ := hL,
     rw struct_perm.derivative_cons,
@@ -697,31 +747,69 @@ begin
     rw allowable.derivative_to_struct_perm (show path (γ : type_index) (δ : Iic_index α), from C),
     refine eq.trans _ (to_struct_perm_smul_f_map (δ : Iic_index α) ε ζ (coe_lt hε) _ _
       (allowable.derivative (show path (γ : type_index) (δ : Iic_index α), from C) ρ) t).symm,
-    { sorry, },
+    { intro h,
+      refine hεζ (subtype.ext _),
+      have := congr_arg subtype.val h,
+      exact coe_injective this, },
     refine congr_arg _ _,
     rw [← allowable.derivative_cons_apply, ← inv_smul_eq_iff, smul_smul],
     refine (designated_support t).supports _ _,
     intros c hct,
     rw [mul_smul, inv_smul_eq_iff],
     obtain ⟨a | M, D⟩ := c,
-    { sorry, },
+    { refine prod.ext _ rfl,
+      change inl _ = inl _,
+      simp only,
+      rw [← allowable.derivative_to_struct_perm, struct_perm.derivative_derivative],
+      refine eq.trans _ ((h _).map_atom a _),
+      refine (((ih_action _ ).hypothesised_allowable_exactly_approximates
+        ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, t, rfl, rfl⟩ _ _ D).map_atom a _).symm.trans _,
+      { refine or.inl (or.inl (or.inl (or.inl _))),
+        exact relation.trans_gen.single (constrains.f_map _ _ _ _ _ _ hct), },
+      { rw [struct_action.rc_smul_atom_eq, struct_action.rc_smul_atom_eq],
+        { simp only [struct_action.comp_atom_map, ih_action_atom_map, foa_hypothesis_atom_image,
+            ihs_action_atom_map],
+          simp_rw ← path.comp_cons,
+          rw path.comp_assoc, },
+        { refine or.inl (relation.trans_gen.head _ hc'),
+          exact constrains_comp (constrains.f_map _ _ _ _ _ _ hct) A, },
+        { simp only [struct_action.comp_atom_map, ih_action_atom_map],
+          simp_rw ← path.comp_cons,
+          rw path.comp_assoc,
+          exact relation.trans_gen.single
+            (constrains_comp (constrains.f_map _ _ _ _ _ _ hct) A), }, },
+      { refine or.inl (or.inl (or.inl (or.inl (or.inl _)))),
+        refine relation.trans_gen.head _ hc',
+        exact constrains_comp (constrains.f_map _ _ _ _ _ _ hct) A, }, },
     { specialize ih ε (lt_of_lt_of_le hε (coe_le_coe.mp (le_of_path C)))
-        ((A.comp C).cons $ coe_lt hε) D M _,
-      { refine relation.trans_gen.head _ (trans_gen_near_litter' hc),
-        rw hNL,
-        rw [path.comp_cons, path.comp_cons],
-        exact constrains.f_map _ hζ _ _ t _ hct, },
-      have := ih (allowable.derivative _ ρ) _ _,
-      rw ih (((ih_action π.foa_hypothesis).hypothesised_allowable
-        ⟨δ, ε, ζ, hε, hζ, hεζ, _, t, rfl, rfl⟩ _ _)) at this,
+        ((A.comp C).cons $ coe_lt hε) D M,
+      have := ih c d _ _ (allowable.derivative _ ρ) _,
+      rw ih _ _ _ _ (((ih_action π.foa_hypothesis).hypothesised_allowable
+        ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, t, rfl, rfl⟩ _ _)) at this,
       refine prod.ext _ rfl,
       change inr _ = inr _,
       simp only,
       exact this,
-      { sorry, },
-      { sorry, },
-      { sorry, },
-      { sorry, }, }, },
+      { have := struct_action.hypothesised_allowable_exactly_approximates
+          (ih_action _) ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, t, rfl, rfl⟩ _ _,
+        refine struct_approx.exactly_approximates_of_eq this _,
+        swap 4,
+        simp_rw ← ihs_action_self, },
+      { rw [path.comp_cons, path.comp_cons],
+        exact relation.trans_gen.single (constrains.f_map _ _ _ _ _ _ hct), },
+      { refine relation.trans_gen.head _ (trans_gen_near_litter' hc),
+        rw hNL,
+        rw [path.comp_cons, path.comp_cons],
+        exact constrains.f_map _ hζ _ _ t _ hct, },
+      { rw [← path.comp_cons, ← struct_action.comp_comp],
+        exact hπ.comp _, },
+      { rw ← allowable.derivative_to_struct_perm,
+        intro E,
+        rw struct_perm.derivative_derivative,
+        sorry,
+        -- refine near_litter_approx.exactly_approximates_of_eq (h ((C.cons _).comp E)) _,
+        -- simp_rw [← path.comp_cons, ← struct_action.rc_comp, struct_action.comp_comp],
+         }, }, },
 end
 
 lemma ih_action_coherent_coe

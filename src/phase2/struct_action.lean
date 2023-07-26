@@ -268,6 +268,58 @@ begin
           reduced.mk_atom _ _⟩, }, }, },
 end
 
+instance {β : type_index} : partial_order (struct_action β) := {
+  le := λ φ ψ, ∀ B, φ B ≤ ψ B,
+  le_refl := λ φ B, le_rfl,
+  le_trans := λ φ ψ χ h₁ h₂ B, (h₁ B).trans (h₂ B),
+  le_antisymm := λ φ ψ h₁ h₂, funext (λ B, le_antisymm (h₁ B) (h₂ B)),
+}
+
+lemma lawful.le {β : type_index} {φ ψ : struct_action β} (h : φ.lawful) (hψ : ψ ≤ φ) : ψ.lawful :=
+λ B, (h B).le (hψ B)
+
+def comp {β γ : type_index} (φ : struct_action β) (A : path β γ) :
+  struct_action γ :=
+λ B, {
+  atom_map := (φ (A.comp B)).atom_map,
+  litter_map := (φ (A.comp B)).litter_map,
+  atom_map_dom_small := begin
+    refine small.image_subset id function.injective_id (φ (A.comp B)).atom_map_dom_small _,
+    simp only [id.def, image_id'],
+  end,
+  litter_map_dom_small := begin
+    refine small.image_subset id function.injective_id (φ (A.comp B)).litter_map_dom_small _,
+    simp only [id.def, image_id'],
+  end,
+}
+
+@[simp] lemma comp_atom_map {β γ : type_index}
+  {φ : struct_action β} {A : path β γ} {B : extended_index γ} :
+  (φ.comp A B).atom_map = (φ (A.comp B)).atom_map := rfl
+
+@[simp] lemma comp_litter_map {β γ : type_index}
+  {φ : struct_action β} {A : path β γ} {B : extended_index γ} :
+  (φ.comp A B).litter_map = (φ (A.comp B)).litter_map := rfl
+
+lemma comp_comp {β γ δ : type_index}
+  {φ : struct_action β} {A : path β γ} {B : path γ δ} :
+  (φ.comp A).comp B = φ.comp (A.comp B) :=
+begin
+  ext,
+  simp only [struct_action.comp_atom_map, path.comp_assoc],
+  simp only [struct_action.comp_litter_map, path.comp_assoc],
+end
+
+lemma le_comp {β γ : type_index} {φ ψ : struct_action β} (h : φ ≤ ψ) (A : path β γ) :
+  φ.comp A ≤ ψ.comp A := λ B, h (A.comp B)
+
+lemma lawful.comp {β γ : type_index} {φ : struct_action β} (h : φ.lawful) (A : path β γ) :
+  lawful (φ.comp A) := λ B, {
+  atom_map_injective := (h (A.comp B)).atom_map_injective,
+  litter_map_injective := (h (A.comp B)).litter_map_injective,
+  atom_mem := (h (A.comp B)).atom_mem,
+}
+
 end struct_action
 
 end con_nf

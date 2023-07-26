@@ -262,6 +262,10 @@ end
   extends approximates π₀ π : Prop :=
 (exception_mem : ∀ a, π.is_exception a → a ∈ π₀.atom_perm.domain)
 
+lemma exactly_approximates_of_eq {π₀ π₀' : near_litter_approx} {π : near_litter_perm}
+  (h : π₀.exactly_approximates π) (h' : π₀ = π₀') :
+  π₀'.exactly_approximates π := by rwa [h'] at h
+
 lemma exactly_approximates.of_is_exception {π₀ : near_litter_approx} {π : near_litter_perm}
   (hπ : π₀.exactly_approximates π) (a : atom) (ha : a.1 ∈ π₀.litter_perm.domain) :
   π.is_exception a → π₀ • a ∉ litter_set (π₀ • a.1) ∨ π₀.symm • a ∉ litter_set (π₀.symm • a.1) :=
@@ -363,6 +367,10 @@ def approximates {β : type_index} (π₀ : struct_approx β) (π : struct_perm 
 
 def exactly_approximates {β : type_index} (π₀ : struct_approx β) (π : struct_perm β) : Prop :=
 ∀ A, (π₀ A).exactly_approximates (struct_perm.of_bot $ struct_perm.derivative A π)
+
+lemma exactly_approximates_of_eq {β : type_index} {π₀ π₀' : struct_approx β} {π : struct_perm β}
+  (h : π₀.exactly_approximates π) (h' : π₀ = π₀') :
+  π₀'.exactly_approximates π := by rwa [h'] at h
 
 variables {α : Λ} [position_data.{}] [phase_2_assumptions α]
 
