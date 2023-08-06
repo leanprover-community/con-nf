@@ -37,6 +37,9 @@ variables {α : Λ} [position_data.{}] [phase_2_assumptions α] {β : Iio α} (�
 noncomputable def complete (hφ : φ.lawful) : struct_approx β :=
 λ B, (φ B).complete (hφ B) B
 
+lemma complete_apply (hφ : φ.lawful) (B : extended_index β) :
+  φ.complete hφ B = (φ B).complete (hφ B) B := rfl
+
 lemma smul_atom_eq {hφ : φ.lawful}
   {π : struct_perm β} (hπ : (φ.complete hφ).exactly_approximates π)
   {a : atom} {B : extended_index β} (ha : ((φ B).atom_map a).dom) :
@@ -293,21 +296,17 @@ def comp {β γ : type_index} (φ : struct_action β) (A : path β γ) :
   end,
 }
 
-@[simp] lemma comp_atom_map {β γ : type_index}
+@[simp] lemma comp_apply {β γ : type_index}
   {φ : struct_action β} {A : path β γ} {B : extended_index γ} :
-  (φ.comp A B).atom_map = (φ (A.comp B)).atom_map := rfl
-
-@[simp] lemma comp_litter_map {β γ : type_index}
-  {φ : struct_action β} {A : path β γ} {B : extended_index γ} :
-  (φ.comp A B).litter_map = (φ (A.comp B)).litter_map := rfl
+  φ.comp A B = φ (A.comp B) := by ext : 1; refl
 
 lemma comp_comp {β γ δ : type_index}
   {φ : struct_action β} {A : path β γ} {B : path γ δ} :
   (φ.comp A).comp B = φ.comp (A.comp B) :=
 begin
-  ext,
-  simp only [struct_action.comp_atom_map, path.comp_assoc],
-  simp only [struct_action.comp_litter_map, path.comp_assoc],
+  ext : 2,
+  simp only [comp_apply, path.comp_assoc],
+  simp only [comp_apply, path.comp_assoc],
 end
 
 lemma le_comp {β γ : type_index} {φ ψ : struct_action β} (h : φ ≤ ψ) (A : path β γ) :

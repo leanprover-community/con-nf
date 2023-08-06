@@ -116,6 +116,22 @@ begin
   { exact (local_perm.sandbox_subset_subset _ _ hL').2, },
 end
 
+lemma rc_comp_atom_perm {γ : Iio α} {φ : struct_action β} {hφ : φ.lawful}
+  (A : path (β : type_index) γ) (B : extended_index γ) :
+  ((φ.comp A).rc (hφ.comp A) B).atom_perm = (φ.rc hφ (A.comp B)).atom_perm :=
+begin
+  unfold rc refine complete near_litter_action.refine near_litter_action.complete,
+  simp_rw struct_action.comp_apply,
+end
+
+lemma rc_comp_smul_atom {γ : Iio α} {φ : struct_action β} {hφ : φ.lawful}
+  (A : path (β : type_index) γ) (B : extended_index γ) (a : atom) :
+  (φ.comp A).rc (hφ.comp A) B • a = φ.rc hφ (A.comp B) • a :=
+begin
+  change near_litter_approx.atom_perm _ _ = near_litter_approx.atom_perm _ _,
+  rw rc_comp_atom_perm,
+end
+
 end struct_action
 
 end con_nf

@@ -2,7 +2,7 @@ import mathlib.logic.equiv.local_perm
 import phase2.flexible
 import phase2.sublitter
 
-open set sum
+open quiver set sum
 open_locale cardinal pointwise
 
 universe u
@@ -465,6 +465,17 @@ lemma smul_eq_smul_of_exactly_approximates' {β : Iio α}
 @smul_eq_smul_of_exactly_approximates _ _ _ _ (β : Iic α) _ _ _ _ hπ hπ' S t hS hS' ht hSπ
 
 def free {β : Iic α} (π₀ : struct_approx β) : Prop := ∀ A, (π₀ A).free α A
+
+/-!
+# Derivatives of structural approximations
+-/
+
+def comp {β γ : type_index} (π₀ : struct_approx β) (A : path β γ) : struct_approx γ :=
+λ B, π₀ (A.comp B)
+
+@[simp] lemma comp_apply {β γ : type_index} (π₀ : struct_approx β)
+  (A : path β γ) (B : extended_index γ) :
+  π₀.comp A B = π₀ (A.comp B) := rfl
 
 /-!
 # Induction on support conditions
