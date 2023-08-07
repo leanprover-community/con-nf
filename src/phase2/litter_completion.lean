@@ -265,7 +265,7 @@ if h : nonempty (inflexible_coe L A) then
     f_map (coe_ne_coe.mpr $ coe_ne' h.some.hδε)
       ((ih_action H).hypothesised_allowable h.some hs.1 hs.2 • h.some.t)
   else
-    near_litter_approx.flexible_completion α (π A) A • L
+    L
 else if h : nonempty (inflexible_bot L A) then
   f_map (show (⊥ : type_index) ≠ (h.some.ε : Λ), from bot_ne_coe)
     (H.atom_image h.some.a (h.some.B.cons (bot_lt_coe _)) h.some.constrains)
@@ -284,6 +284,23 @@ begin
     exact hflex (inflexible.mk_coe hδ _ _ _ _), },
 end
 
+lemma litter_completion_of_inflexible_coe' (π : struct_approx β)
+  (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩)
+  (h : inflexible_coe L A) :
+  litter_completion π L A H =
+  if h' : _ ∧ _ then
+    f_map (coe_ne_coe.mpr $ coe_ne' h.hδε)
+      ((ih_action H).hypothesised_allowable h h'.1 h'.2 • h.t)
+  else L :=
+begin
+  rw [litter_completion, dif_pos],
+  { repeat {
+      congr' 1;
+      try { rw subsingleton.elim h, },
+    }, },
+  { exact ⟨h⟩, },
+end
+
 lemma litter_completion_of_inflexible_coe (π : struct_approx β)
   (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩)
   (h : inflexible_coe L A)
@@ -293,13 +310,8 @@ lemma litter_completion_of_inflexible_coe (π : struct_approx β)
   f_map (coe_ne_coe.mpr $ coe_ne' h.hδε)
     ((ih_action H).hypothesised_allowable h h₁ h₂ • h.t) :=
 begin
-  rw [litter_completion, dif_pos, dif_pos],
-  { repeat {
-      congr' 1;
-      try { rw subsingleton.elim h, },
-    }, },
+  rw [litter_completion_of_inflexible_coe', dif_pos],
   { refine ⟨_, _⟩,
-    { exact ⟨h⟩, },
     { rw subsingleton.elim h at h₁,
       exact h₁, },
     { rw subsingleton.elim h at h₂,
