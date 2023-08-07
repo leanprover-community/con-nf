@@ -647,10 +647,10 @@ begin
 end
 
 def in_out (π : near_litter_perm) (a : atom) (L : litter) : Prop :=
-xor ((π • a).1 = π • L) (a.1 = L)
+xor (a.1 = L) ((π • a).1 = π • L)
 
 lemma in_out_def {π : near_litter_perm} {a : atom} {L : litter} :
-  in_out π a L ↔ xor ((π • a).1 = π • L) (a.1 = L) := iff.rfl
+  in_out π a L ↔ xor (a.1 = L) ((π • a).1 = π • L) := iff.rfl
 
 structure _root_.con_nf.near_litter_perm.biexact (π π' : near_litter_perm)
   (atoms : set atom) (litters : set litter) : Prop :=
@@ -724,12 +724,12 @@ begin
   by_cases h'' : (π'⁻¹ • π • a).1 = L,
   { refine ⟨_, h'', _⟩,
     rw smul_inv_smul, },
-  { have := h.right_exact L hL _ (or.inl ⟨_, h''⟩),
+  { have := h.right_exact L hL _ (or.inr ⟨_, h''⟩),
     { rw [smul_inv_smul, smul_left_cancel_iff, inv_smul_eq_iff] at this,
       rw this,
       exact ⟨a, ha, rfl⟩, },
     { rw [smul_inv_smul, h', h.smul_eq_smul_litter L hL], }, },
-  { rw h.left_exact L hL a (or.inr ⟨ha, h'⟩),
+  { rw h.left_exact L hL a (or.inl ⟨ha, h'⟩),
     simp only [litter.coe_to_near_litter, smul_mem_smul_set_iff, mem_litter_set],
     exact ha, },
 end
@@ -768,20 +768,20 @@ begin
     exact ⟨b, hb, rfl⟩, },
 end
 
--- `in_out` is just another way to quantify exceptions, focusing on a slightly different litter.
--- Basically `in_out` looks only at images not preimages.
-example (π : near_litter_perm) (a : atom) (L : litter) :
+/- `in_out` is just another way to quantify exceptions, focusing on a slightly different litter.
+Basically `in_out` looks only at images not preimages. -/
+lemma is_exception_of_in_out {π : near_litter_perm} {a : atom} {L : litter} :
   in_out π a L → π.is_exception a ∨ π.is_exception (π • a) :=
 begin
-  rintro (ha | ⟨rfl, ha⟩),
-  { refine or.inl (or.inl _),
-    rw [mem_litter_set, ha.1, smul_left_cancel_iff],
-    exact ne.symm ha.2, },
+  rintro (⟨rfl, ha⟩ | ha),
   { refine or.inr (or.inr _),
     intro h,
     rw [mem_litter_set, eq_inv_smul_iff] at h,
     rw [← h, inv_smul_smul] at ha,
     exact ha rfl, },
+  { refine or.inl (or.inl _),
+    rw [mem_litter_set, ha.1, smul_left_cancel_iff],
+    exact ne.symm ha.2, },
 end
 
 structure biexact {β : Iio α} (π π' : struct_perm β) (c : support_condition β) : Prop :=
@@ -791,12 +791,10 @@ structure biexact {β : Iio α} (π π' : struct_perm β) (c : support_condition
 (smul_eq_smul_litter : ∀ A : extended_index β, ∀ L : litter,
   (inr L.to_near_litter, A) ≤[α] c → flexible α L A →
   struct_perm.derivative A π • L = struct_perm.derivative A π' • L)
-(left_exact : ∀ A : extended_index β, ∀ L : litter, ∀ a : atom,
-  (inr L.to_near_litter, A) ≤[α] c → in_out (struct_perm.of_bot $ struct_perm.derivative A π) a L →
-  struct_perm.derivative A π • a = struct_perm.derivative A π' • a)
-(right_exact : ∀ A : extended_index β, ∀ L : litter, ∀ a : atom,
-  (inr L.to_near_litter, A) ≤[α] c → in_out (struct_perm.of_bot $ struct_perm.derivative A π') a L →
-  struct_perm.derivative A π • a = struct_perm.derivative A π' • a)
+(exact : ∀ A : extended_index β, ∀ L : litter,
+  (inr L.to_near_litter, A) ≤[α] c →
+  struct_perm.derivative A π • L = struct_perm.derivative A π' • L →
+  struct_perm.derivative A π • L.to_near_litter = struct_perm.derivative A π' • L.to_near_litter)
 
 lemma biexact.atoms {β : Iio α} {π π' : struct_perm β} {c : support_condition β}
   (h : biexact π π' c) (A : extended_index β) :
@@ -812,8 +810,7 @@ lemma biexact.constrains {β : Iio α} {π π' : struct_perm β} {c d : support_
 ⟨
   λ A a ha, h.smul_eq_smul_atom A a (ha.trans h'),
   λ A L hL, h.smul_eq_smul_litter A L (hL.trans h'),
-  λ A L a hL, h.left_exact A L a (hL.trans h'),
-  λ A L a hL, h.right_exact A L a (hL.trans h'),
+  λ A L hL, h.exact A L (hL.trans h'),
 ⟩
 
 lemma biexact.smul_eq_smul {β : Iio α} {π π' : allowable β} {c : support_condition β}
@@ -855,15 +852,7 @@ begin
   obtain ⟨L, rfl⟩ := hL.exists_litter_eq,
   suffices : struct_perm.derivative A π.to_struct_perm • L =
     struct_perm.derivative A π'.to_struct_perm • L,
-  { have := near_litter_perm.biexact.litter L this _ _,
-    { refine (this.union (h.atoms A)).smul_near_litter L.to_near_litter (or.inl rfl) _,
-      intros a ha,
-      rw [litter.to_near_litter_fst, litter.coe_to_near_litter, symm_diff_self] at ha,
-      cases ha, },
-    { intros a ha,
-      exact h.left_exact A L a relation.refl_trans_gen.refl ha, },
-    { intros a ha,
-      exact h.right_exact A L a relation.refl_trans_gen.refl ha, }, },
+  { exact h.exact _ _ relation.refl_trans_gen.refl this, },
   obtain (hL | hL) := flexible_cases α L A,
   swap,
   { exact h.smul_eq_smul_litter A L relation.refl_trans_gen.refl hL, },
@@ -928,6 +917,21 @@ begin
   have : (inr _, _) = (inr _, _) := h.smul_eq_smul,
   rw prod.mk.inj_iff at this,
   exact inr_injective this.1,
+end
+
+lemma mem_dom_of_exactly_approximates {β : Iio α} {π₀ : struct_approx β}
+  {π : struct_perm β} (hπ : π₀.exactly_approximates π)
+  {a : atom} {L : litter} {A : extended_index β}
+  (h : in_out (struct_perm.of_bot $ struct_perm.derivative A π) a L) :
+  a ∈ (π₀ A).atom_perm.domain :=
+begin
+  obtain (h | h) := is_exception_of_in_out h,
+  { exact (hπ A).exception_mem _ h, },
+  { have h₁ := (hπ A).exception_mem _ h,
+    have := (hπ A).symm_map_atom _ h₁,
+    rw inv_smul_smul at this,
+    rw ← this,
+    exact (π₀ A).atom_perm.symm.map_domain h₁, },
 end
 
 lemma coherent {γ : Iio α} (A : path (β : type_index) γ)
@@ -1018,7 +1022,9 @@ begin
       refine struct_action.lawful.comp _ _,
       refine (hπ.le (struct_action.le_comp (ih_action_le_ihs_action π c d) _)).le _,
       exact struct_action.le_comp (ih_action_le hc'.to_refl) _, },
-    swap, sorry,
+    swap,
+    { rw [inflexible_coe.comp_B, ← path.comp_cons],
+      sorry, },
     obtain ⟨δ, ε, ζ, hε, hζ, hεζ, C, t, rfl, rfl⟩ := hL,
     rw struct_perm.derivative_cons,
     refine eq.trans _ (struct_perm.derivative_bot_smul _ _).symm,
@@ -1128,10 +1134,34 @@ begin
           simp only [← hNL, path.comp_assoc, ← path.comp_cons],
           exact trans_gen_constrains_comp hLN _, },
         { exact hL₂, }, },
-      { intros E L a hL haL,
-        sorry, },
-      { intros E L a hL haL,
-        sorry, }, }, },
+      { intros E L hL₁ hL₂,
+        have hLN : (inr L.to_near_litter, (C.cons $ coe_lt hε).comp E) <[α]
+          (inr N.fst.to_near_litter, (C.cons $ coe_lt hζ).cons (bot_lt_coe _)),
+        { simp only [hNL],
+          refine relation.trans_gen.tail' _ (constrains.f_map hε _ _ _ _ _ hct),
+          exact refl_trans_gen_constrains_comp hL₁ _, },
+        specialize ih (L.to_near_litter, ((C.cons $ coe_lt hε).comp E))
+          (trans_gen_near_litter hLN)
+          (trans (trans_gen_constrains_comp (trans_gen_near_litter hLN) _) hc),
+        simp only at ih,
+        rw [← path.comp_assoc, path.comp_cons] at ih,
+        refine (near_litter_action.smul_to_near_litter_eq_of_precise_at _
+          (struct_action.hypothesised_allowable_exactly_approximates
+            (ih_action _) ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, t, rfl, rfl⟩ _ _ _)
+          _ (near_litter_action.refine_precise _) _).trans _,
+        { refine relation.trans_gen.tail' (refl_trans_gen_constrains_comp hL₁ _) _,
+          exact constrains.f_map _ _ _ _ _ _ hct, },
+        { refine hL₂.trans _,
+          simp only [struct_action.comp_apply, struct_action.refine_apply,
+            near_litter_action.refine_litter_map, ih_action_litter_map,
+            foa_hypothesis_near_litter_image],
+          rw [ih, ← allowable.derivative_to_struct_perm, struct_perm.derivative_derivative],
+          refl, },
+        { simp only [struct_action.comp_apply, struct_action.refine_apply,
+            near_litter_action.refine_litter_map, ih_action_litter_map,
+            foa_hypothesis_near_litter_image],
+          rw [ih, ← allowable.derivative_to_struct_perm,
+            struct_perm.derivative_derivative], }, }, }, },
 end
 
 end struct_approx

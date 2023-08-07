@@ -17,9 +17,6 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: leanprover-contrib/update-versions-action@master
 
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
-
       - name: build docker container
         run: docker build -t con-nf .
 
