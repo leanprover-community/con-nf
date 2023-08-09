@@ -249,6 +249,21 @@ noncomputable def _root_.con_nf.struct_action.hypothesised_allowable
 (φ.comp (h.B.cons (coe_lt h.hδ))).allowable
   (h.hδ.trans_le (show _, from coe_le_coe.mp (le_of_path h.B))) h₁ h₂
 
+/- TODO: Extract out the path bit from inflexible_coe so that the following lemma doesn't need
+to be stated. -/
+lemma _root_.con_nf.struct_action.hypothesised_allowable_eq
+  {φ : struct_action β}
+  {L L' : litter} {A : extended_index β}
+  {γ : Iic α} {δ ε : Iio α} {hδ : (δ : Λ) < γ} {hε : (ε : Λ) < γ} {hδε : δ ≠ ε}
+  {B : quiver.path (β : type_index) γ} (t t' : tangle δ)
+  {hL : L = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t}
+  (hL' : L' = f_map (coe_ne_coe.mpr $ coe_ne' hδε) t')
+  {hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)}
+  {h₁ h₂}
+  (h₁' h₂') :
+  (φ.hypothesised_allowable ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩ h₁ h₂ : allowable δ) =
+  (φ.hypothesised_allowable ⟨γ, δ, ε, hδ, hε, hδε, B, t', hL', hA⟩ h₁' h₂' : allowable δ) := rfl
+
 lemma _root_.con_nf.struct_action.hypothesised_allowable_exactly_approximates
   (φ : struct_action β)
   {L : litter} {A : extended_index β} (h : inflexible_coe L A)
