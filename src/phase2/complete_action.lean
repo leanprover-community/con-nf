@@ -1,3 +1,4 @@
+import order.extension.well
 import phase2.atom_completion
 import phase2.near_litter_completion
 
@@ -1817,18 +1818,122 @@ begin
     exact h', },
 end
 
+/--
+**Split relation**
+Let `<` denote a relation on `α`.
+The split relation `<ₛ` defined on `α × α` is defined by:
+
+* `a < b → (a, c) <ₛ (b, c)` (left `<`)
+* `b < c → (a, b) <ₛ (a, c)` (right `<`)
+* `a < c → b < c → (a, b) <ₛ (c, d)` (left split)
+* `a < d → b < d → (a, b) <ₛ (c, d)` (right split)
+
+This is more granular than the standard product of relations,
+which would be given by just the first two constructors.
+The splitting constructors allow one to "split" either `c` or `d` into two lower values `a` and `b`.
+
+Splitting has applications with well-founded relations; in particular, `<ₛ` is well-founded whenever
+`<` is, so this relation can simplify certain inductive steps.
+-/
+inductive split_lt {α : Type*} (r : α → α → Prop) :
+  α × α → α × α → Prop
+| left_lt ⦃a b c : α⦄ : r a b → split_lt (a, c) (b, c)
+| right_lt ⦃a b c : α⦄ : r b c → split_lt (a, b) (a, c)
+| left_split ⦃a b c d : α⦄ : r a c → r b c → split_lt (a, b) (c, d)
+| right_split ⦃a b c d : α⦄ : r a d → r b d → split_lt (a, b) (c, d)
+
+lemma le_well_order_extension_lt {α : Type*} {r : α → α → Prop} (hr : well_founded r) :
+  r ≤ hr.well_order_extension.lt :=
+λ a b h, prod.lex.left _ _ (hr.rank_lt_of_rel h)
+
+lemma to_lex_lt_of_split_lt {α : Type*} {r : α → α → Prop} {hr : well_founded r} :
+  split_lt r ≤ inv_image (prod.lex hr.well_order_extension.lt hr.well_order_extension.lt)
+    (λ a, if hr.well_order_extension.lt a.1 a.2 then (a.2, a.1) else (a.1, a.2)) :=
+begin
+  intros a b h,
+  induction h with a b c h a b c h a b c d ha hb a b c d ha hb,
+  { change prod.lex _ _ _ _,
+    simp only,
+    split_ifs with h₁ h₂ h₂,
+    { exact prod.lex.right _ (le_well_order_extension_lt hr _ _ h), },
+    { by_cases hcb : c = b,
+      { cases hcb,
+        exact prod.lex.right _ h₁, },
+      { refine prod.lex.left _ _ _,
+        have := (@not_lt _ hr.well_order_extension _ _).mp h₂,
+        exact @lt_of_le_of_ne _ (@linear_order.to_partial_order _ hr.well_order_extension)
+          _ _ this hcb, }, },
+    { cases h₁ ((le_well_order_extension_lt hr _ _ h).trans h₂), },
+    { exact prod.lex.left _ _ (le_well_order_extension_lt hr _ _ h), }, },
+  { change prod.lex _ _ _ _,
+    simp only,
+    split_ifs with h₁ h₂ h₂,
+    { exact prod.lex.left _ _ (le_well_order_extension_lt hr _ _ h), },
+    { cases h₂ (h₁.trans (le_well_order_extension_lt hr _ _ h)), },
+    { exact prod.lex.left _ _ h₂, },
+    { exact prod.lex.right _ (le_well_order_extension_lt hr _ _ h), }, },
+  { change prod.lex _ _ _ _,
+    simp only,
+    split_ifs with h₁ h₂ h₂,
+    { exact prod.lex.left _ _ ((le_well_order_extension_lt hr _ _ hb).trans h₂), },
+    { exact prod.lex.left _ _ (le_well_order_extension_lt hr _ _ hb), },
+    { exact prod.lex.left _ _ ((le_well_order_extension_lt hr _ _ ha).trans h₂), },
+    { exact prod.lex.left _ _ (le_well_order_extension_lt hr _ _ ha), }, },
+  { change prod.lex _ _ _ _,
+    simp only,
+    split_ifs with h₁ h₂ h₂,
+    { exact prod.lex.left _ _ (le_well_order_extension_lt hr _ _ hb), },
+    { by_cases hcb : c = b,
+      { cases hcb,
+        exact prod.lex.right _ (le_well_order_extension_lt hr _ _ ha), },
+      { refine prod.lex.left _ _ _,
+        have := (@not_lt _ hr.well_order_extension _ _).mp h₂,
+        exact @lt_of_lt_of_le _
+          (@partial_order.to_preorder _ (@linear_order.to_partial_order _ hr.well_order_extension))
+          _ _ _ (le_well_order_extension_lt hr _ _ hb) this, }, },
+    { exact prod.lex.left _ _ (le_well_order_extension_lt hr _ _ ha), },
+    { have := (@not_lt _ hr.well_order_extension _ _).mp h₂,
+      have := @lt_of_lt_of_le _
+        (@partial_order.to_preorder _ (@linear_order.to_partial_order _ hr.well_order_extension))
+        _ _ _ (le_well_order_extension_lt hr _ _ ha) this,
+      exact prod.lex.left _ _ this, }, },
+end
+
+lemma split_lt_well_founded {α : Type*} {r : α → α → Prop} (hr : well_founded r) :
+  well_founded (split_lt r) :=
+begin
+  refine subrelation.wf to_lex_lt_of_split_lt _,
+  { exact hr, },
+  { refine inv_image.wf _ (inv_image.wf _ _),
+    refine prod.lex_wf _ _;
+    exact inv_image.wf _ (prod.lex_wf
+      ordinal.well_founded_lt.wf well_ordering_rel.is_well_order.wf), },
+end
+
 lemma ihs_action_lawful_extends (hπf : π.free) (c d : support_condition β)
-  (hπl : ∀ e : support_condition β, e <[α] c → (ihs_action π e d).lawful)
-  (hπr : ∀ e : support_condition β, e <[α] d → (ihs_action π c e).lawful) :
+  (hπ : ∀ e f, split_lt (λ c d, c <[α] d) (e, f) (c, d) → (ihs_action π e f).lawful) :
   (ihs_action π c d).lawful :=
 begin
   intro A,
   constructor,
   { intros a b ha hb hab,
     simp only [ihs_action_atom_map] at ha hb hab,
-    sorry, },
+    cases ha; cases hb,
+    { specialize hπ (inl a, A) (inl b, A) (split_lt.left_split ha hb),
+      exact atom_injective_extends hπ
+        (or.inl relation.refl_trans_gen.refl) (or.inr relation.refl_trans_gen.refl) hab, },
+    { specialize hπ (inl a, A) d (split_lt.left_lt ha),
+      exact atom_injective_extends hπ
+        (or.inl relation.refl_trans_gen.refl) (or.inr hb.to_refl) hab, },
+    { specialize hπ c (inl a, A) (split_lt.right_lt ha),
+      exact atom_injective_extends hπ
+        (or.inr relation.refl_trans_gen.refl) (or.inl hb.to_refl) hab, },
+    { specialize hπ (inl a, A) (inl b, A) (split_lt.right_split ha hb),
+      exact atom_injective_extends hπ
+        (or.inl relation.refl_trans_gen.refl) (or.inr relation.refl_trans_gen.refl) hab, }, },
   { intros L₁ L₂ h₁ h₂ h₁₂,
     simp only [ihs_action_litter_map] at h₁ h₂ h₁₂,
+    -- Copy above.
     sorry, },
   { intros a ha L hL,
     sorry, },

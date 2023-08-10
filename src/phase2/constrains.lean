@@ -189,6 +189,10 @@ end
 notation c ` <[`:50 α `] ` d:50 := relation.trans_gen (constrains α _) c d
 notation c ` ≤[`:50 α `] ` d:50 := relation.refl_trans_gen (constrains α _) c d
 
+lemma trans_constrains_wf (α : Λ) [phase_2_assumptions α] (β : Λ) :
+  well_founded (λ c d : support_condition β, c <[α] d) :=
+(@relation.trans_gen.is_well_founded _ _ _).wf
+
 lemma refl_trans_gen_constrains_comp {β γ : Λ} {c d : support_condition γ}
   (h : c ≤[α] d) (B : path (β : type_index) γ) :
   ⟨c.fst, B.comp c.snd⟩ ≤[α] ⟨d.fst, B.comp d.snd⟩ :=
