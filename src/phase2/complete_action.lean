@@ -1837,6 +1837,45 @@ begin
       (eq_of_complete_litter_map_inter_nonempty ⟨_, this, h⟩), },
 end
 
+lemma complete_near_litter_map_subset_range (hπf : π.free) (A : extended_index β) (L : litter) :
+  (π.complete_near_litter_map A L.to_near_litter : set atom) ⊆ range (π.complete_atom_map A) :=
+begin
+  rw complete_near_litter_map_to_near_litter_eq,
+  rintros a (⟨ha₁, ha₂⟩ | ⟨a, ⟨ha₁, ha₂⟩, rfl⟩),
+  { refine ⟨(((π A).largest_sublitter L).order_iso
+      ((π A).largest_sublitter a.1)).symm
+      ⟨a, (π A).mem_largest_sublitter_of_not_mem_domain a ha₂⟩, _⟩,
+    rw complete_atom_map_eq_of_not_mem_domain,
+    swap,
+    { exact near_litter_approx.not_mem_domain_of_mem_largest_sublitter _
+        (sublitter.order_iso_symm_apply_mem ⟨a, _⟩), },
+    { rw mem_litter_set at ha₁,
+      have : (((((π A).largest_sublitter L).order_iso
+          ((π A).largest_sublitter a.fst)).symm) ⟨a, _⟩ : atom).fst = L :=
+        sublitter.order_iso_symm_apply_fst_eq ⟨a, _⟩,
+      rw [sublitter.order_iso_congr_left (congr_arg _ this),
+        sublitter.order_iso_congr_right (congr_arg _ (congr_arg _ this)),
+        sublitter.order_iso_congr_right (congr_arg _ ha₁.symm)],
+      simp only [set_like.coe_mk, set_like.eta, order_iso.apply_symm_apply], }, },
+  { refine ⟨a, _⟩,
+    rw complete_atom_map_eq_of_mem_domain ha₂, },
+end
+
+lemma complete_atom_map_surjective_extends (hπf : π.free) (A : extended_index β) (a : atom)
+  (h : a.1 ∈ range (π.complete_litter_map A)) :
+  a ∈ range (π.complete_atom_map A) :=
+begin
+  obtain ⟨L, hL⟩ := h,
+  by_cases ha : a ∈ (π A).atom_perm.domain,
+  { refine ⟨(π A).atom_perm.symm a, _⟩,
+    rw complete_atom_map_eq_of_mem_domain ((π A).atom_perm.symm.map_domain ha),
+    exact (π A).atom_perm.right_inv ha, },
+  { have := complete_near_litter_map_to_near_litter_eq A L,
+    rw hL at this,
+    have := eq.subset this.symm (or.inl ⟨rfl, ha⟩),
+    exact complete_near_litter_map_subset_range hπf A L this, },
+end
+
 end struct_approx
 
 end con_nf
