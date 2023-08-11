@@ -17,6 +17,8 @@ Every free approximation exactly approximates some allowable permutation. -/
 def foa_ih (β : Iic α) : Prop :=
 ∀ (π₀ : struct_approx β), π₀.free → ∃ (π : allowable β), π₀.exactly_approximates π.to_struct_perm
 
+-- TODO: Split off the path bit of inflexible_*. Then rearrange args L and A.
+
 /-- A proof-relevant statement that `L` is `A`-inflexible (excluding `ε = ⊥`). -/
 structure inflexible_coe {β : Iic α} (L : litter) (A : extended_index β) :=
 (γ : Iic α) (δ ε : Iio α) (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
@@ -195,8 +197,8 @@ export freedom_of_action_hypothesis (freedom_of_action_of_lt)
 /-- The structural action associated to a given inductive hypothesis. -/
 def ih_action {β : Iic α} {c : support_condition β} (H : hypothesis c) : struct_action β :=
 λ B, {
-  atom_map := λ a, ⟨_, λ h, H.atom_image a B h⟩,
-  litter_map := λ L, ⟨_, λ h, H.near_litter_image L.to_near_litter B h⟩,
+  atom_map := λ a, ⟨_, λ h, H.atom_image B a h⟩,
+  litter_map := λ L, ⟨_, λ h, H.near_litter_image B L.to_near_litter h⟩,
   atom_map_dom_small := begin
     simp only [pfun.dom_mk],
     have := reduction_small'' α (small_singleton c),
@@ -222,11 +224,11 @@ def ih_action {β : Iic α} {c : support_condition β} (H : hypothesis c) : stru
 
 @[simp] lemma ih_action_atom_map {β : Iic α} {c : support_condition β} {H : hypothesis c}
   {B : extended_index β} {a : atom} :
-  (ih_action H B).atom_map a = ⟨_, λ h, H.atom_image a B h⟩ := rfl
+  (ih_action H B).atom_map a = ⟨_, λ h, H.atom_image B a h⟩ := rfl
 
 @[simp] lemma ih_action_litter_map {β : Iic α} {c : support_condition β} {H : hypothesis c}
   {B : extended_index β} {L : litter} :
-  (ih_action H B).litter_map L = ⟨_, λ h, H.near_litter_image L.to_near_litter B h⟩ := rfl
+  (ih_action H B).litter_map L = ⟨_, λ h, H.near_litter_image B L.to_near_litter h⟩ := rfl
 
 variables {β : Iic α} [freedom_of_action_hypothesis β]
 
@@ -274,7 +276,7 @@ lemma _root_.con_nf.struct_action.hypothesised_allowable_exactly_approximates
 (φ.comp (h.B.cons (coe_lt h.hδ))).allowable_exactly_approximates _ _ _
 
 noncomputable def litter_completion (π : struct_approx β)
-  (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩) : litter :=
+  (A : extended_index β) (L : litter) (H : hypothesis ⟨inr L.to_near_litter, A⟩) : litter :=
 if h : nonempty (inflexible_coe L A) then
   if hs : _ ∧ _ then
     f_map (coe_ne_coe.mpr $ coe_ne' h.some.hδε)
@@ -283,14 +285,14 @@ if h : nonempty (inflexible_coe L A) then
     L
 else if h : nonempty (inflexible_bot L A) then
   f_map (show (⊥ : type_index) ≠ (h.some.ε : Λ), from bot_ne_coe)
-    (H.atom_image h.some.a (h.some.B.cons (bot_lt_coe _)) h.some.constrains)
+    (H.atom_image (h.some.B.cons (bot_lt_coe _)) h.some.a h.some.constrains)
 else
   near_litter_approx.flexible_completion α (π A) A • L
 
 lemma litter_completion_of_flexible (π : struct_approx β)
-  (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩)
+  (A : extended_index β) (L : litter) (H : hypothesis ⟨inr L.to_near_litter, A⟩)
   (hflex : flexible α L A) :
-  litter_completion π L A H = near_litter_approx.flexible_completion α (π A) A • L :=
+  litter_completion π A L H = near_litter_approx.flexible_completion α (π A) A • L :=
 begin
   rw [litter_completion, dif_neg, dif_neg],
   { rintro ⟨⟨γ, ε, hε, C, a, rfl, rfl⟩⟩,
@@ -300,9 +302,9 @@ begin
 end
 
 lemma litter_completion_of_inflexible_coe' (π : struct_approx β)
-  (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩)
+  (A : extended_index β) (L : litter) (H : hypothesis ⟨inr L.to_near_litter, A⟩)
   (h : inflexible_coe L A) :
-  litter_completion π L A H =
+  litter_completion π A L H =
   if h' : _ ∧ _ then
     f_map (coe_ne_coe.mpr $ coe_ne' h.hδε)
       ((ih_action H).hypothesised_allowable h h'.1 h'.2 • h.t)
@@ -317,11 +319,11 @@ begin
 end
 
 lemma litter_completion_of_inflexible_coe (π : struct_approx β)
-  (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩)
+  (A : extended_index β) (L : litter) (H : hypothesis ⟨inr L.to_near_litter, A⟩)
   (h : inflexible_coe L A)
   (h₁ : ((ih_action H).comp (h.B.cons (coe_lt h.hδ))).lawful)
   (h₂ : ((ih_action H).comp (h.B.cons (coe_lt h.hδ))).map_flexible) :
-  litter_completion π L A H =
+  litter_completion π A L H =
   f_map (coe_ne_coe.mpr $ coe_ne' h.hδε)
     ((ih_action H).hypothesised_allowable h h₁ h₂ • h.t) :=
 begin
@@ -334,11 +336,11 @@ begin
 end
 
 lemma litter_completion_of_inflexible_bot (π : struct_approx β)
-  (L : litter) (A : extended_index β) (H : hypothesis ⟨inr L.to_near_litter, A⟩)
+  (A : extended_index β) (L : litter) (H : hypothesis ⟨inr L.to_near_litter, A⟩)
   (h : inflexible_bot L A) :
-  litter_completion π L A H =
+  litter_completion π A L H =
   f_map (show (⊥ : type_index) ≠ (h.ε : Λ), from bot_ne_coe)
-    (H.atom_image h.a (h.B.cons (bot_lt_coe _)) h.constrains) :=
+    (H.atom_image (h.B.cons (bot_lt_coe _)) h.a h.constrains) :=
 begin
   rw [litter_completion, dif_neg, dif_pos, subsingleton.elim h],
   { exact ⟨h⟩, },

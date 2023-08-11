@@ -29,11 +29,11 @@ begin
 end
 
 /-- Computes the action of a structural approximation `π` on an atom `a`. -/
-noncomputable def atom_completion (a : atom) (A : extended_index β)
+noncomputable def atom_completion (A : extended_index β) (a : atom)
   (H : hypothesis ⟨inl a, A⟩) : atom :=
 if h : a ∈ (π A).atom_perm.domain then π A • a else
 ((π A).largest_sublitter a.1).order_iso
-  ((π A).largest_sublitter (H.near_litter_image a.1.to_near_litter A
+  ((π A).largest_sublitter (H.near_litter_image A a.1.to_near_litter
     (relation.trans_gen.single $ constrains.atom a A)).1)
   ⟨a, (π A).mem_largest_sublitter_of_not_mem_domain a h⟩
 

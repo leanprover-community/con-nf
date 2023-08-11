@@ -494,42 +494,42 @@ end
 /-- The inductive hypothesis used to construct the induced action of an approximation in the
 freedom of action theorem. -/
 structure hypothesis {β : Iic α} (c : support_condition β) :=
-(atom_image : Π a A, ⟨inl a, A⟩ <[α] c → atom)
-(near_litter_image : Π N A, ⟨inr N, A⟩ <[α] c → near_litter)
+(atom_image : Π A a, ⟨inl a, A⟩ <[α] c → atom)
+(near_litter_image : Π A N, ⟨inr N, A⟩ <[α] c → near_litter)
 
 namespace hypothesis
 variable {β : Iic α}
 
 def fix_map :
-  (psum (Σ' (_ : atom), extended_index β) (Σ' (_ : near_litter), extended_index β)) →
+  (psum (Σ' (_ : extended_index β), atom) (Σ' (_ : extended_index β), near_litter)) →
   support_condition β
-| (psum.inl ⟨a, A⟩) := ⟨inl a, A⟩
-| (psum.inr ⟨N, A⟩) := ⟨inr N, A⟩
+| (psum.inl ⟨A, a⟩) := ⟨inl a, A⟩
+| (psum.inr ⟨A, N⟩) := ⟨inr N, A⟩
 
 def fix_wf : has_well_founded
-  (psum (Σ' (_ : atom), extended_index β) (Σ' (_ : near_litter), extended_index β)) :=
+  (psum (Σ' (_ : extended_index β), atom) (Σ' (_ : extended_index β), near_litter)) :=
 ⟨inv_image (relation.trans_gen (constrains α β)) fix_map,
   inv_image.wf _ (constrains_wf α β).trans_gen⟩
 
 /-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.
 This is used to compute the induced action of an approximation on all atoms and near-litters. -/
 noncomputable! mutual def fix_atom, fix_near_litter
-  (Fa : Π a (A : extended_index β), hypothesis ⟨inl a, A⟩ → atom)
-  (FN : Π N (A : extended_index β), hypothesis ⟨inr N, A⟩ → near_litter)
-with fix_atom : atom → extended_index β → atom
-| a A := Fa a A ⟨λ b B hb, fix_atom b B, λ N B hb, fix_near_litter N B⟩
-with fix_near_litter : near_litter → extended_index β → near_litter
-| N A := FN N A ⟨λ b B hb, fix_atom b B, λ N B hb, fix_near_litter N B⟩
+  (Fa : Π (A : extended_index β) a, hypothesis ⟨inl a, A⟩ → atom)
+  (FN : Π (A : extended_index β) N, hypothesis ⟨inr N, A⟩ → near_litter)
+with fix_atom : extended_index β → atom → atom
+| A a := Fa A a ⟨λ B b hb, fix_atom B b, λ B N hb, fix_near_litter B N⟩
+with fix_near_litter : extended_index β → near_litter → near_litter
+| A N := FN A N ⟨λ B b hb, fix_atom B b, λ B N hb, fix_near_litter B N⟩
 using_well_founded { rel_tac := λ _ _, `[exact fix_wf], dec_tac := `[exact hb] }
 
-lemma fix_atom_eq (Fa FN) (a : atom) (A : extended_index β) :
-  fix_atom Fa FN a A =
-  Fa a A ⟨λ b B hb, fix_atom Fa FN b B, λ N B hb, fix_near_litter Fa FN N B⟩ :=
+lemma fix_atom_eq (Fa FN) (A : extended_index β) (a : atom) :
+  fix_atom Fa FN A a =
+  Fa A a ⟨λ B b hb, fix_atom Fa FN B b, λ B N hb, fix_near_litter Fa FN B N⟩ :=
 by rw fix_atom
 
-lemma fix_near_litter_eq (Fa FN) (N : near_litter) (A : extended_index β) :
-  fix_near_litter Fa FN N A =
-  FN N A ⟨λ b B hb, fix_atom Fa FN b B, λ N B hb, fix_near_litter Fa FN N B⟩ :=
+lemma fix_near_litter_eq (Fa FN) (A : extended_index β) (N : near_litter) :
+  fix_near_litter Fa FN A N =
+  FN A N ⟨λ B b hb, fix_atom Fa FN B b, λ B N hb, fix_near_litter Fa FN B N⟩ :=
 by rw fix_near_litter
 
 end hypothesis
