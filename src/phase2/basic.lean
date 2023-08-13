@@ -1,6 +1,7 @@
 import phase1.f_map
 
 open set with_bot
+open_locale pointwise
 
 universe u
 
@@ -82,6 +83,8 @@ class phase_2_assumptions extends phase_2_data α :=
   (π : allowable β),
   struct_perm.derivative (quiver.path.nil.cons hγ) π.to_struct_perm =
     (allowable_derivative β γ hγ π).to_struct_perm)
+(smul_designated_support {β : Iic α} (t : tangle β) (π : allowable β) :
+  π • (designated_support t : set (support_condition β)) = designated_support (π • t))
 (smul_f_map {β : Iic_index α} (γ : Iio_index α) (δ : Iio α)
   (hγ : (γ : type_index) < β) (hδ : (δ : type_index) < β) (hγδ : γ ≠ δ)
   (π : allowable β) (t : tangle γ) :
@@ -89,7 +92,8 @@ class phase_2_assumptions extends phase_2_data α :=
     f_map (subtype.coe_injective.ne hγδ) t =
     f_map (subtype.coe_injective.ne hγδ) (allowable_derivative β γ hγ π • t))
 
-export phase_2_assumptions (allowable_derivative allowable_derivative_eq smul_f_map)
+export phase_2_assumptions (allowable_derivative allowable_derivative_eq
+  smul_designated_support smul_f_map)
 
 variables {α} [phase_2_assumptions α]
 
@@ -194,6 +198,12 @@ begin
   refine eq.trans _ (congr_arg2 (•) this.symm rfl),
   refl,
 end
+
+lemma smul_mem_designated_support {β : Iio α} {c : support_condition β} {t : tangle β}
+  (h : c ∈ designated_support t) (π : allowable β) :
+  π • c ∈ designated_support (π • t) :=
+(set.ext_iff.mp (smul_designated_support (show tangle (β : Iic α), from t) π)
+  ((show allowable (β : Iic α), from π) • c)).mp ⟨c, h, rfl⟩
 
 lemma to_struct_perm_smul_f_map (β : Iic_index α) (γ : Iio_index α) (δ : Iio α)
   (hγ : (γ : type_index) < β) (hδ : (δ : type_index) < β) (hγδ : γ ≠ δ)

@@ -1293,6 +1293,39 @@ begin
   exact (or.inl hc),
 end
 
+lemma ih_action_coherent_precise (hπf : π.free) {γ : Iio α} (A : path (β : type_index) γ)
+  (B : extended_index γ) (N : near_litter)
+  (c : support_condition β) (hc : (inr N, A.comp B) <[α] c)
+  (hπ : ((ih_action (π.foa_hypothesis : hypothesis c)).comp A).lawful)
+  (ρ : allowable γ)
+  (h : (((ih_action (π.foa_hypothesis : hypothesis c)).comp A).rc hπ).exactly_approximates
+    ρ.to_struct_perm) :
+  complete_near_litter_map π (A.comp B) N = struct_perm.derivative B ρ.to_struct_perm • N :=
+begin
+  refine ihs_action_coherent_precise hπf A B N c c hc _ ρ _,
+  { rw ihs_action_self,
+    exact hπ, },
+  { simp_rw ihs_action_self,
+    exact h, },
+end
+
+lemma ih_action_coherent_precise_atom (hπf : π.free) {γ : Iio α}
+  (A : path (β : type_index) γ)
+  (B : extended_index γ) (a : atom)
+  (c : support_condition β) (hc : (inl a, A.comp B) <[α] c)
+  (hπ : ((ih_action (π.foa_hypothesis : hypothesis c)).comp A).lawful)
+  (ρ : allowable γ)
+  (h : (((ih_action (π.foa_hypothesis : hypothesis c)).comp A).rc hπ).exactly_approximates
+    ρ.to_struct_perm) :
+  complete_atom_map π (A.comp B) a = struct_perm.derivative B ρ.to_struct_perm • a :=
+begin
+  refine ihs_action_coherent_precise_atom hπf A B a c c hc _ ρ _,
+  { rw ihs_action_self,
+    exact hπ, },
+  { simp_rw ihs_action_self,
+    exact h, },
+end
+
 /--
 **Coherence lemma**: We can extend the coherence lemma right up to `c` itself, but here we only get
 equality of rough images. This is proven using many instances of the precise coherence lemma,
@@ -1998,6 +2031,9 @@ begin
       simpa only [f_map_β, bot_ne_coe] using this, }, },
 end
 
+lemma _root_.relation.refl_trans_gen_of_eq {α : Type*} {r : α → α → Prop} {x y : α}
+  (h : x = y) : relation.refl_trans_gen r x y := by cases h; refl
+
 lemma complete_litter_map_surjective_extends (hπf : π.free) (A : extended_index β) (L : litter)
   (ha : ∀ B (a : atom), (inl a, B) <[α] (inr L.to_near_litter, A) →
     a ∈ range (π.complete_atom_map B))
@@ -2029,37 +2065,61 @@ begin
     refine (designated_support t).supports _ _,
     intros c hc,
     rw [mul_smul, smul_eq_iff_eq_inv_smul],
-    refine biexact.smul_eq_smul _,
-    constructor,
-    { intros A a ha',
-      have hac := (relation.trans_gen.tail' (refl_trans_gen_constrains_comp ha' _)
-        (constrains.f_map hδ _ _ _ _ _ hc)),
+    obtain ⟨a | N, A⟩ := c,
+    { refine prod.ext _ rfl,
+      change inl _ = inl _,
+      simp only,
+      have hac := relation.trans_gen.single (constrains.f_map hδ _ _ _ _ _ hc),
       specialize ha _ a hac,
       obtain ⟨b, ha⟩ := ha,
+      have : (struct_perm.derivative A
+        ((preimage_action hπf (inr (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter,
+          (B.cons (coe_lt hε)).cons (bot_lt_coe _))).hypothesised_allowable
+            ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩
+            (preimage_action_lawful.comp _) (preimage_action_comp_map_flexible _)).to_struct_perm)⁻¹
+        • a = b,
+      { rw [inv_smul_eq_iff, ← ha],
+        sorry, },
       transitivity b,
-      { rw [map_inv, map_inv, inv_smul_eq_iff, ← ha],
-        refine eq.trans _
-          ((struct_action.hypothesised_allowable_exactly_approximates _ _ _ _ A).map_atom b _),
-        rw struct_action.rc_smul_atom_eq,
-        refl,
-        { rw ← ha at hac,
-          exact hac, },
-        { refine or.inl (or.inl (or.inl (or.inl _))),
-          rw ← ha at hac,
-          exact hac, }, },
+      { rw [map_inv, map_inv, this], },
       { rw [map_inv, map_inv, ← smul_eq_iff_eq_inv_smul, ← ha],
-        refine eq.trans ((struct_action.hypothesised_allowable_exactly_approximates _ _ _ _ A)
-          .map_atom b _).symm _,
-        { refine or.inl (or.inl (or.inl (or.inl _))),
-          rw ← ha at hac,
-          simp only [struct_action.comp_apply, ih_action_atom_map],
-          sorry, },
-        { rw ← ha at hac,
-          sorry, }, }, },
-    { intros A L hL₁ hL₂,
-      sorry, },
-    { intros A L hL₁ hL₂,
-      sorry, }, },
+        rw struct_action.hypothesised_allowable,
+        refine (ih_action_coherent_precise_atom hπf (B.cons $ coe_lt hδ) A b _ _
+          ((ih_action_lawful hπf _).comp _) _
+          (struct_action.allowable_exactly_approximates _ _ _ _)).symm,
+        refine relation.trans_gen.tail' _
+          (constrains.f_map hδ _ _ _ _ _ (smul_mem_designated_support hc _)),
+        refine relation.refl_trans_gen_of_eq _,
+        refine prod.ext _ rfl,
+        change inl _ = inl _,
+        simp only [map_inv, eq_inv_smul_iff, ← this, smul_inv_smul], }, },
+    { refine prod.ext _ rfl,
+      change inr _ = inr _,
+      simp only,
+      have hNc := relation.trans_gen.single (constrains.f_map hδ _ _ _ _ _ hc),
+      specialize hN _ N hNc,
+      obtain ⟨N', hN⟩ := hN,
+      have : (struct_perm.derivative A
+        ((preimage_action hπf (inr (f_map (coe_ne_coe.mpr $ coe_ne' hδε) t).to_near_litter,
+          (B.cons (coe_lt hε)).cons (bot_lt_coe _))).hypothesised_allowable
+            ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩
+            (preimage_action_lawful.comp _) (preimage_action_comp_map_flexible _)).to_struct_perm)⁻¹
+        • N = N',
+      { rw [inv_smul_eq_iff, ← hN],
+        sorry, },
+      transitivity N',
+      { rw [map_inv, map_inv, this], },
+      { rw [map_inv, map_inv, ← smul_eq_iff_eq_inv_smul, ← hN],
+        rw struct_action.hypothesised_allowable,
+        refine (ih_action_coherent_precise hπf (B.cons $ coe_lt hδ) A N' _ _
+          ((ih_action_lawful hπf _).comp _) _
+          (struct_action.allowable_exactly_approximates _ _ _ _)).symm,
+        refine relation.trans_gen.tail' _
+          (constrains.f_map hδ _ _ _ _ _ (smul_mem_designated_support hc _)),
+        refine relation.refl_trans_gen_of_eq _,
+        refine prod.ext _ rfl,
+        change inr _ = inr _,
+        simp only [map_inv, eq_inv_smul_iff, ← this, smul_inv_smul], }, }, },
 end
 
 end struct_approx
