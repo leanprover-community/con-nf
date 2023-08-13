@@ -1032,19 +1032,19 @@ lemma complete_litter_map_inflexible_coe_iff (hπf : π.free) {c d : support_con
 ⟩
 
 lemma ihs_action_coherent_precise' (hπf : π.free) {γ : Iio α} (A : path (β : type_index) γ)
-  (N : near_litter × extended_index γ)
-  (c d : support_condition β) (hc : (inr N.1, A.comp N.2) <[α] c)
+  (N : extended_index γ × near_litter)
+  (c d : support_condition β) (hc : (inr N.2, A.comp N.1) <[α] c)
   (hπ : ((ihs_action π c d).comp A).lawful)
   (ρ : allowable γ)
   (h : (((ihs_action π c d).comp A).rc hπ).exactly_approximates ρ.to_struct_perm) :
-  complete_near_litter_map π (A.comp N.2) N.1 = struct_perm.derivative N.2 ρ.to_struct_perm • N.1 :=
+  complete_near_litter_map π (A.comp N.1) N.2 = struct_perm.derivative N.1 ρ.to_struct_perm • N.2 :=
 begin
   revert hc,
   refine well_founded.induction
     (inv_image.wf _ (relation.trans_gen.is_well_founded (constrains α γ)).wf) N _,
-  exact λ N : near_litter × extended_index γ, (inr N.1, N.2),
+  exact λ N : extended_index γ × near_litter, (inr N.2, N.1),
   clear N,
-  rintros ⟨N, B⟩ ih hc,
+  rintros ⟨B, N⟩ ih hc,
   dsimp only at *,
   have hdom : ((((ihs_action π c d).comp A B).refine (hπ B)).litter_map N.fst).dom :=
     or.inl (trans_gen_near_litter' hc),
@@ -1217,7 +1217,7 @@ begin
         simp only [struct_action.comp_apply, struct_action.refine_apply,
           near_litter_action.refine_litter_map, ih_action_litter_map,
           foa_hypothesis_near_litter_image],
-        specialize ih (L.to_near_litter, (C.cons $ coe_lt hε).comp E) (trans_gen_near_litter hLN)
+        specialize ih ((C.cons $ coe_lt hε).comp E, L.to_near_litter) (trans_gen_near_litter hLN)
           (trans (trans_gen_constrains_comp (trans_gen_near_litter hLN) _) hc),
         { dsimp only at ih,
           rw [← path.comp_assoc, path.comp_cons] at ih,
@@ -1237,7 +1237,7 @@ begin
         { simp only [hNL],
           refine relation.trans_gen.tail' _ (constrains.f_map hε _ _ _ _ _ hct),
           exact refl_trans_gen_constrains_comp hL₁ _, },
-        specialize ih (L.to_near_litter, ((C.cons $ coe_lt hε).comp E))
+        specialize ih (((C.cons $ coe_lt hε).comp E), L.to_near_litter)
           (trans_gen_near_litter hLN)
           (trans (trans_gen_constrains_comp (trans_gen_near_litter hLN) _) hc),
         simp only at ih,
@@ -1273,7 +1273,7 @@ lemma ihs_action_coherent_precise (hπf : π.free) {γ : Iio α} (A : path (β :
   (ρ : allowable γ)
   (h : (((ihs_action π c d).comp A).rc hπ).exactly_approximates ρ.to_struct_perm) :
   complete_near_litter_map π (A.comp B) N = struct_perm.derivative B ρ.to_struct_perm • N :=
-ihs_action_coherent_precise' hπf A (N, B) c d hc hπ ρ h
+ihs_action_coherent_precise' hπf A (B, N) c d hc hπ ρ h
 
 /--
 The coherence lemma for atoms, which is much easier to prove.
@@ -1975,6 +1975,15 @@ noncomputable def preimage_action (hπf : π.free) (c : support_condition β) : 
   end,
 }
 
+@[simp] lemma preimage_action_atom_map_dom {hπf : π.free} {c : support_condition β}
+  {B : extended_index β} {a : atom} :
+  ((preimage_action hπf c B).atom_map a).dom ↔ (inl (π.complete_atom_map B a), B) <[α] c := iff.rfl
+
+@[simp] lemma preimage_action_litter_map_dom {hπf : π.free} {c : support_condition β}
+  {B : extended_index β} {L : litter} :
+  ((preimage_action hπf c B).litter_map L).dom ↔
+  (inr (π.complete_near_litter_map B L.to_near_litter), B) <[α] c := iff.rfl
+
 lemma preimage_action_lawful {hπf : π.free} {c : support_condition β} :
   (preimage_action hπf c).lawful :=
 begin
@@ -2034,10 +2043,33 @@ end
 lemma _root_.relation.refl_trans_gen_of_eq {α : Type*} {r : α → α → Prop} {x y : α}
   (h : x = y) : relation.refl_trans_gen r x y := by cases h; refl
 
+lemma preimage_action_coherent_precise (hπf : π.free) {γ : Iio α} (A : path (β : type_index) γ)
+  (B : extended_index γ) (N : near_litter)
+  (c : support_condition β) (hc : (inr (π.complete_near_litter_map (A.comp B) N), A.comp B) <[α] c)
+  (ρ : allowable γ)
+  (h : (((preimage_action hπf c).comp A).rc (preimage_action_lawful.comp _)).exactly_approximates
+    ρ.to_struct_perm) :
+  complete_near_litter_map π (A.comp B) N = struct_perm.derivative B ρ.to_struct_perm • N :=
+sorry
+
+lemma preimage_action_coherent_precise_atom (hπf : π.free) {γ : Iio α} (A : path (β : type_index) γ)
+  (B : extended_index γ) (a : atom)
+  (c : support_condition β) (hc : (inl (π.complete_atom_map (A.comp B) a), A.comp B) <[α] c)
+  (ρ : allowable γ)
+  (h : (((preimage_action hπf c).comp A).rc (preimage_action_lawful.comp _)).exactly_approximates
+    ρ.to_struct_perm) :
+  complete_atom_map π (A.comp B) a = struct_perm.derivative B ρ.to_struct_perm • a :=
+begin
+  refine eq.trans _ ((h B).map_atom a (or.inl (or.inl (or.inl (or.inl hc))))),
+  rw struct_action.rc_smul_atom_eq,
+  refl,
+  exact hc,
+end
+
 lemma complete_litter_map_surjective_extends (hπf : π.free) (A : extended_index β) (L : litter)
-  (ha : ∀ B (a : atom), (inl a, B) <[α] (inr L.to_near_litter, A) →
+  (ha : ∀ B (a : atom), (inl a, B) ≺[α] (inr L.to_near_litter, A) →
     a ∈ range (π.complete_atom_map B))
-  (hN : ∀ B N, (inr N, B) <[α] (inr L.to_near_litter, A) →
+  (hN : ∀ B N, (inr N, B) ≺[α] (inr L.to_near_litter, A) →
     N ∈ range (π.complete_near_litter_map B)) :
   L ∈ range (π.complete_litter_map A) :=
 begin
@@ -2048,7 +2080,7 @@ begin
       exact h, },
     { exact near_litter_approx.flexible_completion_symm_smul_flexible α (π A) A (hπf A) L h, }, },
   { obtain ⟨γ, ε, hε, C, a, rfl, rfl⟩ := h,
-    obtain ⟨b, rfl⟩ := ha _ a (relation.trans_gen.single $ constrains.f_map_bot hε _ a),
+    obtain ⟨b, rfl⟩ := ha _ a (constrains.f_map_bot hε _ a),
     refine ⟨f_map (show ⊥ ≠ (ε : type_index), from bot_ne_coe) b, _⟩,
     rw complete_litter_map_eq_of_inflexible_bot ⟨γ, ε, hε, C, b, rfl, rfl⟩, },
   { obtain ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ := h,
@@ -2069,7 +2101,7 @@ begin
     { refine prod.ext _ rfl,
       change inl _ = inl _,
       simp only,
-      have hac := relation.trans_gen.single (constrains.f_map hδ _ _ _ _ _ hc),
+      have hac := constrains.f_map hδ _ _ _ _ _ hc,
       specialize ha _ a hac,
       obtain ⟨b, ha⟩ := ha,
       have : (struct_perm.derivative A
@@ -2079,7 +2111,11 @@ begin
             (preimage_action_lawful.comp _) (preimage_action_comp_map_flexible _)).to_struct_perm)⁻¹
         • a = b,
       { rw [inv_smul_eq_iff, ← ha],
-        sorry, },
+        rw struct_action.hypothesised_allowable,
+        refine preimage_action_coherent_precise_atom hπf (B.cons $ coe_lt hδ) A b _ _ _
+          (struct_action.allowable_exactly_approximates _ _ _ _),
+        rw ha,
+        exact relation.trans_gen.single hac, },
       transitivity b,
       { rw [map_inv, map_inv, this], },
       { rw [map_inv, map_inv, ← smul_eq_iff_eq_inv_smul, ← ha],
@@ -2096,7 +2132,7 @@ begin
     { refine prod.ext _ rfl,
       change inr _ = inr _,
       simp only,
-      have hNc := relation.trans_gen.single (constrains.f_map hδ _ _ _ _ _ hc),
+      have hNc := constrains.f_map hδ _ _ _ _ _ hc,
       specialize hN _ N hNc,
       obtain ⟨N', hN⟩ := hN,
       have : (struct_perm.derivative A
@@ -2106,7 +2142,11 @@ begin
             (preimage_action_lawful.comp _) (preimage_action_comp_map_flexible _)).to_struct_perm)⁻¹
         • N = N',
       { rw [inv_smul_eq_iff, ← hN],
-        sorry, },
+        rw struct_action.hypothesised_allowable,
+        refine preimage_action_coherent_precise hπf (B.cons $ coe_lt hδ) A N' _ _ _
+          (struct_action.allowable_exactly_approximates _ _ _ _),
+        rw hN,
+        exact relation.trans_gen.single hNc, },
       transitivity N',
       { rw [map_inv, map_inv, this], },
       { rw [map_inv, map_inv, ← smul_eq_iff_eq_inv_smul, ← hN],
@@ -2121,6 +2161,35 @@ begin
         change inr _ = inr _,
         simp only [map_inv, eq_inv_smul_iff, ← this, smul_inv_smul], }, }, },
 end
+
+lemma complete_near_litter_map_surjective_extends (hπf : π.free) (A : extended_index β)
+  (N : near_litter) (hL : N.1 ∈ range (π.complete_litter_map A))
+  (ha : litter_set N.1 ∆ N ⊆ range (π.complete_atom_map A)) :
+  N ∈ range (π.complete_near_litter_map A) := sorry
+
+variable (π)
+
+def complete_map_surjective_at : support_condition β → Prop
+| (inl a, A) := a ∈ range (π.complete_atom_map A)
+| (inr N, A) := N ∈ range (π.complete_near_litter_map A)
+
+variable {π}
+
+lemma complete_map_surjective_extends (hπf : π.free) (c : support_condition β)
+  (hc : ∀ d : support_condition β, d ≺[α] c → π.complete_map_surjective_at d) :
+  π.complete_map_surjective_at c := sorry
+
+lemma complete_map_surjective_at_all (hπf : π.free) (c : support_condition β) :
+  π.complete_map_surjective_at c := sorry
+
+lemma complete_atom_map_surjective (hπf : π.free) (A : extended_index β) :
+  surjective (π.complete_atom_map A) := sorry
+
+lemma complete_near_litter_map_surjective (hπf : π.free) (A : extended_index β) :
+  surjective (π.complete_near_litter_map A) := sorry
+
+lemma complete_litter_map_surjective (hπf : π.free) (A : extended_index β) :
+  surjective (π.complete_litter_map A) := sorry
 
 end struct_approx
 
