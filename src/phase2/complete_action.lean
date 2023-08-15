@@ -55,7 +55,7 @@ by rw [complete_litter_map, complete_near_litter_map_eq]; refl
 lemma complete_near_litter_map_fst_eq :
   (π.complete_near_litter_map A L.to_near_litter).1 = π.complete_litter_map A L := rfl
 
-lemma complete_near_litter_map_fst_eq' :
+@[simp] lemma complete_near_litter_map_fst_eq' :
   (π.complete_near_litter_map A N).1 = π.complete_litter_map A N.1 :=
 begin
   rw [complete_near_litter_map_eq, near_litter_completion, complete_litter_map_eq],
@@ -2028,9 +2028,9 @@ begin
 end
 
 lemma complete_litter_map_surjective_extends (hπf : π.free) (A : extended_index β) (L : litter)
-  (ha : ∀ B (a : atom), (inl a, B) ≺[α] (inr L.to_near_litter, A) →
+  (ha : ∀ (B : extended_index β) (a : atom), (inl a, B) ≺[α] (inr L.to_near_litter, A) →
     a ∈ range (π.complete_atom_map B))
-  (hN : ∀ B N, (inr N, B) ≺[α] (inr L.to_near_litter, A) →
+  (hN : ∀ (B : extended_index β) (N : near_litter), (inr N, B) ≺[α] (inr L.to_near_litter, A) →
     N ∈ range (π.complete_near_litter_map B)) :
   L ∈ range (π.complete_litter_map A) :=
 begin
@@ -2123,10 +2123,65 @@ begin
         simp only [map_inv, eq_inv_smul_iff, ← this, smul_inv_smul], }, }, },
 end
 
+lemma atom_mem_range_of_mem_complete_near_litter_map (hπf : π.free) (A : extended_index β)
+  (a : atom) {N : near_litter} (h : a ∈ π.complete_near_litter_map A N) :
+  a ∈ range (π.complete_atom_map A) :=
+begin
+  rw ← set_like.mem_coe at h,
+  rw complete_near_litter_map_eq' at h,
+  obtain (⟨h₁, h₂⟩ | ⟨h₁, h₂⟩) := h,
+  { rw complete_near_litter_map_to_near_litter_eq at h₁,
+    cases h₁,
+    { exact complete_atom_map_surjective_extends hπf A a ⟨_, h₁.1.symm⟩, },
+    { obtain ⟨b, h₁, rfl⟩ := h₁,
+      refine ⟨b, _⟩,
+      exact complete_atom_map_eq_of_mem_domain h₁.2, }, },
+  { obtain ⟨b, h₁, rfl⟩ := h₁,
+    exact ⟨b, rfl⟩, },
+end
+
+lemma complete_near_litter_map_coe (hπf : π.free) (A : extended_index β) (N : near_litter) :
+  (π.complete_near_litter_map A N : set atom) = π.complete_atom_map A '' N :=
+begin
+  ext a : 1,
+  split,
+  { intro h,
+    obtain ⟨b, rfl⟩ := atom_mem_range_of_mem_complete_near_litter_map hπf A a h,
+    rw [set_like.mem_coe, complete_atom_map_mem_complete_near_litter_map hπf] at h,
+    exact ⟨b, h, rfl⟩, },
+  { rintro ⟨b, h, rfl⟩,
+    rw [set_like.mem_coe, complete_atom_map_mem_complete_near_litter_map hπf],
+    exact h, },
+end
+
+@[simp] lemma preimage_symm_diff {α β : Type*} {s t : set β} {f : α → β} :
+  f ⁻¹' (s ∆ t) = (f ⁻¹' s) ∆ (f ⁻¹' t) := rfl
+
 lemma complete_near_litter_map_surjective_extends (hπf : π.free) (A : extended_index β)
-  (N : near_litter) (hL : N.1 ∈ range (π.complete_litter_map A))
+  (N : near_litter) (hN : N.1 ∈ range (π.complete_litter_map A))
   (ha : litter_set N.1 ∆ N ⊆ range (π.complete_atom_map A)) :
-  N ∈ range (π.complete_near_litter_map A) := sorry
+  N ∈ range (π.complete_near_litter_map A) :=
+begin
+  obtain ⟨L, hN⟩ := hN,
+  refine ⟨⟨L, π.complete_atom_map A ⁻¹' N, _⟩, _⟩,
+  { suffices : small ((π.complete_atom_map A '' L.to_near_litter) ∆ N),
+    { have := small.preimage (complete_atom_map_injective hπf A) this,
+      rw [preimage_symm_diff, preimage_image_eq _ (complete_atom_map_injective hπf A)] at this,
+      exact this, },
+    rw ← complete_near_litter_map_coe hπf,
+    refine is_near_litter.near _ N.2.2,
+    simp only [near_litter.is_near_litter, complete_near_litter_map_fst_eq],
+    exact hN, },
+  { refine set_like.coe_injective _,
+    rw complete_near_litter_map_coe hπf,
+    simp only [near_litter.coe_mk, subtype.coe_mk, litter.coe_to_near_litter],
+    rw image_preimage_eq_of_subset _,
+    intros a ha',
+    by_cases a.1 = N.1,
+    { rw ← hN at h,
+      exact complete_atom_map_surjective_extends hπf A a ⟨_, h.symm⟩, },
+    { exact ha (or.inr ⟨ha', h⟩), }, },
+end
 
 variable (π)
 
@@ -2137,20 +2192,49 @@ def complete_map_surjective_at : support_condition β → Prop
 variable {π}
 
 lemma complete_map_surjective_extends (hπf : π.free) (c : support_condition β)
-  (hc : ∀ d : support_condition β, d ≺[α] c → π.complete_map_surjective_at d) :
-  π.complete_map_surjective_at c := sorry
+  (hc : ∀ d : support_condition β, d <[α] c → π.complete_map_surjective_at d) :
+  π.complete_map_surjective_at c :=
+begin
+  obtain ⟨a | N, A⟩ := c,
+  { refine complete_atom_map_surjective_extends hπf A a _,
+    obtain ⟨N, hN⟩ := hc (inr a.1.to_near_litter, A)
+      (relation.trans_gen.single $ constrains.atom a A),
+    refine ⟨N.1, _⟩,
+    apply_fun sigma.fst at hN,
+    simp only [litter.to_near_litter_fst, complete_near_litter_map_fst_eq'] at hN,
+    exact hN, },
+  { refine complete_near_litter_map_surjective_extends hπf A N _ _,
+    { refine complete_litter_map_surjective_extends hπf A N.1 _ _,
+      { intros B a h,
+        exact hc (inl a, B) (trans_gen_near_litter $ relation.trans_gen.single h), },
+      { intros B N h,
+        exact hc (inr N, B) (trans_gen_near_litter $ relation.trans_gen.single h), }, },
+    { intros a h,
+      exact hc (inl a, A) (relation.trans_gen.single $ constrains.symm_diff N a h A), }, },
+end
 
 lemma complete_map_surjective_at_all (hπf : π.free) (c : support_condition β) :
-  π.complete_map_surjective_at c := sorry
+  π.complete_map_surjective_at c :=
+well_founded.induction (trans_constrains_wf α β) c (complete_map_surjective_extends hπf)
 
 lemma complete_atom_map_surjective (hπf : π.free) (A : extended_index β) :
-  surjective (π.complete_atom_map A) := sorry
+  surjective (π.complete_atom_map A) :=
+λ a, complete_map_surjective_at_all hπf (inl a, A)
 
 lemma complete_near_litter_map_surjective (hπf : π.free) (A : extended_index β) :
-  surjective (π.complete_near_litter_map A) := sorry
+  surjective (π.complete_near_litter_map A) :=
+λ N, complete_map_surjective_at_all hπf (inr N, A)
 
 lemma complete_litter_map_surjective (hπf : π.free) (A : extended_index β) :
-  surjective (π.complete_litter_map A) := sorry
+  surjective (π.complete_litter_map A) :=
+begin
+  intro L,
+  obtain ⟨N, hN⟩ := complete_near_litter_map_surjective hπf A L.to_near_litter,
+  refine ⟨N.1, _⟩,
+  apply_fun sigma.fst at hN,
+  simp only [complete_near_litter_map_fst_eq', litter.to_near_litter_fst] at hN,
+  exact hN,
+end
 
 end struct_approx
 
