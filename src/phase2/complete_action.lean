@@ -2,7 +2,7 @@ import order.extension.well
 import phase2.atom_completion
 import phase2.near_litter_completion
 
-open function quiver set sum with_bot
+open equiv function quiver set sum with_bot
 open_locale classical pointwise
 
 universe u
@@ -2234,6 +2234,63 @@ begin
   apply_fun sigma.fst at hN,
   simp only [complete_near_litter_map_fst_eq', litter.to_near_litter_fst] at hN,
   exact hN,
+end
+
+lemma complete_atom_map_bijective (hπf : π.free) (A : extended_index β) :
+  bijective (π.complete_atom_map A) :=
+⟨complete_atom_map_injective hπf A, complete_atom_map_surjective hπf A⟩
+
+lemma complete_litter_map_bijective (hπf : π.free) (A : extended_index β) :
+  bijective (π.complete_litter_map A) :=
+⟨complete_litter_map_injective hπf A, complete_litter_map_surjective hπf A⟩
+
+lemma complete_near_litter_map_bijective (hπf : π.free) (A : extended_index β) :
+  bijective (π.complete_near_litter_map A) :=
+⟨complete_near_litter_map_injective hπf A, complete_near_litter_map_surjective hπf A⟩
+
+noncomputable def complete_atom_perm (hπf : π.free) (A : extended_index β) : perm atom :=
+equiv.of_bijective _ (complete_atom_map_bijective hπf A)
+
+noncomputable def complete_litter_perm (hπf : π.free) (A : extended_index β) : perm litter :=
+equiv.of_bijective _ (complete_litter_map_bijective hπf A)
+
+lemma complete_atom_perm_apply (hπf : π.free) (A : extended_index β) (a : atom) :
+  complete_atom_perm hπf A a = π.complete_atom_map A a := rfl
+
+lemma complete_litter_perm_apply (hπf : π.free) (A : extended_index β) (L : litter) :
+  complete_litter_perm hπf A L = π.complete_litter_map A L := rfl
+
+noncomputable def complete_near_litter_perm (hπf : π.free) (A : extended_index β) :
+  near_litter_perm := {
+  atom_perm := complete_atom_perm hπf A,
+  litter_perm := complete_litter_perm hπf A,
+  near := begin
+    intros L s hs,
+    have : ⇑(complete_atom_perm hπf A)⁻¹ ⁻¹' s =
+      (π.complete_near_litter_map A ⟨L, s, hs⟩ : set atom),
+    { rw [complete_near_litter_map_coe hπf, perm.preimage_inv],
+      refl, },
+    rw this,
+    simp only [near_litter.is_near_litter, complete_near_litter_map_fst_eq'],
+    refl,
+  end,
+}
+
+lemma complete_near_litter_perm_smul_atom (hπf : π.free) (A : extended_index β)
+  (a : atom) :
+  complete_near_litter_perm hπf A • a = π.complete_atom_map A a := rfl
+
+lemma complete_near_litter_perm_smul_litter (hπf : π.free) (A : extended_index β)
+  (L : litter) :
+  complete_near_litter_perm hπf A • L = π.complete_litter_map A L := rfl
+
+lemma complete_near_litter_perm_smul_near_litter (hπf : π.free) (A : extended_index β)
+  (N : near_litter) :
+  complete_near_litter_perm hπf A • N = π.complete_near_litter_map A N :=
+begin
+  refine set_like.coe_injective _,
+  rw complete_near_litter_map_coe hπf,
+  refl,
 end
 
 end struct_approx
