@@ -189,7 +189,7 @@ begin
   exact flexible_cases α L A,
 end
 
-class freedom_of_action_hypothesis (β : Iic α) :=
+class freedom_of_action_hypothesis (β : Iic α) : Prop :=
 (freedom_of_action_of_lt : ∀ γ < β, foa_ih γ)
 
 export freedom_of_action_hypothesis (freedom_of_action_of_lt)

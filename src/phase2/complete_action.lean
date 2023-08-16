@@ -2431,17 +2431,80 @@ begin
   { exact ih δ (coe_lt_coe.mp hδ) (le_of_lt δ.prop) _, },
 end
 
-lemma allowable_action (hπf : π.free) :
-  ∃ ρ : allowable β, ∀ A : extended_index β,
-  struct_perm.of_bot (struct_perm.derivative A ρ.to_struct_perm) =
+noncomputable def complete_allowable (hπf : π.free) : allowable β :=
+(allowable_below_all hπf β path.nil).some
+
+lemma complete_allowable_derivative (hπf : π.free) (A : extended_index β) :
+  struct_perm.of_bot (struct_perm.derivative A (complete_allowable hπf).to_struct_perm) =
   complete_near_litter_perm hπf A :=
 begin
-  obtain ⟨ρ, h⟩ := allowable_below_all hπf β path.nil,
-  refine ⟨ρ, _⟩,
-  intro B,
-  have := h B,
+  have := (allowable_below_all hπf β path.nil).some_spec A,
   rw path.nil_comp at this,
   exact this,
+end
+
+lemma complete_exception_mem (hπf : π.free) (A : extended_index β) (a : atom)
+  (ha : (complete_near_litter_perm hπf A).is_exception a) :
+  a ∈ (π A).atom_perm.domain :=
+begin
+  unfold near_litter_perm.is_exception at ha,
+  simp only [mem_litter_set, complete_near_litter_perm_smul_atom,
+    complete_near_litter_perm_smul_litter] at ha,
+  cases ha,
+  { have := complete_near_litter_map_to_near_litter_eq A a.1,
+    rw [complete_near_litter_map_coe hπf, set.ext_iff] at this,
+    have := (this (π.complete_atom_map A a)).mp ⟨_, rfl, rfl⟩,
+    obtain (ha' | ⟨b, ⟨hb₁, hb₂⟩, hb₃⟩) := this,
+    { cases ha ha'.1, },
+    rw ← complete_atom_map_eq_of_mem_domain hb₂ at hb₃,
+    cases complete_atom_map_injective hπf A hb₃,
+    exact hb₂, },
+  { obtain ⟨a, rfl⟩ := complete_atom_map_surjective hπf A a,
+    rw [eq_inv_smul_iff, ← complete_near_litter_perm_smul_atom hπf, inv_smul_smul] at ha,
+    have := complete_near_litter_map_to_near_litter_eq A a.1,
+    rw [complete_near_litter_map_coe hπf, set.ext_iff] at this,
+    have := (this (π.complete_atom_map A a)).mp ⟨_, rfl, rfl⟩,
+    obtain (ha' | ⟨b, ⟨hb₁, hb₂⟩, hb₃⟩) := this,
+    { cases ha ha'.1.symm, },
+    { rw ← complete_atom_map_eq_of_mem_domain hb₂ at hb₃,
+      cases complete_atom_map_injective hπf A hb₃,
+      rw complete_atom_map_eq_of_mem_domain hb₂,
+      exact (π A).atom_perm.map_domain hb₂, }, },
+end
+
+lemma complete_allowable_exactly_approximates (hπf : π.free) :
+  π.exactly_approximates (complete_allowable hπf).to_struct_perm :=
+begin
+  intro A,
+  refine ⟨⟨_, _⟩, _⟩,
+  { intros a ha,
+    rw [complete_allowable_derivative, complete_near_litter_perm_smul_atom,
+      complete_atom_map_eq_of_mem_domain ha], },
+  { intros L hL,
+    rw [complete_allowable_derivative, complete_near_litter_perm_smul_litter,
+      complete_litter_map_eq_of_flexible (hπf A L hL),
+      near_litter_approx.flexible_completion_smul_of_mem_domain _ _ A L hL],
+    refl, },
+  { intros a ha,
+    rw complete_allowable_derivative at ha,
+    exact complete_exception_mem hπf A a ha, },
+end
+
+def foa_extends : foa_ih β :=
+λ π hπf, ⟨complete_allowable hπf, complete_allowable_exactly_approximates hπf⟩
+
+theorem freedom_of_action (β : Iic α) (π₀ : struct_approx β) (h : π₀.free) :
+  ∃ (π : allowable β), π₀.exactly_approximates π.to_struct_perm :=
+begin
+  obtain ⟨β, hβ⟩ := β,
+  revert hβ,
+  refine well_founded.induction Λwf.wf β _,
+  intros β ih hβ π₀ h,
+  haveI : freedom_of_action_hypothesis ⟨β, hβ⟩,
+  { constructor,
+    intros γ hγ,
+    exact ih γ hγ γ.prop, },
+  exact foa_extends π₀ h,
 end
 
 end struct_approx
