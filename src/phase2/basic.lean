@@ -91,9 +91,21 @@ class phase_2_assumptions extends phase_2_data α :=
   (allowable_derivative β δ hδ π) •
     f_map (subtype.coe_injective.ne hγδ) t =
     f_map (subtype.coe_injective.ne hγδ) (allowable_derivative β γ hγ π • t))
+(allowable_of_smul_f_map (β : Iic α)
+  (πs : Π (γ : Iio_index α), (γ : type_index) < β → allowable γ) :
+  (∀ (γ : Iio_index α) (δ : Iio α)
+    (hγ : (γ : type_index) < β) (hδ : (δ : type_index) < β) (hγδ : γ ≠ δ)
+    (t : tangle γ),
+    πs δ hδ • f_map (subtype.coe_injective.ne hγδ) t =
+    f_map (subtype.coe_injective.ne hγδ) (πs γ hγ • t)) →
+  allowable (β : Iic_index α))
+(allowable_of_smul_f_map_derivative_eq {β : Iic α} {πs} {h}
+  (γ : Iio_index α) (hγ : (γ : type_index) < β) :
+  allowable_derivative β γ hγ (allowable_of_smul_f_map β πs h) = πs γ hγ)
 
 export phase_2_assumptions (allowable_derivative allowable_derivative_eq
-  smul_designated_support smul_f_map)
+  smul_designated_support smul_f_map
+  allowable_of_smul_f_map allowable_of_smul_f_map_derivative_eq)
 
 variables {α} [phase_2_assumptions α]
 

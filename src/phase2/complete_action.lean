@@ -2293,6 +2293,62 @@ begin
   refl,
 end
 
+def allowable_below (hπf : π.free) (γ : Iic_index α) (A : path (β : type_index) γ) : Prop :=
+  ∃ ρ : allowable γ, ∀ B : extended_index γ,
+  struct_perm.of_bot (struct_perm.derivative B ρ.to_struct_perm) =
+  complete_near_litter_perm hπf (A.comp B)
+
+@[simp] lemma of_bot_to_struct_perm (π : allowable ⊥) :
+  struct_perm.of_bot π.to_struct_perm = π :=
+begin
+  ext a : 2,
+  rw [to_struct_perm_bot],
+  simp only [mul_equiv.coe_to_monoid_hom, struct_perm.coe_to_bot_iso, struct_perm.of_bot_to_bot],
+end
+
+lemma allowable_below_bot (hπf : π.free) (A : extended_index β) : allowable_below hπf ⊥ A :=
+begin
+  refine ⟨complete_near_litter_perm hπf A, _⟩,
+  intro B,
+  obtain (B | ⟨B, h⟩) := B,
+  { simp only [struct_perm.derivative_nil, path.comp_nil, of_bot_to_struct_perm], },
+  { -- TODO: Make this a lemma.
+    cases le_bot_iff.mp (le_of_path B),
+    cases bot_le.not_lt h, },
+end
+
+lemma exists_nil_cons_of_path {β : Iic α} (A : extended_index β) :
+  ∃ γ : Iio_index α, ∃ h : (γ : type_index) < β, ∃ B : extended_index γ,
+  A = ((path.nil : path (β : type_index) β).cons h).comp B :=
+begin
+  sorry
+end
+
+lemma allowable_below_extends (hπf : π.free) (γ : Iic α) (A : path (β : type_index) γ)
+  (h : ∀ (δ : Iio_index α) (h : (δ : type_index) < γ), allowable_below hπf δ (A.cons h)) :
+  allowable_below hπf γ A :=
+begin
+  choose ρs hρ using h,
+  refine ⟨allowable_of_smul_f_map γ ρs _, _⟩,
+  { intros δ ε hδ hε hδε t,
+    change struct_perm.to_near_litter_perm _ • _ = _,
+    have := hρ ε hε (path.nil.cons (bot_lt_coe _)),
+    simp only [path.comp_cons, path.comp_nil] at this,
+    change struct_perm.to_near_litter_perm (ρs ε hε).to_struct_perm = _ at this,
+    rw this,
+    sorry, },
+  { intro B,
+    obtain ⟨δ, hδ, B, rfl⟩ := exists_nil_cons_of_path B,
+    specialize hρ δ hδ B,
+    rw [← struct_perm.derivative_derivative],
+    have := allowable_of_smul_f_map_derivative_eq δ hδ,
+    apply_fun allowable.to_struct_perm at this,
+    rw ← allowable_derivative_eq at this,
+    rw ← this at hρ,
+    rw [← path.comp_assoc, path.comp_cons, path.comp_nil],
+    exact hρ, },
+end
+
 end struct_approx
 
 end con_nf
