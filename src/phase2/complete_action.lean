@@ -2324,6 +2324,13 @@ begin
   sorry
 end
 
+lemma Iio_index_cases (δ : Iio_index α) : δ = ⊥ ∨ ∃ ε : Iio α, δ = ε :=
+begin
+  obtain ⟨(_ | δ), hδ⟩ := δ,
+  { exact or.inl rfl, },
+  { exact or.inr ⟨⟨δ, coe_lt_coe.mp hδ⟩, rfl⟩, },
+end
+
 lemma allowable_below_extends (hπf : π.free) (γ : Iic α) (A : path (β : type_index) γ)
   (h : ∀ (δ : Iio_index α) (h : (δ : type_index) < γ), allowable_below hπf δ (A.cons h)) :
   allowable_below hπf γ A :=
@@ -2336,7 +2343,44 @@ begin
     simp only [path.comp_cons, path.comp_nil] at this,
     change struct_perm.to_near_litter_perm (ρs ε hε).to_struct_perm = _ at this,
     rw this,
-    sorry, },
+    rw complete_near_litter_perm_smul_litter,
+    obtain (rfl | ⟨δ, rfl⟩) := Iio_index_cases δ,
+    { refine (complete_litter_map_eq_of_inflexible_bot
+        ⟨γ, ε, coe_lt_coe.mp hε, A, t, rfl, rfl⟩).trans _,
+      refine congr_arg _ _,
+      specialize hρ ⊥ hδ path.nil,
+      simp only [struct_perm.derivative_nil, of_bot_to_struct_perm, path.comp_nil] at hρ,
+      rw hρ,
+      refl, },
+    { refine (complete_litter_map_eq_of_inflexible_coe
+        ⟨γ, δ, ε, coe_lt_coe.mp hδ, coe_lt_coe.mp hε, _, A, t, rfl, rfl⟩
+        ((ih_action_lawful hπf _).comp _)
+        (ih_action_comp_map_flexible hπf _ _)).trans _,
+      { rintro rfl,
+        cases hδε rfl, },
+      refine congr_arg _ _,
+      rw [← inv_smul_eq_iff, smul_smul],
+      refine (designated_support t).supports _ _,
+      intros c hc,
+      rw [mul_smul, inv_smul_eq_iff],
+      obtain ⟨a | N, B⟩ := c,
+      { refine prod.ext _ rfl,
+        change inl _ = inl _,
+        simp only,
+        rw ← ih_action_coherent_precise_atom hπf _ B a _
+          (relation.trans_gen.single $ constrains.f_map _ _ _ _ _ _ hc) _ _
+          (struct_action.hypothesised_allowable_exactly_approximates _
+            ⟨γ, δ, ε, _, _, _, _, t, rfl, rfl⟩ _ _),
+        exact (congr_arg (λ π, π • a) (hρ δ hδ B)).symm, },
+      { refine prod.ext _ rfl,
+        change inr _ = inr _,
+        simp only,
+        rw ← ih_action_coherent_precise hπf _ B N _
+          (relation.trans_gen.single $ constrains.f_map _ _ _ _ _ _ hc) _ _
+          (struct_action.hypothesised_allowable_exactly_approximates _
+            ⟨γ, δ, ε, _, _, _, _, t, rfl, rfl⟩ _ _),
+        rw ← complete_near_litter_perm_smul_near_litter hπf,
+        exact (congr_arg (λ π, π • N) (hρ δ hδ B)).symm, }, }, },
   { intro B,
     obtain ⟨δ, hδ, B, rfl⟩ := exists_nil_cons_of_path B,
     specialize hρ δ hδ B,
