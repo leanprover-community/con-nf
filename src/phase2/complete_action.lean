@@ -2317,11 +2317,35 @@ begin
     cases bot_le.not_lt h, },
 end
 
+lemma exists_nil_cons_of_path' {β γ : type_index} (A : path (β : type_index) γ)
+  (hA : A.length ≠ 0) :
+  ∃ δ : type_index, ∃ h : (δ : type_index) < β, ∃ B : path δ γ,
+  A = ((path.nil : path (β : type_index) β).cons h).comp B :=
+begin
+  set n := A.length with hn,
+  clear_value n,
+  induction n with n ih generalizing γ,
+  { cases hA rfl, },
+  cases A with δ _ A hδ,
+  { cases hn, },
+  simp only [path.length_cons, nat.succ_eq_add_one, add_left_inj] at hn,
+  cases n,
+  { cases path.eq_of_length_zero A hn.symm,
+    cases path_eq_nil A,
+    exact ⟨γ, hδ, path.nil, rfl⟩, },
+  { obtain ⟨ε, hε, B, rfl⟩ := ih (n.succ_ne_zero) A hn,
+    exact ⟨ε, hε, B.cons hδ, rfl⟩, },
+end
+
 lemma exists_nil_cons_of_path {β : Iic α} (A : extended_index β) :
   ∃ γ : Iio_index α, ∃ h : (γ : type_index) < β, ∃ B : extended_index γ,
   A = ((path.nil : path (β : type_index) β).cons h).comp B :=
 begin
-  sorry
+  obtain ⟨γ, h, B, rfl⟩:= exists_nil_cons_of_path' A _,
+  { refine ⟨⟨γ, _⟩, h, B, rfl⟩,
+    exact lt_of_lt_of_le h (coe_le_coe.mpr β.prop), },
+  { intro h,
+    cases path.eq_of_length_zero A h, },
 end
 
 lemma Iio_index_cases (δ : Iio_index α) : δ = ⊥ ∨ ∃ ε : Iio α, δ = ε :=
@@ -2391,6 +2415,33 @@ begin
     rw ← this at hρ,
     rw [← path.comp_assoc, path.comp_cons, path.comp_nil],
     exact hρ, },
+end
+
+lemma allowable_below_all (hπf : π.free) (γ : Iic α) (A : path (β : type_index) γ) :
+  allowable_below hπf γ A :=
+begin
+  obtain ⟨γ, hγ⟩ := γ,
+  revert hγ,
+  refine well_founded.induction Λwf.wf γ _,
+  intros γ ih hγ A,
+  refine allowable_below_extends hπf ⟨γ, hγ⟩ A _,
+  intros δ hδ,
+  obtain (rfl | ⟨δ, rfl⟩) := Iio_index_cases δ,
+  { exact allowable_below_bot hπf _, },
+  { exact ih δ (coe_lt_coe.mp hδ) (le_of_lt δ.prop) _, },
+end
+
+lemma allowable_action (hπf : π.free) :
+  ∃ ρ : allowable β, ∀ A : extended_index β,
+  struct_perm.of_bot (struct_perm.derivative A ρ.to_struct_perm) =
+  complete_near_litter_perm hπf A :=
+begin
+  obtain ⟨ρ, h⟩ := allowable_below_all hπf β path.nil,
+  refine ⟨ρ, _⟩,
+  intro B,
+  have := h B,
+  rw path.nil_comp at this,
+  exact this,
 end
 
 end struct_approx
