@@ -8,7 +8,7 @@ open scoped Classical
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] (α : Λ) [PositionData] [Phase2Assumptions α] {β : TypeIndex}
   (π : NearLitterApprox) (A : ExtendedIndex β)
@@ -81,4 +81,4 @@ theorem flexibleCompletionSymmSmulFlexible (hπ : π.Free α A) (L : Litter) (hL
 
 end NearLitterApprox
 
-end ConNf
+end ConNF

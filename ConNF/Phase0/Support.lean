@@ -16,7 +16,7 @@ noncomputable section
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] {α : TypeIndex}
 
@@ -113,4 +113,4 @@ theorem mk_support_le (x : τ) : (#Support α G x) ≤ (#μ) :=
   · rw [← mk_subset_mk_lt_cof μ_strong_limit.2]
     exact mk_subtype_mono fun s hs => lt_of_lt_of_le hs κ_le_μ_cof
 
-end ConNf
+end ConNF

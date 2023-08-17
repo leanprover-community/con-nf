@@ -19,7 +19,7 @@ open scoped Cardinal
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 section ChooseWf
 
@@ -249,4 +249,4 @@ theorem typedAtomPosition_lt_fMap (x : Tangle ⊥) :
   contrapose! this
   exact f_map_condition.bot x rfl HEq.rfl this
 
-end ConNf
+end ConNF

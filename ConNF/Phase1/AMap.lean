@@ -37,7 +37,7 @@ open scoped Cardinal
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] [PositionData]
 
@@ -365,4 +365,4 @@ theorem aMapRel'_subsingleton (c : NonemptyCode α) :
 
 end AMapCode
 
-end ConNf
+end ConNF

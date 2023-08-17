@@ -13,7 +13,7 @@ open MulAction Quiver Set Sum WithBot
 
 open scoped Cardinal
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] (α : Λ) [PositionData] [Phase2Assumptions α]
 
@@ -191,4 +191,4 @@ theorem mem_reduction_designated_support {β γ : Iic α} {δ ε : Iio α} (hδ 
   refine' Relation.TransGen.tail' _ (constrains.f_map hδ hε hδε B t d hd)
   exact refl_trans_gen_constrains_comp hcd _
 
-end ConNf
+end ConNF

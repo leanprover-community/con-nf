@@ -37,7 +37,7 @@ open Set WithBot
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] [PositionData] {α : Λ} {β : iioIndex α} {γ : Iio α} [CoreTangleCumul α]
   [AlmostTangleCumul α] [PositionedTangleCumul α]
@@ -150,7 +150,7 @@ alias not_is_even ↔ _ is_odd.not_is_even
 
 theorem isEven_or_isOdd (c : Code α) : c.IsEven ∨ c.IsOdd := by rw [← not_is_even]; exact em _
 
-protected theorem ConNf.AMapRel.isOdd (hc : c.IsEven) (h : c ↝ d) : d.IsOdd :=
+protected theorem ConNF.AMapRel.isOdd (hc : c.IsEven) (h : c ↝ d) : d.IsOdd :=
   isOdd_iff.2 ⟨_, h, hc⟩
 
 protected theorem IsEven.aMapCode (hc : c.IsEven) (hcγ : c.1 ≠ γ) : (aMapCode γ c).IsOdd :=
@@ -239,7 +239,7 @@ theorem emptyEmpty : ∀ β γ, (⟨β, ∅⟩ : Code α) ≡ ⟨γ, ∅⟩
           bot_ne_mk_coe <;>
       rw [extension_ne _ _ bot_ne_coe, snd_mk, A_map_empty]
 
-protected theorem ConNf.Code.IsEmpty.equiv (hc : c.isEmpty) (hd : d.isEmpty) : c ≡ d :=
+protected theorem ConNF.Code.IsEmpty.equiv (hc : c.isEmpty) (hd : d.isEmpty) : c ≡ d :=
   by
   cases c; cases d; change c_snd = ∅ at hc ; change d_snd = ∅ at hd ; subst hc; subst hd
   exact equiv.empty_empty _ _
@@ -403,4 +403,4 @@ theorem equiv_bot_subsingleton : ∀ (d) (_ : d ≡ c), ∀ (e) (_ : e ≡ c), d
 
 end Code
 
-end ConNf
+end ConNF

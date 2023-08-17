@@ -19,7 +19,7 @@ noncomputable section
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] (α : Λ) [CoreTangleCumul α] (β : iioIndex α) (γ : Iio α)
 
@@ -248,7 +248,7 @@ theorem snd_smul (f : AllowablePerm α) (c : Code α) : (f • c).2 = f • c.2 
 theorem smul_mk (f : AllowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f • s) :=
   rfl
 
-theorem ConNf.Code.Equiv.smul : c ≡ d → f • c ≡ f • d :=
+theorem ConNF.Code.Equiv.smul : c ≡ d → f • c ≡ f • d :=
   (f.2 _ _).2
 
 end AllowablePerm
@@ -358,4 +358,4 @@ alias is_odd_smul ↔ _ is_odd.smul
 
 end Code
 
-end ConNf
+end ConNF

@@ -8,7 +8,7 @@ open scoped Cardinal
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] (α : Λ) [PositionData] [Phase2Assumptions α] {β : TypeIndex}
 
@@ -64,4 +64,4 @@ theorem not_flexible_iff {L : Litter} {A : ExtendedIndex β} : ¬Flexible α L A
 theorem flexibleOfCompFlexible {γ : TypeIndex} {L : Litter} {A : ExtendedIndex γ}
     {B : Quiver.Path β γ} (h : Flexible α L (B.comp A)) : Flexible α L A := fun h' => h (h'.comp B)
 
-end ConNf
+end ConNF

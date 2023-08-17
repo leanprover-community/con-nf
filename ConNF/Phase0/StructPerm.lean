@@ -26,7 +26,7 @@ noncomputable section
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -357,4 +357,4 @@ instance : FaithfulSMul (StructPerm ⊥) Atom :=
 
 end StructPerm
 
-end ConNf
+end ConNF

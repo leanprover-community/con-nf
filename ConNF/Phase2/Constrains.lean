@@ -16,7 +16,7 @@ open scoped Cardinal Classical
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -324,4 +324,4 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
     cases hd₂.1
     rfl
 
-end ConNf
+end ConNF

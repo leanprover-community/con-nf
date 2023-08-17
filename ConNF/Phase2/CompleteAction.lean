@@ -10,7 +10,7 @@ open scoped Classical Pointwise
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 namespace StructApprox
 
@@ -461,7 +461,7 @@ theorem transGen_constrains_of_mem_designatedSupport {A : ExtendedIndex β} {L :
 
 -- TODO: move to struct_perm
 @[simp]
-theorem ConNf.StructPerm.derivative_fst {α β : TypeIndex} (π : StructPerm α) (A : Path α β)
+theorem ConNF.StructPerm.derivative_fst {α β : TypeIndex} (π : StructPerm α) (A : Path α β)
     (N : NearLitter) : (StructPerm.derivative A π • N).fst = StructPerm.derivative A π • N.fst :=
   rfl
 
@@ -686,7 +686,7 @@ theorem inOut_def {π : NearLitterPerm} {a : Atom} {L : Litter} :
     InOut π a L ↔ Xor' (a.1 = L) ((π • a).1 = π • L) :=
   Iff.rfl
 
-structure ConNf.NearLitterPerm.Biexact (π π' : NearLitterPerm) (atoms : Set Atom)
+structure ConNF.NearLitterPerm.Biexact (π π' : NearLitterPerm) (atoms : Set Atom)
     (litters : Set Litter) : Prop where
   smul_eq_smul_atom : ∀ a ∈ atoms, π • a = π' • a
   smul_eq_smul_litter : ∀ L ∈ litters, π • L = π' • L
@@ -705,23 +705,23 @@ theorem xor'_elim_not_left {a b : Prop} (h : ¬a) : Xor' a b ↔ b := by unfold 
 @[simp]
 theorem xor'_elim_not_right {a b : Prop} (h : ¬b) : Xor' a b ↔ a := by unfold Xor' <;> tauto
 
-theorem ConNf.NearLitterPerm.Biexact.atoms {π π' : NearLitterPerm} (s : Set Atom)
+theorem ConNF.NearLitterPerm.Biexact.atoms {π π' : NearLitterPerm} (s : Set Atom)
     (hs : ∀ a ∈ s, π • a = π' • a) : NearLitterPerm.Biexact π π' s ∅ :=
   ⟨hs, fun L => False.elim, fun L => False.elim, fun L => False.elim⟩
 
-theorem ConNf.NearLitterPerm.Biexact.litter {π π' : NearLitterPerm} (L : Litter)
+theorem ConNF.NearLitterPerm.Biexact.litter {π π' : NearLitterPerm} (L : Litter)
     (hL : π • L = π' • L) (hL₁ : ∀ a, InOut π a L → π • a = π' • a)
     (hL₂ : ∀ a, InOut π' a L → π • a = π' • a) : NearLitterPerm.Biexact π π' ∅ {L} :=
   ⟨fun a ha => ha.elim, fun L' hL' => by cases hL' <;> exact hL, fun L' hL' => by
     cases hL' <;> exact hL₁, fun L' hL' => by cases hL' <;> exact hL₂⟩
 
-theorem ConNf.NearLitterPerm.Biexact.symm {π π' : NearLitterPerm} {atoms : Set Atom}
+theorem ConNF.NearLitterPerm.Biexact.symm {π π' : NearLitterPerm} {atoms : Set Atom}
     {litters : Set Litter} (h : NearLitterPerm.Biexact π π' atoms litters) :
     NearLitterPerm.Biexact π' π atoms litters :=
   ⟨fun a ha => (h.smul_eq_smul_atom a ha).symm, fun L hL => (h.smul_eq_smul_litter L hL).symm,
     fun L hL a ha => (h.right_exact L hL a ha).symm, fun L hL a ha => (h.left_exact L hL a ha).symm⟩
 
-theorem ConNf.NearLitterPerm.Biexact.union {π π' : NearLitterPerm} {s₁ s₂ : Set Atom}
+theorem ConNF.NearLitterPerm.Biexact.union {π π' : NearLitterPerm} {s₁ s₂ : Set Atom}
     {t₁ t₂ : Set Litter} (h₁ : NearLitterPerm.Biexact π π' s₁ t₁)
     (h₂ : NearLitterPerm.Biexact π π' s₂ t₂) : NearLitterPerm.Biexact π π' (s₁ ∪ s₂) (t₁ ∪ t₂) :=
   ⟨fun a ha => ha.elim (h₁.smul_eq_smul_atom a) (h₂.smul_eq_smul_atom a), fun L hL =>
@@ -729,7 +729,7 @@ theorem ConNf.NearLitterPerm.Biexact.union {π π' : NearLitterPerm} {s₁ s₂ 
     hL.elim (h₁.left_exact L) (h₂.left_exact L), fun L hL =>
     hL.elim (h₁.right_exact L) (h₂.right_exact L)⟩
 
-theorem ConNf.NearLitterPerm.Biexact.smul_litter_subset {π π' : NearLitterPerm} {atoms : Set Atom}
+theorem ConNF.NearLitterPerm.Biexact.smul_litter_subset {π π' : NearLitterPerm} {atoms : Set Atom}
     {litters : Set Litter} (h : NearLitterPerm.Biexact π π' atoms litters) (L : Litter)
     (hL : L ∈ litters) : (π • L.toNearLitter : Set Atom) ⊆ π' • L.toNearLitter :=
   by
@@ -748,7 +748,7 @@ theorem ConNf.NearLitterPerm.Biexact.smul_litter_subset {π π' : NearLitterPerm
     simp only [litter.coe_to_near_litter, smul_mem_smul_set_iff, mem_litter_set]
     exact ha
 
-theorem ConNf.NearLitterPerm.Biexact.smul_litter {π π' : NearLitterPerm} {atoms : Set Atom}
+theorem ConNF.NearLitterPerm.Biexact.smul_litter {π π' : NearLitterPerm} {atoms : Set Atom}
     {litters : Set Litter} (h : NearLitterPerm.Biexact π π' atoms litters) (L : Litter)
     (hL : L ∈ litters) : π • L.toNearLitter = π' • L.toNearLitter :=
   by
@@ -757,7 +757,7 @@ theorem ConNf.NearLitterPerm.Biexact.smul_litter {π π' : NearLitterPerm} {atom
   exact h.smul_litter_subset L hL
   exact h.symm.smul_litter_subset L hL
 
-theorem ConNf.NearLitterPerm.Biexact.smul_nearLitter {π π' : NearLitterPerm} {atoms : Set Atom}
+theorem ConNF.NearLitterPerm.Biexact.smul_nearLitter {π π' : NearLitterPerm} {atoms : Set Atom}
     {litters : Set Litter} (h : NearLitterPerm.Biexact π π' atoms litters) (N : NearLitter)
     (hN : N.1 ∈ litters) (hN' : litterSet N.1 ∆ N ⊆ atoms) : π • N = π' • N :=
   by
@@ -2470,4 +2470,4 @@ theorem freedom_of_action (β : Iic α) (π₀ : StructApprox β) (h : π₀.Fre
 
 end StructApprox
 
-end ConNf
+end ConNF

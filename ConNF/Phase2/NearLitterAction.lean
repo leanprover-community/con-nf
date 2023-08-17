@@ -11,7 +11,7 @@ open scoped Cardinal Classical Pointwise
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -216,7 +216,7 @@ noncomputable def nearLitterMapOrElse (N : NearLitter) : NearLitter :=
     rw [is_near_litter, is_near, ← symmDiff_assoc]
     exact (φ.litter_map_or_else N.fst).snd.Prop.symmDiff (small.image N.2.Prop)⟩
 
-theorem ConNf.Small.pFun_image {α β : Type _} {s : Set α} (h : Small s) {f : α →. β} :
+theorem ConNF.Small.pFun_image {α β : Type _} {s : Set α} (h : Small s) {f : α →. β} :
     Small (f.image s) := by
   have : Small (f '' s) := small.image h
   refine' small.image_subset Part.some Part.some_injective this _
@@ -606,4 +606,4 @@ theorem smul_nearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm}
 
 end NearLitterAction
 
-end ConNf
+end ConNF

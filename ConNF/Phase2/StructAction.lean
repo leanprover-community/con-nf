@@ -9,7 +9,7 @@ open scoped Cardinal Classical Pointwise
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -327,4 +327,4 @@ theorem Lawful.comp {β γ : TypeIndex} {φ : StructAction β} (h : φ.Lawful) (
 
 end StructAction
 
-end ConNf
+end ConNF

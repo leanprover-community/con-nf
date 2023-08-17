@@ -6,7 +6,7 @@ open Set WithBot
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] (α : Λ) [CoreTangleCumul α] {β : iioIndex α} {s t : Set (Tangle β)}
 
@@ -54,4 +54,4 @@ theorem mk_inj : mk β s = mk β t ↔ s = t := by simp [mk]
 
 end Code
 
-end ConNf
+end ConNF

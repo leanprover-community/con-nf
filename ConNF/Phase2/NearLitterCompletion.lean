@@ -8,7 +8,7 @@ open scoped Pointwise
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 namespace StructApprox
 
@@ -71,4 +71,4 @@ theorem nearLitterCompletion_fst_eq (π : StructApprox β) (A : ExtendedIndex β
 
 end StructApprox
 
-end ConNf
+end ConNF

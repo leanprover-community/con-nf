@@ -8,7 +8,7 @@ open scoped Cardinal Classical Pointwise
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -911,4 +911,4 @@ theorem fillAtomOrbits_precise
 
 end NearLitterAction
 
-end ConNf
+end ConNF

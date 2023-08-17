@@ -24,7 +24,7 @@ noncomputable section
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -313,4 +313,4 @@ abbrev TangleCumul (α : Λ) [CoreTangleCumul α] [PositionedTangleCumul α] [Po
     [AlmostTangleCumul α] :=
   ∀ β : Iio α, TangleData β
 
-end ConNf
+end ConNF

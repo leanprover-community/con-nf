@@ -27,7 +27,7 @@ open scoped Cardinal Classical
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 /-- The parameters of the constructions. We collect them all in one class for simplicity.
 Note that the ordinal `λ` in the paper is instead referred to here as `Λ`, since the symbol `λ` is
@@ -461,4 +461,4 @@ theorem IsNear.mk_inter (h : IsNear s t) (hs : (#κ) ≤ (#s)) : (#κ) ≤ (#(s 
 
 end IsNear
 
-end ConNf
+end ConNF

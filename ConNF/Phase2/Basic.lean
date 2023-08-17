@@ -8,7 +8,7 @@ open scoped Pointwise
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] [PositionData] (α : Λ)
 
@@ -231,4 +231,4 @@ theorem toStructPerm_smul_fMap (β : iicIndex α) (γ : iioIndex α) (δ : Iio �
   rw [allowable_derivative_eq β δ hδ π]
   exact smul_f_map γ δ hγ hδ hγδ π t
 
-end ConNf
+end ConNF

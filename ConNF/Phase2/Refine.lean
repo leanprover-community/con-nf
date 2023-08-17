@@ -9,7 +9,7 @@ open Quiver Set
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -138,4 +138,4 @@ theorem rc_comp_smul_atom {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
 
 end StructAction
 
-end ConNf
+end ConNF

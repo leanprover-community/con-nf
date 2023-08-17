@@ -23,7 +23,7 @@ jobs:
         run: ~/.elan/bin/lake -Kenv=dev build ConNF
 
       - name: build documentation
-        run: ~/.elan/bin/lake -Kenv=dev build ConNF:docs
+        run: ~/.elan/bin/lake -Kenv=dev build ConNF:docs Mathlib:docs Std:docs
 
       - name: copy documentation
         run: cp -R build/doc docs/

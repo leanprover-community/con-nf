@@ -10,7 +10,7 @@ open scoped Classical
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 namespace StructApprox
 
@@ -249,16 +249,16 @@ theorem ihAction_litterMap {β : Iic α} {c : SupportCondition β} {H : Hypothes
 
 variable {β : Iic α} [FreedomOfActionHypothesis β]
 
-noncomputable def ConNf.StructAction.allowable {γ : Iio α} (φ : StructAction γ)
+noncomputable def ConNF.StructAction.allowable {γ : Iio α} (φ : StructAction γ)
     (h : (γ : Iic α) < β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) : Allowable γ :=
   (freedomOfActionOfLt _ h _ (StructAction.rcFree _ h₁ h₂)).some
 
-theorem ConNf.StructAction.allowable_exactlyApproximates {γ : Iio α} (φ : StructAction γ)
+theorem ConNF.StructAction.allowable_exactlyApproximates {γ : Iio α} (φ : StructAction γ)
     (h : (γ : Iic α) < β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :
     (φ.rc h₁).ExactlyApproximates (φ.Allowable h h₁ h₂).toStructPerm :=
   (freedomOfActionOfLt _ h _ (StructAction.rcFree _ h₁ h₂)).choose_spec
 
-noncomputable def ConNf.StructAction.hypothesisedAllowable (φ : StructAction β) {L : Litter}
+noncomputable def ConNF.StructAction.hypothesisedAllowable (φ : StructAction β) {L : Litter}
     {A : ExtendedIndex β} (h : InflexibleCoe L A) (h₁ : (φ.comp (h.b.cons (coe_lt h.hδ))).Lawful)
     (h₂ : (φ.comp (h.b.cons (coe_lt h.hδ))).MapFlexible) : Allowable h.δ :=
   (φ.comp (h.b.cons (coe_lt h.hδ))).Allowable
@@ -266,7 +266,7 @@ noncomputable def ConNf.StructAction.hypothesisedAllowable (φ : StructAction β
 
 /- TODO: Extract out the path bit from inflexible_coe so that the following lemma doesn't need
 to be stated. -/
-theorem ConNf.StructAction.hypothesisedAllowable_eq {φ : StructAction β} {L L' : Litter}
+theorem ConNF.StructAction.hypothesisedAllowable_eq {φ : StructAction β} {L L' : Litter}
     {A : ExtendedIndex β} {γ : Iic α} {δ ε : Iio α} {hδ : (δ : Λ) < γ} {hε : (ε : Λ) < γ}
     {hδε : δ ≠ ε} {B : Quiver.Path (β : TypeIndex) γ} (t t' : Tangle δ)
     {hL : L = fMap (coe_ne_coe.mpr <| coe_ne' hδε) t}
@@ -276,7 +276,7 @@ theorem ConNf.StructAction.hypothesisedAllowable_eq {φ : StructAction β} {L L'
       (φ.hypothesisedAllowable ⟨γ, δ, ε, hδ, hε, hδε, B, t', hL', hA⟩ h₁' h₂' : Allowable δ) :=
   rfl
 
-theorem ConNf.StructAction.hypothesisedAllowable_exactlyApproximates (φ : StructAction β)
+theorem ConNF.StructAction.hypothesisedAllowable_exactlyApproximates (φ : StructAction β)
     {L : Litter} {A : ExtendedIndex β} (h : InflexibleCoe L A)
     (h₁ : (φ.comp (h.b.cons (coe_lt h.hδ))).Lawful)
     (h₂ : (φ.comp (h.b.cons (coe_lt h.hδ))).MapFlexible) :
@@ -346,4 +346,4 @@ theorem litterCompletion_of_inflexibleBot (π : StructApprox β) (A : ExtendedIn
 
 end StructApprox
 
-end ConNf
+end ConNF

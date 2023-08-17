@@ -8,7 +8,7 @@ open scoped Cardinal
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -259,4 +259,4 @@ def orderIsoMeet (S T U : Sublitter) (h : S.Litter = U.Litter) : Sublitter
 
 end Sublitter
 
-end ConNf
+end ConNF

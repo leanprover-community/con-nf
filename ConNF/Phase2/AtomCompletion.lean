@@ -8,7 +8,7 @@ open scoped Classical
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] {α : Λ} [PositionData] [Phase2Assumptions α] {β : Iic α} (π : StructApprox β)
 
@@ -40,4 +40,4 @@ noncomputable def atomCompletion (A : ExtendedIndex β) (a : Atom) (H : Hypothes
 
 end StructApprox
 
-end ConNf
+end ConNF

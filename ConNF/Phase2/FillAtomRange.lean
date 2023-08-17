@@ -8,7 +8,7 @@ open scoped Cardinal Classical Pointwise
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -401,4 +401,4 @@ theorem fillAtomRange_symmDiff_subset_ran (hφ : φ.Lawful) (L : Litter)
 
 end NearLitterAction
 
-end ConNf
+end ConNF

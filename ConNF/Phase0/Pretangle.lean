@@ -11,7 +11,7 @@ noncomputable section
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] {α : Λ}
 
@@ -92,4 +92,4 @@ instance hasMem {β : TypeIndex} (hβ : β < α) : Membership (Pretangle β) (Pr
 
 end Pretangle
 
-end ConNf
+end ConNF

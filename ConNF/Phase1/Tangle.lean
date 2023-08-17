@@ -13,7 +13,7 @@ open scoped Cardinal Pointwise
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] [PositionData]
 
@@ -398,7 +398,7 @@ theorem allowableToStructPerm_bot (π : Allowable (⊥ : iioIndex α)) :
     CoreTangleData.allowableToStructPerm π = StructPerm.toBotIso.toMonoidHom π :=
   rfl
 
-theorem ConNf.SemiallowablePerm.toAllowable_bot (π : SemiallowablePerm α) :
+theorem ConNF.SemiallowablePerm.toAllowable_bot (π : SemiallowablePerm α) :
     SemiallowablePerm.toAllowable ⊥ π =
       StructPerm.toNearLitterPerm (SemiallowablePerm.toStructPerm π) :=
   by
@@ -508,4 +508,4 @@ instance mulActionNewTangle : MulAction (AllowablePerm α) (NewTangle α) :=
 
 end AllowablePerm
 
-end ConNf
+end ConNF

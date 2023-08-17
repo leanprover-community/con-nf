@@ -9,7 +9,7 @@ open scoped Cardinal
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -379,4 +379,4 @@ instance hasCoeΛ : Coe (ProperLtIndex α) Λ :=
 
 end ProperLtIndex
 
-end ConNf
+end ConNF

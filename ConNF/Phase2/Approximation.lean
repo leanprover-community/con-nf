@@ -10,7 +10,7 @@ open scoped Cardinal Pointwise
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}]
 
@@ -271,7 +271,7 @@ theorem smul_nearLitter_coe (π : NearLitterApprox) (N : NearLitter) :
 
 end Generate
 
-def ConNf.NearLitterPerm.IsException (π : NearLitterPerm) (a : Atom) : Prop :=
+def ConNF.NearLitterPerm.IsException (π : NearLitterPerm) (a : Atom) : Prop :=
   π • a ∉ litterSet (π • a.1) ∨ π⁻¹ • a ∉ litterSet (π⁻¹ • a.1)
 
 @[mk_iff]
@@ -571,4 +571,4 @@ end Hypothesis
 
 end StructApprox
 
-end ConNf
+end ConNF

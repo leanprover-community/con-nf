@@ -26,7 +26,7 @@ open scoped Cardinal Pointwise
 
 universe u
 
-namespace ConNf
+namespace ConNF
 
 variable [Params.{u}] {α β : Type u}
 
@@ -532,4 +532,4 @@ theorem smul_nearLitter_eq_smul_symmDiff_smul (π : NearLitterPerm) (N : NearLit
 
 end NearLitterPerm
 
-end ConNf
+end ConNF
