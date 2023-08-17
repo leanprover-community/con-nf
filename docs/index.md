@@ -13,9 +13,8 @@ Much of the project infrastructure has been adapted from the [sphere eversion pr
 
 ## Current progress
 
-The project is not yet finished. The following table details live which files are unfinished, and how many 'sorries' (unproven statements) remain in each file.
-
-{% include sorries.md %}
+The project is not yet finished.
+Our main result is the freedom of action theorem, which is a major step towards the end goal.
 
 ## The source
 
