@@ -1,2 +1,0 @@
-import .all
-run_cmd tactic.skip

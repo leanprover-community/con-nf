@@ -13,15 +13,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: update branch
-        if: github.ref == 'refs/heads/main'
-        uses: leanprover-contrib/update-versions-action@master
-
-      - name: build docker container
-        run: docker build -t con-nf .
+      - name: install elan
+        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh
 
       - name: build project
-        run: docker run --rm -v ${{ github.workspace }}:/src con-nf
+        run: lake -Kenv=dev build ConNF
+
+      - name: build documentation
+        run: lake -Kenv=dev build ConNF:docs
+
+      - name: copy documentation
+        run: cp -R build/docs docs/
 
       - name: remove .gitignore for gh-pages
         run: rm docs/.gitignore
