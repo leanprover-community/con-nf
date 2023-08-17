@@ -1,7 +1,5 @@
 import Mathlib.GroupTheory.Perm.Basic
 
-#align_import mathlib.equiv
-
 variable {α β γ : Type _}
 
 namespace Equiv

@@ -3,6 +3,7 @@ import ConNF.Mathlib.Order
 import ConNF.Mathlib.Ordinal
 import ConNF.Mathlib.WithBot
 import Mathlib.SetTheory.Cardinal.Cofinality
+import Mathlib.Data.Prod.Lex
 
 /-!
 # Parameters of the construction
@@ -106,38 +107,37 @@ example : Params.{0} where
 theorem noMaxOrder_of_ordinal_type_eq {α : Type u} [Preorder α] [Infinite α] [IsWellOrder α (· < ·)]
     (h : Ordinal.type ((· < ·) : α → α → Prop) = (#α).ord) : NoMaxOrder α := by
   refine ⟨fun a => ?_⟩
-  have := (Ordinal.succ_lt_of_isLimit _).mpr (Ordinal.typein_lt_type (· < ·) a)
+  have := (Ordinal.succ_lt_of_isLimit ?_).mpr (Ordinal.typein_lt_type (· < ·) a)
   · obtain ⟨b, hb⟩ := Ordinal.typein_surj (· < ·) this
-    refine' ⟨b, _⟩
-    have := Order.lt_succ _
+    refine ⟨b, ?_⟩
+    have := Order.lt_succ (Ordinal.typein (fun x y => x < y) a)
     rw [← hb, Ordinal.typein_lt_typein] at this
     exact this
-    infer_instance
   · rw [h]
-    exact Cardinal.ord_isLimit (cardinal.infinite_iff.mp inferInstance)
+    exact Cardinal.ord_isLimit (Cardinal.infinite_iff.mp inferInstance)
 
 noncomputable def succOrderOfIsWellOrder (α : Type u) [Preorder α] [Infinite α]
     [inst : IsWellOrder α (· < ·)] (h : Ordinal.type ((· < ·) : α → α → Prop) = (#α).ord) :
     SuccOrder α where
-  succ := inst.to_isWellFounded.wf.succ
+  succ := inst.toIsWellFounded.wf.succ
   le_succ a := le_of_lt (WellFounded.lt_succ _ ((noMaxOrder_of_ordinal_type_eq h).exists_gt a))
-  max_of_succ_le a ha b hb :=
-    (ha.not_lt (WellFounded.lt_succ _ ((noMaxOrder_of_ordinal_type_eq h).exists_gt a))).elim
+  max_of_succ_le ha hb :=
+    (ha.not_lt (WellFounded.lt_succ _ ((noMaxOrder_of_ordinal_type_eq h).exists_gt _))).elim
   succ_le_of_lt := by
     intro a b ha
     by_contra hb
     obtain hab | hab | hab :=
-      inst.to_is_trichotomous.trichotomous (inst.to_is_well_founded.wf.succ a) b
+      inst.toIsTrichotomous.trichotomous (inst.toIsWellFounded.wf.succ a) b
     · exact hb hab.le
     · exact hb hab.le
-    · rw [WellFounded.lt_succ_iff ((no_max_order_of_ordinal_type_eq h).exists_gt a)] at hab
-      cases hab
+    · rw [WellFounded.lt_succ_iff ((noMaxOrder_of_ordinal_type_eq h).exists_gt a)] at hab
+      obtain (hab | hab) := hab
       exact ha.not_lt hab
       exact ha.ne hab.symm
   le_of_lt_succ := by
     intro a b ha
-    rw [WellFounded.lt_succ_iff ((no_max_order_of_ordinal_type_eq h).exists_gt _)] at ha
-    cases ha
+    rw [WellFounded.lt_succ_iff ((noMaxOrder_of_ordinal_type_eq h).exists_gt _)] at ha
+    obtain (ha | ha) := ha
     exact ha.le
     exact ha.le
 
@@ -164,27 +164,36 @@ instance : LinearOrder κ :=
 instance : LinearOrder μ :=
   linearOrderOfSTO μr
 
+instance : IsWellOrder Λ (· < ·) :=
+  Λwf
+
+instance : IsWellOrder κ (· < ·) :=
+  κwf
+
+instance : IsWellOrder μ (· < ·) :=
+  μwf
+
 /-- We deduce that `Λ` has a well-founded relation. -/
 instance : WellFoundedRelation Λ :=
-  IsWellOrder.toHasWellFounded
+  IsWellOrder.toHasWellFounded (hwo := Λwf)
 
 instance : WellFoundedRelation κ :=
-  IsWellOrder.toHasWellFounded
+  IsWellOrder.toHasWellFounded (hwo := κwf)
 
 instance : WellFoundedRelation μ :=
-  IsWellOrder.toHasWellFounded
+  IsWellOrder.toHasWellFounded (hwo := μwf)
 
 theorem κ_le_μ : (#κ) ≤ (#μ) :=
   κ_lt_μ.le
 
 noncomputable instance : Inhabited Λ :=
-  @Classical.inhabited_of_nonempty _ <| mk_ne_zero_iff.1 Λ_limit.NeZero
+  @Classical.inhabited_of_nonempty _ <| mk_ne_zero_iff.1 Λ_limit.1
 
 noncomputable instance : Inhabited κ :=
-  @Classical.inhabited_of_nonempty _ <| mk_ne_zero_iff.1 κ_regular.Pos.ne'
+  @Classical.inhabited_of_nonempty _ <| mk_ne_zero_iff.1 κ_regular.pos.ne'
 
 noncomputable instance : Inhabited μ :=
-  @Classical.inhabited_of_nonempty _ <| mk_ne_zero_iff.1 μ_strong_limit.NeZero
+  @Classical.inhabited_of_nonempty _ <| mk_ne_zero_iff.1 μ_strong_limit.1
 
 instance : Infinite Λ :=
   Cardinal.infinite_iff.mpr Λ_limit.aleph0_le
@@ -193,7 +202,7 @@ instance : Infinite κ :=
   Cardinal.infinite_iff.mpr κ_regular.aleph0_le
 
 instance : Infinite μ :=
-  Cardinal.infinite_iff.mpr μ_strong_limit.IsLimit.aleph0_le
+  Cardinal.infinite_iff.mpr μ_strong_limit.isLimit.aleph0_le
 
 instance : NoMaxOrder Λ :=
   noMaxOrder_of_ordinal_type_eq Λ_ord
@@ -233,15 +242,15 @@ structure Litter where
   β_ne_γ : β ≠ γ
 
 instance : Inhabited Litter :=
-  ⟨⟨Inhabited.default μ, ⊥, Inhabited.default Λ, WithBot.bot_ne_coe⟩⟩
+  ⟨⟨default, ⊥, default, WithBot.bot_ne_coe⟩⟩
 
 /-- Litters are equivalent to a subtype of a product type. -/
 def litterEquiv : Litter ≃ { a : μ ×ₗ TypeIndex ×ₗ Λ // a.2.1 ≠ a.2.2 }
     where
   toFun L := ⟨⟨L.ν, L.β, L.γ⟩, L.β_ne_γ⟩
-  invFun L := ⟨L.val.1, L.val.2.1, L.val.2.2, L.Prop⟩
-  left_inv := by rintro ⟨ν, β, γ, h⟩ <;> rfl
-  right_inv := by rintro ⟨⟨ν, β, γ⟩, h⟩ <;> rfl
+  invFun L := ⟨L.val.1, L.val.2.1, L.val.2.2, L.prop⟩
+  left_inv := by rintro ⟨ν, β, γ, h⟩; rfl
+  right_inv := by rintro ⟨⟨ν, β, γ⟩, h⟩; rfl
 
 instance Subtype.isWellOrder {α : Type _} (p : α → Prop) [LT α] [IsWellOrder α (· < ·)] :
     IsWellOrder (Subtype p) (· < ·) :=
@@ -249,29 +258,28 @@ instance Subtype.isWellOrder {α : Type _} (p : α → Prop) [LT α] [IsWellOrde
 
 instance Lex.isWellOrder {α β : Type _} [LT α] [LT β] [IsWellOrder α (· < ·)]
     [IsWellOrder β (· < ·)] : IsWellOrder (α ×ₗ β) (· < ·) :=
-  Prod.Lex.isWellOrder
+  instIsWellOrderProdLex
 
 @[simp]
-theorem mk_litter : (#Litter) = (#μ) :=
-  by
-  refine'
-    litter_equiv.cardinal_eq.trans
-      (le_antisymm ((Cardinal.mk_subtype_le _).trans_eq _)
-        ⟨⟨fun ν => ⟨⟨ν, ⊥, Inhabited.default Λ⟩, WithBot.bot_ne_coe⟩, fun ν₁ ν₂ =>
+theorem mk_litter : #Litter = #μ := by
+  refine
+    litterEquiv.cardinal_eq.trans
+      (le_antisymm ((Cardinal.mk_subtype_le _).trans_eq ?_)
+        ⟨⟨fun ν => ⟨⟨ν, ⊥, default⟩, WithBot.bot_ne_coe⟩, fun ν₁ ν₂ =>
             congr_arg <| Prod.fst ∘ Subtype.val⟩⟩)
   have :=
-    mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_limit.ne_zero
-  simp only [Lex, mk_prod, lift_id, mk_type_index, mul_eq_self Λ_limit.aleph_0_le, this]
+    mul_eq_left (κ_regular.aleph0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_limit.ne_zero
+  simp only [Lex, mk_prod, lift_id, mk_typeIndex, mul_eq_self Λ_limit.aleph0_le, this]
 
 /-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
-theorem card_Iio_lt (x : μ) : (#Iio x) < (#μ) :=
+theorem card_Iio_lt (x : μ) : #(Iio x) < #μ :=
   card_typein_lt (· < ·) x μ_ord.symm
 
 /-- Initial segments (sets of the form `{y | y ≤ x}`) have cardinality `< μ`. -/
-theorem card_Iic_lt (x : μ) : (#Iic x) < (#μ) :=
+theorem card_Iic_lt (x : μ) : #(Iic x) < #μ :=
   by
   rw [← Iio_union_right, mk_union_of_disjoint, mk_singleton]
-  · exact (add_one_le_succ _).trans_lt (μ_strong_limit.is_limit.succ_lt (card_Iio_lt x))
+  · exact (add_one_le_succ _).trans_lt (μ_strong_limit.isLimit.succ_lt (card_Iio_lt x))
   · simp
 
 instance : LT Litter :=
@@ -296,14 +304,16 @@ These are not 'atoms' in the ZFU, TTTU or NFU sense; they are simply the element
 are in type `τ₋₁`. -/
 def Atom : Type _ :=
   Litter × κ
-deriving Inhabited
+
+instance : Inhabited Atom :=
+  ⟨⟨default, default⟩⟩
 
 instance : LT Atom :=
   ⟨Prod.Lex (· < ·) (· < ·)⟩
 
 /-- Atoms are well-ordered. -/
 instance Atom.isWellOrder : IsWellOrder Atom (· < ·) :=
-  Prod.Lex.isWellOrder
+  instIsWellOrderProdLex
 
 instance : LinearOrder Atom :=
   linearOrderOfSTO (· < ·)
@@ -314,16 +324,16 @@ instance : WellFoundedRelation Atom :=
 /-- The cardinality of `τ₋₁` is the cardinality of `μ`.
 We will prove that all types constructed in our model have cardinality equal to `μ`. -/
 @[simp]
-theorem mk_atom : (#Atom) = (#μ) := by
-  simp_rw [atom, mk_prod, lift_id, mk_litter,
-    mul_eq_left (κ_regular.aleph_0_le.trans κ_le_μ) κ_le_μ κ_regular.pos.ne']
+theorem mk_atom : #Atom = #μ := by
+  simp_rw [Atom, mk_prod, lift_id, mk_litter,
+    mul_eq_left (κ_regular.aleph0_le.trans κ_le_μ) κ_le_μ κ_regular.pos.ne']
 
 section Small
 
 variable {f : α → β} {s t : Set α}
 
 /-- A set is small if its cardinality is strictly less than `κ`. -/
-def Small (s : Set α) :=
+def Small (s : Set α) : Prop :=
   (#s) < (#κ)
 
 theorem Small.lt : Small s → (#s) < (#κ) :=
@@ -334,11 +344,11 @@ theorem Set.Subsingleton.small {α : Type _} {s : Set α} (hs : s.Subsingleton) 
 
 @[simp]
 theorem small_empty : Small (∅ : Set α) :=
-  subsingleton_empty.Small
+  Set.Subsingleton.small subsingleton_empty
 
 @[simp]
 theorem small_singleton (x : α) : Small ({x} : Set α) :=
-  subsingleton_singleton.Small
+  Set.Subsingleton.small subsingleton_singleton
 
 theorem small_setOf (p : α → Prop) : (Small fun a => p a) ↔ Small {a | p a} :=
   Iff.rfl
@@ -358,7 +368,7 @@ theorem Small.symmDiff (hs : Small s) (ht : Small t) : Small (s ∆ t) :=
   (hs.union ht).mono symmDiff_subset_union
 
 theorem Small.symmDiff_iff (hs : Small s) : Small t ↔ Small (s ∆ t) :=
-  ⟨hs.symmDiff, fun ht => by simpa only [symmDiff_symmDiff_self'] using ht.symm_diff hs⟩
+  ⟨hs.symmDiff, fun ht => by simpa only [symmDiff_symmDiff_self'] using ht.symmDiff hs⟩
 
 theorem small_iUnion (hι : (#ι) < (#κ)) {f : ι → Set α} (hf : ∀ i, Small (f i)) :
     Small (⋃ i, f i) :=
@@ -371,7 +381,7 @@ theorem small_iUnion_Prop {p : Prop} {f : p → Set α} (hf : ∀ i, Small (f i)
 protected theorem Small.bUnion {s : Set ι} (hs : Small s) {f : ∀ i ∈ s, Set α}
     (hf : ∀ (i) (hi : i ∈ s), Small (f i hi)) : Small (⋃ (i) (hi : i ∈ s), f i hi) :=
   (mk_bUnion_le' _ _).trans_lt <|
-    mul_lt_of_lt κ_regular.aleph0_le hs <| iSup_lt_of_isRegular κ_regular hs fun i => hf _ _
+    mul_lt_of_lt κ_regular.aleph0_le hs <| iSup_lt_of_isRegular κ_regular hs fun _ => hf _ _
 
 /-- The image of a small set under any function `f` is small. -/
 theorem Small.image : Small s → Small (f '' s) :=
@@ -386,7 +396,7 @@ theorem Small.preimage {s : Set β} (h : f.Injective) : Small s → Small (f ⁻
 theorem Small.image_subset {t : Set β} (f : α → β) (h : f.Injective) :
     Small t → f '' s ⊆ t → Small s := by
   intro h₁ h₂
-  have := (small.mono h₂ h₁).Preimage h
+  have := (Small.mono h₂ h₁).preimage h
   rw [preimage_image_eq s h] at this
   exact this
 
@@ -402,7 +412,7 @@ def IsNear (s t : Set α) : Prop :=
 
 /-- A set is near itself. -/
 @[refl]
-theorem isNear_refl (s : Set α) : IsNear s s := by rw [is_near, symmDiff_self]; exact small_empty
+theorem isNear_refl (s : Set α) : IsNear s s := by rw [IsNear, symmDiff_self]; exact small_empty
 
 /-- A version of the `is_near_refl` lemma that does not require the set `s` to be given explicitly.
 The value of `s` will be inferred automatically by the elaborator. -/
@@ -411,7 +421,7 @@ theorem isNear_rfl : IsNear s s :=
 
 /-- If `s` is near `t`, then `t` is near `s`. -/
 @[symm]
-theorem IsNear.symm (h : IsNear s t) : IsNear t s := by rwa [is_near, symmDiff_comm]
+theorem IsNear.symm (h : IsNear s t) : IsNear t s := by rwa [IsNear, symmDiff_comm]
 
 /-- `s` is near `t` if and only if `t` is near `s`.
 In each direction, this is an application of the `is_near.symm` lemma.
@@ -426,7 +436,7 @@ theorem IsNear.trans (hst : IsNear s t) (htu : IsNear t u) : IsNear s u :=
 
 /-- If two sets are near each other, then their images under an arbitrary function are also near. -/
 theorem IsNear.image (f : α → β) (h : IsNear s t) : IsNear (f '' s) (f '' t) :=
-  h.image.mono subset_image_symmDiff
+  Small.mono subset_image_symmDiff (Small.image h)
 
 theorem isNear_of_small (hs : Small s) (ht : Small t) : IsNear s t :=
   Small.symmDiff hs ht
@@ -434,23 +444,20 @@ theorem isNear_of_small (hs : Small s) (ht : Small t) : IsNear s t :=
 theorem Small.isNear_iff (hs : Small s) : Small t ↔ IsNear s t :=
   hs.symmDiff_iff
 
-theorem IsNear.κ_le (h : IsNear s t) (hs : (#κ) ≤ (#s)) : (#κ) ≤ (#(t : Set α)) :=
-  by
+theorem IsNear.κ_le (h : IsNear s t) (hs : (#κ) ≤ (#s)) : (#κ) ≤ (#(t : Set α)) := by
   by_contra ht
   rw [not_le] at ht
   have := h.symm
-  rw [← small.is_near_iff ht] at this
+  rw [← Small.isNear_iff ht] at this
   exact (lt_iff_not_ge _ _).mp this hs
 
-theorem IsNear.mk_inter (h : IsNear s t) (hs : (#κ) ≤ (#s)) : (#κ) ≤ (#(s ∩ t : Set α)) :=
-  by
-  rw [is_near, symmDiff_eq_sup_sdiff_inf] at h
-  exact
-    le_of_not_gt fun hst =>
-      lt_irrefl _
-        (((hs.trans (mk_le_mk_of_subset (subset_union_left _ _))).trans
-              (le_mk_diff_add_mk (s ∪ t) (s ∩ t))).trans_lt
-          (add_lt_of_lt κ_regular.aleph_0_le h hst))
+theorem IsNear.mk_inter (h : IsNear s t) (hs : (#κ) ≤ (#s)) : (#κ) ≤ (#(s ∩ t : Set α)) := by
+  rw [IsNear, symmDiff_eq_sup_sdiff_inf] at h
+  exact le_of_not_gt fun hst =>
+    lt_irrefl _
+      (((hs.trans (mk_le_mk_of_subset (subset_union_left _ _))).trans
+            (le_mk_diff_add_mk (s ∪ t) (s ∩ t))).trans_lt
+        (add_lt_of_lt κ_regular.aleph0_le h hst))
 
 end IsNear
 

@@ -1,9 +1,8 @@
 import ConNF.Mathlib.Order
-import ConNF.Mathlib.Transfer
-import ConNF.Mathlib.Group
-import ConNF.Mathlib.GroupAction
+-- import ConNF.Mathlib.Transfer
+-- import ConNF.Mathlib.Group
+-- import ConNF.Mathlib.GroupAction
 import ConNF.Mathlib.WithBot
-import ConNF.Mathlib.Prod
 import ConNF.Mathlib.Nat
 import ConNF.Mathlib.Pointwise
 import ConNF.Mathlib.Cardinal

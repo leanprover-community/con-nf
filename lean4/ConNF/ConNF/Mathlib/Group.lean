@@ -1,7 +1,5 @@
 import Mathlib.Algebra.Group.Pi
 
-#align_import mathlib.group
-
 /-!
 # Pi instances for groups and monoids
 

@@ -1,8 +1,6 @@
 import ConNF.Mathlib.Group
 import Mathlib.GroupTheory.GroupAction.Defs
 
-#align_import mathlib.group_action
-
 /-!
 # Pi instances for multiplicative actions
 

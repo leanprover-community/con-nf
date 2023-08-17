@@ -1,8 +1,6 @@
 import Mathlib.Order.Hom.Basic
 import Mathlib.Order.CompleteBooleanAlgebra
 
-#align_import mathlib.transfer
-
 /-!
 # Transfer order structures across `equiv`s
 
