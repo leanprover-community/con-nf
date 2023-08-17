@@ -7,17 +7,7 @@ import Mathlib.Data.Prod.Lex
 
 /-!
 # Parameters of the construction
-
-This file is based on sections 3.1 and 3.2 of the paper.
 -/
-
-
-/-!
-We do not assume that our definitions, instances, lemmas and theorems are 'computable';
-that is, can be provably evaluated in finite time by a computer.
-For our purposes, restricting to only computable functions is unnecessary.
--/
-
 
 noncomputable section
 
@@ -29,7 +19,8 @@ universe u
 
 namespace ConNF
 
-/-- The parameters of the constructions. We collect them all in one class for simplicity.
+/--
+The parameters of the constructions. We collect them all in one class for simplicity.
 Note that the ordinal `λ` in the paper is instead referred to here as `Λ`, since the symbol `λ` is
 used for lambda abstractions.
 
@@ -63,8 +54,8 @@ class Params where
   κ_lt_μ : (#κ) < (#μ)
   κ_le_μ_cof : (#κ) ≤ (#μ).ord.cof
 
-export
-  Params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular κr κwf κ_ord Λ_lt_κ μ μr μwf μ_ord μr μ_strong_limit κ_lt_μ κ_le_μ_cof)
+export Params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular κr κwf κ_ord Λ_lt_κ μ μr μwf μ_ord μr μ_strong_limit
+  κ_lt_μ κ_le_μ_cof)
 
 /-!
 ### Explicit parameters
@@ -74,7 +65,6 @@ There exists valid parameters for the model. The smallest parameters are
 * `κ := ℵ_1`
 * `μ = ℶ_{ω_1}`.
 -/
-
 
 -- TODO: Remove the ordering on `κ`.
 example : Params.{0} where
@@ -223,7 +213,7 @@ def TypeIndex :=
   WithBot Λ
 
 @[simp]
-theorem mk_typeIndex : (#TypeIndex) = (#Λ) :=
+theorem mk_typeIndex : #TypeIndex = #Λ :=
   mk_option.trans <| add_eq_left Λ_limit.aleph0_le <| one_le_aleph0.trans Λ_limit.aleph0_le
 
 /- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
@@ -233,100 +223,6 @@ noncomputable instance : LinearOrder TypeIndex :=
 
 noncomputable instance : WellFoundedRelation TypeIndex :=
   IsWellOrder.toHasWellFounded
-
-/-- The litters. This is the type indexing the partition of `atom`. -/
-structure Litter where
-  ν : μ
-  β : TypeIndex
-  γ : Λ
-  β_ne_γ : β ≠ γ
-
-instance : Inhabited Litter :=
-  ⟨⟨default, ⊥, default, WithBot.bot_ne_coe⟩⟩
-
-/-- Litters are equivalent to a subtype of a product type. -/
-def litterEquiv : Litter ≃ { a : μ ×ₗ TypeIndex ×ₗ Λ // a.2.1 ≠ a.2.2 }
-    where
-  toFun L := ⟨⟨L.ν, L.β, L.γ⟩, L.β_ne_γ⟩
-  invFun L := ⟨L.val.1, L.val.2.1, L.val.2.2, L.prop⟩
-  left_inv := by rintro ⟨ν, β, γ, h⟩; rfl
-  right_inv := by rintro ⟨⟨ν, β, γ⟩, h⟩; rfl
-
-instance Subtype.isWellOrder {α : Type _} (p : α → Prop) [LT α] [IsWellOrder α (· < ·)] :
-    IsWellOrder (Subtype p) (· < ·) :=
-  RelEmbedding.isWellOrder (Subtype.relEmbedding (· < ·) p)
-
-instance Lex.isWellOrder {α β : Type _} [LT α] [LT β] [IsWellOrder α (· < ·)]
-    [IsWellOrder β (· < ·)] : IsWellOrder (α ×ₗ β) (· < ·) :=
-  instIsWellOrderProdLex
-
-@[simp]
-theorem mk_litter : #Litter = #μ := by
-  refine
-    litterEquiv.cardinal_eq.trans
-      (le_antisymm ((Cardinal.mk_subtype_le _).trans_eq ?_)
-        ⟨⟨fun ν => ⟨⟨ν, ⊥, default⟩, WithBot.bot_ne_coe⟩, fun ν₁ ν₂ =>
-            congr_arg <| Prod.fst ∘ Subtype.val⟩⟩)
-  have :=
-    mul_eq_left (κ_regular.aleph0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_limit.ne_zero
-  simp only [Lex, mk_prod, lift_id, mk_typeIndex, mul_eq_self Λ_limit.aleph0_le, this]
-
-/-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
-theorem card_Iio_lt (x : μ) : #(Iio x) < #μ :=
-  card_typein_lt (· < ·) x μ_ord.symm
-
-/-- Initial segments (sets of the form `{y | y ≤ x}`) have cardinality `< μ`. -/
-theorem card_Iic_lt (x : μ) : #(Iic x) < #μ :=
-  by
-  rw [← Iio_union_right, mk_union_of_disjoint, mk_singleton]
-  · exact (add_one_le_succ _).trans_lt (μ_strong_limit.isLimit.succ_lt (card_Iio_lt x))
-  · simp
-
-instance : LT Litter :=
-  ⟨litterEquiv ⁻¹'o (· < ·)⟩
-
-/-- Litters are well-ordered. -/
-instance Litter.isWellOrder : IsWellOrder Litter (· < ·) :=
-  RelIso.IsWellOrder.preimage _ litterEquiv
-
-instance : LinearOrder Litter :=
-  linearOrderOfSTO (· < ·)
-
-instance : WellFoundedRelation Litter :=
-  IsWellOrder.toHasWellFounded
-
-/-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
-arbitrary type of cardinality `μ` and partitioning it into suitable sets of litters afterwards, we
-define it as `litter × κ`, which has the correct cardinality and comes with a natural
-partition.
-
-These are not 'atoms' in the ZFU, TTTU or NFU sense; they are simply the elements of the model which
-are in type `τ₋₁`. -/
-def Atom : Type _ :=
-  Litter × κ
-
-instance : Inhabited Atom :=
-  ⟨⟨default, default⟩⟩
-
-instance : LT Atom :=
-  ⟨Prod.Lex (· < ·) (· < ·)⟩
-
-/-- Atoms are well-ordered. -/
-instance Atom.isWellOrder : IsWellOrder Atom (· < ·) :=
-  instIsWellOrderProdLex
-
-instance : LinearOrder Atom :=
-  linearOrderOfSTO (· < ·)
-
-instance : WellFoundedRelation Atom :=
-  IsWellOrder.toHasWellFounded
-
-/-- The cardinality of `τ₋₁` is the cardinality of `μ`.
-We will prove that all types constructed in our model have cardinality equal to `μ`. -/
-@[simp]
-theorem mk_atom : #Atom = #μ := by
-  simp_rw [Atom, mk_prod, lift_id, mk_litter,
-    mul_eq_left (κ_regular.aleph0_le.trans κ_le_μ) κ_le_μ κ_regular.pos.ne']
 
 section Small
 
