@@ -6,7 +6,7 @@ on:
 jobs:
   update_con_nf_branch_and_build:
     runs-on: ubuntu-latest
-    name: Update con-nf branch and build project
+    name: Build project
     steps:
       - name: checkout project
         uses: actions/checkout@v2
@@ -15,6 +15,9 @@ jobs:
 
       - name: install elan
         run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:nightly-2023-08-15
+
+      - name: get cache
+        run: ~/.elan/bin/lake exe cache get
 
       - name: build project
         run: ~/.elan/bin/lake -Kenv=dev build ConNF

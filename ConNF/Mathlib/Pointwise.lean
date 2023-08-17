@@ -1,4 +1,4 @@
-import Mathlib.Data.Set.Pointwise.Smul
+import Mathlib.Data.Set.Pointwise.SMul
 import ConNF.Mathlib.Order
 
 open scoped Pointwise
