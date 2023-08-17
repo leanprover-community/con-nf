@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 0
 
       - name: install elan
-        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:nightly-2023-08-15
 
       - name: build project
         run: lake -Kenv=dev build ConNF
