@@ -3,6 +3,4 @@ _site
 .jekyll-cache
 .jekyll-metadata
 vendor
-blueprint/
-blueprint.pdf
 docs/
