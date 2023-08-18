@@ -9,6 +9,7 @@ import Mathlib.Data.Prod.Lex
 # Parameters of the construction
 -/
 
+-- TODO: Remove all `noncomputable section` annotations.
 noncomputable section
 
 open Cardinal Set
@@ -223,6 +224,9 @@ noncomputable instance : LinearOrder TypeIndex :=
 
 noncomputable instance : WellFoundedRelation TypeIndex :=
   IsWellOrder.toHasWellFounded
+
+noncomputable instance : WellFoundedLT TypeIndex :=
+  inferInstance
 
 section Small
 

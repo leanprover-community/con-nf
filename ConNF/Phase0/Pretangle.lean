@@ -1,11 +1,8 @@
-import ConNF.Phase0.Params
-
-#align_import phase0.pretangle
+import ConNF.Phase0.Litter
 
 /-!
 # Pretangles
 -/
-
 
 noncomputable section
 
@@ -15,29 +12,32 @@ namespace ConNF
 
 variable [Params.{u}] {α : Λ}
 
+-- TODO: Convert this to a dependent product using paths, just like structural permutations.
+
 /-- A *pretangle* is an object that may become a *tangle*, an element of the model.
 The type of pretangles forms a model of TTT without extensionality. -/
 def Pretangle : TypeIndex → Type u
   | ⊥ => Atom
-  | (α : Λ) => ∀ β : TypeIndex, β < α → Set (pretangle β)
+  | (α : Λ) => ∀ β : TypeIndex, β < α → Set (Pretangle β)
+termination_by Pretangle x => x
 
 namespace Pretangle
 
 /-- The "identity" equivalence between `atom` and `pretangle ⊥`. -/
 def toBot : Atom ≃ Pretangle ⊥ :=
-  Equiv.cast <| by unfold pretangle
+  Equiv.cast <| by unfold Pretangle; rfl
 
 /-- The "identity" equivalence between `pretangle ⊥` and `atom`. -/
 def ofBot : Pretangle ⊥ ≃ Atom :=
-  Equiv.cast <| by unfold pretangle
+  Equiv.cast <| by unfold Pretangle; rfl
 
 /-- The "identity" equivalence between `Π β < α, set (pretangle β)` and `pretangle α`. -/
 def toCoe : (∀ β : TypeIndex, β < α → Set (Pretangle β)) ≃ Pretangle α :=
-  Equiv.cast <| by unfold pretangle
+  Equiv.cast <| by unfold Pretangle; rfl
 
 /-- The "identity" equivalence between `pretangle α` and `Π β < α, set (pretangle β)`. -/
 def ofCoe : Pretangle α ≃ ∀ β : TypeIndex, β < α → Set (Pretangle β) :=
-  Equiv.cast <| by unfold pretangle
+  Equiv.cast <| by unfold Pretangle; rfl
 
 @[simp]
 theorem toBot_symm : toBot.symm = ofBot :=
@@ -56,39 +56,32 @@ theorem ofCoe_symm : ofCoe.symm = (toCoe : _ ≃ Pretangle α) :=
   rfl
 
 @[simp]
-theorem toBot_ofBot (a) : toBot (ofBot a) = a := by simp [to_bot, of_bot]
+theorem toBot_ofBot (a) : toBot (ofBot a) = a := by simp [toBot, ofBot]
 
 @[simp]
-theorem ofBot_toBot (a) : ofBot (toBot a) = a := by simp [to_bot, of_bot]
+theorem ofBot_toBot (a) : ofBot (toBot a) = a := by simp [toBot, ofBot]
 
 @[simp]
-theorem toCoe_ofCoe (a : Pretangle α) : toCoe (ofCoe a) = a := by simp [to_coe, of_coe]
+theorem toCoe_ofCoe (a : Pretangle α) : toCoe (ofCoe a) = a := by simp [toCoe, ofCoe]
 
 @[simp]
-theorem ofCoe_toCoe (a) : ofCoe (toCoe a : Pretangle α) = a := by simp [to_coe, of_coe]
+theorem ofCoe_toCoe (a) : ofCoe (toCoe a : Pretangle α) = a := by simp [toCoe, ofCoe]
 
 @[simp]
 theorem toBot_inj {a b} : toBot a = toBot b ↔ a = b :=
-  toBot.Injective.eq_iff
+  toBot.injective.eq_iff
 
 @[simp]
 theorem ofBot_inj {a b} : ofBot a = ofBot b ↔ a = b :=
-  ofBot.Injective.eq_iff
+  ofBot.injective.eq_iff
 
 @[simp]
 theorem toCoe_inj {a b} : (toCoe a : Pretangle α) = toCoe b ↔ a = b :=
-  toCoe.Injective.eq_iff
+  toCoe.injective.eq_iff
 
 @[simp]
 theorem ofCoe_inj {a b : Pretangle α} : ofCoe a = ofCoe b ↔ a = b :=
-  ofCoe.Injective.eq_iff
-
--- Yaël: Note, this instance is useless as it won't fire because `β < α` is not a class
-/-- The membership relation defined on pretangles.
-This is exactly the membership relation on tangles, without the extensionality condition that
-allows this membership relation to be used in a model of TTT. -/
-instance hasMem {β : TypeIndex} (hβ : β < α) : Membership (Pretangle β) (Pretangle α) :=
-  ⟨fun b a => b ∈ ofCoe a β hβ⟩
+  ofCoe.injective.eq_iff
 
 end Pretangle
 
