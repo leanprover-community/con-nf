@@ -128,9 +128,9 @@ def CoherentCoe (φ : StructAction β) (hφ : φ.Lawful) (t : Tangle β) : Prop 
     fMap (Subtype.coe_injective.Ne (Iio.coe_injective.Ne hδε))
         (show Tangle δ from
           (show Allowable δ from
-              allowableDerivative (γ : iicIndex α) δ (coe_lt_coe.mpr hδ)
+              allowableDerivative (γ : IicBot α) δ (coe_lt_coe.mpr hδ)
                 (Allowable.derivative
-                  (show Path ((β : iicIndex α) : TypeIndex) (γ : iicIndex α) from C) π)) •
+                  (show Path ((β : IicBot α) : TypeIndex) (γ : IicBot α) from C) π)) •
             t') =
       (((φ ((C.cons (coe_lt hε)).cons (bot_lt_coe _))).litterMap
               (fMap (Subtype.coe_injective.Ne (Iio.coe_injective.Ne hδε)) t')).get
@@ -143,11 +143,11 @@ def CoherentBot (φ : StructAction β) (hφ : φ.Lawful) : Prop :=
       StructPerm.derivative (C.cons (bot_lt_coe _)) π.toStructPerm • a =
         (φ (C.cons (bot_lt_coe _))).atomMapOrElse a),
     fMap
-        (show ((⊥ : iioIndex α) : TypeIndex) ≠ (ε : iioIndex α) from
-          Subtype.coe_injective.Ne iioIndex.bot_ne_coe)
-        ((show Allowable (⊥ : iioIndex α) from
+        (show ((⊥ : IioBot α) : TypeIndex) ≠ (ε : IioBot α) from
+          Subtype.coe_injective.Ne IioBot.bot_ne_coe)
+        ((show Allowable (⊥ : IioBot α) from
             (Allowable.derivative
-                (show Path ((β : iicIndex α) : TypeIndex) (⊥ : iicIndex α) from
+                (show Path ((β : IicBot α) : TypeIndex) (⊥ : IicBot α) from
                   C.cons (bot_lt_coe _)))
               π) •
           a) =

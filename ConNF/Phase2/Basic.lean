@@ -53,21 +53,21 @@ instance almostTangleData : AlmostTangleData β :=
 instance tangleData : TangleData γ :=
   @id _ lowerTangleData ⟨γ, γ.Prop⟩
 
-noncomputable instance iicIndexCoreTangleData : ∀ β : iicIndex α, CoreTangleData β
+noncomputable instance IicBotCoreTangleData : ∀ β : IicBot α, CoreTangleData β
   | ⟨⊥, h⟩ => Bot.coreTangleData
   | ⟨(β : Λ), hβ⟩ => lowerCoreTangleData ⟨β, coe_le_coe.mp hβ⟩
 
-noncomputable instance iioIndexCoreTangleData (β : iioIndex α) : CoreTangleData β :=
-  show CoreTangleData (⟨β, le_of_lt β.Prop⟩ : iicIndex α) from inferInstance
+noncomputable instance IioBotCoreTangleData (β : IioBot α) : CoreTangleData β :=
+  show CoreTangleData (⟨β, le_of_lt β.Prop⟩ : IicBot α) from inferInstance
 
-noncomputable instance iioIndexPositionedTangleData : ∀ β : iioIndex α, PositionedTangleData β
+noncomputable instance IioBotPositionedTangleData : ∀ β : IioBot α, PositionedTangleData β
   | ⟨⊥, h⟩ => Bot.positionedTangleData
   | ⟨(β : Λ), hβ⟩ => lowerPositionedTangleData ⟨β, coe_lt_coe.mp hβ⟩
 
-instance hasCoeIioIicIndex : Coe (Iio α) (iicIndex α) :=
+instance hasCoeIioIicIndex : Coe (Iio α) (IicBot α) :=
   ⟨fun β => ⟨some β, le_of_lt (WithBot.coe_lt_coe.mpr β.Prop)⟩⟩
 
-instance hasCoeIioIndexIicIndex : Coe (iioIndex α) (iicIndex α) :=
+instance hasCoeIioIndexIicIndex : Coe (IioBot α) (IicBot α) :=
   ⟨fun β => ⟨β, le_of_lt β.Prop⟩⟩
 
 instance [Phase2Data α] {X : Type _} {δ : Iio α} [inst : MulAction (Allowable δ) X] :
@@ -77,32 +77,32 @@ instance [Phase2Data α] {X : Type _} {δ : Iio α} [inst : MulAction (Allowable
 instance mulActionTypeIndex {δ : Iio α} : MulAction (Allowable δ) (Tangle (δ : Λ)) :=
   show MulAction (Allowable δ) (Tangle δ) from inferInstance
 
-noncomputable instance mulActionIioIndex {δ : iioIndex α} :
-    MulAction (Allowable (δ : iicIndex α)) (Tangle δ) :=
+noncomputable instance mulActionIioIndex {δ : IioBot α} :
+    MulAction (Allowable (δ : IicBot α)) (Tangle δ) :=
   show MulAction (Allowable δ) (Tangle δ) from inferInstance
 
 end Phase2Data
 
 class Phase2Assumptions extends Phase2Data α where
   allowableDerivative :
-    ∀ (β : iicIndex α) (γ : iicIndex α) (hγ : (γ : TypeIndex) < β), Allowable β →* Allowable γ
+    ∀ (β : IicBot α) (γ : IicBot α) (hγ : (γ : TypeIndex) < β), Allowable β →* Allowable γ
   allowableDerivative_eq :
-    ∀ (β : iicIndex α) (γ : iicIndex α) (hγ : (γ : TypeIndex) < β) (π : Allowable β),
+    ∀ (β : IicBot α) (γ : IicBot α) (hγ : (γ : TypeIndex) < β) (π : Allowable β),
       StructPerm.derivative (Quiver.Path.nil.cons hγ) π.toStructPerm =
         (allowable_derivative β γ hγ π).toStructPerm
   smul_designatedSupport {β : Iic α} (t : Tangle β) (π : Allowable β) :
     π • (designatedSupport t : Set (SupportCondition β)) = designatedSupport (π • t)
-  smul_fMap {β : iicIndex α} (γ : iioIndex α) (δ : Iio α) (hγ : (γ : TypeIndex) < β)
+  smul_fMap {β : IicBot α} (γ : IioBot α) (δ : Iio α) (hγ : (γ : TypeIndex) < β)
     (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (π : Allowable β) (t : Tangle γ) :
     allowable_derivative β δ hδ π • fMap (Subtype.coe_injective.Ne hγδ) t =
       fMap (Subtype.coe_injective.Ne hγδ) (allowable_derivative β γ hγ π • t)
-  allowableOfSmulFMap (β : Iic α) (πs : ∀ γ : iioIndex α, (γ : TypeIndex) < β → Allowable γ) :
-    (∀ (γ : iioIndex α) (δ : Iio α) (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β)
+  allowableOfSmulFMap (β : Iic α) (πs : ∀ γ : IioBot α, (γ : TypeIndex) < β → Allowable γ) :
+    (∀ (γ : IioBot α) (δ : Iio α) (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β)
         (hγδ : γ ≠ δ) (t : Tangle γ),
         πs δ hδ • fMap (Subtype.coe_injective.Ne hγδ) t =
           fMap (Subtype.coe_injective.Ne hγδ) (πs γ hγ • t)) →
-      Allowable (β : iicIndex α)
-  allowableOfSmulFMap_derivative_eq {β : Iic α} {πs} {h} (γ : iioIndex α)
+      Allowable (β : IicBot α)
+  allowableOfSmulFMap_derivative_eq {β : Iic α} {πs} {h} (γ : IioBot α)
     (hγ : (γ : TypeIndex) < β) :
     allowable_derivative β γ hγ (allowable_of_smul_f_map β πs h) = πs γ hγ
 
@@ -111,48 +111,48 @@ export
 
 variable {α} [Phase2Assumptions α]
 
-noncomputable def Allowable.derivative {β : iicIndex α} :
-    ∀ {γ : iicIndex α} (A : Quiver.Path (β : TypeIndex) γ), Allowable β →* Allowable γ :=
+noncomputable def Allowable.derivative {β : IicBot α} :
+    ∀ {γ : IicBot α} (A : Quiver.Path (β : TypeIndex) γ), Allowable β →* Allowable γ :=
   @Path.iicRec _ α β (fun δ A => Allowable β →* Allowable δ) (MonoidHom.id _) fun γ δ A h =>
     (allowableDerivative γ δ h).comp
 
 @[simp]
-theorem Allowable.derivative_nil {β : iicIndex α} :
+theorem Allowable.derivative_nil {β : IicBot α} :
     Allowable.derivative (Quiver.Path.nil : Quiver.Path (β : TypeIndex) β) = MonoidHom.id _ := by
   rw [allowable.derivative, path.Iic_rec_nil]
 
 @[simp]
-theorem Allowable.derivative_cons {β γ δ : iicIndex α} (A : Quiver.Path (β : TypeIndex) γ)
+theorem Allowable.derivative_cons {β γ δ : IicBot α} (A : Quiver.Path (β : TypeIndex) γ)
     (h : δ < γ) :
     Allowable.derivative (A.cons h) = (allowableDerivative γ δ h).comp (Allowable.derivative A) :=
   by rw [allowable.derivative, path.Iic_rec_cons]
 
-theorem Allowable.derivative_cons_apply (β γ δ : iicIndex α) (A : Quiver.Path (β : TypeIndex) γ)
+theorem Allowable.derivative_cons_apply (β γ δ : IicBot α) (A : Quiver.Path (β : TypeIndex) γ)
     (h : δ < γ) (π : Allowable β) :
     Allowable.derivative (A.cons h) π = allowableDerivative γ δ h (Allowable.derivative A π) := by
   rw [allowable.derivative_cons] <;> rfl
 
 theorem Allowable.derivative_cons_apply' (β : Iio α) (γ : Iic α) (δ : Iio α)
     (A : Quiver.Path (β : TypeIndex) γ) (h : (δ : TypeIndex) < γ) (π : Allowable β) :
-    @Allowable.derivative _ _ _ _ (β : iicIndex α) (δ : iicIndex α) (A.cons h) π =
-      allowableDerivative (γ : iicIndex α) (δ : iicIndex α) h
+    @Allowable.derivative _ _ _ _ (β : IicBot α) (δ : IicBot α) (A.cons h) π =
+      allowableDerivative (γ : IicBot α) (δ : IicBot α) h
         (Allowable.derivative
-          (show Quiver.Path ((β : iicIndex α) : TypeIndex) (γ : iicIndex α) from A) π) :=
+          (show Quiver.Path ((β : IicBot α) : TypeIndex) (γ : IicBot α) from A) π) :=
   by rw [← allowable.derivative_cons_apply]
 
 theorem Allowable.derivative_cons_apply'' (β : Iio α) (γ : Iic α)
     (A : Quiver.Path (β : TypeIndex) γ) (π : Allowable β) :
-    @Allowable.derivative _ _ _ _ (β : iicIndex α) (⊥ : iicIndex α) (A.cons <| bot_lt_coe _) π =
-      allowableDerivative (γ : iicIndex α) (⊥ : iicIndex α) (bot_lt_coe _)
+    @Allowable.derivative _ _ _ _ (β : IicBot α) (⊥ : IicBot α) (A.cons <| bot_lt_coe _) π =
+      allowableDerivative (γ : IicBot α) (⊥ : IicBot α) (bot_lt_coe _)
         (Allowable.derivative
-          (show Quiver.Path ((β : iicIndex α) : TypeIndex) (γ : iicIndex α) from A) π) :=
+          (show Quiver.Path ((β : IicBot α) : TypeIndex) (γ : IicBot α) from A) π) :=
   by rw [← allowable.derivative_cons_apply] <;> rfl
 
-theorem Allowable.derivative_eq {β γ : iicIndex α} (h : γ < β) :
+theorem Allowable.derivative_eq {β γ : IicBot α} (h : γ < β) :
     allowableDerivative β γ h = Allowable.derivative (Quiver.Path.nil.cons h) := by
   rw [allowable.derivative_cons, allowable.derivative_nil, MonoidHom.comp_id]
 
-theorem Allowable.derivative_derivative {β γ δ : iicIndex α} (A : Quiver.Path (β : TypeIndex) γ)
+theorem Allowable.derivative_derivative {β γ δ : IicBot α} (A : Quiver.Path (β : TypeIndex) γ)
     (B : Quiver.Path (γ : TypeIndex) δ) (π : Allowable β) :
     Allowable.derivative B (Allowable.derivative A π) = Allowable.derivative (A.comp B) π :=
   by
@@ -169,7 +169,7 @@ theorem Allowable.derivative_derivative {β γ δ : iicIndex α} (A : Quiver.Pat
           from B)]
     simp only [MonoidHom.coe_comp, Function.comp_apply, ih, ← allowable.derivative_cons_apply]
 
-theorem Allowable.derivative_toStructPerm {β γ : iicIndex α} (A : Quiver.Path (β : TypeIndex) γ)
+theorem Allowable.derivative_toStructPerm {β γ : IicBot α} (A : Quiver.Path (β : TypeIndex) γ)
     (π : Allowable β) :
     StructPerm.derivative A π.toStructPerm = (Allowable.derivative A π).toStructPerm :=
   by
@@ -182,7 +182,7 @@ theorem Allowable.derivative_toStructPerm {β γ : iicIndex α} (A : Quiver.Path
       allowable_derivative_eq, ← ih π, struct_perm.derivative_derivative, Quiver.Path.comp_cons,
       Quiver.Path.comp_nil]
 
-theorem Allowable.derivative_smul {β γ : iicIndex α} (A : Quiver.Path (β : TypeIndex) γ)
+theorem Allowable.derivative_smul {β γ : IicBot α} (A : Quiver.Path (β : TypeIndex) γ)
     (π : Allowable β) {X : Type _} [MulAction (StructPerm γ) X] (x : X) :
     Allowable.derivative A π • x = StructPerm.derivative A π.toStructPerm • x := by
   rw [allowable.derivative_to_struct_perm] <;> rfl
@@ -221,7 +221,7 @@ theorem smul_mem_designatedSupport {β : Iio α} {c : SupportCondition β} {t : 
         ((show Allowable (β : Iic α) from π) • c)).mp
     ⟨c, h, rfl⟩
 
-theorem toStructPerm_smul_fMap (β : iicIndex α) (γ : iioIndex α) (δ : Iio α)
+theorem toStructPerm_smul_fMap (β : IicBot α) (γ : IioBot α) (δ : Iio α)
     (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (π : Allowable β)
     (t : Tangle γ) :
     StructPerm.derivative (Quiver.Path.nil.cons hδ) π.toStructPerm •

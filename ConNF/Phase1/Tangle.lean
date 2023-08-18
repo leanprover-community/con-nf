@@ -19,7 +19,7 @@ variable [Params.{u}] [PositionData]
 
 open Code IioIndex
 
-variable (α : Λ) [CoreTangleCumul α] {β : iioIndex α} {γ : Iio α}
+variable (α : Λ) [CoreTangleCumul α] {β : IioBot α} {γ : Iio α}
 
 abbrev Extensions :=
   ∀ β : Iio α, Set (Tangle β)
@@ -33,7 +33,7 @@ relating each extension of the semitangle. -/
 @[nolint has_nonempty_instance]
 inductive Preference (members : Extensions α)
   |
-  base (atoms : Set (Tangle (⊥ : iioIndex α))) :
+  base (atoms : Set (Tangle (⊥ : IioBot α))) :
     (∀ γ, aMap bot_ne_coe atoms = members γ) → preference
   |
   proper (β : Iio α) :
@@ -292,7 +292,7 @@ theorem smul_extension (f : AllowablePerm α) (s : Set (Tangle β)) :
   rw [← smul_extension_apply]
   rfl
 
-theorem smul_aux₁ {s : Set (Tangle (⊥ : iioIndex α))}
+theorem smul_aux₁ {s : Set (Tangle (⊥ : IioBot α))}
     (h : ∀ γ : Iio α, aMap bot_ne_coe s = (e γ : Set (Tangle (iioCoe γ)))) (γ : Iio α) :
     aMap bot_ne_coe (f • s) = (f • e) γ := by
   simpa only [smul_A_map] using congr_arg (fun c => f • c) (h γ)
@@ -394,7 +394,7 @@ theorem smul_intro (f : AllowablePerm α) (s : Set (Tangle β)) (hs) :
     rw [allowable_perm.smul_extension]
 
 -- TODO: Move next two lemmas elsewhere.
-theorem allowableToStructPerm_bot (π : Allowable (⊥ : iioIndex α)) :
+theorem allowableToStructPerm_bot (π : Allowable (⊥ : IioBot α)) :
     CoreTangleData.allowableToStructPerm π = StructPerm.toBotIso.toMonoidHom π :=
   rfl
 
@@ -412,7 +412,7 @@ theorem ConNF.SemiallowablePerm.toAllowable_bot (π : SemiallowablePerm α) :
 /-- For any near-litter `N`, the code `(α, -1, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
 def newTypedNearLitter (N : NearLitter) : NewTangle α :=
-  ⟨intro (show Set (Tangle (⊥ : iioIndex α)) from N.2.1) <| Code.isEvenBot _,
+  ⟨intro (show Set (Tangle (⊥ : IioBot α)) from N.2.1) <| Code.isEvenBot _,
     ⟨⟨{(Sum.inr N, default)}, small_singleton _, fun π h =>
         by
         simp only [Subtype.val_eq_coe, Option.smul_some, smul_intro, Option.some_inj]

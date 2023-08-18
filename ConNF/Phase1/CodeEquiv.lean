@@ -39,7 +39,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [PositionData] {α : Λ} {β : iioIndex α} {γ : Iio α} [CoreTangleCumul α]
+variable [Params.{u}] [PositionData] {α : Λ} {β : IioBot α} {γ : Iio α} [CoreTangleCumul α]
   [AlmostTangleCumul α] [PositionedTangleCumul α]
 
 open IioIndex
@@ -299,12 +299,12 @@ theorem ext : ∀ {c d : Code α}, c ≡ d → c.1 = d.1 → c = d
 
 @[simp]
 theorem bot_left_iff {s} :
-    mk ⊥ s ≡ c ↔ mk ⊥ s = c ∨ ∃ β : Iio α, c = mk β (aMap iioIndex.bot_ne_coe s) := by
+    mk ⊥ s ≡ c ↔ mk ⊥ s = c ∨ ∃ β : Iio α, c = mk β (aMap IioBot.bot_ne_coe s) := by
   simp [equiv_iff, A_map_code_ne_bot.symm, eq_comm]
 
 @[simp]
 theorem bot_right_iff {s} :
-    c ≡ mk ⊥ s ↔ c = mk ⊥ s ∨ ∃ β : Iio α, c = mk β (aMap iioIndex.bot_ne_coe s) := by
+    c ≡ mk ⊥ s ↔ c = mk ⊥ s ∨ ∃ β : Iio α, c = mk β (aMap IioBot.bot_ne_coe s) := by
   simp [equiv_iff, A_map_code_ne_bot.symm, eq_comm]
 
 @[simp]

@@ -2261,7 +2261,7 @@ theorem completeNearLitterPerm_smul_nearLitter (hπf : π.Free) (A : ExtendedInd
   rw [complete_near_litter_map_coe hπf]
   rfl
 
-def AllowableBelow (hπf : π.Free) (γ : iicIndex α) (A : Path (β : TypeIndex) γ) : Prop :=
+def AllowableBelow (hπf : π.Free) (γ : IicBot α) (A : Path (β : TypeIndex) γ) : Prop :=
   ∃ ρ : Allowable γ,
     ∀ B : ExtendedIndex γ,
       StructPerm.ofBot (StructPerm.derivative B ρ.toStructPerm) =
@@ -2305,7 +2305,7 @@ theorem exists_nil_cons_of_path' {β γ : TypeIndex} (A : Path (β : TypeIndex) 
     exact ⟨ε, hε, B.cons hδ, rfl⟩
 
 theorem exists_nil_cons_of_path {β : Iic α} (A : ExtendedIndex β) :
-    ∃ γ : iioIndex α,
+    ∃ γ : IioBot α,
       ∃ h : (γ : TypeIndex) < β,
         ∃ B : ExtendedIndex γ, A = ((Path.nil : Path (β : TypeIndex) β).cons h).comp B :=
   by
@@ -2315,14 +2315,14 @@ theorem exists_nil_cons_of_path {β : Iic α} (A : ExtendedIndex β) :
   · intro h
     cases path.eq_of_length_zero A h
 
-theorem iioIndex_cases (δ : iioIndex α) : δ = ⊥ ∨ ∃ ε : Iio α, δ = ε :=
+theorem IioBot_cases (δ : IioBot α) : δ = ⊥ ∨ ∃ ε : Iio α, δ = ε :=
   by
   obtain ⟨_ | δ, hδ⟩ := δ
   · exact Or.inl rfl
   · exact Or.inr ⟨⟨δ, coe_lt_coe.mp hδ⟩, rfl⟩
 
 theorem allowableBelowExtends (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
-    (h : ∀ (δ : iioIndex α) (h : (δ : TypeIndex) < γ), AllowableBelow hπf δ (A.cons h)) :
+    (h : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ), AllowableBelow hπf δ (A.cons h)) :
     AllowableBelow hπf γ A := by
   choose ρs hρ using h
   refine' ⟨allowable_of_smul_f_map γ ρs _, _⟩

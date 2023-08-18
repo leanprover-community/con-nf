@@ -278,7 +278,7 @@ section CoreTangleCumul
 
 variable [CoreTangleCumul α]
 
-instance CoreTangleCumul.toCoreTangleData : ∀ β : iioIndex α, CoreTangleData β
+instance CoreTangleCumul.toCoreTangleData : ∀ β : IioBot α, CoreTangleData β
   | ⟨⊥, h⟩ => Bot.coreTangleData
   | ⟨(β : Λ), hβ⟩ => CoreTangleCumul.data ⟨β, coe_lt_coe.1 hβ⟩
 
@@ -295,7 +295,7 @@ section PositionedTangleCumul
 
 variable [CoreTangleCumul α] [PositionedTangleCumul α]
 
-instance PositionedTangleCumul.toPositionedTangleData : ∀ β : iioIndex α, PositionedTangleData β
+instance PositionedTangleCumul.toPositionedTangleData : ∀ β : IioBot α, PositionedTangleData β
   | ⟨⊥, h⟩ => Bot.positionedTangleData
   | ⟨(β : Λ), hβ⟩ => PositionedTangleCumul.data ⟨β, coe_lt_coe.1 hβ⟩
 

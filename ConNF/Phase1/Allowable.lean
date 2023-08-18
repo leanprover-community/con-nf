@@ -21,7 +21,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] (α : Λ) [CoreTangleCumul α] (β : iioIndex α) (γ : Iio α)
+variable [Params.{u}] (α : Λ) [CoreTangleCumul α] (β : IioBot α) (γ : Iio α)
 
 open Code
 
@@ -29,7 +29,7 @@ open Code
 permutation) together with allowable permutations on all `γ < β`. This forms a group structure
 automatically. -/
 def SemiallowablePerm : Type u :=
-  ∀ β : iioIndex α, Allowable β
+  ∀ β : IioBot α, Allowable β
 deriving Group
 
 namespace SemiallowablePerm

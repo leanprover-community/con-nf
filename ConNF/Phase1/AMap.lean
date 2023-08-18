@@ -45,7 +45,7 @@ open Code
 
 section AMap
 
-variable {α : Λ} {γ : iioIndex α} [CoreTangleData γ] [PositionedTangleData γ] {β : Iio α}
+variable {α : Λ} {γ : IioBot α} [CoreTangleData γ] [PositionedTangleData γ] {β : Iio α}
   [CoreTangleData (iioCoe β)] [PositionedTangleData (iioCoe β)] [AlmostTangleData β] (hγβ : γ ≠ β)
 
 theorem coe_ne : γ ≠ β → (γ : TypeIndex) ≠ (β : Λ) :=
@@ -116,7 +116,7 @@ theorem aMap_injective : Injective (aMap hγβ) :=
     Pairwise.biUnion_injective (fun x y h => localCardinal_disjoint <| (fMap_injective _).Ne h)
       fun _ => localCardinal_nonempty _
 
-variable {δ : iioIndex α} [CoreTangleData δ] [PositionedTangleData δ]
+variable {δ : IioBot α} [CoreTangleData δ] [PositionedTangleData δ]
   {hδβ : (δ : TypeIndex) ≠ (β : Λ)}
 
 theorem aMap_disjoint_range {hδβ} (c : Set (Tangle γ)) (d : Set (Tangle δ)) (hc : c.Nonempty)
@@ -176,7 +176,7 @@ theorem code_wf : WellFounded (InvImage μr (codeMinMap : NonemptyCode α → μ
 
 section Extension
 
-variable [AlmostTangleCumul α] {β : iioIndex α}
+variable [AlmostTangleCumul α] {β : IioBot α}
 
 /-- The A-map, phrased as a function on sets of `γ`-tangles, but if `γ = β`, this is the
 identity function. This is the true alternative extension map. -/
@@ -199,7 +199,7 @@ theorem extension_ne (hβγ : β ≠ γ) : extension s γ = aMap hβγ s :=
 
 end Extension
 
-variable [AlmostTangleCumul α] (γ : iioIndex α) (β : Iio α) (c d : Code α)
+variable [AlmostTangleCumul α] (γ : IioBot α) (β : Iio α) (c d : Code α)
 
 /-- The A-map, phrased as a function on `α`-codes, but if the code's level matches `β`, this is the
 identity function. This is written in a weird way in order to make `(A_map_code β c).1` defeq
