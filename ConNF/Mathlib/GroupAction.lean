@@ -13,7 +13,6 @@ This file defines instances for mul_action and related structures on Pi types.
 * `group_theory.group_action.sum`
 -/
 
-
 open Pi
 
 universe u v w
@@ -28,7 +27,7 @@ variable (x y : ∀ i, f i) (i : I)
 
 namespace PiProp
 
-@[to_additive PiProp.hasVadd]
+@[to_additive]
 instance hasSmul {α : Type _} [∀ i, SMul α <| f i] : SMul α (∀ i : I, f i) :=
   ⟨fun s x => fun i => s • x i⟩
 
@@ -36,15 +35,15 @@ instance hasSmul {α : Type _} [∀ i, SMul α <| f i] : SMul α (∀ i : I, f i
 theorem smul_def {α : Type _} [∀ i, SMul α <| f i] (s : α) : s • x = fun i => s • x i :=
   rfl
 
-@[simp, to_additive]
+@[to_additive (attr := simp)]
 theorem smul_apply {α : Type _} [∀ i, SMul α <| f i] (s : α) : (s • x) i = s • x i :=
   rfl
 
-@[to_additive PiProp.hasVadd']
+@[to_additive]
 instance hasSmul' {g : I → Type _} [∀ i, SMul (f i) (g i)] : SMul (∀ i, f i) (∀ i : I, g i) :=
   ⟨fun s x => fun i => s i • x i⟩
 
-@[simp, to_additive]
+@[to_additive (attr := simp)]
 theorem smul_apply' {g : I → Type _} [∀ i, SMul (f i) (g i)] (s : ∀ i, f i) (x : ∀ i, g i) :
     (s • x) i = s i • x i :=
   rfl
@@ -81,14 +80,14 @@ instance smul_comm_class'' {g : I → Type _} {h : I → Type _} [∀ i, SMul (g
 
 instance {α : Type _} [∀ i, SMul α <| f i] [∀ i, SMul αᵐᵒᵖ <| f i] [∀ i, IsCentralScalar α (f i)] :
     IsCentralScalar α (∀ i, f i) :=
-  ⟨fun r m => funext fun i => op_smul_eq_smul _ _⟩
+  ⟨fun _ _ => funext fun _ => op_smul_eq_smul _ _⟩
 
 /-- If `f i` has a faithful scalar action for a given `i`, then so does `Π i, f i`. This is
 not an instance as `i` cannot be inferred. -/
 @[to_additive PiProp.has_faithful_vadd_at]
 theorem faithfulSMul_at {α : Type _} [∀ i, SMul α <| f i] [∀ i, Nonempty (f i)] (i : I)
     [FaithfulSMul α (f i)] : FaithfulSMul α (∀ i, f i) :=
-  ⟨fun x y h =>
+  ⟨fun h =>
     eq_of_smul_eq_smul fun a : f i => by
       classical
       have :=
@@ -105,43 +104,43 @@ instance faithfulSMul {α : Type _} [Nonempty I] [∀ i, SMul α <| f i] [∀ i,
 instance mulAction (α) {m : Monoid α} [∀ i, MulAction α <| f i] : @MulAction α (∀ i : I, f i) m
     where
   smul := (· • ·)
-  hMul_smul r s f := funext fun i => hMul_smul _ _ _
-  one_smul f := funext fun i => one_smul α _
+  mul_smul _ _ _ := funext fun _ => mul_smul _ _ _
+  one_smul _ := funext fun _ => one_smul α _
 
 @[to_additive]
 instance mulAction' {g : I → Type _} {m : ∀ i, Monoid (f i)} [∀ i, MulAction (f i) (g i)] :
     @MulAction (∀ i, f i) (∀ i : I, g i) (@PiProp.monoid I f m)
     where
   smul := (· • ·)
-  hMul_smul r s f := funext fun i => hMul_smul _ _ _
-  one_smul f := funext fun i => one_smul _ _
+  mul_smul _ _ _ := funext fun _ => mul_smul _ _ _
+  one_smul _ := funext fun _ => one_smul _ _
 
 instance distribMulAction (α) {m : Monoid α} {n : ∀ i, AddMonoid <| f i}
     [∀ i, DistribMulAction α <| f i] :
     @DistribMulAction α (∀ i : I, f i) m (@PiProp.addMonoid I f n) :=
   { PiProp.mulAction _ with
-    smul_zero := fun c => funext fun i => smul_zero _
-    smul_add := fun c f g => funext fun i => smul_add _ _ _ }
+    smul_zero := fun c => funext fun _ => smul_zero c
+    smul_add := fun c _ _ => funext fun _ => smul_add c _ _ }
 
 instance distribMulAction' {g : I → Type _} {m : ∀ i, Monoid (f i)} {n : ∀ i, AddMonoid <| g i}
     [∀ i, DistribMulAction (f i) (g i)] :
     @DistribMulAction (∀ i, f i) (∀ i, g i) (@PiProp.monoid I f m) (@PiProp.addMonoid I g n)
     where
-  smul_add := by intros; ext x; apply smul_add
-  smul_zero := by intros; ext x; apply smul_zero
+  smul_add := fun a b c => funext fun x => smul_add (a x) (b x) (c x)
+  smul_zero := fun a => funext fun x => smul_zero (a x)
 
 instance mulDistribMulAction (α) {m : Monoid α} {n : ∀ i, Monoid <| f i}
     [∀ i, MulDistribMulAction α <| f i] :
     @MulDistribMulAction α (∀ i : I, f i) m (@PiProp.monoid I f n) :=
   { PiProp.mulAction _ with
-    smul_one := fun c => funext fun i => smul_one _
-    smul_hMul := fun c f g => funext fun i => smul_mul' _ _ _ }
+    smul_one := fun _ => funext fun _ => smul_one _
+    smul_mul := fun _ _ _ => funext fun _ => smul_mul' _ _ _ }
 
 instance mulDistribMulAction' {g : I → Type _} {m : ∀ i, Monoid (f i)} {n : ∀ i, Monoid <| g i}
     [∀ i, MulDistribMulAction (f i) (g i)] :
     @MulDistribMulAction (∀ i, f i) (∀ i, g i) (@PiProp.monoid I f m) (@PiProp.monoid I g n)
     where
-  smul_hMul := by intros; ext x; apply smul_mul'
+  smul_mul := by intros; ext x; apply smul_mul'
   smul_one := by intros; ext x; apply smul_one
 
 end PiProp
