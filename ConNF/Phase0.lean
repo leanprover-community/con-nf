@@ -5,4 +5,4 @@ import ConNF.Phase0.NearLitterPerm
 import ConNF.Phase0.Index
 import ConNF.Phase0.Pretangle
 import ConNF.Phase0.StructPerm
--- import ConNF.Phase0.Support
+import ConNF.Phase0.Support
