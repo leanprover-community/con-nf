@@ -18,6 +18,8 @@ levels. Interaction will be introduced in phase 2.
 
 open Function Set WithBot
 
+open scoped Pointwise
+
 noncomputable section
 
 universe u
@@ -121,6 +123,14 @@ namespace Allowable
 
 variable {α}
 variable [AlmostTangleData α]
+
+@[simp]
+theorem smul_fst (π : Allowable α) (N : NearLitter) : (π • N).fst = π • N.fst :=
+  rfl
+
+@[simp]
+theorem coe_smul (π : Allowable α) (N : NearLitter) : ((π • N) : Set Atom) = π • (N : Set Atom) :=
+  rfl
 
 /--
 The action of allowable permutations on tangles commutes with the `typed_near_litter` function mapping
@@ -285,6 +295,14 @@ instance CoreTangleCumul.toCoreTangleData : ∀ β : IioBot α, CoreTangleData �
 
 instance CoreTangleCumul.toCoreTangleData' (β : Iio α) : CoreTangleData β :=
   show CoreTangleData (iioCoe β) by infer_instance
+
+instance CoreTangleCumul.toCoreTangleData'' (β : TypeIndex) (hβ : β < α) :
+    CoreTangleData (show IioBot α from ⟨β, hβ⟩) :=
+  CoreTangleCumul.toCoreTangleData α ⟨β, hβ⟩
+
+instance CoreTangleCumul.toCoreTangleData''' (β : Λ) (hβ : (β : TypeIndex) < α) :
+    CoreTangleData (show IioBot α from ⟨β, hβ⟩) :=
+  CoreTangleCumul.toCoreTangleData α ⟨β, hβ⟩
 
 end CoreTangleCumul
 

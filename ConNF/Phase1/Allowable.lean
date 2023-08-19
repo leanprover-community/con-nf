@@ -1,13 +1,9 @@
-import ConNF.Mathlib.Prod
 import Mathlib.GroupTheory.GroupAction.Sigma
 import ConNF.Phase1.CodeEquiv
-
-#align_import phase1.allowable
 
 /-!
 # Allowable permutations
 -/
-
 
 -- Note to whoever fixes this file: We may want to use `type_index` instead of `Λ` in some places
 -- now that supports are defined in these cases.
@@ -30,46 +26,47 @@ permutation) together with allowable permutations on all `γ < β`. This forms a
 automatically. -/
 def SemiallowablePerm : Type u :=
   ∀ β : IioBot α, Allowable β
-deriving Group
+
+instance : Group (SemiallowablePerm α) := Pi.group
 
 namespace SemiallowablePerm
 
-variable {α} (π : SemiallowablePerm α) (c : Code α)
+variable {α}
+variable (π : SemiallowablePerm α) (c : Code α)
 
 /-- The allowable permutation at a lower level corresponding to a semi-allowable permutation. -/
-noncomputable def toAllowable : SemiallowablePerm α →* Allowable β :=
-  ⟨fun f => f β, rfl, fun _ _ => rfl⟩
+noncomputable def toAllowable : SemiallowablePerm α →* Allowable β
+    where
+  toFun f := f β
+  map_one' := rfl
+  map_mul' _ _ := rfl
 
 /-- Reinterpret a semi-allowable permutation as a structural permutation. -/
 noncomputable def toStructPerm : SemiallowablePerm α →* StructPerm α
     where
-  toFun f := StructPerm.toCoe fun β hβ => (f ⟨β, hβ⟩).toStructPerm
+  toFun f := StructPerm.toCoe fun β hβ => Allowable.toStructPerm (f ⟨β, hβ⟩)
   map_one' :=
-    StructPerm.ofCoe.Injective <|
+    StructPerm.ofCoe.injective <|
       funext fun β =>
         funext fun hβ =>
           match β, hβ with
-          | ⊥, _ =>
-            by
-            simp only [StructPerm.of_coe_to_coe, StructPerm.of_coe_one, Pi.one_apply]
-            exact StructPerm.to_bot_one
-          | (β : Λ), (hβ : ↑β < ↑α) =>
-            by
-            simp only [StructPerm.of_coe_to_coe, StructPerm.of_coe_one, Pi.one_apply]
-            exact allowable.to_StructPerm.map_one
+          | ⊥, _ => by
+            simp only [StructPerm.ofCoe_toCoe, StructPerm.ofCoe_one, Pi.one_apply]
+            exact StructPerm.toBot_one
+          | (β : Λ), (hβ : (β : TypeIndex) < α) => by
+            simp only [StructPerm.ofCoe_toCoe, StructPerm.ofCoe_one, Pi.one_apply]
+            exact (Allowable.toStructPerm (α := show IioBot α from ⟨β, hβ⟩)).map_one
   map_mul' f g :=
-    StructPerm.ofCoe.Injective <|
+    StructPerm.ofCoe.injective <|
       funext fun β =>
         funext fun hβ =>
           match β, hβ with
-          | ⊥, _ =>
-            by
-            simp only [StructPerm.of_coe_to_coe, StructPerm.of_coe_mul, Pi.mul_apply]
-            exact StructPerm.to_bot_mul _ _
-          | (β : Λ), (hβ : ↑β < ↑α) =>
-            by
-            simp only [StructPerm.of_coe_to_coe, StructPerm.of_coe_mul, Pi.mul_apply]
-            exact allowable.to_StructPerm.map_mul _ _
+          | ⊥, _ => by
+            simp only [StructPerm.ofCoe_toCoe, StructPerm.ofCoe_mul, Pi.mul_apply]
+            exact StructPerm.toBot_mul _ _
+          | (β : Λ), (hβ : (β : TypeIndex) < α) => by
+            simp only [StructPerm.ofCoe_toCoe, StructPerm.ofCoe_mul, Pi.mul_apply]
+            exact (Allowable.toStructPerm (α := show IioBot α from ⟨β, hβ⟩)).map_mul _ _
 
 section
 
@@ -79,7 +76,8 @@ instance mulActionOfStructPerm : MulAction (SemiallowablePerm α) X :=
   MulAction.compHom _ toStructPerm
 
 @[simp]
-theorem toStructPerm_smul (f : SemiallowablePerm α) (x : X) : f.toStructPerm • x = f • x :=
+theorem toStructPerm_smul (f : SemiallowablePerm α) (x : X) :
+    SemiallowablePerm.toStructPerm f • x = f • x :=
   rfl
 
 end
@@ -97,10 +95,20 @@ instance mulActionTangle'' : MulAction (SemiallowablePerm α) (Tangle (γ : Λ))
 theorem toAllowable_smul (f : SemiallowablePerm α) (t : Tangle β) : toAllowable β f • t = f • t :=
   rfl
 
-/- ./././Mathport/Syntax/Translate/Command.lean:43:9: unsupported derive handler mul_action[mul_action] (semiallowable_perm[con_nf.semiallowable_perm] α) -/
-deriving instance
-  «./././Mathport/Syntax/Translate/Command.lean:43:9: unsupported derive handler mul_action[mul_action] (semiallowable_perm[con_nf.semiallowable_perm] α)» for
-  code
+instance : MulAction (SemiallowablePerm α) (Code α)
+    where
+  smul π c := ⟨c.1, π • c.2⟩
+  one_smul _ := Sigma.ext rfl (heq_of_eq (one_smul _ _))
+  mul_smul _ _ _ := Sigma.ext rfl (heq_of_eq (mul_smul _ _ _))
+
+@[simp]
+theorem fst_smul_nearLitter (π : SemiallowablePerm α) (N : NearLitter) : (π • N).1 = π • N.1 :=
+  rfl
+
+@[simp]
+theorem snd_smul_nearLitter (π : SemiallowablePerm α) (N : NearLitter) :
+    ((π • N).2 : Set Atom) = π • (N.2 : Set Atom) :=
+  rfl
 
 @[simp]
 theorem fst_smul : (π • c).1 = c.1 :=
@@ -115,14 +123,14 @@ theorem smul_mk (f : SemiallowablePerm α) (γ s) : f • (mk γ s : Code α) = 
   rfl
 
 instance hasSmulNonemptyCode : SMul (SemiallowablePerm α) (NonemptyCode α) :=
-  ⟨fun π c => ⟨π • c, c.2.image _⟩⟩
+  ⟨fun π c => ⟨π • (c : Code α), c.2.image _⟩⟩
 
 @[simp, norm_cast]
-theorem coe_smul (c : NonemptyCode α) : (↑(π • c) : Code α) = π • c :=
+theorem coe_smul (c : NonemptyCode α) : (↑(π • c) : Code α) = π • (c : Code α) :=
   rfl
 
 instance mulActionNonemptyCode : MulAction (SemiallowablePerm α) (NonemptyCode α) :=
-  Subtype.coe_injective.MulAction _ coe_smul
+  Subtype.coe_injective.mulAction _ coe_smul
 
 end SemiallowablePerm
 
@@ -133,14 +141,16 @@ equivalence. -/
 def AllowablePerm :=
   { π : SemiallowablePerm α // ∀ X Y : Code α, π • X ≡ π • Y ↔ X ≡ Y }
 
-variable {α} {f : AllowablePerm α} {c d : Code α}
+variable {α}
+variable {f : AllowablePerm α} {c d : Code α}
 
 namespace AllowablePerm
 
-instance : CoeTC (AllowablePerm α) (SemiallowablePerm α) :=
-  @coeBase _ _ coeSubtype
+instance : CoeTC (AllowablePerm α) (SemiallowablePerm α)
+    where
+  coe := Subtype.val
 
-theorem coe_injective : Injective (coe : AllowablePerm α → SemiallowablePerm α) :=
+theorem coe_injective : Injective (Subtype.val : AllowablePerm α → SemiallowablePerm α) :=
   Subtype.coe_injective
 
 instance : One (AllowablePerm α) :=
@@ -157,18 +167,18 @@ instance : Div (AllowablePerm α) :=
 
 instance : Pow (AllowablePerm α) ℕ :=
   ⟨fun f n =>
-    ⟨f ^ n, by
+    ⟨(f : SemiallowablePerm α) ^ n, by
       induction' n with d hd
       · simp_rw [pow_zero]
-        exact (1 : allowable_perm α).2
+        exact (1 : AllowablePerm α).2
       · simp_rw [pow_succ]
-        exact (f * ⟨f ^ d, hd⟩).2⟩⟩
+        exact (f * ⟨(f : SemiallowablePerm α) ^ d, hd⟩).2⟩⟩
 
 instance : Pow (AllowablePerm α) ℤ :=
   ⟨fun f n =>
-    ⟨f ^ n, by
-      cases n
-      · simp_rw [zpow_ofNat]
+    ⟨(f : SemiallowablePerm α) ^ n, by
+      obtain (n | n) := n
+      · simp_rw [zpow_ofNat, Int.ofNat_eq_coe, zpow_coe_nat]
         exact (f ^ n).2
       · simp_rw [zpow_negSucc]
         exact (f ^ (n + 1))⁻¹.2⟩⟩
@@ -178,32 +188,42 @@ theorem coe_one : ((1 : AllowablePerm α) : SemiallowablePerm α) = 1 :=
   rfl
 
 @[simp]
-theorem coe_inv (f : AllowablePerm α) : (↑f⁻¹ : SemiallowablePerm α) = f⁻¹ :=
+theorem coe_inv (f : AllowablePerm α) : ↑(f⁻¹) = (f : SemiallowablePerm α)⁻¹ :=
   rfl
 
 @[simp]
-theorem coe_hMul (f g : AllowablePerm α) : (↑(f * g) : SemiallowablePerm α) = f * g :=
+theorem coe_mul (f g : AllowablePerm α) : ↑(f * g) = (f : SemiallowablePerm α) * g :=
   rfl
 
 @[simp]
-theorem coe_div (f g : AllowablePerm α) : (↑(f / g) : SemiallowablePerm α) = f / g :=
+theorem coe_div (f g : AllowablePerm α) : ↑(f / g) = (f : SemiallowablePerm α) / g :=
   rfl
 
 @[simp]
-theorem coe_pow (f : AllowablePerm α) (n : ℕ) : (↑(f ^ n) : SemiallowablePerm α) = f ^ n :=
+theorem coe_pow (f : AllowablePerm α) (n : ℕ) : ↑(f ^ n) = (f : SemiallowablePerm α) ^ n :=
   rfl
 
 @[simp]
-theorem coe_zpow (f : AllowablePerm α) (n : ℤ) : (↑(f ^ n) : SemiallowablePerm α) = f ^ n :=
+theorem coe_zpow (f : AllowablePerm α) (n : ℤ) : ↑(f ^ n) = (f : SemiallowablePerm α) ^ n :=
   rfl
 
 instance : Group (AllowablePerm α) :=
-  coe_injective.Group _ coe_one coe_hMul coe_inv coe_div coe_pow coe_zpow
+  coe_injective.group
+    Subtype.val
+    coe_one
+    coe_mul
+    coe_inv
+    coe_div
+    coe_pow
+    coe_zpow
 
 /-- The coercion from allowable to semi-allowable permutation as a monoid homomorphism. -/
 @[simps]
-noncomputable def coeHom : AllowablePerm α →* SemiallowablePerm α :=
-  ⟨coe, coe_one, coe_hMul⟩
+noncomputable def coeHom : AllowablePerm α →* SemiallowablePerm α
+    where
+  toFun := Subtype.val
+  map_one' := coe_one
+  map_mul' := coe_mul
 
 /-- Turn an allowable permutation into a structural permutation. -/
 def toStructPerm : AllowablePerm α →* StructPerm α :=
@@ -228,7 +248,7 @@ theorem fst_smul_nearLitter (f : AllowablePerm α) (N : NearLitter) : (f • N).
 
 @[simp]
 theorem snd_smul_nearLitter (f : AllowablePerm α) (N : NearLitter) :
-    ((f • N).2 : Set Atom) = f • ↑N.2 :=
+    ((f • N).2 : Set Atom) = f • (N.2 : Set Atom) :=
   rfl
 
 @[simp]
@@ -260,101 +280,105 @@ variable {β γ}
 theorem smul_fMap (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
     (π : SemiallowablePerm α) γ • fMap (coe_ne hβγ) t = fMap (coe_ne hβγ) (π • t) := by
   classical
-  have equiv := code.equiv.singleton hβγ t
-  rw [← π.prop] at equiv
-  simp only [Subtype.val_eq_coe, rec_bot_coe_coe, image_smul, smul_set_singleton] at equiv
-  simp only [code.equiv_iff] at equiv
-  obtain a | ⟨heven, ε, hε, hA⟩ | ⟨heven, ε, hε, hA⟩ | ⟨c, heven, ε, hε, ζ, hζ, h₁, h₂⟩ := Equiv
+  have h := Code.Equiv.singleton hβγ t
+  rw [← π.prop] at h
+  simp only [recBotCoe_coe, image_smul, smul_set_singleton] at h
+  simp only [Code.Equiv_iff] at h
+  obtain a | ⟨_, ε, _, hA⟩ | ⟨_, ε, hε, hA⟩ | ⟨c, _, ε, hε, ζ, _, h₁, h₂⟩ := h
   · cases hβγ.symm (congr_arg Sigma.fst a)
-  · simp_rw [semiallowable_perm.smul_mk, smul_set_singleton] at hA
-    cases aMap_code_ne_singleton _ hA.symm
+  · simp_rw [SemiallowablePerm.smul_mk, smul_set_singleton] at hA
+    exfalso
+    refine aMapCode_ne_singleton ?_ hA.symm
     exact hβγ.symm
   · have := congr_arg Sigma.fst hA
-    simp only [semiallowable_perm.smul_mk, fst_aMap_code, fst_mk, Iio.coe_inj] at this
-    subst this
-    simp only [semiallowable_perm.smul_mk, aMap_code_ne _ (mk β _) hβγ, mk_inj] at hA
+    simp only [coe_smul, smul_mk, fst_mk, smul_set_singleton, ne_eq, fst_aMapCode, Subtype.mk.injEq,
+      coe_inj, Subtype.coe_inj] at this
+    cases this
+    simp only [SemiallowablePerm.smul_mk, aMapCode_ne _ (mk β _) hβγ, mk_inj] at hA
     simp only [coe_smul, snd_mk, smul_set_singleton, aMap_singleton] at hA
-    simp only [← image_smul, image_image, smul_typed_near_litter] at hA
+    simp only [← image_smul, image_image, smul_typedNearLitter] at hA
     rw [← image_image] at hA
-    rw [image_eq_image typed_near_litter.injective] at hA
-    have := litter.to_near_litter_mem_local_cardinal (fMap (coe_ne hβγ) (π • t))
+    rw [image_eq_image typedNearLitter.injective] at hA
+    have := Litter.toNearLitter_mem_localCardinal (fMap (coe_ne hβγ) (π • t))
     rw [← hA] at this
     obtain ⟨N, hN₁, hN₂⟩ := this
     have := congr_arg Sigma.fst hN₂
-    simp only [litter.to_near_litter_fst] at this
-    rw [← allowable.to_StructPerm_smul, StructPerm.smul_near_litter_fst,
-      allowable.to_StructPerm_smul] at this
-    rw [mem_local_cardinal] at hN₁
+    simp only [Litter.toNearLitter_fst] at this
+    rw [← Allowable.toStructPerm_smul, StructPerm.smul_nearLitter_fst,
+      Allowable.toStructPerm_smul] at this
+    rw [mem_localCardinal] at hN₁
     rw [hN₁] at this
     exact this
   · have := congr_arg Sigma.fst h₁
-    simp only [coe_smul, smul_mk, fst_mk, fst_aMap_code] at this
+    simp only [coe_smul, smul_mk, fst_mk, fst_aMapCode] at this
     subst this
     simp only [coe_smul, smul_mk, smul_set_singleton] at h₁
-    cases aMap_code_ne_singleton hε h₁.symm
+    cases aMapCode_ne_singleton hε h₁.symm
 
 theorem smul_aMap (π : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
     π • aMap hβγ s = aMap hβγ (π • s) := by
-  ext
-  simp only [aMap, mem_image, mem_Union, mem_local_cardinal, exists_prop, ← image_smul]
-  simp only [exists_exists_and_eq_and, smul_typed_near_litter, ← smul_fMap hβγ]
+  ext t
+  simp only [aMap, mem_image, mem_iUnion, mem_localCardinal, exists_prop, ← image_smul]
+  simp_rw [← smul_fMap hβγ, exists_exists_and_eq_and]
   constructor
-  · rintro ⟨N, ⟨y, y_mem, y_fmap⟩, rfl⟩
-    refine' ⟨(π : semiallowable_perm α) γ • N, ⟨y, y_mem, _⟩, rfl⟩
-    rw [← y_fmap]
-    rfl
-  · rintro ⟨N, ⟨y, y_mem, y_fmap⟩, rfl⟩
-    refine' ⟨((π : semiallowable_perm α) γ)⁻¹ • N, ⟨y, y_mem, _⟩, _⟩
-    · change _ • N.fst = _
-      simp only [y_fmap, map_inv, inv_smul_eq_iff]
-      rfl
-    · simp only [smul_inv_smul]
+  · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
+    refine ⟨(π : SemiallowablePerm α) γ • N, ⟨t, ht₁, ?_⟩, ?_⟩
+    · rw [← smul_fMap hβγ, Allowable.smul_fst, ht₂]
+    · rw [smul_typedNearLitter]
+  · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
+    refine ⟨((π : SemiallowablePerm α) γ)⁻¹ • N, ⟨t, ht₁, ?_⟩, ?_⟩
+    · rw [Allowable.smul_fst, ht₂, ← smul_fMap hβγ, inv_smul_smul]
+    · rw [smul_typedNearLitter, smul_inv_smul]
 
 theorem smul_aMapCode (π : AllowablePerm α) (hc : c.1 ≠ γ) :
     π • aMapCode γ c = aMapCode γ (π • c) := by
-  simp only [aMap_code_ne γ c hc, aMap_code_ne γ (π • c) hc, smul_aMap, snd_smul, smul_mk]
+  simp only [aMapCode_ne γ c hc, smul_mk, aMapCode_ne γ (π • c) hc, fst_smul, snd_smul, mk_inj]
+  rw [smul_aMap]
 
 end AllowablePerm
 
-theorem AMapRel.smul : c ↝ d → f • c ↝ f • d := by rintro ⟨γ, hγ⟩;
-  exact (aMap_rel_iff _ _).2 ⟨_, hγ, f.smul_aMap_code hγ⟩
+theorem AMapRel.smul : c ↝ d → f • c ↝ f • d := by
+  rintro ⟨γ, hγ⟩
+  exact (AMapRel_iff _ _).2 ⟨_, hγ, f.smul_aMapCode hγ⟩
 
 @[simp]
-theorem smul_aMapRel : f • c ↝ f • d ↔ c ↝ d := by refine' ⟨fun h => _, aMap_rel.smul⟩;
-  rw [← inv_smul_smul f c, ← inv_smul_smul f d]; exact h.smul
+theorem smul_aMapRel : f • c ↝ f • d ↔ c ↝ d := by
+  refine ⟨fun h => ?_, AMapRel.smul⟩
+  rw [← inv_smul_smul f c, ← inv_smul_smul f d]
+  exact h.smul
 
 namespace Code
 
 theorem isEven_smul_nonempty : ∀ c : NonemptyCode α, (f • c.val).IsEven ↔ c.val.IsEven
   | ⟨c, hc⟩ => by
-    simp_rw [code.is_even_iff]
+    simp_rw [Code.IsEven_iff]
     constructor <;> intro h d hd
     · have := hd.nonempty_iff.2 hc
-      let rec : aMap_rel' ⟨d, this⟩ ⟨c, hc⟩ := aMap_rel_coe_coe.1 hd
-      exact
-        code.not_is_even.1 fun H =>
-          (h _ hd.smul).not_isEven <| (is_even_smul_nonempty ⟨d, this⟩).2 H
+      have _ : AMapRel' ⟨d, this⟩ ⟨c, hc⟩ := aMapRel_coe_coe.1 hd
+      exact Code.not_isEven.1 fun H =>
+        (h _ hd.smul).not_isEven <| (isEven_smul_nonempty ⟨d, this⟩).2 H
     · rw [← smul_inv_smul f d] at hd ⊢
-      rw [smul_aMap_rel] at hd
+      rw [smul_aMapRel] at hd
       have := hd.nonempty_iff.2 hc
-      let rec : aMap_rel' ⟨_, this⟩ ⟨c, hc⟩ := aMap_rel_coe_coe.1 hd
-      exact code.not_is_even.1 fun H => (h _ hd).not_isEven <| (is_even_smul_nonempty ⟨_, this⟩).1 H
+      have _ : AMapRel' ⟨_, this⟩ ⟨c, hc⟩ := aMapRel_coe_coe.1 hd
+      exact Code.not_isEven.1 fun H =>
+        (h _ hd).not_isEven <| (isEven_smul_nonempty ⟨_, this⟩).1 H
+termination_by isEven_smul_nonempty c => c
 
 @[simp]
-theorem isEven_smul : (f • c).IsEven ↔ c.IsEven :=
-  by
-  cases c.2.eq_empty_or_nonempty
-  · rw [is_empty.is_even_iff h, is_empty.is_even_iff]
+theorem isEven_smul : (f • c).IsEven ↔ c.IsEven := by
+  obtain (h | h) := c.2.eq_empty_or_nonempty
+  · rw [IsEmpty.isEven_iff h, IsEmpty.isEven_iff]
     · rfl
-    simpa [code.is_empty]
-  · exact is_even_smul_nonempty ⟨c, h⟩
+    simpa [Code.IsEmpty]
+  · exact isEven_smul_nonempty ⟨c, h⟩
 
 @[simp]
-theorem isOdd_smul : (f • c).IsOdd ↔ c.IsOdd := by simp_rw [← code.not_is_even, is_even_smul]
+theorem isOdd_smul : (f • c).IsOdd ↔ c.IsOdd := by simp_rw [← Code.not_isEven, isEven_smul]
 
-alias is_even_smul ↔ _ is_even.smul
+alias isEven_smul ↔ _ isEven.smul
 
-alias is_odd_smul ↔ _ is_odd.smul
+alias isOdd_smul ↔ _ isOdd.smul
 
 end Code
 
