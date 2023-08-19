@@ -158,7 +158,7 @@ theorem reduction_designatedSupport_supports [CoreTangleData β] (t : Tangle β)
       refine' SetLike.coe_injective _
       refine' (near_litter_perm.smul_near_litter_eq_smul_symm_diff_smul _ N).trans _
       change _ • (_ : Set atom) = _ at h₃
-      simp only [struct_perm.to_near_litter_perm_smul_set, h₃]
+      simp only [StructPerm.to_near_litter_perm_smul_set, h₃]
       refine' Eq.trans _ (symmDiff_symmDiff_cancel_left (litter_set N.fst) _)
       refine' congr_arg _ _
       ext a : 1

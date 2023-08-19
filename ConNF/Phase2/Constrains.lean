@@ -113,12 +113,12 @@ theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) :=
     rfl
   · exact symm_diff_lt_near_litter N a ha
   · have := f_map_position (coe_ne_coe.mpr <| coe_ne' hδε) t _ (is_near_litter_litter_set _)
-    rw [tangle_data.typed_near_litter_position_eq] at this
+    rw [TangleData.typed_near_litter_position_eq] at this
     refine' lt_of_le_of_lt _ this
-    convert tangle_data.support_le (show tangle (h_δ : Λ) from t) _ hc
+    convert TangleData.support_le (show tangle (h_δ : Λ) from t) _ hc
   · simp only [InvImage, elim_inr]
     convert typed_atom_position_lt_f_map a
-    rw [tangle_data.typed_near_litter_position_eq (f_map bot_ne_coe a).toNearLitter]
+    rw [TangleData.typed_near_litter_position_eq (f_map bot_ne_coe a).toNearLitter]
     infer_instance
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,

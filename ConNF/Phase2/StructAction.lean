@@ -51,7 +51,7 @@ theorem smul_atom_eq {hφ : φ.Lawful} {π : StructPerm β} (hπ : (φ.complete 
     StructPerm.derivative B π • a = ((φ B).atomMap a).get ha :=
   by
   have := (φ B).smul_atom_eq (hπ B) ha
-  rw [struct_perm.of_bot_smul] at this
+  rw [StructPerm.of_bot_smul] at this
   exact this
 
 theorem smul_toNearLitter_eq_of_precise {hφ : φ.Lawful} (hφp : φ.Precise) {π : StructPerm β}
@@ -61,9 +61,9 @@ theorem smul_toNearLitter_eq_of_precise {hφ : φ.Lawful} (hφp : φ.Precise) {�
     StructPerm.derivative B π • L.toNearLitter = ((φ B).litterMap L).get hL :=
   by
   have := (φ B).smul_toNearLitter_eq_of_preciseAt (hπ B) hL (hφp B hL) _
-  · rw [struct_perm.of_bot_smul] at this
+  · rw [StructPerm.of_bot_smul] at this
     exact this
-  · rw [struct_perm.of_bot_smul]
+  · rw [StructPerm.of_bot_smul]
     exact hπL
 
 theorem smul_nearLitter_eq_of_precise {hφ : φ.Lawful} (hφp : φ.Precise) {π : StructPerm β}
@@ -74,9 +74,9 @@ theorem smul_nearLitter_eq_of_precise {hφ : φ.Lawful} (hφp : φ.Precise) {π 
       ((φ B).litterMap N.1).get hN ∆ (StructPerm.derivative B π • litterSet N.1 ∆ N) :=
   by
   have := (φ B).smul_nearLitter_eq_of_preciseAt (hπ B) hN (hφp B hN) _
-  · rw [struct_perm.of_bot_smul] at this
+  · rw [StructPerm.of_bot_smul] at this
     exact this
-  · rw [struct_perm.of_bot_smul]
+  · rw [StructPerm.of_bot_smul]
     exact hπL
 
 end Precise
@@ -183,7 +183,7 @@ theorem smul_litter_eq_of_supports (φ : StructAction β) (hφ : φ.Lawful) {π 
             (show Path ((β : Iic_index α) : type_index) (γ : Iic_index α) from C) π)
           t'
       rw [← allowable.derivative_cons_apply, allowable.derivative_smul, ←
-        struct_perm.derivative_bot_smul, ← struct_perm.derivative_cons] at this
+        StructPerm.derivative_bot_smul, ← StructPerm.derivative_cons] at this
       exact this.trans (hφc.coe hπ γ δ ε hδ hε hδε C t' _ ⟨d, hd, hc⟩ hc₂)
     · have hc : (_, _) = (_, _) := ih _ (Relation.TransGen.single <| constrains.f_map_bot hε C a)
       simp only [smul_inl, Prod.mk.inj_iff, eq_self_iff_true, and_true_iff] at hc
@@ -194,11 +194,11 @@ theorem smul_litter_eq_of_supports (φ : StructAction β) (hφ : φ.Lawful) {π 
             (show Path ((β : Iic_index α) : type_index) (γ : Iic_index α) from C) π)
           a
       rw [← allowable.derivative_cons_apply, allowable.derivative_smul, ←
-        struct_perm.derivative_bot_smul, ← struct_perm.derivative_cons, ←
+        StructPerm.derivative_bot_smul, ← StructPerm.derivative_cons, ←
         allowable.derivative_cons_apply] at this
       exact this
   · have := hφs.litter_mem L B ⟨⟨d, hd, refl_trans_gen_near_litter hc⟩, reduced.mk_litter _ _⟩
-    rw [← struct_perm.of_bot_smul, ← (hπ B).map_litter _ (Or.inl (Or.inl ⟨this, hflex⟩))]
+    rw [← StructPerm.of_bot_smul, ← (hπ B).map_litter _ (Or.inl (Or.inl ⟨this, hflex⟩))]
     refine' ((φ B).complete_smul_litter_eq L).trans _
     rw [near_litter_action.flexible_litter_perm_apply_eq, (φ B).roughLitterMapOrElse_of_dom]
     exact this

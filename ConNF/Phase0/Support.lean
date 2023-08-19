@@ -58,6 +58,9 @@ instance mulActionSupportCondition : MulAction (StructPerm α) (SupportCondition
       rw [derivative_mul, mul_smul]
       rfl
 
+instance mulActionBotSupportCondition : MulAction NearLitterPerm (SupportCondition ⊥) :=
+  mulActionSupportCondition (α := ⊥)
+
 @[simp]
 theorem smul_toCondition (π : StructPerm α) (x : Sum Atom NearLitter × ExtendedIndex α) :
     π • toCondition x = toCondition ⟨derivative x.2 π • x.1, x.2⟩ :=
@@ -69,8 +72,8 @@ variable (G : Type _) (α) {τ : Type _} [SMul G (SupportCondition α)] [SMul G 
 
 structure Support (x : τ) where
   carrier : Set (SupportCondition α)
-  Small : Small carrier
-  Supports : Supports G carrier x
+  small : Small carrier
+  supports : Supports G carrier x
 
 /-- An element of `τ` is *supported* if it has some support. -/
 def Supported (x : τ) : Prop :=
@@ -89,7 +92,7 @@ theorem Support.carrier_eq_coe {x : τ} {s : Support α G x} : s.carrier = s :=
 theorem mk_support_le (x : τ) : #(Support α G x) ≤ #μ := by
   trans #{ s : Set μ // Small s }
   trans #{ S : Set (SupportCondition α) // Small S }
-  · refine ⟨⟨fun s => ⟨s.carrier, s.Small⟩, fun s t h => ?_⟩⟩
+  · refine ⟨⟨fun s => ⟨s.carrier, s.small⟩, fun s t h => ?_⟩⟩
     simpa only [Subtype.mk_eq_mk, Support.carrier_eq_coe, SetLike.coe_set_eq] using h
   · rw [← mk_subtype_of_equiv Small (Equiv.Set.congr (Cardinal.eq.mp (mk_supportCondition α)).some)]
     exact ⟨⟨fun s => ⟨s, Small.image s.prop⟩, fun s h => by simp⟩⟩

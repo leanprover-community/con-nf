@@ -459,7 +459,7 @@ theorem transGen_constrains_of_mem_designatedSupport {A : ExtendedIndex β} {L :
   refine' Relation.ReflTransGen.trans _ hd₂
   exact Relation.ReflTransGen.single (constrains.f_map hδ hε hδε C t _ hc)
 
--- TODO: move to struct_perm
+-- TODO: move to StructPerm
 @[simp]
 theorem ConNF.StructPerm.derivative_fst {α β : TypeIndex} (π : StructPerm α) (A : Path α β)
     (N : NearLitter) : (StructPerm.derivative A π • N).fst = StructPerm.derivative A π • N.fst :=
@@ -476,8 +476,8 @@ a function from extended indices to near-litter permutations. -/
 theorem toStructPerm_toNearLitterPerm (π : Allowable ⊥) : π.toStructPerm.toNearLitterPerm = π :=
   by
   ext a : 2
-  rw [to_struct_perm_bot, struct_perm.coe_to_near_litter_perm]
-  simp only [MulEquiv.coe_toMonoidHom, struct_perm.coe_to_bot_iso, struct_perm.of_bot_to_bot]
+  rw [to_StructPerm_bot, StructPerm.coe_to_near_litter_perm]
+  simp only [MulEquiv.coe_toMonoidHom, StructPerm.coe_to_bot_iso, StructPerm.of_bot_to_bot]
 
 -- TODO: move earlier and use
 theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
@@ -857,68 +857,68 @@ theorem Biexact.smul_eq_smul {β : Iio α} {π π' : Allowable β} {c : SupportC
       exact ⟨b, hb, this⟩
   obtain ⟨L, rfl⟩ := hL.exists_litter_eq
   suffices
-    struct_perm.derivative A π.to_struct_perm • L = struct_perm.derivative A π'.to_struct_perm • L
+    StructPerm.derivative A π.to_StructPerm • L = StructPerm.derivative A π'.to_StructPerm • L
     by exact h.exact _ _ Relation.ReflTransGen.refl this
   obtain hL | hL := flexible_cases α L A
   swap
   · exact h.smul_eq_smul_litter A L Relation.ReflTransGen.refl hL
   induction' hL with γ δ ε hδ hε hδε B t γ ε hε B a
-  · rw [struct_perm.derivative_cons, struct_perm.derivative_bot_smul, struct_perm.derivative_cons]
-    rw [allowable.derivative_to_struct_perm (show Path (β : type_index) (γ : Iic_index α) from _)]
+  · rw [StructPerm.derivative_cons, StructPerm.derivative_bot_smul, StructPerm.derivative_cons]
+    rw [allowable.derivative_to_StructPerm (show Path (β : type_index) (γ : Iic_index α) from _)]
     refine'
-      (to_struct_perm_smul_f_map (γ : Iic_index α) δ ε (coe_lt hδ) (coe_lt hε)
+      (to_StructPerm_smul_f_map (γ : Iic_index α) δ ε (coe_lt hδ) (coe_lt hε)
             (Iio.coe_injective.ne hδε) _ _).trans
         _
-    rw [struct_perm.derivative_cons, struct_perm.derivative_bot_smul, struct_perm.derivative_cons]
-    rw [allowable.derivative_to_struct_perm (show Path (β : type_index) (γ : Iic_index α) from _)]
+    rw [StructPerm.derivative_cons, StructPerm.derivative_bot_smul, StructPerm.derivative_cons]
+    rw [allowable.derivative_to_StructPerm (show Path (β : type_index) (γ : Iic_index α) from _)]
     refine'
       Eq.trans _
-        (to_struct_perm_smul_f_map (γ : Iic_index α) δ ε (coe_lt hδ) (coe_lt hε)
+        (to_StructPerm_smul_f_map (γ : Iic_index α) δ ε (coe_lt hδ) (coe_lt hε)
             (Iio.coe_injective.ne hδε) _ _).symm
     refine' congr_arg _ _
     rw [← inv_smul_eq_iff, smul_smul]
     refine' (designated_support t).Supports _ _
     intro c hc
     rw [mul_smul, inv_smul_eq_iff]
-    rw [← allowable.to_struct_perm_smul, ← allowable.to_struct_perm_smul, ←
+    rw [← allowable.to_StructPerm_smul, ← allowable.to_StructPerm_smul, ←
       allowable.derivative_cons_apply, ← allowable.derivative_cons_apply, ←
-      allowable.derivative_to_struct_perm, ← allowable.derivative_to_struct_perm]
+      allowable.derivative_to_StructPerm, ← allowable.derivative_to_StructPerm]
     have := ih (c.fst, (B.cons <| coe_lt hδ).comp c.snd) _ _
     · refine' Prod.ext _ rfl
       apply_fun Prod.fst at this
       change _ • _ = _ • _
-      rw [struct_perm.derivative_derivative, struct_perm.derivative_derivative]
+      rw [StructPerm.derivative_derivative, StructPerm.derivative_derivative]
       exact this
     · exact constrains.f_map _ _ _ _ _ _ hc
     · refine' h.constrains (Relation.ReflTransGen.single _)
       exact constrains.f_map _ _ _ _ _ _ hc
-  · rw [struct_perm.derivative_cons, struct_perm.derivative_bot_smul, struct_perm.derivative_cons]
-    rw [allowable.derivative_to_struct_perm (show Path (β : type_index) (γ : Iic_index α) from _)]
+  · rw [StructPerm.derivative_cons, StructPerm.derivative_bot_smul, StructPerm.derivative_cons]
+    rw [allowable.derivative_to_StructPerm (show Path (β : type_index) (γ : Iic_index α) from _)]
     refine'
-      (to_struct_perm_smul_f_map (γ : Iic_index α) ⊥ ε (bot_lt_coe _) (coe_lt hε)
+      (to_StructPerm_smul_f_map (γ : Iic_index α) ⊥ ε (bot_lt_coe _) (coe_lt hε)
             Iio_index.bot_ne_coe _ _).trans
         _
-    rw [struct_perm.derivative_cons, struct_perm.derivative_bot_smul, struct_perm.derivative_cons]
-    rw [allowable.derivative_to_struct_perm (show Path (β : type_index) (γ : Iic_index α) from _)]
+    rw [StructPerm.derivative_cons, StructPerm.derivative_bot_smul, StructPerm.derivative_cons]
+    rw [allowable.derivative_to_StructPerm (show Path (β : type_index) (γ : Iic_index α) from _)]
     refine'
       Eq.trans _
-        (to_struct_perm_smul_f_map (γ : Iic_index α) ⊥ ε (bot_lt_coe _) (coe_lt hε)
+        (to_StructPerm_smul_f_map (γ : Iic_index α) ⊥ ε (bot_lt_coe _) (coe_lt hε)
             Iio_index.bot_ne_coe _ _).symm
     refine' congr_arg _ _
     rw [← allowable.derivative_cons_apply, ← allowable.derivative_cons_apply]
     have := ih (inl a, B.cons <| bot_lt_coe _) _ _
     · change (inl _, _) = (inl _, _) at this
       simp only [Prod.mk.inj_iff, eq_self_iff_true, and_true_iff] at this
-      rw [allowable.derivative_to_struct_perm
+      rw [allowable.derivative_to_StructPerm
           (show Path (β : type_index) (⊥ : Iic_index α) from _)] at
         this
-      rw [allowable.derivative_to_struct_perm
+      rw [allowable.derivative_to_StructPerm
           (show Path (β : type_index) (⊥ : Iic_index α) from _)] at
         this
-      rw [allowable.to_struct_perm_smul] at this
-      rw [allowable.to_struct_perm_smul] at this
+      rw [allowable.to_StructPerm_smul] at this
+      rw [allowable.to_StructPerm_smul] at this
       dsimp only
-      convert this using 2 <;> · rw [to_struct_perm_to_near_litter_perm]; rfl
+      convert this using 2 <;> · rw [to_StructPerm_to_near_litter_perm]; rfl
     · exact constrains.f_map_bot _ _ _
     · refine' h.constrains (Relation.ReflTransGen.single _)
       exact constrains.f_map_bot _ _ _
@@ -1106,7 +1106,7 @@ theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : 
   have hdom : ((((constrained_action π s hs).comp A B).refine (hπ B)).litterMap N.fst).Dom :=
     ⟨c, hc₁, refl_trans_gen_near_litter hc₂⟩
   suffices
-    complete_litter_map π (A.comp B) N.fst = struct_perm.derivative B ρ.to_struct_perm • N.fst
+    complete_litter_map π (A.comp B) N.fst = StructPerm.derivative B ρ.to_StructPerm • N.fst
     by
     refine' SetLike.coe_injective _
     refine'
@@ -1115,7 +1115,7 @@ theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : 
             (near_litter_action.refine_precise _) this.symm).symm
     rw [complete_near_litter_map_eq' (A.comp B) N]
     simp only [struct_action.refine_apply, struct_action.refine_litter_map,
-      foa_hypothesis_near_litter_image, struct_perm.of_bot_smul]
+      foa_hypothesis_near_litter_image, StructPerm.of_bot_smul]
     simp only [struct_action.comp_apply, constrained_action_litter_map, symmDiff_right_inj]
     ext a : 1
     constructor
@@ -1149,13 +1149,13 @@ theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : 
       refine' ⟨hdom, hL⟩
   · rw [complete_litter_map_eq_of_inflexible_bot (hL.comp A)]
     obtain ⟨δ, ε, hε, C, a, rfl, rfl⟩ := hL
-    rw [struct_perm.derivative_cons]
-    refine' Eq.trans _ (struct_perm.derivative_bot_smul _ _).symm
-    rw [struct_perm.derivative_cons]
-    rw [allowable.derivative_to_struct_perm (show Path (γ : type_index) (δ : Iic_index α) from C)]
+    rw [StructPerm.derivative_cons]
+    refine' Eq.trans _ (StructPerm.derivative_bot_smul _ _).symm
+    rw [StructPerm.derivative_cons]
+    rw [allowable.derivative_to_StructPerm (show Path (γ : type_index) (δ : Iic_index α) from C)]
     refine'
       Eq.trans _
-        (to_struct_perm_smul_f_map (δ : Iic_index α) ⊥ ε (bot_lt_coe _) _ _
+        (to_StructPerm_smul_f_map (δ : Iic_index α) ⊥ ε (bot_lt_coe _) _ _
             (allowable.derivative (show Path (γ : type_index) (δ : Iic_index α) from _) ρ) a).symm
     · intro h; cases h
     refine' congr_arg _ _
@@ -1174,16 +1174,16 @@ theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : 
       rfl
       exact ⟨c, hc₁, Relation.ReflTransGen.head (constrains.f_map_bot hε _ _) hc₂'⟩
     · have :=
-        allowable.to_struct_perm_smul
+        allowable.to_StructPerm_smul
           (allowable.derivative
             (show Path (γ : type_index) (⊥ : Iic_index α) from C.cons (bot_lt_coe _)) ρ)
           a
-      rw [← allowable.derivative_to_struct_perm] at this
+      rw [← allowable.derivative_to_StructPerm] at this
       refine' this.trans _
       congr
       ext π a : 4
-      change π.to_struct_perm.to_near_litter_perm.atom_perm a = π.atom_perm a
-      rw [to_struct_perm_to_near_litter_perm]
+      change π.to_StructPerm.to_near_litter_perm.atom_perm a = π.atom_perm a
+      rw [to_StructPerm_to_near_litter_perm]
   · rw [complete_litter_map_eq_of_inflexible_coe (hL.comp A)]
     swap
     · rw [inflexible_coe.comp_B, ← path.comp_cons, ← struct_action.comp_comp]
@@ -1194,13 +1194,13 @@ theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : 
     · rw [inflexible_coe.comp_B, ← path.comp_cons]
       exact ih_action_comp_map_flexible hπf _ _
     obtain ⟨δ, ε, ζ, hε, hζ, hεζ, C, t, rfl, rfl⟩ := hL
-    rw [struct_perm.derivative_cons]
-    refine' Eq.trans _ (struct_perm.derivative_bot_smul _ _).symm
-    rw [struct_perm.derivative_cons]
-    rw [allowable.derivative_to_struct_perm (show Path (γ : type_index) (δ : Iic_index α) from C)]
+    rw [StructPerm.derivative_cons]
+    refine' Eq.trans _ (StructPerm.derivative_bot_smul _ _).symm
+    rw [StructPerm.derivative_cons]
+    rw [allowable.derivative_to_StructPerm (show Path (γ : type_index) (δ : Iic_index α) from C)]
     refine'
       Eq.trans _
-        (to_struct_perm_smul_f_map (δ : Iic_index α) ε ζ (coe_lt hε) _ _
+        (to_StructPerm_smul_f_map (δ : Iic_index α) ε ζ (coe_lt hε) _ _
             (allowable.derivative (show Path (γ : type_index) (δ : Iic_index α) from C) ρ) t).symm
     · intro h
       refine' hεζ (Subtype.ext _)
@@ -1215,7 +1215,7 @@ theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : 
     · refine' Prod.ext _ rfl
       change inl _ = inl _
       simp only
-      rw [← allowable.derivative_to_struct_perm, struct_perm.derivative_derivative]
+      rw [← allowable.derivative_to_StructPerm, StructPerm.derivative_derivative]
       refine' Eq.trans _ ((h _).map_atom a _)
       refine'
         (((ih_action _).hypothesisedAllowable_exactlyApproximates
@@ -1272,15 +1272,15 @@ theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : 
           refine' Relation.ReflTransGen.trans (trans_gen_constrains_comp haN _).to_reflTransGen _
           exact refl_trans_gen_near_litter Relation.ReflTransGen.refl
         · simp only [struct_action.comp_apply, ih_action_atom_map, foa_hypothesis_atom_image,
-            constrained_action_atom_map, struct_perm.of_bot_smul] at this ⊢
-          rw [← allowable.derivative_to_struct_perm, struct_perm.derivative_derivative, ← this, ←
+            constrained_action_atom_map, StructPerm.of_bot_smul] at this ⊢
+          rw [← allowable.derivative_to_StructPerm, StructPerm.derivative_derivative, ← this, ←
             path.comp_assoc, path.comp_cons]
         · refine' Or.inl (Or.inl (Or.inl (Or.inl _)))
           refine' ⟨c, hc₁, trans _ hc₂⟩
           simp only [← hNL, path.comp_assoc, ← path.comp_cons]
           exact refl_trans_gen_constrains_comp (trans_gen_near_litter haN).to_reflTransGen _
       · intro E L hL₁ hL₂
-        rw [← struct_perm.of_bot_smul]
+        rw [← StructPerm.of_bot_smul]
         refine'
           ((struct_action.hypothesised_allowable_exactly_approximates _
                       ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, t, rfl, rfl⟩ _ _ _).map_litter
@@ -1308,8 +1308,8 @@ theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : 
         · dsimp only at ih
           rw [← path.comp_assoc, path.comp_cons] at ih
           rw [ih]
-          simp only [struct_perm.derivative_fst, litter.to_near_litter_fst]
-          rw [← allowable.derivative_to_struct_perm, struct_perm.derivative_derivative]
+          simp only [StructPerm.derivative_fst, litter.to_near_litter_fst]
+          rw [← allowable.derivative_to_StructPerm, StructPerm.derivative_derivative]
         · refine' trans_gen_near_litter _
           simp only [← hNL, path.comp_assoc, ← path.comp_cons]
           exact trans_gen_constrains_comp hLN _
@@ -1343,12 +1343,12 @@ theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : 
           simp only [struct_action.comp_apply, struct_action.refine_apply,
             near_litter_action.refine_litter_map, ih_action_litter_map,
             foa_hypothesis_near_litter_image]
-          rw [ih, ← allowable.derivative_to_struct_perm, struct_perm.derivative_derivative]
+          rw [ih, ← allowable.derivative_to_StructPerm, StructPerm.derivative_derivative]
           rfl
         · simp only [struct_action.comp_apply, struct_action.refine_apply,
             near_litter_action.refine_litter_map, ih_action_litter_map,
             foa_hypothesis_near_litter_image]
-          rw [ih, ← allowable.derivative_to_struct_perm, struct_perm.derivative_derivative]
+          rw [ih, ← allowable.derivative_to_StructPerm, StructPerm.derivative_derivative]
 
 /-- **Coherence lemma**: The action of the complete litter map, below a given support condition `c`,
 is equal to the action of any allowable permutation that exactly approximates it.
@@ -2030,7 +2030,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       specialize ha _ a hac
       obtain ⟨b, ha⟩ := ha
       have :
-        (struct_perm.derivative A
+        (StructPerm.derivative A
                 ((preimage_action hπf
                         (inr (f_map (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter,
                           (B.cons (coe_lt hε)).cons (bot_lt_coe _))).hypothesisedAllowable
@@ -2068,7 +2068,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       specialize hN _ N hNc
       obtain ⟨N', hN⟩ := hN
       have :
-        (struct_perm.derivative A
+        (StructPerm.derivative A
                 ((preimage_action hπf
                         (inr (f_map (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter,
                           (B.cons (coe_lt hε)).cons (bot_lt_coe _))).hypothesisedAllowable
@@ -2271,15 +2271,15 @@ def AllowableBelow (hπf : π.Free) (γ : IicBot α) (A : Path (β : TypeIndex) 
 theorem ofBot_toStructPerm (π : Allowable ⊥) : StructPerm.ofBot π.toStructPerm = π :=
   by
   ext a : 2
-  rw [to_struct_perm_bot]
-  simp only [MulEquiv.coe_toMonoidHom, struct_perm.coe_to_bot_iso, struct_perm.of_bot_to_bot]
+  rw [to_StructPerm_bot]
+  simp only [MulEquiv.coe_toMonoidHom, StructPerm.coe_to_bot_iso, StructPerm.of_bot_to_bot]
 
 theorem allowableBelowBot (hπf : π.Free) (A : ExtendedIndex β) : AllowableBelow hπf ⊥ A :=
   by
   refine' ⟨complete_near_litter_perm hπf A, _⟩
   intro B
   obtain B | ⟨B, h⟩ := B
-  · simp only [struct_perm.derivative_nil, path.comp_nil, of_bot_to_struct_perm]
+  · simp only [StructPerm.derivative_nil, path.comp_nil, of_bot_to_StructPerm]
   · -- TODO: Make this a lemma.
     cases le_bot_iff.mp (le_of_path B)
     cases bot_le.not_lt h
@@ -2327,10 +2327,10 @@ theorem allowableBelowExtends (hπf : π.Free) (γ : Iic α) (A : Path (β : Typ
   choose ρs hρ using h
   refine' ⟨allowable_of_smul_f_map γ ρs _, _⟩
   · intro δ ε hδ hε hδε t
-    change struct_perm.to_near_litter_perm _ • _ = _
+    change StructPerm.to_near_litter_perm _ • _ = _
     have := hρ ε hε (path.nil.cons (bot_lt_coe _))
     simp only [path.comp_cons, path.comp_nil] at this
-    change struct_perm.to_near_litter_perm (ρs ε hε).toStructPerm = _ at this
+    change StructPerm.to_near_litter_perm (ρs ε hε).toStructPerm = _ at this
     rw [this]
     rw [complete_near_litter_perm_smul_litter]
     obtain rfl | ⟨δ, rfl⟩ := Iio_index_cases δ
@@ -2338,7 +2338,7 @@ theorem allowableBelowExtends (hπf : π.Free) (γ : Iic α) (A : Path (β : Typ
         (complete_litter_map_eq_of_inflexible_bot ⟨γ, ε, coe_lt_coe.mp hε, A, t, rfl, rfl⟩).trans _
       refine' congr_arg _ _
       specialize hρ ⊥ hδ path.nil
-      simp only [struct_perm.derivative_nil, of_bot_to_struct_perm, path.comp_nil] at hρ
+      simp only [StructPerm.derivative_nil, of_bot_to_StructPerm, path.comp_nil] at hρ
       rw [hρ]
       rfl
     · refine'
@@ -2376,9 +2376,9 @@ theorem allowableBelowExtends (hπf : π.Free) (γ : Iic α) (A : Path (β : Typ
   · intro B
     obtain ⟨δ, hδ, B, rfl⟩ := exists_nil_cons_of_path B
     specialize hρ δ hδ B
-    rw [← struct_perm.derivative_derivative]
+    rw [← StructPerm.derivative_derivative]
     have := allowable_of_smul_f_map_derivative_eq δ hδ
-    apply_fun allowable.to_struct_perm at this
+    apply_fun allowable.to_StructPerm at this
     rw [← allowable_derivative_eq] at this
     rw [← this] at hρ
     rw [← path.comp_assoc, path.comp_cons, path.comp_nil]

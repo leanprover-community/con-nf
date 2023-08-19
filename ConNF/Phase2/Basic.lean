@@ -176,23 +176,23 @@ theorem Allowable.derivative_toStructPerm {β γ : IicBot α} (A : Quiver.Path (
   revert π A γ
   refine' path.Iic_rec _ _
   · intro π
-    simp only [struct_perm.derivative_nil, allowable.derivative_nil, MonoidHom.id_apply]
+    simp only [StructPerm.derivative_nil, allowable.derivative_nil, MonoidHom.id_apply]
   · intro γ δ A h ih π
     rw [allowable.derivative_cons, MonoidHom.coe_comp, Function.comp_apply, ←
-      allowable_derivative_eq, ← ih π, struct_perm.derivative_derivative, Quiver.Path.comp_cons,
+      allowable_derivative_eq, ← ih π, StructPerm.derivative_derivative, Quiver.Path.comp_cons,
       Quiver.Path.comp_nil]
 
 theorem Allowable.derivative_smul {β γ : IicBot α} (A : Quiver.Path (β : TypeIndex) γ)
     (π : Allowable β) {X : Type _} [MulAction (StructPerm γ) X] (x : X) :
     Allowable.derivative A π • x = StructPerm.derivative A π.toStructPerm • x := by
-  rw [allowable.derivative_to_struct_perm] <;> rfl
+  rw [allowable.derivative_to_StructPerm] <;> rfl
 
 -- TODO: Unify next three lemmas.
 @[simp]
 theorem Allowable.derivative_bot_smul_atom (β : Iic α) (π : Allowable β) (a : Atom) :
     allowableDerivative (iicCoe β) ⊥ (bot_lt_coe β) π • a = π • a :=
   by
-  refine' Eq.trans _ (struct_perm.derivative_bot_smul π.to_struct_perm a)
+  refine' Eq.trans _ (StructPerm.derivative_bot_smul π.to_StructPerm a)
   have := allowable_derivative_eq (Iic_coe β) ⊥ (bot_lt_coe _) π
   refine' Eq.trans _ (congr_arg₂ (· • ·) this.symm rfl)
   rfl
@@ -201,7 +201,7 @@ theorem Allowable.derivative_bot_smul_atom (β : Iic α) (π : Allowable β) (a 
 theorem Allowable.derivative_bot_smul_litter (β : Iic α) (π : Allowable β) (L : Litter) :
     allowableDerivative (iicCoe β) ⊥ (bot_lt_coe β) π • L = π • L :=
   by
-  refine' Eq.trans _ (struct_perm.derivative_bot_smul π.to_struct_perm L)
+  refine' Eq.trans _ (StructPerm.derivative_bot_smul π.to_StructPerm L)
   have := allowable_derivative_eq (Iic_coe β) ⊥ (bot_lt_coe _) π
   refine' Eq.trans _ (congr_arg₂ (· • ·) this.symm rfl)
   rfl
@@ -210,7 +210,7 @@ theorem Allowable.derivative_bot_smul_litter (β : Iic α) (π : Allowable β) (
 theorem Allowable.derivative_bot_smul_nearLitter (β : Iic α) (π : Allowable β) (N : NearLitter) :
     allowableDerivative (iicCoe β) ⊥ (bot_lt_coe β) π • N = π • N :=
   by
-  refine' Eq.trans _ (struct_perm.derivative_bot_smul π.to_struct_perm N)
+  refine' Eq.trans _ (StructPerm.derivative_bot_smul π.to_StructPerm N)
   have := allowable_derivative_eq (Iic_coe β) ⊥ (bot_lt_coe _) π
   refine' Eq.trans _ (congr_arg₂ (· • ·) this.symm rfl)
   rfl

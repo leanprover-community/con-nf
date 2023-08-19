@@ -402,11 +402,11 @@ theorem ConNF.SemiallowablePerm.toAllowable_bot (π : SemiallowablePerm α) :
     SemiallowablePerm.toAllowable ⊥ π =
       StructPerm.toNearLitterPerm (SemiallowablePerm.toStructPerm π) :=
   by
-  unfold semiallowable_perm.to_allowable semiallowable_perm.to_struct_perm
-    struct_perm.to_near_litter_perm struct_perm.lower allowable.to_struct_perm
+  unfold semiallowable_perm.to_allowable semiallowable_perm.to_StructPerm
+    StructPerm.to_near_litter_perm StructPerm.lower allowable.to_StructPerm
   rw [dif_neg WithBot.bot_ne_coe]
   simp only [MonoidHom.coe_mk, MonoidHom.coe_comp, MulEquiv.coe_toMonoidHom, comp_app,
-    struct_perm.of_coe_to_coe, allowable_to_struct_perm_bot, MulEquiv.symm_apply_apply]
+    StructPerm.of_coe_to_coe, allowable_to_StructPerm_bot, MulEquiv.symm_apply_apply]
   rfl
 
 /-- For any near-litter `N`, the code `(α, -1, N)` is a tangle at level `α`.
@@ -418,7 +418,7 @@ def newTypedNearLitter (N : NearLitter) : NewTangle α :=
         simp only [Subtype.val_eq_coe, Option.smul_some, smul_intro, Option.some_inj]
         have :=
           show
-            struct_perm.lower (bot_lt_coe α).le (semiallowable_perm.to_struct_perm ↑π) • Sum.inr N =
+            StructPerm.lower (bot_lt_coe α).le (semiallowable_perm.to_StructPerm ↑π) • Sum.inr N =
               Sum.inr N
             from congr_arg Prod.fst (h rfl)
         simp only [Sum.smul_inr] at this

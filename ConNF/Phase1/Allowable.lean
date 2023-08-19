@@ -51,12 +51,12 @@ noncomputable def toStructPerm : SemiallowablePerm α →* StructPerm α
           match β, hβ with
           | ⊥, _ =>
             by
-            simp only [struct_perm.of_coe_to_coe, struct_perm.of_coe_one, Pi.one_apply]
-            exact struct_perm.to_bot_one
+            simp only [StructPerm.of_coe_to_coe, StructPerm.of_coe_one, Pi.one_apply]
+            exact StructPerm.to_bot_one
           | (β : Λ), (hβ : ↑β < ↑α) =>
             by
-            simp only [struct_perm.of_coe_to_coe, struct_perm.of_coe_one, Pi.one_apply]
-            exact allowable.to_struct_perm.map_one
+            simp only [StructPerm.of_coe_to_coe, StructPerm.of_coe_one, Pi.one_apply]
+            exact allowable.to_StructPerm.map_one
   map_mul' f g :=
     StructPerm.ofCoe.Injective <|
       funext fun β =>
@@ -64,12 +64,12 @@ noncomputable def toStructPerm : SemiallowablePerm α →* StructPerm α
           match β, hβ with
           | ⊥, _ =>
             by
-            simp only [struct_perm.of_coe_to_coe, struct_perm.of_coe_mul, Pi.mul_apply]
-            exact struct_perm.to_bot_mul _ _
+            simp only [StructPerm.of_coe_to_coe, StructPerm.of_coe_mul, Pi.mul_apply]
+            exact StructPerm.to_bot_mul _ _
           | (β : Λ), (hβ : ↑β < ↑α) =>
             by
-            simp only [struct_perm.of_coe_to_coe, struct_perm.of_coe_mul, Pi.mul_apply]
-            exact allowable.to_struct_perm.map_mul _ _
+            simp only [StructPerm.of_coe_to_coe, StructPerm.of_coe_mul, Pi.mul_apply]
+            exact allowable.to_StructPerm.map_mul _ _
 
 section
 
@@ -282,8 +282,8 @@ theorem smul_fMap (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
     obtain ⟨N, hN₁, hN₂⟩ := this
     have := congr_arg Sigma.fst hN₂
     simp only [litter.to_near_litter_fst] at this
-    rw [← allowable.to_struct_perm_smul, struct_perm.smul_near_litter_fst,
-      allowable.to_struct_perm_smul] at this
+    rw [← allowable.to_StructPerm_smul, StructPerm.smul_near_litter_fst,
+      allowable.to_StructPerm_smul] at this
     rw [mem_local_cardinal] at hN₁
     rw [hN₁] at this
     exact this

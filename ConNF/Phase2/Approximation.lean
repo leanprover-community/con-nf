@@ -391,7 +391,7 @@ def StructApprox (β : TypeIndex) :=
 
 namespace StructApprox
 
--- TODO: Could refactor struct_perm as a map `extended_index β → near_litter_perm`.
+-- TODO: Could refactor StructPerm as a map `extended_index β → near_litter_perm`.
 def Approximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructPerm β) : Prop :=
   ∀ A, (π₀ A).Approximates (StructPerm.ofBot <| StructPerm.derivative A π)
 
@@ -436,27 +436,27 @@ theorem smul_eq_of_supports {β : Iic α} {π₀ : StructApprox β} {π : Allowa
   constructor
   · rintro (⟨h₁, h₂⟩ | ⟨a, ⟨ha₁, ha₂⟩, rfl⟩)
     · refine'
-        ⟨(struct_perm.derivative A π.to_struct_perm)⁻¹ • a, _, by
-          simp only [struct_perm.coe_to_near_litter_perm, struct_perm.of_bot_smul, smul_inv_smul]⟩
+        ⟨(StructPerm.derivative A π.to_StructPerm)⁻¹ • a, _, by
+          simp only [StructPerm.coe_to_near_litter_perm, StructPerm.of_bot_smul, smul_inv_smul]⟩
       simp only [litter.coe_to_near_litter, mem_litter_set]
       have := (hπ A).mem_litterSet_inv a h₂
       rw [h₁, (hπ A).map_litter _ (hS.near_litter_mem_domain N A hc), mem_litter_set, inv_smul_smul,
-        struct_perm.of_bot_inv_smul] at this
+        StructPerm.of_bot_inv_smul] at this
       exact this
     · exact ⟨a, ha₁, ((hπ A).map_atom a ha₂).symm⟩
   · rintro ⟨a, ha, rfl⟩
     simp only [litter.coe_to_near_litter, mem_litter_set] at ha
-    simp only [struct_perm.coe_to_near_litter_perm, struct_perm.of_bot_smul]
+    simp only [StructPerm.coe_to_near_litter_perm, StructPerm.of_bot_smul]
     by_cases a ∈ (π₀ A).atomPerm.domain
     · exact Or.inr ⟨a, ⟨ha, h⟩, (hπ A).map_atom a h⟩
     · refine' Or.inl ⟨_, _⟩
       · have := (hπ A).mem_litterSet a h
-        simp only [struct_perm.of_bot_smul, mem_litter_set] at this
+        simp only [StructPerm.of_bot_smul, mem_litter_set] at this
         rw [this, ha]
         exact ((hπ A).map_litter _ (hS.near_litter_mem_domain N A hc)).symm
       · contrapose! h
         have := (hπ A).symm_map_atom _ h
-        simp only [struct_perm.of_bot_inv_smul, inv_smul_smul] at this
+        simp only [StructPerm.of_bot_inv_smul, inv_smul_smul] at this
         rw [← this]
         exact (π₀ A).symm.atomPerm.map_domain h
 
@@ -504,7 +504,7 @@ theorem Approximates.comp {β γ : TypeIndex} {π₀ : StructApprox β} {π : St
     (h : π₀.Approximates π) (A : Path β γ) : (π₀.comp A).Approximates (StructPerm.derivative A π) :=
   by
   intro B
-  rw [comp_apply, struct_perm.derivative_derivative]
+  rw [comp_apply, StructPerm.derivative_derivative]
   exact h _
 
 theorem ExactlyApproximates.comp {β γ : TypeIndex} {π₀ : StructApprox β} {π : StructPerm β}
@@ -512,7 +512,7 @@ theorem ExactlyApproximates.comp {β γ : TypeIndex} {π₀ : StructApprox β} {
     (π₀.comp A).ExactlyApproximates (StructPerm.derivative A π) :=
   by
   intro B
-  rw [comp_apply, struct_perm.derivative_derivative]
+  rw [comp_apply, StructPerm.derivative_derivative]
   exact h _
 
 /-!

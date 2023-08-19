@@ -53,19 +53,19 @@ theorem coe_def (α : Λ) : StructPerm ↑α = ∀ β : TypeIndex, β < α → S
   unfold StructPerm
   rfl
 
-/-- The "identity" equivalence between `near_litter_perm` and `struct_perm ⊥`. -/
+/-- The "identity" equivalence between `near_litter_perm` and `StructPerm ⊥`. -/
 def toBot : NearLitterPerm ≃ StructPerm ⊥ :=
   Equiv.cast <| by unfold StructPerm; rfl
 
-/-- The "identity" equivalence between `struct_perm ⊥` and `near_litter_perm`. -/
+/-- The "identity" equivalence between `StructPerm ⊥` and `near_litter_perm`. -/
 def ofBot : StructPerm ⊥ ≃ NearLitterPerm :=
   Equiv.cast <| by unfold StructPerm; rfl
 
-/-- The "identity" equivalence between `Π β < α, struct_perm β` and `struct_perm α`. -/
+/-- The "identity" equivalence between `Π β < α, StructPerm β` and `StructPerm α`. -/
 def toCoe : (∀ β : TypeIndex, β < α → StructPerm β) ≃ StructPerm α :=
   Equiv.cast <| by unfold StructPerm; rfl
 
-/-- The "identity" equivalence between `struct_perm α` and `Π β < α, struct_perm β`. -/
+/-- The "identity" equivalence between `StructPerm α` and `Π β < α, StructPerm β`. -/
 def ofCoe : StructPerm α ≃ ∀ β : TypeIndex, β < α → StructPerm β :=
   Equiv.cast <| by unfold StructPerm; rfl
 
@@ -120,7 +120,7 @@ noncomputable instance group : ∀ α, Group (StructPerm α)
 termination_by group α => α
 
 /-- The isomorphism between near-litter permutations and bottom structural permutations. This holds
-by definition of `struct_perm`. -/
+by definition of `StructPerm`. -/
 def toBotIso : NearLitterPerm ≃* StructPerm ⊥
     where
   __ := toBot
@@ -135,7 +135,7 @@ theorem coe_toBotIso_symm : ⇑toBotIso.symm = ofBot :=
   rfl
 
 /-- The isomorphism between the product of structural permutations under `α` and `α`-structural
-permutations. This holds by definition of `struct_perm`. -/
+permutations. This holds by definition of `StructPerm`. -/
 def toCoeIso (α : Λ) : (∀ β : TypeIndex, β < α → StructPerm β) ≃* StructPerm α
     where
   __ := toCoe
