@@ -1,7 +1,5 @@
 import ConNF.Phase1.Basic
 
-#align_import phase1.code
-
 open Set WithBot
 
 universe u
@@ -12,8 +10,10 @@ variable [Params.{u}] (α : Λ) [CoreTangleCumul α] {β : IioBot α} {s t : Set
 
 /-- An `α` code is a type index `β < α` together with a set of tangles of type `β`. -/
 def Code : Type u :=
-  Σ β : IioBot α, Set (Tangle β)
-deriving Inhabited
+  (β : IioBot α) × Set (Tangle β)
+
+instance : Inhabited (Code α) :=
+⟨⟨⊥, ∅⟩⟩
 
 /-- Nonempty codes. -/
 abbrev NonemptyCode : Type u :=
@@ -21,7 +21,8 @@ abbrev NonemptyCode : Type u :=
 
 namespace Code
 
-variable {α} {c : Code α}
+variable {α}
+variable {c : Code α}
 
 /-- Constructor for `code`. -/
 def mk : ∀ β : IioBot α, Set (Tangle β) → Code α :=
@@ -42,15 +43,17 @@ theorem snd_mk (β : IioBot α) (s : Set (Tangle β)) : (mk β s).2 = s :=
 protected def IsEmpty (c : Code α) : Prop :=
   c.2 = ∅
 
-protected theorem IsEmpty.eq : c.isEmpty → c.2 = ∅ :=
+protected theorem IsEmpty.eq : c.IsEmpty → c.2 = ∅ :=
   id
 
 @[simp]
-theorem isEmpty_mk : (mk β s).isEmpty ↔ s = ∅ :=
+theorem isEmpty_mk : (mk β s).IsEmpty ↔ s = ∅ :=
   Iff.rfl
 
 @[simp]
-theorem mk_inj : mk β s = mk β t ↔ s = t := by simp [mk]
+theorem mk_inj : mk β s = mk β t ↔ s = t := by
+  rw [Sigma.ext_iff]
+  simp
 
 end Code
 
