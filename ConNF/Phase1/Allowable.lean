@@ -267,17 +267,17 @@ theorem smul_fMap (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
   obtain a | ⟨heven, ε, hε, hA⟩ | ⟨heven, ε, hε, hA⟩ | ⟨c, heven, ε, hε, ζ, hζ, h₁, h₂⟩ := Equiv
   · cases hβγ.symm (congr_arg Sigma.fst a)
   · simp_rw [semiallowable_perm.smul_mk, smul_set_singleton] at hA
-    cases A_map_code_ne_singleton _ hA.symm
+    cases aMap_code_ne_singleton _ hA.symm
     exact hβγ.symm
   · have := congr_arg Sigma.fst hA
-    simp only [semiallowable_perm.smul_mk, fst_A_map_code, fst_mk, Iio.coe_inj] at this
+    simp only [semiallowable_perm.smul_mk, fst_aMap_code, fst_mk, Iio.coe_inj] at this
     subst this
-    simp only [semiallowable_perm.smul_mk, A_map_code_ne _ (mk β _) hβγ, mk_inj] at hA
-    simp only [coe_smul, snd_mk, smul_set_singleton, A_map_singleton] at hA
+    simp only [semiallowable_perm.smul_mk, aMap_code_ne _ (mk β _) hβγ, mk_inj] at hA
+    simp only [coe_smul, snd_mk, smul_set_singleton, aMap_singleton] at hA
     simp only [← image_smul, image_image, smul_typed_near_litter] at hA
     rw [← image_image] at hA
     rw [image_eq_image typed_near_litter.injective] at hA
-    have := litter.to_near_litter_mem_local_cardinal (f_map (coe_ne hβγ) (π • t))
+    have := litter.to_near_litter_mem_local_cardinal (fMap (coe_ne hβγ) (π • t))
     rw [← hA] at this
     obtain ⟨N, hN₁, hN₂⟩ := this
     have := congr_arg Sigma.fst hN₂
@@ -288,16 +288,16 @@ theorem smul_fMap (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
     rw [hN₁] at this
     exact this
   · have := congr_arg Sigma.fst h₁
-    simp only [coe_smul, smul_mk, fst_mk, fst_A_map_code] at this
+    simp only [coe_smul, smul_mk, fst_mk, fst_aMap_code] at this
     subst this
     simp only [coe_smul, smul_mk, smul_set_singleton] at h₁
-    cases A_map_code_ne_singleton hε h₁.symm
+    cases aMap_code_ne_singleton hε h₁.symm
 
 theorem smul_aMap (π : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
     π • aMap hβγ s = aMap hβγ (π • s) := by
   ext
-  simp only [A_map, mem_image, mem_Union, mem_local_cardinal, exists_prop, ← image_smul]
-  simp only [exists_exists_and_eq_and, smul_typed_near_litter, ← smul_f_map hβγ]
+  simp only [aMap, mem_image, mem_Union, mem_local_cardinal, exists_prop, ← image_smul]
+  simp only [exists_exists_and_eq_and, smul_typed_near_litter, ← smul_fMap hβγ]
   constructor
   · rintro ⟨N, ⟨y, y_mem, y_fmap⟩, rfl⟩
     refine' ⟨(π : semiallowable_perm α) γ • N, ⟨y, y_mem, _⟩, rfl⟩
@@ -312,15 +312,15 @@ theorem smul_aMap (π : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠ 
 
 theorem smul_aMapCode (π : AllowablePerm α) (hc : c.1 ≠ γ) :
     π • aMapCode γ c = aMapCode γ (π • c) := by
-  simp only [A_map_code_ne γ c hc, A_map_code_ne γ (π • c) hc, smul_A_map, snd_smul, smul_mk]
+  simp only [aMap_code_ne γ c hc, aMap_code_ne γ (π • c) hc, smul_aMap, snd_smul, smul_mk]
 
 end AllowablePerm
 
 theorem AMapRel.smul : c ↝ d → f • c ↝ f • d := by rintro ⟨γ, hγ⟩;
-  exact (A_map_rel_iff _ _).2 ⟨_, hγ, f.smul_A_map_code hγ⟩
+  exact (aMap_rel_iff _ _).2 ⟨_, hγ, f.smul_aMap_code hγ⟩
 
 @[simp]
-theorem smul_aMapRel : f • c ↝ f • d ↔ c ↝ d := by refine' ⟨fun h => _, A_map_rel.smul⟩;
+theorem smul_aMapRel : f • c ↝ f • d ↔ c ↝ d := by refine' ⟨fun h => _, aMap_rel.smul⟩;
   rw [← inv_smul_smul f c, ← inv_smul_smul f d]; exact h.smul
 
 namespace Code
@@ -330,14 +330,14 @@ theorem isEven_smul_nonempty : ∀ c : NonemptyCode α, (f • c.val).IsEven ↔
     simp_rw [code.is_even_iff]
     constructor <;> intro h d hd
     · have := hd.nonempty_iff.2 hc
-      let rec : A_map_rel' ⟨d, this⟩ ⟨c, hc⟩ := A_map_rel_coe_coe.1 hd
+      let rec : aMap_rel' ⟨d, this⟩ ⟨c, hc⟩ := aMap_rel_coe_coe.1 hd
       exact
         code.not_is_even.1 fun H =>
           (h _ hd.smul).not_isEven <| (is_even_smul_nonempty ⟨d, this⟩).2 H
     · rw [← smul_inv_smul f d] at hd ⊢
-      rw [smul_A_map_rel] at hd
+      rw [smul_aMap_rel] at hd
       have := hd.nonempty_iff.2 hc
-      let rec : A_map_rel' ⟨_, this⟩ ⟨c, hc⟩ := A_map_rel_coe_coe.1 hd
+      let rec : aMap_rel' ⟨_, this⟩ ⟨c, hc⟩ := aMap_rel_coe_coe.1 hd
       exact code.not_is_even.1 fun H => (h _ hd).not_isEven <| (is_even_smul_nonempty ⟨_, this⟩).1 H
 
 @[simp]

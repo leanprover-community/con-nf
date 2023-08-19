@@ -188,7 +188,7 @@ theorem mem_reduction_designated_support {β γ : Iic α} {δ ε : Iio α} (hδ 
         (B.cons (coe_lt hε)).cons (bot_lt_coe _)) :=
   by
   obtain ⟨⟨d, hd, hcd⟩, hc⟩ := h
-  refine' Relation.TransGen.tail' _ (constrains.f_map hδ hε hδε B t d hd)
+  refine' Relation.TransGen.tail' _ (constrains.fMap hδ hε hδε B t d hd)
   exact refl_trans_gen_constrains_comp hcd _
 
 end ConNF

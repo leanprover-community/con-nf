@@ -80,13 +80,13 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
   symmDiff (N : NearLitter) (a) (_ : a ∈ litterSet N.fst ∆ N.snd) (A : ExtendedIndex β) :
     constrains ⟨inl a, A⟩ ⟨inr N, A⟩
   |
-  f_map ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  fMap ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
     (A : Path (β : TypeIndex) γ) (t : Tangle δ) (c) (_ : c ∈ (designatedSupport t).carrier) :
     constrains ⟨c.fst, (A.cons (coe_lt hδ)).comp c.snd⟩
       ⟨inr (fMap (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter,
         (A.cons (coe_lt hε)).cons (bot_lt_coe _)⟩
   |
-  f_map_bot ⦃γ : Iic α⦄ ⦃ε : Iio α⦄ (hε : (ε : Λ) < γ) (A : Path (β : TypeIndex) γ) (a : Atom) :
+  fMap_bot ⦃γ : Iic α⦄ ⦃ε : Iio α⦄ (hε : (ε : Λ) < γ) (A : Path (β : TypeIndex) γ) (a : Atom) :
     constrains ⟨inl a, A.cons (bot_lt_coe _)⟩
       ⟨inr (fMap (show (⊥ : TypeIndex) ≠ (ε : Λ) from bot_ne_coe) a).toNearLitter,
         (A.cons (coe_lt hε)).cons (bot_lt_coe _)⟩
@@ -112,13 +112,13 @@ theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) :=
     rw [← hN]
     rfl
   · exact symm_diff_lt_near_litter N a ha
-  · have := f_map_position (coe_ne_coe.mpr <| coe_ne' hδε) t _ (is_near_litter_litter_set _)
+  · have := fMap_position (coe_ne_coe.mpr <| coe_ne' hδε) t _ (is_near_litter_litter_set _)
     rw [TangleData.typed_near_litter_position_eq] at this
     refine' lt_of_le_of_lt _ this
     convert TangleData.support_le (show tangle (h_δ : Λ) from t) _ hc
   · simp only [InvImage, elim_inr]
-    convert typed_atom_position_lt_f_map a
-    rw [TangleData.typed_near_litter_position_eq (f_map bot_ne_coe a).toNearLitter]
+    convert typed_atom_position_lt_fMap a
+    rw [TangleData.typed_near_litter_position_eq (fMap bot_ne_coe a).toNearLitter]
     infer_instance
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `⟨x, A⟩ ≺ ⟨y, B⟩`,
@@ -141,9 +141,9 @@ theorem constrains_atom {c : SupportCondition β} {a : Atom} {A : ExtendedIndex 
 
 /-
 -- Probably not the statement we actually want to prove.
-lemma constrains_f_map {γ : Iio α} {δ : Iio α}
+lemma constrains_fMap {γ : Iio α} {δ : Iio α}
   (h : (γ : type_index) ≠ δ) (B : extended_index δ) (t : tangle γ) {c : support_condition δ}
-  (hc : c ≺[α] (inr (f_map h t).to_near_litter, B)) :
+  (hc : c ≺[α] (inr (fMap h t).to_near_litter, B)) :
   ∃ β : Iic α, ∃ hβ : (γ : Λ) < β, ∃ A : path (δ : type_index) β, ∃ d : support_condition γ,
     d ∈ designated_support t ∧ c = (d.fst, (A.cons (coe_lt hβ)).comp d.snd) :=
 begin
@@ -155,36 +155,36 @@ begin
     cases hc.1 rfl, },
   { simp only [prod.mk.inj_iff, exists_eq_right_right'] at hc,
     obtain ⟨_, a, ha, hc, rfl⟩ := hc,
-    change a ∈ ((f_map h t).to_near_litter : set atom) ∆ (f_map h t).to_near_litter at ha,
+    change a ∈ ((fMap h t).to_near_litter : set atom) ∆ (fMap h t).to_near_litter at ha,
     simp only [symm_diff_self, bot_eq_empty, mem_empty_iff_false] at ha,
     cases ha, },
   { obtain ⟨γ', δ', ε', hδ', hε', hδε', A, t', c, hc₁, rfl, hc₂⟩ := hc,
     simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff] at hc₂,
     have : γ = δ',
-    { have h₁ := f_map_β h t,
+    { have h₁ := fMap_β h t,
       rw hc₂.1 at h₁,
-      have h₂ := f_map_β _ t',
+      have h₂ := fMap_β _ t',
       have := h₁.symm.trans h₂,
       have := with_bot.coe_inj.mp this,
       rw subtype.coe_inj at this,
       exact this, },
     subst this,
     have : δ = ε',
-    { have h₁ := f_map_γ h t,
+    { have h₁ := fMap_γ h t,
       rw hc₂.1 at h₁,
-      have h₂ := f_map_γ _ t',
+      have h₂ := fMap_γ _ t',
       have := h₁.symm.trans h₂,
       rw subtype.coe_inj at this,
       exact this, },
     subst this,
-    cases f_map_injective _ hc₂.1,
+    cases fMap_injective _ hc₂.1,
     cases hc₂.2,
     exact ⟨γ', hδ', A, c, hc₁, rfl⟩, },
   { obtain ⟨γ', ε', hε', A, a, hc₁, hc₂⟩ := hc,
     simp only [prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff] at hc₂,
-    have := f_map_β h t,
+    have := fMap_β h t,
     rw hc₂.1 at this,
-    have := this.symm.trans (f_map_β bot_ne_coe a),
+    have := this.symm.trans (fMap_β bot_ne_coe a),
     cases this, },
 end -/
 /-- The constrains relation is stable under composition of paths. -/
@@ -196,9 +196,9 @@ theorem constrainsComp {β γ : Λ} {c d : SupportCondition γ} (h : c ≺[α] d
   · exact constrains.near_litter _ hN _
   · exact constrains.symm_diff _ _ ha _
   · rw [path.comp_cons, ← path.comp_assoc, path.comp_cons]
-    exact constrains.f_map hδ hε hδε (B.comp A) t c hc
+    exact constrains.fMap hδ hε hδε (B.comp A) t c hc
   · rw [path.comp_cons]
-    exact constrains.f_map_bot hδ (B.comp A) a
+    exact constrains.fMap_bot hδ (B.comp A) a
 
 notation:50 c " <[" α "] " d:50 => Relation.TransGen (Constrains α _) c d
 
@@ -280,7 +280,7 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
   · by_cases
       ∃ (γ : Iic α) (δ : Iio α) (ε : Iio α) (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε) (B :
         Path (β : type_index) γ) (t : tangle δ),
-        N = (f_map (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter ∧
+        N = (fMap (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter ∧
           A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)
     · obtain ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ := h
       refine' lt_of_le_of_lt _ (designated_support t).Small
@@ -291,7 +291,7 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
         by
         refine' le_trans (Cardinal.mk_subtype_le_of_subset _) this
         rintro x ⟨_, _, _, _, _, _, _, _, c, hc, rfl, h⟩
-        simp only [Prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff, f_map] at h
+        simp only [Prod.mk.inj_iff, litter.to_near_litter_injective.eq_iff, fMap] at h
         cases subtype.coe_inj.mp (coe_inj.mp h.1.2.1)
         cases subtype.coe_inj.mp h.1.2.2
         cases choose_wf_injective h.1.1
@@ -320,7 +320,7 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
       subtype.coe_inj.mp
         (coe_inj.mp (path.obj_eq_of_cons_eq_cons (path.heq_of_cons_eq_cons hd₂.2).Eq))
     cases (path.heq_of_cons_eq_cons (path.heq_of_cons_eq_cons hd₂.2).Eq).Eq
-    rw [(f_map_injective bot_ne_coe).eq_iff] at hd₂
+    rw [(fMap_injective bot_ne_coe).eq_iff] at hd₂
     cases hd₂.1
     rfl
 

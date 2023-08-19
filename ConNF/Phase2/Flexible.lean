@@ -40,7 +40,7 @@ theorem mk_flexible (A : ExtendedIndex β) : (#{L | Flexible α L A}) = (#μ) :=
     rw [inflexible_iff] at h
     obtain ⟨γ, δ, ε, hδ, hε, hδε, A, t, h, rfl⟩ | ⟨γ, ε, hε, A, t, h, rfl⟩ := h
     all_goals
-      have := f_map_γ _ _
+      have := fMap_γ _ _
       rw [← h] at this
       exact ne_of_lt ε.prop this.symm
   · intro ν₁ ν₂ h

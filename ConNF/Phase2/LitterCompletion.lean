@@ -44,11 +44,11 @@ instance {β : Iic α} (L : Litter) (A : ExtendedIndex β) : Subsingleton (Infle
     Subtype.coe_injective
       (coe_eq_coe.mp (path.obj_eq_of_cons_eq_cons (path.heq_of_cons_eq_cons hA₂).Eq))
   cases (path.heq_of_cons_eq_cons (path.heq_of_cons_eq_cons hA₂).Eq).Eq
-  have h₁ := f_map_β (coe_ne_coe.mpr <| coe_ne' hδε₁) t₁
-  have h₂ := f_map_β (coe_ne_coe.mpr <| coe_ne' hδε₂) t₂
+  have h₁ := fMap_β (coe_ne_coe.mpr <| coe_ne' hδε₁) t₁
+  have h₂ := fMap_β (coe_ne_coe.mpr <| coe_ne' hδε₂) t₂
   rw [hL₂, h₂] at h₁
   cases Subtype.coe_injective (coe_eq_coe.mp h₁)
-  cases f_map_injective _ hL₂
+  cases fMap_injective _ hL₂
   rfl
 
 /-- A proof-relevant statement that `L` is `A`-inflexible, where `δ = ⊥`. -/
@@ -70,15 +70,15 @@ instance {β : Iic α} (L : Litter) (A : ExtendedIndex β) : Subsingleton (Infle
     Subtype.coe_injective
       (coe_eq_coe.mp (path.obj_eq_of_cons_eq_cons (path.heq_of_cons_eq_cons hA₂).Eq))
   cases (path.heq_of_cons_eq_cons (path.heq_of_cons_eq_cons hA₂).Eq).Eq
-  cases f_map_injective _ hL₂
+  cases fMap_injective _ hL₂
   rfl
 
 theorem inflexibleBot_inflexibleCoe {β : Iic α} {L : Litter} {A : ExtendedIndex β} :
     InflexibleBot L A → InflexibleCoe L A → False :=
   by
   rintro ⟨γ₁, ε₁, hε₁, B₁, a₁, rfl, rfl⟩ ⟨γ₂, δ₂, ε₂, hδ₂, hε₂, hδε₂, B₂, t₂, hL₂, hA₂⟩
-  have h₁ := f_map_β (show (⊥ : type_index) ≠ (ε₁ : Λ) from bot_ne_coe) a₁
-  have h₂ := f_map_β (coe_ne_coe.mpr <| coe_ne' hδε₂) t₂
+  have h₁ := fMap_β (show (⊥ : type_index) ≠ (ε₁ : Λ) from bot_ne_coe) a₁
+  have h₂ := fMap_β (coe_ne_coe.mpr <| coe_ne' hδε₂) t₂
   rw [hL₂, h₂] at h₁
   cases h₁
 
@@ -152,7 +152,7 @@ end Comp
 theorem InflexibleBot.constrains {β : Iic α} {L : Litter} {A : ExtendedIndex β}
     (h : InflexibleBot L A) : (inl h.a, h.b.cons (bot_lt_coe _)) <[α] (inr L.toNearLitter, A) :=
   by
-  have := constrains.f_map_bot h.hε h.B h.a
+  have := constrains.fMap_bot h.hε h.B h.a
   rw [← h.hL, ← h.hA] at this
   exact Relation.TransGen.single this
 

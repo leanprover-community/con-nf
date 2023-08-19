@@ -103,7 +103,7 @@ theorem reprCodeSpec : ∀ s : Semitangle α, (reprCode s : Code α).IsEven
 theorem reprCode_members_ne :
     ∀ (s : Semitangle α) (γ : Iio α) (hcγ : (reprCode s : Code α).1 ≠ γ),
       (aMapCode γ (reprCode s)).2 = s.members γ
-  | ⟨exts, preference.proper β rep hA⟩, γ, hcγ => by rw [snd_A_map_code] <;> exact hA _ hcγ
+  | ⟨exts, preference.proper β rep hA⟩, γ, hcγ => by rw [snd_aMap_code] <;> exact hA _ hcγ
   | ⟨exts, preference.base atoms hA⟩, γ, hcγ => hA _
 
 -- Remark: This formulation of extensionality holds only for types larger than type zero, since
@@ -117,15 +117,15 @@ theorem ext_core (x y : Semitangle α) : (∃ γ, γ < α) → x.members = y.mem
   have γ : Iio α := ⟨γ, hγ⟩
   refine' congr_arg (fun h => ⟨xs, h⟩) _
   obtain ⟨atoms₁, hA₁⟩ | ⟨β, even₁, hA₁⟩ := hxs <;> obtain ⟨atoms₂, hA₂⟩ | ⟨γ, even₂, hA₂⟩ := hys
-  · simp_rw [A_map_injective ((hA₁ γ).trans (hA₂ _).symm)]
+  · simp_rw [aMap_injective ((hA₁ γ).trans (hA₂ _).symm)]
   · cases (is_even_bot _).aMapCode_ne even₂ bot_ne_mk_coe (Sigma.ext_iff.2 ⟨rfl, (hA₁ γ).HEq⟩)
   · cases (is_even_bot _).aMapCode_ne even₁ bot_ne_mk_coe (Sigma.ext_iff.2 ⟨rfl, (hA₂ β).HEq⟩)
   · simp only
     refine'
       not_ne_iff.1 fun hβγ =>
-        even₂.A_map_code_ne even₁ (Iio.coe_injective.ne hβγ.symm) <|
+        even₂.aMap_code_ne even₁ (Iio.coe_injective.ne hβγ.symm) <|
           Sigma.ext_iff.2 ⟨rfl, hEq_of_eq _⟩
-    rw [snd_A_map_code]
+    rw [snd_aMap_code]
     exact hA₂ β fun h => hβγ.symm (Iio.coe_injective h)
 
 /-- One useful form of extensionality in tangled type theory. Two nonempty semitangles are equal if
@@ -153,8 +153,8 @@ theorem ext_code : ∀ {x y : Semitangle α}, (reprCode x : Code α) ≡ reprCod
   | ⟨x, preference.proper γ even₁ hA₁⟩, ⟨y, preference.proper δ even₂ hA₂⟩, h =>
     by
     dsimp at h
-    simp only [code.equiv_iff, Sigma.ext_iff, mem_Iio, Iio.coe_inj, Ne.def, fst_A_map_code,
-      snd_A_map_code, Iio.coe_mk] at h
+    simp only [code.equiv_iff, Sigma.ext_iff, mem_Iio, Iio.coe_inj, Ne.def, fst_aMap_code,
+      snd_aMap_code, Iio.coe_mk] at h
     obtain ⟨rfl, h⟩ | ⟨-, γ, hδγ, rfl, h⟩ | ⟨-, δ, hγδ, rfl, h⟩ |
       ⟨c, hc, γ, hcγ, δ, hcδ, ⟨⟨rfl, hx'⟩, hx⟩, _⟩ := h
     · suffices x = y by subst this
@@ -167,11 +167,11 @@ theorem ext_code : ∀ {x y : Semitangle α}, (reprCode x : Code α) ≡ reprCod
       dsimp
       rw [h.eq]
     · rw [h.eq] at even₁
-      cases (even₂.A_map_code <| Iio.coe_injective.ne hδγ).not_isEven even₁
+      cases (even₂.aMap_code <| Iio.coe_injective.ne hδγ).not_isEven even₁
     · rw [h.eq] at even₂
-      cases (even₁.A_map_code <| Iio.coe_injective.ne hγδ).not_isEven even₂
+      cases (even₁.aMap_code <| Iio.coe_injective.ne hγδ).not_isEven even₂
     · rw [hx.eq] at even₁
-      cases (hc.A_map_code hcγ).not_isEven even₁
+      cases (hc.aMap_code hcγ).not_isEven even₁
 
 /-- Extensionality in tangled type theory. Two nonempty semitangles are equal if their
 `β`-extensions are equal for *any* choice of `γ < α`.
@@ -183,52 +183,52 @@ theorem ext (x y : Semitangle α) (h : x.members γ = y.members γ) : x = y :=
   dsimp only at h
   refine' ext_code _
   obtain ⟨atoms₁, hA₁⟩ | ⟨β, even₁, hA₁⟩ := hxs <;> obtain ⟨atoms₂, hA₂⟩ | ⟨δ, even₂, hA₂⟩ := hys
-  · refine' (code.equiv.A_map_right _ (code.is_even_bot _) γ bot_ne_mk_coe).trans _
-    simp only [Ne.def, Iio_index.bot_ne_coe, not_false_iff, A_map_code_mk_ne, repr_code_base,
+  · refine' (code.equiv.aMap_right _ (code.is_even_bot _) γ bot_ne_mk_coe).trans _
+    simp only [Ne.def, Iio_index.bot_ne_coe, not_false_iff, aMap_code_mk_ne, repr_code_base,
       Subtype.coe_mk]
     rw [hA₁ γ, h, ← hA₂ γ]
-    exact code.equiv.A_map_left _ (code.is_even_bot _) γ bot_ne_mk_coe
+    exact code.equiv.aMap_left _ (code.is_even_bot _) γ bot_ne_mk_coe
   · simp only [repr_code_base, Subtype.coe_mk, repr_code_proper]
     obtain rfl | hδγ := eq_or_ne δ γ
     · simp only [is_even_bot, mem_Iio, Subtype.val_eq_coe, SetCoe.forall, Ne.def, Iio.coe_inj] at *
       have := hA₁ δ δ.prop
       rw [Subtype.coe_eta] at this
       rw [← h, ← this]
-      exact code.equiv.A_map_right _ (code.is_even_bot _) _ bot_ne_mk_coe
-    · refine' (code.equiv.A_map_right _ (code.is_even_bot _) γ bot_ne_mk_coe).trans _
-      simp only [Ne.def, Iio_index.bot_ne_coe, not_false_iff, A_map_code_mk_ne]
-      rw [hA₁ γ, h, ← hA₂ γ (Iio.coe_injective.ne hδγ), ← A_map_code_mk_ne]
-      exact code.equiv.A_map_left _ even₂ γ (Iio.coe_injective.ne hδγ)
+      exact code.equiv.aMap_right _ (code.is_even_bot _) _ bot_ne_mk_coe
+    · refine' (code.equiv.aMap_right _ (code.is_even_bot _) γ bot_ne_mk_coe).trans _
+      simp only [Ne.def, Iio_index.bot_ne_coe, not_false_iff, aMap_code_mk_ne]
+      rw [hA₁ γ, h, ← hA₂ γ (Iio.coe_injective.ne hδγ), ← aMap_code_mk_ne]
+      exact code.equiv.aMap_left _ even₂ γ (Iio.coe_injective.ne hδγ)
   · simp only [repr_code_proper, Subtype.coe_mk, repr_code_base]
     obtain rfl | hβγ := eq_or_ne β γ
     · dsimp only [mem_Iio, Ne.def, Subtype.val_eq_coe, SetCoe.forall] at *
       rw [h, ← hA₂ β]
-      exact code.equiv.A_map_left _ (code.is_even_bot _) _ bot_ne_mk_coe
-    · refine' (code.equiv.A_map_right _ even₁ γ <| Iio.coe_injective.ne hβγ).trans _
+      exact code.equiv.aMap_left _ (code.is_even_bot _) _ bot_ne_mk_coe
+    · refine' (code.equiv.aMap_right _ even₁ γ <| Iio.coe_injective.ne hβγ).trans _
       dsimp only [mem_Iio, Ne.def, Subtype.val_eq_coe, SetCoe.forall] at *
-      rw [A_map_code_mk_ne _ _ (Iio.coe_injective.ne hβγ)]
+      rw [aMap_code_mk_ne _ _ (Iio.coe_injective.ne hβγ)]
       rw [hA₁ γ (Iio.coe_injective.ne hβγ), h, ← hA₂ γ]
-      exact code.equiv.A_map_left _ (code.is_even_bot _) γ bot_ne_mk_coe
+      exact code.equiv.aMap_left _ (code.is_even_bot _) γ bot_ne_mk_coe
   · simp only [repr_code_proper, Subtype.coe_mk]
     obtain rfl | hβγ := eq_or_ne β γ
     · obtain rfl | hδβ := eq_or_ne δ β
       · rw [h]
-      · have := A_map_code_ne β (code.mk δ (ys δ)) (Iio.coe_injective.ne hδβ)
+      · have := aMap_code_ne β (code.mk δ (ys δ)) (Iio.coe_injective.ne hδβ)
         dsimp only [mem_Iio, Ne.def, Subtype.val_eq_coe, SetCoe.forall, code.snd_mk] at *
         rw [h, ← hA₂ _ (Iio.coe_injective.ne hδβ), ← code.mk_def, ← this]
-        exact code.equiv.A_map_left _ even₂ _ (Iio.coe_injective.ne hδβ)
+        exact code.equiv.aMap_left _ even₂ _ (Iio.coe_injective.ne hδβ)
     obtain rfl | hδγ := eq_or_ne δ γ
-    · have := A_map_code_ne δ (code.mk β (xs β)) (Iio.coe_injective.ne hβγ)
+    · have := aMap_code_ne δ (code.mk β (xs β)) (Iio.coe_injective.ne hβγ)
       dsimp only [mem_Iio, Ne.def, Subtype.val_eq_coe, SetCoe.forall, code.snd_mk] at *
       simp_rw [← h, ← hA₁ _ (Iio.coe_injective.ne hβγ), ← code.mk_def, ← this]
-      exact code.equiv.A_map_right _ even₁ _ (Iio.coe_injective.ne hβγ)
-    refine' (code.equiv.A_map_right _ even₁ γ <| Iio.coe_injective.ne hβγ).trans _
-    have := A_map_code_ne γ (code.mk (↑δ) (ys δ)) (Iio.coe_injective.ne hδγ)
+      exact code.equiv.aMap_right _ even₁ _ (Iio.coe_injective.ne hβγ)
+    refine' (code.equiv.aMap_right _ even₁ γ <| Iio.coe_injective.ne hβγ).trans _
+    have := aMap_code_ne γ (code.mk (↑δ) (ys δ)) (Iio.coe_injective.ne hδγ)
     dsimp only [mem_Iio, Ne.def, Subtype.val_eq_coe, SetCoe.forall, code.snd_mk] at *
-    rw [A_map_code_ne]
+    rw [aMap_code_ne]
     rw [code.snd_mk, hA₁ γ (Iio.coe_injective.ne hβγ), h, ← hA₂ γ (Iio.coe_injective.ne hδγ)]
     rw [← this]
-    exact code.equiv.A_map_left _ even₂ γ (Iio.coe_injective.ne hδγ)
+    exact code.equiv.aMap_left _ even₂ γ (Iio.coe_injective.ne hδγ)
 
 /-- Extensionality in tangled type theory. Two nonempty semitangles are equal if their
 `β`-extensions are equal for *any* choice of `β < α`. -/
@@ -283,7 +283,7 @@ theorem smul_extension_apply (f : AllowablePerm α) (s : Set (Tangle β)) :
   by_cases β = γ
   · subst h
     simp only [extension_eq, cast_eq]
-  · simp only [extension_ne _ _ h, smul_A_map]
+  · simp only [extension_ne _ _ h, smul_aMap]
 
 @[simp]
 theorem smul_extension (f : AllowablePerm α) (s : Set (Tangle β)) :
@@ -295,12 +295,12 @@ theorem smul_extension (f : AllowablePerm α) (s : Set (Tangle β)) :
 theorem smul_aux₁ {s : Set (Tangle (⊥ : IioBot α))}
     (h : ∀ γ : Iio α, aMap bot_ne_coe s = (e γ : Set (Tangle (iioCoe γ)))) (γ : Iio α) :
     aMap bot_ne_coe (f • s) = (f • e) γ := by
-  simpa only [smul_A_map] using congr_arg (fun c => f • c) (h γ)
+  simpa only [smul_aMap] using congr_arg (fun c => f • c) (h γ)
 
 theorem smul_aux₂
     (h : ∀ (δ : Iio α) (hγδ : iioCoe γ ≠ δ), aMap hγδ (e γ) = (e δ : Set (Tangle (iioCoe δ))))
     (δ : Iio α) (hγδ : iioCoe γ ≠ δ) : aMap hγδ ((f • e) γ) = (f • e) δ := by
-  simpa only [smul_A_map] using congr_arg (fun c => f • c) (h δ hγδ)
+  simpa only [smul_aMap] using congr_arg (fun c => f • c) (h δ hγδ)
 
 /-- Allowable permutations act on nonempty semitangles. -/
 noncomputable instance : SMul (AllowablePerm α) (Semitangle α)

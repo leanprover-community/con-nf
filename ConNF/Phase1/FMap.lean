@@ -104,8 +104,8 @@ variable [Params.{u}] {β : TypeIndex} {γ : Λ} [CoreTangleData β] [Positioned
   [PositionData] [CoreTangleData γ] [PositionedTangleData γ] [AlmostTangleData γ] (hβγ : β ≠ γ)
 
 /-- The requirements to be satisfied by the f-maps.
-If `f_map_condition` applied to a litter indexed by `i` is true,
-then `i` is *not* a valid output to `f_map x`. -/
+If `fMap_condition` applied to a litter indexed by `i` is true,
+then `i` is *not* a valid output to `fMap x`. -/
 inductive FMapCondition (x : Tangle β) (i : μ) : Prop
   | any (N : Set Atom) (hN : IsNearLitter ⟨i, β, γ, hβγ⟩ N) :
     position (typedNearLitter ⟨⟨i, β, γ, hβγ⟩, N, hN⟩ : Tangle γ) ≤ position x → FMapCondition x i
@@ -144,7 +144,7 @@ theorem mk_invImage_le (x : Tangle β) : #{ y : Tangle γ // position y ≤ posi
 
 variable {γ}
 
-theorem mk_f_map_deny (hβγ : β ≠ γ) (x : Tangle β) :
+theorem mk_fMap_deny (hβγ : β ≠ γ) (x : Tangle β) :
     #{ y // InvImage (· < ·) position y x } + #{ i // FMapCondition hβγ x i } < #μ := by
   have h₁ := mk_invImage_lt x
   suffices h₂ : #{ i // FMapCondition hβγ x i } < #μ
@@ -195,7 +195,7 @@ We're done with proving technical results, now we can define the f-maps.
 
 /-- The f-maps. -/
 noncomputable def fMap (x : Tangle β) : Litter :=
-  ⟨chooseWf (FMapCondition hβγ) (mk_f_map_deny hβγ) x, β, γ, hβγ⟩
+  ⟨chooseWf (FMapCondition hβγ) (mk_fMap_deny hβγ) x, β, γ, hβγ⟩
 
 @[simp]
 theorem fMap_β (x : Tangle β) : (fMap hβγ x).β = β :=
@@ -213,7 +213,7 @@ theorem fMap_injective : Injective (fMap hβγ) := by
 theorem fMap_not_mem_deny (x : Tangle β) : (fMap hβγ x).ν ∉ {i | FMapCondition hβγ x i} :=
   chooseWf_not_mem_deny x
 
-theorem fMap_position (x : Tangle β) (N : Set Atom) (h : IsNearLitter (fMap hβγ x) N) :
+theorem fMap_position' (x : Tangle β) (N : Set Atom) (h : IsNearLitter (fMap hβγ x) N) :
     position x < position (typedNearLitter ⟨fMap hβγ x, N, h⟩ : Tangle γ) := by
   have h' := fMap_not_mem_deny hβγ x
   contrapose! h'
@@ -223,6 +223,11 @@ theorem fMap_position (x : Tangle β) (N : Set Atom) (h : IsNearLitter (fMap hβ
   induction β using WithBot.recBotCoe <;>
   · intros _ _ hβγ x h h'
     exact FMapCondition.any _ h h'
+
+theorem fMap_position (x : Tangle β) (N : NearLitter) (h : N.1 = fMap hβγ x) :
+    position x < position (typedNearLitter N : Tangle γ) := by
+  have := fMap_position' hβγ x N ((NearLitter.isNearLitter _ _).mpr h)
+  exact lt_of_lt_of_eq this (congr_arg _ (congr_arg _ (NearLitter.ext rfl)))
 
 theorem typedAtomPosition_lt_fMap (x : Tangle ⊥) :
   typedAtomPosition x <

@@ -104,7 +104,7 @@ class Phase2Assumptions extends Phase2Data α where
       Allowable (β : IicBot α)
   allowableOfSmulFMap_derivative_eq {β : Iic α} {πs} {h} (γ : IioBot α)
     (hγ : (γ : TypeIndex) < β) :
-    allowable_derivative β γ hγ (allowable_of_smul_f_map β πs h) = πs γ hγ
+    allowable_derivative β γ hγ (allowable_of_smul_fMap β πs h) = πs γ hγ
 
 export
   Phase2Assumptions (allowableDerivative allowableDerivative_eq smul_designatedSupport smul_fMap allowableOfSmulFMap allowableOfSmulFMap_derivative_eq)
@@ -229,6 +229,6 @@ theorem toStructPerm_smul_fMap (β : IicBot α) (γ : IioBot α) (δ : Iio α)
       fMap (Subtype.coe_injective.Ne hγδ) (allowableDerivative β γ hγ π • t) :=
   by
   rw [allowable_derivative_eq β δ hδ π]
-  exact smul_f_map γ δ hγ hδ hγδ π t
+  exact smul_fMap γ δ hγ hδ hγδ π t
 
 end ConNF

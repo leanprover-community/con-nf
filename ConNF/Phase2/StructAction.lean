@@ -176,20 +176,20 @@ theorem smul_litter_eq_of_supports (φ : StructAction β) (hφ : φ.Lawful) {π 
   · rw [inflexible_iff] at hflex
     obtain ⟨γ, δ, ε, hδ, hε, hδε, C, t', rfl, rfl⟩ | ⟨γ, ε, hε, C, a, rfl, rfl⟩ := hflex
     · have hc₂ := fun c hc =>
-        ih _ (Relation.TransGen.single <| constrains.f_map hδ hε hδε C t' c hc)
+        ih _ (Relation.TransGen.single <| constrains.fMap hδ hε hδε C t' c hc)
       have :=
-        smul_f_map (δ : Iio_index α) ε _ _ (Iio.coe_injective.ne hδε)
+        smul_fMap (δ : Iio_index α) ε _ _ (Iio.coe_injective.ne hδε)
           (allowable.derivative
             (show Path ((β : Iic_index α) : type_index) (γ : Iic_index α) from C) π)
           t'
       rw [← allowable.derivative_cons_apply, allowable.derivative_smul, ←
         StructPerm.derivative_bot_smul, ← StructPerm.derivative_cons] at this
       exact this.trans (hφc.coe hπ γ δ ε hδ hε hδε C t' _ ⟨d, hd, hc⟩ hc₂)
-    · have hc : (_, _) = (_, _) := ih _ (Relation.TransGen.single <| constrains.f_map_bot hε C a)
+    · have hc : (_, _) = (_, _) := ih _ (Relation.TransGen.single <| constrains.fMap_bot hε C a)
       simp only [smul_inl, Prod.mk.inj_iff, eq_self_iff_true, and_true_iff] at hc
       rw [← hφc.bot hπ γ ε hε C a _ hc]
       have :=
-        smul_f_map (⊥ : Iio_index α) ε _ _ (by intro h <;> cases h)
+        smul_fMap (⊥ : Iio_index α) ε _ _ (by intro h <;> cases h)
           (allowable.derivative
             (show Path ((β : Iic_index α) : type_index) (γ : Iic_index α) from C) π)
           a

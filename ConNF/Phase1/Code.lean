@@ -21,6 +21,10 @@ abbrev NonemptyCode : Type u :=
 
 namespace Code
 
+@[ext]
+theorem Code.ext {c₀ c₁ : Code α} (h₀ : c₀.1 = c₁.1) (h₁ : HEq c₀.2 c₁.2) : c₀ = c₁ :=
+  Sigma.ext h₀ h₁
+
 variable {α}
 variable {c : Code α}
 
