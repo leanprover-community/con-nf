@@ -21,6 +21,18 @@ abbrev IioBot (α : Λ) :=
 abbrev IicBot (α : Λ) :=
   Iic (α : TypeIndex)
 
+@[simp]
+lemma _root_.Set.Iio.lt (β : Iio α) : (β : Λ) < α := β.prop
+
+@[simp]
+lemma _root_.Set.Iic.le (β : Iic α) : (β : Λ) ≤ α := β.prop
+
+@[simp]
+lemma IioBot.lt (β : IioBot α) : (β : TypeIndex) < α := β.prop
+
+@[simp]
+lemma IicBot.le (β : IicBot α) : (β : TypeIndex) ≤ α := β.prop
+
 instance coeIioIic : CoeTC (Iio α) (Iic α) :=
   ⟨fun β => ⟨β.1, le_of_lt (show β < α from β.2)⟩⟩
 
