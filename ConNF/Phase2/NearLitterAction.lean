@@ -87,7 +87,7 @@ theorem bannedLitter_small : Small {L | φ.BannedLitter L} :=
     rw [h] at this
     exact Subtype.coe_injective (this.trans a₂.prop.some_spec.2.symm)
   · refine' lt_of_le_of_lt _ φ.litter_map_dom_small
-    refine' ⟨⟨fun L => ⟨_, L.Prop⟩, fun L₁ L₂ h => _⟩⟩
+    refine' ⟨⟨fun L => ⟨_, L.prop⟩, fun L₁ L₂ h => _⟩⟩
     simp only [Subtype.mk_eq_mk, Prod.mk.inj_iff] at h
     exact Subtype.coe_injective h
   · refine' lt_of_le_of_lt _ φ.atom_map_dom_small
@@ -109,11 +109,11 @@ theorem bannedLitter_small : Small {L | φ.BannedLitter L} :=
       by
       refine' small.bUnion _ _
       · refine' lt_of_le_of_lt _ φ.litter_map_dom_small
-        refine' ⟨⟨fun N => ⟨_, N.Prop⟩, fun N₁ N₂ h => _⟩⟩
+        refine' ⟨⟨fun N => ⟨_, N.prop⟩, fun N₁ N₂ h => _⟩⟩
         simp only [Subtype.mk_eq_mk, Prod.mk.inj_iff] at h
         exact subtype.coe_inj.mp h
       · intro L hL
-        refine' small.mono _ ((φ.litter_map L).get hL).2.Prop
+        refine' small.mono _ ((φ.litter_map L).get hL).2.prop
         exact fun x hx => Or.inr hx
     refine' lt_of_le_of_lt _ this
     refine' ⟨⟨fun L => ⟨L.prop.some_spec.some_spec.some, _⟩, fun L₁ L₂ h => _⟩⟩
@@ -151,7 +151,7 @@ noncomputable def sandboxLitter : Litter :=
   φ.not_bannedLitter_nonempty.some
 
 theorem sandboxLitter_not_banned : ¬φ.BannedLitter φ.sandboxLitter :=
-  φ.not_bannedLitter_nonempty.some.Prop
+  φ.not_bannedLitter_nonempty.some.prop
 
 /-- If `a` is in the domain, this is the atom map. Otherwise, this gives an arbitrary atom. -/
 noncomputable def atomMapOrElse (a : Atom) : Atom :=
@@ -214,7 +214,7 @@ noncomputable def nearLitterMapOrElse (N : NearLitter) : NearLitter :=
     φ.litterMapOrElse N.fst ∆ (φ.atomMapOrElse '' litterSet N.fst ∆ N),
     by
     rw [is_near_litter, is_near, ← symmDiff_assoc]
-    exact (φ.litter_map_or_else N.fst).snd.Prop.symmDiff (small.image N.2.Prop)⟩
+    exact (φ.litter_map_or_else N.fst).snd.prop.symmDiff (small.image N.2.prop)⟩
 
 theorem ConNF.Small.pFun_image {α β : Type _} {s : Set α} (h : Small s) {f : α →. β} :
     Small (f.image s) := by
@@ -230,7 +230,7 @@ theorem nearLitterMapOrElse_of_dom {N : NearLitter} (h₁ : (φ.litterMap N.fst)
         (φ.litterMap N.fst).get h₁ ∆ (φ.atomMap.image <| litterSet N.fst ∆ N),
         by
         rw [is_near_litter, is_near, ← symmDiff_assoc]
-        exact ((φ.litter_map N.fst).get h₁).snd.Prop.symmDiff (small.pfun_image N.2.Prop)⟩ :=
+        exact ((φ.litter_map N.fst).get h₁).snd.prop.symmDiff (small.pfun_image N.2.prop)⟩ :=
   by
   rw [← SetLike.coe_set_eq, near_litter_map_or_else, near_litter.coe_mk, Subtype.coe_mk,
     φ.litter_map_or_else_of_dom h₁]

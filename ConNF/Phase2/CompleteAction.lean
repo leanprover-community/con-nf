@@ -670,7 +670,7 @@ theorem atom_injective_extends {c d : SupportCondition β} (hcd : (ihsAction π 
     have h₁ := (subtype.coe_eq_iff.mp h).some.1
     have h₂ :=
       (((π A).largestSublitter b.1).OrderIso ((π A).largestSublitter (π.complete_litter_map A b.1))
-            ⟨b, (π A).mem_largestSublitter_of_not_mem_domain b hb⟩).Prop.1
+            ⟨b, (π A).mem_largestSublitter_of_not_mem_domain b hb⟩).prop.1
     have := (hcd A).litterMap_injective (fst_trans_constrained hac) (fst_trans_constrained hbc) _
     · have := eq_of_sublitter_bijection_apply_eq h this (by rw [this])
       rw [SetLike.coe_mk, SetLike.coe_mk] at this

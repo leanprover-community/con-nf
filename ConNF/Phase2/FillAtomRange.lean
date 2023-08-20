@@ -26,7 +26,7 @@ noncomputable def preimageLitter : Litter :=
   φ.not_bannedLitter_nonempty.some
 
 theorem preimageLitter_not_banned : ¬φ.BannedLitter φ.preimageLitter :=
-  φ.not_bannedLitter_nonempty.some.Prop
+  φ.not_bannedLitter_nonempty.some.prop
 
 /-- An atom is called *without preimage* if it is not in the range of the approximation,
 but it is in a litter near some near-litter in the range.
@@ -52,13 +52,13 @@ theorem withoutPreimage_small : Small {a | φ.WithoutPreimage a} :=
     exact ⟨L, hL, ha₁, ha₂ _ _⟩
   refine' small.bUnion _ _
   · refine' lt_of_le_of_lt _ φ.litter_map_dom_small
-    refine' ⟨⟨fun L => ⟨_, L.Prop⟩, _⟩⟩
+    refine' ⟨⟨fun L => ⟨_, L.prop⟩, _⟩⟩
     intro L₁ L₂ h
     simp only [Subtype.mk_eq_mk, Prod.mk.inj_iff, eq_self_iff_true, and_true_iff,
       litter.to_near_litter_injective.eq_iff, Subtype.coe_inj] at h
     exact h
   · intro L hL
-    refine' small.mono _ ((φ.litter_map L).get hL).2.Prop
+    refine' small.mono _ ((φ.litter_map L).get hL).2.prop
     exact fun x hx => Or.inl hx
 
 /-- The subset of the preimage litter that is put in correspondence with the set of
@@ -99,7 +99,7 @@ theorem mappedOutside_small (L : Litter) (hL : (φ.litterMap L).Dom) :
   simp only [mapped_outside_iff, set_of_and]
   rw [← inter_assoc]
   refine' small.mono (inter_subset_left _ _) _
-  refine' small.mono _ ((φ.litter_map L).get hL).2.Prop
+  refine' small.mono _ ((φ.litter_map L).get hL).2.prop
   exact fun x hx => Or.inr hx
 
 theorem WithoutPreimage.not_mappedOutside {a : Atom} (ha : φ.WithoutPreimage a) (L : Litter)
@@ -185,7 +185,7 @@ theorem supportedActionAtomMapCore_dom_small : Small φ.supportedActionAtomMapCo
   · exact φ.preimage_litter_subset_small
   · refine' small.bUnion _ _
     · refine' lt_of_le_of_lt _ φ.litter_map_dom_small
-      refine' ⟨⟨fun L => ⟨_, L.Prop⟩, fun L₁ L₂ h => _⟩⟩
+      refine' ⟨⟨fun L => ⟨_, L.prop⟩, fun L₁ L₂ h => _⟩⟩
       simp only [Subtype.mk_eq_mk, Prod.mk.inj_iff, eq_self_iff_true, and_true_iff,
         litter.to_near_litter_injective.eq_iff, Subtype.coe_inj] at h
       exact h
@@ -280,7 +280,7 @@ theorem supportedActionAtomMapCore_injective ⦃a b : Atom⦄ (hφ : φ.Lawful)
         (hab.trans (supported_action_eq_of_mem_mapped_outside_subset _ hb))
     obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp this
     cases
-      without_preimage.not_mapped_outside φ hab _ hL' (φ.mapped_outside_equiv L' hL' ⟨b, hb⟩).Prop
+      without_preimage.not_mapped_outside φ hab _ hL' (φ.mapped_outside_equiv L' hL' ⟨b, hb⟩).prop
   · have :=
       (supported_action_eq_of_mem_mapped_outside_subset _ ha).symm.trans
         (hab.trans (supported_action_eq_of_dom _ hb))
@@ -290,7 +290,7 @@ theorem supportedActionAtomMapCore_injective ⦃a b : Atom⦄ (hφ : φ.Lawful)
       (supported_action_eq_of_mem_mapped_outside_subset _ ha).symm.trans
         (hab.trans (supported_action_eq_of_mem_preimage_litter_subset _ hb))
     obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp this.symm
-    cases without_preimage.not_mapped_outside φ hab _ hL (φ.mapped_outside_equiv L hL ⟨a, ha⟩).Prop
+    cases without_preimage.not_mapped_outside φ hab _ hL (φ.mapped_outside_equiv L hL ⟨a, ha⟩).prop
   · have :=
       (supported_action_eq_of_mem_mapped_outside_subset _ ha).symm.trans
         (hab.trans (supported_action_eq_of_mem_mapped_outside_subset _ hb))
@@ -298,7 +298,7 @@ theorem supportedActionAtomMapCore_injective ⦃a b : Atom⦄ (hφ : φ.Lawful)
     · simp only [Subtype.coe_inj, EmbeddingLike.apply_eq_iff_eq] at this
       exact this
     obtain ⟨hab, -⟩ := subtype.coe_eq_iff.mp this
-    exact ⟨_, hab.1, (φ.mapped_outside_equiv L' hL' ⟨b, hb⟩).Prop.1⟩
+    exact ⟨_, hab.1, (φ.mapped_outside_equiv L' hL' ⟨b, hb⟩).prop.1⟩
 
 theorem supportedActionAtomMapCore_mem (hφ : φ.Lawful) (a : Atom)
     (ha : (φ.supportedActionAtomMapCore a).Dom) (L : Litter) (hL : (φ.litterMap L).Dom) :
@@ -315,15 +315,15 @@ theorem supportedActionAtomMapCore_mem (hφ : φ.Lawful) (a : Atom)
       have := banned_litter.litter_dom _ hL
       cases φ.preimage_litter_not_banned this
     · intro h
-      cases (φ.preimage_litter_equiv ⟨a, ha⟩).Prop.not_mem_map L hL h
+      cases (φ.preimage_litter_equiv ⟨a, ha⟩).prop.not_mem_map L hL h
   · cases φ.mapped_outside_subset_subset L' hL' ha
     rw [supported_action_eq_of_mem_mapped_outside_subset]
     constructor
     · rintro rfl
-      exact (φ.mapped_outside_equiv _ _ _).Prop.mem_map
+      exact (φ.mapped_outside_equiv _ _ _).prop.mem_map
     · intro h
       refine' hφ.litter_map_injective hL' hL ⟨_, _, h⟩
-      exact (φ.mapped_outside_equiv _ _ _).Prop.mem_map
+      exact (φ.mapped_outside_equiv _ _ _).prop.mem_map
 
 noncomputable def fillAtomRange : NearLitterAction
     where
@@ -367,20 +367,20 @@ theorem fillAtomRange_symmDiff_subset_ran (hφ : φ.Lawful) (L : Litter)
     exact fun _ => ⟨b, Or.inl hb, φ.supported_action_eq_of_dom hb⟩
   rintro (⟨ha₂, ha₃⟩ | ⟨ha₂, ha₃⟩)
   · refine' ⟨(φ.mapped_outside_equiv L hL).symm ⟨a, ha₂, ha₃, ha₁⟩, _, _⟩
-    · exact Or.inr (Or.inr ⟨L, hL, ((φ.mapped_outside_equiv L hL).symm _).Prop⟩)
+    · exact Or.inr (Or.inr ⟨L, hL, ((φ.mapped_outside_equiv L hL).symm _).prop⟩)
     · simp only [fill_atom_range_atom_map]
       refine'
         (φ.supported_action_eq_of_mem_mapped_outside_subset
-              ((φ.mapped_outside_equiv L hL).symm _).Prop).trans
+              ((φ.mapped_outside_equiv L hL).symm _).prop).trans
           _
       simp only [Subtype.coe_eta, Equiv.apply_symm_apply, Subtype.coe_mk]
   · by_cases ha₄ : ∀ (L' : litter) (hL' : (φ.litter_map L').Dom), a ∉ (φ.litter_map L').get hL'
     · refine' ⟨φ.preimage_litter_equiv.symm ⟨a, ⟨L, hL, ha₂⟩, ha₄, ha₁⟩, _, _⟩
-      · exact Or.inr (Or.inl (φ.preimage_litter_equiv.symm _).Prop)
+      · exact Or.inr (Or.inl (φ.preimage_litter_equiv.symm _).prop)
       · simp only [fill_atom_range_atom_map]
         refine'
           (φ.supported_action_eq_of_mem_preimage_litter_subset
-                (φ.preimage_litter_equiv.symm _).Prop).trans
+                (φ.preimage_litter_equiv.symm _).prop).trans
             _
         simp only [Subtype.coe_eta, Equiv.apply_symm_apply, Subtype.coe_mk]
     · push_neg at ha₄
@@ -391,11 +391,11 @@ theorem fillAtomRange_symmDiff_subset_ran (hφ : φ.Lawful) (L : Litter)
           near_litter.inter_nonempty_of_fst_eq_fst (eq_of_mem_litter_set_of_mem_litter_set ha₂ ha)
         cases hφ.litter_map_injective hL hL' this
         exact ha₃ ha₄
-      · exact Or.inr (Or.inr ⟨L', hL', ((φ.mapped_outside_equiv L' hL').symm _).Prop⟩)
+      · exact Or.inr (Or.inr ⟨L', hL', ((φ.mapped_outside_equiv L' hL').symm _).prop⟩)
       · simp only [fill_atom_range_atom_map]
         refine'
           (φ.supported_action_eq_of_mem_mapped_outside_subset
-                ((φ.mapped_outside_equiv L' hL').symm _).Prop).trans
+                ((φ.mapped_outside_equiv L' hL').symm _).prop).trans
             _
         simp only [Subtype.coe_eta, Equiv.apply_symm_apply, Subtype.coe_mk]
 

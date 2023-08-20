@@ -33,8 +33,8 @@ structure LocalPerm (α : Type _) where
   domain : Set α
   toFun_domain' : ∀ ⦃x⦄, x ∈ domain → toFun x ∈ domain
   invFun_domain' : ∀ ⦃x⦄, x ∈ domain → invFun x ∈ domain
-  leftInv' : ∀ ⦃x⦄, x ∈ domain → invFun (toFun x) = x
-  rightInv' : ∀ ⦃x⦄, x ∈ domain → toFun (invFun x) = x
+  left_inv' : ∀ ⦃x⦄, x ∈ domain → invFun (toFun x) = x
+  right_inv' : ∀ ⦃x⦄, x ∈ domain → toFun (invFun x) = x
 
 /-- A `perm` gives rise to a `local_perm` Associating a local_perm to an equiv -/
 def Equiv.Perm.toLocalPerm (π : Equiv.Perm α) : LocalPerm α
@@ -44,8 +44,8 @@ def Equiv.Perm.toLocalPerm (π : Equiv.Perm α) : LocalPerm α
   domain := univ
   toFun_domain' _ _ := mem_univ _
   invFun_domain' _ _ := mem_univ _
-  leftInv' x _ := π.left_inv x
-  rightInv' x _ := π.right_inv x
+  left_inv' x _ := π.left_inv x
+  right_inv' x _ := π.right_inv x
 
 namespace LocalPerm
 
@@ -58,8 +58,8 @@ protected def symm : LocalPerm α where
   domain := π.domain
   toFun_domain' := π.invFun_domain'
   invFun_domain' := π.toFun_domain'
-  leftInv' := π.rightInv'
-  rightInv' := π.leftInv'
+  left_inv' := π.right_inv'
+  right_inv' := π.left_inv'
 
 instance : CoeFun (LocalPerm α) fun _ => α → α :=
   ⟨LocalPerm.toFun⟩
@@ -101,11 +101,11 @@ theorem iterate_domain {x : α} (h : x ∈ π.domain) {n : ℕ} : (π^[n]) x ∈
 
 @[simp]
 theorem left_inv {x : α} (h : x ∈ π.domain) : π.symm (π x) = x :=
-  π.leftInv' h
+  π.left_inv' h
 
 @[simp]
 theorem right_inv {x : α} (h : x ∈ π.domain) : π (π.symm x) = x :=
-  π.rightInv' h
+  π.right_inv' h
 
 @[simp]
 theorem symm_domain : π.symm.domain = π.domain :=
@@ -145,8 +145,8 @@ def copy (π : LocalPerm α) (f : α → α) (hf : ⇑π = f) (g : α → α) (h
   domain := s
   toFun_domain' := hs ▸ hf ▸ π.toFun_domain'
   invFun_domain' := hs ▸ hg ▸ π.invFun_domain'
-  leftInv' _ := hs ▸ hf ▸ hg ▸ π.left_inv
-  rightInv' _ := hs ▸ hf ▸ hg ▸ π.right_inv
+  left_inv' _ := hs ▸ hf ▸ hg ▸ π.left_inv
+  right_inv' _ := hs ▸ hf ▸ hg ▸ π.right_inv
 
 theorem copy_eq (π : LocalPerm α) (f : α → α) (hf : ⇑π = f) (g : α → α) (hg : ⇑π.symm = g)
     (s : Set α) (hs : π.domain = s) : π.copy f hf g hg s hs = π := by substs f g s; cases π; rfl
@@ -205,8 +205,8 @@ def restr (h : π.IsStable s) : LocalPerm α
   domain := π.domain ∩ s
   toFun_domain' := h.mapsTo
   invFun_domain' := h.symm_mapsTo
-  leftInv' := π.leftInvOn.mono (inter_subset_left _ _)
-  rightInv' := π.rightInvOn.mono (inter_subset_left _ _)
+  left_inv' := π.leftInvOn.mono (inter_subset_left _ _)
+  right_inv' := π.rightInvOn.mono (inter_subset_left _ _)
 
 theorem image_eq (h : π.IsStable s) : π '' (π.domain ∩ s) = π.domain ∩ s :=
   h.restr.image_domain
@@ -367,12 +367,12 @@ protected def trans (π' : LocalPerm α) (h : π.domain = π'.domain) : LocalPer
         rw [h] at hy
         have := map_domain π'.symm hy
         rwa [symm_domain, ← h] at this )
-  leftInv' x hx := by
+  left_inv' x hx := by
     simp [hx, h.symm]
     rw [left_inv π', left_inv π hx]
     have := map_domain π hx
     rwa [← h]
-  rightInv' y hy := by
+  right_inv' y hy := by
     simp
     rw [h] at hy
     rw [right_inv π, right_inv π' hy]
@@ -386,8 +386,8 @@ def ofSet (s : Set α) : LocalPerm α where
   domain := s
   toFun_domain' _ hx := hx
   invFun_domain' _ hx := hx
-  leftInv' _ _ := rfl
-  rightInv' _ _ := rfl
+  left_inv' _ _ := rfl
+  right_inv' _ _ := rfl
 
 @[simp]
 theorem ofSet_domain (s : Set α) : (ofSet s).domain = s :=
@@ -554,7 +554,7 @@ def piecewise (h : Disjoint π.domain π'.domain) : LocalPerm α
       exact Or.inl (π.symm.map_domain hx)
     · rw [piecewise_eqOn_compl π.domain π.symm π'.symm (disjoint_right.mp h hx)]
       exact Or.inr (π'.symm.map_domain hx)
-  leftInv' := by
+  left_inv' := by
     rintro x (hx | hx)
     ·
       rw [piecewise_eqOn π.domain π π' hx,
@@ -563,7 +563,7 @@ def piecewise (h : Disjoint π.domain π'.domain) : LocalPerm α
       rw [piecewise_eqOn_compl π.domain π π' (disjoint_right.mp h hx),
         piecewise_eqOn_compl π.domain π.symm π'.symm (disjoint_right.mp h (π'.map_domain hx)),
         π'.left_inv hx]
-  rightInv' := by
+  right_inv' := by
     rintro x (hx | hx)
     ·
       rw [piecewise_eqOn π.domain π.symm π'.symm hx,
@@ -613,8 +613,8 @@ noncomputable def BijOn.toLocalPerm [Nonempty α] (f : α → α) (s : Set α) (
   domain := s
   toFun_domain' := hf.mapsTo
   invFun_domain' := hf.surjOn.mapsTo_invFunOn
-  leftInv' := hf.invOn_invFunOn.1
-  rightInv' := hf.invOn_invFunOn.2
+  left_inv' := hf.invOn_invFunOn.1
+  right_inv' := hf.invOn_invFunOn.2
 
 end Set
 

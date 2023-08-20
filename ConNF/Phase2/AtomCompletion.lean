@@ -20,7 +20,7 @@ theorem orderIso_apply_mem {S T : Sublitter} {a} {L : Litter}
     (h : (S.OrderIso T a : Atom) ∈ litterSet L) : T.Litter = L :=
   by
   rw [← litter.litter_to_sublitter L, ← sublitter.inter_nonempty_iff]
-  exact ⟨_, (S.order_iso T a).Prop, h⟩
+  exact ⟨_, (S.order_iso T a).prop, h⟩
 
 theorem orderIso_apply_eq {S T U V : Sublitter} {a b}
     (h : (S.OrderIso T a : Atom) = U.OrderIso V b) : T.Litter = V.Litter :=

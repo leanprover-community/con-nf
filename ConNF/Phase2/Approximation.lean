@@ -129,7 +129,7 @@ theorem eq_symm_apply_litter {L₁ L₂} :
 theorem nearLitter_domain_small (N : NearLitter) : Small ((N : Set Atom) ∩ π.atomPerm.domain) :=
   by
   rw [← symmDiff_symmDiff_cancel_left (litter_set N.fst) N, inter_symm_diff_distrib_right]
-  exact small.symm_diff (π.domain_small N.fst) (small.mono (inter_subset_left _ _) N.2.Prop)
+  exact small.symm_diff (π.domain_small N.fst) (small.mono (inter_subset_left _ _) N.2.prop)
 
 section Generate
 
@@ -251,7 +251,7 @@ def generateNearLitter (π : NearLitterApprox) (N : NearLitter) : NearLitter :=
         exact small_empty
       · refine' small.mono (diff_subset _ _) (small.image _)
         have :=
-          small.union (small.mono (subset_union_right _ _) N.2.Prop)
+          small.union (small.mono (subset_union_right _ _) N.2.prop)
             (π.largest_sublitter N.1).diff_small
         simp only [largest_sublitter_litter, sublitter.carrier_eq_coe] at this
         refine' small.mono _ this

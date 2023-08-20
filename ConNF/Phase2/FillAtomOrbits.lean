@@ -99,8 +99,8 @@ theorem orbitSetEquiv_injective {a₁ a₂ : Sum (ℕ × φ.needBackwardImages) 
     {L₁ L₂ : Litter} (h : ((φ.orbitSetEquiv L₁).symm a₁ : Atom) = (φ.orbitSetEquiv L₂).symm a₂) :
     L₁ = L₂ ∧ a₁ = a₂ :=
   by
-  have h₁ := φ.orbit_set_subset L₁ ((φ.orbit_set_equiv L₁).symm a₁).Prop
-  have h₂ := φ.orbit_set_subset L₂ ((φ.orbit_set_equiv L₂).symm a₂).Prop
+  have h₁ := φ.orbit_set_subset L₁ ((φ.orbit_set_equiv L₁).symm a₁).prop
+  have h₂ := φ.orbit_set_subset L₂ ((φ.orbit_set_equiv L₂).symm a₂).prop
   rw [h] at h₁
   cases eq_of_mem_litter_set_of_mem_litter_set h₁.1 h₂.1
   simp only [Subtype.coe_inj, EmbeddingLike.apply_eq_iff_eq] at h
@@ -149,9 +149,9 @@ theorem nextForwardImage_eq {L₁ L₂ : Litter} {a b : ℕ × φ.needForwardIma
   by
   rw [next_forward_image, next_forward_image] at h
   have ha :=
-    φ.orbit_set_subset _ ((φ.orbit_set_equiv (φ.litter_perm hφ L₁)).symm (inr (a.1 + 1, a.2))).Prop
+    φ.orbit_set_subset _ ((φ.orbit_set_equiv (φ.litter_perm hφ L₁)).symm (inr (a.1 + 1, a.2))).prop
   have hb :=
-    φ.orbit_set_subset _ ((φ.orbit_set_equiv (φ.litter_perm hφ L₂)).symm (inr (b.1 + 1, b.2))).Prop
+    φ.orbit_set_subset _ ((φ.orbit_set_equiv (φ.litter_perm hφ L₂)).symm (inr (b.1 + 1, b.2))).prop
   rw [h] at ha
   refine' (φ.litter_perm hφ).InjOn hL₁ hL₂ _
   exact eq_of_mem_litter_set_of_mem_litter_set ha.1 hb.1
@@ -170,15 +170,15 @@ theorem nextBackwardImage_eq {L₁ L₂ : Litter} {a b : ℕ × φ.needBackwardI
     exact hb.2
   · rw [Subtype.coe_eq_iff] at h
     obtain ⟨h₁, h₂⟩ := h
-    cases φ.not_mem_need_backward_images_of_mem_orbit_set ((φ.orbit_set_equiv _).symm _).Prop h₁
+    cases φ.not_mem_need_backward_images_of_mem_orbit_set ((φ.orbit_set_equiv _).symm _).prop h₁
   · symm at h
     rw [Subtype.coe_eq_iff] at h
     obtain ⟨h₁, h₂⟩ := h
-    cases φ.not_mem_need_backward_images_of_mem_orbit_set ((φ.orbit_set_equiv _).symm _).Prop h₁
+    cases φ.not_mem_need_backward_images_of_mem_orbit_set ((φ.orbit_set_equiv _).symm _).prop h₁
   · have ha :=
-      φ.orbit_set_subset _ ((φ.orbit_set_equiv (φ.litter_perm hφ L₁)).symm (inl (m, a))).Prop
+      φ.orbit_set_subset _ ((φ.orbit_set_equiv (φ.litter_perm hφ L₁)).symm (inl (m, a))).prop
     have hb :=
-      φ.orbit_set_subset _ ((φ.orbit_set_equiv (φ.litter_perm hφ L₂)).symm (inl (n, b))).Prop
+      φ.orbit_set_subset _ ((φ.orbit_set_equiv (φ.litter_perm hφ L₂)).symm (inl (n, b))).prop
     rw [h] at ha
     refine' (φ.litter_perm hφ).InjOn hL₁ hL₂ _
     exact eq_of_mem_litter_set_of_mem_litter_set ha.1 hb.1
@@ -203,11 +203,11 @@ theorem nextBackwardImage_injective {L : Litter} {a b : ℕ × φ.needBackwardIm
   · exact h
   · rw [Subtype.coe_eq_iff] at h
     obtain ⟨h₁, h₂⟩ := h
-    cases φ.not_mem_need_backward_images_of_mem_orbit_set ((φ.orbit_set_equiv _).symm _).Prop h₁
+    cases φ.not_mem_need_backward_images_of_mem_orbit_set ((φ.orbit_set_equiv _).symm _).prop h₁
   · symm at h
     rw [Subtype.coe_eq_iff] at h
     obtain ⟨h₁, h₂⟩ := h
-    cases φ.not_mem_need_backward_images_of_mem_orbit_set ((φ.orbit_set_equiv _).symm _).Prop h₁
+    cases φ.not_mem_need_backward_images_of_mem_orbit_set ((φ.orbit_set_equiv _).symm _).prop h₁
   · exact h
 
 theorem nextForwardImage_injective' {L₁ L₂ : Litter} {a b : ℕ × φ.needForwardImages}
@@ -232,7 +232,7 @@ theorem nextForwardImage_ne_nextBackwardImage {L₁ L₂ : Litter} {a : ℕ × �
   cases n
   · rw [next_forward_image, next_backward_image]
     refine'
-      (ne_of_mem_of_not_mem _ (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).2).symm
+      (ne_of_mem_of_not_mem _ (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).2).symm
     exact Or.inl b.prop.1
   · rw [next_forward_image, next_backward_image]
     intro h
@@ -374,7 +374,7 @@ theorem orbitSetEquiv_ne_nextImageCore (a b : Atom)
   rw [← hb'] at h
   obtain ⟨_ | n, b'⟩ | b' := b' <;>
     simp only [elim_inl, elim_inr, next_backward_image, next_forward_image] at h
-  · have := φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop
+  · have := φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop
     rw [h] at this
     exact this.2 (Or.inl b'.prop.1)
   · cases (φ.orbit_set_equiv_injective h).2
@@ -451,7 +451,7 @@ theorem orbitAtomMap_apply_ne_of_needForwardImages ⦃a b : Atom⦄ (ha : (φ.at
   by
   rw [orbit_atom_map_eq_of_mem_dom, orbit_atom_map_eq_of_need_forward_images]
   intro h
-  have := φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop
+  have := φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop
   rw [← h] at this
   exact this.2 (Or.inr ⟨a, ha, rfl⟩)
 
@@ -471,11 +471,11 @@ theorem orbitAtomMap_apply_ne_of_mem_nextImageCoreDomain ⦃a b : Atom⦄ (ha : 
     rw [← h] at this
     exact this ⟨a, ha, rfl⟩
   · intro h
-    have := (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).2
+    have := (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).2
     rw [← h] at this
     exact this (Or.inr ⟨a, ha, rfl⟩)
   · intro h
-    have := (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).2
+    have := (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).2
     rw [← h] at this
     exact this (Or.inr ⟨a, ha, rfl⟩)
 
@@ -520,8 +520,8 @@ theorem nextImageCore_atom_mem_litter_map (a : Atom) (ha : a ∈ φ.nextImageCor
     · exact ha''.symm
     · exact hL
     · exact this.1
-  exact (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).1
-  exact (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).1
+  exact (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).1
+  exact (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).1
 
 theorem nextImageCore_not_mem_ran (a : Atom) (ha : a ∈ φ.nextImageCoreDomain hφ) :
     φ.nextImageCore hφ a a.fst (φ.mem_orbitSet_of_mem_nextImageCoreDomain hφ ha) ∉ φ.atomMap.ran :=
@@ -538,7 +538,7 @@ theorem nextImageCore_not_mem_ran (a : Atom) (ha : a ∈ φ.nextImageCoreDomain 
       hb₂
   · exact a'.prop.2 ⟨b, hb₁, hb₂⟩
   all_goals
-    have := φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop
+    have := φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop
     rw [← hb₂] at this
     exact this.2 (Or.inr ⟨b, hb₁, rfl⟩)
 
@@ -587,7 +587,7 @@ theorem orbitSetEquiv_atom_mem
   by
   have ha' : _ ∧ _ :=
     φ.orbit_set_subset _
-      ((φ.orbit_set_equiv (φ.litter_perm hφ a.fst)).symm (inr (0, ⟨a, ha.1⟩))).Prop
+      ((φ.orbit_set_equiv (φ.litter_perm hφ a.fst)).symm (inr (0, ⟨a, ha.1⟩))).prop
   rw [mem_litter_set] at ha'
   constructor
   · rintro rfl
@@ -722,11 +722,11 @@ theorem fillAtomOrbits_precise
         have :=
           (congr_arg Prod.fst (φ.orbit_atom_map_eq_of_need_forward_images hφ a ha)).symm.trans ha'
         rw [← this]
-        exact (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).1
+        exact (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).1
       refine' ⟨Or.inl (Or.inl (Or.inl hL)), _, _⟩
       · refine' mem_of_eq_of_mem (φ.orbit_atom_map_eq_of_need_forward_images hφ a ha) _
         rw [haL]
-        exact ((φ.orbit_set_equiv _).symm _).Prop
+        exact ((φ.orbit_set_equiv _).symm _).prop
       · have := φ.orbit_atom_map_eq_of_need_forward_images hφ a ha
         obtain ⟨hm₁, hm₂⟩ := subtype.coe_eq_iff.mp this.symm
         rw [Equiv.symm_apply_eq, φ.orbit_set_equiv_congr hm₁ haL.symm] at hm₂
@@ -766,7 +766,7 @@ theorem fillAtomOrbits_precise
             ⟨(φ.orbit_set_equiv (φ.litter_perm hφ (a : atom).1)).symm (inl (n, b)), _⟩, _⟩
         · exact (φ.litter_perm hφ).symm.iterate_domain hbL.1
         · rw [← hbL']
-          have := ((φ.orbit_set_equiv (φ.litter_perm hφ (a : atom).1)).symm (inl (n, b))).Prop
+          have := ((φ.orbit_set_equiv (φ.litter_perm hφ (a : atom).1)).symm (inl (n, b))).prop
           rw [haL'] at this ⊢
           exact this
         · simp only [Function.comp_apply, mem_set_of_eq, Subtype.coe_mk, eq_self_iff_true,
@@ -781,7 +781,7 @@ theorem fillAtomOrbits_precise
             ⟨(φ.orbit_set_equiv (φ.litter_perm hφ (a : atom).1)).symm (inr (n + 1, b)), _⟩, _⟩
         · exact (φ.litter_perm hφ).iterate_domain hbL.1
         · rw [Function.iterate_succ_apply', hbL.2, haL']
-          exact ((φ.orbit_set_equiv _).symm _).Prop
+          exact ((φ.orbit_set_equiv _).symm _).prop
         · simp only [Function.comp_apply, mem_set_of_eq, Subtype.coe_mk, eq_self_iff_true,
             and_true_iff]
           have := congr_arg (φ.litter_perm hφ) hbL.2
@@ -818,7 +818,7 @@ theorem fillAtomOrbits_precise
                   atom).fst =
               (φ.litter_perm hφ).symm a.fst :=
             by
-            exact (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).1
+            exact (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).1
             exact ⟨ha₁, ha₃⟩
           rw [φ.orbit_set_equiv_congr _ this]
           simp only [Equiv.apply_symm_apply, elim_inl, Subtype.coe_eta, next_backward_image,
@@ -851,14 +851,14 @@ theorem fillAtomOrbits_precise
                   (inl (n + 1, a')) :
                 atom).fst =
             ((φ.litter_perm hφ).symm^[n + 2]) (a' : atom).fst :=
-          (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).1
+          (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).1
         rw [φ.orbit_set_equiv_congr _ this]
         simp only [Subtype.coe_eta, Equiv.apply_symm_apply, elim_inl, next_backward_image]
         have := congr_arg Subtype.val ha'
         simp only [Subtype.val_eq_coe] at this
         rw [← this]
         refine' φ.orbit_set_equiv_symm_congr _
-        have := (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).1
+        have := (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).1
         rw [mem_litter_set] at this
         rw [this]
         have := φ.orbit_set_equiv_elim_of_mem_next_image_core_domain hφ ha₁
@@ -892,14 +892,14 @@ theorem fillAtomOrbits_precise
           ((φ.orbit_set_equiv ((φ.litter_perm hφ^[n + 1]) (a' : atom).fst)).symm (inr (n, a')) :
                 atom).fst =
             (φ.litter_perm hφ^[n + 1]) (a' : atom).fst :=
-          (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).1
+          (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).1
         rw [φ.orbit_set_equiv_congr _ this]
         simp only [Subtype.coe_eta, Equiv.apply_symm_apply, elim_inl, next_backward_image]
         have := congr_arg Subtype.val ha'
         simp only [Subtype.val_eq_coe] at this
         rw [← this]
         refine' φ.orbit_set_equiv_symm_congr _
-        have := (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).Prop).1
+        have := (φ.orbit_set_subset _ ((φ.orbit_set_equiv _).symm _).prop).1
         rw [mem_litter_set] at this
         rw [this]
         have := φ.orbit_set_equiv_elim_of_mem_next_image_core_domain hφ ha₁

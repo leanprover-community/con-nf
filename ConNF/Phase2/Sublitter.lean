@@ -39,8 +39,8 @@ instance : SetLike Sublitter Atom where
   coe_injective' := by
     rintro ⟨i, N₁, h₁, h₂⟩ ⟨j, N₂, h₃, h₄⟩ (rfl : N₁ = N₂)
     obtain ⟨e⟩ := cardinal.eq.mp (sublitter.mk_S_eq_κ ⟨i, N₁, h₁, h₂⟩)
-    have h₅ := h₁ (e.symm (Inhabited.default κ)).Prop
-    have h₆ := h₃ (e.symm (Inhabited.default κ)).Prop
+    have h₅ := h₁ (e.symm (Inhabited.default κ)).prop
+    have h₆ := h₃ (e.symm (Inhabited.default κ)).prop
     rw [mem_litter_set] at h₅ h₆
     rw [h₅] at h₆
     cases h₆
@@ -107,8 +107,8 @@ theorem isNear_iff : IsNear (S₁ : Set Atom) S₂ ↔ S₁.Litter = S₂.Litter
   by
   refine' ⟨fun h => _, fun h => _⟩
   · obtain ⟨f⟩ := is_near.mk_inter h S₁.mk_eq_κ.symm.le
-    rw [← fst_eq_of_mem (f (Inhabited.default κ)).Prop.1, ←
-      fst_eq_of_mem (f (Inhabited.default κ)).Prop.2]
+    rw [← fst_eq_of_mem (f (Inhabited.default κ)).prop.1, ←
+      fst_eq_of_mem (f (Inhabited.default κ)).prop.2]
   · refine' S₁.is_near_litter.symm.trans _
     rw [h]
     exact S₂.is_near_litter
@@ -119,7 +119,7 @@ theorem inter_nonempty_iff : (S₁ ∩ S₂ : Set Atom).Nonempty ↔ S₁.Litter
   · obtain ⟨a, ha⟩ := h
     rw [← fst_eq_of_mem ha.1, fst_eq_of_mem ha.2]
   · obtain ⟨f⟩ := is_near.mk_inter _ _
-    exact ⟨_, (f (Inhabited.default κ)).Prop⟩
+    exact ⟨_, (f (Inhabited.default κ)).prop⟩
     rw [is_near_iff]
     exact h
     rw [mk_eq_κ']
@@ -141,7 +141,7 @@ namespace Sublitter
 
 def relEmbedding (S : Sublitter) :
     ((· < ·) : S → S → Prop) ↪r ((· < ·) : litterSet S.Litter → litterSet S.Litter → Prop) :=
-  ⟨⟨fun a => ⟨a, S.Subset a.Prop⟩, fun a b h => Subtype.coe_injective (Subtype.mk_eq_mk.mp h)⟩,
+  ⟨⟨fun a => ⟨a, S.Subset a.prop⟩, fun a b h => Subtype.coe_injective (Subtype.mk_eq_mk.mp h)⟩,
     fun a b => by simp only [Function.Embedding.coeFn_mk, Subtype.mk_lt_mk, Subtype.coe_lt_coe]⟩
 
 /-- The order type of a sublitter is `κ`. -/
@@ -165,20 +165,20 @@ noncomputable def orderIso (S T : Sublitter) : S ≃o T :=
 
 @[simp]
 theorem orderIso_apply_mem {S T : Sublitter} (a : S) : (S.OrderIso T a : Atom) ∈ T :=
-  (S.OrderIso T a).Prop
+  (S.OrderIso T a).prop
 
 @[simp]
 theorem orderIso_symm_apply_mem {S T : Sublitter} (a : T) : ((S.OrderIso T).symm a : Atom) ∈ S :=
-  ((S.OrderIso T).symm a).Prop
+  ((S.OrderIso T).symm a).prop
 
 @[simp]
 theorem orderIso_apply_fst_eq {S T : Sublitter} (a : S) : (S.OrderIso T a : Atom).1 = T.Litter :=
-  T.Subset (S.OrderIso T a).Prop
+  T.Subset (S.OrderIso T a).prop
 
 @[simp]
 theorem orderIso_symm_apply_fst_eq {S T : Sublitter} (a : T) :
     ((S.OrderIso T).symm a : Atom).1 = S.Litter :=
-  S.Subset ((S.OrderIso T).symm a).Prop
+  S.Subset ((S.OrderIso T).symm a).prop
 
 theorem orderIso_congr_left {S T U : Sublitter} (h : S = T) (a : S) :
     (S.OrderIso U a : Atom) = T.OrderIso U ⟨a, by rw [← h] <;> exact a.2⟩ := by
@@ -250,7 +250,7 @@ def orderIsoMeet (S T U : Sublitter) (h : S.Litter = U.Litter) : Sublitter
       exact Or.inr ⟨h, ha.2⟩
       exact Or.inl ⟨ha.1, h⟩
     refine' lt_of_le_of_lt _ U.diff_small
-    refine' ⟨⟨fun a => ⟨(S.order_iso T).symm ⟨a, a.Prop.1⟩, _, _⟩, fun a b h => _⟩⟩
+    refine' ⟨⟨fun a => ⟨(S.order_iso T).symm ⟨a, a.prop.1⟩, _, _⟩, fun a b h => _⟩⟩
     · rw [← h]
       exact S.subset ((S.order_iso T).symm ⟨a, a.prop.1⟩).2
     · intro h
