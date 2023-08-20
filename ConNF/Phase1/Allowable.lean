@@ -178,7 +178,7 @@ instance : Pow (AllowablePerm α) ℤ :=
   ⟨fun f n =>
     ⟨(f : SemiallowablePerm α) ^ n, by
       obtain (n | n) := n
-      · simp_rw [zpow_ofNat, Int.ofNat_eq_coe, zpow_coe_nat]
+      · simp_rw [Int.ofNat_eq_coe, zpow_coe_nat]
         exact (f ^ n).2
       · simp_rw [zpow_negSucc]
         exact (f ^ (n + 1))⁻¹.2⟩⟩
@@ -319,7 +319,7 @@ theorem smul_aMap (π : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠ 
     π • aMap hβγ s = aMap hβγ (π • s) := by
   ext t
   simp only [aMap, mem_image, mem_iUnion, mem_localCardinal, exists_prop, ← image_smul]
-  simp_rw [← smul_fMap hβγ, exists_exists_and_eq_and]
+  simp_rw [exists_exists_and_eq_and]
   constructor
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
     refine ⟨(π : SemiallowablePerm α) γ • N, ⟨t, ht₁, ?_⟩, ?_⟩
