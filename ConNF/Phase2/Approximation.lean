@@ -2,8 +2,6 @@ import ConNF.Mathlib.Logic.Equiv.LocalPerm
 import ConNF.Phase2.Flexible
 import ConNF.Phase2.Sublitter
 
-#align_import phase2.approximation
-
 open Quiver Set Sum
 
 open scoped Cardinal Pointwise
@@ -18,12 +16,11 @@ variable [Params.{u}]
 # Near-litter approximations
 -/
 
-
 @[ext]
 structure NearLitterApprox where
   atomPerm : LocalPerm Atom
   litterPerm : LocalPerm Litter
-  domain_small : ∀ L, Small (litterSet L ∩ atom_perm.domain)
+  domain_small : ∀ L, Small (litterSet L ∩ atomPerm.domain)
 
 namespace NearLitterApprox
 
@@ -42,32 +39,26 @@ theorem smul_litter_eq {L : Litter} : π.litterPerm L = π • L :=
   rfl
 
 @[simp]
-theorem mk_smul_atom {atom_perm : LocalPerm Atom} {litter_perm : LocalPerm Litter}
-    {domain_small : ∀ L, Small (litterSet L ∩ atom_perm.domain)} {a : Atom} :
-    {     atomPerm
-          litterPerm
-          domain_small } • a = atom_perm a :=
+theorem mk_smul_atom {atomPerm : LocalPerm Atom} {litterPerm : LocalPerm Litter}
+    {domain_small : ∀ L, Small (litterSet L ∩ atomPerm.domain)} {a : Atom} :
+    (⟨atomPerm, litterPerm, domain_small⟩ : NearLitterApprox) • a = atomPerm a :=
   rfl
 
 @[simp]
-theorem mk_smul_litter {atom_perm : LocalPerm Atom} {litter_perm : LocalPerm Litter}
-    {domain_small : ∀ L, Small (litterSet L ∩ atom_perm.domain)} {L : Litter} :
-    {     atomPerm
-          litterPerm
-          domain_small } • L = litter_perm L :=
+theorem mk_smul_litter {atomPerm : LocalPerm Atom} {litterPerm : LocalPerm Litter}
+    {domain_small : ∀ L, Small (litterSet L ∩ atomPerm.domain)} {L : Litter} :
+    (⟨atomPerm, litterPerm, domain_small⟩ : NearLitterApprox) • L = litterPerm L :=
   rfl
 
 theorem smul_eq_smul_atom {a₁ a₂ : Atom} (h₁ : a₁ ∈ π.atomPerm.domain)
-    (h₂ : a₂ ∈ π.atomPerm.domain) : π • a₁ = π • a₂ ↔ a₁ = a₂ :=
-  by
-  unfold SMul.smul
-  rw [← π.atom_perm.eq_symm_apply h₁ (π.atom_perm.map_domain h₂), LocalPerm.left_inv _ h₂]
+    (h₂ : a₂ ∈ π.atomPerm.domain) : π • a₁ = π • a₂ ↔ a₁ = a₂ := by
+  rw [mk_smul_atom, mk_smul_atom,
+    ← π.atomPerm.eq_symm_apply h₁ (π.atomPerm.map_domain h₂), LocalPerm.left_inv _ h₂]
 
 theorem smul_eq_smul_litter {L₁ L₂ : Litter} (h₁ : L₁ ∈ π.litterPerm.domain)
-    (h₂ : L₂ ∈ π.litterPerm.domain) : π • L₁ = π • L₂ ↔ L₁ = L₂ :=
-  by
-  unfold SMul.smul
-  rw [← π.litter_perm.eq_symm_apply h₁ (π.litter_perm.map_domain h₂), LocalPerm.left_inv _ h₂]
+    (h₂ : L₂ ∈ π.litterPerm.domain) : π • L₁ = π • L₂ ↔ L₁ = L₂ := by
+  rw [mk_smul_litter, mk_smul_litter,
+    ← π.litterPerm.eq_symm_apply h₁ (π.litterPerm.map_domain h₂), LocalPerm.left_inv _ h₂]
 
 def symm : NearLitterApprox where
   atomPerm := π.atomPerm.symm
@@ -126,25 +117,22 @@ theorem eq_symm_apply_litter {L₁ L₂} :
     L₁ ∈ π.litterPerm.domain → L₂ ∈ π.litterPerm.domain → (L₁ = π.symm • L₂ ↔ π • L₁ = L₂) :=
   π.litterPerm.eq_symm_apply
 
-theorem nearLitter_domain_small (N : NearLitter) : Small ((N : Set Atom) ∩ π.atomPerm.domain) :=
-  by
-  rw [← symmDiff_symmDiff_cancel_left (litter_set N.fst) N, inter_symm_diff_distrib_right]
-  exact small.symm_diff (π.domain_small N.fst) (small.mono (inter_subset_left _ _) N.2.prop)
+theorem nearLitter_domain_small (N : NearLitter) : Small ((N : Set Atom) ∩ π.atomPerm.domain) := by
+  rw [← symmDiff_symmDiff_cancel_left (litterSet N.fst) N, inter_symmDiff_distrib_right]
+  exact Small.symmDiff (π.domain_small N.fst) (Small.mono (inter_subset_left _ _) N.2.prop)
 
 section Generate
-
-variable (π)
 
 /-- Gives the largest sublitter of `π` on which `π.atom_perm` is not defined. -/
 def largestSublitter (L : Litter) : Sublitter
     where
-  Litter := L
+  litter := L
   carrier := litterSet L \ π.atomPerm.domain
-  Subset := diff_subset _ _
+  subset := diff_subset _ _
   diff_small := by simpa only [sdiff_sdiff_right_self, inf_eq_inter] using π.domain_small L
 
 @[simp]
-theorem largestSublitter_litter (L : Litter) : (π.largestSublitter L).Litter = L :=
+theorem largestSublitter_litter (L : Litter) : (π.largestSublitter L).litter = L :=
   rfl
 
 @[simp]
@@ -162,13 +150,13 @@ theorem not_mem_domain_of_mem_largestSublitter {a : Atom} {L : Litter}
 
 /-- Computes the action of `π` on this sublitter, assuming it is in `sublitter_domain`. -/
 def generateSublitter (S : Sublitter) : Sublitter :=
-  π.largestSublitter (π • S.Litter)
+  π.largestSublitter (π • S.litter)
 
 def sublitterDomain : Set Sublitter :=
-  {S | S.Litter ∈ π.litterPerm.domain ∧ (S : Set Atom) = litterSet S.Litter \ π.atomPerm.domain}
+  {S | S.litter ∈ π.litterPerm.domain ∧ (S : Set Atom) = litterSet S.litter \ π.atomPerm.domain}
 
 theorem mem_sublitterDomain (S : Sublitter) (h : S ∈ π.sublitterDomain) :
-    (S : Set Atom) = litterSet S.Litter \ π.atomPerm.domain :=
+    (S : Set Atom) = litterSet S.litter \ π.atomPerm.domain :=
   h.2
 
 theorem generateSublitter_mem_domain ⦃S : Sublitter⦄ (h : S ∈ sublitterDomain π) :
@@ -176,11 +164,10 @@ theorem generateSublitter_mem_domain ⦃S : Sublitter⦄ (h : S ∈ sublitterDom
   ⟨π.litterPerm.map_domain h.1, rfl⟩
 
 theorem generateSublitter_left_inv ⦃S : Sublitter⦄ (h : S ∈ sublitterDomain π) :
-    generateSublitter π.symm (generateSublitter π S) = S :=
-  by
+    generateSublitter π.symm (generateSublitter π S) = S := by
   ext : 1
-  simp only [h.2, largest_sublitter, generate_sublitter, symm_atom_perm, LocalPerm.symm_domain,
-    sublitter.coe_mk, π.left_inv_litter h.1]
+  simp only [h.2, largestSublitter, generateSublitter, symm_atomPerm, LocalPerm.symm_domain,
+    Sublitter.coe_mk, π.left_inv_litter h.1]
 
 /-- Generates the unique near-litter approximation given by an atom local permutation and a
 near-litter local permutation. This uniqueness is only up to evaluating everything on the domain
@@ -211,15 +198,17 @@ theorem generateSublitter_apply (S : Sublitter) :
 instance : SMul NearLitterApprox Sublitter :=
   ⟨fun π => π.generateSublitterPerm⟩
 
+theorem smul_sublitter_eq (S : Sublitter) : π • S = generateSublitterPerm π S :=
+  rfl
+
 @[simp]
-theorem smul_sublitter (S : Sublitter) : (π • S).Litter = π • S.Litter :=
+theorem smul_sublitter_litter (S : Sublitter) : (π • S).litter = π • S.litter :=
   rfl
 
 theorem smul_eq_smul_sublitter {S₁ S₂ : Sublitter} (h₁ : S₁ ∈ sublitterDomain π)
-    (h₂ : S₂ ∈ sublitterDomain π) : π • S₁ = π • S₂ ↔ S₁ = S₂ :=
-  by
-  unfold SMul.smul
-  rw [← π.generate_sublitter_perm.eq_symm_apply h₁ (π.generate_sublitter_perm.map_domain h₂),
+    (h₂ : S₂ ∈ sublitterDomain π) : π • S₁ = π • S₂ ↔ S₁ = S₂ := by
+  rw [smul_sublitter_eq, smul_sublitter_eq,
+    ← π.generateSublitterPerm.eq_symm_apply h₁ (π.generateSublitterPerm.map_domain h₂),
     LocalPerm.left_inv _ _]
   exact h₂
 
@@ -238,25 +227,23 @@ theorem eq_symm_apply_sublitter {S₁ S₂} :
 /-- Computes the action of `π` on this near-litter. This action is not injective.
 The nicest properties will hold when `N` is a litter. -/
 def generateNearLitter (π : NearLitterApprox) (N : NearLitter) : NearLitter :=
-  ⟨π • N.1, π.largestSublitter (π • N.1) ∪ π • (N \ π.largestSublitter N.1),
-    by
-    refine' small.union _ _
+  ⟨π • N.1, π.largestSublitter (π • N.1) ∪ π • ((N : Set Atom) \ π.largestSublitter N.1), by
+    refine Small.union ?_ ?_
     · rw [← diff_diff]
-      exact small.mono (diff_subset _ _) (π.largest_sublitter (π • N.1)).diff_small
+      exact Small.mono (diff_subset _ _) (π.largestSublitter (π • N.1)).diff_small
     · rw [union_diff_distrib]
-      refine' small.union _ _
-      · have := (π.largest_sublitter (π • N.1)).Subset
-        rw [largest_sublitter_litter, sublitter.carrier_eq_coe] at this
+      refine Small.union ?_ ?_
+      · have := (π.largestSublitter (π • N.1)).subset
+        rw [largestSublitter_litter, Sublitter.carrier_eq_coe] at this
         rw [diff_eq_empty.mpr this]
         exact small_empty
-      · refine' small.mono (diff_subset _ _) (small.image _)
-        have :=
-          small.union (small.mono (subset_union_right _ _) N.2.prop)
-            (π.largest_sublitter N.1).diff_small
-        simp only [largest_sublitter_litter, sublitter.carrier_eq_coe] at this
-        refine' small.mono _ this
+      · refine Small.mono (diff_subset _ _) (Small.image ?_)
+        have := Small.union (Small.mono (subset_union_right _ _) N.2.prop)
+            (π.largestSublitter N.1).diff_small
+        simp only [largestSublitter_litter, Sublitter.carrier_eq_coe] at this
+        refine Small.mono ?_ this
         intro a ha
-        by_cases a ∈ litter_set N.fst
+        by_cases a ∈ litterSet N.fst
         exact Or.inr ⟨h, ha.2⟩
         exact Or.inl ⟨ha.1, h⟩⟩
 
@@ -266,12 +253,12 @@ instance : SMul NearLitterApprox NearLitter :=
 @[simp]
 theorem smul_nearLitter_coe (π : NearLitterApprox) (N : NearLitter) :
     ((π • N : NearLitter) : Set Atom) =
-      π.largestSublitter (π • N.1) ∪ π • (N \ π.largestSublitter N.1) :=
+      (π.largestSublitter (π • N.1) : Set Atom) ∪ π • ((N : Set Atom) \ π.largestSublitter N.1) :=
   rfl
 
 end Generate
 
-def ConNF.NearLitterPerm.IsException (π : NearLitterPerm) (a : Atom) : Prop :=
+def _root_.ConNF.NearLitterPerm.IsException (π : NearLitterPerm) (a : Atom) : Prop :=
   π • a ∉ litterSet (π • a.1) ∨ π⁻¹ • a ∉ litterSet (π⁻¹ • a.1)
 
 @[mk_iff]
@@ -280,20 +267,20 @@ structure Approximates (π₀ : NearLitterApprox) (π : NearLitterPerm) : Prop w
   map_litter : ∀ L, L ∈ π₀.litterPerm.domain → π₀ • L = π • L
 
 theorem Approximates.symm_map_atom {π₀ : NearLitterApprox} {π : NearLitterPerm}
-    (hπ : π₀.Approximates π) (a : Atom) (ha : a ∈ π₀.atomPerm.domain) : π₀.symm • a = π⁻¹ • a :=
-  by
-  have := hπ.map_atom (π₀.symm • a) (π₀.symm.atom_perm.map_domain ha)
+    (hπ : π₀.Approximates π) (a : Atom) (ha : a ∈ π₀.atomPerm.domain) :
+    π₀.symm • a = π⁻¹ • a := by
+  have := hπ.map_atom (π₀.symm • a) (π₀.symm.atomPerm.map_domain ha)
   rw [← inv_smul_eq_iff] at this
   rw [← this, smul_left_cancel_iff]
-  exact π₀.atom_perm.right_inv ha
+  exact π₀.atomPerm.right_inv ha
 
 theorem Approximates.symm_map_litter {π₀ : NearLitterApprox} {π : NearLitterPerm}
-    (hπ : π₀.Approximates π) (L : Litter) (hL : L ∈ π₀.litterPerm.domain) : π₀.symm • L = π⁻¹ • L :=
-  by
-  have := hπ.map_litter (π₀.symm • L) (π₀.symm.litter_perm.map_domain hL)
+    (hπ : π₀.Approximates π) (L : Litter) (hL : L ∈ π₀.litterPerm.domain) :
+    π₀.symm • L = π⁻¹ • L := by
+  have := hπ.map_litter (π₀.symm • L) (π₀.symm.litterPerm.map_domain hL)
   rw [← inv_smul_eq_iff] at this
   rw [← this, smul_left_cancel_iff]
-  exact π₀.litter_perm.right_inv hL
+  exact π₀.litterPerm.right_inv hL
 
 @[mk_iff]
 structure ExactlyApproximates (π₀ : NearLitterApprox) (π : NearLitterPerm) extends
@@ -311,54 +298,55 @@ theorem ExactlyApproximates.of_isException {π₀ : NearLitterApprox} {π : Near
 
 theorem ExactlyApproximates.mem_litterSet {π₀ : NearLitterApprox} {π : NearLitterPerm}
     (hπ : π₀.ExactlyApproximates π) (a : Atom) (ha : a ∉ π₀.atomPerm.domain) :
-    π • a ∈ litterSet (π • a.1) := by contrapose! ha <;> exact hπ.exception_mem _ (Or.inl ha)
+    π • a ∈ litterSet (π • a.1) := by contrapose! ha; exact hπ.exception_mem _ (Or.inl ha)
 
 theorem ExactlyApproximates.mem_litterSet_inv {π₀ : NearLitterApprox} {π : NearLitterPerm}
     (hπ : π₀.ExactlyApproximates π) (a : Atom) (ha : a ∉ π₀.atomPerm.domain) :
-    π⁻¹ • a ∈ litterSet (π⁻¹ • a.1) := by contrapose! ha <;> exact hπ.exception_mem _ (Or.inr ha)
+    π⁻¹ • a ∈ litterSet (π⁻¹ • a.1) := by contrapose! ha; exact hπ.exception_mem _ (Or.inr ha)
 
 theorem ExactlyApproximates.map_nearLitter {π₀ : NearLitterApprox} {π : NearLitterPerm}
     (hπ : π₀.ExactlyApproximates π) (N : NearLitter) (h₁ : N.fst ∈ π₀.litterPerm.domain)
-    (h₂ : litterSet N.fst ∆ N ⊆ π₀.atomPerm.domain) : π₀ • N = π • N :=
-  by
+    (h₂ : litterSet N.fst ∆ N ⊆ π₀.atomPerm.domain) : π₀ • N = π • N := by
   rw [← SetLike.coe_set_eq]
-  rw [smul_near_litter_coe]
+  rw [smul_nearLitter_coe]
   ext a : 1
-  simp only [coe_largest_sublitter, mem_union, mem_diff, mem_litter_set, near_litter_perm.coe_smul]
+  simp only [coe_largestSublitter, mem_union, mem_diff, ConNF.mem_litterSet,
+    NearLitterPerm.coe_smul]
   constructor
   · rintro (⟨ha₁, ha₂⟩ | ⟨b, ⟨hb₁, hb₂⟩, rfl⟩)
     · rw [hπ.map_litter _ h₁, ← inv_smul_eq_iff] at ha₁
       have := (hπ.exception_mem a).mt ha₂
-      simp only [near_litter_perm.is_exception, not_or, Classical.not_not, mem_litter_set,
+      simp only [NearLitterPerm.IsException, not_or, Classical.not_not, ConNF.mem_litterSet,
         eq_inv_smul_iff, ha₁] at this
       rw [mem_smul_set_iff_inv_smul_mem]
       contrapose! ha₂
-      have h : π₀ • _ ∈ _ := π₀.atom_perm.map_domain (h₂ (Or.inl ⟨this.2, ha₂⟩))
+      have h : π₀ • (π⁻¹ • a) ∈ _ := π₀.atomPerm.map_domain (h₂ (Or.inl ⟨this.2, ha₂⟩))
       rw [hπ.map_atom _ (h₂ (Or.inl ⟨this.2, ha₂⟩)), smul_inv_smul] at h
       exact h
-    · simp only [mem_diff, mem_litter_set, not_and, not_not_mem] at hb₂
-      suffices b ∈ π₀.atom_perm.domain by
+    · simp only [mem_diff, ConNF.mem_litterSet, not_and, not_not_mem] at hb₂
+      suffices b ∈ π₀.atomPerm.domain by
+        dsimp only
         rw [hπ.map_atom _ this]
         exact ⟨b, hb₁, rfl⟩
       by_cases b.fst = N.fst
       · exact hb₂ h
       · exact h₂ (Or.inr ⟨hb₁, h⟩)
   · rintro ⟨b, hb, rfl⟩
-    by_cases b ∈ π₀.atom_perm.domain
+    by_cases b ∈ π₀.atomPerm.domain
     · right
       refine' ⟨b, ⟨hb, _⟩, hπ.map_atom b h⟩
-      simp only [mem_diff, mem_litter_set, not_and, not_not_mem]
+      simp only [mem_diff, ConNF.mem_litterSet, not_and, not_not_mem]
       exact fun _ => h
     · left
       constructor
       · have := (@h₂ b).mt h
-        simp only [mem_symm_diff, hb, mem_litter_set, not_true, and_false_iff, true_and_iff,
+        simp only [mem_symmDiff, hb, ConNF.mem_litterSet, not_true, and_false_iff, true_and_iff,
           false_or_iff, Classical.not_not] at this
         rw [hπ.map_litter _ h₁, ← this]
         by_contra h'
         exact h (hπ.exception_mem b (Or.inl h'))
       · intro hb₁
-        have hb₂ : π₀.symm • _ ∈ _ := π₀.symm.atom_perm.map_domain hb₁
+        have hb₂ : π₀.symm • (π • b) ∈ _ := π₀.symm.atomPerm.map_domain hb₁
         rw [hπ.symm_map_atom _ hb₁, inv_smul_smul] at hb₂
         exact h hb₂
 
@@ -383,7 +371,6 @@ end NearLitterApprox
 # Structural approximations
 -/
 
-
 /-- A `β`-structural approximation is a product that assigns a near-litter approximation to each
 `β`-extended index. -/
 def StructApprox (β : TypeIndex) :=
@@ -400,6 +387,8 @@ def ExactlyApproximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructP
 
 variable {α : Λ} [PositionData] [Phase2Assumptions α]
 
+-- TODO: I think these were never used.
+/-
 /-- A structural approximation `π` *supports* a set of support conditions if all of the support
 conditions lie in the domain of `π` and all near-litter support conditions are litters. -/
 @[mk_iff]
@@ -416,18 +405,20 @@ theorem smul_supportCondition_eq {β : TypeIndex} (π : StructApprox β) (c : Su
   rfl
 
 theorem smul_eq_of_supports {β : Iic α} {π₀ : StructApprox β} {π : Allowable β}
-    (hπ : π₀.ExactlyApproximates π.toStructPerm) {S : Set (SupportCondition β)} (hS : π₀.Supports S)
-    {c : SupportCondition β} (hc : c ∈ S) : π₀ • c = π • c :=
-  by
+    (hπ : π₀.ExactlyApproximates (Allowable.toStructPerm π))
+    {S : Set (SupportCondition β)} (hS : π₀.Supports S)
+    {c : SupportCondition β} (hc : c ∈ S) : π₀ • c = π • c := by
   obtain ⟨a | N, A⟩ := c
-  · refine' Prod.ext _ rfl
+  · refine Prod.ext ?_ rfl
     change inl _ = inl _
     exact congr_arg inl ((hπ A).map_atom a (hS.atom_mem_domain a A hc))
-  refine' Prod.ext _ rfl
+  refine Prod.ext ?_ rfl
   change inr _ = inr _
-  refine' congr_arg inr _
-  ext : 1
-  exact (hπ A).map_litter N.fst (hS.near_litter_mem_domain N A hc)
+  refine congr_arg inr ?_
+  refine SetLike.coe_injective ?_
+  -- ext a : 1
+  -- exact (hπ A).map_litter N.fst (hS.nearLitter_mem_domain N A hc)
+  dsimp only
   rw [(hS.is_litter N A hc).eq_fst_toNearLitter]
   ext a : 1
   simp only [near_litter_approx.smul_near_litter_coe, litter.to_near_litter_fst,
@@ -483,6 +474,7 @@ theorem smul_eq_smul_of_exactly_approximates' {β : Iio α} {π₀ π₀' : Stru
     (ht : MulAction.Supports (Allowable β) S t) (hSπ : ∀ c ∈ S, π₀ • c = π₀' • c) :
     π • t = π' • t :=
   @smul_eq_smul_of_exactlyApproximates _ _ _ _ (β : Iic α) _ _ _ _ hπ hπ' S t hS hS' ht hSπ
+-/
 
 def Free {β : Iic α} (π₀ : StructApprox β) : Prop :=
   ∀ A, (π₀ A).Free α A
@@ -538,7 +530,8 @@ def fixMap :
 def fixWf :
     WellFoundedRelation
       (PSum (Σ' _ : ExtendedIndex β, Atom) (Σ' _ : ExtendedIndex β, NearLitter)) :=
-  ⟨InvImage (Relation.TransGen (Constrains α β)) fixMap, InvImage.wf _ (constrains_wf α β).TransGen⟩
+  ⟨InvImage (Relation.TransGen (Constrains α β)) fixMap,
+    InvImage.wf _ (WellFounded.transGen <| constrains_wf α β)⟩
 
 mutual
   /-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.
@@ -546,26 +539,25 @@ mutual
   noncomputable def fixAtom (Fa : ∀ (A : ExtendedIndex β) (a), Hypothesis ⟨inl a, A⟩ → Atom)
       (FN : ∀ (A : ExtendedIndex β) (N), Hypothesis ⟨inr N, A⟩ → NearLitter) :
       ExtendedIndex β → Atom → Atom
-    | A, a => Fa A a ⟨fun B b hb => fix_atom B b, fun B N hb => fix_near_litter B N⟩
+    | A, a => Fa A a ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩
   /-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.
   This is used to compute the induced action of an approximation on all atoms and near-litters. -/
   noncomputable def fixNearLitter (Fa : ∀ (A : ExtendedIndex β) (a), Hypothesis ⟨inl a, A⟩ → Atom)
       (FN : ∀ (A : ExtendedIndex β) (N), Hypothesis ⟨inr N, A⟩ → NearLitter) :
       ExtendedIndex β → NearLitter → NearLitter
-    | A, N => FN A N ⟨fun B b hb => fix_atom B b, fun B N hb => fix_near_litter B N⟩
+    | A, N => FN A N ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩
 end
-termination_by' fix_wf
-decreasing_by exact hb
+termination_by' fixWf
 
 theorem fixAtom_eq (Fa FN) (A : ExtendedIndex β) (a : Atom) :
     fixAtom Fa FN A a =
-      Fa A a ⟨fun B b hb => fixAtom Fa FN B b, fun B N hb => fixNearLitter Fa FN B N⟩ :=
-  by rw [fix_atom]
+      Fa A a ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩ :=
+  by rw [fixAtom]
 
 theorem fixNearLitter_eq (Fa FN) (A : ExtendedIndex β) (N : NearLitter) :
     fixNearLitter Fa FN A N =
-      FN A N ⟨fun B b hb => fixAtom Fa FN B b, fun B N hb => fixNearLitter Fa FN B N⟩ :=
-  by rw [fix_near_litter]
+      FN A N ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩ :=
+  by rw [fixNearLitter]
 
 end Hypothesis
 
