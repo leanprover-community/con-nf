@@ -64,7 +64,7 @@ theorem IsNearLitter.unique {s : Set Atom} (hi : IsNearLitter i s) (hj : IsNearL
 
 /-- There are `μ` near-litters near the `i`-th litter. -/
 @[simp]
-theorem mk_nearLitter' (i : Litter) : #{s // IsNearLitter i s} = #μ := by
+theorem mk_nearLitter' (i : Litter) : #{ s // IsNearLitter i s } = #μ := by
   refine (le_antisymm ?_ ?_).trans mk_atom
   · have := mk_subset_mk_lt_cof (μ_strong_limit.2)
     refine le_of_le_of_eq ?_ (mk_subset_mk_lt_cof <| by simp_rw [mk_atom]; exact μ_strong_limit.2)
@@ -81,7 +81,7 @@ theorem mk_nearLitter' (i : Litter) : #{s // IsNearLitter i s} = #μ := by
 
 /-- The type of near-litters. -/
 def NearLitter : Type _ :=
-  Σ i, {s // IsNearLitter i s}
+  Σ i, { s // IsNearLitter i s }
 
 namespace NearLitter
 
@@ -95,7 +95,7 @@ instance : SetLike NearLitter Atom where
     rfl
 
 @[simp]
-theorem coe_mk (i : Litter) (s : {s // IsNearLitter i s}) :
+theorem coe_mk (i : Litter) (s : { s // IsNearLitter i s }) :
     SetLike.coe (A := NearLitter) ⟨i, s⟩ = s :=
   rfl
 
