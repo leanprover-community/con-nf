@@ -29,10 +29,9 @@ def Flexible (L : Litter) (A : ExtendedIndex β) : Prop :=
 theorem flexible_cases (L : Litter) (A : ExtendedIndex β) : Inflexible α L A ∨ Flexible α L A :=
   or_not
 
-theorem mk_flexible (A : ExtendedIndex β) : #{L | Flexible α L A} = #μ :=
-  by
-  refine' le_antisymm ((Cardinal.mk_subtype_le _).trans mk_litter.le) _
-  refine' ⟨⟨fun ν => ⟨⟨ν, ⊥, α, WithBot.bot_ne_coe⟩, _⟩, _⟩⟩
+theorem mk_flexible (A : ExtendedIndex β) : #{L | Flexible α L A} = #μ := by
+  refine le_antisymm ((Cardinal.mk_subtype_le _).trans mk_litter.le) ?_
+  refine ⟨⟨fun ν => ⟨⟨ν, ⊥, α, WithBot.bot_ne_coe⟩, ?_⟩, ?_⟩⟩
   · intro h
     rw [Inflexible_iff] at h
     obtain ⟨γ, δ, ε, _, hε, hδε, A, t, h, rfl⟩ | ⟨γ, ε, hε, A, t, h, rfl⟩ := h
