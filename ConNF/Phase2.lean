@@ -1,5 +1,5 @@
 import ConNF.Phase2.Basic
--- import ConNF.Phase2.Constrains
+import ConNF.Phase2.Constrains
 -- import ConNF.Phase2.NearLitterAction
 -- import ConNF.Phase2.CompleteOrbit
 -- import ConNF.Phase2.FlexibleCompletion
