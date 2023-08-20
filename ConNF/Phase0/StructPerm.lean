@@ -288,7 +288,16 @@ theorem derivative_bot_smul {α : Λ} (f : StructPerm α) (x : X) :
     StructPerm.derivative (nil.cons (bot_lt_coe α)) f • x = f • x :=
   rfl
 
+@[simp]
 theorem smul_nearLitter_fst (π : StructPerm α) (N : NearLitter) : (π • N).fst = π • N.fst :=
+  rfl
+
+theorem smul_nearLitter_snd (π : StructPerm α) (N : NearLitter) :
+    ((π • N).2 : Set Atom) = π • (N.2 : Set Atom) :=
+  rfl
+
+theorem smul_nearLitter_coe (π : StructPerm α) (N : NearLitter) :
+    ((π • N) : Set Atom) = π • (N : Set Atom) :=
   rfl
 
 end

@@ -12,8 +12,6 @@ namespace ConNF
 
 variable [Params.{u}] {α : Λ}
 
--- TODO: Convert this to a dependent product using paths, just like structural permutations.
-
 /-- A *pretangle* is an object that may become a *tangle*, an element of the model.
 The type of pretangles forms a model of TTT without extensionality. -/
 def Pretangle : TypeIndex → Type u
