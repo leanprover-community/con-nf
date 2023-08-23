@@ -18,8 +18,8 @@ variable {β : Λ} {G : Type _} {τ : Type _} [SMul G (SupportCondition β)] [SM
 /-- A support condition is *reduced* if it is an atom or a litter. -/
 @[mk_iff]
 inductive Reduced {β : TypeIndex} : SupportCondition β → Prop
-  | mk_atom (a : Atom) (B : ExtendedIndex β) : Reduced (inl a, B)
-  | mk_litter (L : Litter) (B : ExtendedIndex β) : Reduced (inr L.toNearLitter, B)
+  | mkAtom (a : Atom) (B : ExtendedIndex β) : Reduced (inl a, B)
+  | mkLitter (L : Litter) (B : ExtendedIndex β) : Reduced (inr L.toNearLitter, B)
 
 /-- The *reduction* of a set of support conditions is the downward closure of the set under
 the constrains relation, but we only keep reduced conditions. -/
@@ -121,20 +121,20 @@ theorem reduction_designatedSupport_supports [CoreTangleData β] (t : Tangle β)
   intro π h₁
   refine' (designatedSupport t).supports π _
   rintro ⟨a | N, B⟩ h₂
-  · exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mk_atom a B) h₂)
+  · exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mkAtom a B) h₂)
   · by_cases N.IsLitter
     · obtain ⟨L, rfl⟩ := h.exists_litter_eq
-      exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mk_litter L B) h₂)
+      exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mkLitter L B) h₂)
     · have h := NearLitter.not_isLitter h
       have h₃ :=
         congr_arg Prod.fst
           (h₁
-            (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mk_litter N.fst B)
+            (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkLitter N.fst B)
               (Constrains.nearLitter N h B) h₂))
       have h₄ := fun a ha =>
         congr_arg Prod.fst
           (h₁
-            (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mk_atom a B)
+            (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkAtom a B)
               (Constrains.symmDiff N a ha B) h₂))
       refine' Prod.ext _ rfl
       change inr _ = inr _ at h₃

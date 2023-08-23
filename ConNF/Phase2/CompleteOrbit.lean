@@ -19,7 +19,6 @@ There are natural bijections along this diagram, mapping `l (n + 1)` to `l n` an
 This yields a local permutation defined on `s`, `f '' s \ s`, the `l i`, and the `r i`.
 -/
 
-
 open Cardinal Function Set
 
 open scoped Cardinal Classical
