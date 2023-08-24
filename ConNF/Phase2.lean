@@ -11,7 +11,7 @@ import ConNF.Phase2.AtomCompletion
 import ConNF.Phase2.FlexibleCompletion
 import ConNF.Phase2.FillAtomOrbits
 import ConNF.Phase2.FillAtomRange
--- import ConNF.Phase2.Refine
+import ConNF.Phase2.Refine
 -- import ConNF.Phase2.LitterCompletion
 -- import ConNF.Phase2.NearLitterCompletion
 -- import ConNF.Phase2.CompleteAction

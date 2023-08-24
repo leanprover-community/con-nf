@@ -3,8 +3,6 @@ import ConNF.Phase2.StructAction
 import ConNF.Phase2.FillAtomRange
 import ConNF.Phase2.FillAtomOrbits
 
-#align_import phase2.refine
-
 open Quiver Set
 
 universe u
@@ -16,7 +14,6 @@ variable [Params.{u}]
 /-!
 # Refinements of actions
 -/
-
 
 namespace NearLitterAction
 
@@ -36,17 +33,17 @@ theorem refine_atomMap {a : Atom} (ha : (φ.atomMap a).Dom) :
   by
   unfold refine
   refine' Part.ext' _ _
-  · simp only [ha, fill_atom_orbits_atom_map, orbit_atom_map_dom_iff, fill_atom_range_atom_map,
-      iff_true_iff]
+  · simp only [ha, fillAtomOrbits_atomMap, orbitAtomMap_dom_iff,
+      fillAtomRange_atomMap, iff_true_iff]
     exact Or.inl (Or.inl ha)
-  intro h₁ h₂
-  refine' (φ.fill_atom_range.orbit_atom_map_eq_of_mem_dom _ _ (Or.inl ha)).trans _
-  exact φ.supported_action_eq_of_dom ha
+  intros
+  refine' (φ.fillAtomRange.orbitAtomMap_eq_of_mem_dom _ _ (Or.inl ha)).trans _
+  exact φ.supportedAction_eq_of_dom ha
 
 @[simp]
 theorem refine_atomMap_get {a : Atom} (ha : (φ.atomMap a).Dom) :
     ((φ.refine hφ).atomMap a).get (Or.inl (Or.inl ha)) = (φ.atomMap a).get ha := by
-  simp only [refine_atom_map ha]
+  simp only [refine_atomMap ha]
 
 @[simp]
 theorem refine_litterMap : (φ.refine hφ).litterMap = φ.litterMap :=
@@ -65,7 +62,7 @@ noncomputable def refine : StructAction β := fun A => (φ A).refine (hφ A)
 
 variable {φ} {hφ}
 
-theorem refine_lawful : (φ.refine hφ).Lawful := fun A => NearLitterAction.refineLawful
+theorem refine_lawful : (φ.refine hφ).Lawful := fun _ => NearLitterAction.refineLawful
 
 @[simp]
 theorem refine_apply {A : ExtendedIndex β} : φ.refine hφ A = (φ A).refine (hφ A) :=
@@ -85,7 +82,7 @@ theorem refine_litterMap {A : ExtendedIndex β} :
     ((φ A).refine (hφ A)).litterMap = (φ A).litterMap :=
   rfl
 
-theorem refine_precise : Precise (φ.refine hφ) := fun A => NearLitterAction.refine_precise
+theorem refine_precise : Precise (φ.refine hφ) := fun _ => NearLitterAction.refine_precise
 
 theorem refineSupports {α : Λ} [PositionData] [Phase2Assumptions α] {β : Iio α} {t : Tangle β}
     (φ : StructAction β) (hφ : φ.Lawful) (h : φ.Supports t) : (φ.refine hφ).Supports t :=
@@ -103,38 +100,34 @@ noncomputable def rc (φ : StructAction β) (h : φ.Lawful) : StructApprox β :=
   (φ.refine h).complete refine_lawful
 
 theorem rc_smul_atom_eq {φ : StructAction β} {h : φ.Lawful} {B : ExtendedIndex β} {a : Atom}
-    (ha : ((φ B).atomMap a).Dom) : φ.rc h B • a = ((φ B).atomMap a).get ha :=
-  by
-  refine' (near_litter_action.complete_smul_atom_eq _ _).trans _
+    (ha : ((φ B).atomMap a).Dom) : φ.rc h B • a = ((φ B).atomMap a).get ha := by
+  refine' (NearLitterAction.complete_smul_atom_eq _ _).trans _
   · exact Or.inl (Or.inl ha)
-  · simp only [refine_apply, refine_atom_map ha]
+  · simp only [refine_apply, refine_atomMap ha]
 
 theorem rc_smul_litter_eq {φ : StructAction β} {hφ : φ.Lawful} {B : ExtendedIndex β} (L : Litter) :
     φ.rc hφ B • L = (φ.refine hφ B).flexibleLitterPerm (refine_lawful B) B L :=
   rfl
 
-theorem rcFree (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :
-    (show StructApprox (β : Iic α) from φ.rc h₁).Free :=
-  by
+theorem rc_free (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :
+    (show StructApprox (β : Iic α) from φ.rc h₁).Free := by
   rintro B L' ((hL' | ⟨L', hL', rfl⟩) | hL')
   · exact hL'.2
-  · rw [near_litter_action.rough_litter_map_or_else_of_dom _ hL'.1]
+  · rw [NearLitterAction.roughLitterMapOrElse_of_dom _ hL'.1]
     exact h₂ L' B hL'.1 hL'.2
   · exact (LocalPerm.sandboxSubset_subset _ _ hL').2
 
 theorem rc_comp_atomPerm {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) :
-    ((φ.comp A).rc (hφ.comp A) B).atomPerm = (φ.rc hφ (A.comp B)).atomPerm :=
-  by
-  unfold rc refine complete near_litter_action.refine near_litter_action.complete
-  simp_rw [struct_action.comp_apply]
+    ((φ.comp A).rc (hφ.comp A) B).atomPerm = (φ.rc hφ (A.comp B)).atomPerm := by
+  unfold rc refine complete NearLitterAction.refine NearLitterAction.complete
+  simp_rw [StructAction.comp_apply]
 
 theorem rc_comp_smul_atom {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) (a : Atom) :
-    (φ.comp A).rc (hφ.comp A) B • a = φ.rc hφ (A.comp B) • a :=
-  by
-  change near_litter_approx.atom_perm _ _ = near_litter_approx.atom_perm _ _
-  rw [rc_comp_atom_perm]
+    (φ.comp A).rc (hφ.comp A) B • a = φ.rc hφ (A.comp B) • a := by
+  change NearLitterApprox.atomPerm _ _ = NearLitterApprox.atomPerm _ _
+  rw [rc_comp_atomPerm]
 
 end StructAction
 
