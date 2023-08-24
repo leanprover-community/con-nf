@@ -217,12 +217,12 @@ theorem symm_image_eq (h : π.IsStable s) : π.symm '' (π.domain ∩ s) = π.do
 theorem iff_preimage_eq : π.IsStable s ↔ π.domain ∩ π ⁻¹' s = π.domain ∩ s := by
   simp only [IsStable, Set.ext_iff, mem_inter_iff, and_congr_right_iff, mem_preimage]
 
-alias iff_preimage_eq ↔ preimage_eq of_preimage_eq
+alias ⟨preimage_eq, of_preimage_eq⟩ := iff_preimage_eq
 
 theorem iff_symm_preimage_eq : π.IsStable s ↔ π.domain ∩ π.symm ⁻¹' s = π.domain ∩ s :=
   symm_iff.symm.trans iff_preimage_eq
 
-alias iff_symm_preimage_eq ↔ symm_preimage_eq of_symm_preimage_eq
+alias ⟨symm_preimage_eq, of_symm_preimage_eq⟩ := iff_symm_preimage_eq
 
 -- lemma of_image_eq (h : π '' (π.domain ∩ s) = π.domain ∩ s) : π.is_stable s :=
 -- of_symm_preimage_eq $ eq.trans (of_symm_preimage_eq rfl).image_eq.symm h

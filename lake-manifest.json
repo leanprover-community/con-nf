@@ -20,7 +20,7 @@
   {"git":
    {"url": "https://github.com/leanprover/doc-gen4",
     "subDir?": null,
-    "rev": "d805539b34d134d29ba957cd7608c494d5296f09",
+    "rev": "34165f36e6f5e679e1a11b4a8129c7b2fa817bf4",
     "opts": {},
     "name": "«doc-gen4»",
     "inputRev?": "main",
@@ -44,7 +44,7 @@
   {"git":
    {"url": "https://github.com/leanprover-community/mathlib4.git",
     "subDir?": null,
-    "rev": "a1bb5932254a591f05aba4f28cee2310bbebc9b0",
+    "rev": "1239d77cc5fdd1ecb8fc2f8a70ee5f0cfed53aff",
     "opts": {},
     "name": "mathlib",
     "inputRev?": null,
@@ -76,7 +76,7 @@
   {"git":
    {"url": "https://github.com/leanprover/std4",
     "subDir?": null,
-    "rev": "49353fa54abdac7221fe27f7b57a6ed9ff559d5c",
+    "rev": "b5f7bd40d2162fe148e585543f284a5d8cc0ef26",
     "opts": {},
     "name": "std",
     "inputRev?": "main",
