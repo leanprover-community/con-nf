@@ -147,9 +147,9 @@ theorem not_isOdd : ¬c.IsOdd ↔ c.IsEven :=
 theorem not_isEven : ¬c.IsEven ↔ c.IsOdd :=
   not_isOdd.symm.not_left
 
-alias not_isOdd ↔ _ IsEven.not_isOdd
+alias ⟨_, IsEven.not_isOdd⟩ := not_isOdd
 
-alias not_isEven ↔ _ IsOdd.not_isEven
+alias ⟨_, IsOdd.not_isEven⟩ := not_isEven
 
 theorem isEven_or_isOdd (c : Code α) : c.IsEven ∨ c.IsOdd := by rw [← not_isEven]; exact em _
 

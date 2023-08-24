@@ -376,9 +376,9 @@ theorem isEven_smul : (f • c).IsEven ↔ c.IsEven := by
 @[simp]
 theorem isOdd_smul : (f • c).IsOdd ↔ c.IsOdd := by simp_rw [← Code.not_isEven, isEven_smul]
 
-alias isEven_smul ↔ _ isEven.smul
+alias ⟨_, isEven.smul⟩ := isEven_smul
 
-alias isOdd_smul ↔ _ isOdd.smul
+alias ⟨_, isOdd.smul⟩ := isOdd_smul
 
 end Code
 
