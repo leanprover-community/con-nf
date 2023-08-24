@@ -306,19 +306,6 @@ theorem nextImageCore_injective (a b : Atom) (ha : a ∈ φ.nextImageCoreDomain 
 def nextImageDomain : Set Atom :=
   φ.needForwardImages ∩ {a | a.1 ∈ (φ.litterPerm hφ).domain} ∪ φ.nextImageCoreDomain hφ
 
-/-- Noncomputably eliminates a disjunction into a (possibly predicative) universe. -/
-noncomputable def _root_.Or.elim' {α : Sort _} {p q : Prop}
-    (h : p ∨ q) (f : p → α) (g : q → α) : α :=
-  if hp : p then f hp else g (h.resolve_left hp)
-
-lemma _root_.Or.elim'_left {α : Sort _} {p q : Prop}
-    (h : p ∨ q) (f : p → α) (g : q → α) (hp : p) : h.elim' f g = f hp :=
-  by rw [Or.elim', dif_pos hp]
-
-lemma _root_.Or.elim'_right {α : Sort _} {p q : Prop}
-    (h : p ∨ q) (f : p → α) (g : q → α) (hp : ¬p) : h.elim' f g = g (h.resolve_left hp) :=
-  by rw [Or.elim', dif_neg hp]
-
 noncomputable def nextImage (a : Atom) (ha : a ∈ φ.nextImageDomain hφ) : Atom :=
   ha.elim'
     (fun ha' => (φ.orbitSetEquiv (φ.litterPerm hφ a.1)).symm (inr (0, ⟨a, ha'.1⟩)))

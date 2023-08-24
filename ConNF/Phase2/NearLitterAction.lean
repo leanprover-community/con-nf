@@ -17,6 +17,19 @@ variable [Params.{u}]
 # Structural actions
 -/
 
+/-- Noncomputably eliminates a disjunction into a (possibly predicative) universe. -/
+noncomputable def _root_.Or.elim' {α : Sort _} {p q : Prop}
+    (h : p ∨ q) (f : p → α) (g : q → α) : α :=
+  if hp : p then f hp else g (h.resolve_left hp)
+
+lemma _root_.Or.elim'_left {α : Sort _} {p q : Prop}
+    (h : p ∨ q) (f : p → α) (g : q → α) (hp : p) : h.elim' f g = f hp :=
+  by rw [Or.elim', dif_pos hp]
+
+lemma _root_.Or.elim'_right {α : Sort _} {p q : Prop}
+    (h : p ∨ q) (f : p → α) (g : q → α) (hp : ¬p) : h.elim' f g = g (h.resolve_left hp) :=
+  by rw [Or.elim', dif_neg hp]
+
 /-- A *near-litter action* is a partial function from atoms to atoms and a partial
 function from litters to near-litters, both of which have small domain.
 The image of a litter under the `litter_map` should be interpreted as the intended *precise* image
