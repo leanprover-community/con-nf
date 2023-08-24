@@ -181,6 +181,7 @@ theorem transGen_near_litter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
   · exact Relation.TransGen.head (Constrains.nearLitter N (NearLitter.not_isLitter h') B) h
 
 -- TODO: Move
+-- TODO: Search for uses of fMap_β and replace with this lemma.
 lemma fMap_congr_β {β γ β' γ' : Iio α} {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
   {t : Tangle β} {t' : Tangle β'}
   (h : fMap hβγ t = fMap hβγ' t') :
