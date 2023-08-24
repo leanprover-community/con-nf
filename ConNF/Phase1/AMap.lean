@@ -242,7 +242,7 @@ theorem aMapCode_isEmpty : (aMapCode β c).IsEmpty ↔ c.IsEmpty :=
 theorem aMapCode_nonempty : (aMapCode β c).2.Nonempty ↔ c.2.Nonempty := by
   simp_rw [nonempty_iff_ne_empty]; exact aMapCode_isEmpty.not
 
-alias aMapCode_isEmpty ↔ _ Code.IsEmpty.aMapCode
+alias ⟨_, Code.IsEmpty.aMapCode⟩ := aMapCode_isEmpty
 
 theorem aMapCode_injOn : {c : Code α | c.1 ≠ β ∧ c.2.Nonempty}.InjOn (aMapCode β) := by
   rintro ⟨γ, s⟩ ⟨hγβ, hs⟩ ⟨δ, t⟩ ⟨hδβ, ht⟩ h

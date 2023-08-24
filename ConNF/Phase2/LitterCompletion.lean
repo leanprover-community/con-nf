@@ -177,7 +177,8 @@ theorem inflexible_iff_inflexibleBot_or_inflexibleCoe {β : Iic α} {L : Litter}
   exact inflexible_of_inflexibleBot h
   exact inflexible_of_inflexibleCoe h
 
-theorem flexible_iff_not_inflexibleBot_coe {β : Iic α} {L : Litter} {A : ExtendedIndex β} :
+theorem flexible_iff_not_inflexibleBot_inflexibleCoe {β : Iic α} {L : Litter}
+    {A : ExtendedIndex β} :
     Flexible α L A ↔ IsEmpty (InflexibleBot L A) ∧ IsEmpty (InflexibleCoe L A) := by
   constructor
   · intro h

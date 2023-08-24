@@ -173,7 +173,7 @@ theorem transGen_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β} {c
     exact h
   · exact Relation.TransGen.tail h (Constrains.nearLitter N (NearLitter.not_isLitter h') B)
 
-theorem transGen_near_litter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
+theorem transGen_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
     {c : SupportCondition β} (h : (inr N, B) <[α] c) : (inr N.1.toNearLitter, B) <[α] c := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq

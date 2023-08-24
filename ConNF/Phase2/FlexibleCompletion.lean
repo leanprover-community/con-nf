@@ -61,7 +61,7 @@ theorem flexibleCompletion_smul_of_mem_domain (L : Litter) (hL : L ∈ π.litter
   rw [flexibleCompletion_smul_eq, flexibleCompletionLitterPerm,
     LocalPerm.piecewise_apply_eq_left hL]
 
-theorem flexibleCompletionSmulFlexible (hπ : π.Free α A) (L : Litter) (hL : Flexible α L A) :
+theorem flexibleCompletion_smul_flexible (hπ : π.Free α A) (L : Litter) (hL : Flexible α L A) :
     Flexible α (flexibleCompletion α π A • L) A := by
   have := LocalPerm.map_domain (flexibleCompletion α π A).litterPerm (x := ?_) ?_
   · rw [flexibleCompletion_litterPerm_domain_free α π A hπ] at this
@@ -69,7 +69,7 @@ theorem flexibleCompletionSmulFlexible (hπ : π.Free α A) (L : Litter) (hL : F
   · rw [flexibleCompletion_litterPerm_domain_free α π A hπ]
     exact hL
 
-theorem flexibleCompletionSymmSmulFlexible (hπ : π.Free α A) (L : Litter) (hL : Flexible α L A) :
+theorem flexibleCompletion_symm_smul_flexible (hπ : π.Free α A) (L : Litter) (hL : Flexible α L A) :
     Flexible α ((flexibleCompletion α π A).symm • L) A := by
   have := LocalPerm.map_domain (flexibleCompletion α π A).symm.litterPerm (x := ?_) ?_
   · rw [symm_litterPerm, LocalPerm.symm_domain,
