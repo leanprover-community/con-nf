@@ -405,11 +405,7 @@ theorem allowableToStructPerm_bot (π : Allowable (⊥ : IioBot α)) :
 
 theorem _root_.ConNF.SemiallowablePerm.coe_apply_bot (π : SemiallowablePerm α) :
     (π : SemiallowablePerm α) ⊥ =
-      StructPerm.toNearLitterPerm (SemiallowablePerm.toStructPerm π) := by
-  unfold SemiallowablePerm.toStructPerm
-    StructPerm.toNearLitterPerm StructPerm.lower Allowable.toStructPerm
-  simp only [MonoidHom.coe_mk, OneHom.coe_mk, WithBot.bot_ne_coe, dite_false, MonoidHom.coe_comp,
-    MulEquiv.coe_toMonoidHom, StructPerm.coe_toBotIso_symm, comp_apply, StructPerm.ofCoe_toCoe]
+      SemiallowablePerm.toStructPerm π (Quiver.Hom.toPath (bot_lt_coe _)) := by
   rfl
 
 /-- For any near-litter `N`, the code `(α, -1, N)` is a tangle at level `α`.
@@ -423,6 +419,7 @@ def newTypedNearLitter (N : NearLitter) : NewTangle α :=
         simp only [AllowablePerm.coeHom_apply, Sum.inr.injEq] at this
         apply_fun SetLike.coe at this
         refine Eq.trans ?_ this
+        rw [NearLitterPerm.smul_nearLitter_coe]
         change (fun x => (π : SemiallowablePerm α) ⊥ • x) '' _ = (fun x => π • x) '' _
         simp_rw [SemiallowablePerm.coe_apply_bot]
         rfl⟩⟩⟩

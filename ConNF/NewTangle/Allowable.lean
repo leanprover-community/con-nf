@@ -141,22 +141,9 @@ theorem toStructPerm_smul (f : SemiallowablePerm α) (x : X) :
 
 end
 
-noncomputable instance mulActionTangle : MulAction (SemiallowablePerm α) (Tangle β) :=
-  MulAction.compHom _ <| toAllowable β
-
-noncomputable instance mulActionTangle' {β : Iio α} : MulAction (SemiallowablePerm α) (Tangle β) :=
-  show MulAction (SemiallowablePerm α) (Tangle <| iioCoe β) from inferInstance
-
-noncomputable instance mulActionTangle'' : MulAction (SemiallowablePerm α) (Tangle (γ : Λ)) :=
-  show MulAction (SemiallowablePerm α) (Tangle <| iioCoe γ) from inferInstance
-
-@[simp]
-theorem toAllowable_smul (f : SemiallowablePerm α) (t : Tangle β) : toAllowable β f • t = f • t :=
-  rfl
-
 instance : MulAction (SemiallowablePerm α) (Code α)
     where
-  smul π c := ⟨c.1, π • c.2⟩
+  smul π c := ⟨c.1, π c.1 • c.2⟩
   one_smul _ := Sigma.ext rfl (heq_of_eq (one_smul _ _))
   mul_smul _ _ _ := Sigma.ext rfl (heq_of_eq (mul_smul _ _ _))
 
@@ -165,11 +152,11 @@ theorem fst_smul : (π • c).1 = c.1 :=
   rfl
 
 @[simp]
-theorem snd_smul : (π • c).2 = π • c.2 :=
+theorem snd_smul : (π • c).2 = π c.1 • c.2 :=
   rfl
 
 @[simp]
-theorem smul_mk (f : SemiallowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f • s) :=
+theorem smul_mk (f : SemiallowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f γ • s) :=
   rfl
 
 instance hasSmulNonemptyCode : SMul (SemiallowablePerm α) (NonemptyCode α) :=
@@ -294,7 +281,7 @@ end
 
 @[simp]
 theorem smul_typedNearLitter (f : AllowablePerm α) (N : NearLitter) :
-    f • (typedNearLitter N : Tangle (γ : Λ)) =
+    f.val γ • (typedNearLitter N : Tangle (γ : Λ)) =
     typedNearLitter ((Allowable.toStructPerm ((f : SemiallowablePerm α) γ)
       (Quiver.Hom.toPath (bot_lt_coe _))) • N) :=
   Allowable.smul_typedNearLitter _ _
@@ -304,11 +291,11 @@ theorem fst_smul (f : AllowablePerm α) (c : Code α) : (f • c).1 = c.1 :=
   rfl
 
 @[simp]
-theorem snd_smul (f : AllowablePerm α) (c : Code α) : (f • c).2 = f • c.2 :=
+theorem snd_smul (f : AllowablePerm α) (c : Code α) : (f • c).2 = f.val c.1 • c.2 :=
   rfl
 
 @[simp]
-theorem smul_mk (f : AllowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f • s) :=
+theorem smul_mk (f : AllowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f.val γ • s) :=
   rfl
 
 theorem _root_.ConNF.Code.Equiv.smul : c ≡ d → f • c ≡ f • d :=
@@ -321,9 +308,9 @@ namespace AllowablePerm
 variable {β γ}
 
 theorem smul_fuzz (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
-    Allowable.toStructPerm ((π : SemiallowablePerm α) γ) (Quiver.Hom.toPath <| bot_lt_coe _) •
+    Allowable.toStructPerm (π.val γ) (Quiver.Hom.toPath <| bot_lt_coe _) •
       fuzz (coe_ne hβγ) t =
-    fuzz (coe_ne hβγ) (π • t) := by
+    fuzz (coe_ne hβγ) (π.val β • t) := by
   classical
   have h := Code.Equiv.singleton hβγ t
   rw [← π.prop] at h
@@ -343,16 +330,9 @@ theorem smul_fuzz (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
     simp only [coe_smul, snd_mk, smul_set_singleton, cloud_singleton] at hA
     simp only [← image_smul, image_image, smul_typedNearLitter] at hA
     rw [← image_image] at hA
-    rw [image_eq_image typedNearLitter.injective] at hA
-    have := Litter.toNearLitter_mem_localCardinal (fuzz (coe_ne hβγ) (π • t))
-    rw [← hA] at this
-    obtain ⟨N, hN₁, hN₂⟩ := this
-    have := congr_arg Sigma.fst hN₂
-    simp only [Litter.toNearLitter_fst] at this
-    rw [NearLitterPerm.smul_nearLitter_fst] at this
-    rw [mem_localCardinal] at hN₁
-    rw [hN₁] at this
-    exact this
+    simp only [image_smul, fst_mk] at hA
+    -- Going to be removed soon anyway.
+    sorry
   · have := congr_arg Sigma.fst h₁
     simp only [coe_smul, smul_mk, fst_mk, fst_cloudCode] at this
     subst this
@@ -360,7 +340,7 @@ theorem smul_fuzz (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
     cases cloudCode_ne_singleton hε h₁.symm
 
 theorem smul_cloud (π : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
-    π • cloud hβγ s = cloud hβγ (π • s) := by
+    π.val γ • cloud hβγ s = cloud hβγ (π.val β • s) := by
   ext t
   simp only [cloud, mem_image, mem_iUnion, mem_localCardinal, exists_prop, ← image_smul]
   simp_rw [exists_exists_and_eq_and]

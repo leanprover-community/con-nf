@@ -498,7 +498,7 @@ theorem smul_toNearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm
     π • L.toNearLitter = (φ.litterMap L).get hL := by
   refine' SetLike.coe_injective _
   ext a : 1
-  simp only [mem_smul_set_iff_inv_smul_mem, NearLitterPerm.coe_smul, Litter.coe_toNearLitter,
+  simp only [mem_smul_set_iff_inv_smul_mem, NearLitterPerm.smul_nearLitter_coe, Litter.coe_toNearLitter,
     mem_litterSet, SetLike.mem_coe]
   constructor
   · intro ha
