@@ -288,35 +288,53 @@ variable {f : AllowablePerm α} {e : Extensions α}
 
 @[simp]
 theorem smul_extension_apply (f : AllowablePerm α) (s : Set (Tangle β)) :
-    f • extension s γ = extension (f • s) γ := by
+    f.val γ • extension s γ = extension (f.val β • s) γ := by
   by_cases β = γ
   · subst h
     simp only [extension_eq, cast_eq]
   · rw [extension_ne _ _ h, extension_ne _ _ h, smul_cloud]
 
+instance : MulAction (SemiallowablePerm α) (Extensions α)
+    where
+  smul f e γ := f γ • e γ
+  one_smul e := by
+    funext γ
+    change (1 : SemiallowablePerm α) γ • e γ = e γ
+    simp only [SemiallowablePerm.one_apply, one_smul]
+  mul_smul f g e := by
+    funext γ
+    change (f * g) γ • e γ = f γ • g γ • e γ
+    simp only [SemiallowablePerm.mul_apply, mul_smul]
+
 @[simp]
 theorem smul_extension (f : AllowablePerm α) (s : Set (Tangle β)) :
-    f • extension s = extension (f • s) := by
+    f • extension s = extension (f.val β • s) := by
   ext γ : 1
   rw [← smul_extension_apply]
   rfl
 
 theorem smul_aux₁ {s : Set (Tangle (⊥ : IioBot α))}
     (h : ∀ γ : Iio α, cloud bot_ne_coe s = (e γ : Set (Tangle (iioCoe γ)))) (γ : Iio α) :
-    cloud bot_ne_coe (f • s) = (f • e) γ := by
-  simpa only [smul_cloud] using congr_arg (fun c => f • c) (h γ)
+    cloud bot_ne_coe (f.val ⊥ • s) = (f • e) γ := by
+  have := congr_arg (fun c => f.val γ • c) (h γ)
+  dsimp only at this
+  rw [smul_cloud] at this
+  exact this
 
 theorem smul_aux₂
     (h : ∀ (δ : Iio α) (hγδ : iioCoe γ ≠ δ), cloud hγδ (e γ) = (e δ : Set (Tangle (iioCoe δ))))
     (δ : Iio α) (hγδ : iioCoe γ ≠ δ) : cloud hγδ ((f • e) γ) = (f • e) δ := by
-  simpa only [smul_cloud] using congr_arg (fun c => f • c) (h δ hγδ)
+  have := congr_arg (fun c => f.val δ • c) (h δ hγδ)
+  dsimp only at this
+  rw [smul_cloud] at this
+  exact this
 
 /-- Allowable permutations act on semitangles. -/
 noncomputable instance : SMul (AllowablePerm α) (Semitangle α)
     where smul f t :=
     ⟨f • t.members, by
       obtain ⟨members, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩ := t
-      · exact Preference.base (f • s) (smul_aux₁ h)
+      · exact Preference.base (f.val ⊥ • s) (smul_aux₁ h)
       · exact Preference.proper _ (isEven_smul.mpr ht) (smul_aux₂ h)⟩
 
 @[simp]
@@ -326,7 +344,7 @@ theorem members_smul (f : AllowablePerm α) (s : Semitangle α) : (f • s).memb
 @[simp]
 theorem smul_base (f : AllowablePerm α) (e : Extensions α) (s h) :
     f • (⟨e, Preference.base s h⟩ : Semitangle α) =
-      ⟨f • e, Preference.base (f • s) (smul_aux₁ h)⟩ :=
+      ⟨f • e, Preference.base (f.val ⊥ • s) (smul_aux₁ h)⟩ :=
   rfl
 
 @[simp]
@@ -341,8 +359,9 @@ noncomputable instance mulActionSemitangle : MulAction (AllowablePerm α) (Semit
     rintro ⟨exts, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩
     · rw [smul_base]
       simp only [one_smul, mk.injEq, true_and]
-      refine Preference.base_heq_base ?_ rfl
-      rw [one_smul]
+      refine Preference.base_heq_base ?_ ?_
+      · rw [one_smul]
+      · simp only [coe_one, SemiallowablePerm.one_apply, one_smul]
     · rw [smul_proper]
       simp only [one_smul, mk.injEq, true_and]
       refine Preference.proper_heq_proper ?_ rfl
@@ -350,8 +369,9 @@ noncomputable instance mulActionSemitangle : MulAction (AllowablePerm α) (Semit
   mul_smul := by
     rintro f g ⟨exts, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩
     · simp only [smul_base, mul_smul, mk.injEq, true_and]
-      refine Preference.base_heq_base ?_ rfl
-      rw [mul_smul]
+      refine Preference.base_heq_base ?_ ?_
+      · rw [mul_smul]
+      · simp only [coe_mul, SemiallowablePerm.mul_apply, mul_smul]
     · simp only [smul_proper, mk.injEq, mul_smul, true_and]
       refine Preference.proper_heq_proper ?_ rfl
       rw [mul_smul]
@@ -388,7 +408,7 @@ theorem Code.Equiv.supported_iff (hcd : c ≡ d) :
 
 @[simp]
 theorem smul_intro (f : AllowablePerm α) (s : Set (Tangle β)) (hs) :
-    f • intro s hs = intro (f • s) (isEven_smul.mpr hs) := by
+    f • intro s hs = intro (f.val β • s) (isEven_smul.mpr hs) := by
   obtain ⟨β, hβ⟩ := β
   induction β using WithBot.recBotCoe
   · simp only [intro, AllowablePerm.smul_base, mk.injEq, AllowablePerm.smul_extension, true_and]
@@ -420,10 +440,11 @@ def newTypedNearLitter (N : NearLitter) : NewTangle α :=
         apply_fun SetLike.coe at this
         refine Eq.trans ?_ this
         rw [NearLitterPerm.smul_nearLitter_coe]
-        change (fun x => (π : SemiallowablePerm α) ⊥ • x) '' _ = (fun x => π • x) '' _
+        change _ '' _ = _ '' _
         simp_rw [SemiallowablePerm.coe_apply_bot]
         rfl⟩⟩⟩
 
+/-
 /-- For any supported tangle `x`, the code `(α, β, {x})` is a tangle at level `α`. -/
 def supportedSingleton (x : Tangle β) (supp : Supported α (AllowablePerm α) x) : NewTangle α :=
   ⟨intro {x} (Code.isEven_singleton _), by
@@ -458,6 +479,7 @@ def supportedSet (s : Set (Tangle β)) (hs : Small s) (hc : (mk β s).IsEven)
       · rwa [← mem_smul_set_iff_inv_smul_mem]
     · rw [← this t ht]
       exact smul_mem_smul_set ht⟩
+-/
 
 namespace NewTangle
 
