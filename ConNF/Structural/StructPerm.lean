@@ -87,6 +87,16 @@ noncomputable instance group (α : TypeIndex) : Group (StructPerm α) :=
 @[simp]
 theorem one_apply (A : ExtendedIndex α) : (1 : StructPerm α) A = 1 := rfl
 
+@[simp]
+theorem mul_apply (π π' : StructPerm α) (A : ExtendedIndex α) :
+    (π * π') A = π A * π' A :=
+  rfl
+
+@[simp]
+theorem inv_apply (π : StructPerm α) (A : ExtendedIndex α) :
+    π⁻¹ A = (π A)⁻¹ :=
+  rfl
+
 /-- The isomorphism between near-litter permutations and bottom structural permutations. This holds
 by definition of `StructPerm`. -/
 def toBotIso : NearLitterPerm ≃* StructPerm ⊥

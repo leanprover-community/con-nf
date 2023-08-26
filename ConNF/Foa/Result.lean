@@ -111,8 +111,6 @@ theorem iioBot_cases (δ : IioBot α) : δ = ⊥ ∨ ∃ ε : Iio α, δ = ε :=
   · exact Or.inl rfl
   · exact Or.inr ⟨⟨δ, coe_lt_coe.mp hδ⟩, rfl⟩
 
-set_option pp.proofs.withType false
-
 -- TODO: Use this theorem in places above.
 -- I think that the `change` and `obtain` calls slow down proofs severely in Lean 4.
 -- TODO: Canonicalise uses of `<` to always be with respect to `TypeIndex`.

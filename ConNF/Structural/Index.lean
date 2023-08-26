@@ -147,6 +147,10 @@ theorem path_eq_nil : ∀ p : Path α α, p = nil
   | nil => rfl
   | cons p f => ((le_of_path p).not_lt f).elim
 
+theorem ExtendedIndex.length_ne_zero {α : Λ} (A : ExtendedIndex α) : A.length ≠ 0 := by
+  intro h
+  cases Quiver.Path.eq_of_length_zero A h
+
 /-- An induction principle for paths that allows us to use `Iic_index α` instead of needing to
 define the motive for all `type_index`. -/
 @[elab_as_elim]
