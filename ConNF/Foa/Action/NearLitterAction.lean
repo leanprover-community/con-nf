@@ -1,7 +1,7 @@
 import Mathlib.Data.PFun
-import ConNF.Foa.Approximation
-import ConNF.Foa.CompleteOrbit
-import ConNF.Foa.Reduction
+import ConNF.Foa.Basic.Approximation
+import ConNF.Foa.Basic.CompleteOrbit
+import ConNF.Foa.Basic.Reduction
 
 open Cardinal Quiver Set Sum WithBot
 

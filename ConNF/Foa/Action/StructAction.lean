@@ -1,5 +1,5 @@
-import ConNF.Foa.Flexible
-import ConNF.Foa.NearLitterAction
+import ConNF.Foa.Basic.Flexible
+import ConNF.Foa.Action.NearLitterAction
 
 open Cardinal Quiver Set Sum WithBot
 

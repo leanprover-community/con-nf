@@ -1,6 +1,6 @@
-import ConNF.Foa.FlexibleCompletion
-import ConNF.Foa.Reduction
-import ConNF.Foa.Refine
+import ConNF.Foa.Basic.Reduction
+import ConNF.Foa.Action.Refine
+import ConNF.Foa.Complete.FlexibleCompletion
 
 open Quiver Set Sum WithBot
 

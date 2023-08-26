@@ -1,4 +1,4 @@
-import ConNF.Foa.Approximation
+import ConNF.Foa.Basic.Approximation
 
 open Set
 

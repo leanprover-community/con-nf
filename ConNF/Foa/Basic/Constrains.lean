@@ -1,5 +1,5 @@
 import ConNF.FMap
-import ConNF.Foa.Basic
+import ConNF.Foa.Basic.Hypotheses
 
 /-!
 # Constraints

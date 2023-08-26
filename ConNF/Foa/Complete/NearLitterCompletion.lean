@@ -1,4 +1,4 @@
-import ConNF.Foa.LitterCompletion
+import ConNF.Foa.Complete.LitterCompletion
 
 open Set Sum
 

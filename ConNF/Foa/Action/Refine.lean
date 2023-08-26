@@ -1,7 +1,7 @@
-import ConNF.Foa.Flexible
-import ConNF.Foa.StructAction
-import ConNF.Foa.FillAtomRange
-import ConNF.Foa.FillAtomOrbits
+import ConNF.Foa.Basic.Flexible
+import ConNF.Foa.Action.StructAction
+import ConNF.Foa.Action.FillAtomRange
+import ConNF.Foa.Action.FillAtomOrbits
 
 open Quiver Set
 

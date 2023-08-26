@@ -1,4 +1,4 @@
-import ConNF.Foa.Flexible
+import ConNF.Foa.Basic.Flexible
 
 /-!
 # Reductions of supports

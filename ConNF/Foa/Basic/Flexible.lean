@@ -1,4 +1,4 @@
-import ConNF.Foa.Constrains
+import ConNF.Foa.Basic.Constrains
 
 open Set Sum
 

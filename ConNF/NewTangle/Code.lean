@@ -1,4 +1,4 @@
-import ConNF.FMap.Basic
+import ConNF.FMap.Hypotheses
 
 open Set WithBot
 

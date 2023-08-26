@@ -1,6 +1,6 @@
 import ConNF.Mathlib.Logic.Equiv.LocalPerm
-import ConNF.Foa.Flexible
-import ConNF.Foa.Sublitter
+import ConNF.Foa.Basic.Flexible
+import ConNF.Foa.Basic.Sublitter
 
 open Quiver Set Sum
 
