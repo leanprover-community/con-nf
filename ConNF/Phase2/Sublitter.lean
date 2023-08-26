@@ -130,88 +130,37 @@ theorem Litter.coe_toSublitter (L : Litter) : (L.toSublitter : Set Atom) = litte
 
 namespace Sublitter
 
-def relEmbedding (S : Sublitter) :
-    ((· < ·) : S → S → Prop) ↪r ((· < ·) : litterSet S.litter → litterSet S.litter → Prop) :=
-  ⟨⟨fun a => ⟨a, S.subset a.prop⟩, fun a b h => Subtype.coe_injective (Subtype.mk_eq_mk.mp h)⟩,
-    fun {a b} => by simp only [Function.Embedding.coeFn_mk, Subtype.mk_lt_mk, Subtype.coe_lt_coe]⟩
-
-/-- The order type of a sublitter is `κ`. -/
-theorem ordinal_type (S : Sublitter) : Ordinal.type ((· < ·) : S → S → Prop) = (#κ).ord := by
-  refine le_antisymm ?_ ?_
-  · rw [← S.litter.ordinal_type]
-    exact RelEmbedding.ordinal_type_le S.relEmbedding
-  · rw [Cardinal.gc_ord_card, Ordinal.card_type, mk_eq_κ]
-
--- TODO: We can probably do this constructively, but this way is easier for now.
-noncomputable def orderIsoκ (S : Sublitter) : S ≃o κ := by
-  refine OrderIso.ofRelIsoLT (Nonempty.some ?_)
-  rw [← Ordinal.type_eq, ordinal_type, ← κ_ord]
-  rfl
+noncomputable def equivκ (S : Sublitter) : S ≃ κ :=
+  (Cardinal.eq.mp S.mk_eq_κ).some
 
 /-- There is a (unique) order isomorphism between any two sublitters. -/
-noncomputable def orderIso (S T : Sublitter) : S ≃o T :=
-  S.orderIsoκ.trans T.orderIsoκ.symm
+noncomputable def equiv (S T : Sublitter) : S ≃ T :=
+  S.equivκ.trans T.equivκ.symm
 
 @[simp]
-theorem orderIso_apply_mem {S T : Sublitter} (a : S) : (S.orderIso T a : Atom) ∈ T :=
-  (S.orderIso T a).prop
+theorem equiv_apply_mem {S T : Sublitter} (a : S) : (S.equiv T a : Atom) ∈ T :=
+  (S.equiv T a).prop
 
 @[simp]
-theorem orderIso_symm_apply_mem {S T : Sublitter} (a : T) : ((S.orderIso T).symm a : Atom) ∈ S :=
-  ((S.orderIso T).symm a).prop
+theorem equiv_symm_apply_mem {S T : Sublitter} (a : T) : ((S.equiv T).symm a : Atom) ∈ S :=
+  ((S.equiv T).symm a).prop
 
 @[simp]
-theorem orderIso_apply_fst_eq {S T : Sublitter} (a : S) : (S.orderIso T a : Atom).1 = T.litter :=
-  T.subset (S.orderIso T a).prop
+theorem equiv_apply_fst_eq {S T : Sublitter} (a : S) : (S.equiv T a : Atom).1 = T.litter :=
+  T.subset (S.equiv T a).prop
 
 @[simp]
-theorem orderIso_symm_apply_fst_eq {S T : Sublitter} (a : T) :
-    ((S.orderIso T).symm a : Atom).1 = S.litter :=
-  S.subset ((S.orderIso T).symm a).prop
+theorem equiv_symm_apply_fst_eq {S T : Sublitter} (a : T) :
+    ((S.equiv T).symm a : Atom).1 = S.litter :=
+  S.subset ((S.equiv T).symm a).prop
 
-theorem orderIso_congr_left {S T U : Sublitter} (h : S = T) (a : S) :
-    (S.orderIso U a : Atom) = T.orderIso U ⟨a, by rw [← h]; exact a.2⟩ := by
+theorem equiv_congr_left {S T U : Sublitter} (h : S = T) (a : S) :
+    (S.equiv U a : Atom) = T.equiv U ⟨a, by rw [← h]; exact a.2⟩ := by
   cases h
   rw [Subtype.coe_eta]
 
-theorem orderIso_congr_right {S T U : Sublitter} (h : T = U) (a : S) :
-    (S.orderIso T a : Atom) = S.orderIso U a := by cases h; rfl
-
-def _root_.OrderIso.subtypeIso {α β : Type _} [LE α] [LE β] (e : α ≃o β)
-    {p : α → Prop} {q : β → Prop} (hpq : ∀ a, p a ↔ q (e a)) :
-    { a // p a } ≃o { b // q b } :=
-  ⟨e.subtypeEquiv hpq, by
-    simp only [RelIso.coe_fn_toEquiv, Equiv.subtypeEquiv_apply, Subtype.mk_le_mk,
-      OrderIso.le_iff_le, Subtype.coe_le_coe, iff_self_iff, Subtype.forall, imp_true_iff]⟩
-
-/-- The intersection of two sublitters. -/
-def meet (S T : Sublitter) (h : S.litter = T.litter) : Sublitter
-    where
-  litter := S.litter
-  carrier := S ∩ T
-  subset := (Set.inter_subset_left _ _).trans S.subset
-  diff_small := by rw [Set.diff_inter]; exact Small.union S.diff_small (h.symm ▸ T.diff_small)
-
-/-- Transports the meet of sublitters `S` and `U` across the order isomorphism `S ≃o T`. -/
-def orderIsoMeet (S T U : Sublitter) (h : S.litter = U.litter) : Sublitter
-    where
-  litter := T.litter
-  carrier := {a | ∃ ha : a ∈ T, ((S.orderIso T).symm ⟨a, ha⟩ : Atom) ∈ U}
-  subset a ha := T.subset ha.choose
-  diff_small := by
-    suffices Small ((T : Set Atom) \
-      {a | ∃ ha : a ∈ T, ((S.orderIso T).symm ⟨a, ha⟩ : Atom) ∈ U}) by
-      refine Small.mono (fun a ha => ?_) (Small.union T.diff_small this)
-      by_cases a ∈ T
-      exact Or.inr ⟨h, ha.2⟩
-      exact Or.inl ⟨ha.1, h⟩
-    refine lt_of_le_of_lt ?_ U.diff_small
-    refine ⟨⟨fun a => ⟨(S.orderIso T).symm ⟨a, a.prop.1⟩, ?_, ?_⟩, fun a b h => ?_⟩⟩
-    · rw [← h]
-      exact S.subset ((S.orderIso T).symm ⟨a, a.prop.1⟩).2
-    · intro h
-      exact a.prop.2 ⟨a.prop.1, h⟩
-    · simpa only [Subtype.mk_eq_mk, RelIso.eq_iff_eq, Subtype.coe_inj] using h
+theorem equiv_congr_right {S T U : Sublitter} (h : T = U) (a : S) :
+    (S.equiv T a : Atom) = S.equiv U a := by cases h; rfl
 
 end Sublitter
 

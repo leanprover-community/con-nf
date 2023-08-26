@@ -80,7 +80,7 @@ theorem completeAtomMap_eq_of_mem_domain {a} {A} (h : a ∈ (π A).atomPerm.doma
 
 theorem completeAtomMap_eq_of_not_mem_domain {a} {A} (h : a ∉ (π A).atomPerm.domain) :
     π.completeAtomMap A a =
-      ((π A).largestSublitter a.1).orderIso ((π A).largestSublitter (π.completeLitterMap A a.1))
+      ((π A).largestSublitter a.1).equiv ((π A).largestSublitter (π.completeLitterMap A a.1))
         ⟨a, (π A).mem_largestSublitter_of_not_mem_domain a h⟩ := by
   rw [completeAtomMap_eq, atomCompletion, dif_neg h]
   rfl
@@ -249,8 +249,8 @@ theorem fst_mem_transConstrained_of_mem {c d : SupportCondition β} {A : Extende
   · exact fst_mem_transConstrained_of_mem_symmDiff (Or.inr ⟨h, ha⟩) hN
 
 theorem eq_of_sublitter_bijection_apply_eq {π : NearLitterApprox} {L₁ L₂ L₃ L₄ : Litter} {a b} :
-    ((π.largestSublitter L₁).orderIso (π.largestSublitter L₂) a : Atom) =
-        (π.largestSublitter L₃).orderIso (π.largestSublitter L₄) b →
+    ((π.largestSublitter L₁).equiv (π.largestSublitter L₂) a : Atom) =
+        (π.largestSublitter L₃).equiv (π.largestSublitter L₄) b →
       L₁ = L₃ → L₂ = L₄ → (a : Atom) = b := by
   rintro h₁ rfl rfl
   simp only [Subtype.coe_inj, EmbeddingLike.apply_eq_iff_eq] at h₁
@@ -525,7 +525,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
       · rw [← ha₂]
         exact Or.inr ⟨a, ⟨h, ha₁.2⟩, rfl⟩
       rw [completeAtomMap_eq_of_not_mem_domain hb₂]
-      simp only [mem_union, mem_diff, mem_litterSet, Sublitter.orderIso_apply_fst_eq,
+      simp only [mem_union, mem_diff, mem_litterSet, Sublitter.equiv_apply_fst_eq,
         NearLitterApprox.largestSublitter_litter]
       refine' Or.inl ⟨_, _⟩
       · suffices b ∈ litterSet N.fst by
@@ -539,9 +539,9 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
           dsimp only at ha₂
           rw [ha₂] at this
           exact NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
-            (Sublitter.orderIso_apply_mem _) this
+            (Sublitter.equiv_apply_mem _) this
       · exact NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
-          (Sublitter.orderIso_apply_mem _)
+          (Sublitter.equiv_apply_mem _)
   · rintro (⟨ha₁ | ⟨a, ha₁, rfl⟩, ha₂⟩ | ⟨⟨a, ha₁, rfl⟩, ha₂⟩)
     · refine' Or.inl ⟨Or.inl ha₁, _⟩
       simp only [mem_iUnion, mem_singleton_iff, not_exists, and_imp]
@@ -574,7 +574,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
           rw [hb₂] at this
           exact
             NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
-              (Sublitter.orderIso_apply_mem _) this
+              (Sublitter.equiv_apply_mem _) this
       · by_cases a ∈ (π A).atomPerm.domain
         · refine' Or.inl ⟨_, _⟩
           · simp only [completeAtomMap_eq_of_mem_domain h]
@@ -589,7 +589,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
             rw [hab] at this
             exact
               NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
-                (Sublitter.orderIso_apply_mem _) this
+                (Sublitter.equiv_apply_mem _) this
         · refine' Or.inr ⟨_, _⟩
           · exact ⟨_, ⟨a, rfl⟩, _, ⟨⟨ha₁, h⟩, rfl⟩, rfl⟩
           rintro (h' | ⟨b, hb₁, hb₂⟩)
@@ -598,7 +598,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
           have : π A • b ∈ _ := (π A).atomPerm.map_domain hb₁.2
           rw [hb₂] at this
           exact NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
-            (Sublitter.orderIso_apply_mem _) this
+            (Sublitter.equiv_apply_mem _) this
 
 theorem completeNearLitterMap_toNearLitter_eq (A : ExtendedIndex β) (L : Litter) :
     (completeNearLitterMap π A L.toNearLitter : Set Atom) =
@@ -655,7 +655,7 @@ theorem atom_injective_extends {c d : SupportCondition β} (hcd : (ihsAction π 
   · rw [completeAtomMap_eq_of_not_mem_domain ha, completeAtomMap_eq_of_not_mem_domain hb] at h
     have h₁ := (Subtype.coe_eq_iff.mp h).choose.1
     have h₂ :=
-      (((π A).largestSublitter b.1).orderIso ((π A).largestSublitter (π.completeLitterMap A b.1))
+      (((π A).largestSublitter b.1).equiv ((π A).largestSublitter (π.completeLitterMap A b.1))
             ⟨b, (π A).mem_largestSublitter_of_not_mem_domain b hb⟩).prop.1
     have := (hcd A).litterMap_injective (fst_transConstrained hac) (fst_transConstrained hbc) ?_
     · have := eq_of_sublitter_bijection_apply_eq h this (by rw [this])
@@ -1071,7 +1071,7 @@ theorem completeLitterMap_inflexibleCoe_iff (hπf : π.Free) {c d : SupportCondi
   ⟨fun ⟨h⟩ => ⟨completeLitterMap_inflexibleCoe' hπf h⟩, fun ⟨h⟩ =>
     ⟨completeLitterMap_inflexibleCoe hπf hcd h hL⟩⟩
 
-theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
+theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (N : ExtendedIndex γ × NearLitter) (s : Set (SupportCondition β)) (hs : Small s)
     (hc : ∃ c : SupportCondition β, c ∈ s ∧ (inr N.2, A.comp N.1) ≤[α] c)
     (hπ : ((constrainedAction π s hs).comp A).Lawful) (ρ : Allowable γ)
@@ -1350,19 +1350,19 @@ theorem constrainedAction_coherent_precise' (hπf : π.Free) {γ : Iio α} (A : 
 is equal to the action of any allowable permutation that exactly approximates it.
 This condition can only be applied for `γ < α` as we're dealing with lower allowable permutations.
 -/
-theorem constrainedAction_coherent_precise (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
+theorem constrainedAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (N : NearLitter) (s : Set (SupportCondition β)) (hs : Small s)
     (hc : ∃ c : SupportCondition β, c ∈ s ∧ (inr N, A.comp B) ≤[α] c)
     (hπ : ((constrainedAction π s hs).comp A).Lawful) (ρ : Allowable γ)
     (h : (((constrainedAction π s hs).comp A).rc hπ).ExactlyApproximates
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N = StructPerm.derivative B (Allowable.toStructPerm ρ) • N :=
-  constrainedAction_coherent_precise' hπf A (B, N) s hs hc hπ ρ h
+  constrainedAction_coherent' hπf A (B, N) s hs hc hπ ρ h
 
 /-- The coherence lemma for atoms, which is much easier to prove.
 The statement is here for symmetry.
 -/
-theorem constrainedAction_coherent_precise_atom {γ : Iio α}
+theorem constrainedAction_coherent_atom {γ : Iio α}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) (a : Atom) (s : Set (SupportCondition β))
     (hs : Small s) (hc : ∃ c : SupportCondition β, c ∈ s ∧ (inl a, A.comp B) ≤[α] c)
     (hπ : ((constrainedAction π s hs).comp A).Lawful) (ρ : Allowable γ)
@@ -1374,7 +1374,7 @@ theorem constrainedAction_coherent_precise_atom {γ : Iio α}
   rfl
   exact hc
 
-theorem ihsAction_coherent_precise (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
+theorem ihsAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (N : NearLitter) (c d : SupportCondition β)
     (hc : (inr N, A.comp B) ∈ transConstrained c d) (hπ : ((ihsAction π c d).comp A).Lawful)
     (ρ : Allowable γ) (h : (((ihsAction π c d).comp A).rc hπ).ExactlyApproximates
@@ -1382,7 +1382,7 @@ theorem ihsAction_coherent_precise (hπf : π.Free) {γ : Iio α} (A : Path (β 
     completeNearLitterMap π (A.comp B) N =
     StructPerm.derivative B (Allowable.toStructPerm ρ) • N := by
   simp_rw [ihsAction_eq_constrainedAction] at hπ
-  refine constrainedAction_coherent_precise hπf A B N _ _ ?_ hπ ρ ?_
+  refine constrainedAction_coherent hπf A B N _ _ ?_ hπ ρ ?_
   obtain hc | hc := hc
   · simp only [Relation.TransGen.tail'_iff] at hc
     obtain ⟨d, hd₁, hd₂⟩ := hc
@@ -1393,7 +1393,7 @@ theorem ihsAction_coherent_precise (hπf : π.Free) {γ : Iio α} (A : Path (β 
   · convert h
     rw [ihsAction_eq_constrainedAction]
 
-theorem ihsAction_coherent_precise_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
+theorem ihsAction_coherent_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c d : SupportCondition β) (hc : (inl a, A.comp B) <[α] c)
     (hπ : ((ihsAction π c d).comp A).Lawful) (ρ : Allowable γ)
     (h : (((ihsAction π c d).comp A).rc hπ).ExactlyApproximates (Allowable.toStructPerm ρ)) :
@@ -1403,27 +1403,27 @@ theorem ihsAction_coherent_precise_atom {γ : Iio α} (A : Path (β : TypeIndex)
   rfl
   exact Or.inl hc
 
-theorem ihAction_coherent_precise (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
+theorem ihAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (N : NearLitter) (c : SupportCondition β) (hc : (inr N, A.comp B) <[α] c)
     (hπ : ((ihAction (π.foaHypothesis : Hypothesis c)).comp A).Lawful) (ρ : Allowable γ)
     (h : (((ihAction (π.foaHypothesis : Hypothesis c)).comp A).rc hπ).ExactlyApproximates
         (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
     StructPerm.derivative B (Allowable.toStructPerm ρ) • N := by
-  refine' ihsAction_coherent_precise hπf A B N c c (Or.inl hc) _ ρ _
+  refine' ihsAction_coherent hπf A B N c c (Or.inl hc) _ ρ _
   · rw [ihsAction_self]
     exact hπ
   · convert h
     rw [ihsAction_self]
 
-theorem ihAction_coherent_precise_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
+theorem ihAction_coherent_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c : SupportCondition β) (hc : (inl a, A.comp B) <[α] c)
     (hπ : ((ihAction (π.foaHypothesis : Hypothesis c)).comp A).Lawful) (ρ : Allowable γ)
     (h :
       (((ihAction (π.foaHypothesis : Hypothesis c)).comp A).rc hπ).ExactlyApproximates
         (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = StructPerm.derivative B (Allowable.toStructPerm ρ) • a := by
-  refine' ihsAction_coherent_precise_atom A B a c c hc _ ρ _
+  refine' ihsAction_coherent_atom A B a c c hc _ ρ _
   · rw [ihsAction_self]
     exact hπ
   · convert h
@@ -1448,9 +1448,9 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : SupportCondition β) (A : 
     simp only [inl.injEq]
     refine'
       Eq.trans _
-        (ihsAction_coherent_precise_atom _ _ a c d _ hlaw₂ _
+        (ihsAction_coherent_atom _ _ a c d _ hlaw₂ _
           ((ihsAction π c d).hypothesisedAllowable_exactlyApproximates _ _ _))
-    have := ihAction_coherent_precise_atom (π := π) (B.cons ?_) C a
+    have := ihAction_coherent_atom (π := π) (B.cons ?_) C a
         (inr (Litter.toNearLitter (fMap (coe_ne_coe.mpr <| coe_ne' hδε) t)),
           Path.cons (Path.cons B (coe_lt hε)) (bot_lt_coe _))
         ?_ hlaw₁ _
@@ -1463,9 +1463,9 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : SupportCondition β) (A : 
     simp only [inr.injEq]
     refine'
       Eq.trans _
-        (ihsAction_coherent_precise hπf _ _ N c d _ hlaw₂ _
+        (ihsAction_coherent hπf _ _ N c d _ hlaw₂ _
           ((ihsAction π c d).hypothesisedAllowable_exactlyApproximates _ _ _))
-    have := ihAction_coherent_precise hπf (B.cons ?_) C N
+    have := ihAction_coherent hπf (B.cons ?_) C N
         (inr (Litter.toNearLitter (fMap (coe_ne_coe.mpr <| coe_ne' hδε) t)),
           Path.cons (Path.cons B (coe_lt hε)) (bot_lt_coe _))
         ?_ hlaw₁ _
@@ -1669,14 +1669,14 @@ theorem completeAtomMap_mem_completeNearLitterMap_toNearLitter' (hπf : π.Free)
     rintro ⟨_, ⟨b, rfl⟩, _, ⟨hb, rfl⟩, hab⟩
     simp only [foaHypothesis_atomImage, mem_singleton_iff] at hab
     rw [completeAtomMap_eq_of_not_mem_domain hb.2] at hab
-    have := Sublitter.orderIso_apply_mem (S := (π A).largestSublitter b.fst)
+    have := Sublitter.equiv_apply_mem (S := (π A).largestSublitter b.fst)
       (T := (π A).largestSublitter (completeLitterMap π A b.fst)) ⟨b, rfl, hb.2⟩
     rw [← hab] at this
     exact this.2 ((π A).atomPerm.map_domain ha)
   rw [completeAtomMap_eq_of_not_mem_domain ha]
   refine' Or.inl ⟨Or.inl _, _⟩
   · rw [SetLike.mem_coe]
-    convert Sublitter.orderIso_apply_mem _ using 1
+    convert Sublitter.equiv_apply_mem _ using 1
     rw [nearLitterHypothesis_eq, completeLitterMap_eq]
     rfl
   · rintro ⟨_, ⟨b, rfl⟩, _, ⟨hb, rfl⟩, hab⟩
@@ -1684,12 +1684,12 @@ theorem completeAtomMap_mem_completeNearLitterMap_toNearLitter' (hπf : π.Free)
     rw [completeAtomMap_eq_of_not_mem_domain hb.2] at hab
     have := litter_injective_extends hπf hcd hL
       (fst_mem_reflTransConstrained_of_mem_symmDiff hb.1 hL) ?_
-    · rw [Sublitter.orderIso_congr_left (congr_arg _ this) _,
-        Sublitter.orderIso_congr_right (congr_arg _ (congr_arg₂ _ rfl this)) _,
+    · rw [Sublitter.equiv_congr_left (congr_arg _ this) _,
+        Sublitter.equiv_congr_right (congr_arg _ (congr_arg₂ _ rfl this)) _,
         Subtype.coe_inj, EquivLike.apply_eq_iff_eq] at hab
       cases hab
       exact hb.1.elim (fun h' => h'.2 rfl) fun h' => h'.2 rfl
-    exact orderIso_apply_eq hab
+    exact equiv_apply_eq hab
 
 theorem ihsAction_lawful_extends (hπf : π.Free) (c d : SupportCondition β)
     (hπ : ∀ e f, SplitLt (fun c d => c <[α] d) (e, f) (c, d) → (ihsAction π e f).Lawful) :
@@ -1829,21 +1829,21 @@ theorem completeNearLitterMap_subset_range (A : ExtendedIndex β) (L : Litter) :
     (π.completeNearLitterMap A L.toNearLitter : Set Atom) ⊆ range (π.completeAtomMap A) := by
   rw [completeNearLitterMap_toNearLitter_eq]
   rintro a (⟨ha₁, ha₂⟩ | ⟨a, ⟨_, ha₂⟩, rfl⟩)
-  · refine' ⟨(((π A).largestSublitter L).orderIso ((π A).largestSublitter a.1)).symm
+  · refine' ⟨(((π A).largestSublitter L).equiv ((π A).largestSublitter a.1)).symm
       ⟨a, (π A).mem_largestSublitter_of_not_mem_domain a ha₂⟩, _⟩
     rw [completeAtomMap_eq_of_not_mem_domain]
     swap
     · exact NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
-        (Sublitter.orderIso_symm_apply_mem ⟨a, _⟩)
+        (Sublitter.equiv_symm_apply_mem ⟨a, _⟩)
     · rw [mem_litterSet] at ha₁
-      have : ((((π A).largestSublitter L).orderIso
+      have : ((((π A).largestSublitter L).equiv
         ((π A).largestSublitter a.fst)).symm ⟨a, rfl, ha₂⟩ : Atom).fst =
           L :=
-        Sublitter.orderIso_symm_apply_fst_eq ⟨a, _⟩
-      rw [Sublitter.orderIso_congr_left (congr_arg _ this),
-        Sublitter.orderIso_congr_right (congr_arg _ (congr_arg _ this)),
-        Sublitter.orderIso_congr_right (congr_arg _ ha₁.symm)]
-      simp only [SetLike.eta, OrderIso.apply_symm_apply]
+        Sublitter.equiv_symm_apply_fst_eq ⟨a, _⟩
+      rw [Sublitter.equiv_congr_left (congr_arg _ this),
+        Sublitter.equiv_congr_right (congr_arg _ (congr_arg _ this)),
+        Sublitter.equiv_congr_right (congr_arg _ ha₁.symm)]
+      simp only [SetLike.eta, Equiv.apply_symm_apply]
   · refine' ⟨a, _⟩
     rw [completeAtomMap_eq_of_mem_domain ha₂]
 
@@ -1925,25 +1925,25 @@ theorem Relation.reflTransGen_of_eq {α : Type _} {r : α → α → Prop} {x y 
   cases h
   rfl
 
-theorem preimageAction_coherent_precise (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
+theorem preimageAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (N : NearLitter) (c : SupportCondition β)
     (hc : (inr (π.completeNearLitterMap (A.comp B) N), A.comp B) ≺[α] c) (ρ : Allowable γ)
     (h : (((preimageAction hπf c).comp A).rc
       ((preimageAction_lawful hπf).comp _)).ExactlyApproximates (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
     StructPerm.derivative B (Allowable.toStructPerm ρ) • N := by
-  refine' constrainedAction_coherent_precise hπf A B N _ _ _
+  refine' constrainedAction_coherent hπf A B N _ _ _
     ((preimageAction_lawful hπf).comp _) ρ h
   refine' ⟨_, _, Relation.ReflTransGen.refl⟩
   exact hc
 
-theorem preimageAction_coherent_precise_atom (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
+theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c : SupportCondition β)
     (hc : (inl (π.completeAtomMap (A.comp B) a), A.comp B) ≺[α] c) (ρ : Allowable γ)
     (h : (((preimageAction hπf c).comp A).rc
       ((preimageAction_lawful hπf).comp _)).ExactlyApproximates (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = StructPerm.derivative B (Allowable.toStructPerm ρ) • a := by
-  refine' constrainedAction_coherent_precise_atom A B a _ _ _ _ ρ h
+  refine' constrainedAction_coherent_atom A B a _ _ _ _ ρ h
   refine' ⟨_, _, Relation.ReflTransGen.refl⟩
   exact hc
 
@@ -1993,7 +1993,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
               (preimageAction_comp_mapFlexible _))))⁻¹ • a = b
       · rw [inv_smul_eq_iff, ← ha]
         rw [StructAction.hypothesisedAllowable]
-        refine' preimageAction_coherent_precise_atom hπf (B.cons <| coe_lt hδ) A b _ _ _
+        refine' preimageAction_coherent_atom hπf (B.cons <| coe_lt hδ) A b _ _ _
           (StructAction.allowable_exactlyApproximates _ _ _ _)
         rw [ha]
         exact hac
@@ -2001,7 +2001,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       · rw [map_inv, map_inv, this]
       · rw [map_inv, map_inv, ← smul_eq_iff_eq_inv_smul, ← ha]
         rw [StructAction.hypothesisedAllowable]
-        refine' (ihAction_coherent_precise_atom (B.cons <| coe_lt hδ) A b _ _
+        refine' (ihAction_coherent_atom (B.cons <| coe_lt hδ) A b _ _
           ((ihAction_lawful hπf _).comp _) _
           (StructAction.allowable_exactlyApproximates _ _ _ _)).symm
         refine' Relation.TransGen.tail' _
@@ -2023,7 +2023,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
               (preimageAction_comp_mapFlexible _))))⁻¹ • N = N'
       · rw [inv_smul_eq_iff, ← hN]
         rw [StructAction.hypothesisedAllowable]
-        refine' preimageAction_coherent_precise hπf (B.cons <| coe_lt hδ) A N' _ _ _
+        refine' preimageAction_coherent hπf (B.cons <| coe_lt hδ) A N' _ _ _
           (StructAction.allowable_exactlyApproximates _ _ _ _)
         rw [hN]
         exact hNc
@@ -2031,7 +2031,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       · rw [map_inv, map_inv, this]
       · rw [map_inv, map_inv, ← smul_eq_iff_eq_inv_smul, ← hN]
         rw [StructAction.hypothesisedAllowable]
-        refine' (ihAction_coherent_precise hπf (B.cons <| coe_lt hδ) A N' _ _
+        refine' (ihAction_coherent hπf (B.cons <| coe_lt hδ) A N' _ _
           ((ihAction_lawful hπf _).comp _) _
           (StructAction.allowable_exactlyApproximates _ _ _ _)).symm
         refine' Relation.TransGen.tail' _
@@ -2328,7 +2328,7 @@ theorem ConNF.StructApprox.extracted_2
   simp only
   refine supports (t := t) ?_ ?_
   · intros a B ha
-    have := ihAction_coherent_precise_atom (π := π) (A.cons _) B a
+    have := ihAction_coherent_atom (π := π) (A.cons _) B a
       (inr (fMap (show (δ : TypeIndex) ≠ ε from ?_) t).toNearLitter, _)
       (Relation.TransGen.single <| Constrains.fMap ?_ ?_ ?_ _ t _ ha)
       ((ihAction_lawful hπf _).comp _) ?_ ?_
@@ -2343,7 +2343,7 @@ theorem ConNF.StructApprox.extracted_2
     · exact (ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
         ⟨γ, δ, ε, _, _, _, _, t, rfl, rfl⟩ _ _
   · intros N B hN
-    have := ihAction_coherent_precise hπf (A.cons _) B N
+    have := ihAction_coherent hπf (A.cons _) B N
       (inr (fMap (show (δ : TypeIndex) ≠ ε from ?_) t).toNearLitter, _)
       (Relation.TransGen.single <| Constrains.fMap ?_ ?_ ?_ _ t _ hN)
       ((ihAction_lawful hπf _).comp _) ?_ ?_

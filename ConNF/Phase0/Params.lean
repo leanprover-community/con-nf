@@ -43,9 +43,6 @@ class Params where
   Λ_limit : (#Λ).IsLimit
   κ : Type u
   κ_regular : (#κ).IsRegular
-  κr : κ → κ → Prop
-  [κwf : IsWellOrder κ κr]
-  κ_ord : Ordinal.type κr = (#κ).ord
   Λ_lt_κ : (#Λ) < (#κ)
   μ : Type u
   μr : μ → μ → Prop
@@ -55,7 +52,7 @@ class Params where
   κ_lt_μ : (#κ) < (#μ)
   κ_le_μ_cof : (#κ) ≤ (#μ).ord.cof
 
-export Params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular κr κwf κ_ord Λ_lt_κ μ μr μwf μ_ord μr μ_strong_limit
+export Params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular Λ_lt_κ μ μr μwf μ_ord μr μ_strong_limit
   κ_lt_μ κ_le_μ_cof)
 
 /-!
@@ -67,7 +64,6 @@ There exists valid parameters for the model. The smallest parameters are
 * `μ = ℶ_{ω_1}`.
 -/
 
--- TODO: Remove the ordering on `κ`.
 example : Params.{0} where
   Λ := ℕ
   Λr := (· < ·)
@@ -75,9 +71,6 @@ example : Params.{0} where
   Λ_ord := by simp only [mk_denumerable, ord_aleph0, Ordinal.type_nat_lt]
   Λ_limit := by rw [mk_denumerable]; exact isLimit_aleph0
   κ := (aleph 1).ord.out.α
-  κr := (aleph 1).ord.out.r
-  κwf := (aleph 1).ord.out.wo
-  κ_ord := by simp
   κ_regular := by rw [mk_ordinal_out, card_ord]; exact isRegular_aleph_one
   Λ_lt_κ := by rw [mk_denumerable, mk_ordinal_out, card_ord]; exact aleph0_lt_aleph_one
   μ := (beth <| ord <| aleph 1).ord.out.α
@@ -139,9 +132,6 @@ explicitly write `Λwf` everywhere, we declare it as an instance. -/
 instance : IsWellOrder Λ Λr :=
   Λwf
 
-instance : IsWellOrder κ κr :=
-  κwf
-
 instance : IsWellOrder μ μr :=
   μwf
 
@@ -149,17 +139,11 @@ instance : IsWellOrder μ μr :=
 instance : LinearOrder Λ :=
   linearOrderOfSTO Λr
 
-instance : LinearOrder κ :=
-  linearOrderOfSTO κr
-
 instance : LinearOrder μ :=
   linearOrderOfSTO μr
 
 instance : IsWellOrder Λ (· < ·) :=
   Λwf
-
-instance : IsWellOrder κ (· < ·) :=
-  κwf
 
 instance : IsWellOrder μ (· < ·) :=
   μwf
@@ -167,9 +151,6 @@ instance : IsWellOrder μ (· < ·) :=
 /-- We deduce that `Λ` has a well-founded relation. -/
 instance : WellFoundedRelation Λ :=
   IsWellOrder.toHasWellFounded (hwo := Λwf)
-
-instance : WellFoundedRelation κ :=
-  IsWellOrder.toHasWellFounded (hwo := κwf)
 
 instance : WellFoundedRelation μ :=
   IsWellOrder.toHasWellFounded (hwo := μwf)

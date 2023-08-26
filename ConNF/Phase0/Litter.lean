@@ -103,19 +103,6 @@ def Atom : Type _ :=
 instance : Inhabited Atom :=
   ⟨⟨default, default⟩⟩
 
-instance : LT Atom :=
-  ⟨Prod.Lex (· < ·) (· < ·)⟩
-
-/-- Atoms are well-ordered. -/
-instance Atom.isWellOrder : IsWellOrder Atom (· < ·) :=
-  instIsWellOrderProdLex
-
-instance : LinearOrder Atom :=
-  linearOrderOfSTO (· < ·)
-
-instance : WellFoundedRelation Atom :=
-  IsWellOrder.toHasWellFounded
-
 /-- The cardinality of `τ₋₁` is the cardinality of `μ`.
 We will prove that all types constructed in our model have cardinality equal to `μ`. -/
 @[simp]
@@ -160,25 +147,5 @@ theorem eq_of_mem_litterSet_of_mem_litterSet {a : Atom}
 theorem litterSet_symmDiff_litterSet (h : i ≠ j) :
     litterSet i ∆ litterSet j = litterSet i ∪ litterSet j :=
   (pairwise_disjoint_litterSet h).symmDiff_eq_sup
-
-def litterSetRelIso (L : Litter) : ((· < ·) : litterSet L → litterSet L → Prop) ≃r κr := by
-  refine ⟨litterSetEquiv L, ?_⟩
-  rintro ⟨⟨La, a⟩, ha⟩ ⟨⟨Lb, b⟩, hb⟩
-  cases ha
-  cases hb
-  constructor
-  · intro h
-    exact Prod.Lex.right La h
-  · rintro (⟨_, _, hL⟩ | ⟨_, hab⟩)
-    cases lt_irrefl _ hL
-    exact hab
-
-noncomputable def litterSetOrderIso (L : Litter) : litterSet L ≃o κ :=
-  OrderIso.ofRelIsoLT (litterSetRelIso L)
-
-/-- The order type of a litter is `κ`. -/
-theorem Litter.ordinal_type (L : Litter) :
-    Ordinal.type ((· < ·) : litterSet L → litterSet L → Prop) = (#κ).ord := by
-  rw [← κ_ord, Ordinal.type_eq]; exact ⟨litterSetRelIso L⟩
 
 end ConNF
