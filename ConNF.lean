@@ -1,4 +1,6 @@
 import ConNF.Mathlib
-import ConNF.Phase0
-import ConNF.Phase1
-import ConNF.Phase2
+import ConNF.Atom
+import ConNF.Structural
+import ConNF.FMap
+import ConNF.NewTangle
+import ConNF.Foa
