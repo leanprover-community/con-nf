@@ -73,7 +73,7 @@ namespace Allowable
 /-- Allowable permutations can be considered a subtype of structural permutations. However, we
 cannot write this explicitly in type theory, so instead we assume this monoid homomorphism from
 allowable permutations to structural permutations. This can be thought of as an inclusion map that
-preserves the group structure. This allows allowable permutations to act on pretangles. -/
+preserves the group structure. -/
 def toStructPerm : Allowable α →* StructPerm α :=
   CoreTangleData.allowableToStructPerm
 
@@ -81,7 +81,7 @@ instance : MulAction (Allowable α) (Tangle α) :=
   CoreTangleData.allowableAction
 
 /-- Allowable permutations act on tangles. This action commutes with certain other operations; the
-exact conditions are given in `smul_typed_near_litter` and `smul_pretangle_inj`. -/
+exact condition are given in `smul_typed_near_litter`. -/
 instance : MulAction (Allowable α) X :=
   MulAction.compHom _ toStructPerm
 
@@ -113,11 +113,8 @@ class AlmostTangleData where
   typedNearLitter : NearLitter ↪ Tangle α
   smul_typedNearLitter :
     ∀ (π : Allowable α) (N), π • typedNearLitter N = typedNearLitter (π • N)
-  pretangleInj : Tangle α ↪ Pretangle α
-  smul_pretangleInj :
-    ∀ (π : Allowable α) (t : Tangle α), π • pretangleInj t = pretangleInj (π • t)
 
-export AlmostTangleData (typedAtom typedNearLitter pretangleInj)
+export AlmostTangleData (typedAtom typedNearLitter)
 
 namespace Allowable
 
@@ -139,12 +136,6 @@ but since at this stage tangles are just a type, we have to state this condition
 theorem smul_typedNearLitter (π : Allowable α) (N : NearLitter) :
     π • (typedNearLitter N : Tangle α) = typedNearLitter (π • N) :=
   AlmostTangleData.smul_typedNearLitter _ _
-
-/-- The action of allowable permutations on tangles commutes with the `pretangle_inj` injection
-converting tangles into pretangles. -/
-theorem smul_pretangleInj (π : Allowable α) (t : Tangle α) :
-    π • pretangleInj t = pretangleInj (π • t) :=
-  AlmostTangleData.smul_pretangleInj _ _
 
 end Allowable
 
@@ -189,12 +180,6 @@ Since we haven't assumed anything about the structure of tangles at this level, 
 these typed near-litters explicitly, so we rely on this function instead. In the blueprint, this is
 function `j`. -/
 add_decl_doc AlmostTangleData.typedNearLitter
-
-/-- Tangles can be considered a subtype of pretangles, which are tangles without extensionality and
-which are guaranteed to have a `-1`-extension. This injection can be seen as an inclusion map.
-Since pretangles have a membership relation, we can use this map to see the members of a tangle at
-any given level, by first converting it to a pretangle. -/
-add_decl_doc AlmostTangleData.pretangleInj
 
 /-- For any atom `a`, we can construct an `α`-tangle that has a `-1`-extension that contains exactly
 this atom. This is called a typed singleton. In the blueprint, this is the function `k`. -/
