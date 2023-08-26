@@ -35,10 +35,10 @@ The f-maps that we will construct indeed satisfy these conditions.
 variable {α β : Type u} {r : α → α → Prop}
 
 /-- Noncomputably chooses an element of `β \ s`, given `#s < #β`. -/
-noncomputable def someOfMkLt (s : Set β) (h : (#s) < (#β)) : β :=
+noncomputable def someOfMkLt (s : Set β) (h : #s < #β) : β :=
   (nonempty_compl_of_mk_lt_mk h).choose
 
-theorem someOfMkLt_spec {s : Set β} {h : (#s) < (#β)} : someOfMkLt s h ∉ s :=
+theorem someOfMkLt_spec {s : Set β} {h : #s < #β} : someOfMkLt s h ∉ s :=
   (nonempty_compl_of_mk_lt_mk h).choose_spec
 
 theorem mk_image₂_le {p : α → Prop} (f : ∀ x, p x → β) :
@@ -52,12 +52,12 @@ theorem mk_image₂_le {p : α → Prop} (f : ∀ x, p x → β) :
     simp only [Subtype.coe_inj] at this
     exact this⟩⟩
 
-noncomputable def chooseWfCore (deny : α → Set β) (h : ∀ x, (#{ y // r y x }) + #(deny x) < #β)
+noncomputable def chooseWfCore (deny : α → Set β) (h : ∀ x, #{ y // r y x } + #(deny x) < #β)
     (x : α) (f : ∀ y : α, r y x → β) : β :=
   someOfMkLt ({z | ∃ y h, f y h = z} ∪ deny x)
     (lt_of_le_of_lt (mk_union_le _ _) (lt_of_le_of_lt (add_le_add_right (mk_image₂_le _) _) (h x)))
 
-theorem chooseWfCore_spec {deny : α → Set β} {h : ∀ x, (#{ y // r y x }) + #(deny x) < #β} (x : α)
+theorem chooseWfCore_spec {deny : α → Set β} {h : ∀ x, #{ y // r y x } + #(deny x) < #β} (x : α)
     (f : ∀ y : α, r y x → β) :
     chooseWfCore deny h x f ∉ {z | ∃ y h, f y h = z} ∪ deny x :=
   someOfMkLt_spec
@@ -136,7 +136,7 @@ theorem mk_invImage_lt (x : Tangle β) : #{ y // InvImage (· < ·) position y x
   exact h
 
 theorem mk_invImage_le (x : Tangle β) : #{ y : Tangle γ // position y ≤ position x } < #μ := by
-  refine lt_of_le_of_lt ?_ (show (#{ y // y ≤ position x }) < (#μ) from card_Iic_lt _)
+  refine lt_of_le_of_lt ?_ (show #{ y // y ≤ position x } < #μ from card_Iic_lt _)
   refine ⟨⟨fun y => ⟨_, y.prop⟩, ?_⟩⟩
   intro y₁ y₂ h
   simp only [Subtype.mk.injEq, EmbeddingLike.apply_eq_iff_eq, Subtype.coe_inj] at h

@@ -32,10 +32,15 @@ theorem mk_supportCondition (α : TypeIndex) : #(SupportCondition α) = #μ := b
 
 namespace StructPerm
 
-instance mulActionSupportCondition :
-    MulAction (StructPerm α) (SupportCondition α)
+instance : MulAction (StructPerm α) (SupportCondition α)
     where
   smul π c := (π c.snd • c.fst, c.snd)
+  one_smul := by rintro ⟨a | N, A⟩ <;> rfl
+  mul_smul _ _ := by rintro ⟨a | N, A⟩ <;> rfl
+
+instance : MulAction NearLitterPerm (SupportCondition ⊥)
+    where
+  smul π c := (π • c.fst, c.snd)
   one_smul := by rintro ⟨a | N, A⟩ <;> rfl
   mul_smul _ _ := by rintro ⟨a | N, A⟩ <;> rfl
 
