@@ -1,3 +1,4 @@
+import ConNF.Atom.Small
 import ConNF.Atom.Atom
 
 universe u

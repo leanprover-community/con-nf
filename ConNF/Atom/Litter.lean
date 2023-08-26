@@ -1,3 +1,4 @@
+import Mathlib.Data.Prod.Lex
 import ConNF.Atom.Params
 
 /-!
