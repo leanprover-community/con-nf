@@ -255,6 +255,15 @@ noncomputable instance Bot.coreTangleData : CoreTangleData ⊥
 noncomputable instance Bot.positionedTangleData : PositionedTangleData ⊥ :=
   ⟨Nonempty.some mk_atom.le⟩
 
+def _root_.NearLitterPerm.ofBot : Allowable ⊥ ≃ NearLitterPerm :=
+  Equiv.refl _
+
+@[simp]
+theorem _root_.NearLitterPerm.ofBot_smul {X : Type _} [MulAction NearLitterPerm X]
+    (π : Allowable ⊥) (x : X) :
+    NearLitterPerm.ofBot π • x = π • x :=
+  rfl
+
 variable (α : Λ)
 
 /-- The core tangle data below phase `α`. -/

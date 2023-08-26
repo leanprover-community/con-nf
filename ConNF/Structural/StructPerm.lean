@@ -169,6 +169,13 @@ theorem derivative_mul {β} (π₁ π₂ : StructPerm α) (A : Path (α : TypeIn
     derivative A (π₁ * π₂) = derivative A π₁ * derivative A π₂ :=
   rfl
 
+@[simp]
+theorem derivative_bot (π : StructPerm α) (A : Path (α : TypeIndex) ⊥) :
+    derivative A π = toBot (π A) := by
+  funext B
+  cases path_eq_nil B
+  rfl
+
 section
 
 variable {X : Type _} [MulAction NearLitterPerm X]
