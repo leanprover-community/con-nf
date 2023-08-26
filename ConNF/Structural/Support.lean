@@ -22,49 +22,37 @@ def SupportCondition (α : TypeIndex) : Type u :=
 noncomputable instance : Inhabited (SupportCondition α) :=
 ⟨Sum.inl default, default⟩
 
-/-- The "identity" equivalence between `(atom ⊕ near_litter) × extended_index α` and
-`support_condition α`. -/
-def toCondition : Sum Atom NearLitter × ExtendedIndex α ≃ SupportCondition α :=
-  Equiv.refl _
-
-/-- The "identity" equivalence between `support_condition α` and
-`(atom ⊕ near_litter) × extended_index α`. -/
-def ofCondition : SupportCondition α ≃ Sum Atom NearLitter × ExtendedIndex α :=
-  Equiv.refl _
-
 /-- There are `μ` support conditions. -/
 @[simp]
 theorem mk_supportCondition (α : TypeIndex) : #(SupportCondition α) = #μ := by
   simp only [SupportCondition, mk_prod, mk_sum, mk_atom, lift_id, mk_nearLitter]
   rw [add_eq_left (κ_regular.aleph0_le.trans κ_le_μ) le_rfl]
-  exact
-    mul_eq_left (κ_regular.aleph0_le.trans κ_le_μ)
-      (le_trans (mk_extendedIndex α) <| le_of_lt <| lt_trans Λ_lt_κ κ_lt_μ) (mk_ne_zero _)
+  exact mul_eq_left (κ_regular.aleph0_le.trans κ_le_μ)
+    (le_trans (mk_extendedIndex α) <| le_of_lt <| lt_trans Λ_lt_κ κ_lt_μ) (mk_ne_zero _)
 
 namespace StructPerm
 
-noncomputable instance mulActionSupportCondition :
+instance mulActionSupportCondition :
     MulAction (StructPerm α) (SupportCondition α)
     where
-  smul π c := ⟨derivative c.snd π • c.fst, c.snd⟩
-  one_smul := by
-    rintro ⟨atoms | Ns, A⟩ <;>
-    · change (_, _) = (_, _)
-      simp only [map_one, one_smul]
-  mul_smul := by
-    rintro π₁ π₂ ⟨atoms | Ns, A⟩ <;>
-    · change (_, _) = (_, _)
-      rw [derivative_mul, mul_smul]
-      rfl
-
-noncomputable instance mulActionBotSupportCondition :
-    MulAction NearLitterPerm (SupportCondition ⊥) :=
-  mulActionSupportCondition (α := ⊥)
+  smul π c := (π c.snd • c.fst, c.snd)
+  one_smul := by rintro ⟨a | N, A⟩ <;> rfl
+  mul_smul _ _ := by rintro ⟨a | N, A⟩ <;> rfl
 
 @[simp]
-theorem smul_toCondition (π : StructPerm α) (x : Sum Atom NearLitter × ExtendedIndex α) :
-    π • toCondition x = toCondition ⟨derivative x.2 π • x.1, x.2⟩ :=
+theorem smul_supportCondition {π : StructPerm α} {c : SupportCondition α} :
+    π • c = (π c.snd • c.fst, c.snd) :=
   rfl
+
+@[simp]
+theorem smul_supportCondition_eq_iff {π π' : StructPerm α} {c : SupportCondition α} :
+    π • c = π' • c ↔ π c.snd • c.fst = π' c.snd • c.fst := by
+  rw [Prod.ext_iff]
+  simp only [smul_supportCondition, and_true]
+
+-- The following attributes help with simplifications involving support conditions.
+attribute [simp] Sum.inl.injEq
+attribute [simp] Sum.inr.injEq
 
 end StructPerm
 
@@ -82,7 +70,10 @@ def Supported (x : τ) : Prop :=
 instance Support.setLike (x : τ) : SetLike (Support α G x) (SupportCondition α)
     where
   coe := Support.carrier
-  coe_injective' s t h := by cases s; cases t; congr
+  coe_injective' s t h := by
+    cases s
+    cases t
+    congr
 
 @[simp]
 theorem Support.carrier_eq_coe {x : τ} {s : Support α G x} : s.carrier = s :=

@@ -189,32 +189,35 @@ instance : MulAction NearLitterPerm Litter
   one_smul _ := rfl
   mul_smul _ _ _ := rfl
 
-theorem near_smul (f : NearLitterPerm) (h : IsNearLitter i s) : IsNearLitter (f • i) (f • s) := by
-  convert f.near h using 1
-  exact (preimage_inv _ _).symm
-
-instance : SMul NearLitterPerm NearLitter :=
-  ⟨fun f N => ⟨f • N.1, f • (N : Set Atom), f.near_smul N.2.2⟩⟩
-
-@[simp]
-theorem toProd_smul (f : NearLitterPerm) (N : NearLitter) : (f • N).toProd = f • N.toProd :=
-  rfl
-
 /-- Near-litter permutations act on near-litters. -/
-instance : MulAction NearLitterPerm NearLitter :=
-  NearLitter.toProd_injective.mulAction _ toProd_smul
+instance : MulAction NearLitterPerm NearLitter
+    where
+  smul f N := ⟨f • N.1, ↑f.atomPerm⁻¹ ⁻¹' N, f.near N.2.2⟩
+  one_smul _ := rfl
+  mul_smul _ _ _ := rfl
 
 @[simp]
-theorem smul_fst (π : NearLitterPerm) (N : NearLitter) : (π • N).fst = π • N.fst :=
+theorem smul_nearLitter_fst (π : NearLitterPerm) (N : NearLitter) : (π • N).fst = π • N.fst :=
   rfl
 
-@[simp]
-theorem coe_smul (π : NearLitterPerm) (N : NearLitter) : ((π • N) : Set Atom) = π • (N : Set Atom) :=
+theorem smul_nearLitter_coe_preimage (π : NearLitterPerm) (N : NearLitter) :
+    π • N = ↑π.atomPerm⁻¹ ⁻¹' N :=
   rfl
+
+theorem smul_nearLitter_coe (π : NearLitterPerm) (N : NearLitter) :
+    ((π • N) : Set Atom) = π • (N : Set Atom) := by
+  rw [smul_nearLitter_coe_preimage, preimage_inv]
+  rfl
+
+theorem smul_nearLitter_snd (π : NearLitterPerm) (N : NearLitter) :
+    ((π • N).2 : Set Atom) = π • (N.2 : Set Atom) :=
+  smul_nearLitter_coe π N
 
 @[simp]
 theorem smul_localCardinal (π : NearLitterPerm) (i : Litter) :
-    π • localCardinal i = localCardinal (π • i) := by ext N; simp [mem_smul_set, ← eq_inv_smul_iff]
+    π • localCardinal i = localCardinal (π • i) := by
+  ext N
+  simp [mem_smul_set, ← eq_inv_smul_iff]
 
 @[simp]
 theorem NearLitter.mem_snd_iff (N : NearLitter) (a : Atom) : a ∈ (N.snd : Set Atom) ↔ a ∈ N :=
@@ -227,7 +230,7 @@ theorem NearLitter.not_mem_snd_iff (N : NearLitter) (a : Atom) : a ∉ (N.snd : 
 theorem smul_nearLitter_eq_smul_symmDiff_smul (π : NearLitterPerm) (N : NearLitter) :
     (π • N : Set Atom) = (π • N.fst.toNearLitter : Set Atom) ∆ (π • litterSet N.fst ∆ N.snd) := by
   ext a : 1
-  simp only [mem_symmDiff, mem_smul_set_iff_inv_smul_mem, coe_smul]
+  simp only [mem_symmDiff, mem_smul_set_iff_inv_smul_mem, smul_nearLitter_coe]
   tauto
 
 end NearLitterPerm

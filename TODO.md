@@ -1,4 +1,5 @@
 - Remove excessive imports.
+- Maybe remove `localCardinal`.
 - Refactor new allowable permutation to use a `smul_fuzz` definition.
 - Fix variable letters.
 - Add typeclasses for derivatives and toStructPerm?
