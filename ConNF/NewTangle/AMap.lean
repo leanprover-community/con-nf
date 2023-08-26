@@ -26,9 +26,6 @@ empty codes that form a complete graph).
 * `c ↝ d`: `d` is the image of `c` under some A-map.
 -/
 
-
-noncomputable section
-
 open Function Set WithBot
 
 open scoped Cardinal

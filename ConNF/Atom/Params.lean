@@ -9,9 +9,6 @@ import Mathlib.Data.Prod.Lex
 # Parameters of the construction
 -/
 
--- TODO: Remove all `noncomputable section` annotations.
-noncomputable section
-
 open Cardinal Set
 
 open scoped Cardinal Classical
@@ -136,10 +133,10 @@ instance : IsWellOrder μ μr :=
   μwf
 
 /-- We can deduce from the well-ordering `Λwf` that `Λ` is linearly ordered. -/
-instance : LinearOrder Λ :=
+noncomputable instance : LinearOrder Λ :=
   linearOrderOfSTO Λr
 
-instance : LinearOrder μ :=
+noncomputable instance : LinearOrder μ :=
   linearOrderOfSTO μr
 
 instance : IsWellOrder Λ (· < ·) :=

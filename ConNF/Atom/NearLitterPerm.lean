@@ -1,3 +1,4 @@
+import Mathlib.Data.Set.Pointwise.SMul
 import ConNF.Atom.NearLitter
 
 universe u

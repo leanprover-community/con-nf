@@ -1,4 +1,4 @@
-import ConNF.Foa.Properties
+import ConNF.Foa.Properties.Bijective
 
 open Equiv Function Quiver Set Sum WithBot
 

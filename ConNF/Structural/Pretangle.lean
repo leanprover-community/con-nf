@@ -1,10 +1,8 @@
-import ConNF.Atom.Litter
+import ConNF.Atom.Atom
 
 /-!
 # Pretangles
 -/
-
-noncomputable section
 
 universe u
 

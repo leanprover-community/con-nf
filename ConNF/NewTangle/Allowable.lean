@@ -11,8 +11,6 @@ open Function Set WithBot
 
 open scoped Pointwise
 
-noncomputable section
-
 universe u
 
 namespace ConNF
@@ -27,7 +25,7 @@ automatically. -/
 def SemiallowablePerm : Type u :=
   ∀ β : IioBot α, Allowable β
 
-instance : Group (SemiallowablePerm α) := Pi.group
+noncomputable instance : Group (SemiallowablePerm α) := Pi.group
 
 namespace SemiallowablePerm
 
@@ -72,7 +70,7 @@ section
 
 variable {X : Type _} [MulAction (StructPerm α) X]
 
-instance mulActionOfStructPerm : MulAction (SemiallowablePerm α) X :=
+noncomputable instance mulActionOfStructPerm : MulAction (SemiallowablePerm α) X :=
   MulAction.compHom _ toStructPerm
 
 @[simp]
@@ -82,13 +80,13 @@ theorem toStructPerm_smul (f : SemiallowablePerm α) (x : X) :
 
 end
 
-instance mulActionTangle : MulAction (SemiallowablePerm α) (Tangle β) :=
+noncomputable instance mulActionTangle : MulAction (SemiallowablePerm α) (Tangle β) :=
   MulAction.compHom _ <| toAllowable β
 
-instance mulActionTangle' {β : Iio α} : MulAction (SemiallowablePerm α) (Tangle β) :=
+noncomputable instance mulActionTangle' {β : Iio α} : MulAction (SemiallowablePerm α) (Tangle β) :=
   show MulAction (SemiallowablePerm α) (Tangle <| iioCoe β) from inferInstance
 
-instance mulActionTangle'' : MulAction (SemiallowablePerm α) (Tangle (γ : Λ)) :=
+noncomputable instance mulActionTangle'' : MulAction (SemiallowablePerm α) (Tangle (γ : Λ)) :=
   show MulAction (SemiallowablePerm α) (Tangle <| iioCoe γ) from inferInstance
 
 @[simp]
@@ -153,19 +151,19 @@ instance : CoeTC (AllowablePerm α) (SemiallowablePerm α)
 theorem coe_injective : Injective (Subtype.val : AllowablePerm α → SemiallowablePerm α) :=
   Subtype.coe_injective
 
-instance : One (AllowablePerm α) :=
+noncomputable instance : One (AllowablePerm α) :=
   ⟨⟨1, fun _ _ => by simp_rw [one_smul]⟩⟩
 
-instance : Inv (AllowablePerm α) :=
+noncomputable instance : Inv (AllowablePerm α) :=
   ⟨fun f => ⟨f⁻¹, fun c d => by rw [← f.prop, smul_inv_smul, smul_inv_smul]⟩⟩
 
-instance : Mul (AllowablePerm α) :=
+noncomputable instance : Mul (AllowablePerm α) :=
   ⟨fun f g => ⟨f * g, fun c d => by simp_rw [mul_smul, f.prop, g.prop]⟩⟩
 
-instance : Div (AllowablePerm α) :=
+noncomputable instance : Div (AllowablePerm α) :=
   ⟨fun f g => ⟨f / g, by simp_rw [div_eq_mul_inv]; exact (f * g⁻¹).2⟩⟩
 
-instance : Pow (AllowablePerm α) ℕ :=
+noncomputable instance : Pow (AllowablePerm α) ℕ :=
   ⟨fun f n =>
     ⟨(f : SemiallowablePerm α) ^ n, by
       induction' n with d hd
@@ -174,7 +172,7 @@ instance : Pow (AllowablePerm α) ℕ :=
       · simp_rw [pow_succ]
         exact (f * ⟨(f : SemiallowablePerm α) ^ d, hd⟩).2⟩⟩
 
-instance : Pow (AllowablePerm α) ℤ :=
+noncomputable instance : Pow (AllowablePerm α) ℤ :=
   ⟨fun f n =>
     ⟨(f : SemiallowablePerm α) ^ n, by
       obtain (n | n) := n
@@ -207,7 +205,7 @@ theorem coe_pow (f : AllowablePerm α) (n : ℕ) : ↑(f ^ n) = (f : Semiallowab
 theorem coe_zpow (f : AllowablePerm α) (n : ℤ) : ↑(f ^ n) = (f : SemiallowablePerm α) ^ n :=
   rfl
 
-instance : Group (AllowablePerm α) :=
+noncomputable instance : Group (AllowablePerm α) :=
   coe_injective.group
     Subtype.val
     coe_one
@@ -226,14 +224,14 @@ noncomputable def coeHom : AllowablePerm α →* SemiallowablePerm α
   map_mul' := coe_mul
 
 /-- Turn an allowable permutation into a structural permutation. -/
-def toStructPerm : AllowablePerm α →* StructPerm α :=
+noncomputable def toStructPerm : AllowablePerm α →* StructPerm α :=
   SemiallowablePerm.toStructPerm.comp coeHom
 
 section
 
 variable {X : Type _} [MulAction (SemiallowablePerm α) X]
 
-instance mulActionOfSemiallowablePerm : MulAction (AllowablePerm α) X :=
+noncomputable instance mulActionOfSemiallowablePerm : MulAction (AllowablePerm α) X :=
   MulAction.compHom _ coeHom
 
 @[simp]

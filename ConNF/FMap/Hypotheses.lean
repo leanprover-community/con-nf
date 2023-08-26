@@ -20,8 +20,6 @@ open Function Set WithBot
 
 open scoped Pointwise
 
-noncomputable section
-
 universe u
 
 namespace ConNF
@@ -242,7 +240,7 @@ end Instances
 
 /-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
 permutations to be near-litter-permutations, and the designated supports to be singletons. -/
-instance Bot.coreTangleData : CoreTangleData ⊥
+noncomputable instance Bot.coreTangleData : CoreTangleData ⊥
     where
   Tangle := Atom
   Allowable := NearLitterPerm
@@ -261,7 +259,7 @@ instance Bot.coreTangleData : CoreTangleData ⊥
       small := small_singleton _ }
 
 /-- The tangle data at the bottom level. -/
-instance Bot.positionedTangleData : PositionedTangleData ⊥ :=
+noncomputable instance Bot.positionedTangleData : PositionedTangleData ⊥ :=
   ⟨Nonempty.some mk_atom.le⟩
 
 variable (α : Λ)
@@ -274,18 +272,18 @@ section CoreTangleCumul
 
 variable [CoreTangleCumul α]
 
-instance CoreTangleCumul.toCoreTangleData : ∀ β : IioBot α, CoreTangleData β
+noncomputable instance CoreTangleCumul.toCoreTangleData : ∀ β : IioBot α, CoreTangleData β
   | ⟨⊥, _⟩ => Bot.coreTangleData
   | ⟨(β : Λ), hβ⟩ => CoreTangleCumul.data ⟨β, coe_lt_coe.1 hβ⟩
 
-instance CoreTangleCumul.toCoreTangleData' (β : Iio α) : CoreTangleData β :=
+noncomputable instance CoreTangleCumul.toCoreTangleData' (β : Iio α) : CoreTangleData β :=
   show CoreTangleData (iioCoe β) by infer_instance
 
-instance CoreTangleCumul.toCoreTangleData'' (β : TypeIndex) (hβ : β < α) :
+noncomputable instance CoreTangleCumul.toCoreTangleData'' (β : TypeIndex) (hβ : β < α) :
     CoreTangleData (show IioBot α from ⟨β, hβ⟩) :=
   CoreTangleCumul.toCoreTangleData α ⟨β, hβ⟩
 
-instance CoreTangleCumul.toCoreTangleData''' (β : Λ) (hβ : (β : TypeIndex) < α) :
+noncomputable instance CoreTangleCumul.toCoreTangleData''' (β : Λ) (hβ : (β : TypeIndex) < α) :
     CoreTangleData (show IioBot α from ⟨β, hβ⟩) :=
   CoreTangleCumul.toCoreTangleData α ⟨β, hβ⟩
 
@@ -299,11 +297,13 @@ section PositionedTangleCumul
 
 variable [CoreTangleCumul α] [PositionedTangleCumul α]
 
-instance PositionedTangleCumul.toPositionedTangleData : ∀ β : IioBot α, PositionedTangleData β
+noncomputable instance PositionedTangleCumul.toPositionedTangleData :
+    ∀ β : IioBot α, PositionedTangleData β
   | ⟨⊥, _⟩ => Bot.positionedTangleData
   | ⟨(β : Λ), hβ⟩ => PositionedTangleCumul.data ⟨β, coe_lt_coe.1 hβ⟩
 
-instance PositionedTangleCumul.toPositionedTangleData' (β : Iio α) : PositionedTangleData β :=
+noncomputable instance PositionedTangleCumul.toPositionedTangleData' (β : Iio α) :
+    PositionedTangleData β :=
   show PositionedTangleData (iioCoe β) by infer_instance
 
 end PositionedTangleCumul

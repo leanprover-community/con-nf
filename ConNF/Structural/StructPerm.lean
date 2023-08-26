@@ -15,12 +15,9 @@ tangles; we define these larger ambient groups in advance in order to set up the
 derivatives and so on independently of the recursion.
 -/
 
-
 open Cardinal Equiv Quiver Quiver.Path Set WithBot
 
 open scoped Cardinal Pointwise
-
-noncomputable section
 
 universe u
 
@@ -199,7 +196,7 @@ end
 variable {α β γ : TypeIndex}
 
 /-- Obtains the permutations on lower types induced by a structural permutation. -/
-def lower : ∀ {α β : TypeIndex}, β ≤ α → StructPerm α →* StructPerm β
+noncomputable def lower : ∀ {α β : TypeIndex}, β ≤ α → StructPerm α →* StructPerm β
   | ⊥, ⊥, _ => MonoidHom.id _
   | ⊥, (β : Λ), hβ => (not_coe_le_bot _ hβ).elim
   | (α : Λ), β, hβ =>
@@ -216,7 +213,7 @@ theorem lower_self : lower le_rfl = MonoidHom.id (StructPerm α) := by
   · exact dif_pos rfl
 
 /-- The near-litter permutation associated to a structural permutation. -/
-def toNearLitterPerm : StructPerm α →* NearLitterPerm :=
+noncomputable def toNearLitterPerm : StructPerm α →* NearLitterPerm :=
   toBotIso.symm.toMonoidHom.comp <| lower bot_le
 
 theorem coe_toNearLitterPerm : (toNearLitterPerm : StructPerm ⊥ → NearLitterPerm) = ofBot := by
@@ -254,7 +251,7 @@ section
 variable {X : Type _} [MulAction NearLitterPerm X]
 
 /-- Structural permutations act on atoms. -/
-instance mulActionOfNearLitterPerm : MulAction (StructPerm α) X :=
+noncomputable instance mulActionOfNearLitterPerm : MulAction (StructPerm α) X :=
   MulAction.compHom _ toNearLitterPerm
 
 @[simp]

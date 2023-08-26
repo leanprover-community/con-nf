@@ -9,8 +9,6 @@ open Cardinal Equiv MulAction Quiver
 
 open scoped Cardinal
 
-noncomputable section
-
 universe u
 
 namespace ConNF
@@ -21,7 +19,7 @@ variable [Params.{u}] {α : TypeIndex}
 def SupportCondition (α : TypeIndex) : Type u :=
   Sum Atom NearLitter × ExtendedIndex α
 
-instance : Inhabited (SupportCondition α) :=
+noncomputable instance : Inhabited (SupportCondition α) :=
 ⟨Sum.inl default, default⟩
 
 /-- The "identity" equivalence between `(atom ⊕ near_litter) × extended_index α` and
@@ -45,7 +43,8 @@ theorem mk_supportCondition (α : TypeIndex) : #(SupportCondition α) = #μ := b
 
 namespace StructPerm
 
-instance mulActionSupportCondition : MulAction (StructPerm α) (SupportCondition α)
+noncomputable instance mulActionSupportCondition :
+    MulAction (StructPerm α) (SupportCondition α)
     where
   smul π c := ⟨derivative c.snd π • c.fst, c.snd⟩
   one_smul := by
@@ -58,7 +57,8 @@ instance mulActionSupportCondition : MulAction (StructPerm α) (SupportCondition
       rw [derivative_mul, mul_smul]
       rfl
 
-instance mulActionBotSupportCondition : MulAction NearLitterPerm (SupportCondition ⊥) :=
+noncomputable instance mulActionBotSupportCondition :
+    MulAction NearLitterPerm (SupportCondition ⊥) :=
   mulActionSupportCondition (α := ⊥)
 
 @[simp]

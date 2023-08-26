@@ -3,8 +3,6 @@ import ConNF.Mathlib.GroupAction
 import ConNF.Mathlib.Pointwise
 import ConNF.NewTangle.Allowable
 
-noncomputable section
-
 open Function Set WithBot
 
 open scoped Cardinal Pointwise
@@ -337,7 +335,7 @@ theorem smul_proper (f : AllowablePerm α) (e : Extensions α) (γ ht h) :
       ⟨f • e, Preference.proper _ (isEven_smul.mpr ht) (smul_aux₂ h)⟩ :=
   rfl
 
-instance mulActionSemitangle : MulAction (AllowablePerm α) (Semitangle α)
+noncomputable instance mulActionSemitangle : MulAction (AllowablePerm α) (Semitangle α)
     where
   one_smul := by
     rintro ⟨exts, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩
@@ -479,7 +477,7 @@ namespace AllowablePerm
 
 --Yaël: I suspect we can generalize `supports.smul` so that it applies here
 /-- Allowable permutations act on `α`-tangles. -/
-instance hasSmulNewTangle : SMul (AllowablePerm α) (NewTangle α) :=
+noncomputable instance hasSmulNewTangle : SMul (AllowablePerm α) (NewTangle α) :=
   ⟨fun π t =>
     ⟨π • (t : Semitangle α),
       t.2.map fun (s : Support α (AllowablePerm α) (t : Semitangle α)) =>
@@ -499,7 +497,7 @@ theorem coe_smul_newTangle (f : AllowablePerm α) (t : NewTangle α) :
     ((f • t) : Semitangle α) = f • (t : Semitangle α) :=
   rfl
 
-instance mulActionNewTangle : MulAction (AllowablePerm α) (NewTangle α) :=
+noncomputable instance mulActionNewTangle : MulAction (AllowablePerm α) (NewTangle α) :=
   NewTangle.coe_injective.mulAction Subtype.val coe_smul_newTangle
 
 end AllowablePerm
