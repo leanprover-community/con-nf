@@ -44,7 +44,6 @@ instance : MulAction NearLitterPerm (SupportCondition ⊥)
   one_smul := by rintro ⟨a | N, A⟩ <;> rfl
   mul_smul _ _ := by rintro ⟨a | N, A⟩ <;> rfl
 
-@[simp]
 theorem smul_supportCondition {π : StructPerm α} {c : SupportCondition α} :
     π • c = (π c.snd • c.fst, c.snd) :=
   rfl
@@ -52,6 +51,14 @@ theorem smul_supportCondition {π : StructPerm α} {c : SupportCondition α} :
 @[simp]
 theorem smul_supportCondition_eq_iff {π π' : StructPerm α} {c : SupportCondition α} :
     π • c = π' • c ↔ π c.snd • c.fst = π' c.snd • c.fst := by
+  rw [Prod.ext_iff]
+  simp only [smul_supportCondition, and_true]
+
+@[simp]
+theorem smul_supportCondition_eq_iff' {π π' : StructPerm α}
+    {x y : Atom ⊕ NearLitter} {A : ExtendedIndex α} :
+    π • (show SupportCondition α from (x, A)) = π' • (show SupportCondition α from (y, A)) ↔
+    π A • x = π' A • y := by
   rw [Prod.ext_iff]
   simp only [smul_supportCondition, and_true]
 

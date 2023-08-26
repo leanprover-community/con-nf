@@ -193,10 +193,46 @@ theorem smul_mem_designatedSupport {β : Iio α} {c : SupportCondition β} {t : 
     ⟨c, h, rfl⟩
 
 @[simp]
-theorem ofBot_derivative {β : IicBot α} {hβ : ⊥ < β} {π : Allowable β} :
+theorem ofBot_derivative' {β : IicBot α} {hβ : ⊥ < β} {π : Allowable β} :
     NearLitterPerm.ofBot (allowableDerivative β ⊥ hβ π) =
     Allowable.toStructPerm π (Quiver.Hom.toPath hβ) :=
   (congr_fun (allowableDerivative_eq β ⊥ hβ π) Quiver.Path.nil).symm
+
+theorem exists_cons_of_length_ne_zero {V : Type _} [Quiver V] {x y : V}
+    (p : Quiver.Path x y) (h : p.length ≠ 0) :
+    ∃ t : V, ∃ q : Quiver.Path x t, ∃ e : t ⟶ y, p = q.cons e := by
+  cases p
+  · cases h rfl
+  · exact ⟨_, _, _, rfl⟩
+
+theorem ofBot_derivative {β : IicBot α} {π : Allowable β}
+    (A : Quiver.Path (β : TypeIndex) (⊥ : IicBot α)) :
+    NearLitterPerm.ofBot (Allowable.derivative A π) = Allowable.toStructPerm π A := by
+  dsimp only [Iic.coe_bot] at A
+  by_cases A.length = 0
+  · have : β = ⊥ := Subtype.coe_injective (Quiver.Path.eq_of_length_zero A h)
+    cases this
+    cases path_eq_nil A
+    rfl
+  · obtain ⟨γ, A, h', rfl⟩ := exists_cons_of_length_ne_zero A h
+    have := Allowable.derivative_cons
+      (show Quiver.Path (β : TypeIndex) (⟨γ, ?_⟩ : IicBot α) from A)
+      (show ⊥ < ⟨γ, _⟩ from h')
+    rw [← this, MonoidHom.comp_apply, ofBot_derivative', Allowable.toStructPerm_derivative]
+    simp only [StructPerm.derivative_apply, Quiver.Hom.comp_toPath]
+    exact le_trans (le_of_path A) β.prop
+
+@[simp]
+theorem ofBot_smul {X : Type _} [MulAction NearLitterPerm X] (π : Allowable ⊥) (x : X) :
+    π • x = NearLitterPerm.ofBot π • x :=
+  rfl
+
+@[simp]
+theorem derivative_bot_smul_atom {β : IicBot α}
+    (π : Allowable β) (A : Quiver.Path (β : TypeIndex) (⊥ : IicBot α)) (a : Tangle ⊥) :
+    Allowable.derivative A π • a = Allowable.toStructPerm π A • (show Atom from a) := by
+  rw [← ofBot_derivative]
+  rfl
 
 theorem toStructPerm_smul_fuzz (β : IicBot α) (γ : IioBot α) (δ : Iio α)
     (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (π : Allowable β)
@@ -206,6 +242,6 @@ theorem toStructPerm_smul_fuzz (β : IicBot α) (γ : IioBot α) (δ : Iio α)
     fuzz (Subtype.coe_injective.ne hγδ) (allowableDerivative β γ hγ π • t) := by
   have := congr_fun (allowableDerivative_eq β δ hδ π) (Quiver.Hom.toPath (bot_lt_coe _))
   simp only [StructPerm.derivative_apply, Quiver.Hom.comp_toPath] at this
-  rw [this, ← smul_fuzz γ δ hγ hδ hγδ π t, ofBot_derivative]
+  rw [this, ← smul_fuzz γ δ hγ hδ hγδ π t, ofBot_derivative']
 
 end ConNF

@@ -136,7 +136,7 @@ noncomputable instance mulActionOfStructPerm : MulAction (SemiallowablePerm α) 
 
 @[simp]
 theorem toStructPerm_smul (f : SemiallowablePerm α) (x : X) :
-    SemiallowablePerm.toStructPerm f • x = f • x :=
+    f • x = SemiallowablePerm.toStructPerm f • x :=
   rfl
 
 end
