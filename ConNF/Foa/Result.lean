@@ -145,9 +145,9 @@ theorem ConNF.StructApprox.extracted_1
     StructPerm.ofBot (StructPerm.derivative B (Allowable.toStructPerm (ρs δ h))) =
       completeNearLitterPerm hπf ((A.cons h).comp B))
   (ε : Iio α) (hε : (ε : TypeIndex) < γ) (a : Atom) :
-  ρs ε hε • fMap (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) a =
-    fMap (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) (ρs ⊥ (bot_lt_coe _) • a) := by
-  change StructPerm.toNearLitterPerm (Allowable.toStructPerm _) • fMap _ (show Tangle ⊥ from a) = _
+  ρs ε hε • fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) a =
+    fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) (ρs ⊥ (bot_lt_coe _) • a) := by
+  change StructPerm.toNearLitterPerm (Allowable.toStructPerm _) • fuzz _ (show Tangle ⊥ from a) = _
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
   simp only [Path.comp_cons, Path.comp_nil] at this
   change StructPerm.toNearLitterPerm (Allowable.toStructPerm _) = _ at this
@@ -170,9 +170,9 @@ theorem ConNF.StructApprox.extracted_2
       completeNearLitterPerm hπf ((A.cons h).comp B))
   (δ : Iio α) (ε : Iio α) (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ)
   (hδε : δ ≠ ε) (t : Tangle ↑δ) :
-  ρs ε hε • fMap (coe_ne_coe.mpr <| coe_ne' hδε) t =
-    fMap (coe_ne_coe.mpr <| coe_ne' hδε) (ρs δ hδ • t) := by
-  change StructPerm.toNearLitterPerm (Allowable.toStructPerm _) • fMap _ t = _
+  ρs ε hε • fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t =
+    fuzz (coe_ne_coe.mpr <| coe_ne' hδε) (ρs δ hδ • t) := by
+  change StructPerm.toNearLitterPerm (Allowable.toStructPerm _) • fuzz _ t = _
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
   simp only [Path.comp_cons, Path.comp_nil] at this
   change StructPerm.toNearLitterPerm (Allowable.toStructPerm _) = _ at this
@@ -188,8 +188,8 @@ theorem ConNF.StructApprox.extracted_2
   refine supports (t := t) ?_ ?_
   · intros a B ha
     have := ihAction_coherent_atom (π := π) (A.cons _) B a
-      (inr (fMap (show (δ : TypeIndex) ≠ ε from ?_) t).toNearLitter, _)
-      (Relation.TransGen.single <| Constrains.fMap ?_ ?_ ?_ _ t _ ha)
+      (inr (fuzz (show (δ : TypeIndex) ≠ ε from ?_) t).toNearLitter, _)
+      (Relation.TransGen.single <| Constrains.fuzz ?_ ?_ ?_ _ t _ ha)
       ((ihAction_lawful hπf _).comp _) ?_ ?_
     exact this.symm.trans (congr_arg (fun π => π • a) (hρ δ hδ B)).symm
     · intro h
@@ -203,8 +203,8 @@ theorem ConNF.StructApprox.extracted_2
         ⟨γ, δ, ε, _, _, _, _, t, rfl, rfl⟩ _ _
   · intros N B hN
     have := ihAction_coherent hπf (A.cons _) B N
-      (inr (fMap (show (δ : TypeIndex) ≠ ε from ?_) t).toNearLitter, _)
-      (Relation.TransGen.single <| Constrains.fMap ?_ ?_ ?_ _ t _ hN)
+      (inr (fuzz (show (δ : TypeIndex) ≠ ε from ?_) t).toNearLitter, _)
+      (Relation.TransGen.single <| Constrains.fuzz ?_ ?_ ?_ _ t _ hN)
       ((ihAction_lawful hπf _).comp _) ?_ ?_
     rw [← completeNearLitterPerm_smul_nearLitter hπf] at this
     exact this.symm.trans (congr_arg (fun π => π • N) (hρ δ hδ B)).symm
@@ -222,7 +222,7 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
     (h : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ), AllowableBelow hπf δ (A.cons h)) :
     AllowableBelow hπf γ A := by
   choose ρs hρ using h
-  refine' ⟨allowableOfSmulFMap γ ρs _, _⟩
+  refine' ⟨allowableOfSmulFuzz γ ρs _, _⟩
   · intro δ ε hδ hε hδε t
     obtain rfl | ⟨δ, rfl⟩ := iioBot_cases δ
     · exact ConNF.StructApprox.extracted_1 hπf γ A ρs hρ ε hε t
@@ -233,7 +233,7 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
     obtain ⟨δ, hδ, B, rfl⟩ := exists_nil_cons_of_path B
     specialize hρ δ hδ B
     rw [← StructPerm.derivative_derivative]
-    have := allowableOfSmulFMap_derivative_eq (πs := ρs) (h := ?_) δ hδ
+    have := allowableOfSmulFuzz_derivative_eq (πs := ρs) (h := ?_) δ hδ
     apply_fun Allowable.toStructPerm at this
     rw [← allowableDerivative_eq] at this
     rw [← this] at hρ

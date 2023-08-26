@@ -15,11 +15,11 @@ variable [Params.{u}] (α : Λ) [PositionData] [Phase2Assumptions α] {β : Type
 inductive Inflexible : Litter → ExtendedIndex β → Prop
   | mk_coe ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
     (A : Quiver.Path (β : TypeIndex) γ) (t : Tangle δ) :
-    Inflexible (fMap (WithBot.coe_ne_coe.mpr <| coe_ne' hδε) t)
+    Inflexible (fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' hδε) t)
       ((A.cons (coe_lt hε)).cons (WithBot.bot_lt_coe _))
   | mk_bot ⦃γ : Iic α⦄ ⦃ε : Iio α⦄ (hε : (ε : Λ) < γ)
     (A : Quiver.Path (β : TypeIndex) γ) (a : Atom) :
-    Inflexible (fMap (show (⊥ : TypeIndex) ≠ (ε : Λ) from WithBot.bot_ne_coe) a)
+    Inflexible (fuzz (show (⊥ : TypeIndex) ≠ (ε : Λ) from WithBot.bot_ne_coe) a)
       ((A.cons (coe_lt hε)).cons (WithBot.bot_lt_coe _))
 
 /-- A litter is *flexible* if it is not the image of any f-map. -/
@@ -37,7 +37,7 @@ theorem mk_flexible (A : ExtendedIndex β) : #{L | Flexible α L A} = #μ := by
     obtain ⟨γ, δ, ε, _, hε, hδε, A, t, h, rfl⟩ | ⟨γ, ε, hε, A, t, h, rfl⟩ := h
     all_goals
       apply_fun Litter.γ at h
-      rw [fMap_γ _ _] at h
+      rw [fuzz_γ _ _] at h
       exact ne_of_lt (Iio.lt ε) h.symm
   · intro ν₁ ν₂ h
     simp only [coe_setOf, mem_setOf_eq, Subtype.mk.injEq, Litter.mk.injEq, and_self, and_true] at h

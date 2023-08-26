@@ -275,8 +275,8 @@ namespace AllowablePerm
 
 variable {β γ}
 
-theorem smul_fMap (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
-    (π : SemiallowablePerm α) γ • fMap (coe_ne hβγ) t = fMap (coe_ne hβγ) (π • t) := by
+theorem smul_fuzz (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
+    (π : SemiallowablePerm α) γ • fuzz (coe_ne hβγ) t = fuzz (coe_ne hβγ) (π • t) := by
   classical
   have h := Code.Equiv.singleton hβγ t
   rw [← π.prop] at h
@@ -286,18 +286,18 @@ theorem smul_fMap (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
   · cases hβγ.symm (congr_arg Sigma.fst a)
   · simp_rw [SemiallowablePerm.smul_mk, smul_set_singleton] at hA
     exfalso
-    refine aMapCode_ne_singleton ?_ hA.symm
+    refine cloudCode_ne_singleton ?_ hA.symm
     exact hβγ.symm
   · have := congr_arg Sigma.fst hA
-    simp only [coe_smul, smul_mk, fst_mk, smul_set_singleton, ne_eq, fst_aMapCode, Subtype.mk.injEq,
+    simp only [coe_smul, smul_mk, fst_mk, smul_set_singleton, ne_eq, fst_cloudCode, Subtype.mk.injEq,
       coe_inj, Subtype.coe_inj] at this
     cases this
-    simp only [SemiallowablePerm.smul_mk, aMapCode_ne _ (mk β _) hβγ, mk_inj] at hA
-    simp only [coe_smul, snd_mk, smul_set_singleton, aMap_singleton] at hA
+    simp only [SemiallowablePerm.smul_mk, cloudCode_ne _ (mk β _) hβγ, mk_inj] at hA
+    simp only [coe_smul, snd_mk, smul_set_singleton, cloud_singleton] at hA
     simp only [← image_smul, image_image, smul_typedNearLitter] at hA
     rw [← image_image] at hA
     rw [image_eq_image typedNearLitter.injective] at hA
-    have := Litter.toNearLitter_mem_localCardinal (fMap (coe_ne hβγ) (π • t))
+    have := Litter.toNearLitter_mem_localCardinal (fuzz (coe_ne hβγ) (π • t))
     rw [← hA] at this
     obtain ⟨N, hN₁, hN₂⟩ := this
     have := congr_arg Sigma.fst hN₂
@@ -308,40 +308,40 @@ theorem smul_fMap (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
     rw [hN₁] at this
     exact this
   · have := congr_arg Sigma.fst h₁
-    simp only [coe_smul, smul_mk, fst_mk, fst_aMapCode] at this
+    simp only [coe_smul, smul_mk, fst_mk, fst_cloudCode] at this
     subst this
     simp only [coe_smul, smul_mk, smul_set_singleton] at h₁
-    cases aMapCode_ne_singleton hε h₁.symm
+    cases cloudCode_ne_singleton hε h₁.symm
 
-theorem smul_aMap (π : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
-    π • aMap hβγ s = aMap hβγ (π • s) := by
+theorem smul_cloud (π : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
+    π • cloud hβγ s = cloud hβγ (π • s) := by
   ext t
-  simp only [aMap, mem_image, mem_iUnion, mem_localCardinal, exists_prop, ← image_smul]
+  simp only [cloud, mem_image, mem_iUnion, mem_localCardinal, exists_prop, ← image_smul]
   simp_rw [exists_exists_and_eq_and]
   constructor
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
     refine ⟨(π : SemiallowablePerm α) γ • N, ⟨t, ht₁, ?_⟩, ?_⟩
-    · rw [← smul_fMap hβγ, Allowable.smul_fst, ht₂]
+    · rw [← smul_fuzz hβγ, Allowable.smul_fst, ht₂]
     · rw [smul_typedNearLitter]
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
     refine ⟨((π : SemiallowablePerm α) γ)⁻¹ • N, ⟨t, ht₁, ?_⟩, ?_⟩
-    · rw [Allowable.smul_fst, ht₂, ← smul_fMap hβγ, inv_smul_smul]
+    · rw [Allowable.smul_fst, ht₂, ← smul_fuzz hβγ, inv_smul_smul]
     · rw [smul_typedNearLitter, smul_inv_smul]
 
-theorem smul_aMapCode (π : AllowablePerm α) (hc : c.1 ≠ γ) :
-    π • aMapCode γ c = aMapCode γ (π • c) := by
-  simp only [aMapCode_ne γ c hc, smul_mk, aMapCode_ne γ (π • c) hc, fst_smul, snd_smul, mk_inj]
-  rw [smul_aMap]
+theorem smul_cloudCode (π : AllowablePerm α) (hc : c.1 ≠ γ) :
+    π • cloudCode γ c = cloudCode γ (π • c) := by
+  simp only [cloudCode_ne γ c hc, smul_mk, cloudCode_ne γ (π • c) hc, fst_smul, snd_smul, mk_inj]
+  rw [smul_cloud]
 
 end AllowablePerm
 
-theorem AMapRel.smul : c ↝ d → f • c ↝ f • d := by
+theorem CloudRel.smul : c ↝ d → f • c ↝ f • d := by
   rintro ⟨γ, hγ⟩
-  exact (AMapRel_iff _ _).2 ⟨_, hγ, f.smul_aMapCode hγ⟩
+  exact (CloudRel_iff _ _).2 ⟨_, hγ, f.smul_cloudCode hγ⟩
 
 @[simp]
-theorem smul_aMapRel : f • c ↝ f • d ↔ c ↝ d := by
-  refine ⟨fun h => ?_, AMapRel.smul⟩
+theorem smul_cloudRel : f • c ↝ f • d ↔ c ↝ d := by
+  refine ⟨fun h => ?_, CloudRel.smul⟩
   rw [← inv_smul_smul f c, ← inv_smul_smul f d]
   exact h.smul
 
@@ -352,13 +352,13 @@ theorem isEven_smul_nonempty : ∀ c : NonemptyCode α, (f • c.val).IsEven ↔
     simp_rw [Code.IsEven_iff]
     constructor <;> intro h d hd
     · have := hd.nonempty_iff.2 hc
-      have _ : AMapRel' ⟨d, this⟩ ⟨c, hc⟩ := aMapRel_coe_coe.1 hd
+      have _ : CloudRel' ⟨d, this⟩ ⟨c, hc⟩ := cloudRel_coe_coe.1 hd
       exact Code.not_isEven.1 fun H =>
         (h _ hd.smul).not_isEven <| (isEven_smul_nonempty ⟨d, this⟩).2 H
     · rw [← smul_inv_smul f d] at hd ⊢
-      rw [smul_aMapRel] at hd
+      rw [smul_cloudRel] at hd
       have := hd.nonempty_iff.2 hc
-      have _ : AMapRel' ⟨_, this⟩ ⟨c, hc⟩ := aMapRel_coe_coe.1 hd
+      have _ : CloudRel' ⟨_, this⟩ ⟨c, hc⟩ := cloudRel_coe_coe.1 hd
       exact Code.not_isEven.1 fun H =>
         (h _ hd).not_isEven <| (isEven_smul_nonempty ⟨_, this⟩).1 H
 termination_by isEven_smul_nonempty c => c

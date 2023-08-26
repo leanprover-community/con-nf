@@ -1,4 +1,4 @@
-import ConNF.FMap
+import ConNF.Fuzz
 
 open Set WithBot
 
@@ -88,22 +88,22 @@ class Phase2Assumptions extends Phase2Data α where
         Allowable.toStructPerm (allowableDerivative β γ hγ π)
   smul_designatedSupport {β : Iic α} (t : Tangle β) (π : Allowable β) :
     π • (designatedSupport t : Set (SupportCondition β)) = designatedSupport (π • t)
-  smul_fMap {β : IicBot α} (γ : IioBot α) (δ : Iio α) (hγ : (γ : TypeIndex) < β)
+  smul_fuzz {β : IicBot α} (γ : IioBot α) (δ : Iio α) (hγ : (γ : TypeIndex) < β)
     (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (π : Allowable β) (t : Tangle γ) :
-    allowableDerivative β δ hδ π • fMap (Subtype.coe_injective.ne hγδ) t =
-      fMap (Subtype.coe_injective.ne hγδ) (allowableDerivative β γ hγ π • t)
-  allowableOfSmulFMap (β : Iic α) (πs : ∀ γ : IioBot α, (γ : TypeIndex) < β → Allowable γ) :
+    allowableDerivative β δ hδ π • fuzz (Subtype.coe_injective.ne hγδ) t =
+      fuzz (Subtype.coe_injective.ne hγδ) (allowableDerivative β γ hγ π • t)
+  allowableOfSmulFuzz (β : Iic α) (πs : ∀ γ : IioBot α, (γ : TypeIndex) < β → Allowable γ) :
     (∀ (γ : IioBot α) (δ : Iio α) (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β)
         (hγδ : γ ≠ δ) (t : Tangle γ),
-        πs δ hδ • fMap (Subtype.coe_injective.ne hγδ) t =
-          fMap (Subtype.coe_injective.ne hγδ) (πs γ hγ • t)) →
+        πs δ hδ • fuzz (Subtype.coe_injective.ne hγδ) t =
+          fuzz (Subtype.coe_injective.ne hγδ) (πs γ hγ • t)) →
       Allowable (β : IicBot α)
-  allowableOfSmulFMap_derivative_eq {β : Iic α} {πs} {h} (γ : IioBot α)
+  allowableOfSmulFuzz_derivative_eq {β : Iic α} {πs} {h} (γ : IioBot α)
     (hγ : (γ : TypeIndex) < β) :
-    allowableDerivative β γ hγ (allowableOfSmulFMap β πs h) = πs γ hγ
+    allowableDerivative β γ hγ (allowableOfSmulFuzz β πs h) = πs γ hγ
 
 export Phase2Assumptions (allowableDerivative allowableDerivative_eq smul_designatedSupport
-  smul_fMap allowableOfSmulFMap allowableOfSmulFMap_derivative_eq)
+  smul_fuzz allowableOfSmulFuzz allowableOfSmulFuzz_derivative_eq)
 
 variable {α} [Phase2Assumptions α]
 
@@ -212,13 +212,13 @@ theorem smul_mem_designatedSupport {β : Iio α} {c : SupportCondition β} {t : 
         ((show Allowable (β : Iic α) from π) • c)).mp
     ⟨c, h, rfl⟩
 
-theorem toStructPerm_smul_fMap (β : IicBot α) (γ : IioBot α) (δ : Iio α)
+theorem toStructPerm_smul_fuzz (β : IicBot α) (γ : IioBot α) (δ : Iio α)
     (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (π : Allowable β)
     (t : Tangle γ) :
     StructPerm.derivative (Quiver.Path.nil.cons hδ) (Allowable.toStructPerm π) •
-        fMap (Subtype.coe_injective.ne hγδ) t =
-      fMap (Subtype.coe_injective.ne hγδ) (allowableDerivative β γ hγ π • t) := by
+        fuzz (Subtype.coe_injective.ne hγδ) t =
+      fuzz (Subtype.coe_injective.ne hγδ) (allowableDerivative β γ hγ π • t) := by
   rw [allowableDerivative_eq β δ hδ π]
-  exact smul_fMap γ δ hγ hδ hγδ π t
+  exact smul_fuzz γ δ hγ hδ hγδ π t
 
 end ConNF

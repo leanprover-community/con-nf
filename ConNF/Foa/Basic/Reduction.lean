@@ -170,10 +170,10 @@ theorem mem_reduction_designated_support {β γ : Iic α} {δ ε : Iio α} (hδ 
     (hε : (ε : Λ) < γ) (hδε : δ ≠ ε) (B : Path (β : TypeIndex) γ) (t : Tangle δ)
     (c : SupportCondition δ) (h : c ∈ reducedSupport α t) :
     (c.fst, (B.cons (coe_lt hδ)).comp c.snd) <[α]
-      (inr (fMap (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter,
+      (inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter,
         (B.cons (coe_lt hε)).cons (bot_lt_coe _)) := by
   obtain ⟨⟨d, hd, hcd⟩, _⟩ := h
-  refine' Relation.TransGen.tail' _ (Constrains.fMap hδ hε hδε B t d hd)
+  refine' Relation.TransGen.tail' _ (Constrains.fuzz hδ hε hδε B t d hd)
   exact reflTransGen_constrains_comp hcd _
 
 end ConNF

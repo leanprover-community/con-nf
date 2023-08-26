@@ -94,7 +94,7 @@ def nearLitterHypothesis_eq (A : ExtendedIndex β) (N : NearLitter) :
 theorem completeLitterMap_eq_of_inflexibleCoe {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleCoe L A) (h₁ h₂) :
     π.completeLitterMap A L =
-      fMap (WithBot.coe_ne_coe.mpr <| coe_ne' h.hδε)
+      fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.hδε)
         ((ihAction (π.foaHypothesis : Hypothesis ⟨inr L.toNearLitter, A⟩)).hypothesisedAllowable h
             h₁ h₂ •
           h.t) := by
@@ -104,7 +104,7 @@ theorem completeLitterMap_eq_of_inflexible_coe' {A : ExtendedIndex β} {L : Litt
     (h : InflexibleCoe L A) :
     π.completeLitterMap A L =
       if h' : _ ∧ _ then
-        fMap (WithBot.coe_ne_coe.mpr <| coe_ne' h.hδε)
+        fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.hδε)
           ((ihAction (π.foaHypothesis : Hypothesis ⟨inr L.toNearLitter, A⟩)).hypothesisedAllowable h
               h'.1 h'.2 •
             h.t)
@@ -115,7 +115,7 @@ theorem completeLitterMap_eq_of_inflexible_coe' {A : ExtendedIndex β} {L : Litt
 theorem completeLitterMap_eq_of_inflexibleBot {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleBot L A) :
     π.completeLitterMap A L =
-      fMap (show (⊥ : TypeIndex) ≠ (h.ε : Λ) from WithBot.bot_ne_coe)
+      fuzz (show (⊥ : TypeIndex) ≠ (h.ε : Λ) from WithBot.bot_ne_coe)
         (π.completeAtomMap (h.B.cons (WithBot.bot_lt_coe _)) h.a) := by
   rw [completeLitterMap_eq, litterCompletion_of_inflexibleBot] <;> rfl
 

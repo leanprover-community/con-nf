@@ -1,4 +1,4 @@
-import ConNF.FMap
+import ConNF.Fuzz
 import ConNF.Foa.Basic.Hypotheses
 
 /-!
@@ -71,14 +71,14 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
     Constrains (inr N.fst.toNearLitter, A) (inr N, A)
   | symmDiff (N : NearLitter) (a) (_ : a ∈ litterSet N.fst ∆ N.snd) (A : ExtendedIndex β) :
     Constrains (inl a, A) (inr N, A)
-  | fMap ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
+  | fuzz ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
     (A : Path (β : TypeIndex) γ) (t : Tangle δ) (c) (_ : c ∈ (designatedSupport t).carrier) :
     Constrains (c.fst, (A.cons (coe_lt hδ)).comp c.snd)
-      (inr (fMap (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter,
+      (inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter,
         (A.cons (coe_lt hε)).cons (bot_lt_coe _))
-  | fMap_bot ⦃γ : Iic α⦄ ⦃ε : Iio α⦄ (hε : (ε : Λ) < γ) (A : Path (β : TypeIndex) γ) (a : Atom) :
+  | fuzz_bot ⦃γ : Iic α⦄ ⦃ε : Iio α⦄ (hε : (ε : Λ) < γ) (A : Path (β : TypeIndex) γ) (a : Atom) :
     Constrains (inl a, A.cons (bot_lt_coe _))
-      (inr (fMap (show (⊥ : TypeIndex) ≠ (ε : Λ) from bot_ne_coe) a).toNearLitter,
+      (inr (fuzz (show (⊥ : TypeIndex) ≠ (ε : Λ) from bot_ne_coe) a).toNearLitter,
         (A.cons (coe_lt hε)).cons (bot_lt_coe _))
 
 /-! We declare new notation for the "constrains" relation on support conditions. -/
@@ -101,13 +101,13 @@ theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) := by
     rw [← hN]
     rfl
   · exact symmDiff_lt_nearLitter N a ha
-  · have := fMap_position (coe_ne_coe.mpr <| coe_ne' hδε) t ?_ ?_
+  · have := fuzz_position (coe_ne_coe.mpr <| coe_ne' hδε) t ?_ ?_
     rw [TangleData.typedNearLitterPosition_eq] at this
     refine' lt_of_le_of_lt _ this
     convert TangleData.support_le t _ hc
     rfl
   · simp only [InvImage, elim_inr]
-    convert typedAtomPosition_lt_fMap a
+    convert typedAtomPosition_lt_fuzz a
     refine (@TangleData.typedNearLitterPosition_eq _ _ _ _ _ _ ?_ _).symm
     infer_instance
 
@@ -135,9 +135,9 @@ theorem constrains_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≺[α] 
   · exact Constrains.nearLitter _ hN _
   · exact Constrains.symmDiff _ _ ha _
   · rw [Path.comp_cons, ← Path.comp_assoc, Path.comp_cons]
-    exact Constrains.fMap hδ hε hδε (B.comp A) t c hc
+    exact Constrains.fuzz hδ hε hδε (B.comp A) t c hc
   · rw [Path.comp_cons]
-    exact Constrains.fMap_bot hδ (B.comp A) a
+    exact Constrains.fuzz_bot hδ (B.comp A) a
 
 notation:50 c " <[" α "] " d:50 => Relation.TransGen (Constrains α _) c d
 
@@ -181,22 +181,22 @@ theorem transGen_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
   · exact Relation.TransGen.head (Constrains.nearLitter N (NearLitter.not_isLitter h') B) h
 
 -- TODO: Move
--- TODO: Search for uses of fMap_β and replace with this lemma.
-lemma fMap_congr_β {β γ β' γ' : Iio α} {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
+-- TODO: Search for uses of fuzz_β and replace with this lemma.
+lemma fuzz_congr_β {β γ β' γ' : Iio α} {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
   {t : Tangle β} {t' : Tangle β'}
-  (h : fMap hβγ t = fMap hβγ' t') :
+  (h : fuzz hβγ t = fuzz hβγ' t') :
   β = β' := by
-  have h₁ := fMap_β hβγ t
-  have h₂ := fMap_β hβγ' t'
+  have h₁ := fuzz_β hβγ t
+  have h₂ := fuzz_β hβγ' t'
   rw [← h, h₁] at h₂
   exact Subtype.coe_injective (WithBot.coe_injective h₂)
 
-lemma fMap_congr_γ {β γ β' γ' : Iio α} {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
+lemma fuzz_congr_γ {β γ β' γ' : Iio α} {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
   {t : Tangle β} {t' : Tangle β'}
-  (h : fMap hβγ t = fMap hβγ' t') :
+  (h : fuzz hβγ t = fuzz hβγ' t') :
   γ = γ' := by
-  have h₁ := fMap_γ hβγ t
-  have h₂ := fMap_γ hβγ' t'
+  have h₁ := fuzz_γ hβγ t
+  have h₂ := fuzz_γ hβγ' t'
   rw [← h, h₁] at h₂
   exact Subtype.coe_injective h₂
 
@@ -227,7 +227,7 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
   · by_cases
       ∃ (γ : Iic α) (δ : Iio α) (ε : Iio α) (_hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
         (B : Path (β : TypeIndex) γ) (t : Tangle δ),
-        N = (fMap (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter ∧
+        N = (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter ∧
           A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)
     · obtain ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ := h
       refine lt_of_le_of_lt ?_ (designatedSupport t).small
@@ -239,9 +239,9 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
         rintro x ⟨_, _, _, _, _, _, _, _, c, hc, rfl, h⟩
         rw [Prod.mk.injEq] at h
         simp only [inr.injEq, Litter.toNearLitter_injective.eq_iff] at h
-        cases fMap_congr_β h.1
-        cases fMap_congr_γ h.1
-        cases fMap_injective _ h.1
+        cases fuzz_congr_β h.1
+        cases fuzz_congr_γ h.1
+        cases fuzz_injective _ h.1
         cases Subtype.coe_inj.mp
           (coe_inj.mp (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons h.2).eq))
         cases (Path.heq_of_cons_eq_cons (Path.heq_of_cons_eq_cons h.2).eq).eq
@@ -266,7 +266,7 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
     cases Subtype.coe_inj.mp
       (coe_inj.mp (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hd₂.2).eq))
     cases (Path.heq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hd₂.2).eq).eq
-    rw [(fMap_injective bot_ne_coe).eq_iff] at hd₂
+    rw [(fuzz_injective bot_ne_coe).eq_iff] at hd₂
     cases hd₂.1
     rfl
 

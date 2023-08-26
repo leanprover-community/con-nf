@@ -1,4 +1,4 @@
-import ConNF.NewTangle.AMap
+import ConNF.NewTangle.Cloud
 
 /-!
 # Equivalence of codes
@@ -7,7 +7,7 @@ Several codes will be identified to make one TTT object. A TTT object has extens
 indices (except possibly `⊥`), so our equivalence classes must too.
 
 One way to do this is to make an equivalence class out of a code and its image under each A-map.
-Thus we want to partition the big tree given by `aMap_rel` into trees of height `1` that each
+Thus we want to partition the big tree given by `cloud_rel` into trees of height `1` that each
 contains all descendents of its root (this is a slight lie for empty codes as the one equivalence
 class they form won't be a tree but rather a complete graph).
 
@@ -48,7 +48,7 @@ variable {c d : Code α}
 /-! ### Parity of a code
 
 Parity of codes. We define them mutually inductively (`even_odd ff` is evenness, `even_odd tt`
-is oddity). If we consider codes as states of a game and `aMap_rel` as the "leads to"
+is oddity). If we consider codes as states of a game and `cloud_rel` as the "leads to"
 relation, then even codes are precisely losing codes and odd codes are precisely winning codes.
 Parity of a nonempty code corresponds to the parity of its number of iterated preimages under
 A-maps. The only even empty code is `⊥` one, all others are odd.
@@ -78,7 +78,7 @@ theorem isEven_bot (s : Set Atom) : IsEven (mk ⊥ s : Code α) :=
   isEven_of_eq_bot _ rfl
 
 theorem not_isOdd_bot (s : Set Atom) : ¬IsOdd (mk ⊥ s : Code α) := by
-  simp_rw [IsOdd_iff, AMapRel_iff]
+  simp_rw [IsOdd_iff, CloudRel_iff]
   rintro ⟨d, ⟨γ, _, h⟩, _⟩
   exact bot_ne_mk_coe (congr_arg Sigma.fst h)
 
@@ -92,13 +92,13 @@ theorem IsEmpty.isEven_iff (hc : c.IsEmpty) : IsEven c ↔ (c.1 : TypeIndex) = �
     cases hc
     have := not_isOdd_bot ∅ ((IsEven_iff _).1 h ⟨⟨⊥, _⟩, ∅⟩ ?_)
     · cases this
-    convert AMapRel.intro ⟨β, coe_lt_coe.1 hβ⟩ _
-    · rw [aMapCode_ne]
+    convert CloudRel.intro ⟨β, coe_lt_coe.1 hβ⟩ _
+    · rw [cloudCode_ne]
       refine Sigma.ext rfl (heq_of_eq ?_)
       swap
       · simp only [ne_eq, Subtype.mk.injEq, WithBot.bot_ne_coe, not_false_eq_true]
       rw [snd_mk]
-      exact aMap_empty.symm
+      exact cloud_empty.symm
     · simp only [ne_eq, Subtype.mk.injEq, WithBot.bot_ne_coe, not_false_eq_true]
 
 @[simp]
@@ -109,8 +109,8 @@ theorem IsEmpty.isOdd_iff (hc : c.IsEmpty) : IsOdd c ↔ (c.1 : TypeIndex) ≠ �
   · rintro h (rfl : β = _)
     exact not_isOdd_bot _ h
   · lift β to Λ using h
-    refine (AMapRel_iff _ _).2 ⟨⟨β, coe_lt_coe.1 hβ⟩, bot_ne_mk_coe, ?_⟩
-    simp only [ne_eq, bot_ne_mk_coe, not_false_eq_true, aMapCode_mk_ne, aMap_empty]
+    refine (CloudRel_iff _ _).2 ⟨⟨β, coe_lt_coe.1 hβ⟩, bot_ne_mk_coe, ?_⟩
+    simp only [ne_eq, bot_ne_mk_coe, not_false_eq_true, cloudCode_mk_ne, cloud_empty]
     exact Sigma.ext rfl (heq_of_eq hc.eq)
 
 @[simp]
@@ -132,7 +132,7 @@ private theorem not_isOdd_nonempty : ∀ c : NonemptyCode α, ¬c.1.IsOdd ↔ c.
     rw [Iff.comm, ← not_iff_not, Classical.not_not]
     obtain hd | hd := d.2.eq_empty_or_nonempty
     · rw [IsEmpty.isOdd_iff hd, IsEmpty.isEven_iff hd, Classical.not_not]
-    · let _ : AMapRel' ⟨d, hd⟩ c := aMapRel_coe_coe.1 h
+    · let _ : CloudRel' ⟨d, hd⟩ c := cloudRel_coe_coe.1 h
       exact not_isOdd_nonempty ⟨d, hd⟩
 termination_by not_isOdd_nonempty c => c
 
@@ -153,42 +153,42 @@ alias ⟨_, IsOdd.not_isEven⟩ := not_isEven
 
 theorem isEven_or_isOdd (c : Code α) : c.IsEven ∨ c.IsOdd := by rw [← not_isEven]; exact em _
 
-protected theorem _root_.ConNF.AMapRel.isOdd (hc : c.IsEven) (h : c ↝ d) : d.IsOdd :=
+protected theorem _root_.ConNF.CloudRel.isOdd (hc : c.IsEven) (h : c ↝ d) : d.IsOdd :=
   (IsOdd_iff d).2 ⟨_, h, hc⟩
 
-protected theorem IsEven.aMapCode (hc : c.IsEven) (hcγ : c.1 ≠ γ) : (aMapCode γ c).IsOdd :=
-  (AMapRel.intro _ hcγ).isOdd hc
+protected theorem IsEven.cloudCode (hc : c.IsEven) (hcγ : c.1 ≠ γ) : (cloudCode γ c).IsOdd :=
+  (CloudRel.intro _ hcγ).isOdd hc
 
-protected theorem IsOdd.aMapCode (hc : c.IsOdd) (hc' : c.2.Nonempty) (hcγ : c.1 ≠ γ) :
-    (aMapCode γ c).IsEven :=
-  (IsEven_iff _).2 fun d hd => by rwa [(aMapRel_aMapCode _ hc' hcγ).1 hd]
+protected theorem IsOdd.cloudCode (hc : c.IsOdd) (hc' : c.2.Nonempty) (hcγ : c.1 ≠ γ) :
+    (cloudCode γ c).IsEven :=
+  (IsEven_iff _).2 fun d hd => by rwa [(cloudRel_cloudCode _ hc' hcγ).1 hd]
 
-protected theorem IsEven.aMapCode_ne (hc : c.IsEven) (hd : d.IsEven) (hcγ : c.1 ≠ γ) :
-    aMapCode γ c ≠ d := by rintro rfl; exact hd.not_isOdd (hc.aMapCode hcγ)
+protected theorem IsEven.cloudCode_ne (hc : c.IsEven) (hd : d.IsEven) (hcγ : c.1 ≠ γ) :
+    cloudCode γ c ≠ d := by rintro rfl; exact hd.not_isOdd (hc.cloudCode hcγ)
 
-theorem aMapCode_ne_bot {s} : aMapCode γ c ≠ mk ⊥ s :=
+theorem cloudCode_ne_bot {s} : cloudCode γ c ≠ mk ⊥ s :=
   ne_of_apply_ne (Subtype.val ∘ Sigma.fst) coe_ne_bot
 
-theorem aMapCode_ne_singleton {t} (hcβ : c.1 ≠ β) : aMapCode γ c ≠ mk β {t} := by
+theorem cloudCode_ne_singleton {t} (hcβ : c.1 ≠ β) : cloudCode γ c ≠ mk β {t} := by
   intro h
-  rw [aMapCode, mk, Sigma.ext_iff] at h
+  rw [cloudCode, mk, Sigma.ext_iff] at h
   simp only [ne_eq] at h
   obtain ⟨rfl, h⟩ := h
   -- have := eq_of_heq h
   refine' (Cardinal.one_lt_aleph0.trans_le <| κ_regular.aleph0_le.trans κ_le_μ).not_le _
   rw [← Cardinal.mk_singleton t, ← h.eq]
-  refine' μ_le_mk_aMapCode c hcβ (aMapCode_nonempty.1 _)
+  refine' μ_le_mk_cloudCode c hcβ (cloudCode_nonempty.1 _)
   exact γ
-  rw [aMapCode, eq_of_heq h]
+  rw [cloudCode, eq_of_heq h]
   simp only [snd_mk, singleton_nonempty]
 
 @[simp]
 theorem isEven_singleton (t) : (mk β {t}).IsEven := by
   refine' isEven_of_forall_not fun c hc => _
-  obtain ⟨γ, hc', h⟩ := (AMapRel_iff _ _).1 hc
+  obtain ⟨γ, hc', h⟩ := (CloudRel_iff _ _).1 hc
   have := congr_arg Sigma.fst h
   cases this
-  exact aMapCode_ne_singleton hc' h.symm
+  exact cloudCode_ne_singleton hc' h.symm
 
 /-! ### Equivalence of codes -/
 
@@ -196,10 +196,10 @@ theorem isEven_singleton (t) : (mk β {t}).IsEven := by
 @[mk_iff]
 inductive Equiv : Code α → Code α → Prop
   | refl (c) : Equiv c c
-  | aMap_left (c : Code α) (hc : c.IsEven) (β : Iio α) (hcβ : c.1 ≠ β) : Equiv (aMapCode β c) c
-  | aMap_right (c : Code α) (hc : c.IsEven) (β : Iio α) (hcβ : c.1 ≠ β) : Equiv c (aMapCode β c)
-  | aMap_aMap (c : Code α) (hc : c.IsEven) (β : Iio α) (hcβ : c.1 ≠ β) (γ : Iio α) (hcγ : c.1 ≠ γ) :
-    Equiv (aMapCode β c) (aMapCode γ c)
+  | cloud_left (c : Code α) (hc : c.IsEven) (β : Iio α) (hcβ : c.1 ≠ β) : Equiv (cloudCode β c) c
+  | cloud_right (c : Code α) (hc : c.IsEven) (β : Iio α) (hcβ : c.1 ≠ β) : Equiv c (cloudCode β c)
+  | cloud_cloud (c : Code α) (hc : c.IsEven) (β : Iio α) (hcβ : c.1 ≠ β) (γ : Iio α) (hcγ : c.1 ≠ γ) :
+    Equiv (cloudCode β c) (cloudCode γ c)
 
 /-! We declare new notation for code equivalence. -/
 
@@ -216,9 +216,9 @@ theorem of_eq : c = d → c ≡ d := by rintro rfl; rfl
 
 theorem symm : Symmetric ((· ≡ ·) : Code α → Code α → Prop)
   | _, _, refl _ => refl _
-  | _, _, aMap_left c β hc hcβ => aMap_right c β hc hcβ
-  | _, _, aMap_right c β hc hcβ => aMap_left c β hc hcβ
-  | _, _, aMap_aMap c hc β hcβ γ hcγ => aMap_aMap c hc γ hcγ β hcβ
+  | _, _, cloud_left c β hc hcβ => cloud_right c β hc hcβ
+  | _, _, cloud_right c β hc hcβ => cloud_left c β hc hcβ
+  | _, _, cloud_cloud c hc β hcβ γ hcγ => cloud_cloud c hc γ hcγ β hcβ
 
 theorem comm : c ≡ d ↔ d ≡ c :=
   symm.iff _ _
@@ -226,18 +226,18 @@ theorem comm : c ≡ d ↔ d ≡ c :=
 theorem empty_empty : ∀ β γ, (⟨β, ∅⟩ : Code α) ≡ ⟨γ, ∅⟩
   | ⟨⊥, _⟩, ⟨⊥, _⟩ => Equiv.rfl
   | ⟨⊥, _⟩, ⟨(γ : Λ), hγ⟩ => by
-    convert aMap_right _ (isEven_bot _) ⟨_, coe_lt_coe.1 hγ⟩ bot_ne_mk_coe
-    rw [aMapCode, extension_ne _ _ bot_ne_coe, snd_mk, aMap_empty]
+    convert cloud_right _ (isEven_bot _) ⟨_, coe_lt_coe.1 hγ⟩ bot_ne_mk_coe
+    rw [cloudCode, extension_ne _ _ bot_ne_coe, snd_mk, cloud_empty]
     rfl
   | ⟨(β : Λ), hβ⟩, ⟨⊥, _⟩ => by
-    convert aMap_left _ (isEven_bot _) ⟨_, coe_lt_coe.1 hβ⟩ bot_ne_mk_coe
-    rw [aMapCode, extension_ne _ _ bot_ne_coe, snd_mk, aMap_empty]
+    convert cloud_left _ (isEven_bot _) ⟨_, coe_lt_coe.1 hβ⟩ bot_ne_mk_coe
+    rw [cloudCode, extension_ne _ _ bot_ne_coe, snd_mk, cloud_empty]
     rfl
   | ⟨(β : Λ), hβ⟩, ⟨(γ : Λ), hγ⟩ => by
     convert
-        aMap_aMap _ (isEven_bot ∅) ⟨_, coe_lt_coe.1 hβ⟩ bot_ne_mk_coe ⟨_, coe_lt_coe.1 hγ⟩
+        cloud_cloud _ (isEven_bot ∅) ⟨_, coe_lt_coe.1 hβ⟩ bot_ne_mk_coe ⟨_, coe_lt_coe.1 hγ⟩
           bot_ne_mk_coe <;>
-    · rw [aMapCode, extension_ne _ _ bot_ne_coe, snd_mk, aMap_empty]
+    · rw [cloudCode, extension_ne _ _ bot_ne_coe, snd_mk, cloud_empty]
       rfl
 
 protected theorem _root_.ConNF.Code.IsEmpty.equiv (hc : c.IsEmpty) (hd : d.IsEmpty) : c ≡ d := by
@@ -254,65 +254,65 @@ theorem trans {c d e : Code α} : c ≡ d → d ≡ e → c ≡ e := by
   rintro (rfl | ⟨hc, β, hcβ, rfl⟩ | ⟨hc, β, hcβ, rfl⟩ | ⟨d, hd, γ, hdγ, ε, hdε, rfl, rfl⟩)
   · exact (Equiv_iff _ _).2
   · rintro (rfl | ⟨hc', γ, hcγ, rfl⟩ | ⟨-, γ, hcγ, rfl⟩ | ⟨_, hc', γ, hcγ, ε, _, rfl, rfl⟩)
-    · exact aMap_left _ hc β hcβ
-    · cases (hc'.aMapCode hcγ).not_isEven hc
-    · exact aMap_aMap _ hc _ hcβ _ hcγ
-    · cases (hc'.aMapCode hcγ).not_isEven hc
+    · exact cloud_left _ hc β hcβ
+    · cases (hc'.cloudCode hcγ).not_isEven hc
+    · exact cloud_cloud _ hc _ hcβ _ hcγ
+    · cases (hc'.cloudCode hcγ).not_isEven hc
   · rintro (rfl | ⟨_, γ, hcγ, hce⟩ | ⟨hc', γ, _, rfl⟩ | ⟨e, he, γ, hcγ, ε, heε, hce, rfl⟩)
-    · exact aMap_right _ hc β hcβ
+    · exact cloud_right _ hc β hcβ
     · obtain h | h := c.2.eq_empty_or_nonempty
       · refine' IsEmpty.equiv h _
-        rwa [← aMapCode_isEmpty, ← hce, aMapCode_isEmpty, Code.IsEmpty]
-      · exact of_eq (eq_of_aMapCode h hcβ hcγ hce)
-    · cases (hc.aMapCode hcβ).not_isEven hc'
+        rwa [← cloudCode_isEmpty, ← hce, cloudCode_isEmpty, Code.IsEmpty]
+      · exact of_eq (eq_of_cloudCode h hcβ hcγ hce)
+    · cases (hc.cloudCode hcβ).not_isEven hc'
     · obtain h | h := c.2.eq_empty_or_nonempty
       · refine' IsEmpty.equiv h _
-        rwa [aMapCode_isEmpty, ← aMapCode_isEmpty, ← hce, aMapCode_isEmpty, Code.IsEmpty]
-      · rw [eq_of_aMapCode h hcβ hcγ hce]
-        exact aMap_right _ he _ heε
+        rwa [cloudCode_isEmpty, ← cloudCode_isEmpty, ← hce, cloudCode_isEmpty, Code.IsEmpty]
+      · rw [eq_of_cloudCode h hcβ hcγ hce]
+        exact cloud_right _ he _ heε
   · rintro (rfl | ⟨_, γ, heγ, hde⟩ | ⟨hd', γ, -, rfl⟩ | ⟨e, he, ι, heι, κ, heκ, hde, rfl⟩)
-    · exact aMap_aMap _ hd _ hdγ _ hdε
+    · exact cloud_cloud _ hd _ hdγ _ hdε
     · obtain h | h := e.2.eq_empty_or_nonempty
       · refine' IsEmpty.equiv _ h
-        rwa [aMapCode_isEmpty, ← aMapCode_isEmpty, hde, aMapCode_isEmpty, Code.IsEmpty]
-      · rw [eq_of_aMapCode h heγ hdε hde.symm]
-        exact aMap_left _ hd _ hdγ
-    · cases (hd.aMapCode hdε).not_isEven hd'
+        rwa [cloudCode_isEmpty, ← cloudCode_isEmpty, hde, cloudCode_isEmpty, Code.IsEmpty]
+      · rw [eq_of_cloudCode h heγ hdε hde.symm]
+        exact cloud_left _ hd _ hdγ
+    · cases (hd.cloudCode hdε).not_isEven hd'
     · obtain h | h := d.2.eq_empty_or_nonempty
-      · refine' (IsEmpty.aMapCode h).equiv _
-        rwa [aMapCode_isEmpty, ← aMapCode_isEmpty, ← hde, aMapCode_isEmpty, Code.IsEmpty]
-      · have := eq_of_aMapCode h hdε heι hde
+      · refine' (IsEmpty.cloudCode h).equiv _
+        rwa [cloudCode_isEmpty, ← cloudCode_isEmpty, ← hde, cloudCode_isEmpty, Code.IsEmpty]
+      · have := eq_of_cloudCode h hdε heι hde
         subst this
-        exact aMap_aMap _ hd _ hdγ _ heκ
+        exact cloud_cloud _ hd _ hdγ _ heκ
 
 theorem equiv_equivalence : Equivalence ((· ≡ ·) : Code α → Code α → Prop) :=
   ⟨refl, fun {_ _} h => symm h, fun {_ _ _} h₁ h₂ => trans h₁ h₂⟩
 
 theorem nonempty_iff : ∀ {c d : Code α}, c ≡ d → (c.2.Nonempty ↔ d.2.Nonempty)
   | _, _, refl _ => Iff.rfl
-  | _, _, aMap_left _ _ _ _ => aMapCode_nonempty
-  | _, _, aMap_right _ _ _ _ => aMapCode_nonempty.symm
-  | _, _, aMap_aMap _ _ _ _ _ _ => aMapCode_nonempty.trans aMapCode_nonempty.symm
+  | _, _, cloud_left _ _ _ _ => cloudCode_nonempty
+  | _, _, cloud_right _ _ _ _ => cloudCode_nonempty.symm
+  | _, _, cloud_cloud _ _ _ _ _ _ => cloudCode_nonempty.trans cloudCode_nonempty.symm
 
 theorem ext : ∀ {c d : Code α}, c ≡ d → c.1 = d.1 → c = d
   | _, _, refl _, _ => rfl
-  | _, _, aMap_left c _ β h, H => (h H.symm).elim
-  | _, _, aMap_right c _ β h, H => (h H).elim
-  | _, _, aMap_aMap c _ β _ γ hcγ, H => by
-    simp only [fst_aMapCode, Subtype.mk.injEq, coe_inj, Subtype.coe_inj] at H
+  | _, _, cloud_left c _ β h, H => (h H.symm).elim
+  | _, _, cloud_right c _ β h, H => (h H).elim
+  | _, _, cloud_cloud c _ β _ γ hcγ, H => by
+    simp only [fst_cloudCode, Subtype.mk.injEq, coe_inj, Subtype.coe_inj] at H
     subst H
     rfl
 
 @[simp]
 theorem bot_left_iff {s} :
-    mk ⊥ s ≡ c ↔ mk ⊥ s = c ∨ ∃ β : Iio α, c = mk β (aMap IioBot.bot_ne_coe s) := by
-  simp [Equiv_iff, aMapCode_ne_bot.symm]
+    mk ⊥ s ≡ c ↔ mk ⊥ s = c ∨ ∃ β : Iio α, c = mk β (cloud IioBot.bot_ne_coe s) := by
+  simp [Equiv_iff, cloudCode_ne_bot.symm]
   rw [eq_comm]
 
 @[simp]
 theorem bot_right_iff {s} :
-    c ≡ mk ⊥ s ↔ c = mk ⊥ s ∨ ∃ β : Iio α, c = mk β (aMap IioBot.bot_ne_coe s) := by
-  simp [Equiv_iff, aMapCode_ne_bot.symm]
+    c ≡ mk ⊥ s ↔ c = mk ⊥ s ∨ ∃ β : Iio α, c = mk β (cloud IioBot.bot_ne_coe s) := by
+  simp [Equiv_iff, cloudCode_ne_bot.symm]
   rw [eq_comm]
 
 @[simp]
@@ -328,15 +328,15 @@ theorem bot_bot_iff {s t} : (mk ⊥ s : Code α) ≡ mk ⊥ t ↔ s = t := by
     rfl
 
 theorem singleton (hβγ : β ≠ γ) (g : Tangle β) :
-    mk β {g} ≡ mk γ (typedNearLitter '' localCardinal (fMap (coe_ne hβγ) g)) := by
-  convert Equiv.aMap_right (mk β {g}) (isEven_singleton _) _ hβγ
-  rw [aMapCode, extension, dif_neg, snd_mk, aMap_singleton]
+    mk β {g} ≡ mk γ (typedNearLitter '' localCardinal (fuzz (coe_ne hβγ) g)) := by
+  convert Equiv.cloud_right (mk β {g}) (isEven_singleton _) _ hβγ
+  rw [cloudCode, extension, dif_neg, snd_mk, cloud_singleton]
   exact hβγ
 
 theorem singleton_iff {g} :
     c ≡ mk β {g} ↔
     c = mk β {g} ∨ ∃ γ : Iio α,
-      (c.1 : TypeIndex) = (γ : Λ) ∧ β ≠ γ ∧ c = aMapCode γ (mk β {g}) := by
+      (c.1 : TypeIndex) = (γ : Λ) ∧ β ≠ γ ∧ c = cloudCode γ (mk β {g}) := by
   classical
   refine ⟨fun h => ?_, ?_⟩
   · rw [Equiv_iff] at h
@@ -348,13 +348,13 @@ theorem singleton_iff {g} :
     · simp only [Subtype.coe_mk, SetCoe.exists, exists_and_left]
       exact Or.inr ⟨_, rfl, hβγ, hcβ, rfl⟩
     · cases congr_arg Sigma.fst h
-      cases aMapCode_ne_singleton γne h.symm
+      cases cloudCode_ne_singleton γne h.symm
     · cases congr_arg Sigma.fst h
-      cases aMapCode_ne_singleton δne h.symm
+      cases cloudCode_ne_singleton δne h.symm
   · rintro (rfl | ⟨γ, hc, hβγ, rfl⟩)
     · rfl
     · convert (singleton hβγ g).symm
-      simp only [snd_mk, aMapCode, extension_ne _ _ hβγ, aMap_singleton]
+      simp only [snd_mk, cloudCode, extension_ne _ _ hβγ, cloud_singleton]
 
 end Equiv
 
@@ -365,15 +365,15 @@ theorem extension_eq_of_singleton_equiv_singleton {γ : IioBot α}
   obtain h | ⟨ε, hc, hβε, hA⟩ := Equiv.singleton_iff.1 h
   · exact (Sigma.ext_iff.1 h).1
   · exfalso
-    refine aMapCode_ne_singleton ?_ hA.symm
+    refine cloudCode_ne_singleton ?_ hA.symm
     cases congr_arg Sigma.fst hA
     exact hβε
 
 theorem IsEven.unique : ∀ {c d : Code α}, c.IsEven → d.IsEven → c ≡ d → c = d
   | c, _, _, _, Equiv.refl _ => rfl
-  | _, _, _, _, Equiv.aMap_left d hd β hdβ => by cases (hd.aMapCode hdβ).not_isEven ‹_›
-  | _, _, _, _, Equiv.aMap_right d hd β hcβ => by cases (hd.aMapCode hcβ).not_isEven ‹_›
-  | _, _, _, _, Equiv.aMap_aMap e he β hcβ γ _ => by cases (he.aMapCode hcβ).not_isEven ‹_›
+  | _, _, _, _, Equiv.cloud_left d hd β hdβ => by cases (hd.cloudCode hdβ).not_isEven ‹_›
+  | _, _, _, _, Equiv.cloud_right d hd β hcβ => by cases (hd.cloudCode hcβ).not_isEven ‹_›
+  | _, _, _, _, Equiv.cloud_cloud e he β hcβ γ _ => by cases (he.cloudCode hcβ).not_isEven ‹_›
 
 theorem exists_even_equiv : ∀ c : Code α, ∃ d : Code α, d ≡ c ∧ d.IsEven := by
   rintro ⟨β, s⟩
@@ -381,15 +381,15 @@ theorem exists_even_equiv : ∀ c : Code α, ∃ d : Code α, d ≡ c ∧ d.IsEv
   · exact ⟨_, Equiv.empty_empty _ _, isEven_bot _⟩
   obtain heven | hodd := isEven_or_isOdd ⟨β, s⟩
   · exact ⟨_, Equiv.rfl, heven⟩
-  simp_rw [IsOdd_iff, AMapRel_iff] at hodd
+  simp_rw [IsOdd_iff, CloudRel_iff] at hodd
   obtain ⟨d, ⟨γ, hdγ, hc⟩, hd⟩ := id hodd
-  exact ⟨d, (Equiv.aMap_right _ hd _ hdγ).trans (Equiv.of_eq hc.symm), hd⟩
+  exact ⟨d, (Equiv.cloud_right _ hd _ hdγ).trans (Equiv.of_eq hc.symm), hd⟩
 
 protected theorem IsEven.exists_equiv_extension_eq (heven : c.IsEven) :
     ∃ d : Code α, d ≡ c ∧ d.1 = γ := by
   by_cases c.1 = γ
   · exact ⟨c, Equiv.rfl, h⟩
-  · exact ⟨aMapCode γ c, Equiv.aMap_left _ heven _ h, rfl⟩
+  · exact ⟨cloudCode γ c, Equiv.cloud_left _ heven _ h, rfl⟩
 
 theorem exists_equiv_extension_eq : ∀ c : Code α, ∃ d : Code α, d ≡ c ∧ d.1 = γ := by
   intro c
@@ -399,9 +399,9 @@ theorem exists_equiv_extension_eq : ∀ c : Code α, ∃ d : Code α, d ≡ c �
 
 theorem Equiv.unique : ∀ {c d : Code α}, c ≡ d → c.1 = d.1 → c = d
   | c, _, Equiv.refl _, _ => rfl
-  | _, _, Equiv.aMap_left d _ β hdβ, h => by cases hdβ h.symm
-  | _, _, Equiv.aMap_right d _ β hcβ, h => by cases hcβ h
-  | _, _, Equiv.aMap_aMap e _ β _ γ _, h => by
+  | _, _, Equiv.cloud_left d _ β hdβ, h => by cases hdβ h.symm
+  | _, _, Equiv.cloud_right d _ β hcβ, h => by cases hcβ h
+  | _, _, Equiv.cloud_cloud e _ β _ γ _, h => by
       have : β = γ := Iio.coe_injective h
       subst this
       rfl

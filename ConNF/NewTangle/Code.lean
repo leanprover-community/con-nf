@@ -1,4 +1,4 @@
-import ConNF.FMap.Hypotheses
+import ConNF.Fuzz.Hypotheses
 
 open Set WithBot
 

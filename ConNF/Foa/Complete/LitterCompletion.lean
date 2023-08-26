@@ -31,7 +31,7 @@ structure InflexibleCoe {β : Iic α} (L : Litter) (A : ExtendedIndex β) where
   hδε : δ ≠ ε
   B : Quiver.Path (β : TypeIndex) γ
   t : Tangle δ
-  hL : L = fMap (coe_ne_coe.mpr <| coe_ne' hδε) t
+  hL : L = fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t
   hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)
 
 instance {β : Iic α} (L : Litter) (A : ExtendedIndex β) : Subsingleton (InflexibleCoe L A) := by
@@ -42,11 +42,11 @@ instance {β : Iic α} (L : Litter) (A : ExtendedIndex β) : Subsingleton (Infle
   cases Subtype.coe_injective
     (coe_eq_coe.mp (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hA₂).eq))
   cases (Path.heq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hA₂).eq).eq
-  have h₁ := fMap_β (coe_ne_coe.mpr <| coe_ne' hδε₁) t₁
-  have h₂ := fMap_β (coe_ne_coe.mpr <| coe_ne' hδε₂) t₂
+  have h₁ := fuzz_β (coe_ne_coe.mpr <| coe_ne' hδε₁) t₁
+  have h₂ := fuzz_β (coe_ne_coe.mpr <| coe_ne' hδε₂) t₂
   rw [hL₂, h₂] at h₁
   cases Subtype.coe_injective (coe_eq_coe.mp h₁)
-  cases fMap_injective _ hL₂
+  cases fuzz_injective _ hL₂
   rfl
 
 /-- A proof-relevant statement that `L` is `A`-inflexible, where `δ = ⊥`. -/
@@ -56,7 +56,7 @@ structure InflexibleBot {β : Iic α} (L : Litter) (A : ExtendedIndex β) where
   hε : (ε : Λ) < γ
   B : Quiver.Path (β : TypeIndex) γ
   a : Atom
-  hL : L = fMap (show (⊥ : TypeIndex) ≠ (ε : Λ) from bot_ne_coe) a
+  hL : L = fuzz (show (⊥ : TypeIndex) ≠ (ε : Λ) from bot_ne_coe) a
   hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)
 
 instance {β : Iic α} (L : Litter) (A : ExtendedIndex β) : Subsingleton (InflexibleBot L A) := by
@@ -66,14 +66,14 @@ instance {β : Iic α} (L : Litter) (A : ExtendedIndex β) : Subsingleton (Infle
   cases Subtype.coe_injective
     (coe_eq_coe.mp (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hA₂).eq))
   cases (Path.heq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hA₂).eq).eq
-  cases fMap_injective _ hL₂
+  cases fuzz_injective _ hL₂
   rfl
 
 theorem inflexibleBot_inflexibleCoe {β : Iic α} {L : Litter} {A : ExtendedIndex β} :
     InflexibleBot L A → InflexibleCoe L A → False := by
   rintro ⟨γ₁, ε₁, hε₁, B₁, a₁, rfl, rfl⟩ ⟨_, δ₂, ε₂, _, _, hδε₂, _, t₂, hL₂, _⟩
-  have h₁ := fMap_β (show (⊥ : TypeIndex) ≠ (ε₁ : Λ) from bot_ne_coe) a₁
-  have h₂ := fMap_β (coe_ne_coe.mpr <| coe_ne' hδε₂) t₂
+  have h₁ := fuzz_β (show (⊥ : TypeIndex) ≠ (ε₁ : Λ) from bot_ne_coe) a₁
+  have h₂ := fuzz_β (coe_ne_coe.mpr <| coe_ne' hδε₂) t₂
   rw [hL₂, h₂] at h₁
   cases h₁
 
@@ -146,7 +146,7 @@ end Comp
 
 theorem InflexibleBot.constrains {β : Iic α} {L : Litter} {A : ExtendedIndex β}
     (h : InflexibleBot L A) : (inl h.a, h.B.cons (bot_lt_coe _)) <[α] (inr L.toNearLitter, A) := by
-  have := Constrains.fMap_bot h.hε h.B h.a
+  have := Constrains.fuzz_bot h.hε h.B h.a
   rw [← h.hL, ← h.hA] at this
   exact Relation.TransGen.single this
 
@@ -256,8 +256,8 @@ to be stated. -/
 theorem _root_.ConNF.StructAction.hypothesisedAllowable_eq {φ : StructAction β} {L L' : Litter}
     {A : ExtendedIndex β} {γ : Iic α} {δ ε : Iio α} {hδ : (δ : Λ) < γ} {hε : (ε : Λ) < γ}
     {hδε : δ ≠ ε} {B : Quiver.Path (β : TypeIndex) γ} (t t' : Tangle δ)
-    {hL : L = fMap (coe_ne_coe.mpr <| coe_ne' hδε) t}
-    (hL' : L' = fMap (coe_ne_coe.mpr <| coe_ne' hδε) t')
+    {hL : L = fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t}
+    (hL' : L' = fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t')
     {hA : A = (B.cons (coe_lt hε)).cons (bot_lt_coe _)} {h₁ h₂} (h₁' h₂') :
     (φ.hypothesisedAllowable ⟨γ, δ, ε, hδ, hε, hδε, B, t, hL, hA⟩ h₁ h₂ : Allowable δ) =
       (φ.hypothesisedAllowable ⟨γ, δ, ε, hδ, hε, hδε, B, t', hL', hA⟩ h₁' h₂' : Allowable δ) :=
@@ -275,12 +275,12 @@ noncomputable def litterCompletion (π : StructApprox β) (A : ExtendedIndex β)
     (H : Hypothesis ⟨inr L.toNearLitter, A⟩) : Litter :=
   if h : Nonempty (InflexibleCoe L A) then
     if hs : _ ∧ _ then
-      fMap (coe_ne_coe.mpr <| coe_ne' h.some.hδε)
+      fuzz (coe_ne_coe.mpr <| coe_ne' h.some.hδε)
         ((ihAction H).hypothesisedAllowable h.some hs.1 hs.2 • h.some.t)
     else L
   else
     if h : Nonempty (InflexibleBot L A) then
-      fMap (show (⊥ : TypeIndex) ≠ (h.some.ε : Λ) from bot_ne_coe)
+      fuzz (show (⊥ : TypeIndex) ≠ (h.some.ε : Λ) from bot_ne_coe)
         (H.atomImage (h.some.B.cons (bot_lt_coe _)) h.some.a h.some.constrains)
     else NearLitterApprox.flexibleCompletion α (π A) A • L
 
@@ -297,7 +297,7 @@ theorem litterCompletion_of_inflexibleCoe' (π : StructApprox β) (A : ExtendedI
     (H : Hypothesis ⟨inr L.toNearLitter, A⟩) (h : InflexibleCoe L A) :
     litterCompletion π A L H =
       if h' : _ ∧ _ then
-        fMap (coe_ne_coe.mpr <| coe_ne' h.hδε)
+        fuzz (coe_ne_coe.mpr <| coe_ne' h.hδε)
           ((ihAction H).hypothesisedAllowable h h'.1 h'.2 • h.t)
       else L := by
   -- Push the subsingleton elimination into the kernel by
@@ -313,7 +313,7 @@ theorem litterCompletion_of_inflexibleCoe (π : StructApprox β) (A : ExtendedIn
     (h₁ : ((ihAction H).comp (h.B.cons (coe_lt h.hδ))).Lawful)
     (h₂ : ((ihAction H).comp (h.B.cons (coe_lt h.hδ))).MapFlexible) :
     litterCompletion π A L H =
-      fMap (coe_ne_coe.mpr <| coe_ne' h.hδε)
+      fuzz (coe_ne_coe.mpr <| coe_ne' h.hδε)
         ((ihAction H).hypothesisedAllowable h h₁ h₂ • h.t) := by
   rw [litterCompletion_of_inflexibleCoe', dif_pos]
   · refine' ⟨_, _⟩
@@ -325,7 +325,7 @@ theorem litterCompletion_of_inflexibleCoe (π : StructApprox β) (A : ExtendedIn
 theorem litterCompletion_of_inflexibleBot (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
     (H : Hypothesis ⟨inr L.toNearLitter, A⟩) (h : InflexibleBot L A) :
     litterCompletion π A L H =
-      fMap (show (⊥ : TypeIndex) ≠ (h.ε : Λ) from bot_ne_coe)
+      fuzz (show (⊥ : TypeIndex) ≠ (h.ε : Λ) from bot_ne_coe)
         (H.atomImage (h.B.cons (bot_lt_coe _)) h.a h.constrains) := by
   rw [litterCompletion, dif_neg, dif_pos, Subsingleton.elim h]
   · exact ⟨h⟩

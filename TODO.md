@@ -1,6 +1,5 @@
 - Remove excessive imports.
-- Rename `fMap` and `aMap`.
-- Refactor new allowable permutation to use a `smul_fMap` definition.
+- Refactor new allowable permutation to use a `smul_fuzz` definition.
 - Fix variable letters.
 - Add typeclasses for derivatives and toStructPerm?
 - Add documentation.

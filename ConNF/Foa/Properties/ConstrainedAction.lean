@@ -336,7 +336,7 @@ theorem transGen_constrains_of_mem_designatedSupport {A : ExtendedIndex β} {L :
     {h : InflexibleCoe L A} {γ : Iic α} {δ ε : Iio α} {hδ : (δ : Λ) < γ} {hε : (ε : Λ) < γ}
     (hδε : δ ≠ ε) {C : Path (h.δ : TypeIndex) γ} {t : Tangle δ} {d : SupportCondition h.δ}
     (hd₂ :
-      (inr (fMap (Subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t).toNearLitter,
+      (inr (fuzz (Subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t).toNearLitter,
           (C.cons (coe_lt hε)).cons (bot_lt_coe _)) ≤[α]
         d)
     (hd : (d.fst, (h.B.cons (coe_lt h.hδ)).comp d.snd) ≺[α] (inr L.toNearLitter, A))
@@ -346,7 +346,7 @@ theorem transGen_constrains_of_mem_designatedSupport {A : ExtendedIndex β} {L :
   refine' Relation.TransGen.tail' _ hd
   refine' reflTransGen_constrains_comp (c := (inl a, _)) (d := d) _ (h.B.cons <| coe_lt h.hδ)
   refine' Relation.ReflTransGen.trans _ hd₂
-  exact Relation.ReflTransGen.single (Constrains.fMap hδ hε hδε C t _ hc)
+  exact Relation.ReflTransGen.single (Constrains.fuzz hδ hε hδε C t _ hc)
 
 end StructApprox
 

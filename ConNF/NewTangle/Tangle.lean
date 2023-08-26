@@ -28,10 +28,10 @@ variable [PositionedTangleCumul α] [AlmostTangleCumul α]
 relating each extension of the semitangle. -/
 inductive Preference (members : Extensions α)
   | base (atoms : Set (Tangle (⊥ : IioBot α))) :
-    (∀ γ, aMap bot_ne_coe atoms = members γ) → Preference members
+    (∀ γ, cloud bot_ne_coe atoms = members γ) → Preference members
   | proper (β : Iio α) :
     (mk β (members β) : Code α).IsEven →
-    (∀ (γ : Iio α) (hβγ : iioCoe β ≠ γ), aMap hβγ (members β) = members γ) →
+    (∀ (γ : Iio α) (hβγ : iioCoe β ≠ γ), cloud hβγ (members β) = members γ) →
     Preference members
 
 variable {α}
@@ -100,9 +100,9 @@ theorem reprCodeSpec : ∀ s : Semitangle α, (reprCode s : Code α).IsEven
 
 theorem reprCode_members_ne :
     ∀ (s : Semitangle α) (γ : Iio α) (_ : (reprCode s : Code α).1 ≠ γ),
-      (aMapCode γ (reprCode s)).2 = s.members γ
+      (cloudCode γ (reprCode s)).2 = s.members γ
   | ⟨exts, Preference.proper β rep hA⟩, γ, hcγ => by
-      rw [snd_aMapCode]
+      rw [snd_cloudCode]
       exact hA _ hcγ
   | ⟨_, Preference.base _ hA⟩, γ, _ => hA _
 
@@ -116,14 +116,14 @@ theorem ext_core (x y : Semitangle α) : (∃ γ, γ < α) → x.members = y.mem
   have γ : Iio α := ⟨γ, hγ⟩
   obtain ⟨atoms₁, hA₁⟩ | ⟨β, even₁, hA₁⟩ := hxs <;>
   obtain ⟨atoms₂, hA₂⟩ | ⟨γ, even₂, hA₂⟩ := hys
-  · simp_rw [aMap_injective ((hA₁ γ).trans (hA₂ _).symm)]
-  · cases (isEven_bot _).aMapCode_ne even₂ bot_ne_mk_coe (Sigma.ext_iff.2 ⟨rfl, (hA₁ γ).heq⟩)
-  · cases (isEven_bot _).aMapCode_ne even₁ bot_ne_mk_coe (Sigma.ext_iff.2 ⟨rfl, (hA₂ β).heq⟩)
+  · simp_rw [cloud_injective ((hA₁ γ).trans (hA₂ _).symm)]
+  · cases (isEven_bot _).cloudCode_ne even₂ bot_ne_mk_coe (Sigma.ext_iff.2 ⟨rfl, (hA₁ γ).heq⟩)
+  · cases (isEven_bot _).cloudCode_ne even₁ bot_ne_mk_coe (Sigma.ext_iff.2 ⟨rfl, (hA₂ β).heq⟩)
   · simp only [Preference.proper.injEq]
     refine not_ne_iff.1 fun hβγ =>
-      even₂.aMapCode_ne even₁ (Iio.coe_injective.ne hβγ.symm) <|
+      even₂.cloudCode_ne even₁ (Iio.coe_injective.ne hβγ.symm) <|
         Sigma.ext_iff.2 ⟨rfl, heq_of_eq ?_⟩
-    rw [snd_aMapCode]
+    rw [snd_cloudCode]
     exact hA₂ β fun h => hβγ.symm (Iio.coe_injective h)
 
 /-- One useful form of extensionality in tangled type theory. Two nonempty semitangles are equal if
@@ -138,13 +138,13 @@ theorem ext_code : ∀ {x y : Semitangle α}, (reprCode x : Code α) ≡ reprCod
     obtain ⟨δ, hδ⟩ :=
       (Code.Equiv.bot_left_iff.1 h).resolve_left (ne_of_apply_ne Sigma.fst bot_ne_mk_coe)
     rw [hδ] at even₂
-    cases even₂.not_isOdd ((isEven_bot _).aMapCode bot_ne_mk_coe)
+    cases even₂.not_isOdd ((isEven_bot _).cloudCode bot_ne_mk_coe)
   | ⟨x, Preference.proper γ even₁ hA₁⟩, ⟨y, Preference.base s hA₂⟩, h => by
     change Code.mk _ _ ≡ Code.mk _ _ at h
     obtain ⟨δ, hδ⟩ :=
       (Code.Equiv.bot_right_iff.1 h).resolve_left (ne_of_apply_ne Sigma.fst mk_coe_ne_bot)
     rw [hδ] at even₁
-    cases even₁.not_isOdd ((isEven_bot _).aMapCode bot_ne_mk_coe)
+    cases even₁.not_isOdd ((isEven_bot _).cloudCode bot_ne_mk_coe)
   | ⟨x, Preference.proper γ even₁ hA₁⟩, ⟨y, Preference.proper δ even₂ hA₂⟩, h => by
     dsimp at h
     simp only [Equiv_iff, WithBot.coe_ne_bot, ne_eq, Subtype.mk.injEq, coe_inj, Subtype.coe_inj,
@@ -162,21 +162,21 @@ theorem ext_code : ∀ {x y : Semitangle α}, (reprCode x : Code α) ≡ reprCod
           (Eq.trans ?_ <| hA₂ _ fun h => hδε (Iio.coe_injective h))
       rw [eq_of_heq h.2]
     · rw [Sigma.ext_iff] at h
-      simp only [fst_aMapCode, Subtype.mk.injEq, coe_inj, ne_eq] at h
+      simp only [fst_cloudCode, Subtype.mk.injEq, coe_inj, ne_eq] at h
       obtain rfl := h.1
       rw [eq_of_heq h.2] at even₁
-      cases (even₂.aMapCode <| Iio.coe_injective.ne hδγ).not_isEven even₁
+      cases (even₂.cloudCode <| Iio.coe_injective.ne hδγ).not_isEven even₁
     · rw [Sigma.ext_iff] at h
-      simp only [fst_aMapCode, Subtype.mk.injEq, coe_inj, ne_eq] at h
+      simp only [fst_cloudCode, Subtype.mk.injEq, coe_inj, ne_eq] at h
       obtain rfl := h.1
       rw [eq_of_heq h.2] at even₂
-      cases (even₁.aMapCode <| Iio.coe_injective.ne hγδ).not_isEven even₂
+      cases (even₁.cloudCode <| Iio.coe_injective.ne hγδ).not_isEven even₂
     · --rw [hx.eq] at even₁
       rw [Sigma.ext_iff] at h
-      simp only [fst_aMapCode, Subtype.mk.injEq, coe_inj, ne_eq] at h
+      simp only [fst_cloudCode, Subtype.mk.injEq, coe_inj, ne_eq] at h
       obtain rfl := h.2.1.1
       rw [eq_of_heq h.2.1.2] at even₁
-      cases (hc.aMapCode hc').not_isEven even₁
+      cases (hc.cloudCode hc').not_isEven even₁
 
 /-- Extensionality in tangled type theory. Two nonempty semitangles are equal if their
 `β`-extensions are equal for *any* choice of `γ < α`.
@@ -187,52 +187,52 @@ theorem ext (x y : Semitangle α) (h : x.members γ = y.members γ) : x = y := b
   dsimp only at h
   refine ext_code ?_
   obtain ⟨atoms₁, hA₁⟩ | ⟨β, even₁, hA₁⟩ := hxs <;> obtain ⟨atoms₂, hA₂⟩ | ⟨δ, even₂, hA₂⟩ := hys
-  · refine (Code.Equiv.aMap_right _ (Code.isEven_bot _) γ bot_ne_mk_coe).trans ?_
-    simp only [Ne.def, IioBot.bot_ne_coe, not_false_iff, aMapCode_mk_ne, reprCode_base,
+  · refine (Code.Equiv.cloud_right _ (Code.isEven_bot _) γ bot_ne_mk_coe).trans ?_
+    simp only [Ne.def, IioBot.bot_ne_coe, not_false_iff, cloudCode_mk_ne, reprCode_base,
       Subtype.coe_mk]
     rw [hA₁ γ, h, ← hA₂ γ]
-    exact Code.Equiv.aMap_left _ (Code.isEven_bot _) γ bot_ne_mk_coe
+    exact Code.Equiv.cloud_left _ (Code.isEven_bot _) γ bot_ne_mk_coe
   · simp only [reprCode_base, Subtype.coe_mk, reprCode_proper]
     obtain rfl | hδγ := eq_or_ne δ γ
     · simp only [isEven_bot, mem_Iio, SetCoe.forall, Ne.def, Iio.coe_inj] at *
       have := hA₁ δ δ.prop
       rw [Subtype.coe_eta] at this
       rw [← h, ← this]
-      exact Code.Equiv.aMap_right _ (Code.isEven_bot _) _ bot_ne_mk_coe
-    · refine (Code.Equiv.aMap_right _ (Code.isEven_bot _) γ bot_ne_mk_coe).trans ?_
-      simp only [Ne.def, IioBot.bot_ne_coe, not_false_iff, aMapCode_mk_ne]
-      rw [hA₁ γ, h, ← hA₂ γ (Iio.coe_injective.ne hδγ), ← aMapCode_mk_ne]
-      exact Code.Equiv.aMap_left _ even₂ γ (Iio.coe_injective.ne hδγ)
+      exact Code.Equiv.cloud_right _ (Code.isEven_bot _) _ bot_ne_mk_coe
+    · refine (Code.Equiv.cloud_right _ (Code.isEven_bot _) γ bot_ne_mk_coe).trans ?_
+      simp only [Ne.def, IioBot.bot_ne_coe, not_false_iff, cloudCode_mk_ne]
+      rw [hA₁ γ, h, ← hA₂ γ (Iio.coe_injective.ne hδγ), ← cloudCode_mk_ne]
+      exact Code.Equiv.cloud_left _ even₂ γ (Iio.coe_injective.ne hδγ)
   · simp only [reprCode_proper, Subtype.coe_mk, reprCode_base]
     obtain rfl | hβγ := eq_or_ne β γ
     · dsimp only [mem_Iio, Ne.def, SetCoe.forall] at *
       rw [h, ← hA₂ β]
-      exact Code.Equiv.aMap_left _ (Code.isEven_bot _) _ bot_ne_mk_coe
-    · refine (Code.Equiv.aMap_right _ even₁ γ <| Iio.coe_injective.ne hβγ).trans ?_
+      exact Code.Equiv.cloud_left _ (Code.isEven_bot _) _ bot_ne_mk_coe
+    · refine (Code.Equiv.cloud_right _ even₁ γ <| Iio.coe_injective.ne hβγ).trans ?_
       dsimp only [mem_Iio, Ne.def, SetCoe.forall] at *
-      refine (Code.Equiv.of_eq <| aMapCode_mk_ne _ _ (Iio.coe_injective.ne hβγ) (xs β)).trans ?_
+      refine (Code.Equiv.of_eq <| cloudCode_mk_ne _ _ (Iio.coe_injective.ne hβγ) (xs β)).trans ?_
       rw [hA₁ γ (Iio.coe_injective.ne hβγ), h, ← hA₂ γ]
-      exact Code.Equiv.aMap_left _ (Code.isEven_bot _) γ bot_ne_mk_coe
+      exact Code.Equiv.cloud_left _ (Code.isEven_bot _) γ bot_ne_mk_coe
   · simp only [reprCode_proper, Subtype.coe_mk]
     obtain rfl | hβγ := eq_or_ne β γ
     · obtain rfl | hδβ := eq_or_ne δ β
       · rw [h]
-      · have := aMapCode_ne β (Code.mk δ (ys δ)) (Iio.coe_injective.ne hδβ)
+      · have := cloudCode_ne β (Code.mk δ (ys δ)) (Iio.coe_injective.ne hδβ)
         dsimp only [mem_Iio, Ne.def, SetCoe.forall, Code.snd_mk] at *
         rw [h, ← hA₂ _ (Iio.coe_injective.ne hδβ), ← Code.mk_def, ← this]
-        exact Code.Equiv.aMap_left _ even₂ _ (Iio.coe_injective.ne hδβ)
+        exact Code.Equiv.cloud_left _ even₂ _ (Iio.coe_injective.ne hδβ)
     obtain rfl | hδγ := eq_or_ne δ γ
-    · have := aMapCode_ne δ (Code.mk β (xs β)) (Iio.coe_injective.ne hβγ)
+    · have := cloudCode_ne δ (Code.mk β (xs β)) (Iio.coe_injective.ne hβγ)
       dsimp only [mem_Iio, Ne.def, SetCoe.forall, Code.snd_mk] at *
       simp_rw [← h, ← hA₁ _ (Iio.coe_injective.ne hβγ), ← Code.mk_def, ← this]
-      exact Code.Equiv.aMap_right _ even₁ _ (Iio.coe_injective.ne hβγ)
-    refine' (Code.Equiv.aMap_right _ even₁ γ <| Iio.coe_injective.ne hβγ).trans _
-    have := aMapCode_ne γ (Code.mk (↑δ) (ys δ)) (Iio.coe_injective.ne hδγ)
+      exact Code.Equiv.cloud_right _ even₁ _ (Iio.coe_injective.ne hβγ)
+    refine' (Code.Equiv.cloud_right _ even₁ γ <| Iio.coe_injective.ne hβγ).trans _
+    have := cloudCode_ne γ (Code.mk (↑δ) (ys δ)) (Iio.coe_injective.ne hδγ)
     dsimp only [mem_Iio, Ne.def, SetCoe.forall, Code.snd_mk] at *
-    rw [aMapCode_ne]
+    rw [cloudCode_ne]
     rw [Code.snd_mk, hA₁ γ (Iio.coe_injective.ne hβγ), h, ← hA₂ γ (Iio.coe_injective.ne hδγ)]
     rw [← this]
-    exact Code.Equiv.aMap_left _ even₂ γ (Iio.coe_injective.ne hδγ)
+    exact Code.Equiv.cloud_left _ even₂ γ (Iio.coe_injective.ne hδγ)
 
 /-- Extensionality in tangled type theory. Two nonempty semitangles are equal if their
 `β`-extensions are equal for *any* choice of `β < α`. -/
@@ -292,7 +292,7 @@ theorem smul_extension_apply (f : AllowablePerm α) (s : Set (Tangle β)) :
   by_cases β = γ
   · subst h
     simp only [extension_eq, cast_eq]
-  · rw [extension_ne _ _ h, extension_ne _ _ h, smul_aMap]
+  · rw [extension_ne _ _ h, extension_ne _ _ h, smul_cloud]
 
 @[simp]
 theorem smul_extension (f : AllowablePerm α) (s : Set (Tangle β)) :
@@ -302,14 +302,14 @@ theorem smul_extension (f : AllowablePerm α) (s : Set (Tangle β)) :
   rfl
 
 theorem smul_aux₁ {s : Set (Tangle (⊥ : IioBot α))}
-    (h : ∀ γ : Iio α, aMap bot_ne_coe s = (e γ : Set (Tangle (iioCoe γ)))) (γ : Iio α) :
-    aMap bot_ne_coe (f • s) = (f • e) γ := by
-  simpa only [smul_aMap] using congr_arg (fun c => f • c) (h γ)
+    (h : ∀ γ : Iio α, cloud bot_ne_coe s = (e γ : Set (Tangle (iioCoe γ)))) (γ : Iio α) :
+    cloud bot_ne_coe (f • s) = (f • e) γ := by
+  simpa only [smul_cloud] using congr_arg (fun c => f • c) (h γ)
 
 theorem smul_aux₂
-    (h : ∀ (δ : Iio α) (hγδ : iioCoe γ ≠ δ), aMap hγδ (e γ) = (e δ : Set (Tangle (iioCoe δ))))
-    (δ : Iio α) (hγδ : iioCoe γ ≠ δ) : aMap hγδ ((f • e) γ) = (f • e) δ := by
-  simpa only [smul_aMap] using congr_arg (fun c => f • c) (h δ hγδ)
+    (h : ∀ (δ : Iio α) (hγδ : iioCoe γ ≠ δ), cloud hγδ (e γ) = (e δ : Set (Tangle (iioCoe δ))))
+    (δ : Iio α) (hγδ : iioCoe γ ≠ δ) : cloud hγδ ((f • e) γ) = (f • e) δ := by
+  simpa only [smul_cloud] using congr_arg (fun c => f • c) (h δ hγδ)
 
 /-- Allowable permutations act on semitangles. -/
 noncomputable instance : SMul (AllowablePerm α) (Semitangle α)

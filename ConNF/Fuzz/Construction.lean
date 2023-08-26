@@ -1,4 +1,4 @@
-import ConNF.FMap.Hypotheses
+import ConNF.Fuzz.Hypotheses
 
 /-!
 # f-maps
@@ -104,17 +104,17 @@ variable [Params.{u}] {β : TypeIndex} {γ : Λ} [CoreTangleData β] [Positioned
   [PositionData] [CoreTangleData γ] [PositionedTangleData γ] [AlmostTangleData γ] (hβγ : β ≠ γ)
 
 /-- The requirements to be satisfied by the f-maps.
-If `fMap_condition` applied to a litter indexed by `i` is true,
-then `i` is *not* a valid output to `fMap x`. -/
-inductive FMapCondition (x : Tangle β) (i : μ) : Prop
+If `fuzz_condition` applied to a litter indexed by `i` is true,
+then `i` is *not* a valid output to `fuzz x`. -/
+inductive FuzzCondition (x : Tangle β) (i : μ) : Prop
   | any (N : Set Atom) (hN : IsNearLitter ⟨i, β, γ, hβγ⟩ N) :
-    position (typedNearLitter ⟨⟨i, β, γ, hβγ⟩, N, hN⟩ : Tangle γ) ≤ position x → FMapCondition x i
+    position (typedNearLitter ⟨⟨i, β, γ, hβγ⟩, N, hN⟩ : Tangle γ) ≤ position x → FuzzCondition x i
   | bot (a : Atom) :
       β = ⊥ →   -- this condition should only trigger for type `-1`
       HEq a x → -- using `heq` instead of induction on `β` or the instance deals with many annoyances
       position (typedNearLitter (Litter.toNearLitter ⟨i, ⊥, γ, bot_ne_coe⟩) : Tangle γ) ≤
         typedAtomPosition a →
-      FMapCondition x i
+      FuzzCondition x i
 
 instance : IsWellOrder (Tangle β) (InvImage (· < ·) position) := by
   refine' { .. }
@@ -144,12 +144,12 @@ theorem mk_invImage_le (x : Tangle β) : #{ y : Tangle γ // position y ≤ posi
 
 variable {γ}
 
-theorem mk_fMap_deny (hβγ : β ≠ γ) (x : Tangle β) :
-    #{ y // InvImage (· < ·) position y x } + #{ i // FMapCondition hβγ x i } < #μ := by
+theorem mk_fuzz_deny (hβγ : β ≠ γ) (x : Tangle β) :
+    #{ y // InvImage (· < ·) position y x } + #{ i // FuzzCondition hβγ x i } < #μ := by
   have h₁ := mk_invImage_lt x
-  suffices h₂ : #{ i // FMapCondition hβγ x i } < #μ
+  suffices h₂ : #{ i // FuzzCondition hβγ x i } < #μ
   · exact add_lt_of_lt μ_strong_limit.isLimit.aleph0_le h₁ h₂
-  have : ∀ i, FMapCondition hβγ x i →
+  have : ∀ i, FuzzCondition hβγ x i →
     (∃ (N : Set Atom) (hN : IsNearLitter ⟨i, β, γ, hβγ⟩ N),
         position (typedNearLitter ⟨_, N, hN⟩ : Tangle γ) ≤ position x) ∨
       β = ⊥ ∧
@@ -194,47 +194,47 @@ We're done with proving technical results, now we can define the f-maps.
 -/
 
 /-- The f-maps. -/
-noncomputable def fMap (x : Tangle β) : Litter :=
-  ⟨chooseWf (FMapCondition hβγ) (mk_fMap_deny hβγ) x, β, γ, hβγ⟩
+noncomputable def fuzz (x : Tangle β) : Litter :=
+  ⟨chooseWf (FuzzCondition hβγ) (mk_fuzz_deny hβγ) x, β, γ, hβγ⟩
 
 @[simp]
-theorem fMap_β (x : Tangle β) : (fMap hβγ x).β = β :=
+theorem fuzz_β (x : Tangle β) : (fuzz hβγ x).β = β :=
   rfl
 
 @[simp]
-theorem fMap_γ (x : Tangle β) : (fMap hβγ x).γ = γ :=
+theorem fuzz_γ (x : Tangle β) : (fuzz hβγ x).γ = γ :=
   rfl
 
-theorem fMap_injective : Injective (fMap hβγ) := by
+theorem fuzz_injective : Injective (fuzz hβγ) := by
   intro x y h
-  simp only [fMap, Litter.mk.injEq, chooseWf_injective.eq_iff, and_self, and_true] at h
+  simp only [fuzz, Litter.mk.injEq, chooseWf_injective.eq_iff, and_self, and_true] at h
   exact h
 
-theorem fMap_not_mem_deny (x : Tangle β) : (fMap hβγ x).ν ∉ {i | FMapCondition hβγ x i} :=
+theorem fuzz_not_mem_deny (x : Tangle β) : (fuzz hβγ x).ν ∉ {i | FuzzCondition hβγ x i} :=
   chooseWf_not_mem_deny x
 
-theorem fMap_position' (x : Tangle β) (N : Set Atom) (h : IsNearLitter (fMap hβγ x) N) :
-    position x < position (typedNearLitter ⟨fMap hβγ x, N, h⟩ : Tangle γ) := by
-  have h' := fMap_not_mem_deny hβγ x
+theorem fuzz_position' (x : Tangle β) (N : Set Atom) (h : IsNearLitter (fuzz hβγ x) N) :
+    position x < position (typedNearLitter ⟨fuzz hβγ x, N, h⟩ : Tangle γ) := by
+  have h' := fuzz_not_mem_deny hβγ x
   contrapose! h'
   -- Generalise the instances.
   revert β
   intro β
   induction β using WithBot.recBotCoe <;>
   · intros _ _ hβγ x h h'
-    exact FMapCondition.any _ h h'
+    exact FuzzCondition.any _ h h'
 
-theorem fMap_position (x : Tangle β) (N : NearLitter) (h : N.1 = fMap hβγ x) :
+theorem fuzz_position (x : Tangle β) (N : NearLitter) (h : N.1 = fuzz hβγ x) :
     position x < position (typedNearLitter N : Tangle γ) := by
-  have := fMap_position' hβγ x N ((NearLitter.isNearLitter _ _).mpr h)
+  have := fuzz_position' hβγ x N ((NearLitter.isNearLitter _ _).mpr h)
   exact lt_of_lt_of_eq this (congr_arg _ (congr_arg _ (NearLitter.ext rfl)))
 
-theorem typedAtomPosition_lt_fMap (x : Tangle ⊥) :
+theorem typedAtomPosition_lt_fuzz (x : Tangle ⊥) :
   typedAtomPosition x <
     position
-      (typedNearLitter (fMap (bot_ne_coe : (⊥ : TypeIndex) ≠ γ) x).toNearLitter : Tangle γ) := by
-  have := fMap_not_mem_deny (bot_ne_coe : (⊥ : TypeIndex) ≠ γ) x
+      (typedNearLitter (fuzz (bot_ne_coe : (⊥ : TypeIndex) ≠ γ) x).toNearLitter : Tangle γ) := by
+  have := fuzz_not_mem_deny (bot_ne_coe : (⊥ : TypeIndex) ≠ γ) x
   contrapose! this
-  exact FMapCondition.bot x rfl HEq.rfl this
+  exact FuzzCondition.bot x rfl HEq.rfl this
 
 end ConNF
