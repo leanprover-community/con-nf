@@ -64,12 +64,6 @@ protected def symm : LocalPerm α where
 instance : CoeFun (LocalPerm α) fun _ => α → α :=
   ⟨LocalPerm.toFun⟩
 
-/-- See Note [custom simps projection] -/
-def Simps.symmApply (π : LocalPerm α) : α → α :=
-  π.symm
-
-initialize_simps_projections? LocalPerm (toFun → apply, invFun → symm_apply)
-
 @[simp]
 theorem coe_mk (f : α → α) (g s ml mr il ir) : (LocalPerm.mk f g s ml mr il ir : α → α) = f :=
   rfl
