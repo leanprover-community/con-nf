@@ -53,7 +53,7 @@ theorem completeNearLitterPerm_smul_litter (hπf : π.Free) (A : ExtendedIndex �
 theorem completeNearLitterPerm_smul_nearLitter (hπf : π.Free) (A : ExtendedIndex β)
     (N : NearLitter) : completeNearLitterPerm hπf A • N = π.completeNearLitterMap A N := by
   refine' SetLike.coe_injective _
-  rw [completeNearLitterMap_coe hπf]
+  rw [completeNearLitterMap_coe hπf, NearLitterPerm.smul_nearLitter_coe]
   rfl
 
 def AllowableBelow (hπf : π.Free) (γ : IicBot α) (A : Path (β : TypeIndex) γ) : Prop :=
@@ -111,31 +111,6 @@ theorem iioBot_cases (δ : IioBot α) : δ = ⊥ ∨ ∃ ε : Iio α, δ = ε :=
   · exact Or.inl rfl
   · exact Or.inr ⟨⟨δ, coe_lt_coe.mp hδ⟩, rfl⟩
 
--- TODO: Use this theorem in places above.
--- I think that the `change` and `obtain` calls slow down proofs severely in Lean 4.
--- TODO: Canonicalise uses of `<` to always be with respect to `TypeIndex`.
-theorem supports {β : Iio α} {π π' : Allowable β} {t : Tangle β}
-    (ha : ∀ a A, (inl a, A) ∈ designatedSupport t →
-      StructPerm.derivative A (Allowable.toStructPerm π) • a =
-      StructPerm.derivative A (Allowable.toStructPerm π') • a)
-    (hN : ∀ N A, (inr N, A) ∈ designatedSupport t →
-      StructPerm.derivative A (Allowable.toStructPerm π) • N =
-      StructPerm.derivative A (Allowable.toStructPerm π') • N) :
-    π • t = π' • t := by
-  rw [← inv_smul_eq_iff, smul_smul]
-  refine' (designatedSupport t).supports _ _
-  intro c hc
-  rw [mul_smul, inv_smul_eq_iff]
-  change (_, c.2) = (_, c.2)
-  refine Prod.ext ?_ rfl
-  obtain ⟨a | N, A⟩ := c
-  · change inl _ = inl _
-    simp only [inl.injEq]
-    exact ha a A hc
-  · change inr _ = inr _
-    simp only [inr.injEq]
-    exact hN N A hc
-
 theorem ConNF.StructApprox.extracted_1
   (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
   (ρs : (δ : IioBot α) → (δ : TypeIndex) < γ → Allowable δ)
@@ -143,13 +118,14 @@ theorem ConNF.StructApprox.extracted_1
     StructPerm.ofBot (StructPerm.derivative B (Allowable.toStructPerm (ρs δ h))) =
       completeNearLitterPerm hπf ((A.cons h).comp B))
   (ε : Iio α) (hε : (ε : TypeIndex) < γ) (a : Atom) :
-  ρs ε hε • fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) a =
-    fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) (ρs ⊥ (bot_lt_coe _) • a) := by
-  change StructPerm.toNearLitterPerm (Allowable.toStructPerm _) • fuzz _ (show Tangle ⊥ from a) = _
+  Allowable.toStructPerm (ρs ε hε) (Hom.toPath (bot_lt_coe _)) •
+    fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) a =
+  fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe)
+    (NearLitterPerm.ofBot (ρs ⊥ (bot_lt_coe _)) • a) := by
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
-  simp only [Path.comp_cons, Path.comp_nil] at this
-  change StructPerm.toNearLitterPerm (Allowable.toStructPerm _) = _ at this
-  rw [this]
+  simp only [Path.comp_cons, Path.comp_nil, StructPerm.derivative_bot, StructPerm.ofBot_toBot,
+    Hom.toPath] at this
+  erw [this]
   rw [completeNearLitterPerm_smul_litter]
   refine' (completeLitterMap_eq_of_inflexibleBot
     ⟨γ, ε, coe_lt_coe.mp hε, A, a, rfl, rfl⟩).trans _
@@ -168,13 +144,13 @@ theorem ConNF.StructApprox.extracted_2
       completeNearLitterPerm hπf ((A.cons h).comp B))
   (δ : Iio α) (ε : Iio α) (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ)
   (hδε : δ ≠ ε) (t : Tangle ↑δ) :
-  ρs ε hε • fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t =
-    fuzz (coe_ne_coe.mpr <| coe_ne' hδε) (ρs δ hδ • t) := by
-  change StructPerm.toNearLitterPerm (Allowable.toStructPerm _) • fuzz _ t = _
+  Allowable.toStructPerm (ρs ε hε) (Hom.toPath (bot_lt_coe _)) •
+    fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t =
+  fuzz (coe_ne_coe.mpr <| coe_ne' hδε) (ρs δ hδ • t) := by
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
-  simp only [Path.comp_cons, Path.comp_nil] at this
-  change StructPerm.toNearLitterPerm (Allowable.toStructPerm _) = _ at this
-  rw [this]
+  simp only [StructPerm.derivative_bot, StructPerm.ofBot_toBot, Path.comp_cons,
+    Path.comp_nil] at this
+  erw [this]
   rw [completeNearLitterPerm_smul_litter]
   refine' (completeLitterMap_eq_of_inflexibleCoe
     ⟨γ, δ, ε, coe_lt_coe.mp hδ, coe_lt_coe.mp hε, _, A, t, rfl, rfl⟩
@@ -216,6 +192,8 @@ theorem ConNF.StructApprox.extracted_2
     · exact (ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
         ⟨γ, δ, ε, _, _, _, _, t, rfl, rfl⟩ _ _
 
+set_option pp.proofs.withType false
+
 theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
     (h : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ), AllowableBelow hπf δ (A.cons h)) :
     AllowableBelow hπf γ A := by
@@ -223,8 +201,22 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
   refine' ⟨allowableOfSmulFuzz γ ρs _, _⟩
   · intro δ ε hδ hε hδε t
     obtain rfl | ⟨δ, rfl⟩ := iioBot_cases δ
-    · exact ConNF.StructApprox.extracted_1 hπf γ A ρs hρ ε hε t
-    · refine ConNF.StructApprox.extracted_2 hπf γ A ρs hρ δ ε hδ hε ?_ t
+    · simp only [Iic.coe_bot, Allowable.derivative_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
+      refine Eq.trans ?_ (ConNF.StructApprox.extracted_1 hπf γ A ρs hρ ε hε t)
+      have := Allowable.toStructPerm_derivative
+        (show Path ((ε : IicBot α) : TypeIndex) (⊥ : IicBot α) from Path.nil.cons (bot_lt_coe _))
+        (ρs ε hε)
+      dsimp only at this
+      erw [this]
+      rfl
+    · simp only [Iic.coe_bot, Allowable.derivative_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
+      refine Eq.trans ?_ (ConNF.StructApprox.extracted_2 hπf γ A ρs hρ δ ε hδ hε ?_ t)
+      have := Allowable.toStructPerm_derivative
+        (show Path ((ε : IicBot α) : TypeIndex) (⊥ : IicBot α) from Path.nil.cons (bot_lt_coe _))
+        (ρs ε hε)
+      dsimp only at this
+      erw [this]
+      rfl
       rintro rfl
       exact hδε rfl
   · intro B

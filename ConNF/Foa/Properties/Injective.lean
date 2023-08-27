@@ -447,8 +447,6 @@ theorem completeLitterMap_inflexibleCoe_iff (hπf : π.Free) {c d : SupportCondi
   ⟨fun ⟨h⟩ => ⟨completeLitterMap_inflexibleCoe' hπf h⟩, fun ⟨h⟩ =>
     ⟨completeLitterMap_inflexibleCoe hπf hcd h hL⟩⟩
 
-set_option pp.proofs.withType false
-
 theorem _root_.ConNF.StructPerm.derivative_fst {α : TypeIndex} (π : StructPerm α)
     (A : ExtendedIndex α) (N : NearLitter) :
     (StructPerm.derivative A π • N).fst = StructPerm.derivative A π • N.fst :=
