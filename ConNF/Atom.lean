@@ -1,4 +1,5 @@
 import ConNF.Atom.Params
+import ConNF.Atom.Small
 import ConNF.Atom.Litter
 import ConNF.Atom.Atom
 import ConNF.Atom.NearLitter

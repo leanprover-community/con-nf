@@ -7,7 +7,8 @@ Follow the [mathlib4 naming convention](https://github.com/leanprover-community/
 | Object                          | Names           |
 | ------------------------------- | --------------- |
 | Types                           | `α, β`          |
-| Sets                            | `s, t`          |
+| Universes                       | `u, v, w`       |
+| Sets                            | `s, t, u`       |
 | Supports                        | `s` or `s₁, s₂` |
 | Equivalences                    | `e`             |
 | Functions, (local) permutations | `f, g, h`       |

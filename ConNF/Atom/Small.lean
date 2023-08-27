@@ -1,5 +1,16 @@
 import ConNF.Atom.Params
 
+/-!
+# Smallness
+
+In this file, we define what it means for a set to be small.
+
+## Main declarations
+
+* `ConNF.Small`: A set is small if its cardinality (as a type) is strictly less than `κ`.
+* `ConNF.IsNear`: Two sets are near if their symmetric difference is small.
+-/
+
 open Cardinal Set
 
 open scoped Classical

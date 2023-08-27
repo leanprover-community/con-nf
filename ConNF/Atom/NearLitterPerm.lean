@@ -222,6 +222,8 @@ theorem smul_nearLitter_coe_preimage (π : NearLitterPerm) (N : NearLitter) :
     π • N = ↑π.atomPerm⁻¹ ⁻¹' N :=
   rfl
 
+/-- The action of a near-litter perm on a near-litter agrees with the pointwise action on its
+atoms. -/
 theorem smul_nearLitter_coe (π : NearLitterPerm) (N : NearLitter) :
     ((π • N) : Set Atom) = π • (N : Set Atom) := by
   rw [smul_nearLitter_coe_preimage, preimage_inv]
