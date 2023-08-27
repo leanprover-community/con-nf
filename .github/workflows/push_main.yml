@@ -4,7 +4,7 @@ on:
       - main
 
 jobs:
-  update_con_nf_branch_and_build:
+  build_project:
     runs-on: ubuntu-latest
     name: Build project
     steps:
