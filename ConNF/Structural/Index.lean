@@ -204,6 +204,12 @@ theorem mk_extendedIndex (α : TypeIndex) : #(ExtendedIndex α) ≤ #Λ := by
   convert mk_list_le_max _ using 1
   simp only [mk_typeIndex, max_eq_right, aleph0_le_mk]
 
+/-- If `β < γ`, we have a path directly between the two types in the opposite order.
+Note that the `⟶` symbol (long right arrow) is not the normal `→` (right arrow),
+even though monospace fonts often display them similarly. -/
+instance ltToHom (β γ : Λ) : Coe (β < γ) ((γ : TypeIndex) ⟶ β) :=
+  ⟨coe_lt_coe.2⟩
+
 instance : (α : TypeIndex) → Inhabited (ExtendedIndex α)
   | ⊥ => ⟨nil⟩
   | (α : Λ) => ⟨Hom.toPath <| WithBot.bot_lt_coe α⟩
