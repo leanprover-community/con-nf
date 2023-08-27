@@ -1,3 +1,4 @@
+import ConNF.NewTangle.Hypotheses
 import ConNF.NewTangle.Code
 import ConNF.NewTangle.Cloud
 import ConNF.NewTangle.CodeEquiv
