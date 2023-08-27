@@ -26,8 +26,8 @@ noncomputable instance : Inhabited (SupportCondition α) :=
 @[simp]
 theorem mk_supportCondition (α : TypeIndex) : #(SupportCondition α) = #μ := by
   simp only [SupportCondition, mk_prod, mk_sum, mk_atom, lift_id, mk_nearLitter]
-  rw [add_eq_left (κ_regular.aleph0_le.trans κ_le_μ) le_rfl]
-  exact mul_eq_left (κ_regular.aleph0_le.trans κ_le_μ)
+  rw [add_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) le_rfl]
+  exact mul_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ)
     (le_trans (mk_extendedIndex α) <| le_of_lt <| lt_trans Λ_lt_κ κ_lt_μ) (mk_ne_zero _)
 
 namespace StructPerm
@@ -99,7 +99,7 @@ theorem mk_support_le (x : τ) : #(Support α G x) ≤ #μ := by
     simpa only [Subtype.mk_eq_mk, Support.carrier_eq_coe, SetLike.coe_set_eq] using h
   · rw [← mk_subtype_of_equiv Small (Equiv.Set.congr (Cardinal.eq.mp (mk_supportCondition α)).some)]
     exact ⟨⟨fun s => ⟨s, Small.image s.prop⟩, fun s h => by simp⟩⟩
-  · rw [← mk_subset_mk_lt_cof μ_strong_limit.2]
-    exact mk_subtype_mono fun s hs => lt_of_lt_of_le hs κ_le_μ_cof
+  · rw [← mk_subset_mk_lt_cof μ_isStrongLimit.2]
+    exact mk_subtype_mono fun s hs => lt_of_lt_of_le hs κ_le_μ_ord_cof
 
 end ConNF

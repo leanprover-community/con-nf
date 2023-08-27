@@ -124,7 +124,7 @@ instance : IsWellOrder (Tangle β) (InvImage (· < ·) position) := by
     exact this
   · intro x y z
     exact lt_trans
-  · exact InvImage.wf _ μwf.wf
+  · exact InvImage.wf _ μwo.wf
 
 variable (γ)
 
@@ -148,7 +148,7 @@ theorem mk_fuzz_deny (hβγ : β ≠ γ) (x : Tangle β) :
     #{ y // InvImage (· < ·) position y x } + #{ i // FuzzCondition hβγ x i } < #μ := by
   have h₁ := mk_invImage_lt x
   suffices h₂ : #{ i // FuzzCondition hβγ x i } < #μ
-  · exact add_lt_of_lt μ_strong_limit.isLimit.aleph0_le h₁ h₂
+  · exact add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le h₁ h₂
   have : ∀ i, FuzzCondition hβγ x i →
     (∃ (N : Set Atom) (hN : IsNearLitter ⟨i, β, γ, hβγ⟩ N),
         position (typedNearLitter ⟨_, N, hN⟩ : Tangle γ) ≤ position x) ∨
@@ -163,7 +163,7 @@ theorem mk_fuzz_deny (hβγ : β ≠ γ) (x : Tangle β) :
     · right; refine' ⟨h₁, a, h₂, _⟩; simp_rw [h₁]; exact h₃
   refine lt_of_le_of_lt (mk_subtype_mono this) ?_
   refine lt_of_le_of_lt (mk_union_le _ _) ?_
-  refine add_lt_of_lt μ_strong_limit.isLimit.aleph0_le ?_ ?_
+  refine add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le ?_ ?_
   · refine lt_of_le_of_lt ?_ (mk_invImage_le γ x)
     refine ⟨⟨fun i => ⟨_, i.prop.choose_spec.choose_spec⟩, ?_⟩⟩
     intro i j h
@@ -184,7 +184,7 @@ theorem mk_fuzz_deny (hβγ : β ≠ γ) (x : Tangle β) :
           Litter.toNearLitter_injective.eq_iff,
           Litter.mk.injEq, Subtype.coe_inj, and_self, and_true] at h
         exact h
-    · refine' lt_of_eq_of_lt _ (lt_of_lt_of_le aleph0_pos μ_strong_limit.isLimit.aleph0_le)
+    · refine' lt_of_eq_of_lt _ (lt_of_lt_of_le aleph0_pos μ_isStrongLimit.isLimit.aleph0_le)
       rw [mk_eq_zero_iff, isEmpty_coe_sort, Set.eq_empty_iff_forall_not_mem]
       rintro i ⟨hb, a, ha, _⟩
       exact h ⟨hb, a, ha⟩

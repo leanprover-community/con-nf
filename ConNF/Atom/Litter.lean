@@ -50,8 +50,8 @@ theorem mk_litter : #Litter = #μ := by
         ⟨⟨fun ν => ⟨⟨ν, ⊥, default⟩, WithBot.bot_ne_coe⟩, fun ν₁ ν₂ =>
             congr_arg <| Prod.fst ∘ Subtype.val⟩⟩)
   have :=
-    mul_eq_left (κ_regular.aleph0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_limit.ne_zero
-  simp only [mk_prod, lift_id, mk_typeIndex, mul_eq_self Λ_limit.aleph0_le, this]
+    mul_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_isLimit.ne_zero
+  simp only [mk_prod, lift_id, mk_typeIndex, mul_eq_self Λ_isLimit.aleph0_le, this]
 
 /-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
 theorem card_Iio_lt (x : μ) : #(Iio x) < #μ :=
@@ -60,7 +60,7 @@ theorem card_Iio_lt (x : μ) : #(Iio x) < #μ :=
 /-- Initial segments (sets of the form `{y | y ≤ x}`) have cardinality `< μ`. -/
 theorem card_Iic_lt (x : μ) : #(Iic x) < #μ := by
   rw [← Iio_union_right, mk_union_of_disjoint, mk_singleton]
-  · exact (add_one_le_succ _).trans_lt (μ_strong_limit.isLimit.succ_lt (card_Iio_lt x))
+  · exact (add_one_le_succ _).trans_lt (μ_isStrongLimit.isLimit.succ_lt (card_Iio_lt x))
   · simp
 
 end ConNF

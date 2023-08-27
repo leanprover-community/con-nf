@@ -187,7 +187,7 @@ theorem mk_supportedActionAtomMap_dom :
       #(litterSet φ.preimageLitter) := by
   rw [mk_litterSet]
   refine' le_trans (mk_subtype_mono symmDiff_subset_union) (le_trans (mk_union_le _ _) _)
-  refine' add_le_of_le κ_regular.aleph0_le _ _
+  refine' add_le_of_le κ_isRegular.aleph0_le _ _
   · exact le_of_lt φ.supportedActionAtomMapCore_dom_small
   · exact le_trans mk_image_le (le_of_lt φ.supportedActionAtomMapCore_dom_small)
 

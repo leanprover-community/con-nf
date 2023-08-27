@@ -6,6 +6,8 @@ import Mathlib.SetTheory.Cardinal.Cofinality
 
 /-!
 # Parameters of the construction
+
+We describe the various parameters to the model construction.
 -/
 
 open Cardinal
@@ -17,44 +19,58 @@ universe u
 namespace ConNF
 
 /--
-The parameters of the constructions. We collect them all in one class for simplicity.
+The parameters of the construction. We collect them all in one class for simplicity.
 Note that the ordinal `λ` in the paper is instead referred to here as `Λ`, since the symbol `λ` is
 used for lambda abstractions.
 
 Ordinals and cardinals are represented here as arbitrary types (not sets) with certain properties.
 For instance, `Λ` is an arbitrary type that has an ordering `Λr`, which is assumed to be a
-well-ordering (the `Λwf` term is a proof of this fact). If `Λr a b` holds, then we can say `a < b`.
+well-ordering (the `Λwo` term is a proof of this fact). If `Λr a b` holds, then we can say `a < b`.
 
 The prefix `#` denotes the cardinality of a type.
-
-Where possible, we use `<` and `≤` instead of `>` and `≥`. Human readers can easily convert between
-the two, but it is not as immediately transparent for Lean. For simplicity, we keep with the
-convention of using only `<` and `≤`.
 -/
 class Params where
+  /--
+  The type indexing the levels of our model.
+  This type is well-ordered.
+  We inductively construct each type level by induction over `Λ`.
+  Its cardinality is smaller than `κ` and `μ`.
+  -/
   Λ : Type u
   Λr : Λ → Λ → Prop
-  [Λwf : IsWellOrder Λ Λr]
+  [Λwo : IsWellOrder Λ Λr]
   Λ_ord : Ordinal.type Λr = (#Λ).ord
-  Λ_limit : (#Λ).IsLimit
+  /- TODO: Relax this condition to being infinite (not all infinite cardinals are limit cardinals,
+  but they are limit ordinals in the ZFC sense!) -/
+  Λ_isLimit : (#Λ).IsLimit
+  /--
+  The type indexing the atoms in each litter.
+  Its cardinality is regular, and is larger than `Λ` but smaller than `κ`.
+  -/
   κ : Type u
-  κ_regular : (#κ).IsRegular
+  κ_isRegular : (#κ).IsRegular
   Λ_lt_κ : #Λ < #κ
+  /--
+  A large type used in indexing the litters.
+  This type is well-ordered.
+  Its cardinality is a strong limit, larger than `Λ` and `κ`.
+  The cofinality of the order type of `μ` is at least `κ`.
+  -/
   μ : Type u
   μr : μ → μ → Prop
-  [μwf : IsWellOrder μ μr]
+  [μwo : IsWellOrder μ μr]
   μ_ord : Ordinal.type μr = (#μ).ord
-  μ_strong_limit : (#μ).IsStrongLimit
+  μ_isStrongLimit : (#μ).IsStrongLimit
   κ_lt_μ : #κ < #μ
-  κ_le_μ_cof : #κ ≤ (#μ).ord.cof
+  κ_le_μ_ord_cof : #κ ≤ (#μ).ord.cof
 
-export Params (Λ Λr Λwf Λ_ord Λ_limit κ κ_regular Λ_lt_κ μ μr μwf μ_ord μr μ_strong_limit
-  κ_lt_μ κ_le_μ_cof)
+export Params (Λ Λr Λwo Λ_ord Λ_isLimit κ κ_isRegular Λ_lt_κ μ μr μwo μ_ord μr μ_isStrongLimit
+  κ_lt_μ κ_le_μ_ord_cof)
 
 /-!
 ### Explicit parameters
 
-There exists valid parameters for the model. The smallest parameters are
+There exist valid parameters for the model. The smallest such parameters are
 * `Λ := ℵ_0`
 * `κ := ℵ_1`
 * `μ = ℶ_{ω_1}`.
@@ -63,23 +79,23 @@ There exists valid parameters for the model. The smallest parameters are
 example : Params.{0} where
   Λ := ℕ
   Λr := (· < ·)
-  Λwf := inferInstance
+  Λwo := inferInstance
   Λ_ord := by simp only [mk_denumerable, ord_aleph0, Ordinal.type_nat_lt]
-  Λ_limit := by rw [mk_denumerable]; exact isLimit_aleph0
+  Λ_isLimit := by rw [mk_denumerable]; exact isLimit_aleph0
   κ := (aleph 1).out
-  κ_regular := by rw [mk_out]; exact isRegular_aleph_one
+  κ_isRegular := by rw [mk_out]; exact isRegular_aleph_one
   Λ_lt_κ := by rw [mk_denumerable, mk_out]; exact aleph0_lt_aleph_one
   μ := (beth <| ord <| aleph 1).ord.out.α
   μr := (beth <| ord <| aleph 1).ord.out.r
-  μwf := (beth <| ord <| aleph 1).ord.out.wo
+  μwo := (beth <| ord <| aleph 1).ord.out.wo
   μ_ord := by simp
-  μ_strong_limit := by
+  μ_isStrongLimit := by
     simp only [Cardinal.card_ord, Cardinal.mk_ordinal_out]
     exact isStrongLimit_beth (Ordinal.IsLimit.isSuccLimit (ord_aleph_isLimit _))
   κ_lt_μ := by
     simp only [mk_out, mk_ordinal_out, card_ord]
     exact (aleph_le_beth _).trans_lt (beth_strictMono (ord_aleph_isLimit _).one_lt)
-  κ_le_μ_cof := by
+  κ_le_μ_ord_cof := by
     simp only [mk_out, mk_ordinal_out, card_ord]
     rw [beth_normal.cof_eq (ord_isLimit <| aleph0_le_aleph 1)]
     exact isRegular_aleph_one.2
@@ -123,15 +139,17 @@ noncomputable def succOrderOfIsWellOrder (α : Type u) [Preorder α] [Infinite �
 
 variable [Params.{u}] {ι α β : Type u}
 
-/-- To allow Lean's type checker to see that the ordering `Λr` is a well-ordering without having to
-explicitly write `Λwf` everywhere, we declare it as an instance. -/
+/-! To allow Lean's type checker to see that the ordering `Λr` is a well-ordering without having to
+explicitly write `Λwo` everywhere, we declare it as an instance. -/
+
 instance : IsWellOrder Λ Λr :=
-  Λwf
+  Λwo
 
 instance : IsWellOrder μ μr :=
-  μwf
+  μwo
 
-/-- We can deduce from the well-ordering `Λwf` that `Λ` is linearly ordered. -/
+/-! `Λ` is linearly ordered by `Λwo`. -/
+
 noncomputable instance : LinearOrder Λ :=
   linearOrderOfSTO Λr
 
@@ -139,38 +157,50 @@ noncomputable instance : LinearOrder μ :=
   linearOrderOfSTO μr
 
 instance : IsWellOrder Λ (· < ·) :=
-  Λwf
+  Λwo
 
 instance : IsWellOrder μ (· < ·) :=
-  μwf
+  μwo
 
-/-- We deduce that `Λ` has a well-founded relation. -/
+/-! `Λ` and `μ` have well-founded relations given by their orders. -/
+
 instance : WellFoundedRelation Λ :=
-  IsWellOrder.toHasWellFounded (hwo := Λwf)
+  IsWellOrder.toHasWellFounded (hwo := Λwo)
 
 instance : WellFoundedRelation μ :=
-  IsWellOrder.toHasWellFounded (hwo := μwf)
+  IsWellOrder.toHasWellFounded (hwo := μwo)
 
-theorem κ_le_μ : (#κ) ≤ (#μ) :=
+theorem κ_le_μ : #κ ≤ #μ :=
   κ_lt_μ.le
 
+/-! The types `Λ`, `κ`, `μ` are inhabited and infinite. -/
+
+instance : Nonempty Λ :=
+  mk_ne_zero_iff.1 Λ_isLimit.1
+
+instance : Nonempty κ :=
+  mk_ne_zero_iff.1 κ_isRegular.pos.ne'
+
+instance : Nonempty μ :=
+  mk_ne_zero_iff.1 μ_isStrongLimit.1
+
 noncomputable instance : Inhabited Λ :=
-  @Classical.inhabited_of_nonempty _ <| mk_ne_zero_iff.1 Λ_limit.1
+  Classical.inhabited_of_nonempty inferInstance
 
 noncomputable instance : Inhabited κ :=
-  @Classical.inhabited_of_nonempty _ <| mk_ne_zero_iff.1 κ_regular.pos.ne'
+  Classical.inhabited_of_nonempty inferInstance
 
 noncomputable instance : Inhabited μ :=
-  @Classical.inhabited_of_nonempty _ <| mk_ne_zero_iff.1 μ_strong_limit.1
+  Classical.inhabited_of_nonempty inferInstance
 
 instance : Infinite Λ :=
-  Cardinal.infinite_iff.mpr Λ_limit.aleph0_le
+  Cardinal.infinite_iff.mpr Λ_isLimit.aleph0_le
 
 instance : Infinite κ :=
-  Cardinal.infinite_iff.mpr κ_regular.aleph0_le
+  Cardinal.infinite_iff.mpr κ_isRegular.aleph0_le
 
 instance : Infinite μ :=
-  Cardinal.infinite_iff.mpr μ_strong_limit.isLimit.aleph0_le
+  Cardinal.infinite_iff.mpr μ_isStrongLimit.isLimit.aleph0_le
 
 instance : NoMaxOrder Λ :=
   noMaxOrder_of_ordinal_type_eq Λ_ord
@@ -192,10 +222,11 @@ def TypeIndex :=
 
 @[simp]
 theorem mk_typeIndex : #TypeIndex = #Λ :=
-  mk_option.trans <| add_eq_left Λ_limit.aleph0_le <| one_le_aleph0.trans Λ_limit.aleph0_le
+  mk_option.trans <| add_eq_left Λ_isLimit.aleph0_le <| one_le_aleph0.trans Λ_isLimit.aleph0_le
 
-/- Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
+/-! Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
 This allows well founded recursion on type indices. -/
+
 noncomputable instance : LinearOrder TypeIndex :=
   linearOrderOfSTO (· < ·)
 

@@ -127,13 +127,13 @@ theorem mk_not_bannedLitter : #{L | ¬φ.BannedLitter L} = #μ := by
     have h' := add_le_add (le_of_lt φ.bannedLitter_small) h.le
     rw [this] at h'
     refine' not_lt_of_le h' _
-    refine' Cardinal.add_lt_of_lt μ_strong_limit.isLimit.aleph0_le κ_lt_μ _
-    exact lt_of_le_of_lt κ_regular.aleph0_le κ_lt_μ
+    refine' Cardinal.add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le κ_lt_μ _
+    exact lt_of_le_of_lt κ_isRegular.aleph0_le κ_lt_μ
   · by_contra' h
     have h' := add_le_add (le_of_lt φ.bannedLitter_small) h.le
     rw [this] at h'
     refine' not_lt_of_le h' _
-    refine' Cardinal.add_lt_of_lt μ_strong_limit.isLimit.aleph0_le κ_lt_μ _
+    refine' Cardinal.add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le κ_lt_μ _
     exact lt_trans φ.bannedLitter_small κ_lt_μ
 
 theorem not_bannedLitter_nonempty : Nonempty {L | ¬φ.BannedLitter L} := by
@@ -159,7 +159,7 @@ theorem mk_atomMap_image_le_mk_sandbox :
       #(litterSet φ.sandboxLitter) := by
   rw [mk_litterSet]
   refine' le_trans (mk_subtype_mono symmDiff_subset_union) (le_trans (mk_union_le _ _) _)
-  refine' add_le_of_le κ_regular.aleph0_le _ _
+  refine' add_le_of_le κ_isRegular.aleph0_le _ _
   exact le_of_lt φ.atomMap_dom_small
   exact le_trans mk_image_le (le_of_lt φ.atomMap_dom_small)
 
@@ -305,7 +305,7 @@ theorem mk_dom_symmDiff_le :
 
 theorem aleph0_le_not_bannedLitter : ℵ₀ ≤ #{L | ¬φ.BannedLitter L} := by
   rw [mk_not_bannedLitter]
-  exact μ_strong_limit.isLimit.aleph0_le
+  exact μ_isStrongLimit.isLimit.aleph0_le
 
 theorem disjoint_dom_not_bannedLitter :
     Disjoint (φ.litterMap.Dom ∪ φ.roughLitterMapOrElse '' φ.litterMap.Dom)
@@ -358,8 +358,8 @@ theorem litterPerm'_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm' hφ).
   rw [Small]
   rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
   simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
-  refine' add_lt_of_lt κ_regular.aleph0_le _ _ <;>
-      refine' mul_lt_of_lt κ_regular.aleph0_le (lt_of_le_of_lt Λ_limit.aleph0_le Λ_lt_κ) _ <;>
+  refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
+      refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt Λ_isLimit.aleph0_le Λ_lt_κ) _ <;>
     refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
   exact φ.litterMap_dom_small
   exact φ.litterMap_dom_small.image
@@ -376,7 +376,7 @@ theorem mk_not_bannedLitter_and_flexible : #{L | ¬φ.BannedLitter L ∧ Flexibl
   have h₁ := Cardinal.le_mk_diff_add_mk {L | Flexible α L A} {L | φ.BannedLitter L}
   rw [mk_flexible, diff_eq, inter_comm] at h₁
   have h₂ :=
-    add_lt_of_lt μ_strong_limit.isLimit.aleph0_le h (lt_trans φ.bannedLitter_small κ_lt_μ)
+    add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le h (lt_trans φ.bannedLitter_small κ_lt_μ)
   exact h₁.not_lt h₂
 
 theorem mk_dom_inter_flexible_symmDiff_le :
@@ -391,7 +391,7 @@ theorem mk_dom_inter_flexible_symmDiff_le :
 theorem aleph0_le_not_bannedLitter_and_flexible :
     ℵ₀ ≤ #{L | ¬φ.BannedLitter L ∧ Flexible α L A} := by
   rw [mk_not_bannedLitter_and_flexible]
-  exact μ_strong_limit.isLimit.aleph0_le
+  exact μ_isStrongLimit.isLimit.aleph0_le
 
 theorem disjoint_dom_inter_flexible_not_bannedLitter :
     Disjoint
@@ -426,8 +426,8 @@ theorem flexibleLitterPerm_domain_small (hφ : φ.Lawful) :
   · rw [Small]
     rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
     simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
-    refine' add_lt_of_lt κ_regular.aleph0_le _ _ <;>
-        refine' mul_lt_of_lt κ_regular.aleph0_le (lt_of_le_of_lt Λ_limit.aleph0_le Λ_lt_κ) _ <;>
+    refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
+        refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt Λ_isLimit.aleph0_le Λ_lt_κ) _ <;>
       refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
     exact φ.litterMap_dom_small.mono (inter_subset_left _ _)
     exact (φ.litterMap_dom_small.mono (inter_subset_left _ _)).image
@@ -443,18 +443,18 @@ a litter which is away from the domain and range of the approximation in questio
 not interfere with other constructions. -/
 noncomputable def completeAtomPerm (hφ : φ.Lawful) : LocalPerm Atom :=
   LocalPerm.complete φ.atomMapOrElse φ.atomMap.Dom (litterSet φ.sandboxLitter)
-    φ.mk_atomMap_image_le_mk_sandbox (by simpa only [mk_litterSet] using κ_regular.aleph0_le)
+    φ.mk_atomMap_image_le_mk_sandbox (by simpa only [mk_litterSet] using κ_isRegular.aleph0_le)
     φ.disjoint_sandbox (φ.atomMapOrElse_injective hφ)
 
 theorem sandboxSubset_small :
     Small
       (LocalPerm.sandboxSubset φ.mk_atomMap_image_le_mk_sandbox
-        (by simpa only [mk_litterSet] using κ_regular.aleph0_le)) := by
+        (by simpa only [mk_litterSet] using κ_isRegular.aleph0_le)) := by
   rw [Small]
   rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
   simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
-  refine' add_lt_of_lt κ_regular.aleph0_le _ _ <;>
-    refine' mul_lt_of_lt κ_regular.aleph0_le (lt_of_le_of_lt Λ_limit.aleph0_le Λ_lt_κ) _ <;>
+  refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
+    refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt Λ_isLimit.aleph0_le Λ_lt_κ) _ <;>
     refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
   · exact φ.atomMap_dom_small
   · exact lt_of_le_of_lt mk_image_le φ.atomMap_dom_small

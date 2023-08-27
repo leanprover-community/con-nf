@@ -234,7 +234,7 @@ theorem allowableBelow_all (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIn
   revert hγ
   refine' WellFounded.induction
     (C := fun γ => ∀ (hγ : γ ∈ Iic α) (A : Path (β : TypeIndex) γ),
-      AllowableBelow hπf ⟨γ, coe_le_coe.mpr hγ⟩ A) Λwf.wf γ _
+      AllowableBelow hπf ⟨γ, coe_le_coe.mpr hγ⟩ A) Λwo.wf γ _
   clear γ
   intro γ ih hγ A
   refine' allowableBelow_extends hπf ⟨γ, hγ⟩ A _
@@ -307,7 +307,7 @@ theorem freedom_of_action (β : Iic α) (π₀ : StructApprox β) (h : π₀.Fre
   refine' WellFounded.induction
     (C := fun β => ∀ (hβ : β ∈ Iic α) (π₀ : StructApprox (⟨β, hβ⟩ : Iic α)),
       Free π₀ → ∃ π : @Allowable _ (⟨β, hβ⟩ : Iic α) Phase2Data.corePositionedTypedObjects,
-        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ Phase2Data.corePositionedTypedObjects π)) Λwf.wf β _
+        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ Phase2Data.corePositionedTypedObjects π)) Λwo.wf β _
   intro β ih hβ π₀ h
   have : FreedomOfActionHypothesis ⟨β, hβ⟩
   · constructor

@@ -42,7 +42,7 @@ We will prove that all types constructed in our model have cardinality equal to 
 @[simp]
 theorem mk_atom : #Atom = #μ := by
   simp_rw [Atom, mk_prod, lift_id, mk_litter,
-    mul_eq_left (κ_regular.aleph0_le.trans κ_le_μ) κ_le_μ κ_regular.pos.ne']
+    mul_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) κ_le_μ κ_isRegular.pos.ne']
 
 variable {i j : Litter} {s t : Set Atom}
 

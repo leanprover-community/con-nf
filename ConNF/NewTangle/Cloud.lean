@@ -160,7 +160,7 @@ noncomputable def codeMinMap (c : NonemptyCode α) : μ :=
 
 /-- The pullback `<` relation on codes is well-founded. -/
 theorem code_wf : WellFounded (InvImage μr (codeMinMap : NonemptyCode α → μ)) :=
-  InvImage.wf codeMinMap μwf.wf
+  InvImage.wf codeMinMap μwo.wf
 
 section Extension
 

@@ -175,7 +175,7 @@ theorem cloudCode_ne_singleton {t} (hcβ : c.1 ≠ β) : cloudCode γ c ≠ mk �
   simp only [ne_eq] at h
   obtain ⟨rfl, h⟩ := h
   -- have := eq_of_heq h
-  refine' (Cardinal.one_lt_aleph0.trans_le <| κ_regular.aleph0_le.trans κ_le_μ).not_le _
+  refine' (Cardinal.one_lt_aleph0.trans_le <| κ_isRegular.aleph0_le.trans κ_le_μ).not_le _
   rw [← Cardinal.mk_singleton t, ← h.eq]
   refine' μ_le_mk_cloudCode c hcβ (cloudCode_nonempty.1 _)
   exact γ

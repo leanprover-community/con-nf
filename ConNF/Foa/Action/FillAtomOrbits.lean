@@ -44,7 +44,7 @@ theorem mk_diff_dom_ran (L : Litter) :
     intro a b h
     exact Subtype.coe_injective (Prod.ext (a.prop.1.trans b.prop.1.symm) h)
   · by_contra' h
-    have := add_lt_of_lt κ_regular.aleph0_le h (Small.union φ.atomMap_dom_small φ.atomMap_ran_small)
+    have := add_lt_of_lt κ_isRegular.aleph0_le h (Small.union φ.atomMap_dom_small φ.atomMap_ran_small)
     have := (le_mk_diff_add_mk (litterSet L) _).trans_lt this
     simp only [mk_litterSet, lt_self_iff_false] at this
 
@@ -53,9 +53,9 @@ theorem need_images_small :
   simp only [mk_prod, mk_denumerable, lift_aleph0, lift_uzero, mk_diff_dom_ran, mk_sum, lift_id]
   rw [← mul_add]
   refine' lt_of_le_of_lt (mul_le_max _ _) (max_lt (max_lt _ _) _)
-  exact Λ_limit.aleph0_le.trans_lt Λ_lt_κ
-  exact add_lt_of_lt κ_regular.aleph0_le φ.needBackwardImages_small φ.needForwardImages_small
-  exact Λ_limit.aleph0_le.trans_lt Λ_lt_κ
+  exact Λ_isLimit.aleph0_le.trans_lt Λ_lt_κ
+  exact add_lt_of_lt κ_isRegular.aleph0_le φ.needBackwardImages_small φ.needForwardImages_small
+  exact Λ_isLimit.aleph0_le.trans_lt Λ_lt_κ
 
 theorem le_mk_diff_dom_ran (L : Litter) :
     #(Sum (ℕ × φ.needBackwardImages) (ℕ × φ.needForwardImages)) ≤
