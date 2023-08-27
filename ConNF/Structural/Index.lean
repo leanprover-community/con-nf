@@ -1,6 +1,21 @@
 import Mathlib.Combinatorics.Quiver.Path
 import ConNF.Atom.Params
 
+/-!
+# Indices
+
+In this file, we define various types of type index and extended type index.
+
+## Main declarations
+
+* `Set.Iio` (defined in mathlib): The type of proper type indices below a given type index.
+* `Set.Iic` (defined in mathlib): The type of proper type indices up to and including a given
+    type index.
+* `ConNF.IioBot`: The type of type indices below a given type index.
+* `ConNF.IicBot`: The type of type indices up to and including a given type index.
+* `ConNF.ExtendedIndex`: The type of extended type indices from a given base type index.
+-/
+
 open Cardinal Function Quiver Quiver.Path Set WithBot
 
 open scoped Cardinal
@@ -15,11 +30,17 @@ section IioIic
 
 variable {α β : Λ}
 
+/-- The type of type indices below `α`. -/
 abbrev IioBot (α : Λ) :=
   Iio (α : TypeIndex)
 
+/-- The type of type indices up to and including `α`. -/
 abbrev IicBot (α : Λ) :=
   Iic (α : TypeIndex)
+
+/-!
+We define various conversions between the various `Iio*/Iic*` types.
+-/
 
 @[simp]
 lemma _root_.Set.Iio.lt (β : Iio α) : (β : Λ) < α := β.prop
@@ -130,10 +151,10 @@ variable {α : TypeIndex}
 instance quiver : Quiver TypeIndex :=
   ⟨(· > ·)⟩
 
-/-- A (finite) path from the type α to the base type.
-This can be seen as a way that we can perceive extensionality, iteratively descending to lower
+/-- A (finite) path from the type `α` to the base type.
+This is a way that we can perceive extensionality, iteratively descending to lower
 types in the hierarchy until we reach the base type.
-This plays the role of an extended type index in the paper. -/
+As `Λ` is well-ordered, there are no infinite descending paths. -/
 def ExtendedIndex (α : TypeIndex) :=
   Quiver.Path α ⊥
 
@@ -151,8 +172,8 @@ theorem ExtendedIndex.length_ne_zero {α : Λ} (A : ExtendedIndex α) : A.length
   intro h
   cases Quiver.Path.eq_of_length_zero A h
 
-/-- An induction principle for paths that allows us to use `Iic_index α` instead of needing to
-define the motive for all `type_index`. -/
+/-- An induction principle for paths that allows us to use `IicBot α` instead of needing to
+define the motive for all `TypeIndex`. -/
 @[elab_as_elim]
 def Path.iicRec {α : Λ} {β : IicBot α}
     {motive : ∀ γ : IicBot α, Path (β : TypeIndex) γ → Sort _} :
@@ -182,12 +203,6 @@ theorem mk_extendedIndex (α : TypeIndex) : #(ExtendedIndex α) ≤ #Λ := by
   refine le_trans ((Cardinal.le_def _ _).2 ⟨⟨toList, toList_injective (α : TypeIndex) ⊥⟩⟩) ?_
   convert mk_list_le_max _ using 1
   simp only [mk_typeIndex, max_eq_right, aleph0_le_mk]
-
-/-- If `β < γ`, we have a path directly between the two types in the opposite order.
-Note that the `⟶` symbol (long right arrow) is not the normal `→` (right arrow),
-even though monospace fonts often display them similarly. -/
-instance ltToHom (β γ : Λ) : Coe (β < γ) ((γ : TypeIndex) ⟶ β) :=
-  ⟨coe_lt_coe.2⟩
 
 instance : (α : TypeIndex) → Inhabited (ExtendedIndex α)
   | ⊥ => ⟨nil⟩

@@ -4,3 +4,4 @@
 - Fix variable letters.
 - Add typeclasses for derivatives and toStructPerm?
 - Add documentation.
+- Move all the things of the form `_root_.*`

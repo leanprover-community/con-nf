@@ -13,6 +13,11 @@ In this file, we define the ambient groups of *structural permutations*.  These 
 recursively-constructed subgroups of *semi-allowable* and *allowable permutations* which will act on
 tangles; we define these larger ambient groups in advance in order to set up their infrastructure of
 derivatives and so on independently of the recursion.
+
+## Main declarations
+
+* `ConNF.StructPerm`: The type of structural permutations.
+* `ConNF.StructPerm.derivative`: The derivative functor on structural permutations.
 -/
 
 open Cardinal Equiv Quiver Quiver.Path Set WithBot
@@ -25,9 +30,9 @@ namespace ConNF
 
 variable [Params.{u}]
 
--- Note: perhaps should be constructed directly as *groups*, not just types.
-/-- A *structural permutation* on a proper type index is defined by its derivatives,
-as well as its permutation on atoms. -/
+/-- A *structural permutation* on a proper type index `α` is a near-litter permutation for
+each `α`-extended index. This represents how the permutation acts along each path down the type
+levels in the model. -/
 def StructPerm (α : TypeIndex) : Type u :=
   ExtendedIndex α → NearLitterPerm
 
@@ -97,8 +102,7 @@ theorem inv_apply (π : StructPerm α) (A : ExtendedIndex α) :
     π⁻¹ A = (π A)⁻¹ :=
   rfl
 
-/-- The isomorphism between near-litter permutations and bottom structural permutations. This holds
-by definition of `StructPerm`. -/
+/-- The group isomorphism between near-litter permutations and `⊥`-structural permutations. -/
 def toBotIso : NearLitterPerm ≃* StructPerm ⊥
     where
   __ := toBot
@@ -121,19 +125,19 @@ theorem ofBot_one : ofBot 1 = 1 :=
   toBotIso.symm.map_one
 
 @[simp]
-theorem toBot_mul (a b) : toBot (a * b) = toBot a * toBot b :=
+theorem toBot_mul (π π' : NearLitterPerm) : toBot (π * π') = toBot π * toBot π' :=
   toBotIso.map_mul _ _
 
 @[simp]
-theorem ofBot_mul (a b) : ofBot (a * b) = ofBot a * ofBot b :=
+theorem ofBot_mul (π π' : StructPerm ⊥) : ofBot (π * π') = ofBot π * ofBot π' :=
   toBotIso.symm.map_mul _ _
 
 @[simp]
-theorem toBot_inv (a) : toBot a⁻¹ = (toBot a)⁻¹ :=
+theorem toBot_inv (π : NearLitterPerm) : toBot π⁻¹ = (toBot π)⁻¹ :=
   toBotIso.map_inv _
 
 @[simp]
-theorem ofBot_inv (a) : ofBot a⁻¹ = (ofBot a)⁻¹ :=
+theorem ofBot_inv (π : StructPerm ⊥) : ofBot π⁻¹ = (ofBot π)⁻¹ :=
   toBotIso.symm.map_inv _
 
 end
@@ -175,7 +179,7 @@ theorem derivative_derivative (π : StructPerm α) (p : Path α β) (q : Path β
   simp only [derivative, MonoidHom.coe_mk, OneHom.coe_mk, comp_assoc]
 
 /-- The derivative map preserves multiplication. -/
-theorem derivative_mul {β} (π₁ π₂ : StructPerm α) (A : Path (α : TypeIndex) β) :
+theorem derivative_mul {β : TypeIndex} (π₁ π₂ : StructPerm α) (A : Path (α : TypeIndex) β) :
     derivative A (π₁ * π₂) = derivative A π₁ * derivative A π₂ :=
   rfl
 
@@ -190,24 +194,25 @@ section
 
 variable {X : Type _} [MulAction NearLitterPerm X]
 
-/-- Structural permutations act on atoms. -/
+/-- `⊥`-structural permutations can act on everything that near-litter permutations can.
+In particular, this defines an action on atoms, litters, and near-litters. -/
 instance : MulAction (StructPerm ⊥) X :=
   MulAction.compHom X (toBotIso.symm : StructPerm ⊥ →* NearLitterPerm)
 
 @[simp]
-theorem toBot_smul (f : NearLitterPerm) (x : X) : toBot f • x = f • x := by
+theorem toBot_smul (π : NearLitterPerm) (x : X) : toBot π • x = π • x := by
   rfl
 
 @[simp]
-theorem ofBot_smul (f : StructPerm ⊥) (x : X) : ofBot f • x = f • x := by
+theorem ofBot_smul (π : StructPerm ⊥) (x : X) : ofBot π • x = π • x := by
   rfl
 
 @[simp]
-theorem toBot_inv_smul (f : NearLitterPerm) (x : X) : (toBot f)⁻¹ • x = f⁻¹ • x := by
+theorem toBot_inv_smul (π : NearLitterPerm) (x : X) : (toBot π)⁻¹ • x = π⁻¹ • x := by
   rfl
 
 @[simp]
-theorem ofBot_inv_smul (f : StructPerm ⊥) (x : X) : (ofBot f)⁻¹ • x = f⁻¹ • x := by
+theorem ofBot_inv_smul (π : StructPerm ⊥) (x : X) : (ofBot π)⁻¹ • x = π⁻¹ • x := by
   rfl
 
 @[simp]

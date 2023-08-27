@@ -3,6 +3,13 @@ import ConNF.Structural.StructPerm
 
 /-!
 # Supports
+
+In this file, we define support conditions and supports.
+
+## Main declarations
+
+* `ConNF.SupportCondition`: The type of support conditions.
+* `ConNF.Support`: The type of small supports made of support conditions.
 -/
 
 open Cardinal Equiv MulAction Quiver
@@ -15,7 +22,10 @@ namespace ConNF
 
 variable [Params.{u}] {α : TypeIndex}
 
-/-- A support condition is an atom or a near-litter together with an extended type index. -/
+/-- A *support condition* is an atom or a near-litter together with an extended type index.
+This represents an object in the base type (the atom or near-litter) together with the path
+detailing how we descend from type `α` to type `⊥` by looking at elements of elements and so on
+in the model. -/
 def SupportCondition (α : TypeIndex) : Type u :=
   Sum Atom NearLitter × ExtendedIndex α
 
@@ -32,6 +42,8 @@ theorem mk_supportCondition (α : TypeIndex) : #(SupportCondition α) = #μ := b
 
 namespace StructPerm
 
+/-- Structural permutations act on support conditions by following the derivative given in the
+condition. -/
 instance : MulAction (StructPerm α) (SupportCondition α)
     where
   smul π c := (π c.snd • c.fst, c.snd)
@@ -70,6 +82,7 @@ end StructPerm
 
 variable (G : Type _) (α) {τ : Type _} [SMul G (SupportCondition α)] [SMul G τ]
 
+/-- A (small) support of an object is a small set of support conditions that support it. -/
 structure Support (x : τ) where
   carrier : Set (SupportCondition α)
   small : Small carrier

@@ -2,6 +2,13 @@ import ConNF.Atom.Atom
 
 /-!
 # Pretangles
+
+A pretangle is an object of the supertype structure that our model resides inside.
+In this file, we define pretangles.
+
+## Main declarations
+
+* `ConNF.Pretangle`: The type of pretangles.
 -/
 
 universe u
@@ -19,19 +26,19 @@ termination_by Pretangle x => x
 
 namespace Pretangle
 
-/-- The "identity" equivalence between `atom` and `pretangle ⊥`. -/
+/-- The "identity" equivalence between `Atom` and `Pretangle ⊥`. -/
 def toBot : Atom ≃ Pretangle ⊥ :=
   Equiv.cast <| by unfold Pretangle; rfl
 
-/-- The "identity" equivalence between `pretangle ⊥` and `atom`. -/
+/-- The "identity" equivalence between `Pretangle ⊥` and `Atom`. -/
 def ofBot : Pretangle ⊥ ≃ Atom :=
   Equiv.cast <| by unfold Pretangle; rfl
 
-/-- The "identity" equivalence between `Π β < α, set (pretangle β)` and `pretangle α`. -/
+/-- The "identity" equivalence between `Π β < α, Set (Pretangle β)` and `Pretangle α`. -/
 def toCoe : (∀ β : TypeIndex, β < α → Set (Pretangle β)) ≃ Pretangle α :=
   Equiv.cast <| by unfold Pretangle; rfl
 
-/-- The "identity" equivalence between `pretangle α` and `Π β < α, set (pretangle β)`. -/
+/-- The "identity" equivalence between `Pretangle α` and `Π β < α, Set (Pretangle β)`. -/
 def ofCoe : Pretangle α ≃ ∀ β : TypeIndex, β < α → Set (Pretangle β) :=
   Equiv.cast <| by unfold Pretangle; rfl
 
