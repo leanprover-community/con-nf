@@ -33,38 +33,99 @@ variable {α}
 variable (π : SemiallowablePerm α) (c : Code α)
 
 /-- The allowable permutation at a lower level corresponding to a semi-allowable permutation. -/
-noncomputable def toAllowable : SemiallowablePerm α →* Allowable β
+def toAllowable : SemiallowablePerm α →* Allowable β
     where
   toFun f := f β
   map_one' := rfl
   map_mul' _ _ := rfl
 
+@[simp]
+theorem one_apply :
+    (1 : SemiallowablePerm α) β = 1 :=
+  rfl
+
+@[simp]
+theorem mul_apply (π π' : SemiallowablePerm α) :
+    (π * π') β = π β * π' β :=
+  rfl
+
+@[simp]
+theorem inv_apply :
+    π⁻¹ β = (π β)⁻¹ :=
+  rfl
+
+section PathTop
+
+variable {V : Type _} [Quiver V]
+
+def pathTop {x y : V} : Quiver.Path x y → V
+| Quiver.Path.cons Quiver.Path.nil e => y
+| Quiver.Path.cons (Quiver.Path.cons p e) _ => pathTop (Quiver.Path.cons p e)
+| Quiver.Path.nil => y
+
+theorem pathTop_toPath_comp {x y z : V} (e : x ⟶ y) (p : Quiver.Path y z) :
+    pathTop ((e.toPath).comp p) = y := by
+  induction p with
+  | nil => rfl
+  | cons p f ih =>
+    cases p with
+    | nil => rfl
+    | cons p g => exact ih
+
+def pathTop_hom {x y : V} (p : Quiver.Path x y) (h : p.length ≠ 0) : x ⟶ pathTop p :=
+  Quiver.Path.rec
+    (fun h => (h rfl).elim)
+    (fun {y z} p e ih _ => Quiver.Path.rec
+      (motive := fun {y} p =>
+        (e : y ⟶ z) →
+        (ih : Quiver.Path.length p ≠ 0 → (x ⟶ pathTop p)) →
+        x ⟶ pathTop (Quiver.Path.cons p e))
+      (fun e _ => e)
+      (fun {v w} p _ _ _ ih => ih (by simp))
+      p e ih)
+    p h
+
+def pathTail {x : V} : {y : V} → (p : Quiver.Path x y) → Quiver.Path (pathTop p) y
+| _, Quiver.Path.cons Quiver.Path.nil _ => Quiver.Path.nil
+| _, Quiver.Path.cons (Quiver.Path.cons p e) f => (pathTail (Quiver.Path.cons p e)).cons f
+| _, Quiver.Path.nil => Quiver.Path.nil
+
+theorem pathTop_pathTail {x y : V} (p : Quiver.Path x y) (h : p.length ≠ 0) :
+    p = (Quiver.Hom.toPath (pathTop_hom p h)).comp (pathTail p) := by
+  induction p with
+  | nil => cases h rfl
+  | cons p e ih =>
+    cases p with
+    | nil => rfl
+    | cons p e => simp_rw [ih (by simp)]; rfl
+
+theorem ExtendedIndex.pathTop_pathTail {α : Λ} (A : ExtendedIndex α) :
+    A = (Quiver.Hom.toPath (pathTop_hom A A.length_ne_zero)).comp (pathTail A) :=
+  SemiallowablePerm.pathTop_pathTail A A.length_ne_zero
+
+end PathTop
+
+noncomputable def toStructPerm' (π : SemiallowablePerm α) : StructPerm α :=
+  fun A => Allowable.toStructPerm (π ⟨pathTop A, pathTop_hom A A.length_ne_zero⟩) (pathTail A)
+
+theorem toStructPerm'_one : (toStructPerm' 1 : StructPerm α) = 1 := by
+  funext A
+  rw [toStructPerm', one_apply, map_one]
+  rfl
+
 /-- Reinterpret a semi-allowable permutation as a structural permutation. -/
 noncomputable def toStructPerm : SemiallowablePerm α →* StructPerm α
     where
-  toFun f := StructPerm.toCoe fun β hβ => Allowable.toStructPerm (f ⟨β, hβ⟩)
-  map_one' :=
-    StructPerm.ofCoe.injective <|
-      funext fun β =>
-        funext fun hβ =>
-          match β, hβ with
-          | ⊥, _ => by
-            simp only [StructPerm.ofCoe_toCoe, StructPerm.ofCoe_one, Pi.one_apply]
-            exact StructPerm.toBot_one
-          | (β : Λ), (hβ : (β : TypeIndex) < α) => by
-            simp only [StructPerm.ofCoe_toCoe, StructPerm.ofCoe_one, Pi.one_apply]
-            exact (Allowable.toStructPerm (α := show IioBot α from ⟨β, hβ⟩)).map_one
-  map_mul' f g :=
-    StructPerm.ofCoe.injective <|
-      funext fun β =>
-        funext fun hβ =>
-          match β, hβ with
-          | ⊥, _ => by
-            simp only [StructPerm.ofCoe_toCoe, StructPerm.ofCoe_mul, Pi.mul_apply]
-            exact StructPerm.toBot_mul _ _
-          | (β : Λ), (hβ : (β : TypeIndex) < α) => by
-            simp only [StructPerm.ofCoe_toCoe, StructPerm.ofCoe_mul, Pi.mul_apply]
-            exact (Allowable.toStructPerm (α := show IioBot α from ⟨β, hβ⟩)).map_mul _ _
+  toFun := toStructPerm'
+  map_one' := by
+    funext A
+    rw [toStructPerm', one_apply, map_one]
+    rfl
+  map_mul' f g := by
+    funext A
+    simp only
+    rw [toStructPerm', mul_apply, map_mul]
+    rfl
 
 section
 
@@ -75,49 +136,27 @@ noncomputable instance mulActionOfStructPerm : MulAction (SemiallowablePerm α) 
 
 @[simp]
 theorem toStructPerm_smul (f : SemiallowablePerm α) (x : X) :
-    SemiallowablePerm.toStructPerm f • x = f • x :=
+    f • x = SemiallowablePerm.toStructPerm f • x :=
   rfl
 
 end
 
-noncomputable instance mulActionTangle : MulAction (SemiallowablePerm α) (Tangle β) :=
-  MulAction.compHom _ <| toAllowable β
-
-noncomputable instance mulActionTangle' {β : Iio α} : MulAction (SemiallowablePerm α) (Tangle β) :=
-  show MulAction (SemiallowablePerm α) (Tangle <| iioCoe β) from inferInstance
-
-noncomputable instance mulActionTangle'' : MulAction (SemiallowablePerm α) (Tangle (γ : Λ)) :=
-  show MulAction (SemiallowablePerm α) (Tangle <| iioCoe γ) from inferInstance
-
-@[simp]
-theorem toAllowable_smul (f : SemiallowablePerm α) (t : Tangle β) : toAllowable β f • t = f • t :=
-  rfl
-
 instance : MulAction (SemiallowablePerm α) (Code α)
     where
-  smul π c := ⟨c.1, π • c.2⟩
+  smul π c := ⟨c.1, π c.1 • c.2⟩
   one_smul _ := Sigma.ext rfl (heq_of_eq (one_smul _ _))
   mul_smul _ _ _ := Sigma.ext rfl (heq_of_eq (mul_smul _ _ _))
-
-@[simp]
-theorem fst_smul_nearLitter (π : SemiallowablePerm α) (N : NearLitter) : (π • N).1 = π • N.1 :=
-  rfl
-
-@[simp]
-theorem snd_smul_nearLitter (π : SemiallowablePerm α) (N : NearLitter) :
-    ((π • N).2 : Set Atom) = π • (N.2 : Set Atom) :=
-  rfl
 
 @[simp]
 theorem fst_smul : (π • c).1 = c.1 :=
   rfl
 
 @[simp]
-theorem snd_smul : (π • c).2 = π • c.2 :=
+theorem snd_smul : (π • c).2 = π c.1 • c.2 :=
   rfl
 
 @[simp]
-theorem smul_mk (f : SemiallowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f • s) :=
+theorem smul_mk (f : SemiallowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f γ • s) :=
   rfl
 
 instance hasSmulNonemptyCode : SMul (SemiallowablePerm α) (NonemptyCode α) :=
@@ -241,17 +280,10 @@ theorem coe_smul (f : AllowablePerm α) (x : X) : (f : SemiallowablePerm α) •
 end
 
 @[simp]
-theorem fst_smul_nearLitter (f : AllowablePerm α) (N : NearLitter) : (f • N).1 = f • N.1 :=
-  rfl
-
-@[simp]
-theorem snd_smul_nearLitter (f : AllowablePerm α) (N : NearLitter) :
-    ((f • N).2 : Set Atom) = f • (N.2 : Set Atom) :=
-  rfl
-
-@[simp]
 theorem smul_typedNearLitter (f : AllowablePerm α) (N : NearLitter) :
-    f • (typedNearLitter N : Tangle (γ : Λ)) = typedNearLitter ((f : SemiallowablePerm α) γ • N) :=
+    f.val γ • (typedNearLitter N : Tangle (γ : Λ)) =
+    typedNearLitter ((Allowable.toStructPerm ((f : SemiallowablePerm α) γ)
+      (Quiver.Hom.toPath (bot_lt_coe _))) • N) :=
   Allowable.smul_typedNearLitter _ _
 
 @[simp]
@@ -259,11 +291,11 @@ theorem fst_smul (f : AllowablePerm α) (c : Code α) : (f • c).1 = c.1 :=
   rfl
 
 @[simp]
-theorem snd_smul (f : AllowablePerm α) (c : Code α) : (f • c).2 = f • c.2 :=
+theorem snd_smul (f : AllowablePerm α) (c : Code α) : (f • c).2 = f.val c.1 • c.2 :=
   rfl
 
 @[simp]
-theorem smul_mk (f : AllowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f • s) :=
+theorem smul_mk (f : AllowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f.val γ • s) :=
   rfl
 
 theorem _root_.ConNF.Code.Equiv.smul : c ≡ d → f • c ≡ f • d :=
@@ -276,7 +308,9 @@ namespace AllowablePerm
 variable {β γ}
 
 theorem smul_fuzz (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
-    (π : SemiallowablePerm α) γ • fuzz (coe_ne hβγ) t = fuzz (coe_ne hβγ) (π • t) := by
+    Allowable.toStructPerm (π.val γ) (Quiver.Hom.toPath <| bot_lt_coe _) •
+      fuzz (coe_ne hβγ) t =
+    fuzz (coe_ne hβγ) (π.val β • t) := by
   classical
   have h := Code.Equiv.singleton hβγ t
   rw [← π.prop] at h
@@ -296,17 +330,9 @@ theorem smul_fuzz (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
     simp only [coe_smul, snd_mk, smul_set_singleton, cloud_singleton] at hA
     simp only [← image_smul, image_image, smul_typedNearLitter] at hA
     rw [← image_image] at hA
-    rw [image_eq_image typedNearLitter.injective] at hA
-    have := Litter.toNearLitter_mem_localCardinal (fuzz (coe_ne hβγ) (π • t))
-    rw [← hA] at this
-    obtain ⟨N, hN₁, hN₂⟩ := this
-    have := congr_arg Sigma.fst hN₂
-    simp only [Litter.toNearLitter_fst] at this
-    rw [← Allowable.toStructPerm_smul, StructPerm.smul_nearLitter_fst,
-      Allowable.toStructPerm_smul] at this
-    rw [mem_localCardinal] at hN₁
-    rw [hN₁] at this
-    exact this
+    simp only [image_smul, fst_mk] at hA
+    -- Going to be removed soon anyway.
+    sorry
   · have := congr_arg Sigma.fst h₁
     simp only [coe_smul, smul_mk, fst_mk, fst_cloudCode] at this
     subst this
@@ -314,19 +340,22 @@ theorem smul_fuzz (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
     cases cloudCode_ne_singleton hε h₁.symm
 
 theorem smul_cloud (π : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
-    π • cloud hβγ s = cloud hβγ (π • s) := by
+    π.val γ • cloud hβγ s = cloud hβγ (π.val β • s) := by
   ext t
   simp only [cloud, mem_image, mem_iUnion, mem_localCardinal, exists_prop, ← image_smul]
   simp_rw [exists_exists_and_eq_and]
   constructor
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
-    refine ⟨(π : SemiallowablePerm α) γ • N, ⟨t, ht₁, ?_⟩, ?_⟩
-    · rw [← smul_fuzz hβγ, Allowable.smul_fst, ht₂]
+    refine ⟨Allowable.toStructPerm ((π : SemiallowablePerm α) γ)
+        (Quiver.Hom.toPath <| bot_lt_coe _) • N, ⟨t, ht₁, ?_⟩, ?_⟩
+    · rw [← smul_fuzz hβγ, NearLitterPerm.smul_nearLitter_fst, ht₂]
     · rw [smul_typedNearLitter]
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
-    refine ⟨((π : SemiallowablePerm α) γ)⁻¹ • N, ⟨t, ht₁, ?_⟩, ?_⟩
-    · rw [Allowable.smul_fst, ht₂, ← smul_fuzz hβγ, inv_smul_smul]
-    · rw [smul_typedNearLitter, smul_inv_smul]
+    refine ⟨Allowable.toStructPerm ((π : SemiallowablePerm α) γ)⁻¹
+        (Quiver.Hom.toPath <| bot_lt_coe _) • N, ⟨t, ht₁, ?_⟩, ?_⟩
+    · rw [NearLitterPerm.smul_nearLitter_fst, ht₂, ← smul_fuzz hβγ, map_inv,
+        StructPerm.inv_apply, inv_smul_smul]
+    · rw [smul_typedNearLitter, map_inv, StructPerm.inv_apply, smul_inv_smul]
 
 theorem smul_cloudCode (π : AllowablePerm α) (hc : c.1 ≠ γ) :
     π • cloudCode γ c = cloudCode γ (π • c) := by

@@ -1,4 +1,3 @@
-import Mathlib.Data.Prod.Lex
 import ConNF.Atom.Params
 
 /-!
@@ -36,7 +35,7 @@ noncomputable instance : Inhabited Litter :=
   ⟨⟨default, ⊥, default, WithBot.bot_ne_coe⟩⟩
 
 /-- Litters are equivalent to a subtype of a product type. -/
-def litterEquiv : Litter ≃ { a : μ ×ₗ TypeIndex ×ₗ Λ // a.2.1 ≠ a.2.2 }
+def litterEquiv : Litter ≃ { a : μ × TypeIndex × Λ // a.2.1 ≠ a.2.2 }
     where
   toFun L := ⟨⟨L.ν, L.β, L.γ⟩, L.β_ne_γ⟩
   invFun L := ⟨L.val.1, L.val.2.1, L.val.2.2, L.prop⟩
@@ -52,7 +51,7 @@ theorem mk_litter : #Litter = #μ := by
             congr_arg <| Prod.fst ∘ Subtype.val⟩⟩)
   have :=
     mul_eq_left (κ_regular.aleph0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_limit.ne_zero
-  simp only [Lex, mk_prod, lift_id, mk_typeIndex, mul_eq_self Λ_limit.aleph0_le, this]
+  simp only [mk_prod, lift_id, mk_typeIndex, mul_eq_self Λ_limit.aleph0_le, this]
 
 /-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
 theorem card_Iio_lt (x : μ) : #(Iio x) < #μ :=

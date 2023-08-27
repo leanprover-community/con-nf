@@ -84,7 +84,7 @@ instance : MulAction (Allowable α) X :=
   MulAction.compHom _ toStructPerm
 
 @[simp]
-theorem toStructPerm_smul (f : Allowable α) (x : X) : Allowable.toStructPerm f • x = f • x :=
+theorem toStructPerm_smul (f : Allowable α) (x : X) : f • x = Allowable.toStructPerm f • x :=
   rfl
 
 end Allowable
@@ -110,7 +110,9 @@ class AlmostTangleData where
   typedAtom : Atom ↪ Tangle α
   typedNearLitter : NearLitter ↪ Tangle α
   smul_typedNearLitter :
-    ∀ (π : Allowable α) (N), π • typedNearLitter N = typedNearLitter (π • N)
+    ∀ (π : Allowable α) (N : NearLitter),
+    π • typedNearLitter N =
+    typedNearLitter ((Allowable.toStructPerm π) (Quiver.Hom.toPath <| bot_lt_coe α) • N)
 
 export AlmostTangleData (typedAtom typedNearLitter)
 
@@ -119,20 +121,13 @@ namespace Allowable
 variable {α}
 variable [AlmostTangleData α]
 
-@[simp]
-theorem smul_fst (π : Allowable α) (N : NearLitter) : (π • N).fst = π • N.fst :=
-  rfl
-
-@[simp]
-theorem coe_smul (π : Allowable α) (N : NearLitter) : ((π • N) : Set Atom) = π • (N : Set Atom) :=
-  rfl
-
 /--
 The action of allowable permutations on tangles commutes with the `typed_near_litter` function mapping
 near-litters to typed near-litters. This is quite clear to see when representing tangles as codes,
 but since at this stage tangles are just a type, we have to state this condition explicitly. -/
 theorem smul_typedNearLitter (π : Allowable α) (N : NearLitter) :
-    π • (typedNearLitter N : Tangle α) = typedNearLitter (π • N) :=
+    (π • typedNearLitter N : Tangle α) =
+    typedNearLitter ((Allowable.toStructPerm π) (Quiver.Hom.toPath <| bot_lt_coe α) • N) :=
   AlmostTangleData.smul_typedNearLitter _ _
 
 end Allowable
@@ -247,20 +242,27 @@ noncomputable instance Bot.coreTangleData : CoreTangleData ⊥
   allowableToStructPerm := StructPerm.toBotIso.toMonoidHom
   allowableAction := inferInstance
   designatedSupport a :=
-    { carrier := {toCondition (Sum.inl a, Quiver.Path.nil)}
+    { carrier := {(Sum.inl a, Quiver.Path.nil)}
       supports := fun π => by
         simp only [mem_singleton_iff, forall_eq]
         intro h
         change (Sum.inl _, _) = (_, _) at h
-        simp only [MulEquiv.coe_toMonoidHom, StructPerm.coe_toBotIso, toCondition, Equiv.refl_apply,
-          StructPerm.derivative_nil, StructPerm.toBot_smul, Prod.mk.injEq, Sum.inl.injEq,
-          and_true] at h
+        simp only [MulEquiv.coe_toMonoidHom, Prod.mk.injEq, Sum.inl.injEq, and_true] at h
         exact h
       small := small_singleton _ }
 
 /-- The tangle data at the bottom level. -/
 noncomputable instance Bot.positionedTangleData : PositionedTangleData ⊥ :=
   ⟨Nonempty.some mk_atom.le⟩
+
+def _root_.NearLitterPerm.ofBot : Allowable ⊥ ≃ NearLitterPerm :=
+  Equiv.refl _
+
+@[simp]
+theorem _root_.NearLitterPerm.ofBot_smul {X : Type _} [MulAction NearLitterPerm X]
+    (π : Allowable ⊥) (x : X) :
+    NearLitterPerm.ofBot π • x = π • x :=
+  rfl
 
 variable (α : Λ)
 

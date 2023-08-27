@@ -135,6 +135,41 @@ theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (�
   refine' ⟨_, _, Relation.ReflTransGen.refl⟩
   exact hc
 
+-- TODO: Use this theorem in places above.
+-- I think that the `change` and `obtain` calls slow down proofs severely in Lean 4.
+-- TODO: Canonicalise uses of `<` to always be with respect to `TypeIndex`.
+theorem supports {β : Iio α} {π π' : Allowable β} {t : Tangle β}
+    (ha : ∀ a A, (inl a, A) ∈ designatedSupport t →
+      StructPerm.derivative A (Allowable.toStructPerm π) • a =
+      StructPerm.derivative A (Allowable.toStructPerm π') • a)
+    (hN : ∀ N A, (inr N, A) ∈ designatedSupport t →
+      StructPerm.derivative A (Allowable.toStructPerm π) • N =
+      StructPerm.derivative A (Allowable.toStructPerm π') • N) :
+    π • t = π' • t := by
+  rw [← inv_smul_eq_iff, smul_smul]
+  refine' (designatedSupport t).supports _ _
+  intro c hc
+  rw [mul_smul, inv_smul_eq_iff]
+  change (_, c.2) = (_, c.2)
+  refine StructPerm.smul_supportCondition_eq_iff.mpr ?_
+  obtain ⟨a | N, A⟩ := c
+  · change inl _ = inl _
+    simp only [inl.injEq]
+    exact ha a A hc
+  · change inr _ = inr _
+    simp only [inr.injEq]
+    exact hN N A hc
+
+theorem _root_.ConNF.StructPerm.derivative_bot_smul_atom {α : TypeIndex} (π : StructPerm α)
+    (A : ExtendedIndex α) (a : Atom) :
+    StructPerm.derivative A π • a = π A • a :=
+  rfl
+
+theorem _root_.ConNF.StructPerm.derivative_bot_smul_nearLitter {α : TypeIndex} (π : StructPerm α)
+    (A : ExtendedIndex α) (N : NearLitter) :
+    StructPerm.derivative A π • N = π A • N :=
+  rfl
+
 theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex β) (L : Litter)
     (ha : ∀ (B : ExtendedIndex β) (a : Atom),
       (inl a, B) ≺[α] (inr L.toNearLitter, A) → a ∈ range (π.completeAtomMap B))
@@ -161,15 +196,10 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
     rw [completeLitterMap_eq_of_inflexibleCoe ⟨γ, δ, ε, hδ, hε, hδε, B, _, rfl, rfl⟩
         ((ihAction_lawful hπf _).comp _) (ihAction_comp_mapFlexible hπf _ _)]
     refine' congr_arg _ _
-    rw [smul_smul]
-    refine' (designatedSupport t).supports _ _
-    intro c hc
-    rw [mul_smul, smul_eq_iff_eq_inv_smul]
-    change (_, c.2) = (_, c.2)
-    refine' Prod.ext _ rfl
-    obtain ⟨a | N, A⟩ := c
-    · change inl _ = inl _
-      simp only [inl.injEq]
+    dsimp only
+    rw [smul_eq_iff_eq_inv_smul]
+    refine supports (t := t) ?_ ?_
+    · intros a A hc
       have hac := Constrains.fuzz hδ hε hδε B t _ hc
       specialize ha _ a hac
       obtain ⟨b, ha⟩ := ha
@@ -186,8 +216,10 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         rw [ha]
         exact hac
       trans b
-      · rw [map_inv, map_inv, this]
-      · rw [map_inv, map_inv, ← smul_eq_iff_eq_inv_smul, ← ha]
+      · rw [map_inv]
+        exact this
+      · rw [map_inv, StructPerm.derivative_bot_smul_atom, StructPerm.inv_apply,
+          ← smul_eq_iff_eq_inv_smul, ← ha]
         rw [StructAction.hypothesisedAllowable]
         refine' (ihAction_coherent_atom (B.cons <| coe_lt hδ) A b _ _
           ((ihAction_lawful hπf _).comp _) _
@@ -197,9 +229,9 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' Relation.reflTransGen_of_eq _
         refine' Prod.ext _ rfl
         change inl _ = inl _
-        simp only [map_inv, eq_inv_smul_iff, ← this, smul_inv_smul]
-    · change inr _ = inr _
-      simp only [inr.injEq]
+        simp only [← this, ne_eq, StructPerm.derivative_bot, StructPerm.toBot_inv_smul, map_inv,
+          StructPerm.inv_apply]
+    · intros N A hc
       have hNc := Constrains.fuzz hδ hε hδε B t _ hc
       specialize hN _ N hNc
       obtain ⟨N', hN⟩ := hN
@@ -216,8 +248,10 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         rw [hN]
         exact hNc
       trans N'
-      · rw [map_inv, map_inv, this]
-      · rw [map_inv, map_inv, ← smul_eq_iff_eq_inv_smul, ← hN]
+      · rw [map_inv]
+        exact this
+      · rw [map_inv, StructPerm.derivative_bot_smul_nearLitter, StructPerm.inv_apply,
+          ← smul_eq_iff_eq_inv_smul, ← hN]
         rw [StructAction.hypothesisedAllowable]
         refine' (ihAction_coherent hπf (B.cons <| coe_lt hδ) A N' _ _
           ((ihAction_lawful hπf _).comp _) _
@@ -227,7 +261,8 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' Relation.reflTransGen_of_eq _
         refine' Prod.ext _ rfl
         change inr _ = inr _
-        simp only [map_inv, eq_inv_smul_iff, ← this, smul_inv_smul]
+        simp only [← this, ne_eq, StructPerm.derivative_bot, StructPerm.toBot_inv_smul, map_inv,
+          StructPerm.inv_apply]
 
 theorem atom_mem_range_of_mem_completeNearLitterMap (A : ExtendedIndex β) (a : Atom)
     {N : NearLitter} (h : a ∈ π.completeNearLitterMap A N) : a ∈ range (π.completeAtomMap A) := by

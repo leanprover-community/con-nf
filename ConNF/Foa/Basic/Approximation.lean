@@ -311,7 +311,7 @@ theorem ExactlyApproximates.map_nearLitter {π₀ : NearLitterApprox} {π : Near
   rw [smul_nearLitter_coe]
   ext a : 1
   simp only [coe_largestSublitter, mem_union, mem_diff, ConNF.mem_litterSet,
-    NearLitterPerm.coe_smul]
+    NearLitterPerm.smul_nearLitter_coe]
   constructor
   · rintro (⟨ha₁, ha₂⟩ | ⟨b, ⟨hb₁, hb₂⟩, rfl⟩)
     · rw [hπ.map_litter _ h₁, ← inv_smul_eq_iff] at ha₁

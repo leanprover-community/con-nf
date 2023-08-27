@@ -1,4 +1,7 @@
 - Remove excessive imports.
+- Maybe remove `localCardinal`.
+- Clean up instances to take advantage of Lean 4.
+- Exploit `erw` where possible.
 - Refactor new allowable permutation to use a `smul_fuzz` definition.
 - Fix variable letters.
 - Add typeclasses for derivatives and toStructPerm?

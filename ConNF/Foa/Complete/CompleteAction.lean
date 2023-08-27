@@ -124,19 +124,8 @@ theorem completeLitterMap_eq_of_flexible {A : ExtendedIndex β} {L : Litter} (h 
     π.completeLitterMap A L = NearLitterApprox.flexibleCompletion α (π A) A • L := by
   rw [completeLitterMap_eq, litterCompletion_of_flexible _ _ _ _ h]
 
--- TODO: move to StructPerm
-@[simp]
-theorem _root_.ConNF.StructPerm.derivative_fst {α β : TypeIndex} (π : StructPerm α) (A : Path α β)
-    (N : NearLitter) : (StructPerm.derivative A π • N).fst = StructPerm.derivative A π • N.fst :=
-  rfl
-
 theorem toStructPerm_bot :
     (Allowable.toStructPerm : Allowable ⊥ → StructPerm ⊥) = StructPerm.toBotIso.toMonoidHom :=
-  rfl
-
-@[simp]
-theorem toStructPerm_toNearLitterPerm (π : Allowable ⊥) :
-    StructPerm.toNearLitterPerm (Allowable.toStructPerm π) = π := by
   rfl
 
 -- TODO: use this
