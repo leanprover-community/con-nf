@@ -6,6 +6,10 @@ import ConNF.Atom.Params
 In this file, we define litters, which are the parts of an indexed partition of the base type of our
 model. Each litter is indexed by an element of `μ`, as well as some parameters `β` and `γ` used for
 defining the `fuzz` map later.
+
+## Main declarations
+
+* `ConNF.Litter`: The type of litters.
 -/
 
 open Cardinal Set
@@ -16,7 +20,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] {α β : Type u}
+variable [Params.{u}]
 
 /-- The type indexing the partition of `Atom`. Each atom belongs to a unique litter.
 The field `ν : μ` is an index that enforces that there are `μ` litters.

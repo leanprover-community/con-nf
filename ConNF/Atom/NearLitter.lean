@@ -24,7 +24,7 @@ open scoped Cardinal
 
 namespace ConNF
 
-variable [Params.{u}] {α β : Type u} {L L₁ L₂ : Litter} {s t : Set Atom}
+variable [Params.{u}] {L L₁ L₂ : Litter} {s t : Set Atom}
 
 /-- A `L`-near-litter is a set of small symmetric difference to litter `L`. In other words,
 it is near litter `L`.

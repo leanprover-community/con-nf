@@ -16,6 +16,8 @@ variable [Params.{u}]
 # Near-litter approximations
 -/
 
+-- TODO: Split into two files
+
 @[ext]
 structure NearLitterApprox where
   atomPerm : LocalPerm Atom

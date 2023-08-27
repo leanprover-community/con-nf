@@ -8,6 +8,10 @@ ZFU sense (for example), they are simply the elements of the model which are in 
 
 This base type does not appear in the final construction, it is just used as the foundation on which
 the subsequent layers can be built.
+
+## Main declarations
+
+* `ConNF.Atom`: The type of atoms.
 -/
 
 open Cardinal Set
@@ -34,15 +38,15 @@ def Atom : Type _ :=
 noncomputable instance : Inhabited Atom :=
   ⟨⟨default, default⟩⟩
 
-/-- The cardinality of `τ₋₁` is the cardinality of `μ`.
+/-- The cardinality of `Atom` is the cardinality of `μ`.
 We will prove that all types constructed in our model have cardinality equal to `μ`. -/
 @[simp]
 theorem mk_atom : #Atom = #μ := by
   simp_rw [Atom, mk_prod, lift_id, mk_litter,
     mul_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) κ_le_μ κ_isRegular.pos.ne']
 
-/-- The set corresponding to litter `L`. We define a litter set as the set of elements of the
-base type `τ₋₁` where the first element of the pair is `L`. -/
+/-- The set corresponding to litter `L`. We define a litter set as the set of atoms with first
+projection `L`. -/
 def litterSet (L : Litter) : Set Atom :=
   {a | a.1 = L}
 
