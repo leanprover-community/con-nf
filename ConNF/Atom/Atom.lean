@@ -1,17 +1,13 @@
 import ConNF.Atom.Litter
 
 /-!
-# Litters, near-litters
+# Atoms
 
-In this file, we define litters and near-litters.
+In this file, we define atoms: the elements of the base type of our model. They are not atoms in the
+ZFU sense (for example), they are simply the elements of the model which are in type `τ₋₁`.
 
-Litters are the parts of an indexed partition of `con_nf.atom`. Their precise definition can be
-considered opaque, as we only care about the fact that their cardinality is `κ`.
-
-## Main declarations
-
-* `con_nf.litter`: The `i`-th litter.
-* `con_nf.is_near_litter`: A set is a `i`-near-litter if it is near the `i`-th litter.
+This base type does not appear in the final construction, it is just used as the foundation on which
+the subsequent layers can be built.
 -/
 
 open Cardinal Set
@@ -24,13 +20,14 @@ namespace ConNF
 
 variable [Params.{u}] {α β : Type u}
 
-/-- The base type of the construction, `τ₋₁` in the document. Instead of declaring it as an
+/--
+The base type of the construction, denoted by `τ₋₁` in various papers. Instead of declaring it as an
 arbitrary type of cardinality `μ` and partitioning it into suitable sets of litters afterwards, we
-define it as `litter × κ`, which has the correct cardinality and comes with a natural
-partition.
+define it as `Litter × κ`, which has the correct cardinality and comes with a natural partition.
 
 These are not 'atoms' in the ZFU, TTTU or NFU sense; they are simply the elements of the model which
-are in type `τ₋₁`. -/
+are in type `τ₋₁`.
+-/
 def Atom : Type _ :=
   Litter × κ
 
@@ -44,20 +41,16 @@ theorem mk_atom : #Atom = #μ := by
   simp_rw [Atom, mk_prod, lift_id, mk_litter,
     mul_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) κ_le_μ κ_isRegular.pos.ne']
 
-variable {i j : Litter} {s t : Set Atom}
-
-/-- The set corresponding to the `i`-th litter.
-
-We define a litter as the set of elements of the base type `τ₋₁` where the first element of the pair
-is `i`. However, as noted above, the definition can be viewed as opaque, since its cardinality is
-the only interesting feature. -/
-def litterSet (i : Litter) : Set Atom :=
-  {p | p.1 = i}
+/-- The set corresponding to litter `L`. We define a litter set as the set of elements of the
+base type `τ₋₁` where the first element of the pair is `L`. -/
+def litterSet (L : Litter) : Set Atom :=
+  {a | a.1 = L}
 
 @[simp]
-theorem mem_litterSet {a : Atom} {i : Litter} : a ∈ litterSet i ↔ a.1 = i :=
+theorem mem_litterSet {a : Atom} {L : Litter} : a ∈ litterSet L ↔ a.1 = L :=
   Iff.rfl
 
+/-- Each litter set is equivalent as a type to `κ`. -/
 def litterSetEquiv (L : Litter) : litterSet L ≃ κ := ⟨
     fun x => x.1.2,
     fun k => ⟨(L, k), rfl⟩,
@@ -65,21 +58,21 @@ def litterSetEquiv (L : Litter) : litterSet L ≃ κ := ⟨
     fun _ => rfl
   ⟩
 
-/-- Each litter has cardinality `κ`. -/
+/-- Each litter set has cardinality `κ`. -/
 @[simp]
-theorem mk_litterSet (i : Litter) : #(litterSet i) = #κ :=
-  Cardinal.eq.2 ⟨litterSetEquiv i⟩
+theorem mk_litterSet (L : Litter) : #(litterSet L) = #κ :=
+  Cardinal.eq.2 ⟨litterSetEquiv L⟩
 
-/-- Two litters with different indices are disjoint. -/
+/-- Two litters with different indices have disjoint litter sets. -/
 theorem pairwise_disjoint_litterSet : Pairwise (Disjoint on litterSet) :=
-  fun _ _ h => disjoint_left.2 fun _ hi hj => h <| hi.symm.trans hj
+  fun _ _ h => disjoint_left.2 fun _ h₁ h₂ => h <| h₁.symm.trans h₂
 
-theorem eq_of_mem_litterSet_of_mem_litterSet {a : Atom}
-    (hi : a ∈ litterSet i) (hj : a ∈ litterSet j) : i = j :=
+theorem eq_of_mem_litterSet_of_mem_litterSet {a : Atom} {L₁ L₂ : Litter}
+    (hi : a ∈ litterSet L₁) (hj : a ∈ litterSet L₂) : L₁ = L₂ :=
   pairwise_disjoint_litterSet.eq <| not_disjoint_iff.2 ⟨_, hi, hj⟩
 
-theorem litterSet_symmDiff_litterSet (h : i ≠ j) :
-    litterSet i ∆ litterSet j = litterSet i ∪ litterSet j :=
+theorem litterSet_symmDiff_litterSet {L₁ L₂ : Litter} (h : L₁ ≠ L₂) :
+    litterSet L₁ ∆ litterSet L₂ = litterSet L₁ ∪ litterSet L₂ :=
   (pairwise_disjoint_litterSet h).symmDiff_eq_sup
 
 end ConNF

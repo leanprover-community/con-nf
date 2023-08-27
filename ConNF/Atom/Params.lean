@@ -236,4 +236,14 @@ noncomputable instance : WellFoundedRelation TypeIndex :=
 noncomputable instance : WellFoundedLT TypeIndex :=
   inferInstance
 
+/-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
+theorem card_Iio_lt (x : μ) : #(Set.Iio x) < #μ :=
+  card_typein_lt (· < ·) x μ_ord.symm
+
+/-- Initial segments (sets of the form `{y | y ≤ x}`) have cardinality `< μ`. -/
+theorem card_Iic_lt (x : μ) : #(Set.Iic x) < #μ := by
+  rw [← Set.Iio_union_right, mk_union_of_disjoint, mk_singleton]
+  · exact (add_one_le_succ _).trans_lt (μ_isStrongLimit.isLimit.succ_lt (card_Iio_lt x))
+  · simp
+
 end ConNF

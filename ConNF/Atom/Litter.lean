@@ -1,17 +1,11 @@
 import ConNF.Atom.Params
 
 /-!
-# Litters, near-litters
+# Litters
 
-In this file, we define litters and near-litters.
-
-Litters are the parts of an indexed partition of `con_nf.atom`. Their precise definition can be
-considered opaque, as we only care about the fact that their cardinality is `κ`.
-
-## Main declarations
-
-* `con_nf.litter`: The `i`-th litter.
-* `con_nf.is_near_litter`: A set is a `i`-near-litter if it is near the `i`-th litter.
+In this file, we define litters, which are the parts of an indexed partition of the base type of our
+model. Each litter is indexed by an element of `μ`, as well as some parameters `β` and `γ` used for
+defining the `fuzz` map later.
 -/
 
 open Cardinal Set
@@ -24,7 +18,10 @@ namespace ConNF
 
 variable [Params.{u}] {α β : Type u}
 
-/-- The litters. This is the type indexing the partition of `atom`. -/
+/-- The type indexing the partition of `Atom`. Each atom belongs to a unique litter.
+The field `ν : μ` is an index that enforces that there are `μ` litters.
+The fields `β` and `γ` are used in the definition of the `fuzz` map, which is an injection
+into the type of litters. -/
 structure Litter where
   ν : μ
   β : TypeIndex
@@ -34,7 +31,8 @@ structure Litter where
 noncomputable instance : Inhabited Litter :=
   ⟨⟨default, ⊥, default, WithBot.bot_ne_coe⟩⟩
 
-/-- Litters are equivalent to a subtype of a product type. -/
+/-- Strips away the name of the type of litters, converting it into a combination of types
+well-known to mathlib. -/
 def litterEquiv : Litter ≃ { a : μ × TypeIndex × Λ // a.2.1 ≠ a.2.2 }
     where
   toFun L := ⟨⟨L.ν, L.β, L.γ⟩, L.β_ne_γ⟩
@@ -42,6 +40,7 @@ def litterEquiv : Litter ≃ { a : μ × TypeIndex × Λ // a.2.1 ≠ a.2.2 }
   left_inv := by rintro ⟨ν, β, γ, h⟩; rfl
   right_inv := by rintro ⟨⟨ν, β, γ⟩, h⟩; rfl
 
+/-- There are precisely `μ` litters. -/
 @[simp]
 theorem mk_litter : #Litter = #μ := by
   refine
@@ -52,15 +51,5 @@ theorem mk_litter : #Litter = #μ := by
   have :=
     mul_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) Λ_isLimit.ne_zero
   simp only [mk_prod, lift_id, mk_typeIndex, mul_eq_self Λ_isLimit.aleph0_le, this]
-
-/-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
-theorem card_Iio_lt (x : μ) : #(Iio x) < #μ :=
-  card_typein_lt (· < ·) x μ_ord.symm
-
-/-- Initial segments (sets of the form `{y | y ≤ x}`) have cardinality `< μ`. -/
-theorem card_Iic_lt (x : μ) : #(Iic x) < #μ := by
-  rw [← Iio_union_right, mk_union_of_disjoint, mk_singleton]
-  · exact (add_one_le_succ _).trans_lt (μ_isStrongLimit.isLimit.succ_lt (card_Iio_lt x))
-  · simp
 
 end ConNF
