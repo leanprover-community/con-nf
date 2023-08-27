@@ -34,7 +34,7 @@ noncomputable def completeNearLitterPerm (hπf : π.Free) (A : ExtendedIndex β)
   near := by
     intro L s hs
     have :
-      (completeAtomPerm hπf A)⁻¹.toFun ⁻¹' s =
+      ↑(completeAtomPerm hπf A)⁻¹ ⁻¹' s =
         (π.completeNearLitterMap A ⟨L, s, hs⟩ : Set Atom)
     · simp only [completeNearLitterMap_coe hπf, toFun_as_coe, Perm.preimage_inv, NearLitter.coe_mk]
       rfl
