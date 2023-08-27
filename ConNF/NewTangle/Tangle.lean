@@ -393,8 +393,10 @@ open MulAction
 
 /-- If a set of support conditions supports a code, it supports all equivalent codes. -/
 protected theorem Code.Equiv.supports (hcd : c ≡ d) (hS : Supports (AllowablePerm α) S c) :
-    Supports (AllowablePerm α) S d := fun f h =>
-  (((f.2 _ _).mpr hcd).symm.trans <| (Code.Equiv.of_eq <| hS f h).trans hcd).unique rfl
+    Supports (AllowablePerm α) S d := fun f h => by
+  have h₁ := hcd.smul (f := f)
+  have h₂ := (Code.Equiv.of_eq <| hS f h).trans hcd
+  exact (h₁.symm.trans h₂).unique rfl
 
 theorem Code.Equiv.supports_iff (hcd : c ≡ d) :
     Supports (AllowablePerm α) S c ↔ Supports (AllowablePerm α) S d :=

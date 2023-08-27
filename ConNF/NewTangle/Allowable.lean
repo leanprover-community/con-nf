@@ -173,10 +173,56 @@ end SemiallowablePerm
 
 variable [PositionData] [PositionedTangleCumul α] [AlmostTangleCumul α] [CoreTangleData α]
 
+def SemiallowablePerm.IsAllowable (π : SemiallowablePerm α) : Prop :=
+  ∀ ⦃β : IioBot α⦄ ⦃γ : Iio α⦄ (hβγ : β ≠ γ) (t : Tangle β),
+  Allowable.toStructPerm (π γ) (Quiver.Hom.toPath <| bot_lt_coe _) •
+    fuzz (coe_ne hβγ) t =
+  fuzz (coe_ne hβγ) (π β • t)
+
+variable {π π' : SemiallowablePerm α}
+
+theorem isAllowable_one : (1 : SemiallowablePerm α).IsAllowable := by
+  intros β γ hβγ t
+  simp only [SemiallowablePerm.one_apply, map_one, StructPerm.one_apply, one_smul]
+
+theorem isAllowable_inv (h : π.IsAllowable) : π⁻¹.IsAllowable := by
+  intros β γ hβγ t
+  have := h hβγ (π⁻¹ β • t)
+  simp only [SemiallowablePerm.inv_apply, smul_inv_smul] at this
+  rw [← this]
+  simp only [SemiallowablePerm.inv_apply, map_inv, StructPerm.inv_apply, inv_smul_smul]
+
+theorem isAllowable_mul (h : π.IsAllowable) (h' : π'.IsAllowable) : (π * π').IsAllowable := by
+  intros β γ hβγ t
+  simp only [SemiallowablePerm.mul_apply, map_mul, StructPerm.mul_apply, mul_smul]
+  rw [h' hβγ t, h hβγ (π' β • t)]
+
+theorem isAllowable_div (h : π.IsAllowable) (h' : π'.IsAllowable) : (π / π').IsAllowable := by
+  rw [div_eq_mul_inv]
+  exact isAllowable_mul α h (isAllowable_inv α h')
+
+theorem isAllowable_pow (h : π.IsAllowable) (n : ℕ) : (π ^ n).IsAllowable := by
+  induction n with
+  | zero =>
+    rw [pow_zero]
+    exact isAllowable_one α
+  | succ n ih =>
+    rw [pow_succ]
+    exact isAllowable_mul α h ih
+
+theorem isAllowable_zpow (h : π.IsAllowable) (n : ℤ) : (π ^ n).IsAllowable := by
+  cases n with
+  | ofNat n =>
+    rw [Int.ofNat_eq_coe, zpow_coe_nat]
+    exact isAllowable_pow α h n
+  | negSucc n =>
+    rw [zpow_negSucc]
+    exact isAllowable_inv α (isAllowable_pow α h (n + 1))
+
 /-- An allowable permutation is a semi-allowable permutation whose action on codes preserves
 equivalence. -/
 def AllowablePerm :=
-  { π : SemiallowablePerm α // ∀ X Y : Code α, π • X ≡ π • Y ↔ X ≡ Y }
+  { π : SemiallowablePerm α // π.IsAllowable }
 
 variable {α}
 variable {f : AllowablePerm α} {c d : Code α}
@@ -191,34 +237,22 @@ theorem coe_injective : Injective (Subtype.val : AllowablePerm α → Semiallowa
   Subtype.coe_injective
 
 noncomputable instance : One (AllowablePerm α) :=
-  ⟨⟨1, fun _ _ => by simp_rw [one_smul]⟩⟩
+  ⟨⟨1, isAllowable_one α⟩⟩
 
 noncomputable instance : Inv (AllowablePerm α) :=
-  ⟨fun f => ⟨f⁻¹, fun c d => by rw [← f.prop, smul_inv_smul, smul_inv_smul]⟩⟩
+  ⟨fun f => ⟨f⁻¹, isAllowable_inv α f.prop⟩⟩
 
 noncomputable instance : Mul (AllowablePerm α) :=
-  ⟨fun f g => ⟨f * g, fun c d => by simp_rw [mul_smul, f.prop, g.prop]⟩⟩
+  ⟨fun f g => ⟨f * g, isAllowable_mul α f.prop g.prop⟩⟩
 
 noncomputable instance : Div (AllowablePerm α) :=
-  ⟨fun f g => ⟨f / g, by simp_rw [div_eq_mul_inv]; exact (f * g⁻¹).2⟩⟩
+  ⟨fun f g => ⟨f / g, isAllowable_div α f.prop g.prop⟩⟩
 
 noncomputable instance : Pow (AllowablePerm α) ℕ :=
-  ⟨fun f n =>
-    ⟨(f : SemiallowablePerm α) ^ n, by
-      induction' n with d hd
-      · simp_rw [pow_zero]
-        exact (1 : AllowablePerm α).2
-      · simp_rw [pow_succ]
-        exact (f * ⟨(f : SemiallowablePerm α) ^ d, hd⟩).2⟩⟩
+  ⟨fun f n => ⟨(f : SemiallowablePerm α) ^ n, isAllowable_pow α f.prop n⟩⟩
 
 noncomputable instance : Pow (AllowablePerm α) ℤ :=
-  ⟨fun f n =>
-    ⟨(f : SemiallowablePerm α) ^ n, by
-      obtain (n | n) := n
-      · simp_rw [Int.ofNat_eq_coe, zpow_coe_nat]
-        exact (f ^ n).2
-      · simp_rw [zpow_negSucc]
-        exact (f ^ (n + 1))⁻¹.2⟩⟩
+  ⟨fun f n => ⟨(f : SemiallowablePerm α) ^ n, isAllowable_zpow α f.prop n⟩⟩
 
 @[simp]
 theorem coe_one : ((1 : AllowablePerm α) : SemiallowablePerm α) = 1 :=
@@ -298,46 +332,11 @@ theorem snd_smul (f : AllowablePerm α) (c : Code α) : (f • c).2 = f.val c.1 
 theorem smul_mk (f : AllowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f.val γ • s) :=
   rfl
 
-theorem _root_.ConNF.Code.Equiv.smul : c ≡ d → f • c ≡ f • d :=
-  (f.2 _ _).2
-
 end AllowablePerm
 
 namespace AllowablePerm
 
 variable {β γ}
-
-theorem smul_fuzz (hβγ : β ≠ γ) (π : AllowablePerm α) (t : Tangle β) :
-    Allowable.toStructPerm (π.val γ) (Quiver.Hom.toPath <| bot_lt_coe _) •
-      fuzz (coe_ne hβγ) t =
-    fuzz (coe_ne hβγ) (π.val β • t) := by
-  classical
-  have h := Code.Equiv.singleton hβγ t
-  rw [← π.prop] at h
-  simp only [recBotCoe_coe, image_smul, smul_set_singleton] at h
-  simp only [Code.Equiv_iff] at h
-  obtain a | ⟨_, ε, _, hA⟩ | ⟨_, ε, hε, hA⟩ | ⟨c, _, ε, hε, ζ, _, h₁, h₂⟩ := h
-  · cases hβγ.symm (congr_arg Sigma.fst a)
-  · simp_rw [SemiallowablePerm.smul_mk, smul_set_singleton] at hA
-    exfalso
-    refine cloudCode_ne_singleton ?_ hA.symm
-    exact hβγ.symm
-  · have := congr_arg Sigma.fst hA
-    simp only [coe_smul, smul_mk, fst_mk, smul_set_singleton, ne_eq, fst_cloudCode, Subtype.mk.injEq,
-      coe_inj, Subtype.coe_inj] at this
-    cases this
-    simp only [SemiallowablePerm.smul_mk, cloudCode_ne _ (mk β _) hβγ, mk_inj] at hA
-    simp only [coe_smul, snd_mk, smul_set_singleton, cloud_singleton] at hA
-    simp only [← image_smul, image_image, smul_typedNearLitter] at hA
-    rw [← image_image] at hA
-    simp only [image_smul, fst_mk] at hA
-    -- Going to be removed soon anyway.
-    sorry
-  · have := congr_arg Sigma.fst h₁
-    simp only [coe_smul, smul_mk, fst_mk, fst_cloudCode] at this
-    subst this
-    simp only [coe_smul, smul_mk, smul_set_singleton] at h₁
-    cases cloudCode_ne_singleton hε h₁.symm
 
 theorem smul_cloud (π : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
     π.val γ • cloud hβγ s = cloud hβγ (π.val β • s) := by
@@ -348,12 +347,12 @@ theorem smul_cloud (π : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
     refine ⟨Allowable.toStructPerm ((π : SemiallowablePerm α) γ)
         (Quiver.Hom.toPath <| bot_lt_coe _) • N, ⟨t, ht₁, ?_⟩, ?_⟩
-    · rw [← smul_fuzz hβγ, NearLitterPerm.smul_nearLitter_fst, ht₂]
+    · rw [← π.prop hβγ, NearLitterPerm.smul_nearLitter_fst, ht₂]
     · rw [smul_typedNearLitter]
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
     refine ⟨Allowable.toStructPerm ((π : SemiallowablePerm α) γ)⁻¹
         (Quiver.Hom.toPath <| bot_lt_coe _) • N, ⟨t, ht₁, ?_⟩, ?_⟩
-    · rw [NearLitterPerm.smul_nearLitter_fst, ht₂, ← smul_fuzz hβγ, map_inv,
+    · rw [NearLitterPerm.smul_nearLitter_fst, ht₂, ← π.prop hβγ, map_inv,
         StructPerm.inv_apply, inv_smul_smul]
     · rw [smul_typedNearLitter, map_inv, StructPerm.inv_apply, smul_inv_smul]
 
@@ -406,6 +405,35 @@ theorem isOdd_smul : (f • c).IsOdd ↔ c.IsOdd := by simp_rw [← Code.not_isE
 alias ⟨_, isEven.smul⟩ := isEven_smul
 
 alias ⟨_, isOdd.smul⟩ := isOdd_smul
+
+theorem Equiv.smul : c ≡ d → f • c ≡ f • d := by
+  intro h
+  cases h with
+  | refl => rfl
+  | cloud_left _ h β hdβ =>
+    rw [AllowablePerm.smul_cloudCode]
+    refine cloud_left _ ?_ β hdβ
+    rw [isEven_smul]
+    exact h
+    exact hdβ
+  | cloud_right _ h β hdβ =>
+    rw [AllowablePerm.smul_cloudCode]
+    refine cloud_right _ ?_ β hdβ
+    rw [isEven_smul]
+    exact h
+    exact hdβ
+  | cloud_cloud c hc β hcβ γ hcγ =>
+    rw [AllowablePerm.smul_cloudCode, AllowablePerm.smul_cloudCode]
+    refine cloud_cloud (f • c) ?_ β hcβ γ hcγ
+    rw [isEven_smul]
+    exact hc
+    exact hcγ
+    exact hcβ
+
+theorem smul_code : f • c ≡ f • d ↔ c ≡ d := by
+  refine ⟨fun h => ?_, Equiv.smul⟩
+  rw [← inv_smul_smul f c, ← inv_smul_smul f d]
+  exact h.smul
 
 end Code
 
