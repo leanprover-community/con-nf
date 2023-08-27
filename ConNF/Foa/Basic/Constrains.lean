@@ -102,13 +102,13 @@ theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) := by
     rfl
   · exact symmDiff_lt_nearLitter N a ha
   · have := fuzz_position (coe_ne_coe.mpr <| coe_ne' hδε) t ?_ ?_
-    rw [PositionedTangleData.typedNearLitterPosition_eq] at this
+    rw [PositionedTypedObjects.typedNearLitterPosition_eq] at this
     refine' lt_of_le_of_lt _ this
-    convert PositionedTangleData.support_le t _ hc
+    convert PositionedTypedObjects.support_le t _ hc
     rfl
   · simp only [InvImage, elim_inr]
     convert typedAtomPosition_lt_fuzz a
-    refine (@PositionedTangleData.typedNearLitterPosition_eq _ _ _ _ _ _ ?_ _).symm
+    refine (@PositionedTypedObjects.typedNearLitterPosition_eq _ _ _ _ _ _ ?_ _).symm
     infer_instance
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `(x, A) ≺ (y, B)`,

@@ -10,54 +10,70 @@ namespace ConNF
 
 variable [Params.{u}] [BasePositions] (α : Λ)
 
-instance corePositionedTangleDataIic (β : Iio α) [inst : TangleData (β : Iic α)] : TangleData β :=
+instance corePositionedTypedObjectsIic (β : Iio α) [inst : TangleData (β : Iic α)] : TangleData β :=
   inst
 
-instance corePositionedTangleDataIic' (β : Iic α) [inst : TangleData β] : TangleData (β : Λ) :=
+instance corePositionedTypedObjectsIic' (β : Iic α) [inst : TangleData β] : TangleData (β : Λ) :=
   inst
 
-instance corePositionedTangleDataIio' (β : Iio α) [inst : TangleData β] : TangleData (β : Λ) :=
+instance corePositionedTypedObjectsIio' (β : Iio α) [inst : TangleData β] : TangleData (β : Λ) :=
   inst
 
-instance almostPositionedTangleDataIio (β : Iio α) [inst_0 : TangleData β]
+instance almostPositionedTypedObjectsIio (β : Iio α) [inst_0 : TangleData β]
     [inst : @TypedObjects _ (β : Iic α) inst_0] : TypedObjects β :=
   inst
 
-instance positionedPositionedTangleDataIio (β : Iio α) [TangleData β] [inst : PositionFunction β] :
+instance positionedPositionedTypedObjectsIio (β : Iio α) [TangleData β] [inst : PositionFunction β] :
     PositionFunction (β : Λ) :=
   inst
+
+/-- The motor of the initial recursion. This contains all the information needed for phase 1 of the
+recursion. -/
+class PositionedTypedObjects [TangleData α] [TypedObjects α] [PositionFunction α] : Prop where
+  typedAtomPosition_eq : ∀ a : Atom, position (typedAtom a : Tangle α) = typedAtomPosition a
+  typedNearLitterPosition_eq :
+    ∀ N : NearLitter, position (typedNearLitter N : Tangle α) = typedNearLitterPosition N
+  support_le :
+    ∀ (t : Tangle α) (c : SupportCondition α),
+      c ∈ designatedSupport t → c.fst.elim typedAtomPosition typedNearLitterPosition ≤ position t
+
+/-- For all tangles `t` that are not typed singletons and not typed litters, `t` comes later than
+all of the support conditions in its designated support. That is, if an atom `a` is in the
+designated support for `t`, then `t` lies after `a`, and if a near-litter `N` is in the designated
+support for `t`, then `t` lies after `N` (under suitable maps to `μ`). -/
+add_decl_doc PositionedTypedObjects.support_le
 
 class Phase2Data where
   lowerTangleData : ∀ β : Iic α, TangleData β
   lowerPositionFunction : ∀ β : Iio α, PositionFunction β
   lowerTypedObjects : ∀ β : Iic α, TypedObjects β
-  lowerPositionedTangleData : ∀ β : Iio α, PositionedTangleData β
+  lowerPositionedTypedObjects : ∀ β : Iio α, PositionedTypedObjects β
 
 namespace Phase2Data
 
 variable [Phase2Data α] {α} {β : Iic α} {γ : Iio α}
 
-instance corePositionedTangleData : TangleData β :=
+instance corePositionedTypedObjects : TangleData β :=
   lowerTangleData β
 
-instance positionedPositionedTangleData : PositionFunction γ :=
+instance positionedPositionedTypedObjects : PositionFunction γ :=
   lowerPositionFunction γ
 
-instance almostPositionedTangleData : TypedObjects β :=
+instance almostPositionedTypedObjects : TypedObjects β :=
   lowerTypedObjects β
 
-instance tangleData : PositionedTangleData γ :=
-  lowerPositionedTangleData γ
+instance tangleData : PositionedTypedObjects γ :=
+  lowerPositionedTypedObjects γ
 
 noncomputable instance IicBotTangleData : ∀ β : IicBot α, TangleData β
-  | ⟨⊥, _⟩ => Bot.corePositionedTangleData
+  | ⟨⊥, _⟩ => Bot.corePositionedTypedObjects
   | ⟨(β : Λ), hβ⟩ => lowerTangleData ⟨β, coe_le_coe.mp hβ⟩
 
 noncomputable instance IioBotTangleData (β : IioBot α) : TangleData β :=
   show TangleData (⟨β, le_of_lt (IioBot.lt β)⟩ : IicBot α) from inferInstance
 
 noncomputable instance IioBotPositionFunction : ∀ β : IioBot α, PositionFunction β
-  | ⟨⊥, _⟩ => Bot.positionedPositionedTangleData
+  | ⟨⊥, _⟩ => Bot.positionedPositionedTypedObjects
   | ⟨(β : Λ), hβ⟩ => lowerPositionFunction ⟨β, coe_lt_coe.mp hβ⟩
 
 instance hasCoeIioIicIndex : Coe (Iio α) (IicBot α) :=

@@ -306,8 +306,8 @@ theorem freedom_of_action (β : Iic α) (π₀ : StructApprox β) (h : π₀.Fre
   revert hβ
   refine' WellFounded.induction
     (C := fun β => ∀ (hβ : β ∈ Iic α) (π₀ : StructApprox (⟨β, hβ⟩ : Iic α)),
-      Free π₀ → ∃ π : @Allowable _ (⟨β, hβ⟩ : Iic α) Phase2Data.corePositionedTangleData,
-        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ Phase2Data.corePositionedTangleData π)) Λwf.wf β _
+      Free π₀ → ∃ π : @Allowable _ (⟨β, hβ⟩ : Iic α) Phase2Data.corePositionedTypedObjects,
+        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ Phase2Data.corePositionedTypedObjects π)) Λwf.wf β _
   intro β ih hβ π₀ h
   have : FreedomOfActionHypothesis ⟨β, hβ⟩
   · constructor

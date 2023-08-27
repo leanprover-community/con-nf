@@ -9,10 +9,10 @@ levels. Interaction will be introduced in phase 2.
 
 ## Main declarations
 
-* `con_nf.core_PositionedTangleData`:
+* `con_nf.core_PositionedTypedObjects`:
 * `con_nf.PositionFunction`:
 * `con_nf.TypedObjects`:
-* `con_nf.PositionedTangleData`: The data for the first phase of the recursion.
+* `con_nf.PositionedTypedObjects`: The data for the first phase of the recursion.
 -/
 
 
@@ -26,7 +26,7 @@ namespace ConNF
 
 variable [Params.{u}]
 
-section DefinePositionedTangleData
+section DefinePositionedTypedObjects
 
 /-- The motor of the initial recursion. This contains the data of tangles and allowable permutations
 for phase 1 of the recursion. -/
@@ -49,7 +49,7 @@ variable (α : TypeIndex) [TangleData α]
 /-- The type of tangles that we assume were constructed at stage `α`.
 Later in the recursion, we will construct this type explicitly, but for now, we will just assume
 that it exists.
-Fields in `PositionedTangleData` give more information about this type. -/
+Fields in `PositionedTypedObjects` give more information about this type. -/
 def Tangle : Type u :=
   TangleData.Tangle α
 
@@ -153,18 +153,6 @@ theorem litter_lt_nearLitter [BasePositions] (N : NearLitter) (hN : N.fst.toNear
     typedNearLitterPosition N.fst.toNearLitter < typedNearLitterPosition N :=
   lt_of_le_of_ne (litter_le_nearLitter N) (typedNearLitterPosition.injective.ne hN)
 
-variable [TypedObjects α] [PositionFunction α] [BasePositions]
-
-/-- The motor of the initial recursion. This contains all the information needed for phase 1 of the
-recursion. -/
-class PositionedTangleData : Prop where
-  typedAtomPosition_eq : ∀ a : Atom, position (typedAtom a : Tangle α) = typedAtomPosition a
-  typedNearLitterPosition_eq :
-    ∀ N : NearLitter, position (typedNearLitter N : Tangle α) = typedNearLitterPosition N
-  support_le :
-    ∀ (t : Tangle α) (c : SupportCondition α),
-      c ∈ designatedSupport t → c.fst.elim typedAtomPosition typedNearLitterPosition ≤ position t
-
 /-- An injection from near-litters into level `α` tangles.
 These will be explicitly constructed as "typed near-litters", which are codes of the form
 `(α, -1, N)` for `N` a near-litter.
@@ -196,13 +184,7 @@ add_decl_doc litter_lt_nearLitter
 a small set by construction). Note that if `N` is a litter, this condition is vacuously true. -/
 add_decl_doc symmDiff_lt_nearLitter
 
-/-- For all tangles `t` that are not typed singletons and not typed litters, `t` comes later than
-all of the support conditions in its designated support. That is, if an atom `a` is in the
-designated support for `t`, then `t` lies after `a`, and if a near-litter `N` is in the designated
-support for `t`, then `t` lies after `N` (under suitable maps to `μ`). -/
-add_decl_doc PositionedTangleData.support_le
-
-end DefinePositionedTangleData
+end DefinePositionedTypedObjects
 
 section Instances
 
@@ -235,7 +217,7 @@ end Instances
 
 /-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
 permutations to be near-litter-permutations, and the designated supports to be singletons. -/
-noncomputable instance Bot.corePositionedTangleData : TangleData ⊥
+noncomputable instance Bot.corePositionedTypedObjects : TangleData ⊥
     where
   Tangle := Atom
   Allowable := NearLitterPerm
@@ -252,7 +234,7 @@ noncomputable instance Bot.corePositionedTangleData : TangleData ⊥
       small := small_singleton _ }
 
 /-- The tangle data at the bottom level. -/
-noncomputable instance Bot.positionedPositionedTangleData : PositionFunction ⊥ :=
+noncomputable instance Bot.positionedPositionedTypedObjects : PositionFunction ⊥ :=
   ⟨Nonempty.some mk_atom.le⟩
 
 def _root_.NearLitterPerm.ofBot : Allowable ⊥ ≃ NearLitterPerm :=
@@ -275,7 +257,7 @@ section TangleDataIio
 variable [TangleDataIio α]
 
 noncomputable instance TangleDataIio.toTangleData : ∀ β : IioBot α, TangleData β
-  | ⟨⊥, _⟩ => Bot.corePositionedTangleData
+  | ⟨⊥, _⟩ => Bot.corePositionedTypedObjects
   | ⟨(β : Λ), hβ⟩ => TangleDataIio.data ⟨β, coe_lt_coe.1 hβ⟩
 
 noncomputable instance TangleDataIio.toTangleData' (β : Iio α) : TangleData β :=
@@ -301,7 +283,7 @@ variable [TangleDataIio α] [PositionFunctionIio α]
 
 noncomputable instance PositionFunctionIio.toPositionFunction :
     ∀ β : IioBot α, PositionFunction β
-  | ⟨⊥, _⟩ => Bot.positionedPositionedTangleData
+  | ⟨⊥, _⟩ => Bot.positionedPositionedTypedObjects
   | ⟨(β : Λ), hβ⟩ => PositionFunctionIio.data ⟨β, coe_lt_coe.1 hβ⟩
 
 noncomputable instance PositionFunctionIio.toPositionFunction' (β : Iio α) :
@@ -313,10 +295,5 @@ end PositionFunctionIio
 /-- The almost tangle data below phase `α`. -/
 abbrev TypedObjectsIio (α : Λ) [TangleDataIio α] :=
   ∀ β : Iio α, TypedObjects β
-
-/-- The tangle data below phase `α`. -/
-abbrev PositionedTangleDataCumul (α : Λ) [TangleDataIio α] [PositionFunctionIio α] [BasePositions]
-    [TypedObjectsIio α] :=
-  ∀ β : Iio α, PositionedTangleData β
 
 end ConNF
