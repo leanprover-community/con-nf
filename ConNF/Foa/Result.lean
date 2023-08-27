@@ -10,7 +10,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] {α : Λ} [PositionData] [Phase2Assumptions α] {β : Iic α}
+variable [Params.{u}] {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Iic α}
   [FreedomOfActionHypothesis β] {π : StructApprox β}
 
 noncomputable def completeAtomPerm (hπf : π.Free) (A : ExtendedIndex β) : Perm Atom :=
@@ -306,8 +306,8 @@ theorem freedom_of_action (β : Iic α) (π₀ : StructApprox β) (h : π₀.Fre
   revert hβ
   refine' WellFounded.induction
     (C := fun β => ∀ (hβ : β ∈ Iic α) (π₀ : StructApprox (⟨β, hβ⟩ : Iic α)),
-      Free π₀ → ∃ π : @Allowable _ (⟨β, hβ⟩ : Iic α) Phase2Data.coreTangleData,
-        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ Phase2Data.coreTangleData π)) Λwf.wf β _
+      Free π₀ → ∃ π : @Allowable _ (⟨β, hβ⟩ : Iic α) Phase2Data.corePositionedTangleData,
+        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ Phase2Data.corePositionedTangleData π)) Λwf.wf β _
   intro β ih hβ π₀ h
   have : FreedomOfActionHypothesis ⟨β, hβ⟩
   · constructor

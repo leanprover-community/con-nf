@@ -34,14 +34,14 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [PositionData]
+variable [Params.{u}] [BasePositions]
 
 open Code
 
 section Cloud
 
-variable {α : Λ} {γ : IioBot α} [CoreTangleData γ] [PositionedTangleData γ] {β : Iio α}
-  [CoreTangleData (iioCoe β)] [PositionedTangleData (iioCoe β)] [AlmostTangleData β] (hγβ : γ ≠ β)
+variable {α : Λ} {γ : IioBot α} [TangleData γ] [PositionFunction γ] {β : Iio α}
+  [TangleData (iioCoe β)] [PositionFunction (iioCoe β)] [TypedObjects β] (hγβ : γ ≠ β)
 
 theorem coe_ne : γ ≠ β → (γ : TypeIndex) ≠ (β : Λ) :=
   Subtype.coe_injective.ne
@@ -108,7 +108,7 @@ theorem cloud_injective : Injective (cloud hγβ) :=
     Pairwise.biUnion_injective (fun _ _ h => localCardinal_disjoint <| (fuzz_injective _).ne h)
       fun _ => localCardinal_nonempty _
 
-variable {δ : IioBot α} [CoreTangleData δ] [PositionedTangleData δ]
+variable {δ : IioBot α} [TangleData δ] [PositionFunction δ]
   {hδβ : (δ : TypeIndex) ≠ (β : Λ)}
 
 theorem cloud_disjoint_range {hδβ} (c : Set (Tangle γ)) (d : Set (Tangle δ)) (hc : c.Nonempty)
@@ -152,7 +152,7 @@ end Cloud
 
 section CloudCode
 
-variable {α : Λ} [CoreTangleCumul α] [PositionedTangleCumul α]
+variable {α : Λ} [TangleDataIio α] [PositionFunctionIio α]
 
 /-- Tool that lets us use well-founded recursion on codes via `μ`. -/
 noncomputable def codeMinMap (c : NonemptyCode α) : μ :=
@@ -164,7 +164,7 @@ theorem code_wf : WellFounded (InvImage μr (codeMinMap : NonemptyCode α → μ
 
 section Extension
 
-variable [AlmostTangleCumul α] {β : IioBot α}
+variable [TypedObjectsIio α] {β : IioBot α}
 
 /-- The A-map, phrased as a function on sets of `γ`-tangles, but if `γ = β`, this is the
 identity function. This is the true alternative extension map. -/
@@ -187,7 +187,7 @@ theorem extension_ne (hβγ : β ≠ γ) : extension s γ = cloud hβγ s :=
 
 end Extension
 
-variable [AlmostTangleCumul α] (γ : IioBot α) (β : Iio α) (c d : Code α)
+variable [TypedObjectsIio α] (γ : IioBot α) (β : Iio α) (c d : Code α)
 
 /-- The A-map, phrased as a function on `α`-codes, but if the code's level matches `β`, this is the
 identity function. This is written in a weird way in order to make `(cloudCode β c).1` defeq

@@ -10,7 +10,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] {α : Λ} [PositionData] [Phase2Assumptions α] {β : Iic α}
+variable [Params.{u}] {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Iic α}
   [FreedomOfActionHypothesis β] {π : StructApprox β}
 
 theorem atom_injective_extends {c d : SupportCondition β} (hcd : (ihsAction π c d).Lawful)

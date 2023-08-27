@@ -36,8 +36,8 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [PositionData] {α : Λ} {β : IioBot α} {γ : Iio α} [CoreTangleCumul α]
-  [AlmostTangleCumul α] [PositionedTangleCumul α]
+variable [Params.{u}] [BasePositions] {α : Λ} {β : IioBot α} {γ : Iio α} [TangleDataIio α]
+  [TypedObjectsIio α] [PositionFunctionIio α]
 
 open IioBot
 

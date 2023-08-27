@@ -8,7 +8,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] (α : Λ) [PositionData] [Phase2Assumptions α] {β : TypeIndex}
+variable [Params.{u}] (α : Λ) [BasePositions] [Phase2Assumptions α] {β : TypeIndex}
 
 /-- A litter is *inflexible* if it is the image of some f-map. -/
 @[mk_iff]

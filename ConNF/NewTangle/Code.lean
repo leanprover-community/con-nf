@@ -6,7 +6,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] (α : Λ) [CoreTangleCumul α] {β : IioBot α} {s t : Set (Tangle β)}
+variable [Params.{u}] (α : Λ) [TangleDataIio α] {β : IioBot α} {s t : Set (Tangle β)}
 
 /-- An `α` code is a type index `β < α` together with a set of tangles of type `β`. -/
 def Code : Type u :=

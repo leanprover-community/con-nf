@@ -11,18 +11,18 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [PositionData]
+variable [Params.{u}] [BasePositions]
 
 open Code IioBot
 
-variable (α : Λ) [CoreTangleCumul α] {β : IioBot α} {γ : Iio α}
+variable (α : Λ) [TangleDataIio α] {β : IioBot α} {γ : Iio α}
 
 abbrev Extensions :=
   ∀ β : Iio α, Set (Tangle β)
 
 namespace Semitangle
 
-variable [PositionedTangleCumul α] [AlmostTangleCumul α]
+variable [PositionFunctionIio α] [TypedObjectsIio α]
 
 /-- Keeps track of the preferred extension of a semitangle, along with coherence conditions
 relating each extension of the semitangle. -/
@@ -61,7 +61,7 @@ end Semitangle
 
 open Semitangle
 
-variable [PositionedTangleCumul α] [AlmostTangleCumul α]
+variable [PositionFunctionIio α] [TypedObjectsIio α]
 
 /-- A *semitangle* may become an element of our model of tangled type theory.
 We keep track of its members, written as tangles of all lower levels `β < α`. -/
@@ -280,7 +280,7 @@ end Semitangle
 
 open Semitangle
 
-variable [CoreTangleData α]
+variable [TangleData α]
 
 namespace AllowablePerm
 
@@ -422,7 +422,7 @@ theorem smul_intro (f : AllowablePerm α) (s : Set (Tangle β)) (hs) :
 
 -- TODO: Move next two lemmas elsewhere.
 theorem allowableToStructPerm_bot (π : Allowable (⊥ : IioBot α)) :
-    CoreTangleData.allowableToStructPerm π = StructPerm.toBotIso.toMonoidHom π :=
+    TangleData.allowableToStructPerm π = StructPerm.toBotIso.toMonoidHom π :=
   rfl
 
 theorem _root_.ConNF.SemiallowablePerm.coe_apply_bot (π : SemiallowablePerm α) :

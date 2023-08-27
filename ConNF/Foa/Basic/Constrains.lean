@@ -40,7 +40,7 @@ noncomputable instance : LinearOrder (ExtendedIndex α) :=
 
 end ExtendedIndex
 
-variable {α : Λ} [PositionData] [Phase2Assumptions α] {β : Λ}
+variable {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Λ}
 
 theorem coe_ne' {γ : Iio α} {β : Iio α} : γ ≠ β → (γ : Λ) ≠ (β : Λ) := by
   contrapose!
@@ -102,13 +102,13 @@ theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) := by
     rfl
   · exact symmDiff_lt_nearLitter N a ha
   · have := fuzz_position (coe_ne_coe.mpr <| coe_ne' hδε) t ?_ ?_
-    rw [TangleData.typedNearLitterPosition_eq] at this
+    rw [PositionedTangleData.typedNearLitterPosition_eq] at this
     refine' lt_of_le_of_lt _ this
-    convert TangleData.support_le t _ hc
+    convert PositionedTangleData.support_le t _ hc
     rfl
   · simp only [InvImage, elim_inr]
     convert typedAtomPosition_lt_fuzz a
-    refine (@TangleData.typedNearLitterPosition_eq _ _ _ _ _ _ ?_ _).symm
+    refine (@PositionedTangleData.typedNearLitterPosition_eq _ _ _ _ _ _ ?_ _).symm
     infer_instance
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `(x, A) ≺ (y, B)`,

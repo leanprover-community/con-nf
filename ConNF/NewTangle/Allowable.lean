@@ -15,7 +15,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] (α : Λ) [CoreTangleCumul α] (β : IioBot α) (γ : Iio α)
+variable [Params.{u}] (α : Λ) [TangleDataIio α] (β : IioBot α) (γ : Iio α)
 
 open Code
 
@@ -171,7 +171,7 @@ instance mulActionNonemptyCode : MulAction (SemiallowablePerm α) (NonemptyCode 
 
 end SemiallowablePerm
 
-variable [PositionData] [PositionedTangleCumul α] [AlmostTangleCumul α] [CoreTangleData α]
+variable [BasePositions] [PositionFunctionIio α] [TypedObjectsIio α] [TangleData α]
 
 def SemiallowablePerm.IsAllowable (π : SemiallowablePerm α) : Prop :=
   ∀ ⦃β : IioBot α⦄ ⦃γ : Iio α⦄ (hβγ : β ≠ γ) (t : Tangle β),

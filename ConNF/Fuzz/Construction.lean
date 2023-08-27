@@ -100,8 +100,8 @@ such that we could run out of available values for the function.
 -/
 
 
-variable [Params.{u}] {β : TypeIndex} {γ : Λ} [CoreTangleData β] [PositionedTangleData β]
-  [PositionData] [CoreTangleData γ] [PositionedTangleData γ] [AlmostTangleData γ] (hβγ : β ≠ γ)
+variable [Params.{u}] {β : TypeIndex} {γ : Λ} [TangleData β] [PositionFunction β]
+  [BasePositions] [TangleData γ] [PositionFunction γ] [TypedObjects γ] (hβγ : β ≠ γ)
 
 /-- The requirements to be satisfied by the f-maps.
 If `fuzz_condition` applied to a litter indexed by `i` is true,

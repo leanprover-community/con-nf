@@ -178,7 +178,7 @@ theorem Path.iicRec_cons {α : Λ} {β : IicBot α}
 
 /-- There are at most `Λ` `α`-extended type indices. -/
 @[simp]
-theorem mk_extendedIndex (α : TypeIndex) : #(ExtendedIndex α) ≤ (#Λ) := by
+theorem mk_extendedIndex (α : TypeIndex) : #(ExtendedIndex α) ≤ #Λ := by
   refine le_trans ((Cardinal.le_def _ _).2 ⟨⟨toList, toList_injective (α : TypeIndex) ⊥⟩⟩) ?_
   convert mk_list_le_max _ using 1
   simp only [mk_typeIndex, max_eq_right, aleph0_le_mk]

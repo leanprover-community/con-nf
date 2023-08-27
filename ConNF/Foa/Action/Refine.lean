@@ -84,7 +84,7 @@ theorem refine_litterMap {A : ExtendedIndex β} :
 
 theorem refine_precise : Precise (φ.refine hφ) := fun _ => NearLitterAction.refine_precise
 
-theorem refineSupports {α : Λ} [PositionData] [Phase2Assumptions α] {β : Iio α} {t : Tangle β}
+theorem refineSupports {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Iio α} {t : Tangle β}
     (φ : StructAction β) (hφ : φ.Lawful) (h : φ.Supports t) : (φ.refine hφ).Supports t :=
   { atom_mem := fun a B ha => Or.inl (Or.inl <| h.atom_mem a B ha)
     litter_mem := h.litter_mem }
@@ -93,7 +93,7 @@ end StructAction
 
 namespace StructAction
 
-variable {α : Λ} [PositionData] [Phase2Assumptions α] {β : Iio α}
+variable {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Iio α}
 
 /-- Refine and complete this action into a structural approximation. -/
 noncomputable def rc (φ : StructAction β) (h : φ.Lawful) : StructApprox β :=

@@ -12,7 +12,7 @@ open scoped Cardinal Pointwise
 
 namespace ConNF
 
-variable [Params.{u}] (α : Λ) [PositionData] [Phase2Assumptions α]
+variable [Params.{u}] (α : Λ) [BasePositions] [Phase2Assumptions α]
 variable {β : Λ} {G : Type _} {τ : Type _} [SMul G (SupportCondition β)] [SMul G τ] {x : τ}
 
 /-- A support condition is *reduced* if it is an atom or a litter. -/
@@ -116,7 +116,7 @@ theorem reduction_small'' {S : Set (SupportCondition β)} (h : Small S) :
 theorem reduction_small {S : Set (SupportCondition β)} (h : Small S) : Small (reduction α S) :=
   lt_of_le_of_lt (Cardinal.mk_subtype_le_of_subset fun _c hc => hc.1) (reduction_small' α h)
 
-theorem reduction_designatedSupport_supports [CoreTangleData β] (t : Tangle β) :
+theorem reduction_designatedSupport_supports [TangleData β] (t : Tangle β) :
     Supports (Allowable β) (reduction α (designatedSupport t : Set (SupportCondition β))) t := by
   intro π h₁
   refine' (designatedSupport t).supports π _
@@ -156,13 +156,13 @@ theorem reduction_designatedSupport_supports [CoreTangleData β] (t : Tangle β)
         refine' ⟨a, ha, _⟩
         exact h₄ a ha
 
-noncomputable def reducedSupport [CoreTangleData β] (t : Tangle β) : Support β (Allowable β) t
+noncomputable def reducedSupport [TangleData β] (t : Tangle β) : Support β (Allowable β) t
     where
   carrier := reduction α (designatedSupport t : Set (SupportCondition β))
   small := reduction_small α (designatedSupport t).small
   supports := reduction_designatedSupport_supports α t
 
-theorem mem_reducedSupport_iff [CoreTangleData β] (t : Tangle β) (c : SupportCondition β) :
+theorem mem_reducedSupport_iff [TangleData β] (t : Tangle β) (c : SupportCondition β) :
     c ∈ reducedSupport α t ↔ c ∈ reduction α (designatedSupport t : Set (SupportCondition β)) :=
   Iff.rfl
 

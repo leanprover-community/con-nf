@@ -8,7 +8,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] {α : Λ} [PositionData] [Phase2Assumptions α] {β : Iic α} (π : StructApprox β)
+variable [Params.{u}] {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Iic α} (π : StructApprox β)
 
 namespace StructApprox
 

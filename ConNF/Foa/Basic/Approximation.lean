@@ -361,7 +361,7 @@ theorem approximatesOfLe {π₀ π₀' : NearLitterApprox} {π : NearLitterPerm}
   ⟨fun a ha => (hle.1.2 ha).trans (h.1 a (hle.1.1 ha)), fun N hN =>
     (hle.2.2 hN).trans (h.2 N (hle.2.1 hN))⟩
 
-def Free (α : Λ) [PositionData] [Phase2Assumptions α] {β : TypeIndex} (π : NearLitterApprox)
+def Free (α : Λ) [BasePositions] [Phase2Assumptions α] {β : TypeIndex} (π : NearLitterApprox)
     (A : ExtendedIndex β) : Prop :=
   ∀ L ∈ π.litterPerm.domain, Flexible α L A
 
@@ -385,7 +385,7 @@ def Approximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructPerm β)
 def ExactlyApproximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructPerm β) : Prop :=
   ∀ A, (π₀ A).ExactlyApproximates (StructPerm.ofBot <| StructPerm.derivative A π)
 
-variable {α : Λ} [PositionData] [Phase2Assumptions α]
+variable {α : Λ} [BasePositions] [Phase2Assumptions α]
 
 -- TODO: I think these were never used.
 /-

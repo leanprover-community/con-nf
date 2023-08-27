@@ -8,57 +8,57 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [PositionData] (α : Λ)
+variable [Params.{u}] [BasePositions] (α : Λ)
 
-instance coreTangleDataIic (β : Iio α) [inst : CoreTangleData (β : Iic α)] : CoreTangleData β :=
+instance corePositionedTangleDataIic (β : Iio α) [inst : TangleData (β : Iic α)] : TangleData β :=
   inst
 
-instance coreTangleDataIic' (β : Iic α) [inst : CoreTangleData β] : CoreTangleData (β : Λ) :=
+instance corePositionedTangleDataIic' (β : Iic α) [inst : TangleData β] : TangleData (β : Λ) :=
   inst
 
-instance coreTangleDataIio' (β : Iio α) [inst : CoreTangleData β] : CoreTangleData (β : Λ) :=
+instance corePositionedTangleDataIio' (β : Iio α) [inst : TangleData β] : TangleData (β : Λ) :=
   inst
 
-instance almostTangleDataIio (β : Iio α) [inst_0 : CoreTangleData β]
-    [inst : @AlmostTangleData _ (β : Iic α) inst_0] : AlmostTangleData β :=
+instance almostPositionedTangleDataIio (β : Iio α) [inst_0 : TangleData β]
+    [inst : @TypedObjects _ (β : Iic α) inst_0] : TypedObjects β :=
   inst
 
-instance positionedTangleDataIio (β : Iio α) [CoreTangleData β] [inst : PositionedTangleData β] :
-    PositionedTangleData (β : Λ) :=
+instance positionedPositionedTangleDataIio (β : Iio α) [TangleData β] [inst : PositionFunction β] :
+    PositionFunction (β : Λ) :=
   inst
 
 class Phase2Data where
-  lowerCoreTangleData : ∀ β : Iic α, CoreTangleData β
+  lowerTangleData : ∀ β : Iic α, TangleData β
+  lowerPositionFunction : ∀ β : Iio α, PositionFunction β
+  lowerTypedObjects : ∀ β : Iic α, TypedObjects β
   lowerPositionedTangleData : ∀ β : Iio α, PositionedTangleData β
-  lowerAlmostTangleData : ∀ β : Iic α, AlmostTangleData β
-  lowerTangleData : ∀ β : Iio α, TangleData β
 
 namespace Phase2Data
 
 variable [Phase2Data α] {α} {β : Iic α} {γ : Iio α}
 
-instance coreTangleData : CoreTangleData β :=
-  lowerCoreTangleData β
+instance corePositionedTangleData : TangleData β :=
+  lowerTangleData β
 
-instance positionedTangleData : PositionedTangleData γ :=
+instance positionedPositionedTangleData : PositionFunction γ :=
+  lowerPositionFunction γ
+
+instance almostPositionedTangleData : TypedObjects β :=
+  lowerTypedObjects β
+
+instance tangleData : PositionedTangleData γ :=
   lowerPositionedTangleData γ
 
-instance almostTangleData : AlmostTangleData β :=
-  lowerAlmostTangleData β
+noncomputable instance IicBotTangleData : ∀ β : IicBot α, TangleData β
+  | ⟨⊥, _⟩ => Bot.corePositionedTangleData
+  | ⟨(β : Λ), hβ⟩ => lowerTangleData ⟨β, coe_le_coe.mp hβ⟩
 
-instance tangleData : TangleData γ :=
-  lowerTangleData γ
+noncomputable instance IioBotTangleData (β : IioBot α) : TangleData β :=
+  show TangleData (⟨β, le_of_lt (IioBot.lt β)⟩ : IicBot α) from inferInstance
 
-noncomputable instance IicBotCoreTangleData : ∀ β : IicBot α, CoreTangleData β
-  | ⟨⊥, _⟩ => Bot.coreTangleData
-  | ⟨(β : Λ), hβ⟩ => lowerCoreTangleData ⟨β, coe_le_coe.mp hβ⟩
-
-noncomputable instance IioBotCoreTangleData (β : IioBot α) : CoreTangleData β :=
-  show CoreTangleData (⟨β, le_of_lt (IioBot.lt β)⟩ : IicBot α) from inferInstance
-
-noncomputable instance IioBotPositionedTangleData : ∀ β : IioBot α, PositionedTangleData β
-  | ⟨⊥, _⟩ => Bot.positionedTangleData
-  | ⟨(β : Λ), hβ⟩ => lowerPositionedTangleData ⟨β, coe_lt_coe.mp hβ⟩
+noncomputable instance IioBotPositionFunction : ∀ β : IioBot α, PositionFunction β
+  | ⟨⊥, _⟩ => Bot.positionedPositionedTangleData
+  | ⟨(β : Λ), hβ⟩ => lowerPositionFunction ⟨β, coe_lt_coe.mp hβ⟩
 
 instance hasCoeIioIicIndex : Coe (Iio α) (IicBot α) :=
   ⟨fun β => ⟨(β : Λ), le_of_lt (WithBot.coe_lt_coe.mpr (Iio.lt β))⟩⟩
