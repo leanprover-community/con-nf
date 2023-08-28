@@ -1,5 +1,16 @@
 import ConNF.NewTangle.Hypotheses
 
+/-!
+# Codes
+
+In this file, we define codes representing tangles of type `α`.
+
+## Main declarations
+
+* `ConNF.Code`: Codes representing `α`-tangles.
+* `ConNF.NonemptyCode`: Nonempty `α`-codes.
+-/
+
 open Set WithBot
 
 universe u

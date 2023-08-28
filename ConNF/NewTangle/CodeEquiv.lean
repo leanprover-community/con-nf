@@ -6,23 +6,23 @@ import ConNF.NewTangle.Cloud
 Several codes will be identified to make one TTT object. A TTT object has extensions for all type
 indices (except possibly `⊥`), so our equivalence classes must too.
 
-One way to do this is to make an equivalence class out of a code and its image under each A-map.
+One way to do this is to make an equivalence class out of a code and its image under each `cloud` map.
 Thus we want to partition the big tree given by `cloud_rel` into trees of height `1` that each
 contains all descendents of its root (this is a slight lie for empty codes as the one equivalence
 class they form won't be a tree but rather a complete graph).
 
 This is where code parity kicks in. We recursively pick out the small trees by noticing that codes
-whose preimages under A-maps are all in a small tree already (in particular, those that have no
-preimage under an A-map) must be the root of their own small tree, and that codes that are a
+whose preimages under `cloud` maps are all in a small tree already (in particular, those that have no
+preimage under an `cloud` map) must be the root of their own small tree, and that codes that are a
 image of some root of a small tree must belong to that same tree. This motivates the following
 definitions:
-* A code is even if all its preimages under A-maps are odd.
-* A code is odd if one of its preimages under A-maps are even.
+* A code is even if all its preimages under `cloud` maps are odd.
+* A code is odd if one of its preimages under `cloud` maps are even.
 
 If we replace "even" and "odd" by "winning" and "losing", we precisely get the rules for determining
 whether a game position is winning or losing.
 
-Note that for nonempty codes there is at most one preimage under A-maps.
+Note that for nonempty codes there is at most one preimage under `cloud` maps.
 
 ## Main declarations
 
@@ -51,22 +51,22 @@ Parity of codes. We define them mutually inductively (`even_odd ff` is evenness,
 is oddity). If we consider codes as states of a game and `cloud_rel` as the "leads to"
 relation, then even codes are precisely losing codes and odd codes are precisely winning codes.
 Parity of a nonempty code corresponds to the parity of its number of iterated preimages under
-A-maps. The only even empty code is `⊥` one, all others are odd.
+`cloud` maps. The only even empty code is `⊥` one, all others are odd.
 -/
 
 mutual
 /-- A code is even iff it only leads to odd codes. -/
   @[mk_iff]
   inductive IsEven : Code α → Prop
-    | intro : ∀ c, (∀ d, d ↝ c → IsOdd d) → IsEven c
+    | intro : ∀ c, (∀ d, d ↝₀ c → IsOdd d) → IsEven c
 
   /-- A code is odd iff it leads to some even code. -/
   @[mk_iff]
   inductive IsOdd : Code α → Prop
-    | intro : ∀ c d, d ↝ c → IsEven d → IsOdd c
+    | intro : ∀ c d, d ↝₀ c → IsEven d → IsOdd c
 end
 
-theorem isEven_of_forall_not (h : ∀ d, ¬d ↝ c) : IsEven c :=
+theorem isEven_of_forall_not (h : ∀ d, ¬d ↝₀ c) : IsEven c :=
   (IsEven_iff c).2 fun _ hd => (h _ hd).elim
 
 @[simp]
@@ -132,7 +132,7 @@ private theorem not_isOdd_nonempty : ∀ c : NonemptyCode α, ¬c.1.IsOdd ↔ c.
     rw [Iff.comm, ← not_iff_not, Classical.not_not]
     obtain hd | hd := d.2.eq_empty_or_nonempty
     · rw [IsEmpty.isOdd_iff hd, IsEmpty.isEven_iff hd, Classical.not_not]
-    · let _ : CloudRel' ⟨d, hd⟩ c := cloudRel_coe_coe.1 h
+    · let _ : ⟨d, hd⟩ ↝ c := cloudRel_coe_coe.1 h
       exact not_isOdd_nonempty ⟨d, hd⟩
 termination_by not_isOdd_nonempty c => c
 
@@ -153,7 +153,7 @@ alias ⟨_, IsOdd.not_isEven⟩ := not_isEven
 
 theorem isEven_or_isOdd (c : Code α) : c.IsEven ∨ c.IsOdd := by rw [← not_isEven]; exact em _
 
-protected theorem _root_.ConNF.CloudRel.isOdd (hc : c.IsEven) (h : c ↝ d) : d.IsOdd :=
+protected theorem _root_.ConNF.CloudRel.isOdd (hc : c.IsEven) (h : c ↝₀ d) : d.IsOdd :=
   (IsOdd_iff d).2 ⟨_, h, hc⟩
 
 protected theorem IsEven.cloudCode (hc : c.IsEven) (hcγ : c.1 ≠ γ) : (cloudCode γ c).IsOdd :=

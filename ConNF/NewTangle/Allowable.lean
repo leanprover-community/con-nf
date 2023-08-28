@@ -363,12 +363,12 @@ theorem smul_cloudCode (π : AllowablePerm α) (hc : c.1 ≠ γ) :
 
 end AllowablePerm
 
-theorem CloudRel.smul : c ↝ d → f • c ↝ f • d := by
+theorem CloudRel.smul : c ↝₀ d → f • c ↝₀ f • d := by
   rintro ⟨γ, hγ⟩
   exact (CloudRel_iff _ _).2 ⟨_, hγ, f.smul_cloudCode hγ⟩
 
 @[simp]
-theorem smul_cloudRel : f • c ↝ f • d ↔ c ↝ d := by
+theorem smul_cloudRel : f • c ↝₀ f • d ↔ c ↝₀ d := by
   refine ⟨fun h => ?_, CloudRel.smul⟩
   rw [← inv_smul_smul f c, ← inv_smul_smul f d]
   exact h.smul
@@ -380,13 +380,13 @@ theorem isEven_smul_nonempty : ∀ c : NonemptyCode α, (f • c.val).IsEven ↔
     simp_rw [Code.IsEven_iff]
     constructor <;> intro h d hd
     · have := hd.nonempty_iff.2 hc
-      have _ : CloudRel' ⟨d, this⟩ ⟨c, hc⟩ := cloudRel_coe_coe.1 hd
+      have _ : ⟨d, this⟩ ↝ ⟨c, hc⟩ := cloudRel_coe_coe.1 hd
       exact Code.not_isEven.1 fun H =>
         (h _ hd.smul).not_isEven <| (isEven_smul_nonempty ⟨d, this⟩).2 H
     · rw [← smul_inv_smul f d] at hd ⊢
       rw [smul_cloudRel] at hd
       have := hd.nonempty_iff.2 hc
-      have _ : CloudRel' ⟨_, this⟩ ⟨c, hc⟩ := cloudRel_coe_coe.1 hd
+      have _ : ⟨_, this⟩ ↝ ⟨c, hc⟩ := cloudRel_coe_coe.1 hd
       exact Code.not_isEven.1 fun H =>
         (h _ hd).not_isEven <| (isEven_smul_nonempty ⟨_, this⟩).1 H
 termination_by isEven_smul_nonempty c => c

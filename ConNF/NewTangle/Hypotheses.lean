@@ -1,5 +1,20 @@
 import ConNF.Fuzz.Hypotheses
 
+/-!
+# Hypotheses for constructing tangles
+
+In this file we state the conditions required to generate the `fuzz` maps at all levels below a
+given proper type index `α : Λ`. Using these inductive hypotheses we can build the types of tangles
+and allowable permutations at level `α`. However, with such weak hypotheses (in particular, the lack
+of any coherence between type levels) we cannot prove many facts about these new types.
+
+## Main declarations
+
+* `ConNF.TangleDataIio`: The `TangleData` for each `β < α`.
+* `ConNF.PositionFunctionIio`: The `PositionFunction` for each `β < α`.
+* `ConNF.TypedObjectsIio`: The `TypedObjects` for each `β < α`.
+-/
+
 open Function Set WithBot
 
 open scoped Pointwise
@@ -12,7 +27,7 @@ variable [Params.{u}]
 
 variable (α : Λ)
 
-/-- The core tangle data below phase `α`. -/
+/-- The `TangleData` for each `β < α`. -/
 class TangleDataIio (α : Λ) where
   data : ∀ β : Iio α, TangleData β
 
@@ -37,7 +52,7 @@ noncomputable instance TangleDataIio.toTangleData''' (β : Λ) (hβ : (β : Type
 
 end TangleDataIio
 
-/-- The positioned tangle data below phase `α`. -/
+/-- The `PositionFunction` for each `β < α`. -/
 class PositionFunctionIio (α : Λ) [TangleDataIio α] where
   data : ∀ β : Iio α, PositionFunction β
 
@@ -56,7 +71,7 @@ noncomputable instance PositionFunctionIio.toPositionFunction' (β : Iio α) :
 
 end PositionFunctionIio
 
-/-- The almost tangle data below phase `α`. -/
+/-- The `TypedObjects` for each `β < α`. -/
 abbrev TypedObjectsIio (α : Λ) [TangleDataIio α] :=
   ∀ β : Iio α, TypedObjects β
 
