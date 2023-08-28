@@ -6,3 +6,5 @@
 - Unify naming of `comp`/`derivative`/`lower`.
 - Add documentation.
 - Move all the things of the form `_root_.*`
+- Clarify that `@[simp]` lemmas normalise casts between permutation types to be visible to help with applying lemmas. (Change them to coercions, and then we won't need this maybe?)
+- Remove instance names.

@@ -6,18 +6,19 @@ import ConNF.NewTangle.Cloud
 Several codes will be identified to make one TTT object. A TTT object has extensions for all type
 indices (except possibly `⊥`), so our equivalence classes must too.
 
-One way to do this is to make an equivalence class out of a code and its image under each `cloud` map.
-Thus we want to partition the big tree given by `cloud_rel` into trees of height `1` that each
-contains all descendents of its root (this is a slight lie for empty codes as the one equivalence
-class they form won't be a tree but rather a complete graph).
+One way to do this is to make an equivalence class out of a code and its image under each
+`cloudCode` map. Thus we want to partition the big tree given by `↝₀` into trees of height `1` that
+each contains all descendents of its root (this is a slight lie for empty codes as the one
+equivalence class they form won't be a tree but rather a complete graph).
 
 This is where code parity kicks in. We recursively pick out the small trees by noticing that codes
-whose preimages under `cloud` maps are all in a small tree already (in particular, those that have no
-preimage under an `cloud` map) must be the root of their own small tree, and that codes that are a
-image of some root of a small tree must belong to that same tree. This motivates the following
+whose preimages under `cloud` maps are all in a small tree already (in particular, those that have
+no preimage under an `cloud` map) must be the root of their own small tree, and that codes that are
+an image of some root of a small tree must belong to that same tree. This motivates the following
 definitions:
-* A code is even if all its preimages under `cloud` maps are odd.
-* A code is odd if one of its preimages under `cloud` maps are even.
+
+* A code is even if all its preimages under `cloudCode` maps are odd.
+* A code is odd if one of its preimages under `cloudCode` maps are even.
 
 If we replace "even" and "odd" by "winning" and "losing", we precisely get the rules for determining
 whether a game position is winning or losing.
@@ -26,8 +27,9 @@ Note that for nonempty codes there is at most one preimage under `cloud` maps.
 
 ## Main declarations
 
-* `con_nf.is_even`, `con_nf.is_odd`: Code parity.
-* `con_nf.code.equiv`: Equivalence of codes.
+* `ConNF.IsEven`, `ConNF.IsOdd`: Code parity.
+* `ConNF.Code.Equiv`: Equivalence of codes.
+* `ConNF.exists_even_equiv`: There is a unique even code in each equivalence class.
 -/
 
 open Set WithBot
@@ -47,11 +49,10 @@ variable {c d : Code α}
 
 /-! ### Parity of a code
 
-Parity of codes. We define them mutually inductively (`even_odd ff` is evenness, `even_odd tt`
-is oddity). If we consider codes as states of a game and `cloud_rel` as the "leads to"
+Parity of codes. If we consider codes as states of a game and `↝₀` as the "leads to"
 relation, then even codes are precisely losing codes and odd codes are precisely winning codes.
 Parity of a nonempty code corresponds to the parity of its number of iterated preimages under
-`cloud` maps. The only even empty code is `⊥` one, all others are odd.
+`cloudCode`. The only even empty code is `⊥`, all others are odd.
 -/
 
 mutual
@@ -82,6 +83,7 @@ theorem not_isOdd_bot (s : Set Atom) : ¬IsOdd (mk ⊥ s : Code α) := by
   rintro ⟨d, ⟨γ, _, h⟩, _⟩
   exact bot_ne_mk_coe (congr_arg Sigma.fst h)
 
+/-- An empty code is even iff its extension is `⊥`. -/
 @[simp]
 theorem IsEmpty.isEven_iff (hc : c.IsEmpty) : IsEven c ↔ (c.1 : TypeIndex) = ⊥ := by
   refine ⟨?_, isEven_of_eq_bot _⟩
@@ -102,8 +104,7 @@ theorem IsEmpty.isEven_iff (hc : c.IsEmpty) : IsEven c ↔ (c.1 : TypeIndex) = �
     · simp only [ne_eq, Subtype.mk.injEq, WithBot.bot_ne_coe, not_false_eq_true]
 
 @[simp]
-theorem IsEmpty.isOdd_iff (hc : c.IsEmpty) : IsOdd c ↔ (c.1 : TypeIndex) ≠ ⊥ :=
-  by
+theorem IsEmpty.isOdd_iff (hc : c.IsEmpty) : IsOdd c ↔ (c.1 : TypeIndex) ≠ ⊥ := by
   obtain ⟨⟨β, hβ⟩, s⟩ := c
   refine' ⟨_, fun h => (IsOdd_iff _).2 ⟨mk ⊥ ∅, _, isEven_bot _⟩⟩
   · rintro h (rfl : β = _)
@@ -136,13 +137,14 @@ private theorem not_isOdd_nonempty : ∀ c : NonemptyCode α, ¬c.1.IsOdd ↔ c.
       exact not_isOdd_nonempty ⟨d, hd⟩
 termination_by not_isOdd_nonempty c => c
 
+/-- A code is not odd iff it is even. -/
 @[simp]
-theorem not_isOdd : ¬c.IsOdd ↔ c.IsEven :=
-  by
+theorem not_isOdd : ¬c.IsOdd ↔ c.IsEven := by
   obtain hc | hc := c.2.eq_empty_or_nonempty
   · rw [IsEmpty.isOdd_iff hc, IsEmpty.isEven_iff hc, Classical.not_not]
   · exact not_isOdd_nonempty ⟨c, hc⟩
 
+/-- A code is not even iff it is odd. -/
 @[simp]
 theorem not_isEven : ¬c.IsEven ↔ c.IsOdd :=
   not_isOdd.symm.not_left
@@ -151,7 +153,10 @@ alias ⟨_, IsEven.not_isOdd⟩ := not_isOdd
 
 alias ⟨_, IsOdd.not_isEven⟩ := not_isEven
 
-theorem isEven_or_isOdd (c : Code α) : c.IsEven ∨ c.IsOdd := by rw [← not_isEven]; exact em _
+/-- Any code is even or odd. -/
+theorem isEven_or_isOdd (c : Code α) : c.IsEven ∨ c.IsOdd := by
+  rw [← not_isEven]
+  exact em _
 
 protected theorem _root_.ConNF.CloudRel.isOdd (hc : c.IsEven) (h : c ↝₀ d) : d.IsOdd :=
   (IsOdd_iff d).2 ⟨_, h, hc⟩
@@ -169,12 +174,12 @@ protected theorem IsEven.cloudCode_ne (hc : c.IsEven) (hd : d.IsEven) (hcγ : c.
 theorem cloudCode_ne_bot {s} : cloudCode γ c ≠ mk ⊥ s :=
   ne_of_apply_ne (Subtype.val ∘ Sigma.fst) coe_ne_bot
 
+/-- The cloud map cannot produce a singleton code. -/
 theorem cloudCode_ne_singleton {t} (hcβ : c.1 ≠ β) : cloudCode γ c ≠ mk β {t} := by
   intro h
   rw [cloudCode, mk, Sigma.ext_iff] at h
   simp only [ne_eq] at h
   obtain ⟨rfl, h⟩ := h
-  -- have := eq_of_heq h
   refine' (Cardinal.one_lt_aleph0.trans_le <| κ_isRegular.aleph0_le.trans κ_le_μ).not_le _
   rw [← Cardinal.mk_singleton t, ← h.eq]
   refine' μ_le_mk_cloudCode c hcβ (cloudCode_nonempty.1 _)
@@ -182,6 +187,7 @@ theorem cloudCode_ne_singleton {t} (hcβ : c.1 ≠ β) : cloudCode γ c ≠ mk �
   rw [cloudCode, eq_of_heq h]
   simp only [snd_mk, singleton_nonempty]
 
+/-- Singleton codes are even. -/
 @[simp]
 theorem isEven_singleton (t) : (mk β {t}).IsEven := by
   refine' isEven_of_forall_not fun c hc => _
@@ -223,6 +229,7 @@ theorem symm : Symmetric ((· ≡ ·) : Code α → Code α → Prop)
 theorem comm : c ≡ d ↔ d ≡ c :=
   symm.iff _ _
 
+/-- All empty codes are equivalent. -/
 theorem empty_empty : ∀ β γ, (⟨β, ∅⟩ : Code α) ≡ ⟨γ, ∅⟩
   | ⟨⊥, _⟩, ⟨⊥, _⟩ => Equiv.rfl
   | ⟨⊥, _⟩, ⟨(γ : Λ), hγ⟩ => by
@@ -249,6 +256,7 @@ protected theorem _root_.ConNF.Code.IsEmpty.equiv (hc : c.IsEmpty) (hd : d.IsEmp
   subst hd
   exact empty_empty _ _
 
+/-- Code equivalence is transitive. -/
 theorem trans {c d e : Code α} : c ≡ d → d ≡ e → c ≡ e := by
   rw [Equiv_iff, Equiv_iff]
   rintro (rfl | ⟨hc, β, hcβ, rfl⟩ | ⟨hc, β, hcβ, rfl⟩ | ⟨d, hd, γ, hdγ, ε, hdε, rfl, rfl⟩)
@@ -285,15 +293,18 @@ theorem trans {c d e : Code α} : c ≡ d → d ≡ e → c ≡ e := by
         subst this
         exact cloud_cloud _ hd _ hdγ _ heκ
 
+/-- Code equivalence is an equivalence relation. -/
 theorem equiv_equivalence : Equivalence ((· ≡ ·) : Code α → Code α → Prop) :=
   ⟨refl, fun {_ _} h => symm h, fun {_ _ _} h₁ h₂ => trans h₁ h₂⟩
 
+/-- If two codes are equal, they are either both empty or both nonempty. -/
 theorem nonempty_iff : ∀ {c d : Code α}, c ≡ d → (c.2.Nonempty ↔ d.2.Nonempty)
   | _, _, refl _ => Iff.rfl
   | _, _, cloud_left _ _ _ _ => cloudCode_nonempty
   | _, _, cloud_right _ _ _ _ => cloudCode_nonempty.symm
   | _, _, cloud_cloud _ _ _ _ _ _ => cloudCode_nonempty.trans cloudCode_nonempty.symm
 
+/-- If two codes at the same level are equivalent, they are equal. -/
 theorem ext : ∀ {c d : Code α}, c ≡ d → c.1 = d.1 → c = d
   | _, _, refl _, _ => rfl
   | _, _, cloud_left c _ β h, H => (h H.symm).elim
@@ -375,6 +386,7 @@ theorem IsEven.unique : ∀ {c d : Code α}, c.IsEven → d.IsEven → c ≡ d �
   | _, _, _, _, Equiv.cloud_right d hd β hcβ => by cases (hd.cloudCode hcβ).not_isEven ‹_›
   | _, _, _, _, Equiv.cloud_cloud e he β hcβ γ _ => by cases (he.cloudCode hcβ).not_isEven ‹_›
 
+/-- There is a unique even code in each equivalence class. -/
 theorem exists_even_equiv : ∀ c : Code α, ∃ d : Code α, d ≡ c ∧ d.IsEven := by
   rintro ⟨β, s⟩
   obtain rfl | _ := s.eq_empty_or_nonempty
@@ -402,9 +414,9 @@ theorem Equiv.unique : ∀ {c d : Code α}, c ≡ d → c.1 = d.1 → c = d
   | _, _, Equiv.cloud_left d _ β hdβ, h => by cases hdβ h.symm
   | _, _, Equiv.cloud_right d _ β hcβ, h => by cases hcβ h
   | _, _, Equiv.cloud_cloud e _ β _ γ _, h => by
-      have : β = γ := Iio.coe_injective h
-      subst this
-      rfl
+    have : β = γ := Iio.coe_injective h
+    subst this
+    rfl
 
 theorem equiv_bot_subsingleton (d e : Code α)
     (hdc : d ≡ c) (hec : e ≡ c) (hd : d.1 = ⊥) (he : e.1 = ⊥) : d = e :=

@@ -108,7 +108,7 @@ instance : Div NearLitterPerm :=
 
 /-- We can raise near-litter permutations to a natural power since we can do this to
 permutations of atoms and litters. -/
-instance hasPow : Pow NearLitterPerm ℕ :=
+instance : Pow NearLitterPerm ℕ :=
   ⟨fun π n =>
     ⟨π.atomPerm ^ n, π.litterPerm ^ n, by
       induction n with
@@ -120,7 +120,7 @@ instance hasPow : Pow NearLitterPerm ℕ :=
 
 /-- We can raise near-litter permutations to an integer power since we can do this to
 permutations of atoms and litters. -/
-instance hasZpow : Pow NearLitterPerm ℤ :=
+instance : Pow NearLitterPerm ℤ :=
   ⟨fun π n =>
     ⟨π.atomPerm ^ n, π.litterPerm ^ n, by
       obtain (n | n) := n

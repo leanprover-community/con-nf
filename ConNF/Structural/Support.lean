@@ -22,12 +22,14 @@ namespace ConNF
 
 variable [Params.{u}] {α : TypeIndex}
 
+-- TODO: Swap the elements of the following product type to align with codes and the new
+-- calling convention.
 /-- A *support condition* is an atom or a near-litter together with an extended type index.
 This represents an object in the base type (the atom or near-litter) together with the path
 detailing how we descend from type `α` to type `⊥` by looking at elements of elements and so on
 in the model. -/
 def SupportCondition (α : TypeIndex) : Type u :=
-  Sum Atom NearLitter × ExtendedIndex α
+  (Atom ⊕ NearLitter) × ExtendedIndex α
 
 noncomputable instance : Inhabited (SupportCondition α) :=
 ⟨Sum.inl default, default⟩

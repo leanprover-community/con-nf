@@ -380,7 +380,6 @@ def StructApprox (β : TypeIndex) :=
 
 namespace StructApprox
 
--- TODO: Could refactor StructPerm as a map `extended_index β → near_litter_perm`.
 def Approximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructPerm β) : Prop :=
   ∀ A, (π₀ A).Approximates (StructPerm.ofBot <| StructPerm.derivative A π)
 
@@ -388,95 +387,6 @@ def ExactlyApproximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructP
   ∀ A, (π₀ A).ExactlyApproximates (StructPerm.ofBot <| StructPerm.derivative A π)
 
 variable {α : Λ} [BasePositions] [Phase2Assumptions α]
-
--- TODO: I think these were never used.
-/-
-/-- A structural approximation `π` *supports* a set of support conditions if all of the support
-conditions lie in the domain of `π` and all near-litter support conditions are litters. -/
-@[mk_iff]
-structure Supports {β : Iic α} (π₀ : StructApprox β) (S : Set (SupportCondition β)) : Prop where
-  atom_mem_domain : ∀ a B, (inl a, B) ∈ S → a ∈ (π₀ B).atomPerm.domain
-  nearLitter_mem_domain : ∀ (N : NearLitter) (B), (inr N, B) ∈ S → N.1 ∈ (π₀ B).litterPerm.domain
-  IsLitter : ∀ (N : NearLitter) (B), (inr N, B) ∈ S → N.IsLitter
-
-instance hasSmulSupportCondition {β : TypeIndex} : SMul (StructApprox β) (SupportCondition β) :=
-  ⟨fun π c => ⟨π c.snd • c.fst, c.snd⟩⟩
-
-theorem smul_supportCondition_eq {β : TypeIndex} (π : StructApprox β) (c : SupportCondition β) :
-    π • c = ⟨π c.snd • c.fst, c.snd⟩ :=
-  rfl
-
-theorem smul_eq_of_supports {β : Iic α} {π₀ : StructApprox β} {π : Allowable β}
-    (hπ : π₀.ExactlyApproximates (Allowable.toStructPerm π))
-    {S : Set (SupportCondition β)} (hS : π₀.Supports S)
-    {c : SupportCondition β} (hc : c ∈ S) : π₀ • c = π • c := by
-  obtain ⟨a | N, A⟩ := c
-  · refine Prod.ext ?_ rfl
-    change inl _ = inl _
-    exact congr_arg inl ((hπ A).map_atom a (hS.atom_mem_domain a A hc))
-  refine Prod.ext ?_ rfl
-  change inr _ = inr _
-  refine congr_arg inr ?_
-  refine SetLike.coe_injective ?_
-  -- ext a : 1
-  -- exact (hπ A).map_litter N.fst (hS.nearLitter_mem_domain N A hc)
-  dsimp only
-  rw [(hS.is_litter N A hc).eq_fst_toNearLitter]
-  ext a : 1
-  simp only [near_litter_approx.smul_near_litter_coe, litter.to_near_litter_fst,
-    near_litter_approx.coe_largest_sublitter, litter.coe_to_near_litter, sdiff_sdiff_right_self,
-    inf_eq_inter, mem_union, mem_diff, mem_litter_set, SetLike.mem_coe]
-  constructor
-  · rintro (⟨h₁, h₂⟩ | ⟨a, ⟨ha₁, ha₂⟩, rfl⟩)
-    · refine'
-        ⟨(StructPerm.derivative A π.to_StructPerm)⁻¹ • a, _, by
-          simp only [StructPerm.coe_to_near_litter_perm, StructPerm.of_bot_smul, smul_inv_smul]⟩
-      simp only [litter.coe_to_near_litter, mem_litter_set]
-      have := (hπ A).mem_litterSet_inv a h₂
-      rw [h₁, (hπ A).map_litter _ (hS.near_litter_mem_domain N A hc), mem_litter_set, inv_smul_smul,
-        StructPerm.of_bot_inv_smul] at this
-      exact this
-    · exact ⟨a, ha₁, ((hπ A).map_atom a ha₂).symm⟩
-  · rintro ⟨a, ha, rfl⟩
-    simp only [litter.coe_to_near_litter, mem_litter_set] at ha
-    simp only [StructPerm.coe_to_near_litter_perm, StructPerm.of_bot_smul]
-    by_cases a ∈ (π₀ A).atomPerm.domain
-    · exact Or.inr ⟨a, ⟨ha, h⟩, (hπ A).map_atom a h⟩
-    · refine' Or.inl ⟨_, _⟩
-      · have := (hπ A).mem_litterSet a h
-        simp only [StructPerm.of_bot_smul, mem_litter_set] at this
-        rw [this, ha]
-        exact ((hπ A).map_litter _ (hS.near_litter_mem_domain N A hc)).symm
-      · contrapose! h
-        have := (hπ A).symm_map_atom _ h
-        simp only [StructPerm.of_bot_inv_smul, inv_smul_smul] at this
-        rw [← this]
-        exact (π₀ A).symm.atomPerm.map_domain h
-
-/-- If two allowable permutations exactly approximate some structural approximation, then their
-actions agree on everything that the structural approximation supports. -/
-theorem smul_eq_smul_of_exactlyApproximates {β : Iic α} {π₀ π₀' : StructApprox β}
-    {π π' : Allowable β} (hπ : π₀.ExactlyApproximates π.toStructPerm)
-    (hπ' : π₀'.ExactlyApproximates π'.toStructPerm) (S : Set (SupportCondition β)) (t : Tangle β)
-    (hS : π₀.Supports S) (hS' : π₀'.Supports S) (ht : MulAction.Supports (Allowable β) S t)
-    (hSπ : ∀ c ∈ S, π₀ • c = π₀' • c) : π • t = π' • t :=
-  by
-  have := ht (π'⁻¹ * π) _
-  · rw [mul_smul, inv_smul_eq_iff] at this
-    exact this
-  intro c hc
-  rw [mul_smul, inv_smul_eq_iff, ← smul_eq_of_supports hπ hS hc, ← smul_eq_of_supports hπ' hS' hc]
-  exact hSπ c hc
-
-theorem smul_eq_smul_of_exactly_approximates' {β : Iio α} {π₀ π₀' : StructApprox β}
-    {π π' : Allowable β} (hπ : π₀.ExactlyApproximates π.toStructPerm)
-    (hπ' : π₀'.ExactlyApproximates π'.toStructPerm) (S : Set (SupportCondition β)) (t : Tangle β)
-    (hS : (show StructApprox (β : Iic α) from π₀).Supports S)
-    (hS' : (show StructApprox (β : Iic α) from π₀').Supports S)
-    (ht : MulAction.Supports (Allowable β) S t) (hSπ : ∀ c ∈ S, π₀ • c = π₀' • c) :
-    π • t = π' • t :=
-  @smul_eq_smul_of_exactlyApproximates _ _ _ _ (β : Iic α) _ _ _ _ hπ hπ' S t hS hS' ht hSπ
--/
 
 def Free {β : Iic α} (π₀ : StructApprox β) : Prop :=
   ∀ A, (π₀ A).Free α A

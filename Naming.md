@@ -26,11 +26,11 @@ Follow the [mathlib4 naming convention](https://github.com/leanprover-community/
 | Litters                                  | `L` or `L₁, L₂` |
 | Near-litters                             | `N` or `N₁, N₂` |
 | Sublitters                               | `S` or `S₁, S₂` |
-| Tangles                                  | `t` or `t₁, t₂` |
+| Tangles or semitangles                   | `t` or `t₁, t₂` |
 | Support conditions                       | `c₁, c₂`        |
 | Codes                                    | `c, d`          |
 | Paths of type indices                    | `A, B`          |
 | Near-litter or structural actions        | `χ, χ'`         |
 | Near-litter or structural approximations | `φ, φ'`         |
 | Near-litter or structural permutations   | `π, π'`         |
-| Allowable permutations                   | `ρ, ρ'`         |
+| Allowable or semiallowable permutations  | `ρ, ρ'`         |
