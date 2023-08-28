@@ -83,8 +83,7 @@ theorem _root_.Set.Nonempty.cloud (h : s.Nonempty) : (cloud hγβ s).Nonempty :=
   exact h.choose_spec
 
 @[simp]
-theorem cloud_eq_empty (hγβ : γ ≠ β) : cloud hγβ s = ∅ ↔ s = ∅ :=
-  by
+theorem cloud_eq_empty (hγβ : γ ≠ β) : cloud hγβ s = ∅ ↔ s = ∅ := by
   refine' ⟨fun h => not_nonempty_iff_eq_empty.1 fun hs => hs.cloud.ne_empty h, _⟩
   rintro rfl
   exact cloud_empty

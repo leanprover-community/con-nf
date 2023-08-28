@@ -10,9 +10,10 @@ it here for more convenient use later.
 ## Main declarations
 
 * `ConNF.TangleData`: Data about the model elements at level `α`.
-* `con_nf.PositionFunction`:
-* `con_nf.TypedObjects`:
-* `con_nf.PositionedTypedObjects`: The data for the first phase of the recursion.
+* `ConNF.PositionFunction`: A function that gives each `α`-tangle a unique position `ν : μ`.
+* `ConNF.TypedObjects`: Allows us to encode atoms and near-litters as `α`-tangles.
+* `ConNF.BasePositions`: The position of typed atoms and typed near-litters in the position function
+    at any level.
 -/
 
 open Function Set WithBot
