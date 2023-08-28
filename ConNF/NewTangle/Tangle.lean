@@ -17,6 +17,7 @@ In this file, we construct the type of tangles at level `α`, assuming they exis
     The non-preferred extensions can be derived from the preferred extension.
 * `ConNF.AllowablePerm.mulActionSemitangle`: Allowable permutations act on semitangles.
 * `ConNF.NewTangle`: The type of tangles at level `α`.
+* `ConNF.Allowableperm.mulActionNewTangle`: Allowable permutations act on tangles.
 -/
 
 open Function Set WithBot
@@ -406,9 +407,9 @@ open MulAction
 
 /-- If a set of support conditions supports a code, it supports all equivalent codes. -/
 protected theorem Code.Equiv.supports (hcd : c ≡ d) (hS : Supports (AllowablePerm α) S c) :
-    Supports (AllowablePerm α) S d := fun f h => by
-  have h₁ := hcd.smul (f := f)
-  have h₂ := (Code.Equiv.of_eq <| hS f h).trans hcd
+    Supports (AllowablePerm α) S d := fun ρ h => by
+  have h₁ := hcd.smul (ρ := ρ)
+  have h₂ := (Code.Equiv.of_eq <| hS ρ h).trans hcd
   exact (h₁.symm.trans h₂).unique rfl
 
 theorem Code.Equiv.supports_iff (hcd : c ≡ d) :
