@@ -66,14 +66,14 @@ instance tangleData : PositionedTypedObjects γ :=
   lowerPositionedTypedObjects γ
 
 noncomputable instance IicBotTangleData : ∀ β : IicBot α, TangleData β
-  | ⟨⊥, _⟩ => Bot.corePositionedTypedObjects
+  | ⟨⊥, _⟩ => Bot.tangleData
   | ⟨(β : Λ), hβ⟩ => lowerTangleData ⟨β, coe_le_coe.mp hβ⟩
 
 noncomputable instance IioBotTangleData (β : IioBot α) : TangleData β :=
   show TangleData (⟨β, le_of_lt (IioBot.lt β)⟩ : IicBot α) from inferInstance
 
 noncomputable instance IioBotPositionFunction : ∀ β : IioBot α, PositionFunction β
-  | ⟨⊥, _⟩ => Bot.positionedPositionedTypedObjects
+  | ⟨⊥, _⟩ => Bot.positionFunction
   | ⟨(β : Λ), hβ⟩ => lowerPositionFunction ⟨β, coe_lt_coe.mp hβ⟩
 
 instance hasCoeIioIicIndex : Coe (Iio α) (IicBot α) :=

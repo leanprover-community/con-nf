@@ -1,5 +1,5 @@
-import ConNF.Atom.Small
-import ConNF.Atom.Atom
+import ConNF.BaseType.Small
+import ConNF.BaseType.Atom
 
 /-!
 # Near-litters

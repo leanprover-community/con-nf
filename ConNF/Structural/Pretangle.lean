@@ -1,4 +1,4 @@
-import ConNF.Atom.Atom
+import ConNF.BaseType.Atom
 
 /-!
 # Pretangles

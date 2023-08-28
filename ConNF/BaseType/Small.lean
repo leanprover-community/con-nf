@@ -1,4 +1,4 @@
-import ConNF.Atom.Params
+import ConNF.BaseType.Params
 
 /-!
 # Smallness

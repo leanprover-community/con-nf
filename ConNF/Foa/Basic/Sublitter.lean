@@ -1,4 +1,4 @@
-import ConNF.Atom.NearLitter
+import ConNF.BaseType.NearLitter
 
 open Cardinal
 

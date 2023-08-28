@@ -1,5 +1,5 @@
 import Mathlib.Combinatorics.Quiver.Path
-import ConNF.Atom.Params
+import ConNF.BaseType.Params
 
 /-!
 # Indices

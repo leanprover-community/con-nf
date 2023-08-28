@@ -3,5 +3,6 @@
 - Exploit `erw` where possible.
 - Fix variable letters.
 - Add typeclasses for derivatives and toStructPerm?
+- Unify naming of `comp`/`derivative`/`lower`.
 - Add documentation.
 - Move all the things of the form `_root_.*`

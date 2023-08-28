@@ -1,5 +1,5 @@
 import Mathlib.Data.Set.Pointwise.SMul
-import ConNF.Atom.NearLitter
+import ConNF.BaseType.NearLitter
 
 /-!
 # Near-litter permutations

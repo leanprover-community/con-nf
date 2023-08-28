@@ -1,4 +1,4 @@
-import ConNF.Atom.Litter
+import ConNF.BaseType.Litter
 
 /-!
 # Atoms

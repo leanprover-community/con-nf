@@ -1,20 +1,19 @@
 import ConNF.Structural.Support
 
 /-!
-# Phase 1 of the recursion
+# Hypotheses for constructing the `fuzz` map
 
-This file contains the induction hypothesis for the first phase of the recursion. In this phase at
-level `α`, we assume phase 1 at all levels `β < α`, but we do not assume any interaction between the
-levels. Interaction will be introduced in phase 2.
+This file contains the inductive hypotheses required for constructing the `fuzz` map.
+Even though not everything defined here is strictly necessary for this construction, we bundle
+it here for more convenient use later.
 
 ## Main declarations
 
-* `con_nf.core_PositionedTypedObjects`:
+* `ConNF.TangleData`: Data about the model elements at level `α`.
 * `con_nf.PositionFunction`:
 * `con_nf.TypedObjects`:
 * `con_nf.PositionedTypedObjects`: The data for the first phase of the recursion.
 -/
-
 
 open Function Set WithBot
 
@@ -26,12 +25,17 @@ namespace ConNF
 
 variable [Params.{u}]
 
-section DefinePositionedTypedObjects
-
-/-- The motor of the initial recursion. This contains the data of tangles and allowable permutations
-for phase 1 of the recursion. -/
+/-- Data about the model elements at level `α`. This class asserts the existence of a type of
+tangles at level `α`, and a group of allowable permutations at level `α` that act on the
+`α`-tangles. We also stipulate that each tangle has a prescribed small support, called its
+designated support. -/
 class TangleData (α : TypeIndex) where
-  (Tangle Allowable : Type u)
+  /-- The type of tangles that we assume were constructed at stage `α`.
+  Later in the recursion, we will construct this type explicitly, but for now, we will just assume
+  that it exists. -/
+  (Tangle : Type u)
+  /-- The type of allowable permutations that we assume exists on `α`-tangles. -/
+  (Allowable : Type u)
   [allowableGroup : Group Allowable]
   allowableToStructPerm : Allowable →* StructPerm α
   [allowableAction : MulAction Allowable Tangle]
@@ -40,46 +44,22 @@ class TangleData (α : TypeIndex) where
       MulAction.compHom _ allowableToStructPerm
     (t : Tangle) → Support α Allowable t
 
+export TangleData (Tangle Allowable)
+
 attribute [instance] TangleData.allowableGroup TangleData.allowableAction
 
 section
 
-variable (α : TypeIndex) [TangleData α]
-
-/-- The type of tangles that we assume were constructed at stage `α`.
-Later in the recursion, we will construct this type explicitly, but for now, we will just assume
-that it exists.
-Fields in `PositionedTypedObjects` give more information about this type. -/
-def Tangle : Type u :=
-  TangleData.Tangle α
-
-/-- The type of allowable permutations that we assume exists on `α`-tangles. -/
-def Allowable : Type u :=
-  TangleData.Allowable α
-
-/-- Allowable permutations at level `α` forms a group with respect to function composition. Note
-that at this stage in the recursion, we have not established that the allowable permutations on
-`α`-tangles are actually (coercible to) functions, so we cannot compose them with the `∘` symbol; we
-must instead use group multiplication `*`. -/
-instance : Group (Allowable α) :=
-  TangleData.allowableGroup
-
-variable {α} {X : Type _} [MulAction (StructPerm α) X]
+variable {α : TypeIndex} [TangleData α] {X : Type _} [MulAction (StructPerm α) X]
 
 namespace Allowable
 
-/-- Allowable permutations can be considered a subtype of structural permutations. However, we
-cannot write this explicitly in type theory, so instead we assume this monoid homomorphism from
-allowable permutations to structural permutations. This can be thought of as an inclusion map that
-preserves the group structure. -/
+/-- Allowable permutations can be considered a subtype of structural permutations.
+This map can be thought of as an inclusion that preserves the group structure. -/
 def toStructPerm : Allowable α →* StructPerm α :=
   TangleData.allowableToStructPerm
 
-instance : MulAction (Allowable α) (Tangle α) :=
-  TangleData.allowableAction
-
-/-- Allowable permutations act on tangles. This action commutes with certain other operations; the
-exact condition are given in `smul_typed_near_litter`. -/
+/-- Allowable permutations act on anything that structural permutations do. -/
 instance : MulAction (Allowable α) X :=
   MulAction.compHom _ toStructPerm
 
@@ -96,18 +76,25 @@ def designatedSupport (t : Tangle α) : Support α (Allowable α) t :=
 
 end
 
-/-- The motor of the initial recursion. This contains the data of the position function. -/
 class PositionFunction (α : TypeIndex) [TangleData α] where
+  /-- A position function, giving each tangle a unique position `ν : μ`.
+  The existence of this injection proves that there are at most `μ` tangles at level `α`.
+  Since `μ` has a well-ordering, this induces a well-ordering on `α`-tangles: to compare two
+  tangles, simply compare their images under this map. -/
   position : Tangle α ↪ μ
 
 export PositionFunction (position)
 
 variable (α : Λ) [TangleData α]
 
-/-- The motor of the initial recursion. This contains the data of the injection to all the
-information needed for phase 1 of the recursion. -/
+/-- Allows us to encode atoms and near-litters as `α`-tangles. These maps are expected to cohere
+with the conditions given in `BasePositions`, but this requirement is expressed later. -/
 class TypedObjects where
+  /-- Encode an atom as an `α`-tangle. The resulting model element has a `⊥`-extension which
+  contains only this atom. -/
   typedAtom : Atom ↪ Tangle α
+  /-- Encode a near-litter as an `α`-tangle. The resulting model element has a `⊥`-extension which
+  contains only this near-litter. -/
   typedNearLitter : NearLitter ↪ Tangle α
   smul_typedNearLitter :
     ∀ (π : Allowable α) (N : NearLitter),
@@ -121,10 +108,8 @@ namespace Allowable
 variable {α}
 variable [TypedObjects α]
 
-/--
-The action of allowable permutations on tangles commutes with the `typed_near_litter` function mapping
-near-litters to typed near-litters. This is quite clear to see when representing tangles as codes,
-but since at this stage tangles are just a type, we have to state this condition explicitly. -/
+/-- The action of allowable permutations on tangles commutes with the `typedNearLitter` function
+mapping near-litters to typed near-litters. This can be seen by representing tangles as codes. -/
 theorem smul_typedNearLitter (π : Allowable α) (N : NearLitter) :
     (π • typedNearLitter N : Tangle α) =
     typedNearLitter ((Allowable.toStructPerm π) (Quiver.Hom.toPath <| bot_lt_coe α) • N) :=
@@ -132,16 +117,22 @@ theorem smul_typedNearLitter (π : Allowable α) (N : NearLitter) :
 
 end Allowable
 
-/-- The position of typed atoms and typed near-litters in the position function at any level.
-This is part of the `γ = -1` fix. -/
+/-- This class stores the position of typed atoms and typed near-litters in the position function
+at any level, along with some conditions on these maps. -/
 class BasePositions where
+  /-- Gives the positions of typed atoms at any level. -/
   typedAtomPosition : Atom ↪ μ
+  /-- Gives the positions of typed near-litters at any level. -/
   typedNearLitterPosition : NearLitter ↪ μ
+  /-- Typed litters precede typed atoms they contain. -/
   litter_lt :
     ∀ (L : Litter),
       ∀ a ∈ litterSet L, typedNearLitterPosition L.toNearLitter < typedAtomPosition a
+  /-- Typed litters precede near-litters to them. -/
   litter_le_nearLitter :
     ∀ N : NearLitter, typedNearLitterPosition N.fst.toNearLitter ≤ typedNearLitterPosition N
+  /-- Atoms in the symmetric difference between a near-litter and its corresponding litter
+  precede the near-litter. -/
   symmDiff_lt_nearLitter :
     ∀ (N : NearLitter),
       ∀ a ∈ litterSet N.fst ∆ N.snd, typedAtomPosition a < typedNearLitterPosition N
@@ -149,75 +140,43 @@ class BasePositions where
 export BasePositions (typedAtomPosition typedNearLitterPosition litter_lt litter_le_nearLitter
     symmDiff_lt_nearLitter)
 
+/-- Typed litters precede near-litters to them. -/
 theorem litter_lt_nearLitter [BasePositions] (N : NearLitter) (hN : N.fst.toNearLitter ≠ N) :
     typedNearLitterPosition N.fst.toNearLitter < typedNearLitterPosition N :=
   lt_of_le_of_ne (litter_le_nearLitter N) (typedNearLitterPosition.injective.ne hN)
-
-/-- An injection from near-litters into level `α` tangles.
-These will be explicitly constructed as "typed near-litters", which are codes of the form
-`(α, -1, N)` for `N` a near-litter.
-
-Since we haven't assumed anything about the structure of tangles at this level, we can't construct
-these typed near-litters explicitly, so we rely on this function instead. In the blueprint, this is
-function `j`. -/
-add_decl_doc TypedObjects.typedNearLitter
-
-/-- For any atom `a`, we can construct an `α`-tangle that has a `-1`-extension that contains exactly
-this atom. This is called a typed singleton. In the blueprint, this is the function `k`. -/
-add_decl_doc TypedObjects.typedAtom
-
-/-- An injection from level `α` tangles into the type `μ`.
-Since `μ` has a well-ordering, this induces a well-ordering on `α`-tangles: to compare two tangles,
-simply compare their images under this map.
-
-Conditions satisfied by this injection are given in `litter_lt`, `litter_lt_near_litter`,
-`symm_diff_lt_near_litter`, and `support_le`. In the blueprint, this is function `ι`. -/
-add_decl_doc PositionFunction.position
-
-/-- Each typed litter `L` precedes the typed singletons of all of its elements `a ∈ L`. -/
-add_decl_doc BasePositions.litter_lt
-
-/-- Each near litter `N` which is not a litter comes later than its associated liter `L = N°`. -/
-add_decl_doc litter_lt_nearLitter
-
-/-- Each near litter `N` comes after all elements in the symmetric difference `N ∆ N°` (which is
-a small set by construction). Note that if `N` is a litter, this condition is vacuously true. -/
-add_decl_doc symmDiff_lt_nearLitter
-
-end DefinePositionedTypedObjects
 
 section Instances
 
 variable {α : Λ} (β : Iio α) [TangleData (iioCoe β)]
 
-instance coreVal : TangleData β.val :=
+instance tangleDataVal : TangleData β.val :=
   ‹TangleData β›
 
-instance coreCoeCoe : TangleData (β : Λ) :=
+instance tangleDataCoeCoe : TangleData (β : Λ) :=
   ‹TangleData β›
 
 section PositionFunction
 
 variable [PositionFunction (iioCoe β)]
 
-instance positionedVal : PositionFunction β.val :=
+instance positionFunctionVal : PositionFunction β.val :=
   ‹PositionFunction _›
 
-instance positionedCoeCoe : PositionFunction (β : Λ) :=
+instance positionFunctionCoeCoe : PositionFunction (β : Λ) :=
   ‹PositionFunction _›
 
 end PositionFunction
 
 variable [TypedObjects β]
 
-instance almostVal : TypedObjects β.val :=
+instance typedObjectsVal : TypedObjects β.val :=
   ‹TypedObjects β›
 
 end Instances
 
 /-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
-permutations to be near-litter-permutations, and the designated supports to be singletons. -/
-noncomputable instance Bot.corePositionedTypedObjects : TangleData ⊥
+permutations to be near-litter permutations, and the designated supports to be singletons. -/
+noncomputable instance Bot.tangleData : TangleData ⊥
     where
   Tangle := Atom
   Allowable := NearLitterPerm
@@ -233,10 +192,12 @@ noncomputable instance Bot.corePositionedTypedObjects : TangleData ⊥
         exact h
       small := small_singleton _ }
 
-/-- The tangle data at the bottom level. -/
-noncomputable instance Bot.positionedPositionedTypedObjects : PositionFunction ⊥ :=
+/-- The position function at level `⊥`, which is chosen arbitrarily. -/
+noncomputable instance Bot.positionFunction : PositionFunction ⊥ :=
   ⟨Nonempty.some mk_atom.le⟩
 
+/-- The identity equivalence between `⊥`-allowable permutations and near-litter permutations.
+This equivalence is a group isomorphism. -/
 def _root_.NearLitterPerm.ofBot : Allowable ⊥ ≃ NearLitterPerm :=
   Equiv.refl _
 

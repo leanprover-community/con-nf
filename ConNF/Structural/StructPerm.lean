@@ -2,7 +2,7 @@ import Mathlib.GroupTheory.GroupAction.Sum
 import Mathlib.Logic.Equiv.TransferInstance
 import ConNF.Mathlib.GroupAction
 import ConNF.Mathlib.Logic
-import ConNF.Atom.NearLitterPerm
+import ConNF.BaseType.NearLitterPerm
 import ConNF.Structural.Index
 import ConNF.Structural.Pretangle
 

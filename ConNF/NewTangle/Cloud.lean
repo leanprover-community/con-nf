@@ -58,11 +58,11 @@ variable {hγβ}
 theorem mem_cloud {t : Tangle <| iioCoe β} {s : Set (Tangle γ)} :
     t ∈ cloud hγβ s ↔
       ∃ t' ∈ s, ∃ (N : NearLitter), N.1 = fuzz (coe_ne hγβ) t' ∧ t = typedNearLitter N := by
-  simp only [cloud, and_comm, mem_image, mem_iUnion, exists_prop]
+  simp only [cloud, mem_image, mem_iUnion, mem_localCardinal, exists_prop]
   constructor
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
-    exact ⟨t, ht₂, N, ht₁, rfl⟩
-  · rintro ⟨t, ht₂, N, ht₁, rfl⟩
+    exact ⟨t, ht₁, N, ht₂, rfl⟩
+  · rintro ⟨t, ht₁, N, ht₂, rfl⟩
     exact ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
 
 @[simp]

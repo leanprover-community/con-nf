@@ -21,7 +21,7 @@ section TangleDataIio
 variable [TangleDataIio α]
 
 noncomputable instance TangleDataIio.toTangleData : ∀ β : IioBot α, TangleData β
-  | ⟨⊥, _⟩ => Bot.corePositionedTypedObjects
+  | ⟨⊥, _⟩ => Bot.tangleData
   | ⟨(β : Λ), hβ⟩ => TangleDataIio.data ⟨β, coe_lt_coe.1 hβ⟩
 
 noncomputable instance TangleDataIio.toTangleData' (β : Iio α) : TangleData β :=
@@ -47,7 +47,7 @@ variable [TangleDataIio α] [PositionFunctionIio α]
 
 noncomputable instance PositionFunctionIio.toPositionFunction :
     ∀ β : IioBot α, PositionFunction β
-  | ⟨⊥, _⟩ => Bot.positionedPositionedTypedObjects
+  | ⟨⊥, _⟩ => Bot.positionFunction
   | ⟨(β : Λ), hβ⟩ => PositionFunctionIio.data ⟨β, coe_lt_coe.1 hβ⟩
 
 noncomputable instance PositionFunctionIio.toPositionFunction' (β : Iio α) :
