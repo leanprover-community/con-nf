@@ -98,9 +98,9 @@ class TypedObjects where
   contains only this near-litter. -/
   typedNearLitter : NearLitter ↪ Tangle α
   smul_typedNearLitter :
-    ∀ (π : Allowable α) (N : NearLitter),
-    π • typedNearLitter N =
-    typedNearLitter ((Allowable.toStructPerm π) (Quiver.Hom.toPath <| bot_lt_coe α) • N)
+    ∀ (ρ : Allowable α) (N : NearLitter),
+    ρ • typedNearLitter N =
+    typedNearLitter ((Allowable.toStructPerm ρ) (Quiver.Hom.toPath <| bot_lt_coe α) • N)
 
 export TypedObjects (typedAtom typedNearLitter)
 
@@ -111,9 +111,9 @@ variable [TypedObjects α]
 
 /-- The action of allowable permutations on tangles commutes with the `typedNearLitter` function
 mapping near-litters to typed near-litters. This can be seen by representing tangles as codes. -/
-theorem smul_typedNearLitter (π : Allowable α) (N : NearLitter) :
-    (π • typedNearLitter N : Tangle α) =
-    typedNearLitter ((Allowable.toStructPerm π) (Quiver.Hom.toPath <| bot_lt_coe α) • N) :=
+theorem smul_typedNearLitter (ρ : Allowable α) (N : NearLitter) :
+    (ρ • typedNearLitter N : Tangle α) =
+    typedNearLitter ((Allowable.toStructPerm ρ) (Quiver.Hom.toPath <| bot_lt_coe α) • N) :=
   TypedObjects.smul_typedNearLitter _ _
 
 end Allowable
@@ -184,12 +184,12 @@ noncomputable instance Bot.tangleData : TangleData ⊥
   allowableToStructPerm := StructPerm.toBotIso.toMonoidHom
   allowableAction := inferInstance
   designatedSupport a :=
-    { carrier := {(Sum.inl a, Quiver.Path.nil)}
+    { carrier := {(Quiver.Path.nil, Sum.inl a)}
       supports := fun π => by
         simp only [mem_singleton_iff, forall_eq]
         intro h
-        change (Sum.inl _, _) = (_, _) at h
-        simp only [MulEquiv.coe_toMonoidHom, Prod.mk.injEq, Sum.inl.injEq, and_true] at h
+        change (_, Sum.inl _) = (_, Sum.inl _) at h
+        simp only [MulEquiv.coe_toMonoidHom, Prod.mk.injEq, Sum.inl.injEq, true_and] at h
         exact h
       small := small_singleton _ }
 

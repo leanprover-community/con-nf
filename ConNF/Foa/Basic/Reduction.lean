@@ -120,7 +120,7 @@ theorem reduction_designatedSupport_supports [TangleData β] (t : Tangle β) :
     Supports (Allowable β) (reduction α (designatedSupport t : Set (SupportCondition β))) t := by
   intro π h₁
   refine' (designatedSupport t).supports π _
-  rintro ⟨a | N, B⟩ h₂
+  rintro ⟨B, a | N⟩ h₂
   · exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mkAtom a B) h₂)
   · by_cases N.IsLitter
     · obtain ⟨L, rfl⟩ := h.exists_litter_eq

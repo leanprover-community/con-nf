@@ -152,7 +152,7 @@ theorem supports {β : Iio α} {π π' : Allowable β} {t : Tangle β}
   rw [mul_smul, inv_smul_eq_iff]
   change (_, c.2) = (_, c.2)
   refine StructPerm.smul_supportCondition_eq_iff.mpr ?_
-  obtain ⟨a | N, A⟩ := c
+  obtain ⟨A, a | N⟩ := c
   · change inl _ = inl _
     simp only [inl.injEq]
     exact ha a A hc
@@ -330,7 +330,7 @@ variable {π}
 theorem completeMap_surjective_extends (hπf : π.Free) (c : SupportCondition β)
     (hc : ∀ d : SupportCondition β, d <[α] c → π.CompleteMapSurjectiveAt d) :
     π.CompleteMapSurjectiveAt c := by
-  obtain ⟨a | N, A⟩ := c
+  obtain ⟨A, a | N⟩ := c
   · refine' completeAtomMap_surjective_extends A a _
     obtain ⟨N, hN⟩ := hc (inr a.1.toNearLitter, A) (Relation.TransGen.single <| Constrains.atom a A)
     refine' ⟨N.1, _⟩

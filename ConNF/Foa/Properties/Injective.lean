@@ -188,7 +188,7 @@ theorem Biexact.smul_eq_smul {β : Iio α} {π π' : Allowable β} {c : SupportC
     (constrains_wf α β) c _
   clear c
   intro c ih h
-  obtain ⟨a | N, A⟩ := c <;> refine StructPerm.smul_supportCondition_eq_iff.mpr ?_
+  obtain ⟨A, a | N⟩ := c <;> refine StructPerm.smul_supportCondition_eq_iff.mpr ?_
   · change inl _ = inl _
     simp only [inl.injEq]
     exact h.smul_eq_smul_atom A a Relation.ReflTransGen.refl
