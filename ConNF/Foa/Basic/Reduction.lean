@@ -18,8 +18,8 @@ variable {β : Λ} {G : Type _} {τ : Type _} [SMul G (SupportCondition β)] [SM
 /-- A support condition is *reduced* if it is an atom or a litter. -/
 @[mk_iff]
 inductive Reduced {β : TypeIndex} : SupportCondition β → Prop
-  | mkAtom (a : Atom) (B : ExtendedIndex β) : Reduced (inl a, B)
-  | mkLitter (L : Litter) (B : ExtendedIndex β) : Reduced (inr L.toNearLitter, B)
+  | mkAtom (B : ExtendedIndex β) (a : Atom) : Reduced (B, inl a)
+  | mkLitter (B : ExtendedIndex β) (L : Litter) : Reduced (B, inr L.toNearLitter)
 
 /-- The *reduction* of a set of support conditions is the downward closure of the set under
 the constrains relation, but we only keep reduced conditions. -/
@@ -121,22 +121,22 @@ theorem reduction_designatedSupport_supports [TangleData β] (t : Tangle β) :
   intro π h₁
   refine' (designatedSupport t).supports π _
   rintro ⟨B, a | N⟩ h₂
-  · exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mkAtom a B) h₂)
+  · exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mkAtom B a) h₂)
   · by_cases N.IsLitter
     · obtain ⟨L, rfl⟩ := h.exists_litter_eq
-      exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mkLitter L B) h₂)
+      exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mkLitter B L) h₂)
     · have h := NearLitter.not_isLitter h
       have h₃ :=
-        congr_arg Prod.fst
+        congr_arg Prod.snd
           (h₁
-            (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkLitter N.fst B)
+            (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkLitter B N.fst)
               (Constrains.nearLitter N h B) h₂))
       have h₄ := fun a ha =>
-        congr_arg Prod.fst
+        congr_arg Prod.snd
           (h₁
-            (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkAtom a B)
+            (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkAtom B a)
               (Constrains.symmDiff N a ha B) h₂))
-      refine' Prod.ext _ rfl
+      refine' Prod.ext rfl _
       change inr _ = inr _ at h₃
       change ∀ a ha, inl _ = inl _ at h₄
       change inr _ = inr _
@@ -169,9 +169,9 @@ theorem mem_reducedSupport_iff [TangleData β] (t : Tangle β) (c : SupportCondi
 theorem mem_reduction_designated_support {β γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ)
     (hε : (ε : Λ) < γ) (hδε : δ ≠ ε) (B : Path (β : TypeIndex) γ) (t : Tangle δ)
     (c : SupportCondition δ) (h : c ∈ reducedSupport α t) :
-    (c.fst, (B.cons (coe_lt hδ)).comp c.snd) <[α]
-      (inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter,
-        (B.cons (coe_lt hε)).cons (bot_lt_coe _)) := by
+    ((B.cons (coe_lt hδ)).comp c.fst, c.snd) <[α]
+      ((B.cons (coe_lt hε)).cons (bot_lt_coe _),
+        inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter) := by
   obtain ⟨⟨d, hd, hcd⟩, _⟩ := h
   refine' Relation.TransGen.tail' _ (Constrains.fuzz hδ hε hδε B t d hd)
   exact reflTransGen_constrains_comp hcd _
