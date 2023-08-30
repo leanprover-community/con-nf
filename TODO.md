@@ -12,3 +12,4 @@
 - Remove mathport comments.
 - Remove double line breaks.
 - Reformat lines containing only `by`.
+- Change `refine'` to new variants.

@@ -19,7 +19,7 @@ variable [Params.{u}]
 
 section ExtendedIndex
 
-variable {α : TypeIndex}
+variable {α : TypeIndex} [BasePositions]
 
 /-!
 We construct a well-order on the type of extended indices.
@@ -37,6 +37,86 @@ instance : WellFoundedRelation (ExtendedIndex α) :=
 
 noncomputable instance : LinearOrder (ExtendedIndex α) :=
   linearOrderOfSTO (· < ·)
+
+def sumAtomNearLitterMap : Atom ⊕ NearLitter → μ
+| inl a => typedAtomPosition a
+| inr N => typedNearLitterPosition N
+
+@[simp]
+theorem sumAtomNearLitterMap_inl (a : Atom) :
+    sumAtomNearLitterMap (inl a) = typedAtomPosition a :=
+  rfl
+
+@[simp]
+theorem sumAtomNearLitterMap_inr (N : NearLitter) :
+    sumAtomNearLitterMap (inr N) = typedNearLitterPosition N :=
+  rfl
+
+theorem sumAtomNearLitterMap_injective : Function.Injective sumAtomNearLitterMap := by
+  rintro (a₁ | N₁) (a₂ | N₂) h
+  · exact congr_arg _ (typedAtomPosition.injective h)
+  · cases typedAtomPosition_ne_typedNearLitterPosition a₁ N₂ h
+  · cases typedAtomPosition_ne_typedNearLitterPosition a₂ N₁ h.symm
+  · exact congr_arg _ (typedNearLitterPosition.injective h)
+
+-- TODO: Move and use
+theorem isWellOrder_invImage {α β : Type _} {r : β → β → Prop} (h : IsWellOrder β r)
+    (f : α → β) (hf : Function.Injective f) :
+    IsWellOrder α (InvImage r f) where
+  trichotomous := by
+    intro x y
+    have := h.trichotomous (f x) (f y)
+    rw [hf.eq_iff] at this
+    exact this
+  trans x y z := h.trans (f x) (f y) (f z)
+  wf := InvImage.wf _ h.wf
+
+instance : LT (Atom ⊕ NearLitter) :=
+  ⟨InvImage (· < ·) sumAtomNearLitterMap⟩
+
+theorem sumAtomNearLitter_lt_def (x y : Atom ⊕ NearLitter) :
+    x < y ↔ sumAtomNearLitterMap x < sumAtomNearLitterMap y :=
+  Iff.rfl
+
+instance : IsWellOrder (Atom ⊕ NearLitter) (· < ·) :=
+  isWellOrder_invImage μwo _ sumAtomNearLitterMap_injective
+
+instance : WellFoundedRelation (Atom ⊕ NearLitter) :=
+  IsWellOrder.toHasWellFounded
+
+def ConditionPosition (α : TypeIndex) : Type u :=
+  (Atom ⊕ NearLitter) ×ₗ ExtendedIndex α
+
+def SupportCondition.position : SupportCondition α → ConditionPosition α :=
+  Prod.swap
+
+theorem SupportCondition.position_injective :
+    Function.Injective (SupportCondition.position (α := α)) :=
+  Prod.swap_injective
+
+instance : LT (ConditionPosition α) :=
+  inferInstanceAs (LT ((Atom ⊕ NearLitter) ×ₗ ExtendedIndex α))
+
+instance : IsWellOrder (ConditionPosition α) (· < ·) :=
+  instIsWellOrderProdLex
+
+instance : WellFoundedRelation (ConditionPosition α) :=
+  IsWellOrder.toHasWellFounded
+
+attribute [irreducible] ConditionPosition
+
+instance : LT (SupportCondition α) :=
+  ⟨InvImage (· < ·) SupportCondition.position⟩
+
+theorem SupportCondition.lt_def (c d : SupportCondition α) :
+    c < d ↔ SupportCondition.position c < SupportCondition.position d :=
+  Iff.rfl
+
+instance : IsWellOrder (SupportCondition α) (· < ·) :=
+  isWellOrder_invImage inferInstance _ SupportCondition.position_injective
+
+instance : WellFoundedRelation (SupportCondition α) :=
+  IsWellOrder.toHasWellFounded
 
 end ExtendedIndex
 
@@ -86,20 +166,8 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
 
 notation:50 c " ≺[" α "] " d:50 => Constrains α _ c d
 
--- TODO: Refactor this so that there's a global position function on support conditions, then
--- the constrains relation is a subrelation of the inverse image under that.
-
-instance : LT (SupportCondition β) :=
-  sorry
-  --⟨Prod.Lex (· < ·) (InvImage (· < ·) fun c => c.elim typedAtomPosition typedNearLitterPosition)⟩
-
-instance : IsWellFounded (SupportCondition β) (· < ·) :=
-  sorry
-  --instIsWellFoundedProdLex
-
 theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) := by
-  sorry
-  /- intro c d h
+  intro c d h
   obtain ⟨a, A⟩ | ⟨N, hN, A⟩ | ⟨N, a, ha, A⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h <;> left
   · exact litter_lt a.1 a rfl
   · refine litter_lt_nearLitter N ?_
@@ -111,11 +179,14 @@ theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) := by
     rw [PositionedTypedObjects.typedNearLitterPosition_eq] at this
     refine' lt_of_le_of_lt _ this
     convert PositionedTypedObjects.support_le t _ hc
-    rfl
+    · funext x
+      cases x <;> rfl
+    · rfl
   · simp only [InvImage, elim_inr]
     convert typedAtomPosition_lt_fuzz a
-    refine (@PositionedTypedObjects.typedNearLitterPosition_eq _ _ _ _ _ _ ?_ _).symm
-    infer_instance -/
+    simp only [sumAtomNearLitter_lt_def, sumAtomNearLitterMap_inl, sumAtomNearLitterMap_inr]
+    rw [@PositionedTypedObjects.typedNearLitterPosition_eq _ _ _ ?_ ?_ ?_ ?_ _]
+    infer_instance
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `(x, A) ≺ (y, B)`,
 then `x < y` in `µ`, under the `typed_near_litter` or `typed_atom` maps. -/

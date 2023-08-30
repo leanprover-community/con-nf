@@ -137,9 +137,11 @@ class BasePositions where
   symmDiff_lt_nearLitter :
     ∀ (N : NearLitter),
       ∀ a ∈ litterSet N.fst ∆ N.snd, typedAtomPosition a < typedNearLitterPosition N
+  typedAtomPosition_ne_typedNearLitterPosition :
+    ∀ a N, typedAtomPosition a ≠ typedNearLitterPosition N
 
 export BasePositions (typedAtomPosition typedNearLitterPosition litter_lt litter_le_nearLitter
-    symmDiff_lt_nearLitter)
+    symmDiff_lt_nearLitter typedAtomPosition_ne_typedNearLitterPosition)
 
 /-- Typed litters precede near-litters to them. -/
 theorem litter_lt_nearLitter [BasePositions] (N : NearLitter) (hN : N.fst.toNearLitter ≠ N) :
