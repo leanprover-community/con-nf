@@ -75,12 +75,12 @@ theorem transConstrained_of_reflTransConstrained_of_constrains {c d e f : Suppor
 theorem fst_transConstrained {c d : SupportCondition β} {A : ExtendedIndex β} {a : Atom}
     (hac : (A, inl a) ∈ reflTransConstrained c d) :
     (A, inr a.fst.toNearLitter) ∈ transConstrained c d :=
-  transConstrained_of_reflTransConstrained_of_constrains hac (Constrains.atom a A)
+  transConstrained_of_reflTransConstrained_of_constrains hac (Constrains.atom A a)
 
 theorem fst_mem_trans_constrained' {c d : SupportCondition β} {A : ExtendedIndex β} {a : Atom}
     (h : (A, inl a) ∈ transConstrained c d) :
     (A, inr a.fst.toNearLitter) ∈ transConstrained c d :=
-  transConstrained_of_constrains h (Constrains.atom a A)
+  transConstrained_of_constrains h (Constrains.atom A a)
 
 theorem fst_mem_transConstrained {c d : SupportCondition β} {A : ExtendedIndex β} {N : NearLitter}
     (hN : (A, inr N) ∈ transConstrained c d) :
@@ -92,7 +92,7 @@ theorem fst_mem_transConstrained {c d : SupportCondition β} {A : ExtendedIndex 
 theorem fst_mem_refl_trans_constrained' {c d : SupportCondition β} {A : ExtendedIndex β} {a : Atom}
     (h : (A, inl a) ∈ reflTransConstrained c d) :
     (A, inr a.fst.toNearLitter) ∈ reflTransConstrained c d :=
-  reflTransConstrained_of_constrains h (Constrains.atom a A)
+  reflTransConstrained_of_constrains h (Constrains.atom A a)
 
 theorem fst_mem_reflTransConstrained {c d : SupportCondition β} {A : ExtendedIndex β}
     {N : NearLitter} (hN : (A, inr N) ∈ reflTransConstrained c d) :
@@ -111,9 +111,9 @@ theorem fst_mem_transConstrained_of_mem_symmDiff {c d : SupportCondition β} {A 
     exact fst_mem_transConstrained hN
   · obtain hN | hN := hN
     · refine' fst_mem_trans_constrained' (Or.inl _)
-      exact Relation.TransGen.head (Constrains.symmDiff N a (Or.inr ⟨h₁, h₂⟩) A) hN
+      exact Relation.TransGen.head (Constrains.symmDiff A N a (Or.inr ⟨h₁, h₂⟩)) hN
     · refine' fst_mem_trans_constrained' (Or.inr _)
-      exact Relation.TransGen.head (Constrains.symmDiff N a (Or.inr ⟨h₁, h₂⟩) A) hN
+      exact Relation.TransGen.head (Constrains.symmDiff A N a (Or.inr ⟨h₁, h₂⟩)) hN
 
 theorem fst_mem_reflTransConstrained_of_mem_symmDiff {c d : SupportCondition β}
     {A : ExtendedIndex β} {N : NearLitter} {a : Atom} (h : a ∈ litterSet N.1 ∆ N)
@@ -125,9 +125,9 @@ theorem fst_mem_reflTransConstrained_of_mem_symmDiff {c d : SupportCondition β}
     exact fst_mem_reflTransConstrained hN
   · obtain hN | hN := hN
     · refine' fst_mem_refl_trans_constrained' (Or.inl _)
-      exact Relation.ReflTransGen.head (Constrains.symmDiff N a (Or.inr ⟨h₁, h₂⟩) A) hN
+      exact Relation.ReflTransGen.head (Constrains.symmDiff A N a (Or.inr ⟨h₁, h₂⟩)) hN
     · refine' fst_mem_refl_trans_constrained' (Or.inr _)
-      exact Relation.ReflTransGen.head (Constrains.symmDiff N a (Or.inr ⟨h₁, h₂⟩) A) hN
+      exact Relation.ReflTransGen.head (Constrains.symmDiff A N a (Or.inr ⟨h₁, h₂⟩)) hN
 
 theorem fst_mem_transConstrained_of_mem {c d : SupportCondition β} {A : ExtendedIndex β}
     {N : NearLitter} {a : Atom} (h : a ∈ N) (hN : (A, inr N) ∈ transConstrained c d) :

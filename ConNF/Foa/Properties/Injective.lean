@@ -185,7 +185,7 @@ theorem Biexact.smul_eq_smul {β : Iio α} {π π' : Allowable β} {c : SupportC
   by_cases hL : N.IsLitter
   swap
   · have :=
-      ih _ (Constrains.nearLitter N (NearLitter.not_isLitter hL) A)
+      ih _ (Constrains.nearLitter A N (NearLitter.not_isLitter hL))
         (h.constrains (reflTransGen_nearLitter Relation.ReflTransGen.refl))
     change (_, inr _) = (_, inr _) at this
     simp only [Prod.mk.injEq, inr.injEq, true_and] at this
@@ -197,14 +197,14 @@ theorem Biexact.smul_eq_smul {β : Iio α} {π π' : Allowable β} {c : SupportC
     constructor
     · rintro ⟨b, hb, rfl⟩
       have : (_, inl _) = (_, inl _) :=
-        ih _ (Constrains.symmDiff N b hb A)
-          (h.constrains (Relation.ReflTransGen.single <| Constrains.symmDiff N b hb A))
+        ih _ (Constrains.symmDiff A N b hb)
+          (h.constrains (Relation.ReflTransGen.single <| Constrains.symmDiff A N b hb))
       simp only [Prod.mk.injEq, inl.injEq, true_and] at this
       exact ⟨b, hb, this.symm⟩
     · rintro ⟨b, hb, rfl⟩
       have : (_, inl _) = (_, inl _) :=
-        ih _ (Constrains.symmDiff N b hb A)
-          (h.constrains (Relation.ReflTransGen.single <| Constrains.symmDiff N b hb A))
+        ih _ (Constrains.symmDiff A N b hb)
+          (h.constrains (Relation.ReflTransGen.single <| Constrains.symmDiff A N b hb))
       simp only [Prod.mk.injEq, inl.injEq, true_and] at this
       exact ⟨b, hb, this⟩
   obtain ⟨L, rfl⟩ := hL.exists_litter_eq
@@ -478,18 +478,18 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
       refine' ⟨a, ha, _⟩
       refine' ((h B).map_atom a _).symm.trans _
       · refine' Or.inl (Or.inl (Or.inl (Or.inl _)))
-        exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.symmDiff N a ha _) hc₂⟩
+        exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.symmDiff _ N a ha) hc₂⟩
       · rw [StructAction.rc_smul_atom_eq]
         rfl
-        exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.symmDiff N a ha _) hc₂⟩
+        exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.symmDiff _ N a ha) hc₂⟩
     · rintro ⟨a, ha, rfl⟩
       refine' ⟨a, ha, _⟩
       refine' Eq.trans _ ((h B).map_atom a _)
       · rw [StructAction.rc_smul_atom_eq]
         rfl
-        exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.symmDiff N a ha _) hc₂⟩
+        exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.symmDiff _ N a ha) hc₂⟩
       · refine' Or.inl (Or.inl (Or.inl (Or.inl _)))
-        exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.symmDiff N a ha _) hc₂⟩
+        exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.symmDiff _ N a ha) hc₂⟩
   have hc₂' := reflTransGen_nearLitter hc₂
   generalize hNL : N.fst = L
   rw [hNL] at hdom hc₂'

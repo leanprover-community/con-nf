@@ -331,7 +331,7 @@ theorem completeMap_surjective_extends (hπf : π.Free) (c : SupportCondition β
     π.CompleteMapSurjectiveAt c := by
   obtain ⟨A, a | N⟩ := c
   · refine' completeAtomMap_surjective_extends A a _
-    obtain ⟨N, hN⟩ := hc (A, inr a.1.toNearLitter) (Relation.TransGen.single <| Constrains.atom a A)
+    obtain ⟨N, hN⟩ := hc (A, inr a.1.toNearLitter) (Relation.TransGen.single <| Constrains.atom A a)
     refine' ⟨N.1, _⟩
     apply_fun Sigma.fst at hN
     simp only [Litter.toNearLitter_fst, completeNearLitterMap_fst_eq'] at hN
@@ -343,7 +343,7 @@ theorem completeMap_surjective_extends (hπf : π.Free) (c : SupportCondition β
       · intro B N h
         exact hc (B, inr N) (transGen_nearLitter <| Relation.TransGen.single h)
     · intro a h
-      exact hc (A, inl a) (Relation.TransGen.single <| Constrains.symmDiff N a h A)
+      exact hc (A, inl a) (Relation.TransGen.single <| Constrains.symmDiff A N a h)
 
 theorem completeMapSurjectiveAtAll (hπf : π.Free) (c : SupportCondition β) :
     π.CompleteMapSurjectiveAt c :=

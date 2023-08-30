@@ -130,12 +130,12 @@ theorem reduction_designatedSupport_supports [TangleData β] (t : Tangle β) :
         congr_arg Prod.snd
           (h₁
             (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkLitter B N.fst)
-              (Constrains.nearLitter N h B) h₂))
+              (Constrains.nearLitter B N h) h₂))
       have h₄ := fun a ha =>
         congr_arg Prod.snd
           (h₁
             (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkAtom B a)
-              (Constrains.symmDiff N a ha B) h₂))
+              (Constrains.symmDiff B N a ha) h₂))
       refine' Prod.ext rfl _
       change inr _ = inr _ at h₃
       change ∀ a ha, inl _ = inl _ at h₄
