@@ -22,6 +22,7 @@ namespace ConNF
 
 variable [Params.{u}] {α : TypeIndex}
 
+-- TODO: Make this a structure to try to make it easier to use lemmas with.
 /-- A *support condition* is an extended type index together with an atom or a near-litter.
 This represents an object in the base type (the atom or near-litter) together with the path
 detailing how we descend from type `α` to type `⊥` by looking at elements of elements and so on

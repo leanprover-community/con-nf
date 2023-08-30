@@ -147,13 +147,14 @@ TODO: Refactor `near_litter` to use `¬N.is_litter`.
 -/
 @[mk_iff]
 inductive Constrains : SupportCondition β → SupportCondition β → Prop
-  | atom (a : Atom) (A : ExtendedIndex β) : Constrains (A, inr a.1.toNearLitter) (A, inl a)
-  | nearLitter (N : NearLitter) (hN : litterSet N.fst ≠ N.snd) (A : ExtendedIndex β) :
+  | atom (A : ExtendedIndex β) (a : Atom) : Constrains (A, inr a.1.toNearLitter) (A, inl a)
+  | nearLitter (A : ExtendedIndex β) (N : NearLitter) (hN : litterSet N.fst ≠ N.snd) :
     Constrains (A, inr N.fst.toNearLitter) (A, inr N)
-  | symmDiff (N : NearLitter) (a) (_ : a ∈ litterSet N.fst ∆ N.snd) (A : ExtendedIndex β) :
-    Constrains (A, inl a) (A, inr N)
+  | symmDiff (A : ExtendedIndex β) (N : NearLitter) (a : Atom) :
+    a ∈ litterSet N.fst ∆ N.snd → Constrains (A, inl a) (A, inr N)
   | fuzz ⦃γ : Iic α⦄ ⦃δ : Iio α⦄ ⦃ε : Iio α⦄ (hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
-    (A : Path (β : TypeIndex) γ) (t : Tangle δ) (c) (_ : c ∈ (designatedSupport t).carrier) :
+    (A : Path (β : TypeIndex) γ) (t : Tangle δ) (c : SupportCondition δ) :
+    c ∈ designatedSupport t →
     Constrains ((A.cons (coe_lt hδ)).comp c.fst, c.snd)
       ((A.cons (coe_lt hε)).cons (bot_lt_coe _),
         inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter)
@@ -168,7 +169,7 @@ notation:50 c " ≺[" α "] " d:50 => Constrains α _ c d
 
 theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) := by
   intro c d h
-  obtain ⟨a, A⟩ | ⟨N, hN, A⟩ | ⟨N, a, ha, A⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h <;> left
+  obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h <;> left
   · exact litter_lt a.1 a rfl
   · refine litter_lt_nearLitter N ?_
     contrapose! hN
@@ -202,15 +203,15 @@ theorem constrains_atom {c : SupportCondition β} {a : Atom} {A : ExtendedIndex 
   · rintro ⟨⟩
     rfl
   · rintro rfl
-    exact Constrains.atom a A
+    exact Constrains.atom A a
 
 /-- The constrains relation is stable under composition of paths. -/
 theorem constrains_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≺[α] d)
     (B : Path (β : TypeIndex) γ) : (B.comp c.fst, c.snd) ≺[α] (B.comp d.fst, d.snd) := by
-  obtain ⟨a, A⟩ | ⟨N, hN, A⟩ | ⟨N, a, ha, A⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h
+  obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h
   · exact Constrains.atom _ _
-  · exact Constrains.nearLitter _ hN _
-  · exact Constrains.symmDiff _ _ ha _
+  · exact Constrains.nearLitter _ _ hN
+  · exact Constrains.symmDiff _ _ _ ha
   · rw [Path.comp_cons, ← Path.comp_assoc, Path.comp_cons]
     exact Constrains.fuzz hδ hε hδε (B.comp A) t c hc
   · rw [Path.comp_cons]
@@ -241,21 +242,21 @@ theorem reflTransGen_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
-  · exact Relation.ReflTransGen.head (Constrains.nearLitter N (NearLitter.not_isLitter h') B) h
+  · exact Relation.ReflTransGen.head (Constrains.nearLitter B N (NearLitter.not_isLitter h')) h
 
 theorem transGen_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β} {c : SupportCondition β}
     (h : c <[α] (B, inr N.1.toNearLitter)) : c <[α] (B, inr N) := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
-  · exact Relation.TransGen.tail h (Constrains.nearLitter N (NearLitter.not_isLitter h') B)
+  · exact Relation.TransGen.tail h (Constrains.nearLitter B N (NearLitter.not_isLitter h'))
 
 theorem transGen_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
     {c : SupportCondition β} (h : (B, inr N) <[α] c) : (B, inr N.1.toNearLitter) <[α] c := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
-  · exact Relation.TransGen.head (Constrains.nearLitter N (NearLitter.not_isLitter h') B) h
+  · exact Relation.TransGen.head (Constrains.nearLitter B N (NearLitter.not_isLitter h')) h
 
 -- TODO: Move
 -- TODO: Search for uses of fuzz_β and replace with this lemma.
@@ -285,22 +286,28 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
     rw [small_setOf]
   · change Small {c | ∃ b B, _ ∧ _ = _}
     simp only [Prod.mk.injEq, false_and, and_false, exists_false, setOf_false, small_empty]
-  · change Small {c | ∃ N', _ ∧ ∃ B, _ ∧ _ = _}
-    simp only [ne_eq, Prod.mk.injEq, inr.injEq, exists_eq_right_right',
-      ← and_assoc, exists_eq_right']
+  · change Small {c | ∃ B N', _}
     by_cases litterSet N.fst = N.snd
     · refine small_of_forall_not_mem ?_
-      rintro c ⟨N', h₁, A, ⟨rfl, rfl⟩, rfl⟩
+      rintro c ⟨A, N', h₁, ⟨rfl, rfl⟩, h₂⟩
+      cases h₂
       exact h₁ h
     · refine Set.Subsingleton.small ?_
-      rintro c ⟨_, _, _, ⟨rfl, rfl⟩, rfl⟩ d ⟨_, _, _, ⟨rfl, rfl⟩, rfl⟩
+      rintro c ⟨_, _, _, ⟨rfl, rfl⟩, h₁⟩ d ⟨_, _, _, ⟨rfl, rfl⟩, h₂⟩
+      cases h₁
+      cases h₂
       rfl
-  · change Small {c | ∃ N' a, _ ∧ ∃ B, _ ∧ _ = _}
-    simp only [Prod.mk.injEq, inr.injEq, and_assoc, exists_and_right, exists_eq_right']
+  · change Small {c | ∃ B N' a, _}
     convert (show Small (litterSet N.fst ∆ N) from N.2.prop).image
       (f := fun a : Atom => ((A, inl a) : SupportCondition β)) using 1
     ext c : 1
-    aesop
+    simp only [mem_setOf_eq, mem_image]
+    constructor
+    · rintro ⟨B, N', a, h₁, h₂, h₃⟩
+      cases h₃
+      exact ⟨a, h₁, h₂.symm⟩
+    · rintro ⟨a, h₁, h₂⟩
+      exact ⟨A, N, a, h₁, h₂.symm, rfl⟩
   · by_cases
       ∃ (γ : Iic α) (δ : Iio α) (ε : Iio α) (_hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
         (B : Path (β : TypeIndex) γ) (t : Tangle δ),
