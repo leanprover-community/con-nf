@@ -427,8 +427,8 @@ theorem ExactlyApproximates.comp {β γ : TypeIndex} {π₀ : StructApprox β} {
 /-- The inductive hypothesis used to construct the induced action of an approximation in the
 freedom of action theorem. -/
 structure Hypothesis {β : Iic α} (c : SupportCondition β) where
-  atomImage : ∀ A a, ⟨inl a, A⟩ <[α] c → Atom
-  nearLitterImage : ∀ A N, ⟨inr N, A⟩ <[α] c → NearLitter
+  atomImage : ∀ A a, (A, inl a) <[α] c → Atom
+  nearLitterImage : ∀ A N, (A, inr N) <[α] c → NearLitter
 
 namespace Hypothesis
 
@@ -436,8 +436,8 @@ variable {β : Iic α}
 
 def fixMap :
     PSum (Σ' _ : ExtendedIndex β, Atom) (Σ' _ : ExtendedIndex β, NearLitter) → SupportCondition β
-  | PSum.inl ⟨A, a⟩ => ⟨inl a, A⟩
-  | PSum.inr ⟨A, N⟩ => ⟨inr N, A⟩
+  | PSum.inl ⟨A, a⟩ => (A, inl a)
+  | PSum.inr ⟨A, N⟩ => (A, inr N)
 
 def fixWf :
     WellFoundedRelation
@@ -448,14 +448,14 @@ def fixWf :
 mutual
   /-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.
   This is used to compute the induced action of an approximation on all atoms and near-litters. -/
-  noncomputable def fixAtom (Fa : ∀ (A : ExtendedIndex β) (a), Hypothesis ⟨inl a, A⟩ → Atom)
-      (FN : ∀ (A : ExtendedIndex β) (N), Hypothesis ⟨inr N, A⟩ → NearLitter) :
+  noncomputable def fixAtom (Fa : ∀ (A : ExtendedIndex β) (a), Hypothesis (A, inl a) → Atom)
+      (FN : ∀ (A : ExtendedIndex β) (N), Hypothesis (A, inr N) → NearLitter) :
       ExtendedIndex β → Atom → Atom
     | A, a => Fa A a ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩
   /-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.
   This is used to compute the induced action of an approximation on all atoms and near-litters. -/
-  noncomputable def fixNearLitter (Fa : ∀ (A : ExtendedIndex β) (a), Hypothesis ⟨inl a, A⟩ → Atom)
-      (FN : ∀ (A : ExtendedIndex β) (N), Hypothesis ⟨inr N, A⟩ → NearLitter) :
+  noncomputable def fixNearLitter (Fa : ∀ (A : ExtendedIndex β) (a), Hypothesis (A, inl a) → Atom)
+      (FN : ∀ (A : ExtendedIndex β) (N), Hypothesis (A, inr N) → NearLitter) :
       ExtendedIndex β → NearLitter → NearLitter
     | A, N => FN A N ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩
 end

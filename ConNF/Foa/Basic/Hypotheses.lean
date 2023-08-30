@@ -33,9 +33,10 @@ class PositionedTypedObjects [TangleData α] [TypedObjects α] [PositionFunction
   typedAtomPosition_eq : ∀ a : Atom, position (typedAtom a : Tangle α) = typedAtomPosition a
   typedNearLitterPosition_eq :
     ∀ N : NearLitter, position (typedNearLitter N : Tangle α) = typedNearLitterPosition N
+  -- TODO: Refactor this condition to avoid the `elim`.
   support_le :
     ∀ (t : Tangle α) (c : SupportCondition α),
-      c ∈ designatedSupport t → c.fst.elim typedAtomPosition typedNearLitterPosition ≤ position t
+      c ∈ designatedSupport t → c.snd.elim typedAtomPosition typedNearLitterPosition ≤ position t
 
 /-- For all tangles `t` that are not typed singletons and not typed litters, `t` comes later than
 all of the support conditions in its designated support. That is, if an atom `a` is in the

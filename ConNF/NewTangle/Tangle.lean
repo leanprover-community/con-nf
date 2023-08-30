@@ -448,10 +448,10 @@ theorem _root_.ConNF.SemiallowablePerm.coe_apply_bot (ρ : SemiallowablePerm α)
 This is called a *typed near litter*. -/
 def newTypedNearLitter (N : NearLitter) : NewTangle α :=
   ⟨intro (show Set (Tangle (⊥ : IioBot α)) from N.2.1) <| Code.isEven_bot _,
-    ⟨⟨{(Sum.inr N, default)}, small_singleton _, fun π h => by
+    ⟨⟨{(Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N)}, small_singleton _, fun π h => by
         simp only [smul_intro]
         congr 1
-        have : Sum.inr _ = _ := congr_arg Prod.fst (h rfl)
+        have : Sum.inr _ = _ := congr_arg Prod.snd (h rfl)
         simp only [AllowablePerm.coeHom_apply, Sum.inr.injEq] at this
         apply_fun SetLike.coe at this
         refine Eq.trans ?_ this
