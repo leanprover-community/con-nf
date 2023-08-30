@@ -31,7 +31,7 @@ noncomputable def atomCompletion (A : ExtendedIndex β) (a : Atom) (H : Hypothes
   else
     ((π A).largestSublitter a.1).equiv
       ((π A).largestSublitter
-        (H.nearLitterImage A a.1.toNearLitter (Relation.TransGen.single <| Constrains.atom a A)).1)
+        (H.nearLitterImage A a.1.toNearLitter (Relation.TransGen.single <| Constrains.atom A a)).1)
       ⟨a, (π A).mem_largestSublitter_of_not_mem_domain a h⟩
 
 end StructApprox

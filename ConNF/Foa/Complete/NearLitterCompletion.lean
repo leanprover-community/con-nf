@@ -23,7 +23,7 @@ def nearLitterHypothesis (A : ExtendedIndex β) (N : NearLitter) (H : Hypothesis
         suffices N.fst.toNearLitter = N by rwa [this] at h
         · ext : 1
           exact h'
-        exact Relation.TransGen.tail h (Constrains.nearLitter N h' A))
+        exact Relation.TransGen.tail h (Constrains.nearLitter A N h'))
   nearLitterImage B N' h :=
     H.nearLitterImage B N'
       (by
@@ -31,14 +31,14 @@ def nearLitterHypothesis (A : ExtendedIndex β) (N : NearLitter) (H : Hypothesis
         suffices N.fst.toNearLitter = N by rwa [this] at h
         · ext : 1
           exact h'
-        exact Relation.TransGen.tail h (Constrains.nearLitter N h' A))
+        exact Relation.TransGen.tail h (Constrains.nearLitter A N h'))
 
 def nearLitterCompletionMap (π : StructApprox β) (A : ExtendedIndex β) (N : NearLitter)
     (H : Hypothesis (A, inr N)) : Set Atom :=
   (NearLitterApprox.largestSublitter (π A) (π.litterCompletion A N.1 (nearLitterHypothesis A N H)) ∪
       π A • ((N : Set Atom) ∩ (π A).atomPerm.domain)) ∆
     ⋃ (a : Atom) (ha : a ∈ litterSet N.1 ∆ N \ (π A).atomPerm.domain),
-      {H.atomImage A a (Relation.TransGen.single (Constrains.symmDiff N a ha.1 A))}
+      {H.atomImage A a (Relation.TransGen.single (Constrains.symmDiff A N a ha.1))}
 
 theorem nearLitterCompletionMap_isNearLitter (π : StructApprox β) (A : ExtendedIndex β)
     (N : NearLitter) (H : Hypothesis (A, inr N)) :
