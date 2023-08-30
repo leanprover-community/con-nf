@@ -314,24 +314,6 @@ theorem ihAction_le {π : StructApprox β} {c d : SupportCondition β} (h : c �
   · intro a ha
     exact Relation.TransGen.trans_left ha h
 
-theorem ihActionSupports {π : StructApprox β} {A : ExtendedIndex β} {L : Litter}
-    (h : InflexibleCoe L A) :
-    ((ihAction (π.foaHypothesis : Hypothesis (inr L.toNearLitter, A))).comp
-      (h.B.cons (coe_lt h.hδ))).Supports h.t
-    where
-  atom_mem := by
-    intro a B ha
-    simp only [StructAction.comp_apply, ihAction_atomMap]
-    have := mem_reduction_designated_support α h.hδ h.hε h.hδε h.B h.t _ ha
-    rw [← h.hL, ← h.hA] at this
-    exact this
-  litter_mem := by
-    intro L B hL
-    simp only [StructAction.comp_apply, ihAction_litterMap]
-    have := mem_reduction_designated_support α h.hδ h.hε h.hδε h.B h.t _ hL
-    rw [← h.hL, ← h.hA] at this
-    exact this
-
 theorem transGen_constrains_of_mem_designatedSupport {A : ExtendedIndex β} {L : Litter}
     {h : InflexibleCoe L A} {γ : Iic α} {δ ε : Iio α} {hδ : (δ : Λ) < γ} {hε : (ε : Λ) < γ}
     (hδε : δ ≠ ε) {C : Path (h.δ : TypeIndex) γ} {t : Tangle δ} {d : SupportCondition h.δ}

@@ -64,21 +64,21 @@ theorem completeNearLitterMap_fst_eq' :
   rfl
 
 @[simp]
-theorem foaHypothesis_atomImage {c : SupportCondition β} (h : (inl a, A) <[α] c) :
+theorem foaHypothesis_atomImage {c : SupportCondition β} (h : (A, inl a) <[α] c) :
     (π.foaHypothesis : Hypothesis c).atomImage A a h = π.completeAtomMap A a :=
   rfl
 
 @[simp]
-theorem foaHypothesis_nearLitterImage {c : SupportCondition β} (h : (inr N, A) <[α] c) :
+theorem foaHypothesis_nearLitterImage {c : SupportCondition β} (h : (A, inr N) <[α] c) :
     (π.foaHypothesis : Hypothesis c).nearLitterImage A N h = π.completeNearLitterMap A N :=
   rfl
 
 end MapSpec
 
-theorem completeAtomMap_eq_of_mem_domain {a} {A} (h : a ∈ (π A).atomPerm.domain) :
+theorem completeAtomMap_eq_of_mem_domain {A} {a} (h : a ∈ (π A).atomPerm.domain) :
     π.completeAtomMap A a = π A • a := by rw [completeAtomMap_eq, atomCompletion, dif_pos h]
 
-theorem completeAtomMap_eq_of_not_mem_domain {a} {A} (h : a ∉ (π A).atomPerm.domain) :
+theorem completeAtomMap_eq_of_not_mem_domain {A} {a} (h : a ∉ (π A).atomPerm.domain) :
     π.completeAtomMap A a =
       ((π A).largestSublitter a.1).equiv ((π A).largestSublitter (π.completeLitterMap A a.1))
         ⟨a, (π A).mem_largestSublitter_of_not_mem_domain a h⟩ := by
@@ -95,7 +95,7 @@ theorem completeLitterMap_eq_of_inflexibleCoe {A : ExtendedIndex β} {L : Litter
     (h : InflexibleCoe L A) (h₁ h₂) :
     π.completeLitterMap A L =
       fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.hδε)
-        ((ihAction (π.foaHypothesis : Hypothesis ⟨inr L.toNearLitter, A⟩)).hypothesisedAllowable h
+        ((ihAction (π.foaHypothesis : Hypothesis (A, inr L.toNearLitter))).hypothesisedAllowable h
             h₁ h₂ •
           h.t) := by
   rw [completeLitterMap_eq, litterCompletion_of_inflexibleCoe]
@@ -105,7 +105,7 @@ theorem completeLitterMap_eq_of_inflexible_coe' {A : ExtendedIndex β} {L : Litt
     π.completeLitterMap A L =
       if h' : _ ∧ _ then
         fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.hδε)
-          ((ihAction (π.foaHypothesis : Hypothesis ⟨inr L.toNearLitter, A⟩)).hypothesisedAllowable h
+          ((ihAction (π.foaHypothesis : Hypothesis (A, inr L.toNearLitter))).hypothesisedAllowable h
               h'.1 h'.2 •
             h.t)
       else L := by

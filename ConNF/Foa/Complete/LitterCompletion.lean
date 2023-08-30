@@ -144,32 +144,32 @@ theorem InflexibleBot.comp_B (h : InflexibleBot L B) (A : Path (β : TypeIndex) 
 
 end Comp
 
-theorem InflexibleBot.constrains {β : Iic α} {L : Litter} {A : ExtendedIndex β}
-    (h : InflexibleBot L A) : (inl h.a, h.B.cons (bot_lt_coe _)) <[α] (inr L.toNearLitter, A) := by
+theorem InflexibleBot.constrains {β : Iic α} {A : ExtendedIndex β} {L : Litter}
+    (h : InflexibleBot L A) : (h.B.cons (bot_lt_coe _), inl h.a) <[α] (A, inr L.toNearLitter) := by
   have := Constrains.fuzz_bot h.hε h.B h.a
   rw [← h.hL, ← h.hA] at this
   exact Relation.TransGen.single this
 
-theorem inflexible_of_inflexibleBot {β : Iic α} {L : Litter} {A : ExtendedIndex β}
+theorem inflexible_of_inflexibleBot {β : Iic α} {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleBot L A) : Inflexible α L A := by
   have := Inflexible.mk_bot h.hε h.B h.a
   rw [← h.hL, ← h.hA] at this
   exact this
 
-theorem inflexible_of_inflexibleCoe {β : Iic α} {L : Litter} {A : ExtendedIndex β}
+theorem inflexible_of_inflexibleCoe {β : Iic α} {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleCoe L A) : Inflexible α L A := by
   have := Inflexible.mk_coe h.hδ h.hε h.hδε h.B h.t
   rw [← h.hL, ← h.hA] at this
   exact this
 
-theorem inflexibleBot_or_inflexibleCoe_of_inflexible {β : Iic α} {L : Litter} {A : ExtendedIndex β}
+theorem inflexibleBot_or_inflexibleCoe_of_inflexible {β : Iic α} {A : ExtendedIndex β} {L : Litter}
     (h : Inflexible α L A) : Nonempty (InflexibleBot L A) ∨ Nonempty (InflexibleCoe L A) := by
   obtain ⟨hδ, hε, hδε, B, t⟩ | ⟨hε, B, a⟩ := h
   · refine' Or.inr ⟨⟨_, _, _, _, _, _, _, _, rfl, rfl⟩⟩ <;> assumption
   · refine' Or.inl ⟨⟨_, _, _, _, _, rfl, rfl⟩⟩; assumption
 
-theorem inflexible_iff_inflexibleBot_or_inflexibleCoe {β : Iic α} {L : Litter}
-    {A : ExtendedIndex β} :
+theorem inflexible_iff_inflexibleBot_or_inflexibleCoe {β : Iic α} {A : ExtendedIndex β}
+    {L : Litter} :
     Inflexible α L A ↔ Nonempty (InflexibleBot L A) ∨ Nonempty (InflexibleCoe L A) := by
   constructor
   exact inflexibleBot_or_inflexibleCoe_of_inflexible
@@ -177,8 +177,8 @@ theorem inflexible_iff_inflexibleBot_or_inflexibleCoe {β : Iic α} {L : Litter}
   exact inflexible_of_inflexibleBot h
   exact inflexible_of_inflexibleCoe h
 
-theorem flexible_iff_not_inflexibleBot_inflexibleCoe {β : Iic α} {L : Litter}
-    {A : ExtendedIndex β} :
+theorem flexible_iff_not_inflexibleBot_inflexibleCoe {β : Iic α} {A : ExtendedIndex β}
+    {L : Litter} :
     Flexible α L A ↔ IsEmpty (InflexibleBot L A) ∧ IsEmpty (InflexibleCoe L A) := by
   constructor
   · intro h
@@ -189,7 +189,7 @@ theorem flexible_iff_not_inflexibleBot_inflexibleCoe {β : Iic α} {L : Litter}
     · exact h₁.1.false h.some
     · exact h₁.2.false h.some
 
-theorem flexible_cases' (β : Iic α) (L : Litter) (A : ExtendedIndex β) :
+theorem flexible_cases' (β : Iic α) (A : ExtendedIndex β) (L : Litter) :
     Flexible α L A ∨ Nonempty (InflexibleBot L A) ∨ Nonempty (InflexibleCoe L A) := by
   rw [← inflexible_iff_inflexibleBot_or_inflexibleCoe, or_comm]
   exact flexible_cases α L A
@@ -207,19 +207,19 @@ def ihAction {β : Iic α} {c : SupportCondition β} (H : Hypothesis c) : Struct
       simp only [PFun.dom_mk]
       have := reduction_small'' α (small_singleton c)
       simp only [mem_singleton_iff, exists_prop, exists_eq_left] at this
-      refine' Small.image_subset (fun a => (inl a, B)) _ this _
+      refine' Small.image_subset (fun a => (B, inl a)) _ this _
       · intro a b h
-        simpa only [Prod.mk.injEq, inl.injEq, and_true] using h
+        simpa [Prod.mk.injEq, inl.injEq, true_and] using h
       · rintro _ ⟨a, h, rfl⟩
         exact h
     litterMap_dom_small := by
       simp only [PFun.dom_mk]
       have := reduction_small'' α (small_singleton c)
       simp only [mem_singleton_iff, exists_prop, exists_eq_left] at this
-      refine' Small.image_subset (fun L => (inr L.toNearLitter, B)) _ this _
+      refine' Small.image_subset (fun L => (B, inr L.toNearLitter)) _ this _
       · intro L₁ L₂ h
         simpa only [Prod.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff,
-          and_true] using h
+          true_and] using h
       · rintro _ ⟨a, h, rfl⟩
         exact h }
 
@@ -272,7 +272,7 @@ theorem _root_.ConNF.StructAction.hypothesisedAllowable_exactlyApproximates (φ 
   (φ.comp (h.B.cons (coe_lt h.hδ))).allowable_exactlyApproximates _ _ _
 
 noncomputable def litterCompletion (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
-    (H : Hypothesis ⟨inr L.toNearLitter, A⟩) : Litter :=
+    (H : Hypothesis (A, inr L.toNearLitter)) : Litter :=
   if h : Nonempty (InflexibleCoe L A) then
     if hs : _ ∧ _ then
       fuzz (coe_ne_coe.mpr <| coe_ne' h.some.hδε)
@@ -285,7 +285,7 @@ noncomputable def litterCompletion (π : StructApprox β) (A : ExtendedIndex β)
     else NearLitterApprox.flexibleCompletion α (π A) A • L
 
 theorem litterCompletion_of_flexible (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
-    (H : Hypothesis ⟨inr L.toNearLitter, A⟩) (hflex : Flexible α L A) :
+    (H : Hypothesis (A, inr L.toNearLitter)) (hflex : Flexible α L A) :
     litterCompletion π A L H = NearLitterApprox.flexibleCompletion α (π A) A • L := by
   rw [litterCompletion, dif_neg, dif_neg]
   · rintro ⟨⟨γ, ε, hε, C, a, rfl, rfl⟩⟩
@@ -294,7 +294,7 @@ theorem litterCompletion_of_flexible (π : StructApprox β) (A : ExtendedIndex �
     exact hflex (Inflexible.mk_coe hδ hε hδε _ _)
 
 theorem litterCompletion_of_inflexibleCoe' (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
-    (H : Hypothesis ⟨inr L.toNearLitter, A⟩) (h : InflexibleCoe L A) :
+    (H : Hypothesis (A, inr L.toNearLitter)) (h : InflexibleCoe L A) :
     litterCompletion π A L H =
       if h' : _ ∧ _ then
         fuzz (coe_ne_coe.mpr <| coe_ne' h.hδε)
@@ -309,7 +309,7 @@ theorem litterCompletion_of_inflexibleCoe' (π : StructApprox β) (A : ExtendedI
   rfl
 
 theorem litterCompletion_of_inflexibleCoe (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
-    (H : Hypothesis ⟨inr L.toNearLitter, A⟩) (h : InflexibleCoe L A)
+    (H : Hypothesis (A, inr L.toNearLitter)) (h : InflexibleCoe L A)
     (h₁ : ((ihAction H).comp (h.B.cons (coe_lt h.hδ))).Lawful)
     (h₂ : ((ihAction H).comp (h.B.cons (coe_lt h.hδ))).MapFlexible) :
     litterCompletion π A L H =
@@ -323,7 +323,7 @@ theorem litterCompletion_of_inflexibleCoe (π : StructApprox β) (A : ExtendedIn
       exact h₂
 
 theorem litterCompletion_of_inflexibleBot (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
-    (H : Hypothesis ⟨inr L.toNearLitter, A⟩) (h : InflexibleBot L A) :
+    (H : Hypothesis (A, inr L.toNearLitter)) (h : InflexibleBot L A) :
     litterCompletion π A L H =
       fuzz (show (⊥ : TypeIndex) ≠ (h.ε : Λ) from bot_ne_coe)
         (H.atomImage (h.B.cons (bot_lt_coe _)) h.a h.constrains) := by

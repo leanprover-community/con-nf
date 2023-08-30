@@ -78,13 +78,6 @@ end Precise
 
 variable {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Iio α}
 
-/-- A structural action *supports* a tangle if it defines an image for everything
-in the reduction of its designated support. -/
-structure Supports (φ : StructAction β) (t : Tangle β) : Prop where
-  atom_mem : ∀ a B, (inl a, B) ∈ reducedSupport α t → ((φ B).atomMap a).Dom
-  litter_mem :
-    ∀ (L : Litter) (B), (inr L.toNearLitter, B) ∈ reducedSupport α t → ((φ B).litterMap L).Dom
-
 instance {β : TypeIndex} : PartialOrder (StructAction β)
     where
   le φ ψ := ∀ B, φ B ≤ ψ B
