@@ -18,8 +18,8 @@ variable {β : Λ} {G : Type _} {τ : Type _} [SMul G (SupportCondition β)] [SM
 /-- A support condition is *reduced* if it is an atom or a litter. -/
 @[mk_iff]
 inductive Reduced {β : TypeIndex} : SupportCondition β → Prop
-  | mkAtom (B : ExtendedIndex β) (a : Atom) : Reduced (B, inl a)
-  | mkLitter (B : ExtendedIndex β) (L : Litter) : Reduced (B, inr L.toNearLitter)
+  | mkAtom (B : ExtendedIndex β) (a : Atom) : Reduced ⟨B, inl a⟩
+  | mkLitter (B : ExtendedIndex β) (L : Litter) : Reduced ⟨B, inr L.toNearLitter⟩
 
 /-- The *reduction* of a set of support conditions is the downward closure of the set under
 the constrains relation, but we only keep reduced conditions. -/
@@ -126,21 +126,14 @@ theorem reduction_designatedSupport_supports [TangleData β] (t : Tangle β) :
     · obtain ⟨L, rfl⟩ := h.exists_litter_eq
       exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mkLitter B L) h₂)
     · have h := NearLitter.not_isLitter h
-      have h₃ :=
-        congr_arg Prod.snd
-          (h₁
-            (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkLitter B N.fst)
-              (Constrains.nearLitter B N h) h₂))
-      have h₄ := fun a ha =>
-        congr_arg Prod.snd
-          (h₁
-            (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkAtom B a)
-              (Constrains.symmDiff B N a ha) h₂))
-      refine' Prod.ext rfl _
-      change inr _ = inr _ at h₃
-      change ∀ a ha, inl _ = inl _ at h₄
-      change inr _ = inr _
-      simp only [inr.injEq, inl.injEq] at h₃ h₄ ⊢
+      simp only [Allowable.smul_supportCondition_eq_iff, smul_inr, inr.injEq] at h₁ ⊢
+      have h₃ := h₁
+        (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkLitter B N.fst)
+          (Constrains.nearLitter B N h) h₂)
+      have h₄ := fun a ha => h₁
+        (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkAtom B a)
+          (Constrains.symmDiff B N a ha) h₂)
+      simp only [smul_inr, inr.injEq, smul_inl, inl.injEq] at h₃ h₄
       refine' SetLike.coe_injective _
       refine' (NearLitterPerm.smul_nearLitter_eq_smul_symmDiff_smul _ N).trans _
       rw [h₃]
@@ -169,9 +162,9 @@ theorem mem_reducedSupport_iff [TangleData β] (t : Tangle β) (c : SupportCondi
 theorem mem_reduction_designated_support {β γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ)
     (hε : (ε : Λ) < γ) (hδε : δ ≠ ε) (B : Path (β : TypeIndex) γ) (t : Tangle δ)
     (c : SupportCondition δ) (h : c ∈ reducedSupport α t) :
-    ((B.cons (coe_lt hδ)).comp c.path, c.value) <[α]
-      ((B.cons (coe_lt hε)).cons (bot_lt_coe _),
-        inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter) := by
+    ⟨(B.cons (coe_lt hδ)).comp c.path, c.value⟩ <[α]
+      ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
+        inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩ := by
   obtain ⟨⟨d, hd, hcd⟩, _⟩ := h
   refine' Relation.TransGen.tail' _ (Constrains.fuzz hδ hε hδε B t d hd)
   exact reflTransGen_constrains_comp hcd _

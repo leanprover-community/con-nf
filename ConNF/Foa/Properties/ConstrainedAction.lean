@@ -73,38 +73,38 @@ theorem transConstrained_of_reflTransConstrained_of_constrains {c d e f : Suppor
   transConstrained_of_reflTransConstrained_of_trans_constrains he (Relation.TransGen.single hf)
 
 theorem fst_transConstrained {c d : SupportCondition β} {A : ExtendedIndex β} {a : Atom}
-    (hac : (A, inl a) ∈ reflTransConstrained c d) :
-    (A, inr a.fst.toNearLitter) ∈ transConstrained c d :=
+    (hac : ⟨A, inl a⟩ ∈ reflTransConstrained c d) :
+    ⟨A, inr a.fst.toNearLitter⟩ ∈ transConstrained c d :=
   transConstrained_of_reflTransConstrained_of_constrains hac (Constrains.atom A a)
 
 theorem fst_mem_trans_constrained' {c d : SupportCondition β} {A : ExtendedIndex β} {a : Atom}
-    (h : (A, inl a) ∈ transConstrained c d) :
-    (A, inr a.fst.toNearLitter) ∈ transConstrained c d :=
+    (h : ⟨A, inl a⟩ ∈ transConstrained c d) :
+    ⟨A, inr a.fst.toNearLitter⟩ ∈ transConstrained c d :=
   transConstrained_of_constrains h (Constrains.atom A a)
 
 theorem fst_mem_transConstrained {c d : SupportCondition β} {A : ExtendedIndex β} {N : NearLitter}
-    (hN : (A, inr N) ∈ transConstrained c d) :
-    (A, inr N.fst.toNearLitter) ∈ transConstrained c d := by
+    (hN : ⟨A, inr N⟩ ∈ transConstrained c d) :
+    ⟨A, inr N.fst.toNearLitter⟩ ∈ transConstrained c d := by
   obtain hN | hN := hN
   exact Or.inl (transGen_nearLitter' hN)
   exact Or.inr (transGen_nearLitter' hN)
 
 theorem fst_mem_refl_trans_constrained' {c d : SupportCondition β} {A : ExtendedIndex β} {a : Atom}
-    (h : (A, inl a) ∈ reflTransConstrained c d) :
-    (A, inr a.fst.toNearLitter) ∈ reflTransConstrained c d :=
+    (h : ⟨A, inl a⟩ ∈ reflTransConstrained c d) :
+    ⟨A, inr a.fst.toNearLitter⟩ ∈ reflTransConstrained c d :=
   reflTransConstrained_of_constrains h (Constrains.atom A a)
 
 theorem fst_mem_reflTransConstrained {c d : SupportCondition β} {A : ExtendedIndex β}
-    {N : NearLitter} (hN : (A, inr N) ∈ reflTransConstrained c d) :
-    (A, inr N.fst.toNearLitter) ∈ reflTransConstrained c d := by
+    {N : NearLitter} (hN : ⟨A, inr N⟩ ∈ reflTransConstrained c d) :
+    ⟨A, inr N.fst.toNearLitter⟩ ∈ reflTransConstrained c d := by
   obtain hN | hN := hN
   exact Or.inl (reflTransGen_nearLitter hN)
   exact Or.inr (reflTransGen_nearLitter hN)
 
 theorem fst_mem_transConstrained_of_mem_symmDiff {c d : SupportCondition β} {A : ExtendedIndex β}
     {N : NearLitter} {a : Atom} (h : a ∈ litterSet N.1 ∆ N)
-    (hN : (A, inr N) ∈ transConstrained c d) :
-    (A, inr a.fst.toNearLitter) ∈ transConstrained c d := by
+    (hN : ⟨A, inr N⟩ ∈ transConstrained c d) :
+    ⟨A, inr a.fst.toNearLitter⟩ ∈ transConstrained c d := by
   obtain ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩ := h
   · rw [mem_litterSet] at h₁
     rw [h₁]
@@ -117,8 +117,8 @@ theorem fst_mem_transConstrained_of_mem_symmDiff {c d : SupportCondition β} {A 
 
 theorem fst_mem_reflTransConstrained_of_mem_symmDiff {c d : SupportCondition β}
     {A : ExtendedIndex β} {N : NearLitter} {a : Atom} (h : a ∈ litterSet N.1 ∆ N)
-    (hN : (A, inr N) ∈ reflTransConstrained c d) :
-    (A, inr a.fst.toNearLitter) ∈ reflTransConstrained c d := by
+    (hN : ⟨A, inr N⟩ ∈ reflTransConstrained c d) :
+    ⟨A, inr a.fst.toNearLitter⟩ ∈ reflTransConstrained c d := by
   obtain ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩ := h
   · rw [mem_litterSet] at h₁
     rw [h₁]
@@ -130,8 +130,8 @@ theorem fst_mem_reflTransConstrained_of_mem_symmDiff {c d : SupportCondition β}
       exact Relation.ReflTransGen.head (Constrains.symmDiff A N a (Or.inr ⟨h₁, h₂⟩)) hN
 
 theorem fst_mem_transConstrained_of_mem {c d : SupportCondition β} {A : ExtendedIndex β}
-    {N : NearLitter} {a : Atom} (h : a ∈ N) (hN : (A, inr N) ∈ transConstrained c d) :
-    (A, inr a.fst.toNearLitter) ∈ transConstrained c d := by
+    {N : NearLitter} {a : Atom} (h : a ∈ N) (hN : ⟨A, inr N⟩ ∈ transConstrained c d) :
+    ⟨A, inr a.fst.toNearLitter⟩ ∈ transConstrained c d := by
   by_cases ha : a.1 = N.1
   · rw [ha]
     exact fst_mem_transConstrained hN
@@ -148,45 +148,46 @@ theorem eq_of_sublitter_bijection_apply_eq {π : NearLitterApprox} {L₁ L₂ L�
 noncomputable def constrainedAction (π : StructApprox β) (s : Set (SupportCondition β))
     (hs : Small s) : StructAction β := fun B =>
   { atomMap := fun a =>
-      ⟨∃ c : SupportCondition β, c ∈ s ∧ (B, inl a) ≤[α] c,
+      ⟨∃ c : SupportCondition β, c ∈ s ∧ ⟨B, inl a⟩ ≤[α] c,
         fun _ => π.completeAtomMap B a⟩
     litterMap := fun L =>
-      ⟨∃ c : SupportCondition β, c ∈ s ∧ (B, inr L.toNearLitter) ≤[α] c,
+      ⟨∃ c : SupportCondition β, c ∈ s ∧ ⟨B, inr L.toNearLitter⟩ ≤[α] c,
         fun _ => π.completeNearLitterMap B L.toNearLitter⟩
     atomMap_dom_small := by
-      change Small ((fun a : Atom => (B, inl a)) ⁻¹'
+      change Small ((fun a : Atom => ⟨B, inl a⟩) ⁻¹'
         {c : SupportCondition β | ∃ d : SupportCondition β, d ∈ s ∧ c ≤[α] d})
       refine' Small.preimage _ (reduction_small' α hs)
       intro a b h
       cases h
       rfl
     litterMap_dom_small := by
-      change Small ((fun L : Litter => (B, inr L.toNearLitter)) ⁻¹'
+      change Small ((fun L : Litter => ⟨B, inr L.toNearLitter⟩) ⁻¹'
         {c : SupportCondition β | ∃ d : SupportCondition β, d ∈ s ∧ c ≤[α] d})
       refine' Small.preimage _ (reduction_small' α hs)
       intro a b h
       cases h
       rfl }
 
+-- TODO: Why is `by exact` needed?
 /-- An object like `ih_action` that can take two support conditions. -/
 noncomputable def ihsAction (π : StructApprox β) (c d : SupportCondition β) : StructAction β :=
   fun B =>
-  { atomMap := fun a => ⟨(B, inl a) ∈ transConstrained c d,
+  { atomMap := fun a => ⟨⟨B, inl a⟩ ∈ transConstrained c d,
       fun _ => π.completeAtomMap B a⟩
-    litterMap := fun L => ⟨(B, inr L.toNearLitter) ∈ transConstrained c d,
+    litterMap := fun L => ⟨⟨B, inr L.toNearLitter⟩ ∈ transConstrained c d,
       fun _ => π.completeNearLitterMap B L.toNearLitter⟩
-    atomMap_dom_small :=
-      Small.union (ihAction π.foaHypothesis B).atomMap_dom_small
+    atomMap_dom_small := by
+      exact Small.union (ihAction π.foaHypothesis B).atomMap_dom_small
         (ihAction π.foaHypothesis B).atomMap_dom_small
-    litterMap_dom_small :=
-      Small.union (ihAction π.foaHypothesis B).litterMap_dom_small
+    litterMap_dom_small := by
+      exact Small.union (ihAction π.foaHypothesis B).litterMap_dom_small
         (ihAction π.foaHypothesis B).litterMap_dom_small }
 
 @[simp]
 theorem constrainedAction_atomMap {π : StructApprox β} {s : Set (SupportCondition β)} {hs : Small s}
     {B : ExtendedIndex β} {a : Atom} :
     (constrainedAction π s hs B).atomMap a =
-      ⟨∃ c : SupportCondition β, c ∈ s ∧ (B, inl a) ≤[α] c,
+      ⟨∃ c : SupportCondition β, c ∈ s ∧ ⟨B, inl a⟩ ≤[α] c,
         fun _ => completeAtomMap π B a⟩ :=
   rfl
 
@@ -194,7 +195,7 @@ theorem constrainedAction_atomMap {π : StructApprox β} {s : Set (SupportCondit
 theorem constrainedAction_litterMap {π : StructApprox β} {s : Set (SupportCondition β)}
     {hs : Small s} {B : ExtendedIndex β} {L : Litter} :
     (constrainedAction π s hs B).litterMap L =
-      ⟨∃ c : SupportCondition β, c ∈ s ∧ (B, inr L.toNearLitter) ≤[α] c,
+      ⟨∃ c : SupportCondition β, c ∈ s ∧ ⟨B, inr L.toNearLitter⟩ ≤[α] c,
         fun _ => π.completeNearLitterMap B L.toNearLitter⟩ :=
   rfl
 
@@ -202,7 +203,7 @@ theorem constrainedAction_litterMap {π : StructApprox β} {s : Set (SupportCond
 theorem ihsAction_atomMap {π : StructApprox β} {c d : SupportCondition β} {B : ExtendedIndex β}
     {a : Atom} :
     (ihsAction π c d B).atomMap a =
-      ⟨(B, inl a) ∈ transConstrained c d,
+      ⟨⟨B, inl a⟩ ∈ transConstrained c d,
         fun _ => completeAtomMap π B a⟩ :=
   rfl
 
@@ -210,7 +211,7 @@ theorem ihsAction_atomMap {π : StructApprox β} {c d : SupportCondition β} {B 
 theorem ihsAction_litterMap {π : StructApprox β} {c d : SupportCondition β} {B : ExtendedIndex β}
     {L : Litter} :
     (ihsAction π c d B).litterMap L =
-      ⟨(B, inr L.toNearLitter) ∈ transConstrained c d,
+      ⟨⟨B, inr L.toNearLitter⟩ ∈ transConstrained c d,
         fun _ => π.completeNearLitterMap B L.toNearLitter⟩ :=
   rfl
 
@@ -318,14 +319,14 @@ theorem transGen_constrains_of_mem_designatedSupport {A : ExtendedIndex β} {L :
     {h : InflexibleCoe L A} {γ : Iic α} {δ ε : Iio α} {hδ : (δ : Λ) < γ} {hε : (ε : Λ) < γ}
     (hδε : δ ≠ ε) {C : Path (h.δ : TypeIndex) γ} {t : Tangle δ} {d : SupportCondition h.δ}
     (hd₂ :
-      ((C.cons (coe_lt hε)).cons (bot_lt_coe _),
-        inr (fuzz (Subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t).toNearLitter) ≤[α] d)
-    (hd : ((h.B.cons (coe_lt h.hδ)).comp d.fst, d.snd) ≺[α] (A, inr L.toNearLitter))
-    {B : ExtendedIndex δ} {a : Atom} (hc : (B, inl a) ∈ (designatedSupport t).carrier) :
-    ((h.B.cons (coe_lt h.hδ)).comp ((C.cons (coe_lt hδ)).comp B), inl a) <[α]
-      (A, inr L.toNearLitter) := by
+      ⟨(C.cons (coe_lt hε)).cons (bot_lt_coe _),
+        inr (fuzz (Subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t).toNearLitter⟩ ≤[α] d)
+    (hd : ⟨(h.B.cons (coe_lt h.hδ)).comp d.path, d.value⟩ ≺[α] ⟨A, inr L.toNearLitter⟩)
+    {B : ExtendedIndex δ} {a : Atom} (hc : ⟨B, inl a⟩ ∈ (designatedSupport t).carrier) :
+    ⟨(h.B.cons (coe_lt h.hδ)).comp ((C.cons (coe_lt hδ)).comp B), inl a⟩ <[α]
+      ⟨A, inr L.toNearLitter⟩ := by
   refine' Relation.TransGen.tail' _ hd
-  refine' reflTransGen_constrains_comp (c := (_, inl a)) (d := d) _ (h.B.cons <| coe_lt h.hδ)
+  refine' reflTransGen_constrains_comp (c := ⟨_, inl a⟩) (d := d) _ (h.B.cons <| coe_lt h.hδ)
   refine' Relation.ReflTransGen.trans _ hd₂
   exact Relation.ReflTransGen.single (Constrains.fuzz hδ hε hδε C t _ hc)
 
