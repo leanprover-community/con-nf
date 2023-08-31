@@ -65,7 +65,8 @@ instance : MulAction (StructPerm α) (SupportCondition α)
   mul_smul _ _ := by rintro ⟨A, a | N⟩ <;> rfl
 
 /-!
-We have a form of the next three lemmas for `StructPerm`, `NearLitterPerm`, and `Allowable`.
+We have a form of the next three lemmas for `StructPerm`, `NearLitterPerm`,
+`Allowable`, and `AllowablePerm`.
 -/
 
 theorem smul_supportCondition :

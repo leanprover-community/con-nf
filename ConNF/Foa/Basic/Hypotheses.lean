@@ -33,16 +33,16 @@ class PositionedTypedObjects [TangleData α] [TypedObjects α] [PositionFunction
   typedAtomPosition_eq : ∀ a : Atom, position (typedAtom a : Tangle α) = typedAtomPosition a
   typedNearLitterPosition_eq :
     ∀ N : NearLitter, position (typedNearLitter N : Tangle α) = typedNearLitterPosition N
-  -- TODO: Refactor this condition to avoid the `elim`.
-  support_le :
-    ∀ (t : Tangle α) (c : SupportCondition α),
-      c ∈ designatedSupport t → c.snd.elim typedAtomPosition typedNearLitterPosition ≤ position t
-
-/-- For all tangles `t` that are not typed singletons and not typed litters, `t` comes later than
-all of the support conditions in its designated support. That is, if an atom `a` is in the
-designated support for `t`, then `t` lies after `a`, and if a near-litter `N` is in the designated
-support for `t`, then `t` lies after `N` (under suitable maps to `μ`). -/
-add_decl_doc PositionedTypedObjects.support_le
+  /-- All tangles are positioned later than all of the support conditions in their designated
+  support. -/
+  typedAtomPosition_le :
+    ∀ (t : Tangle α) (A : ExtendedIndex α) (a : Atom),
+      ⟨A, Sum.inl a⟩ ∈ designatedSupport t → typedAtomPosition a ≤ position t
+  /-- All tangles are positioned later than all of the support conditions in their designated
+  support. -/
+  typedNearLitterPosition_le :
+    ∀ (t : Tangle α) (A : ExtendedIndex α) (N : NearLitter),
+      ⟨A, Sum.inr N⟩ ∈ designatedSupport t → typedNearLitterPosition N ≤ position t
 
 class Phase2Data where
   lowerTangleData : ∀ β : Iic α, TangleData β

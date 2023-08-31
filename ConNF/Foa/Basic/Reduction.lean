@@ -169,7 +169,7 @@ theorem mem_reducedSupport_iff [TangleData β] (t : Tangle β) (c : SupportCondi
 theorem mem_reduction_designated_support {β γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ)
     (hε : (ε : Λ) < γ) (hδε : δ ≠ ε) (B : Path (β : TypeIndex) γ) (t : Tangle δ)
     (c : SupportCondition δ) (h : c ∈ reducedSupport α t) :
-    ((B.cons (coe_lt hδ)).comp c.fst, c.snd) <[α]
+    ((B.cons (coe_lt hδ)).comp c.path, c.value) <[α]
       ((B.cons (coe_lt hε)).cons (bot_lt_coe _),
         inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter) := by
   obtain ⟨⟨d, hd, hcd⟩, _⟩ := h

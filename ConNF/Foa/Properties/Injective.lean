@@ -241,7 +241,7 @@ theorem Biexact.smul_eq_smul {β : Iio α} {π π' : Allowable β} {c : SupportC
       Allowable.toStructPerm_derivative
         (show Path ((β : IicBot α) : TypeIndex) (γ : IicBot α) from B),
       StructPerm.derivative_derivative, StructPerm.derivative_derivative]
-    have := ih ((B.cons <| coe_lt hδ).comp c.fst, c.snd) ?_ ?_
+    have := ih ((B.cons <| coe_lt hδ).comp c.path, c.value) ?_ ?_
     · rw [StructPerm.smul_supportCondition_eq_iff]
       exact (StructPerm.smul_supportCondition_eq_iff.mp this).symm
     · exact Constrains.fuzz hδ hε hδε _ _ _ hc

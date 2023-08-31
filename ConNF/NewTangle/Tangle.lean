@@ -444,17 +444,34 @@ theorem _root_.ConNF.SemiallowablePerm.coe_apply_bot (ρ : SemiallowablePerm α)
       SemiallowablePerm.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _)) := by
   rfl
 
+theorem AllowablePerm.smul_supportCondition {ρ : AllowablePerm α} {c : SupportCondition α} :
+    ρ • c = ⟨c.path, AllowablePerm.toStructPerm ρ c.path • c.value⟩ :=
+  rfl
+
+@[simp]
+theorem AllowablePerm.smul_supportCondition_eq_iff {ρ : AllowablePerm α} {c : SupportCondition α} :
+    ρ • c = c ↔ AllowablePerm.toStructPerm ρ c.path • c.value = c.value :=
+  StructPerm.smul_supportCondition_eq_iff
+
+@[simp]
+theorem AllowablePerm.smul_supportCondition_eq_smul_iff
+    {ρ ρ' : AllowablePerm α} {c : SupportCondition α} :
+    ρ • c = ρ' • c ↔
+    AllowablePerm.toStructPerm ρ c.path • c.value =
+      AllowablePerm.toStructPerm ρ' c.path • c.value :=
+  StructPerm.smul_supportCondition_eq_smul_iff
+
 /-- For any near-litter `N`, the code `(α, ⊥, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
 def newTypedNearLitter (N : NearLitter) : NewTangle α :=
   ⟨intro (show Set (Tangle (⊥ : IioBot α)) from N.2.1) <| Code.isEven_bot _,
-    ⟨⟨{(Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N)}, small_singleton _, fun π h => by
+    ⟨⟨{⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩}, small_singleton _, fun ρ h => by
         simp only [smul_intro]
         congr 1
-        have : Sum.inr _ = _ := congr_arg Prod.snd (h rfl)
-        simp only [AllowablePerm.coeHom_apply, Sum.inr.injEq] at this
-        apply_fun SetLike.coe at this
-        refine Eq.trans ?_ this
+        simp only [mem_singleton_iff, AllowablePerm.smul_supportCondition_eq_iff, forall_eq,
+          Sum.smul_inr, Sum.inr.injEq] at h
+        apply_fun SetLike.coe at h
+        refine Eq.trans ?_ h
         rw [NearLitterPerm.smul_nearLitter_coe]
         change _ '' _ = _ '' _
         simp_rw [SemiallowablePerm.coe_apply_bot]
