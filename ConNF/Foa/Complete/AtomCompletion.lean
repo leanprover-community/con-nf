@@ -25,7 +25,7 @@ theorem equiv_apply_eq {S T U V : Sublitter} {a b}
   exact (equiv_apply_mem (T.subset h.choose)).symm
 
 /-- Computes the action of a structural approximation `π` on an atom `a`. -/
-noncomputable def atomCompletion (A : ExtendedIndex β) (a : Atom) (H : Hypothesis (A, inl a)) :
+noncomputable def atomCompletion (A : ExtendedIndex β) (a : Atom) (H : Hypothesis ⟨A, inl a⟩) :
     Atom :=
   if h : a ∈ (π A).atomPerm.domain then π A • a
   else

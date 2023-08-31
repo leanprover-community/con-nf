@@ -49,24 +49,24 @@ theorem completeAtomMap_surjective_extends (A : ExtendedIndex β) (a : Atom)
 
 noncomputable def completeSupportConditionMap (π : StructApprox β) :
     SupportCondition β → SupportCondition β
-  | (B, inl a) => (B, inl (π.completeAtomMap B a))
-  | (B, inr N) => (B, inr (π.completeNearLitterMap B N))
+  | ⟨B, inl a⟩ => ⟨B, inl (π.completeAtomMap B a)⟩
+  | ⟨B, inr N⟩ => ⟨B, inr (π.completeNearLitterMap B N)⟩
 
 @[simp]
 theorem completeSupportConditionMap_atom_eq {π : StructApprox β} {a : Atom} {B : ExtendedIndex β} :
-    π.completeSupportConditionMap (B, inl a) = (B, inl (π.completeAtomMap B a)) :=
+    π.completeSupportConditionMap ⟨B, inl a⟩ = ⟨B, inl (π.completeAtomMap B a)⟩ :=
   rfl
 
 @[simp]
 theorem completeSupportConditionMap_nearLitter_eq {π : StructApprox β} {N : NearLitter}
     {B : ExtendedIndex β} :
-    π.completeSupportConditionMap (B, inr N) = (B, inr (π.completeNearLitterMap B N)) :=
+    π.completeSupportConditionMap ⟨B, inr N⟩ = ⟨B, inr (π.completeNearLitterMap B N)⟩ :=
   rfl
 
 theorem completeSupportConditionMap_injective (hπf : π.Free) :
     Injective π.completeSupportConditionMap := by
   rintro ⟨B₁, a₁ | N₁⟩ ⟨B₂, a₂ | N₂⟩ h <;>
-    rw [Prod.ext_iff] at h <;>
+    rw [SupportCondition.ext_iff] at h <;>
     simp only [completeSupportConditionMap_atom_eq,
       completeSupportConditionMap_nearLitter_eq,
       inl.injEq, inr.injEq, and_false] at h
@@ -115,7 +115,7 @@ theorem Relation.reflTransGen_of_eq {α : Type _} {r : α → α → Prop} {x y 
 
 theorem preimageAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (N : NearLitter) (c : SupportCondition β)
-    (hc : (A.comp B, inr (π.completeNearLitterMap (A.comp B) N)) ≺[α] c) (ρ : Allowable γ)
+    (hc : ⟨A.comp B, inr (π.completeNearLitterMap (A.comp B) N)⟩ ≺[α] c) (ρ : Allowable γ)
     (h : (((preimageAction hπf c).comp A).rc
       ((preimageAction_lawful hπf).comp _)).ExactlyApproximates (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
@@ -127,7 +127,7 @@ theorem preimageAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : T
 
 theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c : SupportCondition β)
-    (hc : (A.comp B, inl (π.completeAtomMap (A.comp B) a)) ≺[α] c) (ρ : Allowable γ)
+    (hc : ⟨A.comp B, inl (π.completeAtomMap (A.comp B) a)⟩ ≺[α] c) (ρ : Allowable γ)
     (h : (((preimageAction hπf c).comp A).rc
       ((preimageAction_lawful hπf).comp _)).ExactlyApproximates (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = StructPerm.derivative B (Allowable.toStructPerm ρ) • a := by
@@ -139,10 +139,10 @@ theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (�
 -- I think that the `change` and `obtain` calls slow down proofs severely in Lean 4.
 -- TODO: Canonicalise uses of `<` to always be with respect to `TypeIndex`.
 theorem supports {β : Iio α} {π π' : Allowable β} {t : Tangle β}
-    (ha : ∀ A a, (A, inl a) ∈ designatedSupport t →
+    (ha : ∀ A a, ⟨A, inl a⟩ ∈ designatedSupport t →
       StructPerm.derivative A (Allowable.toStructPerm π) • a =
       StructPerm.derivative A (Allowable.toStructPerm π') • a)
-    (hN : ∀ A N, (A, inr N) ∈ designatedSupport t →
+    (hN : ∀ A N, ⟨A, inr N⟩ ∈ designatedSupport t →
       StructPerm.derivative A (Allowable.toStructPerm π) • N =
       StructPerm.derivative A (Allowable.toStructPerm π') • N) :
     π • t = π' • t := by
@@ -150,13 +150,11 @@ theorem supports {β : Iio α} {π π' : Allowable β} {t : Tangle β}
   refine' (designatedSupport t).supports _ _
   intro c hc
   rw [mul_smul, inv_smul_eq_iff]
-  refine StructPerm.smul_supportCondition_eq_iff.mpr ?_
+  simp only [Allowable.smul_supportCondition_eq_smul_iff]
   obtain ⟨A, a | N⟩ := c
-  · change inl _ = inl _
-    simp only [inl.injEq]
+  · simp only [smul_inl, inl.injEq]
     exact ha A a hc
-  · change inr _ = inr _
-    simp only [inr.injEq]
+  · simp only [smul_inr, inr.injEq]
     exact hN A N hc
 
 theorem _root_.ConNF.StructPerm.derivative_bot_smul_atom {α : TypeIndex} (π : StructPerm α)
@@ -171,9 +169,9 @@ theorem _root_.ConNF.StructPerm.derivative_bot_smul_nearLitter {α : TypeIndex} 
 
 theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex β) (L : Litter)
     (ha : ∀ (B : ExtendedIndex β) (a : Atom),
-      (B, inl a) ≺[α] (A, inr L.toNearLitter) → a ∈ range (π.completeAtomMap B))
+      ⟨B, inl a⟩ ≺[α] ⟨A, inr L.toNearLitter⟩ → a ∈ range (π.completeAtomMap B))
     (hN : ∀ (B : ExtendedIndex β) (N : NearLitter),
-      (B, inr N) ≺[α] (A, inr L.toNearLitter) → N ∈ range (π.completeNearLitterMap B)) :
+      ⟨B, inr N⟩ ≺[α] ⟨A, inr L.toNearLitter⟩ → N ∈ range (π.completeNearLitterMap B)) :
     L ∈ range (π.completeLitterMap A) := by
   obtain h | ⟨⟨h⟩⟩ | ⟨⟨h⟩⟩ := flexible_cases' β A L
   · refine' ⟨(NearLitterApprox.flexibleCompletion α (π A) A).symm • L, _⟩
@@ -188,8 +186,8 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
   · obtain ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ := h
     refine' ⟨fuzz (coe_ne_coe.mpr <| coe_ne' hδε)
       (((preimageAction hπf
-            ((B.cons (coe_lt hε)).cons (bot_lt_coe _),
-              inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter)).hypothesisedAllowable
+            ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
+              inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩).hypothesisedAllowable
           ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩
           ((preimageAction_lawful hπf).comp _) (preimageAction_comp_mapFlexible _))⁻¹ • t), _⟩
     rw [completeLitterMap_eq_of_inflexibleCoe ⟨γ, δ, ε, hδ, hε, hδε, B, _, rfl, rfl⟩
@@ -204,8 +202,8 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       obtain ⟨b, ha⟩ := ha
       have : (StructPerm.derivative A
         (Allowable.toStructPerm ((preimageAction hπf
-            ((B.cons (coe_lt hε)).cons (bot_lt_coe _),
-              inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter)).hypothesisedAllowable
+            ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
+              inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩).hypothesisedAllowable
               ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ ((preimageAction_lawful hπf).comp _)
               (preimageAction_comp_mapFlexible _))))⁻¹ • a = b
       · rw [inv_smul_eq_iff, ← ha]
@@ -226,7 +224,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' Relation.TransGen.tail' _
           (Constrains.fuzz hδ hε hδε B _ _ (smul_mem_designatedSupport hc _))
         refine' Relation.reflTransGen_of_eq _
-        refine' Prod.ext rfl _
+        refine' SupportCondition.ext _ _ rfl _
         change inl _ = inl _
         simp only [← this, ne_eq, StructPerm.derivative_bot, StructPerm.toBot_inv_smul, map_inv,
           StructPerm.inv_apply]
@@ -236,8 +234,8 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       obtain ⟨N', hN⟩ := hN
       have : (StructPerm.derivative A
         (Allowable.toStructPerm ((preimageAction hπf
-          ((B.cons (coe_lt hε)).cons (bot_lt_coe _),
-            inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter)).hypothesisedAllowable
+          ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
+            inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩).hypothesisedAllowable
               ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ ((preimageAction_lawful hπf).comp _)
               (preimageAction_comp_mapFlexible _))))⁻¹ • N = N'
       · rw [inv_smul_eq_iff, ← hN]
@@ -258,7 +256,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' Relation.TransGen.tail' _
           (Constrains.fuzz hδ hε hδε B _ _ (smul_mem_designatedSupport hc _))
         refine' Relation.reflTransGen_of_eq _
-        refine' Prod.ext rfl _
+        refine' SupportCondition.ext _ _ rfl _
         change inr _ = inr _
         simp only [← this, ne_eq, StructPerm.derivative_bot, StructPerm.toBot_inv_smul, map_inv,
           StructPerm.inv_apply]
@@ -321,8 +319,8 @@ theorem completeNearLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedI
 variable (π)
 
 def CompleteMapSurjectiveAt : SupportCondition β → Prop
-  | (A, inl a) => a ∈ range (π.completeAtomMap A)
-  | (A, inr N) => N ∈ range (π.completeNearLitterMap A)
+  | ⟨A, inl a⟩ => a ∈ range (π.completeAtomMap A)
+  | ⟨A, inr N⟩ => N ∈ range (π.completeNearLitterMap A)
 
 variable {π}
 
@@ -331,7 +329,7 @@ theorem completeMap_surjective_extends (hπf : π.Free) (c : SupportCondition β
     π.CompleteMapSurjectiveAt c := by
   obtain ⟨A, a | N⟩ := c
   · refine' completeAtomMap_surjective_extends A a _
-    obtain ⟨N, hN⟩ := hc (A, inr a.1.toNearLitter) (Relation.TransGen.single <| Constrains.atom A a)
+    obtain ⟨N, hN⟩ := hc ⟨A, inr a.1.toNearLitter⟩ (Relation.TransGen.single <| Constrains.atom A a)
     refine' ⟨N.1, _⟩
     apply_fun Sigma.fst at hN
     simp only [Litter.toNearLitter_fst, completeNearLitterMap_fst_eq'] at hN
@@ -339,21 +337,21 @@ theorem completeMap_surjective_extends (hπf : π.Free) (c : SupportCondition β
   · refine' completeNearLitterMap_surjective_extends hπf A N _ _
     · refine' completeLitterMap_surjective_extends hπf A N.1 _ _
       · intro B a h
-        exact hc (B, inl a) (transGen_nearLitter <| Relation.TransGen.single h)
+        exact hc ⟨B, inl a⟩ (transGen_nearLitter <| Relation.TransGen.single h)
       · intro B N h
-        exact hc (B, inr N) (transGen_nearLitter <| Relation.TransGen.single h)
+        exact hc ⟨B, inr N⟩ (transGen_nearLitter <| Relation.TransGen.single h)
     · intro a h
-      exact hc (A, inl a) (Relation.TransGen.single <| Constrains.symmDiff A N a h)
+      exact hc ⟨A, inl a⟩ (Relation.TransGen.single <| Constrains.symmDiff A N a h)
 
 theorem completeMapSurjectiveAtAll (hπf : π.Free) (c : SupportCondition β) :
     π.CompleteMapSurjectiveAt c :=
   WellFounded.induction (trans_constrains_wf α β) c (completeMap_surjective_extends hπf)
 
 theorem completeAtomMap_surjective (hπf : π.Free) (A : ExtendedIndex β) :
-    Surjective (π.completeAtomMap A) := fun a => completeMapSurjectiveAtAll hπf (A, inl a)
+    Surjective (π.completeAtomMap A) := fun a => completeMapSurjectiveAtAll hπf ⟨A, inl a⟩
 
 theorem completeNearLitterMap_surjective (hπf : π.Free) (A : ExtendedIndex β) :
-    Surjective (π.completeNearLitterMap A) := fun N => completeMapSurjectiveAtAll hπf (A, inr N)
+    Surjective (π.completeNearLitterMap A) := fun N => completeMapSurjectiveAtAll hπf ⟨A, inr N⟩
 
 theorem completeLitterMap_surjective (hπf : π.Free) (A : ExtendedIndex β) :
     Surjective (π.completeLitterMap A) := by

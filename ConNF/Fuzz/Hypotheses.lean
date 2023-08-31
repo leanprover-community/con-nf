@@ -49,11 +49,9 @@ export TangleData (Tangle Allowable)
 
 attribute [instance] TangleData.allowableGroup TangleData.allowableAction
 
-section
+namespace Allowable
 
 variable {α : TypeIndex} [TangleData α] {X : Type _} [MulAction (StructPerm α) X]
-
-namespace Allowable
 
 /-- Allowable permutations can be considered a subtype of structural permutations.
 This map can be thought of as an inclusion that preserves the group structure. -/
@@ -68,14 +66,29 @@ instance : MulAction (Allowable α) X :=
 theorem toStructPerm_smul (f : Allowable α) (x : X) : f • x = Allowable.toStructPerm f • x :=
   rfl
 
+variable {ρ ρ' : Allowable α} {c : SupportCondition α}
+
+theorem smul_supportCondition :
+    ρ • c = ⟨c.path, Allowable.toStructPerm ρ c.path • c.value⟩ :=
+  rfl
+
+@[simp]
+theorem smul_supportCondition_eq_iff :
+    ρ • c = c ↔ Allowable.toStructPerm ρ c.path • c.value = c.value :=
+  StructPerm.smul_supportCondition_eq_iff
+
+@[simp]
+theorem smul_supportCondition_eq_smul_iff :
+    ρ • c = ρ' • c ↔
+    Allowable.toStructPerm ρ c.path • c.value = Allowable.toStructPerm ρ' c.path • c.value :=
+  StructPerm.smul_supportCondition_eq_smul_iff
+
 end Allowable
 
 /-- For each tangle, we provide a small support for it. This is known as the designated support of
 the tangle. -/
-def designatedSupport (t : Tangle α) : Support α (Allowable α) t :=
+def designatedSupport {α : TypeIndex} [TangleData α] (t : Tangle α) : Support α (Allowable α) t :=
   TangleData.designatedSupport _
-
-end
 
 class PositionFunction (α : TypeIndex) [TangleData α] where
   /-- A position function, giving each tangle a unique position `ν : μ`.
@@ -186,12 +199,11 @@ noncomputable instance Bot.tangleData : TangleData ⊥
   allowableToStructPerm := StructPerm.toBotIso.toMonoidHom
   allowableAction := inferInstance
   designatedSupport a :=
-    { carrier := {(Quiver.Path.nil, Sum.inl a)}
+    { carrier := {⟨Quiver.Path.nil, Sum.inl a⟩}
       supports := fun π => by
-        simp only [mem_singleton_iff, forall_eq]
         intro h
-        change (_, Sum.inl _) = (_, Sum.inl _) at h
-        simp only [MulEquiv.coe_toMonoidHom, Prod.mk.injEq, Sum.inl.injEq, true_and] at h
+        simp only [mem_singleton_iff, NearLitterPerm.smul_supportCondition_eq_iff, forall_eq,
+          Sum.smul_inl, Sum.inl.injEq] at h
         exact h
       small := small_singleton _ }
 
