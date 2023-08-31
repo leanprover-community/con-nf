@@ -1098,7 +1098,7 @@ theorem ihsAction_lawful_extends (hπf : π.Free) (c d : SupportCondition β)
   · exact litter_map_injective
   · intro a ha L hL
     simp only [ihsAction_atomMap, ihsAction_litterMap]
-    have : π.completeAtomMap A a ∈ π.completeNearLitterMap A a.fst.toNearLitter :=by
+    have : π.completeAtomMap A a ∈ π.completeNearLitterMap A a.fst.toNearLitter := by
       obtain ha | ha := ha <;> obtain hL | hL := hL
       · specialize hπ (A, inl a) (A, inr L.toNearLitter) (SplitLt.left_split ha hL)
         exact completeAtomMap_mem_completeNearLitterMap_toNearLitter' hπf hπ rfl

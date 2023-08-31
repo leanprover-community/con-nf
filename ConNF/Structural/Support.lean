@@ -27,15 +27,26 @@ variable [Params.{u}] {α : TypeIndex}
 This represents an object in the base type (the atom or near-litter) together with the path
 detailing how we descend from type `α` to type `⊥` by looking at elements of elements and so on
 in the model. -/
-def SupportCondition (α : TypeIndex) : Type u :=
-  ExtendedIndex α × (Atom ⊕ NearLitter)
+@[ext]
+structure SupportCondition (α : TypeIndex) : Type u
+    where
+  path : ExtendedIndex α
+  value : Atom ⊕ NearLitter
 
 noncomputable instance : Inhabited (SupportCondition α) :=
 ⟨default, Sum.inl default⟩
 
+def supportCondition_equiv : SupportCondition α ≃ ExtendedIndex α × (Atom ⊕ NearLitter)
+    where
+  toFun c := ⟨c.path, c.value⟩
+  invFun c := ⟨c.1, c.2⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
 /-- There are `μ` support conditions. -/
 @[simp]
 theorem mk_supportCondition (α : TypeIndex) : #(SupportCondition α) = #μ := by
+  rw [mk_congr supportCondition_equiv]
   simp only [SupportCondition, mk_prod, mk_sum, mk_atom, lift_id, mk_nearLitter]
   rw [add_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) le_rfl]
   exact mul_eq_right (κ_isRegular.aleph0_le.trans κ_le_μ)
@@ -43,43 +54,65 @@ theorem mk_supportCondition (α : TypeIndex) : #(SupportCondition α) = #μ := b
 
 namespace StructPerm
 
+variable {π π' : StructPerm α} {c : SupportCondition α}
+
 /-- Structural permutations act on support conditions by following the derivative given in the
 condition. -/
 instance : MulAction (StructPerm α) (SupportCondition α)
     where
-  smul π c := (c.fst, π c.fst • c.snd)
+  smul π c := ⟨c.path, π c.path • c.value⟩
   one_smul := by rintro ⟨A, a | N⟩ <;> rfl
   mul_smul _ _ := by rintro ⟨A, a | N⟩ <;> rfl
 
-instance : MulAction NearLitterPerm (SupportCondition ⊥)
-    where
-  smul π c := (c.fst, π • c.snd)
-  one_smul := by rintro ⟨A, a | N⟩ <;> rfl
-  mul_smul _ _ := by rintro ⟨A, a | N⟩ <;> rfl
+/-!
+We have a form of the next three lemmas for `StructPerm`, `NearLitterPerm`, and `Allowable`.
+-/
 
-theorem smul_supportCondition {π : StructPerm α} {c : SupportCondition α} :
-    π • c = (c.fst, π c.fst • c.snd) :=
+theorem smul_supportCondition :
+    π • c = ⟨c.path, π c.path • c.value⟩ :=
   rfl
 
 @[simp]
-theorem smul_supportCondition_eq_iff {π π' : StructPerm α} {c : SupportCondition α} :
-    π • c = π' • c ↔ π c.fst • c.snd = π' c.fst • c.snd := by
-  rw [Prod.ext_iff]
-  simp only [smul_supportCondition, true_and]
+theorem smul_supportCondition_eq_iff :
+    π • c = c ↔ π c.path • c.value = c.value := by
+  obtain ⟨A, x⟩ := c
+  simp only [smul_supportCondition, SupportCondition.mk.injEq, true_and]
 
 @[simp]
-theorem smul_supportCondition_eq_iff' {π π' : StructPerm α}
-    {x y : Atom ⊕ NearLitter} {A : ExtendedIndex α} :
-    π • (show SupportCondition α from (A, x)) = π' • (show SupportCondition α from (A, y)) ↔
-    π A • x = π' A • y := by
-  rw [Prod.ext_iff]
-  simp only [smul_supportCondition, true_and]
-
--- The following attributes help with simplifications involving support conditions.
-attribute [simp] Sum.inl.injEq
-attribute [simp] Sum.inr.injEq
+theorem smul_supportCondition_eq_smul_iff :
+    π • c = π' • c ↔ π c.path • c.value = π' c.path • c.value := by
+  obtain ⟨A, x⟩ := c
+  simp only [smul_supportCondition, SupportCondition.mk.injEq, true_and]
 
 end StructPerm
+
+namespace NearLitterPerm
+
+variable {π π' : NearLitterPerm} {c : SupportCondition ⊥}
+
+instance : MulAction NearLitterPerm (SupportCondition ⊥)
+    where
+  smul π c := ⟨c.path, π • c.value⟩
+  one_smul := by rintro ⟨A, a | N⟩ <;> rfl
+  mul_smul _ _ := by rintro ⟨A, a | N⟩ <;> rfl
+
+theorem smul_supportCondition :
+    π • c = ⟨c.path, π • c.value⟩ :=
+  rfl
+
+@[simp]
+theorem smul_supportCondition_eq_iff :
+    π • c = c ↔ π • c.value = c.value := by
+  obtain ⟨A, x⟩ := c
+  simp only [smul_supportCondition, SupportCondition.mk.injEq, true_and]
+
+@[simp]
+theorem smul_supportCondition_eq_smul_iff :
+    π • c = π' • c ↔ π • c.value = π' • c.value := by
+  obtain ⟨A, x⟩ := c
+  simp only [smul_supportCondition, SupportCondition.mk.injEq, true_and]
+
+end NearLitterPerm
 
 variable (G : Type _) (α) {τ : Type _} [SMul G (SupportCondition α)] [SMul G τ]
 
