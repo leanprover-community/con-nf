@@ -432,7 +432,7 @@ theorem completeLitterMap_inflexibleCoe_iff (hπf : π.Free) {c d : SupportCondi
   ⟨fun ⟨h⟩ => ⟨completeLitterMap_inflexibleCoe' hπf h⟩, fun ⟨h⟩ =>
     ⟨completeLitterMap_inflexibleCoe hπf hcd h hL⟩⟩
 
-theorem _root_.ConNF.Structural.comp_fst {α : TypeIndex} (π : StructPerm α)
+theorem _root_.ConNF.Tree.comp_fst {α : TypeIndex} (π : StructPerm α)
     (A : ExtendedIndex α) (N : NearLitter) :
     (Tree.comp A π • N).fst = Tree.comp A π • N.fst :=
   rfl

@@ -2,7 +2,7 @@ import ConNF.BaseType.NearLitterPerm
 import ConNF.Structural.Tree
 
 /-!
-# Tree permutations
+# Structural permutations
 
 In this file, we define the ambient groups of *structural permutations*.  These will later have
 recursively-constructed subgroups of *semi-allowable* and *allowable permutations* which will act on
@@ -28,8 +28,8 @@ variable [Params.{u}]
 
 /-- A *structural permutation* on a proper type index `α` is a near-litter permutation for
 each `α`-extended index. This represents how the permutation acts along each path down the type
-levels in the model. Note that we define structural permutations as the structural groups of
-near-litter permutations. -/
+levels in the model. Note that we define structural permutations as trees of near-litter
+permutations. -/
 abbrev StructPerm : TypeIndex → Type u :=
   Tree NearLitterPerm
 

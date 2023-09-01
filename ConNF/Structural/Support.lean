@@ -57,7 +57,7 @@ namespace StructPerm
 
 variable {π π' : StructPerm α} {c : SupportCondition α}
 
-/-- Tree permutations act on support conditions by following the derivative given in the
+/-- Structural permutations act on support conditions by following the derivative given in the
 condition. -/
 instance : MulAction (StructPerm α) (SupportCondition α)
     where

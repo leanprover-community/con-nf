@@ -11,9 +11,9 @@ If `τ` has a group structure, the `α`-trees of `τ` can also be given a group 
 
 ## Main declarations
 
-* `ConNF.Structural`: The type of trees of a given type `τ`.
-* `ConNF.Structural.group`: The group structure on trees.
-* `ConNF.Structural.comp`: The derivative functor on tree groups.
+* `ConNF.Tree`: The type of trees of a given type `τ`.
+* `ConNF.Tree.group`: The group structure on trees.
+* `ConNF.Tree.comp`: The derivative functor on tree groups.
 -/
 
 open Quiver Path

@@ -370,7 +370,7 @@ def Free (α : Λ) [BasePositions] [Phase2Assumptions α] {β : TypeIndex} (π :
 end NearLitterApprox
 
 /-!
-# Tree approximations
+# Structural approximations
 -/
 
 /-- A `β`-structural approximation is a product that assigns a near-litter approximation to each

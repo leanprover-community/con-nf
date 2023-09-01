@@ -14,7 +14,7 @@ namespace ConNF
 variable [Params.{u}]
 
 /-!
-# Tree actions
+# Structural actions
 -/
 
 /-- Noncomputably eliminates a disjunction into a (possibly predicative) universe. -/
