@@ -203,6 +203,14 @@ theorem Allowable.toStructPerm_apply {β : IicBot α}
     NearLitterPerm.ofBot (Allowable.comp A π) = Allowable.toStructPerm π A :=
   congr_fun (Allowable.toStructPerm_comp A π) Quiver.Path.nil
 
+theorem Allowable.comp_bot {β : IicBot α}
+    (A : Quiver.Path (β : TypeIndex) (⊥ : IicBot α)) (ρ : Allowable β) :
+    Allowable.comp A ρ = Allowable.toStructPerm ρ A := by
+  refine NearLitterPerm.ext ?_
+  ext a : 1
+  change NearLitterPerm.ofBot (Allowable.comp A ρ) • a = Allowable.toStructPerm ρ A • a
+  simp only [Allowable.toStructPerm_apply]
+
 theorem smul_mem_designatedSupport {β : Iio α} {c : SupportCondition β} {t : Tangle β}
     (h : c ∈ designatedSupport t) (π : Allowable β) : π • c ∈ designatedSupport (π • t) :=
   (Set.ext_iff.mp (smul_designatedSupport (show Tangle (β : Iic α) from t) π)

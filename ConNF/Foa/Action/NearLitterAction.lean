@@ -1,4 +1,3 @@
-import Mathlib.Data.PFun
 import ConNF.Foa.Basic.Approximation
 import ConNF.Foa.Basic.CompleteOrbit
 import ConNF.Foa.Basic.Reduction
@@ -205,13 +204,6 @@ noncomputable def nearLitterMapOrElse (N : NearLitter) : NearLitter :=
     φ.litterMapOrElse N.fst ∆ (φ.atomMapOrElse '' litterSet N.fst ∆ N), by
     rw [IsNearLitter, IsNear, ← symmDiff_assoc]
     exact (φ.litterMapOrElse N.fst).snd.prop.symmDiff (Small.image N.2.prop)⟩
-
-theorem _root_.ConNF.Small.pFun_image {α β : Type _} {s : Set α} (h : Small s) {f : α →. β} :
-    Small (f.image s) := by
-  have : Small (f '' s) := Small.image h
-  refine' Small.image_subset Part.some Part.some_injective this _
-  rintro x ⟨y, ⟨z, hz₁, hz₂⟩, rfl⟩
-  exact ⟨z, hz₁, Part.eq_some_iff.mpr hz₂⟩
 
 theorem nearLitterMapOrElse_of_dom {N : NearLitter} (h₁ : (φ.litterMap N.fst).Dom)
     (h₂ : ∀ a ∈ litterSet N.fst ∆ N, (φ.atomMap a).Dom) :

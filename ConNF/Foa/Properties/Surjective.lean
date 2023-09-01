@@ -159,16 +159,6 @@ theorem supports {β : Iio α} {π π' : Allowable β} {t : Tangle β}
   · simp only [smul_inr, inr.injEq]
     exact hN A N hc
 
-theorem _root_.ConNF.StructPerm.comp_bot_smul_atom {α : TypeIndex} (π : StructPerm α)
-    (A : ExtendedIndex α) (a : Atom) :
-    Tree.comp A π • a = π A • a :=
-  rfl
-
-theorem _root_.ConNF.StructPerm.comp_bot_smul_nearLitter {α : TypeIndex} (π : StructPerm α)
-    (A : ExtendedIndex α) (N : NearLitter) :
-    Tree.comp A π • N = π A • N :=
-  rfl
-
 theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex β) (L : Litter)
     (ha : ∀ (B : ExtendedIndex β) (a : Atom),
       ⟨B, inl a⟩ ≺[α] ⟨A, inr L.toNearLitter⟩ → a ∈ range (π.completeAtomMap B))

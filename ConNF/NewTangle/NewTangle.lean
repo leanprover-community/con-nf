@@ -434,16 +434,6 @@ theorem smul_intro (ρ : NewAllowable α) (s : Set (Tangle β)) (hs) :
     refine Preference.proper_heq_proper ?_ rfl
     rw [NewAllowable.smul_extension]
 
--- TODO: Move next two lemmas elsewhere.
-theorem allowableToStructPerm_bot (π : Allowable (⊥ : IioBot α)) :
-    TangleData.allowableToStructPerm π = Tree.toBotIso.toMonoidHom π :=
-  rfl
-
-theorem _root_.ConNF.SemiallowablePerm.coe_apply_bot (ρ : SemiallowablePerm α) :
-    (ρ : SemiallowablePerm α) ⊥ =
-      SemiallowablePerm.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _)) := by
-  rfl
-
 theorem NewAllowable.smul_supportCondition {ρ : NewAllowable α} {c : SupportCondition α} :
     ρ • c = ⟨c.path, NewAllowable.toStructPerm ρ c.path • c.value⟩ :=
   rfl

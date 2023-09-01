@@ -53,6 +53,24 @@ theorem smul_nearLitter_snd (π : StructPerm ⊥) (N : NearLitter) :
     ((π • N).2 : Set Atom) = π • (N.2 : Set Atom) :=
   NearLitterPerm.smul_nearLitter_snd (Tree.ofBot π) N
 
+@[simp]
+theorem comp_bot_smul_atom {α : TypeIndex} (π : StructPerm α)
+    (A : ExtendedIndex α) (a : Atom) :
+    Tree.comp A π • a = π A • a :=
+  rfl
+
+@[simp]
+theorem comp_bot_smul_litter {α : TypeIndex} (π : StructPerm α)
+    (A : ExtendedIndex α) (L : Litter) :
+    Tree.comp A π • L = π A • L :=
+  rfl
+
+@[simp]
+theorem comp_bot_smul_nearLitter {α : TypeIndex} (π : StructPerm α)
+    (A : ExtendedIndex α) (N : NearLitter) :
+    Tree.comp A π • N = π A • N :=
+  rfl
+
 end StructPerm
 
 end ConNF

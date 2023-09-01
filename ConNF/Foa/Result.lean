@@ -192,14 +192,6 @@ theorem ConNF.StructApprox.extracted_2
     · exact (ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
         ⟨γ, δ, ε, _, _, _, _, t, rfl, rfl⟩ _ _
 
-theorem _root_.ConNF.Allowable.comp_bot {β : IicBot α}
-    (ρ : Allowable β) (A : Quiver.Path (β : TypeIndex) (⊥ : IicBot α)) :
-    Allowable.comp A ρ = Allowable.toStructPerm ρ A := by
-  refine NearLitterPerm.ext ?_
-  ext a : 1
-  change NearLitterPerm.ofBot (Allowable.comp A ρ) • a = Allowable.toStructPerm ρ A • a
-  simp only [Allowable.toStructPerm_apply]
-
 theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
     (h : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ), AllowableBelow hπf δ (A.cons h)) :
     AllowableBelow hπf γ A := by

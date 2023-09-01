@@ -142,6 +142,11 @@ noncomputable def toStructPerm : SemiallowablePerm α →* StructPerm α
     rw [toStructPerm', mul_apply, map_mul]
     rfl
 
+theorem coe_apply_bot (ρ : SemiallowablePerm α) :
+    (ρ : SemiallowablePerm α) ⊥ =
+      SemiallowablePerm.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _)) := by
+  rfl
+
 section
 
 variable {X : Type _} [MulAction (StructPerm α) X]

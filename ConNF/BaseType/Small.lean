@@ -1,3 +1,4 @@
+import Mathlib.Data.PFun
 import ConNF.BaseType.Params
 
 /-!
@@ -88,6 +89,13 @@ theorem Small.image_subset {t : Set β} (f : α → β) (h : f.Injective) :
   have := (Small.mono h₂ h₁).preimage h
   rw [preimage_image_eq s h] at this
   exact this
+
+theorem Small.pFun_image {α β : Type _} {s : Set α} (h : Small s) {f : α →. β} :
+    Small (f.image s) := by
+  have : Small (f '' s) := Small.image h
+  refine' Small.image_subset Part.some Part.some_injective this _
+  rintro x ⟨y, ⟨z, hz₁, hz₂⟩, rfl⟩
+  exact ⟨z, hz₁, Part.eq_some_iff.mpr hz₂⟩
 
 /-- Two sets are near if their symmetric difference is small. -/
 def IsNear (s t : Set α) : Prop :=
