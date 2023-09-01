@@ -375,48 +375,36 @@ end NearLitterApprox
 
 /-- A `β`-structural approximation is a product that assigns a near-litter approximation to each
 `β`-extended index. -/
-def StructApprox (β : TypeIndex) :=
-  ExtendedIndex β → NearLitterApprox
+abbrev StructApprox :=
+  Structural NearLitterApprox
 
 namespace StructApprox
 
 def Approximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructPerm β) : Prop :=
-  ∀ A, (π₀ A).Approximates (StructPerm.ofBot <| StructPerm.comp A π)
+  ∀ A, (π₀ A).Approximates (Structural.ofBot <| Structural.comp A π)
 
 def ExactlyApproximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructPerm β) : Prop :=
-  ∀ A, (π₀ A).ExactlyApproximates (StructPerm.ofBot <| StructPerm.comp A π)
+  ∀ A, (π₀ A).ExactlyApproximates (Structural.ofBot <| Structural.comp A π)
 
 variable {α : Λ} [BasePositions] [Phase2Assumptions α]
 
 def Free {β : Iic α} (π₀ : StructApprox β) : Prop :=
   ∀ A, (π₀ A).Free α A
 
-/-!
-# Derivatives of structural approximations
--/
-
-
-def comp {β γ : TypeIndex} (π₀ : StructApprox β) (A : Path β γ) : StructApprox γ := fun B =>
-  π₀ (A.comp B)
-
-@[simp]
-theorem comp_apply {β γ : TypeIndex} (π₀ : StructApprox β) (A : Path β γ) (B : ExtendedIndex γ) :
-    π₀.comp A B = π₀ (A.comp B) :=
-  rfl
-
 theorem Approximates.comp {β γ : TypeIndex} {π₀ : StructApprox β} {π : StructPerm β}
-    (h : π₀.Approximates π) (A : Path β γ) : (π₀.comp A).Approximates (StructPerm.comp A π) :=
+    (h : π₀.Approximates π) (A : Path β γ) :
+    StructApprox.Approximates (π₀.comp A) (Structural.comp A π) :=
   by
   intro B
-  rw [comp_apply, StructPerm.comp_comp]
+  rw [Structural.comp_apply, Structural.comp_comp]
   exact h _
 
 theorem ExactlyApproximates.comp {β γ : TypeIndex} {π₀ : StructApprox β} {π : StructPerm β}
     (h : π₀.ExactlyApproximates π) (A : Path β γ) :
-    (π₀.comp A).ExactlyApproximates (StructPerm.comp A π) :=
+    StructApprox.ExactlyApproximates (π₀.comp A) (Structural.comp A π) :=
   by
   intro B
-  rw [comp_apply, StructPerm.comp_comp]
+  rw [Structural.comp_apply, Structural.comp_comp]
   exact h _
 
 /-!

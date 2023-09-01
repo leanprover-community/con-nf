@@ -125,7 +125,7 @@ theorem completeLitterMap_eq_of_flexible {A : ExtendedIndex β} {L : Litter} (h 
   rw [completeLitterMap_eq, litterCompletion_of_flexible _ _ _ _ h]
 
 theorem toStructPerm_bot :
-    (Allowable.toStructPerm : Allowable ⊥ → StructPerm ⊥) = StructPerm.toBotIso.toMonoidHom :=
+    (Allowable.toStructPerm : Allowable ⊥ → StructPerm ⊥) = Structural.toBotIso.toMonoidHom :=
   rfl
 
 -- TODO: use this

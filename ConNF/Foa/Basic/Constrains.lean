@@ -1,3 +1,4 @@
+import Mathlib.Data.Prod.Lex
 import ConNF.Fuzz
 import ConNF.Foa.Basic.Hypotheses
 

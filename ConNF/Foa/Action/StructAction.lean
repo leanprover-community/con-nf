@@ -17,8 +17,8 @@ variable [Params.{u}]
 
 /-- A `β`-structural action is a product that assigns a near-litter action to each `β`-extended
 index. -/
-def StructAction (β : TypeIndex) :=
-  ExtendedIndex β → NearLitterAction
+abbrev StructAction :=
+  Structural NearLitterAction
 
 namespace StructAction
 
@@ -45,33 +45,33 @@ theorem complete_apply (hφ : φ.Lawful) (B : ExtendedIndex β) :
 
 theorem smul_atom_eq {hφ : φ.Lawful} {π : StructPerm β} (hπ : (φ.complete hφ).ExactlyApproximates π)
     {a : Atom} {B : ExtendedIndex β} (ha : ((φ B).atomMap a).Dom) :
-    StructPerm.comp B π • a = ((φ B).atomMap a).get ha := by
+    Structural.comp B π • a = ((φ B).atomMap a).get ha := by
   have := (φ B).smul_atom_eq (hπ B) ha
-  rw [StructPerm.ofBot_smul] at this
+  rw [Structural.ofBot_smul] at this
   exact this
 
 theorem smul_toNearLitter_eq_of_precise {hφ : φ.Lawful} (hφp : φ.Precise) {π : StructPerm β}
     (hπ : (φ.complete hφ).ExactlyApproximates π) {L : Litter} {B : ExtendedIndex β}
     (hL : ((φ B).litterMap L).Dom)
-    (hπL : StructPerm.comp B π • L = (((φ B).litterMap L).get hL).1) :
-    StructPerm.comp B π • L.toNearLitter = ((φ B).litterMap L).get hL := by
+    (hπL : Structural.comp B π • L = (((φ B).litterMap L).get hL).1) :
+    Structural.comp B π • L.toNearLitter = ((φ B).litterMap L).get hL := by
   have := (φ B).smul_toNearLitter_eq_of_preciseAt (hπ B) hL (hφp B hL) ?_
-  · rw [StructPerm.ofBot_smul] at this
+  · rw [Structural.ofBot_smul] at this
     exact this
-  · rw [StructPerm.ofBot_smul]
+  · rw [Structural.ofBot_smul]
     exact hπL
 
 theorem smul_nearLitter_eq_of_precise {hφ : φ.Lawful} (hφp : φ.Precise) {π : StructPerm β}
     (hπ : (φ.complete hφ).ExactlyApproximates π) {N : NearLitter} {B : ExtendedIndex β}
     (hN : ((φ B).litterMap N.1).Dom)
-    (hπL : StructPerm.comp B π • N.1 = (((φ B).litterMap N.1).get hN).1) :
-    ((StructPerm.comp B π • N : NearLitter) : Set Atom) =
+    (hπL : Structural.comp B π • N.1 = (((φ B).litterMap N.1).get hN).1) :
+    ((Structural.comp B π • N : NearLitter) : Set Atom) =
       (((φ B).litterMap N.1).get hN : Set Atom) ∆
-        (StructPerm.comp B π • litterSet N.1 ∆ N) := by
+        (Structural.comp B π • litterSet N.1 ∆ N) := by
   have := (φ B).smul_nearLitter_eq_of_preciseAt (hπ B) hN (hφp B hN) ?_
-  · rw [StructPerm.ofBot_smul] at this
+  · rw [Structural.ofBot_smul] at this
     exact this
-  · rw [StructPerm.ofBot_smul]
+  · rw [Structural.ofBot_smul]
     exact hπL
 
 end Precise
@@ -87,28 +87,6 @@ instance {β : TypeIndex} : PartialOrder (StructAction β)
 
 theorem Lawful.le {β : TypeIndex} {φ ψ : StructAction β} (h : φ.Lawful) (hψ : ψ ≤ φ) : ψ.Lawful :=
   fun B => (h B).le (hψ B)
-
-def comp {β γ : TypeIndex} (φ : StructAction β) (A : Path β γ) : StructAction γ := fun B =>
-  { atomMap := (φ (A.comp B)).atomMap
-    litterMap := (φ (A.comp B)).litterMap
-    atomMap_dom_small := by
-      refine' Small.image_subset id Function.injective_id (φ (A.comp B)).atomMap_dom_small _
-      simp only [id_eq, image_id']
-      rfl
-    litterMap_dom_small := by
-      refine' Small.image_subset id Function.injective_id (φ (A.comp B)).litterMap_dom_small _
-      simp only [id.def, image_id']
-      rfl }
-
-@[simp]
-theorem comp_apply {β γ : TypeIndex} {φ : StructAction β} {A : Path β γ} {B : ExtendedIndex γ} :
-    φ.comp A B = φ (A.comp B) := by ext : 1 <;> rfl
-
-theorem comp_comp {β γ δ : TypeIndex} {φ : StructAction β} {A : Path β γ} {B : Path γ δ} :
-    (φ.comp A).comp B = φ.comp (A.comp B) := by
-  funext A
-  ext : 1 <;>
-    simp only [comp_apply, Path.comp_assoc]
 
 theorem le_comp {β γ : TypeIndex} {φ ψ : StructAction β} (h : φ ≤ ψ) (A : Path β γ) :
     φ.comp A ≤ ψ.comp A := fun B => h (A.comp B)

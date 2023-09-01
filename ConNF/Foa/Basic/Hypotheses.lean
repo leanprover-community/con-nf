@@ -101,7 +101,7 @@ class Phase2Assumptions extends Phase2Data α where
     ∀ (β : IicBot α) (γ : IicBot α), (γ : TypeIndex) < β → Allowable β →* Allowable γ
   allowableDerivative_eq :
     ∀ (β : IicBot α) (γ : IicBot α) (hγ : (γ : TypeIndex) < β) (π : Allowable β),
-      StructPerm.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm π) =
+      Structural.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm π) =
         Allowable.toStructPerm (allowableDerivative β γ hγ π)
   smul_designatedSupport {β : Iic α} (t : Tangle β) (π : Allowable β) :
     π • (designatedSupport t : Set (SupportCondition β)) = designatedSupport (π • t)
@@ -187,14 +187,14 @@ theorem Allowable.comp_comp {β γ δ : IicBot α} (A : Quiver.Path (β : TypeIn
 theorem Allowable.toStructPerm_comp {β γ : IicBot α}
     (A : Quiver.Path (β : TypeIndex) γ) (π : Allowable β) :
     Allowable.toStructPerm (Allowable.comp A π) =
-    StructPerm.comp A (Allowable.toStructPerm π) := by
+    Structural.comp A (Allowable.toStructPerm π) := by
   obtain ⟨γ, hγ⟩ := γ
   change Quiver.Path (β : TypeIndex) γ at A
   induction A with
-  | nil => rw [StructPerm.comp_nil, Allowable.comp_nil, MonoidHom.id_apply]
+  | nil => rw [Structural.comp_nil, Allowable.comp_nil, MonoidHom.id_apply]
   | cons A h ih =>
       change toStructPerm (allowableDerivative _ _ _ (comp _ π)) = _
-      rw [StructPerm.comp_cons, ← allowableDerivative_eq, ih]
+      rw [Structural.comp_cons, ← allowableDerivative_eq, ih]
       rfl
 
 @[simp]
@@ -225,7 +225,6 @@ theorem exists_cons_of_length_ne_zero {V : Type _} [Quiver V] {x y : V}
 theorem ofBot_comp {β : IicBot α} {π : Allowable β}
     (A : Quiver.Path (β : TypeIndex) (⊥ : IicBot α)) :
     NearLitterPerm.ofBot (Allowable.comp A π) = Allowable.toStructPerm π A := by
-  dsimp only [Iic.coe_bot] at A
   by_cases A.length = 0
   · have : β = ⊥ := Subtype.coe_injective (Quiver.Path.eq_of_length_zero A h)
     cases this
@@ -236,7 +235,7 @@ theorem ofBot_comp {β : IicBot α} {π : Allowable β}
       (show Quiver.Path (β : TypeIndex) (⟨γ, ?_⟩ : IicBot α) from A)
       (show ⊥ < ⟨γ, _⟩ from h')
     rw [← this, MonoidHom.comp_apply, ofBot_comp', Allowable.toStructPerm_comp]
-    simp only [StructPerm.comp_apply, Quiver.Hom.comp_toPath]
+    simp only [Structural.comp_apply, Quiver.Hom.comp_toPath]
     exact le_trans (le_of_path A) β.prop
 
 @[simp]
@@ -258,7 +257,7 @@ theorem toStructPerm_smul_fuzz (β : IicBot α) (γ : IioBot α) (δ : Iio α)
       fuzz (Subtype.coe_injective.ne hγδ) t =
     fuzz (Subtype.coe_injective.ne hγδ) (allowableDerivative β γ hγ π • t) := by
   have := congr_fun (allowableDerivative_eq β δ hδ π) (Quiver.Hom.toPath (bot_lt_coe _))
-  simp only [StructPerm.comp_apply, Quiver.Hom.comp_toPath] at this
+  simp only [Structural.comp_apply, Quiver.Hom.comp_toPath] at this
   rw [this, ← smul_fuzz γ δ hγ hδ hγδ π t, ofBot_comp']
 
 end ConNF

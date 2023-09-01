@@ -1,3 +1,4 @@
+import Mathlib.GroupTheory.GroupAction.Sum
 import Mathlib.GroupTheory.GroupAction.Support
 import ConNF.Structural.StructPerm
 
@@ -146,7 +147,9 @@ theorem mk_support_le (x : τ) : #(Support α G x) ≤ #μ := by
   · refine ⟨⟨fun s => ⟨s.carrier, s.small⟩, fun s t h => ?_⟩⟩
     simpa only [Subtype.mk_eq_mk, Support.carrier_eq_coe, SetLike.coe_set_eq] using h
   · rw [← mk_subtype_of_equiv Small (Equiv.Set.congr (Cardinal.eq.mp (mk_supportCondition α)).some)]
-    exact ⟨⟨fun s => ⟨s, Small.image s.prop⟩, fun s h => by simp⟩⟩
+    refine ⟨⟨fun s => ⟨s, Small.image s.prop⟩, fun s h => ?_⟩⟩
+    simp only [Set.congr_apply, Subtype.mk.injEq]
+    exact Subtype.eq
   · rw [← mk_subset_mk_lt_cof μ_isStrongLimit.2]
     exact mk_subtype_mono fun s hs => lt_of_lt_of_le hs κ_le_μ_ord_cof
 
