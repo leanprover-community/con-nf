@@ -38,63 +38,36 @@ instance : WellFoundedRelation (ExtendedIndex α) :=
 noncomputable instance : LinearOrder (ExtendedIndex α) :=
   linearOrderOfSTO (· < ·)
 
-def sumAtomNearLitterMap : Atom ⊕ NearLitter → μ
-| inl a => typedAtomPosition a
-| inr N => typedNearLitterPosition N
+instance : Position (Atom ⊕ NearLitter) μ where
+  pos := {
+    toFun := fun x => match x with
+      | inl a => pos a
+      | inr N => pos N
+    inj' := by
+      rintro (a₁ | N₁) (a₂ | N₂) h
+      · exact congr_arg _ (pos_injective h)
+      · cases pos_atom_ne_pos_nearLitter a₁ N₂ h
+      · cases pos_atom_ne_pos_nearLitter a₂ N₁ h.symm
+      · exact congr_arg _ (pos_injective h)
+  }
 
-@[simp]
-theorem sumAtomNearLitterMap_inl (a : Atom) :
-    sumAtomNearLitterMap (inl a) = typedAtomPosition a :=
-  rfl
-
-@[simp]
-theorem sumAtomNearLitterMap_inr (N : NearLitter) :
-    sumAtomNearLitterMap (inr N) = typedNearLitterPosition N :=
-  rfl
-
-theorem sumAtomNearLitterMap_injective : Function.Injective sumAtomNearLitterMap := by
-  rintro (a₁ | N₁) (a₂ | N₂) h
-  · exact congr_arg _ (typedAtomPosition.injective h)
-  · cases typedAtomPosition_ne_typedNearLitterPosition a₁ N₂ h
-  · cases typedAtomPosition_ne_typedNearLitterPosition a₂ N₁ h.symm
-  · exact congr_arg _ (typedNearLitterPosition.injective h)
-
--- TODO: Move and use
-theorem isWellOrder_invImage {α β : Type _} {r : β → β → Prop} (h : IsWellOrder β r)
-    (f : α → β) (hf : Function.Injective f) :
-    IsWellOrder α (InvImage r f) where
-  trichotomous := by
-    intro x y
-    have := h.trichotomous (f x) (f y)
-    rw [hf.eq_iff] at this
-    exact this
-  trans x y z := h.trans (f x) (f y) (f z)
-  wf := InvImage.wf _ h.wf
-
+/-- Override the default instance for `LT (α ⊕ β)`. -/
+@[default_instance 1500]
 instance : LT (Atom ⊕ NearLitter) :=
-  ⟨InvImage (· < ·) sumAtomNearLitterMap⟩
+  ⟨InvImage (· < ·) pos⟩
 
-theorem sumAtomNearLitter_lt_def (x y : Atom ⊕ NearLitter) :
-    x < y ↔ sumAtomNearLitterMap x < sumAtomNearLitterMap y :=
-  Iff.rfl
+@[simp]
+theorem pos_atomNearLitter_inl (a : Atom) :
+    pos (inl a : Atom ⊕ NearLitter) = pos a :=
+  rfl
 
-instance : IsWellOrder (Atom ⊕ NearLitter) (· < ·) :=
-  isWellOrder_invImage μwo _ sumAtomNearLitterMap_injective
-
-instance : WellFoundedRelation (Atom ⊕ NearLitter) :=
-  IsWellOrder.toHasWellFounded
+@[simp]
+theorem pos_atomNearLitter_inr (N : NearLitter) :
+    pos (inr N : Atom ⊕ NearLitter) = pos N :=
+  rfl
 
 def ConditionPosition (α : TypeIndex) : Type u :=
   (Atom ⊕ NearLitter) ×ₗ ExtendedIndex α
-
-def SupportCondition.position (c : SupportCondition α) : ConditionPosition α :=
-  ⟨c.value, c.path⟩
-
-theorem SupportCondition.position_injective :
-    Function.Injective (SupportCondition.position (α := α)) := by
-  rintro ⟨A, x⟩ ⟨B, y⟩ h
-  cases h
-  rfl
 
 instance : LT (ConditionPosition α) :=
   inferInstanceAs (LT ((Atom ⊕ NearLitter) ×ₗ ExtendedIndex α))
@@ -105,18 +78,14 @@ instance : IsWellOrder (ConditionPosition α) (· < ·) :=
 instance : WellFoundedRelation (ConditionPosition α) :=
   IsWellOrder.toHasWellFounded
 
-instance : LT (SupportCondition α) :=
-  ⟨InvImage (· < ·) SupportCondition.position⟩
-
-theorem SupportCondition.lt_def (c d : SupportCondition α) :
-    c < d ↔ SupportCondition.position c < SupportCondition.position d :=
-  Iff.rfl
-
-instance : IsWellOrder (SupportCondition α) (· < ·) :=
-  isWellOrder_invImage inferInstance _ SupportCondition.position_injective
-
-instance : WellFoundedRelation (SupportCondition α) :=
-  IsWellOrder.toHasWellFounded
+instance : Position (SupportCondition α) (ConditionPosition α) where
+  pos := {
+    toFun := fun c => ⟨c.value, c.path⟩
+    inj' := by
+      rintro ⟨A, x⟩ ⟨B, y⟩ h
+      cases h
+      rfl
+  }
 
 end ExtendedIndex
 
@@ -132,8 +101,6 @@ theorem coe_lt {γ : Iio α} {β : Iic α} : (γ : Λ) < β → (γ : TypeIndex)
 
 variable (α) (β)
 
-/- ./././Mathport/Syntax/Translate/Basic.lean:635:2: warning: expanding binder collection (a «expr ∈ » «expr ∆ »(litter_set[con_nf.litter_set] N.fst, N.snd)) -/
-/- ./././Mathport/Syntax/Translate/Basic.lean:635:2: warning: expanding binder collection (c «expr ∈ » (designated_support[con_nf.designated_support] t).carrier) -/
 -- TODO: Swap around argument order to put paths first.
 /-- Support conditions can be said to *constrain* each other in a number of ways. This is discussed
 in the "freedom of action discussion".
@@ -143,12 +110,11 @@ in the "freedom of action discussion".
 3. `(a, A) ≺ (N, A)` for all `a ∈ N ∆ N°`.
 4. `(x, A ≫ (γ ⟶ δ) ≫ B) ≺ (f_{γ,δ}(t), A ≫ (γ ⟶ ε) ≫ (ε ⟶ ⊥))` for all paths `A : β ⟶ γ` and
     `δ, ε < γ` with `δ ≠ ε`, `t ∈ τ_γ`, where `(x, B)` lies in the designated `δ`-support of `t`.
-TODO: Refactor `near_litter` to use `¬N.is_litter`.
 -/
 @[mk_iff]
 inductive Constrains : SupportCondition β → SupportCondition β → Prop
   | atom (A : ExtendedIndex β) (a : Atom) : Constrains ⟨A, inr a.1.toNearLitter⟩ ⟨A, inl a⟩
-  | nearLitter (A : ExtendedIndex β) (N : NearLitter) (hN : litterSet N.fst ≠ N.snd) :
+  | nearLitter (A : ExtendedIndex β) (N : NearLitter) (hN : ¬N.IsLitter) :
     Constrains ⟨A, inr N.fst.toNearLitter⟩ ⟨A, inr N⟩
   | symmDiff (A : ExtendedIndex β) (N : NearLitter) (a : Atom) :
     a ∈ litterSet N.fst ∆ N.snd → Constrains ⟨A, inl a⟩ ⟨A, inr N⟩
@@ -170,23 +136,20 @@ notation:50 c " ≺[" α "] " d:50 => Constrains α _ c d
 theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) := by
   intro c d h
   obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h <;> left
-  · exact litter_lt a.1 a rfl
-  · refine litter_lt_nearLitter N ?_
-    contrapose! hN
-    rw [← hN]
-    rfl
+  · exact litter_lt_atom a.1 a rfl
+  · exact litter_lt_nearLitter N hN
   · exact symmDiff_lt_nearLitter N a ha
-  · have := fuzz_position (coe_ne_coe.mpr <| coe_ne' hδε) t ?_ ?_
-    rw [PositionedTypedObjects.typedNearLitterPosition_eq] at this
+  · have := fuzz_pos (coe_ne_coe.mpr <| coe_ne' hδε) t ?_ ?_
+    rw [PositionedTypedObjects.pos_nearLitter_eq] at this
     refine' lt_of_le_of_lt _ this
     obtain ⟨B, a | N⟩ := c
-    · exact PositionedTypedObjects.typedAtomPosition_le t B a hc
-    · exact PositionedTypedObjects.typedNearLitterPosition_le t B N hc
+    · exact PositionedTypedObjects.pos_atom_le t B a hc
+    · exact PositionedTypedObjects.pos_nearLitter_le t B N hc
     · rfl
   · simp only [InvImage, elim_inr]
-    convert typedAtomPosition_lt_fuzz a
-    simp only [sumAtomNearLitter_lt_def, sumAtomNearLitterMap_inl, sumAtomNearLitterMap_inr]
-    rw [@PositionedTypedObjects.typedNearLitterPosition_eq _ _ _ ?_ ?_ ?_ ?_ _]
+    convert pos_atom_lt_fuzz a
+    simp only [← pos_lt_pos, pos_atomNearLitter_inl, pos_atomNearLitter_inr]
+    rw [@PositionedTypedObjects.pos_nearLitter_eq _ _ _ ?_ ?_ ?_ ?_ _]
     infer_instance
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `(x, A) ≺ (y, B)`,
@@ -242,21 +205,21 @@ theorem reflTransGen_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
-  · exact Relation.ReflTransGen.head (Constrains.nearLitter B N (NearLitter.not_isLitter h')) h
+  · exact Relation.ReflTransGen.head (Constrains.nearLitter B N h') h
 
 theorem transGen_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β} {c : SupportCondition β}
     (h : c <[α] ⟨B, inr N.1.toNearLitter⟩) : c <[α] ⟨B, inr N⟩ := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
-  · exact Relation.TransGen.tail h (Constrains.nearLitter B N (NearLitter.not_isLitter h'))
+  · exact Relation.TransGen.tail h (Constrains.nearLitter B N h')
 
 theorem transGen_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
     {c : SupportCondition β} (h : ⟨B, inr N⟩ <[α] c) : ⟨B, inr N.1.toNearLitter⟩ <[α] c := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
-  · exact Relation.TransGen.head (Constrains.nearLitter B N (NearLitter.not_isLitter h')) h
+  · exact Relation.TransGen.head (Constrains.nearLitter B N h') h
 
 -- TODO: Move
 -- TODO: Search for uses of fuzz_β and replace with this lemma.
@@ -287,16 +250,11 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
   · change Small {c | ∃ b B, _ ∧ _ = _}
     simp only [SupportCondition.mk.injEq, false_and, and_false, exists_false, setOf_false, small_empty]
   · change Small {c | ∃ B N', _}
-    by_cases litterSet N.fst = N.snd
-    · refine small_of_forall_not_mem ?_
-      rintro c ⟨A, N', h₁, ⟨rfl, rfl⟩, h₂⟩
-      cases h₂
-      exact h₁ h
-    · refine Set.Subsingleton.small ?_
-      rintro c ⟨_, _, _, ⟨rfl, rfl⟩, h₁⟩ d ⟨_, _, _, ⟨rfl, rfl⟩, h₂⟩
-      cases h₁
-      cases h₂
-      rfl
+    refine Set.Subsingleton.small ?_
+    rintro c ⟨_, _, _, ⟨rfl, rfl⟩, h₁⟩ d ⟨_, _, _, ⟨rfl, rfl⟩, h₂⟩
+    cases h₁
+    cases h₂
+    rfl
   · change Small {c | ∃ B N' a, _}
     convert (show Small (litterSet N.fst ∆ N) from N.2.prop).image
       (f := fun a : Atom => (⟨A, inl a⟩ : SupportCondition β)) using 1

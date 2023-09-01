@@ -10,7 +10,7 @@ it here for more convenient use later.
 ## Main declarations
 
 * `ConNF.TangleData`: Data about the model elements at level `α`.
-* `ConNF.PositionFunction`: A function that gives each `α`-tangle a unique position `ν : μ`.
+* `ConNF.PositionedTangles`: A function that gives each `α`-tangle a unique position `ν : μ`.
 * `ConNF.TypedObjects`: Allows us to encode atoms and near-litters as `α`-tangles.
 * `ConNF.BasePositions`: The position of typed atoms and typed near-litters in the position function
     at any level.
@@ -90,14 +90,58 @@ the tangle. -/
 def designatedSupport {α : TypeIndex} [TangleData α] (t : Tangle α) : Support α (Allowable α) t :=
   TangleData.designatedSupport _
 
-class PositionFunction (α : TypeIndex) [TangleData α] where
+section Position
+
+class Position (α : Type _) (β : outParam <| Type _) where
+  pos : α ↪ β
+
+export Position (pos)
+
+variable {α : Type _} {β : Type _} [Position α β]
+
+theorem pos_injective :
+    Injective (pos : α → β) :=
+  pos.inj'
+
+instance [LT β] : LT α :=
+  ⟨InvImage (· < ·) pos⟩
+
+theorem pos_lt_pos [LT β] (c d : α) :
+    pos c < pos d ↔ c < d :=
+  Iff.rfl
+
+theorem isWellOrder_invImage {r : β → β → Prop} (h : IsWellOrder β r)
+    (f : α → β) (hf : Function.Injective f) :
+    IsWellOrder α (InvImage r f) where
+  trichotomous := by
+    intro x y
+    have := h.trichotomous (f x) (f y)
+    rw [hf.eq_iff] at this
+    exact this
+  trans x y z := h.trans (f x) (f y) (f z)
+  wf := InvImage.wf _ h.wf
+
+instance [LT β] [IsWellOrder β (· < ·)] : IsWellOrder α (· < ·) :=
+  isWellOrder_invImage inferInstance _ pos_injective
+
+instance [LT β] [IsWellOrder β (· < ·)] : WellFoundedRelation α :=
+  IsWellOrder.toHasWellFounded
+
+open scoped Classical in
+noncomputable instance [LT β] [IsWellOrder β (· < ·)] : LinearOrder α :=
+  linearOrderOfSTO (· < ·)
+
+end Position
+
+class PositionedTangles (α : TypeIndex) [TangleData α] where
   /-- A position function, giving each tangle a unique position `ν : μ`.
   The existence of this injection proves that there are at most `μ` tangles at level `α`.
   Since `μ` has a well-ordering, this induces a well-ordering on `α`-tangles: to compare two
   tangles, simply compare their images under this map. -/
-  position : Tangle α ↪ μ
+  pos : Tangle α ↪ μ
 
-export PositionFunction (position)
+instance {α : TypeIndex} [TangleData α] [PositionedTangles α] : Position (Tangle α) μ where
+  pos := PositionedTangles.pos
 
 variable (α : Λ) [TangleData α]
 
@@ -139,7 +183,7 @@ class BasePositions where
   /-- Gives the positions of typed near-litters at any level. -/
   typedNearLitterPosition : NearLitter ↪ μ
   /-- Typed litters precede typed atoms they contain. -/
-  litter_lt :
+  litter_lt_atom :
     ∀ (L : Litter),
       ∀ a ∈ litterSet L, typedNearLitterPosition L.toNearLitter < typedAtomPosition a
   /-- Typed litters precede near-litters to them. -/
@@ -153,13 +197,45 @@ class BasePositions where
   typedAtomPosition_ne_typedNearLitterPosition :
     ∀ a N, typedAtomPosition a ≠ typedNearLitterPosition N
 
-export BasePositions (typedAtomPosition typedNearLitterPosition litter_lt litter_le_nearLitter
-    symmDiff_lt_nearLitter typedAtomPosition_ne_typedNearLitterPosition)
+instance [BasePositions] : Position Atom μ where
+  pos := BasePositions.typedAtomPosition
+
+instance [BasePositions] : Position NearLitter μ where
+  pos := BasePositions.typedNearLitterPosition
+
+instance [BasePositions] : Position Litter μ where
+  pos := {
+    toFun := fun L => pos L.toNearLitter
+    inj' := fun _ _ h => Litter.toNearLitter_injective (pos_injective h)
+  }
+
+/-- Typed litters precede typed atoms they contain. -/
+theorem litter_lt_atom [BasePositions] :
+    ∀ L : Litter, ∀ a ∈ litterSet L, pos L < pos a :=
+  BasePositions.litter_lt_atom
 
 /-- Typed litters precede near-litters to them. -/
-theorem litter_lt_nearLitter [BasePositions] (N : NearLitter) (hN : N.fst.toNearLitter ≠ N) :
-    typedNearLitterPosition N.fst.toNearLitter < typedNearLitterPosition N :=
-  lt_of_le_of_ne (litter_le_nearLitter N) (typedNearLitterPosition.injective.ne hN)
+theorem litter_le_nearLitter [BasePositions] :
+    ∀ N : NearLitter, pos N.1 ≤ pos N :=
+  BasePositions.litter_le_nearLitter
+
+/-- Typed litters precede near-litters to them. -/
+theorem litter_lt_nearLitter [BasePositions] (N : NearLitter) (hN : ¬N.IsLitter) :
+    pos N.1 < pos N :=
+  lt_of_le_of_ne
+    (litter_le_nearLitter N)
+    (pos_injective.ne (f := (pos : NearLitter → μ)) (NearLitter.not_isLitter' hN))
+
+/-- Atoms in the symmetric difference between a near-litter and its corresponding litter
+precede the near-litter. -/
+theorem symmDiff_lt_nearLitter [BasePositions] :
+    ∀ N : NearLitter, ∀ a ∈ litterSet N.fst ∆ N.snd, pos a < pos N :=
+  BasePositions.symmDiff_lt_nearLitter
+
+/-- Atoms and near-litters cannot be assigned the same position. -/
+theorem pos_atom_ne_pos_nearLitter [BasePositions] :
+    ∀ a : Atom, ∀ N : NearLitter, pos a ≠ pos N :=
+  BasePositions.typedAtomPosition_ne_typedNearLitterPosition
 
 section Instances
 
@@ -171,17 +247,17 @@ instance tangleDataVal : TangleData β.val :=
 instance tangleDataCoeCoe : TangleData (β : Λ) :=
   ‹TangleData β›
 
-section PositionFunction
+section PositionedTangles
 
-variable [PositionFunction (iioCoe β)]
+variable [PositionedTangles (iioCoe β)]
 
-instance positionFunctionVal : PositionFunction β.val :=
-  ‹PositionFunction _›
+instance positionedTanglesVal : PositionedTangles β.val :=
+  ‹PositionedTangles _›
 
-instance positionFunctionCoeCoe : PositionFunction (β : Λ) :=
-  ‹PositionFunction _›
+instance positionedTanglesCoeCoe : PositionedTangles (β : Λ) :=
+  ‹PositionedTangles _›
 
-end PositionFunction
+end PositionedTangles
 
 variable [TypedObjects β]
 
@@ -208,8 +284,10 @@ noncomputable instance Bot.tangleData : TangleData ⊥
       small := small_singleton _ }
 
 /-- The position function at level `⊥`, which is chosen arbitrarily. -/
-noncomputable instance Bot.positionFunction : PositionFunction ⊥ :=
+noncomputable instance Bot.positionedTangles : PositionedTangles ⊥ :=
   ⟨Nonempty.some mk_atom.le⟩
+
+-- TODO: Require coherence between `pos : Tangle ⊥ → μ` and `pos : Atom → μ`?
 
 /-- The identity equivalence between `⊥`-allowable permutations and near-litter permutations.
 This equivalence is a group isomorphism. -/

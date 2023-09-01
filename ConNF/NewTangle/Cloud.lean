@@ -42,8 +42,8 @@ open Code
 
 section Cloud
 
-variable {α : Λ} {γ : IioBot α} [TangleData γ] [PositionFunction γ] {β : Iio α}
-  [TangleData (iioCoe β)] [PositionFunction (iioCoe β)] [TypedObjects β] (hγβ : γ ≠ β)
+variable {α : Λ} {γ : IioBot α} [TangleData γ] [PositionedTangles γ] {β : Iio α}
+  [TangleData (iioCoe β)] [PositionedTangles (iioCoe β)] [TypedObjects β] (hγβ : γ ≠ β)
 
 theorem coe_ne : γ ≠ β → (γ : TypeIndex) ≠ (β : Λ) :=
   Subtype.coe_injective.ne
@@ -108,7 +108,7 @@ theorem cloud_injective : Injective (cloud hγβ) :=
     Pairwise.biUnion_injective (fun _ _ h => localCardinal_disjoint <| (fuzz_injective _).ne h)
       fun _ => localCardinal_nonempty _
 
-variable {δ : IioBot α} [TangleData δ] [PositionFunction δ]
+variable {δ : IioBot α} [TangleData δ] [PositionedTangles δ]
 
 theorem cloud_disjoint_range {hδβ} (c : Set (Tangle γ)) (d : Set (Tangle δ)) (hc : c.Nonempty)
     (h : cloud hγβ c = cloud hδβ d) : γ = δ := by
@@ -126,37 +126,37 @@ We now show that there are only finitely many iterated images under any inverse 
 case of nonempty sets.
 -/
 
-theorem wellFounded_position : WellFounded fun a b : Tangle γ => position a < position b :=
+theorem wellFounded_pos : WellFounded fun a b : Tangle γ => pos a < pos b :=
   InvImage.wf _ IsWellFounded.wf
 
 /-- The minimum tangle of a nonempty set of tangles. -/
 noncomputable def minTangle (s : Set (Tangle γ)) (hs : s.Nonempty) : Tangle γ :=
-  wellFounded_position.min s hs
+  wellFounded_pos.min s hs
 
 theorem minTangle_mem (s : Set (Tangle γ)) (hs : s.Nonempty) : minTangle s hs ∈ s :=
   WellFounded.min_mem _ s hs
 
 theorem minTangle_le (s : Set (Tangle γ)) (hs : s.Nonempty) {t : Tangle γ} (ht : t ∈ s) :
-    position (minTangle s hs) ≤ position t :=
-  not_lt.1 <| wellFounded_position.not_lt_min s hs ht
+    pos (minTangle s hs) ≤ pos t :=
+  not_lt.1 <| wellFounded_pos.not_lt_min s hs ht
 
 theorem minTangle_lt_minTangle_cloud (s : Set (Tangle γ)) (hs : s.Nonempty) :
-    position (minTangle s hs) < position (minTangle (cloud hγβ s) hs.cloud) := by
+    pos (minTangle s hs) < pos (minTangle (cloud hγβ s) hs.cloud) := by
   obtain ⟨t, ht, N, hN, h⟩ := mem_cloud.1 (minTangle_mem (cloud hγβ s) hs.cloud)
   refine (minTangle_le s hs ht).trans_lt ?_
   rw [h]
-  exact fuzz_position (coe_ne hγβ) t _ hN
+  exact fuzz_pos (coe_ne hγβ) t _ hN
 
 end Cloud
 
 section CloudCode
 
-variable {α : Λ} [TangleDataIio α] [PositionFunctionIio α]
+variable {α : Λ} [TangleDataIio α] [PositionedTanglesIio α]
 
 /-- Tool that lets us use well-founded recursion on codes via `μ`.
-This maps a nonempty code to the least position of a tangle in the extension of the code. -/
+This maps a nonempty code to the least pos of a tangle in the extension of the code. -/
 noncomputable def codeMinMap (c : NonemptyCode α) : μ :=
-  position <| minTangle _ c.prop
+  pos <| minTangle _ c.prop
 
 /-- The pullback `<` relation on codes is well-founded. -/
 theorem invImage_codeMinMap_wf : WellFounded (InvImage μr (codeMinMap : NonemptyCode α → μ)) :=

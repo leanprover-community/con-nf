@@ -218,6 +218,13 @@ theorem NearLitter.not_isLitter {N : NearLitter} (h : ¬N.IsLitter) : litterSet 
   cases h
   exact NearLitter.IsLitter.mk _
 
+theorem NearLitter.not_isLitter' {N : NearLitter} (h : ¬N.IsLitter) : N.fst.toNearLitter ≠ N := by
+  contrapose! h
+  obtain ⟨L, S, hS⟩ := N
+  simp only [Subtype.coe_mk] at h
+  cases h
+  exact NearLitter.IsLitter.mk _
+
 /-- The size of each near-litter is `κ`. -/
 @[simp]
 theorem mk_nearLitter'' (N : NearLitter) : #N = #κ := by

@@ -11,7 +11,7 @@ of any coherence between type levels) we cannot prove many facts about these new
 ## Main declarations
 
 * `ConNF.TangleDataIio`: The `TangleData` for each `β < α`.
-* `ConNF.PositionFunctionIio`: The `PositionFunction` for each `β < α`.
+* `ConNF.PositionedTanglesIio`: The `PositionedTangles` for each `β < α`.
 * `ConNF.TypedObjectsIio`: The `TypedObjects` for each `β < α`.
 -/
 
@@ -52,24 +52,24 @@ noncomputable instance TangleDataIio.toTangleData''' (β : Λ) (hβ : (β : Type
 
 end TangleDataIio
 
-/-- The `PositionFunction` for each `β < α`. -/
-class PositionFunctionIio (α : Λ) [TangleDataIio α] where
-  data : ∀ β : Iio α, PositionFunction β
+/-- The `PositionedTangles` for each `β < α`. -/
+class PositionedTanglesIio (α : Λ) [TangleDataIio α] where
+  data : ∀ β : Iio α, PositionedTangles β
 
-section PositionFunctionIio
+section PositionedTanglesIio
 
-variable [TangleDataIio α] [PositionFunctionIio α]
+variable [TangleDataIio α] [PositionedTanglesIio α]
 
-noncomputable instance PositionFunctionIio.toPositionFunction :
-    ∀ β : IioBot α, PositionFunction β
-  | ⟨⊥, _⟩ => Bot.positionFunction
-  | ⟨(β : Λ), hβ⟩ => PositionFunctionIio.data ⟨β, coe_lt_coe.1 hβ⟩
+noncomputable instance PositionedTanglesIio.toPositionedTangles :
+    ∀ β : IioBot α, PositionedTangles β
+  | ⟨⊥, _⟩ => Bot.positionedTangles
+  | ⟨(β : Λ), hβ⟩ => PositionedTanglesIio.data ⟨β, coe_lt_coe.1 hβ⟩
 
-noncomputable instance PositionFunctionIio.toPositionFunction' (β : Iio α) :
-    PositionFunction β :=
-  show PositionFunction (iioCoe β) by infer_instance
+noncomputable instance PositionedTanglesIio.toPositionedTangles' (β : Iio α) :
+    PositionedTangles β :=
+  show PositionedTangles (iioCoe β) by infer_instance
 
-end PositionFunctionIio
+end PositionedTanglesIio
 
 /-- The `TypedObjects` for each `β < α`. -/
 abbrev TypedObjectsIio (α : Λ) [TangleDataIio α] :=

@@ -183,7 +183,7 @@ theorem Biexact.smul_eq_smul {β : Iio α} {π π' : Allowable β} {c : SupportC
   simp only [smul_inr, inr.injEq]
   by_cases hL : N.IsLitter
   swap
-  · have := ih _ (Constrains.nearLitter A N (NearLitter.not_isLitter hL))
+  · have := ih _ (Constrains.nearLitter A N hL)
       (h.constrains (reflTransGen_nearLitter Relation.ReflTransGen.refl))
     simp only [smul_inr, inr.injEq] at this
     refine' SetLike.coe_injective _

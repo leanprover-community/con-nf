@@ -188,7 +188,7 @@ instance : MulAction (SemiallowablePerm α) (NonemptyCode α) :=
 
 end SemiallowablePerm
 
-variable [BasePositions] [PositionFunctionIio α] [TypedObjectsIio α] [TangleData α]
+variable [BasePositions] [PositionedTanglesIio α] [TypedObjectsIio α] [TangleData α]
 
 /-- We say that a semiallowable permutation is allowable if its one-step derivatives commute with
 the `fuzz` maps. -/
