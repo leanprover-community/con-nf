@@ -246,10 +246,13 @@ theorem _root_.ConNF.StructAction.allowable_exactlyApproximates {γ : Iio α} (�
   (freedomOfAction_of_lt _ h _ (StructAction.rc_free _ h₁ h₂)).choose_spec
 
 noncomputable def _root_.ConNF.StructAction.hypothesisedAllowable (φ : StructAction β) {L : Litter}
-    {A : ExtendedIndex β} (h : InflexibleCoe L A) (h₁ : (φ.comp (h.B.cons (coe_lt h.hδ))).Lawful)
-    (h₂ : (φ.comp (h.B.cons (coe_lt h.hδ))).MapFlexible) : Allowable h.δ :=
-  (φ.comp (h.B.cons (coe_lt h.hδ))).allowable
-    (h.hδ.trans_le (show _ from coe_le_coe.mp (le_of_path h.B))) h₁ h₂
+    {A : ExtendedIndex β} (h : InflexibleCoe L A)
+    (h₁ : StructAction.Lawful (φ.comp (h.B.cons (coe_lt h.hδ))))
+    (h₂ : StructAction.MapFlexible (φ.comp (h.B.cons (coe_lt h.hδ)))) : Allowable h.δ :=
+  StructAction.allowable
+    (φ.comp (h.B.cons (coe_lt h.hδ)))
+    (h.hδ.trans_le (show _ from coe_le_coe.mp (le_of_path h.B)))
+    h₁ h₂
 
 /- TODO: Extract out the path bit from inflexible_coe so that the following lemma doesn't need
 to be stated. -/
@@ -265,11 +268,12 @@ theorem _root_.ConNF.StructAction.hypothesisedAllowable_eq {φ : StructAction β
 
 theorem _root_.ConNF.StructAction.hypothesisedAllowable_exactlyApproximates (φ : StructAction β)
     {L : Litter} {A : ExtendedIndex β} (h : InflexibleCoe L A)
-    (h₁ : (φ.comp (h.B.cons (coe_lt h.hδ))).Lawful)
-    (h₂ : (φ.comp (h.B.cons (coe_lt h.hδ))).MapFlexible) :
-    ((φ.comp (h.B.cons (coe_lt h.hδ))).rc h₁).ExactlyApproximates
+    (h₁ : StructAction.Lawful (φ.comp (h.B.cons (coe_lt h.hδ))))
+    (h₂ : StructAction.MapFlexible (φ.comp (h.B.cons (coe_lt h.hδ)))) :
+    StructApprox.ExactlyApproximates
+      (StructAction.rc (φ.comp (h.B.cons (coe_lt h.hδ))) h₁)
       (Allowable.toStructPerm (φ.hypothesisedAllowable h h₁ h₂)) :=
-  (φ.comp (h.B.cons (coe_lt h.hδ))).allowable_exactlyApproximates _ _ _
+  StructAction.allowable_exactlyApproximates (φ.comp (h.B.cons (coe_lt h.hδ))) _ _ _
 
 noncomputable def litterCompletion (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
     (H : Hypothesis ⟨A, inr L.toNearLitter⟩) : Litter :=
@@ -310,8 +314,8 @@ theorem litterCompletion_of_inflexibleCoe' (π : StructApprox β) (A : ExtendedI
 
 theorem litterCompletion_of_inflexibleCoe (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
     (H : Hypothesis ⟨A, inr L.toNearLitter⟩) (h : InflexibleCoe L A)
-    (h₁ : ((ihAction H).comp (h.B.cons (coe_lt h.hδ))).Lawful)
-    (h₂ : ((ihAction H).comp (h.B.cons (coe_lt h.hδ))).MapFlexible) :
+    (h₁ : StructAction.Lawful ((ihAction H).comp (h.B.cons (coe_lt h.hδ))))
+    (h₂ : StructAction.MapFlexible ((ihAction H).comp (h.B.cons (coe_lt h.hδ)))) :
     litterCompletion π A L H =
       fuzz (coe_ne_coe.mpr <| coe_ne' h.hδε)
         ((ihAction H).hypothesisedAllowable h h₁ h₂ • h.t) := by

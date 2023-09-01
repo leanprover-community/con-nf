@@ -105,7 +105,7 @@ theorem preimageAction_lawful (hπf : π.Free) {c : SupportCondition β} :
     exact (completeAtomMap_mem_completeNearLitterMap_toNearLitter hπf).symm
 
 theorem preimageAction_comp_mapFlexible {hπf : π.Free} {γ : Iio α} {c : SupportCondition β}
-    (A : Path (β : TypeIndex) γ) : ((preimageAction hπf c).comp A).MapFlexible :=
+    (A : Path (β : TypeIndex) γ) : StructAction.MapFlexible ((preimageAction hπf c).comp A) :=
   constrainedAction_comp_mapFlexible hπf A
 
 theorem Relation.reflTransGen_of_eq {α : Type _} {r : α → α → Prop} {x y : α} (h : x = y) :
@@ -116,8 +116,9 @@ theorem Relation.reflTransGen_of_eq {α : Type _} {r : α → α → Prop} {x y 
 theorem preimageAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (N : NearLitter) (c : SupportCondition β)
     (hc : ⟨A.comp B, inr (π.completeNearLitterMap (A.comp B) N)⟩ ≺[α] c) (ρ : Allowable γ)
-    (h : (((preimageAction hπf c).comp A).rc
-      ((preimageAction_lawful hπf).comp _)).ExactlyApproximates (Allowable.toStructPerm ρ)) :
+    (h : StructApprox.ExactlyApproximates
+      (StructAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
+      (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
     Structural.comp B (Allowable.toStructPerm ρ) • N := by
   refine' constrainedAction_coherent hπf A B N _ _ _
@@ -128,8 +129,9 @@ theorem preimageAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : T
 theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c : SupportCondition β)
     (hc : ⟨A.comp B, inl (π.completeAtomMap (A.comp B) a)⟩ ≺[α] c) (ρ : Allowable γ)
-    (h : (((preimageAction hπf c).comp A).rc
-      ((preimageAction_lawful hπf).comp _)).ExactlyApproximates (Allowable.toStructPerm ρ)) :
+    (h : StructApprox.ExactlyApproximates
+      (StructAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
+      (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = Structural.comp B (Allowable.toStructPerm ρ) • a := by
   refine' constrainedAction_coherent_atom A B a _ _ _ _ ρ h
   refine' ⟨_, _, Relation.ReflTransGen.refl⟩
