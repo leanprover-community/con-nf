@@ -202,18 +202,18 @@ variable {ρ ρ' : SemiallowablePerm α}
 
 theorem isAllowable_one : (1 : SemiallowablePerm α).IsAllowable := by
   intros β γ hβγ t
-  simp only [SemiallowablePerm.one_apply, map_one, Structural.one_apply, one_smul]
+  simp only [SemiallowablePerm.one_apply, map_one, Tree.one_apply, one_smul]
 
 theorem isAllowable_inv (h : ρ.IsAllowable) : ρ⁻¹.IsAllowable := by
   intros β γ hβγ t
   have := h hβγ (ρ⁻¹ β • t)
   simp only [SemiallowablePerm.inv_apply, smul_inv_smul] at this
   rw [← this]
-  simp only [SemiallowablePerm.inv_apply, map_inv, Structural.inv_apply, inv_smul_smul]
+  simp only [SemiallowablePerm.inv_apply, map_inv, Tree.inv_apply, inv_smul_smul]
 
 theorem isAllowable_mul (h : ρ.IsAllowable) (h' : ρ'.IsAllowable) : (ρ * ρ').IsAllowable := by
   intros β γ hβγ t
-  simp only [SemiallowablePerm.mul_apply, map_mul, Structural.mul_apply, mul_smul]
+  simp only [SemiallowablePerm.mul_apply, map_mul, Tree.mul_apply, mul_smul]
   rw [h' hβγ t, h hβγ (ρ' β • t)]
 
 theorem isAllowable_div (h : ρ.IsAllowable) (h' : ρ'.IsAllowable) : (ρ / ρ').IsAllowable := by
@@ -372,8 +372,8 @@ theorem smul_cloud (ρ : NewAllowable α) (s : Set (Tangle β)) (hβγ : β ≠ 
     refine ⟨Allowable.toStructPerm ((ρ : SemiallowablePerm α) γ)⁻¹
         (Quiver.Hom.toPath <| bot_lt_coe _) • N, ⟨t, ht₁, ?_⟩, ?_⟩
     · rw [NearLitterPerm.smul_nearLitter_fst, ht₂, ← ρ.prop hβγ, map_inv,
-        Structural.inv_apply, inv_smul_smul]
-    · rw [smul_typedNearLitter, map_inv, Structural.inv_apply, smul_inv_smul]
+        Tree.inv_apply, inv_smul_smul]
+    · rw [smul_typedNearLitter, map_inv, Tree.inv_apply, smul_inv_smul]
 
 /-- Allowable permutations commute with the `cloudCode` map. -/
 theorem smul_cloudCode (ρ : NewAllowable α) (hc : c.1 ≠ γ) :

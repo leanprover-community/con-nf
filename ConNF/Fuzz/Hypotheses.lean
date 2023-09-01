@@ -230,7 +230,7 @@ noncomputable instance Bot.tangleData : TangleData ⊥
     where
   Tangle := Atom
   Allowable := NearLitterPerm
-  allowableToStructPerm := Structural.toBotIso.toMonoidHom
+  allowableToStructPerm := Tree.toBotIso.toMonoidHom
   allowableAction := inferInstance
   designatedSupport a :=
     { carrier := {⟨Quiver.Path.nil, Sum.inl a⟩}

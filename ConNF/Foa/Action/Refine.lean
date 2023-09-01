@@ -116,7 +116,7 @@ theorem rc_comp_atomPerm {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) :
     (rc (φ.comp A) (hφ.comp A) B).atomPerm = (φ.rc hφ (A.comp B)).atomPerm := by
   unfold rc refine complete NearLitterAction.refine NearLitterAction.complete
-  simp_rw [Structural.comp_apply]
+  simp_rw [Tree.comp_apply]
 
 theorem rc_comp_smul_atom {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) (a : Atom) :

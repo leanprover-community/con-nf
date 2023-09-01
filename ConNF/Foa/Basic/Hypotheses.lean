@@ -101,7 +101,7 @@ class Phase2Assumptions extends Phase2Data α where
     ∀ (β : IicBot α) (γ : IicBot α), (γ : TypeIndex) < β → Allowable β →* Allowable γ
   allowableDerivative_eq :
     ∀ (β : IicBot α) (γ : IicBot α) (hγ : (γ : TypeIndex) < β) (π : Allowable β),
-      Structural.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm π) =
+      Tree.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm π) =
         Allowable.toStructPerm (allowableDerivative β γ hγ π)
   smul_designatedSupport {β : Iic α} (t : Tangle β) (π : Allowable β) :
     π • (designatedSupport t : Set (SupportCondition β)) = designatedSupport (π • t)
@@ -187,14 +187,14 @@ theorem Allowable.comp_comp {β γ δ : IicBot α} (A : Quiver.Path (β : TypeIn
 theorem Allowable.toStructPerm_comp {β γ : IicBot α}
     (A : Quiver.Path (β : TypeIndex) γ) (π : Allowable β) :
     Allowable.toStructPerm (Allowable.comp A π) =
-    Structural.comp A (Allowable.toStructPerm π) := by
+    Tree.comp A (Allowable.toStructPerm π) := by
   obtain ⟨γ, hγ⟩ := γ
   change Quiver.Path (β : TypeIndex) γ at A
   induction A with
-  | nil => rw [Structural.comp_nil, Allowable.comp_nil, MonoidHom.id_apply]
+  | nil => rw [Tree.comp_nil, Allowable.comp_nil, MonoidHom.id_apply]
   | cons A h ih =>
       change toStructPerm (allowableDerivative _ _ _ (comp _ π)) = _
-      rw [Structural.comp_cons, ← allowableDerivative_eq, ih]
+      rw [Tree.comp_cons, ← allowableDerivative_eq, ih]
       rfl
 
 @[simp]
@@ -235,7 +235,7 @@ theorem ofBot_comp {β : IicBot α} {π : Allowable β}
       (show Quiver.Path (β : TypeIndex) (⟨γ, ?_⟩ : IicBot α) from A)
       (show ⊥ < ⟨γ, _⟩ from h')
     rw [← this, MonoidHom.comp_apply, ofBot_comp', Allowable.toStructPerm_comp]
-    simp only [Structural.comp_apply, Quiver.Hom.comp_toPath]
+    simp only [Tree.comp_apply, Quiver.Hom.comp_toPath]
     exact le_trans (le_of_path A) β.prop
 
 @[simp]
@@ -257,7 +257,7 @@ theorem toStructPerm_smul_fuzz (β : IicBot α) (γ : IioBot α) (δ : Iio α)
       fuzz (Subtype.coe_injective.ne hγδ) t =
     fuzz (Subtype.coe_injective.ne hγδ) (allowableDerivative β γ hγ π • t) := by
   have := congr_fun (allowableDerivative_eq β δ hδ π) (Quiver.Hom.toPath (bot_lt_coe _))
-  simp only [Structural.comp_apply, Quiver.Hom.comp_toPath] at this
+  simp only [Tree.comp_apply, Quiver.Hom.comp_toPath] at this
   rw [this, ← smul_fuzz γ δ hγ hδ hγδ π t, ofBot_comp']
 
 end ConNF

@@ -370,21 +370,21 @@ def Free (α : Λ) [BasePositions] [Phase2Assumptions α] {β : TypeIndex} (π :
 end NearLitterApprox
 
 /-!
-# Structural approximations
+# Tree approximations
 -/
 
 /-- A `β`-structural approximation is a product that assigns a near-litter approximation to each
 `β`-extended index. -/
 abbrev StructApprox :=
-  Structural NearLitterApprox
+  Tree NearLitterApprox
 
 namespace StructApprox
 
 def Approximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructPerm β) : Prop :=
-  ∀ A, (π₀ A).Approximates (Structural.ofBot <| Structural.comp A π)
+  ∀ A, (π₀ A).Approximates (Tree.ofBot <| Tree.comp A π)
 
 def ExactlyApproximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructPerm β) : Prop :=
-  ∀ A, (π₀ A).ExactlyApproximates (Structural.ofBot <| Structural.comp A π)
+  ∀ A, (π₀ A).ExactlyApproximates (Tree.ofBot <| Tree.comp A π)
 
 variable {α : Λ} [BasePositions] [Phase2Assumptions α]
 
@@ -393,18 +393,18 @@ def Free {β : Iic α} (π₀ : StructApprox β) : Prop :=
 
 theorem Approximates.comp {β γ : TypeIndex} {π₀ : StructApprox β} {π : StructPerm β}
     (h : π₀.Approximates π) (A : Path β γ) :
-    StructApprox.Approximates (π₀.comp A) (Structural.comp A π) :=
+    StructApprox.Approximates (π₀.comp A) (Tree.comp A π) :=
   by
   intro B
-  rw [Structural.comp_apply, Structural.comp_comp]
+  rw [Tree.comp_apply, Tree.comp_comp]
   exact h _
 
 theorem ExactlyApproximates.comp {β γ : TypeIndex} {π₀ : StructApprox β} {π : StructPerm β}
     (h : π₀.ExactlyApproximates π) (A : Path β γ) :
-    StructApprox.ExactlyApproximates (π₀.comp A) (Structural.comp A π) :=
+    StructApprox.ExactlyApproximates (π₀.comp A) (Tree.comp A π) :=
   by
   intro B
-  rw [Structural.comp_apply, Structural.comp_comp]
+  rw [Tree.comp_apply, Tree.comp_comp]
   exact h _
 
 /-!
