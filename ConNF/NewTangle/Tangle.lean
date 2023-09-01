@@ -39,7 +39,7 @@ abbrev Extensions :=
 
 namespace Semitangle
 
-variable [PositionFunctionIio α] [TypedObjectsIio α]
+variable [PositionedTanglesIio α] [TypedObjectsIio α]
 
 /-- Keeps track of the preferred extension of a semitangle, along with coherence conditions
 relating each extension of the semitangle. In particular, each non-preferred extension can be
@@ -79,7 +79,7 @@ end Semitangle
 
 open Semitangle
 
-variable [PositionFunctionIio α] [TypedObjectsIio α]
+variable [PositionedTanglesIio α] [TypedObjectsIio α]
 
 /-- A *semitangle* is a collection of `β`-tangles for each lower level `β < α`, together with
 a preference for one of these extensions. -/

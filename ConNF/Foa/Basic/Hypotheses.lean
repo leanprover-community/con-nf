@@ -23,30 +23,30 @@ instance almostPositionedTypedObjectsIio (β : Iio α) [inst_0 : TangleData β]
     [inst : @TypedObjects _ (β : Iic α) inst_0] : TypedObjects β :=
   inst
 
-instance positionedPositionedTypedObjectsIio (β : Iio α) [TangleData β] [inst : PositionFunction β] :
-    PositionFunction (β : Λ) :=
+instance positionedPositionedTypedObjectsIio (β : Iio α) [TangleData β] [inst : PositionedTangles β] :
+    PositionedTangles (β : Λ) :=
   inst
 
 /-- The motor of the initial recursion. This contains all the information needed for phase 1 of the
 recursion. -/
-class PositionedTypedObjects [TangleData α] [TypedObjects α] [PositionFunction α] : Prop where
-  typedAtomPosition_eq : ∀ a : Atom, position (typedAtom a : Tangle α) = typedAtomPosition a
-  typedNearLitterPosition_eq :
-    ∀ N : NearLitter, position (typedNearLitter N : Tangle α) = typedNearLitterPosition N
+class PositionedTypedObjects [TangleData α] [TypedObjects α] [PositionedTangles α] : Prop where
+  pos_atom_eq : ∀ a : Atom, pos (typedAtom a : Tangle α) = pos a
+  pos_nearLitter_eq :
+    ∀ N : NearLitter, pos (typedNearLitter N : Tangle α) = pos N
   /-- All tangles are positioned later than all of the support conditions in their designated
   support. -/
-  typedAtomPosition_le :
+  pos_atom_le :
     ∀ (t : Tangle α) (A : ExtendedIndex α) (a : Atom),
-      ⟨A, Sum.inl a⟩ ∈ designatedSupport t → typedAtomPosition a ≤ position t
+      ⟨A, Sum.inl a⟩ ∈ designatedSupport t → pos a ≤ pos t
   /-- All tangles are positioned later than all of the support conditions in their designated
   support. -/
-  typedNearLitterPosition_le :
+  pos_nearLitter_le :
     ∀ (t : Tangle α) (A : ExtendedIndex α) (N : NearLitter),
-      ⟨A, Sum.inr N⟩ ∈ designatedSupport t → typedNearLitterPosition N ≤ position t
+      ⟨A, Sum.inr N⟩ ∈ designatedSupport t → pos N ≤ pos t
 
 class Phase2Data where
   lowerTangleData : ∀ β : Iic α, TangleData β
-  lowerPositionFunction : ∀ β : Iio α, PositionFunction β
+  lowerPositionedTangles : ∀ β : Iio α, PositionedTangles β
   lowerTypedObjects : ∀ β : Iic α, TypedObjects β
   lowerPositionedTypedObjects : ∀ β : Iio α, PositionedTypedObjects β
 
@@ -57,8 +57,8 @@ variable [Phase2Data α] {α} {β : Iic α} {γ : Iio α}
 instance corePositionedTypedObjects : TangleData β :=
   lowerTangleData β
 
-instance positionedPositionedTypedObjects : PositionFunction γ :=
-  lowerPositionFunction γ
+instance positionedPositionedTypedObjects : PositionedTangles γ :=
+  lowerPositionedTangles γ
 
 instance almostPositionedTypedObjects : TypedObjects β :=
   lowerTypedObjects β
@@ -73,9 +73,9 @@ noncomputable instance IicBotTangleData : ∀ β : IicBot α, TangleData β
 noncomputable instance IioBotTangleData (β : IioBot α) : TangleData β :=
   show TangleData (⟨β, le_of_lt (IioBot.lt β)⟩ : IicBot α) from inferInstance
 
-noncomputable instance IioBotPositionFunction : ∀ β : IioBot α, PositionFunction β
-  | ⟨⊥, _⟩ => Bot.positionFunction
-  | ⟨(β : Λ), hβ⟩ => lowerPositionFunction ⟨β, coe_lt_coe.mp hβ⟩
+noncomputable instance IioBotPositionedTangles : ∀ β : IioBot α, PositionedTangles β
+  | ⟨⊥, _⟩ => Bot.positionedTangles
+  | ⟨(β : Λ), hβ⟩ => lowerPositionedTangles ⟨β, coe_lt_coe.mp hβ⟩
 
 instance hasCoeIioIicIndex : Coe (Iio α) (IicBot α) :=
   ⟨fun β => ⟨(β : Λ), le_of_lt (WithBot.coe_lt_coe.mpr (Iio.lt β))⟩⟩

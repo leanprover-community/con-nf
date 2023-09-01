@@ -39,7 +39,7 @@ universe u
 namespace ConNF
 
 variable [Params.{u}] [BasePositions] {α : Λ} {β : IioBot α} {γ : Iio α} [TangleDataIio α]
-  [TypedObjectsIio α] [PositionFunctionIio α]
+  [TypedObjectsIio α] [PositionedTanglesIio α]
 
 open IioBot
 
