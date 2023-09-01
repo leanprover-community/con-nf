@@ -59,11 +59,11 @@ theorem completeNearLitterPerm_smul_nearLitter (hπf : π.Free) (A : ExtendedInd
 def AllowableBelow (hπf : π.Free) (γ : IicBot α) (A : Path (β : TypeIndex) γ) : Prop :=
   ∃ ρ : Allowable γ,
     ∀ B : ExtendedIndex γ,
-      StructPerm.ofBot (StructPerm.comp B (Allowable.toStructPerm ρ)) =
+      Structural.ofBot (Structural.comp B (Allowable.toStructPerm ρ)) =
         completeNearLitterPerm hπf (A.comp B)
 
 @[simp]
-theorem ofBot_toStructPerm (π : Allowable ⊥) : StructPerm.ofBot (Allowable.toStructPerm π) = π := by
+theorem ofBot_toStructPerm (π : Allowable ⊥) : Structural.ofBot (Allowable.toStructPerm π) = π := by
   rfl
 
 theorem allowableBelow_bot (hπf : π.Free) (A : ExtendedIndex β) : AllowableBelow hπf ⊥ A := by
@@ -115,7 +115,7 @@ theorem ConNF.StructApprox.extracted_1
   (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
   (ρs : (δ : IioBot α) → (δ : TypeIndex) < γ → Allowable δ)
   (hρ : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ) (B : ExtendedIndex δ),
-    StructPerm.ofBot (StructPerm.comp B (Allowable.toStructPerm (ρs δ h))) =
+    Structural.ofBot (Structural.comp B (Allowable.toStructPerm (ρs δ h))) =
       completeNearLitterPerm hπf ((A.cons h).comp B))
   (ε : Iio α) (hε : (ε : TypeIndex) < γ) (a : Atom) :
   Allowable.toStructPerm (ρs ε hε) (Hom.toPath (bot_lt_coe _)) •
@@ -123,7 +123,7 @@ theorem ConNF.StructApprox.extracted_1
   fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe)
     (NearLitterPerm.ofBot (ρs ⊥ (bot_lt_coe _)) • a) := by
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
-  simp only [Path.comp_cons, Path.comp_nil, StructPerm.comp_bot, StructPerm.ofBot_toBot,
+  simp only [Path.comp_cons, Path.comp_nil, Structural.comp_bot, Structural.ofBot_toBot,
     Hom.toPath] at this
   erw [this]
   rw [completeNearLitterPerm_smul_litter]
@@ -131,7 +131,7 @@ theorem ConNF.StructApprox.extracted_1
     ⟨γ, ε, coe_lt_coe.mp hε, A, a, rfl, rfl⟩).trans _
   refine' congr_arg _ _
   specialize hρ ⊥ (bot_lt_coe _) Path.nil
-  rw [Path.comp_nil, StructPerm.comp_nil
+  rw [Path.comp_nil, Structural.comp_nil
     (Allowable.toStructPerm (ρs ⊥ (bot_lt_coe _)))] at hρ
   rw [(ofBot_toStructPerm (ρs ⊥ (bot_lt_coe _))).symm.trans hρ]
   rfl
@@ -140,7 +140,7 @@ theorem ConNF.StructApprox.extracted_2
   (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
   (ρs : (δ : IioBot α) → (δ : TypeIndex) < γ → Allowable δ)
   (hρ : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ) (B : ExtendedIndex δ),
-    StructPerm.ofBot (StructPerm.comp B (Allowable.toStructPerm (ρs δ h))) =
+    Structural.ofBot (Structural.comp B (Allowable.toStructPerm (ρs δ h))) =
       completeNearLitterPerm hπf ((A.cons h).comp B))
   (δ : Iio α) (ε : Iio α) (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ)
   (hδε : δ ≠ ε) (t : Tangle ↑δ) :
@@ -148,7 +148,7 @@ theorem ConNF.StructApprox.extracted_2
     fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t =
   fuzz (coe_ne_coe.mpr <| coe_ne' hδε) (ρs δ hδ • t) := by
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
-  simp only [StructPerm.comp_bot, StructPerm.ofBot_toBot, Path.comp_cons,
+  simp only [Structural.comp_bot, Structural.ofBot_toBot, Path.comp_cons,
     Path.comp_nil] at this
   erw [this]
   rw [completeNearLitterPerm_smul_litter]
@@ -220,7 +220,7 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
   · intro B
     obtain ⟨δ, hδ, B, rfl⟩ := exists_nil_cons_of_path B
     specialize hρ δ hδ B
-    rw [← StructPerm.comp_comp]
+    rw [← Structural.comp_comp]
     have := allowableOfSmulFuzz_comp_eq (πs := ρs) (h := ?_) δ hδ
     apply_fun Allowable.toStructPerm at this
     rw [← allowableDerivative_eq] at this
@@ -247,7 +247,7 @@ noncomputable def completeAllowable (hπf : π.Free) : Allowable β :=
   (allowableBelow_all hπf β Path.nil).choose
 
 theorem completeAllowable_comp (hπf : π.Free) (A : ExtendedIndex β) :
-    StructPerm.ofBot (StructPerm.comp A (Allowable.toStructPerm <| completeAllowable hπf)) =
+    Structural.ofBot (Structural.comp A (Allowable.toStructPerm <| completeAllowable hπf)) =
       completeNearLitterPerm hπf A := by
   have := (allowableBelow_all hπf β Path.nil).choose_spec A
   rw [Path.nil_comp] at this

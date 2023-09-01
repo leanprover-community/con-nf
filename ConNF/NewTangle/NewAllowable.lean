@@ -316,7 +316,7 @@ noncomputable def coeHom : NewAllowable α →* SemiallowablePerm α
 
 /-- Turn an allowable permutation into a structural permutation. -/
 noncomputable def toStructPerm : NewAllowable α →* StructPerm α :=
-  SemiallowablePerm.toStructPerm.comp coeHom
+  SemiallowablePerm.toStructural.comp coeHom
 
 section
 

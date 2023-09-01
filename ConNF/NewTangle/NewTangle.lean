@@ -436,7 +436,7 @@ theorem smul_intro (ρ : NewAllowable α) (s : Set (Tangle β)) (hs) :
 
 -- TODO: Move next two lemmas elsewhere.
 theorem allowableToStructPerm_bot (π : Allowable (⊥ : IioBot α)) :
-    TangleData.allowableToStructPerm π = StructPerm.toBotIso.toMonoidHom π :=
+    TangleData.allowableToStructPerm π = Structural.toBotIso.toMonoidHom π :=
   rfl
 
 theorem _root_.ConNF.SemiallowablePerm.coe_apply_bot (ρ : SemiallowablePerm α) :

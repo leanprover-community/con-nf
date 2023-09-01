@@ -144,23 +144,23 @@ theorem isException_of_inOut {π : NearLitterPerm} {a : Atom} {L : Litter} :
 structure Biexact {β : Iio α} (π π' : StructPerm β) (c : SupportCondition β) : Prop where
   smul_eq_smul_atom :
     ∀ A : ExtendedIndex β,
-      ∀ a : Atom, ⟨A, inl a⟩ ≤[α] c → StructPerm.comp A π • a = StructPerm.comp A π' • a
+      ∀ a : Atom, ⟨A, inl a⟩ ≤[α] c → Structural.comp A π • a = Structural.comp A π' • a
   smul_eq_smul_litter :
     ∀ A : ExtendedIndex β,
       ∀ L : Litter,
         ⟨A, inr L.toNearLitter⟩ ≤[α] c →
-          Flexible α L A → StructPerm.comp A π • L = StructPerm.comp A π' • L
+          Flexible α L A → Structural.comp A π • L = Structural.comp A π' • L
   exact :
     ∀ A : ExtendedIndex β,
       ∀ L : Litter,
         ⟨A, inr L.toNearLitter⟩ ≤[α] c →
-          StructPerm.comp A π • L = StructPerm.comp A π' • L →
-            StructPerm.comp A π • L.toNearLitter = StructPerm.comp A π' • L.toNearLitter
+          Structural.comp A π • L = Structural.comp A π' • L →
+            Structural.comp A π • L.toNearLitter = Structural.comp A π' • L.toNearLitter
 
 theorem Biexact.atoms {β : Iio α} {π π' : StructPerm β} {c : SupportCondition β}
     (h : Biexact π π' c) (A : ExtendedIndex β) :
-    NearLitterPerm.Biexact (StructPerm.ofBot <| StructPerm.comp A π)
-      (StructPerm.ofBot <| StructPerm.comp A π') {a | ⟨A, inl a⟩ ≤[α] c} ∅ :=
+    NearLitterPerm.Biexact (Structural.ofBot <| Structural.comp A π)
+      (Structural.ofBot <| Structural.comp A π') {a | ⟨A, inl a⟩ ≤[α] c} ∅ :=
   NearLitterPerm.Biexact.atoms _ (h.smul_eq_smul_atom A)
 
 theorem Biexact.constrains {β : Iio α} {π π' : StructPerm β} {c d : SupportCondition β}
@@ -235,10 +235,10 @@ theorem Biexact.smul_eq_smul {β : Iio α} {π π' : Allowable β} {c : SupportC
         (show Path ((β : IicBot α) : TypeIndex) (γ : IicBot α) from B),
       Allowable.toStructPerm_comp
         (show Path ((β : IicBot α) : TypeIndex) (γ : IicBot α) from B),
-      StructPerm.comp_comp, StructPerm.comp_comp]
+      Structural.comp_comp, Structural.comp_comp]
     have := ih ⟨(B.cons <| coe_lt hδ).comp c.path, c.value⟩ ?_ ?_
     · simp only [Path.comp_cons, Path.comp_nil, StructPerm.smul_supportCondition_eq_smul_iff,
-        StructPerm.comp_apply]
+        Structural.comp_apply]
       exact this.symm
     · exact Constrains.fuzz hδ hε hδε _ _ _ hc
     · refine' h.constrains (Relation.ReflTransGen.single _)
@@ -260,7 +260,7 @@ theorem Biexact.smul_eq_smul {β : Iio α} {π π' : Allowable β} {c : SupportC
         (show Path ((β : IicBot α) : TypeIndex) (γ : IicBot α) from B),
       Allowable.toStructPerm_comp
         (show Path ((β : IicBot α) : TypeIndex) (γ : IicBot α) from B),
-      StructPerm.comp_apply, StructPerm.comp_apply]
+      Structural.comp_apply, Structural.comp_apply]
     have := ih ⟨B.cons <| bot_lt_coe _, inl a⟩ ?_ ?_
     · simp only [smul_inl, inl.injEq] at this
       exact this
@@ -271,8 +271,8 @@ theorem Biexact.smul_eq_smul {β : Iio α} {π π' : Allowable β} {c : SupportC
 theorem Biexact.smul_eq_smul_nearLitter {β : Iio α} {π π' : Allowable β} {A : ExtendedIndex β}
     {N : NearLitter}
     (h : Biexact (Allowable.toStructPerm π) (Allowable.toStructPerm π') ⟨A, inr N⟩) :
-    StructPerm.comp A (Allowable.toStructPerm π) • N =
-    StructPerm.comp A (Allowable.toStructPerm π') • N := by
+    Structural.comp A (Allowable.toStructPerm π) • N =
+    Structural.comp A (Allowable.toStructPerm π') • N := by
   have := h.smul_eq_smul
   simp only [Allowable.toStructPerm_smul, StructPerm.smul_supportCondition_eq_smul_iff, smul_inr,
     inr.injEq] at this
@@ -280,7 +280,7 @@ theorem Biexact.smul_eq_smul_nearLitter {β : Iio α} {π π' : Allowable β} {A
 
 theorem mem_dom_of_exactlyApproximates {β : Iio α} {π₀ : StructApprox β} {π : StructPerm β}
     (hπ : π₀.ExactlyApproximates π) {A : ExtendedIndex β} {a : Atom} {L : Litter}
-    (h : InOut (StructPerm.ofBot <| StructPerm.comp A π) a L) :
+    (h : InOut (Structural.ofBot <| Structural.comp A π) a L) :
     a ∈ (π₀ A).atomPerm.domain := by
   obtain h | h := isException_of_inOut h
   · exact (hπ A).exception_mem _ h
@@ -431,9 +431,9 @@ theorem completeLitterMap_inflexibleCoe_iff (hπf : π.Free) {c d : SupportCondi
   ⟨fun ⟨h⟩ => ⟨completeLitterMap_inflexibleCoe' hπf h⟩, fun ⟨h⟩ =>
     ⟨completeLitterMap_inflexibleCoe hπf hcd h hL⟩⟩
 
-theorem _root_.ConNF.StructPerm.comp_fst {α : TypeIndex} (π : StructPerm α)
+theorem _root_.ConNF.Structural.comp_fst {α : TypeIndex} (π : StructPerm α)
     (A : ExtendedIndex α) (N : NearLitter) :
-    (StructPerm.comp A π • N).fst = StructPerm.comp A π • N.fst :=
+    (Structural.comp A π • N).fst = Structural.comp A π • N.fst :=
   rfl
 
 theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
@@ -443,14 +443,14 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
     (h : (((constrainedAction π s hs).comp A).rc hπ).ExactlyApproximates
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp N.1) N.2 =
-    StructPerm.comp N.1 (Allowable.toStructPerm ρ) • N.2 := by
+    Structural.comp N.1 (Allowable.toStructPerm ρ) • N.2 := by
   revert hc
   refine'
     WellFounded.induction
       (C := fun N : ExtendedIndex γ × NearLitter => (∃ c : SupportCondition β, c ∈ s ∧
         Relation.ReflTransGen (Constrains α ↑β) ⟨A.comp N.fst, inr N.snd⟩ c) →
         completeNearLitterMap π (Path.comp A N.fst) N.snd =
-        StructPerm.comp N.fst (Allowable.toStructPerm ρ) • N.snd)
+        Structural.comp N.fst (Allowable.toStructPerm ρ) • N.snd)
       (InvImage.wf (fun N => ⟨N.1, inr N.2⟩) (WellFounded.transGen (constrains_wf α γ))) N _
   clear N
   rintro ⟨B, N⟩ ih ⟨c, hc₁, hc₂⟩
@@ -458,7 +458,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
   have hdom : ((((constrainedAction π s hs).comp A B).refine (hπ B)).litterMap N.fst).Dom :=
     ⟨c, hc₁, reflTransGen_nearLitter hc₂⟩
   suffices completeLitterMap π (A.comp B) N.fst =
-      StructPerm.comp B (Allowable.toStructPerm ρ) • N.fst by
+      Structural.comp B (Allowable.toStructPerm ρ) • N.fst by
     refine' SetLike.coe_injective _
     refine'
       Eq.trans _
@@ -466,7 +466,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
             (NearLitterAction.refine_precise _) this.symm).symm
     rw [completeNearLitterMap_eq' (A.comp B) N]
     simp only [StructAction.refine_apply, StructAction.refine_litterMap,
-      foaHypothesis_nearLitterImage, StructPerm.ofBot_smul]
+      foaHypothesis_nearLitterImage, Structural.ofBot_smul]
     simp only [StructAction.comp_apply, constrainedAction_litterMap, symmDiff_right_inj]
     ext a : 1
     constructor
@@ -500,7 +500,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
       refine' ⟨hdom, hL⟩
   · rw [completeLitterMap_eq_of_inflexibleBot (hL.comp A)]
     obtain ⟨δ, ε, hε, C, a, rfl, rfl⟩ := hL
-    rw [StructPerm.comp_cons, StructPerm.comp_cons]
+    rw [Structural.comp_cons, Structural.comp_cons]
     rw [← Allowable.toStructPerm_comp (show Path ((γ : IicBot α) : TypeIndex) (δ : IicBot α) from C)]
     refine'
       Eq.trans _
@@ -524,7 +524,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
     · rw [StructAction.rc_smul_atom_eq]
       rfl
       exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.fuzz_bot hε _ _) hc₂'⟩
-    · simp only [StructPerm.comp_bot, StructPerm.ofBot_toBot]
+    · simp only [Structural.comp_bot, Structural.ofBot_toBot]
       have := comp_bot_smul_atom (show Allowable (γ : IicBot α) from ρ)
         (show Path ((γ : IicBot α) : TypeIndex) (⊥ : IicBot α) from C.cons (bot_lt_coe _)) a
       dsimp only at this
@@ -540,7 +540,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
       exact ihAction_comp_mapFlexible hπf _ _
     obtain ⟨δ, ε, ζ, hε, hζ, hεζ, C, t, rfl, rfl⟩ := hL
     generalize_proofs -- Massively speeds up rewrites and simplifications.
-    rw [StructPerm.comp_cons, StructPerm.comp_cons]
+    rw [Structural.comp_cons, Structural.comp_cons]
     rw [← Allowable.toStructPerm_comp (show Path ((γ : IicBot α) : TypeIndex) (δ : IicBot α) from C)]
     refine'
       Eq.trans _
@@ -562,7 +562,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
       simp only [smul_inl, inl.injEq]
       rw [Allowable.toStructPerm_comp
           (show Path ((γ : IicBot α) : TypeIndex) (ε : IicBot α) from _),
-        StructPerm.comp_apply]
+        Structural.comp_apply]
       refine' Eq.trans _ ((h _).map_atom a _)
       refine'
         (((ihAction _).hypothesisedAllowable_exactlyApproximates
@@ -617,17 +617,17 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
           refine' Relation.ReflTransGen.trans (transGen_constrains_comp haN _).to_reflTransGen _
           exact reflTransGen_nearLitter Relation.ReflTransGen.refl
         · simp only [StructAction.comp_apply, ihAction_atomMap, foaHypothesis_atomImage,
-            constrainedAction_atomMap, StructPerm.ofBot_smul] at this ⊢
+            constrainedAction_atomMap, Structural.ofBot_smul] at this ⊢
           rw [Allowable.toStructPerm_comp
               (show Path ((γ : IicBot α) : TypeIndex) (ε : IicBot α) from _),
-            StructPerm.comp_comp, ← this,
+            Structural.comp_comp, ← this,
             ← Path.comp_assoc, Path.comp_cons]
         · refine' Or.inl (Or.inl (Or.inl (Or.inl _)))
           refine' ⟨c, hc₁, _root_.trans _ hc₂⟩
           simp only [← hNL, Path.comp_assoc, ← Path.comp_cons]
           exact reflTransGen_constrains_comp (transGen_nearLitter haN).to_reflTransGen _
       · intro E L hL₁ hL₂
-        rw [← StructPerm.ofBot_smul]
+        rw [← Structural.ofBot_smul]
         refine'
           ((StructAction.hypothesisedAllowable_exactlyApproximates _
                       ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, t, rfl, rfl⟩ _ _ _).map_litter
@@ -654,10 +654,10 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
         · dsimp only at ih
           rw [← Path.comp_assoc, Path.comp_cons] at ih
           rw [ih]
-          simp only [StructPerm.comp_fst, Litter.toNearLitter_fst]
+          simp only [Structural.comp_fst, Litter.toNearLitter_fst]
           rw [Allowable.toStructPerm_comp
               (show Path ((γ : IicBot α) : TypeIndex) (ε : IicBot α) from _),
-            StructPerm.comp_comp]
+            Structural.comp_comp]
         · refine' transGen_nearLitter _
           simp only [← hNL, Path.comp_assoc, ← Path.comp_cons]
           exact transGen_constrains_comp hLN _
@@ -693,7 +693,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
           rw [ih,
             Allowable.toStructPerm_comp
               (show Path ((γ : IicBot α) : TypeIndex) (ε : IicBot α) from _),
-            StructPerm.comp_comp]
+            Structural.comp_comp]
           rfl
         · simp only [StructAction.comp_apply, StructAction.refine_apply,
             NearLitterAction.refine_litterMap, ihAction_litterMap,
@@ -701,7 +701,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
           rw [ih,
             Allowable.toStructPerm_comp
               (show Path ((γ : IicBot α) : TypeIndex) (ε : IicBot α) from _),
-            StructPerm.comp_comp]
+            Structural.comp_comp]
 
 /-- **Coherence lemma**: The action of the complete litter map, below a given support condition `c`,
 is equal to the action of any allowable permutation that exactly approximates it.
@@ -713,7 +713,7 @@ theorem constrainedAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β 
     (hπ : ((constrainedAction π s hs).comp A).Lawful) (ρ : Allowable γ)
     (h : (((constrainedAction π s hs).comp A).rc hπ).ExactlyApproximates
       (Allowable.toStructPerm ρ)) :
-    completeNearLitterMap π (A.comp B) N = StructPerm.comp B (Allowable.toStructPerm ρ) • N :=
+    completeNearLitterMap π (A.comp B) N = Structural.comp B (Allowable.toStructPerm ρ) • N :=
   constrainedAction_coherent' hπf A (B, N) s hs hc hπ ρ h
 
 /-- The coherence lemma for atoms, which is much easier to prove.
@@ -725,7 +725,7 @@ theorem constrainedAction_coherent_atom {γ : Iio α}
     (hπ : ((constrainedAction π s hs).comp A).Lawful) (ρ : Allowable γ)
     (h : (((constrainedAction π s hs).comp A).rc hπ).ExactlyApproximates
       (Allowable.toStructPerm ρ)) :
-    completeAtomMap π (A.comp B) a = StructPerm.comp B (Allowable.toStructPerm ρ) • a := by
+    completeAtomMap π (A.comp B) a = Structural.comp B (Allowable.toStructPerm ρ) • a := by
   refine' Eq.trans _ ((h B).map_atom a (Or.inl (Or.inl (Or.inl (Or.inl hc)))))
   rw [StructAction.rc_smul_atom_eq]
   rfl
@@ -737,7 +737,7 @@ theorem ihsAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIn
     (ρ : Allowable γ) (h : (((ihsAction π c d).comp A).rc hπ).ExactlyApproximates
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
-    StructPerm.comp B (Allowable.toStructPerm ρ) • N := by
+    Structural.comp B (Allowable.toStructPerm ρ) • N := by
   simp_rw [ihsAction_eq_constrainedAction] at hπ
   refine constrainedAction_coherent hπf A B N _ _ ?_ hπ ρ ?_
   obtain hc | hc := hc
@@ -754,7 +754,7 @@ theorem ihsAction_coherent_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c d : SupportCondition β) (hc : ⟨A.comp B, inl a⟩ <[α] c)
     (hπ : ((ihsAction π c d).comp A).Lawful) (ρ : Allowable γ)
     (h : (((ihsAction π c d).comp A).rc hπ).ExactlyApproximates (Allowable.toStructPerm ρ)) :
-    completeAtomMap π (A.comp B) a = StructPerm.comp B (Allowable.toStructPerm ρ) • a := by
+    completeAtomMap π (A.comp B) a = Structural.comp B (Allowable.toStructPerm ρ) • a := by
   refine' Eq.trans _ ((h B).map_atom a (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl hc))))))
   rw [StructAction.rc_smul_atom_eq]
   rfl
@@ -766,7 +766,7 @@ theorem ihAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeInd
     (h : (((ihAction (π.foaHypothesis : Hypothesis c)).comp A).rc hπ).ExactlyApproximates
         (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
-    StructPerm.comp B (Allowable.toStructPerm ρ) • N := by
+    Structural.comp B (Allowable.toStructPerm ρ) • N := by
   refine' ihsAction_coherent hπf A B N c c (Or.inl hc) _ ρ _
   · rw [ihsAction_self]
     exact hπ
@@ -779,7 +779,7 @@ theorem ihAction_coherent_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (h :
       (((ihAction (π.foaHypothesis : Hypothesis c)).comp A).rc hπ).ExactlyApproximates
         (Allowable.toStructPerm ρ)) :
-    completeAtomMap π (A.comp B) a = StructPerm.comp B (Allowable.toStructPerm ρ) • a := by
+    completeAtomMap π (A.comp B) a = Structural.comp B (Allowable.toStructPerm ρ) • a := by
   refine' ihsAction_coherent_atom A B a c c hc _ ρ _
   · rw [ihsAction_self]
     exact hπ
