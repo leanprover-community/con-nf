@@ -1,7 +1,7 @@
 import Mathlib.GroupTheory.GroupAction.Option
 import ConNF.Mathlib.GroupAction
 import ConNF.Mathlib.Pointwise
-import ConNF.NewTangle.Allowable
+import ConNF.NewTangle.NewAllowable
 
 /-!
 # Construction of tangles
@@ -15,7 +15,7 @@ In this file, we construct the type of tangles at level `α`, assuming they exis
 * `ConNF.Preference`: A preferred extension of a semitangle.
 * `ConNF.Semitangle`: An extension for each `β < α`, with one chosen as its preferred extension.
     The non-preferred extensions can be derived from the preferred extension.
-* `ConNF.AllowablePerm.mulActionSemitangle`: Allowable permutations act on semitangles.
+* `ConNF.NewAllowable.mulActionSemitangle`: Allowable permutations act on semitangles.
 * `ConNF.NewTangle`: The type of tangles at level `α`.
 * `ConNF.Allowableperm.mulActionNewTangle`: Allowable permutations act on tangles.
 -/
@@ -292,16 +292,16 @@ open Semitangle
 
 variable [TangleData α]
 
-namespace AllowablePerm
+namespace NewAllowable
 
 /-!
 We now establish that allowable permutations can act on semitangles.
 -/
 
-variable {ρ : AllowablePerm α} {e : Extensions α}
+variable {ρ : NewAllowable α} {e : Extensions α}
 
 @[simp]
-theorem smul_extension_apply (ρ : AllowablePerm α) (s : Set (Tangle β)) :
+theorem smul_extension_apply (ρ : NewAllowable α) (s : Set (Tangle β)) :
     ρ.val γ • extension s γ = extension (ρ.val β • s) γ := by
   by_cases β = γ
   · subst h
@@ -321,7 +321,7 @@ instance : MulAction (SemiallowablePerm α) (Extensions α)
     simp only [SemiallowablePerm.mul_apply, mul_smul]
 
 @[simp]
-theorem smul_extension (ρ : AllowablePerm α) (s : Set (Tangle β)) :
+theorem smul_extension (ρ : NewAllowable α) (s : Set (Tangle β)) :
     ρ • extension s = extension (ρ.val β • s) := by
   ext γ : 1
   rw [← smul_extension_apply]
@@ -344,7 +344,7 @@ theorem smul_aux₂
   exact this
 
 /-- Allowable permutations act on semitangles. -/
-noncomputable instance : SMul (AllowablePerm α) (Semitangle α)
+noncomputable instance : SMul (NewAllowable α) (Semitangle α)
     where smul ρ t :=
     ⟨ρ • t.members, by
       obtain ⟨members, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩ := t
@@ -352,22 +352,22 @@ noncomputable instance : SMul (AllowablePerm α) (Semitangle α)
       · exact Preference.proper _ (isEven_smul.mpr ht) (smul_aux₂ h)⟩
 
 @[simp]
-theorem members_smul (ρ : AllowablePerm α) (t : Semitangle α) : (ρ • t).members = ρ • t.members :=
+theorem members_smul (ρ : NewAllowable α) (t : Semitangle α) : (ρ • t).members = ρ • t.members :=
   rfl
 
 @[simp]
-theorem smul_base (ρ : AllowablePerm α) (e : Extensions α) (s h) :
+theorem smul_base (ρ : NewAllowable α) (e : Extensions α) (s h) :
     ρ • (⟨e, Preference.base s h⟩ : Semitangle α) =
       ⟨ρ • e, Preference.base (ρ.val ⊥ • s) (smul_aux₁ h)⟩ :=
   rfl
 
 @[simp]
-theorem smul_proper (ρ : AllowablePerm α) (e : Extensions α) (γ ht h) :
+theorem smul_proper (ρ : NewAllowable α) (e : Extensions α) (γ ht h) :
     ρ • (⟨e, Preference.proper γ ht h⟩ : Semitangle α) =
       ⟨ρ • e, Preference.proper _ (isEven_smul.mpr ht) (smul_aux₂ h)⟩ :=
   rfl
 
-noncomputable instance mulActionSemitangle : MulAction (AllowablePerm α) (Semitangle α)
+noncomputable instance mulActionSemitangle : MulAction (NewAllowable α) (Semitangle α)
     where
   one_smul := by
     rintro ⟨exts, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩
@@ -390,7 +390,7 @@ noncomputable instance mulActionSemitangle : MulAction (AllowablePerm α) (Semit
       refine Preference.proper_heq_proper ?_ rfl
       rw [mul_smul]
 
-end AllowablePerm
+end NewAllowable
 
 variable (α)
 
@@ -398,7 +398,7 @@ variable (α)
 This is `τ_α` in the blueprint.
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
 def NewTangle :=
-  { t : Semitangle α // Supported α (AllowablePerm α) t }
+  { t : Semitangle α // Supported α (NewAllowable α) t }
 
 variable {α}
 variable {c d : Code α} {S : Set (SupportCondition α)}
@@ -406,33 +406,33 @@ variable {c d : Code α} {S : Set (SupportCondition α)}
 open MulAction
 
 /-- If a set of support conditions supports a code, it supports all equivalent codes. -/
-protected theorem Code.Equiv.supports (hcd : c ≡ d) (hS : Supports (AllowablePerm α) S c) :
-    Supports (AllowablePerm α) S d := fun ρ h => by
+protected theorem Code.Equiv.supports (hcd : c ≡ d) (hS : Supports (NewAllowable α) S c) :
+    Supports (NewAllowable α) S d := fun ρ h => by
   have h₁ := hcd.smul (ρ := ρ)
   have h₂ := (Code.Equiv.of_eq <| hS ρ h).trans hcd
   exact (h₁.symm.trans h₂).unique rfl
 
 theorem Code.Equiv.supports_iff (hcd : c ≡ d) :
-    Supports (AllowablePerm α) S c ↔ Supports (AllowablePerm α) S d :=
+    Supports (NewAllowable α) S c ↔ Supports (NewAllowable α) S d :=
   ⟨hcd.supports, hcd.symm.supports⟩
 
 /-- If two codes are equivalent, one is supported if and only if the other is. -/
 theorem Code.Equiv.supported_iff (hcd : c ≡ d) :
-    Supported α (AllowablePerm α) c ↔ Supported α (AllowablePerm α) d :=
+    Supported α (NewAllowable α) c ↔ Supported α (NewAllowable α) d :=
   ⟨fun ⟨⟨s, hs, h⟩⟩ => ⟨⟨s, hs, hcd.supports h⟩⟩,
     fun ⟨⟨s, hs, h⟩⟩ => ⟨⟨s, hs, hcd.symm.supports h⟩⟩⟩
 
 @[simp]
-theorem smul_intro (ρ : AllowablePerm α) (s : Set (Tangle β)) (hs) :
+theorem smul_intro (ρ : NewAllowable α) (s : Set (Tangle β)) (hs) :
     ρ • intro s hs = intro (ρ.val β • s) (isEven_smul.mpr hs) := by
   obtain ⟨β, hβ⟩ := β
   induction β using WithBot.recBotCoe
-  · simp only [intro, AllowablePerm.smul_base, mk.injEq, AllowablePerm.smul_extension, true_and]
+  · simp only [intro, NewAllowable.smul_base, mk.injEq, NewAllowable.smul_extension, true_and]
     refine Preference.base_heq_base ?_ rfl
-    rw [AllowablePerm.smul_extension]
-  · simp only [intro, AllowablePerm.smul_proper, mk.injEq, AllowablePerm.smul_extension, true_and]
+    rw [NewAllowable.smul_extension]
+  · simp only [intro, NewAllowable.smul_proper, mk.injEq, NewAllowable.smul_extension, true_and]
     refine Preference.proper_heq_proper ?_ rfl
-    rw [AllowablePerm.smul_extension]
+    rw [NewAllowable.smul_extension]
 
 -- TODO: Move next two lemmas elsewhere.
 theorem allowableToStructPerm_bot (π : Allowable (⊥ : IioBot α)) :
@@ -444,21 +444,21 @@ theorem _root_.ConNF.SemiallowablePerm.coe_apply_bot (ρ : SemiallowablePerm α)
       SemiallowablePerm.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _)) := by
   rfl
 
-theorem AllowablePerm.smul_supportCondition {ρ : AllowablePerm α} {c : SupportCondition α} :
-    ρ • c = ⟨c.path, AllowablePerm.toStructPerm ρ c.path • c.value⟩ :=
+theorem NewAllowable.smul_supportCondition {ρ : NewAllowable α} {c : SupportCondition α} :
+    ρ • c = ⟨c.path, NewAllowable.toStructPerm ρ c.path • c.value⟩ :=
   rfl
 
 @[simp]
-theorem AllowablePerm.smul_supportCondition_eq_iff {ρ : AllowablePerm α} {c : SupportCondition α} :
-    ρ • c = c ↔ AllowablePerm.toStructPerm ρ c.path • c.value = c.value :=
+theorem NewAllowable.smul_supportCondition_eq_iff {ρ : NewAllowable α} {c : SupportCondition α} :
+    ρ • c = c ↔ NewAllowable.toStructPerm ρ c.path • c.value = c.value :=
   StructPerm.smul_supportCondition_eq_iff
 
 @[simp]
-theorem AllowablePerm.smul_supportCondition_eq_smul_iff
-    {ρ ρ' : AllowablePerm α} {c : SupportCondition α} :
+theorem NewAllowable.smul_supportCondition_eq_smul_iff
+    {ρ ρ' : NewAllowable α} {c : SupportCondition α} :
     ρ • c = ρ' • c ↔
-    AllowablePerm.toStructPerm ρ c.path • c.value =
-      AllowablePerm.toStructPerm ρ' c.path • c.value :=
+    NewAllowable.toStructPerm ρ c.path • c.value =
+      NewAllowable.toStructPerm ρ' c.path • c.value :=
   StructPerm.smul_supportCondition_eq_smul_iff
 
 /-- For any near-litter `N`, the code `(α, ⊥, N)` is a tangle at level `α`.
@@ -468,7 +468,7 @@ def newTypedNearLitter (N : NearLitter) : NewTangle α :=
     ⟨⟨{⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩}, small_singleton _, fun ρ h => by
         simp only [smul_intro]
         congr 1
-        simp only [mem_singleton_iff, AllowablePerm.smul_supportCondition_eq_iff, forall_eq,
+        simp only [mem_singleton_iff, NewAllowable.smul_supportCondition_eq_iff, forall_eq,
           Sum.smul_inr, Sum.inr.injEq] at h
         apply_fun SetLike.coe at h
         refine Eq.trans ?_ h
@@ -488,13 +488,13 @@ theorem coe_injective : Injective (Subtype.val : NewTangle α → Semitangle α)
 
 end NewTangle
 
-namespace AllowablePerm
+namespace NewAllowable
 
 /-- Allowable permutations act on `α`-tangles. -/
-noncomputable instance hasSmulNewTangle : SMul (AllowablePerm α) (NewTangle α) :=
+noncomputable instance hasSmulNewTangle : SMul (NewAllowable α) (NewTangle α) :=
   ⟨fun ρ t =>
     ⟨ρ • (t : Semitangle α),
-      t.2.map fun (s : Support α (AllowablePerm α) (t : Semitangle α)) =>
+      t.2.map fun (s : Support α (NewAllowable α) (t : Semitangle α)) =>
         { carrier := ρ • (s : Set (SupportCondition α))
           small := s.small.image
           supports := by
@@ -507,13 +507,13 @@ noncomputable instance hasSmulNewTangle : SMul (AllowablePerm α) (NewTangle α)
               exact h (smul_mem_smul_set ha) }⟩⟩
 
 @[simp, norm_cast]
-theorem coe_smul_newTangle (ρ : AllowablePerm α) (t : NewTangle α) :
+theorem coe_smul_newTangle (ρ : NewAllowable α) (t : NewTangle α) :
     ((ρ • t) : Semitangle α) = ρ • (t : Semitangle α) :=
   rfl
 
-noncomputable instance mulActionNewTangle : MulAction (AllowablePerm α) (NewTangle α) :=
+noncomputable instance mulActionNewTangle : MulAction (NewAllowable α) (NewTangle α) :=
   NewTangle.coe_injective.mulAction Subtype.val coe_smul_newTangle
 
-end AllowablePerm
+end NewAllowable
 
 end ConNF

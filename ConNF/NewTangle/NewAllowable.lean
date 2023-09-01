@@ -10,7 +10,7 @@ exist for all type indices `β < α`.
 ## Main declarations
 
 * `ConNF.SemiallowablePerm`: A collection of allowable permutations at every level `β < α`.
-* `ConNF.AllowablePerm`: A `SemiallowablePerm` that commutes with the `fuzz` map.
+* `ConNF.NewAllowable`: A `SemiallowablePerm` that commutes with the `fuzz` map.
 * `ConNF.Code.smul_code`: Allowable permutations preserve code equivalence.
 -/
 
@@ -239,64 +239,64 @@ theorem isAllowable_zpow (h : ρ.IsAllowable) (n : ℤ) : (ρ ^ n).IsAllowable :
     exact isAllowable_inv α (isAllowable_pow α h (n + 1))
 
 /-- An allowable permutation is a semi-allowable permutation that commutes with the `fuzz` maps. -/
-def AllowablePerm :=
+def NewAllowable :=
   { ρ : SemiallowablePerm α // ρ.IsAllowable }
 
 variable {α}
-variable {ρ : AllowablePerm α} {c d : Code α}
+variable {ρ : NewAllowable α} {c d : Code α}
 
-namespace AllowablePerm
+namespace NewAllowable
 
-instance : CoeTC (AllowablePerm α) (SemiallowablePerm α)
+instance : CoeTC (NewAllowable α) (SemiallowablePerm α)
     where
   coe := Subtype.val
 
-theorem coe_injective : Injective (Subtype.val : AllowablePerm α → SemiallowablePerm α) :=
+theorem coe_injective : Injective (Subtype.val : NewAllowable α → SemiallowablePerm α) :=
   Subtype.coe_injective
 
-noncomputable instance : One (AllowablePerm α) :=
+noncomputable instance : One (NewAllowable α) :=
   ⟨⟨1, isAllowable_one α⟩⟩
 
-noncomputable instance : Inv (AllowablePerm α) :=
+noncomputable instance : Inv (NewAllowable α) :=
   ⟨fun ρ => ⟨ρ⁻¹, isAllowable_inv α ρ.prop⟩⟩
 
-noncomputable instance : Mul (AllowablePerm α) :=
+noncomputable instance : Mul (NewAllowable α) :=
   ⟨fun ρ ρ' => ⟨ρ * ρ', isAllowable_mul α ρ.prop ρ'.prop⟩⟩
 
-noncomputable instance : Div (AllowablePerm α) :=
+noncomputable instance : Div (NewAllowable α) :=
   ⟨fun ρ ρ' => ⟨ρ / ρ', isAllowable_div α ρ.prop ρ'.prop⟩⟩
 
-noncomputable instance : Pow (AllowablePerm α) ℕ :=
+noncomputable instance : Pow (NewAllowable α) ℕ :=
   ⟨fun ρ n => ⟨ρ.val ^ n, isAllowable_pow α ρ.prop n⟩⟩
 
-noncomputable instance : Pow (AllowablePerm α) ℤ :=
+noncomputable instance : Pow (NewAllowable α) ℤ :=
   ⟨fun ρ n => ⟨ρ.val ^ n, isAllowable_zpow α ρ.prop n⟩⟩
 
 @[simp]
-theorem coe_one : ((1 : AllowablePerm α) : SemiallowablePerm α) = 1 :=
+theorem coe_one : ((1 : NewAllowable α) : SemiallowablePerm α) = 1 :=
   rfl
 
 @[simp]
-theorem coe_inv (ρ : AllowablePerm α) : ↑(ρ⁻¹) = (ρ : SemiallowablePerm α)⁻¹ :=
+theorem coe_inv (ρ : NewAllowable α) : ↑(ρ⁻¹) = (ρ : SemiallowablePerm α)⁻¹ :=
   rfl
 
 @[simp]
-theorem coe_mul (ρ ρ' : AllowablePerm α) : ↑(ρ * ρ') = (ρ : SemiallowablePerm α) * ρ' :=
+theorem coe_mul (ρ ρ' : NewAllowable α) : ↑(ρ * ρ') = (ρ : SemiallowablePerm α) * ρ' :=
   rfl
 
 @[simp]
-theorem coe_div (ρ ρ' : AllowablePerm α) : ↑(ρ / ρ') = (ρ : SemiallowablePerm α) / ρ' :=
+theorem coe_div (ρ ρ' : NewAllowable α) : ↑(ρ / ρ') = (ρ : SemiallowablePerm α) / ρ' :=
   rfl
 
 @[simp]
-theorem coe_pow (ρ : AllowablePerm α) (n : ℕ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm α) ^ n :=
+theorem coe_pow (ρ : NewAllowable α) (n : ℕ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm α) ^ n :=
   rfl
 
 @[simp]
-theorem coe_zpow (ρ : AllowablePerm α) (n : ℤ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm α) ^ n :=
+theorem coe_zpow (ρ : NewAllowable α) (n : ℤ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm α) ^ n :=
   rfl
 
-noncomputable instance : Group (AllowablePerm α) :=
+noncomputable instance : Group (NewAllowable α) :=
   coe_injective.group
     Subtype.val
     coe_one
@@ -308,56 +308,56 @@ noncomputable instance : Group (AllowablePerm α) :=
 
 /-- The coercion from allowable to semi-allowable permutations as a monoid homomorphism. -/
 @[simps]
-noncomputable def coeHom : AllowablePerm α →* SemiallowablePerm α
+noncomputable def coeHom : NewAllowable α →* SemiallowablePerm α
     where
   toFun := Subtype.val
   map_one' := coe_one
   map_mul' := coe_mul
 
 /-- Turn an allowable permutation into a structural permutation. -/
-noncomputable def toStructPerm : AllowablePerm α →* StructPerm α :=
+noncomputable def toStructPerm : NewAllowable α →* StructPerm α :=
   SemiallowablePerm.toStructPerm.comp coeHom
 
 section
 
 variable {X : Type _} [MulAction (SemiallowablePerm α) X]
 
-noncomputable instance : MulAction (AllowablePerm α) X :=
+noncomputable instance : MulAction (NewAllowable α) X :=
   MulAction.compHom _ coeHom
 
 @[simp]
-theorem coe_smul (ρ : AllowablePerm α) (x : X) : (ρ : SemiallowablePerm α) • x = ρ • x :=
+theorem coe_smul (ρ : NewAllowable α) (x : X) : (ρ : SemiallowablePerm α) • x = ρ • x :=
   rfl
 
 end
 
 @[simp]
-theorem smul_typedNearLitter (ρ : AllowablePerm α) (N : NearLitter) :
+theorem smul_typedNearLitter (ρ : NewAllowable α) (N : NearLitter) :
     ρ.val γ • (typedNearLitter N : Tangle (γ : Λ)) =
     typedNearLitter ((Allowable.toStructPerm ((ρ : SemiallowablePerm α) γ)
       (Quiver.Hom.toPath (bot_lt_coe _))) • N) :=
   Allowable.smul_typedNearLitter _ _
 
 @[simp]
-theorem fst_smul (ρ : AllowablePerm α) (c : Code α) : (ρ • c).1 = c.1 :=
+theorem fst_smul (ρ : NewAllowable α) (c : Code α) : (ρ • c).1 = c.1 :=
   rfl
 
 @[simp]
-theorem snd_smul (ρ : AllowablePerm α) (c : Code α) : (ρ • c).2 = ρ.val c.1 • c.2 :=
+theorem snd_smul (ρ : NewAllowable α) (c : Code α) : (ρ • c).2 = ρ.val c.1 • c.2 :=
   rfl
 
 @[simp]
-theorem smul_mk (ρ : AllowablePerm α) (γ s) : ρ • (mk γ s : Code α) = mk γ (ρ.val γ • s) :=
+theorem smul_mk (ρ : NewAllowable α) (γ s) : ρ • (mk γ s : Code α) = mk γ (ρ.val γ • s) :=
   rfl
 
-end AllowablePerm
+end NewAllowable
 
-namespace AllowablePerm
+namespace NewAllowable
 
 variable {β γ}
 
 /-- Allowable permutations commute with the `cloud` map. -/
-theorem smul_cloud (ρ : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
+theorem smul_cloud (ρ : NewAllowable α) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
     ρ.val γ • cloud hβγ s = cloud hβγ (ρ.val β • s) := by
   ext t
   simp only [cloud, mem_image, mem_iUnion, mem_localCardinal, exists_prop, ← image_smul]
@@ -376,12 +376,12 @@ theorem smul_cloud (ρ : AllowablePerm α) (s : Set (Tangle β)) (hβγ : β ≠
     · rw [smul_typedNearLitter, map_inv, StructPerm.inv_apply, smul_inv_smul]
 
 /-- Allowable permutations commute with the `cloudCode` map. -/
-theorem smul_cloudCode (ρ : AllowablePerm α) (hc : c.1 ≠ γ) :
+theorem smul_cloudCode (ρ : NewAllowable α) (hc : c.1 ≠ γ) :
     ρ • cloudCode γ c = cloudCode γ (ρ • c) := by
   simp only [cloudCode_ne γ c hc, smul_mk, cloudCode_ne γ (ρ • c) hc, fst_smul, snd_smul, mk_inj]
   rw [smul_cloud]
 
-end AllowablePerm
+end NewAllowable
 
 theorem CloudRel.smul : c ↝₀ d → ρ • c ↝₀ ρ • d := by
   rintro ⟨γ, hγ⟩
@@ -431,19 +431,19 @@ theorem Equiv.smul : c ≡ d → ρ • c ≡ ρ • d := by
   cases h with
   | refl => rfl
   | cloud_left _ h β hdβ =>
-    rw [AllowablePerm.smul_cloudCode]
+    rw [NewAllowable.smul_cloudCode]
     refine cloud_left _ ?_ β hdβ
     rw [isEven_smul]
     exact h
     exact hdβ
   | cloud_right _ h β hdβ =>
-    rw [AllowablePerm.smul_cloudCode]
+    rw [NewAllowable.smul_cloudCode]
     refine cloud_right _ ?_ β hdβ
     rw [isEven_smul]
     exact h
     exact hdβ
   | cloud_cloud c hc β hcβ γ hcγ =>
-    rw [AllowablePerm.smul_cloudCode, AllowablePerm.smul_cloudCode]
+    rw [NewAllowable.smul_cloudCode, NewAllowable.smul_cloudCode]
     refine cloud_cloud (ρ • c) ?_ β hcβ γ hcγ
     rw [isEven_smul]
     exact hc

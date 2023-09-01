@@ -66,7 +66,7 @@ instance : MulAction (StructPerm α) (SupportCondition α)
 
 /-!
 We have a form of the next three lemmas for `StructPerm`, `NearLitterPerm`,
-`Allowable`, and `AllowablePerm`.
+`Allowable`, and `NewAllowable`.
 -/
 
 theorem smul_supportCondition :
