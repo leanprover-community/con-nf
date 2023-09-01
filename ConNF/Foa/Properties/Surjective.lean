@@ -215,7 +215,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       trans b
       · rw [map_inv]
         exact this
-      · rw [map_inv, Structural.comp_bot_smul_atom, StructPerm.inv_apply,
+      · rw [map_inv, Structural.comp_bot_smul_atom, Structural.inv_apply,
           ← smul_eq_iff_eq_inv_smul, ← ha]
         rw [StructAction.hypothesisedAllowable]
         refine' (ihAction_coherent_atom (B.cons <| coe_lt hδ) A b _ _
@@ -227,7 +227,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' SupportCondition.ext _ _ rfl _
         change inl _ = inl _
         simp only [← this, ne_eq, Structural.comp_bot, Structural.toBot_inv_smul, map_inv,
-          StructPerm.inv_apply]
+          Structural.inv_apply]
     · intros A N hc
       have hNc := Constrains.fuzz hδ hε hδε B t _ hc
       specialize hN _ N hNc
@@ -247,7 +247,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       trans N'
       · rw [map_inv]
         exact this
-      · rw [map_inv, Structural.comp_bot_smul_nearLitter, StructPerm.inv_apply,
+      · rw [map_inv, Structural.comp_bot_smul_nearLitter, Structural.inv_apply,
           ← smul_eq_iff_eq_inv_smul, ← hN]
         rw [StructAction.hypothesisedAllowable]
         refine' (ihAction_coherent hπf (B.cons <| coe_lt hδ) A N' _ _
@@ -259,7 +259,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' SupportCondition.ext _ _ rfl _
         change inr _ = inr _
         simp only [← this, ne_eq, Structural.comp_bot, Structural.toBot_inv_smul, map_inv,
-          StructPerm.inv_apply]
+          Structural.inv_apply]
 
 theorem atom_mem_range_of_mem_completeNearLitterMap (A : ExtendedIndex β) (a : Atom)
     {N : NearLitter} (h : a ∈ π.completeNearLitterMap A N) : a ∈ range (π.completeAtomMap A) := by
