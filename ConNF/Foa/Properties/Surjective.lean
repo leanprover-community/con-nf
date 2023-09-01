@@ -159,12 +159,12 @@ theorem supports {β : Iio α} {π π' : Allowable β} {t : Tangle β}
   · simp only [smul_inr, inr.injEq]
     exact hN A N hc
 
-theorem _root_.ConNF.Structural.comp_bot_smul_atom {α : TypeIndex} (π : StructPerm α)
+theorem _root_.ConNF.StructPerm.comp_bot_smul_atom {α : TypeIndex} (π : StructPerm α)
     (A : ExtendedIndex α) (a : Atom) :
     Tree.comp A π • a = π A • a :=
   rfl
 
-theorem _root_.ConNF.Structural.comp_bot_smul_nearLitter {α : TypeIndex} (π : StructPerm α)
+theorem _root_.ConNF.StructPerm.comp_bot_smul_nearLitter {α : TypeIndex} (π : StructPerm α)
     (A : ExtendedIndex α) (N : NearLitter) :
     Tree.comp A π • N = π A • N :=
   rfl
@@ -217,7 +217,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       trans b
       · rw [map_inv]
         exact this
-      · rw [map_inv, Tree.comp_bot_smul_atom, Tree.inv_apply,
+      · rw [map_inv, StructPerm.comp_bot_smul_atom, Tree.inv_apply,
           ← smul_eq_iff_eq_inv_smul, ← ha]
         rw [StructAction.hypothesisedAllowable]
         refine' (ihAction_coherent_atom (B.cons <| coe_lt hδ) A b _ _
@@ -249,7 +249,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       trans N'
       · rw [map_inv]
         exact this
-      · rw [map_inv, Tree.comp_bot_smul_nearLitter, Tree.inv_apply,
+      · rw [map_inv, StructPerm.comp_bot_smul_nearLitter, Tree.inv_apply,
           ← smul_eq_iff_eq_inv_smul, ← hN]
         rw [StructAction.hypothesisedAllowable]
         refine' (ihAction_coherent hπf (B.cons <| coe_lt hδ) A N' _ _

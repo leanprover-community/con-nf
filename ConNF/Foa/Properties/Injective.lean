@@ -432,7 +432,7 @@ theorem completeLitterMap_inflexibleCoe_iff (hπf : π.Free) {c d : SupportCondi
   ⟨fun ⟨h⟩ => ⟨completeLitterMap_inflexibleCoe' hπf h⟩, fun ⟨h⟩ =>
     ⟨completeLitterMap_inflexibleCoe hπf hcd h hL⟩⟩
 
-theorem _root_.ConNF.Tree.comp_fst {α : TypeIndex} (π : StructPerm α)
+theorem _root_.ConNF.StructPerm.comp_fst {α : TypeIndex} (π : StructPerm α)
     (A : ExtendedIndex α) (N : NearLitter) :
     (Tree.comp A π • N).fst = Tree.comp A π • N.fst :=
   rfl
@@ -656,7 +656,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
         · dsimp only at ih
           rw [← Path.comp_assoc, Path.comp_cons] at ih
           rw [ih]
-          simp only [Tree.comp_fst, Litter.toNearLitter_fst]
+          simp only [StructPerm.comp_fst, Litter.toNearLitter_fst]
           rw [Allowable.toStructPerm_comp
               (show Path ((γ : IicBot α) : TypeIndex) (ε : IicBot α) from _),
             Tree.comp_comp]
