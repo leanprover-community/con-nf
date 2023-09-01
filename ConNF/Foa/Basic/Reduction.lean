@@ -125,8 +125,7 @@ theorem reduction_designatedSupport_supports [TangleData β] (t : Tangle β) :
   · by_cases N.IsLitter
     · obtain ⟨L, rfl⟩ := h.exists_litter_eq
       exact h₁ (mem_reduction_of_reduced α _ _ (Reduced.mkLitter B L) h₂)
-    · have h := NearLitter.not_isLitter h
-      simp only [Allowable.smul_supportCondition_eq_iff, smul_inr, inr.injEq] at h₁ ⊢
+    · simp only [Allowable.smul_supportCondition_eq_iff, smul_inr, inr.injEq] at h₁ ⊢
       have h₃ := h₁
         (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkLitter B N.fst)
           (Constrains.nearLitter B N h) h₂)

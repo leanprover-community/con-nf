@@ -19,18 +19,16 @@ def nearLitterHypothesis (A : ExtendedIndex β) (N : NearLitter) (H : Hypothesis
   atomImage B a h :=
     H.atomImage B a
       (by
-        by_cases h' : litterSet N.fst = N.snd
-        suffices N.fst.toNearLitter = N by rwa [this] at h
-        · ext : 1
-          exact h'
-        exact Relation.TransGen.tail h (Constrains.nearLitter A N h'))
+        by_cases h' : N.IsLitter
+        · rw [h'.eq_fst_toNearLitter]
+          exact h
+        · exact Relation.TransGen.tail h (Constrains.nearLitter A N h'))
   nearLitterImage B N' h :=
     H.nearLitterImage B N'
       (by
-        by_cases h' : litterSet N.fst = N.snd
-        suffices N.fst.toNearLitter = N by rwa [this] at h
-        · ext : 1
-          exact h'
+        by_cases h' : N.IsLitter
+        · rw [h'.eq_fst_toNearLitter]
+          exact h
         exact Relation.TransGen.tail h (Constrains.nearLitter A N h'))
 
 def nearLitterCompletionMap (π : StructApprox β) (A : ExtendedIndex β) (N : NearLitter)

@@ -137,22 +137,19 @@ theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) := by
   intro c d h
   obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h <;> left
   · exact litter_lt_atom a.1 a rfl
-  · refine litter_lt_nearLitter N ?_
-    contrapose! hN
-    rw [← hN]
-    rfl
+  · exact litter_lt_nearLitter N hN
   · exact symmDiff_lt_nearLitter N a ha
   · have := fuzz_pos (coe_ne_coe.mpr <| coe_ne' hδε) t ?_ ?_
-    rw [PositionedTypedObjects.typedNearLitterPosition_eq] at this
+    rw [PositionedTypedObjects.pos_nearLitter_eq] at this
     refine' lt_of_le_of_lt _ this
     obtain ⟨B, a | N⟩ := c
-    · exact PositionedTypedObjects.typedAtomPosition_le t B a hc
-    · exact PositionedTypedObjects.typedNearLitterPosition_le t B N hc
+    · exact PositionedTypedObjects.pos_atom_le t B a hc
+    · exact PositionedTypedObjects.pos_nearLitter_le t B N hc
     · rfl
   · simp only [InvImage, elim_inr]
     convert pos_atom_lt_fuzz a
-    simp only [sumAtomNearLitter_lt_def, sumAtomNearLitterMap_inl, sumAtomNearLitterMap_inr]
-    rw [@PositionedTypedObjects.typedNearLitterPosition_eq _ _ _ ?_ ?_ ?_ ?_ _]
+    simp only [← pos_lt_pos, pos_atomNearLitter_inl, pos_atomNearLitter_inr]
+    rw [@PositionedTypedObjects.pos_nearLitter_eq _ _ _ ?_ ?_ ?_ ?_ _]
     infer_instance
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `(x, A) ≺ (y, B)`,
@@ -208,21 +205,21 @@ theorem reflTransGen_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
-  · exact Relation.ReflTransGen.head (Constrains.nearLitter B N (NearLitter.not_isLitter h')) h
+  · exact Relation.ReflTransGen.head (Constrains.nearLitter B N h') h
 
 theorem transGen_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β} {c : SupportCondition β}
     (h : c <[α] ⟨B, inr N.1.toNearLitter⟩) : c <[α] ⟨B, inr N⟩ := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
-  · exact Relation.TransGen.tail h (Constrains.nearLitter B N (NearLitter.not_isLitter h'))
+  · exact Relation.TransGen.tail h (Constrains.nearLitter B N h')
 
 theorem transGen_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
     {c : SupportCondition β} (h : ⟨B, inr N⟩ <[α] c) : ⟨B, inr N.1.toNearLitter⟩ <[α] c := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
-  · exact Relation.TransGen.head (Constrains.nearLitter B N (NearLitter.not_isLitter h')) h
+  · exact Relation.TransGen.head (Constrains.nearLitter B N h') h
 
 -- TODO: Move
 -- TODO: Search for uses of fuzz_β and replace with this lemma.
@@ -253,16 +250,11 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
   · change Small {c | ∃ b B, _ ∧ _ = _}
     simp only [SupportCondition.mk.injEq, false_and, and_false, exists_false, setOf_false, small_empty]
   · change Small {c | ∃ B N', _}
-    by_cases litterSet N.fst = N.snd
-    · refine small_of_forall_not_mem ?_
-      rintro c ⟨A, N', h₁, ⟨rfl, rfl⟩, h₂⟩
-      cases h₂
-      exact h₁ h
-    · refine Set.Subsingleton.small ?_
-      rintro c ⟨_, _, _, ⟨rfl, rfl⟩, h₁⟩ d ⟨_, _, _, ⟨rfl, rfl⟩, h₂⟩
-      cases h₁
-      cases h₂
-      rfl
+    refine Set.Subsingleton.small ?_
+    rintro c ⟨_, _, _, ⟨rfl, rfl⟩, h₁⟩ d ⟨_, _, _, ⟨rfl, rfl⟩, h₂⟩
+    cases h₁
+    cases h₂
+    rfl
   · change Small {c | ∃ B N' a, _}
     convert (show Small (litterSet N.fst ∆ N) from N.2.prop).image
       (f := fun a : Atom => (⟨A, inl a⟩ : SupportCondition β)) using 1
