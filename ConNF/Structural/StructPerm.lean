@@ -9,6 +9,8 @@ recursively-constructed subgroups of *semi-allowable* and *allowable permutation
 tangles; we define these larger ambient groups in advance in order to set up their infrastructure of
 derivatives and so on independently of the recursion.
 
+We define structural permutations as the structural groups of near-litter permutations.
+
 ## Main declarations
 
 * `ConNF.StructPerm`: The type of structural permutations.
@@ -27,7 +29,8 @@ variable [Params.{u}]
 
 /-- A *structural permutation* on a proper type index `α` is a near-litter permutation for
 each `α`-extended index. This represents how the permutation acts along each path down the type
-levels in the model. -/
+levels in the model. Note that we define structural permutations as the structural groups of
+near-litter permutations. -/
 abbrev StructPerm : TypeIndex → Type u :=
   Structural NearLitterPerm
 
@@ -35,6 +38,9 @@ namespace StructPerm
 
 instance instInhabitedStructPerm (α : TypeIndex) : Inhabited (StructPerm α) :=
   ⟨fun _ => 1⟩
+
+/-! The following lemmas show how the action of `⊥`-structural permutations on near-litters
+behaves; this is exactly how near-litter permutations behave. -/
 
 @[simp]
 theorem smul_nearLitter_fst (π : StructPerm ⊥) (N : NearLitter) : (π • N).fst = π • N.fst :=
