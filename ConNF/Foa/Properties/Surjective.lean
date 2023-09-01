@@ -119,7 +119,7 @@ theorem preimageAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : T
     (h : (((preimageAction hπf c).comp A).rc
       ((preimageAction_lawful hπf).comp _)).ExactlyApproximates (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
-    StructPerm.derivative B (Allowable.toStructPerm ρ) • N := by
+    StructPerm.comp B (Allowable.toStructPerm ρ) • N := by
   refine' constrainedAction_coherent hπf A B N _ _ _
     ((preimageAction_lawful hπf).comp _) ρ h
   refine' ⟨_, _, Relation.ReflTransGen.refl⟩
@@ -130,7 +130,7 @@ theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (�
     (hc : ⟨A.comp B, inl (π.completeAtomMap (A.comp B) a)⟩ ≺[α] c) (ρ : Allowable γ)
     (h : (((preimageAction hπf c).comp A).rc
       ((preimageAction_lawful hπf).comp _)).ExactlyApproximates (Allowable.toStructPerm ρ)) :
-    completeAtomMap π (A.comp B) a = StructPerm.derivative B (Allowable.toStructPerm ρ) • a := by
+    completeAtomMap π (A.comp B) a = StructPerm.comp B (Allowable.toStructPerm ρ) • a := by
   refine' constrainedAction_coherent_atom A B a _ _ _ _ ρ h
   refine' ⟨_, _, Relation.ReflTransGen.refl⟩
   exact hc
@@ -140,11 +140,11 @@ theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (�
 -- TODO: Canonicalise uses of `<` to always be with respect to `TypeIndex`.
 theorem supports {β : Iio α} {π π' : Allowable β} {t : Tangle β}
     (ha : ∀ A a, ⟨A, inl a⟩ ∈ designatedSupport t →
-      StructPerm.derivative A (Allowable.toStructPerm π) • a =
-      StructPerm.derivative A (Allowable.toStructPerm π') • a)
+      StructPerm.comp A (Allowable.toStructPerm π) • a =
+      StructPerm.comp A (Allowable.toStructPerm π') • a)
     (hN : ∀ A N, ⟨A, inr N⟩ ∈ designatedSupport t →
-      StructPerm.derivative A (Allowable.toStructPerm π) • N =
-      StructPerm.derivative A (Allowable.toStructPerm π') • N) :
+      StructPerm.comp A (Allowable.toStructPerm π) • N =
+      StructPerm.comp A (Allowable.toStructPerm π') • N) :
     π • t = π' • t := by
   rw [← inv_smul_eq_iff, smul_smul]
   refine' (designatedSupport t).supports _ _
@@ -157,14 +157,14 @@ theorem supports {β : Iio α} {π π' : Allowable β} {t : Tangle β}
   · simp only [smul_inr, inr.injEq]
     exact hN A N hc
 
-theorem _root_.ConNF.StructPerm.derivative_bot_smul_atom {α : TypeIndex} (π : StructPerm α)
+theorem _root_.ConNF.StructPerm.comp_bot_smul_atom {α : TypeIndex} (π : StructPerm α)
     (A : ExtendedIndex α) (a : Atom) :
-    StructPerm.derivative A π • a = π A • a :=
+    StructPerm.comp A π • a = π A • a :=
   rfl
 
-theorem _root_.ConNF.StructPerm.derivative_bot_smul_nearLitter {α : TypeIndex} (π : StructPerm α)
+theorem _root_.ConNF.StructPerm.comp_bot_smul_nearLitter {α : TypeIndex} (π : StructPerm α)
     (A : ExtendedIndex α) (N : NearLitter) :
-    StructPerm.derivative A π • N = π A • N :=
+    StructPerm.comp A π • N = π A • N :=
   rfl
 
 theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex β) (L : Litter)
@@ -200,7 +200,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       have hac := Constrains.fuzz hδ hε hδε B t _ hc
       specialize ha _ a hac
       obtain ⟨b, ha⟩ := ha
-      have : (StructPerm.derivative A
+      have : (StructPerm.comp A
         (Allowable.toStructPerm ((preimageAction hπf
             ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
               inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩).hypothesisedAllowable
@@ -215,7 +215,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       trans b
       · rw [map_inv]
         exact this
-      · rw [map_inv, StructPerm.derivative_bot_smul_atom, StructPerm.inv_apply,
+      · rw [map_inv, StructPerm.comp_bot_smul_atom, StructPerm.inv_apply,
           ← smul_eq_iff_eq_inv_smul, ← ha]
         rw [StructAction.hypothesisedAllowable]
         refine' (ihAction_coherent_atom (B.cons <| coe_lt hδ) A b _ _
@@ -226,13 +226,13 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' Relation.reflTransGen_of_eq _
         refine' SupportCondition.ext _ _ rfl _
         change inl _ = inl _
-        simp only [← this, ne_eq, StructPerm.derivative_bot, StructPerm.toBot_inv_smul, map_inv,
+        simp only [← this, ne_eq, StructPerm.comp_bot, StructPerm.toBot_inv_smul, map_inv,
           StructPerm.inv_apply]
     · intros A N hc
       have hNc := Constrains.fuzz hδ hε hδε B t _ hc
       specialize hN _ N hNc
       obtain ⟨N', hN⟩ := hN
-      have : (StructPerm.derivative A
+      have : (StructPerm.comp A
         (Allowable.toStructPerm ((preimageAction hπf
           ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
             inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩).hypothesisedAllowable
@@ -247,7 +247,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       trans N'
       · rw [map_inv]
         exact this
-      · rw [map_inv, StructPerm.derivative_bot_smul_nearLitter, StructPerm.inv_apply,
+      · rw [map_inv, StructPerm.comp_bot_smul_nearLitter, StructPerm.inv_apply,
           ← smul_eq_iff_eq_inv_smul, ← hN]
         rw [StructAction.hypothesisedAllowable]
         refine' (ihAction_coherent hπf (B.cons <| coe_lt hδ) A N' _ _
@@ -258,7 +258,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' Relation.reflTransGen_of_eq _
         refine' SupportCondition.ext _ _ rfl _
         change inr _ = inr _
-        simp only [← this, ne_eq, StructPerm.derivative_bot, StructPerm.toBot_inv_smul, map_inv,
+        simp only [← this, ne_eq, StructPerm.comp_bot, StructPerm.toBot_inv_smul, map_inv,
           StructPerm.inv_apply]
 
 theorem atom_mem_range_of_mem_completeNearLitterMap (A : ExtendedIndex β) (a : Atom)

@@ -59,7 +59,7 @@ theorem completeNearLitterPerm_smul_nearLitter (hπf : π.Free) (A : ExtendedInd
 def AllowableBelow (hπf : π.Free) (γ : IicBot α) (A : Path (β : TypeIndex) γ) : Prop :=
   ∃ ρ : Allowable γ,
     ∀ B : ExtendedIndex γ,
-      StructPerm.ofBot (StructPerm.derivative B (Allowable.toStructPerm ρ)) =
+      StructPerm.ofBot (StructPerm.comp B (Allowable.toStructPerm ρ)) =
         completeNearLitterPerm hπf (A.comp B)
 
 @[simp]
@@ -115,7 +115,7 @@ theorem ConNF.StructApprox.extracted_1
   (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
   (ρs : (δ : IioBot α) → (δ : TypeIndex) < γ → Allowable δ)
   (hρ : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ) (B : ExtendedIndex δ),
-    StructPerm.ofBot (StructPerm.derivative B (Allowable.toStructPerm (ρs δ h))) =
+    StructPerm.ofBot (StructPerm.comp B (Allowable.toStructPerm (ρs δ h))) =
       completeNearLitterPerm hπf ((A.cons h).comp B))
   (ε : Iio α) (hε : (ε : TypeIndex) < γ) (a : Atom) :
   Allowable.toStructPerm (ρs ε hε) (Hom.toPath (bot_lt_coe _)) •
@@ -123,7 +123,7 @@ theorem ConNF.StructApprox.extracted_1
   fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe)
     (NearLitterPerm.ofBot (ρs ⊥ (bot_lt_coe _)) • a) := by
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
-  simp only [Path.comp_cons, Path.comp_nil, StructPerm.derivative_bot, StructPerm.ofBot_toBot,
+  simp only [Path.comp_cons, Path.comp_nil, StructPerm.comp_bot, StructPerm.ofBot_toBot,
     Hom.toPath] at this
   erw [this]
   rw [completeNearLitterPerm_smul_litter]
@@ -131,7 +131,7 @@ theorem ConNF.StructApprox.extracted_1
     ⟨γ, ε, coe_lt_coe.mp hε, A, a, rfl, rfl⟩).trans _
   refine' congr_arg _ _
   specialize hρ ⊥ (bot_lt_coe _) Path.nil
-  rw [Path.comp_nil, StructPerm.derivative_nil
+  rw [Path.comp_nil, StructPerm.comp_nil
     (Allowable.toStructPerm (ρs ⊥ (bot_lt_coe _)))] at hρ
   rw [(ofBot_toStructPerm (ρs ⊥ (bot_lt_coe _))).symm.trans hρ]
   rfl
@@ -140,7 +140,7 @@ theorem ConNF.StructApprox.extracted_2
   (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
   (ρs : (δ : IioBot α) → (δ : TypeIndex) < γ → Allowable δ)
   (hρ : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ) (B : ExtendedIndex δ),
-    StructPerm.ofBot (StructPerm.derivative B (Allowable.toStructPerm (ρs δ h))) =
+    StructPerm.ofBot (StructPerm.comp B (Allowable.toStructPerm (ρs δ h))) =
       completeNearLitterPerm hπf ((A.cons h).comp B))
   (δ : Iio α) (ε : Iio α) (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ)
   (hδε : δ ≠ ε) (t : Tangle ↑δ) :
@@ -148,7 +148,7 @@ theorem ConNF.StructApprox.extracted_2
     fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t =
   fuzz (coe_ne_coe.mpr <| coe_ne' hδε) (ρs δ hδ • t) := by
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
-  simp only [StructPerm.derivative_bot, StructPerm.ofBot_toBot, Path.comp_cons,
+  simp only [StructPerm.comp_bot, StructPerm.ofBot_toBot, Path.comp_cons,
     Path.comp_nil] at this
   erw [this]
   rw [completeNearLitterPerm_smul_litter]
@@ -199,17 +199,17 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
   refine' ⟨allowableOfSmulFuzz γ ρs _, _⟩
   · intro δ ε hδ hε hδε t
     obtain rfl | ⟨δ, rfl⟩ := iioBot_cases δ
-    · simp only [Iic.coe_bot, Allowable.derivative_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
+    · simp only [Iic.coe_bot, Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
       refine Eq.trans ?_ (ConNF.StructApprox.extracted_1 hπf γ A ρs hρ ε hε t)
-      have := Allowable.toStructPerm_derivative
+      have := Allowable.toStructPerm_comp
         (show Path ((ε : IicBot α) : TypeIndex) (⊥ : IicBot α) from Path.nil.cons (bot_lt_coe _))
         (ρs ε hε)
       dsimp only at this
       erw [this]
       rfl
-    · simp only [Iic.coe_bot, Allowable.derivative_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
+    · simp only [Iic.coe_bot, Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
       refine Eq.trans ?_ (ConNF.StructApprox.extracted_2 hπf γ A ρs hρ δ ε hδ hε ?_ t)
-      have := Allowable.toStructPerm_derivative
+      have := Allowable.toStructPerm_comp
         (show Path ((ε : IicBot α) : TypeIndex) (⊥ : IicBot α) from Path.nil.cons (bot_lt_coe _))
         (ρs ε hε)
       dsimp only at this
@@ -220,8 +220,8 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
   · intro B
     obtain ⟨δ, hδ, B, rfl⟩ := exists_nil_cons_of_path B
     specialize hρ δ hδ B
-    rw [← StructPerm.derivative_derivative]
-    have := allowableOfSmulFuzz_derivative_eq (πs := ρs) (h := ?_) δ hδ
+    rw [← StructPerm.comp_comp]
+    have := allowableOfSmulFuzz_comp_eq (πs := ρs) (h := ?_) δ hδ
     apply_fun Allowable.toStructPerm at this
     rw [← allowableDerivative_eq] at this
     rw [← this] at hρ
@@ -246,8 +246,8 @@ theorem allowableBelow_all (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIn
 noncomputable def completeAllowable (hπf : π.Free) : Allowable β :=
   (allowableBelow_all hπf β Path.nil).choose
 
-theorem completeAllowable_derivative (hπf : π.Free) (A : ExtendedIndex β) :
-    StructPerm.ofBot (StructPerm.derivative A (Allowable.toStructPerm <| completeAllowable hπf)) =
+theorem completeAllowable_comp (hπf : π.Free) (A : ExtendedIndex β) :
+    StructPerm.ofBot (StructPerm.comp A (Allowable.toStructPerm <| completeAllowable hπf)) =
       completeNearLitterPerm hπf A := by
   have := (allowableBelow_all hπf β Path.nil).choose_spec A
   rw [Path.nil_comp] at this
@@ -286,15 +286,15 @@ theorem completeAllowable_exactlyApproximates (hπf : π.Free) :
   intro A
   refine' ⟨⟨_, _⟩, _⟩
   · intro a ha
-    rw [completeAllowable_derivative, completeNearLitterPerm_smul_atom,
+    rw [completeAllowable_comp, completeNearLitterPerm_smul_atom,
       completeAtomMap_eq_of_mem_domain ha]
   · intro L hL
-    rw [completeAllowable_derivative, completeNearLitterPerm_smul_litter,
+    rw [completeAllowable_comp, completeNearLitterPerm_smul_litter,
       completeLitterMap_eq_of_flexible (hπf A L hL),
       NearLitterApprox.flexibleCompletion_smul_of_mem_domain _ _ A L hL]
     rfl
   · intro a ha
-    rw [completeAllowable_derivative] at ha
+    rw [completeAllowable_comp] at ha
     exact complete_exception_mem hπf A a ha
 
 def foa_extends : FoaIh β := fun _ hπf =>

@@ -156,36 +156,36 @@ theorem _root_.Quiver.Hom.comp_toPath_comp {V : Type _} [Quiver V] {a b c d : V}
   rw [Hom.toPath, ← comp_assoc, comp_cons, comp_nil]
 
 /-- The derivative of a structural permutation at any lower level. -/
-def derivative (A : Path α β) (π : StructPerm α) : StructPerm β :=
+def comp (A : Path α β) (π : StructPerm α) : StructPerm β :=
   fun B => π (A.comp B)
 
 @[simp]
-theorem derivative_apply (π : StructPerm α) (A : Path α β) (B : ExtendedIndex β) :
-    derivative A π B = π (A.comp B) :=
+theorem comp_apply (π : StructPerm α) (A : Path α β) (B : ExtendedIndex β) :
+    comp A π B = π (A.comp B) :=
   rfl
 
 /-- The derivative along the empty path does nothing. -/
 @[simp]
-theorem derivative_nil (π : StructPerm α) : derivative nil π = π := by
-  simp only [derivative, nil_comp, MonoidHom.coe_mk, OneHom.coe_mk]
+theorem comp_nil (π : StructPerm α) : comp nil π = π := by
+  simp only [comp, nil_comp, MonoidHom.coe_mk, OneHom.coe_mk]
 
-theorem derivative_cons (π : StructPerm α) (p : Path α β) {γ : TypeIndex} (h : γ < β) :
-    derivative (p.cons h) π = (derivative (Hom.toPath h)) (derivative p π) := by
-  simp only [derivative, MonoidHom.coe_mk, OneHom.coe_mk, Hom.comp_toPath_comp]
+theorem comp_cons (π : StructPerm α) (p : Path α β) {γ : TypeIndex} (h : γ < β) :
+    comp (p.cons h) π = (comp (Hom.toPath h)) (comp p π) := by
+  simp only [comp, MonoidHom.coe_mk, OneHom.coe_mk, Hom.comp_toPath_comp]
 
-/-- The derivative map is functorial. -/
-theorem derivative_derivative (π : StructPerm α) (p : Path α β) (q : Path β γ) :
-    derivative q (derivative p π) = derivative (p.comp q) π := by
-  simp only [derivative, MonoidHom.coe_mk, OneHom.coe_mk, comp_assoc]
+/-- The comp map is functorial. -/
+theorem comp_comp (π : StructPerm α) (p : Path α β) (q : Path β γ) :
+    comp q (comp p π) = comp (p.comp q) π := by
+  simp only [comp, MonoidHom.coe_mk, OneHom.coe_mk, comp_assoc]
 
-/-- The derivative map preserves multiplication. -/
-theorem derivative_mul {β : TypeIndex} (π₁ π₂ : StructPerm α) (A : Path (α : TypeIndex) β) :
-    derivative A (π₁ * π₂) = derivative A π₁ * derivative A π₂ :=
+/-- The comp map preserves multiplication. -/
+theorem comp_mul {β : TypeIndex} (π₁ π₂ : StructPerm α) (A : Path (α : TypeIndex) β) :
+    comp A (π₁ * π₂) = comp A π₁ * comp A π₂ :=
   rfl
 
 @[simp]
-theorem derivative_bot (π : StructPerm α) (A : Path (α : TypeIndex) ⊥) :
-    derivative A π = toBot (π A) := by
+theorem comp_bot (π : StructPerm α) (A : Path (α : TypeIndex) ⊥) :
+    comp A π = toBot (π A) := by
   funext B
   cases path_eq_nil B
   rfl
