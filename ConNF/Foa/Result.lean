@@ -192,7 +192,13 @@ theorem ConNF.StructApprox.extracted_2
     · exact (ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
         ⟨γ, δ, ε, _, _, _, _, t, rfl, rfl⟩ _ _
 
-set_option pp.proofs.withType false
+theorem _root_.ConNF.Allowable.comp_bot {β : IicBot α}
+    (ρ : Allowable β) (A : Quiver.Path (β : TypeIndex) (⊥ : IicBot α)) :
+    Allowable.comp A ρ = Allowable.toStructPerm ρ A := by
+  refine NearLitterPerm.ext ?_
+  ext a : 1
+  change NearLitterPerm.ofBot (Allowable.comp A ρ) • a = Allowable.toStructPerm ρ A • a
+  simp only [Allowable.toStructPerm_apply]
 
 theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
     (h : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ), AllowableBelow hπf δ (A.cons h)) :
@@ -203,20 +209,12 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
     obtain rfl | ⟨δ, rfl⟩ := iioBot_cases δ
     · simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
       refine Eq.trans ?_ (ConNF.StructApprox.extracted_1 hπf γ A ρs hρ ε hε t)
-      have := Allowable.toStructPerm_comp
-        (show Path ((ε : IicBot α) : TypeIndex) (⊥ : IicBot α) from Path.nil.cons (bot_lt_coe _))
-        (ρs ε hε)
-      refine congr_arg₂ _ ?_ rfl
-      sorry
+      exact congr_arg₂ _ (Allowable.comp_bot _ _) rfl
     · simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
       refine Eq.trans ?_ (ConNF.StructApprox.extracted_2 hπf γ A ρs hρ δ ε hδ hε ?_ t)
-      have := Allowable.toStructPerm_comp
-        (show Path ((ε : IicBot α) : TypeIndex) (⊥ : IicBot α) from Path.nil.cons (bot_lt_coe _))
-        (ρs ε hε)
-      refine congr_arg₂ _ ?_ rfl
+      · exact congr_arg₂ _ (Allowable.comp_bot _ _) rfl
       · rintro rfl
         exact hδε rfl
-      sorry
   · intro B
     obtain ⟨δ, hδ, B, rfl⟩ := exists_nil_cons_of_path B
     specialize hρ δ hδ B
