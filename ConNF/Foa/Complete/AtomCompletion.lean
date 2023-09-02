@@ -1,4 +1,4 @@
-import ConNF.Foa.Basic.Approximation
+import ConNF.Foa.Approximation
 
 open Set Sum
 
