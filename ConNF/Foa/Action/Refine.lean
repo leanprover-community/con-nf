@@ -88,7 +88,7 @@ end StructAction
 
 namespace StructAction
 
-variable {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Iio α}
+variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iio α}
 
 /-- Refine and complete this action into a structural approximation. -/
 noncomputable def rc (φ : StructAction β) (h : φ.Lawful) : StructApprox β :=

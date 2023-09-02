@@ -363,7 +363,7 @@ theorem approximatesOfLe {π₀ π₀' : NearLitterApprox} {π : NearLitterPerm}
   ⟨fun a ha => (hle.1.2 ha).trans (h.1 a (hle.1.1 ha)), fun N hN =>
     (hle.2.2 hN).trans (h.2 N (hle.2.1 hN))⟩
 
-def Free (α : Λ) [BasePositions] [Phase2Assumptions α] {β : TypeIndex} (π : NearLitterApprox)
+def Free (α : Λ) [BasePositions] [FoaAssumptions α] {β : TypeIndex} (π : NearLitterApprox)
     (A : ExtendedIndex β) : Prop :=
   ∀ L ∈ π.litterPerm.domain, Flexible α L A
 

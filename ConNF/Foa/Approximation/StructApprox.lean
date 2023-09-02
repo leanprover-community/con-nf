@@ -27,7 +27,7 @@ def Approximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructPerm β)
 def ExactlyApproximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructPerm β) : Prop :=
   ∀ A, (π₀ A).ExactlyApproximates (π A)
 
-variable {α : Λ} [BasePositions] [Phase2Assumptions α]
+variable {α : Λ} [BasePositions] [FoaAssumptions α]
 
 def Free {β : Iic α} (π₀ : StructApprox β) : Prop :=
   ∀ A, (π₀ A).Free α A

@@ -1,5 +1,18 @@
 import ConNF.Fuzz
 
+/-!
+# Hypotheses for proving freedom of action
+
+This file contains the inductive hypotheses required for proving the freedom of action theorem.
+
+## Main declarations
+
+* `ConNF.PositionedTypedObjects`: Asserts that the positions of typed objects agree with the
+    position functions defined on atoms and near-litters in `BasePositions`.
+* `ConNF.FoaData`: Contains various kinds of tangle data for all levels below `α`.
+* `ConNF.FoaAssumptions`: Describes how the type levels in the `FoaData` tangle together.
+-/
+
 open Set WithBot
 
 open scoped Pointwise
@@ -10,25 +23,25 @@ namespace ConNF
 
 variable [Params.{u}] [BasePositions] (α : Λ)
 
-instance corePositionedTypedObjectsIic (β : Iio α) [inst : TangleData (β : Iic α)] : TangleData β :=
+instance tangleDataIioCoe (β : Iio α) [inst : TangleData (β : Iic α)] : TangleData β :=
   inst
 
-instance corePositionedTypedObjectsIic' (β : Iic α) [inst : TangleData β] : TangleData (β : Λ) :=
+instance tangleDataIic (β : Iic α) [inst : TangleData β] : TangleData (β : Λ) :=
   inst
 
-instance corePositionedTypedObjectsIio' (β : Iio α) [inst : TangleData β] : TangleData (β : Λ) :=
+instance tangleDataIic' (β : Iio α) [inst : TangleData β] : TangleData (β : Λ) :=
   inst
 
-instance almostPositionedTypedObjectsIio (β : Iio α) [inst_0 : TangleData β]
+instance typedObjectsIio (β : Iio α) [inst_0 : TangleData β]
     [inst : @TypedObjects _ (β : Iic α) inst_0] : TypedObjects β :=
   inst
 
-instance positionedPositionedTypedObjectsIio (β : Iio α) [TangleData β] [inst : PositionedTangles β] :
+instance positionedTanglesIio (β : Iio α) [TangleData β] [inst : PositionedTangles β] :
     PositionedTangles (β : Λ) :=
   inst
 
-/-- The motor of the initial recursion. This contains all the information needed for phase 1 of the
-recursion. -/
+/-- Asserts that the positions of typed objects agree with the position functions defined on atoms
+and near-litters in `BasePositions`. -/
 class PositionedTypedObjects [TangleData α] [TypedObjects α] [PositionedTangles α] : Prop where
   pos_atom_eq : ∀ a : Atom, pos (typedAtom a : Tangle α) = pos a
   pos_nearLitter_eq :
@@ -44,92 +57,115 @@ class PositionedTypedObjects [TangleData α] [TypedObjects α] [PositionedTangle
     ∀ (t : Tangle α) (A : ExtendedIndex α) (N : NearLitter),
       ⟨A, Sum.inr N⟩ ∈ designatedSupport t → pos N ≤ pos t
 
-class Phase2Data where
+/-- The data that we will use when proving the freedom of action theorem.
+This structure combines the following data:
+* `Tangle`
+* `Allowable`
+* `designatedSupport`
+* `pos : Tangle β ↪ μ`
+* `typedAtom` and `typedNearLitter`
+-/
+class FoaData where
   lowerTangleData : ∀ β : Iic α, TangleData β
   lowerPositionedTangles : ∀ β : Iio α, PositionedTangles β
   lowerTypedObjects : ∀ β : Iic α, TypedObjects β
   lowerPositionedTypedObjects : ∀ β : Iio α, PositionedTypedObjects β
 
-namespace Phase2Data
+namespace FoaData
 
-variable [Phase2Data α] {α} {β : Iic α} {γ : Iio α}
+variable [FoaData α] {α} {β : Iic α} {γ : Iio α}
 
-instance corePositionedTypedObjects : TangleData β :=
+instance tangleData : TangleData β :=
   lowerTangleData β
 
-instance positionedPositionedTypedObjects : PositionedTangles γ :=
+instance positionedTangles : PositionedTangles γ :=
   lowerPositionedTangles γ
 
-instance almostPositionedTypedObjects : TypedObjects β :=
+instance typedObjects : TypedObjects β :=
   lowerTypedObjects β
 
-instance tangleData : PositionedTypedObjects γ :=
+instance positionedTypedObjects : PositionedTypedObjects γ :=
   lowerPositionedTypedObjects γ
 
-noncomputable instance IicBotTangleData : ∀ β : IicBot α, TangleData β
+noncomputable instance iicBotTangleData : ∀ β : IicBot α, TangleData β
   | ⟨⊥, _⟩ => Bot.tangleData
   | ⟨(β : Λ), hβ⟩ => lowerTangleData ⟨β, coe_le_coe.mp hβ⟩
 
-noncomputable instance IioBotTangleData (β : IioBot α) : TangleData β :=
+noncomputable instance iioBotTangleData (β : IioBot α) : TangleData β :=
   show TangleData (⟨β, le_of_lt (IioBot.lt β)⟩ : IicBot α) from inferInstance
 
-noncomputable instance IioBotPositionedTangles : ∀ β : IioBot α, PositionedTangles β
+noncomputable instance iioBotPositionedTangles : ∀ β : IioBot α, PositionedTangles β
   | ⟨⊥, _⟩ => Bot.positionedTangles
   | ⟨(β : Λ), hβ⟩ => lowerPositionedTangles ⟨β, coe_lt_coe.mp hβ⟩
 
-instance hasCoeIioIicIndex : Coe (Iio α) (IicBot α) :=
+instance coeIioIicBot : Coe (Iio α) (IicBot α) :=
   ⟨fun β => ⟨(β : Λ), le_of_lt (WithBot.coe_lt_coe.mpr (Iio.lt β))⟩⟩
 
-instance hasCoeIioIndexIicIndex : Coe (IioBot α) (IicBot α) :=
+instance coeIioBotIicBot : Coe (IioBot α) (IicBot α) :=
   ⟨fun β => ⟨(β : TypeIndex), le_of_lt (IioBot.lt β)⟩⟩
 
-instance [Phase2Data α] {X : Type _} {δ : Iio α} [inst : MulAction (Allowable δ) X] :
+instance [FoaData α] {X : Type _} {δ : Iio α} [inst : MulAction (Allowable δ) X] :
     MulAction (Allowable (iioCoe δ)) X :=
   inst
 
 instance mulActionTypeIndex {δ : Iio α} : MulAction (Allowable δ) (Tangle (δ : Λ)) :=
-  show MulAction (Allowable δ) (Tangle δ) from inferInstance
+  inferInstanceAs (MulAction (Allowable δ) (Tangle δ))
 
 noncomputable instance mulActionIioIndex {δ : IioBot α} :
     MulAction (Allowable (δ : IicBot α)) (Tangle δ) :=
-  show MulAction (Allowable δ) (Tangle δ) from inferInstance
+  inferInstanceAs (MulAction (Allowable δ) (Tangle δ))
 
-end Phase2Data
+end FoaData
 
-class Phase2Assumptions extends Phase2Data α where
-  allowableDerivative :
+/-- Assumptions detailing how the different levels of the tangled structure interact. -/
+class FoaAssumptions extends FoaData α where
+  /-- The one-step derivative map between types of allowable permutations.
+  We can think of this map as `cons`ing a single morphism on a path. -/
+  allowableCons :
     ∀ (β : IicBot α) (γ : IicBot α), (γ : TypeIndex) < β → Allowable β →* Allowable γ
-  allowableDerivative_eq :
+  /-- The one-step derivative map commutes with `toStructPerm`. -/
+  allowableCons_eq :
     ∀ (β : IicBot α) (γ : IicBot α) (hγ : (γ : TypeIndex) < β) (π : Allowable β),
       Tree.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm π) =
-        Allowable.toStructPerm (allowableDerivative β γ hγ π)
+        Allowable.toStructPerm (allowableCons β γ hγ π)
+  /-- Designated supports commute with allowable permutations. -/
   smul_designatedSupport {β : Iic α} (t : Tangle β) (π : Allowable β) :
     π • (designatedSupport t : Set (SupportCondition β)) = designatedSupport (π • t)
+  /-- The `fuzz` map commutes with allowable permutations. -/
   smul_fuzz {β : IicBot α} (γ : IioBot α) (δ : Iio α) (hγ : (γ : TypeIndex) < β)
     (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (π : Allowable β) (t : Tangle γ) :
-    NearLitterPerm.ofBot (allowableDerivative δ ⊥ (bot_lt_coe _) (allowableDerivative β δ hδ π)) •
+    NearLitterPerm.ofBot (allowableCons δ ⊥ (bot_lt_coe _) (allowableCons β δ hδ π)) •
       fuzz (Subtype.coe_injective.ne hγδ) t =
-    fuzz (Subtype.coe_injective.ne hγδ) (allowableDerivative β γ hγ π • t)
+    fuzz (Subtype.coe_injective.ne hγδ) (allowableCons β γ hγ π • t)
+  /-- We can build an `β`-allowable permutation from a family of allowable permutations at each
+  level `γ < β` if they commute with the `fuzz` map. -/
   allowableOfSmulFuzz (β : Iic α) (πs : ∀ γ : IioBot α, (γ : TypeIndex) < β → Allowable γ) :
     (∀ (γ : IioBot α) (δ : Iio α) (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β)
         (hγδ : γ ≠ δ) (t : Tangle γ),
-        NearLitterPerm.ofBot (allowableDerivative δ ⊥ (bot_lt_coe _) (πs δ hδ)) •
+        NearLitterPerm.ofBot (allowableCons δ ⊥ (bot_lt_coe _) (πs δ hδ)) •
           fuzz (Subtype.coe_injective.ne hγδ) t =
         fuzz (Subtype.coe_injective.ne hγδ) (πs γ hγ • t)) →
       Allowable (β : IicBot α)
+  /-- The allowable permutation we construct in `allowableOfSmulFuzz` has the correct one-step
+  derivatives. -/
   allowableOfSmulFuzz_comp_eq {β : Iic α} {πs} {h} (γ : IioBot α)
     (hγ : (γ : TypeIndex) < β) :
-    allowableDerivative β γ hγ (allowableOfSmulFuzz β πs h) = πs γ hγ
+    allowableCons β γ hγ (allowableOfSmulFuzz β πs h) = πs γ hγ
 
-export Phase2Assumptions (allowableDerivative allowableDerivative_eq smul_designatedSupport
+export FoaAssumptions (allowableCons allowableCons_eq smul_designatedSupport
   smul_fuzz allowableOfSmulFuzz allowableOfSmulFuzz_comp_eq)
 
-variable {α} [Phase2Assumptions α]
+variable {α} [FoaAssumptions α]
 
+/-- Define the full derivative map on allowable permutations by recursion along paths.
+This agrees with `Tree.comp`, but yields allowable permutations. -/
 noncomputable def Allowable.comp {β : IicBot α} :
     ∀ {γ : IicBot α}, Quiver.Path (β : TypeIndex) γ → Allowable β →* Allowable γ :=
   @Path.iicRec _ α β (fun δ _ => Allowable β →* Allowable δ) (MonoidHom.id _) fun γ δ _ h =>
-    (allowableDerivative γ δ h).comp
+    (allowableCons γ δ h).comp
+
+/-! We prove that `Allowable.comp` is functorial. In addition, we prove a number of lemmas about
+`FoaAssumptions`. -/
 
 @[simp]
 theorem Allowable.comp_nil {β : IicBot α} :
@@ -138,22 +174,22 @@ theorem Allowable.comp_nil {β : IicBot α} :
 
 @[simp]
 theorem Allowable.comp_eq {β γ : IicBot α} (h : γ < β) :
-    allowableDerivative β γ h = Allowable.comp (Quiver.Path.nil.cons h) :=
+    allowableCons β γ h = Allowable.comp (Quiver.Path.nil.cons h) :=
   rfl
 
 theorem Allowable.comp_cons {β γ δ : IicBot α} (A : Quiver.Path (β : TypeIndex) γ)
     (h : δ < γ) :
-    (allowableDerivative γ δ h).comp (Allowable.comp A) = Allowable.comp (A.cons h) :=
+    (allowableCons γ δ h).comp (Allowable.comp A) = Allowable.comp (A.cons h) :=
   rfl
 
 theorem Allowable.comp_cons_apply (β γ δ : IicBot α) (A : Quiver.Path (β : TypeIndex) γ)
     (h : δ < γ) (π : Allowable β) :
-    allowableDerivative γ δ h (Allowable.comp A π) = Allowable.comp (A.cons h) π :=
+    allowableCons γ δ h (Allowable.comp A π) = Allowable.comp (A.cons h) π :=
   rfl
 
 theorem Allowable.comp_cons_apply' (β : Iio α) (γ : Iic α) (δ : Iio α)
     (A : Quiver.Path (β : TypeIndex) γ) (h : (δ : TypeIndex) < γ) (π : Allowable β) :
-    allowableDerivative (γ : IicBot α) (δ : IicBot α) h
+    allowableCons (γ : IicBot α) (δ : IicBot α) h
       (Allowable.comp
         (show Quiver.Path ((β : IicBot α) : TypeIndex) (γ : IicBot α) from A) π) =
     @Allowable.comp _ _ _ _ (β : IicBot α) (δ : IicBot α) (A.cons h) π :=
@@ -161,7 +197,7 @@ theorem Allowable.comp_cons_apply' (β : Iio α) (γ : Iic α) (δ : Iio α)
 
 theorem Allowable.comp_cons_apply'' (β : Iio α) (γ : Iic α)
     (A : Quiver.Path (β : TypeIndex) γ) (π : Allowable β) :
-    allowableDerivative (γ : IicBot α) (⊥ : IicBot α) (bot_lt_coe _)
+    allowableCons (γ : IicBot α) (⊥ : IicBot α) (bot_lt_coe _)
       (Allowable.comp
         (show Quiver.Path ((β : IicBot α) : TypeIndex) (γ : IicBot α) from A) π) =
     @Allowable.comp _ _ _ _ (β : IicBot α) (⊥ : IicBot α) (A.cons <| bot_lt_coe _) π :=
@@ -193,8 +229,8 @@ theorem Allowable.toStructPerm_comp {β γ : IicBot α}
   induction A with
   | nil => rw [Tree.comp_nil, Allowable.comp_nil, MonoidHom.id_apply]
   | cons A h ih =>
-      change toStructPerm (allowableDerivative _ _ _ (comp _ π)) = _
-      rw [Tree.comp_cons, ← allowableDerivative_eq, ih]
+      change toStructPerm (allowableCons _ _ _ (comp _ π)) = _
+      rw [Tree.comp_cons, ← allowableCons_eq, ih]
       rfl
 
 @[simp]
@@ -219,9 +255,9 @@ theorem smul_mem_designatedSupport {β : Iio α} {c : SupportCondition β} {t : 
 
 @[simp]
 theorem ofBot_comp' {β : IicBot α} {hβ : ⊥ < β} {π : Allowable β} :
-    NearLitterPerm.ofBot (allowableDerivative β ⊥ hβ π) =
+    NearLitterPerm.ofBot (allowableCons β ⊥ hβ π) =
     Allowable.toStructPerm π (Quiver.Hom.toPath hβ) :=
-  (congr_fun (allowableDerivative_eq β ⊥ hβ π) Quiver.Path.nil).symm
+  (congr_fun (allowableCons_eq β ⊥ hβ π) Quiver.Path.nil).symm
 
 theorem exists_cons_of_length_ne_zero {V : Type _} [Quiver V] {x y : V}
     (p : Quiver.Path x y) (h : p.length ≠ 0) :
@@ -263,8 +299,8 @@ theorem toStructPerm_smul_fuzz' (β : IicBot α) (γ : IioBot α) (δ : Iio α)
     (t : Tangle γ) :
     Allowable.toStructPerm π ((Quiver.Path.nil.cons hδ).cons (bot_lt_coe _)) •
       fuzz (Subtype.coe_injective.ne hγδ) t =
-    fuzz (Subtype.coe_injective.ne hγδ) (allowableDerivative β γ hγ π • t) := by
-  have := congr_fun (allowableDerivative_eq β δ hδ π) (Quiver.Hom.toPath (bot_lt_coe _))
+    fuzz (Subtype.coe_injective.ne hγδ) (allowableCons β γ hγ π • t) := by
+  have := congr_fun (allowableCons_eq β δ hδ π) (Quiver.Hom.toPath (bot_lt_coe _))
   simp only [Tree.comp_apply, Quiver.Hom.comp_toPath] at this
   rw [this, ← smul_fuzz γ δ hγ hδ hγδ π t, ofBot_comp']
 

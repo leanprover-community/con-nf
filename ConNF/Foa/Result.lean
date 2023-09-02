@@ -10,7 +10,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Iic α}
+variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α}
   [FreedomOfActionHypothesis β] {π : StructApprox β}
 
 noncomputable def completeAtomPerm (hπf : π.Free) (A : ExtendedIndex β) : Perm Atom :=
@@ -213,7 +213,7 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
     rw [← Tree.comp_comp]
     have := allowableOfSmulFuzz_comp_eq (πs := ρs) (h := ?_) δ hδ
     apply_fun Allowable.toStructPerm at this
-    rw [← allowableDerivative_eq] at this
+    rw [← allowableCons_eq] at this
     rw [← this] at hρ
     rw [← Path.comp_assoc, Path.comp_cons, Path.comp_nil]
     exact hρ
@@ -296,8 +296,8 @@ theorem freedom_of_action (β : Iic α) (π₀ : StructApprox β) (h : π₀.Fre
   revert hβ
   refine' WellFounded.induction
     (C := fun β => ∀ (hβ : β ∈ Iic α) (π₀ : StructApprox (⟨β, hβ⟩ : Iic α)),
-      Free π₀ → ∃ π : @Allowable _ (⟨β, hβ⟩ : Iic α) Phase2Data.corePositionedTypedObjects,
-        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ Phase2Data.corePositionedTypedObjects π)) Λwo.wf β _
+      Free π₀ → ∃ π : @Allowable _ (⟨β, hβ⟩ : Iic α) FoaData.tangleData,
+        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ FoaData.tangleData π)) Λwo.wf β _
   intro β ih hβ π₀ h
   have : FreedomOfActionHypothesis ⟨β, hβ⟩
   · constructor

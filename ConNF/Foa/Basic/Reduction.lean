@@ -12,7 +12,7 @@ open scoped Cardinal Pointwise
 
 namespace ConNF
 
-variable [Params.{u}] (α : Λ) [BasePositions] [Phase2Assumptions α]
+variable [Params.{u}] (α : Λ) [BasePositions] [FoaAssumptions α]
 variable {β : Λ} {G : Type _} {τ : Type _} [SMul G (SupportCondition β)] [SMul G τ] {x : τ}
 
 /-- A support condition is *reduced* if it is an atom or a litter. -/

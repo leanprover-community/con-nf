@@ -90,7 +90,7 @@ instance : Position (SupportCondition α) (ConditionPosition α) where
 
 end ExtendedIndex
 
-variable {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Λ}
+variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Λ}
 
 theorem coe_ne' {γ : Iio α} {β : Iio α} : γ ≠ β → (γ : Λ) ≠ (β : Λ) := by
   contrapose!
@@ -185,7 +185,7 @@ notation:50 c " <[" α "] " d:50 => Relation.TransGen (Constrains α _) c d
 
 notation:50 c " ≤[" α "] " d:50 => Relation.ReflTransGen (Constrains α _) c d
 
-theorem trans_constrains_wf (α : Λ) [Phase2Assumptions α] (β : Λ) :
+theorem trans_constrains_wf (α : Λ) [FoaAssumptions α] (β : Λ) :
     WellFounded fun c d : SupportCondition β => c <[α] d :=
   WellFounded.transGen (constrains_wf α β)
 

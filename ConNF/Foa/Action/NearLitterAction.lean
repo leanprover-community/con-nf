@@ -359,7 +359,7 @@ theorem litterPerm'_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm' hφ).
 theorem litterPerm_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm hφ).domain :=
   Small.union (φ.litterPerm'_domain_small hφ) (Small.mono (diff_subset _ _) φ.bannedLitter_small)
 
-variable {α : Λ} [BasePositions] [Phase2Assumptions α] {β : Iio α} {A : ExtendedIndex β}
+variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iio α} {A : ExtendedIndex β}
 
 theorem mk_not_bannedLitter_and_flexible : #{L | ¬φ.BannedLitter L ∧ Flexible α L A} = #μ := by
   refine' le_antisymm ((mk_subtype_le _).trans mk_litter.le) _
