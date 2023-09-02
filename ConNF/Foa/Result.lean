@@ -111,7 +111,7 @@ theorem iioBot_cases (δ : IioBot α) : δ = ⊥ ∨ ∃ ε : Iio α, δ = ε :=
   · exact Or.inl rfl
   · exact Or.inr ⟨⟨δ, coe_lt_coe.mp hδ⟩, rfl⟩
 
-theorem ConNF.StructApprox.extracted_1
+theorem ConNF.StructApprox.extracted_1'
   (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
   (ρs : (δ : IioBot α) → (δ : TypeIndex) < γ → Allowable δ)
   (hρ : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ) (B : ExtendedIndex δ),
@@ -136,7 +136,7 @@ theorem ConNF.StructApprox.extracted_1
   rw [(ofBot_toStructPerm (ρs ⊥ (bot_lt_coe _))).symm.trans hρ]
   rfl
 
-theorem ConNF.StructApprox.extracted_2
+theorem ConNF.StructApprox.extracted_2'
   (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
   (ρs : (δ : IioBot α) → (δ : TypeIndex) < γ → Allowable δ)
   (hρ : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ) (B : ExtendedIndex δ),
@@ -200,10 +200,10 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
   · intro δ ε hδ hε hδε t
     obtain rfl | ⟨δ, rfl⟩ := iioBot_cases δ
     · simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
-      refine Eq.trans ?_ (ConNF.StructApprox.extracted_1 hπf γ A ρs hρ ε hε t)
+      refine Eq.trans ?_ (ConNF.StructApprox.extracted_1' hπf γ A ρs hρ ε hε t)
       exact congr_arg₂ _ (Allowable.comp_bot _ _) rfl
     · simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
-      refine Eq.trans ?_ (ConNF.StructApprox.extracted_2 hπf γ A ρs hρ δ ε hδ hε ?_ t)
+      refine Eq.trans ?_ (ConNF.StructApprox.extracted_2' hπf γ A ρs hρ δ ε hδ hε ?_ t)
       · exact congr_arg₂ _ (Allowable.comp_bot _ _) rfl
       · rintro rfl
         exact hδε rfl
@@ -236,9 +236,9 @@ theorem allowableBelow_all (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIn
 noncomputable def completeAllowable (hπf : π.Free) : Allowable β :=
   (allowableBelow_all hπf β Path.nil).choose
 
-theorem completeAllowable_comp (hπf : π.Free) (A : ExtendedIndex β) :
-    Tree.ofBot (Tree.comp A (Allowable.toStructPerm <| completeAllowable hπf)) =
-      completeNearLitterPerm hπf A := by
+theorem completeAllowable_comp (hπf : π.Free) :
+    Allowable.toStructPerm (completeAllowable hπf) = completeNearLitterPerm hπf := by
+  funext A
   have := (allowableBelow_all hπf β Path.nil).choose_spec A
   rw [Path.nil_comp] at this
   exact this

@@ -137,28 +137,6 @@ theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (�
   refine' ⟨_, _, Relation.ReflTransGen.refl⟩
   exact hc
 
--- TODO: Use this theorem in places above.
--- I think that the `change` and `obtain` calls slow down proofs severely in Lean 4.
--- TODO: Canonicalise uses of `<` to always be with respect to `TypeIndex`.
-theorem supports {β : Iio α} {π π' : Allowable β} {t : Tangle β}
-    (ha : ∀ A a, ⟨A, inl a⟩ ∈ designatedSupport t →
-      Tree.comp A (Allowable.toStructPerm π) • a =
-      Tree.comp A (Allowable.toStructPerm π') • a)
-    (hN : ∀ A N, ⟨A, inr N⟩ ∈ designatedSupport t →
-      Tree.comp A (Allowable.toStructPerm π) • N =
-      Tree.comp A (Allowable.toStructPerm π') • N) :
-    π • t = π' • t := by
-  rw [← inv_smul_eq_iff, smul_smul]
-  refine' (designatedSupport t).supports _ _
-  intro c hc
-  rw [mul_smul, inv_smul_eq_iff]
-  simp only [Allowable.smul_supportCondition_eq_smul_iff]
-  obtain ⟨A, a | N⟩ := c
-  · simp only [smul_inl, inl.injEq]
-    exact ha A a hc
-  · simp only [smul_inr, inr.injEq]
-    exact hN A N hc
-
 theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex β) (L : Litter)
     (ha : ∀ (B : ExtendedIndex β) (a : Atom),
       ⟨B, inl a⟩ ≺[α] ⟨A, inr L.toNearLitter⟩ → a ∈ range (π.completeAtomMap B))
@@ -207,8 +185,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       trans b
       · rw [map_inv]
         exact this
-      · rw [map_inv, StructPerm.comp_bot_smul_atom, Tree.inv_apply,
-          ← smul_eq_iff_eq_inv_smul, ← ha]
+      · rw [map_inv, Tree.inv_apply, ← smul_eq_iff_eq_inv_smul, ← ha]
         rw [StructAction.hypothesisedAllowable]
         refine' (ihAction_coherent_atom (B.cons <| coe_lt hδ) A b _ _
           ((ihAction_lawful hπf _).comp _) _
@@ -239,8 +216,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       trans N'
       · rw [map_inv]
         exact this
-      · rw [map_inv, StructPerm.comp_bot_smul_nearLitter, Tree.inv_apply,
-          ← smul_eq_iff_eq_inv_smul, ← hN]
+      · rw [map_inv, Tree.inv_apply, ← smul_eq_iff_eq_inv_smul, ← hN]
         rw [StructAction.hypothesisedAllowable]
         refine' (ihAction_coherent hπf (B.cons <| coe_lt hδ) A N' _ _
           ((ihAction_lawful hπf _).comp _) _

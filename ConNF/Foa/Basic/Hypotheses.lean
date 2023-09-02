@@ -258,7 +258,7 @@ theorem comp_bot_smul_atom {β : IicBot α}
   rw [← ofBot_comp]
   rfl
 
-theorem toStructPerm_smul_fuzz (β : IicBot α) (γ : IioBot α) (δ : Iio α)
+theorem toStructPerm_smul_fuzz' (β : IicBot α) (γ : IioBot α) (δ : Iio α)
     (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (π : Allowable β)
     (t : Tangle γ) :
     Allowable.toStructPerm π ((Quiver.Path.nil.cons hδ).cons (bot_lt_coe _)) •
@@ -267,5 +267,16 @@ theorem toStructPerm_smul_fuzz (β : IicBot α) (γ : IioBot α) (δ : Iio α)
   have := congr_fun (allowableDerivative_eq β δ hδ π) (Quiver.Hom.toPath (bot_lt_coe _))
   simp only [Tree.comp_apply, Quiver.Hom.comp_toPath] at this
   rw [this, ← smul_fuzz γ δ hγ hδ hγδ π t, ofBot_comp']
+
+theorem toStructPerm_smul_fuzz (β : IicBot α) (γ : IicBot α) (δ : IioBot α) (ε : Iio α)
+    (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : δ ≠ ε)
+    (A : Quiver.Path (β : TypeIndex) γ) (π : Allowable β) (t : Tangle δ) :
+    Allowable.toStructPerm π ((A.cons hε).cons (bot_lt_coe _)) •
+      fuzz (Subtype.coe_injective.ne hδε) t =
+    fuzz (Subtype.coe_injective.ne hδε) (Allowable.comp (β := β) (γ := δ) (A.cons hδ) π • t) := by
+  have := toStructPerm_smul_fuzz' γ δ ε hδ hε hδε (Allowable.comp A π) t
+  simp only [Allowable.toStructPerm_comp, Tree.comp_apply, Quiver.Path.comp_cons,
+    Quiver.Path.comp_nil, Allowable.comp_eq] at this
+  exact this
 
 end ConNF
