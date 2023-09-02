@@ -114,33 +114,24 @@ such that we could run out of available values for the function.
 variable [Params.{u}] {β : TypeIndex} {γ : Λ} [TangleData β] [PositionedTangles β]
   [BasePositions] [TangleData γ] [PositionedTangles γ] [TypedObjects γ] (hβγ : β ≠ γ)
 
+-- TODO: Refactor to use near-litters directly instead of `IsNearLitter`.
 /-- The requirements to be satisfied by the f-maps.
 If `FuzzCondition` applied to a litter indexed by `ν` is true,
 then `ν` is *not* a valid output to `fuzz _ t`. -/
-inductive FuzzCondition (x : Tangle β) (ν : μ) : Prop
+inductive FuzzCondition (t : Tangle β) (ν : μ) : Prop
   | any (N : Set Atom) (hN : IsNearLitter ⟨ν, β, γ, hβγ⟩ N) :
-    pos (typedNearLitter ⟨⟨ν, β, γ, hβγ⟩, N, hN⟩ : Tangle γ) ≤ pos x → FuzzCondition x ν
+    pos (typedNearLitter ⟨⟨ν, β, γ, hβγ⟩, N, hN⟩ : Tangle γ) ≤ pos t → FuzzCondition t ν
   | bot (a : Atom) :
       β = ⊥ →   -- this condition should only trigger for type `⊥`
-      HEq a x → -- using `HEq` instead of induction on `β` or the instance deals with some problems
+      HEq a t → -- using `HEq` instead of induction on `β` or the instance deals with some problems
       pos (typedNearLitter (Litter.toNearLitter ⟨ν, ⊥, γ, bot_ne_coe⟩) : Tangle γ) ≤ pos a →
-      FuzzCondition x ν
-
-instance : IsWellOrder (Tangle β) (InvImage (· < ·) pos) := by
-  refine' { .. }
-  · intro t₁ t₂
-    have := lt_trichotomy (pos t₁) (pos t₂)
-    rw [EmbeddingLike.apply_eq_iff_eq] at this
-    exact this
-  · intro t₁ t₂ t₃
-    exact lt_trans
-  · exact InvImage.wf _ μwo.wf
+      FuzzCondition t ν
 
 variable (γ)
 
-theorem mk_invImage_lt (t : Tangle β) : #{ y // InvImage (· < ·) pos y t } < #μ := by
+theorem mk_invImage_lt (t : Tangle β) : #{ t' // t' < t } < #μ := by
   refine lt_of_le_of_lt ?_ (show #{ ν // ν < pos t } < #μ from card_Iio_lt _)
-  refine ⟨⟨fun y => ⟨_, y.prop⟩, ?_⟩⟩
+  refine ⟨⟨fun t' => ⟨_, t'.prop⟩, ?_⟩⟩
   intro y₁ y₂ h
   simp only [Subtype.mk.injEq, EmbeddingLike.apply_eq_iff_eq, Subtype.coe_inj] at h
   exact h
@@ -155,7 +146,7 @@ theorem mk_invImage_le (t : Tangle β) : #{ t' : Tangle γ // pos t' ≤ pos t }
 variable {γ}
 
 theorem mk_fuzz_deny (hβγ : β ≠ γ) (t : Tangle β) :
-    #{ t' // InvImage (· < ·) pos t' t } + #{ ν // FuzzCondition hβγ t ν } < #μ := by
+    #{ t' // t' < t } + #{ ν // FuzzCondition hβγ t ν } < #μ := by
   have h₁ := mk_invImage_lt t
   suffices h₂ : #{ ν // FuzzCondition hβγ t ν } < #μ
   · exact add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le h₁ h₂
@@ -179,12 +170,12 @@ theorem mk_fuzz_deny (hβγ : β ≠ γ) (t : Tangle β) :
     simp only [Litter.mk.injEq, Subtype.coe_inj, and_self, and_true] at h
     exact h
   · by_cases β = ⊥ ∧ ∃ a : Atom, HEq a t
-    · obtain ⟨_, a, hax⟩ := h
+    · obtain ⟨_, a, hat⟩ := h
       refine lt_of_le_of_lt ?_ (card_Iic_lt (pos a))
       refine ⟨⟨fun i => ⟨pos (typedNearLitter
         (Litter.toNearLitter ⟨i, β, γ, hβγ⟩) : Tangle γ), ?_⟩, ?_⟩⟩
       · obtain ⟨ν, _, b, hb, _⟩ := i
-        rw [eq_of_heq (hax.trans hb.symm)]
+        rw [eq_of_heq (hat.trans hb.symm)]
         assumption
       · intro i j h
         simp only [Subtype.mk.injEq, EmbeddingLike.apply_eq_iff_eq,
@@ -227,6 +218,29 @@ theorem fuzz_β (t : Tangle β) : (fuzz hβγ t).β = β :=
 @[simp]
 theorem fuzz_γ (t : Tangle β) : (fuzz hβγ t).γ = γ :=
   rfl
+
+section congr
+
+variable {β' : TypeIndex} {γ' : Λ} [TangleData β'] [PositionedTangles β']
+  [TangleData γ'] [PositionedTangles γ'] [TypedObjects γ']
+
+lemma fuzz_congr_β {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
+  {t : Tangle β} {t' : Tangle β'} (h : fuzz hβγ t = fuzz hβγ' t') :
+  β = β' := by
+  have h₁ := fuzz_β hβγ t
+  have h₂ := fuzz_β hβγ' t'
+  rw [← h, h₁] at h₂
+  exact h₂
+
+lemma fuzz_congr_γ {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
+  {t : Tangle β} {t' : Tangle β'} (h : fuzz hβγ t = fuzz hβγ' t') :
+  γ = γ' := by
+  have h₁ := fuzz_γ hβγ t
+  have h₂ := fuzz_γ hβγ' t'
+  rw [← h, h₁] at h₂
+  exact h₂
+
+end congr
 
 theorem fuzz_injective : Injective (fuzz hβγ) := by
   intro t₁ t₂ h

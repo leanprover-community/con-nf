@@ -35,6 +35,9 @@ theorem isWellOrder_invImage {r : β → β → Prop} (h : IsWellOrder β r)
 instance [LT β] [IsWellOrder β (· < ·)] : IsWellOrder α (· < ·) :=
   isWellOrder_invImage inferInstance _ pos_injective
 
+instance [LT β] [IsWellOrder β (· < ·)] : IsWellOrder α (InvImage (· < ·) pos) :=
+  isWellOrder_invImage inferInstance _ pos_injective
+
 instance [LT β] [IsWellOrder β (· < ·)] : WellFoundedRelation α :=
   IsWellOrder.toHasWellFounded
 

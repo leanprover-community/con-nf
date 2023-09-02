@@ -222,26 +222,6 @@ theorem transGen_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
     exact h
   · exact Relation.TransGen.head (Constrains.nearLitter B N h') h
 
--- TODO: Move
--- TODO: Search for uses of fuzz_β and replace with this lemma.
-lemma fuzz_congr_β {β γ β' γ' : Iio α} {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
-  {t : Tangle β} {t' : Tangle β'}
-  (h : fuzz hβγ t = fuzz hβγ' t') :
-  β = β' := by
-  have h₁ := fuzz_β hβγ t
-  have h₂ := fuzz_β hβγ' t'
-  rw [← h, h₁] at h₂
-  exact Subtype.coe_injective (WithBot.coe_injective h₂)
-
-lemma fuzz_congr_γ {β γ β' γ' : Iio α} {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
-  {t : Tangle β} {t' : Tangle β'}
-  (h : fuzz hβγ t = fuzz hβγ' t') :
-  γ = γ' := by
-  have h₁ := fuzz_γ hβγ t
-  have h₂ := fuzz_γ hβγ' t'
-  rw [← h, h₁] at h₂
-  exact Subtype.coe_injective h₂
-
 theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[α] c} := by
   obtain ⟨A, a | N⟩ := c
   · simp only [constrains_atom, setOf_eq_eq_singleton, small_singleton]
@@ -282,8 +262,8 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
         rintro x ⟨_, _, _, _, _, _, _, _, c, hc, rfl, h⟩
         rw [SupportCondition.mk.injEq] at h
         simp only [inr.injEq, Litter.toNearLitter_injective.eq_iff] at h
-        cases fuzz_congr_β h.2
-        cases fuzz_congr_γ h.2
+        cases Subtype.coe_injective (WithBot.coe_injective (fuzz_congr_β h.2))
+        cases Subtype.coe_injective (fuzz_congr_γ h.2)
         cases fuzz_injective _ h.2
         cases Subtype.coe_inj.mp
           (coe_inj.mp (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons h.1).eq))

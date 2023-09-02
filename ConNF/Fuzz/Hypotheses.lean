@@ -64,7 +64,7 @@ instance : MulAction (Allowable α) X :=
   MulAction.compHom _ toStructPerm
 
 @[simp]
-theorem toStructPerm_smul (f : Allowable α) (x : X) : f • x = Allowable.toStructPerm f • x :=
+theorem toStructPerm_smul (ρ : Allowable α) (x : X) : ρ • x = Allowable.toStructPerm ρ • x :=
   rfl
 
 variable {ρ ρ' : Allowable α} {c : SupportCondition α}
@@ -89,7 +89,7 @@ end Allowable
 /-- For each tangle, we provide a small support for it. This is known as the designated support of
 the tangle. -/
 def designatedSupport {α : TypeIndex} [TangleData α] (t : Tangle α) : Support α (Allowable α) t :=
-  TangleData.designatedSupport _
+  TangleData.designatedSupport t
 
 class PositionedTangles (α : TypeIndex) [TangleData α] where
   /-- A position function, giving each tangle a unique position `ν : μ`.
