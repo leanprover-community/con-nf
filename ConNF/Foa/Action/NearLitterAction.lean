@@ -351,7 +351,7 @@ theorem litterPerm'_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm' hφ).
   rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
   simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
   refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
-      refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt Λ_isLimit.aleph0_le Λ_lt_κ) _ <;>
+      refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt aleph0_le_mk_Λ Λ_lt_κ) _ <;>
     refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
   exact φ.litterMap_dom_small
   exact φ.litterMap_dom_small.image
@@ -419,7 +419,7 @@ theorem flexibleLitterPerm_domain_small (hφ : φ.Lawful) :
     rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
     simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
     refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
-        refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt Λ_isLimit.aleph0_le Λ_lt_κ) _ <;>
+        refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt aleph0_le_mk_Λ Λ_lt_κ) _ <;>
       refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
     exact φ.litterMap_dom_small.mono (inter_subset_left _ _)
     exact (φ.litterMap_dom_small.mono (inter_subset_left _ _)).image
@@ -446,7 +446,7 @@ theorem sandboxSubset_small :
   rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
   simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
   refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
-    refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt Λ_isLimit.aleph0_le Λ_lt_κ) _ <;>
+    refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt aleph0_le_mk_Λ Λ_lt_κ) _ <;>
     refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
   · exact φ.atomMap_dom_small
   · exact lt_of_le_of_lt mk_image_le φ.atomMap_dom_small

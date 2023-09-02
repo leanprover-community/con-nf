@@ -101,7 +101,7 @@ theorem reduction_small' {S : Set (SupportCondition β)} (h : Small S) :
   have : Small (⋃ n : ULift ℕ, nthReduction α S n.down)
   · refine' small_iUnion _ fun _ => small_nthReduction α h
     rw [Cardinal.mk_denumerable]
-    exact Λ_isLimit.aleph0_le.trans_lt Λ_lt_κ
+    exact aleph0_le_mk_Λ.trans_lt Λ_lt_κ
   convert this using 1
   ext x : 1
   simp only [mem_iUnion, ULift.exists]

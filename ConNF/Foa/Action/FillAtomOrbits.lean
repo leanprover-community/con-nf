@@ -53,9 +53,9 @@ theorem need_images_small :
   simp only [mk_prod, mk_denumerable, lift_aleph0, lift_uzero, mk_diff_dom_ran, mk_sum, lift_id]
   rw [← mul_add]
   refine' lt_of_le_of_lt (mul_le_max _ _) (max_lt (max_lt _ _) _)
-  exact Λ_isLimit.aleph0_le.trans_lt Λ_lt_κ
+  exact aleph0_le_mk_Λ.trans_lt Λ_lt_κ
   exact add_lt_of_lt κ_isRegular.aleph0_le φ.needBackwardImages_small φ.needForwardImages_small
-  exact Λ_isLimit.aleph0_le.trans_lt Λ_lt_κ
+  exact aleph0_le_mk_Λ.trans_lt Λ_lt_κ
 
 theorem le_mk_diff_dom_ran (L : Litter) :
     #(Sum (ℕ × φ.needBackwardImages) (ℕ × φ.needForwardImages)) ≤
