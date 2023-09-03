@@ -8,3 +8,4 @@
 - Remove double line breaks.
 - Reformat lines containing only `by`.
 - Change `refine'` to new variants.
+- Remove unnecessary instances of `*_eta` lemmas.

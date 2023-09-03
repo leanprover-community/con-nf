@@ -133,7 +133,7 @@ namespace Sublitter
 noncomputable def equivκ (S : Sublitter) : S ≃ κ :=
   (Cardinal.eq.mp S.mk_eq_κ).some
 
-/-- There is a (unique) order isomorphism between any two sublitters. -/
+/-- There is an equivalence between any two sublitters. -/
 noncomputable def equiv (S T : Sublitter) : S ≃ T :=
   S.equivκ.trans T.equivκ.symm
 
@@ -157,10 +157,12 @@ theorem equiv_symm_apply_fst_eq {S T : Sublitter} (a : T) :
 theorem equiv_congr_left {S T U : Sublitter} (h : S = T) (a : S) :
     (S.equiv U a : Atom) = T.equiv U ⟨a, by rw [← h]; exact a.2⟩ := by
   cases h
-  rw [Subtype.coe_eta]
+  rfl
 
 theorem equiv_congr_right {S T U : Sublitter} (h : T = U) (a : S) :
-    (S.equiv T a : Atom) = S.equiv U a := by cases h; rfl
+    (S.equiv T a : Atom) = S.equiv U a := by
+  cases h
+  rfl
 
 end Sublitter
 

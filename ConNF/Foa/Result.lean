@@ -211,7 +211,7 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
     obtain ⟨δ, hδ, B, rfl⟩ := exists_nil_cons_of_path B
     specialize hρ δ hδ B
     rw [← Tree.comp_comp]
-    have := allowableOfSmulFuzz_comp_eq (πs := ρs) (h := ?_) δ hδ
+    have := allowableOfSmulFuzz_comp_eq (ρs := ρs) (h := ?_) δ hδ
     apply_fun Allowable.toStructPerm at this
     rw [← allowableCons_eq] at this
     rw [← this] at hρ

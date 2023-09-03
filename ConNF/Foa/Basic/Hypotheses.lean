@@ -125,32 +125,32 @@ class FoaAssumptions extends FoaData α where
     ∀ (β : IicBot α) (γ : IicBot α), (γ : TypeIndex) < β → Allowable β →* Allowable γ
   /-- The one-step derivative map commutes with `toStructPerm`. -/
   allowableCons_eq :
-    ∀ (β : IicBot α) (γ : IicBot α) (hγ : (γ : TypeIndex) < β) (π : Allowable β),
-      Tree.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm π) =
-        Allowable.toStructPerm (allowableCons β γ hγ π)
+    ∀ (β : IicBot α) (γ : IicBot α) (hγ : (γ : TypeIndex) < β) (ρ : Allowable β),
+      Tree.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm ρ) =
+        Allowable.toStructPerm (allowableCons β γ hγ ρ)
   /-- Designated supports commute with allowable permutations. -/
-  smul_designatedSupport {β : Iic α} (t : Tangle β) (π : Allowable β) :
-    π • (designatedSupport t : Set (SupportCondition β)) = designatedSupport (π • t)
+  smul_designatedSupport {β : Iic α} (t : Tangle β) (ρ : Allowable β) :
+    ρ • (designatedSupport t : Set (SupportCondition β)) = designatedSupport (ρ • t)
   /-- The `fuzz` map commutes with allowable permutations. -/
   smul_fuzz {β : IicBot α} (γ : IioBot α) (δ : Iio α) (hγ : (γ : TypeIndex) < β)
-    (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (π : Allowable β) (t : Tangle γ) :
-    NearLitterPerm.ofBot (allowableCons δ ⊥ (bot_lt_coe _) (allowableCons β δ hδ π)) •
+    (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (ρ : Allowable β) (t : Tangle γ) :
+    NearLitterPerm.ofBot (allowableCons δ ⊥ (bot_lt_coe _) (allowableCons β δ hδ ρ)) •
       fuzz (Subtype.coe_injective.ne hγδ) t =
-    fuzz (Subtype.coe_injective.ne hγδ) (allowableCons β γ hγ π • t)
+    fuzz (Subtype.coe_injective.ne hγδ) (allowableCons β γ hγ ρ • t)
   /-- We can build an `β`-allowable permutation from a family of allowable permutations at each
   level `γ < β` if they commute with the `fuzz` map. -/
-  allowableOfSmulFuzz (β : Iic α) (πs : ∀ γ : IioBot α, (γ : TypeIndex) < β → Allowable γ) :
+  allowableOfSmulFuzz (β : Iic α) (ρs : ∀ γ : IioBot α, (γ : TypeIndex) < β → Allowable γ) :
     (∀ (γ : IioBot α) (δ : Iio α) (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β)
         (hγδ : γ ≠ δ) (t : Tangle γ),
-        NearLitterPerm.ofBot (allowableCons δ ⊥ (bot_lt_coe _) (πs δ hδ)) •
+        NearLitterPerm.ofBot (allowableCons δ ⊥ (bot_lt_coe _) (ρs δ hδ)) •
           fuzz (Subtype.coe_injective.ne hγδ) t =
-        fuzz (Subtype.coe_injective.ne hγδ) (πs γ hγ • t)) →
+        fuzz (Subtype.coe_injective.ne hγδ) (ρs γ hγ • t)) →
       Allowable (β : IicBot α)
   /-- The allowable permutation we construct in `allowableOfSmulFuzz` has the correct one-step
   derivatives. -/
-  allowableOfSmulFuzz_comp_eq {β : Iic α} {πs} {h} (γ : IioBot α)
+  allowableOfSmulFuzz_comp_eq {β : Iic α} {ρs} {h} (γ : IioBot α)
     (hγ : (γ : TypeIndex) < β) :
-    allowableCons β γ hγ (allowableOfSmulFuzz β πs h) = πs γ hγ
+    allowableCons β γ hγ (allowableOfSmulFuzz β ρs h) = ρs γ hγ
 
 export FoaAssumptions (allowableCons allowableCons_eq smul_designatedSupport
   smul_fuzz allowableOfSmulFuzz allowableOfSmulFuzz_comp_eq)
@@ -254,10 +254,10 @@ theorem smul_mem_designatedSupport {β : Iio α} {c : SupportCondition β} {t : 
     ⟨c, h, rfl⟩
 
 @[simp]
-theorem ofBot_comp' {β : IicBot α} {hβ : ⊥ < β} {π : Allowable β} :
-    NearLitterPerm.ofBot (allowableCons β ⊥ hβ π) =
-    Allowable.toStructPerm π (Quiver.Hom.toPath hβ) :=
-  (congr_fun (allowableCons_eq β ⊥ hβ π) Quiver.Path.nil).symm
+theorem ofBot_comp' {β : IicBot α} {hβ : ⊥ < β} {ρ : Allowable β} :
+    NearLitterPerm.ofBot (allowableCons β ⊥ hβ ρ) =
+    Allowable.toStructPerm ρ (Quiver.Hom.toPath hβ) :=
+  (congr_fun (allowableCons_eq β ⊥ hβ ρ) Quiver.Path.nil).symm
 
 theorem exists_cons_of_length_ne_zero {V : Type _} [Quiver V] {x y : V}
     (p : Quiver.Path x y) (h : p.length ≠ 0) :
@@ -266,9 +266,9 @@ theorem exists_cons_of_length_ne_zero {V : Type _} [Quiver V] {x y : V}
   · cases h rfl
   · exact ⟨_, _, _, rfl⟩
 
-theorem ofBot_comp {β : IicBot α} {π : Allowable β}
+theorem ofBot_comp {β : IicBot α} {ρ : Allowable β}
     (A : Quiver.Path (β : TypeIndex) (⊥ : IicBot α)) :
-    NearLitterPerm.ofBot (Allowable.comp A π) = Allowable.toStructPerm π A := by
+    NearLitterPerm.ofBot (Allowable.comp A ρ) = Allowable.toStructPerm ρ A := by
   by_cases A.length = 0
   · have : β = ⊥ := Subtype.coe_injective (Quiver.Path.eq_of_length_zero A h)
     cases this
@@ -289,28 +289,28 @@ theorem ofBot_smul {X : Type _} [MulAction NearLitterPerm X] (π : Allowable ⊥
 
 @[simp]
 theorem comp_bot_smul_atom {β : IicBot α}
-    (π : Allowable β) (A : Quiver.Path (β : TypeIndex) (⊥ : IicBot α)) (a : Tangle ⊥) :
-    Allowable.comp A π • a = Allowable.toStructPerm π A • (show Atom from a) := by
+    (ρ : Allowable β) (A : Quiver.Path (β : TypeIndex) (⊥ : IicBot α)) (a : Tangle ⊥) :
+    Allowable.comp A ρ • a = Allowable.toStructPerm ρ A • (show Atom from a) := by
   rw [← ofBot_comp]
   rfl
 
 theorem toStructPerm_smul_fuzz' (β : IicBot α) (γ : IioBot α) (δ : Iio α)
-    (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (π : Allowable β)
+    (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (ρ : Allowable β)
     (t : Tangle γ) :
-    Allowable.toStructPerm π ((Quiver.Path.nil.cons hδ).cons (bot_lt_coe _)) •
+    Allowable.toStructPerm ρ ((Quiver.Path.nil.cons hδ).cons (bot_lt_coe _)) •
       fuzz (Subtype.coe_injective.ne hγδ) t =
-    fuzz (Subtype.coe_injective.ne hγδ) (allowableCons β γ hγ π • t) := by
-  have := congr_fun (allowableCons_eq β δ hδ π) (Quiver.Hom.toPath (bot_lt_coe _))
+    fuzz (Subtype.coe_injective.ne hγδ) (allowableCons β γ hγ ρ • t) := by
+  have := congr_fun (allowableCons_eq β δ hδ ρ) (Quiver.Hom.toPath (bot_lt_coe _))
   simp only [Tree.comp_apply, Quiver.Hom.comp_toPath] at this
-  rw [this, ← smul_fuzz γ δ hγ hδ hγδ π t, ofBot_comp']
+  rw [this, ← smul_fuzz γ δ hγ hδ hγδ ρ t, ofBot_comp']
 
 theorem toStructPerm_smul_fuzz (β : IicBot α) (γ : IicBot α) (δ : IioBot α) (ε : Iio α)
     (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : δ ≠ ε)
-    (A : Quiver.Path (β : TypeIndex) γ) (π : Allowable β) (t : Tangle δ) :
-    Allowable.toStructPerm π ((A.cons hε).cons (bot_lt_coe _)) •
+    (A : Quiver.Path (β : TypeIndex) γ) (ρ : Allowable β) (t : Tangle δ) :
+    Allowable.toStructPerm ρ ((A.cons hε).cons (bot_lt_coe _)) •
       fuzz (Subtype.coe_injective.ne hδε) t =
-    fuzz (Subtype.coe_injective.ne hδε) (Allowable.comp (β := β) (γ := δ) (A.cons hδ) π • t) := by
-  have := toStructPerm_smul_fuzz' γ δ ε hδ hε hδε (Allowable.comp A π) t
+    fuzz (Subtype.coe_injective.ne hδε) (Allowable.comp (β := β) (γ := δ) (A.cons hδ) ρ • t) := by
+  have := toStructPerm_smul_fuzz' γ δ ε hδ hε hδε (Allowable.comp A ρ) t
   simp only [Allowable.toStructPerm_comp, Tree.comp_apply, Quiver.Path.comp_cons,
     Quiver.Path.comp_nil, Allowable.comp_eq] at this
   exact this

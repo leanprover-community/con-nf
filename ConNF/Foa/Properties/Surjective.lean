@@ -305,15 +305,15 @@ theorem completeMap_surjective_extends (hπf : π.Free) (c : SupportCondition β
   · refine' completeNearLitterMap_surjective_extends hπf A N _ _
     · refine' completeLitterMap_surjective_extends hπf A N.1 _ _
       · intro B a h
-        exact hc ⟨B, inl a⟩ (transGen_nearLitter <| Relation.TransGen.single h)
+        exact hc ⟨B, inl a⟩ (transConstrains_nearLitter <| Relation.TransGen.single h)
       · intro B N h
-        exact hc ⟨B, inr N⟩ (transGen_nearLitter <| Relation.TransGen.single h)
+        exact hc ⟨B, inr N⟩ (transConstrains_nearLitter <| Relation.TransGen.single h)
     · intro a h
       exact hc ⟨A, inl a⟩ (Relation.TransGen.single <| Constrains.symmDiff A N a h)
 
 theorem completeMapSurjectiveAtAll (hπf : π.Free) (c : SupportCondition β) :
     π.CompleteMapSurjectiveAt c :=
-  WellFounded.induction (trans_constrains_wf α β) c (completeMap_surjective_extends hπf)
+  WellFounded.induction (transConstrains_wf α β) c (completeMap_surjective_extends hπf)
 
 theorem completeAtomMap_surjective (hπf : π.Free) (A : ExtendedIndex β) :
     Surjective (π.completeAtomMap A) := fun a => completeMapSurjectiveAtAll hπf ⟨A, inl a⟩

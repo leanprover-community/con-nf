@@ -7,7 +7,7 @@ namespace LocalPerm
 Utilities to complete orbits of functions into local permutations.
 
 Suppose we have a function `f : α → α`, and a set `s` on which `f` is injective.
-We will construct a pair of functions `to_fun` and `inv_fun` that agree with `f` and its inverse
+We will construct a pair of functions `toFun` and `invFun` that agree with `f` and its inverse
 on `s`, in such a way that forms a local permutation of `α`. In particular, consider the diagram
 ```
 ... → l 2 → l 1 → l 0 → s \ f '' s → ... → f '' s \ s → r 0 → r 1 → r 2 → ...
@@ -23,16 +23,18 @@ open Cardinal Function Set
 
 open scoped Cardinal Classical
 
-variable {α : Type _} {f : α → α} {s : Set α} {t : Set α} (hs : (#(s ∆ (f '' s) : Set α)) ≤ (#t))
-  (ht : ℵ₀ ≤ (#t))
+variable {α : Type _} {f : α → α} {s : Set α} {t : Set α} (hs : #(s ∆ (f '' s) : Set α) ≤ #t)
+  (ht : ℵ₀ ≤ #t)
 
-theorem exists_sandbox_subset (hs : (#(s ∆ (f '' s) : Set α)) ≤ (#t)) (ht : ℵ₀ ≤ (#t)) :
-    #(Sum (ℕ × (s \ f '' s : Set α)) (ℕ × (f '' s \ s : Set α))) ≤ (#t) := by
+-- TODO: Clean up variable assumptions.
+
+theorem exists_sandbox_subset (hs : #(s ∆ (f '' s) : Set α) ≤ #t) (ht : ℵ₀ ≤ #t) :
+    #((ℕ × (s \ f '' s : Set α)) ⊕ (ℕ × (f '' s \ s : Set α))) ≤ #t := by
   rw [Set.symmDiff_def, mk_union_of_disjoint] at hs
-  simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id, ← mul_add] at hs ⊢
-  exact le_trans (mul_le_max_of_aleph0_le_left le_rfl) (max_le ht hs)
-  rw [disjoint_iff_inter_eq_empty, eq_empty_iff_forall_not_mem]
-  exact fun x hx => hx.1.2 hx.2.1
+  · simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id, ← mul_add] at hs ⊢
+    exact le_trans (mul_le_max_of_aleph0_le_left le_rfl) (max_le ht hs)
+  · rw [disjoint_iff_inter_eq_empty, eq_empty_iff_forall_not_mem]
+    exact fun x hx => hx.1.2 hx.2.1
 
 /-- Creates a "sandbox" subset of `t` on which we will define an extension of `f`. -/
 def sandboxSubset : Set α :=
@@ -42,32 +44,38 @@ theorem sandboxSubset_subset : sandboxSubset hs ht ⊆ t :=
   (le_mk_iff_exists_subset.mp <| exists_sandbox_subset hs ht).choose_spec.1
 
 noncomputable def sandboxSubsetEquiv :
-    sandboxSubset hs ht ≃ Sum (ℕ × (s \ f '' s : Set α)) (ℕ × (f '' s \ s : Set α)) :=
+    sandboxSubset hs ht ≃ (ℕ × (s \ f '' s : Set α)) ⊕ (ℕ × (f '' s \ s : Set α)) :=
   (Cardinal.eq.mp (le_mk_iff_exists_subset.mp <| exists_sandbox_subset hs ht).choose_spec.2).some
 
 /-- Considered an implementation detail; use lemmas about `complete` instead. -/
-noncomputable def shiftRight : Sum (ℕ × (s \ f '' s : Set α)) (ℕ × (f '' s \ s : Set α)) → α
+noncomputable def shiftRight : (ℕ × (s \ f '' s : Set α)) ⊕ (ℕ × (f '' s \ s : Set α)) → α
   | Sum.inl ⟨0, a⟩ => a
   | Sum.inl ⟨n + 1, a⟩ => (sandboxSubsetEquiv hs ht).symm (Sum.inl ⟨n, a⟩)
   | Sum.inr ⟨n, a⟩ => (sandboxSubsetEquiv hs ht).symm (Sum.inr ⟨n + 1, a⟩)
 
 /-- Considered an implementation detail; use lemmas about `complete` instead. -/
 noncomputable def completeToFun (a : α) : α :=
-  if h : a ∈ sandboxSubset hs ht then shiftRight hs ht (sandboxSubsetEquiv hs ht ⟨a, h⟩)
-  else if h : a ∈ f '' s \ s then (sandboxSubsetEquiv hs ht).symm (Sum.inr ⟨0, a, h⟩) else f a
+  if h : a ∈ sandboxSubset hs ht then
+    shiftRight hs ht (sandboxSubsetEquiv hs ht ⟨a, h⟩)
+  else if h : a ∈ f '' s \ s then
+    (sandboxSubsetEquiv hs ht).symm (Sum.inr ⟨0, a, h⟩)
+  else
+    f a
 
 /-- Considered an implementation detail; use lemmas about `complete` instead. -/
-noncomputable def shiftLeft : Sum (ℕ × (s \ f '' s : Set α)) (ℕ × (f '' s \ s : Set α)) → α
+noncomputable def shiftLeft : (ℕ × (s \ f '' s : Set α)) ⊕ (ℕ × (f '' s \ s : Set α)) → α
   | Sum.inl ⟨n, a⟩ => (sandboxSubsetEquiv hs ht).symm (Sum.inl ⟨n + 1, a⟩)
-  | Sum.inr ⟨0, a⟩ => a.1
+  | Sum.inr ⟨0, a⟩ => a
   | Sum.inr ⟨n + 1, a⟩ => (sandboxSubsetEquiv hs ht).symm (Sum.inr ⟨n, a⟩)
 
 /-- Considered an implementation detail; use lemmas about `complete` instead. -/
 noncomputable def completeInvFun [Nonempty α] (a : α) : α :=
-  if h : a ∈ sandboxSubset hs ht then shiftLeft hs ht (sandboxSubsetEquiv hs ht ⟨a, h⟩)
+  if h : a ∈ sandboxSubset hs ht then
+    shiftLeft hs ht (sandboxSubsetEquiv hs ht ⟨a, h⟩)
+  else if h : a ∈ s \ f '' s then
+    (sandboxSubsetEquiv hs ht).symm (Sum.inl ⟨0, a, h⟩)
   else
-    if h : a ∈ s \ f '' s then (sandboxSubsetEquiv hs ht).symm (Sum.inl ⟨0, a, h⟩)
-    else invFunOn f s a
+    invFunOn f s a
 
 /-- The domain on which we will define the completion of a function to a local permutation. -/
 def completeDomain : Set α :=
@@ -156,7 +164,6 @@ theorem complete_left_inv [Nonempty α] (hst : Disjoint (s ∪ f '' s) t) (hf : 
     exact a.prop
     · rw [Equiv.symm_apply_eq]
       simp only [ha, Sum.inl.injEq, Prod.mk.injEq, true_and]
-      ext
       rfl
     · rw [ha]
       exact fun h => hst _ ⟨Or.inl a.prop.1, sandboxSubset_subset hs ht h⟩
@@ -208,7 +215,6 @@ theorem complete_right_inv [Nonempty α] (hst : Disjoint (s ∪ f '' s) t) (hf :
     exact a.prop
     · rw [Equiv.symm_apply_eq]
       simp only [ha, Sum.inr.injEq, Prod.mk.injEq, true_and]
-      ext
       rfl
     · rw [ha]
       exact fun h => hst _ ⟨Or.inr a.prop.1, sandboxSubset_subset hs ht h⟩
@@ -234,7 +240,7 @@ theorem complete_right_inv [Nonempty α] (hst : Disjoint (s ∪ f '' s) t) (hf :
 /-- Completes a function `f` on a domain `s` into a local permutation that agrees with `f` on `s`,
 with domain contained in `s ∪ (f '' s) ∪ t`. -/
 noncomputable def complete [Nonempty α] (f : α → α) (s : Set α) (t : Set α)
-    (hs : (#(s ∆ (f '' s) : Set α)) ≤ (#t)) (ht : ℵ₀ ≤ (#t)) (hst : Disjoint (s ∪ f '' s) t)
+    (hs : #(s ∆ (f '' s) : Set α) ≤ #t) (ht : ℵ₀ ≤ #t) (hst : Disjoint (s ∪ f '' s) t)
     (hf : InjOn f s) : LocalPerm α
     where
   toFun := completeToFun hs ht

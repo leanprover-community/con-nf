@@ -6,6 +6,12 @@ import ConNF.Foa.Basic.Hypotheses
 # Constraints
 Support conditions can be said to *constrain* each other in a number of ways.
 This is detailed below. The `constrains` relation is well-founded.
+
+## Main declarations
+* `ConNF.Constrains`: The constrains relation.
+* `ConNF.constrains_wf`: The constrains relation is well-founded.
+* `ConNF.small_constrains`: Only a small amount of things are constrained by a particular support
+    condition.
 -/
 
 open Quiver Set Sum WithBot
@@ -103,8 +109,7 @@ theorem coe_lt {γ : Iio α} {β : Iic α} : (γ : Λ) < β → (γ : TypeIndex)
 variable (α) (β)
 
 -- TODO: Swap around argument order to put paths first.
-/-- Support conditions can be said to *constrain* each other in a number of ways. This is discussed
-in the "freedom of action discussion".
+/-- Support conditions can be said to *constrain* each other in a number of ways.
 1. `(L, A) ≺ (a, A)` when `a ∈ L` and `L` is a litter. We can say that an atom is constrained by the
     litter it belongs to.
 2. `(N°, A) ≺ (N, A)` when `N` is a near-litter not equal to its corresponding litter `N°`.
@@ -154,7 +159,7 @@ theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) := by
     infer_instance
 
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `(x, A) ≺ (y, B)`,
-then `x < y` in `µ`, under the `typed_near_litter` or `typed_atom` maps. -/
+then `x < y` in `µ`, under the `typedNearLitter` or `typedAtom` maps. -/
 theorem constrains_wf : WellFounded (Constrains α β) :=
   Subrelation.wf (constrains_subrelation α β) IsWellFounded.wf
 
@@ -185,37 +190,37 @@ notation:50 c " <[" α "] " d:50 => Relation.TransGen (Constrains α _) c d
 
 notation:50 c " ≤[" α "] " d:50 => Relation.ReflTransGen (Constrains α _) c d
 
-theorem trans_constrains_wf (α : Λ) [FoaAssumptions α] (β : Λ) :
+theorem transConstrains_wf (α : Λ) [FoaAssumptions α] (β : Λ) :
     WellFounded fun c d : SupportCondition β => c <[α] d :=
   WellFounded.transGen (constrains_wf α β)
 
-theorem reflTransGen_constrains_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≤[α] d)
+theorem reflTransConstrains_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≤[α] d)
     (B : Path (β : TypeIndex) γ) : ⟨B.comp c.path, c.value⟩ ≤[α] ⟨B.comp d.path, d.value⟩ := by
   induction h with
   | refl => exact Relation.ReflTransGen.refl
   | tail _ h ih => exact Relation.ReflTransGen.tail ih (constrains_comp h B)
 
-theorem transGen_constrains_comp {β γ : Λ} {c d : SupportCondition γ} (h : c <[α] d)
+theorem transConstrains_comp {β γ : Λ} {c d : SupportCondition γ} (h : c <[α] d)
     (B : Path (β : TypeIndex) γ) : ⟨B.comp c.path, c.value⟩ <[α] ⟨B.comp d.path, d.value⟩ := by
   induction h with
   | single h => exact Relation.TransGen.single (constrains_comp h B)
   | tail _ h ih => exact Relation.TransGen.tail ih (constrains_comp h B)
 
-theorem reflTransGen_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
+theorem reflTransConstrains_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
     {c : SupportCondition β} (h : ⟨B, inr N⟩ ≤[α] c) : ⟨B, inr N.1.toNearLitter⟩ ≤[α] c := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
   · exact Relation.ReflTransGen.head (Constrains.nearLitter B N h') h
 
-theorem transGen_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β} {c : SupportCondition β}
-    (h : c <[α] ⟨B, inr N.1.toNearLitter⟩) : c <[α] ⟨B, inr N⟩ := by
+theorem transConstrains_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
+    {c : SupportCondition β} (h : c <[α] ⟨B, inr N.1.toNearLitter⟩) : c <[α] ⟨B, inr N⟩ := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
   · exact Relation.TransGen.tail h (Constrains.nearLitter B N h')
 
-theorem transGen_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
+theorem transConstrains_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
     {c : SupportCondition β} (h : ⟨B, inr N⟩ <[α] c) : ⟨B, inr N.1.toNearLitter⟩ <[α] c := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
@@ -229,7 +234,8 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
   refine Small.union ?_ (Small.union ?_ (Small.union ?_ (Small.union ?_ ?_))) <;>
     rw [small_setOf]
   · change Small {c | ∃ b B, _ ∧ _ = _}
-    simp only [SupportCondition.mk.injEq, false_and, and_false, exists_false, setOf_false, small_empty]
+    simp only [SupportCondition.mk.injEq, false_and, and_false, exists_false,
+      setOf_false, small_empty]
   · change Small {c | ∃ B N', _}
     refine Set.Subsingleton.small ?_
     rintro c ⟨_, _, _, ⟨rfl, rfl⟩, h₁⟩ d ⟨_, _, _, ⟨rfl, rfl⟩, h₂⟩

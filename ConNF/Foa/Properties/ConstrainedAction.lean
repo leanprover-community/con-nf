@@ -86,8 +86,8 @@ theorem fst_mem_transConstrained {c d : SupportCondition β} {A : ExtendedIndex 
     (hN : ⟨A, inr N⟩ ∈ transConstrained c d) :
     ⟨A, inr N.fst.toNearLitter⟩ ∈ transConstrained c d := by
   obtain hN | hN := hN
-  exact Or.inl (transGen_nearLitter' hN)
-  exact Or.inr (transGen_nearLitter' hN)
+  exact Or.inl (transConstrains_nearLitter' hN)
+  exact Or.inr (transConstrains_nearLitter' hN)
 
 theorem fst_mem_refl_trans_constrained' {c d : SupportCondition β} {A : ExtendedIndex β} {a : Atom}
     (h : ⟨A, inl a⟩ ∈ reflTransConstrained c d) :
@@ -98,8 +98,8 @@ theorem fst_mem_reflTransConstrained {c d : SupportCondition β} {A : ExtendedIn
     {N : NearLitter} (hN : ⟨A, inr N⟩ ∈ reflTransConstrained c d) :
     ⟨A, inr N.fst.toNearLitter⟩ ∈ reflTransConstrained c d := by
   obtain hN | hN := hN
-  exact Or.inl (reflTransGen_nearLitter hN)
-  exact Or.inr (reflTransGen_nearLitter hN)
+  exact Or.inl (reflTransConstrains_nearLitter hN)
+  exact Or.inr (reflTransConstrains_nearLitter hN)
 
 theorem fst_mem_transConstrained_of_mem_symmDiff {c d : SupportCondition β} {A : ExtendedIndex β}
     {N : NearLitter} {a : Atom} (h : a ∈ litterSet N.1 ∆ N)
@@ -156,14 +156,14 @@ noncomputable def constrainedAction (π : StructApprox β) (s : Set (SupportCond
     atomMap_dom_small := by
       change Small ((fun a : Atom => ⟨B, inl a⟩) ⁻¹'
         {c : SupportCondition β | ∃ d : SupportCondition β, d ∈ s ∧ c ≤[α] d})
-      refine' Small.preimage _ (reduction_small' α hs)
+      refine' Small.preimage _ (reflTransClosure_small α hs)
       intro a b h
       cases h
       rfl
     litterMap_dom_small := by
       change Small ((fun L : Litter => ⟨B, inr L.toNearLitter⟩) ⁻¹'
         {c : SupportCondition β | ∃ d : SupportCondition β, d ∈ s ∧ c ≤[α] d})
-      refine' Small.preimage _ (reduction_small' α hs)
+      refine' Small.preimage _ (reflTransClosure_small α hs)
       intro a b h
       cases h
       rfl }
@@ -326,7 +326,7 @@ theorem transGen_constrains_of_mem_designatedSupport {A : ExtendedIndex β} {L :
     ⟨(h.B.cons (coe_lt h.hδ)).comp ((C.cons (coe_lt hδ)).comp B), inl a⟩ <[α]
       ⟨A, inr L.toNearLitter⟩ := by
   refine' Relation.TransGen.tail' _ hd
-  refine' reflTransGen_constrains_comp (c := ⟨_, inl a⟩) (d := d) _ (h.B.cons <| coe_lt h.hδ)
+  refine' reflTransConstrains_comp (c := ⟨_, inl a⟩) (d := d) _ (h.B.cons <| coe_lt h.hδ)
   refine' Relation.ReflTransGen.trans _ hd₂
   exact Relation.ReflTransGen.single (Constrains.fuzz hδ hε hδε C t _ hc)
 

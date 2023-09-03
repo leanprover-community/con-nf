@@ -205,8 +205,8 @@ def ihAction {β : Iic α} {c : SupportCondition β} (H : Hypothesis c) : Struct
     litterMap := fun L => ⟨_, fun h => H.nearLitterImage B L.toNearLitter h⟩
     atomMap_dom_small := by
       simp only [PFun.dom_mk]
-      have := reduction_small'' α (small_singleton c)
-      simp only [mem_singleton_iff, exists_prop, exists_eq_left] at this
+      have := transClosure_small α (small_singleton c)
+      simp only [transClosure, mem_singleton_iff, exists_prop, exists_eq_left] at this
       refine' Small.image_subset (fun a => ⟨B, inl a⟩) _ this _
       · intro a b h
         simpa [SupportCondition.mk.injEq, inl.injEq, true_and] using h
@@ -214,8 +214,8 @@ def ihAction {β : Iic α} {c : SupportCondition β} (H : Hypothesis c) : Struct
         exact h
     litterMap_dom_small := by
       simp only [PFun.dom_mk]
-      have := reduction_small'' α (small_singleton c)
-      simp only [mem_singleton_iff, exists_prop, exists_eq_left] at this
+      have := transClosure_small α (small_singleton c)
+      simp only [transClosure, mem_singleton_iff, exists_prop, exists_eq_left] at this
       refine' Small.image_subset (fun L => ⟨B, inr L.toNearLitter⟩) _ this _
       · intro L₁ L₂ h
         simpa only [SupportCondition.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff,
