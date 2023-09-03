@@ -92,35 +92,35 @@ def nearLitterHypothesis_eq (A : ExtendedIndex β) (N : NearLitter) :
 
 /-- A basic definition unfold. -/
 theorem completeLitterMap_eq_of_inflexibleCoe {A : ExtendedIndex β} {L : Litter}
-    (h : InflexibleCoe L A) (h₁ h₂) :
+    (h : InflexibleCoe A L) (h₁ h₂) :
     π.completeLitterMap A L =
-      fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.hδε)
-        ((ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable h
-            h₁ h₂ •
+      fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.path.hδε)
+        ((ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable
+            h.path h₁ h₂ •
           h.t) := by
   rw [completeLitterMap_eq, litterCompletion_of_inflexibleCoe]
 
 theorem completeLitterMap_eq_of_inflexible_coe' {A : ExtendedIndex β} {L : Litter}
-    (h : InflexibleCoe L A) :
+    (h : InflexibleCoe A L) :
     π.completeLitterMap A L =
       if h' : _ ∧ _ then
-        fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.hδε)
-          ((ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable h
-              h'.1 h'.2 •
+        fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.path.hδε)
+          ((ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable
+              h.path h'.1 h'.2 •
             h.t)
       else L := by
   rw [completeLitterMap_eq, litterCompletion_of_inflexibleCoe']
 
 /-- A basic definition unfold. -/
 theorem completeLitterMap_eq_of_inflexibleBot {A : ExtendedIndex β} {L : Litter}
-    (h : InflexibleBot L A) :
+    (h : InflexibleBot A L) :
     π.completeLitterMap A L =
-      fuzz (show (⊥ : TypeIndex) ≠ (h.ε : Λ) from WithBot.bot_ne_coe)
-        (π.completeAtomMap (h.B.cons (WithBot.bot_lt_coe _)) h.a) := by
+      fuzz (show (⊥ : TypeIndex) ≠ (h.path.ε : Λ) from WithBot.bot_ne_coe)
+        (π.completeAtomMap (h.path.B.cons (WithBot.bot_lt_coe _)) h.a) := by
   rw [completeLitterMap_eq, litterCompletion_of_inflexibleBot] <;> rfl
 
 /-- A basic definition unfold. -/
-theorem completeLitterMap_eq_of_flexible {A : ExtendedIndex β} {L : Litter} (h : Flexible α L A) :
+theorem completeLitterMap_eq_of_flexible {A : ExtendedIndex β} {L : Litter} (h : Flexible α A L) :
     π.completeLitterMap A L = NearLitterApprox.flexibleCompletion α (π A) A • L := by
   rw [completeLitterMap_eq, litterCompletion_of_flexible _ _ _ _ h]
 

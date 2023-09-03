@@ -128,7 +128,7 @@ theorem ConNF.StructApprox.extracted_1'
   erw [this]
   rw [completeNearLitterPerm_smul_litter]
   refine' (completeLitterMap_eq_of_inflexibleBot
-    ⟨γ, ε, coe_lt_coe.mp hε, A, a, rfl, rfl⟩).trans _
+    ⟨⟨γ, ε, coe_lt_coe.mp hε, A, rfl⟩, a, rfl⟩).trans _
   refine' congr_arg _ _
   specialize hρ ⊥ (bot_lt_coe _) Path.nil
   rw [Path.comp_nil, Tree.comp_nil
@@ -153,7 +153,7 @@ theorem ConNF.StructApprox.extracted_2'
   erw [this]
   rw [completeNearLitterPerm_smul_litter]
   refine' (completeLitterMap_eq_of_inflexibleCoe
-    ⟨γ, δ, ε, coe_lt_coe.mp hδ, coe_lt_coe.mp hε, _, A, t, rfl, rfl⟩
+    ⟨⟨γ, δ, ε, coe_lt_coe.mp hδ, coe_lt_coe.mp hε, _, A, rfl⟩, t, rfl⟩
     ((ihAction_lawful hπf _).comp _) (ihAction_comp_mapFlexible hπf _ _)).trans _
   · rintro rfl
     cases hδε rfl
@@ -174,7 +174,7 @@ theorem ConNF.StructApprox.extracted_2'
     · rintro rfl
       cases hδε rfl
     · exact (ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
-        ⟨γ, δ, ε, _, _, _, _, t, rfl, rfl⟩ _ _
+        ⟨γ, δ, ε, _, _, _, _, rfl⟩ _ _
   · intros B N hN
     have := ihAction_coherent hπf (A.cons _) B N
       ⟨_, inr (fuzz (show (δ : TypeIndex) ≠ ε from ?_) t).toNearLitter⟩
@@ -190,7 +190,7 @@ theorem ConNF.StructApprox.extracted_2'
     · rintro rfl
       cases hδε rfl
     · exact (ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
-        ⟨γ, δ, ε, _, _, _, _, t, rfl, rfl⟩ _ _
+        ⟨γ, δ, ε, _, _, _, _, rfl⟩ _ _
 
 theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
     (h : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ), AllowableBelow hπf δ (A.cons h)) :

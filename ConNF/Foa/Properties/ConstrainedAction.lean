@@ -316,17 +316,17 @@ theorem ihAction_le {π : StructApprox β} {c d : SupportCondition β} (h : c �
     exact Relation.TransGen.trans_left ha h
 
 theorem transGen_constrains_of_mem_designatedSupport {A : ExtendedIndex β} {L : Litter}
-    {h : InflexibleCoe L A} {γ : Iic α} {δ ε : Iio α} {hδ : (δ : Λ) < γ} {hε : (ε : Λ) < γ}
-    (hδε : δ ≠ ε) {C : Path (h.δ : TypeIndex) γ} {t : Tangle δ} {d : SupportCondition h.δ}
-    (hd₂ :
-      ⟨(C.cons (coe_lt hε)).cons (bot_lt_coe _),
-        inr (fuzz (Subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t).toNearLitter⟩ ≤[α] d)
-    (hd : ⟨(h.B.cons (coe_lt h.hδ)).comp d.path, d.value⟩ ≺[α] ⟨A, inr L.toNearLitter⟩)
+    {h : InflexibleCoe A L} {γ : Iic α} {δ ε : Iio α} {hδ : (δ : Λ) < γ} {hε : (ε : Λ) < γ}
+    (hδε : δ ≠ ε) {C : Path (h.path.δ : TypeIndex) γ} {t : Tangle δ}
+    {d : SupportCondition h.path.δ}
+    (hd₂ : ⟨(C.cons (coe_lt hε)).cons (bot_lt_coe _),
+      inr (fuzz (Subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t).toNearLitter⟩ ≤[α] d)
+    (hd : ⟨(h.path.B.cons (coe_lt h.path.hδ)).comp d.path, d.value⟩ ≺[α] ⟨A, inr L.toNearLitter⟩)
     {B : ExtendedIndex δ} {a : Atom} (hc : ⟨B, inl a⟩ ∈ (designatedSupport t).carrier) :
-    ⟨(h.B.cons (coe_lt h.hδ)).comp ((C.cons (coe_lt hδ)).comp B), inl a⟩ <[α]
+    ⟨(h.path.B.cons (coe_lt h.path.hδ)).comp ((C.cons (coe_lt hδ)).comp B), inl a⟩ <[α]
       ⟨A, inr L.toNearLitter⟩ := by
   refine' Relation.TransGen.tail' _ hd
-  refine' reflTransConstrains_comp (c := ⟨_, inl a⟩) (d := d) _ (h.B.cons <| coe_lt h.hδ)
+  refine' reflTransConstrains_comp (c := ⟨_, inl a⟩) (d := d) _ (h.path.B.cons <| coe_lt h.path.hδ)
   refine' Relation.ReflTransGen.trans _ hd₂
   exact Relation.ReflTransGen.single (Constrains.fuzz hδ hε hδε C t _ hc)
 

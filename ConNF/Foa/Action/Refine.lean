@@ -109,7 +109,7 @@ theorem rc_free (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible
   rintro B L' ((hL' | ⟨L', hL', rfl⟩) | hL')
   · exact hL'.2
   · rw [NearLitterAction.roughLitterMapOrElse_of_dom _ hL'.1]
-    exact h₂ L' B hL'.1 hL'.2
+    exact h₂ B L' hL'.1 hL'.2
   · exact (LocalPerm.sandboxSubset_subset _ _ hL').2
 
 theorem rc_comp_atomPerm {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}

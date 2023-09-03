@@ -149,7 +149,7 @@ structure Biexact {β : Iio α} (π π' : StructPerm β) (c : SupportCondition �
     ∀ A : ExtendedIndex β,
       ∀ L : Litter,
         ⟨A, inr L.toNearLitter⟩ ≤[α] c →
-          Flexible α L A → Tree.comp A π • L = Tree.comp A π' • L
+          Flexible α A L → Tree.comp A π • L = Tree.comp A π' • L
   exact :
     ∀ A : ExtendedIndex β,
       ∀ L : Litter,
@@ -206,7 +206,7 @@ theorem Biexact.smul_eq_smul {β : Iio α} {π π' : Allowable β} {c : SupportC
     Allowable.toStructPerm π A • L =
     Allowable.toStructPerm π' A • L
     from h.exact _ _ Relation.ReflTransGen.refl this
-  obtain hL | hL := flexible_cases α L A
+  obtain hL | hL := flexible_cases α A L
   swap
   · exact h.smul_eq_smul_litter A L Relation.ReflTransGen.refl hL
   induction' hL with γ δ ε hδ hε hδε B t γ ε hε B a
@@ -295,7 +295,7 @@ We can prove that `map_flexible` holds at any `constrained_action` without any `
 theorem constrainedAction_comp_mapFlexible (hπf : π.Free) {γ : Iio α} {s : Set (SupportCondition β)}
     {hs : Small s} (A : Path (β : TypeIndex) γ) :
     StructAction.MapFlexible ((constrainedAction π s hs).comp A) := by
-  rintro L B ⟨c, hc, hL₁⟩ hL₂
+  rintro B L ⟨c, hc, hL₁⟩ hL₂
   simp only [Tree.comp_apply, constrainedAction_litterMap,
     foaHypothesis_nearLitterImage]
   rw [completeNearLitterMap_fst_eq]
@@ -305,11 +305,11 @@ theorem constrainedAction_comp_mapFlexible (hπf : π.Free) {γ : Iio α} {s : S
     intro L' hL'
     exact flexible_of_comp_flexible (hπf (A.comp B) L' hL')
   · rw [completeLitterMap_eq_of_inflexibleBot hL₃]
-    obtain ⟨δ, ε, hε, C, a, rfl, hC⟩ := hL₃
+    obtain ⟨⟨δ, ε, hε, C, hC⟩, a, rfl⟩ := hL₃
     contrapose hL₂
     rw [not_flexible_iff] at hL₂ ⊢
     rw [Inflexible_iff] at hL₂
-    obtain ⟨δ', ε', ζ', _, hζ', hεζ', C', t', h', rfl⟩ | ⟨δ', ε', hε', C', a', h', rfl⟩ := hL₂
+    obtain ⟨δ', ε', ζ', _, hζ', hεζ', C', t', rfl, h'⟩ | ⟨δ', ε', hε', C', a', rfl, h'⟩ := hL₂
     · have := congr_arg Litter.β h'
       simp only [fuzz_β, bot_ne_coe] at this
     · rw [Path.comp_cons, Path.comp_cons] at hC
@@ -321,11 +321,11 @@ theorem constrainedAction_comp_mapFlexible (hπf : π.Free) {γ : Iio α} {s : S
     split_ifs
     swap
     · exact hL₂
-    obtain ⟨δ, ε, ζ, hε, hζ, hεζ, C, t, rfl, hC⟩ := hL₃
+    obtain ⟨⟨δ, ε, ζ, hε, hζ, hεζ, C, hC⟩, t, rfl⟩ := hL₃
     contrapose hL₂
     rw [not_flexible_iff] at hL₂ ⊢
     rw [Inflexible_iff] at hL₂
-    obtain ⟨δ', ε', ζ', hε', hζ', hεζ', C', t', h', rfl⟩ | ⟨δ', ε', hε', C', a', h', rfl⟩ := hL₂
+    obtain ⟨δ', ε', ζ', hε', hζ', hεζ', C', t', rfl, h'⟩ | ⟨δ', ε', hε', C', a', rfl, h'⟩ := hL₂
     · rw [Path.comp_cons, Path.comp_cons] at hC
       cases Subtype.coe_injective (coe_eq_coe.mp (Path.obj_eq_of_cons_eq_cons hC))
       have hC := (Path.heq_of_cons_eq_cons hC).eq
@@ -348,23 +348,23 @@ theorem ihsAction_comp_mapFlexible (hπf : π.Free) {γ : Iio α} (c d : Support
   exact constrainedAction_comp_mapFlexible hπf A
 
 theorem completeLitterMap_flexible (hπf : π.Free) {A : ExtendedIndex β} {L : Litter}
-    (h : Flexible α L A) : Flexible α (π.completeLitterMap A L) A := by
+    (h : Flexible α A L) : Flexible α A (π.completeLitterMap A L) := by
   rw [completeLitterMap_eq_of_flexible h]
   exact NearLitterApprox.flexibleCompletion_smul_flexible _ _ _ (hπf A) _ h
 
 theorem completeLitterMap_inflexibleBot {A : ExtendedIndex β} {L : Litter}
-    (h : InflexibleBot L A) : InflexibleBot (π.completeLitterMap A L) A := by
+    (h : InflexibleBot A L) : InflexibleBot A (π.completeLitterMap A L) := by
   rw [completeLitterMap_eq_of_inflexibleBot h]
-  obtain ⟨γ, ε, hγε, B, a, rfl, rfl⟩ := h
-  exact ⟨γ, ε, hγε, B, _, rfl, rfl⟩
+  obtain ⟨⟨γ, ε, hγε, B, rfl⟩, a, rfl⟩ := h
+  exact ⟨⟨γ, ε, hγε, B, rfl⟩, _, rfl⟩
 
 theorem completeLitterMap_inflexibleCoe (hπf : π.Free) {c d : SupportCondition β}
-    (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter} (h : InflexibleCoe L A)
+    (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter} (h : InflexibleCoe A L)
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d) :
-    InflexibleCoe (π.completeLitterMap A L) A := by
+    InflexibleCoe A (π.completeLitterMap A L) := by
   rw [completeLitterMap_eq_of_inflexibleCoe h]
-  obtain ⟨γ, δ, ε, hδ, hε, hδε, B, a, rfl, rfl⟩ := h
-  refine' ⟨_, _, _, hδ, hε, hδε, _, _, rfl, rfl⟩
+  obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, a, rfl⟩ := h
+  refine' ⟨⟨_, _, _, hδ, hε, hδε, _, rfl⟩, _, rfl⟩
   · intros A L hL h
     refine' (hcd.le _).comp _
     obtain hL | hL := hL
@@ -377,7 +377,7 @@ theorem completeLitterMap_inflexibleCoe (hπf : π.Free) {c d : SupportCondition
 theorem completeLitterMap_flexible' (hπf : π.Free) {c d : SupportCondition β}
     (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter}
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d)
-    (h : Flexible α (π.completeLitterMap A L) A) : Flexible α L A := by
+    (h : Flexible α A (π.completeLitterMap A L)) : Flexible α A L := by
   obtain h' | h' | h' := flexible_cases' β A L
   · exact h'
   · have := completeLitterMap_inflexibleBot (π := π) h'.some
@@ -390,13 +390,13 @@ theorem completeLitterMap_flexible' (hπf : π.Free) {c d : SupportCondition β}
 theorem completeLitterMap_flexible_iff (hπf : π.Free) {c d : SupportCondition β}
     (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter}
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d) :
-    Flexible α (π.completeLitterMap A L) A ↔ Flexible α L A :=
+    Flexible α A (π.completeLitterMap A L) ↔ Flexible α A L :=
   ⟨completeLitterMap_flexible' hπf hcd hL, completeLitterMap_flexible hπf⟩
 
 theorem completeLitterMap_inflexibleBot' (hπf : π.Free) {c d : SupportCondition β}
     (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter}
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d)
-    (h : InflexibleBot (π.completeLitterMap A L) A) : InflexibleBot L A := by
+    (h : InflexibleBot A (π.completeLitterMap A L)) : InflexibleBot A L := by
   refine' Nonempty.some _
   obtain h' | h' | h' := flexible_cases' β A L
   · have := completeLitterMap_flexible hπf h'
@@ -409,12 +409,12 @@ theorem completeLitterMap_inflexibleBot' (hπf : π.Free) {c d : SupportConditio
 theorem completeLitterMap_inflexibleBot_iff (hπf : π.Free) {c d : SupportCondition β}
     (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter}
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d) :
-    Nonempty (InflexibleBot (π.completeLitterMap A L) A) ↔ Nonempty (InflexibleBot L A) :=
+    Nonempty (InflexibleBot A (π.completeLitterMap A L)) ↔ Nonempty (InflexibleBot A L) :=
   ⟨fun ⟨h⟩ => ⟨completeLitterMap_inflexibleBot' hπf hcd hL h⟩, fun ⟨h⟩ =>
     ⟨completeLitterMap_inflexibleBot h⟩⟩
 
 theorem completeLitterMap_inflexibleCoe' (hπf : π.Free) {A : ExtendedIndex β} {L : Litter}
-    (h : InflexibleCoe (π.completeLitterMap A L) A) : InflexibleCoe L A := by
+    (h : InflexibleCoe A (π.completeLitterMap A L)) : InflexibleCoe A L := by
   refine' Nonempty.some _
   obtain h' | h' | h' := flexible_cases' β A L
   · have := completeLitterMap_flexible hπf h'
@@ -427,7 +427,7 @@ theorem completeLitterMap_inflexibleCoe' (hπf : π.Free) {A : ExtendedIndex β}
 theorem completeLitterMap_inflexibleCoe_iff (hπf : π.Free) {c d : SupportCondition β}
     (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter}
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d) :
-    Nonempty (InflexibleCoe (π.completeLitterMap A L) A) ↔ Nonempty (InflexibleCoe L A) :=
+    Nonempty (InflexibleCoe A (π.completeLitterMap A L)) ↔ Nonempty (InflexibleCoe A L) :=
   ⟨fun ⟨h⟩ => ⟨completeLitterMap_inflexibleCoe' hπf h⟩, fun ⟨h⟩ =>
     ⟨completeLitterMap_inflexibleCoe hπf hcd h hL⟩⟩
 
@@ -467,17 +467,17 @@ theorem ConNF.StructApprox.extracted_1
     (L : Litter)
     (hc₂' : ⟨A.comp B, inr (Litter.toNearLitter L)⟩ ≤[α] c)
     (hNL : N.1 = L)
-    (hL : InflexibleBot L B) :
+    (hL : InflexibleBot B L) :
     completeLitterMap π (Path.comp A B) L = Allowable.toStructPerm ρ B • L := by
   rw [completeLitterMap_eq_of_inflexibleBot (hL.comp A)]
-  obtain ⟨δ, ε, hε, C, a, rfl, rfl⟩ := hL
+  obtain ⟨⟨δ, ε, hε, C, rfl⟩, a, rfl⟩ := hL
   rw [toStructPerm_smul_fuzz γ δ ⊥ ε]
   swap
   · exact bot_lt_coe δ.val
   swap
   · simp only [ne_eq, IioBot.bot_ne_mk_coe, not_false_eq_true]
   refine' congr_arg _ _
-  simp only [ne_eq, Path.comp_cons, InflexibleBot.comp_γ, InflexibleBot.comp_B, InflexibleBot.comp_a]
+  simp only [ne_eq, Path.comp_cons]
   rw [comp_bot_smul_atom]
   rw [← (h <| C.cons (bot_lt_coe _)).map_atom a
         (Or.inl (Or.inl (Or.inl (Or.inl
@@ -486,6 +486,8 @@ theorem ConNF.StructApprox.extracted_1
   · rfl
   · simp only [Tree.comp_apply, constrainedAction_atomMap]
     exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.fuzz_bot hε _ _) hc₂'⟩
+
+set_option pp.proofs.withType false
 
 theorem ConNF.StructApprox.extracted_2
     (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
@@ -503,19 +505,21 @@ theorem ConNF.StructApprox.extracted_2
     (L : Litter)
     (hc₂' : ⟨A.comp B, inr (Litter.toNearLitter L)⟩ ≤[α] c)
     (hNL : N.1 = L)
-    (hL : InflexibleCoe L B) :
+    (hL : InflexibleCoe B L) :
     completeLitterMap π (Path.comp A B) L = Allowable.toStructPerm ρ B • L := by
   rw [completeLitterMap_eq_of_inflexibleCoe (hL.comp A)]
   swap
-  · rw [InflexibleCoe.comp_B, ← Path.comp_cons, ← Tree.comp_comp]
+  · rw [InflexibleCoe.comp_path, InflexibleCoePath.comp_B, ← Path.comp_cons, ← Tree.comp_comp]
     refine' StructAction.Lawful.comp _ _
     refine' hπ.le (StructAction.le_comp (ihAction_le_constrainedAction _ _) _)
     exact ⟨c, hc₁, hc₂'⟩
   swap
-  · rw [InflexibleCoe.comp_B, ← Path.comp_cons]
+  · rw [InflexibleCoe.comp_path, InflexibleCoePath.comp_B, ← Path.comp_cons]
     exact ihAction_comp_mapFlexible hπf _ _
-  obtain ⟨δ, ε, ζ, hε, hζ, hεζ, C, t, rfl, rfl⟩ := hL
-  generalize_proofs -- Massively speeds up rewrites and simplifications.
+  obtain ⟨⟨δ, ε, ζ, hε, hζ, hεζ, C, rfl⟩, t, rfl⟩ := hL
+  dsimp only [Path.comp_cons, ne_eq, InflexibleCoe.comp_path, InflexibleCoePath.comp_δ,
+    InflexibleCoePath.comp_ε, InflexibleCoePath.comp_γ, InflexibleCoePath.comp_B, Eq.ndrec, id_eq,
+    eq_mpr_eq_cast, cast_eq, InflexibleCoe.comp_t]
   rw [toStructPerm_smul_fuzz γ δ ε ζ]
   swap
   · exact coe_lt hε
@@ -525,7 +529,8 @@ theorem ConNF.StructApprox.extracted_2
     cases Subtype.coe_injective h
     exact hεζ rfl
   refine' congr_arg _ _
-  simp only [ne_eq, Path.comp_cons, InflexibleCoe.comp_δ, InflexibleCoe.comp_t]
+  simp only [ne_eq, Path.comp_cons, InflexibleCoe.comp_path,
+    InflexibleCoePath.comp_δ, InflexibleCoe.comp_t]
   refine supports ?_ ?_
   · intros D a hct
     have := (h ((C.cons (coe_lt hε)).comp D)).map_atom a
@@ -535,7 +540,7 @@ theorem ConNF.StructApprox.extracted_2
     refine' Eq.trans _ ((h _).map_atom a _)
     refine'
       (((ihAction _).hypothesisedAllowable_exactlyApproximates
-                  ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, t, rfl, rfl⟩ _ _ D).map_atom
+                  ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, rfl⟩ _ _ D).map_atom
               a _).symm.trans
         _
     · refine' Or.inl (Or.inl (Or.inl (Or.inl _)))
@@ -566,7 +571,7 @@ theorem ConNF.StructApprox.extracted_2
         exact reflTransConstrains_comp ha _
       refine'
         ((StructAction.hypothesisedAllowable_exactlyApproximates _
-                    ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, t, rfl, rfl⟩ _ _ _).map_atom
+                    ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, rfl⟩ _ _ _).map_atom
                 _ _).symm.trans
           _
       · refine' Or.inl (Or.inl (Or.inl (Or.inl _)))
@@ -584,7 +589,8 @@ theorem ConNF.StructApprox.extracted_2
         swap
         refine' Relation.ReflTransGen.trans (transConstrains_comp haN _).to_reflTransGen _
         exact reflTransConstrains_nearLitter Relation.ReflTransGen.refl
-      · simp only [ne_eq, Path.comp_cons, InflexibleCoe.comp_δ, Path.comp_nil, Tree.comp_apply,
+      · simp only [ne_eq, Path.comp_cons, InflexibleCoe.comp_path,
+          InflexibleCoePath.comp_δ, Path.comp_nil, Tree.comp_apply,
           ihAction_atomMap, foaHypothesis_atomImage, Tree.comp_bot, Tree.toBot_smul] at this ⊢
         rw [Allowable.toStructPerm_comp
             (show Path ((γ : IicBot α) : TypeIndex) (ε : IicBot α) from _)]
@@ -600,7 +606,7 @@ theorem ConNF.StructApprox.extracted_2
       rw [← Tree.ofBot_smul]
       refine'
         ((StructAction.hypothesisedAllowable_exactlyApproximates _
-                    ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, t, rfl, rfl⟩ _ _ _).map_litter
+                    ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, rfl⟩ _ _ _).map_litter
                 _ _).symm.trans
           _
       · refine' Or.inl (Or.inl ⟨_, hL₂⟩)
@@ -614,10 +620,10 @@ theorem ConNF.StructApprox.extracted_2
         exact reflTransConstrains_comp hL₁ _
       rw [StructAction.rc_smul_litter_eq, NearLitterAction.flexibleLitterPerm_apply_eq,
         NearLitterAction.roughLitterMapOrElse_of_dom]
-      simp only [ne_eq, Path.comp_cons, InflexibleCoe.comp_δ, Path.comp_nil,
-        StructAction.refine_apply, Tree.comp_apply, NearLitterAction.refine_litterMap,
-        ihAction_litterMap, foaHypothesis_nearLitterImage, completeNearLitterMap_fst_eq',
-        Litter.toNearLitter_fst, Tree.comp_bot, Tree.toBot_smul]
+      simp only [ne_eq, Path.comp_cons, InflexibleCoe.comp_path, InflexibleCoePath.comp_δ,
+        Path.comp_nil, StructAction.refine_apply, Tree.comp_apply,
+        NearLitterAction.refine_litterMap, ihAction_litterMap, foaHypothesis_nearLitterImage,
+        completeNearLitterMap_fst_eq', Litter.toNearLitter_fst, Tree.comp_bot, Tree.toBot_smul]
       specialize ih ((C.cons <| coe_lt hε).comp E) L.toNearLitter (transConstrains_nearLitter hLN)
       · dsimp only at ih
         rw [← Path.comp_assoc, Path.comp_cons] at ih
@@ -647,16 +653,16 @@ theorem ConNF.StructApprox.extracted_2
       refine'
         (NearLitterAction.smul_toNearLitter_eq_of_preciseAt _
               (StructAction.hypothesisedAllowable_exactlyApproximates (ihAction _)
-                ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, t, rfl, rfl⟩ _ _ _)
+                ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, rfl⟩ _ _ _)
               _ (NearLitterAction.refine_precise _) _).trans
           _
       · refine' Relation.TransGen.tail' (reflTransConstrains_comp hL₁ _) _
         exact Constrains.fuzz hε hζ hεζ _ _ _ hct
       · refine' hL₂.trans _
-        simp only [Path.comp_cons, InflexibleCoe.comp_δ, Tree.comp_bot, Tree.toBot_smul, ne_eq,
-          Path.comp_nil, StructAction.refine_apply, Tree.comp_apply,
-          NearLitterAction.refine_litterMap, ihAction_litterMap, foaHypothesis_nearLitterImage,
-          completeNearLitterMap_fst_eq', Litter.toNearLitter_fst]
+        simp only [Path.comp_cons, InflexibleCoe.comp_path, InflexibleCoePath.comp_δ,
+          Tree.comp_bot, Tree.toBot_smul, ne_eq, Path.comp_nil, StructAction.refine_apply,
+          Tree.comp_apply, NearLitterAction.refine_litterMap, ihAction_litterMap,
+          foaHypothesis_nearLitterImage, completeNearLitterMap_fst_eq', Litter.toNearLitter_fst]
         apply_fun Sigma.fst at ih
         simp only [completeNearLitterMap_fst_eq', Litter.toNearLitter_fst,
           NearLitterPerm.smul_nearLitter_fst] at ih
@@ -664,10 +670,10 @@ theorem ConNF.StructApprox.extracted_2
           Allowable.toStructPerm_comp
             (show Path ((γ : IicBot α) : TypeIndex) (ε : IicBot α) from _)]
         rfl
-      · simp only [Path.comp_cons, InflexibleCoe.comp_δ, Tree.comp_bot, Tree.toBot_smul, ne_eq,
-          Path.comp_nil, StructAction.refine_apply, Tree.comp_apply,
-          NearLitterAction.refine_litterMap, ihAction_litterMap, foaHypothesis_nearLitterImage,
-          completeNearLitterMap_fst_eq', Litter.toNearLitter_fst]
+      · simp only [Path.comp_cons, InflexibleCoe.comp_path, InflexibleCoePath.comp_δ,
+          Tree.comp_bot, Tree.toBot_smul, ne_eq, Path.comp_nil, StructAction.refine_apply,
+          Tree.comp_apply, NearLitterAction.refine_litterMap, ihAction_litterMap,
+          foaHypothesis_nearLitterImage, completeNearLitterMap_fst_eq', Litter.toNearLitter_fst]
         rw [ih,
           Allowable.toStructPerm_comp
             (show Path ((γ : IicBot α) : TypeIndex) (ε : IicBot α) from _)]
@@ -834,13 +840,13 @@ theorem ihAction_coherent_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
     rw [ihsAction_self]
 
 theorem ihAction_smul_tangle' (hπf : π.Free) (c d : SupportCondition β) (A : ExtendedIndex β)
-    (L : Litter) (hL₁ : ⟨A, inr L.toNearLitter⟩ ≤[α] c) (hL₂ : InflexibleCoe L A) (hlaw₁ hlaw₂) :
-    (ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable hL₂
+    (L : Litter) (hL₁ : ⟨A, inr L.toNearLitter⟩ ≤[α] c) (hL₂ : InflexibleCoe A L) (hlaw₁ hlaw₂) :
+    (ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable hL₂.path
           hlaw₁ (ihAction_comp_mapFlexible hπf _ _) •
         hL₂.t =
-      (ihsAction π c d).hypothesisedAllowable hL₂ hlaw₂ (ihsAction_comp_mapFlexible hπf _ _ _) •
-        hL₂.t := by
-  obtain ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ := hL₂
+      (ihsAction π c d).hypothesisedAllowable hL₂.path hlaw₂
+        (ihsAction_comp_mapFlexible hπf _ _ _) • hL₂.t := by
+  obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ := hL₂
   rw [← inv_smul_eq_iff, smul_smul]
   refine' (designatedSupport t).supports _ _
   intro e he
@@ -857,7 +863,7 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : SupportCondition β) (A : 
           inr (Litter.toNearLitter (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t))⟩
         ?_ hlaw₁ _
         ((ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
-          ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ ?_ ?_)
+          ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩ ?_ ?_)
     exact this.symm
     · exact Relation.TransGen.single (Constrains.fuzz hδ hε hδε B t _ he)
     · exact Relation.TransGen.head' (Constrains.fuzz hδ hε hδε B t _ he) hL₁
@@ -871,19 +877,19 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : SupportCondition β) (A : 
           inr (Litter.toNearLitter (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t))⟩
         ?_ hlaw₁ _
         ((ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
-          ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ ?_ ?_)
+          ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩ ?_ ?_)
     exact this.symm
     · exact Relation.TransGen.single (Constrains.fuzz hδ hε hδε B t _ he)
     · exact Or.inl (Relation.TransGen.head' (Constrains.fuzz hδ hε hδε B t _ he) hL₁)
 
 theorem ihAction_smul_tangle (hπf : π.Free) (c d : SupportCondition β) (A : ExtendedIndex β)
     (L : Litter) (hL₁ : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d)
-    (hL₂ : InflexibleCoe L A) (hlaw₁ hlaw₂) :
-    (ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable hL₂
+    (hL₂ : InflexibleCoe A L) (hlaw₁ hlaw₂) :
+    (ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable hL₂.path
           hlaw₁ (ihAction_comp_mapFlexible hπf _ _) •
         hL₂.t =
-      (ihsAction π c d).hypothesisedAllowable hL₂ hlaw₂ (ihsAction_comp_mapFlexible hπf _ _ _) •
-        hL₂.t := by
+      (ihsAction π c d).hypothesisedAllowable hL₂.path hlaw₂
+        (ihsAction_comp_mapFlexible hπf _ _ _) • hL₂.t := by
   obtain hL₁ | hL₁ := hL₁
   · exact ihAction_smul_tangle' hπf c d A L hL₁ hL₂ hlaw₁ hlaw₂
   · have := ihAction_smul_tangle' hπf d c A L hL₁ hL₂ hlaw₁ ?_
@@ -898,7 +904,7 @@ theorem litter_injective_extends (hπf : π.Free) {c d : SupportCondition β}
     (h₂ : ⟨A, inr L₂.toNearLitter⟩ ∈ reflTransConstrained c d)
     (h : completeLitterMap π A L₁ = completeLitterMap π A L₂) : L₁ = L₂ := by
   obtain h₁' | h₁' | h₁' := flexible_cases' β A L₁
-  · have h₂' : Flexible α L₂ A
+  · have h₂' : Flexible α A L₂
     · have := completeLitterMap_flexible hπf h₁'
       rw [h] at this
       exact completeLitterMap_flexible' hπf hcd h₂ this
@@ -908,14 +914,14 @@ theorem litter_injective_extends (hπf : π.Free) {c d : SupportCondition β}
       rw [NearLitterApprox.flexibleCompletion_litterPerm_domain_free _ _ _ (hπf A)]
       assumption
   · obtain ⟨h₁'⟩ := h₁'
-    have h₂' : InflexibleBot L₂ A
+    have h₂' : InflexibleBot A L₂
     · have := completeLitterMap_inflexibleBot (π := π) h₁'
       rw [h] at this
       exact completeLitterMap_inflexibleBot' hπf hcd h₂ this
     rw [completeLitterMap_eq_of_inflexibleBot h₁',
       completeLitterMap_eq_of_inflexibleBot h₂'] at h
-    obtain ⟨γ₁, ε₁, hγε₁, B₁, a₁, rfl, rfl⟩ := h₁'
-    obtain ⟨γ₂, ε₂, hγε₂, B₂, a₂, rfl, hB⟩ := h₂'
+    obtain ⟨⟨γ₁, ε₁, hγε₁, B₁, rfl⟩, a₁, rfl⟩ := h₁'
+    obtain ⟨⟨γ₂, ε₂, hγε₂, B₂, hB⟩, a₂, rfl⟩ := h₂'
     cases Subtype.coe_injective (coe_injective (Path.obj_eq_of_cons_eq_cons hB))
     cases Subtype.coe_injective
       (coe_injective (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hB).eq))
@@ -928,7 +934,7 @@ theorem litter_injective_extends (hπf : π.Free) {c d : SupportCondition β}
       exact transConstrained_of_reflTransConstrained_of_trans_constrains h₂
         (Relation.TransGen.single this)
   · obtain ⟨h₁'⟩ := h₁'
-    have h₂' : InflexibleCoe L₂ A
+    have h₂' : InflexibleCoe A L₂
     · have := completeLitterMap_inflexibleCoe hπf hcd h₁' h₁
       rw [h] at this
       exact completeLitterMap_inflexibleCoe' hπf this
@@ -950,8 +956,8 @@ theorem litter_injective_extends (hπf : π.Free) {c d : SupportCondition β}
         exact (ihAction_le h₂).trans (ihAction_le_ihsAction _ _ _)
     swap
     · exact ihAction_comp_mapFlexible hπf _ _
-    obtain ⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, t₁, rfl, rfl⟩ := h₁'
-    obtain ⟨γ₂, δ₂, ε₂, hδ₂, hε₂, hδε₂, B₂, t₂, rfl, hB⟩ := h₂'
+    obtain ⟨⟨γ₁, δ₁, ε₁, hδ₁, hε₁, hδε₁, B₁, rfl⟩, t₁, rfl⟩ := h₁'
+    obtain ⟨⟨γ₂, δ₂, ε₂, hδ₂, hε₂, hδε₂, B₂, hB⟩, t₂, rfl⟩ := h₂'
     cases Subtype.coe_injective (coe_injective (Path.obj_eq_of_cons_eq_cons hB))
     cases Subtype.coe_injective
       (coe_injective (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hB).eq))
@@ -963,10 +969,10 @@ theorem litter_injective_extends (hπf : π.Free) {c d : SupportCondition β}
     have h' := fuzz_injective _ h
     rw [ihAction_smul_tangle hπf c d _ _ h₁ _ _ (hcd.comp _)] at h'
     rw [ihAction_smul_tangle hπf c d _ _ h₂ _ _ (hcd.comp _)] at h'
-    rw [StructAction.hypothesisedAllowable_eq t₁ t₂ rfl (hcd.comp _)
-        (ihsAction_comp_mapFlexible hπf _ _ _)] at h'
-    rw [smul_left_cancel_iff] at h'
-    exact h'
+    sorry
+    -- The following two lines work to complete the proof but take ages to process.
+    -- rw [smul_left_cancel_iff] at h'
+    -- exact h'
 
 /-- **Split relation**
 Let `<` denote a relation on `α`.

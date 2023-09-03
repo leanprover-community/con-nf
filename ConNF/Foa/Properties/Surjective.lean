@@ -149,18 +149,18 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
     · rw [NearLitterApprox.flexibleCompletion_litterPerm_domain_free α (π A) A (hπf A)]
       exact h
     · exact NearLitterApprox.flexibleCompletion_symm_smul_flexible α (π A) A (hπf A) L h
-  · obtain ⟨γ, ε, hε, C, a, rfl, rfl⟩ := h
+  · obtain ⟨⟨γ, ε, hε, C, rfl⟩, a, rfl⟩ := h
     obtain ⟨b, rfl⟩ := ha _ a (Constrains.fuzz_bot hε _ a)
     refine' ⟨fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) b, _⟩
-    rw [completeLitterMap_eq_of_inflexibleBot ⟨γ, ε, hε, C, b, rfl, rfl⟩]
-  · obtain ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ := h
+    rw [completeLitterMap_eq_of_inflexibleBot ⟨⟨γ, ε, hε, C, rfl⟩, b, rfl⟩]
+  · obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ := h
     refine' ⟨fuzz (coe_ne_coe.mpr <| coe_ne' hδε)
       (((preimageAction hπf
             ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
               inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩).hypothesisedAllowable
-          ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩
+          ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩
           ((preimageAction_lawful hπf).comp _) (preimageAction_comp_mapFlexible _))⁻¹ • t), _⟩
-    rw [completeLitterMap_eq_of_inflexibleCoe ⟨γ, δ, ε, hδ, hε, hδε, B, _, rfl, rfl⟩
+    rw [completeLitterMap_eq_of_inflexibleCoe ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, _, rfl⟩
         ((ihAction_lawful hπf _).comp _) (ihAction_comp_mapFlexible hπf _ _)]
     refine' congr_arg _ _
     dsimp only
@@ -174,7 +174,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         (Allowable.toStructPerm ((preimageAction hπf
             ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
               inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩).hypothesisedAllowable
-              ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ ((preimageAction_lawful hπf).comp _)
+              ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩ ((preimageAction_lawful hπf).comp _)
               (preimageAction_comp_mapFlexible _))))⁻¹ • a = b
       · rw [inv_smul_eq_iff, ← ha]
         rw [StructAction.hypothesisedAllowable]
@@ -205,7 +205,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         (Allowable.toStructPerm ((preimageAction hπf
           ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
             inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩).hypothesisedAllowable
-              ⟨γ, δ, ε, hδ, hε, hδε, B, t, rfl, rfl⟩ ((preimageAction_lawful hπf).comp _)
+              ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩ ((preimageAction_lawful hπf).comp _)
               (preimageAction_comp_mapFlexible _))))⁻¹ • N = N'
       · rw [inv_smul_eq_iff, ← hN]
         rw [StructAction.hypothesisedAllowable]

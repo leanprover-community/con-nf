@@ -29,7 +29,7 @@ def Lawful {β : TypeIndex} (φ : StructAction β) : Prop :=
 /-- This structural action maps flexible litters to flexible litters. -/
 def MapFlexible {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iio α} (φ : StructAction β) :
     Prop :=
-  ∀ (L : Litter) (B hL), Flexible α L B → Flexible α (((φ B).litterMap L).get hL).1 B
+  ∀ (B) (L : Litter) (hL), Flexible α B L → Flexible α B (((φ B).litterMap L).get hL).1
 
 section Precise
 
