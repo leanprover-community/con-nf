@@ -16,8 +16,6 @@ variable [Params.{u}]
 # Near-litter approximations
 -/
 
--- TODO: Split into two files
-
 @[ext]
 structure NearLitterApprox where
   atomPerm : LocalPerm Atom
@@ -150,82 +148,6 @@ theorem not_mem_domain_of_mem_largestSublitter {a : Atom} {L : Litter}
     (h : a ∈ π.largestSublitter L) : a ∉ π.atomPerm.domain :=
   h.2
 
-/-- Computes the action of `π` on this sublitter, assuming it is in `sublitter_domain`. -/
-def generateSublitter (S : Sublitter) : Sublitter :=
-  π.largestSublitter (π • S.litter)
-
-def sublitterDomain : Set Sublitter :=
-  {S | S.litter ∈ π.litterPerm.domain ∧ (S : Set Atom) = litterSet S.litter \ π.atomPerm.domain}
-
-theorem mem_sublitterDomain (S : Sublitter) (h : S ∈ π.sublitterDomain) :
-    (S : Set Atom) = litterSet S.litter \ π.atomPerm.domain :=
-  h.2
-
-theorem generateSublitter_mem_domain ⦃S : Sublitter⦄ (h : S ∈ sublitterDomain π) :
-    generateSublitter π S ∈ sublitterDomain π :=
-  ⟨π.litterPerm.map_domain h.1, rfl⟩
-
-theorem generateSublitter_left_inv ⦃S : Sublitter⦄ (h : S ∈ sublitterDomain π) :
-    generateSublitter π.symm (generateSublitter π S) = S := by
-  ext : 1
-  simp only [h.2, largestSublitter, generateSublitter, symm_atomPerm, LocalPerm.symm_domain,
-    Sublitter.coe_mk, π.left_inv_litter h.1]
-
-/-- Generates the unique near-litter approximation given by an atom local permutation and a
-near-litter local permutation. This uniqueness is only up to evaluating everything on the domain
-of the permutation. -/
-def generateSublitterPerm : LocalPerm Sublitter
-    where
-  toFun := generateSublitter π
-  invFun := generateSublitter π.symm
-  domain := sublitterDomain π
-  toFun_domain' := generateSublitter_mem_domain π
-  invFun_domain' := generateSublitter_mem_domain π.symm
-  left_inv' := generateSublitter_left_inv π
-  right_inv' := generateSublitter_left_inv π.symm
-
-@[simp]
-theorem generate_symm : (generateSublitterPerm π).symm = generateSublitterPerm π.symm :=
-  rfl
-
-@[simp]
-theorem generateSublitterPerm_domain : (generateSublitterPerm π).domain = sublitterDomain π :=
-  rfl
-
-@[simp]
-theorem generateSublitter_apply (S : Sublitter) :
-    generateSublitterPerm π S = generateSublitter π S :=
-  rfl
-
-instance : SMul NearLitterApprox Sublitter :=
-  ⟨fun π => π.generateSublitterPerm⟩
-
-theorem smul_sublitter_eq (S : Sublitter) : π • S = generateSublitterPerm π S :=
-  rfl
-
-@[simp]
-theorem smul_sublitter_litter (S : Sublitter) : (π • S).litter = π • S.litter :=
-  rfl
-
-theorem smul_eq_smul_sublitter {S₁ S₂ : Sublitter} (h₁ : S₁ ∈ sublitterDomain π)
-    (h₂ : S₂ ∈ sublitterDomain π) : π • S₁ = π • S₂ ↔ S₁ = S₂ := by
-  rw [smul_sublitter_eq, smul_sublitter_eq,
-    ← π.generateSublitterPerm.eq_symm_apply h₁ (π.generateSublitterPerm.map_domain h₂),
-    LocalPerm.left_inv _ _]
-  exact h₂
-
-@[simp]
-theorem left_inv_sublitter {S} : S ∈ π.sublitterDomain → π.symm • π • S = S :=
-  π.generateSublitterPerm.left_inv
-
-@[simp]
-theorem right_inv_sublitter {S} : S ∈ π.sublitterDomain → π • π.symm • S = S :=
-  π.generateSublitterPerm.right_inv
-
-theorem eq_symm_apply_sublitter {S₁ S₂} :
-    S₁ ∈ π.sublitterDomain → S₂ ∈ π.sublitterDomain → (S₁ = π.symm • S₂ ↔ π • S₁ = S₂) :=
-  π.generateSublitterPerm.eq_symm_apply
-
 /-- Computes the action of `π` on this near-litter. This action is not injective.
 The nicest properties will hold when `N` is a litter. -/
 def generateNearLitter (π : NearLitterApprox) (N : NearLitter) : NearLitter :=
@@ -351,17 +273,6 @@ theorem ExactlyApproximates.map_nearLitter {π₀ : NearLitterApprox} {π : Near
         have hb₂ : π₀.symm • (π • b) ∈ _ := π₀.symm.atomPerm.map_domain hb₁
         rw [hπ.symm_map_atom _ hb₁, inv_smul_smul] at hb₂
         exact h hb₂
-
-instance : Preorder NearLitterApprox
-    where
-  le π π' := π.atomPerm ≤ π'.atomPerm ∧ π.litterPerm ≤ π'.litterPerm
-  le_refl π := ⟨le_rfl, le_rfl⟩
-  le_trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
-
-theorem approximatesOfLe {π₀ π₀' : NearLitterApprox} {π : NearLitterPerm} (hle : π₀' ≤ π₀)
-    (h : π₀.Approximates π) : π₀'.Approximates π :=
-  ⟨fun a ha => (hle.1.2 ha).trans (h.1 a (hle.1.1 ha)), fun N hN =>
-    (hle.2.2 hN).trans (h.2 N (hle.2.1 hN))⟩
 
 def Free (α : Λ) [BasePositions] [FoaAssumptions α] {β : TypeIndex} (π : NearLitterApprox)
     (A : ExtendedIndex β) : Prop :=
