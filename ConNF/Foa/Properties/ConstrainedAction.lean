@@ -226,7 +226,7 @@ theorem ihsAction_symm (π : StructApprox β) (c d : SupportCondition β) :
 
 @[simp]
 theorem ihsAction_self (π : StructApprox β) (c : SupportCondition β) :
-    ihsAction π c c = ihAction (π.foaHypothesis : Hypothesis c) := by
+    ihsAction π c c = ihAction (π.foaHypothesis : HypAction c) := by
   funext
   ext
   · funext
@@ -244,7 +244,7 @@ theorem constrainedAction_mono {π : StructApprox β} {s t : Set (SupportConditi
 
 theorem ihAction_le_constrainedAction {π : StructApprox β} {s : Set (SupportCondition β)}
     {hs : Small s} (c : SupportCondition β) (hc : ∃ d : SupportCondition β, d ∈ s ∧ c ≤[α] d) :
-    ihAction (π.foaHypothesis : Hypothesis c) ≤ constrainedAction π s hs :=
+    ihAction (π.foaHypothesis : HypAction c) ≤ constrainedAction π s hs :=
   fun _ =>
   ⟨⟨fun _ ha => ⟨hc.choose, hc.choose_spec.1, _root_.trans ha.to_reflTransGen hc.choose_spec.2⟩,
     fun _ _ => rfl⟩,
@@ -252,7 +252,7 @@ theorem ihAction_le_constrainedAction {π : StructApprox β} {s : Set (SupportCo
     fun _ _ => rfl⟩⟩
 
 theorem ihAction_eq_constrainedAction (π : StructApprox β) (c : SupportCondition β) :
-    ihAction (π.foaHypothesis : Hypothesis c) =
+    ihAction (π.foaHypothesis : HypAction c) =
       constrainedAction π {d | d ≺[α] c} (small_constrains c) := by
   funext
   ext
@@ -304,11 +304,11 @@ theorem ihsAction_eq_constrainedAction (π : StructApprox β) (c d : SupportCond
       · exact Or.inr ⟨b, hb₂, hb₁⟩
 
 theorem ihAction_le_ihsAction (π : StructApprox β) (c d : SupportCondition β) :
-    ihAction (π.foaHypothesis : Hypothesis c) ≤ ihsAction π c d :=
+    ihAction (π.foaHypothesis : HypAction c) ≤ ihsAction π c d :=
   fun _ => ⟨⟨fun _ => Or.inl, fun _ _ => rfl⟩, ⟨fun _ => Or.inl, fun _ _ => rfl⟩⟩
 
 theorem ihAction_le {π : StructApprox β} {c d : SupportCondition β} (h : c ≤[α] d) :
-    ihAction (π.foaHypothesis : Hypothesis c) ≤ ihAction (π.foaHypothesis : Hypothesis d) := by
+    ihAction (π.foaHypothesis : HypAction c) ≤ ihAction (π.foaHypothesis : HypAction d) := by
   refine' fun B => ⟨⟨_, fun a h => rfl⟩, ⟨_, fun L h => rfl⟩⟩
   · intro a ha
     exact Relation.TransGen.trans_left ha h

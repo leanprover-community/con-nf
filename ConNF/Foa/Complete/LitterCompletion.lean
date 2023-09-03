@@ -1,4 +1,5 @@
 import ConNF.Foa.Basic.Reduction
+import ConNF.Foa.Complete.HypAction
 import ConNF.Foa.Action.Refine
 import ConNF.Foa.Complete.FlexibleCompletion
 
@@ -26,7 +27,7 @@ class FreedomOfActionHypothesis (β : Iic α) : Prop where
 export FreedomOfActionHypothesis (freedomOfAction_of_lt)
 
 /-- The structural action associated to a given inductive hypothesis. -/
-def ihAction {β : Iic α} {c : SupportCondition β} (H : Hypothesis c) : StructAction β := fun B =>
+def ihAction {β : Iic α} {c : SupportCondition β} (H : HypAction c) : StructAction β := fun B =>
   { atomMap := fun a => ⟨_, fun h => H.atomImage B a h⟩
     litterMap := fun L => ⟨_, fun h => H.nearLitterImage B L.toNearLitter h⟩
     atomMap_dom_small := by
@@ -50,12 +51,12 @@ def ihAction {β : Iic α} {c : SupportCondition β} (H : Hypothesis c) : Struct
         exact h }
 
 @[simp]
-theorem ihAction_atomMap {β : Iic α} {c : SupportCondition β} {H : Hypothesis c}
+theorem ihAction_atomMap {β : Iic α} {c : SupportCondition β} {H : HypAction c}
     {B : ExtendedIndex β} {a : Atom} : (ihAction H B).atomMap a = ⟨_, fun h => H.atomImage B a h⟩ :=
   rfl
 
 @[simp]
-theorem ihAction_litterMap {β : Iic α} {c : SupportCondition β} {H : Hypothesis c}
+theorem ihAction_litterMap {β : Iic α} {c : SupportCondition β} {H : HypAction c}
     {B : ExtendedIndex β} {L : Litter} :
     (ihAction H B).litterMap L = ⟨_, fun h => H.nearLitterImage B L.toNearLitter h⟩ :=
   rfl
@@ -90,7 +91,7 @@ theorem _root_.ConNF.StructAction.hypothesisedAllowable_exactlyApproximates (φ 
   StructAction.allowable_exactlyApproximates (φ.comp (h.B.cons (coe_lt h.hδ))) _ _ _
 
 noncomputable def litterCompletion (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
-    (H : Hypothesis ⟨A, inr L.toNearLitter⟩) : Litter :=
+    (H : HypAction ⟨A, inr L.toNearLitter⟩) : Litter :=
   if h : Nonempty (InflexibleCoe A L) then
     if hs : _ ∧ _ then
       fuzz (coe_ne_coe.mpr <| coe_ne' h.some.path.hδε)
@@ -103,7 +104,7 @@ noncomputable def litterCompletion (π : StructApprox β) (A : ExtendedIndex β)
     else NearLitterApprox.flexibleCompletion α (π A) A • L
 
 theorem litterCompletion_of_flexible (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
-    (H : Hypothesis ⟨A, inr L.toNearLitter⟩) (hflex : Flexible α A L) :
+    (H : HypAction ⟨A, inr L.toNearLitter⟩) (hflex : Flexible α A L) :
     litterCompletion π A L H = NearLitterApprox.flexibleCompletion α (π A) A • L := by
   rw [litterCompletion, dif_neg, dif_neg]
   · rintro ⟨⟨⟨γ, ε, hε, C, rfl⟩, a, rfl⟩⟩
@@ -112,7 +113,7 @@ theorem litterCompletion_of_flexible (π : StructApprox β) (A : ExtendedIndex �
     exact hflex (Inflexible.mk_coe hδ hε hδε _ _)
 
 theorem litterCompletion_of_inflexibleCoe' (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
-    (H : Hypothesis ⟨A, inr L.toNearLitter⟩) (h : InflexibleCoe A L) :
+    (H : HypAction ⟨A, inr L.toNearLitter⟩) (h : InflexibleCoe A L) :
     litterCompletion π A L H =
       if h' : _ ∧ _ then
         fuzz (coe_ne_coe.mpr <| coe_ne' h.path.hδε)
@@ -127,7 +128,7 @@ theorem litterCompletion_of_inflexibleCoe' (π : StructApprox β) (A : ExtendedI
   rfl
 
 theorem litterCompletion_of_inflexibleCoe (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
-    (H : Hypothesis ⟨A, inr L.toNearLitter⟩) (h : InflexibleCoe A L)
+    (H : HypAction ⟨A, inr L.toNearLitter⟩) (h : InflexibleCoe A L)
     (h₁ : StructAction.Lawful ((ihAction H).comp (h.path.B.cons (coe_lt h.path.hδ))))
     (h₂ : StructAction.MapFlexible ((ihAction H).comp (h.path.B.cons (coe_lt h.path.hδ)))) :
     litterCompletion π A L H =
@@ -141,7 +142,7 @@ theorem litterCompletion_of_inflexibleCoe (π : StructApprox β) (A : ExtendedIn
       exact h₂
 
 theorem litterCompletion_of_inflexibleBot (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
-    (H : Hypothesis ⟨A, inr L.toNearLitter⟩) (h : InflexibleBot A L) :
+    (H : HypAction ⟨A, inr L.toNearLitter⟩) (h : InflexibleBot A L) :
     litterCompletion π A L H =
       fuzz (show (⊥ : TypeIndex) ≠ (h.path.ε : Λ) from bot_ne_coe)
         (H.atomImage (h.path.B.cons (bot_lt_coe _)) h.a h.constrains) := by

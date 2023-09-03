@@ -22,17 +22,17 @@ TODO: Rename `completeAtomMap`, `atomCompletion` etc.
 -/
 
 noncomputable def completeAtomMap (π : StructApprox β) : ExtendedIndex β → Atom → Atom :=
-  Hypothesis.fixAtom π.atomCompletion π.nearLitterCompletion
+  HypAction.fixAtom π.atomCompletion π.nearLitterCompletion
 
 noncomputable def completeNearLitterMap (π : StructApprox β) :
     ExtendedIndex β → NearLitter → NearLitter :=
-  Hypothesis.fixNearLitter π.atomCompletion π.nearLitterCompletion
+  HypAction.fixNearLitter π.atomCompletion π.nearLitterCompletion
 
 noncomputable def completeLitterMap (π : StructApprox β) (A : ExtendedIndex β) (L : Litter) :
     Litter :=
   (π.completeNearLitterMap A L.toNearLitter).1
 
-noncomputable def foaHypothesis (π : StructApprox β) {c : SupportCondition β} : Hypothesis c :=
+noncomputable def foaHypothesis (π : StructApprox β) {c : SupportCondition β} : HypAction c :=
   ⟨fun B b _ => π.completeAtomMap B b, fun B N _ => π.completeNearLitterMap B N⟩
 
 variable {π : StructApprox β}
@@ -42,11 +42,11 @@ section MapSpec
 variable {A : ExtendedIndex β} {a : Atom} {L : Litter} {N : NearLitter}
 
 theorem completeAtomMap_eq : π.completeAtomMap A a = π.atomCompletion A a π.foaHypothesis :=
-  Hypothesis.fixAtom_eq _ _ _ _
+  HypAction.fixAtom_eq _ _ _ _
 
 theorem completeNearLitterMap_eq :
     π.completeNearLitterMap A N = π.nearLitterCompletion A N π.foaHypothesis :=
-  Hypothesis.fixNearLitter_eq _ _ _ _
+  HypAction.fixNearLitter_eq _ _ _ _
 
 theorem completeLitterMap_eq :
     π.completeLitterMap A L = π.litterCompletion A L π.foaHypothesis := by
@@ -65,12 +65,12 @@ theorem completeNearLitterMap_fst_eq' :
 
 @[simp]
 theorem foaHypothesis_atomImage {c : SupportCondition β} (h : ⟨A, inl a⟩ <[α] c) :
-    (π.foaHypothesis : Hypothesis c).atomImage A a h = π.completeAtomMap A a :=
+    (π.foaHypothesis : HypAction c).atomImage A a h = π.completeAtomMap A a :=
   rfl
 
 @[simp]
 theorem foaHypothesis_nearLitterImage {c : SupportCondition β} (h : ⟨A, inr N⟩ <[α] c) :
-    (π.foaHypothesis : Hypothesis c).nearLitterImage A N h = π.completeNearLitterMap A N :=
+    (π.foaHypothesis : HypAction c).nearLitterImage A N h = π.completeNearLitterMap A N :=
   rfl
 
 end MapSpec
@@ -95,7 +95,7 @@ theorem completeLitterMap_eq_of_inflexibleCoe {A : ExtendedIndex β} {L : Litter
     (h : InflexibleCoe A L) (h₁ h₂) :
     π.completeLitterMap A L =
       fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.path.hδε)
-        ((ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable
+        ((ihAction (π.foaHypothesis : HypAction ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable
             h.path h₁ h₂ •
           h.t) := by
   rw [completeLitterMap_eq, litterCompletion_of_inflexibleCoe]
@@ -105,7 +105,7 @@ theorem completeLitterMap_eq_of_inflexible_coe' {A : ExtendedIndex β} {L : Litt
     π.completeLitterMap A L =
       if h' : _ ∧ _ then
         fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.path.hδε)
-          ((ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable
+          ((ihAction (π.foaHypothesis : HypAction ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable
               h.path h'.1 h'.2 •
             h.t)
       else L := by

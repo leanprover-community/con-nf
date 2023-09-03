@@ -337,7 +337,7 @@ theorem constrainedAction_comp_mapFlexible (hπf : π.Free) {γ : Iio α} {s : S
 
 theorem ihAction_comp_mapFlexible (hπf : π.Free) {γ : Iio α} (c : SupportCondition β)
     (A : Path (β : TypeIndex) γ) :
-    StructAction.MapFlexible ((ihAction (π.foaHypothesis : Hypothesis c)).comp A) := by
+    StructAction.MapFlexible ((ihAction (π.foaHypothesis : HypAction c)).comp A) := by
   rw [ihAction_eq_constrainedAction]
   exact constrainedAction_comp_mapFlexible hπf A
 
@@ -812,10 +812,10 @@ theorem ihsAction_coherent_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
 
 theorem ihAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (N : NearLitter) (c : SupportCondition β) (hc : ⟨A.comp B, inr N⟩ <[α] c)
-    (hπ : StructAction.Lawful ((ihAction (π.foaHypothesis : Hypothesis c)).comp A))
+    (hπ : StructAction.Lawful ((ihAction (π.foaHypothesis : HypAction c)).comp A))
     (ρ : Allowable γ)
     (h : StructApprox.ExactlyApproximates
-      (StructAction.rc ((ihAction (π.foaHypothesis : Hypothesis c)).comp A) hπ)
+      (StructAction.rc ((ihAction (π.foaHypothesis : HypAction c)).comp A) hπ)
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
     Tree.comp B (Allowable.toStructPerm ρ) • N := by
@@ -827,10 +827,10 @@ theorem ihAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeInd
 
 theorem ihAction_coherent_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c : SupportCondition β) (hc : ⟨A.comp B, inl a⟩ <[α] c)
-    (hπ : StructAction.Lawful ((ihAction (π.foaHypothesis : Hypothesis c)).comp A))
+    (hπ : StructAction.Lawful ((ihAction (π.foaHypothesis : HypAction c)).comp A))
     (ρ : Allowable γ)
     (h : StructApprox.ExactlyApproximates
-      (StructAction.rc ((ihAction (π.foaHypothesis : Hypothesis c)).comp A) hπ)
+      (StructAction.rc ((ihAction (π.foaHypothesis : HypAction c)).comp A) hπ)
       (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = Tree.comp B (Allowable.toStructPerm ρ) • a := by
   refine' ihsAction_coherent_atom A B a c c hc _ ρ _
@@ -841,7 +841,7 @@ theorem ihAction_coherent_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
 
 theorem ihAction_smul_tangle' (hπf : π.Free) (c d : SupportCondition β) (A : ExtendedIndex β)
     (L : Litter) (hL₁ : ⟨A, inr L.toNearLitter⟩ ≤[α] c) (hL₂ : InflexibleCoe A L) (hlaw₁ hlaw₂) :
-    (ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable hL₂.path
+    (ihAction (π.foaHypothesis : HypAction ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable hL₂.path
           hlaw₁ (ihAction_comp_mapFlexible hπf _ _) •
         hL₂.t =
       (ihsAction π c d).hypothesisedAllowable hL₂.path hlaw₂
@@ -885,7 +885,7 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : SupportCondition β) (A : 
 theorem ihAction_smul_tangle (hπf : π.Free) (c d : SupportCondition β) (A : ExtendedIndex β)
     (L : Litter) (hL₁ : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d)
     (hL₂ : InflexibleCoe A L) (hlaw₁ hlaw₂) :
-    (ihAction (π.foaHypothesis : Hypothesis ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable hL₂.path
+    (ihAction (π.foaHypothesis : HypAction ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable hL₂.path
           hlaw₁ (ihAction_comp_mapFlexible hπf _ _) •
         hL₂.t =
       (ihsAction π c d).hypothesisedAllowable hL₂.path hlaw₂
@@ -1172,7 +1172,7 @@ theorem ihsAction_lawful (hπf : π.Free) (c d : SupportCondition β) : (ihsActi
   exact ihsAction_lawful_extends hπf c d fun e f hef => ih (e, f) hef
 
 theorem ihAction_lawful (hπf : π.Free) (c : SupportCondition β) :
-    (ihAction (π.foaHypothesis : Hypothesis c)).Lawful := by
+    (ihAction (π.foaHypothesis : HypAction c)).Lawful := by
   rw [← ihsAction_self]
   exact ihsAction_lawful hπf c c
 

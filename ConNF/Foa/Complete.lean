@@ -1,3 +1,4 @@
+import ConNF.Foa.Complete.HypAction
 import ConNF.Foa.Complete.AtomCompletion
 import ConNF.Foa.Complete.FlexibleCompletion
 import ConNF.Foa.Complete.LitterCompletion

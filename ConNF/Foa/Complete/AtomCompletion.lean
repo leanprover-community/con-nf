@@ -1,3 +1,4 @@
+import ConNF.Foa.Complete.HypAction
 import ConNF.Foa.Approximation
 
 open Set Sum
@@ -12,7 +13,7 @@ variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α
 
 namespace StructApprox
 
-open NearLitterApprox Hypothesis
+open NearLitterApprox HypAction
 
 theorem equiv_apply_mem {S T : Sublitter} {a} {L : Litter}
     (h : (S.equiv T a : Atom) ∈ litterSet L) : T.litter = L := by
@@ -25,7 +26,7 @@ theorem equiv_apply_eq {S T U V : Sublitter} {a b}
   exact (equiv_apply_mem (T.subset h.choose)).symm
 
 /-- Computes the action of a structural approximation `π` on an atom `a`. -/
-noncomputable def atomCompletion (A : ExtendedIndex β) (a : Atom) (H : Hypothesis ⟨A, inl a⟩) :
+noncomputable def atomCompletion (A : ExtendedIndex β) (a : Atom) (H : HypAction ⟨A, inl a⟩) :
     Atom :=
   if h : a ∈ (π A).atomPerm.domain then π A • a
   else
