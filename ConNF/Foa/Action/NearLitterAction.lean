@@ -198,32 +198,6 @@ theorem roughLitterMapOrElse_of_dom {L : Litter} (hL : (φ.litterMap L).Dom) :
     φ.roughLitterMapOrElse L = ((φ.litterMap L).get hL).1 := by
   rw [roughLitterMapOrElse, litterMapOrElse_of_dom]
 
-/-- The induced action on near-litters. -/
-noncomputable def nearLitterMapOrElse (N : NearLitter) : NearLitter :=
-  ⟨(φ.litterMapOrElse N.fst).fst,
-    φ.litterMapOrElse N.fst ∆ (φ.atomMapOrElse '' litterSet N.fst ∆ N), by
-    rw [IsNearLitter, IsNear, ← symmDiff_assoc]
-    exact (φ.litterMapOrElse N.fst).snd.prop.symmDiff (Small.image N.2.prop)⟩
-
-theorem nearLitterMapOrElse_of_dom {N : NearLitter} (h₁ : (φ.litterMap N.fst).Dom)
-    (h₂ : ∀ a ∈ litterSet N.fst ∆ N, (φ.atomMap a).Dom) :
-    φ.nearLitterMapOrElse N =
-      ⟨((φ.litterMap N.fst).get h₁).fst,
-        (φ.litterMap N.fst).get h₁ ∆ (φ.atomMap.image <| litterSet N.fst ∆ N), by
-        rw [IsNearLitter, IsNear, ← symmDiff_assoc]
-        exact ((φ.litterMap N.fst).get h₁).snd.prop.symmDiff (Small.pFun_image N.2.prop)⟩ := by
-  rw [← SetLike.coe_set_eq, nearLitterMapOrElse, NearLitter.coe_mk, Subtype.coe_mk,
-    φ.litterMapOrElse_of_dom h₁]
-  refine' congr_arg _ _
-  ext a : 1
-  constructor
-  · rintro ⟨b, hb, rfl⟩
-    rw [φ.atomMapOrElse_of_dom (h₂ b hb)]
-    exact ⟨b, hb, Part.get_mem (h₂ b hb)⟩
-  · rintro ⟨b, hb₁, hb₂, rfl⟩
-    refine' ⟨b, hb₁, _⟩
-    rw [φ.atomMapOrElse_of_dom]
-
 /-!
 # Preorder structure
 -/
