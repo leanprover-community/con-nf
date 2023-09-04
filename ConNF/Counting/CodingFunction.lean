@@ -127,6 +127,11 @@ theorem code_decode (S : OrdSupport β) (t : Tangle β)
     exact Allowable.smul_eq_of_smul_ordSupport_eq _ hc h'.choose_spec.symm
 
 @[simp]
+theorem mem_code_self {S : OrdSupport β} {t : Tangle β} {h : Supports (Allowable β) {c | c ∈ S} t} :
+    S ∈ code S t h :=
+  ⟨1, by rw [one_smul]⟩
+
+@[simp]
 theorem mem_code {S : OrdSupport β} {t : Tangle β}
     {h : Supports (Allowable β) {c | c ∈ S} t} (T : OrdSupport β) :
     T ∈ code S t h ↔ ∃ ρ : Allowable β, T = ρ • S :=

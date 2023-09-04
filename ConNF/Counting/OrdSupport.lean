@@ -21,7 +21,7 @@ structure OrdSupport (β : Iic α) where
   cpos : SupportCondition β →. μ
   injective (c d : SupportCondition β) (hc : (cpos c).Dom) (hd : (cpos d).Dom) :
     c.path = d.path → (cpos c).get hc = (cpos d).get hd → c = d
-  dom_small : Small cpos.Dom
+  dom_small' : Small cpos.Dom
 
 namespace OrdSupport
 
@@ -31,6 +31,9 @@ instance : Membership (SupportCondition β) (OrdSupport β) where
 theorem mem_iff {S : OrdSupport β} {c : SupportCondition β} :
     c ∈ S ↔ (S.cpos c).Dom :=
   Iff.rfl
+
+theorem dom_small (S : OrdSupport β) : Small {c | c ∈ S} :=
+  S.dom_small'
 
 @[ext]
 theorem ext {S T : OrdSupport β}
@@ -46,7 +49,7 @@ instance : MulAction (StructPerm β) (OrdSupport β) where
     cpos := fun c => S.cpos (π⁻¹ • c)
     injective := fun c d hc hd h₁ h₂ =>
       smul_left_cancel _ (S.injective (π⁻¹ • c) (π⁻¹ • d) hc hd h₁ h₂)
-    dom_small := by
+    dom_small' := by
       refine lt_of_le_of_lt ?_ S.dom_small
       refine ⟨⟨fun c => ⟨π⁻¹ • c.1, c.2⟩, ?_⟩⟩
       rintro ⟨c, hc⟩ ⟨d, hd⟩
@@ -140,7 +143,7 @@ theorem _root_.ConNF.Allowable.smul_eq_of_smul_ordSupport_eq (ρ : Allowable β)
 def before (S : OrdSupport β) (i : μ) : OrdSupport β where
   cpos c := ⟨∃ h : c ∈ S, (S.cpos c).get h < i, fun h => (S.cpos c).get h.1⟩
   injective c d hc hd h := S.injective c d _ _ h
-  dom_small := by
+  dom_small' := by
     refine Small.mono ?_ S.dom_small
     intro c hc
     exact hc.1
@@ -159,7 +162,7 @@ def comp (S : OrdSupport β) (γ : Iic α) (A : Quiver.Path (β : TypeIndex) γ)
       rw [Quiver.Path.comp_inj_right] at this
       exact this
     · rw [h₁]
-  dom_small := by
+  dom_small' := by
     change Small ((fun c : SupportCondition γ => ⟨A.comp c.path, c.value⟩) ⁻¹' S.cpos.Dom)
     refine Small.preimage ?_ S.dom_small
     intro c d h
@@ -173,9 +176,11 @@ theorem mem_comp {S : OrdSupport β} (γ : Iic α) (A : Quiver.Path (β : TypeIn
     c ∈ S.comp γ A ↔ ⟨A.comp c.path, c.value⟩ ∈ S :=
   Iff.rfl
 
-/-- An ordered support is strong if every reduced condition it constrains lies in its domain,
-and the position of each support condition is given by the global position function. -/
+/-- An ordered support is strong if every element of its domain is reduced, every reduced condition
+it constrains lies in its domain, and the position of each support condition is given by the global
+position function. -/
 structure Strong (S : OrdSupport β) : Prop where
+  reduced_of_mem (c : SupportCondition β) : c ∈ S → Reduced c
   transConstrains_mem (c d : SupportCondition β) : Reduced c → c <[α] d → d ∈ S → c ∈ S
   cpos_get_eq (c : SupportCondition β) (hc : c ∈ S) : (S.cpos c).get hc = pos c.value
 
