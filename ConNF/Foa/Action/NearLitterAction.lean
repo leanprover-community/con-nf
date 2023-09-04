@@ -138,44 +138,12 @@ theorem mk_not_bannedLitter : #{L | ¬φ.BannedLitter L} = #μ := by
 theorem not_bannedLitter_nonempty : Nonempty {L | ¬φ.BannedLitter L} := by
   simp only [← mk_ne_zero_iff, mk_not_bannedLitter, Ne.def, mk_ne_zero, not_false_iff]
 
-/-- The *sandbox litter* for a near-litter action is an arbitrarily chosen litter that
-isn't banned. -/
-noncomputable def sandboxLitter : Litter :=
-  φ.not_bannedLitter_nonempty.some
-
-theorem sandboxLitter_not_banned : ¬φ.BannedLitter φ.sandboxLitter :=
-  φ.not_bannedLitter_nonempty.some.prop
-
 /-- If `a` is in the domain, this is the atom map. Otherwise, this gives an arbitrary atom. -/
 noncomputable def atomMapOrElse (a : Atom) : Atom :=
   (φ.atomMap a).getOrElse default
 
 theorem atomMapOrElse_of_dom {a : Atom} (ha : (φ.atomMap a).Dom) :
     φ.atomMapOrElse a = (φ.atomMap a).get ha := by rw [atomMapOrElse, Part.getOrElse_of_dom]
-
-theorem mk_atomMap_image_le_mk_sandbox :
-    #(φ.atomMap.Dom ∆ (φ.atomMapOrElse '' φ.atomMap.Dom) : Set Atom) ≤
-      #(litterSet φ.sandboxLitter) := by
-  rw [mk_litterSet]
-  refine' le_trans (mk_subtype_mono symmDiff_subset_union) (le_trans (mk_union_le _ _) _)
-  refine' add_le_of_le κ_isRegular.aleph0_le _ _
-  exact le_of_lt φ.atomMap_dom_small
-  exact le_trans mk_image_le (le_of_lt φ.atomMap_dom_small)
-
-theorem disjoint_sandbox :
-    Disjoint (φ.atomMap.Dom ∪ φ.atomMapOrElse '' φ.atomMap.Dom) (litterSet φ.sandboxLitter) := by
-  rw [disjoint_iff_inter_eq_empty, eq_empty_iff_forall_not_mem]
-  rintro a ⟨ha₁, ha₂⟩
-  rw [mem_litterSet] at ha₂
-  have hnb := φ.sandboxLitter_not_banned
-  rw [← ha₂] at hnb
-  obtain (ha₁ | ha₁) := ha₁
-  · exact hnb (BannedLitter.atomDom a ha₁)
-  · refine' hnb _
-    simp only [mem_image, PFun.mem_dom] at ha₁
-    obtain ⟨b, ⟨_, hb, rfl⟩, rfl⟩ := ha₁
-    rw [φ.atomMapOrElse_of_dom hb]
-    exact BannedLitter.atomMap b hb
 
 theorem atomMapOrElse_injective (hφ : φ.Lawful) : InjOn φ.atomMapOrElse φ.atomMap.Dom := by
   intro a ha b hb h
@@ -262,17 +230,6 @@ def Precise : Prop :=
 ## Induced litter permutation
 -/
 
-theorem mk_dom_symmDiff_le :
-    #(φ.litterMap.Dom ∆ (φ.roughLitterMapOrElse '' φ.litterMap.Dom) : Set Litter) ≤
-      #{L : Litter | ¬φ.BannedLitter L} := by
-  rw [mk_not_bannedLitter]
-  refine' le_trans (le_of_lt _) κ_le_μ
-  exact Small.symmDiff φ.litterMap_dom_small φ.litterMap_dom_small.image
-
-theorem aleph0_le_not_bannedLitter : ℵ₀ ≤ #{L | ¬φ.BannedLitter L} := by
-  rw [mk_not_bannedLitter]
-  exact μ_isStrongLimit.isLimit.aleph0_le
-
 theorem disjoint_dom_not_bannedLitter :
     Disjoint (φ.litterMap.Dom ∪ φ.roughLitterMapOrElse '' φ.litterMap.Dom)
       {L : Litter | ¬φ.BannedLitter L} := by
@@ -288,50 +245,6 @@ theorem roughLitterMapOrElse_injOn (hφ : φ.Lawful) :
   intro L₁ hL₁ L₂ hL₂ h
   rw [φ.roughLitterMapOrElse_of_dom hL₁, φ.roughLitterMapOrElse_of_dom hL₂] at h
   exact hφ.litterMap_injective hL₁ hL₂ (NearLitter.inter_nonempty_of_fst_eq_fst h)
-
-/-- A local permutation on the set of litters that occur in the domain or range of `w`.
-This permutes both flexible and inflexible litters. -/
-noncomputable def litterPerm' (hφ : φ.Lawful) : LocalPerm Litter :=
-  LocalPerm.complete φ.roughLitterMapOrElse φ.litterMap.Dom {L | ¬φ.BannedLitter L}
-    φ.mk_dom_symmDiff_le φ.aleph0_le_not_bannedLitter φ.disjoint_dom_not_bannedLitter
-    (φ.roughLitterMapOrElse_injOn hφ)
-
-def idOnBanned (s : Set Litter) : LocalPerm Litter
-    where
-  toFun := id
-  invFun := id
-  domain := {L | φ.BannedLitter L} \ s
-  toFun_domain' _ h := h
-  invFun_domain' _ h := h
-  left_inv' _ _ := rfl
-  right_inv' _ _ := rfl
-
-noncomputable def litterPerm (hφ : φ.Lawful) : LocalPerm Litter :=
-  LocalPerm.piecewise (φ.litterPerm' hφ) (φ.idOnBanned (φ.litterPerm' hφ).domain)
-    (by rw [← Set.subset_compl_iff_disjoint_left]; exact fun L h => h.2)
-
-theorem litterPerm'_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
-    (hL : L ∈ φ.litterMap.Dom) : φ.litterPerm' hφ L = φ.roughLitterMapOrElse L :=
-  LocalPerm.complete_apply_eq _ _ _ hL
-
-theorem litterPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
-    (hL : L ∈ φ.litterMap.Dom) : φ.litterPerm hφ L = φ.roughLitterMapOrElse L := by
-  rw [← litterPerm'_apply_eq L hL]
-  exact LocalPerm.piecewise_apply_eq_left (Or.inl (Or.inl hL))
-
-theorem litterPerm'_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm' hφ).domain := by
-  refine' Small.union (Small.union φ.litterMap_dom_small φ.litterMap_dom_small.image) _
-  rw [Small]
-  rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
-  simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
-  refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
-      refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt aleph0_le_mk_Λ Λ_lt_κ) _ <;>
-    refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
-  exact φ.litterMap_dom_small
-  exact φ.litterMap_dom_small.image
-
-theorem litterPerm_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm hφ).domain :=
-  Small.union (φ.litterPerm'_domain_small hφ) (Small.mono (diff_subset _ _) φ.bannedLitter_small)
 
 variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iio α} {A : ExtendedIndex β}
 
@@ -373,19 +286,19 @@ theorem roughLitterMapOrElse_injOn_dom_inter_flexible (hφ : φ.Lawful) :
     InjOn φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible α A L}) :=
   (φ.roughLitterMapOrElse_injOn hφ).mono (inter_subset_left _ _)
 
-noncomputable def flexibleLitterPerm (hφ : φ.Lawful) (A : ExtendedIndex β) : LocalPerm Litter :=
+noncomputable def flexibleLitterLocalPerm (hφ : φ.Lawful) (A : ExtendedIndex β) : LocalPerm Litter :=
   LocalPerm.complete φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible α A L})
     {L | ¬φ.BannedLitter L ∧ Flexible α A L} φ.mk_dom_inter_flexible_symmDiff_le
     φ.aleph0_le_not_bannedLitter_and_flexible φ.disjoint_dom_inter_flexible_not_bannedLitter
     (φ.roughLitterMapOrElse_injOn_dom_inter_flexible hφ)
 
-theorem flexibleLitterPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
+theorem flexibleLitterLocalPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
     (hL₁ : L ∈ φ.litterMap.Dom) (hL₂ : Flexible α A L) :
-    φ.flexibleLitterPerm hφ A L = φ.roughLitterMapOrElse L :=
+    φ.flexibleLitterLocalPerm hφ A L = φ.roughLitterMapOrElse L :=
   LocalPerm.complete_apply_eq _ _ _ ⟨hL₁, hL₂⟩
 
-theorem flexibleLitterPerm_domain_small (hφ : φ.Lawful) :
-    Small (φ.flexibleLitterPerm hφ A).domain := by
+theorem flexibleLitterLocalPerm_domain_small (hφ : φ.Lawful) :
+    Small (φ.flexibleLitterLocalPerm hφ A).domain := by
   refine' Small.union (Small.union _ _) _
   · exact φ.litterMap_dom_small.mono (inter_subset_left _ _)
   · exact (φ.litterMap_dom_small.mono (inter_subset_left _ _)).image
@@ -402,12 +315,43 @@ theorem flexibleLitterPerm_domain_small (hφ : φ.Lawful) :
 # Completed permutations
 -/
 
+/-- The *sandbox litter* for a near-litter action is an arbitrarily chosen litter that
+isn't banned. -/
+noncomputable def sandboxLitter : Litter :=
+  φ.not_bannedLitter_nonempty.some
+
+theorem sandboxLitter_not_banned : ¬φ.BannedLitter φ.sandboxLitter :=
+  φ.not_bannedLitter_nonempty.some.prop
+
+theorem mk_atomMap_image_le_mk_sandbox :
+    #(φ.atomMap.Dom ∆ (φ.atomMapOrElse '' φ.atomMap.Dom) : Set Atom) ≤
+      #(litterSet φ.sandboxLitter) := by
+  rw [mk_litterSet]
+  refine' le_trans (mk_subtype_mono symmDiff_subset_union) (le_trans (mk_union_le _ _) _)
+  refine' add_le_of_le κ_isRegular.aleph0_le _ _
+  exact le_of_lt φ.atomMap_dom_small
+  exact le_trans mk_image_le (le_of_lt φ.atomMap_dom_small)
+
+theorem disjoint_sandbox :
+    Disjoint (φ.atomMap.Dom ∪ φ.atomMapOrElse '' φ.atomMap.Dom) (litterSet φ.sandboxLitter) := by
+  rw [disjoint_iff_inter_eq_empty, eq_empty_iff_forall_not_mem]
+  rintro a ⟨ha₁, ha₂⟩
+  rw [mem_litterSet] at ha₂
+  have hnb := φ.sandboxLitter_not_banned
+  rw [← ha₂] at hnb
+  obtain (ha₁ | ha₁) := ha₁
+  · exact hnb (BannedLitter.atomDom a ha₁)
+  · refine' hnb _
+    simp only [mem_image, PFun.mem_dom] at ha₁
+    obtain ⟨b, ⟨_, hb, rfl⟩, rfl⟩ := ha₁
+    rw [φ.atomMapOrElse_of_dom hb]
+    exact BannedLitter.atomMap b hb
 
 /-- A local permutation induced by completing the orbits of atoms in a near-litter action.
 This function creates forward and backward images of atoms in the *sandbox litter*,
 a litter which is away from the domain and range of the approximation in question, so it should
 not interfere with other constructions. -/
-noncomputable def completeAtomPerm (hφ : φ.Lawful) : LocalPerm Atom :=
+noncomputable def atomLocalPerm (hφ : φ.Lawful) : LocalPerm Atom :=
   LocalPerm.complete φ.atomMapOrElse φ.atomMap.Dom (litterSet φ.sandboxLitter)
     φ.mk_atomMap_image_le_mk_sandbox (by simpa only [mk_litterSet] using κ_isRegular.aleph0_le)
     φ.disjoint_sandbox (φ.atomMapOrElse_injective hφ)
@@ -425,7 +369,7 @@ theorem sandboxSubset_small :
   · exact φ.atomMap_dom_small
   · exact lt_of_le_of_lt mk_image_le φ.atomMap_dom_small
 
-theorem completeAtomPerm_domain_small (hφ : φ.Lawful) : Small (φ.completeAtomPerm hφ).domain :=
+theorem atomLocalPerm_domain_small (hφ : φ.Lawful) : Small (φ.atomLocalPerm hφ).domain :=
   Small.union (Small.union φ.atomMap_dom_small (lt_of_le_of_lt mk_image_le φ.atomMap_dom_small))
     φ.sandboxSubset_small
 
@@ -434,23 +378,21 @@ Its action on atoms matches that of the action, and its rough action on litters
 matches the given litter permutation. -/
 noncomputable def complete (hφ : φ.Lawful) (A : ExtendedIndex β) : NearLitterApprox
     where
-  atomPerm := φ.completeAtomPerm hφ
-  litterPerm := φ.flexibleLitterPerm hφ A
-  domain_small _ := Small.mono (inter_subset_right _ _) (φ.completeAtomPerm_domain_small hφ)
+  atomPerm := φ.atomLocalPerm hφ
+  litterPerm := φ.flexibleLitterLocalPerm hφ A
+  domain_small _ := Small.mono (inter_subset_right _ _) (φ.atomLocalPerm_domain_small hφ)
 
-variable {litter_perm : LocalPerm Litter}
-
-theorem completeAtomPerm_apply_eq (hφ : φ.Lawful) {a : Atom} (ha : (φ.atomMap a).Dom) :
-    φ.completeAtomPerm hφ a = (φ.atomMap a).get ha := by
-  rwa [completeAtomPerm, LocalPerm.complete_apply_eq, atomMapOrElse_of_dom]
+theorem atomLocalPerm_apply_eq (hφ : φ.Lawful) {a : Atom} (ha : (φ.atomMap a).Dom) :
+    φ.atomLocalPerm hφ a = (φ.atomMap a).get ha := by
+  rwa [atomLocalPerm, LocalPerm.complete_apply_eq, atomMapOrElse_of_dom]
 
 theorem complete_smul_atom_eq {hφ : φ.Lawful} {a : Atom} (ha : (φ.atomMap a).Dom) :
     φ.complete hφ A • a = (φ.atomMap a).get ha :=
-  φ.completeAtomPerm_apply_eq hφ ha
+  φ.atomLocalPerm_apply_eq hφ ha
 
 @[simp]
 theorem complete_smul_litter_eq {hφ : φ.Lawful} (L : Litter) :
-    φ.complete hφ A • L = φ.flexibleLitterPerm hφ A L :=
+    φ.complete hφ A • L = φ.flexibleLitterLocalPerm hφ A L :=
   rfl
 
 theorem smul_atom_eq {hφ : φ.Lawful} {π : NearLitterPerm}
@@ -498,7 +440,6 @@ theorem smul_toNearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm
       rw [this, inv_smul_smul] at ha
       exact ha
   · intro ha
-    -- TODO: probably possible to clean up `by_cases` into a `suffices`
     by_cases π⁻¹ • a ∈ φ.atomMap.Dom
     · rw [hφ.atom_mem _ h L hL]
       have := hπ.map_atom _ (Or.inl (Or.inl h))

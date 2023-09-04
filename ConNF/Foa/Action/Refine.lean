@@ -101,7 +101,7 @@ theorem rc_smul_atom_eq {φ : StructAction β} {h : φ.Lawful} {B : ExtendedInde
   · simp only [refine_apply, refine_atomMap ha]
 
 theorem rc_smul_litter_eq {φ : StructAction β} {hφ : φ.Lawful} {B : ExtendedIndex β} (L : Litter) :
-    φ.rc hφ B • L = (φ.refine hφ B).flexibleLitterPerm (refine_lawful B) B L :=
+    φ.rc hφ B • L = (φ.refine hφ B).flexibleLitterLocalPerm (refine_lawful B) B L :=
   rfl
 
 theorem rc_free (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :

@@ -618,7 +618,7 @@ theorem ConNF.StructApprox.extracted_2
       · simp only [hNL]
         refine' Relation.TransGen.tail' _ (Constrains.fuzz hε hζ hεζ _ _ _ hct)
         exact reflTransConstrains_comp hL₁ _
-      rw [StructAction.rc_smul_litter_eq, NearLitterAction.flexibleLitterPerm_apply_eq,
+      rw [StructAction.rc_smul_litter_eq, NearLitterAction.flexibleLitterLocalPerm_apply_eq,
         NearLitterAction.roughLitterMapOrElse_of_dom]
       simp only [ne_eq, Path.comp_cons, InflexibleCoe.comp_path, InflexibleCoePath.comp_δ,
         Path.comp_nil, StructAction.refine_apply, Tree.comp_apply,
@@ -735,7 +735,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
   obtain hL | ⟨⟨hL⟩⟩ | ⟨⟨hL⟩⟩ := flexible_cases' (γ : Iic α) B L
   · refine' Eq.trans _ ((h B).map_litter L _)
     · rw [StructAction.rc_smul_litter_eq]
-      rw [NearLitterAction.flexibleLitterPerm_apply_eq]
+      rw [NearLitterAction.flexibleLitterLocalPerm_apply_eq]
       swap; exact hdom
       swap; exact hL
       exact (NearLitterAction.roughLitterMapOrElse_of_dom _ hdom).symm

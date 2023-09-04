@@ -18,6 +18,61 @@ namespace NearLitterAction
 
 variable (φ : NearLitterAction) (hφ : φ.Lawful)
 
+theorem mk_dom_symmDiff_le :
+    #(φ.litterMap.Dom ∆ (φ.roughLitterMapOrElse '' φ.litterMap.Dom) : Set Litter) ≤
+      #{L : Litter | ¬φ.BannedLitter L} := by
+  rw [mk_not_bannedLitter]
+  refine' le_trans (le_of_lt _) κ_le_μ
+  exact Small.symmDiff φ.litterMap_dom_small φ.litterMap_dom_small.image
+
+theorem aleph0_le_not_bannedLitter : ℵ₀ ≤ #{L | ¬φ.BannedLitter L} := by
+  rw [mk_not_bannedLitter]
+  exact μ_isStrongLimit.isLimit.aleph0_le
+
+/-- A local permutation on the set of litters that occur in the domain or range of `w`.
+This permutes both flexible and inflexible litters. -/
+noncomputable def litterPerm' (hφ : φ.Lawful) : LocalPerm Litter :=
+  LocalPerm.complete φ.roughLitterMapOrElse φ.litterMap.Dom {L | ¬φ.BannedLitter L}
+    φ.mk_dom_symmDiff_le φ.aleph0_le_not_bannedLitter φ.disjoint_dom_not_bannedLitter
+    (φ.roughLitterMapOrElse_injOn hφ)
+
+def idOnBanned (s : Set Litter) : LocalPerm Litter
+    where
+  toFun := id
+  invFun := id
+  domain := {L | φ.BannedLitter L} \ s
+  toFun_domain' _ h := h
+  invFun_domain' _ h := h
+  left_inv' _ _ := rfl
+  right_inv' _ _ := rfl
+
+noncomputable def litterPerm (hφ : φ.Lawful) : LocalPerm Litter :=
+  LocalPerm.piecewise (φ.litterPerm' hφ) (φ.idOnBanned (φ.litterPerm' hφ).domain)
+    (by rw [← Set.subset_compl_iff_disjoint_left]; exact fun L h => h.2)
+
+theorem litterPerm'_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
+    (hL : L ∈ φ.litterMap.Dom) : φ.litterPerm' hφ L = φ.roughLitterMapOrElse L :=
+  LocalPerm.complete_apply_eq _ _ _ hL
+
+theorem litterPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
+    (hL : L ∈ φ.litterMap.Dom) : φ.litterPerm hφ L = φ.roughLitterMapOrElse L := by
+  rw [← litterPerm'_apply_eq L hL]
+  exact LocalPerm.piecewise_apply_eq_left (Or.inl (Or.inl hL))
+
+theorem litterPerm'_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm' hφ).domain := by
+  refine' Small.union (Small.union φ.litterMap_dom_small φ.litterMap_dom_small.image) _
+  rw [Small]
+  rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
+  simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
+  refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
+      refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt aleph0_le_mk_Λ Λ_lt_κ) _ <;>
+    refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
+  exact φ.litterMap_dom_small
+  exact φ.litterMap_dom_small.image
+
+theorem litterPerm_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm hφ).domain :=
+  Small.union (φ.litterPerm'_domain_small hφ) (Small.mono (diff_subset _ _) φ.bannedLitter_small)
+
 def needForwardImages : Set Atom :=
   φ.atomMap.ran \ φ.atomMap.Dom
 
