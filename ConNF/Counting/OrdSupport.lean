@@ -14,10 +14,13 @@ variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α
 
 structure OrdSupport (β : Iic α) where
   /-- The position of a support condition in this ordered support.
-  Named `cpos` instead of `pos` so it doesn't clash with `pos`. -/
-  cpos : SupportCondition β →. ConditionPosition β
+  Named `cpos` instead of `pos` so it doesn't clash with `pos`.
+
+  The support conditions in the domain of an ordered support are well-ordered lexicographically
+  first by `cpos` then their paths. -/
+  cpos : SupportCondition β →. μ
   injective (c d : SupportCondition β) (hc : (cpos c).Dom) (hd : (cpos d).Dom) :
-    (cpos c).get hc = (cpos d).get hd → c = d
+    c.path = d.path → (cpos c).get hc = (cpos d).get hd → c = d
   dom_small : Small cpos.Dom
 
 namespace OrdSupport
@@ -41,7 +44,8 @@ theorem ext {S T : OrdSupport β}
 instance : MulAction (StructPerm β) (OrdSupport β) where
   smul π S := {
     cpos := fun c => S.cpos (π⁻¹ • c)
-    injective := fun c d hc hd h => smul_left_cancel _ (S.injective (π⁻¹ • c) (π⁻¹ • d) hc hd h)
+    injective := fun c d hc hd h₁ h₂ =>
+      smul_left_cancel _ (S.injective (π⁻¹ • c) (π⁻¹ • d) hc hd h₁ h₂)
     dom_small := by
       refine lt_of_le_of_lt ?_ S.dom_small
       refine ⟨⟨fun c => ⟨π⁻¹ • c.1, c.2⟩, ?_⟩⟩
@@ -121,7 +125,7 @@ theorem _root_.ConNF.StructPerm.smul_eq_of_smul_ordSupport_eq (π : StructPerm �
     π • S = S → π • c = c := by
   intro hS
   have := congr_arg₂ OrdSupport.cpos hS (refl c)
-  refine eq_inv_smul_iff.mp (S.injective c (π⁻¹ • c) h ?_ ?_)
+  refine eq_inv_smul_iff.mp (S.injective c (π⁻¹ • c) h ?_ rfl ?_)
   · rw [← StructPerm.smul_cpos, this]
     exact h
   · rw [StructPerm.smul_cpos] at this
@@ -132,16 +136,42 @@ theorem _root_.ConNF.Allowable.smul_eq_of_smul_ordSupport_eq (ρ : Allowable β)
     ρ • S = S → ρ • c = c :=
   (Allowable.toStructPerm ρ).smul_eq_of_smul_ordSupport_eq h
 
+/-- The restriction of this ordered support to conditions that come before position `i`. -/
+def before (S : OrdSupport β) (i : μ) : OrdSupport β where
+  cpos c := ⟨∃ h : c ∈ S, (S.cpos c).get h < i, fun h => (S.cpos c).get h.1⟩
+  injective c d hc hd h := S.injective c d _ _ h
+  dom_small := by
+    refine Small.mono ?_ S.dom_small
+    intro c hc
+    exact hc.1
+
+/-- Retains only those support conditions beginning with the path `A`. -/
+def comp (S : OrdSupport β) (γ : Iic α) (A : Quiver.Path (β : TypeIndex) γ) : OrdSupport γ where
+  cpos c := S.cpos ⟨A.comp c.path, c.value⟩
+  injective c d hc hd h₁ h₂ := by
+    have := S.injective _ _ _ _ ?_ h₂
+    · rw [SupportCondition.mk.injEq] at this ⊢
+      rw [Quiver.Path.comp_inj_right] at this
+      exact this
+    · rw [h₁]
+  dom_small := by
+    change Small ((fun c : SupportCondition γ => ⟨A.comp c.path, c.value⟩) ⁻¹' S.cpos.Dom)
+    refine Small.preimage ?_ S.dom_small
+    intro c d h
+    rw [SupportCondition.mk.injEq] at h ⊢
+    rw [Quiver.Path.comp_inj_right] at h
+    exact h
+
 /-- An ordered support is strong if every reduced condition it constrains lies in its domain,
 and the position of each support condition is given by the global position function. -/
 structure Strong (S : OrdSupport β) : Prop where
   transConstrains_mem (c d : SupportCondition β) : Reduced c → c <[α] d → d ∈ S → c ∈ S
-  cpos_get_eq (c : SupportCondition β) (hc : c ∈ S) : (S.cpos c).get hc = pos c
+  cpos_get_eq (c : SupportCondition β) (hc : c ∈ S) : (S.cpos c).get hc = pos c.value
 
 attribute [simp] Strong.cpos_get_eq
 
 theorem Strong.cpos_eq {S : OrdSupport β} {c : SupportCondition β} (h : S.Strong) :
-    S.cpos c = ⟨c ∈ S, fun _ => pos c⟩ := by
+    S.cpos c = ⟨c ∈ S, fun _ => pos c.value⟩ := by
   refine Part.ext' Iff.rfl ?_
   intros hc _
   exact h.cpos_get_eq c hc

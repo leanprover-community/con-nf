@@ -134,7 +134,7 @@ theorem mem_code {S : OrdSupport β} {t : Tangle β}
 
 /-- Every coding function can be obtained by invoking `code` with an ordered support in its
 domain. -/
-lemma eq_code {χ : CodingFunction β} {S : OrdSupport β} (h : S ∈ χ) :
+theorem eq_code {χ : CodingFunction β} {S : OrdSupport β} (h : S ∈ χ) :
     χ = code S ((χ.decode S).get h) (χ.supports_decode S h) := by
   refine ext S h ?_ ?_
   · refine ⟨1, ?_⟩
