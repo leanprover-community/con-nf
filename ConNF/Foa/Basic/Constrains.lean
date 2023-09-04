@@ -28,23 +28,6 @@ section ExtendedIndex
 
 variable {α : TypeIndex} [BasePositions]
 
-/-!
-We construct a well-order on the type of extended indices.
-The details are unimportant, we probably don't actually need AC here.
--/
-
-instance : LT (ExtendedIndex α) :=
-  ⟨WellOrderingRel⟩
-
-instance : IsWellOrder (ExtendedIndex α) (· < ·) :=
-  WellOrderingRel.isWellOrder
-
-instance : WellFoundedRelation (ExtendedIndex α) :=
-  IsWellOrder.toHasWellFounded
-
-noncomputable instance : LinearOrder (ExtendedIndex α) :=
-  linearOrderOfSTO (· < ·)
-
 instance : Position (Atom ⊕ NearLitter) μ where
   pos := {
     toFun := fun x => match x with
@@ -72,27 +55,6 @@ theorem pos_atomNearLitter_inl (a : Atom) :
 theorem pos_atomNearLitter_inr (N : NearLitter) :
     pos (inr N : Atom ⊕ NearLitter) = pos N :=
   rfl
-
-def ConditionPosition (α : TypeIndex) : Type u :=
-  (Atom ⊕ NearLitter) ×ₗ ExtendedIndex α
-
-instance : LT (ConditionPosition α) :=
-  inferInstanceAs (LT ((Atom ⊕ NearLitter) ×ₗ ExtendedIndex α))
-
-instance : IsWellOrder (ConditionPosition α) (· < ·) :=
-  instIsWellOrderProdLex
-
-instance : WellFoundedRelation (ConditionPosition α) :=
-  IsWellOrder.toHasWellFounded
-
-instance : Position (SupportCondition α) (ConditionPosition α) where
-  pos := {
-    toFun := fun c => ⟨c.value, c.path⟩
-    inj' := by
-      rintro ⟨A, x⟩ ⟨B, y⟩ h
-      cases h
-      rfl
-  }
 
 end ExtendedIndex
 
@@ -139,9 +101,11 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
 
 notation:50 c " ≺[" α "] " d:50 => Constrains α _ c d
 
-theorem constrains_subrelation : Subrelation (Constrains α β) (· < ·) := by
+theorem constrains_subrelation : Subrelation
+    ((· ≺[α] ·) : SupportCondition β → _ → Prop)
+    (InvImage (· < ·) SupportCondition.value) := by
   intro c d h
-  obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h <;> left
+  obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h
   · exact litter_lt_atom a.1 a rfl
   · exact litter_lt_nearLitter N hN
   · exact symmDiff_lt_nearLitter N a ha
@@ -189,6 +153,17 @@ theorem constrains_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≺[α] 
 notation:50 c " <[" α "] " d:50 => Relation.TransGen (Constrains α _) c d
 
 notation:50 c " ≤[" α "] " d:50 => Relation.ReflTransGen (Constrains α _) c d
+
+theorem transConstrains_subrelation : Subrelation
+    ((· <[α] ·) : SupportCondition β → _ → Prop)
+    (InvImage (· < ·) SupportCondition.value) := by
+  intro c d h
+  change pos c.value < pos d.value
+  induction h with
+  | single hcd => exact constrains_subrelation α β hcd
+  | tail _ h ih =>
+      have := constrains_subrelation α β h
+      exact ih.trans this
 
 theorem transConstrains_wf (α : Λ) [FoaAssumptions α] (β : Λ) :
     WellFounded fun c d : SupportCondition β => c <[α] d :=

@@ -145,6 +145,11 @@ def before (S : OrdSupport β) (i : μ) : OrdSupport β where
     intro c hc
     exact hc.1
 
+@[simp]
+theorem mem_before {S : OrdSupport β} {i : μ} (c : SupportCondition β) :
+    c ∈ S.before i ↔ ∃ h : c ∈ S, (S.cpos c).get h < i :=
+  Iff.rfl
+
 /-- Retains only those support conditions beginning with the path `A`. -/
 def comp (S : OrdSupport β) (γ : Iic α) (A : Quiver.Path (β : TypeIndex) γ) : OrdSupport γ where
   cpos c := S.cpos ⟨A.comp c.path, c.value⟩
@@ -162,13 +167,17 @@ def comp (S : OrdSupport β) (γ : Iic α) (A : Quiver.Path (β : TypeIndex) γ)
     rw [Quiver.Path.comp_inj_right] at h
     exact h
 
+@[simp]
+theorem mem_comp {S : OrdSupport β} (γ : Iic α) (A : Quiver.Path (β : TypeIndex) γ)
+    (c : SupportCondition γ) :
+    c ∈ S.comp γ A ↔ ⟨A.comp c.path, c.value⟩ ∈ S :=
+  Iff.rfl
+
 /-- An ordered support is strong if every reduced condition it constrains lies in its domain,
 and the position of each support condition is given by the global position function. -/
 structure Strong (S : OrdSupport β) : Prop where
   transConstrains_mem (c d : SupportCondition β) : Reduced c → c <[α] d → d ∈ S → c ∈ S
   cpos_get_eq (c : SupportCondition β) (hc : c ∈ S) : (S.cpos c).get hc = pos c.value
-
-attribute [simp] Strong.cpos_get_eq
 
 theorem Strong.cpos_eq {S : OrdSupport β} {c : SupportCondition β} (h : S.Strong) :
     S.cpos c = ⟨c ∈ S, fun _ => pos c.value⟩ := by

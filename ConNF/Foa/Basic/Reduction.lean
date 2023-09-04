@@ -34,6 +34,12 @@ inductive Reduced {β : TypeIndex} : SupportCondition β → Prop
   | mkAtom (B : ExtendedIndex β) (a : Atom) : Reduced ⟨B, inl a⟩
   | mkLitter (B : ExtendedIndex β) (L : Litter) : Reduced ⟨B, inr L.toNearLitter⟩
 
+theorem Reduced.comp {β γ : TypeIndex} {c : SupportCondition γ} (h : Reduced c) (A : Path β γ) :
+    Reduced ⟨A.comp c.path, c.value⟩ := by
+  cases h
+  · exact mkAtom _ _
+  · exact mkLitter _ _
+
 /-- The reflexive transitive closure of a set of support conditions. -/
 def reflTransClosure (S : Set (SupportCondition β)) : Set (SupportCondition β) :=
   {c | ∃ d ∈ S, c ≤[α] d}
@@ -194,7 +200,7 @@ theorem mem_reducedSupport_iff [TangleData β] (t : Tangle β) (c : SupportCondi
     c ∈ reducedSupport α t ↔ c ∈ reduction α (designatedSupport t : Set (SupportCondition β)) :=
   Iff.rfl
 
-theorem transsConstrains_of_mem_reductedSupport {β γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ)
+theorem transConstrains_of_mem_reducedSupport {β γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ)
     (hε : (ε : Λ) < γ) (hδε : δ ≠ ε) (B : Path (β : TypeIndex) γ) (t : Tangle δ)
     (c : SupportCondition δ) (h : c ∈ reducedSupport α t) :
     ⟨(B.cons (coe_lt hδ)).comp c.path, c.value⟩ <[α]
@@ -203,5 +209,11 @@ theorem transsConstrains_of_mem_reductedSupport {β γ : Iic α} {δ ε : Iio α
   obtain ⟨⟨d, hd, hcd⟩, _⟩ := h
   refine' Relation.TransGen.tail' _ (Constrains.fuzz hδ hε hδε B t d hd)
   exact reflTransConstrains_comp hcd _
+
+theorem pos_lt_of_mem_reducedSupport {β γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ)
+    (hε : (ε : Λ) < γ) (hδε : δ ≠ ε) (B : Path (β : TypeIndex) γ) (t : Tangle δ)
+    (c : SupportCondition δ) (h : c ∈ reducedSupport α t) :
+    pos c.value < pos (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t) :=
+  transConstrains_subrelation β (transConstrains_of_mem_reducedSupport α hδ hε hδε B t c h)
 
 end ConNF
