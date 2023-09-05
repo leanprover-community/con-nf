@@ -18,7 +18,7 @@ structure OrdSupport (β : Iic α) where
 
   The support conditions in the domain of an ordered support are well-ordered lexicographically
   first by `cpos` then their paths. -/
-  cpos : SupportCondition β →. μ
+  cpos : SupportCondition β →. Atom ⊕ NearLitter
   injective (c d : SupportCondition β) (hc : (cpos c).Dom) (hd : (cpos d).Dom) :
     c.path = d.path → (cpos c).get hc = (cpos d).get hd → c = d
   dom_small' : Small cpos.Dom
@@ -107,7 +107,7 @@ theorem smul_eq_of_smul_eq (ρ : Allowable β) {S : OrdSupport β} {c : SupportC
     simp_rw [this]
 
 /-- The restriction of this ordered support to conditions that come before position `i`. -/
-def before (S : OrdSupport β) (i : μ) : OrdSupport β where
+def before (S : OrdSupport β) (i : Atom ⊕ NearLitter) : OrdSupport β where
   cpos c := ⟨∃ h : c ∈ S, (S.cpos c).get h < i, fun h => (S.cpos c).get h.1⟩
   injective c d hc hd h := S.injective c d _ _ h
   dom_small' := by
@@ -116,7 +116,7 @@ def before (S : OrdSupport β) (i : μ) : OrdSupport β where
     exact hc.1
 
 @[simp]
-theorem mem_before {S : OrdSupport β} {i : μ} (c : SupportCondition β) :
+theorem mem_before {S : OrdSupport β} {i : Atom ⊕ NearLitter} (c : SupportCondition β) :
     c ∈ S.before i ↔ ∃ h : c ∈ S, (S.cpos c).get h < i :=
   Iff.rfl
 
@@ -149,10 +149,10 @@ position function. -/
 structure Strong (S : OrdSupport β) : Prop where
   reduced_of_mem (c : SupportCondition β) : c ∈ S → Reduced c
   transConstrains_mem (c d : SupportCondition β) : Reduced c → c <[α] d → d ∈ S → c ∈ S
-  cpos_get_eq (c : SupportCondition β) (hc : c ∈ S) : (S.cpos c).get hc = pos c.value
+  cpos_get_eq (c : SupportCondition β) (hc : c ∈ S) : (S.cpos c).get hc = c.value
 
 theorem Strong.cpos_eq {S : OrdSupport β} {c : SupportCondition β} (h : S.Strong) :
-    S.cpos c = ⟨c ∈ S, fun _ => pos c.value⟩ := by
+    S.cpos c = ⟨c ∈ S, fun _ => c.value⟩ := by
   refine Part.ext' Iff.rfl ?_
   intros hc _
   exact h.cpos_get_eq c hc

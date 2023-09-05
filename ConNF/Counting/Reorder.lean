@@ -1,4 +1,4 @@
-import ConNF.BaseType.Params
+import ConNF.BaseType.NearLitter
 
 universe u
 
@@ -6,20 +6,20 @@ namespace ConNF
 
 variable [Params.{u}]
 
-/-- A reordering of some subset of `μ`.
+/-- A reordering of some subset of `Atom ⊕ NearLitter`.
 Reorders typically have hypotheses attached to them to make them into local order isomorphisms. -/
 structure Reorder where
-  toFun : μ → μ
-  invFun : μ → μ
+  toFun : Atom ⊕ NearLitter → Atom ⊕ NearLitter
+  invFun : Atom ⊕ NearLitter → Atom ⊕ NearLitter
 
 namespace Reorder
 
-instance : CoeFun Reorder (fun _ => μ → μ) where
+instance : CoeFun Reorder (fun _ => Atom ⊕ NearLitter → Atom ⊕ NearLitter) where
   coe := Reorder.toFun
 
 @[simp]
-theorem toFun_apply (r : Reorder) (ν : μ) :
-    r.toFun ν = r ν :=
+theorem toFun_apply (r : Reorder) (i : Atom ⊕ NearLitter) :
+    r.toFun i = r i :=
   rfl
 
 def symm (r : Reorder) : Reorder where
@@ -27,8 +27,8 @@ def symm (r : Reorder) : Reorder where
   invFun := r.toFun
 
 @[simp]
-theorem invFun_apply (r : Reorder) (ν : μ) :
-    r.invFun ν = r.symm ν :=
+theorem invFun_apply (r : Reorder) (i : Atom ⊕ NearLitter) :
+    r.invFun i = r.symm i :=
   rfl
 
 @[simp]
