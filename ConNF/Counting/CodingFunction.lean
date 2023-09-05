@@ -54,7 +54,7 @@ theorem supports_decode {χ : CodingFunction β} (S : OrdSupport β) (hS : S ∈
 
 @[simp]
 theorem decode_smul {χ : CodingFunction β} (S : OrdSupport β) (ρ : Allowable β) (h : ρ • S ∈ χ) :
-    (χ.decode (Allowable.toStructPerm ρ • S)).get h = ρ • (χ.decode S).get (mem_of_smul_mem h) :=
+    (χ.decode (ρ • S)).get h = ρ • (χ.decode S).get (mem_of_smul_mem h) :=
   χ.decode_smul' S ρ _ _
 
 /-- Two coding functions are equal if they decode a single ordered support to the same tangle. -/
@@ -81,7 +81,7 @@ theorem smul_supports {S : OrdSupport β} {t : Tangle β}
   intros c hc
   rw [mul_assoc, mul_smul, inv_smul_eq_iff, mul_smul]
   refine hρ' ?_
-  rw [mem_setOf, Allowable.smul_mem_ordSupport_smul]
+  simp only [OrdSupport.smul_mem, mem_setOf_eq, inv_smul_smul]
   exact hc
 
 /-- Produce a coding function for a given ordered support and tangle it supports. -/
@@ -111,7 +111,7 @@ noncomputable def code (S : OrdSupport β) (t : Tangle β)
     have := h₂.choose_spec.symm
     conv_rhs at this => rw [h₁.choose_spec]
     rw [← inv_smul_eq_iff, ← inv_smul_eq_iff, smul_smul, smul_smul] at this
-    exact Allowable.smul_eq_of_smul_ordSupport_eq _ hc this
+    exact OrdSupport.smul_eq_of_smul_eq _ hc this
 
 @[simp]
 theorem code_decode (S : OrdSupport β) (t : Tangle β)
@@ -124,7 +124,7 @@ theorem code_decode (S : OrdSupport β) (t : Tangle β)
   · intros h' _
     refine h _ ?_
     intros c hc
-    exact Allowable.smul_eq_of_smul_ordSupport_eq _ hc h'.choose_spec.symm
+    exact OrdSupport.smul_eq_of_smul_eq _ hc h'.choose_spec.symm
 
 @[simp]
 theorem mem_code_self {S : OrdSupport β} {t : Tangle β} {h : Supports (Allowable β) {c | c ∈ S} t} :

@@ -15,14 +15,14 @@ universe u
 namespace ConNF
 
 variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α}
-  {σ : Spec β} {S T U : OrdSupport β} (hS : S.Strong) (hT : T.Strong)
-  (hσS : Specifies σ S)
+  {σ : Spec β} {S T U : OrdSupport β}
+  (hS : S.Strong) (hU: U.Strong)
+  (hσS : Specifies σ S) (hσT : Specifies σ T)
+  {r : Tree Reorder β} (hr : OrdSupport.IsEquiv r T U)
 
 namespace Spec
 
--- structure Equiv (S T : OrdSupport β) (σ τ : Spec β) extends OrdSupport.Equiv S T where
---   specifies_left : Specifies σ S
---   specifies_right : Specifies τ T
+
 
 end Spec
 

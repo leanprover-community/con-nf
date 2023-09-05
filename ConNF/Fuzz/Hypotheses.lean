@@ -63,7 +63,6 @@ def toStructPerm : Allowable α →* StructPerm α :=
 instance : MulAction (Allowable α) X :=
   MulAction.compHom _ toStructPerm
 
-@[simp]
 theorem toStructPerm_smul (ρ : Allowable α) (x : X) : ρ • x = Allowable.toStructPerm ρ • x :=
   rfl
 

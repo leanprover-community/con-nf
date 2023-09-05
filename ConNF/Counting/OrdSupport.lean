@@ -44,14 +44,14 @@ theorem ext {S T : OrdSupport β}
   funext c
   exact Part.ext' (hdom c) (h c)
 
-instance : MulAction (StructPerm β) (OrdSupport β) where
-  smul π S := {
-    cpos := fun c => S.cpos (π⁻¹ • c)
+instance : MulAction (Allowable β) (OrdSupport β) where
+  smul ρ S := {
+    cpos := fun c => S.cpos (ρ⁻¹ • c)
     injective := fun c d hc hd h₁ h₂ =>
-      smul_left_cancel _ (S.injective (π⁻¹ • c) (π⁻¹ • d) hc hd h₁ h₂)
+      smul_left_cancel _ (S.injective (ρ⁻¹ • c) (ρ⁻¹ • d) hc hd h₁ h₂)
     dom_small' := by
       refine lt_of_le_of_lt ?_ S.dom_small
-      refine ⟨⟨fun c => ⟨π⁻¹ • c.1, c.2⟩, ?_⟩⟩
+      refine ⟨⟨fun c => ⟨ρ⁻¹ • c.1, c.2⟩, ?_⟩⟩
       rintro ⟨c, hc⟩ ⟨d, hd⟩
       simp only [Subtype.mk.injEq, smul_left_cancel_iff, PFun.dom_mk, coe_setOf, mem_setOf_eq,
         imp_self]
@@ -69,75 +69,42 @@ instance : MulAction (StructPerm β) (OrdSupport β) where
     · change (S.cpos _).get _ = (S.cpos _).get _
       simp only [mul_inv_rev, mul_smul]
 
+
 @[simp]
-theorem _root_.ConNF.StructPerm.smul_mem_ordSupport {π : StructPerm β}
-    {S : OrdSupport β} {c : SupportCondition β} :
-    c ∈ π • S ↔ π⁻¹ • c ∈ S :=
+theorem smul_mem {ρ : Allowable β} {S : OrdSupport β} {c : SupportCondition β} :
+    c ∈ ρ • S ↔ ρ⁻¹ • c ∈ S :=
   Iff.rfl
 
-theorem _root_.ConNF.Allowable.smul_mem_ordSupport {ρ : Allowable β}
-    {S : OrdSupport β} {c : SupportCondition β} :
-    c ∈ ρ • S ↔ ρ⁻¹ • c ∈ S := by
-  simp only [Allowable.toStructPerm_smul, StructPerm.smul_mem_ordSupport, map_inv]
-
-theorem _root_.ConNF.StructPerm.smul_mem_ordSupport_smul {π : StructPerm β}
-    {S : OrdSupport β} {c : SupportCondition β} :
-    π • c ∈ π • S ↔ c ∈ S := by
-  simp only [StructPerm.smul_mem_ordSupport, inv_smul_smul]
-
-theorem _root_.ConNF.Allowable.smul_mem_ordSupport_smul {ρ : Allowable β}
-    {S : OrdSupport β} {c : SupportCondition β} :
+theorem smul_mem_smul {ρ : Allowable β} {S : OrdSupport β} {c : SupportCondition β} :
     ρ • c ∈ ρ • S ↔ c ∈ S := by
-  simp only [Allowable.toStructPerm_smul, StructPerm.smul_mem_ordSupport, inv_smul_smul]
+  simp only [smul_mem, inv_smul_smul]
 
 @[simp]
-theorem _root_.ConNF.StructPerm.smul_cpos {π : StructPerm β}
-    {S : OrdSupport β} {c : SupportCondition β} :
-    (π • S).cpos c = S.cpos (π⁻¹ • c) :=
+theorem smul_cpos {ρ : Allowable β} {S : OrdSupport β} {c : SupportCondition β} :
+    (ρ • S).cpos c = S.cpos (ρ⁻¹ • c) :=
   rfl
 
-theorem _root_.ConNF.Allowable.smul_cpos {ρ : Allowable β}
-    {S : OrdSupport β} {c : SupportCondition β} :
-    (ρ • S).cpos c = S.cpos (ρ⁻¹ • c) := by
-  simp only [Allowable.toStructPerm_smul, StructPerm.smul_cpos, map_inv]
-
-theorem _root_.ConNF.StructPerm.smul_cpos_smul {π : StructPerm β}
-    {S : OrdSupport β} {c : SupportCondition β} :
-    (π • S).cpos (π • c) = S.cpos c := by
-  simp only [StructPerm.smul_cpos, inv_smul_smul]
-
-theorem _root_.ConNF.Allowable.smul_cpos_smul {ρ : Allowable β}
-    {S : OrdSupport β} {c : SupportCondition β} :
+theorem smul_cpos_smul {ρ : Allowable β} {S : OrdSupport β} {c : SupportCondition β} :
     (ρ • S).cpos (ρ • c) = S.cpos c := by
-  simp only [Allowable.toStructPerm_smul, StructPerm.smul_cpos, inv_smul_smul]
+  simp only [smul_cpos, inv_smul_smul]
 
-theorem _root_.ConNF.StructPerm.smul_mem_ordSupport_inv {π : StructPerm β}
-    {S : OrdSupport β} {c : SupportCondition β} :
-    c ∈ π⁻¹ • S ↔ π • c ∈ S := by
-  rw [mem_iff, mem_iff]
-  simp only [StructPerm.smul_cpos, inv_inv]
-
-theorem _root_.ConNF.Allowable.smul_mem_ordSupport_inv {ρ : Allowable β}
-    {S : OrdSupport β} {c : SupportCondition β} :
+theorem smul_mem_inv {ρ : Allowable β} {S : OrdSupport β} {c : SupportCondition β} :
     c ∈ ρ⁻¹ • S ↔ ρ • c ∈ S := by
-  rw [mem_iff, mem_iff]
-  simp only [Allowable.toStructPerm_smul, map_inv, StructPerm.smul_cpos, inv_inv]
+  simp only [smul_mem, inv_inv]
 
-theorem _root_.ConNF.StructPerm.smul_eq_of_smul_ordSupport_eq (π : StructPerm β)
-    {S : OrdSupport β} {c : SupportCondition β} (h : c ∈ S) :
-    π • S = S → π • c = c := by
+theorem inv_smul_mem {ρ : Allowable β} {S : OrdSupport β} {c : SupportCondition β} :
+    ρ⁻¹ • c ∈ S ↔ c ∈ ρ • S := by
+  simp only [smul_mem]
+
+theorem smul_eq_of_smul_eq (ρ : Allowable β) {S : OrdSupport β} {c : SupportCondition β}
+    (h : c ∈ S) : ρ • S = S → ρ • c = c := by
   intro hS
   have := congr_arg₂ OrdSupport.cpos hS (refl c)
-  refine eq_inv_smul_iff.mp (S.injective c (π⁻¹ • c) h ?_ rfl ?_)
-  · rw [← StructPerm.smul_cpos, this]
+  refine eq_inv_smul_iff.mp (S.injective c (ρ⁻¹ • c) h ?_ rfl ?_)
+  · rw [← smul_cpos, this]
     exact h
-  · rw [StructPerm.smul_cpos] at this
+  · rw [smul_cpos] at this
     simp_rw [this]
-
-theorem _root_.ConNF.Allowable.smul_eq_of_smul_ordSupport_eq (ρ : Allowable β)
-    {S : OrdSupport β} {c : SupportCondition β} (h : c ∈ S) :
-    ρ • S = S → ρ • c = c :=
-  (Allowable.toStructPerm ρ).smul_eq_of_smul_ordSupport_eq h
 
 /-- The restriction of this ordered support to conditions that come before position `i`. -/
 def before (S : OrdSupport β) (i : μ) : OrdSupport β where
