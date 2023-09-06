@@ -7,98 +7,72 @@
 
 # The consistency of New Foundations
 
-The purpose of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer implementation of a logical theory (such as set theory or type theory).
+[![.github/workflows/push_main.yml](https://github.com/leanprover-community/con-nf/actions/workflows/push_main.yml/badge.svg)](https://github.com/leanprover-community/con-nf/actions/workflows/push_main.yml)
 
-Much of the project infrastructure has been adapted from the [sphere eversion project](https://leanprover-community.github.io/sphere-eversion/), the [liquid tensor experiment](https://leanprover-community.github.io/lean-liquid/), and the [unit fractions project](https://github.com/b-mehta/unit-fractions/).
+In 1937, Quine proposed a set theory called "New Foundations", and since 2010, Randall Holmes has claimed to have a proof of its consistency.
+In this repository, we use the formal theorem prover Lean to verify the difficult part of his proof, thus proving that New Foundations is indeed consistent.
 
-## Current progress
+See [our website](https://leanprover-community.github.io/con-nf/) for more information, the [documentation of our Lean code](https://leanprover-community.github.io/con-nf/doc/), and the [draft paper](https://zeramorphic.github.io/con-nf-paper/main.pdf) aiming to translate the Lean definitions into English.
 
-The project is not yet finished.
-Our main result is the freedom of action theorem, which is a major step towards the end goal.
-
-## The source
-
-The definitions, theorems and proofs in this repository are taken from Randall Holmes [untangled.pdf](https://randall-holmes.github.io/Nfproof/untangled.pdf), claiming to prove the consistency of Quine's New Foundations axiom system.
-
-## The target
-
-The formal system which we are using as a target system is Lean's dependent type theory. Lean is a project being developed at Microsoft Research by Leonardo de Moura and his team. Our formalisation could not have even started without a major classical mathematical library backing it up, and so we chose Lean 3 as the engine behind the project. Note that Lean 4's type theory is the same as Lean 3's type theory, however porting 800K lines of mathematical library between languages is a *highly* nontrivial endeavour.
-
-## How to browse this repository
-
-### Getting the project
-
-At the moment, the recommended way of browsing this repository,
-is by using a Lean development environment.
-Crucially, this will allow you to introspect Lean's "Goal state" during proofs,
-and easily jump to definitions or otherwise follow paths through the code.
-
-We are looking into ways to setup an online interactive website
-that will provide the same experience without the hassle of installing a complete
-Lean development environment.
-
-For the time being: please use the
-[installation instructions](https://leanprover-community.github.io/get_started.html#regular-install)
-to install Lean and a supporting toolchain.
-After that, download and open a copy of the repository
-by executing the following command in a terminal:
+To run our code locally, install [elan](https://github.com/leanprover/elan), clone the repository, and run the following command in a terminal in the repository's root directory.
 ```
-leanproject get con-nf
-code con-nf
+lake exe cache get
 ```
-For detailed instructions on how to work with Lean projects,
-see [this](https://leanprover-community.github.io/install/project.html). The script `scripts/get-cache.sh`
-in the folder `con-nf` will download the `olean` files created by our continuous integration. This
-will save you some time by not havig to do `leanproject build`.
+The code can then be viewed in an editor such as Visual Studio Code, or compiled directly from the command-line using `lake build`.
 
-### Reading the project
+## Objective
 
-With the project opened in VScode,
-you are all set to start exploring the code.
-There are two pieces of functionality that help a lot when browsing through Lean code:
+It is known that New Foundations is consistent if and only if a theory called Tangled Type Theory (TTT) is consistent (see theorem 1 [here](https://randall-holmes.github.io/Papers/tangled.pdf)).
+We aim to formally construct a model of TTT in Lean, thus proving (on paper) that New Foundations is consistent, or in short, Con(NF).
+We are working from the paper proofs in [untangled.pdf](https://randall-holmes.github.io/Nfproof/untangled.pdf), [retangled.pdf](https://randall-holmes.github.io/Nfproof/retangled.pdf), and a [new document](https://randall-holmes.github.io/Nfproof/newnfdoc.pdf), but many alterations and additions have been made to make the proof compatible with Lean's type theory.
 
-* "Go to definition": If you right-click on a name of a definition or lemma
-  (such as `normal_filter`, or `clans`), then you can choose "Go to definition" from the menu,
-  and you will be taken to the relevant location in the source files.
-  This also works by `Ctrl`-clicking on the name.
-* "Goal view": in the event that you would like to read a *proof*,
-  you can step through the proof line-by-line,
-  and see the internals of Lean's "brain" in the Goal window.
-  If the Goal window is not open,
-  you can open it by clicking on one of the icons in the top right hand corner.
+Note that this project depends on [mathlib](https://github.com/leanprover-community/mathlib4), the community mathematical library written in Lean.
+This allows us to use familiar results about things like cardinals and groups without having to prove them ourselves.
 
-### Organization of the project
+Every definition and theorem in mathlib and this project have been checked by Lean's trusted kernel, which computationally verifies that the proofs we have constructed are indeed correct.
+However, Lean cannot check that the statements of the definitions and theorems match their intended English equivalents, so when drawing conclusions from the code in this project, translation to and from English must be done with care.
 
-* The Lean code is contained in the directory `src/`.
+## Tangled type theory
 
-## Brief note on type theory
+TTT is a many-sorted set theory with equality "=" and the membership relation "∈".
+The sorts are indexed by a limit ordinal λ, and elements of λ are called type indices.
+A formula "x = y" is well-formed if x and y have the same type, and a formula "x ∈ y" is well-formed if x has any type less than y.
 
-Lean is based on type theory,
-which means that some things work slightly differently from set theory.
-We highlight two syntactical differences.
+One of the axioms of tangled type theory is extensionality, which stipulates that a set of type α is uniquely determined by its elements of *any* type β < α.
+This is strange: for example, if two sets of type α differ, they have different type β elements for *every* β < α.
+This property makes it difficult to construct models of TTT.
 
-* Firstly, the element-of relation (`∈`) plays no fundamental role.
-  Instead, there is a typing judgment (`:`).
+## Strategy
 
-  This means that we write `x : X` to say that "`x` is a term of type `X`"
-  instead of "`x` is an element of the set `X`".
-  Conveniently, we can write `f : X → Y` to mean "`f` has type `X → Y`",
-  in other words "`f` is a function from `X` to `Y`".
+Our construction of the model uses the following rough strategy.
 
-* Secondly, type theorists do not use the mapsto symbol (`↦`),
-  but instead use lambda-notation.
-  This means that we can define the square function on the integers via
-  `λ x, x^2`, which translates to `x ↦ x^2` in set-theoretic notation.
-  For more information about `λ`, see the Wikipedia page on
-  [lambda calculus](https://en.wikipedia.org/wiki/Lambda_calculus).
+### Construction of the base type
 
-For a more extensive discussion of type theory,
-see the dedicated
-[page](https://leanprover-community.github.io/lean-perfectoid-spaces/type_theory.html)
-on the perfectoid project website.
+Let λ be a limit ordinal, κ > λ be a regular uncountable ordinal, and μ > κ be a strong limit cardinal with cofinality at least κ.
+Sets of size less than κ are called *small*.
 
-## Source reference
+We first construct an auxiliary type at level -1, called the *base type*, below all types that will eventually become part of the model.
+Elements of this type are called atoms (although they are not atoms in the ZFU or NFU sense, for instance).
+There are μ atoms, divided into *litters* of size κ.
 
-`[untangled]` : https://randall-holmes.github.io/Nfproof/untangled.pdf
+### Constructing each type
 
-[untangled]: https://randall-holmes.github.io/Nfproof/untangled.pdf
+At each type level α, we will produce a collection of model elements called *tangles*.
+We also produce a group of permutations, called *allowable permutations*, which act on the type of tangles.
+Each tangle is stipulated to have a *support* under the action of allowable permutations; this is a small set of objects called *support conditions*.
+
+Each tangle at level α will be given a preferred extension of some type β < α, and we can recover from a tangle's elements which extension it prefers.
+The extensions of such a tangle in other lower types can be deduced from its β-extension.
+This allows us to satisfy TTT's extensionality axiom.
+
+### Controlling the size of each type
+
+Each type α can only be constructed under the assumption that all types β < α are of size exactly μ.
+It is easy to prove that the type of α-tangles has cardinality at least μ, so we need to show that there are at most μ elements of this set.
+We do this by showing that there are not that many fundamentally different descriptions of tangles under the action of allowable permutations.
+This requires the [freedom of action theorem](https://leanprover-community.github.io/con-nf/doc/ConNF/Foa/Result.html#ConNF.StructApprox.freedom_of_action), which is a technical lemma that allows us to construct allowable permutations.
+
+### Finishing the induction
+
+We can then run the above process recursively to produce the types of tangles at all type levels α.
+We then check that our construction indeed produces a model of TTT by checking that it satisfies a finite axiomatisation of the theory.
