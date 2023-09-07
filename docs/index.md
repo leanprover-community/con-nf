@@ -7,8 +7,6 @@
 
 # The consistency of New Foundations
 
-[![.github/workflows/push_main.yml](https://github.com/leanprover-community/con-nf/actions/workflows/push_main.yml/badge.svg)](https://github.com/leanprover-community/con-nf/actions/workflows/push_main.yml)
-
 In 1937, Quine proposed a set theory called "New Foundations", and since 2010, Randall Holmes has claimed to have a proof of its consistency.
 In this repository, we use the formal theorem prover Lean to verify the difficult part of his proof, thus proving that New Foundations is indeed consistent.
 
