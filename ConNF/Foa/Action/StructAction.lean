@@ -27,7 +27,7 @@ def Lawful {β : TypeIndex} (φ : StructAction β) : Prop :=
   ∀ B, (φ B).Lawful
 
 /-- This structural action maps flexible litters to flexible litters. -/
-def MapFlexible {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iio α} (φ : StructAction β) :
+def MapFlexible {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α} (φ : StructAction β) :
     Prop :=
   ∀ (B) (L : Litter) (hL), Flexible α B L → Flexible α B (((φ B).litterMap L).get hL).1
 
@@ -36,7 +36,7 @@ section Precise
 def Precise {β : TypeIndex} (φ : StructAction β) : Prop :=
   ∀ B, (φ B).Precise
 
-variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iio α} (φ : StructAction β)
+variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α} (φ : StructAction β)
 
 noncomputable def complete (hφ : φ.Lawful) : StructApprox β := fun B => (φ B).complete (hφ B) B
 

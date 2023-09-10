@@ -105,7 +105,8 @@ theorem preimageAction_lawful (hπf : π.Free) {c : SupportCondition β} :
     exact (completeAtomMap_mem_completeNearLitterMap_toNearLitter hπf).symm
 
 theorem preimageAction_comp_mapFlexible {hπf : π.Free} {γ : Iio α} {c : SupportCondition β}
-    (A : Path (β : TypeIndex) γ) : StructAction.MapFlexible ((preimageAction hπf c).comp A) :=
+    (A : Path (β : TypeIndex) γ) :
+    StructAction.MapFlexible (β := (γ : Iic α)) ((preimageAction hπf c).comp A) :=
   constrainedAction_comp_mapFlexible hπf A
 
 theorem Relation.reflTransGen_of_eq {α : Type _} {r : α → α → Prop} {x y : α} (h : x = y) :
@@ -116,7 +117,7 @@ theorem Relation.reflTransGen_of_eq {α : Type _} {r : α → α → Prop} {x y 
 theorem preimageAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (N : NearLitter) (c : SupportCondition β)
     (hc : ⟨A.comp B, inr (π.completeNearLitterMap (A.comp B) N)⟩ ≺[α] c) (ρ : Allowable γ)
-    (h : StructApprox.ExactlyApproximates
+    (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
@@ -129,7 +130,7 @@ theorem preimageAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : T
 theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c : SupportCondition β)
     (hc : ⟨A.comp B, inl (π.completeAtomMap (A.comp B) a)⟩ ≺[α] c) (ρ : Allowable γ)
-    (h : StructApprox.ExactlyApproximates
+    (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
       (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = Tree.comp B (Allowable.toStructPerm ρ) • a := by

@@ -88,7 +88,7 @@ end StructAction
 
 namespace StructAction
 
-variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iio α}
+variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α}
 
 /-- Refine and complete this action into a structural approximation. -/
 noncomputable def rc (φ : StructAction β) (h : φ.Lawful) : StructApprox β :=
@@ -114,13 +114,14 @@ theorem rc_free (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible
 
 theorem rc_comp_atomPerm {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) :
-    (rc (φ.comp A) (hφ.comp A) B).atomPerm = (φ.rc hφ (A.comp B)).atomPerm := by
+    (rc (β := (γ : Iic α)) (φ.comp A) (hφ.comp A) B).atomPerm =
+    (φ.rc hφ (A.comp B)).atomPerm := by
   unfold rc refine complete NearLitterAction.refine NearLitterAction.complete
   simp_rw [Tree.comp_apply]
 
 theorem rc_comp_smul_atom {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) (a : Atom) :
-    rc (φ.comp A) (hφ.comp A) B • a = φ.rc hφ (A.comp B) • a := by
+    rc (β := (γ : Iic α)) (φ.comp A) (hφ.comp A) B • a = φ.rc hφ (A.comp B) • a := by
   change NearLitterApprox.atomPerm _ _ = NearLitterApprox.atomPerm _ _
   rw [rc_comp_atomPerm]
 

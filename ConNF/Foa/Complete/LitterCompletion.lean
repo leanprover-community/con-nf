@@ -64,18 +64,19 @@ theorem ihAction_litterMap {β : Iic α} {c : SupportCondition β} {H : HypActio
 variable {β : Iic α} [FreedomOfActionHypothesis β]
 
 noncomputable def _root_.ConNF.StructAction.allowable {γ : Iio α} (φ : StructAction γ)
-    (h : (γ : Iic α) < β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) : Allowable γ :=
+    (h : (γ : Iic α) < β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible (β := (γ : Iic α))) : Allowable γ :=
   (freedomOfAction_of_lt _ h _ (StructAction.rc_free _ h₁ h₂)).choose
 
 theorem _root_.ConNF.StructAction.allowable_exactlyApproximates {γ : Iio α} (φ : StructAction γ)
     (h : (γ : Iic α) < β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :
-    (φ.rc h₁).ExactlyApproximates (Allowable.toStructPerm (φ.allowable h h₁ h₂)) :=
+    (φ.rc h₁).ExactlyApproximates (β := (γ : Iic α)) (Allowable.toStructPerm (φ.allowable h h₁ h₂)) :=
   (freedomOfAction_of_lt _ h _ (StructAction.rc_free _ h₁ h₂)).choose_spec
 
 noncomputable def _root_.ConNF.StructAction.hypothesisedAllowable (φ : StructAction β)
     {A : ExtendedIndex β} (h : InflexibleCoePath A)
     (h₁ : StructAction.Lawful (φ.comp (h.B.cons (coe_lt h.hδ))))
-    (h₂ : StructAction.MapFlexible (φ.comp (h.B.cons (coe_lt h.hδ)))) : Allowable h.δ :=
+    (h₂ : StructAction.MapFlexible (β := (h.δ : Iic α)) (φ.comp (h.B.cons (coe_lt h.hδ)))) :
+    Allowable h.δ :=
   StructAction.allowable
     (φ.comp (h.B.cons (coe_lt h.hδ)))
     (h.hδ.trans_le (show _ from coe_le_coe.mp (le_of_path h.B)))
@@ -85,7 +86,7 @@ theorem _root_.ConNF.StructAction.hypothesisedAllowable_exactlyApproximates (φ 
     {A : ExtendedIndex β} (h : InflexibleCoePath A)
     (h₁ : StructAction.Lawful (φ.comp (h.B.cons (coe_lt h.hδ))))
     (h₂ : StructAction.MapFlexible (φ.comp (h.B.cons (coe_lt h.hδ)))) :
-    StructApprox.ExactlyApproximates
+    StructApprox.ExactlyApproximates (β := (h.δ : Iic α))
       (StructAction.rc (φ.comp (h.B.cons (coe_lt h.hδ))) h₁)
       (Allowable.toStructPerm (φ.hypothesisedAllowable h h₁ h₂)) :=
   StructAction.allowable_exactlyApproximates (φ.comp (h.B.cons (coe_lt h.hδ))) _ _ _

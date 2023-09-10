@@ -294,7 +294,7 @@ We can prove that `map_flexible` holds at any `constrained_action` without any `
 -/
 theorem constrainedAction_comp_mapFlexible (hπf : π.Free) {γ : Iio α} {s : Set (SupportCondition β)}
     {hs : Small s} (A : Path (β : TypeIndex) γ) :
-    StructAction.MapFlexible ((constrainedAction π s hs).comp A) := by
+    StructAction.MapFlexible (β := (γ : Iic α)) ((constrainedAction π s hs).comp A) := by
   rintro B L ⟨c, hc, hL₁⟩ hL₂
   simp only [Tree.comp_apply, constrainedAction_litterMap,
     foaHypothesis_nearLitterImage]
@@ -337,13 +337,14 @@ theorem constrainedAction_comp_mapFlexible (hπf : π.Free) {γ : Iio α} {s : S
 
 theorem ihAction_comp_mapFlexible (hπf : π.Free) {γ : Iio α} (c : SupportCondition β)
     (A : Path (β : TypeIndex) γ) :
-    StructAction.MapFlexible ((ihAction (π.foaHypothesis : HypAction c)).comp A) := by
+    StructAction.MapFlexible (β := (γ : Iic α))
+      ((ihAction (π.foaHypothesis : HypAction c)).comp A) := by
   rw [ihAction_eq_constrainedAction]
   exact constrainedAction_comp_mapFlexible hπf A
 
 theorem ihsAction_comp_mapFlexible (hπf : π.Free) {γ : Iio α} (c d : SupportCondition β)
     (A : Path (β : TypeIndex) γ) :
-    StructAction.MapFlexible ((ihsAction π c d).comp A) := by
+    StructAction.MapFlexible (β := (γ : Iic α)) ((ihsAction π c d).comp A) := by
   rw [ihsAction_eq_constrainedAction]
   exact constrainedAction_comp_mapFlexible hπf A
 
@@ -458,7 +459,7 @@ theorem ConNF.StructApprox.extracted_1
     (s : Set (SupportCondition β)) (hs : Small s)
     (hπ : StructAction.Lawful (Tree.comp A (constrainedAction π s hs)))
     (ρ : Allowable γ)
-    (h : ExactlyApproximates
+    (h : ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc (Tree.comp A (constrainedAction π s hs)) hπ)
       (Allowable.toStructPerm ρ))
     (B : ExtendedIndex (γ : Iic α)) (N : NearLitter)
@@ -494,7 +495,7 @@ theorem ConNF.StructApprox.extracted_2
     (s : Set (SupportCondition β)) (hs : Small s)
     (hπ : StructAction.Lawful (Tree.comp A (constrainedAction π s hs)))
     (ρ : Allowable γ)
-    (h : ExactlyApproximates
+    (h : ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc (Tree.comp A (constrainedAction π s hs)) hπ)
       (Allowable.toStructPerm ρ))
     (B : ExtendedIndex (γ : Iic α)) (N : NearLitter)
@@ -683,7 +684,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Iio α} (A : Path (β
     (N : ExtendedIndex γ × NearLitter) (s : Set (SupportCondition β)) (hs : Small s)
     (hc : ∃ c : SupportCondition β, c ∈ s ∧ ⟨A.comp N.1, inr N.2⟩ ≤[α] c)
     (hπ : StructAction.Lawful ((constrainedAction π s hs).comp A)) (ρ : Allowable γ)
-    (h : StructApprox.ExactlyApproximates
+    (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc ((constrainedAction π s hs).comp A) hπ)
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp N.1) N.2 =
@@ -754,8 +755,8 @@ theorem constrainedAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β 
     (B : ExtendedIndex γ) (N : NearLitter) (s : Set (SupportCondition β)) (hs : Small s)
     (hc : ∃ c : SupportCondition β, c ∈ s ∧ ⟨A.comp B, inr N⟩ ≤[α] c)
     (hπ : StructAction.Lawful ((constrainedAction π s hs).comp A)) (ρ : Allowable γ)
-    (h : StructApprox.ExactlyApproximates
-      (StructAction.rc  ((constrainedAction π s hs).comp A) hπ)
+    (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
+      (StructAction.rc ((constrainedAction π s hs).comp A) hπ)
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N = Tree.comp B (Allowable.toStructPerm ρ) • N :=
   constrainedAction_coherent' hπf A (B, N) s hs hc hπ ρ h
@@ -767,8 +768,8 @@ theorem constrainedAction_coherent_atom {γ : Iio α}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) (a : Atom) (s : Set (SupportCondition β))
     (hs : Small s) (hc : ∃ c : SupportCondition β, c ∈ s ∧ ⟨A.comp B, inl a⟩ ≤[α] c)
     (hπ : StructAction.Lawful ((constrainedAction π s hs).comp A)) (ρ : Allowable γ)
-    (h : StructApprox.ExactlyApproximates
-      (StructAction.rc  ((constrainedAction π s hs).comp A) hπ)
+    (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
+      (StructAction.rc ((constrainedAction π s hs).comp A) hπ)
       (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = Tree.comp B (Allowable.toStructPerm ρ) • a := by
   refine' Eq.trans _ ((h B).map_atom a (Or.inl (Or.inl (Or.inl (Or.inl hc)))))
@@ -781,7 +782,7 @@ theorem ihsAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIn
     (hc : ⟨A.comp B, inr N⟩ ∈ transConstrained c d)
     (hπ : StructAction.Lawful ((ihsAction π c d).comp A))
     (ρ : Allowable γ)
-    (h : StructApprox.ExactlyApproximates
+    (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc ((ihsAction π c d).comp A) hπ)
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
@@ -801,7 +802,7 @@ theorem ihsAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIn
 theorem ihsAction_coherent_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c d : SupportCondition β) (hc : ⟨A.comp B, inl a⟩ <[α] c)
     (hπ : StructAction.Lawful ((ihsAction π c d).comp A)) (ρ : Allowable γ)
-    (h : StructApprox.ExactlyApproximates
+    (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc ((ihsAction π c d).comp A) hπ)
       (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = Tree.comp B (Allowable.toStructPerm ρ) • a := by
@@ -814,7 +815,7 @@ theorem ihAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeInd
     (B : ExtendedIndex γ) (N : NearLitter) (c : SupportCondition β) (hc : ⟨A.comp B, inr N⟩ <[α] c)
     (hπ : StructAction.Lawful ((ihAction (π.foaHypothesis : HypAction c)).comp A))
     (ρ : Allowable γ)
-    (h : StructApprox.ExactlyApproximates
+    (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc ((ihAction (π.foaHypothesis : HypAction c)).comp A) hπ)
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
@@ -829,7 +830,7 @@ theorem ihAction_coherent_atom {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c : SupportCondition β) (hc : ⟨A.comp B, inl a⟩ <[α] c)
     (hπ : StructAction.Lawful ((ihAction (π.foaHypothesis : HypAction c)).comp A))
     (ρ : Allowable γ)
-    (h : StructApprox.ExactlyApproximates
+    (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc ((ihAction (π.foaHypothesis : HypAction c)).comp A) hπ)
       (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = Tree.comp B (Allowable.toStructPerm ρ) • a := by
