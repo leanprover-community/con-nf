@@ -969,10 +969,9 @@ theorem litter_injective_extends (hπf : π.Free) {c d : SupportCondition β}
     have h' := fuzz_injective _ h
     rw [ihAction_smul_tangle hπf c d _ _ h₁ _ _ (hcd.comp _)] at h'
     rw [ihAction_smul_tangle hπf c d _ _ h₂ _ _ (hcd.comp _)] at h'
-    sorry
     -- The following two lines work to complete the proof but take ages to process.
-    -- rw [smul_left_cancel_iff] at h'
-    -- exact h'
+    rw [smul_left_cancel_iff] at h'
+    exact h'
 
 /-- **Split relation**
 Let `<` denote a relation on `α`.

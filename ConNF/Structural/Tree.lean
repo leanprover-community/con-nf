@@ -74,6 +74,10 @@ theorem toBot_inj {a b : τ} : toBot a = toBot b ↔ a = b :=
 theorem ofBot_inj {a b : Tree τ ⊥} : ofBot a = ofBot b ↔ a = b :=
   ofBot.injective.eq_iff
 
+@[ext]
+theorem ext {α : TypeIndex} (a b : Tree τ α) (h : ∀ A, a A = b A) : a = b :=
+  funext h
+
 variable [Group τ] {α : TypeIndex}
 
 /-- The group structure on the type of `α`-trees of `τ` is given by "branchwise" multiplication,

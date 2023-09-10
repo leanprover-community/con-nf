@@ -30,15 +30,9 @@ variable {β : Λ} {G : Type _} {τ : Type _} [SMul G (SupportCondition β)] [SM
 
 /-- A support condition is *reduced* if it is an atom or a litter. -/
 @[mk_iff]
-inductive Reduced {β : TypeIndex} : SupportCondition β → Prop
-  | mkAtom (B : ExtendedIndex β) (a : Atom) : Reduced ⟨B, inl a⟩
-  | mkLitter (B : ExtendedIndex β) (L : Litter) : Reduced ⟨B, inr L.toNearLitter⟩
-
-theorem Reduced.comp {β γ : TypeIndex} {c : SupportCondition γ} (h : Reduced c) (A : Path β γ) :
-    Reduced ⟨A.comp c.path, c.value⟩ := by
-  cases h
-  · exact mkAtom _ _
-  · exact mkLitter _ _
+inductive Reduced : Atom ⊕ NearLitter → Prop
+  | mkAtom (a : Atom) : Reduced (inl a)
+  | mkLitter (L : Litter) : Reduced (inr L.toNearLitter)
 
 /-- The reflexive transitive closure of a set of support conditions. -/
 def reflTransClosure (S : Set (SupportCondition β)) : Set (SupportCondition β) :=
@@ -55,14 +49,15 @@ def transClosure (S : Set (SupportCondition β)) : Set (SupportCondition β) :=
 /-- The *reduction* of a set of support conditions is the downward closure of the set under
 the constrains relation, but we only keep reduced conditions. -/
 def reduction (S : Set (SupportCondition β)) : Set (SupportCondition β) :=
-  reflTransClosure α S ∩ setOf Reduced
+  reflTransClosure α S ∩ {c | Reduced c.value}
 
 theorem mem_reduction_of_reduced (S : Set (SupportCondition β)) (c : SupportCondition β)
-    (hc₁ : Reduced c) (hc₂ : c ∈ S) : c ∈ reduction α S :=
+    (hc₁ : Reduced c.value) (hc₂ : c ∈ S) : c ∈ reduction α S :=
   ⟨mem_reflTransClosure_of_mem α S c hc₂, hc₁⟩
 
 theorem mem_reduction_of_reduced_constrains (S : Set (SupportCondition β))
-    (c d : SupportCondition β) (hc : Reduced c) (hcd : c ≺[α] d) (hd : d ∈ S) : c ∈ reduction α S :=
+    (c d : SupportCondition β) (hc : Reduced c.value) (hcd : c ≺[α] d) (hd : d ∈ S) :
+    c ∈ reduction α S :=
   ⟨⟨d, hd, Relation.ReflTransGen.single hcd⟩, hc⟩
 
 /-- Gadget that helps us prove that the `reflTransClosure` of a small set is small. -/
@@ -157,15 +152,15 @@ theorem reduction_supports (S : Set (SupportCondition β)) (c : SupportCondition
     Supports (StructPerm β) (reduction α S) c := by
   intro π hc'
   obtain ⟨B, a | N⟩ := c
-  · exact hc' (mem_reduction_of_reduced α _ _ (Reduced.mkAtom B a) hc)
+  · exact hc' (mem_reduction_of_reduced α _ _ (Reduced.mkAtom a) hc)
   by_cases N.IsLitter
   · obtain ⟨L, rfl⟩ := h.exists_litter_eq
-    exact hc' (mem_reduction_of_reduced α _ _ (Reduced.mkLitter B L) hc)
+    exact hc' (mem_reduction_of_reduced α _ _ (Reduced.mkLitter L) hc)
   simp only [StructPerm.smul_supportCondition_eq_iff, smul_inr, inr.injEq] at hc' ⊢
-  have h₃ := hc' (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkLitter B N.fst)
-    (Constrains.nearLitter B N h) hc)
-  have h₄ := fun a ha => hc' (mem_reduction_of_reduced_constrains α _ _ _ (Reduced.mkAtom B a)
-    (Constrains.symmDiff B N a ha) hc)
+  have h₃ := hc' (mem_reduction_of_reduced_constrains α _ ⟨B, inr N.fst.toNearLitter⟩ _
+    (Reduced.mkLitter N.fst) (Constrains.nearLitter B N h) hc)
+  have h₄ := fun a ha => hc' (mem_reduction_of_reduced_constrains α _ ⟨B, inl a⟩ _
+    (Reduced.mkAtom a) (Constrains.symmDiff B N a ha) hc)
   simp only [smul_inr, inr.injEq, smul_inl, inl.injEq] at h₃ h₄
   refine' SetLike.coe_injective _
   refine' (NearLitterPerm.smul_nearLitter_eq_smul_symmDiff_smul _ N).trans _

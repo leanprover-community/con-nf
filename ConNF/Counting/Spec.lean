@@ -75,7 +75,7 @@ theorem before_comp_supports {S : OrdSupport β} (hS : S.Strong)
   rw [mem_setOf, OrdSupport.mem_comp (h.path.δ : Iic α), OrdSupport.mem_before]
   refine ⟨?_, ?_⟩
   · refine hS.transConstrains_mem _ ⟨A, inr N⟩ ?_ ?_ hN
-    · exact hc.2.comp _
+    · exact hc.2
     · obtain ⟨d, hd₁, hd₂⟩ := hc.1
       refine Relation.TransGen.trans_right (reflTransConstrains_comp hd₂ _) ?_
       refine transConstrains_nearLitter ?_

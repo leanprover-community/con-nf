@@ -147,8 +147,8 @@ theorem mem_comp {S : OrdSupport β} (γ : Iic α) (A : Quiver.Path (β : TypeIn
 it constrains lies in its domain, and the position of each support condition is given by the global
 position function. -/
 structure Strong (S : OrdSupport β) : Prop where
-  reduced_of_mem (c : SupportCondition β) : c ∈ S → Reduced c
-  transConstrains_mem (c d : SupportCondition β) : Reduced c → c <[α] d → d ∈ S → c ∈ S
+  reduced_of_mem (c : SupportCondition β) : c ∈ S → Reduced c.value
+  transConstrains_mem (c d : SupportCondition β) : Reduced c.value → c <[α] d → d ∈ S → c ∈ S
   cpos_get_eq (c : SupportCondition β) (hc : c ∈ S) : (S.cpos c).get hc = c.value
 
 theorem Strong.cpos_eq {S : OrdSupport β} {c : SupportCondition β} (h : S.Strong) :
