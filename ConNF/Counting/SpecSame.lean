@@ -134,7 +134,6 @@ theorem convertAtom_dom (A : ExtendedIndex β) (a : Atom) :
   · intro h
     obtain ⟨c, h₁, h₂⟩ := this.mp ⟨_, h, rfl⟩
     rw [Prod.ext_iff] at h₂
-    dsimp only at h₂
     obtain ⟨A, b | N⟩ := c <;> cases h₂.2
     · exact ⟨b, h₁, h₂.1.symm⟩
     · obtain ⟨L, hL⟩ := cpos_nearLitter hσS hσT hr hS hU A N h₁
@@ -142,16 +141,49 @@ theorem convertAtom_dom (A : ExtendedIndex β) (a : Atom) :
       simp only at h₂
 
 theorem convertLitter_dom (A : ExtendedIndex β) (L : Litter) :
-    (convertLitter T A L).Dom ↔ ⟨A, inr L.toNearLitter⟩ ∈ S :=
-  sorry
+    (convertLitter T A L).Dom ↔ ⟨A, inr L.toNearLitter⟩ ∈ S := by
+  have := Specifies.dom_iff hσT ⟨inr L.toNearLitter, A⟩
+  rw [hσS.dom_iff ⟨inr L.toNearLitter, A⟩] at this
+  simp_rw [hS.cpos_get_eq] at this
+  constructor
+  · rintro ⟨N, hNT, h⟩
+    obtain ⟨c, h₁, h₂⟩ := this.mpr ⟨_, hNT, Prod.ext h.symm rfl⟩
+    rw [Prod.ext_iff] at h₂
+    obtain ⟨A, a | N'⟩ := c <;> cases h₂.2
+    · cases h₂.1
+    · cases h₂.1
+      exact h₁
+  · intro h
+    obtain ⟨c, h₁, h₂⟩ := this.mp ⟨_, h, rfl⟩
+    rw [Prod.ext_iff] at h₂
+    obtain ⟨A, a | N'⟩ := c <;> cases h₂.2
+    · obtain ⟨L, hL⟩ := cpos_atom hσS hσT hr hS hU A a h₁
+      simp only [hL] at h₂
+    · exact ⟨N', h₁, h₂.1.symm⟩
 
 theorem deconvertAtom_dom (A : ExtendedIndex β) (a : Atom) :
-    (deconvertAtom T A a).Dom ↔ ⟨A, inl a⟩ ∈ T :=
-  sorry
+    (deconvertAtom T A a).Dom ↔ ⟨A, inl a⟩ ∈ T := by
+  have := Specifies.dom_iff hσT ⟨inl a, A⟩
+  rw [hσS.dom_iff ⟨inl a, A⟩] at this
+  simp_rw [hS.cpos_get_eq] at this
+  constructor
+  · rintro ⟨b, hbT, _⟩
+    exact hbT
+  · intro h
+    obtain ⟨b, hb⟩ := cpos_atom hσS hσT hr hS hU A a h
+    exact ⟨b, h, hb⟩
 
 theorem deconvertLitter_dom (A : ExtendedIndex β) (N : NearLitter) :
-    (deconvertLitter T A N).Dom ↔ ⟨A, inr N⟩ ∈ T :=
-  sorry
+    (deconvertLitter T A N).Dom ↔ ⟨A, inr N⟩ ∈ T := by
+  have := Specifies.dom_iff hσT ⟨inr N, A⟩
+  rw [hσS.dom_iff ⟨inr N, A⟩] at this
+  simp_rw [hS.cpos_get_eq] at this
+  constructor
+  · rintro ⟨b, hbT, _⟩
+    exact hbT
+  · intro h
+    obtain ⟨L, hL⟩ := cpos_nearLitter hσS hσT hr hS hU A N h
+    exact ⟨L, h, hL⟩
 
 theorem convertAtom_mem {A : ExtendedIndex β} {a : Atom} (h : (convertAtom T A a).Dom) :
     ⟨A, inl ((convertAtom T A a).get h)⟩ ∈ T :=
@@ -171,18 +203,32 @@ theorem convertLitter_get {A : ExtendedIndex β} {L : Litter} (h : (convertLitte
 
 theorem convertAtom_dom_small (A : ExtendedIndex β) :
     Small (PFun.Dom (convertAtom T A)) := by
-  sorry
+  change Small {a | (convertAtom T A a).Dom}
+  simp only [convertAtom_dom hσS hσT hr hS hU A]
+  refine S.dom_small.image_subset (fun a => ⟨A, inl a⟩) ?_ ?_
+  · intros a b h
+    cases h
+    rfl
+  · rintro _ ⟨a, h, rfl⟩
+    exact h
 
 theorem convertLitter_dom_small (A : ExtendedIndex β) :
     Small (PFun.Dom (convertLitter T A)) := by
-  sorry
+  change Small {L | (convertLitter T A L).Dom}
+  simp only [convertLitter_dom hσS hσT hr hS hU A]
+  refine S.dom_small.image_subset (fun L => ⟨A, inr L.toNearLitter⟩) ?_ ?_
+  · intros L₁ L₂ h
+    cases h
+    rfl
+  · rintro _ ⟨L, h, rfl⟩
+    exact h
 
 noncomputable def convert : StructAction β :=
   fun A => {
     atomMap := convertAtom T A
     litterMap := convertLitter T A
-    atomMap_dom_small := convertAtom_dom_small A
-    litterMap_dom_small := convertLitter_dom_small A
+    atomMap_dom_small := convertAtom_dom_small hσS hσT hr hS hU A
+    litterMap_dom_small := convertLitter_dom_small hσS hσT hr hS hU A
   }
 
 end Spec
