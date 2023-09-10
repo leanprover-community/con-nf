@@ -137,7 +137,7 @@ theorem convertAtom_dom (A : ExtendedIndex β) (a : Atom) :
     dsimp only at h₂
     obtain ⟨A, b | N⟩ := c <;> cases h₂.2
     · exact ⟨b, h₁, h₂.1.symm⟩
-    · obtain ⟨L, hL⟩ := cpos_nearLitter A N h₁
+    · obtain ⟨L, hL⟩ := cpos_nearLitter hσS hσT hr hS hU A N h₁
       rw [hL] at h₂
       simp only at h₂
 
