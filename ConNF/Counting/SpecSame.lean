@@ -193,6 +193,14 @@ theorem convertLitter_mem {A : ExtendedIndex β} {L : Litter} (h : (convertLitte
     ⟨A, inr ((convertLitter T A L).get h)⟩ ∈ T :=
   h.choose_spec.1
 
+theorem deconvertAtom_mem {A : ExtendedIndex β} {a : Atom} (h : (deconvertAtom T A a).Dom) :
+    ⟨A, inl a⟩ ∈ T :=
+  h.choose_spec.1
+
+theorem deconvertLitter_mem {A : ExtendedIndex β} {N : NearLitter}
+    (h : (deconvertLitter T A N).Dom) : ⟨A, inr N⟩ ∈ T :=
+  h.choose_spec.1
+
 theorem convertAtom_get {A : ExtendedIndex β} {a : Atom} (h : (convertAtom T A a).Dom) :
     (T.cpos ⟨A, inl ((convertAtom T A a).get h)⟩).get (convertAtom_mem h) = inl a :=
   h.choose_spec.2
@@ -200,6 +208,93 @@ theorem convertAtom_get {A : ExtendedIndex β} {a : Atom} (h : (convertAtom T A 
 theorem convertLitter_get {A : ExtendedIndex β} {L : Litter} (h : (convertLitter T A L).Dom) :
     (T.cpos ⟨A, inr ((convertLitter T A L).get h)⟩).get (convertLitter_mem h) = inr L.toNearLitter :=
   h.choose_spec.2
+
+theorem get_deconvertAtom {A : ExtendedIndex β} {a : Atom} (h : (deconvertAtom T A a).Dom) :
+    (T.cpos ⟨A, inl a⟩).get (deconvertAtom_mem h) = inl ((deconvertAtom T A a).get h) :=
+  h.choose_spec.2
+
+theorem get_deconvertLitter {A : ExtendedIndex β} {N : NearLitter}
+    (h : (deconvertLitter T A N).Dom) :
+    (T.cpos ⟨A, inr N⟩).get (deconvertLitter_mem h) =
+      inr ((deconvertLitter T A N).get h).toNearLitter :=
+  h.choose_spec.2
+
+theorem convertLitter_isLitter {A : ExtendedIndex β} {L : Litter}
+    (h : (convertLitter T A L).Dom) :
+    ((convertLitter T A L).get h).IsLitter := by
+  have := hU.reduced_of_mem_equiv hr.equiv _ (convertLitter_mem h)
+  simp only [Reduced_iff, exists_false, inr.injEq, false_or] at this
+  obtain ⟨L, h⟩ := this
+  rw [h]
+  exact NearLitter.IsLitter.mk _
+
+theorem convertAtom_deconvertAtom_dom {A : ExtendedIndex β} {a : Atom}
+    (h : (convertAtom T A a).Dom) :
+    (deconvertAtom T A ((convertAtom T A a).get h)).Dom :=
+  ⟨a, h.choose_spec⟩
+
+theorem convertLitter_deconvertLitter_dom {A : ExtendedIndex β} {L : Litter}
+    (h : (convertLitter T A L).Dom) :
+    (deconvertLitter T A ((convertLitter T A L).get h)).Dom :=
+  ⟨L, h.choose_spec⟩
+
+theorem deconvertAtom_convertAtom_dom {A : ExtendedIndex β} {a : Atom}
+    (h : (deconvertAtom T A a).Dom) :
+    (convertAtom T A ((deconvertAtom T A a).get h)).Dom :=
+  ⟨a, h.choose_spec⟩
+
+theorem deconvertLitter_convertLitter_dom {A : ExtendedIndex β} {N : NearLitter}
+    (h : (deconvertLitter T A N).Dom) :
+    (convertLitter T A ((deconvertLitter T A N).get h)).Dom :=
+  ⟨N, h.choose_spec⟩
+
+theorem convertAtom_deconvertAtom {A : ExtendedIndex β} {a : Atom}
+    (h : (convertAtom T A a).Dom) :
+    (deconvertAtom T A ((convertAtom T A a).get h)).get (convertAtom_deconvertAtom_dom h) = a := by
+  have := get_deconvertAtom (convertAtom_deconvertAtom_dom h)
+  rw [convertAtom_get h, inl.injEq] at this
+  exact this.symm
+
+theorem convertLitter_deconvertLitter {A : ExtendedIndex β} {L : Litter}
+    (h : (convertLitter T A L).Dom) :
+    (deconvertLitter T A ((convertLitter T A L).get h)).get
+      (convertLitter_deconvertLitter_dom h) = L := by
+  have := get_deconvertLitter (convertLitter_deconvertLitter_dom h)
+  rw [convertLitter_get h, inr.injEq, Litter.toNearLitter_injective.eq_iff] at this
+  exact this.symm
+
+theorem deconvertAtom_convertAtom {A : ExtendedIndex β} {a : Atom}
+    (h : (deconvertAtom T A a).Dom) :
+    (convertAtom T A ((deconvertAtom T A a).get h)).get (deconvertAtom_convertAtom_dom h) = a := by
+  have := get_deconvertAtom h
+  rw [← convertAtom_get (deconvertAtom_convertAtom_dom h)] at this
+  have := T.injective _ _ _ _ (by rfl) this
+  simp only [SupportCondition.mk.injEq, inl.injEq, true_and] at this
+  exact this.symm
+
+theorem deconvertLitter_convertLitter {A : ExtendedIndex β} {N : NearLitter}
+    (h : (deconvertLitter T A N).Dom) :
+    (convertLitter T A ((deconvertLitter T A N).get h)).get
+      (deconvertLitter_convertLitter_dom h) = N := by
+  have := get_deconvertLitter h
+  rw [← convertLitter_get (deconvertLitter_convertLitter_dom h)] at this
+  have := T.injective _ _ _ _ (by rfl) this
+  simp only [SupportCondition.mk.injEq, inr.injEq, true_and] at this
+  exact this.symm
+
+theorem convertAtom_injective (A : ExtendedIndex β) (a b : Atom)
+    (ha : (convertAtom T A a).Dom) (hb : (convertAtom T A b).Dom)
+    (hab : (convertAtom T A a).get ha = (convertAtom T A b).get hb) :
+    a = b := by
+  rw [← convertAtom_deconvertAtom ha, ← convertAtom_deconvertAtom hb]
+  simp_rw [hab]
+
+theorem convertLitter_injective (A : ExtendedIndex β) (L₁ L₂ : Litter)
+    (h₁ : (convertLitter T A L₁).Dom) (h₂ : (convertLitter T A L₂).Dom)
+    (h : (convertLitter T A L₁).get h₁ = (convertLitter T A L₂).get h₂) :
+    L₁ = L₂ := by
+  rw [← convertLitter_deconvertLitter h₁, ← convertLitter_deconvertLitter h₂]
+  simp_rw [h]
 
 theorem convertAtom_dom_small (A : ExtendedIndex β) :
     Small (PFun.Dom (convertAtom T A)) := by
@@ -230,6 +325,47 @@ noncomputable def convert : StructAction β :=
     atomMap_dom_small := convertAtom_dom_small hσS hσT hr hS hU A
     litterMap_dom_small := convertLitter_dom_small hσS hσT hr hS hU A
   }
+
+theorem convert_atomMap {A : ExtendedIndex β} :
+    (convert hσS hσT hr hS hU A).atomMap = convertAtom T A :=
+  rfl
+
+theorem convert_litterMap {A : ExtendedIndex β} :
+    (convert hσS hσT hr hS hU A).litterMap = convertLitter T A :=
+  rfl
+
+theorem convert_lawful : StructAction.Lawful (convert hσS hσT hr hS hU) := by
+  intro A
+  constructor
+  · exact convertAtom_injective A
+  · intro L₁ L₂ h₁ h₂ h
+    refine convertLitter_injective A L₁ L₂ h₁ h₂ ?_
+    simp_rw [convert_litterMap] at h
+    rw [(convertLitter_isLitter hr hU h₁).eq_fst_toNearLitter,
+      (convertLitter_isLitter hr hU h₂).eq_fst_toNearLitter] at h ⊢
+    obtain ⟨a, ha₁, ha₂⟩ := h
+    refine congr_arg _ ?_
+    exact ha₁.symm.trans ha₂
+  · intro a ha L hL
+    simp_rw [convert_atomMap, convert_litterMap]
+    -- Use `hσS` and `hσT`.
+    sorry
+
+-- TODO: Use `hσS` and `hσT`.
+theorem convert_mapFlexible : StructAction.MapFlexible (convert hσS hσT hr hS hU) := sorry
+
+noncomputable def convertAllowable : Allowable β :=
+  (StructApprox.freedom_of_action β
+    (StructAction.rc (convert hσS hσT hr hS hU) (convert_lawful hσS hσT hr hS hU))
+    (StructAction.rc_free _ _ (convert_mapFlexible hσS hσT hr hS hU))).choose
+
+theorem convertAllowable_spec :
+    (StructAction.rc (convert hσS hσT hr hS hU)
+      (convert_lawful hσS hσT hr hS hU)).ExactlyApproximates
+    (Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU)) :=
+  (StructApprox.freedom_of_action β
+    (StructAction.rc (convert hσS hσT hr hS hU) (convert_lawful hσS hσT hr hS hU))
+    (StructAction.rc_free _ _ (convert_mapFlexible hσS hσT hr hS hU))).choose_spec
 
 end Spec
 
