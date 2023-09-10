@@ -34,17 +34,64 @@ variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α
 
 namespace Spec
 
+set_option pp.proofs.withType false
+
 /-- Because `σ` specifies a strong support `S` as well as `T`, `T` must assign its atoms
 at "atom times": their positions must be indexed by an atom. -/
 theorem cpos_atom (A : ExtendedIndex β) (a : Atom) (ha : ⟨A, inl a⟩ ∈ T) :
-    ∃ b, (T.cpos ⟨A, inl a⟩).get ha = inl b :=
-  sorry
+    ∃ b, (T.cpos ⟨A, inl a⟩).get ha = inl b := by
+  obtain ⟨⟨B, x⟩, hc₁, hc₂⟩ := hσS.exists_mem_of_dom _ (hσT.cpos_dom _ ha)
+  rw [Prod.ext_iff] at hc₂
+  cases hc₂.2
+  simp only [hS.cpos_get_eq, and_true] at hc₂
+  rw [hc₂]
+  obtain (b | N) := x
+  · exact ⟨b, rfl⟩
+  exfalso
+  have := hS.reduced_of_mem _ hc₁
+  simp only [Reduced_iff, exists_false, inr.injEq, false_or] at this
+  obtain ⟨L, rfl⟩ := this
+  have hcT := hσT.atom_spec A a a.1.toNearLitter ha (hU.fst_toNearLitter_mem_equiv hr.equiv ha) rfl
+  obtain (hL | ⟨⟨hL⟩⟩ | ⟨⟨hL⟩⟩) := flexible_cases' β A L
+  · have hcS := hσS.flexible_spec A L.toNearLitter hc₁ hL
+    simp_rw [hS.cpos_get_eq, ← hc₂, hcT] at hcS
+  · have hcS := hσS.inflexibleBot_spec A L.toNearLitter hc₁ hL ?_
+    · simp_rw [hS.cpos_get_eq, ← hc₂, hcT] at hcS
+    · refine hS.transConstrains_mem _ _ (Reduced.mkAtom hL.a) (Relation.TransGen.single ?_) hc₁
+      simp_rw [hL.hL, hL.path.hA]
+      exact Constrains.fuzz_bot hL.path.hε _ hL.a
+  · obtain ⟨_, _, _, hcS⟩ := hσS.inflexibleCoe_spec A L.toNearLitter hc₁ hL
+    simp_rw [hS.cpos_get_eq, ← hc₂, hcT] at hcS
 
 /-- Because `σ` specifies a strong support `S` as well as `T`, `T` must assign its near-litters
 at "litter times": their positions must be indexed by a litter. -/
 theorem cpos_nearLitter (A : ExtendedIndex β) (N : NearLitter) (hN : ⟨A, inr N⟩ ∈ T) :
-    ∃ L : Litter, (T.cpos ⟨A, inr N⟩).get hN = inr L.toNearLitter :=
-  sorry
+    ∃ L : Litter, (T.cpos ⟨A, inr N⟩).get hN = inr L.toNearLitter := by
+  obtain ⟨⟨B, x⟩, hc₁, hc₂⟩ := hσS.exists_mem_of_dom _ (hσT.cpos_dom _ hN)
+  rw [Prod.ext_iff] at hc₂
+  cases hc₂.2
+  simp only [hS.cpos_get_eq, and_true] at hc₂
+  rw [hc₂]
+  obtain (b | N') := x
+  swap
+  · obtain ⟨L'⟩ := hS.isLitter_of_mem hc₁
+    exact ⟨L', rfl⟩
+  exfalso
+  have hcS := hσS.atom_spec A b b.1.toNearLitter hc₁ (hS.fst_toNearLitter_mem hc₁) rfl
+  have := hU.reduced_of_mem_equiv hr.equiv _ hN
+  simp only [Reduced_iff, exists_false, inr.injEq, false_or] at this
+  obtain ⟨L, rfl⟩ := this
+  obtain (hL | ⟨⟨hL⟩⟩ | ⟨⟨hL⟩⟩) := flexible_cases' β A L
+  · have hcT := hσT.flexible_spec A L.toNearLitter hN hL
+    simp_rw [hS.cpos_get_eq, ← hc₂, hcT] at hcS
+  · have hcT := hσT.inflexibleBot_spec A L.toNearLitter hN hL ?_
+    · simp_rw [hS.cpos_get_eq, ← hc₂, hcT] at hcS
+    · refine hU.transConstrains_mem_equiv hr.equiv _ _
+        (Reduced.mkAtom hL.a) (Relation.TransGen.single ?_) hN
+      simp_rw [hL.hL, hL.path.hA]
+      exact Constrains.fuzz_bot hL.path.hε _ hL.a
+  · obtain ⟨_, _, _, hcT⟩ := hσT.inflexibleCoe_spec A L.toNearLitter hN hL
+    simp_rw [hS.cpos_get_eq, ← hc₂, hcT] at hcS
 
 variable (T)
 

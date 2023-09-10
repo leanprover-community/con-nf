@@ -151,7 +151,7 @@ structure Strong (S : OrdSupport β) : Prop where
   transConstrains_mem (c d : SupportCondition β) : Reduced c.value → c <[α] d → d ∈ S → c ∈ S
   cpos_get_eq (c : SupportCondition β) (hc : c ∈ S) : (S.cpos c).get hc = c.value
 
-theorem Strong.cpos_eq {S : OrdSupport β} {c : SupportCondition β} (h : S.Strong) :
+theorem Strong.cpos_eq {S : OrdSupport β} (h : S.Strong) {c : SupportCondition β} :
     S.cpos c = ⟨c ∈ S, fun _ => c.value⟩ := by
   refine Part.ext' Iff.rfl ?_
   intros hc _
