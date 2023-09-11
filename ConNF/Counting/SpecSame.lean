@@ -296,6 +296,18 @@ theorem convertLitter_injective (A : ExtendedIndex β) (L₁ L₂ : Litter)
   rw [← convertLitter_deconvertLitter h₁, ← convertLitter_deconvertLitter h₂]
   simp_rw [h]
 
+theorem convertLitter_injective' (A : ExtendedIndex β) (L₁ L₂ : Litter)
+    (h₁ : (convertLitter T A L₁).Dom) (h₂ : (convertLitter T A L₂).Dom)
+    (h : Set.Nonempty (((convertLitter T A L₁).get h₁ : Set Atom) ∩
+      (convertLitter T A L₂).get h₂)) :
+    L₁ = L₂ := by
+  refine convertLitter_injective A L₁ L₂ h₁ h₂ ?_
+  rw [(convertLitter_isLitter hr hU h₁).eq_fst_toNearLitter,
+    (convertLitter_isLitter hr hU h₂).eq_fst_toNearLitter] at h ⊢
+  obtain ⟨a, ha₁, ha₂⟩ := h
+  refine congr_arg _ ?_
+  exact ha₁.symm.trans ha₂
+
 theorem convertAtom_dom_small (A : ExtendedIndex β) :
     Small (PFun.Dom (convertAtom T A)) := by
   change Small {a | (convertAtom T A a).Dom}
@@ -318,6 +330,7 @@ theorem convertLitter_dom_small (A : ExtendedIndex β) :
   · rintro _ ⟨L, h, rfl⟩
     exact h
 
+/-- Convert atoms or litters in `S` to the equivalent atoms or litters in `T`. -/
 noncomputable def convert : StructAction β :=
   fun A => {
     atomMap := convertAtom T A
@@ -334,25 +347,87 @@ theorem convert_litterMap {A : ExtendedIndex β} :
     (convert hσS hσT hr hS hU A).litterMap = convertLitter T A :=
   rfl
 
-theorem convert_lawful : StructAction.Lawful (convert hσS hσT hr hS hU) := by
-  intro A
-  constructor
-  · exact convertAtom_injective A
-  · intro L₁ L₂ h₁ h₂ h
-    refine convertLitter_injective A L₁ L₂ h₁ h₂ ?_
-    simp_rw [convert_litterMap] at h
-    rw [(convertLitter_isLitter hr hU h₁).eq_fst_toNearLitter,
-      (convertLitter_isLitter hr hU h₂).eq_fst_toNearLitter] at h ⊢
-    obtain ⟨a, ha₁, ha₂⟩ := h
-    refine congr_arg _ ?_
-    exact ha₁.symm.trans ha₂
-  · intro a ha L hL
-    simp_rw [convert_atomMap, convert_litterMap]
-    -- Use `hσS` and `hσT`.
-    sorry
+theorem _root_.ConNF.mem_toNearLitter {a : Atom} {L : Litter} :
+    a ∈ L.toNearLitter ↔ a.1 = L :=
+  Iff.rfl
 
--- TODO: Use `hσS` and `hσT`.
-theorem convert_mapFlexible : StructAction.MapFlexible (convert hσS hσT hr hS hU) := sorry
+theorem convertLitter_dom_of_convertAtom_dom {A : ExtendedIndex β} {a : Atom}
+    (ha : (convertAtom T A a).Dom) : (convertLitter T A a.fst).Dom := by
+  rw [convertLitter_dom hσS hσT hr hS hU]
+  exact hS.transConstrains_mem _ _
+    (Reduced.mkLitter _)
+    (Relation.TransGen.single (Constrains.atom _ _))
+    ((convertAtom_dom hσS hσT hr hS hU A a).mp ha)
+
+theorem get_fst_eq_fst_get {A : ExtendedIndex β} {a : Atom} (ha : (convertAtom T A a).Dom) :
+    (Part.get (convertAtom T A a) ha).fst =
+    (Part.get (convertLitter T A a.fst)
+      (convertLitter_dom_of_convertAtom_dom hσS hσT hr hS hU ha)).fst := by
+  have haS := hσS.atom_spec A a a.1.toNearLitter
+    ((convertAtom_dom hσS hσT hr hS hU A a).mp ha)
+    (hS.fst_toNearLitter_mem ((convertAtom_dom hσS hσT hr hS hU A a).mp ha)) rfl
+  have haT := hσT.atom_spec A ((convertAtom T A a).get ha)
+    ((convertAtom T A a).get ha).1.toNearLitter
+    (convertAtom_mem ha) (hU.fst_toNearLitter_mem_equiv hr.equiv (convertAtom_mem ha)) rfl
+  simp_rw [hS.cpos_get_eq] at haS
+  simp_rw [convertAtom_get ha] at haT
+  rw [haS] at haT
+  have := congr_arg Prod.fst (SpecCondition.atom_injective haT)
+  have ha' : (convertLitter T A a.1).Dom
+  · rw [convertLitter_dom hσS hσT hr hS hU]
+    exact hS.transConstrains_mem _ _
+      (Reduced.mkLitter _)
+      (Relation.TransGen.single (Constrains.atom _ _))
+      ((convertAtom_dom hσS hσT hr hS hU A a).mp ha)
+  rw [← convertLitter_get ha'] at this
+  have := T.injective _ _ _ _ (by rfl) this
+  simp only [SupportCondition.mk.injEq, inr.injEq, true_and] at this
+  exact (congr_arg Sigma.fst this).symm
+
+theorem get_mem_get (A : ExtendedIndex β) (a : Atom) (ha : (convertAtom T A a).Dom)
+    (L : Litter) (hL : (convertLitter T A L).Dom) :
+    a.1 = L ↔ (convertAtom T A a).get ha ∈ (convertLitter T A L).get hL := by
+  obtain hL' := (convertLitter_isLitter hr hU hL).eq_fst_toNearLitter
+  rw [hL', mem_toNearLitter, get_fst_eq_fst_get hσS hσT hr hS hU ha]
+  constructor
+  · rintro rfl
+    rfl
+  · intro h
+    exact convertLitter_injective' hr hU A _ _
+      (convertLitter_dom_of_convertAtom_dom hσS hσT hr hS hU ha) hL
+      (NearLitter.inter_nonempty_of_fst_eq_fst h)
+
+theorem convert_lawful : StructAction.Lawful (convert hσS hσT hr hS hU) :=
+  fun A => {
+    atomMap_injective := convertAtom_injective A
+    litterMap_injective := convertLitter_injective' hr hU A
+    atom_mem := get_mem_get hσS hσT hr hS hU A
+  }
+
+theorem convert_mapFlexible : StructAction.MapFlexible (convert hσS hσT hr hS hU) := by
+  intro A L hL₁ hL₂
+  have hL₃ := hL₁
+  rw [convert_litterMap, convertLitter_dom hσS hσT hr hS hU] at hL₃
+  have hLS := hσS.flexible_spec A L.toNearLitter hL₃ hL₂
+  simp_rw [hS.cpos_get_eq] at hLS
+  obtain (hL | ⟨⟨hL⟩⟩ | ⟨⟨hL⟩⟩) := flexible_cases' β A ((convertLitter T A L).get hL₁).1
+  · exact hL
+  · exfalso
+    have hLT := hσT.inflexibleBot_spec A _ (convertLitter_mem hL₁) hL ?_
+    simp_rw [convertLitter_get] at hLT
+    rw [hLS] at hLT
+    · cases hLT
+    · refine hU.transConstrains_mem_equiv hr.equiv _ _
+        (Reduced.mkAtom hL.a) (Relation.TransGen.single ?_) (convertLitter_mem hL₁)
+      have := Constrains.fuzz_bot hL.path.hε hL.path.B hL.a
+      rw [← hL.hL, ← hL.path.hA,
+        ← (convertLitter_isLitter hr hU hL₁).eq_fst_toNearLitter] at this
+      exact this
+  · exfalso
+    obtain ⟨χ, _, _, hLT⟩ := hσT.inflexibleCoe_spec A _ (convertLitter_mem hL₁) hL
+    simp_rw [convertLitter_get] at hLT
+    rw [hLS] at hLT
+    cases hLT
 
 noncomputable def convertAllowable : Allowable β :=
   (StructApprox.freedom_of_action β

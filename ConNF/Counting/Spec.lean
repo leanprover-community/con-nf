@@ -26,6 +26,11 @@ inductive SpecCondition (β : Iic α)
   | inflexibleBot (A : ExtendedIndex β) (h : InflexibleBotPath A)
       (i : Time β)
 
+theorem SpecCondition.atom_injective {A : ExtendedIndex β} {i j : Time β}
+    (h : SpecCondition.atom A i = SpecCondition.atom A j) : i = j := by
+  cases h
+  rfl
+
 structure Spec (β : Iic α) where
   /-- `cond i` describes the condition inserted at time `i` in the construction of an ordered
   support. -/
