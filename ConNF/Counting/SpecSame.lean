@@ -308,6 +308,90 @@ theorem convertLitter_injective' (A : ExtendedIndex β) (L₁ L₂ : Litter)
   refine congr_arg _ ?_
   exact ha₁.symm.trans ha₂
 
+theorem convertAtom_ran (A : ExtendedIndex β) :
+    PFun.ran (convertAtom T A) = PFun.Dom (deconvertAtom T A) := by
+  ext a : 1
+  constructor
+  · intro ⟨b, hb₁, hb₂⟩
+    subst hb₂
+    refine ⟨(deconvertAtom T A ((convertAtom T A b).get hb₁)).get ?_, ?_, ?_⟩
+    · exact convertAtom_deconvertAtom_dom hb₁
+    · exact convertAtom_mem hb₁
+    · rw [get_deconvertAtom]
+  · intro ha
+    refine ⟨(deconvertAtom T A a).get ha, ?_, ?_⟩
+    · exact deconvertAtom_convertAtom_dom ha
+    · rw [deconvertAtom_convertAtom]
+
+theorem convertLitter_ran (A : ExtendedIndex β) :
+    PFun.ran (convertLitter T A) = PFun.Dom (deconvertLitter T A) := by
+  ext N : 1
+  constructor
+  · intro ⟨L, h₁, h₂⟩
+    subst h₂
+    refine ⟨(deconvertLitter T A ((convertLitter T A L).get h₁)).get ?_, ?_, ?_⟩
+    · exact convertLitter_deconvertLitter_dom h₁
+    · exact convertLitter_mem h₁
+    · rw [get_deconvertLitter]
+  · intro hN
+    refine ⟨(deconvertLitter T A N).get hN, ?_, ?_⟩
+    · exact deconvertLitter_convertLitter_dom hN
+    · rw [deconvertLitter_convertLitter]
+
+theorem deconvertAtom_ran (A : ExtendedIndex β) :
+    PFun.ran (deconvertAtom T A) = PFun.Dom (convertAtom T A) := by
+  ext a : 1
+  constructor
+  · intro ⟨b, hb₁, hb₂⟩
+    subst hb₂
+    refine ⟨(convertAtom T A ((deconvertAtom T A b).get hb₁)).get ?_, ?_, ?_⟩
+    · exact deconvertAtom_convertAtom_dom hb₁
+    · rw [deconvertAtom_dom hσS hσT hr hS hU] at hb₁
+      rw [deconvertAtom_convertAtom]
+      exact hb₁
+    · rw [convertAtom_get]
+  · intro ha
+    refine ⟨(convertAtom T A a).get ha, ?_, ?_⟩
+    · exact convertAtom_deconvertAtom_dom ha
+    · rw [convertAtom_deconvertAtom]
+
+theorem deconvertLitter_ran (A : ExtendedIndex β) :
+    PFun.ran (deconvertLitter T A) = PFun.Dom (convertLitter T A) := by
+  ext L : 1
+  constructor
+  · intro ⟨N, h₁, h₂⟩
+    subst h₂
+    refine ⟨(convertLitter T A ((deconvertLitter T A N).get h₁)).get ?_, ?_, ?_⟩
+    · exact deconvertLitter_convertLitter_dom h₁
+    · rw [deconvertLitter_dom hσS hσT hr hS hU] at h₁
+      rw [deconvertLitter_convertLitter]
+      exact h₁
+    · rw [convertLitter_get]
+  · intro hL
+    refine ⟨(convertLitter T A L).get hL, ?_, ?_⟩
+    · exact convertLitter_deconvertLitter_dom hL
+    · rw [convertLitter_deconvertLitter]
+
+theorem mem_convertAtom_ran (A : ExtendedIndex β) (a : Atom) (ha : ⟨A, inl a⟩ ∈ T) :
+    a ∈ PFun.ran (convertAtom T A) := by
+  rw [convertAtom_ran, PFun.Dom, mem_setOf, deconvertAtom_dom hσS hσT hr hS hU]
+  exact ha
+
+theorem mem_convertLitter_ran (A : ExtendedIndex β) (N : NearLitter) (hN : ⟨A, inr N⟩ ∈ T) :
+    N ∈ PFun.ran (convertLitter T A) := by
+  rw [convertLitter_ran, PFun.Dom, mem_setOf, deconvertLitter_dom hσS hσT hr hS hU]
+  exact hN
+
+theorem mem_deconvertAtom_ran (A : ExtendedIndex β) (a : Atom) (ha : ⟨A, inl a⟩ ∈ S) :
+    a ∈ PFun.ran (deconvertAtom T A) := by
+  rw [deconvertAtom_ran hσS hσT hr hS hU, PFun.Dom, mem_setOf, convertAtom_dom hσS hσT hr hS hU]
+  exact ha
+
+theorem mem_deconvertLitter_ran (A : ExtendedIndex β) (L : Litter)
+    (hL : ⟨A, inr L.toNearLitter⟩ ∈ S) : L ∈ PFun.ran (deconvertLitter T A) := by
+  rw [deconvertLitter_ran hσS hσT hr hS hU, PFun.Dom, mem_setOf, convertLitter_dom hσS hσT hr hS hU]
+  exact hL
+
 theorem convertAtom_dom_small (A : ExtendedIndex β) :
     Small (PFun.Dom (convertAtom T A)) := by
   change Small {a | (convertAtom T A a).Dom}
@@ -441,6 +525,73 @@ theorem convertAllowable_spec :
   (StructApprox.freedom_of_action β
     (StructAction.rc (convert hσS hσT hr hS hU) (convert_lawful hσS hσT hr hS hU))
     (StructAction.rc_free _ _ (convert_mapFlexible hσS hσT hr hS hU))).choose_spec
+
+theorem convertAllowable_smul_mem (c : SupportCondition β)
+    (ih : ∀ (d : SupportCondition β), d <[α] c →
+      (d ∈ S ↔ convertAllowable hσS hσT hr hS hU • d ∈ T) ∧
+      ∀ (hdS : d ∈ S) (hdT : convertAllowable hσS hσT hr hS hU • d ∈ T),
+        (S.cpos d).get hdS = (T.cpos (convertAllowable hσS hσT hr hS hU • d)).get hdT) :
+    c ∈ S ↔ convertAllowable hσS hσT hr hS hU • c ∈ T := by
+  obtain ⟨A, a | N⟩ := c
+  · constructor
+    · intro haS
+      have ha : (convertAtom T A a).Dom
+      · rw [convertAtom_dom hσS hσT hr hS hU]
+        exact haS
+      rw [Allowable.smul_supportCondition]
+      dsimp only [smul_inl]
+      rw [← (convertAllowable_spec hσS hσT hr hS hU A).map_atom a
+          (Or.inl (Or.inl (Or.inl (Or.inl ha)))),
+        StructAction.rc_smul_atom_eq (by exact ha)]
+      simp_rw [convert_atomMap hσS hσT hr hS hU]
+      exact convertAtom_mem ha
+    · intro haT
+      obtain ⟨b, hb₁, hb₂⟩ := mem_convertAtom_ran hσS hσT hr hS hU A _ haT
+      simp only at hb₂
+      have := (convertAllowable_spec hσS hσT hr hS hU A).map_atom b
+        (Or.inl (Or.inl (Or.inl (Or.inl hb₁))))
+      rw [StructAction.rc_smul_atom_eq] at this
+      have := hb₂.symm.trans this
+      rw [smul_left_cancel_iff] at this
+      rw [this]
+      rw [convertAtom_dom hσS hσT hr hS hU] at hb₁
+      exact hb₁
+  · sorry
+
+theorem convertAllowable_smul_eq (c : SupportCondition β)
+    (hcS : c ∈ S) (hcT : convertAllowable hσS hσT hr hS hU • c ∈ T)
+    (ih : ∀ (d : SupportCondition β), d <[α] c →
+      (d ∈ S ↔ convertAllowable hσS hσT hr hS hU • d ∈ T) ∧
+      ∀ (hdS : d ∈ S) (hdT : convertAllowable hσS hσT hr hS hU • d ∈ T),
+        (S.cpos d).get hdS = (T.cpos (convertAllowable hσS hσT hr hS hU • d)).get hdT) :
+    (S.cpos c).get hcS = (T.cpos (convertAllowable hσS hσT hr hS hU • c)).get hcT := sorry
+
+theorem convertAllowable_smul' (c : SupportCondition β) :
+    (c ∈ S ↔ convertAllowable hσS hσT hr hS hU • c ∈ T) ∧
+    (∀ hcS : c ∈ S, ∀ hcT : convertAllowable hσS hσT hr hS hU • c ∈ T,
+      (S.cpos c).get hcS = (T.cpos ((convertAllowable hσS hσT hr hS hU) • c)).get hcT) := by
+  refine (transConstrains_wf α β).induction
+    (C := fun c => (c ∈ S ↔ convertAllowable hσS hσT hr hS hU • c ∈ T) ∧
+      (∀ hcS : c ∈ S, ∀ hcT : convertAllowable hσS hσT hr hS hU • c ∈ T,
+        (S.cpos c).get hcS = (T.cpos ((convertAllowable hσS hσT hr hS hU) • c)).get hcT))
+    c ?_
+  clear c
+  intro c ih
+  constructor
+  · exact convertAllowable_smul_mem hσS hσT hr hS hU c ih
+  · intro hcS hcT
+    exact convertAllowable_smul_eq hσS hσT hr hS hU c hcS hcT ih
+
+theorem convertAllowable_smul : convertAllowable hσS hσT hr hS hU • S = T := by
+  refine OrdSupport.ext ?_ ?_
+  · intro c
+    have := (convertAllowable_smul' hσS hσT hr hS hU ((convertAllowable hσS hσT hr hS hU)⁻¹ • c)).1
+    rw [smul_inv_smul] at this
+    exact this
+  · intro c
+    have := (convertAllowable_smul' hσS hσT hr hS hU ((convertAllowable hσS hσT hr hS hU)⁻¹ • c)).2
+    rw [smul_inv_smul] at this
+    exact this
 
 end Spec
 
