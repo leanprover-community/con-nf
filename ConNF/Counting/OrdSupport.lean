@@ -157,6 +157,18 @@ theorem Strong.cpos_eq {S : OrdSupport β} (h : S.Strong) {c : SupportCondition 
   intros hc _
   exact h.cpos_get_eq c hc
 
+theorem Strong.fst_toNearLitter_mem {S : OrdSupport β} (hS : S.Strong)
+    {A : ExtendedIndex β} {a : Atom} (h : ⟨A, inl a⟩ ∈ S) :
+    ⟨A, inr a.1.toNearLitter⟩ ∈ S :=
+  hS.transConstrains_mem _ _
+    (Reduced.mkLitter a.1) (Relation.TransGen.single (Constrains.atom A a)) h
+
+theorem Strong.isLitter_of_mem {S : OrdSupport β} (hS : S.Strong)
+    {A : ExtendedIndex β} {N : NearLitter} (h : ⟨A, inr N⟩ ∈ S) :
+    N.IsLitter := by
+  cases hS.reduced_of_mem _ h
+  exact NearLitter.IsLitter.mk _
+
 end OrdSupport
 
 end ConNF

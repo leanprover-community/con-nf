@@ -73,22 +73,10 @@ theorem Strong.transConstrains_mem_equiv {S T : OrdSupport β} (hS : S.Strong) (
     (c d : SupportCondition β) (hc : Reduced c.value) (hcd : c <[α] d) (hd : d ∈ T) : c ∈ T :=
   hST.mem_right (hS.transConstrains_mem c d hc hcd (hST.mem_left hd))
 
-theorem Strong.fst_toNearLitter_mem {S : OrdSupport β} (hS : S.Strong)
-    {A : ExtendedIndex β} {a : Atom} (h : ⟨A, inl a⟩ ∈ S) :
-    ⟨A, inr a.1.toNearLitter⟩ ∈ S :=
-  hS.transConstrains_mem _ _
-    (Reduced.mkLitter a.1) (Relation.TransGen.single (Constrains.atom A a)) h
-
 theorem Strong.fst_toNearLitter_mem_equiv {S T : OrdSupport β} (hS : S.Strong) (hST : S ≈ T)
     {A : ExtendedIndex β} {a : Atom} (h : ⟨A, inl a⟩ ∈ T) :
     ⟨A, inr a.1.toNearLitter⟩ ∈ T :=
   hST.mem_right (hS.fst_toNearLitter_mem (hST.mem_left h))
-
-theorem Strong.isLitter_of_mem {S : OrdSupport β} (hS : S.Strong)
-    {A : ExtendedIndex β} {N : NearLitter} (h : ⟨A, inr N⟩ ∈ S) :
-    N.IsLitter := by
-  cases hS.reduced_of_mem _ h
-  exact NearLitter.IsLitter.mk _
 
 theorem Strong.isLitter_of_mem_equiv {S T : OrdSupport β} (hS : S.Strong) (hST : S ≈ T)
     {A : ExtendedIndex β} {N : NearLitter} (h : ⟨A, inr N⟩ ∈ T) :

@@ -31,6 +31,12 @@ theorem SpecCondition.atom_injective {A : ExtendedIndex β} {i j : Time β}
   cases h
   rfl
 
+theorem SpecCondition.inflexibleBot_injective {A : ExtendedIndex β} {h₁ h₂ : InflexibleBotPath A}
+    {i j : Time β} (h : SpecCondition.inflexibleBot A h₁ i = SpecCondition.inflexibleBot A h₂ j) :
+    h₁ = h₂ ∧ i = j := by
+  cases h
+  exact ⟨rfl, rfl⟩
+
 structure Spec (β : Iic α) where
   /-- `cond i` describes the condition inserted at time `i` in the construction of an ordered
   support. -/
@@ -57,7 +63,8 @@ structure Specifies (σ : Spec β) (S : OrdSupport β) : Prop where
     (σ.cond ⟨(S.cpos _).get hN, A⟩).get (cpos_dom ⟨A, inr N⟩ hN) =
     SpecCondition.inflexibleCoe A h.path χ
   inflexibleBot_spec (A : ExtendedIndex β) (N : NearLitter) (hN : ⟨A, inr N⟩ ∈ S)
-    (h : InflexibleBot A N.1) (ha : ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩ ∈ S) :
+    (h : InflexibleBot A N.1) :
+    ∃ ha : ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩ ∈ S,
     (σ.cond ⟨(S.cpos _).get hN, A⟩).get (cpos_dom ⟨A, inr N⟩ hN) =
     SpecCondition.inflexibleBot A h.path ⟨(S.cpos _).get ha, h.path.B.cons (bot_lt_coe _)⟩
 
@@ -209,8 +216,13 @@ theorem spec_specifies {S : OrdSupport β} (hS : S.Strong) :
     · simp_rw [hS.cpos_get_eq]
       rw [spec_cond_get, specConditionAt_inflexibleCoe A N hN₁ hN₂]
   case inflexibleBot_spec =>
-    intro A N hN₁ hN₂ ha
-    simp_rw [hS.cpos_get_eq]
-    rw [spec_cond_get, specConditionAt_inflexibleBot A N hN₁ hN₂]
+    intro A N hN₁ hN₂
+    refine ⟨?_, ?_⟩
+    · refine hS.transConstrains_mem _ _ (Reduced.mkAtom _) ?_ hN₁
+      have := Constrains.fuzz_bot hN₂.path.hε hN₂.path.B hN₂.a
+      rw [← hN₂.hL, ← hN₂.path.hA, ← (hS.isLitter_of_mem hN₁).eq_fst_toNearLitter] at this
+      exact Relation.TransGen.single this
+    · simp_rw [hS.cpos_get_eq]
+      rw [spec_cond_get, specConditionAt_inflexibleBot A N hN₁ hN₂]
 
 end ConNF
