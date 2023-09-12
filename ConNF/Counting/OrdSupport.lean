@@ -120,6 +120,12 @@ theorem mem_before {S : OrdSupport β} {i : Atom ⊕ NearLitter} (c : SupportCon
     c ∈ S.before i ↔ ∃ h : c ∈ S, (S.cpos c).get h < i :=
   Iff.rfl
 
+@[simp]
+theorem before_get {S : OrdSupport β} {i : Atom ⊕ NearLitter} {c : SupportCondition β}
+    (hc : c ∈ S.before i) :
+    ((S.before i).cpos c).get hc = (S.cpos c).get hc.1 :=
+  rfl
+
 /-- Retains only those support conditions beginning with the path `A`. -/
 def comp (S : OrdSupport β) (γ : Iic α) (A : Quiver.Path (β : TypeIndex) γ) : OrdSupport γ where
   cpos c := S.cpos ⟨A.comp c.path, c.value⟩
@@ -142,6 +148,12 @@ theorem mem_comp {S : OrdSupport β} (γ : Iic α) (A : Quiver.Path (β : TypeIn
     (c : SupportCondition γ) :
     c ∈ S.comp γ A ↔ ⟨A.comp c.path, c.value⟩ ∈ S :=
   Iff.rfl
+
+@[simp]
+theorem comp_get {S : OrdSupport β} {γ : Iic α} {A : Quiver.Path (β : TypeIndex) γ}
+    {c : SupportCondition γ} (hc : c ∈ S.comp γ A) :
+    ((S.comp γ A).cpos c).get hc = (S.cpos ⟨A.comp c.path, c.value⟩).get hc :=
+  rfl
 
 /-- An ordered support is strong if every element of its domain is reduced, every reduced condition
 it constrains lies in its domain, and the position of each support condition is given by the global

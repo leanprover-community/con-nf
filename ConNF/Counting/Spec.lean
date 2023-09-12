@@ -37,6 +37,20 @@ theorem SpecCondition.inflexibleBot_injective {A : ExtendedIndex β} {h₁ h₂ 
   cases h
   exact ⟨rfl, rfl⟩
 
+theorem SpecCondition.inflexibleCoe_injective₁ {A : ExtendedIndex β} {h₁ h₂ : InflexibleCoePath A}
+    {χ₁ : CodingFunction h₁.δ} {χ₂ : CodingFunction h₂.δ}
+    (h : SpecCondition.inflexibleCoe A h₁ χ₁ = SpecCondition.inflexibleCoe A h₂ χ₂) :
+    h₁ = h₂ := by
+  cases h
+  exact rfl
+
+theorem SpecCondition.inflexibleCoe_injective₂ {A : ExtendedIndex β} {h : InflexibleCoePath A}
+    {χ₁ χ₂ : CodingFunction h.δ}
+    (h : SpecCondition.inflexibleCoe A h χ₁ = SpecCondition.inflexibleCoe A h χ₂) :
+    χ₁ = χ₂ := by
+  cases h
+  exact rfl
+
 structure Spec (β : Iic α) where
   /-- `cond i` describes the condition inserted at time `i` in the construction of an ordered
   support. -/

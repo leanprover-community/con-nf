@@ -52,7 +52,6 @@ theorem supports_decode {χ : CodingFunction β} (S : OrdSupport β) (hS : S ∈
     Supports (Allowable β) {c | c ∈ S} ((χ.decode S).get hS) :=
   χ.supports_decode' S hS
 
-@[simp]
 theorem decode_smul {χ : CodingFunction β} (S : OrdSupport β) (ρ : Allowable β) (h : ρ • S ∈ χ) :
     (χ.decode (ρ • S)).get h = ρ • (χ.decode S).get (mem_of_smul_mem h) :=
   χ.decode_smul' S ρ _ _
@@ -83,6 +82,12 @@ theorem smul_supports {S : OrdSupport β} {t : Tangle β}
   refine hρ' ?_
   simp only [OrdSupport.smul_mem, mem_setOf_eq, inv_smul_smul]
   exact hc
+
+theorem decode_congr {χ : CodingFunction β} {S₁ S₂ : OrdSupport β}
+    {h₁ : S₁ ∈ χ} {h₂ : S₂ ∈ χ} (h : S₁ = S₂) :
+    (χ.decode S₁).get h₁ = (χ.decode S₂).get h₂ := by
+  subst h
+  rfl
 
 /-- Produce a coding function for a given ordered support and tangle it supports. -/
 noncomputable def code (S : OrdSupport β) (t : Tangle β)
