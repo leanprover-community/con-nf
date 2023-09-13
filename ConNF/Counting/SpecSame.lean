@@ -605,37 +605,6 @@ theorem spec_inflexibleCoe (A : ExtendedIndex β) (L : Litter) (hL : InflexibleC
     · simp_rw [convertLitter_get] at hχ₂
       exact heq_of_eq hχ₂
 
-def ConvertLawfulAt : SupportCondition β → Prop
-| ⟨A, inl a⟩ => ∀ ha : (convertAtom T A a).Dom,
-    Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A • a =
-    (convertAtom T A a).get ha
-| ⟨A, inr N⟩ => N.IsLitter → ∀ hN : (convertLitter T A N.1).Dom,
-    Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A • N =
-    (convertLitter T A N.1).get hN
-
-@[simp]
-theorem convertLawfulAt_atom (A : ExtendedIndex β) (a : Atom) :
-    ConvertLawfulAt hσS hσT hr hS hU ⟨A, inl a⟩ ↔
-    ∀ ha : (convertAtom T A a).Dom,
-      Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A • a =
-      (convertAtom T A a).get ha :=
-  Iff.rfl
-
-@[simp]
-theorem convertLawfulAt_nearLitter (A : ExtendedIndex β) (N : NearLitter) :
-    ConvertLawfulAt hσS hσT hr hS hU ⟨A, inr N⟩ ↔
-    N.IsLitter → ∀ hN : (convertLitter T A N.1).Dom,
-      Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A • N =
-      (convertLitter T A N.1).get hN :=
-  Iff.rfl
-
-theorem convertLawfulAt_atom_extends (A : ExtendedIndex β) (a : Atom)
-    (ih : ∀ c : SupportCondition β, c.value < inl a → ConvertLawfulAt hσS hσT hr hS hU c)
-    (ha : (convertAtom T A a).Dom) :
-    Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A • a =
-    (convertAtom T A a).get ha := by
-  sorry
-
 theorem convert_inflexibleBot (A : ExtendedIndex β) (L : Litter) (hL : InflexibleBot A L)
     (hLd : (convertLitter T ((hL.path.B.cons (coe_lt hL.path.hε)).cons (bot_lt_coe _))
       (fuzz (show ((⊥ : IioBot α) : TypeIndex) ≠ (hL.path.ε : Λ) from bot_ne_coe) hL.a)).Dom)
@@ -661,12 +630,189 @@ theorem convert_inflexibleBot (A : ExtendedIndex β) (L : Litter) (hL : Inflexib
   simp_rw [P.hA, hL] at this
   rw [this, convertAtom_eq_of_eq_cpos had h₂']
 
+/--
+`convertAllowable` is lawful inside a set `s` if the set of support conditions assigned at times in
+`s` lie in `S` if and only if they are mapped inside `T`, and such support conditions have images
+given by `convertAtom` and `convertLitter`.
+-/
+structure LawfulIn (s : Set (Atom ⊕ NearLitter)) : Prop where
+  /--
+  All support conditions in `S` that are contained in `s` are mapped inside `T`.
+  Note that `S` is strong so `c.value ∈ s` means `(S.cpos c).get _ ∈ s`.
+  -/
+  smul_mem : ∀ c : SupportCondition β, c ∈ S →
+    c.value ∈ s → convertAllowable hσS hσT hr hS hU • c ∈ T
+  /--
+  All support conditions that were mapped inside `T`, and were defined at a time in `s`,
+  came from `S`.
+  -/
+  of_smul_mem : ∀ c : SupportCondition β, ∀ hc : convertAllowable hσS hσT hr hS hU • c ∈ T,
+    (T.cpos _).get hc ∈ s → c ∈ S
+  /--
+  The image of an atom in `s` under `convertAllowable` is given by `convertAtom`.
+  -/
+  smul_atom_eq : ∀ A : ExtendedIndex β, ∀ a : Atom,
+    ∀ hc : (convertAtom T A a).Dom, inl a ∈ s →
+    Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A • a =
+    (convertAtom T A a).get hc
+  /--
+  The image of a litter in `s` under `convertAllowable` is given by `convertLitter`.
+  -/
+  smul_litter_eq : ∀ A : ExtendedIndex β, ∀ L : Litter,
+    ∀ hc : (convertLitter T A L).Dom, inr L.toNearLitter ∈ s →
+    Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A • L.toNearLitter =
+    (convertLitter T A L).get hc
+
+abbrev LawfulBefore (i : Atom ⊕ NearLitter) : Prop :=
+  LawfulIn hσS hσT hr hS hU {j | j < i}
+
+theorem lawfulIn_iff (s : Set (Atom ⊕ NearLitter)) :
+    LawfulIn hσS hσT hr hS hU s ↔ ∀ i ∈ s, LawfulIn hσS hσT hr hS hU {i} := by
+  constructor
+  · intro h i hi
+    constructor
+    case smul_mem =>
+      rintro c hcS rfl
+      exact h.smul_mem c hcS hi
+    case of_smul_mem =>
+      rintro c hcT rfl
+      exact h.of_smul_mem c hcT hi
+    case smul_atom_eq =>
+      rintro A a hc rfl
+      exact h.smul_atom_eq A a hc hi
+    case smul_litter_eq =>
+      rintro A L hc rfl
+      exact h.smul_litter_eq A L hc hi
+  · intro h
+    constructor
+    case smul_mem =>
+      rintro c hcS hcd
+      exact (h c.value hcd).smul_mem c hcS rfl
+    case of_smul_mem =>
+      rintro c hcT hcd
+      exact (h _ hcd).of_smul_mem c hcT rfl
+    case smul_atom_eq =>
+      intro A a hc hcd
+      exact (h (inl a) hcd).smul_atom_eq A a hc rfl
+    case smul_litter_eq =>
+      rintro A L hc hcd
+      exact (h (inr L.toNearLitter) hcd).smul_litter_eq A L hc rfl
+
+theorem lawfulBefore_induction
+    (h : ∀ i, LawfulBefore hσS hσT hr hS hU i → LawfulIn hσS hσT hr hS hU {i}) :
+    LawfulIn hσS hσT hr hS hU univ := by
+  rw [lawfulIn_iff]
+  simp only [mem_univ, forall_true_left]
+  intro i
+  refine (inferInstanceAs (IsWellFounded (Atom ⊕ NearLitter) (· < ·))).wf.induction
+    (C := fun i => LawfulIn hσS hσT hr hS hU {i}) i ?_
+  intro i ih
+  refine h i ?_
+  rw [LawfulBefore, lawfulIn_iff]
+  exact ih
+
+theorem lawfulIn_step (i : Atom ⊕ NearLitter) (h : LawfulBefore hσS hσT hr hS hU i) :
+    LawfulIn hσS hσT hr hS hU {i} :=
+  sorry
+
+theorem lawfulIn_all : LawfulIn hσS hσT hr hS hU univ :=
+  lawfulBefore_induction hσS hσT hr hS hU (lawfulIn_step hσS hσT hr hS hU)
+
+theorem convertAllowable_smul : convertAllowable hσS hσT hr hS hU • S = T := by
+  refine OrdSupport.ext ?_ ?_
+  · intro c
+    constructor
+    · intro hc
+      have := (lawfulIn_all hσS hσT hr hS hU).smul_mem
+        ((convertAllowable hσS hσT hr hS hU)⁻¹ • c) hc (mem_univ _)
+      rw [smul_inv_smul] at this
+      exact this
+    · intro hc
+      refine (lawfulIn_all hσS hσT hr hS hU).of_smul_mem
+        ((convertAllowable hσS hσT hr hS hU)⁻¹ • c) ?_ (mem_univ _)
+      rw [smul_inv_smul]
+      exact hc
+  · intro c hcS hcT
+    obtain ⟨A, a | N⟩ := c
+    · simp only [OrdSupport.smul_cpos, Allowable.smul_supportCondition, map_inv, Tree.inv_apply,
+        smul_inl]
+      have hd : (convertAtom T A ((Allowable.toStructPerm
+        (convertAllowable hσS hσT hr hS hU) A)⁻¹ • a)).Dom
+      · change _ ∈ S at hcS
+        rw [convertAtom_dom hσS hσT hr hS hU]
+        simp only [Allowable.smul_supportCondition, map_inv, Tree.inv_apply, smul_inl] at hcS
+        exact hcS
+      have := (lawfulIn_all hσS hσT hr hS hU).smul_atom_eq A _ hd (mem_univ _)
+      rw [smul_inv_smul] at this
+      rw [hS.cpos_get_eq]
+      have goal := convertAtom_get hd
+      simp_rw [← this] at goal
+      exact goal.symm
+    · obtain ⟨L, rfl⟩ := (hU.isLitter_of_mem_equiv hr.equiv hcT).exists_litter_eq
+      have hL := hS.isLitter_of_mem hcS
+      simp only [map_inv, Tree.inv_apply] at hL
+      simp only [OrdSupport.smul_cpos, Allowable.smul_supportCondition, map_inv, Tree.inv_apply,
+        smul_inr]
+      have hd : (convertLitter T A ((Allowable.toStructPerm
+        (convertAllowable hσS hσT hr hS hU) A)⁻¹ • L)).Dom
+      · change _ ∈ S at hcS
+        rw [convertLitter_dom hσS hσT hr hS hU]
+        simp only [Allowable.smul_supportCondition, map_inv, Tree.inv_apply, smul_inr] at hcS
+        rw [(hS.isLitter_of_mem hcS).eq_fst_toNearLitter] at hcS
+        exact hcS
+      have := (lawfulIn_all hσS hσT hr hS hU).smul_litter_eq A _ hd (mem_univ _)
+      rw [hS.cpos_get_eq, hL.eq_fst_toNearLitter]
+      simp only [NearLitterPerm.smul_nearLitter_fst, Litter.toNearLitter_fst]
+      rw [← convertLitter_get hd]
+      simp_rw [← this]
+      have hL' : (Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A •
+        ((Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A)⁻¹ •
+          L).toNearLitter).IsLitter
+      · rw [this]
+        rw [(convertLitter_isLitter hr hU hd).eq_fst_toNearLitter]
+        exact NearLitter.IsLitter.mk _
+      congr
+      rw [hL'.eq_fst_toNearLitter]
+      simp only [NearLitterPerm.smul_nearLitter_fst, Litter.toNearLitter_fst, smul_inv_smul]
+
+/-
+
+theorem mem_before_smul_iff_mem_before (A : ExtendedIndex β) (L : Litter) (P : InflexibleCoePath A)
+    (ih : LawfulBefore hσS hσT hr hS hU (inr L.toNearLitter))
+    (c : SupportCondition P.δ) :
+    c ∈ (S.before (inr L.toNearLitter)).comp P.δ (P.B.cons (coe_lt P.hδ)) ↔
+    Tree.comp (P.B.cons (coe_lt P.hδ))
+        (Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU)) • c ∈
+      ((T.before (inr L.toNearLitter)).comp P.δ (P.B.cons (coe_lt P.hδ))) := by
+  constructor
+  · rintro ⟨h₁, h₂⟩
+    rw [hS.cpos_get_eq] at h₂
+    refine ⟨ih' _ h₁ h₂, ?_⟩
+    change (T.cpos (convertAllowable hσS hσT hr hS hU •
+      ⟨(P.B.cons (coe_lt P.hδ)).comp c.path, c.value⟩)).get _ < _
+    rw [(ih _ h₂).cpos_get h₁]
+    exact h₂
+  · rintro ⟨h₁, h₂⟩
+    change (convertAllowable hσS hσT hr hS hU •
+      ⟨(P.B.cons (coe_lt P.hδ)).comp c.path, c.value⟩) ∈ T at h₁
+    change (T.cpos (convertAllowable hσS hσT hr hS hU •
+      ⟨(P.B.cons (coe_lt P.hδ)).comp c.path, c.value⟩)).get _ < _ at h₂
+    refine ⟨ih'' _ h₁ h₂, ?_⟩
+    rw [(ih''' _ h₁ h₂).cpos_get (ih'' _ h₁ h₂)] at h₂
+    rw [hS.cpos_get_eq]
+    exact h₂
+
+#exit
+
 theorem before_smul_eq_before (A : ExtendedIndex β) (L : Litter) (P : InflexibleCoePath A)
     (t : Tangle P.δ) (hL : L = fuzz (coe_ne_coe.mpr <| coe_ne' P.hδε) t)
     (hLd : (convertLitter T ((P.B.cons (coe_lt P.hε)).cons (bot_lt_coe _))
       (fuzz (coe_ne_coe.mpr <| coe_ne' P.hδε) t)).Dom)
     (ih : ∀ c : SupportCondition P.δ, c.value < inr L.toNearLitter →
-      ConvertLawfulAt hσS hσT hr hS hU ⟨(P.B.cons (coe_lt P.hδ)).comp c.path, c.value⟩) :
+      ConvertLawfulAt hσS hσT hr hS hU ⟨(P.B.cons (coe_lt P.hδ)).comp c.path, c.value⟩)
+    (ih' : ∀ c : SupportCondition P.δ, c.value < inr L.toNearLitter →
+      (⟨(P.B.cons (coe_lt P.hδ)).comp c.path, c.value⟩ ∈ S ↔
+      convertAllowable hσS hσT hr hS hU • ⟨(P.B.cons (coe_lt P.hδ)).comp c.path, c.value⟩ ∈ T)) :
     (S.before (inr (Litter.toNearLitter L))).comp P.δ (P.B.cons (coe_lt P.hδ)) =
     (show Allowable (P.δ : Iic α) from
       (Allowable.comp (show Path ((β : IicBot α) : TypeIndex) (P.δ : IicBot α) from
@@ -676,8 +822,11 @@ theorem before_smul_eq_before (A : ExtendedIndex β) (L : Litter) (P : Inflexibl
   dsimp only
   refine OrdSupport.ext ?_ ?_
   · intro c
-    simp only [OrdSupport.mem_comp, OrdSupport.mem_before, OrdSupport.smul_mem, inv_inv]
-    sorry
+    rw [mem_before_smul_iff_mem_before hσS hσT hr hS hU A L P t hL hLd ih ih' c,
+      OrdSupport.smul_mem, inv_inv, Allowable.smul_supportCondition,
+      Allowable.toStructPerm_comp (show Path ((β : IicBot α) : TypeIndex) (P.δ : IicBot α) from
+        P.B.cons (coe_lt P.hδ))]
+    rfl
   · intro c hcS hcT
     simp only [OrdSupport.smul_cpos, inv_inv]
     have ih := ih c ?_
@@ -720,7 +869,11 @@ theorem convert_inflexibleCoe (A : ExtendedIndex β) (L : Litter) (hL : Inflexib
     (hLd : (convertLitter T ((hL.path.B.cons (coe_lt hL.path.hε)).cons (bot_lt_coe _))
       (fuzz (coe_ne_coe.mpr <| coe_ne' hL.path.hδε) hL.t)).Dom)
     (ih : ∀ c : SupportCondition hL.path.δ, c.value < inr L.toNearLitter →
-      ConvertLawfulAt hσS hσT hr hS hU ⟨(hL.path.B.cons (coe_lt hL.path.hδ)).comp c.path, c.value⟩) :
+      ConvertLawfulAt hσS hσT hr hS hU ⟨(hL.path.B.cons (coe_lt hL.path.hδ)).comp c.path, c.value⟩)
+    (ih' : ∀ c : SupportCondition hL.path.δ, c.value < inr L.toNearLitter →
+      (⟨(hL.path.B.cons (coe_lt hL.path.hδ)).comp c.path, c.value⟩ ∈ S ↔
+      convertAllowable hσS hσT hr hS hU •
+        ⟨(hL.path.B.cons (coe_lt hL.path.hδ)).comp c.path, c.value⟩ ∈ T)) :
     fuzz (coe_ne_coe.mpr <| coe_ne' hL.path.hδε)
       (Allowable.comp
         (show Path ((β : IicBot α) : TypeIndex) (hL.path.δ : IicBot α) from
@@ -763,11 +916,13 @@ theorem convert_inflexibleCoe (A : ExtendedIndex β) (L : Litter) (hL : Inflexib
   simp only [map_inv, inv_inv, smul_left_cancel_iff]
   refine Eq.trans hχ₂.symm (CodingFunction.decode_congr ?_)
   simp_rw [hS.cpos_get_eq]
-  exact before_smul_eq_before hσS hσT hr hS hU A L P t hL hLd ih
+  exact before_smul_eq_before hσS hσT hr hS hU A L P t hL hLd ih ih'
 
 theorem convertLawfulAt_litter_extends' (A : ExtendedIndex β) (L : Litter)
     (ih : ∀ c : SupportCondition β, c.value < inr L.toNearLitter →
       ConvertLawfulAt hσS hσT hr hS hU c)
+    (ih' : ∀ c : SupportCondition β, c.value < inr L.toNearLitter →
+      (c ∈ S ↔ convertAllowable hσS hσT hr hS hU • c ∈ T))
     (hLd : (convertLitter T A L).Dom) :
     Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A • L =
     ((convertLitter T A L).get hLd).1 := by
@@ -798,31 +953,45 @@ theorem convertLawfulAt_litter_extends' (A : ExtendedIndex β) (L : Litter)
       simp only [Subtype.mk.injEq, coe_inj] at h
       exact coe_ne' hL.path.hδε h
     simp_rw [hL.hL, hL.path.hA] at hLd
-    refine convert_inflexibleCoe hσS hσT hr hS hU A L hL hLd ?_
-    intro c hc
-    exact ih _ hc
+    refine convert_inflexibleCoe hσS hσT hr hS hU A L hL hLd ?_ ?_
+    · intro c hc
+      exact ih _ hc
+    · intro c hc
+      exact ih' _ hc
 
 theorem convertLawfulAt_litter_extends (A : ExtendedIndex β) (L : Litter)
     (ih : ∀ c : SupportCondition β, c.value < inr L.toNearLitter →
       ConvertLawfulAt hσS hσT hr hS hU c)
+    (ih' : ∀ c : SupportCondition β, c.value < inr L.toNearLitter →
+      (c ∈ S ↔ convertAllowable hσS hσT hr hS hU • c ∈ T))
     (hLd : (convertLitter T A L).Dom) :
     Allowable.toStructPerm (convertAllowable hσS hσT hr hS hU) A • L.toNearLitter =
     (convertLitter T A L).get hLd :=
   StructAction.smul_toNearLitter_eq_of_precise _ StructAction.refine_precise
     (convertAllowable_spec hσS hσT hr hS hU) hLd
-    (convertLawfulAt_litter_extends' hσS hσT hr hS hU A L ih hLd)
+    (convertLawfulAt_litter_extends' hσS hσT hr hS hU A L ih ih' hLd)
 
-theorem convertLawfulAt_all (c : SupportCondition β) : ConvertLawfulAt hσS hσT hr hS hU c := by
+theorem convertLawfulAt_all (c : SupportCondition β) :
+    ConvertLawfulAt hσS hσT hr hS hU c ∧ (c ∈ S ↔ convertAllowable hσS hσT hr hS hU • c ∈ T) := by
   have : WellFounded (InvImage (· < ·) SupportCondition.value)
   · exact InvImage.wf _ IsWellFounded.wf
-  refine this.induction (C := ConvertLawfulAt hσS hσT hr hS hU) c ?_
+  refine this.induction
+    (C := fun c => ConvertLawfulAt hσS hσT hr hS hU c ∧
+      (c ∈ S ↔ convertAllowable hσS hσT hr hS hU • c ∈ T)) c ?_
   clear c
   intro c ih
   obtain ⟨A, a | N⟩ := c
-  · exact convertLawfulAt_atom_extends hσS hσT hr hS hU A a ih
-  · intro hL₁ hL₂
-    obtain ⟨L, rfl⟩ := hL₁.exists_litter_eq
-    exact convertLawfulAt_litter_extends hσS hσT hr hS hU A L ih hL₂
+  · constructor
+    · refine convertLawfulAt_atom_extends hσS hσT hr hS hU A a ?_
+      sorry
+    · sorry
+  · constructor
+    · intro hL₁ hL₂
+      obtain ⟨L, rfl⟩ := hL₁.exists_litter_eq
+      refine convertLawfulAt_litter_extends hσS hσT hr hS hU A L ?_ ?_ hL₂
+      · sorry
+      · sorry
+    · sorry
 
 theorem convertAllowable_smul : convertAllowable hσS hσT hr hS hU • S = T := by
   refine OrdSupport.ext ?_ ?_
@@ -846,7 +1015,7 @@ theorem convertAllowable_smul : convertAllowable hσS hσT hr hS hU • S = T :=
         rw [convertAtom_dom hσS hσT hr hS hU]
         simp only [Allowable.smul_supportCondition, map_inv, Tree.inv_apply, smul_inl] at hcS
         exact hcS
-      have := this hd
+      have := this.1 hd
       rw [smul_inv_smul] at this
       rw [hS.cpos_get_eq]
       have goal := convertAtom_get hd
@@ -861,7 +1030,7 @@ theorem convertAllowable_smul : convertAllowable hσS hσT hr hS hU • S = T :=
         simp only [Allowable.smul_supportCondition, map_inv, Tree.inv_apply, smul_inr] at hcS
         rw [(hS.isLitter_of_mem hcS).eq_fst_toNearLitter] at hcS
         exact hcS
-      have := this ?_ hd
+      have := this.1 ?_ hd
       · rw [smul_inv_smul] at this
         simp_rw [NearLitterPerm.smul_nearLitter_fst] at this
         have h' := (hS.isLitter_of_mem hcS).eq_fst_toNearLitter
@@ -871,6 +1040,8 @@ theorem convertAllowable_smul : convertAllowable hσS hσT hr hS hU • S = T :=
       · have := hS.isLitter_of_mem hcS
         simp only [map_inv, Tree.inv_apply] at this
         exact this
+
+-/
 
 end Spec
 
