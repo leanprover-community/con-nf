@@ -104,6 +104,11 @@ theorem rc_smul_litter_eq {φ : StructAction β} {hφ : φ.Lawful} {B : Extended
     φ.rc hφ B • L = (φ.refine hφ B).flexibleLitterLocalPerm (refine_lawful B) B L :=
   rfl
 
+theorem rc_symm_smul_litter_eq {φ : StructAction β} {hφ : φ.Lawful} {B : ExtendedIndex β}
+    (L : Litter) :
+    (φ.rc hφ B).symm • L = ((φ.refine hφ B).flexibleLitterLocalPerm (refine_lawful B) B).symm L :=
+  rfl
+
 theorem rc_free (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :
     (show StructApprox (β : Iic α) from φ.rc h₁).Free := by
   rintro B L' ((hL' | ⟨L', hL', rfl⟩) | hL')
