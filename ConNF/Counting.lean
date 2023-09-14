@@ -1,5 +1,4 @@
 import ConNF.Counting.OrdSupport
-import ConNF.Counting.Reorder
 import ConNF.Counting.OrdSupportEquiv
 import ConNF.Counting.CodingFunction
 import ConNF.Counting.CodingFunctionEquiv

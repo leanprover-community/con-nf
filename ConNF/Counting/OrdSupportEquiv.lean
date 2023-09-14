@@ -1,5 +1,4 @@
 import ConNF.Counting.OrdSupport
-import ConNF.Counting.Reorder
 
 /-!
 # Equivalence of ordered supports
@@ -87,43 +86,5 @@ end OrdSupport
 
 def OrdSupportClass (β : Iic α) : Type u :=
   Quotient (OrdSupport.setoid β)
-
--- TODO: API for `OrdSupportClass` once we know what's needed.
-
-namespace OrdSupport
-
-/--
-`r` is an equivalence of ordered supports `S` and `T`.
-
-Paths in the following diagram starting with `S` or `T` commute, where
-* the morphisms `S ↔ T` are the identity,
-* the maps `μ ↔ μ` are `toFun` and `invFun`,
-* the maps `S → μ` and `T → μ` are `cpos`.
-```
-μ ↔ μ
-↑   ↑
-S ↔ T
-```
--/
-structure IsEquiv (r : Tree Reorder β) (S T : OrdSupport β) : Prop where
-  equiv : S ≈ T
-  toFun_apply (c : SupportCondition β) (hS : c ∈ S) (hT : c ∈ T) :
-    r c.path ((S.cpos c).get hS) = (T.cpos c).get hT
-  invFun_apply (c : SupportCondition β) (hT : c ∈ T) (hS : c ∈ S) :
-    (r c.path).symm ((T.cpos c).get hT) = (S.cpos c).get hS
-
-theorem isEquiv_smul {r : Tree Reorder β} {S T : OrdSupport β}
-    (h : IsEquiv r S T) (ρ : Allowable β) :
-    IsEquiv r (ρ • S) (ρ • T) := by
-  constructor
-  case equiv => exact smul_equiv_smul h.equiv ρ
-  case toFun_apply =>
-    intros c hS hT
-    exact h.toFun_apply (ρ⁻¹ • c) hS hT
-  case invFun_apply =>
-    intros c hT hS
-    exact h.invFun_apply (ρ⁻¹ • c) hT hS
-
-end OrdSupport
 
 end ConNF
