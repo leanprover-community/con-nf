@@ -488,8 +488,6 @@ theorem ConNF.StructApprox.extracted_1
   · simp only [Tree.comp_apply, constrainedAction_atomMap]
     exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.fuzz_bot hε _ _) hc₂'⟩
 
-set_option pp.proofs.withType false
-
 theorem ConNF.StructApprox.extracted_2
     (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (s : Set (SupportCondition β)) (hs : Small s)

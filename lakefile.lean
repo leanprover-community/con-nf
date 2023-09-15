@@ -4,7 +4,8 @@ open Lake DSL
 package ConNF where
   moreServerArgs := #[
     "-DautoImplicit=false",
-    "-DrelaxedAutoImplicit=false"
+    "-DrelaxedAutoImplicit=false",
+    "-Dpp.proofs.withType=false"
   ]
 
 require mathlib from git

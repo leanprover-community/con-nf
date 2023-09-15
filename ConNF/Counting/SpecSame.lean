@@ -34,8 +34,6 @@ variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α
 
 namespace Spec
 
-set_option pp.proofs.withType false
-
 /-- Because `σ` specifies a strong support `S` as well as `T`, `T` must assign its atoms
 at "atom times": their positions must be indexed by an atom. -/
 theorem cpos_atom (A : ExtendedIndex β) (a : Atom) (ha : ⟨A, inl a⟩ ∈ T) :
