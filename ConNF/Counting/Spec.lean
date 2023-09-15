@@ -18,6 +18,7 @@ variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α
 def Time (β : Iic α) : Type u :=
   (Atom ⊕ NearLitter) ×ₗ ExtendedIndex β
 
+-- TODO: Make `Inflexible*Path` have better names.
 inductive SpecCondition (β : Iic α)
   | atom (A : ExtendedIndex β) (i : Time β)
   | flexible (A : ExtendedIndex β)
@@ -51,6 +52,7 @@ theorem SpecCondition.inflexibleCoe_injective₂ {A : ExtendedIndex β} {h : Inf
   cases h
   exact rfl
 
+@[ext]
 structure Spec (β : Iic α) where
   /-- `cond i` describes the condition inserted at time `i` in the construction of an ordered
   support. -/
@@ -63,6 +65,8 @@ structure Specifies (σ : Spec β) (S : OrdSupport β) : Prop where
   cpos_dom (c : SupportCondition β) (hc : c ∈ S) : (σ.cond ⟨(S.cpos c).get hc, c.path⟩).Dom
   exists_mem_of_dom (i : Time β) : (σ.cond i).Dom →
     ∃ c, ∃ (hc : c ∈ S), i = ⟨(S.cpos c).get hc, c.path⟩
+  atom_dom (A : ExtendedIndex β) (a : Atom) (ha : ⟨A, inl a⟩ ∈ S) :
+    ∃ N : NearLitter, a ∈ N ∧ ⟨A, inr N⟩ ∈ S
   atom_spec (A : ExtendedIndex β) (a : Atom) (N : NearLitter)
     (ha : ⟨A, inl a⟩ ∈ S) (hN : ⟨A, inr N⟩ ∈ S) : a ∈ N →
     (σ.cond ⟨(S.cpos _).get ha, A⟩).get (cpos_dom ⟨A, inl a⟩ ha) =
@@ -89,6 +93,32 @@ theorem Specifies.dom_iff {σ : Spec β} {S : OrdSupport β} (h : Specifies σ S
   · obtain ⟨value, path⟩ := i
     rintro ⟨c, hc₁, rfl, rfl⟩
     exact h.cpos_dom c hc₁
+
+theorem specifies_subsingleton (S : OrdSupport β) :
+    {σ | Specifies σ S}.Subsingleton := by
+  intros σ₁ h₁ σ₂ h₂
+  refine Spec.ext _ _ (PFun.ext' ?_ ?_)
+  · intro i
+    change (σ₁.cond i).Dom ↔ (σ₂.cond i).Dom
+    rw [Specifies.dom_iff h₁, Specifies.dom_iff h₂]
+  · intro i hi₁ hi₂
+    obtain ⟨c, hc, rfl⟩ := h₁.exists_mem_of_dom i hi₁
+    rw [PFun.fn_apply, PFun.fn_apply]
+    obtain ⟨A, a | N⟩ := c
+    · obtain ⟨N, hN₁, hN₂⟩ := h₁.atom_dom A a hc
+      rw [h₁.atom_spec A a N hc hN₂ hN₁, h₂.atom_spec A a N hc hN₂ hN₁]
+    obtain (hL | ⟨⟨hL⟩⟩ | ⟨⟨hL⟩⟩) := flexible_cases' β A N.1
+    · rw [h₁.flexible_spec A N hc hL, h₂.flexible_spec A N hc hL]
+    · obtain ⟨ha₁, ha₁'⟩ := h₁.inflexibleBot_spec A N hc hL
+      obtain ⟨ha₂, ha₂'⟩ := h₂.inflexibleBot_spec A N hc hL
+      rw [ha₁', ha₂']
+    · obtain ⟨χ₁, hχ₁, ht₁, h₁'⟩ := h₁.inflexibleCoe_spec A N hc hL
+      obtain ⟨χ₂, hχ₂, ht₂, h₂'⟩ := h₂.inflexibleCoe_spec A N hc hL
+      rw [h₁', h₂']
+      suffices : χ₁ = χ₂
+      · rw [this]
+      refine CodingFunction.ext _ hχ₁ hχ₂ ?_
+      rw [ht₁, ht₂]
 
 theorem before_comp_supports {S : OrdSupport β} (hS : S.Strong)
     {A : ExtendedIndex β} {N : NearLitter} (h : InflexibleCoe A N.1) (hN : ⟨A, inr N⟩ ∈ S) :
@@ -208,6 +238,11 @@ theorem spec_specifies {S : OrdSupport β} (hS : S.Strong) :
     rintro i hi
     simp_rw [hS.cpos_get_eq]
     exact ⟨_, hi, rfl⟩
+  case atom_dom =>
+    intro A a ha
+    refine ⟨a.1.toNearLitter, rfl, ?_⟩
+    refine hS.transConstrains_mem _ _ (Reduced.mkLitter _) ?_ ha
+    exact Relation.TransGen.single (Constrains.atom _ _)
   case atom_spec =>
     intro A a N ha hN haN
     simp_rw [hS.cpos_get_eq]

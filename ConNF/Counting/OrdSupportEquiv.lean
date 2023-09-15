@@ -1,4 +1,5 @@
 import ConNF.Counting.OrdSupport
+import ConNF.Counting.Reorder
 
 /-!
 # Equivalence of ordered supports
@@ -29,22 +30,22 @@ def refl (S : OrdSupport β) : Equiv S S where
   mem_right _ hc := hc
   lt_iff_lt _ _ _ _ _ _ := Iff.rfl
 
-def symm {S T : OrdSupport β} (e : Equiv S T) : Equiv T S where
-  mem_left _ hc := e.mem_right hc
-  mem_right _ hc := e.mem_left hc
-  lt_iff_lt _ _ hcT hcS hdT hdS := (e.lt_iff_lt hcS hcT hdS hdT).symm
+def symm {S T : OrdSupport β} (h : Equiv S T) : Equiv T S where
+  mem_left _ hc := h.mem_right hc
+  mem_right _ hc := h.mem_left hc
+  lt_iff_lt _ _ hcT hcS hdT hdS := (h.lt_iff_lt hcS hcT hdS hdT).symm
 
-def trans {S T U : OrdSupport β} (e : Equiv S T) (f : Equiv T U) : Equiv S U where
-  mem_left _ hc := e.mem_left (f.mem_left hc)
-  mem_right _ hc := f.mem_right (e.mem_right hc)
+def trans {S T U : OrdSupport β} (h₁ : Equiv S T) (h₂ : Equiv T U) : Equiv S U where
+  mem_left _ hc := h₁.mem_left (h₂.mem_left hc)
+  mem_right _ hc := h₂.mem_right (h₁.mem_right hc)
   lt_iff_lt _ _ hcS hcU hdS hdU :=
-    (e.lt_iff_lt hcS (e.mem_right hcS) hdS (e.mem_right hdS)).trans
-    (f.lt_iff_lt (f.mem_left hcU) hcU (f.mem_left hdU) hdU)
+    (h₁.lt_iff_lt hcS (h₁.mem_right hcS) hdS (h₁.mem_right hdS)).trans
+    (h₂.lt_iff_lt (h₂.mem_left hcU) hcU (h₂.mem_left hdU) hdU)
 
 end Equiv
 
 instance setoid (β : Iic α) : Setoid (OrdSupport β) where
-  r S T := Equiv S T
+  r := Equiv
   iseqv := ⟨Equiv.refl, Equiv.symm, Equiv.trans⟩
 
 theorem mem_iff_mem {S T : OrdSupport β} (h : S ≈ T) (c : SupportCondition β) :
@@ -82,9 +83,97 @@ theorem Strong.isLitter_of_mem_equiv {S T : OrdSupport β} (hS : S.Strong) (hST 
     N.IsLitter :=
   hS.isLitter_of_mem (hST.mem_left h)
 
+/--
+`r` is an equivalence of ordered supports `S` and `T`.
+Paths in the following diagram starting with `S` or `T` commute, where
+* the morphisms `S ↔ T` are the identity,
+* the maps `μ ↔ μ` are `toFun` and `invFun`,
+* the maps `S → μ` and `T → μ` are `cpos`.
+```
+μ ↔ μ
+↑   ↑
+S ↔ T
+```
+-/
+structure IsEquiv (r : Tree Reorder β) (S T : OrdSupport β) : Prop where
+  equiv : S ≈ T
+  toFun_apply (c : SupportCondition β) (hS : c ∈ S) (hT : c ∈ T) :
+    r c.path ((S.cpos c).get hS) = (T.cpos c).get hT
+  invFun_apply (c : SupportCondition β) (hT : c ∈ T) (hS : c ∈ S) :
+    (r c.path).symm ((T.cpos c).get hT) = (S.cpos c).get hS
+
+theorem isEquiv_smul {r : Tree Reorder β} {S T : OrdSupport β}
+    (h : IsEquiv r S T) (ρ : Allowable β) :
+    IsEquiv r (ρ • S) (ρ • T) := by
+  constructor
+  case equiv => exact smul_equiv_smul h.equiv ρ
+  case toFun_apply =>
+    intros c hS hT
+    exact h.toFun_apply (ρ⁻¹ • c) hS hT
+  case invFun_apply =>
+    intros c hT hS
+    exact h.invFun_apply (ρ⁻¹ • c) hT hS
+
+structure ReorderSupports (S : OrdSupport β) (r : Tree Reorder β) : Prop where
+  invFun_toFun (c : SupportCondition β) (hc : c ∈ S) :
+    (r c.path).symm (r c.path ((S.cpos c).get hc)) = (S.cpos c).get hc
+
+theorem ReorderSupports.smul {S : OrdSupport β} {r : Tree Reorder β}
+    (h : S.ReorderSupports r) (ρ : Allowable β) : (ρ • S).ReorderSupports r :=
+  ⟨fun _ => h.invFun_toFun _⟩
+
+theorem ReorderSupports.cpos_injective {S : OrdSupport β} {r : Tree Reorder β}
+    (h : S.ReorderSupports r) {A : ExtendedIndex β} {x y : Atom ⊕ NearLitter}
+    (hx : ⟨A, x⟩ ∈ S) (hy : ⟨A, y⟩ ∈ S)
+    (hxy : r A ((S.cpos ⟨A, x⟩).get hx) = r A ((S.cpos ⟨A, y⟩).get hy)) :
+    x = y := by
+  have := h.invFun_toFun _ hx
+  rw [hxy, h.invFun_toFun _ hy] at this
+  have := S.injective _ _ hx hy rfl this.symm
+  simp only [SupportCondition.mk.injEq, true_and] at this
+  exact this
+
+def reorder (S : OrdSupport β) (r : Tree Reorder β) (h : S.ReorderSupports r) : OrdSupport β where
+  cpos c := ⟨c ∈ S, fun h => r c.path ((S.cpos c).get h)⟩
+  injective := by
+    rintro ⟨A, x⟩ ⟨_, y⟩ hx hy rfl h'
+    rw [h.cpos_injective hx hy h']
+  dom_small' := S.dom_small'
+
 end OrdSupport
 
 def OrdSupportClass (β : Iic α) : Type u :=
   Quotient (OrdSupport.setoid β)
+
+namespace OrdSupportClass
+
+def mk (S : OrdSupport β) : OrdSupportClass β := ⟦S⟧
+
+def Strong (S : OrdSupportClass β) : Prop :=
+  ∃ S' : OrdSupport β, S'.Strong ∧ S = mk S'
+
+-- TODO: Make this into a `noncomputable def`?
+theorem exists_strong_of_strong {S : OrdSupportClass β} (h : S.Strong) :
+    ∃ S' : OrdSupport β, S'.Strong ∧ S = mk S' :=
+  h
+
+instance : MulAction (Allowable β) (OrdSupportClass β) where
+  smul ρ := Quotient.lift (fun S => mk (ρ • S))
+    (fun S T h => Quotient.sound (OrdSupport.smul_equiv_smul h ρ))
+  one_smul S := by
+    refine Quotient.inductionOn S ?_
+    change ∀ S, mk ((1 : Allowable β) • S) = mk S
+    simp only [one_smul, implies_true]
+  mul_smul ρ₁ ρ₂ S := by
+    refine Quotient.inductionOn S ?_
+    change ∀ S, mk ((ρ₁ * ρ₂) • S) = mk (ρ₁ • ρ₂ • S)
+    simp only [mul_smul, implies_true]
+
+@[simp]
+theorem smul_mk (ρ : Allowable β) (S : OrdSupport β) :
+    mk (ρ • S) = ρ • (mk S) :=
+  rfl
+
+end OrdSupportClass
 
 end ConNF
