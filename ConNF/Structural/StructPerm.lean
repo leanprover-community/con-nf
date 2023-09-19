@@ -1,5 +1,6 @@
 import ConNF.BaseType.NearLitterPerm
 import ConNF.Structural.Tree
+import ConNF.Structural.Pretangle
 
 /-!
 # Structural permutations
@@ -70,6 +71,59 @@ theorem comp_bot_smul_nearLitter {α : TypeIndex} (π : StructPerm α)
     (A : ExtendedIndex α) (N : NearLitter) :
     Tree.comp A π • N = π A • N :=
   rfl
+
+def pretangleAction : {α : TypeIndex} → StructPerm α → Pretangle α → Pretangle α
+  | ⊥, π, t => Tree.ofBot π • (Pretangle.ofBot t)
+  | (α : Λ), π, t => Pretangle.toCoe
+      (fun β hβ => pretangleAction (Tree.comp (Hom.toPath hβ) π) '' Pretangle.ofCoe t β hβ)
+termination_by pretangleAction α π t => α
+
+theorem one_pretangleAction {α : TypeIndex} (t : Pretangle α) : pretangleAction 1 t = t := by
+  have : WellFoundedLT TypeIndex := inferInstance
+  revert t
+  refine this.induction α (C := fun α => ∀ t : Pretangle α, pretangleAction 1 t = t) ?_
+  intro α ih t
+  induction α using WithBot.recBotCoe with
+  | bot =>
+      unfold pretangleAction
+      rfl
+  | coe α =>
+      unfold pretangleAction
+      rw [Pretangle.coe_ext]
+      intro β hβ u
+      simp only [Tree.comp_one, Pretangle.ofCoe_toCoe, ih β hβ, image_id']
+
+theorem mul_pretangleAction {α : TypeIndex} (π₁ π₂ : StructPerm α) (t : Pretangle α) :
+    pretangleAction (π₁ * π₂) t = pretangleAction π₁ (pretangleAction π₂ t) := by
+  have : WellFoundedLT TypeIndex := inferInstance
+  revert π₁ π₂ t
+  refine this.induction α
+    (C := fun α => ∀ π₁ π₂ : StructPerm α, ∀ t : Pretangle α,
+      pretangleAction (π₁ * π₂) t = pretangleAction π₁ (pretangleAction π₂ t)) ?_
+  intro α ih π₁ π₂ t
+  induction α using WithBot.recBotCoe with
+  | bot =>
+      unfold pretangleAction
+      rfl
+  | coe α =>
+      rw [pretangleAction, pretangleAction, pretangleAction]
+      simp only [Tree.comp_mul, Pretangle.ofCoe_toCoe, EmbeddingLike.apply_eq_iff_eq]
+      ext β hβ u
+      simp only [ih β hβ, mem_image, exists_exists_and_eq_and]
+
+instance {α : TypeIndex} : MulAction (StructPerm α) (Pretangle α) where
+  smul := pretangleAction
+  one_smul := one_pretangleAction
+  mul_smul := mul_pretangleAction
+
+theorem smul_eq {α : TypeIndex} (π : StructPerm α) (t : Pretangle α) :
+    π • t = pretangleAction π t :=
+  rfl
+
+theorem ofCoe_smul {α : Λ} {β : TypeIndex} (π : StructPerm α) (t : Pretangle α) (h : β < α) :
+    Pretangle.ofCoe (π • t) β h = Tree.comp (Hom.toPath h) π • Pretangle.ofCoe t β h := by
+  ext u
+  simp only [smul_eq, pretangleAction, Pretangle.ofCoe_toCoe, mem_image, mem_smul_set]
 
 end StructPerm
 

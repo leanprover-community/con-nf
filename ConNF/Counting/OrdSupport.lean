@@ -181,6 +181,53 @@ theorem Strong.isLitter_of_mem {S : OrdSupport β} (hS : S.Strong)
   cases hS.reduced_of_mem _ h
   exact NearLitter.IsLitter.mk _
 
+/-- `T` *specialises* `S` if it is defined wherever `S` is, and agrees with it there. -/
+structure Specialises (T S : OrdSupport β) : Prop where
+  mem_of_mem (c : SupportCondition β) : c ∈ S → c ∈ T
+  get_eq_get (c : SupportCondition β) (hS : c ∈ S) (hT : c ∈ T) :
+    (S.cpos c).get hS = (T.cpos c).get hT
+
+instance : LE (OrdSupport β) where
+  le S T := Specialises T S
+
+instance : PartialOrder (OrdSupport β) where
+  le_refl S := by
+    constructor
+    · intro c hc
+      exact hc
+    · intros
+      rfl
+  le_trans S T U hST hTU := by
+    constructor
+    · intro c hc
+      exact hTU.mem_of_mem c (hST.mem_of_mem c hc)
+    · intro c hS hU
+      rw [hST.get_eq_get c hS (hST.mem_of_mem c hS), hTU.get_eq_get c (hST.mem_of_mem c hS) hU]
+  le_antisymm S T hST hTS := by
+    ext c hS hT
+    · constructor
+      · exact hST.mem_of_mem c
+      · exact hTS.mem_of_mem c
+    · exact hST.get_eq_get c hS hT
+
+theorem smul_le_smul {S T : OrdSupport β} (h : S ≤ T) (ρ : Allowable β) : ρ • S ≤ ρ • T := by
+  constructor
+  · intro c hc
+    exact h.mem_of_mem (ρ⁻¹ • c) hc
+  · intro c hS hT
+    exact h.get_eq_get (ρ⁻¹ • c) hS hT
+
+theorem smul_le_iff_le_inv {S T : OrdSupport β} (ρ : Allowable β) : S ≤ ρ⁻¹ • T ↔ ρ • S ≤ T := by
+  constructor
+  · intro h
+    have := smul_le_smul h ρ
+    rw [smul_inv_smul] at this
+    exact this
+  · intro h
+    have := smul_le_smul h ρ⁻¹
+    rw [inv_smul_smul] at this
+    exact this
+
 end OrdSupport
 
 end ConNF

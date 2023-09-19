@@ -86,6 +86,16 @@ theorem toCoe_inj {a b} : (toCoe a : Pretangle α) = toCoe b ↔ a = b :=
 theorem ofCoe_inj {a b : Pretangle α} : ofCoe a = ofCoe b ↔ a = b :=
   ofCoe.injective.eq_iff
 
+theorem coe_ext {α : Λ} {a b : Pretangle α} :
+    a = b ↔ ∀ β hβ t, t ∈ ofCoe a β hβ ↔ t ∈ ofCoe b β hβ := by
+  constructor
+  · rintro rfl
+    simp only [implies_true, forall_const]
+  intro h
+  rw [← ofCoe_inj]
+  ext β hβ t
+  exact h β hβ t
+
 end Pretangle
 
 end ConNF

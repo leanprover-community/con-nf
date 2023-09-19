@@ -183,6 +183,12 @@ theorem comp_comp (a : Tree τ α) (p : Path α β) (q : Path β γ) :
     comp q (comp p a) = comp (p.comp q) a := by
   simp only [comp, MonoidHom.coe_mk, OneHom.coe_mk, comp_assoc]
 
+/-- The derivative map preserves the identity. -/
+@[simp]
+theorem comp_one {β : TypeIndex} (A : Path (α : TypeIndex) β) :
+    comp A (1 : Tree τ α) = 1 :=
+  rfl
+
 /-- The derivative map preserves multiplication. -/
 theorem comp_mul {β : TypeIndex} (a₁ a₂ : Tree τ α) (A : Path (α : TypeIndex) β) :
     comp A (a₁ * a₂) = comp A a₁ * comp A a₂ :=
