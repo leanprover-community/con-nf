@@ -91,10 +91,21 @@ theorem raisedSupportSet_small (S : Set (SupportCondition (top α))) (t : Tangle
 
 /-- A support for a `β`-tangle, expressed as a set of `α`-support conditions. -/
 def raisedSupport (S : Set (SupportCondition (top α))) (t : Tangle β) (hS : Small S) :
-    OrdSupport (top α) where
-  cpos c := ⟨c ∈ raisedSupportSet S t, fun _ => c.value⟩
-  injective := by intros; ext <;> assumption
-  dom_small' := raisedSupportSet_small S t hS
+    OrdSupport (top α) :=
+  OrdSupport.strongSupport (raisedSupportSet S t) (raisedSupportSet_small S t hS)
+
+theorem raisedSupport_strong (S : Set (SupportCondition (top α))) (t : Tangle β)
+    (hS : Small S) (hS₁ : ∀ c ∈ S, Reduced c.value)
+    (hS₂ : ∀ c d, Reduced c.value → c <[α] d → d ∈ S → c ∈ S) :
+    (raisedSupport S t hS).Strong := by
+  refine OrdSupport.strongSupport_strong _ _ ?_ ?_
+  · rintro c (hc | hc)
+    · exact hS₁ c hc
+    · exact hc.2
+  · rintro c d hc hcd (hd | ⟨⟨e, he₁, he₂⟩, _⟩)
+    · exact Or.inl (hS₂ c d hc hcd hd)
+    · refine Or.inr ⟨?_, hc⟩
+      exact ⟨e, he₁, Relation.ReflTransGen.trans hcd.to_reflTransGen he₂⟩
 
 -- TODO: New file starting from here.
 
@@ -168,8 +179,7 @@ theorem decodeRaised_smul {β : Iio α} {χs : Set (CodingFunction (top α))} (U
   intro t
   rw [toPretangle_smul, Allowable.toStructPerm_smul, StructPerm.ofCoe_smul,
     decodeRaised_spec, decodeRaised_spec]
-  -- Interestingly enough, from this point on,
-  -- the tactic proof of this theorem is syntactically identical to the previous one.
+  -- TODO: Unify this proof with the previous by extracting a lemma.
   constructor
   · simp only [ge_iff_le, mem_setOf_eq, forall_exists_index, and_imp]
     intro χ hχ V hUV hVχ hu
@@ -204,6 +214,15 @@ theorem raisedSupport_supports (S : Set (SupportCondition (top α))) (t : Tangle
   rw [smul_raise_eq_iff] at this
   exact this
 
+theorem strongSupport_le_raisedSupport (β : Iio α) (t : Tangle (top α)) (u : Tangle β) :
+    OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small ≤
+    raisedSupport (reducedSupport α t) u (reducedSupport α t).small := by
+  constructor
+  · intro c hc
+    exact Or.inl hc
+  · intros
+    rfl
+
 /-- Take the `β`-extension of `t`, treated as a set of `α`-level singletons, and turn them into
 coding functions. -/
 def raiseSingletons (β : Iio α) (t : Tangle (top α)) : Set (CodingFunction (top α)) :=
@@ -211,5 +230,74 @@ def raiseSingletons (β : Iio α) (t : Tangle (top α)) : Set (CodingFunction (t
     (raisedSupport (reducedSupport α t) u (reducedSupport α t).small)
     (singleton (top α) β (coe_lt_coe.mpr β.prop) u)
     (raisedSupport_supports (reducedSupport α t) u _)) '' extension β t
+
+-- TODO: Move next two lemmas.
+
+theorem reduced_of_mem_reducedSupport {β : Iic α} {t : Tangle β}
+    (c : SupportCondition β) (hc : c ∈ reducedSupport α t) :
+    Reduced c.value :=
+  hc.2
+
+theorem mem_reducedSupport_of_transConstrains_mem_reducedSupport {β : Iic α} {t : Tangle β}
+    (c d : SupportCondition β)
+    (hc : Reduced c.value) (hcd : c <[α] d) (hd : d ∈ reducedSupport α t) :
+    c ∈ reducedSupport α t := by
+  obtain ⟨e, he₁, he₂⟩ := hd.1
+  exact ⟨⟨e, he₁, Relation.ReflTransGen.trans hcd.to_reflTransGen he₂⟩, hc⟩
+
+theorem raiseSingletons_reducedSupport (β : Iio α) (t : Tangle (top α)) :
+    {u | ∃ χ ∈ raiseSingletons β t,
+      ∃ V ≥ OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small,
+      ∃ hV : V ∈ χ,
+      u ∈ Pretangle.ofCoe
+        (toPretangle (top α : IicBot α) ((χ.decode V).get hV))
+        β (coe_lt_coe.mpr β.prop)} =
+    Pretangle.ofCoe (toPretangle (top α : IicBot α) t) β (coe_lt_coe.mpr β.prop) := by
+  ext u
+  constructor
+  · simp only [ge_iff_le, mem_setOf_eq, forall_exists_index, and_imp]
+    intro χ hχ V hUV hVχ hu
+    obtain ⟨v, hv, rfl⟩ := hχ
+    rw [CodingFunction.mem_code] at hVχ
+    obtain ⟨ρ, rfl⟩ := hVχ
+    simp_rw [CodingFunction.decode_smul, CodingFunction.code_decode] at hu
+    rw [Part.get_some, toPretangle_smul, Allowable.toStructPerm_smul, StructPerm.ofCoe_smul,
+      singleton_toPretangle, smul_set_singleton, mem_singleton_iff] at hu
+    subst hu
+    suffices : ρ • t = t
+    · rw [← mem_inv_smul_set_iff, Tree.comp_inv, ← StructPerm.ofCoe_smul, ← map_inv,
+        ← Allowable.toStructPerm_smul, ← toPretangle_smul (top α : IicBot α), ← this, inv_smul_smul]
+      exact hv
+    refine (reducedSupport α t).supports _ ?_
+    intro c hc
+    have := hUV.get_eq_get _ hc (hUV.mem_of_mem _ hc)
+    simp only [OrdSupport.smul_cpos] at this
+    rw [OrdSupport.Strong.cpos_get_eq, OrdSupport.Strong.cpos_get_eq] at this
+    · rw [Allowable.smul_supportCondition, this, Allowable.smul_supportCondition]
+      simp only [map_inv, Tree.inv_apply, smul_inv_smul]
+    · exact raisedSupport_strong _ _ _
+        reduced_of_mem_reducedSupport mem_reducedSupport_of_transConstrains_mem_reducedSupport
+    · exact OrdSupport.strongSupport_strong _ _
+        reduced_of_mem_reducedSupport mem_reducedSupport_of_transConstrains_mem_reducedSupport
+  · simp only [ge_iff_le, mem_setOf_eq]
+    intro hu
+    obtain ⟨u, rfl⟩ := eq_toPretangle_of_mem (top α) β (coe_lt_coe.mpr β.prop) t u hu
+    refine ⟨_, ⟨u, hu, rfl⟩, (raisedSupport (reducedSupport α t) u (reducedSupport α t).small), ?_⟩
+    refine ⟨strongSupport_le_raisedSupport β t u, CodingFunction.mem_code_self, ?_⟩
+    simp only [CodingFunction.code_decode]
+    rw [Part.get_some, singleton_toPretangle, mem_singleton_iff]
+
+theorem appearsRaised_raiseSingletons (β : Iio α) (t : Tangle (top α)) :
+    AppearsRaised β (raiseSingletons β t)
+      (OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small) :=
+  ⟨t, raiseSingletons_reducedSupport β t⟩
+
+theorem decodeRaised_raiseSingletons (β : Iio α) (t : Tangle (top α)) :
+    decodeRaised (raiseSingletons β t)
+      (OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small)
+      (appearsRaised_raiseSingletons β t) = t := by
+  refine toPretangle_ext (top α) β β.prop _ _ ?_
+  intro u
+  rw [decodeRaised_spec, raiseSingletons_reducedSupport]
 
 end ConNF

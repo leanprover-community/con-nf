@@ -181,6 +181,16 @@ theorem Strong.isLitter_of_mem {S : OrdSupport β} (hS : S.Strong)
   cases hS.reduced_of_mem _ h
   exact NearLitter.IsLitter.mk _
 
+def strongSupport (S : Set (SupportCondition β)) (hS : Small S) : OrdSupport β where
+  cpos c := ⟨c ∈ S, fun _ => c.value⟩
+  injective := by intros; ext <;> assumption
+  dom_small' := hS
+
+theorem strongSupport_strong (S : Set (SupportCondition β)) (hS : Small S)
+    (hS₁ : ∀ c ∈ S, Reduced c.value) (hS₂ : ∀ c d, Reduced c.value → c <[α] d → d ∈ S → c ∈ S) :
+    (strongSupport S hS).Strong :=
+  ⟨hS₁, hS₂, fun _ _ => rfl⟩
+
 /-- `T` *specialises* `S` if it is defined wherever `S` is, and agrees with it there. -/
 structure Specialises (T S : OrdSupport β) : Prop where
   mem_of_mem (c : SupportCondition β) : c ∈ S → c ∈ T
