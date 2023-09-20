@@ -1,4 +1,5 @@
 import ConNF.Structural.Pretangle
+import ConNF.Counting.OrdSupportOrbit
 import ConNF.Counting.CodingFunction
 
 /-!
@@ -106,8 +107,6 @@ theorem raisedSupport_strong (S : Set (SupportCondition (top α))) (t : Tangle �
     · exact Or.inl (hS₂ c d hc hcd hd)
     · refine Or.inr ⟨?_, hc⟩
       exact ⟨e, he₁, Relation.ReflTransGen.trans hcd.to_reflTransGen he₂⟩
-
--- TODO: New file starting from here.
 
 /-- A set `s` of `β`-pretangles *appears* at level `α` if it occurs as the `β`-extension of some
 `α`-tangle. -/
@@ -299,5 +298,101 @@ theorem decodeRaised_raiseSingletons (β : Iio α) (t : Tangle (top α)) :
   refine toPretangle_ext (top α) β β.prop _ _ ?_
   intro u
   rw [decodeRaised_spec, raiseSingletons_reducedSupport]
+
+noncomputable def raisedCodingFunction (β : Iio α) (χs : Set (CodingFunction (top α)))
+    (o : OrdSupportOrbit (top α)) (ho : ∀ U ∈ o, AppearsRaised β χs U)
+    (ho' : ∀ U, ∀ hU : U ∈ o,
+      Supports (Allowable (top α)) {c | c ∈ U} (decodeRaised χs U (ho U hU))) :
+    CodingFunction (top α) where
+  decode U := ⟨U ∈ o, fun hU => decodeRaised χs U (ho U hU)⟩
+  dom_nonempty := o.nonempty
+  supports_decode' := ho'
+  dom_iff := by
+    intro S T hS
+    cases OrdSupportOrbit.eq_mk_of_mem hS
+    simp only [OrdSupportOrbit.mem_mk_iff, mem_orbit_iff, eq_comm]
+  decode_smul' := by
+    intro S ρ h₁ h₂
+    dsimp only
+    rw [decodeRaised_smul]
+
+theorem decode_raisedCodingFunction (β : Iio α) (χs : Set (CodingFunction (top α)))
+    (o : OrdSupportOrbit (top α)) (ho : ∀ U ∈ o, AppearsRaised β χs U)
+    (ho' : ∀ U, ∀ hU : U ∈ o,
+      Supports (Allowable (top α)) {c | c ∈ U} (decodeRaised χs U (ho U hU)))
+    (U : OrdSupport (top α)) (hU : U ∈ raisedCodingFunction β χs o ho ho') :
+    ((raisedCodingFunction β χs o ho ho').decode U).get hU = decodeRaised χs U (ho U hU) :=
+  rfl
+
+theorem mem_raisedCodingFunction_iff (β : Iio α) (χs : Set (CodingFunction (top α)))
+    (o : OrdSupportOrbit (top α)) (ho : ∀ U ∈ o, AppearsRaised β χs U)
+    (ho' : ∀ U, ∀ hU : U ∈ o,
+      Supports (Allowable (top α)) {c | c ∈ U} (decodeRaised χs U (ho U hU)))
+    (U : OrdSupport (top α)) :
+    U ∈ raisedCodingFunction β χs o ho ho' ↔ U ∈ o :=
+  Iff.rfl
+
+theorem appearsRaised_of_mem_orbit (β : Iio α) (t : Tangle (top α)) (U : OrdSupport (top α))
+    (hU : U ∈ OrdSupportOrbit.mk
+      (OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small)) :
+    AppearsRaised β (raiseSingletons β t) U := by
+  simp only [OrdSupportOrbit.mem_mk_iff] at hU
+  obtain ⟨ρ, rfl⟩ := hU
+  exact appearsRaised_smul _ (appearsRaised_raiseSingletons β t) _
+
+theorem supports_decodeRaised_raiseSingletons (β : Iio α) (t : Tangle (top α)) :
+    Supports (Allowable (top α)) {c | c ∈ reducedSupport α t}
+      (decodeRaised (raiseSingletons β t)
+        (OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small)
+        (appearsRaised_raiseSingletons β t)) := by
+  intro ρ h
+  rw [← decodeRaised_smul]
+  simp_rw [OrdSupport.smul_strongSupport_eq (reducedSupport α t) (reducedSupport α t).small ρ h]
+
+theorem supports_decodeRaised_of_mem_orbit (β : Iio α) (t : Tangle (top α)) (U : OrdSupport (top α))
+    (hU : U ∈ OrdSupportOrbit.mk
+      (OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small)) :
+    Supports (Allowable (top α)) {c | c ∈ U}
+      (decodeRaised (raiseSingletons β t) U (appearsRaised_of_mem_orbit β t U hU)) := by
+  simp only [OrdSupportOrbit.mem_mk_iff] at hU
+  obtain ⟨ρ, rfl⟩ := hU
+  rw [decodeRaised_smul _ (appearsRaised_raiseSingletons β t) ρ]
+  intro ρ' h
+  have := supports_decodeRaised_raiseSingletons β t (ρ⁻¹ * ρ' * ρ) ?_
+  · rw [mul_smul, mul_smul, inv_smul_eq_iff] at this
+    exact this
+  · intro c hc
+    rw [mul_smul, mul_smul, inv_smul_eq_iff]
+    refine h ⟨?_, ?_⟩
+    · rw [inv_smul_smul]
+      exact hc.1
+    · rw [inv_smul_smul]
+      exact hc.2
+
+/-- Converts a tangle to a coding function by going via `raisedCodingFunction β`. -/
+noncomputable def recode (β : Iio α) (t : Tangle (top α)) :
+    CodingFunction (top α) :=
+  raisedCodingFunction β (raiseSingletons β t)
+    (OrdSupportOrbit.mk (OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small))
+    (appearsRaised_of_mem_orbit β t)
+    (supports_decodeRaised_of_mem_orbit β t)
+
+theorem mem_recode (β : Iio α) (t : Tangle (top α)) :
+    (OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small) ∈ recode β t := by
+  rw [recode, mem_raisedCodingFunction_iff]
+  rfl
+
+theorem decode_recode (β : Iio α) (t : Tangle (top α)) :
+    ((recode β t).decode _).get (mem_recode β t) = t :=
+  by simp only [recode, decode_raisedCodingFunction, decodeRaised_raiseSingletons]
+
+/-- The `recode` function yields the original coding function on `t`. -/
+theorem recode_eq (β : Iio α) (t : Tangle (top α)) :
+    recode β t =
+    CodingFunction.code
+      (OrdSupport.strongSupport (reducedSupport α t).carrier (reducedSupport α t).small) t
+      (reducedSupport α t).supports := by
+  refine CodingFunction.ext _ (mem_recode β t) CodingFunction.mem_code_self ?_
+  simp only [decode_recode, Support.carrier_eq_coe, CodingFunction.code_decode, Part.get_some]
 
 end ConNF

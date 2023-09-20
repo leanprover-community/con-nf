@@ -186,10 +186,32 @@ def strongSupport (S : Set (SupportCondition β)) (hS : Small S) : OrdSupport β
   injective := by intros; ext <;> assumption
   dom_small' := hS
 
+@[simp]
+theorem strongSupport_cpos (S : Set (SupportCondition β)) (hS : Small S)
+    (c : SupportCondition β) (h : c ∈ S) : ((strongSupport S hS).cpos c).get h = c.value :=
+  rfl
+
 theorem strongSupport_strong (S : Set (SupportCondition β)) (hS : Small S)
     (hS₁ : ∀ c ∈ S, Reduced c.value) (hS₂ : ∀ c d, Reduced c.value → c <[α] d → d ∈ S → c ∈ S) :
     (strongSupport S hS).Strong :=
   ⟨hS₁, hS₂, fun _ _ => rfl⟩
+
+theorem smul_strongSupport_eq (S : Set (SupportCondition β)) (hS : Small S) (ρ : Allowable β)
+    (h : ∀ c ∈ S, ρ • c = c) : ρ • strongSupport S hS = strongSupport S hS := by
+  ext c hcS hcT
+  · simp only [smul_mem]
+    constructor
+    · intro hc
+      have := h _ hc
+      rw [smul_inv_smul] at this
+      rw [this]
+      exact hc
+    · intro hc
+      have := h _ hc
+      rw [← this, inv_smul_smul]
+      exact hc
+  · simp only [smul_cpos, strongSupport_cpos]
+    conv_lhs => rw [← h _ hcT, inv_smul_smul]
 
 /-- `T` *specialises* `S` if it is defined wherever `S` is, and agrees with it there. -/
 structure Specialises (T S : OrdSupport β) : Prop where
