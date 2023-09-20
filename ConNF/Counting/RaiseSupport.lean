@@ -198,7 +198,7 @@ theorem decodeRaised_smul {β : Iio α} {χs : Set (CodingFunction (top α))} (U
     exact hu
 
 /-- The tangles in the `β`-extension of a given `α`-tangle. -/
-def extension (β : Iio α) (t : Tangle (top α)) : Set (Tangle β) :=
+def tangleExtension (β : Iio α) (t : Tangle (top α)) : Set (Tangle β) :=
   {u | toPretangle (β : IicBot α) u ∈
     Pretangle.ofCoe (toPretangle (top α : IicBot α) t) β (coe_lt_coe.mpr β.prop)}
 
@@ -229,7 +229,7 @@ def raiseSingletons (β : Iio α) (t : Tangle (top α)) : Set (CodingFunction (t
   (fun u => CodingFunction.code
     (raisedSupport (reducedSupport α t) u (reducedSupport α t).small)
     (singleton (top α) β (coe_lt_coe.mpr β.prop) u)
-    (raisedSupport_supports (reducedSupport α t) u _)) '' extension β t
+    (raisedSupport_supports (reducedSupport α t) u _)) '' tangleExtension β t
 
 -- TODO: Move next two lemmas.
 
