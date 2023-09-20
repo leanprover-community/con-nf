@@ -1,5 +1,5 @@
 import Mathlib.GroupTheory.GroupAction.Basic
-import ConNF.Counting.SpecSame
+import ConNF.Counting.OrdSupport
 
 /-!
 # Orbits of ordered supports
