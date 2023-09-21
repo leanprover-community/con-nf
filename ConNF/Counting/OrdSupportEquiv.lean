@@ -13,6 +13,9 @@ namespace ConNF
 
 variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α}
 
+def reorderSymm (r : Tree Reorder β) : Tree Reorder β :=
+  fun A => (r A).symm
+
 namespace OrdSupport
 
 /-- Ordered supports are *equivalent* if they are defined on the same set and put support conditions
@@ -65,6 +68,43 @@ theorem smul_equiv_smul {S T : OrdSupport β} (h : S ≈ T) (ρ : Allowable β) 
     intro c d hcS hcT hdS hdT
     exact h.lt_iff_lt _ _ _ _
 
+/-- This is the key lemma that uses the fact that equivalences are order isomorphisms. -/
+theorem cpos_smul_eq_cpos {S : OrdSupport β} (ρ : Allowable β) (h : ρ • S ≈ S)
+    (c : SupportCondition β) (hc : c ∈ S) :
+    ((ρ • S).cpos c).get (h.mem_left hc) = (S.cpos c).get hc := by
+  letI hwo : IsWellOrder (Atom ⊕ NearLitter) (· < ·) := inferInstance
+  letI hlo : LinearOrder (Atom ⊕ NearLitter) := inferInstance
+  -- Override the normal preorder on `⊕`.
+  letI hpo : Preorder (Atom ⊕ NearLitter) := hlo.toPreorder
+  refine hwo.wf.induction
+    (C := fun x => ∀ c, ∀ hc : c ∈ S, (S.cpos c).get hc = x →
+      ((ρ • S).cpos c).get (h.mem_left hc) = (S.cpos c).get hc)
+    _ ?_ c hc rfl
+  clear hc c
+  rintro _ ih c hc rfl
+  obtain (h' | h' | h') := lt_trichotomy (((ρ • S).cpos c).get (h.mem_left hc)) ((S.cpos c).get hc)
+  · exfalso
+    have := ih _ h' _ (h.mem_left hc) rfl
+    have h'' := h.lt_iff_lt
+      (h.mem_left <| h.mem_left hc) (h.mem_left hc) (h.mem_left hc) hc
+    simp_rw [smul_cpos, ← h'', this, smul_cpos] at h'
+    exact ne_of_lt h' rfl
+  · exact h'
+  · exfalso
+    have := h.lt_iff_lt
+      (smul_mem_smul.mpr hc) (h.mem_right (smul_mem_smul.mpr hc)) (h.mem_left hc) hc
+    simp_rw [smul_cpos_smul] at this
+    rw [this] at h'
+    have := ih _ h' _ _ rfl
+    simp_rw [smul_cpos_smul] at this
+    exact ne_of_lt h' this.symm
+
+theorem smul_eq_of_smul_equiv {S : OrdSupport β} (ρ : Allowable β) (h : ρ • S ≈ S) :
+    ρ • S = S := by
+  ext c _ hc
+  · exact ⟨fun hc => h.mem_right hc, fun hc => h.mem_left hc⟩
+  · exact cpos_smul_eq_cpos ρ h c hc
+
 theorem Strong.reduced_of_mem_equiv {S T : OrdSupport β} (hS : S.Strong) (hST : S ≈ T)
     (c : SupportCondition β) (h : c ∈ T) : Reduced c.value :=
   hS.reduced_of_mem c (hST.mem_left h)
@@ -101,6 +141,17 @@ structure IsEquiv (r : Tree Reorder β) (S T : OrdSupport β) : Prop where
     r c.path ((S.cpos c).get hS) = (T.cpos c).get hT
   invFun_apply (c : SupportCondition β) (hT : c ∈ T) (hS : c ∈ S) :
     (r c.path).symm ((T.cpos c).get hT) = (S.cpos c).get hS
+
+theorem IsEquiv.symm {r : Tree Reorder β} {S T : OrdSupport β} (h : IsEquiv r S T) :
+    IsEquiv (reorderSymm r) T S :=
+  ⟨h.equiv.symm, h.invFun_apply, h.toFun_apply⟩
+
+theorem isEquiv_isEquiv_right {r : Tree Reorder β} {S T U : OrdSupport β}
+    (h₁ : IsEquiv r S T) (h₂ : IsEquiv r S U) : T = U := by
+  ext c hcT hcU
+  · rw [← mem_iff_mem h₁.equiv c, ← mem_iff_mem h₂.equiv c]
+  · rw [← h₁.toFun_apply c (h₁.equiv.mem_left hcT) hcT,
+      ← h₂.toFun_apply c (h₂.equiv.mem_left hcU) hcU]
 
 theorem isEquiv_smul {r : Tree Reorder β} {S T : OrdSupport β}
     (h : IsEquiv r S T) (ρ : Allowable β) :

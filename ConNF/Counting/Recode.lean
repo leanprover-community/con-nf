@@ -1,6 +1,6 @@
 import ConNF.Structural.Pretangle
 import ConNF.Counting.OrdSupportOrbit
-import ConNF.Counting.CodingFunction
+import ConNF.Counting.CodingFunctionEquiv
 
 /-!
 # Raising supports to higher levels

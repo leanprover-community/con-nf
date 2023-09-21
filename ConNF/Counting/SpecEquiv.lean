@@ -57,7 +57,7 @@ noncomputable def reorder (σ : Spec β) (r : Tree Reorder β) (h : σ.ReorderSu
 
 structure IsEquiv (r : Tree Reorder β) (σ₁ σ₂ : Spec β) : Prop where
   reorderSupports_left : σ₁.ReorderSupports r
-  reorderSupports_right : σ₂.ReorderSupports (fun A => (r A).symm)
+  reorderSupports_right : σ₂.ReorderSupports (reorderSymm r)
   dom_right (i : Time β) (hi : (σ₁.cond i).Dom) : (σ₂.cond (i.reorder r)).Dom
   dom_left (i : Time β) (hi : (σ₂.cond i).Dom) : (σ₁.cond (i.reorder_symm r)).Dom
   reorder_right (i : Time β) (hi : (σ₁.cond i).Dom) :

@@ -28,9 +28,7 @@ This condition will be relaxed later. The reordering `r` can be used to reinterp
 
 variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α}
   {σ : Spec β} {S T U : OrdSupport β}
-  (hσS : Specifies σ S) (hσT : Specifies σ T)
-  {r : Tree Reorder β} (hUT : U ≈ T)
-  (hS : S.Strong) (hU: U.Strong)
+  (hσS : Specifies σ S) (hσT : Specifies σ T) (hUT : U ≈ T) (hS : S.Strong) (hU: U.Strong)
 
 namespace Spec
 
