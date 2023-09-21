@@ -146,6 +146,54 @@ theorem IsEquiv.symm {r : Tree Reorder β} {S T : OrdSupport β} (h : IsEquiv r 
     IsEquiv (reorderSymm r) T S :=
   ⟨h.equiv.symm, h.invFun_apply, h.toFun_apply⟩
 
+open scoped Classical in
+/-- Maps `S.cpos c` to `T.cpos c` if the input is of the form `S.cpos c`. -/
+noncomputable def posOf (S T : OrdSupport β) (A : ExtendedIndex β) (x : Atom ⊕ NearLitter) :
+    Atom ⊕ NearLitter :=
+  if h : ∃ y : Atom ⊕ NearLitter, ∃ c : SupportCondition β, ∃ hS : c ∈ S, ∃ hT : c ∈ T,
+      c.path = A ∧ (S.cpos c).get hS = x ∧ (T.cpos c).get hT = y then
+    h.choose
+  else
+    default
+
+theorem posOf_spec (S T : OrdSupport β) (A : ExtendedIndex β) (x : Atom ⊕ NearLitter)
+    (h : ∃ y : Atom ⊕ NearLitter, ∃ c : SupportCondition β, ∃ hS : c ∈ S, ∃ hT : c ∈ T,
+      c.path = A ∧ (S.cpos c).get hS = x ∧ (T.cpos c).get hT = y) :
+    ∃ c : SupportCondition β, ∃ hS : c ∈ S, ∃ hT : c ∈ T,
+      c.path = A ∧ (S.cpos c).get hS = x ∧ (T.cpos c).get hT = posOf S T A x := by
+  rw [posOf, dif_pos h]
+  exact h.choose_spec
+
+/-- `posOf` behaves as required. -/
+theorem posOf_cpos (S T : OrdSupport β) (c : SupportCondition β) (hS : c ∈ S) (hT : c ∈ T) :
+    posOf S T c.path ((S.cpos c).get hS) = (T.cpos c).get hT := by
+  obtain ⟨_, _, _, h₁, h₂, h₃⟩ :=
+    posOf_spec S T c.path ((S.cpos c).get hS) ⟨_, c, hS, hT, rfl, rfl, rfl⟩
+  cases S.injective _ _ _ _ h₁ h₂
+  exact h₃.symm
+
+noncomputable def reorderTree (S T : OrdSupport β) : Tree Reorder β :=
+  fun A => {
+    toFun := posOf S T A
+    invFun := posOf T S A
+  }
+
+theorem reorderTree_isEquiv {S T : OrdSupport β} (h : S ≈ T) : IsEquiv (reorderTree S T) S T := by
+  constructor
+  · exact h
+  · intro c hS hT
+    rw [reorderTree]
+    dsimp only
+    rw [posOf_cpos]
+  · intro c hT hS
+    rw [reorderTree, Reorder.symm]
+    dsimp only
+    rw [posOf_cpos]
+
+theorem exists_isEquiv_of_equiv {S T : OrdSupport β} (h : S ≈ T) :
+    ∃ r : Tree Reorder β, IsEquiv r S T :=
+  ⟨reorderTree S T, reorderTree_isEquiv h⟩
+
 theorem isEquiv_isEquiv_right {r : Tree Reorder β} {S T U : OrdSupport β}
     (h₁ : IsEquiv r S T) (h₂ : IsEquiv r S U) : T = U := by
   ext c hcT hcU
@@ -165,13 +213,27 @@ theorem isEquiv_smul {r : Tree Reorder β} {S T : OrdSupport β}
     intros c hT hS
     exact h.invFun_apply (ρ⁻¹ • c) hT hS
 
+-- TODO: Rename this.
 structure ReorderSupports (S : OrdSupport β) (r : Tree Reorder β) : Prop where
   invFun_toFun (c : SupportCondition β) (hc : c ∈ S) :
     (r c.path).symm (r c.path ((S.cpos c).get hc)) = (S.cpos c).get hc
+  lt_iff_lt (c d : SupportCondition β) (hc : c ∈ S) (hd : d ∈ S) :
+    (S.cpos c).get hc < (S.cpos d).get hd ↔
+    r c.path ((S.cpos c).get hc) < r d.path ((S.cpos d).get hd)
+
+theorem reorderSupports_of_isEquiv {S T : OrdSupport β} {r : Tree Reorder β}
+    (h : IsEquiv r S T) : ReorderSupports S r := by
+  constructor
+  · intro c hc
+    rw [h.toFun_apply, h.invFun_apply]
+    exact h.equiv.mem_right hc
+  · intro c d hc hd
+    rw [h.toFun_apply _ hc (h.equiv.mem_right hc), h.toFun_apply _ hd (h.equiv.mem_right hd)]
+    exact h.equiv.lt_iff_lt hc (h.equiv.mem_right hc) hd (h.equiv.mem_right hd)
 
 theorem ReorderSupports.smul {S : OrdSupport β} {r : Tree Reorder β}
     (h : S.ReorderSupports r) (ρ : Allowable β) : (ρ • S).ReorderSupports r :=
-  ⟨fun _ => h.invFun_toFun _⟩
+  ⟨fun _ => h.invFun_toFun _, fun c d => h.lt_iff_lt (ρ⁻¹ • c) (ρ⁻¹ • d)⟩
 
 theorem ReorderSupports.cpos_injective {S : OrdSupport β} {r : Tree Reorder β}
     (h : S.ReorderSupports r) {A : ExtendedIndex β} {x y : Atom ⊕ NearLitter}
@@ -191,6 +253,31 @@ def reorder (S : OrdSupport β) (r : Tree Reorder β) (h : S.ReorderSupports r) 
     rw [h.cpos_injective hx hy h']
   dom_small' := S.dom_small'
 
+@[simp]
+theorem cpos_reorder {S : OrdSupport β} {r : Tree Reorder β} {h : S.ReorderSupports r}
+    (c : SupportCondition β) (hc : c ∈ S) :
+    ((reorder S r h).cpos c).get hc = r c.path ((S.cpos c).get hc) :=
+  rfl
+
+theorem reorder_equiv (S : OrdSupport β) (r : Tree Reorder β) (h : S.ReorderSupports r) :
+    reorder S r h ≈ S := by
+  constructor
+  · intro c hc
+    exact hc
+  · intro c hc
+    exact hc
+  · intro c d hcS hcT hcD hdT
+    rw [cpos_reorder, cpos_reorder]
+    exact (h.lt_iff_lt _ _ _ _).symm
+
+theorem reorder_isEquiv (S : OrdSupport β) (r : Tree Reorder β) (h : S.ReorderSupports r) :
+    IsEquiv r S (reorder S r h) := by
+  refine ⟨(reorder_equiv S r h).symm, ?_, ?_⟩
+  · intros
+    rfl
+  · intros
+    rw [cpos_reorder, h.invFun_toFun]
+
 end OrdSupport
 
 def OrdSupportClass (β : Iic α) : Type u :=
@@ -199,6 +286,9 @@ def OrdSupportClass (β : Iic α) : Type u :=
 namespace OrdSupportClass
 
 def mk (S : OrdSupport β) : OrdSupportClass β := ⟦S⟧
+
+protected theorem eq {S T : OrdSupport β} : mk S = mk T ↔ S ≈ T :=
+  Quotient.eq
 
 def Strong (S : OrdSupportClass β) : Prop :=
   ∃ S' : OrdSupport β, S'.Strong ∧ S = mk S'
