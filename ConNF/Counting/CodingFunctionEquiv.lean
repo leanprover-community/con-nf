@@ -159,6 +159,19 @@ theorem reorder_isEquiv (χ : CodingFunction β) (r : Tree Reorder β) (h : χ.R
   simp only [reorder, code_decode]
   rfl
 
+theorem reorderSupports_of_isEquiv {χ₁ χ₂ : CodingFunction β} {r : Tree Reorder β}
+    (h : IsEquiv r χ₁ χ₂) : ReorderSupports χ₁ r := by
+  intro S₁ hS₁
+  obtain ⟨S₂, hS₂, hS, _⟩ := exists_mem_isEquiv h S₁ hS₁
+  exact OrdSupport.reorderSupports_of_isEquiv hS
+
+theorem exists_isEquiv_of_equiv {χ₁ χ₂ : CodingFunction β} (h : χ₁ ≈ χ₂) :
+    ∃ r : Tree Reorder β, IsEquiv r χ₁ χ₂ := by
+  obtain ⟨S₁, hS₁⟩ := χ₁.dom_nonempty
+  obtain ⟨S₂, hS₂, hS, hχ⟩ := exists_mem_equiv h S₁ hS₁
+  refine ⟨OrdSupport.reorderTree S₁ S₂, ?_⟩
+  exact ⟨S₁, hS₁, S₂, hS₂, OrdSupport.reorderTree_isEquiv hS, hχ⟩
+
 end CodingFunction
 
 def CodingClass (β : Iic α) : Type u :=
@@ -219,7 +232,15 @@ theorem exists_rep_of_mem {c : CodingClass β} {S : OrdSupport β} (h : OrdSuppo
 theorem exists_rep_of_mk_mem_mk {χ : CodingFunction β} {S : OrdSupport β}
     (h : OrdSupportClass.mk S ∈ mk χ) :
     ∃ T, T ≈ S ∧ T ∈ χ := by
-  sorry
+  obtain ⟨T, hT, χ', hχ', h⟩ := h
+  obtain ⟨r, hr⟩ := CodingFunction.exists_isEquiv_of_equiv (CodingClass.eq.mp hχ')
+  refine ⟨T.reorder r ?_, ?_,  ?_⟩
+  · exact CodingFunction.reorderSupports_of_isEquiv hr T h
+  · have := OrdSupport.reorder_equiv T r (CodingFunction.reorderSupports_of_isEquiv hr T h)
+    exact this.trans (OrdSupportClass.eq.mp hT)
+  · rw [← CodingFunction.mem_iff_mem_of_isEquiv
+      (OrdSupport.reorder_isEquiv T r (CodingFunction.reorderSupports_of_isEquiv hr T h)) hr]
+    exact h
 
 theorem smul_mem {c : CodingClass β} {S : OrdSupport β}
     (ρ : Allowable β) (h : OrdSupportClass.mk S ∈ c) :
