@@ -75,26 +75,12 @@ theorem smul_raise_eq_iff (c : SupportCondition β) (ρ : Allowable (top α)) :
     Tree.comp_apply,
     raiseIndex]
 
-/-- A support for a `β`-tangle, expressed as a set of `α`-support conditions.
-We also throw in another set of support conditions for convenience later. -/
-def raisedSupportSet (S : Set (SupportCondition (top α))) (t : Tangle β) :
-    Set (SupportCondition (top α)) :=
-  S ∪ reduction α (raise '' (reducedSupport α t).carrier)
-
-theorem raise_reducedSupport_subset (S : Set (SupportCondition (top α))) (t : Tangle β) :
-    raise '' (reducedSupport α t).carrier ⊆ raisedSupportSet S t := by
-  rintro _ ⟨c, hc, rfl⟩
-  exact Or.inr ⟨mem_reflTransClosure_of_mem _ _ _ ⟨_, hc, rfl⟩, hc.2⟩
-
-theorem raisedSupportSet_small (S : Set (SupportCondition (top α))) (t : Tangle β)
-    (hS : Small S) : Small (raisedSupportSet S t) :=
-  Small.union hS (reduction_small _ (Small.image (reduction_small α (designatedSupport t).small)))
-
 /-- A support for a `β`-tangle, expressed as a set of `α`-support conditions. -/
-def raisedSupport (S : Set (SupportCondition (top α))) (t : Tangle β) (hS : Small S) :
+noncomputable def raisedSupport (t : Tangle (top α)) (u : Tangle β) :
     OrdSupport (top α) :=
-  sorry
-  -- OrdSupport.strongSupport (raisedSupportSet S t) (raisedSupportSet_small S t hS)
+  (OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small).extend
+    (reduction α (raise '' (reducedSupport α u).carrier))
+    (reduction_small _ (Small.image (reduction_small α (designatedSupport u).small)))
 
 /-- A set `s` of `β`-pretangles *appears* at level `α` if it occurs as the `β`-extension of some
 `α`-tangle. -/
@@ -199,42 +185,38 @@ def tangleExtension (β : Iio α) (t : Tangle (top α)) : Set (Tangle β) :=
   {u | toPretangle (β : IicBot α) u ∈
     Pretangle.ofCoe (toPretangle (top α : IicBot α) t) β (coe_lt_coe.mpr β.prop)}
 
-theorem raisedSupport_supports (S : Set (SupportCondition (top α))) (t : Tangle β) (hS : Small S) :
-    Supports (Allowable (top α)) {c | c ∈ raisedSupport S t hS}
-      (singleton (top α) β (coe_lt_coe.mpr β.prop) t) := by
+theorem raisedSupport_supports (t : Tangle (top α)) (u : Tangle β) :
+    Supports (Allowable (top α)) {c | c ∈ raisedSupport t u}
+      (singleton (top α) β (coe_lt_coe.mpr β.prop) u) := by
   intro ρ h
   rw [singleton_smul (top α) β]
   refine congr_arg _ ?_
-  refine (reducedSupport α t).supports _ ?_
+  refine (reducedSupport α u).supports _ ?_
   intro c hc
-  sorry
-  -- have := h (raise_reducedSupport_subset S t ⟨c, hc, rfl⟩)
-  -- rw [smul_raise_eq_iff] at this
-  -- exact this
+  rw [← smul_raise_eq_iff]
+  refine h ?_
+  rw [mem_setOf, raisedSupport, OrdSupport.mem_extend_iff]
+  refine Or.inr ⟨?_, hc.2⟩
+  exact mem_reflTransClosure_of_mem α _ _ ⟨_, hc, rfl⟩
 
 theorem strongSupport_le_raisedSupport (β : Iio α) (t : Tangle (top α)) (u : Tangle β) :
     OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small ≤
-    raisedSupport (reducedSupport α t) u (reducedSupport α t).small := by
-  sorry
-  -- constructor
-  -- · intro c hc
-  --   exact Or.inl hc
-  -- · intros
-  --   rfl
+    raisedSupport t u :=
+  OrdSupport.le_extend _ _ _
 
 /-- Take the `β`-extension of `t`, treated as a set of `α`-level singletons, and turn them into
 coding functions. -/
 def raiseSingletons (β : Iio α) (t : Tangle (top α)) : Set (CodingClass (top α)) :=
   (fun u => CodingClass.mk <| CodingFunction.code
-    (raisedSupport (reducedSupport α t) u (reducedSupport α t).small)
+    (raisedSupport t u)
     (singleton (top α) β (coe_lt_coe.mpr β.prop) u)
-    (raisedSupport_supports (reducedSupport α t) u (reducedSupport α t).small)) ''
+    (raisedSupport_supports t u)) ''
       tangleExtension β t
 
 theorem smul_reducedSupport_eq (β : Iio α) (t : Tangle (top α)) (V : OrdSupport (top α))
     (hUV : OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small ≤ V)
     (v : Tangle β) (ρ : Allowable (top α))
-    (hVW : ρ • raisedSupport (reducedSupport α t) v (reducedSupport α t).small ≈ V)
+    (hVW : ρ • raisedSupport t v ≈ V)
     (c : SupportCondition (top α)) (hc : c ∈ (reducedSupport α t).carrier) : ρ • c = c := by
   have := OrdSupport.equiv_of_le_equiv
     (OrdSupport.smul_le_smul (strongSupport_le_raisedSupport β t v) ρ) hUV hVW
@@ -278,7 +260,7 @@ theorem raiseSingletons_reducedSupport (β : Iio α) (t : Tangle (top α)) :
   · simp only [ge_iff_le, mem_setOf_eq]
     intro hu
     obtain ⟨u, rfl⟩ := eq_toPretangle_of_mem (top α) β (coe_lt_coe.mpr β.prop) t u hu
-    refine ⟨_, ⟨u, hu, rfl⟩, (raisedSupport (reducedSupport α t) u (reducedSupport α t).small), ?_⟩
+    refine ⟨_, ⟨u, hu, rfl⟩, (raisedSupport t u), ?_⟩
     refine ⟨strongSupport_le_raisedSupport β t u,
       CodingClass.mk_mem_mk_of_mem (CodingFunction.mem_code_self), ?_⟩
     simp only [CodingFunction.mem_code_self, CodingClass.decode_mk_eq_decode,

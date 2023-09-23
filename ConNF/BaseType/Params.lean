@@ -249,6 +249,7 @@ theorem card_Iio_lt (x : μ) : #(Set.Iio x) < #μ :=
 /-- Initial segments (sets of the form `{y | y ≤ x}`) have cardinality `< μ`. -/
 theorem card_Iic_lt (x : μ) : #(Set.Iic x) < #μ := by
   rw [← Set.Iio_union_right, mk_union_of_disjoint, mk_singleton]
+  -- TODO: This isn't the morally correct proof because it uses the fact `μ` is a limit cardinal.
   · exact (add_one_le_succ _).trans_lt (μ_isStrongLimit.isLimit.succ_lt (card_Iio_lt x))
   · simp
 
