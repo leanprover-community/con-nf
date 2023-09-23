@@ -278,6 +278,107 @@ theorem reorder_isEquiv (S : OrdSupport β) (r : Tree Reorder β) (h : S.Reorder
   · intros
     rw [cpos_reorder, h.invFun_toFun]
 
+theorem subset_or_subset_of_le_equiv {S₁ S₂ T₁ T₂ : OrdSupport β}
+    (h₁ : S₁ ≤ T₁) (h₂ : S₂ ≤ T₂) (hT : T₁ ≈ T₂) :
+    (∀ c, c ∈ S₁ → c ∈ S₂) ∨ (∀ c, c ∈ S₂ → c ∈ S₁) := by
+  rw [or_iff_not_imp_left]
+  intro h c hc₂
+  by_contra hc₁
+  simp only [not_forall, exists_prop] at h
+  obtain ⟨d, hd₁, hd₂⟩ := h
+  have h₁' := h₁.get_lt_get d c hd₁ (h₁.mem_of_mem d hd₁) hc₁ (hT.mem_left (h₂.mem_of_mem c hc₂))
+  have h₂' := h₂.get_lt_get c d hc₂ (h₂.mem_of_mem c hc₂) hd₂ (hT.mem_right (h₁.mem_of_mem d hd₁))
+  rw [← hT.lt_iff_lt (hT.mem_left (h₂.mem_of_mem c hc₂)) _ (h₁.mem_of_mem d hd₁)] at h₂'
+  exact not_lt_of_lt h₁' h₂'
+
+/-- If `ρ` maps `S` to an initial segment of itself, it is an order isomorphism. -/
+theorem lt_iff_lt_of_le_equiv {S T₁ T₂ : OrdSupport β} {ρ : Allowable β}
+    (h₁ : ρ • S ≤ T₁) (h₂ : S ≤ T₂) (hT : T₁ ≈ T₂)
+    (h : ∀ c, c ∈ S → ρ • c ∈ S)
+    (c d : SupportCondition β) (hc : c ∈ S) (hd : d ∈ S) :
+    (S.cpos c).get hc < (S.cpos d).get hd ↔
+    (S.cpos (ρ • c)).get (h c hc) < (S.cpos (ρ • d)).get (h d hd) := by
+  simp_rw [← smul_cpos_smul (ρ := ρ) (c := c), ← smul_cpos_smul (ρ := ρ) (c := d)]
+  rw [h₁.get_eq_get _ _ (h₁.mem_of_mem _ (smul_mem_smul.mpr hc)),
+    h₁.get_eq_get _ _ (h₁.mem_of_mem _ (smul_mem_smul.mpr hd)),
+    h₂.get_eq_get _ _ (hT.mem_right (h₁.mem_of_mem _ (smul_mem_smul.mpr hc))),
+    h₂.get_eq_get _ _ (hT.mem_right (h₁.mem_of_mem _ (smul_mem_smul.mpr hd))),
+    hT.lt_iff_lt]
+
+/-- If `ρ` maps `S` to an initial segment of itself, it is the identity function. -/
+theorem smul_eq_of_le_equiv' {S T₁ T₂ : OrdSupport β} {ρ : Allowable β}
+    (h₁ : ρ • S ≤ T₁) (h₂ : S ≤ T₂) (hT : T₁ ≈ T₂)
+    (h : ∀ c, c ∈ S → ρ • c ∈ S)
+    (c : SupportCondition β) (hc : c ∈ S) :
+    ρ • c = c := by
+  letI hwo : IsWellOrder (Atom ⊕ NearLitter) (· < ·) := inferInstance
+  letI hlo : LinearOrder (Atom ⊕ NearLitter) := inferInstance
+  letI hpo : Preorder (Atom ⊕ NearLitter) := hlo.toPreorder
+  refine hwo.wf.induction _
+    (C := fun x => ∀ c, ∀ hc : c ∈ S, (S.cpos c).get hc = x → ρ • c = c)
+    ?_ c hc rfl
+  clear hc c
+  rintro _ ih c hc rfl
+  have hc'' : c ∈ ρ • S
+  · by_contra hc''
+    have := h₁.get_lt_get (ρ • c) c
+      (smul_mem_smul.mpr hc) (h₁.mem_of_mem _ (smul_mem_smul.mpr hc))
+      hc'' (hT.mem_left (h₂.mem_of_mem _ hc))
+    rw [hT.lt_iff_lt _ (h₂.mem_of_mem _ (h c hc)) (hT.mem_left (h₂.mem_of_mem _ hc))
+      (h₂.mem_of_mem _ hc)] at this
+    rw [← h₂.get_eq_get _ (h c hc), ← h₂.get_eq_get _ hc] at this
+    have h := ih _ this (ρ • c) (h c hc) rfl
+    rw [smul_left_cancel_iff] at h
+    simp_rw [h] at this
+    exact this.false
+  refine S.injective (ρ • c) c (h c hc) hc rfl ?_
+  by_contra' hc'
+  obtain (hc' | hc') := lt_or_gt_of_ne hc'
+  · have := ih _ hc' (ρ • c) (h c hc) rfl
+    rw [smul_left_cancel_iff] at this
+    simp_rw [this] at hc'
+    exact hc'.false
+  · rw [gt_iff_lt] at hc'
+    have := lt_iff_lt_of_le_equiv h₁ h₂ hT h (ρ⁻¹ • c) c hc'' hc
+    simp only [smul_inv_smul, hc', iff_true] at this
+    have h := ih _ this (ρ⁻¹ • c) hc'' rfl
+    rw [smul_inv_smul] at h
+    simp_rw [← h] at this
+    exact this.false
+
+/-- `ρ` is an order isomorphism. -/
+theorem smul_eq_of_le_equiv {S T₁ T₂ : OrdSupport β} {ρ : Allowable β}
+    (h₁ : ρ • S ≤ T₁) (h₂ : S ≤ T₂) (hT : T₁ ≈ T₂)
+    (c : SupportCondition β) (hc : c ∈ S) :
+    ρ • c = c := by
+  obtain (h | h) := subset_or_subset_of_le_equiv h₁ h₂ hT
+  · refine smul_eq_of_le_equiv' h₁ h₂ hT ?_ c hc
+    intro c hc
+    exact h (ρ • c) (smul_mem_smul.mpr hc)
+  · have := smul_eq_of_le_equiv' (ρ := ρ⁻¹) (by rwa [inv_smul_smul]) h₁ hT.symm ?_
+    · rw [← this (ρ • c) (smul_mem_smul.mpr hc), inv_smul_smul]
+    · intro c hc
+      exact h (ρ⁻¹ • c) hc
+
+theorem equiv_of_le_equiv {S T₁ T₂ : OrdSupport β} {ρ : Allowable β}
+    (h₁ : ρ • S ≤ T₁) (h₂ : S ≤ T₂) (hT : T₁ ≈ T₂) : ρ • S ≈ S := by
+  constructor
+  · intro c hc
+    rw [smul_mem, ← smul_eq_of_le_equiv h₁ h₂ hT c hc, inv_smul_smul]
+    exact hc
+  · intro c hc
+    have := smul_eq_of_le_equiv h₁ h₂ hT (ρ⁻¹ • c) hc
+    rw [smul_inv_smul] at this
+    rw [this]
+    exact hc
+  · intro c d hc₁ hc₂ hd₁ hd₂
+    rw [h₁.get_eq_get c hc₁ (h₁.mem_of_mem c hc₁),
+      h₁.get_eq_get d hd₁ (h₁.mem_of_mem d hd₁),
+      h₂.get_eq_get c hc₂ (h₂.mem_of_mem c hc₂),
+      h₂.get_eq_get d hd₂ (h₂.mem_of_mem d hd₂)]
+    exact hT.lt_iff_lt
+      (h₁.mem_of_mem c hc₁) (h₂.mem_of_mem c hc₂) (h₁.mem_of_mem d hd₁) (h₂.mem_of_mem d hd₂)
+
 end OrdSupport
 
 def OrdSupportClass (β : Iic α) : Type u :=

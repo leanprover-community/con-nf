@@ -231,24 +231,15 @@ def raiseSingletons (β : Iio α) (t : Tangle (top α)) : Set (CodingClass (top 
     (raisedSupport_supports (reducedSupport α t) u (reducedSupport α t).small)) ''
       tangleExtension β t
 
--- TODO: Change defn of `≤` to make this true.
-theorem equiv_of_le_equiv {β : Iic α} (S₁ S₂ T₁ T₂ : OrdSupport β)
-    (h₁ : S₁ ≤ T₁) (h₂ : S₂ ≤ T₂) (hT : T₁ ≈ T₂) : S₁ ≈ S₂ := by
-  sorry
-
 theorem smul_reducedSupport_eq (β : Iio α) (t : Tangle (top α)) (V : OrdSupport (top α))
     (hUV : OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small ≤ V)
     (v : Tangle β) (ρ : Allowable (top α))
     (hVW : ρ • raisedSupport (reducedSupport α t) v (reducedSupport α t).small ≈ V)
     (c : SupportCondition (top α)) (hc : c ∈ (reducedSupport α t).carrier) : ρ • c = c := by
-  have := equiv_of_le_equiv
-    (OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small)
-    (ρ • OrdSupport.strongSupport (reducedSupport α t) (reducedSupport α t).small)
-    V
-    (ρ • raisedSupport (reducedSupport α t) v (reducedSupport α t).small)
-    hUV (OrdSupport.smul_le_smul (strongSupport_le_raisedSupport β t v) ρ) hVW.symm
-  have hc' := OrdSupport.cpos_smul_eq_cpos ρ this.symm c hc
-  have hS₁ := OrdSupport.smul_eq_of_smul_equiv ρ this.symm
+  have := OrdSupport.equiv_of_le_equiv
+    (OrdSupport.smul_le_smul (strongSupport_le_raisedSupport β t v) ρ) hUV hVW
+  have hc' := OrdSupport.cpos_smul_eq_cpos ρ this c hc
+  have hS₁ := OrdSupport.smul_eq_of_smul_equiv ρ this
   have hS₂ := OrdSupport.strongSupport_strong (reducedSupport α t) (reducedSupport α t).small ?_ ?_
   · simp_rw [OrdSupport.smul_cpos] at hc'
     rw [hS₂.cpos_get_eq, hS₂.cpos_get_eq] at hc'

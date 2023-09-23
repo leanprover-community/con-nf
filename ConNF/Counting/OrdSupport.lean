@@ -84,6 +84,10 @@ theorem smul_cpos {ρ : Allowable β} {S : OrdSupport β} {c : SupportCondition 
     (ρ • S).cpos c = S.cpos (ρ⁻¹ • c) :=
   rfl
 
+theorem smul_cpos_rev {ρ : Allowable β} {S : OrdSupport β} {c : SupportCondition β} :
+    S.cpos (ρ • c) = (ρ⁻¹ • S).cpos c := by
+  simp only [smul_cpos, inv_inv]
+
 theorem smul_cpos_smul {ρ : Allowable β} {S : OrdSupport β} {c : SupportCondition β} :
     (ρ • S).cpos (ρ • c) = S.cpos c := by
   simp only [smul_cpos, inv_smul_smul]
@@ -213,14 +217,18 @@ theorem smul_strongSupport_eq (S : Set (SupportCondition β)) (hS : Small S) (ρ
   · simp only [smul_cpos, strongSupport_cpos]
     conv_lhs => rw [← h _ hcT, inv_smul_smul]
 
-/-- `T` *specialises* `S` if it is defined wherever `S` is, and agrees with it there. -/
-structure Specialises (T S : OrdSupport β) : Prop where
+/-- `T` *extends* `S` if it is defined wherever `S` is, and agrees with it there, and any
+extra support conditions come after all those in `S`. -/
+structure Extends (T S : OrdSupport β) : Prop where
   mem_of_mem (c : SupportCondition β) : c ∈ S → c ∈ T
   get_eq_get (c : SupportCondition β) (hS : c ∈ S) (hT : c ∈ T) :
     (S.cpos c).get hS = (T.cpos c).get hT
+  /-- If `c` is in `S ∩ T` and `d` is in `T \ S`, then `c` comes before `d`. -/
+  get_lt_get (c d : SupportCondition β) (hcS : c ∈ S) (hcT : c ∈ T) (hdS : d ∉ S) (hdT : d ∈ T) :
+    (T.cpos c).get hcT < (T.cpos d).get hdT
 
 instance : LE (OrdSupport β) where
-  le S T := Specialises T S
+  le S T := Extends T S
 
 instance : PartialOrder (OrdSupport β) where
   le_refl S := by
@@ -229,12 +237,19 @@ instance : PartialOrder (OrdSupport β) where
       exact hc
     · intros
       rfl
+    · intro c d _ _ hdS hdT
+      cases hdS hdT
   le_trans S T U hST hTU := by
     constructor
     · intro c hc
       exact hTU.mem_of_mem c (hST.mem_of_mem c hc)
     · intro c hS hU
       rw [hST.get_eq_get c hS (hST.mem_of_mem c hS), hTU.get_eq_get c (hST.mem_of_mem c hS) hU]
+    · intro c d hcS hcU hdS hdU
+      by_cases hdT : d ∈ T
+      · rw [← hTU.get_eq_get c (hST.mem_of_mem c hcS) hcU, ← hTU.get_eq_get d hdT hdU]
+        exact hST.get_lt_get c d hcS (hST.mem_of_mem c hcS) hdS hdT
+      · exact hTU.get_lt_get c d (hST.mem_of_mem c hcS) hcU hdT hdU
   le_antisymm S T hST hTS := by
     ext c hS hT
     · constructor
@@ -244,10 +259,12 @@ instance : PartialOrder (OrdSupport β) where
 
 theorem smul_le_smul {S T : OrdSupport β} (h : S ≤ T) (ρ : Allowable β) : ρ • S ≤ ρ • T := by
   constructor
-  · intro c hc
-    exact h.mem_of_mem (ρ⁻¹ • c) hc
-  · intro c hS hT
-    exact h.get_eq_get (ρ⁻¹ • c) hS hT
+  · intro c
+    exact h.mem_of_mem (ρ⁻¹ • c)
+  · intro c
+    exact h.get_eq_get (ρ⁻¹ • c)
+  · intro c d
+    exact h.get_lt_get (ρ⁻¹ • c) (ρ⁻¹ • d)
 
 theorem smul_le_iff_le_inv {S T : OrdSupport β} (ρ : Allowable β) : S ≤ ρ⁻¹ • T ↔ ρ • S ≤ T := by
   constructor
