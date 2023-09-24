@@ -391,6 +391,17 @@ def mk (S : OrdSupport β) : OrdSupportClass β := ⟦S⟧
 protected theorem eq {S T : OrdSupport β} : mk S = mk T ↔ S ≈ T :=
   Quotient.eq
 
+theorem exists_rep (S : OrdSupportClass β) : ∃ S', mk S' = S :=
+  Quotient.exists_rep S
+
+instance : Membership (SupportCondition β) (OrdSupportClass β) where
+  mem c := Quotient.lift (c ∈ ·) (fun _ _ h => propext (OrdSupport.mem_iff_mem h c))
+
+@[simp]
+theorem mem_mk_iff (S : OrdSupport β) (c : SupportCondition β) :
+    c ∈ mk S ↔ c ∈ S :=
+  Iff.rfl
+
 def Strong (S : OrdSupportClass β) : Prop :=
   ∃ S' : OrdSupport β, S'.Strong ∧ S = mk S'
 
@@ -411,10 +422,41 @@ instance : MulAction (Allowable β) (OrdSupportClass β) where
     change ∀ S, mk ((ρ₁ * ρ₂) • S) = mk (ρ₁ • ρ₂ • S)
     simp only [mul_smul, implies_true]
 
+-- TODO: rename to mk_smul
 @[simp]
 theorem smul_mk (ρ : Allowable β) (S : OrdSupport β) :
     mk (ρ • S) = ρ • (mk S) :=
   rfl
+
+instance : LE (OrdSupportClass β) where
+  le S T := ∀ S', mk S' = S → ∃ T', mk T' = T ∧ S' ≤ T'
+
+-- TODO: Might want to prove this is a partial order
+
+theorem smul_le_smul {S T : OrdSupportClass β} (h : S ≤ T) (ρ : Allowable β) :
+    ρ • S ≤ ρ • T := by
+  rintro U hUS
+  have := h (ρ⁻¹ • U) ?_
+  swap
+  · rw [smul_mk, inv_smul_eq_iff]
+    exact hUS
+  obtain ⟨V, rfl, hV⟩ := this
+  refine ⟨ρ • V, rfl, ?_⟩
+  have := OrdSupport.smul_le_smul hV ρ
+  rw [smul_inv_smul] at this
+  exact this
+
+theorem smul_le_iff_le_inv {S T : OrdSupportClass β} (ρ : Allowable β) :
+    S ≤ ρ⁻¹ • T ↔ ρ • S ≤ T := by
+  constructor
+  · intro h
+    have := smul_le_smul h ρ
+    rw [smul_inv_smul] at this
+    exact this
+  · intro h
+    have := smul_le_smul h ρ⁻¹
+    rw [inv_smul_smul] at this
+    exact this
 
 end OrdSupportClass
 

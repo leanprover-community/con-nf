@@ -219,7 +219,7 @@ theorem ordSupportOfMem_mem_codingFunctionOfMem
     ordSupportOfMem h ∈ codingFunctionOfMem h :=
   h.choose_spec.2.choose_spec.2
 
-theorem exists_rep_of_mem {c : CodingClass β} {S : OrdSupport β} (h : OrdSupportClass.mk S ∈ c) :
+theorem exists_rep_of_mk_mem {c : CodingClass β} {S : OrdSupport β} (h : OrdSupportClass.mk S ∈ c) :
     ∃ χ, mk χ = c ∧ S ∈ χ := by
   obtain ⟨T, hT, χ, hχ, h⟩ := h
   obtain ⟨r, hr⟩ := OrdSupport.exists_isEquiv_of_equiv (OrdSupportClass.eq.mp hT)
@@ -229,26 +229,31 @@ theorem exists_rep_of_mem {c : CodingClass β} {S : OrdSupport β} (h : OrdSuppo
     exact CodingClass.eq.mpr (CodingFunction.reorder_equiv χ r _)
   · exact CodingFunction.mem_of_mem_of_isEquiv hr (CodingFunction.reorder_isEquiv χ r _) h
 
-theorem exists_rep_of_mk_mem_mk {χ : CodingFunction β} {S : OrdSupport β}
-    (h : OrdSupportClass.mk S ∈ mk χ) :
-    ∃ T, T ≈ S ∧ T ∈ χ := by
+theorem exists_rep_of_mem_mk {χ : CodingFunction β} {S : OrdSupportClass β}
+    (h : S ∈ mk χ) :
+    ∃ T, OrdSupportClass.mk T = S ∧ T ∈ χ := by
   obtain ⟨T, hT, χ', hχ', h⟩ := h
   obtain ⟨r, hr⟩ := CodingFunction.exists_isEquiv_of_equiv (CodingClass.eq.mp hχ')
   refine ⟨T.reorder r ?_, ?_,  ?_⟩
   · exact CodingFunction.reorderSupports_of_isEquiv hr T h
   · have := OrdSupport.reorder_equiv T r (CodingFunction.reorderSupports_of_isEquiv hr T h)
-    exact this.trans (OrdSupportClass.eq.mp hT)
+    exact (OrdSupportClass.eq.mpr this).trans hT
   · rw [← CodingFunction.mem_iff_mem_of_isEquiv
       (OrdSupport.reorder_isEquiv T r (CodingFunction.reorderSupports_of_isEquiv hr T h)) hr]
     exact h
 
-theorem smul_mem {c : CodingClass β} {S : OrdSupport β}
-    (ρ : Allowable β) (h : OrdSupportClass.mk S ∈ c) :
-    OrdSupportClass.mk (ρ • S) ∈ c := by
+theorem smul_mem {c : CodingClass β} {S : OrdSupportClass β}
+    (ρ : Allowable β) (h : S ∈ c) : ρ • S ∈ c := by
   obtain ⟨T, ht, χ, hχ, h⟩ := h
   refine ⟨ρ • T, ?_, χ, hχ, CodingFunction.smul_mem ρ h⟩
   simp only [OrdSupportClass.smul_mk, smul_left_cancel_iff]
   exact ht
+
+theorem mem_of_smul_mem {c : CodingClass β} {S : OrdSupportClass β} {ρ : Allowable β}
+    (h : ρ • S ∈ c) : S ∈ c := by
+  have := smul_mem ρ⁻¹ h
+  rw [inv_smul_smul] at this
+  exact this
 
 noncomputable def decode (c : CodingClass β) (o : OrdSupportClass β) (h : o ∈ c) : Tangle β :=
   ((codingFunctionOfMem h).decode (ordSupportOfMem h)).get
@@ -265,6 +270,14 @@ theorem decode_mk_eq_decode {S : OrdSupport β} {χ : CodingFunction β} (h : S 
   exact (CodingFunction.decode_eq_decode_of_equiv h
     (ordSupportOfMem_mem_codingFunctionOfMem h')
     (equiv_ordSupportOfMem h') (equiv_codingFunctionOfMem h')).symm
+
+theorem decode_smul {c : CodingClass β} (S : OrdSupportClass β) (ρ : Allowable β) (h : ρ • S ∈ c) :
+    c.decode (ρ • S) h = ρ • c.decode S (mem_of_smul_mem h) := by
+  obtain ⟨S, rfl⟩ := S.exists_rep
+  obtain ⟨χ, rfl, hχ⟩ := exists_rep_of_mk_mem h
+  simp_rw [← OrdSupportClass.smul_mk]
+  rw [decode_mk_eq_decode hχ, decode_mk_eq_decode (CodingFunction.mem_of_smul_mem hχ),
+    χ.decode_smul]
 
 end CodingClass
 
