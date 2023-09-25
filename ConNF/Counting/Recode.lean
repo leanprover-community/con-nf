@@ -1,4 +1,5 @@
 import ConNF.Structural.Pretangle
+import ConNF.Counting.OrdSupportExtend
 import ConNF.Counting.OrdSupportOrbit
 import ConNF.Counting.CodingFunctionEquiv
 
@@ -259,7 +260,11 @@ theorem raiseSingletons_reducedSupport (β : Iio α) (t : Tangle (top α)) :
     refine ⟨?_, CodingClass.mk_mem_mk_of_mem (CodingFunction.mem_code_self), ?_⟩
     · have := strongSupport_le_raisedSupport β t u
       intro S hS
-      sorry
+      refine ⟨S.extend (reduction α (raise '' (reducedSupport α u).carrier))
+        (reduction_small _ (Small.image (reduction_small α (designatedSupport u).small))), ?_, ?_⟩
+      · rw [OrdSupportClass.eq] at hS ⊢
+        exact OrdSupport.extend_equiv _ _ _ _ hS
+      · exact OrdSupport.le_extend _ _ _
     · simp only [CodingFunction.mem_code_self, CodingClass.decode_mk_eq_decode,
         CodingFunction.code_decode, Part.get_some]
       rw [singleton_toPretangle, mem_singleton_iff]
