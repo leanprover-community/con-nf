@@ -1,6 +1,6 @@
 import ConNF.Foa.Basic.Flexible
 import ConNF.Foa.Approximation.StructApprox
-import ConNF.Foa.Action.NearLitterAction
+import ConNF.Foa.Action.Complete
 
 open Cardinal Quiver Set Sum WithBot
 
@@ -13,7 +13,7 @@ namespace ConNF
 variable [Params.{u}]
 
 /-!
-# Tree actions
+# Structural actions
 -/
 
 /-- A `β`-structural action is a product that assigns a near-litter action to each `β`-extended

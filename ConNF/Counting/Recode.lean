@@ -250,8 +250,7 @@ theorem raiseSingletons_reducedSupport (S : OrdSupport β) (t : Tangle β)
     obtain ⟨u, rfl⟩ := eq_toPretangle_of_mem β γ (coe_lt_coe.mpr hγ) t u hu
     refine ⟨_, ⟨u, hu, rfl⟩, OrdSupportClass.mk (raisedSupport hγ S u), ?_⟩
     refine ⟨?_, CodingClass.mk_mem_mk_of_mem (CodingFunction.mem_code_self), ?_⟩
-    · have := le_raisedSupport hγ S u
-      intro S hS
+    · intro S hS
       refine ⟨S.extend (reduction α (raise hγ '' (reducedSupport α u).carrier))
         (reduction_small _ (Small.image (reduction_small α (designatedSupport u).small))), ?_, ?_⟩
       · rw [OrdSupportClass.eq] at hS ⊢
