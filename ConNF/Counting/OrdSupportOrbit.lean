@@ -37,12 +37,30 @@ instance : SetLike (OrdSupportOrbit β) (OrdSupport β) where
 theorem mem_mk (S : OrdSupport β) : S ∈ mk S :=
   rfl
 
-theorem mem_mk_def (S T : OrdSupport β) : S ∈ mk T ↔ mk S = mk T := Iff.rfl
+theorem mem_def (S : OrdSupport β) (o : OrdSupportOrbit β) : S ∈ o ↔ mk S = o := Iff.rfl
 
 @[simp]
 theorem mem_mk_iff (S T : OrdSupport β) : S ∈ mk T ↔ S ∈ orbit (Allowable β) T := by
-  rw [mem_mk_def, mk, mk, ← orbitRel_apply, Quotient.eq (r := _)]
+  rw [mem_def, mk, mk, ← orbitRel_apply, Quotient.eq (r := _)]
   rfl
+
+theorem smul_mem_of_mem {S : OrdSupport β} {o : OrdSupportOrbit β} (ρ : Allowable β) (h : S ∈ o) :
+    ρ • S ∈ o := by
+  refine Quotient.inductionOn o ?_ h
+  intro T hST
+  change _ ∈ mk _ at hST ⊢
+  rw [mem_mk_iff] at hST ⊢
+  obtain ⟨ρ', rfl⟩ := hST
+  rw [smul_smul]
+  exact ⟨ρ * ρ', rfl⟩
+
+theorem smul_mem_iff_mem {S : OrdSupport β} {o : OrdSupportOrbit β} (ρ : Allowable β) :
+    ρ • S ∈ o ↔ S ∈ o := by
+  refine ⟨?_, smul_mem_of_mem ρ⟩
+  intro h
+  have := smul_mem_of_mem ρ⁻¹ h
+  rw [inv_smul_smul] at this
+  exact this
 
 noncomputable def out (o : OrdSupportOrbit β) : OrdSupport β :=
   Quotient.out (s := _) o
@@ -86,11 +104,11 @@ instance : SetLike (OrdSupportClassOrbit β) (OrdSupportClass β) where
 theorem mem_mk (S : OrdSupportClass β) : S ∈ mk S :=
   rfl
 
-theorem mem_mk_def (S T : OrdSupportClass β) : S ∈ mk T ↔ mk S = mk T := Iff.rfl
+theorem mem_def (S : OrdSupportClass β) (o : OrdSupportClassOrbit β) : S ∈ o ↔ mk S = o := Iff.rfl
 
 @[simp]
 theorem mem_mk_iff (S T : OrdSupportClass β) : S ∈ mk T ↔ S ∈ orbit (Allowable β) T := by
-  rw [mem_mk_def, mk, mk, ← orbitRel_apply, Quotient.eq (r := _)]
+  rw [mem_def, mk, mk, ← orbitRel_apply, Quotient.eq (r := _)]
   rfl
 
 @[simp]
@@ -140,6 +158,18 @@ theorem mk_mem_of_mem_orbit {S : OrdSupport β} {o : OrdSupportOrbit β} {co : O
   subst ho
   obtain ⟨ρ, rfl⟩ := hS
   simp only [ofOrbit_mk, mem_mk_iff, mem_orbit_self]
+
+theorem ofOrbit_eq_ofOrbit {o₁ o₂ : OrdSupportOrbit β} (h : ofOrbit o₁ = ofOrbit o₂) :
+    ∃ S T, S ∈ o₁ ∧ T ∈ o₂ ∧ S ≈ T := by
+  have h₁ := OrdSupportOrbit.eq_mk_of_mem o₁.out_mem
+  have h₂ := OrdSupportOrbit.eq_mk_of_mem o₂.out_mem
+  rw [h₁, h₂, ofOrbit_mk, ofOrbit_mk, OrdSupportClassOrbit.eq] at h
+  obtain ⟨ρ, h⟩ := h
+  dsimp only at h
+  rw [← OrdSupportClass.smul_mk, OrdSupportClass.eq] at h
+  refine ⟨o₁.out, ρ • o₂.out, o₁.out_mem, ?_, h.symm⟩
+  rw [OrdSupportOrbit.smul_mem_iff_mem]
+  exact OrdSupportOrbit.out_mem o₂
 
 end OrdSupportClassOrbit
 
