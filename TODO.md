@@ -9,5 +9,3 @@
 - Reformat lines containing only `by`.
 - Change `refine'` to new variants.
 - Remove unnecessary instances of `*_eta` lemmas.
-- Make `Counting` use `beta, gamma : Iic alpha` instead of `top alpha, beta : Iic alpha`.
-  Then we don't need an IH in the main induction at all.
