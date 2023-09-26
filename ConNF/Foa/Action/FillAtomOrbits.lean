@@ -225,7 +225,7 @@ theorem nextBackwardImage_eq {L₁ L₂ : Litter} {a b : ℕ × φ.needBackwardI
 
 theorem nextForwardImage_injective {L : Litter} {a b : ℕ × φ.needForwardImages}
     (h : φ.nextForwardImage hφ L a = φ.nextForwardImage hφ L b) : a = b := by
-  simp only [nextForwardImage._eq_1, Subtype.coe_inj, EmbeddingLike.apply_eq_iff_eq, inr.injEq,
+  simp only [nextForwardImage, Subtype.coe_inj, EmbeddingLike.apply_eq_iff_eq, inr.injEq,
     Prod.mk.injEq, add_left_inj] at h
   exact Prod.ext h.1 h.2
 
