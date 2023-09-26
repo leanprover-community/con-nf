@@ -32,8 +32,7 @@ jobs:
           ~/.elan/bin/lake -Kenv=dev build
 
       - name: check environments using lean4checker
-        run: |
-          grep -h '^import ConNF.' ConNF/*.lean | sed 's/import //' | xargs -n 1 -P 8 lean4checker/build/bin/lean4checker
+        run: ~/.elan/bin/lake -Kenv=dev env lean4checker/build/bin/lean4checker
 
       - name: build documentation
         run: ~/.elan/bin/lake -Kenv=dev build ConNF:docs
