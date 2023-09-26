@@ -281,8 +281,8 @@ def nextImageCoreDomain : Set Atom :=
         (fun b => b ∈ φ.nextForwardImageDomain hφ L)}
 
 theorem nextImageCoreDomain_small : Small (φ.nextImageCoreDomain hφ) :=
-  Small.bUnion (φ.litterPerm_domain_small hφ) fun L _ =>
-    Small.image (lt_of_le_of_lt (Cardinal.mk_subtype_le _) (φ.orbitSet_small L))
+  Small.bUnion (φ.litterPerm_domain_small hφ)
+    (fun L _ => Small.image (lt_of_le_of_lt (Cardinal.mk_subtype_le _) (φ.orbitSet_small L)))
 
 theorem litter_map_dom_of_mem_nextImageCoreDomain {a : Atom} (h : a ∈ φ.nextImageCoreDomain hφ) :
     a.1 ∈ (φ.litterPerm hφ).domain := by
@@ -309,8 +309,8 @@ theorem mem_orbitSet_of_mem_nextImageCoreDomain {a : Atom} (h : a ∈ φ.nextIma
 theorem orbitSetEquiv_elim_of_mem_nextImageCoreDomain
     {a : Atom} (h : a ∈ φ.nextImageCoreDomain hφ) :
     (φ.orbitSetEquiv a.1 ⟨a, φ.mem_orbitSet_of_mem_nextImageCoreDomain hφ h⟩).elim
-      (fun c => c ∈ φ.nextBackwardImageDomain hφ a.1)
-      (fun c => c ∈ φ.nextForwardImageDomain hφ a.1) := by
+      (· ∈ φ.nextBackwardImageDomain hφ a.1)
+      (· ∈ φ.nextForwardImageDomain hφ a.1) := by
   rw [nextImageCoreDomain] at h
   simp only [PFun.mem_dom, iUnion_exists, mem_iUnion, mem_image, mem_setOf_eq, SetCoe.exists,
     Subtype.coe_mk, exists_and_right, exists_eq_right, exists_prop] at h
@@ -533,7 +533,6 @@ theorem nextImageCore_atom_mem_litter_map (a : Atom) (ha : a ∈ φ.nextImageCor
     φ.nextImageCore hφ a a.fst (φ.mem_orbitSet_of_mem_nextImageCoreDomain hφ ha) ∈
       litterSet (φ.litterPerm hφ a.fst) := by
   have hL := φ.litter_map_dom_of_mem_nextImageCoreDomain hφ ha
-  have := φ.mem_orbitSet_of_mem_nextImageCoreDomain hφ ha
   obtain ⟨a', ha'⟩ := (φ.orbitSetEquiv a.fst).symm.surjective
     ⟨a, φ.mem_orbitSet_of_mem_nextImageCoreDomain hφ ha⟩
   have := φ.orbitSetEquiv_elim_of_mem_nextImageCoreDomain hφ ha
@@ -546,8 +545,8 @@ theorem nextImageCore_atom_mem_litter_map (a : Atom) (ha : a ∈ φ.nextImageCor
     · exact ha''.symm
     · exact hL
     · exact this.1
-  exact (φ.orbitSet_subset _ ((φ.orbitSetEquiv _).symm _).prop).1
-  exact (φ.orbitSet_subset _ ((φ.orbitSetEquiv _).symm _).prop).1
+  · exact (φ.orbitSet_subset _ ((φ.orbitSetEquiv _).symm _).prop).1
+  · exact (φ.orbitSet_subset _ ((φ.orbitSetEquiv _).symm _).prop).1
 
 theorem nextImageCore_not_mem_ran (a : Atom) (ha : a ∈ φ.nextImageCoreDomain hφ) :
     φ.nextImageCore hφ a a.fst (φ.mem_orbitSet_of_mem_nextImageCoreDomain hφ ha) ∉
@@ -579,26 +578,23 @@ theorem nextImageCore_atom_mem
         (φ.litterMap L).get hL := by
   have ha' := φ.nextImageCore_atom_mem_litter_map hφ a ha
   rw [mem_litterSet] at ha'
+  have hL' := litterPerm_apply_eq (hφ := hφ) L hL
+  rw [φ.roughLitterMapOrElse_of_dom hL] at hL'
+  have := not_mem_subset (hdiff _ hL) (φ.nextImageCore_not_mem_ran hφ a ha)
   constructor
   · rintro rfl
-    have := not_mem_subset (hdiff _ hL) (φ.nextImageCore_not_mem_ran hφ a ha)
     simp only [mem_symmDiff, SetLike.mem_coe, mem_litterSet, not_or, not_and_or,
       Classical.not_not] at this
     refine' this.2.resolve_left (not_not.mpr _)
-    rw [ha']
-    rw [litterPerm_apply_eq _ hL]
-    rw [φ.roughLitterMapOrElse_of_dom]
+    rw [ha', hL']
   · intro h
-    have hL' := litterPerm_apply_eq (hφ := hφ) L hL
-    rw [φ.roughLitterMapOrElse_of_dom hL] at hL'
-    have := not_mem_subset (hdiff _ hL) (φ.nextImageCore_not_mem_ran hφ a ha)
     simp only [mem_symmDiff, SetLike.mem_coe, h, mem_litterSet, true_and, not_true, and_false,
       or_false, not_not] at this
     rw [ha', ← hL', ← LocalPerm.eq_symm_apply, LocalPerm.left_inv] at this
-    exact this
-    exact Or.inl (Or.inl (Or.inl hL))
-    exact φ.litter_map_dom_of_mem_nextImageCoreDomain hφ ha
-    exact LocalPerm.map_domain _ (Or.inl (Or.inl (Or.inl hL)))
+    · exact this
+    · exact Or.inl (Or.inl (Or.inl hL))
+    · exact φ.litter_map_dom_of_mem_nextImageCoreDomain hφ ha
+    · exact LocalPerm.map_domain _ (Or.inl (Or.inl (Or.inl hL)))
 
 theorem orbitSetEquiv_atom_mem
     (hdiff : ∀ L hL,
