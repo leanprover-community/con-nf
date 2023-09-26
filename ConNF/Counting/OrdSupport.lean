@@ -32,6 +32,10 @@ instance : CoeTC (OrdSupport β) (Set (SupportCondition β)) where
 instance : Membership (SupportCondition β) (OrdSupport β) where
   mem c S := c ∈ S.carrier
 
+@[simp]
+theorem mem_carrier_iff {c : SupportCondition β} : c ∈ S.carrier ↔ c ∈ S :=
+  Iff.rfl
+
 instance : CoeSort (OrdSupport β) (Type _) :=
   ⟨fun S => { x : SupportCondition β // x ∈ S }⟩
 
@@ -62,6 +66,16 @@ theorem ext {S T : OrdSupport β} (h₁ : S ⊆ T) (h₂ : T ⊆ S)
   simp only [mk.injEq, heq_eq_eq, true_and]
   ext c d
   exact h c d
+
+noncomputable def recursion {motive : S → Sort _} (c : S)
+    (h : (c : S) → ((d : S) → d < c → motive d) → motive c) :
+    motive c :=
+  S.isWellOrder.wf.recursion c h
+
+theorem induction {motive : S → Prop} (c : S)
+    (h : (c : S) → ((d : S) → d < c → motive d) → motive c) :
+    motive c :=
+  S.isWellOrder.wf.induction c h
 
 instance : SMul (Allowable β) (OrdSupport β) where
   smul ρ S := {
@@ -97,6 +111,41 @@ theorem smul_mem_inv {ρ : Allowable β} {S : OrdSupport β} {c : SupportConditi
 theorem lt_iff_smul {ρ : Allowable β} {S : OrdSupport β} {c d : ρ • S} :
     c < d ↔ (⟨ρ⁻¹ • c.val, c.prop⟩ : S) < ⟨ρ⁻¹ • d.val, d.prop⟩ :=
   Iff.rfl
+
+theorem lt_iff_smul' {S : OrdSupport β} {c d : S} (ρ : Allowable β) :
+    c < d ↔
+    (⟨ρ • c.val, smul_mem_smul.mpr c.prop⟩ : ρ • S) < ⟨ρ • d.val, smul_mem_smul.mpr d.prop⟩ := by
+  simp only [lt_iff_smul, inv_smul_smul, Subtype.coe_eta]
+
+theorem lt_iff_lt_of_smul_eq {S T : OrdSupport β} (c d : T) (h : S = T)
+    (hc : c.val ∈ S) (hd : d.val ∈ S) :
+    (⟨c, hc⟩ : S) < ⟨d, hd⟩ ↔ c < d := by
+  subst h
+  rfl
+
+theorem smul_eq_of_smul_eq (ρ : Allowable β) {S : OrdSupport β} (c : S) :
+    ρ • S = S → ρ • c.val = c.val := by
+  intro hS
+  refine S.induction (motive := fun c => ρ • c.val = c.val) c ?_
+  intro c ih
+  have hc : ρ • c.val ∈ S
+  · conv_rhs => rw [← hS]
+    exact smul_mem_smul.mpr c.prop
+  have hc' : c.val ∈ ρ • S
+  · rw [hS]
+    exact c.prop
+  obtain (h | h | h) := lt_trichotomy ⟨ρ • c.val, hc⟩ c
+  · have := ih ⟨ρ • c.val, hc⟩ h
+    simp only [smul_left_cancel_iff] at this
+    exact this
+  · exact congr_arg Subtype.val h
+  · have := ih ⟨ρ⁻¹ • c.val, hc'⟩ ?_
+    · simp only [smul_inv_smul] at this
+      conv_lhs => rw [this, smul_inv_smul]
+    · rw [lt_iff_smul' ρ]
+      simp only [smul_inv_smul]
+      rw [lt_iff_lt_of_smul_eq c ⟨ρ • c.val, _⟩ hS]
+      exact h
 
 instance : MulAction (Allowable β) (OrdSupport β) where
   one_smul S := by
