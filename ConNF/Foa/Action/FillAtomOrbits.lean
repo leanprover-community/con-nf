@@ -276,8 +276,9 @@ noncomputable def nextImageCore (a : Atom) (L : Litter) (ha : a ∈ φ.orbitSet 
 def nextImageCoreDomain : Set Atom :=
   ⋃ L ∈ (φ.litterPerm hφ).domain, Subtype.val ''
     {a : φ.orbitSet L |
-      (φ.orbitSetEquiv L a).elim (fun b => b ∈ φ.nextBackwardImageDomain hφ L) fun b =>
-        b ∈ φ.nextForwardImageDomain hφ L}
+      (φ.orbitSetEquiv L a).elim
+        (fun b => b ∈ φ.nextBackwardImageDomain hφ L)
+        (fun b => b ∈ φ.nextForwardImageDomain hφ L)}
 
 theorem nextImageCoreDomain_small : Small (φ.nextImageCoreDomain hφ) :=
   Small.bUnion (φ.litterPerm_domain_small hφ) fun L _ =>

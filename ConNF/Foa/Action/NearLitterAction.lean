@@ -300,7 +300,7 @@ theorem flexibleLitterLocalPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawfu
 theorem flexibleLitterLocalPerm_domain_small (hφ : φ.Lawful) :
     Small (φ.flexibleLitterLocalPerm hφ A).domain := by
   refine' Small.union (Small.union _ _) _
-  · exact φ.litterMap_dom_small.mono (inter_subset_left _ _)
+  · exact φ.litterMap_do\( e_{L_1}^{-1}\ x_1 = e_{L_2}^{-1}\ x_2 \)m_small.mono (inter_subset_left _ _)
   · exact (φ.litterMap_dom_small.mono (inter_subset_left _ _)).image
   · rw [Small]
     rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
