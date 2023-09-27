@@ -5,7 +5,7 @@ import ConNF.Counting.CodingFunction
 # Specifications
 -/
 
-open Quiver Set Sum WithBot
+open Ordinal Quiver Set Sum WithBot
 
 open scoped Classical Cardinal
 
@@ -57,39 +57,39 @@ namespace Spec
 /-- A specification `σ` specifies an ordered support `S` if each support condition in `S` is
 described in a sensible way by `σ`. -/
 structure Specifies (σ : Spec β) (S : OrdSupport β) : Prop where
-  lt_orderType (c : S) : Ordinal.typein S.r c < σ.orderType
-  of_lt_orderType (i : Ordinal) : i < σ.orderType → ∃ c : S, i = Ordinal.typein S.r c
+  lt_orderType (c : S) : typein S.r c < σ.orderType
+  of_lt_orderType (i : Ordinal) : i < σ.orderType → ∃ c : S, i = typein S.r c
   atom_dom (A : ExtendedIndex β) (a : Atom) (ha : ⟨A, inl a⟩ ∈ S) :
     ∃ N : NearLitter, a ∈ N ∧ ⟨A, inr N⟩ ∈ S
   atom_spec (A : ExtendedIndex β) (a : Atom) (N : NearLitter)
     (ha : ⟨A, inl a⟩ ∈ S) (hN : ⟨A, inr N⟩ ∈ S) : a ∈ N →
-    σ.cond (Ordinal.typein S.r ⟨_, ha⟩) (lt_orderType ⟨_, ha⟩) =
-    SpecCondition.atom A (Ordinal.typein S.r ⟨_, hN⟩)
+    σ.cond (typein S.r ⟨_, ha⟩) (lt_orderType ⟨_, ha⟩) =
+    SpecCondition.atom A (typein S.r ⟨_, hN⟩)
   flexible_spec (A : ExtendedIndex β) (N : NearLitter) (hN : ⟨A, inr N⟩ ∈ S) : Flexible α A N.fst →
-    σ.cond (Ordinal.typein S.r ⟨_, hN⟩) (lt_orderType ⟨_, hN⟩) = SpecCondition.flexible A
+    σ.cond (typein S.r ⟨_, hN⟩) (lt_orderType ⟨_, hN⟩) = SpecCondition.flexible A
   inflexibleCoe_spec (A : ExtendedIndex β) (N : NearLitter) (hN : ⟨A, inr N⟩ ∈ S)
     (h : InflexibleCoe A N.1) :
     ∃ χ : CodingFunction h.path.δ,
-    ∃ h' : (S.before (Ordinal.typein S.r ⟨_, hN⟩)).comp h.path.δ (h.path.B.cons h.path.hδ) ∈ χ,
+    ∃ h' : (S.before (typein S.r ⟨_, hN⟩)).comp h.path.δ (h.path.B.cons h.path.hδ) ∈ χ,
     (χ.decode _).get h' = h.t ∧
-    σ.cond (Ordinal.typein S.r ⟨_, hN⟩) (lt_orderType ⟨_, hN⟩) =
+    σ.cond (typein S.r ⟨_, hN⟩) (lt_orderType ⟨_, hN⟩) =
     SpecCondition.inflexibleCoe A h.path χ
   inflexibleBot_spec (A : ExtendedIndex β) (N : NearLitter) (hN : ⟨A, inr N⟩ ∈ S)
     (h : InflexibleBot A N.1) :
     ∃ ha : ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩ ∈ S,
-    σ.cond (Ordinal.typein S.r ⟨_, hN⟩) (lt_orderType ⟨_, hN⟩) =
-    SpecCondition.inflexibleBot A h.path (Ordinal.typein S.r ⟨_, ha⟩)
+    σ.cond (typein S.r ⟨_, hN⟩) (lt_orderType ⟨_, hN⟩) =
+    SpecCondition.inflexibleBot A h.path (typein S.r ⟨_, ha⟩)
 
-theorem orderType_eq_of_specifies {σ : Spec β} {S : OrdSupport β} (hσS : Specifies σ S) :
-    σ.orderType = Ordinal.type S.r := by
-  obtain (h | h | h) := lt_trichotomy σ.orderType (Ordinal.type S.r)
+theorem orderType_eq_of_specifies {σ : Spec β} {S : OrdSupport β} (hσS : σ.Specifies S) :
+    σ.orderType = type S.r := by
+  obtain (h | h | h) := lt_trichotomy σ.orderType (type S.r)
   · exfalso
-    obtain ⟨c, hc⟩ := Ordinal.typein_surj S.r h
+    obtain ⟨c, hc⟩ := typein_surj S.r h
     exact (hσS.lt_orderType c).ne hc
   · exact h
   · exfalso
     obtain ⟨c, hc⟩ := hσS.of_lt_orderType _ h
-    exact (Ordinal.typein_lt_type S.r c).ne hc.symm
+    exact (typein_lt_type S.r c).ne hc.symm
 
 theorem specifies_subsingleton (S : OrdSupport β) :
     {σ | Specifies σ S}.Subsingleton := by
@@ -118,7 +118,7 @@ theorem specifies_subsingleton (S : OrdSupport β) :
 theorem before_comp_supports {S : OrdSupport β} (hS : S.Strong)
     {A : ExtendedIndex β} {N : NearLitter} (h : InflexibleCoe A N.1) (hN : ⟨A, inr N⟩ ∈ S) :
     MulAction.Supports (Allowable h.path.δ)
-      {c | c ∈ (S.before (Ordinal.typein S.r ⟨_, hN⟩)).comp
+      {c | c ∈ (S.before (typein S.r ⟨_, hN⟩)).comp
         h.path.δ (h.path.B.cons h.path.hδ)} h.t := by
   intro ρ hρ
   refine (reducedSupport α h.t).supports ?_ ?_
@@ -134,7 +134,7 @@ theorem before_comp_supports {S : OrdSupport β} (hS : S.Strong)
       have := Constrains.fuzz h.path.hδ h.path.hε h.path.hδε h.path.B h.t d hd₁
       rw [← h.path.hA, ← h.hL] at this
       exact Relation.TransGen.single this
-  · simp only [OrdSupport.coe_sort_coe, Ordinal.typein_lt_typein]
+  · simp only [OrdSupport.coe_sort_coe, typein_lt_typein]
     refine hS.lt_of_transConstrains _ _ ?_
     have := transConstrains_of_mem_reducedSupport α h.path.hδ h.path.hε h.path.hδε h.path.B h.t c hc
     rw [← h.path.hA, ← h.hL] at this
@@ -144,20 +144,20 @@ noncomputable def codeBefore {S : OrdSupport β} (hS : S.Strong)
     {A : ExtendedIndex β} {N : NearLitter} (h : InflexibleCoe A N.1) (hN : ⟨A, inr N⟩ ∈ S) :
     CodingFunction (h.path.δ : Iic α) :=
   CodingFunction.code
-    ((S.before (Ordinal.typein S.r ⟨_, hN⟩)).comp h.path.δ (h.path.B.cons h.path.hδ))
+    ((S.before (typein S.r ⟨_, hN⟩)).comp h.path.δ (h.path.B.cons h.path.hδ))
     h.t (before_comp_supports hS h hN)
 
 noncomputable def specCondition {S : OrdSupport β} (hS : S.Strong) :
     (c : S) → SpecCondition β
   | ⟨⟨A, Sum.inl a⟩, hc⟩ => SpecCondition.atom A
-      (Ordinal.typein S.r ⟨⟨A, inr a.1.toNearLitter⟩, hS.transConstrains_mem _ ⟨_, hc⟩
+      (typein S.r ⟨⟨A, inr a.1.toNearLitter⟩, hS.transConstrains_mem _ ⟨_, hc⟩
         (Reduced.mkLitter _) (Relation.TransGen.single <| Constrains.atom _ _)⟩)
   | ⟨⟨A, Sum.inr N⟩, hc⟩ =>
       if h : Nonempty (InflexibleCoe A N.1) then
         SpecCondition.inflexibleCoe A h.some.path (codeBefore hS h.some hc)
       else if h : Nonempty (InflexibleBot A N.1) then
         SpecCondition.inflexibleBot A h.some.path
-          (Ordinal.typein S.r ⟨⟨h.some.path.B.cons (bot_lt_coe _), inl h.some.a⟩,
+          (typein S.r ⟨⟨h.some.path.B.cons (bot_lt_coe _), inl h.some.a⟩,
             hS.transConstrains_mem _ ⟨_, hc⟩ (Reduced.mkAtom _)
             (by
               have := Constrains.fuzz_bot h.some.path.hε h.some.path.B h.some.a
@@ -170,7 +170,7 @@ noncomputable def specCondition {S : OrdSupport β} (hS : S.Strong) :
 theorem specCondition_atom {S : OrdSupport β} {hS : S.Strong}
     (A : ExtendedIndex β) (a : Atom) (h : ⟨A, inl a⟩ ∈ S) :
     specCondition hS ⟨⟨A, inl a⟩, h⟩ = SpecCondition.atom A
-      (Ordinal.typein S.r ⟨⟨A, inr a.1.toNearLitter⟩, hS.transConstrains_mem _ ⟨_, h⟩
+      (typein S.r ⟨⟨A, inr a.1.toNearLitter⟩, hS.transConstrains_mem _ ⟨_, h⟩
         (Reduced.mkLitter _) (Relation.TransGen.single <| Constrains.atom _ _)⟩) :=
   rfl
 
@@ -189,7 +189,7 @@ theorem specCondition_inflexibleBot {S : OrdSupport β} {hS : S.Strong}
     (ha : ⟨hN.path.B.cons (bot_lt_coe _), inl hN.a⟩ ∈ S) :
     specCondition hS ⟨⟨A, inr N⟩, hNS⟩ =
     SpecCondition.inflexibleBot A hN.path
-      (Ordinal.typein S.r ⟨⟨hN.path.B.cons (bot_lt_coe _), inl hN.a⟩, ha⟩) := by
+      (typein S.r ⟨⟨hN.path.B.cons (bot_lt_coe _), inl hN.a⟩, ha⟩) := by
   rw [specCondition]
   dsimp only
   rw [dif_neg, dif_pos ⟨hN⟩]
@@ -214,47 +214,47 @@ theorem specCondition_flexible {S : OrdSupport β} {hS : S.Strong}
 
 /-- The support condition at position `i` in `S`. -/
 noncomputable def _root_.ConNF.OrdSupport.conditionAt (S : OrdSupport β)
-    (i : Ordinal) (hi : i < Ordinal.type S.r) : S :=
-  (Ordinal.typein_surj S.r hi).choose
+    (i : Ordinal) (hi : i < type S.r) : S :=
+  (typein_surj S.r hi).choose
 
 @[simp]
-theorem typein_conditionAt (S : OrdSupport β) (i : Ordinal) (hi : i < Ordinal.type S.r) :
-    Ordinal.typein S.r (S.conditionAt i hi) = i :=
-  (Ordinal.typein_surj S.r hi).choose_spec
+theorem typein_conditionAt (S : OrdSupport β) (i : Ordinal) (hi : i < type S.r) :
+    typein S.r (S.conditionAt i hi) = i :=
+  (typein_surj S.r hi).choose_spec
 
 @[simp]
 theorem conditionAt_typein (S : OrdSupport β) (c : S) :
-    S.conditionAt (Ordinal.typein S.r c) (Ordinal.typein_lt_type S.r c) = c := by
-  refine Ordinal.typein_injective S.r ?_
+    S.conditionAt (typein S.r c) (typein_lt_type S.r c) = c := by
+  refine typein_injective S.r ?_
   rw [typein_conditionAt]
 
 noncomputable def spec (S : OrdSupport β) (hS : S.Strong) : Spec β where
-  orderType := Ordinal.type S.r
+  orderType := type S.r
   cond i hi := specCondition hS (S.conditionAt i hi)
 
 @[simp]
 theorem spec_orderType {S : OrdSupport β} {hS : S.Strong} :
-    (spec S hS).orderType = Ordinal.type S.r :=
+    (spec S hS).orderType = type S.r :=
   rfl
 
 @[simp]
 theorem spec_cond_eq {S : OrdSupport β} {hS : S.Strong}
-    (i : Ordinal) (hi : i < Ordinal.type S.r) :
+    (i : Ordinal) (hi : i < type S.r) :
     (spec S hS).cond i hi = specCondition hS (S.conditionAt i hi) :=
   rfl
 
 /-- Every strong support has a specification, described by `spec`. -/
 theorem spec_specifies {S : OrdSupport β} (hS : S.Strong) :
-    Specifies (spec S hS) S := by
+    (spec S hS).Specifies S := by
   constructor
   case lt_orderType =>
     intro c
     simp only [OrdSupport.coe_sort_coe, spec_orderType]
-    exact Ordinal.typein_lt_type S.r c
+    exact typein_lt_type S.r c
   case of_lt_orderType =>
     intro i hi
     simp only [OrdSupport.coe_sort_coe, Subtype.exists]
-    obtain ⟨c, hc⟩ := Ordinal.typein_surj S.r hi
+    obtain ⟨c, hc⟩ := typein_surj S.r hi
     exact ⟨c, c.prop, hc.symm⟩
   case atom_dom =>
     intro A a ha
@@ -264,7 +264,7 @@ theorem spec_specifies {S : OrdSupport β} (hS : S.Strong) :
   case atom_spec =>
     intro A a N ha hN haN
     simp only [OrdSupport.coe_sort_coe, spec_cond_eq, conditionAt_typein, specCondition_atom,
-      SpecCondition.atom.injEq, Ordinal.typein_inj, Subtype.mk.injEq, SupportCondition.mk.injEq,
+      SpecCondition.atom.injEq, typein_inj, Subtype.mk.injEq, SupportCondition.mk.injEq,
       inr.injEq, true_and]
     have := hS.reduced_of_mem ⟨_, hN⟩
     cases this
