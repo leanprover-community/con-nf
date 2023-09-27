@@ -191,6 +191,11 @@ theorem le_extend (S : OrdSupport β) (s : Set (SupportCondition β)) (hs : Smal
   lt_iff_lt c d := ⟨ExtendRel.lt c d, fun h => lt_of_extendRel c d (show ExtendRel S c d from h)⟩
   get_lt_get c d hd := ExtendRel.sep c d hd
 
+theorem mem_extend_iff (S : OrdSupport β) (s : Set (SupportCondition β)) (hs : Small s)
+    (c : SupportCondition β) :
+    c ∈ S.extend s hs ↔ c ∈ S ∨ c ∈ s :=
+  Iff.rfl
+
 end OrdSupport
 
 end ConNF

@@ -231,6 +231,84 @@ theorem smul_le_iff_le_inv {S T : OrdSupport β} (ρ : Allowable β) : S ≤ ρ�
     rw [inv_smul_smul] at this
     exact this
 
+theorem subset_or_subset_of_le {S₁ S₂ T : OrdSupport β}
+    (h₁ : S₁ ≤ T) (h₂ : S₂ ≤ T) :
+    (∀ c, c ∈ S₁ → c ∈ S₂) ∨ (∀ c, c ∈ S₂ → c ∈ S₁) := by
+  rw [or_iff_not_imp_left]
+  intro h c hc₂
+  by_contra hc₁
+  simp only [not_forall, exists_prop] at h
+  obtain ⟨d, hd₁, hd₂⟩ := h
+  have h₁' := h₁.get_lt_get ⟨d, hd₁⟩ ⟨c, h₂.mem_of_mem ⟨c, hc₂⟩⟩ hc₁
+  have h₂' := h₂.get_lt_get ⟨c, hc₂⟩ ⟨d, h₁.mem_of_mem ⟨d, hd₁⟩⟩ hd₂
+  exact not_lt_of_lt h₁' h₂'
+
+/-- If `ρ` maps `S` to an initial segment of itself, it is an order isomorphism. -/
+theorem lt_iff_lt_of_le {S T : OrdSupport β} {ρ : Allowable β}
+    (h₁ : ρ • S ≤ T) (h₂ : S ≤ T) (h : ∀ c, c ∈ S → ρ • c ∈ S)
+    (c d : S) :
+    c < d ↔ (⟨ρ • c.val, h c c.prop⟩ : S) < ⟨ρ • d.val, h d d.prop⟩ :=
+  by rw [lt_iff_smul' ρ, h₁.lt_iff_lt, h₂.lt_iff_lt]
+
+/-- If `ρ` maps `S` to an initial segment of itself, it is the identity function. -/
+theorem smul_eq_of_le' {S T : OrdSupport β} {ρ : Allowable β}
+    (h₁ : ρ • S ≤ T) (h₂ : S ≤ T)
+    (h : ∀ c, c ∈ S → ρ • c ∈ S)
+    (c : S) : ρ • c.val = c.val := by
+  refine S.induction (motive := fun c => ρ • c.val = c.val) c ?_
+  intro c ih
+  have hc' : c.val ∈ ρ • S
+  · by_contra hc''
+    have := h₁.get_lt_get ⟨ρ • c.val, smul_mem_smul.mpr c.prop⟩ ⟨c, h₂.mem_of_mem c⟩ hc''
+    rw [← h₂.lt_iff_lt ⟨ρ • c.val, h c c.prop⟩ c] at this
+    have h := ih ⟨ρ • c.val, h c c.prop⟩ this
+    simp only [smul_left_cancel_iff] at h
+    simp_rw [h] at this
+    exact this.false
+  obtain (hc | hc | hc) := lt_trichotomy ⟨ρ • c.val, h c c.prop⟩ c
+  · have := ih ⟨ρ • c.val, h c c.prop⟩ hc
+    simp only [smul_left_cancel_iff] at this
+    simp_rw [this] at hc
+    cases ne_of_lt hc rfl
+  · exact congr_arg Subtype.val hc
+  · have := lt_iff_lt_of_le h₁ h₂ h ⟨ρ⁻¹ • c.val, hc'⟩ c
+    simp only [smul_inv_smul, Subtype.coe_eta, hc, iff_true] at this
+    have h := ih _ this
+    simp only [smul_inv_smul] at h
+    simp_rw [← h] at this
+    cases ne_of_lt this rfl
+
+/-- `ρ` is an order isomorphism. -/
+theorem smul_eq_of_le {S T : OrdSupport β} {ρ : Allowable β}
+    (h₁ : ρ • S ≤ T) (h₂ : S ≤ T)
+    (c : S) : ρ • c.val = c.val := by
+  obtain (h | h) := subset_or_subset_of_le h₁ h₂
+  · refine smul_eq_of_le' h₁ h₂ ?_ c
+    intro c hc
+    exact h (ρ • c) (smul_mem_smul.mpr hc)
+  · have := smul_eq_of_le' (ρ := ρ⁻¹) (by rwa [inv_smul_smul]) h₁ ?_
+        ⟨ρ • c.val, smul_mem_smul.mpr c.prop⟩
+    · simp only [inv_smul_smul] at this
+      exact this.symm
+    · intro c hc
+      exact h (ρ⁻¹ • c) hc
+
+theorem eq_of_le {S T : OrdSupport β} {ρ : Allowable β}
+    (h₁ : ρ • S ≤ T) (h₂ : S ≤ T) : ρ • S = S := by
+  refine ext ?_ ?_ ?_
+  · intro c hc
+    have := smul_eq_of_le h₁ h₂ ⟨ρ⁻¹ • c, hc⟩
+    rw [smul_inv_smul] at this
+    rw [this]
+    exact hc
+  · intro c hc
+    have := smul_eq_of_le h₁ h₂ ⟨c, hc⟩
+    dsimp only at this
+    rw [smul_mem, ← this, inv_smul_smul]
+    exact hc
+  · intro c d
+    rw [h₁.lt_iff_lt, h₂.lt_iff_lt]
+
 end OrdSupport
 
 end ConNF
