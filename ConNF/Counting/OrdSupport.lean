@@ -169,6 +169,56 @@ instance : MulAction (Allowable β) (OrdSupport β) where
     · intro c d
       simp only [lt_iff_smul, mul_inv_rev, mul_smul]
 
+/-- The restriction of this ordered support to conditions that come before position `i`. -/
+def before (S : OrdSupport β) (i : Ordinal.{u}) : OrdSupport β where
+  carrier := {c | ∃ hc : c ∈ S, Ordinal.typein S.r ⟨c, hc⟩ < i}
+  carrier_small := Small.mono (fun c hc => hc.1) S.small
+  r c d := (⟨c, c.prop.1⟩ : S) < ⟨d, d.prop.1⟩
+  r_isWellOrder := by
+    refine isWellOrder_invImage S.isWellOrder _ ?_
+    intro c d h
+    simp only [coe_sort_coe, mem_setOf_eq, Subtype.mk.injEq] at h
+    exact Subtype.coe_injective h
+
+@[simp]
+theorem mem_before {S : OrdSupport β} {i : Ordinal} (c : SupportCondition β) :
+    c ∈ S.before i ↔ ∃ hc : c ∈ S, Ordinal.typein S.r ⟨c, hc⟩ < i :=
+  Iff.rfl
+
+@[simp]
+theorem before_lt {S : OrdSupport β} {i : Ordinal} (c d : S.before i) :
+    c < d ↔ (⟨c, c.prop.1⟩ : S) < ⟨d, d.prop.1⟩ :=
+  Iff.rfl
+
+/-- Retains only those support conditions beginning with the path `A`. -/
+def comp (S : OrdSupport β) (γ : Iic α) (A : Quiver.Path (β : TypeIndex) γ) : OrdSupport γ where
+  carrier := {c | ⟨A.comp c.path, c.value⟩ ∈ S}
+  carrier_small := by
+    refine S.small.preimage ?_
+    intro c d h
+    rw [SupportCondition.mk.injEq, Quiver.Path.comp_inj_right] at h
+    exact SupportCondition.ext _ _ h.1 h.2
+  r := InvImage (· < ·) (fun c => (⟨_, c.prop⟩ : S))
+  r_isWellOrder := by
+    refine isWellOrder_invImage S.isWellOrder _ ?_
+    intro c d h
+    simp only [mem_setOf_eq, Subtype.mk.injEq, SupportCondition.mk.injEq] at h
+    rw [Quiver.Path.comp_inj_right] at h
+    exact Subtype.coe_injective (SupportCondition.ext _ _ h.1 h.2)
+
+@[simp]
+theorem mem_comp {S : OrdSupport β} (γ : Iic α) (A : Quiver.Path (β : TypeIndex) γ)
+    (c : SupportCondition γ) :
+    c ∈ S.comp γ A ↔ ⟨A.comp c.path, c.value⟩ ∈ S :=
+  Iff.rfl
+
+@[simp]
+theorem comp_lt {S : OrdSupport β} {γ : Iic α} {A : Quiver.Path (β : TypeIndex) γ}
+    {c d : S.comp γ A} :
+    c < d ↔
+    (⟨⟨A.comp c.val.path, c.val.value⟩, c.prop⟩ : S) < ⟨⟨A.comp d.val.path, d.val.value⟩, d.prop⟩ :=
+  Iff.rfl
+
 /-- An ordered support is strong if every element of its domain is reduced, every reduced condition
 it constrains lies in its domain, and its order agrees with the constrains relation. -/
 structure Strong (S : OrdSupport β) : Prop where
