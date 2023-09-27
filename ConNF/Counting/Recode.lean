@@ -172,6 +172,15 @@ noncomputable def raisedSupport (S : OrdSupport β) (u : Tangle γ) :
     (reduction α (raise hγ '' (reducedSupport α u).carrier))
     (reduction_small _ (Small.image (reduction_small α (designatedSupport u).small)))
 
+theorem raisedSupport_strong (S : OrdSupport β) (hS : S.Strong) (u : Tangle γ) :
+    (raisedSupport hγ S u).Strong := by
+  refine OrdSupport.extend_strong hS ?_ ?_
+  · intro c hc
+    exact hc.2
+  · rintro c ⟨⟨e, he₁, he₂⟩, _⟩ d hd hcd
+    refine ⟨?_, hd⟩
+    exact ⟨e, he₁, hcd.to_reflTransGen.trans he₂⟩
+
 theorem raisedSupport_supports (S : OrdSupport β) (u : Tangle γ) :
     Supports (Allowable β) {c | c ∈ raisedSupport hγ S u}
       (singleton β γ (coe_lt_coe.mpr hγ) u) := by
@@ -190,14 +199,25 @@ theorem le_raisedSupport (S : OrdSupport β) (u : Tangle γ) :
     S ≤ raisedSupport hγ S u :=
   OrdSupport.le_extend _ _ _
 
+noncomputable def raiseSingleton (S : OrdSupport β) (u : Tangle γ) : CodingFunction β :=
+  CodingFunction.code
+    (raisedSupport hγ S u)
+    (singleton β γ (coe_lt_coe.mpr hγ) u)
+    (raisedSupport_supports hγ S u)
+
+def RaisedSingleton : Type u :=
+  {χ : CodingFunction β // ∃ S : OrdSupport β, ∃ u : Tangle γ, χ = raiseSingleton hγ S u}
+
 /-- Take the `γ`-extension of `t`, treated as a set of `α`-level singletons, and turn them into
 coding functions. -/
 def raiseSingletons (S : OrdSupport β) (t : Tangle β) : Set (CodingFunction β) :=
-  (fun u => CodingFunction.code
-    (raisedSupport hγ S u)
-    (singleton β γ (coe_lt_coe.mpr hγ) u)
-    (raisedSupport_supports hγ S u)) ''
-      tangleExtension hγ t
+  raiseSingleton hγ S '' tangleExtension hγ t
+
+theorem raiseSingletons_subset_range {S : OrdSupport β} {t : Tangle β} :
+    raiseSingletons hγ S t ⊆
+    range (Subtype.val : RaisedSingleton hγ → CodingFunction β) := by
+  rintro _ ⟨u, _, rfl⟩
+  exact ⟨⟨raiseSingleton hγ S u, ⟨S, u, rfl⟩⟩, rfl⟩
 
 theorem smul_reducedSupport_eq (S : OrdSupport β) (v : Tangle γ) (ρ : Allowable β)
     (hUV : S ≤ ρ • raisedSupport hγ S v)
@@ -217,9 +237,9 @@ theorem raiseSingletons_reducedSupport (S : OrdSupport β) (t : Tangle β)
   · simp only [ge_iff_le, mem_setOf_eq, forall_exists_index, and_imp]
     intro χ hχ V hUV hVχ hu
     obtain ⟨v, hv, rfl⟩ := hχ
-    rw [CodingFunction.mem_code] at hVχ
+    rw [raiseSingleton, CodingFunction.mem_code] at hVχ
     obtain ⟨ρ, rfl⟩ := hVχ
-    simp_rw [CodingFunction.decode_smul, CodingFunction.code_decode] at hu
+    simp_rw [CodingFunction.decode_smul, raiseSingleton, CodingFunction.code_decode] at hu
     rw [Part.get_some, toPretangle_smul, Allowable.toStructPerm_smul, StructPerm.ofCoe_smul,
       singleton_toPretangle, smul_set_singleton, mem_singleton_iff] at hu
     subst hu
@@ -232,7 +252,8 @@ theorem raiseSingletons_reducedSupport (S : OrdSupport β) (t : Tangle β)
     obtain ⟨u, rfl⟩ := eq_toPretangle_of_mem β γ (coe_lt_coe.mpr hγ) t u hu
     refine ⟨_, ⟨u, hu, rfl⟩, raisedSupport hγ S u, ?_⟩
     refine ⟨le_raisedSupport hγ S u, CodingFunction.mem_code_self, ?_⟩
-    simp only [CodingFunction.mem_code_self, CodingFunction.code_decode, Part.get_some]
+    simp only [raiseSingleton, CodingFunction.mem_code_self, CodingFunction.code_decode,
+      Part.get_some]
     rw [singleton_toPretangle, mem_singleton_iff]
 
 theorem appearsRaised_raiseSingletons (S : OrdSupport β) (t : Tangle β)
@@ -280,6 +301,15 @@ theorem mem_raisedCodingFunction_iff (χs : Set (CodingFunction β))
     (U : OrdSupport β) :
     U ∈ raisedCodingFunction hγ χs o ho ho' ↔ U ∈ o :=
   Iff.rfl
+
+theorem raisedCodingFunction_strong {χs : Set (RaisedSingleton hγ)}
+    {o : OrdSupportOrbit β} {ho : ∀ U ∈ o, AppearsRaised hγ (Subtype.val '' χs) U}
+    {ho' : ∀ U, ∀ hU : U ∈ o,
+      Supports (Allowable β) {c | c ∈ U} (decodeRaised hγ (Subtype.val '' χs) U (ho U hU))}
+    (h : o.Strong) :
+    (raisedCodingFunction hγ (Subtype.val '' χs) o ho ho').Strong := by
+  obtain ⟨S, rfl, hS⟩ := h
+  exact ⟨S, rfl, hS⟩
 
 theorem appearsRaised_of_mem_orbit (S : OrdSupport β) (t : Tangle β)
     (hSt : Supports (Allowable β) {c | c ∈ S} t) (U : OrdSupport β)

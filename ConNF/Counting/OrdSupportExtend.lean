@@ -196,6 +196,33 @@ theorem mem_extend_iff (S : OrdSupport β) (s : Set (SupportCondition β)) (hs :
     c ∈ S.extend s hs ↔ c ∈ S ∨ c ∈ s :=
   Iff.rfl
 
+theorem extend_strong {S : OrdSupport β} {s : Set (SupportCondition β)} {hs : Small s}
+    (hS : S.Strong) (hs₁ : ∀ c ∈ s, Reduced c.value)
+    (hs₂ : ∀ c ∈ s, ∀ d : SupportCondition β, Reduced d.value → d <[α] c → d ∈ s) :
+    (S.extend s hs).Strong := by
+  constructor
+  case reduced_of_mem =>
+    intro c
+    obtain (hc | hc) := c.prop
+    · exact hS.reduced_of_mem ⟨c, hc⟩
+    · exact hs₁ c hc
+  case transConstrains_mem =>
+    intro c d hc hcd
+    obtain (hd | hd) := d.prop
+    · exact Or.inl (hS.transConstrains_mem c ⟨d, hd⟩ hc hcd)
+    · exact Or.inr (hs₂ d hd c hc hcd)
+  case lt_of_transConstrains =>
+    intro c d hcd
+    by_cases hd : d.val ∈ S
+    · refine ExtendRel.lt ⟨c.val, ?_⟩ ⟨d.val, hd⟩ ?_
+      · by_contra hcS
+        have hcs := or_iff_not_imp_left.mp c.prop hcS
+        exact hcS (hS.transConstrains_mem c ⟨d.val, hd⟩ (hs₁ c hcs) hcd)
+      · exact hS.lt_of_transConstrains _ _ hcd
+    by_cases hc : c.val ∈ S
+    · exact ExtendRel.sep ⟨c.val, hc⟩ d hd
+    · exact ExtendRel.conditionRel c.val d.val hc hd (conditionRel_of_transConstrains hcd)
+
 end OrdSupport
 
 end ConNF

@@ -152,6 +152,10 @@ theorem eq_code {χ : CodingFunction β} {S : OrdSupport β} (h : S ∈ χ) :
     rw [one_smul]
   · simp only [code_decode, Part.get_some]
 
+/-- A coding function is *strong* if it contains a strong support. -/
+def Strong (χ : CodingFunction β) : Prop :=
+  ∃ S : OrdSupport β, S ∈ χ ∧ S.Strong
+
 end CodingFunction
 
 end ConNF
