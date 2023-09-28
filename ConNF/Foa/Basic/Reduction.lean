@@ -34,6 +34,10 @@ inductive Reduced : Atom ⊕ NearLitter → Prop
   | mkAtom (a : Atom) : Reduced (inl a)
   | mkLitter (L : Litter) : Reduced (inr L.toNearLitter)
 
+theorem isLitter_of_reduced {N : NearLitter} (h : Reduced (inr N)) : N.IsLitter := by
+  cases h
+  exact NearLitter.IsLitter.mk _
+
 /-- The reflexive transitive closure of a set of support conditions. -/
 def reflTransClosure (S : Set (SupportCondition β)) : Set (SupportCondition β) :=
   {c | ∃ d ∈ S, c ≤[α] d}

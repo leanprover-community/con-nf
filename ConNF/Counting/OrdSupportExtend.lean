@@ -1,4 +1,4 @@
-import ConNF.Counting.OrdSupportEquiv
+import ConNF.Counting.OrdSupport
 
 /-!
 # Extending ordered supports
@@ -15,254 +15,213 @@ variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α
 
 namespace OrdSupport
 
-theorem _root_.PFun.image_dom {α β : Type _} (f : α →. β) :
-    f.image f.Dom = f.ran := by
-  ext x
-  simp only [PFun.mem_image, PFun.ran, PFun.mem_dom, mem_setOf_eq]
+/-- An arbitrary global well-ordering on support conditions, such that `c ≺ d` implies `c < d`. -/
+def ConditionRel (c d : SupportCondition β) : Prop :=
+  c.value < d.value ∨ (c.value = d.value ∧ WellOrderingRel c.path d.path)
+
+theorem conditionRel_of_constrains :
+    Subrelation ((· ≺[α] ·) : SupportCondition β → _ → Prop) ConditionRel :=
+  Or.inl ∘ constrains_subrelation α β
+
+theorem conditionRel_of_transConstrains :
+    Subrelation ((· <[α] ·) : SupportCondition β → _ → Prop) ConditionRel :=
+  Or.inl ∘ transConstrains_subrelation β
+
+instance conditionRel_isTrichotomous : IsTrichotomous (SupportCondition β) ConditionRel := by
+  letI hlo : LinearOrder (Atom ⊕ NearLitter) := inferInstance
   constructor
-  · rintro ⟨y, _, hy⟩
-    exact ⟨y, hy⟩
-  · rintro ⟨y, hy⟩
-    exact ⟨y, ⟨x, hy⟩, hy⟩
+  rintro ⟨A, x⟩ ⟨B, y⟩
+  unfold ConditionRel
+  simp only [SupportCondition.mk.injEq]
+  rw [or_iff_not_imp_left, not_or, not_and]
+  intro h₁
+  rw [or_iff_not_imp_left, not_and]
+  intro h₂
+  rw [or_iff_not_imp_left]
+  intro h₃
+  simp only [not_lt] at h₁ h₃
+  cases @le_antisymm _ hlo.toPartialOrder _ _ h₁.1 h₃
+  obtain (h | h | h) := WellOrderingRel.isWellOrder.trichotomous A B
+  · cases h₁.2 rfl h
+  · cases h₂ h rfl
+  · exact ⟨rfl, h⟩
 
-theorem le_invImage_cof {α β : Type _} {c : Cardinal} (r : α → α → Prop) (f : β → α)
-    [inst : IsWellOrder α r] [IsWellOrder β (InvImage r f)]
-    (hf : Unbounded r (Set.range f)) (hc : c ≤ (Ordinal.type r).cof) :
-    c ≤ (Ordinal.type (InvImage r f)).cof := by
-  rw [Ordinal.le_cof_type] at hc ⊢
-  intro s hs
-  refine (hc (f '' s) ?_).trans Cardinal.mk_image_le
-  intro a
-  obtain ⟨_, ⟨b, rfl⟩, hb⟩ := hf a
-  obtain ⟨c, hc₁, hc₂⟩ := hs b
-  refine ⟨f c, ⟨c, hc₁, rfl⟩, ?_⟩
-  intro h
-  rw [InvImage] at hc₂
-  refine hc₂ ?_
-  have := inst.trichotomous (f b) a
-  simp only [hb, false_or] at this
-  obtain (this | this) := this
-  · subst this
-    exact h
-  · exact inst.trans _ _ _ h this
-
-theorem unbounded_of_injective {α β : Type _} (r : α → α → Prop) (f : β → α)
-    [IsWellOrder α r] (hα : Ordinal.type r = (#α).ord) (hαβ : #α = #β) (hf : Function.Injective f) :
-    Unbounded r (Set.range f) := by
-  rw [← not_bounded_iff]
-  rintro ⟨x, hx⟩
-  have : #{y | r y x} < #α := Cardinal.card_typein_lt r x hα.symm
-  rw [lt_iff_not_le] at this
-  refine this ?_
-  rw [hαβ]
-  refine ⟨⟨fun y => ⟨f y, hx _ ⟨_, rfl⟩⟩, ?_⟩⟩
-  intro y z h
-  simp only [coe_setOf, mem_setOf_eq, Subtype.mk.injEq] at h
-  exact hf h
-
-theorem unbounded_sumAtomNearLitter_pos :
-    Unbounded (· < ·) (Set.range (pos : Atom ⊕ NearLitter → μ)) := by
-  refine unbounded_of_injective _ _ μ_ord ?_ ?_
-  · simp only [Cardinal.mk_sum, mk_atom, Cardinal.lift_id, mk_nearLitter,
-      Cardinal.add_mk_eq_max, max_self]
-  · intro a b
-    simp only [EmbeddingLike.apply_eq_iff_eq, imp_self]
-
-theorem mk_setOf_eq (S : OrdSupport β) :
-    #{x | ∀ d, ∀ hd : d ∈ S, (S.cpos d).get hd < x} = #μ := by
-  letI hwo : IsWellOrder (Atom ⊕ NearLitter) (· < ·) := inferInstance
+instance conditionRel_isTrans : IsTrans (SupportCondition β) ConditionRel := by
   letI hlo : LinearOrder (Atom ⊕ NearLitter) := inferInstance
   letI hpo : Preorder (Atom ⊕ NearLitter) := hlo.toPreorder
-  refine le_antisymm ?_ ?_
-  · refine (Cardinal.mk_subtype_le _).trans ?_
-    simp only [Cardinal.mk_sum, mk_atom, Cardinal.lift_id, mk_nearLitter, Cardinal.add_mk_eq_max,
-      max_self, le_refl]
-  have : Small S.cpos.ran
-  · have := Small.pFun_image S.dom_small' (f := S.cpos)
-    rw [PFun.image_dom] at this
-    exact this
-  have := Ordinal.lt_cof_type (r := (· < ·)) (this.trans_le ?_)
-  swap
-  · have hμ := κ_le_μ_ord_cof
-    rw [← μ_ord] at hμ
-    exact le_invImage_cof _ _ unbounded_sumAtomNearLitter_pos hμ
-  obtain ⟨x, hx⟩ := this
-  have huniv : Iic x ∪ {y | ∀ d, ∀ hd : d ∈ S, (S.cpos d).get hd < y} = univ
-  · simp only [eq_univ_iff_forall, mem_union, or_iff_not_imp_left, mem_Iic, not_le]
-    rintro y hy d hd
-    exact (hx _ ⟨d, hd, rfl⟩).trans hy
-  by_contra' h
-  have := Cardinal.mk_union_le (Iic x) {y | ∀ d, ∀ hd : d ∈ S, (S.cpos d).get hd < y}
-  have := this.trans_lt (Cardinal.add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le ?_ h)
-  swap
-  · refine lt_of_le_of_lt ?_ (card_Iic_lt (pos x))
-    refine ⟨⟨fun y => ⟨pos y.val, ?_⟩, ?_⟩⟩
-    · rw [mem_Iic]
-      show pos y.val ≤ pos x
-      have : _ = _ ∨ _ < _ := y.prop
-      rw [le_iff_eq_or_lt, EmbeddingLike.apply_eq_iff_eq]
-      exact this
-    · intro x y h
-      simp only [Subtype.mk.injEq, EmbeddingLike.apply_eq_iff_eq] at h
-      exact Subtype.coe_inj.mp h
-  simp only [huniv, Cardinal.mk_univ, Cardinal.mk_sum, mk_atom, Cardinal.lift_id, mk_nearLitter,
-    Cardinal.add_mk_eq_max, max_self, lt_self_iff_false] at this
+  constructor
+  unfold ConditionRel
+  intro c₁ c₂ c₃ h₁ h₂
+  have := WellOrderingRel.isWellOrder.trans c₁.path c₂.path c₃.path
+  have := @lt_trans _ hlo.toPreorder c₁.value c₂.value c₃.value
+  aesop
 
-theorem exists_relHom_of_type_le
-    (α : Type _) (r : α → α → Prop) [IsWellOrder α r]
-    (β : Type _) (s : β → β → Prop) [IsWellOrder β s]
-    (S : Set β) (h : Ordinal.type r ≤ @Ordinal.type _
-      (InvImage s (Subtype.val : S → β))
-      (isWellOrder_invImage inferInstance _ Subtype.val_injective)) :
-    ∃ f : r ↪r s, ∀ x, f x ∈ S := by
-  rw [@Ordinal.type_le_iff' _ _ _ _ _
-    (isWellOrder_invImage inferInstance _ Subtype.val_injective)] at h
-  obtain ⟨f⟩ := h
-  refine ⟨⟨⟨Subtype.val ∘ f, ?_⟩, ?_⟩, ?_⟩
-  · intro x y h
-    simp only [Function.comp_apply, Subtype.coe_inj] at h
-    exact f.injective h
-  · intro x y
-    simp only [Function.Embedding.coeFn_mk, Function.comp_apply]
-    exact f.map_rel_iff
-  · intro x
-    exact (f x).prop
+instance conditionRel_isWellFounded : IsWellFounded (SupportCondition β) ConditionRel := by
+  letI hwo : IsWellFounded (Atom ⊕ NearLitter) (· < ·) := inferInstance
+  refine ⟨⟨?_⟩⟩
+  intro c
+  refine hwo.wf.induction
+    (C := fun x => ∀ A : ExtendedIndex β, Acc ConditionRel ⟨A, x⟩) c.value ?_ c.path
+  clear c
+  intro x ih₁ A
+  refine WellOrderingRel.isWellOrder.wf.induction (C := fun A => Acc ConditionRel ⟨A, x⟩) A ?_
+  clear A
+  intro A ih₂
+  constructor
+  rintro c (hc | ⟨rfl, hc⟩)
+  · exact ih₁ c.value hc c.path
+  · exact ih₂ c.path hc
 
-theorem type_lt_type_of_lt {α β : Type _} (r : α → α → Prop) (s : β → β → Prop)
-    [inst_α : IsWellOrder α r] [inst_β : IsWellOrder β s] (h : #α < #β) :
-    Ordinal.type r < Ordinal.type s := by
-  contrapose! h
-  obtain ⟨f⟩ := h
-  exact ⟨f, f.injective⟩
+instance : IsWellOrder (SupportCondition β) ConditionRel := ⟨⟩
 
-theorem exists_relHom (S : OrdSupport β) (s : Set (SupportCondition β)) (hs : Small s)
-    (r : s → s → Prop) [IsWellOrder s r] :
-    ∃ f : r ↪r ((· < ·) : Atom ⊕ NearLitter → _ → _),
-      ∀ x, f x ∈ {x | ∀ d, ∀ hd : d ∈ S, (S.cpos d).get hd < x} := by
-  refine exists_relHom_of_type_le s r (Atom ⊕ NearLitter) (· < ·)
-      {x | ∀ d, ∀ hd : d ∈ S, (S.cpos d).get hd < x} ?_
-  refine le_of_lt (type_lt_type_of_lt (inst_β := _) _ ?_)
-  rw [mk_setOf_eq]
-  exact hs.trans_le κ_le_μ
+/-- Extends the well-order `S` to a well-order of `SupportCondition β`, in such a way that `S`
+is an initial segment. -/
+@[mk_iff]
+inductive ExtendRel (S : OrdSupport β) : SupportCondition β → SupportCondition β → Prop
+| lt (c d : S) : c < d → ExtendRel S c d
+| conditionRel (c d : SupportCondition β) : c ∉ S → d ∉ S → ConditionRel c d → ExtendRel S c d
+| sep (c : S) (d : SupportCondition β) : d ∉ S → ExtendRel S c d
 
-noncomputable def embedAfter (S : OrdSupport β) (s : Set (SupportCondition β)) (hs : Small s)
-    (r : s → s → Prop) [IsWellOrder s r] (c : SupportCondition β) (hc : c ∈ s) :
-    Atom ⊕ NearLitter :=
-  (exists_relHom S s hs r).choose ⟨c, hc⟩
+instance (S : OrdSupport β) : IsTrichotomous (SupportCondition β) (ExtendRel S) := by
+  constructor
+  intro c d
+  by_cases hc : c ∈ S <;> by_cases hd : d ∈ S
+  · obtain (h | h | h) := lt_trichotomy (⟨c, hc⟩ : S) ⟨d, hd⟩
+    · exact Or.inl (ExtendRel.lt ⟨c, hc⟩ ⟨d, hd⟩ h)
+    · rw [Subtype.mk.injEq] at h
+      exact Or.inr (Or.inl h)
+    · exact Or.inr (Or.inr (ExtendRel.lt ⟨d, hd⟩ ⟨c, hc⟩ h))
+  · exact Or.inl (ExtendRel.sep ⟨c, hc⟩ d hd)
+  · exact Or.inr (Or.inr (ExtendRel.sep ⟨d, hd⟩ c hc))
+  · obtain (h | h | h) := conditionRel_isTrichotomous.trichotomous c d
+    · exact Or.inl (ExtendRel.conditionRel c d hc hd h)
+    · exact Or.inr (Or.inl h)
+    · exact Or.inr (Or.inr (ExtendRel.conditionRel d c hd hc h))
 
-theorem embedAfter_injective (S : OrdSupport β) (s : Set (SupportCondition β)) (hs : Small s)
-    (r : s → s → Prop) [IsWellOrder s r] (c d : SupportCondition β) (hc : c ∈ s) (hd : d ∈ s)
-    (hcd : S.embedAfter s hs r c hc = S.embedAfter s hs r d hd) :
-    c = d := by
-  have := (exists_relHom S s hs r).choose.injective hcd
-  rw [Subtype.mk.injEq] at this
-  exact this
+instance (S : OrdSupport β) : IsTrans (SupportCondition β) (ExtendRel S) := by
+  constructor
+  intro c₁ c₂ c₃ h₁ h₂
+  cases h₁ with
+  | lt c₁ c₂ h₁ =>
+    obtain ⟨c₂, hc₂⟩ := c₂
+    cases h₂ with
+    | lt c₂ c₃ h₂ =>
+      exact ExtendRel.lt c₁ c₃ (h₁.trans h₂)
+    | conditionRel c₂ c₃ hc₂' hc₃ h₂ =>
+      cases hc₂' hc₂
+    | sep c₂ c₃ hc₃ =>
+      exact ExtendRel.sep c₁ c₃ hc₃
+  | conditionRel c₁ c₂ hc₁ hc₂ h₁ =>
+    cases h₂ with
+    | lt c₂ c₃ h₂ =>
+      cases hc₂ c₂.prop
+    | conditionRel c₂ c₃ hc₂' hc₃ h₂ =>
+      exact ExtendRel.conditionRel c₁ c₃ hc₁ hc₃ (conditionRel_isTrans.trans c₁ c₂ c₃ h₁ h₂)
+    | sep c₂ c₃ hc₃ =>
+      cases hc₂ c₂.prop
+  | sep c₁ c₂ hc₂ =>
+    cases h₂ with
+    | lt c₂ c₃ h₂ =>
+      cases hc₂ c₂.prop
+    | conditionRel c₂ c₃ hc₂' hc₃ h₂ =>
+      exact ExtendRel.sep c₁ c₃ hc₃
+    | sep c₂ c₃ hc₃ =>
+      cases hc₂ c₂.prop
 
-theorem lt_embedAfter (S : OrdSupport β) (s : Set (SupportCondition β)) (hs : Small s)
-    (r : s → s → Prop) [IsWellOrder s r] (c d : SupportCondition β) (hc : c ∈ S) (hd : d ∈ s) :
-    (S.cpos c).get hc < S.embedAfter s hs r d hd :=
-  (exists_relHom S s hs r).choose_spec ⟨d, hd⟩ c hc
+theorem mem_of_extendRel {S : OrdSupport β} (c : SupportCondition β) (d : S)
+    (h : ExtendRel S c d) : c ∈ S := by
+  obtain ⟨d, hd⟩ := d
+  cases h with
+  | lt c d h =>
+    exact c.prop
+  | conditionRel c d hc hd' h =>
+    cases hd' hd
+  | sep c d h =>
+    cases h hd
 
-theorem embedAfter_lt_embedAfter_iff (S : OrdSupport β) (s : Set (SupportCondition β))
-    (hs : Small s) (r : s → s → Prop) [IsWellOrder s r]
-    (c d : SupportCondition β) (hc : c ∈ s) (hd : d ∈ s) :
-    S.embedAfter s hs r c hc < S.embedAfter s hs r d hd ↔ r ⟨c, hc⟩ ⟨d, hd⟩ :=
-  (exists_relHom S s hs r).choose.map_rel_iff
+theorem lt_of_extendRel {S : OrdSupport β} (c : SupportCondition β) (d : S)
+    (h : ExtendRel S c d) : ⟨c, mem_of_extendRel c d h⟩ < d := by
+  obtain ⟨d, hd⟩ := d
+  cases h with
+  | lt c d h =>
+    exact h
+  | conditionRel c d hc hd' h =>
+    cases hd' hd
+  | sep c d h =>
+    cases h hd
 
-open scoped Classical in
+instance (S : OrdSupport β) : IsWellFounded (SupportCondition β) (ExtendRel S) := by
+  constructor
+  have : ∀ c : S, Acc (ExtendRel S) c
+  · intro c
+    refine S.induction (motive := fun c => Acc (ExtendRel S) c) c ?_
+    intro c ih
+    constructor
+    intro d hd
+    exact ih ⟨d, mem_of_extendRel d c hd⟩ (lt_of_extendRel d c hd)
+  constructor
+  intro c
+  refine conditionRel_isWellFounded.induction (C := fun c => Acc (ExtendRel S) c) c ?_
+  intro c ih
+  constructor
+  intro d hd
+  cases hd with
+  | lt c d h =>
+    exact this c
+  | conditionRel c d hc hd' h =>
+    exact ih d h
+  | sep c d h =>
+    exact this c
+
+instance (S : OrdSupport β) : IsWellOrder (SupportCondition β) (ExtendRel S) := ⟨⟩
+
 /-- Add some extra support conditions to the end of an ordered support. -/
 noncomputable def extend (S : OrdSupport β) (s : Set (SupportCondition β)) (hs : Small s) :
     OrdSupport β where
-  cpos c := ⟨c ∈ S ∨ c ∈ s, fun h =>
-    if hc : c ∈ S then
-      (S.cpos c).get hc
-    else
-      S.embedAfter s hs WellOrderingRel c (or_iff_not_imp_left.mp h hc)⟩
-  injective := by
-    letI hlo : LinearOrder (Atom ⊕ NearLitter) := inferInstance
-    letI hpo : Preorder (Atom ⊕ NearLitter) := hlo.toPreorder
-    rintro ⟨A, x⟩ ⟨_, y⟩ hc hd rfl h
-    simp only at hc hd h
-    split_ifs at h with h₁ h₂ h₂
-    · exact S.injective _ _ _ _ rfl h
-    · have := lt_embedAfter S s hs WellOrderingRel _ _ h₁ (or_iff_not_imp_left.mp hd h₂)
-      rw [h] at this
-      cases this.false
-    · have := lt_embedAfter S s hs WellOrderingRel _ _ h₂ (or_iff_not_imp_left.mp hc h₁)
-      rw [h] at this
-      cases this.false
-    · exact S.embedAfter_injective s hs _ _ _
-        (or_iff_not_imp_left.mp hc h₁) (or_iff_not_imp_left.mp hd h₂) h
-  dom_small' := Small.union S.dom_small hs
+  carrier := S ∪ s
+  carrier_small := Small.union S.small hs
+  r c d := ExtendRel S c d
+  r_isWellOrder := isWellOrder_invImage
+    (inferInstanceAs (IsWellOrder (SupportCondition β) (ExtendRel S))) _ Subtype.val_injective
 
 /-- An extended support specialises the original. -/
 theorem le_extend (S : OrdSupport β) (s : Set (SupportCondition β)) (hs : Small s) :
     S ≤ S.extend s hs where
-  mem_of_mem c := Or.inl
-  get_eq_get _ _ _ := by
-    dsimp only [extend]
-    rw [dif_pos]
-  get_lt_get c d hc _ hdS hds := by
-    dsimp only [extend]
-    rw [dif_pos hc, dif_neg hdS]
-    exact S.lt_embedAfter s hs WellOrderingRel c d hc (or_iff_not_imp_left.mp hds hdS)
+  mem_of_mem c := Or.inl c.prop
+  lt_iff_lt c d := ⟨ExtendRel.lt c d, fun h => lt_of_extendRel c d (show ExtendRel S c d from h)⟩
+  get_lt_get c d hd := ExtendRel.sep c d hd
 
 theorem mem_extend_iff (S : OrdSupport β) (s : Set (SupportCondition β)) (hs : Small s)
     (c : SupportCondition β) :
     c ∈ S.extend s hs ↔ c ∈ S ∨ c ∈ s :=
   Iff.rfl
 
-theorem extend_lt_extend₁ {S : OrdSupport β} {s : Set (SupportCondition β)} {hs : Small s}
-    {c d : SupportCondition β} (hc : c ∈ S) (hd : d ∈ S) :
-    ((S.extend s hs).cpos c).get (Or.inl hc) < ((S.extend s hs).cpos d).get (Or.inl hd) ↔
-    (S.cpos c).get hc < (S.cpos d).get hd :=
-  by simp only [extend, hc, hd, dite_true]
-
-theorem extend_lt_extend₂ {S : OrdSupport β} {s : Set (SupportCondition β)} {hs : Small s}
-    {c d : SupportCondition β} (hc : c ∈ S) (hd₁ : d ∉ S) (hd₂ : d ∈ s) :
-    ((S.extend s hs).cpos c).get (Or.inl hc) < ((S.extend s hs).cpos d).get (Or.inr hd₂) := by
-  dsimp only [extend]
-  rw [dif_pos hc, dif_neg hd₁]
-  exact lt_embedAfter _ _ _ _ _ _ _ _
-
-theorem extend_lt_extend₃ {S : OrdSupport β} {s : Set (SupportCondition β)} {hs : Small s}
-    {c d : SupportCondition β} (hc₁ : c ∉ S) (hc₂ : c ∈ s) (hd : d ∈ S) :
-    ¬((S.extend s hs).cpos c).get (Or.inr hc₂) < ((S.extend s hs).cpos d).get (Or.inl hd) :=
-  not_lt_of_lt (extend_lt_extend₂ hd hc₁ hc₂)
-
-theorem extend_lt_extend₄ {S : OrdSupport β} {s : Set (SupportCondition β)} {hs : Small s}
-    {c d : SupportCondition β} (hc₁ : c ∉ S) (hc₂ : c ∈ s) (hd₁ : d ∉ S) (hd₂ : d ∈ s) :
-    ((S.extend s hs).cpos c).get (Or.inr hc₂) < ((S.extend s hs).cpos d).get (Or.inr hd₂) ↔
-    (WellOrderingRel : s → s → Prop) ⟨c, hc₂⟩ ⟨d, hd₂⟩ :=
-  by simp only [extend, hc₁, hd₁, dite_false, embedAfter_lt_embedAfter_iff]
-
-theorem extend_equiv (S T : OrdSupport β) (s : Set (SupportCondition β)) (hs : Small s)
-    (h : S ≈ T) : S.extend s hs ≈ T.extend s hs := by
+theorem extend_strong {S : OrdSupport β} {s : Set (SupportCondition β)} {hs : Small s}
+    (hS : S.Strong) (hs₁ : ∀ c ∈ s, Reduced c.value)
+    (hs₂ : ∀ c ∈ s, ∀ d : SupportCondition β, Reduced d.value → d <[α] c → d ∈ s) :
+    (S.extend s hs).Strong := by
   constructor
-  · intro c hc
-    rw [mem_extend_iff] at hc ⊢
-    rw [OrdSupport.mem_iff_mem h]
-    exact hc
-  · intro c hc
-    rw [mem_extend_iff] at hc ⊢
-    rw [← OrdSupport.mem_iff_mem h]
-    exact hc
-  · intro c d hcS hcT hdS hdT
-    by_cases hc₁ : c ∈ S <;> by_cases hd₁ : d ∈ S
-    · rw [extend_lt_extend₁ hc₁ hd₁, extend_lt_extend₁ (h.mem_right hc₁) (h.mem_right hd₁),
-        h.lt_iff_lt]
-    · simp only [extend_lt_extend₂ hc₁ hd₁ (or_iff_not_imp_left.mp hdS hd₁),
-        extend_lt_extend₂ (h.mem_right hc₁) (fun hd₂ => hd₁ (h.mem_left hd₂))
-          (or_iff_not_imp_left.mp hdS hd₁)]
-    · simp only [extend_lt_extend₃ hc₁ (or_iff_not_imp_left.mp hcS hc₁) hd₁,
-        extend_lt_extend₃ (fun hc₂ => hc₁ (h.mem_left hc₂)) (or_iff_not_imp_left.mp hcS hc₁)
-          (h.mem_right hd₁)]
-    · rw [extend_lt_extend₄ hc₁ (or_iff_not_imp_left.mp hcS hc₁)
-        hd₁ (or_iff_not_imp_left.mp hdS hd₁),
-      extend_lt_extend₄ (fun hc₂ => hc₁ (h.mem_left hc₂))
-        (or_iff_not_imp_left.mp hcT (fun hc₂ => hc₁ (h.mem_left hc₂)))
-        (fun hd₂ => hd₁ (h.mem_left hd₂))
-        (or_iff_not_imp_left.mp hdT (fun hd₂ => hd₁ (h.mem_left hd₂)))]
+  case reduced_of_mem =>
+    intro c
+    obtain (hc | hc) := c.prop
+    · exact hS.reduced_of_mem ⟨c, hc⟩
+    · exact hs₁ c hc
+  case transConstrains_mem =>
+    intro c d hc hcd
+    obtain (hd | hd) := d.prop
+    · exact Or.inl (hS.transConstrains_mem c ⟨d, hd⟩ hc hcd)
+    · exact Or.inr (hs₂ d hd c hc hcd)
+  case lt_of_transConstrains =>
+    intro c d hcd
+    by_cases hd : d.val ∈ S
+    · refine ExtendRel.lt ⟨c.val, ?_⟩ ⟨d.val, hd⟩ ?_
+      · by_contra hcS
+        have hcs := or_iff_not_imp_left.mp c.prop hcS
+        exact hcS (hS.transConstrains_mem c ⟨d.val, hd⟩ (hs₁ c hcs) hcd)
+      · exact hS.lt_of_transConstrains _ _ hcd
+    by_cases hc : c.val ∈ S
+    · exact ExtendRel.sep ⟨c.val, hc⟩ d hd
+    · exact ExtendRel.conditionRel c.val d.val hc hd (conditionRel_of_transConstrains hcd)
 
 end OrdSupport
 

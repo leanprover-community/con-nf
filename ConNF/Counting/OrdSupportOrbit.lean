@@ -1,5 +1,5 @@
 import Mathlib.GroupTheory.GroupAction.Basic
-import ConNF.Counting.OrdSupportEquiv
+import ConNF.Counting.OrdSupport
 
 /-!
 # Orbits of ordered supports
@@ -79,98 +79,5 @@ def Strong (o : OrdSupportOrbit β) : Prop :=
   ∃ S : OrdSupport β, o = mk S ∧ S.Strong
 
 end OrdSupportOrbit
-
-def OrdSupportClassOrbit (β : Iic α) : Type u :=
-  orbitRel.Quotient (Allowable β) (OrdSupportClass β)
-
-namespace OrdSupportClassOrbit
-
-/-- The orbit of a given ordered support class. -/
-def mk (S : OrdSupportClass β) : OrdSupportClassOrbit β :=
-  ⟦S⟧
-
-protected theorem eq {S T : OrdSupportClass β} : mk S = mk T ↔ S ∈ orbit (Allowable β) T :=
-  Quotient.eq (r := _)
-
-instance : SetLike (OrdSupportClassOrbit β) (OrdSupportClass β) where
-  coe o := {S | mk S = o}
-  coe_injective' := by
-    intro o₁ o₂
-    refine Quotient.inductionOn₂ o₁ o₂ ?_
-    intro S₁ S₂ h
-    simp only [ext_iff, mem_setOf_eq] at h
-    exact (h S₁).mp rfl
-
-theorem mem_mk (S : OrdSupportClass β) : S ∈ mk S :=
-  rfl
-
-theorem mem_def (S : OrdSupportClass β) (o : OrdSupportClassOrbit β) : S ∈ o ↔ mk S = o := Iff.rfl
-
-@[simp]
-theorem mem_mk_iff (S T : OrdSupportClass β) : S ∈ mk T ↔ S ∈ orbit (Allowable β) T := by
-  rw [mem_def, mk, mk, ← orbitRel_apply, Quotient.eq (r := _)]
-  rfl
-
-@[simp]
-theorem mk_smul (S : OrdSupportClass β) (ρ : Allowable β) : mk (ρ • S) = mk S := by
-  rw [OrdSupportClassOrbit.eq]
-  exact ⟨ρ, rfl⟩
-
-/-- This theorem shows that it doesn't matter whether we take the quotient by equivalence before or
-after the quotient by orbits. -/
-theorem mk_eq_mk_of_mem_orbit (S T : OrdSupport β) (h : S ∈ orbit (Allowable β) T) :
-    mk (OrdSupportClass.mk S) = mk (OrdSupportClass.mk T) := by
-  obtain ⟨ρ, rfl⟩ := h
-  simp only [OrdSupportClass.smul_mk, mk_smul]
-
-def ofOrbit : OrdSupportOrbit β → OrdSupportClassOrbit β :=
-  Quotient.lift (fun S => mk (OrdSupportClass.mk S)) mk_eq_mk_of_mem_orbit
-
-@[simp]
-theorem ofOrbit_mk (S : OrdSupport β) :
-    ofOrbit (OrdSupportOrbit.mk S) = mk (OrdSupportClass.mk S) :=
-  rfl
-
-/-- An ordered support class in this class orbit. -/
-noncomputable def chooseClass (o : OrdSupportClassOrbit β) : OrdSupportClass β :=
-  (o.out (s := _))
-
-@[simp]
-theorem mk_chooseClass (o : OrdSupportClassOrbit β) :
-    mk o.chooseClass = o :=
-  Quotient.out_eq (s := _) _
-
-theorem chooseClass_mem (o : OrdSupportClassOrbit β) :
-    o.chooseClass ∈ o :=
-  o.mk_chooseClass
-
-/-- An ordered support orbit in this class orbit. -/
-noncomputable def chooseOrbit (o : OrdSupportClassOrbit β) : OrdSupportOrbit β :=
-  OrdSupportOrbit.mk (o.chooseClass.out)
-
-@[simp]
-theorem ofOrbit_chooseOrbit (o : OrdSupportClassOrbit β) :
-    ofOrbit o.chooseOrbit = o := by
-  rw [chooseOrbit, ofOrbit_mk, OrdSupportClass.mk, Quotient.out_eq, mk_chooseClass]
-
-theorem mk_mem_of_mem_orbit {S : OrdSupport β} {o : OrdSupportOrbit β} {co : OrdSupportClassOrbit β}
-    (hS : S ∈ o) (ho : ofOrbit o = co) : OrdSupportClass.mk S ∈ co := by
-  subst ho
-  obtain ⟨ρ, rfl⟩ := hS
-  simp only [ofOrbit_mk, mem_mk_iff, mem_orbit_self]
-
-theorem ofOrbit_eq_ofOrbit {o₁ o₂ : OrdSupportOrbit β} (h : ofOrbit o₁ = ofOrbit o₂) :
-    ∃ S T, S ∈ o₁ ∧ T ∈ o₂ ∧ S ≈ T := by
-  have h₁ := OrdSupportOrbit.eq_mk_of_mem o₁.out_mem
-  have h₂ := OrdSupportOrbit.eq_mk_of_mem o₂.out_mem
-  rw [h₁, h₂, ofOrbit_mk, ofOrbit_mk, OrdSupportClassOrbit.eq] at h
-  obtain ⟨ρ, h⟩ := h
-  dsimp only at h
-  rw [← OrdSupportClass.smul_mk, OrdSupportClass.eq] at h
-  refine ⟨o₁.out, ρ • o₂.out, o₁.out_mem, ?_, h.symm⟩
-  rw [OrdSupportOrbit.smul_mem_iff_mem]
-  exact OrdSupportOrbit.out_mem o₂
-
-end OrdSupportClassOrbit
 
 end ConNF

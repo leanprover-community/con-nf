@@ -364,16 +364,17 @@ theorem completeLitterMap_inflexibleCoe (hπf : π.Free) {c d : SupportCondition
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d) :
     InflexibleCoe A (π.completeLitterMap A L) := by
   rw [completeLitterMap_eq_of_inflexibleCoe h]
-  obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, a, rfl⟩ := h
-  refine' ⟨⟨_, _, _, hδ, hε, hδε, _, rfl⟩, _, rfl⟩
-  · intros A L hL h
-    refine' (hcd.le _).comp _
+  swap
+  · refine' (hcd.le _).comp _
     obtain hL | hL := hL
     · exact (ihAction_le hL).trans (ihAction_le_ihsAction _ _ _)
     · rw [ihsAction_symm]
       exact (ihAction_le hL).trans (ihAction_le_ihsAction _ _ _)
-  · intros A L _ h
-    exact ihAction_comp_mapFlexible hπf _ _
+  swap
+  · exact ihAction_comp_mapFlexible hπf _ _
+  obtain ⟨P, t, ht⟩ := h
+  constructor
+  rfl
 
 theorem completeLitterMap_flexible' (hπf : π.Free) {c d : SupportCondition β}
     (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter}
@@ -585,7 +586,6 @@ theorem ConNF.StructApprox.extracted_2
         exact transConstrains_comp haN _
       swap
       · refine' ⟨c, hc₁, _root_.trans _ hc₂⟩
-        swap
         refine' Relation.ReflTransGen.trans (transConstrains_comp haN _).to_reflTransGen _
         exact reflTransConstrains_nearLitter Relation.ReflTransGen.refl
       · simp only [ne_eq, Path.comp_cons, InflexibleCoe.comp_path,

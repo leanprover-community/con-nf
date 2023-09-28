@@ -16,7 +16,7 @@ structure CodingFunction (β : Iic α) where
   decode : OrdSupport β →. Tangle β
   dom_nonempty : decode.Dom.Nonempty
   supports_decode' (S : OrdSupport β) (hS : (decode S).Dom) :
-    Supports (Allowable β) {c | c ∈ S} ((decode S).get hS)
+    Supports (Allowable β) (S : Set (SupportCondition β)) ((decode S).get hS)
   dom_iff (S T : OrdSupport β) (hS : (decode S).Dom) :
     (decode T).Dom ↔ ∃ ρ : Allowable β, T = ρ • S
   decode_smul' (S : OrdSupport β) (ρ : Allowable β)
@@ -49,7 +49,7 @@ theorem exists_mem (χ : CodingFunction β) :
   χ.dom_nonempty
 
 theorem supports_decode {χ : CodingFunction β} (S : OrdSupport β) (hS : S ∈ χ) :
-    Supports (Allowable β) {c | c ∈ S} ((χ.decode S).get hS) :=
+    Supports (Allowable β) (S : Set (SupportCondition β)) ((χ.decode S).get hS) :=
   χ.supports_decode' S hS
 
 theorem decode_smul {χ : CodingFunction β} (S : OrdSupport β) (ρ : Allowable β) (h : ρ • S ∈ χ) :
@@ -71,8 +71,8 @@ theorem ext {χ₁ χ₂ : CodingFunction β}
     rw [χ₁.decode_smul' S ρ h₁ h₁', χ₂.decode_smul' S ρ h₂ h₂', h]
 
 theorem smul_supports {S : OrdSupport β} {t : Tangle β}
-    (h : Supports (Allowable β) {c | c ∈ S} t) (ρ : Allowable β) :
-    Supports (Allowable β) {c | c ∈ ρ • S} (ρ • t) := by
+    (h : Supports (Allowable β) (S : Set (SupportCondition β)) t) (ρ : Allowable β) :
+    Supports (Allowable β) (ρ • S : Set (SupportCondition β)) (ρ • t) := by
   intro ρ' hρ'
   have := h (ρ⁻¹ * ρ' * ρ) ?_
   · rw [mul_assoc, mul_smul, inv_smul_eq_iff, mul_smul] at this
@@ -80,7 +80,7 @@ theorem smul_supports {S : OrdSupport β} {t : Tangle β}
   intros c hc
   rw [mul_assoc, mul_smul, inv_smul_eq_iff, mul_smul]
   refine hρ' ?_
-  simp only [OrdSupport.smul_mem, mem_setOf_eq, inv_smul_smul]
+  simp only [OrdSupport.mem_carrier_iff, OrdSupport.smul_mem, inv_smul_smul]
   exact hc
 
 theorem decode_congr {χ : CodingFunction β} {S₁ S₂ : OrdSupport β}
@@ -91,7 +91,7 @@ theorem decode_congr {χ : CodingFunction β} {S₁ S₂ : OrdSupport β}
 
 /-- Produce a coding function for a given ordered support and tangle it supports. -/
 noncomputable def code (S : OrdSupport β) (t : Tangle β)
-    (h : Supports (Allowable β) {c | c ∈ S} t) :
+    (h : Supports (Allowable β) (S : Set (SupportCondition β)) t) :
     CodingFunction β where
   decode T := ⟨∃ ρ : Allowable β, T = ρ • S, fun hT => hT.choose • t⟩
   dom_nonempty := ⟨S, 1, by rw [one_smul]⟩
@@ -116,11 +116,11 @@ noncomputable def code (S : OrdSupport β) (t : Tangle β)
     have := h₂.choose_spec.symm
     conv_rhs at this => rw [h₁.choose_spec]
     rw [← inv_smul_eq_iff, ← inv_smul_eq_iff, smul_smul, smul_smul] at this
-    exact OrdSupport.smul_eq_of_smul_eq _ hc this
+    exact OrdSupport.smul_eq_of_smul_eq _ ⟨c, hc⟩ this
 
 @[simp]
 theorem code_decode (S : OrdSupport β) (t : Tangle β)
-    (h : Supports (Allowable β) {c | c ∈ S} t) :
+    (h : Supports (Allowable β) (S : Set (SupportCondition β)) t) :
     (code S t h).decode S = Part.some t := by
   refine Part.ext' ?_ ?_
   · simp only [Allowable.toStructPerm_smul, Part.some_dom, iff_true]
@@ -129,16 +129,17 @@ theorem code_decode (S : OrdSupport β) (t : Tangle β)
   · intros h' _
     refine h _ ?_
     intros c hc
-    exact OrdSupport.smul_eq_of_smul_eq _ hc h'.choose_spec.symm
+    exact OrdSupport.smul_eq_of_smul_eq _ ⟨c, hc⟩ h'.choose_spec.symm
 
 @[simp]
-theorem mem_code_self {S : OrdSupport β} {t : Tangle β} {h : Supports (Allowable β) {c | c ∈ S} t} :
+theorem mem_code_self {S : OrdSupport β} {t : Tangle β}
+    {h : Supports (Allowable β) (S : Set (SupportCondition β)) t} :
     S ∈ code S t h :=
   ⟨1, by rw [one_smul]⟩
 
 @[simp]
 theorem mem_code {S : OrdSupport β} {t : Tangle β}
-    {h : Supports (Allowable β) {c | c ∈ S} t} (T : OrdSupport β) :
+    {h : Supports (Allowable β) (S : Set (SupportCondition β)) t} (T : OrdSupport β) :
     T ∈ code S t h ↔ ∃ ρ : Allowable β, T = ρ • S :=
   Iff.rfl
 
@@ -150,6 +151,10 @@ theorem eq_code {χ : CodingFunction β} {S : OrdSupport β} (h : S ∈ χ) :
   · refine ⟨1, ?_⟩
     rw [one_smul]
   · simp only [code_decode, Part.get_some]
+
+/-- A coding function is *strong* if it contains a strong support. -/
+def Strong (χ : CodingFunction β) : Prop :=
+  ∃ S : OrdSupport β, S ∈ χ ∧ S.Strong
 
 end CodingFunction
 
