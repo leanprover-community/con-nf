@@ -62,6 +62,12 @@ theorem smul_mem_iff_mem {S : OrdSupport β} {o : OrdSupportOrbit β} (ρ : Allo
   rw [inv_smul_smul] at this
   exact this
 
+theorem eq_of_mem_orbit {o₁ o₂ : OrdSupportOrbit β} {S₁ S₂ : OrdSupport β}
+    (h₁ : S₁ ∈ o₁) (h₂ : S₂ ∈ o₂) (h : S₁ ∈ orbit (Allowable β) S₂) : o₁ = o₂ := by
+  rw [mem_def] at h₁ h₂
+  rw [← h₁, ← h₂, OrdSupportOrbit.eq]
+  exact h
+
 noncomputable def out (o : OrdSupportOrbit β) : OrdSupport β :=
   Quotient.out (s := _) o
 
@@ -77,6 +83,17 @@ theorem eq_mk_of_mem {S : OrdSupport β} {o : OrdSupportOrbit β} (h : S ∈ o) 
 /-- An orbit of ordered supports is *strong* if it contains a strong support. -/
 def Strong (o : OrdSupportOrbit β) : Prop :=
   ∃ S : OrdSupport β, o = mk S ∧ S.Strong
+
+/-- A strong support in this strong orbit. -/
+noncomputable def Strong.out {o : OrdSupportOrbit β} (h : o.Strong) : OrdSupport β :=
+  h.choose
+
+@[simp]
+theorem Strong.mk_out {o : OrdSupportOrbit β} (h : o.Strong) : mk h.out = o :=
+  h.choose_spec.1.symm
+
+theorem Strong.out_strong {o : OrdSupportOrbit β} (h : o.Strong) : h.out.Strong :=
+  h.choose_spec.2
 
 end OrdSupportOrbit
 
