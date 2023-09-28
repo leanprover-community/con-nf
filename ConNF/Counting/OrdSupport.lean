@@ -226,6 +226,12 @@ structure Strong (S : OrdSupport β) : Prop where
   transConstrains_mem (c : SupportCondition β) (d : S) : Reduced c.value → c <[α] d → c ∈ S
   lt_of_transConstrains : (c d : S) → c.val <[α] d.val → c < d
 
+theorem Strong.fst_toNearLitter_mem {S : OrdSupport β} (hS : S.Strong)
+    {A : ExtendedIndex β} {a : Atom} (h : ⟨A, inl a⟩ ∈ S) :
+    ⟨A, inr a.1.toNearLitter⟩ ∈ S :=
+  hS.transConstrains_mem _ ⟨_, h⟩
+    (Reduced.mkLitter a.1) (Relation.TransGen.single (Constrains.atom A a))
+
 /-- `T` *extends* `S` if it is a well-order that end-extends `S`. -/
 structure Extends (T S : OrdSupport β) : Prop where
   mem_of_mem (c : S) : c.val ∈ T
