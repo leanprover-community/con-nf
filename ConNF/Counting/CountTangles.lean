@@ -42,7 +42,7 @@ theorem recodeSurjection_surjective : Surjective (recodeSurjection hγ) := by
       ← recode_eq hγ S ((χ.decode S).get hSχ) (χ.supports_decode S hSχ)]
 
 theorem mk_strong_codingFunction_le :
-    #{χ : CodingFunction β // χ.Strong} ≤
+    #{ χ : CodingFunction β // χ.Strong } ≤
     2 ^ #(RaisedSingleton hγ) * #{ o : OrdSupportOrbit β // o.Strong } := by
   refine (mk_le_of_surjective (recodeSurjection_surjective hγ)).trans ?_
   refine (mk_subtype_le_of_subset (q := fun x => x.2.Strong) (fun x hx => hx.1)).trans ?_

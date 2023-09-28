@@ -19,7 +19,8 @@ variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α
 inductive SpecCondition (β : Iic α)
   | atom (A : ExtendedIndex β) (i : Ordinal.{u})
   | flexible (A : ExtendedIndex β)
-  | inflexibleCoe (A : ExtendedIndex β) (h : InflexibleCoePath A) (χ : CodingFunction (h.δ : Iic α))
+  | inflexibleCoe (A : ExtendedIndex β) (h : InflexibleCoePath A)
+      (χ : CodingFunction (h.δ : Iic α)) (hχ : χ.Strong)
   | inflexibleBot (A : ExtendedIndex β) (h : InflexibleBotPath A) (i : Ordinal.{u})
 
 theorem SpecCondition.atom_injective {A : ExtendedIndex β} {i j : Ordinal}
@@ -34,15 +35,15 @@ theorem SpecCondition.inflexibleBot_injective {A : ExtendedIndex β} {h₁ h₂ 
   exact ⟨rfl, rfl⟩
 
 theorem SpecCondition.inflexibleCoe_injective₁ {A : ExtendedIndex β} {h₁ h₂ : InflexibleCoePath A}
-    {χ₁ : CodingFunction h₁.δ} {χ₂ : CodingFunction h₂.δ}
-    (h : SpecCondition.inflexibleCoe A h₁ χ₁ = SpecCondition.inflexibleCoe A h₂ χ₂) :
+    {χ₁ : CodingFunction h₁.δ} {χ₂ : CodingFunction h₂.δ} {hχ₁ : χ₁.Strong} {hχ₂ : χ₂.Strong}
+    (h : SpecCondition.inflexibleCoe A h₁ χ₁ hχ₁ = SpecCondition.inflexibleCoe A h₂ χ₂ hχ₂) :
     h₁ = h₂ := by
   cases h
   exact rfl
 
 theorem SpecCondition.inflexibleCoe_injective₂ {A : ExtendedIndex β} {h : InflexibleCoePath A}
-    {χ₁ χ₂ : CodingFunction h.δ}
-    (h : SpecCondition.inflexibleCoe A h χ₁ = SpecCondition.inflexibleCoe A h χ₂) :
+    {χ₁ χ₂ : CodingFunction h.δ} {hχ₁ : χ₁.Strong} {hχ₂ : χ₂.Strong}
+    (h : SpecCondition.inflexibleCoe A h χ₁ hχ₁ = SpecCondition.inflexibleCoe A h χ₂ hχ₂) :
     χ₁ = χ₂ := by
   cases h
   exact rfl
@@ -70,10 +71,11 @@ structure Specifies (σ : Spec β) (S : OrdSupport β) : Prop where
   inflexibleCoe_spec (A : ExtendedIndex β) (N : NearLitter) (hN : ⟨A, inr N⟩ ∈ S)
     (h : InflexibleCoe A N.1) :
     ∃ χ : CodingFunction h.path.δ,
+    ∃ hχ : χ.Strong,
     ∃ h' : (S.before (typein S.r ⟨_, hN⟩)).comp h.path.δ (h.path.B.cons h.path.hδ) ∈ χ,
     (χ.decode _).get h' = h.t ∧
     σ.cond (typein S.r ⟨_, hN⟩) (lt_orderType ⟨_, hN⟩) =
-    SpecCondition.inflexibleCoe A h.path χ
+    SpecCondition.inflexibleCoe A h.path χ hχ
   inflexibleBot_spec (A : ExtendedIndex β) (N : NearLitter) (hN : ⟨A, inr N⟩ ∈ S)
     (h : InflexibleBot A N.1) :
     ∃ ha : ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩ ∈ S,
@@ -107,12 +109,12 @@ theorem specifies_subsingleton (S : OrdSupport β) :
   · obtain ⟨ha₁, ha₁'⟩ := h₁.inflexibleBot_spec A N hc hL
     obtain ⟨ha₂, ha₂'⟩ := h₂.inflexibleBot_spec A N hc hL
     exact ha₁'.trans ha₂'.symm
-  · obtain ⟨χ₁, hχ₁, ht₁, h₁'⟩ := h₁.inflexibleCoe_spec A N hc hL
-    obtain ⟨χ₂, hχ₂, ht₂, h₂'⟩ := h₂.inflexibleCoe_spec A N hc hL
+  · obtain ⟨χ₁, hχ₁, hχ₁', ht₁, h₁'⟩ := h₁.inflexibleCoe_spec A N hc hL
+    obtain ⟨χ₂, hχ₂, hχ₂', ht₂, h₂'⟩ := h₂.inflexibleCoe_spec A N hc hL
     suffices : χ₁ = χ₂
     · subst this
       exact h₁'.trans h₂'.symm
-    refine CodingFunction.ext _ hχ₁ hχ₂ ?_
+    refine CodingFunction.ext _ hχ₁' hχ₂' ?_
     rw [ht₁, ht₂]
 
 theorem before_comp_supports {S : OrdSupport β} (hS : S.Strong)
@@ -147,6 +149,11 @@ noncomputable def codeBefore {S : OrdSupport β} (hS : S.Strong)
     ((S.before (typein S.r ⟨_, hN⟩)).comp h.path.δ (h.path.B.cons h.path.hδ))
     h.t (before_comp_supports hS h hN)
 
+theorem codeBefore_strong {S : OrdSupport β} (hS : S.Strong)
+    {A : ExtendedIndex β} {N : NearLitter} (h : InflexibleCoe A N.1) (hN : ⟨A, inr N⟩ ∈ S) :
+    (codeBefore hS h hN).Strong :=
+  CodingFunction.code_strong ((hS.before _).comp _ _)
+
 noncomputable def specCondition {S : OrdSupport β} (hS : S.Strong) :
     (c : S) → SpecCondition β
   | ⟨⟨A, Sum.inl a⟩, hc⟩ => SpecCondition.atom A
@@ -154,7 +161,8 @@ noncomputable def specCondition {S : OrdSupport β} (hS : S.Strong) :
         (Reduced.mkLitter _) (Relation.TransGen.single <| Constrains.atom _ _)⟩)
   | ⟨⟨A, Sum.inr N⟩, hc⟩ =>
       if h : Nonempty (InflexibleCoe A N.1) then
-        SpecCondition.inflexibleCoe A h.some.path (codeBefore hS h.some hc)
+        SpecCondition.inflexibleCoe A h.some.path
+          (codeBefore hS h.some hc) (codeBefore_strong hS h.some hc)
       else if h : Nonempty (InflexibleBot A N.1) then
         SpecCondition.inflexibleBot A h.some.path
           (typein S.r ⟨⟨h.some.path.B.cons (bot_lt_coe _), inl h.some.a⟩,
@@ -177,7 +185,7 @@ theorem specCondition_atom {S : OrdSupport β} {hS : S.Strong}
 theorem specCondition_inflexibleCoe {S : OrdSupport β} {hS : S.Strong}
     (A : ExtendedIndex β) (N : NearLitter) (hNS : ⟨A, inr N⟩ ∈ S) (hN : InflexibleCoe A N.1) :
     specCondition hS ⟨⟨A, inr N⟩, hNS⟩ =
-    SpecCondition.inflexibleCoe A hN.path (codeBefore hS hN hNS) := by
+    SpecCondition.inflexibleCoe A hN.path (codeBefore hS hN hNS) (codeBefore_strong hS hN hNS) := by
   rw [specCondition]
   dsimp only
   rw [dif_pos ⟨hN⟩]
@@ -276,7 +284,7 @@ theorem spec_specifies {S : OrdSupport β} (hS : S.Strong) :
     rw [specCondition_flexible A N hN₁ hN₂]
   case inflexibleCoe_spec =>
     intro A N hN₁ hN₂
-    refine ⟨codeBefore hS hN₂ hN₁, ?_, ?_, ?_⟩
+    refine ⟨codeBefore hS hN₂ hN₁, codeBefore_strong hS hN₂ hN₁, ?_, ?_, ?_⟩
     · rw [codeBefore]
       exact CodingFunction.mem_code_self
     · simp only [codeBefore, CodingFunction.code_decode, Part.get_some]

@@ -156,6 +156,11 @@ theorem eq_code {χ : CodingFunction β} {S : OrdSupport β} (h : S ∈ χ) :
 def Strong (χ : CodingFunction β) : Prop :=
   ∃ S : OrdSupport β, S ∈ χ ∧ S.Strong
 
+theorem code_strong {S : OrdSupport β} {t : Tangle β}
+    {h : Supports (Allowable β) (S : Set (SupportCondition β)) t} (hS : S.Strong) :
+    (code S t h).Strong :=
+  ⟨S, mem_code_self, hS⟩
+
 end CodingFunction
 
 end ConNF

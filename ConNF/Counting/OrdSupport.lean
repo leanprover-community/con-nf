@@ -232,6 +232,36 @@ theorem Strong.fst_toNearLitter_mem {S : OrdSupport β} (hS : S.Strong)
   hS.transConstrains_mem _ ⟨_, h⟩
     (Reduced.mkLitter a.1) (Relation.TransGen.single (Constrains.atom A a))
 
+theorem Strong.before {S : OrdSupport β} (h : S.Strong) (i : Ordinal) :
+    (S.before i).Strong := by
+  constructor
+  case reduced_of_mem =>
+    intro c
+    exact h.reduced_of_mem ⟨c.val, c.prop.1⟩
+  case transConstrains_mem =>
+    intro c d hc hcd
+    refine ⟨h.transConstrains_mem c ⟨d.val, d.prop.1⟩ hc hcd, ?_⟩
+    refine lt_trans ?_ d.prop.2
+    rw [Ordinal.typein_lt_typein]
+    exact h.lt_of_transConstrains _ _ hcd
+  case lt_of_transConstrains =>
+    intro c d hcd
+    exact h.lt_of_transConstrains _ _ hcd
+
+theorem Strong.comp {S : OrdSupport β} (h : S.Strong)
+    (γ : Iic α) (A : Quiver.Path (β : TypeIndex) γ) :
+    (S.comp γ A).Strong := by
+  constructor
+  case reduced_of_mem =>
+    intro c
+    exact h.reduced_of_mem ⟨_, c.prop⟩
+  case transConstrains_mem =>
+    intro c d hc hcd
+    exact h.transConstrains_mem _ ⟨_, d.prop⟩ hc (transConstrains_comp hcd _)
+  case lt_of_transConstrains =>
+    intro c d hcd
+    exact h.lt_of_transConstrains _ _ (transConstrains_comp hcd _)
+
 /-- `T` *extends* `S` if it is a well-order that end-extends `S`. -/
 structure Extends (T S : OrdSupport β) : Prop where
   mem_of_mem (c : S) : c.val ∈ T
