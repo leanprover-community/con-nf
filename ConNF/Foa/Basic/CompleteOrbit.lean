@@ -161,10 +161,11 @@ theorem complete_left_inv [Nonempty α] (hst : Disjoint (s ∪ f '' s) t) (hf : 
     rw [dif_neg, dif_pos, Subtype.coe_eq_iff]
     refine' ⟨h, _⟩
     simp only [ha]
-    exact a.prop
     · rw [Equiv.symm_apply_eq]
-      simp only [ha, Sum.inl.injEq, Prod.mk.injEq, true_and]
-      rfl
+      · simp only [ha, Sum.inl.injEq, Prod.mk.injEq, true_and]
+        rfl
+      · rw [ha]
+        exact a.prop
     · rw [ha]
       exact fun h => hst _ ⟨Or.inl a.prop.1, sandboxSubset_subset hs ht h⟩
   have h₄ :
@@ -212,10 +213,11 @@ theorem complete_right_inv [Nonempty α] (hst : Disjoint (s ∪ f '' s) t) (hf :
     rw [dif_neg, dif_pos, Subtype.coe_eq_iff]
     refine' ⟨h, _⟩
     simp only [ha]
-    exact a.prop
     · rw [Equiv.symm_apply_eq]
-      simp only [ha, Sum.inr.injEq, Prod.mk.injEq, true_and]
-      rfl
+      · simp only [ha, Sum.inr.injEq, Prod.mk.injEq, true_and]
+        rfl
+      · rw [ha]
+        exact a.prop
     · rw [ha]
       exact fun h => hst _ ⟨Or.inr a.prop.1, sandboxSubset_subset hs ht h⟩
   have h₄ :
