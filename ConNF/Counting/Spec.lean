@@ -300,6 +300,10 @@ theorem spec_specifies {S : OrdSupport β} (hS : S.Strong) :
     · simp only [OrdSupport.coe_sort_coe, spec_cond_eq, conditionAt_typein]
       rw [specCondition_inflexibleBot A N hN₁ hN₂]
 
+/-- A specification is *strong* if it specifies a strong support. -/
+def Strong (σ : Spec β) : Prop :=
+  ∃ S : OrdSupport β, S.Strong ∧ σ.Specifies S
+
 end Spec
 
 end ConNF

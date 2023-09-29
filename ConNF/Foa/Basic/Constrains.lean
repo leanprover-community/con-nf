@@ -130,7 +130,7 @@ theorem constrains_wf : WellFounded (Constrains α β) :=
 variable {α}
 
 @[simp]
-theorem constrains_atom {c : SupportCondition β} {a : Atom} {A : ExtendedIndex β} :
+theorem constrains_atom {c : SupportCondition β} {A : ExtendedIndex β} {a : Atom} :
     c ≺[α] ⟨A, inl a⟩ ↔ c = ⟨A, inr a.1.toNearLitter⟩ := by
   constructor
   · rintro ⟨⟩

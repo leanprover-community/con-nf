@@ -73,9 +73,9 @@ theorem OrdSupportOrbit.spec_injective {o₁ o₂ : OrdSupportOrbit β} {h₁ : 
 
 theorem mk_ordSupportOrbit_le :
     lift.{u + 1} #{ o : OrdSupportOrbit β // o.Strong } ≤
-      #{ σ : Spec β // ∃ S : OrdSupport β, σ.Specifies S } := by
+      #{ σ : Spec β // σ.Strong } := by
   refine ⟨fun o => ⟨o.down.val.spec o.down.prop,
-    o.down.prop.out, o.down.val.spec_specifies_out _⟩, ?_⟩
+    o.down.prop.out, o.down.prop.out_strong, o.down.val.spec_specifies_out _⟩, ?_⟩
   intro o₁ o₂ h
   rw [Subtype.mk.injEq] at h
   exact ULift.ext _ _ (Subtype.coe_injective (OrdSupportOrbit.spec_injective h))
@@ -89,7 +89,7 @@ inductive SpecConditionBelow (β : Iic α) (i : Ordinal.{u})
 
 def SpecConditionBelowType (β : Iic α) (i : Ordinal.{u}) :=
     (ExtendedIndex β × Iio i) ⊕ (ExtendedIndex β) ⊕
-    (ExtendedIndex β × Σ δ : { δ : Iic α // δ < β }, { χ : CodingFunction δ.val // χ.Strong }) ⊕
+    (ExtendedIndex β × (δ : { δ : Iic α // δ < β }) × { χ : CodingFunction δ.val // χ.Strong }) ⊕
     (ExtendedIndex β × Iio i)
 
 def specConditionBelow_map {β : Iic α} {i : Ordinal} :
@@ -155,10 +155,63 @@ theorem specConditionBelow_map_injective {β : Iic α} {i : Ordinal} :
       rfl
     | _ => try cases h
 
+instance {α : Type _} {x : α} : IsTrichotomous ({x} : Set α) emptyRelation := by
+  constructor
+  rintro ⟨_, rfl⟩ ⟨_, rfl⟩
+  exact Or.inr (Or.inl rfl)
+
+instance {α : Type _} {x : α} : IsTrans ({x} : Set α) emptyRelation := by
+  constructor
+  rintro ⟨_, rfl⟩ ⟨_, rfl⟩ _ h _
+  cases h
+
+instance {α : Type _} {x : α} : IsWellFounded ({x} : Set α) emptyRelation := emptyWf.isWellFounded
+
+instance {α : Type _} {x : α} : IsWellOrder ({x} : Set α) emptyRelation := ⟨⟩
+
+def OrdSupport.litter (β : Iic α) (L : Litter) : OrdSupport β where
+  carrier := {⟨Quiver.Hom.toPath (WithBot.bot_lt_coe β.val), Sum.inr L.toNearLitter⟩}
+  carrier_small := small_singleton _
+  r := emptyRelation
+  r_isWellOrder := inferInstance
+
+theorem OrdSupport.litter_supports (β : Iic α) (L : Litter) :
+    Supports (Allowable β) (OrdSupport.litter β L).carrier
+      (typedNearLitter (Litter.toNearLitter L) : Tangle β) := by
+  intro ρ h
+  have := h rfl
+  simp only [Allowable.smul_supportCondition_eq_iff, Sum.smul_inr, Sum.inr.injEq] at this
+  rw [Allowable.smul_typedNearLitter, this]
+
+theorem OrdSupport.litter_strong (β : Iic α) (L : Litter)
+    (hL : Flexible α (Quiver.Hom.toPath (WithBot.bot_lt_coe β.val)) L) :
+    (OrdSupport.litter β L).Strong := by
+  constructor
+  · rintro ⟨_, rfl⟩
+    exact Reduced.mkLitter _
+  · rintro c ⟨_, rfl⟩ _ hcd
+    cases not_transConstrains_flexible α c hL hcd
+  · rintro c ⟨_, rfl⟩ hcd
+    cases not_transConstrains_flexible α c hL hcd
+
+noncomputable def CodingFunction.codeLitter (β : Iic α) (L : Litter) : CodingFunction β :=
+  CodingFunction.code
+    (OrdSupport.litter β L)
+    (typedNearLitter L.toNearLitter)
+    (OrdSupport.litter_supports β L)
+
+theorem CodingFunction.codeLitter_strong (β : Iic α) (L : Litter)
+    (hL : Flexible α (Quiver.Hom.toPath (WithBot.bot_lt_coe β.val)) L) :
+    (CodingFunction.codeLitter β L).Strong :=
+  CodingFunction.code_strong (OrdSupport.litter_strong β L hL)
+
 theorem mk_codingFunction_ne_zero (β : Iic α) :
     #{ χ : CodingFunction β // χ.Strong } ≠ 0 := by
-  rw [Cardinal.mk_ne_zero_iff]
-  sorry
+  have := (aleph0_pos.trans_le μ_isStrongLimit.isLimit.aleph0_le).ne.symm
+  rw [← mk_flexible α (Quiver.Hom.toPath (WithBot.bot_lt_coe β.val))] at this
+  rw [mk_ne_zero_iff] at this ⊢
+  obtain ⟨L, hL⟩ := this
+  exact ⟨CodingFunction.codeLitter β L, CodingFunction.codeLitter_strong β L hL⟩
 
 theorem sum_mk_codingFunction_ne_zero (β : Iic α) (hβ : ¬IsMin β) :
     (sum fun δ : { δ : Iic α // δ < β } =>
@@ -166,7 +219,11 @@ theorem sum_mk_codingFunction_ne_zero (β : Iic α) (hβ : ¬IsMin β) :
   rw [not_isMin_iff] at hβ
   obtain ⟨δ, hδ⟩ := hβ
   intro h
-  sorry
+  rw [← lift_sum, lift_eq_zero, ← mk_sigma, mk_eq_zero_iff] at h
+  refine h.false ⟨⟨δ, hδ⟩, ?_⟩
+  have := mk_codingFunction_ne_zero δ
+  rw [mk_ne_zero_iff] at this
+  exact this.some
 
 theorem _root_.Cardinal.mul_le_of_le {a b c : Cardinal} (ha : a ≤ c) (hb : b ≤ c) (hc : ℵ₀ ≤ c) :
     a * b ≤ c := by
@@ -185,8 +242,8 @@ theorem _root_.Cardinal.mul_le_of_le {a b c : Cardinal} (ha : a ≤ c) (hb : b �
 theorem mk_iio (i : Ordinal.{u}) : #(Iio i) = lift.{u + 1} i.card :=
   Ordinal.mk_initialSeg i
 
-theorem mk_specCondition_below (β : Iic α) (hβ : ¬IsMin β)
-    (i : Ordinal.{u}) (hi : Ordinal.card i ≤ #κ) :
+theorem mk_specConditionBelow (β : Iic α) (hβ : ¬IsMin β)
+    (i : Ordinal.{u}) (hi : i.card ≤ #κ) :
     #(SpecConditionBelow β i) ≤
     lift.{u + 1}
       (#κ * sum fun δ : { δ : Iic α // δ < β } => #{ χ : CodingFunction δ.val // χ.Strong }) := by
@@ -224,5 +281,178 @@ theorem mk_specCondition_below (β : Iic α) (hβ : ¬IsMin β)
         ← Ordinal.lift_card, lift_le]
       exact hi
     · simp only [aleph0_le_lift, aleph0_le_mk]
+
+theorem orderType_lt_of_specifies (σ : Spec β) (S : OrdSupport β) (hσS : σ.Specifies S) :
+    σ.orderType.card < #κ := by
+  rw [Spec.orderType_eq_of_specifies hσS]
+  exact S.small
+
+-- TODO: Could rewrite `SpecSame` making much bigger use of `specifies_subsingleton`.
+
+def SpecType (β : Iic α) : Type _ :=
+  (i : Iio (#κ).ord) × (Iio i.val → SpecConditionBelow β i)
+
+theorem specCondition_atom_below {β : Iic α}
+    {σ : { σ : Spec β // σ.Strong }}
+    {i j : Ordinal} {hi : i < σ.val.orderType} {A : ExtendedIndex β}
+    (h : SpecCondition.atom A j = σ.val.cond i hi) :
+    j < σ.val.orderType := by
+  obtain ⟨σ, S, hS, hσS⟩ := σ
+  cases Spec.specifies_subsingleton S hσS (Spec.spec_specifies hS)
+  simp only [Spec.spec_cond_eq, Spec.specCondition] at h
+  set c := S.conditionAt i hi
+  obtain ⟨⟨B, a | N⟩, hc⟩ := c
+  · simp only [OrdSupport.coe_sort_coe, SpecCondition.atom.injEq] at h
+    cases h.1
+    cases h.2
+    exact Ordinal.typein_lt_type S.r _
+  · dsimp only at h
+    split_ifs at h
+
+theorem specCondition_inflexibleBot_below {β : Iic α}
+    {σ : { σ : Spec β // σ.Strong }}
+    {i j : Ordinal} {hi : i < σ.val.orderType} {A : ExtendedIndex β} {h : InflexibleBotPath A}
+    (h : SpecCondition.inflexibleBot A h j = σ.val.cond i hi) :
+    j < σ.val.orderType := by
+  obtain ⟨σ, S, hS, hσS⟩ := σ
+  cases Spec.specifies_subsingleton S hσS (Spec.spec_specifies hS)
+  simp only [Spec.spec_cond_eq, Spec.specCondition] at h
+  set c := S.conditionAt i hi
+  obtain ⟨⟨B, a | N⟩, hc⟩ := c
+  · simp only at h
+  · dsimp only at h
+    split_ifs at h
+    simp only [OrdSupport.coe_sort_coe, SpecCondition.inflexibleBot.injEq] at h
+    cases h.2.2
+    exact Ordinal.typein_lt_type S.r _
+
+noncomputable def specCondition_map (β : Iic α) (σ : { σ : Spec β // σ.Strong })
+    (i : Iio σ.val.orderType) : SpecConditionBelow β (σ.val.orderType) :=
+  (σ.val.cond i i.prop).rec
+  (motive := fun c => c = σ.val.cond i i.prop → SpecConditionBelow β (σ.val.orderType))
+  (fun A j hc => .atom A j (specCondition_atom_below hc))
+  (fun A _ => .flexible A)
+  (fun A h χ hχ _ => .inflexibleCoe A h χ hχ)
+  (fun A h j hc => .inflexibleBot A h j (specCondition_inflexibleBot_below hc))
+  rfl
+
+theorem specCondition_map_mk_congr {β : Iic α} {o : Ordinal}
+    {cond : (i : Ordinal) → i < o → SpecCondition β} {h : Spec.Strong ⟨o, cond⟩}
+    {i : Ordinal} {hi : i < o} {d : SpecCondition β} (hd : d = cond i hi) :
+    specCondition_map β ⟨⟨o, cond⟩, h⟩ ⟨i, hi⟩ =
+    d.rec
+    (motive := fun c => c = cond i hi → SpecConditionBelow β o)
+    (fun A j hc => .atom A j (specCondition_atom_below (σ := ⟨⟨o, cond⟩, h⟩) hc))
+    (fun A _ => .flexible A)
+    (fun A h χ hχ _ => .inflexibleCoe A h χ hχ)
+    (fun A h' j hc => .inflexibleBot A h' j
+      (specCondition_inflexibleBot_below (σ := ⟨⟨o, cond⟩, h⟩) hc))
+    hd := by
+  subst hd
+  rfl
+
+noncomputable def specType_map (β : Iic α) (σ : { σ : Spec β // σ.Strong }) :
+    SpecType β :=
+  ⟨⟨σ.val.orderType,
+    lt_ord.mpr (orderType_lt_of_specifies σ.val σ.prop.choose σ.prop.choose_spec.2)⟩,
+    specCondition_map β σ⟩
+
+theorem specType_map_injective (β : Iic α) : Injective (specType_map β) := by
+  rintro ⟨⟨o₁, c₁⟩, S₁, hS₁, hσS₁⟩ ⟨⟨σ₂, c₂⟩, S₂, hS₂, hσS₂⟩ h
+  rw [specType_map, specType_map, Sigma.ext_iff] at h
+  cases h.1
+  simp only [heq_eq_eq, true_and] at h
+  simp only [Subtype.mk.injEq, Spec.mk.injEq, heq_eq_eq, true_and]
+  funext i hi
+  have := congr_fun h ⟨i, hi⟩
+  set d₁ := c₁ i hi with hd₁
+  set d₂ := c₂ i hi with hd₂
+  revert hd₁ hd₂
+  cases d₁ with
+  | atom =>
+    cases d₂ <;>
+      intros hd₁ hd₂ <;>
+      rw [specCondition_map_mk_congr hd₁, specCondition_map_mk_congr hd₂] at this <;>
+      aesop
+  | flexible =>
+    cases d₂ <;>
+      intros hd₁ hd₂ <;>
+      rw [specCondition_map_mk_congr hd₁, specCondition_map_mk_congr hd₂] at this <;>
+      aesop
+  | inflexibleCoe =>
+    cases d₂ with
+    | inflexibleCoe =>
+      intros hd₁ hd₂
+      rw [specCondition_map_mk_congr hd₁, specCondition_map_mk_congr hd₂,
+        SpecConditionBelow.inflexibleCoe.injEq] at this
+      cases this.1
+      cases eq_of_heq this.2.1
+      cases eq_of_heq this.2.2
+      rfl
+    | _ =>
+      intros hd₁ hd₂
+      rw [specCondition_map_mk_congr hd₁, specCondition_map_mk_congr hd₂] at this
+      aesop
+  | inflexibleBot =>
+    cases d₂ with
+    | inflexibleBot =>
+      intros hd₁ hd₂
+      rw [specCondition_map_mk_congr hd₁, specCondition_map_mk_congr hd₂,
+        SpecConditionBelow.inflexibleBot.injEq] at this
+      cases this.1
+      cases eq_of_heq this.2.1
+      cases this.2.2
+      rfl
+    | _ =>
+      intros hd₁ hd₂
+      rw [specCondition_map_mk_congr hd₁, specCondition_map_mk_congr hd₂] at this
+      aesop
+
+theorem Cardinal.power_le_power_left {a b c : Cardinal} : a ≠ 0 → b ≤ c → a ^ b ≤ a ^ c := by
+  refine Cardinal.inductionOn₃ a b c ?_
+  rintro α β γ hα ⟨f⟩
+  by_cases hβ : Nonempty β
+  · rw [power_def, power_def]
+    refine ⟨fun g x => g (Function.invFun f x), ?_⟩
+    intro g₁ g₂ h
+    funext x
+    have h₁ := congr_fun h (f x)
+    have h₂ := congr_fun (Function.invFun_comp f.injective) x
+    dsimp only [comp_apply] at h₁ h₂
+    rw [h₂] at h₁
+    exact h₁
+  rw [mk_ne_zero_iff] at hα
+  rw [not_nonempty_iff] at hβ
+  rw [power_def, power_def]
+  refine ⟨fun _ _ => hα.some, ?_⟩
+  intro g₁ g₂ _
+  funext x
+  exact hβ.elim x
+
+theorem mk_spec_le (β : Iic α) (hβ : ¬IsMin β) :
+    #{ σ : Spec β // σ.Strong } ≤
+    lift.{u + 1} (#κ * (2 ^ #κ * (sum fun δ : { δ : Iic α // δ < β } =>
+        #{ χ : CodingFunction δ.val // χ.Strong }) ^ #κ)) := by
+  refine (mk_le_of_injective (specType_map_injective β)).trans ?_
+  rw [SpecType]
+  simp only [mk_sigma, mk_pi, prod_const, mk_iio, lift_id]
+  suffices : ∀ i : (Iio (#κ).ord),
+      #(SpecConditionBelow β i.val) ^ lift.{u + 1} i.val.card ≤
+      lift.{u + 1} (2 ^ #κ * (sum fun δ : { δ : Iic α // δ < β } =>
+        #{ χ : CodingFunction δ.val // χ.Strong }) ^ #κ)
+  · refine (sum_le_sum _ _ this).trans ?_
+    simp only [sum_const, mk_iio, card_ord, lift_id, lift_mul]
+    rfl
+  rintro ⟨i, hi⟩
+  have := mk_specConditionBelow β hβ i (lt_ord.mp hi).le
+  refine (power_le_power_right (c := lift.{u + 1} i.card) this).trans ?_
+  rw [← lift_power, lift_le, mul_power]
+  refine mul_le_mul' ?_ ?_
+  · rw [← power_self_eq κ_isRegular.aleph0_le]
+    exact power_le_power_left κ_isRegular.pos.ne.symm (lt_ord.mp hi).le
+  · refine power_le_power_left ?_ (lt_ord.mp hi).le
+    have := sum_mk_codingFunction_ne_zero β hβ
+    rw [← lift_sum, ne_eq, lift_eq_zero] at this
+    exact this
 
 end ConNF

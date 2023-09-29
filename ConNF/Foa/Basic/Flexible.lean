@@ -29,6 +29,24 @@ def Flexible (A : ExtendedIndex β) (L : Litter) : Prop :=
 theorem flexible_cases (A : ExtendedIndex β) (L : Litter) : Inflexible α A L ∨ Flexible α A L :=
   or_not
 
+theorem not_constrains_flexible {β : Λ} (c : SupportCondition β)
+    {A : ExtendedIndex β} {L : Litter} (hL : Flexible α A L) :
+    ¬c ≺[α] ⟨A, inr L.toNearLitter⟩ := by
+  rintro (⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hε, A, a⟩)
+  · exact hN (NearLitter.IsLitter.mk _)
+  · obtain (ha | ha) := ha
+    · cases ha.2 ha.1
+    · cases ha.2 ha.1
+  · exact hL (Inflexible.mk_coe hδ hε hδε _ _)
+  · exact hL (Inflexible.mk_bot hε _ _)
+
+theorem not_transConstrains_flexible {β : Λ} (c : SupportCondition β)
+    {A : ExtendedIndex β} {L : Litter} (hL : Flexible α A L) :
+    ¬c <[α] ⟨A, inr L.toNearLitter⟩ := by
+  intro h
+  obtain ⟨d, _, hd⟩ := Relation.TransGen.tail'_iff.mp h
+  exact not_constrains_flexible α d hL hd
+
 theorem mk_flexible (A : ExtendedIndex β) : #{L | Flexible α A L} = #μ := by
   refine le_antisymm ((Cardinal.mk_subtype_le _).trans mk_litter.le) ?_
   refine ⟨⟨fun ν => ⟨⟨ν, ⊥, α, bot_ne_coe⟩, ?_⟩, ?_⟩⟩
