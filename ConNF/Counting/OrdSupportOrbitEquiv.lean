@@ -174,6 +174,7 @@ noncomputable def specEquiv (β : Iic α) :
     have := Spec.specifies_smul σ.val _ h₁ ρ
     exact Spec.specifies_subsingleton _ (Spec.spec_specifies _) this
 
+/-- The amount of strong support orbits is exactly the amount of strong specifications. -/
 noncomputable def mk_ordSupportOrbit (β : Iic α) :
     Cardinal.lift.{u + 1} #{ o : OrdSupportOrbit β // o.Strong } = #{ σ : Spec β // σ.Strong } := by
   rw [Cardinal.lift_mk_eq'.mpr ⟨specEquiv β⟩]
