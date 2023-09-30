@@ -1,5 +1,5 @@
 import ConNF.Counting.Recode
-import ConNF.Counting.SpecSame
+import ConNF.Counting.OrdSupportOrbitEquiv
 
 /-!
 # Counting tangles
@@ -55,30 +55,6 @@ theorem mk_strong_codingFunction_le :
   cases h.1
   cases h.2
   rfl
-
-noncomputable def OrdSupportOrbit.spec (o : OrdSupportOrbit β) (h : o.Strong) : Spec β :=
-  Spec.spec h.out h.out_strong
-
-theorem OrdSupportOrbit.spec_specifies_out (o : OrdSupportOrbit β) (h : o.Strong) :
-    (o.spec h).Specifies h.out :=
-  Spec.spec_specifies h.out_strong
-
-theorem OrdSupportOrbit.spec_injective {o₁ o₂ : OrdSupportOrbit β} {h₁ : o₁.Strong} {h₂ : o₂.Strong}
-    (h : o₁.spec h₁ = o₂.spec h₂) : o₁ = o₂ := by
-  have := Spec.convertAllowable_smul (σ := o₁.spec h₁) ?_ ?_ h₁.out_strong h₂.out_strong
-  · exact (OrdSupportOrbit.eq_of_mem_orbit h₂.mk_out h₁.mk_out ⟨_, this⟩).symm
-  · exact o₁.spec_specifies_out h₁
-  · rw [h]
-    exact o₂.spec_specifies_out h₂
-
-theorem mk_ordSupportOrbit_le :
-    lift.{u + 1} #{ o : OrdSupportOrbit β // o.Strong } ≤
-      #{ σ : Spec β // σ.Strong } := by
-  refine ⟨fun o => ⟨o.down.val.spec o.down.prop,
-    o.down.prop.out, o.down.prop.out_strong, o.down.val.spec_specifies_out _⟩, ?_⟩
-  intro o₁ o₂ h
-  rw [Subtype.mk.injEq] at h
-  exact ULift.ext _ _ (Subtype.coe_injective (OrdSupportOrbit.spec_injective h))
 
 inductive SpecConditionBelow (β : Iic α) (i : Ordinal.{u})
   | atom (A : ExtendedIndex β) (j : Ordinal) (h : j < i)

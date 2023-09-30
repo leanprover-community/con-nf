@@ -169,6 +169,35 @@ instance : MulAction (Allowable β) (OrdSupport β) where
     · intro c d
       simp only [lt_iff_smul, mul_inv_rev, mul_smul]
 
+def relIso (S : OrdSupport β) (ρ : Allowable β) : S.r ≃r (ρ • S).r where
+  toFun c := ⟨ρ • c.val, smul_mem_smul.mpr c.prop⟩
+  invFun c := ⟨ρ⁻¹ • c.val, c.prop⟩
+  left_inv := by
+    intro c
+    simp only [coe_sort_coe, inv_smul_smul, Subtype.coe_eta]
+  right_inv := by
+    intro c
+    simp only [coe_sort_coe, smul_inv_smul, Subtype.coe_eta]
+  map_rel_iff' := by
+    intro c d
+    change _ < _ ↔ c < d
+    simp only [mem_setOf_eq, coe_sort_coe, Equiv.coe_fn_mk, inv_smul_smul, Subtype.coe_eta]
+
+theorem relIso_apply (S : OrdSupport β) (ρ : Allowable β) (c : { c // c ∈ S.carrier }) :
+    S.relIso ρ c = ⟨ρ • c.val, smul_mem_smul.mpr c.prop⟩ :=
+  rfl
+
+@[simp]
+theorem typein_smul (S : OrdSupport β) (ρ : Allowable β) (c : ρ • S) :
+    Ordinal.typein (ρ • S).r c = Ordinal.typein S.r ⟨ρ⁻¹ • c.val, c.prop⟩ := by
+  have := Ordinal.relIso_enum (S.relIso ρ)
+    (Ordinal.typein S.r ⟨ρ⁻¹ • c.val, c.prop⟩) (Ordinal.typein_lt_type _ _)
+  simp only [coe_sort_coe, Ordinal.enum_typein] at this
+  have := (relIso_apply S ρ ⟨ρ⁻¹ • c.val, c.prop⟩).symm.trans this
+  have := congr_arg (Ordinal.typein (ρ • S).r) this
+  simp only [coe_sort_coe, smul_inv_smul, Subtype.coe_eta, Ordinal.typein_enum] at this
+  exact this
+
 /-- The restriction of this ordered support to conditions that come before position `i`. -/
 def before (S : OrdSupport β) (i : Ordinal.{u}) : OrdSupport β where
   carrier := {c | ∃ hc : c ∈ S, Ordinal.typein S.r ⟨c, hc⟩ < i}
@@ -189,6 +218,19 @@ theorem mem_before {S : OrdSupport β} {i : Ordinal} (c : SupportCondition β) :
 theorem before_lt {S : OrdSupport β} {i : Ordinal} (c d : S.before i) :
     c < d ↔ (⟨c, c.prop.1⟩ : S) < ⟨d, d.prop.1⟩ :=
   Iff.rfl
+
+@[simp]
+theorem before_smul {S : OrdSupport β} {i : Ordinal} {ρ : Allowable β} :
+    (ρ • S).before i = ρ • S.before i := by
+  refine ext ?_ ?_ ?_
+  · intro c hc
+    simp only [mem_before, coe_sort_coe, OrdSupport.typein_smul, smul_mem] at hc ⊢
+    exact hc
+  · intro c hc
+    simp only [mem_before, coe_sort_coe, OrdSupport.typein_smul, smul_mem] at hc ⊢
+    exact hc
+  · intro c d
+    simp only [before_lt, lt_iff_smul]
 
 /-- Retains only those support conditions beginning with the path `A`. -/
 def comp (S : OrdSupport β) (γ : Iic α) (A : Quiver.Path (β : TypeIndex) γ) : OrdSupport γ where
@@ -218,6 +260,27 @@ theorem comp_lt {S : OrdSupport β} {γ : Iic α} {A : Quiver.Path (β : TypeInd
     c < d ↔
     (⟨⟨A.comp c.val.path, c.val.value⟩, c.prop⟩ : S) < ⟨⟨A.comp d.val.path, d.val.value⟩, d.prop⟩ :=
   Iff.rfl
+
+@[simp]
+theorem comp_smul {S : OrdSupport β} {γ : Iic α} {A : Quiver.Path (β : TypeIndex) γ}
+    {ρ : Allowable β} :
+    (ρ • S).comp γ A =
+    Allowable.comp (β := (β : IicBot α)) (γ := (γ : IicBot α)) A ρ • S.comp γ A := by
+  refine ext ?_ ?_ ?_
+  · intro c hc
+    simp only [mem_comp, smul_mem, Allowable.smul_supportCondition, map_inv, Tree.inv_apply] at hc ⊢
+    rw [Allowable.toStructPerm_comp (β := (β : IicBot α)) (γ := (γ : IicBot α))]
+    exact hc
+  · intro c hc
+    simp only [mem_comp, smul_mem, Allowable.smul_supportCondition, map_inv, Tree.inv_apply] at hc ⊢
+    rw [Allowable.toStructPerm_comp (β := (β : IicBot α)) (γ := (γ : IicBot α))] at hc
+    exact hc
+  · intro c d
+    simp only [comp_lt, lt_iff_smul, Allowable.smul_supportCondition, map_inv, Tree.inv_apply]
+    have := Allowable.toStructPerm_comp (β := (β : IicBot α)) (γ := (γ : IicBot α)) A
+    dsimp only at this
+    simp_rw [this]
+    simp only [Tree.comp_apply]
 
 /-- An ordered support is strong if every element of its domain is reduced, every reduced condition
 it constrains lies in its domain, and its order agrees with the constrains relation. -/

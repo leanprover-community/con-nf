@@ -304,6 +304,16 @@ theorem spec_specifies {S : OrdSupport β} (hS : S.Strong) :
 def Strong (σ : Spec β) : Prop :=
   ∃ S : OrdSupport β, S.Strong ∧ σ.Specifies S
 
+/-- A strong support specified by this strong specification. -/
+noncomputable def Strong.out {σ : Spec β} (h : σ.Strong) : OrdSupport β :=
+  h.choose
+
+theorem Strong.out_strong {σ : Spec β} (h : σ.Strong) : h.out.Strong :=
+  h.choose_spec.1
+
+theorem Strong.specifies_out {σ : Spec β} (h : σ.Strong) : σ.Specifies h.out :=
+  h.choose_spec.2
+
 end Spec
 
 end ConNF
