@@ -3,6 +3,11 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build_project:
     runs-on: ubuntu-latest
@@ -54,9 +59,10 @@ jobs:
         working-directory: docs
         run: JEKYLL_ENV=production bundle exec jekyll build
 
-      - name: deploy
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          SINGLE_COMMIT: true
-          BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: docs/_site
+          path: 'docs/_site'
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
