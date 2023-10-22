@@ -46,13 +46,15 @@ noncomputable def InflexibleBot.smul {A : ExtendedIndex β} {L : Litter}
   path := h.path
   a := Allowable.toStructPerm ρ (h.path.B.cons (WithBot.bot_lt_coe _)) • h.a
   hL := by
-    have := toStructPerm_smul_fuzz (β : IicBot α) h.path.γ ⊥ h.path.ε ?_ ?_ ?_
-      h.path.B ρ h.a
-    rw [Allowable.comp_bot (β := (β : IicBot α))] at this
-    rw [← this, ← h.path.hA, ← h.hL]
+    refine Eq.trans ?_ (congr_arg _
+      (comp_bot_smul_atom (β := (β : IicBot α)) ρ (Quiver.Path.cons h.path.B ?_) h.a))
+    refine Eq.trans ?_ (toStructPerm_smul_fuzz (β : IicBot α) h.path.γ ⊥ h.path.ε ?_ ?_ ?_
+      h.path.B ρ h.a)
+    rw [← h.path.hA, ← h.hL]
     · intro hδε
       simp only [IioBot.bot_ne_mk_coe] at hδε
     · exact WithBot.coe_lt_coe.mpr h.path.hε
+    · exact WithBot.bot_lt_coe _
     · exact WithBot.bot_lt_coe _
 
 @[simp]

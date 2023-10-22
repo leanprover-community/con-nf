@@ -735,8 +735,9 @@ theorem smul_litter_eq_of_lawfulBefore' (A : ExtendedIndex β) (L : Litter)
     have := ih.smul_eq ⟨_, ha⟩ ?_
     · rw [convertCondition_eq_convertAtom hσS hσT hS hT, Allowable.smul_supportCondition] at this
       simp only [smul_inl, SupportCondition.mk.injEq, inl.injEq, true_and] at this
-      rw [← this, Allowable.comp_bot (show Path ((β : IicBot α) : TypeIndex) (⊥ : IicBot α) from
+      rw [← this, ← Allowable.comp_bot (show Path ((β : IicBot α) : TypeIndex) (⊥ : IicBot α) from
           hL.path.B.cons (bot_lt_coe _))]
+      rfl
     · simp only [OrdSupport.coe_sort_coe, mem_setOf_eq, typein_lt_typein, hL.hL, hL.path.hA]
       exact hS.lt_of_transConstrains _ _
         (Relation.TransGen.single (Constrains.fuzz_bot hL.path.hε hL.path.B hL.a))
@@ -793,8 +794,9 @@ theorem inv_smul_litter_eq_of_lawfulBefore' (A : ExtendedIndex β) (L : Litter)
         convertCondition_eq_convertAtom hσT hσS hT hS, Allowable.smul_supportCondition] at this
       simp only [smul_inl, SupportCondition.mk.injEq, inl.injEq, true_and] at this
       rw [← inv_smul_eq_iff] at this
-      rw [← this, Allowable.comp_bot (show Path ((β : IicBot α) : TypeIndex) (⊥ : IicBot α) from
-          hL.path.B.cons (bot_lt_coe _)), map_inv, Tree.inv_apply]
+      rw [← this, ← Allowable.comp_bot (show Path ((β : IicBot α) : TypeIndex) (⊥ : IicBot α) from
+          hL.path.B.cons (bot_lt_coe _)), map_inv]
+      rfl
     · simp only [OrdSupport.coe_sort_coe, mem_setOf_eq, typein_lt_typein, hL.hL, hL.path.hA]
       exact hT.lt_of_transConstrains _ _
         (Relation.TransGen.single <| Constrains.fuzz_bot hL.path.hε hL.path.B hL.a)
