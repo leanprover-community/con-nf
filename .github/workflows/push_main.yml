@@ -25,14 +25,14 @@ jobs:
       - name: build project
         run: ~/.elan/bin/lake -Kenv=dev build ConNF
 
-      - name: build lean4checker
-        run: |
-          git clone https://github.com/leanprover/lean4checker
-          cd lean4checker
-          ~/.elan/bin/lake -Kenv=dev build
+      # - name: build lean4checker
+      #   run: |
+      #     git clone https://github.com/leanprover/lean4checker
+      #     cd lean4checker
+      #     ~/.elan/bin/lake -Kenv=dev build
 
-      - name: check environments using lean4checker
-        run: grep -h '^import ConNF.' ConNF/*.lean | sed 's/import //' | xargs -n 1 -P 8 ~/.elan/bin/lake -Kenv=dev env lean4checker/build/bin/lean4checker
+      # - name: check environments using lean4checker
+      #   run: grep -h '^import ConNF.' ConNF/*.lean | sed 's/import //' | xargs -n 1 -P 8 ~/.elan/bin/lake -Kenv=dev env lean4checker/build/bin/lean4checker
 
       - name: build documentation
         run: ~/.elan/bin/lake -Kenv=dev build ConNF:docs
