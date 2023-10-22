@@ -59,10 +59,10 @@ theorem ofCoe_symm : ofCoe.symm = (toCoe : _ ≃ Pretangle α) :=
   rfl
 
 @[simp]
-theorem toBot_ofBot (a) : toBot (ofBot a) = a := by simp [toBot, ofBot]
+theorem toBot_ofBot (a) : toBot (ofBot a) = a := by aesop
 
 @[simp]
-theorem ofBot_toBot (a) : ofBot (toBot a) = a := by simp [toBot, ofBot]
+theorem ofBot_toBot (a) : ofBot (toBot a) = a := by aesop
 
 @[simp]
 theorem toCoe_ofCoe (a : Pretangle α) : toCoe (ofCoe a) = a := by simp [toCoe, ofCoe]

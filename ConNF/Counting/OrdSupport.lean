@@ -181,7 +181,7 @@ def relIso (S : OrdSupport β) (ρ : Allowable β) : S.r ≃r (ρ • S).r where
   map_rel_iff' := by
     intro c d
     change _ < _ ↔ c < d
-    simp only [mem_setOf_eq, coe_sort_coe, Equiv.coe_fn_mk, inv_smul_smul, Subtype.coe_eta]
+    simp only [Equiv.coe_fn_mk, inv_smul_smul, Subtype.coe_eta]
 
 theorem relIso_apply (S : OrdSupport β) (ρ : Allowable β) (c : { c // c ∈ S.carrier }) :
     S.relIso ρ c = ⟨ρ • c.val, smul_mem_smul.mpr c.prop⟩ :=

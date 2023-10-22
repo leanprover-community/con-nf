@@ -49,7 +49,7 @@ theorem flexibleCompletion_litterPerm_domain :
 
 theorem flexibleCompletion_litterPerm_domain_free (hπ : π.Free α A) :
     (flexibleCompletion α π A).litterPerm.domain = {L | Flexible α A L} := by
-  rw [flexibleCompletion_litterPerm_domain, union_eq_right_iff_subset]
+  rw [flexibleCompletion_litterPerm_domain, union_eq_right]
   exact fun L hL => hπ L hL
 
 theorem flexibleCompletion_smul_eq (L : Litter) :

@@ -773,7 +773,7 @@ theorem fillAtomOrbits_precise
           rw [φ.orbitSetEquiv_congr _ hbL'.symm,
             φ.orbitSetEquiv_congr _ (congr_arg (φ.litterPerm hφ) haL'.symm)]
           simp only [Subtype.coe_eta, Equiv.apply_symm_apply, elim_inl]
-          exact ⟨hbL.1, rfl⟩
+          exact ⟨⟨hbL.1, rfl⟩, rfl⟩
       · refine' Or.inr (Or.inr _)
         refine'
           ⟨_, ⟨(φ.litterPerm hφ)^[n + 2] (b : Atom).1, rfl⟩, _, ⟨_, rfl⟩,
@@ -789,7 +789,7 @@ theorem fillAtomOrbits_precise
             φ.orbitSetEquiv_congr _ (congr_arg (φ.litterPerm hφ) haL'.symm)]
           simp only [Function.iterate_succ, Function.comp_apply, Subtype.coe_eta,
             Equiv.apply_symm_apply, elim_inr]
-          exact ⟨hbL.1, rfl⟩
+          exact ⟨⟨hbL.1, rfl⟩, rfl⟩
       · refine' ⟨_, ⟨L', rfl⟩, _, ⟨hL', rfl⟩, a, _, rfl⟩
         rw [mem_setOf_eq, ← hb]
         exact hbL

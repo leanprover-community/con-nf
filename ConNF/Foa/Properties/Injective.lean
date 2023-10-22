@@ -479,8 +479,8 @@ theorem ConNF.StructApprox.extracted_1
   swap
   · simp only [ne_eq, IioBot.bot_ne_mk_coe, not_false_eq_true]
   refine' congr_arg _ _
-  simp only [ne_eq, Path.comp_cons]
-  rw [comp_bot_smul_atom]
+  have := comp_bot_smul_atom (β := (γ : IicBot α)) ρ (C.cons (bot_lt_coe _)) a
+  refine Eq.trans ?_ this.symm
   rw [← (h <| C.cons (bot_lt_coe _)).map_atom a
         (Or.inl (Or.inl (Or.inl (Or.inl
           ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.fuzz_bot hε _ _) hc₂'⟩))))]
