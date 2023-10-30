@@ -95,7 +95,7 @@ instance : Inv NearLitterPerm :=
     ⟨π.atomPerm⁻¹, π.litterPerm⁻¹, fun L s h => by
       have : IsNear (π.atomPerm⁻¹.toFun ⁻¹' litterSet (π.litterPerm⁻¹ L)) s :=
         (π.near <| isNearLitter_litterSet _).near (by rwa [apply_inv_self])
-      simpa only [toFun_as_coe_apply, Perm.image_inv, toFun_as_coe, preimage_inv, preimage_image,
+      simpa only [Perm.image_inv, toFun_as_coe, preimage_inv, preimage_image,
         isNear_litterSet] using this.image π.atomPerm⁻¹.toFun⟩⟩
 
 /-- Near-litter permutations can be composed. -/

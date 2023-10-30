@@ -59,10 +59,10 @@ jobs:
         working-directory: docs
         run: JEKYLL_ENV=production bundle exec jekyll build
 
-      - name: Upload artifact
+      - name: upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: 'docs/_site'
 
-      - name: Deploy to GitHub Pages
+      - name: deploy website
         uses: actions/deploy-pages@v1
