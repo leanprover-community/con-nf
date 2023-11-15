@@ -130,9 +130,7 @@ class FoaAssumptions extends FoaData α where
         Allowable.toStructPerm (allowableCons β γ hγ ρ)
   /-- Designated supports commute with allowable permutations. -/
   smul_designatedSupport {β : Iic α} (t : Tangle β) (ρ : Allowable β) :
-    ∃ ρ' : Allowable β, ρ' • t = ρ • t ∧
-    ∀ c : SupportCondition β,
-      c ∈ designatedSupport t ↔ ρ' • c ∈ designatedSupport (ρ' • t)
+    ρ • (designatedSupport t : Set (SupportCondition β)) = designatedSupport (ρ • t)
   /-- The `fuzz` map commutes with allowable permutations. -/
   smul_fuzz {β : IicBot α} (γ : IioBot α) (δ : Iio α) (hγ : (γ : TypeIndex) < β)
     (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (ρ : Allowable β) (t : Tangle γ) :
@@ -248,6 +246,12 @@ theorem Allowable.comp_bot {β : IicBot α}
   ext a : 1
   change NearLitterPerm.ofBot (Allowable.comp A ρ) • a = Allowable.toStructPerm ρ A • a
   simp only [Allowable.toStructPerm_apply]
+
+theorem smul_mem_designatedSupport {β : Iio α} {c : SupportCondition β} {t : Tangle β}
+    (h : c ∈ designatedSupport t) (π : Allowable β) : π • c ∈ designatedSupport (π • t) :=
+  (Set.ext_iff.mp (smul_designatedSupport (show Tangle (β : Iic α) from t) π)
+        ((show Allowable (β : Iic α) from π) • c)).mp
+    ⟨c, h, rfl⟩
 
 @[simp]
 theorem ofBot_comp' {β : IicBot α} {hβ : ⊥ < β} {ρ : Allowable β} :

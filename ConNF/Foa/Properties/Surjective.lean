@@ -138,62 +138,6 @@ theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (�
   refine' ⟨_, _, Relation.ReflTransGen.refl⟩
   exact hc
 
-theorem completeLitterMap_surjective_extends_inflexibleCoe (hπf : π.Free) (A : ExtendedIndex β)
-    (P : InflexibleCoePath A) (t : Tangle P.δ)
-    (ha : ∀ (B : ExtendedIndex β) (a : Atom),
-        ⟨B, inl a⟩ ≺[α] ⟨A, inr (fuzz (coe_ne_coe.mpr <| coe_ne' P.hδε) t).toNearLitter⟩ →
-        a ∈ range (π.completeAtomMap B))
-      (hN : ∀ (B : ExtendedIndex β) (N : NearLitter),
-        ⟨B, inr N⟩ ≺[α] ⟨A, inr (fuzz (coe_ne_coe.mpr <| coe_ne' P.hδε) t).toNearLitter⟩ →
-        N ∈ range (π.completeNearLitterMap B)) :
-    fuzz (coe_ne_coe.mpr <| coe_ne' P.hδε) t ∈ range (completeLitterMap π A) := by
-  obtain ⟨ρ, hρ₁, hρ₂⟩ := smul_designatedSupport t
-    ((preimageAction hπf
-        ⟨(P.B.cons (coe_lt P.hε)).cons (bot_lt_coe _),
-          inr (fuzz (coe_ne_coe.mpr <| coe_ne' P.hδε) t).toNearLitter⟩).hypothesisedAllowable
-      P ((preimageAction_lawful hπf).comp _) (preimageAction_comp_mapFlexible _))⁻¹
-  refine ⟨fuzz (coe_ne_coe.mpr <| coe_ne' P.hδε) (ρ • t), ?_⟩
-  rw [completeLitterMap_eq_of_inflexibleCoe ⟨P, _, rfl⟩
-      ((ihAction_lawful hπf _).comp _) (ihAction_comp_mapFlexible hπf _ _)]
-  refine' congr_arg _ _
-  dsimp only
-  obtain ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩ := P
-  rw [smul_eq_iff_eq_inv_smul, hρ₁]
-  refine supports (t := t) ?_ ?_
-  · intros A a hc
-    have hac := Constrains.fuzz hδ hε hδε B t _ hc
-    specialize ha _ a hac
-    obtain ⟨b, ha⟩ := ha
-    have : (Tree.comp A
-      (Allowable.toStructPerm ((preimageAction hπf
-          ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
-            inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩).hypothesisedAllowable
-            ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩ ((preimageAction_lawful hπf).comp _)
-            (preimageAction_comp_mapFlexible _))))⁻¹ • a = b
-    · rw [inv_smul_eq_iff, ← ha]
-      rw [StructAction.hypothesisedAllowable]
-      refine' preimageAction_coherent_atom hπf (B.cons <| coe_lt hδ) A b _ _ _
-        (StructAction.allowable_exactlyApproximates _ _ _ _)
-      rw [ha]
-      exact hac
-    trans b
-    · rw [map_inv]
-      exact this
-    · rw [map_inv, Tree.inv_apply, ← smul_eq_iff_eq_inv_smul, ← ha]
-      rw [StructAction.hypothesisedAllowable]
-      refine' (ihAction_coherent_atom (B.cons <| coe_lt hδ) A b _ _
-        ((ihAction_lawful hπf _).comp _) _
-        (StructAction.allowable_exactlyApproximates _ _ _ _)).symm
-      have hρ₂' := (hρ₂ ⟨A, inl a⟩).mp hc
-      rw [hρ₁] at hρ₂'
-      refine' Relation.TransGen.tail' _ (Constrains.fuzz hδ hε hδε B _ _ hρ₂')
-      refine' Relation.reflTransGen_of_eq _
-      refine' SupportCondition.ext _ _ rfl _
-      change inl _ = inl _
-      simp only [← this, Tree.comp_bot, Tree.toBot_inv_smul, inl.injEq]
-      sorry
-  · sorry
-
 theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex β) (L : Litter)
     (ha : ∀ (B : ExtendedIndex β) (a : Atom),
       ⟨B, inl a⟩ ≺[α] ⟨A, inr L.toNearLitter⟩ → a ∈ range (π.completeAtomMap B))
@@ -210,19 +154,19 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
     obtain ⟨b, rfl⟩ := ha _ a (Constrains.fuzz_bot hε _ a)
     refine' ⟨fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) b, _⟩
     rw [completeLitterMap_eq_of_inflexibleBot ⟨⟨γ, ε, hε, C, rfl⟩, b, rfl⟩]
-  · obtain ⟨P, t, rfl⟩ := h
-    exact completeLitterMap_surjective_extends_inflexibleCoe hπf A P t ha hN
-    /- refine' ⟨fuzz (coe_ne_coe.mpr <| coe_ne' P.hδε)
+  · obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ := h
+    refine' ⟨fuzz (coe_ne_coe.mpr <| coe_ne' hδε)
       (((preimageAction hπf
-            ⟨(P.B.cons (coe_lt P.hε)).cons (bot_lt_coe _),
-              inr (fuzz (coe_ne_coe.mpr <| coe_ne' P.hδε) t).toNearLitter⟩).hypothesisedAllowable
-          P ((preimageAction_lawful hπf).comp _) (preimageAction_comp_mapFlexible _))⁻¹ • t), _⟩
-    rw [completeLitterMap_eq_of_inflexibleCoe ⟨P, _, rfl⟩
+            ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
+              inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩).hypothesisedAllowable
+          ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩
+          ((preimageAction_lawful hπf).comp _) (preimageAction_comp_mapFlexible _))⁻¹ • t), _⟩
+    rw [completeLitterMap_eq_of_inflexibleCoe ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, _, rfl⟩
         ((ihAction_lawful hπf _).comp _) (ihAction_comp_mapFlexible hπf _ _)]
     refine' congr_arg _ _
     dsimp only
-    rw [smul_eq_iff_eq_inv_smul] -/
-    /- refine supports (t := t) ?_ ?_
+    rw [smul_eq_iff_eq_inv_smul]
+    refine supports (t := t) ?_ ?_
     · intros A a hc
       have hac := Constrains.fuzz hδ hε hδε B t _ hc
       specialize ha _ a hac
@@ -284,7 +228,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' SupportCondition.ext _ _ rfl _
         change inr _ = inr _
         simp only [← this, ne_eq, Tree.comp_bot, Tree.toBot_inv_smul, map_inv,
-          Tree.inv_apply] -/
+          Tree.inv_apply]
 
 theorem atom_mem_range_of_mem_completeNearLitterMap (A : ExtendedIndex β) (a : Atom)
     {N : NearLitter} (h : a ∈ π.completeNearLitterMap A N) : a ∈ range (π.completeAtomMap A) := by
