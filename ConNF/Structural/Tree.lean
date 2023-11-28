@@ -162,6 +162,10 @@ as a functor to the category of all trees on `τ` where the morphisms are group 
 def comp (A : Path α β) (a : Tree τ α) : Tree τ β :=
   fun B => a (A.comp B)
 
+theorem comp_def (A : Path α β) (a : Tree τ α) :
+    comp A a = fun B => a (A.comp B) :=
+  rfl
+
 /-- Evaluating the derivative of a structural group element along a path is the same as evaluating
 the original element along the composition of the paths. -/
 @[simp]
@@ -172,16 +176,16 @@ theorem comp_apply (a : Tree τ α) (A : Path α β) (B : ExtendedIndex β) :
 /-- The derivative along the empty path does nothing. -/
 @[simp]
 theorem comp_nil (a : Tree τ α) : comp nil a = a := by
-  simp only [comp, nil_comp, MonoidHom.coe_mk, OneHom.coe_mk]
+  simp only [comp_def, nil_comp, MonoidHom.coe_mk, OneHom.coe_mk]
 
 theorem comp_cons (a : Tree τ α) (p : Path α β) {γ : TypeIndex} (h : γ < β) :
     comp (p.cons h) a = (comp (Hom.toPath h)) (comp p a) := by
-  simp only [comp, MonoidHom.coe_mk, OneHom.coe_mk, Hom.comp_toPath_comp]
+  simp only [comp_def, MonoidHom.coe_mk, OneHom.coe_mk, Hom.comp_toPath_comp]
 
 /-- The derivative map is functorial. -/
 theorem comp_comp (a : Tree τ α) (p : Path α β) (q : Path β γ) :
     comp q (comp p a) = comp (p.comp q) a := by
-  simp only [comp, MonoidHom.coe_mk, OneHom.coe_mk, comp_assoc]
+  simp only [comp_def, MonoidHom.coe_mk, OneHom.coe_mk, comp_assoc]
 
 /-- The derivative map preserves the identity. -/
 @[simp]

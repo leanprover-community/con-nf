@@ -303,7 +303,7 @@ variable {ρ : NewAllowable α} {e : Extensions α}
 @[simp]
 theorem smul_extension_apply (ρ : NewAllowable α) (s : Set (Tangle β)) :
     ρ.val γ • extension s γ = extension (ρ.val β • s) γ := by
-  by_cases β = γ
+  by_cases h : β = γ
   · subst h
     simp only [extension_eq, cast_eq]
   · rw [extension_ne _ _ h, extension_ne _ _ h, smul_cloud]

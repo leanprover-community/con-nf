@@ -66,7 +66,7 @@ theorem small_iUnion (hι : #ι < #κ) {f : ι → Set α} (hf : ∀ i, Small (f
     mul_lt_of_lt κ_isRegular.aleph0_le hι <| iSup_lt_of_isRegular κ_isRegular hι hf
 
 theorem small_iUnion_Prop {p : Prop} {f : p → Set α} (hf : ∀ i, Small (f i)) : Small (⋃ i, f i) :=
-  by by_cases p <;> simp [h, hf _]
+  by by_cases p <;> simp_all
 
 protected theorem Small.bUnion {s : Set ι} (hs : Small s) {f : ∀ i ∈ s, Set α}
     (hf : ∀ i (hi : i ∈ s), Small (f i hi)) : Small (⋃ (i) (hi : i ∈ s), f i hi) :=

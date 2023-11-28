@@ -47,7 +47,7 @@ theorem smul_nearLitter_fst (π : StructPerm ⊥) (N : NearLitter) : (π • N).
   rfl
 
 theorem smul_nearLitter_coe (π : StructPerm ⊥) (N : NearLitter) :
-    ((π • N) : Set Atom) = π • (N : Set Atom) :=
+    (π • N : NearLitter) = π • (N : Set Atom) :=
   NearLitterPerm.smul_nearLitter_coe (Tree.ofBot π) N
 
 theorem smul_nearLitter_snd (π : StructPerm ⊥) (N : NearLitter) :

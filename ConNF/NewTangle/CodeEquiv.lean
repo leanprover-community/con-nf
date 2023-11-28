@@ -399,7 +399,7 @@ theorem exists_even_equiv : ∀ c : Code α, ∃ d : Code α, d ≡ c ∧ d.IsEv
 
 protected theorem IsEven.exists_equiv_extension_eq (heven : c.IsEven) :
     ∃ d : Code α, d ≡ c ∧ d.1 = γ := by
-  by_cases c.1 = γ
+  by_cases h : c.1 = γ
   · exact ⟨c, Equiv.rfl, h⟩
   · exact ⟨cloudCode γ c, Equiv.cloud_left _ heven _ h, rfl⟩
 

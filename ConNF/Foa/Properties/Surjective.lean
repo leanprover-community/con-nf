@@ -280,7 +280,7 @@ theorem completeNearLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedI
     simp only [NearLitter.coe_mk, Subtype.coe_mk, Litter.coe_toNearLitter]
     rw [image_preimage_eq_of_subset _]
     intro a ha'
-    by_cases a.1 = N.1
+    by_cases h : a.1 = N.1
     · rw [← hN] at h
       exact completeAtomMap_surjective_extends A a ⟨_, h.symm⟩
     · exact ha (Or.inr ⟨ha', h⟩)

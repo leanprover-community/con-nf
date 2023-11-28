@@ -82,7 +82,8 @@ theorem _root_.ConNF.NearLitterPerm.Biexact.union {π π' : NearLitterPerm} {s�
 theorem _root_.ConNF.NearLitterPerm.Biexact.smul_litter_subset {π π' : NearLitterPerm}
     {atoms : Set Atom} {litters : Set Litter}
     (h : NearLitterPerm.Biexact π π' atoms litters)
-    (L : Litter) (hL : L ∈ litters) : (π • L.toNearLitter : Set Atom) ⊆ π' • L.toNearLitter := by
+    (L : Litter) (hL : L ∈ litters) :
+    ((π • L.toNearLitter : NearLitter) : Set Atom) ⊆ (π' • L.toNearLitter : NearLitter) := by
   rw [NearLitterPerm.smul_nearLitter_coe, NearLitterPerm.smul_nearLitter_coe]
   rintro _ ⟨a, ha, rfl⟩
   simp only [Litter.coe_toNearLitter, mem_litterSet] at ha
@@ -1091,8 +1092,8 @@ theorem completeAtomMap_mem_completeNearLitterMap_toNearLitter' (hπf : π.Free)
       (fst_mem_reflTransConstrained_of_mem_symmDiff hb.1 hL) ?_
     · rw [Sublitter.equiv_congr_left (congr_arg _ this) _,
         Sublitter.equiv_congr_right (congr_arg _ (congr_arg₂ _ rfl this)) _,
-        Subtype.coe_inj, EquivLike.apply_eq_iff_eq] at hab
-      cases hab
+        Subtype.coe_inj] at hab
+      cases (EquivLike.apply_eq_iff_eq _).mp hab
       exact hb.1.elim (fun h' => h'.2 rfl) fun h' => h'.2 rfl
     exact equiv_apply_eq hab
 

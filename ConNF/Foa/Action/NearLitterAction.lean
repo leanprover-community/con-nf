@@ -67,7 +67,7 @@ inductive BannedLitter : Litter → Prop
 
 theorem BannedLitter.memMap (a : Atom) (L : Litter) (hL)
     (ha : a ∈ ((φ.litterMap L).get hL : Set Atom)) : φ.BannedLitter a.1 := by
-  by_cases a.1 = ((φ.litterMap L).get hL).1
+  by_cases h : a.1 = ((φ.litterMap L).get hL).1
   · rw [h]
     exact BannedLitter.litterMap L hL
   · exact BannedLitter.diff L hL a ⟨ha, h⟩

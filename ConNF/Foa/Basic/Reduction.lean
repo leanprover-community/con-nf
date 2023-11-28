@@ -157,7 +157,7 @@ theorem reduction_supports (S : Set (SupportCondition β)) (c : SupportCondition
   intro π hc'
   obtain ⟨B, a | N⟩ := c
   · exact hc' (mem_reduction_of_reduced α _ _ (Reduced.mkAtom a) hc)
-  by_cases N.IsLitter
+  by_cases h : N.IsLitter
   · obtain ⟨L, rfl⟩ := h.exists_litter_eq
     exact hc' (mem_reduction_of_reduced α _ _ (Reduced.mkLitter L) hc)
   simp only [StructPerm.smul_supportCondition_eq_iff, smul_inr, inr.injEq] at hc' ⊢

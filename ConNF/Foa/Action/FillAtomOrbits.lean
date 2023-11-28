@@ -678,7 +678,7 @@ theorem subset_orbitAtomMap_ran : φ.atomMap.ran ⊆ (φ.orbitAtomMap hφ).ran :
 
 theorem fst_mem_litterPerm_domain_of_mem_map ⦃L : Litter⦄ (hL : (φ.litterMap L).Dom) ⦃a : Atom⦄
     (ha : a ∈ (φ.litterMap L).get hL) : a.1 ∈ (φ.litterPerm hφ).domain := by
-  by_cases a.1 = ((φ.litterMap L).get hL).1
+  by_cases h : a.1 = ((φ.litterMap L).get hL).1
   · rw [h]
     refine' Or.inl (Or.inl (Or.inr ⟨L, hL, _⟩))
     rw [roughLitterMapOrElse_of_dom]

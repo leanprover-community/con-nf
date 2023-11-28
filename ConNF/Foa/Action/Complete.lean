@@ -112,7 +112,7 @@ theorem smul_toNearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm
     mem_litterSet, SetLike.mem_coe]
   constructor
   · intro ha
-    by_cases π.IsException a
+    by_cases h : π.IsException a
     · suffices h' : π⁻¹ • a ∈ φ.atomMap.Dom
       · rw [hφ.atom_mem _ h' L hL] at ha
         have := hπ.map_atom _ (Or.inl (Or.inl h'))
@@ -142,7 +142,7 @@ theorem smul_toNearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm
       rw [this, inv_smul_smul] at ha
       exact ha
   · intro ha
-    by_cases π⁻¹ • a ∈ φ.atomMap.Dom
+    by_cases h : π⁻¹ • a ∈ φ.atomMap.Dom
     · rw [hφ.atom_mem _ h L hL]
       have := hπ.map_atom _ (Or.inl (Or.inl h))
       rw [φ.complete_smul_atom_eq h] at this

@@ -169,7 +169,7 @@ theorem mk_fuzz_deny (hβγ : β ≠ γ) (t : Tangle β) :
     apply_fun Sigma.fst at h
     simp only [Litter.mk.injEq, Subtype.coe_inj, and_self, and_true] at h
     exact h
-  · by_cases β = ⊥ ∧ ∃ a : Atom, HEq a t
+  · by_cases h : β = ⊥ ∧ ∃ a : Atom, HEq a t
     · obtain ⟨_, a, hat⟩ := h
       refine lt_of_le_of_lt ?_ (card_Iic_lt (pos a))
       refine ⟨⟨fun i => ⟨pos (typedNearLitter

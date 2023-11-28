@@ -142,7 +142,8 @@ theorem eq_of_sublitter_bijection_apply_eq {π : NearLitterApprox} {L₁ L₂ L�
         (π.largestSublitter L₃).equiv (π.largestSublitter L₄) b →
       L₁ = L₃ → L₂ = L₄ → (a : Atom) = b := by
   rintro h₁ rfl rfl
-  simp only [Subtype.coe_inj, EmbeddingLike.apply_eq_iff_eq] at h₁
+  simp only [NearLitterApprox.coe_largestSublitter, SetLike.coe_eq_coe,
+    EmbeddingLike.apply_eq_iff_eq] at h₁
   rw [h₁]
 
 noncomputable def constrainedAction (π : StructApprox β) (s : Set (SupportCondition β))

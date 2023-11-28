@@ -108,13 +108,14 @@ theorem smul_mem_inv {ρ : Allowable β} {S : OrdSupport β} {c : SupportConditi
   simp only [smul_mem, inv_inv]
 
 @[simp]
-theorem lt_iff_smul {ρ : Allowable β} {S : OrdSupport β} {c d : ρ • S} :
+theorem lt_iff_smul {ρ : Allowable β} {S : OrdSupport β} {c d : (ρ • S : OrdSupport β)} :
     c < d ↔ (⟨ρ⁻¹ • c.val, c.prop⟩ : S) < ⟨ρ⁻¹ • d.val, d.prop⟩ :=
   Iff.rfl
 
 theorem lt_iff_smul' {S : OrdSupport β} {c d : S} (ρ : Allowable β) :
     c < d ↔
-    (⟨ρ • c.val, smul_mem_smul.mpr c.prop⟩ : ρ • S) < ⟨ρ • d.val, smul_mem_smul.mpr d.prop⟩ := by
+    (⟨ρ • c.val, smul_mem_smul.mpr c.prop⟩ : (ρ • S : OrdSupport β)) <
+      ⟨ρ • d.val, smul_mem_smul.mpr d.prop⟩ := by
   simp only [lt_iff_smul, inv_smul_smul, Subtype.coe_eta]
 
 theorem lt_iff_lt_of_smul_eq {S T : OrdSupport β} (c d : T) (h : S = T)
@@ -188,7 +189,7 @@ theorem relIso_apply (S : OrdSupport β) (ρ : Allowable β) (c : { c // c ∈ S
   rfl
 
 @[simp]
-theorem typein_smul (S : OrdSupport β) (ρ : Allowable β) (c : ρ • S) :
+theorem typein_smul (S : OrdSupport β) (ρ : Allowable β) (c : (ρ • S : OrdSupport β)) :
     Ordinal.typein (ρ • S).r c = Ordinal.typein S.r ⟨ρ⁻¹ • c.val, c.prop⟩ := by
   have := Ordinal.relIso_enum (S.relIso ρ)
     (Ordinal.typein S.r ⟨ρ⁻¹ • c.val, c.prop⟩) (Ordinal.typein_lt_type _ _)

@@ -227,10 +227,9 @@ theorem cloudCode_mk_ne (hγβ : γ ≠ β) (s) : cloudCode β (mk γ s) = mk β
 variable {β c d}
 
 @[simp]
-theorem cloudCode_isEmpty : (cloudCode β c).IsEmpty ↔ c.IsEmpty :=
-  by
+theorem cloudCode_isEmpty : (cloudCode β c).IsEmpty ↔ c.IsEmpty := by
   obtain ⟨γ, s⟩ := c
-  by_cases γ = β
+  by_cases h : γ = β
   · rw [cloudCode_eq]
     exact h
   · rw [cloudCode_ne]

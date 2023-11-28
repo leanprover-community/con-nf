@@ -269,7 +269,7 @@ theorem exists_cons_of_length_ne_zero {V : Type _} [Quiver V] {x y : V}
 theorem ofBot_comp {β : IicBot α} {ρ : Allowable β}
     (A : Quiver.Path (β : TypeIndex) (⊥ : IicBot α)) :
     NearLitterPerm.ofBot (Allowable.comp A ρ) = Allowable.toStructPerm ρ A := by
-  by_cases A.length = 0
+  by_cases h : A.length = 0
   · have : β = ⊥ := Subtype.coe_injective (Quiver.Path.eq_of_length_zero A h)
     cases this
     cases path_eq_nil A

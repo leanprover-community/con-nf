@@ -72,7 +72,7 @@ theorem ext {χ₁ χ₂ : CodingFunction β}
 
 theorem smul_supports {S : OrdSupport β} {t : Tangle β}
     (h : Supports (Allowable β) (S : Set (SupportCondition β)) t) (ρ : Allowable β) :
-    Supports (Allowable β) (ρ • S : Set (SupportCondition β)) (ρ • t) := by
+    Supports (Allowable β) ((ρ • S : OrdSupport β) : Set (SupportCondition β)) (ρ • t) := by
   intro ρ' hρ'
   have := h (ρ⁻¹ * ρ' * ρ) ?_
   · rw [mul_assoc, mul_smul, inv_smul_eq_iff, mul_smul] at this

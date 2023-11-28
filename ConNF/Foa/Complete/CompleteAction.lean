@@ -144,13 +144,13 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
     · refine' Or.inl ⟨Or.inl ha₁, _⟩
       simp only [mem_image, not_exists, not_and]
       intro b hb
-      by_cases b ∈ (π A).atomPerm.domain
+      by_cases h : b ∈ (π A).atomPerm.domain
       · rw [completeAtomMap_eq_of_mem_domain h]
         rintro rfl
         exact ha₁.2 ((π A).atomPerm.map_domain h)
       · simp only [mem_iUnion, mem_singleton_iff, not_exists, and_imp] at ha₂
         exact Ne.symm (ha₂ b hb h)
-    · by_cases a ∈ litterSet N.fst
+    · by_cases h : a ∈ litterSet N.fst
       · refine' Or.inl ⟨Or.inr ⟨a, ⟨h, ha₁.2⟩, rfl⟩, _⟩
         simp only [mem_image, not_exists, not_and]
         intro b hb
@@ -176,7 +176,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
       obtain ha₂ | ha₂ := ha₂
       · exact Or.inl ha₂
       obtain ⟨a, ha₁, ha₂⟩ := ha₂
-      by_cases a ∈ N
+      by_cases h : a ∈ N
       · rw [← ha₂]
         exact Or.inr ⟨a, ⟨h, ha₁.2⟩, rfl⟩
       rw [completeAtomMap_eq_of_not_mem_domain hb₂]
@@ -203,7 +203,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
       rintro b hb _ rfl
       exact ha₂ ⟨b, hb, rfl⟩
     · refine' Or.inl ⟨_, _⟩
-      · by_cases a ∈ N
+      · by_cases h : a ∈ N
         · exact Or.inr ⟨a, ⟨h, ha₁.2⟩, rfl⟩
         · simp only [mem_image, not_exists, not_and] at ha₂
           have := ha₂ a (Or.inl ⟨ha₁.1, h⟩)
@@ -230,7 +230,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
           exact
             NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
               (Sublitter.equiv_apply_mem _) this
-      · by_cases a ∈ (π A).atomPerm.domain
+      · by_cases h : a ∈ (π A).atomPerm.domain
         · refine' Or.inl ⟨_, _⟩
           · simp only [completeAtomMap_eq_of_mem_domain h]
             refine' Or.inr ⟨a, ⟨_, h⟩, rfl⟩

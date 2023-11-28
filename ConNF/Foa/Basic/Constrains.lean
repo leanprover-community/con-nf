@@ -228,7 +228,7 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺[
       exact ⟨a, h₁, h₂.symm⟩
     · rintro ⟨a, h₁, h₂⟩
       exact ⟨A, N, a, h₁, h₂.symm, rfl⟩
-  · by_cases
+  · by_cases h :
       ∃ (γ : Iic α) (δ : Iio α) (ε : Iio α) (_hδ : (δ : Λ) < γ) (hε : (ε : Λ) < γ) (hδε : δ ≠ ε)
         (B : Path (β : TypeIndex) γ) (t : Tangle δ),
         N = (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter ∧
