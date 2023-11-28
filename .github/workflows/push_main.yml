@@ -43,7 +43,7 @@ jobs:
         run: ~/.elan/bin/lake -Kenv=dev build ConNF:docs
 
       - name: copy documentation
-        run: cp -R build/doc docs/
+        run: cp -R .lake/build/doc docs/
 
       - name: remove .gitignore for gh-pages
         run: rm docs/.gitignore
