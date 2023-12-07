@@ -98,8 +98,9 @@ theorem mk_diff_dom_ran (L : Litter) :
   · refine' ⟨⟨fun a => a.1.2, _⟩⟩
     intro a b h
     exact Subtype.coe_injective (Prod.ext (a.prop.1.trans b.prop.1.symm) h)
-  · by_contra' h
-    have := add_lt_of_lt κ_isRegular.aleph0_le h (Small.union φ.atomMap_dom_small φ.atomMap_ran_small)
+  · by_contra h
+    have := add_lt_of_lt κ_isRegular.aleph0_le (lt_of_not_le h)
+      (Small.union φ.atomMap_dom_small φ.atomMap_ran_small)
     have := (le_mk_diff_add_mk (litterSet L) _).trans_lt this
     simp only [mk_litterSet, lt_self_iff_false] at this
 

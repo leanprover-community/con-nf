@@ -63,7 +63,7 @@ protected theorem IsNearLitter.nonempty (hs : IsNearLitter L s) : s.Nonempty := 
 @[simp]
 theorem isNearLitter_litterSet_iff : IsNearLitter L₁ (litterSet L₂) ↔ L₁ = L₂ := by
   refine ⟨fun h => ?_, ?_⟩
-  · by_contra'
+  · by_contra this
     refine ((mk_litterSet L₁).symm.trans_le <| mk_le_mk_of_subset ?_).not_lt h
     change litterSet L₁ ≤ _
     exact (le_symmDiff_iff_left _ _).2 (pairwise_disjoint_litterSet this)

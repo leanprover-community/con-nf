@@ -110,8 +110,8 @@ theorem mk_mapped_outside_domain (L : Litter) :
   refine' le_antisymm _ _
   · rw [← mk_litterSet]
     exact mk_subtype_mono fun x hx => hx.1
-  by_contra' h
-  have := Small.union h φ.atomMap_dom_small
+  by_contra h
+  have := Small.union (lt_of_not_le h) φ.atomMap_dom_small
   rw [diff_union_self] at this
   exact (mk_litterSet L).not_lt (Small.mono (subset_union_left _ _) this)
 

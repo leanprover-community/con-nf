@@ -2,10 +2,10 @@ import Lake
 open Lake DSL
 
 package ConNF where
-  moreServerArgs := #[
-    "-DautoImplicit=false",
-    "-DrelaxedAutoImplicit=false",
-    "-Dpp.proofs.withType=false"
+  moreServerOptions := #[
+    ⟨`autoImplicit, false⟩,
+    ⟨`relaxedAutoImplicit, false⟩,
+    ⟨`pp.proofs.withType, false⟩
   ]
 
 require mathlib from git

@@ -122,14 +122,14 @@ theorem mk_not_bannedLitter : #{L | ¬φ.BannedLitter L} = #μ := by
   have := mk_sum_compl {L | φ.BannedLitter L}
   rw [compl_setOf, mk_litter] at this
   rw [← this, add_eq_right]
-  · by_contra' h
-    have h' := add_le_add (le_of_lt φ.bannedLitter_small) h.le
+  · by_contra h
+    have h' := add_le_add (le_of_lt φ.bannedLitter_small) (le_of_not_le h)
     rw [this] at h'
     refine' not_lt_of_le h' _
     refine' Cardinal.add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le κ_lt_μ _
     exact lt_of_le_of_lt κ_isRegular.aleph0_le κ_lt_μ
-  · by_contra' h
-    have h' := add_le_add (le_of_lt φ.bannedLitter_small) h.le
+  · by_contra h
+    have h' := add_le_add (le_of_lt φ.bannedLitter_small) (le_of_not_le h)
     rw [this] at h'
     refine' not_lt_of_le h' _
     refine' Cardinal.add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le κ_lt_μ _
