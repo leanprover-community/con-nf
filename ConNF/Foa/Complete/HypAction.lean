@@ -24,16 +24,8 @@ namespace HypAction
 
 variable {β : Iic α}
 
-def fixMap :
-    PSum (Σ' _ : ExtendedIndex β, Atom) (Σ' _ : ExtendedIndex β, NearLitter) → SupportCondition β
-  | PSum.inl ⟨A, a⟩ => ⟨A, inl a⟩
-  | PSum.inr ⟨A, N⟩ => ⟨A, inr N⟩
-
-def fixWf :
-    WellFoundedRelation
-      (PSum (Σ' _ : ExtendedIndex β, Atom) (Σ' _ : ExtendedIndex β, NearLitter)) :=
-  ⟨InvImage (Relation.TransGen (Constrains α β)) fixMap,
-    InvImage.wf _ (WellFounded.transGen <| constrains_wf α β)⟩
+instance : WellFoundedRelation (SupportCondition β) :=
+  ⟨_, WellFounded.transGen <| constrains_wf α β⟩
 
 mutual
   /-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.
@@ -49,7 +41,9 @@ mutual
       ExtendedIndex β → NearLitter → NearLitter
     | A, N => FN A N ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩
 end
-termination_by' fixWf
+termination_by
+  fixAtom A n => SupportCondition.mk A (inl n)
+  fixNearLitter A N => SupportCondition.mk A (inr N)
 
 theorem fixAtom_eq (Fa FN) (A : ExtendedIndex β) (a : Atom) :
     fixAtom Fa FN A a =
