@@ -22,17 +22,26 @@ namespace ConNF
 
 variable [Params.{u}]
 
-class IsLt (β : TypeIndex) (α : outParam Λ) : Prop where
+/-- The current level of the structure we are building. -/
+class Level where
+  (α : Λ)
+
+export Level (α)
+
+variable [Level]
+
+/-- The type index `β` is less than our current level. -/
+class LtLevel (β : TypeIndex) : Prop where
   elim : β < α
 
-def isLtBot (α : Λ) : IsLt ⊥ α where
+instance : LtLevel ⊥ where
   elim := bot_lt_coe α
 
-class IsLe (β : TypeIndex) (α : outParam Λ) : Prop where
+class LeLevel (β : TypeIndex) : Prop where
   elim : β ≤ α
 
-instance {β : TypeIndex} {α : Λ} [IsLt β α] : IsLe β α where
-  elim := IsLt.elim.le
+instance {β : TypeIndex} [LtLevel β] : LeLevel β where
+  elim := LtLevel.elim.le
 
 variable {α : TypeIndex}
 

@@ -23,30 +23,28 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}]
-
-variable (α : Λ)
+variable [Params.{u}] [Level]
 
 /-- The `TangleData` for each `β < α`. -/
-class TangleDataLt (α : Λ) where
-  data : ∀ β : Λ, [IsLt β α] → TangleData β
+class TangleDataLt where
+  data : ∀ β : Λ, [LtLevel β] → TangleData β
 
-noncomputable instance TangleDataLt.toTangleData [TangleDataLt α] :
-    ∀ β : TypeIndex, [IsLt β α] → TangleData β
+noncomputable instance TangleDataLt.toTangleData [TangleDataLt] :
+    ∀ β : TypeIndex, [LtLevel β] → TangleData β
   | ⊥, _ => Bot.tangleData
-  | (β : Λ), _ => TangleDataLt.data α β
+  | (β : Λ), _ => TangleDataLt.data β
 
 /-- The `PositionedTangles` for each `β < α`. -/
-class PositionedTanglesLt (α : Λ) [TangleDataLt α] where
-  data : ∀ β : Λ, [IsLt β α] → PositionedTangles β
+class PositionedTanglesLt [TangleDataLt] where
+  data : ∀ β : Λ, [LtLevel β] → PositionedTangles β
 
 noncomputable instance PositionedTanglesLt.toPositionedTangles
-    [TangleDataLt α] [PositionedTanglesLt α] : ∀ β : TypeIndex, [IsLt β α] → PositionedTangles β
+    [TangleDataLt] [PositionedTanglesLt] : ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
   | ⊥, _ => Bot.positionedTangles
   | (β : Λ), _ => PositionedTanglesLt.data β
 
 /-- The `TypedObjects` for each `β < α`. -/
-abbrev TypedObjectsLt (α : Λ) [TangleDataLt α] :=
-  ∀ β : Λ, [IsLt β α] → TypedObjects β
+abbrev TypedObjectsLt [TangleDataLt] :=
+  ∀ β : Λ, [LtLevel β] → TypedObjects β
 
 end ConNF

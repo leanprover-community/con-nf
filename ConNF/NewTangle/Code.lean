@@ -17,32 +17,31 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] (α : Λ) [TangleDataLt α] {β : Λ} [IsLt β α] {s t : Set (Tangle β)}
+variable [Params.{u}] [Level] [TangleDataLt] {β : Λ} [LtLevel β] {s t : Set (Tangle β)}
 
 /-- An `α` code is a type index `β < α` together with a set of tangles of type `β`. -/
 @[ext]
 structure Code : Type u where
   (β : TypeIndex)
-  [inst : IsLt β α]
+  [inst : LtLevel β]
   (members : Set (Tangle β))
 
-instance (c : Code α) : IsLt c.β α := c.inst
+instance (c : Code) : LtLevel c.β := c.inst
 
-instance : Inhabited (Code α) :=
-  let _ := isLtBot α
+instance : Inhabited Code :=
   ⟨⟨⊥, ∅⟩⟩
 
 /-- Nonempty codes. -/
 abbrev NonemptyCode : Type u :=
-  { c : Code α // c.members.Nonempty }
+  { c : Code // c.members.Nonempty }
 
 namespace Code
 
 variable {α}
-variable {c : Code α}
+variable {c : Code}
 
 /-- A code is empty if it has no element. -/
-protected def IsEmpty (c : Code α) : Prop :=
+protected def IsEmpty (c : Code) : Prop :=
   c.members = ∅
 
 protected theorem IsEmpty.eq : c.IsEmpty → c.members = ∅ :=

@@ -36,14 +36,14 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [BasePositions]
+variable [Params.{u}] [Level] [BasePositions]
 
 open Code
 
 section Cloud
 
-variable {α : Λ} {γ : TypeIndex} [IsLt γ α] [TangleData γ] [PositionedTangles γ]
-  {β : Λ} [IsLt β α] [TangleData β] [PositionedTangles β] [TypedObjects β] (hγβ : γ ≠ β)
+variable {γ : TypeIndex} [LtLevel γ] [TangleData γ] [PositionedTangles γ]
+  {β : Λ} [LtLevel β] [TangleData β] [PositionedTangles β] [TypedObjects β] (hγβ : γ ≠ β)
 
 /-- The cloud map. We map each tangle to all typed near-litters near the `fuzz`ed tangle, and take
 the union over all tangles in the input. -/
@@ -105,7 +105,7 @@ theorem cloud_injective : Injective (cloud hγβ) :=
     Pairwise.biUnion_injective (fun _ _ h => localCardinal_disjoint <| (fuzz_injective _).ne h)
       fun _ => localCardinal_nonempty _
 
-variable {δ : TypeIndex} [IsLt δ α] [TangleData δ] [PositionedTangles δ]
+variable {δ : TypeIndex} [LtLevel δ] [TangleData δ] [PositionedTangles δ]
 
 theorem cloud_disjoint_range {hδβ} (c : Set (Tangle γ)) (d : Set (Tangle δ)) (hc : c.Nonempty)
     (h : cloud hγβ c = cloud hδβ d) : γ = δ := by
@@ -147,31 +147,31 @@ end Cloud
 
 section CloudCode
 
-variable {α : Λ} [TangleDataLt α] [PositionedTanglesLt α]
+variable [TangleDataLt] [PositionedTanglesLt]
 
 /-- Tool that lets us use well-founded recursion on codes via `μ`.
 This maps a nonempty code to the least pos of a tangle in the extension of the code. -/
-noncomputable def codeMinMap (c : NonemptyCode α) : μ :=
+noncomputable def codeMinMap (c : NonemptyCode) : μ :=
   pos <| minTangle _ c.prop
 
 /-- The pullback `<` relation on codes is well-founded. -/
-theorem invImage_codeMinMap_wf : WellFounded (InvImage μr (codeMinMap : NonemptyCode α → μ)) :=
+theorem invImage_codeMinMap_wf : WellFounded (InvImage μr (codeMinMap : NonemptyCode → μ)) :=
   InvImage.wf codeMinMap μwo.wf
 
 section Extension
 
-variable [TypedObjectsLt α] {β : TypeIndex} [IsLt β α]
+variable [TypedObjectsLt] {β : TypeIndex} [LtLevel β]
 
 /-- The `cloud` map, phrased as a function on sets of `γ`-tangles, but if `γ = β`, this is the
 identity function. -/
-def extension (s : Set (Tangle β)) (γ : Λ) [IsLt γ α] : Set (Tangle γ) :=
+def extension (s : Set (Tangle β)) (γ : Λ) [LtLevel γ] : Set (Tangle γ) :=
   if hβγ : β = γ then cast (by subst hβγ; rfl) s else cloud hβγ s
 
 @[simp]
-theorem extension_self {γ : Λ} [IsLt γ α] (s : Set (Tangle γ)) : extension s γ = s :=
+theorem extension_self {γ : Λ} [LtLevel γ] (s : Set (Tangle γ)) : extension s γ = s :=
   dif_pos rfl
 
-variable (s : Set (Tangle β)) (γ : Λ) [IsLt γ α]
+variable (s : Set (Tangle β)) (γ : Λ) [LtLevel γ]
 
 @[simp]
 theorem extension_eq (hβγ : β = γ) : extension s γ = cast (by subst hβγ; rfl) s :=
@@ -183,12 +183,12 @@ theorem extension_ne (hβγ : β ≠ γ) : extension s γ = cloud hβγ s :=
 
 end Extension
 
-variable [TypedObjectsLt α] (γ : TypeIndex) [IsLt γ α] (β : Λ) [IsLt β α] (c d : Code α)
+variable [TypedObjectsLt] (γ : TypeIndex) [LtLevel γ] (β : Λ) [LtLevel β] (c d : Code)
 
 /-- The `cloud` map, phrased as a function on `α`-codes, but if the code's level matches `β`,
 this is the identity function. This is written in a weird way in order to make `(cloudCode β c).1`
 defeq to `β`. -/
-def cloudCode (c : Code α) : Code α :=
+def cloudCode (c : Code) : Code :=
   mk β (extension c.members β)
 
 theorem cloudCode_eq (hcβ : c.1 = β) : cloudCode β c = c := by
@@ -236,7 +236,7 @@ theorem cloudCode_nonempty : (cloudCode β c).members.Nonempty ↔ c.members.Non
 
 alias ⟨_, Code.IsEmpty.cloudCode⟩ := cloudCode_isEmpty
 
-theorem cloudCode_injOn : {c : Code α | c.1 ≠ β ∧ c.members.Nonempty}.InjOn (cloudCode β) := by
+theorem cloudCode_injOn : {c : Code | c.1 ≠ β ∧ c.members.Nonempty}.InjOn (cloudCode β) := by
   rintro ⟨γ, s⟩ ⟨hγβ, hs⟩ ⟨δ, t⟩ ⟨hδβ, ht⟩ h
   rw [cloudCode_ne _ _ hγβ, cloudCode_ne _ _ hδβ] at h
   have := (congr_arg_heq Code.members h).eq
@@ -244,14 +244,14 @@ theorem cloudCode_injOn : {c : Code α | c.1 ≠ β ∧ c.members.Nonempty}.InjO
   dsimp only at this
   rw [cloud_injective this]
 
-theorem μ_le_mk_cloudCode (c : Code α) (hcβ : c.1 ≠ β) :
+theorem μ_le_mk_cloudCode (c : Code) (hcβ : c.1 ≠ β) :
     c.members.Nonempty → #μ ≤ #(cloudCode β c).members := by
   rw [cloudCode_ne β c hcβ]
   exact μ_le_mk_cloud (hγβ := hcβ)
 
 variable (β)
 
-theorem codeMinMap_lt_codeMinMap_cloudCode (c : NonemptyCode α) (hcβ : c.1.1 ≠ β) :
+theorem codeMinMap_lt_codeMinMap_cloudCode (c : NonemptyCode) (hcβ : c.1.1 ≠ β) :
     codeMinMap c < codeMinMap ⟨cloudCode β c, cloudCode_nonempty.mpr c.2⟩ := by
   unfold codeMinMap
   have := cloudCode_ne β c hcβ
@@ -263,12 +263,12 @@ theorem codeMinMap_lt_codeMinMap_cloudCode (c : NonemptyCode α) (hcβ : c.1.1 �
 under the inverse `cloud` map. Note that we require the map to actually change the data, by
 stipulating that `c.1 ≠ β`. -/
 @[mk_iff]
-inductive CloudRel (c : Code α) : Code α → Prop
-  | intro (β : Λ) [IsLt β α] : c.1 ≠ β → CloudRel c (cloudCode β c)
+inductive CloudRel (c : Code) : Code → Prop
+  | intro (β : Λ) [LtLevel β] : c.1 ≠ β → CloudRel c (cloudCode β c)
 
 infixl:62 " ↝₀ " => CloudRel
 
-theorem cloudRel_subsingleton (hc : c.members.Nonempty) : {d : Code α | d ↝₀ c}.Subsingleton := by
+theorem cloudRel_subsingleton (hc : c.members.Nonempty) : {d : Code | d ↝₀ c}.Subsingleton := by
   intro d hd e he
   simp only [CloudRel_iff] at hd he
   obtain ⟨β, hβ, hdβ, rfl⟩ := hd
@@ -299,7 +299,7 @@ theorem cloudRelEmptyEmpty (hγβ : γ ≠ β) : mk γ ∅ ↝₀ mk β ∅ :=
       · refine heq_of_eq ?_
         simp only [snd_cloudCode _ (mk γ ∅) hγβ, cloud_empty]⟩
 
-theorem eq_of_cloudCode {β γ : Λ} [IsLt β α] [IsLt γ α]
+theorem eq_of_cloudCode {β γ : Λ} [LtLevel β] [LtLevel γ]
     (hc : c.members.Nonempty) (hcβ : c.1 ≠ β) (hdγ : d.1 ≠ γ)
     (h : cloudCode β c = cloudCode γ d) : c = d := by
   refine cloudRel_subsingleton (by rwa [cloudCode_nonempty]) (CloudRel.intro _ hcβ) ?_
@@ -309,31 +309,31 @@ theorem eq_of_cloudCode {β γ : Λ} [IsLt β α] [IsLt γ α]
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse `cloud` map. -/
 @[mk_iff]
-inductive CloudRel' (c : NonemptyCode α) : NonemptyCode α → Prop
-  | intro (β : Λ) [IsLt β α] :
-      (c : Code α).1 ≠ β → CloudRel' c ⟨cloudCode β c, cloudCode_nonempty.mpr c.2⟩
+inductive CloudRel' (c : NonemptyCode) : NonemptyCode → Prop
+  | intro (β : Λ) [LtLevel β] :
+      (c : Code).1 ≠ β → CloudRel' c ⟨cloudCode β c, cloudCode_nonempty.mpr c.2⟩
 
 infixl:62 " ↝ " => CloudRel'
 
 @[simp]
-theorem cloudRel_coe_coe {c d : NonemptyCode α} : (c : Code α) ↝₀ d ↔ c ↝ d := by
+theorem cloudRel_coe_coe {c d : NonemptyCode} : (c : Code) ↝₀ d ↔ c ↝ d := by
   rw [CloudRel_iff, CloudRel'_iff]
   aesop
 
-theorem cloud_subrelation : Subrelation (· ↝ ·) (InvImage μr (codeMinMap : NonemptyCode α → μ))
+theorem cloud_subrelation : Subrelation (· ↝ ·) (InvImage μr (codeMinMap : NonemptyCode → μ))
   | c, _, CloudRel'.intro β hc => codeMinMap_lt_codeMinMap_cloudCode β c hc
 
 /-- There are only finitely many iterated images under any inverse `cloud` map. -/
-theorem cloudRel'_wellFounded : WellFounded ((· ↝ ·) : _ → NonemptyCode α → Prop) :=
+theorem cloudRel'_wellFounded : WellFounded ((· ↝ ·) : _ → NonemptyCode → Prop) :=
   cloud_subrelation.wf invImage_codeMinMap_wf
 
-instance : WellFoundedRelation (NonemptyCode α) :=
+instance : WellFoundedRelation NonemptyCode :=
   ⟨_, cloudRel'_wellFounded⟩
 
 /-- There is at most one inverse under an `cloud` map. This corresponds to the fact that there is
 only one code which is related (on the left) to any given code under the `cloud` map relation. -/
-theorem cloudRel'_subsingleton (c : NonemptyCode α) :
-    {d : NonemptyCode α | d ↝ c}.Subsingleton := by
+theorem cloudRel'_subsingleton (c : NonemptyCode) :
+    {d : NonemptyCode | d ↝ c}.Subsingleton := by
   intro d hd e he
   simp only [Ne.def, CloudRel'_iff, mem_setOf_eq] at hd he
   obtain ⟨β, hβ, hdβ, rfl⟩ := hd
