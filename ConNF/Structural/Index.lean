@@ -34,6 +34,8 @@ variable [Level]
 class LtLevel (β : TypeIndex) : Prop where
   elim : β < α
 
+instance {β : Λ} [inst : LtLevel (Option.some β)] : LtLevel β := inst
+
 instance : LtLevel ⊥ where
   elim := bot_lt_coe α
 
@@ -42,6 +44,8 @@ class LeLevel (β : TypeIndex) : Prop where
 
 instance {β : TypeIndex} [LtLevel β] : LeLevel β where
   elim := LtLevel.elim.le
+
+instance {β : Λ} [inst : LeLevel (Option.some β)] : LeLevel β := inst
 
 variable {α : TypeIndex}
 

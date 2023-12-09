@@ -36,7 +36,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions]
+variable [Params.{u}] [BasePositions] [Level]
 
 open Code
 
