@@ -17,48 +17,35 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] (α : Λ) [TangleDataIio α] {β : IioBot α} {s t : Set (Tangle β)}
+variable [Params.{u}] (α : Λ) [TangleDataLt α] {β : Λ} [IsLt β α] {s t : Set (Tangle β)}
 
 /-- An `α` code is a type index `β < α` together with a set of tangles of type `β`. -/
-def Code : Type u :=
-  (β : IioBot α) × Set (Tangle β)
+@[ext]
+structure Code : Type u where
+  (β : TypeIndex)
+  [inst : IsLt β α]
+  (members : Set (Tangle β))
+
+instance (c : Code α) : IsLt c.β α := c.inst
 
 instance : Inhabited (Code α) :=
-⟨⟨⊥, ∅⟩⟩
+  let _ := isLtBot α
+  ⟨⟨⊥, ∅⟩⟩
 
 /-- Nonempty codes. -/
 abbrev NonemptyCode : Type u :=
-  { c : Code α // c.2.Nonempty }
+  { c : Code α // c.members.Nonempty }
 
 namespace Code
-
-@[ext]
-theorem Code.ext {c₀ c₁ : Code α} (h₀ : c₀.1 = c₁.1) (h₁ : HEq c₀.2 c₁.2) : c₀ = c₁ :=
-  Sigma.ext h₀ h₁
 
 variable {α}
 variable {c : Code α}
 
-/-- Constructor for `code`. -/
-def mk : ∀ β : IioBot α, Set (Tangle β) → Code α :=
-  Sigma.mk
-
-theorem mk_def : mk β s = ⟨β, s⟩ :=
-  rfl
-
-@[simp]
-theorem fst_mk (β : IioBot α) (s : Set (Tangle β)) : (mk β s).1 = β :=
-  rfl
-
-@[simp]
-theorem snd_mk (β : IioBot α) (s : Set (Tangle β)) : (mk β s).2 = s :=
-  rfl
-
 /-- A code is empty if it has no element. -/
 protected def IsEmpty (c : Code α) : Prop :=
-  c.2 = ∅
+  c.members = ∅
 
-protected theorem IsEmpty.eq : c.IsEmpty → c.2 = ∅ :=
+protected theorem IsEmpty.eq : c.IsEmpty → c.members = ∅ :=
   id
 
 @[simp]
@@ -66,9 +53,8 @@ theorem isEmpty_mk : (mk β s).IsEmpty ↔ s = ∅ :=
   Iff.rfl
 
 @[simp]
-theorem mk_inj : mk β s = mk β t ↔ s = t := by
-  rw [Sigma.ext_iff]
-  simp
+theorem mk_inj : mk β s = mk β t ↔ s = t :=
+  by simp only [mk.injEq, heq_eq_eq, true_and]
 
 end Code
 

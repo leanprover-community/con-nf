@@ -23,7 +23,7 @@ namespace ConNF
 
 variable [Params.{u}] [BasePositions] (α : Λ)
 
-instance tangleDataIioCoe (β : Iio α) [inst : TangleData (β : Iic α)] : TangleData β :=
+instance TangleDataLtCoe (β : Iio α) [inst : TangleData (β : Iic α)] : TangleData β :=
   inst
 
 instance tangleDataIic (β : Iic α) [inst : TangleData β] : TangleData (β : Λ) :=
@@ -32,11 +32,11 @@ instance tangleDataIic (β : Iic α) [inst : TangleData β] : TangleData (β : �
 instance tangleDataIic' (β : Iio α) [inst : TangleData β] : TangleData (β : Λ) :=
   inst
 
-instance typedObjectsIio (β : Iio α) [inst_0 : TangleData β]
+instance TypedObjectsLt (β : Iio α) [inst_0 : TangleData β]
     [inst : @TypedObjects _ (β : Iic α) inst_0] : TypedObjects β :=
   inst
 
-instance positionedTanglesIio (β : Iio α) [TangleData β] [inst : PositionedTangles β] :
+instance PositionedTanglesLt (β : Iio α) [TangleData β] [inst : PositionedTangles β] :
     PositionedTangles (β : Λ) :=
   inst
 

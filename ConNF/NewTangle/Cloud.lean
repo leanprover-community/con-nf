@@ -42,23 +42,20 @@ open Code
 
 section Cloud
 
-variable {α : Λ} {γ : IioBot α} [TangleData γ] [PositionedTangles γ] {β : Iio α}
-  [TangleData (iioCoe β)] [PositionedTangles (iioCoe β)] [TypedObjects β] (hγβ : γ ≠ β)
-
-theorem coe_ne : γ ≠ β → (γ : TypeIndex) ≠ (β : Λ) :=
-  Subtype.coe_injective.ne
+variable {α : Λ} {γ : TypeIndex} [IsLt γ α] [TangleData γ] [PositionedTangles γ]
+  {β : Λ} [IsLt β α] [TangleData β] [PositionedTangles β] [TypedObjects β] (hγβ : γ ≠ β)
 
 /-- The cloud map. We map each tangle to all typed near-litters near the `fuzz`ed tangle, and take
 the union over all tangles in the input. -/
-def cloud (s : Set (Tangle γ)) : Set (Tangle <| iioCoe β) :=
-  typedNearLitter '' ⋃ t ∈ s, localCardinal (fuzz (coe_ne hγβ) t)
+def cloud (s : Set (Tangle γ)) : Set (Tangle β) :=
+  typedNearLitter '' ⋃ t ∈ s, localCardinal (fuzz hγβ t)
 
 variable {hγβ}
 
 @[simp]
-theorem mem_cloud {t : Tangle <| iioCoe β} {s : Set (Tangle γ)} :
+theorem mem_cloud {t : Tangle β} {s : Set (Tangle γ)} :
     t ∈ cloud hγβ s ↔
-      ∃ t' ∈ s, ∃ (N : NearLitter), N.1 = fuzz (coe_ne hγβ) t' ∧ t = typedNearLitter N := by
+      ∃ t' ∈ s, ∃ (N : NearLitter), N.1 = fuzz hγβ t' ∧ t = typedNearLitter N := by
   simp only [cloud, mem_image, mem_iUnion, mem_localCardinal, exists_prop]
   constructor
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
@@ -72,14 +69,14 @@ theorem cloud_empty : cloud hγβ (∅ : Set (Tangle γ)) = ∅ := by
 
 @[simp]
 theorem cloud_singleton (t : Tangle γ) :
-    cloud hγβ {t} = typedNearLitter '' localCardinal (fuzz (coe_ne hγβ) t) := by
+    cloud hγβ {t} = typedNearLitter '' localCardinal (fuzz hγβ t) := by
   simp only [cloud, mem_singleton_iff, iUnion_iUnion_eq_left]
 
 variable {s : Set (Tangle γ)} {t : Tangle γ}
 
 theorem _root_.Set.Nonempty.cloud (h : s.Nonempty) : (cloud hγβ s).Nonempty := by
   refine (nonempty_iUnion.2 ?_).image _
-  refine ⟨h.choose, ⟨(fuzz (coe_ne hγβ) h.choose).toNearLitter, ?_⟩⟩
+  refine ⟨h.choose, ⟨(fuzz hγβ h.choose).toNearLitter, ?_⟩⟩
   simp only [mem_iUnion, mem_localCardinal, Litter.toNearLitter_fst, exists_prop, and_true]
   exact h.choose_spec
 
@@ -94,8 +91,8 @@ theorem cloud_nonempty (hγβ : γ ≠ β) : (cloud hγβ s).Nonempty ↔ s.None
   simp_rw [nonempty_iff_ne_empty, Ne.def, cloud_eq_empty]
 
 theorem subset_cloud (ht : t ∈ s) :
-    typedNearLitter '' localCardinal (fuzz (coe_ne hγβ) t) ⊆ cloud hγβ s :=
-  image_subset _ <| subset_iUnion₂ (s := fun t' _ => localCardinal (fuzz (coe_ne hγβ) t')) t ht
+    typedNearLitter '' localCardinal (fuzz hγβ t) ⊆ cloud hγβ s :=
+  image_subset _ <| subset_iUnion₂ (s := fun t' _ => localCardinal (fuzz hγβ t')) t ht
 
 theorem μ_le_mk_cloud : s.Nonempty → #μ ≤ #(cloud hγβ s) := by
   rintro ⟨t, ht⟩
@@ -108,15 +105,14 @@ theorem cloud_injective : Injective (cloud hγβ) :=
     Pairwise.biUnion_injective (fun _ _ h => localCardinal_disjoint <| (fuzz_injective _).ne h)
       fun _ => localCardinal_nonempty _
 
-variable {δ : IioBot α} [TangleData δ] [PositionedTangles δ]
+variable {δ : TypeIndex} [IsLt δ α] [TangleData δ] [PositionedTangles δ]
 
 theorem cloud_disjoint_range {hδβ} (c : Set (Tangle γ)) (d : Set (Tangle δ)) (hc : c.Nonempty)
     (h : cloud hγβ c = cloud hδβ d) : γ = δ := by
   obtain ⟨b, hb⟩ := hc
   have := (subset_iUnion₂ b hb).trans (typedNearLitter.injective.image_injective h).subset
   obtain ⟨i, -, hi⟩ := mem_iUnion₂.1 (this (fuzz _ b).toNearLitter_mem_localCardinal)
-  refine Subtype.coe_injective ?_
-  exact (fuzz_β (coe_ne hγβ) b).trans ((congr_arg Litter.β hi).trans (fuzz_β (coe_ne hδβ) i))
+  exact fuzz_congr_β hi
 
 /-!
 We don't need to prove that the ranges of the `cloud` maps are disjoint for different `β`, since
@@ -145,13 +141,13 @@ theorem minTangle_lt_minTangle_cloud (s : Set (Tangle γ)) (hs : s.Nonempty) :
   obtain ⟨t, ht, N, hN, h⟩ := mem_cloud.1 (minTangle_mem (cloud hγβ s) hs.cloud)
   refine (minTangle_le s hs ht).trans_lt ?_
   rw [h]
-  exact fuzz_pos (coe_ne hγβ) t _ hN
+  exact fuzz_pos hγβ t _ hN
 
 end Cloud
 
 section CloudCode
 
-variable {α : Λ} [TangleDataIio α] [PositionedTanglesIio α]
+variable {α : Λ} [TangleDataLt α] [PositionedTanglesLt α]
 
 /-- Tool that lets us use well-founded recursion on codes via `μ`.
 This maps a nonempty code to the least pos of a tangle in the extension of the code. -/
@@ -164,21 +160,21 @@ theorem invImage_codeMinMap_wf : WellFounded (InvImage μr (codeMinMap : Nonempt
 
 section Extension
 
-variable [TypedObjectsIio α] {β : IioBot α}
+variable [TypedObjectsLt α] {β : TypeIndex} [IsLt β α]
 
 /-- The `cloud` map, phrased as a function on sets of `γ`-tangles, but if `γ = β`, this is the
 identity function. -/
-def extension (s : Set (Tangle β)) (γ : Iio α) : Set (Tangle γ) :=
-  if hβγ : β = γ then cast (by rw [hβγ]) s else cloud hβγ s
+def extension (s : Set (Tangle β)) (γ : Λ) [IsLt γ α] : Set (Tangle γ) :=
+  if hβγ : β = γ then cast (by subst hβγ; rfl) s else cloud hβγ s
 
 @[simp]
-theorem extension_self {γ : Iio α} (s : Set (Tangle (iioCoe γ))) : extension s γ = s :=
+theorem extension_self {γ : Λ} [IsLt γ α] (s : Set (Tangle γ)) : extension s γ = s :=
   dif_pos rfl
 
-variable (s : Set (Tangle β)) (γ : Iio α)
+variable (s : Set (Tangle β)) (γ : Λ) [IsLt γ α]
 
 @[simp]
-theorem extension_eq (hβγ : β = γ) : extension s γ = cast (by rw [hβγ]) s :=
+theorem extension_eq (hβγ : β = γ) : extension s γ = cast (by subst hβγ; rfl) s :=
   dif_pos hβγ
 
 @[simp]
@@ -187,21 +183,21 @@ theorem extension_ne (hβγ : β ≠ γ) : extension s γ = cloud hβγ s :=
 
 end Extension
 
-variable [TypedObjectsIio α] (γ : IioBot α) (β : Iio α) (c d : Code α)
+variable [TypedObjectsLt α] (γ : TypeIndex) [IsLt γ α] (β : Λ) [IsLt β α] (c d : Code α)
 
 /-- The `cloud` map, phrased as a function on `α`-codes, but if the code's level matches `β`,
 this is the identity function. This is written in a weird way in order to make `(cloudCode β c).1`
 defeq to `β`. -/
 def cloudCode (c : Code α) : Code α :=
-  mk β (extension c.2 β)
+  mk β (extension c.members β)
 
 theorem cloudCode_eq (hcβ : c.1 = β) : cloudCode β c = c := by
   rw [cloudCode, extension_eq _ _ hcβ]
   ext : 1
   · exact hcβ.symm
-  · simp only [snd_mk, cast_heq]
+  · simp only [cast_heq]
 
-theorem cloudCode_ne (hcβ : c.1 ≠ β) : cloudCode β c = mk β (cloud hcβ c.2) := by
+theorem cloudCode_ne (hcβ : c.1 ≠ β) : cloudCode β c = mk β (cloud hcβ c.members) := by
   rw [cloudCode, extension_ne _ _ hcβ]
 
 @[simp]
@@ -209,9 +205,9 @@ theorem fst_cloudCode : (cloudCode β c).1 = β :=
   rfl
 
 @[simp]
-theorem snd_cloudCode (hcβ : c.1 ≠ β) : (cloudCode β c).2 = cloud hcβ c.2 := by
+theorem snd_cloudCode (hcβ : c.1 ≠ β) : (cloudCode β c).members = cloud hcβ c.members := by
   have := cloudCode_ne β c hcβ
-  rw [Sigma.ext_iff] at this
+  rw [Code.ext_iff] at this
   exact this.2.eq
 
 @[simp]
@@ -220,9 +216,8 @@ theorem cloudCode_mk_eq (s) : cloudCode β (mk β s) = mk β s := by
   rfl
 
 @[simp]
-theorem cloudCode_mk_ne (hγβ : γ ≠ β) (s) : cloudCode β (mk γ s) = mk β (cloud hγβ s) := by
-  rw [cloudCode_ne β (mk γ s) hγβ]
-  rfl
+theorem cloudCode_mk_ne (hγβ : γ ≠ β) (s) : cloudCode β (mk γ s) = mk β (cloud hγβ s) :=
+  by rw [cloudCode_ne β (mk γ s) hγβ]
 
 variable {β c d}
 
@@ -234,24 +229,23 @@ theorem cloudCode_isEmpty : (cloudCode β c).IsEmpty ↔ c.IsEmpty := by
     exact h
   · rw [cloudCode_ne]
     exact cloud_eq_empty h
-    exact h
 
 @[simp]
-theorem cloudCode_nonempty : (cloudCode β c).2.Nonempty ↔ c.2.Nonempty := by
+theorem cloudCode_nonempty : (cloudCode β c).members.Nonempty ↔ c.members.Nonempty := by
   simp_rw [nonempty_iff_ne_empty]; exact cloudCode_isEmpty.not
 
 alias ⟨_, Code.IsEmpty.cloudCode⟩ := cloudCode_isEmpty
 
-theorem cloudCode_injOn : {c : Code α | c.1 ≠ β ∧ c.2.Nonempty}.InjOn (cloudCode β) := by
+theorem cloudCode_injOn : {c : Code α | c.1 ≠ β ∧ c.members.Nonempty}.InjOn (cloudCode β) := by
   rintro ⟨γ, s⟩ ⟨hγβ, hs⟩ ⟨δ, t⟩ ⟨hδβ, ht⟩ h
   rw [cloudCode_ne _ _ hγβ, cloudCode_ne _ _ hδβ] at h
-  have := (congr_arg_heq Sigma.snd h).eq
-  simp only [fst_mk, snd_mk] at this
+  have := (congr_arg_heq Code.members h).eq
   obtain rfl := cloud_disjoint_range _ _ hs this
+  dsimp only at this
   rw [cloud_injective this]
 
 theorem μ_le_mk_cloudCode (c : Code α) (hcβ : c.1 ≠ β) :
-    c.2.Nonempty → #μ ≤ #(cloudCode β c).2 := by
+    c.members.Nonempty → #μ ≤ #(cloudCode β c).members := by
   rw [cloudCode_ne β c hcβ]
   exact μ_le_mk_cloud (hγβ := hcβ)
 
@@ -261,7 +255,7 @@ theorem codeMinMap_lt_codeMinMap_cloudCode (c : NonemptyCode α) (hcβ : c.1.1 �
     codeMinMap c < codeMinMap ⟨cloudCode β c, cloudCode_nonempty.mpr c.2⟩ := by
   unfold codeMinMap
   have := cloudCode_ne β c hcβ
-  convert minTangle_lt_minTangle_cloud c.1.2 c.2 using 1
+  convert minTangle_lt_minTangle_cloud c.1.members c.2 using 1
   congr
   exact snd_cloudCode β c hcβ
 
@@ -270,42 +264,43 @@ under the inverse `cloud` map. Note that we require the map to actually change t
 stipulating that `c.1 ≠ β`. -/
 @[mk_iff]
 inductive CloudRel (c : Code α) : Code α → Prop
-  | intro (β : Iio α) : c.1 ≠ β → CloudRel c (cloudCode β c)
+  | intro (β : Λ) [IsLt β α] : c.1 ≠ β → CloudRel c (cloudCode β c)
 
 infixl:62 " ↝₀ " => CloudRel
 
-theorem cloudRel_subsingleton (hc : c.2.Nonempty) : {d : Code α | d ↝₀ c}.Subsingleton := by
+theorem cloudRel_subsingleton (hc : c.members.Nonempty) : {d : Code α | d ↝₀ c}.Subsingleton := by
   intro d hd e he
   simp only [CloudRel_iff] at hd he
-  obtain ⟨⟨β, hβ⟩, hdβ, rfl⟩ := hd
-  obtain ⟨⟨γ, hγ⟩, heγ, h⟩ := he
-  have := congr_arg Subtype.val (Sigma.ext_iff.1 h).1
-  dsimp only [fst_cloudCode, Iio.coe_mk] at this
-  rw [coe_eq_coe] at this
+  obtain ⟨β, hβ, hdβ, rfl⟩ := hd
+  obtain ⟨γ, hγ, heγ, h⟩ := he
+  have := ((Code.ext_iff _ _).1 h).1
+  simp only [fst_cloudCode, coe_inj] at this
   subst this
   refine' cloudCode_injOn ⟨hdβ, cloudCode_nonempty.1 hc⟩ _ h
   rw [h] at hc
   exact ⟨heγ, cloudCode_nonempty.1 hc⟩
 
-theorem cloudRel_cloudCode (hd : d.2.Nonempty) (hdβ : d.1 ≠ β) : c ↝₀ cloudCode β d ↔ c = d := by
+theorem cloudRel_cloudCode (hd : d.members.Nonempty) (hdβ : d.1 ≠ β) :
+    c ↝₀ cloudCode β d ↔ c = d := by
   refine'
     ⟨fun h => cloudRel_subsingleton (by rwa [cloudCode_nonempty]) h <| CloudRel.intro _ hdβ, _⟩
   rintro rfl
   exact ⟨_, hdβ⟩
 
-theorem CloudRel.nonempty_iff : c ↝₀ d → (c.2.Nonempty ↔ d.2.Nonempty) := by
+theorem CloudRel.nonempty_iff : c ↝₀ d → (c.members.Nonempty ↔ d.members.Nonempty) := by
   rintro ⟨β, hcβ⟩
   exact cloudCode_nonempty.symm
 
 theorem cloudRelEmptyEmpty (hγβ : γ ≠ β) : mk γ ∅ ↝₀ mk β ∅ :=
   (CloudRel_iff _ _).2
-    ⟨β, hγβ, by
+    ⟨β, inferInstance, hγβ, by
       ext : 1
       · rfl
       · refine heq_of_eq ?_
-        simp only [snd_mk, snd_cloudCode _ (mk γ ∅) hγβ, cloud_empty]⟩
+        simp only [snd_cloudCode _ (mk γ ∅) hγβ, cloud_empty]⟩
 
-theorem eq_of_cloudCode {β γ : Iio α} (hc : c.2.Nonempty) (hcβ : c.1 ≠ β) (hdγ : d.1 ≠ γ)
+theorem eq_of_cloudCode {β γ : Λ} [IsLt β α] [IsLt γ α]
+    (hc : c.members.Nonempty) (hcβ : c.1 ≠ β) (hdγ : d.1 ≠ γ)
     (h : cloudCode β c = cloudCode γ d) : c = d := by
   refine cloudRel_subsingleton (by rwa [cloudCode_nonempty]) (CloudRel.intro _ hcβ) ?_
   rw [h]
@@ -315,14 +310,15 @@ theorem eq_of_cloudCode {β γ : Iio α} (hc : c.2.Nonempty) (hcβ : c.1 ≠ β)
 under the inverse `cloud` map. -/
 @[mk_iff]
 inductive CloudRel' (c : NonemptyCode α) : NonemptyCode α → Prop
-  | intro (β : Iio α) : (c : Code α).1 ≠ β → CloudRel' c ⟨cloudCode β c, cloudCode_nonempty.mpr c.2⟩
+  | intro (β : Λ) [IsLt β α] :
+      (c : Code α).1 ≠ β → CloudRel' c ⟨cloudCode β c, cloudCode_nonempty.mpr c.2⟩
 
 infixl:62 " ↝ " => CloudRel'
 
 @[simp]
 theorem cloudRel_coe_coe {c d : NonemptyCode α} : (c : Code α) ↝₀ d ↔ c ↝ d := by
-  rw [CloudRel_iff, CloudRel'_iff, Iff.comm]
-  exact exists_congr fun β => and_congr_right' Subtype.ext_iff
+  rw [CloudRel_iff, CloudRel'_iff]
+  aesop
 
 theorem cloud_subrelation : Subrelation (· ↝ ·) (InvImage μr (codeMinMap : NonemptyCode α → μ))
   | c, _, CloudRel'.intro β hc => codeMinMap_lt_codeMinMap_cloudCode β c hc
@@ -340,11 +336,11 @@ theorem cloudRel'_subsingleton (c : NonemptyCode α) :
     {d : NonemptyCode α | d ↝ c}.Subsingleton := by
   intro d hd e he
   simp only [Ne.def, CloudRel'_iff, mem_setOf_eq] at hd he
-  obtain ⟨⟨β, hβ⟩, hdβ, rfl⟩ := hd
-  obtain ⟨⟨γ, hγ⟩, heγ, h⟩ := he
+  obtain ⟨β, hβ, hdβ, rfl⟩ := hd
+  obtain ⟨γ, hγ, heγ, h⟩ := he
   rw [Subtype.ext_iff] at h
-  have := congr_arg Subtype.val (Sigma.ext_iff.1 h).1
-  simp only [Subtype.coe_mk, fst_cloudCode, Iio.coe_mk, coe_eq_coe] at this
+  have := ((Code.ext_iff _ _).1 h).1
+  simp only [Subtype.coe_mk, fst_cloudCode, coe_eq_coe] at this
   subst this
   exact Subtype.coe_injective (cloudCode_injOn ⟨hdβ, d.2⟩ ⟨heγ, e.2⟩ h)
 

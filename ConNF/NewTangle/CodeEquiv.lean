@@ -38,10 +38,8 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [BasePositions] {α : Λ} {β : IioBot α} {γ : Iio α} [TangleDataIio α]
-  [TypedObjectsIio α] [PositionedTanglesIio α]
-
-open IioBot
+variable [Params.{u}] [BasePositions] {α : Λ} {β : TypeIndex} [IsLt β α] {γ : Λ} [IsLt γ α]
+  [TangleDataLt α] [TypedObjectsLt α] [PositionedTanglesLt α]
 
 namespace Code
 
@@ -71,7 +69,7 @@ theorem isEven_of_forall_not (h : ∀ d, ¬d ↝₀ c) : IsEven c :=
   (IsEven_iff c).2 fun _ hd => (h _ hd).elim
 
 @[simp]
-theorem isEven_of_eq_bot (c : Code α) (hc : c.1.1 = ⊥) : c.IsEven :=
+theorem isEven_of_eq_bot (c : Code α) (hc : c.1 = ⊥) : c.IsEven :=
   isEven_of_forall_not <| by rintro d ⟨β, -⟩; exact coe_ne_bot hc
 
 @[simp]

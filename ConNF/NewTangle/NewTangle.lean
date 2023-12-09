@@ -32,14 +32,14 @@ variable [Params.{u}] [BasePositions]
 
 open Code IioBot
 
-variable (α : Λ) [TangleDataIio α] {β : IioBot α} {γ : Iio α}
+variable (α : Λ) [TangleDataLt α] {β : IioBot α} {γ : Iio α}
 
 abbrev Extensions :=
   ∀ β : Iio α, Set (Tangle β)
 
 namespace Semitangle
 
-variable [PositionedTanglesIio α] [TypedObjectsIio α]
+variable [PositionedTanglesLt α] [TypedObjectsLt α]
 
 /-- Keeps track of the preferred extension of a semitangle, along with coherence conditions
 relating each extension of the semitangle. In particular, each non-preferred extension can be
@@ -79,7 +79,7 @@ end Semitangle
 
 open Semitangle
 
-variable [PositionedTanglesIio α] [TypedObjectsIio α]
+variable [PositionedTanglesLt α] [TypedObjectsLt α]
 
 /-- A *semitangle* is a collection of `β`-tangles for each lower level `β < α`, together with
 a preference for one of these extensions. -/

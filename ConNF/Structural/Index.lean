@@ -22,14 +22,17 @@ namespace ConNF
 
 variable [Params.{u}]
 
-instance {α : Type _} {x y : α} [Preorder α] [i : Fact (x < y)] : Fact (x ≤ y) where
-  out := i.elim.le
+class IsLt (β : TypeIndex) (α : outParam Λ) : Prop where
+  elim : β < α
 
-instance {α β : Λ} [i : Fact (β < α)] : Fact ((β : TypeIndex) < α) where
-  out := WithBot.coe_lt_coe.mpr i.elim
+def isLtBot (α : Λ) : IsLt ⊥ α where
+  elim := bot_lt_coe α
 
-instance {α β : Λ} [i : Fact (β ≤ α)] : Fact ((β : TypeIndex) ≤ α) where
-  out := WithBot.coe_le_coe.mpr i.elim
+class IsLe (β : TypeIndex) (α : outParam Λ) : Prop where
+  elim : β ≤ α
+
+instance {β : TypeIndex} {α : Λ} [IsLt β α] : IsLe β α where
+  elim := IsLt.elim.le
 
 variable {α : TypeIndex}
 
