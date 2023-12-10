@@ -25,7 +25,7 @@ open scoped Cardinal Pointwise
 
 namespace ConNF
 
-variable [Params.{u}] (α : Λ) [BasePositions] [FoaAssumptions α]
+variable [Params.{u}] [BasePositions] [Level] [FoaAssumptions]
 variable {β : Λ} {G : Type _} {τ : Type _} [SMul G (SupportCondition β)] [SMul G τ] {x : τ}
 
 /-- A support condition is *reduced* if it is an atom or a litter. -/
@@ -40,28 +40,28 @@ theorem isLitter_of_reduced {N : NearLitter} (h : Reduced (inr N)) : N.IsLitter 
 
 /-- The reflexive transitive closure of a set of support conditions. -/
 def reflTransClosure (S : Set (SupportCondition β)) : Set (SupportCondition β) :=
-  {c | ∃ d ∈ S, c ≤[α] d}
+  {c | ∃ d ∈ S, c ≤ d}
 
 theorem mem_reflTransClosure_of_mem (S : Set (SupportCondition β)) (c : SupportCondition β)
-    (hc : c ∈ S) : c ∈ reflTransClosure α S :=
+    (hc : c ∈ S) : c ∈ reflTransClosure S :=
   ⟨c, hc, Relation.ReflTransGen.refl⟩
 
 /-- The transitive closure of a set of support conditions. -/
 def transClosure (S : Set (SupportCondition β)) : Set (SupportCondition β) :=
-  {c | ∃ d ∈ S, c <[α] d}
+  {c | ∃ d ∈ S, c < d}
 
 /-- The *reduction* of a set of support conditions is the downward closure of the set under
 the constrains relation, but we only keep reduced conditions. -/
 def reduction (S : Set (SupportCondition β)) : Set (SupportCondition β) :=
-  reflTransClosure α S ∩ {c | Reduced c.value}
+  reflTransClosure S ∩ {c | Reduced c.value}
 
 theorem mem_reduction_of_reduced (S : Set (SupportCondition β)) (c : SupportCondition β)
-    (hc₁ : Reduced c.value) (hc₂ : c ∈ S) : c ∈ reduction α S :=
-  ⟨mem_reflTransClosure_of_mem α S c hc₂, hc₁⟩
+    (hc₁ : Reduced c.value) (hc₂ : c ∈ S) : c ∈ reduction S :=
+  ⟨mem_reflTransClosure_of_mem S c hc₂, hc₁⟩
 
 theorem mem_reduction_of_reduced_constrains (S : Set (SupportCondition β))
     (c d : SupportCondition β) (hc : Reduced c.value) (hcd : c ≺ d) (hd : d ∈ S) :
-    c ∈ reduction α S :=
+    c ∈ reduction S :=
   ⟨⟨d, hd, Relation.ReflTransGen.single hcd⟩, hc⟩
 
 /-- Gadget that helps us prove that the `reflTransClosure` of a small set is small. -/
@@ -71,7 +71,7 @@ def nthClosure (S : Set (SupportCondition β)) : ℕ → Set (SupportCondition �
 
 /-- The `nthClosure` of a small set is small. -/
 theorem small_nthReduction {S : Set (SupportCondition β)} {n : ℕ} (h : Small S) :
-    Small (nthClosure α S n) := by
+    Small (nthClosure S n) := by
   induction' n with n hn
   exact h
   rw [nthClosure]
@@ -81,8 +81,8 @@ theorem small_nthReduction {S : Set (SupportCondition β)} {n : ℕ} (h : Small 
   exact small_constrains c
 
 theorem mem_nthClosure_iff {S : Set (SupportCondition β)} {n : ℕ} {c : SupportCondition β} :
-    c ∈ nthClosure α S n ↔
-      ∃ l, List.Chain (Constrains α β) c l ∧
+    c ∈ nthClosure S n ↔
+      ∃ l, List.Chain (· ≺ ·) c l ∧
         l.length = n ∧ (c::l).getLast (List.cons_ne_nil _ _) ∈ S := by
   induction' n with n hn generalizing c
   · rw [nthClosure]
@@ -110,7 +110,7 @@ theorem mem_nthClosure_iff {S : Set (SupportCondition β)} {n : ℕ} {c : Suppor
 
 /-- The `reflTransClosure` of a set is the `ℕ`-indexed union of the `n`th closures. -/
 theorem reflTransClosure_eq_iUnion_nthClosure {S : Set (SupportCondition β)} :
-    reflTransClosure α S = ⋃ n, nthClosure α S n := by
+    reflTransClosure S = ⋃ n, nthClosure S n := by
   refine' subset_antisymm _ _
   · rintro c ⟨d, hdS, hd⟩
     obtain ⟨l, hl, rfl⟩ := List.exists_chain_of_relationReflTransGen hd
@@ -129,10 +129,10 @@ theorem reflTransClosure_eq_iUnion_nthClosure {S : Set (SupportCondition β)} :
 
 /-- The `reflTransClosure` of a small set is small. -/
 theorem reflTransClosure_small {S : Set (SupportCondition β)} (h : Small S) :
-    Small (reflTransClosure α S) := by
+    Small (reflTransClosure S) := by
   rw [reflTransClosure_eq_iUnion_nthClosure]
-  have : Small (⋃ n : ULift ℕ, nthClosure α S n.down)
-  · refine' small_iUnion _ fun _ => small_nthReduction α h
+  have : Small (⋃ n : ULift ℕ, nthClosure S n.down)
+  · refine' small_iUnion _ fun _ => small_nthReduction h
     rw [Cardinal.mk_denumerable]
     exact aleph0_le_mk_Λ.trans_lt Λ_lt_κ
   convert this using 1
@@ -141,29 +141,29 @@ theorem reflTransClosure_small {S : Set (SupportCondition β)} (h : Small S) :
 
 /-- The `transClosure` of a small set is small. -/
 theorem transClosure_small {S : Set (SupportCondition β)} (h : Small S) :
-    Small (transClosure α S) := by
-  refine' lt_of_le_of_lt (Cardinal.mk_le_mk_of_subset _) (reflTransClosure_small α h)
+    Small (transClosure S) := by
+  refine' lt_of_le_of_lt (Cardinal.mk_le_mk_of_subset _) (reflTransClosure_small h)
   rintro c ⟨d, hd₁, hd₂⟩
   exact ⟨d, hd₁, hd₂.to_reflTransGen⟩
 
 /-- The `reduction` of a small set is small. -/
-theorem reduction_small {S : Set (SupportCondition β)} (h : Small S) : Small (reduction α S) :=
-  lt_of_le_of_lt (Cardinal.mk_subtype_le_of_subset fun _c hc => hc.1) (reflTransClosure_small α h)
+theorem reduction_small {S : Set (SupportCondition β)} (h : Small S) : Small (reduction S) :=
+  lt_of_le_of_lt (Cardinal.mk_subtype_le_of_subset fun _c hc => hc.1) (reflTransClosure_small h)
 
 /-- The reduction of a set supports every element in its domain under the action of structural
 permutations. -/
 theorem reduction_supports (S : Set (SupportCondition β)) (c : SupportCondition β) (hc : c ∈ S) :
-    Supports (StructPerm β) (reduction α S) c := by
+    Supports (StructPerm β) (reduction S) c := by
   intro π hc'
   obtain ⟨B, a | N⟩ := c
-  · exact hc' (mem_reduction_of_reduced α _ _ (Reduced.mkAtom a) hc)
+  · exact hc' (mem_reduction_of_reduced _ _ (Reduced.mkAtom a) hc)
   by_cases h : N.IsLitter
   · obtain ⟨L, rfl⟩ := h.exists_litter_eq
-    exact hc' (mem_reduction_of_reduced α _ _ (Reduced.mkLitter L) hc)
+    exact hc' (mem_reduction_of_reduced _ _ (Reduced.mkLitter L) hc)
   simp only [StructPerm.smul_supportCondition_eq_iff, smul_inr, inr.injEq] at hc' ⊢
-  have h₃ := hc' (mem_reduction_of_reduced_constrains α _ ⟨B, inr N.fst.toNearLitter⟩ _
+  have h₃ := hc' (mem_reduction_of_reduced_constrains _ ⟨B, inr N.fst.toNearLitter⟩ _
     (Reduced.mkLitter N.fst) (Constrains.nearLitter B N h) hc)
-  have h₄ := fun a ha => hc' (mem_reduction_of_reduced_constrains α _ ⟨B, inl a⟩ _
+  have h₄ := fun a ha => hc' (mem_reduction_of_reduced_constrains _ ⟨B, inl a⟩ _
     (Reduced.mkAtom a) (Constrains.symmDiff B N a ha) hc)
   simp only [smul_inr, inr.injEq, smul_inl, inl.injEq] at h₃ h₄
   refine' SetLike.coe_injective _
@@ -182,37 +182,39 @@ theorem reduction_supports (S : Set (SupportCondition β)) (c : SupportCondition
     exact h₄ a ha
 
 theorem reduction_designatedSupport_supports [TangleData β] (t : Tangle β) :
-    Supports (Allowable β) (reduction α (designatedSupport t : Set (SupportCondition β))) t := by
+    Supports (Allowable β) (reduction (designatedSupport t : Set (SupportCondition β))) t := by
   intro ρ h
   refine (designatedSupport t).supports ρ ?_
   intros c hc'
-  exact reduction_supports α (designatedSupport t) c hc' (Allowable.toStructPerm ρ) h
+  exact reduction_supports (designatedSupport t) c hc' (Allowable.toStructPerm ρ) h
 
 /-- A support for a tangle containing only reduced support conditions. -/
 noncomputable def reducedSupport [TangleData β] (t : Tangle β) : Support β (Allowable β) t
     where
-  carrier := reduction α (designatedSupport t : Set (SupportCondition β))
-  small := reduction_small α (designatedSupport t).small
-  supports := reduction_designatedSupport_supports α t
+  carrier := reduction (designatedSupport t : Set (SupportCondition β))
+  small := reduction_small (designatedSupport t).small
+  supports := reduction_designatedSupport_supports t
 
 theorem mem_reducedSupport_iff [TangleData β] (t : Tangle β) (c : SupportCondition β) :
-    c ∈ reducedSupport α t ↔ c ∈ reduction α (designatedSupport t : Set (SupportCondition β)) :=
+    c ∈ reducedSupport t ↔ c ∈ reduction (designatedSupport t : Set (SupportCondition β)) :=
   Iff.rfl
 
-theorem transConstrains_of_mem_reducedSupport {β γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ)
-    (hε : (ε : Λ) < γ) (hδε : δ ≠ ε) (B : Path (β : TypeIndex) γ) (t : Tangle δ)
-    (c : SupportCondition δ) (h : c ∈ reducedSupport α t) :
-    ⟨(B.cons (coe_lt hδ)).comp c.path, c.value⟩ <[α]
-      ⟨(B.cons (coe_lt hε)).cons (bot_lt_coe _),
-        inr (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t).toNearLitter⟩ := by
+theorem lt_of_mem_reducedSupport
+    {β γ δ ε : Λ} [LeLevel β] [LeLevel γ] [LtLevel δ] [LtLevel ε]
+    (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε)
+    (B : Path (β : TypeIndex) γ) (t : Tangle δ)
+    (c : SupportCondition δ) (h : c ∈ reducedSupport t) :
+    (⟨(B.cons hδ).comp c.path, c.value⟩ : SupportCondition β) <
+      ⟨(B.cons hε).cons (bot_lt_coe _), inr (fuzz hδε t).toNearLitter⟩ := by
   obtain ⟨⟨d, hd, hcd⟩, _⟩ := h
-  refine' Relation.TransGen.tail' _ (Constrains.fuzz hδ hε hδε B t d hd)
-  exact reflTransConstrains_comp hcd _
+  exact Relation.TransGen.tail' (le_comp hcd _) (Constrains.fuzz hδ hε hδε B t d hd)
 
-theorem pos_lt_of_mem_reducedSupport {β γ : Iic α} {δ ε : Iio α} (hδ : (δ : Λ) < γ)
-    (hε : (ε : Λ) < γ) (hδε : δ ≠ ε) (B : Path (β : TypeIndex) γ) (t : Tangle δ)
-    (c : SupportCondition δ) (h : c ∈ reducedSupport α t) :
-    pos c.value < pos (fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t) :=
-  transConstrains_subrelation β (transConstrains_of_mem_reducedSupport α hδ hε hδε B t c h)
+theorem pos_lt_of_mem_reducedSupport
+    {β γ δ ε : Λ} [LeLevel β] [LeLevel γ] [LtLevel δ] [LtLevel ε]
+    (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε)
+    (B : Path (β : TypeIndex) γ) (t : Tangle δ)
+    (c : SupportCondition δ) (h : c ∈ reducedSupport t) :
+    pos c.value < pos (fuzz hδε t) :=
+  lt_subrelation (lt_of_mem_reducedSupport hδ hε hδε B t c h)
 
 end ConNF
