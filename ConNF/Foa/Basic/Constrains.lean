@@ -175,6 +175,14 @@ instance : WellFoundedLT (SupportCondition β) where
 instance : WellFoundedRelation (SupportCondition β) :=
   ⟨(· < ·), (constrains_wf β).transGen⟩
 
+theorem SupportCondition.le_iff {c d : SupportCondition β} :
+    c ≤ d ↔ Relation.ReflTransGen (· ≺ ·) c d :=
+  Iff.rfl
+
+theorem SupportCondition.lt_iff {c d : SupportCondition β} :
+    c < d ↔ Relation.TransGen (· ≺ ·) c d :=
+  Iff.rfl
+
 theorem le_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≤ d)
     (B : Path (β : TypeIndex) γ) :
     (⟨B.comp c.path, c.value⟩ : SupportCondition β) ≤ ⟨B.comp d.path, d.value⟩ := by
