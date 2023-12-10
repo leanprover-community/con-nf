@@ -78,7 +78,7 @@ theorem completeSupportConditionMap_injective (hπf : π.Free) :
     rfl
 
 def preimageConstrained (π : StructApprox β) (c : SupportCondition β) : Set (SupportCondition β) :=
-  π.completeSupportConditionMap ⁻¹' {d | d ≺[α] c}
+  π.completeSupportConditionMap ⁻¹' {d | d ≺ c}
 
 theorem preimageConstrained_small (hπf : π.Free) (c : SupportCondition β) :
     Small (preimageConstrained π c) :=
@@ -116,7 +116,7 @@ theorem Relation.reflTransGen_of_eq {α : Type _} {r : α → α → Prop} {x y 
 
 theorem preimageAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (N : NearLitter) (c : SupportCondition β)
-    (hc : ⟨A.comp B, inr (π.completeNearLitterMap (A.comp B) N)⟩ ≺[α] c) (ρ : Allowable γ)
+    (hc : ⟨A.comp B, inr (π.completeNearLitterMap (A.comp B) N)⟩ ≺ c) (ρ : Allowable γ)
     (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
       (Allowable.toStructPerm ρ)) :
@@ -129,7 +129,7 @@ theorem preimageAction_coherent (hπf : π.Free) {γ : Iio α} (A : Path (β : T
 
 theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (β : TypeIndex) γ)
     (B : ExtendedIndex γ) (a : Atom) (c : SupportCondition β)
-    (hc : ⟨A.comp B, inl (π.completeAtomMap (A.comp B) a)⟩ ≺[α] c) (ρ : Allowable γ)
+    (hc : ⟨A.comp B, inl (π.completeAtomMap (A.comp B) a)⟩ ≺ c) (ρ : Allowable γ)
     (h : StructApprox.ExactlyApproximates (β := (γ : Iic α))
       (StructAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
       (Allowable.toStructPerm ρ)) :
@@ -140,9 +140,9 @@ theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Iio α} (A : Path (�
 
 theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex β) (L : Litter)
     (ha : ∀ (B : ExtendedIndex β) (a : Atom),
-      ⟨B, inl a⟩ ≺[α] ⟨A, inr L.toNearLitter⟩ → a ∈ range (π.completeAtomMap B))
+      ⟨B, inl a⟩ ≺ ⟨A, inr L.toNearLitter⟩ → a ∈ range (π.completeAtomMap B))
     (hN : ∀ (B : ExtendedIndex β) (N : NearLitter),
-      ⟨B, inr N⟩ ≺[α] ⟨A, inr L.toNearLitter⟩ → N ∈ range (π.completeNearLitterMap B)) :
+      ⟨B, inr N⟩ ≺ ⟨A, inr L.toNearLitter⟩ → N ∈ range (π.completeNearLitterMap B)) :
     L ∈ range (π.completeLitterMap A) := by
   obtain h | ⟨⟨h⟩⟩ | ⟨⟨h⟩⟩ := flexible_cases' β A L
   · refine' ⟨(NearLitterApprox.flexibleCompletion α (π A) A).symm • L, _⟩

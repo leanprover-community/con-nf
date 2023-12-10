@@ -31,7 +31,7 @@ theorem flexible_cases (A : ExtendedIndex β) (L : Litter) : Inflexible α A L �
 
 theorem not_constrains_flexible {β : Λ} (c : SupportCondition β)
     {A : ExtendedIndex β} {L : Litter} (hL : Flexible α A L) :
-    ¬c ≺[α] ⟨A, inr L.toNearLitter⟩ := by
+    ¬c ≺ ⟨A, inr L.toNearLitter⟩ := by
   rintro (⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hε, A, a⟩)
   · exact hN (NearLitter.IsLitter.mk _)
   · obtain (ha | ha) := ha

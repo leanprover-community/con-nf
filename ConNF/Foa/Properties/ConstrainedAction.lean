@@ -61,15 +61,15 @@ theorem transConstrained_of_reflTransConstrained_of_trans_constrains {c d e f : 
   exact Or.inr (hf.trans_left he)
 
 theorem transConstrained_of_constrains {c d e f : SupportCondition β}
-    (he : e ∈ transConstrained c d) (hf : f ≺[α] e) : f ∈ transConstrained c d :=
+    (he : e ∈ transConstrained c d) (hf : f ≺ e) : f ∈ transConstrained c d :=
   transConstrained_trans he (Relation.ReflTransGen.single hf)
 
 theorem reflTransConstrained_of_constrains {c d e f : SupportCondition β}
-    (he : e ∈ reflTransConstrained c d) (hf : f ≺[α] e) : f ∈ reflTransConstrained c d :=
+    (he : e ∈ reflTransConstrained c d) (hf : f ≺ e) : f ∈ reflTransConstrained c d :=
   reflTransConstrained_trans he (Relation.ReflTransGen.single hf)
 
 theorem transConstrained_of_reflTransConstrained_of_constrains {c d e f : SupportCondition β}
-    (he : e ∈ reflTransConstrained c d) (hf : f ≺[α] e) : f ∈ transConstrained c d :=
+    (he : e ∈ reflTransConstrained c d) (hf : f ≺ e) : f ∈ transConstrained c d :=
   transConstrained_of_reflTransConstrained_of_trans_constrains he (Relation.TransGen.single hf)
 
 theorem fst_transConstrained {c d : SupportCondition β} {A : ExtendedIndex β} {a : Atom}
@@ -254,7 +254,7 @@ theorem ihAction_le_constrainedAction {π : StructApprox β} {s : Set (SupportCo
 
 theorem ihAction_eq_constrainedAction (π : StructApprox β) (c : SupportCondition β) :
     ihAction (π.foaHypothesis : HypAction c) =
-      constrainedAction π {d | d ≺[α] c} (small_constrains c) := by
+      constrainedAction π {d | d ≺ c} (small_constrains c) := by
   funext
   ext
   · funext
@@ -274,7 +274,7 @@ theorem ihAction_eq_constrainedAction (π : StructApprox β) (c : SupportConditi
 
 theorem ihsAction_eq_constrainedAction (π : StructApprox β) (c d : SupportCondition β) :
     ihsAction π c d =
-      constrainedAction π ({e | e ≺[α] c} ∪ {e | e ≺[α] d})
+      constrainedAction π ({e | e ≺ c} ∪ {e | e ≺ d})
         ((small_constrains c).union (small_constrains d)) := by
   funext
   ext
@@ -322,7 +322,7 @@ theorem transGen_constrains_of_mem_designatedSupport {A : ExtendedIndex β} {L :
     {d : SupportCondition h.path.δ}
     (hd₂ : ⟨(C.cons (coe_lt hε)).cons (bot_lt_coe _),
       inr (fuzz (Subtype.coe_injective.ne (Iio.coe_injective.ne hδε)) t).toNearLitter⟩ ≤[α] d)
-    (hd : ⟨(h.path.B.cons (coe_lt h.path.hδ)).comp d.path, d.value⟩ ≺[α] ⟨A, inr L.toNearLitter⟩)
+    (hd : ⟨(h.path.B.cons (coe_lt h.path.hδ)).comp d.path, d.value⟩ ≺ ⟨A, inr L.toNearLitter⟩)
     {B : ExtendedIndex δ} {a : Atom} (hc : ⟨B, inl a⟩ ∈ (designatedSupport t).carrier) :
     ⟨(h.path.B.cons (coe_lt h.path.hδ)).comp ((C.cons (coe_lt hδ)).comp B), inl a⟩ <[α]
       ⟨A, inr L.toNearLitter⟩ := by

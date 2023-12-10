@@ -60,14 +60,14 @@ theorem mem_reduction_of_reduced (S : Set (SupportCondition β)) (c : SupportCon
   ⟨mem_reflTransClosure_of_mem α S c hc₂, hc₁⟩
 
 theorem mem_reduction_of_reduced_constrains (S : Set (SupportCondition β))
-    (c d : SupportCondition β) (hc : Reduced c.value) (hcd : c ≺[α] d) (hd : d ∈ S) :
+    (c d : SupportCondition β) (hc : Reduced c.value) (hcd : c ≺ d) (hd : d ∈ S) :
     c ∈ reduction α S :=
   ⟨⟨d, hd, Relation.ReflTransGen.single hcd⟩, hc⟩
 
 /-- Gadget that helps us prove that the `reflTransClosure` of a small set is small. -/
 def nthClosure (S : Set (SupportCondition β)) : ℕ → Set (SupportCondition β)
   | 0 => S
-  | n + 1 => {c | ∃ d, d ∈ nthClosure S n ∧ c ≺[α] d}
+  | n + 1 => {c | ∃ d, d ∈ nthClosure S n ∧ c ≺ d}
 
 /-- The `nthClosure` of a small set is small. -/
 theorem small_nthReduction {S : Set (SupportCondition β)} {n : ℕ} (h : Small S) :

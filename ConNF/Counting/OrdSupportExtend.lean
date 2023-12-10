@@ -20,7 +20,7 @@ def ConditionRel (c d : SupportCondition β) : Prop :=
   c.value < d.value ∨ (c.value = d.value ∧ WellOrderingRel c.path d.path)
 
 theorem conditionRel_of_constrains :
-    Subrelation ((· ≺[α] ·) : SupportCondition β → _ → Prop) ConditionRel :=
+    Subrelation ((· ≺ ·) : SupportCondition β → _ → Prop) ConditionRel :=
   Or.inl ∘ constrains_subrelation α β
 
 theorem conditionRel_of_transConstrains :
