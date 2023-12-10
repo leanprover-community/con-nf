@@ -9,7 +9,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α} (π : StructApprox β)
+variable [Params.{u}] [BasePositions] [Level] [FoaAssumptions] {β : Λ} (π : StructApprox β)
 
 namespace StructApprox
 

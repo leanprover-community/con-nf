@@ -12,7 +12,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α}
+variable [Params.{u}] [BasePositions] [Level] [FoaAssumptions] {β : Λ} [LeLevel β]
   [FreedomOfActionHypothesis β]
 
 /-!
@@ -64,12 +64,12 @@ theorem completeNearLitterMap_fst_eq' :
   rfl
 
 @[simp]
-theorem foaHypothesis_atomImage {c : SupportCondition β} (h : ⟨A, inl a⟩ <[α] c) :
+theorem foaHypothesis_atomImage {c : SupportCondition β} (h : ⟨A, inl a⟩ < c) :
     (π.foaHypothesis : HypAction c).atomImage A a h = π.completeAtomMap A a :=
   rfl
 
 @[simp]
-theorem foaHypothesis_nearLitterImage {c : SupportCondition β} (h : ⟨A, inr N⟩ <[α] c) :
+theorem foaHypothesis_nearLitterImage {c : SupportCondition β} (h : ⟨A, inr N⟩ < c) :
     (π.foaHypothesis : HypAction c).nearLitterImage A N h = π.completeNearLitterMap A N :=
   rfl
 
@@ -94,7 +94,7 @@ def nearLitterHypothesis_eq (A : ExtendedIndex β) (N : NearLitter) :
 theorem completeLitterMap_eq_of_inflexibleCoe {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleCoe A L) (h₁ h₂) :
     π.completeLitterMap A L =
-      fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.path.hδε)
+      fuzz h.path.hδε
         ((ihAction (π.foaHypothesis : HypAction ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable
             h.path h₁ h₂ •
           h.t) := by
@@ -104,7 +104,7 @@ theorem completeLitterMap_eq_of_inflexible_coe' {A : ExtendedIndex β} {L : Litt
     (h : InflexibleCoe A L) :
     π.completeLitterMap A L =
       if h' : _ ∧ _ then
-        fuzz (WithBot.coe_ne_coe.mpr <| coe_ne' h.path.hδε)
+        fuzz h.path.hδε
           ((ihAction (π.foaHypothesis : HypAction ⟨A, inr L.toNearLitter⟩)).hypothesisedAllowable
               h.path h'.1 h'.2 •
             h.t)
@@ -120,8 +120,8 @@ theorem completeLitterMap_eq_of_inflexibleBot {A : ExtendedIndex β} {L : Litter
   rw [completeLitterMap_eq, litterCompletion_of_inflexibleBot] <;> rfl
 
 /-- A basic definition unfold. -/
-theorem completeLitterMap_eq_of_flexible {A : ExtendedIndex β} {L : Litter} (h : Flexible α A L) :
-    π.completeLitterMap A L = NearLitterApprox.flexibleCompletion α (π A) A • L := by
+theorem completeLitterMap_eq_of_flexible {A : ExtendedIndex β} {L : Litter} (h : Flexible A L) :
+    π.completeLitterMap A L = NearLitterApprox.flexibleCompletion (π A) A • L := by
   rw [completeLitterMap_eq, litterCompletion_of_flexible _ _ _ _ h]
 
 theorem toStructPerm_bot :

@@ -8,7 +8,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α]
+variable [Params.{u}] [BasePositions] [Level] [FoaAssumptions]
 
 /-!
 # Induction on support conditions
@@ -16,16 +16,13 @@ variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α]
 
 /-- The inductive hypothesis used to construct the induced action of an approximation in the
 freedom of action theorem. -/
-structure HypAction {β : Iic α} (c : SupportCondition β) where
-  atomImage : ∀ A a, ⟨A, inl a⟩ <[α] c → Atom
-  nearLitterImage : ∀ A N, ⟨A, inr N⟩ <[α] c → NearLitter
+structure HypAction {β : Λ} (c : SupportCondition β) where
+  atomImage : ∀ A a, ⟨A, inl a⟩ < c → Atom
+  nearLitterImage : ∀ A N, ⟨A, inr N⟩ < c → NearLitter
 
 namespace HypAction
 
-variable {β : Iic α}
-
-instance : WellFoundedRelation (SupportCondition β) :=
-  ⟨_, WellFounded.transGen <| constrains_wf α β⟩
+variable {β : Λ}
 
 mutual
   /-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.

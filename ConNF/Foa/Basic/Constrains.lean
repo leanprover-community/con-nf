@@ -172,6 +172,9 @@ theorem lt_subrelation : Subrelation
 instance : WellFoundedLT (SupportCondition β) where
   wf := (constrains_wf β).transGen
 
+instance : WellFoundedRelation (SupportCondition β) :=
+  ⟨(· < ·), (constrains_wf β).transGen⟩
+
 theorem le_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≤ d)
     (B : Path (β : TypeIndex) γ) :
     (⟨B.comp c.path, c.value⟩ : SupportCondition β) ≤ ⟨B.comp d.path, d.value⟩ := by
