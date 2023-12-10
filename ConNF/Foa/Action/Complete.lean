@@ -12,8 +12,8 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] (φ : NearLitterAction)
-  {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α} {A : ExtendedIndex β}
+variable [Params.{u}] (φ : NearLitterAction) [BasePositions] [Level]
+  [FoaAssumptions] {β : Λ} {A : ExtendedIndex β}
 
 namespace NearLitterAction
 

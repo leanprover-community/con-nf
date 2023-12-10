@@ -29,7 +29,7 @@ def ExactlyApproximates {β : TypeIndex} (π₀ : StructApprox β) (π : StructP
 
 variable [BasePositions] [Level] [FoaAssumptions]
 
-def Free {β : Iic α} (π₀ : StructApprox β) : Prop :=
+def Free {β : Λ} (π₀ : StructApprox β) : Prop :=
   ∀ A, (π₀ A).Free A
 
 theorem Approximates.comp {β γ : TypeIndex} {π₀ : StructApprox β} {π : StructPerm β}

@@ -246,54 +246,54 @@ theorem roughLitterMapOrElse_injOn (hφ : φ.Lawful) :
   rw [φ.roughLitterMapOrElse_of_dom hL₁, φ.roughLitterMapOrElse_of_dom hL₂] at h
   exact hφ.litterMap_injective hL₁ hL₂ (NearLitter.inter_nonempty_of_fst_eq_fst h)
 
-variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α} {A : ExtendedIndex β}
+variable [BasePositions] [Level] [FoaAssumptions] {β : Λ} {A : ExtendedIndex β}
 
-theorem mk_not_bannedLitter_and_flexible : #{L | ¬φ.BannedLitter L ∧ Flexible α A L} = #μ := by
+theorem mk_not_bannedLitter_and_flexible : #{L | ¬φ.BannedLitter L ∧ Flexible A L} = #μ := by
   refine' le_antisymm ((mk_subtype_le _).trans mk_litter.le) _
   by_contra h
   rw [not_le] at h
-  have h₁ := Cardinal.le_mk_diff_add_mk {L | Flexible α A L} {L | φ.BannedLitter L}
+  have h₁ := Cardinal.le_mk_diff_add_mk {L | Flexible A L} {L | φ.BannedLitter L}
   rw [mk_flexible, diff_eq, inter_comm] at h₁
   have h₂ :=
     add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le h (lt_trans φ.bannedLitter_small κ_lt_μ)
   exact h₁.not_lt h₂
 
 theorem mk_dom_inter_flexible_symmDiff_le :
-    #((φ.litterMap.Dom ∩ {L | Flexible α A L}) ∆
-        (φ.roughLitterMapOrElse '' (φ.litterMap.Dom ∩ {L | Flexible α A L})) : Set Litter) ≤
-      #{L : Litter | ¬φ.BannedLitter L ∧ Flexible α A L} := by
+    #((φ.litterMap.Dom ∩ {L | Flexible A L}) ∆
+        (φ.roughLitterMapOrElse '' (φ.litterMap.Dom ∩ {L | Flexible A L})) : Set Litter) ≤
+      #{L : Litter | ¬φ.BannedLitter L ∧ Flexible A L} := by
   rw [mk_not_bannedLitter_and_flexible]
   refine' le_trans (le_of_lt _) κ_le_μ
   exact Small.symmDiff (Small.mono (inter_subset_left _ _) φ.litterMap_dom_small)
     (Small.mono (inter_subset_left _ _) φ.litterMap_dom_small).image
 
 theorem aleph0_le_not_bannedLitter_and_flexible :
-    ℵ₀ ≤ #{L | ¬φ.BannedLitter L ∧ Flexible α A L} := by
+    ℵ₀ ≤ #{L | ¬φ.BannedLitter L ∧ Flexible A L} := by
   rw [mk_not_bannedLitter_and_flexible]
   exact μ_isStrongLimit.isLimit.aleph0_le
 
 theorem disjoint_dom_inter_flexible_not_bannedLitter :
     Disjoint
-      (φ.litterMap.Dom ∩ {L | Flexible α A L} ∪
-        φ.roughLitterMapOrElse '' (φ.litterMap.Dom ∩ {L | Flexible α A L}))
-      {L : Litter | ¬φ.BannedLitter L ∧ Flexible α A L} := by
+      (φ.litterMap.Dom ∩ {L | Flexible A L} ∪
+        φ.roughLitterMapOrElse '' (φ.litterMap.Dom ∩ {L | Flexible A L}))
+      {L : Litter | ¬φ.BannedLitter L ∧ Flexible A L} := by
   refine' disjoint_of_subset _ (inter_subset_left _ _) φ.disjoint_dom_not_bannedLitter
   rintro a (ha | ⟨b, hb, rfl⟩)
   exact Or.inl ha.1
   exact Or.inr ⟨b, hb.1, rfl⟩
 
 theorem roughLitterMapOrElse_injOn_dom_inter_flexible (hφ : φ.Lawful) :
-    InjOn φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible α A L}) :=
+    InjOn φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible A L}) :=
   (φ.roughLitterMapOrElse_injOn hφ).mono (inter_subset_left _ _)
 
 noncomputable def flexibleLitterLocalPerm (hφ : φ.Lawful) (A : ExtendedIndex β) : LocalPerm Litter :=
-  LocalPerm.complete φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible α A L})
-    {L | ¬φ.BannedLitter L ∧ Flexible α A L} φ.mk_dom_inter_flexible_symmDiff_le
+  LocalPerm.complete φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible A L})
+    {L | ¬φ.BannedLitter L ∧ Flexible A L} φ.mk_dom_inter_flexible_symmDiff_le
     φ.aleph0_le_not_bannedLitter_and_flexible φ.disjoint_dom_inter_flexible_not_bannedLitter
     (φ.roughLitterMapOrElse_injOn_dom_inter_flexible hφ)
 
 theorem flexibleLitterLocalPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
-    (hL₁ : L ∈ φ.litterMap.Dom) (hL₂ : Flexible α A L) :
+    (hL₁ : L ∈ φ.litterMap.Dom) (hL₂ : Flexible A L) :
     φ.flexibleLitterLocalPerm hφ A L = φ.roughLitterMapOrElse L :=
   LocalPerm.complete_apply_eq _ _ _ ⟨hL₁, hL₂⟩
 
