@@ -10,7 +10,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α}
+variable [Params.{u}] [BasePositions] [Level] [FoaAssumptions] {β : Λ} [LeLevel β]
   [FreedomOfActionHypothesis β] {π : StructApprox β}
 
 noncomputable def completeAtomPerm (hπf : π.Free) (A : ExtendedIndex β) : Perm Atom :=
@@ -56,7 +56,7 @@ theorem completeNearLitterPerm_smul_nearLitter (hπf : π.Free) (A : ExtendedInd
   rw [completeNearLitterMap_coe hπf, NearLitterPerm.smul_nearLitter_coe]
   rfl
 
-def AllowableBelow (hπf : π.Free) (γ : IicBot α) (A : Path (β : TypeIndex) γ) : Prop :=
+def AllowableBelow (hπf : π.Free) (γ : TypeIndex) [LeLevel γ] (A : Path (β : TypeIndex) γ) : Prop :=
   ∃ ρ : Allowable γ,
     ∀ B : ExtendedIndex γ,
       Tree.ofBot (Tree.comp B (Allowable.toStructPerm ρ)) =
@@ -95,40 +95,31 @@ theorem exists_nil_cons_of_path' {β γ : TypeIndex} (A : Path (β : TypeIndex) 
   · obtain ⟨ε, hε, B, rfl⟩ := ih A n.succ_ne_zero hn
     exact ⟨ε, hε, B.cons hδ, rfl⟩
 
-theorem exists_nil_cons_of_path {β : Iic α} (A : ExtendedIndex β) :
-    ∃ γ : IioBot α,
+theorem exists_nil_cons_of_path {β : Λ} [LeLevel β] (A : ExtendedIndex β) :
+    ∃ γ : TypeIndex, ∃ _ : LtLevel γ,
       ∃ h : (γ : TypeIndex) < β,
         ∃ B : ExtendedIndex γ, A = ((Path.nil : Path (β : TypeIndex) β).cons h).comp B := by
   have := exists_nil_cons_of_path' A ?_
   obtain ⟨γ, h, B, rfl⟩ := this
-  · refine' ⟨⟨γ, _⟩, h, B, rfl⟩
-    exact lt_of_lt_of_le h (coe_le_coe.mpr β.prop)
+  · refine' ⟨γ, _, h, B, rfl⟩
+    exact ⟨lt_of_lt_of_le h LeLevel.elim⟩
   · intro h
     cases Path.eq_of_length_zero A h
 
-theorem iioBot_cases (δ : IioBot α) : δ = ⊥ ∨ ∃ ε : Iio α, δ = ε := by
-  obtain ⟨_ | δ, hδ⟩ := δ
-  · exact Or.inl rfl
-  · exact Or.inr ⟨⟨δ, coe_lt_coe.mp hδ⟩, rfl⟩
-
 theorem ConNF.StructApprox.extracted_1'
-  (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
-  (ρs : (δ : IioBot α) → (δ : TypeIndex) < γ → Allowable δ)
-  (hρ : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ) (B : ExtendedIndex δ),
+  (hπf : π.Free) (γ : Λ) [LeLevel γ] (A : Path (β : TypeIndex) γ)
+  (ρs : (δ : TypeIndex) → [LtLevel δ] → δ < γ → Allowable δ)
+  (hρ : ∀ (δ : TypeIndex) [LtLevel δ] (h : δ < γ) (B : ExtendedIndex δ),
     Tree.ofBot (Tree.comp B (Allowable.toStructPerm (ρs δ h))) =
       completeNearLitterPerm hπf ((A.cons h).comp B))
-  (ε : Iio α) (hε : (ε : TypeIndex) < γ) (a : Atom) :
-  Allowable.toStructPerm (ρs ε hε) (Hom.toPath (bot_lt_coe _)) •
-    fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) a =
-  fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe)
-    (NearLitterPerm.ofBot (ρs ⊥ (bot_lt_coe _)) • a) := by
+  (ε : Λ) [LtLevel ε] (hε : (ε : TypeIndex) < γ) (a : Atom) :
+  Allowable.toStructPerm (ρs ε hε) (Hom.toPath (bot_lt_coe _)) • fuzz (bot_ne_coe (a := ε)) a =
+    fuzz (bot_ne_coe (a := ε)) (NearLitterPerm.ofBot (ρs ⊥ (bot_lt_coe _)) • a) := by
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
-  simp only [Path.comp_cons, Path.comp_nil, Tree.comp_bot, Tree.ofBot_toBot,
-    Hom.toPath] at this
+  simp only [Path.comp_cons, Path.comp_nil, Tree.comp_bot, Tree.ofBot_toBot, Hom.toPath] at this
   erw [this]
   rw [completeNearLitterPerm_smul_litter]
-  refine' (completeLitterMap_eq_of_inflexibleBot
-    ⟨⟨γ, ε, coe_lt_coe.mp hε, A, rfl⟩, a, rfl⟩).trans _
+  refine' (completeLitterMap_eq_of_inflexibleBot ⟨⟨γ, ε, hε, A, rfl⟩, a, rfl⟩).trans _
   refine' congr_arg _ _
   specialize hρ ⊥ (bot_lt_coe _) Path.nil
   rw [Path.comp_nil, Tree.comp_nil
@@ -137,80 +128,69 @@ theorem ConNF.StructApprox.extracted_1'
   rfl
 
 theorem ConNF.StructApprox.extracted_2'
-  (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
-  (ρs : (δ : IioBot α) → (δ : TypeIndex) < γ → Allowable δ)
-  (hρ : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ) (B : ExtendedIndex δ),
+  (hπf : π.Free) (γ : Λ) [LeLevel γ] (A : Path (β : TypeIndex) γ)
+  (ρs : (δ : TypeIndex) → [LtLevel δ] → δ < γ → Allowable δ)
+  (hρ : ∀ (δ : TypeIndex) [LtLevel δ] (h : δ < γ) (B : ExtendedIndex δ),
     Tree.ofBot (Tree.comp B (Allowable.toStructPerm (ρs δ h))) =
       completeNearLitterPerm hπf ((A.cons h).comp B))
-  (δ : Iio α) (ε : Iio α) (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ)
-  (hδε : δ ≠ ε) (t : Tangle ↑δ) :
+  (δ : Λ) [LtLevel δ] (ε : Λ) [LtLevel ε] (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ)
+  (hδε : (δ : TypeIndex) ≠ ε) (t : Tangle δ) :
   Allowable.toStructPerm (ρs ε hε) (Hom.toPath (bot_lt_coe _)) •
-    fuzz (coe_ne_coe.mpr <| coe_ne' hδε) t =
-  fuzz (coe_ne_coe.mpr <| coe_ne' hδε) (ρs δ hδ • t) := by
+    fuzz hδε t =
+  fuzz hδε (ρs δ hδ • t) := by
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
   simp only [Tree.comp_bot, Tree.ofBot_toBot, Path.comp_cons,
     Path.comp_nil] at this
   erw [this]
   rw [completeNearLitterPerm_smul_litter]
   refine' (completeLitterMap_eq_of_inflexibleCoe
-    ⟨⟨γ, δ, ε, coe_lt_coe.mp hδ, coe_lt_coe.mp hε, _, A, rfl⟩, t, rfl⟩
+    ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, rfl⟩
     ((ihAction_lawful hπf _).comp _) (ihAction_comp_mapFlexible hπf _ _)).trans _
-  · rintro rfl
-    cases hδε rfl
   refine' congr_arg _ _
-  simp only
+  dsimp only
   refine supports (t := t) ?_ ?_
   · intros B a ha
     have := ihAction_coherent_atom (π := π) (A.cons _) B a
-      ⟨_, inr (fuzz (show (δ : TypeIndex) ≠ ε from ?_) t).toNearLitter⟩
-      (Relation.TransGen.single <| Constrains.fuzz ?_ ?_ ?_ _ t _ ha)
+      ⟨_, inr (fuzz hδε t).toNearLitter⟩
+      (Relation.TransGen.single <| Constrains.fuzz hδ hε hδε _ t _ ha)
       ((ihAction_lawful hπf _).comp _) ?_ ?_
-    exact this.symm.trans (congr_arg (fun π => π • a) (hρ δ hδ B)).symm
-    · intro h
-      simp only [coe_inj, Subtype.coe_inj] at h
-      cases hδε h
-    · exact coe_lt_coe.mp hδ
-    · exact coe_lt_coe.mp hε
-    · rintro rfl
-      cases hδε rfl
+    · exact this.symm.trans (congr_arg (fun π => π • a) (hρ δ hδ B)).symm
     · exact (ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
         ⟨γ, δ, ε, _, _, _, _, rfl⟩ _ _
   · intros B N hN
     have := ihAction_coherent hπf (A.cons _) B N
-      ⟨_, inr (fuzz (show (δ : TypeIndex) ≠ ε from ?_) t).toNearLitter⟩
-      (Relation.TransGen.single <| Constrains.fuzz ?_ ?_ ?_ _ t _ hN)
+      ⟨_, inr (fuzz hδε t).toNearLitter⟩
+      (Relation.TransGen.single <| Constrains.fuzz hδ hε hδε _ t _ hN)
       ((ihAction_lawful hπf _).comp _) ?_ ?_
     rw [← completeNearLitterPerm_smul_nearLitter hπf] at this
-    exact this.symm.trans (congr_arg (fun π => π • N) (hρ δ hδ B)).symm
-    · exact coe_lt_coe.mp hδ
-    · intro h
-      simp only [coe_inj, Subtype.coe_inj] at h
-      cases hδε h
-    · exact coe_lt_coe.mp hε
-    · rintro rfl
-      cases hδε rfl
+    · exact this.symm.trans (congr_arg (fun π => π • N) (hρ δ hδ B)).symm
     · exact (ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
         ⟨γ, δ, ε, _, _, _, _, rfl⟩ _ _
 
-theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ)
-    (h : ∀ (δ : IioBot α) (h : (δ : TypeIndex) < γ), AllowableBelow hπf δ (A.cons h)) :
+theorem allowableBelow_extends (hπf : π.Free) (γ : Λ) [LeLevel γ] (A : Path (β : TypeIndex) γ)
+    (h : ∀ (δ : TypeIndex) [LtLevel δ] (h : δ < γ), AllowableBelow hπf δ (A.cons h)) :
     AllowableBelow hπf γ A := by
   choose ρs hρ using h
   refine' ⟨allowableOfSmulFuzz γ ρs _, _⟩
-  · intro δ ε hδ hε hδε t
-    obtain rfl | ⟨δ, rfl⟩ := iioBot_cases δ
-    · simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
-      refine Eq.trans ?_ (ConNF.StructApprox.extracted_1' hπf γ A ρs hρ ε hε t)
-      exact congr_arg₂ _ (Allowable.comp_bot _ _) rfl
-    · simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
-      refine Eq.trans ?_ (ConNF.StructApprox.extracted_2' hπf γ A ρs hρ δ ε hδ hε ?_ t)
-      · exact congr_arg₂ _ (Allowable.comp_bot _ _) rfl
-      · rintro rfl
-        exact hδε rfl
+  · intro δ i ε _ hδ hε hδε t
+    revert i
+    induction δ using recBotCoe with
+    | bot =>
+        intro i t
+        simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
+        refine Eq.trans ?_ (ConNF.StructApprox.extracted_1' hπf γ A ρs hρ ε hε t)
+        simp only [Allowable.toStructPerm_comp, Tree.comp_bot, Tree.toBot_smul]
+        rfl
+    | coe δ =>
+        intro i t
+        simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
+        refine Eq.trans ?_ (ConNF.StructApprox.extracted_2' hπf γ A ρs hρ δ ε hδ hε hδε t)
+        simp only [Allowable.toStructPerm_comp, Tree.comp_bot, Tree.toBot_smul]
+        rfl
   · intro B
-    obtain ⟨δ, hδ, B, rfl⟩ := exists_nil_cons_of_path B
+    obtain ⟨δ, _, hδ, B, rfl⟩ := exists_nil_cons_of_path B
     specialize hρ δ hδ B
-    rw [← Tree.comp_comp]
+    simp only [Tree.comp_bot, Tree.ofBot_toBot] at hρ ⊢
     have := allowableOfSmulFuzz_comp_eq (ρs := ρs) (h := ?_) δ hδ
     apply_fun Allowable.toStructPerm at this
     rw [← allowableCons_eq] at this
@@ -218,20 +198,18 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Iic α) (A : Path (β : Ty
     rw [← Path.comp_assoc, Path.comp_cons, Path.comp_nil]
     exact hρ
 
-theorem allowableBelow_all (hπf : π.Free) (γ : Iic α) (A : Path (β : TypeIndex) γ) :
+theorem allowableBelow_all (hπf : π.Free) (γ : Λ) [i : LeLevel γ] (A : Path (β : TypeIndex) γ) :
     AllowableBelow hπf γ A := by
-  obtain ⟨γ, hγ⟩ := γ
-  revert hγ
-  refine' WellFounded.induction
-    (C := fun γ => ∀ (hγ : γ ∈ Iic α) (A : Path (β : TypeIndex) γ),
-      AllowableBelow hπf ⟨γ, coe_le_coe.mpr hγ⟩ A) Λwo.wf γ _
-  clear γ
-  intro γ ih hγ A
-  refine' allowableBelow_extends hπf ⟨γ, hγ⟩ A _
+  revert i
+  have := WellFounded.induction
+    (C := fun γ => ∀ (A : Path (β : TypeIndex) γ) (i : LeLevel γ), AllowableBelow hπf γ A) Λwo.wf γ
+  refine this ?_ _
+  intro γ ih A hγ
+  refine' allowableBelow_extends hπf γ A _
   intro δ hδ
-  obtain rfl | ⟨δ, rfl⟩ := iioBot_cases δ
-  · exact allowableBelow_bot hπf _
-  · exact ih δ (coe_lt_coe.mp hδ) (le_of_lt (Iio.lt δ)) _
+  induction δ using recBotCoe generalizing hδ with
+  | bot => intro; exact allowableBelow_bot hπf _
+  | coe δ => intro h; exact ih δ (coe_lt_coe.mp h) _ _
 
 noncomputable def completeAllowable (hπf : π.Free) : Allowable β :=
   (allowableBelow_all hπf β Path.nil).choose
@@ -281,7 +259,7 @@ theorem completeAllowable_exactlyApproximates (hπf : π.Free) :
   · intro L hL
     rw [completeAllowable_comp, completeNearLitterPerm_smul_litter,
       completeLitterMap_eq_of_flexible (hπf A L hL),
-      NearLitterApprox.flexibleCompletion_smul_of_mem_domain _ _ A L hL]
+      NearLitterApprox.flexibleCompletion_smul_of_mem_domain _ A L hL]
     rfl
   · intro a ha
     rw [completeAllowable_comp] at ha
@@ -290,19 +268,19 @@ theorem completeAllowable_exactlyApproximates (hπf : π.Free) :
 def foa_extends : FoaIh β := fun _ hπf =>
   ⟨completeAllowable hπf, completeAllowable_exactlyApproximates hπf⟩
 
-theorem freedom_of_action (β : Iic α) (π₀ : StructApprox β) (h : π₀.Free) :
+theorem freedom_of_action (β : Λ) [i : LeLevel β] (π₀ : StructApprox β) (h : π₀.Free) :
     ∃ π : Allowable β, π₀.ExactlyApproximates (Allowable.toStructPerm π) := by
-  obtain ⟨β, hβ⟩ := β
-  revert hβ
-  refine' WellFounded.induction
-    (C := fun β => ∀ (hβ : β ∈ Iic α) (π₀ : StructApprox (⟨β, hβ⟩ : Iic α)),
-      Free π₀ → ∃ π : @Allowable _ (⟨β, hβ⟩ : Iic α) FoaData.tangleData,
-        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ FoaData.tangleData π)) Λwo.wf β _
-  intro β ih hβ π₀ h
-  have : FreedomOfActionHypothesis ⟨β, hβ⟩
+  revert i
+  have := WellFounded.induction
+    (C := fun β => ∀ (i : LeLevel β) (π₀ : StructApprox β),
+      Free π₀ → ∃ π : Allowable β,
+        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ FoaData.tangleData π)) Λwo.wf β
+  refine fun i => this ?_ i π₀ h
+  intro β ih _ π₀ h
+  have : FreedomOfActionHypothesis β
   · constructor
     intro γ hγ
-    exact ih γ hγ γ.prop
+    exact ih γ hγ inferInstance
   exact foa_extends π₀ h
 
 end StructApprox

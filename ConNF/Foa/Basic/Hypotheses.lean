@@ -114,7 +114,7 @@ class FoaAssumptions extends FoaData where
   /-- The allowable permutation we construct in `allowableOfSmulFuzz` has the correct one-step
   derivatives. -/
   allowableOfSmulFuzz_comp_eq {β : Λ} [LeLevel β] {ρs} {h}
-    {γ : TypeIndex} [LtLevel γ] {hγ : γ < β} :
+    (γ : TypeIndex) [LtLevel γ] (hγ : γ < β) :
     allowableCons hγ (allowableOfSmulFuzz β ρs h) = ρs γ hγ
 
 export FoaAssumptions (allowableCons allowableCons_eq designatedSupport_smul

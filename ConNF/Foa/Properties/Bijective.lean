@@ -11,7 +11,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α}
+variable [Params.{u}] [BasePositions] [Level] [FoaAssumptions] {β : Λ} [LeLevel β]
   [FreedomOfActionHypothesis β] {π : StructApprox β}
 
 theorem completeAtomMap_bijective (hπf : π.Free) (A : ExtendedIndex β) :
