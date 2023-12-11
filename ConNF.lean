@@ -4,4 +4,3 @@ import ConNF.Structural
 import ConNF.Fuzz
 import ConNF.NewTangle
 import ConNF.Foa
-import ConNF.Counting
