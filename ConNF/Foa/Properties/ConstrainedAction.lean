@@ -318,7 +318,7 @@ theorem ihAction_le {π : StructApprox β} {c d : SupportCondition β} (h : c �
     exact Relation.TransGen.trans_left ha h
 
 theorem transGen_constrains_of_mem_designatedSupport {A : ExtendedIndex β} {L : Litter}
-    {h : InflexibleCoe A L} {γ δ ε : Iio α} [LeLevel γ] [LtLevel δ] [LtLevel ε]
+    {h : InflexibleCoe A L} {γ δ ε : Λ} [LeLevel γ] [LtLevel δ] [LtLevel ε]
     {hδ : (δ : TypeIndex) < γ} {hε : (ε : TypeIndex) < γ}
     (hδε : (δ : TypeIndex) ≠ ε) {C : Path (h.path.δ : TypeIndex) γ} {t : Tangle δ}
     {d : SupportCondition h.path.δ}

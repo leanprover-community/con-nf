@@ -116,14 +116,14 @@ theorem rc_free (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible
     exact h₂ B L' hL'.1 hL'.2
   · exact (LocalPerm.sandboxSubset_subset _ _ hL').2
 
-theorem rc_comp_atomPerm {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
+theorem rc_comp_atomPerm {γ : Λ} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) :
     (rc (φ.comp A) (hφ.comp A) B).atomPerm =
     (φ.rc hφ (A.comp B)).atomPerm := by
   unfold rc refine complete NearLitterAction.refine NearLitterAction.complete
   simp_rw [Tree.comp_apply]
 
-theorem rc_comp_smul_atom {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
+theorem rc_comp_smul_atom {γ : Λ} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) (a : Atom) :
     rc (φ.comp A) (hφ.comp A) B • a = φ.rc hφ (A.comp B) • a := by
   change NearLitterApprox.atomPerm _ _ = NearLitterApprox.atomPerm _ _

@@ -67,7 +67,7 @@ theorem smul_nearLitter_eq_of_precise {hφ : φ.Lawful} (hφp : φ.Precise) {π 
 
 end Precise
 
-variable [BasePositions] [Level] [FoaAssumptions] {β : Iio α}
+variable [BasePositions] [Level] [FoaAssumptions] {β : Λ}
 
 instance {β : TypeIndex} : PartialOrder (StructAction β)
     where
