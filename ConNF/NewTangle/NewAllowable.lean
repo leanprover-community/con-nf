@@ -1,4 +1,5 @@
 import Mathlib.GroupTheory.GroupAction.Sigma
+import ConNF.Mathlib.Group
 import ConNF.NewTangle.CodeEquiv
 
 /-!
@@ -22,7 +23,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] (α : Λ) [TangleDataIio α] (β : IioBot α) (γ : Iio α)
+variable [Params.{u}] [Level] [TangleDataLt] (β : TypeIndex) [LtLevel β] (γ : Λ) [LtLevel γ]
 
 open Code
 
@@ -31,22 +32,21 @@ open Code
 derivative `α ⟶ β` to a given semi-allowable permutation yields the `β`-allowable permutation
 stored inside it. -/
 def SemiallowablePerm : Type u :=
-  ∀ β : IioBot α, Allowable β
+  ∀ β : TypeIndex, [LtLevel β] → Allowable β
 
-noncomputable instance : Group (SemiallowablePerm α) := Pi.group
+noncomputable instance : Group SemiallowablePerm := Pi.group
 
 namespace SemiallowablePerm
 
-variable {α}
-variable (ρ : SemiallowablePerm α) (c : Code α)
+variable (ρ : SemiallowablePerm) (c : Code)
 
 @[simp]
 theorem one_apply :
-    (1 : SemiallowablePerm α) β = 1 :=
+    (1 : SemiallowablePerm) β = 1 :=
   rfl
 
 @[simp]
-theorem mul_apply (ρ ρ' : SemiallowablePerm α) :
+theorem mul_apply (ρ ρ' : SemiallowablePerm) :
     (ρ * ρ') β = ρ β * ρ' β :=
   rfl
 
@@ -117,11 +117,14 @@ theorem ExtendedIndex.pathTop_pathTail {α : Λ} (A : ExtendedIndex α) :
 
 end PathTop
 
+instance (A : ExtendedIndex α) : LtLevel (pathTop A) where
+  elim := pathTop_hom A A.length_ne_zero
+
 /-- Convert a semi-allowable permutation to a structural permutation.
 To work out the `A`-derivative, we extract the first morphism in the path `A` and use it to
 determine which of the `β`-allowable permutations in `ρ` we will use. -/
-noncomputable def toStructPerm' (ρ : SemiallowablePerm α) : StructPerm α :=
-  fun A => Allowable.toStructPerm (ρ ⟨pathTop A, pathTop_hom A A.length_ne_zero⟩) (pathTail A)
+noncomputable def toStructPerm' (ρ : SemiallowablePerm) : StructPerm α :=
+  fun A => Allowable.toStructPerm (ρ (pathTop A)) (pathTail A)
 
 theorem toStructPerm'_one : (toStructPerm' 1 : StructPerm α) = 1 := by
   funext A
@@ -129,7 +132,7 @@ theorem toStructPerm'_one : (toStructPerm' 1 : StructPerm α) = 1 := by
   rfl
 
 /-- Convert a semi-allowable permutation to a structural permutation. -/
-noncomputable def toStructPerm : SemiallowablePerm α →* StructPerm α
+noncomputable def toStructPerm : SemiallowablePerm →* StructPerm α
     where
   toFun := toStructPerm'
   map_one' := by
@@ -142,8 +145,8 @@ noncomputable def toStructPerm : SemiallowablePerm α →* StructPerm α
     rw [toStructPerm', mul_apply, map_mul]
     rfl
 
-theorem coe_apply_bot (ρ : SemiallowablePerm α) :
-    (ρ : SemiallowablePerm α) ⊥ =
+theorem coe_apply_bot (ρ : SemiallowablePerm) :
+    (ρ : SemiallowablePerm) ⊥ =
       SemiallowablePerm.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _)) := by
   rfl
 
@@ -151,11 +154,11 @@ section
 
 variable {X : Type _} [MulAction (StructPerm α) X]
 
-noncomputable instance : MulAction (SemiallowablePerm α) X :=
+noncomputable instance : MulAction (SemiallowablePerm) X :=
   MulAction.compHom _ toStructPerm
 
 @[simp]
-theorem toStructPerm_smul (ρ : SemiallowablePerm α) (x : X) :
+theorem toStructPerm_smul (ρ : SemiallowablePerm) (x : X) :
     ρ • x = SemiallowablePerm.toStructPerm ρ • x :=
   rfl
 
@@ -163,145 +166,143 @@ end
 
 /-- In the same way that structural permutations act on support conditions, semiallowable
 permutations act on codes. -/
-instance : MulAction (SemiallowablePerm α) (Code α)
+instance : MulAction SemiallowablePerm Code
     where
-  smul ρ c := ⟨c.1, ρ c.1 • c.2⟩
-  one_smul _ := Sigma.ext rfl (heq_of_eq (one_smul _ _))
-  mul_smul _ _ _ := Sigma.ext rfl (heq_of_eq (mul_smul _ _ _))
+  smul ρ c := ⟨c.β, ρ c.β • c.members⟩
+  one_smul _ := Code.ext _ _ rfl (heq_of_eq (one_smul _ _))
+  mul_smul _ _ _ := Code.ext _ _ rfl (heq_of_eq (mul_smul _ _ _))
 
 @[simp]
-theorem fst_smul : (ρ • c).1 = c.1 :=
+theorem β_smul : (ρ • c).β = c.β :=
   rfl
 
 @[simp]
-theorem snd_smul : (ρ • c).2 = ρ c.1 • c.2 :=
+theorem members_smul : (ρ • c).members = ρ c.1 • c.members :=
   rfl
 
 @[simp]
-theorem smul_mk (f : SemiallowablePerm α) (γ s) : f • (mk γ s : Code α) = mk γ (f γ • s) :=
+theorem smul_mk (f : SemiallowablePerm) (γ : TypeIndex) [LtLevel γ] (s : Set (Tangle γ)) :
+    f • (mk γ s : Code) = mk γ (f γ • s) :=
   rfl
 
-instance : SMul (SemiallowablePerm α) (NonemptyCode α) :=
-  ⟨fun ρ c => ⟨ρ • (c : Code α), c.2.image _⟩⟩
+instance : SMul SemiallowablePerm NonemptyCode :=
+  ⟨fun ρ c => ⟨ρ • (c : Code), c.2.image _⟩⟩
 
 @[simp, norm_cast]
-theorem coe_smul (c : NonemptyCode α) : (↑(ρ • c) : Code α) = ρ • (c : Code α) :=
+theorem coe_smul (c : NonemptyCode) : (↑(ρ • c) : Code) = ρ • (c : Code) :=
   rfl
 
-instance : MulAction (SemiallowablePerm α) (NonemptyCode α) :=
+instance : MulAction SemiallowablePerm NonemptyCode :=
   Subtype.coe_injective.mulAction _ coe_smul
 
 end SemiallowablePerm
 
-variable [BasePositions] [PositionedTanglesIio α] [TypedObjectsIio α] [TangleData α]
+variable [BasePositions] [PositionedTanglesLt] [TypedObjectsLt] [TangleData α]
 
 /-- We say that a semiallowable permutation is allowable if its one-step derivatives commute with
 the `fuzz` maps. -/
-def SemiallowablePerm.IsAllowable (ρ : SemiallowablePerm α) : Prop :=
-  ∀ ⦃β : IioBot α⦄ ⦃γ : Iio α⦄ (hβγ : β ≠ γ) (t : Tangle β),
-  Allowable.toStructPerm (ρ γ) (Quiver.Hom.toPath <| bot_lt_coe _) •
-    fuzz (coe_ne hβγ) t =
-  fuzz (coe_ne hβγ) (ρ β • t)
+def SemiallowablePerm.IsAllowable (ρ : SemiallowablePerm) : Prop :=
+  ∀ ⦃β : TypeIndex⦄ [LtLevel β] ⦃γ : Λ⦄ [LtLevel γ] (hβγ : β ≠ γ) (t : Tangle β),
+  Allowable.toStructPerm (ρ γ) (Quiver.Hom.toPath <| bot_lt_coe _) • fuzz hβγ t = fuzz hβγ (ρ β • t)
 
-variable {ρ ρ' : SemiallowablePerm α}
+variable {ρ ρ' : SemiallowablePerm}
 
-theorem isAllowable_one : (1 : SemiallowablePerm α).IsAllowable := by
-  intros β γ hβγ t
-  simp only [SemiallowablePerm.one_apply, map_one, Tree.one_apply, one_smul]
+theorem isAllowable_one : (1 : SemiallowablePerm).IsAllowable := by
+  intro
+  simp only [ne_eq, SemiallowablePerm.one_apply, map_one, Tree.one_apply, one_smul, implies_true]
 
 theorem isAllowable_inv (h : ρ.IsAllowable) : ρ⁻¹.IsAllowable := by
-  intros β γ hβγ t
+  intros β _ γ _ hβγ t
   have := h hβγ (ρ⁻¹ β • t)
   simp only [SemiallowablePerm.inv_apply, smul_inv_smul] at this
   rw [← this]
   simp only [SemiallowablePerm.inv_apply, map_inv, Tree.inv_apply, inv_smul_smul]
 
 theorem isAllowable_mul (h : ρ.IsAllowable) (h' : ρ'.IsAllowable) : (ρ * ρ').IsAllowable := by
-  intros β γ hβγ t
+  intros β _ γ _ hβγ t
   simp only [SemiallowablePerm.mul_apply, map_mul, Tree.mul_apply, mul_smul]
   rw [h' hβγ t, h hβγ (ρ' β • t)]
 
 theorem isAllowable_div (h : ρ.IsAllowable) (h' : ρ'.IsAllowable) : (ρ / ρ').IsAllowable := by
   rw [div_eq_mul_inv]
-  exact isAllowable_mul α h (isAllowable_inv α h')
+  exact isAllowable_mul h (isAllowable_inv h')
 
 theorem isAllowable_pow (h : ρ.IsAllowable) (n : ℕ) : (ρ ^ n).IsAllowable := by
   induction n with
   | zero =>
     rw [pow_zero]
-    exact isAllowable_one α
+    exact isAllowable_one
   | succ n ih =>
     rw [pow_succ]
-    exact isAllowable_mul α h ih
+    exact isAllowable_mul h ih
 
 theorem isAllowable_zpow (h : ρ.IsAllowable) (n : ℤ) : (ρ ^ n).IsAllowable := by
   cases n with
   | ofNat n =>
     rw [Int.ofNat_eq_coe, zpow_coe_nat]
-    exact isAllowable_pow α h n
+    exact isAllowable_pow h n
   | negSucc n =>
     rw [zpow_negSucc]
-    exact isAllowable_inv α (isAllowable_pow α h (n + 1))
+    exact isAllowable_inv (isAllowable_pow h (n + 1))
 
 /-- An allowable permutation is a semi-allowable permutation that commutes with the `fuzz` maps. -/
 def NewAllowable :=
-  { ρ : SemiallowablePerm α // ρ.IsAllowable }
+  { ρ : SemiallowablePerm // ρ.IsAllowable }
 
-variable {α}
-variable {ρ : NewAllowable α} {c d : Code α}
+variable {ρ : NewAllowable} {c d : Code}
 
 namespace NewAllowable
 
-instance : CoeTC (NewAllowable α) (SemiallowablePerm α)
+instance : CoeTC NewAllowable SemiallowablePerm
     where
   coe := Subtype.val
 
-theorem coe_injective : Injective (Subtype.val : NewAllowable α → SemiallowablePerm α) :=
+theorem coe_injective : Injective (Subtype.val : NewAllowable → SemiallowablePerm) :=
   Subtype.coe_injective
 
-noncomputable instance : One (NewAllowable α) :=
-  ⟨⟨1, isAllowable_one α⟩⟩
+noncomputable instance : One NewAllowable :=
+  ⟨⟨1, isAllowable_one⟩⟩
 
-noncomputable instance : Inv (NewAllowable α) :=
-  ⟨fun ρ => ⟨ρ⁻¹, isAllowable_inv α ρ.prop⟩⟩
+noncomputable instance : Inv NewAllowable :=
+  ⟨fun ρ => ⟨ρ⁻¹, isAllowable_inv ρ.prop⟩⟩
 
-noncomputable instance : Mul (NewAllowable α) :=
-  ⟨fun ρ ρ' => ⟨ρ * ρ', isAllowable_mul α ρ.prop ρ'.prop⟩⟩
+noncomputable instance : Mul NewAllowable :=
+  ⟨fun ρ ρ' => ⟨ρ * ρ', isAllowable_mul ρ.prop ρ'.prop⟩⟩
 
-noncomputable instance : Div (NewAllowable α) :=
-  ⟨fun ρ ρ' => ⟨ρ / ρ', isAllowable_div α ρ.prop ρ'.prop⟩⟩
+noncomputable instance : Div NewAllowable :=
+  ⟨fun ρ ρ' => ⟨ρ / ρ', isAllowable_div ρ.prop ρ'.prop⟩⟩
 
-noncomputable instance : Pow (NewAllowable α) ℕ :=
-  ⟨fun ρ n => ⟨ρ.val ^ n, isAllowable_pow α ρ.prop n⟩⟩
+noncomputable instance : Pow NewAllowable ℕ :=
+  ⟨fun ρ n => ⟨ρ.val ^ n, isAllowable_pow ρ.prop n⟩⟩
 
-noncomputable instance : Pow (NewAllowable α) ℤ :=
-  ⟨fun ρ n => ⟨ρ.val ^ n, isAllowable_zpow α ρ.prop n⟩⟩
+noncomputable instance : Pow NewAllowable ℤ :=
+  ⟨fun ρ n => ⟨ρ.val ^ n, isAllowable_zpow ρ.prop n⟩⟩
 
 @[simp]
-theorem coe_one : ((1 : NewAllowable α) : SemiallowablePerm α) = 1 :=
+theorem coe_one : ((1 : NewAllowable) : SemiallowablePerm) = 1 :=
   rfl
 
 @[simp]
-theorem coe_inv (ρ : NewAllowable α) : ↑(ρ⁻¹) = (ρ : SemiallowablePerm α)⁻¹ :=
+theorem coe_inv (ρ : NewAllowable) : ↑(ρ⁻¹) = (ρ : SemiallowablePerm)⁻¹ :=
   rfl
 
 @[simp]
-theorem coe_mul (ρ ρ' : NewAllowable α) : ↑(ρ * ρ') = (ρ : SemiallowablePerm α) * ρ' :=
+theorem coe_mul (ρ ρ' : NewAllowable) : ↑(ρ * ρ') = (ρ : SemiallowablePerm) * ρ' :=
   rfl
 
 @[simp]
-theorem coe_div (ρ ρ' : NewAllowable α) : ↑(ρ / ρ') = (ρ : SemiallowablePerm α) / ρ' :=
+theorem coe_div (ρ ρ' : NewAllowable) : ↑(ρ / ρ') = (ρ : SemiallowablePerm) / ρ' :=
   rfl
 
 @[simp]
-theorem coe_pow (ρ : NewAllowable α) (n : ℕ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm α) ^ n :=
+theorem coe_pow (ρ : NewAllowable) (n : ℕ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm) ^ n :=
   rfl
 
 @[simp]
-theorem coe_zpow (ρ : NewAllowable α) (n : ℤ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm α) ^ n :=
+theorem coe_zpow (ρ : NewAllowable) (n : ℤ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm) ^ n :=
   rfl
 
-noncomputable instance : Group (NewAllowable α) :=
+noncomputable instance : Group NewAllowable :=
   coe_injective.group
     Subtype.val
     coe_one
@@ -313,46 +314,47 @@ noncomputable instance : Group (NewAllowable α) :=
 
 /-- The coercion from allowable to semi-allowable permutations as a monoid homomorphism. -/
 @[simps]
-noncomputable def coeHom : NewAllowable α →* SemiallowablePerm α
+noncomputable def coeHom : NewAllowable →* SemiallowablePerm
     where
   toFun := Subtype.val
   map_one' := coe_one
   map_mul' := coe_mul
 
 /-- Turn an allowable permutation into a structural permutation. -/
-noncomputable def toStructPerm : NewAllowable α →* StructPerm α :=
+noncomputable def toStructPerm : NewAllowable →* StructPerm α :=
   SemiallowablePerm.toStructPerm.comp coeHom
 
 section
 
-variable {X : Type _} [MulAction (SemiallowablePerm α) X]
+variable {X : Type _} [MulAction (SemiallowablePerm) X]
 
-noncomputable instance : MulAction (NewAllowable α) X :=
+noncomputable instance : MulAction NewAllowable X :=
   MulAction.compHom _ coeHom
 
 @[simp]
-theorem coe_smul (ρ : NewAllowable α) (x : X) : (ρ : SemiallowablePerm α) • x = ρ • x :=
+theorem coe_smul (ρ : NewAllowable) (x : X) : (ρ : SemiallowablePerm) • x = ρ • x :=
   rfl
 
 end
 
 @[simp]
-theorem smul_typedNearLitter (ρ : NewAllowable α) (N : NearLitter) :
+theorem smul_typedNearLitter (ρ : NewAllowable) (N : NearLitter) :
     ρ.val γ • (typedNearLitter N : Tangle (γ : Λ)) =
-    typedNearLitter ((Allowable.toStructPerm ((ρ : SemiallowablePerm α) γ)
+    typedNearLitter ((Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
       (Quiver.Hom.toPath (bot_lt_coe _))) • N) :=
   Allowable.smul_typedNearLitter _ _
 
 @[simp]
-theorem fst_smul (ρ : NewAllowable α) (c : Code α) : (ρ • c).1 = c.1 :=
+theorem β_smul (ρ : NewAllowable) (c : Code) : (ρ • c).β = c.β :=
   rfl
 
 @[simp]
-theorem snd_smul (ρ : NewAllowable α) (c : Code α) : (ρ • c).2 = ρ.val c.1 • c.2 :=
+theorem members_smul (ρ : NewAllowable) (c : Code) : (ρ • c).members = ρ.val c.β • c.members :=
   rfl
 
 @[simp]
-theorem smul_mk (ρ : NewAllowable α) (γ s) : ρ • (mk γ s : Code α) = mk γ (ρ.val γ • s) :=
+theorem smul_mk (ρ : NewAllowable) (γ : TypeIndex) [LtLevel γ] (s : Set (Tangle γ)) :
+    ρ • (mk γ s : Code) = mk γ (ρ.val γ • s) :=
   rfl
 
 end NewAllowable
@@ -362,35 +364,35 @@ namespace NewAllowable
 variable {β γ}
 
 /-- Allowable permutations commute with the `cloud` map. -/
-theorem smul_cloud (ρ : NewAllowable α) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
+theorem smul_cloud (ρ : NewAllowable) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
     ρ.val γ • cloud hβγ s = cloud hβγ (ρ.val β • s) := by
   ext t
   simp only [cloud, mem_image, mem_iUnion, mem_localCardinal, exists_prop, ← image_smul]
   simp_rw [exists_exists_and_eq_and]
   constructor
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
-    refine ⟨Allowable.toStructPerm ((ρ : SemiallowablePerm α) γ)
+    refine ⟨Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
         (Quiver.Hom.toPath <| bot_lt_coe _) • N, ⟨t, ht₁, ?_⟩, ?_⟩
     · rw [← ρ.prop hβγ, NearLitterPerm.smul_nearLitter_fst, ht₂]
     · rw [smul_typedNearLitter]
   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
-    refine ⟨Allowable.toStructPerm ((ρ : SemiallowablePerm α) γ)⁻¹
+    refine ⟨Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)⁻¹
         (Quiver.Hom.toPath <| bot_lt_coe _) • N, ⟨t, ht₁, ?_⟩, ?_⟩
     · rw [NearLitterPerm.smul_nearLitter_fst, ht₂, ← ρ.prop hβγ, map_inv,
         Tree.inv_apply, inv_smul_smul]
     · rw [smul_typedNearLitter, map_inv, Tree.inv_apply, smul_inv_smul]
 
 /-- Allowable permutations commute with the `cloudCode` map. -/
-theorem smul_cloudCode (ρ : NewAllowable α) (hc : c.1 ≠ γ) :
+theorem smul_cloudCode (ρ : NewAllowable) (hc : c.1 ≠ γ) :
     ρ • cloudCode γ c = cloudCode γ (ρ • c) := by
-  simp only [cloudCode_ne γ c hc, smul_mk, cloudCode_ne γ (ρ • c) hc, fst_smul, snd_smul, mk_inj]
+  simp only [cloudCode_ne γ c hc, smul_mk, cloudCode_ne γ (ρ • c) hc, β_smul, members_smul, mk_inj]
   rw [smul_cloud]
 
 end NewAllowable
 
 theorem CloudRel.smul : c ↝₀ d → ρ • c ↝₀ ρ • d := by
   rintro ⟨γ, hγ⟩
-  exact (CloudRel_iff _ _).2 ⟨_, hγ, ρ.smul_cloudCode hγ⟩
+  exact (CloudRel_iff _ _).2 ⟨_, inferInstance, hγ, ρ.smul_cloudCode hγ⟩
 
 @[simp]
 theorem smul_cloudRel : ρ • c ↝₀ ρ • d ↔ c ↝₀ d := by
@@ -400,7 +402,7 @@ theorem smul_cloudRel : ρ • c ↝₀ ρ • d ↔ c ↝₀ d := by
 
 namespace Code
 
-theorem isEven_smul_nonempty : ∀ c : NonemptyCode α, (ρ • c.val).IsEven ↔ c.val.IsEven
+theorem isEven_smul_nonempty : ∀ c : NonemptyCode, (ρ • c.val).IsEven ↔ c.val.IsEven
   | ⟨c, hc⟩ => by
     simp_rw [Code.IsEven_iff]
     constructor <;> intro h d hd
@@ -418,7 +420,7 @@ termination_by isEven_smul_nonempty c => c
 
 @[simp]
 theorem isEven_smul : (ρ • c).IsEven ↔ c.IsEven := by
-  obtain (h | h) := c.2.eq_empty_or_nonempty
+  obtain (h | h) := c.members.eq_empty_or_nonempty
   · rw [IsEmpty.isEven_iff h, IsEmpty.isEven_iff]
     · rfl
     simpa [Code.IsEmpty]

@@ -10,12 +10,12 @@ of any coherence between type levels) we cannot prove many facts about these new
 
 ## Main declarations
 
-* `ConNF.TangleDataIio`: The `TangleData` for each `β < α`.
-* `ConNF.PositionedTanglesIio`: The `PositionedTangles` for each `β < α`.
-* `ConNF.TypedObjectsIio`: The `TypedObjects` for each `β < α`.
+* `ConNF.TangleDataLt`: The `TangleData` for each `β < α`.
+* `ConNF.PositionedTanglesLt`: The `PositionedTangles` for each `β < α`.
+* `ConNF.TypedObjectsLt`: The `TypedObjects` for each `β < α`.
 -/
 
-open Function Set WithBot
+open Function WithBot
 
 open scoped Pointwise
 
@@ -23,56 +23,28 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}]
-
-variable (α : Λ)
+variable [Params.{u}] [Level]
 
 /-- The `TangleData` for each `β < α`. -/
-class TangleDataIio (α : Λ) where
-  data : ∀ β : Iio α, TangleData β
+class TangleDataLt where
+  data : ∀ β : Λ, [LtLevel β] → TangleData β
 
-section TangleDataIio
-
-variable [TangleDataIio α]
-
-noncomputable instance TangleDataIio.toTangleData : ∀ β : IioBot α, TangleData β
-  | ⟨⊥, _⟩ => Bot.tangleData
-  | ⟨(β : Λ), hβ⟩ => TangleDataIio.data ⟨β, coe_lt_coe.1 hβ⟩
-
-noncomputable instance TangleDataIio.toTangleData' (β : Iio α) : TangleData β :=
-  show TangleData (iioCoe β) by infer_instance
-
-noncomputable instance TangleDataIio.toTangleData'' (β : TypeIndex) (hβ : β < α) :
-    TangleData (show IioBot α from ⟨β, hβ⟩) :=
-  TangleDataIio.toTangleData α ⟨β, hβ⟩
-
-noncomputable instance TangleDataIio.toTangleData''' (β : Λ) (hβ : (β : TypeIndex) < α) :
-    TangleData (show IioBot α from ⟨β, hβ⟩) :=
-  TangleDataIio.toTangleData α ⟨β, hβ⟩
-
-end TangleDataIio
+noncomputable instance TangleDataLt.toTangleData [TangleDataLt] :
+    ∀ β : TypeIndex, [LtLevel β] → TangleData β
+  | ⊥, _ => Bot.tangleData
+  | (β : Λ), _ => TangleDataLt.data β
 
 /-- The `PositionedTangles` for each `β < α`. -/
-class PositionedTanglesIio (α : Λ) [TangleDataIio α] where
-  data : ∀ β : Iio α, PositionedTangles β
+class PositionedTanglesLt [TangleDataLt] where
+  data : ∀ β : Λ, [LtLevel β] → PositionedTangles β
 
-section PositionedTanglesIio
-
-variable [TangleDataIio α] [PositionedTanglesIio α]
-
-noncomputable instance PositionedTanglesIio.toPositionedTangles :
-    ∀ β : IioBot α, PositionedTangles β
-  | ⟨⊥, _⟩ => Bot.positionedTangles
-  | ⟨(β : Λ), hβ⟩ => PositionedTanglesIio.data ⟨β, coe_lt_coe.1 hβ⟩
-
-noncomputable instance PositionedTanglesIio.toPositionedTangles' (β : Iio α) :
-    PositionedTangles β :=
-  show PositionedTangles (iioCoe β) by infer_instance
-
-end PositionedTanglesIio
+noncomputable instance PositionedTanglesLt.toPositionedTangles
+    [TangleDataLt] [PositionedTanglesLt] : ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
+  | ⊥, _ => Bot.positionedTangles
+  | (β : Λ), _ => PositionedTanglesLt.data β
 
 /-- The `TypedObjects` for each `β < α`. -/
-abbrev TypedObjectsIio (α : Λ) [TangleDataIio α] :=
-  ∀ β : Iio α, TypedObjects β
+abbrev TypedObjectsLt [TangleDataLt] :=
+  ∀ β : Λ, [LtLevel β] → TypedObjects β
 
 end ConNF

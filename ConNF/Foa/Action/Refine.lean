@@ -29,8 +29,7 @@ theorem refineLawful : (φ.refine hφ).Lawful :=
 
 @[simp]
 theorem refine_atomMap {a : Atom} (ha : (φ.atomMap a).Dom) :
-    (φ.refine hφ).atomMap a = φ.atomMap a :=
-  by
+    (φ.refine hφ).atomMap a = φ.atomMap a := by
   unfold refine
   refine' Part.ext' _ _
   · simp only [ha, fillAtomOrbits_atomMap, orbitAtomMap_dom_iff,
@@ -88,7 +87,7 @@ end StructAction
 
 namespace StructAction
 
-variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α}
+variable [BasePositions] [Level] [FoaAssumptions] {β : Λ}
 
 /-- Refine and complete this action into a structural approximation. -/
 noncomputable def rc (φ : StructAction β) (h : φ.Lawful) : StructApprox β :=
@@ -110,7 +109,7 @@ theorem rc_symm_smul_litter_eq {φ : StructAction β} {hφ : φ.Lawful} {B : Ext
   rfl
 
 theorem rc_free (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :
-    (show StructApprox (β : Iic α) from φ.rc h₁).Free := by
+    (φ.rc h₁).Free := by
   rintro B L' ((hL' | ⟨L', hL', rfl⟩) | hL')
   · exact hL'.2
   · rw [NearLitterAction.roughLitterMapOrElse_of_dom _ hL'.1]
@@ -119,14 +118,14 @@ theorem rc_free (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible
 
 theorem rc_comp_atomPerm {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) :
-    (rc (β := (γ : Iic α)) (φ.comp A) (hφ.comp A) B).atomPerm =
+    (rc (φ.comp A) (hφ.comp A) B).atomPerm =
     (φ.rc hφ (A.comp B)).atomPerm := by
   unfold rc refine complete NearLitterAction.refine NearLitterAction.complete
   simp_rw [Tree.comp_apply]
 
 theorem rc_comp_smul_atom {γ : Iio α} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) (a : Atom) :
-    rc (β := (γ : Iic α)) (φ.comp A) (hφ.comp A) B • a = φ.rc hφ (A.comp B) • a := by
+    rc (φ.comp A) (hφ.comp A) B • a = φ.rc hφ (A.comp B) • a := by
   change NearLitterApprox.atomPerm _ _ = NearLitterApprox.atomPerm _ _
   rw [rc_comp_atomPerm]
 

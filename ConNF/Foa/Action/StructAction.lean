@@ -27,16 +27,16 @@ def Lawful {β : TypeIndex} (φ : StructAction β) : Prop :=
   ∀ B, (φ B).Lawful
 
 /-- This structural action maps flexible litters to flexible litters. -/
-def MapFlexible {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α} (φ : StructAction β) :
+def MapFlexible [BasePositions] [Level] [FoaAssumptions] {β : Λ} (φ : StructAction β) :
     Prop :=
-  ∀ (B) (L : Litter) (hL), Flexible α B L → Flexible α B (((φ B).litterMap L).get hL).1
+  ∀ (B) (L : Litter) (hL), Flexible B L → Flexible B (((φ B).litterMap L).get hL).1
 
 section Precise
 
 def Precise {β : TypeIndex} (φ : StructAction β) : Prop :=
   ∀ B, (φ B).Precise
 
-variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iic α} (φ : StructAction β)
+variable [BasePositions] [Level] [FoaAssumptions] {β : Λ} (φ : StructAction β)
 
 noncomputable def complete (hφ : φ.Lawful) : StructApprox β := fun B => (φ B).complete (hφ B) B
 
@@ -67,7 +67,7 @@ theorem smul_nearLitter_eq_of_precise {hφ : φ.Lawful} (hφp : φ.Precise) {π 
 
 end Precise
 
-variable {α : Λ} [BasePositions] [FoaAssumptions α] {β : Iio α}
+variable [BasePositions] [Level] [FoaAssumptions] {β : Iio α}
 
 instance {β : TypeIndex} : PartialOrder (StructAction β)
     where

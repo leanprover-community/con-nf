@@ -194,35 +194,6 @@ theorem pos_atom_ne_pos_nearLitter [BasePositions] :
     ∀ a : Atom, ∀ N : NearLitter, pos a ≠ pos N :=
   BasePositions.typedAtomPosition_ne_typedNearLitterPosition
 
-section Instances
-
-variable {α : Λ} (β : Iio α) [TangleData (iioCoe β)]
-
-instance tangleDataVal : TangleData β.val :=
-  ‹TangleData β›
-
-instance tangleDataCoeCoe : TangleData (β : Λ) :=
-  ‹TangleData β›
-
-section PositionedTangles
-
-variable [PositionedTangles (iioCoe β)]
-
-instance positionedTanglesVal : PositionedTangles β.val :=
-  ‹PositionedTangles _›
-
-instance positionedTanglesCoeCoe : PositionedTangles (β : Λ) :=
-  ‹PositionedTangles _›
-
-end PositionedTangles
-
-variable [TypedObjects β]
-
-instance typedObjectsVal : TypedObjects β.val :=
-  ‹TypedObjects β›
-
-end Instances
-
 /-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
 permutations to be near-litter permutations, and the designated supports to be singletons. -/
 noncomputable instance Bot.tangleData : TangleData ⊥

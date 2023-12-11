@@ -4,15 +4,11 @@ import ConNF.BaseType.Params
 /-!
 # Indices
 
-In this file, we define various types of type index and extended type index.
+In this file, we create instances for various facts about comparisons between type indices,
+and also define extended type indices.
 
 ## Main declarations
 
-* `Set.Iio` (defined in mathlib): The type of proper type indices below a given type index.
-* `Set.Iic` (defined in mathlib): The type of proper type indices up to and including a given
-    type index.
-* `ConNF.IioBot`: The type of type indices below a given type index.
-* `ConNF.IicBot`: The type of type indices up to and including a given type index.
 * `ConNF.ExtendedIndex`: The type of extended type indices from a given base type index.
 -/
 
@@ -26,129 +22,35 @@ namespace ConNF
 
 variable [Params.{u}]
 
-section IioIic
+/-- The current level of the structure we are building. -/
+class Level where
+  (α : Λ)
 
-variable {α β : Λ}
+export Level (α)
 
-/-- The type of type indices below `α`. -/
-abbrev IioBot (α : Λ) :=
-  Iio (α : TypeIndex)
+variable [Level]
 
-/-- The type of type indices up to and including `α`. -/
-abbrev IicBot (α : Λ) :=
-  Iic (α : TypeIndex)
+/-- The type index `β` is less than our current level. -/
+class LtLevel (β : TypeIndex) : Prop where
+  elim : β < α
 
-/-!
-We define various conversions between the various `Iio*/Iic*` types.
--/
+instance {β : Λ} [inst : LtLevel (Option.some β)] : LtLevel β := inst
 
-@[simp]
-lemma _root_.Set.Iio.lt (β : Iio α) : (β : Λ) < α := β.prop
+instance : LtLevel ⊥ where
+  elim := bot_lt_coe α
 
-@[simp]
-lemma _root_.Set.Iic.le (β : Iic α) : (β : Λ) ≤ α := β.prop
+class LeLevel (β : TypeIndex) : Prop where
+  elim : β ≤ α
 
-@[simp]
-lemma IioBot.lt (β : IioBot α) : (β : TypeIndex) < α := β.prop
+instance {β : TypeIndex} [LtLevel β] : LeLevel β where
+  elim := LtLevel.elim.le
 
-@[simp]
-lemma IicBot.le (β : IicBot α) : (β : TypeIndex) ≤ α := β.prop
-
-instance coeIioIic : CoeTC (Iio α) (Iic α) :=
-  ⟨fun β => ⟨β.1, le_of_lt (show β < α from β.2)⟩⟩
-
-instance coeIio : CoeTC (Iio α) (IioBot α) :=
-  ⟨fun β => ⟨β.1, coe_lt_coe.2 β.2⟩⟩
-
-instance coeIic : CoeTC (Iic α) (IicBot α) :=
-  ⟨fun β => ⟨β.1, coe_le_coe.2 β.2⟩⟩
-
-abbrev iioCoe : Iio α → IioBot α :=
-  coeIio.coe
-
-abbrev iicCoe : Iic α → IicBot α :=
-  coeIic.coe
-
-@[simp]
-theorem Iio.coe_mk (β : Λ) (hβ : β < α) : ((⟨β, hβ⟩ : Iio α) : IioBot α) = ⟨β, coe_lt_coe.2 hβ⟩ :=
-  rfl
-
-@[simp]
-theorem Iic.coe_mk (β : Λ) (hβ : β ≤ α) : ((⟨β, hβ⟩ : Iic α) : IicBot α) = ⟨β, coe_le_coe.2 hβ⟩ :=
-  rfl
-
-theorem Iio.coe_injective : Injective (show Iio α → IioBot α from CoeTC.coe) := by
-  rintro ⟨β, hβ⟩ ⟨γ, hγ⟩ h
-  cases h
-  rfl
-
-theorem Iic.coe_injective : Injective (show Iic α → IicBot α from CoeTC.coe) := by
-  rintro ⟨β, hβ⟩ ⟨γ, hγ⟩ h
-  cases h
-  rfl
-
-@[simp]
-theorem Iio.coe_inj {β γ : Iio α} : iioCoe β = γ ↔ β = γ :=
-  Iio.coe_injective.eq_iff
-
-@[simp]
-theorem Iic.coe_inj {β γ : Iic α} : iicCoe β = γ ↔ β = γ :=
-  Iic.coe_injective.eq_iff
-
-section IioIndex
-
-variable {hβ : (β : TypeIndex) ∈ IioBot α}
-
-instance : Bot (IioBot α) :=
-  ⟨⟨⊥, bot_lt_coe _⟩⟩
-
-instance : Inhabited (IioBot α) :=
-  ⟨⊥⟩
-
-@[simp]
-theorem IioBot.bot_ne_mk_coe : (⊥ : IioBot α) ≠ ⟨β, hβ⟩ :=
-  ne_of_apply_ne Subtype.val WithBot.bot_ne_coe
-
-@[simp]
-theorem IioBot.mk_coe_ne_bot : (⟨β, hβ⟩ : IioBot α) ≠ ⊥ :=
-  ne_of_apply_ne Subtype.val WithBot.coe_ne_bot
-
-@[simp]
-theorem IioBot.bot_ne_coe {β : Iio α} : ⊥ ≠ (β : IioBot α) :=
-  ne_of_apply_ne Subtype.val WithBot.bot_ne_coe
-
-@[simp]
-theorem IioBot.coe_ne_bot {β : Iio α} : (β : IioBot α) ≠ ⊥ :=
-  ne_of_apply_ne Subtype.val WithBot.coe_ne_bot
-
-end IioIndex
-
-section IicIndex
-
-variable {hβ : (β : TypeIndex) ∈ IicBot α}
-
-instance : Bot (IicBot α) :=
-  ⟨⟨⊥, bot_le (a := (α : TypeIndex))⟩⟩
-
-instance : Inhabited (IicBot α) :=
-  ⟨⊥⟩
-
-@[simp]
-theorem IicBot.bot_ne_mk_coe : (⊥ : IicBot α) ≠ ⟨β, hβ⟩ :=
-  ne_of_apply_ne Subtype.val bot_ne_coe
-
-@[simp]
-theorem IicBot.mk_coe_ne_bot : (⟨β, hβ⟩ : IicBot α) ≠ ⊥ :=
-  ne_of_apply_ne Subtype.val coe_ne_bot
-
-end IicIndex
-
-end IioIic
+instance {β : Λ} [inst : LeLevel (Option.some β)] : LeLevel β := inst
 
 variable {α : TypeIndex}
 
 /-- We define the type of paths from certain types to lower types as elements of this quiver. -/
-instance quiver : Quiver TypeIndex :=
+instance : Quiver TypeIndex :=
   ⟨(· > ·)⟩
 
 /-- A (finite) path from the type `α` to the base type.
@@ -171,31 +73,6 @@ theorem path_eq_nil : ∀ p : Path α α, p = nil
 theorem ExtendedIndex.length_ne_zero {α : Λ} (A : ExtendedIndex α) : A.length ≠ 0 := by
   intro h
   cases Quiver.Path.eq_of_length_zero A h
-
-/-- An induction principle for paths that allows us to use `IicBot α` instead of needing to
-define the motive for all `TypeIndex`. -/
-@[elab_as_elim]
-def Path.iicRec {α : Λ} {β : IicBot α}
-    {motive : ∀ γ : IicBot α, Path (β : TypeIndex) γ → Sort _} :
-    motive β nil →
-      (∀ (γ δ : IicBot α) (A : Path (β : TypeIndex) γ) (h : δ < γ),
-          motive γ A → motive δ (A.cons h)) →
-        ∀ (γ : IicBot α) (A : Path (β : TypeIndex) γ), motive γ A :=
-  fun hn hc _ => Path.rec (motive := fun δ B => motive ⟨δ, (le_of_path B).trans β.prop⟩ B)
-    hn (fun {δ ε} B h c => hc ⟨δ, _⟩ ⟨ε, _⟩ B h c)
-
-@[simp]
-theorem Path.iicRec_nil {α : Λ} {β : IicBot α}
-    {motive : ∀ γ : IicBot α, Path (β : TypeIndex) γ → Sort _} {hn : motive β nil} {hc} :
-    @Path.iicRec _ _ _ motive hn hc β nil = hn :=
-  rfl
-
-@[simp]
-theorem Path.iicRec_cons {α : Λ} {β : IicBot α}
-    {motive : ∀ γ : IicBot α, Path (β : TypeIndex) γ → Sort _} {hn : motive β nil} {hc}
-    (γ δ : IicBot α) (A : Path (β : TypeIndex) γ) (h : δ < γ) :
-    @Path.iicRec _ _ _ motive hn hc δ (A.cons h) = hc γ δ A h (Path.iicRec hn hc γ A) :=
-  rfl
 
 /-- There are at most `Λ` `α`-extended type indices. -/
 @[simp]
