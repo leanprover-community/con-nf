@@ -28,7 +28,7 @@ theorem mk_S_eq_κ (S : Sublitter) : #S.carrier = #κ := by
   obtain (h | h) := lt_or_eq_of_le this
   · have := mk_diff_add_mk S.subset
     rw [mk_litterSet] at this
-    cases (add_lt_of_lt κ_isRegular.aleph0_le S.diff_small h).ne this
+    cases (add_lt_of_lt Params.κ_isRegular.aleph0_le S.diff_small h).ne this
   · exact h
 
 instance : SetLike Sublitter Atom where

@@ -32,8 +32,8 @@ structure Litter where
   γ : Λ
   β_ne_γ : β ≠ γ
 
-noncomputable instance : Inhabited Litter :=
-  ⟨⟨default, ⊥, default, WithBot.bot_ne_coe⟩⟩
+instance : Nonempty Litter :=
+  ⟨⟨Classical.arbitrary μ, ⊥, 0, WithBot.bot_ne_coe⟩⟩
 
 /-- Strips away the name of the type of litters, converting it into a combination of types
 well-known to mathlib. -/
@@ -52,8 +52,10 @@ theorem mk_litter : #Litter = #μ := by
       (le_antisymm ((Cardinal.mk_subtype_le _).trans_eq ?_)
         ⟨⟨fun ν => ⟨⟨ν, ⊥, default⟩, WithBot.bot_ne_coe⟩, fun ν₁ ν₂ =>
             congr_arg <| Prod.fst ∘ Subtype.val⟩⟩)
-  have :=
-    mul_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) (Λ_lt_κ.le.trans κ_lt_μ.le) mk_Λ_ne_zero
+  have := mul_eq_left
+    (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le)
+    (Params.Λ_lt_κ.le.trans Params.κ_lt_μ.le)
+    mk_Λ_ne_zero
   simp only [mk_prod, lift_id, mk_typeIndex, mul_eq_self aleph0_le_mk_Λ, this]
 
 end ConNF

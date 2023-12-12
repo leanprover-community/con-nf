@@ -155,8 +155,8 @@ noncomputable def codeMinMap (c : NonemptyCode) : μ :=
   pos <| minTangle _ c.prop
 
 /-- The pullback `<` relation on codes is well-founded. -/
-theorem invImage_codeMinMap_wf : WellFounded (InvImage μr (codeMinMap : NonemptyCode → μ)) :=
-  InvImage.wf codeMinMap μwo.wf
+theorem invImage_codeMinMap_wf : WellFounded (InvImage (· < ·) (codeMinMap : NonemptyCode → μ)) :=
+  InvImage.wf codeMinMap IsWellFounded.wf
 
 section Extension
 
@@ -320,7 +320,7 @@ theorem cloudRel_coe_coe {c d : NonemptyCode} : (c : Code) ↝₀ d ↔ c ↝ d 
   rw [CloudRel_iff, CloudRel'_iff]
   aesop
 
-theorem cloud_subrelation : Subrelation (· ↝ ·) (InvImage μr (codeMinMap : NonemptyCode → μ))
+theorem cloud_subrelation : Subrelation (· ↝ ·) (InvImage (· < ·) (codeMinMap : NonemptyCode → μ))
   | c, _, CloudRel'.intro β hc => codeMinMap_lt_codeMinMap_cloudCode β c hc
 
 /-- There are only finitely many iterated images under any inverse `cloud` map. -/

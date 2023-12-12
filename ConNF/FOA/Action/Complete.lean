@@ -30,7 +30,7 @@ theorem mk_atomMap_image_le_mk_sandbox :
       #(litterSet φ.sandboxLitter) := by
   rw [mk_litterSet]
   refine' le_trans (mk_subtype_mono symmDiff_subset_union) (le_trans (mk_union_le _ _) _)
-  refine' add_le_of_le κ_isRegular.aleph0_le _ _
+  refine' add_le_of_le Params.κ_isRegular.aleph0_le _ _
   exact le_of_lt φ.atomMap_dom_small
   exact le_trans mk_image_le (le_of_lt φ.atomMap_dom_small)
 
@@ -55,18 +55,20 @@ a litter which is away from the domain and range of the approximation in questio
 not interfere with other constructions. -/
 noncomputable def atomLocalPerm (hφ : φ.Lawful) : LocalPerm Atom :=
   LocalPerm.complete φ.atomMapOrElse φ.atomMap.Dom (litterSet φ.sandboxLitter)
-    φ.mk_atomMap_image_le_mk_sandbox (by simpa only [mk_litterSet] using κ_isRegular.aleph0_le)
+    φ.mk_atomMap_image_le_mk_sandbox
+    (by simpa only [mk_litterSet] using Params.κ_isRegular.aleph0_le)
     φ.disjoint_sandbox (φ.atomMapOrElse_injective hφ)
 
 theorem sandboxSubset_small :
     Small
       (LocalPerm.sandboxSubset φ.mk_atomMap_image_le_mk_sandbox
-        (by simpa only [mk_litterSet] using κ_isRegular.aleph0_le)) := by
+        (by simpa only [mk_litterSet] using Params.κ_isRegular.aleph0_le)) := by
   rw [Small]
   rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
   simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
-  refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
-    refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt aleph0_le_mk_Λ Λ_lt_κ) _ <;>
+  refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
+    refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le
+      (lt_of_le_of_lt aleph0_le_mk_Λ Params.Λ_lt_κ) _ <;>
     refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
   · exact φ.atomMap_dom_small
   · exact lt_of_le_of_lt mk_image_le φ.atomMap_dom_small

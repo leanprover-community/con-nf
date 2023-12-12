@@ -35,15 +35,18 @@ are in type `τ₋₁`.
 def Atom : Type _ :=
   Litter × κ
 
-noncomputable instance : Inhabited Atom :=
-  ⟨⟨default, default⟩⟩
+instance : Nonempty Atom :=
+  ⟨⟨Classical.arbitrary Litter, 0⟩⟩
 
 /-- The cardinality of `Atom` is the cardinality of `μ`.
 We will prove that all types constructed in our model have cardinality equal to `μ`. -/
 @[simp]
 theorem mk_atom : #Atom = #μ := by
   simp_rw [Atom, mk_prod, lift_id, mk_litter,
-    mul_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) κ_le_μ κ_isRegular.pos.ne']
+    mul_eq_left
+      (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le)
+      Params.κ_lt_μ.le
+      Params.κ_isRegular.pos.ne']
 
 /-- The set corresponding to litter `L`. We define a litter set as the set of atoms with first
 projection `L`. -/

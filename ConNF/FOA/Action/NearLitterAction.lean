@@ -126,21 +126,21 @@ theorem mk_not_bannedLitter : #{L | ¬φ.BannedLitter L} = #μ := by
     have h' := add_le_add (le_of_lt φ.bannedLitter_small) (le_of_not_le h)
     rw [this] at h'
     refine' not_lt_of_le h' _
-    refine' Cardinal.add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le κ_lt_μ _
-    exact lt_of_le_of_lt κ_isRegular.aleph0_le κ_lt_μ
+    refine' Cardinal.add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le Params.κ_lt_μ _
+    exact lt_of_le_of_lt Params.κ_isRegular.aleph0_le Params.κ_lt_μ
   · by_contra h
     have h' := add_le_add (le_of_lt φ.bannedLitter_small) (le_of_not_le h)
     rw [this] at h'
     refine' not_lt_of_le h' _
-    refine' Cardinal.add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le κ_lt_μ _
-    exact lt_trans φ.bannedLitter_small κ_lt_μ
+    refine' Cardinal.add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le Params.κ_lt_μ _
+    exact lt_trans φ.bannedLitter_small Params.κ_lt_μ
 
 theorem not_bannedLitter_nonempty : Nonempty {L | ¬φ.BannedLitter L} := by
   simp only [← mk_ne_zero_iff, mk_not_bannedLitter, Ne.def, mk_ne_zero, not_false_iff]
 
 /-- If `a` is in the domain, this is the atom map. Otherwise, this gives an arbitrary atom. -/
 noncomputable def atomMapOrElse (a : Atom) : Atom :=
-  (φ.atomMap a).getOrElse default
+  (φ.atomMap a).getOrElse (Classical.arbitrary Atom)
 
 theorem atomMapOrElse_of_dom {a : Atom} (ha : (φ.atomMap a).Dom) :
     φ.atomMapOrElse a = (φ.atomMap a).get ha := by rw [atomMapOrElse, Part.getOrElse_of_dom]
@@ -153,7 +153,7 @@ theorem atomMapOrElse_injective (hφ : φ.Lawful) : InjOn φ.atomMapOrElse φ.at
 /-- If `L` is in the domain, this is the litter map.
 Otherwise, this gives an arbitrary near-litter. -/
 noncomputable def litterMapOrElse (L : Litter) : NearLitter :=
-  (φ.litterMap L).getOrElse default
+  (φ.litterMap L).getOrElse (Classical.arbitrary NearLitter)
 
 theorem litterMapOrElse_of_dom {L : Litter} (hL : (φ.litterMap L).Dom) :
     φ.litterMapOrElse L = (φ.litterMap L).get hL := by
@@ -254,8 +254,8 @@ theorem mk_not_bannedLitter_and_flexible : #{L | ¬φ.BannedLitter L ∧ Flexibl
   rw [not_le] at h
   have h₁ := Cardinal.le_mk_diff_add_mk {L | Flexible A L} {L | φ.BannedLitter L}
   rw [mk_flexible, diff_eq, inter_comm] at h₁
-  have h₂ :=
-    add_lt_of_lt μ_isStrongLimit.isLimit.aleph0_le h (lt_trans φ.bannedLitter_small κ_lt_μ)
+  have h₂ := add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le h
+    (lt_trans φ.bannedLitter_small Params.κ_lt_μ)
   exact h₁.not_lt h₂
 
 theorem mk_dom_inter_flexible_symmDiff_le :
@@ -263,14 +263,14 @@ theorem mk_dom_inter_flexible_symmDiff_le :
         (φ.roughLitterMapOrElse '' (φ.litterMap.Dom ∩ {L | Flexible A L})) : Set Litter) ≤
       #{L : Litter | ¬φ.BannedLitter L ∧ Flexible A L} := by
   rw [mk_not_bannedLitter_and_flexible]
-  refine' le_trans (le_of_lt _) κ_le_μ
+  refine' le_trans (le_of_lt _) Params.κ_lt_μ.le
   exact Small.symmDiff (Small.mono (inter_subset_left _ _) φ.litterMap_dom_small)
     (Small.mono (inter_subset_left _ _) φ.litterMap_dom_small).image
 
 theorem aleph0_le_not_bannedLitter_and_flexible :
     ℵ₀ ≤ #{L | ¬φ.BannedLitter L ∧ Flexible A L} := by
   rw [mk_not_bannedLitter_and_flexible]
-  exact μ_isStrongLimit.isLimit.aleph0_le
+  exact Params.μ_isStrongLimit.isLimit.aleph0_le
 
 theorem disjoint_dom_inter_flexible_not_bannedLitter :
     Disjoint
@@ -305,8 +305,9 @@ theorem flexibleLitterLocalPerm_domain_small (hφ : φ.Lawful) :
   · rw [Small]
     rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
     simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
-    refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
-        refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt aleph0_le_mk_Λ Λ_lt_κ) _ <;>
+    refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
+      refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le
+        (lt_of_le_of_lt aleph0_le_mk_Λ Params.Λ_lt_κ) _ <;>
       refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
     exact φ.litterMap_dom_small.mono (inter_subset_left _ _)
     exact (φ.litterMap_dom_small.mono (inter_subset_left _ _)).image

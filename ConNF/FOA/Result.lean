@@ -202,7 +202,8 @@ theorem allowableBelow_all (hπf : π.Free) (γ : Λ) [i : LeLevel γ] (A : Path
     AllowableBelow hπf γ A := by
   revert i
   have := WellFounded.induction
-    (C := fun γ => ∀ (A : Path (β : TypeIndex) γ) (i : LeLevel γ), AllowableBelow hπf γ A) Λwo.wf γ
+    (C := fun γ => ∀ (A : Path (β : TypeIndex) γ) (i : LeLevel γ), AllowableBelow hπf γ A)
+    (inferInstanceAs (IsWellFounded Λ (· < ·))).wf γ
   refine this ?_ _
   intro γ ih A hγ
   refine' allowableBelow_extends hπf γ A _
@@ -274,7 +275,8 @@ theorem freedom_of_action (β : Λ) [i : LeLevel β] (π₀ : StructApprox β) (
   have := WellFounded.induction
     (C := fun β => ∀ (i : LeLevel β) (π₀ : StructApprox β),
       Free π₀ → ∃ π : Allowable β,
-        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ FOAData.tangleData π)) Λwo.wf β
+        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ FOAData.tangleData π))
+    (inferInstanceAs (IsWellFounded Λ (· < ·))).wf β
   refine fun i => this ?_ i π₀ h
   intro β ih _ π₀ h
   have : FreedomOfActionHypothesis β

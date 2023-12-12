@@ -30,7 +30,7 @@ theorem Small.lt : Small s → #s < #κ :=
   id
 
 theorem Set.Subsingleton.small {α : Type _} {s : Set α} (hs : s.Subsingleton) : Small s :=
-  hs.cardinal_mk_le_one.trans_lt <| one_lt_aleph0.trans_le κ_isRegular.aleph0_le
+  hs.cardinal_mk_le_one.trans_lt <| one_lt_aleph0.trans_le Params.κ_isRegular.aleph0_le
 
 @[simp]
 theorem small_empty : Small (∅ : Set α) :=
@@ -52,7 +52,7 @@ theorem Small.mono (h : s ⊆ t) : Small t → Small s :=
 
 /-- Unions of small subsets are small. -/
 theorem Small.union (hs : Small s) (ht : Small t) : Small (s ∪ t) :=
-  (mk_union_le _ _).trans_lt <| add_lt_of_lt κ_isRegular.aleph0_le hs ht
+  (mk_union_le _ _).trans_lt <| add_lt_of_lt Params.κ_isRegular.aleph0_le hs ht
 
 theorem Small.symmDiff (hs : Small s) (ht : Small t) : Small (s ∆ t) :=
   (hs.union ht).mono symmDiff_subset_union
@@ -63,7 +63,7 @@ theorem Small.symmDiff_iff (hs : Small s) : Small t ↔ Small (s ∆ t) :=
 theorem small_iUnion (hι : #ι < #κ) {f : ι → Set α} (hf : ∀ i, Small (f i)) :
     Small (⋃ i, f i) :=
   (mk_iUnion_le _).trans_lt <|
-    mul_lt_of_lt κ_isRegular.aleph0_le hι <| iSup_lt_of_isRegular κ_isRegular hι hf
+    mul_lt_of_lt Params.κ_isRegular.aleph0_le hι <| iSup_lt_of_isRegular Params.κ_isRegular hι hf
 
 theorem small_iUnion_Prop {p : Prop} {f : p → Set α} (hf : ∀ i, Small (f i)) : Small (⋃ i, f i) :=
   by by_cases p <;> simp_all
@@ -71,7 +71,8 @@ theorem small_iUnion_Prop {p : Prop} {f : p → Set α} (hf : ∀ i, Small (f i)
 protected theorem Small.bUnion {s : Set ι} (hs : Small s) {f : ∀ i ∈ s, Set α}
     (hf : ∀ i (hi : i ∈ s), Small (f i hi)) : Small (⋃ (i) (hi : i ∈ s), f i hi) :=
   (mk_bUnion_le' _ _).trans_lt <|
-    mul_lt_of_lt κ_isRegular.aleph0_le hs <| iSup_lt_of_isRegular κ_isRegular hs fun _ => hf _ _
+    mul_lt_of_lt Params.κ_isRegular.aleph0_le hs <|
+    iSup_lt_of_isRegular Params.κ_isRegular hs (fun _ => hf _ _)
 
 /-- The image of a small set under any function `f` is small. -/
 theorem Small.image : Small s → Small (f '' s) :=
@@ -148,6 +149,6 @@ theorem IsNear.mk_inter (h : IsNear s t) (hs : #κ ≤ #s) : #κ ≤ #(s ∩ t :
     lt_irrefl _
       (((hs.trans (mk_le_mk_of_subset (subset_union_left _ _))).trans
             (le_mk_diff_add_mk (s ∪ t) (s ∩ t))).trans_lt
-        (add_lt_of_lt κ_isRegular.aleph0_le h hst))
+        (add_lt_of_lt Params.κ_isRegular.aleph0_le h hst))
 
 end ConNF

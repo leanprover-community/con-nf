@@ -22,12 +22,12 @@ theorem mk_dom_symmDiff_le :
     #(φ.litterMap.Dom ∆ (φ.roughLitterMapOrElse '' φ.litterMap.Dom) : Set Litter) ≤
       #{L : Litter | ¬φ.BannedLitter L} := by
   rw [mk_not_bannedLitter]
-  refine' le_trans (le_of_lt _) κ_le_μ
+  refine' le_trans (le_of_lt _) Params.κ_lt_μ.le
   exact Small.symmDiff φ.litterMap_dom_small φ.litterMap_dom_small.image
 
 theorem aleph0_le_not_bannedLitter : ℵ₀ ≤ #{L | ¬φ.BannedLitter L} := by
   rw [mk_not_bannedLitter]
-  exact μ_isStrongLimit.isLimit.aleph0_le
+  exact Params.μ_isStrongLimit.isLimit.aleph0_le
 
 /-- A local permutation on the set of litters that occur in the domain or range of `w`.
 This permutes both flexible and inflexible litters. -/
@@ -64,8 +64,9 @@ theorem litterPerm'_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm' hφ).
   rw [Small]
   rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
   simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
-  refine' add_lt_of_lt κ_isRegular.aleph0_le _ _ <;>
-      refine' mul_lt_of_lt κ_isRegular.aleph0_le (lt_of_le_of_lt aleph0_le_mk_Λ Λ_lt_κ) _ <;>
+  refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
+    refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le
+      (lt_of_le_of_lt aleph0_le_mk_Λ Params.Λ_lt_κ) _ <;>
     refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
   exact φ.litterMap_dom_small
   exact φ.litterMap_dom_small.image
@@ -99,7 +100,7 @@ theorem mk_diff_dom_ran (L : Litter) :
     intro a b h
     exact Subtype.coe_injective (Prod.ext (a.prop.1.trans b.prop.1.symm) h)
   · by_contra h
-    have := add_lt_of_lt κ_isRegular.aleph0_le (lt_of_not_le h)
+    have := add_lt_of_lt Params.κ_isRegular.aleph0_le (lt_of_not_le h)
       (Small.union φ.atomMap_dom_small φ.atomMap_ran_small)
     have := (le_mk_diff_add_mk (litterSet L) _).trans_lt this
     simp only [mk_litterSet, lt_self_iff_false] at this
@@ -109,9 +110,10 @@ theorem need_images_small :
   simp only [mk_prod, mk_denumerable, lift_aleph0, lift_uzero, mk_diff_dom_ran, mk_sum, lift_id]
   rw [← mul_add]
   refine' lt_of_le_of_lt (mul_le_max _ _) (max_lt (max_lt _ _) _)
-  exact aleph0_le_mk_Λ.trans_lt Λ_lt_κ
-  exact add_lt_of_lt κ_isRegular.aleph0_le φ.needBackwardImages_small φ.needForwardImages_small
-  exact aleph0_le_mk_Λ.trans_lt Λ_lt_κ
+  exact aleph0_le_mk_Λ.trans_lt Params.Λ_lt_κ
+  exact add_lt_of_lt Params.κ_isRegular.aleph0_le
+    φ.needBackwardImages_small φ.needForwardImages_small
+  exact aleph0_le_mk_Λ.trans_lt Params.Λ_lt_κ
 
 theorem le_mk_diff_dom_ran (L : Litter) :
     #(Sum (ℕ × φ.needBackwardImages) (ℕ × φ.needForwardImages)) ≤

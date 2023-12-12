@@ -50,14 +50,15 @@ theorem IsNearLitter.near (hs : IsNearLitter L s) (ht : IsNearLitter L t) : IsNe
 
 theorem IsNearLitter.mk_eq_κ (hs : IsNearLitter L s) : #s = #κ :=
   ((le_mk_diff_add_mk _ _).trans <|
-        add_le_of_le κ_isRegular.aleph0_le (hs.mono <| subset_union_right _ _).lt.le
+        add_le_of_le Params.κ_isRegular.aleph0_le (hs.mono <| subset_union_right _ _).lt.le
           (mk_litterSet _).le).eq_of_not_lt
     fun h =>
     ((mk_litterSet _).symm.trans_le <| le_mk_diff_add_mk _ _).not_lt <|
-      add_lt_of_lt κ_isRegular.aleph0_le (hs.mono <| subset_union_left _ _) h
+      add_lt_of_lt Params.κ_isRegular.aleph0_le (hs.mono <| subset_union_left _ _) h
 
 protected theorem IsNearLitter.nonempty (hs : IsNearLitter L s) : s.Nonempty := by
-  rw [← nonempty_coe_sort, ← mk_ne_zero_iff, hs.mk_eq_κ]; exact κ_isRegular.pos.ne'
+  rw [← nonempty_coe_sort, ← mk_ne_zero_iff, hs.mk_eq_κ]
+  exact Params.κ_isRegular.pos.ne'
 
 /-- A litter set is only a near-litter to itself. -/
 @[simp]
@@ -79,17 +80,19 @@ theorem IsNearLitter.unique {s : Set Atom} (h₁ : IsNearLitter L₁ s) (h₂ : 
 @[simp]
 theorem mk_nearLitter' (L : Litter) : #{ s // IsNearLitter L s } = #μ := by
   refine (le_antisymm ?_ ?_).trans mk_atom
-  · have := mk_subset_mk_lt_cof (μ_isStrongLimit.2)
-    refine le_of_le_of_eq ?_ (mk_subset_mk_lt_cof <| by simp_rw [mk_atom]; exact μ_isStrongLimit.2)
-    rw [mk_atom]
-    exact (Cardinal.mk_congr <|
-        subtypeEquiv
-          ((symmDiff_right_involutive <| litterSet L).toPerm _)
-          fun s => Iff.rfl).trans_le
-      ⟨Subtype.impEmbedding _ _ fun s => κ_le_μ_ord_cof.trans_lt'⟩
+  · have := mk_subset_mk_lt_cof (Params.μ_isStrongLimit.2)
+    refine le_of_le_of_eq ?_ (mk_subset_mk_lt_cof ?_)
+    · rw [mk_atom]
+      exact (Cardinal.mk_congr <|
+          subtypeEquiv
+            ((symmDiff_right_involutive <| litterSet L).toPerm _)
+            fun s => Iff.rfl).trans_le
+        ⟨Subtype.impEmbedding _ _ fun s => Params.κ_le_μ_ord_cof.trans_lt'⟩
+    · simp_rw [mk_atom]
+      exact Params.μ_isStrongLimit.2
   . refine ⟨⟨fun a => ⟨litterSet L ∆ {a}, ?_⟩, fun a b h => ?_⟩⟩
     · rw [IsNearLitter, IsNear, Small, symmDiff_symmDiff_cancel_left, mk_singleton]
-      exact one_lt_aleph0.trans_le κ_isRegular.aleph0_le
+      exact one_lt_aleph0.trans_le Params.κ_isRegular.aleph0_le
     · exact singleton_injective (symmDiff_right_injective _ <| by convert congr_arg Subtype.val h)
 
 /-- The type of near-litters. A near-litter is a litter together with a set near it. -/
@@ -139,8 +142,8 @@ namespace Litter
 def toNearLitter (L : Litter) : NearLitter :=
   ⟨L, litterSet L, isNearLitter_litterSet L⟩
 
-noncomputable instance : Inhabited NearLitter :=
-  ⟨(default : Litter).toNearLitter⟩
+instance : Nonempty NearLitter :=
+  ⟨(Classical.arbitrary Litter).toNearLitter⟩
 
 @[simp]
 theorem toNearLitter_fst (L : Litter) : L.toNearLitter.fst = L :=
@@ -160,7 +163,10 @@ end Litter
 theorem mk_nearLitter : #NearLitter = #μ := by
   simp_rw [NearLitter, mk_sigma, mk_nearLitter', sum_const]
   simp only [NearLitter, mk_sigma, mk_nearLitter', sum_const, mk_litter, lift_id]
-  exact mul_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) le_rfl μ_isStrongLimit.ne_zero
+  exact mul_eq_left
+    (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le)
+    le_rfl
+    Params.μ_isStrongLimit.ne_zero
 
 /-- The *local cardinal* of a litter is the set of all near-litters to that litter. -/
 def localCardinal (L : Litter) : Set NearLitter :=

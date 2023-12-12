@@ -23,7 +23,6 @@ namespace ConNF
 
 variable [Params.{u}] {α : TypeIndex}
 
--- TODO: Make this a structure to try to make it easier to use lemmas with.
 /-- A *support condition* is an extended type index together with an atom or a near-litter.
 This represents an object in the base type (the atom or near-litter) together with the path
 detailing how we descend from type `α` to type `⊥` by looking at elements of elements and so on
@@ -33,9 +32,6 @@ structure SupportCondition (α : TypeIndex) : Type u
     where
   path : ExtendedIndex α
   value : Atom ⊕ NearLitter
-
-noncomputable instance : Inhabited (SupportCondition α) :=
-⟨default, Sum.inl default⟩
 
 def supportCondition_equiv : SupportCondition α ≃ ExtendedIndex α × (Atom ⊕ NearLitter)
     where
@@ -49,9 +45,11 @@ def supportCondition_equiv : SupportCondition α ≃ ExtendedIndex α × (Atom �
 theorem mk_supportCondition (α : TypeIndex) : #(SupportCondition α) = #μ := by
   rw [mk_congr supportCondition_equiv]
   simp only [SupportCondition, mk_prod, mk_sum, mk_atom, lift_id, mk_nearLitter]
-  rw [add_eq_left (κ_isRegular.aleph0_le.trans κ_le_μ) le_rfl]
-  exact mul_eq_right (κ_isRegular.aleph0_le.trans κ_le_μ)
-    (le_trans (mk_extendedIndex α) <| le_of_lt <| lt_trans Λ_lt_κ κ_lt_μ) (mk_ne_zero _)
+  rw [add_eq_left (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le) le_rfl]
+  exact mul_eq_right
+    (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le)
+    (le_trans (mk_extendedIndex α) <| le_of_lt <| lt_trans Params.Λ_lt_κ Params.κ_lt_μ)
+    (mk_ne_zero _)
 
 namespace StructPerm
 
@@ -150,7 +148,7 @@ theorem mk_support_le (x : τ) : #(Support α G x) ≤ #μ := by
     refine ⟨⟨fun s => ⟨s, Small.image s.prop⟩, fun s h => ?_⟩⟩
     simp only [Set.congr_apply, Subtype.mk.injEq]
     exact Subtype.eq
-  · rw [← mk_subset_mk_lt_cof μ_isStrongLimit.2]
-    exact mk_subtype_mono fun s hs => lt_of_lt_of_le hs κ_le_μ_ord_cof
+  · rw [← mk_subset_mk_lt_cof Params.μ_isStrongLimit.2]
+    exact mk_subtype_mono fun s hs => lt_of_lt_of_le hs Params.κ_le_μ_ord_cof
 
 end ConNF
