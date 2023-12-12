@@ -29,7 +29,7 @@ variable [Params.{u}] [Level]
 class TangleDataLt where
   data : ∀ β : Λ, [LtLevel β] → TangleData β
 
-noncomputable instance TangleDataLt.toTangleData [TangleDataLt] :
+instance TangleDataLt.toTangleData [TangleDataLt] :
     ∀ β : TypeIndex, [LtLevel β] → TangleData β
   | ⊥, _ => Bot.tangleData
   | (β : Λ), _ => TangleDataLt.data β

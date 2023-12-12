@@ -41,8 +41,4 @@ instance [LT β] [IsWellOrder β (· < ·)] : IsWellOrder α (InvImage (· < ·)
 instance [LT β] [IsWellOrder β (· < ·)] : WellFoundedRelation α :=
   IsWellOrder.toHasWellFounded
 
-open scoped Classical in
-noncomputable instance [LT β] [IsWellOrder β (· < ·)] : LinearOrder α :=
-  linearOrderOfSTO (· < ·)
-
 end ConNF

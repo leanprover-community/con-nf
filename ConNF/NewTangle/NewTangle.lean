@@ -348,12 +348,11 @@ theorem smul_aux₂
   exact this
 
 /-- Allowable permutations act on semitangles. -/
-noncomputable instance : SMul NewAllowable Semitangle
-    where smul ρ t :=
-    ⟨ρ • t.members, by
-      obtain ⟨members, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩ := t
-      · exact Preference.base (ρ.val ⊥ • s) (smul_aux₁ h)
-      · exact Preference.proper _ (isEven_smul.mpr ht) (smul_aux₂ h)⟩
+instance : SMul NewAllowable Semitangle where
+  smul ρ t := ⟨ρ • t.members, by
+    obtain ⟨members, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩ := t
+    · exact Preference.base (ρ.val ⊥ • s) (smul_aux₁ h)
+    · exact Preference.proper _ (isEven_smul.mpr ht) (smul_aux₂ h)⟩
 
 @[simp]
 theorem members_smul' (ρ : NewAllowable) (t : Semitangle) : (ρ • t).members = ρ • t.members :=
@@ -371,7 +370,7 @@ theorem smul_proper (ρ : NewAllowable) (e : Extensions) (γ : Λ) [LtLevel γ] 
       ⟨ρ • e, Preference.proper _ (isEven_smul.mpr ht) (smul_aux₂ h)⟩ :=
   rfl
 
-noncomputable instance mulActionSemitangle : MulAction NewAllowable Semitangle
+instance mulActionSemitangle : MulAction NewAllowable Semitangle
     where
   one_smul := by
     rintro ⟨exts, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩
@@ -484,7 +483,7 @@ end NewTangle
 namespace NewAllowable
 
 /-- Allowable permutations act on `α`-tangles. -/
-noncomputable instance hasSmulNewTangle : SMul NewAllowable NewTangle :=
+instance hasSmulNewTangle : SMul NewAllowable NewTangle :=
   ⟨fun ρ t =>
     ⟨ρ • (t : Semitangle),
       t.2.map fun (s : Support α NewAllowable (t : Semitangle)) =>
@@ -504,7 +503,7 @@ theorem coe_smul_newTangle (ρ : NewAllowable) (t : NewTangle) :
     ((ρ • t) : Semitangle) = ρ • (t : Semitangle) :=
   rfl
 
-noncomputable instance mulActionNewTangle : MulAction NewAllowable NewTangle :=
+instance mulActionNewTangle : MulAction NewAllowable NewTangle :=
   NewTangle.coe_injective.mulAction Subtype.val coe_smul_newTangle
 
 end NewAllowable

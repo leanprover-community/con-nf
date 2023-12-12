@@ -238,31 +238,6 @@ theorem noMaxOrder_of_ordinal_type_eq {α : Type u} [Preorder α] [Infinite α] 
   rw [← hb, Ordinal.typein_lt_typein] at this
   exact this
 
-noncomputable def succOrderOfIsWellOrder {α : Type u} [Preorder α] [Infinite α]
-    [inst : IsWellOrder α (· < ·)] (h : (Ordinal.type ((· < ·) : α → α → Prop)).IsLimit) :
-    SuccOrder α where
-  succ := inst.toIsWellFounded.wf.succ
-  le_succ a := le_of_lt (WellFounded.lt_succ _ ((noMaxOrder_of_ordinal_type_eq h).exists_gt a))
-  max_of_succ_le ha hb :=
-    (ha.not_lt (WellFounded.lt_succ _ ((noMaxOrder_of_ordinal_type_eq h).exists_gt _))).elim
-  succ_le_of_lt := by
-    intro a b ha
-    by_contra hb
-    obtain hab | hab | hab :=
-      inst.toIsTrichotomous.trichotomous (inst.toIsWellFounded.wf.succ a) b
-    · exact hb hab.le
-    · exact hb hab.le
-    · rw [WellFounded.lt_succ_iff ((noMaxOrder_of_ordinal_type_eq h).exists_gt a)] at hab
-      obtain (hab | hab) := hab
-      exact ha.not_lt hab
-      exact ha.ne hab.symm
-  le_of_lt_succ := by
-    intro a b ha
-    rw [WellFounded.lt_succ_iff ((noMaxOrder_of_ordinal_type_eq h).exists_gt _)] at ha
-    obtain (ha | ha) := ha
-    exact ha.le
-    exact ha.le
-
 variable [Params.{u}] {ι α β : Type u}
 
 /-! The types `Λ`, `κ`, `μ` are inhabited and infinite. -/

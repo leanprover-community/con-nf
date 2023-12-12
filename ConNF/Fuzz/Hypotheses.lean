@@ -196,7 +196,7 @@ theorem pos_atom_ne_pos_nearLitter [BasePositions] :
 
 /-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
 permutations to be near-litter permutations, and the designated supports to be singletons. -/
-noncomputable instance Bot.tangleData : TangleData ⊥
+instance Bot.tangleData : TangleData ⊥
     where
   Tangle := Atom
   Allowable := NearLitterPerm

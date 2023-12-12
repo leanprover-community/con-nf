@@ -34,7 +34,7 @@ stored inside it. -/
 def SemiallowablePerm : Type u :=
   ∀ β : TypeIndex, [LtLevel β] → Allowable β
 
-noncomputable instance : Group SemiallowablePerm := Pi.group
+instance : Group SemiallowablePerm := Pi.group
 
 namespace SemiallowablePerm
 
@@ -123,7 +123,7 @@ instance (A : ExtendedIndex α) : LtLevel (pathTop A) where
 /-- Convert a semi-allowable permutation to a structural permutation.
 To work out the `A`-derivative, we extract the first morphism in the path `A` and use it to
 determine which of the `β`-allowable permutations in `ρ` we will use. -/
-noncomputable def toStructPerm' (ρ : SemiallowablePerm) : StructPerm α :=
+def toStructPerm' (ρ : SemiallowablePerm) : StructPerm α :=
   fun A => Allowable.toStructPerm (ρ (pathTop A)) (pathTail A)
 
 theorem toStructPerm'_one : (toStructPerm' 1 : StructPerm α) = 1 := by
@@ -132,7 +132,7 @@ theorem toStructPerm'_one : (toStructPerm' 1 : StructPerm α) = 1 := by
   rfl
 
 /-- Convert a semi-allowable permutation to a structural permutation. -/
-noncomputable def toStructPerm : SemiallowablePerm →* StructPerm α
+def toStructPerm : SemiallowablePerm →* StructPerm α
     where
   toFun := toStructPerm'
   map_one' := by
@@ -154,7 +154,7 @@ section
 
 variable {X : Type _} [MulAction (StructPerm α) X]
 
-noncomputable instance : MulAction (SemiallowablePerm) X :=
+instance : MulAction (SemiallowablePerm) X :=
   MulAction.compHom _ toStructPerm
 
 @[simp]
@@ -260,22 +260,22 @@ instance : CoeTC NewAllowable SemiallowablePerm
 theorem coe_injective : Injective (Subtype.val : NewAllowable → SemiallowablePerm) :=
   Subtype.coe_injective
 
-noncomputable instance : One NewAllowable :=
+instance : One NewAllowable :=
   ⟨⟨1, isAllowable_one⟩⟩
 
-noncomputable instance : Inv NewAllowable :=
+instance : Inv NewAllowable :=
   ⟨fun ρ => ⟨ρ⁻¹, isAllowable_inv ρ.prop⟩⟩
 
-noncomputable instance : Mul NewAllowable :=
+instance : Mul NewAllowable :=
   ⟨fun ρ ρ' => ⟨ρ * ρ', isAllowable_mul ρ.prop ρ'.prop⟩⟩
 
-noncomputable instance : Div NewAllowable :=
+instance : Div NewAllowable :=
   ⟨fun ρ ρ' => ⟨ρ / ρ', isAllowable_div ρ.prop ρ'.prop⟩⟩
 
-noncomputable instance : Pow NewAllowable ℕ :=
+instance : Pow NewAllowable ℕ :=
   ⟨fun ρ n => ⟨ρ.val ^ n, isAllowable_pow ρ.prop n⟩⟩
 
-noncomputable instance : Pow NewAllowable ℤ :=
+instance : Pow NewAllowable ℤ :=
   ⟨fun ρ n => ⟨ρ.val ^ n, isAllowable_zpow ρ.prop n⟩⟩
 
 @[simp]
@@ -302,7 +302,7 @@ theorem coe_pow (ρ : NewAllowable) (n : ℕ) : ↑(ρ ^ n) = (ρ : Semiallowabl
 theorem coe_zpow (ρ : NewAllowable) (n : ℤ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm) ^ n :=
   rfl
 
-noncomputable instance : Group NewAllowable :=
+instance : Group NewAllowable :=
   coe_injective.group
     Subtype.val
     coe_one
@@ -314,21 +314,21 @@ noncomputable instance : Group NewAllowable :=
 
 /-- The coercion from allowable to semi-allowable permutations as a monoid homomorphism. -/
 @[simps]
-noncomputable def coeHom : NewAllowable →* SemiallowablePerm
+def coeHom : NewAllowable →* SemiallowablePerm
     where
   toFun := Subtype.val
   map_one' := coe_one
   map_mul' := coe_mul
 
 /-- Turn an allowable permutation into a structural permutation. -/
-noncomputable def toStructPerm : NewAllowable →* StructPerm α :=
+def toStructPerm : NewAllowable →* StructPerm α :=
   SemiallowablePerm.toStructPerm.comp coeHom
 
 section
 
 variable {X : Type _} [MulAction (SemiallowablePerm) X]
 
-noncomputable instance : MulAction NewAllowable X :=
+instance : MulAction NewAllowable X :=
   MulAction.compHom _ coeHom
 
 @[simp]
