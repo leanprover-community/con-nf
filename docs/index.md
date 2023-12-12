@@ -68,7 +68,7 @@ This allows us to satisfy TTT's extensionality axiom.
 Each type α can only be constructed under the assumption that all types β < α are of size exactly μ.
 It is easy to prove that the type of α-tangles has cardinality at least μ, so we need to show that there are at most μ elements of this set.
 We do this by showing that there are not that many fundamentally different descriptions of tangles under the action of allowable permutations.
-This requires the [freedom of action theorem](https://leanprover-community.github.io/con-nf/doc/ConNF/Foa/Result.html#ConNF.StructApprox.freedom_of_action), which is a technical lemma that allows us to construct allowable permutations.
+This requires the [freedom of action theorem](https://leanprover-community.github.io/con-nf/doc/ConNF/FOA/Result.html#ConNF.StructApprox.freedom_of_action), which is a technical lemma that allows us to construct allowable permutations.
 
 ### Finishing the induction
 
