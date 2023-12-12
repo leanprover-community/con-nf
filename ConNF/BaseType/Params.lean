@@ -281,21 +281,15 @@ The base type is written `⊥`. -/
 def TypeIndex :=
   WithBot Λ
 
-@[simp]
-theorem mk_typeIndex : #TypeIndex = #Λ :=
-  mk_option.trans <| add_eq_left aleph0_le_mk_Λ <| one_le_aleph0.trans aleph0_le_mk_Λ
-
 /-! Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
 This allows well founded recursion on type indices. -/
 
-noncomputable instance : LinearOrder TypeIndex :=
-  linearOrderOfSTO (· < ·)
-
-noncomputable instance : WellFoundedRelation TypeIndex :=
+instance : WellFoundedRelation TypeIndex :=
   IsWellOrder.toHasWellFounded
 
-noncomputable instance : WellFoundedLT TypeIndex :=
-  inferInstance
+@[simp]
+theorem mk_typeIndex : #TypeIndex = #Λ :=
+  mk_option.trans <| add_eq_left aleph0_le_mk_Λ <| one_le_aleph0.trans aleph0_le_mk_Λ
 
 /-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
 theorem card_Iio_lt (x : μ) : #(Set.Iio x) < #μ :=
