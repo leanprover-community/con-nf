@@ -114,20 +114,12 @@ such that we could run out of available values for the function.
 variable [Params.{u}] {β : TypeIndex} {γ : Λ} [TangleData β] [PositionedTangles β]
   [TangleData γ] [PositionedTangles γ] [TypedObjects γ] (hβγ : β ≠ γ)
 
--- TODO: Refactor to use near-litters directly instead of `IsNearLitter`.
-/-- The requirements to be satisfied by the f-maps.
-If `FuzzCondition` applied to a litter indexed by `ν` is true,
-then `ν` is *not* a valid output to `fuzz _ t`. -/
-inductive FuzzCondition (t : Tangle β) (ν : μ) : Prop
-  | any (N : Set Atom) (hN : IsNearLitter ⟨ν, β, γ, hβγ⟩ N) :
-    pos (typedNearLitter ⟨⟨ν, β, γ, hβγ⟩, N, hN⟩ : Tangle γ) ≤ pos t → FuzzCondition t ν
-  | bot (a : Atom) :
-      β = ⊥ →   -- this condition should only trigger for type `⊥`
-      HEq a t → -- using `HEq` instead of induction on `β` or the instance deals with some problems
-      pos (typedNearLitter (Litter.toNearLitter ⟨ν, ⊥, γ, bot_ne_coe⟩) : Tangle γ) ≤ pos a →
-      FuzzCondition t ν
-
 variable (γ)
+
+/-- The set of elements of `ν` that `fuzz _ t` cannot be. -/
+def fuzzDeny (t : Tangle β) : Set μ :=
+  { ν : μ | ∃ (N : NearLitter), pos (typedNearLitter N : Tangle γ) ≤ pos t ∧ ν = N.1.1 } ∪
+  { ν : μ | ∃ (a : Atom), pos a ≤ pos t ∧ ν = a.1.1 }
 
 theorem mk_invImage_lt (t : Tangle β) : #{ t' // t' < t } < #μ := by
   refine lt_of_le_of_lt ?_ (show #{ ν // ν < pos t } < #μ from card_Iio_lt _)
@@ -145,47 +137,27 @@ theorem mk_invImage_le (t : Tangle β) : #{ t' : Tangle γ // pos t' ≤ pos t }
 
 variable {γ}
 
-theorem mk_fuzz_deny (hβγ : β ≠ γ) (t : Tangle β) :
-    #{ t' // t' < t } + #{ ν // FuzzCondition hβγ t ν } < #μ := by
-  have h₁ := mk_invImage_lt t
-  suffices h₂ : #{ ν // FuzzCondition hβγ t ν } < #μ
-  · exact add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le h₁ h₂
-  have : ∀ ν, FuzzCondition hβγ t ν →
-    (∃ (N : Set Atom) (hN : IsNearLitter ⟨ν, β, γ, hβγ⟩ N),
-        pos (typedNearLitter ⟨_, N, hN⟩ : Tangle γ) ≤ pos t) ∨
-    (β = ⊥ ∧ ∃ a : Atom, HEq a t ∧
-    pos (typedNearLitter (Litter.toNearLitter ⟨ν, β, γ, hβγ⟩) : Tangle γ) ≤ pos a)
-  · intro i hi
-    obtain ⟨N, hN₁, hN₂⟩ | ⟨a, h₁, h₂, h₃⟩ := hi
-    · left; exact ⟨N, hN₁, hN₂⟩
-    · right; refine' ⟨h₁, a, h₂, _⟩; simp_rw [h₁]; exact h₃
-  refine lt_of_le_of_lt (mk_subtype_mono this) ?_
+theorem mk_fuzzDeny (t : Tangle β) :
+    #{ t' // t' < t } + #(fuzzDeny γ t) < #μ := by
+  refine add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le (mk_invImage_lt t) ?_
   refine lt_of_le_of_lt (mk_union_le _ _) ?_
   refine add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le ?_ ?_
   · refine lt_of_le_of_lt ?_ (mk_invImage_le γ t)
-    refine ⟨⟨fun i => ⟨_, i.prop.choose_spec.choose_spec⟩, ?_⟩⟩
-    intro i j h
-    simp only [Subtype.mk.injEq, EmbeddingLike.apply_eq_iff_eq] at h
-    apply_fun Sigma.fst at h
-    simp only [Litter.mk.injEq, Subtype.coe_inj, and_self, and_true] at h
-    exact h
-  · by_cases h : β = ⊥ ∧ ∃ a : Atom, HEq a t
-    · obtain ⟨_, a, hat⟩ := h
-      refine lt_of_le_of_lt ?_ (card_Iic_lt (pos a))
-      refine ⟨⟨fun i => ⟨pos (typedNearLitter
-        (Litter.toNearLitter ⟨i, β, γ, hβγ⟩) : Tangle γ), ?_⟩, ?_⟩⟩
-      · obtain ⟨ν, _, b, hb, _⟩ := i
-        rw [eq_of_heq (hat.trans hb.symm)]
-        assumption
-      · intro i j h
-        simp only [Subtype.mk.injEq, EmbeddingLike.apply_eq_iff_eq,
-          Litter.toNearLitter_injective.eq_iff,
-          Litter.mk.injEq, Subtype.coe_inj, and_self, and_true] at h
-        exact h
-    · refine' lt_of_eq_of_lt _ (lt_of_lt_of_le aleph0_pos Params.μ_isStrongLimit.isLimit.aleph0_le)
-      rw [mk_eq_zero_iff, isEmpty_coe_sort, Set.eq_empty_iff_forall_not_mem]
-      rintro i ⟨hb, a, ha, _⟩
-      exact h ⟨hb, a, ha⟩
+    refine ⟨⟨fun i => ⟨typedNearLitter i.prop.choose, i.prop.choose_spec.1⟩, ?_⟩⟩
+    intro ν₁ ν₂ h
+    have h' := typedNearLitter.injective (Subtype.coe_inj.mpr h)
+    have := ν₁.2.choose_spec.2
+    rw [h', ← ν₂.2.choose_spec.2] at this
+    exact Subtype.coe_inj.mp this
+  · have : #{ a : Atom | pos a ≤ pos t } < #μ
+    · refine lt_of_le_of_lt ?_ (card_Iic_lt (pos t))
+      refine ⟨⟨fun a => ⟨pos a.1, a.2⟩, ?_⟩⟩
+      intro a b h
+      exact Subtype.coe_inj.mp (pos_injective (Subtype.coe_inj.mpr h))
+    refine lt_of_le_of_lt ?_ this
+    refine mk_le_of_surjective (f := fun a => ⟨_, a.1, a.2, rfl⟩) ?_
+    rintro ⟨_, a, ha, rfl⟩
+    exact ⟨⟨a, ha⟩, rfl⟩
 
 /-!
 We're done with proving technical results, now we can define the `fuzz` maps.
@@ -209,7 +181,7 @@ the pos of the input to the function. This ensures a well-foundedness condition 
 in many places later.
 -/
 noncomputable def fuzz (t : Tangle β) : Litter :=
-  ⟨chooseWf (FuzzCondition hβγ) (mk_fuzz_deny hβγ) t, β, γ, hβγ⟩
+  ⟨chooseWf (fuzzDeny γ) mk_fuzzDeny t, β, γ, hβγ⟩
 
 @[simp]
 theorem fuzz_β (t : Tangle β) : (fuzz hβγ t).β = β :=
@@ -247,27 +219,21 @@ theorem fuzz_injective : Injective (fuzz hβγ) := by
   simp only [fuzz, Litter.mk.injEq, chooseWf_injective.eq_iff, and_self, and_true] at h
   exact h
 
-theorem fuzz_not_mem_deny (t : Tangle β) : (fuzz hβγ t).ν ∉ {ν | FuzzCondition hβγ t ν} :=
+theorem fuzz_not_mem_deny (t : Tangle β) : (fuzz hβγ t).ν ∉ fuzzDeny γ t :=
   chooseWf_not_mem_deny t
-
-theorem fuzz_pos' (t : Tangle β) (N : Set Atom) (h : IsNearLitter (fuzz hβγ t) N) :
-    pos t < pos (typedNearLitter ⟨fuzz hβγ t, N, h⟩ : Tangle γ) := by
-  have h' := fuzz_not_mem_deny hβγ t
-  contrapose! h'
-  -- Generalise the instances.
-  revert β
-  intro β
-  induction β using WithBot.recBotCoe <;>
-  · intros _ _ hβγ t h h'
-    exact FuzzCondition.any _ h h'
 
 theorem fuzz_pos (t : Tangle β) (N : NearLitter) (h : N.1 = fuzz hβγ t) :
     pos t < pos (typedNearLitter N : Tangle γ) := by
-  have := fuzz_pos' hβγ t N ((NearLitter.isNearLitter _ _).mpr h)
-  exact lt_of_lt_of_eq this (congr_arg _ (congr_arg _ (NearLitter.ext rfl)))
+  have h' := fuzz_not_mem_deny hβγ t
+  contrapose! h'
+  refine Or.inl ⟨N, h', ?_⟩
+  rw [h]
 
 theorem pos_lt_pos_fuzz (t : Tangle β) (a : Atom) (ha : a.1 = fuzz hβγ t) :
     pos t < pos a := by
-  sorry
+  have h' := fuzz_not_mem_deny hβγ t
+  contrapose! h'
+  refine Or.inr ⟨a, h', ?_⟩
+  rw [ha]
 
 end ConNF
