@@ -119,6 +119,10 @@ theorem coe_mk (L : Litter) (s : { s // IsNearLitter L s }) :
 theorem ext (h₂ : (N₁ : Set Atom) = N₂) : N₁ = N₂ :=
   SetLike.coe_injective h₂
 
+theorem nonempty (N : NearLitter) : Nonempty N := by
+  obtain ⟨a, ha⟩ := IsNearLitter.nonempty N.2.2
+  exact ⟨a, ha⟩
+
 /-- Reinterpret a near-litter as a product of a litter and a set of atoms. -/
 @[simps]
 def toProd (N : NearLitter) : Litter × Set Atom :=

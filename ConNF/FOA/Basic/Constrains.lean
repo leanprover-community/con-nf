@@ -38,7 +38,7 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
   | nearLitter (A : ExtendedIndex β) (N : NearLitter) (hN : ¬N.IsLitter) :
     Constrains ⟨A, inr N.fst.toNearLitter⟩ ⟨A, inr N⟩
   | symmDiff (A : ExtendedIndex β) (N : NearLitter) (a : Atom) :
-    a ∈ litterSet N.fst ∆ N.snd → Constrains ⟨A, inl a⟩ ⟨A, inr N⟩
+    a ∈ litterSet N.fst ∆ N → Constrains ⟨A, inl a⟩ ⟨A, inr N⟩
   | fuzz ⦃γ : Λ⦄ [LeLevel γ] ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε]
     (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε)
     (A : Path (β : TypeIndex) γ) (t : Tangle δ) (c : SupportCondition δ) :
@@ -59,8 +59,9 @@ inductive LitterConstrains : Litter → Litter → Prop
     (t : Tangle δ) {B : ExtendedIndex δ} {a : Atom} : ⟨B, inl a⟩ ∈ designatedSupport t →
     LitterConstrains a.1 (fuzz hδε t)
   | fuzz_nearLitter ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε] (hδε : (δ : TypeIndex) ≠ ε)
-    (t : Tangle δ) {B : ExtendedIndex δ} {N : NearLitter} : ⟨B, inr N⟩ ∈ designatedSupport t →
-    LitterConstrains N.1 (fuzz hδε t)
+    (t : Tangle δ) {B : ExtendedIndex δ} {N : NearLitter} (h : ⟨B, inr N⟩ ∈ designatedSupport t)
+    {a : Atom} (ha : a ∈ N) :
+    LitterConstrains a.1 (fuzz hδε t)
   | fuzz_bot ⦃ε : Λ⦄ [LtLevel ε] (a : Atom) :
     LitterConstrains a.1 (fuzz (bot_ne_coe (a := ε)) a)
 
@@ -124,12 +125,11 @@ theorem hasPosition_lt_of_litterConstrains {L₁ L₂ : Litter} (h : LitterConst
           cases h₁ with
           | inl h =>
               obtain ⟨δ, _, ε, _, hδε, t', ht', rfl⟩ := h
-              exact pos_lt_pos_of_atom_mem_designatedSupport t ht t' hδε ht'
+              exact pos_lt_pos_atom t ht t' hδε ht'
           | inr h =>
               obtain ⟨ε, _, a, h, rfl⟩ := h
-              exact pos_lt_pos_of_atom_mem_designatedSupport t ht
-                (show Tangle ⊥ from a) bot_ne_coe h
-  | fuzz_nearLitter hδε t ht =>
+              exact pos_lt_pos_atom t ht (show Tangle ⊥ from a) bot_ne_coe h
+  | fuzz_nearLitter hδε t ht ha =>
       cases h₂ with
       | inr h =>
           obtain ⟨_, _, _, h, rfl⟩ := h
@@ -142,11 +142,10 @@ theorem hasPosition_lt_of_litterConstrains {L₁ L₂ : Litter} (h : LitterConst
           cases h₁ with
           | inl h =>
               obtain ⟨δ, _, ε, _, hδε, t', ht', rfl⟩ := h
-              exact pos_lt_pos_of_nearLitter_mem_designatedSupport t ht t' hδε ht'
+              exact pos_lt_pos_nearLitter t ht t' hδε ⟨_, ha, ht'⟩
           | inr h =>
               obtain ⟨ε, _, a, h, rfl⟩ := h
-              exact pos_lt_pos_of_nearLitter_mem_designatedSupport t ht
-                (show Tangle ⊥ from a) bot_ne_coe h
+              exact pos_lt_pos_nearLitter t ht (show Tangle ⊥ from a) bot_ne_coe ⟨_, ha, h⟩
   | fuzz_bot a =>
       cases h₂ with
       | inl h =>
@@ -184,10 +183,6 @@ theorem litterConstrains_subrelation :
 theorem litterConstrains_wf : WellFounded LitterConstrains :=
   Subrelation.wf litterConstrains_subrelation IsWellFounded.wf
 
-/-- The `≺` relation is well-founded. -/
-theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : SupportCondition β → _ → Prop) :=
-  sorry
-
 @[simp]
 theorem constrains_atom {c : SupportCondition β} {A : ExtendedIndex β} {a : Atom} :
     c ≺ ⟨A, inl a⟩ ↔ c = ⟨A, inr a.1.toNearLitter⟩ := by
@@ -196,6 +191,101 @@ theorem constrains_atom {c : SupportCondition β} {A : ExtendedIndex β} {a : At
     rfl
   · rintro rfl
     exact Constrains.atom A a
+
+theorem constrains_nearLitter {c : SupportCondition β} {A : ExtendedIndex β}
+    {N : NearLitter} (hN : ¬N.IsLitter) :
+    c ≺ ⟨A, inr N⟩ ↔ c = ⟨A, inr N.1.toNearLitter⟩ ∨
+      ∃ a ∈ litterSet N.fst ∆ N.snd, c = ⟨A, inl a⟩ := by
+  constructor
+  · intro h
+    rw [Constrains_iff] at h
+    obtain ⟨A, a, rfl, hc⟩ | ⟨A, N, hN, rfl, hc⟩ | ⟨A, N, a, ha, rfl, hc⟩ |
+        ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, A, t, c, _, rfl, hc'⟩ |
+        ⟨γ, _, ε, _, hγ, A, a, rfl, hc⟩ := h
+    · cases hc
+    · cases hc
+      exact Or.inl rfl
+    · cases hc
+      exact Or.inr ⟨a, ha, rfl⟩
+    · cases hc'
+      cases hN (NearLitter.IsLitter.mk _)
+    · cases hc
+      cases hN (NearLitter.IsLitter.mk _)
+  · rintro (rfl | ⟨a, ha, rfl⟩)
+    · exact Constrains.nearLitter A N hN
+    · exact Constrains.symmDiff A N a ha
+
+theorem acc_atom {a : Atom} {A : ExtendedIndex β}
+    (h : Acc ((· ≺ ·) : SupportCondition β → _ → Prop) ⟨A, inr a.1.toNearLitter⟩) :
+    Acc ((· ≺ ·) : SupportCondition β → _ → Prop) ⟨A, inl a⟩ := by
+  constructor
+  intro c
+  rw [constrains_atom]
+  rintro rfl
+  exact h
+
+theorem acc_nearLitter {N : NearLitter} {A : ExtendedIndex β}
+    (h : ∀ a ∈ N, Acc ((· ≺ ·) : SupportCondition β → _ → Prop) ⟨A, inr a.1.toNearLitter⟩) :
+    Acc ((· ≺ ·) : SupportCondition β → _ → Prop) ⟨A, inr N⟩ := by
+  by_cases hN : N.IsLitter
+  · obtain ⟨L, rfl⟩ := hN.exists_litter_eq
+    obtain ⟨⟨a, rfl⟩⟩ := litterSet_nonempty L
+    exact h _ rfl
+  constructor
+  intro d hd
+  rw [constrains_nearLitter hN] at hd
+  obtain (rfl | ⟨a, ha, rfl⟩) := hd
+  · obtain ⟨a, ha⟩ := NearLitter.inter_nonempty_of_fst_eq_fst (N₁ := N) (N₂ := N.1.toNearLitter) rfl
+    have := h a ha.1
+    rw [ha.2] at this
+    exact this
+  · refine acc_atom ?_
+    obtain (ha | ha) := ha
+    · obtain ⟨b, hb⟩ := NearLitter.inter_nonempty_of_fst_eq_fst (N₁ := N) (N₂ := N.1.toNearLitter) rfl
+      have := h b hb.1
+      rw [hb.2, ← ha.1] at this
+      exact this
+    · exact h a ha.1
+
+/-- The `≺` relation is well-founded. -/
+theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : SupportCondition β → _ → Prop) := by
+  have : ∀ L : Litter, ∀ A : ExtendedIndex β,
+      Acc ((· ≺ ·) : SupportCondition β → _ → Prop) ⟨A, inr L.toNearLitter⟩
+  · intro L
+    refine litterConstrains_wf.induction
+      (C := fun L => ∀ A : ExtendedIndex β, Acc (· ≺ ·) ⟨A, inr L.toNearLitter⟩) L ?_
+    clear L
+    intro L ih A
+    constructor
+    intro c hc
+    rw [Constrains_iff] at hc
+    obtain ⟨A, a, rfl, hc⟩ | ⟨A, N, hN, rfl, hc⟩ | ⟨A, N, a, ha, rfl, hc⟩ |
+        ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, A, t, c, hc, rfl, hc'⟩ |
+        ⟨γ, _, ε, _, hγ, A, a, rfl, hc⟩ := hc
+    · cases hc
+    · cases hc
+      cases hN (NearLitter.IsLitter.mk _)
+    · cases hc
+      cases ha with
+      | inl ha => cases ha.2 ha.1
+      | inr ha => cases ha.2 ha.1
+    · simp only [SupportCondition.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff] at hc'
+      cases hc'.1
+      cases hc'.2
+      obtain ⟨B, a | N⟩ := c
+      · exact acc_atom (ih a.1 (LitterConstrains.fuzz_atom _ _ hc) _)
+      · refine acc_nearLitter ?_
+        intro a ha
+        exact ih _ (LitterConstrains.fuzz_nearLitter hδε t hc ha) _
+    · simp only [SupportCondition.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff] at hc
+      cases hc.1
+      cases hc.2
+      refine acc_atom (ih _ (LitterConstrains.fuzz_bot _) _)
+  constructor
+  intro c
+  obtain ⟨B, a | N⟩ := c
+  · exact acc_atom (this _ _)
+  · exact acc_nearLitter (fun _ _ => this _ _)
 
 /-- The constrains relation is stable under composition of paths. -/
 theorem constrains_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≺ d)

@@ -75,16 +75,16 @@ class FOAAssumptions extends FOAData where
     designatedSupport (ρ • t) = ρ • (designatedSupport t : Set (SupportCondition β))
   /-- Inflexible litters whose atoms occur in designated supports have position less than the
   original tangle. -/
-  pos_lt_pos_of_atom_mem_designatedSupport {β : Λ} [LtLevel β] (t : Tangle β)
+  pos_lt_pos_atom {β : Λ} [LtLevel β] (t : Tangle β)
     {A : ExtendedIndex β} {a : Atom} (ht : ⟨A, Sum.inl a⟩ ∈ designatedSupport t)
     {γ : TypeIndex} [LtLevel γ] (s : Tangle γ) {δ : Λ} [LtLevel δ] (hγδ : γ ≠ δ)
     (ha : a.1 = fuzz hγδ s) : pos s < pos t
-  /-- Inflexible litters with near-litters in designated supports have position less than the
+  /-- Inflexible litters touching near-litters in designated supports have position less than the
   original tangle. -/
-  pos_lt_pos_of_nearLitter_mem_designatedSupport {β : Λ} [LtLevel β] (t : Tangle β)
+  pos_lt_pos_nearLitter {β : Λ} [LtLevel β] (t : Tangle β)
     {A : ExtendedIndex β} {N : NearLitter} (ht : ⟨A, Sum.inr N⟩ ∈ designatedSupport t)
     {γ : TypeIndex} [LtLevel γ] (s : Tangle γ) {δ : Λ} [LtLevel δ] (hγδ : γ ≠ δ)
-    (hN : N.1 = fuzz hγδ s) : pos s < pos t
+    (h : Set.Nonempty ((N : Set Atom) ∩ (fuzz hγδ s).toNearLitter)) : pos s < pos t
   /-- The `fuzz` map commutes with allowable permutations. -/
   smul_fuzz {β : TypeIndex} [LeLevel β] {γ : TypeIndex} [LtLevel γ] {δ : Λ} [LtLevel δ]
     (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (ρ : Allowable β) (t : Tangle γ) :
@@ -106,7 +106,7 @@ class FOAAssumptions extends FOAData where
     allowableCons hγ (allowableOfSmulFuzz β ρs h) = ρs γ hγ
 
 export FOAAssumptions (allowableCons allowableCons_eq designatedSupport_smul
-  pos_lt_pos_of_atom_mem_designatedSupport pos_lt_pos_of_nearLitter_mem_designatedSupport
+  pos_lt_pos_atom pos_lt_pos_nearLitter
   smul_fuzz allowableOfSmulFuzz allowableOfSmulFuzz_comp_eq)
 
 attribute [simp] designatedSupport_smul allowableOfSmulFuzz_comp_eq
