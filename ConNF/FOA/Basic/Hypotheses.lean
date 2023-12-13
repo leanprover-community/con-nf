@@ -27,19 +27,7 @@ variable [Params.{u}] [Level]
 and near-litters in `BasePositions`. -/
 class PositionedTypedObjects (β : Λ) [TangleData β] [TypedObjects β] [PositionedTangles β] : Prop
     where
-  pos_atom_eq : ∀ a : Atom, pos (typedAtom a : Tangle β) = pos a
-  pos_nearLitter_eq :
-    ∀ N : NearLitter, pos (typedNearLitter N : Tangle β) = pos N
-  /-- All tangles are positioned later than all of the support conditions in their designated
-  support. -/
-  pos_atom_le :
-    ∀ (t : Tangle β) (A : ExtendedIndex β) (a : Atom),
-      ⟨A, Sum.inl a⟩ ∈ designatedSupport t → pos a ≤ pos t
-  /-- All tangles are positioned later than all of the support conditions in their designated
-  support. -/
-  pos_nearLitter_le :
-    ∀ (t : Tangle β) (A : ExtendedIndex β) (N : NearLitter),
-      ⟨A, Sum.inr N⟩ ∈ designatedSupport t → pos N ≤ pos t
+  -- TODO: Fill with what we need.
 
 /-- The data that we will use when proving the freedom of action theorem.
 This structure combines the following data:

@@ -22,43 +22,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}]
-
-section ExtendedIndex
-
-variable
-
-instance : Position (Atom ⊕ NearLitter) μ where
-  pos := {
-    toFun := fun x => match x with
-      | inl a => pos a
-      | inr N => pos N
-    inj' := by
-      rintro (a₁ | N₁) (a₂ | N₂) h
-      · exact congr_arg _ (pos_injective h)
-      · cases pos_atom_ne_pos_nearLitter a₁ N₂ h
-      · cases pos_atom_ne_pos_nearLitter a₂ N₁ h.symm
-      · exact congr_arg _ (pos_injective h)
-  }
-
-/-- Override the default instance for `LT (α ⊕ β)`. -/
-@[default_instance 1500]
-instance : LT (Atom ⊕ NearLitter) :=
-  ⟨InvImage (· < ·) pos⟩
-
-@[simp]
-theorem pos_atomNearLitter_inl (a : Atom) :
-    pos (inl a : Atom ⊕ NearLitter) = pos a :=
-  rfl
-
-@[simp]
-theorem pos_atomNearLitter_inr (N : NearLitter) :
-    pos (inr N : Atom ⊕ NearLitter) = pos N :=
-  rfl
-
-end ExtendedIndex
-
-variable [Level] [FOAAssumptions] {β : Λ}
+variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ}
 
 /-- Support conditions can be said to *constrain* each other in a number of ways.
 1. `(L, A) ≺ (a, A)` when `a ∈ L` and `L` is a litter. We can say that an atom is constrained by the
@@ -90,31 +54,10 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
 
 @[inherit_doc] infix:50 " ≺ " => Constrains
 
-theorem constrains_subrelation : Subrelation
-    ((· ≺ ·) : SupportCondition β → _ → Prop)
-    (InvImage (· < ·) SupportCondition.value) := by
-  intro c d h
-  obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h
-  · exact litter_lt_atom a.1 a rfl
-  · exact litter_lt_nearLitter N hN
-  · exact symmDiff_lt_nearLitter N a ha
-  · have := fuzz_pos hδε t ?_ ?_
-    rw [PositionedTypedObjects.pos_nearLitter_eq] at this
-    refine' lt_of_le_of_lt _ this
-    obtain ⟨B, a | N⟩ := c
-    · exact PositionedTypedObjects.pos_atom_le t B a hc
-    · exact PositionedTypedObjects.pos_nearLitter_le t B N hc
-    · rfl
-  · simp only [InvImage, elim_inr]
-    convert pos_atom_lt_fuzz a
-    simp only [← pos_lt_pos, pos_atomNearLitter_inl, pos_atomNearLitter_inr]
-    rw [@PositionedTypedObjects.pos_nearLitter_eq _ _ _ ?_ ?_ ?_ ?_ _]
-    infer_instance
-
 /-- The `≺` relation is well-founded. By the conditions on orderings, if we have `(x, A) ≺ (y, B)`,
 then `x < y` in `µ`, under the `typedNearLitter` or `typedAtom` maps. -/
 theorem constrains_wf (β : Λ) : WellFounded ((· ≺ · ) : SupportCondition β → _ → Prop) :=
-  Subrelation.wf constrains_subrelation IsWellFounded.wf
+  sorry
 
 @[simp]
 theorem constrains_atom {c : SupportCondition β} {A : ExtendedIndex β} {a : Atom} :
@@ -159,15 +102,6 @@ instance : PartialOrder (SupportCondition β) where
     obtain (h₂ | h₂) := Relation.reflTransGen_iff_eq_or_transGen.mp h₂
     · exact h₂
     cases (constrains_wf β).transGen.isIrrefl.irrefl c (h₁.trans h₂)
-
-theorem lt_subrelation : Subrelation
-    ((· < ·) : SupportCondition β → _ → Prop)
-    (InvImage (· < ·) SupportCondition.value) := by
-  intro c d h
-  change pos c.value < pos d.value
-  induction h with
-  | single hcd => exact constrains_subrelation hcd
-  | tail _ h ih => exact ih.trans (constrains_subrelation h)
 
 instance : WellFoundedLT (SupportCondition β) where
   wf := (constrains_wf β).transGen

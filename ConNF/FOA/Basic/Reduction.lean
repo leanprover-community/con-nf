@@ -209,12 +209,4 @@ theorem lt_of_mem_reducedSupport
   obtain ⟨⟨d, hd, hcd⟩, _⟩ := h
   exact Relation.TransGen.tail' (le_comp hcd _) (Constrains.fuzz hδ hε hδε B t d hd)
 
-theorem pos_lt_of_mem_reducedSupport
-    {β γ δ ε : Λ} [LeLevel β] [LeLevel γ] [LtLevel δ] [LtLevel ε]
-    (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε)
-    (B : Path (β : TypeIndex) γ) (t : Tangle δ)
-    (c : SupportCondition δ) (h : c ∈ reducedSupport t) :
-    pos c.value < pos (fuzz hδε t) :=
-  lt_subrelation (lt_of_mem_reducedSupport hδ hε hδε B t c h)
-
 end ConNF
