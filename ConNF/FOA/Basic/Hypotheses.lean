@@ -21,7 +21,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [BasePositions] [Level]
+variable [Params.{u}] [Level]
 
 /-- Asserts that the positions of typed objects agree with the position functions defined on atoms
 and near-litters in `BasePositions`. -/

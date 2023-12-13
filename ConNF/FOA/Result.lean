@@ -10,7 +10,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] [BasePositions] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
   [FreedomOfActionHypothesis β] {π : StructApprox β}
 
 noncomputable def completeAtomPerm (hπf : π.Free) (A : ExtendedIndex β) : Perm Atom :=

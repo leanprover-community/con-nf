@@ -8,7 +8,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [BasePositions] [Level] [FOAAssumptions] {β : TypeIndex}
+variable [Params.{u}] [Level] [FOAAssumptions] {β : TypeIndex}
 
 /-- A litter is *inflexible* if it is the image of some f-map. -/
 @[mk_iff]

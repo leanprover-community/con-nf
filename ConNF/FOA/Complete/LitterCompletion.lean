@@ -13,7 +13,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] [BasePositions] [Level] [FOAAssumptions]
+variable [Params.{u}] [Level] [FOAAssumptions]
 
 /-- The inductive hypothesis used for proving freedom of action:
 Every free approximation exactly approximates some allowable permutation. -/

@@ -132,68 +132,6 @@ theorem smul_typedNearLitter (ρ : Allowable α) (N : NearLitter) :
 
 end Allowable
 
-/-- This class stores the position of typed atoms and typed near-litters in the position function
-at any level, along with some conditions on these maps. -/
-class BasePositions where
-  /-- Gives the positions of typed atoms at any level. -/
-  typedAtomPosition : Atom ↪ μ
-  /-- Gives the positions of typed near-litters at any level. -/
-  typedNearLitterPosition : NearLitter ↪ μ
-  /-- Typed litters precede typed atoms they contain. -/
-  litter_lt_atom :
-    ∀ (L : Litter),
-      ∀ a ∈ litterSet L, typedNearLitterPosition L.toNearLitter < typedAtomPosition a
-  /-- Typed litters precede near-litters to them. -/
-  litter_le_nearLitter :
-    ∀ N : NearLitter, typedNearLitterPosition N.fst.toNearLitter ≤ typedNearLitterPosition N
-  /-- Atoms in the symmetric difference between a near-litter and its corresponding litter
-  precede the near-litter. -/
-  symmDiff_lt_nearLitter :
-    ∀ (N : NearLitter),
-      ∀ a ∈ litterSet N.fst ∆ N.snd, typedAtomPosition a < typedNearLitterPosition N
-  typedAtomPosition_ne_typedNearLitterPosition :
-    ∀ a N, typedAtomPosition a ≠ typedNearLitterPosition N
-
-instance [BasePositions] : Position Atom μ where
-  pos := BasePositions.typedAtomPosition
-
-instance [BasePositions] : Position NearLitter μ where
-  pos := BasePositions.typedNearLitterPosition
-
-instance [BasePositions] : Position Litter μ where
-  pos := {
-    toFun := fun L => pos L.toNearLitter
-    inj' := fun _ _ h => Litter.toNearLitter_injective (pos_injective h)
-  }
-
-/-- Typed litters precede typed atoms they contain. -/
-theorem litter_lt_atom [BasePositions] :
-    ∀ L : Litter, ∀ a ∈ litterSet L, pos L < pos a :=
-  BasePositions.litter_lt_atom
-
-/-- Typed litters precede near-litters to them. -/
-theorem litter_le_nearLitter [BasePositions] :
-    ∀ N : NearLitter, pos N.1 ≤ pos N :=
-  BasePositions.litter_le_nearLitter
-
-/-- Typed litters precede near-litters to them. -/
-theorem litter_lt_nearLitter [BasePositions] (N : NearLitter) (hN : ¬N.IsLitter) :
-    pos N.1 < pos N :=
-  lt_of_le_of_ne
-    (litter_le_nearLitter N)
-    (pos_injective.ne (f := (pos : NearLitter → μ)) (NearLitter.not_isLitter' hN))
-
-/-- Atoms in the symmetric difference between a near-litter and its corresponding litter
-precede the near-litter. -/
-theorem symmDiff_lt_nearLitter [BasePositions] :
-    ∀ N : NearLitter, ∀ a ∈ litterSet N.fst ∆ N.snd, pos a < pos N :=
-  BasePositions.symmDiff_lt_nearLitter
-
-/-- Atoms and near-litters cannot be assigned the same position. -/
-theorem pos_atom_ne_pos_nearLitter [BasePositions] :
-    ∀ a : Atom, ∀ N : NearLitter, pos a ≠ pos N :=
-  BasePositions.typedAtomPosition_ne_typedNearLitterPosition
-
 /-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
 permutations to be near-litter permutations, and the designated supports to be singletons. -/
 instance Bot.tangleData : TangleData ⊥
@@ -211,11 +149,13 @@ instance Bot.tangleData : TangleData ⊥
         exact h
       small := small_singleton _ }
 
-/-- The position function at level `⊥`, which is chosen arbitrarily. -/
-noncomputable instance Bot.positionedTangles : PositionedTangles ⊥ :=
+/-- A position function for atoms, which is chosen arbitrarily. -/
+noncomputable instance instPositionAtom : Position Atom μ :=
   ⟨Nonempty.some mk_atom.le⟩
 
--- TODO: Require coherence between `pos : Tangle ⊥ → μ` and `pos : Atom → μ`?
+/-- The position function at level `⊥`, which is chosen arbitrarily. -/
+noncomputable instance Bot.positionedTangles : PositionedTangles ⊥ :=
+  ⟨instPositionAtom.pos⟩
 
 /-- The identity equivalence between `⊥`-allowable permutations and near-litter permutations.
 This equivalence is a group isomorphism. -/

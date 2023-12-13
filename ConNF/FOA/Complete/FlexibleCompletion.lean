@@ -8,7 +8,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [BasePositions] [Level] [FOAAssumptions] {β : TypeIndex}
+variable [Params.{u}] [Level] [FOAAssumptions] {β : TypeIndex}
   (π : NearLitterApprox) (A : ExtendedIndex β)
 
 namespace NearLitterApprox

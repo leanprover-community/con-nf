@@ -12,7 +12,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] [BasePositions] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
   [FreedomOfActionHypothesis β]
 
 /-!

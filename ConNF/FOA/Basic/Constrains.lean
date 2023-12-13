@@ -26,7 +26,7 @@ variable [Params.{u}]
 
 section ExtendedIndex
 
-variable [BasePositions]
+variable
 
 instance : Position (Atom ⊕ NearLitter) μ where
   pos := {
@@ -58,7 +58,7 @@ theorem pos_atomNearLitter_inr (N : NearLitter) :
 
 end ExtendedIndex
 
-variable [BasePositions] [Level] [FOAAssumptions] {β : Λ}
+variable [Level] [FOAAssumptions] {β : Λ}
 
 /-- Support conditions can be said to *constrain* each other in a number of ways.
 1. `(L, A) ≺ (a, A)` when `a ∈ L` and `L` is a litter. We can say that an atom is constrained by the

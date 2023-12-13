@@ -112,7 +112,7 @@ such that we could run out of available values for the function.
 -/
 
 variable [Params.{u}] {β : TypeIndex} {γ : Λ} [TangleData β] [PositionedTangles β]
-  [BasePositions] [TangleData γ] [PositionedTangles γ] [TypedObjects γ] (hβγ : β ≠ γ)
+  [TangleData γ] [PositionedTangles γ] [TypedObjects γ] (hβγ : β ≠ γ)
 
 -- TODO: Refactor to use near-litters directly instead of `IsNearLitter`.
 /-- The requirements to be satisfied by the f-maps.
