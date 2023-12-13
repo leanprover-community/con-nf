@@ -266,11 +266,8 @@ theorem fuzz_pos (t : Tangle β) (N : NearLitter) (h : N.1 = fuzz hβγ t) :
   have := fuzz_pos' hβγ t N ((NearLitter.isNearLitter _ _).mpr h)
   exact lt_of_lt_of_eq this (congr_arg _ (congr_arg _ (NearLitter.ext rfl)))
 
-theorem pos_atom_lt_fuzz (t : Tangle ⊥) :
-  pos (show Atom from t) <
-    pos (typedNearLitter (fuzz (bot_ne_coe : (⊥ : TypeIndex) ≠ γ) t).toNearLitter : Tangle γ) := by
-  have := fuzz_not_mem_deny (bot_ne_coe : (⊥ : TypeIndex) ≠ γ) t
-  contrapose! this
-  exact FuzzCondition.bot t rfl HEq.rfl this
+theorem pos_lt_pos_fuzz (t : Tangle β) (a : Atom) (ha : a.1 = fuzz hβγ t) :
+    pos t < pos a := by
+  sorry
 
 end ConNF

@@ -54,9 +54,138 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
 
 @[inherit_doc] infix:50 " ≺ " => Constrains
 
-/-- The `≺` relation is well-founded. By the conditions on orderings, if we have `(x, A) ≺ (y, B)`,
-then `x < y` in `µ`, under the `typedNearLitter` or `typedAtom` maps. -/
-theorem constrains_wf (β : Λ) : WellFounded ((· ≺ · ) : SupportCondition β → _ → Prop) :=
+inductive LitterConstrains : Litter → Litter → Prop
+  | fuzz_atom ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε] (hδε : (δ : TypeIndex) ≠ ε)
+    (t : Tangle δ) {B : ExtendedIndex δ} {a : Atom} : ⟨B, inl a⟩ ∈ designatedSupport t →
+    LitterConstrains a.1 (fuzz hδε t)
+  | fuzz_nearLitter ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε] (hδε : (δ : TypeIndex) ≠ ε)
+    (t : Tangle δ) {B : ExtendedIndex δ} {N : NearLitter} : ⟨B, inr N⟩ ∈ designatedSupport t →
+    LitterConstrains N.1 (fuzz hδε t)
+  | fuzz_bot ⦃ε : Λ⦄ [LtLevel ε] (a : Atom) :
+    LitterConstrains a.1 (fuzz (bot_ne_coe (a := ε)) a)
+
+@[mk_iff]
+inductive HasPosition : Litter → μ → Prop
+  | fuzz ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε] (hδε : (δ : TypeIndex) ≠ ε) (t : Tangle δ) :
+    HasPosition (fuzz hδε t) (pos t)
+  | fuzz_bot ⦃ε : Λ⦄ [LtLevel ε] (a : Atom) :
+    HasPosition (fuzz (bot_ne_coe (a := ε)) a) (pos a)
+
+theorem hasPosition_subsingleton {L : Litter} {ν₁ ν₂ : μ}
+    (h₁ : HasPosition L ν₁) (h₂ : HasPosition L ν₂) : ν₁ = ν₂ := by
+  rw [HasPosition_iff] at h₁ h₂
+  cases h₁ with
+  | inl h₁ =>
+      obtain ⟨δ, _, ε, _, hδε, t, rfl, rfl⟩ := h₁
+      cases h₂ with
+      | inl h₂ =>
+          obtain ⟨_, _, _, _, _, t, ht, rfl⟩ := h₂
+          cases fuzz_congr_β ht
+          cases fuzz_congr_γ ht
+          cases fuzz_injective _ ht
+          rfl
+      | inr h₂ =>
+          obtain ⟨_, _, a, ha, rfl⟩ := h₂
+          cases fuzz_congr_β ha
+  | inr h₁ =>
+      obtain ⟨_, _, a, rfl, rfl⟩ := h₁
+      cases h₂ with
+      | inl h₂ =>
+          obtain ⟨_, _, _, _, _, t, ht, rfl⟩ := h₂
+          cases fuzz_congr_β ht
+      | inr h₂ =>
+          obtain ⟨_, _, a, ha, rfl⟩ := h₂
+          cases fuzz_congr_γ ha
+          cases fuzz_injective _ ha
+          rfl
+
+theorem hasPosition_of_litterConstrains {L₁ L₂ : Litter} (h : LitterConstrains L₁ L₂) :
+    ∃ ν, HasPosition L₂ ν := by
+  cases h
+  · exact ⟨_, HasPosition.fuzz _ _⟩
+  · exact ⟨_, HasPosition.fuzz _ _⟩
+  · exact ⟨_, HasPosition.fuzz_bot _⟩
+
+theorem hasPosition_lt_of_litterConstrains {L₁ L₂ : Litter} (h : LitterConstrains L₁ L₂)
+    {ν₁ ν₂ : μ} (h₁ : HasPosition L₁ ν₁) (h₂ : HasPosition L₂ ν₂) :
+    ν₁ < ν₂ := by
+  rw [HasPosition_iff] at h₁ h₂
+  cases h with
+  | fuzz_atom hδε t ht =>
+      cases h₂ with
+      | inr h =>
+          obtain ⟨_, _, _, h, rfl⟩ := h
+          cases fuzz_congr_β h
+      | inl h =>
+          obtain ⟨δ, _, ε, _, _, t', ht', rfl⟩ := h
+          cases fuzz_congr_β ht'
+          cases fuzz_congr_γ ht'
+          cases fuzz_injective _ ht'
+          cases h₁ with
+          | inl h =>
+              obtain ⟨δ, _, ε, _, hδε, t', ht', rfl⟩ := h
+              exact pos_lt_pos_of_atom_mem_designatedSupport t ht t' hδε ht'
+          | inr h =>
+              obtain ⟨ε, _, a, h, rfl⟩ := h
+              exact pos_lt_pos_of_atom_mem_designatedSupport t ht
+                (show Tangle ⊥ from a) bot_ne_coe h
+  | fuzz_nearLitter hδε t ht =>
+      cases h₂ with
+      | inr h =>
+          obtain ⟨_, _, _, h, rfl⟩ := h
+          cases fuzz_congr_β h
+      | inl h =>
+          obtain ⟨δ, _, ε, _, _, t', ht', rfl⟩ := h
+          cases fuzz_congr_β ht'
+          cases fuzz_congr_γ ht'
+          cases fuzz_injective _ ht'
+          cases h₁ with
+          | inl h =>
+              obtain ⟨δ, _, ε, _, hδε, t', ht', rfl⟩ := h
+              exact pos_lt_pos_of_nearLitter_mem_designatedSupport t ht t' hδε ht'
+          | inr h =>
+              obtain ⟨ε, _, a, h, rfl⟩ := h
+              exact pos_lt_pos_of_nearLitter_mem_designatedSupport t ht
+                (show Tangle ⊥ from a) bot_ne_coe h
+  | fuzz_bot a =>
+      cases h₂ with
+      | inl h =>
+          obtain ⟨_, _, _, _, _, _, h, rfl⟩ := h
+          cases fuzz_congr_β h
+      | inr h =>
+          obtain ⟨ε, _, a, ha, rfl⟩ := h
+          cases fuzz_congr_γ ha
+          cases fuzz_injective _ ha
+          cases h₁ with
+          | inl h =>
+              obtain ⟨δ, _, ε, _, hδε, t', ht', rfl⟩ := h
+              exact pos_lt_pos_fuzz _ t' a ht'
+          | inr h =>
+              obtain ⟨ε, _, a', ha', rfl⟩ := h
+              exact pos_lt_pos_fuzz _ (show Tangle ⊥ from a') a ha'
+
+open scoped Classical in
+noncomputable def positionOrBot (L : Litter) : WithBot μ :=
+  if h : ∃ ν, HasPosition L ν then h.choose else ⊥
+
+theorem litterConstrains_subrelation :
+    Subrelation LitterConstrains (InvImage (· < ·) positionOrBot) := by
+  intro L₁ L₂ h
+  obtain ⟨ν₂, hν₂⟩ := hasPosition_of_litterConstrains h
+  by_cases h₁ : ∃ ν₁, HasPosition L₁ ν₁
+  · obtain ⟨ν₁, hν₁⟩ := h₁
+    rw [InvImage, positionOrBot, positionOrBot, dif_pos ⟨ν₁, hν₁⟩, dif_pos ⟨ν₂, hν₂⟩,
+      hasPosition_subsingleton (Exists.choose_spec ⟨ν₁, hν₁⟩) hν₁,
+      hasPosition_subsingleton (Exists.choose_spec ⟨ν₂, hν₂⟩) hν₂]
+    exact WithBot.coe_lt_coe.mpr (hasPosition_lt_of_litterConstrains h hν₁ hν₂)
+  · rw [InvImage, positionOrBot, positionOrBot, dif_neg h₁, dif_pos ⟨ν₂, hν₂⟩]
+    exact bot_lt_coe _
+
+theorem litterConstrains_wf : WellFounded LitterConstrains :=
+  Subrelation.wf litterConstrains_subrelation IsWellFounded.wf
+
+/-- The `≺` relation is well-founded. -/
+theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : SupportCondition β → _ → Prop) :=
   sorry
 
 @[simp]

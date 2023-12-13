@@ -7,8 +7,6 @@ This file contains the inductive hypotheses required for proving the freedom of 
 
 ## Main declarations
 
-* `ConNF.PositionedTypedObjects`: Asserts that the positions of typed objects agree with the
-    position functions defined on atoms and near-litters in `BasePositions`.
 * `ConNF.FOAData`: Contains various kinds of tangle data for all levels below `α`.
 * `ConNF.FOAAssumptions`: Describes how the type levels in the `FOAData` tangle together.
 -/
@@ -23,12 +21,6 @@ namespace ConNF
 
 variable [Params.{u}] [Level]
 
-/-- Asserts that the positions of typed objects agree with the position functions defined on atoms
-and near-litters in `BasePositions`. -/
-class PositionedTypedObjects (β : Λ) [TangleData β] [TypedObjects β] [PositionedTangles β] : Prop
-    where
-  -- TODO: Fill with what we need.
-
 /-- The data that we will use when proving the freedom of action theorem.
 This structure combines the following data:
 * `Tangle`
@@ -41,7 +33,6 @@ class FOAData where
   lowerTangleData : ∀ β : Λ, [LeLevel β] → TangleData β
   lowerPositionedTangles : ∀ β : Λ, [LtLevel β] → PositionedTangles β
   lowerTypedObjects : ∀ β : Λ, [LeLevel β] → TypedObjects β
-  lowerPositionedTypedObjects : ∀ β : Λ, [LtLevel β] → PositionedTypedObjects β
 
 namespace FOAData
 
@@ -55,9 +46,6 @@ instance positionedTangles : PositionedTangles γ :=
 
 instance typedObjects : TypedObjects β :=
   lowerTypedObjects β
-
-instance positionedTypedObjects : PositionedTypedObjects γ :=
-  lowerPositionedTypedObjects γ
 
 noncomputable instance iicBotTangleData : ∀ β : TypeIndex, [LeLevel β] → TangleData β
   | ⊥, _ => Bot.tangleData
@@ -85,6 +73,18 @@ class FOAAssumptions extends FOAData where
   /-- Designated supports commute with allowable permutations. -/
   designatedSupport_smul {β : Λ} [LeLevel β] (t : Tangle β) (ρ : Allowable β) :
     designatedSupport (ρ • t) = ρ • (designatedSupport t : Set (SupportCondition β))
+  /-- Inflexible litters whose atoms occur in designated supports have position less than the
+  original tangle. -/
+  pos_lt_pos_of_atom_mem_designatedSupport {β : Λ} [LtLevel β] (t : Tangle β)
+    {A : ExtendedIndex β} {a : Atom} (ht : ⟨A, Sum.inl a⟩ ∈ designatedSupport t)
+    {γ : TypeIndex} [LtLevel γ] (s : Tangle γ) {δ : Λ} [LtLevel δ] (hγδ : γ ≠ δ)
+    (ha : a.1 = fuzz hγδ s) : pos s < pos t
+  /-- Inflexible litters with near-litters in designated supports have position less than the
+  original tangle. -/
+  pos_lt_pos_of_nearLitter_mem_designatedSupport {β : Λ} [LtLevel β] (t : Tangle β)
+    {A : ExtendedIndex β} {N : NearLitter} (ht : ⟨A, Sum.inr N⟩ ∈ designatedSupport t)
+    {γ : TypeIndex} [LtLevel γ] (s : Tangle γ) {δ : Λ} [LtLevel δ] (hγδ : γ ≠ δ)
+    (hN : N.1 = fuzz hγδ s) : pos s < pos t
   /-- The `fuzz` map commutes with allowable permutations. -/
   smul_fuzz {β : TypeIndex} [LeLevel β] {γ : TypeIndex} [LtLevel γ] {δ : Λ} [LtLevel δ]
     (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (ρ : Allowable β) (t : Tangle γ) :
@@ -106,6 +106,7 @@ class FOAAssumptions extends FOAData where
     allowableCons hγ (allowableOfSmulFuzz β ρs h) = ρs γ hγ
 
 export FOAAssumptions (allowableCons allowableCons_eq designatedSupport_smul
+  pos_lt_pos_of_atom_mem_designatedSupport pos_lt_pos_of_nearLitter_mem_designatedSupport
   smul_fuzz allowableOfSmulFuzz allowableOfSmulFuzz_comp_eq)
 
 attribute [simp] designatedSupport_smul allowableOfSmulFuzz_comp_eq
