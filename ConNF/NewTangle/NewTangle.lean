@@ -28,7 +28,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [BasePositions] [Level] [TangleDataLt]
+variable [Params.{u}] [Level] [TangleDataLt]
   {β : TypeIndex} [LtLevel β] {γ : Λ} [LtLevel γ]
 
 open Code

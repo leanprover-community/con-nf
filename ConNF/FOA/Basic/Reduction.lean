@@ -25,7 +25,7 @@ open scoped Cardinal Pointwise
 
 namespace ConNF
 
-variable [Params.{u}] [BasePositions] [Level] [FOAAssumptions]
+variable [Params.{u}] [Level] [FOAAssumptions]
 variable {β : Λ} {G : Type _} {τ : Type _} [SMul G (SupportCondition β)] [SMul G τ] {x : τ}
 
 /-- A support condition is *reduced* if it is an atom or a litter. -/
@@ -208,13 +208,5 @@ theorem lt_of_mem_reducedSupport
       ⟨(B.cons hε).cons (bot_lt_coe _), inr (fuzz hδε t).toNearLitter⟩ := by
   obtain ⟨⟨d, hd, hcd⟩, _⟩ := h
   exact Relation.TransGen.tail' (le_comp hcd _) (Constrains.fuzz hδ hε hδε B t d hd)
-
-theorem pos_lt_of_mem_reducedSupport
-    {β γ δ ε : Λ} [LeLevel β] [LeLevel γ] [LtLevel δ] [LtLevel ε]
-    (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε)
-    (B : Path (β : TypeIndex) γ) (t : Tangle δ)
-    (c : SupportCondition δ) (h : c ∈ reducedSupport t) :
-    pos c.value < pos (fuzz hδε t) :=
-  lt_subrelation (lt_of_mem_reducedSupport hδ hε hδε B t c h)
 
 end ConNF

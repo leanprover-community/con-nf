@@ -70,6 +70,10 @@ def litterSetEquiv (L : Litter) : litterSet L ≃ κ := ⟨
 theorem mk_litterSet (L : Litter) : #(litterSet L) = #κ :=
   Cardinal.eq.2 ⟨litterSetEquiv L⟩
 
+theorem litterSet_nonempty (L : Litter) : Nonempty (litterSet L) := by
+  rw [← Cardinal.mk_ne_zero_iff, mk_litterSet]
+  exact mk_ne_zero κ
+
 /-- Two litters with different indices have disjoint litter sets. -/
 theorem pairwise_disjoint_litterSet : Pairwise (Disjoint on litterSet) :=
   fun _ _ h => disjoint_left.2 fun _ h₁ h₂ => h <| h₁.symm.trans h₂

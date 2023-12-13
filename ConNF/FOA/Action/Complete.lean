@@ -12,7 +12,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] (φ : NearLitterAction) [BasePositions] [Level]
+variable [Params.{u}] (φ : NearLitterAction) [Level]
   [FOAAssumptions] {β : Λ} {A : ExtendedIndex β}
 
 namespace NearLitterAction
