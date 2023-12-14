@@ -15,7 +15,7 @@ In this file, we define support conditions and supports.
 
 open Cardinal Equiv
 
-open scoped Cardinal
+open scoped Cardinal Pointwise
 
 universe u
 
@@ -126,11 +126,27 @@ def Support.carrier (S : Support α) : Set (SupportCondition α) :=
 instance : CoeTC (Support α) (Set (SupportCondition α)) where
   coe S := S.carrier
 
+instance : Membership (SupportCondition α) (Support α) where
+  mem c S := c ∈ S.carrier
+
+@[simp]
+theorem Support.mem_carrier_iff (c : SupportCondition α) (S : Support α) :
+    c ∈ S.carrier ↔ ∃ i, ∃ (h : i < S.max), c = S.f i h :=
+  Iff.rfl
+
+@[simp]
+theorem Support.mem_iff (c : SupportCondition α) (S : Support α) :
+    c ∈ S ↔ ∃ i, ∃ (h : i < S.max), c = S.f i h :=
+  Iff.rfl
+
 theorem Support.carrier_small (S : Support α) : Small S.carrier := by
   refine lt_of_le_of_lt (b := #(Set.Iio S.max)) ?_ (card_typein_lt (· < ·) S.max Params.κ_ord.symm)
   refine mk_le_of_surjective (f := fun x => ⟨S.f x x.prop, x, x.prop, rfl⟩) ?_
   rintro ⟨_, i, h, rfl⟩
   exact ⟨⟨i, h⟩, rfl⟩
+
+theorem Support.small (S : Support α) : Small (S : Set (SupportCondition α)) :=
+  S.carrier_small
 
 def supportEquiv : Support α ≃ Σ max : κ, Set.Iio max → SupportCondition α where
   toFun S := ⟨S.max, fun x => S.f x x.prop⟩
@@ -224,5 +240,50 @@ theorem mk_support_le : #(Support α) ≤ #μ := by
     exact card_typein_lt (· < ·) i Params.κ_ord.symm
   · simp only [sum_const, lift_id, mul_mk_eq_max, ge_iff_le, max_le_iff, le_refl, and_true]
     exact Params.κ_lt_μ.le
+
+instance {G : Type _} [SMul G (SupportCondition α)] : SMul G (Support α) where
+  smul g S := ⟨S.max, fun i hi => g • S.f i hi⟩
+
+@[simp]
+theorem smul_max {G : Type _} [SMul G (SupportCondition α)] (g : G) (S : Support α) :
+    (g • S).max = S.max :=
+  rfl
+
+@[simp]
+theorem smul_f {G : Type _} [SMul G (SupportCondition α)]
+    (g : G) (S : Support α) (i : κ) (hi : i < S.max) :
+    (g • S).f i hi = g • S.f i hi :=
+  rfl
+
+@[simp]
+theorem smul_carrier {G : Type _} [SMul G (SupportCondition α)] (g : G) (S : Support α) :
+    (g • S).carrier = g • S.carrier := by
+  ext x : 1
+  constructor
+  · rintro ⟨i, hi, h⟩
+    exact ⟨_, ⟨i, hi, rfl⟩, h.symm⟩
+  · rintro ⟨_, ⟨i, hi, rfl⟩, h⟩
+    exact ⟨i, hi, h.symm⟩
+
+@[simp]
+theorem smul_coe {G : Type _} [SMul G (SupportCondition α)] (g : G) (S : Support α) :
+    (g • S : Support α) = g • (S : Set (SupportCondition α)) :=
+  smul_carrier g S
+
+instance {G : Type _} [Monoid G] [MulAction G (SupportCondition α)] : MulAction G (Support α) where
+  one_smul := by
+    rintro ⟨i, f⟩
+    ext
+    · rfl
+    · refine heq_of_eq (funext₂ ?_)
+      intro j hj
+      simp only [smul_f, one_smul]
+  mul_smul g h := by
+    rintro ⟨i, f⟩
+    ext
+    · rfl
+    · refine heq_of_eq (funext₂ ?_)
+      intro j hj
+      simp only [smul_f, mul_smul]
 
 end ConNF

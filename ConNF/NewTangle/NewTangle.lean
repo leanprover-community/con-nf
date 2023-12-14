@@ -400,7 +400,8 @@ end NewAllowable
 This is `τ_α` in the blueprint.
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
 def NewTangle :=
-  { t : Semitangle // Supported α NewAllowable t }
+  { t : Semitangle //
+    ∃ S : Support α, MulAction.Supports NewAllowable (S : Set (SupportCondition α)) t }
 
 variable {c d : Code} {S : Set (SupportCondition α)}
 
@@ -419,9 +420,11 @@ theorem Code.Equiv.supports_iff (hcd : c ≡ d) :
 
 /-- If two codes are equivalent, one is supported if and only if the other is. -/
 theorem Code.Equiv.supported_iff (hcd : c ≡ d) :
-    Supported α NewAllowable c ↔ Supported α NewAllowable d :=
-  ⟨fun ⟨⟨s, hs, h⟩⟩ => ⟨⟨s, hs, hcd.supports h⟩⟩,
-    fun ⟨⟨s, hs, h⟩⟩ => ⟨⟨s, hs, hcd.symm.supports h⟩⟩⟩
+    (∃ S : Support α, MulAction.Supports NewAllowable (S : Set (SupportCondition α)) c) ↔
+    ∃ S : Support α, MulAction.Supports NewAllowable (S : Set (SupportCondition α)) d := by
+  constructor <;> rintro ⟨S, hS⟩
+  · exact ⟨S, hcd.supports hS⟩
+  · exact ⟨S, hcd.symm.supports hS⟩
 
 @[simp]
 theorem smul_intro {β : TypeIndex} [inst : LtLevel β]  (ρ : NewAllowable) (s : Set (Tangle β)) (hs) :
@@ -457,17 +460,19 @@ theorem NewAllowable.smul_supportCondition_eq_smul_iff
 This is called a *typed near litter*. -/
 def newTypedNearLitter (N : NearLitter) : NewTangle :=
   ⟨intro (show Set (Tangle ⊥) from N.2.1) <| Code.isEven_bot _,
-    ⟨⟨{⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩}, small_singleton _, fun ρ h => by
-        simp only [smul_intro]
-        congr 1
-        simp only [mem_singleton_iff, NewAllowable.smul_supportCondition_eq_iff, forall_eq,
-          Sum.smul_inr, Sum.inr.injEq] at h
-        apply_fun SetLike.coe at h
-        refine Eq.trans ?_ h
-        rw [NearLitterPerm.smul_nearLitter_coe]
-        change _ '' _ = _ '' _
-        simp_rw [SemiallowablePerm.coe_apply_bot]
-        rfl⟩⟩⟩
+    ⟨1, fun _ _ => ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩⟩,
+    by
+      intro ρ h
+      simp only [smul_intro]
+      congr 1
+      simp only [Support.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
+        NewAllowable.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inr, Sum.inr.injEq] at h
+      apply_fun SetLike.coe at h
+      refine Eq.trans ?_ h
+      rw [NearLitterPerm.smul_nearLitter_coe]
+      change _ '' _ = _ '' _
+      simp_rw [SemiallowablePerm.coe_apply_bot]
+      rfl⟩
 
 namespace NewTangle
 
@@ -486,17 +491,18 @@ namespace NewAllowable
 instance hasSmulNewTangle : SMul NewAllowable NewTangle :=
   ⟨fun ρ t =>
     ⟨ρ • (t : Semitangle),
-      t.2.map fun (s : Support α NewAllowable (t : Semitangle)) =>
-        { carrier := ρ • (s : Set (SupportCondition α))
-          small := s.small.image
-          supports := by
-            intro ρ' h
-            have := s.supports (ρ⁻¹ * ρ' * ρ) ?_
-            · conv_rhs =>
-                rw [← this, ← mul_smul, ← mul_assoc, ← mul_assoc, mul_inv_self, one_mul, mul_smul]
-            · intro a ha
-              rw [mul_smul, mul_smul, inv_smul_eq_iff]
-              exact h (smul_mem_smul_set ha) }⟩⟩
+      by
+        obtain ⟨S, hS⟩ := t.2
+        refine ⟨ρ • S, ?_⟩
+        intro ρ' h
+        have := hS (ρ⁻¹ * ρ' * ρ) ?_
+        · conv_rhs =>
+            rw [← this, ← mul_smul, ← mul_assoc, ← mul_assoc, mul_inv_self, one_mul, mul_smul]
+        · intro a ha
+          rw [mul_smul, mul_smul, inv_smul_eq_iff]
+          refine h ?_
+          simp only [Support.mem_carrier_iff, smul_carrier, smul_mem_smul_set_iff] at ha ⊢
+          exact ha⟩⟩
 
 @[simp, norm_cast]
 theorem coe_smul_newTangle (ρ : NewAllowable) (t : NewTangle) :

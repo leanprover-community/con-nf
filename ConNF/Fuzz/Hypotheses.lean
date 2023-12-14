@@ -145,14 +145,11 @@ instance Bot.tangleData : TangleData ⊥
   Allowable := NearLitterPerm
   allowableToStructPerm := Tree.toBotIso.toMonoidHom
   allowableAction := inferInstance
-  designatedSupport a := ⟨1, _⟩
-    -- { carrier := {⟨Quiver.Path.nil, Sum.inl a⟩}
-    --   supports := fun π => by
-    --     intro h
-    --     simp only [mem_singleton_iff, NearLitterPerm.smul_supportCondition_eq_iff, forall_eq,
-    --       Sum.smul_inl, Sum.inl.injEq] at h
-    --     exact h
-    --   small := small_singleton _ }
+  designatedSupport a := ⟨1, fun _ _ => ⟨Quiver.Path.nil, Sum.inl a⟩⟩
+  designatedSupport_supports a π h := by
+    simp only [Support.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
+      NearLitterPerm.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
+    exact h
 
 /-- A position function for atoms, which is chosen arbitrarily. -/
 noncomputable instance instPositionAtom : Position Atom μ :=

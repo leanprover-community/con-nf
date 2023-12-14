@@ -184,29 +184,8 @@ theorem reduction_supports (S : Set (SupportCondition β)) (c : SupportCondition
 theorem reduction_designatedSupport_supports [TangleData β] (t : Tangle β) :
     Supports (Allowable β) (reduction (designatedSupport t : Set (SupportCondition β))) t := by
   intro ρ h
-  refine (designatedSupport t).supports ρ ?_
+  refine designatedSupport_supports t ρ ?_
   intros c hc'
   exact reduction_supports (designatedSupport t) c hc' (Allowable.toStructPerm ρ) h
-
-/-- A support for a tangle containing only reduced support conditions. -/
-noncomputable def reducedSupport [TangleData β] (t : Tangle β) : Support β (Allowable β) t
-    where
-  carrier := reduction (designatedSupport t : Set (SupportCondition β))
-  small := reduction_small (designatedSupport t).small
-  supports := reduction_designatedSupport_supports t
-
-theorem mem_reducedSupport_iff [TangleData β] (t : Tangle β) (c : SupportCondition β) :
-    c ∈ reducedSupport t ↔ c ∈ reduction (designatedSupport t : Set (SupportCondition β)) :=
-  Iff.rfl
-
-theorem lt_of_mem_reducedSupport
-    {β γ δ ε : Λ} [LeLevel β] [LeLevel γ] [LtLevel δ] [LtLevel ε]
-    (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε)
-    (B : Path (β : TypeIndex) γ) (t : Tangle δ)
-    (c : SupportCondition δ) (h : c ∈ reducedSupport t) :
-    (⟨(B.cons hδ).comp c.path, c.value⟩ : SupportCondition β) <
-      ⟨(B.cons hε).cons (bot_lt_coe _), inr (fuzz hδε t).toNearLitter⟩ := by
-  obtain ⟨⟨d, hd, hcd⟩, _⟩ := h
-  exact Relation.TransGen.tail' (le_comp hcd _) (Constrains.fuzz hδ hε hδε B t d hd)
 
 end ConNF
