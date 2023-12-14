@@ -405,9 +405,9 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺ 
     · obtain ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, B, t, rfl, rfl⟩ := h
       refine lt_of_le_of_lt ?_ (designatedSupport t).small
       suffices
-        #{a : SupportCondition β |
-            ∃ c : designatedSupport t, a = ⟨(B.cons hδ).comp c.val.path, c.val.value⟩} ≤
-          #(designatedSupport t) by
+        #{a : SupportCondition β | ∃ c : (designatedSupport t : Set (SupportCondition δ)),
+            a = ⟨(B.cons hδ).comp c.val.path, c.val.value⟩} ≤
+          #(designatedSupport t : Set (SupportCondition δ)) by
         refine le_trans (Cardinal.mk_subtype_le_of_subset ?_) this
         rintro x ⟨_, _, _, _, _, _, _, _, _, _, _, c, hc, rfl, h⟩
         rw [SupportCondition.mk.injEq] at h

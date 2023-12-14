@@ -218,7 +218,7 @@ theorem Biexact.smul_eq_smul {β : Λ} [LeLevel β] {π π' : Allowable β} {c :
     refine h₁.trans (h₂.trans ?_).symm
     refine' congr_arg _ _
     rw [← inv_smul_eq_iff, smul_smul]
-    refine' (designatedSupport t).supports _ _
+    refine' designatedSupport_supports t _ _
     intro c hc
     rw [mul_smul, inv_smul_eq_iff]
     simp only [Allowable.toStructPerm_smul, Allowable.toStructPerm_comp, Tree.comp_comp]
@@ -423,7 +423,7 @@ theorem supports {β : Λ} [LeLevel β] {π π' : Allowable β} {t : Tangle β}
       Allowable.toStructPerm π' A • N) :
     π • t = π' • t := by
   rw [← inv_smul_eq_iff, smul_smul]
-  refine' (designatedSupport t).supports _ _
+  refine' designatedSupport_supports t _ _
   intro c hc
   rw [mul_smul, inv_smul_eq_iff]
   simp only [Allowable.smul_supportCondition_eq_smul_iff]
@@ -802,7 +802,7 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : SupportCondition β) (A : 
         (ihsAction_comp_mapFlexible hπf _ _ _) • hL₂.t := by
   obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ := hL₂
   rw [← inv_smul_eq_iff, smul_smul]
-  refine' (designatedSupport t).supports _ _
+  refine' designatedSupport_supports t _ _
   intro e he
   rw [mul_smul, inv_smul_eq_iff]
   simp only [ne_eq, Allowable.smul_supportCondition_eq_smul_iff]

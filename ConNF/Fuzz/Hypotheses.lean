@@ -41,10 +41,11 @@ class TangleData (α : TypeIndex) where
   [allowableGroup : Group Allowable]
   allowableToStructPerm : Allowable →* StructPerm α
   [allowableAction : MulAction Allowable Tangle]
-  designatedSupport :
+  designatedSupport : Tangle → Support α
+  designatedSupport_supports (t : Tangle) :
     haveI : MulAction Allowable (SupportCondition α) :=
       MulAction.compHom _ allowableToStructPerm
-    (t : Tangle) → Support α Allowable t
+    MulAction.Supports Allowable (designatedSupport t : Set (SupportCondition α)) t
 
 export TangleData (Tangle Allowable)
 
@@ -87,8 +88,12 @@ end Allowable
 
 /-- For each tangle, we provide a small support for it. This is known as the designated support of
 the tangle. -/
-def designatedSupport {α : TypeIndex} [TangleData α] (t : Tangle α) : Support α (Allowable α) t :=
+def designatedSupport {α : TypeIndex} [TangleData α] (t : Tangle α) : Support α :=
   TangleData.designatedSupport t
+
+theorem designatedSupport_supports {α : TypeIndex} [TangleData α] (t : Tangle α) :
+    MulAction.Supports (Allowable α) (designatedSupport t : Set (SupportCondition α)) t :=
+  TangleData.designatedSupport_supports t
 
 class PositionedTangles (α : TypeIndex) [TangleData α] where
   /-- A position function, giving each tangle a unique position `ν : μ`.
@@ -140,14 +145,11 @@ instance Bot.tangleData : TangleData ⊥
   Allowable := NearLitterPerm
   allowableToStructPerm := Tree.toBotIso.toMonoidHom
   allowableAction := inferInstance
-  designatedSupport a :=
-    { carrier := {⟨Quiver.Path.nil, Sum.inl a⟩}
-      supports := fun π => by
-        intro h
-        simp only [mem_singleton_iff, NearLitterPerm.smul_supportCondition_eq_iff, forall_eq,
-          Sum.smul_inl, Sum.inl.injEq] at h
-        exact h
-      small := small_singleton _ }
+  designatedSupport a := ⟨1, fun _ _ => ⟨Quiver.Path.nil, Sum.inl a⟩⟩
+  designatedSupport_supports a π h := by
+    simp only [Support.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
+      NearLitterPerm.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
+    exact h
 
 /-- A position function for atoms, which is chosen arbitrarily. -/
 noncomputable instance instPositionAtom : Position Atom μ :=
