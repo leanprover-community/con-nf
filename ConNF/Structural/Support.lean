@@ -13,7 +13,7 @@ In this file, we define support conditions and supports.
 * `ConNF.Support`: The type of small supports made of support conditions.
 -/
 
-open Cardinal Equiv MulAction Quiver
+open Cardinal Equiv
 
 open scoped Cardinal
 
@@ -114,41 +114,115 @@ theorem smul_supportCondition_eq_smul_iff :
 
 end NearLitterPerm
 
-variable (G : Type _) (α) {τ : Type _} [SMul G (SupportCondition α)] [SMul G τ]
+/-- A *support* is a function from an initial segment of κ to the type of support conditions. -/
+@[ext]
+structure Support (α : TypeIndex) where
+  max : κ
+  f : (i : κ) → i < max → SupportCondition α
 
-/-- A (small) support of an object is a small set of support conditions that support it. -/
-structure Support (x : τ) where
-  carrier : Set (SupportCondition α)
-  small : Small carrier
-  supports : Supports G carrier x
+def Support.carrier (S : Support α) : Set (SupportCondition α) :=
+  { c | ∃ i, ∃ (h : i < S.max), c = S.f i h }
 
-/-- An element of `τ` is *supported* if it has some support. -/
-def Supported (x : τ) : Prop :=
-  Nonempty <| Support α G x
+instance : CoeTC (Support α) (Set (SupportCondition α)) where
+  coe S := S.carrier
 
-instance Support.setLike (x : τ) : SetLike (Support α G x) (SupportCondition α)
-    where
-  coe := Support.carrier
-  coe_injective' s t h := by
-    cases s
-    cases t
-    congr
+theorem Support.carrier_small (S : Support α) : Small S.carrier := by
+  refine lt_of_le_of_lt (b := #(Set.Iio S.max)) ?_ (card_typein_lt (· < ·) S.max Params.κ_ord.symm)
+  refine mk_le_of_surjective (f := fun x => ⟨S.f x x.prop, x, x.prop, rfl⟩) ?_
+  rintro ⟨_, i, h, rfl⟩
+  exact ⟨⟨i, h⟩, rfl⟩
 
-@[simp]
-theorem Support.carrier_eq_coe {x : τ} {s : Support α G x} : s.carrier = s :=
-  rfl
+def supportEquiv : Support α ≃ Σ max : κ, Set.Iio max → SupportCondition α where
+  toFun S := ⟨S.max, fun x => S.f x x.prop⟩
+  invFun S := ⟨S.1, fun i h => S.2 ⟨i, h⟩⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
 
-/-- There are at most `μ` supports for a given `x : τ`. -/
-theorem mk_support_le (x : τ) : #(Support α G x) ≤ #μ := by
-  trans #{ s : Set μ // Small s }
-  trans #{ S : Set (SupportCondition α) // Small S }
-  · refine ⟨⟨fun s => ⟨s.carrier, s.small⟩, fun s t h => ?_⟩⟩
-    simpa only [Subtype.mk_eq_mk, Support.carrier_eq_coe, SetLike.coe_set_eq] using h
-  · rw [← mk_subtype_of_equiv Small (Equiv.Set.congr (Cardinal.eq.mp (mk_supportCondition α)).some)]
-    refine ⟨⟨fun s => ⟨s, Small.image s.prop⟩, fun s h => ?_⟩⟩
-    simp only [Set.congr_apply, Subtype.mk.injEq]
-    exact Subtype.eq
-  · rw [← mk_subset_mk_lt_cof Params.μ_isStrongLimit.2]
-    exact mk_subtype_mono fun s hs => lt_of_lt_of_le hs Params.κ_le_μ_ord_cof
+def funMap (α β : Type _) [LT β] (f : α → β) :
+    { S : Set β // #S ≤ #α } × (α → α → Prop) :=
+  ⟨⟨Set.range f, mk_range_le⟩, InvImage (· < ·) f⟩
+
+theorem funMap_injective {α β : Type _} [LinearOrder β] [IsWellOrder β (· < ·)] :
+    Function.Injective (funMap α β) := by
+  intro f g h
+  simp only [funMap, Prod.mk.injEq, Subtype.mk.injEq] at h
+  suffices : ∀ y : β, ∀ x : α, f x = y → g x = y
+  · ext x : 1
+    rw [this]
+    rfl
+  intro y
+  refine IsWellFounded.induction (· < ·) (C := fun y => ∀ x : α, f x = y → g x = y) y ?_
+  clear y
+  rintro y ih x rfl
+  obtain ⟨y, h₁⟩ : f x ∈ Set.range g
+  · rw [← h.1]
+    exact ⟨x, rfl⟩
+  rw [← h₁]
+  obtain (h₂ | h₂ | h₂) := lt_trichotomy (g x) (g y)
+  · obtain ⟨z, h₃⟩ : g x ∈ Set.range f
+    · rw [h.1]
+      exact ⟨x, rfl⟩
+    rw [h₁, ← h₃] at h₂
+    have h₄ := ih (f z) h₂ z rfl
+    have := congr_fun₂ h.2 z x
+    simp only [InvImage, h₂, eq_iff_iff, true_iff] at this
+    rw [h₄, h₃] at this
+    cases lt_irrefl _ this
+  · exact h₂
+  · have := congr_fun₂ h.2 y x
+    simp only [InvImage, eq_iff_iff] at this
+    rw [← this] at h₂
+    have := ih (f y) h₂ y rfl
+    have := h₂.trans_eq (h₁.symm.trans this)
+    cases lt_irrefl _ this
+
+theorem mk_fun_le {α β : Type u} :
+    #(α → β) ≤ #({ S : Set β // #S ≤ #α } × (α → α → Prop)) := by
+  classical
+  obtain ⟨r, hr⟩ := IsWellOrder.subtype_nonempty (σ := β)
+  let _ := linearOrderOfSTO r
+  exact ⟨⟨funMap α β, funMap_injective⟩⟩
+
+theorem pow_le_of_isStrongLimit' {α β : Type u} [Infinite α] [Infinite β]
+    (h₁ : IsStrongLimit #β) (h₂ : #α < (#β).ord.cof) : #β ^ #α ≤ #β := by
+  refine le_trans mk_fun_le ?_
+  simp only [mk_prod, lift_id, mk_pi, mk_fintype, Fintype.card_prop, Nat.cast_ofNat, prod_const,
+    lift_id', lift_two]
+  have h₃ : #{ S : Set β // #S ≤ #α } ≤ #β
+  · rw [← mk_subset_mk_lt_cof h₁.2]
+    refine ⟨⟨fun S => ⟨S, S.prop.trans_lt h₂⟩, ?_⟩⟩
+    intro S T h
+    simp only [Subtype.mk.injEq] at h
+    exact Subtype.coe_injective h
+  have h₄ : (2 ^ #α) ^ #α ≤ #β
+  · rw [← power_mul, mul_eq_self (Cardinal.infinite_iff.mp inferInstance)]
+    refine (h₁.2 _ ?_).le
+    exact h₂.trans_le (Ordinal.cof_ord_le #β)
+  refine le_trans (mul_le_max _ _) ?_
+  simp only [ge_iff_le, le_max_iff, max_le_iff, le_aleph0_iff_subtype_countable, h₃, h₄, and_self,
+    aleph0_le_mk]
+
+theorem pow_le_of_isStrongLimit {κ μ : Cardinal.{u}} (h₁ : IsStrongLimit μ) (h₂ : κ < μ.ord.cof) :
+    μ ^ κ ≤ μ := by
+  by_cases h : κ < ℵ₀
+  · exact pow_le h₁.isLimit.aleph0_le h
+  · revert h₁ h₂ h
+    refine inductionOn₂ κ μ ?_
+    intro α β h₁ h₂ h
+    have := Cardinal.infinite_iff.mpr (le_of_not_lt h)
+    have := Cardinal.infinite_iff.mpr h₁.isLimit.aleph0_le
+    exact pow_le_of_isStrongLimit' h₁ h₂
+
+/-- There are at most `μ` supports. -/
+theorem mk_support_le : #(Support α) ≤ #μ := by
+  rw [Cardinal.mk_congr supportEquiv]
+  simp only [mk_sigma, mk_pi, mk_supportCondition, prod_const, lift_id]
+  refine le_trans (sum_le_sum _ (fun _ => #μ) ?_) ?_
+  · intro i
+    refine pow_le_of_isStrongLimit Params.μ_isStrongLimit ?_
+    refine lt_of_lt_of_le ?_ Params.κ_le_μ_ord_cof
+    exact card_typein_lt (· < ·) i Params.κ_ord.symm
+  · simp only [sum_const, lift_id, mul_mk_eq_max, ge_iff_le, max_le_iff, le_refl, and_true]
+    exact Params.κ_lt_μ.le
 
 end ConNF

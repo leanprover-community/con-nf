@@ -54,9 +54,10 @@ class Params where
   [κ_isWellOrder : IsWellOrder κ (· < ·)]
   κ_ord : Ordinal.type ((· < ·) : κ → κ → Prop) = (#κ).ord
   κ_isRegular : (#κ).IsRegular
+  [κ_succ : SuccOrder κ]
   [κ_addMonoid : AddMonoid κ]
-  [κ_covariant : CovariantClass κ κ (· + ·) (· ≤ ·)]
-  [κ_covariant_swap : CovariantClass κ κ (Function.swap (· + ·)) (· ≤ ·)]
+  κ_typein (i j : κ) : Ordinal.typein (· < ·) (i + j : κ) =
+    Ordinal.typein (· < ·) i + Ordinal.typein (· < ·) j
   Λ_lt_κ : #Λ < #κ
   /--
   A large type used in indexing the litters.
@@ -82,6 +83,41 @@ There exist valid parameters for the model. The smallest such parameters are
 * `κ := ℵ_1`
 * `μ = ℶ_{ω_1}`.
 -/
+
+theorem noMaxOrder_of_ordinal_type_eq {α : Type u} [Preorder α] [Infinite α] [IsWellOrder α (· < ·)]
+    (h : (Ordinal.type ((· < ·) : α → α → Prop)).IsLimit) : NoMaxOrder α := by
+  refine ⟨fun a => ?_⟩
+  have := (Ordinal.succ_lt_of_isLimit h).mpr (Ordinal.typein_lt_type (· < ·) a)
+  obtain ⟨b, hb⟩ := Ordinal.typein_surj (· < ·) this
+  refine ⟨b, ?_⟩
+  have := Order.lt_succ (Ordinal.typein (fun x y => x < y) a)
+  rw [← hb, Ordinal.typein_lt_typein] at this
+  exact this
+
+noncomputable def succOrderOfIsWellOrder {α : Type u} [Preorder α] [Infinite α]
+    [inst : IsWellOrder α (· < ·)] (h : (Ordinal.type ((· < ·) : α → α → Prop)).IsLimit) :
+    SuccOrder α where
+  succ := inst.toIsWellFounded.wf.succ
+  le_succ a := le_of_lt (WellFounded.lt_succ _ ((noMaxOrder_of_ordinal_type_eq h).exists_gt a))
+  max_of_succ_le ha hb :=
+    (ha.not_lt (WellFounded.lt_succ _ ((noMaxOrder_of_ordinal_type_eq h).exists_gt _))).elim
+  succ_le_of_lt := by
+    intro a b ha
+    by_contra hb
+    obtain hab | hab | hab :=
+      inst.toIsTrichotomous.trichotomous (inst.toIsWellFounded.wf.succ a) b
+    · exact hb hab.le
+    · exact hb hab.le
+    · rw [WellFounded.lt_succ_iff ((noMaxOrder_of_ordinal_type_eq h).exists_gt a)] at hab
+      obtain (hab | hab) := hab
+      exact ha.not_lt hab
+      exact ha.ne hab.symm
+  le_of_lt_succ := by
+    intro a b ha
+    rw [WellFounded.lt_succ_iff ((noMaxOrder_of_ordinal_type_eq h).exists_gt _)] at ha
+    obtain (ha | ha) := ha
+    exact ha.le
+    exact ha.le
 
 theorem typein_add_lt_of_type_eq_ord {α : Type _}
     [Infinite α] [LinearOrder α] [IsWellOrder α (· < ·)]
@@ -162,33 +198,6 @@ noncomputable def addMonoid_of_type_eq_ord {α : Type _}
     simp only [Ordinal.typein_enum, Ordinal.enum_inj, add_assoc]
   __ := addZeroClass_of_type_eq_ord h
 
-noncomputable def add_covariant_of_type_eq_ord {α : Type _}
-    [Infinite α] [LinearOrder α] [IsWellOrder α (· < ·)]
-    (h : Ordinal.type ((· < ·) : α → α → Prop) = (#α).ord) :
-    CovariantClass α α (add_of_type_eq_ord h).add (· ≤ ·) where
-  elim x y z := by
-    contrapose
-    rw [not_le, not_le]
-    intro h
-    have := (Ordinal.enum_lt_enum _ _).mp h
-    simp only [add_lt_add_iff_left, Ordinal.typein_lt_typein] at this
-    exact this
-
-noncomputable def add_covariant_swap_of_type_eq_ord {α : Type _}
-    [Infinite α] [LinearOrder α] [IsWellOrder α (· < ·)]
-    (h : Ordinal.type ((· < ·) : α → α → Prop) = (#α).ord) :
-    CovariantClass α α (Function.swap (add_of_type_eq_ord h).add) (· ≤ ·) where
-  elim x y z := by
-    contrapose
-    rw [not_le, not_le]
-    intro h
-    have := (Ordinal.enum_lt_enum _ _).mp h
-    obtain (h' | h' | h') := lt_trichotomy z y
-    · exact h'
-    · subst h'
-      simp only [lt_self_iff_false] at this
-    · cases (add_le_add_right ((Ordinal.typein_lt_typein (· < ·)).mpr h').le _).not_lt this
-
 noncomputable example : Params.{0} where
   Λ := ℕ
   Λ_zero_le := zero_le
@@ -200,18 +209,15 @@ noncomputable example : Params.{0} where
   κ_isRegular := by
     simp only [Cardinal.card_ord, Cardinal.mk_ordinal_out]
     exact isRegular_aleph_one
+  κ_succ :=
+    let _ : Infinite (aleph 1).ord.out.α :=
+      by simp only [Cardinal.infinite_iff, mk_ordinal_out, card_ord, aleph0_le_aleph]
+    succOrderOfIsWellOrder (by rw [Ordinal.type_lt]; exact ord_aleph_isLimit 1)
   κ_addMonoid :=
     let _ : Infinite (aleph 1).ord.out.α :=
       by simp only [Cardinal.infinite_iff, mk_ordinal_out, card_ord, aleph0_le_aleph]
     addMonoid_of_type_eq_ord (by simp)
-  κ_covariant :=
-    let _ : Infinite (aleph 1).ord.out.α :=
-      by simp only [Cardinal.infinite_iff, mk_ordinal_out, card_ord, aleph0_le_aleph]
-    add_covariant_of_type_eq_ord (by simp)
-  κ_covariant_swap :=
-    let _ : Infinite (aleph 1).ord.out.α :=
-      by simp only [Cardinal.infinite_iff, mk_ordinal_out, card_ord, aleph0_le_aleph]
-    add_covariant_swap_of_type_eq_ord (by simp)
+  κ_typein i j := Ordinal.typein_enum _ _
   Λ_lt_κ := by
     rw [mk_denumerable, mk_ordinal_out, card_ord]
     exact aleph0_lt_aleph_one
@@ -227,16 +233,6 @@ noncomputable example : Params.{0} where
     simp only [mk_out, mk_ordinal_out, card_ord]
     rw [beth_normal.cof_eq (ord_isLimit <| aleph0_le_aleph 1)]
     exact isRegular_aleph_one.2
-
-theorem noMaxOrder_of_ordinal_type_eq {α : Type u} [Preorder α] [Infinite α] [IsWellOrder α (· < ·)]
-    (h : (Ordinal.type ((· < ·) : α → α → Prop)).IsLimit) : NoMaxOrder α := by
-  refine ⟨fun a => ?_⟩
-  have := (Ordinal.succ_lt_of_isLimit h).mpr (Ordinal.typein_lt_type (· < ·) a)
-  obtain ⟨b, hb⟩ := Ordinal.typein_surj (· < ·) this
-  refine ⟨b, ?_⟩
-  have := Order.lt_succ (Ordinal.typein (fun x y => x < y) a)
-  rw [← hb, Ordinal.typein_lt_typein] at this
-  exact this
 
 variable [Params.{u}] {ι α β : Type u}
 
@@ -260,11 +256,14 @@ instance : NoMaxOrder Λ := noMaxOrder_of_ordinal_type_eq Params.Λ_isLimit
 
 instance : LinearOrder κ := Params.κ_linearOrder
 instance : IsWellOrder κ (· < ·) := Params.κ_isWellOrder
+instance : SuccOrder κ := Params.κ_succ
 instance : AddMonoid κ := Params.κ_addMonoid
-instance : CovariantClass κ κ (· + ·) (· ≤ ·) := Params.κ_covariant
-instance : CovariantClass κ κ (Function.swap (· + ·)) (· ≤ ·) := Params.κ_covariant_swap
 instance : Inhabited κ := ⟨0⟩
 instance : Infinite κ := Cardinal.infinite_iff.mpr Params.κ_isRegular.aleph0_le
+instance : NoMaxOrder κ := by
+  have := Cardinal.ord_isLimit Params.κ_isRegular.aleph0_le
+  rw [← Params.κ_ord] at this
+  exact noMaxOrder_of_ordinal_type_eq this
 
 instance : LinearOrder μ := Params.μ_linearOrder
 instance : IsWellOrder μ (· < ·) := Params.μ_isWellOrder
@@ -274,6 +273,74 @@ instance : NoMaxOrder μ := by
   have := Cardinal.ord_isLimit Params.μ_isStrongLimit.isLimit.aleph0_le
   rw [← Params.μ_ord] at this
   exact noMaxOrder_of_ordinal_type_eq this
+
+def κ_ofNat : ℕ → κ
+  | 0 => 0
+  | n + 1 => Order.succ (κ_ofNat n)
+
+instance (n : ℕ) : OfNat κ n := ⟨κ_ofNat n⟩
+
+instance : CovariantClass κ κ (· + ·) (· ≤ ·) := by
+  constructor
+  intro i j k h
+  rw [← not_lt, ← Ordinal.typein_le_typein (· < ·)] at h ⊢
+  rw [Params.κ_typein, Params.κ_typein]
+  exact add_le_add_left h _
+
+instance : CovariantClass κ κ (Function.swap (· + ·)) (· ≤ ·) := by
+  constructor
+  intro i j k h
+  rw [← not_lt, ← Ordinal.typein_le_typein (· < ·)] at h ⊢
+  rw [Params.κ_typein, Params.κ_typein]
+  exact add_le_add_right h _
+
+@[simp]
+theorem κ_typein_zero : Ordinal.typein ((· < ·) : κ → κ → Prop) 0 = 0 := by
+  have := add_zero (0 : κ)
+  rw [← Ordinal.typein_inj (· < ·), Params.κ_typein] at this
+  conv at this => rhs; rw [← add_zero (Ordinal.typein _ _)]
+  rw [Ordinal.add_left_cancel] at this
+  exact this
+
+theorem κ_le_zero_iff (i : κ) : i ≤ 0 ↔ i = 0 :=
+  by rw [← not_lt, ← Ordinal.typein_le_typein (· < ·), κ_typein_zero, Ordinal.le_zero,
+    ← κ_typein_zero, Ordinal.typein_inj]
+
+@[simp]
+theorem κ_add_eq_zero_iff (i j : κ) : i + j = 0 ↔ i = 0 ∧ j = 0 :=
+  by rw [← Ordinal.typein_inj (α := κ) (· < ·), ← Ordinal.typein_inj (α := κ) (· < ·),
+    ← Ordinal.typein_inj (α := κ) (· < ·), Params.κ_typein, κ_typein_zero, Ordinal.add_eq_zero_iff]
+
+@[simp]
+theorem κ_succ_typein (i : κ) :
+    Ordinal.typein ((· < ·) : κ → κ → Prop) (Order.succ i) =
+    Ordinal.typein ((· < ·) : κ → κ → Prop) i + 1 := by
+  refine le_antisymm ?_ ?_
+  · have : i < Ordinal.enum (· < ·) (Ordinal.typein ((· < ·) : κ → κ → Prop) i + 1) ?_
+    · conv_lhs => rw [← Ordinal.enum_typein ((· < ·) : κ → κ → Prop) i]
+      rw [Ordinal.enum_lt_enum (r := (· < ·))]
+      · exact lt_add_one _
+      · have := Order.lt_succ i
+        rw [← Ordinal.typein_lt_typein ((· < ·) : κ → κ → Prop)] at this
+        exact (Order.succ_le_of_lt this).trans_lt (Ordinal.typein_lt_type _ _)
+    have := Order.succ_le_of_lt this
+    conv at this => lhs; rw [← Ordinal.enum_typein ((· < ·) : κ → κ → Prop) (Order.succ i)]
+    rw [← not_lt, Ordinal.enum_le_enum] at this
+    exact this
+  · simp only [Ordinal.add_one_eq_succ, Order.succ_le_iff, Ordinal.typein_lt_typein,
+      Order.lt_succ_iff_not_isMax, gt_iff_lt, not_isMax, not_false_eq_true]
+
+theorem κ_zero_lt_one : (0 : κ) < 1 := by
+  rw [← Ordinal.typein_lt_typein ((· < ·) : κ → κ → Prop)]
+  exact lt_of_lt_of_eq (lt_add_one _) (κ_succ_typein 0).symm
+
+@[simp]
+theorem κ_lt_one_iff (i : κ) : i < 1 ↔ i = 0 := by
+  constructor
+  · rw [← κ_le_zero_iff]
+    exact SuccOrder.le_of_lt_succ
+  · rintro rfl
+    exact κ_zero_lt_one
 
 /-- Either the base type or a proper type index (an element of `Λ`).
 The base type is written `⊥`. -/
