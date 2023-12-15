@@ -56,8 +56,11 @@ class Params where
   κ_isRegular : (#κ).IsRegular
   [κ_succ : SuccOrder κ]
   [κ_addMonoid : AddMonoid κ]
-  κ_typein (i j : κ) : Ordinal.typein (· < ·) (i + j : κ) =
+  [κ_sub : Sub κ]
+  κ_add_typein (i j : κ) : Ordinal.typein (· < ·) (i + j : κ) =
     Ordinal.typein (· < ·) i + Ordinal.typein (· < ·) j
+  κ_sub_typein (i j : κ) : Ordinal.typein (· < ·) (i - j : κ) =
+    Ordinal.typein (· < ·) i - Ordinal.typein (· < ·) j
   Λ_lt_κ : #Λ < #κ
   /--
   A large type used in indexing the litters.
@@ -198,6 +201,12 @@ noncomputable def addMonoid_of_type_eq_ord {α : Type _}
     simp only [Ordinal.typein_enum, Ordinal.enum_inj, add_assoc]
   __ := addZeroClass_of_type_eq_ord h
 
+noncomputable def sub_of_isWellOrder {α : Type _}
+    [LinearOrder α] [IsWellOrder α (· < ·)] : Sub α where
+  sub x y := Ordinal.enum (· < ·)
+    (Ordinal.typein (· < ·) x - Ordinal.typein (· < ·) y)
+      ((Ordinal.sub_le_self _ _).trans_lt (Ordinal.typein_lt_type _ _))
+
 noncomputable example : Params.{0} where
   Λ := ℕ
   Λ_zero_le := zero_le
@@ -217,7 +226,9 @@ noncomputable example : Params.{0} where
     let _ : Infinite (aleph 1).ord.out.α :=
       by simp only [Cardinal.infinite_iff, mk_ordinal_out, card_ord, aleph0_le_aleph]
     addMonoid_of_type_eq_ord (by simp)
-  κ_typein i j := Ordinal.typein_enum _ _
+  κ_sub := sub_of_isWellOrder
+  κ_add_typein i j := Ordinal.typein_enum _ _
+  κ_sub_typein i j := Ordinal.typein_enum _ _
   Λ_lt_κ := by
     rw [mk_denumerable, mk_ordinal_out, card_ord]
     exact aleph0_lt_aleph_one
@@ -258,6 +269,7 @@ instance : LinearOrder κ := Params.κ_linearOrder
 instance : IsWellOrder κ (· < ·) := Params.κ_isWellOrder
 instance : SuccOrder κ := Params.κ_succ
 instance : AddMonoid κ := Params.κ_addMonoid
+instance : Sub κ := Params.κ_sub
 instance : Inhabited κ := ⟨0⟩
 instance : Infinite κ := Cardinal.infinite_iff.mpr Params.κ_isRegular.aleph0_le
 instance : NoMaxOrder κ := by
@@ -284,20 +296,27 @@ instance : CovariantClass κ κ (· + ·) (· ≤ ·) := by
   constructor
   intro i j k h
   rw [← not_lt, ← Ordinal.typein_le_typein (· < ·)] at h ⊢
-  rw [Params.κ_typein, Params.κ_typein]
+  rw [Params.κ_add_typein, Params.κ_add_typein]
   exact add_le_add_left h _
 
 instance : CovariantClass κ κ (Function.swap (· + ·)) (· ≤ ·) := by
   constructor
   intro i j k h
   rw [← not_lt, ← Ordinal.typein_le_typein (· < ·)] at h ⊢
-  rw [Params.κ_typein, Params.κ_typein]
+  rw [Params.κ_add_typein, Params.κ_add_typein]
   exact add_le_add_right h _
+
+instance : ContravariantClass κ κ (· + ·) (· ≤ ·) := by
+  constructor
+  intro i j k h
+  rw [← not_lt, ← Ordinal.typein_le_typein (· < ·)] at h ⊢
+  rw [Params.κ_add_typein, Params.κ_add_typein, add_le_add_iff_left] at h
+  exact h
 
 @[simp]
 theorem κ_typein_zero : Ordinal.typein ((· < ·) : κ → κ → Prop) 0 = 0 := by
   have := add_zero (0 : κ)
-  rw [← Ordinal.typein_inj (· < ·), Params.κ_typein] at this
+  rw [← Ordinal.typein_inj (· < ·), Params.κ_add_typein] at this
   conv at this => rhs; rw [← add_zero (Ordinal.typein _ _)]
   rw [Ordinal.add_left_cancel] at this
   exact this
@@ -309,7 +328,7 @@ theorem κ_le_zero_iff (i : κ) : i ≤ 0 ↔ i = 0 :=
 @[simp]
 theorem κ_add_eq_zero_iff (i j : κ) : i + j = 0 ↔ i = 0 ∧ j = 0 :=
   by rw [← Ordinal.typein_inj (α := κ) (· < ·), ← Ordinal.typein_inj (α := κ) (· < ·),
-    ← Ordinal.typein_inj (α := κ) (· < ·), Params.κ_typein, κ_typein_zero, Ordinal.add_eq_zero_iff]
+    ← Ordinal.typein_inj (α := κ) (· < ·), Params.κ_add_typein, κ_typein_zero, Ordinal.add_eq_zero_iff]
 
 @[simp]
 theorem κ_succ_typein (i : κ) :
@@ -341,6 +360,21 @@ theorem κ_lt_one_iff (i : κ) : i < 1 ↔ i = 0 := by
     exact SuccOrder.le_of_lt_succ
   · rintro rfl
     exact κ_zero_lt_one
+
+theorem κ_le_self_add (i j : κ) : i ≤ i + j := by
+  rw [← not_lt, ← Ordinal.typein_le_typein (· < ·), Params.κ_add_typein]
+  exact Ordinal.le_add_right _ _
+
+theorem κ_add_sub_cancel (i j : κ) : i + j - i = j := by
+  rw [← Ordinal.typein_inj (· < ·), Params.κ_sub_typein, Params.κ_add_typein]
+  exact Ordinal.add_sub_cancel _ _
+
+theorem κ_sub_lt {i j k : κ} (h₁ : i < j + k) (h₂ : j ≤ i) : i - j < k := by
+  rw [← Ordinal.typein_lt_typein (· < ·)] at h₁ ⊢
+  rw [← not_lt, ← Ordinal.typein_le_typein (· < ·)] at h₂
+  rw [Params.κ_add_typein, ← Ordinal.sub_lt_of_le h₂] at h₁
+  rw [Params.κ_sub_typein]
+  exact h₁
 
 /-- Either the base type or a proper type index (an element of `Λ`).
 The base type is written `⊥`. -/

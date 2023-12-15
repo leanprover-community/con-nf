@@ -229,17 +229,26 @@ theorem pow_le_of_isStrongLimit {κ μ : Cardinal.{u}} (h₁ : IsStrongLimit μ)
     have := Cardinal.infinite_iff.mpr h₁.isLimit.aleph0_le
     exact pow_le_of_isStrongLimit' h₁ h₂
 
-/-- There are at most `μ` supports. -/
-theorem mk_support_le : #(Support α) ≤ #μ := by
-  rw [Cardinal.mk_congr supportEquiv]
-  simp only [mk_sigma, mk_pi, mk_supportCondition, prod_const, lift_id]
-  refine le_trans (sum_le_sum _ (fun _ => #μ) ?_) ?_
-  · intro i
-    refine pow_le_of_isStrongLimit Params.μ_isStrongLimit ?_
-    refine lt_of_lt_of_le ?_ Params.κ_le_μ_ord_cof
-    exact card_typein_lt (· < ·) i Params.κ_ord.symm
-  · simp only [sum_const, lift_id, mul_mk_eq_max, ge_iff_le, max_le_iff, le_refl, and_true]
-    exact Params.κ_lt_μ.le
+/-- There are exactly `μ` supports. -/
+@[simp]
+theorem mk_support : #(Support α) = #μ := by
+  refine le_antisymm ?_ ?_
+  · rw [Cardinal.mk_congr supportEquiv]
+    simp only [mk_sigma, mk_pi, mk_supportCondition, prod_const, lift_id]
+    refine le_trans (sum_le_sum _ (fun _ => #μ) ?_) ?_
+    · intro i
+      refine pow_le_of_isStrongLimit Params.μ_isStrongLimit ?_
+      refine lt_of_lt_of_le ?_ Params.κ_le_μ_ord_cof
+      exact card_typein_lt (· < ·) i Params.κ_ord.symm
+    · simp only [sum_const, lift_id, mul_mk_eq_max, ge_iff_le, max_le_iff, le_refl, and_true]
+      exact Params.κ_lt_μ.le
+  · rw [← mk_atom]
+    refine ⟨⟨fun a => ⟨1, fun _ _ => ⟨default, Sum.inl a⟩⟩, ?_⟩⟩
+    intro a₁ a₂ h
+    simp only [Support.mk.injEq, heq_eq_eq, true_and] at h
+    have := congr_fun₂ h 0 κ_zero_lt_one
+    simp only [SupportCondition.mk.injEq, Sum.inl.injEq, true_and] at this
+    exact this
 
 instance {G : Type _} [SMul G (SupportCondition α)] : SMul G (Support α) where
   smul g S := ⟨S.max, fun i hi => g • S.f i hi⟩
@@ -285,5 +294,59 @@ instance {G : Type _} [Monoid G] [MulAction G (SupportCondition α)] : MulAction
     · refine heq_of_eq (funext₂ ?_)
       intro j hj
       simp only [smul_f, mul_smul]
+
+/-- Note: In the paper, the sum of supports requires an additional step of closing over atoms in
+certain intersections of near-litters. We'll try to get away without adding this for as long as
+possible. -/
+instance : Add (Support α) where
+  add S T := ⟨S.max + T.max, fun i hi =>
+    if hi' : i < S.max then
+      S.f i hi'
+    else
+      T.f (i - S.max) (κ_sub_lt hi (not_lt.mp hi'))⟩
+
+theorem Support.add_f_eq {S T : Support α} {i : κ} (hi : i < (S + T).max) :
+    (S + T).f i hi =
+      if hi' : i < S.max then
+        S.f i hi'
+      else
+        T.f (i - S.max) (κ_sub_lt hi (not_lt.mp hi')) :=
+  rfl
+
+@[simp]
+theorem Support.add_max {S T : Support α} : (S + T).max = S.max + T.max :=
+  rfl
+
+theorem Support.add_f_left {S T : Support α} {i : κ} (h : i < S.max) :
+    (S + T).f i (h.trans_le (κ_le_self_add _ _)) = S.f i h :=
+  by rw [add_f_eq, dif_pos h]
+
+theorem Support.add_f_right {S T : Support α} {i : κ} (h₁ : i < (S + T).max) (h₂ : S.max ≤ i) :
+    (S + T).f i h₁ = T.f (i - S.max) (κ_sub_lt h₁ h₂) :=
+  by rw [add_f_eq, dif_neg (not_lt.mpr h₂)]
+
+theorem Support.add_f_right_add {S T : Support α} {i : κ} (h : i < T.max) :
+    (S + T).f (S.max + i) (add_lt_add_left h S.max) = T.f i h := by
+  rw [add_f_right]
+  simp only [κ_add_sub_cancel]
+  exact κ_le_self_add _ _
+
+theorem Support.add_coe (S T : Support α) :
+    (S + T : Set (SupportCondition α)) = (S : Set _) ∪ T := by
+  ext c
+  simp only [mem_carrier_iff, Set.mem_union]
+  constructor
+  · rintro ⟨i, hi, rfl⟩
+    by_cases hi' : i < S.max
+    · refine Or.inl ⟨i, hi', ?_⟩
+      rw [add_f_left]
+    · refine Or.inr ⟨i - S.max, κ_sub_lt hi (not_lt.mp hi'), ?_⟩
+      rw [add_f_right]
+      exact not_lt.mp hi'
+  · rintro (⟨i, hi, rfl⟩ | ⟨i, hi, rfl⟩)
+    · refine ⟨i, hi.trans_le (κ_le_self_add _ _), ?_⟩
+      rw [add_f_left]
+    · refine ⟨S.max + i, add_lt_add_left hi S.max, ?_⟩
+      rw [add_f_right_add]
 
 end ConNF
