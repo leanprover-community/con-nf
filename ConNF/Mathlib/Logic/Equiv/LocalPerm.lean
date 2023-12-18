@@ -1,5 +1,5 @@
 import Mathlib.GroupTheory.Perm.Basic
-import Mathlib.Logic.Equiv.LocalEquiv
+import Mathlib.Logic.Equiv.PartialEquiv
 
 /-!
 # Local permutation
@@ -12,6 +12,8 @@ A local permutation on `α` is a domain `Set α` and two functions `α → α` t
 ## Main declarations
 
 * `LocalPerm α`: The type of local permutations on `α`.
+
+TODO: Rename to PartialPerm, c.f. <https://github.com/leanprover-community/mathlib4/pull/8984>
 -/
 
 open Function Set
@@ -387,7 +389,7 @@ theorem ofSet_univ : ofSet univ = LocalPerm.refl α :=
   rfl
 
 /-- Reinterpret a local permutation as a local equivalence. -/
-def toLocalEquiv : LocalEquiv α α where
+def toPartialEquiv : PartialEquiv α α where
   toFun := π
   invFun := π.symm
   source := π.domain
@@ -398,32 +400,32 @@ def toLocalEquiv : LocalEquiv α α where
   right_inv' := π.rightInvOn
 
 @[simp]
-theorem coe_toLocalEquiv : ⇑π.toLocalEquiv = π :=
+theorem coe_toPartialEquiv : ⇑π.toPartialEquiv = π :=
   rfl
 
 @[simp]
-theorem coe_toLocalEquiv_symm : ⇑π.toLocalEquiv.symm = π.symm :=
+theorem coe_toPartialEquiv_symm : ⇑π.toPartialEquiv.symm = π.symm :=
   rfl
 
 @[simp]
-theorem toLocalEquiv_source : π.toLocalEquiv.source = π.domain :=
+theorem toPartialEquiv_source : π.toPartialEquiv.source = π.domain :=
   rfl
 
 @[simp]
-theorem toLocalEquiv_target : π.toLocalEquiv.target = π.domain :=
+theorem toPartialEquiv_target : π.toPartialEquiv.target = π.domain :=
   rfl
 
 @[simp]
-theorem toLocalEquiv_refl : (LocalPerm.refl α).toLocalEquiv = LocalEquiv.refl _ :=
+theorem toPartialEquiv_refl : (LocalPerm.refl α).toPartialEquiv = PartialEquiv.refl _ :=
   rfl
 
 @[simp]
-theorem toLocalEquiv_symm : π.symm.toLocalEquiv = π.toLocalEquiv.symm :=
+theorem toPartialEquiv_symm : π.symm.toPartialEquiv = π.toPartialEquiv.symm :=
   rfl
 
 @[simp]
-theorem toLocalEquiv_trans (h) :
-    (π.trans π' h).toLocalEquiv = π.toLocalEquiv.trans π'.toLocalEquiv := by
+theorem toPartialEquiv_trans (h) :
+    (π.trans π' h).toPartialEquiv = π.toPartialEquiv.trans π'.toPartialEquiv := by
   ext
   · rfl
   · rfl
@@ -617,7 +619,7 @@ theorem toLocalPerm_mul : (π * π').toLocalPerm = π'.toLocalPerm.trans π.toLo
   LocalPerm.ext (fun _ => rfl) (fun _ => rfl) rfl
 
 @[simp]
-theorem toLocalEquiv_toLocalPerm : π.toLocalPerm.toLocalEquiv = π.toLocalEquiv :=
+theorem toPartialEquiv_toLocalPerm : π.toLocalPerm.toPartialEquiv = π.toPartialEquiv :=
   rfl
 
 end Equiv.Perm
