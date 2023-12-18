@@ -286,24 +286,24 @@ theorem roughLitterMapOrElse_injOn_dom_inter_flexible (hφ : φ.Lawful) :
     InjOn φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible A L}) :=
   (φ.roughLitterMapOrElse_injOn hφ).mono (inter_subset_left _ _)
 
-noncomputable def flexibleLitterLocalPerm (hφ : φ.Lawful) (A : ExtendedIndex β) : LocalPerm Litter :=
-  LocalPerm.complete φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible A L})
+noncomputable def flexibleLitterPartialPerm (hφ : φ.Lawful) (A : ExtendedIndex β) : PartialPerm Litter :=
+  PartialPerm.complete φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible A L})
     {L | ¬φ.BannedLitter L ∧ Flexible A L} φ.mk_dom_inter_flexible_symmDiff_le
     φ.aleph0_le_not_bannedLitter_and_flexible φ.disjoint_dom_inter_flexible_not_bannedLitter
     (φ.roughLitterMapOrElse_injOn_dom_inter_flexible hφ)
 
-theorem flexibleLitterLocalPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
+theorem flexibleLitterPartialPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
     (hL₁ : L ∈ φ.litterMap.Dom) (hL₂ : Flexible A L) :
-    φ.flexibleLitterLocalPerm hφ A L = φ.roughLitterMapOrElse L :=
-  LocalPerm.complete_apply_eq _ _ _ ⟨hL₁, hL₂⟩
+    φ.flexibleLitterPartialPerm hφ A L = φ.roughLitterMapOrElse L :=
+  PartialPerm.complete_apply_eq _ _ _ ⟨hL₁, hL₂⟩
 
-theorem flexibleLitterLocalPerm_domain_small (hφ : φ.Lawful) :
-    Small (φ.flexibleLitterLocalPerm hφ A).domain := by
+theorem flexibleLitterPartialPerm_domain_small (hφ : φ.Lawful) :
+    Small (φ.flexibleLitterPartialPerm hφ A).domain := by
   refine' Small.union (Small.union _ _) _
   · exact φ.litterMap_dom_small.mono (inter_subset_left _ _)
   · exact (φ.litterMap_dom_small.mono (inter_subset_left _ _)).image
   · rw [Small]
-    rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
+    rw [Cardinal.mk_congr (PartialPerm.sandboxSubsetEquiv _ _)]
     simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
     refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
       refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le

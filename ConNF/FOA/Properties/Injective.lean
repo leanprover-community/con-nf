@@ -580,7 +580,7 @@ theorem ConNF.StructApprox.extracted_2
       · simp only [hNL]
         refine' Relation.TransGen.tail' _ (Constrains.fuzz hε hζ hεζ _ _ _ hct)
         exact le_comp hL₁ _
-      rw [StructAction.rc_smul_litter_eq, NearLitterAction.flexibleLitterLocalPerm_apply_eq,
+      rw [StructAction.rc_smul_litter_eq, NearLitterAction.flexibleLitterPartialPerm_apply_eq,
         NearLitterAction.roughLitterMapOrElse_of_dom]
       simp only [ne_eq, Path.comp_cons, InflexibleCoe.comp_path, InflexibleCoePath.comp_δ,
         Path.comp_nil, StructAction.refine_apply, Tree.comp_apply,
@@ -689,7 +689,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Λ} [LeLevel γ] (A :
   obtain hL | ⟨⟨hL⟩⟩ | ⟨⟨hL⟩⟩ := flexible_cases' γ B L
   · refine' Eq.trans _ ((h B).map_litter L _)
     · rw [StructAction.rc_smul_litter_eq]
-      rw [NearLitterAction.flexibleLitterLocalPerm_apply_eq]
+      rw [NearLitterAction.flexibleLitterPartialPerm_apply_eq]
       swap; exact hdom
       swap; exact hL
       exact (NearLitterAction.roughLitterMapOrElse_of_dom _ hdom).symm
@@ -861,7 +861,7 @@ theorem litter_injective_extends (hπf : π.Free) {c d : SupportCondition β}
       rw [h] at this
       exact completeLitterMap_flexible' hπf hcd h₂ this
     rw [completeLitterMap_eq_of_flexible h₁', completeLitterMap_eq_of_flexible h₂'] at h
-    refine' LocalPerm.injOn _ _ _ h
+    refine' PartialPerm.injOn _ _ _ h
     all_goals
       rw [NearLitterApprox.flexibleCompletion_litterPerm_domain_free _ _ (hπf A)]
       assumption

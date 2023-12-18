@@ -53,18 +53,18 @@ theorem disjoint_sandbox :
 This function creates forward and backward images of atoms in the *sandbox litter*,
 a litter which is away from the domain and range of the approximation in question, so it should
 not interfere with other constructions. -/
-noncomputable def atomLocalPerm (hφ : φ.Lawful) : LocalPerm Atom :=
-  LocalPerm.complete φ.atomMapOrElse φ.atomMap.Dom (litterSet φ.sandboxLitter)
+noncomputable def atomPartialPerm (hφ : φ.Lawful) : PartialPerm Atom :=
+  PartialPerm.complete φ.atomMapOrElse φ.atomMap.Dom (litterSet φ.sandboxLitter)
     φ.mk_atomMap_image_le_mk_sandbox
     (by simpa only [mk_litterSet] using Params.κ_isRegular.aleph0_le)
     φ.disjoint_sandbox (φ.atomMapOrElse_injective hφ)
 
 theorem sandboxSubset_small :
     Small
-      (LocalPerm.sandboxSubset φ.mk_atomMap_image_le_mk_sandbox
+      (PartialPerm.sandboxSubset φ.mk_atomMap_image_le_mk_sandbox
         (by simpa only [mk_litterSet] using Params.κ_isRegular.aleph0_le)) := by
   rw [Small]
-  rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
+  rw [Cardinal.mk_congr (PartialPerm.sandboxSubsetEquiv _ _)]
   simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
   refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
     refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le
@@ -73,7 +73,7 @@ theorem sandboxSubset_small :
   · exact φ.atomMap_dom_small
   · exact lt_of_le_of_lt mk_image_le φ.atomMap_dom_small
 
-theorem atomLocalPerm_domain_small (hφ : φ.Lawful) : Small (φ.atomLocalPerm hφ).domain :=
+theorem atomPartialPerm_domain_small (hφ : φ.Lawful) : Small (φ.atomPartialPerm hφ).domain :=
   Small.union (Small.union φ.atomMap_dom_small (lt_of_le_of_lt mk_image_le φ.atomMap_dom_small))
     φ.sandboxSubset_small
 
@@ -82,21 +82,21 @@ Its action on atoms matches that of the action, and its rough action on litters
 matches the given litter permutation. -/
 noncomputable def complete (hφ : φ.Lawful) (A : ExtendedIndex β) : NearLitterApprox
     where
-  atomPerm := φ.atomLocalPerm hφ
-  litterPerm := φ.flexibleLitterLocalPerm hφ A
-  domain_small _ := Small.mono (inter_subset_right _ _) (φ.atomLocalPerm_domain_small hφ)
+  atomPerm := φ.atomPartialPerm hφ
+  litterPerm := φ.flexibleLitterPartialPerm hφ A
+  domain_small _ := Small.mono (inter_subset_right _ _) (φ.atomPartialPerm_domain_small hφ)
 
-theorem atomLocalPerm_apply_eq (hφ : φ.Lawful) {a : Atom} (ha : (φ.atomMap a).Dom) :
-    φ.atomLocalPerm hφ a = (φ.atomMap a).get ha := by
-  rwa [atomLocalPerm, LocalPerm.complete_apply_eq, atomMapOrElse_of_dom]
+theorem atomPartialPerm_apply_eq (hφ : φ.Lawful) {a : Atom} (ha : (φ.atomMap a).Dom) :
+    φ.atomPartialPerm hφ a = (φ.atomMap a).get ha := by
+  rwa [atomPartialPerm, PartialPerm.complete_apply_eq, atomMapOrElse_of_dom]
 
 theorem complete_smul_atom_eq {hφ : φ.Lawful} {a : Atom} (ha : (φ.atomMap a).Dom) :
     φ.complete hφ A • a = (φ.atomMap a).get ha :=
-  φ.atomLocalPerm_apply_eq hφ ha
+  φ.atomPartialPerm_apply_eq hφ ha
 
 @[simp]
 theorem complete_smul_litter_eq {hφ : φ.Lawful} (L : Litter) :
-    φ.complete hφ A • L = φ.flexibleLitterLocalPerm hφ A L :=
+    φ.complete hφ A • L = φ.flexibleLitterPartialPerm hφ A L :=
   rfl
 
 theorem smul_atom_eq {hφ : φ.Lawful} {π : NearLitterPerm}
@@ -132,7 +132,7 @@ theorem smul_toNearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm
         exact this
       · exfalso
         refine φ.sandboxLitter_not_banned ?_
-        rw [← eq_of_mem_litterSet_of_mem_litterSet ha (LocalPerm.sandboxSubset_subset _ _ hdom)]
+        rw [← eq_of_mem_litterSet_of_mem_litterSet ha (PartialPerm.sandboxSubset_subset _ _ hdom)]
         exact BannedLitter.litterDom L hL
     · by_contra h'
       simp only [NearLitterPerm.IsException, mem_litterSet, not_or, Classical.not_not, ha] at h
@@ -175,7 +175,7 @@ theorem smul_toNearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm
       rw [this] at h
       exact h hb₁
     · refine' φ.sandboxLitter_not_banned _
-      rw [eq_of_mem_litterSet_of_mem_litterSet (LocalPerm.sandboxSubset_subset _ _ hdom) haL]
+      rw [eq_of_mem_litterSet_of_mem_litterSet (PartialPerm.sandboxSubset_subset _ _ hdom) haL]
       exact BannedLitter.litterMap L hL
 
 theorem smul_nearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm}

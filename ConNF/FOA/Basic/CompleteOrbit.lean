@@ -1,7 +1,7 @@
 import Mathlib.SetTheory.Cardinal.Ordinal
-import ConNF.Mathlib.Logic.Equiv.LocalPerm
+import ConNF.Mathlib.Logic.Equiv.PartialPerm
 
-namespace LocalPerm
+namespace PartialPerm
 
 /-!
 Utilities to complete orbits of functions into local permutations.
@@ -243,7 +243,7 @@ theorem complete_right_inv [Nonempty α] (hst : Disjoint (s ∪ f '' s) t) (hf :
 with domain contained in `s ∪ (f '' s) ∪ t`. -/
 noncomputable def complete [Nonempty α] (f : α → α) (s : Set α) (t : Set α)
     (hs : #(s ∆ (f '' s) : Set α) ≤ #t) (ht : ℵ₀ ≤ #t) (hst : Disjoint (s ∪ f '' s) t)
-    (hf : InjOn f s) : LocalPerm α
+    (hf : InjOn f s) : PartialPerm α
     where
   toFun := completeToFun hs ht
   invFun := completeInvFun hs ht
@@ -283,4 +283,4 @@ theorem complete_apply_eq (x : α) (hx : x ∈ s) : complete f s t hs ht hst hf 
   exact fun h' => h'.2 hx
   exact not_mem_sandbox_of_mem hs ht hst x hx
 
-end LocalPerm
+end PartialPerm

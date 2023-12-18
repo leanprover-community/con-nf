@@ -9,4 +9,4 @@ import ConNF.Mathlib.Equiv
 import ConNF.Mathlib.Group
 import ConNF.Mathlib.GroupAction
 import ConNF.Mathlib.Transfer
-import ConNF.Mathlib.Logic.Equiv.LocalPerm
+import ConNF.Mathlib.Logic.Equiv.PartialPerm

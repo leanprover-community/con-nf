@@ -31,12 +31,12 @@ theorem aleph0_le_not_bannedLitter : ℵ₀ ≤ #{L | ¬φ.BannedLitter L} := by
 
 /-- A local permutation on the set of litters that occur in the domain or range of `w`.
 This permutes both flexible and inflexible litters. -/
-noncomputable def litterPerm' (hφ : φ.Lawful) : LocalPerm Litter :=
-  LocalPerm.complete φ.roughLitterMapOrElse φ.litterMap.Dom {L | ¬φ.BannedLitter L}
+noncomputable def litterPerm' (hφ : φ.Lawful) : PartialPerm Litter :=
+  PartialPerm.complete φ.roughLitterMapOrElse φ.litterMap.Dom {L | ¬φ.BannedLitter L}
     φ.mk_dom_symmDiff_le φ.aleph0_le_not_bannedLitter φ.disjoint_dom_not_bannedLitter
     (φ.roughLitterMapOrElse_injOn hφ)
 
-def idOnBanned (s : Set Litter) : LocalPerm Litter
+def idOnBanned (s : Set Litter) : PartialPerm Litter
     where
   toFun := id
   invFun := id
@@ -46,23 +46,23 @@ def idOnBanned (s : Set Litter) : LocalPerm Litter
   left_inv' _ _ := rfl
   right_inv' _ _ := rfl
 
-noncomputable def litterPerm (hφ : φ.Lawful) : LocalPerm Litter :=
-  LocalPerm.piecewise (φ.litterPerm' hφ) (φ.idOnBanned (φ.litterPerm' hφ).domain)
+noncomputable def litterPerm (hφ : φ.Lawful) : PartialPerm Litter :=
+  PartialPerm.piecewise (φ.litterPerm' hφ) (φ.idOnBanned (φ.litterPerm' hφ).domain)
     (by rw [← Set.subset_compl_iff_disjoint_left]; exact fun L h => h.2)
 
 theorem litterPerm'_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
     (hL : L ∈ φ.litterMap.Dom) : φ.litterPerm' hφ L = φ.roughLitterMapOrElse L :=
-  LocalPerm.complete_apply_eq _ _ _ hL
+  PartialPerm.complete_apply_eq _ _ _ hL
 
 theorem litterPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
     (hL : L ∈ φ.litterMap.Dom) : φ.litterPerm hφ L = φ.roughLitterMapOrElse L := by
   rw [← litterPerm'_apply_eq L hL]
-  exact LocalPerm.piecewise_apply_eq_left (Or.inl (Or.inl hL))
+  exact PartialPerm.piecewise_apply_eq_left (Or.inl (Or.inl hL))
 
 theorem litterPerm'_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm' hφ).domain := by
   refine' Small.union (Small.union φ.litterMap_dom_small φ.litterMap_dom_small.image) _
   rw [Small]
-  rw [Cardinal.mk_congr (LocalPerm.sandboxSubsetEquiv _ _)]
+  rw [Cardinal.mk_congr (PartialPerm.sandboxSubsetEquiv _ _)]
   simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
   refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
     refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le
@@ -544,7 +544,7 @@ theorem nextImageCore_atom_mem_litter_map (a : Atom) (ha : a ∈ φ.nextImageCor
   obtain ⟨_ | n, a'⟩ | ⟨n, a'⟩ := a' <;>
     simp only [elim_inr, elim_inl, Nat.zero_eq, nextBackwardImage, nextForwardImage] at this ⊢
   · have ha'' := this.2.symm
-    rw [Function.iterate_one, LocalPerm.eq_symm_apply] at ha''
+    rw [Function.iterate_one, PartialPerm.eq_symm_apply] at ha''
     · exact ha''.symm
     · exact hL
     · exact this.1
@@ -593,11 +593,11 @@ theorem nextImageCore_atom_mem
   · intro h
     simp only [mem_symmDiff, SetLike.mem_coe, h, mem_litterSet, true_and, not_true, and_false,
       or_false, not_not] at this
-    rw [ha', ← hL', ← LocalPerm.eq_symm_apply, LocalPerm.left_inv] at this
+    rw [ha', ← hL', ← PartialPerm.eq_symm_apply, PartialPerm.left_inv] at this
     · exact this
     · exact Or.inl (Or.inl (Or.inl hL))
     · exact φ.litter_map_dom_of_mem_nextImageCoreDomain hφ ha
-    · exact LocalPerm.map_domain _ (Or.inl (Or.inl (Or.inl hL)))
+    · exact PartialPerm.map_domain _ (Or.inl (Or.inl (Or.inl hL)))
 
 theorem orbitSetEquiv_atom_mem
     (hdiff : ∀ L hL,
@@ -627,7 +627,7 @@ theorem orbitSetEquiv_atom_mem
     simp only [mem_symmDiff, h, SetLike.mem_coe, mem_litterSet, true_and_iff, not_true,
       and_false_iff, or_false_iff, Classical.not_not] at this
     rw [ha'.1, ← roughLitterMapOrElse_of_dom, ← litterPerm_apply_eq (hφ := hφ), ←
-      LocalPerm.eq_symm_apply, LocalPerm.left_inv] at this
+      PartialPerm.eq_symm_apply, PartialPerm.left_inv] at this
     exact this
     · exact Or.inl (Or.inl (Or.inl hL))
     · exact ha.2
@@ -763,7 +763,7 @@ theorem fillAtomOrbits_precise
         have hbL' := hbL.2
         symm at hbL'
         rw [Function.iterate_succ_apply',
-          LocalPerm.eq_symm_apply _ hL' ((φ.litterPerm hφ).symm.iterate_domain hbL.1)] at hbL'
+          PartialPerm.eq_symm_apply _ hL' ((φ.litterPerm hφ).symm.iterate_domain hbL.1)] at hbL'
         refine' ⟨_, ⟨((φ.litterPerm hφ).symm^[n + 1]) (b : Atom).1, rfl⟩, _, ⟨_, rfl⟩,
           ⟨(φ.orbitSetEquiv (φ.litterPerm hφ (a : Atom).1)).symm (inl (n, b)), _⟩, _⟩
         · exact (φ.litterPerm hφ).symm.iterate_domain hbL.1
@@ -865,7 +865,7 @@ theorem fillAtomOrbits_precise
         rw [← ha'] at this
         simp only [Equiv.apply_symm_apply, elim_inl, nextBackwardImageDomain,
           Function.comp_apply, mem_setOf_eq] at this
-        rw [← this.2, Function.iterate_succ_apply', LocalPerm.right_inv]
+        rw [← this.2, Function.iterate_succ_apply', PartialPerm.right_inv]
         exact (φ.litterPerm hφ).symm.iterate_domain this.1
       · have := φ.orbitSetEquiv_elim_of_mem_nextImageCoreDomain hφ ha₁
         rw [← ha'] at this

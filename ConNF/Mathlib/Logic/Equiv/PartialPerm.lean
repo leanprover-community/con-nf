@@ -2,28 +2,26 @@ import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.Logic.Equiv.PartialEquiv
 
 /-!
-# Local permutation
+# Partial permutation
 
 This files defines permutations on a set.
 
-A local permutation on `α` is a domain `Set α` and two functions `α → α` that map `domain` to
+A partial permutation on `α` is a domain `Set α` and two functions `α → α` that map `domain` to
 `domain` and are inverse to each other on `domain`.
 
 ## Main declarations
 
-* `LocalPerm α`: The type of local permutations on `α`.
-
-TODO: Rename to PartialPerm, c.f. <https://github.com/leanprover-community/mathlib4/pull/8984>
+* `PartialPerm α`: The type of partial permutations on `α`.
 -/
 
 open Function Set
 
 variable {α : Type _}
 
-/-- A local permutation of a subset `domain` of `α`. The (global) maps `toFun : α → α` and
+/-- A partial permutation of a subset `domain` of `α`. The (global) maps `toFun : α → α` and
 `invFun : α → α` map `domain` to itself, and are inverse to each other there. The values of
 `toFun` and `invFun` outside of `domain` are irrelevant. -/
-structure LocalPerm (α : Type _) where
+structure PartialPerm (α : Type _) where
   (toFun invFun : α → α)
   domain : Set α
   toFun_domain' : ∀ ⦃x⦄, x ∈ domain → toFun x ∈ domain
@@ -31,8 +29,8 @@ structure LocalPerm (α : Type _) where
   left_inv' : ∀ ⦃x⦄, x ∈ domain → invFun (toFun x) = x
   right_inv' : ∀ ⦃x⦄, x ∈ domain → toFun (invFun x) = x
 
-/-- A `Perm` gives rise to a `LocalPerm` defined on the entire type. -/
-def Equiv.Perm.toLocalPerm (π : Equiv.Perm α) : LocalPerm α
+/-- A `Perm` gives rise to a `PartialPerm` defined on the entire type. -/
+def Equiv.Perm.toPartialPerm (π : Equiv.Perm α) : PartialPerm α
     where
   toFun := π
   invFun := π.symm
@@ -42,12 +40,12 @@ def Equiv.Perm.toLocalPerm (π : Equiv.Perm α) : LocalPerm α
   left_inv' x _ := π.left_inv x
   right_inv' x _ := π.right_inv x
 
-namespace LocalPerm
+namespace PartialPerm
 
-variable (π π' : LocalPerm α)
+variable (π π' : PartialPerm α)
 
-/-- The inverse of a local permutation. -/
-protected def symm : LocalPerm α where
+/-- The inverse of a partial permutation. -/
+protected def symm : PartialPerm α where
   toFun := π.invFun
   invFun := π.toFun
   domain := π.domain
@@ -56,16 +54,16 @@ protected def symm : LocalPerm α where
   left_inv' := π.right_inv'
   right_inv' := π.left_inv'
 
-instance : CoeFun (LocalPerm α) fun _ => α → α :=
-  ⟨LocalPerm.toFun⟩
+instance : CoeFun (PartialPerm α) fun _ => α → α :=
+  ⟨PartialPerm.toFun⟩
 
 @[simp]
-theorem coe_mk (f : α → α) (g s ml mr il ir) : (LocalPerm.mk f g s ml mr il ir : α → α) = f :=
+theorem coe_mk (f : α → α) (g s ml mr il ir) : (PartialPerm.mk f g s ml mr il ir : α → α) = f :=
   rfl
 
 @[simp]
 theorem coe_symm_mk (f : α → α) (g s ml mr il ir) :
-    ((LocalPerm.mk f g s ml mr il ir).symm : α → α) = g :=
+    ((PartialPerm.mk f g s ml mr il ir).symm : α → α) = g :=
   rfl
 
 @[simp]
@@ -124,10 +122,10 @@ protected theorem bijOn : BijOn π π.domain π.domain :=
 protected theorem surjOn : SurjOn π π.domain π.domain :=
   π.bijOn.surjOn
 
-/-- Create a copy of a `LocalPerm` providing better definitional equalities. -/
+/-- Create a copy of a `PartialPerm` providing better definitional equalities. -/
 @[simps (config := { fullyApplied := false })]
-def copy (π : LocalPerm α) (f : α → α) (hf : ⇑π = f) (g : α → α) (hg : ⇑π.symm = g) (s : Set α)
-    (hs : π.domain = s) : LocalPerm α where
+def copy (π : PartialPerm α) (f : α → α) (hf : ⇑π = f) (g : α → α) (hg : ⇑π.symm = g) (s : Set α)
+    (hs : π.domain = s) : PartialPerm α where
   toFun := f
   invFun := g
   domain := s
@@ -136,10 +134,10 @@ def copy (π : LocalPerm α) (f : α → α) (hf : ⇑π = f) (g : α → α) (h
   left_inv' _ := hs ▸ hf ▸ hg ▸ π.left_inv
   right_inv' _ := hs ▸ hf ▸ hg ▸ π.right_inv
 
-theorem copy_eq (π : LocalPerm α) (f : α → α) (hf : ⇑π = f) (g : α → α) (hg : ⇑π.symm = g)
+theorem copy_eq (π : PartialPerm α) (f : α → α) (hf : ⇑π = f) (g : α → α) (hg : ⇑π.symm = g)
     (s : Set α) (hs : π.domain = s) : π.copy f hf g hg s hs = π := by substs f g s; cases π; rfl
 
-/-- Associating to a local_perm a permutation of the domain. -/
+/-- Associating to a partial_perm a permutation of the domain. -/
 protected def toPerm : Equiv.Perm π.domain
     where
   toFun x := ⟨π x, π.map_domain x.mem⟩
@@ -157,7 +155,7 @@ theorem forall_mem_domain {p : α → Prop} : (∀ y ∈ π.domain, p y) ↔ ∀
 theorem exists_mem_domain {p : α → Prop} : (∃ y ∈ π.domain, p y) ↔ ∃ x ∈ π.domain, p (π x) := by
   conv_lhs => rw [← image_domain, bex_image_iff]
 
-/-- A set `s` is *stable* under a local equivalence `π` if it preserved by it. -/
+/-- A set `s` is *stable* under a partial equivalence `π` if it preserved by it. -/
 def IsStable (s : Set α) : Prop :=
   ∀ ⦃x⦄, x ∈ π.domain → (π x ∈ s ↔ x ∈ s)
 
@@ -184,9 +182,9 @@ protected theorem mapsTo (h : π.IsStable s) : MapsTo π (π.domain ∩ s) (π.d
 theorem symm_mapsTo (h : π.IsStable s) : MapsTo π.symm (π.domain ∩ s) (π.domain ∩ s) :=
   h.symm.mapsTo
 
-/-- Restrict a `LocalPerm` to a stable subset. -/
+/-- Restrict a `PartialPerm` to a stable subset. -/
 @[simps (config := { fullyApplied := false })]
-def restr (h : π.IsStable s) : LocalPerm α
+def restr (h : π.IsStable s) : PartialPerm α
     where
   toFun := π
   invFun := π.symm
@@ -224,7 +222,7 @@ protected theorem union {s'} (h : π.IsStable s) (h' : π.IsStable s') : π.IsSt
 protected theorem diff {s'} (h : π.IsStable s) (h' : π.IsStable s') : π.IsStable (s \ s') :=
   h.inter h'.compl
 
-theorem leftInvOn_piecewise {π' : LocalPerm α} [∀ i, Decidable (i ∈ s)] (h : π.IsStable s)
+theorem leftInvOn_piecewise {π' : PartialPerm α} [∀ i, Decidable (i ∈ s)] (h : π.IsStable s)
     (h' : π'.IsStable s) :
     LeftInvOn (s.piecewise π.symm π'.symm) (s.piecewise π π') (s.ite π.domain π'.domain) := by
   rintro x (⟨he, hs⟩ | ⟨he, hs : x ∉ s⟩)
@@ -232,11 +230,11 @@ theorem leftInvOn_piecewise {π' : LocalPerm α} [∀ i, Decidable (i ∈ s)] (h
   · rw [piecewise_eq_of_not_mem _ _ _ hs, piecewise_eq_of_not_mem _ _ _ ((h'.compl he).2 hs),
       π'.left_inv he]
 
-theorem inter_eq_of_inter_eq_of_eqOn {π' : LocalPerm α} (h : π.IsStable s) (h' : π'.IsStable s)
+theorem inter_eq_of_inter_eq_of_eqOn {π' : PartialPerm α} (h : π.IsStable s) (h' : π'.IsStable s)
     (hs : π.domain ∩ s = π'.domain ∩ s) (Heq : EqOn π π' (π.domain ∩ s)) :
     π.domain ∩ s = π'.domain ∩ s := by rw [← h.image_eq, ← h'.image_eq, ← hs, Heq.image_eq]
 
-theorem symm_eqOn_of_inter_eq_of_eqOn {π' : LocalPerm α} (h : π.IsStable s)
+theorem symm_eqOn_of_inter_eq_of_eqOn {π' : PartialPerm α} (h : π.IsStable s)
     (hs : π.domain ∩ s = π'.domain ∩ s) (Heq : EqOn π π' (π.domain ∩ s)) :
     EqOn π.symm π'.symm (π.domain ∩ s) := by
   rw [← h.image_eq]
@@ -294,7 +292,7 @@ theorem domain_subset_preimage_domain : π.domain ⊆ π ⁻¹' π.domain :=
 theorem symm_image_domain : π.symm '' π.domain = π.domain :=
   π.symm.image_domain
 
-/-- Two local permutations that have the same `domain`, same `toFun` and same `invFun`, coincide. -/
+/-- Two partial permutations that have the same `domain`, same `toFun` and same `invFun`, coincide. -/
 @[ext]
 protected theorem ext (h : ∀ x, π x = π' x) (hsymm : ∀ x, π.symm x = π'.symm x)
     (hs : π.domain = π'.domain) : π = π' := by
@@ -306,32 +304,32 @@ protected theorem ext (h : ∀ x, π x = π' x) (hsymm : ∀ x, π.symm x = π'.
   cases π; cases π'
   simp_all only [coe_symm_mk, coe_mk, eq_self_iff_true, and_self_iff]
 
-/-- The identity local permutation. -/
-protected def refl (α : Type _) : LocalPerm α :=
-  Equiv.Perm.toLocalPerm <| Equiv.refl _
+/-- The identity partial permutation. -/
+protected def refl (α : Type _) : PartialPerm α :=
+  Equiv.Perm.toPartialPerm <| Equiv.refl _
 
 @[simp]
-theorem refl_domain : (LocalPerm.refl α).domain = univ :=
+theorem refl_domain : (PartialPerm.refl α).domain = univ :=
   rfl
 
 @[simp]
-theorem coe_refl : ⇑(LocalPerm.refl α) = id :=
+theorem coe_refl : ⇑(PartialPerm.refl α) = id :=
   rfl
 
 @[simp]
-theorem symm_refl : (LocalPerm.refl α).symm = LocalPerm.refl α :=
+theorem symm_refl : (PartialPerm.refl α).symm = PartialPerm.refl α :=
   rfl
 
-instance : Inhabited (LocalPerm α) :=
-  ⟨LocalPerm.refl _⟩
+instance : Inhabited (PartialPerm α) :=
+  ⟨PartialPerm.refl _⟩
 
 variable (π π')
 
 -- TODO: Clean up these proofs
-/-- Composing two local permutations if the domain of the first coincides with the domain of the
+/-- Composing two partial permutations if the domain of the first coincides with the domain of the
 second. -/
 @[simps]
-protected def trans (π' : LocalPerm α) (h : π.domain = π'.domain) : LocalPerm α
+protected def trans (π' : PartialPerm α) (h : π.domain = π'.domain) : PartialPerm α
     where
   toFun := π' ∘ π
   invFun := π.symm ∘ π'.symm
@@ -358,8 +356,8 @@ protected def trans (π' : LocalPerm α) (h : π.domain = π'.domain) : LocalPer
     have := map_domain π'.symm hy
     rwa [symm_domain, ← h] at this
 
-/-- The identity local PERMUTATION on a set `s` -/
-def ofSet (s : Set α) : LocalPerm α where
+/-- The identity partial PERMUTATION on a set `s` -/
+def ofSet (s : Set α) : PartialPerm α where
   toFun := id
   invFun := id
   domain := s
@@ -385,10 +383,10 @@ theorem ofSet_trans_ofSet (s : Set α) : (ofSet s).trans (ofSet s) rfl = ofSet s
   rfl
 
 @[simp]
-theorem ofSet_univ : ofSet univ = LocalPerm.refl α :=
+theorem ofSet_univ : ofSet univ = PartialPerm.refl α :=
   rfl
 
-/-- Reinterpret a local permutation as a local equivalence. -/
+/-- Reinterpret a partial permutation as a partial equivalence. -/
 def toPartialEquiv : PartialEquiv α α where
   toFun := π
   invFun := π.symm
@@ -416,7 +414,7 @@ theorem toPartialEquiv_target : π.toPartialEquiv.target = π.domain :=
   rfl
 
 @[simp]
-theorem toPartialEquiv_refl : (LocalPerm.refl α).toPartialEquiv = PartialEquiv.refl _ :=
+theorem toPartialEquiv_refl : (PartialPerm.refl α).toPartialEquiv = PartialEquiv.refl _ :=
   rfl
 
 @[simp]
@@ -432,12 +430,12 @@ theorem toPartialEquiv_trans (h) :
   · simpa [← h] using fun hx => π.mapsTo hx
 
 /-- `EqOnDomain π π'` means that `π` and `π'` have the same domain, and coincide there. Then `π`
-and `π'` should really be considered the same local permutation. -/
+and `π'` should really be considered the same partial permutation. -/
 def EqOnDomain : Prop :=
   π.domain = π'.domain ∧ π.domain.EqOn π π'
 
 /-- `eq_on_domain` is an equivalence relation -/
-instance eqOnDomainSetoid : Setoid (LocalPerm α)
+instance eqOnDomainSetoid : Setoid (PartialPerm α)
     where
   r := EqOnDomain
   iseqv := ⟨
@@ -461,25 +459,25 @@ variable {π π'}
 theorem eq_on_domain_refl : π ≈ π :=
   Setoid.refl _
 
-/-- Two equivalent local permutations have the same domain -/
+/-- Two equivalent partial permutations have the same domain -/
 theorem EqOnDomain.domain_eq (h : π ≈ π') : π.domain = π'.domain :=
   h.1
 
 theorem EqOnDomain.symm_domain_eq (h : π ≈ π') : π.symm.domain = π'.symm.domain :=
   h.1
 
-/-- Two equivalent local permutations coincide on the domain -/
+/-- Two equivalent partial permutations coincide on the domain -/
 theorem EqOnDomain.eqOn (h : π ≈ π') : π.domain.EqOn π π' :=
   h.2
 
-/-- If two local permutations are equivalent, so are their inverses. -/
+/-- If two partial permutations are equivalent, so are their inverses. -/
 theorem EqOnDomain.symm' (h : π ≈ π') : π.symm ≈ π'.symm := by
   refine ⟨EqOnDomain.symm_domain_eq h, eqOn_of_leftInvOn_of_rightInvOn π.leftInvOn ?_ ?_⟩ <;>
     simp only [symm_domain, EqOnDomain.domain_eq h, π'.symm.mapsTo]
   exact π'.rightInvOn.congr_right π'.symm.mapsTo (EqOnDomain.domain_eq h ▸ h.eqOn.symm)
   exact π'.symm.mapsTo
 
-/-- Two equivalent local permutations have coinciding inverses on the domain -/
+/-- Two equivalent partial permutations have coinciding inverses on the domain -/
 theorem EqOnDomain.symm_eqOn (h : π ≈ π') : EqOn π.symm π'.symm π.domain :=
   EqOnDomain.eqOn (EqOnDomain.symm' h)
 
@@ -487,13 +485,13 @@ theorem EqOnDomain.symm_eqOn (h : π ≈ π') : EqOn π.symm π'.symm π.domain 
 theorem EqOnDomain.domain_inter_preimage_eq (hπ : π ≈ π') (s : Set α) :
     π.domain ∩ π ⁻¹' s = π'.domain ∩ π' ⁻¹' s := by rw [hπ.eqOn.inter_preimage_eq, EqOnDomain.domain_eq hπ]
 
-/-- Two equivalent local permutations are equal when the domain and domain are univ. -/
+/-- Two equivalent partial permutations are equal when the domain and domain are univ. -/
 protected theorem EqOnDomain.eq (h : π ≈ π') (hπ : π.domain = univ) : π = π' := by
-  apply LocalPerm.ext (fun x => h.2 _) (fun x => h.symm'.2 _) h.1 <;> simp [hπ]
+  apply PartialPerm.ext (fun x => h.2 _) (fun x => h.symm'.2 _) h.1 <;> simp [hπ]
 
-/-- We define a preorder on local permutations by saying `π ≤ π'` if the domain of `π` is contained
+/-- We define a preorder on partial permutations by saying `π ≤ π'` if the domain of `π` is contained
 in the domain of `π'`, and the permutations agree on the domain of `π`. -/
-instance : Preorder (LocalPerm α)
+instance : Preorder (PartialPerm α)
     where
   le π π' := π.domain ⊆ π'.domain ∧ π.domain.EqOn π π'
   le_refl a := ⟨subset_rfl, eqOn_refl _ _⟩
@@ -515,8 +513,8 @@ section Piecewise
 
 variable (π π') [∀ j : α, Decidable (j ∈ π.domain)] {h : Disjoint π.domain π'.domain}
 
-/-- Construct a local permutation from two local permutations with disjoint domains. -/
-def piecewise (h : Disjoint π.domain π'.domain) : LocalPerm α
+/-- Construct a partial permutation from two partial permutations with disjoint domains. -/
+def piecewise (h : Disjoint π.domain π'.domain) : PartialPerm α
     where
   toFun := π.domain.piecewise π π'
   invFun := π.domain.piecewise π.symm π'.symm
@@ -574,15 +572,15 @@ theorem le_piecewise_right : π' ≤ piecewise π π' h :=
 
 end Piecewise
 
-end LocalPerm
+end PartialPerm
 
 namespace Set
 
 -- All arguments are explicit to avoid missing information in the pretty printer output
-/-- A bijection between two sets `s : Set α` and `t : Set α` provides a local permutation on `α`. -/
+/-- A bijection between two sets `s : Set α` and `t : Set α` provides a partial permutation on `α`. -/
 @[simps (config := { fullyApplied := false })]
-noncomputable def BijOn.toLocalPerm [Nonempty α] (f : α → α) (s : Set α) (hf : BijOn f s s) :
-    LocalPerm α where
+noncomputable def BijOn.toPartialPerm [Nonempty α] (f : α → α) (s : Set α) (hf : BijOn f s s) :
+    PartialPerm α where
   toFun := f
   invFun := invFunOn f s
   domain := s
@@ -594,10 +592,10 @@ noncomputable def BijOn.toLocalPerm [Nonempty α] (f : α → α) (s : Set α) (
 end Set
 
 /-!
-# `Perm.toLocalPerm`
+# `Perm.toPartialPerm`
 
-A `Perm` can be be interpreted as a `LocalPerm`. We set up simp lemmas to reduce most
-properties of the `LocalPerm` to that of the `Perm`.
+A `Perm` can be be interpreted as a `PartialPerm`. We set up simp lemmas to reduce most
+properties of the `PartialPerm` to that of the `Perm`.
 -/
 
 open Equiv
@@ -607,19 +605,19 @@ namespace Equiv.Perm
 variable (π π' : Perm α)
 
 @[simp]
-theorem toLocalPerm_one : toLocalPerm (Equiv.refl α) = LocalPerm.refl α :=
+theorem toPartialPerm_one : toPartialPerm (Equiv.refl α) = PartialPerm.refl α :=
   rfl
 
 @[simp]
-theorem toLocalPerm_inv : π⁻¹.toLocalPerm = π.toLocalPerm.symm :=
+theorem toPartialPerm_inv : π⁻¹.toPartialPerm = π.toPartialPerm.symm :=
   rfl
 
 @[simp]
-theorem toLocalPerm_mul : (π * π').toLocalPerm = π'.toLocalPerm.trans π.toLocalPerm rfl :=
-  LocalPerm.ext (fun _ => rfl) (fun _ => rfl) rfl
+theorem toPartialPerm_mul : (π * π').toPartialPerm = π'.toPartialPerm.trans π.toPartialPerm rfl :=
+  PartialPerm.ext (fun _ => rfl) (fun _ => rfl) rfl
 
 @[simp]
-theorem toPartialEquiv_toLocalPerm : π.toLocalPerm.toPartialEquiv = π.toPartialEquiv :=
+theorem toPartialEquiv_toPartialPerm : π.toPartialPerm.toPartialEquiv = π.toPartialEquiv :=
   rfl
 
 end Equiv.Perm

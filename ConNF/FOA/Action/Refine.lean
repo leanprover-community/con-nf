@@ -100,12 +100,12 @@ theorem rc_smul_atom_eq {φ : StructAction β} {h : φ.Lawful} {B : ExtendedInde
   · simp only [refine_apply, refine_atomMap ha]
 
 theorem rc_smul_litter_eq {φ : StructAction β} {hφ : φ.Lawful} {B : ExtendedIndex β} (L : Litter) :
-    φ.rc hφ B • L = (φ.refine hφ B).flexibleLitterLocalPerm (refine_lawful B) B L :=
+    φ.rc hφ B • L = (φ.refine hφ B).flexibleLitterPartialPerm (refine_lawful B) B L :=
   rfl
 
 theorem rc_symm_smul_litter_eq {φ : StructAction β} {hφ : φ.Lawful} {B : ExtendedIndex β}
     (L : Litter) :
-    (φ.rc hφ B).symm • L = ((φ.refine hφ B).flexibleLitterLocalPerm (refine_lawful B) B).symm L :=
+    (φ.rc hφ B).symm • L = ((φ.refine hφ B).flexibleLitterPartialPerm (refine_lawful B) B).symm L :=
   rfl
 
 theorem rc_free (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :
@@ -114,7 +114,7 @@ theorem rc_free (φ : StructAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible
   · exact hL'.2
   · rw [NearLitterAction.roughLitterMapOrElse_of_dom _ hL'.1]
     exact h₂ B L' hL'.1 hL'.2
-  · exact (LocalPerm.sandboxSubset_subset _ _ hL').2
+  · exact (PartialPerm.sandboxSubset_subset _ _ hL').2
 
 theorem rc_comp_atomPerm {γ : Λ} {φ : StructAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) :

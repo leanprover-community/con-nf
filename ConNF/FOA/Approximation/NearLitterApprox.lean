@@ -1,4 +1,4 @@
-import ConNF.Mathlib.Logic.Equiv.LocalPerm
+import ConNF.Mathlib.Logic.Equiv.PartialPerm
 import ConNF.FOA.Basic.Flexible
 import ConNF.FOA.Basic.Sublitter
 
@@ -18,8 +18,8 @@ variable [Params.{u}]
 
 @[ext]
 structure NearLitterApprox where
-  atomPerm : LocalPerm Atom
-  litterPerm : LocalPerm Litter
+  atomPerm : PartialPerm Atom
+  litterPerm : PartialPerm Litter
   domain_small : ∀ L, Small (litterSet L ∩ atomPerm.domain)
 
 namespace NearLitterApprox
@@ -39,13 +39,13 @@ theorem smul_litter_eq {L : Litter} : π.litterPerm L = π • L :=
   rfl
 
 @[simp]
-theorem mk_smul_atom {atomPerm : LocalPerm Atom} {litterPerm : LocalPerm Litter}
+theorem mk_smul_atom {atomPerm : PartialPerm Atom} {litterPerm : PartialPerm Litter}
     {domain_small : ∀ L, Small (litterSet L ∩ atomPerm.domain)} {a : Atom} :
     (⟨atomPerm, litterPerm, domain_small⟩ : NearLitterApprox) • a = atomPerm a :=
   rfl
 
 @[simp]
-theorem mk_smul_litter {atomPerm : LocalPerm Atom} {litterPerm : LocalPerm Litter}
+theorem mk_smul_litter {atomPerm : PartialPerm Atom} {litterPerm : PartialPerm Litter}
     {domain_small : ∀ L, Small (litterSet L ∩ atomPerm.domain)} {L : Litter} :
     (⟨atomPerm, litterPerm, domain_small⟩ : NearLitterApprox) • L = litterPerm L :=
   rfl
@@ -53,12 +53,12 @@ theorem mk_smul_litter {atomPerm : LocalPerm Atom} {litterPerm : LocalPerm Litte
 theorem smul_eq_smul_atom {a₁ a₂ : Atom} (h₁ : a₁ ∈ π.atomPerm.domain)
     (h₂ : a₂ ∈ π.atomPerm.domain) : π • a₁ = π • a₂ ↔ a₁ = a₂ := by
   rw [mk_smul_atom, mk_smul_atom,
-    ← π.atomPerm.eq_symm_apply h₁ (π.atomPerm.map_domain h₂), LocalPerm.left_inv _ h₂]
+    ← π.atomPerm.eq_symm_apply h₁ (π.atomPerm.map_domain h₂), PartialPerm.left_inv _ h₂]
 
 theorem smul_eq_smul_litter {L₁ L₂ : Litter} (h₁ : L₁ ∈ π.litterPerm.domain)
     (h₂ : L₂ ∈ π.litterPerm.domain) : π • L₁ = π • L₂ ↔ L₁ = L₂ := by
   rw [mk_smul_litter, mk_smul_litter,
-    ← π.litterPerm.eq_symm_apply h₁ (π.litterPerm.map_domain h₂), LocalPerm.left_inv _ h₂]
+    ← π.litterPerm.eq_symm_apply h₁ (π.litterPerm.map_domain h₂), PartialPerm.left_inv _ h₂]
 
 def symm : NearLitterApprox where
   atomPerm := π.atomPerm.symm
