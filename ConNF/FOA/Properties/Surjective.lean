@@ -192,7 +192,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
           ((ihAction_lawful hπf _).comp _) _
           (StructAction.allowable_exactlyApproximates _ _ _ _)).symm
         refine' Relation.TransGen.tail' _
-          (Constrains.fuzz hδ hε hδε B _ _ (smul_mem_designatedSupport hc _))
+          (Constrains.fuzz hδ hε hδε B _ _ (smul_mem_support hc _))
         refine' Relation.reflTransGen_of_eq _
         refine' SupportCondition.ext _ _ rfl _
         change inl _ = inl _
@@ -223,7 +223,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
           ((ihAction_lawful hπf _).comp _) _
           (StructAction.allowable_exactlyApproximates _ _ _ _)).symm
         refine' Relation.TransGen.tail' _
-          (Constrains.fuzz hδ hε hδε B _ _ (smul_mem_designatedSupport hc _))
+          (Constrains.fuzz hδ hε hδε B _ _ (smul_mem_support hc _))
         refine' Relation.reflTransGen_of_eq _
         refine' SupportCondition.ext _ _ rfl _
         change inr _ = inr _

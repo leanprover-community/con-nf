@@ -218,7 +218,7 @@ theorem Biexact.smul_eq_smul {β : Λ} [LeLevel β] {π π' : Allowable β} {c :
     refine h₁.trans (h₂.trans ?_).symm
     refine' congr_arg _ _
     rw [← inv_smul_eq_iff, smul_smul]
-    refine' designatedSupport_supports t _ _
+    refine' support_supports t _ _
     intro c hc
     rw [mul_smul, inv_smul_eq_iff]
     simp only [Allowable.toStructPerm_smul, Allowable.toStructPerm_comp, Tree.comp_comp]
@@ -415,15 +415,15 @@ theorem completeLitterMap_inflexibleCoe_iff (hπf : π.Free) {c d : SupportCondi
 -- TODO: Use this theorem in places above.
 -- I think that the `change` and `obtain` calls slow down proofs severely in Lean 4.
 theorem supports {β : Λ} [LeLevel β] {π π' : Allowable β} {t : Tangle β}
-    (ha : ∀ A a, ⟨A, inl a⟩ ∈ designatedSupport t →
+    (ha : ∀ A a, ⟨A, inl a⟩ ∈ t.support →
       Allowable.toStructPerm π A • a =
       Allowable.toStructPerm π' A • a)
-    (hN : ∀ A N, ⟨A, inr N⟩ ∈ designatedSupport t →
+    (hN : ∀ A N, ⟨A, inr N⟩ ∈ t.support →
       Allowable.toStructPerm π A • N =
       Allowable.toStructPerm π' A • N) :
     π • t = π' • t := by
   rw [← inv_smul_eq_iff, smul_smul]
-  refine' designatedSupport_supports t _ _
+  refine' support_supports t _ _
   intro c hc
   rw [mul_smul, inv_smul_eq_iff]
   simp only [Allowable.smul_supportCondition_eq_smul_iff]
@@ -802,7 +802,7 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : SupportCondition β) (A : 
         (ihsAction_comp_mapFlexible hπf _ _ _) • hL₂.t := by
   obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ := hL₂
   rw [← inv_smul_eq_iff, smul_smul]
-  refine' designatedSupport_supports t _ _
+  refine' support_supports t _ _
   intro e he
   rw [mul_smul, inv_smul_eq_iff]
   simp only [ne_eq, Allowable.smul_supportCondition_eq_smul_iff]

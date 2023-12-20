@@ -181,11 +181,11 @@ theorem reduction_supports (S : Set (SupportCondition β)) (c : SupportCondition
     refine' ⟨a, ha, _⟩
     exact h₄ a ha
 
-theorem reduction_designatedSupport_supports [TangleData β] (t : Tangle β) :
-    Supports (Allowable β) (reduction (designatedSupport t : Set (SupportCondition β))) t := by
+theorem reduction_support_supports [TangleData β] (t : Tangle β) :
+    Supports (Allowable β) (reduction (t.support : Set (SupportCondition β))) t := by
   intro ρ h
-  refine designatedSupport_supports t ρ ?_
+  refine support_supports t ρ ?_
   intros c hc'
-  exact reduction_supports (designatedSupport t) c hc' (Allowable.toStructPerm ρ) h
+  exact reduction_supports (t.support) c hc' (Allowable.toStructPerm ρ) h
 
 end ConNF

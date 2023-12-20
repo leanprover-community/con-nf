@@ -250,6 +250,8 @@ theorem mk_support : #(Support α) = #μ := by
     simp only [SupportCondition.mk.injEq, Sum.inl.injEq, true_and] at this
     exact this
 
+namespace Support
+
 instance {G : Type _} [SMul G (SupportCondition α)] : SMul G (Support α) where
   smul g S := ⟨S.max, fun i hi => g • S.f i hi⟩
 
@@ -279,6 +281,18 @@ theorem smul_coe {G : Type _} [SMul G (SupportCondition α)] (g : G) (S : Suppor
     (g • S : Support α) = g • (S : Set (SupportCondition α)) :=
   smul_carrier g S
 
+theorem smul_mem_smul {G : Type _} [SMul G (SupportCondition α)]
+    {S : Support α} {c : SupportCondition α} (h : c ∈ S) (g : G) : g • c ∈ g • S := by
+  obtain ⟨i, hi, rfl⟩ := h
+  exact ⟨i, hi, rfl⟩
+
+theorem smul_eq_of_smul_eq {G : Type _} [SMul G (SupportCondition α)] {g : G} {S : Support α}
+    (hS : g • S = S) {c : SupportCondition α} (hc : c ∈ S) : g • c = c := by
+  obtain ⟨i, hi, rfl⟩ := hc
+  have := smul_f g S i hi
+  conv at this => lhs; simp only [hS]
+  exact this.symm
+
 instance {G : Type _} [Monoid G] [MulAction G (SupportCondition α)] : MulAction G (Support α) where
   one_smul := by
     rintro ⟨i, f⟩
@@ -305,7 +319,7 @@ instance : Add (Support α) where
     else
       T.f (i - S.max) (κ_sub_lt hi (not_lt.mp hi'))⟩
 
-theorem Support.add_f_eq {S T : Support α} {i : κ} (hi : i < (S + T).max) :
+theorem add_f_eq {S T : Support α} {i : κ} (hi : i < (S + T).max) :
     (S + T).f i hi =
       if hi' : i < S.max then
         S.f i hi'
@@ -314,24 +328,24 @@ theorem Support.add_f_eq {S T : Support α} {i : κ} (hi : i < (S + T).max) :
   rfl
 
 @[simp]
-theorem Support.add_max {S T : Support α} : (S + T).max = S.max + T.max :=
+theorem add_max {S T : Support α} : (S + T).max = S.max + T.max :=
   rfl
 
-theorem Support.add_f_left {S T : Support α} {i : κ} (h : i < S.max) :
+theorem add_f_left {S T : Support α} {i : κ} (h : i < S.max) :
     (S + T).f i (h.trans_le (κ_le_self_add _ _)) = S.f i h :=
   by rw [add_f_eq, dif_pos h]
 
-theorem Support.add_f_right {S T : Support α} {i : κ} (h₁ : i < (S + T).max) (h₂ : S.max ≤ i) :
+theorem add_f_right {S T : Support α} {i : κ} (h₁ : i < (S + T).max) (h₂ : S.max ≤ i) :
     (S + T).f i h₁ = T.f (i - S.max) (κ_sub_lt h₁ h₂) :=
   by rw [add_f_eq, dif_neg (not_lt.mpr h₂)]
 
-theorem Support.add_f_right_add {S T : Support α} {i : κ} (h : i < T.max) :
+theorem add_f_right_add {S T : Support α} {i : κ} (h : i < T.max) :
     (S + T).f (S.max + i) (add_lt_add_left h S.max) = T.f i h := by
   rw [add_f_right]
   simp only [κ_add_sub_cancel]
   exact κ_le_self_add _ _
 
-theorem Support.add_coe (S T : Support α) :
+theorem add_coe (S T : Support α) :
     (S + T : Set (SupportCondition α)) = (S : Set _) ∪ T := by
   ext c
   simp only [mem_carrier_iff, Set.mem_union]
@@ -348,5 +362,7 @@ theorem Support.add_coe (S T : Support α) :
       rw [add_f_left]
     · refine ⟨S.max + i, add_lt_add_left hi S.max, ?_⟩
       rw [add_f_right_add]
+
+end Support
 
 end ConNF

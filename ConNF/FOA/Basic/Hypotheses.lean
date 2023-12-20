@@ -25,7 +25,7 @@ variable [Params.{u}] [Level]
 This structure combines the following data:
 * `Tangle`
 * `Allowable`
-* `designatedSupport`
+* `support`
 * `pos : Tangle β ↪ μ`
 * `typedAtom` and `typedNearLitter`
 -/
@@ -71,18 +71,18 @@ class FOAAssumptions extends FOAData where
       Tree.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm ρ) =
         Allowable.toStructPerm (allowableCons hγ ρ)
   /-- Designated supports commute with allowable permutations. -/
-  designatedSupport_smul {β : Λ} [LeLevel β] (t : Tangle β) (ρ : Allowable β) :
-    designatedSupport (ρ • t) = ρ • (designatedSupport t : Set (SupportCondition β))
+  support_smul {β : Λ} [LeLevel β] (t : Tangle β) (ρ : Allowable β) :
+    (ρ • t).support = ρ • (t.support : Set (SupportCondition β))
   /-- Inflexible litters whose atoms occur in designated supports have position less than the
   original tangle. -/
   pos_lt_pos_atom {β : Λ} [LtLevel β] (t : Tangle β)
-    {A : ExtendedIndex β} {a : Atom} (ht : ⟨A, Sum.inl a⟩ ∈ designatedSupport t)
+    {A : ExtendedIndex β} {a : Atom} (ht : ⟨A, Sum.inl a⟩ ∈ t.support)
     {γ : TypeIndex} [LtLevel γ] (s : Tangle γ) {δ : Λ} [LtLevel δ] (hγδ : γ ≠ δ)
     (ha : a.1 = fuzz hγδ s) : pos s < pos t
   /-- Inflexible litters touching near-litters in designated supports have position less than the
   original tangle. -/
   pos_lt_pos_nearLitter {β : Λ} [LtLevel β] (t : Tangle β)
-    {A : ExtendedIndex β} {N : NearLitter} (ht : ⟨A, Sum.inr N⟩ ∈ designatedSupport t)
+    {A : ExtendedIndex β} {N : NearLitter} (ht : ⟨A, Sum.inr N⟩ ∈ t.support)
     {γ : TypeIndex} [LtLevel γ] (s : Tangle γ) {δ : Λ} [LtLevel δ] (hγδ : γ ≠ δ)
     (h : Set.Nonempty ((N : Set Atom) ∩ (fuzz hγδ s).toNearLitter)) : pos s < pos t
   /-- The `fuzz` map commutes with allowable permutations. -/
@@ -105,11 +105,11 @@ class FOAAssumptions extends FOAData where
     (γ : TypeIndex) [LtLevel γ] (hγ : γ < β) :
     allowableCons hγ (allowableOfSmulFuzz β ρs h) = ρs γ hγ
 
-export FOAAssumptions (allowableCons allowableCons_eq designatedSupport_smul
+export FOAAssumptions (allowableCons allowableCons_eq support_smul
   pos_lt_pos_atom pos_lt_pos_nearLitter
   smul_fuzz allowableOfSmulFuzz allowableOfSmulFuzz_comp_eq)
 
-attribute [simp] designatedSupport_smul allowableOfSmulFuzz_comp_eq
+attribute [simp] support_smul allowableOfSmulFuzz_comp_eq
 
 variable [FOAAssumptions]
 
@@ -205,9 +205,9 @@ theorem Allowable.comp_bot {β : TypeIndex} [LeLevel β] (A : Quiver.Path β ⊥
   change NearLitterPerm.ofBot (Allowable.comp A ρ) • a = Allowable.toStructPerm ρ A • a
   simp only [Allowable.toStructPerm_apply]
 
-theorem smul_mem_designatedSupport {β : Λ} [LtLevel β] {c : SupportCondition β} {t : Tangle β}
-    (h : c ∈ designatedSupport t) (π : Allowable β) : π • c ∈ designatedSupport (π • t) :=
-  (Set.ext_iff.mp (designatedSupport_smul t π) (π • c)).mpr ⟨c, h, rfl⟩
+theorem smul_mem_support {β : Λ} [LtLevel β] {c : SupportCondition β} {t : Tangle β}
+    (h : c ∈ t.support) (π : Allowable β) : π • c ∈ (π • t).support :=
+  (Set.ext_iff.mp (support_smul t π) (π • c)).mpr ⟨c, h, rfl⟩
 
 @[simp]
 theorem NearLitterPerm.ofBot_comp' {β : TypeIndex} [LeLevel β] {hβ : ⊥ < β} {ρ : Allowable β} :

@@ -42,7 +42,7 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
   | fuzz ⦃γ : Λ⦄ [LeLevel γ] ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε]
     (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε)
     (A : Path (β : TypeIndex) γ) (t : Tangle δ) (c : SupportCondition δ) :
-    c ∈ designatedSupport t →
+    c ∈ t.support →
     Constrains ⟨(A.cons hδ).comp c.path, c.value⟩
       ⟨(A.cons hε).cons (bot_lt_coe _), inr (fuzz hδε t).toNearLitter⟩
   | fuzz_bot ⦃γ : Λ⦄ [LeLevel γ] ⦃ε : Λ⦄ [LtLevel ε]
@@ -56,10 +56,10 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
 
 inductive LitterConstrains : Litter → Litter → Prop
   | fuzz_atom ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε] (hδε : (δ : TypeIndex) ≠ ε)
-    (t : Tangle δ) {B : ExtendedIndex δ} {a : Atom} : ⟨B, inl a⟩ ∈ designatedSupport t →
+    (t : Tangle δ) {B : ExtendedIndex δ} {a : Atom} : ⟨B, inl a⟩ ∈ t.support →
     LitterConstrains a.1 (fuzz hδε t)
   | fuzz_nearLitter ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε] (hδε : (δ : TypeIndex) ≠ ε)
-    (t : Tangle δ) {B : ExtendedIndex δ} {N : NearLitter} (h : ⟨B, inr N⟩ ∈ designatedSupport t)
+    (t : Tangle δ) {B : ExtendedIndex δ} {N : NearLitter} (h : ⟨B, inr N⟩ ∈ t.support)
     {a : Atom} (ha : a ∈ N) :
     LitterConstrains a.1 (fuzz hδε t)
   | fuzz_bot ⦃ε : Λ⦄ [LtLevel ε] (a : Atom) :
@@ -403,11 +403,11 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺ 
         (B : Path (β : TypeIndex) γ) (t : Tangle δ),
         N = (fuzz hδε t).toNearLitter ∧ A = (B.cons hε).cons (bot_lt_coe _)
     · obtain ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, B, t, rfl, rfl⟩ := h
-      refine lt_of_le_of_lt ?_ (designatedSupport t).small
+      refine lt_of_le_of_lt ?_ (t.support).small
       suffices
-        #{a : SupportCondition β | ∃ c : (designatedSupport t : Set (SupportCondition δ)),
+        #{a : SupportCondition β | ∃ c : (t.support : Set (SupportCondition δ)),
             a = ⟨(B.cons hδ).comp c.val.path, c.val.value⟩} ≤
-          #(designatedSupport t : Set (SupportCondition δ)) by
+          #(t.support : Set (SupportCondition δ)) by
         refine le_trans (Cardinal.mk_subtype_le_of_subset ?_) this
         rintro x ⟨_, _, _, _, _, _, _, _, _, _, _, c, hc, rfl, h⟩
         rw [SupportCondition.mk.injEq] at h

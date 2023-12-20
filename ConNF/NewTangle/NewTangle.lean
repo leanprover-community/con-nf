@@ -500,9 +500,7 @@ instance hasSmulNewTangle : SMul NewAllowable NewTangle :=
             rw [← this, ← mul_smul, ← mul_assoc, ← mul_assoc, mul_inv_self, one_mul, mul_smul]
         · intro a ha
           rw [mul_smul, mul_smul, inv_smul_eq_iff]
-          refine h ?_
-          simp only [Support.mem_carrier_iff, smul_carrier, smul_mem_smul_set_iff] at ha ⊢
-          exact ha⟩⟩
+          exact h (Support.smul_mem_smul ha ρ)⟩⟩
 
 @[simp, norm_cast]
 theorem coe_smul_newTangle (ρ : NewAllowable) (t : NewTangle) :

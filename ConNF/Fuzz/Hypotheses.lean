@@ -41,11 +41,11 @@ class TangleData (α : TypeIndex) where
   [allowableGroup : Group Allowable]
   allowableToStructPerm : Allowable →* StructPerm α
   [allowableAction : MulAction Allowable Tangle]
-  designatedSupport : Tangle → Support α
-  designatedSupport_supports (t : Tangle) :
+  support : Tangle → Support α
+  support_supports (t : Tangle) :
     haveI : MulAction Allowable (SupportCondition α) :=
       MulAction.compHom _ allowableToStructPerm
-    MulAction.Supports Allowable (designatedSupport t : Set (SupportCondition α)) t
+    MulAction.Supports Allowable (support t : Set (SupportCondition α)) t
 
 export TangleData (Tangle Allowable)
 
@@ -88,12 +88,12 @@ end Allowable
 
 /-- For each tangle, we provide a small support for it. This is known as the designated support of
 the tangle. -/
-def designatedSupport {α : TypeIndex} [TangleData α] (t : Tangle α) : Support α :=
-  TangleData.designatedSupport t
+def TangleData.Tangle.support {α : TypeIndex} [TangleData α] (t : Tangle α) : Support α :=
+  TangleData.support t
 
-theorem designatedSupport_supports {α : TypeIndex} [TangleData α] (t : Tangle α) :
-    MulAction.Supports (Allowable α) (designatedSupport t : Set (SupportCondition α)) t :=
-  TangleData.designatedSupport_supports t
+theorem support_supports {α : TypeIndex} [TangleData α] (t : Tangle α) :
+    MulAction.Supports (Allowable α) (t.support : Set (SupportCondition α)) t :=
+  TangleData.support_supports t
 
 class PositionedTangles (α : TypeIndex) [TangleData α] where
   /-- A position function, giving each tangle a unique position `ν : μ`.
@@ -145,8 +145,8 @@ instance Bot.tangleData : TangleData ⊥
   Allowable := NearLitterPerm
   allowableToStructPerm := Tree.toBotIso.toMonoidHom
   allowableAction := inferInstance
-  designatedSupport a := ⟨1, fun _ _ => ⟨Quiver.Path.nil, Sum.inl a⟩⟩
-  designatedSupport_supports a π h := by
+  support a := ⟨1, fun _ _ => ⟨Quiver.Path.nil, Sum.inl a⟩⟩
+  support_supports a π h := by
     simp only [Support.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
       NearLitterPerm.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
     exact h
