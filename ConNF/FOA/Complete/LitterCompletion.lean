@@ -97,11 +97,10 @@ noncomputable def litterCompletion (π : StructApprox β) (A : ExtendedIndex β)
     if hs : _ ∧ _ then
       fuzz h.some.path.hδε ((ihAction H).hypothesisedAllowable h.some.path hs.1 hs.2 • h.some.t)
     else L
-  else
-    if h : Nonempty (InflexibleBot A L) then
-      fuzz (show (⊥ : TypeIndex) ≠ (h.some.path.ε : Λ) from bot_ne_coe)
-        (H.atomImage (h.some.path.B.cons (bot_lt_coe _)) h.some.a h.some.constrains)
-    else NearLitterApprox.flexibleCompletion (π A) A • L
+  else if h : Nonempty (InflexibleBot A L) then
+    fuzz (show (⊥ : TypeIndex) ≠ (h.some.path.ε : Λ) from bot_ne_coe)
+      (H.atomImage (h.some.path.B.cons (bot_lt_coe _)) h.some.a h.some.constrains)
+  else NearLitterApprox.flexibleCompletion (π A) A • L
 
 theorem litterCompletion_of_flexible (π : StructApprox β) (A : ExtendedIndex β) (L : Litter)
     (H : HypAction ⟨A, inr L.toNearLitter⟩) (hflex : Flexible A L) :

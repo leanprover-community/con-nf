@@ -325,6 +325,12 @@ theorem κ_le_zero_iff (i : κ) : i ≤ 0 ↔ i = 0 :=
   by rw [← not_lt, ← Ordinal.typein_le_typein (· < ·), κ_typein_zero, Ordinal.le_zero,
     ← κ_typein_zero, Ordinal.typein_inj]
 
+theorem κ_not_lt_zero (i : κ) : ¬i < 0 := by
+  obtain (h | h | h) := lt_trichotomy i 0
+  · cases h.ne ((κ_le_zero_iff i).mp h.le)
+  · exact h.not_lt
+  · exact h.not_lt
+
 @[simp]
 theorem κ_add_eq_zero_iff (i j : κ) : i + j = 0 ↔ i = 0 ∧ j = 0 :=
   by rw [← Ordinal.typein_inj (α := κ) (· < ·), ← Ordinal.typein_inj (α := κ) (· < ·),
