@@ -147,7 +147,7 @@ instance Bot.tangleData : TangleData ⊥
   allowableAction := inferInstance
   support a := ⟨1, fun _ _ => ⟨Quiver.Path.nil, Sum.inl a⟩⟩
   support_supports a π h := by
-    simp only [Support.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
+    simp only [Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
       NearLitterPerm.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
     exact h
 

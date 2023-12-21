@@ -80,7 +80,7 @@ theorem smul_supports {S : Support β} {t : Tangle β}
   intros c hc
   rw [mul_assoc, mul_smul, inv_smul_eq_iff, mul_smul]
   refine hρ' ?_
-  exact Support.smul_mem_smul hc ρ
+  exact Enumeration.smul_mem_smul hc ρ
 
 theorem decode_congr {χ : CodingFunction β} {S₁ S₂ : Support β}
     {h₁ : S₁ ∈ χ} {h₂ : S₂ ∈ χ} (h : S₁ = S₂) :
@@ -115,7 +115,7 @@ noncomputable def code (S : Support β) (t : Tangle β)
     have := h₂.choose_spec.symm
     conv_rhs at this => rw [h₁.choose_spec]
     rw [← inv_smul_eq_iff, ← inv_smul_eq_iff, smul_smul, smul_smul] at this
-    exact Support.smul_eq_of_smul_eq this hc
+    exact Enumeration.smul_eq_of_smul_eq this hc
 
 @[simp]
 theorem code_decode (S : Support β) (t : Tangle β)
@@ -128,7 +128,7 @@ theorem code_decode (S : Support β) (t : Tangle β)
   · intros h' _
     refine h _ ?_
     intros c hc
-    exact Support.smul_eq_of_smul_eq h'.choose_spec.symm hc
+    exact Enumeration.smul_eq_of_smul_eq h'.choose_spec.symm hc
 
 @[simp]
 theorem mem_code_self {S : Support β} {t : Tangle β}
@@ -150,6 +150,16 @@ theorem eq_code {χ : CodingFunction β} {S : Support β} (h : S ∈ χ) :
   · refine ⟨1, ?_⟩
     rw [one_smul]
   · simp only [code_decode, Part.get_some]
+
+theorem code_smul (S : Support β) (t : Tangle β) (ρ : Allowable β)
+    (h₁ : Supports (Allowable β) ((ρ • S : Support β) : Set (SupportCondition β)) (ρ • t))
+    (h₂ : Supports (Allowable β) (S : Set (SupportCondition β)) t) :
+    code (ρ • S) (ρ • t) h₁ = code S t h₂ := by
+  refine ext S ⟨ρ⁻¹, eq_inv_smul_iff.mpr rfl⟩ mem_code_self ?_
+  have := decode_smul (χ := code (ρ • S) (ρ • t) h₁) (ρ • S) ρ⁻¹ ⟨ρ⁻¹, rfl⟩
+  simp_rw [inv_smul_smul] at this
+  rw [this]
+  simp only [code_decode, Part.get_some, inv_smul_smul]
 
 end CodingFunction
 

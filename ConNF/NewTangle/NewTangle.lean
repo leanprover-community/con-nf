@@ -465,7 +465,7 @@ def newTypedNearLitter (N : NearLitter) : NewTangle :=
       intro ρ h
       simp only [smul_intro]
       congr 1
-      simp only [Support.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
+      simp only [Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
         NewAllowable.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inr, Sum.inr.injEq] at h
       apply_fun SetLike.coe at h
       refine Eq.trans ?_ h
@@ -500,7 +500,7 @@ instance hasSmulNewTangle : SMul NewAllowable NewTangle :=
             rw [← this, ← mul_smul, ← mul_assoc, ← mul_assoc, mul_inv_self, one_mul, mul_smul]
         · intro a ha
           rw [mul_smul, mul_smul, inv_smul_eq_iff]
-          exact h (Support.smul_mem_smul ha ρ)⟩⟩
+          exact h (Enumeration.smul_mem_smul ha ρ)⟩⟩
 
 @[simp, norm_cast]
 theorem coe_smul_newTangle (ρ : NewAllowable) (t : NewTangle) :
