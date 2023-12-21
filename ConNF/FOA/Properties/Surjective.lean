@@ -144,7 +144,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
     (hN : ∀ (B : ExtendedIndex β) (N : NearLitter),
       ⟨B, inr N⟩ ≺ ⟨A, inr L.toNearLitter⟩ → N ∈ range (π.completeNearLitterMap B)) :
     L ∈ range (π.completeLitterMap A) := by
-  obtain h | ⟨⟨h⟩⟩ | ⟨⟨h⟩⟩ := flexible_cases' β A L
+  obtain h | ⟨⟨h⟩⟩ | ⟨⟨h⟩⟩ := flexible_cases' A L
   · refine' ⟨(NearLitterApprox.flexibleCompletion (π A) A).symm • L, _⟩
     rw [completeLitterMap_eq_of_flexible, NearLitterApprox.right_inv_litter]
     · rw [NearLitterApprox.flexibleCompletion_litterPerm_domain_free (π A) A (hπf A)]

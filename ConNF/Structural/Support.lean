@@ -363,6 +363,56 @@ theorem add_coe (S T : Support α) :
     · refine ⟨S.max + i, add_lt_add_left hi S.max, ?_⟩
       rw [add_f_right_add]
 
+@[simp]
+theorem smul_add {G : Type _} [SMul G (SupportCondition α)] {g : G} (S T : Support α) :
+    g • (S + T) = g • S + g • T := by
+  ext
+  · rfl
+  rw [heq_iff_eq]
+  ext i hi : 2
+  by_cases hi' : i < S.max
+  · rw [smul_f, add_f_left (show i < (g • S).max from hi'), add_f_left hi', smul_f]
+  · rw [smul_f, add_f_right hi (show (g • S).max ≤ i from le_of_not_lt hi'),
+      add_f_right (show i < (g • S + g • T).max from hi)
+        (show (g • S).max ≤ i from le_of_not_lt hi'), smul_f]
+    rfl
+
 end Support
+
+section comp
+
+variable {β : TypeIndex} (A : Quiver.Path α β)
+
+open scoped Classical in
+noncomputable def SupportCondition.comp (c : SupportCondition α) (otherwise : SupportCondition β) :
+    SupportCondition β :=
+  if h : ∃ B : ExtendedIndex β, c.path = A.comp B then
+    ⟨h.choose, c.value⟩
+  else
+    otherwise
+
+open scoped Classical in
+noncomputable def Support.comp (S : Support α) : Support β :=
+  if h : ∃ B : ExtendedIndex β, ∃ x : Atom ⊕ NearLitter, ⟨A.comp B, x⟩ ∈ S then
+    ⟨S.max, fun i hi => (S.f i hi).comp A ⟨h.choose, h.choose_spec.choose⟩⟩
+  else
+    ⟨0, fun _ hi => (κ_not_lt_zero _ hi).elim⟩
+
+variable {S : Support α}
+variable {A}
+
+theorem Support.comp_eq_of_exists
+    (h : ∃ B : ExtendedIndex β, ∃ x : Atom ⊕ NearLitter, ⟨A.comp B, x⟩ ∈ S) :
+    S.comp A = ⟨S.max, fun i hi => (S.f i hi).comp A ⟨h.choose, h.choose_spec.choose⟩⟩ :=
+  by rw [Support.comp, dif_pos h]
+
+theorem Support.comp_eq_of_forall
+    (h : ∀ B : ExtendedIndex β, ∀ x : Atom ⊕ NearLitter, ⟨A.comp B, x⟩ ∉ S) :
+    S.comp A = ⟨0, fun _ hi => (κ_not_lt_zero _ hi).elim⟩ := by
+  rw [Support.comp, dif_neg]
+  push_neg
+  exact h
+
+end comp
 
 end ConNF

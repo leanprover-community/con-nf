@@ -277,7 +277,7 @@ theorem constrainedAction_comp_mapFlexible (hπf : π.Free) {γ : Λ} {s : Set (
   simp only [Tree.comp_apply, constrainedAction_litterMap,
     foaHypothesis_nearLitterImage]
   rw [completeNearLitterMap_fst_eq]
-  obtain hL₃ | (⟨⟨hL₃⟩⟩ | ⟨⟨hL₃⟩⟩) := flexible_cases' _ (A.comp B) L
+  obtain hL₃ | (⟨⟨hL₃⟩⟩ | ⟨⟨hL₃⟩⟩) := flexible_cases' (A.comp B) L
   · rw [completeLitterMap_eq_of_flexible hL₃]
     refine' NearLitterApprox.flexibleCompletion_smul_flexible _ _ _ _ hL₂
     intro L' hL'
@@ -359,7 +359,7 @@ theorem completeLitterMap_flexible' (hπf : π.Free) {c d : SupportCondition β}
     (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter}
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d)
     (h : Flexible A (π.completeLitterMap A L)) : Flexible A L := by
-  obtain h' | h' | h' := flexible_cases' β A L
+  obtain h' | h' | h' := flexible_cases' A L
   · exact h'
   · have := completeLitterMap_inflexibleBot (π := π) h'.some
     rw [flexible_iff_not_inflexibleBot_inflexibleCoe] at h
@@ -379,7 +379,7 @@ theorem completeLitterMap_inflexibleBot' (hπf : π.Free) {c d : SupportConditio
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d)
     (h : InflexibleBot A (π.completeLitterMap A L)) : InflexibleBot A L := by
   refine' Nonempty.some _
-  obtain h' | h' | h' := flexible_cases' β A L
+  obtain h' | h' | h' := flexible_cases' A L
   · have := completeLitterMap_flexible hπf h'
     rw [flexible_iff_not_inflexibleBot_inflexibleCoe] at this
     cases this.1.false h
@@ -397,7 +397,7 @@ theorem completeLitterMap_inflexibleBot_iff (hπf : π.Free) {c d : SupportCondi
 theorem completeLitterMap_inflexibleCoe' (hπf : π.Free) {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleCoe A (π.completeLitterMap A L)) : InflexibleCoe A L := by
   refine' Nonempty.some _
-  obtain h' | h' | h' := flexible_cases' β A L
+  obtain h' | h' | h' := flexible_cases' A L
   · have := completeLitterMap_flexible hπf h'
     rw [flexible_iff_not_inflexibleBot_inflexibleCoe] at this
     cases this.2.false h
@@ -686,7 +686,7 @@ theorem constrainedAction_coherent' (hπf : π.Free) {γ : Λ} [LeLevel γ] (A :
   have hc₂' := le_nearLitter hc₂
   generalize hNL : N.fst = L
   rw [hNL] at hdom hc₂'
-  obtain hL | ⟨⟨hL⟩⟩ | ⟨⟨hL⟩⟩ := flexible_cases' γ B L
+  obtain hL | ⟨⟨hL⟩⟩ | ⟨⟨hL⟩⟩ := flexible_cases' B L
   · refine' Eq.trans _ ((h B).map_litter L _)
     · rw [StructAction.rc_smul_litter_eq]
       rw [NearLitterAction.flexibleLitterPartialPerm_apply_eq]
@@ -855,7 +855,7 @@ theorem litter_injective_extends (hπf : π.Free) {c d : SupportCondition β}
     (h₁ : ⟨A, inr L₁.toNearLitter⟩ ∈ reflTransConstrained c d)
     (h₂ : ⟨A, inr L₂.toNearLitter⟩ ∈ reflTransConstrained c d)
     (h : completeLitterMap π A L₁ = completeLitterMap π A L₂) : L₁ = L₂ := by
-  obtain h₁' | h₁' | h₁' := flexible_cases' β A L₁
+  obtain h₁' | h₁' | h₁' := flexible_cases' A L₁
   · have h₂' : Flexible A L₂
     · have := completeLitterMap_flexible hπf h₁'
       rw [h] at this

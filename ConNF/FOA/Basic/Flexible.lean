@@ -271,9 +271,88 @@ theorem flexible_iff_not_inflexibleBot_inflexibleCoe {β : Λ} {A : ExtendedInde
     · exact h₁.1.false h.some
     · exact h₁.2.false h.some
 
-theorem flexible_cases' (β : Λ) (A : ExtendedIndex β) (L : Litter) :
+theorem flexible_cases' {β : Λ} (A : ExtendedIndex β) (L : Litter) :
     Flexible A L ∨ Nonempty (InflexibleBot A L) ∨ Nonempty (InflexibleCoe A L) := by
   rw [← inflexible_iff_inflexibleBot_or_inflexibleCoe, or_comm]
   exact flexible_cases A L
+
+def InflexibleCoe.smul {β : Λ} [LeLevel β] {A : ExtendedIndex β} {L : Litter}
+    (h : InflexibleCoe A L) (ρ : Allowable β) :
+    InflexibleCoe A (Allowable.toStructPerm ρ A • L) :=
+  ⟨h.path,
+    Allowable.comp (h.path.B.cons h.path.hδ) ρ • h.t, by
+      rw [← toStructPerm_smul_fuzz h.path.hδ h.path.hε]
+      simp only [h.path.hA, h.hL]⟩
+
+@[simp]
+theorem inflexibleCoe_smul {β : Λ} [LeLevel β]
+    {A : ExtendedIndex β} {L : Litter} {ρ : Allowable β} :
+    Nonempty (InflexibleCoe A (Allowable.toStructPerm ρ A • L)) ↔ Nonempty (InflexibleCoe A L) := by
+  constructor
+  · rintro ⟨h⟩
+    have := h.smul ρ⁻¹
+    simp only [map_inv, Tree.inv_apply, inv_smul_smul] at this
+    exact ⟨this⟩
+  · rintro ⟨h⟩
+    exact ⟨h.smul ρ⟩
+
+def InflexibleBot.smul {β : Λ} [LeLevel β] {A : ExtendedIndex β} {L : Litter}
+    (h : InflexibleBot A L) (ρ : Allowable β) :
+    InflexibleBot A (Allowable.toStructPerm ρ A • L) :=
+  ⟨h.path,
+    Allowable.comp (h.path.B.cons (bot_lt_coe _)) ρ • h.a, by
+      rw [← toStructPerm_smul_fuzz (bot_lt_coe _) h.path.hε]
+      simp only [h.path.hA, h.hL]⟩
+
+@[simp]
+theorem inflexibleBot_smul {β : Λ} [LeLevel β]
+    {A : ExtendedIndex β} {L : Litter} {ρ : Allowable β} :
+    Nonempty (InflexibleBot A (Allowable.toStructPerm ρ A • L)) ↔ Nonempty (InflexibleBot A L) := by
+  constructor
+  · rintro ⟨h⟩
+    have := h.smul ρ⁻¹
+    simp only [map_inv, Tree.inv_apply, inv_smul_smul] at this
+    exact ⟨this⟩
+  · rintro ⟨h⟩
+    exact ⟨h.smul ρ⟩
+
+theorem Flexible.smul {β : Λ} [LeLevel β] {A : ExtendedIndex β} {L : Litter}
+    (h : Flexible A L) (ρ : Allowable β) :
+    Flexible A (Allowable.toStructPerm ρ A • L) := by
+  rw [flexible_iff_not_inflexibleBot_inflexibleCoe, ← not_nonempty_iff, ← not_nonempty_iff,
+    inflexibleBot_smul, inflexibleCoe_smul, not_nonempty_iff, not_nonempty_iff,
+    ← flexible_iff_not_inflexibleBot_inflexibleCoe]
+  exact h
+
+@[simp]
+theorem flexible_smul {β : Λ} [LeLevel β]
+    {A : ExtendedIndex β} {L : Litter} {ρ : Allowable β} :
+    Flexible A (Allowable.toStructPerm ρ A • L) ↔ Flexible A L :=
+  by simp only [flexible_iff_not_inflexibleBot_inflexibleCoe, ← not_nonempty_iff,
+    inflexibleBot_smul, inflexibleCoe_smul]
+
+@[simp]
+theorem inflexibleCoe_smul_path {β : Λ} [LeLevel β]
+    {A : ExtendedIndex β} {L : Litter} {ρ : Allowable β} (h : InflexibleCoe A L) :
+    (h.smul ρ).path = h.path :=
+  rfl
+
+@[simp]
+theorem inflexibleCoe_smul_t {β : Λ} [LeLevel β]
+    {A : ExtendedIndex β} {L : Litter} {ρ : Allowable β} (h : InflexibleCoe A L) :
+    (h.smul ρ).t = Allowable.comp (h.path.B.cons h.path.hδ) ρ • h.t :=
+  rfl
+
+@[simp]
+theorem inflexibleBot_smul_path {β : Λ} [LeLevel β]
+    {A : ExtendedIndex β} {L : Litter} {ρ : Allowable β} (h : InflexibleBot A L) :
+    (h.smul ρ).path = h.path :=
+  rfl
+
+@[simp]
+theorem inflexibleBot_smul_a {β : Λ} [LeLevel β]
+    {A : ExtendedIndex β} {L : Litter} {ρ : Allowable β} (h : InflexibleBot A L) :
+    (h.smul ρ).a = Allowable.comp (h.path.B.cons (bot_lt_coe _)) ρ • h.a :=
+  rfl
 
 end ConNF

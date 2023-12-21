@@ -9,3 +9,4 @@
 - Reformat lines containing only `by`.
 - Change `refine'` to new variants.
 - Remove unnecessary instances of `*_eta` lemmas.
+- Turn `Allowable.comp *` into `*.comp`.

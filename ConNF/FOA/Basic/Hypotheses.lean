@@ -47,7 +47,7 @@ instance positionedTangles : PositionedTangles γ :=
 instance typedObjects : TypedObjects β :=
   lowerTypedObjects β
 
-noncomputable instance iicBotTangleData : ∀ β : TypeIndex, [LeLevel β] → TangleData β
+instance iicBotTangleData : ∀ β : TypeIndex, [LeLevel β] → TangleData β
   | ⊥, _ => Bot.tangleData
   | (β : Λ), _ => lowerTangleData β
 
@@ -71,8 +71,8 @@ class FOAAssumptions extends FOAData where
       Tree.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm ρ) =
         Allowable.toStructPerm (allowableCons hγ ρ)
   /-- Designated supports commute with allowable permutations. -/
-  support_smul {β : Λ} [LeLevel β] (t : Tangle β) (ρ : Allowable β) :
-    (ρ • t).support = ρ • (t.support : Set (SupportCondition β))
+  smul_support {β : Λ} [LeLevel β] (t : Tangle β) (ρ : Allowable β) :
+    (ρ • t).support = ρ • t.support
   /-- Inflexible litters whose atoms occur in designated supports have position less than the
   original tangle. -/
   pos_lt_pos_atom {β : Λ} [LtLevel β] (t : Tangle β)
@@ -105,11 +105,11 @@ class FOAAssumptions extends FOAData where
     (γ : TypeIndex) [LtLevel γ] (hγ : γ < β) :
     allowableCons hγ (allowableOfSmulFuzz β ρs h) = ρs γ hγ
 
-export FOAAssumptions (allowableCons allowableCons_eq support_smul
+export FOAAssumptions (allowableCons allowableCons_eq smul_support
   pos_lt_pos_atom pos_lt_pos_nearLitter
   smul_fuzz allowableOfSmulFuzz allowableOfSmulFuzz_comp_eq)
 
-attribute [simp] support_smul allowableOfSmulFuzz_comp_eq
+attribute [simp] smul_support allowableOfSmulFuzz_comp_eq
 
 variable [FOAAssumptions]
 
@@ -206,8 +206,10 @@ theorem Allowable.comp_bot {β : TypeIndex} [LeLevel β] (A : Quiver.Path β ⊥
   simp only [Allowable.toStructPerm_apply]
 
 theorem smul_mem_support {β : Λ} [LtLevel β] {c : SupportCondition β} {t : Tangle β}
-    (h : c ∈ t.support) (π : Allowable β) : π • c ∈ (π • t).support :=
-  (Set.ext_iff.mp (support_smul t π) (π • c)).mpr ⟨c, h, rfl⟩
+    (h : c ∈ t.support) (π : Allowable β) : π • c ∈ (π • t).support := by
+  rw [smul_support]
+  simp only [Support.mem_iff, Support.smul_f, smul_left_cancel_iff, Support.smul_max] at h ⊢
+  exact h
 
 @[simp]
 theorem NearLitterPerm.ofBot_comp' {β : TypeIndex} [LeLevel β] {hβ : ⊥ < β} {ρ : Allowable β} :
