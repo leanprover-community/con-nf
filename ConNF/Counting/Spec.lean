@@ -1,3 +1,4 @@
+import ConNF.Mathlib.Support
 import ConNF.FOA.Basic.Flexible
 import ConNF.Counting.CodingFunction
 
@@ -321,7 +322,7 @@ theorem specFor_smul_inflexibleCoe {S : Support β} {A : ExtendedIndex β} {N : 
           (Allowable.comp (h.path.B.cons h.path.hδ) ρ) ?_ ?_
       · simp only [smul_support, this]
       · rw [Enumeration.smul_carrier]
-        exact (support_supports h.t).smul (Allowable.comp (h.path.B.cons h.path.hδ) ρ)
+        exact (support_supports h.t).smul' (Allowable.comp (h.path.B.cons h.path.hδ) ρ)
       · exact support_supports h.t
   · rw [← ih h.path.δ (coe_lt_coe.mp h.δ_lt_β)
       (S.comp (h.path.B.cons h.path.hδ) + h.t.support) (Allowable.comp (h.path.B.cons h.path.hδ) ρ)]
