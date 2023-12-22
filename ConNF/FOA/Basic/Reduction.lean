@@ -186,6 +186,6 @@ theorem reduction_support_supports [TangleData β] (t : Tangle β) :
   intro ρ h
   refine support_supports t ρ ?_
   intros c hc'
-  exact reduction_supports (t.support) c hc' (Allowable.toStructPerm ρ) h
+  exact reduction_supports t.support c hc' (Allowable.toStructPerm ρ) h
 
 end ConNF

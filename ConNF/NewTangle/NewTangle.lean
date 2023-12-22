@@ -460,13 +460,14 @@ theorem NewAllowable.smul_supportCondition_eq_smul_iff
 This is called a *typed near litter*. -/
 def newTypedNearLitter (N : NearLitter) : NewTangle :=
   ⟨intro (show Set (Tangle ⊥) from N.2.1) <| Code.isEven_bot _,
-    ⟨1, fun _ _ => ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩⟩,
+    Support.singleton ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩,
     by
       intro ρ h
       simp only [smul_intro]
       congr 1
-      simp only [Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
-        NewAllowable.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inr, Sum.inr.injEq] at h
+      simp only [Support.singleton_enum, Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop,
+        exists_eq_left, NewAllowable.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inr,
+        Sum.inr.injEq] at h 
       apply_fun SetLike.coe at h
       refine Eq.trans ?_ h
       rw [NearLitterPerm.smul_nearLitter_coe]

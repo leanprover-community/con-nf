@@ -53,7 +53,7 @@ theorem SupportCondition.comp_smul_comp [LeLevel β] [LeLevel γ] (c : SupportCo
   · rw [comp_eq_of_not_exists h, comp_eq_of_not_exists (by exact h)]
 
 def Support.pathEnumeration (S : Support β) : Enumeration (ExtendedIndex β) :=
-  S.image SupportCondition.path
+  S.enum.image SupportCondition.path
 
 @[simp]
 theorem Support.pathEnumeration_f (S : Support β) (i : κ) (hi : i < S.pathEnumeration.max) :
@@ -84,7 +84,8 @@ theorem Support.compIndex_spec (E : Enumeration (ExtendedIndex β)) (h : canComp
   (Enumeration.chooseIndex_spec (p := (fun B => ∃ C, A.comp C = B)) h).choose_spec
 
 open scoped Classical in
-noncomputable def Support.comp (A : Quiver.Path β γ) (S : Support β) : Support γ :=
+noncomputable def Support.comp' (A : Quiver.Path β γ) (S : Support β) :
+    Enumeration (SupportCondition γ) :=
   if h : canComp A S.pathEnumeration then
     ⟨S.max, fun i hi => (S.f i hi).comp A
       ⟨compIndex_tail S.pathEnumeration h,
@@ -94,36 +95,57 @@ noncomputable def Support.comp (A : Quiver.Path β γ) (S : Support β) : Suppor
 
 variable {S : Support β}
 
-theorem Support.comp_eq_pos (h : canComp A S.pathEnumeration) :
-    S.comp A = ⟨S.max, fun i hi => (S.f i hi).comp A
+theorem Support.comp'_eq_pos (h : canComp A S.pathEnumeration) :
+    S.comp' A = ⟨S.max, fun i hi => (S.f i hi).comp A
       ⟨compIndex_tail S.pathEnumeration h,
         (S.f (compIndex S.pathEnumeration h) (compIndex_lt _ _)).value⟩⟩ :=
-  by rw [Support.comp, dif_pos h]
+  by rw [Support.comp', dif_pos h]
 
-theorem Support.comp_eq_neg (h : ¬canComp A S.pathEnumeration) :
-    S.comp A = ⟨0, fun _ hi => (κ_not_lt_zero _ hi).elim⟩ :=
-  by rw [Support.comp, dif_neg h]
+theorem Support.comp'_eq_neg (h : ¬canComp A S.pathEnumeration) :
+    S.comp' A = ⟨0, fun _ hi => (κ_not_lt_zero _ hi).elim⟩ :=
+  by rw [Support.comp', dif_neg h]
 
-theorem Allowable.comp_smul_support_comp {β γ : TypeIndex} [LeLevel β] [LeLevel γ]
+theorem Allowable.comp_smul_support_comp' {β γ : TypeIndex} [LeLevel β] [LeLevel γ]
     (S : Support β) (ρ : Allowable β) (A : Path β γ) :
-    Allowable.comp A ρ • S.comp A = (ρ • S).comp A := by
+    Allowable.comp A ρ • S.comp' A = (ρ • S).comp' A := by
   by_cases h : Support.canComp A S.pathEnumeration
-  · rw [Support.comp_eq_pos h, Support.comp_eq_pos]
+  · rw [Support.comp'_eq_pos h, Support.comp'_eq_pos]
     swap
     · exact h
     refine Enumeration.ext _ _ rfl (heq_of_eq ?_)
     ext i hi : 2
-    simp only [Enumeration.smul_f, SupportCondition.comp_smul_comp, Support.pathEnumeration_smul]
+    simp only [Enumeration.smul_f, SupportCondition.comp_smul_comp, smul_support_f,
+      Support.pathEnumeration_smul]
     refine congr_arg _ ?_
     rw [Allowable.smul_supportCondition, Allowable.smul_supportCondition,
       toStructPerm_comp, Tree.comp_apply, SupportCondition.mk.injEq,
       Support.compIndex_spec S.pathEnumeration h, Support.pathEnumeration_f]
     exact ⟨rfl, rfl⟩
   · push_neg at h
-    rw [Support.comp_eq_neg h, Support.comp_eq_neg (by rwa [Support.pathEnumeration_smul])]
+    rw [Support.comp'_eq_neg h, Support.comp'_eq_neg (by rwa [Support.pathEnumeration_smul])]
     refine Enumeration.ext _ _ rfl (heq_of_eq ?_)
     ext i hi : 2
     cases κ_not_lt_zero _ hi
+
+theorem Support.mem_of_mem_symmDiff_comp (A : Quiver.Path β γ) (S : Support β) (B : ExtendedIndex γ)
+    (N₁ N₂ : NearLitter) (a : Atom) :
+    N₁.1 = N₂.1 → a ∈ (N₁ : Set Atom) ∆ N₂ →
+    ⟨B, inr N₁⟩ ∈ S.comp' A → ⟨B, inr N₂⟩ ∈ S.comp' A → ⟨B, inl a⟩ ∈ S.comp' A := by
+  intro hN a hN₁ hN₂
+  by_cases h : Support.canComp A S.pathEnumeration
+  · rw [Support.comp'_eq_pos h] at hN₁ hN₂ ⊢
+    sorry
+  · rw [Support.comp'_eq_neg h] at hN₁ hN₂ ⊢
+    sorry
+
+noncomputable def Support.comp (A : Quiver.Path β γ) (S : Support β) : Support γ :=
+  ⟨S.comp' A, mem_of_mem_symmDiff_comp A S⟩
+
+theorem Allowable.comp_smul_support_comp {β γ : TypeIndex} [LeLevel β] [LeLevel γ]
+    (S : Support β) (ρ : Allowable β) (A : Path β γ) :
+    Allowable.comp A ρ • S.comp A = (ρ • S).comp A := by
+  ext : 1
+  simp only [Support.comp, Allowable.smul_mk_support, Allowable.comp_smul_support_comp']
 
 end comp
 
@@ -131,7 +153,7 @@ variable {β : Λ}
 
 mutual
   inductive SpecCondition : Λ → Type u
-    | atom {β : Λ} (A : ExtendedIndex β) (others : Set κ) (nearLitters: Set κ) :
+    | atom {β : Λ} (A : ExtendedIndex β) (others : Set κ) (nearLitters : Set κ) :
         SpecCondition β
     | flexible {β : Λ} (A : ExtendedIndex β) :
         SpecCondition β
@@ -173,6 +195,8 @@ theorem ext {σ τ : Spec β} (h₁ : σ.max = τ.max)
   exact h₂ i hi hi
 
 end Spec
+
+/-
 
 instance : WellFoundedRelation Λ where
   rel := (· < ·)
@@ -354,5 +378,7 @@ theorem specFor_smul {β : Λ} [i : LeLevel β]
 theorem smul_spec {β : Λ} [LeLevel β] {S : Support β} {ρ : Allowable β} :
     (ρ • S).spec = S.spec :=
   Spec.ext rfl (fun _ _ _ => specFor_smul)
+
+-/
 
 end ConNF

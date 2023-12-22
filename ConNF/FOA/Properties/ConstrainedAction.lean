@@ -325,7 +325,7 @@ theorem transGen_constrains_of_mem_support {A : ExtendedIndex β} {L : Litter}
     (hd₂ : ⟨(C.cons hε).cons (bot_lt_coe _),
       inr (fuzz hδε t).toNearLitter⟩ ≤ d)
     (hd : ⟨(h.path.B.cons h.path.hδ).comp d.path, d.value⟩ ≺ ⟨A, inr L.toNearLitter⟩)
-    {B : ExtendedIndex δ} {a : Atom} (hc : ⟨B, inl a⟩ ∈ (t.support).carrier) :
+    {B : ExtendedIndex δ} {a : Atom} (hc : ⟨B, inl a⟩ ∈ t.support) :
     (⟨(h.path.B.cons h.path.hδ).comp ((C.cons hδ).comp B), inl a⟩ : SupportCondition β) <
       ⟨A, inr L.toNearLitter⟩ := by
   refine' Relation.TransGen.tail' _ hd

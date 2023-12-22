@@ -115,7 +115,7 @@ noncomputable def code (S : Support β) (t : Tangle β)
     have := h₂.choose_spec.symm
     conv_rhs at this => rw [h₁.choose_spec]
     rw [← inv_smul_eq_iff, ← inv_smul_eq_iff, smul_smul, smul_smul] at this
-    exact Enumeration.smul_eq_of_smul_eq this hc
+    exact Allowable.smul_eq_of_smul_support_eq this hc
 
 @[simp]
 theorem code_decode (S : Support β) (t : Tangle β)
@@ -128,7 +128,7 @@ theorem code_decode (S : Support β) (t : Tangle β)
   · intros h' _
     refine h _ ?_
     intros c hc
-    exact Enumeration.smul_eq_of_smul_eq h'.choose_spec.symm hc
+    exact Allowable.smul_eq_of_smul_support_eq h'.choose_spec.symm hc
 
 @[simp]
 theorem mem_code_self {S : Support β} {t : Tangle β}

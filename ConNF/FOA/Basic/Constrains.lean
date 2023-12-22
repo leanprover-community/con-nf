@@ -403,7 +403,7 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺ 
         (B : Path (β : TypeIndex) γ) (t : Tangle δ),
         N = (fuzz hδε t).toNearLitter ∧ A = (B.cons hε).cons (bot_lt_coe _)
     · obtain ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, B, t, rfl, rfl⟩ := h
-      refine lt_of_le_of_lt ?_ (t.support).small
+      refine lt_of_le_of_lt ?_ t.support.small
       suffices
         #{a : SupportCondition β | ∃ c : (t.support : Set (SupportCondition δ)),
             a = ⟨(B.cons hδ).comp c.val.path, c.val.value⟩} ≤

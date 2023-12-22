@@ -67,6 +67,34 @@ instance : MulAction (Allowable α) X :=
 theorem toStructPerm_smul (ρ : Allowable α) (x : X) : ρ • x = Allowable.toStructPerm ρ • x :=
   rfl
 
+@[simp]
+theorem smul_support_max (ρ : Allowable α) (S : Support α) :
+    (ρ • S).max = S.max :=
+  rfl
+
+@[simp]
+theorem smul_support_f (ρ : Allowable α) (S : Support α) (i : κ) (hi : i < S.max) :
+    (ρ • S).f i hi = ρ • S.f i hi :=
+  rfl
+
+@[simp]
+theorem smul_support_coe (ρ : Allowable α) (S : Support α) :
+    (ρ • S : Support α) = ρ • (S : Set (SupportCondition α)) :=
+  Support.smul_coe _ _
+
+@[simp]
+theorem smul_mk_support (ρ : Allowable α) (E : Enumeration (SupportCondition α)) (h) :
+    ρ • Support.mk E h = Support.mk (ρ • E) ((Support.mk E h).mem_of_mem_symmDiff_smul _) :=
+  rfl
+
+theorem smul_mem_smul_support {S : Support α} {c : SupportCondition α}
+    (h : c ∈ S) (ρ : Allowable α) : ρ • c ∈ ρ • S :=
+  Support.smul_mem_smul h _
+
+theorem smul_eq_of_smul_support_eq {S : Support α} {ρ : Allowable α}
+    (hS : ρ • S = S) {c : SupportCondition α} (hc : c ∈ S) : ρ • c = c :=
+  Support.smul_eq_of_smul_eq hS hc
+
 variable {ρ ρ' : Allowable α} {c : SupportCondition α}
 
 theorem smul_supportCondition :
@@ -145,10 +173,11 @@ instance Bot.tangleData : TangleData ⊥
   Allowable := NearLitterPerm
   allowableToStructPerm := Tree.toBotIso.toMonoidHom
   allowableAction := inferInstance
-  support a := ⟨1, fun _ _ => ⟨Quiver.Path.nil, Sum.inl a⟩⟩
+  support a := Support.singleton ⟨Quiver.Path.nil, Sum.inl a⟩
   support_supports a π h := by
-    simp only [Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
-      NearLitterPerm.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
+    simp only [Support.singleton_enum, Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop,
+      exists_eq_left, NearLitterPerm.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inl,
+      Sum.inl.injEq] at h
     exact h
 
 /-- A position function for atoms, which is chosen arbitrarily. -/
