@@ -331,6 +331,10 @@ theorem κ_not_lt_zero (i : κ) : ¬i < 0 := by
   · exact h.not_lt
   · exact h.not_lt
 
+theorem κ_pos (i : κ) : 0 ≤ i := by
+  rw [← not_lt]
+  exact κ_not_lt_zero i
+
 @[simp]
 theorem κ_add_eq_zero_iff (i j : κ) : i + j = 0 ↔ i = 0 ∧ j = 0 :=
   by rw [← Ordinal.typein_inj (α := κ) (· < ·), ← Ordinal.typein_inj (α := κ) (· < ·),

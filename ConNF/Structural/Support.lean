@@ -263,4 +263,99 @@ theorem mk_support : #(Support α) = #μ := by
     simp only [SupportCondition.mk.injEq, inl.injEq, true_and] at this
     exact this
 
+/-- `S` is a *completion* of an enumeration of support conditions `E` if it extends `E`,
+and every support condition in the extension is an atom contained in the symmetric difference of
+two near-litters in `E`. -/
+structure IsCompletion (S : Support α) (E : Enumeration (SupportCondition α)) : Prop where
+  le : E ≤ S.enum
+  eq_atom (i : κ) (hi₁ : i < S.max) (hi₂ : E.max ≤ i) :
+    ∃ A : ExtendedIndex α, ∃ a : Atom, ∃ N₁ N₂ : NearLitter,
+    N₁.1 = N₂.1 ∧ a ∈ (N₁ : Set Atom) ∆ N₂ ∧
+    ⟨A, inr N₁⟩ ∈ E ∧ ⟨A, inr N₂⟩ ∈ E ∧ S.f i hi₁ = ⟨A, inl a⟩
+
+/-- The set of support conditions that we need to add to `s` to make it a support. -/
+def completionToAdd (s : Set (SupportCondition α)) : Set (SupportCondition α) :=
+  {x | ∃ N₁ N₂ : NearLitter, N₁.1 = N₂.1 ∧ ∃ a : Atom, x.2 = inl a ∧ a ∈ (N₁ : Set Atom) ∆ N₂ ∧
+    ⟨x.1, inr N₁⟩ ∈ s ∧ ⟨x.1, inr N₂⟩ ∈ s}
+
+theorem nearLitter_not_mem_completionToAdd (A : ExtendedIndex α) (N : NearLitter)
+    (s : Set (SupportCondition α)) : ⟨A, inr N⟩ ∉ completionToAdd s := by
+  rintro ⟨_, _, _, a, h, _⟩
+  cases h
+
+def completionToAdd' (s : Set (SupportCondition α)) (A : ExtendedIndex α) : Set Atom :=
+  ⋃ (N₁ : NearLitter) (_ : N₁ ∈ (fun N => ⟨A, inr N⟩) ⁻¹' s)
+    (N₂ : NearLitter) (_ : N₂ ∈ (fun N => ⟨A, inr N⟩) ⁻¹' s)
+    (_ : N₁.1 = N₂.1),
+  (N₁ : Set Atom) ∆ N₂
+
+theorem completionToAdd'_small (s : Set (SupportCondition α)) (hs : Small s) (A : ExtendedIndex α) :
+    Small (completionToAdd' s A) := by
+  have : Function.Injective (fun N => (⟨A, inr N⟩ : SupportCondition α))
+  · intro N₁ N₂ h
+    simp only [SupportCondition.mk.injEq, inr.injEq, true_and] at h
+    exact h
+  refine Small.bUnion (Small.preimage this hs) (fun N₁ _ => ?_)
+  refine Small.bUnion (Small.preimage this hs) (fun N₂ _ => ?_)
+  refine small_iUnion_Prop (fun h => ?_)
+  refine N₁.2.prop.symm.trans ?_
+  rw [h]
+  exact N₂.2.prop
+
+theorem completionToAdd_eq_completionToAdd' (s : Set (SupportCondition α)) :
+    completionToAdd s = ⋃ (A : ExtendedIndex α), (⟨A, inl ·⟩) '' completionToAdd' s A := by
+  simp only [completionToAdd, completionToAdd']
+  aesop
+
+theorem completionToAdd_small (s : Set (SupportCondition α)) (hs : Small s) :
+    Small (completionToAdd s) := by
+  rw [completionToAdd_eq_completionToAdd']
+  refine small_iUnion ?_ ?_
+  · exact (mk_extendedIndex α).trans_lt Params.Λ_lt_κ
+  · intro A
+    exact Small.image (completionToAdd'_small s hs A)
+
+noncomputable def completeEnum (E : Enumeration (SupportCondition α)) :
+    Enumeration (SupportCondition α) :=
+  E + Enumeration.ofSet (completionToAdd E) (completionToAdd_small _ E.small)
+
+@[simp]
+theorem mem_completeEnum (E : Enumeration (SupportCondition α)) (c : SupportCondition α) :
+    c ∈ completeEnum E ↔ c ∈ E ∨ c ∈ completionToAdd E :=
+  by rw [completeEnum, Enumeration.mem_add_iff, Enumeration.mem_ofSet_iff]
+
+theorem completeEnum_mem_of_mem_symmDiff (E : Enumeration (SupportCondition α))
+    (A : ExtendedIndex α) (N₁ N₂ : NearLitter) (a : Atom) :
+    N₁.1 = N₂.1 → a ∈ (N₁ : Set Atom) ∆ N₂ →
+    ⟨A, inr N₁⟩ ∈ completeEnum E → ⟨A, inr N₂⟩ ∈ completeEnum E → ⟨A, inl a⟩ ∈ completeEnum E := by
+  intro hN ha hN₁ hN₂
+  rw [mem_completeEnum] at hN₁ hN₂ ⊢
+  obtain (hN₁ | hN₁) := hN₁
+  · obtain (hN₂ | hN₂) := hN₂
+    · exact Or.inr ⟨N₁, N₂, hN, a, rfl, ha, hN₁, hN₂⟩
+    · cases nearLitter_not_mem_completionToAdd A N₂ _ hN₂
+  · cases nearLitter_not_mem_completionToAdd A N₁ _ hN₁
+
+/-- Extend an enumeration to a support. -/
+noncomputable def complete (E : Enumeration (SupportCondition α)) : Support α where
+  enum := completeEnum E
+  mem_of_mem_symmDiff' := completeEnum_mem_of_mem_symmDiff E
+
+theorem complete_isCompletion (E : Enumeration (SupportCondition α)) :
+    IsCompletion (complete E) E := by
+  constructor
+  · exact Enumeration.le_add _ _
+  · intro i hi₁ hi₂
+    have := Enumeration.f_mem _ (i - E.max) (κ_sub_lt hi₁ hi₂)
+    rw [← Enumeration.add_f_right hi₁ hi₂, Enumeration.mem_ofSet_iff] at this
+    obtain ⟨N₁, N₂, hN, a, ha₁, ha₂, hN₁, hN₂⟩ := this
+    refine ⟨_, a, N₁, N₂, hN, ha₂, hN₁, hN₂, ?_⟩
+    rw [← ha₁]
+    rfl
+
+/-- `S` is a *sum* of `S₁` and `S₂` if it is a completion of `S₁ + S₂`. -/
+def IsSum (S S₁ S₂ : Support α) : Prop := IsCompletion S (S₁.enum + S₂.enum)
+
+theorem exists_isSum (S₁ S₂ : Support α) : ∃ S, IsSum S S₁ S₂ := ⟨_, complete_isCompletion _⟩
+
 end ConNF

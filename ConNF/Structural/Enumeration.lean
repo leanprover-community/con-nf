@@ -2,7 +2,7 @@ import Mathlib.Data.Set.Pointwise.SMul
 import ConNF.BaseType.Small
 import ConNF.Structural.Index
 
-open Cardinal
+open Cardinal Ordinal
 
 open scoped Cardinal Pointwise
 
@@ -36,6 +36,10 @@ theorem Enumeration.mem_carrier_iff (x : α) (E : Enumeration α) :
 theorem Enumeration.mem_iff (c : α) (E : Enumeration α) :
     c ∈ E ↔ ∃ i, ∃ (h : i < E.max), c = E.f i h :=
   Iff.rfl
+
+theorem Enumeration.f_mem (E : Enumeration α) (i : κ) (hi : i < E.max) :
+    E.f i hi ∈ E :=
+  ⟨i, hi, rfl⟩
 
 theorem Enumeration.carrier_small (E : Enumeration α) : Small E.carrier := by
   refine lt_of_le_of_lt (b := #(Set.Iio E.max)) ?_ (card_typein_lt (· < ·) E.max Params.κ_ord.symm)
@@ -97,11 +101,11 @@ theorem mk_fun_le {α β : Type u} :
   let _ := linearOrderOfSTO r
   exact ⟨⟨funMap α β, funMap_injective⟩⟩
 
-theorem pow_le_of_isEtrongLimit' {α β : Type u} [Infinite α] [Infinite β]
+theorem pow_le_of_isStrongLimit' {α β : Type u} [Infinite α] [Infinite β]
     (h₁ : IsStrongLimit #β) (h₂ : #α < (#β).ord.cof) : #β ^ #α ≤ #β := by
   refine le_trans mk_fun_le ?_
-  simp only [mk_prod, lift_id, mk_pi, mk_fintype, Fintype.card_prop, Nat.cast_ofNat, prod_const,
-    lift_id', lift_two]
+  simp only [mk_prod, Cardinal.lift_id, mk_pi, mk_fintype, Fintype.card_prop, Nat.cast_ofNat,
+    prod_const, Cardinal.lift_id', lift_two]
   have h₃ : #{ E : Set β // #E ≤ #α } ≤ #β
   · rw [← mk_subset_mk_lt_cof h₁.2]
     refine ⟨⟨fun E => ⟨E, E.prop.trans_lt h₂⟩, ?_⟩⟩
@@ -111,12 +115,12 @@ theorem pow_le_of_isEtrongLimit' {α β : Type u} [Infinite α] [Infinite β]
   have h₄ : (2 ^ #α) ^ #α ≤ #β
   · rw [← power_mul, mul_eq_self (Cardinal.infinite_iff.mp inferInstance)]
     refine (h₁.2 _ ?_).le
-    exact h₂.trans_le (Ordinal.cof_ord_le #β)
+    exact h₂.trans_le (cof_ord_le #β)
   refine le_trans (mul_le_max _ _) ?_
   simp only [ge_iff_le, le_max_iff, max_le_iff, le_aleph0_iff_subtype_countable, h₃, h₄, and_self,
     aleph0_le_mk]
 
-theorem pow_le_of_isEtrongLimit {κ μ : Cardinal.{u}} (h₁ : IsStrongLimit μ) (h₂ : κ < μ.ord.cof) :
+theorem pow_le_of_isStrongLimit {κ μ : Cardinal.{u}} (h₁ : IsStrongLimit μ) (h₂ : κ < μ.ord.cof) :
     μ ^ κ ≤ μ := by
   by_cases h : κ < ℵ₀
   · exact pow_le h₁.isLimit.aleph0_le h
@@ -125,20 +129,21 @@ theorem pow_le_of_isEtrongLimit {κ μ : Cardinal.{u}} (h₁ : IsStrongLimit μ)
     intro α β h₁ h₂ h
     have := Cardinal.infinite_iff.mpr (le_of_not_lt h)
     have := Cardinal.infinite_iff.mpr h₁.isLimit.aleph0_le
-    exact pow_le_of_isEtrongLimit' h₁ h₂
+    exact pow_le_of_isStrongLimit' h₁ h₂
 
 /-- Given that `#α = #μ`, there are exactly `μ` Enumerations. -/
 @[simp]
 theorem mk_enumeration (mk_α : #α = #μ) : #(Enumeration α) = #μ := by
   refine le_antisymm ?_ ?_
   · rw [Cardinal.mk_congr enumerationEquiv]
-    simp only [mk_sigma, mk_pi, mk_α, prod_const, lift_id]
+    simp only [mk_sigma, mk_pi, mk_α, prod_const, Cardinal.lift_id]
     refine le_trans (sum_le_sum _ (fun _ => #μ) ?_) ?_
     · intro i
-      refine pow_le_of_isEtrongLimit Params.μ_isStrongLimit ?_
+      refine pow_le_of_isStrongLimit Params.μ_isStrongLimit ?_
       refine lt_of_lt_of_le ?_ Params.κ_le_μ_ord_cof
       exact card_typein_lt (· < ·) i Params.κ_ord.symm
-    · simp only [sum_const, lift_id, mul_mk_eq_max, ge_iff_le, max_le_iff, le_refl, and_true]
+    · simp only [sum_const, Cardinal.lift_id, mul_mk_eq_max, ge_iff_le, max_le_iff, le_refl,
+        and_true]
       exact Params.κ_lt_μ.le
   · rw [← mk_α]
     refine ⟨⟨fun x => ⟨1, fun _ _ => x⟩, ?_⟩⟩
@@ -288,6 +293,13 @@ theorem add_coe (E F : Enumeration α) :
       rw [add_f_right_add]
 
 @[simp]
+theorem mem_add_iff (E F : Enumeration α) (x : α) :
+    x ∈ E + F ↔ x ∈ E ∨ x ∈ F := by
+  change x ∈ (E + F : Set α) ↔ _
+  rw [add_coe]
+  rfl
+
+@[simp]
 theorem smul_add {G : Type _} [SMul G α] {g : G} (E F : Enumeration α) :
     g • (E + F) = g • E + g • F := by
   ext
@@ -301,8 +313,99 @@ theorem smul_add {G : Type _} [SMul G α] {g : G} (E F : Enumeration α) :
         (show (g • E).max ≤ i from le_of_not_lt hi'), smul_f]
     rfl
 
-noncomputable section choose
+instance : LE (Enumeration α) where
+  le E F := E.max ≤ F.max ∧ ∀ (i : κ) (hE : i < E.max) (hF : i < F.max), E.f i hE = F.f i hF
+
+instance : LT (Enumeration α) where
+  lt E F := E.max < F.max ∧ ∀ (i : κ) (hE : i < E.max) (hF : i < F.max), E.f i hE = F.f i hF
+
+theorem le_iff (E F : Enumeration α) :
+    E ≤ F ↔ E.max ≤ F.max ∧ ∀ (i : κ) (hE : i < E.max) (hF : i < F.max), E.f i hE = F.f i hF :=
+  Iff.rfl
+
+theorem lt_iff (E F : Enumeration α) :
+    E < F ↔ E.max < F.max ∧ ∀ (i : κ) (hE : i < E.max) (hF : i < F.max), E.f i hE = F.f i hF :=
+  Iff.rfl
+
+instance : PartialOrder (Enumeration α) where
+  lt_iff_le_not_le E F := by
+    rw [le_iff, le_iff, lt_iff]
+    constructor
+    · intro h
+      exact ⟨⟨h.1.le, h.2⟩, fun h' => h'.1.not_lt h.1⟩
+    · intro h
+      rw [not_and'] at h
+      exact ⟨lt_of_le_not_le h.1.1 (h.2 (fun i hE hF => (h.1.2 i hF hE).symm)), h.1.2⟩
+  le_refl E := ⟨le_rfl, fun _ _ _ => rfl⟩
+  le_trans E F G hEF hFG := ⟨hEF.1.trans hFG.1, fun i hE hG =>
+    (hEF.2 i hE (hE.trans_le hEF.1)).trans (hFG.2 i (hE.trans_le hEF.1) hG)⟩
+  le_antisymm := by
+    rintro ⟨m₁, f₁⟩ ⟨m₂, f₂⟩ h₁₂ h₂₁
+    cases le_antisymm h₁₂.1 h₂₁.1
+    refine Enumeration.ext _ _ rfl (heq_of_eq ?_)
+    ext i hi
+    exact h₁₂.2 i hi hi
+
+theorem le_add (E F : Enumeration α) : E ≤ E + F := by
+  constructor
+  · simp only [add_max, le_add_iff_nonneg_right]
+    exact κ_pos _
+  · intro i hE hF
+    rw [add_f_left]
+
+noncomputable section
 open scoped Classical
+
+theorem ord_lt_of_small {s : Set α} (hs : Small s) [LinearOrder s] [IsWellOrder s (· < ·)] :
+    type ((· < ·) : s → s → Prop) < type ((· < ·) : κ → κ → Prop) := by
+  by_contra! h
+  have := card_le_card h
+  simp only [card_type] at this
+  exact hs.not_le this
+
+theorem typein_lt_type_of_small {s : Set α} (hs : Small s) [LinearOrder s] [IsWellOrder s (· < ·)]
+    {i : κ} (hi : i < enum (· < ·) (type ((· < ·) : s → s → Prop)) (ord_lt_of_small hs)) :
+    typein ((· < ·) : κ → κ → Prop) i < type ((· < ·) : s → s → Prop) := by
+  rw [← typein_lt_typein (· < ·), typein_enum] at hi
+  exact hi
+
+def ofSet' (s : Set α) (hs : Small s) [LinearOrder s] [IsWellOrder s (· < ·)] : Enumeration α where
+  max := enum (· < ·) (type ((· < ·) : s → s → Prop)) (ord_lt_of_small hs)
+  f i hi := (enum ((· < ·) : s → s → Prop) (typein ((· < ·) : κ → κ → Prop) i)
+    (typein_lt_type_of_small hs hi) : s)
+
+@[simp]
+theorem ofSet'_coe (s : Set α) (hs : Small s) [LinearOrder s] [IsWellOrder s (· < ·)] :
+    (ofSet' s hs : Set α) = s := by
+  ext x
+  rw [ofSet', mem_carrier_iff]
+  constructor
+  · rintro ⟨i, hi, rfl⟩
+    exact Subtype.coe_prop _
+  · rintro hx
+    refine ⟨enum ((· < ·) : κ → κ → Prop) (typein ((· < ·) : s → s → Prop) ⟨x, hx⟩) ?_, ?_, ?_⟩
+    · exact (typein_lt_type _ _).trans (ord_lt_of_small hs)
+    · rw [enum_lt_enum (r := ((· < ·) : κ → κ → Prop))]
+      exact typein_lt_type _ _
+    · simp only [typein_enum, enum_typein]
+
+def ofSet (s : Set α) (hs : Small s) : Enumeration α :=
+  letI := (IsWellOrder.subtype_nonempty (σ := s)).some.prop
+  letI := linearOrderOfSTO (IsWellOrder.subtype_nonempty (σ := s)).some.val
+  ofSet' s hs
+
+@[simp]
+theorem ofSet_coe (s : Set α) (hs : Small s) :
+    (ofSet s hs : Set α) = s :=
+  letI := (IsWellOrder.subtype_nonempty (σ := s)).some.prop
+  letI := linearOrderOfSTO (IsWellOrder.subtype_nonempty (σ := s)).some.val
+  ofSet'_coe s hs
+
+@[simp]
+theorem mem_ofSet_iff (s : Set α) (hs : Small s) (x : α) :
+    x ∈ ofSet s hs ↔ x ∈ s := by
+  change x ∈ (ofSet s hs : Set α) ↔ x ∈ s
+  rw [ofSet_coe]
 
 def chooseIndex (E : Enumeration α) (p : α → Prop)
     (h : ∃ i : κ, ∃ h : i < E.max, p (E.f i h)) : κ :=
@@ -316,7 +419,7 @@ theorem chooseIndex_spec {E : Enumeration α} {p : α → Prop}
     (h : ∃ i : κ, ∃ h : i < E.max, p (E.f i h)) : p (E.f (E.chooseIndex p h) (chooseIndex_lt h)) :=
   h.choose_spec.choose_spec
 
-end choose
+end
 
 end Enumeration
 
