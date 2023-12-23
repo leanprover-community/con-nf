@@ -136,9 +136,13 @@ theorem inflexibleBot_inflexibleCoe {β : Λ} {A : ExtendedIndex β} {L : Litter
   rintro ⟨⟨γ₁, ε₁, hε₁, B₁, rfl⟩, a₁, rfl⟩ ⟨⟨_, δ₂, ε₂, _, _, hδε₂, _, _⟩, t₂, hL₂⟩
   cases fuzz_congr_β hL₂
 
+theorem InflexibleCoePath.δ_lt_β {β : Λ} {A : ExtendedIndex β}
+    (h : InflexibleCoePath A) : (h.δ : TypeIndex) < β :=
+  h.hδ.trans_le (le_of_path h.B)
+
 theorem InflexibleCoe.δ_lt_β {β : Λ} {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleCoe A L) : (h.path.δ : TypeIndex) < β :=
-  h.path.hδ.trans_le (le_of_path h.path.B)
+  h.path.δ_lt_β
 
 section Comp
 
@@ -232,12 +236,14 @@ theorem InflexibleBot.constrains {β : Λ} {A : ExtendedIndex β} {L : Litter}
   rw [← h.hL, ← h.path.hA] at this
   exact Relation.TransGen.single this
 
+@[aesop unsafe 50% apply]
 theorem inflexible_of_inflexibleBot {β : Λ} {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleBot A L) : Inflexible A L := by
   have := Inflexible.mk_bot h.path.hε h.path.B h.a
   rw [← h.hL, ← h.path.hA] at this
   exact this
 
+@[aesop unsafe 50% apply]
 theorem inflexible_of_inflexibleCoe {β : Λ} {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleCoe A L) : Inflexible A L := by
   have := Inflexible.mk_coe h.path.hδ h.path.hε h.path.hδε h.path.B h.t
@@ -259,6 +265,7 @@ theorem inflexible_iff_inflexibleBot_or_inflexibleCoe {β : Λ} {A : ExtendedInd
   exact inflexible_of_inflexibleBot h
   exact inflexible_of_inflexibleCoe h
 
+@[aesop unsafe 50% apply]
 theorem flexible_iff_not_inflexibleBot_inflexibleCoe {β : Λ} {A : ExtendedIndex β}
     {L : Litter} :
     Flexible A L ↔ IsEmpty (InflexibleBot A L) ∧ IsEmpty (InflexibleCoe A L) := by

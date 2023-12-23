@@ -395,6 +395,9 @@ def TypeIndex :=
 /-! Since `Λ` is well-ordered, so is `Λ` together with the base type `⊥`.
 This allows well founded recursion on type indices. -/
 
+instance : WellFoundedRelation Λ :=
+  IsWellOrder.toHasWellFounded
+
 instance : WellFoundedRelation TypeIndex :=
   IsWellOrder.toHasWellFounded
 

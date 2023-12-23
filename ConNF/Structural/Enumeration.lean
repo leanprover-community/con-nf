@@ -27,12 +27,10 @@ instance : CoeTC (Enumeration α) (Set α) where
 instance : Membership α (Enumeration α) where
   mem x E := x ∈ E.carrier
 
-@[simp]
 theorem Enumeration.mem_carrier_iff (x : α) (E : Enumeration α) :
     x ∈ E.carrier ↔ ∃ i, ∃ (h : i < E.max), x = E.f i h :=
   Iff.rfl
 
-@[simp]
 theorem Enumeration.mem_iff (c : α) (E : Enumeration α) :
     c ∈ E ↔ ∃ i, ∃ (h : i < E.max), c = E.f i h :=
   Iff.rfl

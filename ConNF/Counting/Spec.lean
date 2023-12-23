@@ -127,16 +127,53 @@ theorem Allowable.comp_smul_support_comp' {β γ : TypeIndex} [LeLevel β] [LeLe
     ext i hi : 2
     cases κ_not_lt_zero _ hi
 
+@[simp]
+theorem Support.mem_comp'_iff (A : Quiver.Path β γ) (S : Support β) (c : SupportCondition γ) :
+    c ∈ S.comp' A ↔ ⟨A.comp c.path, c.value⟩ ∈ S := by
+  by_cases h : Support.canComp A S.pathEnumeration
+  · simp only [comp'_eq_pos h, Enumeration.mem_iff, mem_iff]
+    constructor
+    · rintro ⟨i, hi, hc⟩
+      by_cases h' : ∃ B : ExtendedIndex γ, (S.f i hi).path = A.comp B
+      · obtain ⟨B, hB⟩ := h'
+        rw [SupportCondition.comp_eq_of_eq_comp B hB] at hc
+        subst hc
+        refine ⟨i, hi, ?_⟩
+        ext
+        · exact hB.symm
+        · rfl
+      · rw [SupportCondition.comp_eq_of_not_exists h'] at hc
+        subst hc
+        refine ⟨compIndex _ h, compIndex_lt _ h, ?_⟩
+        rw [compIndex_spec]
+        rfl
+    · rintro ⟨i, hi, hc⟩
+      refine ⟨i, hi, ?_⟩
+      rw [← hc, SupportCondition.comp_eq_of_eq_comp c.path]
+      rfl
+  · simp only [comp'_eq_neg h, Enumeration.mem_iff, mem_iff]
+    constructor
+    · rintro ⟨i, hi, _⟩
+      cases κ_not_lt_zero i hi
+    · rintro ⟨i, hi, hc⟩
+      exfalso
+      refine h ?_
+      refine ⟨i, hi, c.path, ?_⟩
+      rw [pathEnumeration_f, ← hc]
+
+@[simp]
+theorem Support.comp'_coe (A : Quiver.Path β γ) (S : Support β) :
+    (S.comp' A : Set (SupportCondition γ)) =
+    (fun c => ⟨A.comp c.path, c.value⟩) ⁻¹' (S : Set (SupportCondition β)) := by
+  ext
+  exact Support.mem_comp'_iff A S _
+
 theorem Support.mem_of_mem_symmDiff_comp (A : Quiver.Path β γ) (S : Support β) (B : ExtendedIndex γ)
     (N₁ N₂ : NearLitter) (a : Atom) :
     N₁.1 = N₂.1 → a ∈ (N₁ : Set Atom) ∆ N₂ →
     ⟨B, inr N₁⟩ ∈ S.comp' A → ⟨B, inr N₂⟩ ∈ S.comp' A → ⟨B, inl a⟩ ∈ S.comp' A := by
-  intro hN a hN₁ hN₂
-  by_cases h : Support.canComp A S.pathEnumeration
-  · rw [Support.comp'_eq_pos h] at hN₁ hN₂ ⊢
-    sorry
-  · rw [Support.comp'_eq_neg h] at hN₁ hN₂ ⊢
-    sorry
+  simp only [mem_comp'_iff]
+  exact S.mem_of_mem_symmDiff (A.comp B) N₁ N₂ a
 
 noncomputable def Support.comp (A : Quiver.Path β γ) (S : Support β) : Support γ :=
   ⟨S.comp' A, mem_of_mem_symmDiff_comp A S⟩
@@ -151,48 +188,518 @@ end comp
 
 variable {β : Λ}
 
-mutual
-  inductive SpecCondition : Λ → Type u
-    | atom {β : Λ} (A : ExtendedIndex β) (others : Set κ) (nearLitters : Set κ) :
-        SpecCondition β
-    | flexible {β : Λ} (A : ExtendedIndex β) :
-        SpecCondition β
-    | inflexibleCoe {β : Λ} (A : ExtendedIndex β) (h : InflexibleCoePath A)
-        (χ : CodingFunction h.δ) (σ : Spec h.δ) : SpecCondition β
-    | inflexibleBot {β : Λ} (A : ExtendedIndex β) (h : InflexibleBotPath A) (atoms : Set κ) :
-        SpecCondition β
+inductive SpecCondition' (β : Λ) (lower : ∀ (δ : Λ) [LeLevel δ], δ < β → Type u) : Type u
+  | atom (A : ExtendedIndex β) (others : Set κ) (nearLitters : Set κ) :
+      SpecCondition' β lower
+  | flexible (A : ExtendedIndex β) :
+      SpecCondition' β lower
+  | inflexibleCoe (A : ExtendedIndex β) (h : InflexibleCoePath A)
+      (χ : CodingFunction h.δ) (σ : Enumeration (lower h.δ (coe_lt_coe.mp h.δ_lt_β))) :
+      SpecCondition' β lower
+  | inflexibleBot (A : ExtendedIndex β) (h : InflexibleBotPath A) (atoms : Set κ) :
+      SpecCondition' β lower
 
-inductive Spec : Λ → Type u
-    | mk {β : Λ} (max : κ) : ((i : κ) → i < max → SpecCondition β) → Spec β
-end
+def SpecCondition : Λ → Type u
+  | β => SpecCondition' β (fun δ _ _ => SpecCondition δ)
+termination_by SpecCondition β => β
+
+abbrev Spec (β : Λ) : Type u :=
+  Enumeration (SpecCondition β)
+
+/-- The "identity" equivalence between `SpecCondition` and `SpecCondition'`. -/
+def SpecCondition.equiv : SpecCondition β ≃ SpecCondition' β (fun δ _ _ => SpecCondition δ) :=
+  Equiv.cast <| by rw [SpecCondition]
+
+def SpecCondition.atom (A : ExtendedIndex β) (others : Set κ) (nearLitters : Set κ) :
+    SpecCondition β :=
+  equiv.symm (SpecCondition'.atom A others nearLitters)
+
+def SpecCondition.flexible (A : ExtendedIndex β) :
+    SpecCondition β :=
+  equiv.symm (SpecCondition'.flexible A)
+
+def SpecCondition.inflexibleCoe (A : ExtendedIndex β) (h : InflexibleCoePath A)
+    (χ : CodingFunction h.δ) (σ : Spec h.δ) :
+    SpecCondition β :=
+  equiv.symm (SpecCondition'.inflexibleCoe A h χ σ)
+
+def SpecCondition.inflexibleBot (A : ExtendedIndex β) (h : InflexibleBotPath A) (atoms : Set κ) :
+    SpecCondition β :=
+  equiv.symm (SpecCondition'.inflexibleBot A h atoms)
+
+@[simp]
+theorem SpecCondition.equiv_atom (A : ExtendedIndex β) (others : Set κ) (nearLitters : Set κ) :
+    equiv (atom A others nearLitters) = .atom A others nearLitters := by
+  rw [atom, Equiv.apply_symm_apply]
+
+@[simp]
+theorem SpecCondition.equiv_flexible (A : ExtendedIndex β) :
+    equiv (flexible A) = .flexible A := by
+  rw [flexible, Equiv.apply_symm_apply]
+
+@[simp]
+theorem SpecCondition.equiv_inflexibleCoe (A : ExtendedIndex β) (h : InflexibleCoePath A)
+    (χ : CodingFunction h.δ) (σ : Spec h.δ) :
+    equiv (inflexibleCoe A h χ σ) = .inflexibleCoe A h χ σ := by
+  rw [inflexibleCoe, Equiv.apply_symm_apply]
+
+@[simp]
+theorem SpecCondition.equiv_inflexibleBot (A : ExtendedIndex β) (h : InflexibleBotPath A)
+    (atoms : Set κ) :
+    equiv (inflexibleBot A h atoms) = .inflexibleBot A h atoms := by
+  rw [inflexibleBot, Equiv.apply_symm_apply]
+
+@[simp]
+theorem SpecCondition.atom.injEq
+    (A₁ A₂ : ExtendedIndex β) (o₁ o₂ : Set κ) (N₁ N₂ : Set κ) :
+    SpecCondition.atom A₁ o₁ N₁ = SpecCondition.atom A₂ o₂ N₂ ↔ A₁ = A₂ ∧ o₁ = o₂ ∧ N₁= N₂ := by
+  constructor
+  · intro h
+    have := congr_arg equiv h
+    simp only [equiv_atom, SpecCondition'.atom.injEq] at this
+    exact this
+  · rintro ⟨rfl, rfl, rfl⟩
+    rfl
+
+@[simp]
+theorem SpecCondition.flexible.injEq (A₁ A₂ : ExtendedIndex β) :
+    SpecCondition.flexible A₁ = SpecCondition.flexible A₂ ↔ A₁ = A₂ := by
+  constructor
+  · intro h
+    have := congr_arg equiv h
+    simp only [equiv_flexible, SpecCondition'.flexible.injEq] at this
+    exact this
+  · rintro rfl
+    rfl
+
+@[simp]
+theorem SpecCondition.inflexibleCoe.injEq (A₁ A₂ : ExtendedIndex β)
+    (h₁ : InflexibleCoePath A₁) (h₂ : InflexibleCoePath A₂)
+    (χ₁ : CodingFunction h₁.δ) (χ₂ : CodingFunction h₂.δ) (σ₁ : Spec h₁.δ) (σ₂ : Spec h₂.δ) :
+    SpecCondition.inflexibleCoe A₁ h₁ χ₁ σ₁ = SpecCondition.inflexibleCoe A₂ h₂ χ₂ σ₂ ↔
+    A₁ = A₂ ∧ HEq h₁ h₂ ∧ HEq χ₁ χ₂ ∧ HEq σ₁ σ₂ := by
+  constructor
+  · intro h
+    have := congr_arg equiv h
+    simp only [equiv_inflexibleCoe, SpecCondition'.inflexibleCoe.injEq] at this
+    exact this
+  · rintro ⟨rfl, h⟩
+    cases eq_of_heq h.1
+    cases eq_of_heq h.2.1
+    cases eq_of_heq h.2.2
+    rfl
+
+@[simp]
+theorem SpecCondition.inflexibleBot.injEq (A₁ A₂ : ExtendedIndex β)
+    (h₁ : InflexibleBotPath A₁) (h₂ : InflexibleBotPath A₂) (s₁ s₂ : Set κ) :
+    SpecCondition.inflexibleBot A₁ h₁ s₁ = SpecCondition.inflexibleBot A₂ h₂ s₂ ↔
+    A₁ = A₂ ∧ HEq h₁ h₂ ∧ s₁ = s₂ := by
+  constructor
+  · intro h
+    have := congr_arg equiv h
+    simp only [equiv_inflexibleBot, SpecCondition'.inflexibleBot.injEq] at this
+    exact this
+  · rintro ⟨rfl, h, rfl⟩
+    cases eq_of_heq h
+    rfl
+
+@[simp]
+theorem SpecCondition.atom_ne_flexible
+    (A₁ : ExtendedIndex β) (o₁ : Set κ) (N₁ : Set κ)
+    (A₂ : ExtendedIndex β) :
+    SpecCondition.atom A₁ o₁ N₁ ≠ SpecCondition.flexible A₂ := by
+  intro h
+  have := congr_arg equiv h
+  rw [equiv_atom, equiv_flexible] at this
+  cases this
+
+@[simp]
+theorem SpecCondition.atom_ne_inflexibleCoe
+    (A₁ : ExtendedIndex β) (o₁ : Set κ) (N₁ : Set κ)
+    (A₂ : ExtendedIndex β) (h₂ : InflexibleCoePath A₂) (χ₂ : CodingFunction h₂.δ) (σ₂ : Spec h₂.δ) :
+    SpecCondition.atom A₁ o₁ N₁ ≠ SpecCondition.inflexibleCoe A₂ h₂ χ₂ σ₂ := by
+  intro h
+  have := congr_arg equiv h
+  rw [equiv_atom, equiv_inflexibleCoe] at this
+  cases this
+
+@[simp]
+theorem SpecCondition.atom_ne_inflexibleBot
+    (A₁ : ExtendedIndex β) (o₁ : Set κ) (N₁ : Set κ)
+    (A₂ : ExtendedIndex β) (h₂ : InflexibleBotPath A₂) (s₂ : Set κ) :
+    SpecCondition.atom A₁ o₁ N₁ ≠ SpecCondition.inflexibleBot A₂ h₂ s₂ := by
+  intro h
+  have := congr_arg equiv h
+  rw [equiv_atom, equiv_inflexibleBot] at this
+  cases this
+
+@[simp]
+theorem SpecCondition.flexible_ne_atom
+    (A₁ : ExtendedIndex β)
+    (A₂ : ExtendedIndex β) (o₂ : Set κ) (N₂ : Set κ) :
+    SpecCondition.flexible A₁ ≠ SpecCondition.atom A₂ o₂ N₂ :=
+  (atom_ne_flexible A₂ o₂ N₂ A₁).symm
+
+@[simp]
+theorem SpecCondition.flexible_ne_inflexibleCoe
+    (A₁ : ExtendedIndex β)
+    (A₂ : ExtendedIndex β) (h₂ : InflexibleCoePath A₂) (χ₂ : CodingFunction h₂.δ) (σ₂ : Spec h₂.δ) :
+    SpecCondition.flexible A₁ ≠ SpecCondition.inflexibleCoe A₂ h₂ χ₂ σ₂ := by
+  intro h
+  have := congr_arg equiv h
+  rw [equiv_flexible, equiv_inflexibleCoe] at this
+  cases this
+
+@[simp]
+theorem SpecCondition.flexible_ne_inflexibleBot
+    (A₁ : ExtendedIndex β)
+    (A₂ : ExtendedIndex β) (h₂ : InflexibleBotPath A₂) (s₂ : Set κ) :
+    SpecCondition.flexible A₁ ≠ SpecCondition.inflexibleBot A₂ h₂ s₂ := by
+  intro h
+  have := congr_arg equiv h
+  rw [equiv_flexible, equiv_inflexibleBot] at this
+  cases this
+
+@[simp]
+theorem SpecCondition.inflexibleCoe_ne_atom
+    (A₁ : ExtendedIndex β) (h₁ : InflexibleCoePath A₁) (χ₁ : CodingFunction h₁.δ) (σ₁ : Spec h₁.δ)
+    (A₂ : ExtendedIndex β) (o₂ : Set κ) (N₂ : Set κ) :
+    SpecCondition.inflexibleCoe A₁ h₁ χ₁ σ₁ ≠ SpecCondition.atom A₂ o₂ N₂ :=
+  (atom_ne_inflexibleCoe A₂ o₂ N₂ A₁ h₁ χ₁ σ₁).symm
+
+@[simp]
+theorem SpecCondition.inflexibleCoe_ne_flexible
+    (A₁ : ExtendedIndex β) (h₁ : InflexibleCoePath A₁) (χ₁ : CodingFunction h₁.δ) (σ₁ : Spec h₁.δ)
+    (A₂ : ExtendedIndex β) :
+    SpecCondition.inflexibleCoe A₁ h₁ χ₁ σ₁ ≠ SpecCondition.flexible A₂ :=
+  (flexible_ne_inflexibleCoe A₂ A₁ h₁ χ₁ σ₁).symm
+
+@[simp]
+theorem SpecCondition.inflexibleCoe_ne_inflexibleBot
+    (A₁ : ExtendedIndex β) (h₁ : InflexibleCoePath A₁) (χ₁ : CodingFunction h₁.δ) (σ₁ : Spec h₁.δ)
+    (A₂ : ExtendedIndex β) (h₂ : InflexibleBotPath A₂) (s₂ : Set κ) :
+    SpecCondition.inflexibleCoe A₁ h₁ χ₁ σ₁ ≠ SpecCondition.inflexibleBot A₂ h₂ s₂ := by
+  intro h
+  have := congr_arg equiv h
+  rw [equiv_inflexibleCoe, equiv_inflexibleBot] at this
+  cases this
+
+@[simp]
+theorem SpecCondition.inflexibleBot_ne_atom
+    (A₁ : ExtendedIndex β) (h₁ : InflexibleBotPath A₁) (s₁ : Set κ)
+    (A₂ : ExtendedIndex β) (o₂ : Set κ) (N₂ : Set κ) :
+    SpecCondition.inflexibleBot A₁ h₁ s₁ ≠ SpecCondition.atom A₂ o₂ N₂ :=
+  (atom_ne_inflexibleBot A₂ o₂ N₂ A₁ h₁ s₁).symm
+
+@[simp]
+theorem SpecCondition.inflexibleBot_ne_flexible
+    (A₁ : ExtendedIndex β) (h₁ : InflexibleBotPath A₁) (s₁ : Set κ)
+    (A₂ : ExtendedIndex β) :
+    SpecCondition.inflexibleBot A₁ h₁ s₁ ≠ SpecCondition.flexible A₂ :=
+  (flexible_ne_inflexibleBot A₂ A₁ h₁ s₁).symm
+
+@[simp]
+theorem SpecCondition.inflexibleBot_ne_inflexibleCoe
+    (A₁ : ExtendedIndex β) (h₁ : InflexibleBotPath A₁) (s₁ : Set κ)
+    (A₂ : ExtendedIndex β) (h₂ : InflexibleCoePath A₂) (χ₂ : CodingFunction h₂.δ) (σ₂ : Spec h₂.δ) :
+    SpecCondition.inflexibleBot A₁ h₁ s₁ ≠ SpecCondition.inflexibleCoe A₂ h₂ χ₂ σ₂ :=
+  (inflexibleCoe_ne_inflexibleBot A₂ h₂ χ₂ σ₂ A₁ h₁ s₁).symm
+
+section recursor
+
+variable {motive : SpecCondition β → Sort _}
+  (atom : ∀ (A : ExtendedIndex β) (others : Set κ) (nearLitters : Set κ),
+    motive (.atom A others nearLitters))
+  (flexible : ∀ (A : ExtendedIndex β), motive (.flexible A))
+  (inflexibleCoe : ∀ (A : ExtendedIndex β) (h : InflexibleCoePath A)
+    (χ : CodingFunction h.δ) (σ : Spec h.δ), motive (.inflexibleCoe A h χ σ))
+  (inflexibleBot : ∀ (A : ExtendedIndex β) (h : InflexibleBotPath A)
+    (atoms : Set κ), motive (.inflexibleBot A h atoms))
+
+def SpecCondition.castMotive {c : SpecCondition β} :
+    motive c ≃ motive (equiv.symm (equiv c)) :=
+  Equiv.cast (by rw [Equiv.symm_apply_apply])
+
+def SpecCondition.rec (c : SpecCondition β) : motive c :=
+  castMotive.symm (match SpecCondition.equiv c with
+    | .atom A others nearLitters => atom A others nearLitters
+    | .flexible A => flexible A
+    | .inflexibleCoe A h χ σ => inflexibleCoe A h χ σ
+    | .inflexibleBot A h atoms => inflexibleBot A h atoms)
+
+variable {atom flexible inflexibleCoe inflexibleBot}
+
+theorem SpecCondition.castMotive_symm_apply_eq
+    (C : (c : SpecCondition' β (fun δ _ _ => SpecCondition δ)) → motive (equiv.symm c))
+    (c : SpecCondition' β (fun δ _ _ => SpecCondition δ)) :
+    castMotive.symm (C (equiv (equiv.symm c))) = C c := by
+  rw [castMotive, Equiv.cast_symm, Equiv.cast_eq_iff_heq]
+  exact congr_arg_heq C (Equiv.apply_symm_apply equiv c)
+
+/-- This is a theorem, but we use `def` to avoid writing out its type. -/
+def SpecCondition.castMotive_symm_apply_eq' :=
+  SpecCondition.castMotive_symm_apply_eq
+    (fun c => match c with
+      | .atom A others nearLitters => atom A others nearLitters
+      | .flexible A => flexible A
+      | .inflexibleCoe A h χ σ => inflexibleCoe A h χ σ
+      | .inflexibleBot A h atoms => inflexibleBot A h atoms)
+
+def SpecCondition.equiv_cast
+    {C : (c : SpecCondition' β (fun δ _ _ => SpecCondition δ)) → Sort _}
+    (c : SpecCondition' β (fun δ _ _ => SpecCondition δ)) :
+    C (equiv (equiv.symm c)) ≃ C c :=
+  Equiv.cast (by rw [Equiv.apply_symm_apply])
+
+@[simp]
+theorem SpecCondition.rec_atom (A : ExtendedIndex β) (others : Set κ) (nearLitters : Set κ) :
+    SpecCondition.rec atom flexible inflexibleCoe inflexibleBot
+      (SpecCondition.atom A others nearLitters) =
+    atom A others nearLitters :=
+  by simp only [SpecCondition.rec, SpecCondition.atom, SpecCondition.castMotive_symm_apply_eq']
+
+@[simp]
+theorem SpecCondition.rec_flexible (A : ExtendedIndex β) :
+    SpecCondition.rec atom flexible inflexibleCoe inflexibleBot (SpecCondition.flexible A) =
+    flexible A :=
+  by simp only [SpecCondition.rec, SpecCondition.flexible, SpecCondition.castMotive_symm_apply_eq']
+
+@[simp]
+theorem SpecCondition.rec_inflexibleCoe (A : ExtendedIndex β) (h : InflexibleCoePath A)
+    (χ : CodingFunction h.δ) (σ : Spec h.δ) :
+    SpecCondition.rec atom flexible inflexibleCoe inflexibleBot
+      (SpecCondition.inflexibleCoe A h χ σ) =
+    inflexibleCoe A h χ σ :=
+  by simp only [SpecCondition.rec, SpecCondition.inflexibleCoe,
+    SpecCondition.castMotive_symm_apply_eq']
+
+@[simp]
+theorem SpecCondition.rec_inflexibleBot (A : ExtendedIndex β) (h : InflexibleBotPath A)
+    (atoms : Set κ) :
+    SpecCondition.rec atom flexible inflexibleCoe inflexibleBot
+      (SpecCondition.inflexibleBot A h atoms) =
+    inflexibleBot A h atoms :=
+  by simp only [SpecCondition.rec, SpecCondition.inflexibleBot,
+    SpecCondition.castMotive_symm_apply_eq']
+
+end recursor
 
 namespace Spec
 
-def max : Spec β → κ
-  | mk max _ => max
+inductive SpecifiesCondition' (S : Support β)
+    (lower : ∀ (δ : Λ) [LeLevel δ], δ < β → Spec δ → Support δ → Prop) :
+    SpecCondition β → SupportCondition β → Prop
+  | atom (A : ExtendedIndex β) (a : Atom) :
+    SpecifiesCondition' S lower
+      (SpecCondition.atom A
+        {i | ∃ hi : i < S.max, S.f i hi = ⟨A, inl a⟩}
+        {i | ∃ N : NearLitter, a ∈ N ∧ ∃ hi : i < S.max, S.f i hi = ⟨A, inr N⟩})
+      ⟨A, inl a⟩
+  | flexible (A : ExtendedIndex β) (N : NearLitter) (h : Flexible A N.1) :
+    SpecifiesCondition' S lower (SpecCondition.flexible A) ⟨A, inr N⟩
+  | inflexibleCoe (A : ExtendedIndex β) (N : NearLitter) (h : InflexibleCoe A N.1)
+    (S' : Support h.path.δ) (hS' : S'.IsSum (S.comp (h.path.B.cons h.path.hδ)) h.t.support)
+    (σ : Spec h.path.δ) (hσ : lower h.path.δ (coe_lt_coe.mp (h.δ_lt_β)) σ S') :
+    SpecifiesCondition' S lower
+      (SpecCondition.inflexibleCoe A h.path
+        (CodingFunction.code h.t.support h.t (support_supports _)) σ)
+      ⟨A, inr N⟩
+  | inflexibleBot (A : ExtendedIndex β) (N : NearLitter) (h : InflexibleBot A N.1) :
+    SpecifiesCondition' S lower
+      (SpecCondition.inflexibleBot A h.path
+        {i | ∃ hi : i < S.max, S.f i hi = ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩})
+      ⟨A, inr N⟩
 
-def f : (σ : Spec β) → (i : κ) → i < σ.max → SpecCondition β
-  | mk _ f => f
+structure Specifies' (σ : Spec β) (S : Support β)
+    (lower : ∀ (δ : Λ) [LeLevel δ], δ < β → Spec δ → Support δ → Prop) : Prop where
+  max_eq_max : σ.max = S.max
+  specifies (i : κ) (hσ : i < σ.max) (hS : i < S.max) :
+    SpecifiesCondition' S lower (σ.f i hσ) (S.f i hS)
 
-@[simp]
-theorem mk_max (max : κ) (f : (i : κ) → i < max → SpecCondition β) :
-    (mk max f).max = max :=
-  rfl
+def Specifies {β : Λ} (σ : Spec β) (S : Support β) : Prop :=
+  Specifies' σ S (fun δ _ _ σ S => Specifies σ S)
+termination_by
+  Specifies β _ _ => β
 
-@[simp]
-theorem mk_f (max : κ) (f : (i : κ) → i < max → SpecCondition β) :
-    (mk max f).f = f :=
-  rfl
+def SpecifiesCondition (S : Support β) : SpecCondition β → SupportCondition β → Prop :=
+  SpecifiesCondition' S (fun _ _ _ => Specifies)
 
-@[ext]
-theorem ext {σ τ : Spec β} (h₁ : σ.max = τ.max)
-    (h₂ : ∀ (i : κ) (hσ : i < σ.max) (hτ : i < τ.max), σ.f i hσ = τ.f i hτ) : σ = τ := by
-  obtain ⟨max, f⟩ := σ
-  obtain ⟨max', f'⟩ := τ
-  subst h₁
-  simp only [mk_max, mk.injEq, heq_eq_eq, true_and]
-  ext i hi
-  exact h₂ i hi hi
+theorem specifiesCondition_atom_right_iff (S : Support β)
+    (A : ExtendedIndex β) (a : Atom) (σc : SpecCondition β) :
+    SpecifiesCondition S σc ⟨A, inl a⟩ ↔
+    σc = (SpecCondition.atom A
+      {i | ∃ hi : i < S.max, S.f i hi = ⟨A, inl a⟩}
+      {i | ∃ N : NearLitter, a ∈ N ∧ ∃ hi : i < S.max, S.f i hi = ⟨A, inr N⟩}) := by
+  constructor
+  · intro h
+    cases h
+    rfl
+  · rintro rfl
+    exact SpecifiesCondition'.atom A a
+
+theorem specifiesCondition_flexible_right_iff (S : Support β)
+    (A : ExtendedIndex β) (N : NearLitter) (h : Flexible A N.1) (σc : SpecCondition β) :
+    SpecifiesCondition S σc ⟨A, inr N⟩ ↔
+    σc = SpecCondition.flexible A := by
+  constructor
+  · intro h
+    cases h with
+    | flexible => rfl
+    | inflexibleCoe _ _ h' =>
+        rw [flexible_iff_not_inflexibleBot_inflexibleCoe] at h
+        exact h.2.elim' h'
+    | inflexibleBot _ _ h' =>
+        rw [flexible_iff_not_inflexibleBot_inflexibleCoe] at h
+        exact h.1.elim' h'
+  · rintro rfl
+    exact SpecifiesCondition'.flexible A N h
+
+theorem specifiesCondition_inflexibleCoe_right_iff (S : Support β)
+    (A : ExtendedIndex β) (N : NearLitter) (h : InflexibleCoe A N.1) (σc : SpecCondition β) :
+    SpecifiesCondition S σc ⟨A, inr N⟩ ↔
+    ∃ (S' : Support h.path.δ) (_ : S'.IsSum (S.comp (h.path.B.cons h.path.hδ)) h.t.support)
+      (σ : Spec h.path.δ) (_ : σ.Specifies S'),
+      σc = (SpecCondition.inflexibleCoe A h.path
+        (CodingFunction.code h.t.support h.t (support_supports _)) σ) := by
+  constructor
+  · intro h
+    cases h with
+    | flexible _ _ h' =>
+        rw [flexible_iff_not_inflexibleBot_inflexibleCoe] at h'
+        exact h'.2.elim' h
+    | inflexibleCoe _ _ h' S' hS' σ hσ =>
+        cases Subsingleton.elim h h'
+        exact ⟨S', hS', σ, hσ, rfl⟩
+    | inflexibleBot _ _ h' => cases inflexibleBot_inflexibleCoe h' h
+  · rintro ⟨S', hS', σ, hσ, rfl⟩
+    exact SpecifiesCondition'.inflexibleCoe A N h S' hS' σ hσ
+
+theorem specifiesCondition_inflexibleBot_right_iff (S : Support β)
+    (A : ExtendedIndex β) (N : NearLitter) (h : InflexibleBot A N.1) (σc : SpecCondition β) :
+    SpecifiesCondition S σc ⟨A, inr N⟩ ↔
+    σc = (SpecCondition.inflexibleBot A h.path
+      {i | ∃ hi : i < S.max, S.f i hi = ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩}) := by
+  constructor
+  · intro h
+    cases h with
+    | flexible _ _ h' =>
+        rw [flexible_iff_not_inflexibleBot_inflexibleCoe] at h'
+        exact h'.1.elim' h
+    | inflexibleCoe _ _ h' => cases inflexibleBot_inflexibleCoe h h'
+    | inflexibleBot _ _ h' =>
+        cases Subsingleton.elim h h'
+        rfl
+  · rintro rfl
+    exact SpecifiesCondition'.inflexibleBot A N h
+
+theorem specifiesCondition_atom_left_iff (S : Support β) (c : SupportCondition β)
+    (A : ExtendedIndex β) (others : Set κ) (nearLitters : Set κ) :
+    SpecifiesCondition S (SpecCondition.atom A others nearLitters) c ↔
+    ∃ a : Atom,
+      c = ⟨A, inl a⟩ ∧
+      others = {i | ∃ hi : i < S.max, S.f i hi = ⟨A, inl a⟩} ∧
+      nearLitters = {i | ∃ N : NearLitter, a ∈ N ∧ ∃ hi : i < S.max, S.f i hi = ⟨A, inr N⟩} := by
+  obtain ⟨B, a | N⟩ := c
+  · rw [specifiesCondition_atom_right_iff]
+    aesop
+  · obtain (h | ⟨⟨h⟩⟩ | ⟨⟨h⟩⟩) := flexible_cases' B N.1
+    · rw [specifiesCondition_flexible_right_iff _ _ _ h]
+      aesop
+    · rw [specifiesCondition_inflexibleBot_right_iff _ _ _ h]
+      aesop
+    · rw [specifiesCondition_inflexibleCoe_right_iff _ _ _ h]
+      aesop
+
+theorem specifiesCondition_flexible_left_iff (S : Support β) (c : SupportCondition β)
+    (A : ExtendedIndex β) :
+    SpecifiesCondition S (SpecCondition.flexible A) c ↔
+    ∃ N : NearLitter,
+      c = ⟨A, inr N⟩ ∧ Flexible A N.1 := by
+  obtain ⟨B, a | N⟩ := c
+  · rw [specifiesCondition_atom_right_iff]
+    aesop
+  · obtain (h | ⟨⟨h⟩⟩ | ⟨⟨h⟩⟩) := flexible_cases' B N.1
+    · rw [specifiesCondition_flexible_right_iff _ _ _ h]
+      aesop
+    · rw [specifiesCondition_inflexibleBot_right_iff _ _ _ h]
+      aesop
+    · rw [specifiesCondition_inflexibleCoe_right_iff _ _ _ h]
+      aesop
+
+theorem specifiesCondition_inflexibleCoe_left_iff (S : Support β) (c : SupportCondition β)
+    (A : ExtendedIndex β) (h : InflexibleCoePath A) (χ : CodingFunction h.δ) (σ : Spec h.δ) :
+    SpecifiesCondition S (SpecCondition.inflexibleCoe A h χ σ) c ↔
+    ∃ (N : NearLitter) (t : Tangle h.δ) (S' : Support h.δ),
+      c = ⟨A, inr N⟩ ∧
+      N.1 = fuzz h.hδε t ∧
+      S'.IsSum (S.comp (h.B.cons h.hδ)) t.support ∧
+      σ.Specifies S' ∧
+      χ = CodingFunction.code (TangleData.Tangle.support t) t (support_supports t) := by
+  obtain ⟨B, a | N⟩ := c
+  · rw [specifiesCondition_atom_right_iff]
+    simp only [SpecCondition.inflexibleCoe_ne_atom, SupportCondition.mk.injEq, and_false, false_and,
+      exists_false, exists_const]
+  · obtain (h' | ⟨⟨h'⟩⟩ | ⟨⟨h'⟩⟩) := flexible_cases' B N.1
+    · rw [specifiesCondition_flexible_right_iff _ _ _ h']
+      simp only [SpecCondition.inflexibleCoe_ne_flexible, SupportCondition.mk.injEq, inr.injEq,
+        exists_and_left, exists_prop, false_iff, not_exists, not_and, and_imp,
+        forall_apply_eq_imp_iff]
+      rintro rfl t hN
+      cases h' (inflexible_of_inflexibleCoe ⟨h, _, hN⟩)
+    · rw [specifiesCondition_inflexibleBot_right_iff _ _ _ h']
+      simp only [SpecCondition.inflexibleCoe_ne_inflexibleBot, SupportCondition.mk.injEq, inr.injEq,
+        exists_and_left, exists_prop, false_iff, not_exists, not_and, and_imp,
+        forall_apply_eq_imp_iff]
+      rintro rfl t hN
+      cases inflexibleBot_inflexibleCoe h' ⟨h, _, hN⟩
+    · rw [specifiesCondition_inflexibleCoe_right_iff _ _ _ h']
+      constructor
+      · rintro ⟨S', hS', σ, hσ, h⟩
+        rw [SpecCondition.inflexibleCoe.injEq] at h
+        cases h.1
+        cases eq_of_heq h.2.1
+        cases eq_of_heq h.2.2.1
+        cases eq_of_heq h.2.2.2
+        exact ⟨N, h'.t, S', rfl, h'.hL, hS', hσ, rfl⟩
+      · rintro ⟨N, t, S', hc, hN, hS', hσ, rfl⟩
+        rw [SupportCondition.mk.injEq, inr.injEq] at hc
+        cases hc.1
+        cases hc.2
+        cases Subsingleton.elim h' ⟨h, _, hN⟩
+        exact ⟨S', hS', σ, hσ, rfl⟩
+
+theorem specifiesCondition_inflexibleBot_left_iff (S : Support β) (c : SupportCondition β)
+    (A : ExtendedIndex β) (h : InflexibleBotPath A) (atoms : Set κ) :
+    SpecifiesCondition S (SpecCondition.inflexibleBot A h atoms) c ↔
+    ∃ (N : NearLitter) (a : Atom),
+      c = ⟨A, inr N⟩ ∧
+      N.1 = fuzz (bot_ne_coe (a := h.ε)) a ∧
+      atoms = {i | ∃ hi : i < S.max, S.f i hi = ⟨h.B.cons (bot_lt_coe _), inl a⟩} := by
+  obtain ⟨B, a | N⟩ := c
+  · rw [specifiesCondition_atom_right_iff]
+    simp only [SpecCondition.inflexibleBot_ne_atom, SupportCondition.mk.injEq, and_false, false_and,
+      exists_const]
+  · obtain (h' | ⟨⟨h'⟩⟩ | ⟨⟨h'⟩⟩) := flexible_cases' B N.1
+    · rw [specifiesCondition_flexible_right_iff _ _ _ h']
+      simp only [SpecCondition.inflexibleBot_ne_flexible, SupportCondition.mk.injEq, inr.injEq,
+        exists_and_left, false_iff, not_exists, not_and, and_imp, forall_apply_eq_imp_iff]
+      rintro rfl a hN
+      cases h' (inflexible_of_inflexibleBot ⟨h, _, hN⟩)
+    · rw [specifiesCondition_inflexibleBot_right_iff _ _ _ h', SpecCondition.inflexibleBot.injEq]
+      constructor
+      · rintro ⟨rfl, h, rfl⟩
+        cases eq_of_heq h
+        exact ⟨N, h'.a, rfl, h'.hL, rfl⟩
+      · rintro ⟨N, a, h, hN, rfl⟩
+        cases h
+        cases Subsingleton.elim h' ⟨h, _, hN⟩
+        exact ⟨rfl, HEq.rfl, rfl⟩
+    · rw [specifiesCondition_inflexibleCoe_right_iff _ _ _ h']
+      simp only [SpecCondition.inflexibleBot_ne_inflexibleCoe, exists_false,
+        SupportCondition.mk.injEq, inr.injEq, exists_and_left, false_iff, not_exists, not_and,
+        and_imp, forall_apply_eq_imp_iff]
+      rintro rfl a hN
+      cases inflexibleBot_inflexibleCoe ⟨h, _, hN⟩ h'
 
 end Spec
 

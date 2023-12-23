@@ -156,7 +156,6 @@ theorem Support.mem_mk (E : Enumeration (SupportCondition α)) (h) (c : SupportC
     c ∈ Support.mk E h ↔ c ∈ E :=
   Iff.rfl
 
-@[simp]
 theorem Support.mem_iff (c : SupportCondition α) (S : Support α) :
     c ∈ S ↔ ∃ i, ∃ (h : i < S.max), c = S.f i h :=
   Iff.rfl
@@ -266,7 +265,7 @@ theorem mk_support : #(Support α) = #μ := by
 /-- `S` is a *completion* of an enumeration of support conditions `E` if it extends `E`,
 and every support condition in the extension is an atom contained in the symmetric difference of
 two near-litters in `E`. -/
-structure IsCompletion (S : Support α) (E : Enumeration (SupportCondition α)) : Prop where
+structure Support.IsCompletion (S : Support α) (E : Enumeration (SupportCondition α)) : Prop where
   le : E ≤ S.enum
   eq_atom (i : κ) (hi₁ : i < S.max) (hi₂ : E.max ≤ i) :
     ∃ A : ExtendedIndex α, ∃ a : Atom, ∃ N₁ N₂ : NearLitter,
@@ -342,7 +341,7 @@ noncomputable def complete (E : Enumeration (SupportCondition α)) : Support α 
   mem_of_mem_symmDiff' := completeEnum_mem_of_mem_symmDiff E
 
 theorem complete_isCompletion (E : Enumeration (SupportCondition α)) :
-    IsCompletion (complete E) E := by
+    (complete E).IsCompletion E := by
   constructor
   · exact Enumeration.le_add _ _
   · intro i hi₁ hi₂
@@ -354,8 +353,9 @@ theorem complete_isCompletion (E : Enumeration (SupportCondition α)) :
     rfl
 
 /-- `S` is a *sum* of `S₁` and `S₂` if it is a completion of `S₁ + S₂`. -/
-def IsSum (S S₁ S₂ : Support α) : Prop := IsCompletion S (S₁.enum + S₂.enum)
+def Support.IsSum (S S₁ S₂ : Support α) : Prop := S.IsCompletion (S₁.enum + S₂.enum)
 
-theorem exists_isSum (S₁ S₂ : Support α) : ∃ S, IsSum S S₁ S₂ := ⟨_, complete_isCompletion _⟩
+theorem exists_isSum (S₁ S₂ : Support α) : ∃ S : Support α, S.IsSum S₁ S₂ :=
+  ⟨_, complete_isCompletion _⟩
 
 end ConNF
