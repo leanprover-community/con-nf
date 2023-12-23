@@ -344,6 +344,16 @@ instance : PartialOrder (Enumeration α) where
     ext i hi
     exact h₁₂.2 i hi hi
 
+theorem image_le_image {E F : Enumeration α} (h : E ≤ F) (f : α → β) : E.image f ≤ F.image f := by
+  constructor
+  · exact h.1
+  · intro i hE hF
+    rw [image_f, image_f, h.2]
+
+theorem smul_le_smul {G : Type _} [SMul G α] {E F : Enumeration α} (h : E ≤ F) (g : G) :
+    g • E ≤ g • F :=
+  image_le_image h (g • ·)
+
 theorem le_add (E F : Enumeration α) : E ≤ E + F := by
   constructor
   · simp only [add_max, le_add_iff_nonneg_right]

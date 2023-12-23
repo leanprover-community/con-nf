@@ -95,6 +95,15 @@ theorem smul_eq_of_smul_support_eq {S : Support α} {ρ : Allowable α}
     (hS : ρ • S = S) {c : SupportCondition α} (hc : c ∈ S) : ρ • c = c :=
   Support.smul_eq_of_smul_eq hS hc
 
+theorem support_isCompletion_smul {S : Support α} {E : Enumeration (SupportCondition α)}
+    (h : S.IsCompletion E) (ρ : Allowable α) :
+    (ρ • S).IsCompletion (ρ • E) :=
+  h.smul _
+
+theorem support_isSum_smul {S S₁ S₂ : Support α} (h : S.IsSum S₁ S₂) (ρ : Allowable α) :
+    (ρ • S).IsSum (ρ • S₁) (ρ • S₂) :=
+  h.smul _
+
 variable {ρ ρ' : Allowable α} {c : SupportCondition α}
 
 theorem smul_supportCondition :

@@ -272,6 +272,29 @@ structure Support.IsCompletion (S : Support α) (E : Enumeration (SupportConditi
     N₁.1 = N₂.1 ∧ a ∈ (N₁ : Set Atom) ∆ N₂ ∧
     ⟨A, inr N₁⟩ ∈ E ∧ ⟨A, inr N₂⟩ ∈ E ∧ S.f i hi₁ = ⟨A, inl a⟩
 
+theorem Support.IsCompletion.smul {S : Support α} {E : Enumeration (SupportCondition α)}
+    (h : S.IsCompletion E) (π : StructPerm α) : (π • S).IsCompletion (π • E) := by
+  constructor
+  · exact Enumeration.smul_le_smul h.le π
+  · intro i hi₁ hi₂
+    obtain ⟨A, a, N₁, N₂, hN, ha, hN₁, hN₂, h⟩ := h.eq_atom i hi₁ hi₂
+    refine ⟨A, π A • a, π A • N₁, π A • N₂, ?_, ?_, ?_, ?_, ?_⟩
+    · simp only [NearLitterPerm.smul_nearLitter_fst, smul_left_cancel_iff]
+      exact hN
+    · rw [NearLitterPerm.smul_nearLitter_coe, NearLitterPerm.smul_nearLitter_coe,
+        ← Set.smul_set_symmDiff, Set.smul_mem_smul_set_iff]
+      exact ha
+    · obtain ⟨i, hi, h⟩ := hN₁
+      refine ⟨i, hi, ?_⟩
+      rw [Enumeration.smul_f, ← h]
+      rfl
+    · obtain ⟨i, hi, h⟩ := hN₂
+      refine ⟨i, hi, ?_⟩
+      rw [Enumeration.smul_f, ← h]
+      rfl
+    · rw [smul_f, h]
+      rfl
+
 /-- The set of support conditions that we need to add to `s` to make it a support. -/
 def completionToAdd (s : Set (SupportCondition α)) : Set (SupportCondition α) :=
   {x | ∃ N₁ N₂ : NearLitter, N₁.1 = N₂.1 ∧ ∃ a : Atom, x.2 = inl a ∧ a ∈ (N₁ : Set Atom) ∆ N₂ ∧
@@ -354,6 +377,12 @@ theorem complete_isCompletion (E : Enumeration (SupportCondition α)) :
 
 /-- `S` is a *sum* of `S₁` and `S₂` if it is a completion of `S₁ + S₂`. -/
 def Support.IsSum (S S₁ S₂ : Support α) : Prop := S.IsCompletion (S₁.enum + S₂.enum)
+
+theorem Support.IsSum.smul {S S₁ S₂ : Support α} (h : S.IsSum S₁ S₂) (π : StructPerm α) :
+    (π • S).IsSum (π • S₁) (π • S₂) := by
+  have := IsCompletion.smul h π
+  rw [Enumeration.smul_add] at this
+  exact this
 
 theorem exists_isSum (S₁ S₂ : Support α) : ∃ S : Support α, S.IsSum S₁ S₂ :=
   ⟨_, complete_isCompletion _⟩
