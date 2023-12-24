@@ -359,11 +359,11 @@ theorem completeEnum_mem_of_mem_symmDiff (E : Enumeration (SupportCondition α))
   · cases nearLitter_not_mem_completionToAdd A N₁ _ hN₁
 
 /-- Extend an enumeration to a support. -/
-noncomputable def complete (E : Enumeration (SupportCondition α)) : Support α where
+noncomputable def Support.complete (E : Enumeration (SupportCondition α)) : Support α where
   enum := completeEnum E
   mem_of_mem_symmDiff' := completeEnum_mem_of_mem_symmDiff E
 
-theorem complete_isCompletion (E : Enumeration (SupportCondition α)) :
+theorem Support.complete_isCompletion (E : Enumeration (SupportCondition α)) :
     (complete E).IsCompletion E := by
   constructor
   · exact Enumeration.le_add _ _
@@ -384,7 +384,7 @@ theorem Support.IsSum.smul {S S₁ S₂ : Support α} (h : S.IsSum S₁ S₂) (�
   rw [Enumeration.smul_add] at this
   exact this
 
-theorem exists_isSum (S₁ S₂ : Support α) : ∃ S : Support α, S.IsSum S₁ S₂ :=
-  ⟨_, complete_isCompletion _⟩
+theorem Support.exists_isSum (S₁ S₂ : Support α) : ∃ S : Support α, S.IsSum S₁ S₂ :=
+  ⟨_, Support.complete_isCompletion _⟩
 
 end ConNF

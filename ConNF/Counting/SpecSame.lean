@@ -1,5 +1,5 @@
 import ConNF.FOA
-import ConNF.Counting.Spec
+import ConNF.Counting.StrongSupport
 
 /-!
 # Supports with the same specification
@@ -11,6 +11,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β] (S T : Support β)
+variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+  {S T : Support β} {σ : Spec β} (hS : σ.Specifies S) (hT : σ.Specifies T)
 
 end ConNF

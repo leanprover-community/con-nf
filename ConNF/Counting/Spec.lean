@@ -532,6 +532,24 @@ theorem specifies_iff (σ : Spec β) (S : Support β) :
   rw [Specifies, Specifies'_iff]
   rfl
 
+theorem Specifies.max_eq_max {σ : Spec β} {S : Support β} (h : σ.Specifies S) :
+    σ.max = S.max := by
+  rw [specifies_iff] at h
+  exact h.1
+
+theorem Specifies.lt_max {σ : Spec β} {S : Support β} (h : σ.Specifies S)
+    {i : κ} (hi : i < σ.max) : i < S.max :=
+  by rwa [← h.max_eq_max]
+
+theorem Specifies.of_lt_max {σ : Spec β} {S : Support β} (h : σ.Specifies S)
+    {i : κ} (hi : i < S.max) : i < σ.max :=
+  by rwa [h.max_eq_max]
+
+theorem Specifies.specifies {σ : Spec β} {S : Support β} (h : σ.Specifies S)
+    (i : κ) (hσ : i < σ.max) (hS : i < S.max) : SpecifiesCondition S (σ.f i hσ) (S.f i hS) := by
+  rw [specifies_iff] at h
+  exact h.2 i hσ hS
+
 theorem specifiesCondition_atom_right_iff (S : Support β)
     (A : ExtendedIndex β) (a : Atom) (σc : SpecCondition β) :
     SpecifiesCondition S σc ⟨A, inl a⟩ ↔
@@ -736,7 +754,7 @@ theorem exists_specifiesCondition (S : Support β) (c : SupportCondition β) :
     · simp_rw [Spec.specifiesCondition_inflexibleBot_right_iff _ _ _ h]
       exact ⟨_, rfl⟩
     · simp_rw [Spec.specifiesCondition_inflexibleCoe_right_iff _ _ _ h]
-      obtain ⟨S', hS'⟩ := exists_isSum (S.comp (h.path.B.cons h.path.hδ)) h.t.support
+      obtain ⟨S', hS'⟩ := Support.exists_isSum (S.comp (h.path.B.cons h.path.hδ)) h.t.support
       obtain ⟨σ, hσ⟩ := exists_spec' S' (ih h.path.δ (coe_lt_coe.mp h.δ_lt_β) S')
       exact ⟨_, S', hS', σ, hσ, rfl⟩
 
