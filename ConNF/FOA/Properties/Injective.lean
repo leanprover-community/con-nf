@@ -23,7 +23,7 @@ theorem atom_injective_extends {c d : SupportCondition β} (hcd : (ihsAction π 
     exact (π A).atomPerm.injOn ha hb h
   · rw [completeAtomMap_eq_of_mem_domain ha, completeAtomMap_eq_of_not_mem_domain hb] at h
     cases
-      (π A).not_mem_domain_of_mem_largestSublitter (Subtype.coe_eq_iff.mp h.symm).choose
+      (π A).notr_mem_domain_of_mem_largestSublitter (Subtype.coe_eq_iff.mp h.symm).choose
         ((π A).atomPerm.map_domain ha)
   · rw [completeAtomMap_eq_of_not_mem_domain ha, completeAtomMap_eq_of_mem_domain hb] at h
     cases
@@ -286,7 +286,7 @@ theorem constrainedAction_comp_mapFlexible (hπf : π.Free) {γ : Λ} {s : Set (
     obtain ⟨⟨δ, ε, hε, C, hC⟩, a, rfl⟩ := hL₃
     contrapose hL₂
     rw [not_flexible_iff] at hL₂ ⊢
-    rw [Inflexible_iff] at hL₂
+    rw [inflexible_iff] at hL₂
     obtain ⟨δ', _, ε', _, ζ', _, _, hζ', hεζ', C', t', rfl, h'⟩ |
         ⟨δ', _, ε', _, hε', C', a', rfl, h'⟩ := hL₂
     · have := congr_arg Litter.β h'
@@ -303,7 +303,7 @@ theorem constrainedAction_comp_mapFlexible (hπf : π.Free) {γ : Λ} {s : Set (
     obtain ⟨⟨δ, ε, ζ, hε, hζ, hεζ, C, hC⟩, t, rfl⟩ := hL₃
     contrapose hL₂
     rw [not_flexible_iff] at hL₂ ⊢
-    rw [Inflexible_iff] at hL₂
+    rw [inflexible_iff] at hL₂
     obtain ⟨δ', _, ε', _, ζ', _, hε', hζ', hεζ', C', t', rfl, h'⟩ |
         ⟨δ', _, ε', _, hε', C', a', rfl, h'⟩ := hL₂
     · rw [Path.comp_cons, Path.comp_cons] at hC

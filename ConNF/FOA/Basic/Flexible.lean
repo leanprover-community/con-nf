@@ -50,7 +50,7 @@ theorem mk_flexible (A : ExtendedIndex β) : #{L | Flexible A L} = #μ := by
   refine le_antisymm ((Cardinal.mk_subtype_le _).trans mk_litter.le) ?_
   refine ⟨⟨fun ν => ⟨⟨ν, ⊥, α, bot_ne_coe⟩, ?_⟩, ?_⟩⟩
   · intro h
-    rw [Inflexible_iff] at h
+    rw [inflexible_iff] at h
     obtain ⟨γ, _, δ, _, ε, _, _, hε, hδε, A, t, rfl, h⟩ | ⟨γ, _, ε, _, hε, A, t, rfl, h⟩ := h
     all_goals
       apply_fun Litter.γ at h

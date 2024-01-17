@@ -74,7 +74,7 @@ theorem BannedLitter.memMap (a : Atom) (L : Litter) (hL)
 
 /-- There are only a small amount of banned litters. -/
 theorem bannedLitter_small : Small {L | φ.BannedLitter L} := by
-  simp only [BannedLitter_iff, mem_diff, SetLike.mem_coe, mem_litterSet]
+  simp only [bannedLitter_iff, mem_diff, SetLike.mem_coe, mem_litterSet]
   refine' Small.union _ (Small.union _ (Small.union _ (Small.union _ _)))
   · refine' lt_of_le_of_lt _ φ.atomMap_dom_small
     refine' ⟨⟨fun a => ⟨_, a.prop.choose_spec.1⟩, fun a₁ a₂ h => _⟩⟩

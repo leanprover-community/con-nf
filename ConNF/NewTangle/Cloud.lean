@@ -270,7 +270,7 @@ infixl:62 " ↝₀ " => CloudRel
 
 theorem cloudRel_subsingleton (hc : c.members.Nonempty) : {d : Code | d ↝₀ c}.Subsingleton := by
   intro d hd e he
-  simp only [CloudRel_iff] at hd he
+  simp only [cloudRel_iff] at hd he
   obtain ⟨β, hβ, hdβ, rfl⟩ := hd
   obtain ⟨γ, hγ, heγ, h⟩ := he
   have := ((Code.ext_iff _ _).1 h).1
@@ -292,7 +292,7 @@ theorem CloudRel.nonempty_iff : c ↝₀ d → (c.members.Nonempty ↔ d.members
   exact cloudCode_nonempty.symm
 
 theorem cloudRelEmptyEmpty (hγβ : γ ≠ β) : mk γ ∅ ↝₀ mk β ∅ :=
-  (CloudRel_iff _ _).2
+  (cloudRel_iff _ _).2
     ⟨β, inferInstance, hγβ, by
       ext : 1
       · rfl
@@ -317,7 +317,7 @@ infixl:62 " ↝ " => CloudRel'
 
 @[simp]
 theorem cloudRel_coe_coe {c d : NonemptyCode} : (c : Code) ↝₀ d ↔ c ↝ d := by
-  rw [CloudRel_iff, CloudRel'_iff]
+  rw [cloudRel_iff, cloudRel'_iff]
   aesop
 
 theorem cloud_subrelation : Subrelation (· ↝ ·) (InvImage (· < ·) (codeMinMap : NonemptyCode → μ))
@@ -335,7 +335,7 @@ only one code which is related (on the left) to any given code under the `cloud`
 theorem cloudRel'_subsingleton (c : NonemptyCode) :
     {d : NonemptyCode | d ↝ c}.Subsingleton := by
   intro d hd e he
-  simp only [Ne.def, CloudRel'_iff, mem_setOf_eq] at hd he
+  simp only [Ne.def, cloudRel'_iff, mem_setOf_eq] at hd he
   obtain ⟨β, hβ, hdβ, rfl⟩ := hd
   obtain ⟨γ, hγ, heγ, h⟩ := he
   rw [Subtype.ext_iff] at h

@@ -164,7 +164,7 @@ theorem ext_code : ∀ {t₁ t₂ : Semitangle}, reprCode t₁ ≡ reprCode t₂
     cases even₁.not_isOdd ((isEven_bot _).cloudCode bot_ne_coe)
   | ⟨e₁, Preference.proper γ even₁ hA₁⟩, ⟨e₂, Preference.proper δ even₂ hA₂⟩, h => by
     dsimp at h
-    simp only [Equiv_iff, WithBot.coe_ne_bot, ne_eq, Subtype.mk.injEq, coe_inj, Subtype.coe_inj,
+    simp only [equiv_iff, WithBot.coe_ne_bot, ne_eq, Subtype.mk.injEq, coe_inj, Subtype.coe_inj,
       Subtype.exists, mem_Iio] at h
     obtain h | ⟨_, γ, _, hδγ, h⟩ | ⟨_, δ, _, hγδ, h⟩ |
       ⟨c, hc, γ, hcγ, hc', δ, hcδ, h⟩ := h
@@ -467,7 +467,7 @@ def newTypedNearLitter (N : NearLitter) : NewTangle :=
       congr 1
       simp only [Support.singleton_enum, Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop,
         exists_eq_left, NewAllowable.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inr,
-        Sum.inr.injEq] at h 
+        Sum.inr.injEq] at h
       apply_fun SetLike.coe at h
       refine Eq.trans ?_ h
       rw [NearLitterPerm.smul_nearLitter_coe]

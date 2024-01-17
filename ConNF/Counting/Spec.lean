@@ -529,7 +529,7 @@ theorem specifies_iff (σ : Spec β) (S : Support β) :
     σ.Specifies S ↔
     σ.max = S.max ∧ ∀ (i : κ) (hσ : i < σ.max) (hS : i < S.max),
       SpecifiesCondition S (σ.f i hσ) (S.f i hS) := by
-  rw [Specifies, Specifies'_iff]
+  rw [Specifies, specifies'_iff]
   rfl
 
 theorem Specifies.max_eq_max {σ : Spec β} {S : Support β} (h : σ.Specifies S) :

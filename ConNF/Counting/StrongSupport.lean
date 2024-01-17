@@ -191,7 +191,7 @@ def bannedLitters (T : Support β) (A : ExtendedIndex β) : Set Litter :=
 
 theorem bannedLitter_iff_mem_bannedLitters (T : Support β) (A : ExtendedIndex β) (L : Litter) :
     BannedLitter T A L ↔ L ∈ bannedLitters T A := by
-  simp only [BannedLitter_iff, bannedLitters,
+  simp only [bannedLitter_iff, bannedLitters,
     mem_union, mem_iUnion, Set.mem_singleton_iff, exists_prop]
   constructor
   · rintro (h | ⟨a, N, ha, hN, rfl⟩)

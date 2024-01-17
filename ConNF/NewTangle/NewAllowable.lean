@@ -392,7 +392,7 @@ end NewAllowable
 
 theorem CloudRel.smul : c ↝₀ d → ρ • c ↝₀ ρ • d := by
   rintro ⟨γ, hγ⟩
-  exact (CloudRel_iff _ _).2 ⟨_, inferInstance, hγ, ρ.smul_cloudCode hγ⟩
+  exact (cloudRel_iff _ _).2 ⟨_, inferInstance, hγ, ρ.smul_cloudCode hγ⟩
 
 @[simp]
 theorem smul_cloudRel : ρ • c ↝₀ ρ • d ↔ c ↝₀ d := by
@@ -404,7 +404,7 @@ namespace Code
 
 theorem isEven_smul_nonempty : ∀ c : NonemptyCode, (ρ • c.val).IsEven ↔ c.val.IsEven
   | ⟨c, hc⟩ => by
-    simp_rw [Code.IsEven_iff]
+    simp_rw [Code.isEven_iff]
     constructor <;> intro h d hd
     · have := hd.nonempty_iff.2 hc
       have _ : ⟨d, this⟩ ↝ ⟨c, hc⟩ := cloudRel_coe_coe.1 hd

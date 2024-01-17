@@ -36,7 +36,7 @@ structure WithoutPreimage (a : Atom) : Prop where
   not_mem_ran : a ∉ φ.atomMap.ran
 
 theorem withoutPreimage_small : Small {a | φ.WithoutPreimage a} := by
-  simp only [WithoutPreimage_iff, setOf_and]
+  simp only [withoutPreimage_iff, setOf_and]
   rw [← inter_assoc]
   refine' Small.mono (inter_subset_left _ _) _
   suffices
@@ -90,7 +90,7 @@ structure MappedOutside (L : Litter) (hL : (φ.litterMap L).Dom) (a : Atom) : Pr
 and that are not already in the domain. -/
 theorem mappedOutside_small (L : Litter) (hL : (φ.litterMap L).Dom) :
     Small {a | φ.MappedOutside L hL a} := by
-  simp only [MappedOutside_iff, setOf_and]
+  simp only [mappedOutside_iff, setOf_and]
   rw [← inter_assoc]
   refine' Small.mono (inter_subset_left _ _) _
   refine' Small.mono _ ((φ.litterMap L).get hL).2.prop
@@ -203,7 +203,7 @@ theorem supportedAction_eq_of_mem_preimageLitterSubset {a : Atom}
   rw [Or.elim'_right, Or.elim'_left]
   intro h'
   have := φ.preimageLitter_not_banned
-  rw [BannedLitter_iff] at this
+  rw [bannedLitter_iff] at this
   push_neg at this
   exact this.1 a h' (φ.preimageLitterSubset_subset ha).symm
 
@@ -225,7 +225,7 @@ theorem supportedAction_eq_of_mem_mappedOutsideSubset {a : Atom}
       (φ.preimageLitterSubset_subset h)
     cases this
     have := φ.preimageLitter_not_banned
-    rw [BannedLitter_iff] at this
+    rw [bannedLitter_iff] at this
     push_neg at this
     cases this.2.1 hL
   · exact ((mappedOutsideSubset_spec _ _ hL).1 ha).2

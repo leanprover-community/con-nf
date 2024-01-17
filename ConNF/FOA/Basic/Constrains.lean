@@ -74,7 +74,7 @@ inductive HasPosition : Litter → μ → Prop
 
 theorem hasPosition_subsingleton {L : Litter} {ν₁ ν₂ : μ}
     (h₁ : HasPosition L ν₁) (h₂ : HasPosition L ν₂) : ν₁ = ν₂ := by
-  rw [HasPosition_iff] at h₁ h₂
+  rw [hasPosition_iff] at h₁ h₂
   cases h₁ with
   | inl h₁ =>
       obtain ⟨δ, _, ε, _, hδε, t, rfl, rfl⟩ := h₁
@@ -110,7 +110,7 @@ theorem hasPosition_of_litterConstrains {L₁ L₂ : Litter} (h : LitterConstrai
 theorem hasPosition_lt_of_litterConstrains {L₁ L₂ : Litter} (h : LitterConstrains L₁ L₂)
     {ν₁ ν₂ : μ} (h₁ : HasPosition L₁ ν₁) (h₂ : HasPosition L₂ ν₂) :
     ν₁ < ν₂ := by
-  rw [HasPosition_iff] at h₁ h₂
+  rw [hasPosition_iff] at h₁ h₂
   cases h with
   | fuzz_atom hδε t ht =>
       cases h₂ with
@@ -198,7 +198,7 @@ theorem constrains_nearLitter {c : SupportCondition β} {A : ExtendedIndex β}
       ∃ a ∈ litterSet N.fst ∆ N.snd, c = ⟨A, inl a⟩ := by
   constructor
   · intro h
-    rw [Constrains_iff] at h
+    rw [constrains_iff] at h
     obtain ⟨A, a, rfl, hc⟩ | ⟨A, N, hN, rfl, hc⟩ | ⟨A, N, a, ha, rfl, hc⟩ |
         ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, A, t, c, _, rfl, hc'⟩ |
         ⟨γ, _, ε, _, hγ, A, a, rfl, hc⟩ := h
@@ -258,7 +258,7 @@ theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : SupportCondition β
     intro L ih A
     constructor
     intro c hc
-    rw [Constrains_iff] at hc
+    rw [constrains_iff] at hc
     obtain ⟨A, a, rfl, hc⟩ | ⟨A, N, hN, rfl, hc⟩ | ⟨A, N, a, ha, rfl, hc⟩ |
         ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, A, t, c, hc, rfl, hc'⟩ |
         ⟨γ, _, ε, _, hγ, A, a, rfl, hc⟩ := hc
@@ -374,7 +374,7 @@ theorem lt_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
 theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺ c} := by
   obtain ⟨A, a | N⟩ := c
   · simp only [constrains_atom, setOf_eq_eq_singleton, small_singleton]
-  simp_rw [Constrains_iff]
+  simp_rw [constrains_iff]
   refine Small.union ?_ (Small.union ?_ (Small.union ?_ (Small.union ?_ ?_))) <;>
     rw [small_setOf]
   · change Small {c | ∃ b B, _ ∧ _ = _}
