@@ -23,7 +23,7 @@ theorem atom_injective_extends {c d : SupportCondition β} (hcd : (ihsAction π 
     exact (π A).atomPerm.injOn ha hb h
   · rw [completeAtomMap_eq_of_mem_domain ha, completeAtomMap_eq_of_not_mem_domain hb] at h
     cases
-      (π A).notr_mem_domain_of_mem_largestSublitter (Subtype.coe_eq_iff.mp h.symm).choose
+      (π A).not_mem_domain_of_mem_largestSublitter (Subtype.coe_eq_iff.mp h.symm).choose
         ((π A).atomPerm.map_domain ha)
   · rw [completeAtomMap_eq_of_not_mem_domain ha, completeAtomMap_eq_of_mem_domain hb] at h
     cases
