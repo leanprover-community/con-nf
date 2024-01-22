@@ -4,7 +4,7 @@ import ConNF.FOA.Approximation.NearLitterApprox
 
 open Cardinal Quiver Set Sum WithBot
 
-open scoped Cardinal Classical Pointwise
+open scoped Cardinal Classical Pointwise symmDiff
 
 universe u
 

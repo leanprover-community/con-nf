@@ -14,7 +14,7 @@ In this file, we define what it means for a set to be small.
 
 open Cardinal Set
 
-open scoped Classical
+open scoped Classical symmDiff
 
 universe u
 

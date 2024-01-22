@@ -2,7 +2,7 @@ import ConNF.FOA.Complete.LitterCompletion
 
 open Set Sum
 
-open scoped Pointwise
+open scoped Pointwise symmDiff
 
 universe u
 

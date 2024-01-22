@@ -21,7 +21,7 @@ This yields a local permutation defined on `s`, `f '' s \ s`, the `l i`, and the
 
 open Cardinal Function Set
 
-open scoped Cardinal Classical
+open scoped Cardinal Classical symmDiff
 
 variable {α : Type _} {f : α → α} {s : Set α} {t : Set α} (hs : #(s ∆ (f '' s) : Set α) ≤ #t)
   (ht : ℵ₀ ≤ #t)

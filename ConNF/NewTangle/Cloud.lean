@@ -1,3 +1,4 @@
+import Mathlib.Data.Set.Pairwise.Lattice
 import ConNF.Mathlib.Logic
 import ConNF.Fuzz
 import ConNF.NewTangle.Code
@@ -30,7 +31,7 @@ we get a tree (except for empty codes, which form a complete graph).
 
 open Function Set WithBot
 
-open scoped Cardinal
+open scoped Cardinal symmDiff
 
 universe u
 

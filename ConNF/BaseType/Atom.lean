@@ -16,7 +16,7 @@ the subsequent layers can be built.
 
 open Cardinal Set
 
-open scoped Classical
+open scoped Classical symmDiff
 
 universe u
 

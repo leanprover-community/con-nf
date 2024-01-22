@@ -48,86 +48,6 @@ theorem inOut_def {π : NearLitterPerm} {a : Atom} {L : Litter} :
     InOut π a L ↔ Xor' (a.1 = L) ((π • a).1 = π • L) :=
   Iff.rfl
 
-structure _root_.ConNF.NearLitterPerm.Biexact (π π' : NearLitterPerm) (atoms : Set Atom)
-    (litters : Set Litter) : Prop where
-  smul_eq_smul_atom : ∀ a ∈ atoms, π • a = π' • a
-  smul_eq_smul_litter : ∀ L ∈ litters, π • L = π' • L
-  left_exact : ∀ L ∈ litters, ∀ a, InOut π a L → π • a = π' • a
-  right_exact : ∀ L ∈ litters, ∀ a, InOut π' a L → π • a = π' • a
-
-theorem _root_.ConNF.NearLitterPerm.Biexact.atoms {π π' : NearLitterPerm} (s : Set Atom)
-    (hs : ∀ a ∈ s, π • a = π' • a) : NearLitterPerm.Biexact π π' s ∅ :=
-  ⟨hs, fun _ => False.elim, fun _ => False.elim, fun _ => False.elim⟩
-
-theorem _root_.ConNF.NearLitterPerm.Biexact.litter {π π' : NearLitterPerm} (L : Litter)
-    (hL : π • L = π' • L) (hL₁ : ∀ a, InOut π a L → π • a = π' • a)
-    (hL₂ : ∀ a, InOut π' a L → π • a = π' • a) : NearLitterPerm.Biexact π π' ∅ {L} :=
-  ⟨fun a ha => ha.elim, fun L' hL' => by cases hL'; exact hL, fun L' hL' => by
-    cases hL'; exact hL₁, fun L' hL' => by cases hL'; exact hL₂⟩
-
-theorem _root_.ConNF.NearLitterPerm.Biexact.symm {π π' : NearLitterPerm} {atoms : Set Atom}
-    {litters : Set Litter} (h : NearLitterPerm.Biexact π π' atoms litters) :
-    NearLitterPerm.Biexact π' π atoms litters :=
-  ⟨fun a ha => (h.smul_eq_smul_atom a ha).symm, fun L hL => (h.smul_eq_smul_litter L hL).symm,
-    fun L hL a ha => (h.right_exact L hL a ha).symm, fun L hL a ha => (h.left_exact L hL a ha).symm⟩
-
-theorem _root_.ConNF.NearLitterPerm.Biexact.union {π π' : NearLitterPerm} {s₁ s₂ : Set Atom}
-    {t₁ t₂ : Set Litter} (h₁ : NearLitterPerm.Biexact π π' s₁ t₁)
-    (h₂ : NearLitterPerm.Biexact π π' s₂ t₂) : NearLitterPerm.Biexact π π' (s₁ ∪ s₂) (t₁ ∪ t₂) :=
-  ⟨fun a ha => ha.elim (h₁.smul_eq_smul_atom a) (h₂.smul_eq_smul_atom a), fun L hL =>
-    hL.elim (h₁.smul_eq_smul_litter L) (h₂.smul_eq_smul_litter L), fun L hL =>
-    hL.elim (h₁.left_exact L) (h₂.left_exact L), fun L hL =>
-    hL.elim (h₁.right_exact L) (h₂.right_exact L)⟩
-
-theorem _root_.ConNF.NearLitterPerm.Biexact.smul_litter_subset {π π' : NearLitterPerm}
-    {atoms : Set Atom} {litters : Set Litter}
-    (h : NearLitterPerm.Biexact π π' atoms litters)
-    (L : Litter) (hL : L ∈ litters) :
-    ((π • L.toNearLitter : NearLitter) : Set Atom) ⊆ (π' • L.toNearLitter : NearLitter) := by
-  rw [NearLitterPerm.smul_nearLitter_coe, NearLitterPerm.smul_nearLitter_coe]
-  rintro _ ⟨a, ha, rfl⟩
-  simp only [Litter.coe_toNearLitter, mem_litterSet] at ha
-  by_cases h' : (π • a).1 = π • L
-  by_cases h'' : (π'⁻¹ • π • a).1 = L
-  · refine' ⟨_, h'', _⟩
-    dsimp only
-    rw [smul_inv_smul]
-  · have := h.right_exact L hL _ (Or.inr ⟨?_, h''⟩)
-    · rw [smul_inv_smul, smul_left_cancel_iff, inv_smul_eq_iff] at this
-      dsimp only
-      rw [this]
-      exact ⟨a, ha, rfl⟩
-    · rw [smul_inv_smul, h', h.smul_eq_smul_litter L hL]
-  · dsimp only
-    rw [h.left_exact L hL a (Or.inl ⟨ha, h'⟩)]
-    exact ⟨a, ha, rfl⟩
-
-theorem _root_.ConNF.NearLitterPerm.Biexact.smul_litter {π π' : NearLitterPerm} {atoms : Set Atom}
-    {litters : Set Litter} (h : NearLitterPerm.Biexact π π' atoms litters) (L : Litter)
-    (hL : L ∈ litters) : π • L.toNearLitter = π' • L.toNearLitter := by
-  refine' SetLike.coe_injective _
-  refine' subset_antisymm _ _
-  exact h.smul_litter_subset L hL
-  exact h.symm.smul_litter_subset L hL
-
-theorem _root_.ConNF.NearLitterPerm.Biexact.smul_nearLitter {π π' : NearLitterPerm} {atoms : Set Atom}
-    {litters : Set Litter} (h : NearLitterPerm.Biexact π π' atoms litters) (N : NearLitter)
-    (hN : N.1 ∈ litters) (hN' : litterSet N.1 ∆ N ⊆ atoms) : π • N = π' • N := by
-  refine' SetLike.coe_injective _
-  conv_lhs => rw [NearLitterPerm.smul_nearLitter_eq_smul_symmDiff_smul]
-  conv_rhs => rw [NearLitterPerm.smul_nearLitter_eq_smul_symmDiff_smul]
-  refine' congr_arg₂ _ (congr_arg SetLike.coe (h.smul_litter N.1 hN)) _
-  ext a : 1
-  constructor
-  · rintro ⟨b, hb, rfl⟩
-    dsimp only
-    rw [h.smul_eq_smul_atom b (hN' hb)]
-    exact ⟨b, hb, rfl⟩
-  · rintro ⟨b, hb, rfl⟩
-    dsimp only
-    rw [← h.smul_eq_smul_atom b (hN' hb)]
-    exact ⟨b, hb, rfl⟩
-
 /- `in_out` is just another way to quantify exceptions, focusing on a slightly different litter.
 Basically `in_out` looks only at images not preimages. -/
 theorem isException_of_inOut {π : NearLitterPerm} {a : Atom} {L : Litter} :
@@ -145,23 +65,18 @@ theorem isException_of_inOut {π : NearLitterPerm} {a : Atom} {L : Litter} :
 structure Biexact {β : Λ} (π π' : StructPerm β) (c : SupportCondition β) : Prop where
   smul_eq_smul_atom :
     ∀ A : ExtendedIndex β,
-      ∀ a : Atom, ⟨A, inl a⟩ ≤ c → Tree.comp A π • a = Tree.comp A π' • a
+      ∀ a : Atom, ⟨A, inl a⟩ ≤ c → π A • a = π' A • a
   smul_eq_smul_litter :
     ∀ A : ExtendedIndex β,
       ∀ L : Litter,
         ⟨A, inr L.toNearLitter⟩ ≤ c →
-          Flexible A L → Tree.comp A π • L = Tree.comp A π' • L
+          Flexible A L → π A • L = π' A • L
   exact :
     ∀ A : ExtendedIndex β,
       ∀ L : Litter,
         ⟨A, inr L.toNearLitter⟩ ≤ c →
-          Tree.comp A π • L = Tree.comp A π' • L →
-            Tree.comp A π • L.toNearLitter = Tree.comp A π' • L.toNearLitter
-
-theorem Biexact.atoms {β : Λ} {π π' : StructPerm β} {c : SupportCondition β}
-    (h : Biexact π π' c) (A : ExtendedIndex β) :
-    NearLitterPerm.Biexact (π A) (π' A) {a | ⟨A, inl a⟩ ≤ c} ∅ :=
-  NearLitterPerm.Biexact.atoms _ (h.smul_eq_smul_atom A)
+          π A • L = π' A • L →
+            π A • L.toNearLitter = π' A • L.toNearLitter
 
 theorem Biexact.constrains {β : Λ} {π π' : StructPerm β} {c d : SupportCondition β}
     (h : Biexact π π' c) (h' : d ≤ c) : Biexact π π' d :=
@@ -248,8 +163,8 @@ theorem Biexact.smul_eq_smul {β : Λ} [LeLevel β] {π π' : Allowable β} {c :
 theorem Biexact.smul_eq_smul_nearLitter {β : Λ} [LeLevel β]
     {π π' : Allowable β} {A : ExtendedIndex β} {N : NearLitter}
     (h : Biexact (Allowable.toStructPerm π) (Allowable.toStructPerm π') ⟨A, inr N⟩) :
-    Tree.comp A (Allowable.toStructPerm π) • N =
-    Tree.comp A (Allowable.toStructPerm π') • N := by
+    Allowable.toStructPerm π A • N =
+    Allowable.toStructPerm π' A • N := by
   have := h.smul_eq_smul
   simp only [Allowable.toStructPerm_smul, StructPerm.smul_supportCondition_eq_smul_iff, smul_inr,
     inr.injEq] at this
@@ -565,7 +480,6 @@ theorem ConNF.StructApprox.extracted_2
         simp only [← hNL, Path.comp_assoc, ← Path.comp_cons]
         exact le_comp (lt_nearLitter haN).to_reflTransGen _
     · intro E L hL₁ hL₂
-      rw [← Tree.ofBot_smul]
       refine'
         ((StructAction.hypothesisedAllowable_exactlyApproximates _
                     ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, rfl⟩ _ _ _).map_litter

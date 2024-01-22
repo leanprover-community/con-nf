@@ -22,7 +22,7 @@ universe u
 
 open Equiv Equiv.Perm Function Set
 
-open scoped Pointwise
+open scoped Pointwise symmDiff
 
 namespace ConNF
 

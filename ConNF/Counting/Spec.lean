@@ -8,7 +8,7 @@ import ConNF.Counting.CodingFunction
 
 open Quiver Set Sum WithBot
 
-open scoped Classical Cardinal
+open scoped Classical Cardinal symmDiff
 
 universe u
 

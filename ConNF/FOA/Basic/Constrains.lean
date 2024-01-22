@@ -16,7 +16,7 @@ This is detailed below. The `constrains` relation is well-founded.
 
 open Quiver Set Sum WithBot
 
-open scoped Cardinal Classical
+open scoped Cardinal Classical symmDiff
 
 universe u
 

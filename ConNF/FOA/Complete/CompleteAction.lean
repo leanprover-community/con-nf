@@ -4,7 +4,7 @@ import ConNF.FOA.Complete.NearLitterCompletion
 
 open Equiv Function Quiver Set Sum WithBot
 
-open scoped Classical Pointwise
+open scoped Classical Pointwise symmDiff
 
 universe u
 

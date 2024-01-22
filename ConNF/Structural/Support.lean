@@ -16,7 +16,7 @@ In this file, we define support conditions and supports.
 
 open Cardinal Equiv Sum
 
-open scoped Cardinal Pointwise
+open scoped Cardinal Pointwise symmDiff
 
 universe u
 

@@ -8,7 +8,7 @@ The main theorem is that if `S, T` are a pair of supports with the same specific
 extended to strong supports which also have the same specification.
 -/
 
-open Cardinal Quiver Set Sum WithBot
+open Cardinal Quiver Set Sum WithBot symmDiff
 
 open scoped Cardinal
 

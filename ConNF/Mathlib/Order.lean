@@ -1,5 +1,7 @@
 import Mathlib.Data.Set.Lattice
 
+open scoped symmDiff
+
 /-!
 # Order theoretic results
 -/

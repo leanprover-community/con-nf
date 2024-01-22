@@ -20,7 +20,7 @@ universe u
 
 open Cardinal Equiv Function Set
 
-open scoped Cardinal
+open scoped Cardinal symmDiff
 
 namespace ConNF
 
