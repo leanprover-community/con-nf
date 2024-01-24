@@ -4,3 +4,4 @@ import ConNF.FOA.Action
 import ConNF.FOA.Complete
 import ConNF.FOA.Properties
 import ConNF.FOA.Result
+import ConNF.FOA.Corollaries

@@ -269,7 +269,7 @@ theorem completeAllowable_exactlyApproximates (hπf : π.Free) :
 def foa_extends : FOAIh β := fun _ hπf =>
   ⟨completeAllowable hπf, completeAllowable_exactlyApproximates hπf⟩
 
-theorem freedom_of_action (β : Λ) [i : LeLevel β] (π₀ : StructApprox β) (h : π₀.Free) :
+theorem freedom_of_action {β : Λ} [i : LeLevel β] (π₀ : StructApprox β) (h : π₀.Free) :
     ∃ π : Allowable β, π₀.ExactlyApproximates (Allowable.toStructPerm π) := by
   revert i
   have := WellFounded.induction
