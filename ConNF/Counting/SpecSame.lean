@@ -1,5 +1,5 @@
 import ConNF.FOA
-import ConNF.Counting.StrongSupport
+import ConNF.Counting.Spec
 
 /-!
 # Supports with the same specification
