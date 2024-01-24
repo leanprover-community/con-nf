@@ -31,6 +31,7 @@ Follow the [mathlib4 naming convention](https://github.com/leanprover-community/
 | Codes                                    | `c, d`          |
 | Paths of type indices                    | `A, B`          |
 | Near-litter or structural actions        | `ψ, ψ'`         |
+| Near-litter or structural behaviours     | `ξ, ξ'`         |
 | Near-litter or structural approximations | `φ, φ'`         |
 | Near-litter or structural permutations   | `π, π'`         |
 | Allowable or semiallowable permutations  | `ρ, ρ'`         |
