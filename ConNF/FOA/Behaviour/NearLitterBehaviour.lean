@@ -63,12 +63,6 @@ theorem map_nearLitter_fst {ξ : NearLitterBehaviour} (hξ : ξ.Lawful) ⦃N₁ 
 def HasLitters (ξ : NearLitterBehaviour) : Prop :=
   ∀ ⦃N : NearLitter⦄, (ξ.nearLitterMap N).Dom → (ξ.nearLitterMap N.1.toNearLitter).Dom
 
-def action (ξ : NearLitterBehaviour) : NearLitterAction where
-  atomMap := ξ.atomMap
-  litterMap L := ξ.nearLitterMap L.toNearLitter
-  atomMap_dom_small := ξ.atomMap_dom_small
-  litterMap_dom_small := Small.preimage (fun _ _ => congr_arg Sigma.fst) (ξ.nearLitterMap_dom_small)
-
 def extraAtoms (ξ : NearLitterBehaviour) : Set Atom :=
   ⋃ (N ∈ ξ.nearLitterMap.Dom), litterSet N.1 \ N
 

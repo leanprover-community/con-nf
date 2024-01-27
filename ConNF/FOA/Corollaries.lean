@@ -226,9 +226,101 @@ structure Coherent (ξ : StructBehaviour β) : Prop where
     (((ξ ((A.cons hε).cons (bot_lt_coe _))).nearLitterMap Nt).get h).fst =
       fuzz (bot_ne_coe (a := ε)) (Allowable.comp (Hom.toPath (bot_lt_coe _)) ρ • a)
 
+noncomputable def _root_.ConNF.NearLitterBehaviour.action
+    (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) : NearLitterAction where
+  atomMap := (ξ.withLitters hξ).atomMap
+  litterMap L := (ξ.withLitters hξ).nearLitterMap L.toNearLitter
+  atomMap_dom_small := (ξ.withLitters hξ).atomMap_dom_small
+  litterMap_dom_small :=
+    (ξ.withLitters hξ).nearLitterMap_dom_small.image (f := fun N => N.1).mono
+      (fun L hL => by exact ⟨L.toNearLitter, hL, rfl⟩)
+
+noncomputable def action (ξ : StructBehaviour β) (hξ : ξ.Lawful) : StructAction β :=
+  fun A => (ξ A).action (hξ A)
+
+theorem _root_.ConNF.NearLitterBehaviour.action_lawful
+    (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) : (ξ.action hξ).Lawful := by
+  constructor
+  case atomMap_injective => exact (ξ.withLitters_lawful hξ).atomMap_injective
+  case litterMap_injective =>
+    rintro L₁ L₂ hL₁ hL₂ ⟨a, ha⟩
+    by_contra hL
+    obtain ⟨a, ha', rfl⟩ := (ξ.withLitters_lawful hξ).ran_of_mem_inter a (by exact hL) hL₁ hL₂ ha
+    simp only [NearLitterBehaviour.action, mem_inter_iff,
+      SetLike.mem_coe, (ξ.withLitters_lawful hξ).atom_mem_iff] at ha
+    exact hL (ha.1.symm.trans ha.2)
+  case atom_mem =>
+    intro a ha L hL
+    exact ((ξ.withLitters_lawful hξ).atom_mem_iff ha hL).symm
+
+theorem action_lawful (ξ : StructBehaviour β) (hξ : ξ.Lawful) : (ξ.action hξ).Lawful :=
+  fun A => (ξ A).action_lawful (hξ A)
+
+@[simp]
+theorem _root_.ConNF.NearLitterBehaviour.action_atomMap
+    (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) :
+    (ξ.action hξ).atomMap = (ξ.withLitters hξ).atomMap :=
+  rfl
+
+@[simp]
+theorem _root_.ConNF.NearLitterBehaviour.action_litterMap
+    (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) :
+    (ξ.action hξ).litterMap = fun L => (ξ.withLitters hξ).nearLitterMap L.toNearLitter :=
+  rfl
+
+@[simp]
+theorem action_atomMap (ξ : StructBehaviour β) (hξ : ξ.Lawful) (A : ExtendedIndex β) :
+    (ξ.action hξ A).atomMap = ((ξ A).withLitters (hξ A)).atomMap :=
+  rfl
+
+@[simp]
+theorem action_litterMap (ξ : StructBehaviour β) (hξ : ξ.Lawful) (A : ExtendedIndex β) :
+    (ξ.action hξ A).litterMap = fun L => ((ξ A).withLitters (hξ A)).nearLitterMap L.toNearLitter :=
+  rfl
+
+theorem _root_.ConNF.NearLitterBehaviour.action_approximates
+    (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) (π : NearLitterPerm)
+    (h : (ξ.action hξ).Approximates π) : ξ.Approximates π := by
+  constructor
+  · intro a ha
+    simp only [h.map_atom a (Or.inl ha), NearLitterBehaviour.action_atomMap,
+      NearLitterBehaviour.withLitters, NearLitterBehaviour.extraAtomMap_eq_of_dom a ha]
+  · intro N hN
+    refine NearLitter.ext ?_
+    rw [NearLitterPerm.smul_nearLitter_eq_smul_symmDiff_smul,
+      h.map_litter _ (Or.inr ⟨⟨_⟩, N, hN, rfl⟩)]
+    rw [← symmDiff_right_inj, symmDiff_symmDiff_cancel_left]
+    ext a
+    simp only [NearLitterBehaviour.action_litterMap,
+      NearLitterBehaviour.withLitters_nearLitterMap_fst hξ hN, NearLitterBehaviour.extraLitterMap,
+      NearLitterBehaviour.extraLitterMap', NearLitter.coe_mk, symmDiff_symmDiff_self', mem_iUnion,
+      mem_singleton_iff]
+    constructor <;>
+    · rintro ⟨a, ha, rfl⟩
+      refine ⟨a, ha, ?_⟩
+      dsimp only
+      rw [h.map_atom]
+      rfl
+
+theorem action_approximates (ξ : StructBehaviour β) (hξ : ξ.Lawful) (π : StructPerm β)
+    (h : (ξ.action hξ).Approximates π) : ξ.Approximates π :=
+  fun A => (ξ A).action_approximates (hξ A) (π A) (h A)
+
+theorem action_coherent (ξ : StructBehaviour β) (h₁ : ξ.Lawful) (h₂ : ξ.Coherent) :
+    (ξ.action h₁).Coherent := by
+  constructor
+  case mapFlexible => sorry
+  case atom_bot_dom => sorry
+  case atom_dom => sorry
+  case nearLitter_dom => sorry
+  case symmDiff_dom => sorry
+  case coherent_coe => sorry
+  case coherent_bot => sorry
+
 theorem freedom_of_action (ξ : StructBehaviour β) (h₁ : ξ.Lawful) (h₂ : ξ.Coherent) :
     ∃ ρ : Allowable β, ξ.Approximates (Allowable.toStructPerm ρ) := by
-  sorry
+  obtain ⟨ρ, hρ⟩ := (ξ.action h₁).freedom_of_action (ξ.action_lawful h₁) (ξ.action_coherent h₁ h₂)
+  exact ⟨ρ, ξ.action_approximates h₁ _ hρ⟩
 
 end StructBehaviour
 
