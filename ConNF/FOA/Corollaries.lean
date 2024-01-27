@@ -1,4 +1,5 @@
 import ConNF.FOA.Result
+import ConNF.FOA.Behaviour.StructBehaviour
 
 open Equiv Function Quiver Set Sum WithBot
 
@@ -10,8 +11,9 @@ namespace ConNF
 
 variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
 
--- TODO: reverse equalities of NearLitterApprox.map_atom
+-- TODO: Reverse equalities of NearLitterApprox.map_atom
 
+-- TODO: Move this to a better place
 @[mk_iff]
 structure NearLitterAction.Approximates (ψ : NearLitterAction) (π : NearLitterPerm) : Prop where
   map_atom : ∀ a (h : (ψ.atomMap a).Dom), π • a = (ψ.atomMap a).get h
@@ -167,5 +169,67 @@ theorem freedom_of_action (ψ : StructAction β) (h₁ : ψ.Lawful) (h₂ : ψ.C
       exact foaMotive_nearLitter ψ h₁ h₂ ρ hρ A L ih h
 
 end StructAction
+
+@[mk_iff]
+structure NearLitterBehaviour.Approximates
+    (ξ : NearLitterBehaviour) (π : NearLitterPerm) : Prop where
+  map_atom : ∀ a (h : (ξ.atomMap a).Dom), π • a = (ξ.atomMap a).get h
+  map_nearLitter : ∀ N (h : (ξ.nearLitterMap N).Dom), π • N = (ξ.nearLitterMap N).get h
+
+namespace StructBehaviour
+
+def Approximates (ξ : StructBehaviour β) (π : StructPerm β) : Prop :=
+  ∀ A, (ξ A).Approximates (π A)
+
+structure Coherent (ξ : StructBehaviour β) : Prop where
+  mapFlexible : ∀ (A : ExtendedIndex β) (N : NearLitter) (hN : ((ξ A).nearLitterMap N).Dom),
+    Flexible A N.1 → Flexible A (((ξ A).nearLitterMap N).get hN).1
+  atom_bot_dom : ∀ {γ : Λ} [LeLevel γ] (A : Path (β : TypeIndex) γ) {ε : Λ} [LtLevel ε]
+    (hε : (ε : TypeIndex) < γ) {a : Atom} {Nt : NearLitter},
+    Nt.1 = fuzz (bot_ne_coe (a := ε)) a →
+    ((ξ ((A.cons hε).cons (bot_lt_coe _))).nearLitterMap Nt).Dom →
+    ((ξ (A.cons (bot_lt_coe _))).atomMap a).Dom
+  atom_dom : ∀ {γ : Λ} [LeLevel γ] (A : Path (β : TypeIndex) γ)
+    {δ : Λ} [LtLevel δ] {ε : Λ} [LtLevel ε]
+    (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε) {t : Tangle δ}
+    {B : ExtendedIndex δ} {a : Atom} {Nt : NearLitter},
+    Nt.1 = fuzz hδε t → ⟨B, inl a⟩ ∈ t.support →
+    ((ξ ((A.cons hε).cons (bot_lt_coe _))).nearLitterMap Nt).Dom →
+    ((ξ ((A.cons hδ).comp B)).atomMap a).Dom
+  nearLitter_dom : ∀ {γ : Λ} [LeLevel γ] (A : Path (β : TypeIndex) γ)
+    {δ : Λ} [LtLevel δ] {ε : Λ} [LtLevel ε]
+    (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε) {t : Tangle δ}
+    {B : ExtendedIndex δ} {N Nt : NearLitter},
+    Nt.1 = fuzz hδε t → ⟨B, inr N⟩ ∈ t.support →
+    ((ξ ((A.cons hε).cons (bot_lt_coe _))).nearLitterMap Nt).Dom →
+    ((ξ ((A.cons hδ).comp B)).nearLitterMap N).Dom
+  coherent_coe : ∀ {γ : Λ} [LeLevel γ] (A : Path (β : TypeIndex) γ)
+    {δ : Λ} [LtLevel δ] {ε : Λ} [LtLevel ε]
+    (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε) {t : Tangle δ}
+    {Nt : NearLitter} (hNt : Nt.1 = fuzz hδε t)
+    (h : ((ξ ((A.cons hε).cons (bot_lt_coe _))).nearLitterMap Nt).Dom)
+    (ρ : Allowable γ),
+    (∀ (B : ExtendedIndex δ) (a : Atom) (ha : ⟨B, inl a⟩ ∈ t.support),
+      ((ξ ((A.cons hδ).comp B)).atomMap a).get (atom_dom A hδ hε hδε hNt ha h) =
+      Allowable.toStructPerm ρ ((Hom.toPath hδ).comp B) • a) →
+    (∀ (B : ExtendedIndex δ) (N : NearLitter) (ha : ⟨B, inr N⟩ ∈ t.support),
+      ((ξ ((A.cons hδ).comp B)).nearLitterMap N).get (nearLitter_dom A hδ hε hδε hNt ha h) =
+      Allowable.toStructPerm ρ ((Hom.toPath hδ).comp B) • N) →
+    (((ξ ((A.cons hε).cons (bot_lt_coe _))).nearLitterMap Nt).get h).fst =
+      fuzz hδε (Allowable.comp (Hom.toPath hδ) ρ • t)
+  coherent_bot : ∀ {γ : Λ} [LeLevel γ] (A : Path (β : TypeIndex) γ) {ε : Λ} [LtLevel ε]
+    (hε : (ε : TypeIndex) < γ) {a : Atom} {Nt : NearLitter} (hNt : Nt.1 = fuzz bot_ne_coe a)
+    (h : ((ξ ((A.cons hε).cons (bot_lt_coe _))).nearLitterMap Nt).Dom)
+    (ρ : Allowable γ),
+    ((ξ (A.cons (bot_lt_coe _))).atomMap a).get (atom_bot_dom A hε hNt h) =
+      Allowable.toStructPerm ρ (Hom.toPath (bot_lt_coe _)) • a →
+    (((ξ ((A.cons hε).cons (bot_lt_coe _))).nearLitterMap Nt).get h).fst =
+      fuzz (bot_ne_coe (a := ε)) (Allowable.comp (Hom.toPath (bot_lt_coe _)) ρ • a)
+
+theorem freedom_of_action (ξ : StructBehaviour β) (h₁ : ξ.Lawful) (h₂ : ξ.Coherent) :
+    ∃ ρ : Allowable β, ξ.Approximates (Allowable.toStructPerm ρ) := by
+  sorry
+
+end StructBehaviour
 
 end ConNF
