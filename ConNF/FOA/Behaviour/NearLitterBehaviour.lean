@@ -191,6 +191,16 @@ theorem litterPresent_small (ξ : NearLitterBehaviour) : Small {L | ξ.LitterPre
   rintro _ ⟨N, hN, rfl⟩
   exact ⟨_, ⟨N, rfl⟩, _, ⟨hN, rfl⟩, rfl⟩
 
+theorem litterPresent_small' (ξ : NearLitterBehaviour) :
+    Small {N : NearLitter | N.IsLitter ∧ ∃ N', (nearLitterMap ξ N').Dom ∧ N'.fst = N.fst} := by
+  have : Small {L | ∃ N, (nearLitterMap ξ N).Dom ∧ N.fst = L}
+  · refine (ξ.nearLitterMap_dom_small.image (f := fun N => N.1)).mono ?_
+    rintro _ ⟨N, hN, rfl⟩
+    exact ⟨N, hN, rfl⟩
+  refine (this.image (f := Litter.toNearLitter)).mono ?_
+  rintro _ ⟨⟨L⟩, N, hN, rfl⟩
+  refine ⟨N.1, ⟨N, hN, rfl⟩, rfl⟩
+
 theorem innerAtoms_small {ξ : NearLitterBehaviour} (L : Litter) (hL : ξ.LitterPresent L) :
     Small (ξ.innerAtoms L) := by
   obtain ⟨N, hN, rfl⟩ := hL
@@ -527,6 +537,21 @@ theorem extraAtomMap_dom_of_mem_symmDiff {ξ : NearLitterBehaviour} (hξ : ξ.La
       exact ⟨N, hN, rfl⟩
     · cases ha'' N hN ha.1
 
+theorem extraAtomMap_dom_of_mem_inter {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+    {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) {L : Litter}
+    (h : N.1 ≠ L) {a : Atom} (ha₁ : a ∈ N) (ha₂ : a.1 = L) :
+    (ξ.extraAtomMap hξ a).Dom := by
+  by_cases ha' : (ξ.atomMap a).Dom
+  · exact Or.inl ha'
+  refine Or.inr (Or.inl ⟨_, ⟨N, hN, rfl⟩, ?_⟩)
+  rw [mem_innerAtoms_iff _ ⟨N, hN, rfl⟩]
+  constructor
+  · rw [ha₂]
+    exact h.symm
+  · intro N' hN'
+    by_contra ha''
+    exact ha' (hξ.dom_of_mem_symmDiff a hN'.2 hN'.1 hN (Or.inr ⟨ha₁, ha''⟩))
+
 def extraLitterMap' (ξ : NearLitterBehaviour) (hξ : ξ.Lawful)
     (N : NearLitter) (hN : (ξ.nearLitterMap N).Dom) : Set Atom :=
   (ξ.nearLitterMap N).get hN ∆
@@ -588,6 +613,269 @@ theorem extraLitterMap'_eq {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
     (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom) :
     ξ.extraLitterMap' hξ N₁ hN₁ = ξ.extraLitterMap' hξ N₂ hN₂ :=
   subset_antisymm (extraLitterMap'_subset h hN₁ hN₂) (extraLitterMap'_subset h.symm hN₂ hN₁)
+
+theorem extraLitterMap'_isNearLitter {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+    {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) :
+    IsNearLitter ((ξ.nearLitterMap N).get hN).1 (ξ.extraLitterMap' hξ N hN) := by
+  rw [extraLitterMap']
+  refine ((ξ.nearLitterMap N).get hN).2.prop.trans ?_
+  erw [IsNear, symmDiff_symmDiff_cancel_left]
+  refine Small.bUnion N.2.prop ?_
+  intro a ha
+  exact small_singleton _
+
+theorem extraLitterMap'_disjoint {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+    {N₁ N₂ : NearLitter} (h : N₁.1 ≠ N₂.1)
+    (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom) (a : Atom) :
+    a ∉ ξ.extraLitterMap' hξ N₁ hN₁ ∩ ξ.extraLitterMap' hξ N₂ hN₂ := by
+  intro h
+  simp only [extraLitterMap', mem_inter_iff] at h
+  obtain ⟨ha₁ | ha₁, ha₂ | ha₂⟩ := h
+  · simp only [mem_diff, SetLike.mem_coe, mem_iUnion, mem_singleton_iff, not_exists] at ha₁ ha₂
+    obtain ⟨a, ha, rfl⟩ := hξ.ran_of_mem_inter a h hN₁ hN₂ ⟨ha₁.1, ha₂.1⟩
+    rw [hξ.atom_mem_iff] at ha₁ ha₂
+    by_cases ha₃ : a.1 = N₁.1
+    · refine ha₂.2 a (Or.inr ⟨ha₂.1, ?_⟩) ?_
+      · rw [mem_litterSet, ha₃]
+        exact h
+      · rw [extraAtomMap_eq_of_dom]
+    · refine ha₁.2 a (Or.inr ⟨ha₁.1, ha₃⟩) ?_
+      rw [extraAtomMap_eq_of_dom]
+  · simp only [mem_diff, SetLike.mem_coe, mem_iUnion, mem_singleton_iff, not_exists] at ha₁
+    simp only [mem_diff, mem_iUnion, mem_singleton_iff, SetLike.mem_coe] at ha₂
+    obtain ⟨⟨b, hb, rfl⟩, ha₂⟩ := ha₂
+    rw [extraAtomMap_mem_iff] at ha₁ ha₂
+    refine ha₁.2 b (Or.inr ⟨ha₁.1, ?_⟩) rfl
+    obtain (hb | hb) := hb
+    · rw [mem_litterSet, hb.1]
+      exact h.symm
+    · cases ha₂ hb.1
+  · simp only [mem_diff, SetLike.mem_coe, mem_iUnion, mem_singleton_iff, not_exists] at ha₂
+    simp only [mem_diff, mem_iUnion, mem_singleton_iff, SetLike.mem_coe] at ha₁
+    obtain ⟨⟨b, hb, rfl⟩, ha₁⟩ := ha₁
+    rw [extraAtomMap_mem_iff] at ha₁ ha₂
+    refine ha₂.2 b (Or.inr ⟨ha₂.1, ?_⟩) rfl
+    obtain (hb | hb) := hb
+    · rw [mem_litterSet, hb.1]
+      exact h
+    · cases ha₁ hb.1
+  · simp only [mem_diff, mem_iUnion, mem_singleton_iff, SetLike.mem_coe] at ha₁ ha₂
+    obtain ⟨⟨b, hb, rfl⟩, ha₁⟩ := ha₁
+    obtain ⟨⟨c, hc, hc'⟩, ha₂⟩ := ha₂
+    cases extraAtomMap_injective _ _ hc'
+    rw [extraAtomMap_mem_iff] at ha₁ ha₂
+    obtain (hb | hb) := hb
+    · obtain (hc | hc) := hc
+      · cases h (hb.1.symm.trans hc.1)
+      · cases ha₂ hc.1
+    · cases ha₁ hb.1
+
+def extraLitterMap (ξ : NearLitterBehaviour) (hξ : ξ.Lawful)
+    (N : NearLitter) (hN : (ξ.nearLitterMap N).Dom) : NearLitter :=
+  ⟨((ξ.nearLitterMap N).get hN).1, ξ.extraLitterMap' hξ N hN, extraLitterMap'_isNearLitter hξ hN⟩
+
+theorem mem_extraLitterMap_iff {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+    {N : NearLitter} {hN : (ξ.nearLitterMap N).Dom} (a : Atom) :
+    a ∈ ξ.extraLitterMap hξ N hN ↔ a ∈ ξ.extraLitterMap' hξ N hN :=
+  Iff.rfl
+
+theorem extraLitterMap_eq {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+    {N₁ N₂ : NearLitter} (h : N₁.1 = N₂.1)
+    (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom) :
+    ξ.extraLitterMap hξ N₁ hN₁ = ξ.extraLitterMap hξ N₂ hN₂ :=
+  NearLitter.ext (extraLitterMap'_eq h hN₁ hN₂)
+
+noncomputable def withLitters (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) : NearLitterBehaviour where
+  atomMap := ξ.extraAtomMap hξ
+  nearLitterMap N := ⟨(ξ.nearLitterMap N).Dom ∨ (N.IsLitter ∧ ξ.LitterPresent N.1),
+    fun h => h.elim'
+      (ξ.nearLitterMap N).get
+      (fun h => ξ.extraLitterMap hξ h.2.choose h.2.choose_spec.1)⟩
+  atomMap_dom_small := ξ.extraAtomMap_dom_small hξ
+  nearLitterMap_dom_small := Small.union ξ.nearLitterMap_dom_small ξ.litterPresent_small'
+
+theorem withLitters_nearLitterMap_of_dom {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+    {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) :
+    ((ξ.withLitters hξ).nearLitterMap N).get (Or.inl hN) = (ξ.nearLitterMap N).get hN := by
+  unfold withLitters
+  dsimp only
+  rw [Or.elim'_left]
+
+theorem withLitters_nearLitterMap_fst {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+    {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) :
+    ((ξ.withLitters hξ).nearLitterMap N.1.toNearLitter).get (Or.inr ⟨⟨_⟩, N, hN, rfl⟩) =
+      ξ.extraLitterMap hξ N hN := by
+  by_cases hN' : (ξ.nearLitterMap N.1.toNearLitter).Dom
+  · rw [withLitters_nearLitterMap_of_dom hξ hN', extraLitterMap_eq (by rfl) hN hN', extraLitterMap]
+    refine NearLitter.ext ?_
+    simp only [extraLitterMap', Litter.toNearLitter_fst, Litter.coe_toNearLitter,
+      symmDiff_self, bot_eq_empty, mem_empty_iff_false, iUnion_of_empty, iUnion_empty,
+      symmDiff_empty, NearLitter.coe_mk]
+  · unfold withLitters
+    dsimp only
+    rw [Or.elim'_right _ _ _ hN']
+    have : ξ.LitterPresent N.1 := ⟨N, hN, rfl⟩
+    rw [extraLitterMap_eq this.choose_spec.2 this.choose_spec.1 hN]
+
+theorem extraAtomMap_mem_iff' {ξ : NearLitterBehaviour} {hξ : Lawful ξ}
+    {a : Atom} (ha : (ξ.extraAtomMap hξ a).Dom)
+    {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) :
+    (ξ.extraAtomMap hξ a).get ha ∈ ξ.extraLitterMap hξ N hN ↔ a.1 = N.1 := by
+  rw [mem_extraLitterMap_iff, extraLitterMap']
+  constructor
+  · rintro (⟨ha₁, ha₂⟩ | ⟨ha₁, ha₂⟩)
+    · rw [SetLike.mem_coe, extraAtomMap_mem_iff] at ha₁
+      contrapose! ha₂
+      simp only [mem_iUnion, mem_singleton_iff]
+      exact ⟨a, Or.inr ⟨ha₁, ha₂⟩, rfl⟩
+    · rw [SetLike.mem_coe, extraAtomMap_mem_iff] at ha₂
+      simp only [mem_iUnion, mem_singleton_iff] at ha₁
+      obtain ⟨b, hb, hab⟩ := ha₁
+      cases extraAtomMap_injective _ _ hab
+      obtain (hb | hb) := hb
+      · exact hb.1
+      · cases ha₂ hb.1
+  · intro ha₁
+    by_cases ha₂ : a ∈ N
+    · refine Or.inl ⟨?_, ?_⟩
+      · rw [SetLike.mem_coe, extraAtomMap_mem_iff]
+        exact ha₂
+      · simp only [mem_iUnion, mem_singleton_iff, not_exists]
+        intro b hb hab
+        cases extraAtomMap_injective _ _ hab
+        obtain (hb | hb) := hb
+        · cases hb.2 ha₂
+        · cases hb.2 ha₁
+    · refine Or.inr ⟨?_, ?_⟩
+      · simp only [mem_iUnion, mem_singleton_iff]
+        exact ⟨a, Or.inl ⟨ha₁, ha₂⟩, rfl⟩
+      · rw [SetLike.mem_coe, extraAtomMap_mem_iff]
+        exact ha₂
+
+theorem extraAtomMap_ran_of_mem_symmDiff {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+    {N₁ N₂ : NearLitter} (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom)
+    (hN : N₁.fst = (Litter.toNearLitter N₂.1).fst)
+    {a : Atom} (ha : a ∈ ((ξ.nearLitterMap N₁).get hN₁ : Set Atom) ∆ ξ.extraLitterMap' hξ N₂ hN₂) :
+    a ∈ (ξ.extraAtomMap hξ).ran := by
+  obtain (⟨ha₁, ha₂⟩ | ⟨ha₁, ha₂⟩) := ha
+  · contrapose! ha₂
+    have ha' : a ∈ (ξ.nearLitterMap N₂).get hN₂
+    · by_contra ha'
+      obtain ⟨b, hb, rfl⟩ := hξ.ran_of_mem_symmDiff a (by exact hN) hN₁ hN₂ (Or.inl ⟨ha₁, ha'⟩)
+      refine ha₂ ⟨b, Or.inl hb, ?_⟩
+      rw [extraAtomMap_eq_of_dom]
+    refine Or.inl ⟨ha', ?_⟩
+    simp only [mem_iUnion, mem_singleton_iff, not_exists]
+    rintro b hb rfl
+    exact ha₂ ⟨b, _, rfl⟩
+  · obtain (⟨ha₁, ha₃⟩ | ⟨ha₁, ha₃⟩) := ha₁
+    · simp only [mem_iUnion, mem_singleton_iff, not_exists] at ha₃
+      obtain ⟨b, hb, rfl⟩ := hξ.ran_of_mem_symmDiff a (by exact hN) hN₁ hN₂ (Or.inr ⟨ha₁, ha₂⟩)
+      refine ⟨b, Or.inl hb, ?_⟩
+      rw [extraAtomMap_eq_of_dom]
+    · simp only [mem_iUnion, mem_singleton_iff] at ha₁
+      obtain ⟨b, hb, rfl⟩ := ha₁
+      exact ⟨_, _, rfl⟩
+
+theorem extraAtomMap_ran_of_mem_inter {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+    {N₁ N₂ : NearLitter} (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom)
+    (hN : N₁.fst ≠ (Litter.toNearLitter N₂.1).fst)
+    {a : Atom} (ha : a ∈ ((ξ.nearLitterMap N₁).get hN₁ : Set Atom) ∩ ξ.extraLitterMap' hξ N₂ hN₂) :
+    a ∈ (ξ.extraAtomMap hξ).ran := by
+  obtain ⟨ha₁, ⟨ha₂, ha₃⟩ | ⟨ha₂, ha₃⟩⟩ := ha
+  · simp only [mem_iUnion, mem_singleton_iff, not_exists] at ha₃
+    obtain ⟨b, hb, rfl⟩ := hξ.ran_of_mem_inter a (by exact hN) hN₁ hN₂ ⟨ha₁, ha₂⟩
+    refine ⟨b, Or.inl hb, ?_⟩
+    rw [extraAtomMap_eq_of_dom]
+  · simp only [mem_iUnion, mem_singleton_iff] at ha₂
+    obtain ⟨b, hb, rfl⟩ := ha₂
+    rw [SetLike.mem_coe, extraAtomMap_mem_iff] at ha₁ ha₃
+    exact ⟨b, _, rfl⟩
+
+theorem withLitters_lawful (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) :
+    (ξ.withLitters hξ).Lawful := by
+  constructor
+  case atomMap_injective => exact extraAtomMap_injective
+  case atom_mem_iff =>
+    rintro a ha N (hN | ⟨⟨_⟩, ⟨N, hN, hN'⟩⟩)
+    · rw [withLitters_nearLitterMap_of_dom hξ hN]
+      exact extraAtomMap_mem_iff ha hN
+    · cases hN'
+      rw [withLitters_nearLitterMap_fst hξ hN]
+      exact extraAtomMap_mem_iff' ha hN
+  case dom_of_mem_symmDiff =>
+    rintro a N₁ N₂ h (hN₁ | ⟨⟨_⟩, ⟨N₁, -, hN₁'⟩⟩) (hN₂ | ⟨⟨_⟩, ⟨N₂, -, hN₂'⟩⟩) ha
+    · exact Or.inl (hξ.dom_of_mem_symmDiff a h hN₁ hN₂ ha)
+    · cases hN₂'
+      refine extraAtomMap_dom_of_mem_symmDiff hξ hN₁ ?_
+      rw [h]
+      rw [symmDiff_comm] at ha
+      exact ha
+    · cases hN₁'
+      refine extraAtomMap_dom_of_mem_symmDiff hξ hN₂ ?_
+      rw [← h]
+      exact ha
+    · cases hN₁'
+      cases hN₂'
+      rw [Litter.toNearLitter_fst] at h
+      obtain (ha | ha) := ha
+      · rw [h] at ha
+        cases ha.2 ha.1
+      · rw [h] at ha
+        cases ha.2 ha.1
+  case dom_of_mem_inter =>
+    rintro a N₁ N₂ h (hN₁ | ⟨⟨_⟩, ⟨N₁, -, hN₁'⟩⟩) (hN₂ | ⟨⟨_⟩, ⟨N₂, -, hN₂'⟩⟩) ha
+    · exact Or.inl (hξ.dom_of_mem_inter a h hN₁ hN₂ ha)
+    · cases hN₂'
+      exact extraAtomMap_dom_of_mem_inter hξ hN₁ h ha.1 ha.2
+    · cases hN₁'
+      exact extraAtomMap_dom_of_mem_inter hξ hN₂ h.symm ha.2 ha.1
+    · cases hN₁'
+      cases hN₂'
+      simp only [Litter.toNearLitter_fst, ne_eq] at h
+      cases h (ha.1.symm.trans ha.2)
+  case ran_of_mem_symmDiff =>
+    rintro a N₁ N₂ h (hN₁ | ⟨⟨_⟩, ⟨N₁, hN₁, hN₁'⟩⟩) (hN₂ | ⟨⟨_⟩, ⟨N₂, hN₂, hN₂'⟩⟩) ha
+    · rw [withLitters_nearLitterMap_of_dom hξ hN₁, withLitters_nearLitterMap_of_dom hξ hN₂] at ha
+      obtain ⟨b, hb, rfl⟩ := hξ.ran_of_mem_symmDiff a h hN₁ hN₂ ha
+      refine ⟨b, Or.inl hb, ?_⟩
+      simp only [withLitters, extraAtomMap_eq_of_dom _ hb]
+    · cases hN₂'
+      refine extraAtomMap_ran_of_mem_symmDiff hξ hN₁ hN₂ h ?_
+      rw [withLitters_nearLitterMap_of_dom hξ hN₁,
+        withLitters_nearLitterMap_fst hξ hN₂] at ha
+      exact ha
+    · cases hN₁'
+      refine extraAtomMap_ran_of_mem_symmDiff hξ hN₂ hN₁ h.symm ?_
+      rw [withLitters_nearLitterMap_of_dom hξ hN₂,
+        withLitters_nearLitterMap_fst hξ hN₁, symmDiff_comm] at ha
+      exact ha
+    · cases hN₁'
+      cases hN₂'
+      rw [Litter.toNearLitter_fst] at h
+      simp only [h, Litter.toNearLitter_fst, symmDiff_self, bot_eq_empty, mem_empty_iff_false] at ha
+  case ran_of_mem_inter =>
+    rintro a N₁ N₂ h (hN₁ | ⟨⟨_⟩, ⟨N₁, hN₁, hN₁'⟩⟩) (hN₂ | ⟨⟨_⟩, ⟨N₂, hN₂, hN₂'⟩⟩) ha
+    · rw [withLitters_nearLitterMap_of_dom hξ hN₁, withLitters_nearLitterMap_of_dom hξ hN₂] at ha
+      obtain ⟨b, hb, rfl⟩ := hξ.ran_of_mem_inter a h hN₁ hN₂ ha
+      refine ⟨b, Or.inl hb, ?_⟩
+      simp only [withLitters, extraAtomMap_eq_of_dom _ hb]
+    · cases hN₂'
+      refine extraAtomMap_ran_of_mem_inter hξ hN₁ hN₂ h ?_
+      rw [withLitters_nearLitterMap_of_dom hξ hN₁,
+        withLitters_nearLitterMap_fst hξ hN₂] at ha
+      exact ha
+    · cases hN₁'
+      refine extraAtomMap_ran_of_mem_inter hξ hN₂ hN₁ h.symm ?_
+      rw [withLitters_nearLitterMap_of_dom hξ hN₂,
+        withLitters_nearLitterMap_fst hξ hN₁, inter_comm] at ha
+      exact ha
+    · cases hN₁'
+      cases hN₂'
+      simp only [mem_inter_iff, SetLike.mem_coe,
+        withLitters_nearLitterMap_fst hξ hN₁, withLitters_nearLitterMap_fst hξ hN₂,
+        mem_extraLitterMap_iff] at ha
+      cases extraLitterMap'_disjoint (by exact h) hN₁ hN₂ a ha
 
 end NearLitterBehaviour
 
