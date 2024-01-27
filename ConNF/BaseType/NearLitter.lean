@@ -138,6 +138,15 @@ theorem toProd_injective : Injective toProd := by
 protected theorem isNearLitter (N : NearLitter) (L : Litter) : IsNearLitter L N ↔ N.fst = L :=
   ⟨IsNearLitter.unique N.snd.prop, by rintro rfl; exact N.2.2⟩
 
+theorem isNear_iff_fst_eq_fst (N₁ N₂ : NearLitter) :
+    IsNear (N₁ : Set Atom) N₂ ↔ N₁.fst = N₂.fst := by
+  rw [← N₁.isNearLitter N₂.fst]
+  constructor
+  · intro h
+    exact N₂.snd.prop.trans h.symm
+  · intro h
+    refine h.symm.trans N₂.snd.prop
+
 end NearLitter
 
 namespace Litter
@@ -252,18 +261,24 @@ theorem mk_nearLitter'' (N : NearLitter) : #N = #κ := by
     · rw [symmDiff_comm]
       exact N.2.2
 
+theorem symmDiff_union_inter {α : Type _} {a b : Set α} : (a ∆ b) ∪ (a ∩ b) = a ∪ b := by
+  ext x
+  simp only [mem_union, mem_symmDiff, mem_inter_iff]
+  tauto
+
+theorem NearLitter.mk_inter_of_fst_eq_fst {N₁ N₂ : NearLitter} (h : N₁.fst = N₂.fst) :
+    #(N₁ ∩ N₂ : Set Atom) = #κ := by
+  rw [← isNear_iff_fst_eq_fst] at h
+  refine le_antisymm ?_ ?_
+  · exact (mk_le_mk_of_subset (inter_subset_left _ _)).trans (mk_nearLitter'' _).le
+  · by_contra! h'
+    have := Small.union h h'
+    rw [symmDiff_union_inter] at this
+    exact (this.mono (subset_union_left _ _)).not_le (le_of_eq (mk_nearLitter'' N₁).symm)
+
 theorem NearLitter.inter_nonempty_of_fst_eq_fst {N₁ N₂ : NearLitter} (h : N₁.fst = N₂.fst) :
     (N₁ ∩ N₂ : Set Atom).Nonempty := by
-  by_contra h'
-  rw [Set.not_nonempty_iff_eq_empty] at h'
-  have := N₁.2.prop
-  simp_rw [h] at this
-  have := Small.mono (subset_union_left _ _) (N₂.2.prop.symm.trans this)
-  have h : (N₂.snd : Set Atom) \ N₁.snd = N₂.snd := by
-    rwa [sdiff_eq_left, disjoint_iff_inter_eq_empty, inter_comm]
-  rw [h] at this
-  have : #N₂ < #κ := this
-  rw [mk_nearLitter''] at this
-  exact lt_irrefl #κ this
+  rw [← nonempty_coe_sort, ← mk_ne_zero_iff, mk_inter_of_fst_eq_fst h]
+  exact mk_ne_zero κ
 
 end ConNF
