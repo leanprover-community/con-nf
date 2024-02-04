@@ -16,7 +16,7 @@ structure CodingFunction (β : Λ) [LeLevel β] where
   decode : Support β →. Tangle β
   dom_nonempty : decode.Dom.Nonempty
   supports_decode' (S : Support β) (hS : (decode S).Dom) :
-    Supports (Allowable β) (S : Set (SupportCondition β)) ((decode S).get hS)
+    Supports (Allowable β) (S : Set (Address β)) ((decode S).get hS)
   dom_iff (S T : Support β) (hS : (decode S).Dom) :
     (decode T).Dom ↔ ∃ ρ : Allowable β, T = ρ • S
   decode_smul' (S : Support β) (ρ : Allowable β)
@@ -49,7 +49,7 @@ theorem exists_mem (χ : CodingFunction β) :
   χ.dom_nonempty
 
 theorem supports_decode {χ : CodingFunction β} (S : Support β) (hS : S ∈ χ) :
-    Supports (Allowable β) (S : Set (SupportCondition β)) ((χ.decode S).get hS) :=
+    Supports (Allowable β) (S : Set (Address β)) ((χ.decode S).get hS) :=
   χ.supports_decode' S hS
 
 theorem decode_smul {χ : CodingFunction β} (S : Support β) (ρ : Allowable β) (h : ρ • S ∈ χ) :
@@ -71,8 +71,8 @@ theorem ext {χ₁ χ₂ : CodingFunction β}
     rw [χ₁.decode_smul' S ρ h₁ h₁', χ₂.decode_smul' S ρ h₂ h₂', h]
 
 theorem smul_supports {S : Support β} {t : Tangle β}
-    (h : Supports (Allowable β) (S : Set (SupportCondition β)) t) (ρ : Allowable β) :
-    Supports (Allowable β) ((ρ • S : Support β) : Set (SupportCondition β)) (ρ • t) := by
+    (h : Supports (Allowable β) (S : Set (Address β)) t) (ρ : Allowable β) :
+    Supports (Allowable β) ((ρ • S : Support β) : Set (Address β)) (ρ • t) := by
   intro ρ' hρ'
   have := h (ρ⁻¹ * ρ' * ρ) ?_
   · rw [mul_assoc, mul_smul, inv_smul_eq_iff, mul_smul] at this
@@ -90,7 +90,7 @@ theorem decode_congr {χ : CodingFunction β} {S₁ S₂ : Support β}
 
 /-- Produce a coding function for a given ordered support and tangle it supports. -/
 noncomputable def code (S : Support β) (t : Tangle β)
-    (h : Supports (Allowable β) (S : Set (SupportCondition β)) t) :
+    (h : Supports (Allowable β) (S : Set (Address β)) t) :
     CodingFunction β where
   decode T := ⟨∃ ρ : Allowable β, T = ρ • S, fun hT => hT.choose • t⟩
   dom_nonempty := ⟨S, 1, by rw [one_smul]⟩
@@ -119,7 +119,7 @@ noncomputable def code (S : Support β) (t : Tangle β)
 
 @[simp]
 theorem code_decode (S : Support β) (t : Tangle β)
-    (h : Supports (Allowable β) (S : Set (SupportCondition β)) t) :
+    (h : Supports (Allowable β) (S : Set (Address β)) t) :
     (code S t h).decode S = Part.some t := by
   refine Part.ext' ?_ ?_
   · simp only [Allowable.toStructPerm_smul, Part.some_dom, iff_true]
@@ -132,13 +132,13 @@ theorem code_decode (S : Support β) (t : Tangle β)
 
 @[simp]
 theorem mem_code_self {S : Support β} {t : Tangle β}
-    {h : Supports (Allowable β) (S : Set (SupportCondition β)) t} :
+    {h : Supports (Allowable β) (S : Set (Address β)) t} :
     S ∈ code S t h :=
   ⟨1, by rw [one_smul]⟩
 
 @[simp]
 theorem mem_code {S : Support β} {t : Tangle β}
-    {h : Supports (Allowable β) (S : Set (SupportCondition β)) t} (T : Support β) :
+    {h : Supports (Allowable β) (S : Set (Address β)) t} (T : Support β) :
     T ∈ code S t h ↔ ∃ ρ : Allowable β, T = ρ • S :=
   Iff.rfl
 
@@ -152,8 +152,8 @@ theorem eq_code {χ : CodingFunction β} {S : Support β} (h : S ∈ χ) :
   · simp only [code_decode, Part.get_some]
 
 theorem code_smul (S : Support β) (t : Tangle β) (ρ : Allowable β)
-    (h₁ : Supports (Allowable β) ((ρ • S : Support β) : Set (SupportCondition β)) (ρ • t))
-    (h₂ : Supports (Allowable β) (S : Set (SupportCondition β)) t) :
+    (h₁ : Supports (Allowable β) ((ρ • S : Support β) : Set (Address β)) (ρ • t))
+    (h₂ : Supports (Allowable β) (S : Set (Address β)) t) :
     code (ρ • S) (ρ • t) h₁ = code S t h₂ := by
   refine ext S ⟨ρ⁻¹, eq_inv_smul_iff.mpr rfl⟩ mem_code_self ?_
   have := decode_smul (χ := code (ρ • S) (ρ • t) h₁) (ρ • S) ρ⁻¹ ⟨ρ⁻¹, rfl⟩

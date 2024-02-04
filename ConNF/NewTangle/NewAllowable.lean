@@ -164,7 +164,7 @@ theorem toStructPerm_smul (ρ : SemiallowablePerm) (x : X) :
 
 end
 
-/-- In the same way that structural permutations act on support conditions, semiallowable
+/-- In the same way that structural permutations act on addresses, semiallowable
 permutations act on codes. -/
 instance : MulAction SemiallowablePerm Code
     where

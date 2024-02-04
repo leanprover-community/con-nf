@@ -47,28 +47,28 @@ theorem completeAtomMap_surjective_extends (A : ExtendedIndex β) (a : Atom)
     have := Eq.subset this.symm (Or.inl ⟨rfl, ha⟩)
     exact completeNearLitterMap_subset_range A L this
 
-noncomputable def completeSupportConditionMap (π : StructApprox β) :
-    SupportCondition β → SupportCondition β
+noncomputable def completeAddressMap (π : StructApprox β) :
+    Address β → Address β
   | ⟨B, inl a⟩ => ⟨B, inl (π.completeAtomMap B a)⟩
   | ⟨B, inr N⟩ => ⟨B, inr (π.completeNearLitterMap B N)⟩
 
 @[simp]
-theorem completeSupportConditionMap_atom_eq {π : StructApprox β} {a : Atom} {B : ExtendedIndex β} :
-    π.completeSupportConditionMap ⟨B, inl a⟩ = ⟨B, inl (π.completeAtomMap B a)⟩ :=
+theorem completeAddressMap_atom_eq {π : StructApprox β} {a : Atom} {B : ExtendedIndex β} :
+    π.completeAddressMap ⟨B, inl a⟩ = ⟨B, inl (π.completeAtomMap B a)⟩ :=
   rfl
 
 @[simp]
-theorem completeSupportConditionMap_nearLitter_eq {π : StructApprox β} {N : NearLitter}
+theorem completeAddressMap_nearLitter_eq {π : StructApprox β} {N : NearLitter}
     {B : ExtendedIndex β} :
-    π.completeSupportConditionMap ⟨B, inr N⟩ = ⟨B, inr (π.completeNearLitterMap B N)⟩ :=
+    π.completeAddressMap ⟨B, inr N⟩ = ⟨B, inr (π.completeNearLitterMap B N)⟩ :=
   rfl
 
-theorem completeSupportConditionMap_injective (hπf : π.Free) :
-    Injective π.completeSupportConditionMap := by
+theorem completeAddressMap_injective (hπf : π.Free) :
+    Injective π.completeAddressMap := by
   rintro ⟨B₁, a₁ | N₁⟩ ⟨B₂, a₂ | N₂⟩ h <;>
-    rw [SupportCondition.ext_iff] at h <;>
-    simp only [completeSupportConditionMap_atom_eq,
-      completeSupportConditionMap_nearLitter_eq,
+    rw [Address.ext_iff] at h <;>
+    simp only [completeAddressMap_atom_eq,
+      completeAddressMap_nearLitter_eq,
       inl.injEq, inr.injEq, and_false] at h
   · cases h.1
     cases completeAtomMap_injective hπf B₁ h.2
@@ -77,23 +77,23 @@ theorem completeSupportConditionMap_injective (hπf : π.Free) :
     cases completeNearLitterMap_injective hπf B₁ h.2
     rfl
 
-def preimageConstrained (π : StructApprox β) (c : SupportCondition β) : Set (SupportCondition β) :=
-  π.completeSupportConditionMap ⁻¹' {d | d ≺ c}
+def preimageConstrained (π : StructApprox β) (c : Address β) : Set (Address β) :=
+  π.completeAddressMap ⁻¹' {d | d ≺ c}
 
-theorem preimageConstrained_small (hπf : π.Free) (c : SupportCondition β) :
+theorem preimageConstrained_small (hπf : π.Free) (c : Address β) :
     Small (preimageConstrained π c) :=
-  Small.preimage (completeSupportConditionMap_injective hπf) (small_constrains c)
+  Small.preimage (completeAddressMap_injective hπf) (small_constrains c)
 
-noncomputable def preimageAction (hπf : π.Free) (c : SupportCondition β) : StructAction β :=
+noncomputable def preimageAction (hπf : π.Free) (c : Address β) : StructAction β :=
   constrainedAction π (preimageConstrained π c) (preimageConstrained_small hπf c)
 
-theorem preimageAction_eq_constrainedAction (hπf : π.Free) (c : SupportCondition β) :
+theorem preimageAction_eq_constrainedAction (hπf : π.Free) (c : Address β) :
     preimageAction hπf c =
       constrainedAction π (preimageConstrained π c) (preimageConstrained_small hπf c) :=
   rfl
 
 -- In fact, any `constrained_action` is lawful.
-theorem preimageAction_lawful (hπf : π.Free) {c : SupportCondition β} :
+theorem preimageAction_lawful (hπf : π.Free) {c : Address β} :
     (preimageAction hπf c).Lawful := by
   intro A
   constructor
@@ -104,7 +104,7 @@ theorem preimageAction_lawful (hπf : π.Free) {c : SupportCondition β} :
   · intro a _ L _
     exact (completeAtomMap_mem_completeNearLitterMap_toNearLitter hπf).symm
 
-theorem preimageAction_comp_mapFlexible {hπf : π.Free} {γ : Λ} {c : SupportCondition β}
+theorem preimageAction_comp_mapFlexible {hπf : π.Free} {γ : Λ} {c : Address β}
     (A : Path (β : TypeIndex) γ) :
     StructAction.MapFlexible ((preimageAction hπf c).comp A) :=
   constrainedAction_comp_mapFlexible hπf A
@@ -115,7 +115,7 @@ theorem Relation.reflTransGen_of_eq {α : Type _} {r : α → α → Prop} {x y 
   rfl
 
 theorem preimageAction_coherent (hπf : π.Free) {γ : Λ} [LeLevel γ] (A : Path (β : TypeIndex) γ)
-    (B : ExtendedIndex γ) (N : NearLitter) (c : SupportCondition β)
+    (B : ExtendedIndex γ) (N : NearLitter) (c : Address β)
     (hc : ⟨A.comp B, inr (π.completeNearLitterMap (A.comp B) N)⟩ ≺ c) (ρ : Allowable γ)
     (h : StructApprox.ExactlyApproximates
       (StructAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
@@ -128,7 +128,7 @@ theorem preimageAction_coherent (hπf : π.Free) {γ : Λ} [LeLevel γ] (A : Pat
   exact hc
 
 theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Λ} [LeLevel γ] (A : Path (β : TypeIndex) γ)
-    (B : ExtendedIndex γ) (a : Atom) (c : SupportCondition β)
+    (B : ExtendedIndex γ) (a : Atom) (c : Address β)
     (hc : ⟨A.comp B, inl (π.completeAtomMap (A.comp B) a)⟩ ≺ c) (ρ : Allowable γ)
     (h : StructApprox.ExactlyApproximates
       (StructAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
@@ -194,7 +194,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' Relation.TransGen.tail' _
           (Constrains.fuzz hδ hε hδε B _ _ (smul_mem_support hc _))
         refine' Relation.reflTransGen_of_eq _
-        refine' SupportCondition.ext _ _ rfl _
+        refine' Address.ext _ _ rfl _
         change inl _ = inl _
         simp only [← this, ne_eq, Tree.comp_bot, Tree.toBot_inv_smul, map_inv,
           Tree.inv_apply]
@@ -225,7 +225,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
         refine' Relation.TransGen.tail' _
           (Constrains.fuzz hδ hε hδε B _ _ (smul_mem_support hc _))
         refine' Relation.reflTransGen_of_eq _
-        refine' SupportCondition.ext _ _ rfl _
+        refine' Address.ext _ _ rfl _
         change inr _ = inr _
         simp only [← this, ne_eq, Tree.comp_bot, Tree.toBot_inv_smul, map_inv,
           Tree.inv_apply]
@@ -287,14 +287,14 @@ theorem completeNearLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedI
 
 variable (π)
 
-def CompleteMapSurjectiveAt : SupportCondition β → Prop
+def CompleteMapSurjectiveAt : Address β → Prop
   | ⟨A, inl a⟩ => a ∈ range (π.completeAtomMap A)
   | ⟨A, inr N⟩ => N ∈ range (π.completeNearLitterMap A)
 
 variable {π}
 
-theorem completeMap_surjective_extends (hπf : π.Free) (c : SupportCondition β)
-    (hc : ∀ d : SupportCondition β, d < c → π.CompleteMapSurjectiveAt d) :
+theorem completeMap_surjective_extends (hπf : π.Free) (c : Address β)
+    (hc : ∀ d : Address β, d < c → π.CompleteMapSurjectiveAt d) :
     π.CompleteMapSurjectiveAt c := by
   obtain ⟨A, a | N⟩ := c
   · refine' completeAtomMap_surjective_extends A a _
@@ -312,7 +312,7 @@ theorem completeMap_surjective_extends (hπf : π.Free) (c : SupportCondition β
     · intro a h
       exact hc ⟨A, inl a⟩ (Relation.TransGen.single <| Constrains.symmDiff A N a h)
 
-theorem completeMapSurjectiveAtAll (hπf : π.Free) (c : SupportCondition β) :
+theorem completeMapSurjectiveAtAll (hπf : π.Free) (c : Address β) :
     π.CompleteMapSurjectiveAt c :=
   WellFoundedRelation.wf.induction c (completeMap_surjective_extends hπf)
 

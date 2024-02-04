@@ -4,7 +4,7 @@ import ConNF.FOA.Basic.Hypotheses
 
 /-!
 # Constraints
-Support conditions can be said to *constrain* each other in a number of ways.
+addresses can be said to *constrain* each other in a number of ways.
 This is detailed below. The `constrains` relation is well-founded.
 
 ## Main declarations
@@ -24,7 +24,7 @@ namespace ConNF
 
 variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ}
 
-/-- Support conditions can be said to *constrain* each other in a number of ways.
+/-- addresses can be said to *constrain* each other in a number of ways.
 1. `(L, A) ≺ (a, A)` when `a ∈ L` and `L` is a litter. We can say that an atom is constrained by the
     litter it belongs to.
 2. `(N°, A) ≺ (N, A)` when `N` is a near-litter not equal to its corresponding litter `N°`.
@@ -33,7 +33,7 @@ variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ}
     `δ, ε < γ` with `δ ≠ ε`, `t ∈ τ_γ`, where `(x, B)` lies in the designated `δ`-support of `t`.
 -/
 @[mk_iff]
-inductive Constrains : SupportCondition β → SupportCondition β → Prop
+inductive Constrains : Address β → Address β → Prop
   | atom (A : ExtendedIndex β) (a : Atom) : Constrains ⟨A, inr a.1.toNearLitter⟩ ⟨A, inl a⟩
   | nearLitter (A : ExtendedIndex β) (N : NearLitter) (hN : ¬N.IsLitter) :
     Constrains ⟨A, inr N.fst.toNearLitter⟩ ⟨A, inr N⟩
@@ -41,7 +41,7 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
     a ∈ litterSet N.fst ∆ N → Constrains ⟨A, inl a⟩ ⟨A, inr N⟩
   | fuzz ⦃γ : Λ⦄ [LeLevel γ] ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε]
     (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε)
-    (A : Path (β : TypeIndex) γ) (t : Tangle δ) (c : SupportCondition δ) :
+    (A : Path (β : TypeIndex) γ) (t : Tangle δ) (c : Address δ) :
     c ∈ t.support →
     Constrains ⟨(A.cons hδ).comp c.path, c.value⟩
       ⟨(A.cons hε).cons (bot_lt_coe _), inr (fuzz hδε t).toNearLitter⟩
@@ -50,7 +50,7 @@ inductive Constrains : SupportCondition β → SupportCondition β → Prop
     Constrains ⟨A.cons (bot_lt_coe _), inl a⟩
       ⟨(A.cons hε).cons (bot_lt_coe _), inr (fuzz (bot_ne_coe (a := ε)) a).toNearLitter⟩
 
-/-! We declare new notation for the "constrains" relation on support conditions. -/
+/-! We declare new notation for the "constrains" relation on addresses. -/
 
 @[inherit_doc] infix:50 " ≺ " => Constrains
 
@@ -184,7 +184,7 @@ theorem litterConstrains_wf : WellFounded LitterConstrains :=
   Subrelation.wf litterConstrains_subrelation IsWellFounded.wf
 
 @[simp]
-theorem constrains_atom {c : SupportCondition β} {A : ExtendedIndex β} {a : Atom} :
+theorem constrains_atom {c : Address β} {A : ExtendedIndex β} {a : Atom} :
     c ≺ ⟨A, inl a⟩ ↔ c = ⟨A, inr a.1.toNearLitter⟩ := by
   constructor
   · rintro ⟨⟩
@@ -192,7 +192,7 @@ theorem constrains_atom {c : SupportCondition β} {A : ExtendedIndex β} {a : At
   · rintro rfl
     exact Constrains.atom A a
 
-theorem constrains_nearLitter {c : SupportCondition β} {A : ExtendedIndex β}
+theorem constrains_nearLitter {c : Address β} {A : ExtendedIndex β}
     {N : NearLitter} (hN : ¬N.IsLitter) :
     c ≺ ⟨A, inr N⟩ ↔ c = ⟨A, inr N.1.toNearLitter⟩ ∨
       ∃ a ∈ litterSet N.fst ∆ N.snd, c = ⟨A, inl a⟩ := by
@@ -216,8 +216,8 @@ theorem constrains_nearLitter {c : SupportCondition β} {A : ExtendedIndex β}
     · exact Constrains.symmDiff A N a ha
 
 theorem acc_atom {a : Atom} {A : ExtendedIndex β}
-    (h : Acc ((· ≺ ·) : SupportCondition β → _ → Prop) ⟨A, inr a.1.toNearLitter⟩) :
-    Acc ((· ≺ ·) : SupportCondition β → _ → Prop) ⟨A, inl a⟩ := by
+    (h : Acc ((· ≺ ·) : Address β → _ → Prop) ⟨A, inr a.1.toNearLitter⟩) :
+    Acc ((· ≺ ·) : Address β → _ → Prop) ⟨A, inl a⟩ := by
   constructor
   intro c
   rw [constrains_atom]
@@ -225,8 +225,8 @@ theorem acc_atom {a : Atom} {A : ExtendedIndex β}
   exact h
 
 theorem acc_nearLitter {N : NearLitter} {A : ExtendedIndex β}
-    (h : ∀ a ∈ N, Acc ((· ≺ ·) : SupportCondition β → _ → Prop) ⟨A, inr a.1.toNearLitter⟩) :
-    Acc ((· ≺ ·) : SupportCondition β → _ → Prop) ⟨A, inr N⟩ := by
+    (h : ∀ a ∈ N, Acc ((· ≺ ·) : Address β → _ → Prop) ⟨A, inr a.1.toNearLitter⟩) :
+    Acc ((· ≺ ·) : Address β → _ → Prop) ⟨A, inr N⟩ := by
   by_cases hN : N.IsLitter
   · obtain ⟨L, rfl⟩ := hN.exists_litter_eq
     obtain ⟨⟨a, rfl⟩⟩ := litterSet_nonempty L
@@ -248,9 +248,9 @@ theorem acc_nearLitter {N : NearLitter} {A : ExtendedIndex β}
     · exact h a ha.1
 
 /-- The `≺` relation is well-founded. -/
-theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : SupportCondition β → _ → Prop) := by
+theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : Address β → _ → Prop) := by
   have : ∀ L : Litter, ∀ A : ExtendedIndex β,
-      Acc ((· ≺ ·) : SupportCondition β → _ → Prop) ⟨A, inr L.toNearLitter⟩
+      Acc ((· ≺ ·) : Address β → _ → Prop) ⟨A, inr L.toNearLitter⟩
   · intro L
     refine litterConstrains_wf.induction
       (C := fun L => ∀ A : ExtendedIndex β, Acc (· ≺ ·) ⟨A, inr L.toNearLitter⟩) L ?_
@@ -269,7 +269,7 @@ theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : SupportCondition β
       cases ha with
       | inl ha => cases ha.2 ha.1
       | inr ha => cases ha.2 ha.1
-    · simp only [SupportCondition.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff] at hc'
+    · simp only [Address.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff] at hc'
       cases hc'.1
       cases hc'.2
       obtain ⟨B, a | N⟩ := c
@@ -277,7 +277,7 @@ theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : SupportCondition β
       · refine acc_nearLitter ?_
         intro a ha
         exact ih _ (LitterConstrains.fuzz_nearLitter hδε t hc ha) _
-    · simp only [SupportCondition.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff] at hc
+    · simp only [Address.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff] at hc
       cases hc.1
       cases hc.2
       refine acc_atom (ih _ (LitterConstrains.fuzz_bot _) _)
@@ -288,7 +288,7 @@ theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : SupportCondition β
   · exact acc_nearLitter (fun _ _ => this _ _)
 
 /-- The constrains relation is stable under composition of paths. -/
-theorem constrains_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≺ d)
+theorem constrains_comp {β γ : Λ} {c d : Address γ} (h : c ≺ d)
     (B : Path (β : TypeIndex) γ) : ⟨B.comp c.path, c.value⟩ ≺ ⟨B.comp d.path, d.value⟩ := by
   obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h
   · exact Constrains.atom _ _
@@ -299,7 +299,7 @@ theorem constrains_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≺ d)
   · rw [Path.comp_cons]
     exact Constrains.fuzz_bot hδ (B.comp A) a
 
-instance : PartialOrder (SupportCondition β) where
+instance : PartialOrder (Address β) where
   le := Relation.ReflTransGen (· ≺ ·)
   lt := Relation.TransGen (· ≺ ·)
   le_refl := fun _ => Relation.ReflTransGen.refl
@@ -322,63 +322,63 @@ instance : PartialOrder (SupportCondition β) where
     · exact h₂
     cases (constrains_wf β).transGen.isIrrefl.irrefl c (h₁.trans h₂)
 
-instance : WellFoundedLT (SupportCondition β) where
+instance : WellFoundedLT (Address β) where
   wf := (constrains_wf β).transGen
 
-instance : WellFoundedRelation (SupportCondition β) :=
+instance : WellFoundedRelation (Address β) :=
   ⟨(· < ·), (constrains_wf β).transGen⟩
 
-theorem SupportCondition.le_iff {c d : SupportCondition β} :
+theorem Address.le_iff {c d : Address β} :
     c ≤ d ↔ Relation.ReflTransGen (· ≺ ·) c d :=
   Iff.rfl
 
-theorem SupportCondition.lt_iff {c d : SupportCondition β} :
+theorem Address.lt_iff {c d : Address β} :
     c < d ↔ Relation.TransGen (· ≺ ·) c d :=
   Iff.rfl
 
-theorem le_comp {β γ : Λ} {c d : SupportCondition γ} (h : c ≤ d)
+theorem le_comp {β γ : Λ} {c d : Address γ} (h : c ≤ d)
     (B : Path (β : TypeIndex) γ) :
-    (⟨B.comp c.path, c.value⟩ : SupportCondition β) ≤ ⟨B.comp d.path, d.value⟩ := by
+    (⟨B.comp c.path, c.value⟩ : Address β) ≤ ⟨B.comp d.path, d.value⟩ := by
   induction h with
   | refl => exact Relation.ReflTransGen.refl
   | tail _ h ih => exact Relation.ReflTransGen.tail ih (constrains_comp h B)
 
-theorem lt_comp {β γ : Λ} {c d : SupportCondition γ} (h : c < d)
+theorem lt_comp {β γ : Λ} {c d : Address γ} (h : c < d)
     (B : Path (β : TypeIndex) γ) :
-    (⟨B.comp c.path, c.value⟩ : SupportCondition β) < ⟨B.comp d.path, d.value⟩ := by
+    (⟨B.comp c.path, c.value⟩ : Address β) < ⟨B.comp d.path, d.value⟩ := by
   induction h with
   | single h => exact Relation.TransGen.single (constrains_comp h B)
   | tail _ h ih => exact Relation.TransGen.tail ih (constrains_comp h B)
 
 theorem le_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
-    {c : SupportCondition β} (h : ⟨B, inr N⟩ ≤ c) : ⟨B, inr N.1.toNearLitter⟩ ≤ c := by
+    {c : Address β} (h : ⟨B, inr N⟩ ≤ c) : ⟨B, inr N.1.toNearLitter⟩ ≤ c := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
   · exact Relation.ReflTransGen.head (Constrains.nearLitter B N h') h
 
 theorem lt_nearLitter {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
-    {c : SupportCondition β} (h : c < ⟨B, inr N.1.toNearLitter⟩) : c < ⟨B, inr N⟩ := by
+    {c : Address β} (h : c < ⟨B, inr N.1.toNearLitter⟩) : c < ⟨B, inr N⟩ := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
   · exact Relation.TransGen.tail h (Constrains.nearLitter B N h')
 
 theorem lt_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
-    {c : SupportCondition β} (h : ⟨B, inr N⟩ < c) : ⟨B, inr N.1.toNearLitter⟩ < c := by
+    {c : Address β} (h : ⟨B, inr N⟩ < c) : ⟨B, inr N.1.toNearLitter⟩ < c := by
   by_cases h' : N.IsLitter
   · obtain ⟨L, rfl⟩ := h'.exists_litter_eq
     exact h
   · exact Relation.TransGen.head (Constrains.nearLitter B N h') h
 
-theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺ c} := by
+theorem small_constrains {β : Λ} (c : Address β) : Small {d | d ≺ c} := by
   obtain ⟨A, a | N⟩ := c
   · simp only [constrains_atom, setOf_eq_eq_singleton, small_singleton]
   simp_rw [constrains_iff]
   refine Small.union ?_ (Small.union ?_ (Small.union ?_ (Small.union ?_ ?_))) <;>
     rw [small_setOf]
   · change Small {c | ∃ b B, _ ∧ _ = _}
-    simp only [SupportCondition.mk.injEq, false_and, and_false, exists_false,
+    simp only [Address.mk.injEq, false_and, and_false, exists_false,
       setOf_false, small_empty]
   · change Small {c | ∃ B N', _}
     refine Set.Subsingleton.small ?_
@@ -388,7 +388,7 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺ 
     rfl
   · change Small {c | ∃ B N' a, _}
     convert (show Small (litterSet N.fst ∆ N) from N.2.prop).image
-      (f := fun a : Atom => (⟨A, inl a⟩ : SupportCondition β)) using 1
+      (f := fun a : Atom => (⟨A, inl a⟩ : Address β)) using 1
     ext c : 1
     simp only [mem_setOf_eq, mem_image]
     constructor
@@ -405,12 +405,12 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺ 
     · obtain ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, B, t, rfl, rfl⟩ := h
       refine lt_of_le_of_lt ?_ t.support.small
       suffices
-        #{a : SupportCondition β | ∃ c : (t.support : Set (SupportCondition δ)),
+        #{a : Address β | ∃ c : (t.support : Set (Address δ)),
             a = ⟨(B.cons hδ).comp c.val.path, c.val.value⟩} ≤
-          #(t.support : Set (SupportCondition δ)) by
+          #(t.support : Set (Address δ)) by
         refine le_trans (Cardinal.mk_subtype_le_of_subset ?_) this
         rintro x ⟨_, _, _, _, _, _, _, _, _, _, _, c, hc, rfl, h⟩
-        rw [SupportCondition.mk.injEq] at h
+        rw [Address.mk.injEq] at h
         simp only [inr.injEq, Litter.toNearLitter_injective.eq_iff] at h
         cases WithBot.coe_injective (fuzz_congr_β h.2)
         cases fuzz_congr_γ h.2
@@ -425,12 +425,12 @@ theorem small_constrains {β : Λ} (c : SupportCondition β) : Small {d | d ≺ 
       simp only [h]
     · refine small_of_forall_not_mem ?_
       rintro x ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, B, t, c, _, rfl, hA⟩
-      rw [SupportCondition.mk.injEq] at hA
+      rw [Address.mk.injEq] at hA
       simp only [inr.injEq] at hA
       exact h ⟨γ, inferInstance, δ, inferInstance, ε, inferInstance, hδ, hε, hδε, B, t, hA.2, hA.1⟩
   · refine Set.Subsingleton.small ?_
     rintro ⟨c, C⟩ ⟨γ, _, ε, _, hε, C', a, hc₁, hc₂⟩ ⟨d, D⟩ ⟨γ, _, ε, _, hε, D', b, hd₁, hd₂⟩
-    rw [SupportCondition.mk.injEq] at hc₁ hc₂ hd₁ hd₂
+    rw [Address.mk.injEq] at hc₁ hc₂ hd₁ hd₂
     simp only [inr.injEq] at hc₂ hd₂
     rw [hc₁.1, hc₁.2, hd₁.1, hd₁.2]
     rw [hc₂.1, hc₂.2, Litter.toNearLitter_injective.eq_iff] at hd₂

@@ -6,12 +6,12 @@ import ConNF.Structural.Enumeration
 /-!
 # Supports
 
-In this file, we define support conditions and supports.
+In this file, we define addresses and supports.
 
 ## Main declarations
 
-* `ConNF.SupportCondition`: The type of support conditions.
-* `ConNF.Support`: The type of small supports made of support conditions.
+* `ConNF.Address`: The type of addresses.
+* `ConNF.Support`: The type of small supports made of addresses.
 -/
 
 open Cardinal Equiv Sum
@@ -24,28 +24,28 @@ namespace ConNF
 
 variable [Params.{u}] {α : TypeIndex}
 
-/-- A *support condition* is an extended type index together with an atom or a near-litter.
+/-- A *address* is an extended type index together with an atom or a near-litter.
 This represents an object in the base type (the atom or near-litter) together with the path
 detailing how we descend from type `α` to type `⊥` by looking at elements of elements and so on
 in the model. -/
 @[ext]
-structure SupportCondition (α : TypeIndex) : Type u
+structure Address (α : TypeIndex) : Type u
     where
   path : ExtendedIndex α
   value : Atom ⊕ NearLitter
 
-def supportCondition_equiv : SupportCondition α ≃ ExtendedIndex α × (Atom ⊕ NearLitter)
+def Address_equiv : Address α ≃ ExtendedIndex α × (Atom ⊕ NearLitter)
     where
   toFun c := ⟨c.path, c.value⟩
   invFun c := ⟨c.1, c.2⟩
   left_inv _ := rfl
   right_inv _ := rfl
 
-/-- There are `μ` support conditions. -/
+/-- There are `μ` addresses. -/
 @[simp]
-theorem mk_supportCondition (α : TypeIndex) : #(SupportCondition α) = #μ := by
-  rw [mk_congr supportCondition_equiv]
-  simp only [SupportCondition, mk_prod, mk_sum, mk_atom, lift_id, mk_nearLitter]
+theorem mk_Address (α : TypeIndex) : #(Address α) = #μ := by
+  rw [mk_congr Address_equiv]
+  simp only [Address, mk_prod, mk_sum, mk_atom, lift_id, mk_nearLitter]
   rw [add_eq_left (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le) le_rfl]
   exact mul_eq_right
     (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le)
@@ -54,11 +54,11 @@ theorem mk_supportCondition (α : TypeIndex) : #(SupportCondition α) = #μ := b
 
 namespace StructPerm
 
-variable {π π' : StructPerm α} {c : SupportCondition α}
+variable {π π' : StructPerm α} {c : Address α}
 
-/-- Structural permutations act on support conditions by following the derivative given in the
+/-- Structural permutations act on addresses by following the derivative given in the
 condition. -/
-instance : MulAction (StructPerm α) (SupportCondition α)
+instance : MulAction (StructPerm α) (Address α)
     where
   smul π c := ⟨c.path, π c.path • c.value⟩
   one_smul := by rintro ⟨A, a | N⟩ <;> rfl
@@ -69,58 +69,58 @@ We have a form of the next three lemmas for `StructPerm`, `NearLitterPerm`,
 `Allowable`, and `NewAllowable`.
 -/
 
-theorem smul_supportCondition :
+theorem smul_Address :
     π • c = ⟨c.path, π c.path • c.value⟩ :=
   rfl
 
 @[simp]
-theorem smul_supportCondition_eq_iff :
+theorem smul_Address_eq_iff :
     π • c = c ↔ π c.path • c.value = c.value := by
   obtain ⟨A, x⟩ := c
-  simp only [smul_supportCondition, SupportCondition.mk.injEq, true_and]
+  simp only [smul_Address, Address.mk.injEq, true_and]
 
 @[simp]
-theorem smul_supportCondition_eq_smul_iff :
+theorem smul_Address_eq_smul_iff :
     π • c = π' • c ↔ π c.path • c.value = π' c.path • c.value := by
   obtain ⟨A, x⟩ := c
-  simp only [smul_supportCondition, SupportCondition.mk.injEq, true_and]
+  simp only [smul_Address, Address.mk.injEq, true_and]
 
 end StructPerm
 
 namespace NearLitterPerm
 
-variable {π π' : NearLitterPerm} {c : SupportCondition ⊥}
+variable {π π' : NearLitterPerm} {c : Address ⊥}
 
-instance : MulAction NearLitterPerm (SupportCondition ⊥)
+instance : MulAction NearLitterPerm (Address ⊥)
     where
   smul π c := ⟨c.path, π • c.value⟩
   one_smul := by rintro ⟨A, a | N⟩ <;> rfl
   mul_smul _ _ := by rintro ⟨A, a | N⟩ <;> rfl
 
-theorem smul_supportCondition :
+theorem smul_Address :
     π • c = ⟨c.path, π • c.value⟩ :=
   rfl
 
 @[simp]
-theorem smul_supportCondition_eq_iff :
+theorem smul_Address_eq_iff :
     π • c = c ↔ π • c.value = c.value := by
   obtain ⟨A, x⟩ := c
-  simp only [smul_supportCondition, SupportCondition.mk.injEq, true_and]
+  simp only [smul_Address, Address.mk.injEq, true_and]
 
 @[simp]
-theorem smul_supportCondition_eq_smul_iff :
+theorem smul_Address_eq_smul_iff :
     π • c = π' • c ↔ π • c.value = π' • c.value := by
   obtain ⟨A, x⟩ := c
-  simp only [smul_supportCondition, SupportCondition.mk.injEq, true_and]
+  simp only [smul_Address, Address.mk.injEq, true_and]
 
 end NearLitterPerm
 
-/-- A *support* is a function from an initial segment of κ to the type of support conditions,
+/-- A *support* is a function from an initial segment of κ to the type of addresses,
 such that if `N₁, N₂` are near-litters near the same litter, any atoms in their symmetric difference
 are included in the enumeration. -/
 @[ext]
 structure Support (α : TypeIndex) where
-  enum : Enumeration (SupportCondition α)
+  enum : Enumeration (Address α)
   mem_of_mem_symmDiff' (A : ExtendedIndex α) (N₁ N₂ : NearLitter) (a : Atom) :
     N₁.1 = N₂.1 → a ∈ (N₁ : Set Atom) ∆ N₂ →
     ⟨A, inr N₁⟩ ∈ enum → ⟨A, inr N₂⟩ ∈ enum → ⟨A, inl a⟩ ∈ enum
@@ -128,13 +128,13 @@ structure Support (α : TypeIndex) where
 def Support.max (S : Support α) : κ :=
   S.enum.max
 
-def Support.f (S : Support α) : (i : κ) → i < S.max → SupportCondition α :=
+def Support.f (S : Support α) : (i : κ) → i < S.max → Address α :=
   S.enum.f
 
-instance : CoeTC (Support α) (Set (SupportCondition α)) where
+instance : CoeTC (Support α) (Set (Address α)) where
   coe S := S.enum
 
-instance : Membership (SupportCondition α) (Support α) where
+instance : Membership (Address α) (Support α) where
   mem c S := c ∈ S.enum
 
 theorem Support.mem_of_mem_symmDiff (S : Support α) (A : ExtendedIndex α)
@@ -143,20 +143,20 @@ theorem Support.mem_of_mem_symmDiff (S : Support α) (A : ExtendedIndex α)
     ⟨A, inr N₁⟩ ∈ S → ⟨A, inr N₂⟩ ∈ S → ⟨A, inl a⟩ ∈ S :=
   S.mem_of_mem_symmDiff' A N₁ N₂ a
 
-theorem Support.small (S : Support α) : Small (S : Set (SupportCondition α)) :=
+theorem Support.small (S : Support α) : Small (S : Set (Address α)) :=
   S.enum.small
 
 @[simp]
-theorem Support.mk_f (E : Enumeration (SupportCondition α)) (h) :
+theorem Support.mk_f (E : Enumeration (Address α)) (h) :
     (Support.mk E h).f = E.f :=
   rfl
 
 @[simp]
-theorem Support.mem_mk (E : Enumeration (SupportCondition α)) (h) (c : SupportCondition α) :
+theorem Support.mem_mk (E : Enumeration (Address α)) (h) (c : Address α) :
     c ∈ Support.mk E h ↔ c ∈ E :=
   Iff.rfl
 
-theorem Support.mem_iff (c : SupportCondition α) (S : Support α) :
+theorem Support.mem_iff (c : Address α) (S : Support α) :
     c ∈ S ↔ ∃ i, ∃ (h : i < S.max), c = S.f i h :=
   Iff.rfl
 
@@ -205,42 +205,42 @@ theorem Support.smul_f (π : StructPerm α) (S : Support α) (i : κ) (hi : i < 
 
 @[simp]
 theorem Support.smul_coe (π : StructPerm α) (S : Support α) :
-    (π • S : Support α) = π • (S : Set (SupportCondition α)) :=
+    (π • S : Support α) = π • (S : Set (Address α)) :=
   Enumeration.smul_coe _ _
 
-theorem Support.smul_mem_smul {S : Support α} {c : SupportCondition α}
+theorem Support.smul_mem_smul {S : Support α} {c : Address α}
     (h : c ∈ S) (π : StructPerm α) : π • c ∈ π • S :=
   Enumeration.smul_mem_smul h π
 
 theorem Support.smul_eq_of_smul_eq {S : Support α} {π : StructPerm α}
-    (hS : π • S = S) {c : SupportCondition α} (hc : c ∈ S) : π • c = c :=
+    (hS : π • S = S) {c : Address α} (hc : c ∈ S) : π • c = c :=
   Enumeration.smul_eq_of_smul_eq (congr_arg Support.enum hS) hc
 
-def Support.singleton (c : SupportCondition α) : Support α where
+def Support.singleton (c : Address α) : Support α where
   enum := ⟨1, fun _ _ => c⟩
   mem_of_mem_symmDiff' := by
     intro _ N₁ N₂ b _ hb hN₁ hN₂
     simp only [Enumeration.mem_iff, κ_lt_one_iff, exists_prop, exists_eq_left] at hN₁ hN₂
     rw [← hN₂] at hN₁
-    simp only [SupportCondition.mk.injEq, inr.injEq, true_and] at hN₁
+    simp only [Address.mk.injEq, inr.injEq, true_and] at hN₁
     subst hN₁
     cases hb with
     | inl hb => cases hb.2 hb.1
     | inr hb => cases hb.2 hb.1
 
 @[simp]
-theorem Support.singleton_enum (c : SupportCondition α) :
+theorem Support.singleton_enum (c : Address α) :
     (Support.singleton c).enum = ⟨1, fun _ _ => c⟩ :=
   rfl
 
 @[simp]
-theorem Support.mem_singleton_iff (c d : SupportCondition α) : c ∈ Support.singleton d ↔ c = d := by
+theorem Support.mem_singleton_iff (c d : Address α) : c ∈ Support.singleton d ↔ c = d := by
   unfold singleton
   simp only [mem_mk, Enumeration.mem_iff, κ_lt_one_iff, exists_prop, exists_eq_left]
 
 @[simp]
 theorem Support.singleton_injective :
-    Function.Injective (Support.singleton : SupportCondition α → Support α) := by
+    Function.Injective (Support.singleton : Address α → Support α) := by
   unfold singleton
   intro c d h
   simp only [mk.injEq, Enumeration.mk.injEq, heq_eq_eq, true_and] at h
@@ -250,7 +250,7 @@ theorem Support.singleton_injective :
 @[simp]
 theorem mk_support : #(Support α) = #μ := by
   refine le_antisymm ?_ ?_
-  · rw [← mk_enumeration (mk_supportCondition α)]
+  · rw [← mk_enumeration (mk_Address α)]
     refine ⟨⟨Support.enum, ?_⟩⟩
     intro S₁ S₂ h
     ext : 1
@@ -259,20 +259,20 @@ theorem mk_support : #(Support α) = #μ := by
     refine ⟨⟨fun a => Support.singleton ⟨default, inl a⟩, ?_⟩⟩
     intro a₁ a₂ h
     have := Support.singleton_injective h
-    simp only [SupportCondition.mk.injEq, inl.injEq, true_and] at this
+    simp only [Address.mk.injEq, inl.injEq, true_and] at this
     exact this
 
-/-- `S` is a *completion* of an enumeration of support conditions `E` if it extends `E`,
-and every support condition in the extension is an atom contained in the symmetric difference of
+/-- `S` is a *completion* of an enumeration of addresses `E` if it extends `E`,
+and every address in the extension is an atom contained in the symmetric difference of
 two near-litters in `E`. -/
-structure Support.IsCompletion (S : Support α) (E : Enumeration (SupportCondition α)) : Prop where
+structure Support.IsCompletion (S : Support α) (E : Enumeration (Address α)) : Prop where
   le : E ≤ S.enum
   eq_atom (i : κ) (hi₁ : i < S.max) (hi₂ : E.max ≤ i) :
     ∃ A : ExtendedIndex α, ∃ a : Atom, ∃ N₁ N₂ : NearLitter,
     N₁.1 = N₂.1 ∧ a ∈ (N₁ : Set Atom) ∆ N₂ ∧
     ⟨A, inr N₁⟩ ∈ E ∧ ⟨A, inr N₂⟩ ∈ E ∧ S.f i hi₁ = ⟨A, inl a⟩
 
-theorem Support.IsCompletion.smul {S : Support α} {E : Enumeration (SupportCondition α)}
+theorem Support.IsCompletion.smul {S : Support α} {E : Enumeration (Address α)}
     (h : S.IsCompletion E) (π : StructPerm α) : (π • S).IsCompletion (π • E) := by
   constructor
   · exact Enumeration.smul_le_smul h.le π
@@ -295,27 +295,27 @@ theorem Support.IsCompletion.smul {S : Support α} {E : Enumeration (SupportCond
     · rw [smul_f, h]
       rfl
 
-/-- The set of support conditions that we need to add to `s` to make it a support. -/
-def completionToAdd (s : Set (SupportCondition α)) : Set (SupportCondition α) :=
+/-- The set of addresses that we need to add to `s` to make it a support. -/
+def completionToAdd (s : Set (Address α)) : Set (Address α) :=
   {x | ∃ N₁ N₂ : NearLitter, N₁.1 = N₂.1 ∧ ∃ a : Atom, x.2 = inl a ∧ a ∈ (N₁ : Set Atom) ∆ N₂ ∧
     ⟨x.1, inr N₁⟩ ∈ s ∧ ⟨x.1, inr N₂⟩ ∈ s}
 
 theorem nearLitter_not_mem_completionToAdd (A : ExtendedIndex α) (N : NearLitter)
-    (s : Set (SupportCondition α)) : ⟨A, inr N⟩ ∉ completionToAdd s := by
+    (s : Set (Address α)) : ⟨A, inr N⟩ ∉ completionToAdd s := by
   rintro ⟨_, _, _, a, h, _⟩
   cases h
 
-def completionToAdd' (s : Set (SupportCondition α)) (A : ExtendedIndex α) : Set Atom :=
+def completionToAdd' (s : Set (Address α)) (A : ExtendedIndex α) : Set Atom :=
   ⋃ (N₁ : NearLitter) (_ : N₁ ∈ (fun N => ⟨A, inr N⟩) ⁻¹' s)
     (N₂ : NearLitter) (_ : N₂ ∈ (fun N => ⟨A, inr N⟩) ⁻¹' s)
     (_ : N₁.1 = N₂.1),
   (N₁ : Set Atom) ∆ N₂
 
-theorem completionToAdd'_small (s : Set (SupportCondition α)) (hs : Small s) (A : ExtendedIndex α) :
+theorem completionToAdd'_small (s : Set (Address α)) (hs : Small s) (A : ExtendedIndex α) :
     Small (completionToAdd' s A) := by
-  have : Function.Injective (fun N => (⟨A, inr N⟩ : SupportCondition α))
+  have : Function.Injective (fun N => (⟨A, inr N⟩ : Address α))
   · intro N₁ N₂ h
-    simp only [SupportCondition.mk.injEq, inr.injEq, true_and] at h
+    simp only [Address.mk.injEq, inr.injEq, true_and] at h
     exact h
   refine Small.bUnion (Small.preimage this hs) (fun N₁ _ => ?_)
   refine Small.bUnion (Small.preimage this hs) (fun N₂ _ => ?_)
@@ -324,12 +324,12 @@ theorem completionToAdd'_small (s : Set (SupportCondition α)) (hs : Small s) (A
   rw [h]
   exact N₂.2.prop
 
-theorem completionToAdd_eq_completionToAdd' (s : Set (SupportCondition α)) :
+theorem completionToAdd_eq_completionToAdd' (s : Set (Address α)) :
     completionToAdd s = ⋃ (A : ExtendedIndex α), (⟨A, inl ·⟩) '' completionToAdd' s A := by
   simp only [completionToAdd, completionToAdd']
   aesop
 
-theorem completionToAdd_small (s : Set (SupportCondition α)) (hs : Small s) :
+theorem completionToAdd_small (s : Set (Address α)) (hs : Small s) :
     Small (completionToAdd s) := by
   rw [completionToAdd_eq_completionToAdd']
   refine small_iUnion ?_ ?_
@@ -337,16 +337,16 @@ theorem completionToAdd_small (s : Set (SupportCondition α)) (hs : Small s) :
   · intro A
     exact Small.image (completionToAdd'_small s hs A)
 
-noncomputable def completeEnum (E : Enumeration (SupportCondition α)) :
-    Enumeration (SupportCondition α) :=
+noncomputable def completeEnum (E : Enumeration (Address α)) :
+    Enumeration (Address α) :=
   E + Enumeration.ofSet (completionToAdd E) (completionToAdd_small _ E.small)
 
 @[simp]
-theorem mem_completeEnum (E : Enumeration (SupportCondition α)) (c : SupportCondition α) :
+theorem mem_completeEnum (E : Enumeration (Address α)) (c : Address α) :
     c ∈ completeEnum E ↔ c ∈ E ∨ c ∈ completionToAdd E :=
   by rw [completeEnum, Enumeration.mem_add_iff, Enumeration.mem_ofSet_iff]
 
-theorem completeEnum_mem_of_mem_symmDiff (E : Enumeration (SupportCondition α))
+theorem completeEnum_mem_of_mem_symmDiff (E : Enumeration (Address α))
     (A : ExtendedIndex α) (N₁ N₂ : NearLitter) (a : Atom) :
     N₁.1 = N₂.1 → a ∈ (N₁ : Set Atom) ∆ N₂ →
     ⟨A, inr N₁⟩ ∈ completeEnum E → ⟨A, inr N₂⟩ ∈ completeEnum E → ⟨A, inl a⟩ ∈ completeEnum E := by
@@ -359,11 +359,11 @@ theorem completeEnum_mem_of_mem_symmDiff (E : Enumeration (SupportCondition α))
   · cases nearLitter_not_mem_completionToAdd A N₁ _ hN₁
 
 /-- Extend an enumeration to a support. -/
-noncomputable def Support.complete (E : Enumeration (SupportCondition α)) : Support α where
+noncomputable def Support.complete (E : Enumeration (Address α)) : Support α where
   enum := completeEnum E
   mem_of_mem_symmDiff' := completeEnum_mem_of_mem_symmDiff E
 
-theorem Support.complete_isCompletion (E : Enumeration (SupportCondition α)) :
+theorem Support.complete_isCompletion (E : Enumeration (Address α)) :
     (complete E).IsCompletion E := by
   constructor
   · exact Enumeration.le_add _ _

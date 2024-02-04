@@ -43,9 +43,9 @@ class TangleData (α : TypeIndex) where
   [allowableAction : MulAction Allowable Tangle]
   support : Tangle → Support α
   support_supports (t : Tangle) :
-    haveI : MulAction Allowable (SupportCondition α) :=
+    haveI : MulAction Allowable (Address α) :=
       MulAction.compHom _ allowableToStructPerm
-    MulAction.Supports Allowable (support t : Set (SupportCondition α)) t
+    MulAction.Supports Allowable (support t : Set (Address α)) t
 
 export TangleData (Tangle Allowable)
 
@@ -79,23 +79,23 @@ theorem smul_support_f (ρ : Allowable α) (S : Support α) (i : κ) (hi : i < S
 
 @[simp]
 theorem smul_support_coe (ρ : Allowable α) (S : Support α) :
-    (ρ • S : Support α) = ρ • (S : Set (SupportCondition α)) :=
+    (ρ • S : Support α) = ρ • (S : Set (Address α)) :=
   Support.smul_coe _ _
 
 @[simp]
-theorem smul_mk_support (ρ : Allowable α) (E : Enumeration (SupportCondition α)) (h) :
+theorem smul_mk_support (ρ : Allowable α) (E : Enumeration (Address α)) (h) :
     ρ • Support.mk E h = Support.mk (ρ • E) ((Support.mk E h).mem_of_mem_symmDiff_smul _) :=
   rfl
 
-theorem smul_mem_smul_support {S : Support α} {c : SupportCondition α}
+theorem smul_mem_smul_support {S : Support α} {c : Address α}
     (h : c ∈ S) (ρ : Allowable α) : ρ • c ∈ ρ • S :=
   Support.smul_mem_smul h _
 
 theorem smul_eq_of_smul_support_eq {S : Support α} {ρ : Allowable α}
-    (hS : ρ • S = S) {c : SupportCondition α} (hc : c ∈ S) : ρ • c = c :=
+    (hS : ρ • S = S) {c : Address α} (hc : c ∈ S) : ρ • c = c :=
   Support.smul_eq_of_smul_eq hS hc
 
-theorem support_isCompletion_smul {S : Support α} {E : Enumeration (SupportCondition α)}
+theorem support_isCompletion_smul {S : Support α} {E : Enumeration (Address α)}
     (h : S.IsCompletion E) (ρ : Allowable α) :
     (ρ • S).IsCompletion (ρ • E) :=
   h.smul _
@@ -104,22 +104,22 @@ theorem support_isSum_smul {S S₁ S₂ : Support α} (h : S.IsSum S₁ S₂) (�
     (ρ • S).IsSum (ρ • S₁) (ρ • S₂) :=
   h.smul _
 
-variable {ρ ρ' : Allowable α} {c : SupportCondition α}
+variable {ρ ρ' : Allowable α} {c : Address α}
 
-theorem smul_supportCondition :
+theorem smul_Address :
     ρ • c = ⟨c.path, Allowable.toStructPerm ρ c.path • c.value⟩ :=
   rfl
 
 @[simp]
-theorem smul_supportCondition_eq_iff :
+theorem smul_Address_eq_iff :
     ρ • c = c ↔ Allowable.toStructPerm ρ c.path • c.value = c.value :=
-  StructPerm.smul_supportCondition_eq_iff
+  StructPerm.smul_Address_eq_iff
 
 @[simp]
-theorem smul_supportCondition_eq_smul_iff :
+theorem smul_Address_eq_smul_iff :
     ρ • c = ρ' • c ↔
     Allowable.toStructPerm ρ c.path • c.value = Allowable.toStructPerm ρ' c.path • c.value :=
-  StructPerm.smul_supportCondition_eq_smul_iff
+  StructPerm.smul_Address_eq_smul_iff
 
 end Allowable
 
@@ -129,7 +129,7 @@ def TangleData.Tangle.support {α : TypeIndex} [TangleData α] (t : Tangle α) :
   TangleData.support t
 
 theorem support_supports {α : TypeIndex} [TangleData α] (t : Tangle α) :
-    MulAction.Supports (Allowable α) (t.support : Set (SupportCondition α)) t :=
+    MulAction.Supports (Allowable α) (t.support : Set (Address α)) t :=
   TangleData.support_supports t
 
 class PositionedTangles (α : TypeIndex) [TangleData α] where
@@ -185,7 +185,7 @@ instance Bot.tangleData : TangleData ⊥
   support a := Support.singleton ⟨Quiver.Path.nil, Sum.inl a⟩
   support_supports a π h := by
     simp only [Support.singleton_enum, Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop,
-      exists_eq_left, NearLitterPerm.smul_supportCondition_eq_iff, forall_eq, Sum.smul_inl,
+      exists_eq_left, NearLitterPerm.smul_Address_eq_iff, forall_eq, Sum.smul_inl,
       Sum.inl.injEq] at h
     exact h
 

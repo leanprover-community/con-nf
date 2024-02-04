@@ -11,12 +11,12 @@ namespace ConNF
 variable [Params.{u}] [Level] [FOAAssumptions]
 
 /-!
-# Induction on support conditions
+# Induction on addresses
 -/
 
 /-- The inductive hypothesis used to construct the induced action of an approximation in the
 freedom of action theorem. -/
-structure HypAction {β : Λ} (c : SupportCondition β) where
+structure HypAction {β : Λ} (c : Address β) where
   atomImage : ∀ A a, ⟨A, inl a⟩ < c → Atom
   nearLitterImage : ∀ A N, ⟨A, inr N⟩ < c → NearLitter
 
@@ -31,14 +31,14 @@ mutual
       (FN : ∀ (A : ExtendedIndex β) (N), HypAction ⟨A, inr N⟩ → NearLitter) :
       ExtendedIndex β → Atom → Atom
     | A, a => Fa A a ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩
-  termination_by A n => SupportCondition.mk A (inl n)
+  termination_by A n => Address.mk A (inl n)
   /-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.
   This is used to compute the induced action of an approximation on all atoms and near-litters. -/
   noncomputable def fixNearLitter (Fa : ∀ (A : ExtendedIndex β) (a), HypAction ⟨A, inl a⟩ → Atom)
       (FN : ∀ (A : ExtendedIndex β) (N), HypAction ⟨A, inr N⟩ → NearLitter) :
       ExtendedIndex β → NearLitter → NearLitter
     | A, N => FN A N ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩
-  termination_by A N => SupportCondition.mk A (inr N)
+  termination_by A N => Address.mk A (inr N)
 end
 
 theorem fixAtom_eq (Fa FN) (A : ExtendedIndex β) (a : Atom) :

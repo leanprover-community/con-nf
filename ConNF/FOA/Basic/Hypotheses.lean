@@ -205,7 +205,7 @@ theorem Allowable.comp_bot {β : TypeIndex} [LeLevel β] (A : Quiver.Path β ⊥
   change NearLitterPerm.ofBot (Allowable.comp A ρ) • a = Allowable.toStructPerm ρ A • a
   simp only [Allowable.toStructPerm_apply]
 
-theorem smul_mem_support {β : Λ} [LtLevel β] {c : SupportCondition β} {t : Tangle β}
+theorem smul_mem_support {β : Λ} [LtLevel β] {c : Address β} {t : Tangle β}
     (h : c ∈ t.support) (π : Allowable β) : π • c ∈ (π • t).support := by
   rw [smul_support]
   simp only [Support.mem_iff, Allowable.smul_support_f, smul_left_cancel_iff,

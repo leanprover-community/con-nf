@@ -30,7 +30,7 @@ theorem specifiesCondition_atom_smul {S : Support β}
       refine ⟨hi₁, ?_⟩
       rw [smul_eq_iff_eq_inv_smul] at hi₂
       rw [hi₂]
-      simp only [Allowable.smul_supportCondition, map_inv, Tree.inv_apply, smul_inl, inv_smul_smul]
+      simp only [Allowable.smul_Address, map_inv, Tree.inv_apply, smul_inl, inv_smul_smul]
   · ext i
     constructor
     · rintro ⟨N, ha, hi₁, hi₂⟩
@@ -43,7 +43,7 @@ theorem specifiesCondition_atom_smul {S : Support β}
       refine ⟨(Allowable.toStructPerm ρ A)⁻¹ • N, ha, hi₁, ?_⟩
       rw [smul_eq_iff_eq_inv_smul] at hi₂
       rw [hi₂]
-      simp only [Allowable.smul_supportCondition, map_inv, Tree.inv_apply, smul_inr]
+      simp only [Allowable.smul_Address, map_inv, Tree.inv_apply, smul_inr]
 
 theorem specifiesCondition_flexible_smul {S : Support β}
     {σc : SpecCondition β} {A : ExtendedIndex β} {N : NearLitter} (hN : Flexible A N.1)
@@ -85,25 +85,25 @@ theorem specifiesCondition_inflexibleBot_smul {S : Support β}
   · rintro ⟨hi₁, hi₂⟩
     refine ⟨hi₁, ?_⟩
     rw [Allowable.smul_support_f, hi₂]
-    simp only [Allowable.smul_supportCondition, smul_inl, NearLitterPerm.smul_nearLitter_fst,
+    simp only [Allowable.smul_Address, smul_inl, NearLitterPerm.smul_nearLitter_fst,
       inflexibleBot_smul_path, inflexibleBot_smul_a, ofBot_smul, Allowable.toStructPerm_apply]
   · rintro ⟨hi₁, hi₂⟩
     refine ⟨hi₁, ?_⟩
     rw [Allowable.smul_support_f, smul_eq_iff_eq_inv_smul] at hi₂
     rw [hi₂]
     simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleBot_smul_path, inflexibleBot_smul_a,
-      ofBot_smul, Allowable.toStructPerm_apply, Allowable.smul_supportCondition, map_inv,
+      ofBot_smul, Allowable.toStructPerm_apply, Allowable.smul_Address, map_inv,
       Tree.inv_apply, smul_inl, inv_smul_smul]
 
 theorem Spec.SpecifiesCondition.smul {S : Support β}
-    {σc : SpecCondition β} {c : SupportCondition β}
+    {σc : SpecCondition β} {c : Address β}
     (h : Spec.SpecifiesCondition S σc c) (ρ : Allowable β) :
     Spec.SpecifiesCondition (ρ • S) σc (ρ • c) := by
   have : WellFoundedLT Λ := inferInstance
   revert i S σc c
   have := this.induction
     (C := fun β => (i : LeLevel β) → ∀ S : Support β, ∀ σc : SpecCondition β,
-      ∀ c : SupportCondition β, ∀ _ : Spec.SpecifiesCondition S σc c, ∀ ρ : Allowable β,
+      ∀ c : Address β, ∀ _ : Spec.SpecifiesCondition S σc c, ∀ ρ : Allowable β,
       Spec.SpecifiesCondition (ρ • S) σc (ρ • c))
   refine this β ?_
   intro β ih _ S σc c h ρ

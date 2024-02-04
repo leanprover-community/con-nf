@@ -21,39 +21,39 @@ section comp
 variable {β γ : TypeIndex} {A : Quiver.Path β γ}
 
 open scoped Classical in
-noncomputable def SupportCondition.comp (A : Quiver.Path β γ) (c : SupportCondition β)
-    (otherwise : SupportCondition γ) : SupportCondition γ :=
+noncomputable def Address.comp (A : Quiver.Path β γ) (c : Address β)
+    (otherwise : Address γ) : Address γ :=
   if h : ∃ B : ExtendedIndex γ, c.path = A.comp B then
     ⟨h.choose, c.value⟩
   else
     otherwise
 
-theorem SupportCondition.comp_eq_of_eq_comp {c : SupportCondition β}
-    {otherwise : SupportCondition γ} (B : ExtendedIndex γ) (h : c.path = A.comp B) :
+theorem Address.comp_eq_of_eq_comp {c : Address β}
+    {otherwise : Address γ} (B : ExtendedIndex γ) (h : c.path = A.comp B) :
     c.comp A otherwise = ⟨B, c.value⟩ := by
   have : ∃ B : ExtendedIndex γ, c.path = A.comp B := ⟨B, h⟩
   have hB : this.choose = B := Path.comp_injective_right A (this.choose_spec.symm.trans h)
   rw [comp, dif_pos this, hB]
 
-theorem SupportCondition.comp_eq_of_not_exists {c : SupportCondition β}
-    {otherwise : SupportCondition γ} (h : ¬∃ B : ExtendedIndex γ, c.path = A.comp B) :
+theorem Address.comp_eq_of_not_exists {c : Address β}
+    {otherwise : Address γ} (h : ¬∃ B : ExtendedIndex γ, c.path = A.comp B) :
     c.comp A otherwise = otherwise :=
   by rw [comp, dif_neg h]
 
 @[simp]
-theorem SupportCondition.comp_smul_comp [LeLevel β] [LeLevel γ] (c : SupportCondition β)
-    (otherwise : SupportCondition γ) (ρ : Allowable β) :
+theorem Address.comp_smul_comp [LeLevel β] [LeLevel γ] (c : Address β)
+    (otherwise : Address γ) (ρ : Allowable β) :
     Allowable.comp A ρ • (c.comp A otherwise) =
     (ρ • c).comp A (Allowable.comp A ρ • otherwise) := by
   by_cases h : ∃ B : ExtendedIndex γ, c.path = A.comp B
   · obtain ⟨B, h⟩ := h
     rw [comp_eq_of_eq_comp B h, comp_eq_of_eq_comp B (by exact h),
-      Allowable.smul_supportCondition, Allowable.smul_supportCondition, h]
+      Allowable.smul_Address, Allowable.smul_Address, h]
     simp only [Allowable.toStructPerm_comp, Tree.comp_apply]
   · rw [comp_eq_of_not_exists h, comp_eq_of_not_exists (by exact h)]
 
 def Support.pathEnumeration (S : Support β) : Enumeration (ExtendedIndex β) :=
-  S.enum.image SupportCondition.path
+  S.enum.image Address.path
 
 @[simp]
 theorem Support.pathEnumeration_f (S : Support β) (i : κ) (hi : i < S.pathEnumeration.max) :
@@ -85,7 +85,7 @@ theorem Support.compIndex_spec (E : Enumeration (ExtendedIndex β)) (h : canComp
 
 open scoped Classical in
 noncomputable def Support.comp' (A : Quiver.Path β γ) (S : Support β) :
-    Enumeration (SupportCondition γ) :=
+    Enumeration (Address γ) :=
   if h : canComp A S.pathEnumeration then
     ⟨S.max, fun i hi => (S.f i hi).comp A
       ⟨compIndex_tail S.pathEnumeration h,
@@ -114,11 +114,11 @@ theorem Allowable.comp_smul_support_comp' {β γ : TypeIndex} [LeLevel β] [LeLe
     · exact h
     refine Enumeration.ext _ _ rfl (heq_of_eq ?_)
     ext i hi : 2
-    simp only [Enumeration.smul_f, SupportCondition.comp_smul_comp, smul_support_f,
+    simp only [Enumeration.smul_f, Address.comp_smul_comp, smul_support_f,
       Support.pathEnumeration_smul]
     refine congr_arg _ ?_
-    rw [Allowable.smul_supportCondition, Allowable.smul_supportCondition,
-      toStructPerm_comp, Tree.comp_apply, SupportCondition.mk.injEq,
+    rw [Allowable.smul_Address, Allowable.smul_Address,
+      toStructPerm_comp, Tree.comp_apply, Address.mk.injEq,
       Support.compIndex_spec S.pathEnumeration h, Support.pathEnumeration_f]
     exact ⟨rfl, rfl⟩
   · push_neg at h
@@ -128,7 +128,7 @@ theorem Allowable.comp_smul_support_comp' {β γ : TypeIndex} [LeLevel β] [LeLe
     cases κ_not_lt_zero _ hi
 
 @[simp]
-theorem Support.mem_comp'_iff (A : Quiver.Path β γ) (S : Support β) (c : SupportCondition γ) :
+theorem Support.mem_comp'_iff (A : Quiver.Path β γ) (S : Support β) (c : Address γ) :
     c ∈ S.comp' A ↔ ⟨A.comp c.path, c.value⟩ ∈ S := by
   by_cases h : Support.canComp A S.pathEnumeration
   · simp only [comp'_eq_pos h, Enumeration.mem_iff, mem_iff]
@@ -136,20 +136,20 @@ theorem Support.mem_comp'_iff (A : Quiver.Path β γ) (S : Support β) (c : Supp
     · rintro ⟨i, hi, hc⟩
       by_cases h' : ∃ B : ExtendedIndex γ, (S.f i hi).path = A.comp B
       · obtain ⟨B, hB⟩ := h'
-        rw [SupportCondition.comp_eq_of_eq_comp B hB] at hc
+        rw [Address.comp_eq_of_eq_comp B hB] at hc
         subst hc
         refine ⟨i, hi, ?_⟩
         ext
         · exact hB.symm
         · rfl
-      · rw [SupportCondition.comp_eq_of_not_exists h'] at hc
+      · rw [Address.comp_eq_of_not_exists h'] at hc
         subst hc
         refine ⟨compIndex _ h, compIndex_lt _ h, ?_⟩
         rw [compIndex_spec]
         rfl
     · rintro ⟨i, hi, hc⟩
       refine ⟨i, hi, ?_⟩
-      rw [← hc, SupportCondition.comp_eq_of_eq_comp c.path]
+      rw [← hc, Address.comp_eq_of_eq_comp c.path]
       rfl
   · simp only [comp'_eq_neg h, Enumeration.mem_iff, mem_iff]
     constructor
@@ -163,8 +163,8 @@ theorem Support.mem_comp'_iff (A : Quiver.Path β γ) (S : Support β) (c : Supp
 
 @[simp]
 theorem Support.comp'_coe (A : Quiver.Path β γ) (S : Support β) :
-    (S.comp' A : Set (SupportCondition γ)) =
-    (fun c => ⟨A.comp c.path, c.value⟩) ⁻¹' (S : Set (SupportCondition β)) := by
+    (S.comp' A : Set (Address γ)) =
+    (fun c => ⟨A.comp c.path, c.value⟩) ⁻¹' (S : Set (Address β)) := by
   ext
   exact Support.mem_comp'_iff A S _
 
@@ -488,7 +488,7 @@ namespace Spec
 
 inductive SpecifiesCondition' (S : Support β)
     (lower : ∀ (δ : Λ) [LeLevel δ], δ < β → Spec δ → Support δ → Prop) :
-    SpecCondition β → SupportCondition β → Prop
+    SpecCondition β → Address β → Prop
   | atom (A : ExtendedIndex β) (a : Atom) :
     SpecifiesCondition' S lower
       (SpecCondition.atom A
@@ -521,7 +521,7 @@ def Specifies {β : Λ} (σ : Spec β) (S : Support β) : Prop :=
   Specifies' σ S (fun δ _ _ σ S => Specifies σ S)
 termination_by β
 
-def SpecifiesCondition (S : Support β) : SpecCondition β → SupportCondition β → Prop :=
+def SpecifiesCondition (S : Support β) : SpecCondition β → Address β → Prop :=
   SpecifiesCondition' S (fun _ _ _ => Specifies)
 
 theorem specifies_iff (σ : Spec β) (S : Support β) :
@@ -617,7 +617,7 @@ theorem specifiesCondition_inflexibleBot_right_iff (S : Support β)
   · rintro rfl
     exact SpecifiesCondition'.inflexibleBot A N h
 
-theorem specifiesCondition_atom_left_iff (S : Support β) (c : SupportCondition β)
+theorem specifiesCondition_atom_left_iff (S : Support β) (c : Address β)
     (A : ExtendedIndex β) (others : Set κ) (nearLitters : Set κ) :
     SpecifiesCondition S (SpecCondition.atom A others nearLitters) c ↔
     ∃ a : Atom,
@@ -635,7 +635,7 @@ theorem specifiesCondition_atom_left_iff (S : Support β) (c : SupportCondition 
     · rw [specifiesCondition_inflexibleCoe_right_iff _ _ _ h]
       aesop
 
-theorem specifiesCondition_flexible_left_iff (S : Support β) (c : SupportCondition β)
+theorem specifiesCondition_flexible_left_iff (S : Support β) (c : Address β)
     (A : ExtendedIndex β) :
     SpecifiesCondition S (SpecCondition.flexible A) c ↔
     ∃ N : NearLitter,
@@ -651,7 +651,7 @@ theorem specifiesCondition_flexible_left_iff (S : Support β) (c : SupportCondit
     · rw [specifiesCondition_inflexibleCoe_right_iff _ _ _ h]
       aesop
 
-theorem specifiesCondition_inflexibleCoe_left_iff (S : Support β) (c : SupportCondition β)
+theorem specifiesCondition_inflexibleCoe_left_iff (S : Support β) (c : Address β)
     (A : ExtendedIndex β) (h : InflexibleCoePath A) (χ : CodingFunction h.δ) (σ : Spec h.δ) :
     SpecifiesCondition S (SpecCondition.inflexibleCoe A h χ σ) c ↔
     ∃ (N : NearLitter) (t : Tangle h.δ) (S' : Support h.δ),
@@ -662,17 +662,17 @@ theorem specifiesCondition_inflexibleCoe_left_iff (S : Support β) (c : SupportC
       χ = CodingFunction.code (TangleData.Tangle.support t) t (support_supports t) := by
   obtain ⟨B, a | N⟩ := c
   · rw [specifiesCondition_atom_right_iff]
-    simp only [SpecCondition.inflexibleCoe_ne_atom, SupportCondition.mk.injEq, and_false, false_and,
+    simp only [SpecCondition.inflexibleCoe_ne_atom, Address.mk.injEq, and_false, false_and,
       exists_false, exists_const]
   · obtain (h' | ⟨⟨h'⟩⟩ | ⟨⟨h'⟩⟩) := flexible_cases' B N.1
     · rw [specifiesCondition_flexible_right_iff _ _ _ h']
-      simp only [SpecCondition.inflexibleCoe_ne_flexible, SupportCondition.mk.injEq, inr.injEq,
+      simp only [SpecCondition.inflexibleCoe_ne_flexible, Address.mk.injEq, inr.injEq,
         exists_and_left, exists_prop, false_iff, not_exists, not_and, and_imp,
         forall_apply_eq_imp_iff]
       rintro rfl t hN
       cases h' (inflexible_of_inflexibleCoe ⟨h, _, hN⟩)
     · rw [specifiesCondition_inflexibleBot_right_iff _ _ _ h']
-      simp only [SpecCondition.inflexibleCoe_ne_inflexibleBot, SupportCondition.mk.injEq, inr.injEq,
+      simp only [SpecCondition.inflexibleCoe_ne_inflexibleBot, Address.mk.injEq, inr.injEq,
         exists_and_left, exists_prop, false_iff, not_exists, not_and, and_imp,
         forall_apply_eq_imp_iff]
       rintro rfl t hN
@@ -687,13 +687,13 @@ theorem specifiesCondition_inflexibleCoe_left_iff (S : Support β) (c : SupportC
         cases eq_of_heq h.2.2.2
         exact ⟨N, h'.t, S', rfl, h'.hL, hS', hσ, rfl⟩
       · rintro ⟨N, t, S', hc, hN, hS', hσ, rfl⟩
-        rw [SupportCondition.mk.injEq, inr.injEq] at hc
+        rw [Address.mk.injEq, inr.injEq] at hc
         cases hc.1
         cases hc.2
         cases Subsingleton.elim h' ⟨h, _, hN⟩
         exact ⟨S', hS', σ, hσ, rfl⟩
 
-theorem specifiesCondition_inflexibleBot_left_iff (S : Support β) (c : SupportCondition β)
+theorem specifiesCondition_inflexibleBot_left_iff (S : Support β) (c : Address β)
     (A : ExtendedIndex β) (h : InflexibleBotPath A) (atoms : Set κ) :
     SpecifiesCondition S (SpecCondition.inflexibleBot A h atoms) c ↔
     ∃ (N : NearLitter) (a : Atom),
@@ -702,11 +702,11 @@ theorem specifiesCondition_inflexibleBot_left_iff (S : Support β) (c : SupportC
       atoms = {i | ∃ hi : i < S.max, S.f i hi = ⟨h.B.cons (bot_lt_coe _), inl a⟩} := by
   obtain ⟨B, a | N⟩ := c
   · rw [specifiesCondition_atom_right_iff]
-    simp only [SpecCondition.inflexibleBot_ne_atom, SupportCondition.mk.injEq, and_false, false_and,
+    simp only [SpecCondition.inflexibleBot_ne_atom, Address.mk.injEq, and_false, false_and,
       exists_const]
   · obtain (h' | ⟨⟨h'⟩⟩ | ⟨⟨h'⟩⟩) := flexible_cases' B N.1
     · rw [specifiesCondition_flexible_right_iff _ _ _ h']
-      simp only [SpecCondition.inflexibleBot_ne_flexible, SupportCondition.mk.injEq, inr.injEq,
+      simp only [SpecCondition.inflexibleBot_ne_flexible, Address.mk.injEq, inr.injEq,
         exists_and_left, false_iff, not_exists, not_and, and_imp, forall_apply_eq_imp_iff]
       rintro rfl a hN
       cases h' (inflexible_of_inflexibleBot ⟨h, _, hN⟩)
@@ -721,7 +721,7 @@ theorem specifiesCondition_inflexibleBot_left_iff (S : Support β) (c : SupportC
         exact ⟨rfl, HEq.rfl, rfl⟩
     · rw [specifiesCondition_inflexibleCoe_right_iff _ _ _ h']
       simp only [SpecCondition.inflexibleBot_ne_inflexibleCoe, exists_false,
-        SupportCondition.mk.injEq, inr.injEq, exists_and_left, false_iff, not_exists, not_and,
+        Address.mk.injEq, inr.injEq, exists_and_left, false_iff, not_exists, not_and,
         and_imp, forall_apply_eq_imp_iff]
       rintro rfl a hN
       cases inflexibleBot_inflexibleCoe ⟨h, _, hN⟩ h'
@@ -729,19 +729,19 @@ theorem specifiesCondition_inflexibleBot_left_iff (S : Support β) (c : SupportC
 end Spec
 
 theorem exists_spec' (S : Support β)
-    (h : ∀ (c : SupportCondition β), ∃ σc, Spec.SpecifiesCondition S σc c) :
+    (h : ∀ (c : Address β), ∃ σc, Spec.SpecifiesCondition S σc c) :
     ∃ σ : Spec β, σ.Specifies S := by
   choose f hf using h
   refine ⟨⟨S.max, fun i hi => f (S.f i hi)⟩, ?_⟩
   rw [Spec.specifies_iff]
   exact ⟨rfl, fun i _ _ => hf _⟩
 
-theorem exists_specifiesCondition (S : Support β) (c : SupportCondition β) :
+theorem exists_specifiesCondition (S : Support β) (c : Address β) :
     ∃ σc : SpecCondition β, Spec.SpecifiesCondition S σc c := by
   have : WellFoundedLT Λ := inferInstance
   revert S c
   refine this.induction
-    (C := fun β => ∀ S : Support β, ∀ c : SupportCondition β,
+    (C := fun β => ∀ S : Support β, ∀ c : Address β,
       ∃ σc, Spec.SpecifiesCondition S σc c) β ?_
   intro β ih S c
   obtain ⟨B, a | N⟩ := c

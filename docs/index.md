@@ -57,7 +57,7 @@ There are μ atoms, divided into *litters* of size κ.
 
 At each type level α, we will produce a collection of model elements called *tangles*.
 We also produce a group of permutations, called *allowable permutations*, which act on the type of tangles.
-Each tangle is stipulated to have a *support* under the action of allowable permutations; this is a small set of objects called *support conditions*.
+Each tangle is stipulated to have a *support* under the action of allowable permutations; this is a small set of objects called *addresses*.
 
 Each tangle at level α will be given a preferred extension of some type β < α, and we can recover from a tangle's elements which extension it prefers.
 The extensions of such a tangle in other lower types can be deduced from its β-extension.

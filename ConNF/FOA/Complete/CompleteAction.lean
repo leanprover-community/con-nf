@@ -17,7 +17,7 @@ variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
 
 /-!
 We now construct the completed action of a structural approximation using well-founded recursion
-on support conditions. It remains to prove that this map yields an allowable permutation.
+on addresses. It remains to prove that this map yields an allowable permutation.
 TODO: Rename `completeAtomMap`, `atomCompletion` etc.
 -/
 
@@ -32,7 +32,7 @@ noncomputable def completeLitterMap (π : StructApprox β) (A : ExtendedIndex β
     Litter :=
   (π.completeNearLitterMap A L.toNearLitter).1
 
-noncomputable def foaHypothesis (π : StructApprox β) {c : SupportCondition β} : HypAction c :=
+noncomputable def foaHypothesis (π : StructApprox β) {c : Address β} : HypAction c :=
   ⟨fun B b _ => π.completeAtomMap B b, fun B N _ => π.completeNearLitterMap B N⟩
 
 variable {π : StructApprox β}
@@ -64,12 +64,12 @@ theorem completeNearLitterMap_fst_eq' :
   rfl
 
 @[simp]
-theorem foaHypothesis_atomImage {c : SupportCondition β} (h : ⟨A, inl a⟩ < c) :
+theorem foaHypothesis_atomImage {c : Address β} (h : ⟨A, inl a⟩ < c) :
     (π.foaHypothesis : HypAction c).atomImage A a h = π.completeAtomMap A a :=
   rfl
 
 @[simp]
-theorem foaHypothesis_nearLitterImage {c : SupportCondition β} (h : ⟨A, inr N⟩ < c) :
+theorem foaHypothesis_nearLitterImage {c : Address β} (h : ⟨A, inr N⟩ < c) :
     (π.foaHypothesis : HypAction c).nearLitterImage A N h = π.completeNearLitterMap A N :=
   rfl
 

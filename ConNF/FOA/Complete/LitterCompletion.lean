@@ -27,7 +27,7 @@ class FreedomOfActionHypothesis (β : Λ) [LeLevel β] : Prop where
 export FreedomOfActionHypothesis (freedomOfAction_of_lt)
 
 /-- The structural action associated to a given inductive hypothesis. -/
-def ihAction {β : Λ} {c : SupportCondition β} (H : HypAction c) : StructAction β := fun B =>
+def ihAction {β : Λ} {c : Address β} (H : HypAction c) : StructAction β := fun B =>
   { atomMap := fun a => ⟨_, fun h => H.atomImage B a h⟩
     litterMap := fun L => ⟨_, fun h => H.nearLitterImage B L.toNearLitter h⟩
     atomMap_dom_small := by
@@ -36,7 +36,7 @@ def ihAction {β : Λ} {c : SupportCondition β} (H : HypAction c) : StructActio
       simp only [transClosure, mem_singleton_iff, exists_prop, exists_eq_left] at this
       refine' Small.image_subset (fun a => ⟨B, inl a⟩) _ this _
       · intro a b h
-        simpa [SupportCondition.mk.injEq, inl.injEq, true_and] using h
+        simpa [Address.mk.injEq, inl.injEq, true_and] using h
       · rintro _ ⟨a, h, rfl⟩
         exact h
     litterMap_dom_small := by
@@ -45,18 +45,18 @@ def ihAction {β : Λ} {c : SupportCondition β} (H : HypAction c) : StructActio
       simp only [transClosure, mem_singleton_iff, exists_prop, exists_eq_left] at this
       refine' Small.image_subset (fun L => ⟨B, inr L.toNearLitter⟩) _ this _
       · intro L₁ L₂ h
-        simpa only [SupportCondition.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff,
+        simpa only [Address.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff,
           true_and] using h
       · rintro _ ⟨a, h, rfl⟩
         exact h }
 
 @[simp]
-theorem ihAction_atomMap {β : Λ} {c : SupportCondition β} {H : HypAction c}
+theorem ihAction_atomMap {β : Λ} {c : Address β} {H : HypAction c}
     {B : ExtendedIndex β} {a : Atom} : (ihAction H B).atomMap a = ⟨_, fun h => H.atomImage B a h⟩ :=
   rfl
 
 @[simp]
-theorem ihAction_litterMap {β : Λ} {c : SupportCondition β} {H : HypAction c}
+theorem ihAction_litterMap {β : Λ} {c : Address β} {H : HypAction c}
     {B : ExtendedIndex β} {L : Litter} :
     (ihAction H B).litterMap L = ⟨_, fun h => H.nearLitterImage B L.toNearLitter h⟩ :=
   rfl

@@ -79,7 +79,7 @@ structure Coherent (ψ : StructAction β) extends CoherentDom ψ : Prop where
     (((ψ ((A.cons hε).cons (bot_lt_coe _))).litterMap (fuzz bot_ne_coe a)).get h).fst =
       fuzz (bot_ne_coe (a := ε)) (Allowable.comp (Hom.toPath (bot_lt_coe _)) ρ • a)
 
-def FOAMotive (ψ : StructAction β) (ρ : Allowable β) : SupportCondition β → Prop
+def FOAMotive (ψ : StructAction β) (ρ : Allowable β) : Address β → Prop
   | ⟨A, inl a⟩ => (ha : ((ψ A).atomMap a).Dom) →
       Allowable.toStructPerm ρ A • a = ((ψ A).atomMap a).get ha
   | ⟨A, inr N⟩ => N.IsLitter → (hL : ((ψ A).litterMap N.1).Dom) →
@@ -97,7 +97,7 @@ theorem foaMotive_atom (ψ : StructAction β) (h₁ : ψ.Lawful)
 theorem foaMotive_litter (ψ : StructAction β) (h₁ : ψ.Lawful) (h₂ : ψ.Coherent)
     (ρ : Allowable β) (hρ : (ψ.rc h₁).ExactlyApproximates (Allowable.toStructPerm ρ))
     (A : ExtendedIndex β) (L : Litter)
-    (ih : ∀ (c : SupportCondition β), c < ⟨A, inr L.toNearLitter⟩ → FOAMotive ψ ρ c)
+    (ih : ∀ (c : Address β), c < ⟨A, inr L.toNearLitter⟩ → FOAMotive ψ ρ c)
     (hL : ((ψ A).litterMap L).Dom) :
     Allowable.toStructPerm ρ A • L = (((ψ A).litterMap L).get hL).fst := by
   obtain (hL' | ⟨⟨⟨γ, ε, hε, A, rfl⟩, a, rfl⟩⟩ |
@@ -142,7 +142,7 @@ theorem foaMotive_litter (ψ : StructAction β) (h₁ : ψ.Lawful) (h₂ : ψ.Co
 theorem foaMotive_nearLitter (ψ : StructAction β) (h₁ : ψ.Lawful) (h₂ : ψ.Coherent)
     (ρ : Allowable β) (hρ : (ψ.rc h₁).ExactlyApproximates (Allowable.toStructPerm ρ))
     (A : ExtendedIndex β) (L : Litter)
-    (ih : ∀ (c : SupportCondition β), c < ⟨A, inr L.toNearLitter⟩ → FOAMotive ψ ρ c)
+    (ih : ∀ (c : Address β), c < ⟨A, inr L.toNearLitter⟩ → FOAMotive ψ ρ c)
     (hL : ((ψ A).litterMap L).Dom) :
     Allowable.toStructPerm ρ A • L.toNearLitter = ((ψ A).litterMap L).get hL := by
   refine NearLitter.ext ?_

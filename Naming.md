@@ -27,7 +27,7 @@ Follow the [mathlib4 naming convention](https://github.com/leanprover-community/
 | Near-litters                             | `N` or `N₁, N₂` |
 | Sublitters                               | `S` or `S₁, S₂` |
 | Tangles or semitangles                   | `t` or `t₁, t₂` |
-| Support conditions                       | `c₁, c₂`        |
+| Addresses                                | `c₁, c₂`        |
 | Codes                                    | `c, d`          |
 | Paths of type indices                    | `A, B`          |
 | Near-litter or structural actions        | `ψ, ψ'`         |

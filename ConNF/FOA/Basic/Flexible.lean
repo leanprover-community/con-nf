@@ -28,7 +28,7 @@ def Flexible (A : ExtendedIndex β) (L : Litter) : Prop :=
 theorem flexible_cases (A : ExtendedIndex β) (L : Litter) : Inflexible A L ∨ Flexible A L :=
   or_not
 
-theorem not_constrains_flexible {β : Λ} (c : SupportCondition β)
+theorem not_constrains_flexible {β : Λ} (c : Address β)
     {A : ExtendedIndex β} {L : Litter} (hL : Flexible A L) :
     ¬c ≺ ⟨A, inr L.toNearLitter⟩ := by
   rintro (⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hε, A, a⟩)
@@ -39,7 +39,7 @@ theorem not_constrains_flexible {β : Λ} (c : SupportCondition β)
   · exact hL (Inflexible.mk_coe hδ hε hδε _ _)
   · exact hL (Inflexible.mk_bot hε _ _)
 
-theorem not_transConstrains_flexible {β : Λ} (c : SupportCondition β)
+theorem not_transConstrains_flexible {β : Λ} (c : Address β)
     {A : ExtendedIndex β} {L : Litter} (hL : Flexible A L) :
     ¬c < ⟨A, inr L.toNearLitter⟩ := by
   intro h
@@ -231,7 +231,7 @@ end Comp
 
 theorem InflexibleBot.constrains {β : Λ} {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleBot A L) :
-    (⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩ : SupportCondition β) < ⟨A, inr L.toNearLitter⟩ := by
+    (⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩ : Address β) < ⟨A, inr L.toNearLitter⟩ := by
   have := Constrains.fuzz_bot h.path.hε h.path.B h.a
   rw [← h.hL, ← h.path.hA] at this
   exact Relation.TransGen.single this
