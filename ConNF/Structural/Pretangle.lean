@@ -22,7 +22,7 @@ The type of pretangles forms a model of TTT without extensionality. -/
 def Pretangle : TypeIndex → Type u
   | ⊥ => Atom
   | (α : Λ) => ∀ β : TypeIndex, β < α → Set (Pretangle β)
-termination_by Pretangle x => x
+termination_by x => x
 
 namespace Pretangle
 

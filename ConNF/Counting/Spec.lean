@@ -201,7 +201,7 @@ inductive SpecCondition' (β : Λ) (lower : ∀ (δ : Λ) [LeLevel δ], δ < β 
 
 def SpecCondition : Λ → Type u
   | β => SpecCondition' β (fun δ _ _ => SpecCondition δ)
-termination_by SpecCondition β => β
+termination_by β => β
 
 abbrev Spec (β : Λ) : Type u :=
   Enumeration (SpecCondition β)
@@ -519,8 +519,7 @@ structure Specifies' (σ : Spec β) (S : Support β)
 
 def Specifies {β : Λ} (σ : Spec β) (S : Support β) : Prop :=
   Specifies' σ S (fun δ _ _ σ S => Specifies σ S)
-termination_by
-  Specifies β _ _ => β
+termination_by β
 
 def SpecifiesCondition (S : Support β) : SpecCondition β → SupportCondition β → Prop :=
   SpecifiesCondition' S (fun _ _ _ => Specifies)

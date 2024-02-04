@@ -129,7 +129,7 @@ private theorem not_isOdd_nonempty : ∀ c : NonemptyCode, ¬c.1.IsOdd ↔ c.1.I
     · rw [IsEmpty.isOdd_iff hd, IsEmpty.isEven_iff hd, Classical.not_not]
     · let _ : ⟨d, hd⟩ ↝ c := cloudRel_coe_coe.1 h
       exact not_isOdd_nonempty ⟨d, hd⟩
-termination_by not_isOdd_nonempty c => c
+termination_by c => c
 
 /-- A code is not odd iff it is even. -/
 @[simp]

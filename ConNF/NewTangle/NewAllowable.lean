@@ -416,7 +416,7 @@ theorem isEven_smul_nonempty : ∀ c : NonemptyCode, (ρ • c.val).IsEven ↔ c
       have _ : ⟨_, this⟩ ↝ ⟨c, hc⟩ := cloudRel_coe_coe.1 hd
       exact Code.not_isEven.1 fun H =>
         (h _ hd).not_isEven <| (isEven_smul_nonempty ⟨_, this⟩).1 H
-termination_by isEven_smul_nonempty c => c
+termination_by c => c
 
 @[simp]
 theorem isEven_smul : (ρ • c).IsEven ↔ c.IsEven := by

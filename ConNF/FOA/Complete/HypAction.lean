@@ -31,16 +31,15 @@ mutual
       (FN : ∀ (A : ExtendedIndex β) (N), HypAction ⟨A, inr N⟩ → NearLitter) :
       ExtendedIndex β → Atom → Atom
     | A, a => Fa A a ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩
+  termination_by A n => SupportCondition.mk A (inl n)
   /-- Construct the fixed-point functions `fix_atom` and `fix_near_litter`.
   This is used to compute the induced action of an approximation on all atoms and near-litters. -/
   noncomputable def fixNearLitter (Fa : ∀ (A : ExtendedIndex β) (a), HypAction ⟨A, inl a⟩ → Atom)
       (FN : ∀ (A : ExtendedIndex β) (N), HypAction ⟨A, inr N⟩ → NearLitter) :
       ExtendedIndex β → NearLitter → NearLitter
     | A, N => FN A N ⟨fun B b _ => fixAtom Fa FN B b, fun B N _ => fixNearLitter Fa FN B N⟩
+  termination_by A N => SupportCondition.mk A (inr N)
 end
-termination_by
-  fixAtom A n => SupportCondition.mk A (inl n)
-  fixNearLitter A N => SupportCondition.mk A (inr N)
 
 theorem fixAtom_eq (Fa FN) (A : ExtendedIndex β) (a : Atom) :
     fixAtom Fa FN A a =

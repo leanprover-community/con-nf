@@ -76,7 +76,7 @@ def pretangleAction : {α : TypeIndex} → StructPerm α → Pretangle α → Pr
   | ⊥, π, t => Tree.ofBot π • (Pretangle.ofBot t)
   | (α : Λ), π, t => Pretangle.toCoe
       (fun β hβ => pretangleAction (Tree.comp (Hom.toPath hβ) π) '' Pretangle.ofCoe t β hβ)
-termination_by pretangleAction α π t => α
+termination_by α π t => α
 
 theorem one_pretangleAction {α : TypeIndex} (t : Pretangle α) : pretangleAction 1 t = t := by
   have : WellFoundedLT TypeIndex := inferInstance
