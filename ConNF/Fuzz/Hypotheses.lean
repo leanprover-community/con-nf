@@ -106,20 +106,20 @@ theorem support_isSum_smul {S S₁ S₂ : Support α} (h : S.IsSum S₁ S₂) (�
 
 variable {ρ ρ' : Allowable α} {c : Address α}
 
-theorem smul_Address :
+theorem smul_address :
     ρ • c = ⟨c.path, Allowable.toStructPerm ρ c.path • c.value⟩ :=
   rfl
 
 @[simp]
-theorem smul_Address_eq_iff :
+theorem smul_address_eq_iff :
     ρ • c = c ↔ Allowable.toStructPerm ρ c.path • c.value = c.value :=
-  StructPerm.smul_Address_eq_iff
+  StructPerm.smul_address_eq_iff
 
 @[simp]
-theorem smul_Address_eq_smul_iff :
+theorem smul_address_eq_smul_iff :
     ρ • c = ρ' • c ↔
     Allowable.toStructPerm ρ c.path • c.value = Allowable.toStructPerm ρ' c.path • c.value :=
-  StructPerm.smul_Address_eq_smul_iff
+  StructPerm.smul_address_eq_smul_iff
 
 end Allowable
 
@@ -185,7 +185,7 @@ instance Bot.tangleData : TangleData ⊥
   support a := Support.singleton ⟨Quiver.Path.nil, Sum.inl a⟩
   support_supports a π h := by
     simp only [Support.singleton_enum, Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop,
-      exists_eq_left, NearLitterPerm.smul_Address_eq_iff, forall_eq, Sum.smul_inl,
+      exists_eq_left, NearLitterPerm.smul_address_eq_iff, forall_eq, Sum.smul_inl,
       Sum.inl.injEq] at h
     exact h
 

@@ -160,7 +160,7 @@ theorem reduction_supports (S : Set (Address β)) (c : Address β) (hc : c ∈ S
   by_cases h : N.IsLitter
   · obtain ⟨L, rfl⟩ := h.exists_litter_eq
     exact hc' (mem_reduction_of_reduced _ _ (Reduced.mkLitter L) hc)
-  simp only [StructPerm.smul_Address_eq_iff, smul_inr, inr.injEq] at hc' ⊢
+  simp only [StructPerm.smul_address_eq_iff, smul_inr, inr.injEq] at hc' ⊢
   have h₃ := hc' (mem_reduction_of_reduced_constrains _ ⟨B, inr N.fst.toNearLitter⟩ _
     (Reduced.mkLitter N.fst) (Constrains.nearLitter B N h) hc)
   have h₄ := fun a ha => hc' (mem_reduction_of_reduced_constrains _ ⟨B, inl a⟩ _

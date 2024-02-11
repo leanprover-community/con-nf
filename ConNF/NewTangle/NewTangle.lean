@@ -439,22 +439,22 @@ theorem smul_intro {β : TypeIndex} [inst : LtLevel β]  (ρ : NewAllowable) (s 
     refine Preference.proper_heq_proper ?_ rfl
     rw [NewAllowable.smul_extension]
 
-theorem NewAllowable.smul_Address {ρ : NewAllowable} {c : Address α} :
+theorem NewAllowable.smul_address {ρ : NewAllowable} {c : Address α} :
     ρ • c = ⟨c.path, NewAllowable.toStructPerm ρ c.path • c.value⟩ :=
   rfl
 
 @[simp]
-theorem NewAllowable.smul_Address_eq_iff {ρ : NewAllowable} {c : Address α} :
+theorem NewAllowable.smul_address_eq_iff {ρ : NewAllowable} {c : Address α} :
     ρ • c = c ↔ NewAllowable.toStructPerm ρ c.path • c.value = c.value :=
-  StructPerm.smul_Address_eq_iff
+  StructPerm.smul_address_eq_iff
 
 @[simp]
-theorem NewAllowable.smul_Address_eq_smul_iff
+theorem NewAllowable.smul_address_eq_smul_iff
     {ρ ρ' : NewAllowable} {c : Address α} :
     ρ • c = ρ' • c ↔
     NewAllowable.toStructPerm ρ c.path • c.value =
       NewAllowable.toStructPerm ρ' c.path • c.value :=
-  StructPerm.smul_Address_eq_smul_iff
+  StructPerm.smul_address_eq_smul_iff
 
 /-- For any near-litter `N`, the code `(α, ⊥, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
@@ -466,7 +466,7 @@ def newTypedNearLitter (N : NearLitter) : NewTangle :=
       simp only [smul_intro]
       congr 1
       simp only [Support.singleton_enum, Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop,
-        exists_eq_left, NewAllowable.smul_Address_eq_iff, forall_eq, Sum.smul_inr,
+        exists_eq_left, NewAllowable.smul_address_eq_iff, forall_eq, Sum.smul_inr,
         Sum.inr.injEq] at h
       apply_fun SetLike.coe at h
       refine Eq.trans ?_ h

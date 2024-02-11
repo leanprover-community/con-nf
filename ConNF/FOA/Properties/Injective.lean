@@ -91,7 +91,7 @@ theorem Biexact.smul_eq_smul {β : Λ} [LeLevel β] {π π' : Allowable β} {c :
     (constrains_wf β) c _
   clear c
   intro c ih h
-  simp only [Allowable.smul_Address_eq_smul_iff] at ih ⊢
+  simp only [Allowable.smul_address_eq_smul_iff] at ih ⊢
   obtain ⟨A, a | N⟩ := c
   · simp only [smul_inl, inl.injEq]
     exact h.smul_eq_smul_atom A a Relation.ReflTransGen.refl
@@ -138,7 +138,7 @@ theorem Biexact.smul_eq_smul {β : Λ} [LeLevel β] {π π' : Allowable β} {c :
     rw [mul_smul, inv_smul_eq_iff]
     simp only [Allowable.toStructPerm_smul, Allowable.toStructPerm_comp, Tree.comp_comp]
     have := ih ⟨(B.cons hδ).comp c.path, c.value⟩ ?_ ?_
-    · simp only [Path.comp_cons, Path.comp_nil, StructPerm.smul_Address_eq_smul_iff,
+    · simp only [Path.comp_cons, Path.comp_nil, StructPerm.smul_address_eq_smul_iff,
         Tree.comp_apply]
       exact this.symm
     · exact Constrains.fuzz hδ hε hδε _ _ _ hc
@@ -166,7 +166,7 @@ theorem Biexact.smul_eq_smul_nearLitter {β : Λ} [LeLevel β]
     Allowable.toStructPerm π A • N =
     Allowable.toStructPerm π' A • N := by
   have := h.smul_eq_smul
-  simp only [Allowable.toStructPerm_smul, StructPerm.smul_Address_eq_smul_iff, smul_inr,
+  simp only [Allowable.toStructPerm_smul, StructPerm.smul_address_eq_smul_iff, smul_inr,
     inr.injEq] at this
   exact this
 
@@ -341,7 +341,7 @@ theorem supports {β : Λ} [LeLevel β] {π π' : Allowable β} {t : Tangle β}
   refine' support_supports t _ _
   intro c hc
   rw [mul_smul, inv_smul_eq_iff]
-  simp only [Allowable.smul_Address_eq_smul_iff]
+  simp only [Allowable.smul_address_eq_smul_iff]
   obtain ⟨A, a | N⟩ := c
   · simp only [smul_inl, inl.injEq]
     exact ha A a hc
@@ -719,7 +719,7 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : Address β) (A : ExtendedI
   refine' support_supports t _ _
   intro e he
   rw [mul_smul, inv_smul_eq_iff]
-  simp only [ne_eq, Allowable.smul_Address_eq_smul_iff]
+  simp only [ne_eq, Allowable.smul_address_eq_smul_iff]
   obtain ⟨C, a | N⟩ := e
   · simp only [smul_inl, inl.injEq]
     refine'

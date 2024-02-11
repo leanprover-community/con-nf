@@ -43,7 +43,7 @@ def Address_equiv : Address α ≃ ExtendedIndex α × (Atom ⊕ NearLitter)
 
 /-- There are `μ` addresses. -/
 @[simp]
-theorem mk_Address (α : TypeIndex) : #(Address α) = #μ := by
+theorem mk_address (α : TypeIndex) : #(Address α) = #μ := by
   rw [mk_congr Address_equiv]
   simp only [Address, mk_prod, mk_sum, mk_atom, lift_id, mk_nearLitter]
   rw [add_eq_left (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le) le_rfl]
@@ -69,21 +69,21 @@ We have a form of the next three lemmas for `StructPerm`, `NearLitterPerm`,
 `Allowable`, and `NewAllowable`.
 -/
 
-theorem smul_Address :
+theorem smul_address :
     π • c = ⟨c.path, π c.path • c.value⟩ :=
   rfl
 
 @[simp]
-theorem smul_Address_eq_iff :
+theorem smul_address_eq_iff :
     π • c = c ↔ π c.path • c.value = c.value := by
   obtain ⟨A, x⟩ := c
-  simp only [smul_Address, Address.mk.injEq, true_and]
+  simp only [smul_address, Address.mk.injEq, true_and]
 
 @[simp]
-theorem smul_Address_eq_smul_iff :
+theorem smul_address_eq_smul_iff :
     π • c = π' • c ↔ π c.path • c.value = π' c.path • c.value := by
   obtain ⟨A, x⟩ := c
-  simp only [smul_Address, Address.mk.injEq, true_and]
+  simp only [smul_address, Address.mk.injEq, true_and]
 
 end StructPerm
 
@@ -97,21 +97,21 @@ instance : MulAction NearLitterPerm (Address ⊥)
   one_smul := by rintro ⟨A, a | N⟩ <;> rfl
   mul_smul _ _ := by rintro ⟨A, a | N⟩ <;> rfl
 
-theorem smul_Address :
+theorem smul_address :
     π • c = ⟨c.path, π • c.value⟩ :=
   rfl
 
 @[simp]
-theorem smul_Address_eq_iff :
+theorem smul_address_eq_iff :
     π • c = c ↔ π • c.value = c.value := by
   obtain ⟨A, x⟩ := c
-  simp only [smul_Address, Address.mk.injEq, true_and]
+  simp only [smul_address, Address.mk.injEq, true_and]
 
 @[simp]
-theorem smul_Address_eq_smul_iff :
+theorem smul_address_eq_smul_iff :
     π • c = π' • c ↔ π • c.value = π' • c.value := by
   obtain ⟨A, x⟩ := c
-  simp only [smul_Address, Address.mk.injEq, true_and]
+  simp only [smul_address, Address.mk.injEq, true_and]
 
 end NearLitterPerm
 
@@ -250,7 +250,7 @@ theorem Support.singleton_injective :
 @[simp]
 theorem mk_support : #(Support α) = #μ := by
   refine le_antisymm ?_ ?_
-  · rw [← mk_enumeration (mk_Address α)]
+  · rw [← mk_enumeration (mk_address α)]
     refine ⟨⟨Support.enum, ?_⟩⟩
     intro S₁ S₂ h
     ext : 1
