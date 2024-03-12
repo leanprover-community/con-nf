@@ -1,4 +1,4 @@
-import Mathlib.Algebra.Group.Pi
+import Mathlib.Algebra.Group.Pi.Lemmas
 
 /-!
 # Pi instances for groups and monoids

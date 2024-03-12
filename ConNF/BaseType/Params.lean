@@ -1,3 +1,4 @@
+import Mathlib.Tactic.Have
 import ConNF.Mathlib.Cardinal
 import ConNF.Mathlib.Order
 import ConNF.Mathlib.Ordinal
@@ -199,6 +200,7 @@ noncomputable def addMonoid_of_type_eq_ord {α : Type _}
       Ordinal.enum _ (Ordinal.typein _ (Ordinal.enum _ _ _) + _) _ =
       Ordinal.enum _ (_ + Ordinal.typein _ (Ordinal.enum _ _ _)) _
     simp only [Ordinal.typein_enum, Ordinal.enum_inj, add_assoc]
+  nsmul := nsmulRec
   __ := addZeroClass_of_type_eq_ord h
 
 noncomputable def sub_of_isWellOrder {α : Type _}

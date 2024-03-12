@@ -1,3 +1,4 @@
+import Mathlib.Tactic.Have
 import Mathlib.SetTheory.Cardinal.Ordinal
 import ConNF.Mathlib.Logic.Equiv.PartialPerm
 

@@ -134,7 +134,7 @@ theorem toBot_inv (a : τ) : toBot a⁻¹ = (toBot a)⁻¹ :=
 
 @[simp]
 theorem ofBot_inv (a : Tree τ ⊥) : ofBot a⁻¹ = (ofBot a)⁻¹ :=
-  toBotIso.symm.map_inv a
+  (toBotIso (τ := τ)).symm.map_inv a
 
 variable {α β γ : TypeIndex}
 
