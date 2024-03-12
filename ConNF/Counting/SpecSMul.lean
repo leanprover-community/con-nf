@@ -86,10 +86,10 @@ theorem specifiesCondition_inflexibleCoe_smul {S : Support β}
     exact hr i hi
   · intro i hi
     simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
-      smul_support, Allowable.smul_support_max, Support.smul_f] at hi ⊢
+      smul_support, Allowable.smul_support_max, Enumeration.smul_f] at hi ⊢
     rw [← hS i hi]
     simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path,
-      Allowable.toStructPerm_smul, Allowable.toStructPerm_comp, Support.smul_f]
+      Allowable.toStructPerm_smul, Allowable.toStructPerm_comp, Enumeration.smul_f]
   · refine congr_arg₂ _ ?_ rfl
     simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
       smul_support]
@@ -142,7 +142,7 @@ theorem Spec.Specifies.smul {σ : Spec β} {S : Support β} (h : σ.Specifies S)
   refine ⟨_, _, max_eq_max, fun hγ A => (Allowable.toStructPerm ρ).comp A • lS hγ A,
       hlS₁, ?_, ?_, ?_⟩
   · intro γ hγ A i hi
-    simp only [Support.smul_f, Allowable.smul_support_f]
+    simp only [Enumeration.smul_f, Allowable.smul_support_f]
     rw [← hlS₂ hγ A i hi]
     rfl
   · intro γ hγ A

@@ -208,7 +208,7 @@ theorem Allowable.comp_bot {β : TypeIndex} [LeLevel β] (A : Quiver.Path β ⊥
 theorem smul_mem_support {β : Λ} [LtLevel β] {c : Address β} {t : Tangle β}
     (h : c ∈ t.support) (π : Allowable β) : π • c ∈ (π • t).support := by
   rw [smul_support]
-  simp only [Support.mem_iff, Allowable.smul_support_f, smul_left_cancel_iff,
+  simp only [Enumeration.mem_iff, Allowable.smul_support_f, smul_left_cancel_iff,
     Allowable.smul_support_max] at h ⊢
   exact h
 

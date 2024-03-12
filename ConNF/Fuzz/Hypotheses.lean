@@ -80,29 +80,15 @@ theorem smul_support_f (ρ : Allowable α) (S : Support α) (i : κ) (hi : i < S
 @[simp]
 theorem smul_support_coe (ρ : Allowable α) (S : Support α) :
     (ρ • S : Support α) = ρ • (S : Set (Address α)) :=
-  Support.smul_coe _ _
-
-@[simp]
-theorem smul_mk_support (ρ : Allowable α) (E : Enumeration (Address α)) (h) :
-    ρ • Support.mk E h = Support.mk (ρ • E) ((Support.mk E h).mem_of_mem_symmDiff_smul _) :=
-  rfl
+  Enumeration.smul_coe _ _
 
 theorem smul_mem_smul_support {S : Support α} {c : Address α}
     (h : c ∈ S) (ρ : Allowable α) : ρ • c ∈ ρ • S :=
-  Support.smul_mem_smul h _
+  Enumeration.smul_mem_smul h _
 
 theorem smul_eq_of_smul_support_eq {S : Support α} {ρ : Allowable α}
     (hS : ρ • S = S) {c : Address α} (hc : c ∈ S) : ρ • c = c :=
-  Support.smul_eq_of_smul_eq hS hc
-
-theorem support_isCompletion_smul {S : Support α} {E : Enumeration (Address α)}
-    (h : S.IsCompletion E) (ρ : Allowable α) :
-    (ρ • S).IsCompletion (ρ • E) :=
-  h.smul _
-
-theorem support_isSum_smul {S S₁ S₂ : Support α} (h : S.IsSum S₁ S₂) (ρ : Allowable α) :
-    (ρ • S).IsSum (ρ • S₁) (ρ • S₂) :=
-  h.smul _
+  Enumeration.smul_eq_of_smul_eq hS hc
 
 variable {ρ ρ' : Allowable α} {c : Address α}
 
@@ -182,11 +168,10 @@ instance Bot.tangleData : TangleData ⊥
   Allowable := NearLitterPerm
   allowableToStructPerm := Tree.toBotIso.toMonoidHom
   allowableAction := inferInstance
-  support a := Support.singleton ⟨Quiver.Path.nil, Sum.inl a⟩
+  support a := ⟨1, fun _ _ => ⟨Quiver.Path.nil, Sum.inl a⟩⟩
   support_supports a π h := by
-    simp only [Support.singleton_enum, Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop,
-      exists_eq_left, NearLitterPerm.smul_address_eq_iff, forall_eq, Sum.smul_inl,
-      Sum.inl.injEq] at h
+    simp only [Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
+      NearLitterPerm.smul_address_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
     exact h
 
 /-- A position function for atoms, which is chosen arbitrarily. -/
