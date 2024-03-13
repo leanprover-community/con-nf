@@ -124,6 +124,25 @@ theorem strongClosure_small {s : Set (Address β)} (h : Small s) :
   intro a _
   exact small_singleton _
 
+theorem subset_strongClosure (s : Set (Address β)) : s ⊆ strongClosure s :=
+  fun c hc => Or.inr ⟨c, hc, Relation.ReflTransGen.refl⟩
+
+theorem interferes_mem_strongClosure (s : Set (Address β)) (A : ExtendedIndex β) (a : Atom)
+    (N₁ N₂ : NearLitter) (h : Interferes a N₁ N₂)
+    (hN₁ : ⟨A, inr N₁⟩ ∈ strongClosure s) (hN₂ : ⟨A, inr N₂⟩ ∈ strongClosure s) :
+    ⟨A, inl a⟩ ∈ strongClosure s := by
+  obtain (⟨_, _, _, _, _, _, _, h⟩ | hN₁) := hN₁
+  · cases h
+  obtain (⟨_, _, _, _, _, _, _, h⟩ | hN₂) := hN₂
+  · cases h
+  exact Or.inl ⟨A, a, N₁, N₂, hN₁, hN₂, h, rfl⟩
+
+theorem precedes_mem_strongClosure (s : Set (Address β)) {c d : Address β}
+    (hcd : Precedes c d) (hd : d ∈ strongClosure s) : c ∈ strongClosure s := by
+  obtain (⟨_, _, _, _, _, _, _, rfl⟩ | ⟨e, he, hd⟩) := hd
+  · cases hcd
+  · exact Or.inr ⟨e, he, Relation.ReflTransGen.head hcd hd⟩
+
 inductive StrongSupportRel : Address β → Address β → Prop
   | atom (A B : ExtendedIndex β) (a : Atom) (N : NearLitter) :
       StrongSupportRel ⟨A, inl a⟩ ⟨B, inr N⟩
@@ -182,10 +201,73 @@ noncomputable def indexed {s : Set (Address β)} (hs : Small s) (i : κ) (hi : i
 noncomputable def strongSupport {s : Set (Address β)} (hs : Small s) : Support β :=
   ⟨indexMax (strongClosure_small hs), indexed (strongClosure_small hs)⟩
 
-theorem subset_strongSupport {s : Set (Address β)} (hs : Small s) : s ⊆ strongSupport hs :=
-  sorry
+@[simp]
+theorem strongSupport_f {s : Set (Address β)} (hs : Small s)
+    {i : κ} (hi : i < indexMax (strongClosure_small hs)) :
+    (strongSupport hs).f i hi = indexed (strongClosure_small hs) i hi := rfl
 
-theorem strongSupport_strong {s : Set (Address β)} (hs : Small s) : Strong (strongSupport hs) :=
-  sorry
+theorem strongSupport_index_lt_iff {s : Set (Address β)} (hs : Small s) {i j : κ}
+    (hi : i < indexMax (strongClosure_small hs)) (hj : j < indexMax (strongClosure_small hs)) :
+    StrongSupportOrder ((strongSupport hs).f i hi) ((strongSupport hs).f j hj) ↔ i < j := by
+  rw [← Ordinal.typein_lt_typein (· < ·),
+    ← Ordinal.enum_lt_enum (r := StrongSupportOrderOn (strongClosure s))]
+  rfl
+
+theorem lt_of_strongSupportRel {s : Set (Address β)} (hs : Small s) {i j : κ}
+    (hi : i < indexMax (strongClosure_small hs)) (hj : j < indexMax (strongClosure_small hs))
+    (h : StrongSupportRel ((strongSupport hs).f i hi) ((strongSupport hs).f j hj)) : i < j := by
+  rw [← strongSupport_index_lt_iff hs hi hj]
+  exact Prod.Lex.left _ _ (WellFounded.rank_lt_of_rel _ h)
+
+theorem mem_of_strongSupport_f_eq {s : Set (Address β)} (hs : Small s)
+    {i : κ} (hi : i < indexMax (strongClosure_small hs)) :
+    (strongSupport hs).f i hi ∈ strongClosure s :=
+  Subtype.coe_prop _
+
+theorem exists_of_mem_strongClosure {s : Set (Address β)} (hs : Small s)
+    (c : Address β) (hc : c ∈ strongClosure s) :
+    ∃ (j : κ) (hj : j < indexMax (strongClosure_small hs)), (strongSupport hs).f j hj = c := by
+  refine ⟨Ordinal.enum (α := κ) (· < ·)
+    (Ordinal.typein (StrongSupportOrderOn (strongClosure s)) ⟨c, hc⟩) ?_,
+      ?_, ?_⟩
+  · refine lt_of_not_le (fun h => ?_)
+    have := Ordinal.card_le_card h
+    simp only [Ordinal.card_type] at this
+    have := this.trans
+      (Ordinal.card_le_card (Ordinal.typein_lt_type (StrongSupportOrderOn _) ⟨c, hc⟩).le)
+    cases this.not_lt (strongClosure_small hs)
+  · rw [indexMax, Ordinal.enum_lt_enum (r := (· < ·))]
+    exact Ordinal.typein_lt_type _ _
+  · simp only [strongSupport_f, indexed, Ordinal.typein_enum, Ordinal.enum_typein]
+
+theorem subset_strongSupport {s : Set (Address β)} (hs : Small s) : s ⊆ strongSupport hs := by
+  intro c hc
+  obtain ⟨j, hj, hc⟩ := exists_of_mem_strongClosure hs c (subset_strongClosure s hc)
+  exact ⟨j, hj, hc.symm⟩
+
+theorem strongSupport_strong {s : Set (Address β)} (hs : Small s) : Strong (strongSupport hs) := by
+  constructor
+  · intro i₁ i₂ hi₁ hi₂ A N₁ N₂ hN₁ hN₂ a ha
+    have hi₁' := mem_of_strongSupport_f_eq hs hi₁
+    have hi₂' := mem_of_strongSupport_f_eq hs hi₂
+    rw [hN₁] at hi₁'
+    rw [hN₂] at hi₂'
+    have := interferes_mem_strongClosure s A a N₁ N₂ ha hi₁' hi₂'
+    obtain ⟨j, hj, hc⟩ := exists_of_mem_strongClosure _ _ this
+    refine ⟨j, hj, ?_, ?_, hc⟩
+    · refine lt_of_strongSupportRel hs hj hi₁ ?_
+      rw [hc, hN₁]
+      exact StrongSupportRel.atom _ _ _ _
+    · refine lt_of_strongSupportRel hs hj hi₂ ?_
+      rw [hc, hN₂]
+      exact StrongSupportRel.atom _ _ _ _
+  · intro i hi c hc
+    have hi' := mem_of_strongSupport_f_eq hs hi
+    have := precedes_mem_strongClosure s hc hi'
+    obtain ⟨j, hj, hc'⟩ := exists_of_mem_strongClosure _ _ this
+    refine ⟨j, hj, ?_, hc'⟩
+    refine lt_of_strongSupportRel hs hj hi ?_
+    rw [hc']
+    exact StrongSupportRel.precedes _ _ hc
 
 end ConNF
