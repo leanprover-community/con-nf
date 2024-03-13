@@ -1,4 +1,4 @@
-import ConNF.FOA.Basic.Hypotheses
+import ConNF.Counting.StrongSupport
 
 /-!
 # Coding functions
@@ -160,6 +160,15 @@ theorem code_smul (S : Support β) (t : Tangle β) (ρ : Allowable β)
   simp_rw [inv_smul_smul] at this
   rw [this]
   simp only [code_decode, Part.get_some, inv_smul_smul]
+
+def Strong (χ : CodingFunction β) : Prop :=
+  ∀ S ∈ χ.decode.Dom, S.Strong
+
+theorem strong_of_strong_mem (χ : CodingFunction β) (S : Support β)
+    (hS : S.Strong) (hSχ : S ∈ χ.decode.Dom) : χ.Strong := by
+  intro T hTχ
+  obtain ⟨ρ, rfl⟩ := (χ.dom_iff S T hSχ).mp hTχ
+  exact hS.smul ρ
 
 end CodingFunction
 

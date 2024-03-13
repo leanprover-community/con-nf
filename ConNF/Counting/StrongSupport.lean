@@ -2,7 +2,6 @@ import Mathlib.Order.Extension.Well
 import ConNF.Mathlib.Support
 import ConNF.FOA.Basic.Reduction
 import ConNF.FOA.Basic.Flexible
-import ConNF.Counting.CodingFunction
 
 /-!
 # Strong supports
@@ -34,7 +33,7 @@ inductive Precedes : Address β → Address β → Prop
       ⟨(h.path.B.cons h.path.hε).cons (bot_lt_coe _), inr N⟩
 
 @[mk_iff]
-structure Strong (S : Support β) : Prop where
+structure Support.Strong (S : Support β) : Prop where
   interferes {i₁ i₂ : κ} (hi₁ : i₁ < S.max) (hi₂ : i₂ < S.max)
     {A : ExtendedIndex β} {N₁ N₂ : NearLitter}
     (h₁ : S.f i₁ hi₁ = ⟨A, inr N₁⟩) (h₂ : S.f i₂ hi₂ = ⟨A, inr N₂⟩)
@@ -245,7 +244,7 @@ theorem subset_strongSupport {s : Set (Address β)} (hs : Small s) : s ⊆ stron
   obtain ⟨j, hj, hc⟩ := exists_of_mem_strongClosure hs c (subset_strongClosure s hc)
   exact ⟨j, hj, hc.symm⟩
 
-theorem strongSupport_strong {s : Set (Address β)} (hs : Small s) : Strong (strongSupport hs) := by
+theorem strongSupport_strong {s : Set (Address β)} (hs : Small s) : (strongSupport hs).Strong := by
   constructor
   · intro i₁ i₂ hi₁ hi₂ A N₁ N₂ hN₁ hN₂ a ha
     have hi₁' := mem_of_strongSupport_f_eq hs hi₁
@@ -269,5 +268,77 @@ theorem strongSupport_strong {s : Set (Address β)} (hs : Small s) : Strong (str
     refine lt_of_strongSupportRel hs hj hi ?_
     rw [hc']
     exact StrongSupportRel.precedes _ _ hc
+
+theorem Interferes.smul {a : Atom} {N₁ N₂ : NearLitter} (h : Interferes a N₁ N₂)
+    (π : NearLitterPerm) : Interferes (π • a) (π • N₁) (π • N₂) := by
+  cases h
+  case symmDiff h₁ h₂ =>
+    refine Interferes.symmDiff ?_ ?_
+    · simp only [NearLitterPerm.smul_nearLitter_fst, smul_left_cancel_iff]
+      exact h₁
+    · obtain (h₂ | h₂) := h₂
+      · refine Or.inl ?_
+        rw [NearLitterPerm.smul_nearLitter_coe, NearLitterPerm.smul_nearLitter_coe,
+          mem_diff, smul_mem_smul_set_iff, smul_mem_smul_set_iff]
+        exact h₂
+      · refine Or.inr ?_
+        rw [NearLitterPerm.smul_nearLitter_coe, NearLitterPerm.smul_nearLitter_coe,
+          mem_diff, smul_mem_smul_set_iff, smul_mem_smul_set_iff]
+        exact h₂
+  case inter h₁ h₂ =>
+    refine Interferes.inter ?_ ?_
+    · simp only [NearLitterPerm.smul_nearLitter_fst, ne_eq, smul_left_cancel_iff]
+      exact h₁
+    · rw [mem_inter_iff, NearLitterPerm.smul_nearLitter_coe, NearLitterPerm.smul_nearLitter_coe,
+        smul_mem_smul_set_iff, smul_mem_smul_set_iff]
+      exact h₂
+
+theorem Precedes.smul [LeLevel β] {c d : Address β} (h : Precedes c d) (ρ : Allowable β) :
+    Precedes (ρ • c) (ρ • d) := by
+  cases h
+  case fuzz A N h c hc =>
+    have := Precedes.fuzz A (Allowable.toStructPerm ρ A • N) (h.smul ρ)
+        (Allowable.comp (h.path.B.cons h.path.hδ) ρ • c) ?_
+    · simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path,
+        Allowable.smul_address, Allowable.toStructPerm_comp, Tree.comp_apply] at this
+      simp only [Allowable.smul_address, smul_inr]
+      rw [← h.path.hA] at this ⊢
+      exact this
+    · simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
+        smul_support]
+      change _ ∈ (_ : Set (Address h.path.δ))
+      rw [Enumeration.smul_coe, smul_mem_smul_set_iff]
+      exact hc
+  case fuzzBot A N h =>
+    have := Precedes.fuzzBot A (Allowable.toStructPerm ρ A • N) (h.smul ρ)
+    simp only [Allowable.smul_address, smul_inl, smul_inr]
+    simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleBot_smul_path, inflexibleBot_smul_a,
+      ofBot_smul, Allowable.toStructPerm_apply] at this
+    simp_rw [h.path.hA] at this ⊢
+    exact this
+
+theorem Support.Strong.smul [LeLevel β] {S : Support β} (hS : S.Strong) (ρ : Allowable β) :
+    (ρ • S).Strong := by
+  constructor
+  · intro i₁ i₂ hi₁ hi₂ A N₁ N₂ hN₁ hN₂ a ha
+    have := ha.smul (Allowable.toStructPerm ρ A)⁻¹
+    have := hS.interferes hi₁ hi₂
+        (N₁ := (Allowable.toStructPerm ρ A)⁻¹ • N₁) (N₂ := (Allowable.toStructPerm ρ A)⁻¹ • N₂)
+        ?_ ?_ (A := A) (a := (Allowable.toStructPerm ρ A)⁻¹ • a) this
+    · obtain ⟨j, hj, hj₁, hj₂, h⟩ := this
+      refine ⟨j, hj, hj₁, hj₂, ?_⟩
+      rw [Enumeration.smul_f, h, Allowable.smul_address, smul_inl, smul_inv_smul]
+    · rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at hN₁
+      rw [hN₁, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr]
+    · rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at hN₂
+      rw [hN₂, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr]
+  · intro i hi c hc
+    have := hS.precedes hi (ρ⁻¹ • c) ?_
+    · obtain ⟨j, hj, hj', hc⟩ := this
+      refine ⟨j, hj, hj', ?_⟩
+      rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul, hc]
+    · have := hc.smul ρ⁻¹
+      simp only [Enumeration.smul_f, inv_smul_smul] at this
+      exact this
 
 end ConNF
