@@ -18,6 +18,19 @@ structure Enumeration (α : Type _) where
   max : κ
   f : (i : κ) → i < max → α
 
+theorem Enumeration.ext' {E F : Enumeration α} (h : E.max = F.max)
+    (h' : ∀ (i : κ) (hE : i < E.max) (hF : i < F.max), E.f i hE = F.f i hF) :
+    E = F := by
+  ext
+  · exact h
+  obtain ⟨m, e⟩ := E
+  obtain ⟨n, f⟩ := F
+  cases h
+  refine heq_of_eq (funext ?_)
+  intro i
+  ext h
+  exact h' i h h
+
 def Enumeration.carrier (E : Enumeration α) : Set α :=
   { c | ∃ i, ∃ (h : i < E.max), c = E.f i h }
 

@@ -82,13 +82,24 @@ theorem convertNearLitter_subsingleton_flexible (A : ExtendedIndex β) (NS NT NT
     (convert_flexible hσS hσT  hN hiS₁' hiT₁' hiS₂' hiT₂') hiT₂'
   have h₅ := h₁.symm.trans h₃
   have h₆ := h₂.symm.trans h₄
-  simp only [and_true, exists_const, SpecCondition.flexible.injEq, true_and] at h₅ h₆
+  simp only [SpecCondition.flexible.injEq, true_and] at h₅ h₆
+  obtain ⟨h₅, h₅'⟩ := h₅
+  obtain ⟨h₆, -⟩ := h₆
   have := h₅.symm.trans h₆
   rw [Set.ext_iff] at this
-  obtain ⟨_, h⟩ := (this i).mp ⟨hiT₁, hiT₂⟩
-  have := hiT₂.symm.trans h
-  cases this
-  rfl
+  obtain ⟨_, N', h₁, h₂⟩ := (this i).mp ⟨hiT₁, NT, hiT₂, rfl⟩
+  cases hiT₂.symm.trans h₁
+  -- TODO: Abstract away the last bit of the proof since it's repeated for the other cases.
+  refine NearLitter.ext ?_
+  rw [← symmDiff_eq_bot, bot_eq_empty, eq_empty_iff_forall_not_mem]
+  intro a ha
+  obtain ⟨j, hj, -, -, hja⟩ :=
+    hT.interferes hiT₁ hiT₁' hiT₂ hiT₂' (Support.Interferes.symmDiff h₂ ha)
+  simp only [Function.funext_iff, Set.ext_iff] at h₅'
+  obtain ⟨_, _, a', NS', _, ha', hS', -⟩ :=
+    (h₅' i' j).mpr ⟨hiT₁', hj, a, NT', h₂.symm, ha, hiT₂', hja⟩
+  cases hiS₂'.symm.trans hS'
+  simp only [symmDiff_self, bot_eq_empty, mem_empty_iff_false] at ha'
 
 theorem convert_inflexibleCoe {A : ExtendedIndex β} {NS NT : NearLitter} (P : InflexibleCoePath A)
     (t : Tangle P.δ) (hNS : NS.1 = fuzz P.hδε t)
@@ -304,5 +315,278 @@ noncomputable def convert : StructBehaviour β :=
     atomMap_dom_small := convertAtom_dom_small A
     nearLitterMap_dom_small := convertNearLitter_dom_small A
   }
+
+theorem convIndex {i : κ} (h : i < S.max) : i < T.max :=
+  h.trans_eq (hσS.max_eq_max.trans hσT.max_eq_max.symm)
+
+theorem convert_atomMap_eq {A : ExtendedIndex β} {a b : Atom} (h : ConvertAtom S T A a b) :
+    ((convert hσS hσT A).atomMap a).get ⟨b, h⟩ = b :=
+  PFun.get_eq (hg := (convertAtom_subsingleton hσS hσT A)) _ _ h
+
+theorem convert_nearLitterMap_eq {A : ExtendedIndex β} {N₁ N₂ : NearLitter}
+    (h : ConvertNearLitter S T A N₁ N₂) :
+    ((convert hσS hσT A).nearLitterMap N₁).get ⟨N₂, h⟩ = N₂ :=
+  PFun.get_eq (hg := (convertNearLitter_subsingleton hσS hσT A)) _ _ h
+
+theorem convertAtom_dom {A : ExtendedIndex β} {a : Atom} (h : ⟨A, inl a⟩ ∈ S) :
+    ∃ b, ConvertAtom S T A a b := by
+  obtain ⟨i, hiS, hc⟩ := h
+  have := hσS.atom_spec i hiS A a hc.symm
+  obtain ⟨b, hb⟩ := hσT.of_eq_atom this
+  exact ⟨b, i, hiS, (convIndex hσS hσT hiS), hc.symm, hb⟩
+
+theorem convertNearLitter_dom {A : ExtendedIndex β} {N : NearLitter} (h : ⟨A, inr N⟩ ∈ S) :
+    ∃ N', ConvertNearLitter S T A N N' := by
+  obtain ⟨i, hiS, hc⟩ := h
+  obtain (hN | ⟨⟨hN⟩⟩ | ⟨⟨hN⟩⟩) := flexible_cases' A N.1
+  · have := hσS.flexible_spec i hiS A N hN hc.symm
+    obtain ⟨N', -, hN'₂⟩ := hσT.of_eq_flexible this
+    exact ⟨N', i, hiS, (convIndex hσS hσT hiS), hc.symm, hN'₂⟩
+  · have := hσS.inflexibleBot_spec i hiS A N hN hc.symm
+    obtain ⟨N', hN'₁, -, hN'₃⟩ := hσT.of_eq_inflexibleBot this
+    exact ⟨N', i, hiS, (convIndex hσS hσT hiS), hc.symm, hN'₃⟩
+  · have := hσS.inflexibleCoe_spec i hiS A N hN hc.symm
+    obtain ⟨N', hN'₁, -, hN'₃⟩ := hσT.of_eq_inflexibleCoe this
+    exact ⟨N', i, hiS, (convIndex hσS hσT hiS), hc.symm, hN'₃⟩
+
+theorem convertAtom_injective {A : ExtendedIndex β} {a b c : Atom}
+    (ha : ConvertAtom S T A a c) (hb : ConvertAtom S T A b c) : a = b := by
+  obtain ⟨i, hiS, hiT, hiS', hiT'⟩ := ha
+  obtain ⟨j, hjS, hjT, hjS', hjT'⟩ := hb
+  have := (hσS.atom_spec i hiS A a hiS').symm.trans (hσT.atom_spec i hiT A c hiT')
+  rw [SpecCondition.atom.injEq] at this
+  obtain ⟨_, h⟩ := (Set.ext_iff.mp this.2.1 j).mpr ⟨hjT, hjT'⟩
+  have := hjS'.symm.trans h
+  cases this
+  rfl
+
+theorem convertAtom_mem_convertLitter_iff {A : ExtendedIndex β}
+    {a a' : Atom} {N N' : NearLitter}
+    (ha : ConvertAtom S T A a a') (hb : ConvertNearLitter S T A N N') :
+    a' ∈ N' ↔ a ∈ N := by
+  obtain ⟨i, hiS, hiT, hiS', hiT'⟩ := ha
+  obtain ⟨j, hjS, hjT, hjS', hjT'⟩ := hb
+  have := (hσS.atom_spec i hiS A a hiS').symm.trans (hσT.atom_spec i hiT A a' hiT')
+  rw [SpecCondition.atom.injEq] at this
+  constructor
+  · intro h
+    obtain ⟨_, _, hS', hN'⟩ := (Set.ext_iff.mp this.2.2 j).mpr ⟨hjT, N', hjT', h⟩
+    cases hjS'.symm.trans hS'
+    exact hN'
+  · intro h
+    obtain ⟨_, _, hT', hN'⟩ := (Set.ext_iff.mp this.2.2 j).mp ⟨hjS, N, hjS', h⟩
+    cases hjT'.symm.trans hT'
+    exact hN'
+
+theorem convertNearLitter_fst {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : NearLitter}
+    (h₁ : ConvertNearLitter S T A N₁ N₃) (h₂ : ConvertNearLitter S T A N₂ N₄)
+    (h : N₁.1 = N₂.1) : N₃.1 = N₄.1 := by
+  obtain ⟨i, hiS, hiT, hiS', hiT'⟩ := h₁
+  obtain ⟨j, hjS, hjT, hjS', hjT'⟩ := h₂
+  obtain (hN | ⟨⟨P, a₁, hN⟩⟩ | ⟨⟨P, t₁, hN⟩⟩) := flexible_cases' A N₁.1
+  · have h₁ := hσS.flexible_spec i hiS A N₁ hN hiS'
+    obtain ⟨N', hN₃, hN'₃⟩ := hσT.of_eq_flexible h₁
+    cases hiT'.symm.trans hN'₃
+    have h₂ := hσS.flexible_spec j hjS A N₂ (h ▸ hN) hjS'
+    obtain ⟨N', hN₄, hN'₄⟩ := hσT.of_eq_flexible h₂
+    cases hjT'.symm.trans hN'₄
+    have h₃ := hσT.flexible_spec i hiT A N₃ hN₃ hiT'
+    have := h₁.symm.trans h₃
+    rw [SpecCondition.flexible.injEq] at this
+    obtain ⟨_, N', h₁, h₂⟩ := (Set.ext_iff.mp this.2.1 j).mp ⟨hjS, N₂, hjS', h.symm⟩
+    cases hjT'.symm.trans h₁
+    exact h₂.symm
+  · have h₁ := hσS.inflexibleBot_spec i hiS A N₁ ⟨P, a₁, hN⟩ hiS'
+    obtain ⟨N', a₃, hN₃, hN'₃⟩ := hσT.of_eq_inflexibleBot h₁
+    cases hiT'.symm.trans hN'₃
+    have h₂ := hσS.inflexibleBot_spec j hjS A N₂ ⟨P, a₁, h ▸ hN⟩ hjS'
+    obtain ⟨N', a₄, hN₄, hN'₄⟩ := hσT.of_eq_inflexibleBot h₂
+    cases hjT'.symm.trans hN'₄
+    have h₃ := hσT.inflexibleBot_spec i hiT A N₃ ⟨P, a₃, hN₃⟩ hiT'
+    have h₄ := hσT.inflexibleBot_spec j hjT A N₄ ⟨P, a₄, hN₄⟩ hjT'
+    have h₁₃ := h₁.symm.trans h₃
+    have h₂₄ := h₂.symm.trans h₄
+    rw [SpecCondition.inflexibleBot.injEq] at h₁₃ h₂₄
+    clear h₁ h₂ h₃ h₄
+    have h₁' := Support.Precedes.fuzzBot A N₁ ⟨P, a₁, hN⟩
+    rw [← P.hA, ← hiS'] at h₁'
+    obtain ⟨j₁, hj₁S, -, hj₁S'⟩ := hS.precedes hiS ⟨P.B.cons (bot_lt_coe _), inl a₁⟩ h₁'
+    obtain ⟨_, hj₁T⟩ := (Set.ext_iff.mp h₁₃.2.2.1 j₁).mp ⟨hj₁S, hj₁S'⟩
+    obtain ⟨_, hj₂T⟩ := (Set.ext_iff.mp h₂₄.2.2.1 j₁).mp ⟨hj₁S, hj₁S'⟩
+    cases hj₁T.symm.trans hj₂T
+    rw [hN₃, hN₄]
+  · have h₁ := hσS.inflexibleCoe_spec i hiS A N₁ ⟨P, t₁, hN⟩ hiS'
+    obtain ⟨N', t₃, hN₃, hN'₃⟩ := hσT.of_eq_inflexibleCoe h₁
+    cases hiT'.symm.trans hN'₃
+    have h₂ := hσS.inflexibleCoe_spec j hjS A N₂ ⟨P, t₁, h ▸ hN⟩ hjS'
+    obtain ⟨N', t₄, hN₄, hN'₄⟩ := hσT.of_eq_inflexibleCoe h₂
+    cases hjT'.symm.trans hN'₄
+    have h₃ := hσT.inflexibleCoe_spec i hiT A N₃ ⟨P, t₃, hN₃⟩ hiT'
+    have h₄ := hσT.inflexibleCoe_spec j hjT A N₄ ⟨P, t₄, hN₄⟩ hjT'
+    have h₁₃ := h₁.symm.trans h₃
+    have h₂₄ := h₂.symm.trans h₄
+    rw [SpecCondition.inflexibleCoe.injEq] at h₁₃ h₂₄
+    suffices : t₃ = t₄
+    · rw [hN₃, hN₄, this]
+    have h₁₃' := eq_of_heq h₁₃.2.2.1
+    have h₂₄' := eq_of_heq h₂₄.2.2.1
+    simp only [CodingFunction.code_eq_code_iff] at h₁₃' h₂₄'
+    obtain ⟨ρ, hρ, rfl⟩ := h₁₃'
+    obtain ⟨ρ', hρ', rfl⟩ := h₂₄'
+    clear h₁ h₂ h₃ h₄ h₁₃ h₂₄ hN'₃ hN'₄
+    have := support_supports t₁ (ρ'⁻¹ * ρ) ?_
+    · rw [mul_smul, inv_smul_eq_iff] at this
+      exact this
+    intro c hc
+    rw [mul_smul, inv_smul_eq_iff]
+    have : ∃ k hk, k < i ∧ k < j ∧ S.f k hk = ⟨(P.B.cons P.hδ).comp c.1, c.2⟩
+    · by_cases hij : i < j
+      · have hc' := Support.Precedes.fuzz A N₁ ⟨P, t₁, hN⟩ c hc
+        rw [← P.hA, ← hiS'] at hc'
+        obtain ⟨k, hk, hki, hkS⟩ := hS.precedes hiS _ hc'
+        exact ⟨k, hk, hki, hki.trans hij, hkS⟩
+      · have hc' := Support.Precedes.fuzz A N₂ ⟨P, t₁, h ▸ hN⟩ c hc
+        rw [← P.hA, ← hjS'] at hc'
+        obtain ⟨k, hk, hki, hkS⟩ := hS.precedes hjS _ hc'
+        exact ⟨k, hk, hki.trans_le (le_of_not_lt hij), hki, hkS⟩
+    obtain ⟨k, hk, hki, hkj, hkS⟩ := this
+    obtain ⟨d, hd⟩ := comp_eq_same hσS hσT hk (P.B.cons P.hδ) c hkS
+    have h₁' := support_f_congr hρ k ?_
+    swap
+    · rw [Support.comp_max_eq_of_canComp]
+      exact hki
+      exact ⟨k, hki, d, hd⟩
+    rw [Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hd),
+      Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hkS)] at h₁'
+    have h₂' := support_f_congr hρ' k ?_
+    swap
+    · rw [Support.comp_max_eq_of_canComp]
+      exact hkj
+      exact ⟨k, hkj, d, hd⟩
+    rw [Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hd),
+      Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hkS)] at h₂'
+    rw [← h₁', ← h₂']
+
+theorem convertNearLitter_fst' {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : NearLitter}
+    (h₁ : ConvertNearLitter S T A N₁ N₃) (h₂ : ConvertNearLitter S T A N₂ N₄)
+    (h : N₃.1 = N₄.1) : N₁.1 = N₂.1 := by
+  obtain ⟨i, hiS, hiT, hiS', hiT'⟩ := h₁
+  obtain ⟨j, hjS, hjT, hjS', hjT'⟩ := h₂
+  obtain (hN | ⟨⟨P, a₁, hN⟩⟩ | ⟨⟨P, t₁, hN⟩⟩) := flexible_cases' A N₁.1
+  · have h₁ := hσS.flexible_spec i hiS A N₁ hN hiS'
+    obtain ⟨N', hN₃, hN'₃⟩ := hσT.of_eq_flexible h₁
+    cases hiT'.symm.trans hN'₃
+    sorry
+  · have h₁ := hσS.inflexibleBot_spec i hiS A N₁ ⟨P, a₁, hN⟩ hiS'
+    obtain ⟨N', a₃, hN₃, hN'₃⟩ := hσT.of_eq_inflexibleBot h₁
+    cases hiT'.symm.trans hN'₃
+    sorry
+  · have h₁ := hσS.inflexibleCoe_spec i hiS A N₁ ⟨P, t₁, hN⟩ hiS'
+    obtain ⟨N', t₃, hN₃, hN'₃⟩ := hσT.of_eq_inflexibleCoe h₁
+    cases hiT'.symm.trans hN'₃
+    sorry
+
+theorem convert_lawful : (convert hσS hσT).Lawful := by
+  intro A
+  constructor
+  case atomMap_injective =>
+    rintro a b ⟨a', ha⟩ ⟨b', hb⟩ h
+    rw [convert_atomMap_eq hσS hσT ha, convert_atomMap_eq hσS hσT hb] at h
+    subst h
+    exact convertAtom_injective hσS hσT ha hb
+  case atom_mem_iff =>
+    rintro a ⟨a', ha⟩ N ⟨N', hN⟩
+    rw [convert_atomMap_eq hσS hσT ha, convert_nearLitterMap_eq hσS hσT hN]
+    exact convertAtom_mem_convertLitter_iff hσS hσT ha hN
+  case dom_of_mem_symmDiff =>
+    rintro a N₁ N₂ hN ⟨N₁', i, hiS, hiT, hiS', -⟩ ⟨N₂', j, hjS, hjT, hjS', -⟩ ha
+    obtain ⟨k, hkS, -, -, hk⟩ :=
+      hS.interferes hiS hjS hiS' hjS' (Support.Interferes.symmDiff hN ha)
+    exact convertAtom_dom hσS hσT ⟨k, hkS, hk.symm⟩
+  case dom_of_mem_inter =>
+    rintro a N₁ N₂ hN ⟨N₁', i, hiS, hiT, hiS', -⟩ ⟨N₂', j, hjS, hjT, hjS', -⟩ ha
+    obtain ⟨k, hkS, -, -, hk⟩ :=
+      hS.interferes hiS hjS hiS' hjS' (Support.Interferes.inter hN ha)
+    exact convertAtom_dom hσS hσT ⟨k, hkS, hk.symm⟩
+  case ran_of_mem_symmDiff =>
+    rintro a N₁ N₂ hN ⟨N₁', i, hiS, hiT, hiS', hiT'⟩ ⟨N₂', j, hjS, hjT, hjS', hjT'⟩ ha
+    rw [convert_nearLitterMap_eq hσS hσT ⟨i, hiS, hiT, hiS', hiT'⟩,
+      convert_nearLitterMap_eq hσS hσT ⟨j, hjS, hjT, hjS', hjT'⟩] at ha
+    obtain ⟨k, hkT, -, -, hk⟩ := hT.interferes hiT hjT hiT' hjT'
+      (Support.Interferes.symmDiff
+        (convertNearLitter_fst hσS hσT ⟨i, hiS, hiT, hiS', hiT'⟩ ⟨j, hjS, hjT, hjS', hjT'⟩ hN) ha)
+    have := hσT.atom_spec k hkT A a hk
+    obtain ⟨a', ha'⟩ := hσS.of_eq_atom this
+    refine ⟨a', convertAtom_dom hσS hσT ⟨k, convIndex hσT hσS hkT, ha'.symm⟩, ?_⟩
+    rw [convert_atomMap_eq hσS hσT ⟨k, convIndex hσT hσS hkT, hkT, ha', hk⟩]
+  case ran_of_mem_inter =>
+    rintro a N₁ N₂ hN ⟨N₁', i, hiS, hiT, hiS', hiT'⟩ ⟨N₂', j, hjS, hjT, hjS', hjT'⟩ ha
+    rw [convert_nearLitterMap_eq hσS hσT ⟨i, hiS, hiT, hiS', hiT'⟩,
+      convert_nearLitterMap_eq hσS hσT ⟨j, hjS, hjT, hjS', hjT'⟩] at ha
+    obtain ⟨k, hkT, -, -, hk⟩ := hT.interferes hiT hjT hiT' hjT'
+      (Support.Interferes.inter
+        (hN ∘ convertNearLitter_fst' hσS hσT
+          ⟨i, hiS, hiT, hiS', hiT'⟩ ⟨j, hjS, hjT, hjS', hjT'⟩) ha)
+    have := hσT.atom_spec k hkT A a hk
+    obtain ⟨a', ha'⟩ := hσS.of_eq_atom this
+    refine ⟨a', convertAtom_dom hσS hσT ⟨k, convIndex hσT hσS hkT, ha'.symm⟩, ?_⟩
+    rw [convert_atomMap_eq hσS hσT ⟨k, convIndex hσT hσS hkT, hkT, ha', hk⟩]
+
+theorem convert_coherent : (convert hσS hσT).Coherent := sorry
+
+noncomputable def convertAllowable : Allowable β :=
+  ((convert hσS hσT).freedom_of_action (convert_lawful hσS hσT) (convert_coherent hσS hσT)).choose
+
+theorem convertAllowable_spec :
+    (convert hσS hσT).Approximates (Allowable.toStructPerm <| convertAllowable hσS hσT) :=
+  ((convert hσS hσT).freedom_of_action
+    (convert_lawful hσS hσT) (convert_coherent hσS hσT)).choose_spec
+
+theorem convert_atomMap_get {A : ExtendedIndex β} {a : Atom} {i : κ} (hiS : i < S.max)
+    (h : S.f i hiS = ⟨A, inl a⟩) :
+    T.f i (convIndex hσS hσT hiS) =
+      ⟨A, inl (((convert hσS hσT A).atomMap a).get
+        (convertAtom_dom hσS hσT ⟨i, hiS, h.symm⟩))⟩ := by
+  have h₁ := hσS.atom_spec i hiS A a h
+  obtain ⟨b, hb⟩ := hσT.of_eq_atom h₁
+  have : ConvertAtom S T A a b := ⟨i, hiS, convIndex hσS hσT hiS, h, hb⟩
+  rw [convert_atomMap_eq hσS hσT this]
+  exact hb
+
+theorem convert_nearLitterMap_get {A : ExtendedIndex β} {N : NearLitter} {i : κ} (hiS : i < S.max)
+    (h : S.f i hiS = ⟨A, inr N⟩) :
+    T.f i (convIndex hσS hσT hiS) =
+      ⟨A, inr (((convert hσS hσT A).nearLitterMap N).get
+        (convertNearLitter_dom hσS hσT ⟨i, hiS, h.symm⟩))⟩ := by
+  obtain (hN | ⟨⟨hN⟩⟩ | ⟨⟨hN⟩⟩) := flexible_cases' A N.1
+  · have := hσS.flexible_spec i hiS A N hN h
+    obtain ⟨N', -, hN'₂⟩ := hσT.of_eq_flexible this
+    have : ConvertNearLitter S T A N N' := ⟨i, hiS, convIndex hσS hσT hiS, h, hN'₂⟩
+    rw [convert_nearLitterMap_eq hσS hσT this]
+    exact hN'₂
+  · have := hσS.inflexibleBot_spec i hiS A N hN h
+    obtain ⟨N', hN'₁, -, hN'₃⟩ := hσT.of_eq_inflexibleBot this
+    have : ConvertNearLitter S T A N N' := ⟨i, hiS, convIndex hσS hσT hiS, h, hN'₃⟩
+    rw [convert_nearLitterMap_eq hσS hσT this]
+    exact hN'₃
+  · have := hσS.inflexibleCoe_spec i hiS A N hN h
+    obtain ⟨N', hN'₁, -, hN'₃⟩ := hσT.of_eq_inflexibleCoe this
+    have : ConvertNearLitter S T A N N' := ⟨i, hiS, convIndex hσS hσT hiS, h, hN'₃⟩
+    rw [convert_nearLitterMap_eq hσS hσT this]
+    exact hN'₃
+
+theorem convertAllowable_smul' (i : κ) (hiS : i < S.max) (hiT : i < T.max) :
+    convertAllowable hσS hσT • S.f i hiS = T.f i hiT := by
+  set c := S.f i hiS with hc
+  obtain ⟨A, a | N⟩ := c
+  · have := (convertAllowable_spec hσS hσT A).map_atom a (convertAtom_dom hσS hσT ⟨i, hiS, hc⟩)
+    rw [Allowable.smul_address, smul_inl, this, convert_atomMap_get hσS hσT hiS hc.symm]
+  · have := (convertAllowable_spec hσS hσT A).map_nearLitter N
+      (convertNearLitter_dom hσS hσT ⟨i, hiS, hc⟩)
+    rw [Allowable.smul_address, smul_inr, this, convert_nearLitterMap_get hσS hσT hiS hc.symm]
+
+theorem convertAllowable_smul : convertAllowable hσS hσT • S = T := by
+  refine Enumeration.ext' (hσS.max_eq_max.trans hσT.max_eq_max.symm) ?_
+  exact convertAllowable_smul' hσS hσT
 
 end ConNF
