@@ -605,7 +605,130 @@ theorem convert_lawful : (convert hσS hσT).Lawful := by
     refine ⟨a', convertAtom_dom hσS hσT ⟨k, convIndex hσT hσS hkT, ha'.symm⟩, ?_⟩
     rw [convert_atomMap_eq hσS hσT ⟨k, convIndex hσT hσS hkT, hkT, ha', hk⟩]
 
-theorem convert_coherent : (convert hσS hσT).Coherent := sorry
+theorem convert_coherentDom : (convert hσS hσT).CoherentDom := by
+  constructor
+  case mapFlexible =>
+    rintro A N ⟨N', hN₁⟩ hN₂
+    rw [convert_nearLitterMap_eq hσS hσT hN₁]
+    obtain ⟨i, hiS, hiT, hiS', hiT'⟩ := hN₁
+    have := hσS.flexible_spec i hiS A N hN₂ hiS'
+    obtain ⟨_, hN₃, h⟩ := hσT.of_eq_flexible this
+    cases hiT'.symm.trans h
+    exact hN₃
+  case atom_bot_dom =>
+    rintro γ _ A ε _ hε a Nt hNt ⟨N', i, hiS, hiT, hiS', -⟩
+    have := Support.Precedes.fuzzBot _ Nt ⟨⟨γ, ε, hε, A, rfl⟩, a, hNt⟩
+    rw [← hiS'] at this
+    obtain ⟨j, hj, -, hjS⟩ := hS.precedes hiS _ this
+    obtain ⟨a', ha'⟩ := hσT.of_eq_atom (hσS.atom_spec j hj _ a hjS)
+    exact ⟨a', j, hj, convIndex hσS hσT hj, hjS, ha'⟩
+  case atom_dom =>
+    rintro γ _ A δ _ ε _ hδ hε hδε t B a Nt hNt ha ⟨N', i, hiS, hiT, hiS', -⟩
+    have := Support.Precedes.fuzz _ Nt ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, hNt⟩ _ ha
+    rw [← hiS'] at this
+    obtain ⟨j, hj, -, hjS⟩ := hS.precedes hiS _ this
+    obtain ⟨a', ha'⟩ := hσT.of_eq_atom (hσS.atom_spec j hj _ a hjS)
+    exact ⟨a', j, hj, convIndex hσS hσT hj, hjS, ha'⟩
+  case nearLitter_dom =>
+    rintro γ _ A δ _ ε _ hδ hε hδε t B N Nt hNt hN ⟨N', i, hiS, hiT, hiS', -⟩
+    have := Support.Precedes.fuzz _ Nt ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, hNt⟩ _ hN
+    rw [← hiS'] at this
+    obtain ⟨j, hj, -, hjS⟩ := hS.precedes hiS _ this
+    obtain (hN | ⟨⟨hN⟩⟩ | ⟨⟨hN⟩⟩) := flexible_cases' ((A.cons hδ).comp B) N.1
+    · obtain ⟨N', -, h₂⟩ := hσT.of_eq_flexible (hσS.flexible_spec j hj _ N hN hjS)
+      exact ⟨N', j, hj, convIndex hσS hσT hj, hjS, h₂⟩
+    · obtain ⟨N', h₁, -, h₂⟩ := hσT.of_eq_inflexibleBot (hσS.inflexibleBot_spec j hj _ N hN hjS)
+      exact ⟨N', j, hj, convIndex hσS hσT hj, hjS, h₂⟩
+    · obtain ⟨N', h₁, -, h₂⟩ := hσT.of_eq_inflexibleCoe (hσS.inflexibleCoe_spec j hj _ N hN hjS)
+      exact ⟨N', j, hj, convIndex hσS hσT hj, hjS, h₂⟩
+
+theorem convert_coherent : (convert hσS hσT).Coherent := by
+  constructor
+  case toCoherentDom => exact convert_coherentDom hσS hσT
+  case coherent_coe =>
+    rintro γ _ A δ _ ε _ hδ hε hδε t Nt hNt ⟨Nt', h⟩ ρ h₁ h₂
+    rw [convert_nearLitterMap_eq hσS hσT h]
+    obtain ⟨i, hiS, hiT, hiS', hiT'⟩ := h
+    have hiS'' := hσS.inflexibleCoe_spec i hiS
+      ((A.cons hε).cons (bot_lt_coe _)) Nt ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, hNt⟩ hiS'
+    obtain ⟨Nt'', t', hNt', h⟩ := hσT.of_eq_inflexibleCoe hiS''
+    cases hiT'.symm.trans h
+    have hiT'' := hσT.inflexibleCoe_spec i hiT
+      ((A.cons hε).cons (bot_lt_coe _)) Nt' ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t', hNt'⟩ hiT'
+    suffices : t' = Allowable.comp (Hom.toPath hδ) ρ • t
+    · rw [hNt', this]
+    have := hiS''.symm.trans hiT''
+    simp only [SpecCondition.inflexibleCoe.injEq, heq_eq_eq, CodingFunction.code_eq_code_iff,
+      true_and] at this
+    obtain ⟨ρ', hρ', rfl⟩ := this.1
+    clear hiS'' hiT'' this
+    have := support_supports t (ρ'⁻¹ * Allowable.comp (Hom.toPath hδ) ρ) ?_
+    · rw [mul_smul, inv_smul_eq_iff] at this
+      exact this.symm
+    intro c hc
+    rw [mul_smul, inv_smul_eq_iff]
+    have : ∃ k hk, k < i ∧ S.f k hk = ⟨(A.cons hδ).comp c.1, c.2⟩
+    · have hc' := Support.Precedes.fuzz _ Nt ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, hNt⟩ c hc
+      rw [← hiS'] at hc'
+      obtain ⟨k, hk, hki, hkS⟩ := hS.precedes hiS _ hc'
+      exact ⟨k, hk, hki, hkS⟩
+    obtain ⟨k, hk, hki, hkS⟩ := this
+    have h' := support_f_congr hρ'.symm k ?_
+    swap
+    · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
+      exact hki
+      exact ⟨k, hki, c, hkS⟩
+    obtain ⟨d, hd⟩ := comp_eq_same hσS hσT hk (A.cons hδ) c hkS
+    rw [Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hkS),
+      Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hd)] at h'
+    subst h'
+    obtain ⟨B, a | N⟩ := c
+    · obtain ⟨a', ha'⟩ := (convert_coherentDom hσS hσT).atom_dom A hδ hε hδε hNt hc
+        ⟨Nt', i, hiS, hiT, hiS', hiT'⟩
+      have := h₁ B a hc
+      rw [convert_atomMap_eq hσS hσT ha'] at this
+      have : ConvertAtom S T ((A.cons hδ).comp B) a (Allowable.toStructPerm ρ' B • a) :=
+        ⟨k, hk, convIndex hσS hσT hk, hkS, hd⟩
+      cases convertAtom_subsingleton hσS hσT _ _ _ _ ha' this
+      refine Address.ext _ _ rfl ?_
+      simp only [Allowable.smul_address, Allowable.toStructPerm_comp, Tree.comp_apply, smul_inl,
+        inl.injEq]
+      exact this.symm
+    · obtain ⟨N', hN'⟩ := (convert_coherentDom hσS hσT).nearLitter_dom A hδ hε hδε hNt hc
+        ⟨Nt', i, hiS, hiT, hiS', hiT'⟩
+      have := h₂ B N hc
+      rw [convert_nearLitterMap_eq hσS hσT hN'] at this
+      have : ConvertNearLitter S T ((A.cons hδ).comp B) N (Allowable.toStructPerm ρ' B • N) :=
+        ⟨k, hk, convIndex hσS hσT hk, hkS, hd⟩
+      cases convertNearLitter_subsingleton hσS hσT _ _ _ _ hN' this
+      refine Address.ext _ _ rfl ?_
+      simp only [Allowable.smul_address, Allowable.toStructPerm_comp, Tree.comp_apply, smul_inr,
+        inr.injEq]
+      exact this.symm
+  case coherent_bot =>
+    intro γ _ A ε _ hε a Nt hNt ⟨Nt', hNt'⟩ ρ h
+    rw [convert_nearLitterMap_eq hσS hσT hNt']
+    obtain ⟨i, hiS, hiT, hiS', hiT'⟩ := hNt'
+    have hiS'' := hσS.inflexibleBot_spec i hiS
+      ((A.cons hε).cons (bot_lt_coe _)) Nt ⟨⟨γ, ε, hε, A, rfl⟩, a, hNt⟩ hiS'
+    obtain ⟨Nt'', a', hNt', h'⟩ := hσT.of_eq_inflexibleBot hiS''
+    cases hiT'.symm.trans h'
+    have hiT'' := hσT.inflexibleBot_spec i hiT
+      ((A.cons hε).cons (bot_lt_coe _)) Nt' ⟨⟨γ, ε, hε, A, rfl⟩, a', hNt'⟩ hiT'
+    suffices : a' = Allowable.toStructPerm ρ (Hom.toPath (bot_lt_coe _)) • a
+    · simp only [hNt', this, ofBot_smul, Allowable.toStructPerm_apply]
+    have : ∃ k hk, k < i ∧ S.f k hk = ⟨A.cons (bot_lt_coe _), inl a⟩
+    · have hc' := Support.Precedes.fuzzBot _ Nt ⟨⟨γ, ε, hε, A, rfl⟩, a, hNt⟩
+      rw [← hiS'] at hc'
+      obtain ⟨k, hk, hki, hkS⟩ := hS.precedes hiS _ hc'
+      exact ⟨k, hk, hki, hkS⟩
+    obtain ⟨k, hk, -, hkS⟩ := this
+    rw [← h, convert_atomMap_eq hσS hσT]
+    refine ⟨k, hk, convIndex hσS hσT hk, hkS, ?_⟩
+    have := hiS''.symm.trans hiT''
+    simp only [SpecCondition.inflexibleBot.injEq, heq_eq_eq, true_and] at this
+    obtain ⟨_, h⟩ := (Set.ext_iff.mp this.1 k).mp ⟨hk, hkS⟩
+    exact h
 
 noncomputable def convertAllowable : Allowable β :=
   ((convert hσS hσT).freedom_of_action (convert_lawful hσS hσT) (convert_coherent hσS hσT)).choose
