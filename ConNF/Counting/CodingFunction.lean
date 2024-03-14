@@ -161,6 +161,27 @@ theorem code_smul (S : Support β) (t : Tangle β) (ρ : Allowable β)
   rw [this]
   simp only [code_decode, Part.get_some, inv_smul_smul]
 
+@[simp]
+theorem code_eq_code_iff (S S' : Support β) (t t' : Tangle β)
+    (h : Supports (Allowable β) (S : Set (Address β)) t)
+    (h' : Supports (Allowable β) (S' : Set (Address β)) t') :
+    code S t h = code S' t' h' ↔ ∃ ρ : Allowable β, S' = ρ • S ∧ t' = ρ • t := by
+  constructor
+  · intro hc
+    have : S' ∈ code S t h
+    · rw [hc]
+      exact mem_code_self
+    obtain ⟨ρ, rfl⟩ := this
+    refine ⟨ρ, rfl, ?_⟩
+    have := code_decode (ρ • S) t' h'
+    rw [← hc, ← Part.get_eq_iff_eq_some, decode_smul] at this
+    simp only [code_decode, Part.get_some] at this
+    exact this.symm
+    exact ⟨ρ, rfl⟩
+  · rintro ⟨ρ, rfl, rfl⟩
+    refine ext (ρ • S) ⟨ρ, rfl⟩ ⟨1, by rw [one_smul]⟩ ?_
+    simp only [code_decode, Part.get_some, decode_smul]
+
 def Strong (χ : CodingFunction β) : Prop :=
   ∀ S ∈ χ.decode.Dom, S.Strong
 
