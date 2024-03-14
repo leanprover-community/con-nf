@@ -15,6 +15,8 @@ universe u
 
 namespace ConNF
 
+namespace Support
+
 variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ}
 
 @[mk_iff]
@@ -33,7 +35,7 @@ inductive Precedes : Address β → Address β → Prop
       ⟨(h.path.B.cons h.path.hε).cons (bot_lt_coe _), inr N⟩
 
 @[mk_iff]
-structure Support.Strong (S : Support β) : Prop where
+structure Strong (S : Support β) : Prop where
   interferes {i₁ i₂ : κ} (hi₁ : i₁ < S.max) (hi₂ : i₂ < S.max)
     {A : ExtendedIndex β} {N₁ N₂ : NearLitter}
     (h₁ : S.f i₁ hi₁ = ⟨A, inr N₁⟩) (h₂ : S.f i₂ hi₂ = ⟨A, inr N₂⟩)
@@ -317,7 +319,7 @@ theorem Precedes.smul [LeLevel β] {c d : Address β} (h : Precedes c d) (ρ : A
     simp_rw [h.path.hA] at this ⊢
     exact this
 
-theorem Support.Strong.smul [LeLevel β] {S : Support β} (hS : S.Strong) (ρ : Allowable β) :
+theorem Strong.smul [LeLevel β] {S : Support β} (hS : S.Strong) (ρ : Allowable β) :
     (ρ • S).Strong := by
   constructor
   · intro i₁ i₂ hi₁ hi₂ A N₁ N₂ hN₁ hN₂ a ha
@@ -340,5 +342,206 @@ theorem Support.Strong.smul [LeLevel β] {S : Support β} (hS : S.Strong) (ρ : 
     · have := hc.smul ρ⁻¹
       simp only [Enumeration.smul_f, inv_smul_smul] at this
       exact this
+
+def before (S : Support β) (i : κ) (hi : i < S.max) : Support β :=
+  ⟨i, fun j hj => S.f j (hj.trans hi)⟩
+
+@[simp]
+theorem before_carrier (S : Support β) (i : κ) (hi : i < S.max) :
+    (S.before i hi).carrier = {c | ∃ j hj, j < i ∧ S.f j hj = c} := by
+  ext c
+  constructor
+  · rintro ⟨j, hj, rfl⟩
+    exact ⟨j, _, hj, rfl⟩
+  · rintro ⟨j, hj₁, hj₂, rfl⟩
+    exact ⟨j, hj₂, rfl⟩
+
+theorem before_strong (S : Support β) (i : κ) (hi : i < S.max) (hS : S.Strong) :
+    (S.before i hi).Strong := by
+  constructor
+  · intro i₁ i₂ hi₁ hi₂ A N₁ N₂ hN₁ hN₂ a ha
+    obtain ⟨j, hj, hj₁, hj₂, h⟩ := hS.interferes (hi₁.trans hi) (hi₂.trans hi) hN₁ hN₂ ha
+    exact ⟨j, hj₁.trans hi₁, hj₁, hj₂, h⟩
+  · intro j hj c hc
+    obtain ⟨k, hk₁, hk₂, h⟩ := hS.precedes (hj.trans hi) c hc
+    exact ⟨k, hk₂.trans hj, hk₂, h⟩
+
+def CanComp {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) : Prop :=
+  Set.Nonempty {i | ∃ hi, ∃ (c : Address γ), S.f i hi = ⟨A.comp c.1, c.2⟩}
+
+noncomputable def leastCompIndex {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) : κ :=
+  Params.κ_isWellOrder.wf.min {i | ∃ hi, ∃ (c : Address γ), S.f i hi = ⟨A.comp c.1, c.2⟩} hS
+
+theorem leastCompIndex_mem {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) :
+    leastCompIndex hS ∈ {i | ∃ hi, ∃ (c : Address γ), S.f i hi = ⟨A.comp c.1, c.2⟩} :=
+  WellFounded.min_mem _ _ _
+
+theorem not_lt_leastCompIndex {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) (i : κ) (hi : ∃ hi, ∃ (c : Address γ), S.f i hi = ⟨A.comp c.1, c.2⟩) :
+    ¬i < leastCompIndex hS :=
+  WellFounded.not_lt_min _ _ _ hi
+
+noncomputable def compIndex {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) {i : κ} (hi : i < S.max) : κ :=
+  if ∃ d : Address γ, S.f i hi = ⟨A.comp d.1, d.2⟩ then i else leastCompIndex hS
+
+theorem compIndex_lt_max {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) {i : κ} (hi : i < S.max) :
+    compIndex hS hi < S.max := by
+  rw [compIndex]
+  split_ifs
+  · exact hi
+  · exact (leastCompIndex_mem hS).choose
+
+theorem compIndex_eq_comp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) {i : κ} (hi : i < S.max) :
+    ∃ d : Address γ, S.f (compIndex hS hi) (compIndex_lt_max hS hi) = ⟨A.comp d.1, d.2⟩ := by
+  unfold compIndex
+  split_ifs with h
+  · exact h
+  · exact (leastCompIndex_mem hS).choose_spec
+
+theorem compIndex_eq_of_comp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) {i : κ} (hi : i < S.max)
+    {c : Address γ} (hc : S.f i hi = ⟨A.comp c.1, c.2⟩) :
+    compIndex hS hi = i :=
+  by rw [compIndex, if_pos ⟨c, hc⟩]
+
+noncomputable def decomp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) {i : κ} (hi : i < S.max) : Address γ :=
+  (compIndex_eq_comp hS hi).choose
+
+theorem decomp_spec {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) {i : κ} (hi : i < S.max) :
+    S.f (compIndex hS hi) (compIndex_lt_max hS hi) =
+      ⟨A.comp (decomp hS hi).1, (decomp hS hi).2⟩ :=
+  (compIndex_eq_comp hS hi).choose_spec
+
+open scoped Classical in
+noncomputable def comp {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) : Support γ :=
+  if hS : S.CanComp A then
+    ⟨S.max, fun _ hi => decomp hS hi⟩
+  else
+    ⟨0, fun _ h => (κ_not_lt_zero _ h).elim⟩
+
+theorem comp_eq_of_canComp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ} (hS : S.CanComp A) :
+    S.comp A = ⟨S.max, fun _ hi => decomp hS hi⟩ := by
+  rw [comp, dif_pos]
+
+theorem comp_max_eq_of_canComp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) :
+    (S.comp A).max = S.max := by
+  rw [comp_eq_of_canComp hS]
+
+theorem canComp_of_lt_comp_max {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    {i : κ} (hi : i < (S.comp A).max) : S.CanComp A := by
+  rw [comp] at hi
+  split_ifs at hi with hS
+  · exact hS
+  · cases κ_not_lt_zero _ hi
+
+theorem lt_max_of_lt_comp_max {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    {i : κ} (hi : i < (S.comp A).max) : i < S.max := by
+  rw [comp] at hi
+  split_ifs at hi with hS
+  · exact hi
+  · cases κ_not_lt_zero _ hi
+
+@[simp]
+theorem comp_f_eq {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    {i : κ} (hi : i < (S.comp A).max) :
+    (S.comp A).f i hi =
+      decomp (canComp_of_lt_comp_max hi) (lt_max_of_lt_comp_max hi) := by
+  unfold comp
+  simp_rw [dif_pos (canComp_of_lt_comp_max hi)]
+
+theorem comp_decomp_mem {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) {i : κ} (hi : i < S.max) :
+    ⟨A.comp (decomp hS hi).1, (decomp hS hi).2⟩ ∈ S :=
+  ⟨_, _, (decomp_spec hS hi).symm⟩
+
+theorem comp_decomp_eq {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) {i : κ} (hi : i < S.max) {c : Address γ} (h : S.f i hi = ⟨A.comp c.1, c.2⟩) :
+    decomp hS hi = c := by
+  have hi' := compIndex_eq_of_comp hS hi h
+  have := decomp_spec hS hi
+  simp_rw [hi', h, Address.mk.injEq] at this
+  refine Address.ext _ _ ?_ ?_
+  · exact Path.comp_injective_right _ this.1.symm
+  · exact this.2.symm
+
+@[simp]
+theorem comp_carrier {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) :
+    (S.comp A).carrier = (fun c => ⟨A.comp c.1, c.2⟩) ⁻¹' S.carrier := by
+  ext c
+  constructor
+  · rintro ⟨i, hi, rfl⟩
+    rw [comp_f_eq]
+    exact comp_decomp_mem _ _
+  · rintro ⟨i, hi, hc⟩
+    have hS : S.CanComp A := ⟨i, hi, c, hc.symm⟩
+    rw [comp_eq_of_canComp hS]
+    exact ⟨i, hi, (comp_decomp_eq hS hi hc.symm).symm⟩
+
+theorem Precedes.comp {γ : Λ} {c d : Address γ} (h : Precedes c d) (A : Path (β : TypeIndex) γ) :
+    Precedes ⟨A.comp c.1, c.2⟩ ⟨A.comp d.1, d.2⟩ := by
+  cases h
+  case fuzz B N h c hc =>
+    have := Precedes.fuzz (A.comp B) N (h.comp A) c hc
+    convert this using 2
+    simp only [InflexibleCoe.comp_path, InflexibleCoePath.comp_δ, InflexibleCoePath.comp_γ,
+      InflexibleCoePath.comp_B]
+    rw [← Path.comp_assoc, Path.comp_cons]
+  case fuzzBot B N h =>
+    have := Precedes.fuzzBot (A.comp B) N (h.comp A)
+    exact this
+
+theorem comp_strong {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) (hS : S.Strong) :
+    (S.comp A).Strong := by
+  constructor
+  · intro i₁ i₂ hi₁ hi₂ B N₁ N₂ hN₁ hN₂ a ha
+    have hS' : S.CanComp A := canComp_of_lt_comp_max hi₁
+    rw [comp_max_eq_of_canComp hS'] at hi₁ hi₂
+    rw [comp_f_eq] at hN₁ hN₂
+    have h₁ := decomp_spec hS' hi₁
+    have h₂ := decomp_spec hS' hi₂
+    rw [hN₁] at h₁
+    rw [hN₂] at h₂
+    obtain ⟨j, hj, hj₁, hj₂, h⟩ := hS.interferes _ _ h₁ h₂ ha
+    refine ⟨j, ?_, ?_, ?_, ?_⟩
+    · rw [comp_max_eq_of_canComp hS']
+      exact hj
+    · rw [compIndex] at hj₁
+      split_ifs at hj₁ with hj'
+      · exact hj₁
+      · exact (not_lt_leastCompIndex hS' j ⟨hj, ⟨B, inl a⟩, h⟩ hj₁).elim
+    · rw [compIndex] at hj₂
+      split_ifs at hj₂ with hj'
+      · exact hj₂
+      · exact (not_lt_leastCompIndex hS' j ⟨hj, ⟨B, inl a⟩, h⟩ hj₂).elim
+    · rw [comp_f_eq]
+      exact comp_decomp_eq hS' hj h
+  · intro i hi c hc
+    have hS' : S.CanComp A := canComp_of_lt_comp_max hi
+    rw [comp_max_eq_of_canComp hS'] at hi
+    have h := decomp_spec hS' hi
+    have := hS.precedes hi ⟨A.comp c.1, c.2⟩ ?_
+    · obtain ⟨j, hj₁, hj₂, hj₃⟩ := this
+      refine ⟨j, ?_, hj₂, ?_⟩
+      · rw [comp_max_eq_of_canComp hS']
+        exact hj₁
+      · rw [comp_f_eq]
+        exact comp_decomp_eq hS' hj₁ hj₃
+    · have := hc.comp A
+      rw [comp_f_eq, ← h] at this
+      unfold compIndex at this
+      split_ifs at this with h'
+      · exact this
+      · obtain ⟨j, hj₁, hj₂, hj₃⟩ := hS.precedes _ _ this
+        exact (not_lt_leastCompIndex _ _ ⟨hj₁, c, hj₃⟩ hj₂).elim
+
+end Support
 
 end ConNF

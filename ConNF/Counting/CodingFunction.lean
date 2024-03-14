@@ -170,6 +170,11 @@ theorem strong_of_strong_mem (χ : CodingFunction β) (S : Support β)
   obtain ⟨ρ, rfl⟩ := (χ.dom_iff S T hSχ).mp hTχ
   exact hS.smul ρ
 
+theorem code_strong (S : Support β) (t : Tangle β)
+    (ht : Supports (Allowable β) (S : Set (Address β)) t) (hS : S.Strong) :
+    (code S t ht).Strong :=
+  strong_of_strong_mem _ S hS mem_code_self
+
 end CodingFunction
 
 end ConNF
