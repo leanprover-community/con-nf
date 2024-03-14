@@ -11,6 +11,26 @@ open scoped symmDiff
 
 universe u
 
+namespace PFun
+
+variable {α β : Type _}
+
+noncomputable def ofGraph (g : α → β → Prop)
+    (_hg : ∀ a b b', g a b → g a b' → b = b') : α →. β :=
+  fun a => ⟨∃ b, g a b, fun h => h.choose⟩
+
+variable {g : α → β → Prop} {hg : ∀ a b b', g a b → g a b' → b = b'}
+
+theorem get_eq (a : α) (b : β) (h : g a b) :
+    (ofGraph g hg a).get ⟨b, h⟩ = b := by
+  have : ∃ b, g a b := ⟨b, h⟩
+  refine hg a _ _ this.choose_spec h
+
+@[simp]
+theorem ofGraph_dom : (ofGraph g hg).Dom = {a | ∃ b, g a b} := rfl
+
+end PFun
+
 namespace ConNF
 
 variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
@@ -249,12 +269,40 @@ theorem convertNearLitter_subsingleton (A : ExtendedIndex β) (NS NT NT' : NearL
   · exact convertNearLitter_subsingleton_inflexibleBot hσS hσT A NS NT NT' h h' hNS
   · exact convertNearLitter_subsingleton_inflexibleCoe hσS hσT A NS NT NT' h h' hNS
 
-def convert (S T : Support β) : StructBehaviour β :=
+theorem convertAtom_dom_small (A : ExtendedIndex β) :
+    Small {a | ∃ a', ConvertAtom S T A a a'} := by
+  have : Small {i | i < S.max} := Cardinal.card_typein_lt (· < ·) S.max Params.κ_ord.symm
+  refine (this.pFun_image
+    (f := fun i => ⟨∃ a hi, S.f i hi = ⟨A, inl a⟩, fun h => h.choose⟩)).mono ?_
+  rintro a ⟨b, i, hiS, hiT, hiS', _⟩
+  have : ∃ a hi, S.f i hi = ⟨A, inl a⟩ := ⟨a, hiS, hiS'⟩
+  refine ⟨i, hiS, this, ?_⟩
+  have := this.choose_spec.choose_spec
+  rw [hiS'] at this
+  cases this
+  rfl
+
+theorem convertNearLitter_dom_small (A : ExtendedIndex β) :
+    Small {N | ∃ N', ConvertNearLitter S T A N N'} := by
+  have : Small {i | i < S.max} := Cardinal.card_typein_lt (· < ·) S.max Params.κ_ord.symm
+  refine (this.pFun_image
+    (f := fun i => ⟨∃N hi, S.f i hi = ⟨A, inr N⟩, fun h => h.choose⟩)).mono ?_
+  rintro N ⟨N', i, hiS, hiT, hiS', _⟩
+  have : ∃ N hi, S.f i hi = ⟨A, inr N⟩ := ⟨N, hiS, hiS'⟩
+  refine ⟨i, hiS, this, ?_⟩
+  have := this.choose_spec.choose_spec
+  rw [hiS'] at this
+  cases this
+  rfl
+
+noncomputable def convert : StructBehaviour β :=
   fun A => {
-    atomMap := sorry
-    nearLitterMap := sorry
-    atomMap_dom_small := sorry
-    nearLitterMap_dom_small := sorry
+    atomMap :=
+      PFun.ofGraph (ConvertAtom S T A) (convertAtom_subsingleton hσS hσT A)
+    nearLitterMap :=
+      PFun.ofGraph (ConvertNearLitter S T A) (convertNearLitter_subsingleton hσS hσT A)
+    atomMap_dom_small := convertAtom_dom_small A
+    nearLitterMap_dom_small := convertNearLitter_dom_small A
   }
 
 end ConNF
