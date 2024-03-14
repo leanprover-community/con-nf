@@ -476,15 +476,88 @@ theorem convertNearLitter_fst' {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : Nea
   · have h₁ := hσS.flexible_spec i hiS A N₁ hN hiS'
     obtain ⟨N', hN₃, hN'₃⟩ := hσT.of_eq_flexible h₁
     cases hiT'.symm.trans hN'₃
-    sorry
+    have h₄ := hσT.flexible_spec j hjT A N₄ (h ▸ hN₃) hjT'
+    obtain ⟨N', hN₂, hN'₂⟩ := hσS.of_eq_flexible h₄
+    cases hjS'.symm.trans hN'₂
+    have h₂ := hσS.flexible_spec j hjS A N₂ hN₂ hjS'
+    have := h₂.symm.trans h₄
+    rw [SpecCondition.flexible.injEq] at this
+    obtain ⟨_, N', h₁, h₂⟩ := (Set.ext_iff.mp this.2.1 i).mpr ⟨hiT, N₃, hiT', h⟩
+    cases hiS'.symm.trans h₁
+    exact h₂
   · have h₁ := hσS.inflexibleBot_spec i hiS A N₁ ⟨P, a₁, hN⟩ hiS'
     obtain ⟨N', a₃, hN₃, hN'₃⟩ := hσT.of_eq_inflexibleBot h₁
     cases hiT'.symm.trans hN'₃
-    sorry
+    have h₄ := hσT.inflexibleBot_spec j hjT A N₄ ⟨P, a₃, h ▸ hN₃⟩ hjT'
+    obtain ⟨N', a₂, hN₂, hN'₂⟩ := hσS.of_eq_inflexibleBot h₄
+    cases hjS'.symm.trans hN'₂
+    have h₂ := hσS.inflexibleBot_spec j hjS A N₂ ⟨P, a₂, hN₂⟩ hjS'
+    have h₃ := hσT.inflexibleBot_spec i hiT A N₃ ⟨P, a₃, hN₃⟩ hiT'
+    have h₁₃ := h₁.symm.trans h₃
+    have h₂₄ := h₂.symm.trans h₄
+    rw [SpecCondition.inflexibleBot.injEq] at h₁₃ h₂₄
+    clear h₁ h₂ h₃ h₄
+    have h₃' := Support.Precedes.fuzzBot A N₃ ⟨P, a₃, hN₃⟩
+    rw [← P.hA, ← hiT'] at h₃'
+    obtain ⟨j₁, hj₁S, -, hj₁S'⟩ := hT.precedes hiT ⟨P.B.cons (bot_lt_coe _), inl a₃⟩ h₃'
+    obtain ⟨_, hj₁T⟩ := (Set.ext_iff.mp h₁₃.2.2.1 j₁).mpr ⟨hj₁S, hj₁S'⟩
+    obtain ⟨_, hj₂T⟩ := (Set.ext_iff.mp h₂₄.2.2.1 j₁).mpr ⟨hj₁S, hj₁S'⟩
+    cases hj₁T.symm.trans hj₂T
+    rw [hN, hN₂]
   · have h₁ := hσS.inflexibleCoe_spec i hiS A N₁ ⟨P, t₁, hN⟩ hiS'
     obtain ⟨N', t₃, hN₃, hN'₃⟩ := hσT.of_eq_inflexibleCoe h₁
     cases hiT'.symm.trans hN'₃
-    sorry
+    have h₄ := hσT.inflexibleCoe_spec j hjT A N₄ ⟨P, t₃, h ▸ hN₃⟩ hjT'
+    obtain ⟨N', t₂, hN₂, hN'₂⟩ := hσS.of_eq_inflexibleCoe h₄
+    cases hjS'.symm.trans hN'₂
+    have h₂ := hσS.inflexibleCoe_spec j hjS A N₂ ⟨P, t₂, hN₂⟩ hjS'
+    have h₃ := hσT.inflexibleCoe_spec i hiT A N₃ ⟨P, t₃, hN₃⟩ hiT'
+    have h₁₃ := h₁.symm.trans h₃
+    have h₂₄ := h₂.symm.trans h₄
+    rw [SpecCondition.inflexibleCoe.injEq] at h₁₃ h₂₄
+    suffices : t₁ = t₂
+    · rw [hN, hN₂, this]
+    have h₁₃' := eq_of_heq h₁₃.2.2.1
+    have h₂₄' := eq_of_heq h₂₄.2.2.1
+    simp only [CodingFunction.code_eq_code_iff] at h₁₃' h₂₄'
+    obtain ⟨ρ, hρ, rfl⟩ := h₁₃'
+    obtain ⟨ρ', hρ', hρ'₂⟩ := h₂₄'
+    rw [← inv_smul_eq_iff, smul_smul] at hρ'₂
+    subst hρ'₂
+    clear h₁ h₂ h₃ h₄ h₁₃ h₂₄ hN'₃
+    have := support_supports (ρ • t₁) (ρ' * ρ⁻¹) ?_
+    · rw [mul_smul, inv_smul_smul] at this
+      rw [mul_smul, ← smul_eq_iff_eq_inv_smul]
+      exact this
+    intro c hc
+    rw [mul_smul]
+    have : ∃ k hk, k < i ∧ k < j ∧ T.f k hk = ⟨(P.B.cons P.hδ).comp c.1, c.2⟩
+    · by_cases hij : i < j
+      · have hc' := Support.Precedes.fuzz A N₃ ⟨P, ρ • t₁, hN₃⟩ c hc
+        rw [← P.hA, ← hiT'] at hc'
+        obtain ⟨k, hk, hki, hkT⟩ := hT.precedes hiT _ hc'
+        exact ⟨k, hk, hki, hki.trans hij, hkT⟩
+      · have hc' := Support.Precedes.fuzz A N₄ ⟨P, ρ • t₁, h ▸ hN₃⟩ c hc
+        rw [← P.hA, ← hjT'] at hc'
+        obtain ⟨k, hk, hki, hkT⟩ := hT.precedes hjT _ hc'
+        exact ⟨k, hk, hki.trans_le (le_of_not_lt hij), hki, hkT⟩
+    obtain ⟨k, hk, hki, hkj, hkT⟩ := this
+    obtain ⟨d, hd⟩ := comp_eq_same hσT hσS hk (P.B.cons P.hδ) c hkT
+    have h₁' := support_f_congr hρ.symm k ?_
+    swap
+    · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
+      exact hki
+      exact ⟨k, hki, d, hd⟩
+    rw [Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hd),
+      Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hkT)] at h₁'
+    have h₂' := support_f_congr hρ'.symm k ?_
+    swap
+    · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
+      exact hkj
+      exact ⟨k, hkj, d, hd⟩
+    rw [Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hd),
+      Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hkT)] at h₂'
+    rw [← h₁', inv_smul_smul, h₂', h₁']
 
 theorem convert_lawful : (convert hσS hσT).Lawful := by
   intro A
