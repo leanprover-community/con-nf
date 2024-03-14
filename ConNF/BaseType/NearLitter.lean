@@ -281,7 +281,6 @@ theorem NearLitter.inter_nonempty_of_fst_eq_fst {N₁ N₂ : NearLitter} (h : N�
   rw [← nonempty_coe_sort, ← mk_ne_zero_iff, mk_inter_of_fst_eq_fst h]
   exact mk_ne_zero κ
 
-
 theorem NearLitter.inter_small_of_fst_ne_fst {N₁ N₂ : NearLitter} (h : N₁.fst ≠ N₂.fst) :
     Small (N₁ ∩ N₂ : Set Atom) := by
   have := N₁.2.2

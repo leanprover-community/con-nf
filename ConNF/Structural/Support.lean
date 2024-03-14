@@ -123,4 +123,9 @@ abbrev Support (α : TypeIndex) := Enumeration (Address α)
 theorem mk_support : #(Support α) = #μ :=
   mk_enumeration (mk_address α)
 
+theorem support_f_congr {S T : Support α} (h : S = T) (i : κ) (hS : i < S.max) :
+    S.f i hS = T.f i (h ▸ hS) := by
+  cases h
+  rfl
+
 end ConNF

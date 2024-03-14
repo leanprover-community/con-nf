@@ -7,6 +7,8 @@ import ConNF.Counting.Spec
 
 open Quiver Set Sum WithBot
 
+open scoped symmDiff
+
 universe u
 
 namespace ConNF
@@ -87,29 +89,165 @@ theorem convert_inflexibleCoe {A : ExtendedIndex β} {NS NT : NearLitter} (P : I
     cases this.1
     exact ⟨t', hNT⟩
 
+theorem convert_inflexibleBot {A : ExtendedIndex β} {NS NT : NearLitter} (P : InflexibleBotPath A)
+    (a : Atom) (hNS : NS.1 = fuzz (bot_ne_coe (a := P.ε)) a)
+    {i : κ} (hiS : i < S.max) (hiT : i < T.max)
+    (hiNS : S.f i hiS = ⟨A, inr NS⟩) (hiNT : T.f i hiT = ⟨A, inr NT⟩) :
+    ∃ (a' : Atom), NT.1 = fuzz (bot_ne_coe (a := P.ε)) a' := by
+  obtain (hN | ⟨⟨P', a', hNT⟩⟩ | ⟨⟨hN⟩⟩) := flexible_cases' A NT.1
+  · have h₁ := hσS.inflexibleBot_spec i hiS A NS ⟨P, a, hNS⟩ hiNS
+    have h₂ := hσT.flexible_spec i hiT A NT hN hiNT
+    cases h₁.symm.trans h₂
+  · have h₁ := hσS.inflexibleBot_spec i hiS A NS ⟨P, a, hNS⟩ hiNS
+    have h₂ := hσT.inflexibleBot_spec i hiT A NT ⟨P', a', hNT⟩ hiNT
+    have := h₁.symm.trans h₂
+    simp only [SpecCondition.inflexibleBot.injEq, heq_eq_eq, true_and] at this
+    cases this.1
+    exact ⟨a', hNT⟩
+  · have h₁ := hσS.inflexibleBot_spec i hiS A NS ⟨P, a, hNS⟩ hiNS
+    have h₂ := hσT.inflexibleCoe_spec i hiT A NT hN hiNT
+    cases h₁.symm.trans h₂
+
+theorem comp_eq_same {i : κ} (hiS : i < S.max) {γ : Λ} (A : Path (β : TypeIndex) γ)
+    (c : Address γ) (hc : S.f i hiS = ⟨A.comp c.1, c.2⟩) :
+    ∃ d : Address γ, T.f i (hiS.trans_eq (hσS.max_eq_max.trans hσT.max_eq_max.symm)) =
+      ⟨A.comp d.1, d.2⟩ := by
+  obtain ⟨B, a | N⟩ := c
+  · have := hσS.atom_spec i hiS (A.comp B) a hc
+    obtain ⟨a', ha'⟩ := hσT.of_eq_atom this
+    exact ⟨⟨B, inl a'⟩, ha'⟩
+  obtain (hN | ⟨⟨hN⟩⟩ | ⟨⟨hN⟩⟩) := flexible_cases' (A.comp B) N.1
+  · have := hσS.flexible_spec i hiS (A.comp B) N hN hc
+    obtain ⟨N', -, hN'₂⟩ := hσT.of_eq_flexible this
+    exact ⟨⟨B, inr N'⟩, hN'₂⟩
+  · have := hσS.inflexibleBot_spec i hiS (A.comp B) N hN hc
+    obtain ⟨N', hN'₁, -, hN'₃⟩ := hσT.of_eq_inflexibleBot this
+    exact ⟨⟨B, inr N'⟩, hN'₃⟩
+  · have := hσS.inflexibleCoe_spec i hiS (A.comp B) N hN hc
+    obtain ⟨N', hN'₁, -, hN'₃⟩ := hσT.of_eq_inflexibleCoe this
+    exact ⟨⟨B, inr N'⟩, hN'₃⟩
+
+theorem convertNearLitter_subsingleton_inflexibleCoe (A : ExtendedIndex β) (NS NT NT' : NearLitter)
+    (h : ConvertNearLitter S T A NS NT) (h' : ConvertNearLitter S T A NS NT')
+    (hNS : InflexibleCoe A NS.1) : NT = NT' := by
+  obtain ⟨P, t, hNS⟩ := hNS
+  obtain ⟨i, hiS₁, hiT₁, hiS₂, hiT₂⟩ := h
+  obtain ⟨i', hiS₁', hiT₁', hiS₂', hiT₂'⟩ := h'
+  have h₁ := hσS.inflexibleCoe_spec i hiS₁ A NS ⟨P, t, hNS⟩ hiS₂
+  have h₂ := hσS.inflexibleCoe_spec i' hiS₁' A NS ⟨P, t, hNS⟩ hiS₂'
+  obtain ⟨u, hNT⟩ := convert_inflexibleCoe hσS hσT P t hNS hiS₁ hiT₁ hiS₂ hiT₂
+  obtain ⟨u', hNT'⟩ := convert_inflexibleCoe hσS hσT P t hNS hiS₁' hiT₁' hiS₂' hiT₂'
+  have h₃ := hσT.inflexibleCoe_spec i hiT₁ A NT ⟨P, u, hNT⟩ hiT₂
+  have h₄ := hσT.inflexibleCoe_spec i' hiT₁' A NT' ⟨P, u', hNT'⟩ hiT₂'
+  have h₅ := h₁.symm.trans h₃
+  have h₆ := h₂.symm.trans h₄
+  clear h₁ h₂ h₃ h₄
+  simp only [SpecCondition.inflexibleCoe.injEq, heq_eq_eq, CodingFunction.code_eq_code_iff,
+    true_and] at h₅ h₆
+  obtain ⟨⟨ρ, h₅, rfl⟩, h₅'⟩ := h₅
+  obtain ⟨⟨ρ', h₆, rfl⟩, -⟩ := h₆
+  have : ρ • t = ρ' • t
+  · clear h₅'
+    have := support_supports t (ρ'⁻¹ * ρ) ?_
+    · conv_rhs => rw [← this]
+      rw [mul_smul, smul_smul, mul_right_inv, one_smul]
+    intro c hc
+    rw [mul_smul, inv_smul_eq_iff]
+    have : ∃ (j : κ) (hj : j < S.max), j < i ∧ j < i' ∧ S.f j hj = ⟨(P.B.cons P.hδ).comp c.1, c.2⟩
+    · by_cases hii' : i < i'
+      · have h₇ := Support.Precedes.fuzz A NS ⟨P, t, hNS⟩ _ hc
+        rw [← P.hA, ← hiS₂] at h₇
+        obtain ⟨j, hj, hji, hjc⟩ := hS.precedes hiS₁ _ h₇
+        exact ⟨j, hj, hji, hji.trans hii', hjc⟩
+      · have h₇ := Support.Precedes.fuzz A NS ⟨P, t, hNS⟩ _ hc
+        rw [← P.hA, ← hiS₂'] at h₇
+        obtain ⟨j, hj, hji, hjc⟩ := hS.precedes hiS₁' _ h₇
+        exact ⟨j, hj, hji.trans_le (le_of_not_lt hii'), hji, hjc⟩
+    obtain ⟨j, hj, hji, hji', hjc⟩ := this
+    have h₇ := support_f_congr h₅.symm j ?_
+    swap
+    · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
+      exact hji
+      exact ⟨j, hji, c, hjc⟩
+    have h₈ := support_f_congr h₆.symm j ?_
+    swap
+    · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
+      exact hji'
+      exact ⟨j, hji', c, hjc⟩
+    simp only [Enumeration.smul_f, Support.comp_f_eq] at h₇ h₈
+    obtain ⟨d, hd⟩ := comp_eq_same hσS hσT hj (P.B.cons P.hδ) c hjc
+    rw [Support.comp_decomp_eq _ _ (by exact hjc),
+      Support.comp_decomp_eq _ _ (by exact hd)] at h₇ h₈
+    exact h₇.trans h₈.symm
+  clear h₅ h₆
+  have hNTT' : NT.fst = NT'.fst
+  · rw [hNT, hNT', this]
+  refine NearLitter.ext ?_
+  rw [← symmDiff_eq_bot, bot_eq_empty, eq_empty_iff_forall_not_mem]
+  intro a ha
+  obtain ⟨j, hj, -, -, hja⟩ :=
+    hT.interferes hiT₁ hiT₁' hiT₂ hiT₂' (Support.Interferes.symmDiff hNTT' ha)
+  simp only [Function.funext_iff, Set.ext_iff] at h₅'
+  obtain ⟨_, _, a', NS', _, ha', hS', -⟩ :=
+    (h₅' i' j).mpr ⟨hiT₁', hj, a, NT', hNTT'.symm, ha, hiT₂', hja⟩
+  cases hiS₂'.symm.trans hS'
+  simp only [symmDiff_self, bot_eq_empty, mem_empty_iff_false] at ha'
+
+theorem convertNearLitter_subsingleton_inflexibleBot (A : ExtendedIndex β) (NS NT NT' : NearLitter)
+    (h : ConvertNearLitter S T A NS NT) (h' : ConvertNearLitter S T A NS NT')
+    (hNS : InflexibleBot A NS.1) : NT = NT' := by
+  obtain ⟨P, a, hNS⟩ := hNS
+  obtain ⟨i, hiS₁, hiT₁, hiS₂, hiT₂⟩ := h
+  obtain ⟨i', hiS₁', hiT₁', hiS₂', hiT₂'⟩ := h'
+  have h₁ := hσS.inflexibleBot_spec i hiS₁ A NS ⟨P, a, hNS⟩ hiS₂
+  have h₂ := hσS.inflexibleBot_spec i' hiS₁' A NS ⟨P, a, hNS⟩ hiS₂'
+  obtain ⟨u, hNT⟩ := convert_inflexibleBot hσS hσT P a hNS hiS₁ hiT₁ hiS₂ hiT₂
+  obtain ⟨u', hNT'⟩ := convert_inflexibleBot hσS hσT P a hNS hiS₁' hiT₁' hiS₂' hiT₂'
+  have h₃ := hσT.inflexibleBot_spec i hiT₁ A NT ⟨P, u, hNT⟩ hiT₂
+  have h₄ := hσT.inflexibleBot_spec i' hiT₁' A NT' ⟨P, u', hNT'⟩ hiT₂'
+  have h₅ := h₁.symm.trans h₃
+  have h₆ := h₂.symm.trans h₄
+  simp only [SpecCondition.inflexibleBot.injEq, heq_eq_eq, true_and] at h₅ h₆
+  obtain ⟨h₅, h₅'⟩ := h₅
+  obtain ⟨h₆, -⟩ := h₆
+  clear h₁ h₂ h₃ h₄
+  have : u = u'
+  · clear h₅'
+    have : ∃ (j : κ) (hj : j < S.max), j < i ∧ j < i' ∧ S.f j hj = ⟨P.B.cons (bot_lt_coe _), inl a⟩
+    · by_cases hii' : i < i'
+      · have h₇ := Support.Precedes.fuzzBot A NS ⟨P, a, hNS⟩
+        rw [← P.hA, ← hiS₂] at h₇
+        obtain ⟨j, hj, hji, hjc⟩ := hS.precedes hiS₁ _ h₇
+        exact ⟨j, hj, hji, hji.trans hii', hjc⟩
+      · have h₇ := Support.Precedes.fuzzBot A NS ⟨P, a, hNS⟩
+        rw [← P.hA, ← hiS₂'] at h₇
+        obtain ⟨j, hj, hji, hjc⟩ := hS.precedes hiS₁' _ h₇
+        exact ⟨j, hj, hji.trans_le (le_of_not_lt hii'), hji, hjc⟩
+    obtain ⟨j, hj, hji, hji', ha⟩ := this
+    rw [Set.ext_iff] at h₅ h₆
+    obtain ⟨_, hj₁⟩ := (h₅ j).mp ⟨hj, ha⟩
+    obtain ⟨_, hj₂⟩ := (h₆ j).mp ⟨hj, ha⟩
+    cases hj₁.symm.trans hj₂
+    rfl
+  have hNTT' : NT.fst = NT'.fst
+  · rw [hNT, hNT', this]
+  refine NearLitter.ext ?_
+  rw [← symmDiff_eq_bot, bot_eq_empty, eq_empty_iff_forall_not_mem]
+  intro a ha
+  obtain ⟨j, hj, -, -, hja⟩ :=
+    hT.interferes hiT₁ hiT₁' hiT₂ hiT₂' (Support.Interferes.symmDiff hNTT' ha)
+  simp only [Function.funext_iff, Set.ext_iff] at h₅'
+  obtain ⟨_, _, a', NS', _, ha', hS', -⟩ :=
+    (h₅' i' j).mpr ⟨hiT₁', hj, a, NT', hNTT'.symm, ha, hiT₂', hja⟩
+  cases hiS₂'.symm.trans hS'
+  simp only [symmDiff_self, bot_eq_empty, mem_empty_iff_false] at ha'
+
 theorem convertNearLitter_subsingleton (A : ExtendedIndex β) (NS NT NT' : NearLitter)
     (h : ConvertNearLitter S T A NS NT) (h' : ConvertNearLitter S T A NS NT') : NT = NT' := by
-  obtain (hNS | ⟨⟨hNS⟩⟩ | ⟨⟨P, t, hNS⟩⟩) := flexible_cases' A NS.1
+  obtain (hNS | ⟨⟨hNS⟩⟩ | ⟨⟨hNS⟩⟩) := flexible_cases' A NS.1
   · exact convertNearLitter_subsingleton_flexible hσS hσT A NS NT NT' h h' hNS
-  · obtain ⟨i, hiS₁, hiT₁, hiS₂, hiT₂⟩ := h
-    obtain ⟨i', hiS₁', hiT₁', hiS₂', hiT₂'⟩ := h'
-    sorry
-  · obtain ⟨i, hiS₁, hiT₁, hiS₂, hiT₂⟩ := h
-    obtain ⟨i', hiS₁', hiT₁', hiS₂', hiT₂'⟩ := h'
-    have h₁ := hσS.inflexibleCoe_spec i hiS₁ A NS ⟨P, t, hNS⟩ hiS₂
-    have h₂ := hσS.inflexibleCoe_spec i' hiS₁' A NS ⟨P, t, hNS⟩ hiS₂'
-    obtain ⟨u, hNT⟩ := convert_inflexibleCoe hσS hσT P t hNS hiS₁ hiT₁ hiS₂ hiT₂
-    obtain ⟨u', hNT'⟩ := convert_inflexibleCoe hσS hσT P t hNS hiS₁' hiT₁' hiS₂' hiT₂'
-    have h₃ := hσT.inflexibleCoe_spec i hiT₁ A NT ⟨P, u, hNT⟩ hiT₂
-    have h₄ := hσT.inflexibleCoe_spec i' hiT₁' A NT' ⟨P, u', hNT'⟩ hiT₂'
-    have h₅ := h₁.symm.trans h₃
-    have h₆ := h₂.symm.trans h₄
-    clear h₁ h₂ h₃ h₄
-    simp only [SpecCondition.inflexibleCoe.injEq, heq_eq_eq, CodingFunction.code_eq_code_iff,
-      true_and] at h₅ h₆
-    obtain ⟨ρ, h₅, rfl⟩ := h₅
-    obtain ⟨ρ', h₆, rfl⟩ := h₆
-    sorry
+  · exact convertNearLitter_subsingleton_inflexibleBot hσS hσT A NS NT NT' h h' hNS
+  · exact convertNearLitter_subsingleton_inflexibleCoe hσS hσT A NS NT NT' h h' hNS
 
 def convert (S T : Support β) : StructBehaviour β :=
   fun A => {

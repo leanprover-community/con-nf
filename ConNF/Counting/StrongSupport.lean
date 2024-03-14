@@ -347,6 +347,11 @@ def before (S : Support β) (i : κ) (hi : i < S.max) : Support β :=
   ⟨i, fun j hj => S.f j (hj.trans hi)⟩
 
 @[simp]
+theorem before_f (S : Support β) (i : κ) (hi : i < S.max) (j : κ) (hj : j < i) :
+    (S.before i hi).f j hj = S.f j (hj.trans hi) :=
+  rfl
+
+@[simp]
 theorem before_carrier (S : Support β) (i : κ) (hi : i < S.max) :
     (S.before i hi).carrier = {c | ∃ j hj, j < i ∧ S.f j hj = c} := by
   ext c
