@@ -15,7 +15,7 @@ namespace ConNF
 variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
   {S T : Support β} {hS : S.Strong} {σ : Spec β} (hσS : σ.Specifies S hS) (ρ : Allowable β)
 
-theorem Support.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
+theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
   constructor
   case max_eq_max => exact hσS.max_eq_max
   case atom_spec =>
@@ -117,7 +117,7 @@ theorem Support.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
     · simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
         Tree.inv_apply, ne_eq, eq_mp_eq_cast, CodingFunction.code_eq_code_iff]
       refine ⟨Allowable.comp (P.B.cons P.hδ) ρ, ?_, (smul_inv_smul _ _).symm⟩
-      simp only [before_smul, comp_smul, NearLitterPerm.smul_nearLitter_fst,
+      simp only [Support.before_smul, Support.comp_smul, NearLitterPerm.smul_nearLitter_fst,
         inflexibleCoe_smul_path, inflexibleCoe_smul_t, Tree.inv_apply, ne_eq, eq_mp_eq_cast]
     · ext j k
       constructor
