@@ -371,6 +371,10 @@ theorem before_strong (S : Support β) (i : κ) (hi : i < S.max) (hS : S.Strong)
     obtain ⟨k, hk₁, hk₂, h⟩ := hS.precedes (hj.trans hi) c hc
     exact ⟨k, hk₂.trans hj, hk₂, h⟩
 
+@[simp]
+theorem before_smul [LeLevel β] (S : Support β) (i : κ) (hi : i < S.max) (ρ : Allowable β) :
+    (ρ • S).before i hi = ρ • S.before i hi := rfl
+
 def CanComp {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) : Prop :=
   Set.Nonempty {i | ∃ hi, ∃ (c : Address γ), S.f i hi = ⟨A.comp c.1, c.2⟩}
 
@@ -414,6 +418,12 @@ theorem compIndex_eq_of_comp {γ : Λ} {S : Support β} {A : Path (β : TypeInde
     compIndex hS hi = i :=
   by rw [compIndex, if_pos ⟨c, hc⟩]
 
+theorem compIndex_eq_of_comp' {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) {i : κ} (hi : i < S.max)
+    (hc : ¬∃ c : Address γ, S.f i hi = ⟨A.comp c.1, c.2⟩) :
+    compIndex hS hi = leastCompIndex hS :=
+  by rw [compIndex, if_neg hc]
+
 noncomputable def decomp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
     (hS : S.CanComp A) {i : κ} (hi : i < S.max) : Address γ :=
   (compIndex_eq_comp hS hi).choose
@@ -435,10 +445,20 @@ theorem comp_eq_of_canComp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex)
     S.comp A = ⟨S.max, fun _ hi => decomp hS hi⟩ := by
   rw [comp, dif_pos]
 
+theorem comp_eq_of_not_canComp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : ¬S.CanComp A) :
+    S.comp A = ⟨0, fun _ h => (κ_not_lt_zero _ h).elim⟩ := by
+  rw [comp, dif_neg hS]
+
 theorem comp_max_eq_of_canComp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
     (hS : S.CanComp A) :
     (S.comp A).max = S.max := by
   rw [comp_eq_of_canComp hS]
+
+theorem comp_max_eq_of_not_canComp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : ¬S.CanComp A) :
+    (S.comp A).max = 0 := by
+  rw [comp_eq_of_not_canComp hS]
 
 theorem canComp_of_lt_comp_max {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
     {i : κ} (hi : i < (S.comp A).max) : S.CanComp A := by
@@ -476,6 +496,28 @@ theorem comp_decomp_eq {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
   refine Address.ext _ _ ?_ ?_
   · exact Path.comp_injective_right _ this.1.symm
   · exact this.2.symm
+
+noncomputable def leastComp {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) : Address γ :=
+  (leastCompIndex_mem hS).choose_spec.choose
+
+theorem leastComp_spec {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ} (hS : S.CanComp A) :
+    S.f (leastCompIndex hS) (leastCompIndex_mem hS).choose =
+      ⟨A.comp (leastComp hS).1, (leastComp hS).2⟩ :=
+  (leastCompIndex_mem hS).choose_spec.choose_spec
+
+theorem comp_decomp_eq' {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    (hS : S.CanComp A) {i : κ} (hi : i < S.max)
+    (h : ¬∃ c : Address γ, S.f i hi = ⟨A.comp c.1, c.2⟩) :
+    decomp hS hi = leastComp hS := by
+  have hi' := compIndex_eq_of_comp' hS hi h
+  have := decomp_spec hS hi
+  simp_rw [hi'] at this
+  have := this.symm.trans (leastComp_spec hS)
+  simp only [Address.mk.injEq] at this
+  refine Address.ext _ _ ?_ ?_
+  · exact Path.comp_injective_right _ this.1
+  · exact this.2
 
 @[simp]
 theorem comp_carrier {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) :
@@ -546,6 +588,80 @@ theorem comp_strong {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) (h
       · exact this
       · obtain ⟨j, hj₁, hj₂, hj₃⟩ := hS.precedes _ _ this
         exact (not_lt_leastCompIndex _ _ ⟨hj₁, c, hj₃⟩ hj₂).elim
+
+theorem CanComp.smul [LeLevel β] {γ : Λ} [LeLevel γ] {S : Support β} {A : Path (β : TypeIndex) γ}
+    (h : S.CanComp A) (ρ : Allowable β) :
+    (ρ • S).CanComp A := by
+  obtain ⟨i, hS, c, hc⟩ := h
+  refine ⟨i, hS, Allowable.comp A ρ • c, ?_⟩
+  rw [Enumeration.smul_f, hc]
+  refine Address.ext _ _ rfl ?_
+  rw [Allowable.smul_address, Allowable.smul_address]
+  simp only [Allowable.toStructPerm_comp, Tree.comp_apply]
+
+theorem leastCompIndex_smul [LeLevel β] {γ : Λ} [LeLevel γ] {S : Support β}
+    {A : Path (β : TypeIndex) γ} (hS : S.CanComp A) (ρ : Allowable β) :
+    (ρ • S).leastCompIndex (hS.smul ρ) = S.leastCompIndex hS := by
+  obtain (h | h | h) := lt_trichotomy ((ρ • S).leastCompIndex (hS.smul ρ)) (S.leastCompIndex hS)
+  · refine (not_lt_leastCompIndex hS _ ?_ h).elim
+    obtain ⟨hi, c, hc⟩ := leastCompIndex_mem (hS.smul ρ)
+    refine ⟨hi, (Allowable.comp A ρ)⁻¹ • c, ?_⟩
+    rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at hc
+    rw [hc]
+    simp only [Allowable.smul_address, map_inv, Tree.inv_apply, Allowable.toStructPerm_comp,
+      Tree.comp_apply]
+  · exact h
+  · refine (not_lt_leastCompIndex (hS.smul ρ) _ ?_ h).elim
+    obtain ⟨hi, c, hc⟩ := leastCompIndex_mem hS
+    refine ⟨hi, Allowable.comp A ρ • c, ?_⟩
+    rw [Enumeration.smul_f, hc]
+    simp only [Allowable.smul_address, map_inv, Tree.inv_apply, Allowable.toStructPerm_comp,
+      Tree.comp_apply]
+
+theorem leastComp_smul [LeLevel β] {γ : Λ} [LeLevel γ] {S : Support β}
+    {A : Path (β : TypeIndex) γ} (hS : S.CanComp A) (ρ : Allowable β) :
+    (ρ • S).leastComp (hS.smul ρ) = Allowable.comp A ρ • S.leastComp hS := by
+  have h₁ := leastComp_spec hS
+  have h₂ := leastComp_spec (hS.smul ρ)
+  rw [Enumeration.smul_f] at h₂
+  simp_rw [leastCompIndex_smul hS ρ] at h₂
+  rw [h₁] at h₂
+  simp only [Allowable.smul_address, Address.mk.injEq, Allowable.toStructPerm_comp,
+    Tree.comp_apply] at h₂ ⊢
+  refine Address.ext _ _ ?_ ?_
+  · exact Path.comp_injective_right _ h₂.1.symm
+  · exact h₂.2.symm
+
+@[simp]
+theorem comp_smul [LeLevel β] {γ : Λ} [LeLevel γ] (S : Support β) (A : Path (β : TypeIndex) γ)
+    (ρ : Allowable β) :
+    (ρ • S).comp A = Allowable.comp A ρ • S.comp A := by
+  refine Enumeration.ext' ?_ ?_
+  · by_cases h : S.CanComp A
+    · rw [comp_max_eq_of_canComp (h.smul ρ), Enumeration.smul_max, Enumeration.smul_max,
+        comp_max_eq_of_canComp h]
+    · rw [comp_max_eq_of_not_canComp, Enumeration.smul_max, comp_max_eq_of_not_canComp h]
+      intro h'
+      have := h'.smul ρ⁻¹
+      rw [inv_smul_smul] at this
+      exact h this
+  · intro i hT hS
+    have hcomp : S.CanComp A := canComp_of_lt_comp_max hS
+    rw [comp_f_eq, Enumeration.smul_f, comp_f_eq]
+    have hS' := (lt_max_of_lt_comp_max hT).trans_eq (Enumeration.smul_max _ _)
+    by_cases h : ∃ c : Address γ, S.f i hS' = ⟨A.comp c.1, c.2⟩
+    · obtain ⟨c, hc⟩ := h
+      rw [comp_decomp_eq hcomp hS' hc]
+      refine comp_decomp_eq (hcomp.smul ρ) hS' (c := Allowable.comp A ρ • c) ?_
+      simp only [Enumeration.smul_f, hc, Allowable.smul_address, Allowable.toStructPerm_comp,
+        Tree.comp_apply]
+    · rw [comp_decomp_eq' hcomp _ h, comp_decomp_eq', leastComp_smul]
+      contrapose! h
+      obtain ⟨c, hc⟩ := h
+      refine ⟨(Allowable.comp A ρ)⁻¹ • c, ?_⟩
+      rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at hc
+      simp only [hc, Allowable.smul_address, map_inv, Tree.inv_apply, Allowable.toStructPerm_comp,
+        Tree.comp_apply]
 
 end Support
 
