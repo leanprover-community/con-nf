@@ -5,4 +5,4 @@ import ConNF.Counting.SpecSame
 import ConNF.Counting.SupportOrbit
 import ConNF.Counting.ExistsSpec
 import ConNF.Counting.CountSpec
-import ConNF.Counting.CountStrongSupport
+import ConNF.Counting.CountStrongOrbit
