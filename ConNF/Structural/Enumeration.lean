@@ -131,6 +131,19 @@ theorem pow_le_of_isStrongLimit' {α β : Type u} [Infinite α] [Infinite β]
   simp only [ge_iff_le, le_max_iff, max_le_iff, le_aleph0_iff_subtype_countable, h₃, h₄, and_self,
     aleph0_le_mk]
 
+theorem pow_lt_of_isStrongLimit' {α β γ : Type u} [Infinite β]
+    (hα : #α < #γ) (hβ : #β < #γ) (hγ : IsStrongLimit #γ) : #α ^ #β < #γ := by
+  refine lt_of_le_of_lt mk_fun_le ?_
+  simp only [mk_prod, Cardinal.lift_id, mk_pi, mk_fintype, Fintype.card_prop, Nat.cast_ofNat,
+    prod_const, Cardinal.lift_ofNat, Cardinal.lift_id']
+  refine mul_lt_of_lt ?_ ?_ ?_
+  · exact hγ.isLimit.aleph0_le
+  · refine (Cardinal.mk_subtype_le _).trans_lt ?_
+    rw [mk_set]
+    exact hγ.2 _ hα
+  · rw [← power_mul, mul_eq_self (Cardinal.infinite_iff.mp inferInstance)]
+    exact hγ.2 _ hβ
+
 theorem pow_le_of_isStrongLimit {κ μ : Cardinal.{u}} (h₁ : IsStrongLimit μ) (h₂ : κ < μ.ord.cof) :
     μ ^ κ ≤ μ := by
   by_cases h : κ < ℵ₀
@@ -142,8 +155,24 @@ theorem pow_le_of_isStrongLimit {κ μ : Cardinal.{u}} (h₁ : IsStrongLimit μ)
     have := Cardinal.infinite_iff.mpr h₁.isLimit.aleph0_le
     exact pow_le_of_isStrongLimit' h₁ h₂
 
+theorem pow_lt_of_isStrongLimit {ξ κ μ : Cardinal.{u}}
+    (hξ : ξ < μ) (hκ : κ < μ) (hμ : IsStrongLimit μ) : ξ ^ κ < μ := by
+  by_cases h : κ < ℵ₀
+  · rw [lt_aleph0] at h
+    obtain ⟨n, rfl⟩ := h
+    by_cases h : ξ < ℵ₀
+    · rw [lt_aleph0] at h
+      obtain ⟨m, rfl⟩ := h
+      rw [pow_cast_right, ← Nat.cast_pow]
+      exact (nat_lt_aleph0 _).trans_le hμ.isLimit.aleph0_le
+    · exact (power_nat_le (le_of_not_lt h)).trans_lt hξ
+  · revert hξ hκ hμ h
+    refine inductionOn₃ ξ κ μ ?_
+    intro α β γ hα hβ hγ h
+    have := infinite_iff.mpr (le_of_not_lt h)
+    exact pow_lt_of_isStrongLimit' hα hβ hγ
+
 /-- Given that `#α = #μ`, there are exactly `μ` Enumerations. -/
-@[simp]
 theorem mk_enumeration (mk_α : #α = #μ) : #(Enumeration α) = #μ := by
   refine le_antisymm ?_ ?_
   · rw [Cardinal.mk_congr enumerationEquiv]
@@ -161,6 +190,98 @@ theorem mk_enumeration (mk_α : #α = #μ) : #(Enumeration α) = #μ := by
     intro a₁ a₂ h
     simp only [Enumeration.mk.injEq, heq_eq_eq, true_and] at h
     exact congr_fun₂ h 0 κ_zero_lt_one
+
+theorem _root_.Cardinal.pow_mono_left (a : Cardinal) (ha : a ≠ 0) :
+    Monotone (fun (b : Cardinal) => a ^ b) := by
+  intro b c
+  revert ha
+  refine Cardinal.inductionOn₃ a b c ?_
+  intro α β γ hα h
+  suffices : #(β → α) ≤ #(γ → α)
+  · simp only [mk_pi, prod_const, Cardinal.lift_id] at this
+    exact this
+  obtain (hβ | hβ) := isEmpty_or_nonempty β
+  · rw [mk_ne_zero_iff] at hα
+    obtain ⟨a⟩ := hα
+    refine ⟨fun _ _ => a, ?_⟩
+    intro f g _
+    ext x
+    cases IsEmpty.false x
+  · rw [Cardinal.le_def] at h
+    obtain ⟨f, hf⟩ := h
+    refine mk_le_of_surjective (f := (· ∘ f)) ?_
+    intro g
+    obtain ⟨k, hk⟩ := hf.hasLeftInverse
+    rw [Function.leftInverse_iff_comp] at hk
+    refine ⟨g ∘ k, ?_⟩
+    dsimp only
+    rw [Function.comp.assoc, hk, Function.comp_id]
+
+theorem max_eq_zero [IsEmpty α] (E : Enumeration α) : E.max = 0 := by
+  rw [← κ_le_zero_iff]
+  by_contra! h
+  have := E.f 0 h
+  exact isEmptyElim this
+
+instance [IsEmpty α] : Subsingleton (Enumeration α) := by
+  constructor
+  intro E F
+  refine Enumeration.ext' ?_ ?_
+  · rw [max_eq_zero, max_eq_zero]
+  · intro i hE hF
+    cases show False from isEmptyElim (E.f i hE)
+
+theorem _root_.Cardinal.mul_le_of_le {a b c : Cardinal} (ha : a ≤ c) (hb : b ≤ c) (hc : ℵ₀ ≤ c) :
+    a * b ≤ c := by
+  by_cases ha' : ℵ₀ ≤ a
+  · refine le_trans (mul_le_max_of_aleph0_le_left ha') ?_
+    simp only [ge_iff_le, max_le_iff]
+    exact ⟨ha, hb⟩
+  by_cases hb' : ℵ₀ ≤ b
+  · refine le_trans (mul_le_max_of_aleph0_le_right hb') ?_
+    simp only [ge_iff_le, max_le_iff]
+    exact ⟨ha, hb⟩
+  · simp only [not_le] at ha' hb'
+    exact (mul_lt_aleph0 ha' hb').le.trans hc
+
+theorem _root_.Cardinal.lt_pow {a b : Cardinal} (h : 1 < a) : b < a ^ b := by
+  refine Cardinal.inductionOn b ?_
+  intro β
+  have := sum_lt_prod (fun (_ : β) => 1) (fun _i_ => a) (fun _ => h)
+  simp only [sum_const, Cardinal.lift_id, mul_one, prod_const] at this
+  exact this
+
+/-- A bound on the amount of enumerations. -/
+theorem mk_enumeration_le {α : Type u} [Nontrivial α] : #(Enumeration α) ≤ #α ^ #κ := by
+  rw [mk_congr enumerationEquiv]
+  simp only [mk_sigma, mk_pi, prod_const, Cardinal.lift_id]
+  have : ∀ i : κ, #α ^ #(Set.Iio i) ≤ #α ^ #κ
+  · intro i
+    refine pow_mono_left _ ?_ ?_
+    · rw [mk_ne_zero_iff]
+      infer_instance
+    · exact (card_typein_lt (· < ·) i Params.κ_ord.symm).le
+  refine (sum_le_sum _ _ this).trans ?_
+  simp only [sum_const, Cardinal.lift_id]
+  have : #κ ≤ #α ^ #κ := (lt_pow ?_).le
+  · exact mul_le_of_le this le_rfl (Params.κ_isRegular.aleph0_le.trans this)
+  · rw [one_lt_iff_nontrivial]
+    infer_instance
+
+theorem mk_enumeration_le_of_subsingleton {α : Type u} [Subsingleton α] :
+    #(Enumeration α) ≤ #κ := by
+  refine ⟨Enumeration.max, ?_⟩
+  intro E F h
+  refine Enumeration.ext' h ?_
+  intro i hE hF
+  exact Subsingleton.elim _ _
+
+/-- A bound on the amount of enumerations. -/
+theorem mk_enumeration_lt (h : #α < #μ) : #(Enumeration α) < #μ := by
+  obtain (hα | hα) := subsingleton_or_nontrivial α
+  · exact mk_enumeration_le_of_subsingleton.trans_lt Params.κ_lt_μ
+  · refine mk_enumeration_le.trans_lt ?_
+    exact pow_lt_of_isStrongLimit h Params.κ_lt_μ Params.μ_isStrongLimit
 
 namespace Enumeration
 

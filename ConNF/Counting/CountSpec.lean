@@ -28,35 +28,60 @@ theorem SpecCondition.toPrime_injective : Function.Injective (toPrime (β := β)
     simp only [Sum.inl_injective.eq_iff, Sum.inr_injective.eq_iff, Prod.mk.injEq] at h <;>
     aesop
 
-theorem _root_.Cardinal.pow_mono_left (a : Cardinal) (ha : a ≠ 0) :
-    Monotone (fun (b : Cardinal) => a ^ b) := by
-  intro b c
-  revert ha
-  refine Cardinal.inductionOn₃ a b c ?_
-  intro α β γ hα h
-  suffices : #(β → α) ≤ #(γ → α)
-  · simp only [mk_pi, prod_const, lift_id] at this
-    exact this
-  obtain (hβ | hβ) := isEmpty_or_nonempty β
-  · rw [mk_ne_zero_iff] at hα
-    obtain ⟨a⟩ := hα
-    refine ⟨fun _ _ => a, ?_⟩
-    intro f g _
-    ext x
-    cases IsEmpty.false x
-  · rw [Cardinal.le_def] at h
-    obtain ⟨f, hf⟩ := h
-    refine mk_le_of_surjective (f := (· ∘ f)) ?_
-    intro g
-    obtain ⟨k, hk⟩ := hf.hasLeftInverse
-    rw [Function.leftInverse_iff_comp] at hk
-    refine ⟨g ∘ k, ?_⟩
-    dsimp only
-    rw [Function.comp.assoc, hk, Function.comp_id]
+def InflexibleCoePath' (β : Λ) : Type u :=
+  Λ × Λ × Λ × ExtendedIndex β
 
-theorem mk_inflexibleCoePath (A : ExtendedIndex β) : #(InflexibleCoePath A) ≤ #Λ := sorry
+def InflexibleCoePath'.toPrime {A : ExtendedIndex β} (h : InflexibleCoePath A) :
+    InflexibleCoePath' β :=
+  ⟨h.γ, h.δ, h.ε, h.B.cons (bot_lt_coe _)⟩
 
-theorem mk_inflexibleBotPath (A : ExtendedIndex β) : #(InflexibleBotPath A) ≤ #Λ := sorry
+theorem InflexibleCoePath'.toPrime_injective {A : ExtendedIndex β} :
+    Function.Injective (toPrime (A := A)) := by
+  intro h₁ h₂ h
+  cases h₁
+  cases h₂
+  cases h
+  rfl
+
+theorem mk_inflexibleCoePath (A : ExtendedIndex β) : #(InflexibleCoePath A) ≤ #Λ := by
+  refine (mk_le_of_injective InflexibleCoePath'.toPrime_injective).trans ?_
+  simp only [InflexibleCoePath', mk_prod, lift_id]
+  refine (Cardinal.mul_le_max _ _).trans ?_
+  simp only [ge_iff_le, le_max_iff, aleph0_le_mk, true_or, max_eq_left, max_le_iff, le_refl,
+    true_and]
+  refine (Cardinal.mul_le_max _ _).trans ?_
+  simp only [ge_iff_le, le_max_iff, aleph0_le_mk, true_or, max_eq_left, max_le_iff, le_refl,
+    true_and]
+  refine (Cardinal.mul_le_max _ _).trans ?_
+  simp only [ge_iff_le, le_max_iff, aleph0_le_mk, true_or, max_eq_left, max_le_iff, le_refl,
+    true_and]
+  exact mk_extendedIndex _
+
+def InflexibleBotPath' (β : Λ) : Type u :=
+  Λ × Λ × ExtendedIndex β
+
+def InflexibleBotPath'.toPrime {A : ExtendedIndex β} (h : InflexibleBotPath A) :
+    InflexibleBotPath' β :=
+  ⟨h.γ, h.ε, h.B.cons (bot_lt_coe _)⟩
+
+theorem InflexibleBotPath'.toPrime_injective {A : ExtendedIndex β} :
+    Function.Injective (toPrime (A := A)) := by
+  intro h₁ h₂ h
+  cases h₁
+  cases h₂
+  cases h
+  rfl
+
+theorem mk_inflexibleBotPath (A : ExtendedIndex β) : #(InflexibleBotPath A) ≤ #Λ := by
+  refine (mk_le_of_injective InflexibleBotPath'.toPrime_injective).trans ?_
+  simp only [InflexibleBotPath', mk_prod, lift_id]
+  refine (Cardinal.mul_le_max _ _).trans ?_
+  simp only [ge_iff_le, le_max_iff, aleph0_le_mk, true_or, max_eq_left, max_le_iff, le_refl,
+    true_and]
+  refine (Cardinal.mul_le_max _ _).trans ?_
+  simp only [ge_iff_le, le_max_iff, aleph0_le_mk, true_or, max_eq_left, max_le_iff, le_refl,
+    true_and]
+  exact mk_extendedIndex _
 
 theorem mk_specCondition (h : ∀ (δ : Λ) [LeLevel δ], δ < β → #(CodingFunction δ) < #μ) :
     #(SpecCondition β) < #μ := by
@@ -107,5 +132,9 @@ theorem mk_specCondition (h : ∀ (δ : Λ) [LeLevel δ], δ < β → #(CodingFu
         (Params.Λ_lt_κ.trans_le Params.κ_le_μ_ord_cof)
       refine (pow_mono_left #μ Params.μ_isStrongLimit.1 ?_).trans this
       exact mk_extendedIndex _
+
+theorem mk_spec (h : ∀ (δ : Λ) [LeLevel δ], δ < β → #(CodingFunction δ) < #μ) :
+    #(Spec β) < #μ :=
+  mk_enumeration_lt (mk_specCondition h)
 
 end ConNF
