@@ -251,6 +251,10 @@ theorem _root_.Cardinal.lt_pow {a b : Cardinal} (h : 1 < a) : b < a ^ b := by
   simp only [sum_const, Cardinal.lift_id, mul_one, prod_const] at this
   exact this
 
+theorem mk_enumeration_ne_zero {α : Type u} : #(Enumeration α) ≠ 0 := by
+  rw [Cardinal.mk_ne_zero_iff]
+  exact ⟨⟨0, fun _ hi => (κ_not_lt_zero _ hi).elim⟩⟩
+
 /-- A bound on the amount of enumerations. -/
 theorem mk_enumeration_le {α : Type u} [Nontrivial α] : #(Enumeration α) ≤ #α ^ #κ := by
   rw [mk_congr enumerationEquiv]

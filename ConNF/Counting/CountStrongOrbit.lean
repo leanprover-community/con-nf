@@ -120,4 +120,32 @@ theorem mk_supportOrbit_le_mk_weakSpec (β : Λ) [LeLevel β] :
     #(SupportOrbit β) ≤ #(WeakSpec β) :=
   ⟨⟨SupportOrbit.weakSpec, SupportOrbit.spec_injective⟩⟩
 
+def WeakSpec.decompose (W : WeakSpec β) :
+    κ × (κ → κ) × Spec β :=
+  (W.max, W.f, W.σ)
+
+theorem WeakSpec.decompose_injective : Function.Injective (WeakSpec.decompose (β := β)) := by
+  rintro ⟨m₁, f₁, σ₁⟩ ⟨m₂, f₂, σ₂⟩ h
+  cases h
+  rfl
+
+theorem mk_supportOrbit_le (β : Λ) [LeLevel β] :
+    #(SupportOrbit β) ≤ 2 ^ #κ * #(Spec β) := by
+  refine (mk_supportOrbit_le_mk_weakSpec β).trans ?_
+  refine (Cardinal.mk_le_of_injective WeakSpec.decompose_injective).trans ?_
+  simp only [Cardinal.mk_prod, Cardinal.lift_id, Cardinal.mk_pi, Cardinal.prod_const]
+  rw [← mul_assoc]
+  have hκ := Cardinal.lt_pow (a := 2) (b := #κ) Nat.one_lt_ofNat
+  refine Cardinal.mul_le_of_le (Cardinal.mul_le_of_le ?_ ?_ ?_) ?_ ?_
+  · exact hκ.le.trans (Cardinal.le_mul_right mk_enumeration_ne_zero)
+  · rw [Cardinal.power_self_eq Params.κ_isRegular.aleph0_le]
+    exact Cardinal.le_mul_right mk_enumeration_ne_zero
+  · exact Params.κ_isRegular.aleph0_le.trans
+      (hκ.le.trans (Cardinal.le_mul_right mk_enumeration_ne_zero))
+  · refine Cardinal.le_mul_left ?_
+    have := Cardinal.aleph0_pos.trans_le (Params.κ_isRegular.aleph0_le.trans hκ.le)
+    exact ne_of_gt this
+  · exact Params.κ_isRegular.aleph0_le.trans
+      (hκ.le.trans (Cardinal.le_mul_right mk_enumeration_ne_zero))
+
 end ConNF

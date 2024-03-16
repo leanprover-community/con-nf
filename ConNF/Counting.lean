@@ -10,3 +10,4 @@ import ConNF.Counting.Hypotheses
 import ConNF.Counting.Recode
 import ConNF.Counting.CountCodingFunction
 import ConNF.Counting.CountRaisedSingleton
+import ConNF.Counting.Conclusions
