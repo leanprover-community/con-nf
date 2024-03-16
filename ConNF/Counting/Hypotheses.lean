@@ -1,5 +1,6 @@
 import ConNF.Structural.Pretangle
 import ConNF.FOA.Basic.Reduction
+import ConNF.Counting.CodingFunction
 
 /-!
 # Hypotheses
@@ -7,11 +8,15 @@ import ConNF.FOA.Basic.Reduction
 
 open MulAction Quiver Set Sum WithBot
 
+open scoped Cardinal
+
 universe u
 
 namespace ConNF
 
 variable [Params.{u}] [Level]
+
+instance : LeLevel (0 : Λ) := ⟨WithBot.coe_le_coe.mpr (Params.Λ_zero_le _)⟩
 
 class CountingAssumptions extends FOAAssumptions where
   toPretangle (β : TypeIndex) [LeLevel β] : Tangle β → Pretangle β
@@ -32,9 +37,10 @@ class CountingAssumptions extends FOAAssumptions where
     Function.Injective (singleton β γ h)
   singleton_toPretangle (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : Tangle γ) :
     Pretangle.ofCoe (toPretangle β (singleton β γ h t)) γ h = {toPretangle γ t}
+  mk_codingFunction_zero : #(CodingFunction 0) < #μ
 
 export CountingAssumptions (toPretangle toPretangle_smul eq_toPretangle_of_mem toPretangle_ext
-  singleton singleton_injective singleton_toPretangle)
+  singleton singleton_injective singleton_toPretangle mk_codingFunction_zero)
 
 variable [CountingAssumptions] {β γ : Λ} [LeLevel β] [LeLevel γ] (hγ : γ < β)
 

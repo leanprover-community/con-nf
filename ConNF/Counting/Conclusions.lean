@@ -37,6 +37,34 @@ theorem mk_codingFunction (β : Λ) [i : LeLevel β] : #(CodingFunction β) < #�
     · refine Params.μ_isStrongLimit.2 _ ?_
       exact mul_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le this
         (ih γ (WithBot.coe_lt_coe.mp hγ))
-  · sorry
+  · simp only [WithBot.coe_lt_coe, not_exists, not_lt] at h
+    cases le_antisymm (h 0) (Params.Λ_zero_le β)
+    exact mk_codingFunction_zero
+
+noncomputable def Tangle.code {β : Λ} [LeLevel β] (t : Tangle β) : CodingFunction β × Support β :=
+  (CodingFunction.code _ _ (support_supports t), t.support)
+
+theorem Tangle.code_injective {β : Λ} [LeLevel β] : Function.Injective (Tangle.code (β := β)) := by
+  intro t₁ t₂ h
+  rw [code, code] at h
+  simp only [Prod.mk.injEq, CodingFunction.code_eq_code_iff] at h
+  obtain ⟨⟨ρ, _, rfl⟩, h⟩ := h
+  refine (support_supports t₁ ρ ?_).symm
+  rintro c ⟨i, hi, hc⟩
+  have := support_f_congr h i hi
+  simp only [← hc, smul_support, Enumeration.smul_f] at this
+  exact this.symm
+
+/-- **Theorem.** There are exactly `μ` tangles at each level. -/
+@[simp]
+theorem mk_tangle (β : Λ) [LeLevel β] : #(Tangle β) = #μ := by
+  refine le_antisymm ?_ ?_
+  · refine (mk_le_of_injective Tangle.code_injective).trans ?_
+    simp only [mk_prod, lift_id, mk_support]
+    exact Cardinal.mul_le_of_le (mk_codingFunction β).le le_rfl
+      Params.μ_isStrongLimit.isLimit.aleph0_le
+  · have := mk_le_of_injective (typedAtom (α := β)).injective
+    simp only [mk_atom] at this
+    exact this
 
 end ConNF
