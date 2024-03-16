@@ -124,7 +124,7 @@ def tangleExtension (t : Tangle β) : Set (Tangle γ) :=
 
 /-- A support for a `γ`-tangle, expressed as a set of `β`-support conditions. -/
 noncomputable def raisedSupport (S : Support β) (u : Tangle γ) : Support β :=
-  S + Enumeration.ofSet (raise hγ '' u.support) u.support.small.image
+  S + u.support.image (raise hγ)
 
 theorem le_raisedSupport (S : Support β) (u : Tangle γ) :
     S ≤ raisedSupport hγ S u :=
@@ -139,8 +139,8 @@ theorem raisedSupport_supports (S : Support β) (u : Tangle γ) :
   intro c hc
   rw [← smul_raise_eq_iff]
   refine h ?_
-  erw [raisedSupport, Enumeration.mem_add_iff, Enumeration.mem_ofSet_iff, mem_image]
-  exact Or.inr ⟨c, hc, rfl⟩
+  erw [raisedSupport, Enumeration.mem_add_iff]
+  exact Or.inr (Enumeration.apply_mem_image hc _)
 
 noncomputable def raiseSingleton (S : Support β) (u : Tangle γ) : CodingFunction β :=
   CodingFunction.code
@@ -148,8 +148,51 @@ noncomputable def raiseSingleton (S : Support β) (u : Tangle γ) : CodingFuncti
     (singleton β γ hγ u)
     (raisedSupport_supports hγ S u)
 
-def RaisedSingleton : Type u :=
-  {χ : CodingFunction β // ∃ S : Support β, ∃ u : Tangle γ, χ = raiseSingleton hγ S u}
+def RaisedSingleton (S : Support β) : Type u :=
+  {χ : CodingFunction β // ∃ u : Tangle γ, χ = raiseSingleton hγ S u}
+
+theorem smul_raise_eq (ρ : Allowable β) (c : Address γ) :
+    ρ • raise hγ c = raise hγ (Allowable.comp (Hom.toPath hγ) ρ • c) := by
+  simp only [raise, raiseIndex, Allowable.smul_address, Allowable.toStructPerm_comp,
+    Tree.comp_apply]
+
+theorem smul_image_raise_eq (ρ : Allowable β) (T : Support γ) :
+    ρ • T.image (raise hγ) = (Allowable.comp (Hom.toPath hγ) ρ • T).image (raise hγ) := by
+  refine Enumeration.ext' rfl ?_
+  intro i hE hF
+  dsimp only [Enumeration.smul_f, Enumeration.image_f]
+  rw [smul_raise_eq]
+
+theorem smul_raisedSupport (S : Support β) (u : Tangle γ) (ρ : Allowable β) :
+    ρ • raisedSupport hγ S u =
+      raisedSupport hγ (ρ • S) (Allowable.comp (Hom.toPath hγ) ρ • u) := by
+  simp only [raisedSupport, Enumeration.smul_add, smul_support, smul_image_raise_eq]
+
+theorem raiseSingleton_smul (S : Support β) (u : Tangle γ) (ρ : Allowable β) :
+    raiseSingleton hγ S u = raiseSingleton hγ (ρ • S) (Allowable.comp (Hom.toPath hγ) ρ • u) := by
+  rw [raiseSingleton, raiseSingleton, CodingFunction.code_eq_code_iff]
+  refine ⟨ρ, (smul_raisedSupport hγ S u ρ).symm, ?_⟩
+  rw [singleton_smul]
+
+theorem raiseSingleton_eq (S₁ S₂ : Support β) (h : S₁.max = S₂.max) (u₁ u₂ : Tangle γ)
+    (h : raiseSingleton hγ S₁ u₁ = raiseSingleton hγ S₂ u₂) :
+    ∃ ρ : Allowable β, S₂ = ρ • S₁ ∧ u₂ = Allowable.comp (Hom.toPath hγ) ρ • u₁ := by
+  rw [raiseSingleton, raiseSingleton, CodingFunction.code_eq_code_iff] at h
+  obtain ⟨ρ, hρ₁, hρ₂⟩ := h
+  refine ⟨ρ, ?_, ?_⟩
+  · rw [smul_raisedSupport, raisedSupport, raisedSupport] at hρ₁
+    refine Enumeration.ext' h.symm ?_
+    intro i h₂ h₁
+    have := support_f_congr hρ₁ i ?_
+    swap
+    · rw [Enumeration.add_max]
+      refine h₂.trans_le ?_
+      simp only [Enumeration.image_max, le_add_iff_nonneg_right]
+      exact κ_pos _
+    rw [Enumeration.add_f_left, Enumeration.add_f_left] at this
+    exact this
+  · rw [singleton_smul, (singleton_injective _ _ _).eq_iff] at hρ₂
+    exact hρ₂
 
 /-- Take the `γ`-extension of `t`, treated as a set of `α`-level singletons, and turn them into
 coding functions. -/
@@ -158,9 +201,9 @@ def raiseSingletons (S : Support β) (t : Tangle β) : Set (CodingFunction β) :
 
 theorem raiseSingletons_subset_range {S : Support β} {t : Tangle β} :
     raiseSingletons hγ S t ⊆
-    range (Subtype.val : RaisedSingleton hγ → CodingFunction β) := by
+    range (Subtype.val : RaisedSingleton hγ S → CodingFunction β) := by
   rintro _ ⟨u, _, rfl⟩
-  exact ⟨⟨raiseSingleton hγ S u, ⟨S, u, rfl⟩⟩, rfl⟩
+  exact ⟨⟨raiseSingleton hγ S u, ⟨u, rfl⟩⟩, rfl⟩
 
 theorem smul_reducedSupport_eq (S : Support β) (v : Tangle γ) (ρ : Allowable β)
     (hUV : S ≤ ρ • raisedSupport hγ S v)

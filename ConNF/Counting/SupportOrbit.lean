@@ -75,6 +75,12 @@ theorem nonempty (o : SupportOrbit β) : Set.Nonempty {S | S ∈ o} := by
   intro S
   exact ⟨S, mem_mk _⟩
 
+noncomputable def out (o : SupportOrbit β) : Support β :=
+  Quotient.out (s := _) o
+
+theorem out_mem (o : SupportOrbit β) : o.out ∈ o :=
+  Quotient.out_eq (s := _) o
+
 theorem eq_mk_of_mem {S : Support β} {o : SupportOrbit β} (h : S ∈ o) : o = mk S :=
   h.symm
 

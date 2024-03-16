@@ -9,3 +9,4 @@ import ConNF.Counting.CountStrongOrbit
 import ConNF.Counting.Hypotheses
 import ConNF.Counting.Recode
 import ConNF.Counting.CountCodingFunction
+import ConNF.Counting.CountRaisedSingleton

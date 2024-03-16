@@ -28,11 +28,13 @@ class CountingAssumptions extends FOAAssumptions where
     t₁ = t₂
   /-- Any `γ`-tangle can be treated as a singleton at level `β` if `γ < β`. -/
   singleton (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : Tangle γ) : Tangle β
+  singleton_injective (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) :
+    Function.Injective (singleton β γ h)
   singleton_toPretangle (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : Tangle γ) :
     Pretangle.ofCoe (toPretangle β (singleton β γ h t)) γ h = {toPretangle γ t}
 
 export CountingAssumptions (toPretangle toPretangle_smul eq_toPretangle_of_mem toPretangle_ext
-  singleton singleton_toPretangle)
+  singleton singleton_injective singleton_toPretangle)
 
 variable [CountingAssumptions] {β γ : Λ} [LeLevel β] [LeLevel γ] (hγ : γ < β)
 
