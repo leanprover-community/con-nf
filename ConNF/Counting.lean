@@ -8,3 +8,4 @@ import ConNF.Counting.CountSpec
 import ConNF.Counting.CountStrongOrbit
 import ConNF.Counting.Hypotheses
 import ConNF.Counting.Recode
+import ConNF.Counting.CountCodingFunction
