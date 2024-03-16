@@ -70,6 +70,14 @@ theorem inductionOn {motive : SupportOrbit β → Prop} (o : SupportOrbit β) (h
     motive o :=
   Quotient.inductionOn o h
 
+theorem nonempty (o : SupportOrbit β) : Set.Nonempty {S | S ∈ o} := by
+  refine inductionOn (motive := fun o => Set.Nonempty {S | S ∈ o}) o ?_
+  intro S
+  exact ⟨S, mem_mk _⟩
+
+theorem eq_mk_of_mem {S : Support β} {o : SupportOrbit β} (h : S ∈ o) : o = mk S :=
+  h.symm
+
 /-- An orbit of ordered supports is *strong* if it contains a strong support. -/
 def Strong (o : SupportOrbit β) : Prop :=
   ∀ S ∈ o, S.Strong

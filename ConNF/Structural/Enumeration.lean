@@ -373,6 +373,14 @@ instance {G : Type _} [Monoid G] [MulAction G α] : MulAction G (Enumeration α)
       intro j hj
       simp only [smul_f, mul_smul]
 
+theorem smul_mem_smul_iff {G : Type _} [Group G] [MulAction G α]
+    {E : Enumeration α} {x : α} (g : G) : g • x ∈ g • E ↔ x ∈ E := by
+  constructor
+  · intro h
+    have := smul_mem_smul h g⁻¹
+    rwa [inv_smul_smul, inv_smul_smul] at this
+  · exact (smul_mem_smul · g)
+
 instance : Add (Enumeration α) where
   add E F := ⟨E.max + F.max, fun i hi =>
     if hi' : i < E.max then
@@ -487,6 +495,22 @@ theorem image_le_image {E F : Enumeration α} (h : E ≤ F) (f : α → β) : E.
 theorem smul_le_smul {G : Type _} [SMul G α] {E F : Enumeration α} (h : E ≤ F) (g : G) :
     g • E ≤ g • F :=
   image_le_image h (g • ·)
+
+theorem le_inv_iff_smul_le {G : Type _} [Group G] [MulAction G α] {E F : Enumeration α} (g : G) :
+    E ≤ g⁻¹ • F ↔ g • E ≤ F := by
+  constructor
+  · intro h
+    have := smul_le_smul h g
+    rwa [smul_inv_smul] at this
+  · intro h
+    have := smul_le_smul h g⁻¹
+    rwa [inv_smul_smul] at this
+
+theorem eq_of_le {G : Type _} [SMul G α] {E F : Enumeration α} {g : G}
+    (h₁ : g • E ≤ F) (h₂ : E ≤ F) : g • E = E := by
+  refine ext' rfl ?_
+  intro i _ hE
+  rw [h₁.2 i hE (hE.trans_le h₁.1), h₂.2 i hE (hE.trans_le h₁.1)]
 
 theorem le_add (E F : Enumeration α) : E ≤ E + F := by
   constructor
