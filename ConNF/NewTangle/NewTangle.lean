@@ -399,9 +399,11 @@ end NewAllowable
 /-- A tangle at the new level `α` is a semitangle supported by a small support.
 This is `τ_α` in the blueprint.
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
-def NewTangle :=
-  { t : Semitangle //
-    ∃ S : Support α, MulAction.Supports NewAllowable (S : Set (Address α)) t }
+@[ext]
+structure NewTangle where
+  t : Semitangle
+  S : Support α
+  h : MulAction.Supports NewAllowable (S : Set (Address α)) t
 
 variable {c d : Code} {S : Set (Address α)}
 
@@ -456,6 +458,20 @@ theorem NewAllowable.smul_address_eq_smul_iff
       NewAllowable.toStructPerm ρ' c.path • c.value :=
   StructPerm.smul_address_eq_smul_iff
 
+/-- For any atom `a`, the code `(α, ⊥, a)` is a tangle at level `α`.
+This is called a *typed atom*. -/
+def newTypedAtom (a : Atom) : NewTangle :=
+  ⟨intro (show Set (Tangle ⊥) from {a}) <| Code.isEven_bot _,
+    ⟨1, fun _ _ => ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inl a⟩⟩,
+    by
+      intro ρ h
+      simp only [smul_intro]
+      congr 1
+      simp only [Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
+        NewAllowable.smul_address_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
+      simp only [smul_set_singleton, singleton_eq_singleton_iff]
+      exact h⟩
+
 /-- For any near-litter `N`, the code `(α, ⊥, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
 def newTypedNearLitter (N : NearLitter) : NewTangle :=
@@ -474,14 +490,25 @@ def newTypedNearLitter (N : NearLitter) : NewTangle :=
       simp_rw [SemiallowablePerm.coe_apply_bot]
       rfl⟩
 
+theorem newTypedAtom_injective : Function.Injective newTypedAtom := by
+  intro N₁ N₂ h
+  simp only [newTypedAtom, intro, NewTangle.mk.injEq, Semitangle.mk.injEq,
+    Enumeration.mk.injEq, heq_eq_eq, true_and] at h
+  cases congr_fun₂ h.2 0 ((κ_lt_one_iff 0).mpr rfl)
+  rfl
+
+theorem newTypedNearLitter_injective : Function.Injective newTypedNearLitter := by
+  intro N₁ N₂ h
+  simp only [newTypedNearLitter, intro, NewTangle.mk.injEq, Semitangle.mk.injEq,
+    Enumeration.mk.injEq, heq_eq_eq, true_and] at h
+  cases congr_fun₂ h.2 0 ((κ_lt_one_iff 0).mpr rfl)
+  rfl
+
 namespace NewTangle
 
 instance : Coe NewTangle Semitangle
     where
-  coe := Subtype.val
-
-theorem coe_injective : Injective (Subtype.val : NewTangle → Semitangle) :=
-  Subtype.coe_injective
+  coe := NewTangle.t
 
 end NewTangle
 
@@ -490,25 +517,53 @@ namespace NewAllowable
 /-- Allowable permutations act on `α`-tangles. -/
 instance hasSmulNewTangle : SMul NewAllowable NewTangle :=
   ⟨fun ρ t =>
-    ⟨ρ • (t : Semitangle),
+    ⟨ρ • (t : Semitangle), ρ • t.S,
       by
-        obtain ⟨S, hS⟩ := t.2
-        refine ⟨ρ • S, ?_⟩
+        refine ?_
         intro ρ' h
-        have := hS (ρ⁻¹ * ρ' * ρ) ?_
+        have := t.h (ρ⁻¹ * ρ' * ρ) ?_
         · conv_rhs =>
             rw [← this, ← mul_smul, ← mul_assoc, ← mul_assoc, mul_inv_self, one_mul, mul_smul]
         · intro a ha
           rw [mul_smul, mul_smul, inv_smul_eq_iff]
           exact h (Enumeration.smul_mem_smul ha ρ)⟩⟩
 
-@[simp, norm_cast]
+@[simp]
 theorem coe_smul_newTangle (ρ : NewAllowable) (t : NewTangle) :
     ((ρ • t) : Semitangle) = ρ • (t : Semitangle) :=
   rfl
 
-instance mulActionNewTangle : MulAction NewAllowable NewTangle :=
-  NewTangle.coe_injective.mulAction Subtype.val coe_smul_newTangle
+@[simp]
+theorem smul_newTangle_t (ρ : NewAllowable) (t : NewTangle) :
+    (ρ • t).t = ρ • t.t :=
+  rfl
+
+@[simp]
+theorem smul_newTangle_S (ρ : NewAllowable) (t : NewTangle) :
+    (ρ • t).S = ρ • t.S :=
+  rfl
+
+instance mulActionNewTangle : MulAction NewAllowable NewTangle where
+  one_smul t := by
+    refine NewTangle.ext _ _ ?_ ?_
+    · simp only [smul_newTangle_t, one_smul]
+    · simp only [smul_newTangle_S, one_smul]
+  mul_smul ρ₁ ρ₂ t := by
+    refine NewTangle.ext _ _ ?_ ?_
+    · simp only [smul_newTangle_t, mul_smul]
+    · simp only [smul_newTangle_S, mul_smul]
+
+theorem smul_newTypedNearLitter (N : NearLitter) (ρ : NewAllowable) :
+    ρ • newTypedNearLitter N =
+      newTypedNearLitter (NewAllowable.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _)) • N) := by
+  refine NewTangle.ext _ _ ?_ rfl
+  have := NearLitterPerm.smul_nearLitter_coe
+    (NewAllowable.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _))) N
+  simp only [newTypedNearLitter, smul_newTangle_t, smul_intro,
+    NearLitterPerm.smul_nearLitter_fst, toStructPerm, MonoidHom.coe_comp, comp_apply,
+    coeHom_apply, SemiallowablePerm.coe_apply_bot ρ] at this ⊢
+  congr 1
+  exact this.symm
 
 end NewAllowable
 

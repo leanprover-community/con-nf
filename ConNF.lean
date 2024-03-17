@@ -5,3 +5,4 @@ import ConNF.Fuzz
 import ConNF.NewTangle
 import ConNF.FOA
 import ConNF.Counting
+import ConNF.Model
