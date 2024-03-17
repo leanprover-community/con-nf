@@ -58,6 +58,7 @@ noncomputable instance iioBotPositionedTangles : ∀ β : TypeIndex, [LtLevel β
 end FOAData
 
 /-- Assumptions detailing how the different levels of the tangled structure interact. -/
+@[ext]
 class FOAAssumptions extends FOAData where
   /-- The one-step derivative map between types of allowable permutations.
   We can think of this map as `cons`ing a single morphism on a path. -/
@@ -92,24 +93,20 @@ class FOAAssumptions extends FOAData where
     fuzz hγδ (allowableCons hγ ρ • t)
   /-- We can build an `β`-allowable permutation from a family of allowable permutations at each
   level `γ < β` if they commute with the `fuzz` map. -/
-  allowableOfSmulFuzz (β : Λ) [LeLevel β]
+  allowable_of_smulFuzz (β : Λ) [LeLevel β]
     (ρs : ∀ γ : TypeIndex, [LtLevel γ] → (γ : TypeIndex) < β → Allowable γ) :
     (∀ (γ : TypeIndex) [LtLevel γ] (δ : Λ) [LtLevel δ]
         (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (t : Tangle γ),
         NearLitterPerm.ofBot (allowableCons (bot_lt_coe _) (ρs δ hδ)) • fuzz hγδ t =
         fuzz hγδ (ρs γ hγ • t)) →
-      Allowable β
-  /-- The allowable permutation we construct in `allowableOfSmulFuzz` has the correct one-step
-  derivatives. -/
-  allowableOfSmulFuzz_comp_eq {β : Λ} [LeLevel β] {ρs} {h}
-    (γ : TypeIndex) [LtLevel γ] (hγ : γ < β) :
-    allowableCons hγ (allowableOfSmulFuzz β ρs h) = ρs γ hγ
+      ∃ ρ : Allowable β, ∀ (γ : TypeIndex) [LtLevel γ] (hγ : γ < β),
+      allowableCons hγ ρ = ρs γ hγ
 
 export FOAAssumptions (allowableCons allowableCons_eq smul_support
   pos_lt_pos_atom pos_lt_pos_nearLitter
-  smul_fuzz allowableOfSmulFuzz allowableOfSmulFuzz_comp_eq)
+  smul_fuzz allowable_of_smulFuzz)
 
-attribute [simp] smul_support allowableOfSmulFuzz_comp_eq
+attribute [simp] smul_support
 
 variable [FOAAssumptions]
 

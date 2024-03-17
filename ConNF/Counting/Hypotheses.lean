@@ -23,8 +23,8 @@ class CountingAssumptions extends FOAAssumptions where
   toPretangle_smul (β : TypeIndex) [LeLevel β] (ρ : Allowable β) (t : Tangle β) :
     toPretangle β (ρ • t) = ρ • toPretangle β t
   /-- Tangles contain only tangles. -/
-  eq_toPretangle_of_mem (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ]
-    (h : γ < β) (t₁ : Tangle β) (t₂ : Pretangle γ) :
+  eq_toPretangle_of_mem (β : Λ) [LeLevel β] (γ : Λ) [LeLevel γ]
+    (h : (γ : TypeIndex) < β) (t₁ : Tangle β) (t₂ : Pretangle γ) :
     t₂ ∈ Pretangle.ofCoe (toPretangle β t₁) γ h → ∃ t₂' : Tangle γ, t₂ = toPretangle γ t₂'
   /-- Tangles are extensional at every proper level `γ < β`. -/
   toPretangle_ext (β γ : Λ) [LeLevel β] [LeLevel γ] (h : (γ : TypeIndex) < β) (t₁ t₂ : Tangle β) :

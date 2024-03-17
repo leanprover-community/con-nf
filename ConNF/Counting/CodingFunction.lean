@@ -10,9 +10,9 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] {β : Λ} [TangleData β]
 
-structure CodingFunction (β : Λ) [LeLevel β] where
+structure CodingFunction (β : Λ) [TangleData β] where
   decode : Support β →. Tangle β
   dom_nonempty : decode.Dom.Nonempty
   supports_decode' (S : Support β) (hS : (decode S).Dom) :
@@ -182,16 +182,16 @@ theorem code_eq_code_iff (S S' : Support β) (t t' : Tangle β)
     refine ext (ρ • S) ⟨ρ, rfl⟩ ⟨1, by rw [one_smul]⟩ ?_
     simp only [code_decode, Part.get_some, decode_smul]
 
-def Strong (χ : CodingFunction β) : Prop :=
+def Strong [FOAAssumptions] {β : Λ} [LeLevel β] (χ : CodingFunction β) : Prop :=
   ∀ S ∈ χ.decode.Dom, S.Strong
 
-theorem strong_of_strong_mem (χ : CodingFunction β) (S : Support β)
-    (hS : S.Strong) (hSχ : S ∈ χ.decode.Dom) : χ.Strong := by
+theorem strong_of_strong_mem [FOAAssumptions] {β : Λ} [LeLevel β]
+    (χ : CodingFunction β) (S : Support β) (hS : S.Strong) (hSχ : S ∈ χ.decode.Dom) : χ.Strong := by
   intro T hTχ
   obtain ⟨ρ, rfl⟩ := (χ.dom_iff S T hSχ).mp hTχ
   exact hS.smul ρ
 
-theorem code_strong (S : Support β) (t : Tangle β)
+theorem code_strong [FOAAssumptions] {β : Λ} [LeLevel β] (S : Support β) (t : Tangle β)
     (ht : Supports (Allowable β) (S : Set (Address β)) t) (hS : S.Strong) :
     (code S t ht).Strong :=
   strong_of_strong_mem _ S hS mem_code_self

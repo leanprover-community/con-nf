@@ -170,33 +170,35 @@ theorem ConNF.StructApprox.extracted_2'
 theorem allowableBelow_extends (hπf : π.Free) (γ : Λ) [LeLevel γ] (A : Path (β : TypeIndex) γ)
     (h : ∀ (δ : TypeIndex) [LtLevel δ] (h : δ < γ), AllowableBelow hπf δ (A.cons h)) :
     AllowableBelow hπf γ A := by
-  choose ρs hρ using h
-  refine' ⟨allowableOfSmulFuzz γ ρs _, _⟩
+  choose ρs hρs using h
+  have := allowable_of_smulFuzz γ ρs ?_
+  · obtain ⟨ρ, hρ⟩ := this
+    refine ⟨ρ, ?_⟩
+    intro B
+    obtain ⟨δ, _, hδ, B, rfl⟩ := exists_nil_cons_of_path B
+    specialize hρs δ hδ B
+    simp only [Tree.comp_bot, Tree.ofBot_toBot] at hρs ⊢
+    have := hρ δ hδ
+    apply_fun Allowable.toStructPerm at this
+    rw [← allowableCons_eq] at this
+    rw [← this] at hρs
+    rw [← Path.comp_assoc, Path.comp_cons, Path.comp_nil]
+    exact hρs
   · intro δ i ε _ hδ hε hδε t
     revert i
     induction δ using recBotCoe with
     | bot =>
         intro i t
         simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
-        refine Eq.trans ?_ (ConNF.StructApprox.extracted_1' hπf γ A ρs hρ ε hε t)
+        refine Eq.trans ?_ (ConNF.StructApprox.extracted_1' hπf γ A ρs hρs ε hε t)
         simp only [Allowable.toStructPerm_comp, Tree.comp_bot, Tree.toBot_smul]
         rfl
     | coe δ =>
         intro i t
         simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
-        refine Eq.trans ?_ (ConNF.StructApprox.extracted_2' hπf γ A ρs hρ δ ε hδ hε hδε t)
+        refine Eq.trans ?_ (ConNF.StructApprox.extracted_2' hπf γ A ρs hρs δ ε hδ hε hδε t)
         simp only [Allowable.toStructPerm_comp, Tree.comp_bot, Tree.toBot_smul]
         rfl
-  · intro B
-    obtain ⟨δ, _, hδ, B, rfl⟩ := exists_nil_cons_of_path B
-    specialize hρ δ hδ B
-    simp only [Tree.comp_bot, Tree.ofBot_toBot] at hρ ⊢
-    have := allowableOfSmulFuzz_comp_eq (ρs := ρs) (h := ?_) δ hδ
-    apply_fun Allowable.toStructPerm at this
-    rw [← allowableCons_eq] at this
-    rw [← this] at hρ
-    rw [← Path.comp_assoc, Path.comp_cons, Path.comp_nil]
-    exact hρ
 
 theorem allowableBelow_all (hπf : π.Free) (γ : Λ) [i : LeLevel γ] (A : Path (β : TypeIndex) γ) :
     AllowableBelow hπf γ A := by
