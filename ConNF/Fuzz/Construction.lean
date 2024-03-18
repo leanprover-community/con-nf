@@ -196,7 +196,7 @@ section congr
 variable {β' : TypeIndex} {γ' : Λ} [TangleData β'] [PositionedTangles β']
   [TangleData γ'] [PositionedTangles γ'] [TypedObjects γ']
 
-lemma fuzz_congr_β {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
+theorem fuzz_congr_β {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
   {t : Tangle β} {t' : Tangle β'} (h : fuzz hβγ t = fuzz hβγ' t') :
   β = β' := by
   have h₁ := fuzz_β hβγ t
@@ -204,7 +204,7 @@ lemma fuzz_congr_β {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex
   rw [← h, h₁] at h₂
   exact h₂
 
-lemma fuzz_congr_γ {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
+theorem fuzz_congr_γ {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
   {t : Tangle β} {t' : Tangle β'} (h : fuzz hβγ t = fuzz hβγ' t') :
   γ = γ' := by
   have h₁ := fuzz_γ hβγ t

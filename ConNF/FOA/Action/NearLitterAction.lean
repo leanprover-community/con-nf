@@ -21,11 +21,11 @@ noncomputable def _root_.Or.elim' {α : Sort _} {p q : Prop}
     (h : p ∨ q) (f : p → α) (g : q → α) : α :=
   if hp : p then f hp else g (h.resolve_left hp)
 
-lemma _root_.Or.elim'_left {α : Sort _} {p q : Prop}
+theorem _root_.Or.elim'_left {α : Sort _} {p q : Prop}
     (h : p ∨ q) (f : p → α) (g : q → α) (hp : p) : h.elim' f g = f hp :=
   by rw [Or.elim', dif_pos hp]
 
-lemma _root_.Or.elim'_right {α : Sort _} {p q : Prop}
+theorem _root_.Or.elim'_right {α : Sort _} {p q : Prop}
     (h : p ∨ q) (f : p → α) (g : q → α) (hp : ¬p) : h.elim' f g = g (h.resolve_left hp) :=
   by rw [Or.elim', dif_neg hp]
 

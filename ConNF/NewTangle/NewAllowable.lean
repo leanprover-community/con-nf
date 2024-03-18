@@ -109,11 +109,31 @@ theorem pathTop_pathTail {x y : V} (p : Quiver.Path x y) (h : p.length ≠ 0) :
   | cons p e ih =>
     cases p with
     | nil => rfl
-    | cons p e => simp_rw [← ih (by simp)]; rfl
+    | cons p' e' => simp_rw [← ih (by simp)]; rfl
 
 theorem ExtendedIndex.pathTop_pathTail {α : Λ} (A : ExtendedIndex α) :
     (Quiver.Hom.toPath (pathTop_hom A A.length_ne_zero)).comp (pathTail A) = A :=
   SemiallowablePerm.pathTop_pathTail A A.length_ne_zero
+
+theorem cons_heq {x₁ x₂ y z : V} (p₁ : Quiver.Path x₁ y) (p₂ : Quiver.Path x₂ y) (hx : x₁ = x₂)
+    (hp : HEq p₁ p₂) (e : y ⟶ z) : HEq (p₁.cons e) (p₂.cons e) := by
+  cases hx
+  cases eq_of_heq hp
+  rfl
+
+/-- Adding and removing a morphism from the top of a path doesn't change anything. -/
+theorem pathTail_comp {x y z : V} (f : x ⟶ y) (p : Quiver.Path y z) :
+    HEq (pathTail ((Quiver.Hom.toPath f).comp p)) p := by
+  induction p with
+  | nil => rfl
+  | cons p e ih =>
+    cases p with
+    | nil => rfl
+    | cons p' e' =>
+        rw [Quiver.Path.comp_cons, Quiver.Path.comp_cons, pathTail]
+        rw [Quiver.Path.comp_cons] at ih
+        refine cons_heq _ _ ?_ ih _
+        rw [← Quiver.Path.comp_cons, pathTop_toPath_comp]
 
 end PathTop
 
@@ -125,11 +145,6 @@ To work out the `A`-derivative, we extract the first morphism in the path `A` an
 determine which of the `β`-allowable permutations in `ρ` we will use. -/
 def toStructPerm' (ρ : SemiallowablePerm) : StructPerm α :=
   fun A => Allowable.toStructPerm (ρ (pathTop A)) (pathTail A)
-
-theorem toStructPerm'_one : (toStructPerm' 1 : StructPerm α) = 1 := by
-  funext A
-  rw [toStructPerm', one_apply, map_one]
-  rfl
 
 /-- Convert a semi-allowable permutation to a structural permutation. -/
 def toStructPerm : SemiallowablePerm →* StructPerm α
@@ -144,6 +159,19 @@ def toStructPerm : SemiallowablePerm →* StructPerm α
     simp only
     rw [toStructPerm', mul_apply, map_mul]
     rfl
+
+theorem toStructPerm_congr (ρ : SemiallowablePerm) {β₁ β₂ : TypeIndex} [LtLevel β₁] [LtLevel β₂]
+    (hβ : β₁ = β₂) {A₁ : ExtendedIndex β₁} {A₂ : ExtendedIndex β₂} (hA : HEq A₁ A₂) :
+    Allowable.toStructPerm (ρ β₁) A₁ = Allowable.toStructPerm (ρ β₂) A₂ := by
+  cases hβ
+  cases eq_of_heq hA
+  rfl
+
+theorem comp_toPath_toStructPerm
+    (ρ : SemiallowablePerm) (β : TypeIndex) [i : LtLevel β] :
+    Tree.comp (Quiver.Hom.toPath i.elim) (toStructPerm ρ) = Allowable.toStructPerm (ρ β) := by
+  ext A : 1
+  exact toStructPerm_congr ρ (pathTop_toPath_comp i.elim A) (pathTail_comp _ _)
 
 theorem coe_apply_bot (ρ : SemiallowablePerm) :
     (ρ : SemiallowablePerm) ⊥ =
@@ -323,6 +351,11 @@ def coeHom : NewAllowable →* SemiallowablePerm
 /-- Turn an allowable permutation into a structural permutation. -/
 def toStructPerm : NewAllowable →* StructPerm α :=
   SemiallowablePerm.toStructPerm.comp coeHom
+
+theorem comp_toPath_toStructPerm
+    (ρ : NewAllowable) (β : TypeIndex) [i : LtLevel β] :
+    Tree.comp (Quiver.Hom.toPath i.elim) (toStructPerm ρ) = Allowable.toStructPerm (ρ.val β) :=
+  SemiallowablePerm.comp_toPath_toStructPerm _ _
 
 section
 
