@@ -220,14 +220,14 @@ noncomputable def typedObjectsStepFn (α : Λ) (ihs : (β : Λ) → β < α → 
   if hβ' : β = α then
     hβ'.symm ▸ tangleDataStepFn_eq α ihs ▸ typedObjectsStep α ihs
   else
-    tangleDataStepFn_lt α ihs β (lt_of_le_of_ne hβ hβ') ▸
+    cast (by rw [tangleDataStepFn_lt α ihs β (lt_of_le_of_ne hβ hβ')])
       (ihs β (lt_of_le_of_ne hβ hβ')).typedObjects
 
 theorem typedObjectsStepFn_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β < α) :
     letI := tangleDataStepFn α ihs β hβ.le
     typedObjectsStepFn α ihs β hβ.le =
-      tangleDataStepFn_lt α ihs β hβ ▸ (ihs β hβ).typedObjects := by
+      cast (by rw [tangleDataStepFn_lt α ihs β hβ]) (ihs β hβ).typedObjects := by
   rw [typedObjectsStepFn, dif_neg (ne_of_lt hβ)]
 
 noncomputable def buildStepFOAData (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
@@ -247,10 +247,18 @@ noncomputable def buildStepFOAData (α : Λ) (ihs : (β : Λ) → β < α → IH
         · simp only [← tangleDataStepFn_lt α ihs β (coe_lt_coe.mp hβ.elim)]
           exact (cast_heq _ _).symm
         · dsimp only
-          rw [typedObjectsStepFn_lt α ihs β (coe_lt_coe.mp hβ.elim),
-            heq_eqRec_iff_heq, heq_eq_eq])
+          rw [typedObjectsStepFn_lt α ihs β (coe_lt_coe.mp hβ.elim)]
+          exact heq_of_cast_eq _ rfl)
         (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
   }
+
+theorem buildStepFOAData_positioned_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : Λ) (hβ : β < α) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
+    HEq ((buildStepFOAData α ihs).lowerPositionedTangles β) (ihs β hβ).positionedTangles := by
+  unfold FOAData.lowerPositionedTangles buildStepFOAData
+  simp only [id_eq, eq_mpr_eq_cast, cast_heq]
 
 theorem foaData_tangle_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     letI : Level := ⟨α⟩
@@ -343,6 +351,26 @@ theorem tangleData_cast_smul (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i
       (cast (show i₁.Allowable = i₂.Allowable by rw [h]) ρ)
       (cast (show i₁.Tangle = i₂.Tangle by rw [h]) t) :=
   by subst h; rfl
+
+theorem positionedTangles_cast_pos (α : Λ) (i₁ i₂ : TangleData α) (hi : i₁ = i₂)
+    (j₁ : letI := i₁; PositionedTangles α) (j₂ : letI := i₂; PositionedTangles α) (hj : HEq j₁ j₂)
+    (t) :
+    pos t = pos (cast (show i₁.Tangle = i₂.Tangle by rw [hi]) t) :=
+  by subst hi; subst hj; rfl
+
+theorem typedObjects_cast_typedAtom (α : Λ) (i₁ i₂ : TangleData α) (hi : i₁ = i₂)
+    (j₁ : letI := i₁; TypedObjects α) (j₂ : letI := i₂; TypedObjects α) (hj : HEq j₁ j₂)
+    (a : Atom) :
+    (letI := i₂; typedAtom a) =
+    (letI := i₁; cast (show i₁.Tangle = i₂.Tangle by rw [hi]) (typedAtom a)) :=
+  by subst hi; subst hj; rfl
+
+theorem typedObjects_cast_typedNearLitter (α : Λ) (i₁ i₂ : TangleData α) (hi : i₁ = i₂)
+    (j₁ : letI := i₁; TypedObjects α) (j₂ : letI := i₂; TypedObjects α) (hj : HEq j₁ j₂)
+    (N : NearLitter) :
+    (letI := i₂; typedNearLitter N) =
+    (letI := i₁; cast (show i₁.Tangle = i₂.Tangle by rw [hi]) (typedNearLitter N)) :=
+  by subst hi; subst hj; rfl
 
 @[simp]
 theorem foaData_allowable_eq_equiv_one (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
@@ -452,6 +480,43 @@ theorem foaData_allowable_lt_equiv_smul (α : Λ) (ihs : (β : Λ) → β < α �
     (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
     foaData_allowable_lt_equiv α ihs β hβ ρ • foaData_tangle_lt_equiv α ihs β hβ t) :=
   tangleData_cast_smul β _ _ (tangleDataStepFn_lt α ihs β hβ) ρ t
+
+@[simp]
+theorem foaData_tangle_lt_equiv_pos (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : Λ) (hβ : β < α) (t) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
+    pos t = (ihs β hβ).pos (foaData_tangle_lt_equiv α ihs β hβ t) :=
+  positionedTangles_cast_pos β _ _ (tangleDataStepFn_lt α ihs β hβ) _ _
+    (buildStepFOAData_positioned_lt α ihs β hβ) t
+
+@[simp]
+theorem foaData_tangle_lt_equiv_typedAtom (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : Λ) (hβ : β < α) (a : Atom) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
+    (letI : FOAData := buildStepFOAData α ihs; typedAtom a) =
+    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+    (foaData_tangle_lt_equiv α ihs β hβ).symm ((ihs β hβ).typedAtom a)) := by
+  have := typedObjects_cast_typedAtom β _ _ (tangleDataStepFn_lt α ihs β hβ) _ _
+    (heq_of_cast_eq _ (typedObjectsStepFn_lt α ihs β hβ).symm).symm a
+  erw [this]
+  simp only [foaData_tangle_lt_equiv, Equiv.cast_symm, Equiv.cast_apply, cast_cast, cast_eq]
+
+@[simp]
+theorem foaData_tangle_lt_equiv_typedNearLitter (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : Λ) (hβ : β < α) (N : NearLitter) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
+    (letI : FOAData := buildStepFOAData α ihs; typedNearLitter N) =
+    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+    (foaData_tangle_lt_equiv α ihs β hβ).symm ((ihs β hβ).typedNearLitter N)) := by
+  have := typedObjects_cast_typedNearLitter β _ _ (tangleDataStepFn_lt α ihs β hβ) _ _
+    (heq_of_cast_eq _ (typedObjectsStepFn_lt α ihs β hβ).symm).symm N
+  erw [this]
+  simp only [foaData_tangle_lt_equiv, Equiv.cast_symm, Equiv.cast_apply, cast_cast, cast_eq]
 
 theorem foaData_allowable_bot (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     letI : Level := ⟨α⟩
@@ -698,6 +763,55 @@ theorem smul_support_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     rw [Allowable.toStructPerm_smul, foaData_allowable_lt_equiv_toStructPerm α ihs β hβ']
     exact this
 
+theorem pos_lt_pos_atom_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) [iβ : letI : Level := ⟨α⟩; LtLevel β]
+    (t :
+      letI : Level := ⟨α⟩
+      letI : FOAData := buildStepFOAData α ihs
+      Tangle β)
+    {A : ExtendedIndex β} {a : Atom} :
+    letI : Level := ⟨α⟩
+    letI : FOAData := buildStepFOAData α ihs
+    ⟨A, inl a⟩ ∈ t.support →
+    t ≠ typedAtom a → pos a < pos t := by
+  intro hc hta
+  letI : Level := ⟨α⟩
+  letI : FOAData := buildStepFOAData α ihs
+  have hβ := coe_lt_coe.mp iβ.elim
+  have := (h β hβ).pos_lt_pos_atom (foaData_tangle_lt_equiv α ihs β hβ t) (A := A) (a := a) ?_ ?_
+  · rw [foaData_tangle_lt_equiv_pos α ihs β hβ t]
+    exact this
+  · rw [foaData_allowable_lt_equiv_support α ihs β hβ t] at hc
+    exact hc
+  · rw [foaData_tangle_lt_equiv_typedAtom α ihs β hβ a, ne_eq, Equiv.eq_symm_apply] at hta
+    exact hta
+
+theorem pos_lt_pos_nearLitter_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) [iβ : letI : Level := ⟨α⟩; LtLevel β]
+    (t :
+      letI : Level := ⟨α⟩
+      letI : FOAData := buildStepFOAData α ihs
+      Tangle β)
+    {A : ExtendedIndex β} {N : NearLitter} :
+    letI : Level := ⟨α⟩
+    letI : FOAData := buildStepFOAData α ihs
+    ⟨A, inr N⟩ ∈ t.support →
+    t ≠ typedNearLitter N → pos N < pos t := by
+  intro hc hta
+  letI : Level := ⟨α⟩
+  letI : FOAData := buildStepFOAData α ihs
+  have hβ := coe_lt_coe.mp iβ.elim
+  have := (h β hβ).pos_lt_pos_nearLitter (foaData_tangle_lt_equiv α ihs β hβ t)
+      (A := A) (N := N) ?_ ?_
+  · rw [foaData_tangle_lt_equiv_pos α ihs β hβ t]
+    exact this
+  · rw [foaData_allowable_lt_equiv_support α ihs β hβ t] at hc
+    exact hc
+  · rw [foaData_tangle_lt_equiv_typedNearLitter α ihs β hβ N, ne_eq, Equiv.eq_symm_apply] at hta
+    exact hta
+
 noncomputable def buildStepFOAAssumptions (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     letI : Level := ⟨α⟩
@@ -708,8 +822,8 @@ noncomputable def buildStepFOAAssumptions (α : Λ) (ihs : (β : Λ) → β < α
     allowableCons := fun {β _ γ _} => allowableConsStep α ihs h β γ
     allowableCons_eq := allowableConsStep_eq α ihs h
     smul_support := smul_support_step α ihs h _
-    pos_lt_pos_atom := sorry
-    pos_lt_pos_nearLitter := sorry
+    pos_lt_pos_atom := pos_lt_pos_atom_step α ihs h _
+    pos_lt_pos_nearLitter := pos_lt_pos_nearLitter_step α ihs h _
     smul_fuzz := sorry
     allowable_of_smulFuzz := sorry
   }
