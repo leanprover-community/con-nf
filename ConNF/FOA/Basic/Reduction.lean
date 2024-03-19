@@ -25,7 +25,7 @@ open scoped Cardinal Pointwise
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [FOAAssumptions]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions]
 variable {β : Λ} {G : Type _} {τ : Type _} [SMul G (Address β)] [SMul G τ] {x : τ}
 
 /-- An address is *reduced* if it is an atom or a litter. -/

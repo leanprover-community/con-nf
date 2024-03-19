@@ -14,7 +14,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ}
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ}
 
 inductive SpecCondition (β : Λ)
   | atom (A : ExtendedIndex β) (s : Set κ) (t : Set κ)

@@ -9,7 +9,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
 
 -- TODO: Reverse equalities of NearLitterApprox.map_atom
 
@@ -113,7 +113,7 @@ theorem foaMotive_litter (ψ : StructAction β) (h₁ : ψ.Lawful) (h₂ : ψ.Co
         Allowable.toStructPerm_apply]
       rw [toStructPerm_smul_fuzz, comp_bot_smul_atom]
     · have := ih ⟨A.cons (bot_lt_coe _), inl a⟩
-        (Relation.TransGen.single (Constrains.fuzz_bot hε A a))
+        (Relation.TransGen.single (Constrains.fuzzBot hε A a))
         (h₂.atom_bot_dom A hε hL)
       simp only [Allowable.toStructPerm_comp, Tree.comp_apply, Hom.comp_toPath]
       exact this.symm

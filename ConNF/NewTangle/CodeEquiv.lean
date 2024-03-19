@@ -38,8 +38,8 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] {β : TypeIndex} [LtLevel β] {γ : Λ} [LtLevel γ]
-  [TangleDataLt] [TypedObjectsLt] [PositionedTanglesLt]
+variable [Params.{u}] [Level] [BasePositions] {β : TypeIndex} [LtLevel β] {γ : Λ} [LtLevel γ]
+  [TangleDataLt] [TypedObjectsLt] [PositionedTanglesLt] [PositionedObjectsLt]
 
 namespace Code
 
@@ -116,20 +116,19 @@ theorem isEven_empty_iff : IsEven (mk β ∅) ↔ (β : TypeIndex) = ⊥ :=
 theorem isOdd_empty_iff : IsOdd (mk β ∅) ↔ (β : TypeIndex) ≠ ⊥ :=
   IsEmpty.isOdd_iff rfl
 
-private theorem not_isOdd_nonempty : ∀ c : NonemptyCode, ¬c.1.IsOdd ↔ c.1.IsEven
-  | c => by
-    rw [isOdd_iff, isEven_iff]
-    push_neg
-    apply forall_congr' _
-    intro d
-    apply imp_congr_right _
-    intro h
-    rw [Iff.comm, ← not_iff_not, Classical.not_not]
-    obtain hd | hd := d.members.eq_empty_or_nonempty
-    · rw [IsEmpty.isOdd_iff hd, IsEmpty.isEven_iff hd, Classical.not_not]
-    · let _ : ⟨d, hd⟩ ↝ c := cloudRel_coe_coe.1 h
-      exact not_isOdd_nonempty ⟨d, hd⟩
-termination_by c => c
+private theorem not_isOdd_nonempty (c : NonemptyCode) : ¬c.1.IsOdd ↔ c.1.IsEven := by
+  refine cloudRel'_wellFounded.induction (C := fun c => ¬c.1.IsOdd ↔ c.1.IsEven) c ?_
+  intro c ih
+  rw [isOdd_iff, isEven_iff]
+  push_neg
+  apply forall_congr' _
+  intro d
+  apply imp_congr_right _
+  intro h
+  rw [Iff.comm, ← not_iff_not, Classical.not_not]
+  obtain hd | hd := d.members.eq_empty_or_nonempty
+  · rw [IsEmpty.isOdd_iff hd, IsEmpty.isEven_iff hd, Classical.not_not]
+  · exact ih ⟨d, hd⟩ (cloudRel_coe_coe.1 h)
 
 /-- A code is not odd iff it is even. -/
 @[simp]

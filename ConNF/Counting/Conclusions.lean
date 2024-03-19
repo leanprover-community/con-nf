@@ -11,7 +11,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [CountingAssumptions]
+variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions]
 
 theorem mk_codingFunction (β : Λ) [i : LeLevel β] : #(CodingFunction β) < #μ := by
   revert i

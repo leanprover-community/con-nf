@@ -13,7 +13,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [CountingAssumptions] {β γ : Λ} [LeLevel β] [LeLevel γ]
+variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β γ : Λ} [LeLevel β] [LeLevel γ]
     (hγ : (γ : TypeIndex) < β)
 
 noncomputable def RaisedSingleton.code (S : Support β) (r : RaisedSingleton hγ S) :

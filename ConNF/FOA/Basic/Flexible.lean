@@ -8,7 +8,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : TypeIndex}
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : TypeIndex}
 
 /-- A litter is *inflexible* if it is the image of some f-map. -/
 @[mk_iff]
@@ -232,7 +232,7 @@ end Comp
 theorem InflexibleBot.constrains {β : Λ} {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleBot A L) :
     (⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩ : Address β) < ⟨A, inr L.toNearLitter⟩ := by
-  have := Constrains.fuzz_bot h.path.hε h.path.B h.a
+  have := Constrains.fuzzBot h.path.hε h.path.B h.a
   rw [← h.hL, ← h.path.hA] at this
   exact Relation.TransGen.single this
 

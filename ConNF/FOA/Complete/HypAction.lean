@@ -8,7 +8,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [FOAAssumptions]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions]
 
 /-!
 # Induction on addresses

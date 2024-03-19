@@ -111,14 +111,14 @@ The majority of this section is spent proving that the set of values to deny isn
 such that we could run out of available values for the function.
 -/
 
-variable [Params.{u}] {β : TypeIndex} {γ : Λ} [TangleData β] [PositionedTangles β]
+variable [Params.{u}] [BasePositions] {β : TypeIndex} {γ : Λ} [TangleData β] [PositionedTangles β]
   [TangleData γ] [PositionedTangles γ] [TypedObjects γ] (hβγ : β ≠ γ)
 
 variable (γ)
 
 /-- The set of elements of `ν` that `fuzz _ t` cannot be. -/
 def fuzzDeny (t : Tangle β) : Set μ :=
-  { ν : μ | ∃ (N : NearLitter), pos (typedNearLitter N : Tangle γ) ≤ pos t ∧ ν = N.1.1 } ∪
+  { ν : μ | ∃ (N : NearLitter), pos N ≤ pos t ∧ ν = N.1.1 } ∪
   { ν : μ | ∃ (a : Atom), pos a ≤ pos t ∧ ν = a.1.1 }
 
 theorem mk_invImage_lt (t : Tangle β) : #{ t' // t' < t } < #μ := by
@@ -128,27 +128,22 @@ theorem mk_invImage_lt (t : Tangle β) : #{ t' // t' < t } < #μ := by
   simp only [Subtype.mk.injEq, EmbeddingLike.apply_eq_iff_eq, Subtype.coe_inj] at h
   exact h
 
-theorem mk_invImage_le (t : Tangle β) : #{ t' : Tangle γ // pos t' ≤ pos t } < #μ := by
-  refine lt_of_le_of_lt ?_ (show #{ ν // ν ≤ pos t } < #μ from card_Iic_lt _)
-  refine ⟨⟨fun t' => ⟨_, t'.prop⟩, ?_⟩⟩
-  intro y₁ y₂ h
-  simp only [Subtype.mk.injEq, EmbeddingLike.apply_eq_iff_eq, Subtype.coe_inj] at h
-  exact h
-
 variable {γ}
 
 theorem mk_fuzzDeny (t : Tangle β) :
-    #{ t' // t' < t } + #(fuzzDeny γ t) < #μ := by
+    #{ t' // t' < t } + #(fuzzDeny t) < #μ := by
   refine add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le (mk_invImage_lt t) ?_
   refine lt_of_le_of_lt (mk_union_le _ _) ?_
   refine add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le ?_ ?_
-  · refine lt_of_le_of_lt ?_ (mk_invImage_le γ t)
-    refine ⟨⟨fun i => ⟨typedNearLitter i.prop.choose, i.prop.choose_spec.1⟩, ?_⟩⟩
-    intro ν₁ ν₂ h
-    have h' := typedNearLitter.injective (Subtype.coe_inj.mpr h)
-    have := ν₁.2.choose_spec.2
-    rw [h', ← ν₂.2.choose_spec.2] at this
-    exact Subtype.coe_inj.mp this
+  · have : #{ N : NearLitter | pos N ≤ pos t } < #μ
+    · refine lt_of_le_of_lt ?_ (card_Iic_lt (pos t))
+      refine ⟨⟨fun a => ⟨pos a.1, a.2⟩, ?_⟩⟩
+      intro a b h
+      exact Subtype.coe_inj.mp (pos_injective (Subtype.coe_inj.mpr h))
+    refine lt_of_le_of_lt ?_ this
+    refine mk_le_of_surjective (f := fun a => ⟨_, a.1, a.2, rfl⟩) ?_
+    rintro ⟨_, a, ha, rfl⟩
+    exact ⟨⟨a, ha⟩, rfl⟩
   · have : #{ a : Atom | pos a ≤ pos t } < #μ
     · refine lt_of_le_of_lt ?_ (card_Iic_lt (pos t))
       refine ⟨⟨fun a => ⟨pos a.1, a.2⟩, ?_⟩⟩
@@ -181,7 +176,7 @@ the pos of the input to the function. This ensures a well-foundedness condition 
 in many places later.
 -/
 noncomputable def fuzz (t : Tangle β) : Litter :=
-  ⟨chooseWf (fuzzDeny γ) mk_fuzzDeny t, β, γ, hβγ⟩
+  ⟨chooseWf fuzzDeny mk_fuzzDeny t, β, γ, hβγ⟩
 
 @[simp]
 theorem fuzz_β (t : Tangle β) : (fuzz hβγ t).β = β :=
@@ -219,17 +214,17 @@ theorem fuzz_injective : Injective (fuzz hβγ) := by
   simp only [fuzz, Litter.mk.injEq, chooseWf_injective.eq_iff, and_self, and_true] at h
   exact h
 
-theorem fuzz_not_mem_deny (t : Tangle β) : (fuzz hβγ t).ν ∉ fuzzDeny γ t :=
+theorem fuzz_not_mem_deny (t : Tangle β) : (fuzz hβγ t).ν ∉ fuzzDeny t :=
   chooseWf_not_mem_deny t
 
-theorem fuzz_pos (t : Tangle β) (N : NearLitter) (h : N.1 = fuzz hβγ t) :
-    pos t < pos (typedNearLitter N : Tangle γ) := by
+theorem pos_lt_pos_fuzz_nearLitter (t : Tangle β) (N : NearLitter) (h : N.1 = fuzz hβγ t) :
+    pos t < pos N := by
   have h' := fuzz_not_mem_deny hβγ t
   contrapose! h'
   refine Or.inl ⟨N, h', ?_⟩
   rw [h]
 
-theorem pos_lt_pos_fuzz (t : Tangle β) (a : Atom) (ha : a.1 = fuzz hβγ t) :
+theorem pos_lt_pos_fuzz_atom (t : Tangle β) (a : Atom) (ha : a.1 = fuzz hβγ t) :
     pos t < pos a := by
   have h' := fuzz_not_mem_deny hβγ t
   contrapose! h'

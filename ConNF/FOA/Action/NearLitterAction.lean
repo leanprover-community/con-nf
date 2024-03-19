@@ -246,7 +246,7 @@ theorem roughLitterMapOrElse_injOn (hφ : φ.Lawful) :
   rw [φ.roughLitterMapOrElse_of_dom hL₁, φ.roughLitterMapOrElse_of_dom hL₂] at h
   exact hφ.litterMap_injective hL₁ hL₂ (NearLitter.inter_nonempty_of_fst_eq_fst h)
 
-variable [Level] [FOAAssumptions] {β : Λ} {A : ExtendedIndex β}
+variable [Level] [BasePositions] [FOAAssumptions] {β : Λ} {A : ExtendedIndex β}
 
 theorem mk_not_bannedLitter_and_flexible : #{L | ¬φ.BannedLitter L ∧ Flexible A L} = #μ := by
   refine' le_antisymm ((mk_subtype_le _).trans mk_litter.le) _

@@ -37,14 +37,15 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level]
+variable [Params.{u}] [Level] [BasePositions]
 
 open Code
 
 section Cloud
 
 variable {γ : TypeIndex} [LtLevel γ] [TangleData γ] [PositionedTangles γ]
-  {β : Λ} [LtLevel β] [TangleData β] [PositionedTangles β] [TypedObjects β] (hγβ : γ ≠ β)
+  {β : Λ} [LtLevel β] [TangleData β] [PositionedTangles β] [TypedObjects β] [PositionedObjects β]
+  (hγβ : γ ≠ β)
 
 /-- The cloud map. We map each tangle to all typed near-litters near the `fuzz`ed tangle, and take
 the union over all tangles in the input. -/
@@ -141,8 +142,8 @@ theorem minTangle_lt_minTangle_cloud (s : Set (Tangle γ)) (hs : s.Nonempty) :
     pos (minTangle s hs) < pos (minTangle (cloud hγβ s) hs.cloud) := by
   obtain ⟨t, ht, N, hN, h⟩ := mem_cloud.1 (minTangle_mem (cloud hγβ s) hs.cloud)
   refine (minTangle_le s hs ht).trans_lt ?_
-  rw [h]
-  exact fuzz_pos hγβ t _ hN
+  rw [h, pos_typedNearLitter]
+  exact pos_lt_pos_fuzz_nearLitter hγβ t _ hN
 
 end Cloud
 
@@ -184,7 +185,8 @@ theorem extension_ne (hβγ : β ≠ γ) : extension s γ = cloud hβγ s :=
 
 end Extension
 
-variable [TypedObjectsLt] (γ : TypeIndex) [LtLevel γ] (β : Λ) [LtLevel β] (c d : Code)
+variable [TypedObjectsLt] [PositionedObjectsLt]
+  (γ : TypeIndex) [LtLevel γ] (β : Λ) [LtLevel β] (c d : Code)
 
 /-- The `cloud` map, phrased as a function on `α`-codes, but if the code's level matches `β`,
 this is the identity function. This is written in a weird way in order to make `(cloudCode β c).1`
@@ -259,6 +261,7 @@ theorem codeMinMap_lt_codeMinMap_cloudCode (c : NonemptyCode) (hcβ : c.1.1 ≠ 
   convert minTangle_lt_minTangle_cloud c.1.members c.2 using 1
   congr
   exact snd_cloudCode β c hcβ
+  infer_instance
 
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse `cloud` map. Note that we require the map to actually change the data, by

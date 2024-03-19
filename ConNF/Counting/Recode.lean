@@ -12,7 +12,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [CountingAssumptions] {β γ : Λ} [LeLevel β] [LeLevel γ]
+variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β γ : Λ} [LeLevel β] [LeLevel γ]
   (hγ : (γ : TypeIndex) < β)
 
 def raiseIndex (A : ExtendedIndex (γ : TypeIndex)) : ExtendedIndex β :=

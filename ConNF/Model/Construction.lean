@@ -9,7 +9,9 @@ universe u
 
 namespace ConNF.Construction
 
-variable [Params.{u}]
+variable [Params.{u}] [BasePositions]
+
+#exit
 
 /-- The data for the main inductive hypothesis,
 containing the things we need to construct at each level `α`. -/

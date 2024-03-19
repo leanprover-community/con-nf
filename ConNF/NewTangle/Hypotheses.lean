@@ -39,12 +39,17 @@ class PositionedTanglesLt [TangleDataLt] where
   data : ∀ β : Λ, [LtLevel β] → PositionedTangles β
 
 noncomputable instance PositionedTanglesLt.toPositionedTangles
-    [TangleDataLt] [PositionedTanglesLt] : ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
+    [BasePositions] [TangleDataLt] [PositionedTanglesLt] :
+    ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
   | ⊥, _ => Bot.positionedTangles
   | (β : Λ), _ => PositionedTanglesLt.data β
 
 /-- The `TypedObjects` for each `β < α`. -/
 abbrev TypedObjectsLt [TangleDataLt] :=
   ∀ β : Λ, [LtLevel β] → TypedObjects β
+
+/-- The `PositionedObjects` for each `β < α`. -/
+abbrev PositionedObjectsLt [BasePositions] [TangleDataLt] [PositionedTanglesLt] [TypedObjectsLt] :=
+  ∀ β : Λ, [LtLevel β] → PositionedObjects β
 
 end ConNF

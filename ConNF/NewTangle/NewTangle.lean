@@ -28,7 +28,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [TangleDataLt]
+variable [Params.{u}] [Level] [BasePositions] [TangleDataLt]
   {β : TypeIndex} [LtLevel β] {γ : Λ} [LtLevel γ]
 
 open Code
@@ -81,7 +81,7 @@ end Semitangle
 
 open Semitangle
 
-variable [PositionedTanglesLt] [TypedObjectsLt]
+variable [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjectsLt]
 
 /-- A *semitangle* is a collection of `β`-tangles for each lower level `β < α`, together with
 a preference for one of these extensions. -/

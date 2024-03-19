@@ -22,7 +22,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ}
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ}
 
 /-- addresses can be said to *constrain* each other in a number of ways.
 1. `(L, A) ≺ (a, A)` when `a ∈ L` and `L` is a litter. We can say that an atom is constrained by the
@@ -45,7 +45,7 @@ inductive Constrains : Address β → Address β → Prop
     c ∈ t.support →
     Constrains ⟨(A.cons hδ).comp c.path, c.value⟩
       ⟨(A.cons hε).cons (bot_lt_coe _), inr (fuzz hδε t).toNearLitter⟩
-  | fuzz_bot ⦃γ : Λ⦄ [LeLevel γ] ⦃ε : Λ⦄ [LtLevel ε]
+  | fuzzBot ⦃γ : Λ⦄ [LeLevel γ] ⦃ε : Λ⦄ [LtLevel ε]
     (hε : (ε : TypeIndex) < γ) (A : Path (β : TypeIndex) γ) (a : Atom) :
     Constrains ⟨A.cons (bot_lt_coe _), inl a⟩
       ⟨(A.cons hε).cons (bot_lt_coe _), inr (fuzz (bot_ne_coe (a := ε)) a).toNearLitter⟩
@@ -54,134 +54,52 @@ inductive Constrains : Address β → Address β → Prop
 
 @[inherit_doc] infix:50 " ≺ " => Constrains
 
-inductive LitterConstrains : Litter → Litter → Prop
-  | fuzz_atom ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε] (hδε : (δ : TypeIndex) ≠ ε)
-    (t : Tangle δ) {B : ExtendedIndex δ} {a : Atom} : ⟨B, inl a⟩ ∈ t.support →
-    LitterConstrains a.1 (fuzz hδε t)
-  | fuzz_nearLitter ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε] (hδε : (δ : TypeIndex) ≠ ε)
-    (t : Tangle δ) {B : ExtendedIndex δ} {N : NearLitter} (h : ⟨B, inr N⟩ ∈ t.support)
-    {a : Atom} (ha : a ∈ N) :
-    LitterConstrains a.1 (fuzz hδε t)
-  | fuzz_bot ⦃ε : Λ⦄ [LtLevel ε] (a : Atom) :
-    LitterConstrains a.1 (fuzz (bot_ne_coe (a := ε)) a)
+def Address.pos (c : Address β) : μ :=
+  c.2.elim Position.pos Position.pos
 
-@[mk_iff]
-inductive HasPosition : Litter → μ → Prop
-  | fuzz ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε] (hδε : (δ : TypeIndex) ≠ ε) (t : Tangle δ) :
-    HasPosition (fuzz hδε t) (pos t)
-  | fuzz_bot ⦃ε : Λ⦄ [LtLevel ε] (a : Atom) :
-    HasPosition (fuzz (bot_ne_coe (a := ε)) a) (pos a)
+@[simp]
+theorem Address.pos_atom (A : ExtendedIndex β) (a : Atom) :
+    Address.pos ⟨A, inl a⟩ = Position.pos a :=
+  rfl
 
-theorem hasPosition_subsingleton {L : Litter} {ν₁ ν₂ : μ}
-    (h₁ : HasPosition L ν₁) (h₂ : HasPosition L ν₂) : ν₁ = ν₂ := by
-  rw [hasPosition_iff] at h₁ h₂
-  cases h₁ with
-  | inl h₁ =>
-      obtain ⟨δ, _, ε, _, hδε, t, rfl, rfl⟩ := h₁
-      cases h₂ with
-      | inl h₂ =>
-          obtain ⟨_, _, _, _, _, t, ht, rfl⟩ := h₂
-          cases fuzz_congr_β ht
-          cases fuzz_congr_γ ht
-          cases fuzz_injective _ ht
-          rfl
-      | inr h₂ =>
-          obtain ⟨_, _, a, ha, rfl⟩ := h₂
-          cases fuzz_congr_β ha
-  | inr h₁ =>
-      obtain ⟨_, _, a, rfl, rfl⟩ := h₁
-      cases h₂ with
-      | inl h₂ =>
-          obtain ⟨_, _, _, _, _, t, ht, rfl⟩ := h₂
-          cases fuzz_congr_β ht
-      | inr h₂ =>
-          obtain ⟨_, _, a, ha, rfl⟩ := h₂
-          cases fuzz_congr_γ ha
-          cases fuzz_injective _ ha
-          rfl
+@[simp]
+theorem Address.pos_nearLitter (A : ExtendedIndex β) (N : NearLitter) :
+    Address.pos ⟨A, inr N⟩ = Position.pos N :=
+  rfl
 
-theorem hasPosition_of_litterConstrains {L₁ L₂ : Litter} (h : LitterConstrains L₁ L₂) :
-    ∃ ν, HasPosition L₂ ν := by
+theorem Constrains.hasPosition_lt {c d : Address β} (h : c ≺ d) :
+    c.pos < d.pos := by
   cases h
-  · exact ⟨_, HasPosition.fuzz _ _⟩
-  · exact ⟨_, HasPosition.fuzz _ _⟩
-  · exact ⟨_, HasPosition.fuzz_bot _⟩
+  case atom A a => exact BasePositions.lt_pos_atom a
+  case nearLitter A N hN => exact BasePositions.lt_pos_litter N hN
+  case symmDiff A N a ha => exact BasePositions.lt_pos_symmDiff a N ha
+  case fuzz γ _ δ _ ε _ hδ hε hδε A t c hc' =>
+    have := pos_lt_pos_fuzz_nearLitter hδε t (ConNF.fuzz hδε t).toNearLitter rfl
+    obtain ⟨B, a | N⟩ := c
+    · simp only [Address.pos_atom, Address.pos_nearLitter]
+      by_cases h : t = typedAtom a
+      · subst h
+        rw [pos_typedAtom] at this
+        exact this
+      · exact (pos_lt_pos_atom _ hc' h).trans this
+    · simp only [Address.pos_nearLitter]
+      by_cases h : t = typedNearLitter N
+      · subst h
+        rw [pos_typedNearLitter] at this
+        exact this
+      · exact (pos_lt_pos_nearLitter _ hc' h).trans this
+  case fuzzBot γ _ ε _ hε A a =>
+    simp only [Address.pos_atom, Address.pos_nearLitter]
+    exact pos_lt_pos_fuzz_nearLitter (bot_ne_coe (a := ε)) a
+      (ConNF.fuzz (bot_ne_coe (a := ε)) a).toNearLitter rfl
 
-theorem hasPosition_lt_of_litterConstrains {L₁ L₂ : Litter} (h : LitterConstrains L₁ L₂)
-    {ν₁ ν₂ : μ} (h₁ : HasPosition L₁ ν₁) (h₂ : HasPosition L₂ ν₂) :
-    ν₁ < ν₂ := by
-  rw [hasPosition_iff] at h₁ h₂
-  cases h with
-  | fuzz_atom hδε t ht =>
-      cases h₂ with
-      | inr h =>
-          obtain ⟨_, _, _, h, rfl⟩ := h
-          cases fuzz_congr_β h
-      | inl h =>
-          obtain ⟨δ, _, ε, _, _, t', ht', rfl⟩ := h
-          cases fuzz_congr_β ht'
-          cases fuzz_congr_γ ht'
-          cases fuzz_injective _ ht'
-          cases h₁ with
-          | inl h =>
-              obtain ⟨δ, _, ε, _, hδε, t', ht', rfl⟩ := h
-              exact pos_lt_pos_atom t ht t' hδε ht'
-          | inr h =>
-              obtain ⟨ε, _, a, h, rfl⟩ := h
-              exact pos_lt_pos_atom t ht (show Tangle ⊥ from a) bot_ne_coe h
-  | fuzz_nearLitter hδε t ht ha =>
-      cases h₂ with
-      | inr h =>
-          obtain ⟨_, _, _, h, rfl⟩ := h
-          cases fuzz_congr_β h
-      | inl h =>
-          obtain ⟨δ, _, ε, _, _, t', ht', rfl⟩ := h
-          cases fuzz_congr_β ht'
-          cases fuzz_congr_γ ht'
-          cases fuzz_injective _ ht'
-          cases h₁ with
-          | inl h =>
-              obtain ⟨δ, _, ε, _, hδε, t', ht', rfl⟩ := h
-              exact pos_lt_pos_nearLitter t ht t' hδε ⟨_, ha, ht'⟩
-          | inr h =>
-              obtain ⟨ε, _, a, h, rfl⟩ := h
-              exact pos_lt_pos_nearLitter t ht (show Tangle ⊥ from a) bot_ne_coe ⟨_, ha, h⟩
-  | fuzz_bot a =>
-      cases h₂ with
-      | inl h =>
-          obtain ⟨_, _, _, _, _, _, h, rfl⟩ := h
-          cases fuzz_congr_β h
-      | inr h =>
-          obtain ⟨ε, _, a, ha, rfl⟩ := h
-          cases fuzz_congr_γ ha
-          cases fuzz_injective _ ha
-          cases h₁ with
-          | inl h =>
-              obtain ⟨δ, _, ε, _, hδε, t', ht', rfl⟩ := h
-              exact pos_lt_pos_fuzz _ t' a ht'
-          | inr h =>
-              obtain ⟨ε, _, a', ha', rfl⟩ := h
-              exact pos_lt_pos_fuzz _ (show Tangle ⊥ from a') a ha'
+theorem constrains_subrelation (β : Λ) :
+    Subrelation ((· ≺ ·) : Address β → _ → Prop) (InvImage (· < ·) Address.pos) :=
+  Constrains.hasPosition_lt
 
-open scoped Classical in
-noncomputable def positionOrBot (L : Litter) : WithBot μ :=
-  if h : ∃ ν, HasPosition L ν then h.choose else ⊥
-
-theorem litterConstrains_subrelation :
-    Subrelation LitterConstrains (InvImage (· < ·) positionOrBot) := by
-  intro L₁ L₂ h
-  obtain ⟨ν₂, hν₂⟩ := hasPosition_of_litterConstrains h
-  by_cases h₁ : ∃ ν₁, HasPosition L₁ ν₁
-  · obtain ⟨ν₁, hν₁⟩ := h₁
-    rw [InvImage, positionOrBot, positionOrBot, dif_pos ⟨ν₁, hν₁⟩, dif_pos ⟨ν₂, hν₂⟩,
-      hasPosition_subsingleton (Exists.choose_spec ⟨ν₁, hν₁⟩) hν₁,
-      hasPosition_subsingleton (Exists.choose_spec ⟨ν₂, hν₂⟩) hν₂]
-    exact WithBot.coe_lt_coe.mpr (hasPosition_lt_of_litterConstrains h hν₁ hν₂)
-  · rw [InvImage, positionOrBot, positionOrBot, dif_neg h₁, dif_pos ⟨ν₂, hν₂⟩]
-    exact bot_lt_coe _
-
-theorem litterConstrains_wf : WellFounded LitterConstrains :=
-  Subrelation.wf litterConstrains_subrelation IsWellFounded.wf
+/-- The `≺` relation is well-founded. -/
+theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : Address β → _ → Prop) :=
+  Subrelation.wf (constrains_subrelation β) (InvImage.wf _ Params.μ_isWellOrder.wf)
 
 @[simp]
 theorem constrains_atom {c : Address β} {A : ExtendedIndex β} {a : Atom} :
@@ -215,78 +133,6 @@ theorem constrains_nearLitter {c : Address β} {A : ExtendedIndex β}
     · exact Constrains.nearLitter A N hN
     · exact Constrains.symmDiff A N a ha
 
-theorem acc_atom {a : Atom} {A : ExtendedIndex β}
-    (h : Acc ((· ≺ ·) : Address β → _ → Prop) ⟨A, inr a.1.toNearLitter⟩) :
-    Acc ((· ≺ ·) : Address β → _ → Prop) ⟨A, inl a⟩ := by
-  constructor
-  intro c
-  rw [constrains_atom]
-  rintro rfl
-  exact h
-
-theorem acc_nearLitter {N : NearLitter} {A : ExtendedIndex β}
-    (h : ∀ a ∈ N, Acc ((· ≺ ·) : Address β → _ → Prop) ⟨A, inr a.1.toNearLitter⟩) :
-    Acc ((· ≺ ·) : Address β → _ → Prop) ⟨A, inr N⟩ := by
-  by_cases hN : N.IsLitter
-  · obtain ⟨L, rfl⟩ := hN.exists_litter_eq
-    obtain ⟨⟨a, rfl⟩⟩ := litterSet_nonempty L
-    exact h _ rfl
-  constructor
-  intro d hd
-  rw [constrains_nearLitter hN] at hd
-  obtain (rfl | ⟨a, ha, rfl⟩) := hd
-  · obtain ⟨a, ha⟩ := NearLitter.inter_nonempty_of_fst_eq_fst (N₁ := N) (N₂ := N.1.toNearLitter) rfl
-    have := h a ha.1
-    rw [ha.2] at this
-    exact this
-  · refine acc_atom ?_
-    obtain (ha | ha) := ha
-    · obtain ⟨b, hb⟩ := NearLitter.inter_nonempty_of_fst_eq_fst (N₁ := N) (N₂ := N.1.toNearLitter) rfl
-      have := h b hb.1
-      rw [hb.2, ← ha.1] at this
-      exact this
-    · exact h a ha.1
-
-/-- The `≺` relation is well-founded. -/
-theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : Address β → _ → Prop) := by
-  have : ∀ L : Litter, ∀ A : ExtendedIndex β,
-      Acc ((· ≺ ·) : Address β → _ → Prop) ⟨A, inr L.toNearLitter⟩
-  · intro L
-    refine litterConstrains_wf.induction
-      (C := fun L => ∀ A : ExtendedIndex β, Acc (· ≺ ·) ⟨A, inr L.toNearLitter⟩) L ?_
-    clear L
-    intro L ih A
-    constructor
-    intro c hc
-    rw [constrains_iff] at hc
-    obtain ⟨A, a, rfl, hc⟩ | ⟨A, N, hN, rfl, hc⟩ | ⟨A, N, a, ha, rfl, hc⟩ |
-        ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, A, t, c, hc, rfl, hc'⟩ |
-        ⟨γ, _, ε, _, hγ, A, a, rfl, hc⟩ := hc
-    · cases hc
-    · cases hc
-      cases hN (NearLitter.IsLitter.mk _)
-    · cases hc
-      cases ha with
-      | inl ha => cases ha.2 ha.1
-      | inr ha => cases ha.2 ha.1
-    · simp only [Address.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff] at hc'
-      cases hc'.1
-      cases hc'.2
-      obtain ⟨B, a | N⟩ := c
-      · exact acc_atom (ih a.1 (LitterConstrains.fuzz_atom _ _ hc) _)
-      · refine acc_nearLitter ?_
-        intro a ha
-        exact ih _ (LitterConstrains.fuzz_nearLitter hδε t hc ha) _
-    · simp only [Address.mk.injEq, inr.injEq, Litter.toNearLitter_injective.eq_iff] at hc
-      cases hc.1
-      cases hc.2
-      refine acc_atom (ih _ (LitterConstrains.fuzz_bot _) _)
-  constructor
-  intro c
-  obtain ⟨B, a | N⟩ := c
-  · exact acc_atom (this _ _)
-  · exact acc_nearLitter (fun _ _ => this _ _)
-
 /-- The constrains relation is stable under composition of paths. -/
 theorem constrains_comp {β γ : Λ} {c d : Address γ} (h : c ≺ d)
     (B : Path (β : TypeIndex) γ) : ⟨B.comp c.path, c.value⟩ ≺ ⟨B.comp d.path, d.value⟩ := by
@@ -297,7 +143,7 @@ theorem constrains_comp {β γ : Λ} {c d : Address γ} (h : c ≺ d)
   · rw [Path.comp_cons, ← Path.comp_assoc, Path.comp_cons]
     exact Constrains.fuzz hδ hε hδε (B.comp A) t c hc
   · rw [Path.comp_cons]
-    exact Constrains.fuzz_bot hδ (B.comp A) a
+    exact Constrains.fuzzBot hδ (B.comp A) a
 
 instance : PartialOrder (Address β) where
   le := Relation.ReflTransGen (· ≺ ·)

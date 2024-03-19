@@ -14,7 +14,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level]
+variable [Params.{u}] [Level] [BasePositions]
 
 instance : LeLevel (0 : Λ) := ⟨WithBot.coe_le_coe.mpr (Params.Λ_zero_le _)⟩
 

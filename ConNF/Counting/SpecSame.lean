@@ -33,7 +33,7 @@ end PFun
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
   {S T : Support β} {hS : S.Strong} {hT : T.Strong}
   {σ : Spec β} (hσS : σ.Specifies S hS) (hσT : σ.Specifies T hT)
 

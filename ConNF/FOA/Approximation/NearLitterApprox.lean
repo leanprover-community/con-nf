@@ -196,7 +196,7 @@ theorem ExactlyApproximates.mem_litterSet_inv {π₀ : NearLitterApprox} {π : N
     (hπ : π₀.ExactlyApproximates π) (a : Atom) (ha : a ∉ π₀.atomPerm.domain) :
     π⁻¹ • a ∈ litterSet (π⁻¹ • a.1) := by contrapose! ha; exact hπ.exception_mem _ (Or.inr ha)
 
-def Free [Level] [FOAAssumptions] {β : TypeIndex} (π : NearLitterApprox)
+def Free [Level] [BasePositions] [FOAAssumptions] {β : TypeIndex} (π : NearLitterApprox)
     (A : ExtendedIndex β) : Prop :=
   ∀ L ∈ π.litterPerm.domain, Flexible A L
 

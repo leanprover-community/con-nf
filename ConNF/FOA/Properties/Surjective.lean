@@ -10,7 +10,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
   [FreedomOfActionHypothesis β] {π : StructApprox β}
 
 theorem completeNearLitterMap_subset_range (A : ExtendedIndex β) (L : Litter) :
@@ -151,7 +151,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       exact h
     · exact NearLitterApprox.flexibleCompletion_symm_smul_flexible (π A) A (hπf A) L h
   · obtain ⟨⟨γ, ε, hε, C, rfl⟩, a, rfl⟩ := h
-    obtain ⟨b, rfl⟩ := ha _ a (Constrains.fuzz_bot hε _ a)
+    obtain ⟨b, rfl⟩ := ha _ a (Constrains.fuzzBot hε _ a)
     refine' ⟨fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) b, _⟩
     rw [completeLitterMap_eq_of_inflexibleBot ⟨⟨γ, ε, hε, C, rfl⟩, b, rfl⟩]
   · obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ := h

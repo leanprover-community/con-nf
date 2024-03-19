@@ -19,7 +19,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level]
+variable [Params.{u}] [Level] [BasePositions]
 
 /-- The data that we will use when proving the freedom of action theorem.
 This structure combines the following data:
@@ -33,25 +33,29 @@ class FOAData where
   lowerTangleData : ∀ β : Λ, [LeLevel β] → TangleData β
   lowerPositionedTangles : ∀ β : Λ, [LtLevel β] → PositionedTangles β
   lowerTypedObjects : ∀ β : Λ, [LeLevel β] → TypedObjects β
+  lowerPositionedObjects : ∀ β : Λ, [LtLevel β] → PositionedObjects β
 
 namespace FOAData
 
 variable [FOAData] {β : Λ} [LeLevel β] {γ : Λ} [LtLevel γ]
 
-instance tangleData : TangleData β :=
+instance : TangleData β :=
   lowerTangleData β
 
-instance positionedTangles : PositionedTangles γ :=
+instance : PositionedTangles γ :=
   lowerPositionedTangles γ
 
-instance typedObjects : TypedObjects β :=
+instance : TypedObjects β :=
   lowerTypedObjects β
 
-instance iicBotTangleData : ∀ β : TypeIndex, [LeLevel β] → TangleData β
+instance : PositionedObjects γ :=
+  lowerPositionedObjects γ
+
+instance : ∀ β : TypeIndex, [LeLevel β] → TangleData β
   | ⊥, _ => Bot.tangleData
   | (β : Λ), _ => lowerTangleData β
 
-noncomputable instance iioBotPositionedTangles : ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
+instance : ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
   | ⊥, _ => Bot.positionedTangles
   | (β : Λ), _ => lowerPositionedTangles β
 
@@ -76,16 +80,12 @@ class FOAAssumptions extends FOAData where
     (ρ • t).support = ρ • t.support
   /-- Inflexible litters whose atoms occur in designated supports have position less than the
   original tangle. -/
-  pos_lt_pos_atom {β : Λ} [LtLevel β] (t : Tangle β)
-    {A : ExtendedIndex β} {a : Atom} (ht : ⟨A, Sum.inl a⟩ ∈ t.support)
-    {γ : TypeIndex} [LtLevel γ] (s : Tangle γ) {δ : Λ} [LtLevel δ] (hγδ : γ ≠ δ)
-    (ha : a.1 = fuzz hγδ s) : pos s < pos t
+  pos_lt_pos_atom {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {a : Atom} :
+    ⟨A, Sum.inl a⟩ ∈ t.support → t ≠ typedAtom a → pos a < pos t
   /-- Inflexible litters touching near-litters in designated supports have position less than the
   original tangle. -/
-  pos_lt_pos_nearLitter {β : Λ} [LtLevel β] (t : Tangle β)
-    {A : ExtendedIndex β} {N : NearLitter} (ht : ⟨A, Sum.inr N⟩ ∈ t.support)
-    {γ : TypeIndex} [LtLevel γ] (s : Tangle γ) {δ : Λ} [LtLevel δ] (hγδ : γ ≠ δ)
-    (h : Set.Nonempty ((N : Set Atom) ∩ (fuzz hγδ s).toNearLitter)) : pos s < pos t
+  pos_lt_pos_nearLitter {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {N : NearLitter} :
+    ⟨A, Sum.inr N⟩ ∈ t.support → t ≠ typedNearLitter N → pos N < pos t
   /-- The `fuzz` map commutes with allowable permutations. -/
   smul_fuzz {β : TypeIndex} [LeLevel β] {γ : TypeIndex} [LtLevel γ] {δ : Λ} [LtLevel δ]
     (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (ρ : Allowable β) (t : Tangle γ) :
@@ -213,13 +213,6 @@ theorem smul_mem_support {β : Λ} [LtLevel β] {c : Address β} {t : Tangle β}
 theorem NearLitterPerm.ofBot_comp' {β : TypeIndex} [LeLevel β] {hβ : ⊥ < β} {ρ : Allowable β} :
     NearLitterPerm.ofBot (allowableCons hβ ρ) = Allowable.toStructPerm ρ (Quiver.Hom.toPath hβ) :=
   (congr_fun (allowableCons_eq β ⊥ hβ ρ) Quiver.Path.nil).symm
-
-theorem exists_cons_of_length_ne_zero {V : Type _} [Quiver V] {x y : V}
-    (p : Quiver.Path x y) (h : p.length ≠ 0) :
-    ∃ t : V, ∃ q : Quiver.Path x t, ∃ e : t ⟶ y, p = q.cons e := by
-  cases p
-  · cases h rfl
-  · exact ⟨_, _, _, rfl⟩
 
 @[simp]
 theorem ofBot_smul {X : Type _} [MulAction NearLitterPerm X] (π : Allowable ⊥) (x : X) :

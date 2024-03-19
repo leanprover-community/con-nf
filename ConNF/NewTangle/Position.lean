@@ -12,7 +12,9 @@ universe u
 
 namespace ConNF.NewTangle
 
-variable [Params.{u}] [Level] [TangleDataLt] [PositionedTanglesLt] [TypedObjectsLt]
+variable [Params.{u}] [Level] [BasePositions] [TangleDataLt] [PositionedTanglesLt] [TypedObjectsLt]
+
+#exit
 
 def posBound (t : NewTangle) : Set μ :=
   {ν | ∃ (A : ExtendedIndex α) (a : Atom), ⟨A, inl a⟩ ∈ t.S ∧

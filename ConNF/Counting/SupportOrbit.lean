@@ -9,7 +9,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
 
 def SupportOrbit (β : Λ) [LeLevel β] : Type u :=
   MulAction.orbitRel.Quotient (Allowable β) (Support β)

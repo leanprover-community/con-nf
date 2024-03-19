@@ -19,7 +19,7 @@ it here for more convenient use later.
 
 open Function Set WithBot
 
-open scoped Pointwise
+open scoped Pointwise symmDiff
 
 universe u
 
@@ -146,6 +146,43 @@ class TypedObjects where
 
 export TypedObjects (typedAtom typedNearLitter)
 
+class BasePositions where
+  posAtom : Atom ↪ μ
+  posNearLitter : NearLitter ↪ μ
+  lt_pos_atom (a : Atom) :
+    posNearLitter a.1.toNearLitter < posAtom a
+  lt_pos_litter (N : NearLitter) (hN : ¬N.IsLitter) :
+    posNearLitter N.1.toNearLitter < posNearLitter N
+  lt_pos_symmDiff (a : Atom) (N : NearLitter) (h : a ∈ litterSet N.1 ∆ N) :
+    posAtom a < posNearLitter N
+
+/-- A position function for atoms. -/
+instance [BasePositions] : Position Atom μ :=
+  ⟨BasePositions.posAtom⟩
+
+/-- A position function for near-litters. -/
+instance [BasePositions] : Position NearLitter μ :=
+  ⟨BasePositions.posNearLitter⟩
+
+theorem lt_pos_atom [BasePositions] (a : Atom) : pos a.1.toNearLitter < pos a :=
+  BasePositions.lt_pos_atom a
+
+theorem lt_pos_litter [BasePositions] (N : NearLitter) (hN : ¬N.IsLitter) :
+    pos N.1.toNearLitter < pos N :=
+  BasePositions.lt_pos_litter N hN
+
+theorem lt_pos_symmDiff [BasePositions] (a : Atom) (N : NearLitter) (h : a ∈ litterSet N.1 ∆ N) :
+    pos a < pos N :=
+  BasePositions.lt_pos_symmDiff a N h
+
+class PositionedObjects [BasePositions] [PositionedTangles α] [TypedObjects α] where
+  pos_typedAtom (a : Atom) : pos (typedAtom a : Tangle α) = pos a
+  pos_typedNearLitter (N : NearLitter) : pos (typedNearLitter N : Tangle α) = pos N
+
+export PositionedObjects (pos_typedAtom pos_typedNearLitter)
+
+attribute [simp] pos_typedAtom pos_typedNearLitter
+
 namespace Allowable
 
 variable {α}
@@ -174,13 +211,9 @@ instance Bot.tangleData : TangleData ⊥
       NearLitterPerm.smul_address_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
     exact h
 
-/-- A position function for atoms, which is chosen arbitrarily. -/
-noncomputable instance instPositionAtom : Position Atom μ :=
-  ⟨Nonempty.some mk_atom.le⟩
-
-/-- The position function at level `⊥`, which is chosen arbitrarily. -/
-noncomputable instance Bot.positionedTangles : PositionedTangles ⊥ :=
-  ⟨instPositionAtom.pos⟩
+/-- The position function at level `⊥`, taken from the `BasePositions`. -/
+instance Bot.positionedTangles [BasePositions] : PositionedTangles ⊥ :=
+  ⟨BasePositions.posAtom⟩
 
 /-- The identity equivalence between `⊥`-allowable permutations and near-litter permutations.
 This equivalence is a group isomorphism. -/

@@ -17,7 +17,7 @@ namespace ConNF
 
 namespace Support
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ}
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ}
 
 @[mk_iff]
 inductive Interferes (a : Atom) (N₁ N₂ : NearLitter) : Prop
@@ -68,7 +68,7 @@ theorem Precedes.lt {c d : Address β} :
   case fuzzBot A N h =>
     refine lt_nearLitter (Relation.TransGen.single ?_)
     simp_rw [h.hL]
-    exact Constrains.fuzz_bot h.path.hε _ _
+    exact Constrains.fuzzBot h.path.hε _ _
 
 theorem Precedes.wellFounded : WellFounded (Precedes : Address β → Address β → Prop) := by
   have : Subrelation Precedes ((· < ·) : Address β → Address β → Prop) := Precedes.lt

@@ -10,7 +10,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
   [FreedomOfActionHypothesis β] {π : StructApprox β}
 
 theorem atom_injective_extends {c d : Address β} (hcd : (ihsAction π c d).Lawful)
@@ -156,9 +156,9 @@ theorem Biexact.smul_eq_smul {β : Λ} [LeLevel β] {π π' : Allowable β} {c :
     have := ih ⟨B.cons <| bot_lt_coe _, inl a⟩ ?_ ?_
     · simp only [smul_inl, inl.injEq] at this
       exact this
-    · exact Constrains.fuzz_bot hε _ _
+    · exact Constrains.fuzzBot hε _ _
     · refine' h.constrains (Relation.ReflTransGen.single _)
-      exact Constrains.fuzz_bot hε _ _
+      exact Constrains.fuzzBot hε _ _
 
 theorem Biexact.smul_eq_smul_nearLitter {β : Λ} [LeLevel β]
     {π π' : Allowable β} {A : ExtendedIndex β} {N : NearLitter}
@@ -372,11 +372,11 @@ theorem ConNF.StructApprox.extracted_1
   refine Eq.trans ?_ this.symm
   rw [← (h <| C.cons (bot_lt_coe _)).map_atom a
         (Or.inl (Or.inl (Or.inl (Or.inl
-          ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.fuzz_bot hε _ _) hc₂'⟩))))]
+          ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.fuzzBot hε _ _) hc₂'⟩))))]
   rw [StructAction.rc_smul_atom_eq]
   · rfl
   · simp only [Tree.comp_apply, constrainedAction_atomMap]
-    exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.fuzz_bot hε _ _) hc₂'⟩
+    exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.fuzzBot hε _ _) hc₂'⟩
 
 theorem ConNF.StructApprox.extracted_2
     (hπf : π.Free) {γ : Λ} [LeLevel γ] (A : Path (β : TypeIndex) γ)
@@ -792,10 +792,10 @@ theorem litter_injective_extends (hπf : π.Free) {c d : Address β}
     cases coe_injective (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hB).eq)
     cases (Path.heq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hB).eq).eq
     refine' congr_arg _ ((hcd _).atomMap_injective _ _ (fuzz_injective bot_ne_coe h))
-    · have := Constrains.fuzz_bot hγε₁ B₁ a₁
+    · have := Constrains.fuzzBot hγε₁ B₁ a₁
       exact transConstrained_of_reflTransConstrained_of_trans_constrains h₁
         (Relation.TransGen.single this)
-    · have := Constrains.fuzz_bot hγε₁ B₁ a₂
+    · have := Constrains.fuzzBot hγε₁ B₁ a₂
       exact transConstrained_of_reflTransConstrained_of_trans_constrains h₂
         (Relation.TransGen.single this)
   · obtain ⟨h₁'⟩ := h₁'

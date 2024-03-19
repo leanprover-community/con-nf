@@ -10,7 +10,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
   [FreedomOfActionHypothesis β]
 
 def nearLitterHypothesis (A : ExtendedIndex β) (N : NearLitter) (H : HypAction ⟨A, inr N⟩) :

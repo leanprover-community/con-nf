@@ -10,7 +10,7 @@ namespace ConNF
 
 namespace StructApprox
 
-variable [Params.{u}] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
   [FreedomOfActionHypothesis β] {π : StructApprox β}
 
 noncomputable def completeAtomPerm (hπf : π.Free) (A : ExtendedIndex β) : Perm Atom :=
@@ -276,8 +276,7 @@ theorem freedom_of_action {β : Λ} [i : LeLevel β] (π₀ : StructApprox β) (
   revert i
   have := WellFounded.induction
     (C := fun β => ∀ (i : LeLevel β) (π₀ : StructApprox β),
-      Free π₀ → ∃ π : Allowable β,
-        ExactlyApproximates π₀ (@Allowable.toStructPerm _ _ FOAData.tangleData π))
+      Free π₀ → ∃ π : Allowable β, ExactlyApproximates π₀ (Allowable.toStructPerm π))
     (inferInstanceAs (IsWellFounded Λ (· < ·))).wf β
   refine fun i => this ?_ i π₀ h
   intro β ih _ π₀ h
