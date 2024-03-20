@@ -1291,6 +1291,56 @@ theorem toPretangle_smul_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     rw [toPretangleStep_lt' α ihs β hβ', toPretangleStep_lt' α ihs β hβ']
     exact toPretangleLt_smul α ihs h β ρ t
 
+theorem eq_toPretangle_of_mem_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) [iβ : letI : Level := ⟨α⟩; LeLevel β]
+    (γ : Λ) [iγ : letI : Level := ⟨α⟩; LeLevel γ]
+    (hγβ : (γ : TypeIndex) < β)
+    (t₁ :
+      letI : Level := ⟨α⟩
+      letI : FOAData := buildStepFOAData α ihs
+      Tangle β) :
+    ∀ t₂ ∈ Pretangle.ofCoe (toPretangleStep α ihs β iβ t₁) γ hγβ,
+    ∃ t₂', t₂ = toPretangleStep α ihs γ iγ t₂' := by
+  letI : Level := ⟨α⟩
+  letI iγ' : LtLevel γ := ⟨hγβ.trans_le iβ.elim⟩
+  by_cases hβ : β = α
+  · cases hβ
+    rw [toPretangleStep_eq]
+    simp_rw [toPretangleStep_lt' α ihs γ hγβ]
+    intro t₂ ht₂
+    simp_rw [NewTangle.toPretangle, Semitangle.toPretangle] at ht₂
+    simp only [Pretangle.ofCoe_symm, exists_and_right, Pretangle.ofCoe_toCoe, mem_setOf_eq] at ht₂
+    obtain ⟨t₂', _, ht₂⟩ := ht₂
+    exact ⟨(foaData_tangle_lt'_equiv α ihs γ iγ'.elim).symm t₂', ht₂.symm⟩
+  · intro t₂ ht₂
+    have hβ' := lt_of_le_of_ne (coe_le_coe.mp iβ.elim) hβ
+    have hγ' := coe_lt_coe.mp iγ'.elim
+    have := (h β hβ').eq_toPretangle_of_mem γ (coe_lt_coe.mp hγβ)
+        (foaData_tangle_lt'_equiv α ihs β (coe_lt_coe.mpr hβ') t₁) t₂ ?_
+    · obtain ⟨t₂', ht₂'⟩ := this
+      refine ⟨(foaData_tangle_lt'_equiv α ihs γ iγ'.elim).symm t₂', ?_⟩
+      rw [ht₂', toPretangleStep_lt' α ihs γ iγ'.elim,
+        toPretangleStepLt_coe α ihs γ (coe_lt_coe.mp iγ'.elim),
+        foaData_tangle_lt'_equiv_eq_lt_equiv α ihs γ (coe_lt_coe.mp iγ'.elim)]
+      erw [Equiv.apply_symm_apply]
+    · rw [foaData_tangle_lt'_equiv_eq_lt_equiv α ihs β hβ']
+      rw [toPretangleStep_lt' α ihs β (coe_lt_coe.mpr hβ'),
+        toPretangleStepLt_coe α ihs β hβ'] at ht₂
+      exact ht₂
+
+theorem toPretangle_ext_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) [iβ : letI : Level := ⟨α⟩; LeLevel β]
+    (γ : Λ) [iγ : letI : Level := ⟨α⟩; LeLevel γ]
+    (hγβ : (γ : TypeIndex) < β)
+    (t₁ t₂ :
+      letI : Level := ⟨α⟩
+      letI : FOAData := buildStepFOAData α ihs
+      Tangle β) :
+    (∀ t : Pretangle γ, t ∈ Pretangle.ofCoe (toPretangleStep α ihs β iβ t₁) γ hγβ ↔
+      t ∈ Pretangle.ofCoe (toPretangleStep α ihs β iβ t₂) γ hγβ) → t₁ = t₂ := sorry
+
 noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     letI : Level := ⟨α⟩
@@ -1300,7 +1350,7 @@ noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β
   {
     toPretangle := toPretangleStep α ihs
     toPretangle_smul := toPretangle_smul_step α ihs h
-    eq_toPretangle_of_mem := sorry
+    eq_toPretangle_of_mem := eq_toPretangle_of_mem_step α ihs h
     toPretangle_ext := sorry
     singleton := sorry
     singleton_injective := sorry
