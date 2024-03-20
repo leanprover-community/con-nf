@@ -111,10 +111,7 @@ The majority of this section is spent proving that the set of values to deny isn
 such that we could run out of available values for the function.
 -/
 
-variable [Params.{u}] [BasePositions] {β : TypeIndex} {γ : Λ} [TangleData β] [PositionedTangles β]
-  [TangleData γ] [PositionedTangles γ] [TypedObjects γ] (hβγ : β ≠ γ)
-
-variable (γ)
+variable [Params.{u}] [BasePositions] {β : TypeIndex} [TangleData β] [PositionedTangles β]
 
 /-- The set of elements of `ν` that `fuzz _ t` cannot be. -/
 def fuzzDeny (t : Tangle β) : Set μ :=
@@ -157,6 +154,8 @@ theorem mk_fuzzDeny (t : Tangle β) :
 /-!
 We're done with proving technical results, now we can define the `fuzz` maps.
 -/
+
+variable {γ : Λ} (hβγ : β ≠ γ)
 
 /--
 The `fuzz` map for a particular pair of type indices.

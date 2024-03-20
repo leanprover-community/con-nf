@@ -189,16 +189,12 @@ theorem allowableBelow_extends (hπf : π.Free) (γ : Λ) [LeLevel γ] (A : Path
     induction δ using recBotCoe with
     | bot =>
         intro i t
-        simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
         refine Eq.trans ?_ (ConNF.StructApprox.extracted_1' hπf γ A ρs hρs ε hε t)
         simp only [Allowable.toStructPerm_comp, Tree.comp_bot, Tree.toBot_smul]
-        rfl
     | coe δ =>
         intro i t
-        simp only [Allowable.comp_eq, NearLitterPerm.ofBot_smul, Allowable.toStructPerm_smul]
         refine Eq.trans ?_ (ConNF.StructApprox.extracted_2' hπf γ A ρs hρs δ ε hδ hε hδε t)
         simp only [Allowable.toStructPerm_comp, Tree.comp_bot, Tree.toBot_smul]
-        rfl
 
 theorem allowableBelow_all (hπf : π.Free) (γ : Λ) [i : LeLevel γ] (A : Path (β : TypeIndex) γ) :
     AllowableBelow hπf γ A := by

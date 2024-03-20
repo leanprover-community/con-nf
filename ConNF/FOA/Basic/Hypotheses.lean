@@ -89,7 +89,7 @@ class FOAAssumptions extends FOAData where
   /-- The `fuzz` map commutes with allowable permutations. -/
   smul_fuzz {β : TypeIndex} [LeLevel β] {γ : TypeIndex} [LtLevel γ] {δ : Λ} [LtLevel δ]
     (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (ρ : Allowable β) (t : Tangle γ) :
-    NearLitterPerm.ofBot (allowableCons (bot_lt_coe _) (allowableCons hδ ρ)) • fuzz hγδ t =
+    Allowable.toStructPerm ρ ((Quiver.Hom.toPath hδ).cons (bot_lt_coe _)) • fuzz hγδ t =
     fuzz hγδ (allowableCons hγ ρ • t)
   /-- We can build an `β`-allowable permutation from a family of allowable permutations at each
   level `γ < β` if they commute with the `fuzz` map. -/
@@ -97,7 +97,7 @@ class FOAAssumptions extends FOAData where
     (ρs : ∀ γ : TypeIndex, [LtLevel γ] → (γ : TypeIndex) < β → Allowable γ) :
     (∀ (γ : TypeIndex) [LtLevel γ] (δ : Λ) [LtLevel δ]
         (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (t : Tangle γ),
-        NearLitterPerm.ofBot (allowableCons (bot_lt_coe _) (ρs δ hδ)) • fuzz hγδ t =
+        Allowable.toStructPerm (ρs δ hδ) (Quiver.Hom.toPath (bot_lt_coe _)) • fuzz hγδ t =
         fuzz hγδ (ρs γ hγ • t)) →
       ∃ ρ : Allowable β, ∀ (γ : TypeIndex) [LtLevel γ] (hγ : γ < β),
       allowableCons hγ ρ = ρs γ hγ
@@ -233,7 +233,9 @@ theorem toStructPerm_smul_fuzz'
     fuzz hγδ (allowableCons hγ ρ • t) := by
   have := congr_fun (allowableCons_eq β δ hδ ρ) (Quiver.Hom.toPath (bot_lt_coe _))
   simp only [Tree.comp_apply, Quiver.Hom.comp_toPath] at this
-  rw [this, ← smul_fuzz hγ hδ hγδ ρ t, ← Allowable.toStructPerm_apply]
+  rw [this, ← smul_fuzz hγ hδ hγδ ρ t]
+  simp only [Allowable.comp_eq, Allowable.toStructPerm_comp, Tree.comp_apply,
+    Quiver.Hom.comp_toPath]
   rfl
 
 @[simp]
