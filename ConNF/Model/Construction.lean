@@ -141,11 +141,15 @@ structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
         (Hom.toPath (bot_lt_coe _)) • fuzz'Bot (ih γ hγ.le) t =
       fuzz'Bot (ih γ hγ.le) (π • t)) :
     ∃ ρ : (ih α le_rfl).Allowable,
-    ∀ (β : Λ) (hβ : β < α) (fαβ : (ih α le_rfl).Allowable → (ih β hβ.le).Allowable)
+    (∀ (β : Λ) (hβ : β < α) (fαβ : (ih α le_rfl).Allowable → (ih β hβ.le).Allowable)
       (_hfαβ : ∀ ρ : (ih α le_rfl).Allowable,
         Tree.comp (Hom.toPath (coe_lt_coe.mpr hβ)) ((ih α le_rfl).allowableToStructPerm ρ) =
         (ih β hβ.le).allowableToStructPerm (fαβ ρ)),
-      fαβ ρ = ρs β hβ
+      fαβ ρ = ρs β hβ) ∧
+    (∀ (fα : (ih α le_rfl).Allowable → NearLitterPerm)
+      (_hfα : ∀ ρ : (ih α le_rfl).Allowable,
+        (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = fα ρ),
+      fα ρ = π)
   toPretangle_smul (t : (ih α le_rfl).Tangle) (ρ : (ih α le_rfl).Allowable) :
     (ih α le_rfl).toPretangle (ρ • t) = ρ • (ih α le_rfl).toPretangle t
   eq_toPretangle_of_mem (β : Λ) (hβ : β < α) (t₁ : (ih α le_rfl).Tangle) (t₂ : Pretangle β) :
@@ -565,6 +569,31 @@ def foaData_allowable_lt'_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β
     Allowable β) :=
     Equiv.cast (foaData_allowable_lt' α ihs β hβ)
 
+theorem foaData_tangle_lt' (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : TypeIndex) (hβ : β < α) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨hβ⟩
+    (letI : FOAData := buildStepFOAData α ihs
+    Tangle β) =
+    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    Tangle β) := by
+  revert hβ
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro hβ
+    rfl
+  · intro β hβ
+    rw [foaData_tangle_lt]
+    rfl
+
+def foaData_tangle_lt'_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : TypeIndex) (hβ : β < α) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨hβ⟩
+    (letI : FOAData := buildStepFOAData α ihs
+    Tangle β) ≃
+    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    Tangle β) :=
+    Equiv.cast (foaData_tangle_lt' α ihs β hβ)
+
 @[simp]
 def foaData_allowable_lt'_equiv_eq_lt_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β < α) :
@@ -574,6 +603,16 @@ def foaData_allowable_lt'_equiv_eq_lt_equiv (α : Λ) (ihs : (β : Λ) → β < 
 @[simp]
 def foaData_allowable_lt'_equiv_eq_refl (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     foaData_allowable_lt'_equiv α ihs ⊥ (bot_lt_coe _) = Equiv.refl _ := rfl
+
+@[simp]
+def foaData_tangle_lt'_equiv_eq_lt_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : Λ) (hβ : β < α) :
+    foaData_tangle_lt'_equiv α ihs β (coe_lt_coe.mpr hβ) =
+    foaData_tangle_lt_equiv α ihs β hβ := rfl
+
+@[simp]
+def foaData_tangle_lt'_equiv_eq_refl (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
+    foaData_tangle_lt'_equiv α ihs ⊥ (bot_lt_coe _) = Equiv.refl _ := rfl
 
 @[simp]
 theorem foaData_allowable_lt'_equiv_one (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -616,6 +655,41 @@ theorem foaData_allowable_lt'_equiv_toStructPerm (α : Λ) (ihs : (β : Λ) → 
   · intro β hβ
     simp only [foaData_allowable_lt'_equiv_eq_lt_equiv α ihs β (coe_lt_coe.mp hβ)]
     exact foaData_allowable_lt_equiv_toStructPerm α ihs β (coe_lt_coe.mp hβ)
+
+@[simp]
+theorem foaData_allowable_lt'_equiv_smul (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : TypeIndex) (hβ : β < α) (ρ t) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨hβ⟩
+    foaData_tangle_lt'_equiv α ihs β hβ
+    (letI : FOAData := buildStepFOAData α ihs; ρ • t) =
+    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    foaData_allowable_lt'_equiv α ihs β hβ ρ • foaData_tangle_lt'_equiv α ihs β hβ t) := by
+  revert hβ
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro hβ ρ t
+    rfl
+  · intro β hβ ρ t
+    rw [foaData_tangle_lt'_equiv_eq_lt_equiv α ihs β (coe_lt_coe.mp hβ)]
+    exact foaData_allowable_lt_equiv_smul α ihs β (coe_lt_coe.mp hβ) ρ t
+
+@[simp]
+theorem foaData_tangle_lt'_equiv_fuzz (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : TypeIndex) (hβ : β < α) (γ : Λ) (hβγ : β ≠ γ) (t) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨hβ⟩
+    (letI : FOAData := buildStepFOAData α ihs; fuzz hβγ t) =
+    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+    letI : PositionedTangles β := PositionedTanglesLt.toPositionedTangles β
+    fuzz hβγ (foaData_tangle_lt'_equiv α ihs β hβ t)) := by
+  revert hβ hβγ
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro hβ hβγ t
+    rfl
+  · intro β hβ hβγ t
+    rw [foaData_tangle_lt'_equiv_eq_lt_equiv α ihs β (coe_lt_coe.mp hβ)]
+    exact foaData_tangle_lt_equiv_fuzz α ihs β (coe_lt_coe.mp hβ) γ hβγ t
 
 -- TODO: Add `support` and `smul` lemmas.
 
@@ -874,6 +948,27 @@ theorem allowableConsStep_eq_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β
     foaData_allowable_lt_equiv_toStructPerm] at this
   exact this
 
+theorem allowableConsStep_eq_eq' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (γ : TypeIndex) (hγ : γ < α) (ρ) :
+    letI : Level := ⟨α⟩
+    letI : LeLevel α := ⟨le_rfl⟩
+    letI : LtLevel γ := ⟨hγ⟩
+    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (foaData_allowable_eq_equiv α ihs ρ : SemiallowablePerm) γ =
+    foaData_allowable_lt'_equiv α ihs γ hγ (allowableConsStep α ihs h α γ hγ ρ) := by
+  revert hγ
+  refine WithBot.recBotCoe ?_ ?_ γ
+  · intro hγ
+    letI : Level := ⟨α⟩
+    letI : LeLevel α := ⟨le_rfl⟩
+    have := congr_fun (allowableConsStep_eq α ihs h α ⊥ (bot_lt_coe _) ρ) Path.nil
+    rw [Tree.comp_apply, Path.comp_nil, foaData_allowable_eq_equiv_toStructPerm α ihs] at this
+    exact this
+  · intro γ hγ
+    rw [foaData_allowable_lt'_equiv_eq_lt_equiv, allowableConsStep_eq_eq]
+    rfl
+
 theorem smul_fuzz_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
     (β : TypeIndex) [iβ : letI : Level := ⟨α⟩; LeLevel β]
@@ -950,6 +1045,92 @@ theorem smul_fuzz_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
       simp only [comp_apply, Equiv.symm_apply_apply]
       rfl
 
+theorem allowable_of_smulFuzz_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) [iβ : letI : Level := ⟨α⟩; LeLevel β]
+    (ρs :
+      letI : Level := ⟨α⟩
+      letI : FOAData := buildStepFOAData α ihs
+      (γ : TypeIndex) → [LtLevel γ] → γ < β → Allowable γ)
+    (hρs :
+      letI : Level := ⟨α⟩
+      letI : FOAData := buildStepFOAData α ihs
+      ∀ (γ : TypeIndex) [LtLevel γ] (δ : Λ) [LtLevel δ]
+        (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (t : Tangle γ),
+        Allowable.toStructPerm (ρs δ hδ) (Hom.toPath (bot_lt_coe _)) • fuzz hγδ t =
+          fuzz hγδ (ρs γ hγ • t)) :
+    letI : Level := ⟨α⟩
+    letI : FOAData := buildStepFOAData α ihs
+    ∃ ρ : Allowable β, ∀ (γ : TypeIndex) [LtLevel γ] (hγ : γ < β),
+    allowableConsStep α ihs h β γ hγ ρ = ρs γ hγ := by
+  letI : Level := ⟨α⟩
+  letI : FOAData := buildStepFOAData α ihs
+  by_cases hβ : β = α
+  · cases hβ
+    have hρ :
+      letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+      letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+      SemiallowablePerm.IsAllowable
+        (fun γ hγ => foaData_allowable_lt'_equiv α ihs γ hγ.elim (ρs γ hγ.elim))
+    · intro γ iγ δ iδ hγδ t
+      have := hρs γ δ iγ.elim iδ.elim hγδ ((foaData_tangle_lt'_equiv α ihs γ iγ.elim).symm t)
+      rw [foaData_tangle_lt'_equiv_fuzz α ihs γ iγ.elim δ hγδ,
+        foaData_tangle_lt'_equiv_fuzz α ihs γ iγ.elim δ hγδ, Equiv.apply_symm_apply,
+        foaData_allowable_lt'_equiv_toStructPerm α ihs δ iδ.elim,
+        foaData_allowable_lt'_equiv_smul α ihs γ iγ.elim,
+        Equiv.apply_symm_apply] at this
+      exact this
+    refine ⟨(foaData_allowable_eq_equiv α ihs).symm ⟨_, hρ⟩, ?_⟩
+    intro γ iγ hγ
+    have := allowableConsStep_eq_eq' α ihs h γ hγ ((foaData_allowable_eq_equiv α ihs).symm ⟨_, hρ⟩)
+    simp only [Equiv.apply_symm_apply, EmbeddingLike.apply_eq_iff_eq] at this
+    exact this.symm
+  · have hβ' := lt_of_le_of_ne (coe_le_coe.mp iβ.elim) hβ
+    have := (h β hβ').allowable_of_smulFuzz
+        (fun γ hγ =>
+          letI : LtLevel γ := ⟨coe_lt_coe.mpr (hγ.trans hβ')⟩
+          foaData_allowable_lt_equiv α ihs γ (hγ.trans hβ') (ρs γ (coe_lt_coe.mpr hγ)))
+        (ρs ⊥ (bot_lt_coe _)) ?_ ?_
+    · obtain ⟨ρ, hρ, hρπ⟩ := this
+      refine ⟨(foaData_allowable_lt_equiv α ihs β hβ').symm ρ, ?_⟩
+      rintro (_ | γ) iγ hγ
+      · refine hρπ (allowableConsStep α ihs h β ⊥ (bot_lt_coe _) ∘
+          (foaData_allowable_lt_equiv α ihs β hβ').symm) ?_
+        intro ρ'
+        have := congr_fun (allowableConsStep_eq α ihs h β ⊥ (bot_lt_coe _)
+          ((foaData_allowable_lt_equiv α ihs β hβ').symm ρ')) Path.nil
+        rw [Tree.comp_apply, Path.comp_nil,
+          foaData_allowable_lt_equiv_toStructPerm α ihs β hβ',
+          Equiv.apply_symm_apply] at this
+        exact this
+      · have hγ' := coe_lt_coe.mp hγ
+        have := hρ γ hγ'
+            (foaData_allowable_lt_equiv α ihs γ (hγ'.trans hβ') ∘
+              allowableConsStep α ihs h β γ hγ ∘
+              (foaData_allowable_lt_equiv α ihs β hβ').symm) ?_
+        · simp only [comp_apply, EmbeddingLike.apply_eq_iff_eq] at this
+          exact this
+        · intro ρ'
+          rw [allowableConsStep_eq_lt α ihs h β hβ' γ (hγ'.trans hβ') hγ']
+          rfl
+    · intro γ hγ δ hδ hγδ t
+      haveI : LtLevel γ := ⟨coe_lt_coe.mpr (hγ.trans hβ')⟩
+      haveI : LtLevel δ := ⟨coe_lt_coe.mpr (hδ.trans hβ')⟩
+      have := hρs γ δ (coe_lt_coe.mpr hγ) (coe_lt_coe.mpr hδ) hγδ
+        ((foaData_tangle_lt_equiv α ihs γ (hγ.trans hβ')).symm t)
+      rw [foaData_tangle_lt_equiv_fuzz α ihs γ (hγ.trans hβ') δ hγδ,
+        foaData_tangle_lt_equiv_fuzz α ihs γ (hγ.trans hβ') δ hγδ,
+        Equiv.apply_symm_apply, foaData_allowable_lt_equiv_smul, Equiv.apply_symm_apply,
+        foaData_allowable_lt_equiv_toStructPerm α ihs δ (hδ.trans hβ')] at this
+      erw [this]
+      rfl
+    · intro δ hδ a
+      haveI : LtLevel δ := ⟨coe_lt_coe.mpr (hδ.trans hβ')⟩
+      have := hρs ⊥ δ (bot_lt_coe _) (coe_lt_coe.mpr hδ) bot_ne_coe a
+      rw [foaData_allowable_lt_equiv_toStructPerm α ihs δ (hδ.trans hβ')] at this
+      erw [this]
+      rfl
+
 noncomputable def buildStepFOAAssumptions (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     letI : Level := ⟨α⟩
@@ -963,7 +1144,7 @@ noncomputable def buildStepFOAAssumptions (α : Λ) (ihs : (β : Λ) → β < α
     pos_lt_pos_atom := pos_lt_pos_atom_step α ihs h _
     pos_lt_pos_nearLitter := pos_lt_pos_nearLitter_step α ihs h _
     smul_fuzz := smul_fuzz_step α ihs h _ _ _
-    allowable_of_smulFuzz := sorry
+    allowable_of_smulFuzz := allowable_of_smulFuzz_step α ihs h
   }
 
 noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β < α → IH β)
