@@ -1,6 +1,5 @@
 import ConNF.Structural.Pretangle
 import ConNF.FOA.Basic.Reduction
-import ConNF.Counting.CodingFunction
 
 /-!
 # Hypotheses
@@ -30,28 +29,36 @@ class CountingAssumptions extends FOAAssumptions where
   toPretangle_ext (β γ : Λ) [LeLevel β] [LeLevel γ] (h : (γ : TypeIndex) < β) (t₁ t₂ : Tangle β) :
     (∀ t : Pretangle γ,
       t ∈ Pretangle.ofCoe (toPretangle β t₁) γ h ↔ t ∈ Pretangle.ofCoe (toPretangle β t₂) γ h) →
-    t₁ = t₂
+    toPretangle β t₁ = toPretangle β t₂
+  tangle_ext (β : Λ) [LeLevel β] (t₁ t₂ : Tangle β) :
+    toPretangle β t₁ = toPretangle β t₂ → t₁.support = t₂.support → t₁ = t₂
   /-- Any `γ`-tangle can be treated as a singleton at level `β` if `γ < β`. -/
   singleton (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : Tangle γ) : Tangle β
-  singleton_injective (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) :
-    Function.Injective (singleton β γ h)
+  singleton_support (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : Tangle γ) :
+    (singleton β γ h t).support = t.support.image (fun c => ⟨(Hom.toPath h).comp c.1, c.2⟩)
   singleton_toPretangle (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : Tangle γ) :
     Pretangle.ofCoe (toPretangle β (singleton β γ h t)) γ h = {toPretangle γ t}
-  mk_codingFunction_zero : #(CodingFunction 0) < #μ
 
 export CountingAssumptions (toPretangle toPretangle_smul eq_toPretangle_of_mem toPretangle_ext
-  singleton singleton_injective singleton_toPretangle mk_codingFunction_zero)
+  tangle_ext singleton singleton_support singleton_toPretangle)
 
 variable [CountingAssumptions] {β γ : Λ} [LeLevel β] [LeLevel γ] (hγ : γ < β)
 
 theorem singleton_smul (β γ : Λ) [LeLevel β] [LeLevel γ] (h : (γ : TypeIndex) < β) (t : Tangle γ)
     (ρ : Allowable β) :
     ρ • singleton β γ h t = singleton β γ h (Allowable.comp (Hom.toPath h) ρ • t) := by
-  refine toPretangle_ext β γ h _ _ ?_
-  intro u
-  rw [toPretangle_smul, Allowable.toStructPerm_smul, StructPerm.ofCoe_smul,
-    singleton_toPretangle, singleton_toPretangle, smul_set_singleton,
-    mem_singleton_iff, mem_singleton_iff, toPretangle_smul, Allowable.toStructPerm_smul,
-    Allowable.toStructPerm_comp]
+  refine tangle_ext β _ _ ?_ ?_
+  · refine toPretangle_ext β γ h _ _ ?_
+    intro u
+    rw [toPretangle_smul, Allowable.toStructPerm_smul, StructPerm.ofCoe_smul,
+      singleton_toPretangle, singleton_toPretangle, smul_set_singleton,
+      mem_singleton_iff, mem_singleton_iff, toPretangle_smul, Allowable.toStructPerm_smul,
+      Allowable.toStructPerm_comp]
+  · rw [smul_support, singleton_support, singleton_support]
+    refine Enumeration.ext' ?_ ?_
+    · simp only [Enumeration.smul_max, Enumeration.image_max, smul_support]
+    · intro i h₁ h₂
+      simp only [Enumeration.smul_f, Enumeration.image_f, Allowable.smul_address, smul_support,
+        Allowable.toStructPerm_comp, Tree.comp_apply]
 
 end ConNF

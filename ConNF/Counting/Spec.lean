@@ -14,7 +14,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ}
+variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β : Λ}
 
 inductive SpecCondition (β : Λ)
   | atom (A : ExtendedIndex β) (s : Set κ) (t : Set κ)
@@ -41,6 +41,14 @@ theorem before_comp_supports (S : Support β) (hS : S.Strong)
   obtain ⟨j, hj₁, hj₂, h⟩ := hS.precedes hi _ this
   exact ⟨j, hj₂, hj₁, h⟩
 
+theorem before_comp_supports' (S : Support β) (hS : S.Strong)
+    {i : κ} (hi : i < S.max) {A : ExtendedIndex β}
+    {N : NearLitter} (h : InflexibleCoe A N.1) (hSi : S.f i hi = ⟨A, inr N⟩) :
+    MulAction.Supports (Allowable h.path.δ)
+      ((S.before i hi).comp (h.path.B.cons h.path.hδ)).carrier (Shell.ofTangle h.t) := by
+  intro ρ hρ
+  rw [Shell.smul_ofTangle, before_comp_supports S hS hi h hSi ρ hρ]
+
 /-- A specification `σ` specifies an ordered support `S` if each support condition in `S` is
 described in a sensible way by `σ`. -/
 structure Specifies (σ : Spec β) (S : Support β) (hS : S.Strong) : Prop where
@@ -60,8 +68,9 @@ structure Specifies (σ : Spec β) (S : Support β) (hS : S.Strong) : Prop where
   inflexibleCoe_spec (i : κ) (hi : i < S.max) (A : ExtendedIndex β) (N : NearLitter)
       (h : InflexibleCoe A N.1) (hSi : S.f i hi = ⟨A, inr N⟩) :
       σ.f i (hi.trans_eq max_eq_max) = SpecCondition.inflexibleCoe A h.path
-        (CodingFunction.code ((S.before i hi).comp (h.path.B.cons h.path.hδ)) h.t
-          (before_comp_supports S hS hi h hSi))
+        (CodingFunction.code ((S.before i hi).comp (h.path.B.cons h.path.hδ))
+          (Shell.ofTangle h.t)
+          (before_comp_supports' S hS hi h hSi))
         (CodingFunction.code_strong _ _ _
           (Support.comp_strong _ _ (Support.before_strong _ _ _ hS)))
         (fun j => {k | ∃ hj hk, ∃ (a : Atom) (N' : NearLitter),
