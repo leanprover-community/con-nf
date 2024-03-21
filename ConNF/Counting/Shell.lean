@@ -159,6 +159,10 @@ protected theorem support_supports (s : Shell β) :
     simp only [Enumeration.smul_carrier, smul_mem_smul_set_iff]
     exact ha
 
+theorem smul_support_max (s : Shell β) (ρ : Allowable β) :
+    (ρ • s).support.max = s.support.max := by
+  rw [support, support, Orbit.mk_smul, Enumeration.smul_max, Enumeration.smul_max]
+
 protected noncomputable def singleton
     (β : Λ) [LeLevel β] (γ : Λ) [LeLevel γ] (h : (γ : TypeIndex) < β)
     (t : Shell γ) : Shell β :=

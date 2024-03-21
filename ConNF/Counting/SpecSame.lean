@@ -33,7 +33,7 @@ end PFun
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β : Λ} [LeLevel β]
   {S T : Support β} {hS : S.Strong} {hT : T.Strong}
   {σ : Spec β} (hσS : σ.Specifies S hS) (hσT : σ.Specifies T hT)
 
@@ -175,8 +175,8 @@ theorem convertNearLitter_subsingleton_inflexibleCoe (A : ExtendedIndex β) (NS 
   clear h₁ h₂ h₃ h₄
   simp only [SpecCondition.inflexibleCoe.injEq, heq_eq_eq, CodingFunction.code_eq_code_iff,
     true_and] at h₅ h₆
-  obtain ⟨⟨ρ, h₅, rfl⟩, h₅'⟩ := h₅
-  obtain ⟨⟨ρ', h₆, rfl⟩, -⟩ := h₆
+  obtain ⟨⟨ρ, h₅, h₅'⟩, h₅'⟩ := h₅
+  obtain ⟨⟨ρ', h₆, h₆'⟩, -⟩ := h₆
   have : ρ • t = ρ' • t
   · clear h₅'
     have := support_supports t (ρ'⁻¹ * ρ) ?_

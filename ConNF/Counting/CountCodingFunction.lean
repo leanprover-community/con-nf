@@ -11,8 +11,8 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β γ : Λ} [LeLevel β] [LeLevel γ]
-  (hγ : (γ : TypeIndex) < β)
+variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions]
+  {β γ : Λ} [LeLevel β] [LeLevel γ] (hγ : (γ : TypeIndex) < β)
 
 def RecodeType (S : Support β) : Type u :=
   { x : Set (RaisedSingleton hγ S) //
@@ -44,12 +44,13 @@ theorem recodeSurjection_surjective :
     conv_rhs => rw [CodingFunction.eq_code hS,
       ← recode_eq hγ S ((χ.decode S).get hS) (χ.supports_decode S hS)]
 
+/-
 def RaisedSingleton.smul {S : Support β} (r : RaisedSingleton hγ S) (ρ : Allowable β) :
     RaisedSingleton hγ (ρ • S) :=
   ⟨r.val, by
     obtain ⟨u, hu⟩ := r.prop
     refine ⟨Allowable.comp (Hom.toPath hγ) ρ • u, ?_⟩
-    rw [hu, raiseSingleton_smul]⟩
+    rw [hu]⟩
 
 @[simp]
 theorem RaisedSingleton.smul_val {S : Support β} (r : RaisedSingleton hγ S) (ρ : Allowable β) :
@@ -67,29 +68,31 @@ theorem RaisedSingleton.smul_image_val {S : Support β} {ρ : Allowable β}
     obtain ⟨u, hu⟩ := (RaisedSingleton.smul hγ r ρ⁻¹).prop
     simp only [smul_val, inv_smul_smul] at hu
     exact ⟨u, hu⟩
+-/
 
 theorem recodeSurjection_range_smul_subset (S : Support β) (ρ : Allowable β) :
     Set.range (recodeSurjection hγ (ρ • S)) ⊆ Set.range (recodeSurjection hγ S) := by
   rintro _ ⟨⟨x, h₁, h₂⟩, rfl⟩
-  refine ⟨⟨{u | u.smul hγ ρ ∈ x}, ?_, ?_⟩, ?_⟩
-  · intro U hU
-    rw [RaisedSingleton.smul_image_val]
-    refine h₁ U ?_
-    simp only [SupportOrbit.mem_mk_iff, orbit_smul] at hU ⊢
-    exact hU
-  · intro U hU ρ' h
-    have := h₂ U ?_ ρ' h
-    · simp_rw [RaisedSingleton.smul_image_val hγ x]
-      exact this
-    · simp only [SupportOrbit.mem_mk_iff, orbit_smul] at hU ⊢
-      exact hU
-  · rw [recodeSurjection, recodeSurjection]
-    simp only
-    simp_rw [RaisedSingleton.smul_image_val hγ x]
-    congr 1
-    rw [← SupportOrbit.mem_def, SupportOrbit.mem_mk_iff]
-    refine ⟨ρ⁻¹, ?_⟩
-    simp only [inv_smul_smul]
+  sorry
+  -- refine ⟨⟨{u | u.smul hγ ρ ∈ x}, ?_, ?_⟩, ?_⟩
+  -- · intro U hU
+  --   rw [RaisedSingleton.smul_image_val]
+  --   refine h₁ U ?_
+  --   simp only [SupportOrbit.mem_mk_iff, orbit_smul] at hU ⊢
+  --   exact hU
+  -- · intro U hU ρ' h
+  --   have := h₂ U ?_ ρ' h
+  --   · simp_rw [RaisedSingleton.smul_image_val hγ x]
+  --     exact this
+  --   · simp only [SupportOrbit.mem_mk_iff, orbit_smul] at hU ⊢
+  --     exact hU
+  -- · rw [recodeSurjection, recodeSurjection]
+  --   simp only
+  --   simp_rw [RaisedSingleton.smul_image_val hγ x]
+  --   congr 1
+  --   rw [← SupportOrbit.mem_def, SupportOrbit.mem_mk_iff]
+  --   refine ⟨ρ⁻¹, ?_⟩
+  --   simp only [inv_smul_smul]
 
 theorem recodeSurjection_range_smul (S : Support β) (ρ : Allowable β) :
     Set.range (recodeSurjection hγ (ρ • S)) = Set.range (recodeSurjection hγ S) := by
