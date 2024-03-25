@@ -150,10 +150,10 @@ theorem image_domain : π '' π.domain = π.domain :=
   π.bijOn.image_eq
 
 theorem forall_mem_domain {p : α → Prop} : (∀ y ∈ π.domain, p y) ↔ ∀ x ∈ π.domain, p (π x) := by
-  conv_lhs => rw [← image_domain, ball_image_iff]
+  conv_lhs => rw [← image_domain, forall_mem_image]
 
 theorem exists_mem_domain {p : α → Prop} : (∃ y ∈ π.domain, p y) ↔ ∃ x ∈ π.domain, p (π x) := by
-  conv_lhs => rw [← image_domain, bex_image_iff]
+  conv_lhs => rw [← image_domain, exists_mem_image]
 
 /-- A set `s` is *stable* under a partial equivalence `π` if it preserved by it. -/
 def IsStable (s : Set α) : Prop :=

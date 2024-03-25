@@ -267,7 +267,7 @@ theorem isAllowable_pow (h : ρ.IsAllowable) (n : ℕ) : (ρ ^ n).IsAllowable :=
 theorem isAllowable_zpow (h : ρ.IsAllowable) (n : ℤ) : (ρ ^ n).IsAllowable := by
   cases n with
   | ofNat n =>
-    rw [Int.ofNat_eq_coe, zpow_coe_nat]
+    rw [Int.ofNat_eq_coe, zpow_natCast]
     exact isAllowable_pow h n
   | negSucc n =>
     rw [zpow_negSucc]
