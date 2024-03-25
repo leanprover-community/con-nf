@@ -343,6 +343,7 @@ theorem Strong.smul [LeLevel β] {S : Support β} (hS : S.Strong) (ρ : Allowabl
       simp only [Enumeration.smul_f, inv_smul_smul] at this
       exact this
 
+/-- TODO: We can probably do without this. -/
 def before (S : Support β) (i : κ) (hi : i < S.max) : Support β :=
   ⟨i, fun j hj => S.f j (hj.trans hi)⟩
 

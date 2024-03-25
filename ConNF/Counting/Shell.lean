@@ -71,6 +71,15 @@ protected theorem eq_toPretangle_of_mem (β : Λ) [LeLevel β] (γ : Λ) [LeLeve
   obtain ⟨t₂', ht₂'⟩ := eq_toPretangle_of_mem β γ h t₁ t₂ ht
   exact ⟨ofTangle t₂', ht₂'⟩
 
+theorem ofTangle_eq_iff (t₁ t₂ : Tangle β) :
+    toPretangle β t₁ = toPretangle β t₂ ↔ ofTangle t₁ = ofTangle t₂ := by
+  constructor
+  · intro h
+    ext
+    exact h
+  · intro h
+    exact congr_arg Shell.p h
+
 protected theorem toPretangle_ext (β γ : Λ) [LeLevel β] [LeLevel γ] (h : (γ : TypeIndex) < β)
     (t₁ t₂ : Shell β) :
     (∀ t : Pretangle γ,

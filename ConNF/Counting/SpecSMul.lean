@@ -113,7 +113,7 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
       simp only [map_inv, Tree.inv_apply, inflexibleCoe_smul_path, inflexibleCoe_smul_t] at this
       exact this
     rw [SpecCondition.inflexibleCoe.injEq]
-    refine ⟨rfl, HEq.rfl, heq_of_eq ?_, ?_⟩
+    refine ⟨rfl, HEq.rfl, heq_of_eq ?_, ?_, ?_, ?_⟩
     · simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
         Tree.inv_apply, ne_eq, eq_mp_eq_cast, CodingFunction.code_eq_code_iff]
       refine ⟨Allowable.comp (P.B.cons P.hδ) ρ, ?_, ?_⟩
@@ -146,6 +146,29 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
           rw [h₃, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr]
         · rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at h₄
           rw [h₄, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inl]
+    · simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
+        Tree.inv_apply, ne_eq, id_eq, eq_mp_eq_cast, smul_support, Enumeration.smul_max]
+    · ext j k
+      constructor
+      · rintro ⟨hj, hk, hjk⟩
+        refine ⟨?_, hk, ?_⟩
+        · rw [smul_support] at hj
+          exact hj
+        · rw [Enumeration.smul_f, ← hjk]
+          simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path,
+            inflexibleCoe_smul_t, Tree.inv_apply, ne_eq, id_eq, eq_mp_eq_cast, smul_support,
+            Enumeration.smul_f, Allowable.smul_address, map_inv, Allowable.toStructPerm_comp,
+            Tree.comp_apply, smul_inv_smul]
+      · rintro ⟨hj, hk, hjk⟩
+        refine ⟨?_, hk, ?_⟩
+        · rw [smul_support]
+          exact hj
+        · rw [Enumeration.smul_f, ← inv_smul_eq_iff] at hjk
+          rw [← hjk]
+          simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path,
+            inflexibleCoe_smul_t, Tree.inv_apply, ne_eq, id_eq, eq_mp_eq_cast, smul_support,
+            Enumeration.smul_f, Allowable.smul_address, map_inv, Allowable.toStructPerm_comp,
+            Tree.comp_apply]
   case inflexibleBot_spec =>
     rintro i hi A N ⟨P, a, ha⟩ hSi
     rw [hσS.inflexibleBot_spec i hi A ((Allowable.toStructPerm ρ A)⁻¹ • N)

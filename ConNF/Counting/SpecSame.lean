@@ -158,6 +158,36 @@ theorem comp_eq_same {i : κ} (hiS : i < S.max) {γ : Λ} (A : Path (β : TypeIn
     obtain ⟨N', hN'₁, -, hN'₃⟩ := hσT.of_eq_inflexibleCoe this
     exact ⟨⟨B, inr N'⟩, hN'₃⟩
 
+theorem support_tangle_ext (hS : S.Strong) {A : ExtendedIndex β} (P : InflexibleCoePath A)
+    (t₁ t₂ : Tangle P.δ)
+    (h₁ : Shell.ofTangle t₁ = Shell.ofTangle t₂)
+    (h₂ : t₁.support.max = t₂.support.max)
+    (h₃ :
+      (fun j => {k | ∃ (hj : j < t₁.support.max) (hk : k < S.max),
+        ⟨(P.B.cons P.hδ).comp (t₁.support.f j hj).1, (t₁.support.f j hj).2⟩ =
+          S.f k hk}) =
+      (fun j => {k | ∃ (hj : j < t₂.support.max) (hk : k < S.max),
+        ⟨(P.B.cons P.hδ).comp (t₂.support.f j hj).1, (t₂.support.f j hj).2⟩ =
+          S.f k hk}))
+    {i : κ} (hi₁ : i < S.max) {N : NearLitter}
+    (hi₂ : S.f i hi₁ = ⟨A, inr N⟩) (hi₃ : N.1 = fuzz P.hδε t₁) :
+    t₁ = t₂ := by
+  suffices : t₁.support = t₂.support
+  · refine tangle_ext P.δ _ _ ?_ this
+    rw [Shell.ofTangle_eq_iff, h₁]
+  refine Enumeration.ext' h₂ ?_
+  intro k hku hku'
+  have := hS.precedes hi₁ ⟨(P.B.cons P.hδ).comp (t₁.support.f k hku).1, (t₁.support.f k hku).2⟩ ?_
+  swap
+  · have := Support.Precedes.fuzz _ N ⟨P, t₁, hi₃⟩ (t₁.support.f k hku) ⟨k, hku, rfl⟩
+    rw [← P.hA, ← hi₂] at this
+    exact this
+  obtain ⟨j, hjT, _, hjeq⟩ := this
+  obtain ⟨_, _, hjeq'⟩ := (Set.ext_iff.mp (congr_fun h₃ k) j).mp ⟨hku, hjT, hjeq.symm⟩
+  have := hjeq'.trans hjeq
+  simp only [Address.mk.injEq] at this
+  exact Address.ext _ _ (Path.comp_inj_right.mp this.1).symm this.2.symm
+
 theorem convertNearLitter_subsingleton_inflexibleCoe (A : ExtendedIndex β) (NS NT NT' : NearLitter)
     (h : ConvertNearLitter S T A NS NT) (h' : ConvertNearLitter S T A NS NT')
     (hNS : InflexibleCoe A NS.1) : NT = NT' := by
@@ -170,16 +200,18 @@ theorem convertNearLitter_subsingleton_inflexibleCoe (A : ExtendedIndex β) (NS 
   obtain ⟨u', hNT'⟩ := convert_inflexibleCoe hσS hσT P t hNS hiS₁' hiT₁' hiS₂' hiT₂'
   have h₃ := hσT.inflexibleCoe_spec i hiT₁ A NT ⟨P, u, hNT⟩ hiT₂
   have h₄ := hσT.inflexibleCoe_spec i' hiT₁' A NT' ⟨P, u', hNT'⟩ hiT₂'
-  have h₅ := h₁.symm.trans h₃
-  have h₆ := h₂.symm.trans h₄
+  have h₁₃ := h₁.symm.trans h₃
+  have h₂₄ := h₂.symm.trans h₄
   clear h₁ h₂ h₃ h₄
   simp only [SpecCondition.inflexibleCoe.injEq, heq_eq_eq, CodingFunction.code_eq_code_iff,
-    true_and] at h₅ h₆
-  obtain ⟨⟨ρ, h₅, h₅'⟩, h₅'⟩ := h₅
-  obtain ⟨⟨ρ', h₆, h₆'⟩, -⟩ := h₆
+    true_and] at h₁₃ h₂₄
+  obtain ⟨⟨ρ, h₅, h₆⟩, h₇, h₈, h₉⟩ := h₁₃
+  obtain ⟨⟨ρ', h₅', h₆'⟩, _, h₈', h₉'⟩ := h₂₄
+  have h₈'' := h₈.symm.trans h₈'
+  have h₉'' := h₉.symm.trans h₉'
+  clear h₈ h₈' h₉ h₉'
   have : ρ • t = ρ' • t
-  · clear h₅'
-    have := support_supports t (ρ'⁻¹ * ρ) ?_
+  · have := support_supports t (ρ'⁻¹ * ρ) ?_
     · conv_rhs => rw [← this]
       rw [mul_smul, smul_smul, mul_right_inv, one_smul]
     intro c hc
@@ -200,7 +232,7 @@ theorem convertNearLitter_subsingleton_inflexibleCoe (A : ExtendedIndex β) (NS 
     · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
       exact hji
       exact ⟨j, hji, c, hjc⟩
-    have h₈ := support_f_congr h₆.symm j ?_
+    have h₈ := support_f_congr h₅'.symm j ?_
     swap
     · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
       exact hji'
@@ -210,17 +242,20 @@ theorem convertNearLitter_subsingleton_inflexibleCoe (A : ExtendedIndex β) (NS 
     rw [Support.comp_decomp_eq _ _ (by exact hjc),
       Support.comp_decomp_eq _ _ (by exact hd)] at h₇ h₈
     exact h₇.trans h₈.symm
-  clear h₅ h₆
+  have : u = u'
+  · refine support_tangle_ext hT P u u' ?_ h₈'' h₉'' hiT₁ hiT₂ hNT
+    rw [h₆, h₆', Shell.smul_ofTangle, this, Shell.smul_ofTangle]
+  cases this
   have hNTT' : NT.fst = NT'.fst
-  · rw [hNT, hNT', this]
+  · rw [hNT, hNT']
   refine NearLitter.ext ?_
   rw [← symmDiff_eq_bot, bot_eq_empty, eq_empty_iff_forall_not_mem]
   intro a ha
   obtain ⟨j, hj, -, -, hja⟩ :=
     hT.interferes hiT₁ hiT₁' hiT₂ hiT₂' (Support.Interferes.symmDiff hNTT' ha)
-  simp only [Function.funext_iff, Set.ext_iff] at h₅'
+  simp only [Function.funext_iff, Set.ext_iff] at h₇
   obtain ⟨_, _, a', NS', _, ha', hS', -⟩ :=
-    (h₅' i' j).mpr ⟨hiT₁', hj, a, NT', hNTT'.symm, ha, hiT₂', hja⟩
+    (h₇ i' j).mpr ⟨hiT₁', hj, a, NT', hNTT'.symm, ha, hiT₂', hja⟩
   cases hiS₂'.symm.trans hS'
   simp only [symmDiff_self, bot_eq_empty, mem_empty_iff_false] at ha'
 
@@ -378,6 +413,42 @@ theorem convertAtom_mem_convertLitter_iff {A : ExtendedIndex β}
     cases hjT'.symm.trans hT'
     exact hN'
 
+theorem support_tangle_ext' (hT : T.Strong)
+    {A : ExtendedIndex β} (P : InflexibleCoePath A)
+    (t₁ t₂ : Tangle P.δ) (ρ : Allowable P.δ)
+    (h₁ : Shell.ofTangle t₁ = ρ • Shell.ofTangle t₂)
+    (h₂ : t₁.support.max = t₂.support.max)
+    (h₃ :
+      (fun j => {k | ∃ (hj : j < t₁.support.max) (hk : k < T.max),
+        ⟨(P.B.cons P.hδ).comp (t₁.support.f j hj).1, (t₁.support.f j hj).2⟩ =
+          T.f k hk}) =
+      (fun j => {k | ∃ (hj : j < t₂.support.max) (hk : k < S.max),
+        ⟨(P.B.cons P.hδ).comp (t₂.support.f j hj).1, (t₂.support.f j hj).2⟩ =
+          S.f k hk}))
+    {i : κ} (hi₁ : i < S.max) (hi₂ : i < T.max) {N : NearLitter}
+    (hi₃ : T.f i hi₂ = ⟨A, inr N⟩) (hi₄ : N.1 = fuzz P.hδε t₁)
+    (hi₅ : (T.before i hi₂).comp (P.B.cons P.hδ) = ρ • (S.before i hi₁).comp (P.B.cons P.hδ)) :
+    t₁ = ρ • t₂ := by
+  suffices : t₁.support = ρ • t₂.support
+  · refine tangle_ext P.δ _ _ ?_ ?_
+    · rw [Shell.ofTangle_eq_iff, ← Shell.smul_ofTangle, h₁]
+    · rw [smul_support, this]
+  refine Enumeration.ext' h₂ ?_
+  intro k hku hku'
+  have := hT.precedes hi₂ ⟨(P.B.cons P.hδ).comp (t₁.support.f k hku).1, (t₁.support.f k hku).2⟩ ?_
+  swap
+  · have := Support.Precedes.fuzz _ N ⟨P, t₁, hi₄⟩ (t₁.support.f k hku) ⟨k, hku, rfl⟩
+    rw [← P.hA, ← hi₃] at this
+    exact this
+  obtain ⟨j, hjT, hji, hjeq⟩ := this
+  obtain ⟨_, hjS, hjeq'⟩ := (Set.ext_iff.mp (congr_fun h₃ k) j).mp ⟨hku, hjT, hjeq.symm⟩
+  have hccS : (S.before i hi₁).CanComp (P.B.cons P.hδ) := ⟨j, hji, _, hjeq'.symm⟩
+  have hccT : (T.before i hi₂).CanComp (P.B.cons P.hδ) := ⟨j, hji, _, hjeq⟩
+  have := support_f_congr hi₅ j (Support.comp_max_eq_of_canComp hccT ▸ hji)
+  rw [Support.comp_f_eq, Support.comp_decomp_eq hccT hji hjeq,
+    Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq hccS hji hjeq'.symm] at this
+  exact this
+
 theorem convertNearLitter_fst {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : NearLitter}
     (h₁ : ConvertNearLitter S T A N₁ N₃) (h₂ : ConvertNearLitter S T A N₂ N₄)
     (h : N₁.1 = N₂.1) : N₃.1 = N₄.1 := by
@@ -431,9 +502,17 @@ theorem convertNearLitter_fst {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : Near
     have h₁₃' := eq_of_heq h₁₃.2.2.1
     have h₂₄' := eq_of_heq h₂₄.2.2.1
     simp only [CodingFunction.code_eq_code_iff] at h₁₃' h₂₄'
-    obtain ⟨ρ, hρ, rfl⟩ := h₁₃'
-    obtain ⟨ρ', hρ', rfl⟩ := h₂₄'
+    obtain ⟨ρ, hρ, h₁₃'⟩ := h₁₃'
+    obtain ⟨ρ', hρ', h₂₄'⟩ := h₂₄'
+    have h₁₃'' := h₁₃.2.2.2.2
+    have h₂₄'' := h₂₄.2.2.2.2
     clear h₁ h₂ h₃ h₄ h₁₃ h₂₄ hN'₃ hN'₄
+    have : t₃ = ρ • t₁ :=
+      support_tangle_ext' hT P t₃ t₁ ρ h₁₃' h₁₃''.1.symm h₁₃''.2.symm hiS hiT hiT' hN₃ hρ
+    cases this
+    have : t₄ = ρ' • t₁ :=
+      support_tangle_ext' hT P t₄ t₁ ρ' h₂₄' h₂₄''.1.symm h₂₄''.2.symm hjS hjT hjT' hN₄ hρ'
+    cases this
     have := support_supports t₁ (ρ'⁻¹ * ρ) ?_
     · rw [mul_smul, inv_smul_eq_iff] at this
       exact this
@@ -520,10 +599,17 @@ theorem convertNearLitter_fst' {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : Nea
     have h₁₃' := eq_of_heq h₁₃.2.2.1
     have h₂₄' := eq_of_heq h₂₄.2.2.1
     simp only [CodingFunction.code_eq_code_iff] at h₁₃' h₂₄'
-    obtain ⟨ρ, hρ, rfl⟩ := h₁₃'
+    obtain ⟨ρ, hρ, hρ₂⟩ := h₁₃'
     obtain ⟨ρ', hρ', hρ'₂⟩ := h₂₄'
-    rw [← inv_smul_eq_iff, smul_smul] at hρ'₂
-    subst hρ'₂
+    have ht₃₁ : t₃ = ρ • t₁ :=
+      support_tangle_ext' hT P t₃ t₁ ρ hρ₂
+        h₁₃.2.2.2.2.1.symm h₁₃.2.2.2.2.2.symm hiS hiT hiT' hN₃ hρ
+    have ht₃₂ : t₃ = ρ' • t₂ :=
+      support_tangle_ext' hT P t₃ t₂ ρ' hρ'₂
+        h₂₄.2.2.2.2.1.symm h₂₄.2.2.2.2.2.symm hjS hjT hjT' (h ▸ hN₃) hρ'
+    cases ht₃₁
+    rw [← inv_smul_eq_iff, smul_smul] at ht₃₂
+    subst ht₃₂
     clear h₁ h₂ h₃ h₄ h₁₃ h₂₄ hN'₃
     have := support_supports (ρ • t₁) (ρ' * ρ⁻¹) ?_
     · rw [mul_smul, inv_smul_smul] at this
@@ -660,7 +746,11 @@ theorem convert_coherent : (convert hσS hσT).Coherent := by
     have := hiS''.symm.trans hiT''
     simp only [SpecCondition.inflexibleCoe.injEq, heq_eq_eq, CodingFunction.code_eq_code_iff,
       true_and] at this
-    obtain ⟨ρ', hρ', rfl⟩ := this.1
+    obtain ⟨ρ', hρ', hρ''⟩ := this.1
+    have : t' = ρ' • t :=
+      support_tangle_ext' (S := S) hT ⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩ t' t ρ' hρ''
+        this.2.2.1.symm this.2.2.2.symm hiS hiT hiT' hNt' hρ'
+    cases this
     clear hiS'' hiT'' this
     have := support_supports t (ρ'⁻¹ * Allowable.comp (Hom.toPath hδ) ρ) ?_
     · rw [mul_smul, inv_smul_eq_iff] at this
