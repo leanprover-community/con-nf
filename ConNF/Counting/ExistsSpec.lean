@@ -31,6 +31,10 @@ noncomputable def Support.spec (S : Support β) (hS : S.Strong) : Spec β where
           (fun j => {k | ∃ hj hk, ∃ (a : Atom) (N' : NearLitter),
             N'.1 = N.1 ∧ a ∈ (N : Set Atom) ∆ N' ∧
             S.f j hj = ⟨A, inr N'⟩ ∧ S.f k hk = ⟨A, inl a⟩})
+          h₁.some.t.support.max
+        (fun j => {k | ∃ (hj : j < h₁.some.t.support.max) (hk : k < S.max),
+          ⟨(h₁.some.path.B.cons h₁.some.path.hδ).comp (h₁.some.t.support.f j hj).1,
+            (h₁.some.t.support.f j hj).2⟩ = S.f k hk})
       else if h₂ : Nonempty (InflexibleBot A N.1) then
         SpecCondition.inflexibleBot A h₂.some.path
           {j | ∃ hj, S.f j hj = ⟨h₂.some.path.B.cons (bot_lt_coe _), inl h₂.some.a⟩}

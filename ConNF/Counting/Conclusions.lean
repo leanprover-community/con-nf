@@ -13,7 +13,8 @@ namespace ConNF
 
 variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions]
 
-theorem mk_codingFunction (β : Λ) [i : LeLevel β] : #(CodingFunction β) < #μ := by
+theorem mk_codingFunction (β : Λ) [i : LeLevel β] (hzero : #(CodingFunction 0) < #μ) :
+    #(CodingFunction β) < #μ := by
   revert i
   refine Params.Λ_isWellOrder.induction (C := fun β => [LeLevel β] → #(CodingFunction β) < #μ) β ?_
   intro β ih _
@@ -39,30 +40,40 @@ theorem mk_codingFunction (β : Λ) [i : LeLevel β] : #(CodingFunction β) < #�
         (ih γ (WithBot.coe_lt_coe.mp hγ))
   · simp only [WithBot.coe_lt_coe, not_exists, not_lt] at h
     cases le_antisymm (h 0) (Params.Λ_zero_le β)
-    exact mk_codingFunction_zero
+    exact hzero
 
-noncomputable def Tangle.code {β : Λ} [LeLevel β] (t : Tangle β) : CodingFunction β × Support β :=
-  (CodingFunction.code _ _ (support_supports t), t.support)
+noncomputable def Shell.code {β : Λ} [LeLevel β] (t : Shell β) : CodingFunction β × Support β :=
+  (CodingFunction.code _ _ (Shell.support_supports t), t.support)
 
-theorem Tangle.code_injective {β : Λ} [LeLevel β] : Function.Injective (Tangle.code (β := β)) := by
+theorem Shell.code_injective {β : Λ} [LeLevel β] : Function.Injective (Shell.code (β := β)) := by
   intro t₁ t₂ h
   rw [code, code] at h
   simp only [Prod.mk.injEq, CodingFunction.code_eq_code_iff] at h
-  obtain ⟨⟨ρ, _, rfl⟩, h⟩ := h
-  refine (support_supports t₁ ρ ?_).symm
+  obtain ⟨⟨ρ, h₁, rfl⟩, h₂⟩ := h
+  refine (Shell.support_supports t₁ ρ ?_).symm
   rintro c ⟨i, hi, hc⟩
-  have := support_f_congr h i hi
-  simp only [← hc, smul_support, Enumeration.smul_f] at this
+  have := support_f_congr h₂ i hi
+  simp only [← hc, h₁, Enumeration.smul_f] at this
   exact this.symm
 
-/-- **Theorem.** There are exactly `μ` tangles at each level. -/
-@[simp]
-theorem mk_tangle (β : Λ) [LeLevel β] : #(Tangle β) = #μ := by
+theorem mk_shell_le (β : Λ) [LeLevel β] (hzero : #(CodingFunction 0) < #μ) : #(Shell β) ≤ #μ := by
+  refine (mk_le_of_injective Shell.code_injective).trans ?_
+  simp only [mk_prod, lift_id, mk_support]
+  exact Cardinal.mul_le_of_le (mk_codingFunction β hzero).le le_rfl
+    Params.μ_isStrongLimit.isLimit.aleph0_le
+
+theorem mk_tangle_le (β : Λ) [LeLevel β] : #(Tangle β) ≤ #(Shell β) * #(Support β) := by
+  refine mk_le_of_injective (f := fun t : Tangle β => (Shell.ofTangle t, t.support)) ?_
+  intro t₁ t₂ h
+  simp only [Prod.mk.injEq] at h
+  refine tangle_ext β t₁ t₂ ?_ h.2
+  rw [Shell.ofTangle_eq_iff]
+  exact h.1
+
+theorem mk_tangle (β : Λ) [LeLevel β] (hzero : #(CodingFunction 0) < #μ) : #(Tangle β) = #μ := by
   refine le_antisymm ?_ ?_
-  · refine (mk_le_of_injective Tangle.code_injective).trans ?_
-    simp only [mk_prod, lift_id, mk_support]
-    exact Cardinal.mul_le_of_le (mk_codingFunction β).le le_rfl
-      Params.μ_isStrongLimit.isLimit.aleph0_le
+  · refine le_trans (mk_tangle_le β) ?_
+    exact mul_le_of_le (mk_shell_le β hzero) mk_support.le Params.μ_isStrongLimit.isLimit.aleph0_le
   · have := mk_le_of_injective (typedAtom (α := β)).injective
     simp only [mk_atom] at this
     exact this

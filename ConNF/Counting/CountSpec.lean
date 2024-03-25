@@ -13,13 +13,14 @@ variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β : Λ} [L
 def SpecCondition' (β : Λ) :=
   (ExtendedIndex β × Set κ × Set κ) ⊕
   (ExtendedIndex β × Set κ × (κ → Set κ)) ⊕
-  ((A : ExtendedIndex β) × (h : InflexibleCoePath A) × CodingFunction h.δ × (κ → Set κ)) ⊕
+  ((A : ExtendedIndex β) × (h : InflexibleCoePath A) × CodingFunction h.δ ×
+    (κ → Set κ) × κ × (κ → Set κ)) ⊕
   ((A : ExtendedIndex β) × InflexibleBotPath A × Set κ × (κ → Set κ))
 
 def SpecCondition.toPrime : SpecCondition β → SpecCondition' β
   | .atom A s t => Sum.inl (A, s, t)
   | .flexible A s t => Sum.inr (Sum.inl (A, s, t))
-  | .inflexibleCoe A h χ _ t => Sum.inr (Sum.inr (Sum.inl ⟨A, h, χ, t⟩))
+  | .inflexibleCoe A h χ _ t m u => Sum.inr (Sum.inr (Sum.inl ⟨A, h, χ, t, m, u⟩))
   | .inflexibleBot A h s t => Sum.inr (Sum.inr (Sum.inr ⟨A, h, s, t⟩))
 
 theorem SpecCondition.toPrime_injective : Function.Injective (toPrime (β := β)) := by
@@ -98,16 +99,19 @@ theorem mk_specCondition (h : ∀ (δ : Λ) [LeLevel δ], δ < β → #(CodingFu
     exact mk_pow_κ
   · refine (sum_lt_prod
         (fun (A : ExtendedIndex β) =>
-          sum fun (h : InflexibleCoePath A) => #(CodingFunction h.δ) * (2 ^ #κ) ^ #κ)
+          sum fun (h : InflexibleCoePath A) => #(CodingFunction h.δ) *
+            ((2 ^ #κ) ^ #κ * (#κ * (2 ^ #κ) ^ #κ)))
         (fun _ => #μ) ?_).trans_le ?_
     intro A
     refine (sum_lt_prod
-        (fun (h : InflexibleCoePath A) => #(CodingFunction h.δ) * (2 ^ #κ) ^ #κ)
+        (fun (h : InflexibleCoePath A) => #(CodingFunction h.δ) *
+          ((2 ^ #κ) ^ #κ * (#κ * (2 ^ #κ) ^ #κ)))
         (fun _ => #μ) ?_).trans_le ?_
     · intro hA
       refine mul_lt_of_lt this (h hA.δ (coe_lt_coe.mp hA.δ_lt_β)) ?_
       rw [← Cardinal.power_mul, mul_eq_self Params.κ_isRegular.aleph0_le]
-      exact mk_pow_κ
+      refine mul_lt_of_lt this mk_pow_κ ?_
+      exact mul_lt_of_lt this Params.κ_lt_μ mk_pow_κ
     · simp only [prod_const, lift_id]
       have := pow_le_of_isStrongLimit Params.μ_isStrongLimit
         (Params.Λ_lt_κ.trans_le Params.κ_le_μ_ord_cof)

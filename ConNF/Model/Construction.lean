@@ -1352,11 +1352,18 @@ noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β
     toPretangle_smul := toPretangle_smul_step α ihs h
     eq_toPretangle_of_mem := eq_toPretangle_of_mem_step α ihs h
     toPretangle_ext := sorry
+    tangle_ext := sorry
     singleton := sorry
-    singleton_injective := sorry
+    singleton_support := sorry
     singleton_toPretangle := sorry
-    mk_codingFunction_zero := sorry
   }
+
+theorem mk_codingFunction_le (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
+    letI : Level := ⟨α⟩
+    letI : CountingAssumptions := buildStepCountingAssumptions α ihs h
+    #(CodingFunction 0) < #μ :=
+  sorry
 
 theorem mk_tangle_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
@@ -1370,7 +1377,7 @@ theorem mk_tangle_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   letI : CountingAssumptions := buildStepCountingAssumptions α ihs h
   haveI : LeLevel α := ⟨le_rfl⟩
   rw [← foaData_tangle_eq]
-  exact mk_tangle α
+  exact mk_tangle α (mk_codingFunction_le α ihs h)
 
 noncomputable def buildStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) : IH α :=
