@@ -46,8 +46,13 @@ class TangleData (α : TypeIndex) where
     haveI : MulAction Allowable (Address α) :=
       MulAction.compHom _ allowableToStructPerm
     MulAction.Supports Allowable (support t : Set (Address α)) t
+  toPretangle : Tangle → Pretangle α
+  toPretangle_smul (ρ : Allowable) (t : Tangle) :
+    haveI : MulAction Allowable (Pretangle α) :=
+      MulAction.compHom _ allowableToStructPerm
+    toPretangle (ρ • t) = ρ • toPretangle t
 
-export TangleData (Tangle Allowable)
+export TangleData (Tangle Allowable toPretangle toPretangle_smul)
 
 attribute [instance] TangleData.allowableGroup TangleData.allowableAction
 
@@ -210,6 +215,8 @@ instance Bot.tangleData : TangleData ⊥
     simp only [Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
       NearLitterPerm.smul_address_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
     exact h
+  toPretangle := Pretangle.ofBot
+  toPretangle_smul _ _ := rfl
 
 /-- The position function at level `⊥`, taken from the `BasePositions`. -/
 instance Bot.positionedTangles [BasePositions] : PositionedTangles ⊥ :=

@@ -38,6 +38,10 @@ structure IH (α : Λ) where
     ρ • typedNearLitter N =
     typedNearLitter ((allowableToStructPerm ρ) (Hom.toPath <| bot_lt_coe α) • N)
   toPretangle : Tangle → Pretangle α
+  toPretangle_smul (ρ : Allowable) (t : Tangle) :
+    haveI : MulAction Allowable (Pretangle α) :=
+      MulAction.compHom _ allowableToStructPerm
+    toPretangle (ρ • t) = ρ • toPretangle t
 
 instance {α : Λ} {ih : IH α} : Group ih.Allowable := ih.allowableGroup
 instance {α : Λ} {ih : IH α} : MulAction ih.Allowable ih.Tangle := ih.allowableAction
@@ -52,6 +56,8 @@ def IH.tangleData {α : Λ} (ih : IH α) : TangleData α where
   allowableToStructPerm := ih.allowableToStructPerm
   support := ih.support
   support_supports := ih.support_supports
+  toPretangle := ih.toPretangle
+  toPretangle_smul := ih.toPretangle_smul
 
 def IH.positionedTangles {α : Λ} (ih : IH α) :
     letI := ih.tangleData
@@ -151,16 +157,25 @@ structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
       (_hfα : ∀ ρ : (ih α le_rfl).Allowable,
         (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = fα ρ),
       fα ρ = π)
-  toPretangle_smul (t : (ih α le_rfl).Tangle) (ρ : (ih α le_rfl).Allowable) :
-    (ih α le_rfl).toPretangle (ρ • t) = ρ • (ih α le_rfl).toPretangle t
   eq_toPretangle_of_mem (β : Λ) (hβ : β < α) (t₁ : (ih α le_rfl).Tangle) (t₂ : Pretangle β) :
     t₂ ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₁) β (coe_lt_coe.mpr hβ) →
     ∃ t₂' : (ih β hβ.le).Tangle, t₂ = (ih β hβ.le).toPretangle t₂'
+  toPretangle_ext (β : Λ) (hβ : β < α) (t₁ t₂ : (ih α le_rfl).Tangle) :
+    (∀ t : Pretangle β,
+      t ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₁) β (coe_lt_coe.mpr hβ) ↔
+      t ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₂) β (coe_lt_coe.mpr hβ)) →
+    (ih α le_rfl).toPretangle t₁ = (ih α le_rfl).toPretangle t₂
+  tangle_ext (t₁ t₂ : (ih α le_rfl).Tangle) :
+    (ih α le_rfl).toPretangle t₁ = (ih α le_rfl).toPretangle t₂ →
+    (ih α le_rfl).support t₁ = (ih α le_rfl).support t₂ →
+    t₁ = t₂
   /-- It's useful to keep this `Prop`-valued, because then there is no data in `IH` that
   crosses levels. -/
   has_singletons (β : Λ) (hβ : β < α) :
     ∃! S : (ih β hβ.le).Tangle ↪ (ih α le_rfl).Tangle,
     ∀ t : (ih β hβ.le).Tangle,
+      (ih α le_rfl).support (S t) =
+        ((ih β hβ.le).support t).image (fun c => ⟨(Hom.toPath (coe_lt_coe.mpr hβ)).comp c.1, c.2⟩) ∧
       Pretangle.ofCoe ((ih α le_rfl).toPretangle (S t)) β (coe_lt_coe.mpr hβ) =
       {(ih β hβ.le).toPretangle t}
 
@@ -181,6 +196,8 @@ def tangleDataStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) : TangleDat
       refine Enumeration.ext' rfl ?_
       intro i hS _
       exact h ⟨i, hS, rfl⟩
+    toPretangle := sorry
+    toPretangle_smul := sorry
   }
 
 def typedObjectsStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
@@ -1227,12 +1244,12 @@ theorem toPretangleLt_smul (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   refine WithBot.recBotCoe ?_ ?_ β
   · intro ihs _ iβ ρ t
     rfl
-  · intro β ihs h iβ ρ t
+  · intro β ihs _ iβ ρ t
     letI : Level := ⟨α⟩
     letI : FOAData := buildStepFOAData α ihs
     have hβ' := coe_lt_coe.mp iβ.elim
     rw [toPretangleStepLt_coe α ihs β hβ', toPretangleStepLt_coe α ihs β hβ']
-    rw [foaData_allowable_lt_equiv_smul, (h β hβ').toPretangle_smul]
+    rw [foaData_allowable_lt_equiv_smul, (ihs β hβ').toPretangle_smul]
     rw [Allowable.toStructPerm_smul, foaData_allowable_lt_equiv_toStructPerm]
     rfl
 
@@ -1331,15 +1348,44 @@ theorem eq_toPretangle_of_mem_step (α : Λ) (ihs : (β : Λ) → β < α → IH
 
 theorem toPretangle_ext_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
-    (β : Λ) [iβ : letI : Level := ⟨α⟩; LeLevel β]
-    (γ : Λ) [iγ : letI : Level := ⟨α⟩; LeLevel γ]
+    (β : Λ) (γ : Λ)
+    [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
     (hγβ : (γ : TypeIndex) < β)
     (t₁ t₂ :
       letI : Level := ⟨α⟩
       letI : FOAData := buildStepFOAData α ihs
       Tangle β) :
     (∀ t : Pretangle γ, t ∈ Pretangle.ofCoe (toPretangleStep α ihs β iβ t₁) γ hγβ ↔
-      t ∈ Pretangle.ofCoe (toPretangleStep α ihs β iβ t₂) γ hγβ) → t₁ = t₂ := sorry
+      t ∈ Pretangle.ofCoe (toPretangleStep α ihs β iβ t₂) γ hγβ) →
+    toPretangleStep α ihs β iβ t₁ = toPretangleStep α ihs β iβ t₂ := by
+  letI : Level := ⟨α⟩
+  letI iγ : LtLevel γ := ⟨hγβ.trans_le iβ.elim⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+  by_cases hβ : β = α
+  · cases hβ
+    intro ht
+    simp only [NewTangle.toPretangle, toPretangleStep_eq] at ht ⊢
+    have := Semitangle.ext (γ := γ) (foaData_tangle_eq_equiv α ihs t₁).t
+      (foaData_tangle_eq_equiv α ihs t₂).t ?_
+    · rw [this]
+    simp only [Semitangle.toPretangle, Pretangle.ofCoe_symm, exists_and_right,
+      Pretangle.ofCoe_toCoe, mem_setOf_eq] at ht
+    ext s
+    constructor
+    · intro hs
+      obtain ⟨s', hs'⟩ := (ht _).mp ⟨s, hs, rfl⟩
+      rw [toPretangleStepLt_coe α ihs γ (coe_lt_coe.mp iγ.elim),
+        toPretangleStepLt_coe α ihs γ (coe_lt_coe.mp iγ.elim)] at hs'
+      sorry
+    · sorry
+  · intro ht
+    have hβ' := lt_of_le_of_ne (coe_le_coe.mp iβ.elim) hβ
+    simp only [toPretangleStep_lt' α ihs β (coe_lt_coe.mpr hβ'),
+      toPretangleStepLt_coe α ihs β hβ'] at ht ⊢
+    exact (h β hβ').toPretangle_ext γ (coe_lt_coe.mp hγβ) _ _ ht
 
 noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
@@ -1348,10 +1394,8 @@ noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β
   letI : Level := ⟨α⟩
   letI : FOAAssumptions := buildStepFOAAssumptions α ihs h
   {
-    toPretangle := toPretangleStep α ihs
-    toPretangle_smul := toPretangle_smul_step α ihs h
-    eq_toPretangle_of_mem := eq_toPretangle_of_mem_step α ihs h
-    toPretangle_ext := sorry
+    eq_toPretangle_of_mem := sorry -- eq_toPretangle_of_mem_step α ihs h
+    toPretangle_ext := sorry -- toPretangle_ext_step α ihs h
     tangle_ext := sorry
     singleton := sorry
     singleton_support := sorry

@@ -18,28 +18,25 @@ variable [Params.{u}] [Level] [BasePositions]
 instance : LeLevel (0 : Λ) := ⟨WithBot.coe_le_coe.mpr (Params.Λ_zero_le _)⟩
 
 class CountingAssumptions extends FOAAssumptions where
-  toPretangle (β : TypeIndex) [LeLevel β] : Tangle β → Pretangle β
-  toPretangle_smul (β : TypeIndex) [LeLevel β] (ρ : Allowable β) (t : Tangle β) :
-    toPretangle β (ρ • t) = ρ • toPretangle β t
   /-- Tangles contain only tangles. -/
   eq_toPretangle_of_mem (β : Λ) [LeLevel β] (γ : Λ) [LeLevel γ]
     (h : (γ : TypeIndex) < β) (t₁ : Tangle β) (t₂ : Pretangle γ) :
-    t₂ ∈ Pretangle.ofCoe (toPretangle β t₁) γ h → ∃ t₂' : Tangle γ, t₂ = toPretangle γ t₂'
+    t₂ ∈ Pretangle.ofCoe (toPretangle t₁) γ h → ∃ t₂' : Tangle γ, t₂ = toPretangle t₂'
   /-- Tangles are extensional at every proper level `γ < β`. -/
   toPretangle_ext (β γ : Λ) [LeLevel β] [LeLevel γ] (h : (γ : TypeIndex) < β) (t₁ t₂ : Tangle β) :
     (∀ t : Pretangle γ,
-      t ∈ Pretangle.ofCoe (toPretangle β t₁) γ h ↔ t ∈ Pretangle.ofCoe (toPretangle β t₂) γ h) →
-    toPretangle β t₁ = toPretangle β t₂
+      t ∈ Pretangle.ofCoe (toPretangle t₁) γ h ↔ t ∈ Pretangle.ofCoe (toPretangle t₂) γ h) →
+    toPretangle t₁ = toPretangle t₂
   tangle_ext (β : Λ) [LeLevel β] (t₁ t₂ : Tangle β) :
-    toPretangle β t₁ = toPretangle β t₂ → t₁.support = t₂.support → t₁ = t₂
+    toPretangle t₁ = toPretangle t₂ → t₁.support = t₂.support → t₁ = t₂
   /-- Any `γ`-tangle can be treated as a singleton at level `β` if `γ < β`. -/
   singleton (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : Tangle γ) : Tangle β
   singleton_support (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : Tangle γ) :
     (singleton β γ h t).support = t.support.image (fun c => ⟨(Hom.toPath h).comp c.1, c.2⟩)
   singleton_toPretangle (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : Tangle γ) :
-    Pretangle.ofCoe (toPretangle β (singleton β γ h t)) γ h = {toPretangle γ t}
+    Pretangle.ofCoe (toPretangle (singleton β γ h t)) γ h = {toPretangle t}
 
-export CountingAssumptions (toPretangle toPretangle_smul eq_toPretangle_of_mem toPretangle_ext
+export CountingAssumptions (eq_toPretangle_of_mem toPretangle_ext
   tangle_ext singleton singleton_support singleton_toPretangle)
 
 variable [CountingAssumptions] {β γ : Λ} [LeLevel β] [LeLevel γ] (hγ : γ < β)

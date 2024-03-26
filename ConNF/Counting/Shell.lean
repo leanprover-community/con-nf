@@ -13,55 +13,7 @@ namespace ConNF
 
 variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β : Λ} [LeLevel β]
 
-/-- The "shell" of a tangle, reducing it just to the information that it used to come from
-a tangle. -/
-@[ext]
-structure Shell (β : Λ) [LeLevel β] : Type u where
-  p : Pretangle β
-  h : ∃ t : Tangle β, p = toPretangle β t
-
 namespace Shell
-
-instance : MulAction (Allowable β) (Shell β) where
-  smul ρ t := ⟨ρ • t.p, by
-    obtain ⟨s, hs⟩ := t.h
-    refine ⟨ρ • s, ?_⟩
-    rw [hs]
-    rw [toPretangle_smul]⟩
-  one_smul := by
-    rintro ⟨p, h⟩
-    refine Shell.ext _ _ ?_
-    change 1 • p = p
-    rw [one_smul]
-  mul_smul := by
-    rintro ρ₁ ρ₂ ⟨p, h⟩
-    refine Shell.ext _ _ ?_
-    change (ρ₁ * ρ₂) • p = ρ₁ • ρ₂ • p
-    rw [mul_smul]
-
-@[simp]
-theorem smul_p (ρ : Allowable β) (t : Shell β) :
-    (ρ • t).p = ρ • t.p :=
-  rfl
-
-def ofTangle (t : Tangle β) : Shell β :=
-  ⟨toPretangle β t, t, rfl⟩
-
-theorem exists_eq_ofTangle (s : Shell β) :
-    ∃ t : Tangle β, s = ofTangle t := by
-  obtain ⟨p, t, rfl⟩ := s
-  exact ⟨t, rfl⟩
-
-@[simp]
-theorem ofTangle_p (t : Tangle β) :
-    (ofTangle t).p = toPretangle β t :=
-  rfl
-
-theorem smul_ofTangle (ρ : Allowable β) (t : Tangle β) :
-    ρ • ofTangle t = ofTangle (ρ • t) := by
-  refine Shell.ext _ _ ?_
-  simp only [smul_p, ofTangle_p]
-  rw [toPretangle_smul]
 
 protected theorem eq_toPretangle_of_mem (β : Λ) [LeLevel β] (γ : Λ) [LeLevel γ]
     (h : (γ : TypeIndex) < β) (t₁ : Shell β) (t₂ : Pretangle γ) :
@@ -72,7 +24,7 @@ protected theorem eq_toPretangle_of_mem (β : Λ) [LeLevel β] (γ : Λ) [LeLeve
   exact ⟨ofTangle t₂', ht₂'⟩
 
 theorem ofTangle_eq_iff (t₁ t₂ : Tangle β) :
-    toPretangle β t₁ = toPretangle β t₂ ↔ ofTangle t₁ = ofTangle t₂ := by
+    toPretangle t₁ = toPretangle t₂ ↔ ofTangle t₁ = ofTangle t₂ := by
   constructor
   · intro h
     ext
@@ -156,7 +108,7 @@ theorem out_injective (s₁ s₂ : Shell β) (h : s₁.out = s₂.out) : s₁ = 
   rw [eq_ofTangle_out s₁, eq_ofTangle_out s₂, h]
 
 @[simp]
-theorem out_toPretangle (s : Shell β) : toPretangle β s.out = s.p := by
+theorem out_toPretangle (s : Shell β) : toPretangle s.out = s.p := by
   conv_rhs => rw [eq_ofTangle_out s]
 
 noncomputable def support (s : Shell β) : Support β :=
