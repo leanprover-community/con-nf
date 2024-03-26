@@ -21,31 +21,53 @@ noncomputable def RaisedSingleton.code (S : Support β) (r : RaisedSingleton hγ
   (SupportOrbit.mk (raisedSupport hγ S r.prop.choose),
     CodingFunction.code _ _ (Shell.support_supports r.prop.choose))
 
+/-- TODO: Move this -/
+instance : IsLeftCancelAdd κ := by
+  constructor
+  intro i j k h
+  have := congr_arg (Ordinal.typein (· < ·)) h
+  rw [Params.κ_add_typein, Params.κ_add_typein, Ordinal.add_left_cancel] at this
+  exact Ordinal.typein_injective _ this
+
 theorem smul_singleton_smul (S : Support β) (u : Shell γ) (ρ₁ : Allowable β) (ρ₂ : Allowable γ)
     (h₁ : ρ₁ • raisedSupport hγ S (ρ₂ • u) = raisedSupport hγ S u) :
     ρ₁ • Shell.singleton β γ hγ (ρ₂ • u) = Shell.singleton β γ hγ u := by
   rw [Shell.singleton_smul]
   refine congr_arg _ ?_
   rw [smul_smul]
-  refine Shell.support_supports u (Allowable.comp (Hom.toPath hγ) ρ₁ * ρ₂) ?_
+  have := Shell.support_supports u
+    (Allowable.comp (Hom.toPath hγ) ρ₁ * (ρ₂ • u).twist * u.twist⁻¹) ?_
+  · refine Eq.trans ?_ this
+    simp only [mul_smul, smul_left_cancel_iff]
+    rw [← (smul_eq_iff_eq_inv_smul _).mp u.eq_twist_smul,
+      ← Shell.Orbit.mk_smul u ρ₂, (ρ₂ • u).eq_twist_smul]
   rintro c ⟨i, hi, hc⟩
   rw [raisedSupport, raisedSupport] at h₁
-  sorry
-  -- have := support_f_congr h₁ (S.max + i) ?_
-  -- swap
-  -- · simp only [Enumeration.add_max, Enumeration.smul_max, Enumeration.image_max,
-  --     add_lt_add_iff_left, Shell.smul_support_max]
-  --   exact hi
-  -- rw [Enumeration.add_f_right_add (by exact hi), Enumeration.smul_f,
-  --   Enumeration.add_f_right_add] at this
-  -- swap
-  -- · simp only [Enumeration.image_max, Enumeration.smul_max, Shell.smul_support_max]
-  --   exact hi
-  -- simp only [Enumeration.image_f, raise, raiseIndex, Allowable.smul_address, ← hc,
-  --   Address.mk.injEq] at this
-  -- refine Address.ext _ _ rfl ?_
-  -- simp only [mul_smul, Allowable.smul_address, Allowable.toStructPerm_comp, Tree.comp_apply]
-  -- exact this
+  have hi' : i < (ρ₂ • u).support.max
+  · have := congr_arg Enumeration.max h₁
+    simp only [Enumeration.smul_add, Enumeration.add_max, Enumeration.smul_max,
+      Enumeration.image_max, add_right_inj] at this
+    rw [this]
+    exact hi
+  have := support_f_congr h₁ (S.max + i) ?_
+  swap
+  · rw [Enumeration.smul_max, Enumeration.add_max, Enumeration.image_max, add_lt_add_iff_left]
+    exact hi'
+  rw [Enumeration.add_f_right_add (by exact hi),
+    Enumeration.smul_f, Enumeration.add_f_right_add (by exact hi')] at this
+  refine Address.ext _ _ rfl ?_
+  simp only [Enumeration.image_f, raise, raiseIndex, Allowable.smul_address, ← hc,
+    Address.mk.injEq] at this
+  simp only [Shell.support, Shell.Orbit.mk_smul, Enumeration.smul_f, Allowable.smul_address,
+    mul_smul, map_inv, Tree.inv_apply, Allowable.toStructPerm_comp, Tree.comp_apply] at this ⊢
+  obtain ⟨h₁, h₂⟩ := this
+  rw [Path.comp_inj_right] at h₁
+  rw [h₁] at h₂
+  refine Eq.trans ?_ h₂
+  rw [smul_left_cancel_iff, smul_left_cancel_iff]
+  simp only [Shell.support] at hc
+  rw [congr_arg Address.value hc, Enumeration.smul_f]
+  simp only [inv_smul_eq_iff, Allowable.smul_address, h₁]
 
 theorem RaisedSingleton.code_injective (S : Support β) :
     Function.Injective (RaisedSingleton.code hγ S) := by
