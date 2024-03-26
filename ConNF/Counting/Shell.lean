@@ -136,6 +136,15 @@ theorem eq_twist_smul (s : Shell β) :
     s.twist • ofTangle (Orbit.mk s).repr = s :=
   s.has_twist.choose_spec
 
+theorem twist_smul (s : Shell β) (ρ : Allowable β) :
+    ρ • s = (ρ • s).twist • s.twist⁻¹ • s := by
+  have := eq_twist_smul s
+  rw [smul_eq_iff_eq_inv_smul] at this
+  rw [← this]
+  have := eq_twist_smul (ρ • s)
+  rw [Orbit.mk_smul] at this
+  exact this.symm
+
 /-- A canonical tangle chosen for this shell. -/
 noncomputable def out (s : Shell β) : Tangle β :=
   s.twist • (Orbit.mk s).repr
@@ -172,6 +181,11 @@ theorem smul_support_max (s : Shell β) (ρ : Allowable β) :
     (ρ • s).support.max = s.support.max := by
   rw [support, support, Orbit.mk_smul, Enumeration.smul_max, Enumeration.smul_max]
 
+@[simp]
+theorem smul_support (s : Shell β) (ρ : Allowable β) :
+    (ρ • s).support = (ρ • s).twist • s.twist⁻¹ • s.support := by
+  rw [support, support, inv_smul_smul, Orbit.mk_smul]
+
 protected noncomputable def singleton
     (β : Λ) [LeLevel β] (γ : Λ) [LeLevel γ] (h : (γ : TypeIndex) < β)
     (t : Shell γ) : Shell β :=
@@ -192,6 +206,15 @@ protected theorem singleton_smul
   intro s
   simp only [Shell.singleton, smul_ofTangle, singleton_smul, ofTangle_p, singleton_toPretangle,
     toPretangle_smul, out_toPretangle, mem_singleton_iff, smul_p]
+
+protected theorem singleton_injective
+    (β : Λ) [LeLevel β] (γ : Λ) [LeLevel γ] (h : (γ : TypeIndex) < β) :
+    Function.Injective (Shell.singleton β γ h) := by
+  intro s₁ s₂ hs
+  have h₁ := Shell.singleton_toPretangle β γ h s₁
+  have h₂ := Shell.singleton_toPretangle β γ h s₂
+  rw [hs, h₂, singleton_eq_singleton_iff] at h₁
+  exact Shell.ext _ _ h₁.symm
 
 end Shell
 

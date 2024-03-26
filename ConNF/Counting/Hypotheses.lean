@@ -61,4 +61,26 @@ theorem singleton_smul (β γ : Λ) [LeLevel β] [LeLevel γ] (h : (γ : TypeInd
       simp only [Enumeration.smul_f, Enumeration.image_f, Allowable.smul_address, smul_support,
         Allowable.toStructPerm_comp, Tree.comp_apply]
 
+theorem singleton_injective (β γ : Λ) [LeLevel β] [LeLevel γ] (h : (γ : TypeIndex) < β) :
+    Function.Injective (singleton β γ h) := by
+  intro t₁ t₂ ht
+  refine tangle_ext γ _ _ ?_ ?_
+  · have h₁ := singleton_toPretangle β γ h t₁
+    have h₂ := singleton_toPretangle β γ h t₂
+    rw [ht, h₂, singleton_eq_singleton_iff] at h₁
+    exact h₁.symm
+  · have h₁ := singleton_support β γ h t₁
+    have h₂ := singleton_support β γ h t₂
+    rw [ht, h₂] at h₁
+    refine Enumeration.ext' ?_ ?_
+    · have := congr_arg Enumeration.max h₁
+      simp only [Enumeration.image_max] at this
+      exact this.symm
+    · intro i hi₁ hi₂
+      have := support_f_congr h₁ i hi₂
+      simp only [Enumeration.image_f, Address.mk.injEq] at this
+      refine Address.ext _ _ ?_ ?_
+      · exact Path.comp_inj_right.mp this.1.symm
+      · exact this.2.symm
+
 end ConNF

@@ -443,6 +443,35 @@ theorem mem_add_iff (E F : Enumeration α) (x : α) :
   rw [add_coe]
   rfl
 
+/-- TODO: Move this -/
+instance : IsLeftCancelAdd κ := by
+  constructor
+  intro i j k h
+  have := congr_arg (Ordinal.typein (· < ·)) h
+  rw [Params.κ_add_typein, Params.κ_add_typein, Ordinal.add_left_cancel] at this
+  exact Ordinal.typein_injective _ this
+
+theorem add_congr {E F G H : Enumeration α} (hEF : E.max = F.max) (h : E + G = F + H) :
+    E = F ∧ G = H := by
+  have : E = F
+  · refine ext' hEF ?_
+    intro i hE hF
+    have h₁ := add_f_left hE (F := G)
+    have h₂ := add_f_left hF (F := H)
+    simp_rw [h, h₂] at h₁
+    exact h₁.symm
+  subst this
+  refine ⟨rfl, ?_⟩
+  refine ext' ?_ ?_
+  · have := congr_arg Enumeration.max h
+    simp only [add_max, add_right_inj] at this
+    exact this
+  · intro i hG hH
+    have h₁ := add_f_right_add hG (E := E)
+    have h₂ := add_f_right_add hH (E := E)
+    simp_rw [h, h₂] at h₁
+    exact h₁.symm
+
 @[simp]
 theorem smul_add {G : Type _} [SMul G α] {g : G} (E F : Enumeration α) :
     g • (E + F) = g • E + g • F := by

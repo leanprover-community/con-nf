@@ -148,8 +148,8 @@ noncomputable def raiseSingleton (S : Support β) (u : Shell γ) : CodingFunctio
     (Shell.singleton β γ hγ u)
     (raisedSupport_supports hγ S u)
 
-def RaisedSingleton (S : Support β) : Type u :=
-  {χ : CodingFunction β // ∃ u : Shell γ, χ = raiseSingleton hγ S u}
+def RaisedSingleton : Type u :=
+  {χ : CodingFunction β // ∃ S : Support β, ∃ u : Shell γ, χ = raiseSingleton hγ S u}
 
 theorem smul_raise_eq (ρ : Allowable β) (c : Address γ) :
     ρ • raise hγ c = raise hγ (Allowable.comp (Hom.toPath hγ) ρ • c) := by
@@ -170,9 +170,9 @@ def raiseSingletons (S : Support β) (t : Shell β) : Set (CodingFunction β) :=
 
 theorem raiseSingletons_subset_range {S : Support β} {t : Shell β} :
     raiseSingletons hγ S t ⊆
-    range (Subtype.val : RaisedSingleton hγ S → CodingFunction β) := by
+    range (Subtype.val : RaisedSingleton hγ → CodingFunction β) := by
   rintro _ ⟨u, _, rfl⟩
-  exact ⟨⟨raiseSingleton hγ S u, ⟨u, rfl⟩⟩, rfl⟩
+  exact ⟨⟨raiseSingleton hγ S u, ⟨S, u, rfl⟩⟩, rfl⟩
 
 theorem smul_reducedSupport_eq (S : Support β) (v : Shell γ) (ρ : Allowable β)
     (hUV : S ≤ ρ • raisedSupport hγ S v)
