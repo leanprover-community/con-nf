@@ -421,6 +421,11 @@ theorem tangleData_cast_toStructPerm (α : Λ) (i₁ i₂ : TangleData α) (h : 
     i₂.allowableToStructPerm (cast (show i₁.Allowable = i₂.Allowable by rw [h]) ρ) :=
   by subst h; rfl
 
+theorem tangleData_cast_toPretangle (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂) (t) :
+    i₁.toPretangle t =
+    i₂.toPretangle (cast (show i₁.TSet = i₂.TSet by rw [h]) t) :=
+  by subst h; rfl
+
 theorem tangleData_cast_smul (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂) (ρ t) :
     cast (show i₁.TSet = i₂.TSet by rw [h]) (i₁.allowableAction.smul ρ t) =
     i₂.allowableAction.smul
@@ -481,6 +486,19 @@ theorem fuzz_cast (β : TypeIndex) (γ : Λ) (hβγ : β ≠ γ)
   by subst hi; subst hj; rfl
 
 @[simp]
+theorem foaData_tSet_eq_equiv_toPretangle (α : Λ) (ihs : (β : Λ) → β < α → IH β) (t) :
+    letI : Level := ⟨α⟩
+    letI : LeLevel α := ⟨le_rfl⟩
+    (letI : FOAData := buildStepFOAData α ihs
+    toPretangle t) =
+    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+    letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+    letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+    NewTSet.toPretangle (foaData_tSet_eq_equiv α ihs t)) :=
+  tangleData_cast_toPretangle α _ _ (tangleDataStepFn_eq α ihs) t
+
+@[simp]
 theorem foaData_allowable_eq_equiv_one (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     foaData_allowable_eq_equiv α ihs 1 = 1 :=
   tangleData_cast_one α _ _ (tangleDataStepFn_eq α ihs)
@@ -513,6 +531,16 @@ theorem foaData_allowable_eq_equiv_smul (α : Λ) (ihs : (β : Λ) → β < α �
     foaData_tSet_eq_equiv α ihs (ρ • t) =
     foaData_allowable_eq_equiv α ihs ρ • foaData_tSet_eq_equiv α ihs t :=
   tangleData_cast_smul α _ _ (tangleDataStepFn_eq α ihs) ρ t
+
+@[simp]
+theorem foaData_tSet_lt_equiv_toPretangle (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : Λ) (hβ : β < α) (t) :
+    letI : Level := ⟨α⟩
+    letI : LeLevel β := ⟨coe_le_coe.mpr hβ.le⟩
+    (letI : FOAData := buildStepFOAData α ihs
+    toPretangle t) =
+    (ihs β hβ).toPretangle (foaData_tSet_lt_equiv α ihs β hβ t) :=
+  tangleData_cast_toPretangle β _ _ (tangleDataStepFn_lt α ihs β hβ) t
 
 theorem foaData_allowable_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : Λ) (hβ : β < α) :
     letI : Level := ⟨α⟩
@@ -676,6 +704,31 @@ def foaData_allowable_lt'_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β
     (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
     Allowable β) :=
     Equiv.cast (foaData_allowable_lt' α ihs β hβ)
+
+theorem foaData_tSet_lt' (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : TypeIndex) (hβ : β < α) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨hβ⟩
+    (letI : FOAData := buildStepFOAData α ihs
+    TSet β) =
+    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    TSet β) := by
+  revert hβ
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro hβ
+    rfl
+  · intro β hβ
+    rw [foaData_tSet_lt]
+    rfl
+
+def foaData_tSet_lt'_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : TypeIndex) (hβ : β < α) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨hβ⟩
+    (letI : FOAData := buildStepFOAData α ihs
+    TSet β) ≃
+    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    TSet β) :=
+    Equiv.cast (foaData_tSet_lt' α ihs β hβ)
 
 theorem foaData_tangle_lt' (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : TypeIndex) (hβ : β < α) :
     letI : Level := ⟨α⟩
@@ -1225,151 +1278,6 @@ noncomputable def buildStepFOAAssumptions (α : Λ) (ihs : (β : Λ) → β < α
     allowable_of_smulFuzz := allowable_of_smulFuzz_step α ihs h
   }
 
-#exit
-
-def toPretangleStepLt (α : Λ) (ihs : (β : Λ) → β < α → IH β)
-    (β : TypeIndex) :
-    letI : Level := ⟨α⟩
-    letI : FOAData := buildStepFOAData α ihs
-    (_ : LtLevel β) → Tangle β → Pretangle β :=
-  match β with
-  | ⊥ => fun _ => Pretangle.ofBot
-  | (β : Λ) => fun iβ t =>
-      letI : Level := ⟨α⟩
-      (ihs β (coe_lt_coe.mp iβ.elim)).toPretangle
-        (foaData_tSet_lt_equiv α ihs β (coe_lt_coe.mp iβ.elim) t)
-
-def toPretangleStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
-    (β : TypeIndex) :
-    letI : Level := ⟨α⟩
-    letI : FOAData := buildStepFOAData α ihs
-    (_ : LeLevel β) → Tangle β → Pretangle β :=
-  if hβ : β = α then
-    letI : Level := ⟨α⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
-    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
-    letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
-    letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-    fun _ t => hβ ▸ NewTangle.toPretangle
-      (foaData_tSet_eq_equiv α ihs (cast (by subst hβ; rfl) t))
-      (fun γ hγ s => toPretangleStepLt α ihs γ hγ
-        ((foaData_tangle_lt'_equiv α ihs γ hγ.elim).symm s))
-  else
-    letI : Level := ⟨α⟩
-    fun iβ => toPretangleStepLt α ihs β ⟨lt_of_le_of_ne iβ.elim hβ⟩
-
-theorem toPretangleStep_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β) (t) :
-    letI : Level := ⟨α⟩
-    toPretangleStep α ihs α ⟨le_rfl⟩ t =
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
-    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
-    letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
-    letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-    NewTangle.toPretangle
-      (foaData_tSet_eq_equiv α ihs t)
-      (fun γ hγ s => toPretangleStepLt α ihs γ hγ
-        ((foaData_tangle_lt'_equiv α ihs γ hγ.elim).symm s)) := by
-  rw [toPretangleStep, dif_pos rfl]
-  rfl
-
-theorem toPretangleStep_lt' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
-    (β : TypeIndex) (hβ : β < α) (t) :
-    letI : Level := ⟨α⟩
-    toPretangleStep α ihs β ⟨hβ.le⟩ t = toPretangleStepLt α ihs β ⟨hβ⟩ t := by
-  rw [toPretangleStep, dif_neg (ne_of_lt hβ)]
-
-theorem toPretangleStepLt_bot (α : Λ) (ihs : (β : Λ) → β < α → IH β) (t) :
-    letI : Level := ⟨α⟩
-    toPretangleStepLt α ihs ⊥ inferInstance t = Pretangle.ofBot t :=
-  rfl
-
-theorem toPretangleStepLt_coe (α : Λ) (ihs : (β : Λ) → β < α → IH β)
-    (β : Λ) (hβ : β < α) (t) :
-    letI : Level := ⟨α⟩
-    toPretangleStepLt α ihs β ⟨coe_lt_coe.mpr hβ⟩ t =
-    (ihs β hβ).toPretangle (foaData_tSet_lt_equiv α ihs β hβ t) :=
-  rfl
-
-theorem toPretangleLt_smul (α : Λ) (ihs : (β : Λ) → β < α → IH β)
-    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
-    (β : TypeIndex) [iβ : letI : Level := ⟨α⟩; LtLevel β]
-    (ρ :
-      letI : Level := ⟨α⟩
-      letI : FOAData := buildStepFOAData α ihs
-      Allowable β)
-    (t :
-      letI : Level := ⟨α⟩
-      letI : FOAData := buildStepFOAData α ihs
-      Tangle β) :
-    toPretangleStepLt α ihs β iβ (ρ • t) = ρ • toPretangleStepLt α ihs β iβ t := by
-  revert iβ ihs
-  refine WithBot.recBotCoe ?_ ?_ β
-  · intro ihs _ iβ ρ t
-    rfl
-  · intro β ihs _ iβ ρ t
-    letI : Level := ⟨α⟩
-    letI : FOAData := buildStepFOAData α ihs
-    have hβ' := coe_lt_coe.mp iβ.elim
-    rw [toPretangleStepLt_coe α ihs β hβ', toPretangleStepLt_coe α ihs β hβ']
-    rw [foaData_allowable_lt_equiv_smul, (ihs β hβ').toPretangle_smul]
-    rw [Allowable.toStructPerm_smul, foaData_allowable_lt_equiv_toStructPerm]
-    rfl
-
-theorem toPretangle_smul_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
-    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
-    (β : TypeIndex) [iβ : letI : Level := ⟨α⟩; LeLevel β]
-    (ρ :
-      letI : Level := ⟨α⟩
-      letI : FOAData := buildStepFOAData α ihs
-      Allowable β)
-    (t :
-      letI : Level := ⟨α⟩
-      letI : FOAData := buildStepFOAData α ihs
-      Tangle β) :
-    toPretangleStep α ihs β iβ (ρ • t) = ρ • toPretangleStep α ihs β iβ t := by
-  revert iβ ihs
-  refine WithBot.recBotCoe ?_ ?_ β
-  · intro ihs _ iβ ρ t
-    rfl
-  intro β ihs h iβ ρ t
-  letI : Level := ⟨α⟩
-  letI : FOAData := buildStepFOAData α ihs
-  by_cases hβ : β = α
-  · cases hβ
-    rw [toPretangleStep_eq, toPretangleStep_eq, foaData_allowable_eq_equiv_smul]
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
-    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
-    letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
-    letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-    have := NewTangle.toPretangle_smul
-        (foaData_allowable_eq_equiv α ihs ρ) (foaData_tSet_eq_equiv α ihs t)
-        (fun β hβ => toPretangleStepLt α ihs β hβ ∘
-          (foaData_tangle_lt'_equiv α ihs β hβ.elim).symm) ?_
-    · erw [← this]
-      rw [Allowable.toStructPerm_smul, foaData_allowable_eq_equiv_toStructPerm]
-      rfl
-    · intro β iβ ρ t
-      have := toPretangleLt_smul α ihs h β
-        ((foaData_allowable_lt'_equiv α ihs β iβ.elim).symm ρ)
-        ((foaData_tangle_lt'_equiv α ihs β iβ.elim).symm t)
-      simp only [comp_apply]
-      rw [Allowable.toStructPerm_smul, foaData_allowable_lt'_equiv_toStructPerm,
-        Equiv.apply_symm_apply] at this
-      erw [← this]
-      have := foaData_allowable_lt'_equiv_smul α ihs β iβ.elim
-        ((foaData_allowable_lt'_equiv α ihs β iβ.elim).symm ρ)
-        ((foaData_tangle_lt'_equiv α ihs β iβ.elim).symm t)
-      rw [Equiv.apply_symm_apply, Equiv.apply_symm_apply] at this
-      rw [← this, Equiv.symm_apply_apply]
-  · letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
-    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
-    letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
-    letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-    have hβ' := lt_of_le_of_ne iβ.elim (coe_ne_coe.mpr hβ)
-    letI : LtLevel β := ⟨hβ'⟩
-    rw [toPretangleStep_lt' α ihs β hβ', toPretangleStep_lt' α ihs β hβ']
-    exact toPretangleLt_smul α ihs h β ρ t
-
 theorem eq_toPretangle_of_mem_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
     (β : Λ) [iβ : letI : Level := ⟨α⟩; LeLevel β]
@@ -1378,76 +1286,67 @@ theorem eq_toPretangle_of_mem_step (α : Λ) (ihs : (β : Λ) → β < α → IH
     (t₁ :
       letI : Level := ⟨α⟩
       letI : FOAData := buildStepFOAData α ihs
-      Tangle β) :
-    ∀ t₂ ∈ Pretangle.ofCoe (toPretangleStep α ihs β iβ t₁) γ hγβ,
-    ∃ t₂', t₂ = toPretangleStep α ihs γ iγ t₂' := by
-  letI : Level := ⟨α⟩
-  letI iγ' : LtLevel γ := ⟨hγβ.trans_le iβ.elim⟩
+      TSet β) :
+    letI : Level := ⟨α⟩
+    letI : FOAData := buildStepFOAData α ihs
+    ∀ t₂ ∈ Pretangle.ofCoe (toPretangle t₁) γ hγβ, ∃ t₂', t₂ = toPretangle t₂' := by
   by_cases hβ : β = α
   · cases hβ
-    rw [toPretangleStep_eq]
-    simp_rw [toPretangleStep_lt' α ihs γ hγβ]
     intro t₂ ht₂
-    simp_rw [NewTangle.toPretangle, Semitangle.toPretangle] at ht₂
-    simp only [Pretangle.ofCoe_symm, exists_and_right, Pretangle.ofCoe_toCoe, mem_setOf_eq] at ht₂
-    obtain ⟨t₂', _, ht₂⟩ := ht₂
-    exact ⟨(foaData_tangle_lt'_equiv α ihs γ iγ'.elim).symm t₂', ht₂.symm⟩
-  · intro t₂ ht₂
+    erw [foaData_tSet_eq_equiv_toPretangle α ihs t₁] at ht₂
+    simp only [NewTSet.toPretangle, Semitangle.toPretangle, Pretangle.ofCoe_symm, exists_and_right,
+      Pretangle.ofCoe_toCoe, mem_setOf_eq] at ht₂
+    obtain ⟨s, _, rfl⟩ := ht₂
+    have := foaData_tSet_lt_equiv_toPretangle α ihs γ (coe_lt_coe.mp hγβ)
+      ((foaData_tSet_lt_equiv α ihs γ (coe_lt_coe.mp hγβ)).symm s)
+    rw [Equiv.apply_symm_apply] at this
+    exact ⟨(foaData_tSet_lt_equiv α ihs γ (coe_lt_coe.mp hγβ)).symm s, this.symm⟩
+  · letI : Level := ⟨α⟩
     have hβ' := lt_of_le_of_ne (coe_le_coe.mp iβ.elim) hβ
-    have hγ' := coe_lt_coe.mp iγ'.elim
+    have hγ' := coe_lt_coe.mp (hγβ.trans_le iβ.elim)
+    intro t₂ ht₂
     have := (h β hβ').eq_toPretangle_of_mem γ (coe_lt_coe.mp hγβ)
-        (foaData_tangle_lt'_equiv α ihs β (coe_lt_coe.mpr hβ') t₁) t₂ ?_
-    · obtain ⟨t₂', ht₂'⟩ := this
-      refine ⟨(foaData_tangle_lt'_equiv α ihs γ iγ'.elim).symm t₂', ?_⟩
-      rw [ht₂', toPretangleStep_lt' α ihs γ iγ'.elim,
-        toPretangleStepLt_coe α ihs γ (coe_lt_coe.mp iγ'.elim),
-        foaData_tangle_lt'_equiv_eq_lt_equiv α ihs γ (coe_lt_coe.mp iγ'.elim)]
-      erw [Equiv.apply_symm_apply]
-    · rw [foaData_tangle_lt'_equiv_eq_lt_equiv α ihs β hβ']
-      rw [toPretangleStep_lt' α ihs β (coe_lt_coe.mpr hβ'),
-        toPretangleStepLt_coe α ihs β hβ'] at ht₂
+        (foaData_tSet_lt_equiv α ihs β hβ' t₁) t₂ ?_
+    · obtain ⟨t₂', rfl⟩ := this
+      refine ⟨(foaData_tSet_lt_equiv α ihs γ hγ').symm t₂', ?_⟩
+      rw [foaData_tSet_lt_equiv_toPretangle α ihs γ hγ', Equiv.apply_symm_apply]
+    · rw [foaData_tSet_lt_equiv_toPretangle α ihs β hβ'] at ht₂
       exact ht₂
 
 theorem toPretangle_ext_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
     (β : Λ) (γ : Λ)
-    [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
+    [iβ : letI : Level := ⟨α⟩; LeLevel β] [letI : Level := ⟨α⟩; LeLevel γ]
     (hγβ : (γ : TypeIndex) < β)
     (t₁ t₂ :
       letI : Level := ⟨α⟩
       letI : FOAData := buildStepFOAData α ihs
-      Tangle β) :
-    (∀ t : Pretangle γ, t ∈ Pretangle.ofCoe (toPretangleStep α ihs β iβ t₁) γ hγβ ↔
-      t ∈ Pretangle.ofCoe (toPretangleStep α ihs β iβ t₂) γ hγβ) →
-    toPretangleStep α ihs β iβ t₁ = toPretangleStep α ihs β iβ t₂ := by
+      TSet β) :
+    letI : Level := ⟨α⟩
+    letI : FOAData := buildStepFOAData α ihs
+    (∀ t : Pretangle γ, t ∈ Pretangle.ofCoe (toPretangle t₁) γ hγβ ↔
+      t ∈ Pretangle.ofCoe (toPretangle t₂) γ hγβ) →
+    toPretangle t₁ = toPretangle t₂ := by
   letI : Level := ⟨α⟩
-  letI iγ : LtLevel γ := ⟨hγβ.trans_le iβ.elim⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
-  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
-  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
-  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
   by_cases hβ : β = α
   · cases hβ
     intro ht
-    simp only [NewTangle.toPretangle, toPretangleStep_eq] at ht ⊢
-    have := Semitangle.ext (γ := γ) (foaData_tSet_eq_equiv α ihs t₁).t
-      (foaData_tSet_eq_equiv α ihs t₂).t ?_
-    · rw [this]
-    simp only [Semitangle.toPretangle, Pretangle.ofCoe_symm, exists_and_right,
-      Pretangle.ofCoe_toCoe, mem_setOf_eq] at ht
-    ext s
-    constructor
-    · intro hs
-      obtain ⟨s', hs'⟩ := (ht _).mp ⟨s, hs, rfl⟩
-      rw [toPretangleStepLt_coe α ihs γ (coe_lt_coe.mp iγ.elim),
-        toPretangleStepLt_coe α ihs γ (coe_lt_coe.mp iγ.elim)] at hs'
-      sorry
-    · sorry
-  · intro ht
-    have hβ' := lt_of_le_of_ne (coe_le_coe.mp iβ.elim) hβ
-    simp only [toPretangleStep_lt' α ihs β (coe_lt_coe.mpr hβ'),
-      toPretangleStepLt_coe α ihs β hβ'] at ht ⊢
-    exact (h β hβ').toPretangle_ext γ (coe_lt_coe.mp hγβ) _ _ ht
+    erw [foaData_tSet_eq_equiv_toPretangle α ihs t₁,
+      foaData_tSet_eq_equiv_toPretangle α ihs t₂] at ht ⊢
+    have : LtLevel γ := ⟨hγβ⟩
+    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+    letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+    letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+    have := NewTSet.ext γ (foaData_tSet_eq_equiv α ihs t₁) (foaData_tSet_eq_equiv α ihs t₂) ht
+    rw [EmbeddingLike.apply_eq_iff_eq] at this
+    cases this
+    rfl
+  · have hβ' := lt_of_le_of_ne (coe_le_coe.mp iβ.elim) hβ
+    intro ht
+    simp only [foaData_tSet_lt_equiv_toPretangle α ihs β hβ'] at ht ⊢
+    exact (h β hβ').toPretangle_ext γ (coe_lt_coe.mp hγβ)
+      (foaData_tSet_lt_equiv α ihs β hβ' t₁) (foaData_tSet_lt_equiv α ihs β hβ' t₂) ht
 
 noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
@@ -1456,11 +1355,9 @@ noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β
   letI : Level := ⟨α⟩
   letI : FOAAssumptions := buildStepFOAAssumptions α ihs h
   {
-    eq_toPretangle_of_mem := sorry -- eq_toPretangle_of_mem_step α ihs h
-    toPretangle_ext := sorry -- toPretangle_ext_step α ihs h
-    tangle_ext := sorry
+    eq_toPretangle_of_mem := eq_toPretangle_of_mem_step α ihs h
+    toPretangle_ext := toPretangle_ext_step α ihs h
     singleton := sorry
-    singleton_support := sorry
     singleton_toPretangle := sorry
   }
 
@@ -1471,19 +1368,19 @@ theorem mk_codingFunction_le (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     #(CodingFunction 0) < #μ :=
   sorry
 
-theorem mk_tangle_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+theorem mk_tSet_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     letI : Level := ⟨α⟩
     letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-    #NewTangle = #μ := by
+    #NewTSet = #μ := by
   letI : Level := ⟨α⟩
   letI : CountingAssumptions := buildStepCountingAssumptions α ihs h
   haveI : LeLevel α := ⟨le_rfl⟩
   rw [← foaData_tSet_eq]
-  exact mk_tangle α (mk_codingFunction_le α ihs h)
+  exact mk_tSet α (mk_codingFunction_le α ihs h)
 
 noncomputable def buildStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) : IH α :=
@@ -1502,7 +1399,6 @@ noncomputable def buildStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     pos := sorry
     pos_typedAtom := sorry
     pos_typedNearLitter := sorry
-    toPretangle := sorry
   }
 
 noncomputable def buildStepFn (α : Λ) (ihs : (β : Λ) → β < α → IH β)

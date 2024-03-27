@@ -698,4 +698,22 @@ theorem NewTSet.toPretangle_smul (ρ : NewAllowable) (t : NewTSet) :
     (ρ • t).toPretangle = ρ • t.toPretangle :=
   (t.val.toPretangle_smul ρ).symm
 
+theorem NewTSet.ext (γ : Λ) [iγ : LtLevel γ] (t₁ t₂ : NewTSet)
+    (h : ∀ p, p ∈ Pretangle.ofCoe t₁.toPretangle γ iγ.elim ↔
+      p ∈ Pretangle.ofCoe t₂.toPretangle γ iγ.elim) :
+    t₁ = t₂ := by
+  refine Subtype.ext (Semitangle.ext (γ := γ) t₁ t₂ ?_)
+  simp only [NewTSet.toPretangle, Semitangle.toPretangle, Pretangle.ofCoe_symm, exists_and_right,
+    Pretangle.ofCoe_toCoe] at h
+  ext u
+  constructor
+  · intro hu
+    obtain ⟨v, hv, huv⟩ := (h (toPretangle u)).mp ⟨u, hu, rfl⟩
+    cases toPretangle.injective huv
+    exact hv
+  · intro hu
+    obtain ⟨v, hv, huv⟩ := (h (toPretangle u)).mpr ⟨u, hu, rfl⟩
+    cases toPretangle.injective huv
+    exact hv
+
 end ConNF
