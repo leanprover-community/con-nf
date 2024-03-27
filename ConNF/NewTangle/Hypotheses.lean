@@ -26,6 +26,7 @@ namespace ConNF
 variable [Params.{u}] [Level]
 
 /-- The `TangleData` for each `β < α`. -/
+@[ext]
 class TangleDataLt where
   data : ∀ β : Λ, [LtLevel β] → TangleData β
 
@@ -35,6 +36,7 @@ instance TangleDataLt.toTangleData [TangleDataLt] :
   | (β : Λ), _ => TangleDataLt.data β
 
 /-- The `PositionedTangles` for each `β < α`. -/
+@[ext]
 class PositionedTanglesLt [TangleDataLt] where
   data : ∀ β : Λ, [LtLevel β] → PositionedTangles β
 

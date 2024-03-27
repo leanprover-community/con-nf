@@ -11,9 +11,9 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] {β : Λ} [TangleData β]
 
-structure CodingFunction (β : Λ) [LeLevel β] where
+structure CodingFunction (β : Λ) [TangleData β] where
   decode : Support β →. TSet β
   dom_nonempty : decode.Dom.Nonempty
   supports_decode' (S : Support β) (hS : (decode S).Dom) :
@@ -182,6 +182,8 @@ theorem code_eq_code_iff (S S' : Support β) (t t' : TSet β)
   · rintro ⟨ρ, rfl, rfl⟩
     refine ext (ρ • S) ⟨ρ, rfl⟩ ⟨1, by rw [one_smul]⟩ ?_
     simp only [code_decode, Part.get_some, decode_smul]
+
+variable [BasePositions] [CountingAssumptions] {β : Λ} [LeLevel β]
 
 def Strong (χ : CodingFunction β) : Prop :=
   ∀ S ∈ χ.decode.Dom, S.Strong

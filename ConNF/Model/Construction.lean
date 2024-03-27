@@ -1,5 +1,6 @@
 import ConNF.NewTangle
 import ConNF.Counting
+import ConNF.Model.CountCodingFunction
 
 open Cardinal Function MulAction Set Sum Quiver WithBot
 
@@ -146,84 +147,6 @@ noncomputable def fuzz'Bot {γ : Λ} (ihγ : IH γ) : Atom → Litter :=
   letI := ihγ.positionedTangles
   letI := ihγ.typedObjects
   fuzz (bot_ne_coe (a := γ))
-
-/-- The hypotheses on how `IH` relates to previous `IH`s. -/
-structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
-  canCons (β : Λ) (hβ : β < α) :
-    ∃ f : (ih α le_rfl).Allowable →* (ih β hβ.le).Allowable,
-    ∀ ρ : (ih α le_rfl).Allowable,
-      Tree.comp (Hom.toPath (coe_lt_coe.mpr hβ))
-        ((ih α le_rfl).allowableToStructPerm ρ) =
-        (ih β hβ.le).allowableToStructPerm (f ρ)
-  canConsBot :
-    ∃ f : (ih α le_rfl).Allowable →* NearLitterPerm,
-    ∀ ρ : (ih α le_rfl).Allowable,
-      (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = f ρ
-  pos_lt_pos_atom (t : (ih α le_rfl).Tangle)
-    {A : ExtendedIndex α} {a : Atom}
-    (ht : letI := (ih α le_rfl).tangleData; ⟨A, inl a⟩ ∈ t.support) :
-    letI : Level := ⟨α⟩
-    letI := (ih α le_rfl).tangleData
-    TangleCoe.set t ≠ (ih α le_rfl).typedAtom a →
-    pos a < (ih α le_rfl).pos ((ih α le_rfl).tangleEquiv t)
-  pos_lt_pos_nearLitter (t : (ih α le_rfl).Tangle)
-    {A : ExtendedIndex α} {N : NearLitter}
-    (ht : letI := (ih α le_rfl).tangleData; ⟨A, inr N⟩ ∈ t.support) :
-    letI : Level := ⟨α⟩
-    letI := (ih α le_rfl).tangleData
-    TangleCoe.set t ≠ (ih α le_rfl).typedNearLitter N →
-    pos N < (ih α le_rfl).pos ((ih α le_rfl).tangleEquiv t)
-  smul_fuzz (β : Λ) (hβ : β < α) (γ : Λ) (hγ : γ < α) (hβγ : (β : TypeIndex) ≠ γ)
-    (ρ : (ih α le_rfl).Allowable) (t : (ih β hβ.le).Tangle)
-    (fαβ : (ih α le_rfl).Allowable → (ih β hβ.le).Allowable)
-    (hfαβ : ∀ ρ : (ih α le_rfl).Allowable,
-      Tree.comp (Hom.toPath (coe_lt_coe.mpr hβ)) ((ih α le_rfl).allowableToStructPerm ρ) =
-      (ih β hβ.le).allowableToStructPerm (fαβ ρ)) :
-    (ih α le_rfl).allowableToStructPerm ρ ((Hom.toPath (coe_lt_coe.mpr hγ)).cons (bot_lt_coe _)) •
-      fuzz' (ih β hβ.le) (ih γ hγ.le) hβγ t =
-    fuzz' (ih β hβ.le) (ih γ hγ.le) hβγ (fαβ ρ • t)
-  smul_fuzz_bot (γ : Λ) (hγ : γ < α)
-    (ρ : (ih α le_rfl).Allowable) (t : Atom) :
-    (ih α le_rfl).allowableToStructPerm ρ
-      ((Hom.toPath (coe_lt_coe.mpr hγ)).cons (bot_lt_coe _)) • fuzz'Bot (ih γ hγ.le) t =
-    fuzz'Bot (ih γ hγ.le)
-      ((ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) • t)
-  allowable_of_smulFuzz
-    (ρs : ∀ (β : Λ) (hβ : β < α), (ih β hβ.le).Allowable) (π : NearLitterPerm)
-    (hρs : ∀ (β : Λ) (hβ : β < α) (γ : Λ) (hγ : γ < α) (hβγ : (β : TypeIndex) ≠ γ)
-      (t : (ih β hβ.le).Tangle),
-      (ih γ hγ.le).allowableToStructPerm (ρs γ hγ) (Hom.toPath (bot_lt_coe _)) •
-        fuzz' (ih β hβ.le) (ih γ hγ.le) hβγ t =
-      fuzz' (ih β hβ.le) (ih γ hγ.le) hβγ (ρs β hβ • t))
-    (hπ : ∀ (γ : Λ) (hγ : γ < α) (t : Atom),
-      (ih γ hγ.le).allowableToStructPerm (ρs γ hγ)
-        (Hom.toPath (bot_lt_coe _)) • fuzz'Bot (ih γ hγ.le) t =
-      fuzz'Bot (ih γ hγ.le) (π • t)) :
-    ∃ ρ : (ih α le_rfl).Allowable,
-    (∀ (β : Λ) (hβ : β < α) (fαβ : (ih α le_rfl).Allowable → (ih β hβ.le).Allowable)
-      (_hfαβ : ∀ ρ : (ih α le_rfl).Allowable,
-        Tree.comp (Hom.toPath (coe_lt_coe.mpr hβ)) ((ih α le_rfl).allowableToStructPerm ρ) =
-        (ih β hβ.le).allowableToStructPerm (fαβ ρ)),
-      fαβ ρ = ρs β hβ) ∧
-    (∀ (fα : (ih α le_rfl).Allowable → NearLitterPerm)
-      (_hfα : ∀ ρ : (ih α le_rfl).Allowable,
-        (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = fα ρ),
-      fα ρ = π)
-  eq_toPretangle_of_mem (β : Λ) (hβ : β < α) (t₁ : (ih α le_rfl).TSet) (t₂ : Pretangle β) :
-    t₂ ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₁) β (coe_lt_coe.mpr hβ) →
-    ∃ t₂' : (ih β hβ.le).TSet, t₂ = (ih β hβ.le).toPretangle t₂'
-  toPretangle_ext (β : Λ) (hβ : β < α) (t₁ t₂ : (ih α le_rfl).TSet) :
-    (∀ t : Pretangle β,
-      t ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₁) β (coe_lt_coe.mpr hβ) ↔
-      t ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₂) β (coe_lt_coe.mpr hβ)) →
-    (ih α le_rfl).toPretangle t₁ = (ih α le_rfl).toPretangle t₂
-  /-- It's useful to keep this `Prop`-valued, because then there is no data in `IH` that
-  crosses levels. -/
-  has_singletons (β : Λ) (hβ : β < α) :
-    ∃ S : (ih β hβ.le).TSet → (ih α le_rfl).TSet,
-    ∀ t : (ih β hβ.le).TSet,
-      Pretangle.ofCoe ((ih α le_rfl).toPretangle (S t)) β (coe_lt_coe.mpr hβ) =
-      {(ih β hβ.le).toPretangle t}
 
 def tangleDataStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) : TangleData α :=
   letI : Level := ⟨α⟩
@@ -868,6 +791,85 @@ theorem foaData_tangle_lt'_equiv_fuzz (α : Λ) (ihs : (β : Λ) → β < α →
 
 -- TODO: Add `support` and `smul` lemmas.
 
+/-- The hypotheses on how `IH` relates to previous `IH`s. -/
+structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
+  canCons (β : Λ) (hβ : β < α) :
+    ∃ f : (ih α le_rfl).Allowable →* (ih β hβ.le).Allowable,
+    ∀ ρ : (ih α le_rfl).Allowable,
+      Tree.comp (Hom.toPath (coe_lt_coe.mpr hβ))
+        ((ih α le_rfl).allowableToStructPerm ρ) =
+        (ih β hβ.le).allowableToStructPerm (f ρ)
+  canConsBot :
+    ∃ f : (ih α le_rfl).Allowable →* NearLitterPerm,
+    ∀ ρ : (ih α le_rfl).Allowable,
+      (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = f ρ
+  pos_lt_pos_atom (t : (ih α le_rfl).Tangle)
+    {A : ExtendedIndex α} {a : Atom}
+    (ht : letI := (ih α le_rfl).tangleData; ⟨A, inl a⟩ ∈ t.support) :
+    letI : Level := ⟨α⟩
+    letI := (ih α le_rfl).tangleData
+    TangleCoe.set t ≠ (ih α le_rfl).typedAtom a →
+    pos a < (ih α le_rfl).pos ((ih α le_rfl).tangleEquiv t)
+  pos_lt_pos_nearLitter (t : (ih α le_rfl).Tangle)
+    {A : ExtendedIndex α} {N : NearLitter}
+    (ht : letI := (ih α le_rfl).tangleData; ⟨A, inr N⟩ ∈ t.support) :
+    letI : Level := ⟨α⟩
+    letI := (ih α le_rfl).tangleData
+    TangleCoe.set t ≠ (ih α le_rfl).typedNearLitter N →
+    pos N < (ih α le_rfl).pos ((ih α le_rfl).tangleEquiv t)
+  smul_fuzz (β : Λ) (hβ : β < α) (γ : Λ) (hγ : γ < α) (hβγ : (β : TypeIndex) ≠ γ)
+    (ρ : (ih α le_rfl).Allowable) (t : (ih β hβ.le).Tangle)
+    (fαβ : (ih α le_rfl).Allowable → (ih β hβ.le).Allowable)
+    (hfαβ : ∀ ρ : (ih α le_rfl).Allowable,
+      Tree.comp (Hom.toPath (coe_lt_coe.mpr hβ)) ((ih α le_rfl).allowableToStructPerm ρ) =
+      (ih β hβ.le).allowableToStructPerm (fαβ ρ)) :
+    (ih α le_rfl).allowableToStructPerm ρ ((Hom.toPath (coe_lt_coe.mpr hγ)).cons (bot_lt_coe _)) •
+      fuzz' (ih β hβ.le) (ih γ hγ.le) hβγ t =
+    fuzz' (ih β hβ.le) (ih γ hγ.le) hβγ (fαβ ρ • t)
+  smul_fuzz_bot (γ : Λ) (hγ : γ < α)
+    (ρ : (ih α le_rfl).Allowable) (t : Atom) :
+    (ih α le_rfl).allowableToStructPerm ρ
+      ((Hom.toPath (coe_lt_coe.mpr hγ)).cons (bot_lt_coe _)) • fuzz'Bot (ih γ hγ.le) t =
+    fuzz'Bot (ih γ hγ.le)
+      ((ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) • t)
+  allowable_of_smulFuzz
+    (ρs : ∀ (β : Λ) (hβ : β < α), (ih β hβ.le).Allowable) (π : NearLitterPerm)
+    (hρs : ∀ (β : Λ) (hβ : β < α) (γ : Λ) (hγ : γ < α) (hβγ : (β : TypeIndex) ≠ γ)
+      (t : (ih β hβ.le).Tangle),
+      (ih γ hγ.le).allowableToStructPerm (ρs γ hγ) (Hom.toPath (bot_lt_coe _)) •
+        fuzz' (ih β hβ.le) (ih γ hγ.le) hβγ t =
+      fuzz' (ih β hβ.le) (ih γ hγ.le) hβγ (ρs β hβ • t))
+    (hπ : ∀ (γ : Λ) (hγ : γ < α) (t : Atom),
+      (ih γ hγ.le).allowableToStructPerm (ρs γ hγ)
+        (Hom.toPath (bot_lt_coe _)) • fuzz'Bot (ih γ hγ.le) t =
+      fuzz'Bot (ih γ hγ.le) (π • t)) :
+    ∃ ρ : (ih α le_rfl).Allowable,
+    (∀ (β : Λ) (hβ : β < α) (fαβ : (ih α le_rfl).Allowable → (ih β hβ.le).Allowable)
+      (_hfαβ : ∀ ρ : (ih α le_rfl).Allowable,
+        Tree.comp (Hom.toPath (coe_lt_coe.mpr hβ)) ((ih α le_rfl).allowableToStructPerm ρ) =
+        (ih β hβ.le).allowableToStructPerm (fαβ ρ)),
+      fαβ ρ = ρs β hβ) ∧
+    (∀ (fα : (ih α le_rfl).Allowable → NearLitterPerm)
+      (_hfα : ∀ ρ : (ih α le_rfl).Allowable,
+        (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = fα ρ),
+      fα ρ = π)
+  eq_toPretangle_of_mem (β : Λ) (hβ : β < α) (t₁ : (ih α le_rfl).TSet) (t₂ : Pretangle β) :
+    t₂ ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₁) β (coe_lt_coe.mpr hβ) →
+    ∃ t₂' : (ih β hβ.le).TSet, t₂ = (ih β hβ.le).toPretangle t₂'
+  toPretangle_ext (β : Λ) (hβ : β < α) (t₁ t₂ : (ih α le_rfl).TSet) :
+    (∀ t : Pretangle β,
+      t ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₁) β (coe_lt_coe.mpr hβ) ↔
+      t ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₂) β (coe_lt_coe.mpr hβ)) →
+    (ih α le_rfl).toPretangle t₁ = (ih α le_rfl).toPretangle t₂
+  /-- It's useful to keep this `Prop`-valued, because then there is no data in `IH` that
+  crosses levels. -/
+  has_singletons (β : Λ) (hβ : β < α) :
+    ∃ S : (ih β hβ.le).TSet → (ih α le_rfl).TSet,
+    ∀ t : (ih β hβ.le).TSet,
+      Pretangle.ofCoe ((ih α le_rfl).toPretangle (S t)) β (coe_lt_coe.mpr hβ) =
+      {(ih β hβ.le).toPretangle t}
+  step_zero : zeroTangleData = (ih 0 (Params.Λ_zero_le α)).tangleData
+
 def newAllowableCons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (γ : TypeIndex) [letI : Level := ⟨α⟩; LeLevel γ] (hγ : γ < α) :
     letI : Level := ⟨α⟩
@@ -1436,12 +1438,26 @@ noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β
       singleton_step_spec α ihs h β (coe_le_coe.mp iβ.elim) γ (coe_lt_coe.mp hγβ)
   }
 
+theorem zeroTangleData_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
+    zeroTangleData = tangleDataStepFn α ihs 0 (Params.Λ_zero_le α) := by
+  letI : Level := ⟨α⟩
+  by_cases hz : α = 0
+  · cases hz
+    rw [tangleDataStepFn_eq 0 ihs, zeroTangleData, tangleDataStep]
+    exact zeroTangleData_subsingleton _ _ _ _ _ _ _
+      (fun β hβ => ((Params.Λ_zero_le β).not_lt (coe_lt_coe.mp hβ.elim)).elim)
+  · have hz := lt_of_le_of_ne (Params.Λ_zero_le α) (Ne.symm hz)
+    rw [(h 0 hz).step_zero, tangleDataStepFn_lt α ihs 0 hz]
+
 theorem mk_codingFunction_le (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     letI : Level := ⟨α⟩
     letI : CountingAssumptions := buildStepCountingAssumptions α ihs h
-    #(CodingFunction 0) < #μ :=
-  sorry
+    #(CodingFunction 0) < #μ := by
+  convert mk_codingFunction_zero_le
+  rw [zeroTangleData_eq α ihs h]
+  rfl
 
 theorem mk_tSet_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
