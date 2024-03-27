@@ -28,8 +28,10 @@ class CountingAssumptions extends FOAAssumptions where
       t ∈ Pretangle.ofCoe (toPretangle t₁) γ h ↔ t ∈ Pretangle.ofCoe (toPretangle t₂) γ h) →
     toPretangle t₁ = toPretangle t₂
   /-- Any `γ`-tangle can be treated as a singleton at level `β` if `γ < β`. -/
-  singleton (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : TSet γ) : TSet β
-  singleton_toPretangle (β : Λ) [LeLevel β] (γ : TypeIndex) [LeLevel γ] (h : γ < β) (t : TSet γ) :
+  singleton (β : Λ) [LeLevel β] (γ : Λ) [LeLevel γ]
+    (h : (γ : TypeIndex) < β) (t : TSet γ) : TSet β
+  singleton_toPretangle (β : Λ) [LeLevel β] (γ : Λ) [LeLevel γ]
+    (h : (γ : TypeIndex) < β) (t : TSet γ) :
     Pretangle.ofCoe (toPretangle (singleton β γ h t)) γ h = {toPretangle t}
 
 export CountingAssumptions (eq_toPretangle_of_mem toPretangle_ext

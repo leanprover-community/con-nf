@@ -1348,6 +1348,49 @@ theorem toPretangle_ext_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     exact (h β hβ').toPretangle_ext γ (coe_lt_coe.mp hγβ)
       (foaData_tSet_lt_equiv α ihs β hβ' t₁) (foaData_tSet_lt_equiv α ihs β hβ' t₂) ht
 
+theorem has_singletons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) (hβ : β ≤ α) (γ : Λ) (hγβ : γ < β) :
+    letI : Level := ⟨α⟩
+    letI : FOAData := buildStepFOAData α ihs
+    letI : LeLevel β := ⟨coe_le_coe.mpr hβ⟩
+    letI : LeLevel γ := ⟨coe_le_coe.mpr (hγβ.le.trans hβ)⟩
+    ∃ S : TSet γ → TSet β,
+    ∀ t : TSet γ, Pretangle.ofCoe (toPretangle (S t)) γ (coe_lt_coe.mpr hγβ) = {toPretangle t} := by
+  by_cases hβ' : β = α
+  · sorry
+  · have hβ' := lt_of_le_of_ne hβ hβ'
+    have hγ' := hγβ.trans hβ'
+    obtain ⟨S, hS⟩ := (h β hβ').has_singletons γ hγβ
+    refine ⟨fun t => (foaData_tSet_lt_equiv α ihs β hβ').symm
+      (S (foaData_tSet_lt_equiv α ihs γ hγ' t)), ?_⟩
+    intro t
+    rw [foaData_tSet_lt_equiv_toPretangle α ihs β hβ', Equiv.apply_symm_apply,
+      foaData_tSet_lt_equiv_toPretangle α ihs γ hγ']
+    exact hS _
+
+noncomputable def singleton_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) (hβ : β ≤ α) (γ : Λ) (hγβ : γ < β) :
+    letI : Level := ⟨α⟩
+    letI : FOAData := buildStepFOAData α ihs
+    letI : LeLevel β := ⟨coe_le_coe.mpr hβ⟩
+    letI : LeLevel γ := ⟨coe_le_coe.mpr (hγβ.le.trans hβ)⟩
+    TSet γ → TSet β :=
+  (has_singletons α ihs h β hβ γ hγβ).choose
+
+theorem singleton_step_spec (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) (hβ : β ≤ α) (γ : Λ) (hγβ : γ < β) :
+    letI : Level := ⟨α⟩
+    letI : FOAData := buildStepFOAData α ihs
+    letI : LeLevel β := ⟨coe_le_coe.mpr hβ⟩
+    letI : LeLevel γ := ⟨coe_le_coe.mpr (hγβ.le.trans hβ)⟩
+    ∀ t : TSet γ,
+      Pretangle.ofCoe (toPretangle (singleton_step α ihs h β hβ γ hγβ t)) γ (coe_lt_coe.mpr hγβ) =
+      {toPretangle t} :=
+  (has_singletons α ihs h β hβ γ hγβ).choose_spec
+
 noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     letI : Level := ⟨α⟩
@@ -1357,8 +1400,10 @@ noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β
   {
     eq_toPretangle_of_mem := eq_toPretangle_of_mem_step α ihs h
     toPretangle_ext := toPretangle_ext_step α ihs h
-    singleton := sorry
-    singleton_toPretangle := sorry
+    singleton := fun β iβ γ _ hγβ =>
+      singleton_step α ihs h β (coe_le_coe.mp iβ.elim) γ (coe_lt_coe.mp hγβ)
+    singleton_toPretangle := fun β iβ γ _ hγβ =>
+      singleton_step_spec α ihs h β (coe_le_coe.mp iβ.elim) γ (coe_lt_coe.mp hγβ)
   }
 
 theorem mk_codingFunction_le (α : Λ) (ihs : (β : Λ) → β < α → IH β)
