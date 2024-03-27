@@ -40,6 +40,7 @@ class TangleData (α : TypeIndex) where
   (Allowable : Type u)
   [allowableGroup : Group Allowable]
   allowableToStructPerm : Allowable →* StructPerm α
+  allowableToStructPerm_injective : Function.Injective allowableToStructPerm
   [allowableAction : MulAction Allowable TSet]
   has_support (t : TSet) : ∃ S : Support α,
     letI : MulAction Allowable (Address α) :=
@@ -63,6 +64,10 @@ variable {α : TypeIndex} [TangleData α] {X : Type _} [MulAction (StructPerm α
 This map can be thought of as an inclusion that preserves the group structure. -/
 def toStructPerm : Allowable α →* StructPerm α :=
   TangleData.allowableToStructPerm
+
+theorem toStructPerm_injective (α : TypeIndex) [TangleData α] :
+    Function.Injective (toStructPerm : Allowable α → StructPerm α) :=
+  TangleData.allowableToStructPerm_injective
 
 /-- Allowable permutations act on anything that structural permutations do. -/
 instance : MulAction (Allowable α) X :=
@@ -141,6 +146,7 @@ instance Bot.tangleData : TangleData ⊥
   TSet := Atom
   Allowable := NearLitterPerm
   allowableToStructPerm := Tree.toBotIso.toMonoidHom
+  allowableToStructPerm_injective := MulEquiv.injective _
   allowableAction := inferInstance
   has_support a := ⟨a.support, a.support_supports⟩
   toPretangle := Pretangle.ofBot.toEmbedding

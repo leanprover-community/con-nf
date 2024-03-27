@@ -59,6 +59,17 @@ def Tangle.set_lt [TangleDataLt] : {β : TypeIndex} → [LtLevel β] → Tangle 
   | (β : Λ), _, t => TangleCoe.set t
   | ⊥, _i, a => a
 
+theorem Tangle.set_lt_smul [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β]
+    (ρ : Allowable β) (t : Tangle β) :
+    (ρ • t).set_lt = ρ • t.set_lt := by
+  revert i iβ
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro _ _ ρ t
+    rfl
+  · intro β _ _ ρ t
+    rfl
+
 theorem exists_tangle_lt [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β] (t : TSet β) :
     ∃ u : Tangle β, u.set_lt = t := by
   revert i iβ
@@ -86,5 +97,21 @@ theorem Tangle.smul_set_lt [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β
   revert i iβ
   change (_ : _) → _
   refine WithBot.recBotCoe ?_ ?_ β <;> intros <;> rfl
+
+theorem Tangle.support_supports_lt [i : TangleDataLt] {β : TypeIndex}
+    [iβ : LtLevel β] (t : Tangle β) :
+    MulAction.Supports (Allowable β) (t.support : Set (Address β)) t := by
+  revert i iβ t
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro _ _ t ρ h
+    simp only [support, Atom.support_carrier, Set.mem_singleton_iff, Allowable.smul_address_eq_iff,
+      forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
+    exact h
+  · intro β _ _ t ρ h
+    refine TangleCoe.ext _ _ (TangleCoe.support_supports t ρ h) ?_
+    refine Enumeration.ext' rfl ?_
+    intro i hi _
+    exact h ⟨i, hi, rfl⟩
 
 end ConNF

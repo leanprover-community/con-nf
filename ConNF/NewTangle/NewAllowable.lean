@@ -167,6 +167,20 @@ theorem toStructPerm_congr (ρ : SemiallowablePerm) {β₁ β₂ : TypeIndex} [L
   cases eq_of_heq hA
   rfl
 
+theorem toStructPerm'_injective : Function.Injective toStructPerm' := by
+  intro ρ₁ ρ₂ hρ
+  funext β iβ
+  refine Allowable.toStructPerm_injective β ?_
+  funext A
+  have hβ : (β : TypeIndex) < α := iβ.elim
+  have := congr_fun hρ ((Quiver.Hom.toPath hβ).comp A)
+  simp only [toStructPerm',
+    toStructPerm_congr _ (pathTop_toPath_comp hβ A) (pathTail_comp _ _)] at this
+  exact this
+
+theorem toStructPerm_injective : Function.Injective toStructPerm :=
+  toStructPerm'_injective
+
 theorem comp_toPath_toStructPerm
     (ρ : SemiallowablePerm) (β : TypeIndex) [i : LtLevel β] :
     Tree.comp (Quiver.Hom.toPath i.elim) (toStructPerm ρ) = Allowable.toStructPerm (ρ β) := by
@@ -351,6 +365,12 @@ def coeHom : NewAllowable →* SemiallowablePerm
 /-- Turn an allowable permutation into a structural permutation. -/
 def toStructPerm : NewAllowable →* StructPerm α :=
   SemiallowablePerm.toStructPerm.comp coeHom
+
+theorem toStructPerm_injective : Function.Injective toStructPerm := by
+  intro ρ₁ ρ₂ hρ
+  have := SemiallowablePerm.toStructPerm_injective hρ
+  simp only [coeHom_apply, Subtype.coe_inj] at this
+  exact this
 
 theorem comp_toPath_toStructPerm
     (ρ : NewAllowable) (β : TypeIndex) [i : LtLevel β] :

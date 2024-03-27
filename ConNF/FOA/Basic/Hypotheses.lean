@@ -71,7 +71,7 @@ theorem Tangle.coe_support [FOAData] (β : Λ) [LeLevel β] (t : Tangle β) :
     t.support = TangleCoe.support t :=
   rfl
 
-def support_supports [d : FOAData] {β : TypeIndex} [i : LeLevel β] (t : Tangle β) :
+theorem support_supports [d : FOAData] {β : TypeIndex} [i : LeLevel β] (t : Tangle β) :
     MulAction.Supports (Allowable β) (t.support : Set (Address β)) t := by
   revert d i t
   change (_ : _) → _

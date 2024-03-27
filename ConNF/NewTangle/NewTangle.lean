@@ -639,6 +639,26 @@ theorem newTypedNearLitter_injective : Function.Injective newTypedNearLitter := 
   simp only [singleton_eq_singleton_iff] at this
   exact NearLitter.ext this
 
+def newSingleton' (β : TypeIndex) [i : LtLevel β] (t : Tangle β) : NewTSet :=
+  ⟨intro {t.set_lt} (isEven_singleton t.set_lt),
+    t.support.image (fun c => ⟨(Quiver.Hom.toPath i.elim).comp c.1, c.2⟩),
+    by
+      intro ρ h
+      simp only [smul_intro, smul_set_singleton]
+      congr 1
+      rw [singleton_eq_singleton_iff]
+      have := Tangle.support_supports_lt t (ρ.val β) ?_
+      · refine Eq.trans ?_ (congr_arg Tangle.set_lt this)
+        rw [Tangle.set_lt_smul]
+      · rintro _ ⟨i, hi, rfl⟩
+        have := h ⟨i, hi, rfl⟩
+        simp only [Enumeration.image_f, NewAllowable.smul_address_eq_iff] at this
+        rw [Allowable.smul_address_eq_iff, ← SemiallowablePerm.comp_toPath_toStructPerm]
+        exact this⟩
+
+noncomputable def newSingleton (β : TypeIndex) [LtLevel β] (t : TSet β) : NewTSet :=
+  newSingleton' β (exists_tangle_lt t).choose
+
 namespace NewAllowable
 
 /-- Allowable permutations act on `α`-tangles. -/
@@ -715,5 +735,34 @@ theorem NewTSet.ext (γ : Λ) [iγ : LtLevel γ] (t₁ t₂ : NewTSet)
     obtain ⟨v, hv, huv⟩ := (h (toPretangle u)).mpr ⟨u, hu, rfl⟩
     cases toPretangle.injective huv
     exact hv
+
+theorem NewTSet.newSingleton'_toPretangle
+    (β : TypeIndex) [i : LtLevel β] (t : Tangle β) :
+    Pretangle.ofCoe (NewTSet.toPretangle (newSingleton' β t)) β i.elim =
+    {toPretangle t.set_lt} := by
+  rw [newSingleton', NewTSet.toPretangle, Semitangle.toPretangle]
+  simp only [Pretangle.ofCoe_symm, exts_intro, exists_and_right, Pretangle.ofCoe_toCoe]
+  cases β
+  · dsimp only
+    ext p : 1
+    constructor
+    · rintro ⟨s, ⟨hs₁, hs₂⟩, hps⟩
+      simp only [intro, Preference.base.injEq] at hs₂
+      cases hs₂
+      cases hps
+      rfl
+    · rintro rfl
+      refine ⟨{p}, ⟨?_, rfl⟩, rfl⟩
+      intro γ _
+      rw [extension_ne]
+      rfl
+  · simp only [extension_self, mem_singleton_iff, exists_eq_left, setOf_eq_eq_singleton',
+      singleton_eq_singleton_iff]
+    rfl
+
+theorem NewTSet.newSingleton_toPretangle
+    (β : TypeIndex) [i : LtLevel β] (t : TSet β) :
+    Pretangle.ofCoe (NewTSet.toPretangle (newSingleton β t)) β i.elim = {toPretangle t} := by
+  rw [newSingleton, newSingleton'_toPretangle, (exists_tangle_lt t).choose_spec]
 
 end ConNF

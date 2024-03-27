@@ -66,6 +66,7 @@ def IH.tangleData {α : Λ} (ih : IH α) : TangleData α where
   TSet := ih.TSet
   Allowable := ih.Allowable
   allowableToStructPerm := ih.allowableToStructPerm
+  allowableToStructPerm_injective := ih.allowableToStructPerm_injective
   has_support := ih.has_support
   toPretangle := ih.toPretangle
   toPretangle_smul := ih.toPretangle_smul
@@ -233,6 +234,7 @@ def tangleDataStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) : TangleDat
     TSet := NewTSet
     Allowable := NewAllowable
     allowableToStructPerm := NewAllowable.toStructPerm
+    allowableToStructPerm_injective := NewAllowable.toStructPerm_injective
     has_support := by
       intro t
       obtain ⟨S, hS⟩ := t.prop
@@ -540,6 +542,17 @@ theorem foaData_tSet_lt_equiv_toPretangle (α : Λ) (ihs : (β : Λ) → β < α
     (letI : FOAData := buildStepFOAData α ihs
     toPretangle t) =
     (ihs β hβ).toPretangle (foaData_tSet_lt_equiv α ihs β hβ t) :=
+  tangleData_cast_toPretangle β _ _ (tangleDataStepFn_lt α ihs β hβ) t
+
+@[simp]
+theorem foaData_tSet_lt_equiv_toPretangle' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : Λ) (hβ : β < α) (t) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
+    (letI : FOAData := buildStepFOAData α ihs
+    toPretangle t) =
+    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    toPretangle (foaData_tSet_lt_equiv α ihs β hβ t)) :=
   tangleData_cast_toPretangle β _ _ (tangleDataStepFn_lt α ihs β hβ) t
 
 theorem foaData_allowable_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : Λ) (hβ : β < α) :
@@ -1358,7 +1371,23 @@ theorem has_singletons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     ∃ S : TSet γ → TSet β,
     ∀ t : TSet γ, Pretangle.ofCoe (toPretangle (S t)) γ (coe_lt_coe.mpr hγβ) = {toPretangle t} := by
   by_cases hβ' : β = α
-  · sorry
+  · cases hβ'
+    letI : Level := ⟨α⟩
+    have : LtLevel γ := ⟨coe_lt_coe.mpr hγβ⟩
+    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+    letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+    letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+    refine ⟨(foaData_tSet_eq_equiv α ihs).symm ∘
+      newSingleton γ ∘ foaData_tSet_lt_equiv α ihs γ hγβ, ?_⟩
+    intro t
+    have := NewTSet.newSingleton_toPretangle γ (foaData_tSet_lt_equiv α ihs γ hγβ t)
+    rw [foaData_tSet_lt_equiv_toPretangle' α ihs γ hγβ, ← this]
+    have := foaData_tSet_eq_equiv_toPretangle α ihs
+      ((foaData_tSet_eq_equiv α ihs).symm (newSingleton γ (foaData_tSet_lt_equiv α ihs γ hγβ t)))
+    rw [Equiv.apply_symm_apply] at this
+    rw [← this]
+    rfl
   · have hβ' := lt_of_le_of_ne hβ hβ'
     have hγ' := hγβ.trans hβ'
     obtain ⟨S, hS⟩ := (h β hβ').has_singletons γ hγβ
@@ -1440,7 +1469,6 @@ noncomputable def buildStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   {
     __ := tangleDataStep α ihs
     __ := typedObjectsStep α ihs
-    allowableToStructPerm_injective := sorry
     pos := sorry
     pos_typedAtom := sorry
     pos_typedNearLitter := sorry
