@@ -11,6 +11,7 @@ namespace ConNF.Construction
 
 variable [Params.{u}] [BasePositions]
 
+@[ext]
 structure Tang (α : Λ) (TSet : Type u) (Allowable : Type u)
     [Group Allowable] [MulAction Allowable TSet] [MulAction Allowable (Address α)] where
   set : TSet
@@ -1456,6 +1457,75 @@ theorem mk_tSet_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   rw [← foaData_tSet_eq]
   exact mk_tSet α (mk_codingFunction_le α ihs h)
 
+noncomputable def posStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
+    letI : Level := ⟨α⟩
+    letI := tangleDataStep α ihs
+    Tang α (TSet α) (Allowable α) → μ :=
+  letI : Level := ⟨α⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+  fun t => NewTangle.pos (mk_tSet_step α ihs h) (t.set, t.support)
+
+theorem posStep_injective (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
+    letI : Level := ⟨α⟩
+    letI := tangleDataStep α ihs
+    Function.Injective (posStep α ihs h) := by
+  letI : Level := ⟨α⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+  intro t₁ t₂ ht
+  have := NewTangle.pos_injective (mk_tSet_step α ihs h) ht
+  simp only [Prod.mk.injEq] at this
+  exact Tang.ext _ _ this.1 this.2
+
+theorem posStep_typedAtom (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
+    letI : Level := ⟨α⟩
+    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+    letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+    letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+    letI := tangleDataStep α ihs
+    ∀ (a : Atom) (t : Tang α (TSet α) (Allowable α)),
+    t.set = newTypedAtom a → pos a ≤ posStep α ihs h t := by
+  letI : Level := ⟨α⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+  intro a t ha
+  have := NewTangle.pos_not_mem_deny (mk_tSet_step α ihs h) (t.set, t.support)
+  contrapose! this
+  refine ⟨pos a, ?_, this.le⟩
+  exact Or.inl (Or.inr ⟨a, ha, rfl⟩)
+
+theorem posStep_typedNearLitter (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
+    letI : Level := ⟨α⟩
+    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+    letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+    letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+    letI := tangleDataStep α ihs
+    ∀ (N : NearLitter) (t : Tang α (TSet α) (Allowable α)),
+    t.set = newTypedNearLitter N → pos N ≤ posStep α ihs h t := by
+  letI : Level := ⟨α⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+  intro N t hN
+  have := NewTangle.pos_not_mem_deny (mk_tSet_step α ihs h) (t.set, t.support)
+  contrapose! this
+  refine ⟨pos N, ?_, this.le⟩
+  exact Or.inr ⟨N, hN, rfl⟩
+
 noncomputable def buildStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) : IH α :=
   letI : Level := ⟨α⟩
@@ -1469,9 +1539,9 @@ noncomputable def buildStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   {
     __ := tangleDataStep α ihs
     __ := typedObjectsStep α ihs
-    pos := sorry
-    pos_typedAtom := sorry
-    pos_typedNearLitter := sorry
+    pos := ⟨posStep α ihs h, posStep_injective α ihs h⟩
+    pos_typedAtom := posStep_typedAtom α ihs h
+    pos_typedNearLitter := posStep_typedNearLitter α ihs h
   }
 
 noncomputable def buildStepFn (α : Λ) (ihs : (β : Λ) → β < α → IH β)
