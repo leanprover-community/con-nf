@@ -329,44 +329,7 @@ theorem bot_bot_iff {s t} : (mk ⊥ s : Code) ≡ mk ⊥ t ↔ s = t := by
   · rintro rfl
     rfl
 
-theorem singleton (hβγ : β ≠ γ) (g : Tangle β) :
-    mk β {g} ≡ mk γ (typedNearLitter '' localCardinal (fuzz hβγ g)) := by
-  convert Equiv.cloud_right (mk β {g}) (isEven_singleton _) _ hβγ
-  aesop
-
-theorem singleton_iff {g} :
-    c ≡ mk β {g} ↔
-    c = mk β {g} ∨ ∃ γ : Λ, ∃ _ : LtLevel γ,
-      (c.1 : TypeIndex) = (γ : Λ) ∧ β ≠ γ ∧ c = cloudCode γ (mk β {g}) := by
-  classical
-  refine ⟨fun h => ?_, ?_⟩
-  · rw [equiv_iff] at h
-    simp only [isEven_singleton, ne_eq, exists_and_left, true_and] at h
-    obtain rfl | ⟨γ, hβγ, _, _, rfl⟩ | ⟨_, γ, γne, _, h⟩ | ⟨d, -, γ, _, _, δ, δne, _, _, h⟩ :=
-      h
-    · exact Or.inl rfl
-    · simp only [Subtype.coe_mk, SetCoe.exists, exists_and_left]
-      exact Or.inr ⟨_, rfl, hβγ, inferInstance, rfl⟩
-    · cases congr_arg Code.β h
-      cases cloudCode_ne_singleton γne h.symm
-    · cases congr_arg Code.β h
-      cases cloudCode_ne_singleton δne h.symm
-  · rintro (rfl | ⟨γ, _, hc, hβγ, rfl⟩)
-    · rfl
-    · convert (singleton hβγ g).symm
-      simp only [cloudCode, ne_eq, extension_ne _ _ hβγ, cloud_singleton]
-
 end Equiv
-
-theorem extension_eq_of_singleton_equiv_singleton {γ : TypeIndex} [LtLevel γ]
-    {a : Tangle β} {b : Tangle γ}
-    (h : (⟨β, {a}⟩ : Code) ≡ ⟨γ, {b}⟩) : β = γ := by
-  obtain h | ⟨ε, _, hc, hβε, hA⟩ := Equiv.singleton_iff.1 h
-  · exact ((Code.ext_iff _ _).1 h).1
-  · exfalso
-    refine cloudCode_ne_singleton ?_ hA.symm
-    cases congr_arg Code.β hA
-    exact hβε
 
 theorem IsEven.unique : ∀ {c d : Code}, c.IsEven → d.IsEven → c ≡ d → c = d
   | c, _, _, _, Equiv.refl _ => rfl

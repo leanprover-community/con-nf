@@ -43,44 +43,36 @@ open Code
 
 section Cloud
 
-variable {γ : TypeIndex} [LtLevel γ] [TangleData γ] [PositionedTangles γ]
-  {β : Λ} [LtLevel β] [TangleData β] [PositionedTangles β] [TypedObjects β] [PositionedObjects β]
+variable [TangleDataLt] [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjectsLt]
+  {γ : TypeIndex} [LtLevel γ] {β : Λ} [LtLevel β]
   (hγβ : γ ≠ β)
+
+-- TODO: Remove `localCardinal`
 
 /-- The cloud map. We map each tangle to all typed near-litters near the `fuzz`ed tangle, and take
 the union over all tangles in the input. -/
-def cloud (s : Set (Tangle γ)) : Set (Tangle β) :=
-  typedNearLitter '' ⋃ t ∈ s, localCardinal (fuzz hγβ t)
+def cloud (s : Set (TSet γ)) : Set (TSet β) :=
+  {u | ∃ t : Tangle γ, t.set_lt ∈ s ∧
+    ∃ N : NearLitter,  N.1 = fuzz hγβ t ∧ u = typedNearLitter N}
 
 variable {hγβ}
 
 @[simp]
-theorem mem_cloud {t : Tangle β} {s : Set (Tangle γ)} :
-    t ∈ cloud hγβ s ↔
-      ∃ t' ∈ s, ∃ (N : NearLitter), N.1 = fuzz hγβ t' ∧ t = typedNearLitter N := by
-  simp only [cloud, mem_image, mem_iUnion, mem_localCardinal, exists_prop]
-  constructor
-  · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
-    exact ⟨t, ht₁, N, ht₂, rfl⟩
-  · rintro ⟨t, ht₁, N, ht₂, rfl⟩
-    exact ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
+theorem cloud_empty : cloud hγβ (∅ : Set (TSet γ)) = ∅ := by
+  simp only [cloud, mem_empty_iff_false, false_and, exists_false, setOf_false]
 
 @[simp]
-theorem cloud_empty : cloud hγβ (∅ : Set (Tangle γ)) = ∅ := by
-  simp only [cloud, mem_empty_iff_false, iUnion_of_empty, iUnion_empty, image_empty]
+theorem cloud_singleton (t : TSet γ) :
+    cloud hγβ {t} = {u | ∃ t' : Tangle γ, t'.set_lt = t ∧
+      ∃ N : NearLitter,  N.1 = fuzz hγβ t' ∧ u = typedNearLitter N} := by
+  simp only [cloud, mem_singleton_iff, exists_eq_left]
 
-@[simp]
-theorem cloud_singleton (t : Tangle γ) :
-    cloud hγβ {t} = typedNearLitter '' localCardinal (fuzz hγβ t) := by
-  simp only [cloud, mem_singleton_iff, iUnion_iUnion_eq_left]
-
-variable {s : Set (Tangle γ)} {t : Tangle γ}
+variable {s : Set (TSet γ)} {t : TSet γ}
 
 theorem _root_.Set.Nonempty.cloud (h : s.Nonempty) : (cloud hγβ s).Nonempty := by
-  refine (nonempty_iUnion.2 ?_).image _
-  refine ⟨h.choose, ⟨(fuzz hγβ h.choose).toNearLitter, ?_⟩⟩
-  simp only [mem_iUnion, mem_localCardinal, Litter.toNearLitter_fst, exists_prop, and_true]
-  exact h.choose_spec
+  obtain ⟨u, hu⟩ := h
+  obtain ⟨u, rfl⟩ := exists_tangle_lt u
+  exact ⟨_, u, hu, (fuzz hγβ u).toNearLitter, rfl, rfl⟩
 
 @[simp]
 theorem cloud_eq_empty (hγβ : γ ≠ β) : cloud hγβ s = ∅ ↔ s = ∅ := by
@@ -92,29 +84,49 @@ theorem cloud_eq_empty (hγβ : γ ≠ β) : cloud hγβ s = ∅ ↔ s = ∅ := 
 theorem cloud_nonempty (hγβ : γ ≠ β) : (cloud hγβ s).Nonempty ↔ s.Nonempty := by
   simp_rw [nonempty_iff_ne_empty, Ne.def, cloud_eq_empty]
 
-theorem subset_cloud (ht : t ∈ s) :
-    typedNearLitter '' localCardinal (fuzz hγβ t) ⊆ cloud hγβ s :=
-  image_subset _ <| subset_iUnion₂ (s := fun t' _ => localCardinal (fuzz hγβ t')) t ht
+theorem subset_cloud (t : Tangle γ) (ht : t.set_lt ∈ s) :
+    typedNearLitter '' localCardinal (fuzz hγβ t) ⊆ cloud hγβ s := by
+  rintro _ ⟨N, hN, rfl⟩
+  exact ⟨t, ht, N, hN, rfl⟩
 
 theorem μ_le_mk_cloud : s.Nonempty → #μ ≤ #(cloud hγβ s) := by
   rintro ⟨t, ht⟩
-  refine' (Cardinal.mk_le_mk_of_subset <| subset_cloud ht).trans_eq' _
+  obtain ⟨t, rfl⟩ := exists_tangle_lt t
+  refine' (Cardinal.mk_le_mk_of_subset <| subset_cloud t ht).trans_eq' _
   rw [Cardinal.mk_image_eq, mk_localCardinal]
   exact typedNearLitter.inj'
 
-theorem cloud_injective : Injective (cloud hγβ) :=
-  typedNearLitter.injective.image_injective.comp <|
-    Pairwise.biUnion_injective (fun _ _ h => localCardinal_disjoint <| (fuzz_injective _).ne h)
-      fun _ => localCardinal_nonempty _
+theorem subset_of_cloud_subset (s₁ s₂ : Set (TSet γ)) (h : cloud hγβ s₁ ⊆ cloud hγβ s₂) :
+    s₁ ⊆ s₂ := by
+  contrapose h
+  rw [not_subset] at h ⊢
+  obtain ⟨t, h₁, h₂⟩ := h
+  obtain ⟨t, rfl⟩ := exists_tangle_lt t
+  refine ⟨typedNearLitter (fuzz hγβ t).toNearLitter, ?_, ?_⟩
+  · refine ⟨t, h₁, _, by exact rfl, rfl⟩
+  · contrapose! h₂
+    obtain ⟨u, hu, N, hN₁, hN₂⟩ := h₂
+    cases typedNearLitter.injective hN₂
+    cases fuzz_injective hγβ hN₁
+    exact hu
 
-variable {δ : TypeIndex} [LtLevel δ] [TangleData δ] [PositionedTangles δ]
+theorem cloud_injective : Injective (cloud hγβ) := by
+  intro s₁ s₂ h
+  refine subset_antisymm ?_ ?_
+  exact subset_of_cloud_subset s₁ s₂ (subset_of_eq h)
+  exact subset_of_cloud_subset s₂ s₁ (subset_of_eq h.symm)
 
-theorem cloud_disjoint_range {hδβ} (c : Set (Tangle γ)) (d : Set (Tangle δ)) (hc : c.Nonempty)
+variable {δ : TypeIndex} [LtLevel δ]
+
+theorem cloud_disjoint_range {hδβ} (c : Set (TSet γ)) (d : Set (TSet δ)) (hc : c.Nonempty)
     (h : cloud hγβ c = cloud hδβ d) : γ = δ := by
   obtain ⟨b, hb⟩ := hc
-  have := (subset_iUnion₂ b hb).trans (typedNearLitter.injective.image_injective h).subset
-  obtain ⟨i, -, hi⟩ := mem_iUnion₂.1 (this (fuzz _ b).toNearLitter_mem_localCardinal)
-  exact fuzz_congr_β hi
+  obtain ⟨b, rfl⟩ := exists_tangle_lt b
+  have := (Set.ext_iff.mp h (typedNearLitter (fuzz hγβ b).toNearLitter)).mp
+    ⟨b, hb, _, by exact rfl, rfl⟩
+  obtain ⟨b', _, N, hN₁, hN₂⟩ := this
+  cases typedNearLitter.injective hN₂
+  exact fuzz_congr_β hN₁
 
 /-!
 We don't need to prove that the ranges of the `cloud` maps are disjoint for different `β`, since
@@ -138,12 +150,23 @@ theorem minTangle_le (s : Set (Tangle γ)) (hs : s.Nonempty) {t : Tangle γ} (ht
     pos (minTangle s hs) ≤ pos t :=
   not_lt.1 <| wellFounded_pos.not_lt_min s hs ht
 
-theorem minTangle_lt_minTangle_cloud (s : Set (Tangle γ)) (hs : s.Nonempty) :
-    pos (minTangle s hs) < pos (minTangle (cloud hγβ s) hs.cloud) := by
-  obtain ⟨t, ht, N, hN, h⟩ := mem_cloud.1 (minTangle_mem (cloud hγβ s) hs.cloud)
-  refine (minTangle_le s hs ht).trans_lt ?_
-  rw [h, pos_typedNearLitter]
-  exact pos_lt_pos_fuzz_nearLitter hγβ t _ hN
+theorem set_invImage_nonempty (s : Set (TSet γ)) (hs : s.Nonempty) :
+    (Tangle.set_lt ⁻¹' s).Nonempty := by
+  obtain ⟨t, ht⟩ := hs
+  obtain ⟨t, rfl⟩ := exists_tangle_lt t
+  exact ⟨t, ht⟩
+
+noncomputable def minTSet (s : Set (TSet γ)) (hs : s.Nonempty) : Tangle γ :=
+  minTangle (Tangle.set_lt ⁻¹' s) (set_invImage_nonempty s hs)
+
+theorem minTSet_lt_minTSet_cloud (s : Set (TSet γ)) (hs : s.Nonempty) :
+    pos (minTSet s hs) < pos (minTSet (cloud hγβ s) hs.cloud) := by
+  obtain ⟨t, ht, N, hN, h⟩ := minTangle_mem (Tangle.set_lt ⁻¹' cloud hγβ s)
+    (set_invImage_nonempty _ hs.cloud)
+  have := pos_typedNearLitter N
+    (minTangle (Tangle.set_lt ⁻¹' cloud hγβ s) (set_invImage_nonempty _ hs.cloud)) h
+  refine lt_of_le_of_lt (minTangle_le _ _ ht) ?_
+  exact (pos_lt_pos_fuzz_nearLitter hγβ t _ hN).trans_le this
 
 end Cloud
 
@@ -154,7 +177,7 @@ variable [TangleDataLt] [PositionedTanglesLt]
 /-- Tool that lets us use well-founded recursion on codes via `μ`.
 This maps a nonempty code to the least pos of a tangle in the extension of the code. -/
 noncomputable def codeMinMap (c : NonemptyCode) : μ :=
-  pos <| minTangle _ c.prop
+  pos <| minTSet _ c.prop
 
 /-- The pullback `<` relation on codes is well-founded. -/
 theorem invImage_codeMinMap_wf : WellFounded (InvImage (· < ·) (codeMinMap : NonemptyCode → μ)) :=
@@ -166,14 +189,14 @@ variable [TypedObjectsLt] {β : TypeIndex} [LtLevel β]
 
 /-- The `cloud` map, phrased as a function on sets of `γ`-tangles, but if `γ = β`, this is the
 identity function. -/
-def extension (s : Set (Tangle β)) (γ : Λ) [LtLevel γ] : Set (Tangle γ) :=
+def extension (s : Set (TSet β)) (γ : Λ) [LtLevel γ] : Set (TSet γ) :=
   if hβγ : β = γ then cast (by subst hβγ; rfl) s else cloud hβγ s
 
 @[simp]
-theorem extension_self {γ : Λ} [LtLevel γ] (s : Set (Tangle γ)) : extension s γ = s :=
+theorem extension_self {γ : Λ} [LtLevel γ] (s : Set (TSet γ)) : extension s γ = s :=
   dif_pos rfl
 
-variable (s : Set (Tangle β)) (γ : Λ) [LtLevel γ]
+variable (s : Set (TSet β)) (γ : Λ) [LtLevel γ]
 
 @[simp]
 theorem extension_eq (hβγ : β = γ) : extension s γ = cast (by subst hβγ; rfl) s :=
@@ -258,10 +281,9 @@ theorem codeMinMap_lt_codeMinMap_cloudCode (c : NonemptyCode) (hcβ : c.1.1 ≠ 
     codeMinMap c < codeMinMap ⟨cloudCode β c, cloudCode_nonempty.mpr c.2⟩ := by
   unfold codeMinMap
   have := cloudCode_ne β c hcβ
-  convert minTangle_lt_minTangle_cloud c.1.members c.2 using 1
+  convert minTSet_lt_minTSet_cloud c.1.members c.2 using 1
   congr
   exact snd_cloudCode β c hcβ
-  infer_instance
 
 /-- This relation on `α`-codes allows us to state that there are only finitely many iterated images
 under the inverse `cloud` map. Note that we require the map to actually change the data, by

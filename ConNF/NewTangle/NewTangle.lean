@@ -34,7 +34,7 @@ variable [Params.{u}] [Level] [BasePositions] [TangleDataLt]
 open Code
 
 abbrev Extensions :=
-  ∀ β : Λ, [LtLevel β] → Set (Tangle β)
+  ∀ β : Λ, [LtLevel β] → Set (TSet β)
 
 @[ext]
 theorem Extensions.ext {e₁ e₂ : Extensions} (h : ∀ β : Λ, [LtLevel β] → e₁ β = e₂ β) : e₁ = e₂ :=
@@ -269,7 +269,7 @@ theorem ext_zero (t₁ t₂ : Semitangle) (α_zero : IsMin α) (h : t₁.pref.at
   cases α_zero.not_lt (show β < α from WithBot.coe_lt_coe.mp LtLevel.elim)
 
 /-- Construct a semitangle from an even code. -/
-def intro {β : TypeIndex} [inst : LtLevel β] (s : Set (Tangle β))
+def intro {β : TypeIndex} [inst : LtLevel β] (s : Set (TSet β))
     (heven : (Code.mk β s).IsEven) : Semitangle :=
   ⟨extension s,
     match β, inst, s, heven with
@@ -285,7 +285,7 @@ def intro {β : TypeIndex} [inst : LtLevel β] (s : Set (Tangle β))
           exact congr_arg _ (extension_self s)⟩
 
 @[simp]
-theorem exts_intro (s : Set (Tangle β)) (heven : IsEven (Code.mk β s)) :
+theorem exts_intro (s : Set (TSet β)) (heven : IsEven (Code.mk β s)) :
     (intro s heven).members = extension s :=
   rfl
 
@@ -304,7 +304,7 @@ We now establish that allowable permutations can act on semitangles.
 variable {ρ : NewAllowable} {e : Extensions}
 
 @[simp]
-theorem smul_extension_apply (ρ : NewAllowable) (s : Set (Tangle β)) :
+theorem smul_extension_apply (ρ : NewAllowable) (s : Set (TSet β)) :
     ρ.val γ • extension s γ = extension (ρ.val β • s) γ := by
   by_cases h : β = γ
   · subst h
@@ -324,14 +324,14 @@ instance : MulAction SemiallowablePerm Extensions
     simp only [SemiallowablePerm.mul_apply, mul_smul]
 
 @[simp]
-theorem smul_extension (ρ : NewAllowable) (s : Set (Tangle β)) :
+theorem smul_extension (ρ : NewAllowable) (s : Set (TSet β)) :
     ρ • extension s = extension (ρ.val β • s) := by
   ext γ : 2
   rw [← smul_extension_apply]
   rfl
 
-theorem smul_aux₁ {s : Set (Tangle ⊥)}
-    (h : ∀ γ : Λ, [LtLevel γ] → cloud bot_ne_coe s = (e γ : Set (Tangle γ))) (γ : Λ) [LtLevel γ] :
+theorem smul_aux₁ {s : Set (TSet ⊥)}
+    (h : ∀ γ : Λ, [LtLevel γ] → cloud bot_ne_coe s = (e γ : Set (TSet γ))) (γ : Λ) [LtLevel γ] :
     cloud bot_ne_coe (ρ.val ⊥ • s) = (ρ • e) γ := by
   have := congr_arg (fun c => ρ.val γ • c) (h γ)
   dsimp only at this
@@ -340,7 +340,7 @@ theorem smul_aux₁ {s : Set (Tangle ⊥)}
 
 theorem smul_aux₂
     (h : ∀ (δ : Λ) [LtLevel δ] (hγδ : (γ : TypeIndex) ≠ δ),
-      cloud hγδ (e γ) = (e δ : Set (Tangle δ)))
+      cloud hγδ (e γ) = (e δ : Set (TSet δ)))
     (δ : Λ) [LtLevel δ] (hγδ : (γ : TypeIndex) ≠ δ) : cloud hγδ ((ρ • e) γ) = (ρ • e) δ := by
   have := congr_arg (fun c => ρ.val δ • c) (h δ hγδ)
   dsimp only at this
@@ -429,7 +429,7 @@ theorem Code.Equiv.supported_iff (hcd : c ≡ d) :
   · exact ⟨S, hcd.symm.supports hS⟩
 
 @[simp]
-theorem smul_intro {β : TypeIndex} [inst : LtLevel β]  (ρ : NewAllowable) (s : Set (Tangle β)) (hs) :
+theorem smul_intro {β : TypeIndex} [inst : LtLevel β]  (ρ : NewAllowable) (s : Set (TSet β)) (hs) :
     ρ • intro s hs = intro (ρ.val β • s) (isEven_smul.mpr hs) := by
   induction β using WithBot.recBotCoe generalizing inst
   · simp only [intro, NewAllowable.smul_base, Semitangle.mk.injEq, NewAllowable.smul_extension,
@@ -461,7 +461,7 @@ theorem NewAllowable.smul_address_eq_smul_iff
 /-- For any atom `a`, the code `(α, ⊥, a)` is a tangle at level `α`.
 This is called a *typed atom*. -/
 def newTypedAtom (a : Atom) : NewTangle :=
-  ⟨intro (show Set (Tangle ⊥) from {a}) <| Code.isEven_bot _,
+  ⟨intro (show Set (TSet ⊥) from {a}) <| Code.isEven_bot _,
     ⟨1, fun _ _ => ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inl a⟩⟩,
     by
       intro ρ h
@@ -475,7 +475,7 @@ def newTypedAtom (a : Atom) : NewTangle :=
 /-- For any near-litter `N`, the code `(α, ⊥, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
 def newTypedNearLitter (N : NearLitter) : NewTangle :=
-  ⟨intro (show Set (Tangle ⊥) from N.2.1) <| Code.isEven_bot _,
+  ⟨intro (show Set (TSet ⊥) from N.2.1) <| Code.isEven_bot _,
     ⟨1, fun _ _ => ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩⟩,
     by
       intro ρ h

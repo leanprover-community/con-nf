@@ -139,11 +139,11 @@ class FOAAssumptions extends FOAData where
   /-- Inflexible litters whose atoms occur in designated supports have position less than the
   original tangle. -/
   pos_lt_pos_atom {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {a : Atom} :
-    ⟨A, Sum.inl a⟩ ∈ t.support → t ≠ typedAtom a → pos a < pos t
+    ⟨A, Sum.inl a⟩ ∈ t.support → t.set ≠ typedAtom a → pos a < pos t
   /-- Inflexible litters touching near-litters in designated supports have position less than the
   original tangle. -/
   pos_lt_pos_nearLitter {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {N : NearLitter} :
-    ⟨A, Sum.inr N⟩ ∈ t.support → t ≠ typedNearLitter N → pos N < pos t
+    ⟨A, Sum.inr N⟩ ∈ t.support → t.set ≠ typedNearLitter N → pos N < pos t
   /-- The `fuzz` map commutes with allowable permutations. -/
   smul_fuzz {β : TypeIndex} [LeLevel β] {γ : TypeIndex} [LtLevel γ] {δ : Λ} [LtLevel δ]
     (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (ρ : Allowable β) (t : Tangle γ) :

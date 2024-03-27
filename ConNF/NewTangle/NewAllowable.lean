@@ -209,7 +209,7 @@ theorem members_smul : (ρ • c).members = ρ c.1 • c.members :=
   rfl
 
 @[simp]
-theorem smul_mk (f : SemiallowablePerm) (γ : TypeIndex) [LtLevel γ] (s : Set (Tangle γ)) :
+theorem smul_mk (f : SemiallowablePerm) (γ : TypeIndex) [LtLevel γ] (s : Set (TSet γ)) :
     f • (mk γ s : Code) = mk γ (f γ • s) :=
   rfl
 
@@ -372,7 +372,7 @@ end
 
 @[simp]
 theorem smul_typedNearLitter (ρ : NewAllowable) (N : NearLitter) :
-    ρ.val γ • (typedNearLitter N : Tangle (γ : Λ)) =
+    ρ.val γ • (typedNearLitter N : TSet (γ : Λ)) =
     typedNearLitter ((Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
       (Quiver.Hom.toPath (bot_lt_coe _))) • N) :=
   Allowable.smul_typedNearLitter _ _
@@ -386,7 +386,7 @@ theorem members_smul (ρ : NewAllowable) (c : Code) : (ρ • c).members = ρ.va
   rfl
 
 @[simp]
-theorem smul_mk (ρ : NewAllowable) (γ : TypeIndex) [LtLevel γ] (s : Set (Tangle γ)) :
+theorem smul_mk (ρ : NewAllowable) (γ : TypeIndex) [LtLevel γ] (s : Set (TSet γ)) :
     ρ • (mk γ s : Code) = mk γ (ρ.val γ • s) :=
   rfl
 
@@ -396,14 +396,7 @@ namespace NewAllowable
 
 variable {β γ}
 
-/-- Allowable permutations commute with the `cloud` map. -/
-theorem smul_cloud (ρ : NewAllowable) (s : Set (Tangle β)) (hβγ : β ≠ γ) :
-    ρ.val γ • cloud hβγ s = cloud hβγ (ρ.val β • s) := by
-  ext t
-  simp only [cloud, mem_image, mem_iUnion, mem_localCardinal, exists_prop, ← image_smul]
-  simp_rw [exists_exists_and_eq_and]
-  constructor
-  · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
+/-   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
     refine ⟨Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
         (Quiver.Hom.toPath <| bot_lt_coe _) • N, ⟨t, ht₁, ?_⟩, ?_⟩
     · rw [← ρ.prop hβγ, NearLitterPerm.smul_nearLitter_fst, ht₂]
@@ -414,6 +407,36 @@ theorem smul_cloud (ρ : NewAllowable) (s : Set (Tangle β)) (hβγ : β ≠ γ)
     · rw [NearLitterPerm.smul_nearLitter_fst, ht₂, ← ρ.prop hβγ, map_inv,
         Tree.inv_apply, inv_smul_smul]
     · rw [smul_typedNearLitter, map_inv, Tree.inv_apply, smul_inv_smul]
+ -/
+
+/-- Allowable permutations commute with the `cloud` map. -/
+theorem smul_cloud (ρ : NewAllowable) (s : Set (TSet β)) (hβγ : β ≠ γ) :
+    ρ.val γ • cloud hβγ s = cloud hβγ (ρ.val β • s) := by
+  ext t
+  constructor
+  · rintro ⟨_, ⟨t, ht, N, hN, rfl⟩, rfl⟩
+    refine ⟨ρ.val β • t, ?_,
+        Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
+          (Quiver.Hom.toPath (bot_lt_coe _)) • N, ?_, ?_⟩
+    · rw [Tangle.smul_set_lt, smul_mem_smul_set_iff]
+      exact ht
+    · rw [← ρ.prop hβγ, NearLitterPerm.smul_nearLitter_fst, hN]
+    · dsimp only
+      rw [smul_typedNearLitter]
+  · rintro ⟨t, ht, N, hN, rfl⟩
+    refine ⟨typedNearLitter ((Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
+          (Quiver.Hom.toPath (bot_lt_coe _)))⁻¹ • N),
+        ⟨(ρ.val β)⁻¹ • t, ?_, ?_⟩, ?_⟩
+    · rw [Tangle.smul_set_lt, ← mem_smul_set_iff_inv_smul_mem]
+      exact ht
+    · refine ⟨(Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
+        (Quiver.Hom.toPath (bot_lt_coe _)))⁻¹ • N, ?_, rfl⟩
+      refine Eq.trans ?_ (ρ⁻¹.prop hβγ t)
+      simp only [NearLitterPerm.smul_nearLitter_fst, coe_inv, SemiallowablePerm.inv_apply,
+        map_inv, Tree.inv_apply, smul_left_cancel_iff]
+      exact hN
+    · dsimp only
+      rw [smul_typedNearLitter, smul_inv_smul]
 
 /-- Allowable permutations commute with the `cloudCode` map. -/
 theorem smul_cloudCode (ρ : NewAllowable) (hc : c.1 ≠ γ) :

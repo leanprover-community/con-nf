@@ -1,6 +1,5 @@
 import ConNF.NewTangle
 import ConNF.Counting
-import ConNF.Model.PretangleEmbedding
 
 open Cardinal Function MulAction Set Sum Quiver WithBot
 

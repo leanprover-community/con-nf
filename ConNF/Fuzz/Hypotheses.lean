@@ -198,10 +198,10 @@ with the conditions given in `BasePositions`, but this requirement is expressed 
 class TypedObjects where
   /-- Encode an atom as an `α`-tangle. The resulting model element has a `⊥`-extension which
   contains only this atom. -/
-  typedAtom : Atom ↪ Tangle α
+  typedAtom : Atom ↪ TSet α
   /-- Encode a near-litter as an `α`-tangle. The resulting model element has a `⊥`-extension which
   contains only this near-litter. -/
-  typedNearLitter : NearLitter ↪ Tangle α
+  typedNearLitter : NearLitter ↪ TSet α
   smul_typedNearLitter :
     ∀ (ρ : Allowable α) (N : NearLitter),
     ρ • typedNearLitter N =
@@ -239,12 +239,12 @@ theorem lt_pos_symmDiff [BasePositions] (a : Atom) (N : NearLitter) (h : a ∈ l
   BasePositions.lt_pos_symmDiff a N h
 
 class PositionedObjects [BasePositions] [PositionedTangles α] [TypedObjects α] where
-  pos_typedAtom (a : Atom) : pos (typedAtom a : Tangle α) = pos a
-  pos_typedNearLitter (N : NearLitter) : pos (typedNearLitter N : Tangle α) = pos N
+  pos_typedAtom (a : Atom) (t : Tangle α) :
+    t.set = typedAtom a → pos a ≤ pos t
+  pos_typedNearLitter (N : NearLitter) (t : Tangle α) :
+    t.set = typedNearLitter N → pos N ≤ pos t
 
 export PositionedObjects (pos_typedAtom pos_typedNearLitter)
-
-attribute [simp] pos_typedAtom pos_typedNearLitter
 
 namespace Allowable
 
@@ -254,7 +254,7 @@ variable [TypedObjects α]
 /-- The action of allowable permutations on tangles commutes with the `typedNearLitter` function
 mapping near-litters to typed near-litters. This can be seen by representing tangles as codes. -/
 theorem smul_typedNearLitter (ρ : Allowable α) (N : NearLitter) :
-    (ρ • typedNearLitter N : Tangle α) =
+    (ρ • typedNearLitter N : TSet α) =
     typedNearLitter ((Allowable.toStructPerm ρ) (Quiver.Hom.toPath <| bot_lt_coe α) • N) :=
   TypedObjects.smul_typedNearLitter _ _
 
