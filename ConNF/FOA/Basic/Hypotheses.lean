@@ -133,9 +133,6 @@ class FOAAssumptions extends FOAData where
       (hγ : γ < β) (ρ : Allowable β),
       Tree.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm ρ) =
         Allowable.toStructPerm (allowableCons hγ ρ)
-  /-- Designated supports commute with allowable permutations. -/
-  smul_support {β : Λ} [LeLevel β] (t : Tangle β) (ρ : Allowable β) :
-    (ρ • t).support = ρ • t.support
   /-- Inflexible litters whose atoms occur in designated supports have position less than the
   original tangle. -/
   pos_lt_pos_atom {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {a : Atom} :
@@ -160,11 +157,9 @@ class FOAAssumptions extends FOAData where
       ∃ ρ : Allowable β, ∀ (γ : TypeIndex) [LtLevel γ] (hγ : γ < β),
       allowableCons hγ ρ = ρs γ hγ
 
-export FOAAssumptions (allowableCons allowableCons_eq smul_support
+export FOAAssumptions (allowableCons allowableCons_eq
   pos_lt_pos_atom pos_lt_pos_nearLitter
   smul_fuzz allowable_of_smulFuzz)
-
-attribute [simp] smul_support
 
 variable [FOAAssumptions]
 
@@ -259,6 +254,11 @@ theorem Allowable.comp_bot {β : TypeIndex} [LeLevel β] (A : Quiver.Path β ⊥
   ext a : 1
   change NearLitterPerm.ofBot (Allowable.comp A ρ) • a = Allowable.toStructPerm ρ A • a
   simp only [Allowable.toStructPerm_apply]
+
+@[simp]
+theorem smul_support {β : Λ} [LeLevel β] (t : Tangle β) (ρ : Allowable β) :
+    (ρ • t).support = ρ • t.support := by
+  rfl
 
 theorem smul_mem_support {β : Λ} [LtLevel β] {c : Address β} {t : Tangle β}
     (h : c ∈ t.support) (π : Allowable β) : π • c ∈ (π • t).support := by
