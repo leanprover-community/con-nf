@@ -119,7 +119,7 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
       refine ⟨Allowable.comp (P.B.cons P.hδ) ρ, ?_, ?_⟩
       · simp only [Support.before_smul, Support.comp_smul, NearLitterPerm.smul_nearLitter_fst,
           inflexibleCoe_smul_path, inflexibleCoe_smul_t, Tree.inv_apply, ne_eq, eq_mp_eq_cast]
-      · rw [Shell.smul_ofTangle, smul_inv_smul]
+      · rw [← Tangle.smul_set, smul_inv_smul]
     · ext j k
       constructor
       · rintro ⟨hj, hk, a, N', h₁, h₂, h₃, h₄⟩

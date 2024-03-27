@@ -61,6 +61,64 @@ instance : ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
 
 end FOAData
 
+@[simp]
+theorem Tangle.bot_support (t : Tangle ⊥) :
+    t.support = Atom.support t :=
+  rfl
+
+@[simp]
+theorem Tangle.coe_support [FOAData] (β : Λ) [LeLevel β] (t : Tangle β) :
+    t.support = TangleCoe.support t :=
+  rfl
+
+def support_supports [d : FOAData] {β : TypeIndex} [i : LeLevel β] (t : Tangle β) :
+    MulAction.Supports (Allowable β) (t.support : Set (Address β)) t := by
+  revert d i t
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro _ _ t ρ h
+    simp only [Tangle.bot_support, Atom.support_carrier, mem_singleton_iff,
+      Allowable.smul_address_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
+    exact h
+  · intro β _ _ t ρ h
+    refine TangleCoe.ext _ _ (TangleCoe.support_supports t ρ h) ?_
+    refine Enumeration.ext' rfl ?_
+    intro i hi _
+    exact h ⟨i, hi, rfl⟩
+
+def Tangle.set [FOAData] : {β : TypeIndex} → [LeLevel β] → Tangle β → TSet β
+  | (β : Λ), _, t => TangleCoe.set t
+  | ⊥, _, a => a
+
+@[simp]
+theorem Tangle.bot_set [FOAData] (t : Tangle ⊥) :
+    t.set = t :=
+  rfl
+
+@[simp]
+theorem Tangle.coe_set [FOAData] (β : Λ) [LeLevel β] (t : Tangle β) :
+    t.set = TangleCoe.set t :=
+  rfl
+
+@[ext]
+theorem Tangle.ext [d : FOAData] {β : TypeIndex} [i : LeLevel β] (t₁ t₂ : Tangle β)
+    (hs : t₁.set = t₂.set) (hS : t₁.support = t₂.support) : t₁ = t₂ := by
+  revert d i t₁ t₂
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro _ _ t₁ t₂ hs _
+    exact hs
+  · intro β _ _ t₁ t₂ hs hS
+    exact TangleCoe.ext _ _ hs hS
+
+@[simp]
+theorem Tangle.smul_set [d : FOAData] {β : TypeIndex} [i : LeLevel β]
+    (t : Tangle β) (ρ : Allowable β) :
+    (ρ • t).set = ρ • t.set := by
+  revert d i
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β <;> intros <;> rfl
+
 /-- Assumptions detailing how the different levels of the tangled structure interact. -/
 @[ext]
 class FOAAssumptions extends FOAData where

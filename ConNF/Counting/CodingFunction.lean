@@ -1,5 +1,5 @@
 import ConNF.Counting.StrongSupport
-import ConNF.Counting.Shell
+import ConNF.Counting.Twist
 
 /-!
 # Coding functions
@@ -14,7 +14,7 @@ namespace ConNF
 variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β : Λ} [LeLevel β]
 
 structure CodingFunction (β : Λ) [LeLevel β] where
-  decode : Support β →. Shell β
+  decode : Support β →. TSet β
   dom_nonempty : decode.Dom.Nonempty
   supports_decode' (S : Support β) (hS : (decode S).Dom) :
     Supports (Allowable β) (S : Set (Address β)) ((decode S).get hS)
@@ -71,7 +71,7 @@ theorem ext {χ₁ χ₂ : CodingFunction β}
     obtain ⟨ρ, rfl⟩ := h₁'
     rw [χ₁.decode_smul' S ρ h₁ h₁', χ₂.decode_smul' S ρ h₂ h₂', h]
 
-theorem smul_supports {S : Support β} {t : Shell β}
+theorem smul_supports {S : Support β} {t : TSet β}
     (h : Supports (Allowable β) (S : Set (Address β)) t) (ρ : Allowable β) :
     Supports (Allowable β) ((ρ • S : Support β) : Set (Address β)) (ρ • t) := by
   intro ρ' hρ'
@@ -90,7 +90,7 @@ theorem decode_congr {χ : CodingFunction β} {S₁ S₂ : Support β}
   rfl
 
 /-- Produce a coding function for a given ordered support and tangle it supports. -/
-noncomputable def code (S : Support β) (t : Shell β)
+noncomputable def code (S : Support β) (t : TSet β)
     (h : Supports (Allowable β) (S : Set (Address β)) t) :
     CodingFunction β where
   decode T := ⟨∃ ρ : Allowable β, T = ρ • S, fun hT => hT.choose • t⟩
@@ -119,7 +119,7 @@ noncomputable def code (S : Support β) (t : Shell β)
     exact Allowable.smul_eq_of_smul_support_eq this hc
 
 @[simp]
-theorem code_decode (S : Support β) (t : Shell β)
+theorem code_decode (S : Support β) (t : TSet β)
     (h : Supports (Allowable β) (S : Set (Address β)) t) :
     (code S t h).decode S = Part.some t := by
   refine Part.ext' ?_ ?_
@@ -132,13 +132,13 @@ theorem code_decode (S : Support β) (t : Shell β)
     exact Allowable.smul_eq_of_smul_support_eq h'.choose_spec.symm hc
 
 @[simp]
-theorem mem_code_self {S : Support β} {t : Shell β}
+theorem mem_code_self {S : Support β} {t : TSet β}
     {h : Supports (Allowable β) (S : Set (Address β)) t} :
     S ∈ code S t h :=
   ⟨1, by rw [one_smul]⟩
 
 @[simp]
-theorem mem_code {S : Support β} {t : Shell β}
+theorem mem_code {S : Support β} {t : TSet β}
     {h : Supports (Allowable β) (S : Set (Address β)) t} (T : Support β) :
     T ∈ code S t h ↔ ∃ ρ : Allowable β, T = ρ • S :=
   Iff.rfl
@@ -152,7 +152,7 @@ theorem eq_code {χ : CodingFunction β} {S : Support β} (h : S ∈ χ) :
     rw [one_smul]
   · simp only [code_decode, Part.get_some]
 
-theorem code_smul (S : Support β) (t : Shell β) (ρ : Allowable β)
+theorem code_smul (S : Support β) (t : TSet β) (ρ : Allowable β)
     (h₁ : Supports (Allowable β) ((ρ • S : Support β) : Set (Address β)) (ρ • t))
     (h₂ : Supports (Allowable β) (S : Set (Address β)) t) :
     code (ρ • S) (ρ • t) h₁ = code S t h₂ := by
@@ -163,7 +163,7 @@ theorem code_smul (S : Support β) (t : Shell β) (ρ : Allowable β)
   simp only [code_decode, Part.get_some, inv_smul_smul]
 
 @[simp]
-theorem code_eq_code_iff (S S' : Support β) (t t' : Shell β)
+theorem code_eq_code_iff (S S' : Support β) (t t' : TSet β)
     (h : Supports (Allowable β) (S : Set (Address β)) t)
     (h' : Supports (Allowable β) (S' : Set (Address β)) t') :
     code S t h = code S' t' h' ↔ ∃ ρ : Allowable β, S' = ρ • S ∧ t' = ρ • t := by
@@ -193,7 +193,7 @@ theorem strong_of_strong_mem
   exact hS.smul ρ
 
 theorem code_strong
-    (S : Support β) (t : Shell β)
+    (S : Support β) (t : TSet β)
     (ht : Supports (Allowable β) (S : Set (Address β)) t) (hS : S.Strong) :
     (code S t ht).Strong :=
   strong_of_strong_mem _ S hS mem_code_self
