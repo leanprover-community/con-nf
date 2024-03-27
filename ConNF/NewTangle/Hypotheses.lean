@@ -52,4 +52,39 @@ abbrev TypedObjectsLt [TangleDataLt] :=
 abbrev PositionedObjectsLt [BasePositions] [TangleDataLt] [PositionedTanglesLt] [TypedObjectsLt] :=
   ∀ β : Λ, [LtLevel β] → PositionedObjects β
 
+/-! We have to give the following things different names in the two places we define them:
+here, and in the FOA hypothesis file. -/
+
+def Tangle.set_lt [TangleDataLt] : {β : TypeIndex} → [LtLevel β] → Tangle β → TSet β
+  | (β : Λ), _, t => TangleCoe.set t
+  | ⊥, _i, a => a
+
+theorem exists_tangle_lt [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β] (t : TSet β) :
+    ∃ u : Tangle β, u.set_lt = t := by
+  revert i iβ
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro _ _ t
+    exact ⟨t, rfl⟩
+  · intro β _ _ t
+    obtain ⟨S, hS⟩ := t.has_support
+    exact ⟨⟨t, S, hS⟩, rfl⟩
+
+theorem Tangle.ext_lt [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β] (t₁ t₂ : Tangle β)
+    (hs : t₁.set_lt = t₂.set_lt) (hS : t₁.support = t₂.support) : t₁ = t₂ := by
+  revert i iβ t₁ t₂
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro _ _ t₁ t₂ hs _
+    exact hs
+  · intro β _ _ t₁ t₂ hs hS
+    exact TangleCoe.ext _ _ hs hS
+
+theorem Tangle.smul_set_lt [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β]
+    (t : Tangle β) (ρ : Allowable β) :
+    (ρ • t).set_lt = ρ • t.set_lt := by
+  revert i iβ
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β <;> intros <;> rfl
+
 end ConNF

@@ -61,6 +61,64 @@ instance : ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
 
 end FOAData
 
+@[simp]
+theorem Tangle.bot_support (t : Tangle ⊥) :
+    t.support = Atom.support t :=
+  rfl
+
+@[simp]
+theorem Tangle.coe_support [FOAData] (β : Λ) [LeLevel β] (t : Tangle β) :
+    t.support = TangleCoe.support t :=
+  rfl
+
+def support_supports [d : FOAData] {β : TypeIndex} [i : LeLevel β] (t : Tangle β) :
+    MulAction.Supports (Allowable β) (t.support : Set (Address β)) t := by
+  revert d i t
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro _ _ t ρ h
+    simp only [Tangle.bot_support, Atom.support_carrier, mem_singleton_iff,
+      Allowable.smul_address_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
+    exact h
+  · intro β _ _ t ρ h
+    refine TangleCoe.ext _ _ (TangleCoe.support_supports t ρ h) ?_
+    refine Enumeration.ext' rfl ?_
+    intro i hi _
+    exact h ⟨i, hi, rfl⟩
+
+def Tangle.set [FOAData] : {β : TypeIndex} → [LeLevel β] → Tangle β → TSet β
+  | (β : Λ), _, t => TangleCoe.set t
+  | ⊥, _, a => a
+
+@[simp]
+theorem Tangle.bot_set [FOAData] (t : Tangle ⊥) :
+    t.set = t :=
+  rfl
+
+@[simp]
+theorem Tangle.coe_set [FOAData] (β : Λ) [LeLevel β] (t : Tangle β) :
+    t.set = TangleCoe.set t :=
+  rfl
+
+@[ext]
+theorem Tangle.ext [d : FOAData] {β : TypeIndex} [i : LeLevel β] (t₁ t₂ : Tangle β)
+    (hs : t₁.set = t₂.set) (hS : t₁.support = t₂.support) : t₁ = t₂ := by
+  revert d i t₁ t₂
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro _ _ t₁ t₂ hs _
+    exact hs
+  · intro β _ _ t₁ t₂ hs hS
+    exact TangleCoe.ext _ _ hs hS
+
+@[simp]
+theorem Tangle.smul_set [d : FOAData] {β : TypeIndex} [i : LeLevel β]
+    (t : Tangle β) (ρ : Allowable β) :
+    (ρ • t).set = ρ • t.set := by
+  revert d i
+  change (_ : _) → _
+  refine WithBot.recBotCoe ?_ ?_ β <;> intros <;> rfl
+
 /-- Assumptions detailing how the different levels of the tangled structure interact. -/
 @[ext]
 class FOAAssumptions extends FOAData where
@@ -75,17 +133,14 @@ class FOAAssumptions extends FOAData where
       (hγ : γ < β) (ρ : Allowable β),
       Tree.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm ρ) =
         Allowable.toStructPerm (allowableCons hγ ρ)
-  /-- Designated supports commute with allowable permutations. -/
-  smul_support {β : Λ} [LeLevel β] (t : Tangle β) (ρ : Allowable β) :
-    (ρ • t).support = ρ • t.support
   /-- Inflexible litters whose atoms occur in designated supports have position less than the
   original tangle. -/
   pos_lt_pos_atom {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {a : Atom} :
-    ⟨A, Sum.inl a⟩ ∈ t.support → t ≠ typedAtom a → pos a < pos t
+    ⟨A, Sum.inl a⟩ ∈ t.support → t.set ≠ typedAtom a → pos a < pos t
   /-- Inflexible litters touching near-litters in designated supports have position less than the
   original tangle. -/
   pos_lt_pos_nearLitter {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {N : NearLitter} :
-    ⟨A, Sum.inr N⟩ ∈ t.support → t ≠ typedNearLitter N → pos N < pos t
+    ⟨A, Sum.inr N⟩ ∈ t.support → t.set ≠ typedNearLitter N → pos N < pos t
   /-- The `fuzz` map commutes with allowable permutations. -/
   smul_fuzz {β : TypeIndex} [LeLevel β] {γ : TypeIndex} [LtLevel γ] {δ : Λ} [LtLevel δ]
     (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ) (ρ : Allowable β) (t : Tangle γ) :
@@ -102,11 +157,9 @@ class FOAAssumptions extends FOAData where
       ∃ ρ : Allowable β, ∀ (γ : TypeIndex) [LtLevel γ] (hγ : γ < β),
       allowableCons hγ ρ = ρs γ hγ
 
-export FOAAssumptions (allowableCons allowableCons_eq smul_support
+export FOAAssumptions (allowableCons allowableCons_eq
   pos_lt_pos_atom pos_lt_pos_nearLitter
   smul_fuzz allowable_of_smulFuzz)
-
-attribute [simp] smul_support
 
 variable [FOAAssumptions]
 
@@ -201,6 +254,11 @@ theorem Allowable.comp_bot {β : TypeIndex} [LeLevel β] (A : Quiver.Path β ⊥
   ext a : 1
   change NearLitterPerm.ofBot (Allowable.comp A ρ) • a = Allowable.toStructPerm ρ A • a
   simp only [Allowable.toStructPerm_apply]
+
+@[simp]
+theorem smul_support {β : Λ} [LeLevel β] (t : Tangle β) (ρ : Allowable β) :
+    (ρ • t).support = ρ • t.support := by
+  rfl
 
 theorem smul_mem_support {β : Λ} [LtLevel β] {c : Address β} {t : Tangle β}
     (h : c ∈ t.support) (π : Allowable β) : π • c ∈ (π • t).support := by

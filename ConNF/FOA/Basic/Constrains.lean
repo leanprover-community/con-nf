@@ -77,16 +77,12 @@ theorem Constrains.hasPosition_lt {c d : Address β} (h : c ≺ d) :
     have := pos_lt_pos_fuzz_nearLitter hδε t (ConNF.fuzz hδε t).toNearLitter rfl
     obtain ⟨B, a | N⟩ := c
     · simp only [Address.pos_atom, Address.pos_nearLitter]
-      by_cases h : t = typedAtom a
-      · subst h
-        rw [pos_typedAtom] at this
-        exact this
+      by_cases h : t.set = typedAtom a
+      · exact (pos_typedAtom a t h).trans_lt this
       · exact (pos_lt_pos_atom _ hc' h).trans this
     · simp only [Address.pos_nearLitter]
-      by_cases h : t = typedNearLitter N
-      · subst h
-        rw [pos_typedNearLitter] at this
-        exact this
+      by_cases h : t.set = typedNearLitter N
+      · exact (pos_typedNearLitter N t h).trans_lt this
       · exact (pos_lt_pos_nearLitter _ hc' h).trans this
   case fuzzBot γ _ ε _ hε A a =>
     simp only [Address.pos_atom, Address.pos_nearLitter]

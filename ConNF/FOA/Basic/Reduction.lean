@@ -181,11 +181,4 @@ theorem reduction_supports (S : Set (Address β)) (c : Address β) (hc : c ∈ S
     refine' ⟨a, ha, _⟩
     exact h₄ a ha
 
-theorem reduction_support_supports [TangleData β] (t : Tangle β) :
-    Supports (Allowable β) (reduction (t.support : Set (Address β))) t := by
-  intro ρ h
-  refine support_supports t ρ ?_
-  intros c hc'
-  exact reduction_supports t.support c hc' (Allowable.toStructPerm ρ) h
-
 end ConNF

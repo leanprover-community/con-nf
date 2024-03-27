@@ -160,7 +160,7 @@ theorem comp_eq_same {i : κ} (hiS : i < S.max) {γ : Λ} (A : Path (β : TypeIn
 
 theorem support_tangle_ext (hS : S.Strong) {A : ExtendedIndex β} (P : InflexibleCoePath A)
     (t₁ t₂ : Tangle P.δ)
-    (h₁ : Shell.ofTangle t₁ = Shell.ofTangle t₂)
+    (h₁ : t₁.set = t₂.set)
     (h₂ : t₁.support.max = t₂.support.max)
     (h₃ :
       (fun j => {k | ∃ (hj : j < t₁.support.max) (hk : k < S.max),
@@ -172,9 +172,7 @@ theorem support_tangle_ext (hS : S.Strong) {A : ExtendedIndex β} (P : Inflexibl
     {i : κ} (hi₁ : i < S.max) {N : NearLitter}
     (hi₂ : S.f i hi₁ = ⟨A, inr N⟩) (hi₃ : N.1 = fuzz P.hδε t₁) :
     t₁ = t₂ := by
-  suffices : t₁.support = t₂.support
-  · refine tangle_ext P.δ _ _ ?_ this
-    rw [Shell.ofTangle_eq_iff, h₁]
+  refine Tangle.ext _ _ h₁ ?_
   refine Enumeration.ext' h₂ ?_
   intro k hku hku'
   have := hS.precedes hi₁ ⟨(P.B.cons P.hδ).comp (t₁.support.f k hku).1, (t₁.support.f k hku).2⟩ ?_
@@ -244,7 +242,7 @@ theorem convertNearLitter_subsingleton_inflexibleCoe (A : ExtendedIndex β) (NS 
     exact h₇.trans h₈.symm
   have : u = u'
   · refine support_tangle_ext hT P u u' ?_ h₈'' h₉'' hiT₁ hiT₂ hNT
-    rw [h₆, h₆', Shell.smul_ofTangle, this, Shell.smul_ofTangle]
+    rw [h₆, h₆', ← Tangle.smul_set, this, ← Tangle.smul_set]
   cases this
   have hNTT' : NT.fst = NT'.fst
   · rw [hNT, hNT']
@@ -416,7 +414,7 @@ theorem convertAtom_mem_convertLitter_iff {A : ExtendedIndex β}
 theorem support_tangle_ext' (hT : T.Strong)
     {A : ExtendedIndex β} (P : InflexibleCoePath A)
     (t₁ t₂ : Tangle P.δ) (ρ : Allowable P.δ)
-    (h₁ : Shell.ofTangle t₁ = ρ • Shell.ofTangle t₂)
+    (h₁ : t₁.set = ρ • t₂.set)
     (h₂ : t₁.support.max = t₂.support.max)
     (h₃ :
       (fun j => {k | ∃ (hj : j < t₁.support.max) (hk : k < T.max),
@@ -430,8 +428,8 @@ theorem support_tangle_ext' (hT : T.Strong)
     (hi₅ : (T.before i hi₂).comp (P.B.cons P.hδ) = ρ • (S.before i hi₁).comp (P.B.cons P.hδ)) :
     t₁ = ρ • t₂ := by
   suffices : t₁.support = ρ • t₂.support
-  · refine tangle_ext P.δ _ _ ?_ ?_
-    · rw [Shell.ofTangle_eq_iff, ← Shell.smul_ofTangle, h₁]
+  · refine Tangle.ext _ _ ?_ ?_
+    · rw [Tangle.smul_set, h₁]
     · rw [smul_support, this]
   refine Enumeration.ext' h₂ ?_
   intro k hku hku'

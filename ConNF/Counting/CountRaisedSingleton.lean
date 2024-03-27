@@ -16,10 +16,10 @@ namespace ConNF
 variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions]
     {β γ : Λ} [LeLevel β] [LeLevel γ] (hγ : (γ : TypeIndex) < β)
 
-theorem mem_orbit_of_raiseSingleton_eq (S₁ S₂ : Support β) (u₁ u₂ : Shell γ)
+theorem mem_orbit_of_raiseSingleton_eq (S₁ S₂ : Support β) (u₁ u₂ : TSet γ)
     (hS : S₁.max = S₂.max)
-    (hu : CodingFunction.code _ _ (Shell.support_supports u₁) =
-      CodingFunction.code _ _ (Shell.support_supports u₂))
+    (hu : CodingFunction.code _ _ (TangleData.TSet.support_supports u₁) =
+      CodingFunction.code _ _ (TangleData.TSet.support_supports u₂))
     (hSu : SupportOrbit.mk (raisedSupport hγ S₁ u₁) = SupportOrbit.mk (raisedSupport hγ S₂ u₂)) :
     raiseSingleton hγ S₁ u₁ = raiseSingleton hγ S₂ u₂ := by
   rw [CodingFunction.code_eq_code_iff] at hu
@@ -42,13 +42,13 @@ theorem mem_orbit_of_raiseSingleton_eq (S₁ S₂ : Support β) (u₁ u₂ : She
     have := congr_arg Address.value this
     exact this
   refine ⟨ρ₂, hSu.symm, ?_⟩
-  rw [← this, Shell.singleton_smul]
+  rw [← this, singleton_smul]
 
 noncomputable def RaisedSingleton.code (r : RaisedSingleton hγ) :
     κ × SupportOrbit β × CodingFunction γ :=
   (r.prop.choose.max,
     SupportOrbit.mk (raisedSupport hγ r.prop.choose r.prop.choose_spec.choose),
-    CodingFunction.code _ _ (Shell.support_supports r.prop.choose_spec.choose))
+    CodingFunction.code _ _ (TangleData.TSet.support_supports r.prop.choose_spec.choose))
 
 theorem RaisedSingleton.code_injective :
     Function.Injective (RaisedSingleton.code hγ) := by

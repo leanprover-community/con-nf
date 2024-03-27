@@ -11,3 +11,4 @@
 - Remove unnecessary instances of `*_eta` lemmas.
 - Turn `Allowable.comp *` into `*.comp`.
 - Make `Constrains` use `InflexibleBot` etc.
+- Fix the imports of the main lean files (e.g. `Counting.lean`).

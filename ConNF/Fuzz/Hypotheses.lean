@@ -35,24 +35,23 @@ class TangleData (α : TypeIndex) where
   /-- The type of tangles that we assume were constructed at stage `α`.
   Later in the recursion, we will construct this type explicitly, but for now, we will just assume
   that it exists. -/
-  (Tangle : Type u)
+  (TSet : Type u)
   /-- The type of allowable permutations that we assume exists on `α`-tangles. -/
   (Allowable : Type u)
   [allowableGroup : Group Allowable]
   allowableToStructPerm : Allowable →* StructPerm α
-  [allowableAction : MulAction Allowable Tangle]
-  support : Tangle → Support α
-  support_supports (t : Tangle) :
-    haveI : MulAction Allowable (Address α) :=
+  [allowableAction : MulAction Allowable TSet]
+  has_support (t : TSet) : ∃ S : Support α,
+    letI : MulAction Allowable (Address α) :=
       MulAction.compHom _ allowableToStructPerm
-    MulAction.Supports Allowable (support t : Set (Address α)) t
-  toPretangle : Tangle → Pretangle α
-  toPretangle_smul (ρ : Allowable) (t : Tangle) :
-    haveI : MulAction Allowable (Pretangle α) :=
+    MulAction.Supports Allowable (S : Set (Address α)) t
+  toPretangle : TSet ↪ Pretangle α
+  toPretangle_smul (ρ : Allowable) (t : TSet) :
+    letI : MulAction Allowable (Pretangle α) :=
       MulAction.compHom _ allowableToStructPerm
     toPretangle (ρ • t) = ρ • toPretangle t
 
-export TangleData (Tangle Allowable toPretangle toPretangle_smul)
+export TangleData (TSet Allowable toPretangle toPretangle_smul)
 
 attribute [instance] TangleData.allowableGroup TangleData.allowableAction
 
@@ -114,14 +113,73 @@ theorem smul_address_eq_smul_iff :
 
 end Allowable
 
-/-- For each tangle, we provide a small support for it. This is known as the designated support of
-the tangle. -/
-def TangleData.Tangle.support {α : TypeIndex} [TangleData α] (t : Tangle α) : Support α :=
-  TangleData.support t
+theorem TangleData.TSet.has_support {α : TypeIndex} [TangleData α] (t : TSet α) :
+    ∃ S : Support α, MulAction.Supports (Allowable α) (S : Set (Address α)) t :=
+  TangleData.has_support t
 
-theorem support_supports {α : TypeIndex} [TangleData α] (t : Tangle α) :
-    MulAction.Supports (Allowable α) (t.support : Set (Address α)) t :=
-  TangleData.support_supports t
+def Atom.support (a : Atom) : Support ⊥ :=
+  ⟨1, fun _ _ => ⟨Quiver.Path.nil, Sum.inl a⟩⟩
+
+@[simp]
+theorem Atom.support_carrier (a : Atom) :
+    Enumeration.carrier a.support = {⟨Quiver.Path.nil, Sum.inl a⟩} := by
+  ext x : 1
+  simp only [support, Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
+    mem_singleton_iff]
+
+theorem Atom.support_supports (a : Atom) :
+    MulAction.Supports NearLitterPerm (a.support : Set (Address ⊥)) a := by
+  intro ρ h
+  simp only [support_carrier, mem_singleton_iff, NearLitterPerm.smul_address_eq_iff, forall_eq,
+    Sum.smul_inl, Sum.inl.injEq] at h
+  exact h
+
+/-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
+permutations to be near-litter permutations, and the designated supports to be singletons. -/
+instance Bot.tangleData : TangleData ⊥
+    where
+  TSet := Atom
+  Allowable := NearLitterPerm
+  allowableToStructPerm := Tree.toBotIso.toMonoidHom
+  allowableAction := inferInstance
+  has_support a := ⟨a.support, a.support_supports⟩
+  toPretangle := Pretangle.ofBot.toEmbedding
+  toPretangle_smul _ _ := rfl
+
+@[ext]
+structure TangleCoe (α : Λ) [TangleData α] : Type u where
+  set : TSet α
+  support : Support α
+  support_supports : MulAction.Supports (Allowable α) (support : Set (Address α)) set
+
+def Tangle : (α : TypeIndex) → [TangleData α] → Type u
+  | (α : Λ), _ => TangleCoe α
+  | ⊥, _ => Atom
+
+def Tangle.support : {α : TypeIndex} → [TangleData α] → Tangle α → Support α
+  | (α : Λ), _, t => TangleCoe.support t
+  | ⊥, _i, a => Atom.support a
+
+instance (α : Λ) [TangleData α] : MulAction (Allowable α) (TangleCoe α) where
+  smul ρ t := ⟨ρ • t.set, ρ • t.support, by
+      intro ρ' h
+      rw [← inv_smul_eq_iff, smul_smul, smul_smul]
+      refine t.support_supports _ ?_
+      intro a ha
+      rw [mul_smul, mul_smul, inv_smul_eq_iff]
+      refine h ?_
+      rw [Enumeration.smul_carrier, smul_mem_smul_set_iff]
+      exact ha⟩
+  one_smul t := by
+    change ⟨1 • t.set, 1 • t.support, _⟩ = t
+    ext : 1 <;> simp only [one_smul]
+  mul_smul ρ₁ ρ₂ t := by
+    change ⟨_ • t.set, _ • t.support, _⟩ = (⟨_ • _ • t.set, _ • _ • t.support, _⟩ : Tangle α)
+    ext : 1 <;> simp only [mul_smul]
+
+instance : (α : TypeIndex) → [TangleData α] → MulAction (Allowable α) (Tangle α)
+  | (α : Λ), _ => inferInstanceAs (MulAction (Allowable α) (TangleCoe α))
+  | ⊥, _ => inferInstanceAs (MulAction (Allowable ⊥) Atom)
 
 class PositionedTangles (α : TypeIndex) [TangleData α] where
   /-- A position function, giving each tangle a unique position `ν : μ`.
@@ -140,10 +198,10 @@ with the conditions given in `BasePositions`, but this requirement is expressed 
 class TypedObjects where
   /-- Encode an atom as an `α`-tangle. The resulting model element has a `⊥`-extension which
   contains only this atom. -/
-  typedAtom : Atom ↪ Tangle α
+  typedAtom : Atom ↪ TSet α
   /-- Encode a near-litter as an `α`-tangle. The resulting model element has a `⊥`-extension which
   contains only this near-litter. -/
-  typedNearLitter : NearLitter ↪ Tangle α
+  typedNearLitter : NearLitter ↪ TSet α
   smul_typedNearLitter :
     ∀ (ρ : Allowable α) (N : NearLitter),
     ρ • typedNearLitter N =
@@ -180,13 +238,13 @@ theorem lt_pos_symmDiff [BasePositions] (a : Atom) (N : NearLitter) (h : a ∈ l
     pos a < pos N :=
   BasePositions.lt_pos_symmDiff a N h
 
-class PositionedObjects [BasePositions] [PositionedTangles α] [TypedObjects α] where
-  pos_typedAtom (a : Atom) : pos (typedAtom a : Tangle α) = pos a
-  pos_typedNearLitter (N : NearLitter) : pos (typedNearLitter N : Tangle α) = pos N
+class PositionedObjects [BasePositions] [PositionedTangles α] [TypedObjects α] : Prop where
+  pos_typedAtom (a : Atom) (t : Tangle α) :
+    t.set = typedAtom a → pos a ≤ pos t
+  pos_typedNearLitter (N : NearLitter) (t : Tangle α) :
+    t.set = typedNearLitter N → pos N ≤ pos t
 
 export PositionedObjects (pos_typedAtom pos_typedNearLitter)
-
-attribute [simp] pos_typedAtom pos_typedNearLitter
 
 namespace Allowable
 
@@ -196,27 +254,11 @@ variable [TypedObjects α]
 /-- The action of allowable permutations on tangles commutes with the `typedNearLitter` function
 mapping near-litters to typed near-litters. This can be seen by representing tangles as codes. -/
 theorem smul_typedNearLitter (ρ : Allowable α) (N : NearLitter) :
-    (ρ • typedNearLitter N : Tangle α) =
+    (ρ • typedNearLitter N : TSet α) =
     typedNearLitter ((Allowable.toStructPerm ρ) (Quiver.Hom.toPath <| bot_lt_coe α) • N) :=
   TypedObjects.smul_typedNearLitter _ _
 
 end Allowable
-
-/-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
-permutations to be near-litter permutations, and the designated supports to be singletons. -/
-instance Bot.tangleData : TangleData ⊥
-    where
-  Tangle := Atom
-  Allowable := NearLitterPerm
-  allowableToStructPerm := Tree.toBotIso.toMonoidHom
-  allowableAction := inferInstance
-  support a := ⟨1, fun _ _ => ⟨Quiver.Path.nil, Sum.inl a⟩⟩
-  support_supports a π h := by
-    simp only [Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
-      NearLitterPerm.smul_address_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
-    exact h
-  toPretangle := Pretangle.ofBot
-  toPretangle_smul _ _ := rfl
 
 /-- The position function at level `⊥`, taken from the `BasePositions`. -/
 instance Bot.positionedTangles [BasePositions] : PositionedTangles ⊥ :=
