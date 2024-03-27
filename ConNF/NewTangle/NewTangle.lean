@@ -396,14 +396,136 @@ instance mulActionSemitangle : MulAction NewAllowable Semitangle
 
 end NewAllowable
 
+namespace Semitangle
+
+protected def toPretangle (t : Semitangle) : Pretangle α :=
+  Pretangle.ofCoe.symm (fun β hβ => match β with
+    | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ a ∈ s}
+    | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toPretangle s = p})
+
+theorem members_eq_of_toPretangle_eq (t₁ t₂ : Semitangle) (h : t₁.toPretangle = t₂.toPretangle) :
+    t₁.members = t₂.members := by
+  simp only [Semitangle.toPretangle, Pretangle.ofCoe_symm, exists_and_right,
+    EmbeddingLike.apply_eq_iff_eq] at h
+  ext γ iγ u : 2
+  obtain ⟨u, rfl⟩ := exists_tangle_lt u
+  have := Set.ext_iff.mp (congr_fun₂ h γ iγ.elim) (toPretangle u.set_lt)
+  dsimp only at this
+  constructor
+  · intro hu
+    obtain ⟨v, hv, huv⟩ := this.mp ⟨u.set, hu, rfl⟩
+    cases toPretangle.injective huv
+    exact hv
+  · intro hu
+    obtain ⟨v, hv, huv⟩ := this.mpr ⟨u.set, hu, rfl⟩
+    cases toPretangle.injective huv
+    exact hv
+
+theorem toPretangle_injective : Function.Injective Semitangle.toPretangle := by
+  rintro t₁ t₂ h
+  have := members_eq_of_toPretangle_eq t₁ t₂ h
+  by_cases hγ : Nonempty ((γ : Λ) ×' LtLevel γ)
+  · exact ext_core t₁ t₂ hγ this
+  refine ext_zero t₁ t₂ ?_ ?_
+  · intro δ _
+    by_contra! hδ'
+    exact hγ ⟨δ, ⟨coe_lt_coe.mpr hδ'⟩⟩
+  obtain ⟨m, p₁⟩ := t₁
+  obtain ⟨m, p₂⟩ := t₂
+  cases this
+  obtain (⟨a₁, ha₁⟩ | ⟨γ, _⟩) := p₁
+  swap
+  · cases hγ ⟨γ, inferInstance⟩
+  obtain (⟨a₂, ha₂⟩ | ⟨γ, _⟩) := p₂
+  swap
+  · cases hγ ⟨γ, inferInstance⟩
+  simp only [Semitangle.toPretangle, Pretangle.ofCoe_symm, Preference.base.injEq, exists_and_left,
+    exists_prop, exists_eq_left', EmbeddingLike.apply_eq_iff_eq] at h
+  have := congr_fun₂ h ⊥ (bot_lt_coe _)
+  dsimp only at this
+  dsimp only [Preference.atoms]
+  ext a : 1
+  constructor
+  · intro ha
+    refine ((Set.ext_iff.mp this a).mp ⟨?_, ha⟩).2
+    intro γ _
+    cases hγ ⟨γ, inferInstance⟩
+  · intro ha
+    refine ((Set.ext_iff.mp this a).mpr ⟨?_, ha⟩).2
+    intro γ _
+    cases hγ ⟨γ, inferInstance⟩
+
+theorem toPretangle_smul (ρ : NewAllowable) (t : Semitangle) :
+    ρ • t.toPretangle = (ρ • t).toPretangle := by
+  rw [← Pretangle.ofCoe_inj, Semitangle.toPretangle, Semitangle.toPretangle]
+  rw [Equiv.apply_symm_apply]
+  ext β hβ : 2
+  revert hβ
+  refine WithBot.recBotCoe ?_ ?_ β
+  · intro hβ
+    rw [← NewAllowable.coe_smul]
+    erw [StructPerm.ofCoe_smul]
+    rw [Equiv.apply_symm_apply]
+    dsimp only
+    ext a : 1
+    rw [mem_smul_set_iff_inv_smul_mem]
+    constructor
+    · rintro ⟨s, h, hpref, ha⟩
+      refine ⟨Tree.comp (Quiver.Hom.toPath hβ) (SemiallowablePerm.toStructPerm ρ.val) • s,
+          ?_, ?_, ?_⟩
+      · intro γ _
+        have := NewAllowable.smul_cloud (β := ⊥) (γ := γ) ρ s bot_ne_coe
+        rw [h] at this
+        exact this.symm
+      · obtain ⟨exts, pref | pref⟩ := t
+        · cases hpref
+          rfl
+        · cases hpref
+      · rw [mem_smul_set_iff_inv_smul_mem]
+        exact ha
+    · rintro ⟨s, h, hpref, ha⟩
+      refine ⟨(Tree.comp (Quiver.Hom.toPath hβ) (SemiallowablePerm.toStructPerm ρ.val))⁻¹ • s,
+          ?_, ?_, ?_⟩
+      · intro γ _
+        have := NewAllowable.smul_cloud (β := ⊥) (γ := γ) ρ
+          ((Tree.comp (Quiver.Hom.toPath hβ) (SemiallowablePerm.toStructPerm ρ.val))⁻¹ • s)
+          bot_ne_coe
+        rw [SemiallowablePerm.comp_toPath_toStructPerm] at this
+        erw [smul_inv_smul] at this
+        rw [h, NewAllowable.members_smul'] at this
+        erw [smul_left_cancel_iff] at this
+        exact this
+      · obtain ⟨exts, pref | pref⟩ := t
+        · cases hpref
+          simp only [Tree.comp_bot, Tree.toBot_inv_smul, Preference.base.injEq]
+          erw [smul_inv_smul]
+        · cases hpref
+      · simp only [Tree.comp_bot, Tree.toBot_inv_smul, smul_mem_smul_set_iff]
+        exact ha
+  · intro β hβ
+    have : LtLevel β := ⟨hβ⟩
+    rw [← NewAllowable.coe_smul]
+    erw [StructPerm.ofCoe_smul]
+    rw [Equiv.apply_symm_apply]
+    dsimp only
+    ext s : 1
+    constructor
+    · rintro ⟨_, ⟨s, hs, rfl⟩, rfl⟩
+      refine ⟨ρ.val β • s, smul_mem_smul_set hs, ?_⟩
+      rw [ConNF.toPretangle_smul, SemiallowablePerm.comp_toPath_toStructPerm]
+      rfl
+    · rintro ⟨_, ⟨s, hs, rfl⟩, rfl⟩
+      refine ⟨_, ⟨s, hs, rfl⟩, ?_⟩
+      rw [ConNF.toPretangle_smul, SemiallowablePerm.comp_toPath_toStructPerm]
+      rfl
+
+end Semitangle
+
 /-- A tangle at the new level `α` is a semitangle supported by a small support.
 This is `τ_α` in the blueprint.
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
-@[ext]
-structure NewTangle where
-  t : Semitangle
-  S : Support α
-  h : MulAction.Supports NewAllowable (S : Set (Address α)) t
+abbrev NewTSet : Type u :=
+  { t : Semitangle // ∃ S : Support α, MulAction.Supports NewAllowable (S : Set (Address α)) t }
 
 variable {c d : Code} {S : Set (Address α)}
 
@@ -460,7 +582,7 @@ theorem NewAllowable.smul_address_eq_smul_iff
 
 /-- For any atom `a`, the code `(α, ⊥, a)` is a tangle at level `α`.
 This is called a *typed atom*. -/
-def newTypedAtom (a : Atom) : NewTangle :=
+def newTypedAtom (a : Atom) : NewTSet :=
   ⟨intro (show Set (TSet ⊥) from {a}) <| Code.isEven_bot _,
     ⟨1, fun _ _ => ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inl a⟩⟩,
     by
@@ -474,7 +596,7 @@ def newTypedAtom (a : Atom) : NewTangle :=
 
 /-- For any near-litter `N`, the code `(α, ⊥, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
-def newTypedNearLitter (N : NearLitter) : NewTangle :=
+def newTypedNearLitter (N : NearLitter) : NewTSet :=
   ⟨intro (show Set (TSet ⊥) from N.2.1) <| Code.isEven_bot _,
     ⟨1, fun _ _ => ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩⟩,
     by
@@ -490,38 +612,44 @@ def newTypedNearLitter (N : NearLitter) : NewTangle :=
       simp_rw [SemiallowablePerm.coe_apply_bot]
       rfl⟩
 
+theorem preferenceBase_injective {a₁ a₂ : Set Atom}
+    {e₁ e₂ : ∀ (γ : Λ), [LtLevel γ] → Set (TSet γ)} (he : e₁ = e₂)
+    {h₁ : ∀ (γ : Λ), [LtLevel γ] → cloud bot_ne_coe a₁ = e₁ γ}
+    {h₂ : ∀ (γ : Λ), [LtLevel γ] → cloud bot_ne_coe a₂ = e₂ γ}
+    (h : HEq (Preference.base a₁ h₁) (Preference.base a₂ h₂)) : a₁ = a₂ := by
+  cases he
+  simp only [heq_eq_eq, Preference.base.injEq] at h
+  exact h
+
 theorem newTypedAtom_injective : Function.Injective newTypedAtom := by
-  intro N₁ N₂ h
-  simp only [newTypedAtom, intro, NewTangle.mk.injEq, Semitangle.mk.injEq,
-    Enumeration.mk.injEq, heq_eq_eq, true_and] at h
-  cases congr_fun₂ h.2 0 ((κ_lt_one_iff 0).mpr rfl)
-  rfl
+  intro a₁ a₂ h
+  simp only [newTypedAtom, intro] at h
+  rw [Subtype.mk_eq_mk] at h
+  simp only [Semitangle.mk.injEq] at h
+  have := preferenceBase_injective h.1 h.2
+  simp only [singleton_eq_singleton_iff] at this
+  exact this
 
 theorem newTypedNearLitter_injective : Function.Injective newTypedNearLitter := by
   intro N₁ N₂ h
-  simp only [newTypedNearLitter, intro, NewTangle.mk.injEq, Semitangle.mk.injEq,
-    Enumeration.mk.injEq, heq_eq_eq, true_and] at h
-  cases congr_fun₂ h.2 0 ((κ_lt_one_iff 0).mpr rfl)
-  rfl
-
-namespace NewTangle
-
-instance : Coe NewTangle Semitangle
-    where
-  coe := NewTangle.t
-
-end NewTangle
+  simp only [newTypedNearLitter, intro] at h
+  rw [Subtype.mk_eq_mk] at h
+  simp only [Semitangle.mk.injEq] at h
+  have := preferenceBase_injective h.1 h.2
+  simp only [singleton_eq_singleton_iff] at this
+  exact NearLitter.ext this
 
 namespace NewAllowable
 
 /-- Allowable permutations act on `α`-tangles. -/
-instance hasSmulNewTangle : SMul NewAllowable NewTangle :=
+instance hasSmulNewTSet : SMul NewAllowable NewTSet :=
   ⟨fun ρ t =>
-    ⟨ρ • (t : Semitangle), ρ • t.S,
+    ⟨ρ • (t : Semitangle),
       by
-        refine ?_
+        obtain ⟨S, hS⟩ := t.prop
+        refine ⟨ρ • S, ?_⟩
         intro ρ' h
-        have := t.h (ρ⁻¹ * ρ' * ρ) ?_
+        have := hS (ρ⁻¹ * ρ' * ρ) ?_
         · conv_rhs =>
             rw [← this, ← mul_smul, ← mul_assoc, ← mul_assoc, mul_inv_self, one_mul, mul_smul]
         · intro a ha
@@ -529,34 +657,27 @@ instance hasSmulNewTangle : SMul NewAllowable NewTangle :=
           exact h (Enumeration.smul_mem_smul ha ρ)⟩⟩
 
 @[simp]
-theorem coe_smul_newTangle (ρ : NewAllowable) (t : NewTangle) :
+theorem coe_smul_newTangle (ρ : NewAllowable) (t : NewTSet) :
     ((ρ • t) : Semitangle) = ρ • (t : Semitangle) :=
   rfl
 
 @[simp]
-theorem smul_newTangle_t (ρ : NewAllowable) (t : NewTangle) :
-    (ρ • t).t = ρ • t.t :=
+theorem smul_newTangle_t (ρ : NewAllowable) (t : NewTSet) :
+    (ρ • t : NewTSet) = ρ • (t : Semitangle) :=
   rfl
 
-@[simp]
-theorem smul_newTangle_S (ρ : NewAllowable) (t : NewTangle) :
-    (ρ • t).S = ρ • t.S :=
-  rfl
-
-instance mulActionNewTangle : MulAction NewAllowable NewTangle where
+instance mulActionNewTSet : MulAction NewAllowable NewTSet where
   one_smul t := by
-    refine NewTangle.ext _ _ ?_ ?_
-    · simp only [smul_newTangle_t, one_smul]
-    · simp only [smul_newTangle_S, one_smul]
+    refine Subtype.ext ?_
+    simp only [smul_newTangle_t, one_smul]
   mul_smul ρ₁ ρ₂ t := by
-    refine NewTangle.ext _ _ ?_ ?_
-    · simp only [smul_newTangle_t, mul_smul]
-    · simp only [smul_newTangle_S, mul_smul]
+    refine Subtype.ext ?_
+    simp only [smul_newTangle_t, mul_smul]
 
 theorem smul_newTypedNearLitter (N : NearLitter) (ρ : NewAllowable) :
     ρ • newTypedNearLitter N =
       newTypedNearLitter (NewAllowable.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _)) • N) := by
-  refine NewTangle.ext _ _ ?_ rfl
+  refine Subtype.ext ?_
   have := NearLitterPerm.smul_nearLitter_coe
     (NewAllowable.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _))) N
   simp only [newTypedNearLitter, smul_newTangle_t, smul_intro,
@@ -566,5 +687,15 @@ theorem smul_newTypedNearLitter (N : NearLitter) (ρ : NewAllowable) :
   exact this.symm
 
 end NewAllowable
+
+protected def NewTSet.toPretangle (t : NewTSet) : Pretangle α :=
+  t.val.toPretangle
+
+theorem NewTSet.toPretangle_injective : Function.Injective NewTSet.toPretangle :=
+  fun _ _ h => Subtype.ext (Semitangle.toPretangle_injective h)
+
+theorem NewTSet.toPretangle_smul (ρ : NewAllowable) (t : NewTSet) :
+    (ρ • t).toPretangle = ρ • t.toPretangle :=
+  (t.val.toPretangle_smul ρ).symm
 
 end ConNF

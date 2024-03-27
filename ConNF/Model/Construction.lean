@@ -11,60 +11,89 @@ namespace ConNF.Construction
 
 variable [Params.{u}] [BasePositions]
 
-#exit
+structure Tang (α : Λ) (TSet : Type u) (Allowable : Type u)
+    [Group Allowable] [MulAction Allowable TSet] [MulAction Allowable (Address α)] where
+  set : TSet
+  support : Support α
+  support_supports : MulAction.Supports Allowable (support : Set (Address α)) set
 
 /-- The data for the main inductive hypothesis,
 containing the things we need to construct at each level `α`. -/
 structure IH (α : Λ) where
-  Tangle : Type u
+  TSet : Type u
   Allowable : Type u
   [allowableGroup : Group Allowable]
   allowableToStructPerm : Allowable →* StructPerm α
   /-- We make this assumption for convenience, since it makes `IHProp` into a subsingleton,
   and so we can encode it as a `Prop`. -/
   allowableToStructPerm_injective : Function.Injective allowableToStructPerm
-  [allowableAction : MulAction Allowable Tangle]
-  support : Tangle → Support α
-  support_supports (t : Tangle) :
-    haveI : MulAction Allowable (Address α) :=
+  [allowableAction : MulAction Allowable TSet]
+  has_support (t : TSet) : ∃ S: Support α,
+    letI : MulAction Allowable (Address α) :=
       MulAction.compHom _ allowableToStructPerm
-    MulAction.Supports Allowable (support t : Set (Address α)) t
-  pos : Tangle ↪ μ
-  typedAtom : Atom ↪ Tangle
-  typedNearLitter : NearLitter ↪ Tangle
-  pos_typedAtom (a : Atom) : pos (typedAtom a) = ConNF.pos a
-  pos_typedNearLitter (N : NearLitter) : pos (typedNearLitter N) = ConNF.pos N
+    MulAction.Supports Allowable (S : Set (Address α)) t
+  pos :
+    letI : MulAction Allowable (Address α) :=
+      MulAction.compHom _ allowableToStructPerm
+    Tang α TSet Allowable ↪ μ
+  typedAtom : Atom ↪ TSet
+  typedNearLitter : NearLitter ↪ TSet
+  pos_typedAtom :
+    letI : MulAction Allowable (Address α) := MulAction.compHom _ allowableToStructPerm
+    ∀ (a : Atom) (t : Tang α TSet Allowable),
+    t.set = typedAtom a → ConNF.pos a ≤ pos t
+  pos_typedNearLitter :
+    letI : MulAction Allowable (Address α) := MulAction.compHom _ allowableToStructPerm
+    ∀ (N : NearLitter) (t : Tang α TSet Allowable),
+    t.set = typedNearLitter N → ConNF.pos N ≤ pos t
   smul_typedNearLitter :
     ∀ (ρ : Allowable) (N : NearLitter),
     ρ • typedNearLitter N =
     typedNearLitter ((allowableToStructPerm ρ) (Hom.toPath <| bot_lt_coe α) • N)
-  toPretangle : Tangle → Pretangle α
-  toPretangle_smul (ρ : Allowable) (t : Tangle) :
-    haveI : MulAction Allowable (Pretangle α) :=
+  toPretangle : TSet ↪ Pretangle α
+  toPretangle_smul (ρ : Allowable) (t : TSet) :
+    letI : MulAction Allowable (Pretangle α) :=
       MulAction.compHom _ allowableToStructPerm
     toPretangle (ρ • t) = ρ • toPretangle t
 
 instance {α : Λ} {ih : IH α} : Group ih.Allowable := ih.allowableGroup
-instance {α : Λ} {ih : IH α} : MulAction ih.Allowable ih.Tangle := ih.allowableAction
+instance {α : Λ} {ih : IH α} : MulAction ih.Allowable ih.TSet := ih.allowableAction
 instance {α : Λ} {ih : IH α} {X : Type _} [MulAction (StructPerm α) X] :
     MulAction ih.Allowable X :=
   MulAction.compHom _ ih.allowableToStructPerm
-instance {α : Λ} {ih : IH α} : Position ih.Tangle μ := ⟨ih.pos⟩
 
 def IH.tangleData {α : Λ} (ih : IH α) : TangleData α where
-  Tangle := ih.Tangle
+  TSet := ih.TSet
   Allowable := ih.Allowable
   allowableToStructPerm := ih.allowableToStructPerm
-  support := ih.support
-  support_supports := ih.support_supports
+  has_support := ih.has_support
   toPretangle := ih.toPretangle
   toPretangle_smul := ih.toPretangle_smul
+
+protected def IH.Tangle {α : Λ} (ih : IH α) : Type u :=
+  letI := ih.tangleData
+  Tangle α
+
+instance {α : Λ} {ih : IH α} : MulAction ih.Allowable ih.Tangle :=
+  letI := ih.tangleData
+  inferInstanceAs (MulAction (Allowable α) (Tangle α))
+
+def IH.tangleEquiv {α : Λ} (ih : IH α) :
+    letI := ih.tangleData
+    Tangle α ≃ Tang α ih.TSet ih.Allowable :=
+  letI : Level := ⟨α⟩
+  letI := ih.tangleData
+  { toFun := fun t => ⟨TangleCoe.set t, TangleCoe.support t, TangleCoe.support_supports t⟩,
+    invFun := fun t => ⟨t.set, t.support, t.support_supports⟩,
+    left_inv := fun _ => rfl,
+    right_inv := fun _ => rfl}
 
 def IH.positionedTangles {α : Λ} (ih : IH α) :
     letI := ih.tangleData
     PositionedTangles α :=
   letI := ih.tangleData
-  ⟨ih.pos⟩
+  ⟨⟨fun t => ih.pos (ih.tangleEquiv t),
+    fun _ _ h => ih.tangleEquiv.injective (ih.pos.injective h)⟩⟩
 
 def IH.typedObjects {α : Λ} (ih : IH α) :
     letI := ih.tangleData
@@ -74,20 +103,30 @@ def IH.typedObjects {α : Λ} (ih : IH α) :
     typedNearLitter := ih.typedNearLitter
     smul_typedNearLitter := ih.smul_typedNearLitter }
 
-def IH.positionedObjects {α : Λ} (ih : IH α) :
+@[simp]
+theorem IH.pos_tangleEquiv {α : Λ} (ih : IH α) (t : letI := ih.tangleData; Tangle α) :
+    letI := ih.tangleData
+    letI := ih.positionedTangles
+    ConNF.pos t = ih.pos (ih.tangleEquiv t) :=
+  rfl
+
+theorem IH.positionedObjects {α : Λ} (ih : IH α) :
     letI := ih.tangleData
     letI := ih.positionedTangles
     letI := ih.typedObjects
-    PositionedObjects α :=
+    PositionedObjects α := by
   letI := ih.tangleData
   letI := ih.positionedTangles
   letI := ih.typedObjects
-  { pos_typedAtom := ih.pos_typedAtom
-    pos_typedNearLitter := ih.pos_typedNearLitter }
+  constructor
+  · intro a t h
+    exact ih.pos_typedAtom a (ih.tangleEquiv t) h
+  · intro N t h
+    exact ih.pos_typedNearLitter N (ih.tangleEquiv t) h
 
 /-- A renaming of `fuzz` that uses only data from the `IH`s. -/
 noncomputable def fuzz' {β γ : Λ} (ihβ : IH β) (ihγ : IH γ) (h : (β : TypeIndex) ≠ γ) :
-    ihβ.Tangle → Litter :=
+    (letI := ihβ.tangleData; Tangle β) → Litter :=
   letI := ihβ.tangleData
   letI := ihβ.positionedTangles
   letI := ihγ.tangleData
@@ -114,14 +153,6 @@ structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
     ∃ f : (ih α le_rfl).Allowable →* NearLitterPerm,
     ∀ ρ : (ih α le_rfl).Allowable,
       (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = f ρ
-  smul_support (t : (ih α le_rfl).Tangle) (ρ : (ih α le_rfl).Allowable) :
-    (ih α le_rfl).support (ρ • t) = ρ • (ih α le_rfl).support t
-  pos_lt_pos_atom (t : (ih α le_rfl).Tangle)
-    {A : ExtendedIndex α} {a : Atom} (ht : ⟨A, inl a⟩ ∈ (ih α le_rfl).support t) :
-    t ≠ (ih α le_rfl).typedAtom a → pos a < (ih α le_rfl).pos t
-  pos_lt_pos_nearLitter (t : (ih α le_rfl).Tangle)
-    {A : ExtendedIndex α} {N : NearLitter} (ht : ⟨A, inr N⟩ ∈ (ih α le_rfl).support t) :
-    t ≠ (ih α le_rfl).typedNearLitter N → pos N < (ih α le_rfl).pos t
   smul_fuzz (β : Λ) (hβ : β < α) (γ : Λ) (hγ : γ < α) (hβγ : (β : TypeIndex) ≠ γ)
     (ρ : (ih α le_rfl).Allowable) (t : (ih β hβ.le).Tangle)
     (fαβ : (ih α le_rfl).Allowable → (ih β hβ.le).Allowable)
@@ -158,25 +189,19 @@ structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
       (_hfα : ∀ ρ : (ih α le_rfl).Allowable,
         (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = fα ρ),
       fα ρ = π)
-  eq_toPretangle_of_mem (β : Λ) (hβ : β < α) (t₁ : (ih α le_rfl).Tangle) (t₂ : Pretangle β) :
+  eq_toPretangle_of_mem (β : Λ) (hβ : β < α) (t₁ : (ih α le_rfl).TSet) (t₂ : Pretangle β) :
     t₂ ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₁) β (coe_lt_coe.mpr hβ) →
-    ∃ t₂' : (ih β hβ.le).Tangle, t₂ = (ih β hβ.le).toPretangle t₂'
-  toPretangle_ext (β : Λ) (hβ : β < α) (t₁ t₂ : (ih α le_rfl).Tangle) :
+    ∃ t₂' : (ih β hβ.le).TSet, t₂ = (ih β hβ.le).toPretangle t₂'
+  toPretangle_ext (β : Λ) (hβ : β < α) (t₁ t₂ : (ih α le_rfl).TSet) :
     (∀ t : Pretangle β,
       t ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₁) β (coe_lt_coe.mpr hβ) ↔
       t ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₂) β (coe_lt_coe.mpr hβ)) →
     (ih α le_rfl).toPretangle t₁ = (ih α le_rfl).toPretangle t₂
-  tangle_ext (t₁ t₂ : (ih α le_rfl).Tangle) :
-    (ih α le_rfl).toPretangle t₁ = (ih α le_rfl).toPretangle t₂ →
-    (ih α le_rfl).support t₁ = (ih α le_rfl).support t₂ →
-    t₁ = t₂
   /-- It's useful to keep this `Prop`-valued, because then there is no data in `IH` that
   crosses levels. -/
   has_singletons (β : Λ) (hβ : β < α) :
-    ∃! S : (ih β hβ.le).Tangle ↪ (ih α le_rfl).Tangle,
-    ∀ t : (ih β hβ.le).Tangle,
-      (ih α le_rfl).support (S t) =
-        ((ih β hβ.le).support t).image (fun c => ⟨(Hom.toPath (coe_lt_coe.mpr hβ)).comp c.1, c.2⟩) ∧
+    ∃ S : (ih β hβ.le).TSet → (ih α le_rfl).TSet,
+    ∀ t : (ih β hβ.le).TSet,
       Pretangle.ofCoe ((ih α le_rfl).toPretangle (S t)) β (coe_lt_coe.mpr hβ) =
       {(ih β hβ.le).toPretangle t}
 
@@ -187,18 +212,15 @@ def tangleDataStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) : TangleDat
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
   {
-    Tangle := NewTangle
+    TSet := NewTSet
     Allowable := NewAllowable
     allowableToStructPerm := NewAllowable.toStructPerm
-    support := NewTangle.S
-    support_supports := by
-      intro t ρ h
-      refine NewTangle.ext _ _ (t.h ρ h) ?_
-      refine Enumeration.ext' rfl ?_
-      intro i hS _
-      exact h ⟨i, hS, rfl⟩
-    toPretangle := sorry
-    toPretangle_smul := sorry
+    has_support := by
+      intro t
+      obtain ⟨S, hS⟩ := t.prop
+      exact ⟨S, fun ρ hρ => Subtype.ext (hS ρ hρ)⟩
+    toPretangle := ⟨NewTSet.toPretangle, NewTSet.toPretangle_injective⟩
+    toPretangle_smul := NewTSet.toPretangle_smul
   }
 
 def typedObjectsStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
@@ -278,6 +300,8 @@ theorem buildStepFOAData_positioned_lt (α : Λ) (ihs : (β : Λ) → β < α �
     HEq ((buildStepFOAData α ihs).lowerPositionedTangles β) (ihs β hβ).positionedTangles := by
   unfold FOAData.lowerPositionedTangles buildStepFOAData
   simp only [id_eq, eq_mpr_eq_cast, cast_heq]
+
+#exit
 
 theorem foaData_tangle_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     letI : Level := ⟨α⟩

@@ -42,12 +42,12 @@ class TangleData (α : TypeIndex) where
   allowableToStructPerm : Allowable →* StructPerm α
   [allowableAction : MulAction Allowable TSet]
   has_support (t : TSet) : ∃ S : Support α,
-    haveI : MulAction Allowable (Address α) :=
+    letI : MulAction Allowable (Address α) :=
       MulAction.compHom _ allowableToStructPerm
     MulAction.Supports Allowable (S : Set (Address α)) t
   toPretangle : TSet ↪ Pretangle α
   toPretangle_smul (ρ : Allowable) (t : TSet) :
-    haveI : MulAction Allowable (Pretangle α) :=
+    letI : MulAction Allowable (Pretangle α) :=
       MulAction.compHom _ allowableToStructPerm
     toPretangle (ρ • t) = ρ • toPretangle t
 
@@ -238,7 +238,7 @@ theorem lt_pos_symmDiff [BasePositions] (a : Atom) (N : NearLitter) (h : a ∈ l
     pos a < pos N :=
   BasePositions.lt_pos_symmDiff a N h
 
-class PositionedObjects [BasePositions] [PositionedTangles α] [TypedObjects α] where
+class PositionedObjects [BasePositions] [PositionedTangles α] [TypedObjects α] : Prop where
   pos_typedAtom (a : Atom) (t : Tangle α) :
     t.set = typedAtom a → pos a ≤ pos t
   pos_typedNearLitter (N : NearLitter) (t : Tangle α) :
