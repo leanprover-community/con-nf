@@ -61,6 +61,32 @@ theorem Enumeration.carrier_small (E : Enumeration α) : Small E.carrier := by
 theorem Enumeration.small (E : Enumeration α) : Small (E : Set α) :=
   E.carrier_small
 
+protected def Enumeration.singleton (x : α) : Enumeration α :=
+  ⟨1, fun _ _ => x⟩
+
+@[simp]
+theorem Enumeration.mem_singleton_iff (x : α) (y : α) : y ∈ Enumeration.singleton x ↔ y = x := by
+  constructor
+  · rintro ⟨_, _, rfl⟩
+    rfl
+  · rintro rfl
+    exact ⟨0, κ_zero_lt_one, rfl⟩
+
+@[simp]
+theorem Enumeration.singleton_carrier (x : α) : (Enumeration.singleton x).carrier = {x} := by
+  ext
+  erw [mem_singleton_iff]
+  rfl
+
+@[simp]
+theorem Enumeration.singleton_coe (x : α) : (Enumeration.singleton x : Set α) = {x} :=
+  singleton_carrier x
+
+@[simp]
+theorem Enumeration.singleton_f (x : α) (i : κ) (hi : i < (Enumeration.singleton x).max) :
+    (Enumeration.singleton x).f i hi = x :=
+  rfl
+
 def enumerationEquiv : Enumeration α ≃ Σ max : κ, Set.Iio max → α where
   toFun E := ⟨E.max, fun x => E.f x x.prop⟩
   invFun E := ⟨E.1, fun i h => E.2 ⟨i, h⟩⟩
@@ -186,10 +212,11 @@ theorem mk_enumeration (mk_α : #α = #μ) : #(Enumeration α) = #μ := by
         and_true]
       exact Params.κ_lt_μ.le
   · rw [← mk_α]
-    refine ⟨⟨fun x => ⟨1, fun _ _ => x⟩, ?_⟩⟩
+    refine ⟨Enumeration.singleton, ?_⟩
     intro a₁ a₂ h
-    simp only [Enumeration.mk.injEq, heq_eq_eq, true_and] at h
-    exact congr_fun₂ h 0 κ_zero_lt_one
+    have := (Enumeration.mem_singleton_iff a₁ a₁).mpr rfl
+    rw [h, Enumeration.mem_singleton_iff] at this
+    exact this
 
 theorem _root_.Cardinal.pow_mono_left (a : Cardinal) (ha : a ≠ 0) :
     Monotone (fun (b : Cardinal) => a ^ b) := by

@@ -123,14 +123,13 @@ theorem TangleData.TSet.has_support {α : TypeIndex} [TangleData α] (t : TSet �
   TangleData.has_support t
 
 def Atom.support (a : Atom) : Support ⊥ :=
-  ⟨1, fun _ _ => ⟨Quiver.Path.nil, Sum.inl a⟩⟩
+  Enumeration.singleton ⟨Quiver.Path.nil, Sum.inl a⟩
 
 @[simp]
 theorem Atom.support_carrier (a : Atom) :
     Enumeration.carrier a.support = {⟨Quiver.Path.nil, Sum.inl a⟩} := by
   ext x : 1
-  simp only [support, Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
-    mem_singleton_iff]
+  simp only [support, Enumeration.singleton_carrier, mem_singleton_iff]
 
 theorem Atom.support_supports (a : Atom) :
     MulAction.Supports NearLitterPerm (a.support : Set (Address ⊥)) a := by

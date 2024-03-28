@@ -584,27 +584,26 @@ theorem NewAllowable.smul_address_eq_smul_iff
 This is called a *typed atom*. -/
 def newTypedAtom (a : Atom) : NewTSet :=
   ⟨intro (show Set (TSet ⊥) from {a}) <| Code.isEven_bot _,
-    ⟨1, fun _ _ => ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inl a⟩⟩,
+    Enumeration.singleton ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inl a⟩,
     by
+      simp only [Enumeration.singleton_carrier]
       intro ρ h
-      simp only [smul_intro]
-      congr 1
-      simp only [Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
-        NewAllowable.smul_address_eq_iff, forall_eq, Sum.smul_inl, Sum.inl.injEq] at h
-      simp only [smul_set_singleton, singleton_eq_singleton_iff]
-      exact h⟩
+      have := h rfl
+      simp only [NewAllowable.smul_address_eq_iff, Sum.smul_inl, Sum.inl.injEq] at this
+      simp only [smul_intro, smul_set_singleton]
+      congr 2⟩
 
 /-- For any near-litter `N`, the code `(α, ⊥, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
 def newTypedNearLitter (N : NearLitter) : NewTSet :=
   ⟨intro (show Set (TSet ⊥) from N.2.1) <| Code.isEven_bot _,
-    ⟨1, fun _ _ => ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩⟩,
+    Enumeration.singleton ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩,
     by
       intro ρ h
       simp only [smul_intro]
       congr 1
-      simp only [Enumeration.mem_carrier_iff, κ_lt_one_iff, exists_prop, exists_eq_left,
-        NewAllowable.smul_address_eq_iff, forall_eq, Sum.smul_inr, Sum.inr.injEq] at h
+      simp only [Enumeration.singleton_carrier, mem_singleton_iff, NewAllowable.smul_address_eq_iff,
+        forall_eq, Sum.smul_inr, Sum.inr.injEq] at h
       apply_fun SetLike.coe at h
       refine Eq.trans ?_ h
       rw [NearLitterPerm.smul_nearLitter_coe]

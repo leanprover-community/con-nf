@@ -6,7 +6,7 @@ import ConNF.Counting.SupportOrbit
 
 open Cardinal Function MulAction Set Sum Quiver WithBot
 
-open scoped Cardinal symmDiff
+open scoped Cardinal Pointwise symmDiff
 
 universe u
 
@@ -147,6 +147,9 @@ def zeroDerivative : NewAllowable →* NearLitterPerm :=
     by simp only [NewAllowable.coe_one, SemiallowablePerm.one_apply]⟩,
     by simp only [NewAllowable.coe_mul, SemiallowablePerm.mul_apply, forall_const]⟩
 
+instance {X : Type _} [MulAction NearLitterPerm X] : MulAction (Allowable (0 : Λ)) X :=
+  MulAction.compHom _ zeroDerivative
+
 section FOA
 
 local instance : FOAData where
@@ -226,6 +229,7 @@ def ZeroStrong (S : Support 0) : Prop :=
   ∀ a N₁ N₂, ⟨zeroPath, inr N₁⟩ ∈ S → ⟨zeroPath, inr N₂⟩ ∈ S → Support.Interferes a N₁ N₂ →
     ⟨zeroPath, inl a⟩ ∈ S
 
+@[ext]
 structure ZeroSpec : Type u where
   /-- The length of the support. -/
   max : κ
@@ -245,6 +249,27 @@ structure ZeroSpec : Type u where
   /-- For each position in a support containing an atom,
   the positions of near-litters that contain this atom. -/
   atomMem : κ → Set κ
+
+instance : LE ZeroSpec where
+  le σ τ :=
+    σ.max = τ.max ∧
+    σ.nearLitters ⊆ τ.nearLitters ∧
+    σ.atoms ⊆ τ.atoms ∧
+    σ.nearLitterSame ≤ τ.nearLitterSame ∧
+    σ.symmDiff ≤ τ.symmDiff ∧
+    σ.atomSame ≤ τ.atomSame ∧
+    σ.atomMem ≤ τ.atomMem
+
+instance : PartialOrder ZeroSpec where
+  le_refl σ := ⟨rfl, by rfl, by rfl, by rfl, by rfl, by rfl, by rfl⟩
+  le_trans σ τ υ := by
+    rintro ⟨h₁, h₂, h₃, h₄, h₅, h₆, h₇⟩ ⟨h₁', h₂', h₃', h₄', h₅', h₆', h₇'⟩
+    exact ⟨h₁.trans h₁', h₂.trans h₂', h₃.trans h₃', h₄.trans h₄',
+      h₅.trans h₅', h₆.trans h₆', h₇.trans h₇'⟩
+  le_antisymm σ τ := by
+    rintro ⟨h₁, h₂, h₃, h₄, h₅, h₆, h₇⟩ ⟨-, h₂', h₃', h₄', h₅', h₆', h₇'⟩
+    exact ZeroSpec.ext _ _ h₁ (subset_antisymm h₂ h₂') (subset_antisymm h₃ h₃')
+      (le_antisymm h₄ h₄') (le_antisymm h₅ h₅') (le_antisymm h₆ h₆') (le_antisymm h₇ h₇')
 
 def zeroSpec (S : Support 0) : ZeroSpec where
   max := S.max
@@ -518,6 +543,342 @@ theorem exists_convertAllowable : ∃ ρ : Allowable (0 : Λ), ρ • S = T := b
       convert_nearLitterMap_eq hT hST ⟨i, hiS, hiT, hc.symm, hT'⟩, hT']
 
 end Convert
+
+def interference (S : Set (Address 0)) : Set Atom :=
+  {a | ⟨zeroPath, inl a⟩ ∈ S} ∪
+  {a | ∃ N₁ N₂, ⟨zeroPath, inr N₁⟩ ∈ S ∧ ⟨zeroPath, inr N₂⟩ ∈ S ∧ Support.Interferes a N₁ N₂}
+
+def interference' (S : Set (Address 0)) : Set Atom :=
+  (⋃ (a ∈ {a | ⟨zeroPath, inl a⟩ ∈ S}), {a}) ∪
+  (⋃ (N₁ ∈ {N₁ | ⟨zeroPath, inr N₁⟩ ∈ S}) (N₂ ∈ {N₂ | ⟨zeroPath, inr N₂⟩ ∈ S})
+    (a ∈ {a | Support.Interferes a N₁ N₂}), {a})
+
+theorem interference_eq_interference' (S : Set (Address 0)) : interference S = interference' S := by
+  rw [interference, interference']
+  aesop
+
+theorem interference_small (S : Set (Address 0)) (hS : Small S) : Small (interference S) := by
+  rw [interference_eq_interference']
+  refine Small.union ?_ ?_
+  · refine Small.bUnion ?_ (fun _ _ => small_singleton _)
+    refine hS.preimage (f := fun a => ⟨zeroPath, inl a⟩) ?_
+    intro a b h
+    cases h
+    rfl
+  · refine Small.bUnion
+        ?_ (fun N₁ _ => Small.bUnion
+        ?_ (fun N₂ _ => Small.bUnion
+        (Support.interferes_small N₁ N₂) (fun a _ => small_singleton _)))
+    · refine hS.preimage (f := fun N => ⟨zeroPath, inr N⟩) ?_
+      intro a b h
+      cases h
+      rfl
+    · refine hS.preimage (f := fun N => ⟨zeroPath, inr N⟩) ?_
+      intro a b h
+      cases h
+      rfl
+
+def disjointNL' (S : Set (Address 0)) (N : NearLitter) : Set Atom :=
+  N \ interference S
+
+theorem disjointNL'_isNear (S : Set (Address 0)) (hS : Small S) (N : NearLitter) :
+    IsNearLitter N.1 (disjointNL' S N) := by
+  suffices : Small ((N : Set Atom) ∆ disjointNL' S N)
+  · have h : Small _ := N.2.prop
+    have := h.symmDiff this
+    rw [symmDiff_assoc, ← symmDiff_assoc (N.snd : Set Atom)] at this
+    erw [symmDiff_self] at this
+    rw [bot_eq_empty, empty_symmDiff] at this
+    exact this
+  refine Small.union ?_ ?_
+  · rw [disjointNL', sdiff_sdiff_right_self]
+    exact (interference_small S hS).mono (inter_subset_right _ _)
+  · refine small_of_forall_not_mem ?_
+    rintro x ⟨hx, hxN⟩
+    simp only [disjointNL', mem_iInter, SetLike.mem_coe, and_imp] at hx
+    exact hxN hx.1
+
+theorem disjointNL'_eq (S : Set (Address 0)) (N₁ N₂ : NearLitter)
+    (hN₁ : ⟨zeroPath, inr N₁⟩ ∈ S) (hN₂ : ⟨zeroPath, inr N₂⟩ ∈ S) (h : N₁.1 = N₂.1) :
+    disjointNL' S N₁ = disjointNL' S N₂ := by
+  rw [disjointNL', disjointNL']
+  ext a
+  constructor
+  · rintro ⟨ha₁, ha₂⟩
+    by_cases ha₃ : a ∈ N₂
+    · exact ⟨ha₃, ha₂⟩
+    refine (ha₂ ?_).elim
+    exact (Or.inr ⟨N₁, N₂, hN₁, hN₂, Support.Interferes.symmDiff h (Or.inl ⟨ha₁, ha₃⟩)⟩)
+  · rintro ⟨ha₁, ha₂⟩
+    by_cases ha₃ : a ∈ N₁
+    · exact ⟨ha₃, ha₂⟩
+    refine (ha₂ ?_).elim
+    exact (Or.inr ⟨N₁, N₂, hN₁, hN₂, Support.Interferes.symmDiff h (Or.inr ⟨ha₁, ha₃⟩)⟩)
+
+def disjointNL (S : Set (Address 0)) (hS : Small S) (N : NearLitter) : NearLitter :=
+  ⟨N.1, disjointNL' S N, disjointNL'_isNear S hS N⟩
+
+theorem disjointNL_eq (S : Set (Address 0)) (hS : Small S) (N₁ N₂ : NearLitter)
+    (hN₁ : ⟨zeroPath, inr N₁⟩ ∈ S) (hN₂ : ⟨zeroPath, inr N₂⟩ ∈ S) (h : N₁.1 = N₂.1) :
+    disjointNL S hS N₁ = disjointNL S hS N₂ :=
+  NearLitter.ext (disjointNL'_eq S N₁ N₂ hN₁ hN₂ h)
+
+def disjointNLs (S : Set (Address 0)) (hS : Small S) : Set NearLitter :=
+  {N' | ∃ N, ⟨zeroPath, inr N⟩ ∈ S ∧ N' = disjointNL S hS N}
+
+def disjointSupport (S : Set (Address 0)) (hS : Small S) : Set (Address 0) :=
+  {c | ∃ a, c = ⟨zeroPath, inl a⟩ ∧ a ∈ interference S} ∪
+  {c | ∃ N, c = ⟨zeroPath, inr N⟩ ∧ N ∈ disjointNLs S hS}
+
+@[simp]
+theorem atom_mem_disjointSupport (S : Set (Address 0)) (hS : Small S) (a : Atom) :
+    ⟨zeroPath, inl a⟩ ∈ disjointSupport S hS ↔ a ∈ interference S := by
+  rw [disjointSupport]
+  aesop
+
+@[simp]
+theorem nearLitter_mem_disjointSupport (S : Set (Address 0)) (hS : Small S) (N : NearLitter) :
+    ⟨zeroPath, inr N⟩ ∈ disjointSupport S hS ↔ N ∈ disjointNLs S hS := by
+  rw [disjointSupport]
+  aesop
+
+theorem disjointSupport_supports (S : Set (Address 0)) (hS : Small S)
+    (c : Address (0 : Λ)) (hc : c ∈ S) :
+    MulAction.Supports (Allowable (0 : Λ))
+      (show Set (Address (0 : Λ)) from disjointSupport S hS) c := by
+  intro ρ hρ
+  obtain ⟨A, x⟩ := c
+  simp only [Allowable.smul_address_eq_iff] at hρ ⊢
+  cases path_eq_zeroPath A
+  obtain (a | N) := x
+  · change inl (_ • _) = _
+    refine hρ (a := ⟨zeroPath, inl a⟩) ?_
+    rw [atom_mem_disjointSupport]
+    exact Or.inl hc
+  change inr (_ • _) = inr _
+  rw [inr.injEq]
+  refine NearLitter.ext ?_
+  rw [NearLitterPerm.smul_nearLitter_coe]
+  ext a : 1
+  constructor
+  · intro ha
+    obtain ⟨a, ha, rfl⟩ := ha
+    by_cases ha' : a ∈ interference S
+    · have := hρ (a := ⟨zeroPath, inl a⟩) (by rwa [atom_mem_disjointSupport])
+      simp only [smul_inl, inl.injEq] at this ⊢
+      rwa [this]
+    · have := hρ (a := ⟨zeroPath, inr (disjointNL S hS N)⟩) ?_
+      · simp only [smul_inr, inr.injEq] at this
+        have := congr_arg SetLike.coe this
+        rw [NearLitterPerm.smul_nearLitter_coe, smul_eq_iff_eq_inv_smul] at this
+        have := (Set.ext_iff.mp this a).mp ⟨ha, ha'⟩
+        rw [mem_smul_set_iff_inv_smul_mem, inv_inv] at this
+        exact this.1
+      · rw [nearLitter_mem_disjointSupport]
+        exact ⟨N, hc, rfl⟩
+  · intro ha
+    rw [mem_smul_set_iff_inv_smul_mem]
+    by_cases ha' : a ∈ interference S
+    · have := hρ (a := ⟨zeroPath, inl _⟩) (by rwa [atom_mem_disjointSupport])
+      simp only [smul_inl, inl.injEq] at this ⊢
+      rwa [← this, inv_smul_smul]
+    · have := hρ (a := ⟨zeroPath, inr (disjointNL S hS N)⟩) ?_
+      · simp only [smul_inr, inr.injEq] at this
+        have := congr_arg SetLike.coe this
+        rw [NearLitterPerm.smul_nearLitter_coe] at this
+        have := (Set.ext_iff.mp this _).mpr ⟨ha, ha'⟩
+        rw [mem_smul_set_iff_inv_smul_mem] at this
+        exact this.1
+      · rw [nearLitter_mem_disjointSupport]
+        exact ⟨N, hc, rfl⟩
+
+structure DisjointSupport (S : Set (Address 0)) : Prop where
+  nearLitter (N₁ N₂ : NearLitter)
+    (hN₁ : ⟨zeroPath, inr N₁⟩ ∈ S) (hN₂ : ⟨zeroPath, inr N₂⟩ ∈ S) :
+    N₁ = N₂ ∨ (N₁ : Set Atom) ∩ N₂ = ∅
+  atom (a : Atom) (N : NearLitter)
+    (ha : ⟨zeroPath, inl a⟩ ∈ S) (hN : ⟨zeroPath, inr N⟩ ∈ S) :
+    a ∉ N
+
+theorem disjointSupport_disjointSupport (S : Set (Address 0)) (hS : Small S) :
+    DisjointSupport (disjointSupport S hS) := by
+  constructor
+  · intro N₁ N₂ hN₁ hN₂
+    rw [nearLitter_mem_disjointSupport] at hN₁ hN₂
+    obtain ⟨N₁, hN₁, rfl⟩ := hN₁
+    obtain ⟨N₂, hN₂, rfl⟩ := hN₂
+    by_cases hN : N₁.1 = N₂.1
+    · exact Or.inl (disjointNL_eq S hS N₁ N₂ hN₁ hN₂ hN)
+    refine Or.inr ?_
+    rw [Set.eq_empty_iff_forall_not_mem]
+    rintro a ⟨⟨ha₁, ha₃⟩, ⟨ha₂, _⟩⟩
+    refine ha₃ (Or.inr ⟨N₁, N₂, hN₁, hN₂, Support.Interferes.inter hN ⟨ha₁, ha₂⟩⟩)
+  · intro a N ha hN haN
+    rw [atom_mem_disjointSupport] at ha
+    rw [nearLitter_mem_disjointSupport] at hN
+    obtain ⟨N, _, rfl⟩ := hN
+    cases haN.2 ha
+
+theorem disjointSupport_zeroStrong (S : Support 0) (hS : DisjointSupport S) :
+    ZeroStrong S := by
+  intro a N₁ N₂ hN₁ hN₂ haN
+  obtain (⟨h₁, h₂⟩ | ⟨h₁, h₂⟩) := haN
+  · obtain (rfl | hN) := hS.nearLitter N₁ N₂ hN₁ hN₂
+    · simp only [symmDiff_self, bot_eq_empty, mem_empty_iff_false] at h₂
+    · have := NearLitter.inter_nonempty_of_fst_eq_fst h₁
+      simp_all only [Set.not_nonempty_empty]
+  · obtain (rfl | hN) := hS.nearLitter N₁ N₂ hN₁ hN₂
+    · cases h₁ rfl
+    · simp_all only [ne_eq, mem_empty_iff_false]
+
+theorem zeroStrong_add (S : Support 0) (hS : DisjointSupport S) (a : Atom) :
+    ZeroStrong (S + Enumeration.singleton ⟨zeroPath, inl a⟩) := by
+  intro b N₁ N₂ hN₁ hN₂ hbN
+  simp only [Enumeration.mem_add_iff, Enumeration.mem_singleton_iff, Address.mk.injEq, and_false,
+    or_false, inl.injEq, true_and] at hN₁ hN₂ ⊢
+  exact Or.inl (disjointSupport_zeroStrong S hS b N₁ N₂ hN₁ hN₂ hbN)
+
+theorem nearLitter_le_max_add {S : Support 0} {a : Atom} {N : NearLitter} {i : κ}
+    {hi : i < (S + Enumeration.singleton ⟨zeroPath, inl a⟩ : Support 0).max} :
+    (S + Enumeration.singleton ⟨zeroPath, inl a⟩ : Support 0).f i hi = ⟨zeroPath, inr N⟩ →
+    i < S.max := by
+  intro hN
+  by_contra h
+  rw [Enumeration.add_f_right _ (le_of_not_lt h)] at hN
+  cases hN
+
+theorem zeroStrong_spec_le (S : Support 0) (hS : DisjointSupport S)
+    (a : Atom) (b : Atom) (ha : ⟨zeroPath, inl a⟩ ∉ S)
+    (hab : ∀ N, ⟨zeroPath, inr N⟩ ∈ S → (a ∈ N ↔ b ∈ N)) :
+    zeroSpec (S + Enumeration.singleton ⟨zeroPath, inl a⟩) ≤
+    zeroSpec (S + Enumeration.singleton ⟨zeroPath, inl b⟩) := by
+  refine ⟨rfl, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> dsimp only [zeroSpec]
+  · rintro i ⟨hi, N, hN⟩
+    have hi' := nearLitter_le_max_add hN
+    refine ⟨hi, N, ?_⟩
+    rwa [Enumeration.add_f_left hi'] at hN ⊢
+  · rintro i ⟨hi, c, hc⟩
+    by_cases hi' : i < S.max
+    · refine ⟨hi, c, ?_⟩
+      rwa [Enumeration.add_f_left hi'] at hc ⊢
+    · rw [Enumeration.add_f_right _ (le_of_not_lt hi')] at hc
+      cases hc
+      refine ⟨hi, b, ?_⟩
+      rw [Enumeration.add_f_right _ (le_of_not_lt hi')]
+      rfl
+  · rintro i j ⟨hi, hj, Ni, Nj, hNi, hNj, h⟩
+    have hi' := nearLitter_le_max_add hNi
+    have hj' := nearLitter_le_max_add hNj
+    refine ⟨hi, hj, Ni, Nj, ?_, ?_, h⟩
+    · rwa [Enumeration.add_f_left hi'] at hNi ⊢
+    · rwa [Enumeration.add_f_left hj'] at hNj ⊢
+  · rintro i j k ⟨hi, hj, hk, Ni, Nj, c, hNi, hNj, hc, hN, hcN⟩
+    have hi' := nearLitter_le_max_add hNi
+    have hj' := nearLitter_le_max_add hNj
+    rw [Enumeration.add_f_left hi'] at hNi
+    rw [Enumeration.add_f_left hj'] at hNj
+    by_cases hk' : k < S.max
+    · refine ⟨hi, hj, hk, Ni, Nj, c, ?_⟩
+      obtain (hcN | hcN) := hcN
+      · exfalso
+        refine hS.atom c Ni ?_ ?_ hcN.1
+        · rw [Enumeration.add_f_left hk'] at hc
+          exact ⟨k, hk', hc.symm⟩
+        · exact ⟨i, hi', hNi.symm⟩
+      · exfalso
+        refine hS.atom c Nj ?_ ?_ hcN.1
+        · rw [Enumeration.add_f_left hk'] at hc
+          exact ⟨k, hk', hc.symm⟩
+        · exact ⟨j, hj', hNj.symm⟩
+    · rw [Enumeration.add_f_right _ (le_of_not_lt hk')] at hc
+      cases hc
+      refine ⟨hi, hj, hk, Ni, Nj, b, ?_, ?_, ?_, hN, ?_⟩
+      · rwa [Enumeration.add_f_left hi']
+      · rwa [Enumeration.add_f_left hj']
+      · rw [Enumeration.add_f_right _ (le_of_not_lt hk')]
+        rfl
+      · obtain (⟨ha₁, ha₂⟩ | ⟨ha₁, ha₂⟩) := hcN
+        · erw [hab Ni ⟨i, hi', hNi.symm⟩] at ha₁
+          erw [hab Nj ⟨j, hj', hNj.symm⟩] at ha₂
+          exact Or.inl ⟨ha₁, ha₂⟩
+        · erw [hab Nj ⟨j, hj', hNj.symm⟩] at ha₁
+          erw [hab Ni ⟨i, hi', hNi.symm⟩] at ha₂
+          exact Or.inr ⟨ha₁, ha₂⟩
+  · rintro i j ⟨hi, hj, c, hci, hcj⟩
+    by_cases hi' : i < S.max
+    · by_cases hj' : j < S.max
+      · refine ⟨hi, hj, c, ?_⟩
+        simp only [Enumeration.add_f_left hi', Enumeration.add_f_left hj'] at hci hcj ⊢
+        exact ⟨hci, hcj⟩
+      · rw [Enumeration.add_f_left hi'] at hci
+        rw [Enumeration.add_f_right _ (le_of_not_lt hj'), ← hci, Enumeration.singleton_f] at hcj
+        cases ha ⟨i, hi', hcj⟩
+    · by_cases hj' : j < S.max
+      · rw [Enumeration.add_f_right _ (le_of_not_lt hi')] at hci
+        rw [Enumeration.add_f_left hj', ← hci, Enumeration.singleton_f] at hcj
+        cases ha ⟨j, hj', hcj.symm⟩
+      · refine ⟨hi, hj, b, ?_⟩
+        simp only [Enumeration.add_f_right _ (le_of_not_lt hi'), Enumeration.singleton_f,
+          Enumeration.add_f_right _ (le_of_not_lt hj'), and_self]
+  · rintro i j ⟨hi, hj, c, N, hc, hN, hcN⟩
+    have hj' := nearLitter_le_max_add hN
+    rw [Enumeration.add_f_left hj'] at hN
+    by_cases hi' : i < S.max
+    · rw [Enumeration.add_f_left hi'] at hc
+      cases hS.atom c N ⟨i, hi', hc.symm⟩ ⟨j, hj', hN.symm⟩ hcN
+    · rw [Enumeration.add_f_right _ (le_of_not_lt hi')] at hc
+      cases hc
+      refine ⟨hi, hj, b, N, ?_, ?_, ?_⟩
+      · rw [Enumeration.add_f_right _ (le_of_not_lt hi')]
+        rfl
+      · rw [Enumeration.add_f_left hj', hN]
+      · rwa [← hab]
+        exact ⟨j, hj', hN.symm⟩
+
+theorem zeroStrong_spec_eq (S : Support 0) (hS : DisjointSupport S)
+    (a : Atom) (b : Atom) (ha : ⟨zeroPath, inl a⟩ ∉ S) (hb : ⟨zeroPath, inl b⟩ ∉ S)
+    (hab : ∀ N, ⟨zeroPath, inr N⟩ ∈ S → (a ∈ N ↔ b ∈ N)) :
+    zeroSpec (S + Enumeration.singleton ⟨zeroPath, inl a⟩) =
+    zeroSpec (S + Enumeration.singleton ⟨zeroPath, inl b⟩) := by
+  refine le_antisymm ?_ ?_
+  exact zeroStrong_spec_le S hS a b ha hab
+  refine zeroStrong_spec_le S hS b a hb ?_
+  intro N hN
+  rw [hab N hN]
+
+theorem exists_swap (S : Set (Address (0 : Λ))) (hS₁ : Small S) (hS₂ : DisjointSupport S)
+    (a b : Atom) (ha : ⟨zeroPath, inl a⟩ ∉ S) (hb : ⟨zeroPath, inl b⟩ ∉ S)
+    (hab : ∀ N, ⟨zeroPath, inr N⟩ ∈ S → (a ∈ N ↔ b ∈ N)) :
+    ∃ ρ : Allowable (0 : Λ), (∀ c ∈ S, ρ • c = c) ∧ ρ • a = b := by
+  obtain ⟨ρ, hρ⟩ := exists_convertAllowable
+    (zeroStrong_add (Enumeration.ofSet S hS₁) (by rwa [Enumeration.ofSet_coe]) a)
+    (zeroStrong_add (Enumeration.ofSet S hS₁) (by rwa [Enumeration.ofSet_coe]) b)
+    (zeroStrong_spec_eq (Enumeration.ofSet S hS₁) (by rwa [Enumeration.ofSet_coe]) a b
+      (by rwa [Enumeration.mem_ofSet_iff]) (by rwa [Enumeration.mem_ofSet_iff])
+      (by simp_rw [Enumeration.mem_ofSet_iff]; exact hab))
+  refine ⟨ρ, ?_, ?_⟩
+  · rintro c hc
+    obtain ⟨i, hi, rfl⟩ := (Enumeration.mem_ofSet_iff S hS₁ c).mpr hc
+    have := support_f_congr hρ i (hi.trans_le (κ_le_self_add _ _))
+    simp only [Enumeration.smul_add] at this
+    rw [Enumeration.add_f_left hi, Enumeration.add_f_left (by exact hi)] at this
+    exact this
+  · have := support_f_congr hρ (_ + 0) (add_lt_add_left κ_zero_lt_one _)
+    simp only [Enumeration.smul_add] at this
+    erw [Enumeration.add_f_right_add (by exact κ_zero_lt_one),
+      Enumeration.add_f_right_add (by exact κ_zero_lt_one)] at this
+    simp only [coe_zero, Enumeration.smul_f, Enumeration.singleton_f] at this
+    cases this
+    rfl
+
+/-! In the following lemmas, `e` is the `⊥`-extension of a `0`-set. -/
+
+theorem mem_iff_mem_of_nearLitter_mem_disjointSupport
+    (S : Set (Address (0 : Λ))) (hS : DisjointSupport S)
+    (e : Set Atom) (heS : MulAction.Supports (Allowable (0 : Λ)) S e)
+    (N : NearLitter) (hN : ⟨zeroPath, inr N⟩ ∈ S)
+    (a b : Atom) (ha : a ∈ N) (hb : b ∈ N) : a ∈ e ↔ b ∈ e := by
+    sorry
 
 theorem mk_supportOrbit_zero_le : #(SupportOrbit 0) < #μ := sorry
 
