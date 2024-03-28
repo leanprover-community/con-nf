@@ -1,8 +1,7 @@
 import ConNF.Mathlib.PFun
 import ConNF.NewTangle
 import ConNF.FOA
-import ConNF.Counting.CodingFunction
-import ConNF.Counting.SupportOrbit
+import ConNF.Counting.CountStrongOrbit
 
 open Cardinal Function MulAction Set Sum Quiver WithBot
 
@@ -150,6 +149,9 @@ def zeroDerivative : NewAllowable →* NearLitterPerm :=
 instance {X : Type _} [MulAction NearLitterPerm X] : MulAction (Allowable (0 : Λ)) X :=
   MulAction.compHom _ zeroDerivative
 
+instance {X : Type _} [i : MulAction NewAllowable X] : MulAction (Allowable (0 : Λ)) X :=
+  i
+
 section FOA
 
 local instance : FOAData where
@@ -270,6 +272,28 @@ instance : PartialOrder ZeroSpec where
     rintro ⟨h₁, h₂, h₃, h₄, h₅, h₆, h₇⟩ ⟨-, h₂', h₃', h₄', h₅', h₆', h₇'⟩
     exact ZeroSpec.ext _ _ h₁ (subset_antisymm h₂ h₂') (subset_antisymm h₃ h₃')
       (le_antisymm h₄ h₄') (le_antisymm h₅ h₅') (le_antisymm h₆ h₆') (le_antisymm h₇ h₇')
+
+def ZeroSpec.decompose (σ : ZeroSpec) :
+    κ × Set κ × Set κ × (κ → Set κ) × (κ → κ → Set κ) × (κ → Set κ) × (κ → Set κ) :=
+  ⟨σ.max, σ.nearLitters, σ.atoms, σ.nearLitterSame, σ.symmDiff, σ.atomSame, σ.atomMem⟩
+
+theorem ZeroSpec.decompose_injective : Function.Injective ZeroSpec.decompose := by
+  rintro ⟨⟩ ⟨⟩ h
+  cases h
+  rfl
+
+theorem mk_zeroSpec : #ZeroSpec < #μ := by
+  refine (mk_le_of_injective ZeroSpec.decompose_injective).trans_lt ?_
+  have hμ := Params.μ_isStrongLimit.isLimit.aleph0_le
+  have hκ := Params.κ_lt_μ
+  have hκ₁ := Params.μ_isStrongLimit.2 _ hκ
+  have hκ₂ : (2 ^ #κ) ^ #κ < #μ
+  · rwa [← Cardinal.power_mul, mul_eq_self Params.κ_isRegular.aleph0_le]
+  have hκ₃ : ((2 ^ #κ) ^ #κ) ^ #κ < #μ
+  · rwa [← Cardinal.power_mul, mul_eq_self Params.κ_isRegular.aleph0_le]
+  simp only [mk_prod, lift_id, mk_set, mk_pi, prod_const, gt_iff_lt]
+  exact mul_lt_of_lt hμ hκ (mul_lt_of_lt hμ hκ₁ (mul_lt_of_lt hμ hκ₁
+    (mul_lt_of_lt hμ hκ₂ (mul_lt_of_lt hμ hκ₃ (mul_lt_of_lt hμ hκ₂ hκ₂)))))
 
 def zeroSpec (S : Support 0) : ZeroSpec where
   max := S.max
@@ -626,9 +650,38 @@ theorem disjointNL_eq (S : Set (Address 0)) (hS : Small S) (N₁ N₂ : NearLitt
 def disjointNLs (S : Set (Address 0)) (hS : Small S) : Set NearLitter :=
   {N' | ∃ N, ⟨zeroPath, inr N⟩ ∈ S ∧ N' = disjointNL S hS N}
 
+def disjointNLs' (S : Set (Address 0)) (hS : Small S) : Set NearLitter :=
+  ⋃ (N ∈ {N | ⟨zeroPath, inr N⟩ ∈ S}), {disjointNL S hS N}
+
+theorem disjointNLs_eq_disjointNLs' (S : Set (Address 0)) (hS : Small S) :
+    disjointNLs S hS = disjointNLs' S hS := by
+  rw [disjointNLs, disjointNLs']
+  aesop
+
+theorem disjointNLs_small (S : Set (Address 0)) (hS : Small S) :
+    Small (disjointNLs S hS) := by
+  rw [disjointNLs_eq_disjointNLs', disjointNLs']
+  refine Small.bUnion ?_ (fun _ _ => small_singleton _)
+  refine hS.preimage (f := fun N => ⟨zeroPath, inr N⟩) ?_
+  intro N₁ N₂ h
+  cases h
+  rfl
+
 def disjointSupport (S : Set (Address 0)) (hS : Small S) : Set (Address 0) :=
   {c | ∃ a, c = ⟨zeroPath, inl a⟩ ∧ a ∈ interference S} ∪
   {c | ∃ N, c = ⟨zeroPath, inr N⟩ ∧ N ∈ disjointNLs S hS}
+
+theorem disjointSupport_small (S : Set (Address 0)) (hS : Small S) :
+    Small (disjointSupport S hS) := by
+  refine Small.union ?_ ?_
+  · have := interference_small S hS
+    refine (this.image (f := fun a => ⟨zeroPath, inl a⟩)).mono ?_
+    rintro c ⟨a, rfl, ha⟩
+    exact ⟨a, ha, rfl⟩
+  · have := disjointNLs_small S hS
+    refine (this.image (f := fun N => ⟨zeroPath, inr N⟩)).mono ?_
+    rintro c ⟨N, rfl, hN⟩
+    exact ⟨N, hN, rfl⟩
 
 @[simp]
 theorem atom_mem_disjointSupport (S : Set (Address 0)) (hS : Small S) (a : Atom) :
@@ -995,7 +1048,7 @@ theorem infoOut_iff {S : Support (0 : Λ)} (hS : DisjointSupport S.carrier)
       S.carrier S.small hS e he a b ha₁ hb₁ ha₂ hb₂] at hae
     exact hae
 
-theorem info_injective (S : Support (0 : Λ)) (hS : DisjointSupport S.carrier) (e₁ e₂ : Set Atom)
+theorem info_injective' (S : Support (0 : Λ)) (hS : DisjointSupport S.carrier) (e₁ e₂ : Set Atom)
     (h₁ : MulAction.Supports (Allowable (0 : Λ)) S.carrier e₁)
     (h₂ : MulAction.Supports (Allowable (0 : Λ)) S.carrier e₂)
     (hei : infoIn S e₁ = infoIn S e₂)
@@ -1026,8 +1079,224 @@ theorem info_injective (S : Support (0 : Λ)) (hS : DisjointSupport S.carrier) (
       rw [infoOut, infoOut_iff hS h₂] at heo
       exact heo.mpr ⟨a, ha, ha', hae⟩ a ha ha'
 
-theorem mk_supportOrbit_zero_le : #(SupportOrbit 0) < #μ := sorry
+def info (S : Support (0 : Λ))
+    (e : {e : Set Atom // MulAction.Supports (Allowable (0 : Λ)) S.carrier e}) : Set κ × Prop :=
+  (infoIn S e, infoOut S e)
 
-theorem mk_codingFunction_zero_le : #(CodingFunction 0) < #μ := sorry
+theorem info_injective (S : Support (0 : Λ)) (hS : DisjointSupport S.carrier) :
+    Function.Injective (info S) := by
+  intro e₁ e₂ h
+  simp only [info, coe_zero, Prod.mk.injEq, eq_iff_iff] at h
+  exact Subtype.coe_injective (info_injective' S hS e₁ e₂ e₁.prop e₂.prop h.1 h.2)
+
+def zeroStrong (S : Set (Address 0)) : Set (Address 0) :=
+  S ∪
+  {c | ∃ a N₁ N₂, c = ⟨zeroPath, inl a⟩ ∧ ⟨zeroPath, inr N₁⟩ ∈ S ∧
+    ⟨zeroPath, inr N₂⟩ ∈ S ∧ Support.Interferes a N₁ N₂}
+
+theorem zeroStrong_small {S : Set (Address 0)} (hS : Small S) : Small (zeroStrong S) := by
+  refine Small.union hS ?_
+  refine ((interference_small S hS).image (f := fun a => ⟨zeroPath, inl a⟩)).mono ?_
+  rintro _ ⟨a, N₁, N₂, rfl, hc⟩
+  exact ⟨a, Or.inr ⟨N₁, N₂, hc⟩, rfl⟩
+
+theorem zeroStrong_zeroStrong (S : Support 0) :
+    ZeroStrong (Enumeration.ofSet (zeroStrong _) (zeroStrong_small S.small)) := by
+  intro a N₁ N₂ hN₁ hN₂ ha
+  simp only [zeroStrong, exists_and_left, Enumeration.mem_ofSet_iff, mem_union, mem_setOf_eq,
+    Address.mk.injEq, and_false, false_and, exists_const, or_false, inl.injEq, true_and,
+    exists_eq_left'] at hN₁ hN₂ ⊢
+  exact Or.inr ⟨N₁, hN₁, N₂, hN₂, ha⟩
+
+theorem subset_zeroStrong (S : Support 0) :
+    S.carrier ⊆ Enumeration.ofSet (zeroStrong _) (zeroStrong_small S.small) := by
+  simp only [zeroStrong, exists_and_left, Enumeration.ofSet_coe, subset_union_left]
+
+theorem exists_hom_zeroStrong (S : Support 0) :
+    Nonempty (SupportHom S (Enumeration.ofSet (zeroStrong _) (zeroStrong_small S.small))) := by
+  have := subset_zeroStrong S
+  choose I hI₁ hI₂ using this
+  refine ⟨⟨fun i => if h : i < S.max then I ⟨i, h, rfl⟩ else 0, ?_, ?_⟩⟩
+  · intro i hi
+    simp only [dif_pos hi]
+    exact hI₁ _
+  · intro i hi
+    simp only [dif_pos hi]
+    exact hI₂ _
+
+structure WeakZeroSpec : Type u where
+  max : κ
+  f : κ → κ
+  σ : ZeroSpec
+
+def WeakZeroSpec.Specifies (W : WeakZeroSpec) (S : Support 0) : Prop :=
+  ∃ (T : Support 0) (F : SupportHom S T),
+    ZeroStrong T ∧ W.max = S.max ∧ W.f = F.f ∧ W.σ = zeroSpec T
+
+theorem hasWeakZeroSpec (S : Support 0) : ∃ W : WeakZeroSpec, W.Specifies S := by
+  obtain ⟨F⟩ := exists_hom_zeroStrong S
+  refine ⟨⟨S.max, F.f, zeroSpec (Enumeration.ofSet (zeroStrong _) (zeroStrong_small S.small))⟩, ?_⟩
+  exact ⟨(Enumeration.ofSet (zeroStrong _) (zeroStrong_small S.small)), F,
+    zeroStrong_zeroStrong S, rfl, rfl, rfl⟩
+
+theorem orbit_eq_of_weakSpec_eq (S T : Support (0 : Λ)) (W : WeakZeroSpec)
+    (hS : W.Specifies S) (hT : W.Specifies T) :
+    SupportOrbit.mk S = SupportOrbit.mk T := by
+  obtain ⟨S', FS, hS', hWS, hFS, hSσ⟩ := hS
+  obtain ⟨T', FT, hT', hWT, hFT, hTσ⟩ := hT
+  obtain ⟨ρ, hρ⟩ := exists_convertAllowable hS' hT' (hSσ.symm.trans hTσ)
+  suffices : ρ • S = T
+  · symm
+    rw [← SupportOrbit.mem_def, SupportOrbit.mem_mk_iff]
+    exact ⟨ρ, this⟩
+  refine Enumeration.ext' (hWS.symm.trans hWT) ?_
+  intro i hS hT
+  have := support_f_congr hρ (W.f i) (hFS ▸ FS.hf i hS)
+  rw [Enumeration.smul_f] at this ⊢
+  rw [FS.f_eq i hS, FT.f_eq i hT]
+  simp only [← hFS, ← hFT]
+  exact this
+
+noncomputable def weakZeroSpec (o : SupportOrbit (0 : Λ)) : WeakZeroSpec :=
+  (hasWeakZeroSpec o.out).choose
+
+noncomputable def weakZeroSpec_specifies (o : SupportOrbit (0 : Λ)) :
+    (weakZeroSpec o).Specifies o.out :=
+  (hasWeakZeroSpec o.out).choose_spec
+
+theorem weakZeroSpec_injective : Function.Injective weakZeroSpec := by
+  intro o₁ o₂ h
+  have := orbit_eq_of_weakSpec_eq o₁.out o₂.out _
+    (weakZeroSpec_specifies o₁) (h ▸ weakZeroSpec_specifies o₂)
+  rw [SupportOrbit.eq_mk_of_mem (SupportOrbit.out_mem o₁),
+    SupportOrbit.eq_mk_of_mem (SupportOrbit.out_mem o₂), this]
+
+theorem mk_supportOrbit_zero_le' : #(SupportOrbit 0) ≤ #WeakZeroSpec :=
+  ⟨⟨weakZeroSpec, weakZeroSpec_injective⟩⟩
+
+def WeakZeroSpec.decompose (W : WeakZeroSpec) :
+    κ × (κ → κ) × ZeroSpec :=
+  (W.max, W.f, W.σ)
+
+theorem WeakZeroSpec.decompose_injective : Function.Injective WeakZeroSpec.decompose := by
+  rintro ⟨m₁, f₁, σ₁⟩ ⟨m₂, f₂, σ₂⟩ h
+  cases h
+  rfl
+
+theorem mk_supportOrbit_zero_le : #(SupportOrbit 0) < #μ := by
+  refine mk_supportOrbit_zero_le'.trans_lt ?_
+  refine (mk_le_of_injective WeakZeroSpec.decompose_injective).trans_lt ?_
+  simp only [mk_prod, lift_id, mk_pi, prod_const]
+  refine mul_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le Params.κ_lt_μ
+    (mul_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le ?_ mk_zeroSpec)
+  rw [Cardinal.power_self_eq Params.κ_isRegular.aleph0_le]
+  exact Params.μ_isStrongLimit.2 #κ Params.κ_lt_μ
+
+def zeroExtension' {members : Extensions} : Semitangle.Preference members → Set Atom
+  | Semitangle.Preference.base atoms _ => atoms
+  | Semitangle.Preference.proper γ _ _ => (not_ltLevel γ).elim
+
+def zeroExtension (t : NewTSet) : Set Atom :=
+  zeroExtension' t.val.pref
+
+theorem zeroExtension_injective : Function.Injective zeroExtension := by
+  rintro ⟨⟨m₁, p₁⟩, ht₁⟩ ⟨⟨m₂, p₂⟩, ht₂⟩ h
+  refine Subtype.coe_injective ?_
+  have : m₁ = m₂
+  · funext γ hγ
+    cases not_ltLevel γ
+  cases this
+  simp only [Semitangle.mk.injEq, heq_eq_eq, true_and]
+  cases p₁
+  case proper β _ _ _ =>
+    cases not_ltLevel β
+  case base atoms _ =>
+    cases p₂
+    case proper β _ _ _ =>
+      cases not_ltLevel β
+    case base atoms _ =>
+      cases h
+      rfl
+
+theorem zeroExtension_smul (t : NewTSet) (ρ : Allowable (0 : Λ)) :
+    zeroExtension (ρ • t) = ρ • zeroExtension t := by
+  obtain ⟨⟨m, p⟩, ht⟩ := t
+  cases p
+  case proper β _ _ _ =>
+    cases not_ltLevel β
+  case base atoms _ =>
+    rfl
+
+theorem supports_zeroExtension (S : Support (0 : Λ)) (t : NewTSet)
+    (h : Supports (Allowable (0 : Λ)) S.carrier t) :
+    Supports (Allowable (0 : Λ)) S.carrier (zeroExtension t) := by
+  intro ρ hρ
+  rw [← zeroExtension_smul]
+  exact congr_arg zeroExtension (h ρ hρ)
+
+theorem mk_supports_disjoint (S : Support (0 : Λ)) (hS : DisjointSupport S.carrier) :
+    #{e : Set Atom | MulAction.Supports (Allowable (0 : Λ)) S.carrier e} ≤ 2 ^ #κ := by
+  refine (mk_le_of_injective (info_injective S hS)).trans ?_
+  simp only [mk_prod, mk_set, lift_id', mk_fintype, Fintype.card_prop, Nat.cast_ofNat, lift_ofNat]
+  refine mul_le_of_le le_rfl ?_ ?_
+  · refine self_le_power 2 ?_
+    exact Cardinal.one_le_aleph0.trans Params.κ_isRegular.aleph0_le
+  · exact Params.κ_isRegular.aleph0_le.trans (cantor #κ).le
+
+theorem mk_supports' (S : Support (0 : Λ)) :
+    #{e : Set Atom | MulAction.Supports (Allowable (0 : Λ)) S.carrier e} ≤ 2 ^ #κ := by
+  have := mk_supports_disjoint
+    (Enumeration.ofSet (disjointSupport S.carrier S.small)
+      (disjointSupport_small S.carrier S.small)) ?_
+  swap
+  · rw [Enumeration.ofSet_coe]
+    exact disjointSupport_disjointSupport _ _
+  refine le_trans ?_ this
+  refine mk_subtype_le_of_subset ?_
+  intro e he ρ hρ
+  refine he ρ ?_
+  intro c hc
+  refine disjointSupport_supports S.carrier S.small c hc ρ ?_
+  intro d hd
+  rw [Enumeration.ofSet_coe] at hρ
+  exact hρ hd
+
+theorem mk_supports (S : Support (0 : Λ)) :
+    #{t : NewTSet | MulAction.Supports (Allowable (0 : Λ)) S.carrier t} ≤ 2 ^ #κ := by
+  refine le_trans ?_ (mk_supports' S)
+  refine mk_le_of_injective (f := fun t => ⟨zeroExtension t, ?_⟩) ?_
+  · exact supports_zeroExtension S t t.prop
+  · intro t₁ t₂ h
+    exact Subtype.coe_injective (zeroExtension_injective (congr_arg Subtype.val h))
+
+noncomputable def codeSurjection
+    (x : (o : SupportOrbit (0 : Λ)) ×
+      {t : NewTSet | MulAction.Supports (Allowable (0 : Λ)) o.out.carrier t}) :
+    CodingFunction 0 :=
+  CodingFunction.code x.1.out x.2 x.2.prop
+
+theorem codeSurjection_surjective : Function.Surjective codeSurjection := by
+  intro χ
+  obtain ⟨S, hS⟩ := χ.dom_nonempty
+  have := (SupportOrbit.mk S).out_mem
+  rw [SupportOrbit.mem_mk_iff] at this
+  obtain ⟨ρ, hρ⟩ := this
+  dsimp only at hρ
+  have hS' : (SupportOrbit.mk S).out ∈ χ.decode.Dom
+  · have := χ.smul_mem ρ hS
+    rwa [hρ] at this
+  refine ⟨⟨SupportOrbit.mk S, (χ.decode _).get hS', χ.supports_decode _ _⟩, ?_⟩
+  simp only [codeSurjection]
+  exact (CodingFunction.eq_code hS').symm
+
+theorem mk_codingFunction_zero_le : #(CodingFunction 0) < #μ := by
+  refine (mk_le_of_surjective codeSurjection_surjective).trans_lt ?_
+  simp only [coe_zero, coe_setOf, mk_sigma]
+  refine (sum_le_sum _ (fun _ => 2 ^ #κ) ?_).trans_lt ?_
+  · intro o
+    exact mk_supports o.out
+  simp only [sum_const, lift_id]
+  refine mul_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le mk_supportOrbit_zero_le ?_
+  exact Params.μ_isStrongLimit.2 _ Params.κ_lt_μ
 
 end ConNF.Construction

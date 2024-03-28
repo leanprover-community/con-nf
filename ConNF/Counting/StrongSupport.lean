@@ -193,6 +193,8 @@ theorem of_lt_indexMax {s : Set (Address β)} (hs : Small s) {i : κ} (hi : i < 
   rw [indexMax, ← Ordinal.typein_lt_typein (· < ·), Ordinal.typein_enum] at hi
   exact hi
 
+-- TODO: Use `Enumeration.ofSet`
+
 noncomputable def indexed {s : Set (Address β)} (hs : Small s) (i : κ) (hi : i < indexMax hs) :
     Address β :=
   (Ordinal.enum (StrongSupportOrderOn s)
