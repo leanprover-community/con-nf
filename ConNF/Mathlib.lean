@@ -10,4 +10,5 @@ import ConNF.Mathlib.Group
 import ConNF.Mathlib.GroupAction
 import ConNF.Mathlib.Support
 import ConNF.Mathlib.Transfer
+import ConNF.Mathlib.Logic.Equiv.PFun
 import ConNF.Mathlib.Logic.Equiv.PartialPerm

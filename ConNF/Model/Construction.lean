@@ -1,6 +1,6 @@
 import ConNF.NewTangle
 import ConNF.Counting
-import ConNF.Model.CountCodingFunction
+import ConNF.Model.CountZero
 
 open Cardinal Function MulAction Set Sum Quiver WithBot
 

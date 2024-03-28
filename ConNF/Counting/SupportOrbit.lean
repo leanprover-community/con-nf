@@ -9,12 +9,14 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}]
 
-def SupportOrbit (β : Λ) [LeLevel β] : Type u :=
+def SupportOrbit (β : Λ) [TangleData β] : Type u :=
   MulAction.orbitRel.Quotient (Allowable β) (Support β)
 
 namespace SupportOrbit
+
+variable {β : Λ} [TangleData β]
 
 /-- The orbit of a given ordered support. -/
 def mk (S : Support β) : SupportOrbit β :=
@@ -85,7 +87,8 @@ theorem eq_mk_of_mem {S : Support β} {o : SupportOrbit β} (h : S ∈ o) : o = 
   h.symm
 
 /-- An orbit of ordered supports is *strong* if it contains a strong support. -/
-def Strong (o : SupportOrbit β) : Prop :=
+def Strong [BasePositions] [Level] [FOAAssumptions] {β : Λ} [LeLevel β]
+    (o : SupportOrbit β) : Prop :=
   ∀ S ∈ o, S.Strong
 
 end SupportOrbit
