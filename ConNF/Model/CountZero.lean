@@ -227,8 +227,12 @@ def ZeroStrong (S : Support 0) : Prop :=
     ⟨zeroPath, inl a⟩ ∈ S
 
 structure ZeroSpec : Type u where
+  /-- The length of the support. -/
+  max : κ
   /-- Positions in a support containing a near-litter. -/
   nearLitters : Set κ
+  /-- Positions in a support containing an atom. -/
+  atoms : Set κ
   /-- For each position in a support containing a near-litter,
   the set of all positions at which another close near-litter occurs. -/
   nearLitterSame : κ → Set κ
@@ -243,7 +247,9 @@ structure ZeroSpec : Type u where
   atomMem : κ → Set κ
 
 def zeroSpec (S : Support 0) : ZeroSpec where
+  max := S.max
   nearLitters := {i | ∃ hi N, S.f i hi = ⟨zeroPath, inr N⟩}
+  atoms := {i | ∃ hi a, S.f i hi = ⟨zeroPath, inl a⟩}
   nearLitterSame i := {j | ∃ hi hj Ni Nj,
     S.f i hi = ⟨zeroPath, inr Ni⟩ ∧ S.f j hj = ⟨zeroPath, inr Nj⟩ ∧ Ni.1 = Nj.1}
   symmDiff i j := {k | ∃ hi hj hk Ni Nj a,
@@ -256,7 +262,8 @@ def zeroSpec (S : Support 0) : ZeroSpec where
 
 section Convert
 
-variable {S T : Support 0} (hS : ZeroStrong S) (hT : ZeroStrong T) (hST : zeroSpec S = zeroSpec T)
+variable {S T : Support (0 : Λ)}
+  (hS : ZeroStrong S) (hT : ZeroStrong T) (hST : zeroSpec S = zeroSpec T)
 
 def ConvertAtom (S T : Support 0) (aS aT : Atom) : Prop :=
   ∃ (i : κ) (hiS : i < S.max) (hiT : i < T.max),
@@ -278,6 +285,36 @@ theorem convertAtom_subsingleton (aS aT aT' : Atom)
   have h₂ := hiT₂'.symm.trans ha₂
   simp only [Address.mk.injEq, inl.injEq, true_and] at h₁ h₂
   rw [h₁, h₂]
+
+theorem convertNearLitter_fst (NS NS' NT NT' : NearLitter) (hN : NS.1 = NS'.1)
+    (h : ConvertNearLitter S T NS NT) (h' : ConvertNearLitter S T NS' NT') : NT.1 = NT'.1 := by
+  obtain ⟨i, hiS₁, hiT₁, hiS₂, hiT₂⟩ := h
+  obtain ⟨i', hiS₁', hiT₁', hiS₂', hiT₂'⟩ := h'
+  have := congr_arg ZeroSpec.nearLitterSame hST
+  dsimp only [zeroSpec] at this
+  obtain ⟨_, _, N₁, N₂, hN₁, hN₂, hN⟩ := (Set.ext_iff.mp (congr_fun this i) i').mp
+    ⟨hiS₁, hiS₁', NS, NS', hiS₂, hiS₂', hN⟩
+  have h₁ := hiT₂.symm.trans hN₁
+  have h₂ := hiT₂'.symm.trans hN₂
+  simp only [Address.mk.injEq, inl.injEq, true_and] at h₁ h₂
+  cases h₁
+  cases h₂
+  exact hN
+
+theorem convertNearLitter_fst' (NS NS' NT NT' : NearLitter) (hN : NT.1 = NT'.1)
+    (h : ConvertNearLitter S T NS NT) (h' : ConvertNearLitter S T NS' NT') : NS.1 = NS'.1 := by
+  obtain ⟨i, hiS₁, hiT₁, hiS₂, hiT₂⟩ := h
+  obtain ⟨i', hiS₁', hiT₁', hiS₂', hiT₂'⟩ := h'
+  have := congr_arg ZeroSpec.nearLitterSame hST
+  dsimp only [zeroSpec] at this
+  obtain ⟨_, _, N₁, N₂, hN₁, hN₂, hN⟩ := (Set.ext_iff.mp (congr_fun this i) i').mpr
+    ⟨hiT₁, hiT₁', NT, NT', hiT₂, hiT₂', hN⟩
+  have h₁ := hiS₂.symm.trans hN₁
+  have h₂ := hiS₂'.symm.trans hN₂
+  simp only [Address.mk.injEq, inl.injEq, true_and] at h₁ h₂
+  cases h₁
+  cases h₂
+  exact hN
 
 theorem convertNearLitter_subsingleton (NS NT NT' : NearLitter)
     (h : ConvertNearLitter S T NS NT) (h' : ConvertNearLitter S T NS NT') : NT = NT' := by
@@ -367,6 +404,57 @@ theorem convertAtom_injective {a b c : Atom}
   simp only [Address.mk.injEq, inl.injEq, true_and] at h₁ h₂
   rw [h₁, h₂]
 
+theorem convertAtom_eq {a a' : Atom} {N N' : NearLitter}
+    (ha : ConvertAtom S T a a') (hN : ConvertNearLitter S T N N') :
+    a' ∈ N' ↔ a ∈ N := by
+  obtain ⟨i, hiS₁, hiT₁, hiS₂, hiT₂⟩ := ha
+  obtain ⟨j, hjS₁, hjT₁, hjS₂, hjT₂⟩ := hN
+  have := congr_arg ZeroSpec.atomMem hST
+  dsimp only [zeroSpec] at this
+  have := Set.ext_iff.mp (congr_fun this i) j
+  simp only [exists_and_left, mem_setOf_eq] at this
+  constructor
+  · intro h
+    obtain ⟨_, _, a'', ha'', N'', hN'', h⟩ := this.mpr ⟨hiT₁, hjT₁, a', hiT₂, N', hjT₂, h⟩
+    have h₁ := ha''.symm.trans hiS₂
+    have h₂ := hN''.symm.trans hjS₂
+    simp only [Address.mk.injEq, inl.injEq, true_and, inr.injEq] at h₁ h₂
+    cases h₁
+    cases h₂
+    exact h
+  · intro h
+    obtain ⟨_, _, a'', ha'', N'', hN'', h⟩ := this.mp ⟨hiS₁, hjS₁, a, hiS₂, N, hjS₂, h⟩
+    have h₁ := ha''.symm.trans hiT₂
+    have h₂ := hN''.symm.trans hjT₂
+    simp only [Address.mk.injEq, inl.injEq, true_and, inr.injEq] at h₁ h₂
+    cases h₁
+    cases h₂
+    exact h
+
+theorem dom_of_interferes {a : Atom} {N₁ N₁' N₂ N₂' : NearLitter}
+    (h : Support.Interferes a N₁ N₂)
+    (hN₁ : ConvertNearLitter S T N₁ N₁') (hN₂ : ConvertNearLitter S T N₂ N₂') :
+    ∃ a', ConvertAtom S T a a' := by
+  obtain ⟨i, hiS₁, hiT₁, hiS₂, _⟩ := hN₁
+  obtain ⟨j, hjS₁, hjT₁, hjS₂, _⟩ := hN₂
+  obtain ⟨k, hk₁, hk₂⟩ := hS a N₁ N₂ ⟨i, hiS₁, hiS₂.symm⟩ ⟨j, hjS₁, hjS₂.symm⟩ h
+  have := congr_arg ZeroSpec.atoms hST
+  dsimp only [zeroSpec] at this
+  obtain ⟨hk₃, a', hk₄⟩ := (Set.ext_iff.mp this k).mp ⟨hk₁, a, hk₂.symm⟩
+  exact ⟨a', k, hk₁, hk₃, hk₂.symm, hk₄⟩
+
+theorem ran_of_interferes {a' : Atom} {N₁ N₁' N₂ N₂' : NearLitter}
+    (h : Support.Interferes a' N₁' N₂')
+    (hN₁ : ConvertNearLitter S T N₁ N₁') (hN₂ : ConvertNearLitter S T N₂ N₂') :
+    ∃ a, ConvertAtom S T a a' := by
+  obtain ⟨i, hiS₁, hiT₁, _, hiT₂⟩ := hN₁
+  obtain ⟨j, hjS₁, hjT₁, _, hjT₂⟩ := hN₂
+  obtain ⟨k, hk₁, hk₂⟩ := hT a' N₁' N₂' ⟨i, hiT₁, hiT₂.symm⟩ ⟨j, hjT₁, hjT₂.symm⟩ h
+  have := congr_arg ZeroSpec.atoms hST
+  dsimp only [zeroSpec] at this
+  obtain ⟨hk₃, a, hk₄⟩ := (Set.ext_iff.mp this k).mpr ⟨hk₁, a', hk₂.symm⟩
+  exact ⟨a, k, hk₃, hk₁, hk₄, hk₂.symm⟩
+
 theorem convert_lawful : (convert hT hST).Lawful := by
   constructor
   case atomMap_injective =>
@@ -374,7 +462,60 @@ theorem convert_lawful : (convert hT hST).Lawful := by
     rw [convert_atomMap_eq hT hST ha, convert_atomMap_eq hT hST hb] at h
     cases h
     exact convertAtom_injective hST ha hb
-  all_goals sorry
+  case atom_mem_iff =>
+    intro a ⟨a', ha⟩ N ⟨N', hN⟩
+    rw [convert_atomMap_eq hT hST ha, convert_nearLitterMap_eq hT hST hN]
+    exact convertAtom_eq hST ha hN
+  case dom_of_mem_symmDiff =>
+    intro a N₁ N₂ hN ⟨N₁', hN₁⟩ ⟨N₂', hN₂⟩ ha
+    exact dom_of_interferes hS hST (Support.Interferes.symmDiff hN ha) hN₁ hN₂
+  case ran_of_mem_symmDiff =>
+    intro a' N₁ N₂ hN ⟨N₁', hN₁⟩ ⟨N₂', hN₂⟩ ha'
+    rw [convert_nearLitterMap_eq hT hST hN₁, convert_nearLitterMap_eq hT hST hN₂] at ha'
+    have hN' := convertNearLitter_fst hST N₁ N₂ N₁' N₂' hN hN₁ hN₂
+    obtain ⟨a, ha⟩ := ran_of_interferes hT hST (Support.Interferes.symmDiff hN' ha') hN₁ hN₂
+    refine ⟨a, ?_⟩
+    rw [← convert_atomMap_eq hT hST ha]
+    exact Part.get_mem _
+  case dom_of_mem_inter =>
+    intro a N₁ N₂ hN ⟨N₁', hN₁⟩ ⟨N₂', hN₂⟩ ha
+    exact dom_of_interferes hS hST (Support.Interferes.inter hN ha) hN₁ hN₂
+  case ran_of_mem_inter =>
+    intro a' N₁ N₂ hN ⟨N₁', hN₁⟩ ⟨N₂', hN₂⟩ ha'
+    rw [convert_nearLitterMap_eq hT hST hN₁, convert_nearLitterMap_eq hT hST hN₂] at ha'
+    have hN' : N₁'.1 ≠ N₂'.1
+    · contrapose! hN
+      exact convertNearLitter_fst' hST N₁ N₂ N₁' N₂' hN hN₁ hN₂
+    obtain ⟨a, ha⟩ := ran_of_interferes hT hST (Support.Interferes.inter hN' ha') hN₁ hN₂
+    refine ⟨a, ?_⟩
+    rw [← convert_atomMap_eq hT hST ha]
+    exact Part.get_mem _
+
+theorem exists_convertAllowable : ∃ ρ : Allowable (0 : Λ), ρ • S = T := by
+  obtain ⟨π, hπ⟩ := zero_foa (convert hT hST) (convert_lawful hS hT hST)
+  refine ⟨toAllowable π, ?_⟩
+  refine Enumeration.ext' ?_ ?_
+  · exact congr_arg ZeroSpec.max hST
+  intro i hiS hiT
+  rw [Enumeration.smul_f]
+  set c := S.f i hiS with hc
+  obtain ⟨A, x⟩ := c
+  cases path_eq_zeroPath A
+  obtain (a | N) := x
+  · refine Address.ext _ _ (path_eq_zeroPath _).symm ?_
+    change inl (π • a) = _
+    have := congr_arg ZeroSpec.atoms hST
+    dsimp only [zeroSpec] at this
+    obtain ⟨_, a', hT'⟩ := (Set.ext_iff.mp this i).mp ⟨hiS, a, hc.symm⟩
+    rw [hπ.map_atom a ⟨a', i, hiS, hiT, hc.symm, hT'⟩,
+      convert_atomMap_eq hT hST ⟨i, hiS, hiT, hc.symm, hT'⟩, hT']
+  · refine Address.ext _ _ (path_eq_zeroPath _).symm ?_
+    change inr (π • N) = _
+    have := congr_arg ZeroSpec.nearLitters hST
+    dsimp only [zeroSpec] at this
+    obtain ⟨_, N', hT'⟩ := (Set.ext_iff.mp this i).mp ⟨hiS, N, hc.symm⟩
+    rw [hπ.map_nearLitter N ⟨N', i, hiS, hiT, hc.symm, hT'⟩,
+      convert_nearLitterMap_eq hT hST ⟨i, hiS, hiT, hc.symm, hT'⟩, hT']
 
 end Convert
 
