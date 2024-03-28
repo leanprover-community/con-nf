@@ -874,11 +874,157 @@ theorem exists_swap (S : Set (Address (0 : Λ))) (hS₁ : Small S) (hS₂ : Disj
 /-! In the following lemmas, `e` is the `⊥`-extension of a `0`-set. -/
 
 theorem mem_iff_mem_of_nearLitter_mem_disjointSupport
-    (S : Set (Address (0 : Λ))) (hS : DisjointSupport S)
+    (S : Set (Address (0 : Λ))) (hS₁ : Small S) (hS₂ : DisjointSupport S)
     (e : Set Atom) (heS : MulAction.Supports (Allowable (0 : Λ)) S e)
     (N : NearLitter) (hN : ⟨zeroPath, inr N⟩ ∈ S)
     (a b : Atom) (ha : a ∈ N) (hb : b ∈ N) : a ∈ e ↔ b ∈ e := by
-    sorry
+  have := exists_swap S hS₁ hS₂ a b ?_ ?_ ?_
+  · obtain ⟨ρ, hρ, rfl⟩ := this
+    have := Set.ext_iff.mp (heS ρ hρ) (ρ • a)
+    rw [smul_mem_smul_set_iff] at this
+    exact this
+  · intro ha'
+    exact hS₂.atom a N ha' hN ha
+  · intro hb'
+    exact hS₂.atom b N hb' hN hb
+  · intro N' hN'
+    obtain (rfl | hNN') := hS₂.nearLitter N N' hN hN'
+    · simp only [ha, hb]
+    · rw [Set.eq_empty_iff_forall_not_mem] at hNN'
+      constructor
+      · intro h
+        cases hNN' a ⟨ha, h⟩
+      · intro h
+        cases hNN' b ⟨hb, h⟩
+
+theorem mem_iff_mem_of_not_nearLitter_mem_disjointSupport
+    (S : Set (Address (0 : Λ))) (hS₁ : Small S) (hS₂ : DisjointSupport S)
+    (e : Set Atom) (heS : MulAction.Supports (Allowable (0 : Λ)) S e)
+    (a b : Atom) (haS : ⟨zeroPath, inl a⟩ ∉ S) (hbS : ⟨zeroPath, inl b⟩ ∉ S)
+    (ha : ∀ N, ⟨zeroPath, inr N⟩ ∈ S → a ∉ N) (hb : ∀ N, ⟨zeroPath, inr N⟩ ∈ S → b ∉ N) :
+    a ∈ e ↔ b ∈ e := by
+  have := exists_swap S hS₁ hS₂ a b haS hbS ?_
+  · obtain ⟨ρ, hρ, rfl⟩ := this
+    have := Set.ext_iff.mp (heS ρ hρ) (ρ • a)
+    rw [smul_mem_smul_set_iff] at this
+    exact this
+  · intro N hN
+    constructor
+    · intro ha'
+      cases ha N hN ha'
+    · intro hb'
+      cases hb N hN hb'
+
+def infoIn (S : Support 0) (e : Set Atom) : Set κ :=
+  {i | ∃ hi, (∃ a, S.f i hi = ⟨zeroPath, inl a⟩ ∧ a ∈ e) ∨
+    (∃ N, S.f i hi = ⟨zeroPath, inr N⟩ ∧ (N : Set Atom) ⊆ e)}
+
+def infoOut (S : Support 0) (e : Set Atom) : Prop :=
+  ∀ a, ⟨zeroPath, inl a⟩ ∉ S → (∀ N, ⟨zeroPath, inr N⟩ ∈ S → a ∉ N) → a ∈ e
+
+theorem atom_mem_infoIn_iff {S : Support 0} {e : Set Atom}
+    {i : κ} {hi : i < S.max} {a : Atom} (ha : ⟨zeroPath, inl a⟩ = S.f i hi) :
+    i ∈ infoIn S e ↔ a ∈ e := by
+  rw [infoIn]
+  aesop
+
+theorem nearLitter_mem_infoIn_iff {S : Support 0} {e : Set Atom}
+    {i : κ} {hi : i < S.max} {N : NearLitter} (hN : ⟨zeroPath, inr N⟩ = S.f i hi) :
+    i ∈ infoIn S e ↔ (N : Set Atom) ⊆ e := by
+  rw [infoIn]
+  aesop
+
+theorem nearLitter_mem_infoIn_iff' {S : Support (0 : Λ)} (hS : DisjointSupport S.carrier)
+    {e : Set Atom} (he : MulAction.Supports (Allowable (0 : Λ)) S.carrier e)
+    {i : κ} {hi : i < S.max} {N : NearLitter} (hN : ⟨zeroPath, inr N⟩ = S.f i hi) :
+    i ∈ infoIn S e ↔ ∃ a ∈ N, a ∈ e := by
+  rw [nearLitter_mem_infoIn_iff hN]
+  constructor
+  · intro hN'
+    obtain ⟨a, ha⟩ := N.nonempty
+    exact ⟨a, ha, hN' ha⟩
+  · rintro ⟨a, haN, hae⟩ b hbN
+    rw [mem_iff_mem_of_nearLitter_mem_disjointSupport
+      S.carrier S.small hS e he N ⟨i, hi, hN⟩ a b haN hbN] at hae
+    exact hae
+
+theorem mk_outside (S : Support (0 : Λ)) :
+    #({a | ⟨zeroPath, inl a⟩ ∈ S} ∪
+      ⋃ (N ∈ {N : NearLitter | ⟨zeroPath, inr N⟩ ∈ S}), N : Set Atom) < #μ := by
+  refine (Cardinal.mk_union_le _ _).trans_lt ?_
+  refine add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le ?_ ?_
+  · refine (S.small.preimage (f := fun a => ⟨zeroPath, inl a⟩) ?_).trans Params.κ_lt_μ
+    intro a₁ a₂ h
+    cases h
+    rfl
+  · refine (Cardinal.mk_bUnion_le' _ _).trans_lt ?_
+    refine mul_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le ?_ ?_
+    · refine (S.small.preimage (f := fun N => ⟨zeroPath, inr N⟩) ?_).trans Params.κ_lt_μ
+      intro N₁ N₂ h
+      cases h
+      rfl
+    · simp only [coe_zero, coe_setOf, mem_setOf_eq, SetLike.coe_sort_coe, mk_nearLitter'']
+      refine (ciSup_le' (fun _ => le_rfl)).trans_lt Params.κ_lt_μ
+
+theorem exists_atom_outside (S : Support (0 : Λ)) :
+    ∃ a, ⟨zeroPath, inl a⟩ ∉ S ∧ (∀ N, ⟨zeroPath, inr N⟩ ∈ S → a ∉ N) := by
+  by_contra h
+  have : ∀ a, True → a ∈
+      {a | ⟨zeroPath, inl a⟩ ∈ S} ∪ ⋃ (N ∈ {N : NearLitter | ⟨zeroPath, inr N⟩ ∈ S}), N
+  · intro a _
+    simp only [coe_zero, mem_setOf_eq, mem_union, mem_iUnion, SetLike.mem_coe, exists_prop]
+    push_neg at h
+    by_cases ha : ⟨zeroPath, inl a⟩ ∈ S
+    · exact Or.inl ha
+    · exact Or.inr (h a ha)
+  have := mk_subtype_le_of_subset this
+  erw [Cardinal.mk_univ] at this
+  have := this.trans_lt (mk_outside S)
+  simp only [mk_atom, lt_self_iff_false] at this
+
+theorem infoOut_iff {S : Support (0 : Λ)} (hS : DisjointSupport S.carrier)
+    {e : Set Atom} (he : MulAction.Supports (Allowable (0 : Λ)) S.carrier e) :
+    infoOut S e ↔
+      ∃ a, ⟨zeroPath, inl a⟩ ∉ S ∧ (∀ N, ⟨zeroPath, inr N⟩ ∈ S → a ∉ N) ∧ a ∈ e := by
+  constructor
+  · intro h
+    obtain ⟨a, ha₁, ha₂⟩ := exists_atom_outside S
+    exact ⟨a, ha₁, ha₂, h a ha₁ ha₂⟩
+  · rintro ⟨a, ha₁, ha₂, hae⟩ b hb₁ hb₂
+    rw [mem_iff_mem_of_not_nearLitter_mem_disjointSupport
+      S.carrier S.small hS e he a b ha₁ hb₁ ha₂ hb₂] at hae
+    exact hae
+
+theorem info_injective (S : Support (0 : Λ)) (hS : DisjointSupport S.carrier) (e₁ e₂ : Set Atom)
+    (h₁ : MulAction.Supports (Allowable (0 : Λ)) S.carrier e₁)
+    (h₂ : MulAction.Supports (Allowable (0 : Λ)) S.carrier e₂)
+    (hei : infoIn S e₁ = infoIn S e₂)
+    (heo : infoOut S e₁ ↔ infoOut S e₂) :
+    e₁ = e₂ := by
+  ext a : 1
+  by_cases ha : ⟨zeroPath, inl a⟩ ∈ S
+  · obtain ⟨i, hi, ha⟩ := ha
+    have := Set.ext_iff.mp hei i
+    rw [atom_mem_infoIn_iff ha, atom_mem_infoIn_iff ha] at this
+    exact this
+  by_cases ha' : ∃ N, ⟨zeroPath, inr N⟩ ∈ S ∧ a ∈ N
+  · obtain ⟨N, ⟨i, hi, hN⟩, haN⟩ := ha'
+    have := Set.ext_iff.mp hei i
+    constructor
+    · intro hae
+      rw [nearLitter_mem_infoIn_iff' hS h₁ hN, nearLitter_mem_infoIn_iff hN] at this
+      exact this.mp ⟨a, haN, hae⟩ haN
+    · intro hae
+      rw [nearLitter_mem_infoIn_iff hN, nearLitter_mem_infoIn_iff' hS h₂ hN] at this
+      exact this.mpr ⟨a, haN, hae⟩ haN
+  push_neg at ha'
+  · constructor
+    · intro hae
+      rw [infoOut_iff hS h₁, infoOut] at heo
+      exact heo.mp ⟨a, ha, ha', hae⟩ a ha ha'
+    · intro hae
+      rw [infoOut, infoOut_iff hS h₂] at heo
+      exact heo.mpr ⟨a, ha, ha', hae⟩ a ha ha'
 
 theorem mk_supportOrbit_zero_le : #(SupportOrbit 0) < #μ := sorry
 
