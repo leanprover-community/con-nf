@@ -1875,6 +1875,58 @@ theorem allowable_of_smulFuzz_step' (α : Λ) (ihs : (β : Λ) → β < α → I
     rw [comp_apply, Equiv.apply_symm_apply]
     rfl
 
+theorem eq_toPretangle_of_mem_step' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) (hβ : β < α) (t₁ : (buildStep α ihs h).TSet) (t₂ : Pretangle β)
+    (ht₂ : t₂ ∈ Pretangle.ofCoe ((buildStep α ihs h).toPretangle t₁) β (coe_lt_coe.mpr hβ)) :
+    ∃ t₂' : (ihs β hβ).TSet, t₂ = (ihs β hβ).toPretangle t₂' := by
+  change t₂ ∈ Pretangle.ofCoe (Pretangle.toCoe _) β (coe_lt_coe.mpr hβ) at ht₂
+  simp only [exists_and_right, Pretangle.ofCoe_toCoe, mem_setOf_eq] at ht₂
+  obtain ⟨t₂', _, ht₂'⟩ := ht₂
+  exact ⟨t₂', ht₂'.symm⟩
+
+theorem toPretangle_ext_step' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) (hβ : β < α) (t₁ t₂ : (buildStep α ihs h).TSet)
+    (ht : ∀ t : Pretangle β,
+      t ∈ Pretangle.ofCoe ((buildStep α ihs h).toPretangle t₁) β (coe_lt_coe.mpr hβ) ↔
+      t ∈ Pretangle.ofCoe ((buildStep α ihs h).toPretangle t₂) β (coe_lt_coe.mpr hβ)) :
+    (buildStep α ihs h).toPretangle t₁ = (buildStep α ihs h).toPretangle t₂ := by
+  suffices : t₁ = t₂
+  · rw [this]
+  letI : Level := ⟨α⟩
+  letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+  exact NewTSet.ext β t₁ t₂ ht
+
+noncomputable def singleton_step' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) (hβ : β < α) :
+    (ihs β hβ).TSet → (buildStep α ihs h).TSet :=
+  letI : Level := ⟨α⟩
+  letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+  newSingleton β
+
+theorem singleton_step'_spec (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) (hβ : β < α) (t : (ihs β hβ).TSet) :
+    Pretangle.ofCoe ((buildStep α ihs h).toPretangle (singleton_step' α ihs h β hβ t)) β
+      (coe_lt_coe.mpr hβ) = {(ihs β hβ).toPretangle t} :=
+  letI : Level := ⟨α⟩
+  letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+  NewTSet.newSingleton_toPretangle β t
+
 theorem buildStep_prop (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     IHProp α (buildStepFn α ihs h) := by
@@ -1891,10 +1943,28 @@ theorem buildStep_prop (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   · exact smul_fuzz α ihs h
   · exact smul_fuzz_bot α ihs h
   · exact allowable_of_smulFuzz_step' α ihs h
-  · sorry
-  · sorry
-  · sorry
-  · sorry
+  · intro β hβ
+    rw [buildStepFn_eq, buildStepFn_lt α ihs h β hβ]
+    exact eq_toPretangle_of_mem_step' α ihs h β hβ
+  · intro β hβ
+    rw [buildStepFn_eq]
+    exact toPretangle_ext_step' α ihs h β hβ
+  · intro β hβ
+    rw [buildStepFn_eq, buildStepFn_lt α ihs h β hβ]
+    exact ⟨singleton_step' α ihs h β hβ, singleton_step'_spec α ihs h β hβ⟩
+  · by_cases hα : α = 0
+    · cases hα
+      rw [buildStepFn_eq]
+      letI : Level := ⟨0⟩
+      letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+      letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+      letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+      letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+      exact zeroTangleData_subsingleton _ _ _ _ _ _ _
+        (fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects)
+    · have h0 := lt_of_le_of_ne (Params.Λ_zero_le α) (Ne.symm hα)
+      rw [buildStepFn_lt α ihs h 0 h0]
+      exact (h 0 h0).step_zero
 
 structure IHCumul (α : Λ) where
   ih (β : Λ) (hβ : β ≤ α) : IH β
