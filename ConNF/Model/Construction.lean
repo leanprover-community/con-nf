@@ -1579,10 +1579,87 @@ theorem buildStepFn_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     buildStepFn α ihs h β hβ.le = ihs β hβ := by
   rw [buildStepFn, dif_neg (ne_of_lt hβ)]
 
+theorem canCons_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (β : Λ) (hβ : β < α) :
+    ∃ f : (buildStep α ihs h).Allowable →* (ihs β hβ).Allowable,
+    ∀ ρ, Tree.comp (Hom.toPath (coe_lt_coe.mpr hβ)) ((buildStep α ihs h).allowableToStructPerm ρ) =
+      (ihs β hβ).allowableToStructPerm (f ρ) := by
+  letI : Level := ⟨α⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
+  refine ⟨⟨⟨fun ρ => ρ.val β, rfl⟩, fun _ _ => rfl⟩, ?_⟩
+  intro ρ
+  exact NewAllowable.comp_toPath_toStructPerm _ _
+
+theorem canConsBot_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
+    ∃ f : (buildStep α ihs h).Allowable →* NearLitterPerm,
+    ∀ ρ, (buildStep α ihs h).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = f ρ := by
+  letI : Level := ⟨α⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  exact ⟨⟨⟨fun ρ => ρ.val ⊥, rfl⟩, fun _ _ => rfl⟩, fun _ => rfl⟩
+
+theorem pos_lt_pos_atom (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (t : IH.Tangle (buildStep α ihs h)) {A : ExtendedIndex α} {a : Atom} :
+    letI := (buildStep α ihs h).tangleData
+    ⟨A, inl a⟩ ∈ TangleCoe.support t →
+    TangleCoe.set t ≠ (buildStep α ihs h).typedAtom a →
+    pos a < (buildStep α ihs h).pos ((IH.tangleEquiv (buildStep α ihs h)) t) := by
+  letI : Level := ⟨α⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+  letI := (buildStep α ihs h).tangleData
+  intro h₁ h₂
+  by_contra! h₃
+  refine NewTangle.pos_not_mem_deny (mk_tSet_step α ihs h) ⟨TangleCoe.set t, TangleCoe.support t⟩ ?_
+  refine ⟨pos a, ?_, h₃⟩
+  exact Or.inl (Or.inl (Or.inl ⟨A, a, h₁, h₂, rfl⟩))
+
+theorem pos_lt_pos_nearLitter (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
+    (t : IH.Tangle (buildStep α ihs h)) {A : ExtendedIndex α} {N : NearLitter} :
+    letI := (buildStep α ihs h).tangleData
+    ⟨A, inr N⟩ ∈ TangleCoe.support t →
+    TangleCoe.set t ≠ (buildStep α ihs h).typedNearLitter N →
+    pos N < (buildStep α ihs h).pos ((IH.tangleEquiv (buildStep α ihs h)) t) := by
+  letI : Level := ⟨α⟩
+  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
+  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
+  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
+  letI := (buildStep α ihs h).tangleData
+  intro h₁ h₂
+  by_contra! h₃
+  refine NewTangle.pos_not_mem_deny (mk_tSet_step α ihs h) ⟨TangleCoe.set t, TangleCoe.support t⟩ ?_
+  refine ⟨pos N, ?_, h₃⟩
+  exact Or.inl (Or.inl (Or.inr ⟨A, N, h₁, h₂, rfl⟩))
+
 theorem buildStep_prop (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
-    IHProp α (buildStepFn α ihs h) :=
-  sorry
+    IHProp α (buildStepFn α ihs h) := by
+  constructor
+  · intro β hβ
+    rw [buildStepFn_eq, buildStepFn_lt α ihs h β hβ]
+    exact canCons_step α ihs h β hβ
+  · rw [buildStepFn_eq]
+    exact canConsBot_step α ihs h
+  · rw [buildStepFn_eq]
+    exact pos_lt_pos_atom α ihs h
+  · rw [buildStepFn_eq]
+    exact pos_lt_pos_nearLitter α ihs h
+  · sorry
+  · sorry
+  · sorry
+  · sorry
+  · sorry
+  · sorry
+  · sorry
 
 structure IHCumul (α : Λ) where
   ih (β : Λ) (hβ : β ≤ α) : IH β

@@ -17,23 +17,15 @@ variable [Params.{u}] [Level] [BasePositions] [TangleDataLt] [PositionedTanglesL
 
 def posBound (t : NewTSet) (S : Support α) : Set μ :=
   {ν | ∃ (A : ExtendedIndex α) (a : Atom), ⟨A, inl a⟩ ∈ S ∧
-    ∃ (β : TypeIndex) (_ : LtLevel β) (s : Tangle β) (γ : Λ) (_ : LtLevel γ) (hβγ : β ≠ γ),
-    a.1 = fuzz hβγ s ∧ ν = pos s} ∪
+    t ≠ newTypedAtom a ∧ ν = pos a} ∪
   {ν | ∃ (A : ExtendedIndex α) (N : NearLitter), ⟨A, inr N⟩ ∈ S ∧
-    ∃ (β : TypeIndex) (_ : LtLevel β) (s : Tangle β) (γ : Λ) (_ : LtLevel γ) (hβγ : β ≠ γ),
-    Set.Nonempty ((N : Set Atom) ∩ (fuzz hβγ s).toNearLitter) ∧ ν = pos s} ∪
+    t ≠ newTypedNearLitter N ∧ ν = pos N} ∪
   {ν | ∃ a : Atom, t = newTypedAtom a ∧ ν = pos a} ∪
   {ν | ∃ N : NearLitter, t = newTypedNearLitter N ∧ ν = pos N}
 
 def posBound' (t : NewTSet) (S : Support α) : Set μ :=
-  (⋃ (c ∈ S) (A ∈ {A | c.1 = A}) (a ∈ {a | c.2 = inl a}) (β : TypeIndex) (_ : LtLevel β)
-    (γ : Λ) (_ : LtLevel γ) (hβγ : β ≠ γ)
-    (s : Tangle β) (_ : s ∈ {s | a.1 = fuzz hβγ s}),
-    {ν | ν = pos s}) ∪
-  (⋃ (c ∈ S) (A ∈ {A | c.1 = A}) (N ∈ {N | c.2 = inr N}) (β : TypeIndex) (_ : LtLevel β)
-    (γ : Λ) (_ : LtLevel γ)(hβγ : β ≠ γ)
-    (s : Tangle β) (_ : s ∈ {s | Set.Nonempty ((N : Set Atom) ∩ (fuzz hβγ s).toNearLitter)}),
-    {ν | ν = pos s}) ∪
+  (⋃ (c ∈ S) (A ∈ {A | c.1 = A}) (a ∈ {a | c.2 = inl a ∧ t ≠ newTypedAtom a}), {pos a}) ∪
+  (⋃ (c ∈ S) (A ∈ {A | c.1 = A}) (N ∈ {N | c.2 = inr N ∧ t ≠ newTypedNearLitter N}),{pos N}) ∪
   (⋃ (a ∈ {a | t = newTypedAtom a}), {pos a}) ∪
   (⋃ (N ∈ {a | t = newTypedNearLitter a}), {pos N})
 
@@ -41,21 +33,19 @@ theorem posBound_eq_posBound' (t : NewTSet) (S : Support α) : posBound t S = po
   rw [posBound, posBound']
   refine congr_arg₂ _ (congr_arg₂ _ (congr_arg₂ _ ?_ ?_) ?_) ?_
   · ext ν
-    simp only [ne_eq, exists_and_right, mem_setOf_eq, setOf_eq_eq_singleton', mem_singleton_iff,
-      setOf_eq_eq_singleton, iUnion_exists, iUnion_iUnion_eq_left, mem_iUnion, exists_prop]
+    simp only [mem_setOf_eq, setOf_eq_eq_singleton', mem_singleton_iff, mem_iUnion]
     constructor
-    · rintro ⟨A, a, haS, β, _, s, ⟨γ, _, hβγ, has⟩, hν⟩
-      exact ⟨⟨A, inl a⟩, haS, a, rfl, β, inferInstance, γ, inferInstance, hβγ, s, has, hν⟩
-    · rintro ⟨⟨A, x⟩, haS, a, rfl, β, _, γ, _, hβγ, s, has, hν⟩
-      exact ⟨A, a, haS, β, inferInstance, s, ⟨γ, inferInstance, hβγ, has⟩, hν⟩
+    · rintro ⟨A, a, haS, ht, rfl⟩
+      exact ⟨⟨A, inl a⟩, haS, A, rfl, a, ⟨rfl, ht⟩, rfl⟩
+    · rintro ⟨⟨A, _⟩, haS, A, rfl, a, ⟨rfl, ht⟩, rfl⟩
+      exact ⟨A, a, haS, ht, rfl⟩
   · ext ν
-    simp only [ne_eq, exists_and_right, mem_setOf_eq, setOf_eq_eq_singleton', mem_singleton_iff,
-      setOf_eq_eq_singleton, iUnion_exists, iUnion_iUnion_eq_left, mem_iUnion, exists_prop]
+    simp only [mem_setOf_eq, setOf_eq_eq_singleton', mem_singleton_iff, mem_iUnion]
     constructor
-    · rintro ⟨A, N, hNS, β, _, s, ⟨γ, _, hβγ, hNs⟩, hν⟩
-      exact ⟨⟨A, inr N⟩, hNS, N, rfl, β, inferInstance, γ, inferInstance, hβγ, s, hNs, hν⟩
-    · rintro ⟨⟨A, x⟩, hNS, N, rfl, β, _, γ, _, hβγ, s, hNs, hν⟩
-      exact ⟨A, N, hNS, β, inferInstance, s, ⟨γ, inferInstance, hβγ, hNs⟩, hν⟩
+    · rintro ⟨A, N, hNS, ht, rfl⟩
+      exact ⟨⟨A, inr N⟩, hNS, A, rfl, N, ⟨rfl, ht⟩, rfl⟩
+    · rintro ⟨⟨A, _⟩, hNS, A, rfl, N, ⟨rfl, ht⟩, rfl⟩
+      exact ⟨A, N, hNS, ht, rfl⟩
   · ext ν
     simp only [mem_setOf_eq, mem_iUnion, mem_singleton_iff, exists_prop]
   · ext ν
@@ -66,46 +56,18 @@ theorem small_posBound (t : NewTSet) (S : Support α) : Small (posBound t S) := 
   refine Small.union (Small.union (Small.union ?_ ?_) ?_) ?_
   · refine Small.bUnion S.small (fun c _ => ?_)
     refine Small.bUnion (by simp only [setOf_eq_eq_singleton', small_singleton]) (fun A _ => ?_)
-    refine Small.bUnion ?_ (fun a _ => ?_)
-    · refine Set.Subsingleton.small ?_
-      intro a ha b hb
-      cases ha.symm.trans hb
-      rfl
-    refine small_iUnion (by rw [mk_typeIndex]; exact Params.Λ_lt_κ) (fun β => ?_)
-    refine small_iUnion_Prop (fun _ => ?_)
-    refine small_iUnion Params.Λ_lt_κ (fun γ => ?_)
-    refine small_iUnion_Prop (fun _ => ?_)
-    refine small_iUnion_Prop (fun hβγ => ?_)
-    refine Small.bUnion ?_ ?_
-    · refine Set.Subsingleton.small ?_
-      intro s₁ h₁ s₂ h₂
-      exact fuzz_injective _ (h₁.symm.trans h₂)
-    · simp only [ne_eq, mem_setOf_eq, setOf_eq_eq_singleton, small_singleton, forall_exists_index,
-        implies_true, forall_const]
+    refine Small.bUnion ?_ (fun _ _ => small_singleton _)
+    refine Set.Subsingleton.small ?_
+    intro a ha b hb
+    cases ha.1.symm.trans hb.1
+    rfl
   · refine Small.bUnion S.small (fun c _ => ?_)
     refine Small.bUnion (by simp only [setOf_eq_eq_singleton', small_singleton]) (fun A _ => ?_)
-    refine Small.bUnion ?_ (fun N _ => ?_)
-    · refine Set.Subsingleton.small ?_
-      intro N hN N hN'
-      cases hN.symm.trans hN'
-      rfl
-    refine small_iUnion (by rw [mk_typeIndex]; exact Params.Λ_lt_κ) (fun β => ?_)
-    refine small_iUnion_Prop (fun _ => ?_)
-    refine small_iUnion Params.Λ_lt_κ (fun γ => ?_)
-    refine small_iUnion_Prop (fun _ => ?_)
-    refine small_iUnion_Prop (fun hβγ => ?_)
-    refine Small.bUnion ?_ ?_
-    · suffices : Small {L : Litter | Set.Nonempty ((N : Set Atom) ∩ L.toNearLitter)}
-      · refine this.image_subset (f := fuzz hβγ) (fuzz_injective hβγ) ?_
-        simp only [Litter.coe_toNearLitter, image_subset_iff, preimage_setOf_eq, setOf_subset_setOf,
-          imp_self, implies_true]
-      refine ((Small.image N.2.prop (f := fun a => a.1)).union (small_singleton N.1)).mono ?_
-      rintro L ⟨a, ha, rfl⟩
-      by_cases ha' : a.1 = N.1
-      · exact Or.inr ha'
-      · exact Or.inl ⟨a, Or.inr ⟨ha, ha'⟩, rfl⟩
-    · simp only [ne_eq, mem_setOf_eq, setOf_eq_eq_singleton, small_singleton, forall_exists_index,
-        implies_true, forall_const]
+    refine Small.bUnion ?_ (fun _ _ => small_singleton _)
+    refine Set.Subsingleton.small ?_
+    intro N hN N hN'
+    cases hN.1.symm.trans hN'.1
+    rfl
   · refine Small.bUnion ?_ (fun _ _ => small_singleton _)
     refine Set.Subsingleton.small ?_
     intro a₁ ha₁ a₂ ha₂

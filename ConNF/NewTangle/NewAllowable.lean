@@ -416,19 +416,6 @@ namespace NewAllowable
 
 variable {β γ}
 
-/-   · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
-    refine ⟨Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
-        (Quiver.Hom.toPath <| bot_lt_coe _) • N, ⟨t, ht₁, ?_⟩, ?_⟩
-    · rw [← ρ.prop hβγ, NearLitterPerm.smul_nearLitter_fst, ht₂]
-    · rw [smul_typedNearLitter]
-  · rintro ⟨N, ⟨t, ht₁, ht₂⟩, rfl⟩
-    refine ⟨Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)⁻¹
-        (Quiver.Hom.toPath <| bot_lt_coe _) • N, ⟨t, ht₁, ?_⟩, ?_⟩
-    · rw [NearLitterPerm.smul_nearLitter_fst, ht₂, ← ρ.prop hβγ, map_inv,
-        Tree.inv_apply, inv_smul_smul]
-    · rw [smul_typedNearLitter, map_inv, Tree.inv_apply, smul_inv_smul]
- -/
-
 /-- Allowable permutations commute with the `cloud` map. -/
 theorem smul_cloud (ρ : NewAllowable) (s : Set (TSet β)) (hβγ : β ≠ γ) :
     ρ.val γ • cloud hβγ s = cloud hβγ (ρ.val β • s) := by
