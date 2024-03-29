@@ -276,7 +276,7 @@ theorem isAllowable_pow (h : ρ.IsAllowable) (n : ℕ) : (ρ ^ n).IsAllowable :=
     exact isAllowable_one
   | succ n ih =>
     rw [pow_succ]
-    exact isAllowable_mul h ih
+    exact isAllowable_mul ih h
 
 theorem isAllowable_zpow (h : ρ.IsAllowable) (n : ℤ) : (ρ ^ n).IsAllowable := by
   cases n with

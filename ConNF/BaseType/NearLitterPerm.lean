@@ -115,7 +115,7 @@ instance : Pow NearLitterPerm ℕ :=
       | zero =>
           exact (1 : NearLitterPerm).near
       | succ n hn =>
-          have := (π * ⟨π.atomPerm ^ n, π.litterPerm ^ n, hn⟩).near
+          have := (⟨π.atomPerm ^ n, π.litterPerm ^ n, hn⟩ * π).near
           exact this⟩⟩
 
 /-- We can raise near-litter permutations to an integer power since we can do this to
