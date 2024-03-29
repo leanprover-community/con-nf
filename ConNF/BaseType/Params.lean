@@ -209,7 +209,7 @@ noncomputable def sub_of_isWellOrder {α : Type _}
     (Ordinal.typein (· < ·) x - Ordinal.typein (· < ·) y)
       ((Ordinal.sub_le_self _ _).trans_lt (Ordinal.typein_lt_type _ _))
 
-noncomputable example : Params.{0} where
+noncomputable def minimalParams : Params.{0} where
   Λ := ℕ
   Λ_zero_le := zero_le
   Λ_isLimit := by

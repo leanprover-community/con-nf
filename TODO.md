@@ -13,3 +13,4 @@
 - Make `Constrains` use `InflexibleBot` etc.
 - Fix the imports of the main lean files (e.g. `Counting.lean`).
 - Try to remove typed atoms.
+- Add `noncomputable section` everywhere.

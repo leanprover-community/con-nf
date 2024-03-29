@@ -1,4 +1,10 @@
-import ConNF.Model.CountZero
 import ConNF.Model.Construction
 import ConNF.Model.BasePositions
-import ConNF.Model.Redefinitions
+
+universe u
+
+namespace ConNF
+
+variable [Params.{u}]
+
+end ConNF

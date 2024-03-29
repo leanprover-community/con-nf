@@ -1017,7 +1017,7 @@ theorem mk_outside (S : Support (0 : Λ)) :
       cases h
       rfl
     · simp only [coe_zero, coe_setOf, mem_setOf_eq, SetLike.coe_sort_coe, mk_nearLitter'']
-      refine (ciSup_le' (fun _ => le_rfl)).trans_lt Params.κ_lt_μ
+      exact (ciSup_le' (fun _ => le_rfl)).trans_lt Params.κ_lt_μ
 
 theorem exists_atom_outside (S : Support (0 : Λ)) :
     ∃ a, ⟨zeroPath, inl a⟩ ∉ S ∧ (∀ N, ⟨zeroPath, inr N⟩ ∈ S → a ∉ N) := by
