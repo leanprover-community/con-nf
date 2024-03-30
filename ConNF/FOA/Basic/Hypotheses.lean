@@ -100,7 +100,6 @@ theorem Tangle.coe_set [FOAData] (β : Λ) [LeLevel β] (t : Tangle β) :
     t.set = TangleCoe.set t :=
   rfl
 
-@[ext]
 theorem Tangle.ext [d : FOAData] {β : TypeIndex} [i : LeLevel β] (t₁ t₂ : Tangle β)
     (hs : t₁.set = t₂.set) (hS : t₁.support = t₂.support) : t₁ = t₂ := by
   revert d i t₁ t₂

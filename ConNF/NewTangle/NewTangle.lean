@@ -289,6 +289,38 @@ theorem exts_intro (s : Set (TSet β)) (heven : IsEven (Code.mk β s)) :
     (intro s heven).members = extension s :=
   rfl
 
+noncomputable def intro' {β : TypeIndex} [inst : LtLevel β] (s : Set (TSet β)) : Semitangle :=
+  ⟨extension (exists_even_equiv (Code.mk β s)).choose.members,
+    match (exists_even_equiv (Code.mk β s)).choose,
+      (exists_even_equiv (Code.mk β s)).choose_spec with
+    | Code.mk (γ : Λ) t, h => Preference.proper γ
+        (by rw [extension_self]; exact h.2)
+        (by intro δ _ hδ; rw [extension_self, extension_ne _ _ hδ])
+    | Code.mk ⊥ t, _ => Preference.base t (fun δ => rfl)⟩
+
+@[simp]
+theorem ext_intro' {β : Λ} [LtLevel β] (s : Set (TSet β)) :
+    (intro' s).members β = s := by
+  rw [intro']
+  dsimp only
+  set c := (exists_even_equiv (Code.mk β s)).choose with hc
+  clear_value c
+  have hc' := (exists_even_equiv (Code.mk β s)).choose_spec
+  rw [← hc] at hc'
+  obtain ⟨h, hc'⟩ := hc'
+  suffices : extension c.members β = s
+  · cases hc
+    exact this
+  cases h with
+  | refl => rw [extension_self]
+  | cloud_left _ h₁ δ h₂ =>
+    have := h₁.cloudCode h₂
+    cases not_isOdd.mpr hc' this
+  | cloud_right => rfl
+  | cloud_cloud c h₁ δ h₂ _ h₃ =>
+    have := h₁.cloudCode h₂
+    cases not_isOdd.mpr hc' this
+
 end Semitangle
 
 open Semitangle
@@ -518,6 +550,13 @@ theorem toPretangle_smul (ρ : NewAllowable) (t : Semitangle) :
       refine ⟨_, ⟨s, hs, rfl⟩, ?_⟩
       rw [ConNF.toPretangle_smul, SemiallowablePerm.comp_toPath_toStructPerm]
       rfl
+
+theorem smul_intro' {β : Λ} [inst : LtLevel β] (s : Set (TSet β)) (ρ : NewAllowable) :
+    intro' (ρ.val β • s) = ρ • intro' s := by
+  refine Semitangle.ext (γ := β) _ _ ?_
+  rw [NewAllowable.members_smul']
+  change _ = ρ.val β • (intro' s).members β
+  simp only [ext_intro']
 
 end Semitangle
 
@@ -763,5 +802,28 @@ theorem NewTSet.newSingleton_toPretangle
     (β : TypeIndex) [i : LtLevel β] (t : TSet β) :
     Pretangle.ofCoe (NewTSet.toPretangle (newSingleton β t)) β i.elim = {toPretangle t} := by
   rw [newSingleton, newSingleton'_toPretangle, (exists_tangle_lt t).choose_spec]
+
+noncomputable def NewTSet.intro {β : Λ} [LtLevel β] (s : Set (TSet β))
+    (hs : ∃ S : Set (Address α), Small S ∧
+      ∀ ρ : NewAllowable, (∀ c ∈ S, ρ • c = c) → ρ.val β • s = s) :
+    NewTSet :=
+  ⟨Semitangle.intro' s, by
+    obtain ⟨S, h₁, h₂⟩ := hs
+    refine ⟨Enumeration.ofSet S h₁, ?_⟩
+    intro ρ hρ
+    refine Semitangle.ext (γ := β) _ _ ?_
+    rw [← smul_intro', ext_intro', ext_intro']
+    refine h₂ ρ ?_
+    intro c hc
+    refine hρ ?_
+    rw [Enumeration.ofSet_coe]
+    exact hc⟩
+
+@[simp]
+theorem NewTSet.intro_members {β : Λ} [LtLevel β] (s : Set (TSet β))
+    (hs : ∃ S : Set (Address α), Small S ∧
+      ∀ ρ : NewAllowable, (∀ c ∈ S, ρ • c = c) → ρ.val β • s = s) :
+    (intro s hs).val.members β = s :=
+  Semitangle.ext_intro' _
 
 end ConNF

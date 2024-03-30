@@ -2030,7 +2030,7 @@ noncomputable def buildCumulStep (α : Λ) (ihs : ∀ β < α, IHCumul β) : IHC
       ext γ hγ
       rw [buildStepFn_lt _ _ _ _ (hγ.trans_le hβ), ihs_eq]
 
-noncomputable def buildCumul (α : Λ) : IHCumul α :=
-  Params.Λ_isWellOrder.wf.recursion α buildCumulStep
+noncomputable def buildCumul : (α : Λ) → IHCumul α :=
+  Params.Λ_isWellOrder.wf.fix buildCumulStep
 
 end ConNF.Construction
