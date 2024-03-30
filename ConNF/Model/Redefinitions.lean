@@ -210,67 +210,67 @@ theorem tSetEquiv_typedNearLitter (α : Λ) (N : NearLitter) :
   (Construction.typedObjects_cast_typedNearLitter
     α _ _ (tangleData_eq α) _ _ (typedObjects_heq α) N).symm
 
-def allowableConsCoe {α β : Λ} (hβ : (β : TypeIndex) < α) :
+def cons'Coe {α β : Λ} (hβ : (β : TypeIndex) < α) :
     Allowable α → Allowable β :=
   Equiv.cast (by rw [buildCumul_apply_eq]; rfl) ∘
     (((Construction.buildCumul α).prop α le_rfl).canCons β (coe_lt_coe.mp hβ)).choose
 
-theorem allowableConsCoe_spec {α β : Λ} (hβ : (β : TypeIndex) < α) (ρ : Allowable α) :
+theorem cons'Coe_spec {α β : Λ} (hβ : (β : TypeIndex) < α) (ρ : Allowable α) :
     Tree.comp (Hom.toPath hβ) (Allowable.toStructPerm ρ) =
-      Allowable.toStructPerm (allowableConsCoe hβ ρ) := by
+      Allowable.toStructPerm (cons'Coe hβ ρ) := by
   refine ((((Construction.buildCumul α).prop α le_rfl).canCons β
     (coe_lt_coe.mp hβ)).choose_spec ρ).trans ?_
-  unfold ConNF.allowableConsCoe
+  unfold ConNF.cons'Coe
   have h₁ := buildCumul_apply_eq α β (coe_le_coe.mp hβ.le)
   erw [Construction.tangleData_cast_toStructPerm β _ _ (congr_arg Construction.IH.tangleData h₁)]
   rfl
 
-def allowableConsBot {α : Λ} :
+def cons'Bot {α : Λ} :
     Allowable α → NearLitterPerm :=
   ((Construction.buildCumul α).prop α le_rfl).canConsBot.choose
 
-theorem allowableConsBot_spec {α : Λ} (ρ : Allowable α) :
-    Allowable.toStructPerm ρ (Hom.toPath (bot_lt_coe _)) = allowableConsBot ρ :=
+theorem cons'Bot_spec {α : Λ} (ρ : Allowable α) :
+    Allowable.toStructPerm ρ (Hom.toPath (bot_lt_coe _)) = cons'Bot ρ :=
   (((Construction.buildCumul α).prop α le_rfl).canConsBot).choose_spec ρ
 
-def allowableCons' : {α β : TypeIndex} → (h : β < α) → Allowable α → Allowable β
-  | (α : Λ), (β : Λ), h => allowableConsCoe h
-  | (α : Λ), ⊥, _ => allowableConsBot
+def cons'' : {α β : TypeIndex} → (h : β < α) → Allowable α → Allowable β
+  | (α : Λ), (β : Λ), h => cons'Coe h
+  | (α : Λ), ⊥, _ => cons'Bot
   | ⊥, _, h => (not_lt_bot h).elim
 
-theorem allowableCons'_one {α β : TypeIndex} (h : β < α) :
-    allowableCons' h 1 = 1 := by
+theorem cons''_one {α β : TypeIndex} (h : β < α) :
+    cons'' h 1 = 1 := by
   induction α using recBotCoe
   case bot => cases not_lt_bot h
   case coe α =>
     induction β using recBotCoe
-    case bot => simp only [ConNF.allowableCons', ← allowableConsBot_spec, map_one, Tree.one_apply]
+    case bot => simp only [ConNF.cons'', ← cons'Bot_spec, map_one, Tree.one_apply]
     case coe β =>
-      simp [ConNF.allowableCons']
+      simp [ConNF.cons'']
       refine Allowable.toStructPerm_injective β ?_
-      rw [← allowableConsCoe_spec]
+      rw [← cons'Coe_spec]
       simp only [map_one, Tree.comp_one]
 
-theorem allowableCons_mul {α β : TypeIndex} (h : β < α) (ρ₁ ρ₂ : Allowable α) :
-    allowableCons' h (ρ₁ * ρ₂) = allowableCons' h ρ₁ * allowableCons' h ρ₂ := by
+theorem cons'_mul {α β : TypeIndex} (h : β < α) (ρ₁ ρ₂ : Allowable α) :
+    cons'' h (ρ₁ * ρ₂) = cons'' h ρ₁ * cons'' h ρ₂ := by
   induction α using recBotCoe
   case bot => cases not_lt_bot h
   case coe α =>
     induction β using recBotCoe
-    case bot => simp only [ConNF.allowableCons', ← allowableConsBot_spec, map_mul, Tree.mul_apply]
+    case bot => simp only [ConNF.cons'', ← cons'Bot_spec, map_mul, Tree.mul_apply]
     case coe β =>
-      simp [ConNF.allowableCons']
+      simp [ConNF.cons'']
       refine Allowable.toStructPerm_injective β ?_
-      simp only [← allowableConsCoe_spec, map_mul, Tree.comp_mul]
+      simp only [← cons'Coe_spec, map_mul, Tree.comp_mul]
 
-def allowableCons {α β : TypeIndex} (h : β < α) : Allowable α →* Allowable β where
-  toFun := allowableCons' h
-  map_one' := allowableCons'_one h
-  map_mul' := allowableCons_mul h
+def cons' {α β : TypeIndex} (h : β < α) : Allowable α →* Allowable β where
+  toFun := cons'' h
+  map_one' := cons''_one h
+  map_mul' := cons'_mul h
 
-theorem allowableCons_spec {α β : TypeIndex} (hβ : β < α) (ρ : Allowable α) :
+theorem cons'_spec {α β : TypeIndex} (hβ : β < α) (ρ : Allowable α) :
     Tree.comp (Hom.toPath hβ) (Allowable.toStructPerm ρ) =
-      Allowable.toStructPerm (allowableCons hβ ρ) := by
+      Allowable.toStructPerm (cons' hβ ρ) := by
   induction α using recBotCoe
   case bot => cases not_lt_bot hβ
   case coe α =>
@@ -278,24 +278,24 @@ theorem allowableCons_spec {α β : TypeIndex} (hβ : β < α) (ρ : Allowable �
     case bot =>
       funext B
       cases path_eq_nil B
-      simp only [Tree.comp_apply, Path.comp_nil, ConNF.allowableCons, allowableCons',
+      simp only [Tree.comp_apply, Path.comp_nil, ConNF.cons', cons'',
         MonoidHom.coe_mk, OneHom.coe_mk, gt_iff_lt, bot_lt_coe]
-      rw [← allowableConsBot_spec]
+      rw [← cons'Bot_spec]
       rfl
     case coe β =>
-      simp only [ConNF.allowableCons, allowableCons', MonoidHom.coe_mk, OneHom.coe_mk]
-      rw [allowableConsCoe_spec]
+      simp only [ConNF.cons', cons'', MonoidHom.coe_mk, OneHom.coe_mk]
+      rw [cons'Coe_spec]
 
 @[simp]
 theorem allowableIso_val {α β : Λ} (hβ : β < α) (ρ : Allowable α) :
     letI : Level := ⟨α⟩
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
-    (allowableIso α ρ).val β = ConNF.allowableCons (coe_lt_coe.mpr hβ) ρ := by
+    (allowableIso α ρ).val β = ConNF.cons' (coe_lt_coe.mpr hβ) ρ := by
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
   refine Allowable.toStructPerm_injective β ?_
   rw [← NewAllowable.comp_toPath_toStructPerm (allowableIso α ρ) β,
-    ← allowableCons_spec, ← allowableIso_toStructPerm]
+    ← cons'_spec, ← allowableIso_toStructPerm]
   rfl
 
 def comp {α : TypeIndex} : {β : TypeIndex} → (A : Quiver.Path (α : TypeIndex) β) →
@@ -303,7 +303,7 @@ def comp {α : TypeIndex} : {β : TypeIndex} → (A : Quiver.Path (α : TypeInde
   Quiver.Path.rec
     (motive := fun β _ => Allowable α →* Allowable β)
     (MonoidHom.id _)
-    (fun _ h f => (allowableCons h).comp f)
+    (fun _ h f => (cons' h).comp f)
 
 @[simp]
 theorem comp_nil {α : TypeIndex} :
@@ -311,13 +311,13 @@ theorem comp_nil {α : TypeIndex} :
   rfl
 
 @[simp]
-theorem allowableCons_eq {α β : TypeIndex} (h : β < α) :
-    allowableCons h = comp (Hom.toPath h) :=
+theorem comp_toPath {α β : TypeIndex} (h : β < α) :
+    comp (Hom.toPath h) = cons' h :=
   rfl
 
 @[simp]
 theorem comp_cons {α β γ : TypeIndex} (A : Quiver.Path α β) (h : γ < β) :
-    comp (A.cons h) = (comp (Hom.toPath h)).comp (comp A) :=
+    comp (A.cons h) = (cons' h).comp (comp A) :=
   rfl
 
 @[simp]
@@ -335,7 +335,7 @@ theorem comp_toStructPerm {α β : TypeIndex} (A : Quiver.Path α β) (ρ : Allo
   induction A with
   | nil => simp only [comp_nil, MonoidHom.id_apply, Tree.comp_nil]
   | cons A h ih =>
-    rw [Tree.comp_cons, ← ih, allowableCons_spec]
+    rw [Tree.comp_cons, ← ih, cons'_spec]
     rfl
 
 @[simp]
@@ -358,5 +358,19 @@ theorem allowableIso_apply_eq {α β : Λ} (h : (β : TypeIndex) < α) (ρ : All
   rw [← NewAllowable.comp_toPath_toStructPerm (allowableIso α ρ) β,
     ← allowableIso_toStructPerm α ρ]
   rfl
+
+def cons {α β : Λ} (h : β < α) : Allowable α →* Allowable β :=
+  cons' (coe_lt_coe.mpr h)
+
+@[simp]
+theorem cons'_eq_cons {α β : Λ} (h : (β : TypeIndex) < α) :
+    cons' h = cons (coe_lt_coe.mp h) :=
+  rfl
+
+@[simp]
+theorem cons_toStructPerm {α β : Λ} (h : β < α) (ρ : Allowable α) :
+    Allowable.toStructPerm (cons h ρ) =
+      Tree.comp (Hom.toPath (coe_lt_coe.mpr h)) (Allowable.toStructPerm ρ) := by
+  rw [cons, cons'_spec]
 
 end ConNF

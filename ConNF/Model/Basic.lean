@@ -20,7 +20,7 @@ notation:50 tβ:50 " ∈[" h:50 "] " tα:50 => mem h tβ tα
 theorem tSet_mk_aux {β α : Λ} (hβ : β < α) (s : Set (TSet β))
     (hs : ∃ S : Set (Address α), Small S ∧
       ∀ ρ : Allowable α, (∀ c ∈ S, ρ • c = c) →
-      comp (Hom.toPath (coe_lt_coe.mpr hβ)) ρ • s = s) :
+      cons hβ ρ • s = s) :
     letI : Level := ⟨α⟩
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     ∃ S : Set (Address α), Small S ∧
@@ -38,20 +38,40 @@ theorem tSet_mk_aux {β α : Λ} (hβ : β < α) (s : Set (TSet β))
     simp only [MulEquiv.apply_symm_apply] at this
     rw [← this, h c hc]
 
-def TSet.mk {β α : Λ} (hβ : β < α) (s : Set (TSet β))
-    (hs : ∃ S : Set (Address α), Small S ∧
+def Symmetric {β α : Λ} (hβ : β < α) (s : Set (TSet β)) : Prop :=
+  ∃ S : Set (Address α), Small S ∧
+    ∀ ρ : Allowable α, (∀ c ∈ S, ρ • c = c) →
+    cons hβ ρ • s = s
+
+theorem Symmetric.ofSubset {β α : Λ} (hβ : β < α) (s : Set (TSet β)) :
+    (∃ S : Set (Address α), Small S ∧
       ∀ ρ : Allowable α, (∀ c ∈ S, ρ • c = c) →
-      comp (Hom.toPath (coe_lt_coe.mpr hβ)) ρ • s = s) : TSet α :=
+      cons hβ ρ • s ⊆ s) → Symmetric hβ s := by
+  rintro ⟨S, hS₁, hS₂⟩
+  refine ⟨S, hS₁, ?_⟩
+  intro ρ hρ
+  refine subset_antisymm (hS₂ ρ hρ) ?_
+  have := hS₂ ρ⁻¹  ?_
+  · intro c hc
+    have := this ⟨c, hc, rfl⟩
+    refine ⟨_, this, ?_⟩
+    simp only [map_inv, smul_inv_smul]
+  · intro c hc
+    conv_lhs => rw [← hρ c hc, inv_smul_smul]
+
+namespace TangleData.TSet
+
+def mk {β α : Λ} (hβ : β < α) (s : Set (TSet β)) (hs : Symmetric hβ s) : TSet α :=
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
   (tSetEquiv α).symm (NewTSet.intro s (tSet_mk_aux hβ s hs))
 
-theorem TSet.toPretangle_eq {α : Λ} (t : TSet α) :
+theorem toPretangle_eq {α : Λ} (t : TSet α) :
     toPretangle t = letI : Level := ⟨α⟩; NewTSet.toPretangle (tSetEquiv α t) := by
   rw [← tSetEquiv_toPretangle α t]
   rfl
 
-theorem TSet.mem_tSetEquiv_iff {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) :
+theorem mem_tSetEquiv_iff {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) :
     s ∈[hβ] t ↔
       letI : Level := ⟨α⟩
       toPretangle s ∈
@@ -59,7 +79,7 @@ theorem TSet.mem_tSetEquiv_iff {β α : Λ} (hβ : β < α) (s : TSet β) (t : T
   rw [mem, toPretangle_eq t]
   rfl
 
-theorem TSet.ofCoe_toPretangle_apply_eq {β α : Λ} (hβ : β < α) (t : TSet α) :
+theorem ofCoe_toPretangle_apply_eq {β α : Λ} (hβ : β < α) (t : TSet α) :
     Pretangle.ofCoe (toPretangle t) β (coe_lt_coe.mpr hβ) =
     letI : Level := ⟨α⟩
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
@@ -70,11 +90,8 @@ theorem TSet.ofCoe_toPretangle_apply_eq {β α : Λ} (hβ : β < α) (t : TSet �
   exact congr_fun₂ (Semitangle.toPretangle_ofCoe (tSetEquiv α t).val) β (coe_lt_coe.mpr hβ)
 
 @[simp]
-theorem TSet.mem_mk_iff {β α : Λ} (hβ : β < α) (s : Set (TSet β))
-    (hs : ∃ S : Set (Address α), Small S ∧
-      ∀ ρ : Allowable α, (∀ c ∈ S, ρ • c = c) →
-      comp (Hom.toPath (coe_lt_coe.mpr hβ)) ρ • s = s) (t : TSet β) :
-    t ∈[hβ] TSet.mk hβ s hs ↔ t ∈ s := by
+theorem mem_mk_iff {β α : Λ} (hβ : β < α) (s : Set (TSet β)) (hs : Symmetric hβ s) (t : TSet β) :
+    t ∈[hβ] mk hβ s hs ↔ t ∈ s := by
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
   have := NewTSet.intro_members s (tSet_mk_aux hβ s hs)
@@ -82,7 +99,7 @@ theorem TSet.mem_mk_iff {β α : Λ} (hβ : β < α) (s : Set (TSet β))
   simp only [Set.mem_setOf_eq, EmbeddingLike.apply_eq_iff_eq, exists_eq_right]
   rw [mk, Equiv.apply_symm_apply, this]
 
-theorem TSet.eq_toPretangle_of_mem {β α : Λ} (hβ : β < α) (t₁ : TSet α) (t₂ : Pretangle β) :
+theorem eq_toPretangle_of_mem {β α : Λ} (hβ : β < α) (t₁ : TSet α) (t₂ : Pretangle β) :
     letI : Level := ⟨α⟩
     t₂ ∈ Pretangle.ofCoe (NewTSet.toPretangle (tSetEquiv α t₁)) β (coe_lt_coe.mpr hβ) →
     ∃ t₂' : TSet β, t₂ = toPretangle t₂' := by
@@ -91,7 +108,7 @@ theorem TSet.eq_toPretangle_of_mem {β α : Λ} (hβ : β < α) (t₁ : TSet α)
   obtain ⟨s, _, hs⟩ := h
   exact ⟨s, hs.symm⟩
 
-theorem TSet.ext {β α : Λ} (hβ : β < α) (t₁ t₂ : TSet α) :
+theorem ext {β α : Λ} (hβ : β < α) (t₁ t₂ : TSet α) :
     (∀ s, s ∈[hβ] t₁ ↔ s ∈[hβ] t₂) → t₁ = t₂ := by
   intro h
   letI : Level := ⟨α⟩
@@ -107,9 +124,9 @@ theorem TSet.ext {β α : Λ} (hβ : β < α) (t₁ t₂ : TSet α) :
     obtain ⟨s, rfl⟩ := eq_toPretangle_of_mem hβ t₂ p hp
     exact (h s).mpr hp
 
-theorem TSet.smul_mem_smul {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) (ρ : Allowable α)
+theorem smul_mem_smul {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) (ρ : Allowable α)
     (h : s ∈[hβ] t) :
-    comp (Hom.toPath (coe_lt_coe.mpr hβ)) ρ • s ∈[hβ] ρ • t := by
+    cons hβ ρ • s ∈[hβ] ρ • t := by
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
   rw [mem, ofCoe_toPretangle_apply_eq hβ] at h
@@ -122,25 +139,45 @@ theorem TSet.smul_mem_smul {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet 
       (allowableIso α ρ).val β • (tSetEquiv α t).val.members β
     rw [Set.smul_mem_smul_set_iff]
     exact hs
-  · rw [toPretangle_smul, allowableIso_apply_eq]
+  · rw [toPretangle_smul, allowableIso_apply_eq (coe_lt_coe.mpr hβ)]
+    rfl
 
-theorem TSet.smul_mem_smul_iff {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) (ρ : Allowable α) :
-    comp (Hom.toPath (coe_lt_coe.mpr hβ)) ρ • s ∈[hβ] ρ • t ↔ s ∈[hβ] t := by
+theorem smul_mem_smul_iff {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) (ρ : Allowable α) :
+    cons hβ ρ • s ∈[hβ] ρ • t ↔ s ∈[hβ] t := by
   constructor
   · intro h
-    have := smul_mem_smul hβ (comp (Hom.toPath (coe_lt_coe.mpr hβ)) ρ • s) (ρ • t) ρ⁻¹ h
+    have := smul_mem_smul hβ (cons hβ ρ • s) (ρ • t) ρ⁻¹ h
     simp only [map_inv, inv_smul_smul] at this
     exact this
   · exact smul_mem_smul hβ s t ρ
 
-theorem TSet.smul_mem_iff {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) (ρ : Allowable α) :
-    comp (Hom.toPath (coe_lt_coe.mpr hβ)) ρ • s ∈[hβ] t ↔ s ∈[hβ] ρ⁻¹ • t := by
+theorem smul_mem_iff {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) (ρ : Allowable α) :
+    cons hβ ρ • s ∈[hβ] t ↔ s ∈[hβ] ρ⁻¹ • t := by
   have := smul_mem_smul_iff hβ s (ρ⁻¹ • t) ρ
   rw [smul_inv_smul] at this
   exact this
 
-theorem TSet.induction {β α : Λ} (hβ : β < α) (t : TSet α) :
-    ∃ s hs, t = TSet.mk hβ s hs := by
+theorem mem_smul_iff {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) (ρ : Allowable α) :
+    s ∈[hβ] ρ • t ↔ (cons hβ ρ)⁻¹ • s ∈[hβ] t := by
+  have := smul_mem_smul_iff hβ (cons hβ ρ⁻¹ • s) t ρ
+  simp only [map_inv, smul_inv_smul] at this
+  exact this
+
+theorem exists_support {α : Λ} (t : TSet α) :
+    ∃ S : Set (Address α), Small S ∧ MulAction.Supports (Allowable α) S t := by
+  obtain ⟨S, hS⟩ := (tSetEquiv α t).prop
+  refine ⟨S, S.small, ?_⟩
+  intro ρ hρ
+  have := hS (allowableIso α ρ) ?_
+  · have := (congr_arg Subtype.val (tSetEquiv_smul α ρ t)).trans this
+    rw [Subtype.coe_inj] at this
+    exact (tSetEquiv α).injective this
+  · intro a ha
+    rw [allowableIso_smul_address]
+    exact hρ ha
+
+theorem induction {β α : Λ} (hβ : β < α) (t : TSet α) :
+    ∃ s hs, t = mk hβ s hs := by
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
   refine ⟨{u | u ∈[hβ] t}, ?_, ?_⟩
@@ -161,7 +198,7 @@ theorem TSet.induction {β α : Λ} (hβ : β < α) (t : TSet α) :
       rw [← this, Set.mem_setOf_eq, smul_mem_smul_iff]
       exact hu
     · intro hu
-      refine ⟨(comp (Hom.toPath (coe_lt_coe.mpr hβ)) ρ)⁻¹ • u, ?_, ?_⟩
+      refine ⟨(cons hβ ρ)⁻¹ • u, ?_, ?_⟩
       · dsimp only
         rw [← map_inv, Set.mem_setOf_eq, smul_mem_iff, inv_inv, this]
         exact hu
@@ -170,5 +207,38 @@ theorem TSet.induction {β α : Λ} (hβ : β < α) (t : TSet α) :
     intro s
     rw [TSet.mem_mk_iff]
     rfl
+
+end TangleData.TSet
+
+theorem Small.symmetric {β α : Λ} {s : Set (TSet β)} (hs : Small s) (hβ : β < α) :
+    Symmetric hβ s := by
+  have := TangleData.TSet.exists_support (α := β)
+  choose S hS₁ hS₂ using this
+  refine ⟨⋃ t ∈ s, raise (coe_lt_coe.mpr hβ) '' S t, ?_, ?_⟩
+  · refine Small.bUnion hs ?_
+    intro t _
+    exact Small.image (hS₁ t)
+  · intro ρ hρ
+    ext t
+    constructor
+    · rintro ⟨t, ht, rfl⟩
+      have := hS₂ t (cons hβ ρ) ?_
+      · dsimp only
+        rw [this]
+        exact ht
+      · intro c hc
+        have := hρ (raise (coe_lt_coe.mpr hβ) c) ⟨_, ⟨t, rfl⟩, _, ⟨ht, rfl⟩, c, hc, rfl⟩
+        simp only [raise, raiseIndex, Allowable.smul_address_eq_iff] at this
+        simp only [Allowable.smul_address_eq_iff, cons_toStructPerm, Tree.comp_apply]
+        exact this
+    · intro ht
+      have := hS₂ t (cons hβ ρ) ?_
+      · rw [← this, Set.smul_mem_smul_set_iff]
+        exact ht
+      · intro c hc
+        have := hρ (raise (coe_lt_coe.mpr hβ) c) ⟨_, ⟨t, rfl⟩, _, ⟨ht, rfl⟩, c, hc, rfl⟩
+        simp only [raise, raiseIndex, Allowable.smul_address_eq_iff] at this
+        simp only [Allowable.smul_address_eq_iff, cons_toStructPerm, Tree.comp_apply]
+        exact this
 
 end ConNF
