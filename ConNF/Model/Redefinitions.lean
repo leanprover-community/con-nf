@@ -347,4 +347,16 @@ theorem allowableIso_smul_address {α : Λ} (ρ : Allowable α) (c : Address α)
   rw [allowableIso_toStructPerm]
   rfl
 
+theorem allowableIso_apply_eq {α β : Λ} (h : (β : TypeIndex) < α) (ρ : Allowable α) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨h⟩
+    (allowableIso α ρ).val β = comp (Hom.toPath h) ρ := by
+  letI : Level := ⟨α⟩
+  letI : LtLevel β := ⟨h⟩
+  refine Allowable.toStructPerm_injective β ?_
+  simp only [comp_toStructPerm]
+  rw [← NewAllowable.comp_toPath_toStructPerm (allowableIso α ρ) β,
+    ← allowableIso_toStructPerm α ρ]
+  rfl
+
 end ConNF

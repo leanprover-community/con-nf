@@ -435,6 +435,12 @@ protected def toPretangle (t : Semitangle) : Pretangle α :=
     | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ a ∈ s}
     | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toPretangle s = p})
 
+theorem toPretangle_ofCoe (t : Semitangle) :
+    Pretangle.ofCoe t.toPretangle = fun β hβ => match β with
+      | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ a ∈ s}
+      | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toPretangle s = p} := by
+  rw [Semitangle.toPretangle, Equiv.apply_symm_apply]
+
 theorem members_eq_of_toPretangle_eq (t₁ t₂ : Semitangle) (h : t₁.toPretangle = t₂.toPretangle) :
     t₁.members = t₂.members := by
   simp only [Semitangle.toPretangle, Pretangle.ofCoe_symm, exists_and_right,
