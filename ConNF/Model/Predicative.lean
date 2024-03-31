@@ -1,7 +1,7 @@
 import ConNF.Model.Basic
 
 /-!
-# Hailperin's finite axiomatisation of NF
+# The predicative part of Hailperin's finite axiomatisation of NF
 -/
 
 open Quiver WithBot

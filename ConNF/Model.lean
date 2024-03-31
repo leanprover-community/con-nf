@@ -3,4 +3,5 @@ import ConNF.Model.Construction
 import ConNF.Model.BasePositions
 import ConNF.Model.Redefinitions
 import ConNF.Model.Basic
-import ConNF.Model.Hailperin
+import ConNF.Model.Predicative
+import ConNF.Model.Union

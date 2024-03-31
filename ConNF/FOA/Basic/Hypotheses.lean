@@ -51,11 +51,11 @@ instance : TypedObjects β :=
 instance : PositionedObjects γ :=
   lowerPositionedObjects γ
 
-instance : ∀ β : TypeIndex, [LeLevel β] → TangleData β
+instance leTangleData : ∀ β : TypeIndex, [LeLevel β] → TangleData β
   | ⊥, _ => Bot.tangleData
   | (β : Λ), _ => lowerTangleData β
 
-instance : ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
+instance ltPositionedTangles : ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
   | ⊥, _ => Bot.positionedTangles
   | (β : Λ), _ => lowerPositionedTangles β
 
