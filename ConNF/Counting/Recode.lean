@@ -28,6 +28,16 @@ theorem raise_path (c : Address γ) : (raise hγ c).path = raiseIndex hγ c.path
 @[simp]
 theorem raise_value (c : Address γ) : (raise hγ c).value = c.value := rfl
 
+theorem raiseIndex_injective {A B : ExtendedIndex γ}
+    (h : raiseIndex hγ A = raiseIndex hγ B) : A = B :=
+  Path.comp_inj_right.mp h
+
+theorem raise_injective {c d : Address γ} (h : raise hγ c = raise hγ d) : c = d := by
+  refine Address.ext _ _ ?_ ?_
+  · exact raiseIndex_injective hγ (congr_arg Address.path h)
+  · have := congr_arg Address.value h
+    exact this
+
 theorem smul_raise_eq_iff (c : Address γ) (ρ : Allowable β) :
     ρ • raise hγ c = raise hγ c ↔
     Allowable.comp (Hom.toPath hγ) ρ • c = c := by

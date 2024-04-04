@@ -57,6 +57,11 @@ theorem interferes_small (N₁ N₂ : NearLitter) :
       false_or]
     exact NearLitter.inter_small_of_fst_ne_fst h
 
+@[simp]
+theorem not_precedes_atom {c : Address β} {A : ExtendedIndex β} {a : Atom} :
+    ¬Precedes c ⟨A, inl a⟩ :=
+  by rintro ⟨⟩
+
 theorem Precedes.lt {c d : Address β} :
     Precedes c d → c < d := by
   intro h
