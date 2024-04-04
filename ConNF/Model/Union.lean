@@ -200,7 +200,7 @@ theorem allowable_of_smulFuzz (β : Λ) [iβ : LeLevel β]
     rw [← h₂ δ (coe_lt_coe.mpr hδ) a, allowableEquiv', Equiv.cast_apply, cast_cast, cast_eq]
     rfl
 
-local instance : FOAAssumptions where
+local instance foaAssumptions : FOAAssumptions where
   allowableCons := allowableCons
   allowableCons_eq := allowableCons_eq
   pos_lt_pos_atom := by

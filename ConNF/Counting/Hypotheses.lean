@@ -15,8 +15,6 @@ namespace ConNF
 
 variable [Params.{u}] [Level] [BasePositions]
 
-instance : LeLevel (0 : Λ) := ⟨WithBot.coe_le_coe.mpr (Params.Λ_zero_le _)⟩
-
 class CountingAssumptions extends FOAAssumptions where
   /-- Tangles contain only tangles. -/
   eq_toPretangle_of_mem (β : Λ) [LeLevel β] (γ : Λ) [LeLevel γ]

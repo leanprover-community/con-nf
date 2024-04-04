@@ -11,7 +11,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
 
 /-- A morphism of supports `S → T`. -/
 structure SupportHom (S T : Support β) : Type u where

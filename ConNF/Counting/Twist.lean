@@ -1,5 +1,5 @@
 import Mathlib.GroupTheory.GroupAction.Basic
-import ConNF.Counting.Hypotheses
+import ConNF.FOA.Basic.Hypotheses
 
 /-!
 # Coding functions
@@ -11,7 +11,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
 
 namespace TangleData.TSet
 

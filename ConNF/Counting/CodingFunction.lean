@@ -183,7 +183,7 @@ theorem code_eq_code_iff (S S' : Support β) (t t' : TSet β)
     refine ext (ρ • S) ⟨ρ, rfl⟩ ⟨1, by rw [one_smul]⟩ ?_
     simp only [code_decode, Part.get_some, decode_smul]
 
-variable [BasePositions] [CountingAssumptions] {β : Λ} [LeLevel β]
+variable [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
 
 def Strong (χ : CodingFunction β) : Prop :=
   ∀ S ∈ χ.decode.Dom, S.Strong

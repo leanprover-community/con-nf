@@ -219,6 +219,7 @@ theorem toStructBehaviour_coherent (ξ : NearLitterBehaviour) :
 /-- An instance of the freedom of action theorem for type zero. -/
 theorem zero_foa (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) :
     ∃ π : NearLitterPerm, ξ.Approximates π := by
+  letI : LeLevel (0 : Λ) := ⟨WithBot.coe_le_coe.mpr (Params.Λ_zero_le _)⟩
   have := (toStructBehaviour ξ).freedom_of_action ?_ (toStructBehaviour_coherent ξ)
   · obtain ⟨ρ, hρ⟩ := this
     exact ⟨ρ.val ⊥, hρ zeroPath⟩

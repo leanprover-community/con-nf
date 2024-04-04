@@ -8,7 +8,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β : Λ}
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ}
 
 noncomputable def Support.spec (S : Support β) (hS : S.Strong) : Spec β where
   max := S.max

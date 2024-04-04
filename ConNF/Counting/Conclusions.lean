@@ -13,6 +13,8 @@ namespace ConNF
 
 variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions]
 
+instance : LeLevel (0 : Λ) := ⟨WithBot.coe_le_coe.mpr (Params.Λ_zero_le _)⟩
+
 theorem mk_codingFunction (β : Λ) [i : LeLevel β] (hzero : #(CodingFunction 0) < #μ) :
     #(CodingFunction β) < #μ := by
   revert i

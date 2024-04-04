@@ -8,7 +8,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions] {β : Λ} [LeLevel β]
+variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
 
 def SpecCondition' (β : Λ) :=
   (ExtendedIndex β × Set κ × Set κ) ⊕
