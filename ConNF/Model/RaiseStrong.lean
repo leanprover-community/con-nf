@@ -203,4 +203,97 @@ theorem raise_raise_strong (T : Support γ) :
         have h₂ := congr_arg Address.value ha
         cases h₁.symm.trans h₂
 
+theorem raise_smul_raise_strong (T : Support γ) (ρ : Allowable β) :
+    Support.Strong ((ρ • strongSupport (T.image (raise hγ)).small).image (raise iβ.elim)) := by
+  constructor
+  · intro i₁ i₂ hi₁ hi₂ A N₁ N₂ hN₁ hN₂ a ha
+    rw [Enumeration.image_f] at hN₁ hN₂
+    have := (strongSupport_strong (T.image (raise hγ)).small).interferes hi₁ hi₂
+        (A := ((strongSupport (T.image (raise hγ)).small).f i₁ hi₁).path) ?_ ?_
+        (ha.smul (Allowable.toStructPerm ρ⁻¹
+          ((strongSupport (T.image (raise hγ)).small).f i₁ hi₁).path))
+    · obtain ⟨j, hj, hji₁, hji₂, hj'⟩ := this
+      refine ⟨j, hj, hji₁, hji₂, ?_⟩
+      rw [Enumeration.image_f, Enumeration.smul_f, hj']
+      refine Address.ext _ _ ?_ ?_
+      · have := congr_arg Address.path hN₁
+        exact this
+      · simp only [map_inv, Tree.inv_apply, Allowable.smul_address,
+          smul_inl, smul_inv_smul, raise_value]
+    · refine Address.ext _ _ rfl ?_
+      have := congr_arg Address.value hN₁
+      rw [Enumeration.smul_f, Allowable.smul_address, raise_value, smul_eq_iff_eq_inv_smul] at this
+      simp only [this, smul_inr, map_inv, Tree.inv_apply]
+    · refine Address.ext _ _ ?_ ?_
+      · have h₁ := congr_arg Address.path hN₁
+        have h₂ := congr_arg Address.path hN₂
+        exact raiseIndex_injective _ (h₂.trans h₁.symm)
+      · have := congr_arg Address.value hN₂
+        rw [Enumeration.smul_f, Allowable.smul_address, raise_value,
+          smul_eq_iff_eq_inv_smul] at this
+        simp only [this, smul_inr, map_inv, Tree.inv_apply]
+        have h₁ := congr_arg Address.path hN₁
+        have h₂ := congr_arg Address.path hN₂
+        have := raiseIndex_injective _ (h₂.trans h₁.symm)
+        simp only [Enumeration.smul_f, Allowable.smul_address] at this
+        rw [this]
+  · intro i hi c hc
+    rw [precedes_iff] at hc
+    obtain (⟨A, N, h, d, hd, rfl, hc⟩ | ⟨A, N, h, rfl, hc⟩) := hc
+    · obtain (hc' | ⟨a, ha⟩) := strongSupport_raise_spec hγ T _ ⟨i, hi, rfl⟩
+      · obtain (hc'' | ⟨C, hC⟩) := raise_eq_cons_cons _ _ _ _ _ hc
+        · have := congr_arg Path.length (congr_arg Address.path hc)
+          rw [Path.length_cons, Path.length_cons, Enumeration.image_f, raise_path,
+            raiseIndex_length, path_eq_nil' (coe_inj.mpr hc''.symm) h.path.B, add_left_inj,
+            Enumeration.smul_f, Allowable.smul_address] at this
+          rw [this, lt_self_iff_false] at hc'
+          cases hc'
+        · obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, hL⟩ := h
+          rw [hC, Enumeration.image_f, ← Path.comp_cons, ← Path.comp_cons] at hc
+          change raise iβ.elim _ = raise iβ.elim ⟨(C.cons hε).cons (bot_lt_coe _), inr N⟩ at hc
+          have := (strongSupport_strong (T.image (raise hγ)).small).precedes hi
+            (ρ⁻¹ • ⟨(C.cons hδ).comp d.path, d.value⟩) ?_
+          · obtain ⟨j, hj₁, hj₂, hj₃⟩ := this
+            refine ⟨j, hj₁, hj₂, ?_⟩
+            rw [Enumeration.image_f, Enumeration.smul_f, hj₃, hC, raise, Hom.toPath, raiseIndex,
+              ← Path.comp_cons, Path.comp_assoc, smul_inv_smul]
+            rfl
+          · have := raise_injective _ hc
+            rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at this
+            rw [this]
+            exact (Precedes.fuzz ((C.cons hε).cons (bot_lt_coe _)) N
+              ⟨⟨γ, δ, ε, hδ, hε, hδε, _, rfl⟩, t, hL⟩ d hd).smul ρ⁻¹
+      · have h₁ := congr_arg Address.value hc
+        rw [Enumeration.image_f, Enumeration.smul_f, raise_value, Allowable.smul_address,
+          smul_eq_iff_eq_inv_smul] at h₁
+        have h₂ := congr_arg Address.value ha
+        cases h₁.symm.trans h₂
+    · obtain (hc' | ⟨a, ha⟩) := strongSupport_raise_spec hγ T _ ⟨i, hi, rfl⟩
+      · obtain (hc'' | ⟨C, hC⟩) := raise_eq_cons_cons _ _ _ _ _ hc
+        · have := congr_arg Path.length (congr_arg Address.path hc)
+          rw [Path.length_cons, Path.length_cons, Enumeration.image_f, raise_path,
+            raiseIndex_length, path_eq_nil' (coe_inj.mpr hc''.symm) h.path.B, add_left_inj,
+            Enumeration.smul_f, Allowable.smul_address] at this
+          rw [this, lt_self_iff_false] at hc'
+          cases hc'
+        · obtain ⟨⟨γ, ε, hε, A, rfl⟩, a, hL⟩ := h
+          rw [hC, Enumeration.image_f, ← Path.comp_cons, ← Path.comp_cons] at hc
+          change raise iβ.elim _ = raise iβ.elim ⟨(C.cons hε).cons (bot_lt_coe _), inr N⟩ at hc
+          have := (strongSupport_strong (T.image (raise hγ)).small).precedes hi
+            (ρ⁻¹ • ⟨C.cons (bot_lt_coe _), inl a⟩) ?_
+          · obtain ⟨j, hj₁, hj₂, hj₃⟩ := this
+            refine ⟨j, hj₁, hj₂, ?_⟩
+            rw [Enumeration.image_f, Enumeration.smul_f, hj₃, hC, smul_inv_smul]
+            rfl
+          · have := raise_injective _ hc
+            rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at this
+            rw [this]
+            exact (Precedes.fuzzBot ((C.cons hε).cons (bot_lt_coe _)) N
+              ⟨⟨γ, ε, hε, _, rfl⟩, a, hL⟩).smul ρ⁻¹
+      · have h₁ := congr_arg Address.value hc
+        rw [Enumeration.image_f, Enumeration.smul_f, raise_value, Allowable.smul_address,
+          smul_eq_iff_eq_inv_smul] at h₁
+        have h₂ := congr_arg Address.value ha
+        cases h₁.symm.trans h₂
+
 end ConNF.Support
