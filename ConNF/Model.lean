@@ -4,4 +4,5 @@ import ConNF.Model.BasePositions
 import ConNF.Model.Redefinitions
 import ConNF.Model.Basic
 import ConNF.Model.Predicative
-import ConNF.Model.Union
+import ConNF.Model.FOA
+import ConNF.Model.RaiseStrong

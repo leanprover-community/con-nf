@@ -1,12 +1,12 @@
 import ConNF.Model.Basic
 
 /-!
-# The axiom of union for singletons
+# Restatement of freedom of action theorems
 -/
 
-open Quiver WithBot
+open Quiver Sum WithBot
 
-open scoped Pointwise
+open scoped Pointwise symmDiff
 
 universe u
 
@@ -237,6 +237,12 @@ local instance foaAssumptions : FOAAssumptions where
       exact hρs γ δ hγ hδ hγδ t
     · intro δ _ hδ a
       exact hρs ⊥ δ (bot_lt_coe _) hδ bot_ne_coe a
+
+theorem exists_allowable_of_specifies {S T : Support α} (hS : S.Strong) (hT : T.Strong)
+    {σ : Spec α} (hσS : σ.Specifies S hS) (hσT : σ.Specifies T hT) :
+    ∃ ρ : Allowable α, ρ • S = T :=
+  letI : LeLevel α := ⟨le_rfl⟩
+  ⟨convertAllowable hσS hσT, convertAllowable_smul hσS hσT⟩
 
 end Construction.FOA
 

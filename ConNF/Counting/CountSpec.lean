@@ -20,7 +20,7 @@ def SpecCondition' (β : Λ) :=
 def SpecCondition.toPrime : SpecCondition β → SpecCondition' β
   | .atom A s t => Sum.inl (A, s, t)
   | .flexible A s t => Sum.inr (Sum.inl (A, s, t))
-  | .inflexibleCoe A h χ _ t m u => Sum.inr (Sum.inr (Sum.inl ⟨A, h, χ, t, m, u⟩))
+  | .inflexibleCoe A h χ t m u => Sum.inr (Sum.inr (Sum.inl ⟨A, h, χ, t, m, u⟩))
   | .inflexibleBot A h s t => Sum.inr (Sum.inr (Sum.inr ⟨A, h, s, t⟩))
 
 theorem SpecCondition.toPrime_injective : Function.Injective (toPrime (β := β)) := by

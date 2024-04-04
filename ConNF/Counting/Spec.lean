@@ -1,6 +1,7 @@
 import ConNF.Mathlib.Support
 import ConNF.FOA.Basic.Flexible
 import ConNF.Counting.CodingFunction
+import ConNF.Counting.StrongSupport
 
 /-!
 # Specifications
@@ -20,7 +21,7 @@ inductive SpecCondition (β : Λ)
   | atom (A : ExtendedIndex β) (s : Set κ) (t : Set κ)
   | flexible (A : ExtendedIndex β) (s : Set κ) (t : κ → Set κ)
   | inflexibleCoe (A : ExtendedIndex β) (h : InflexibleCoePath A)
-      (χ : CodingFunction h.δ) (hχ : χ.Strong) (t : κ → Set κ) (m : κ) (u : κ → Set κ)
+      (χ : CodingFunction h.δ) (t : κ → Set κ) (m : κ) (u : κ → Set κ)
   | inflexibleBot (A : ExtendedIndex β) (h : InflexibleBotPath A) (s : Set κ) (t : κ → Set κ)
 
 abbrev Spec (β : Λ) := Enumeration (SpecCondition β)
@@ -70,8 +71,6 @@ structure Specifies (σ : Spec β) (S : Support β) (hS : S.Strong) : Prop where
       σ.f i (hi.trans_eq max_eq_max) = SpecCondition.inflexibleCoe A h.path
         (CodingFunction.code ((S.before i hi).comp (h.path.B.cons h.path.hδ))
           h.t.set (before_comp_supports' S hS hi h hSi))
-        (CodingFunction.code_strong _ _ _
-          (Support.comp_strong _ _ (Support.before_strong _ _ _ hS)))
         (fun j => {k | ∃ hj hk, ∃ (a : Atom) (N' : NearLitter),
           N'.1 = N.1 ∧ a ∈ (N : Set Atom) ∆ N' ∧
           S.f j hj = ⟨A, inr N'⟩ ∧ S.f k hk = ⟨A, inl a⟩})
@@ -119,8 +118,8 @@ theorem Specifies.of_eq_flexible {σ : Spec β} {S : Support β} {hS : S.Strong}
 theorem Specifies.of_eq_inflexibleCoe {σ : Spec β} {S : Support β} {hS : S.Strong}
     (h : σ.Specifies S hS)
     {i : κ} {hi : i < σ.max} {A : ExtendedIndex β} {P : InflexibleCoePath A}
-    {χ : CodingFunction P.δ} {hχ : χ.Strong} {s : κ → Set κ} {m : κ} {u : κ → Set κ}
-    (hi' : σ.f i hi = SpecCondition.inflexibleCoe A P χ hχ s m u) :
+    {χ : CodingFunction P.δ} {s : κ → Set κ} {m : κ} {u : κ → Set κ}
+    (hi' : σ.f i hi = SpecCondition.inflexibleCoe A P χ s m u) :
     ∃ N t, N.1 = fuzz P.hδε t ∧ S.f i (hi.trans_eq h.max_eq_max.symm) = ⟨A, inr N⟩ := by
   have hiS := hi.trans_eq h.max_eq_max.symm
   set c := S.f i hiS with hc

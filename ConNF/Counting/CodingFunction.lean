@@ -1,5 +1,4 @@
-import ConNF.Counting.StrongSupport
-import ConNF.Counting.Twist
+import ConNF.Fuzz.Hypotheses
 
 /-!
 # Coding functions
@@ -182,23 +181,6 @@ theorem code_eq_code_iff (S S' : Support β) (t t' : TSet β)
   · rintro ⟨ρ, rfl, rfl⟩
     refine ext (ρ • S) ⟨ρ, rfl⟩ ⟨1, by rw [one_smul]⟩ ?_
     simp only [code_decode, Part.get_some, decode_smul]
-
-variable [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
-
-def Strong (χ : CodingFunction β) : Prop :=
-  ∀ S ∈ χ.decode.Dom, S.Strong
-
-theorem strong_of_strong_mem
-    (χ : CodingFunction β) (S : Support β) (hS : S.Strong) (hSχ : S ∈ χ.decode.Dom) : χ.Strong := by
-  intro T hTχ
-  obtain ⟨ρ, rfl⟩ := (χ.dom_iff S T hSχ).mp hTχ
-  exact hS.smul ρ
-
-theorem code_strong
-    (S : Support β) (t : TSet β)
-    (ht : Supports (Allowable β) (S : Set (Address β)) t) (hS : S.Strong) :
-    (code S t ht).Strong :=
-  strong_of_strong_mem _ S hS mem_code_self
 
 end CodingFunction
 

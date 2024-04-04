@@ -204,7 +204,6 @@ noncomputable def indexed {s : Set (Address β)} (hs : Small s) (i : κ) (hi : i
 noncomputable def strongSupport {s : Set (Address β)} (hs : Small s) : Support β :=
   ⟨indexMax (strongClosure_small hs), indexed (strongClosure_small hs)⟩
 
-@[simp]
 theorem strongSupport_f {s : Set (Address β)} (hs : Small s)
     {i : κ} (hi : i < indexMax (strongClosure_small hs)) :
     (strongSupport hs).f i hi = indexed (strongClosure_small hs) i hi := rfl
