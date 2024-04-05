@@ -377,16 +377,26 @@ theorem κ_le_self_add (i j : κ) : i ≤ i + j := by
   rw [← not_lt, ← Ordinal.typein_le_typein (· < ·), Params.κ_add_typein]
   exact Ordinal.le_add_right _ _
 
+theorem κ_le_add_self (i j : κ) : i ≤ j + i := by
+  rw [← not_lt, ← Ordinal.typein_le_typein (· < ·), Params.κ_add_typein]
+  exact Ordinal.le_add_left _ _
+
 theorem κ_add_sub_cancel (i j : κ) : i + j - i = j := by
   rw [← Ordinal.typein_inj (· < ·), Params.κ_sub_typein, Params.κ_add_typein]
   exact Ordinal.add_sub_cancel _ _
 
+theorem κ_sub_lt_iff {i j k : κ} (h : j ≤ i) : i - j < k ↔ i < j + k := by
+  rw [← Ordinal.typein_lt_typein (α := κ) (· < ·), ← Ordinal.typein_lt_typein (α := κ) (· < ·)]
+  rw [← not_lt, ← Ordinal.typein_le_typein (· < ·)] at h
+  rw [Params.κ_add_typein, ← Ordinal.sub_lt_of_le h, Params.κ_sub_typein]
+
 theorem κ_sub_lt {i j k : κ} (h₁ : i < j + k) (h₂ : j ≤ i) : i - j < k := by
-  rw [← Ordinal.typein_lt_typein (· < ·)] at h₁ ⊢
-  rw [← not_lt, ← Ordinal.typein_le_typein (· < ·)] at h₂
-  rw [Params.κ_add_typein, ← Ordinal.sub_lt_of_le h₂] at h₁
-  rw [Params.κ_sub_typein]
+  rw [κ_sub_lt_iff h₂]
   exact h₁
+
+theorem κ_lt_sub_iff {i j k : κ} : k < i - j ↔ j + k < i := by
+  rw [← Ordinal.typein_lt_typein (α := κ) (· < ·), ← Ordinal.typein_lt_typein (α := κ) (· < ·)]
+  rw [Params.κ_add_typein, Params.κ_sub_typein, Ordinal.lt_sub]
 
 /-- Either the base type or a proper type index (an element of `Λ`).
 The base type is written `⊥`. -/

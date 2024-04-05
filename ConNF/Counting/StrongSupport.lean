@@ -277,6 +277,18 @@ theorem strongSupport_strong {s : Set (Address β)} (hs : Small s) : (strongSupp
     rw [hc']
     exact StrongSupportRel.precedes _ _ hc
 
+theorem Interferes.symm {a : Atom} {N₁ N₂ : NearLitter} (h : Interferes a N₁ N₂) :
+    Interferes a N₂ N₁ := by
+  cases h
+  case symmDiff h₁ h₂ =>
+    refine Interferes.symmDiff h₁.symm ?_
+    rw [symmDiff_comm]
+    exact h₂
+  case inter h₁ h₂ =>
+    refine Interferes.inter h₁.symm ?_
+    rw [inter_comm]
+    exact h₂
+
 theorem Interferes.smul {a : Atom} {N₁ N₂ : NearLitter} (h : Interferes a N₁ N₂)
     (π : NearLitterPerm) : Interferes (π • a) (π • N₁) (π • N₂) := by
   cases h
