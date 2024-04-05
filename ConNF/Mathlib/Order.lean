@@ -25,9 +25,6 @@ theorem compl_eq_empty : sᶜ = ∅ ↔ s = univ :=
 theorem compl_eq_univ : sᶜ = univ ↔ s = ∅ :=
   compl_eq_top
 
-theorem image_sUnion (f : α → β) (S : Set (Set α)) : f '' ⋃₀ S = ⋃ s ∈ S, f '' s := by
-  rw [sUnion_eq_biUnion, image_iUnion₂]
-
 @[simp]
 theorem iUnion_pos {p : Prop} {f : p → Set α} (hp : p) : (⋃ h, f h) = f hp :=
   iSup_pos hp

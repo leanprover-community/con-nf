@@ -13,7 +13,8 @@ variable [InvolutiveInv α] {s t : Set α}
 
 @[to_additive (attr := simp)]
 theorem inv_sUnion (S : Set (Set α)) : (⋃₀ S)⁻¹ = ⋃ s ∈ S, s⁻¹ := by
-  simp_rw [← image_inv, image_sUnion]
+  rw [← image_inv, image_sUnion, image]
+  aesop
 
 end InvolutiveInv
 
