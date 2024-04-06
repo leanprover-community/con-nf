@@ -24,6 +24,44 @@ inductive SpecCondition (β : Λ)
       (χ : CodingFunction h.δ) (t : κ → Set κ) (m : κ) (u : κ → Set κ)
   | inflexibleBot (A : ExtendedIndex β) (h : InflexibleBotPath A) (s : Set κ) (t : κ → Set κ)
 
+@[mk_iff le_iff]
+protected inductive SpecCondition.LE : SpecCondition β → SpecCondition β → Prop
+  | atom {A s₁ s₂ t₁ t₂} : s₁ ⊆ s₂ → t₁ ⊆ t₂ →
+      SpecCondition.LE (.atom A s₁ t₁) (.atom A s₂ t₂)
+  | flexible {A s₁ s₂ t₁ t₂} : s₁ ⊆ s₂ → t₁ ≤ t₂ →
+      SpecCondition.LE (.flexible A s₁ t₁) (.flexible A s₂ t₂)
+  | inflexibleCoe {A h χ t₁ t₂ m u₁ u₂} : t₁ ≤ t₂ → u₁ ≤ u₂ →
+      SpecCondition.LE (.inflexibleCoe A h χ t₁ m u₁) (.inflexibleCoe A h χ t₂ m u₂)
+  | inflexibleBot {A h s₁ s₂ t₁ t₂} : s₁ ⊆ s₂ → t₁ ≤ t₂ →
+      SpecCondition.LE (.inflexibleBot A h s₁ t₁) (.inflexibleBot A h s₂ t₂)
+
+instance : LE (SpecCondition β) where
+  le := SpecCondition.LE
+
+instance : PartialOrder (SpecCondition β) where
+  le_refl c := by
+    cases c
+    · exact .atom subset_rfl subset_rfl
+    · exact .flexible subset_rfl le_rfl
+    · exact .inflexibleCoe le_rfl le_rfl
+    · exact .inflexibleBot subset_rfl le_rfl
+  le_trans c₁ c₂ c₃ h₁ h₂ := by
+    cases h₁ <;> cases h₂
+    · exact .atom (subset_trans ‹_› ‹_›) (subset_trans ‹_› ‹_›)
+    · exact .flexible (subset_trans ‹_› ‹_›) (le_trans ‹_› ‹_›)
+    · exact .inflexibleCoe (le_trans ‹_› ‹_›) (le_trans ‹_› ‹_›)
+    · exact .inflexibleBot (subset_trans ‹_› ‹_›) (le_trans ‹_› ‹_›)
+  le_antisymm c₁ c₂ h₁ h₂ := by
+    cases h₁ <;> cases h₂
+    · rw [SpecCondition.atom.injEq]
+      exact ⟨rfl, subset_antisymm ‹_› ‹_›, subset_antisymm ‹_› ‹_›⟩
+    · rw [SpecCondition.flexible.injEq]
+      exact ⟨rfl, subset_antisymm ‹_› ‹_›, le_antisymm ‹_› ‹_›⟩
+    · rw [SpecCondition.inflexibleCoe.injEq]
+      exact ⟨rfl, HEq.rfl, HEq.rfl, le_antisymm ‹_› ‹_›, rfl, le_antisymm ‹_› ‹_›⟩
+    · rw [SpecCondition.inflexibleBot.injEq]
+      exact ⟨rfl, HEq.rfl, subset_antisymm ‹_› ‹_›, le_antisymm ‹_› ‹_›⟩
+
 abbrev Spec (β : Λ) := Enumeration (SpecCondition β)
 
 namespace Spec

@@ -288,7 +288,7 @@ def raiseRaise (S : Support α) (T : Support γ) (ρ : Allowable β) : Support �
     ((ρ • interferenceSupport hγ S T).image (raise iβ.elim)) +
       S + ((ρ • strongSupport (T.image (raise hγ)).small).image (raise iβ.elim))
 
-variable {hγ} {S : Support α} {T : Support γ} {ρ : Allowable β}
+variable {hγ} {S : Support α} {T : Support γ} {ρ ρ₁ ρ₂ : Allowable β}
 
 theorem raiseRaise_max : (raiseRaise hγ S T ρ).max =
     (interferenceSupport hγ S T).max + S.max + (strongSupport (T.image (raise hγ)).small).max :=
@@ -466,59 +466,51 @@ theorem raiseRaise_strong (hρS : ∀ c : Address β, raise iβ.elim c ∈ S →
 
 theorem raiseRaise_max_eq_max : (raiseRaise hγ S T 1).max = (raiseRaise hγ S T ρ).max := rfl
 
-theorem raiseRaise_f_eq_atom (i : κ) (hi : i < (raiseRaise hγ S T ρ).max)
-    (A : ExtendedIndex α) (a : Atom) (ha : (raiseRaise hγ S T ρ).f i hi = ⟨A, inl a⟩) :
-    ∃ b, (raiseRaise hγ S T 1).f i hi = ⟨A, inl b⟩ := by
+theorem raiseRaise_f_eq_atom (i : κ) (hi : i < (raiseRaise hγ S T ρ₁).max)
+    (A : ExtendedIndex α) (a : Atom) (ha : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inl a⟩) :
+    ∃ b, (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inl b⟩ := by
   obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
   · rw [raiseRaise_f_eq₁ hi] at ha ⊢
     simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul, smul_inl,
       one_smul] at ha ⊢
-    exact ⟨_, ha⟩
+    refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) ((interferenceSupport hγ S T).f i hi).path • a,
+      ha.1, ?_⟩
+    simp only [ha.2, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul, inv_smul_smul]
   · rw [raiseRaise_f_eq₂ hi hi'] at ha ⊢
     exact ⟨a, ha⟩
   · rw [raiseRaise_f_eq₃ hi hi'] at ha
     rw [raiseRaise_f_eq₃ hi (by exact hi')]
     simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul, smul_inl,
       one_smul] at ha ⊢
-    exact ⟨_, ha⟩
+    refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) ((strongSupport (T.image (raise hγ)).small).f
+        (i - ((interferenceSupport hγ S T).max + S.max)) ?_).path • a,
+      ha.1, ?_⟩
+    · rw [raiseRaise_max, ← κ_sub_lt_iff hi] at hi'
+      exact hi'
+    · simp only [ha.2, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul, inv_smul_smul]
 
-theorem raiseRaise_f_eq_nearLitter (i : κ) (hi : i < (raiseRaise hγ S T ρ).max)
-    (A : ExtendedIndex α) (N : NearLitter) (hN : (raiseRaise hγ S T ρ).f i hi = ⟨A, inr N⟩) :
-    ∃ N', (raiseRaise hγ S T 1).f i hi = ⟨A, inr N'⟩ := by
+theorem raiseRaise_f_eq_nearLitter (i : κ) (hi : i < (raiseRaise hγ S T ρ₁).max)
+    (A : ExtendedIndex α) (N : NearLitter) (hN : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inr N⟩) :
+    ∃ N', (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inr N'⟩ := by
   obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
   · rw [raiseRaise_f_eq₁ hi] at hN ⊢
     simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul, smul_inr,
       one_smul] at hN ⊢
-    exact ⟨_, hN⟩
+    refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) ((interferenceSupport hγ S T).f i hi).path • N,
+      hN.1, ?_⟩
+    simp only [hN.2, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul, inv_smul_smul]
   · rw [raiseRaise_f_eq₂ hi hi'] at hN ⊢
     exact ⟨N, hN⟩
   · rw [raiseRaise_f_eq₃ hi hi'] at hN
     rw [raiseRaise_f_eq₃ hi (by exact hi')]
     simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul, smul_inr,
       one_smul] at hN ⊢
-    exact ⟨_, hN⟩
-
-theorem raiseRaise_f_eq_atom' (i : κ) (hi : i < (raiseRaise hγ S T ρ).max)
-    (A : ExtendedIndex α) (a : Atom) (ha : (raiseRaise hγ S T 1).f i hi = ⟨A, inl a⟩) :
-    ∃ b, (raiseRaise hγ S T ρ).f i hi = ⟨A, inl b⟩ := by
-  set c := (raiseRaise hγ S T ρ).f i hi with hc
-  obtain ⟨B, b | N⟩ := c
-  · obtain ⟨b, hb⟩ := raiseRaise_f_eq_atom i hi B b hc.symm
-    cases hb.symm.trans ha
-    exact ⟨_, rfl⟩
-  · obtain ⟨N, hN⟩ := raiseRaise_f_eq_nearLitter i hi B N hc.symm
-    cases hN.symm.trans ha
-
-theorem raiseRaise_f_eq_nearLitter' (i : κ) (hi : i < (raiseRaise hγ S T ρ).max)
-    (A : ExtendedIndex α) (N : NearLitter) (hN : (raiseRaise hγ S T 1).f i hi = ⟨A, inr N⟩) :
-    ∃ N', (raiseRaise hγ S T ρ).f i hi = ⟨A, inr N'⟩ := by
-  set c := (raiseRaise hγ S T ρ).f i hi with hc
-  obtain ⟨B, a | N'⟩ := c
-  · obtain ⟨a, ha⟩ := raiseRaise_f_eq_atom i hi B a hc.symm
-    cases ha.symm.trans hN
-  · obtain ⟨N'', hN''⟩ := raiseRaise_f_eq_nearLitter i hi B N' hc.symm
-    cases hN''.symm.trans hN
-    exact ⟨_, rfl⟩
+    refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) ((strongSupport (T.image (raise hγ)).small).f
+        (i - ((interferenceSupport hγ S T).max + S.max)) ?_).path • N,
+      hN.1, ?_⟩
+    · rw [raiseRaise_max, ← κ_sub_lt_iff hi] at hi'
+      exact hi'
+    · simp only [hN.2, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul, inv_smul_smul]
 
 theorem raiseRaise_eq_cases {i : κ} {hi : i < (raiseRaise hγ S T ρ).max} {c : Address α}
     (h : (raiseRaise hγ S T ρ).f i hi = c) :
@@ -535,251 +527,181 @@ theorem raiseRaise_eq_cases {i : κ} {hi : i < (raiseRaise hγ S T ρ).max} {c :
     refine Or.inl ⟨_, h.symm, ?_⟩
     rw [one_smul]
 
-theorem raiseRaise_atom_spec₁' (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c)
-    {A : ExtendedIndex α} {a b : Atom} {c : Address β}
-    (ha : raise iβ.elim (ρ • c) = ⟨A, inl a⟩)
-    (hb : raise iβ.elim ((1 : Allowable β) • c) = ⟨A, inl b⟩) :
-    {j | ∃ hj, (raiseRaise hγ S T 1).f j hj = ⟨A, inl b⟩} =
-    {j | ∃ hj, (raiseRaise hγ S T ρ).f j hj = ⟨A, inl a⟩} := by
-  obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq ha
-  have ha := raise_injective' ha
-  have hb := raise_injective' hb
-  rw [one_smul] at hb
-  ext j : 1
-  constructor
-  · rintro ⟨hj₁, hj₂⟩
-    refine ⟨hj₁, ?_⟩
-    refine Eq.trans ?_ (congr_arg (raise iβ.elim) ha)
-    rw [hb]
-    obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
-    · rw [raiseRaise_f_eq₁ hj] at hj₂ ⊢
-      have := raise_injective' hj₂
-      rw [one_smul] at this
-      rw [this]
-    · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
-      rw [hj₂, hρS ⟨A, inl b⟩ ⟨_, _, hj₂.symm⟩, raise]
-    · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ ⊢
-      have := raise_injective' hj₂
-      rw [one_smul] at this
-      rw [this]
-  · rintro ⟨hj₁, hj₂⟩
-    refine ⟨hj₁, ?_⟩
-    refine Eq.trans ?_ (congr_arg (raise iβ.elim) hb)
-    rw [hb]
-    obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
-    · rw [raiseRaise_f_eq₁ hj] at hj₂ ⊢
-      have := raise_injective' hj₂
-      rw [smul_eq_iff_eq_inv_smul] at this
-      rw [this, ← ha, hb, inv_smul_smul, one_smul]
-    · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
-      have := hρS ⟨A, inl a⟩ ⟨_, _, hj₂.symm⟩
-      rw [smul_eq_iff_eq_inv_smul] at this
-      rw [hj₂, ← hb]
-      change raise _ ⟨A, inl a⟩ = _
-      rw [this, ← ha, hb, inv_smul_smul]
-    · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ ⊢
-      have := raise_injective' hj₂
-      rw [smul_eq_iff_eq_inv_smul] at this
-      rw [this, ← ha, hb, inv_smul_smul, one_smul]
+theorem raiseRaise_atom_spec₁_raise
+    (hρ₁S : ∀ c : Address β, raise iβ.elim (ρ₁ • c) ∈ S → ρ₁ • c = ρ₂ • c)
+    {A : ExtendedIndex α} {a₁ a₂ : Atom} {c : Address β}
+    (ha₁ : raise iβ.elim (ρ₁ • c) = ⟨A, inl a₁⟩)
+    (ha₂ : raise iβ.elim (ρ₂ • c) = ⟨A, inl a₂⟩) :
+    {j | ∃ hj, (raiseRaise hγ S T ρ₁).f j hj = ⟨A, inl a₁⟩} ⊆
+    {j | ∃ hj, (raiseRaise hγ S T ρ₂).f j hj = ⟨A, inl a₂⟩} := by
+  obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq ha₁
+  have ha₁ := raise_injective' ha₁
+  have ha₂ := raise_injective' ha₂
+  rintro j ⟨hj₁, hj₂⟩
+  refine ⟨hj₁, ?_⟩
+  change _ = raise iβ.elim ⟨A, inl _⟩ at hj₂ ⊢
+  obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
+  · rw [raiseRaise_f_eq₁ hj] at hj₂ ⊢
+    have := raise_injective _ hj₂
+    rw [smul_eq_iff_eq_inv_smul] at ha₂
+    rw [← ha₁, ha₂, smul_left_cancel_iff, ← smul_eq_iff_eq_inv_smul] at this
+    rw [this]
+  · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
+    rw [hj₂, ← ha₁, hρ₁S c ⟨_, _, ha₁.symm ▸ hj₂.symm⟩, ha₂]
+  · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ ⊢
+    have := raise_injective _ hj₂
+    rw [smul_eq_iff_eq_inv_smul] at ha₂
+    rw [← ha₁, ha₂, smul_left_cancel_iff, ← smul_eq_iff_eq_inv_smul] at this
+    rw [this]
 
-theorem raiseRaise_atom_spec₁ (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c)
-    {i : κ} (hi : i < (raiseRaise hγ S T ρ).max)
-    {A : ExtendedIndex α} {a b : Atom}
-    (ha : (raiseRaise hγ S T ρ).f i hi = ⟨A, inl a⟩)
-    (hb : (raiseRaise hγ S T 1).f i hi = ⟨A, inl b⟩) :
-    {j | ∃ hj, (raiseRaise hγ S T 1).f j hj = ⟨A, inl b⟩} =
-    {j | ∃ hj, (raiseRaise hγ S T ρ).f j hj = ⟨A, inl a⟩} := by
+theorem raiseRaise_atom_spec₁
+    (hρ₁S : ∀ c : Address β, raise iβ.elim (ρ₁ • c) ∈ S → ρ₁ • c = ρ₂ • c)
+    {i : κ} {hi : i < (raiseRaise hγ S T ρ₁).max}
+    {A : ExtendedIndex α} {a₁ a₂ : Atom}
+    (ha₁ : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inl a₁⟩)
+    (ha₂ : (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inl a₂⟩) :
+    {j | ∃ hj, (raiseRaise hγ S T ρ₁).f j hj = ⟨A, inl a₁⟩} ⊆
+    {j | ∃ hj, (raiseRaise hγ S T ρ₂).f j hj = ⟨A, inl a₂⟩} := by
   obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
-  · rw [raiseRaise_f_eq₁ hi] at ha hb
-    exact raiseRaise_atom_spec₁' hρS ha hb
-  · rw [raiseRaise_f_eq₂ hi hi'] at ha hb
-    rw [← ha, hb]
-    ext j : 1
-    constructor
-    · rintro ⟨hj₁, hj₂⟩
-      refine ⟨hj₁, Eq.trans ?_ hj₂⟩
-      obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
-      · rw [raiseRaise_f_eq₁ hj, raiseRaise_f_eq₁ hj]
-        rw [raiseRaise_f_eq₁ hj] at hj₂
-        obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
-        have hj₂ := raise_injective' hj₂
-        rw [one_smul] at hj₂
-        rw [hj₂, hρS ⟨A, inl b⟩ ⟨_, _, hb.symm⟩, one_smul]
-      · rw [raiseRaise_f_eq₂ hj hj', raiseRaise_f_eq₂ hj hj']
-      · rw [raiseRaise_f_eq₃ hj hj', raiseRaise_f_eq₃ hj (by exact hj')]
-        rw [raiseRaise_f_eq₃ hj hj'] at hj₂
-        obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
-        have hj₂ := raise_injective' hj₂
-        rw [one_smul] at hj₂
-        rw [hj₂, hρS ⟨A, inl b⟩ ⟨_, _, hb.symm⟩, one_smul]
-    · rintro ⟨hj₁, hj₂⟩
-      refine ⟨hj₁, Eq.trans ?_ hj₂⟩
-      obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
-      · rw [raiseRaise_f_eq₁ hj, raiseRaise_f_eq₁ hj]
-        rw [raiseRaise_f_eq₁ hj] at hj₂
-        obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
-        have hj₂ := raise_injective' hj₂
-        rw [smul_eq_iff_eq_inv_smul] at hj₂
-        rw [hj₂, one_smul, smul_inv_smul]
-        conv_lhs => rw [← hρS ⟨A, inl b⟩ ⟨_, _, hb.symm⟩, inv_smul_smul]
-      · rw [raiseRaise_f_eq₂ hj hj', raiseRaise_f_eq₂ hj hj']
-      · rw [raiseRaise_f_eq₃ hj hj', raiseRaise_f_eq₃ hj (by exact hj')]
-        rw [raiseRaise_f_eq₃ hj hj'] at hj₂
-        obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
-        have hj₂ := raise_injective' hj₂
-        rw [smul_eq_iff_eq_inv_smul] at hj₂
-        rw [hj₂, one_smul, smul_inv_smul]
-        conv_lhs => rw [← hρS ⟨A, inl b⟩ ⟨_, _, hb.symm⟩, inv_smul_smul]
-  · rw [raiseRaise_f_eq₃ hi (by exact hi')] at ha hb
-    exact raiseRaise_atom_spec₁' hρS ha hb
+  · rw [raiseRaise_f_eq₁ hi] at ha₁ ha₂
+    exact raiseRaise_atom_spec₁_raise hρ₁S ha₁ ha₂
+  · rw [raiseRaise_f_eq₂ hi hi'] at ha₁ ha₂
+    have := ha₁.symm.trans ha₂
+    simp only [Address.mk.injEq, inl.injEq, true_and] at this
+    subst this
+    rintro j ⟨hj₁, hj₂⟩
+    refine ⟨hj₁, ?_⟩
+    obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
+    · rw [raiseRaise_f_eq₁ hj] at hj₂ ⊢
+      obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
+      have hj₂ := raise_injective' hj₂
+      rw [smul_eq_iff_eq_inv_smul] at hj₂
+      rw [hj₂, ← hρ₁S (ρ₁⁻¹ • ⟨A, inl a₁⟩), smul_inv_smul]
+      rfl
+      rw [smul_inv_smul]
+      exact ⟨_, _, ha₁.symm⟩
+    · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
+      exact hj₂
+    · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ ⊢
+      obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
+      have hj₂ := raise_injective' hj₂
+      rw [smul_eq_iff_eq_inv_smul] at hj₂
+      rw [hj₂, ← hρ₁S (ρ₁⁻¹ • ⟨A, inl a₁⟩), smul_inv_smul]
+      rfl
+      rw [smul_inv_smul]
+      exact ⟨_, _, ha₁.symm⟩
+  · rw [raiseRaise_f_eq₃ hi (by exact hi')] at ha₁ ha₂
+    exact raiseRaise_atom_spec₁_raise hρ₁S ha₁ ha₂
 
-theorem raiseRaise_atom_spec₂' (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c)
-    {A : ExtendedIndex α} {a b : Atom} {c : Address β}
-    (ha : raise iβ.elim (ρ • c) = ⟨A, inl a⟩)
-    (hb : raise iβ.elim ((1 : Allowable β) • c) = ⟨A, inl b⟩) :
-    {j | ∃ hj, ∃ N, (raiseRaise hγ S T 1).f j hj = ⟨A, inr N⟩ ∧ b ∈ N} =
-    {j | ∃ hj, ∃ N, (raiseRaise hγ S T ρ).f j hj = ⟨A, inr N⟩ ∧ a ∈ N} := by
-  obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq ha
-  have ha := raise_injective' ha
-  have hb := raise_injective' hb
-  rw [smul_eq_iff_eq_inv_smul] at ha
-  rw [one_smul] at hb
-  have := ha.symm.trans hb
+theorem raiseRaise_atom_spec₂_raise
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ₁⁻¹ • c = ρ₂⁻¹ • c)
+    {A : ExtendedIndex α} {a₁ a₂ : Atom} {c : Address β}
+    (ha₁ : raise iβ.elim (ρ₁ • c) = ⟨A, inl a₁⟩)
+    (ha₂ : raise iβ.elim (ρ₂ • c) = ⟨A, inl a₂⟩) :
+    {j | ∃ hj, ∃ N, (raiseRaise hγ S T ρ₁).f j hj = ⟨A, inr N⟩ ∧ a₁ ∈ N} ⊆
+    {j | ∃ hj, ∃ N, (raiseRaise hγ S T ρ₂).f j hj = ⟨A, inr N⟩ ∧ a₂ ∈ N} := by
+  obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq ha₁
+  have ha₁ := raise_injective' ha₁
+  have ha₂ := raise_injective' ha₂
+  rw [smul_eq_iff_eq_inv_smul] at ha₁ ha₂
+  have := ha₂.symm.trans ha₁
   simp only [Allowable.smul_address, map_inv, Tree.inv_apply, smul_inl, Address.mk.injEq,
     inl.injEq, true_and] at this
-  subst this
-  ext j : 1
-  constructor
-  · rintro ⟨hj₁, N, hj₂, hN⟩
-    obtain ⟨N', hN'⟩ := raiseRaise_f_eq_nearLitter' (ρ := ρ) j hj₁ _ _ hj₂
-    refine ⟨hj₁, N', hN', ?_⟩
-    obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
-    · rw [raiseRaise_f_eq₁ hj] at hj₂ hN'
-      have h₁ := raise_injective' hj₂
-      have h₂ := raise_injective' hN'
-      rw [one_smul] at h₁
-      simp only [h₁, Allowable.smul_address, smul_inr, Address.mk.injEq, inr.injEq,
-        true_and] at h₂
-      rw [← h₂]
-      exact hN
-    · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ hN'
-      rw [hj₂] at hN'
-      have := hρS ⟨A, inr N⟩ ⟨_, _, hj₂.symm⟩
-      simp only [Allowable.smul_address, smul_inr, Address.mk.injEq, inr.injEq,
-        true_and] at this hN'
-      rw [← hN', ← this]
-      exact hN
-    · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ hN'
-      have h₁ := raise_injective' hj₂
-      have h₂ := raise_injective' hN'
-      rw [one_smul] at h₁
-      simp only [h₁, Allowable.smul_address, smul_inr, Address.mk.injEq, inr.injEq,
-        true_and] at h₂
-      rw [← h₂]
-      exact hN
-  · rintro ⟨hj₁, N, hj₂, hN⟩
-    obtain ⟨N', hN'⟩ := raiseRaise_f_eq_nearLitter j hj₁ _ _ hj₂
-    refine ⟨hj₁, N', hN', ?_⟩
-    obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
-    · rw [raiseRaise_f_eq₁ hj] at hj₂ hN'
-      have h₁ := raise_injective' hj₂
-      have h₂ := raise_injective' hN'
-      rw [one_smul] at h₂
-      simp only [h₂, Allowable.smul_address, smul_inr, Address.mk.injEq, inr.injEq,
-        true_and] at h₁
-      rw [← h₁] at hN
-      exact hN
-    · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ hN'
-      rw [hj₂] at hN'
-      have := hρS ⟨A, inr N⟩ ⟨_, _, hj₂.symm⟩
-      simp only [Allowable.smul_address, smul_inr, Address.mk.injEq, inr.injEq,
-        true_and] at this hN'
-      rw [← this] at hN
-      rw [← hN']
-      exact hN
-    · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ hN'
-      have h₁ := raise_injective' hj₂
-      have h₂ := raise_injective' hN'
-      rw [one_smul] at h₂
-      simp only [h₂, Allowable.smul_address, smul_inr, Address.mk.injEq, inr.injEq,
-        true_and] at h₁
-      rw [← h₁] at hN
-      exact hN
+  rintro j ⟨hj₁, N, hj₂, hN⟩
+  obtain ⟨N', hN'⟩ := raiseRaise_f_eq_nearLitter (ρ₂ := ρ₂) j hj₁ _ _ hj₂
+  refine ⟨hj₁, N', hN', ?_⟩
+  obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
+  · rw [raiseRaise_f_eq₁ hj] at hj₂ hN'
+    have h₁ := raise_injective' hj₂
+    have h₂ := raise_injective' hN'
+    rw [smul_eq_iff_eq_inv_smul] at h₁ h₂ this
+    simp only [h₁, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr, Address.mk.injEq,
+      inr.injEq, ← smul_eq_iff_eq_inv_smul, true_and] at h₂
+    rw [← h₂, this, inv_inv]
+    rw [smul_smul, smul_smul, ← NearLitterPerm.NearLitter.mem_snd_iff,
+      NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff,
+      NearLitterPerm.NearLitter.mem_snd_iff]
+    exact hN
+  · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ hN'
+    rw [inv_smul_eq_iff] at this
+    rw [this]
+    cases hN'.symm.trans hj₂
+    rw [← NearLitterPerm.NearLitter.mem_snd_iff, ← Set.mem_inv_smul_set_iff,
+      ← NearLitterPerm.smul_nearLitter_snd]
+    have := hρS ⟨A, inr N⟩ ⟨_, _, hj₂.symm⟩
+    simp only [Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr, Address.mk.injEq,
+      inr.injEq, true_and] at this
+    rw [← this]
+    rw [NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
+    exact hN
+  · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ hN'
+    have h₁ := raise_injective' hj₂
+    have h₂ := raise_injective' hN'
+    rw [smul_eq_iff_eq_inv_smul] at h₁ h₂ this
+    simp only [h₁, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr, Address.mk.injEq,
+      inr.injEq, ← smul_eq_iff_eq_inv_smul, true_and] at h₂
+    rw [← h₂, this, inv_inv]
+    rw [smul_smul, smul_smul, ← NearLitterPerm.NearLitter.mem_snd_iff,
+      NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff,
+      NearLitterPerm.NearLitter.mem_snd_iff]
+    exact hN
 
-theorem raiseRaise_atom_spec₂ (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c)
-    {i : κ} (hi : i < (raiseRaise hγ S T ρ).max)
-    {A : ExtendedIndex α} {a b : Atom}
-    (ha : (raiseRaise hγ S T ρ).f i hi = ⟨A, inl a⟩)
-    (hb : (raiseRaise hγ S T 1).f i hi = ⟨A, inl b⟩) :
-    {j | ∃ hj, ∃ N, (raiseRaise hγ S T 1).f j hj = ⟨A, inr N⟩ ∧ b ∈ N} =
-    {j | ∃ hj, ∃ N, (raiseRaise hγ S T ρ).f j hj = ⟨A, inr N⟩ ∧ a ∈ N} := by
+theorem raiseRaise_atom_spec₂
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ₁⁻¹ • c = ρ₂⁻¹ • c)
+    {i : κ} {hi : i < (raiseRaise hγ S T ρ₁).max}
+    {A : ExtendedIndex α} {a₁ a₂ : Atom}
+    (ha₁ : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inl a₁⟩)
+    (ha₂ : (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inl a₂⟩) :
+    {j | ∃ hj, ∃ N, (raiseRaise hγ S T ρ₁).f j hj = ⟨A, inr N⟩ ∧ a₁ ∈ N} ⊆
+    {j | ∃ hj, ∃ N, (raiseRaise hγ S T ρ₂).f j hj = ⟨A, inr N⟩ ∧ a₂ ∈ N} := by
   obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
-  · rw [raiseRaise_f_eq₁ hi] at ha hb
-    exact raiseRaise_atom_spec₂' hρS ha hb
-  · rw [raiseRaise_f_eq₂ hi hi'] at ha hb
-    cases ha.symm.trans hb
-    ext j : 1
-    constructor
-    · rintro ⟨hj₁, N, hN, hj₂⟩
-      obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
-      · rw [raiseRaise_f_eq₁ hj] at hN
-        obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hN
-        have hN := raise_injective' hN
-        rw [one_smul] at hN
-        refine ⟨hj₁, Allowable.toStructPerm ρ A • N, ?_, ?_⟩
-        · rw [raiseRaise_f_eq₁ hj, hN]
-          rfl
-        · have := congr_arg Address.value (hρS ⟨A, inl a⟩ ⟨_, _, ha.symm⟩)
-          simp only [Allowable.smul_address, smul_inl, inl.injEq] at this
-          rw [← this, ← NearLitterPerm.NearLitter.mem_snd_iff, NearLitterPerm.smul_nearLitter_snd,
-            Set.smul_mem_smul_set_iff, NearLitterPerm.NearLitter.mem_snd_iff]
-          exact hj₂
-      · refine ⟨hj₁, N, ?_, hj₂⟩
-        rw [raiseRaise_f_eq₂ hj hj'] at hN ⊢
+  · rw [raiseRaise_f_eq₁ hi] at ha₁ ha₂
+    exact raiseRaise_atom_spec₂_raise hρS ha₁ ha₂
+  · rw [raiseRaise_f_eq₂ hi hi'] at ha₁ ha₂
+    have := ha₁.symm.trans ha₂
+    simp only [Address.mk.injEq, inl.injEq, true_and] at this
+    subst this
+    rintro j ⟨hj₁, N, hj₂, hN⟩
+    refine ⟨hj₁, ?_⟩
+    obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
+    · rw [raiseRaise_f_eq₁ hj] at hj₂ ⊢
+      obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
+      have hj₂ := raise_injective' hj₂
+      rw [smul_eq_iff_eq_inv_smul] at hj₂
+      rw [hj₂]
+      refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) A • N, ?_, ?_⟩
+      · simp only [Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr, raise, map_mul,
+          Tree.mul_apply, mul_smul]
+      · change _ = raise iβ.elim ⟨A, inl a₁⟩ at ha₁
+        have := hρS _ ⟨_, _, ha₁.symm⟩
+        simp only [Allowable.smul_address_eq_smul_iff, map_inv, Tree.inv_apply, smul_inl,
+          inl.injEq] at this
+        rw [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul,
+          ← NearLitterPerm.NearLitter.mem_snd_iff,
+          NearLitterPerm.smul_nearLitter_snd, Set.mem_smul_set_iff_inv_smul_mem,
+          ← this, NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
         exact hN
-      · rw [raiseRaise_f_eq₃ hj hj'] at hN
-        obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hN
-        have hN := raise_injective' hN
-        rw [one_smul] at hN
-        refine ⟨hj₁, Allowable.toStructPerm ρ A • N, ?_, ?_⟩
-        · rw [raiseRaise_f_eq₃ hj (by exact hj'), hN]
-          rfl
-        · have := congr_arg Address.value (hρS ⟨A, inl a⟩ ⟨_, _, ha.symm⟩)
-          simp only [Allowable.smul_address, smul_inl, inl.injEq] at this
-          rw [← this, ← NearLitterPerm.NearLitter.mem_snd_iff, NearLitterPerm.smul_nearLitter_snd,
-            Set.smul_mem_smul_set_iff, NearLitterPerm.NearLitter.mem_snd_iff]
-          exact hj₂
-    · rintro ⟨hj₁, N, hN, hj₂⟩
-      obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
-      · rw [raiseRaise_f_eq₁ hj] at hN
-        obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hN
-        have hN := raise_injective' hN
-        rw [smul_eq_iff_eq_inv_smul] at hN
-        refine ⟨hj₁, Allowable.toStructPerm ρ⁻¹ A • N, ?_, ?_⟩
-        · rw [raiseRaise_f_eq₁ hj, hN, one_smul]
-          rfl
-        · rw [map_inv, Tree.inv_apply]
-          have := congr_arg Address.value (hρS ⟨A, inl a⟩ ⟨_, _, ha.symm⟩)
-          simp only [Allowable.smul_address, smul_inl, inl.injEq] at this
-          rw [← this] at hj₂
-          exact hj₂
-      · refine ⟨hj₁, N, ?_, hj₂⟩
-        rw [raiseRaise_f_eq₂ hj hj'] at hN ⊢
+    · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
+      exact ⟨N, hj₂, hN⟩
+    · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ ⊢
+      obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
+      have hj₂ := raise_injective' hj₂
+      rw [smul_eq_iff_eq_inv_smul] at hj₂
+      rw [hj₂]
+      refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) A • N, ?_, ?_⟩
+      · simp only [Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr, raise, map_mul,
+          Tree.mul_apply, mul_smul]
+      · change _ = raise iβ.elim ⟨A, inl a₁⟩ at ha₁
+        have := hρS _ ⟨_, _, ha₁.symm⟩
+        simp only [Allowable.smul_address_eq_smul_iff, map_inv, Tree.inv_apply, smul_inl,
+          inl.injEq] at this
+        rw [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul,
+          ← NearLitterPerm.NearLitter.mem_snd_iff,
+          NearLitterPerm.smul_nearLitter_snd, Set.mem_smul_set_iff_inv_smul_mem,
+          ← this, NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
         exact hN
-      · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hN
-        obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hN
-        have hN := raise_injective' hN
-        rw [smul_eq_iff_eq_inv_smul] at hN
-        refine ⟨hj₁, Allowable.toStructPerm ρ⁻¹ A • N, ?_, ?_⟩
-        · rw [raiseRaise_f_eq₃ hj (by exact hj'), one_smul, hN]
-          rfl
-        · rw [map_inv, Tree.inv_apply]
-          have := congr_arg Address.value (hρS ⟨A, inl a⟩ ⟨_, _, ha.symm⟩)
-          simp only [Allowable.smul_address, smul_inl, inl.injEq] at this
-          rw [← this] at hj₂
-          exact hj₂
-  · rw [raiseRaise_f_eq₃ hi (by exact hi')] at ha hb
-    exact raiseRaise_atom_spec₂' hρS ha hb
+  · rw [raiseRaise_f_eq₃ hi (by exact hi')] at ha₁ ha₂
+    exact raiseRaise_atom_spec₂_raise hρS ha₁ ha₂
 
 theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : Allowable β)
     (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) {σ : Spec α}
@@ -788,9 +710,28 @@ theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (
   max_eq_max := raiseRaise_max_eq_max.symm.trans hσ.max_eq_max
   atom_spec := by
     intro i hi A a ha
-    obtain ⟨b, hb⟩ := raiseRaise_f_eq_atom i hi A a ha
+    obtain ⟨b, hb⟩ := raiseRaise_f_eq_atom (ρ₂ := 1) i hi A a ha
     rw [hσ.atom_spec i hi A b hb, SpecCondition.atom.injEq]
-    exact ⟨rfl, raiseRaise_atom_spec₁ hρS hi ha hb, raiseRaise_atom_spec₂ hρS hi ha hb⟩
+    refine ⟨rfl, ?_, ?_⟩
+    · refine subset_antisymm ?_ ?_
+      · refine raiseRaise_atom_spec₁ ?_ hb ha
+        intro c hc
+        rw [one_smul, hρS]
+        rwa [one_smul] at hc
+      · refine raiseRaise_atom_spec₁ ?_ ha hb
+        intro c hc
+        have := hρS (ρ • c) hc
+        rw [smul_left_cancel_iff] at this
+        rwa [one_smul]
+    · refine subset_antisymm ?_ ?_
+      · refine raiseRaise_atom_spec₂ ?_ hb ha
+        intro c hc
+        rw [inv_one, one_smul, eq_inv_smul_iff]
+        exact hρS c hc
+      · refine raiseRaise_atom_spec₂ ?_ ha hb
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff]
+        exact (hρS c hc).symm
   flexible_spec := sorry
   inflexibleCoe_spec := sorry
   inflexibleBot_spec := sorry
