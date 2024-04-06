@@ -32,6 +32,26 @@ theorem raiseIndex_injective {A B : ExtendedIndex γ}
     (h : raiseIndex hγ A = raiseIndex hγ B) : A = B :=
   Path.comp_inj_right.mp h
 
+theorem _root_.Quiver.Path.comp_injective' {V : Type _} [Quiver V]
+    {a b c d : V} {p₁ : Path a b} {p₂ : Path a c} {q₁ : Path b d} {q₂ : Path c d}
+    (h₁ : p₁.length = p₂.length) (h₂ : p₁.comp q₁ = p₂.comp q₂) : b = c := by
+  induction' q₁ with b' c' r f ih
+  · have := congr_arg Path.length h₂
+    rw [Path.comp_nil, h₁, Path.length_comp, self_eq_add_right] at this
+    exact (Path.eq_of_length_zero _ this).symm
+  · cases' q₂ with c'' _ q₂ g
+    · have := congr_arg Path.length h₂
+      simp only [Path.comp_cons, Path.length_cons, Path.length_comp, h₁, add_assoc, Path.comp_nil,
+        add_right_eq_self, add_eq_zero, one_ne_zero, and_false] at this
+    · simp only [Path.comp_cons, Path.cons.injEq] at h₂
+      cases h₂.1
+      exact ih (eq_of_heq h₂.2.1)
+
+theorem raiseIndex_index_injective {γ δ : Λ} (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β)
+    {A : ExtendedIndex γ} {B : ExtendedIndex δ}
+    (h : raiseIndex hγ A = raiseIndex hδ B) : γ = δ :=
+  coe_injective (Path.comp_injective' (by rfl) h)
+
 theorem raise_injective {c d : Address γ} (h : raise hγ c = raise hγ d) : c = d := by
   refine Address.ext _ _ ?_ ?_
   · exact raiseIndex_injective hγ (congr_arg Address.path h)

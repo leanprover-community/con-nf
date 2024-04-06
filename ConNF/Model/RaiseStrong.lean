@@ -466,6 +466,15 @@ theorem raiseRaise_strong (hρS : ∀ c : Address β, raise iβ.elim c ∈ S →
 
 theorem raiseRaise_max_eq_max : (raiseRaise hγ S T 1).max = (raiseRaise hγ S T ρ).max := rfl
 
+theorem raiseRaise_ne_nearLitter
+    {i : κ} (hi : i < (interferenceSupport hγ S T).max) {A : ExtendedIndex α} {N : NearLitter} :
+    (raiseRaise hγ S T ρ).f i ((hi.trans_le (κ_le_self_add _ _)).trans_le (κ_le_self_add _ _)) ≠
+      ⟨A, inr N⟩ := by
+  intro h
+  rw [raiseRaise_f_eq₁ hi, raise, Allowable.smul_address, Address.mk.injEq,
+    smul_eq_iff_eq_inv_smul, smul_inr] at h
+  exact interferenceSupport_ne_nearLitter hγ hi h.2
+
 theorem raiseRaise_f_eq_atom (i : κ) (hi : i < (raiseRaise hγ S T ρ₁).max)
     (A : ExtendedIndex α) (a : Atom) (ha : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inl a⟩) :
     ∃ b, (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inl b⟩ := by
@@ -493,12 +502,7 @@ theorem raiseRaise_f_eq_nearLitter (i : κ) (hi : i < (raiseRaise hγ S T ρ₁)
     (A : ExtendedIndex α) (N : NearLitter) (hN : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inr N⟩) :
     ∃ N', (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inr N'⟩ := by
   obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
-  · rw [raiseRaise_f_eq₁ hi] at hN ⊢
-    simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul, smul_inr,
-      one_smul] at hN ⊢
-    refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) ((interferenceSupport hγ S T).f i hi).path • N,
-      hN.1, ?_⟩
-    simp only [hN.2, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul, inv_smul_smul]
+  · cases raiseRaise_ne_nearLitter hi hN
   · rw [raiseRaise_f_eq₂ hi hi'] at hN ⊢
     exact ⟨N, hN⟩
   · rw [raiseRaise_f_eq₃ hi hi'] at hN
@@ -511,6 +515,72 @@ theorem raiseRaise_f_eq_nearLitter (i : κ) (hi : i < (raiseRaise hγ S T ρ₁)
     · rw [raiseRaise_max, ← κ_sub_lt_iff hi] at hi'
       exact hi'
     · simp only [hN.2, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul, inv_smul_smul]
+
+theorem raiseRaise_cases_nearLitter {i : κ} {hi : i < (raiseRaise hγ S T ρ₁).max}
+    {A : ExtendedIndex α} {N₁ N₂ : NearLitter}
+    (h₁ : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inr N₁⟩)
+    (h₂ : (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inr N₂⟩) :
+    ((interferenceSupport hγ S T).max ≤ i ∧ i < (interferenceSupport hγ S T).max + S.max) ∨
+    ((interferenceSupport hγ S T).max + S.max ≤ i ∧ i < (raiseRaise hγ S T ρ₁).max ∧
+      ∃ B : ExtendedIndex β, A = raiseIndex iβ.elim B) := by
+  obtain (hi | hi | ⟨hi, hi'⟩) := raiseRaise_cases hi
+  · cases raiseRaise_ne_nearLitter hi h₁
+  · exact Or.inl hi
+  · rw [raiseRaise_f_eq₃ hi (by exact hi')] at h₁ h₂
+    have : 0 < A.length
+    · have := congr_arg (Path.length ∘ Address.path) h₁
+      simp only [Allowable.smul_address, Function.comp_apply,
+        raise_path, raiseIndex_length, Path.length_cons, add_left_inj] at this
+      linarith
+    obtain ⟨β', hβ', A, rfl⟩ := eq_raiseIndex_of_zero_lt_length this
+    obtain ⟨B, hB⟩ := raiseIndex_of_raise_eq h₁
+    exact Or.inr ⟨hi, hi', B, hB.symm⟩
+
+theorem raiseRaise_inflexibleCoe₃ {i : κ}
+    (hi : (interferenceSupport hγ S T).max + S.max ≤ i) (hi' : i < (raiseRaise hγ S T ρ).max)
+    {A : ExtendedIndex β} {N₁ N₂ : NearLitter}
+    (h₁ : (raiseRaise hγ S T ρ₁).f i hi' = ⟨raiseIndex iβ.elim A, inr N₁⟩)
+    (h₂ : (raiseRaise hγ S T ρ₂).f i hi' = ⟨raiseIndex iβ.elim A, inr N₂⟩)
+    (h : InflexibleCoe (raiseIndex iβ.elim A) N₁.1) :
+    ∃ (P : InflexibleCoePath A) (t : Tangle P.δ),
+    N₁.1 = fuzz P.hδε (Allowable.comp (P.B.cons P.hδ) ρ₁ • t) ∧
+    N₂.1 = fuzz P.hδε (Allowable.comp (P.B.cons P.hδ) ρ₂ • t) := by
+  rw [raiseRaise_f_eq₃ hi (by exact hi')] at h₁ h₂
+  obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, hB⟩, t, hL⟩ := h
+  have : 0 < B.length
+  · have := strongSupport_raise_spec hγ T _
+      ⟨i - ((interferenceSupport hγ S T).max + S.max), ?_, rfl⟩
+    swap
+    · rw [κ_sub_lt_iff hi]
+      exact hi'
+    obtain (h | ⟨a, ha⟩) := this
+    · have h₁ := congr_arg (Path.length ∘ Address.path) h₁
+      have h₂ := congr_arg Path.length hB
+      simp only [Allowable.smul_address, Function.comp_apply, raise_path,
+        raiseIndex_length, Path.length_cons, add_left_inj] at h₁ h₂
+      linarith
+    · have h₁ := congr_arg Address.value h₁
+      have h₂ := congr_arg Address.value ha
+      rw [Allowable.smul_address, raise_value, smul_eq_iff_eq_inv_smul] at h₁
+      cases h₁.symm.trans h₂
+  obtain ⟨β', hβ', B, rfl⟩ := eq_raiseIndex_of_zero_lt_length this
+  rw [← Path.comp_cons, ← Path.comp_cons] at hB
+  cases Path.comp_injective' (by rfl) hB
+  cases raiseIndex_injective _ hB
+  refine ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, Allowable.comp (B.cons hδ) ρ₁⁻¹ • t, ?_, ?_⟩
+  · simp only [hL, map_inv, smul_inv_smul]
+  · rw [← toStructPerm_smul_fuzz hδ hε hδε, ← toStructPerm_smul_fuzz hδ hε hδε,
+      ← hL, ← inv_smul_eq_iff]
+    simp only [map_inv, Tree.inv_apply]
+    have h₁' := congr_arg Address.value h₁
+    have h₂' := congr_arg Address.value h₂
+    simp only [raise_value, Allowable.smul_address, smul_eq_iff_eq_inv_smul] at h₁' h₂'
+    have := h₁'.symm.trans h₂'
+    simp only [smul_inr, inr.injEq] at this
+    have := congr_arg Sigma.fst this
+    simp only [NearLitterPerm.smul_nearLitter_fst] at this
+    rw [← raiseIndex_injective _ (congr_arg Address.path h₁)]
+    exact this.symm
 
 theorem raiseRaise_eq_cases {i : κ} {hi : i < (raiseRaise hγ S T ρ).max} {c : Address α}
     (h : (raiseRaise hγ S T ρ).f i hi = c) :
@@ -733,7 +803,13 @@ theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (
         rw [inv_one, one_smul, inv_smul_eq_iff]
         exact (hρS c hc).symm
   flexible_spec := sorry
-  inflexibleCoe_spec := sorry
+  inflexibleCoe_spec := by
+    intro i hi A N₁ h hN₁
+    obtain ⟨N₂, hN₂⟩ := raiseRaise_f_eq_nearLitter (ρ₂ := 1) i hi A N₁ hN₁
+    obtain (h | ⟨hi, hi', A, rfl⟩) := raiseRaise_cases_nearLitter hN₁ hN₂
+    · sorry
+    · obtain ⟨P, t, hN₁', hN₂'⟩ := raiseRaise_inflexibleCoe₃ hi hi' hN₁ hN₂ h
+      sorry
   inflexibleBot_spec := sorry
 
 end ConNF.Support
