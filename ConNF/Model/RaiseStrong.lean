@@ -141,8 +141,8 @@ theorem raise_smul_raise_strong (T : Support γ) (ρ : Allowable β) :
         (A := ((strongSupport (T.image (raise hγ)).small).f i₁ hi₁).path) ?_ ?_
         (ha.smul (Allowable.toStructPerm ρ⁻¹
           ((strongSupport (T.image (raise hγ)).small).f i₁ hi₁).path))
-    · obtain ⟨j, hj, hji₁, hji₂, hj'⟩ := this
-      refine ⟨j, hj, hji₁, hji₂, ?_⟩
+    · obtain ⟨j, hj, hj'⟩ := this
+      refine ⟨j, hj, ?_⟩
       rw [Enumeration.image_f, Enumeration.smul_f, hj']
       refine Address.ext _ _ ?_ ?_
       · have := congr_arg Address.path hN₁
@@ -285,47 +285,73 @@ theorem interferenceSupport_eq_atom {S : Support α} {T : Support γ}
     cases this rfl
 
 def raiseRaise (S : Support α) (T : Support γ) (ρ : Allowable β) : Support α :=
-    ((ρ • interferenceSupport hγ S T).image (raise iβ.elim)) +
-      S + ((ρ • strongSupport (T.image (raise hγ)).small).image (raise iβ.elim))
+  S + ((ρ • (strongSupport (T.image (raise hγ)).small +
+    interferenceSupport hγ S T)).image (raise iβ.elim))
 
 variable {hγ} {S : Support α} {T : Support γ} {ρ ρ₁ ρ₂ : Allowable β}
 
 theorem raiseRaise_max : (raiseRaise hγ S T ρ).max =
-    (interferenceSupport hγ S T).max + S.max + (strongSupport (T.image (raise hγ)).small).max :=
+    S.max + ((strongSupport (T.image (raise hγ)).small).max + (interferenceSupport hγ S T).max) :=
   rfl
 
-theorem raiseRaise_f_eq₁ {i : κ} (hi : i < (interferenceSupport hγ S T).max) :
-    (raiseRaise hγ S T ρ).f i ((hi.trans_le (κ_le_self_add _ _)).trans_le (κ_le_self_add _ _)) =
-    raise iβ.elim (ρ • (interferenceSupport hγ S T).f i hi) := by
+theorem raiseRaise_hi₁ {i : κ} (hi : i < S.max) : i < (raiseRaise hγ S T ρ).max :=
+  hi.trans_le (κ_le_self_add _ _)
+
+theorem raiseRaise_hi₂ {i : κ} (hi : i < S.max + (strongSupport (T.image (raise hγ)).small).max) :
+    i < (raiseRaise hγ S T ρ).max := by
+  rw [raiseRaise_max, ← add_assoc]
+  exact hi.trans_le (κ_le_self_add _ _)
+
+theorem raiseRaise_hi₂' {i : κ} (hi₁ : S.max ≤ i)
+    (hi₂ : i < S.max + (strongSupport (T.image (raise hγ)).small).max) :
+    i - S.max < (strongSupport (T.image (raise hγ)).small).max :=
+  κ_sub_lt hi₂ hi₁
+
+theorem raiseRaise_hi₃' {i : κ} (hi₁ : S.max + (strongSupport (T.image (raise hγ)).small).max ≤ i)
+    (hi₂ : i < (raiseRaise hγ S T ρ).max) :
+    i - S.max - (strongSupport (T.image (raise hγ)).small).max <
+      (interferenceSupport hγ S T).max := by
+  rw [κ_sub_lt_iff, κ_sub_lt_iff]
+  · exact hi₂
+  · exact (κ_le_self_add _ _).trans hi₁
+  · by_contra! h
+    rw [κ_sub_lt_iff ((κ_le_self_add _ _).trans hi₁)] at h
+    cases not_lt_of_le hi₁ h
+
+theorem raiseRaise_f_eq₁ {i : κ} (hi : i < S.max) :
+    (raiseRaise hγ S T ρ).f i (raiseRaise_hi₁ hi) = S.f i hi := by
   unfold raiseRaise
-  rw [Enumeration.add_f_left (by exact hi.trans_le (κ_le_self_add _ _)),
-    Enumeration.add_f_left (by exact hi)]
-  rfl
+  rw [Enumeration.add_f_left hi]
 
-theorem raiseRaise_f_eq₂ {i : κ} (hi₁ : (interferenceSupport hγ S T).max ≤ i)
-    (hi₂ : i < (interferenceSupport hγ S T).max + S.max) :
-    (raiseRaise hγ S T ρ).f i (hi₂.trans_le (κ_le_self_add _ _)) =
-    S.f (i - (interferenceSupport hγ S T).max) (κ_sub_lt hi₂ hi₁) := by
+theorem raiseRaise_f_eq₂ {i : κ} (hi₁ : S.max ≤ i)
+    (hi₂ : i < S.max + (strongSupport (T.image (raise hγ)).small).max) :
+    (raiseRaise hγ S T ρ).f i (raiseRaise_hi₂ hi₂) =
+    raise iβ.elim (ρ • (strongSupport (T.image (raise hγ)).small).f
+      (i - S.max) (raiseRaise_hi₂' hi₁ hi₂)) := by
   unfold raiseRaise
-  rw [Enumeration.add_f_left (by exact hi₂), Enumeration.add_f_right (by exact hi₂) (by exact hi₁)]
-  rfl
+  rw [Enumeration.add_f_right _ hi₁, Enumeration.image_f, Enumeration.smul_f,
+    Enumeration.add_f_left (raiseRaise_hi₂' hi₁ hi₂)]
 
-theorem raiseRaise_f_eq₃ {i : κ} (hi₁ : (interferenceSupport hγ S T).max + S.max ≤ i)
+theorem raiseRaise_f_eq₃ {i : κ} (hi₁ : S.max + (strongSupport (T.image (raise hγ)).small).max ≤ i)
     (hi₂ : i < (raiseRaise hγ S T ρ).max) :
     (raiseRaise hγ S T ρ).f i hi₂ =
-    raise iβ.elim (ρ • (strongSupport (T.image (raise hγ)).small).f
-      (i - ((interferenceSupport hγ S T).max + S.max)) (κ_sub_lt hi₂ hi₁)) := by
+    raise iβ.elim (ρ • (interferenceSupport hγ S T).f
+      (i - S.max - (strongSupport (T.image (raise hγ)).small).max)
+      (raiseRaise_hi₃' hi₁ hi₂)) := by
   unfold raiseRaise
-  rw [Enumeration.add_f_right (by exact hi₂) (by exact hi₁)]
-  rfl
+  rw [Enumeration.add_f_right hi₂ ((κ_le_self_add _ _).trans hi₁),
+    Enumeration.image_f, Enumeration.smul_f, Enumeration.add_f_right]
+  by_contra! h
+  rw [κ_sub_lt_iff ((κ_le_self_add _ _).trans hi₁)] at h
+  cases not_lt_of_le hi₁ h
 
 theorem raiseRaise_cases {i : κ} (hi : i < (raiseRaise hγ S T ρ).max) :
-    (i < (interferenceSupport hγ S T).max) ∨
-    ((interferenceSupport hγ S T).max ≤ i ∧ i < (interferenceSupport hγ S T).max + S.max) ∨
-    ((interferenceSupport hγ S T).max + S.max ≤ i ∧ i < (raiseRaise hγ S T ρ).max) := by
-  by_cases h₁ : i < (interferenceSupport hγ S T).max
+    (i < S.max) ∨
+    (S.max ≤ i ∧ i < S.max + (strongSupport (T.image (raise hγ)).small).max) ∨
+    (S.max + (strongSupport (T.image (raise hγ)).small).max ≤ i ∧ i < (raiseRaise hγ S T ρ).max) := by
+  by_cases h₁ : i < S.max
   · exact Or.inl h₁
-  by_cases h₂ : i < (interferenceSupport hγ S T).max + S.max
+  by_cases h₂ : i < S.max + (strongSupport (T.image (raise hγ)).small).max
   · exact Or.inr (Or.inl ⟨le_of_not_lt h₁, h₂⟩)
   · exact Or.inr (Or.inr ⟨le_of_not_lt h₂, hi⟩)
 
@@ -348,40 +374,27 @@ theorem raiseRaise_strong (hρS : ∀ c : Address β, raise iβ.elim c ∈ S →
   · intro i₁ i₂ hi₁ hi₂ A N₁ N₂ hN₁ hN₂ a ha
     obtain (hi₁ | ⟨hi₁, hi₁'⟩ | ⟨hi₁, hi₁'⟩) := raiseRaise_cases hi₁
     · rw [raiseRaise_f_eq₁ hi₁] at hN₁
-      simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul] at hN₁
-      cases interferenceSupport_ne_nearLitter hγ hi₁ hN₁.2
-    · rw [raiseRaise_f_eq₂ hi₁ hi₁'] at hN₁
       obtain (hi₂ | ⟨hi₂, hi₂'⟩ | ⟨hi₂, hi₂'⟩) := raiseRaise_cases hi₂
       · rw [raiseRaise_f_eq₁ hi₂] at hN₂
-        simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul] at hN₂
-        cases interferenceSupport_ne_nearLitter hγ hi₂ hN₂.2
+        obtain ⟨j, hj, hj'⟩ := hS.interferes _ _ hN₁ hN₂ ha
+        refine ⟨j, raiseRaise_hi₁ hj, ?_⟩
+        rw [raiseRaise_f_eq₁ hj]
+        exact hj'
       · rw [raiseRaise_f_eq₂ hi₂ hi₂'] at hN₂
-        obtain ⟨j, hj, hj₁, hj₂, hj'⟩ := hS.interferes _ _ hN₁ hN₂ ha
-        refine ⟨(interferenceSupport hγ S T).max + j, ?_, ?_, ?_, ?_⟩
-        · rw [raiseRaise_max, add_assoc]
-          refine add_lt_add_left ?_ _
-          exact hj.trans_le (κ_le_self_add _ _)
-        · rwa [← κ_lt_sub_iff]
-        · rwa [← κ_lt_sub_iff]
-        · rw [raiseRaise_f_eq₂]
-          · simp_rw [κ_add_sub_cancel]
-            exact hj'
-          · rw [le_add_iff_nonneg_right]
-            exact κ_pos _
-          · rwa [add_lt_add_iff_left]
-      · rw [raiseRaise_f_eq₃ hi₂ hi₂'] at hN₂
         obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hN₂
         have := raise_injective' hN₂
         rw [smul_eq_iff_eq_inv_smul] at this
         have := (mem_interferenceSupport_iff hγ S T ⟨A, inl (Allowable.toStructPerm ρ⁻¹ A • a)⟩).mpr
           ⟨A, _, N₁, _, rfl, ⟨_, _, hN₁.symm⟩, ⟨_, _, this.symm⟩, ?_⟩
         · obtain ⟨j, hj, hj'⟩ := this
-          refine ⟨j, ?_, ?_, ?_, ?_⟩
-          · rw [raiseRaise_max, add_assoc]
-            exact hj.trans_le (κ_le_self_add _ _)
-          · exact hj.trans_le hi₁
-          · exact hj.trans_le ((κ_le_self_add _ _).trans hi₂)
-          · rw [raiseRaise_f_eq₁ hj, ← hj', Allowable.smul_address]
+          refine ⟨S.max + (strongSupport (T.image (raise hγ)).small).max + j, ?_, ?_⟩
+          · rwa [raiseRaise_max, add_assoc, add_lt_add_iff_left, add_lt_add_iff_left]
+          · rw [raiseRaise_f_eq₃]
+            swap
+            · rw [le_add_iff_nonneg_right]
+              exact κ_pos _
+            simp_rw [add_assoc, κ_add_sub_cancel]
+            rw [← hj', Allowable.smul_address]
             simp only [map_inv, Tree.inv_apply, smul_inl, smul_inv_smul]
             rfl
         · convert ha.smul (Allowable.toStructPerm ρ⁻¹ A) using 1
@@ -389,24 +402,26 @@ theorem raiseRaise_strong (hρS : ∀ c : Address β, raise iβ.elim c ∈ S →
           simp only [Allowable.smul_address, smul_inr, Address.mk.injEq, inr.injEq, true_and]
             at this
           rw [map_inv, Tree.inv_apply, eq_inv_smul_iff, this]
-    · rw [raiseRaise_f_eq₃ hi₁ hi₁'] at hN₁
+      · rw [raiseRaise_f_eq₃ hi₂ hi₂'] at hN₂
+        simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul] at hN₂
+        cases interferenceSupport_ne_nearLitter hγ _ hN₂.2
+    · rw [raiseRaise_f_eq₂ hi₁ hi₁'] at hN₁
       obtain (hi₂ | ⟨hi₂, hi₂'⟩ | ⟨hi₂, hi₂'⟩) := raiseRaise_cases hi₂
       · rw [raiseRaise_f_eq₁ hi₂] at hN₂
-        simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul] at hN₂
-        cases interferenceSupport_ne_nearLitter hγ hi₂ hN₂.2
-      · rw [raiseRaise_f_eq₂ hi₂ hi₂'] at hN₂
         obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hN₁
         have := raise_injective' hN₁
         rw [smul_eq_iff_eq_inv_smul] at this
         have := (mem_interferenceSupport_iff hγ S T ⟨A, inl (Allowable.toStructPerm ρ⁻¹ A • a)⟩).mpr
           ⟨A, _, _, _, rfl, ⟨_, _, hN₂.symm⟩, ⟨_, _, this.symm⟩, ?_⟩
         · obtain ⟨j, hj, hj'⟩ := this
-          refine ⟨j, ?_, ?_, ?_, ?_⟩
-          · rw [raiseRaise_max, add_assoc]
-            exact hj.trans_le (κ_le_self_add _ _)
-          · exact hj.trans_le ((κ_le_self_add _ _).trans hi₁)
-          · exact hj.trans_le hi₂
-          · rw [raiseRaise_f_eq₁ hj, ← hj', Allowable.smul_address]
+          refine ⟨S.max + (strongSupport (T.image (raise hγ)).small).max + j, ?_, ?_⟩
+          · rwa [raiseRaise_max, add_assoc, add_lt_add_iff_left, add_lt_add_iff_left]
+          · rw [raiseRaise_f_eq₃]
+            swap
+            · rw [le_add_iff_nonneg_right]
+              exact κ_pos _
+            simp_rw [add_assoc, κ_add_sub_cancel]
+            rw [← hj', Allowable.smul_address]
             simp only [map_inv, Tree.inv_apply, smul_inl, smul_inv_smul]
             rfl
         · convert ha.symm.smul (Allowable.toStructPerm ρ⁻¹ A) using 1
@@ -414,119 +429,118 @@ theorem raiseRaise_strong (hρS : ∀ c : Address β, raise iβ.elim c ∈ S →
           simp only [Allowable.smul_address, smul_inr, Address.mk.injEq, inr.injEq, true_and]
             at this
           rw [map_inv, Tree.inv_apply, eq_inv_smul_iff, this]
-      · rw [raiseRaise_f_eq₃ hi₂ hi₂'] at hN₂
+      · rw [raiseRaise_f_eq₂ hi₂ hi₂'] at hN₂
         obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hN₂
         have hN₁' := raise_injective' hN₁
         have hN₂' := raise_injective' hN₂
         rw [smul_eq_iff_eq_inv_smul] at hN₁' hN₂'
-        obtain ⟨j, hj, hj₁, hj₂, hj'⟩ :=
+        obtain ⟨j, hj, hj'⟩ :=
           (strongSupport_strong (T.image (raise hγ)).small).interferes _ _ hN₁' hN₂' (ha.smul _)
-        refine ⟨(interferenceSupport hγ S T).max + S.max + j, ?_, ?_, ?_, ?_⟩
-        · rw [raiseRaise_max]
-          exact add_lt_add_left hj _
-        · rw [κ_lt_sub_iff] at hj₁
-          refine lt_of_le_of_lt ?_ hj₁
-          rw [add_assoc, add_le_add_iff_left]
-        · rw [κ_lt_sub_iff] at hj₂
-          refine lt_of_le_of_lt ?_ hj₂
-          rw [add_assoc, add_le_add_iff_left]
-        · rw [raiseRaise_f_eq₃]
+        refine ⟨S.max + j, ?_, ?_⟩
+        · rw [raiseRaise_max, add_lt_add_iff_left]
+          exact hj.trans_le (κ_le_self_add _ _)
+        · rw [raiseRaise_f_eq₂]
           · simp_rw [κ_add_sub_cancel]
             rw [hj']
             simp only [map_inv, Tree.inv_apply, Allowable.smul_address, smul_inl, smul_inv_smul]
             rfl
           · rw [le_add_iff_nonneg_right]
             exact κ_pos _
+          · rw [add_lt_add_iff_left]
+            exact hj
+      · rw [raiseRaise_f_eq₃ hi₂ hi₂'] at hN₂
+        simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul] at hN₂
+        cases interferenceSupport_ne_nearLitter hγ _ hN₂.2
+    · rw [raiseRaise_f_eq₃ hi₁ hi₁'] at hN₁
+      simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul] at hN₁
+      cases interferenceSupport_ne_nearLitter hγ _ hN₁.2
   · intro i hi c hc
     obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
     · rw [raiseRaise_f_eq₁ hi] at hc
-      obtain ⟨A, a, ha⟩ := interferenceSupport_eq_atom hγ hi
+      obtain ⟨j, hj₁, hj₂, hj₃⟩ := hS.precedes _ _ hc
+      refine ⟨j, raiseRaise_hi₁ hj₁, hj₂, ?_⟩
+      rw [raiseRaise_f_eq₁ hj₁, hj₃]
+    · rw [raiseRaise_f_eq₂ hi hi'] at hc
+      obtain ⟨j, hj₁, hj₂, hj₃⟩ := (raise_smul_raise_strong hγ T ρ).precedes _ _ hc
+      refine ⟨S.max + j, ?_, ?_, ?_⟩
+      · rw [κ_lt_sub_iff] at hj₂
+        exact hj₂.trans ‹_›
+      · rw [κ_lt_sub_iff] at hj₂
+        exact hj₂
+      · rw [raiseRaise_f_eq₂, ← hj₃]
+        · simp_rw [κ_add_sub_cancel]
+          rfl
+        · rw [le_add_iff_nonneg_right]
+          exact κ_pos _
+        · rw [add_lt_add_iff_left]
+          exact hj₁
+    · rw [raiseRaise_f_eq₃ hi hi'] at hc
+      obtain ⟨A, a, ha⟩ := interferenceSupport_eq_atom hγ _
       rw [ha] at hc
       cases not_precedes_atom hc
-    · rw [raiseRaise_f_eq₂ hi hi'] at hc
-      obtain ⟨j, hj₁, hj₂, hj₃⟩ := hS.precedes _ _ hc
-      refine ⟨(interferenceSupport hγ S T).max + j, ?_, ?_, ?_⟩
-      · rw [raiseRaise_max, add_assoc, add_lt_add_iff_left]
-        exact hj₁.trans_le (κ_le_self_add _ _)
-      · rwa [κ_lt_sub_iff] at hj₂
-      · rw [raiseRaise_f_eq₂]
-        · simp_rw [κ_add_sub_cancel]
-          exact hj₃
-        · exact κ_le_self_add _ _
-        · rwa [add_lt_add_iff_left]
-    · rw [raiseRaise_f_eq₃ hi hi'] at hc
-      obtain ⟨j, hj₁, hj₂, hj₃⟩ := (raise_smul_raise_strong hγ T ρ).precedes _ _ hc
-      refine ⟨(interferenceSupport hγ S T).max + S.max + j, ?_, ?_, ?_⟩
-      · rwa [raiseRaise_max, add_lt_add_iff_left]
-      · rwa [κ_lt_sub_iff] at hj₂
-      · rw [raiseRaise_f_eq₃]
-        · simp_rw [κ_add_sub_cancel]
-          exact hj₃
-        · exact κ_le_self_add _ _
 
 theorem raiseRaise_max_eq_max : (raiseRaise hγ S T 1).max = (raiseRaise hγ S T ρ).max := rfl
 
 theorem raiseRaise_ne_nearLitter
-    {i : κ} (hi : i < (interferenceSupport hγ S T).max) {A : ExtendedIndex α} {N : NearLitter} :
-    (raiseRaise hγ S T ρ).f i ((hi.trans_le (κ_le_self_add _ _)).trans_le (κ_le_self_add _ _)) ≠
-      ⟨A, inr N⟩ := by
+    {i : κ} (hi₁ : S.max + (strongSupport (T.image (raise hγ)).small).max ≤ i)
+    (hi₂ : i < (raiseRaise hγ S T ρ).max) {A : ExtendedIndex α} {N : NearLitter} :
+    (raiseRaise hγ S T ρ).f i hi₂ ≠ ⟨A, inr N⟩ := by
   intro h
-  rw [raiseRaise_f_eq₁ hi, raise, Allowable.smul_address, Address.mk.injEq,
+  rw [raiseRaise_f_eq₃ hi₁ hi₂, raise, Allowable.smul_address, Address.mk.injEq,
     smul_eq_iff_eq_inv_smul, smul_inr] at h
-  exact interferenceSupport_ne_nearLitter hγ hi h.2
+  exact interferenceSupport_ne_nearLitter hγ _ h.2
 
 theorem raiseRaise_f_eq_atom (i : κ) (hi : i < (raiseRaise hγ S T ρ₁).max)
     (A : ExtendedIndex α) (a : Atom) (ha : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inl a⟩) :
     ∃ b, (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inl b⟩ := by
   obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
   · rw [raiseRaise_f_eq₁ hi] at ha ⊢
-    simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul, smul_inl,
-      one_smul] at ha ⊢
-    refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) ((interferenceSupport hγ S T).f i hi).path • a,
-      ha.1, ?_⟩
-    simp only [ha.2, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul, inv_smul_smul]
-  · rw [raiseRaise_f_eq₂ hi hi'] at ha ⊢
     exact ⟨a, ha⟩
-  · rw [raiseRaise_f_eq₃ hi hi'] at ha
-    rw [raiseRaise_f_eq₃ hi (by exact hi')]
+  · rw [raiseRaise_f_eq₂ hi hi'] at ha
+    rw [raiseRaise_f_eq₂ hi (by exact hi')]
     simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul, smul_inl,
       one_smul] at ha ⊢
     refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) ((strongSupport (T.image (raise hγ)).small).f
-        (i - ((interferenceSupport hγ S T).max + S.max)) ?_).path • a,
+        (i - S.max) ?_).path • a,
       ha.1, ?_⟩
-    · rw [raiseRaise_max, ← κ_sub_lt_iff hi] at hi'
+    · rw [← κ_sub_lt_iff hi] at hi'
       exact hi'
     · simp only [ha.2, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul, inv_smul_smul]
+  · rw [raiseRaise_f_eq₃ hi (by exact hi')] at ha ⊢
+    simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul, smul_inl,
+      one_smul] at ha ⊢
+    refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) ((interferenceSupport hγ S T).f _
+        (raiseRaise_hi₃' hi hi')).path • a, ha.1, ?_⟩
+    simp only [ha.2, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul, inv_smul_smul]
 
 theorem raiseRaise_f_eq_nearLitter (i : κ) (hi : i < (raiseRaise hγ S T ρ₁).max)
     (A : ExtendedIndex α) (N : NearLitter) (hN : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inr N⟩) :
     ∃ N', (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inr N'⟩ := by
   obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
-  · cases raiseRaise_ne_nearLitter hi hN
-  · rw [raiseRaise_f_eq₂ hi hi'] at hN ⊢
+  · rw [raiseRaise_f_eq₁ hi] at hN ⊢
     exact ⟨N, hN⟩
-  · rw [raiseRaise_f_eq₃ hi hi'] at hN
-    rw [raiseRaise_f_eq₃ hi (by exact hi')]
+  · rw [raiseRaise_f_eq₂ hi hi'] at hN
+    rw [raiseRaise_f_eq₂ hi (by exact hi')]
     simp only [Allowable.smul_address, raise, Address.mk.injEq, smul_eq_iff_eq_inv_smul, smul_inr,
       one_smul] at hN ⊢
     refine ⟨Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) ((strongSupport (T.image (raise hγ)).small).f
-        (i - ((interferenceSupport hγ S T).max + S.max)) ?_).path • N,
+        (i - S.max) ?_).path • N,
       hN.1, ?_⟩
-    · rw [raiseRaise_max, ← κ_sub_lt_iff hi] at hi'
+    · rw [← κ_sub_lt_iff hi] at hi'
       exact hi'
     · simp only [hN.2, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul, inv_smul_smul]
+  · cases raiseRaise_ne_nearLitter hi hi' hN
 
 theorem raiseRaise_cases_nearLitter {i : κ} {hi : i < (raiseRaise hγ S T ρ₁).max}
     {A : ExtendedIndex α} {N₁ N₂ : NearLitter}
     (h₁ : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inr N₁⟩)
     (h₂ : (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inr N₂⟩) :
-    ((interferenceSupport hγ S T).max ≤ i ∧ i < (interferenceSupport hγ S T).max + S.max) ∨
-    ((interferenceSupport hγ S T).max + S.max ≤ i ∧ i < (raiseRaise hγ S T ρ₁).max ∧
+    (i < S.max) ∨
+    (S.max ≤ i ∧ i < S.max + (strongSupport (T.image (raise hγ)).small).max ∧
       ∃ B : ExtendedIndex β, A = raiseIndex iβ.elim B) := by
-  obtain (hi | hi | ⟨hi, hi'⟩) := raiseRaise_cases hi
-  · cases raiseRaise_ne_nearLitter hi h₁
+  obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
   · exact Or.inl hi
-  · rw [raiseRaise_f_eq₃ hi (by exact hi')] at h₁ h₂
+  · rw [raiseRaise_f_eq₂ hi (by exact hi')] at h₁ h₂
     have : 0 < A.length
     · have := congr_arg (Path.length ∘ Address.path) h₁
       simp only [Allowable.smul_address, Function.comp_apply,
@@ -535,21 +549,21 @@ theorem raiseRaise_cases_nearLitter {i : κ} {hi : i < (raiseRaise hγ S T ρ₁
     obtain ⟨β', hβ', A, rfl⟩ := eq_raiseIndex_of_zero_lt_length this
     obtain ⟨B, hB⟩ := raiseIndex_of_raise_eq h₁
     exact Or.inr ⟨hi, hi', B, hB.symm⟩
+  · cases raiseRaise_ne_nearLitter hi hi' h₁
 
 theorem raiseRaise_inflexibleCoe₃ {i : κ}
-    (hi : (interferenceSupport hγ S T).max + S.max ≤ i) (hi' : i < (raiseRaise hγ S T ρ).max)
+    (hi : S.max ≤ i) (hi' : i < S.max + (strongSupport (T.image (raise hγ)).small).max)
     {A : ExtendedIndex β} {N₁ N₂ : NearLitter}
-    (h₁ : (raiseRaise hγ S T ρ₁).f i hi' = ⟨raiseIndex iβ.elim A, inr N₁⟩)
-    (h₂ : (raiseRaise hγ S T ρ₂).f i hi' = ⟨raiseIndex iβ.elim A, inr N₂⟩)
+    (h₁ : (raiseRaise hγ S T ρ₁).f i (raiseRaise_hi₂ hi') = ⟨raiseIndex iβ.elim A, inr N₁⟩)
+    (h₂ : (raiseRaise hγ S T ρ₂).f i (raiseRaise_hi₂ hi') = ⟨raiseIndex iβ.elim A, inr N₂⟩)
     (h : InflexibleCoe (raiseIndex iβ.elim A) N₁.1) :
     ∃ (P : InflexibleCoePath A) (t : Tangle P.δ),
     N₁.1 = fuzz P.hδε (Allowable.comp (P.B.cons P.hδ) ρ₁ • t) ∧
     N₂.1 = fuzz P.hδε (Allowable.comp (P.B.cons P.hδ) ρ₂ • t) := by
-  rw [raiseRaise_f_eq₃ hi (by exact hi')] at h₁ h₂
+  rw [raiseRaise_f_eq₂ hi (by exact hi')] at h₁ h₂
   obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, hB⟩, t, hL⟩ := h
   have : 0 < B.length
-  · have := strongSupport_raise_spec hγ T _
-      ⟨i - ((interferenceSupport hγ S T).max + S.max), ?_, rfl⟩
+  · have := strongSupport_raise_spec hγ T _ ⟨i - S.max, ?_, rfl⟩
     swap
     · rw [κ_sub_lt_iff hi]
       exact hi'
@@ -587,12 +601,12 @@ theorem raiseRaise_eq_cases {i : κ} {hi : i < (raiseRaise hγ S T ρ).max} {c :
     (∃ d, c = raise iβ.elim (ρ • d) ∧ (raiseRaise hγ S T 1).f i hi = raise iβ.elim d) ∨
     (c ∈ S ∧ (raiseRaise hγ S T 1).f i hi = c) := by
   obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
-  · rw [raiseRaise_f_eq₁ hi] at h ⊢
+  · refine Or.inr ?_
+    rw [raiseRaise_f_eq₁ hi] at h ⊢
+    exact ⟨⟨_, _, h.symm⟩, h⟩
+  · rw [raiseRaise_f_eq₂ hi hi'] at h ⊢
     refine Or.inl ⟨_, h.symm, ?_⟩
     rw [one_smul]
-  · refine Or.inr ?_
-    rw [raiseRaise_f_eq₂ hi hi'] at h ⊢
-    exact ⟨⟨_, _, h.symm⟩, h⟩
   · rw [raiseRaise_f_eq₃ hi (by exact hi')] at h ⊢
     refine Or.inl ⟨_, h.symm, ?_⟩
     rw [one_smul]
@@ -612,12 +626,12 @@ theorem raiseRaise_atom_spec₁_raise
   change _ = raise iβ.elim ⟨A, inl _⟩ at hj₂ ⊢
   obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
   · rw [raiseRaise_f_eq₁ hj] at hj₂ ⊢
+    rw [hj₂, ← ha₁, hρ₁S c ⟨_, _, ha₁.symm ▸ hj₂.symm⟩, ha₂]
+  · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
     have := raise_injective _ hj₂
     rw [smul_eq_iff_eq_inv_smul] at ha₂
     rw [← ha₁, ha₂, smul_left_cancel_iff, ← smul_eq_iff_eq_inv_smul] at this
     rw [this]
-  · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
-    rw [hj₂, ← ha₁, hρ₁S c ⟨_, _, ha₁.symm ▸ hj₂.symm⟩, ha₂]
   · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ ⊢
     have := raise_injective _ hj₂
     rw [smul_eq_iff_eq_inv_smul] at ha₂
@@ -634,8 +648,6 @@ theorem raiseRaise_atom_spec₁
     {j | ∃ hj, (raiseRaise hγ S T ρ₂).f j hj = ⟨A, inl a₂⟩} := by
   obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
   · rw [raiseRaise_f_eq₁ hi] at ha₁ ha₂
-    exact raiseRaise_atom_spec₁_raise hρ₁S ha₁ ha₂
-  · rw [raiseRaise_f_eq₂ hi hi'] at ha₁ ha₂
     have := ha₁.symm.trans ha₂
     simp only [Address.mk.injEq, inl.injEq, true_and] at this
     subst this
@@ -643,6 +655,8 @@ theorem raiseRaise_atom_spec₁
     refine ⟨hj₁, ?_⟩
     obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
     · rw [raiseRaise_f_eq₁ hj] at hj₂ ⊢
+      exact hj₂
+    · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
       obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
       have hj₂ := raise_injective' hj₂
       rw [smul_eq_iff_eq_inv_smul] at hj₂
@@ -650,8 +664,6 @@ theorem raiseRaise_atom_spec₁
       rfl
       rw [smul_inv_smul]
       exact ⟨_, _, ha₁.symm⟩
-    · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
-      exact hj₂
     · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ ⊢
       obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
       have hj₂ := raise_injective' hj₂
@@ -660,6 +672,8 @@ theorem raiseRaise_atom_spec₁
       rfl
       rw [smul_inv_smul]
       exact ⟨_, _, ha₁.symm⟩
+  · rw [raiseRaise_f_eq₂ hi hi'] at ha₁ ha₂
+    exact raiseRaise_atom_spec₁_raise hρ₁S ha₁ ha₂
   · rw [raiseRaise_f_eq₃ hi (by exact hi')] at ha₁ ha₂
     exact raiseRaise_atom_spec₁_raise hρ₁S ha₁ ha₂
 
@@ -682,17 +696,6 @@ theorem raiseRaise_atom_spec₂_raise
   refine ⟨hj₁, N', hN', ?_⟩
   obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
   · rw [raiseRaise_f_eq₁ hj] at hj₂ hN'
-    have h₁ := raise_injective' hj₂
-    have h₂ := raise_injective' hN'
-    rw [smul_eq_iff_eq_inv_smul] at h₁ h₂ this
-    simp only [h₁, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr, Address.mk.injEq,
-      inr.injEq, ← smul_eq_iff_eq_inv_smul, true_and] at h₂
-    rw [← h₂, this, inv_inv]
-    rw [smul_smul, smul_smul, ← NearLitterPerm.NearLitter.mem_snd_iff,
-      NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff,
-      NearLitterPerm.NearLitter.mem_snd_iff]
-    exact hN
-  · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ hN'
     rw [inv_smul_eq_iff] at this
     rw [this]
     cases hN'.symm.trans hj₂
@@ -703,6 +706,17 @@ theorem raiseRaise_atom_spec₂_raise
       inr.injEq, true_and] at this
     rw [← this]
     rw [NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
+    exact hN
+  · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ hN'
+    have h₁ := raise_injective' hj₂
+    have h₂ := raise_injective' hN'
+    rw [smul_eq_iff_eq_inv_smul] at h₁ h₂ this
+    simp only [h₁, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr, Address.mk.injEq,
+      inr.injEq, ← smul_eq_iff_eq_inv_smul, true_and] at h₂
+    rw [← h₂, this, inv_inv]
+    rw [smul_smul, smul_smul, ← NearLitterPerm.NearLitter.mem_snd_iff,
+      NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff,
+      NearLitterPerm.NearLitter.mem_snd_iff]
     exact hN
   · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ hN'
     have h₁ := raise_injective' hj₂
@@ -726,8 +740,6 @@ theorem raiseRaise_atom_spec₂
     {j | ∃ hj, ∃ N, (raiseRaise hγ S T ρ₂).f j hj = ⟨A, inr N⟩ ∧ a₂ ∈ N} := by
   obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
   · rw [raiseRaise_f_eq₁ hi] at ha₁ ha₂
-    exact raiseRaise_atom_spec₂_raise hρS ha₁ ha₂
-  · rw [raiseRaise_f_eq₂ hi hi'] at ha₁ ha₂
     have := ha₁.symm.trans ha₂
     simp only [Address.mk.injEq, inl.injEq, true_and] at this
     subst this
@@ -735,6 +747,8 @@ theorem raiseRaise_atom_spec₂
     refine ⟨hj₁, ?_⟩
     obtain (hj | ⟨hj, hj'⟩ | ⟨hj, hj'⟩) := raiseRaise_cases hj₁
     · rw [raiseRaise_f_eq₁ hj] at hj₂ ⊢
+      exact ⟨N, hj₂, hN⟩
+    · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
       obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
       have hj₂ := raise_injective' hj₂
       rw [smul_eq_iff_eq_inv_smul] at hj₂
@@ -751,8 +765,6 @@ theorem raiseRaise_atom_spec₂
           NearLitterPerm.smul_nearLitter_snd, Set.mem_smul_set_iff_inv_smul_mem,
           ← this, NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
         exact hN
-    · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ ⊢
-      exact ⟨N, hj₂, hN⟩
     · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ ⊢
       obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
       have hj₂ := raise_injective' hj₂
@@ -770,6 +782,8 @@ theorem raiseRaise_atom_spec₂
           NearLitterPerm.smul_nearLitter_snd, Set.mem_smul_set_iff_inv_smul_mem,
           ← this, NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
         exact hN
+  · rw [raiseRaise_f_eq₂ hi hi'] at ha₁ ha₂
+    exact raiseRaise_atom_spec₂_raise hρS ha₁ ha₂
   · rw [raiseRaise_f_eq₃ hi (by exact hi')] at ha₁ ha₂
     exact raiseRaise_atom_spec₂_raise hρS ha₁ ha₂
 
@@ -786,9 +800,10 @@ theorem raiseRaise_inflexibleCoe_spec₂_comp_before
   by_cases hA : ∃ B, (h.path.B.cons h.path.hδ) = (Hom.toPath iβ.elim).comp B
   · obtain ⟨B, hB⟩ := hA
     rw [hB]
-    refine ⟨Allowable.comp B (ρ₂ * ρ₁⁻¹), ?_⟩
-    letI : LeLevel α := ⟨le_rfl⟩
-    rw [comp_comp, comp_comp, ← comp_smul]
+    -- letI : LeLevel α := ⟨le_rfl⟩
+    refine ⟨Allowable.comp B (ρ₂ * ρ₁⁻¹), ?_, ?_⟩
+    · sorry
+    · sorry
   · sorry
 
 theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : Allowable β)
@@ -824,17 +839,17 @@ theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (
   inflexibleCoe_spec := by
     intro i hi A N₁ h hN₁
     obtain ⟨N₂, hN₂⟩ := raiseRaise_f_eq_nearLitter (ρ₂ := 1) i hi A N₁ hN₁
-    obtain (⟨hi', hi''⟩ | ⟨hi, hi', A, rfl⟩) := raiseRaise_cases_nearLitter hN₁ hN₂
+    obtain (hi' | ⟨hi, hi', A, rfl⟩) := raiseRaise_cases_nearLitter hN₁ hN₂
     · have : N₁ = N₂
-      · rw [raiseRaise_f_eq₂ hi' hi''] at hN₁ hN₂
+      · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
         cases hN₁.symm.trans hN₂
         rfl
       cases this
       rw [hσ.inflexibleCoe_spec i hi A N₁ h hN₂]
-      rw [raiseRaise_f_eq₂ hi' hi''] at hN₁ hN₂
+      rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
       simp only [Tangle.coe_set, Tangle.coe_support, SpecCondition.inflexibleCoe.injEq, heq_eq_eq,
         CodingFunction.code_eq_code_iff, true_and]
-      refine ⟨?_, ?_, ?_⟩
+      sorry
     · obtain ⟨P, t, hN₁', hN₂'⟩ := raiseRaise_inflexibleCoe₃ hi hi' hN₁ hN₂ h
       sorry
   inflexibleBot_spec := sorry

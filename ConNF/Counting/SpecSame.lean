@@ -74,7 +74,7 @@ theorem convertNearLitter_subsingleton_flexible (A : ExtendedIndex β) (NS NT NT
   refine NearLitter.ext ?_
   rw [← symmDiff_eq_bot, bot_eq_empty, eq_empty_iff_forall_not_mem]
   intro a ha
-  obtain ⟨j, hj, -, -, hja⟩ :=
+  obtain ⟨j, hj, hja⟩ :=
     hT.interferes hiT₁ hiT₁' hiT₂ hiT₂' (Support.Interferes.symmDiff h₂ ha)
   simp only [Function.funext_iff, Set.ext_iff] at h₅'
   obtain ⟨_, _, a', NS', _, ha', hS', -⟩ :=
@@ -230,7 +230,7 @@ theorem convertNearLitter_subsingleton_inflexibleCoe (A : ExtendedIndex β) (NS 
   refine NearLitter.ext ?_
   rw [← symmDiff_eq_bot, bot_eq_empty, eq_empty_iff_forall_not_mem]
   intro a ha
-  obtain ⟨j, hj, -, -, hja⟩ :=
+  obtain ⟨j, hj, hja⟩ :=
     hT.interferes hiT₁ hiT₁' hiT₂ hiT₂' (Support.Interferes.symmDiff hNTT' ha)
   simp only [Function.funext_iff, Set.ext_iff] at h₇
   obtain ⟨_, _, a', NS', _, ha', hS', -⟩ :=
@@ -279,7 +279,7 @@ theorem convertNearLitter_subsingleton_inflexibleBot (A : ExtendedIndex β) (NS 
   refine NearLitter.ext ?_
   rw [← symmDiff_eq_bot, bot_eq_empty, eq_empty_iff_forall_not_mem]
   intro a ha
-  obtain ⟨j, hj, -, -, hja⟩ :=
+  obtain ⟨j, hj, hja⟩ :=
     hT.interferes hiT₁ hiT₁' hiT₂ hiT₂' (Support.Interferes.symmDiff hNTT' ha)
   simp only [Function.funext_iff, Set.ext_iff] at h₅'
   obtain ⟨_, _, a', NS', _, ha', hS', -⟩ :=
@@ -638,19 +638,19 @@ theorem convert_lawful : (convert hσS hσT).Lawful := by
     exact convertAtom_mem_convertLitter_iff hσS hσT ha hN
   case dom_of_mem_symmDiff =>
     rintro a N₁ N₂ hN ⟨N₁', i, hiS, hiT, hiS', -⟩ ⟨N₂', j, hjS, hjT, hjS', -⟩ ha
-    obtain ⟨k, hkS, -, -, hk⟩ :=
+    obtain ⟨k, hkS, hk⟩ :=
       hS.interferes hiS hjS hiS' hjS' (Support.Interferes.symmDiff hN ha)
     exact convertAtom_dom hσS hσT ⟨k, hkS, hk.symm⟩
   case dom_of_mem_inter =>
     rintro a N₁ N₂ hN ⟨N₁', i, hiS, hiT, hiS', -⟩ ⟨N₂', j, hjS, hjT, hjS', -⟩ ha
-    obtain ⟨k, hkS, -, -, hk⟩ :=
+    obtain ⟨k, hkS, hk⟩ :=
       hS.interferes hiS hjS hiS' hjS' (Support.Interferes.inter hN ha)
     exact convertAtom_dom hσS hσT ⟨k, hkS, hk.symm⟩
   case ran_of_mem_symmDiff =>
     rintro a N₁ N₂ hN ⟨N₁', i, hiS, hiT, hiS', hiT'⟩ ⟨N₂', j, hjS, hjT, hjS', hjT'⟩ ha
     rw [convert_nearLitterMap_eq hσS hσT ⟨i, hiS, hiT, hiS', hiT'⟩,
       convert_nearLitterMap_eq hσS hσT ⟨j, hjS, hjT, hjS', hjT'⟩] at ha
-    obtain ⟨k, hkT, -, -, hk⟩ := hT.interferes hiT hjT hiT' hjT'
+    obtain ⟨k, hkT, hk⟩ := hT.interferes hiT hjT hiT' hjT'
       (Support.Interferes.symmDiff
         (convertNearLitter_fst hσS hσT ⟨i, hiS, hiT, hiS', hiT'⟩ ⟨j, hjS, hjT, hjS', hjT'⟩ hN) ha)
     have := hσT.atom_spec k hkT A a hk
@@ -661,7 +661,7 @@ theorem convert_lawful : (convert hσS hσT).Lawful := by
     rintro a N₁ N₂ hN ⟨N₁', i, hiS, hiT, hiS', hiT'⟩ ⟨N₂', j, hjS, hjT, hjS', hjT'⟩ ha
     rw [convert_nearLitterMap_eq hσS hσT ⟨i, hiS, hiT, hiS', hiT'⟩,
       convert_nearLitterMap_eq hσS hσT ⟨j, hjS, hjT, hjS', hjT'⟩] at ha
-    obtain ⟨k, hkT, -, -, hk⟩ := hT.interferes hiT hjT hiT' hjT'
+    obtain ⟨k, hkT, hk⟩ := hT.interferes hiT hjT hiT' hjT'
       (Support.Interferes.inter
         (hN ∘ convertNearLitter_fst' hσS hσT
           ⟨i, hiS, hiT, hiS', hiT'⟩ ⟨j, hjS, hjT, hjS', hjT'⟩) ha)
