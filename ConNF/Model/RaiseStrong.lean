@@ -773,6 +773,24 @@ theorem raiseRaise_atom_spec₂
   · rw [raiseRaise_f_eq₃ hi (by exact hi')] at ha₁ ha₂
     exact raiseRaise_atom_spec₂_raise hρS ha₁ ha₂
 
+theorem raiseRaise_inflexibleCoe_spec₂_comp_before
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ₁⁻¹ • c = ρ₂⁻¹ • c)
+    {i : κ} (hi : i < (raiseRaise hγ S T ρ₁).max) (hi' : (interferenceSupport hγ S T).max ≤ i)
+    (hi'' : i < (interferenceSupport hγ S T).max + S.max)
+    {A : ExtendedIndex α} {N : NearLitter} (h : InflexibleCoe A N.1)
+    (hN : S.f (i - (interferenceSupport hγ S T).max) (κ_sub_lt hi'' hi') = ⟨A, inr N⟩) :
+    ∃ ρ : Allowable h.path.δ,
+    ρ • ((raiseRaise hγ S T ρ₁).before i hi).comp (h.path.B.cons h.path.hδ) =
+    ((raiseRaise hγ S T ρ₂).before i hi).comp (h.path.B.cons h.path.hδ) ∧
+    ρ • h.t.set = h.t.set := by
+  by_cases hA : ∃ B, (h.path.B.cons h.path.hδ) = (Hom.toPath iβ.elim).comp B
+  · obtain ⟨B, hB⟩ := hA
+    rw [hB]
+    refine ⟨Allowable.comp B (ρ₂ * ρ₁⁻¹), ?_⟩
+    letI : LeLevel α := ⟨le_rfl⟩
+    rw [comp_comp, comp_comp, ← comp_smul]
+  · sorry
+
 theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : Allowable β)
     (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) {σ : Spec α}
     (hσ : σ.Specifies (raiseRaise hγ S T 1) (raiseRaise_strong hS (fun c _ => by rw [one_smul]))) :
@@ -806,8 +824,17 @@ theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (
   inflexibleCoe_spec := by
     intro i hi A N₁ h hN₁
     obtain ⟨N₂, hN₂⟩ := raiseRaise_f_eq_nearLitter (ρ₂ := 1) i hi A N₁ hN₁
-    obtain (h | ⟨hi, hi', A, rfl⟩) := raiseRaise_cases_nearLitter hN₁ hN₂
-    · sorry
+    obtain (⟨hi', hi''⟩ | ⟨hi, hi', A, rfl⟩) := raiseRaise_cases_nearLitter hN₁ hN₂
+    · have : N₁ = N₂
+      · rw [raiseRaise_f_eq₂ hi' hi''] at hN₁ hN₂
+        cases hN₁.symm.trans hN₂
+        rfl
+      cases this
+      rw [hσ.inflexibleCoe_spec i hi A N₁ h hN₂]
+      rw [raiseRaise_f_eq₂ hi' hi''] at hN₁ hN₂
+      simp only [Tangle.coe_set, Tangle.coe_support, SpecCondition.inflexibleCoe.injEq, heq_eq_eq,
+        CodingFunction.code_eq_code_iff, true_and]
+      refine ⟨?_, ?_, ?_⟩
     · obtain ⟨P, t, hN₁', hN₂'⟩ := raiseRaise_inflexibleCoe₃ hi hi' hN₁ hN₂ h
       sorry
   inflexibleBot_spec := sorry
