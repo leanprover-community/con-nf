@@ -787,24 +787,30 @@ theorem raiseRaise_atom_spec₂
   · rw [raiseRaise_f_eq₃ hi (by exact hi')] at ha₁ ha₂
     exact raiseRaise_atom_spec₂_raise hρS ha₁ ha₂
 
-theorem raiseRaise_inflexibleCoe_spec₂_comp_before
-    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ₁⁻¹ • c = ρ₂⁻¹ • c)
-    {i : κ} (hi : i < (raiseRaise hγ S T ρ₁).max) (hi' : (interferenceSupport hγ S T).max ≤ i)
-    (hi'' : i < (interferenceSupport hγ S T).max + S.max)
-    {A : ExtendedIndex α} {N : NearLitter} (h : InflexibleCoe A N.1)
-    (hN : S.f (i - (interferenceSupport hγ S T).max) (κ_sub_lt hi'' hi') = ⟨A, inr N⟩) :
+theorem raiseRaise_inflexibleCoe_spec₁_comp_before_aux
+    {i : κ} (hi : i < S.max) {j : κ} (hji : j < i) :
+    ((raiseRaise hγ S T ρ₁).before i (raiseRaise_hi₁ hi)).f j hji =
+    ((raiseRaise hγ S T ρ₂).before i (raiseRaise_hi₁ hi)).f j hji := by
+  simp only [before_f, raiseRaise_f_eq₁ (hji.trans hi)]
+
+theorem raiseRaise_inflexibleCoe_spec₁_comp_before
+    {i : κ} (hi : i < S.max)
+    {A : ExtendedIndex α} {N : NearLitter} (h : InflexibleCoe A N.1) :
     ∃ ρ : Allowable h.path.δ,
-    ρ • ((raiseRaise hγ S T ρ₁).before i hi).comp (h.path.B.cons h.path.hδ) =
-    ((raiseRaise hγ S T ρ₂).before i hi).comp (h.path.B.cons h.path.hδ) ∧
-    ρ • h.t.set = h.t.set := by
-  by_cases hA : ∃ B, (h.path.B.cons h.path.hδ) = (Hom.toPath iβ.elim).comp B
-  · obtain ⟨B, hB⟩ := hA
-    rw [hB]
-    -- letI : LeLevel α := ⟨le_rfl⟩
-    refine ⟨Allowable.comp B (ρ₂ * ρ₁⁻¹), ?_, ?_⟩
-    · sorry
-    · sorry
-  · sorry
+    ((raiseRaise hγ S T ρ₁).before i (raiseRaise_hi₁ hi)).comp (h.path.B.cons h.path.hδ) =
+    ρ • ((raiseRaise hγ S T ρ₂).before i (raiseRaise_hi₁ hi)).comp (h.path.B.cons h.path.hδ) ∧
+    h.t.set = ρ • h.t.set := by
+  refine ⟨1, ?_, by rw [one_smul]⟩
+  symm
+  refine smul_comp_ext _ _ rfl ?_ ?_
+  · intro j hji _ c h
+    rw [raiseRaise_inflexibleCoe_spec₁_comp_before_aux hi hji (ρ₂ := ρ₁)] at h
+    simp only [map_one, Tree.one_apply, one_smul]
+    exact h
+  · intro j hji _ c h
+    rw [raiseRaise_inflexibleCoe_spec₁_comp_before_aux hi hji (ρ₂ := ρ₂)] at h
+    simp only [inv_one, map_one, Tree.one_apply, one_smul]
+    exact h
 
 theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : Allowable β)
     (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) {σ : Spec α}
@@ -849,7 +855,10 @@ theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (
       rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
       simp only [Tangle.coe_set, Tangle.coe_support, SpecCondition.inflexibleCoe.injEq, heq_eq_eq,
         CodingFunction.code_eq_code_iff, true_and]
-      sorry
+      refine ⟨?_, ?_, ?_⟩
+      · exact raiseRaise_inflexibleCoe_spec₁_comp_before (hγ := hγ) hi' h
+      · sorry
+      · sorry
     · obtain ⟨P, t, hN₁', hN₂'⟩ := raiseRaise_inflexibleCoe₃ hi hi' hN₁ hN₂ h
       sorry
   inflexibleBot_spec := sorry
