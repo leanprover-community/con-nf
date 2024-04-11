@@ -87,6 +87,13 @@ theorem smul_singleton (t : TSet β) (ρ : Allowable α) :
   intro s
   simp only [mem_smul_iff, mem_singleton_iff, inv_smul_eq_iff]
 
+theorem singleton_injective' (t₁ t₂ : TSet β) (h : TSet.singleton hβ t₁ = TSet.singleton hβ t₂) :
+    t₁ = t₂ := by
+  have : t₁ ∈[hβ] TSet.singleton hβ t₁
+  · rw [mem_singleton_iff]
+  rw [h, mem_singleton_iff] at this
+  exact this
+
 @[simp]
 theorem TangleData.TSet.mem_up_iff (t₁ t₂ : TSet β) (s : TSet β) :
     s ∈[hβ] up hβ t₁ t₂ ↔ s = t₁ ∨ s = t₂ := by

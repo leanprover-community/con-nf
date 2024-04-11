@@ -1413,4 +1413,39 @@ theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (
   inflexibleCoe_spec := raiseRaise_specifies_inflexibleCoe_spec hS hρS hσ
   inflexibleBot_spec := raiseRaise_specifies_inflexibleBot_spec hS hρS hσ
 
+theorem raiseRaise_eq_smul (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : Allowable β)
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) :
+    letI : LeLevel α := ⟨le_rfl⟩
+    ∃ ρ' : Allowable α, ρ' • S = S ∧ Allowable.comp ((Hom.toPath iβ.elim).cons hγ) ρ' • T =
+      Allowable.comp (Hom.toPath hγ) ρ • T := by
+  letI : LeLevel α := ⟨le_rfl⟩
+  have hσ := raiseRaise_specifies (hγ := hγ) S hS T ρ hρS (spec_specifies _ _)
+  have hρ := convertAllowable_smul (spec_specifies _ _) hσ
+  refine ⟨convertAllowable (spec_specifies _ _) hσ, ?_, ?_⟩
+  · refine Enumeration.ext' rfl ?_
+    intro i hi hi'
+    have := support_f_congr hρ i (raiseRaise_hi₁ hi)
+    rw [Enumeration.smul_f, raiseRaise_f_eq₁ hi', raiseRaise_f_eq₁ hi'] at this
+    exact this
+  · refine Enumeration.ext' rfl ?_
+    intro i hi hi'
+    obtain ⟨j, hj, hc⟩ := subset_strongSupport (T.image (raise hγ)).small ⟨i, hi', rfl⟩
+    have hj₁ : S.max ≤ S.max + j
+    · rw [le_add_iff_nonneg_right]
+      exact κ_pos _
+    have hj₂ : S.max + j < S.max + (strongSupport (T.image (raise hγ)).small).max
+    · rw [add_lt_add_iff_left]
+      exact hj
+    have := support_f_congr hρ (S.max + j) (raiseRaise_hi₂ hj₂)
+    rw [Enumeration.smul_f, raiseRaise_f_eq₂ hj₁ hj₂, raiseRaise_f_eq₂ hj₁ hj₂] at this
+    simp_rw [κ_add_sub_cancel, one_smul] at this
+    rw [Enumeration.image_f] at hc
+    rw [← hc] at this
+    have := congr_arg Address.value this
+    simp only [Allowable.smul_address, raise_path, raise_value, raiseIndex, Hom.toPath] at this
+    simp only [Enumeration.smul_f, Allowable.smul_address_eq_smul_iff, Allowable.toStructPerm_comp,
+      Tree.comp_apply, Hom.toPath]
+    rw [← Path.comp_assoc, Path.comp_cons] at this
+    exact this
+
 end ConNF.Support
