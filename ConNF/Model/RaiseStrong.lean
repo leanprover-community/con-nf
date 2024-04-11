@@ -662,6 +662,68 @@ theorem raiseRaise_inflexibleCoe₃ {i : κ}
     rw [← raiseIndex_injective _ (congr_arg Address.path h₁)]
     exact this.symm
 
+theorem raiseRaise_inflexibleBot₃ {i : κ}
+    (hi : S.max ≤ i) (hi' : i < S.max + (strongSupport (T.image (raise hγ)).small).max)
+    {A : ExtendedIndex β} {N₁ N₂ : NearLitter}
+    (h₁ : (raiseRaise hγ S T ρ₁).f i (raiseRaise_hi₂ hi') = ⟨raiseIndex iβ.elim A, inr N₁⟩)
+    (h₂ : (raiseRaise hγ S T ρ₂).f i (raiseRaise_hi₂ hi') = ⟨raiseIndex iβ.elim A, inr N₂⟩)
+    (h : InflexibleBot (raiseIndex iβ.elim A) N₁.1) :
+    ∃ (P : InflexibleBotPath A) (a : Atom),
+    N₁.1 = fuzz (bot_ne_coe (a := P.ε))
+      (Allowable.toStructPerm ρ₁ (P.B.cons (bot_lt_coe _)) • a) ∧
+    N₂.1 = fuzz (bot_ne_coe (a := P.ε))
+      (Allowable.toStructPerm ρ₂ (P.B.cons (bot_lt_coe _)) • a) := by
+  rw [raiseRaise_f_eq₂ hi (by exact hi')] at h₁ h₂
+  obtain ⟨⟨γ, ε, hε, B, hB⟩, a, hL⟩ := h
+  have : 0 < B.length
+  · have := strongSupport_raise_spec hγ T _ ⟨i - S.max, ?_, rfl⟩
+    swap
+    · rw [κ_sub_lt_iff hi]
+      exact hi'
+    obtain (h | ⟨a, ha⟩) := this
+    · have h₁ := congr_arg (Path.length ∘ Address.path) h₁
+      have h₂ := congr_arg Path.length hB
+      simp only [Allowable.smul_address, Function.comp_apply, raise_path,
+        raiseIndex_length, Path.length_cons, add_left_inj] at h₁ h₂
+      linarith
+    · have h₁ := congr_arg Address.value h₁
+      have h₂ := congr_arg Address.value ha
+      rw [Allowable.smul_address, raise_value, smul_eq_iff_eq_inv_smul] at h₁
+      cases h₁.symm.trans h₂
+  obtain ⟨β', hβ', B, rfl⟩ := eq_raiseIndex_of_zero_lt_length this
+  rw [← Path.comp_cons, ← Path.comp_cons] at hB
+  cases Path.comp_injective' (by rfl) hB
+  cases raiseIndex_injective _ hB
+  refine ⟨⟨γ, ε, hε, B, rfl⟩, Allowable.toStructPerm ρ₁⁻¹ (B.cons (bot_lt_coe _)) • a, ?_, ?_⟩
+  · simp only [hL, gt_iff_lt, bot_lt_coe, map_inv, Tree.inv_apply, smul_inv_smul]
+  · have := toStructPerm_smul_fuzz (bot_lt_coe _) hε (bot_ne_coe (a := ε)) B
+    simp only [ofBot_smul, Allowable.toStructPerm_apply] at this
+    rw [← this, ← this, ← hL, ← inv_smul_eq_iff]
+    simp only [map_inv, Tree.inv_apply]
+    have h₁' := congr_arg Address.value h₁
+    have h₂' := congr_arg Address.value h₂
+    simp only [raise_value, Allowable.smul_address, smul_eq_iff_eq_inv_smul] at h₁' h₂'
+    have := h₁'.symm.trans h₂'
+    simp only [smul_inr, inr.injEq] at this
+    have := congr_arg Sigma.fst this
+    simp only [NearLitterPerm.smul_nearLitter_fst] at this
+    rw [← raiseIndex_injective _ (congr_arg Address.path h₁)]
+    exact this.symm
+
+theorem raiseRaise_flexible₃ {i : κ}
+    (hi : S.max ≤ i) (hi' : i < S.max + (strongSupport (T.image (raise hγ)).small).max)
+    {A : ExtendedIndex β} {N₁ N₂ : NearLitter}
+    (h₁ : (raiseRaise hγ S T ρ₁).f i (raiseRaise_hi₂ hi') = ⟨raiseIndex iβ.elim A, inr N₁⟩)
+    (h₂ : (raiseRaise hγ S T ρ₂).f i (raiseRaise_hi₂ hi') = ⟨raiseIndex iβ.elim A, inr N₂⟩)
+    (h : Flexible (raiseIndex iβ.elim A) N₁.1) :
+    Flexible (raiseIndex iβ.elim A) N₂.1 := by
+  rw [flexible_iff_not_inflexibleBot_inflexibleCoe] at h ⊢
+  refine ⟨⟨fun h' => ?_⟩, ⟨fun h' => ?_⟩⟩
+  · obtain ⟨P, a, -, h'⟩ := raiseRaise_inflexibleBot₃ hi hi' h₂ h₁ h'
+    exact h.1.false ⟨P.comp _, _, h'⟩
+  · obtain ⟨P, a, -, h'⟩ := raiseRaise_inflexibleCoe₃ hi hi' h₂ h₁ h'
+    exact h.2.false ⟨P.comp _, _, h'⟩
+
 theorem raiseRaise_eq_cases {i : κ} {hi : i < (raiseRaise hγ S T ρ).max} {c : Address α}
     (h : (raiseRaise hγ S T ρ).f i hi = c) :
     (∃ d, c = raise iβ.elim (ρ • d) ∧ (raiseRaise hγ S T 1).f i hi = raise iβ.elim d) ∨
@@ -1025,105 +1087,235 @@ theorem raiseRaise_inflexibleCoe_spec₂_support
   simp only [Tangle.coe_support, Allowable.smul_address, Allowable.toStructPerm_comp,
     Tree.comp_apply, inv_smul_smul]
 
+theorem raiseRaise_specifies_atom_spec
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) {σ : Spec α}
+    (hσ : σ.Specifies (raiseRaise hγ S T 1) (raiseRaise_strong hS (fun c _ => by rw [one_smul])))
+    (i : κ) (hi : i < (raiseRaise hγ S T ρ).max) (A : ExtendedIndex α) (a : Atom) :
+    (raiseRaise hγ S T ρ).f i hi = ⟨A, inl a⟩ →
+    σ.f i (hi.trans_eq hσ.max_eq_max) = SpecCondition.atom A
+      {j | ∃ hj, (raiseRaise hγ S T ρ).f j hj = ⟨A, inl a⟩}
+      {j | ∃ hj N, (raiseRaise hγ S T ρ).f j hj = ⟨A, inr N⟩ ∧ a ∈ N} := by
+  intro ha
+  obtain ⟨b, hb⟩ := raiseRaise_f_eq_atom (ρ₂ := 1) i hi A a ha
+  rw [hσ.atom_spec i hi A b hb, SpecCondition.atom.injEq]
+  refine ⟨rfl, ?_, ?_⟩
+  · refine subset_antisymm ?_ ?_
+    · refine raiseRaise_atom_spec₁ ?_ hb ha
+      intro c hc
+      rw [one_smul, hρS]
+      rwa [one_smul] at hc
+    · refine raiseRaise_atom_spec₁ ?_ ha hb
+      intro c hc
+      have := hρS (ρ • c) hc
+      rw [smul_left_cancel_iff] at this
+      rwa [one_smul]
+  · refine subset_antisymm ?_ ?_
+    · refine raiseRaise_atom_spec₂ ?_ hb ha
+      intro c hc
+      rw [inv_one, one_smul, eq_inv_smul_iff]
+      exact hρS c hc
+    · refine raiseRaise_atom_spec₂ ?_ ha hb
+      intro c hc
+      rw [inv_one, one_smul, inv_smul_eq_iff]
+      exact (hρS c hc).symm
+
+theorem raiseRaise_specifies_flexible_spec
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) {σ : Spec α}
+    (hσ : σ.Specifies (raiseRaise hγ S T 1) (raiseRaise_strong hS (fun c _ => by rw [one_smul])))
+    (i : κ) (hi : i < (raiseRaise hγ S T ρ).max) (A : ExtendedIndex α) (N₁ : NearLitter) :
+    Flexible A N₁.1 → (raiseRaise hγ S T ρ).f i hi = ⟨A, inr N₁⟩ →
+    σ.f i (hi.trans_eq hσ.max_eq_max) = SpecCondition.flexible A
+      {j | ∃ hj, ∃ (N' : NearLitter), (raiseRaise hγ S T ρ).f j hj = ⟨A, inr N'⟩ ∧ N'.1 = N₁.1}
+      (fun j => {k | ∃ hj hk, ∃ (a : Atom) (N' : NearLitter),
+        N'.1 = N₁.1 ∧ a ∈ (N₁ : Set Atom) ∆ N' ∧
+        (raiseRaise hγ S T ρ).f j hj = ⟨A, inr N'⟩ ∧
+        (raiseRaise hγ S T ρ).f k hk = ⟨A, inl a⟩}) := by
+  intro h hN₁
+  obtain ⟨N₂, hN₂⟩ := raiseRaise_f_eq_nearLitter (ρ₂ := 1) i hi A N₁ hN₁
+  obtain (hi' | ⟨hi, hi', A, rfl⟩) := raiseRaise_cases_nearLitter hN₁ hN₂
+  · have : N₁ = N₂
+    · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
+      cases hN₁.symm.trans hN₂
+      rfl
+    cases this
+    rw [hσ.flexible_spec i hi A N₁ h hN₂]
+    simp only [SpecCondition.flexible.injEq, true_and]
+    refine ⟨?_, ?_⟩
+    · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
+      sorry
+    · ext j : 1
+      refine subset_antisymm ?_ ?_
+      · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
+        intro c hc
+        rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · refine raiseRaise_symmDiff ?_ hN₁ hN₂ j
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
+  · have h' := raiseRaise_flexible₃ hi hi' hN₁ hN₂ h
+    rw [hσ.flexible_spec i (raiseRaise_hi₂ hi') (raiseIndex iβ.elim A) N₂ h' hN₂]
+    simp only [SpecCondition.flexible.injEq, true_and]
+    refine ⟨?_, ?_⟩
+    · rw [raiseRaise_f_eq₂ hi hi'] at hN₁ hN₂
+      rw [one_smul] at hN₂
+      have := raise_injective' hN₁
+      rw [raise_injective' hN₂] at this
+      sorry
+    · ext j : 1
+      refine subset_antisymm ?_ ?_
+      · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
+        intro c hc
+        rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · refine raiseRaise_symmDiff ?_ hN₁ hN₂ j
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
+
+theorem raiseRaise_specifies_inflexibleCoe_spec
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) {σ : Spec α}
+    (hσ : σ.Specifies (raiseRaise hγ S T 1) (raiseRaise_strong hS (fun c _ => by rw [one_smul])))
+    (i : κ) (hi : i < (raiseRaise hγ S T ρ).max) (A : ExtendedIndex α) (N₁ : NearLitter)
+    (h : InflexibleCoe A N₁.1) (hN₁ : (raiseRaise hγ S T ρ).f i hi = ⟨A, inr N₁⟩) :
+    σ.f i (hi.trans_eq hσ.max_eq_max) = SpecCondition.inflexibleCoe A h.path
+      (CodingFunction.code (((raiseRaise hγ S T ρ).before i hi).comp (h.path.B.cons h.path.hδ))
+        h.t.set (Spec.before_comp_supports'
+          (raiseRaise hγ S T ρ) (raiseRaise_strong hS hρS) hi h hN₁))
+      (fun j => {k | ∃ hj hk, ∃ (a : Atom) (N' : NearLitter),
+        N'.1 = N₁.1 ∧ a ∈ (N₁ : Set Atom) ∆ N' ∧
+        (raiseRaise hγ S T ρ).f j hj = ⟨A, inr N'⟩ ∧ (raiseRaise hγ S T ρ).f k hk = ⟨A, inl a⟩})
+      h.t.support.max
+      (fun j => {k | ∃ (hj : j < h.t.support.max) (hk : k < (raiseRaise hγ S T ρ).max),
+        ⟨(h.path.B.cons h.path.hδ).comp (h.t.support.f j hj).1, (h.t.support.f j hj).2⟩ =
+          (raiseRaise hγ S T ρ).f k hk}) := by
+  obtain ⟨N₂, hN₂⟩ := raiseRaise_f_eq_nearLitter (ρ₂ := 1) i hi A N₁ hN₁
+  obtain (hi' | ⟨hi, hi', A, rfl⟩) := raiseRaise_cases_nearLitter hN₁ hN₂
+  · have : N₁ = N₂
+    · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
+      cases hN₁.symm.trans hN₂
+      rfl
+    cases this
+    rw [hσ.inflexibleCoe_spec i hi A N₁ h hN₂]
+    simp only [Tangle.coe_set, Tangle.coe_support, SpecCondition.inflexibleCoe.injEq, heq_eq_eq,
+      CodingFunction.code_eq_code_iff, true_and]
+    refine ⟨?_, ?_, ?_⟩
+    · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
+      exact raiseRaise_inflexibleCoe_spec₁_comp_before (hγ := hγ) hi' h
+    · ext j : 1
+      refine subset_antisymm ?_ ?_
+      · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
+        intro c hc
+        rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · refine raiseRaise_symmDiff ?_ hN₁ hN₂ j
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
+    · ext j : 1
+      refine subset_antisymm ?_ ?_
+      · refine raiseRaise_inflexibleCoe_spec₁_support hS ?_ h
+          (raiseRaise_f_eq₁ (hγ := hγ) hi' ▸ hN₁) j
+        intro c hc
+        rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · refine raiseRaise_inflexibleCoe_spec₁_support hS ?_ h
+          (raiseRaise_f_eq₁ (hγ := hγ) hi' ▸ hN₁) j
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
+  · obtain ⟨P, t, hN₁', hN₂'⟩ := raiseRaise_inflexibleCoe₃ hi hi' hN₁ hN₂ h
+    cases Subsingleton.elim h ⟨P.comp _, _, hN₁'⟩
+    rw [hσ.inflexibleCoe_spec i
+      (raiseRaise_hi₂ hi') (raiseIndex iβ.elim A) N₂ ⟨P.comp _, _, hN₂'⟩ hN₂]
+    simp only [InflexibleCoePath.comp_δ, InflexibleCoePath.comp_γ, InflexibleCoePath.comp_B,
+      map_one, one_smul, Tangle.coe_set, Tangle.coe_support, SpecCondition.inflexibleCoe.injEq,
+      heq_eq_eq, CodingFunction.code_eq_code_iff, true_and]
+    refine ⟨?_, ?_, rfl, ?_⟩
+    · rw [raiseRaise_f_eq₂ hi hi'] at hN₁ hN₂
+      rw [one_smul] at hN₂
+      have := raise_injective' hN₁
+      rw [raise_injective' hN₂] at this
+      simp only [map_one, one_smul] at hN₂'
+      exact raiseRaise_inflexibleCoe_spec₂_comp_before hρS hi' P t
+    · ext j : 1
+      refine subset_antisymm ?_ ?_
+      · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
+        intro c hc
+        rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · refine raiseRaise_symmDiff ?_ hN₁ hN₂ j
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
+    · ext j : 1
+      refine subset_antisymm ?_ ?_
+      · have := raiseRaise_inflexibleCoe_spec₂_support (ρ₁ := 1) (ρ₂ := ρ)
+            (hγ := hγ) (S := S) (T := T) ?_ P t j
+        · simp only [map_one, one_smul] at this ⊢
+          exact this
+        · intro c hc
+          rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · have := raiseRaise_inflexibleCoe_spec₂_support (ρ₁ := ρ) (ρ₂ := 1)
+            (hγ := hγ) (S := S) (T := T) ?_ P t j
+        · simp only [map_one, one_smul] at this ⊢
+          exact this
+        · intro c hc
+          rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
+
+theorem raiseRaise_specifies_inflexibleBot_spec
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) {σ : Spec α}
+    (hσ : σ.Specifies (raiseRaise hγ S T 1) (raiseRaise_strong hS (fun c _ => by rw [one_smul])))
+    (i : κ) (hi : i < (raiseRaise hγ S T ρ).max)
+    (A : ExtendedIndex α) (N₁ : NearLitter) (h : InflexibleBot A N₁.1) :
+    (raiseRaise hγ S T ρ).f i hi = ⟨A, inr N₁⟩ →
+    σ.f i (hi.trans_eq hσ.max_eq_max) = SpecCondition.inflexibleBot A h.path
+      {j | ∃ hj, (raiseRaise hγ S T ρ).f j hj = ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩}
+      (fun j => {k | ∃ hj hk, ∃ (a : Atom) (N' : NearLitter),
+        N'.1 = N₁.1 ∧ a ∈ (N₁ : Set Atom) ∆ N' ∧
+        (raiseRaise hγ S T ρ).f j hj = ⟨A, inr N'⟩ ∧
+        (raiseRaise hγ S T ρ).f k hk = ⟨A, inl a⟩}) := by
+  intro hN₁
+  obtain ⟨N₂, hN₂⟩ := raiseRaise_f_eq_nearLitter (ρ₂ := 1) i hi A N₁ hN₁
+  obtain (hi' | ⟨hi, hi', A, rfl⟩) := raiseRaise_cases_nearLitter hN₁ hN₂
+  · have : N₁ = N₂
+    · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
+      cases hN₁.symm.trans hN₂
+      rfl
+    cases this
+    rw [hσ.inflexibleBot_spec i hi A N₁ h hN₂]
+    simp only [SpecCondition.inflexibleBot.injEq, heq_eq_eq, true_and]
+    refine ⟨?_, ?_⟩
+    · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
+      sorry
+    · ext j : 1
+      refine subset_antisymm ?_ ?_
+      · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
+        intro c hc
+        rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · refine raiseRaise_symmDiff ?_ hN₁ hN₂ j
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
+  · obtain ⟨P, a, hN₁', hN₂'⟩ := raiseRaise_inflexibleBot₃ hi hi' hN₁ hN₂ h
+    cases Subsingleton.elim h ⟨P.comp _, _, hN₁'⟩
+    rw [hσ.inflexibleBot_spec i
+      (raiseRaise_hi₂ hi') (raiseIndex iβ.elim A) N₂ ⟨P.comp _, _, hN₂'⟩ hN₂]
+    simp only [InflexibleBotPath.comp_γ, InflexibleBotPath.comp_B, map_one, Tree.one_apply,
+      one_smul, SpecCondition.inflexibleBot.injEq, heq_eq_eq, true_and]
+    refine ⟨?_, ?_⟩
+    · rw [raiseRaise_f_eq₂ hi hi'] at hN₁ hN₂
+      rw [one_smul] at hN₂
+      have := raise_injective' hN₁
+      rw [raise_injective' hN₂] at this
+      simp only [map_one, one_smul] at hN₂'
+      sorry
+    · ext j : 1
+      refine subset_antisymm ?_ ?_
+      · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
+        intro c hc
+        rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · refine raiseRaise_symmDiff ?_ hN₁ hN₂ j
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
+
 theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : Allowable β)
     (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) {σ : Spec α}
     (hσ : σ.Specifies (raiseRaise hγ S T 1) (raiseRaise_strong hS (fun c _ => by rw [one_smul]))) :
     σ.Specifies (raiseRaise hγ S T ρ) (raiseRaise_strong hS hρS) where
   max_eq_max := raiseRaise_max_eq_max.symm.trans hσ.max_eq_max
-  atom_spec := by
-    intro i hi A a ha
-    obtain ⟨b, hb⟩ := raiseRaise_f_eq_atom (ρ₂ := 1) i hi A a ha
-    rw [hσ.atom_spec i hi A b hb, SpecCondition.atom.injEq]
-    refine ⟨rfl, ?_, ?_⟩
-    · refine subset_antisymm ?_ ?_
-      · refine raiseRaise_atom_spec₁ ?_ hb ha
-        intro c hc
-        rw [one_smul, hρS]
-        rwa [one_smul] at hc
-      · refine raiseRaise_atom_spec₁ ?_ ha hb
-        intro c hc
-        have := hρS (ρ • c) hc
-        rw [smul_left_cancel_iff] at this
-        rwa [one_smul]
-    · refine subset_antisymm ?_ ?_
-      · refine raiseRaise_atom_spec₂ ?_ hb ha
-        intro c hc
-        rw [inv_one, one_smul, eq_inv_smul_iff]
-        exact hρS c hc
-      · refine raiseRaise_atom_spec₂ ?_ ha hb
-        intro c hc
-        rw [inv_one, one_smul, inv_smul_eq_iff]
-        exact (hρS c hc).symm
-  flexible_spec := sorry
-  inflexibleCoe_spec := by
-    intro i hi A N₁ h hN₁
-    obtain ⟨N₂, hN₂⟩ := raiseRaise_f_eq_nearLitter (ρ₂ := 1) i hi A N₁ hN₁
-    obtain (hi' | ⟨hi, hi', A, rfl⟩) := raiseRaise_cases_nearLitter hN₁ hN₂
-    · have : N₁ = N₂
-      · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
-        cases hN₁.symm.trans hN₂
-        rfl
-      cases this
-      rw [hσ.inflexibleCoe_spec i hi A N₁ h hN₂]
-      simp only [Tangle.coe_set, Tangle.coe_support, SpecCondition.inflexibleCoe.injEq, heq_eq_eq,
-        CodingFunction.code_eq_code_iff, true_and]
-      refine ⟨?_, ?_, ?_⟩
-      · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
-        exact raiseRaise_inflexibleCoe_spec₁_comp_before (hγ := hγ) hi' h
-      · ext j : 1
-        refine subset_antisymm ?_ ?_
-        · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
-          intro c hc
-          rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
-        · refine raiseRaise_symmDiff ?_ hN₁ hN₂ j
-          intro c hc
-          rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
-      · ext j : 1
-        refine subset_antisymm ?_ ?_
-        · refine raiseRaise_inflexibleCoe_spec₁_support hS ?_ h
-            (raiseRaise_f_eq₁ (hγ := hγ) hi' ▸ hN₁) j
-          intro c hc
-          rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
-        · refine raiseRaise_inflexibleCoe_spec₁_support hS ?_ h
-            (raiseRaise_f_eq₁ (hγ := hγ) hi' ▸ hN₁) j
-          intro c hc
-          rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
-    · obtain ⟨P, t, hN₁', hN₂'⟩ := raiseRaise_inflexibleCoe₃ hi hi' hN₁ hN₂ h
-      cases Subsingleton.elim h ⟨P.comp _, _, hN₁'⟩
-      rw [hσ.inflexibleCoe_spec i
-        (raiseRaise_hi₂ hi') (raiseIndex iβ.elim A) N₂ ⟨P.comp _, _, hN₂'⟩ hN₂]
-      simp only [InflexibleCoePath.comp_δ, InflexibleCoePath.comp_γ, InflexibleCoePath.comp_B,
-        map_one, one_smul, Tangle.coe_set, Tangle.coe_support, SpecCondition.inflexibleCoe.injEq,
-        heq_eq_eq, CodingFunction.code_eq_code_iff, true_and]
-      refine ⟨?_, ?_, rfl, ?_⟩
-      · rw [raiseRaise_f_eq₂ hi hi'] at hN₁ hN₂
-        rw [one_smul] at hN₂
-        have := raise_injective' hN₁
-        rw [raise_injective' hN₂] at this
-        simp only [map_one, one_smul] at hN₂'
-        exact raiseRaise_inflexibleCoe_spec₂_comp_before hρS hi' P t
-      · ext j : 1
-        refine subset_antisymm ?_ ?_
-        · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
-          intro c hc
-          rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
-        · refine raiseRaise_symmDiff ?_ hN₁ hN₂ j
-          intro c hc
-          rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
-      · ext j : 1
-        refine subset_antisymm ?_ ?_
-        · have := raiseRaise_inflexibleCoe_spec₂_support (ρ₁ := 1) (ρ₂ := ρ)
-              (hγ := hγ) (S := S) (T := T) ?_ P t j
-          · simp only [map_one, one_smul] at this ⊢
-            exact this
-          · intro c hc
-            rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
-        · have := raiseRaise_inflexibleCoe_spec₂_support (ρ₁ := ρ) (ρ₂ := 1)
-              (hγ := hγ) (S := S) (T := T) ?_ P t j
-          · simp only [map_one, one_smul] at this ⊢
-            exact this
-          · intro c hc
-            rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
-  inflexibleBot_spec := sorry
+  atom_spec := raiseRaise_specifies_atom_spec hS hρS hσ
+  flexible_spec := raiseRaise_specifies_flexible_spec hS hρS hσ
+  inflexibleCoe_spec := raiseRaise_specifies_inflexibleCoe_spec hS hρS hσ
+  inflexibleBot_spec := raiseRaise_specifies_inflexibleBot_spec hS hρS hσ
 
 end ConNF.Support
