@@ -6,3 +6,5 @@ import ConNF.Model.Basic
 import ConNF.Model.Predicative
 import ConNF.Model.FOA
 import ConNF.Model.RaiseStrong
+import ConNF.Model.Union
+import ConNF.Model.Result

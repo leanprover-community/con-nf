@@ -122,8 +122,8 @@ structure Specifies (σ : Spec β) (S : Support β) (hS : S.Strong) : Prop where
       σ.f i (hi.trans_eq max_eq_max) = SpecCondition.inflexibleBot A h.path
         {j | ∃ hj, S.f j hj = ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩}
         (fun j => {k | ∃ hj hk, ∃ (a : Atom) (N' : NearLitter),
-            N'.1 = N.1 ∧ a ∈ (N : Set Atom) ∆ N' ∧
-            S.f j hj = ⟨A, inr N'⟩ ∧ S.f k hk = ⟨A, inl a⟩})
+          N'.1 = N.1 ∧ a ∈ (N : Set Atom) ∆ N' ∧
+          S.f j hj = ⟨A, inr N'⟩ ∧ S.f k hk = ⟨A, inl a⟩})
 
 theorem Specifies.of_eq_atom {σ : Spec β} {S : Support β} {hS : S.Strong} (h : σ.Specifies S hS)
     {i : κ} {hi : i < σ.max} {A : ExtendedIndex β} {s t : Set κ}

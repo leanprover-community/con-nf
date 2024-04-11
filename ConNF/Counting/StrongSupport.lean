@@ -36,11 +36,12 @@ inductive Precedes : Address β → Address β → Prop
 
 @[mk_iff]
 structure Strong (S : Support β) : Prop where
+  /-- TODO: We can simplify this statement now that we've removed the extra inequalities. -/
   interferes {i₁ i₂ : κ} (hi₁ : i₁ < S.max) (hi₂ : i₂ < S.max)
     {A : ExtendedIndex β} {N₁ N₂ : NearLitter}
     (h₁ : S.f i₁ hi₁ = ⟨A, inr N₁⟩) (h₂ : S.f i₂ hi₂ = ⟨A, inr N₂⟩)
     {a : Atom} (ha : Interferes a N₁ N₂) :
-    ∃ (j : κ) (hj : j < S.max), j < i₁ ∧ j < i₂ ∧ S.f j hj = ⟨A, inl a⟩
+    ∃ (j : κ) (hj : j < S.max), S.f j hj = ⟨A, inl a⟩
   precedes {i : κ} (hi : i < S.max) (c : Address β) (hc : Precedes c (S.f i hi)) :
     ∃ (j : κ) (hj : j < S.max), j < i ∧ S.f j hj = c
 
@@ -260,14 +261,7 @@ theorem strongSupport_strong {s : Set (Address β)} (hs : Small s) : (strongSupp
     rw [hN₁] at hi₁'
     rw [hN₂] at hi₂'
     have := interferes_mem_strongClosure s A a N₁ N₂ ha hi₁' hi₂'
-    obtain ⟨j, hj, hc⟩ := exists_of_mem_strongClosure _ _ this
-    refine ⟨j, hj, ?_, ?_, hc⟩
-    · refine lt_of_strongSupportRel hs hj hi₁ ?_
-      rw [hc, hN₁]
-      exact StrongSupportRel.atom _ _ _ _
-    · refine lt_of_strongSupportRel hs hj hi₂ ?_
-      rw [hc, hN₂]
-      exact StrongSupportRel.atom _ _ _ _
+    exact exists_of_mem_strongClosure _ _ this
   · intro i hi c hc
     have hi' := mem_of_strongSupport_f_eq hs hi
     have := precedes_mem_strongClosure s hc hi'
@@ -345,8 +339,8 @@ theorem Strong.smul [LeLevel β] {S : Support β} (hS : S.Strong) (ρ : Allowabl
     have := hS.interferes hi₁ hi₂
         (N₁ := (Allowable.toStructPerm ρ A)⁻¹ • N₁) (N₂ := (Allowable.toStructPerm ρ A)⁻¹ • N₂)
         ?_ ?_ (A := A) (a := (Allowable.toStructPerm ρ A)⁻¹ • a) this
-    · obtain ⟨j, hj, hj₁, hj₂, h⟩ := this
-      refine ⟨j, hj, hj₁, hj₂, ?_⟩
+    · obtain ⟨j, hj, h⟩ := this
+      refine ⟨j, hj, ?_⟩
       rw [Enumeration.smul_f, h, Allowable.smul_address, smul_inl, smul_inv_smul]
     · rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at hN₁
       rw [hN₁, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr]
@@ -379,16 +373,6 @@ theorem before_carrier (S : Support β) (i : κ) (hi : i < S.max) :
     exact ⟨j, _, hj, rfl⟩
   · rintro ⟨j, hj₁, hj₂, rfl⟩
     exact ⟨j, hj₂, rfl⟩
-
-theorem before_strong (S : Support β) (i : κ) (hi : i < S.max) (hS : S.Strong) :
-    (S.before i hi).Strong := by
-  constructor
-  · intro i₁ i₂ hi₁ hi₂ A N₁ N₂ hN₁ hN₂ a ha
-    obtain ⟨j, hj, hj₁, hj₂, h⟩ := hS.interferes (hi₁.trans hi) (hi₂.trans hi) hN₁ hN₂ ha
-    exact ⟨j, hj₁.trans hi₁, hj₁, hj₂, h⟩
-  · intro j hj c hc
-    obtain ⟨k, hk₁, hk₂, h⟩ := hS.precedes (hj.trans hi) c hc
-    exact ⟨k, hk₂.trans hj, hk₂, h⟩
 
 @[simp]
 theorem before_smul [LeLevel β] (S : Support β) (i : κ) (hi : i < S.max) (ρ : Allowable β) :
@@ -551,6 +535,13 @@ theorem comp_carrier {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) :
     rw [comp_eq_of_canComp hS]
     exact ⟨i, hi, (comp_decomp_eq hS hi hc.symm).symm⟩
 
+theorem comp_f_eq' {γ : Λ} {S : Support β} {A : Path (β : TypeIndex) γ}
+    {i : κ} {hi : i < (S.comp A).max} {c : Address γ}
+    (hiS : (S.comp A).f i hi = c) :
+    ∃ j hj, S.f j hj = ⟨A.comp c.1, c.2⟩ := by
+  obtain ⟨j, hj, hc⟩ := (Set.ext_iff.mp (comp_carrier S A) c).mp ⟨i, hi, hiS.symm⟩
+  exact ⟨j, hj, hc.symm⟩
+
 theorem Precedes.comp {γ : Λ} {c d : Address γ} (h : Precedes c d) (A : Path (β : TypeIndex) γ) :
     Precedes ⟨A.comp c.1, c.2⟩ ⟨A.comp d.1, d.2⟩ := by
   cases h
@@ -575,18 +566,10 @@ theorem comp_strong {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) (h
     have h₂ := decomp_spec hS' hi₂
     rw [hN₁] at h₁
     rw [hN₂] at h₂
-    obtain ⟨j, hj, hj₁, hj₂, h⟩ := hS.interferes _ _ h₁ h₂ ha
-    refine ⟨j, ?_, ?_, ?_, ?_⟩
+    obtain ⟨j, hj, h⟩ := hS.interferes _ _ h₁ h₂ ha
+    refine ⟨j, ?_, ?_⟩
     · rw [comp_max_eq_of_canComp hS']
       exact hj
-    · rw [compIndex] at hj₁
-      split_ifs at hj₁ with hj'
-      · exact hj₁
-      · exact (not_lt_leastCompIndex hS' j ⟨hj, ⟨B, inl a⟩, h⟩ hj₁).elim
-    · rw [compIndex] at hj₂
-      split_ifs at hj₂ with hj'
-      · exact hj₂
-      · exact (not_lt_leastCompIndex hS' j ⟨hj, ⟨B, inl a⟩, h⟩ hj₂).elim
     · rw [comp_f_eq]
       exact comp_decomp_eq hS' hj h
   · intro i hi c hc
@@ -681,6 +664,97 @@ theorem comp_smul [LeLevel β] {γ : Λ} [LeLevel γ] (S : Support β) (A : Path
       rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at hc
       simp only [hc, Allowable.smul_address, map_inv, Tree.inv_apply, Allowable.toStructPerm_comp,
         Tree.comp_apply]
+
+theorem smul_comp_ext {γ : Λ} [LeLevel γ]
+    {S T : Support β} (A : Path (β : TypeIndex) γ) (ρ : Allowable γ)
+    (h₁ : S.max = T.max)
+    (h₂ : ∀ i hiS hiT, ∀ c : Address γ, S.f i hiS = ⟨A.comp c.1, c.2⟩ →
+      T.f i hiT = ⟨A.comp c.1, Allowable.toStructPerm ρ c.1 • c.2⟩)
+    (h₃ : ∀ i hiT hiS, ∀ c : Address γ, T.f i hiT = ⟨A.comp c.1, c.2⟩ →
+      S.f i hiS = ⟨A.comp c.1, Allowable.toStructPerm ρ⁻¹ c.1 • c.2⟩) :
+    ρ • S.comp A = T.comp A := by
+  refine Enumeration.ext' ?_ ?_
+  · by_cases h : S.CanComp A
+    · rw [Enumeration.smul_max, comp_max_eq_of_canComp h, comp_max_eq_of_canComp, h₁]
+      obtain ⟨i, hi, c, hc⟩ := h
+      exact ⟨i, h₁ ▸ hi, ρ • c, h₂ i hi (h₁ ▸ hi) c hc⟩
+    · rw [Enumeration.smul_max, comp_max_eq_of_not_canComp h, comp_max_eq_of_not_canComp]
+      contrapose! h
+      obtain ⟨i, hi, c, hc⟩ := h
+      exact ⟨i, h₁ ▸ hi, ρ⁻¹ • c, h₃ i hi (h₁ ▸ hi) c hc⟩
+  · intro i hS hT
+    have hS' : i < S.max
+    · rw [Enumeration.smul_max] at hS
+      exact lt_max_of_lt_comp_max hS
+    have hT' := hS'.trans_eq h₁
+    rw [Enumeration.smul_f, comp_f_eq, comp_f_eq]
+    by_cases h : ∃ c : Address γ, S.f i hS' = ⟨A.comp c.1, c.2⟩
+    · obtain ⟨c, hc⟩ := h
+      rw [comp_decomp_eq _ _ hc, comp_decomp_eq _ _ (c := ρ • c) (h₂ i hS' hT' c hc)]
+    · rw [comp_decomp_eq' _ _ h, comp_decomp_eq']
+      · have hSA : S.CanComp A := canComp_of_lt_comp_max hS
+        have hTA : T.CanComp A := canComp_of_lt_comp_max hT
+        obtain ⟨hlS, c, hc⟩ := leastCompIndex_mem hSA
+        obtain ⟨hlT, d, hd⟩ := leastCompIndex_mem hTA
+        have hlTS := not_lt_leastCompIndex hSA _ ⟨hlT.trans_eq h₁.symm, ρ⁻¹ • d, h₃ _ _ _ _ hd⟩
+        have hlST := not_lt_leastCompIndex hTA _ ⟨hlS.trans_eq h₁, ρ • c, h₂ _ _ _ _ hc⟩
+        have hST := le_antisymm (le_of_not_lt hlTS) (le_of_not_lt hlST)
+        have hSA' := leastComp_spec hSA
+        have hTA' := leastComp_spec hTA
+        have hTA'' := h₂ _ hlS (hlS.trans_eq h₁) _ hSA'
+        simp_rw [hST] at hTA''
+        simp only [hTA', Address.mk.injEq] at hTA''
+        refine Address.ext _ _ ?_ ?_
+        · exact Path.comp_injective_right _ hTA''.1.symm
+        · exact hTA''.2.symm
+      · rintro ⟨c, hc⟩
+        exact h ⟨ρ⁻¹ • c, h₃ i hT' hS' c hc⟩
+
+/- theorem canComp_comp {γ δ : Λ} {S : Support β}
+    {A : Path (β : TypeIndex) γ} {B : Path (γ : TypeIndex) δ}
+    (h : S.CanComp (A.comp B)) : S.CanComp A := by
+  obtain ⟨i, hi, c, hc⟩ := h
+  rw [Path.comp_assoc] at hc
+  exact ⟨i, hi, ⟨B.comp c.1, c.2⟩, hc⟩
+
+theorem canComp_comp' {γ δ : Λ} {S : Support β}
+    {A : Path (β : TypeIndex) γ} {B : Path (γ : TypeIndex) δ} :
+    (S.comp A).CanComp B ↔ S.CanComp (A.comp B) := by
+  constructor
+  · rintro ⟨i, hi, c, hc⟩
+    obtain ⟨j, hj, hjc⟩ := comp_f_eq' hc
+    rw [← Path.comp_assoc] at hjc
+    exact ⟨j, hj, c, hjc⟩
+  · rintro ⟨i, hi, c, hc⟩
+    refine ⟨i, ?_, c, ?_⟩
+    · rw [comp_max_eq_of_canComp (canComp_comp ⟨i, hi, c, hc⟩)]
+      exact hi
+    · rw [Path.comp_assoc] at hc
+      rw [comp_f_eq, comp_decomp_eq _ _ (c := ⟨B.comp c.1, c.2⟩) hc]
+
+theorem comp_comp [LeLevel β] {γ δ : Λ} [LeLevel γ] [LeLevel δ] (S : Support β)
+    (A : Path (β : TypeIndex) γ) (B : Path (γ : TypeIndex) δ) :
+    S.comp (A.comp B) = (S.comp A).comp B := by
+  refine Enumeration.ext' ?_ ?_
+  · by_cases h : S.CanComp (A.comp B)
+    · rw [comp_max_eq_of_canComp h,
+        comp_max_eq_of_canComp (canComp_comp'.mpr h),
+        comp_max_eq_of_canComp (canComp_comp h)]
+    · rw [comp_max_eq_of_not_canComp h, comp_max_eq_of_not_canComp]
+      rw [canComp_comp']
+      exact h
+  · intro i hE hF
+    have hcomp : S.CanComp (A.comp B) := canComp_of_lt_comp_max hE
+    have hS' := lt_max_of_lt_comp_max hF
+    have hS := lt_max_of_lt_comp_max (lt_max_of_lt_comp_max hF)
+    by_cases h : ∃ c : Address δ, S.f i hS = ⟨(A.comp B).comp c.1, c.2⟩
+    · obtain ⟨c, hc⟩ := h
+      rw [comp_f_eq, comp_decomp_eq hcomp hS hc]
+      rw [comp_f_eq, comp_decomp_eq]
+      rw [comp_f_eq, comp_decomp_eq]
+      rw [hc, Path.comp_assoc]
+    · rw [comp_f_eq, comp_decomp_eq' hcomp hS h]
+      sorry -/
 
 end Support
 

@@ -87,6 +87,13 @@ theorem smul_singleton (t : TSet β) (ρ : Allowable α) :
   intro s
   simp only [mem_smul_iff, mem_singleton_iff, inv_smul_eq_iff]
 
+theorem singleton_injective' (t₁ t₂ : TSet β) (h : TSet.singleton hβ t₁ = TSet.singleton hβ t₂) :
+    t₁ = t₂ := by
+  have : t₁ ∈[hβ] TSet.singleton hβ t₁
+  · rw [mem_singleton_iff]
+  rw [h, mem_singleton_iff] at this
+  exact this
+
 @[simp]
 theorem TangleData.TSet.mem_up_iff (t₁ t₂ : TSet β) (s : TSet β) :
     s ∈[hβ] up hβ t₁ t₂ ↔ s = t₁ ∨ s = t₂ := by
@@ -98,6 +105,53 @@ theorem smul_up (t₁ t₂ : TSet β) (ρ : Allowable α) :
   refine ext hβ _ _ ?_
   intro s
   simp only [mem_smul_iff, mem_up_iff, inv_smul_eq_iff]
+
+theorem up_self (t : TSet β) : up hβ t t = .singleton hβ t := by
+  refine ext hβ _ _ ?_
+  simp only [mem_up_iff, or_self, mem_singleton_iff, implies_true]
+
+theorem up_injective (t₁ t₂ t₁' t₂' : TSet β) (h : up hβ t₁ t₂ = up hβ t₁' t₂') :
+    (t₁ = t₁' ∧ t₂ = t₂') ∨ (t₁ = t₂' ∧ t₂ = t₁') := by
+  have h₁ : t₁ ∈[hβ] up hβ t₁ t₂
+  · rw [mem_up_iff]
+    exact Or.inl rfl
+  have h₂ : t₂ ∈[hβ] up hβ t₁ t₂
+  · rw [mem_up_iff]
+    exact Or.inr rfl
+  rw [h] at h₁ h₂
+  rw [mem_up_iff] at h₁ h₂
+  obtain (h₁ | h₁) := h₁ <;> obtain (h₂ | h₂) := h₂
+  · refine Or.inl ⟨h₁, ?_⟩
+    cases h₁.trans h₂.symm
+    have : t₂' ∈[hβ] up hβ t₁' t₂'
+    · rw [mem_up_iff]
+      exact Or.inr rfl
+    rw [← h, up_self, mem_singleton_iff] at this
+    exact this.symm
+  · refine Or.inl ⟨h₁, h₂⟩
+  · refine Or.inr ⟨h₁, h₂⟩
+  · refine Or.inr ⟨h₁, ?_⟩
+    cases h₁.trans h₂.symm
+    have : t₁' ∈[hβ] up hβ t₁' t₂'
+    · rw [mem_up_iff]
+      exact Or.inl rfl
+    rw [← h, up_self, mem_singleton_iff] at this
+    exact this.symm
+
+theorem up_eq_singleton_iff (t t₁ t₂ : TSet β) :
+    up hβ t₁ t₂ = .singleton hβ t ↔ t₁ = t ∧ t₂ = t := by
+  constructor
+  · intro h
+    have h₁ : t₁ ∈[hβ] up hβ t₁ t₂
+    · rw [mem_up_iff]
+      exact Or.inl rfl
+    have h₂ : t₂ ∈[hβ] up hβ t₁ t₂
+    · rw [mem_up_iff]
+      exact Or.inr rfl
+    rw [h, mem_singleton_iff] at h₁ h₂
+    exact ⟨h₁, h₂⟩
+  · rintro ⟨rfl, rfl⟩
+    rw [up_self]
 
 @[simp]
 theorem TangleData.TSet.mem_op_iff (t₁ t₂ : TSet γ) (s : TSet β) :
@@ -111,6 +165,44 @@ theorem smul_op (t₁ t₂ : TSet γ) (ρ : Allowable α) :
   refine ext hβ _ _ ?_
   intro s
   simp only [mem_smul_iff, mem_op_iff, inv_smul_eq_iff, smul_singleton, smul_up]
+
+theorem op_injective (t₁ t₂ t₁' t₂' : TSet γ) (h : op hβ hγ t₁ t₂ = op hβ hγ t₁' t₂') :
+    t₁ = t₁' ∧ t₂ = t₂' := by
+  have h₁ : .singleton hγ t₁ ∈[hβ] op hβ hγ t₁ t₂
+  · rw [mem_op_iff]
+    exact Or.inl rfl
+  have h₂ : up hγ t₁ t₂ ∈[hβ] op hβ hγ t₁ t₂
+  · rw [mem_op_iff]
+    exact Or.inr rfl
+  rw [h] at h₁ h₂
+  rw [mem_op_iff] at h₁ h₂
+  obtain (h₁ | h₁) := h₁ <;> obtain (h₂ | h₂) := h₂
+  · cases singleton_injective' _ _ _ h₁
+    rw [up_eq_singleton_iff] at h₂
+    have h' : up hγ t₁ t₂' ∈[hβ] op hβ hγ t₁ t₂'
+    · rw [mem_op_iff]
+      exact Or.inr rfl
+    rw [← h, mem_op_iff] at h'
+    obtain (h' | h') := h'
+    · rw [up_eq_singleton_iff] at h'
+      exact ⟨rfl, h₂.2.trans h'.2.symm⟩
+    · obtain (h' | ⟨rfl, rfl⟩) := up_injective _ _ _ _ _ h'
+      · exact ⟨rfl, h'.2.symm⟩
+      · exact ⟨rfl, rfl⟩
+  · cases singleton_injective' _ _ _ h₁
+    obtain (h' | ⟨rfl, rfl⟩) := up_injective _ _ _ _ _ h₂
+    · exact h'
+    · exact ⟨rfl, rfl⟩
+  · symm at h₁
+    rw [up_eq_singleton_iff] at h₁ h₂
+    obtain ⟨rfl, rfl⟩ := h₁
+    obtain ⟨_, rfl⟩ := h₂
+    exact ⟨rfl, rfl⟩
+  · symm at h₁
+    rw [up_eq_singleton_iff] at h₁
+    obtain ⟨rfl, rfl⟩ := h₁
+    rw [up_self, up_eq_singleton_iff] at h₂
+    exact h₂
 
 theorem Symmetric.singletonImage {s : Set (TSet γ)} (h : Symmetric hγ s) :
     Symmetric hβ {p | ∃ a b : TSet ε, op hδ hε a b ∈ s ∧
