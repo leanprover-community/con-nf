@@ -915,6 +915,33 @@ theorem raiseRaise_atom_spec₂
   · rw [raiseRaise_f_eq₃ hi (by exact hi')] at ha₁ ha₂
     exact raiseRaise_atom_spec₂_raise hρS ha₁ ha₂
 
+theorem raiseRaise_flexibleCoe_spec_eq
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ₁⁻¹ • c = ρ₂⁻¹ • c)
+    {i : κ} (hi : i < (raiseRaise hγ S T ρ₁).max) {A : ExtendedIndex α} {N₁ N₂ : NearLitter}
+    (hN₁ : (raiseRaise hγ S T ρ₁).f i hi = ⟨A, inr N₁⟩)
+    (hN₂ : (raiseRaise hγ S T ρ₂).f i hi = ⟨A, inr N₂⟩) :
+    {j | ∃ (hj : j < (raiseRaise hγ S T ρ₁).max), ∃ N',
+      (raiseRaise hγ S T ρ₁).f j hj = ⟨A, inr N'⟩ ∧ N'.1 = N₁.1} ⊆
+    {j | ∃ (hj : j < (raiseRaise hγ S T ρ₂).max), ∃ N',
+      (raiseRaise hγ S T ρ₂).f j hj = ⟨A, inr N'⟩ ∧ N'.1 = N₂.1} := by
+  rintro j ⟨hj, N', hjN', hN'⟩
+  obtain (h | ⟨A, rfl, h⟩) := raiseRaise_cases' ρ₁ ρ₂ hN₁
+  · obtain (h' | ⟨A, rfl, h'⟩) := raiseRaise_cases' ρ₁ ρ₂ hjN'
+    · cases h.symm.trans hN₂
+      exact ⟨hj, N', h', hN'⟩
+    · refine ⟨hj, Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) A • N', ?_, ?_⟩
+      · rw [h']
+        simp only [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, smul_inr]
+      · have := hN₂.symm.trans (raiseRaise_raiseIndex hρS hN₁)
+        simp only [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, smul_inr, Address.mk.injEq,
+          inr.injEq, true_and, NearLitterPerm.smul_nearLitter_fst] at this ⊢
+        rw [this, NearLitterPerm.smul_nearLitter_fst, smul_left_cancel_iff, hN']
+  · refine ⟨hj, Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) A • N', raiseRaise_raiseIndex hρS hjN', ?_⟩
+    have := hN₂.symm.trans (raiseRaise_raiseIndex hρS hN₁)
+    simp only [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, smul_inr, Address.mk.injEq,
+      inr.injEq, true_and, NearLitterPerm.smul_nearLitter_fst] at this ⊢
+    rw [this, NearLitterPerm.smul_nearLitter_fst, smul_left_cancel_iff, hN']
+
 theorem raiseRaise_inflexibleCoe_spec₁_comp_before_aux
     {i : κ} (hi : i < S.max) {j : κ} (hji : j < i) :
     ((raiseRaise hγ S T ρ₁).before i (raiseRaise_hi₁ hi)).f j hji =
@@ -1087,6 +1114,49 @@ theorem raiseRaise_inflexibleCoe_spec₂_support
   simp only [Tangle.coe_support, Allowable.smul_address, Allowable.toStructPerm_comp,
     Tree.comp_apply, inv_smul_smul]
 
+theorem raiseRaise_inflexibleBot_spec₁_atom
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ₁⁻¹ • c = ρ₂⁻¹ • c)
+    {i : κ} {hi : i < S.max}
+    {A : ExtendedIndex α} {N : NearLitter} (h : InflexibleBot A N.1)
+    (hN : S.f i hi = ⟨A, inr N⟩) :
+    {j | ∃ (hj : j < (raiseRaise hγ S T ρ₁).max),
+      (raiseRaise hγ S T ρ₁).f j hj = ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩} ⊆
+    {j | ∃ (hj : j < (raiseRaise hγ S T ρ₂).max),
+      (raiseRaise hγ S T ρ₂).f j hj = ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩} := by
+  rintro j ⟨hj, hja⟩
+  refine ⟨hj, ?_⟩
+  by_cases hB : ∃ B : ExtendedIndex β, h.path.B.cons (bot_lt_coe _) = raiseIndex iβ.elim B
+  · obtain ⟨B, hB⟩ := hB
+    have := hρS ⟨B, inl h.a⟩ ?_
+    · rw [hB] at hja ⊢
+      rw [raiseRaise_raiseIndex hρS hja]
+      simp only [Allowable.smul_address_eq_smul_iff, map_inv, Tree.inv_apply, smul_inl, inl.injEq,
+        map_mul, Tree.mul_apply, mul_smul, Address.mk.injEq, true_and] at this ⊢
+      rw [smul_eq_iff_eq_inv_smul, this]
+    · rw [raise, ← hB]
+      have := hS.precedes hi ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩ ?_
+      · obtain ⟨j, hj, -, hj'⟩ := this
+        exact ⟨j, hj, hj'.symm⟩
+      · simp_rw [hN, h.path.hA]
+        exact Precedes.fuzzBot A N h
+  · exact raiseRaise_not_raiseIndex ρ₂ hB hja
+
+theorem raiseRaise_inflexibleBot_spec₂_atom
+    (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ₁⁻¹ • c = ρ₂⁻¹ • c)
+    {A : ExtendedIndex β} (P : InflexibleBotPath A) (a : Atom) :
+    {j | ∃ (hj : j < (raiseRaise hγ S T ρ₁).max), (raiseRaise hγ S T ρ₁).f j hj =
+      ⟨((Hom.toPath iβ.elim).comp P.B).cons (bot_lt_coe _),
+      inl (Allowable.toStructPerm ρ₁ (P.B.cons (bot_lt_coe _)) • a)⟩} ⊆
+    {j | ∃ (hj : j < (raiseRaise hγ S T ρ₂).max), (raiseRaise hγ S T ρ₂).f j hj =
+      ⟨((Hom.toPath iβ.elim).comp P.B).cons (bot_lt_coe _),
+      inl (Allowable.toStructPerm ρ₂ (P.B.cons (bot_lt_coe _)) • a)⟩} := by
+  rintro j ⟨hj, hja⟩
+  refine ⟨hj, ?_⟩
+  rw [← Path.comp_cons] at hja ⊢
+  rw [raiseRaise_raiseIndex hρS hja]
+  simp only [raiseIndex, Path.comp_cons, map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul,
+    smul_inl, inv_smul_smul]
+
 theorem raiseRaise_specifies_atom_spec
     (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) {σ : Spec α}
     (hσ : σ.Specifies (raiseRaise hγ S T 1) (raiseRaise_strong hS (fun c _ => by rw [one_smul])))
@@ -1141,8 +1211,13 @@ theorem raiseRaise_specifies_flexible_spec
     rw [hσ.flexible_spec i hi A N₁ h hN₂]
     simp only [SpecCondition.flexible.injEq, true_and]
     refine ⟨?_, ?_⟩
-    · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
-      sorry
+    · refine subset_antisymm ?_ ?_
+      · refine raiseRaise_flexibleCoe_spec_eq ?_ (by exact hi) hN₂ hN₁
+        intro c hc
+        rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · refine raiseRaise_flexibleCoe_spec_eq ?_ hi hN₁ hN₂
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
     · ext j : 1
       refine subset_antisymm ?_ ?_
       · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
@@ -1155,11 +1230,13 @@ theorem raiseRaise_specifies_flexible_spec
     rw [hσ.flexible_spec i (raiseRaise_hi₂ hi') (raiseIndex iβ.elim A) N₂ h' hN₂]
     simp only [SpecCondition.flexible.injEq, true_and]
     refine ⟨?_, ?_⟩
-    · rw [raiseRaise_f_eq₂ hi hi'] at hN₁ hN₂
-      rw [one_smul] at hN₂
-      have := raise_injective' hN₁
-      rw [raise_injective' hN₂] at this
-      sorry
+    · refine subset_antisymm ?_ ?_
+      · refine raiseRaise_flexibleCoe_spec_eq ?_ ‹_› hN₂ hN₁
+        intro c hc
+        rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · refine raiseRaise_flexibleCoe_spec_eq ?_ ‹_› hN₁ hN₂
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
     · ext j : 1
       refine subset_antisymm ?_ ?_
       · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
@@ -1277,7 +1354,13 @@ theorem raiseRaise_specifies_inflexibleBot_spec
     simp only [SpecCondition.inflexibleBot.injEq, heq_eq_eq, true_and]
     refine ⟨?_, ?_⟩
     · rw [raiseRaise_f_eq₁ hi'] at hN₁ hN₂
-      sorry
+      refine subset_antisymm ?_ ?_
+      · refine raiseRaise_inflexibleBot_spec₁_atom hS ?_ h hN₂
+        intro c hc
+        rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · refine raiseRaise_inflexibleBot_spec₁_atom hS ?_ h hN₂
+        intro c hc
+        rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
     · ext j : 1
       refine subset_antisymm ?_ ?_
       · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
@@ -1298,7 +1381,19 @@ theorem raiseRaise_specifies_inflexibleBot_spec
       have := raise_injective' hN₁
       rw [raise_injective' hN₂] at this
       simp only [map_one, one_smul] at hN₂'
-      sorry
+      refine subset_antisymm ?_ ?_
+      · have := raiseRaise_inflexibleBot_spec₂_atom
+            (hγ := hγ) (S := S) (T := T) (ρ₁ := 1) (ρ₂ := ρ) ?_ P a
+        · simp only [map_one, Tree.one_apply, one_smul] at this
+          exact this
+        · intro c hc
+          rw [inv_one, one_smul, ← smul_eq_iff_eq_inv_smul, hρS c hc]
+      · have := raiseRaise_inflexibleBot_spec₂_atom
+            (hγ := hγ) (S := S) (T := T) (ρ₁ := ρ) (ρ₂ := 1) ?_ P a
+        · simp only [map_one, Tree.one_apply, one_smul] at this
+          exact this
+        · intro c hc
+          rw [inv_one, one_smul, inv_smul_eq_iff, hρS c hc]
     · ext j : 1
       refine subset_antisymm ?_ ?_
       · refine raiseRaise_symmDiff ?_ hN₂ hN₁ j
