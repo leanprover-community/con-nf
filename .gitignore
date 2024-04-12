@@ -3,3 +3,4 @@
 /.lake/*
 **.olean
 depgraph.*
+unseen_defs.txt
