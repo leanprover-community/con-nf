@@ -35,6 +35,16 @@ jobs:
           printf "\n#deptree\n#index\n#unseen\n" >> DependencyGraph.lean
           ~/.elan/bin/lake -Kenv=dev build DependencyGraph
 
+      - name: setup graphviz
+        uses: ts-graphviz/setup-graphviz@v2
+
+      - name: build dependency graph
+        working-directory: docs
+        run: |
+          dot -Tpdf -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.pdf
+          dot -Tpng -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.png
+          dot -Tsvg -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.svg
+
       # - name: build lean4checker
       #   run: |
       #     git clone https://github.com/leanprover/lean4checker
@@ -67,7 +77,7 @@ jobs:
       - name: upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: 'docs/_site'
+          path: "docs/_site"
 
       - name: deploy website
         uses: actions/deploy-pages@v1
