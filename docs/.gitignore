@@ -4,3 +4,6 @@ _site
 .jekyll-metadata
 vendor
 docs/
+depgraph.*
+unseen_defs.txt
+index.csv

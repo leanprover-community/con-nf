@@ -35,7 +35,7 @@ def groups (imports : NameMap (Array Name)) : NameMap Unit :=
 elab "#deptree " : command => do
   let env ← getEnv
   let imports := env.importGraph
-  IO.FS.withFile "depgraph.dot" IO.FS.Mode.write fun h => do
+  IO.FS.withFile "docs/depgraph.dot" IO.FS.Mode.write fun h => do
   h.write "digraph {\n".toUTF8
   h.write "compound=true;\n".toUTF8
   for (gp, _) in groups imports do
@@ -54,8 +54,6 @@ elab "#deptree " : command => do
       printDeps₂ k v (fun s => h.write s.toUTF8)
   h.write "}\n".toUTF8
 
-#deptree
-
 /-- Extracts the names of the declarations in `env` on which `decl` depends. -/
 -- source:
 -- https://leanprover.zulipchat.com/#narrow/stream/287929-mathlib4/topic/Counting.20prerequisites.20of.20a.20theorem/near/425370265
@@ -68,7 +66,8 @@ partial def allDeclsIn (module : Name) : Elab.Command.CommandElabM (Array Name) 
   unless (← mFile.pathExists) do
     logError m!"object file '{mFile}' of module {module} does not exist"
   let (md, _) ← readModuleData mFile
-  let decls ← md.constNames.filterM fun d => return !(← d.isBlackListed)
+  let decls ← md.constNames.filterM fun d =>
+    return !(← d.isBlackListed) && !(`injEq).isSuffixOf d && !(`sizeOf_spec).isSuffixOf d
   return decls
 
 def allFiles (env : Environment) : List Name :=
@@ -79,11 +78,28 @@ def allDecls (env : Environment) : Elab.Command.CommandElabM NameSet :=
   (fun l => RBTree.ofList (l.map (fun a => a.toList)).join) <$>
     (mapM allDeclsIn (allFiles env))
 
+/-- `#index` computes an index of the declations in the project and saves it to `index.csv`. -/
+elab "#index " : command => do
+  let env ← getEnv
+  let allDecls ← allDecls env
+  let result ← mapM (fun decl => do
+    let ranges ← findDeclarationRanges? decl
+    let mod ← findModuleOf? decl
+    match (ranges, mod) with
+    | (some ranges, some mod) => pure (some (decl, ranges, mod))
+    | _ => pure none)
+    (allDecls.toList.mergeSort (toString · < toString ·))
+  let result' := result.filterMap id
+  IO.FS.withFile "docs/index.csv" IO.FS.Mode.write (fun h => do
+    for (decl, ranges, mod) in result' do
+      h.write (decl.toString ++ ", " ++ mod.toString ++ ", " ++
+        ranges.range.pos.line.repr ++ ", " ++ ranges.range.pos.column.repr ++ "\n").toUTF8)
+
 def seenIn (env : Environment) (allDecls : NameSet) (decl : Name) : NameSet :=
   (getVisited env decl).fold
     (fun decls x => if allDecls.contains x then decls.insert x else decls) RBTree.empty
 
-/-- `#unseen` computes a list of the declarations of the current file that are
+/-- `#unseen` computes a list of the declarations in the project that are
 defined but not used in the current file. The list is stored in `unseen_defs.txt`.
 The average runtime on my computer is 1 minute, with 16 threads. -/
 elab "#unseen " : command => do
@@ -96,12 +112,8 @@ elab "#unseen " : command => do
   for task in tasks do
     for v in task.get do
       unseen := unseen.erase v
-  IO.FS.withFile "unseen_defs.txt" IO.FS.Mode.write (fun h => do
+  IO.FS.withFile "docs/unseen_defs.txt" IO.FS.Mode.write (fun h => do
     for v in unseen.toList.mergeSort (toString · < toString ·) do
       h.write (v.toString ++ "\n").toUTF8)
   let timeEnd ← IO.monoMsNow
   logInfo m!"operation took {(timeEnd - timeStart) / 1000}s"
-
-/-! Uncommenting the following line will run the `#unseen` program, which will take ~1 minute on a
-reasonably powerful system with about 16 threads. -/
--- #unseen

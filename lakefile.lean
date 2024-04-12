@@ -17,3 +17,5 @@ require «doc-gen4» from git
 
 @[default_target]
 lean_lib ConNF
+
+lean_lib DependencyGraph

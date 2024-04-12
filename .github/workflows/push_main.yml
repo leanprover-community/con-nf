@@ -30,6 +30,11 @@ jobs:
       - name: build project
         run: ~/.elan/bin/lake -Kenv=dev build ConNF
 
+      - name: build index
+        run: |
+          printf "\n#deptree\n#index\n#unseen\n" >> DependencyGraph.lean
+          ~/.elan/bin/lake -Kenv=dev build DependencyGraph
+
       # - name: build lean4checker
       #   run: |
       #     git clone https://github.com/leanprover/lean4checker

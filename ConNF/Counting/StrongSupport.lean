@@ -710,52 +710,6 @@ theorem smul_comp_ext {γ : Λ} [LeLevel γ]
       · rintro ⟨c, hc⟩
         exact h ⟨ρ⁻¹ • c, h₃ i hT' hS' c hc⟩
 
-/- theorem canComp_comp {γ δ : Λ} {S : Support β}
-    {A : Path (β : TypeIndex) γ} {B : Path (γ : TypeIndex) δ}
-    (h : S.CanComp (A.comp B)) : S.CanComp A := by
-  obtain ⟨i, hi, c, hc⟩ := h
-  rw [Path.comp_assoc] at hc
-  exact ⟨i, hi, ⟨B.comp c.1, c.2⟩, hc⟩
-
-theorem canComp_comp' {γ δ : Λ} {S : Support β}
-    {A : Path (β : TypeIndex) γ} {B : Path (γ : TypeIndex) δ} :
-    (S.comp A).CanComp B ↔ S.CanComp (A.comp B) := by
-  constructor
-  · rintro ⟨i, hi, c, hc⟩
-    obtain ⟨j, hj, hjc⟩ := comp_f_eq' hc
-    rw [← Path.comp_assoc] at hjc
-    exact ⟨j, hj, c, hjc⟩
-  · rintro ⟨i, hi, c, hc⟩
-    refine ⟨i, ?_, c, ?_⟩
-    · rw [comp_max_eq_of_canComp (canComp_comp ⟨i, hi, c, hc⟩)]
-      exact hi
-    · rw [Path.comp_assoc] at hc
-      rw [comp_f_eq, comp_decomp_eq _ _ (c := ⟨B.comp c.1, c.2⟩) hc]
-
-theorem comp_comp [LeLevel β] {γ δ : Λ} [LeLevel γ] [LeLevel δ] (S : Support β)
-    (A : Path (β : TypeIndex) γ) (B : Path (γ : TypeIndex) δ) :
-    S.comp (A.comp B) = (S.comp A).comp B := by
-  refine Enumeration.ext' ?_ ?_
-  · by_cases h : S.CanComp (A.comp B)
-    · rw [comp_max_eq_of_canComp h,
-        comp_max_eq_of_canComp (canComp_comp'.mpr h),
-        comp_max_eq_of_canComp (canComp_comp h)]
-    · rw [comp_max_eq_of_not_canComp h, comp_max_eq_of_not_canComp]
-      rw [canComp_comp']
-      exact h
-  · intro i hE hF
-    have hcomp : S.CanComp (A.comp B) := canComp_of_lt_comp_max hE
-    have hS' := lt_max_of_lt_comp_max hF
-    have hS := lt_max_of_lt_comp_max (lt_max_of_lt_comp_max hF)
-    by_cases h : ∃ c : Address δ, S.f i hS = ⟨(A.comp B).comp c.1, c.2⟩
-    · obtain ⟨c, hc⟩ := h
-      rw [comp_f_eq, comp_decomp_eq hcomp hS hc]
-      rw [comp_f_eq, comp_decomp_eq]
-      rw [comp_f_eq, comp_decomp_eq]
-      rw [hc, Path.comp_assoc]
-    · rw [comp_f_eq, comp_decomp_eq' hcomp hS h]
-      sorry -/
-
 end Support
 
 end ConNF
