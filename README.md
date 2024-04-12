@@ -5,7 +5,7 @@
 In 1937, Quine proposed a set theory called "New Foundations", and since 2010, Randall Holmes has claimed to have a proof of its consistency.
 In this repository, we use the formal theorem prover Lean to verify the difficult part of his proof, thus proving that New Foundations is indeed consistent.
 
-See [our website](https://leanprover-community.github.io/con-nf/) for more information, the [documentation of our Lean code](https://leanprover-community.github.io/con-nf/doc/), and the [draft paper](https://zeramorphic.github.io/con-nf-paper/main.pdf) aiming to translate the Lean definitions into English.
+See [our website](https://leanprover-community.github.io/con-nf/) for more information, the [documentation of our Lean code](https://leanprover-community.github.io/con-nf/doc/), and the [draft paper](https://zeramorphic.github.io/con-nf-paper/main.l.pdf) aiming to translate the Lean definitions into English.
 
 To run our code locally, install [elan](https://github.com/leanprover/elan), clone the repository, and run the following command in a terminal in the repository's root directory.
 ```
