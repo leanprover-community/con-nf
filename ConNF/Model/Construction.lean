@@ -52,11 +52,11 @@ structure IH (α : Λ) where
     ∀ (ρ : Allowable) (N : NearLitter),
     ρ • typedNearLitter N =
     typedNearLitter ((allowableToStructPerm ρ) (Hom.toPath <| bot_lt_coe α) • N)
-  toPretangle : TSet ↪ Pretangle α
-  toPretangle_smul (ρ : Allowable) (t : TSet) :
-    letI : MulAction Allowable (Pretangle α) :=
+  toStructSet : TSet ↪ StructSet α
+  toStructSet_smul (ρ : Allowable) (t : TSet) :
+    letI : MulAction Allowable (StructSet α) :=
       MulAction.compHom _ allowableToStructPerm
-    toPretangle (ρ • t) = ρ • toPretangle t
+    toStructSet (ρ • t) = ρ • toStructSet t
 
 instance {α : Λ} {ih : IH α} : Group ih.Allowable := ih.allowableGroup
 instance {α : Λ} {ih : IH α} : MulAction ih.Allowable ih.TSet := ih.allowableAction
@@ -70,8 +70,8 @@ def IH.tangleData {α : Λ} (ih : IH α) : TangleData α where
   allowableToStructPerm := ih.allowableToStructPerm
   allowableToStructPerm_injective := ih.allowableToStructPerm_injective
   has_support := ih.has_support
-  toPretangle := ih.toPretangle
-  toPretangle_smul := ih.toPretangle_smul
+  toStructSet := ih.toStructSet
+  toStructSet_smul := ih.toStructSet_smul
 
 protected def IH.Tangle {α : Λ} (ih : IH α) : Type u :=
   letI := ih.tangleData
@@ -163,8 +163,8 @@ def tangleDataStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) : TangleDat
       intro t
       obtain ⟨S, hS⟩ := t.prop
       exact ⟨S, fun ρ hρ => Subtype.ext (hS ρ hρ)⟩
-    toPretangle := ⟨NewTSet.toPretangle, NewTSet.toPretangle_injective⟩
-    toPretangle_smul := NewTSet.toPretangle_smul
+    toStructSet := ⟨NewTSet.toStructSet, NewTSet.toStructSet_injective⟩
+    toStructSet_smul := NewTSet.toStructSet_smul
   }
 
 def typedObjectsStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
@@ -347,9 +347,9 @@ theorem tangleData_cast_toStructPerm (α : Λ) (i₁ i₂ : TangleData α) (h : 
     i₂.allowableToStructPerm (cast (show i₁.Allowable = i₂.Allowable by rw [h]) ρ) :=
   by subst h; rfl
 
-theorem tangleData_cast_toPretangle (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂) (t) :
-    i₁.toPretangle t =
-    i₂.toPretangle (cast (show i₁.TSet = i₂.TSet by rw [h]) t) :=
+theorem tangleData_cast_toStructSet (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂) (t) :
+    i₁.toStructSet t =
+    i₂.toStructSet (cast (show i₁.TSet = i₂.TSet by rw [h]) t) :=
   by subst h; rfl
 
 theorem tangleData_cast_smul (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂) (ρ t) :
@@ -412,17 +412,17 @@ theorem fuzz_cast (β : TypeIndex) (γ : Λ) (hβγ : β ≠ γ)
   by subst hi; subst hj; rfl
 
 @[simp]
-theorem foaData_tSet_eq_equiv_toPretangle (α : Λ) (ihs : (β : Λ) → β < α → IH β) (t) :
+theorem foaData_tSet_eq_equiv_toStructSet (α : Λ) (ihs : (β : Λ) → β < α → IH β) (t) :
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
     (letI : FOAData := buildStepFOAData α ihs
-    toPretangle t) =
+    toStructSet t) =
     (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-    NewTSet.toPretangle (foaData_tSet_eq_equiv α ihs t)) :=
-  tangleData_cast_toPretangle α _ _ (tangleDataStepFn_eq α ihs) t
+    NewTSet.toStructSet (foaData_tSet_eq_equiv α ihs t)) :=
+  tangleData_cast_toStructSet α _ _ (tangleDataStepFn_eq α ihs) t
 
 @[simp]
 theorem foaData_allowable_eq_equiv_one (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
@@ -459,25 +459,25 @@ theorem foaData_allowable_eq_equiv_smul (α : Λ) (ihs : (β : Λ) → β < α �
   tangleData_cast_smul α _ _ (tangleDataStepFn_eq α ihs) ρ t
 
 @[simp]
-theorem foaData_tSet_lt_equiv_toPretangle (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+theorem foaData_tSet_lt_equiv_toStructSet (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β < α) (t) :
     letI : Level := ⟨α⟩
     letI : LeLevel β := ⟨coe_le_coe.mpr hβ.le⟩
     (letI : FOAData := buildStepFOAData α ihs
-    toPretangle t) =
-    (ihs β hβ).toPretangle (foaData_tSet_lt_equiv α ihs β hβ t) :=
-  tangleData_cast_toPretangle β _ _ (tangleDataStepFn_lt α ihs β hβ) t
+    toStructSet t) =
+    (ihs β hβ).toStructSet (foaData_tSet_lt_equiv α ihs β hβ t) :=
+  tangleData_cast_toStructSet β _ _ (tangleDataStepFn_lt α ihs β hβ) t
 
 @[simp]
-theorem foaData_tSet_lt_equiv_toPretangle' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+theorem foaData_tSet_lt_equiv_toStructSet' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β < α) (t) :
     letI : Level := ⟨α⟩
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
-    toPretangle t) =
+    toStructSet t) =
     (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
-    toPretangle (foaData_tSet_lt_equiv α ihs β hβ t)) :=
-  tangleData_cast_toPretangle β _ _ (tangleDataStepFn_lt α ihs β hβ) t
+    toStructSet (foaData_tSet_lt_equiv α ihs β hβ t)) :=
+  tangleData_cast_toStructSet β _ _ (tangleDataStepFn_lt α ihs β hβ) t
 
 theorem foaData_allowable_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : Λ) (hβ : β < α) :
     letI : Level := ⟨α⟩
@@ -853,21 +853,21 @@ structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
       (_hfα : ∀ ρ : (ih α le_rfl).Allowable,
         (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = fα ρ),
       fα ρ = π)
-  eq_toPretangle_of_mem (β : Λ) (hβ : β < α) (t₁ : (ih α le_rfl).TSet) (t₂ : Pretangle β) :
-    t₂ ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₁) β (coe_lt_coe.mpr hβ) →
-    ∃ t₂' : (ih β hβ.le).TSet, t₂ = (ih β hβ.le).toPretangle t₂'
-  toPretangle_ext (β : Λ) (hβ : β < α) (t₁ t₂ : (ih α le_rfl).TSet) :
-    (∀ t : Pretangle β,
-      t ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₁) β (coe_lt_coe.mpr hβ) ↔
-      t ∈ Pretangle.ofCoe ((ih α le_rfl).toPretangle t₂) β (coe_lt_coe.mpr hβ)) →
-    (ih α le_rfl).toPretangle t₁ = (ih α le_rfl).toPretangle t₂
+  eq_toStructSet_of_mem (β : Λ) (hβ : β < α) (t₁ : (ih α le_rfl).TSet) (t₂ : StructSet β) :
+    t₂ ∈ StructSet.ofCoe ((ih α le_rfl).toStructSet t₁) β (coe_lt_coe.mpr hβ) →
+    ∃ t₂' : (ih β hβ.le).TSet, t₂ = (ih β hβ.le).toStructSet t₂'
+  toStructSet_ext (β : Λ) (hβ : β < α) (t₁ t₂ : (ih α le_rfl).TSet) :
+    (∀ t : StructSet β,
+      t ∈ StructSet.ofCoe ((ih α le_rfl).toStructSet t₁) β (coe_lt_coe.mpr hβ) ↔
+      t ∈ StructSet.ofCoe ((ih α le_rfl).toStructSet t₂) β (coe_lt_coe.mpr hβ)) →
+    (ih α le_rfl).toStructSet t₁ = (ih α le_rfl).toStructSet t₂
   /-- It's useful to keep this `Prop`-valued, because then there is no data in `IH` that
   crosses levels. -/
   has_singletons (β : Λ) (hβ : β < α) :
     ∃ S : (ih β hβ.le).TSet → (ih α le_rfl).TSet,
     ∀ t : (ih β hβ.le).TSet,
-      Pretangle.ofCoe ((ih α le_rfl).toPretangle (S t)) β (coe_lt_coe.mpr hβ) =
-      {(ih β hβ.le).toPretangle t}
+      StructSet.ofCoe ((ih α le_rfl).toStructSet (S t)) β (coe_lt_coe.mpr hβ) =
+      {(ih β hβ.le).toStructSet t}
   step_zero : zeroTangleData = (ih 0 (Params.Λ_zero_le α)).tangleData
 
 def newAllowableCons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -1294,7 +1294,7 @@ noncomputable def buildStepFOAAssumptions (α : Λ) (ihs : (β : Λ) → β < α
     allowable_of_smulFuzz := allowable_of_smulFuzz_step α ihs h
   }
 
-theorem eq_toPretangle_of_mem_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+theorem eq_toStructSet_of_mem_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
     (β : Λ) [iβ : letI : Level := ⟨α⟩; LeLevel β]
     (γ : Λ) [iγ : letI : Level := ⟨α⟩; LeLevel γ]
@@ -1305,15 +1305,15 @@ theorem eq_toPretangle_of_mem_step (α : Λ) (ihs : (β : Λ) → β < α → IH
       TSet β) :
     letI : Level := ⟨α⟩
     letI : FOAData := buildStepFOAData α ihs
-    ∀ t₂ ∈ Pretangle.ofCoe (toPretangle t₁) γ hγβ, ∃ t₂', t₂ = toPretangle t₂' := by
+    ∀ t₂ ∈ StructSet.ofCoe (toStructSet t₁) γ hγβ, ∃ t₂', t₂ = toStructSet t₂' := by
   by_cases hβ : β = α
   · cases hβ
     intro t₂ ht₂
-    erw [foaData_tSet_eq_equiv_toPretangle α ihs t₁] at ht₂
-    simp only [NewTSet.toPretangle, Semitangle.toPretangle, Pretangle.ofCoe_symm, exists_and_right,
-      Pretangle.ofCoe_toCoe, mem_setOf_eq] at ht₂
+    erw [foaData_tSet_eq_equiv_toStructSet α ihs t₁] at ht₂
+    simp only [NewTSet.toStructSet, Semitangle.toStructSet, StructSet.ofCoe_symm, exists_and_right,
+      StructSet.ofCoe_toCoe, mem_setOf_eq] at ht₂
     obtain ⟨s, _, rfl⟩ := ht₂
-    have := foaData_tSet_lt_equiv_toPretangle α ihs γ (coe_lt_coe.mp hγβ)
+    have := foaData_tSet_lt_equiv_toStructSet α ihs γ (coe_lt_coe.mp hγβ)
       ((foaData_tSet_lt_equiv α ihs γ (coe_lt_coe.mp hγβ)).symm s)
     rw [Equiv.apply_symm_apply] at this
     exact ⟨(foaData_tSet_lt_equiv α ihs γ (coe_lt_coe.mp hγβ)).symm s, this.symm⟩
@@ -1321,15 +1321,15 @@ theorem eq_toPretangle_of_mem_step (α : Λ) (ihs : (β : Λ) → β < α → IH
     have hβ' := lt_of_le_of_ne (coe_le_coe.mp iβ.elim) hβ
     have hγ' := coe_lt_coe.mp (hγβ.trans_le iβ.elim)
     intro t₂ ht₂
-    have := (h β hβ').eq_toPretangle_of_mem γ (coe_lt_coe.mp hγβ)
+    have := (h β hβ').eq_toStructSet_of_mem γ (coe_lt_coe.mp hγβ)
         (foaData_tSet_lt_equiv α ihs β hβ' t₁) t₂ ?_
     · obtain ⟨t₂', rfl⟩ := this
       refine ⟨(foaData_tSet_lt_equiv α ihs γ hγ').symm t₂', ?_⟩
-      rw [foaData_tSet_lt_equiv_toPretangle α ihs γ hγ', Equiv.apply_symm_apply]
-    · rw [foaData_tSet_lt_equiv_toPretangle α ihs β hβ'] at ht₂
+      rw [foaData_tSet_lt_equiv_toStructSet α ihs γ hγ', Equiv.apply_symm_apply]
+    · rw [foaData_tSet_lt_equiv_toStructSet α ihs β hβ'] at ht₂
       exact ht₂
 
-theorem toPretangle_ext_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+theorem toStructSet_ext_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
     (β : Λ) (γ : Λ)
     [iβ : letI : Level := ⟨α⟩; LeLevel β] [letI : Level := ⟨α⟩; LeLevel γ]
@@ -1340,15 +1340,15 @@ theorem toPretangle_ext_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
       TSet β) :
     letI : Level := ⟨α⟩
     letI : FOAData := buildStepFOAData α ihs
-    (∀ t : Pretangle γ, t ∈ Pretangle.ofCoe (toPretangle t₁) γ hγβ ↔
-      t ∈ Pretangle.ofCoe (toPretangle t₂) γ hγβ) →
-    toPretangle t₁ = toPretangle t₂ := by
+    (∀ t : StructSet γ, t ∈ StructSet.ofCoe (toStructSet t₁) γ hγβ ↔
+      t ∈ StructSet.ofCoe (toStructSet t₂) γ hγβ) →
+    toStructSet t₁ = toStructSet t₂ := by
   letI : Level := ⟨α⟩
   by_cases hβ : β = α
   · cases hβ
     intro ht
-    erw [foaData_tSet_eq_equiv_toPretangle α ihs t₁,
-      foaData_tSet_eq_equiv_toPretangle α ihs t₂] at ht ⊢
+    erw [foaData_tSet_eq_equiv_toStructSet α ihs t₁,
+      foaData_tSet_eq_equiv_toStructSet α ihs t₂] at ht ⊢
     have : LtLevel γ := ⟨hγβ⟩
     letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
@@ -1360,8 +1360,8 @@ theorem toPretangle_ext_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     rfl
   · have hβ' := lt_of_le_of_ne (coe_le_coe.mp iβ.elim) hβ
     intro ht
-    simp only [foaData_tSet_lt_equiv_toPretangle α ihs β hβ'] at ht ⊢
-    exact (h β hβ').toPretangle_ext γ (coe_lt_coe.mp hγβ)
+    simp only [foaData_tSet_lt_equiv_toStructSet α ihs β hβ'] at ht ⊢
+    exact (h β hβ').toStructSet_ext γ (coe_lt_coe.mp hγβ)
       (foaData_tSet_lt_equiv α ihs β hβ' t₁) (foaData_tSet_lt_equiv α ihs β hβ' t₂) ht
 
 theorem has_singletons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -1372,7 +1372,7 @@ theorem has_singletons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     letI : LeLevel β := ⟨coe_le_coe.mpr hβ⟩
     letI : LeLevel γ := ⟨coe_le_coe.mpr (hγβ.le.trans hβ)⟩
     ∃ S : TSet γ → TSet β,
-    ∀ t : TSet γ, Pretangle.ofCoe (toPretangle (S t)) γ (coe_lt_coe.mpr hγβ) = {toPretangle t} := by
+    ∀ t : TSet γ, StructSet.ofCoe (toStructSet (S t)) γ (coe_lt_coe.mpr hγβ) = {toStructSet t} := by
   by_cases hβ' : β = α
   · cases hβ'
     letI : Level := ⟨α⟩
@@ -1384,9 +1384,9 @@ theorem has_singletons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     refine ⟨(foaData_tSet_eq_equiv α ihs).symm ∘
       newSingleton γ ∘ foaData_tSet_lt_equiv α ihs γ hγβ, ?_⟩
     intro t
-    have := NewTSet.newSingleton_toPretangle γ (foaData_tSet_lt_equiv α ihs γ hγβ t)
-    rw [foaData_tSet_lt_equiv_toPretangle' α ihs γ hγβ, ← this]
-    have := foaData_tSet_eq_equiv_toPretangle α ihs
+    have := NewTSet.newSingleton_toStructSet γ (foaData_tSet_lt_equiv α ihs γ hγβ t)
+    rw [foaData_tSet_lt_equiv_toStructSet' α ihs γ hγβ, ← this]
+    have := foaData_tSet_eq_equiv_toStructSet α ihs
       ((foaData_tSet_eq_equiv α ihs).symm (newSingleton γ (foaData_tSet_lt_equiv α ihs γ hγβ t)))
     rw [Equiv.apply_symm_apply] at this
     rw [← this]
@@ -1397,8 +1397,8 @@ theorem has_singletons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     refine ⟨fun t => (foaData_tSet_lt_equiv α ihs β hβ').symm
       (S (foaData_tSet_lt_equiv α ihs γ hγ' t)), ?_⟩
     intro t
-    rw [foaData_tSet_lt_equiv_toPretangle α ihs β hβ', Equiv.apply_symm_apply,
-      foaData_tSet_lt_equiv_toPretangle α ihs γ hγ']
+    rw [foaData_tSet_lt_equiv_toStructSet α ihs β hβ', Equiv.apply_symm_apply,
+      foaData_tSet_lt_equiv_toStructSet α ihs γ hγ']
     exact hS _
 
 noncomputable def singleton_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -1419,8 +1419,8 @@ theorem singleton_step_spec (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     letI : LeLevel β := ⟨coe_le_coe.mpr hβ⟩
     letI : LeLevel γ := ⟨coe_le_coe.mpr (hγβ.le.trans hβ)⟩
     ∀ t : TSet γ,
-      Pretangle.ofCoe (toPretangle (singleton_step α ihs h β hβ γ hγβ t)) γ (coe_lt_coe.mpr hγβ) =
-      {toPretangle t} :=
+      StructSet.ofCoe (toStructSet (singleton_step α ihs h β hβ γ hγβ t)) γ (coe_lt_coe.mpr hγβ) =
+      {toStructSet t} :=
   (has_singletons α ihs h β hβ γ hγβ).choose_spec
 
 noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -1430,11 +1430,11 @@ noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β
   letI : Level := ⟨α⟩
   letI : FOAAssumptions := buildStepFOAAssumptions α ihs h
   {
-    eq_toPretangle_of_mem := eq_toPretangle_of_mem_step α ihs h
-    toPretangle_ext := toPretangle_ext_step α ihs h
+    eq_toStructSet_of_mem := eq_toStructSet_of_mem_step α ihs h
+    toStructSet_ext := toStructSet_ext_step α ihs h
     singleton := fun β iβ γ _ hγβ =>
       singleton_step α ihs h β (coe_le_coe.mp iβ.elim) γ (coe_lt_coe.mp hγβ)
-    singleton_toPretangle := fun β iβ γ _ hγβ =>
+    singleton_toStructSet := fun β iβ γ _ hγβ =>
       singleton_step_spec α ihs h β (coe_le_coe.mp iβ.elim) γ (coe_lt_coe.mp hγβ)
   }
 
@@ -1875,23 +1875,23 @@ theorem allowable_of_smulFuzz_step' (α : Λ) (ihs : (β : Λ) → β < α → I
     rw [comp_apply, Equiv.apply_symm_apply]
     rfl
 
-theorem eq_toPretangle_of_mem_step' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+theorem eq_toStructSet_of_mem_step' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
-    (β : Λ) (hβ : β < α) (t₁ : (buildStep α ihs h).TSet) (t₂ : Pretangle β)
-    (ht₂ : t₂ ∈ Pretangle.ofCoe ((buildStep α ihs h).toPretangle t₁) β (coe_lt_coe.mpr hβ)) :
-    ∃ t₂' : (ihs β hβ).TSet, t₂ = (ihs β hβ).toPretangle t₂' := by
-  change t₂ ∈ Pretangle.ofCoe (Pretangle.toCoe _) β (coe_lt_coe.mpr hβ) at ht₂
-  simp only [exists_and_right, Pretangle.ofCoe_toCoe, mem_setOf_eq] at ht₂
+    (β : Λ) (hβ : β < α) (t₁ : (buildStep α ihs h).TSet) (t₂ : StructSet β)
+    (ht₂ : t₂ ∈ StructSet.ofCoe ((buildStep α ihs h).toStructSet t₁) β (coe_lt_coe.mpr hβ)) :
+    ∃ t₂' : (ihs β hβ).TSet, t₂ = (ihs β hβ).toStructSet t₂' := by
+  change t₂ ∈ StructSet.ofCoe (StructSet.toCoe _) β (coe_lt_coe.mpr hβ) at ht₂
+  simp only [exists_and_right, StructSet.ofCoe_toCoe, mem_setOf_eq] at ht₂
   obtain ⟨t₂', _, ht₂'⟩ := ht₂
   exact ⟨t₂', ht₂'.symm⟩
 
-theorem toPretangle_ext_step' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+theorem toStructSet_ext_step' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
     (β : Λ) (hβ : β < α) (t₁ t₂ : (buildStep α ihs h).TSet)
-    (ht : ∀ t : Pretangle β,
-      t ∈ Pretangle.ofCoe ((buildStep α ihs h).toPretangle t₁) β (coe_lt_coe.mpr hβ) ↔
-      t ∈ Pretangle.ofCoe ((buildStep α ihs h).toPretangle t₂) β (coe_lt_coe.mpr hβ)) :
-    (buildStep α ihs h).toPretangle t₁ = (buildStep α ihs h).toPretangle t₂ := by
+    (ht : ∀ t : StructSet β,
+      t ∈ StructSet.ofCoe ((buildStep α ihs h).toStructSet t₁) β (coe_lt_coe.mpr hβ) ↔
+      t ∈ StructSet.ofCoe ((buildStep α ihs h).toStructSet t₂) β (coe_lt_coe.mpr hβ)) :
+    (buildStep α ihs h).toStructSet t₁ = (buildStep α ihs h).toStructSet t₂ := by
   suffices : t₁ = t₂
   · rw [this]
   letI : Level := ⟨α⟩
@@ -1917,15 +1917,15 @@ noncomputable def singleton_step' (α : Λ) (ihs : (β : Λ) → β < α → IH 
 theorem singleton_step'_spec (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
     (β : Λ) (hβ : β < α) (t : (ihs β hβ).TSet) :
-    Pretangle.ofCoe ((buildStep α ihs h).toPretangle (singleton_step' α ihs h β hβ t)) β
-      (coe_lt_coe.mpr hβ) = {(ihs β hβ).toPretangle t} :=
+    StructSet.ofCoe ((buildStep α ihs h).toStructSet (singleton_step' α ihs h β hβ t)) β
+      (coe_lt_coe.mpr hβ) = {(ihs β hβ).toStructSet t} :=
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
   letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-  NewTSet.newSingleton_toPretangle β t
+  NewTSet.newSingleton_toStructSet β t
 
 theorem buildStep_prop (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
@@ -1945,10 +1945,10 @@ theorem buildStep_prop (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   · exact allowable_of_smulFuzz_step' α ihs h
   · intro β hβ
     rw [buildStepFn_eq, buildStepFn_lt α ihs h β hβ]
-    exact eq_toPretangle_of_mem_step' α ihs h β hβ
+    exact eq_toStructSet_of_mem_step' α ihs h β hβ
   · intro β hβ
     rw [buildStepFn_eq]
-    exact toPretangle_ext_step' α ihs h β hβ
+    exact toStructSet_ext_step' α ihs h β hβ
   · intro β hβ
     rw [buildStepFn_eq, buildStepFn_lt α ihs h β hβ]
     exact ⟨singleton_step' α ihs h β hβ, singleton_step'_spec α ihs h β hβ⟩

@@ -46,13 +46,13 @@ class TangleData (α : TypeIndex) where
     letI : MulAction Allowable (Address α) :=
       MulAction.compHom _ allowableToStructPerm
     MulAction.Supports Allowable (S : Set (Address α)) t
-  toPretangle : TSet ↪ Pretangle α
-  toPretangle_smul (ρ : Allowable) (t : TSet) :
-    letI : MulAction Allowable (Pretangle α) :=
+  toStructSet : TSet ↪ StructSet α
+  toStructSet_smul (ρ : Allowable) (t : TSet) :
+    letI : MulAction Allowable (StructSet α) :=
       MulAction.compHom _ allowableToStructPerm
-    toPretangle (ρ • t) = ρ • toPretangle t
+    toStructSet (ρ • t) = ρ • toStructSet t
 
-export TangleData (TSet Allowable toPretangle toPretangle_smul)
+export TangleData (TSet Allowable toStructSet toStructSet_smul)
 
 attribute [instance] TangleData.allowableGroup TangleData.allowableAction
 
@@ -148,8 +148,8 @@ instance Bot.tangleData : TangleData ⊥
   allowableToStructPerm_injective := MulEquiv.injective _
   allowableAction := inferInstance
   has_support a := ⟨a.support, a.support_supports⟩
-  toPretangle := Pretangle.ofBot.toEmbedding
-  toPretangle_smul _ _ := rfl
+  toStructSet := StructSet.ofBot.toEmbedding
+  toStructSet_smul _ _ := rfl
 
 @[ext]
 structure TangleCoe (α : Λ) [TangleData α] : Type u where

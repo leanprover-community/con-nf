@@ -82,7 +82,7 @@ instance {α : Type _} [∀ i, SMul α <| f i] [∀ i, SMul αᵐᵒᵖ <| f i] 
     IsCentralScalar α (∀ i, f i) :=
   ⟨fun _ _ => funext fun _ => op_smul_eq_smul _ _⟩
 
-/-- If `f i` has a faithful scalar action for a given `i`, then so does `Π i, f i`. This is
+/-- If `f i` has a faithful scalar action for a given `i`, then so does `∀ i, f i`. This is
 not an instance as `i` cannot be inferred. -/
 @[to_additive PiProp.has_faithful_vadd_at]
 theorem faithfulSMul_at {α : Type _} [∀ i, SMul α <| f i] [∀ i, Nonempty (f i)] (i : I)

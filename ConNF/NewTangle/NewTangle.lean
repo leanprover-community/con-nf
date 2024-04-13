@@ -430,38 +430,38 @@ end NewAllowable
 
 namespace Semitangle
 
-protected def toPretangle (t : Semitangle) : Pretangle α :=
-  Pretangle.ofCoe.symm (fun β hβ => match β with
+protected def toStructSet (t : Semitangle) : StructSet α :=
+  StructSet.ofCoe.symm (fun β hβ => match β with
     | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ a ∈ s}
-    | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toPretangle s = p})
+    | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toStructSet s = p})
 
-theorem toPretangle_ofCoe (t : Semitangle) :
-    Pretangle.ofCoe t.toPretangle = fun β hβ => match β with
+theorem toStructSet_ofCoe (t : Semitangle) :
+    StructSet.ofCoe t.toStructSet = fun β hβ => match β with
       | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ a ∈ s}
-      | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toPretangle s = p} := by
-  rw [Semitangle.toPretangle, Equiv.apply_symm_apply]
+      | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toStructSet s = p} := by
+  rw [Semitangle.toStructSet, Equiv.apply_symm_apply]
 
-theorem members_eq_of_toPretangle_eq (t₁ t₂ : Semitangle) (h : t₁.toPretangle = t₂.toPretangle) :
+theorem members_eq_of_toStructSet_eq (t₁ t₂ : Semitangle) (h : t₁.toStructSet = t₂.toStructSet) :
     t₁.members = t₂.members := by
-  simp only [Semitangle.toPretangle, Pretangle.ofCoe_symm, exists_and_right,
+  simp only [Semitangle.toStructSet, StructSet.ofCoe_symm, exists_and_right,
     EmbeddingLike.apply_eq_iff_eq] at h
   ext γ iγ u : 2
   obtain ⟨u, rfl⟩ := exists_tangle_lt u
-  have := Set.ext_iff.mp (congr_fun₂ h γ iγ.elim) (toPretangle u.set_lt)
+  have := Set.ext_iff.mp (congr_fun₂ h γ iγ.elim) (toStructSet u.set_lt)
   dsimp only at this
   constructor
   · intro hu
     obtain ⟨v, hv, huv⟩ := this.mp ⟨u.set, hu, rfl⟩
-    cases toPretangle.injective huv
+    cases toStructSet.injective huv
     exact hv
   · intro hu
     obtain ⟨v, hv, huv⟩ := this.mpr ⟨u.set, hu, rfl⟩
-    cases toPretangle.injective huv
+    cases toStructSet.injective huv
     exact hv
 
-theorem toPretangle_injective : Function.Injective Semitangle.toPretangle := by
+theorem toStructSet_injective : Function.Injective Semitangle.toStructSet := by
   rintro t₁ t₂ h
-  have := members_eq_of_toPretangle_eq t₁ t₂ h
+  have := members_eq_of_toStructSet_eq t₁ t₂ h
   by_cases hγ : Nonempty ((γ : Λ) ×' LtLevel γ)
   · exact ext_core t₁ t₂ hγ this
   refine ext_zero t₁ t₂ ?_ ?_
@@ -477,7 +477,7 @@ theorem toPretangle_injective : Function.Injective Semitangle.toPretangle := by
   obtain (⟨a₂, ha₂⟩ | ⟨γ, _⟩) := p₂
   swap
   · cases hγ ⟨γ, inferInstance⟩
-  simp only [Semitangle.toPretangle, Pretangle.ofCoe_symm, Preference.base.injEq, exists_and_left,
+  simp only [Semitangle.toStructSet, StructSet.ofCoe_symm, Preference.base.injEq, exists_and_left,
     exists_prop, exists_eq_left', EmbeddingLike.apply_eq_iff_eq] at h
   have := congr_fun₂ h ⊥ (bot_lt_coe _)
   dsimp only at this
@@ -493,9 +493,9 @@ theorem toPretangle_injective : Function.Injective Semitangle.toPretangle := by
     intro γ _
     cases hγ ⟨γ, inferInstance⟩
 
-theorem toPretangle_smul (ρ : NewAllowable) (t : Semitangle) :
-    ρ • t.toPretangle = (ρ • t).toPretangle := by
-  rw [← Pretangle.ofCoe_inj, Semitangle.toPretangle, Semitangle.toPretangle]
+theorem toStructSet_smul (ρ : NewAllowable) (t : Semitangle) :
+    ρ • t.toStructSet = (ρ • t).toStructSet := by
+  rw [← StructSet.ofCoe_inj, Semitangle.toStructSet, Semitangle.toStructSet]
   rw [Equiv.apply_symm_apply]
   ext β hβ : 2
   revert hβ
@@ -550,11 +550,11 @@ theorem toPretangle_smul (ρ : NewAllowable) (t : Semitangle) :
     constructor
     · rintro ⟨_, ⟨s, hs, rfl⟩, rfl⟩
       refine ⟨ρ.val β • s, smul_mem_smul_set hs, ?_⟩
-      rw [ConNF.toPretangle_smul, SemiallowablePerm.comp_toPath_toStructPerm]
+      rw [ConNF.toStructSet_smul, SemiallowablePerm.comp_toPath_toStructPerm]
       rfl
     · rintro ⟨_, ⟨s, hs, rfl⟩, rfl⟩
       refine ⟨_, ⟨s, hs, rfl⟩, ?_⟩
-      rw [ConNF.toPretangle_smul, SemiallowablePerm.comp_toPath_toStructPerm]
+      rw [ConNF.toStructSet_smul, SemiallowablePerm.comp_toPath_toStructPerm]
       rfl
 
 theorem smul_intro' {β : Λ} [inst : LtLevel β] (s : Set (TSet β)) (ρ : NewAllowable) :
@@ -752,40 +752,40 @@ theorem smul_newTypedNearLitter (N : NearLitter) (ρ : NewAllowable) :
 
 end NewAllowable
 
-protected def NewTSet.toPretangle (t : NewTSet) : Pretangle α :=
-  t.val.toPretangle
+protected def NewTSet.toStructSet (t : NewTSet) : StructSet α :=
+  t.val.toStructSet
 
-theorem NewTSet.toPretangle_injective : Function.Injective NewTSet.toPretangle :=
-  fun _ _ h => Subtype.ext (Semitangle.toPretangle_injective h)
+theorem NewTSet.toStructSet_injective : Function.Injective NewTSet.toStructSet :=
+  fun _ _ h => Subtype.ext (Semitangle.toStructSet_injective h)
 
-theorem NewTSet.toPretangle_smul (ρ : NewAllowable) (t : NewTSet) :
-    (ρ • t).toPretangle = ρ • t.toPretangle :=
-  (t.val.toPretangle_smul ρ).symm
+theorem NewTSet.toStructSet_smul (ρ : NewAllowable) (t : NewTSet) :
+    (ρ • t).toStructSet = ρ • t.toStructSet :=
+  (t.val.toStructSet_smul ρ).symm
 
 theorem NewTSet.ext (γ : Λ) [iγ : LtLevel γ] (t₁ t₂ : NewTSet)
-    (h : ∀ p, p ∈ Pretangle.ofCoe t₁.toPretangle γ iγ.elim ↔
-      p ∈ Pretangle.ofCoe t₂.toPretangle γ iγ.elim) :
+    (h : ∀ p, p ∈ StructSet.ofCoe t₁.toStructSet γ iγ.elim ↔
+      p ∈ StructSet.ofCoe t₂.toStructSet γ iγ.elim) :
     t₁ = t₂ := by
   refine Subtype.ext (Semitangle.ext (γ := γ) t₁ t₂ ?_)
-  simp only [NewTSet.toPretangle, Semitangle.toPretangle, Pretangle.ofCoe_symm, exists_and_right,
-    Pretangle.ofCoe_toCoe] at h
+  simp only [NewTSet.toStructSet, Semitangle.toStructSet, StructSet.ofCoe_symm, exists_and_right,
+    StructSet.ofCoe_toCoe] at h
   ext u
   constructor
   · intro hu
-    obtain ⟨v, hv, huv⟩ := (h (toPretangle u)).mp ⟨u, hu, rfl⟩
-    cases toPretangle.injective huv
+    obtain ⟨v, hv, huv⟩ := (h (toStructSet u)).mp ⟨u, hu, rfl⟩
+    cases toStructSet.injective huv
     exact hv
   · intro hu
-    obtain ⟨v, hv, huv⟩ := (h (toPretangle u)).mpr ⟨u, hu, rfl⟩
-    cases toPretangle.injective huv
+    obtain ⟨v, hv, huv⟩ := (h (toStructSet u)).mpr ⟨u, hu, rfl⟩
+    cases toStructSet.injective huv
     exact hv
 
-theorem NewTSet.newSingleton'_toPretangle
+theorem NewTSet.newSingleton'_toStructSet
     (β : TypeIndex) [i : LtLevel β] (t : Tangle β) :
-    Pretangle.ofCoe (NewTSet.toPretangle (newSingleton' β t)) β i.elim =
-    {toPretangle t.set_lt} := by
-  rw [newSingleton', NewTSet.toPretangle, Semitangle.toPretangle]
-  simp only [Pretangle.ofCoe_symm, exts_intro, exists_and_right, Pretangle.ofCoe_toCoe]
+    StructSet.ofCoe (NewTSet.toStructSet (newSingleton' β t)) β i.elim =
+    {toStructSet t.set_lt} := by
+  rw [newSingleton', NewTSet.toStructSet, Semitangle.toStructSet]
+  simp only [StructSet.ofCoe_symm, exts_intro, exists_and_right, StructSet.ofCoe_toCoe]
   cases β
   · dsimp only
     ext p : 1
@@ -804,10 +804,10 @@ theorem NewTSet.newSingleton'_toPretangle
       singleton_eq_singleton_iff]
     rfl
 
-theorem NewTSet.newSingleton_toPretangle
+theorem NewTSet.newSingleton_toStructSet
     (β : TypeIndex) [i : LtLevel β] (t : TSet β) :
-    Pretangle.ofCoe (NewTSet.toPretangle (newSingleton β t)) β i.elim = {toPretangle t} := by
-  rw [newSingleton, newSingleton'_toPretangle, (exists_tangle_lt t).choose_spec]
+    StructSet.ofCoe (NewTSet.toStructSet (newSingleton β t)) β i.elim = {toStructSet t} := by
+  rw [newSingleton, newSingleton'_toStructSet, (exists_tangle_lt t).choose_spec]
 
 noncomputable def NewTSet.intro {β : Λ} [LtLevel β] (s : Set (TSet β))
     (hs : ∃ S : Set (Address α), Small S ∧

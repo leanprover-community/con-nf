@@ -30,8 +30,8 @@ theorem zeroTangleData_subsingleton
         intro t
         obtain ⟨S, hS⟩ := t.prop
         exact ⟨S, fun ρ hρ => Subtype.ext (hS ρ hρ)⟩
-      toPretangle := ⟨NewTSet.toPretangle, NewTSet.toPretangle_injective⟩
-      toPretangle_smul := NewTSet.toPretangle_smul
+      toStructSet := ⟨NewTSet.toStructSet, NewTSet.toStructSet_injective⟩
+      toStructSet_smul := NewTSet.toStructSet_smul
     } : TangleData (0 : Λ)) =
     (letI := j₁; letI := j₂; letI := j₃; letI := j₄
     {
@@ -43,8 +43,8 @@ theorem zeroTangleData_subsingleton
         intro t
         obtain ⟨S, hS⟩ := t.prop
         exact ⟨S, fun ρ hρ => Subtype.ext (hS ρ hρ)⟩
-      toPretangle := ⟨NewTSet.toPretangle, NewTSet.toPretangle_injective⟩
-      toPretangle_smul := NewTSet.toPretangle_smul
+      toStructSet := ⟨NewTSet.toStructSet, NewTSet.toStructSet_injective⟩
+      toStructSet_smul := NewTSet.toStructSet_smul
     }) := by
   have : i₁ = j₁
   · refine TangleDataLt.ext _ _ ?_
@@ -85,8 +85,8 @@ local instance zeroTangleData : TangleData (0 : Λ) :=
       intro t
       obtain ⟨S, hS⟩ := t.prop
       exact ⟨S, fun ρ hρ => Subtype.ext (hS ρ hρ)⟩
-    toPretangle := ⟨NewTSet.toPretangle, NewTSet.toPretangle_injective⟩
-    toPretangle_smul := NewTSet.toPretangle_smul
+    toStructSet := ⟨NewTSet.toStructSet, NewTSet.toStructSet_injective⟩
+    toStructSet_smul := NewTSet.toStructSet_smul
   }
 
 local instance zeroTypedObjects : TypedObjects (0 : Λ) :=

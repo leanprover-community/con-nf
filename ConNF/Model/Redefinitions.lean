@@ -133,10 +133,10 @@ theorem allowableIso_toStructPerm (α : Λ) (ρ : Allowable α) :
   (Construction.tangleData_cast_toStructPerm α _ _ (tangleData_eq α) ρ).symm
 
 @[simp]
-theorem tSetEquiv_toPretangle (α : Λ) (t : TSet α) :
+theorem tSetEquiv_toStructSet (α : Λ) (t : TSet α) :
     (Construction.buildStep α (fun β _ => constructionIH β)
-      (fun β _ => constructionIHProp β)).toPretangle (tSetEquiv α t) = toPretangle t :=
-  (Construction.tangleData_cast_toPretangle α _ _ (tangleData_eq α) t).symm
+      (fun β _ => constructionIHProp β)).toStructSet (tSetEquiv α t) = toStructSet t :=
+  (Construction.tangleData_cast_toStructSet α _ _ (tangleData_eq α) t).symm
 
 @[simp]
 theorem tSetEquiv_smul (α : Λ) (ρ : Allowable α) (t : TSet α) :

@@ -66,23 +66,23 @@ theorem smul_raise_eq_iff (c : Address γ) (ρ : Allowable β) :
   simp only [raise_path, raise_value, Address.mk.injEq, true_and]
   rw [Allowable.toStructPerm_comp (Hom.toPath hγ), Tree.comp_apply, raiseIndex]
 
-/-- A set `s` of `γ`-pretangles *appears* at level `α` if it occurs as the `γ`-extension of some
+/-- A set `s` of `γ`-structSets *appears* at level `α` if it occurs as the `γ`-extension of some
 `α`-tangle. -/
-def Appears (s : Set (Pretangle γ)) : Prop :=
-  ∃ t : TSet β, s = Pretangle.ofCoe (toPretangle t) γ hγ
+def Appears (s : Set (StructSet γ)) : Prop :=
+  ∃ t : TSet β, s = StructSet.ofCoe (toStructSet t) γ hγ
 
 /-- Convert a set of `γ`-tangles to the (unique) `α`-tangle with that `γ`-extension,
 if it exists. -/
-noncomputable def toTSet (s : Set (Pretangle γ)) (h : Appears hγ s) : TSet β :=
+noncomputable def toTSet (s : Set (StructSet γ)) (h : Appears hγ s) : TSet β :=
   h.choose
 
-theorem toPretangle_toTSet (s : Set (Pretangle γ)) (h : Appears hγ s) :
-    s = Pretangle.ofCoe (toPretangle (toTSet hγ s h)) γ hγ :=
+theorem toStructSet_toTSet (s : Set (StructSet γ)) (h : Appears hγ s) :
+    s = StructSet.ofCoe (toStructSet (toTSet hγ s h)) γ hγ :=
   h.choose_spec
 
 def AppearsRaised (χs : Set (CodingFunction β)) (U : Support β) : Prop :=
   Appears hγ {u | ∃ χ ∈ χs, ∃ V ≥ U, ∃ hV : V ∈ χ,
-    u ∈ Pretangle.ofCoe (toPretangle ((χ.decode V).get hV)) γ hγ}
+    u ∈ StructSet.ofCoe (toStructSet ((χ.decode V).get hV)) γ hγ}
 
 noncomputable def decodeRaised (χs : Set (CodingFunction β))
     (U : Support β) (hU : AppearsRaised hγ χs U) : TSet β :=
@@ -94,9 +94,9 @@ We now aim to show that `decodeRaised` is a coding function.
 
 theorem decodeRaised_spec (χs : Set (CodingFunction β))
     (U : Support β) (hU : AppearsRaised hγ χs U) :
-    Pretangle.ofCoe (toPretangle (decodeRaised hγ χs U hU)) γ hγ =
+    StructSet.ofCoe (toStructSet (decodeRaised hγ χs U hU)) γ hγ =
     {u | ∃ χ ∈ χs, ∃ V ≥ U, ∃ hV : V ∈ χ,
-      u ∈ Pretangle.ofCoe (toPretangle ((χ.decode V).get hV)) γ hγ} :=
+      u ∈ StructSet.ofCoe (toStructSet ((χ.decode V).get hV)) γ hγ} :=
   hU.choose_spec.symm
 
 theorem appearsRaised_smul {χs : Set (CodingFunction β)}
@@ -104,7 +104,7 @@ theorem appearsRaised_smul {χs : Set (CodingFunction β)}
     AppearsRaised hγ χs (ρ • U) := by
   obtain ⟨t, ht⟩ := hU
   refine ⟨ρ • t, ?_⟩
-  rw [toPretangle_smul, Allowable.toStructPerm_smul, Allowable.toStructPerm_smul,
+  rw [toStructSet_smul, Allowable.toStructPerm_smul, Allowable.toStructPerm_smul,
     StructPerm.ofCoe_smul, ← ht]
   ext u
   constructor
@@ -114,23 +114,23 @@ theorem appearsRaised_smul {χs : Set (CodingFunction β)}
       ?_, by simp only [smul_inv_smul]⟩
     refine ⟨χ, hχ, ρ⁻¹ • V, by rwa [Enumeration.le_inv_iff_smul_le],
       CodingFunction.smul_mem _ hVχ, ?_⟩
-    rw [CodingFunction.decode_smul, toPretangle_smul, Allowable.toStructPerm_smul,
+    rw [CodingFunction.decode_smul, toStructSet_smul, Allowable.toStructPerm_smul,
       StructPerm.ofCoe_smul, map_inv, Tree.comp_inv, smul_mem_smul_set_iff]
     exact hu
   · simp only [ge_iff_le, mem_setOf_eq]
     rintro ⟨u, ⟨χ, hχ, V, hUV, hVχ, hu⟩, rfl⟩
     refine ⟨χ, hχ, ρ • V, Enumeration.smul_le_smul hUV ρ, CodingFunction.smul_mem _ hVχ, ?_⟩
-    rw [CodingFunction.decode_smul, toPretangle_smul, Allowable.toStructPerm_smul,
+    rw [CodingFunction.decode_smul, toStructSet_smul, Allowable.toStructPerm_smul,
       StructPerm.ofCoe_smul, smul_mem_smul_set_iff]
     exact hu
 
 theorem decodeRaised_smul {χs : Set (CodingFunction β)}
     (U : Support β) (hU : AppearsRaised hγ χs U) (ρ : Allowable β) :
     decodeRaised hγ χs (ρ • U) (appearsRaised_smul hγ U hU ρ) = ρ • decodeRaised hγ χs U hU := by
-  refine toPretangle.inj' ?_
-  refine toPretangle_ext β γ hγ _ _ ?_
+  refine toStructSet.inj' ?_
+  refine toStructSet_ext β γ hγ _ _ ?_
   intro u
-  simp_rw [toPretangle_smul, Allowable.toStructPerm_smul, StructPerm.ofCoe_smul,
+  simp_rw [toStructSet_smul, Allowable.toStructPerm_smul, StructPerm.ofCoe_smul,
     decodeRaised_spec]
   -- TODO: Unify this proof with the previous by extracting a lemma.
   constructor
@@ -140,19 +140,19 @@ theorem decodeRaised_smul {χs : Set (CodingFunction β)}
       ?_, by simp only [smul_inv_smul]⟩
     refine ⟨χ, hχ, ρ⁻¹ • V, by rwa [Enumeration.le_inv_iff_smul_le],
       CodingFunction.smul_mem _ hVχ, ?_⟩
-    rw [CodingFunction.decode_smul, toPretangle_smul, Allowable.toStructPerm_smul,
+    rw [CodingFunction.decode_smul, toStructSet_smul, Allowable.toStructPerm_smul,
       StructPerm.ofCoe_smul, map_inv, Tree.comp_inv, smul_mem_smul_set_iff]
     exact hu
   · simp only [ge_iff_le, mem_setOf_eq]
     rintro ⟨u, ⟨χ, hχ, V, hUV, hVχ, hu⟩, rfl⟩
     refine ⟨χ, hχ, ρ • V, Enumeration.smul_le_smul hUV ρ, CodingFunction.smul_mem _ hVχ, ?_⟩
-    rw [CodingFunction.decode_smul, toPretangle_smul, Allowable.toStructPerm_smul,
+    rw [CodingFunction.decode_smul, toStructSet_smul, Allowable.toStructPerm_smul,
       StructPerm.ofCoe_smul, smul_mem_smul_set_iff]
     exact hu
 
 /-- The tangles in the `γ`-extension of a given `β`-tangle. -/
 def tangleExtension (t : TSet β) : Set (TSet γ) :=
-  {u | toPretangle u ∈ Pretangle.ofCoe (toPretangle t) γ hγ}
+  {u | toStructSet u ∈ StructSet.ofCoe (toStructSet t) γ hγ}
 
 /-- A support for a `γ`-tangle, expressed as a set of `β`-support conditions. -/
 noncomputable def raisedSupport (S : Support β) (u : TSet γ) : Support β :=
@@ -216,8 +216,8 @@ theorem raiseSingletons_reducedSupport (S : Support β) (t : TSet β)
     (hSt : Supports (Allowable β) {c | c ∈ S} t) :
     {u | ∃ χ ∈ raiseSingletons hγ S t,
       ∃ V ≥ S, ∃ hV : V ∈ χ,
-      u ∈ Pretangle.ofCoe (toPretangle ((χ.decode V).get hV)) γ hγ} =
-    Pretangle.ofCoe (toPretangle t) γ hγ := by
+      u ∈ StructSet.ofCoe (toStructSet ((χ.decode V).get hV)) γ hγ} =
+    StructSet.ofCoe (toStructSet t) γ hγ := by
   ext u
   constructor
   · simp only [ge_iff_le, mem_setOf_eq, forall_exists_index, and_imp]
@@ -226,21 +226,21 @@ theorem raiseSingletons_reducedSupport (S : Support β) (t : TSet β)
     rw [raiseSingleton, CodingFunction.mem_code] at hVχ
     obtain ⟨ρ, rfl⟩ := hVχ
     simp_rw [CodingFunction.decode_smul, raiseSingleton, CodingFunction.code_decode] at hu
-    rw [Part.get_some, toPretangle_smul, Allowable.toStructPerm_smul, StructPerm.ofCoe_smul,
-      singleton_toPretangle, smul_set_singleton, mem_singleton_iff] at hu
+    rw [Part.get_some, toStructSet_smul, Allowable.toStructPerm_smul, StructPerm.ofCoe_smul,
+      singleton_toStructSet, smul_set_singleton, mem_singleton_iff] at hu
     subst hu
     rw [← mem_inv_smul_set_iff, Tree.comp_inv, ← StructPerm.ofCoe_smul, ← map_inv,
-      ← Allowable.toStructPerm_smul, ← toPretangle_smul,
+      ← Allowable.toStructPerm_smul, ← toStructSet_smul,
       ← hSt _ (smul_reducedSupport_eq hγ S v ρ hUV), inv_smul_smul]
     exact hv
   · simp only [ge_iff_le, mem_setOf_eq]
     intro hu
-    obtain ⟨u, rfl⟩ := eq_toPretangle_of_mem β γ hγ t u hu
+    obtain ⟨u, rfl⟩ := eq_toStructSet_of_mem β γ hγ t u hu
     refine ⟨_, ⟨u, hu, rfl⟩, raisedSupport hγ S u, ?_⟩
     refine ⟨le_raisedSupport hγ S u, CodingFunction.mem_code_self, ?_⟩
     simp only [raiseSingleton, CodingFunction.mem_code_self, CodingFunction.code_decode,
       Part.get_some]
-    rw [singleton_toPretangle, mem_singleton_iff]
+    rw [singleton_toStructSet, mem_singleton_iff]
 
 theorem appearsRaised_raiseSingletons (S : Support β) (t : TSet β)
     (hSt : Supports (Allowable β) {c | c ∈ S} t) :
@@ -250,8 +250,8 @@ theorem appearsRaised_raiseSingletons (S : Support β) (t : TSet β)
 theorem decodeRaised_raiseSingletons (S : Support β) (t : TSet β)
     (hSt : Supports (Allowable β) {c | c ∈ S} t) :
     decodeRaised hγ (raiseSingletons hγ S t) S (appearsRaised_raiseSingletons hγ S t hSt) = t := by
-  refine toPretangle.inj' ?_
-  refine toPretangle_ext β γ hγ _ _ ?_
+  refine toStructSet.inj' ?_
+  refine toStructSet_ext β γ hγ _ _ ?_
   intro u
   rw [decodeRaised_spec, raiseSingletons_reducedSupport hγ S t hSt]
 

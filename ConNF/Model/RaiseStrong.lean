@@ -1415,10 +1415,8 @@ theorem raiseRaise_specifies (S : Support α) (hS : S.Strong) (T : Support γ) (
 
 theorem raiseRaise_eq_smul (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : Allowable β)
     (hρS : ∀ c : Address β, raise iβ.elim c ∈ S → ρ • c = c) :
-    letI : LeLevel α := ⟨le_rfl⟩
     ∃ ρ' : Allowable α, ρ' • S = S ∧ Allowable.comp ((Hom.toPath iβ.elim).cons hγ) ρ' • T =
       Allowable.comp (Hom.toPath hγ) ρ • T := by
-  letI : LeLevel α := ⟨le_rfl⟩
   have hσ := raiseRaise_specifies (hγ := hγ) S hS T ρ hρS (spec_specifies _ _)
   have hρ := convertAllowable_smul (spec_specifies _ _) hσ
   refine ⟨convertAllowable (spec_specifies _ _) hσ, ?_, ?_⟩

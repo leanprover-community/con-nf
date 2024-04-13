@@ -22,7 +22,8 @@ namespace ConNF
 
 variable [Params.{u}]
 
-/-- The current level of the structure we are building. -/
+/-- The current level of the structure we are building. This is registered as a class so that Lean
+can find it easily. -/
 class Level where
   (α : Λ)
 
@@ -30,7 +31,8 @@ export Level (α)
 
 variable [Level]
 
-/-- The type index `β` is less than our current level. -/
+/-- The type index `β` is less than our current level. This is listed as a class so that Lean can
+find this hypothesis without having to include the type `β < α` in the goal state. -/
 class LtLevel (β : TypeIndex) : Prop where
   elim : β < α
 
@@ -39,8 +41,13 @@ instance {β : Λ} [inst : LtLevel (Option.some β)] : LtLevel β := inst
 instance : LtLevel ⊥ where
   elim := bot_lt_coe α
 
+/-- The type index `β` is at most our current level. This is listed as a class so that Lean can
+find this hypothesis without having to include the type `β < α` in the goal state. -/
 class LeLevel (β : TypeIndex) : Prop where
   elim : β ≤ α
+
+instance : LeLevel α where
+  elim := le_rfl
 
 instance {β : TypeIndex} [LtLevel β] : LeLevel β where
   elim := LtLevel.elim.le
@@ -49,13 +56,12 @@ instance {β : Λ} [inst : LeLevel (Option.some β)] : LeLevel β := inst
 
 variable {α : TypeIndex}
 
-/-- We define the type of paths from certain types to lower types as elements of this quiver. -/
+/-- We define the type of paths from certain types to lower types as inhabitants of this quiver. -/
 instance : Quiver TypeIndex :=
   ⟨(· > ·)⟩
 
-/-- A (finite) path from the type `α` to the base type.
-This is a way that we can perceive extensionality, iteratively descending to lower
-types in the hierarchy until we reach the base type.
+/-- A (finite) path from the type `α` to the base type. This is a way that we can perceive
+extensionality, iteratively descending to lower types in the hierarchy until we reach the base type.
 As `Λ` is well-ordered, there are no infinite descending paths. -/
 def ExtendedIndex (α : TypeIndex) :=
   Quiver.Path α ⊥
@@ -66,10 +72,12 @@ theorem le_of_path : ∀ {β : TypeIndex}, Path α β → β ≤ α
   | _, nil => le_rfl
   | _, cons p f => (le_of_lt f).trans <| le_of_path p
 
+/-- Paths from a type index to itself must be the nil path. -/
 theorem path_eq_nil : ∀ p : Path α α, p = nil
   | nil => rfl
   | cons p f => ((le_of_path p).not_lt f).elim
 
+/-- Extended indices cannot be the nil path. -/
 theorem ExtendedIndex.length_ne_zero {α : Λ} (A : ExtendedIndex α) : A.length ≠ 0 := by
   intro h
   cases Quiver.Path.eq_of_length_zero A h

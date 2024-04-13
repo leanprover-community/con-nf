@@ -13,7 +13,7 @@ namespace ConNF
 variable [Params.{u}]
 
 def mem {β α : Λ} (h : β < α) (tβ : TSet β) (tα : TSet α) : Prop :=
-  toPretangle tβ ∈ Pretangle.ofCoe (toPretangle tα) β (coe_lt_coe.mpr h)
+  toStructSet tβ ∈ StructSet.ofCoe (toStructSet tα) β (coe_lt_coe.mpr h)
 
 notation:50 tβ:50 " ∈[" h:50 "] " tα:50 => mem h tβ tα
 
@@ -66,28 +66,28 @@ def mk {β α : Λ} (hβ : β < α) (s : Set (TSet β)) (hs : Symmetric hβ s) :
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
   (tSetEquiv α).symm (NewTSet.intro s (tSet_mk_aux hβ s hs))
 
-theorem toPretangle_eq {α : Λ} (t : TSet α) :
-    toPretangle t = letI : Level := ⟨α⟩; NewTSet.toPretangle (tSetEquiv α t) := by
-  rw [← tSetEquiv_toPretangle α t]
+theorem toStructSet_eq {α : Λ} (t : TSet α) :
+    toStructSet t = letI : Level := ⟨α⟩; NewTSet.toStructSet (tSetEquiv α t) := by
+  rw [← tSetEquiv_toStructSet α t]
   rfl
 
 theorem mem_tSetEquiv_iff {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) :
     s ∈[hβ] t ↔
       letI : Level := ⟨α⟩
-      toPretangle s ∈
-        Pretangle.ofCoe (NewTSet.toPretangle (tSetEquiv α t)) β (coe_lt_coe.mpr hβ) := by
-  rw [mem, toPretangle_eq t]
+      toStructSet s ∈
+        StructSet.ofCoe (NewTSet.toStructSet (tSetEquiv α t)) β (coe_lt_coe.mpr hβ) := by
+  rw [mem, toStructSet_eq t]
   rfl
 
-theorem ofCoe_toPretangle_apply_eq {β α : Λ} (hβ : β < α) (t : TSet α) :
-    Pretangle.ofCoe (toPretangle t) β (coe_lt_coe.mpr hβ) =
+theorem ofCoe_toStructSet_apply_eq {β α : Λ} (hβ : β < α) (t : TSet α) :
+    StructSet.ofCoe (toStructSet t) β (coe_lt_coe.mpr hβ) =
     letI : Level := ⟨α⟩
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
-    {p | ∃ s ∈ (tSetEquiv α t).val.members β, toPretangle s = p} := by
+    {p | ∃ s ∈ (tSetEquiv α t).val.members β, toStructSet s = p} := by
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
-  rw [toPretangle_eq t, NewTSet.toPretangle]
-  exact congr_fun₂ (Semitangle.toPretangle_ofCoe (tSetEquiv α t).val) β (coe_lt_coe.mpr hβ)
+  rw [toStructSet_eq t, NewTSet.toStructSet]
+  exact congr_fun₂ (Semitangle.toStructSet_ofCoe (tSetEquiv α t).val) β (coe_lt_coe.mpr hβ)
 
 @[simp]
 theorem mem_mk_iff {β α : Λ} (hβ : β < α) (s : Set (TSet β)) (hs : Symmetric hβ s) (t : TSet β) :
@@ -95,16 +95,16 @@ theorem mem_mk_iff {β α : Λ} (hβ : β < α) (s : Set (TSet β)) (hs : Symmet
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
   have := NewTSet.intro_members s (tSet_mk_aux hβ s hs)
-  rw [mem, ofCoe_toPretangle_apply_eq hβ]
+  rw [mem, ofCoe_toStructSet_apply_eq hβ]
   simp only [Set.mem_setOf_eq, EmbeddingLike.apply_eq_iff_eq, exists_eq_right]
   rw [mk, Equiv.apply_symm_apply, this]
 
-theorem eq_toPretangle_of_mem {β α : Λ} (hβ : β < α) (t₁ : TSet α) (t₂ : Pretangle β) :
+theorem eq_toStructSet_of_mem {β α : Λ} (hβ : β < α) (t₁ : TSet α) (t₂ : StructSet β) :
     letI : Level := ⟨α⟩
-    t₂ ∈ Pretangle.ofCoe (NewTSet.toPretangle (tSetEquiv α t₁)) β (coe_lt_coe.mpr hβ) →
-    ∃ t₂' : TSet β, t₂ = toPretangle t₂' := by
+    t₂ ∈ StructSet.ofCoe (NewTSet.toStructSet (tSetEquiv α t₁)) β (coe_lt_coe.mpr hβ) →
+    ∃ t₂' : TSet β, t₂ = toStructSet t₂' := by
   intro h
-  simp only [NewTSet.toPretangle, Semitangle.toPretangle, Equiv.apply_symm_apply] at h
+  simp only [NewTSet.toStructSet, Semitangle.toStructSet, Equiv.apply_symm_apply] at h
   obtain ⟨s, _, hs⟩ := h
   exact ⟨s, hs.symm⟩
 
@@ -118,10 +118,10 @@ theorem ext {β α : Λ} (hβ : β < α) (t₁ t₂ : TSet α) :
   simp_rw [TSet.mem_tSetEquiv_iff hβ] at h
   constructor
   · intro hp
-    obtain ⟨s, rfl⟩ := eq_toPretangle_of_mem hβ t₁ p hp
+    obtain ⟨s, rfl⟩ := eq_toStructSet_of_mem hβ t₁ p hp
     exact (h s).mp hp
   · intro hp
-    obtain ⟨s, rfl⟩ := eq_toPretangle_of_mem hβ t₂ p hp
+    obtain ⟨s, rfl⟩ := eq_toStructSet_of_mem hβ t₂ p hp
     exact (h s).mpr hp
 
 theorem smul_mem_smul {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) (ρ : Allowable α)
@@ -129,17 +129,17 @@ theorem smul_mem_smul {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) (
     cons hβ ρ • s ∈[hβ] ρ • t := by
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
-  rw [mem, ofCoe_toPretangle_apply_eq hβ] at h
+  rw [mem, ofCoe_toStructSet_apply_eq hβ] at h
   obtain ⟨s, hs, hs'⟩ := h
-  cases toPretangle.injective hs'
-  rw [mem, toPretangle_smul, ofCoe_toPretangle_apply_eq hβ]
+  cases toStructSet.injective hs'
+  rw [mem, toStructSet_smul, ofCoe_toStructSet_apply_eq hβ]
   refine ⟨(allowableIso α ρ).val β • s, ?_, ?_⟩
   · rw [tSetEquiv_smul]
     change (allowableIso α ρ).val β • s ∈
       (allowableIso α ρ).val β • (tSetEquiv α t).val.members β
     rw [Set.smul_mem_smul_set_iff]
     exact hs
-  · rw [toPretangle_smul, allowableIso_apply_eq (coe_lt_coe.mpr hβ)]
+  · rw [toStructSet_smul, allowableIso_apply_eq (coe_lt_coe.mpr hβ)]
     rfl
 
 theorem smul_mem_smul_iff {β α : Λ} (hβ : β < α) (s : TSet β) (t : TSet α) (ρ : Allowable α) :

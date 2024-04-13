@@ -241,7 +241,6 @@ local instance foaAssumptions : FOAAssumptions where
 theorem exists_allowable_of_specifies {S T : Support α} (hS : S.Strong) (hT : T.Strong)
     {σ : Spec α} (hσS : σ.Specifies S hS) (hσT : σ.Specifies T hT) :
     ∃ ρ : Allowable α, ρ • S = T :=
-  letI : LeLevel α := ⟨le_rfl⟩
   ⟨convertAllowable hσS hσT, convertAllowable_smul hσS hσT⟩
 
 end Construction.FOA

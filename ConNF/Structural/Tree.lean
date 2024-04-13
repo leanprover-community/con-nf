@@ -5,6 +5,7 @@ import ConNF.Structural.Index
 
 In this file, we define the types of *trees* of a given type `τ`.
 For each type index `α`, an `α`-tree of `τ` is a function from `α`-extended type indices to `τ`.
+This will be used to define structural permutations (along with many more gadgets).
 
 If `τ` has a group structure, the `α`-trees of `τ` can also be given a group structure by
 "branchwise" multiplication.
