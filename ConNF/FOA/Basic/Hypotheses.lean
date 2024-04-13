@@ -23,11 +23,10 @@ variable [Params.{u}] [Level] [BasePositions]
 
 /-- The data that we will use when proving the freedom of action theorem.
 This structure combines the following data:
-* `Tangle`
+* `TSet`
 * `Allowable`
-* `support`
 * `pos : Tangle β ↪ μ`
-* `typedAtom` and `typedNearLitter`
+* `typedNearLitter`
 -/
 class FOAData where
   lowerModelData : ∀ β : Λ, [LeLevel β] → ModelData β
@@ -132,12 +131,13 @@ class FOAAssumptions extends FOAData where
       (hγ : γ < β) (ρ : Allowable β),
       Tree.comp (Quiver.Path.nil.cons hγ) (Allowable.toStructPerm ρ) =
         Allowable.toStructPerm (allowableCons hγ ρ)
-  /-- Inflexible litters whose atoms occur in designated supports have position less than the
-  original tangle. -/
+  /-- If an atom occurs in the support associated to an inflexible litter, it must have position
+  less than the associated tangle. -/
   pos_lt_pos_atom {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {a : Atom} :
     ⟨A, Sum.inl a⟩ ∈ t.support → pos a < pos t
-  /-- Inflexible litters touching near-litters in designated supports have position less than the
-  original tangle. -/
+  /-- If a near-litter occurs in the support associated to an inflexible litter, it must have
+  position less than the associated tangle. The only exception is in the case that the tangle
+  is a typed near-litter. -/
   pos_lt_pos_nearLitter {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {N : NearLitter} :
     ⟨A, Sum.inr N⟩ ∈ t.support → t.set ≠ typedNearLitter N → pos N < pos t
   /-- The `fuzz` map commutes with allowable permutations. -/
@@ -282,6 +282,9 @@ theorem comp_bot_smul_atom {β : TypeIndex} [LeLevel β]
     Allowable.comp A ρ • a = Allowable.toStructPerm ρ A • (show Atom from a) := by
   rw [← Allowable.toStructPerm_apply]
   rfl
+
+/-! We now show some different spellings of the theorem that allowable permutations commute with the
+`fuzz` maps. -/
 
 theorem toStructPerm_smul_fuzz'
     {β : TypeIndex} [LeLevel β] {γ : TypeIndex} [LtLevel γ] {δ : Λ} [LtLevel δ]

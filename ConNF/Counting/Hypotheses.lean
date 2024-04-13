@@ -1,5 +1,5 @@
 import ConNF.Structural.StructSet
-import ConNF.FOA.Basic.Reduction
+import ConNF.FOA.Basic.Constrains
 
 /-!
 # Hypotheses

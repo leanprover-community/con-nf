@@ -1,6 +1,5 @@
 import Mathlib.Order.Extension.Well
 import ConNF.Mathlib.Support
-import ConNF.FOA.Basic.Reduction
 import ConNF.FOA.Basic.Flexible
 
 /-!

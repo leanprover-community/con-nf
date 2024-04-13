@@ -1,5 +1,14 @@
 import ConNF.BaseType.NearLitter
 
+/-!
+# Sublitters
+
+In this file, we define sublitters.
+
+## Main declarations
+* `ConNF.Sublitter`: A co-small subset of a litter set.
+-/
+
 open Cardinal
 
 open scoped Cardinal
@@ -10,7 +19,7 @@ namespace ConNF
 
 variable [Params.{u}]
 
-/-- The type of sublitters. -/
+/-- A *sublitter* is a co-small subset of a litter set. -/
 structure Sublitter : Type u where
   litter : Litter
   carrier : Set Atom

@@ -5,6 +5,8 @@ import ConNF.Mathlib.Logic.Equiv.PartialPerm
 namespace PartialPerm
 
 /-!
+# Completion of orbits
+
 Utilities to complete orbits of functions into local permutations.
 
 Suppose we have a function `f : α → α`, and a set `s` on which `f` is injective.
@@ -18,6 +20,9 @@ for each `i : ℕ`, where `#(l i) = #(s \ f '' s)` and `#(r i) = #(f '' s \ s)`.
 There are natural bijections along this diagram, mapping `l (n + 1)` to `l n` and `r n` to
 `r (n + 1)`, and there are also bijections `f '' s \ s → r 0` and `l 0 → s \ f '' s`.
 This yields a local permutation defined on `s`, `f '' s \ s`, the `l i`, and the `r i`.
+
+## Main declarations
+* `PartialPerm.complete`: A completion of an injective function into a partial permutation.
 -/
 
 open Cardinal Function Set

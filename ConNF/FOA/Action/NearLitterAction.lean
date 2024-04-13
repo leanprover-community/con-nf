@@ -1,5 +1,5 @@
 import ConNF.FOA.Basic.CompleteOrbit
-import ConNF.FOA.Basic.Reduction
+import ConNF.FOA.Basic.Constrains
 import ConNF.FOA.Approximation.NearLitterApprox
 
 open Cardinal Quiver Set Sum WithBot

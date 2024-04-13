@@ -3,15 +3,15 @@ import ConNF.Fuzz
 import ConNF.FOA.Basic.Hypotheses
 
 /-!
-# Constraints
-addresses can be said to *constrain* each other in a number of ways.
-This is detailed below. The `constrains` relation is well-founded.
+# The constrains relation
+
+Addresses can be said to *constrain* each other in a number of ways.
+This is detailed below. The `Constrains` relation is well-founded.
 
 ## Main declarations
 * `ConNF.Constrains`: The constrains relation.
 * `ConNF.constrains_wf`: The constrains relation is well-founded.
-* `ConNF.small_constrains`: Only a small amount of things are constrained by a particular support
-    condition.
+* `ConNF.small_constrains`: Only a small amount of things are constrained by a particular address.
 -/
 
 open Quiver Set Sum WithBot
@@ -24,13 +24,17 @@ namespace ConNF
 
 variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ}
 
-/-- addresses can be said to *constrain* each other in a number of ways.
+/--
+Addresses can be said to *constrain* each other in a number of ways.
+
 1. `(L, A) ≺ (a, A)` when `a ∈ L` and `L` is a litter. We can say that an atom is constrained by the
     litter it belongs to.
 2. `(N°, A) ≺ (N, A)` when `N` is a near-litter not equal to its corresponding litter `N°`.
 3. `(a, A) ≺ (N, A)` for all `a ∈ N ∆ N°`.
-4. `(x, A ≫ (γ ⟶ δ) ≫ B) ≺ (f_{γ,δ}(t), A ≫ (γ ⟶ ε) ≫ (ε ⟶ ⊥))` for all paths `A : β ⟶ γ` and
-    `δ, ε < γ` with `δ ≠ ε`, `t ∈ τ_γ`, where `(x, B)` lies in the designated `δ`-support of `t`.
+4. `(x, A ⬝ (γ ⟶ δ) ⬝ B) ≺ (f_{γ,δ}(t), A ⬝ (γ ⟶ ε) ⬝ (ε ⟶ ⊥))` for all paths `A : β ⟶ γ` and
+    `δ, ε < γ` with `δ ≠ ε`, `t` a `γ`-tangle, where `(x, B)` lies in the `δ`-support in `t`.
+
+This choice of relation makes some parts of the freedom of action theorem easier to prove.
 -/
 @[mk_iff]
 inductive Constrains : Address β → Address β → Prop
@@ -67,6 +71,7 @@ theorem Address.pos_nearLitter (A : ExtendedIndex β) (N : NearLitter) :
     Address.pos ⟨A, inr N⟩ = Position.pos N :=
   rfl
 
+/-- If `c` constrains `d`, then the position of `c` is less than the position of `d`. -/
 theorem Constrains.hasPosition_lt {c d : Address β} (h : c ≺ d) :
     c.pos < d.pos := by
   cases h
@@ -94,6 +99,9 @@ theorem constrains_subrelation (β : Λ) :
 /-- The `≺` relation is well-founded. -/
 theorem constrains_wf (β : Λ) : WellFounded ((· ≺ ·) : Address β → _ → Prop) :=
   Subrelation.wf (constrains_subrelation β) (InvImage.wf _ Params.μ_isWellOrder.wf)
+
+/-! We establish some useful lemmas that show what addresses can possibly constrain what other
+addresses. -/
 
 @[simp]
 theorem constrains_atom {c : Address β} {A : ExtendedIndex β} {a : Atom} :
@@ -127,7 +135,7 @@ theorem constrains_nearLitter {c : Address β} {A : ExtendedIndex β}
     · exact Constrains.nearLitter A N hN
     · exact Constrains.symmDiff A N a ha
 
-/-- The constrains relation is stable under composition of paths. -/
+/-- The constrains relation is stable under composition of paths. The converse is false. -/
 theorem constrains_comp {β γ : Λ} {c d : Address γ} (h : c ≺ d)
     (B : Path (β : TypeIndex) γ) : ⟨B.comp c.path, c.value⟩ ≺ ⟨B.comp d.path, d.value⟩ := by
   obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h
@@ -138,6 +146,11 @@ theorem constrains_comp {β γ : Λ} {c d : Address γ} (h : c ≺ d)
     exact Constrains.fuzz hδ hε hδε (B.comp A) t c hc
   · rw [Path.comp_cons]
     exact Constrains.fuzzBot hδ (B.comp A) a
+
+/-!
+We establish a strict partial order `<` on addresses given by the transitive closure of the
+constrains relation. This is well-founded.
+-/
 
 instance : PartialOrder (Address β) where
   le := Relation.ReflTransGen (· ≺ ·)
@@ -211,6 +224,7 @@ theorem lt_nearLitter' {β : Λ} {N : NearLitter} {B : ExtendedIndex β}
     exact h
   · exact Relation.TransGen.head (Constrains.nearLitter B N h') h
 
+/-- There is a small amount of addresses that constrain a given address. -/
 theorem small_constrains {β : Λ} (c : Address β) : Small {d | d ≺ c} := by
   obtain ⟨A, a | N⟩ := c
   · simp only [constrains_atom, setOf_eq_eq_singleton, small_singleton]
@@ -280,5 +294,95 @@ theorem small_constrains {β : Λ} (c : Address β) : Small {d | d ≺ c} := by
     rw [(fuzz_injective bot_ne_coe).eq_iff] at hd₂
     cases hd₂.2
     rfl
+
+/-- The reflexive transitive closure of a set of addresses. -/
+def reflTransClosure (S : Set (Address β)) : Set (Address β) :=
+  {c | ∃ d ∈ S, c ≤ d}
+
+/-- The transitive closure of a set of addresses. -/
+def transClosure (S : Set (Address β)) : Set (Address β) :=
+  {c | ∃ d ∈ S, c < d}
+
+/-- Gadget that helps us prove that the `reflTransClosure` of a small set is small. -/
+def nthClosure (S : Set (Address β)) : ℕ → Set (Address β)
+  | 0 => S
+  | n + 1 => {c | ∃ d, d ∈ nthClosure S n ∧ c ≺ d}
+
+/-- The `nthClosure` of a small set is small. -/
+theorem small_nthClosure {S : Set (Address β)} {n : ℕ} (h : Small S) :
+    Small (nthClosure S n) := by
+  induction' n with n hn
+  exact h
+  rw [nthClosure]
+  simp_rw [← exists_prop, Subtype.exists', setOf_exists]
+  refine' small_iUnion hn _
+  rintro ⟨c, _⟩
+  exact small_constrains c
+
+theorem mem_nthClosure_iff {S : Set (Address β)} {n : ℕ} {c : Address β} :
+    c ∈ nthClosure S n ↔
+      ∃ l, List.Chain (· ≺ ·) c l ∧
+        l.length = n ∧ (c::l).getLast (List.cons_ne_nil _ _) ∈ S := by
+  induction' n with n hn generalizing c
+  · rw [nthClosure]
+    constructor
+    · intro h
+      exact ⟨[], List.Chain.nil, rfl, h⟩
+    · rintro ⟨l, h₁, h₂, h₃⟩
+      rw [List.length_eq_zero] at h₂
+      cases h₂
+      exact h₃
+  · simp only [nthClosure, mem_setOf_eq]
+    constructor
+    · rintro ⟨d, hd₁, hd₂⟩
+      obtain ⟨l, hl₁, hl₂, hl₃⟩ := hn.mp hd₁
+      refine' ⟨d::l, List.Chain.cons hd₂ hl₁, _, _⟩
+      · rw [List.length_cons, hl₂]
+      · rw [List.getLast_cons]
+        exact hl₃
+    · rintro ⟨_ | ⟨d, l⟩, hl₁, hl₂, hl₃⟩
+      · cases hl₂
+      obtain _ | ⟨hcd, hl₁⟩ := hl₁
+      rw [List.getLast_cons] at hl₃
+      have := hn.mpr ⟨l, hl₁, Nat.succ.inj hl₂, hl₃⟩
+      exact ⟨d, this, hcd⟩
+
+/-- The `reflTransClosure` of a set is the `ℕ`-indexed union of the `n`th closures. -/
+theorem reflTransClosure_eq_iUnion_nthClosure {S : Set (Address β)} :
+    reflTransClosure S = ⋃ n, nthClosure S n := by
+  refine' subset_antisymm _ _
+  · rintro c ⟨d, hdS, hd⟩
+    obtain ⟨l, hl, rfl⟩ := List.exists_chain_of_relationReflTransGen hd
+    rw [mem_iUnion]
+    refine' ⟨l.length, _⟩
+    rw [mem_nthClosure_iff]
+    refine' ⟨l, hl, rfl, hdS⟩
+  · intro c hc
+    rw [mem_iUnion] at hc
+    obtain ⟨i, hc⟩ := hc
+    rw [mem_nthClosure_iff] at hc
+    obtain ⟨l, hl₁, _hl₂, hl₃⟩ := hc
+    exact
+      ⟨(c::l).getLast (List.cons_ne_nil _ _), hl₃,
+        List.relationReflTransGen_of_exists_chain l hl₁ rfl⟩
+
+/-- The `reflTransClosure` of a small set is small. -/
+theorem reflTransClosure_small {S : Set (Address β)} (h : Small S) :
+    Small (reflTransClosure S) := by
+  rw [reflTransClosure_eq_iUnion_nthClosure]
+  have : Small (⋃ n : ULift ℕ, nthClosure S n.down)
+  · refine' small_iUnion _ fun _ => small_nthClosure h
+    rw [Cardinal.mk_denumerable]
+    exact aleph0_le_mk_Λ.trans_lt Params.Λ_lt_κ
+  convert this using 1
+  ext x : 1
+  simp only [mem_iUnion, ULift.exists]
+
+/-- The `transClosure` of a small set is small. -/
+theorem transClosure_small {S : Set (Address β)} (h : Small S) :
+    Small (transClosure S) := by
+  refine' lt_of_le_of_lt (Cardinal.mk_le_mk_of_subset _) (reflTransClosure_small h)
+  rintro c ⟨d, hd₁, hd₂⟩
+  exact ⟨d, hd₁, hd₂.to_reflTransGen⟩
 
 end ConNF

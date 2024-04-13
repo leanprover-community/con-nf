@@ -1,4 +1,4 @@
-import ConNF.FOA.Basic.Reduction
+import ConNF.FOA.Basic.Constrains
 import ConNF.FOA.Complete.HypAction
 import ConNF.FOA.Action.Refine
 import ConNF.FOA.Complete.FlexibleCompletion
