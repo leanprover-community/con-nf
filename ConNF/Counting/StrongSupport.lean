@@ -1,6 +1,6 @@
 import Mathlib.Order.Extension.Well
 import ConNF.Mathlib.Support
-import ConNF.FOA.Basic.Flexible
+import ConNF.FOA.Basic.Constrains
 
 /-!
 # Strong supports
@@ -68,12 +68,12 @@ theorem Precedes.lt {c d : Address β} :
   cases h
   case fuzz A N h c hct =>
     refine lt_nearLitter (Relation.TransGen.single ?_)
-    simp_rw [h.hL]
-    exact Constrains.fuzz h.path.hδ h.path.hε h.path.hδε _ _ _ hct
+    simp_rw [← h.path.hA]
+    exact Constrains.fuzz A N.1 h c hct
   case fuzzBot A N h =>
     refine lt_nearLitter (Relation.TransGen.single ?_)
-    simp_rw [h.hL]
-    exact Constrains.fuzzBot h.path.hε _ _
+    simp_rw [← h.path.hA]
+    exact Constrains.fuzzBot A N.1 h
 
 theorem Precedes.wellFounded : WellFounded (Precedes : Address β → Address β → Prop) := by
   have : Subrelation Precedes ((· < ·) : Address β → Address β → Prop) := Precedes.lt

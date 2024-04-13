@@ -1,6 +1,6 @@
 import Mathlib.Data.Prod.Lex
 import ConNF.Fuzz
-import ConNF.FOA.Basic.Hypotheses
+import ConNF.FOA.Basic.Flexible
 
 /-!
 # The constrains relation
@@ -43,20 +43,26 @@ inductive Constrains : Address β → Address β → Prop
     Constrains ⟨A, inr N.fst.toNearLitter⟩ ⟨A, inr N⟩
   | symmDiff (A : ExtendedIndex β) (N : NearLitter) (a : Atom) :
     a ∈ litterSet N.fst ∆ N → Constrains ⟨A, inl a⟩ ⟨A, inr N⟩
-  | fuzz ⦃γ : Λ⦄ [LeLevel γ] ⦃δ : Λ⦄ [LtLevel δ] ⦃ε : Λ⦄ [LtLevel ε]
-    (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε)
-    (A : Path (β : TypeIndex) γ) (t : Tangle δ) (c : Address δ) :
-    c ∈ t.support →
-    Constrains ⟨(A.cons hδ).comp c.path, c.value⟩
-      ⟨(A.cons hε).cons (bot_lt_coe _), inr (fuzz hδε t).toNearLitter⟩
-  | fuzzBot ⦃γ : Λ⦄ [LeLevel γ] ⦃ε : Λ⦄ [LtLevel ε]
-    (hε : (ε : TypeIndex) < γ) (A : Path (β : TypeIndex) γ) (a : Atom) :
-    Constrains ⟨A.cons (bot_lt_coe _), inl a⟩
-      ⟨(A.cons hε).cons (bot_lt_coe _), inr (fuzz (bot_ne_coe (a := ε)) a).toNearLitter⟩
+  | fuzz (A : ExtendedIndex β) (L : Litter) (h : InflexibleCoe A L) (c : Address h.path.δ) :
+    c ∈ h.t.support →
+    Constrains ⟨(h.path.B.cons h.path.hδ).comp c.path, c.value⟩ ⟨A, inr L.toNearLitter⟩
+  | fuzzBot (A : ExtendedIndex β) (L : Litter) (h : InflexibleBot A L) :
+    Constrains ⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩ ⟨A, inr L.toNearLitter⟩
 
 /-! We declare new notation for the "constrains" relation on addresses. -/
 
 @[inherit_doc] infix:50 " ≺ " => Constrains
+
+theorem not_constrains_flexible {β : Λ} (c : Address β)
+    {A : ExtendedIndex β} {L : Litter} (hL : Flexible A L) :
+    ¬c ≺ ⟨A, inr L.toNearLitter⟩ := by
+  rintro (⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨A, L, h, c, hc⟩ | ⟨A, L, h⟩)
+  · exact hN (NearLitter.IsLitter.mk _)
+  · obtain (ha | ha) := ha
+    · cases ha.2 ha.1
+    · cases ha.2 ha.1
+  · exact hL (inflexible_of_inflexibleCoe h)
+  · exact hL (inflexible_of_inflexibleBot h)
 
 def Address.pos (c : Address β) : μ :=
   c.2.elim Position.pos Position.pos
@@ -78,19 +84,19 @@ theorem Constrains.hasPosition_lt {c d : Address β} (h : c ≺ d) :
   case atom A a => exact BasePositions.lt_pos_atom a
   case nearLitter A N hN => exact BasePositions.lt_pos_litter N hN
   case symmDiff A N a ha => exact BasePositions.lt_pos_symmDiff a N ha
-  case fuzz γ _ δ _ ε _ hδ hε hδε A t c hc' =>
-    have := pos_lt_pos_fuzz_nearLitter hδε t (ConNF.fuzz hδε t).toNearLitter rfl
+  case fuzz A L h c hc' =>
+    have := pos_lt_pos_fuzz_nearLitter h.path.hδε h.t (ConNF.fuzz h.path.hδε h.t).toNearLitter rfl
     obtain ⟨B, a | N⟩ := c
-    · simp only [Address.pos_atom, Address.pos_nearLitter]
+    · simp only [Address.pos_atom, Address.pos_nearLitter, h.hL]
       exact (pos_lt_pos_atom _ hc').trans this
-    · simp only [Address.pos_nearLitter]
-      by_cases h : t.set = typedNearLitter N
-      · exact (pos_typedNearLitter N t h).trans_lt this
-      · exact (pos_lt_pos_nearLitter _ hc' h).trans this
-  case fuzzBot γ _ ε _ hε A a =>
-    simp only [Address.pos_atom, Address.pos_nearLitter]
-    exact pos_lt_pos_fuzz_nearLitter (bot_ne_coe (a := ε)) a
-      (ConNF.fuzz (bot_ne_coe (a := ε)) a).toNearLitter rfl
+    · simp only [Address.pos_nearLitter, h.hL]
+      by_cases h' : h.t.set = typedNearLitter N
+      · exact (pos_typedNearLitter N h.t h').trans_lt this
+      · exact (pos_lt_pos_nearLitter _ hc' h').trans this
+  case fuzzBot A L h =>
+    simp only [Address.pos_atom, Address.pos_nearLitter, h.hL]
+    exact pos_lt_pos_fuzz_nearLitter (bot_ne_coe (a := h.path.ε)) h.a
+      (ConNF.fuzz (bot_ne_coe (a := h.path.ε)) h.a).toNearLitter rfl
 
 theorem constrains_subrelation (β : Λ) :
     Subrelation ((· ≺ ·) : Address β → _ → Prop) (InvImage (· < ·) Address.pos) :=
@@ -120,16 +126,16 @@ theorem constrains_nearLitter {c : Address β} {A : ExtendedIndex β}
   · intro h
     rw [constrains_iff] at h
     obtain ⟨A, a, rfl, hc⟩ | ⟨A, N, hN, rfl, hc⟩ | ⟨A, N, a, ha, rfl, hc⟩ |
-        ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, A, t, c, _, rfl, hc'⟩ |
-        ⟨γ, _, ε, _, hγ, A, a, rfl, hc⟩ := h
+        ⟨A, L, h, c, hc, rfl, h'⟩ | ⟨A, L, h, rfl, h'⟩ := h
     · cases hc
     · cases hc
       exact Or.inl rfl
     · cases hc
       exact Or.inr ⟨a, ha, rfl⟩
-    · cases hc'
-      cases hN (NearLitter.IsLitter.mk _)
     · cases hc
+      cases h'
+      cases hN (NearLitter.IsLitter.mk _)
+    · cases h'
       cases hN (NearLitter.IsLitter.mk _)
   · rintro (rfl | ⟨a, ha, rfl⟩)
     · exact Constrains.nearLitter A N hN
@@ -138,14 +144,13 @@ theorem constrains_nearLitter {c : Address β} {A : ExtendedIndex β}
 /-- The constrains relation is stable under composition of paths. The converse is false. -/
 theorem constrains_comp {β γ : Λ} {c d : Address γ} (h : c ≺ d)
     (B : Path (β : TypeIndex) γ) : ⟨B.comp c.path, c.value⟩ ≺ ⟨B.comp d.path, d.value⟩ := by
-  obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨hδ, hε, hδε, A, t, c, hc⟩ | ⟨hδ, A, a⟩ := h
+  obtain ⟨A, a⟩ | ⟨A, N, hN⟩ | ⟨A, N, a, ha⟩ | ⟨A, L, h, c, hc⟩ | ⟨A, L, h⟩ := h
   · exact Constrains.atom _ _
   · exact Constrains.nearLitter _ _ hN
   · exact Constrains.symmDiff _ _ _ ha
-  · rw [Path.comp_cons, ← Path.comp_assoc, Path.comp_cons]
-    exact Constrains.fuzz hδ hε hδε (B.comp A) t c hc
-  · rw [Path.comp_cons]
-    exact Constrains.fuzzBot hδ (B.comp A) a
+  · convert Constrains.fuzz (B.comp A) L (h.comp B) c hc using 2
+    simp only [InflexibleCoe.comp_path, InflexibleCoePath.comp_B, ← Path.comp_cons, Path.comp_assoc]
+  · exact Constrains.fuzzBot (B.comp A) L (h.comp B)
 
 /-!
 We establish a strict partial order `<` on addresses given by the transitive closure of the
@@ -188,6 +193,18 @@ theorem Address.le_iff {c d : Address β} :
 theorem Address.lt_iff {c d : Address β} :
     c < d ↔ Relation.TransGen (· ≺ ·) c d :=
   Iff.rfl
+
+theorem not_transConstrains_flexible {β : Λ} (c : Address β)
+    {A : ExtendedIndex β} {L : Litter} (hL : Flexible A L) :
+    ¬c < ⟨A, inr L.toNearLitter⟩ := by
+  intro h
+  obtain ⟨d, _, hd⟩ := Relation.TransGen.tail'_iff.mp h
+  exact not_constrains_flexible d hL hd
+
+theorem InflexibleBot.constrains {β : Λ} {A : ExtendedIndex β} {L : Litter}
+    (h : InflexibleBot A L) :
+    (⟨h.path.B.cons (bot_lt_coe _), inl h.a⟩ : Address β) < ⟨A, inr L.toNearLitter⟩ :=
+  Relation.TransGen.single (Constrains.fuzzBot A L h)
 
 theorem le_comp {β γ : Λ} {c d : Address γ} (h : c ≤ d)
     (B : Path (β : TypeIndex) γ) :
@@ -251,49 +268,34 @@ theorem small_constrains {β : Λ} (c : Address β) : Small {d | d ≺ c} := by
       exact ⟨a, h₁, h₂.symm⟩
     · rintro ⟨a, h₁, h₂⟩
       exact ⟨A, N, a, h₁, h₂.symm, rfl⟩
-  · by_cases h :
-      ∃ (γ : Λ) (_ : LeLevel γ) (δ : Λ) (_ : LtLevel δ) (ε : Λ) (_ : LtLevel ε)
-        (_ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ) (hδε : (δ : TypeIndex) ≠ ε)
-        (B : Path (β : TypeIndex) γ) (t : Tangle δ),
-        N = (fuzz hδε t).toNearLitter ∧ A = (B.cons hε).cons (bot_lt_coe _)
-    · obtain ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, B, t, rfl, rfl⟩ := h
-      refine lt_of_le_of_lt ?_ t.support.small
+  · obtain (h' | h') := isEmpty_or_nonempty (InflexibleCoe A N.1)
+    · refine small_of_forall_not_mem ?_
+      rintro x ⟨A, L, h, c, hc', rfl, h''⟩
+      cases h''
+      exact h'.elim h
+    · obtain ⟨h⟩ := h'
+      refine lt_of_le_of_lt ?_ h.t.support.small
       suffices
-        #{a : Address β | ∃ c : (t.support : Set (Address δ)),
-            a = ⟨(B.cons hδ).comp c.val.path, c.val.value⟩} ≤
-          #(t.support : Set (Address δ)) by
+        #{a : Address β | ∃ c : (h.t.support : Set (Address h.path.δ)),
+            a = ⟨(h.path.B.cons h.path.hδ).comp c.val.path, c.val.value⟩} ≤
+          #(h.t.support : Set (Address h.path.δ)) by
         refine le_trans (Cardinal.mk_subtype_le_of_subset ?_) this
-        rintro x ⟨_, _, _, _, _, _, _, _, _, _, _, c, hc, rfl, h⟩
-        rw [Address.mk.injEq] at h
-        simp only [inr.injEq, Litter.toNearLitter_injective.eq_iff] at h
-        cases WithBot.coe_injective (fuzz_congr_β h.2)
-        cases fuzz_congr_γ h.2
-        cases fuzz_injective _ h.2
-        cases coe_inj.mp (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons h.1).eq)
-        cases (Path.heq_of_cons_eq_cons (Path.heq_of_cons_eq_cons h.1).eq).eq
+        rintro x ⟨_, _, h', c, hc, rfl, h''⟩
+        cases h''
+        cases Subsingleton.elim h h'
         exact ⟨⟨c, hc⟩, rfl⟩
       refine ⟨⟨fun a => a.prop.choose, ?_⟩⟩
       intro a b h
       refine Subtype.coe_inj.mp ?_
       rw [a.prop.choose_spec, b.prop.choose_spec]
       simp only [h]
-    · refine small_of_forall_not_mem ?_
-      rintro x ⟨γ, _, δ, _, ε, _, hδ, hε, hδε, B, t, c, _, rfl, hA⟩
-      rw [Address.mk.injEq] at hA
-      simp only [inr.injEq] at hA
-      exact h ⟨γ, inferInstance, δ, inferInstance, ε, inferInstance, hδ, hε, hδε, B, t, hA.2, hA.1⟩
   · refine Set.Subsingleton.small ?_
-    rintro ⟨c, C⟩ ⟨γ, _, ε, _, hε, C', a, hc₁, hc₂⟩ ⟨d, D⟩ ⟨γ, _, ε, _, hε, D', b, hd₁, hd₂⟩
-    rw [Address.mk.injEq] at hc₁ hc₂ hd₁ hd₂
-    simp only [inr.injEq] at hc₂ hd₂
-    rw [hc₁.1, hc₁.2, hd₁.1, hd₁.2]
-    rw [hc₂.1, hc₂.2, Litter.toNearLitter_injective.eq_iff] at hd₂
-    cases coe_inj.mp (Path.obj_eq_of_cons_eq_cons hd₂.1)
-    cases coe_inj.mp (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hd₂.1).eq)
-    cases (Path.heq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hd₂.1).eq).eq
-    rw [(fuzz_injective bot_ne_coe).eq_iff] at hd₂
-    cases hd₂.2
-    rfl
+    rintro ⟨c, C⟩ ⟨_, _, h₁, c₁, hc₁⟩ ⟨d, D⟩ ⟨_, _, h₂, c₂, hc₂⟩
+    cases hc₁
+    cases hc₂
+    cases Subsingleton.elim h₁ h₂
+    cases c₂
+    exact c₁
 
 /-- The reflexive transitive closure of a set of addresses. -/
 def reflTransClosure (S : Set (Address β)) : Set (Address β) :=

@@ -125,40 +125,43 @@ theorem Biexact.smul_eq_smul {β : Λ} [LeLevel β] {π π' : Allowable β} {c :
   obtain hL | hL := flexible_cases A L
   swap
   · exact h.smul_eq_smul_litter A L Relation.ReflTransGen.refl hL
-  induction' hL with γ _ δ _ ε _ hδ hε hδε B t γ _ ε _ hε B a
-  · have := toStructPerm_smul_fuzz' hδ hε hδε
-    have h₁ := this (Allowable.comp B π) t
-    have h₂ := this (Allowable.comp B π') t
+  rw [inflexible_iff_inflexibleBot_or_inflexibleCoe] at hL
+  obtain (⟨⟨h'⟩⟩ | ⟨⟨h'⟩⟩) := hL
+  · have := toStructPerm_smul_fuzz' (bot_lt_coe _) h'.path.hε bot_ne_coe
+    have h₁ := this (Allowable.comp h'.path.B π) h'.a
+    have h₂ := this (Allowable.comp h'.path.B π') h'.a
     rw [Allowable.toStructPerm_comp, Allowable.comp_eq] at h₁ h₂
-    refine h₁.trans (h₂.trans ?_).symm
-    refine' congr_arg _ _
-    rw [← inv_smul_eq_iff, smul_smul]
-    refine' support_supports t _ _
-    intro c hc
-    rw [mul_smul, inv_smul_eq_iff]
-    simp only [Allowable.toStructPerm_smul, Allowable.toStructPerm_comp, Tree.comp_comp]
-    have := ih ⟨(B.cons hδ).comp c.path, c.value⟩ ?_ ?_
-    · simp only [Path.comp_cons, Path.comp_nil, StructPerm.smul_address_eq_smul_iff,
-        Tree.comp_apply]
-      exact this.symm
-    · exact Constrains.fuzz hδ hε hδε _ _ _ hc
-    · refine' h.constrains (Relation.ReflTransGen.single _)
-      exact Constrains.fuzz hδ hε hδε _ _ _ hc
-  · have := toStructPerm_smul_fuzz' (bot_lt_coe _) hε bot_ne_coe
-    have h₁ := this (Allowable.comp B π) a
-    have h₂ := this (Allowable.comp B π') a
-    rw [Allowable.toStructPerm_comp, Allowable.comp_eq] at h₁ h₂
+    simp_rw [h'.path.hA, h'.hL]
     refine h₁.trans (h₂.trans ?_).symm
     refine' congr_arg _ _
     refine (comp_bot_smul_atom _ _ _).trans ?_
     refine ((comp_bot_smul_atom _ _ _).trans ?_).symm
     simp only [Allowable.toStructPerm_comp, Tree.comp_apply]
-    have := ih ⟨B.cons <| bot_lt_coe _, inl a⟩ ?_ ?_
+    have := ih ⟨h'.path.B.cons <| bot_lt_coe _, inl h'.a⟩ ?_ ?_
     · simp only [smul_inl, inl.injEq] at this
       exact this
-    · exact Constrains.fuzzBot hε _ _
+    · exact Constrains.fuzzBot _ _ h'
     · refine' h.constrains (Relation.ReflTransGen.single _)
-      exact Constrains.fuzzBot hε _ _
+      exact Constrains.fuzzBot _ _ h'
+  · have := toStructPerm_smul_fuzz' h'.path.hδ h'.path.hε h'.path.hδε
+    have h₁ := this (Allowable.comp h'.path.B π) h'.t
+    have h₂ := this (Allowable.comp h'.path.B π') h'.t
+    rw [Allowable.toStructPerm_comp, Allowable.comp_eq] at h₁ h₂
+    simp_rw [h'.path.hA, h'.hL]
+    refine h₁.trans (h₂.trans ?_).symm
+    refine' congr_arg _ _
+    rw [← inv_smul_eq_iff, smul_smul]
+    refine' support_supports h'.t _ _
+    intro c hc
+    rw [mul_smul, inv_smul_eq_iff]
+    simp only [Allowable.toStructPerm_smul, Allowable.toStructPerm_comp, Tree.comp_comp]
+    have := ih ⟨(h'.path.B.cons h'.path.hδ).comp c.path, c.value⟩ ?_ ?_
+    · simp only [Path.comp_cons, Path.comp_nil, StructPerm.smul_address_eq_smul_iff,
+        Tree.comp_apply]
+      exact this.symm
+    · exact Constrains.fuzz _ _ h' _ hc
+    · refine' h.constrains (Relation.ReflTransGen.single _)
+      exact Constrains.fuzz _ _ h' _ hc
 
 theorem Biexact.smul_eq_smul_nearLitter {β : Λ} [LeLevel β]
     {π π' : Allowable β} {A : ExtendedIndex β} {N : NearLitter}
@@ -370,13 +373,15 @@ theorem ConNF.StructApprox.extracted_1
   refine' congr_arg _ _
   have := comp_bot_smul_atom ρ (C.cons (bot_lt_coe _)) a
   refine Eq.trans ?_ this.symm
+  have := Constrains.fuzzBot _ _ ⟨⟨δ, ε, hε, A.comp C, rfl⟩, a, rfl⟩
+  dsimp only [Path.comp_cons, InflexibleBot.comp_path, InflexibleBotPath.comp_γ,
+    InflexibleBotPath.comp_B, InflexibleBot.comp_a] at this ⊢
   rw [← (h <| C.cons (bot_lt_coe _)).map_atom a
-        (Or.inl (Or.inl (Or.inl (Or.inl
-          ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.fuzzBot hε _ _) hc₂'⟩))))]
+    (Or.inl (Or.inl (Or.inl (Or.inl ⟨c, hc₁, Relation.ReflTransGen.head this hc₂'⟩))))]
   rw [StructAction.rc_smul_atom_eq]
   · rfl
   · simp only [Tree.comp_apply, constrainedAction_atomMap]
-    exact ⟨c, hc₁, Relation.ReflTransGen.head (Constrains.fuzzBot hε _ _) hc₂'⟩
+    exact ⟨c, hc₁, Relation.ReflTransGen.head this hc₂'⟩
 
 theorem ConNF.StructApprox.extracted_2
     (hπf : π.Free) {γ : Λ} [LeLevel γ] (A : Path (β : TypeIndex) γ)
@@ -417,27 +422,29 @@ theorem ConNF.StructApprox.extracted_2
     erw [Allowable.toStructPerm_comp (C.cons hε) ρ]
     rw [Tree.comp_apply]
     refine' Eq.trans _ ((h _).map_atom a _)
-    refine'
-      (((ihAction _).hypothesisedAllowable_exactlyApproximates
-                  ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, rfl⟩ _ _ D).map_atom
-              a _).symm.trans
+    refine' (((ihAction _).hypothesisedAllowable_exactlyApproximates
+      ⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, rfl⟩ _ _ D).map_atom a _).symm.trans
         _
     · refine' Or.inl (Or.inl (Or.inl (Or.inl _)))
-      exact Relation.TransGen.single (Constrains.fuzz hε hζ hεζ _ _ _ hct)
+      exact Relation.TransGen.single
+        (Constrains.fuzz _ _ ⟨⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, rfl⟩, t, rfl⟩ _ hct)
     · rw [StructAction.rc_smul_atom_eq, StructAction.rc_smul_atom_eq]
       · simp only [Tree.comp_apply, ihAction_atomMap, foaHypothesis_atomImage,
           constrainedAction_atomMap]
         simp_rw [← Path.comp_cons]
         rw [Path.comp_assoc]
       · refine' ⟨c, hc₁, Relation.ReflTransGen.head _ hc₂'⟩
-        exact constrains_comp (Constrains.fuzz hε hζ hεζ _ _ _ hct) A
+        exact constrains_comp (Constrains.fuzz _ _
+          ⟨⟨δ, ε, ζ, hε, hζ, hεζ, C, rfl⟩, t, rfl⟩ _ hct) A
       · simp only [Tree.comp_apply, ihAction_atomMap]
         simp_rw [← Path.comp_cons]
         rw [Path.comp_assoc]
-        exact Relation.TransGen.single (constrains_comp (Constrains.fuzz hε hζ hεζ _ _ _ hct) A)
+        exact Relation.TransGen.single (constrains_comp (Constrains.fuzz _ _
+          ⟨⟨δ, ε, ζ, hε, hζ, hεζ, C, rfl⟩, t, rfl⟩ _ hct) A)
     · refine' Or.inl (Or.inl (Or.inl (Or.inl _)))
       refine' ⟨c, hc₁, Relation.ReflTransGen.head _ hc₂'⟩
-      exact constrains_comp (Constrains.fuzz hε hζ hεζ _ _ _ hct) A
+      exact constrains_comp (Constrains.fuzz _ _
+        ⟨⟨δ, ε, ζ, hε, hζ, hεζ, C, rfl⟩, t, rfl⟩ _ hct) A
   · intros D M hct
     refine' Biexact.smul_eq_smul_nearLitter _
     constructor
@@ -446,7 +453,8 @@ theorem ConNF.StructApprox.extracted_2
         (⟨(C.cons hε).comp E, inl a⟩ : Address γ) <
           ⟨(C.cons hζ).cons (bot_lt_coe _), inr N.fst.toNearLitter⟩
       · simp only [hNL]
-        refine' Relation.TransGen.tail' _ (Constrains.fuzz hε hζ hεζ _ _ _ hct)
+        refine' Relation.TransGen.tail' _ (Constrains.fuzz _ _
+          ⟨⟨δ, ε, ζ, hε, hζ, hεζ, C, rfl⟩, t, rfl⟩ _ hct)
         exact le_comp ha _
       refine'
         ((StructAction.hypothesisedAllowable_exactlyApproximates _
@@ -487,12 +495,14 @@ theorem ConNF.StructApprox.extracted_2
           _
       · refine' Or.inl (Or.inl ⟨_, hL₂⟩)
         refine' Relation.TransGen.trans_right (le_comp hL₁ _) _
-        exact Relation.TransGen.single (Constrains.fuzz hε hζ hεζ _ _ _ hct)
+        exact Relation.TransGen.single (Constrains.fuzz _ _
+          ⟨⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, rfl⟩, t, rfl⟩ _ hct)
       have hLN :
         (⟨(C.cons hε).comp E, inr L.toNearLitter⟩ : Address γ) <
           ⟨(C.cons hζ).cons (bot_lt_coe _), inr N.fst.toNearLitter⟩
       · simp only [hNL]
-        refine' Relation.TransGen.tail' _ (Constrains.fuzz hε hζ hεζ _ _ _ hct)
+        refine' Relation.TransGen.tail' _ (Constrains.fuzz _ _
+          ⟨⟨δ, ε, ζ, hε, hζ, hεζ, C, rfl⟩, t, rfl⟩ _ hct)
         exact le_comp hL₁ _
       rw [StructAction.rc_smul_litter_eq, NearLitterAction.flexibleLitterPartialPerm_apply_eq,
         NearLitterAction.roughLitterMapOrElse_of_dom]
@@ -519,7 +529,8 @@ theorem ConNF.StructApprox.extracted_2
         (⟨(C.cons hε).comp E, inr L.toNearLitter⟩ : Address γ) <
           ⟨(C.cons hζ).cons (bot_lt_coe _), inr N.fst.toNearLitter⟩
       · simp only [hNL]
-        refine' Relation.TransGen.tail' _ (Constrains.fuzz hε hζ hεζ _ _ _ hct)
+        refine' Relation.TransGen.tail' _ (Constrains.fuzz _ _
+          ⟨⟨δ, ε, ζ, hε, hζ, hεζ, C, rfl⟩, t, rfl⟩ _ hct)
         exact le_comp hL₁ _
       specialize ih ((C.cons hε).comp E) L.toNearLitter (lt_nearLitter hLN)
       rw [← Path.comp_assoc, Path.comp_cons] at ih
@@ -530,7 +541,7 @@ theorem ConNF.StructApprox.extracted_2
               _ (NearLitterAction.refine_precise _) _).trans
           _
       · refine' Relation.TransGen.tail' (le_comp hL₁ _) _
-        exact Constrains.fuzz hε hζ hεζ _ _ _ hct
+        exact Constrains.fuzz _ _ ⟨⟨δ, ε, ζ, hε, hζ, hεζ, A.comp C, rfl⟩, t, rfl⟩ _ hct
       · refine' hL₂.trans _
         simp only [Path.comp_cons, InflexibleCoe.comp_path, InflexibleCoePath.comp_δ,
           Tree.comp_bot, Tree.toBot_smul, ne_eq, Path.comp_nil, StructAction.refine_apply,
@@ -722,8 +733,7 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : Address β) (A : ExtendedI
   simp only [ne_eq, Allowable.smul_address_eq_smul_iff]
   obtain ⟨C, a | N⟩ := e
   · simp only [smul_inl, inl.injEq]
-    refine'
-      Eq.trans _
+    refine' Eq.trans _
         (ihsAction_coherent_atom _ _ a c d _ hlaw₂ _
           ((ihsAction π c d).hypothesisedAllowable_exactlyApproximates _ _ _))
     have := ihAction_coherent_atom (π := π) (B.cons ?_) C a
@@ -732,8 +742,10 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : Address β) (A : ExtendedI
         ((ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
           ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩ ?_ ?_)
     exact this.symm
-    · exact Relation.TransGen.single (Constrains.fuzz hδ hε hδε B t _ he)
-    · exact Relation.TransGen.head' (Constrains.fuzz hδ hε hδε B t _ he) hL₁
+    · exact Relation.TransGen.single (Constrains.fuzz _ _
+        ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ _ he)
+    · exact Relation.TransGen.head' (Constrains.fuzz _ _
+        ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ _ he) hL₁
   · simp only [smul_inr, inr.injEq]
     refine'
       Eq.trans _
@@ -745,8 +757,10 @@ theorem ihAction_smul_tangle' (hπf : π.Free) (c d : Address β) (A : ExtendedI
         ((ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
           ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩ ?_ ?_)
     exact this.symm
-    · exact Relation.TransGen.single (Constrains.fuzz hδ hε hδε B t _ he)
-    · exact Or.inl (Relation.TransGen.head' (Constrains.fuzz hδ hε hδε B t _ he) hL₁)
+    · exact Relation.TransGen.single (Constrains.fuzz _ _
+        ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ _ he)
+    · exact Or.inl (Relation.TransGen.head' (Constrains.fuzz _ _
+        ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ _ he) hL₁)
 
 theorem ihAction_smul_tangle (hπf : π.Free) (c d : Address β) (A : ExtendedIndex β)
     (L : Litter) (hL₁ : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d)
@@ -792,10 +806,10 @@ theorem litter_injective_extends (hπf : π.Free) {c d : Address β}
     cases coe_injective (Path.obj_eq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hB).eq)
     cases (Path.heq_of_cons_eq_cons (Path.heq_of_cons_eq_cons hB).eq).eq
     refine' congr_arg _ ((hcd _).atomMap_injective _ _ (fuzz_injective bot_ne_coe h))
-    · have := Constrains.fuzzBot hγε₁ B₁ a₁
+    · have := Constrains.fuzzBot _ _ ⟨⟨γ₁, ε₁, hγε₁, B₁, rfl⟩, a₁, rfl⟩
       exact transConstrained_of_reflTransConstrained_of_trans_constrains h₁
         (Relation.TransGen.single this)
-    · have := Constrains.fuzzBot hγε₁ B₁ a₂
+    · have := Constrains.fuzzBot _ _ ⟨⟨γ₁, ε₁, hγε₂, B₁, hB⟩, a₂, rfl⟩
       exact transConstrained_of_reflTransConstrained_of_trans_constrains h₂
         (Relation.TransGen.single this)
   · obtain ⟨h₁'⟩ := h₁'

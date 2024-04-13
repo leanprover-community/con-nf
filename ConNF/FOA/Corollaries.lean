@@ -113,7 +113,7 @@ theorem foaMotive_litter (ψ : StructAction β) (h₁ : ψ.Lawful) (h₂ : ψ.Co
         Allowable.toStructPerm_apply]
       rw [toStructPerm_smul_fuzz, comp_bot_smul_atom]
     · have := ih ⟨A.cons (bot_lt_coe _), inl a⟩
-        (Relation.TransGen.single (Constrains.fuzzBot hε A a))
+        (Relation.TransGen.single (Constrains.fuzzBot _ _ ⟨⟨γ, ε, hε, A, rfl⟩, a, rfl⟩))
         (h₂.atom_bot_dom A hε hL)
       simp only [Allowable.toStructPerm_comp, Tree.comp_apply, Hom.comp_toPath]
       exact this.symm
@@ -121,20 +121,23 @@ theorem foaMotive_litter (ψ : StructAction β) (h₁ : ψ.Lawful) (h₂ : ψ.Co
     · rw [this, Allowable.comp_comp_apply, Hom.comp_toPath, toStructPerm_smul_fuzz]
     · intro B a ha
       have := ih ⟨(A.cons hδ).comp B, inl a⟩
-        (Relation.TransGen.single (Constrains.fuzz hδ hε hδε A t _ ha))
+        (Relation.TransGen.single (Constrains.fuzz _ _
+          ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, rfl⟩ _ ha))
         (h₂.atom_dom A hδ hε hδε ha hL)
       simp only [Allowable.toStructPerm_comp, Tree.comp_apply, Hom.comp_toPath_comp]
       exact this.symm
     · intro B N hN
       have := ih ⟨(A.cons hδ).comp B, inr N.1.toNearLitter⟩
-        (lt_nearLitter' (Relation.TransGen.single (Constrains.fuzz hδ hε hδε A t _ hN)))
+        (lt_nearLitter' (Relation.TransGen.single (Constrains.fuzz _ _
+          ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, rfl⟩ _ hN)))
         (NearLitter.IsLitter.mk _) (h₂.nearLitter_dom A hδ hε hδε (N := N) hN hL)
       simp only [Allowable.toStructPerm_comp, Tree.comp_apply, Hom.comp_toPath_comp]
       exact this.symm
     · intro B N a hN ha
       have := ih ⟨(A.cons hδ).comp B, inl a⟩
         ((Relation.TransGen.single (Constrains.symmDiff _ N a ha)).tail
-          (Constrains.fuzz hδ hε hδε A t _ hN))
+          (Constrains.fuzz _ _
+            ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, rfl⟩ _ hN))
         (h₂.symmDiff_dom A hδ hε hδε hN ha hL)
       simp only [Allowable.toStructPerm_comp, Tree.comp_apply, Hom.comp_toPath_comp]
       exact this.symm

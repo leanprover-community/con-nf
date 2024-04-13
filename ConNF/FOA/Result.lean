@@ -152,7 +152,8 @@ theorem ConNF.StructApprox.extracted_2'
   · intros B a ha
     have := ihAction_coherent_atom (π := π) (A.cons _) B a
       ⟨_, inr (fuzz hδε t).toNearLitter⟩
-      (Relation.TransGen.single <| Constrains.fuzz hδ hε hδε _ t _ ha)
+      (Relation.TransGen.single <| Constrains.fuzz _ _
+        ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, rfl⟩ _ ha)
       ((ihAction_lawful hπf _).comp _) ?_ ?_
     · exact this.symm.trans (congr_arg (fun π => π • a) (hρ δ hδ B)).symm
     · exact (ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
@@ -160,7 +161,8 @@ theorem ConNF.StructApprox.extracted_2'
   · intros B N hN
     have := ihAction_coherent hπf (A.cons _) B N
       ⟨_, inr (fuzz hδε t).toNearLitter⟩
-      (Relation.TransGen.single <| Constrains.fuzz hδ hε hδε _ t _ hN)
+      (Relation.TransGen.single <| Constrains.fuzz _ _
+        ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, rfl⟩ _ hN)
       ((ihAction_lawful hπf _).comp _) ?_ ?_
     rw [← completeNearLitterPerm_smul_nearLitter hπf] at this
     · exact this.symm.trans (congr_arg (fun π => π • N) (hρ δ hδ B)).symm

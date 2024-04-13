@@ -317,22 +317,6 @@ theorem ihAction_le {π : StructApprox β} {c d : Address β} (h : c ≤ d) :
   · intro a ha
     exact Relation.TransGen.trans_left ha h
 
-theorem transGen_constrains_of_mem_support {A : ExtendedIndex β} {L : Litter}
-    {h : InflexibleCoe A L} {γ δ ε : Λ} [LeLevel γ] [LtLevel δ] [LtLevel ε]
-    {hδ : (δ : TypeIndex) < γ} {hε : (ε : TypeIndex) < γ}
-    (hδε : (δ : TypeIndex) ≠ ε) {C : Path (h.path.δ : TypeIndex) γ} {t : Tangle δ}
-    {d : Address h.path.δ}
-    (hd₂ : ⟨(C.cons hε).cons (bot_lt_coe _),
-      inr (fuzz hδε t).toNearLitter⟩ ≤ d)
-    (hd : ⟨(h.path.B.cons h.path.hδ).comp d.path, d.value⟩ ≺ ⟨A, inr L.toNearLitter⟩)
-    {B : ExtendedIndex δ} {a : Atom} (hc : ⟨B, inl a⟩ ∈ t.support) :
-    (⟨(h.path.B.cons h.path.hδ).comp ((C.cons hδ).comp B), inl a⟩ : Address β) <
-      ⟨A, inr L.toNearLitter⟩ := by
-  refine' Relation.TransGen.tail' _ hd
-  refine' le_comp (c := ⟨_, inl a⟩) _ (h.path.B.cons h.path.hδ)
-  refine' Relation.ReflTransGen.trans _ hd₂
-  exact Relation.ReflTransGen.single (Constrains.fuzz hδ hε hδε C t _ hc)
-
 end StructApprox
 
 end ConNF

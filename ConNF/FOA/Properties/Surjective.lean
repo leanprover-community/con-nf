@@ -151,7 +151,8 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       exact h
     · exact NearLitterApprox.flexibleCompletion_symm_smul_flexible (π A) A (hπf A) L h
   · obtain ⟨⟨γ, ε, hε, C, rfl⟩, a, rfl⟩ := h
-    obtain ⟨b, rfl⟩ := ha _ a (Constrains.fuzzBot hε _ a)
+    obtain ⟨b, h'⟩ := ha _ a (Constrains.fuzzBot _ _ ⟨⟨γ, ε, hε, C, rfl⟩, a, rfl⟩)
+    rw [← h']
     refine' ⟨fuzz (show ⊥ ≠ (ε : TypeIndex) from bot_ne_coe) b, _⟩
     rw [completeLitterMap_eq_of_inflexibleBot ⟨⟨γ, ε, hε, C, rfl⟩, b, rfl⟩]
   · obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ := h
@@ -168,7 +169,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
     rw [smul_eq_iff_eq_inv_smul]
     refine supports (t := t) ?_ ?_
     · intros A a hc
-      have hac := Constrains.fuzz hδ hε hδε B t _ hc
+      have hac := Constrains.fuzz _ _ ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ _ hc
       specialize ha _ a hac
       obtain ⟨b, ha⟩ := ha
       have : (Tree.comp A
@@ -192,14 +193,14 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
           ((ihAction_lawful hπf _).comp _) _
           (StructAction.allowable_exactlyApproximates _ _ _ _)).symm
         refine' Relation.TransGen.tail' _
-          (Constrains.fuzz hδ hε hδε B _ _ (smul_mem_support hc _))
+          (Constrains.fuzz _ _ ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, _, rfl⟩ _ (smul_mem_support hc _))
         refine' Relation.reflTransGen_of_eq _
         refine' Address.ext _ _ rfl _
         change inl _ = inl _
         simp only [← this, ne_eq, Tree.comp_bot, Tree.toBot_inv_smul, map_inv,
           Tree.inv_apply]
     · intros A N hc
-      have hNc := Constrains.fuzz hδ hε hδε B t _ hc
+      have hNc := Constrains.fuzz _ _ ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, t, rfl⟩ _ hc
       specialize hN _ N hNc
       obtain ⟨N', hN⟩ := hN
       have : (Tree.comp A
@@ -223,7 +224,7 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
           ((ihAction_lawful hπf _).comp _) _
           (StructAction.allowable_exactlyApproximates _ _ _ _)).symm
         refine' Relation.TransGen.tail' _
-          (Constrains.fuzz hδ hε hδε B _ _ (smul_mem_support hc _))
+          (Constrains.fuzz _ _ ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, _, rfl⟩ _ (smul_mem_support hc _))
         refine' Relation.reflTransGen_of_eq _
         refine' Address.ext _ _ rfl _
         change inr _ = inr _
