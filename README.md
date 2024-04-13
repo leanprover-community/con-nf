@@ -82,3 +82,7 @@ This is an easy step to perform in set theory, but requires a lot of work in typ
 We then check that our construction indeed produces a model of TTT by checking that it satisfies a finite axiomatisation of the theory.
 We have chosen to convert Hailperin's finite axiomatisation of NF's comprehension scheme into a finite axiomatisation of TTT, which we present in our [results file](https://leanprover-community.github.io/con-nf/doc/ConNF/Model/Result.html).
 Note, however, that this choice is arbitrary, and any other finite axiomatisation can be easily proven with the infrastructure already in place.
+
+## Dependency graph
+
+![dependency graph](https://leanprover-community.github.io/con-nf/depgraph.png)
