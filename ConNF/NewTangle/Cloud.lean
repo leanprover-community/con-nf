@@ -53,7 +53,7 @@ variable [TangleDataLt] [PositionedTanglesLt] [TypedObjectsLt] [PositionedObject
 the union over all tangles in the input. -/
 def cloud (s : Set (TSet γ)) : Set (TSet β) :=
   {u | ∃ t : Tangle γ, t.set_lt ∈ s ∧
-    ∃ N : NearLitter,  N.1 = fuzz hγβ t ∧ u = typedNearLitter N}
+    ∃ N : NearLitter, N.1 = fuzz hγβ t ∧ u = typedNearLitter N}
 
 variable {hγβ}
 
