@@ -29,6 +29,10 @@ def Small (s : Set α) : Prop :=
 theorem Small.lt : Small s → #s < #κ :=
   id
 
+/-!
+## Criteria for smallness
+-/
+
 theorem Set.Subsingleton.small {α : Type _} {s : Set α} (hs : s.Subsingleton) : Small s :=
   hs.cardinal_mk_le_one.trans_lt <| one_lt_aleph0.trans_le Params.κ_isRegular.aleph0_le
 
@@ -97,6 +101,10 @@ theorem Small.pFun_image {α β : Type _} {s : Set α} (h : Small s) {f : α →
   refine' Small.image_subset Part.some Part.some_injective this _
   rintro x ⟨y, ⟨z, hz₁, hz₂⟩, rfl⟩
   exact ⟨z, hz₁, Part.eq_some_iff.mpr hz₂⟩
+
+/-!
+## Nearness
+-/
 
 /-- Two sets are near if their symmetric difference is small. -/
 def IsNear (s t : Set α) : Prop :=

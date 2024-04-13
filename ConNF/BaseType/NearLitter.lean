@@ -11,7 +11,6 @@ In this file, we define near-litters, which are sets with small symmetric differ
 * `ConNF.IsNearLitter`: Proposition stating that a set is near a given litter.
 * `ConNF.NearLitter`: The type of near-litters.
 * `ConNF.Litter.toNearLitter`: Converts a litter to its corresponding near-litter.
-* `ConNF.localCardinal`: The set of near-litters to a given litter.
 * `ConNF.NearLitter.IsLitter`: Proposition stating that a near-litter comes directly from a litter:
     it is of the form `L.toNearLitter` for some litter `L`.
 -/
@@ -181,32 +180,9 @@ theorem mk_nearLitter : #NearLitter = #μ := by
     le_rfl
     Params.μ_isStrongLimit.ne_zero
 
-/-- The *local cardinal* of a litter is the set of all near-litters to that litter. -/
-def localCardinal (L : Litter) : Set NearLitter :=
-  {N : NearLitter | N.1 = L}
-
+/-- There aer `μ` near-litters to a given litter. -/
 @[simp]
-theorem mem_localCardinal {L : Litter} {N : NearLitter} : N ∈ localCardinal L ↔ N.1 = L :=
-  Iff.rfl
-
-theorem localCardinal_nonempty (L : Litter) : (localCardinal L).Nonempty :=
-  ⟨⟨L, litterSet _, isNearLitter_litterSet _⟩, rfl⟩
-
-theorem localCardinal_disjoint : Pairwise (Disjoint on localCardinal) :=
-  fun _ _ h => disjoint_left.2 fun _ h₁ h₂ => h <| h₁.symm.trans h₂
-
-theorem localCardinal_injective : Injective localCardinal := by
-  intro L₁ L₂ h₁₂
-  by_contra h
-  have := (localCardinal_disjoint h).inter_eq
-  rw [h₁₂, inter_self] at this
-  exact (localCardinal_nonempty _).ne_empty this
-
-theorem Litter.toNearLitter_mem_localCardinal (L : Litter) : L.toNearLitter ∈ localCardinal L :=
-  rfl
-
-@[simp]
-theorem mk_localCardinal (L : Litter) : #(localCardinal L) = #μ := by
+theorem mk_nearLitter_to (L : Litter) : #{N : NearLitter | N.1 = L} = #μ := by
   refine Eq.trans (Cardinal.eq.2 ⟨⟨?_, fun x => ⟨⟨L, x⟩, rfl⟩, ?_, ?_⟩⟩) (mk_nearLitter' L)
   · rintro ⟨x, rfl : x.1 = L⟩
     exact x.snd
@@ -226,6 +202,7 @@ theorem NearLitter.IsLitter.litterSet_eq {N : NearLitter} (h : N.IsLitter) :
     litterSet N.fst = N.snd :=
   by cases h; rfl
 
+/-- The main induction rule for near-litters that are litters. -/
 theorem NearLitter.IsLitter.exists_litter_eq {N : NearLitter} (h : N.IsLitter) :
     ∃ L : Litter, N = L.toNearLitter :=
   by obtain ⟨L⟩ := h; exact ⟨L, rfl⟩
@@ -266,6 +243,7 @@ theorem symmDiff_union_inter {α : Type _} {a b : Set α} : (a ∆ b) ∪ (a ∩
   simp only [mem_union, mem_symmDiff, mem_inter_iff]
   tauto
 
+/-- Near-litters to the same litter have `κ`-sized intersection. -/
 theorem NearLitter.mk_inter_of_fst_eq_fst {N₁ N₂ : NearLitter} (h : N₁.fst = N₂.fst) :
     #(N₁ ∩ N₂ : Set Atom) = #κ := by
   rw [← isNear_iff_fst_eq_fst] at h
@@ -281,6 +259,7 @@ theorem NearLitter.inter_nonempty_of_fst_eq_fst {N₁ N₂ : NearLitter} (h : N�
   rw [← nonempty_coe_sort, ← mk_ne_zero_iff, mk_inter_of_fst_eq_fst h]
   exact mk_ne_zero κ
 
+/-- Near-litters to different litters have small intersection. -/
 theorem NearLitter.inter_small_of_fst_ne_fst {N₁ N₂ : NearLitter} (h : N₁.fst ≠ N₂.fst) :
     Small (N₁ ∩ N₂ : Set Atom) := by
   have := N₁.2.2

@@ -30,9 +30,8 @@ variable [Params.{u}] {L : Litter}
 
 /--
 A near-litter permutation is a permutation of atoms which sends near-litters to near-litters.
-It turns out that the images of near-litters near the same litter are themselves near
-the same litter. Hence a near-litter permutation induces a permutation of litters, and we keep that
-as data for simplicity.
+Then, the images of near-litters near the same litter must be near the same litter. Hence a
+near-litter permutation induces a permutation of litters, and we keep that as data for simplicity.
 
 This is sometimes called a -1-allowable permutation.
 The proposition `near` can be interpreted as saying that if `s` is an `L`-near-litter, then its
@@ -236,12 +235,6 @@ theorem smul_nearLitter_coe (π : NearLitterPerm) (N : NearLitter) :
 theorem smul_nearLitter_snd (π : NearLitterPerm) (N : NearLitter) :
     ((π • N).2 : Set Atom) = π • (N.2 : Set Atom) :=
   smul_nearLitter_coe π N
-
-@[simp]
-theorem smul_localCardinal (π : NearLitterPerm) (L : Litter) :
-    π • localCardinal L = localCardinal (π • L) := by
-  ext N
-  simp [mem_smul_set, ← eq_inv_smul_iff]
 
 @[simp]
 theorem NearLitter.mem_snd_iff (N : NearLitter) (a : Atom) : a ∈ (N.snd : Set Atom) ↔ a ∈ N :=

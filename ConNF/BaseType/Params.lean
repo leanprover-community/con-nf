@@ -26,7 +26,7 @@ used for lambda abstractions.
 
 Ordinals and cardinals are represented here as arbitrary types (not sets) with certain properties.
 For instance, `Λ` is an arbitrary type that has an ordering `<`, which is assumed to be a
-well-ordering (the `Λwo` term is a proof of this fact).
+well-ordering (the `Λ_isWellOrder` term is a proof of this fact).
 
 The prefix `#` denotes the cardinality of a type.
 -/
@@ -46,9 +46,8 @@ class Params where
   Λ_isLimit : (Ordinal.type ((· < ·) : Λ → Λ → Prop)).IsLimit
   /--
   The type indexing the atoms in each litter.
-  Its cardinality is regular, and is larger than `Λ` but smaller than `κ`.
-  It also has an additive monoid structure, which is covariant in both variables with respect to the
-  ordering.
+  It is well-ordered, has regular cardinality, and is larger than `Λ` but smaller than `κ`.
+  It also has an additive monoid structure induced by its well-ordering.
   -/
   κ : Type u
   [κ_linearOrder : LinearOrder κ]
@@ -80,12 +79,14 @@ class Params where
 export Params (Λ κ μ)
 
 /-!
-### Explicit parameters
+## Explicit parameters
 
 There exist valid parameters for the model. The smallest such parameters are
 * `Λ := ℵ_0`
 * `κ := ℵ_1`
 * `μ = ℶ_{ω_1}`.
+
+We begin by creating a few instances that allow us to use cardinals to satisfy the model parameters.
 -/
 
 theorem noMaxOrder_of_ordinal_type_eq {α : Type u} [Preorder α] [Infinite α] [IsWellOrder α (· < ·)]
@@ -209,6 +210,8 @@ noncomputable def sub_of_isWellOrder {α : Type _}
     (Ordinal.typein (· < ·) x - Ordinal.typein (· < ·) y)
       ((Ordinal.sub_le_self _ _).trans_lt (Ordinal.typein_lt_type _ _))
 
+/-- The smallest set of valid parameters for the model.
+They are instantiated in Lean's minimal universe `0`. -/
 noncomputable def minimalParams : Params.{0} where
   Λ := ℕ
   Λ_zero_le := zero_le
@@ -249,7 +252,7 @@ noncomputable def minimalParams : Params.{0} where
 
 variable [Params.{u}] {ι α β : Type u}
 
-/-! The types `Λ`, `κ`, `μ` are inhabited and infinite. -/
+/-! Here, we unpack the hypotheses on `Λ`, `κ`, `μ` into instances that Lean can see. -/
 
 theorem aleph0_le_mk_Λ : ℵ₀ ≤ #Λ := by
   have := Ordinal.card_le_card (Ordinal.omega_le_of_isLimit Params.Λ_isLimit)
@@ -287,6 +290,10 @@ instance : NoMaxOrder μ := by
   have := Cardinal.ord_isLimit Params.μ_isStrongLimit.isLimit.aleph0_le
   rw [← Params.μ_ord] at this
   exact noMaxOrder_of_ordinal_type_eq this
+
+/-!
+## The ordered structure on `κ`
+-/
 
 def κ_ofNat : ℕ → κ
   | 0 => 0
@@ -398,6 +405,10 @@ theorem κ_lt_sub_iff {i j k : κ} : k < i - j ↔ j + k < i := by
   rw [← Ordinal.typein_lt_typein (α := κ) (· < ·), ← Ordinal.typein_lt_typein (α := κ) (· < ·)]
   rw [Params.κ_add_typein, Params.κ_sub_typein, Ordinal.lt_sub]
 
+/-!
+## Type indices
+-/
+
 /-- Either the base type or a proper type index (an element of `Λ`).
 The base type is written `⊥`. -/
 @[reducible]
@@ -413,15 +424,16 @@ instance : WellFoundedRelation Λ :=
 instance : WellFoundedRelation TypeIndex :=
   IsWellOrder.toHasWellFounded
 
+/-- There are exactly `Λ` type indices. -/
 @[simp]
 theorem mk_typeIndex : #TypeIndex = #Λ :=
   mk_option.trans <| add_eq_left aleph0_le_mk_Λ <| one_le_aleph0.trans aleph0_le_mk_Λ
 
-/-- Principal segments (sets of the form `{y | y < x}`) have cardinality `< μ`. -/
+/-- Sets of the form `{y | y < x}` have cardinality `< μ`. -/
 theorem card_Iio_lt (x : μ) : #(Set.Iio x) < #μ :=
   card_typein_lt (· < ·) x Params.μ_ord.symm
 
-/-- Initial segments (sets of the form `{y | y ≤ x}`) have cardinality `< μ`. -/
+/-- Sets of the form `{y | y ≤ x}` have cardinality `< μ`. -/
 theorem card_Iic_lt (x : μ) : #(Set.Iic x) < #μ := by
   rw [← Set.Iio_union_right, mk_union_of_disjoint, mk_singleton]
   -- TODO: This isn't the morally correct proof because it uses the fact `μ` is a limit cardinal.

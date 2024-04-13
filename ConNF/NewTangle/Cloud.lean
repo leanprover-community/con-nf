@@ -47,8 +47,6 @@ variable [TangleDataLt] [PositionedTanglesLt] [TypedObjectsLt] [PositionedObject
   {γ : TypeIndex} [LtLevel γ] {β : Λ} [LtLevel β]
   (hγβ : γ ≠ β)
 
--- TODO: Remove `localCardinal`
-
 /-- The cloud map. We map each tangle to all typed near-litters near the `fuzz`ed tangle, and take
 the union over all tangles in the input. -/
 def cloud (s : Set (TSet γ)) : Set (TSet β) :=
@@ -85,7 +83,7 @@ theorem cloud_nonempty (hγβ : γ ≠ β) : (cloud hγβ s).Nonempty ↔ s.None
   simp_rw [nonempty_iff_ne_empty, Ne.def, cloud_eq_empty]
 
 theorem subset_cloud (t : Tangle γ) (ht : t.set_lt ∈ s) :
-    typedNearLitter '' localCardinal (fuzz hγβ t) ⊆ cloud hγβ s := by
+    typedNearLitter '' {N | N.1 = fuzz hγβ t} ⊆ cloud hγβ s := by
   rintro _ ⟨N, hN, rfl⟩
   exact ⟨t, ht, N, hN, rfl⟩
 
@@ -93,7 +91,7 @@ theorem μ_le_mk_cloud : s.Nonempty → #μ ≤ #(cloud hγβ s) := by
   rintro ⟨t, ht⟩
   obtain ⟨t, rfl⟩ := exists_tangle_lt t
   refine' (Cardinal.mk_le_mk_of_subset <| subset_cloud t ht).trans_eq' _
-  rw [Cardinal.mk_image_eq, mk_localCardinal]
+  rw [Cardinal.mk_image_eq, mk_nearLitter_to]
   exact typedNearLitter.inj'
 
 theorem subset_of_cloud_subset (s₁ s₂ : Set (TSet γ)) (h : cloud hγβ s₁ ⊆ cloud hγβ s₂) :
