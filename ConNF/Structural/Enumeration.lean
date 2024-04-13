@@ -2,6 +2,19 @@ import Mathlib.Data.Set.Pointwise.SMul
 import ConNF.BaseType.Small
 import ConNF.Structural.Index
 
+/-!
+# Enumerations
+
+In this file, we define sequences indexed by "small ordinals", which here is taken to mean
+some inhabitant of `κ`.
+
+## Main declarations
+
+* `ConNF.Enumeration`: The type of enumerations.
+* `ConNF.mk_enumeration` and `ConNF.mk_enumeration_le`: Bounds on the size of the type of
+enumerations.
+-/
+
 open Cardinal Ordinal
 
 open scoped Cardinal Pointwise
@@ -12,12 +25,14 @@ namespace ConNF
 
 variable [Params.{u}] {α β : Type _}
 
-/-- An *`α`-enumeration* is a function from an initial segment of κ to `α`. -/
+/-- An *`α`-enumeration* is a function from a proper initial segment of `κ` to `α`. -/
 @[ext]
 structure Enumeration (α : Type _) where
   max : κ
   f : (i : κ) → i < max → α
 
+/-- The main induction principle for enumerations. This statement of extensionality avoids dealing
+with heterogeneous equality. -/
 theorem Enumeration.ext' {E F : Enumeration α} (h : E.max = F.max)
     (h' : ∀ (i : κ) (hE : i < E.max) (hF : i < F.max), E.f i hE = F.f i hF) :
     E = F := by
@@ -31,6 +46,8 @@ theorem Enumeration.ext' {E F : Enumeration α} (h : E.max = F.max)
   ext h
   exact h' i h h
 
+/-- The range of an enumeration. We say that some inhabitant of `α` is "in" an enumeration `E`
+if it is an element of the carrier. -/
 def Enumeration.carrier (E : Enumeration α) : Set α :=
   { c | ∃ i, ∃ (h : i < E.max), c = E.f i h }
 
@@ -58,6 +75,7 @@ theorem Enumeration.carrier_small (E : Enumeration α) : Small E.carrier := by
   rintro ⟨_, i, h, rfl⟩
   exact ⟨⟨i, h⟩, rfl⟩
 
+/-- Enumerations give rise to small sets. -/
 theorem Enumeration.small (E : Enumeration α) : Small (E : Set α) :=
   E.carrier_small
 
@@ -87,6 +105,13 @@ theorem Enumeration.singleton_f (x : α) (i : κ) (hi : i < (Enumeration.singlet
     (Enumeration.singleton x).f i hi = x :=
   rfl
 
+/-!
+## Counting enumerations
+
+We now establish that there are precisely `μ` enumerations taking values in `α`, given that `α` has
+size `μ`. This requires a technical lemma about cardinal arithmetic, given in `mk_fun_le`.
+-/
+
 def enumerationEquiv : Enumeration α ≃ Σ max : κ, Set.Iio max → α where
   toFun E := ⟨E.max, fun x => E.f x x.prop⟩
   invFun E := ⟨E.1, fun i h => E.2 ⟨i, h⟩⟩
@@ -97,6 +122,8 @@ def funMap (α β : Type _) [LT β] (f : α → β) :
     { E : Set β // #E ≤ #α } × (α → α → Prop) :=
   ⟨⟨Set.range f, mk_range_le⟩, InvImage (· < ·) f⟩
 
+/-- Suppose that `β` is well-ordered. Then, a function `f : α → β` is uniquely determined by its
+range together with the inverse image of the `<` relation under `f`. -/
 theorem funMap_injective {α β : Type _} [LinearOrder β] [IsWellOrder β (· < ·)] :
     Function.Injective (funMap α β) := by
   intro f g h
@@ -131,6 +158,9 @@ theorem funMap_injective {α β : Type _} [LinearOrder β] [IsWellOrder β (· <
     have := h₂.trans_eq (h₁.symm.trans this)
     cases lt_irrefl _ this
 
+/-- The amount of functions `α → β` is bounded by the amount of subsets of `β` of size at most `α`,
+multiplied by the amount of relations on `α`. We prove this by giving `β` an arbitrary well-ordering
+and using `funMap_injective`. -/
 theorem mk_fun_le {α β : Type u} :
     #(α → β) ≤ #({ E : Set β // #E ≤ #α } × (α → α → Prop)) := by
   classical
@@ -170,6 +200,10 @@ theorem pow_lt_of_isStrongLimit' {α β γ : Type u} [Infinite β]
   · rw [← power_mul, mul_eq_self (Cardinal.infinite_iff.mp inferInstance)]
     exact hγ.2 _ hβ
 
+/-- If `μ` is a strong limit cardinal and `κ` is less than the cofinality of `μ`, then
+`μ ^ κ ≤ μ`. This is a partial converse to a certain form of König's theorem
+(`Cardinal.lt_power_cof`), which implies that `μ < μ ^ κ` if `κ` is at least the
+cofinality of `μ`. -/
 theorem pow_le_of_isStrongLimit {κ μ : Cardinal.{u}} (h₁ : IsStrongLimit μ) (h₂ : κ < μ.ord.cof) :
     μ ^ κ ≤ μ := by
   by_cases h : κ < ℵ₀
@@ -181,6 +215,7 @@ theorem pow_le_of_isStrongLimit {κ μ : Cardinal.{u}} (h₁ : IsStrongLimit μ)
     have := Cardinal.infinite_iff.mpr h₁.isLimit.aleph0_le
     exact pow_le_of_isStrongLimit' h₁ h₂
 
+/-- Strong limits are closed under exponentials. -/
 theorem pow_lt_of_isStrongLimit {ξ κ μ : Cardinal.{u}}
     (hξ : ξ < μ) (hκ : κ < μ) (hμ : IsStrongLimit μ) : ξ ^ κ < μ := by
   by_cases h : κ < ℵ₀
@@ -198,7 +233,7 @@ theorem pow_lt_of_isStrongLimit {ξ κ μ : Cardinal.{u}}
     have := infinite_iff.mpr (le_of_not_lt h)
     exact pow_lt_of_isStrongLimit' hα hβ hγ
 
-/-- Given that `#α = #μ`, there are exactly `μ` Enumerations. -/
+/-- Given that `#α = #μ`, there are exactly `μ` enumerations. -/
 theorem mk_enumeration (mk_α : #α = #μ) : #(Enumeration α) = #μ := by
   refine le_antisymm ?_ ?_
   · rw [Cardinal.mk_congr enumerationEquiv]
@@ -316,6 +351,11 @@ theorem mk_enumeration_lt (h : #α < #μ) : #(Enumeration α) < #μ := by
 
 namespace Enumeration
 
+/-!
+## Operations on enumerations
+-/
+
+/-- The image of an enumeration under a function. -/
 def image (E : Enumeration α) (f : α → β) : Enumeration β where
   max := E.max
   f i hi := f (E.f i hi)
@@ -356,6 +396,7 @@ theorem apply_eq_of_image_eq {E : Enumeration α} (f : α → α)
   conv at this => lhs; simp only [hE]
   exact this.symm
 
+/-- The pointwise image of an enumeration under a group action (or similar). -/
 instance {G : Type _} [SMul G α] : SMul G (Enumeration α) where
   smul g E := E.image (g • ·)
 
@@ -388,6 +429,7 @@ theorem smul_eq_of_smul_eq {G : Type _} [SMul G α] {g : G} {E : Enumeration α}
     (hE : g • E = E) {x : α} (hx : x ∈ E) : g • x = x :=
   apply_eq_of_image_eq _ hE hx
 
+/-- Any group that acts on `α` also acts on `α`-valued enumerations pointwise. -/
 instance {G : Type _} [Monoid G] [MulAction G α] : MulAction G (Enumeration α) where
   one_smul := by
     rintro ⟨i, f⟩
@@ -412,6 +454,7 @@ theorem smul_mem_smul_iff {G : Type _} [Group G] [MulAction G α]
     rwa [inv_smul_smul, inv_smul_smul] at this
   · exact (smul_mem_smul · g)
 
+/-- The concatenation of two enumerations. -/
 instance : Add (Enumeration α) where
   add E F := ⟨E.max + F.max, fun i hi =>
     if hi' : i < E.max then
@@ -470,14 +513,6 @@ theorem mem_add_iff (E F : Enumeration α) (x : α) :
   rw [add_coe]
   rfl
 
-/-- TODO: Move this -/
-instance : IsLeftCancelAdd κ := by
-  constructor
-  intro i j k h
-  have := congr_arg (Ordinal.typein (· < ·)) h
-  rw [Params.κ_add_typein, Params.κ_add_typein, Ordinal.add_left_cancel] at this
-  exact Ordinal.typein_injective _ this
-
 theorem add_congr {E F G H : Enumeration α} (hEF : E.max = F.max) (h : E + G = F + H) :
     E = F ∧ G = H := by
   have : E = F
@@ -499,6 +534,7 @@ theorem add_congr {E F G H : Enumeration α} (hEF : E.max = F.max) (h : E + G = 
     simp_rw [h, h₂] at h₁
     exact h₁.symm
 
+/-- Group actions distribute over sums of enumerations. -/
 @[simp]
 theorem smul_add {G : Type _} [SMul G α] {g : G} (E F : Enumeration α) :
     g • (E + F) = g • E + g • F := by
@@ -512,6 +548,11 @@ theorem smul_add {G : Type _} [SMul G α] {g : G} (E F : Enumeration α) :
       add_f_right (show i < (g • E + g • F).max from hi)
         (show (g • E).max ≤ i from le_of_not_lt hi'), smul_f]
     rfl
+
+/-!
+# The partial order on enumerations
+We say that `E ≤ F` when `F` has larger domain than `E` and agrees on the smaller domain.
+-/
 
 instance : LE (Enumeration α) where
   le E F := E.max ≤ F.max ∧ ∀ (i : κ) (hE : i < E.max) (hF : i < F.max), E.f i hE = F.f i hF
@@ -582,6 +623,11 @@ theorem le_add (E F : Enumeration α) : E ≤ E + F := by
 noncomputable section
 open scoped Classical
 
+/-!
+## Converting sets to enumerations
+We describe a procedure to produce an enumeration whose carrier is any given small set.
+-/
+
 theorem ord_lt_of_small {s : Set α} (hs : Small s) [LinearOrder s] [IsWellOrder s (· < ·)] :
     type ((· < ·) : s → s → Prop) < type ((· < ·) : κ → κ → Prop) := by
   by_contra! h
@@ -615,6 +661,7 @@ theorem ofSet'_coe (s : Set α) (hs : Small s) [LinearOrder s] [IsWellOrder s (�
       exact typein_lt_type _ _
     · simp only [typein_enum, enum_typein]
 
+/-- Converts a small set `s` into an enumeration with carrier set `s`. -/
 def ofSet (s : Set α) (hs : Small s) : Enumeration α :=
   letI := (IsWellOrder.subtype_nonempty (σ := s)).some.prop
   letI := linearOrderOfSTO (IsWellOrder.subtype_nonempty (σ := s)).some.val
@@ -632,18 +679,6 @@ theorem mem_ofSet_iff (s : Set α) (hs : Small s) (x : α) :
     x ∈ ofSet s hs ↔ x ∈ s := by
   change x ∈ (ofSet s hs : Set α) ↔ x ∈ s
   rw [ofSet_coe]
-
-def chooseIndex (E : Enumeration α) (p : α → Prop)
-    (h : ∃ i : κ, ∃ h : i < E.max, p (E.f i h)) : κ :=
-  h.choose
-
-theorem chooseIndex_lt {E : Enumeration α} {p : α → Prop}
-    (h : ∃ i : κ, ∃ h : i < E.max, p (E.f i h)) : E.chooseIndex p h < E.max :=
-  h.choose_spec.choose
-
-theorem chooseIndex_spec {E : Enumeration α} {p : α → Prop}
-    (h : ∃ i : κ, ∃ h : i < E.max, p (E.f i h)) : p (E.f (E.chooseIndex p h) (chooseIndex_lt h)) :=
-  h.choose_spec.choose_spec
 
 end
 

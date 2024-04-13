@@ -405,6 +405,13 @@ theorem κ_lt_sub_iff {i j k : κ} : k < i - j ↔ j + k < i := by
   rw [← Ordinal.typein_lt_typein (α := κ) (· < ·), ← Ordinal.typein_lt_typein (α := κ) (· < ·)]
   rw [Params.κ_add_typein, Params.κ_sub_typein, Ordinal.lt_sub]
 
+instance : IsLeftCancelAdd κ := by
+  constructor
+  intro i j k h
+  have := congr_arg (Ordinal.typein (· < ·)) h
+  rw [Params.κ_add_typein, Params.κ_add_typein, Ordinal.add_left_cancel] at this
+  exact Ordinal.typein_injective _ this
+
 /-!
 ## Type indices
 -/

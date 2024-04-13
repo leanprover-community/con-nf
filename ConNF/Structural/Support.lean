@@ -115,7 +115,7 @@ theorem smul_address_eq_smul_iff :
 
 end NearLitterPerm
 
-/-- A *support* is a function from an initial segment of κ to the type of addresses. -/
+/-- A *support* is a function from an initial segment of `κ` to the type of addresses. -/
 abbrev Support (α : TypeIndex) := Enumeration (Address α)
 
 /-- There are exactly `μ` supports. -/
@@ -123,6 +123,7 @@ abbrev Support (α : TypeIndex) := Enumeration (Address α)
 theorem mk_support : #(Support α) = #μ :=
   mk_enumeration (mk_address α)
 
+/-- A useful lemma that avoids the hypothesis `i < T.max`. -/
 theorem support_f_congr {S T : Support α} (h : S = T) (i : κ) (hS : i < S.max) :
     S.f i hS = T.f i (h ▸ hS) := by
   cases h
