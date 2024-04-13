@@ -17,7 +17,7 @@ section FOA
 
 variable [Level] {β γ : Λ} [iβ : LtLevel β] [iγ : LtLevel γ] (hγ : (γ : TypeIndex) < β)
 
-local instance : FOAAssumptions := Construction.FOA.foaAssumptions
+local instance : FOAAssumptions := MainInduction.FOA.foaAssumptions
 
 theorem symmetric_of_image_singleton_symmetric' (s : Set (TSet γ))
     (h : Symmetric (coe_lt_coe.mp iβ.elim) (.singleton (coe_lt_coe.mp hγ) '' s)) :

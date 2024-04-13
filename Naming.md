@@ -26,7 +26,7 @@ Follow the [mathlib4 naming convention](https://github.com/leanprover-community/
 | Litters                                  | `L` or `L₁, L₂` |
 | Near-litters                             | `N` or `N₁, N₂` |
 | Sublitters                               | `S` or `S₁, S₂` |
-| Tangles or semitangles                   | `t` or `t₁, t₂` |
+| Tangles or t-sets                        | `t` or `t₁, t₂` |
 | Addresses                                | `c₁, c₂`        |
 | Codes                                    | `c, d`          |
 | Paths of type indices                    | `A, B`          |
@@ -34,5 +34,5 @@ Follow the [mathlib4 naming convention](https://github.com/leanprover-community/
 | Near-litter or structural behaviours     | `ξ, ξ'`         |
 | Near-litter or structural approximations | `φ, φ'`         |
 | Near-litter or structural permutations   | `π, π'`         |
-| Allowable or semiallowable permutations  | `ρ, ρ'`         |
+| Allowable permutations                   | `ρ, ρ'`         |
 | Coding functions                         | `χ, χ'`         |

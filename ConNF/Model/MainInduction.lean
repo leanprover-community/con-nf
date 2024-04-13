@@ -1,4 +1,4 @@
-import ConNF.NewTangle
+import ConNF.Construction
 import ConNF.Counting
 import ConNF.Model.CountZero
 
@@ -8,7 +8,7 @@ open scoped Cardinal
 
 universe u
 
-namespace ConNF.Construction
+namespace ConNF.MainInduction
 
 variable [Params.{u}] [BasePositions]
 
@@ -856,7 +856,7 @@ def newAllowableCons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
 theorem newAllowableCons_map_one (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (γ : TypeIndex) [letI : Level := ⟨α⟩; LeLevel γ] (hγ : γ < α) :
     newAllowableCons α ihs γ hγ 1 = 1 := by
-  simp only [newAllowableCons, NewAllowable.coe_one, SemiallowablePerm.one_apply,
+  simp only [newAllowableCons, NewAllowable.coe_one, Derivatives.one_apply,
     Equiv.symm_apply_eq, foaData_allowable_lt'_equiv_one]
 
 @[simp]
@@ -864,7 +864,7 @@ theorem newAllowableCons_map_mul (α : Λ) (ihs : (β : Λ) → β < α → IH �
     (γ : TypeIndex) [letI : Level := ⟨α⟩; LeLevel γ] (hγ : γ < α) (ρ₁ ρ₂) :
     newAllowableCons α ihs γ hγ (ρ₁ * ρ₂) =
     newAllowableCons α ihs γ hγ ρ₁ * newAllowableCons α ihs γ hγ ρ₂ := by
-  simp only [newAllowableCons, NewAllowable.coe_mul, SemiallowablePerm.mul_apply,
+  simp only [newAllowableCons, NewAllowable.coe_mul, Derivatives.mul_apply,
     Equiv.symm_apply_eq, foaData_allowable_lt'_equiv_mul, Equiv.apply_symm_apply]
 
 theorem newAllowableCons_toStructPerm (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -1047,7 +1047,7 @@ theorem allowableConsStep_eq_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β
     letI : LeLevel α := ⟨le_rfl⟩
     letI : LtLevel γ := ⟨coe_lt_coe.mpr hγ⟩
     letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
-    (foaData_allowable_eq_equiv α ihs ρ : SemiallowablePerm) γ =
+    (foaData_allowable_eq_equiv α ihs ρ : Derivatives) γ =
     foaData_allowable_lt_equiv α ihs γ hγ
       (allowableConsStep α ihs h α γ (coe_lt_coe.mpr hγ) ρ) := by
   letI : Level := ⟨α⟩
@@ -1069,7 +1069,7 @@ theorem allowableConsStep_eq_eq' (α : Λ) (ihs : (β : Λ) → β < α → IH �
     letI : LeLevel α := ⟨le_rfl⟩
     letI : LtLevel γ := ⟨hγ⟩
     letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
-    (foaData_allowable_eq_equiv α ihs ρ : SemiallowablePerm) γ =
+    (foaData_allowable_eq_equiv α ihs ρ : Derivatives) γ =
     foaData_allowable_lt'_equiv α ihs γ hγ (allowableConsStep α ihs h α γ hγ ρ) := by
   revert hγ
   refine WithBot.recBotCoe ?_ ?_ γ
@@ -1184,7 +1184,7 @@ theorem allowable_of_smulFuzz_step (α : Λ) (ihs : (β : Λ) → β < α → IH
     have hρ :
       letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
       letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
-      SemiallowablePerm.IsAllowable
+      Derivatives.IsAllowable
         (fun γ hγ => foaData_allowable_lt'_equiv α ihs γ hγ.elim (ρs γ hγ.elim))
     · intro γ iγ δ iδ hγδ t
       have := hρs γ δ iγ.elim iδ.elim hγδ ((foaData_tangle_lt'_equiv α ihs γ iγ.elim).symm t)
@@ -1276,7 +1276,7 @@ theorem eq_toStructSet_of_mem_step (α : Λ) (ihs : (β : Λ) → β < α → IH
   · cases hβ
     intro t₂ ht₂
     erw [foaData_tSet_eq_equiv_toStructSet α ihs t₁] at ht₂
-    simp only [NewTSet.toStructSet, Semitangle.toStructSet, StructSet.ofCoe_symm, exists_and_right,
+    simp only [NewTSet.toStructSet, ExtensionalSet.toStructSet, StructSet.ofCoe_symm, exists_and_right,
       StructSet.ofCoe_toCoe, mem_setOf_eq] at ht₂
     obtain ⟨s, _, rfl⟩ := ht₂
     have := foaData_tSet_lt_equiv_toStructSet α ihs γ (coe_lt_coe.mp hγβ)
@@ -1449,7 +1449,7 @@ noncomputable def posStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-  fun t => NewTangle.pos (mk_tSet_step α ihs h) (t.set, t.support)
+  fun t => Construction.pos (mk_tSet_step α ihs h) (t.set, t.support)
 
 theorem posStep_injective (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
@@ -1462,7 +1462,7 @@ theorem posStep_injective (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
   intro t₁ t₂ ht
-  have := NewTangle.pos_injective (mk_tSet_step α ihs h) ht
+  have := Construction.pos_injective (mk_tSet_step α ihs h) ht
   simp only [Prod.mk.injEq] at this
   exact Tang.ext _ _ this.1 this.2
 
@@ -1482,7 +1482,7 @@ theorem posStep_typedNearLitter (α : Λ) (ihs : (β : Λ) → β < α → IH β
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
   intro N t hN
-  have := NewTangle.pos_not_mem_deny (mk_tSet_step α ihs h) (t.set, t.support)
+  have := Construction.pos_not_mem_deny (mk_tSet_step α ihs h) (t.set, t.support)
   contrapose! this
   refine ⟨pos N, ?_, this.le⟩
   exact Or.inr ⟨N, hN, rfl⟩
@@ -1623,7 +1623,7 @@ theorem pos_lt_pos_atom (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   letI := (buildStep α ihs h).modelData
   intro h₁
   by_contra! h₂
-  refine NewTangle.pos_not_mem_deny (mk_tSet_step α ihs h) ⟨TangleCoe.set t, TangleCoe.support t⟩ ?_
+  refine Construction.pos_not_mem_deny (mk_tSet_step α ihs h) ⟨TangleCoe.set t, TangleCoe.support t⟩ ?_
   refine ⟨pos a, ?_, h₂⟩
   exact Or.inl (Or.inl ⟨A, a, h₁, rfl⟩)
 
@@ -1642,7 +1642,7 @@ theorem pos_lt_pos_nearLitter (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   letI := (buildStep α ihs h).modelData
   intro h₁ h₂
   by_contra! h₃
-  refine NewTangle.pos_not_mem_deny (mk_tSet_step α ihs h) ⟨TangleCoe.set t, TangleCoe.support t⟩ ?_
+  refine Construction.pos_not_mem_deny (mk_tSet_step α ihs h) ⟨TangleCoe.set t, TangleCoe.support t⟩ ?_
   refine ⟨pos N, ?_, h₃⟩
   exact Or.inl (Or.inr ⟨A, N, h₁, h₂, rfl⟩)
 
@@ -1976,4 +1976,4 @@ noncomputable def buildCumulStep (α : Λ) (ihs : ∀ β < α, IHCumul β) : IHC
 noncomputable def buildCumul : (α : Λ) → IHCumul α :=
   Params.Λ_isWellOrder.wf.fix buildCumulStep
 
-end ConNF.Construction
+end ConNF.MainInduction

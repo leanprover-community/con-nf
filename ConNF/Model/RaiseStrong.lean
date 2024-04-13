@@ -12,7 +12,7 @@ namespace ConNF.Support
 
 variable [Params.{u}] [Level] {β γ : Λ} [iβ : LtLevel β] [iγ : LtLevel γ] (hγ : (γ : TypeIndex) < β)
 
-local instance : FOAAssumptions := Construction.FOA.foaAssumptions
+local instance : FOAAssumptions := MainInduction.FOA.foaAssumptions
 
 theorem toPath_comp_eq_cons {α β γ δ : TypeIndex} (hβ : β < α) (hγ : γ < α) (hδ : δ < γ)
     (A : Path β δ) (B : Path α γ)

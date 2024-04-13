@@ -1,14 +1,15 @@
 import Mathlib.Data.Set.Pairwise.Lattice
 import ConNF.Mathlib.Logic
 import ConNF.Fuzz
-import ConNF.NewTangle.Code
+import ConNF.Construction.Code
 
 /-!
 # The `cloud` map
 
-The `cloud` map from `γ` to `β ≠ γ` sends a set of `γ`-tangles to a set of `β`-tangles.
-Each `γ`-tangle in the domain is sent to a "cloud" of `β`-typed near-litters, representing "junk"
-at level `β`. This map will used to identify codes that represent the same TTT object.
+The `cloud` map from `γ` to `β ≠ γ` sends a set of t-sets of type `γ` to a set of t-sets
+of type `β`. Each t-set of type `γ` in the domain is sent to a "cloud" of `β`-typed near-litters,
+representing "junk" at level `β`. This map will used to identify codes that represent the same TTT
+object.
 
 An important property for intuition is that the `cloud` maps have disjoint ranges (except on empty
 codes) and are each injective, so if we connect each code to its images under the `cloud` maps,
@@ -27,6 +28,7 @@ we get a tree (except for empty codes, which form a complete graph).
 ## Notation
 
 * `c ↝₀ d`: `d` is the image of `c` under the `cloudCode` map.
+* `c ↝ d`: `d` is the image of the nonempty code `c` under the `cloudCode` map.
 -/
 
 open Function Set WithBot
@@ -47,8 +49,8 @@ variable [ModelDataLt] [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjects
   {γ : TypeIndex} [LtLevel γ] {β : Λ} [LtLevel β]
   (hγβ : γ ≠ β)
 
-/-- The cloud map. We map each tangle to all typed near-litters near the `fuzz`ed tangle, and take
-the union over all tangles in the input. -/
+/-- The cloud map. We map each t-set to all typed near-litters near any `fuzz`ed tangle with this
+t-set, and take the union over all t-sets in the input. -/
 def cloud (s : Set (TSet γ)) : Set (TSet β) :=
   {u | ∃ t : Tangle γ, t.set_lt ∈ s ∧
     ∃ N : NearLitter, N.1 = fuzz hγβ t ∧ u = typedNearLitter N}
@@ -154,6 +156,7 @@ theorem set_invImage_nonempty (s : Set (TSet γ)) (hs : s.Nonempty) :
   obtain ⟨t, rfl⟩ := exists_tangle_lt t
   exact ⟨t, ht⟩
 
+/-- The minimum tangle with a t-set in `s`. -/
 noncomputable def minTSet (s : Set (TSet γ)) (hs : s.Nonempty) : Tangle γ :=
   minTangle (Tangle.set_lt ⁻¹' s) (set_invImage_nonempty s hs)
 

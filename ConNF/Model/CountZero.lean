@@ -1,5 +1,5 @@
 import ConNF.Mathlib.PFun
-import ConNF.NewTangle
+import ConNF.Construction
 import ConNF.FOA
 import ConNF.Counting.CountStrongOrbit
 
@@ -9,7 +9,7 @@ open scoped Cardinal Pointwise symmDiff
 
 universe u
 
-namespace ConNF.Construction
+namespace ConNF.MainInduction
 
 variable [Params.{u}] [BasePositions]
 
@@ -128,7 +128,7 @@ theorem eq_bot_zero_of_lt (γ β : TypeIndex) [iβ : LeLevel β] [iγ : LeLevel 
   · exact ⟨rfl, rfl⟩
   · cases (Params.Λ_zero_le γ).not_lt (coe_lt_coe.mp h)
 
-def toSemiallowable (π : NearLitterPerm) : SemiallowablePerm :=
+def toSemiallowable (π : NearLitterPerm) : Derivatives :=
   fun β _ => eq_bot_of_ltLevel β ▸ (show Allowable ⊥ from π)
 
 theorem toSemiallowable_allowable (π : NearLitterPerm) :
@@ -142,8 +142,8 @@ def toAllowable (π : NearLitterPerm) : NewAllowable :=
 
 def zeroDerivative : NewAllowable →* NearLitterPerm :=
   ⟨⟨fun ρ => ρ.val ⊥,
-    by simp only [NewAllowable.coe_one, SemiallowablePerm.one_apply]⟩,
-    by simp only [NewAllowable.coe_mul, SemiallowablePerm.mul_apply, forall_const]⟩
+    by simp only [NewAllowable.coe_one, Derivatives.one_apply]⟩,
+    by simp only [NewAllowable.coe_mul, Derivatives.mul_apply, forall_const]⟩
 
 instance {X : Type _} [MulAction NearLitterPerm X] : MulAction (Allowable (0 : Λ)) X :=
   MulAction.compHom _ zeroDerivative
@@ -1192,9 +1192,9 @@ theorem mk_supportOrbit_zero_le : #(SupportOrbit 0) < #μ := by
   rw [Cardinal.power_self_eq Params.κ_isRegular.aleph0_le]
   exact Params.μ_isStrongLimit.2 #κ Params.κ_lt_μ
 
-def zeroExtension' {members : Extensions} : Semitangle.Preference members → Set Atom
-  | Semitangle.Preference.base atoms _ => atoms
-  | Semitangle.Preference.proper γ _ _ => (not_ltLevel γ).elim
+def zeroExtension' {members : Extensions} : ExtensionalSet.Preference members → Set Atom
+  | ExtensionalSet.Preference.base atoms _ => atoms
+  | ExtensionalSet.Preference.proper γ _ _ => (not_ltLevel γ).elim
 
 def zeroExtension (t : NewTSet) : Set Atom :=
   zeroExtension' t.val.pref
@@ -1206,7 +1206,7 @@ theorem zeroExtension_injective : Function.Injective zeroExtension := by
   · funext γ hγ
     cases not_ltLevel γ
   cases this
-  simp only [Semitangle.mk.injEq, heq_eq_eq, true_and]
+  simp only [ExtensionalSet.mk.injEq, heq_eq_eq, true_and]
   cases p₁
   case proper β _ _ _ =>
     cases not_ltLevel β
@@ -1299,4 +1299,4 @@ theorem mk_codingFunction_zero_le : #(CodingFunction 0) < #μ := by
   refine mul_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le mk_supportOrbit_zero_le ?_
   exact Params.μ_isStrongLimit.2 _ Params.κ_lt_μ
 
-end ConNF.Construction
+end ConNF.MainInduction

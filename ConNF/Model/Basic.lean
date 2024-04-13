@@ -87,7 +87,7 @@ theorem ofCoe_toStructSet_apply_eq {β α : Λ} (hβ : β < α) (t : TSet α) :
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
   rw [toStructSet_eq t, NewTSet.toStructSet]
-  exact congr_fun₂ (Semitangle.toStructSet_ofCoe (tSetEquiv α t).val) β (coe_lt_coe.mpr hβ)
+  exact congr_fun₂ (ExtensionalSet.toStructSet_ofCoe (tSetEquiv α t).val) β (coe_lt_coe.mpr hβ)
 
 @[simp]
 theorem mem_mk_iff {β α : Λ} (hβ : β < α) (s : Set (TSet β)) (hs : Symmetric hβ s) (t : TSet β) :
@@ -104,7 +104,7 @@ theorem eq_toStructSet_of_mem {β α : Λ} (hβ : β < α) (t₁ : TSet α) (t�
     t₂ ∈ StructSet.ofCoe (NewTSet.toStructSet (tSetEquiv α t₁)) β (coe_lt_coe.mpr hβ) →
     ∃ t₂' : TSet β, t₂ = toStructSet t₂' := by
   intro h
-  simp only [NewTSet.toStructSet, Semitangle.toStructSet, Equiv.apply_symm_apply] at h
+  simp only [NewTSet.toStructSet, ExtensionalSet.toStructSet, Equiv.apply_symm_apply] at h
   obtain ⟨s, _, hs⟩ := h
   exact ⟨s, hs.symm⟩
 

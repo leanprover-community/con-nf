@@ -9,7 +9,7 @@ open scoped Cardinal symmDiff
 
 universe u
 
-namespace ConNF.Construction
+namespace ConNF.MainInduction
 
 variable [Params.{u}]
 
@@ -302,4 +302,4 @@ noncomputable instance : BasePositions where
     simp only [Function.Embedding.coeFn_mk, Function.comp_apply, OrderIso.lt_iff_lt]
     exact lt_pos_symmDiff'
 
-end ConNF.Construction
+end ConNF.MainInduction

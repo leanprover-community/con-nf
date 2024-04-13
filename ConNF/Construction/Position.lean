@@ -1,7 +1,13 @@
-import ConNF.NewTangle.NewTangle
+import ConNF.Construction.NewTSet
 
 /-!
-# Position function
+# Construction of position functions
+
+Assuming that there are only `μ` t-sets at level `α`, we can construct a position function for them.
+
+## Main declarations
+
+* `CoNNF.Construction.pos`: A position function for type `α` t-sets.
 -/
 
 open Function Set Sum WithBot
@@ -10,11 +16,13 @@ open scoped Cardinal Pointwise
 
 universe u
 
-namespace ConNF.NewTangle
+namespace ConNF.Construction
 
 variable [Params.{u}] [Level] [BasePositions] [ModelDataLt] [PositionedTanglesLt] [TypedObjectsLt]
   [PositionedObjectsLt]
 
+/-- The position of `t` must be greater than elements of this small set. Since it is small, it
+cannot be cofinal in `μ`. -/
 def posBound (t : NewTSet) (S : Support α) : Set μ :=
   {ν | ∃ (A : ExtendedIndex α) (a : Atom), ⟨A, inl a⟩ ∈ S ∧ ν = pos a} ∪
   {ν | ∃ (A : ExtendedIndex α) (N : NearLitter), ⟨A, inr N⟩ ∈ S ∧
@@ -68,6 +76,7 @@ theorem small_posBound (t : NewTSet) (S : Support α) : Small (posBound t S) := 
     intro N₁ hN₁ N₂ hN₂
     exact newTypedNearLitter_injective (hN₁.symm.trans hN₂)
 
+/-- The position of `t` must be greater than elements of this set, which is not cofinal in `μ`. -/
 def posDeny (t : NewTSet × Support α) : Set μ :=
   {ν | ∃ ν' ∈ posBound t.1 t.2, ν ≤ ν'}
 
@@ -110,6 +119,7 @@ theorem mk_posDeny' (h : #NewTSet = #μ) (t : NewTSet × Support α) :
   rw [wellOrder_type, Cardinal.lt_ord] at this
   exact this
 
+/-- A position function for type `α` t-sets. -/
 noncomputable def pos (h : #NewTSet = #μ) : NewTSet × Support α → μ :=
   chooseWf posDeny (mk_posDeny' h)
 
@@ -120,4 +130,4 @@ theorem pos_not_mem_deny (h : #NewTSet = #μ) (t : NewTSet × Support α) :
     pos h t ∉ posDeny t :=
   chooseWf_not_mem_deny t
 
-end ConNF.NewTangle
+end ConNF.Construction

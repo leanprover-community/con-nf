@@ -1,6 +1,6 @@
 import Mathlib.GroupTheory.GroupAction.Sigma
 import ConNF.Mathlib.Group
-import ConNF.NewTangle.CodeEquiv
+import ConNF.Construction.CodeEquiv
 
 /-!
 # Allowable permutations
@@ -10,8 +10,9 @@ exist for all type indices `β < α`.
 
 ## Main declarations
 
-* `ConNF.SemiallowablePerm`: A collection of allowable permutations at every level `β < α`.
-* `ConNF.NewAllowable`: A `SemiallowablePerm` that commutes with the `fuzz` map.
+* `ConNF.Derivatives`: A collection of allowable permutations at every level `β < α`, which are
+    the one-step derivatives of the newly defined allowable permutations at level `α`.
+* `ConNF.NewAllowable`: A collection of `Derivatives` that commutes with the `fuzz` map.
 * `ConNF.Code.smul_code`: Allowable permutations preserve code equivalence.
 -/
 
@@ -27,26 +28,24 @@ variable [Params.{u}] [Level] [ModelDataLt] (β : TypeIndex) [LtLevel β] (γ : 
 
 open Code
 
-/-- A semi-allowable permutation is a collection of allowable permutations at every type index
-`β < α`. The type of allowable permutations is a subtype of this type. Applying a one-step
-derivative `α ⟶ β` to a given semi-allowable permutation yields the `β`-allowable permutation
-stored inside it. -/
-def SemiallowablePerm : Type u :=
+/-- A collection of *derivatives* is a collection of allowable permutations at every type index
+`β < α`. The type of allowable permutations is a subtype of this type. -/
+def Derivatives : Type u :=
   ∀ β : TypeIndex, [LtLevel β] → Allowable β
 
-instance : Group SemiallowablePerm := Pi.group
+instance : Group Derivatives := Pi.group
 
-namespace SemiallowablePerm
+namespace Derivatives
 
-variable (ρ : SemiallowablePerm) (c : Code)
+variable (ρ : Derivatives) (c : Code)
 
 @[simp]
 theorem one_apply :
-    (1 : SemiallowablePerm) β = 1 :=
+    (1 : Derivatives) β = 1 :=
   rfl
 
 @[simp]
-theorem mul_apply (ρ ρ' : SemiallowablePerm) :
+theorem mul_apply (ρ ρ' : Derivatives) :
     (ρ * ρ') β = ρ β * ρ' β :=
   rfl
 
@@ -58,8 +57,9 @@ theorem inv_apply :
 section PathTop
 
 /-!
-We introduce machinery for manipulating the opposite end of a path.
-This allows us to convert semi-allowable permutations into structural permutations, whose
+The bottom of a path can be easily manipulated with operations such as `cons`.
+We now need to introduce machinery for manipulating the top of a path.
+This allows us to convert collections of derivatives structural permutations, whose
 derivative maps are more naturally expressed in the other direction.
 -/
 
@@ -113,7 +113,7 @@ theorem pathTop_pathTail {x y : V} (p : Quiver.Path x y) (h : p.length ≠ 0) :
 
 theorem ExtendedIndex.pathTop_pathTail {α : Λ} (A : ExtendedIndex α) :
     (Quiver.Hom.toPath (pathTop_hom A A.length_ne_zero)).comp (pathTail A) = A :=
-  SemiallowablePerm.pathTop_pathTail A A.length_ne_zero
+  Derivatives.pathTop_pathTail A A.length_ne_zero
 
 theorem cons_heq {x₁ x₂ y z : V} (p₁ : Quiver.Path x₁ y) (p₂ : Quiver.Path x₂ y) (hx : x₁ = x₂)
     (hp : HEq p₁ p₂) (e : y ⟶ z) : HEq (p₁.cons e) (p₂.cons e) := by
@@ -140,14 +140,14 @@ end PathTop
 instance (A : ExtendedIndex α) : LtLevel (pathTop A) where
   elim := pathTop_hom A A.length_ne_zero
 
-/-- Convert a semi-allowable permutation to a structural permutation.
+/-- Convert a collection of derivatives to a structural permutation.
 To work out the `A`-derivative, we extract the first morphism in the path `A` and use it to
 determine which of the `β`-allowable permutations in `ρ` we will use. -/
-def toStructPerm' (ρ : SemiallowablePerm) : StructPerm α :=
+def toStructPerm' (ρ : Derivatives) : StructPerm α :=
   fun A => Allowable.toStructPerm (ρ (pathTop A)) (pathTail A)
 
-/-- Convert a semi-allowable permutation to a structural permutation. -/
-def toStructPerm : SemiallowablePerm →* StructPerm α
+/-- Convert a collection of derivatives to a structural permutation. -/
+def toStructPerm : Derivatives →* StructPerm α
     where
   toFun := toStructPerm'
   map_one' := by
@@ -160,7 +160,7 @@ def toStructPerm : SemiallowablePerm →* StructPerm α
     rw [toStructPerm', mul_apply, map_mul]
     rfl
 
-theorem toStructPerm_congr (ρ : SemiallowablePerm) {β₁ β₂ : TypeIndex} [LtLevel β₁] [LtLevel β₂]
+theorem toStructPerm_congr (ρ : Derivatives) {β₁ β₂ : TypeIndex} [LtLevel β₁] [LtLevel β₂]
     (hβ : β₁ = β₂) {A₁ : ExtendedIndex β₁} {A₂ : ExtendedIndex β₂} (hA : HEq A₁ A₂) :
     Allowable.toStructPerm (ρ β₁) A₁ = Allowable.toStructPerm (ρ β₂) A₂ := by
   cases hβ
@@ -182,33 +182,33 @@ theorem toStructPerm_injective : Function.Injective toStructPerm :=
   toStructPerm'_injective
 
 theorem comp_toPath_toStructPerm
-    (ρ : SemiallowablePerm) (β : TypeIndex) [i : LtLevel β] :
+    (ρ : Derivatives) (β : TypeIndex) [i : LtLevel β] :
     Tree.comp (Quiver.Hom.toPath i.elim) (toStructPerm ρ) = Allowable.toStructPerm (ρ β) := by
   ext A : 1
   exact toStructPerm_congr ρ (pathTop_toPath_comp i.elim A) (pathTail_comp _ _)
 
-theorem coe_apply_bot (ρ : SemiallowablePerm) :
-    (ρ : SemiallowablePerm) ⊥ =
-      SemiallowablePerm.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _)) := by
+theorem coe_apply_bot (ρ : Derivatives) :
+    (ρ : Derivatives) ⊥ =
+      Derivatives.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _)) := by
   rfl
 
 section
 
 variable {X : Type _} [MulAction (StructPerm α) X]
 
-instance : MulAction (SemiallowablePerm) X :=
+instance : MulAction (Derivatives) X :=
   MulAction.compHom _ toStructPerm
 
 @[simp]
-theorem toStructPerm_smul (ρ : SemiallowablePerm) (x : X) :
-    ρ • x = SemiallowablePerm.toStructPerm ρ • x :=
+theorem toStructPerm_smul (ρ : Derivatives) (x : X) :
+    ρ • x = Derivatives.toStructPerm ρ • x :=
   rfl
 
 end
 
-/-- In the same way that structural permutations act on addresses, semiallowable
-permutations act on codes. -/
-instance : MulAction SemiallowablePerm Code
+/-- In the same way that structural permutations act on addresses, collections of derivatives act
+on codes. -/
+instance : MulAction Derivatives Code
     where
   smul ρ c := ⟨c.β, ρ c.β • c.members⟩
   one_smul _ := Code.ext _ _ rfl (heq_of_eq (one_smul _ _))
@@ -223,46 +223,46 @@ theorem members_smul : (ρ • c).members = ρ c.1 • c.members :=
   rfl
 
 @[simp]
-theorem smul_mk (f : SemiallowablePerm) (γ : TypeIndex) [LtLevel γ] (s : Set (TSet γ)) :
+theorem smul_mk (f : Derivatives) (γ : TypeIndex) [LtLevel γ] (s : Set (TSet γ)) :
     f • (mk γ s : Code) = mk γ (f γ • s) :=
   rfl
 
-instance : SMul SemiallowablePerm NonemptyCode :=
+instance : SMul Derivatives NonemptyCode :=
   ⟨fun ρ c => ⟨ρ • (c : Code), c.2.image _⟩⟩
 
 @[simp, norm_cast]
 theorem coe_smul (c : NonemptyCode) : (↑(ρ • c) : Code) = ρ • (c : Code) :=
   rfl
 
-instance : MulAction SemiallowablePerm NonemptyCode :=
+instance : MulAction Derivatives NonemptyCode :=
   Subtype.coe_injective.mulAction _ coe_smul
 
-end SemiallowablePerm
+end Derivatives
 
 variable [BasePositions] [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjectsLt] [ModelData α]
 
-/-- We say that a semiallowable permutation is allowable if its one-step derivatives commute with
+/-- We say that a collection of derivatives is *allowable* if its one-step derivatives commute with
 the `fuzz` maps. -/
-def SemiallowablePerm.IsAllowable (ρ : SemiallowablePerm) : Prop :=
+def Derivatives.IsAllowable (ρ : Derivatives) : Prop :=
   ∀ ⦃β : TypeIndex⦄ [LtLevel β] ⦃γ : Λ⦄ [LtLevel γ] (hβγ : β ≠ γ) (t : Tangle β),
   Allowable.toStructPerm (ρ γ) (Quiver.Hom.toPath <| bot_lt_coe _) • fuzz hβγ t = fuzz hβγ (ρ β • t)
 
-variable {ρ ρ' : SemiallowablePerm}
+variable {ρ ρ' : Derivatives}
 
-theorem isAllowable_one : (1 : SemiallowablePerm).IsAllowable := by
+theorem isAllowable_one : (1 : Derivatives).IsAllowable := by
   intro
-  simp only [ne_eq, SemiallowablePerm.one_apply, map_one, Tree.one_apply, one_smul, implies_true]
+  simp only [ne_eq, Derivatives.one_apply, map_one, Tree.one_apply, one_smul, implies_true]
 
 theorem isAllowable_inv (h : ρ.IsAllowable) : ρ⁻¹.IsAllowable := by
   intros β _ γ _ hβγ t
   have := h hβγ (ρ⁻¹ β • t)
-  simp only [SemiallowablePerm.inv_apply, smul_inv_smul] at this
+  simp only [Derivatives.inv_apply, smul_inv_smul] at this
   rw [← this]
-  simp only [SemiallowablePerm.inv_apply, map_inv, Tree.inv_apply, inv_smul_smul]
+  simp only [Derivatives.inv_apply, map_inv, Tree.inv_apply, inv_smul_smul]
 
 theorem isAllowable_mul (h : ρ.IsAllowable) (h' : ρ'.IsAllowable) : (ρ * ρ').IsAllowable := by
   intros β _ γ _ hβγ t
-  simp only [SemiallowablePerm.mul_apply, map_mul, Tree.mul_apply, mul_smul]
+  simp only [Derivatives.mul_apply, map_mul, Tree.mul_apply, mul_smul]
   rw [h' hβγ t, h hβγ (ρ' β • t)]
 
 theorem isAllowable_div (h : ρ.IsAllowable) (h' : ρ'.IsAllowable) : (ρ / ρ').IsAllowable := by
@@ -287,19 +287,19 @@ theorem isAllowable_zpow (h : ρ.IsAllowable) (n : ℤ) : (ρ ^ n).IsAllowable :
     rw [zpow_negSucc]
     exact isAllowable_inv (isAllowable_pow h (n + 1))
 
-/-- An allowable permutation is a semi-allowable permutation that commutes with the `fuzz` maps. -/
+/-- An allowable permutation is a collection of derivatives that commutes with the `fuzz` maps. -/
 def NewAllowable :=
-  { ρ : SemiallowablePerm // ρ.IsAllowable }
+  { ρ : Derivatives // ρ.IsAllowable }
 
 variable {ρ : NewAllowable} {c d : Code}
 
 namespace NewAllowable
 
-instance : CoeTC NewAllowable SemiallowablePerm
+instance : CoeTC NewAllowable Derivatives
     where
   coe := Subtype.val
 
-theorem coe_injective : Injective (Subtype.val : NewAllowable → SemiallowablePerm) :=
+theorem coe_injective : Injective (Subtype.val : NewAllowable → Derivatives) :=
   Subtype.coe_injective
 
 instance : One NewAllowable :=
@@ -321,27 +321,27 @@ instance : Pow NewAllowable ℤ :=
   ⟨fun ρ n => ⟨ρ.val ^ n, isAllowable_zpow ρ.prop n⟩⟩
 
 @[simp]
-theorem coe_one : ((1 : NewAllowable) : SemiallowablePerm) = 1 :=
+theorem coe_one : ((1 : NewAllowable) : Derivatives) = 1 :=
   rfl
 
 @[simp]
-theorem coe_inv (ρ : NewAllowable) : ↑(ρ⁻¹) = (ρ : SemiallowablePerm)⁻¹ :=
+theorem coe_inv (ρ : NewAllowable) : ↑(ρ⁻¹) = (ρ : Derivatives)⁻¹ :=
   rfl
 
 @[simp]
-theorem coe_mul (ρ ρ' : NewAllowable) : ↑(ρ * ρ') = (ρ : SemiallowablePerm) * ρ' :=
+theorem coe_mul (ρ ρ' : NewAllowable) : ↑(ρ * ρ') = (ρ : Derivatives) * ρ' :=
   rfl
 
 @[simp]
-theorem coe_div (ρ ρ' : NewAllowable) : ↑(ρ / ρ') = (ρ : SemiallowablePerm) / ρ' :=
+theorem coe_div (ρ ρ' : NewAllowable) : ↑(ρ / ρ') = (ρ : Derivatives) / ρ' :=
   rfl
 
 @[simp]
-theorem coe_pow (ρ : NewAllowable) (n : ℕ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm) ^ n :=
+theorem coe_pow (ρ : NewAllowable) (n : ℕ) : ↑(ρ ^ n) = (ρ : Derivatives) ^ n :=
   rfl
 
 @[simp]
-theorem coe_zpow (ρ : NewAllowable) (n : ℤ) : ↑(ρ ^ n) = (ρ : SemiallowablePerm) ^ n :=
+theorem coe_zpow (ρ : NewAllowable) (n : ℤ) : ↑(ρ ^ n) = (ρ : Derivatives) ^ n :=
   rfl
 
 instance : Group NewAllowable :=
@@ -354,9 +354,9 @@ instance : Group NewAllowable :=
     coe_pow
     coe_zpow
 
-/-- The coercion from allowable to semi-allowable permutations as a monoid homomorphism. -/
+/-- The coercion from allowable permutations to their derivatives as a monoid homomorphism. -/
 @[simps]
-def coeHom : NewAllowable →* SemiallowablePerm
+def coeHom : NewAllowable →* Derivatives
     where
   toFun := Subtype.val
   map_one' := coe_one
@@ -364,28 +364,28 @@ def coeHom : NewAllowable →* SemiallowablePerm
 
 /-- Turn an allowable permutation into a structural permutation. -/
 def toStructPerm : NewAllowable →* StructPerm α :=
-  SemiallowablePerm.toStructPerm.comp coeHom
+  Derivatives.toStructPerm.comp coeHom
 
 theorem toStructPerm_injective : Function.Injective toStructPerm := by
   intro ρ₁ ρ₂ hρ
-  have := SemiallowablePerm.toStructPerm_injective hρ
+  have := Derivatives.toStructPerm_injective hρ
   simp only [coeHom_apply, Subtype.coe_inj] at this
   exact this
 
 theorem comp_toPath_toStructPerm
     (ρ : NewAllowable) (β : TypeIndex) [i : LtLevel β] :
     Tree.comp (Quiver.Hom.toPath i.elim) (toStructPerm ρ) = Allowable.toStructPerm (ρ.val β) :=
-  SemiallowablePerm.comp_toPath_toStructPerm _ _
+  Derivatives.comp_toPath_toStructPerm _ _
 
 section
 
-variable {X : Type _} [MulAction (SemiallowablePerm) X]
+variable {X : Type _} [MulAction (Derivatives) X]
 
 instance : MulAction NewAllowable X :=
   MulAction.compHom _ coeHom
 
 @[simp]
-theorem coe_smul (ρ : NewAllowable) (x : X) : (ρ : SemiallowablePerm) • x = ρ • x :=
+theorem coe_smul (ρ : NewAllowable) (x : X) : (ρ : Derivatives) • x = ρ • x :=
   rfl
 
 end
@@ -393,7 +393,7 @@ end
 @[simp]
 theorem smul_typedNearLitter (ρ : NewAllowable) (N : NearLitter) :
     ρ.val γ • (typedNearLitter N : TSet (γ : Λ)) =
-    typedNearLitter ((Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
+    typedNearLitter ((Allowable.toStructPerm ((ρ : Derivatives) γ)
       (Quiver.Hom.toPath (bot_lt_coe _))) • N) :=
   Allowable.smul_typedNearLitter _ _
 
@@ -423,7 +423,7 @@ theorem smul_cloud (ρ : NewAllowable) (s : Set (TSet β)) (hβγ : β ≠ γ) :
   constructor
   · rintro ⟨_, ⟨t, ht, N, hN, rfl⟩, rfl⟩
     refine ⟨ρ.val β • t, ?_,
-        Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
+        Allowable.toStructPerm ((ρ : Derivatives) γ)
           (Quiver.Hom.toPath (bot_lt_coe _)) • N, ?_, ?_⟩
     · rw [Tangle.smul_set_lt, smul_mem_smul_set_iff]
       exact ht
@@ -431,15 +431,15 @@ theorem smul_cloud (ρ : NewAllowable) (s : Set (TSet β)) (hβγ : β ≠ γ) :
     · dsimp only
       rw [smul_typedNearLitter]
   · rintro ⟨t, ht, N, hN, rfl⟩
-    refine ⟨typedNearLitter ((Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
+    refine ⟨typedNearLitter ((Allowable.toStructPerm ((ρ : Derivatives) γ)
           (Quiver.Hom.toPath (bot_lt_coe _)))⁻¹ • N),
         ⟨(ρ.val β)⁻¹ • t, ?_, ?_⟩, ?_⟩
     · rw [Tangle.smul_set_lt, ← mem_smul_set_iff_inv_smul_mem]
       exact ht
-    · refine ⟨(Allowable.toStructPerm ((ρ : SemiallowablePerm) γ)
+    · refine ⟨(Allowable.toStructPerm ((ρ : Derivatives) γ)
         (Quiver.Hom.toPath (bot_lt_coe _)))⁻¹ • N, ?_, rfl⟩
       refine Eq.trans ?_ (ρ⁻¹.prop hβγ t)
-      simp only [NearLitterPerm.smul_nearLitter_fst, coe_inv, SemiallowablePerm.inv_apply,
+      simp only [NearLitterPerm.smul_nearLitter_fst, coe_inv, Derivatives.inv_apply,
         map_inv, Tree.inv_apply, smul_left_cancel_iff]
       exact hN
     · dsimp only

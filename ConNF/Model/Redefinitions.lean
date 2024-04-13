@@ -1,4 +1,4 @@
-import ConNF.Model.Construction
+import ConNF.Model.MainInduction
 import ConNF.Model.BasePositions
 
 open Quiver WithBot
@@ -11,36 +11,36 @@ namespace ConNF
 
 variable [Params.{u}]
 
-def constructionIH (α : Λ) : Construction.IH α :=
-  (Construction.buildCumul α).ih α le_rfl
+def constructionIH (α : Λ) : MainInduction.IH α :=
+  (MainInduction.buildCumul α).ih α le_rfl
 
 theorem buildCumul_spec (α : Λ) :
-    Construction.buildCumul α =
-    Construction.buildCumulStep α (fun β _ => Construction.buildCumul β) := by
-  rw [Construction.buildCumul, WellFounded.fix_eq]
+    MainInduction.buildCumul α =
+    MainInduction.buildCumulStep α (fun β _ => MainInduction.buildCumul β) := by
+  rw [MainInduction.buildCumul, WellFounded.fix_eq]
 
 theorem buildCumul_apply_eq (α β : Λ) (hβ : β ≤ α) :
-    (Construction.buildCumul α).ih β hβ = (Construction.buildCumul β).ih β le_rfl := by
+    (MainInduction.buildCumul α).ih β hβ = (MainInduction.buildCumul β).ih β le_rfl := by
   by_cases hβ' : β = α
   · cases hβ'
     rfl
   rw [buildCumul_spec, buildCumul_spec,
-    Construction.buildCumulStep, Construction.buildCumulStep]
+    MainInduction.buildCumulStep, MainInduction.buildCumulStep]
   dsimp only
-  rw [Construction.buildStepFn, Construction.buildStepFn, dif_neg hβ', dif_pos rfl]
-  rw [buildCumul_spec, Construction.buildCumulStep]
+  rw [MainInduction.buildStepFn, MainInduction.buildStepFn, dif_neg hβ', dif_pos rfl]
+  rw [buildCumul_spec, MainInduction.buildCumulStep]
   dsimp only
-  rw [Construction.buildStepFn, dif_pos rfl]
+  rw [MainInduction.buildStepFn, dif_pos rfl]
 
-theorem constructionIHProp (α : Λ) : Construction.IHProp α (fun γ _ => constructionIH γ) := by
-  convert (Construction.buildCumul α).prop α le_rfl using 1
+theorem constructionIHProp (α : Λ) : MainInduction.IHProp α (fun γ _ => constructionIH γ) := by
+  convert (MainInduction.buildCumul α).prop α le_rfl using 1
   ext β hβ
   rw [constructionIH, buildCumul_apply_eq α β hβ]
 
 theorem constructionIH_eq (α : Λ) :
-    constructionIH α = Construction.buildStep α
+    constructionIH α = MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β) := by
-  refine ((Construction.buildCumul α).ih_eq α le_rfl).trans ?_
+  refine ((MainInduction.buildCumul α).ih_eq α le_rfl).trans ?_
   congr 1
   ext β hβ
   rw [buildCumul_apply_eq α β hβ.le]
@@ -72,81 +72,81 @@ instance [Level] : TypedObjectsLt := fun _ _ => inferInstance
 instance [Level] : PositionedObjectsLt := fun _ _ => inferInstance
 
 theorem modelData_eq (α : Λ) :
-    modelData α = (Construction.buildStep α
+    modelData α = (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).modelData := by
   rw [modelData, constructionIH_eq]
 
 theorem positionedTangles_heq (α : Λ) :
-    HEq (positionedTangles α) (Construction.buildStep α
+    HEq (positionedTangles α) (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).positionedTangles := by
   rw [positionedTangles]
   congr 1
   rw [constructionIH_eq]
 
 theorem typedObjects_heq (α : Λ) :
-    HEq (typedObjects α) (Construction.buildStep α
+    HEq (typedObjects α) (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).typedObjects := by
   rw [typedObjects]
   congr 1
   rw [constructionIH_eq]
 
 theorem positionedObjects_heq (α : Λ) :
-    HEq (positionedObjects α) (Construction.buildStep α
+    HEq (positionedObjects α) (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).positionedObjects := by
   unfold positionedObjects
   congr 1
   rw [constructionIH_eq]
 
 def tSetEquiv (α : Λ) :
-    TSet α ≃ (Construction.buildStep α
+    TSet α ≃ (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).TSet :=
   Equiv.cast (by rw [modelData_eq]; rfl)
 
 def tangleEquiv (α : Λ) :
-    Tangle α ≃ (Construction.buildStep α
+    Tangle α ≃ (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).Tangle :=
   Equiv.cast (by rw [modelData_eq]; rfl)
 
 def allowableEquiv (α : Λ) :
-    Allowable α ≃ (Construction.buildStep α
+    Allowable α ≃ (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).Allowable :=
   Equiv.cast (by rw [modelData_eq]; rfl)
 
 theorem allowableEquiv_one (α : Λ) :
     allowableEquiv α 1 = 1 :=
-  Construction.modelData_cast_one α _ _ (modelData_eq α)
+  MainInduction.modelData_cast_one α _ _ (modelData_eq α)
 
 theorem allowableEquiv_mul (α : Λ) (ρ₁ ρ₂ : Allowable α) :
     allowableEquiv α (ρ₁ * ρ₂) = allowableEquiv α ρ₁ * allowableEquiv α ρ₂ :=
-  Construction.modelData_cast_mul α _ _ (modelData_eq α) ρ₁ ρ₂
+  MainInduction.modelData_cast_mul α _ _ (modelData_eq α) ρ₁ ρ₂
 
 def allowableIso (α : Λ) :
-    Allowable α ≃* (Construction.buildStep α
+    Allowable α ≃* (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).Allowable where
   __ := allowableEquiv α
   map_mul' := allowableEquiv_mul α
 
 theorem allowableIso_toStructPerm (α : Λ) (ρ : Allowable α) :
-    (Construction.buildStep α
+    (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).allowableToStructPerm
     (allowableIso α ρ) = Allowable.toStructPerm ρ :=
-  (Construction.modelData_cast_toStructPerm α _ _ (modelData_eq α) ρ).symm
+  (MainInduction.modelData_cast_toStructPerm α _ _ (modelData_eq α) ρ).symm
 
 @[simp]
 theorem tSetEquiv_toStructSet (α : Λ) (t : TSet α) :
-    (Construction.buildStep α (fun β _ => constructionIH β)
+    (MainInduction.buildStep α (fun β _ => constructionIH β)
       (fun β _ => constructionIHProp β)).toStructSet (tSetEquiv α t) = toStructSet t :=
-  (Construction.modelData_cast_toStructSet α _ _ (modelData_eq α) t).symm
+  (MainInduction.modelData_cast_toStructSet α _ _ (modelData_eq α) t).symm
 
 @[simp]
 theorem tSetEquiv_smul (α : Λ) (ρ : Allowable α) (t : TSet α) :
     tSetEquiv α (ρ • t) = allowableIso α ρ • tSetEquiv α t :=
-  Construction.modelData_cast_smul α _ _ (modelData_eq α) ρ t
+  MainInduction.modelData_cast_smul α _ _ (modelData_eq α) ρ t
 
 @[simp]
 theorem tangleEquiv_smul (α : Λ) (ρ : Allowable α) (t : Tangle α) :
     tangleEquiv α (ρ • t) = allowableIso α ρ • tangleEquiv α t :=
-  Construction.modelData_cast_smul' α _ _ (modelData_eq α) ρ t
+  MainInduction.modelData_cast_smul' α _ _ (modelData_eq α) ρ t
 
 /-! Because we already defined names for things like `Tangle.set` in the inductive step,
 we can't give them the same names here. -/
@@ -184,47 +184,47 @@ theorem Tangle.smul_toSet {β : TypeIndex}
 
 @[simp]
 theorem tangleEquiv_toSet (α : Λ) (t : Tangle α) :
-    (letI := (Construction.buildStep α (fun β _ => constructionIH β)
+    (letI := (MainInduction.buildStep α (fun β _ => constructionIH β)
       (fun β _ => constructionIHProp β)).modelData
     TangleCoe.set (tangleEquiv α t)) = tSetEquiv α t.toSet :=
-  (Construction.modelData_cast_set α _ _ (modelData_eq α) t).symm
+  (MainInduction.modelData_cast_set α _ _ (modelData_eq α) t).symm
 
 @[simp]
 theorem tangleEquiv_support (α : Λ) (t : Tangle α) :
-    (letI := (Construction.buildStep α (fun β _ => constructionIH β)
+    (letI := (MainInduction.buildStep α (fun β _ => constructionIH β)
       (fun β _ => constructionIHProp β)).modelData
     TangleCoe.support (tangleEquiv α t)) = t.support :=
-  (Construction.modelData_cast_support α _ _ (modelData_eq α) t).symm
+  (MainInduction.modelData_cast_support α _ _ (modelData_eq α) t).symm
 
 @[simp]
 theorem tSetEquiv_typedNearLitter (α : Λ) (N : NearLitter) :
-    tSetEquiv α (typedNearLitter N) = (Construction.buildStep α
+    tSetEquiv α (typedNearLitter N) = (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).typedNearLitter N :=
-  (Construction.typedObjects_cast_typedNearLitter
+  (MainInduction.typedObjects_cast_typedNearLitter
     α _ _ (modelData_eq α) _ _ (typedObjects_heq α) N).symm
 
 def cons'Coe {α β : Λ} (hβ : (β : TypeIndex) < α) :
     Allowable α → Allowable β :=
   Equiv.cast (by rw [buildCumul_apply_eq]; rfl) ∘
-    (((Construction.buildCumul α).prop α le_rfl).canCons β (coe_lt_coe.mp hβ)).choose
+    (((MainInduction.buildCumul α).prop α le_rfl).canCons β (coe_lt_coe.mp hβ)).choose
 
 theorem cons'Coe_spec {α β : Λ} (hβ : (β : TypeIndex) < α) (ρ : Allowable α) :
     Tree.comp (Hom.toPath hβ) (Allowable.toStructPerm ρ) =
       Allowable.toStructPerm (cons'Coe hβ ρ) := by
-  refine ((((Construction.buildCumul α).prop α le_rfl).canCons β
+  refine ((((MainInduction.buildCumul α).prop α le_rfl).canCons β
     (coe_lt_coe.mp hβ)).choose_spec ρ).trans ?_
   unfold ConNF.cons'Coe
   have h₁ := buildCumul_apply_eq α β (coe_le_coe.mp hβ.le)
-  erw [Construction.modelData_cast_toStructPerm β _ _ (congr_arg Construction.IH.modelData h₁)]
+  erw [MainInduction.modelData_cast_toStructPerm β _ _ (congr_arg MainInduction.IH.modelData h₁)]
   rfl
 
 def cons'Bot {α : Λ} :
     Allowable α → NearLitterPerm :=
-  ((Construction.buildCumul α).prop α le_rfl).canConsBot.choose
+  ((MainInduction.buildCumul α).prop α le_rfl).canConsBot.choose
 
 theorem cons'Bot_spec {α : Λ} (ρ : Allowable α) :
     Allowable.toStructPerm ρ (Hom.toPath (bot_lt_coe _)) = cons'Bot ρ :=
-  (((Construction.buildCumul α).prop α le_rfl).canConsBot).choose_spec ρ
+  (((MainInduction.buildCumul α).prop α le_rfl).canConsBot).choose_spec ρ
 
 def cons'' : {α β : TypeIndex} → (h : β < α) → Allowable α → Allowable β
   | (α : Λ), (β : Λ), h => cons'Coe h
@@ -334,7 +334,7 @@ theorem comp_toStructPerm {α β : TypeIndex} (A : Quiver.Path α β) (ρ : Allo
 @[simp]
 theorem allowableIso_smul_address {α : Λ} (ρ : Allowable α) (c : Address α) :
     allowableIso α ρ • c = ρ • c := by
-  change (Construction.buildStep α
+  change (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).allowableToStructPerm
       (allowableIso α ρ) • c = ρ • c
   rw [allowableIso_toStructPerm]

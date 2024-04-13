@@ -18,7 +18,7 @@ open ModelData TSet
 
 variable [Params.{u}]
 
-namespace Construction.FOA
+namespace MainInduction.FOA
 
 variable [Level]
 
@@ -89,7 +89,7 @@ theorem smul_fuzz_bot {β : Λ} [LeLevel β] {δ : Λ} [LtLevel δ]
     foaAllowableToStructPerm ρ ((Quiver.Hom.toPath hδ).cons (bot_lt_coe _)) •
       fuzz (bot_ne_coe (a := δ)) t =
     fuzz (bot_ne_coe (a := δ)) (allowableCons (bot_lt_coe _) ρ • t) := by
-  refine (((Construction.buildCumul β).prop β le_rfl).smul_fuzz_bot δ
+  refine (((MainInduction.buildCumul β).prop β le_rfl).smul_fuzz_bot δ
     (coe_lt_coe.mp hδ) ρ t).trans ?_
   rw [fuzz'Bot, allowableCons]
   congr 2
@@ -108,26 +108,26 @@ theorem smul_fuzz {β : Λ} [LeLevel β] {γ : Λ} [LtLevel γ] {δ : Λ} [LtLev
     (ρ : foaAllowable β) (t : Tangle γ) :
     foaAllowableToStructPerm ρ ((Quiver.Hom.toPath hδ).cons (bot_lt_coe _)) • fuzz hγδ t =
     fuzz hγδ (allowableCons hγ ρ • t) := by
-  have := ((Construction.buildCumul β).prop β le_rfl).smul_fuzz
+  have := ((MainInduction.buildCumul β).prop β le_rfl).smul_fuzz
       γ (coe_lt_coe.mp hγ) δ (coe_lt_coe.mp hδ) hγδ ρ
       (tangleEquiv' (coe_lt_coe.mp hγ).le t)
       (fun ρ => allowableEquiv' (coe_lt_coe.mp hγ).le (cons' hγ ρ)) ?_
   · simp only [foaAllowableToStructPerm_eq_coe, allowableCons_eq_coe]
     simp only [cons'_eq_cons] at this
     have h := buildCumul_apply_eq β γ (coe_le_coe.mp hγ.le)
-    have hcast := Construction.fuzz_cast γ δ hγδ _ _ (congr_arg Construction.IH.modelData h)
-      _ _ (congr_arg_heq Construction.IH.positionedTangles h)
+    have hcast := MainInduction.fuzz_cast γ δ hγδ _ _ (congr_arg MainInduction.IH.modelData h)
+      _ _ (congr_arg_heq MainInduction.IH.positionedTangles h)
     rw [tangleEquiv', Equiv.cast_apply] at this
     rw [fuzz', hcast, hcast] at this
     rw [cast_cast, cast_eq] at this
     refine this.trans (congr_arg _ ?_)
-    erw [Construction.modelData_cast_smul' γ _ _ (congr_arg Construction.IH.modelData h)]
+    erw [MainInduction.modelData_cast_smul' γ _ _ (congr_arg MainInduction.IH.modelData h)]
     simp only [allowableEquiv', Equiv.cast_apply, cast_cast, cast_eq]
     rfl
   · intro ρ
     simp only [cons'_eq_cons]
     have h := buildCumul_apply_eq β γ (coe_le_coe.mp hγ.le)
-    erw [Construction.modelData_cast_toStructPerm γ _ _ (congr_arg Construction.IH.modelData h)]
+    erw [MainInduction.modelData_cast_toStructPerm γ _ _ (congr_arg MainInduction.IH.modelData h)]
     rw [allowableEquiv']
     simp only [Equiv.cast_apply, cast_cast, cast_eq]
     erw [cons_toStructPerm]
@@ -151,7 +151,7 @@ theorem allowable_of_smulFuzz (β : Λ) [iβ : LeLevel β]
   letI : Level := ⟨α⟩
   have hβ := iβ.elim
   intro h₁ h₂
-  have := ((Construction.buildCumul β).prop β le_rfl).allowable_of_smulFuzz
+  have := ((MainInduction.buildCumul β).prop β le_rfl).allowable_of_smulFuzz
       (fun γ hγ => letI : LtLevel γ := ⟨(coe_lt_coe.mpr hγ).trans_le hβ⟩;
         allowableEquiv' hγ.le (ρs γ (coe_lt_coe.mpr hγ))) π ?_ ?_
   · obtain ⟨ρ, hρ₁, hρ₂⟩ := this
@@ -163,8 +163,8 @@ theorem allowable_of_smulFuzz (β : Λ) [iβ : LeLevel β]
       · intro ρ
         simp only [cons'_eq_cons]
         have h := buildCumul_apply_eq β γ (coe_le_coe.mp hγ.le)
-        erw [Construction.modelData_cast_toStructPerm γ _ _
-          (congr_arg Construction.IH.modelData h)]
+        erw [MainInduction.modelData_cast_toStructPerm γ _ _
+          (congr_arg MainInduction.IH.modelData h)]
         rw [allowableEquiv']
         simp only [Equiv.cast_apply, cast_cast, cast_eq]
         erw [cons_toStructPerm]
@@ -176,9 +176,9 @@ theorem allowable_of_smulFuzz (β : Λ) [iβ : LeLevel β]
     letI : LtLevel γ := ⟨(coe_lt_coe.mpr hγ).trans_le hβ⟩
     letI : LtLevel δ := ⟨(coe_lt_coe.mpr hδ).trans_le hβ⟩
     have h := buildCumul_apply_eq β γ hγ.le
-    have hcast := Construction.fuzz_cast γ δ hγδ _ _ (congr_arg Construction.IH.modelData h)
-      _ _ (congr_arg_heq Construction.IH.positionedTangles h)
-    have hcast' := Construction.modelData_cast_smul' γ _ _ (congr_arg Construction.IH.modelData h).symm
+    have hcast := MainInduction.fuzz_cast γ δ hγδ _ _ (congr_arg MainInduction.IH.modelData h)
+      _ _ (congr_arg_heq MainInduction.IH.positionedTangles h)
+    have hcast' := MainInduction.modelData_cast_smul' γ _ _ (congr_arg MainInduction.IH.modelData h).symm
       (ρs γ (coe_lt_coe.mpr hγ)) ((tangleEquiv' hγ.le).symm t)
     simp only [tangleEquiv', Equiv.cast_symm, Equiv.cast_apply, cast_cast, cast_eq] at hcast'
     change _ = allowableEquiv' hγ.le (ρs γ (coe_lt_coe.mpr hγ)) • t at hcast'
@@ -186,16 +186,16 @@ theorem allowable_of_smulFuzz (β : Λ) [iβ : LeLevel β]
     rw [hcast, hcast, ← hcast', cast_cast, cast_eq]
     refine Eq.trans ?_
       (h₁ γ δ (coe_lt_coe.mpr hγ) (coe_lt_coe.mpr hδ) hγδ ((tangleEquiv' hγ.le).symm t))
-    have := Construction.modelData_cast_toStructPerm δ _ _
-      (congr_arg Construction.IH.modelData (buildCumul_apply_eq β δ hδ.le))
+    have := MainInduction.modelData_cast_toStructPerm δ _ _
+      (congr_arg MainInduction.IH.modelData (buildCumul_apply_eq β δ hδ.le))
     erw [this]
     rw [allowableEquiv', Equiv.cast_apply, cast_cast, cast_eq]
     rfl
   · intro δ hδ a
     letI : LtLevel δ := ⟨(coe_lt_coe.mpr hδ).trans_le hβ⟩
     dsimp only [fuzz'Bot]
-    have := Construction.modelData_cast_toStructPerm δ _ _
-      (congr_arg Construction.IH.modelData (buildCumul_apply_eq β δ hδ.le))
+    have := MainInduction.modelData_cast_toStructPerm δ _ _
+      (congr_arg MainInduction.IH.modelData (buildCumul_apply_eq β δ hδ.le))
     erw [this]
     rw [← h₂ δ (coe_lt_coe.mpr hδ) a, allowableEquiv', Equiv.cast_apply, cast_cast, cast_eq]
     rfl
@@ -205,10 +205,10 @@ local instance foaAssumptions : FOAAssumptions where
   allowableCons_eq := allowableCons_eq
   pos_lt_pos_atom := by
     intro β _
-    exact ((Construction.buildCumul β).prop β le_rfl).pos_lt_pos_atom
+    exact ((MainInduction.buildCumul β).prop β le_rfl).pos_lt_pos_atom
   pos_lt_pos_nearLitter := by
     intro β _
-    exact ((Construction.buildCumul β).prop β le_rfl).pos_lt_pos_nearLitter
+    exact ((MainInduction.buildCumul β).prop β le_rfl).pos_lt_pos_nearLitter
   smul_fuzz := by
     intro β
     induction β using recBotCoe with
@@ -243,6 +243,6 @@ theorem exists_allowable_of_specifies {S T : Support α} (hS : S.Strong) (hT : T
     ∃ ρ : Allowable α, ρ • S = T :=
   ⟨convertAllowable hσS hσT, convertAllowable_smul hσS hσT⟩
 
-end Construction.FOA
+end MainInduction.FOA
 
 end ConNF

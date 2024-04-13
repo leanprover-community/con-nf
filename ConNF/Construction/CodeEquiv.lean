@@ -1,4 +1,4 @@
-import ConNF.NewTangle.Cloud
+import ConNF.Construction.Cloud
 
 /-!
 # Equivalence of codes
@@ -45,7 +45,8 @@ namespace Code
 
 variable {c d : Code}
 
-/-! ### Parity of a code
+/-!
+## Parity of a code
 
 Parity of codes. If we consider codes as states of a game and `↝₀` as the "leads to"
 relation, then even codes are precisely losing codes and odd codes are precisely winning codes.
@@ -189,9 +190,10 @@ theorem isEven_singleton (t) : (mk β {t}).IsEven := by
   cases this
   exact cloudCode_ne_singleton h.1 h.2.symm
 
-/-! ### Equivalence of codes -/
+/-! ## Equivalence of codes -/
 
-/-- Equivalence of codes. -/
+/-- Codes are said to be equivalent if they belong to the same tree of height 1 with a single
+even root. -/
 @[mk_iff]
 inductive Equiv : Code → Code → Prop
   | refl (c) : Equiv c c
@@ -251,14 +253,17 @@ protected theorem _root_.ConNF.Code.IsEmpty.equiv (hc : c.IsEmpty) (hd : d.IsEmp
 /-- Code equivalence is transitive. -/
 theorem trans {c d e : Code} : c ≡ d → d ≡ e → c ≡ e := by
   rw [equiv_iff, equiv_iff]
-  rintro (rfl | ⟨hc, β, _, hcβ, rfl⟩ | ⟨hc, β, _, hcβ, rfl⟩ | ⟨d, hd, γ, _, hdγ, ε, _, hdε, rfl, rfl⟩)
+  rintro (rfl | ⟨hc, β, _, hcβ, rfl⟩ | ⟨hc, β, _, hcβ, rfl⟩ |
+      ⟨d, hd, γ, _, hdγ, ε, _, hdε, rfl, rfl⟩)
   · exact (equiv_iff _ _).2
-  · rintro (rfl | ⟨hc', γ, _, hcγ, rfl⟩ | ⟨-, γ, _, hcγ, rfl⟩ | ⟨_, hc', γ, _, hcγ, ε, _, _, rfl, rfl⟩)
+  · rintro (rfl | ⟨hc', γ, _, hcγ, rfl⟩ | ⟨-, γ, _, hcγ, rfl⟩ |
+        ⟨_, hc', γ, _, hcγ, ε, _, _, rfl, rfl⟩)
     · exact cloud_left _ hc β hcβ
     · cases (hc'.cloudCode hcγ).not_isEven hc
     · exact cloud_cloud _ hc _ hcβ _ hcγ
     · cases (hc'.cloudCode hcγ).not_isEven hc
-  · rintro (rfl | ⟨_, γ, _, hcγ, hce⟩ | ⟨hc', γ, _, _, rfl⟩ | ⟨e, he, γ, _, hcγ, ε, _, heε, hce, rfl⟩)
+  · rintro (rfl | ⟨_, γ, _, hcγ, hce⟩ | ⟨hc', γ, _, _, rfl⟩ |
+        ⟨e, he, γ, _, hcγ, ε, _, heε, hce, rfl⟩)
     · exact cloud_right _ hc β hcβ
     · obtain h | h := c.members.eq_empty_or_nonempty
       · refine' IsEmpty.equiv h _
@@ -267,10 +272,12 @@ theorem trans {c d e : Code} : c ≡ d → d ≡ e → c ≡ e := by
     · cases (hc.cloudCode hcβ).not_isEven hc'
     · obtain h | h := c.members.eq_empty_or_nonempty
       · refine' IsEmpty.equiv h _
-        rwa [cloudCode_isEmpty, ← cloudCode_isEmpty (β := γ), ← hce, cloudCode_isEmpty, Code.IsEmpty]
+        rwa [cloudCode_isEmpty, ← cloudCode_isEmpty (β := γ), ← hce,
+          cloudCode_isEmpty, Code.IsEmpty]
       · rw [eq_of_cloudCode h hcβ hcγ hce]
         exact cloud_right _ he _ heε
-  · rintro (rfl | ⟨_, γ, _, heγ, hde⟩ | ⟨hd', γ, _, -, rfl⟩ | ⟨e, he, ι, _, heι, κ, _, heκ, hde, rfl⟩)
+  · rintro (rfl | ⟨_, γ, _, heγ, hde⟩ | ⟨hd', γ, _, -, rfl⟩ |
+        ⟨e, he, ι, _, heι, κ, _, heκ, hde, rfl⟩)
     · exact cloud_cloud _ hd _ hdγ _ hdε
     · obtain h | h := e.members.eq_empty_or_nonempty
       · refine' IsEmpty.equiv _ h
@@ -280,7 +287,8 @@ theorem trans {c d e : Code} : c ≡ d → d ≡ e → c ≡ e := by
     · cases (hd.cloudCode hdε).not_isEven hd'
     · obtain h | h := d.members.eq_empty_or_nonempty
       · refine' (IsEmpty.cloudCode h).equiv _
-        rwa [cloudCode_isEmpty, ← cloudCode_isEmpty (β := ι), ← hde, cloudCode_isEmpty, Code.IsEmpty]
+        rwa [cloudCode_isEmpty, ← cloudCode_isEmpty (β := ι), ← hde,
+          cloudCode_isEmpty, Code.IsEmpty]
       · have := eq_of_cloudCode h hdε heι hde
         subst this
         exact cloud_cloud _ hd _ hdγ _ heκ

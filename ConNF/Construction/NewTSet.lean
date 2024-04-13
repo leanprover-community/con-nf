@@ -1,23 +1,21 @@
 import Mathlib.GroupTheory.GroupAction.Option
 import ConNF.Mathlib.GroupAction
 import ConNF.Mathlib.Pointwise
-import ConNF.NewTangle.NewAllowable
+import ConNF.Construction.NewAllowable
 
 /-!
-# Construction of tangles
+# Construction of t-sets
 
-In this file, we construct the type of tangles at level `α`, assuming they exist at all levels
+In this file, we construct the type of t-sets at level `α`, assuming they exist at all levels
 `β < α`.
 
 ## Main declarations
 
-* `ConNF.Extensions`: The type of extensions of an `α`-tangle.
-* `ConNF.Preference`: A preferred extension of a semitangle.
-* `ConNF.Semitangle`: An extension for each `β < α`, with one chosen as its preferred extension.
+* `ConNF.Extensions`: The type of extensions of a t-set at level `α`.
+* `ConNF.Preference`: A preferred extension of a extensional set.
+* `ConNF.ExtensionalSet`: An extension for each `β < α`, with one chosen as its preferred extension.
     The non-preferred extensions can be derived from the preferred extension.
-* `ConNF.NewAllowable.mulActionSemitangle`: Allowable permutations act on semitangles.
-* `ConNF.NewTangle`: The type of tangles at level `α`.
-* `ConNF.Allowableperm.mulActionNewTangle`: Allowable permutations act on tangles.
+* `ConNF.NewTangle`: The type of t-sets at level `α`.
 -/
 
 open Function Set WithBot
@@ -40,12 +38,16 @@ abbrev Extensions :=
 theorem Extensions.ext {e₁ e₂ : Extensions} (h : ∀ β : Λ, [LtLevel β] → e₁ β = e₂ β) : e₁ = e₂ :=
   funext (fun β => funext (fun _ => h β))
 
-namespace Semitangle
+/-!
+## Extensional sets
+-/
+
+namespace ExtensionalSet
 
 variable [PositionedTanglesLt] [TypedObjectsLt]
 
-/-- Keeps track of the preferred extension of a semitangle, along with coherence conditions
-relating each extension of the semitangle. In particular, each non-preferred extension can be
+/-- Keeps track of the preferred extension of a extensional set, along with coherence conditions
+relating each extension of the extensional set. In particular, each non-preferred extension can be
 obtained by applying the `cloud` map to the preferred extension. -/
 inductive Preference (members : Extensions)
   | base (atoms : Set (Tangle ⊥)) :
@@ -57,7 +59,7 @@ inductive Preference (members : Extensions)
 
 variable {members : Extensions}
 
-/-- The `⊥`-extension associated with a given semitangle extension. -/
+/-- The `⊥`-extension in a given extensional set, if it exists. -/
 def Preference.atoms : Preference members → Set Atom
   | Preference.base atoms _ => (atoms : Set (Tangle ⊥))
   | Preference.proper _ _ _ => ∅
@@ -77,22 +79,22 @@ theorem Preference.proper_heq_proper {m₁ m₂ : Extensions} {β₁ β₂ : Λ}
   cases hs
   rfl
 
-end Semitangle
+end ExtensionalSet
 
-open Semitangle
+open ExtensionalSet
 
 variable [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjectsLt]
 
-/-- A *semitangle* is a collection of `β`-tangles for each lower level `β < α`, together with
+/-- A *extensional set* is a collection of `β`-tangles for each lower level `β < α`, together with
 a preference for one of these extensions. -/
-structure Semitangle where
+structure ExtensionalSet where
   members : Extensions
   pref : Preference members
 
-namespace Semitangle
+namespace ExtensionalSet
 
-/-- The even code associated to a semitangle. -/
-def reprCode : Semitangle → Code
+/-- The even code associated to a extensional set. -/
+def reprCode : ExtensionalSet → Code
   | ⟨_, Preference.base atoms _⟩ => ⟨⊥, atoms⟩
   | ⟨exts, Preference.proper β _ _⟩ => ⟨β, exts β⟩
 
@@ -106,24 +108,24 @@ theorem reprCode_proper (exts : Extensions) (β : Λ) [LtLevel β] (rep hA) :
     reprCode ⟨exts, Preference.proper β rep hA⟩ = ⟨β, exts β⟩ :=
   rfl
 
-theorem reprCodeSpec : ∀ t : Semitangle, (reprCode t : Code).IsEven
+theorem reprCodeSpec : ∀ t : ExtensionalSet, (reprCode t : Code).IsEven
   | ⟨_, Preference.proper _ rep _⟩ => rep
   | ⟨_, Preference.base _ _⟩ => isEven_bot _
 
 theorem reprCode_members_ne :
-    ∀ (t : Semitangle) (γ : Λ) [LtLevel γ] (_ : (reprCode t : Code).1 ≠ γ),
+    ∀ (t : ExtensionalSet) (γ : Λ) [LtLevel γ] (_ : (reprCode t : Code).1 ≠ γ),
       (cloudCode γ (reprCode t)).members = t.members γ
   | ⟨exts, Preference.proper β rep hA⟩, γ, _, hcγ => by
       rw [snd_cloudCode]
       exact hA _ hcγ
   | ⟨_, Preference.base _ hA⟩, γ, _, _ => hA _
 
-/-- One form of extensionality: If there is a proper type index `γ < α`, then two semitangles
+/-- One form of extensionality: If there is a proper type index `γ < α`, then two extensional sets
 with the same elements have the same preference.
 
-Remark: This formulation of extensionality holds only for types larger than type zero, since
-it doesn't take into account any `⊥`-extension. -/
-theorem ext_core (t₁ t₂ : Semitangle) : Nonempty ((γ : Λ) ×' LtLevel γ) →
+This formulation of extensionality holds only for types larger than type zero, since it doesn't take
+into account any `⊥`-extension. -/
+theorem ext_core (t₁ t₂ : ExtensionalSet) : Nonempty ((γ : Λ) ×' LtLevel γ) →
     t₁.members = t₂.members → t₁ = t₂ := by
   obtain ⟨xs, hxs⟩ := t₁
   obtain ⟨ys, hys⟩ := t₂
@@ -143,9 +145,9 @@ theorem ext_core (t₁ t₂ : Semitangle) : Nonempty ((γ : Λ) ×' LtLevel γ) 
     rw [snd_cloudCode]
     exact hA₂ β fun h => hβγ.symm (WithBot.coe_injective h)
 
-/-- One useful form of extensionality in tangled type theory. Two semitangles are equal if
+/-- One useful form of extensionality in tangled type theory. Two extensional sets are equal if
 their even codes are equivalent (and hence equal, by uniqueness). -/
-theorem ext_code : ∀ {t₁ t₂ : Semitangle}, reprCode t₁ ≡ reprCode t₂ → t₁ = t₂
+theorem ext_code : ∀ {t₁ t₂ : ExtensionalSet}, reprCode t₁ ≡ reprCode t₂ → t₁ = t₂
   | ⟨e₁, Preference.base atoms₁ hA₁⟩, ⟨e₂, Preference.base atoms₂ hA₂⟩, h => by
     obtain rfl := Code.Equiv.bot_bot_iff.1 h
     obtain rfl : e₁ = e₂ := Extensions.ext fun γ => (hA₁ γ).symm.trans <| hA₂ _
@@ -194,10 +196,10 @@ theorem ext_code : ∀ {t₁ t₂ : Semitangle}, reprCode t₁ ≡ reprCode t₂
       rw [eq_of_heq h.2.1.2] at even₁
       cases (hc.cloudCode hc').not_isEven even₁
 
-/-- Extensionality in tangled type theory. Two semitangles are equal if their
+/-- Extensionality in tangled type theory. Two extensional sets are equal if their
 `β`-extensions are equal for *any* choice of `γ < α`.
 TODO: This proof can be golfed quite a bit just by cleaning up the `simp` calls. -/
-theorem ext (t₁ t₂ : Semitangle) (h : t₁.members γ = t₂.members γ) : t₁ = t₂ := by
+theorem ext (t₁ t₂ : ExtensionalSet) (h : t₁.members γ = t₂.members γ) : t₁ = t₂ := by
   obtain ⟨xs, hxs⟩ := t₁
   obtain ⟨ys, hys⟩ := t₂
   dsimp only at h
@@ -251,9 +253,9 @@ theorem ext (t₁ t₂ : Semitangle) (h : t₁.members γ = t₂.members γ) : t
     exact Code.Equiv.cloud_left _ even₂ γ (WithBot.coe_injective.ne hδγ)
 
 /-- Extensionality at the lowest level of tangled type theory.
-At type 0, all semitangles have a `⊥`-extension.
+At type 0, all extensional sets have a `⊥`-extension.
 Therefore, the extensionality principle in this case applies to the `⊥`-extensions. -/
-theorem ext_zero (t₁ t₂ : Semitangle) (α_zero : IsMin α) (h : t₁.pref.atoms = t₂.pref.atoms) :
+theorem ext_zero (t₁ t₂ : ExtensionalSet) (α_zero : IsMin α) (h : t₁.pref.atoms = t₂.pref.atoms) :
     t₁ = t₂ := by
   obtain ⟨xs, ⟨atoms₁, hA₁⟩ | ⟨γ, _, _⟩⟩ := t₁
   swap
@@ -268,9 +270,9 @@ theorem ext_zero (t₁ t₂ : Semitangle) (α_zero : IsMin α) (h : t₁.pref.at
   ext β : 1
   cases α_zero.not_lt (show β < α from WithBot.coe_lt_coe.mp LtLevel.elim)
 
-/-- Construct a semitangle from an even code. -/
+/-- Construct a extensional set from an even code. -/
 def intro {β : TypeIndex} [inst : LtLevel β] (s : Set (TSet β))
-    (heven : (Code.mk β s).IsEven) : Semitangle :=
+    (heven : (Code.mk β s).IsEven) : ExtensionalSet :=
   ⟨extension s,
     match β, inst, s, heven with
     | ⊥, _, s, _ => Preference.base s fun β => rfl
@@ -289,7 +291,9 @@ theorem exts_intro (s : Set (TSet β)) (heven : IsEven (Code.mk β s)) :
     (intro s heven).members = extension s :=
   rfl
 
-noncomputable def intro' {β : TypeIndex} [inst : LtLevel β] (s : Set (TSet β)) : Semitangle :=
+/-- Construct an extensional set from any set of t-sets of a smaller level.
+This uses choice to find the even code representing the given set. -/
+noncomputable def intro' {β : TypeIndex} [inst : LtLevel β] (s : Set (TSet β)) : ExtensionalSet :=
   ⟨extension (exists_even_equiv (Code.mk β s)).choose.members,
     match (exists_even_equiv (Code.mk β s)).choose,
       (exists_even_equiv (Code.mk β s)).choose_spec with
@@ -321,16 +325,20 @@ theorem ext_intro' {β : Λ} [LtLevel β] (s : Set (TSet β)) :
     have := h₁.cloudCode h₂
     cases not_isOdd.mpr hc' this
 
-end Semitangle
+end ExtensionalSet
 
-open Semitangle
+/-!
+## Allowable permutations on extensional sets
+-/
+
+open ExtensionalSet
 
 variable [ModelData α]
 
 namespace NewAllowable
 
 /-!
-We now establish that allowable permutations can act on semitangles.
+We now establish that allowable permutations can act on extensional sets.
 -/
 
 variable {ρ : NewAllowable} {e : Extensions}
@@ -343,17 +351,17 @@ theorem smul_extension_apply (ρ : NewAllowable) (s : Set (TSet β)) :
     simp only [extension_eq, cast_eq]
   · rw [extension_ne _ _ h, extension_ne _ _ h, smul_cloud]
 
-instance : MulAction SemiallowablePerm Extensions
+instance : MulAction Derivatives Extensions
     where
   smul ρ e γ := ρ γ • e γ
   one_smul e := by
     ext γ : 1
-    change (1 : SemiallowablePerm) γ • e γ = e γ
-    simp only [SemiallowablePerm.one_apply, one_smul]
+    change (1 : Derivatives) γ • e γ = e γ
+    simp only [Derivatives.one_apply, one_smul]
   mul_smul ρ ρ' e := by
     ext γ : 1
     change (ρ * ρ') γ • e γ = ρ γ • ρ' γ • e γ
-    simp only [SemiallowablePerm.mul_apply, mul_smul]
+    simp only [Derivatives.mul_apply, mul_smul]
 
 @[simp]
 theorem smul_extension (ρ : NewAllowable) (s : Set (TSet β)) :
@@ -379,71 +387,74 @@ theorem smul_aux₂
   rw [smul_cloud] at this
   exact this
 
-/-- Allowable permutations act on semitangles. -/
-instance : SMul NewAllowable Semitangle where
+instance : SMul NewAllowable ExtensionalSet where
   smul ρ t := ⟨ρ • t.members, by
     obtain ⟨members, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩ := t
     · exact Preference.base (ρ.val ⊥ • s) (smul_aux₁ h)
     · exact Preference.proper _ (isEven_smul.mpr ht) (smul_aux₂ h)⟩
 
 @[simp]
-theorem members_smul' (ρ : NewAllowable) (t : Semitangle) : (ρ • t).members = ρ • t.members :=
+theorem members_smul' (ρ : NewAllowable) (t : ExtensionalSet) : (ρ • t).members = ρ • t.members :=
   rfl
 
 @[simp]
 theorem smul_base (ρ : NewAllowable) (e : Extensions) (s h) :
-    ρ • (⟨e, Preference.base s h⟩ : Semitangle) =
+    ρ • (⟨e, Preference.base s h⟩ : ExtensionalSet) =
       ⟨ρ • e, Preference.base (ρ.val ⊥ • s) (smul_aux₁ h)⟩ :=
   rfl
 
 @[simp]
 theorem smul_proper (ρ : NewAllowable) (e : Extensions) (γ : Λ) [LtLevel γ] (ht h) :
-    ρ • (⟨e, Preference.proper γ ht h⟩ : Semitangle) =
+    ρ • (⟨e, Preference.proper γ ht h⟩ : ExtensionalSet) =
       ⟨ρ • e, Preference.proper _ (isEven_smul.mpr ht) (smul_aux₂ h)⟩ :=
   rfl
 
-instance mulActionSemitangle : MulAction NewAllowable Semitangle
+/-- Allowable permutations act on extensional sets. -/
+instance : MulAction NewAllowable ExtensionalSet
     where
   one_smul := by
     rintro ⟨exts, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩
     · rw [smul_base]
-      simp only [coe_one, SemiallowablePerm.one_apply, one_smul, Semitangle.mk.injEq, true_and]
+      simp only [coe_one, Derivatives.one_apply, one_smul, ExtensionalSet.mk.injEq, true_and]
       refine Preference.base_heq_base ?_ ?_
       · rw [one_smul]
-      · simp only [coe_one, SemiallowablePerm.one_apply, one_smul]
+      · simp only [coe_one, Derivatives.one_apply, one_smul]
     · rw [smul_proper]
-      simp only [Semitangle.mk.injEq, one_smul, true_and]
+      simp only [ExtensionalSet.mk.injEq, one_smul, true_and]
       refine Preference.proper_heq_proper ?_ rfl
       rw [one_smul]
   mul_smul := by
     rintro ρ ρ' ⟨exts, ⟨s, h⟩ | ⟨γ, ht, h⟩⟩
-    · simp only [smul_base, coe_mul, SemiallowablePerm.mul_apply, mul_smul, Semitangle.mk.injEq,
+    · simp only [smul_base, coe_mul, Derivatives.mul_apply, mul_smul, ExtensionalSet.mk.injEq,
       true_and]
       refine Preference.base_heq_base ?_ ?_
       · rw [mul_smul]
-      · simp only [coe_mul, SemiallowablePerm.mul_apply, mul_smul]
-    · simp only [smul_proper, Semitangle.mk.injEq, mul_smul, true_and]
+      · simp only [coe_mul, Derivatives.mul_apply, mul_smul]
+    · simp only [smul_proper, ExtensionalSet.mk.injEq, mul_smul, true_and]
       refine Preference.proper_heq_proper ?_ rfl
       rw [mul_smul]
 
 end NewAllowable
 
-namespace Semitangle
+namespace ExtensionalSet
 
-protected def toStructSet (t : Semitangle) : StructSet α :=
+/-- Extensional sets can easily be turned into structural sets. -/
+protected def toStructSet (t : ExtensionalSet) : StructSet α :=
   StructSet.ofCoe.symm (fun β hβ => match β with
     | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ a ∈ s}
     | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toStructSet s = p})
 
-theorem toStructSet_ofCoe (t : Semitangle) :
+theorem toStructSet_ofCoe (t : ExtensionalSet) :
     StructSet.ofCoe t.toStructSet = fun β hβ => match β with
       | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ a ∈ s}
       | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toStructSet s = p} := by
-  rw [Semitangle.toStructSet, Equiv.apply_symm_apply]
+  rw [ExtensionalSet.toStructSet, Equiv.apply_symm_apply]
 
-theorem members_eq_of_toStructSet_eq (t₁ t₂ : Semitangle) (h : t₁.toStructSet = t₂.toStructSet) :
+/-- The members of extensional sets are determined by their underlying structural sets. -/
+theorem members_eq_of_toStructSet_eq (t₁ t₂ : ExtensionalSet)
+    (h : t₁.toStructSet = t₂.toStructSet) :
     t₁.members = t₂.members := by
-  simp only [Semitangle.toStructSet, StructSet.ofCoe_symm, exists_and_right,
+  simp only [ExtensionalSet.toStructSet, StructSet.ofCoe_symm, exists_and_right,
     EmbeddingLike.apply_eq_iff_eq] at h
   ext γ iγ u : 2
   obtain ⟨u, rfl⟩ := exists_tangle_lt u
@@ -459,7 +470,7 @@ theorem members_eq_of_toStructSet_eq (t₁ t₂ : Semitangle) (h : t₁.toStruct
     cases toStructSet.injective huv
     exact hv
 
-theorem toStructSet_injective : Function.Injective Semitangle.toStructSet := by
+theorem toStructSet_injective : Function.Injective ExtensionalSet.toStructSet := by
   rintro t₁ t₂ h
   have := members_eq_of_toStructSet_eq t₁ t₂ h
   by_cases hγ : Nonempty ((γ : Λ) ×' LtLevel γ)
@@ -477,7 +488,7 @@ theorem toStructSet_injective : Function.Injective Semitangle.toStructSet := by
   obtain (⟨a₂, ha₂⟩ | ⟨γ, _⟩) := p₂
   swap
   · cases hγ ⟨γ, inferInstance⟩
-  simp only [Semitangle.toStructSet, StructSet.ofCoe_symm, Preference.base.injEq, exists_and_left,
+  simp only [ExtensionalSet.toStructSet, StructSet.ofCoe_symm, Preference.base.injEq, exists_and_left,
     exists_prop, exists_eq_left', EmbeddingLike.apply_eq_iff_eq] at h
   have := congr_fun₂ h ⊥ (bot_lt_coe _)
   dsimp only at this
@@ -493,9 +504,9 @@ theorem toStructSet_injective : Function.Injective Semitangle.toStructSet := by
     intro γ _
     cases hγ ⟨γ, inferInstance⟩
 
-theorem toStructSet_smul (ρ : NewAllowable) (t : Semitangle) :
+theorem toStructSet_smul (ρ : NewAllowable) (t : ExtensionalSet) :
     ρ • t.toStructSet = (ρ • t).toStructSet := by
-  rw [← StructSet.ofCoe_inj, Semitangle.toStructSet, Semitangle.toStructSet]
+  rw [← StructSet.ofCoe_inj, ExtensionalSet.toStructSet, ExtensionalSet.toStructSet]
   rw [Equiv.apply_symm_apply]
   ext β hβ : 2
   revert hβ
@@ -509,7 +520,7 @@ theorem toStructSet_smul (ρ : NewAllowable) (t : Semitangle) :
     rw [mem_smul_set_iff_inv_smul_mem]
     constructor
     · rintro ⟨s, h, hpref, ha⟩
-      refine ⟨Tree.comp (Quiver.Hom.toPath hβ) (SemiallowablePerm.toStructPerm ρ.val) • s,
+      refine ⟨Tree.comp (Quiver.Hom.toPath hβ) (Derivatives.toStructPerm ρ.val) • s,
           ?_, ?_, ?_⟩
       · intro γ _
         have := NewAllowable.smul_cloud (β := ⊥) (γ := γ) ρ s bot_ne_coe
@@ -522,13 +533,13 @@ theorem toStructSet_smul (ρ : NewAllowable) (t : Semitangle) :
       · rw [mem_smul_set_iff_inv_smul_mem]
         exact ha
     · rintro ⟨s, h, hpref, ha⟩
-      refine ⟨(Tree.comp (Quiver.Hom.toPath hβ) (SemiallowablePerm.toStructPerm ρ.val))⁻¹ • s,
+      refine ⟨(Tree.comp (Quiver.Hom.toPath hβ) (Derivatives.toStructPerm ρ.val))⁻¹ • s,
           ?_, ?_, ?_⟩
       · intro γ _
         have := NewAllowable.smul_cloud (β := ⊥) (γ := γ) ρ
-          ((Tree.comp (Quiver.Hom.toPath hβ) (SemiallowablePerm.toStructPerm ρ.val))⁻¹ • s)
+          ((Tree.comp (Quiver.Hom.toPath hβ) (Derivatives.toStructPerm ρ.val))⁻¹ • s)
           bot_ne_coe
-        rw [SemiallowablePerm.comp_toPath_toStructPerm] at this
+        rw [Derivatives.comp_toPath_toStructPerm] at this
         erw [smul_inv_smul] at this
         rw [h, NewAllowable.members_smul'] at this
         erw [smul_left_cancel_iff] at this
@@ -550,27 +561,31 @@ theorem toStructSet_smul (ρ : NewAllowable) (t : Semitangle) :
     constructor
     · rintro ⟨_, ⟨s, hs, rfl⟩, rfl⟩
       refine ⟨ρ.val β • s, smul_mem_smul_set hs, ?_⟩
-      rw [ConNF.toStructSet_smul, SemiallowablePerm.comp_toPath_toStructPerm]
+      rw [ConNF.toStructSet_smul, Derivatives.comp_toPath_toStructPerm]
       rfl
     · rintro ⟨_, ⟨s, hs, rfl⟩, rfl⟩
       refine ⟨_, ⟨s, hs, rfl⟩, ?_⟩
-      rw [ConNF.toStructSet_smul, SemiallowablePerm.comp_toPath_toStructPerm]
+      rw [ConNF.toStructSet_smul, Derivatives.comp_toPath_toStructPerm]
       rfl
 
 theorem smul_intro' {β : Λ} [inst : LtLevel β] (s : Set (TSet β)) (ρ : NewAllowable) :
     intro' (ρ.val β • s) = ρ • intro' s := by
-  refine Semitangle.ext (γ := β) _ _ ?_
+  refine ExtensionalSet.ext (γ := β) _ _ ?_
   rw [NewAllowable.members_smul']
   change _ = ρ.val β • (intro' s).members β
   simp only [ext_intro']
 
-end Semitangle
+end ExtensionalSet
 
-/-- A tangle at the new level `α` is a semitangle supported by a small support.
+/-!
+## Defining t-sets
+-/
+
+/-- A tangle at the new level `α` is a extensional set supported by a small support.
 This is `τ_α` in the blueprint.
 Unlike the type `tangle`, this is not an opaque definition, and we can inspect and unfold it. -/
 abbrev NewTSet : Type u :=
-  { t : Semitangle // ∃ S : Support α, MulAction.Supports NewAllowable (S : Set (Address α)) t }
+  { t : ExtensionalSet // ∃ S : Support α, MulAction.Supports NewAllowable (S : Set (Address α)) t }
 
 variable {c d : Code} {S : Set (Address α)}
 
@@ -599,11 +614,11 @@ theorem Code.Equiv.supported_iff (hcd : c ≡ d) :
 theorem smul_intro {β : TypeIndex} [inst : LtLevel β]  (ρ : NewAllowable) (s : Set (TSet β)) (hs) :
     ρ • intro s hs = intro (ρ.val β • s) (isEven_smul.mpr hs) := by
   induction β using WithBot.recBotCoe generalizing inst
-  · simp only [intro, NewAllowable.smul_base, Semitangle.mk.injEq, NewAllowable.smul_extension,
+  · simp only [intro, NewAllowable.smul_base, ExtensionalSet.mk.injEq, NewAllowable.smul_extension,
       true_and]
     refine Preference.base_heq_base ?_ rfl
     rw [NewAllowable.smul_extension]
-  · simp only [intro, NewAllowable.smul_proper, Semitangle.mk.injEq, NewAllowable.smul_extension,
+  · simp only [intro, NewAllowable.smul_proper, ExtensionalSet.mk.injEq, NewAllowable.smul_extension,
       true_and]
     refine Preference.proper_heq_proper ?_ rfl
     rw [NewAllowable.smul_extension]
@@ -640,7 +655,7 @@ def newTypedNearLitter (N : NearLitter) : NewTSet :=
       refine Eq.trans ?_ h
       rw [NearLitterPerm.smul_nearLitter_coe]
       change _ '' _ = _ '' _
-      simp_rw [SemiallowablePerm.coe_apply_bot]
+      simp_rw [Derivatives.coe_apply_bot]
       rfl⟩
 
 theorem preferenceBase_injective {a₁ a₂ : Set Atom}
@@ -656,7 +671,7 @@ theorem newTypedNearLitter_injective : Function.Injective newTypedNearLitter := 
   intro N₁ N₂ h
   simp only [newTypedNearLitter, intro] at h
   rw [Subtype.mk_eq_mk] at h
-  simp only [Semitangle.mk.injEq] at h
+  simp only [ExtensionalSet.mk.injEq] at h
   have := preferenceBase_injective h.1 h.2
   simp only [singleton_eq_singleton_iff] at this
   exact NearLitter.ext this
@@ -675,7 +690,7 @@ def newSingleton' (β : TypeIndex) [i : LtLevel β] (t : Tangle β) : NewTSet :=
       · rintro _ ⟨i, hi, rfl⟩
         have := h ⟨i, hi, rfl⟩
         simp only [Enumeration.image_f, NewAllowable.smul_address_eq_iff] at this
-        rw [Allowable.smul_address_eq_iff, ← SemiallowablePerm.comp_toPath_toStructPerm]
+        rw [Allowable.smul_address_eq_iff, ← Derivatives.comp_toPath_toStructPerm]
         exact this⟩
 
 noncomputable def newSingleton (β : TypeIndex) [LtLevel β] (t : TSet β) : NewTSet :=
@@ -683,10 +698,9 @@ noncomputable def newSingleton (β : TypeIndex) [LtLevel β] (t : TSet β) : New
 
 namespace NewAllowable
 
-/-- Allowable permutations act on `α`-tangles. -/
 instance hasSmulNewTSet : SMul NewAllowable NewTSet :=
   ⟨fun ρ t =>
-    ⟨ρ • (t : Semitangle),
+    ⟨ρ • (t : ExtensionalSet),
       by
         obtain ⟨S, hS⟩ := t.prop
         refine ⟨ρ • S, ?_⟩
@@ -700,15 +714,16 @@ instance hasSmulNewTSet : SMul NewAllowable NewTSet :=
 
 @[simp]
 theorem coe_smul_newTangle (ρ : NewAllowable) (t : NewTSet) :
-    ((ρ • t) : Semitangle) = ρ • (t : Semitangle) :=
+    ((ρ • t) : ExtensionalSet) = ρ • (t : ExtensionalSet) :=
   rfl
 
 @[simp]
 theorem smul_newTangle_t (ρ : NewAllowable) (t : NewTSet) :
-    (ρ • t : NewTSet) = ρ • (t : Semitangle) :=
+    (ρ • t : NewTSet) = ρ • (t : ExtensionalSet) :=
   rfl
 
-instance mulActionNewTSet : MulAction NewAllowable NewTSet where
+/-- Allowable permutations act on t-sets at level `α`. -/
+instance : MulAction NewAllowable NewTSet where
   one_smul t := by
     refine Subtype.ext ?_
     simp only [smul_newTangle_t, one_smul]
@@ -724,7 +739,7 @@ theorem smul_newTypedNearLitter (N : NearLitter) (ρ : NewAllowable) :
     (NewAllowable.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _))) N
   simp only [newTypedNearLitter, smul_newTangle_t, smul_intro,
     NearLitterPerm.smul_nearLitter_fst, toStructPerm, MonoidHom.coe_comp, comp_apply,
-    coeHom_apply, SemiallowablePerm.coe_apply_bot ρ] at this ⊢
+    coeHom_apply, Derivatives.coe_apply_bot ρ] at this ⊢
   congr 1
   exact this.symm
 
@@ -734,18 +749,19 @@ protected def NewTSet.toStructSet (t : NewTSet) : StructSet α :=
   t.val.toStructSet
 
 theorem NewTSet.toStructSet_injective : Function.Injective NewTSet.toStructSet :=
-  fun _ _ h => Subtype.ext (Semitangle.toStructSet_injective h)
+  fun _ _ h => Subtype.ext (ExtensionalSet.toStructSet_injective h)
 
 theorem NewTSet.toStructSet_smul (ρ : NewAllowable) (t : NewTSet) :
     (ρ • t).toStructSet = ρ • t.toStructSet :=
   (t.val.toStructSet_smul ρ).symm
 
+/-- The t-sets at level `α` are extensional at all lower proper type indices. -/
 theorem NewTSet.ext (γ : Λ) [iγ : LtLevel γ] (t₁ t₂ : NewTSet)
     (h : ∀ p, p ∈ StructSet.ofCoe t₁.toStructSet γ iγ.elim ↔
       p ∈ StructSet.ofCoe t₂.toStructSet γ iγ.elim) :
     t₁ = t₂ := by
-  refine Subtype.ext (Semitangle.ext (γ := γ) t₁ t₂ ?_)
-  simp only [NewTSet.toStructSet, Semitangle.toStructSet, StructSet.ofCoe_symm, exists_and_right,
+  refine Subtype.ext (ExtensionalSet.ext (γ := γ) t₁ t₂ ?_)
+  simp only [NewTSet.toStructSet, ExtensionalSet.toStructSet, StructSet.ofCoe_symm, exists_and_right,
     StructSet.ofCoe_toCoe] at h
   ext u
   constructor
@@ -762,7 +778,7 @@ theorem NewTSet.newSingleton'_toStructSet
     (β : TypeIndex) [i : LtLevel β] (t : Tangle β) :
     StructSet.ofCoe (NewTSet.toStructSet (newSingleton' β t)) β i.elim =
     {toStructSet t.set_lt} := by
-  rw [newSingleton', NewTSet.toStructSet, Semitangle.toStructSet]
+  rw [newSingleton', NewTSet.toStructSet, ExtensionalSet.toStructSet]
   simp only [StructSet.ofCoe_symm, exts_intro, exists_and_right, StructSet.ofCoe_toCoe]
   cases β
   · dsimp only
@@ -787,15 +803,16 @@ theorem NewTSet.newSingleton_toStructSet
     StructSet.ofCoe (NewTSet.toStructSet (newSingleton β t)) β i.elim = {toStructSet t} := by
   rw [newSingleton, newSingleton'_toStructSet, (exists_tangle_lt t).choose_spec]
 
+/-- The main introduction rule for t-sets at level `α`. -/
 noncomputable def NewTSet.intro {β : Λ} [LtLevel β] (s : Set (TSet β))
     (hs : ∃ S : Set (Address α), Small S ∧
       ∀ ρ : NewAllowable, (∀ c ∈ S, ρ • c = c) → ρ.val β • s = s) :
     NewTSet :=
-  ⟨Semitangle.intro' s, by
+  ⟨ExtensionalSet.intro' s, by
     obtain ⟨S, h₁, h₂⟩ := hs
     refine ⟨Enumeration.ofSet S h₁, ?_⟩
     intro ρ hρ
-    refine Semitangle.ext (γ := β) _ _ ?_
+    refine ExtensionalSet.ext (γ := β) _ _ ?_
     rw [← smul_intro', ext_intro', ext_intro']
     refine h₂ ρ ?_
     intro c hc
@@ -808,6 +825,6 @@ theorem NewTSet.intro_members {β : Λ} [LtLevel β] (s : Set (TSet β))
     (hs : ∃ S : Set (Address α), Small S ∧
       ∀ ρ : NewAllowable, (∀ c ∈ S, ρ • c = c) → ρ.val β • s = s) :
     (intro s hs).val.members β = s :=
-  Semitangle.ext_intro' _
+  ExtensionalSet.ext_intro' _
 
 end ConNF

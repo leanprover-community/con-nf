@@ -6,8 +6,8 @@ import ConNF.Structural.StructSet
 # Structural permutations
 
 In this file, we define the ambient groups of *structural permutations*.  These will later have
-recursively-constructed subgroups of *semi-allowable* and *allowable permutations* which will act on
-tangles; we define these larger ambient groups in advance in order to set up their infrastructure of
+recursively-constructed subgroups of *allowable permutations* which will act on t-sets;
+we define these larger ambient groups in advance in order to set up their infrastructure of
 derivatives and so on independently of the recursion.
 
 We define structural permutations as trees of near-litter permutations.
