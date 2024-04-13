@@ -30,7 +30,7 @@ This structure combines the following data:
 * `typedAtom` and `typedNearLitter`
 -/
 class FOAData where
-  lowerTangleData : ∀ β : Λ, [LeLevel β] → TangleData β
+  lowerModelData : ∀ β : Λ, [LeLevel β] → ModelData β
   lowerPositionedTangles : ∀ β : Λ, [LtLevel β] → PositionedTangles β
   lowerTypedObjects : ∀ β : Λ, [LeLevel β] → TypedObjects β
   lowerPositionedObjects : ∀ β : Λ, [LtLevel β] → PositionedObjects β
@@ -39,8 +39,8 @@ namespace FOAData
 
 variable [FOAData] {β : Λ} [LeLevel β] {γ : Λ} [LtLevel γ]
 
-instance : TangleData β :=
-  lowerTangleData β
+instance : ModelData β :=
+  lowerModelData β
 
 instance : PositionedTangles γ :=
   lowerPositionedTangles γ
@@ -51,9 +51,9 @@ instance : TypedObjects β :=
 instance : PositionedObjects γ :=
   lowerPositionedObjects γ
 
-instance leTangleData : ∀ β : TypeIndex, [LeLevel β] → TangleData β
-  | ⊥, _ => Bot.tangleData
-  | (β : Λ), _ => lowerTangleData β
+instance leModelData : ∀ β : TypeIndex, [LeLevel β] → ModelData β
+  | ⊥, _ => Bot.modelData
+  | (β : Λ), _ => lowerModelData β
 
 instance ltPositionedTangles : ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
   | ⊥, _ => Bot.positionedTangles
@@ -135,7 +135,7 @@ class FOAAssumptions extends FOAData where
   /-- Inflexible litters whose atoms occur in designated supports have position less than the
   original tangle. -/
   pos_lt_pos_atom {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {a : Atom} :
-    ⟨A, Sum.inl a⟩ ∈ t.support → t.set ≠ typedAtom a → pos a < pos t
+    ⟨A, Sum.inl a⟩ ∈ t.support → pos a < pos t
   /-- Inflexible litters touching near-litters in designated supports have position less than the
   original tangle. -/
   pos_lt_pos_nearLitter {β : Λ} [LtLevel β] (t : Tangle β) {A : ExtendedIndex β} {N : NearLitter} :

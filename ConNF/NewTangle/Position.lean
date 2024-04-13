@@ -12,33 +12,30 @@ universe u
 
 namespace ConNF.NewTangle
 
-variable [Params.{u}] [Level] [BasePositions] [TangleDataLt] [PositionedTanglesLt] [TypedObjectsLt]
+variable [Params.{u}] [Level] [BasePositions] [ModelDataLt] [PositionedTanglesLt] [TypedObjectsLt]
   [PositionedObjectsLt]
 
 def posBound (t : NewTSet) (S : Support α) : Set μ :=
-  {ν | ∃ (A : ExtendedIndex α) (a : Atom), ⟨A, inl a⟩ ∈ S ∧
-    t ≠ newTypedAtom a ∧ ν = pos a} ∪
+  {ν | ∃ (A : ExtendedIndex α) (a : Atom), ⟨A, inl a⟩ ∈ S ∧ ν = pos a} ∪
   {ν | ∃ (A : ExtendedIndex α) (N : NearLitter), ⟨A, inr N⟩ ∈ S ∧
     t ≠ newTypedNearLitter N ∧ ν = pos N} ∪
-  {ν | ∃ a : Atom, t = newTypedAtom a ∧ ν = pos a} ∪
   {ν | ∃ N : NearLitter, t = newTypedNearLitter N ∧ ν = pos N}
 
 def posBound' (t : NewTSet) (S : Support α) : Set μ :=
-  (⋃ (c ∈ S) (A ∈ {A | c.1 = A}) (a ∈ {a | c.2 = inl a ∧ t ≠ newTypedAtom a}), {pos a}) ∪
+  (⋃ (c ∈ S) (A ∈ {A | c.1 = A}) (a ∈ {a | c.2 = inl a}), {pos a}) ∪
   (⋃ (c ∈ S) (A ∈ {A | c.1 = A}) (N ∈ {N | c.2 = inr N ∧ t ≠ newTypedNearLitter N}),{pos N}) ∪
-  (⋃ (a ∈ {a | t = newTypedAtom a}), {pos a}) ∪
   (⋃ (N ∈ {a | t = newTypedNearLitter a}), {pos N})
 
 theorem posBound_eq_posBound' (t : NewTSet) (S : Support α) : posBound t S = posBound' t S := by
   rw [posBound, posBound']
-  refine congr_arg₂ _ (congr_arg₂ _ (congr_arg₂ _ ?_ ?_) ?_) ?_
+  refine congr_arg₂ _ (congr_arg₂ _ ?_ ?_) ?_
   · ext ν
     simp only [mem_setOf_eq, setOf_eq_eq_singleton', mem_singleton_iff, mem_iUnion]
     constructor
-    · rintro ⟨A, a, haS, ht, rfl⟩
-      exact ⟨⟨A, inl a⟩, haS, A, rfl, a, ⟨rfl, ht⟩, rfl⟩
-    · rintro ⟨⟨A, _⟩, haS, A, rfl, a, ⟨rfl, ht⟩, rfl⟩
-      exact ⟨A, a, haS, ht, rfl⟩
+    · rintro ⟨A, a, haS, rfl⟩
+      exact ⟨⟨A, inl a⟩, haS, A, rfl, a, rfl, rfl⟩
+    · rintro ⟨⟨A, _⟩, haS, A, rfl, a, rfl, rfl⟩
+      exact ⟨A, a, haS, rfl⟩
   · ext ν
     simp only [mem_setOf_eq, setOf_eq_eq_singleton', mem_singleton_iff, mem_iUnion]
     constructor
@@ -48,18 +45,16 @@ theorem posBound_eq_posBound' (t : NewTSet) (S : Support α) : posBound t S = po
       exact ⟨A, N, hNS, ht, rfl⟩
   · ext ν
     simp only [mem_setOf_eq, mem_iUnion, mem_singleton_iff, exists_prop]
-  · ext ν
-    simp only [mem_setOf_eq, mem_iUnion, mem_singleton_iff, exists_prop]
 
 theorem small_posBound (t : NewTSet) (S : Support α) : Small (posBound t S) := by
   rw [posBound_eq_posBound', posBound']
-  refine Small.union (Small.union (Small.union ?_ ?_) ?_) ?_
+  refine Small.union (Small.union ?_ ?_) ?_
   · refine Small.bUnion S.small (fun c _ => ?_)
     refine Small.bUnion (by simp only [setOf_eq_eq_singleton', small_singleton]) (fun A _ => ?_)
     refine Small.bUnion ?_ (fun _ _ => small_singleton _)
     refine Set.Subsingleton.small ?_
     intro a ha b hb
-    cases ha.1.symm.trans hb.1
+    cases ha.symm.trans hb
     rfl
   · refine Small.bUnion S.small (fun c _ => ?_)
     refine Small.bUnion (by simp only [setOf_eq_eq_singleton', small_singleton]) (fun A _ => ?_)
@@ -68,10 +63,6 @@ theorem small_posBound (t : NewTSet) (S : Support α) : Small (posBound t S) := 
     intro N hN N hN'
     cases hN.1.symm.trans hN'.1
     rfl
-  · refine Small.bUnion ?_ (fun _ _ => small_singleton _)
-    refine Set.Subsingleton.small ?_
-    intro a₁ ha₁ a₂ ha₂
-    exact newTypedAtom_injective (ha₁.symm.trans ha₂)
   · refine Small.bUnion ?_ (fun _ _ => small_singleton _)
     refine Set.Subsingleton.small ?_
     intro N₁ hN₁ N₂ hN₂

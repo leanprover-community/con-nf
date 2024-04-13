@@ -14,7 +14,7 @@ noncomputable section
 
 namespace ConNF
 
-open TangleData TSet
+open ModelData TSet
 
 variable [Params.{u}]
 
@@ -23,7 +23,7 @@ namespace Construction.FOA
 variable [Level]
 
 local instance : FOAData where
-  lowerTangleData := fun _ _ => inferInstance
+  lowerModelData := fun _ _ => inferInstance
   lowerPositionedTangles := fun _ _ => inferInstance
   lowerTypedObjects := fun _ _ => inferInstance
   lowerPositionedObjects := fun _ _ => inferInstance
@@ -32,10 +32,10 @@ local instance : FOAData where
 However, it's not the case that `Allowable` is defeq to `foaAllowable`, because we need
 to pattern-match on its argument (i.e. check if it's `⊥`) before we can establish the defeq. -/
 abbrev foaAllowable (β : TypeIndex) [LeLevel β] : Type u :=
-  (FOAData.leTangleData β).Allowable
+  (FOAData.leModelData β).Allowable
 
 def foaAllowableToStructPerm {β : TypeIndex} [LeLevel β] : foaAllowable β →* StructPerm β :=
-  (FOAData.leTangleData β).allowableToStructPerm
+  (FOAData.leModelData β).allowableToStructPerm
 
 @[simp]
 theorem foaAllowableToStructPerm_eq_coe {β : Λ} [LeLevel β] :
@@ -115,19 +115,19 @@ theorem smul_fuzz {β : Λ} [LeLevel β] {γ : Λ} [LtLevel γ] {δ : Λ} [LtLev
   · simp only [foaAllowableToStructPerm_eq_coe, allowableCons_eq_coe]
     simp only [cons'_eq_cons] at this
     have h := buildCumul_apply_eq β γ (coe_le_coe.mp hγ.le)
-    have hcast := Construction.fuzz_cast γ δ hγδ _ _ (congr_arg Construction.IH.tangleData h)
+    have hcast := Construction.fuzz_cast γ δ hγδ _ _ (congr_arg Construction.IH.modelData h)
       _ _ (congr_arg_heq Construction.IH.positionedTangles h)
     rw [tangleEquiv', Equiv.cast_apply] at this
     rw [fuzz', hcast, hcast] at this
     rw [cast_cast, cast_eq] at this
     refine this.trans (congr_arg _ ?_)
-    erw [Construction.tangleData_cast_smul' γ _ _ (congr_arg Construction.IH.tangleData h)]
+    erw [Construction.modelData_cast_smul' γ _ _ (congr_arg Construction.IH.modelData h)]
     simp only [allowableEquiv', Equiv.cast_apply, cast_cast, cast_eq]
     rfl
   · intro ρ
     simp only [cons'_eq_cons]
     have h := buildCumul_apply_eq β γ (coe_le_coe.mp hγ.le)
-    erw [Construction.tangleData_cast_toStructPerm γ _ _ (congr_arg Construction.IH.tangleData h)]
+    erw [Construction.modelData_cast_toStructPerm γ _ _ (congr_arg Construction.IH.modelData h)]
     rw [allowableEquiv']
     simp only [Equiv.cast_apply, cast_cast, cast_eq]
     erw [cons_toStructPerm]
@@ -163,8 +163,8 @@ theorem allowable_of_smulFuzz (β : Λ) [iβ : LeLevel β]
       · intro ρ
         simp only [cons'_eq_cons]
         have h := buildCumul_apply_eq β γ (coe_le_coe.mp hγ.le)
-        erw [Construction.tangleData_cast_toStructPerm γ _ _
-          (congr_arg Construction.IH.tangleData h)]
+        erw [Construction.modelData_cast_toStructPerm γ _ _
+          (congr_arg Construction.IH.modelData h)]
         rw [allowableEquiv']
         simp only [Equiv.cast_apply, cast_cast, cast_eq]
         erw [cons_toStructPerm]
@@ -176,9 +176,9 @@ theorem allowable_of_smulFuzz (β : Λ) [iβ : LeLevel β]
     letI : LtLevel γ := ⟨(coe_lt_coe.mpr hγ).trans_le hβ⟩
     letI : LtLevel δ := ⟨(coe_lt_coe.mpr hδ).trans_le hβ⟩
     have h := buildCumul_apply_eq β γ hγ.le
-    have hcast := Construction.fuzz_cast γ δ hγδ _ _ (congr_arg Construction.IH.tangleData h)
+    have hcast := Construction.fuzz_cast γ δ hγδ _ _ (congr_arg Construction.IH.modelData h)
       _ _ (congr_arg_heq Construction.IH.positionedTangles h)
-    have hcast' := Construction.tangleData_cast_smul' γ _ _ (congr_arg Construction.IH.tangleData h).symm
+    have hcast' := Construction.modelData_cast_smul' γ _ _ (congr_arg Construction.IH.modelData h).symm
       (ρs γ (coe_lt_coe.mpr hγ)) ((tangleEquiv' hγ.le).symm t)
     simp only [tangleEquiv', Equiv.cast_symm, Equiv.cast_apply, cast_cast, cast_eq] at hcast'
     change _ = allowableEquiv' hγ.le (ρs γ (coe_lt_coe.mpr hγ)) • t at hcast'
@@ -186,16 +186,16 @@ theorem allowable_of_smulFuzz (β : Λ) [iβ : LeLevel β]
     rw [hcast, hcast, ← hcast', cast_cast, cast_eq]
     refine Eq.trans ?_
       (h₁ γ δ (coe_lt_coe.mpr hγ) (coe_lt_coe.mpr hδ) hγδ ((tangleEquiv' hγ.le).symm t))
-    have := Construction.tangleData_cast_toStructPerm δ _ _
-      (congr_arg Construction.IH.tangleData (buildCumul_apply_eq β δ hδ.le))
+    have := Construction.modelData_cast_toStructPerm δ _ _
+      (congr_arg Construction.IH.modelData (buildCumul_apply_eq β δ hδ.le))
     erw [this]
     rw [allowableEquiv', Equiv.cast_apply, cast_cast, cast_eq]
     rfl
   · intro δ hδ a
     letI : LtLevel δ := ⟨(coe_lt_coe.mpr hδ).trans_le hβ⟩
     dsimp only [fuzz'Bot]
-    have := Construction.tangleData_cast_toStructPerm δ _ _
-      (congr_arg Construction.IH.tangleData (buildCumul_apply_eq β δ hδ.le))
+    have := Construction.modelData_cast_toStructPerm δ _ _
+      (congr_arg Construction.IH.modelData (buildCumul_apply_eq β δ hδ.le))
     erw [this]
     rw [← h₂ δ (coe_lt_coe.mpr hδ) a, allowableEquiv', Equiv.cast_apply, cast_cast, cast_eq]
     rfl

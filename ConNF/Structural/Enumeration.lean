@@ -550,7 +550,7 @@ theorem smul_add {G : Type _} [SMul G α] {g : G} (E F : Enumeration α) :
     rfl
 
 /-!
-# The partial order on enumerations
+## The partial order on enumerations
 We say that `E ≤ F` when `F` has larger domain than `E` and agrees on the smaller domain.
 -/
 

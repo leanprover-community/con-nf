@@ -38,12 +38,7 @@ structure IH (α : Λ) where
     letI : MulAction Allowable (Address α) :=
       MulAction.compHom _ allowableToStructPerm
     Tang α TSet Allowable ↪ μ
-  typedAtom : Atom ↪ TSet
   typedNearLitter : NearLitter ↪ TSet
-  pos_typedAtom :
-    letI : MulAction Allowable (Address α) := MulAction.compHom _ allowableToStructPerm
-    ∀ (a : Atom) (t : Tang α TSet Allowable),
-    t.set = typedAtom a → ConNF.pos a ≤ pos t
   pos_typedNearLitter :
     letI : MulAction Allowable (Address α) := MulAction.compHom _ allowableToStructPerm
     ∀ (N : NearLitter) (t : Tang α TSet Allowable),
@@ -64,7 +59,7 @@ instance {α : Λ} {ih : IH α} {X : Type _} [MulAction (StructPerm α) X] :
     MulAction ih.Allowable X :=
   MulAction.compHom _ ih.allowableToStructPerm
 
-def IH.tangleData {α : Λ} (ih : IH α) : TangleData α where
+def IH.modelData {α : Λ} (ih : IH α) : ModelData α where
   TSet := ih.TSet
   Allowable := ih.Allowable
   allowableToStructPerm := ih.allowableToStructPerm
@@ -74,83 +69,80 @@ def IH.tangleData {α : Λ} (ih : IH α) : TangleData α where
   toStructSet_smul := ih.toStructSet_smul
 
 protected def IH.Tangle {α : Λ} (ih : IH α) : Type u :=
-  letI := ih.tangleData
+  letI := ih.modelData
   Tangle α
 
 instance {α : Λ} {ih : IH α} : MulAction ih.Allowable ih.Tangle :=
-  letI := ih.tangleData
+  letI := ih.modelData
   inferInstanceAs (MulAction (Allowable α) (Tangle α))
 
-instance {α : Λ} {ih : IH α} : MulAction ih.Allowable (letI := ih.tangleData; Tangle α) :=
-  letI := ih.tangleData
+instance {α : Λ} {ih : IH α} : MulAction ih.Allowable (letI := ih.modelData; Tangle α) :=
+  letI := ih.modelData
   inferInstanceAs (MulAction (Allowable α) (Tangle α))
 
 def IH.tangleEquiv {α : Λ} (ih : IH α) :
-    letI := ih.tangleData
+    letI := ih.modelData
     Tangle α ≃ Tang α ih.TSet ih.Allowable :=
   letI : Level := ⟨α⟩
-  letI := ih.tangleData
+  letI := ih.modelData
   { toFun := fun t => ⟨TangleCoe.set t, TangleCoe.support t, TangleCoe.support_supports t⟩,
     invFun := fun t => ⟨t.set, t.support, t.support_supports⟩,
     left_inv := fun _ => rfl,
     right_inv := fun _ => rfl}
 
 def IH.positionedTangles {α : Λ} (ih : IH α) :
-    letI := ih.tangleData
+    letI := ih.modelData
     PositionedTangles α :=
-  letI := ih.tangleData
+  letI := ih.modelData
   ⟨⟨fun t => ih.pos (ih.tangleEquiv t),
     fun _ _ h => ih.tangleEquiv.injective (ih.pos.injective h)⟩⟩
 
 def IH.typedObjects {α : Λ} (ih : IH α) :
-    letI := ih.tangleData
+    letI := ih.modelData
     TypedObjects α :=
-  letI := ih.tangleData
-  { typedAtom := ih.typedAtom
-    typedNearLitter := ih.typedNearLitter
+  letI := ih.modelData
+  { typedNearLitter := ih.typedNearLitter
     smul_typedNearLitter := ih.smul_typedNearLitter }
 
 @[simp]
-theorem IH.pos_tangleEquiv {α : Λ} (ih : IH α) (t : letI := ih.tangleData; Tangle α) :
-    letI := ih.tangleData
+theorem IH.pos_tangleEquiv {α : Λ} (ih : IH α) (t : letI := ih.modelData; Tangle α) :
+    letI := ih.modelData
     letI := ih.positionedTangles
     ConNF.pos t = ih.pos (ih.tangleEquiv t) :=
   rfl
 
 theorem IH.positionedObjects {α : Λ} (ih : IH α) :
-    letI := ih.tangleData
+    letI := ih.modelData
     letI := ih.positionedTangles
     letI := ih.typedObjects
     PositionedObjects α := by
-  letI := ih.tangleData
+  letI := ih.modelData
   letI := ih.positionedTangles
   letI := ih.typedObjects
   constructor
-  · intro a t h
-    exact ih.pos_typedAtom a (ih.tangleEquiv t) h
-  · intro N t h
-    exact ih.pos_typedNearLitter N (ih.tangleEquiv t) h
+  intro N t h
+  exact ih.pos_typedNearLitter N (ih.tangleEquiv t) h
 
 /-- A renaming of `fuzz` that uses only data from the `IH`s. -/
 noncomputable def fuzz' {β γ : Λ} (ihβ : IH β) (ihγ : IH γ) (h : (β : TypeIndex) ≠ γ) :
-    (letI := ihβ.tangleData; Tangle β) → Litter :=
-  letI := ihβ.tangleData
+    (letI := ihβ.modelData; Tangle β) → Litter :=
+  letI := ihβ.modelData
   letI := ihβ.positionedTangles
-  letI := ihγ.tangleData
+  letI := ihγ.modelData
   letI := ihγ.positionedTangles
   letI := ihγ.typedObjects
   fuzz h
 
 /-- A renaming of `fuzz` that uses only data from the `IH`s. -/
 noncomputable def fuzz'Bot {γ : Λ} (ihγ : IH γ) : Atom → Litter :=
-  letI := ihγ.tangleData
+  letI := ihγ.modelData
   letI := ihγ.positionedTangles
   letI := ihγ.typedObjects
   fuzz (bot_ne_coe (a := γ))
 
-def tangleDataStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) : TangleData α :=
+def modelDataStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) : ModelData α :=
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -168,51 +160,50 @@ def tangleDataStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) : TangleDat
   }
 
 def typedObjectsStep (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
-    letI := tangleDataStep α ihs
+    letI := modelDataStep α ihs
     TypedObjects α :=
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-  letI := tangleDataStep α ihs
+  letI := modelDataStep α ihs
   {
-    typedAtom := ⟨newTypedAtom, newTypedAtom_injective⟩
     typedNearLitter := ⟨newTypedNearLitter, newTypedNearLitter_injective⟩
     smul_typedNearLitter := fun ρ N => NewAllowable.smul_newTypedNearLitter N ρ
   }
 
-noncomputable def tangleDataStepFn (α : Λ) (ihs : (β : Λ) → β < α → IH β)
-    (β : Λ) (hβ : β ≤ α) : TangleData β :=
+noncomputable def modelDataStepFn (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+    (β : Λ) (hβ : β ≤ α) : ModelData β :=
   if hβ' : β = α then
-    hβ' ▸ tangleDataStep α ihs
+    hβ' ▸ modelDataStep α ihs
   else
-    (ihs β (lt_of_le_of_ne hβ hβ')).tangleData
+    (ihs β (lt_of_le_of_ne hβ hβ')).modelData
 
-theorem tangleDataStepFn_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
-    tangleDataStepFn α ihs α le_rfl = tangleDataStep α ihs := by
-  rw [tangleDataStepFn, dif_pos rfl]
+theorem modelDataStepFn_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
+    modelDataStepFn α ihs α le_rfl = modelDataStep α ihs := by
+  rw [modelDataStepFn, dif_pos rfl]
 
-theorem tangleDataStepFn_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+theorem modelDataStepFn_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β < α) :
-    tangleDataStepFn α ihs β hβ.le = (ihs β hβ).tangleData := by
-  rw [tangleDataStepFn, dif_neg (ne_of_lt hβ)]
+    modelDataStepFn α ihs β hβ.le = (ihs β hβ).modelData := by
+  rw [modelDataStepFn, dif_neg (ne_of_lt hβ)]
 
 noncomputable def typedObjectsStepFn (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β ≤ α) :
-    letI := tangleDataStepFn α ihs β hβ
+    letI := modelDataStepFn α ihs β hβ
     TypedObjects β :=
   if hβ' : β = α then
-    hβ'.symm ▸ tangleDataStepFn_eq α ihs ▸ typedObjectsStep α ihs
+    hβ'.symm ▸ modelDataStepFn_eq α ihs ▸ typedObjectsStep α ihs
   else
-    cast (by rw [tangleDataStepFn_lt α ihs β (lt_of_le_of_ne hβ hβ')])
+    cast (by rw [modelDataStepFn_lt α ihs β (lt_of_le_of_ne hβ hβ')])
       (ihs β (lt_of_le_of_ne hβ hβ')).typedObjects
 
 theorem typedObjectsStepFn_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β < α) :
-    letI := tangleDataStepFn α ihs β hβ.le
+    letI := modelDataStepFn α ihs β hβ.le
     typedObjectsStepFn α ihs β hβ.le =
-      cast (by rw [tangleDataStepFn_lt α ihs β hβ]) (ihs β hβ).typedObjects := by
+      cast (by rw [modelDataStepFn_lt α ihs β hβ]) (ihs β hβ).typedObjects := by
   rw [typedObjectsStepFn, dif_neg (ne_of_lt hβ)]
 
 noncomputable def buildStepFOAData (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
@@ -220,16 +211,16 @@ noncomputable def buildStepFOAData (α : Λ) (ihs : (β : Λ) → β < α → IH
     FOAData :=
   letI : Level := ⟨α⟩
   {
-    lowerTangleData := fun β hβ => tangleDataStepFn α ihs β (coe_le_coe.mp hβ.elim)
+    lowerModelData := fun β hβ => modelDataStepFn α ihs β (coe_le_coe.mp hβ.elim)
     lowerPositionedTangles := fun β hβ =>
-      cast (by rw [← tangleDataStepFn_lt α ihs β (coe_lt_coe.mp hβ.elim)])
+      cast (by rw [← modelDataStepFn_lt α ihs β (coe_lt_coe.mp hβ.elim)])
         (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles
     lowerTypedObjects := fun β hβ => typedObjectsStepFn α ihs β (coe_le_coe.mp hβ.elim)
     lowerPositionedObjects := fun β hβ =>
       cast (by
         congr 1
-        · rw [← tangleDataStepFn_lt α ihs β (coe_lt_coe.mp hβ.elim)]
-        · simp only [← tangleDataStepFn_lt α ihs β (coe_lt_coe.mp hβ.elim)]
+        · rw [← modelDataStepFn_lt α ihs β (coe_lt_coe.mp hβ.elim)]
+        · simp only [← modelDataStepFn_lt α ihs β (coe_lt_coe.mp hβ.elim)]
           exact (cast_heq _ _).symm
         · dsimp only
           rw [typedObjectsStepFn_lt α ihs β (coe_lt_coe.mp hβ.elim)]
@@ -248,20 +239,20 @@ theorem buildStepFOAData_positioned_lt (α : Λ) (ihs : (β : Λ) → β < α �
 theorem foaData_tSet_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
     letI : FOAData := buildStepFOAData α ihs
     TSet α = NewTSet := by
-  change (tangleDataStepFn α ihs α le_rfl).TSet = _
-  rw [tangleDataStepFn_eq]
+  change (modelDataStepFn α ihs α le_rfl).TSet = _
+  rw [modelDataStepFn_eq]
   rfl
 
 def foaData_tSet_eq_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -274,8 +265,8 @@ theorem foaData_tSet_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : 
     letI : LeLevel β := ⟨coe_le_coe.mpr hβ.le⟩
     letI : FOAData := buildStepFOAData α ihs
     TSet β = (ihs β hβ).TSet := by
-  change (tangleDataStepFn α ihs β hβ.le).TSet = _
-  rw [tangleDataStepFn_lt]
+  change (modelDataStepFn α ihs β hβ.le).TSet = _
+  rw [modelDataStepFn_lt]
   rfl
 
 def foaData_tSet_lt_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : Λ) (hβ : β < α) :
@@ -290,12 +281,12 @@ theorem foaData_tangle_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β 
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     Tangle β) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     Tangle β) := by
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
-  change @TangleCoe _ β (tangleDataStepFn α ihs β hβ.le) = _
-  rw [tangleDataStepFn_lt α ihs β hβ]
+  change @TangleCoe _ β (modelDataStepFn α ihs β hβ.le) = _
+  rw [modelDataStepFn_lt α ihs β hβ]
   rfl
 
 def foaData_tangle_lt_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : Λ) (hβ : β < α) :
@@ -303,38 +294,38 @@ def foaData_tangle_lt_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β) (�
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     Tangle β) ≃
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     Tangle β) :=
   Equiv.cast (foaData_tangle_lt α ihs β hβ)
 
 theorem foaData_allowable_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : FOAData := buildStepFOAData α ihs
     Allowable α = NewAllowable := by
-  change (tangleDataStepFn α ihs α le_rfl).Allowable = _
-  rw [tangleDataStepFn_eq]
+  change (modelDataStepFn α ihs α le_rfl).Allowable = _
+  rw [modelDataStepFn_eq]
   rfl
 
 def foaData_allowable_eq_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : FOAData := buildStepFOAData α ihs
     Allowable α ≃ NewAllowable :=
     Equiv.cast (foaData_allowable_eq α ihs)
 
-theorem tangleData_cast_one (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂) :
+theorem modelData_cast_one (α : Λ) (i₁ i₂ : ModelData α) (h : i₁ = i₂) :
     cast (show i₁.Allowable = i₂.Allowable by rw [h]) i₁.allowableGroup.one =
       i₂.allowableGroup.one :=
   by subst h; rfl
 
-theorem tangleData_cast_mul (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂)
+theorem modelData_cast_mul (α : Λ) (i₁ i₂ : ModelData α) (h : i₁ = i₂)
     (ρ₁ ρ₂ : i₁.Allowable) :
     cast (show i₁.Allowable = i₂.Allowable by rw [h]) (i₁.allowableGroup.mul ρ₁ ρ₂) =
     i₂.allowableGroup.mul
@@ -342,24 +333,24 @@ theorem tangleData_cast_mul (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i�
       (cast (show i₁.Allowable = i₂.Allowable by rw [h]) ρ₂) :=
   by subst h; rfl
 
-theorem tangleData_cast_toStructPerm (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂) (ρ) :
+theorem modelData_cast_toStructPerm (α : Λ) (i₁ i₂ : ModelData α) (h : i₁ = i₂) (ρ) :
     i₁.allowableToStructPerm ρ =
     i₂.allowableToStructPerm (cast (show i₁.Allowable = i₂.Allowable by rw [h]) ρ) :=
   by subst h; rfl
 
-theorem tangleData_cast_toStructSet (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂) (t) :
+theorem modelData_cast_toStructSet (α : Λ) (i₁ i₂ : ModelData α) (h : i₁ = i₂) (t) :
     i₁.toStructSet t =
     i₂.toStructSet (cast (show i₁.TSet = i₂.TSet by rw [h]) t) :=
   by subst h; rfl
 
-theorem tangleData_cast_smul (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂) (ρ t) :
+theorem modelData_cast_smul (α : Λ) (i₁ i₂ : ModelData α) (h : i₁ = i₂) (ρ t) :
     cast (show i₁.TSet = i₂.TSet by rw [h]) (i₁.allowableAction.smul ρ t) =
     i₂.allowableAction.smul
       (cast (show i₁.Allowable = i₂.Allowable by rw [h]) ρ)
       (cast (show i₁.TSet = i₂.TSet by rw [h]) t) :=
   by subst h; rfl
 
-theorem tangleData_cast_smul' (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = i₂) (ρ t) :
+theorem modelData_cast_smul' (α : Λ) (i₁ i₂ : ModelData α) (h : i₁ = i₂) (ρ t) :
     cast (show (letI := i₁; Tangle α) = (letI := i₂; Tangle α) by rw [h])
       ((inferInstanceAs (MulAction (letI := i₁; Allowable α) (letI := i₁; Tangle α))).smul ρ t) =
     (inferInstanceAs (MulAction (letI := i₂; Allowable α) (letI := i₂; Tangle α))).smul
@@ -367,7 +358,7 @@ theorem tangleData_cast_smul' (α : Λ) (i₁ i₂ : TangleData α) (h : i₁ = 
       (cast (show (letI := i₁; Tangle α) = (letI := i₂; Tangle α) by rw [h]) t) :=
   by subst h; rfl
 
-theorem tangleData_cast_set (α : Λ) (i₁ i₂ : TangleData α) (hi : i₁ = i₂)
+theorem modelData_cast_set (α : Λ) (i₁ i₂ : ModelData α) (hi : i₁ = i₂)
     (t) :
     cast (show i₁.TSet = i₂.TSet by rw [hi])
     (letI := i₁
@@ -376,26 +367,19 @@ theorem tangleData_cast_set (α : Λ) (i₁ i₂ : TangleData α) (hi : i₁ = i
     TangleCoe.set (cast (show (letI := i₁; Tangle α) = (letI := i₂; Tangle α) by rw [hi]) t)) :=
   by subst hi; rfl
 
-theorem tangleData_cast_support (α : Λ) (i₁ i₂ : TangleData α) (hi : i₁ = i₂)
+theorem modelData_cast_support (α : Λ) (i₁ i₂ : ModelData α) (hi : i₁ = i₂)
     (t) :
     (letI := i₁; t.support) =
       (cast (show (letI := i₁; Tangle α) = (letI := i₂; Tangle α) by rw [hi]) t).support :=
   by subst hi; rfl
 
-theorem positionedTangles_cast_pos (α : Λ) (i₁ i₂ : TangleData α) (hi : i₁ = i₂)
+theorem positionedTangles_cast_pos (α : Λ) (i₁ i₂ : ModelData α) (hi : i₁ = i₂)
     (j₁ : letI := i₁; PositionedTangles α) (j₂ : letI := i₂; PositionedTangles α) (hj : HEq j₁ j₂)
     (t) :
     pos t = pos (cast (show (letI := i₁; Tangle α) = (letI := i₂; Tangle α) by rw [hi]) t) :=
   by subst hi; subst hj; rfl
 
-theorem typedObjects_cast_typedAtom (α : Λ) (i₁ i₂ : TangleData α) (hi : i₁ = i₂)
-    (j₁ : letI := i₁; TypedObjects α) (j₂ : letI := i₂; TypedObjects α) (hj : HEq j₁ j₂)
-    (a : Atom) :
-    (letI := i₂; typedAtom a) =
-    (letI := i₁; cast (show i₁.TSet = i₂.TSet by rw [hi]) (typedAtom a)) :=
-  by subst hi; subst hj; rfl
-
-theorem typedObjects_cast_typedNearLitter (α : Λ) (i₁ i₂ : TangleData α) (hi : i₁ = i₂)
+theorem typedObjects_cast_typedNearLitter (α : Λ) (i₁ i₂ : ModelData α) (hi : i₁ = i₂)
     (j₁ : letI := i₁; TypedObjects α) (j₂ : letI := i₂; TypedObjects α) (hj : HEq j₁ j₂)
     (N : NearLitter) :
     (letI := i₂; typedNearLitter N) =
@@ -403,7 +387,7 @@ theorem typedObjects_cast_typedNearLitter (α : Λ) (i₁ i₂ : TangleData α) 
   by subst hi; subst hj; rfl
 
 theorem fuzz_cast (β : TypeIndex) (γ : Λ) (hβγ : β ≠ γ)
-    (i₁ i₂ : TangleData β) (hi : i₁ = i₂)
+    (i₁ i₂ : ModelData β) (hi : i₁ = i₂)
     (j₁ : letI := i₁; PositionedTangles β) (j₂ : letI := i₂; PositionedTangles β) (hj : HEq j₁ j₂)
     (t) :
     (letI := i₁; letI := j₁; fuzz hβγ t) =
@@ -417,46 +401,46 @@ theorem foaData_tSet_eq_equiv_toStructSet (α : Λ) (ihs : (β : Λ) → β < α
     letI : LeLevel α := ⟨le_rfl⟩
     (letI : FOAData := buildStepFOAData α ihs
     toStructSet t) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
     NewTSet.toStructSet (foaData_tSet_eq_equiv α ihs t)) :=
-  tangleData_cast_toStructSet α _ _ (tangleDataStepFn_eq α ihs) t
+  modelData_cast_toStructSet α _ _ (modelDataStepFn_eq α ihs) t
 
 @[simp]
 theorem foaData_allowable_eq_equiv_one (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     foaData_allowable_eq_equiv α ihs 1 = 1 :=
-  tangleData_cast_one α _ _ (tangleDataStepFn_eq α ihs)
+  modelData_cast_one α _ _ (modelDataStepFn_eq α ihs)
 
 @[simp]
 theorem foaData_allowable_eq_equiv_mul (α : Λ) (ihs : (β : Λ) → β < α → IH β) (ρ₁ ρ₂) :
     foaData_allowable_eq_equiv α ihs (ρ₁ * ρ₂) =
     foaData_allowable_eq_equiv α ihs ρ₁ * foaData_allowable_eq_equiv α ihs ρ₂ :=
-  tangleData_cast_mul α _ _ (tangleDataStepFn_eq α ihs) ρ₁ ρ₂
+  modelData_cast_mul α _ _ (modelDataStepFn_eq α ihs) ρ₁ ρ₂
 
 @[simp]
 theorem foaData_allowable_eq_equiv_toStructPerm (α : Λ) (ihs : (β : Λ) → β < α → IH β) (ρ) :
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : FOAData := buildStepFOAData α ihs
     Allowable.toStructPerm ρ =
     NewAllowable.toStructPerm (foaData_allowable_eq_equiv α ihs ρ) :=
-  tangleData_cast_toStructPerm α _ _ (tangleDataStepFn_eq α ihs) ρ
+  modelData_cast_toStructPerm α _ _ (modelDataStepFn_eq α ihs) ρ
 
 @[simp]
 theorem foaData_allowable_eq_equiv_smul (α : Λ) (ihs : (β : Λ) → β < α → IH β) (ρ t) :
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : FOAData := buildStepFOAData α ihs
     foaData_tSet_eq_equiv α ihs (ρ • t) =
     foaData_allowable_eq_equiv α ihs ρ • foaData_tSet_eq_equiv α ihs t :=
-  tangleData_cast_smul α _ _ (tangleDataStepFn_eq α ihs) ρ t
+  modelData_cast_smul α _ _ (modelDataStepFn_eq α ihs) ρ t
 
 @[simp]
 theorem foaData_tSet_lt_equiv_toStructSet (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -466,7 +450,7 @@ theorem foaData_tSet_lt_equiv_toStructSet (α : Λ) (ihs : (β : Λ) → β < α
     (letI : FOAData := buildStepFOAData α ihs
     toStructSet t) =
     (ihs β hβ).toStructSet (foaData_tSet_lt_equiv α ihs β hβ t) :=
-  tangleData_cast_toStructSet β _ _ (tangleDataStepFn_lt α ihs β hβ) t
+  modelData_cast_toStructSet β _ _ (modelDataStepFn_lt α ihs β hβ) t
 
 @[simp]
 theorem foaData_tSet_lt_equiv_toStructSet' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -475,17 +459,17 @@ theorem foaData_tSet_lt_equiv_toStructSet' (α : Λ) (ihs : (β : Λ) → β < �
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     toStructSet t) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     toStructSet (foaData_tSet_lt_equiv α ihs β hβ t)) :=
-  tangleData_cast_toStructSet β _ _ (tangleDataStepFn_lt α ihs β hβ) t
+  modelData_cast_toStructSet β _ _ (modelDataStepFn_lt α ihs β hβ) t
 
 theorem foaData_allowable_lt (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : Λ) (hβ : β < α) :
     letI : Level := ⟨α⟩
     letI : LeLevel β := ⟨coe_le_coe.mpr hβ.le⟩
     letI : FOAData := buildStepFOAData α ihs
     Allowable β = (ihs β hβ).Allowable := by
-  change (tangleDataStepFn α ihs β hβ.le).Allowable = _
-  rw [tangleDataStepFn_lt]
+  change (modelDataStepFn α ihs β hβ.le).Allowable = _
+  rw [modelDataStepFn_lt]
   rfl
 
 def foaData_allowable_lt_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : Λ) (hβ : β < α) :
@@ -499,14 +483,14 @@ def foaData_allowable_lt_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β)
 theorem foaData_allowable_lt_equiv_one (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β < α) :
     foaData_allowable_lt_equiv α ihs β hβ 1 = 1 :=
-  tangleData_cast_one β _ _ (tangleDataStepFn_lt α ihs β hβ)
+  modelData_cast_one β _ _ (modelDataStepFn_lt α ihs β hβ)
 
 @[simp]
 theorem foaData_allowable_lt_equiv_mul (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β < α) (ρ₁ ρ₂) :
     foaData_allowable_lt_equiv α ihs β hβ (ρ₁ * ρ₂) =
     foaData_allowable_lt_equiv α ihs β hβ ρ₁ * foaData_allowable_lt_equiv α ihs β hβ ρ₂ :=
-  tangleData_cast_mul β _ _ (tangleDataStepFn_lt α ihs β hβ) ρ₁ ρ₂
+  modelData_cast_mul β _ _ (modelDataStepFn_lt α ihs β hβ) ρ₁ ρ₂
 
 @[simp]
 theorem foaData_allowable_lt_equiv_toStructPerm (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -515,9 +499,9 @@ theorem foaData_allowable_lt_equiv_toStructPerm (α : Λ) (ihs : (β : Λ) → �
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     Allowable.toStructPerm ρ) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     Allowable.toStructPerm (foaData_allowable_lt_equiv α ihs β hβ ρ)) :=
-  tangleData_cast_toStructPerm β _ _ (tangleDataStepFn_lt α ihs β hβ) ρ
+  modelData_cast_toStructPerm β _ _ (modelDataStepFn_lt α ihs β hβ) ρ
 
 @[simp]
 theorem foaData_allowable_lt_equiv_smul (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -526,9 +510,9 @@ theorem foaData_allowable_lt_equiv_smul (α : Λ) (ihs : (β : Λ) → β < α �
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     foaData_tSet_lt_equiv α ihs β hβ
     (letI : FOAData := buildStepFOAData α ihs; ρ • t) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     foaData_allowable_lt_equiv α ihs β hβ ρ • foaData_tSet_lt_equiv α ihs β hβ t) :=
-  tangleData_cast_smul β _ _ (tangleDataStepFn_lt α ihs β hβ) ρ t
+  modelData_cast_smul β _ _ (modelDataStepFn_lt α ihs β hβ) ρ t
 
 @[simp]
 theorem foaData_allowable_lt_equiv_smul' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -537,9 +521,9 @@ theorem foaData_allowable_lt_equiv_smul' (α : Λ) (ihs : (β : Λ) → β < α 
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     foaData_tangle_lt_equiv α ihs β hβ
     (letI : FOAData := buildStepFOAData α ihs; ρ • t) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     foaData_allowable_lt_equiv α ihs β hβ ρ • foaData_tangle_lt_equiv α ihs β hβ t) :=
-  tangleData_cast_smul' β _ _ (tangleDataStepFn_lt α ihs β hβ) ρ t
+  modelData_cast_smul' β _ _ (modelDataStepFn_lt α ihs β hβ) ρ t
 
 theorem foaData_tangle_lt_set (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β < α) (t) :
@@ -548,9 +532,9 @@ theorem foaData_tangle_lt_set (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     foaData_tSet_lt_equiv α ihs β hβ
     (letI : FOAData := buildStepFOAData α ihs
     TangleCoe.set t) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     TangleCoe.set (show Tangle β from foaData_tangle_lt_equiv α ihs β hβ t)) :=
-  tangleData_cast_set β _ _ (tangleDataStepFn_lt α ihs β hβ) _
+  modelData_cast_set β _ _ (modelDataStepFn_lt α ihs β hβ) _
 
 theorem foaData_tangle_lt_support (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (β : Λ) (hβ : β < α) (t) :
@@ -558,9 +542,9 @@ theorem foaData_tangle_lt_support (α : Λ) (ihs : (β : Λ) → β < α → IH 
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     t.support) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     (foaData_tangle_lt_equiv α ihs β hβ t).support) :=
-  tangleData_cast_support β _ _ (tangleDataStepFn_lt α ihs β hβ) _
+  modelData_cast_support β _ _ (modelDataStepFn_lt α ihs β hβ) _
 
 @[simp]
 theorem foaData_tSet_lt_equiv_pos (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -568,22 +552,8 @@ theorem foaData_tSet_lt_equiv_pos (α : Λ) (ihs : (β : Λ) → β < α → IH 
     letI : Level := ⟨α⟩
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     pos t = (ihs β hβ).pos ((ihs β hβ).tangleEquiv (foaData_tangle_lt_equiv α ihs β hβ t)) :=
-  positionedTangles_cast_pos β _ _ (tangleDataStepFn_lt α ihs β hβ) _ _
+  positionedTangles_cast_pos β _ _ (modelDataStepFn_lt α ihs β hβ) _ _
     (buildStepFOAData_positioned_lt α ihs β hβ) t
-
-@[simp]
-theorem foaData_tSet_lt_equiv_typedAtom (α : Λ) (ihs : (β : Λ) → β < α → IH β)
-    (β : Λ) (hβ : β < α) (a : Atom) :
-    letI : Level := ⟨α⟩
-    letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
-    (letI : FOAData := buildStepFOAData α ihs; typedAtom a) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
-    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
-    (foaData_tSet_lt_equiv α ihs β hβ).symm ((ihs β hβ).typedAtom a)) := by
-  have := typedObjects_cast_typedAtom β _ _ (tangleDataStepFn_lt α ihs β hβ) _ _
-    (heq_of_cast_eq _ (typedObjectsStepFn_lt α ihs β hβ).symm).symm a
-  erw [this]
-  simp only [foaData_tSet_lt_equiv, Equiv.cast_symm, Equiv.cast_apply, cast_cast, cast_eq]
 
 @[simp]
 theorem foaData_tSet_lt_equiv_typedNearLitter (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -591,10 +561,10 @@ theorem foaData_tSet_lt_equiv_typedNearLitter (α : Λ) (ihs : (β : Λ) → β 
     letI : Level := ⟨α⟩
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     (letI : FOAData := buildStepFOAData α ihs; typedNearLitter N) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     (foaData_tSet_lt_equiv α ihs β hβ).symm ((ihs β hβ).typedNearLitter N)) := by
-  have := typedObjects_cast_typedNearLitter β _ _ (tangleDataStepFn_lt α ihs β hβ) _ _
+  have := typedObjects_cast_typedNearLitter β _ _ (modelDataStepFn_lt α ihs β hβ) _ _
     (heq_of_cast_eq _ (typedObjectsStepFn_lt α ihs β hβ).symm).symm N
   erw [this]
   simp only [foaData_tSet_lt_equiv, Equiv.cast_symm, Equiv.cast_apply, cast_cast, cast_eq]
@@ -605,10 +575,10 @@ theorem foaData_tangle_lt_equiv_fuzz (α : Λ) (ihs : (β : Λ) → β < α → 
     letI : Level := ⟨α⟩
     letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
     (letI : FOAData := buildStepFOAData α ihs; fuzz hβγ t) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     fuzz hβγ (foaData_tangle_lt_equiv α ihs β hβ t)) :=
-  fuzz_cast β γ hβγ _ _ (tangleDataStepFn_lt α ihs β hβ) _ _
+  fuzz_cast β γ hβγ _ _ (modelDataStepFn_lt α ihs β hβ) _ _
     (buildStepFOAData_positioned_lt α ihs β hβ) _
 
 theorem foaData_allowable_bot (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
@@ -622,7 +592,7 @@ theorem foaData_allowable_lt' (α : Λ) (ihs : (β : Λ) → β < α → IH β) 
     letI : LtLevel β := ⟨hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     Allowable β) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     Allowable β) := by
   revert hβ
   refine WithBot.recBotCoe ?_ ?_ β
@@ -638,7 +608,7 @@ def foaData_allowable_lt'_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β
     letI : LtLevel β := ⟨hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     Allowable β) ≃
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     Allowable β) :=
     Equiv.cast (foaData_allowable_lt' α ihs β hβ)
 
@@ -647,7 +617,7 @@ theorem foaData_tSet_lt' (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β :
     letI : LtLevel β := ⟨hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     TSet β) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     TSet β) := by
   revert hβ
   refine WithBot.recBotCoe ?_ ?_ β
@@ -663,7 +633,7 @@ def foaData_tSet_lt'_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     letI : LtLevel β := ⟨hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     TSet β) ≃
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     TSet β) :=
     Equiv.cast (foaData_tSet_lt' α ihs β hβ)
 
@@ -672,7 +642,7 @@ theorem foaData_tangle_lt' (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β
     letI : LtLevel β := ⟨hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     Tangle β) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     Tangle β) := by
   revert hβ
   refine WithBot.recBotCoe ?_ ?_ β
@@ -688,7 +658,7 @@ def foaData_tangle_lt'_equiv (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     letI : LtLevel β := ⟨hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     Tangle β) ≃
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     Tangle β) :=
     Equiv.cast (foaData_tangle_lt' α ihs β hβ)
 
@@ -744,7 +714,7 @@ theorem foaData_allowable_lt'_equiv_toStructPerm (α : Λ) (ihs : (β : Λ) → 
     letI : LtLevel β := ⟨hβ⟩
     (letI : FOAData := buildStepFOAData α ihs
     Allowable.toStructPerm ρ) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     Allowable.toStructPerm (foaData_allowable_lt'_equiv α ihs β hβ ρ)) := by
   revert hβ
   refine WithBot.recBotCoe ?_ ?_ β
@@ -761,7 +731,7 @@ theorem foaData_allowable_lt'_equiv_smul (α : Λ) (ihs : (β : Λ) → β < α 
     letI : LtLevel β := ⟨hβ⟩
     foaData_tangle_lt'_equiv α ihs β hβ
     (letI : FOAData := buildStepFOAData α ihs; ρ • t) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     foaData_allowable_lt'_equiv α ihs β hβ ρ • foaData_tangle_lt'_equiv α ihs β hβ t) := by
   revert hβ
   refine WithBot.recBotCoe ?_ ?_ β
@@ -777,7 +747,7 @@ theorem foaData_tangle_lt'_equiv_fuzz (α : Λ) (ihs : (β : Λ) → β < α →
     letI : Level := ⟨α⟩
     letI : LtLevel β := ⟨hβ⟩
     (letI : FOAData := buildStepFOAData α ihs; fuzz hβγ t) =
-    (letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : PositionedTangles β := PositionedTanglesLt.toPositionedTangles β
     fuzz hβγ (foaData_tangle_lt'_equiv α ihs β hβ t)) := by
@@ -805,16 +775,15 @@ structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
       (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = f ρ
   pos_lt_pos_atom (t : (ih α le_rfl).Tangle)
     {A : ExtendedIndex α} {a : Atom}
-    (ht : letI := (ih α le_rfl).tangleData; ⟨A, inl a⟩ ∈ t.support) :
+    (ht : letI := (ih α le_rfl).modelData; ⟨A, inl a⟩ ∈ t.support) :
     letI : Level := ⟨α⟩
-    letI := (ih α le_rfl).tangleData
-    TangleCoe.set t ≠ (ih α le_rfl).typedAtom a →
+    letI := (ih α le_rfl).modelData
     pos a < (ih α le_rfl).pos ((ih α le_rfl).tangleEquiv t)
   pos_lt_pos_nearLitter (t : (ih α le_rfl).Tangle)
     {A : ExtendedIndex α} {N : NearLitter}
-    (ht : letI := (ih α le_rfl).tangleData; ⟨A, inr N⟩ ∈ t.support) :
+    (ht : letI := (ih α le_rfl).modelData; ⟨A, inr N⟩ ∈ t.support) :
     letI : Level := ⟨α⟩
-    letI := (ih α le_rfl).tangleData
+    letI := (ih α le_rfl).modelData
     TangleCoe.set t ≠ (ih α le_rfl).typedNearLitter N →
     pos N < (ih α le_rfl).pos ((ih α le_rfl).tangleEquiv t)
   smul_fuzz (β : Λ) (hβ : β < α) (γ : Λ) (hγ : γ < α) (hβγ : (β : TypeIndex) ≠ γ)
@@ -868,12 +837,12 @@ structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
     ∀ t : (ih β hβ.le).TSet,
       StructSet.ofCoe ((ih α le_rfl).toStructSet (S t)) β (coe_lt_coe.mpr hβ) =
       {(ih β hβ.le).toStructSet t}
-  step_zero : zeroTangleData = (ih 0 (Params.Λ_zero_le α)).tangleData
+  step_zero : zeroModelData = (ih 0 (Params.Λ_zero_le α)).modelData
 
 def newAllowableCons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (γ : TypeIndex) [letI : Level := ⟨α⟩; LeLevel γ] (hγ : γ < α) :
     letI : Level := ⟨α⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : FOAData := buildStepFOAData α ihs
@@ -902,19 +871,19 @@ theorem newAllowableCons_toStructPerm (α : Λ) (ihs : (β : Λ) → β < α →
     (γ : TypeIndex) [letI : Level := ⟨α⟩; LtLevel γ] (hγ : γ < α)
     (ρ :
       letI : Level := ⟨α⟩
-      letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+      letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
       letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
       letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
       NewAllowable) :
     letI : Level := ⟨α⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : FOAData := buildStepFOAData α ihs
     Tree.comp (Hom.toPath hγ) (NewAllowable.toStructPerm ρ) =
     Allowable.toStructPerm (newAllowableCons α ihs γ hγ ρ) := by
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   rw [newAllowableCons, NewAllowable.comp_toPath_toStructPerm ρ γ,
@@ -1010,19 +979,16 @@ theorem pos_lt_pos_atom_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     letI : Level := ⟨α⟩
     letI : FOAData := buildStepFOAData α ihs
     ⟨A, inl a⟩ ∈ t.support →
-    t.set ≠ typedAtom a → pos a < pos t := by
-  intro hc hta
+    pos a < pos t := by
+  intro hc
   letI : Level := ⟨α⟩
   letI : FOAData := buildStepFOAData α ihs
   have hβ := coe_lt_coe.mp iβ.elim
-  have := (h β hβ).pos_lt_pos_atom (foaData_tangle_lt_equiv α ihs β hβ t) (A := A) (a := a) ?_ ?_
+  have := (h β hβ).pos_lt_pos_atom (foaData_tangle_lt_equiv α ihs β hβ t) (A := A) (a := a) ?_
   · rw [foaData_tSet_lt_equiv_pos α ihs β hβ t]
     exact this
   · rw [foaData_tangle_lt_support α ihs β hβ t] at hc
     exact hc
-  · rw [foaData_tSet_lt_equiv_typedAtom α ihs β hβ a, ne_eq, Equiv.eq_symm_apply] at hta
-    erw [foaData_tangle_lt_set] at hta
-    exact hta
 
 theorem pos_lt_pos_nearLitter_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
@@ -1080,14 +1046,14 @@ theorem allowableConsStep_eq_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
     letI : LtLevel γ := ⟨coe_lt_coe.mpr hγ⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     (foaData_allowable_eq_equiv α ihs ρ : SemiallowablePerm) γ =
     foaData_allowable_lt_equiv α ihs γ hγ
       (allowableConsStep α ihs h α γ (coe_lt_coe.mpr hγ) ρ) := by
   letI : Level := ⟨α⟩
   letI : LeLevel α := ⟨le_rfl⟩
   letI : LtLevel γ := ⟨coe_lt_coe.mpr hγ⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   refine (ihs γ hγ).allowableToStructPerm_injective ?_
   have := allowableConsStep_eq α ihs h α γ (coe_lt_coe.mpr hγ) ρ
@@ -1102,7 +1068,7 @@ theorem allowableConsStep_eq_eq' (α : Λ) (ihs : (β : Λ) → β < α → IH �
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
     letI : LtLevel γ := ⟨hγ⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     (foaData_allowable_eq_equiv α ihs ρ : SemiallowablePerm) γ =
     foaData_allowable_lt'_equiv α ihs γ hγ (allowableConsStep α ihs h α γ hγ ρ) := by
   revert hγ
@@ -1216,7 +1182,7 @@ theorem allowable_of_smulFuzz_step (α : Λ) (ihs : (β : Λ) → β < α → IH
   by_cases hβ : β = α
   · cases hβ
     have hρ :
-      letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+      letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
       letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
       SemiallowablePerm.IsAllowable
         (fun γ hγ => foaData_allowable_lt'_equiv α ihs γ hγ.elim (ρs γ hγ.elim))
@@ -1350,7 +1316,7 @@ theorem toStructSet_ext_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     erw [foaData_tSet_eq_equiv_toStructSet α ihs t₁,
       foaData_tSet_eq_equiv_toStructSet α ihs t₂] at ht ⊢
     have : LtLevel γ := ⟨hγβ⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1377,7 +1343,7 @@ theorem has_singletons (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   · cases hβ'
     letI : Level := ⟨α⟩
     have : LtLevel γ := ⟨coe_lt_coe.mpr hγβ⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1438,17 +1404,17 @@ noncomputable def buildStepCountingAssumptions (α : Λ) (ihs : (β : Λ) → β
       singleton_step_spec α ihs h β (coe_le_coe.mp iβ.elim) γ (coe_lt_coe.mp hγβ)
   }
 
-theorem zeroTangleData_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β)
+theorem zeroModelData_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
-    zeroTangleData = tangleDataStepFn α ihs 0 (Params.Λ_zero_le α) := by
+    zeroModelData = modelDataStepFn α ihs 0 (Params.Λ_zero_le α) := by
   letI : Level := ⟨α⟩
   by_cases hz : α = 0
   · cases hz
-    rw [tangleDataStepFn_eq 0 ihs, zeroTangleData, tangleDataStep]
-    exact zeroTangleData_subsingleton _ _ _ _ _ _ _
+    rw [modelDataStepFn_eq 0 ihs, zeroModelData, modelDataStep]
+    exact zeroModelData_subsingleton _ _ _ _ _ _ _
       (fun β hβ => ((Params.Λ_zero_le β).not_lt (coe_lt_coe.mp hβ.elim)).elim)
   · have hz := lt_of_le_of_ne (Params.Λ_zero_le α) (Ne.symm hz)
-    rw [(h 0 hz).step_zero, tangleDataStepFn_lt α ihs 0 hz]
+    rw [(h 0 hz).step_zero, modelDataStepFn_lt α ihs 0 hz]
 
 theorem mk_codingFunction_le (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
@@ -1456,13 +1422,13 @@ theorem mk_codingFunction_le (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     letI : CountingAssumptions := buildStepCountingAssumptions α ihs h
     #(CodingFunction 0) < #μ := by
   convert mk_codingFunction_zero_le
-  rw [zeroTangleData_eq α ihs h]
+  rw [zeroModelData_eq α ihs h]
   rfl
 
 theorem mk_tSet_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     letI : Level := ⟨α⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1476,10 +1442,10 @@ theorem mk_tSet_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
 noncomputable def posStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     letI : Level := ⟨α⟩
-    letI := tangleDataStep α ihs
+    letI := modelDataStep α ihs
     Tang α (TSet α) (Allowable α) → μ :=
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1488,10 +1454,10 @@ noncomputable def posStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
 theorem posStep_injective (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     letI : Level := ⟨α⟩
-    letI := tangleDataStep α ihs
+    letI := modelDataStep α ihs
     Function.Injective (posStep α ihs h) := by
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1500,39 +1466,18 @@ theorem posStep_injective (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   simp only [Prod.mk.injEq] at this
   exact Tang.ext _ _ this.1 this.2
 
-theorem posStep_typedAtom (α : Λ) (ihs : (β : Λ) → β < α → IH β)
-    (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
-    letI : Level := ⟨α⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
-    letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
-    letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
-    letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-    letI := tangleDataStep α ihs
-    ∀ (a : Atom) (t : Tang α (TSet α) (Allowable α)),
-    t.set = newTypedAtom a → pos a ≤ posStep α ihs h t := by
-  letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
-  letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
-  letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
-  letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-  intro a t ha
-  have := NewTangle.pos_not_mem_deny (mk_tSet_step α ihs h) (t.set, t.support)
-  contrapose! this
-  refine ⟨pos a, ?_, this.le⟩
-  exact Or.inl (Or.inr ⟨a, ha, rfl⟩)
-
 theorem posStep_typedNearLitter (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
     letI : Level := ⟨α⟩
-    letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+    letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
     letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
     letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-    letI := tangleDataStep α ihs
+    letI := modelDataStep α ihs
     ∀ (N : NearLitter) (t : Tang α (TSet α) (Allowable α)),
     t.set = newTypedNearLitter N → pos N ≤ posStep α ihs h t := by
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1545,18 +1490,17 @@ theorem posStep_typedNearLitter (α : Λ) (ihs : (β : Λ) → β < α → IH β
 noncomputable def buildStep (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) : IH α :=
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-  letI : (β : Λ) → [LeLevel β] → TangleData β :=
-    fun β hβ => tangleDataStepFn α ihs β (coe_le_coe.mp hβ.elim)
+  letI : (β : Λ) → [LeLevel β] → ModelData β :=
+    fun β hβ => modelDataStepFn α ihs β (coe_le_coe.mp hβ.elim)
   letI : FOAData := buildStepFOAData α ihs
   {
-    __ := tangleDataStep α ihs
+    __ := modelDataStep α ihs
     __ := typedObjectsStep α ihs
     pos := ⟨posStep α ihs h, posStep_injective α ihs h⟩
-    pos_typedAtom := posStep_typedAtom α ihs h
     pos_typedNearLitter := posStep_typedNearLitter α ihs h
   }
 
@@ -1606,7 +1550,7 @@ theorem buildStepFn_allowable_eq_equiv_toStructPerm (α : Λ) (ihs : (β : Λ) �
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) (ρ) :
     (buildStepFn α ihs h α le_rfl).allowableToStructPerm ρ =
     (buildStep α ihs h).allowableToStructPerm (buildStepFn_allowable_eq_equiv α ihs h ρ) :=
-  tangleData_cast_toStructPerm α _ _ (congr_arg IH.tangleData (buildStepFn_eq α ihs h)) ρ
+  modelData_cast_toStructPerm α _ _ (congr_arg IH.modelData (buildStepFn_eq α ihs h)) ρ
 
 @[simp]
 theorem buildStepFn_allowable_lt_equiv_toStructPerm (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -1614,7 +1558,7 @@ theorem buildStepFn_allowable_lt_equiv_toStructPerm (α : Λ) (ihs : (β : Λ) �
     (β : Λ) (hβ : β < α) (ρ) :
     (buildStepFn α ihs h β hβ.le).allowableToStructPerm ρ =
     (ihs β hβ).allowableToStructPerm (buildStepFn_allowable_lt_equiv α ihs h β hβ ρ) :=
-  tangleData_cast_toStructPerm β _ _ (congr_arg IH.tangleData (buildStepFn_lt α ihs h β hβ)) ρ
+  modelData_cast_toStructPerm β _ _ (congr_arg IH.modelData (buildStepFn_lt α ihs h β hβ)) ρ
 
 @[simp]
 theorem buildStepFn_allowable_lt_equiv_smul' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -1622,17 +1566,17 @@ theorem buildStepFn_allowable_lt_equiv_smul' (α : Λ) (ihs : (β : Λ) → β <
     (β : Λ) (hβ : β < α) (ρ t) :
     buildStepFn_tangle_lt_equiv α ihs h β hβ (ρ • t) =
     (buildStepFn_allowable_lt_equiv α ihs h β hβ ρ • buildStepFn_tangle_lt_equiv α ihs h β hβ t) :=
-  tangleData_cast_smul' β _ _ (congr_arg IH.tangleData (buildStepFn_lt α ihs h β hβ)) ρ t
+  modelData_cast_smul' β _ _ (congr_arg IH.modelData (buildStepFn_lt α ihs h β hβ)) ρ t
 
 @[simp]
 theorem buildStepFn_tangle_lt_equiv_fuzz (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
     (β : Λ) (hβ : β < α) (γ : Λ) (hγ : γ < α) (hβγ : (β : TypeIndex) ≠ γ) (t) :
     fuzz' (buildStepFn α ihs h β hβ.le) (buildStepFn α ihs h γ hγ.le) hβγ t =
-    letI := (ihs β hβ).tangleData
+    letI := (ihs β hβ).modelData
     letI := (ihs β hβ).positionedTangles
     fuzz hβγ (buildStepFn_tangle_lt_equiv α ihs h β hβ t) :=
-  fuzz_cast β γ hβγ _ _ (congr_arg IH.tangleData (buildStepFn_lt α ihs h β hβ)) _ _
+  fuzz_cast β γ hβγ _ _ (congr_arg IH.modelData (buildStepFn_lt α ihs h β hβ)) _ _
     (congr_arg_heq IH.positionedTangles (buildStepFn_lt α ihs h β hβ)) _
 
 def cons_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -1649,7 +1593,7 @@ theorem cons_step_spec (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     ∀ ρ, Tree.comp (Hom.toPath (coe_lt_coe.mpr hβ)) ((buildStep α ihs h).allowableToStructPerm ρ) =
       (ihs β hβ).allowableToStructPerm (cons_step α ihs h β hβ ρ) :=
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
   fun _ => NewAllowable.comp_toPath_toStructPerm _ _
@@ -1668,40 +1612,39 @@ theorem consBot_step_spec (α : Λ) (ihs : (β : Λ) → β < α → IH β)
 theorem pos_lt_pos_atom (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
     (t : IH.Tangle (buildStep α ihs h)) {A : ExtendedIndex α} {a : Atom} :
-    letI := (buildStep α ihs h).tangleData
+    letI := (buildStep α ihs h).modelData
     ⟨A, inl a⟩ ∈ TangleCoe.support t →
-    TangleCoe.set t ≠ (buildStep α ihs h).typedAtom a →
     pos a < (buildStep α ihs h).pos ((IH.tangleEquiv (buildStep α ihs h)) t) := by
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-  letI := (buildStep α ihs h).tangleData
-  intro h₁ h₂
-  by_contra! h₃
+  letI := (buildStep α ihs h).modelData
+  intro h₁
+  by_contra! h₂
   refine NewTangle.pos_not_mem_deny (mk_tSet_step α ihs h) ⟨TangleCoe.set t, TangleCoe.support t⟩ ?_
-  refine ⟨pos a, ?_, h₃⟩
-  exact Or.inl (Or.inl (Or.inl ⟨A, a, h₁, h₂, rfl⟩))
+  refine ⟨pos a, ?_, h₂⟩
+  exact Or.inl (Or.inl ⟨A, a, h₁, rfl⟩)
 
 theorem pos_lt_pos_nearLitter (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
     (t : (buildStep α ihs h).Tangle) {A : ExtendedIndex α} {N : NearLitter} :
-    letI := (buildStep α ihs h).tangleData
+    letI := (buildStep α ihs h).modelData
     ⟨A, inr N⟩ ∈ TangleCoe.support t →
     TangleCoe.set t ≠ (buildStep α ihs h).typedNearLitter N →
     pos N < (buildStep α ihs h).pos ((IH.tangleEquiv (buildStep α ihs h)) t) := by
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-  letI := (buildStep α ihs h).tangleData
+  letI := (buildStep α ihs h).modelData
   intro h₁ h₂
   by_contra! h₃
   refine NewTangle.pos_not_mem_deny (mk_tSet_step α ihs h) ⟨TangleCoe.set t, TangleCoe.support t⟩ ?_
   refine ⟨pos N, ?_, h₃⟩
-  exact Or.inl (Or.inl (Or.inr ⟨A, N, h₁, h₂, rfl⟩))
+  exact Or.inl (Or.inr ⟨A, N, h₁, h₂, rfl⟩)
 
 theorem cons_fun_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
@@ -1754,7 +1697,7 @@ theorem smul_fuzz (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   cases this
   clear hfαβ
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1776,7 +1719,7 @@ theorem smul_fuzz_bot (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     fuzz'Bot (buildStepFn α ihs h γ hγ.le)
       ((buildStepFn α ihs h α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) • t) := by
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1809,7 +1752,7 @@ theorem allowable_of_smulFuzz_step' (α : Λ) (ihs : (β : Λ) → β < α → I
         (buildStepFn α ihs h α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = fα ρ),
       fα ρ = π) := by
   letI : Level := ⟨α⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1896,7 +1839,7 @@ theorem toStructSet_ext_step' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
   · rw [this]
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1908,7 +1851,7 @@ noncomputable def singleton_step' (α : Λ) (ihs : (β : Λ) → β < α → IH 
     (ihs β hβ).TSet → (buildStep α ihs h).TSet :=
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1921,7 +1864,7 @@ theorem singleton_step'_spec (α : Λ) (ihs : (β : Λ) → β < α → IH β)
       (coe_lt_coe.mpr hβ) = {(ihs β hβ).toStructSet t} :=
   letI : Level := ⟨α⟩
   letI : LtLevel β := ⟨coe_lt_coe.mpr hβ⟩
-  letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+  letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
   letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
   letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
   letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
@@ -1956,11 +1899,11 @@ theorem buildStep_prop (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     · cases hα
       rw [buildStepFn_eq]
       letI : Level := ⟨0⟩
-      letI : TangleDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).tangleData⟩
+      letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
       letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
       letI : TypedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).typedObjects
       letI : PositionedObjectsLt := fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects
-      exact zeroTangleData_subsingleton _ _ _ _ _ _ _
+      exact zeroModelData_subsingleton _ _ _ _ _ _ _
         (fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedObjects)
     · have h0 := lt_of_le_of_ne (Params.Λ_zero_le α) (Ne.symm hα)
       rw [buildStepFn_lt α ihs h 0 h0]

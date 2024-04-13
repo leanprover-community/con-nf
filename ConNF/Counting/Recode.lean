@@ -167,7 +167,7 @@ theorem raisedSupport_supports (S : Support β) (u : TSet γ) :
   intro ρ h
   rw [singleton_smul β γ]
   refine congr_arg _ ?_
-  refine TangleData.TSet.support_supports u _ ?_
+  refine ModelData.TSet.support_supports u _ ?_
   intro c hc
   rw [← smul_raise_eq_iff]
   refine h ?_

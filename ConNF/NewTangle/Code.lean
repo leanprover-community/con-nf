@@ -17,7 +17,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [TangleDataLt] {β : Λ} [LtLevel β] {s t : Set (TSet β)}
+variable [Params.{u}] [Level] [ModelDataLt] {β : Λ} [LtLevel β] {s t : Set (TSet β)}
 
 /-- An `α` code is a type index `β < α` together with a set of tangles of type `β`. -/
 @[ext]

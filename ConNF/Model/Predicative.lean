@@ -14,7 +14,7 @@ noncomputable section
 
 namespace ConNF
 
-open TangleData TSet
+open ModelData TSet
 
 variable [Params.{u}] {α β γ δ ε ζ : Λ}
   (hβ : β < α) (hγ : γ < β) (hδ : δ < γ) (hε : ε < δ) (hζ : ζ < ε)
@@ -29,14 +29,14 @@ theorem Symmetric.inter {s₁ s₂ : Set (TSet β)}
   rw [Set.smul_set_inter, hS₁' ρ (fun c hc => hρ c (Or.inl hc)),
     hS₂' ρ (fun c hc => hρ c (Or.inr hc))]
 
-theorem TangleData.TSet.inter_supported (t₁ t₂ : TSet α) :
+theorem ModelData.TSet.inter_supported (t₁ t₂ : TSet α) :
     Symmetric hβ {s | s ∈[hβ] t₁ ∧ s ∈[hβ] t₂} := by
   obtain ⟨s₁, hs₁, rfl⟩ := t₁.induction hβ
   obtain ⟨s₂, hs₂, rfl⟩ := t₂.induction hβ
   simp only [mem_mk_iff]
   exact Symmetric.inter hβ hs₁ hs₂
 
-def TangleData.TSet.inter (t₁ t₂ : TSet α) : TSet α :=
+def ModelData.TSet.inter (t₁ t₂ : TSet α) : TSet α :=
   mk hβ {s | s ∈[hβ] t₁ ∧ s ∈[hβ] t₂} (inter_supported hβ t₁ t₂)
 
 theorem Symmetric.compl {s : Set (TSet β)} (h : Symmetric hβ s) :
@@ -46,37 +46,37 @@ theorem Symmetric.compl {s : Set (TSet β)} (h : Symmetric hβ s) :
   intro ρ hρ
   rw [Set.smul_set_compl, hS' ρ hρ]
 
-theorem TangleData.TSet.compl_supported (t : TSet α) :
+theorem ModelData.TSet.compl_supported (t : TSet α) :
     Symmetric hβ {s | ¬s ∈[hβ] t} := by
   obtain ⟨s, hs, rfl⟩ := t.induction hβ
   simp only [mem_mk_iff]
   exact hs.compl
 
-def TangleData.TSet.compl (t : TSet α) : TSet α :=
+def ModelData.TSet.compl (t : TSet α) : TSet α :=
   mk hβ {s | ¬s ∈[hβ] t} (compl_supported hβ t)
 
-theorem TangleData.TSet.singleton_supported (t : TSet β) :
+theorem ModelData.TSet.singleton_supported (t : TSet β) :
     Symmetric hβ {t} :=
   Small.symmetric (small_singleton _) hβ
 
-def TangleData.TSet.singleton (t : TSet β) : TSet α :=
+def ModelData.TSet.singleton (t : TSet β) : TSet α :=
   mk hβ {t} (singleton_supported hβ t)
 
-theorem TangleData.TSet.up_supported (t₁ t₂ : TSet β) :
+theorem ModelData.TSet.up_supported (t₁ t₂ : TSet β) :
     Symmetric hβ {t₁, t₂} := by
   refine Small.symmetric ?_ hβ
   exact Small.union (small_singleton _) (small_singleton _)
 
 /-- The unordered pair. -/
-def TangleData.TSet.up (t₁ t₂ : TSet β) : TSet α :=
+def ModelData.TSet.up (t₁ t₂ : TSet β) : TSet α :=
   mk hβ {t₁, t₂} (up_supported hβ t₁ t₂)
 
 /-- The Kuratowski ordered pair. -/
-def TangleData.TSet.op (t₁ t₂ : TSet γ) : TSet α :=
+def ModelData.TSet.op (t₁ t₂ : TSet γ) : TSet α :=
   up hβ (singleton hγ t₁) (up hγ t₁ t₂)
 
 @[simp]
-theorem TangleData.TSet.mem_singleton_iff (t : TSet β) (s : TSet β) :
+theorem ModelData.TSet.mem_singleton_iff (t : TSet β) (s : TSet β) :
     s ∈[hβ] singleton hβ t ↔ s = t := by
   simp only [singleton, mem_mk_iff, Set.mem_singleton_iff]
 
@@ -95,7 +95,7 @@ theorem singleton_injective' (t₁ t₂ : TSet β) (h : TSet.singleton hβ t₁ 
   exact this
 
 @[simp]
-theorem TangleData.TSet.mem_up_iff (t₁ t₂ : TSet β) (s : TSet β) :
+theorem ModelData.TSet.mem_up_iff (t₁ t₂ : TSet β) (s : TSet β) :
     s ∈[hβ] up hβ t₁ t₂ ↔ s = t₁ ∨ s = t₂ := by
   simp only [up, mem_mk_iff, Set.mem_insert_iff, Set.mem_singleton_iff]
 
@@ -154,7 +154,7 @@ theorem up_eq_singleton_iff (t t₁ t₂ : TSet β) :
     rw [up_self]
 
 @[simp]
-theorem TangleData.TSet.mem_op_iff (t₁ t₂ : TSet γ) (s : TSet β) :
+theorem ModelData.TSet.mem_op_iff (t₁ t₂ : TSet γ) (s : TSet β) :
     s ∈[hβ] op hβ hγ t₁ t₂ ↔ s = singleton hγ t₁ ∨ s = up hγ t₁ t₂ :=
   mem_up_iff _ _ _ _
 
@@ -224,14 +224,14 @@ theorem Symmetric.singletonImage {s : Set (TSet γ)} (h : Symmetric hγ s) :
     exact hab
   · simp only [smul_op, smul_singleton]
 
-theorem TangleData.TSet.singletonImage_supported (t : TSet β) :
+theorem ModelData.TSet.singletonImage_supported (t : TSet β) :
     Symmetric hβ {p | ∃ a b : TSet ε, op hδ hε a b ∈[hγ] t ∧
       p = op hγ hδ (singleton hε a) (singleton hε b)} := by
   obtain ⟨s, hs, rfl⟩ := t.induction hγ
   simp only [mem_mk_iff]
   exact hs.singletonImage _ _ _
 
-def TangleData.TSet.singletonImage (t : TSet β) : TSet α :=
+def ModelData.TSet.singletonImage (t : TSet β) : TSet α :=
   mk hβ {p | ∃ a b : TSet ε, op hδ hε a b ∈[hγ] t ∧
     p = op hγ hδ (singleton hε a) (singleton hε b)} (singletonImage_supported hβ hγ hδ hε t)
 
@@ -256,14 +256,14 @@ theorem Symmetric.insertion2 {s : Set (TSet δ)} (h : Symmetric hδ s) :
     exact habc
   · simp only [smul_op, smul_singleton]
 
-theorem TangleData.TSet.insertion2_supported (t : TSet γ) :
+theorem ModelData.TSet.insertion2_supported (t : TSet γ) :
     Symmetric hβ {p | ∃ a b c : TSet ζ, op hε hζ a c ∈[hδ] t ∧
       p = op hγ hδ (.singleton hε (.singleton hζ a)) (op hε hζ b c)} := by
   obtain ⟨s, hs, rfl⟩ := t.induction hδ
   simp only [mem_mk_iff]
   exact hs.insertion2 _ _ _ _
 
-def TangleData.TSet.insertion2 (t : TSet γ) : TSet α :=
+def ModelData.TSet.insertion2 (t : TSet γ) : TSet α :=
   mk hβ {p | ∃ a b c : TSet ζ, op hε hζ a c ∈[hδ] t ∧
     p = op hγ hδ (.singleton hε (.singleton hζ a)) (op hε hζ b c)}
     (insertion2_supported hβ hγ hδ hε hζ t)
@@ -289,14 +289,14 @@ theorem Symmetric.insertion3 {s : Set (TSet δ)} (h : Symmetric hδ s) :
     exact habc
   · simp only [smul_op, smul_singleton]
 
-theorem TangleData.TSet.insertion3_supported (t : TSet γ) :
+theorem ModelData.TSet.insertion3_supported (t : TSet γ) :
     Symmetric hβ {p | ∃ a b c : TSet ζ, op hε hζ a b ∈[hδ] t ∧
       p = op hγ hδ (.singleton hε (.singleton hζ a)) (op hε hζ b c)} := by
   obtain ⟨s, hs, rfl⟩ := t.induction hδ
   simp only [mem_mk_iff]
   exact hs.insertion3 _ _ _ _
 
-def TangleData.TSet.insertion3 (t : TSet γ) : TSet α :=
+def ModelData.TSet.insertion3 (t : TSet γ) : TSet α :=
   mk hβ {p | ∃ a b c : TSet ζ, op hε hζ a b ∈[hδ] t ∧
     p = op hγ hδ (.singleton hε (.singleton hζ a)) (op hε hζ b c)}
     (insertion3_supported hβ hγ hδ hε hζ t)
@@ -319,13 +319,13 @@ theorem Symmetric.cross {s : Set (TSet δ)} (h : Symmetric hδ s) :
     exact hb
   · simp only [smul_op]
 
-theorem TangleData.TSet.cross_supported (t : TSet γ) :
+theorem ModelData.TSet.cross_supported (t : TSet γ) :
     Symmetric hβ {p | ∃ a b : TSet δ, b ∈[hδ] t ∧ p = op hγ hδ a b} := by
   obtain ⟨s, hs, rfl⟩ := t.induction hδ
   simp only [mem_mk_iff]
   exact hs.cross _ _ _
 
-def TangleData.TSet.cross (t : TSet γ) : TSet α :=
+def ModelData.TSet.cross (t : TSet γ) : TSet α :=
   mk hβ {p | ∃ a b : TSet δ, b ∈[hδ] t ∧ p = op hγ hδ a b}
     (cross_supported hβ hγ hδ t)
 
@@ -345,7 +345,7 @@ theorem Symmetric.typeLower' {s : Set (TSet β)} (h : Symmetric hβ s) :
     exact ha _
   · simp only [smul_singleton]
 
-theorem TangleData.TSet.typeLower'_supported (t : TSet α) :
+theorem ModelData.TSet.typeLower'_supported (t : TSet α) :
     Symmetric hβ {p | ∃ a : TSet ε, (∀ b : TSet δ, op hγ hδ b (.singleton hε a) ∈[hβ] t)
       ∧ p = .singleton hγ (.singleton hδ (.singleton hε a))} := by
   obtain ⟨s, hs, rfl⟩ := t.induction hβ
@@ -354,7 +354,7 @@ theorem TangleData.TSet.typeLower'_supported (t : TSet α) :
 
 /-- This isn't quite the right form of the type lowering axiom, but once we have the axiom
 of union for singletons, we will be able to deduce the correct form of the result. -/
-def TangleData.TSet.typeLower' (t : TSet α) : TSet α :=
+def ModelData.TSet.typeLower' (t : TSet α) : TSet α :=
   mk hβ {p | ∃ a : TSet ε, (∀ b : TSet δ, op hγ hδ b (.singleton hε a) ∈[hβ] t)
       ∧ p = .singleton hγ (.singleton hδ (.singleton hε a))}
     (typeLower'_supported hβ hγ hδ hε t)
@@ -374,13 +374,13 @@ theorem Symmetric.converse {s : Set (TSet β)} (h : Symmetric hβ s) :
     exact hab
   · simp only [smul_op]
 
-theorem TangleData.TSet.converse_supported (t : TSet α) :
+theorem ModelData.TSet.converse_supported (t : TSet α) :
     Symmetric hβ {p | ∃ a b : TSet δ, op hγ hδ a b ∈[hβ] t ∧ p = op hγ hδ b a} := by
   obtain ⟨s, hs, rfl⟩ := t.induction hβ
   simp only [mem_mk_iff]
   exact hs.converse _ _ _
 
-def TangleData.TSet.converse (t : TSet α) : TSet α :=
+def ModelData.TSet.converse (t : TSet α) : TSet α :=
   mk hβ {p | ∃ a b : TSet δ, op hγ hδ a b ∈[hβ] t ∧ p = op hγ hδ b a}
     (converse_supported hβ hγ hδ t)
 
@@ -393,7 +393,7 @@ theorem Symmetric.cardinalOne :
   simp only [smul_singleton, Set.mem_setOf_eq]
   exact ⟨_, rfl⟩
 
-def TangleData.TSet.cardinalOne : TSet α :=
+def ModelData.TSet.cardinalOne : TSet α :=
   mk hβ {p | ∃ a : TSet γ, p = .singleton hγ a} (Symmetric.cardinalOne hβ hγ)
 
 theorem Symmetric.subset :
@@ -410,7 +410,7 @@ theorem Symmetric.subset :
   rw [← mem_smul_iff, ← mem_smul_iff] at this
   exact this hc
 
-def TangleData.TSet.subset : TSet α :=
+def ModelData.TSet.subset : TSet α :=
   mk hβ {p | ∃ a b : TSet δ, (∀ c : TSet ε, c ∈[hε] a → c ∈[hε] b) ∧
       p = op hγ hδ a b} (Symmetric.subset hβ hγ hδ hε)
 

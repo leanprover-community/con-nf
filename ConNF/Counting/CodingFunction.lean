@@ -10,9 +10,9 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] {β : Λ} [TangleData β]
+variable [Params.{u}] [Level] {β : Λ} [ModelData β]
 
-structure CodingFunction (β : Λ) [TangleData β] where
+structure CodingFunction (β : Λ) [ModelData β] where
   decode : Support β →. TSet β
   dom_nonempty : decode.Dom.Nonempty
   supports_decode' (S : Support β) (hS : (decode S).Dom) :

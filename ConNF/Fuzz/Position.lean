@@ -1,6 +1,17 @@
 import Mathlib.Order.RelClasses
 import Mathlib.Logic.Embedding.Basic
 
+/-!
+# Position functions
+
+In this file, we define position functions. Position functions taking values in `μ` are used to
+give orders on types such as tangles.
+
+## Main declarations
+
+* `ConNF.Position`: A class that provides a function `pos : α ↪ β`.
+-/
+
 namespace ConNF
 
 class Position (α : Type _) (β : outParam <| Type _) where

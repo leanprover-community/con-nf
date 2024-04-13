@@ -43,7 +43,7 @@ open Code
 
 section Cloud
 
-variable [TangleDataLt] [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjectsLt]
+variable [ModelDataLt] [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjectsLt]
   {γ : TypeIndex} [LtLevel γ] {β : Λ} [LtLevel β]
   (hγβ : γ ≠ β)
 
@@ -170,7 +170,7 @@ end Cloud
 
 section CloudCode
 
-variable [TangleDataLt] [PositionedTanglesLt]
+variable [ModelDataLt] [PositionedTanglesLt]
 
 /-- Tool that lets us use well-founded recursion on codes via `μ`.
 This maps a nonempty code to the least pos of a tangle in the extension of the code. -/

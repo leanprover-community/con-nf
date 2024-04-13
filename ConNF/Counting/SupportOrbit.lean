@@ -11,12 +11,12 @@ namespace ConNF
 
 variable [Params.{u}]
 
-def SupportOrbit (β : Λ) [TangleData β] : Type u :=
+def SupportOrbit (β : Λ) [ModelData β] : Type u :=
   MulAction.orbitRel.Quotient (Allowable β) (Support β)
 
 namespace SupportOrbit
 
-variable {β : Λ} [TangleData β]
+variable {β : Λ} [ModelData β]
 
 /-- The orbit of a given ordered support. -/
 def mk (S : Support β) : SupportOrbit β :=

@@ -42,14 +42,14 @@ theorem mk_codingFunction (β : Λ) [i : LeLevel β] (hzero : #(CodingFunction 0
     exact hzero
 
 noncomputable def TSet.code {β : Λ} [LeLevel β] (t : TSet β) : CodingFunction β × Support β :=
-  (CodingFunction.code _ _ (TangleData.TSet.support_supports t), t.support)
+  (CodingFunction.code _ _ (ModelData.TSet.support_supports t), t.support)
 
 theorem TSet.code_injective {β : Λ} [LeLevel β] : Function.Injective (TSet.code (β := β)) := by
   intro t₁ t₂ h
   rw [code, code] at h
   simp only [Prod.mk.injEq, CodingFunction.code_eq_code_iff] at h
   obtain ⟨⟨ρ, h₁, rfl⟩, h₂⟩ := h
-  refine (TangleData.TSet.support_supports t₁ ρ ?_).symm
+  refine (ModelData.TSet.support_supports t₁ ρ ?_).symm
   rintro c ⟨i, hi, hc⟩
   have := support_f_congr h₂ i hi
   simp only [← hc, h₁, Enumeration.smul_f] at this
@@ -61,8 +61,8 @@ theorem mk_tSet (β : Λ) [LeLevel β] (hzero : #(CodingFunction 0) < #μ) : #(T
     simp only [mk_prod, lift_id, mk_support]
     exact Cardinal.mul_le_of_le (mk_codingFunction β hzero).le le_rfl
       Params.μ_isStrongLimit.isLimit.aleph0_le
-  · have := mk_le_of_injective (typedAtom (α := β)).injective
-    simp only [mk_atom] at this
+  · have := mk_le_of_injective (typedNearLitter (α := β)).injective
+    simp only [mk_nearLitter] at this
     exact this
 
 end ConNF

@@ -23,7 +23,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [TangleDataLt] (β : TypeIndex) [LtLevel β] (γ : Λ) [LtLevel γ]
+variable [Params.{u}] [Level] [ModelDataLt] (β : TypeIndex) [LtLevel β] (γ : Λ) [LtLevel γ]
 
 open Code
 
@@ -239,7 +239,7 @@ instance : MulAction SemiallowablePerm NonemptyCode :=
 
 end SemiallowablePerm
 
-variable [BasePositions] [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjectsLt] [TangleData α]
+variable [BasePositions] [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjectsLt] [ModelData α]
 
 /-- We say that a semiallowable permutation is allowable if its one-step derivatives commute with
 the `fuzz` maps. -/

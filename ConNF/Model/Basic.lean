@@ -59,7 +59,7 @@ theorem Symmetric.ofSubset {β α : Λ} (hβ : β < α) (s : Set (TSet β)) :
   · intro c hc
     conv_lhs => rw [← hρ c hc, inv_smul_smul]
 
-namespace TangleData.TSet
+namespace ModelData.TSet
 
 def mk {β α : Λ} (hβ : β < α) (s : Set (TSet β)) (hs : Symmetric hβ s) : TSet α :=
   letI : Level := ⟨α⟩
@@ -208,11 +208,11 @@ theorem induction {β α : Λ} (hβ : β < α) (t : TSet α) :
     rw [TSet.mem_mk_iff]
     rfl
 
-end TangleData.TSet
+end ModelData.TSet
 
 theorem Small.symmetric {β α : Λ} {s : Set (TSet β)} (hs : Small s) (hβ : β < α) :
     Symmetric hβ s := by
-  have := TangleData.TSet.exists_support (α := β)
+  have := ModelData.TSet.exists_support (α := β)
   choose S hS₁ hS₂ using this
   refine ⟨⋃ t ∈ s, raise (coe_lt_coe.mpr hβ) '' S t, ?_, ?_⟩
   · refine Small.bUnion hs ?_

@@ -18,8 +18,8 @@ variable [Params.{u}] [Level] [BasePositions] [CountingAssumptions]
 
 theorem mem_orbit_of_raiseSingleton_eq (S₁ S₂ : Support β) (u₁ u₂ : TSet γ)
     (hS : S₁.max = S₂.max)
-    (hu : CodingFunction.code _ _ (TangleData.TSet.support_supports u₁) =
-      CodingFunction.code _ _ (TangleData.TSet.support_supports u₂))
+    (hu : CodingFunction.code _ _ (ModelData.TSet.support_supports u₁) =
+      CodingFunction.code _ _ (ModelData.TSet.support_supports u₂))
     (hSu : SupportOrbit.mk (raisedSupport hγ S₁ u₁) = SupportOrbit.mk (raisedSupport hγ S₂ u₂)) :
     raiseSingleton hγ S₁ u₁ = raiseSingleton hγ S₂ u₂ := by
   rw [CodingFunction.code_eq_code_iff] at hu
@@ -48,7 +48,7 @@ noncomputable def RaisedSingleton.code (r : RaisedSingleton hγ) :
     κ × SupportOrbit β × CodingFunction γ :=
   (r.prop.choose.max,
     SupportOrbit.mk (raisedSupport hγ r.prop.choose r.prop.choose_spec.choose),
-    CodingFunction.code _ _ (TangleData.TSet.support_supports r.prop.choose_spec.choose))
+    CodingFunction.code _ _ (ModelData.TSet.support_supports r.prop.choose_spec.choose))
 
 theorem RaisedSingleton.code_injective :
     Function.Injective (RaisedSingleton.code hγ) := by

@@ -28,7 +28,7 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] [Level] [BasePositions] [TangleDataLt]
+variable [Params.{u}] [Level] [BasePositions] [ModelDataLt]
   {β : TypeIndex} [LtLevel β] {γ : Λ} [LtLevel γ]
 
 open Code
@@ -325,7 +325,7 @@ end Semitangle
 
 open Semitangle
 
-variable [TangleData α]
+variable [ModelData α]
 
 namespace NewAllowable
 
@@ -625,19 +625,6 @@ theorem NewAllowable.smul_address_eq_smul_iff
       NewAllowable.toStructPerm ρ' c.path • c.value :=
   StructPerm.smul_address_eq_smul_iff
 
-/-- For any atom `a`, the code `(α, ⊥, a)` is a tangle at level `α`.
-This is called a *typed atom*. -/
-def newTypedAtom (a : Atom) : NewTSet :=
-  ⟨intro (show Set (TSet ⊥) from {a}) <| Code.isEven_bot _,
-    Enumeration.singleton ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inl a⟩,
-    by
-      simp only [Enumeration.singleton_carrier]
-      intro ρ h
-      have := h rfl
-      simp only [NewAllowable.smul_address_eq_iff, Sum.smul_inl, Sum.inl.injEq] at this
-      simp only [smul_intro, smul_set_singleton]
-      congr 2⟩
-
 /-- For any near-litter `N`, the code `(α, ⊥, N)` is a tangle at level `α`.
 This is called a *typed near litter*. -/
 def newTypedNearLitter (N : NearLitter) : NewTSet :=
@@ -664,15 +651,6 @@ theorem preferenceBase_injective {a₁ a₂ : Set Atom}
   cases he
   simp only [heq_eq_eq, Preference.base.injEq] at h
   exact h
-
-theorem newTypedAtom_injective : Function.Injective newTypedAtom := by
-  intro a₁ a₂ h
-  simp only [newTypedAtom, intro] at h
-  rw [Subtype.mk_eq_mk] at h
-  simp only [Semitangle.mk.injEq] at h
-  have := preferenceBase_injective h.1 h.2
-  simp only [singleton_eq_singleton_iff] at this
-  exact this
 
 theorem newTypedNearLitter_injective : Function.Injective newTypedNearLitter := by
   intro N₁ N₂ h

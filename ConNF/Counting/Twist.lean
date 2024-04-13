@@ -13,7 +13,7 @@ namespace ConNF
 
 variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLevel β]
 
-namespace TangleData.TSet
+namespace ModelData.TSet
 
 def Orbit (β : Λ) [LeLevel β] : Type u :=
   MulAction.orbitRel.Quotient (Allowable β) (TSet β)
@@ -107,6 +107,6 @@ theorem smul_support (s : TSet β) (ρ : Allowable β) :
     (ρ • s).support = (ρ • s).twist • s.twist⁻¹ • s.support := by
   rw [support, support, inv_smul_smul, Orbit.mk_smul]
 
-end TangleData.TSet
+end ModelData.TSet
 
 end ConNF

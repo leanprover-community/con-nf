@@ -10,7 +10,7 @@ of any coherence between type levels) we cannot prove many facts about these new
 
 ## Main declarations
 
-* `ConNF.TangleDataLt`: The `TangleData` for each `β < α`.
+* `ConNF.ModelDataLt`: The `ModelData` for each `β < α`.
 * `ConNF.PositionedTanglesLt`: The `PositionedTangles` for each `β < α`.
 * `ConNF.TypedObjectsLt`: The `TypedObjects` for each `β < α`.
 -/
@@ -25,43 +25,43 @@ namespace ConNF
 
 variable [Params.{u}] [Level]
 
-/-- The `TangleData` for each `β < α`. -/
+/-- The `ModelData` for each `β < α`. -/
 @[ext]
-class TangleDataLt where
-  data : ∀ β : Λ, [LtLevel β] → TangleData β
+class ModelDataLt where
+  data : ∀ β : Λ, [LtLevel β] → ModelData β
 
-instance TangleDataLt.toTangleData [TangleDataLt] :
-    ∀ β : TypeIndex, [LtLevel β] → TangleData β
-  | ⊥, _ => Bot.tangleData
-  | (β : Λ), _ => TangleDataLt.data β
+instance ModelDataLt.toModelData [ModelDataLt] :
+    ∀ β : TypeIndex, [LtLevel β] → ModelData β
+  | ⊥, _ => Bot.modelData
+  | (β : Λ), _ => ModelDataLt.data β
 
 /-- The `PositionedTangles` for each `β < α`. -/
 @[ext]
-class PositionedTanglesLt [TangleDataLt] where
+class PositionedTanglesLt [ModelDataLt] where
   data : ∀ β : Λ, [LtLevel β] → PositionedTangles β
 
 noncomputable instance PositionedTanglesLt.toPositionedTangles
-    [BasePositions] [TangleDataLt] [PositionedTanglesLt] :
+    [BasePositions] [ModelDataLt] [PositionedTanglesLt] :
     ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
   | ⊥, _ => Bot.positionedTangles
   | (β : Λ), _ => PositionedTanglesLt.data β
 
 /-- The `TypedObjects` for each `β < α`. -/
-abbrev TypedObjectsLt [TangleDataLt] :=
+abbrev TypedObjectsLt [ModelDataLt] :=
   ∀ β : Λ, [LtLevel β] → TypedObjects β
 
 /-- The `PositionedObjects` for each `β < α`. -/
-abbrev PositionedObjectsLt [BasePositions] [TangleDataLt] [PositionedTanglesLt] [TypedObjectsLt] :=
+abbrev PositionedObjectsLt [BasePositions] [ModelDataLt] [PositionedTanglesLt] [TypedObjectsLt] :=
   ∀ β : Λ, [LtLevel β] → PositionedObjects β
 
 /-! We have to give the following things different names in the two places we define them:
 here, and in the FOA hypothesis file. -/
 
-def Tangle.set_lt [TangleDataLt] : {β : TypeIndex} → [LtLevel β] → Tangle β → TSet β
+def Tangle.set_lt [ModelDataLt] : {β : TypeIndex} → [LtLevel β] → Tangle β → TSet β
   | (β : Λ), _, t => TangleCoe.set t
   | ⊥, _i, a => a
 
-theorem Tangle.set_lt_smul [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β]
+theorem Tangle.set_lt_smul [i : ModelDataLt] {β : TypeIndex} [iβ : LtLevel β]
     (ρ : Allowable β) (t : Tangle β) :
     (ρ • t).set_lt = ρ • t.set_lt := by
   revert i iβ
@@ -72,7 +72,7 @@ theorem Tangle.set_lt_smul [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β
   · intro β _ _ ρ t
     rfl
 
-theorem exists_tangle_lt [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β] (t : TSet β) :
+theorem exists_tangle_lt [i : ModelDataLt] {β : TypeIndex} [iβ : LtLevel β] (t : TSet β) :
     ∃ u : Tangle β, u.set_lt = t := by
   revert i iβ
   change (_ : _) → _
@@ -83,7 +83,7 @@ theorem exists_tangle_lt [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β] 
     obtain ⟨S, hS⟩ := t.has_support
     exact ⟨⟨t, S, hS⟩, rfl⟩
 
-theorem Tangle.ext_lt [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β] (t₁ t₂ : Tangle β)
+theorem Tangle.ext_lt [i : ModelDataLt] {β : TypeIndex} [iβ : LtLevel β] (t₁ t₂ : Tangle β)
     (hs : t₁.set_lt = t₂.set_lt) (hS : t₁.support = t₂.support) : t₁ = t₂ := by
   revert i iβ t₁ t₂
   change (_ : _) → _
@@ -93,14 +93,14 @@ theorem Tangle.ext_lt [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β] (t�
   · intro β _ _ t₁ t₂ hs hS
     exact TangleCoe.ext _ _ hs hS
 
-theorem Tangle.smul_set_lt [i : TangleDataLt] {β : TypeIndex} [iβ : LtLevel β]
+theorem Tangle.smul_set_lt [i : ModelDataLt] {β : TypeIndex} [iβ : LtLevel β]
     (t : Tangle β) (ρ : Allowable β) :
     (ρ • t).set_lt = ρ • t.set_lt := by
   revert i iβ
   change (_ : _) → _
   refine WithBot.recBotCoe ?_ ?_ β <;> intros <;> rfl
 
-theorem Tangle.support_supports_lt [i : TangleDataLt] {β : TypeIndex}
+theorem Tangle.support_supports_lt [i : ModelDataLt] {β : TypeIndex}
     [iβ : LtLevel β] (t : Tangle β) :
     MulAction.Supports (Allowable β) (t.support : Set (Address β)) t := by
   revert i iβ t

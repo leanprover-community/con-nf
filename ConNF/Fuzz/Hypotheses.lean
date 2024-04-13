@@ -10,11 +10,12 @@ it here for more convenient use later.
 
 ## Main declarations
 
-* `ConNF.TangleData`: Data about the model elements at level `α`.
-* `ConNF.PositionedTangles`: A function that gives each `α`-tangle a unique position `ν : μ`.
-* `ConNF.TypedObjects`: Allows us to encode atoms and near-litters as `α`-tangles.
+* `ConNF.ModelData`: Data about the model elements at level `α`, called *t-sets*.
+* `ConNF.PositionedTangles`: A function that gives each type `α` tangle a unique position `ν : μ`.
+* `ConNF.TypedObjects`: Allows us to encode atoms and near-litters as type `α` t-sets.
 * `ConNF.BasePositions`: The position of typed atoms and typed near-litters in the position function
     at any level.
+* `ConNF.PositionedObjects`: Hypotheses on the positions of typed objects.
 -/
 
 open Function Set WithBot
@@ -31,7 +32,7 @@ variable [Params.{u}]
 tangles at level `α`, and a group of allowable permutations at level `α` that act on the
 `α`-tangles. We also stipulate that each tangle has a prescribed small support, called its
 designated support. -/
-class TangleData (α : TypeIndex) where
+class ModelData (α : TypeIndex) where
   /-- The type of tangles that we assume were constructed at stage `α`.
   Later in the recursion, we will construct this type explicitly, but for now, we will just assume
   that it exists. -/
@@ -52,22 +53,22 @@ class TangleData (α : TypeIndex) where
       MulAction.compHom _ allowableToStructPerm
     toStructSet (ρ • t) = ρ • toStructSet t
 
-export TangleData (TSet Allowable toStructSet toStructSet_smul)
+export ModelData (TSet Allowable toStructSet toStructSet_smul)
 
-attribute [instance] TangleData.allowableGroup TangleData.allowableAction
+attribute [instance] ModelData.allowableGroup ModelData.allowableAction
 
 namespace Allowable
 
-variable {α : TypeIndex} [TangleData α] {X : Type _} [MulAction (StructPerm α) X]
+variable {α : TypeIndex} [ModelData α] {X : Type _} [MulAction (StructPerm α) X]
 
 /-- Allowable permutations can be considered a subtype of structural permutations.
 This map can be thought of as an inclusion that preserves the group structure. -/
 def toStructPerm : Allowable α →* StructPerm α :=
-  TangleData.allowableToStructPerm
+  ModelData.allowableToStructPerm
 
-theorem toStructPerm_injective (α : TypeIndex) [TangleData α] :
+theorem toStructPerm_injective (α : TypeIndex) [ModelData α] :
     Function.Injective (toStructPerm : Allowable α → StructPerm α) :=
-  TangleData.allowableToStructPerm_injective
+  ModelData.allowableToStructPerm_injective
 
 /-- Allowable permutations act on anything that structural permutations do. -/
 instance : MulAction (Allowable α) X :=
@@ -118,9 +119,9 @@ theorem smul_address_eq_smul_iff :
 
 end Allowable
 
-theorem TangleData.TSet.has_support {α : TypeIndex} [TangleData α] (t : TSet α) :
+theorem ModelData.TSet.has_support {α : TypeIndex} [ModelData α] (t : TSet α) :
     ∃ S : Support α, MulAction.Supports (Allowable α) (S : Set (Address α)) t :=
-  TangleData.has_support t
+  ModelData.has_support t
 
 def Atom.support (a : Atom) : Support ⊥ :=
   Enumeration.singleton ⟨Quiver.Path.nil, Sum.inl a⟩
@@ -140,7 +141,7 @@ theorem Atom.support_supports (a : Atom) :
 
 /-- The tangle data at level `⊥` is constructed by taking the tangles to be the atoms, the allowable
 permutations to be near-litter permutations, and the designated supports to be singletons. -/
-instance Bot.tangleData : TangleData ⊥
+instance Bot.modelData : ModelData ⊥
     where
   TSet := Atom
   Allowable := NearLitterPerm
@@ -152,20 +153,20 @@ instance Bot.tangleData : TangleData ⊥
   toStructSet_smul _ _ := rfl
 
 @[ext]
-structure TangleCoe (α : Λ) [TangleData α] : Type u where
+structure TangleCoe (α : Λ) [ModelData α] : Type u where
   set : TSet α
   support : Support α
   support_supports : MulAction.Supports (Allowable α) (support : Set (Address α)) set
 
-def Tangle : (α : TypeIndex) → [TangleData α] → Type u
+def Tangle : (α : TypeIndex) → [ModelData α] → Type u
   | (α : Λ), _ => TangleCoe α
   | ⊥, _ => Atom
 
-def Tangle.support : {α : TypeIndex} → [TangleData α] → Tangle α → Support α
+def Tangle.support : {α : TypeIndex} → [ModelData α] → Tangle α → Support α
   | (α : Λ), _, t => TangleCoe.support t
   | ⊥, _i, a => Atom.support a
 
-instance (α : Λ) [TangleData α] : MulAction (Allowable α) (TangleCoe α) where
+instance (α : Λ) [ModelData α] : MulAction (Allowable α) (TangleCoe α) where
   smul ρ t := ⟨ρ • t.set, ρ • t.support, by
       intro ρ' h
       rw [← inv_smul_eq_iff, smul_smul, smul_smul]
@@ -182,28 +183,25 @@ instance (α : Λ) [TangleData α] : MulAction (Allowable α) (TangleCoe α) whe
     change ⟨_ • t.set, _ • t.support, _⟩ = (⟨_ • _ • t.set, _ • _ • t.support, _⟩ : Tangle α)
     ext : 1 <;> simp only [mul_smul]
 
-instance : (α : TypeIndex) → [TangleData α] → MulAction (Allowable α) (Tangle α)
+instance : (α : TypeIndex) → [ModelData α] → MulAction (Allowable α) (Tangle α)
   | (α : Λ), _ => inferInstanceAs (MulAction (Allowable α) (TangleCoe α))
   | ⊥, _ => inferInstanceAs (MulAction (Allowable ⊥) Atom)
 
-class PositionedTangles (α : TypeIndex) [TangleData α] where
+class PositionedTangles (α : TypeIndex) [ModelData α] where
   /-- A position function, giving each tangle a unique position `ν : μ`.
   The existence of this injection proves that there are at most `μ` tangles at level `α`.
   Since `μ` has a well-ordering, this induces a well-ordering on `α`-tangles: to compare two
   tangles, simply compare their images under this map. -/
   pos : Tangle α ↪ μ
 
-instance {α : TypeIndex} [TangleData α] [PositionedTangles α] : Position (Tangle α) μ where
+instance {α : TypeIndex} [ModelData α] [PositionedTangles α] : Position (Tangle α) μ where
   pos := PositionedTangles.pos
 
-variable (α : Λ) [TangleData α]
+variable (α : Λ) [ModelData α]
 
 /-- Allows us to encode atoms and near-litters as `α`-tangles. These maps are expected to cohere
 with the conditions given in `BasePositions`, but this requirement is expressed later. -/
 class TypedObjects where
-  /-- Encode an atom as an `α`-tangle. The resulting model element has a `⊥`-extension which
-  contains only this atom. -/
-  typedAtom : Atom ↪ TSet α
   /-- Encode a near-litter as an `α`-tangle. The resulting model element has a `⊥`-extension which
   contains only this near-litter. -/
   typedNearLitter : NearLitter ↪ TSet α
@@ -212,7 +210,7 @@ class TypedObjects where
     ρ • typedNearLitter N =
     typedNearLitter ((Allowable.toStructPerm ρ) (Quiver.Hom.toPath <| bot_lt_coe α) • N)
 
-export TypedObjects (typedAtom typedNearLitter)
+export TypedObjects (typedNearLitter)
 
 class BasePositions where
   posAtom : Atom ↪ μ
@@ -244,12 +242,10 @@ theorem lt_pos_symmDiff [BasePositions] (a : Atom) (N : NearLitter) (h : a ∈ l
   BasePositions.lt_pos_symmDiff a N h
 
 class PositionedObjects [BasePositions] [PositionedTangles α] [TypedObjects α] : Prop where
-  pos_typedAtom (a : Atom) (t : Tangle α) :
-    t.set = typedAtom a → pos a ≤ pos t
   pos_typedNearLitter (N : NearLitter) (t : Tangle α) :
     t.set = typedNearLitter N → pos N ≤ pos t
 
-export PositionedObjects (pos_typedAtom pos_typedNearLitter)
+export PositionedObjects (pos_typedNearLitter)
 
 namespace Allowable
 
