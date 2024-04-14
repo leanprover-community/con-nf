@@ -1,5 +1,5 @@
 import ConNF.FOA.Complete.HypAction
-import ConNF.FOA.Approximation
+import ConNF.FOA.Approx
 
 open Set Sum
 
@@ -13,7 +13,7 @@ variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} (π : S
 
 namespace StructApprox
 
-open NearLitterApprox HypAction
+open BaseApprox HypAction
 
 theorem equiv_apply_mem {S T : Sublitter} {a} {L : Litter}
     (h : (S.equiv T a : Atom) ∈ litterSet L) : T.litter = L := by

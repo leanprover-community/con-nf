@@ -40,14 +40,14 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
       · rintro ⟨hj₁, N, hj₂, hj₃⟩
         refine ⟨hj₁, Allowable.toStructPerm ρ A • N, ?_, ?_⟩
         · rw [hj₂, Allowable.smul_address, smul_inr]
-        · rw [← SetLike.mem_coe, NearLitterPerm.smul_nearLitter_coe,
+        · rw [← SetLike.mem_coe, BasePerm.smul_nearLitter_coe,
             mem_smul_set_iff_inv_smul_mem]
           exact hj₃
       · rintro ⟨hj₁, N, hj₂, hj₃⟩
         refine ⟨hj₁, (Allowable.toStructPerm ρ A)⁻¹ • N, ?_, ?_⟩
         · rw [smul_eq_iff_eq_inv_smul] at hj₂
           rw [hj₂, Allowable.smul_address, smul_inr, map_inv, Tree.inv_apply]
-        · rw [← SetLike.mem_coe, NearLitterPerm.smul_nearLitter_coe,
+        · rw [← SetLike.mem_coe, BasePerm.smul_nearLitter_coe,
             mem_smul_set_iff_inv_smul_mem, inv_inv, smul_inv_smul, SetLike.mem_coe]
           exact hj₃
   case flexible_spec =>
@@ -67,23 +67,23 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
       · rintro ⟨hj₁, N', hj₂, hj₃⟩
         refine ⟨hj₁, Allowable.toStructPerm ρ A • N', ?_, ?_⟩
         · rw [hj₂, Allowable.smul_address, smul_inr]
-        · rw [NearLitterPerm.smul_nearLitter_fst, hj₃,
-            NearLitterPerm.smul_nearLitter_fst, smul_inv_smul]
+        · rw [BasePerm.smul_nearLitter_fst, hj₃,
+            BasePerm.smul_nearLitter_fst, smul_inv_smul]
       · rintro ⟨hj₁, N', hj₂, hj₃⟩
         refine ⟨hj₁, (Allowable.toStructPerm ρ A)⁻¹ • N', ?_, ?_⟩
         · rw [smul_eq_iff_eq_inv_smul] at hj₂
           rw [hj₂, Allowable.smul_address, smul_inr, map_inv, Tree.inv_apply]
-        · simp only [NearLitterPerm.smul_nearLitter_fst, smul_left_cancel_iff]
+        · simp only [BasePerm.smul_nearLitter_fst, smul_left_cancel_iff]
           exact hj₃
     · ext j k
       constructor
       · rintro ⟨hj, hk, a, N', h₁, h₂, h₃, h₄⟩
         refine ⟨hj, hk, Allowable.toStructPerm ρ A • a, Allowable.toStructPerm ρ A • N',
             ?_, ?_, ?_, ?_⟩
-        · rw [NearLitterPerm.smul_nearLitter_fst, h₁,
-            NearLitterPerm.smul_nearLitter_fst, smul_inv_smul]
+        · rw [BasePerm.smul_nearLitter_fst, h₁,
+            BasePerm.smul_nearLitter_fst, smul_inv_smul]
         · rw [← mem_inv_smul_set_iff, smul_set_symmDiff,
-            ← NearLitterPerm.smul_nearLitter_coe, ← NearLitterPerm.smul_nearLitter_coe,
+            ← BasePerm.smul_nearLitter_coe, ← BasePerm.smul_nearLitter_coe,
             inv_smul_smul]
           exact h₂
         · rw [h₃, Allowable.smul_address, smul_inr]
@@ -91,10 +91,10 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
       · rintro ⟨hj, hk, a, N', h₁, h₂, h₃, h₄⟩
         refine ⟨hj, hk, (Allowable.toStructPerm ρ A)⁻¹ • a, (Allowable.toStructPerm ρ A)⁻¹ • N',
             ?_, ?_, ?_, ?_⟩
-        · rw [NearLitterPerm.smul_nearLitter_fst, h₁,
-            NearLitterPerm.smul_nearLitter_fst]
+        · rw [BasePerm.smul_nearLitter_fst, h₁,
+            BasePerm.smul_nearLitter_fst]
         · rw [← mem_inv_smul_set_iff, smul_set_symmDiff,
-            ← NearLitterPerm.smul_nearLitter_coe, ← NearLitterPerm.smul_nearLitter_coe,
+            ← BasePerm.smul_nearLitter_coe, ← BasePerm.smul_nearLitter_coe,
             inv_smul_smul, inv_inv, smul_inv_smul]
           exact h₂
         · rw [smul_eq_iff_eq_inv_smul] at h₃
@@ -114,10 +114,10 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
       exact this
     rw [SpecCondition.inflexibleCoe.injEq]
     refine ⟨rfl, HEq.rfl, heq_of_eq ?_, ?_, ?_, ?_⟩
-    · simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
+    · simp only [BasePerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
         Tree.inv_apply, ne_eq, eq_mp_eq_cast, CodingFunction.code_eq_code_iff]
       refine ⟨Allowable.comp (P.B.cons P.hδ) ρ, ?_, ?_⟩
-      · simp only [Support.before_smul, Support.comp_smul, NearLitterPerm.smul_nearLitter_fst,
+      · simp only [Support.before_smul, Support.comp_smul, BasePerm.smul_nearLitter_fst,
           inflexibleCoe_smul_path, inflexibleCoe_smul_t, Tree.inv_apply, ne_eq, eq_mp_eq_cast]
       · rw [← Tangle.smul_set, smul_inv_smul]
     · ext j k
@@ -125,10 +125,10 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
       · rintro ⟨hj, hk, a, N', h₁, h₂, h₃, h₄⟩
         refine ⟨hj, hk, Allowable.toStructPerm ρ A • a, Allowable.toStructPerm ρ A • N',
             ?_, ?_, ?_, ?_⟩
-        · rw [NearLitterPerm.smul_nearLitter_fst, h₁,
-            NearLitterPerm.smul_nearLitter_fst, smul_inv_smul]
+        · rw [BasePerm.smul_nearLitter_fst, h₁,
+            BasePerm.smul_nearLitter_fst, smul_inv_smul]
         · rw [← mem_inv_smul_set_iff, smul_set_symmDiff,
-            ← NearLitterPerm.smul_nearLitter_coe, ← NearLitterPerm.smul_nearLitter_coe,
+            ← BasePerm.smul_nearLitter_coe, ← BasePerm.smul_nearLitter_coe,
             inv_smul_smul]
           exact h₂
         · rw [Enumeration.smul_f, h₃, Allowable.smul_address, smul_inr]
@@ -136,17 +136,17 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
       · rintro ⟨hj, hk, a, N', h₁, h₂, h₃, h₄⟩
         refine ⟨hj, hk, (Allowable.toStructPerm ρ A)⁻¹ • a, (Allowable.toStructPerm ρ A)⁻¹ • N',
             ?_, ?_, ?_, ?_⟩
-        · rw [NearLitterPerm.smul_nearLitter_fst, h₁,
-            NearLitterPerm.smul_nearLitter_fst]
+        · rw [BasePerm.smul_nearLitter_fst, h₁,
+            BasePerm.smul_nearLitter_fst]
         · rw [← mem_inv_smul_set_iff, smul_set_symmDiff,
-            ← NearLitterPerm.smul_nearLitter_coe, ← NearLitterPerm.smul_nearLitter_coe,
+            ← BasePerm.smul_nearLitter_coe, ← BasePerm.smul_nearLitter_coe,
             inv_smul_smul, inv_inv, smul_inv_smul]
           exact h₂
         · rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at h₃
           rw [h₃, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr]
         · rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at h₄
           rw [h₄, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inl]
-    · simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
+    · simp only [BasePerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
         Tree.inv_apply, ne_eq, id_eq, eq_mp_eq_cast, smul_support, Enumeration.smul_max]
     · ext j k
       constructor
@@ -155,7 +155,7 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
         · rw [smul_support] at hj
           exact hj
         · rw [Enumeration.smul_f, ← hjk]
-          simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path,
+          simp only [BasePerm.smul_nearLitter_fst, inflexibleCoe_smul_path,
             inflexibleCoe_smul_t, Tree.inv_apply, ne_eq, id_eq, eq_mp_eq_cast, smul_support,
             Enumeration.smul_f, Allowable.smul_address, map_inv, Allowable.toStructPerm_comp,
             Tree.comp_apply, smul_inv_smul]
@@ -165,7 +165,7 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
           exact hj
         · rw [Enumeration.smul_f, ← inv_smul_eq_iff] at hjk
           rw [← hjk]
-          simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path,
+          simp only [BasePerm.smul_nearLitter_fst, inflexibleCoe_smul_path,
             inflexibleCoe_smul_t, Tree.inv_apply, ne_eq, id_eq, eq_mp_eq_cast, smul_support,
             Enumeration.smul_f, Allowable.smul_address, map_inv, Allowable.toStructPerm_comp,
             Tree.comp_apply]
@@ -179,7 +179,7 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
     swap
     · have := (InflexibleBot.smul ⟨P, a, ha⟩ ρ⁻¹).hL
       simp only [map_inv, Tree.inv_apply] at this
-      rw [NearLitterPerm.smul_nearLitter_fst, this, InflexibleBot.smul]
+      rw [BasePerm.smul_nearLitter_fst, this, InflexibleBot.smul]
       simp_rw [Allowable.comp_bot, map_inv, Tree.inv_apply]
     rw [SpecCondition.inflexibleBot.injEq]
     refine ⟨rfl, HEq.rfl, ?_, ?_⟩
@@ -197,10 +197,10 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
       · rintro ⟨hj, hk, a, N', h₁, h₂, h₃, h₄⟩
         refine ⟨hj, hk, Allowable.toStructPerm ρ A • a, Allowable.toStructPerm ρ A • N',
             ?_, ?_, ?_, ?_⟩
-        · rw [NearLitterPerm.smul_nearLitter_fst, h₁,
-            NearLitterPerm.smul_nearLitter_fst, smul_inv_smul]
+        · rw [BasePerm.smul_nearLitter_fst, h₁,
+            BasePerm.smul_nearLitter_fst, smul_inv_smul]
         · rw [← mem_inv_smul_set_iff, smul_set_symmDiff,
-            ← NearLitterPerm.smul_nearLitter_coe, ← NearLitterPerm.smul_nearLitter_coe,
+            ← BasePerm.smul_nearLitter_coe, ← BasePerm.smul_nearLitter_coe,
             inv_smul_smul]
           exact h₂
         · rw [Enumeration.smul_f, h₃, Allowable.smul_address, smul_inr]
@@ -208,10 +208,10 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
       · rintro ⟨hj, hk, a, N', h₁, h₂, h₃, h₄⟩
         refine ⟨hj, hk, (Allowable.toStructPerm ρ A)⁻¹ • a, (Allowable.toStructPerm ρ A)⁻¹ • N',
             ?_, ?_, ?_, ?_⟩
-        · rw [NearLitterPerm.smul_nearLitter_fst, h₁,
-            NearLitterPerm.smul_nearLitter_fst]
+        · rw [BasePerm.smul_nearLitter_fst, h₁,
+            BasePerm.smul_nearLitter_fst]
         · rw [← mem_inv_smul_set_iff, smul_set_symmDiff,
-            ← NearLitterPerm.smul_nearLitter_coe, ← NearLitterPerm.smul_nearLitter_coe,
+            ← BasePerm.smul_nearLitter_coe, ← BasePerm.smul_nearLitter_coe,
             inv_smul_smul, inv_inv, smul_inv_smul]
           exact h₂
         · rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul] at h₃

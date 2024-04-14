@@ -21,7 +21,7 @@ theorem completeNearLitterMap_subset_range (A : ExtendedIndex β) (L : Litter) :
       ⟨a, (π A).mem_largestSublitter_of_not_mem_domain a ha₂⟩, _⟩
     rw [completeAtomMap_eq_of_not_mem_domain]
     swap
-    · exact NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
+    · exact BaseApprox.not_mem_domain_of_mem_largestSublitter _
         (Sublitter.equiv_symm_apply_mem ⟨a, _⟩)
     · rw [mem_litterSet] at ha₁
       have : ((((π A).largestSublitter L).equiv
@@ -84,7 +84,7 @@ theorem preimageConstrained_small (hπf : π.Free) (c : Address β) :
     Small (preimageConstrained π c) :=
   Small.preimage (completeAddressMap_injective hπf) (small_constrains c)
 
-noncomputable def preimageAction (hπf : π.Free) (c : Address β) : StructAction β :=
+noncomputable def preimageAction (hπf : π.Free) (c : Address β) : StructLAction β :=
   constrainedAction π (preimageConstrained π c) (preimageConstrained_small hπf c)
 
 theorem preimageAction_eq_constrainedAction (hπf : π.Free) (c : Address β) :
@@ -106,7 +106,7 @@ theorem preimageAction_lawful (hπf : π.Free) {c : Address β} :
 
 theorem preimageAction_comp_mapFlexible {hπf : π.Free} {γ : Λ} {c : Address β}
     (A : Path (β : TypeIndex) γ) :
-    StructAction.MapFlexible ((preimageAction hπf c).comp A) :=
+    StructLAction.MapFlexible ((preimageAction hπf c).comp A) :=
   constrainedAction_comp_mapFlexible hπf A
 
 theorem Relation.reflTransGen_of_eq {α : Type _} {r : α → α → Prop} {x y : α} (h : x = y) :
@@ -118,7 +118,7 @@ theorem preimageAction_coherent (hπf : π.Free) {γ : Λ} [LeLevel γ] (A : Pat
     (B : ExtendedIndex γ) (N : NearLitter) (c : Address β)
     (hc : ⟨A.comp B, inr (π.completeNearLitterMap (A.comp B) N)⟩ ≺ c) (ρ : Allowable γ)
     (h : StructApprox.ExactlyApproximates
-      (StructAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
+      (StructLAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
     Tree.comp B (Allowable.toStructPerm ρ) • N := by
@@ -131,7 +131,7 @@ theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Λ} [LeLevel γ] (A 
     (B : ExtendedIndex γ) (a : Atom) (c : Address β)
     (hc : ⟨A.comp B, inl (π.completeAtomMap (A.comp B) a)⟩ ≺ c) (ρ : Allowable γ)
     (h : StructApprox.ExactlyApproximates
-      (StructAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
+      (StructLAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
       (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = Tree.comp B (Allowable.toStructPerm ρ) • a := by
   refine' constrainedAction_coherent_atom A B a _ _ _ _ ρ h
@@ -145,11 +145,11 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
       ⟨B, inr N⟩ ≺ ⟨A, inr L.toNearLitter⟩ → N ∈ range (π.completeNearLitterMap B)) :
     L ∈ range (π.completeLitterMap A) := by
   obtain h | ⟨⟨h⟩⟩ | ⟨⟨h⟩⟩ := flexible_cases' A L
-  · refine' ⟨(NearLitterApprox.flexibleCompletion (π A) A).symm • L, _⟩
-    rw [completeLitterMap_eq_of_flexible, NearLitterApprox.right_inv_litter]
-    · rw [NearLitterApprox.flexibleCompletion_litterPerm_domain_free (π A) A (hπf A)]
+  · refine' ⟨(BaseApprox.flexibleCompletion (π A) A).symm • L, _⟩
+    rw [completeLitterMap_eq_of_flexible, BaseApprox.right_inv_litter]
+    · rw [BaseApprox.flexibleCompletion_litterPerm_domain_free (π A) A (hπf A)]
       exact h
-    · exact NearLitterApprox.flexibleCompletion_symm_smul_flexible (π A) A (hπf A) L h
+    · exact BaseApprox.flexibleCompletion_symm_smul_flexible (π A) A (hπf A) L h
   · obtain ⟨⟨γ, ε, hε, C, rfl⟩, a, rfl⟩ := h
     obtain ⟨b, h'⟩ := ha _ a (Constrains.fuzzBot _ _ ⟨⟨γ, ε, hε, C, rfl⟩, a, rfl⟩)
     rw [← h']
@@ -179,19 +179,19 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
               ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩ ((preimageAction_lawful hπf).comp _)
               (preimageAction_comp_mapFlexible _))))⁻¹ • a = b
       · rw [inv_smul_eq_iff, ← ha]
-        rw [StructAction.hypothesisedAllowable]
+        rw [StructLAction.hypothesisedAllowable]
         refine' preimageAction_coherent_atom hπf (B.cons hδ) A b _ _ _
-          (StructAction.allowable_exactlyApproximates _ _ _ _)
+          (StructLAction.allowable_exactlyApproximates _ _ _ _)
         rw [ha]
         exact hac
       trans b
       · rw [map_inv]
         exact this
       · rw [map_inv, Tree.inv_apply, ← smul_eq_iff_eq_inv_smul, ← ha]
-        rw [StructAction.hypothesisedAllowable]
+        rw [StructLAction.hypothesisedAllowable]
         refine' (ihAction_coherent_atom (B.cons hδ) A b _ _
           ((ihAction_lawful hπf _).comp _) _
-          (StructAction.allowable_exactlyApproximates _ _ _ _)).symm
+          (StructLAction.allowable_exactlyApproximates _ _ _ _)).symm
         refine' Relation.TransGen.tail' _
           (Constrains.fuzz _ _ ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, _, rfl⟩ _ (smul_mem_support hc _))
         refine' Relation.reflTransGen_of_eq _
@@ -210,19 +210,19 @@ theorem completeLitterMap_surjective_extends (hπf : π.Free) (A : ExtendedIndex
               ⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩ ((preimageAction_lawful hπf).comp _)
               (preimageAction_comp_mapFlexible _))))⁻¹ • N = N'
       · rw [inv_smul_eq_iff, ← hN]
-        rw [StructAction.hypothesisedAllowable]
+        rw [StructLAction.hypothesisedAllowable]
         refine' preimageAction_coherent hπf (B.cons hδ) A N' _ _ _
-          (StructAction.allowable_exactlyApproximates _ _ _ _)
+          (StructLAction.allowable_exactlyApproximates _ _ _ _)
         rw [hN]
         exact hNc
       trans N'
       · rw [map_inv]
         exact this
       · rw [map_inv, Tree.inv_apply, ← smul_eq_iff_eq_inv_smul, ← hN]
-        rw [StructAction.hypothesisedAllowable]
+        rw [StructLAction.hypothesisedAllowable]
         refine' (ihAction_coherent hπf (B.cons hδ) A N' _ _
           ((ihAction_lawful hπf _).comp _) _
-          (StructAction.allowable_exactlyApproximates _ _ _ _)).symm
+          (StructLAction.allowable_exactlyApproximates _ _ _ _)).symm
         refine' Relation.TransGen.tail' _
           (Constrains.fuzz _ _ ⟨⟨γ, δ, ε, hδ, hε, hδε, B, rfl⟩, _, rfl⟩ _ (smul_mem_support hc _))
         refine' Relation.reflTransGen_of_eq _

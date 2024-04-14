@@ -65,7 +65,7 @@ instance : MulAction (StructPerm α) (Address α)
   mul_smul _ _ := by rintro ⟨A, a | N⟩ <;> rfl
 
 /-!
-We have a form of the next three lemmas for `StructPerm`, `NearLitterPerm`,
+We have a form of the next three lemmas for `StructPerm`, `BasePerm`,
 `Allowable`, and `NewAllowable`.
 -/
 
@@ -87,11 +87,11 @@ theorem smul_address_eq_smul_iff :
 
 end StructPerm
 
-namespace NearLitterPerm
+namespace BasePerm
 
-variable {π π' : NearLitterPerm} {c : Address ⊥}
+variable {π π' : BasePerm} {c : Address ⊥}
 
-instance : MulAction NearLitterPerm (Address ⊥)
+instance : MulAction BasePerm (Address ⊥)
     where
   smul π c := ⟨c.path, π • c.value⟩
   one_smul := by rintro ⟨A, a | N⟩ <;> rfl
@@ -113,7 +113,7 @@ theorem smul_address_eq_smul_iff :
   obtain ⟨A, x⟩ := c
   simp only [smul_address, Address.mk.injEq, true_and]
 
-end NearLitterPerm
+end BasePerm
 
 /-- A *support* is a function from an initial segment of `κ` to the type of addresses. -/
 abbrev Support (α : TypeIndex) := Enumeration (Address α)

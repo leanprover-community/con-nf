@@ -137,17 +137,17 @@ theorem fst_mem_transConstrained_of_mem {c d : Address β} {A : ExtendedIndex β
     exact fst_mem_transConstrained hN
   · exact fst_mem_transConstrained_of_mem_symmDiff (Or.inr ⟨h, ha⟩) hN
 
-theorem eq_of_sublitter_bijection_apply_eq {π : NearLitterApprox} {L₁ L₂ L₃ L₄ : Litter} {a b} :
+theorem eq_of_sublitter_bijection_apply_eq {π : BaseApprox} {L₁ L₂ L₃ L₄ : Litter} {a b} :
     ((π.largestSublitter L₁).equiv (π.largestSublitter L₂) a : Atom) =
         (π.largestSublitter L₃).equiv (π.largestSublitter L₄) b →
       L₁ = L₃ → L₂ = L₄ → (a : Atom) = b := by
   rintro h₁ rfl rfl
-  simp only [NearLitterApprox.coe_largestSublitter, SetLike.coe_eq_coe,
+  simp only [BaseApprox.coe_largestSublitter, SetLike.coe_eq_coe,
     EmbeddingLike.apply_eq_iff_eq] at h₁
   rw [h₁]
 
 noncomputable def constrainedAction (π : StructApprox β) (s : Set (Address β))
-    (hs : Small s) : StructAction β := fun B =>
+    (hs : Small s) : StructLAction β := fun B =>
   { atomMap := fun a =>
       ⟨∃ c : Address β, c ∈ s ∧ ⟨B, inl a⟩ ≤ c,
         fun _ => π.completeAtomMap B a⟩
@@ -171,7 +171,7 @@ noncomputable def constrainedAction (π : StructApprox β) (s : Set (Address β)
 
 -- TODO: Why is `by exact` needed?
 /-- An object like `ih_action` that can take two addresses. -/
-noncomputable def ihsAction (π : StructApprox β) (c d : Address β) : StructAction β :=
+noncomputable def ihsAction (π : StructApprox β) (c d : Address β) : StructLAction β :=
   fun B =>
   { atomMap := fun a => ⟨⟨B, inl a⟩ ∈ transConstrained c d,
       fun _ => π.completeAtomMap B a⟩

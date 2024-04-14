@@ -1,4 +1,4 @@
-import ConNF.FOA.Approximation.NearLitterApprox
+import ConNF.FOA.Approx.BaseApprox
 
 open Quiver Set Sum
 
@@ -17,7 +17,7 @@ variable [Params.{u}]
 /-- A `β`-structural approximation is a product that assigns a near-litter approximation to each
 `β`-extended index. -/
 abbrev StructApprox :=
-  Tree NearLitterApprox
+  Tree BaseApprox
 
 namespace StructApprox
 

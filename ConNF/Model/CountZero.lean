@@ -128,24 +128,24 @@ theorem eq_bot_zero_of_lt (γ β : TypeIndex) [iβ : LeLevel β] [iγ : LeLevel 
   · exact ⟨rfl, rfl⟩
   · cases (Params.Λ_zero_le γ).not_lt (coe_lt_coe.mp h)
 
-def toSemiallowable (π : NearLitterPerm) : Derivatives :=
+def toSemiallowable (π : BasePerm) : Derivatives :=
   fun β _ => eq_bot_of_ltLevel β ▸ (show Allowable ⊥ from π)
 
-theorem toSemiallowable_allowable (π : NearLitterPerm) :
+theorem toSemiallowable_allowable (π : BasePerm) :
     (toSemiallowable π).IsAllowable := by
   intro β _ γ _ hβγ
   cases eq_bot_of_ltLevel β
   cases eq_bot_of_ltLevel γ
 
-def toAllowable (π : NearLitterPerm) : NewAllowable :=
+def toAllowable (π : BasePerm) : NewAllowable :=
   ⟨toSemiallowable π, toSemiallowable_allowable π⟩
 
-def zeroDerivative : NewAllowable →* NearLitterPerm :=
+def zeroDerivative : NewAllowable →* BasePerm :=
   ⟨⟨fun ρ => ρ.val ⊥,
     by simp only [NewAllowable.coe_one, Derivatives.one_apply]⟩,
     by simp only [NewAllowable.coe_mul, Derivatives.mul_apply, forall_const]⟩
 
-instance {X : Type _} [MulAction NearLitterPerm X] : MulAction (Allowable (0 : Λ)) X :=
+instance {X : Type _} [MulAction BasePerm X] : MulAction (Allowable (0 : Λ)) X :=
   MulAction.compHom _ zeroDerivative
 
 instance {X : Type _} [i : MulAction NewAllowable X] : MulAction (Allowable (0 : Λ)) X :=
@@ -184,11 +184,11 @@ theorem zero_flexible {A : ExtendedIndex 0} {L : Litter} : Flexible A L := by
   cases path_eq_zeroPath A
   rintro (h | h)
 
-def toStructBehaviour (ξ : NearLitterBehaviour) : StructBehaviour 0 :=
+def toStructNLAction (ξ : BaseNLAction) : StructNLAction 0 :=
   fun _ => ξ
 
-theorem toStructBehaviour_coherentDom (ξ : NearLitterBehaviour) :
-    (toStructBehaviour ξ).CoherentDom := by
+theorem toStructNLAction_coherentDom (ξ : BaseNLAction) :
+    (toStructNLAction ξ).CoherentDom := by
   constructor
   case mapFlexible =>
     intros
@@ -203,11 +203,11 @@ theorem toStructBehaviour_coherentDom (ξ : NearLitterBehaviour) :
     intro γ _ A δ _
     cases not_ltLevel δ
 
-theorem toStructBehaviour_coherent (ξ : NearLitterBehaviour) :
-    (toStructBehaviour ξ).Coherent := by
+theorem toStructNLAction_coherent (ξ : BaseNLAction) :
+    (toStructNLAction ξ).Coherent := by
   constructor
   case toCoherentDom =>
-    exact toStructBehaviour_coherentDom ξ
+    exact toStructNLAction_coherentDom ξ
   case coherent_coe =>
     intro γ _ A δ _
     cases not_ltLevel δ
@@ -216,10 +216,10 @@ theorem toStructBehaviour_coherent (ξ : NearLitterBehaviour) :
     cases not_ltLevel δ
 
 /-- An instance of the freedom of action theorem for type zero. -/
-theorem zero_foa (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) :
-    ∃ π : NearLitterPerm, ξ.Approximates π := by
+theorem zero_foa (ξ : BaseNLAction) (hξ : ξ.Lawful) :
+    ∃ π : BasePerm, ξ.Approximates π := by
   letI : LeLevel (0 : Λ) := ⟨WithBot.coe_le_coe.mpr (Params.Λ_zero_le _)⟩
-  have := (toStructBehaviour ξ).freedom_of_action ?_ (toStructBehaviour_coherent ξ)
+  have := (toStructNLAction ξ).freedom_of_action ?_ (toStructNLAction_coherent ξ)
   · obtain ⟨ρ, hρ⟩ := this
     exact ⟨ρ.val ⊥, hρ zeroPath⟩
   · intro
@@ -422,7 +422,7 @@ theorem convertNearLitter_dom_small :
   cases this
   rfl
 
-noncomputable def convert : NearLitterBehaviour :=
+noncomputable def convert : BaseNLAction :=
   {
     atomMap := PFun.ofGraph (ConvertAtom S T) (convertAtom_subsingleton hST)
     nearLitterMap := PFun.ofGraph (ConvertNearLitter S T) (convertNearLitter_subsingleton hT hST)
@@ -711,7 +711,7 @@ theorem disjointSupport_supports (S : Set (Address 0)) (hS : Small S)
   change inr (_ • _) = inr _
   rw [inr.injEq]
   refine NearLitter.ext ?_
-  rw [NearLitterPerm.smul_nearLitter_coe]
+  rw [BasePerm.smul_nearLitter_coe]
   ext a : 1
   constructor
   · intro ha
@@ -723,7 +723,7 @@ theorem disjointSupport_supports (S : Set (Address 0)) (hS : Small S)
     · have := hρ (a := ⟨zeroPath, inr (disjointNL S hS N)⟩) ?_
       · simp only [smul_inr, inr.injEq] at this
         have := congr_arg SetLike.coe this
-        rw [NearLitterPerm.smul_nearLitter_coe, smul_eq_iff_eq_inv_smul] at this
+        rw [BasePerm.smul_nearLitter_coe, smul_eq_iff_eq_inv_smul] at this
         have := (Set.ext_iff.mp this a).mp ⟨ha, ha'⟩
         rw [mem_smul_set_iff_inv_smul_mem, inv_inv] at this
         exact this.1
@@ -738,7 +738,7 @@ theorem disjointSupport_supports (S : Set (Address 0)) (hS : Small S)
     · have := hρ (a := ⟨zeroPath, inr (disjointNL S hS N)⟩) ?_
       · simp only [smul_inr, inr.injEq] at this
         have := congr_arg SetLike.coe this
-        rw [NearLitterPerm.smul_nearLitter_coe] at this
+        rw [BasePerm.smul_nearLitter_coe] at this
         have := (Set.ext_iff.mp this _).mpr ⟨ha, ha'⟩
         rw [mem_smul_set_iff_inv_smul_mem] at this
         exact this.1

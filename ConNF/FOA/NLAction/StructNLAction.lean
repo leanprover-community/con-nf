@@ -1,4 +1,4 @@
-import ConNF.FOA.Behaviour.NearLitterBehaviour
+import ConNF.FOA.NLAction.BaseNLAction
 
 open Cardinal Quiver Set Sum WithBot
 
@@ -16,20 +16,20 @@ variable [Params.{u}] {β : TypeIndex}
 
 /-- A `β`-structural action is a product that assigns a near-litter action to each `β`-extended
 index. -/
-abbrev StructBehaviour :=
-  Tree NearLitterBehaviour
+abbrev StructNLAction :=
+  Tree BaseNLAction
 
-namespace StructBehaviour
+namespace StructNLAction
 
-def Lawful (ξ : StructBehaviour β) : Prop :=
+def Lawful (ξ : StructNLAction β) : Prop :=
   ∀ A, (ξ A).Lawful
 
-noncomputable def withLitters (ξ : StructBehaviour β) (hξ : ξ.Lawful) : StructBehaviour β :=
+noncomputable def withLitters (ξ : StructNLAction β) (hξ : ξ.Lawful) : StructNLAction β :=
   fun A => (ξ A).withLitters (hξ A)
 
-theorem withLitters_lawful (ξ : StructBehaviour β) (hξ : ξ.Lawful) : (ξ.withLitters hξ).Lawful :=
+theorem withLitters_lawful (ξ : StructNLAction β) (hξ : ξ.Lawful) : (ξ.withLitters hξ).Lawful :=
   fun A => (ξ A).withLitters_lawful (hξ A)
 
-end StructBehaviour
+end StructNLAction
 
 end ConNF

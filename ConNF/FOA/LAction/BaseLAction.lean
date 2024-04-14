@@ -1,6 +1,6 @@
 import ConNF.FOA.Basic.CompleteOrbit
 import ConNF.FOA.Basic.Constrains
-import ConNF.FOA.Approximation.NearLitterApprox
+import ConNF.FOA.Approx.BaseApprox
 
 open Cardinal Quiver Set Sum WithBot
 
@@ -34,7 +34,7 @@ function from litters to near-litters, both of which have small domain.
 The image of a litter under the `litter_map` should be interpreted as the intended *precise* image
 of this litter under an allowable permutation. -/
 @[ext]
-structure NearLitterAction where
+structure BaseLAction where
   atomMap : Atom →. Atom
   litterMap : Litter →. NearLitter
   atomMap_dom_small : Small atomMap.Dom
@@ -43,16 +43,16 @@ structure NearLitterAction where
 /-- A near litter action in which the atom and litter maps are injective (in suitable senses) and
 cohere in the sense that images of atoms in litters are mapped to atoms inside the corresponding
 near-litters. -/
-structure NearLitterAction.Lawful (φ : NearLitterAction) : Prop where
+structure BaseLAction.Lawful (φ : BaseLAction) : Prop where
   atomMap_injective : ∀ ⦃a b⦄ (ha hb),
     (φ.atomMap a).get ha = (φ.atomMap b).get hb → a = b
   litterMap_injective : ∀ ⦃L₁ L₂ : Litter⦄ (hL₁ hL₂),
     (((φ.litterMap L₁).get hL₁ : Set Atom) ∩ (φ.litterMap L₂).get hL₂).Nonempty → L₁ = L₂
   atom_mem : ∀ (a : Atom) (ha L hL), a.1 = L ↔ (φ.atomMap a).get ha ∈ (φ.litterMap L).get hL
 
-namespace NearLitterAction
+namespace BaseLAction
 
-variable (φ : NearLitterAction)
+variable (φ : BaseLAction)
 
 /-- A litter that is not allowed to be used as a sandbox because it appears somewhere that
 we need to preserve. -/
@@ -190,7 +190,7 @@ instance {α β : Type _} : PartialOrder (α →. β)
     intro ha _
     exact h₁.get_eq a ha
 
-instance : PartialOrder NearLitterAction
+instance : PartialOrder BaseLAction
     where
   le π π' := π.atomMap ≤ π'.atomMap ∧ π.litterMap ≤ π'.litterMap
   le_refl π := ⟨le_rfl, le_rfl⟩
@@ -201,7 +201,7 @@ instance : PartialOrder NearLitterAction
     exact le_antisymm h₁.1 h₂.1
     exact le_antisymm h₁.2 h₂.2
 
-theorem Lawful.le {φ ψ : NearLitterAction} (h : φ.Lawful) (hψ : ψ ≤ φ) : ψ.Lawful :=
+theorem Lawful.le {φ ψ : BaseLAction} (h : φ.Lawful) (hψ : ψ ≤ φ) : ψ.Lawful :=
   { atomMap_injective := by
       intro a b ha hb hab
       refine' h.atomMap_injective (hψ.1.dom_of_dom a ha) (hψ.1.dom_of_dom b hb) _
@@ -292,7 +292,7 @@ noncomputable def flexibleLitterPartialPerm (hφ : φ.Lawful) (A : ExtendedIndex
     φ.aleph0_le_not_bannedLitter_and_flexible φ.disjoint_dom_inter_flexible_not_bannedLitter
     (φ.roughLitterMapOrElse_injOn_dom_inter_flexible hφ)
 
-theorem flexibleLitterPartialPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
+theorem flexibleLitterPartialPerm_apply_eq {φ : BaseLAction} {hφ : φ.Lawful} (L : Litter)
     (hL₁ : L ∈ φ.litterMap.Dom) (hL₂ : Flexible A L) :
     φ.flexibleLitterPartialPerm hφ A L = φ.roughLitterMapOrElse L :=
   PartialPerm.complete_apply_eq _ _ _ ⟨hL₁, hL₂⟩
@@ -312,6 +312,6 @@ theorem flexibleLitterPartialPerm_domain_small (hφ : φ.Lawful) :
     exact φ.litterMap_dom_small.mono (inter_subset_left _ _)
     exact (φ.litterMap_dom_small.mono (inter_subset_left _ _)).image
 
-end NearLitterAction
+end BaseLAction
 
 end ConNF

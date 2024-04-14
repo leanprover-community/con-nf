@@ -1,6 +1,6 @@
 import ConNF.FOA.Basic.Flexible
-import ConNF.FOA.Approximation.StructApprox
-import ConNF.FOA.Action.Complete
+import ConNF.FOA.Approx.StructApprox
+import ConNF.FOA.LAction.Complete
 
 open Cardinal Quiver Set Sum WithBot
 
@@ -18,25 +18,25 @@ variable [Params.{u}]
 
 /-- A `β`-structural action is a product that assigns a near-litter action to each `β`-extended
 index. -/
-abbrev StructAction :=
-  Tree NearLitterAction
+abbrev StructLAction :=
+  Tree BaseLAction
 
-namespace StructAction
+namespace StructLAction
 
-def Lawful {β : TypeIndex} (φ : StructAction β) : Prop :=
+def Lawful {β : TypeIndex} (φ : StructLAction β) : Prop :=
   ∀ B, (φ B).Lawful
 
 /-- This structural action maps flexible litters to flexible litters. -/
-def MapFlexible [Level] [BasePositions] [FOAAssumptions] {β : Λ} (φ : StructAction β) :
+def MapFlexible [Level] [BasePositions] [FOAAssumptions] {β : Λ} (φ : StructLAction β) :
     Prop :=
   ∀ (B) (L : Litter) (hL), Flexible B L → Flexible B (((φ B).litterMap L).get hL).1
 
 section Precise
 
-def Precise {β : TypeIndex} (φ : StructAction β) : Prop :=
+def Precise {β : TypeIndex} (φ : StructLAction β) : Prop :=
   ∀ B, (φ B).Precise
 
-variable [Level] [BasePositions] [FOAAssumptions] {β : Λ} (φ : StructAction β)
+variable [Level] [BasePositions] [FOAAssumptions] {β : Λ} (φ : StructLAction β)
 
 noncomputable def complete (hφ : φ.Lawful) : StructApprox β := fun B => (φ B).complete (hφ B) B
 
@@ -69,25 +69,25 @@ end Precise
 
 variable [Level] [BasePositions] [FOAAssumptions] {β : Λ}
 
-instance {β : TypeIndex} : PartialOrder (StructAction β)
+instance {β : TypeIndex} : PartialOrder (StructLAction β)
     where
   le φ ψ := ∀ B, φ B ≤ ψ B
   le_refl φ B := le_rfl
   le_trans φ ψ χ h₁ h₂ B := (h₁ B).trans (h₂ B)
   le_antisymm φ ψ h₁ h₂ := funext fun B => le_antisymm (h₁ B) (h₂ B)
 
-theorem Lawful.le {β : TypeIndex} {φ ψ : StructAction β} (h : φ.Lawful) (hψ : ψ ≤ φ) : ψ.Lawful :=
+theorem Lawful.le {β : TypeIndex} {φ ψ : StructLAction β} (h : φ.Lawful) (hψ : ψ ≤ φ) : ψ.Lawful :=
   fun B => (h B).le (hψ B)
 
-theorem le_comp {β γ : TypeIndex} {φ ψ : StructAction β} (h : φ ≤ ψ) (A : Path β γ) :
+theorem le_comp {β γ : TypeIndex} {φ ψ : StructLAction β} (h : φ ≤ ψ) (A : Path β γ) :
     φ.comp A ≤ ψ.comp A := fun B => h (A.comp B)
 
-theorem Lawful.comp {β γ : TypeIndex} {φ : StructAction β} (h : φ.Lawful) (A : Path β γ) :
+theorem Lawful.comp {β γ : TypeIndex} {φ : StructLAction β} (h : φ.Lawful) (A : Path β γ) :
     Lawful (φ.comp A) := fun B =>
   { atomMap_injective := (h (A.comp B)).atomMap_injective
     litterMap_injective := (h (A.comp B)).litterMap_injective
     atom_mem := (h (A.comp B)).atom_mem }
 
-end StructAction
+end StructLAction
 
 end ConNF

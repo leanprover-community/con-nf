@@ -584,7 +584,7 @@ theorem foaData_tangle_lt_equiv_fuzz (α : Λ) (ihs : (β : Λ) → β < α → 
 theorem foaData_allowable_bot (α : Λ) (ihs : (β : Λ) → β < α → IH β) :
     letI : Level := ⟨α⟩
     letI : FOAData := buildStepFOAData α ihs
-    Allowable ⊥ = NearLitterPerm :=
+    Allowable ⊥ = BasePerm :=
   rfl
 
 theorem foaData_allowable_lt' (α : Λ) (ihs : (β : Λ) → β < α → IH β) (β : TypeIndex) (hβ : β < α) :
@@ -770,7 +770,7 @@ structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
         ((ih α le_rfl).allowableToStructPerm ρ) =
         (ih β hβ.le).allowableToStructPerm (f ρ)
   canConsBot :
-    ∃ f : (ih α le_rfl).Allowable →* NearLitterPerm,
+    ∃ f : (ih α le_rfl).Allowable →* BasePerm,
     ∀ ρ : (ih α le_rfl).Allowable,
       (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = f ρ
   pos_lt_pos_atom (t : (ih α le_rfl).Tangle)
@@ -802,7 +802,7 @@ structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
     fuzz'Bot (ih γ hγ.le)
       ((ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) • t)
   allowable_of_smulFuzz
-    (ρs : ∀ (β : Λ) (hβ : β < α), (ih β hβ.le).Allowable) (π : NearLitterPerm)
+    (ρs : ∀ (β : Λ) (hβ : β < α), (ih β hβ.le).Allowable) (π : BasePerm)
     (hρs : ∀ (β : Λ) (hβ : β < α) (γ : Λ) (hγ : γ < α) (hβγ : (β : TypeIndex) ≠ γ)
       (t : (ih β hβ.le).Tangle),
       (ih γ hγ.le).allowableToStructPerm (ρs γ hγ) (Hom.toPath (bot_lt_coe _)) •
@@ -818,7 +818,7 @@ structure IHProp (α : Λ) (ih : ∀ β ≤ α, IH β) : Prop where
         Tree.comp (Hom.toPath (coe_lt_coe.mpr hβ)) ((ih α le_rfl).allowableToStructPerm ρ) =
         (ih β hβ.le).allowableToStructPerm (fαβ ρ)),
       fαβ ρ = ρs β hβ) ∧
-    (∀ (fα : (ih α le_rfl).Allowable → NearLitterPerm)
+    (∀ (fα : (ih α le_rfl).Allowable → BasePerm)
       (_hfα : ∀ ρ : (ih α le_rfl).Allowable,
         (ih α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = fα ρ),
       fα ρ = π)
@@ -1600,7 +1600,7 @@ theorem cons_step_spec (α : Λ) (ihs : (β : Λ) → β < α → IH β)
 
 def consBot_step (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ))) :
-    (buildStep α ihs h).Allowable →* NearLitterPerm :=
+    (buildStep α ihs h).Allowable →* BasePerm :=
   ⟨⟨fun ρ => ρ.val ⊥, rfl⟩, fun _ _ => rfl⟩
 
 theorem consBot_step_spec (α : Λ) (ihs : (β : Λ) → β < α → IH β)
@@ -1660,7 +1660,7 @@ theorem cons_fun_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β)
 
 theorem consBot_fun_eq (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
-    (fα : (buildStep α ihs h).Allowable → NearLitterPerm)
+    (fα : (buildStep α ihs h).Allowable → BasePerm)
     (hfα : ∀ ρ, (buildStep α ihs h).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = fα ρ) :
     fα = consBot_step α ihs h := by
   funext ρ
@@ -1729,7 +1729,7 @@ theorem smul_fuzz_bot (α : Λ) (ihs : (β : Λ) → β < α → IH β)
 
 theorem allowable_of_smulFuzz_step' (α : Λ) (ihs : (β : Λ) → β < α → IH β)
     (h : ∀ (β : Λ) (hβ : β < α), IHProp β (fun γ hγ => ihs γ (hγ.trans_lt hβ)))
-    (ρs : ∀ (β : Λ) (hβ : β < α), (buildStepFn α ihs h β hβ.le).Allowable) (π : NearLitterPerm)
+    (ρs : ∀ (β : Λ) (hβ : β < α), (buildStepFn α ihs h β hβ.le).Allowable) (π : BasePerm)
     (hρs : ∀ (β : Λ) (hβ : β < α) (γ : Λ) (hγ : γ < α) (hβγ : (β : TypeIndex) ≠ γ)
       (t : (buildStepFn α ihs h β hβ.le).Tangle),
       (buildStepFn α ihs h γ hγ.le).allowableToStructPerm (ρs γ hγ) (Hom.toPath (bot_lt_coe _)) •
@@ -1747,7 +1747,7 @@ theorem allowable_of_smulFuzz_step' (α : Λ) (ihs : (β : Λ) → β < α → I
           ((buildStepFn α ihs h α le_rfl).allowableToStructPerm ρ) =
         (buildStepFn α ihs h β hβ.le).allowableToStructPerm (fαβ ρ)),
       fαβ ρ = ρs β hβ) ∧
-    (∀ (fα : (buildStepFn α ihs h α le_rfl).Allowable → NearLitterPerm)
+    (∀ (fα : (buildStepFn α ihs h α le_rfl).Allowable → BasePerm)
       (_hfα : ∀ ρ : (buildStepFn α ihs h α le_rfl).Allowable,
         (buildStepFn α ihs h α le_rfl).allowableToStructPerm ρ (Hom.toPath (bot_lt_coe _)) = fα ρ),
       fα ρ = π) := by

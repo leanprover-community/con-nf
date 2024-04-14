@@ -135,7 +135,7 @@ theorem smul_fuzz {β : Λ} [LeLevel β] {γ : Λ} [LtLevel γ] {δ : Λ} [LtLev
 
 theorem allowable_of_smulFuzz (β : Λ) [iβ : LeLevel β]
     (ρs : ∀ γ : Λ, [LtLevel γ] → (γ : TypeIndex) < β → foaAllowable γ)
-    (π : NearLitterPerm) :
+    (π : BasePerm) :
     (∀ (γ : Λ) [LtLevel γ] (δ : Λ) [LtLevel δ]
         (hγ : (γ : TypeIndex) < β) (hδ : (δ : TypeIndex) < β) (hγδ : (γ : TypeIndex) ≠ δ)
         (t : Tangle γ),

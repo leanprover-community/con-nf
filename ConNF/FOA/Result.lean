@@ -27,7 +27,7 @@ theorem completeLitterPerm_apply (hπf : π.Free) (A : ExtendedIndex β) (L : Li
     completeLitterPerm hπf A L = π.completeLitterMap A L :=
   rfl
 
-noncomputable def completeNearLitterPerm (hπf : π.Free) (A : ExtendedIndex β) : NearLitterPerm
+noncomputable def completeBasePerm (hπf : π.Free) (A : ExtendedIndex β) : BasePerm
     where
   atomPerm := completeAtomPerm hπf A
   litterPerm := completeLitterPerm hπf A
@@ -42,32 +42,32 @@ noncomputable def completeNearLitterPerm (hπf : π.Free) (A : ExtendedIndex β)
     simp only [NearLitter.isNearLitter, completeNearLitterMap_fst_eq']
     rfl
 
-theorem completeNearLitterPerm_smul_atom (hπf : π.Free) (A : ExtendedIndex β) (a : Atom) :
-    completeNearLitterPerm hπf A • a = π.completeAtomMap A a :=
+theorem completeBasePerm_smul_atom (hπf : π.Free) (A : ExtendedIndex β) (a : Atom) :
+    completeBasePerm hπf A • a = π.completeAtomMap A a :=
   rfl
 
-theorem completeNearLitterPerm_smul_litter (hπf : π.Free) (A : ExtendedIndex β) (L : Litter) :
-    completeNearLitterPerm hπf A • L = π.completeLitterMap A L :=
+theorem completeBasePerm_smul_litter (hπf : π.Free) (A : ExtendedIndex β) (L : Litter) :
+    completeBasePerm hπf A • L = π.completeLitterMap A L :=
   rfl
 
-theorem completeNearLitterPerm_smul_nearLitter (hπf : π.Free) (A : ExtendedIndex β)
-    (N : NearLitter) : completeNearLitterPerm hπf A • N = π.completeNearLitterMap A N := by
+theorem completeBasePerm_smul_nearLitter (hπf : π.Free) (A : ExtendedIndex β)
+    (N : NearLitter) : completeBasePerm hπf A • N = π.completeNearLitterMap A N := by
   refine' SetLike.coe_injective _
-  rw [completeNearLitterMap_coe hπf, NearLitterPerm.smul_nearLitter_coe]
+  rw [completeNearLitterMap_coe hπf, BasePerm.smul_nearLitter_coe]
   rfl
 
 def AllowableBelow (hπf : π.Free) (γ : TypeIndex) [LeLevel γ] (A : Path (β : TypeIndex) γ) : Prop :=
   ∃ ρ : Allowable γ,
     ∀ B : ExtendedIndex γ,
       Tree.ofBot (Tree.comp B (Allowable.toStructPerm ρ)) =
-        completeNearLitterPerm hπf (A.comp B)
+        completeBasePerm hπf (A.comp B)
 
 @[simp]
 theorem ofBot_toStructPerm (π : Allowable ⊥) : Tree.ofBot (Allowable.toStructPerm π) = π := by
   rfl
 
 theorem allowableBelow_bot (hπf : π.Free) (A : ExtendedIndex β) : AllowableBelow hπf ⊥ A := by
-  refine' ⟨completeNearLitterPerm hπf A, _⟩
+  refine' ⟨completeBasePerm hπf A, _⟩
   intro B
   obtain B | ⟨B, h⟩ := B
   · rfl
@@ -111,14 +111,14 @@ theorem ConNF.StructApprox.extracted_1'
   (ρs : (δ : TypeIndex) → [LtLevel δ] → δ < γ → Allowable δ)
   (hρ : ∀ (δ : TypeIndex) [LtLevel δ] (h : δ < γ) (B : ExtendedIndex δ),
     Tree.ofBot (Tree.comp B (Allowable.toStructPerm (ρs δ h))) =
-      completeNearLitterPerm hπf ((A.cons h).comp B))
+      completeBasePerm hπf ((A.cons h).comp B))
   (ε : Λ) [LtLevel ε] (hε : (ε : TypeIndex) < γ) (a : Atom) :
   Allowable.toStructPerm (ρs ε hε) (Hom.toPath (bot_lt_coe _)) • fuzz (bot_ne_coe (a := ε)) a =
-    fuzz (bot_ne_coe (a := ε)) (NearLitterPerm.ofBot (ρs ⊥ (bot_lt_coe _)) • a) := by
+    fuzz (bot_ne_coe (a := ε)) (BasePerm.ofBot (ρs ⊥ (bot_lt_coe _)) • a) := by
   have := hρ ε hε (Path.nil.cons (bot_lt_coe _))
   simp only [Path.comp_cons, Path.comp_nil, Tree.comp_bot, Tree.ofBot_toBot, Hom.toPath] at this
   erw [this]
-  rw [completeNearLitterPerm_smul_litter]
+  rw [completeBasePerm_smul_litter]
   refine' (completeLitterMap_eq_of_inflexibleBot ⟨⟨γ, ε, hε, A, rfl⟩, a, rfl⟩).trans _
   refine' congr_arg _ _
   specialize hρ ⊥ (bot_lt_coe _) Path.nil
@@ -132,7 +132,7 @@ theorem ConNF.StructApprox.extracted_2'
   (ρs : (δ : TypeIndex) → [LtLevel δ] → δ < γ → Allowable δ)
   (hρ : ∀ (δ : TypeIndex) [LtLevel δ] (h : δ < γ) (B : ExtendedIndex δ),
     Tree.ofBot (Tree.comp B (Allowable.toStructPerm (ρs δ h))) =
-      completeNearLitterPerm hπf ((A.cons h).comp B))
+      completeBasePerm hπf ((A.cons h).comp B))
   (δ : Λ) [LtLevel δ] (ε : Λ) [LtLevel ε] (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < γ)
   (hδε : (δ : TypeIndex) ≠ ε) (t : Tangle δ) :
   Allowable.toStructPerm (ρs ε hε) (Hom.toPath (bot_lt_coe _)) •
@@ -142,7 +142,7 @@ theorem ConNF.StructApprox.extracted_2'
   simp only [Tree.comp_bot, Tree.ofBot_toBot, Path.comp_cons,
     Path.comp_nil] at this
   erw [this]
-  rw [completeNearLitterPerm_smul_litter]
+  rw [completeBasePerm_smul_litter]
   refine' (completeLitterMap_eq_of_inflexibleCoe
     ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, rfl⟩
     ((ihAction_lawful hπf _).comp _) (ihAction_comp_mapFlexible hπf _ _)).trans _
@@ -164,7 +164,7 @@ theorem ConNF.StructApprox.extracted_2'
       (Relation.TransGen.single <| Constrains.fuzz _ _
         ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, rfl⟩ _ hN)
       ((ihAction_lawful hπf _).comp _) ?_ ?_
-    rw [← completeNearLitterPerm_smul_nearLitter hπf] at this
+    rw [← completeBasePerm_smul_nearLitter hπf] at this
     · exact this.symm.trans (congr_arg (fun π => π • N) (hρ δ hδ B)).symm
     · exact (ihAction π.foaHypothesis).hypothesisedAllowable_exactlyApproximates
         ⟨γ, δ, ε, _, _, _, _, rfl⟩ _ _
@@ -216,17 +216,17 @@ noncomputable def completeAllowable (hπf : π.Free) : Allowable β :=
   (allowableBelow_all hπf β Path.nil).choose
 
 theorem completeAllowable_comp (hπf : π.Free) :
-    Allowable.toStructPerm (completeAllowable hπf) = completeNearLitterPerm hπf := by
+    Allowable.toStructPerm (completeAllowable hπf) = completeBasePerm hπf := by
   funext A
   have := (allowableBelow_all hπf β Path.nil).choose_spec A
   rw [Path.nil_comp] at this
   exact this
 
 theorem complete_exception_mem (hπf : π.Free) (A : ExtendedIndex β) (a : Atom)
-    (ha : (completeNearLitterPerm hπf A).IsException a) : a ∈ (π A).atomPerm.domain := by
-  unfold NearLitterPerm.IsException at ha
-  simp only [mem_litterSet, completeNearLitterPerm_smul_atom,
-    completeNearLitterPerm_smul_litter] at ha
+    (ha : (completeBasePerm hπf A).IsException a) : a ∈ (π A).atomPerm.domain := by
+  unfold BasePerm.IsException at ha
+  simp only [mem_litterSet, completeBasePerm_smul_atom,
+    completeBasePerm_smul_litter] at ha
   obtain ha | ha := ha
   · have := completeNearLitterMap_toNearLitter_eq (π := π) A a.1
     rw [completeNearLitterMap_coe hπf, Set.ext_iff] at this
@@ -238,7 +238,7 @@ theorem complete_exception_mem (hπf : π.Free) (A : ExtendedIndex β) (a : Atom
     cases completeAtomMap_injective hπf A hb₃
     exact hb₂
   · obtain ⟨a, rfl⟩ := completeAtomMap_surjective hπf A a
-    rw [eq_inv_smul_iff, ← completeNearLitterPerm_smul_atom hπf, inv_smul_smul] at ha
+    rw [eq_inv_smul_iff, ← completeBasePerm_smul_atom hπf, inv_smul_smul] at ha
     have := completeNearLitterMap_toNearLitter_eq (π := π) A a.1
     rw [completeNearLitterMap_coe hπf, Set.ext_iff] at this
     have := (this (π.completeAtomMap A a)).mp ⟨_, rfl, rfl⟩
@@ -255,12 +255,12 @@ theorem completeAllowable_exactlyApproximates (hπf : π.Free) :
   intro A
   refine' ⟨⟨_, _⟩, _⟩
   · intro a ha
-    rw [completeAllowable_comp, completeNearLitterPerm_smul_atom,
+    rw [completeAllowable_comp, completeBasePerm_smul_atom,
       completeAtomMap_eq_of_mem_domain ha]
   · intro L hL
-    rw [completeAllowable_comp, completeNearLitterPerm_smul_litter,
+    rw [completeAllowable_comp, completeBasePerm_smul_litter,
       completeLitterMap_eq_of_flexible (hπf A L hL),
-      NearLitterApprox.flexibleCompletion_smul_of_mem_domain _ A L hL]
+      BaseApprox.flexibleCompletion_smul_of_mem_domain _ A L hL]
     rfl
   · intro a ha
     rw [completeAllowable_comp] at ha

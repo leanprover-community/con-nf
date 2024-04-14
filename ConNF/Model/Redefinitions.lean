@@ -219,7 +219,7 @@ theorem cons'Coe_spec {α β : Λ} (hβ : (β : TypeIndex) < α) (ρ : Allowable
   rfl
 
 def cons'Bot {α : Λ} :
-    Allowable α → NearLitterPerm :=
+    Allowable α → BasePerm :=
   ((MainInduction.buildCumul α).prop α le_rfl).canConsBot.choose
 
 theorem cons'Bot_spec {α : Λ} (ρ : Allowable α) :

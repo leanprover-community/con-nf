@@ -1,4 +1,4 @@
-import ConNF.FOA.Action.NearLitterAction
+import ConNF.FOA.LAction.BaseLAction
 
 open Cardinal Quiver Set Sum WithBot
 
@@ -15,9 +15,9 @@ variable [Params.{u}]
 TODO: Rename the gadgetry created in this file.
 -/
 
-namespace NearLitterAction
+namespace BaseLAction
 
-variable (φ : NearLitterAction)
+variable (φ : BaseLAction)
 
 noncomputable def preimageLitter : Litter :=
   φ.not_bannedLitter_nonempty.some
@@ -299,7 +299,7 @@ theorem supportedActionAtomMapCore_mem (hφ : φ.Lawful) (a : Atom)
       refine' hφ.litterMap_injective hL' hL ⟨_, _, h⟩
       exact (φ.mappedOutsideEquiv _ _ ⟨a, ha⟩).prop.mem_map
 
-noncomputable def fillAtomRange : NearLitterAction
+noncomputable def fillAtomRange : BaseLAction
     where
   atomMap := φ.supportedActionAtomMapCore
   litterMap := φ.litterMap
@@ -368,6 +368,6 @@ theorem fillAtomRange_symmDiff_subset_ran (hφ : φ.Lawful) (L : Litter)
           ((φ.mappedOutsideEquiv L' hL').symm _).prop).trans _
         simp only [Subtype.coe_eta, Equiv.apply_symm_apply, Subtype.coe_mk]
 
-end NearLitterAction
+end BaseLAction
 
 end ConNF

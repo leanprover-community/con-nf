@@ -658,7 +658,7 @@ theorem raiseRaise_inflexibleCoe₃ {i : κ}
     have := h₁'.symm.trans h₂'
     simp only [smul_inr, inr.injEq] at this
     have := congr_arg Sigma.fst this
-    simp only [NearLitterPerm.smul_nearLitter_fst] at this
+    simp only [BasePerm.smul_nearLitter_fst] at this
     rw [← raiseIndex_injective _ (congr_arg Address.path h₁)]
     exact this.symm
 
@@ -706,7 +706,7 @@ theorem raiseRaise_inflexibleBot₃ {i : κ}
     have := h₁'.symm.trans h₂'
     simp only [smul_inr, inr.injEq] at this
     have := congr_arg Sigma.fst this
-    simp only [NearLitterPerm.smul_nearLitter_fst] at this
+    simp only [BasePerm.smul_nearLitter_fst] at this
     rw [← raiseIndex_injective _ (congr_arg Address.path h₁)]
     exact this.symm
 
@@ -827,13 +827,13 @@ theorem raiseRaise_atom_spec₂_raise
     rw [inv_smul_eq_iff] at this
     rw [this]
     cases hN'.symm.trans hj₂
-    rw [← NearLitterPerm.NearLitter.mem_snd_iff, ← Set.mem_inv_smul_set_iff,
-      ← NearLitterPerm.smul_nearLitter_snd]
+    rw [← BasePerm.NearLitter.mem_snd_iff, ← Set.mem_inv_smul_set_iff,
+      ← BasePerm.smul_nearLitter_snd]
     have := hρS ⟨A, inr N⟩ ⟨_, _, hj₂.symm⟩
     simp only [Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr, Address.mk.injEq,
       inr.injEq, true_and] at this
     rw [← this]
-    rw [NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
+    rw [BasePerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
     exact hN
   · rw [raiseRaise_f_eq₂ hj hj'] at hj₂ hN'
     have h₁ := raise_injective' hj₂
@@ -842,9 +842,9 @@ theorem raiseRaise_atom_spec₂_raise
     simp only [h₁, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr, Address.mk.injEq,
       inr.injEq, ← smul_eq_iff_eq_inv_smul, true_and] at h₂
     rw [← h₂, this, inv_inv]
-    rw [smul_smul, smul_smul, ← NearLitterPerm.NearLitter.mem_snd_iff,
-      NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff,
-      NearLitterPerm.NearLitter.mem_snd_iff]
+    rw [smul_smul, smul_smul, ← BasePerm.NearLitter.mem_snd_iff,
+      BasePerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff,
+      BasePerm.NearLitter.mem_snd_iff]
     exact hN
   · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ hN'
     have h₁ := raise_injective' hj₂
@@ -853,9 +853,9 @@ theorem raiseRaise_atom_spec₂_raise
     simp only [h₁, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr, Address.mk.injEq,
       inr.injEq, ← smul_eq_iff_eq_inv_smul, true_and] at h₂
     rw [← h₂, this, inv_inv]
-    rw [smul_smul, smul_smul, ← NearLitterPerm.NearLitter.mem_snd_iff,
-      NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff,
-      NearLitterPerm.NearLitter.mem_snd_iff]
+    rw [smul_smul, smul_smul, ← BasePerm.NearLitter.mem_snd_iff,
+      BasePerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff,
+      BasePerm.NearLitter.mem_snd_iff]
     exact hN
 
 theorem raiseRaise_atom_spec₂
@@ -889,9 +889,9 @@ theorem raiseRaise_atom_spec₂
         simp only [Allowable.smul_address_eq_smul_iff, map_inv, Tree.inv_apply, smul_inl,
           inl.injEq] at this
         rw [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul,
-          ← NearLitterPerm.NearLitter.mem_snd_iff,
-          NearLitterPerm.smul_nearLitter_snd, Set.mem_smul_set_iff_inv_smul_mem,
-          ← this, NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
+          ← BasePerm.NearLitter.mem_snd_iff,
+          BasePerm.smul_nearLitter_snd, Set.mem_smul_set_iff_inv_smul_mem,
+          ← this, BasePerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
         exact hN
     · rw [raiseRaise_f_eq₃ hj (by exact hj')] at hj₂ ⊢
       obtain ⟨A, rfl⟩ := raiseIndex_of_raise_eq hj₂
@@ -906,9 +906,9 @@ theorem raiseRaise_atom_spec₂
         simp only [Allowable.smul_address_eq_smul_iff, map_inv, Tree.inv_apply, smul_inl,
           inl.injEq] at this
         rw [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, mul_smul,
-          ← NearLitterPerm.NearLitter.mem_snd_iff,
-          NearLitterPerm.smul_nearLitter_snd, Set.mem_smul_set_iff_inv_smul_mem,
-          ← this, NearLitterPerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
+          ← BasePerm.NearLitter.mem_snd_iff,
+          BasePerm.smul_nearLitter_snd, Set.mem_smul_set_iff_inv_smul_mem,
+          ← this, BasePerm.smul_nearLitter_snd, Set.smul_mem_smul_set_iff]
         exact hN
   · rw [raiseRaise_f_eq₂ hi hi'] at ha₁ ha₂
     exact raiseRaise_atom_spec₂_raise hρS ha₁ ha₂
@@ -934,13 +934,13 @@ theorem raiseRaise_flexibleCoe_spec_eq
         simp only [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, smul_inr]
       · have := hN₂.symm.trans (raiseRaise_raiseIndex hρS hN₁)
         simp only [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, smul_inr, Address.mk.injEq,
-          inr.injEq, true_and, NearLitterPerm.smul_nearLitter_fst] at this ⊢
-        rw [this, NearLitterPerm.smul_nearLitter_fst, smul_left_cancel_iff, hN']
+          inr.injEq, true_and, BasePerm.smul_nearLitter_fst] at this ⊢
+        rw [this, BasePerm.smul_nearLitter_fst, smul_left_cancel_iff, hN']
   · refine ⟨hj, Allowable.toStructPerm (ρ₂ * ρ₁⁻¹) A • N', raiseRaise_raiseIndex hρS hjN', ?_⟩
     have := hN₂.symm.trans (raiseRaise_raiseIndex hρS hN₁)
     simp only [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply, smul_inr, Address.mk.injEq,
-      inr.injEq, true_and, NearLitterPerm.smul_nearLitter_fst] at this ⊢
-    rw [this, NearLitterPerm.smul_nearLitter_fst, smul_left_cancel_iff, hN']
+      inr.injEq, true_and, BasePerm.smul_nearLitter_fst] at this ⊢
+    rw [this, BasePerm.smul_nearLitter_fst, smul_left_cancel_iff, hN']
 
 theorem raiseRaise_inflexibleCoe_spec₁_comp_before_aux
     {i : κ} (hi : i < S.max) {j : κ} (hji : j < i) :
@@ -1042,9 +1042,9 @@ theorem raiseRaise_symmDiff
     cases hN₂.symm.trans (raiseRaise_raiseIndex hρS hN₁)
     refine ⟨_, _, ?_, ?_, raiseRaise_raiseIndex hρS hN', raiseRaise_raiseIndex hρS ha'⟩
     · simp only [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply,
-        NearLitterPerm.smul_nearLitter_fst, hNN']
+        BasePerm.smul_nearLitter_fst, hNN']
     · rw [map_mul, map_inv, Tree.mul_apply, Tree.inv_apply,
-        NearLitterPerm.smul_nearLitter_coe, NearLitterPerm.smul_nearLitter_coe,
+        BasePerm.smul_nearLitter_coe, BasePerm.smul_nearLitter_coe,
         ← Set.smul_set_symmDiff, Set.smul_mem_smul_set_iff]
       exact ha
   · rintro k ⟨hj, hk, a, N', hNN', ha, hN', ha'⟩

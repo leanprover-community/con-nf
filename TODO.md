@@ -4,7 +4,7 @@
 - Add documentation.
 - Clarify that `@[simp]` lemmas normalise casts between permutation types to be visible to help with applying lemmas. (Change them to coercions, and then we won't need this maybe?)
 - Remove instance names.
-- Rename all of the `Allowable`/`NearLitterPerm`/`StructPerm` objects?
+- Rename all of the `Allowable`/`BasePerm`/`StructPerm` objects?
 - Remove double line breaks.
 - Reformat lines containing only `by`.
 - Change `refine'` to new variants.

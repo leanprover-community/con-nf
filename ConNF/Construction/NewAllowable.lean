@@ -427,7 +427,7 @@ theorem smul_cloud (ρ : NewAllowable) (s : Set (TSet β)) (hβγ : β ≠ γ) :
           (Quiver.Hom.toPath (bot_lt_coe _)) • N, ?_, ?_⟩
     · rw [Tangle.smul_set_lt, smul_mem_smul_set_iff]
       exact ht
-    · rw [← ρ.prop hβγ, NearLitterPerm.smul_nearLitter_fst, hN]
+    · rw [← ρ.prop hβγ, BasePerm.smul_nearLitter_fst, hN]
     · dsimp only
       rw [smul_typedNearLitter]
   · rintro ⟨t, ht, N, hN, rfl⟩
@@ -439,7 +439,7 @@ theorem smul_cloud (ρ : NewAllowable) (s : Set (TSet β)) (hβγ : β ≠ γ) :
     · refine ⟨(Allowable.toStructPerm ((ρ : Derivatives) γ)
         (Quiver.Hom.toPath (bot_lt_coe _)))⁻¹ • N, ?_, rfl⟩
       refine Eq.trans ?_ (ρ⁻¹.prop hβγ t)
-      simp only [NearLitterPerm.smul_nearLitter_fst, coe_inv, Derivatives.inv_apply,
+      simp only [BasePerm.smul_nearLitter_fst, coe_inv, Derivatives.inv_apply,
         map_inv, Tree.inv_apply, smul_left_cancel_iff]
       exact hN
     · dsimp only

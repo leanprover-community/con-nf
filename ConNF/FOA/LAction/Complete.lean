@@ -1,4 +1,4 @@
-import ConNF.FOA.Action.NearLitterAction
+import ConNF.FOA.LAction.BaseLAction
 
 /-!
 # Completed permutations
@@ -12,10 +12,10 @@ universe u
 
 namespace ConNF
 
-variable [Params.{u}] (φ : NearLitterAction) [Level]
+variable [Params.{u}] (φ : BaseLAction) [Level]
   [BasePositions] [FOAAssumptions] {β : Λ} {A : ExtendedIndex β}
 
-namespace NearLitterAction
+namespace BaseLAction
 
 /-- The *sandbox litter* for a near-litter action is an arbitrarily chosen litter that
 isn't banned. -/
@@ -80,7 +80,7 @@ theorem atomPartialPerm_domain_small (hφ : φ.Lawful) : Small (φ.atomPartialPe
 /-- A near-litter approximation built from this near-litter action.
 Its action on atoms matches that of the action, and its rough action on litters
 matches the given litter permutation. -/
-noncomputable def complete (hφ : φ.Lawful) (A : ExtendedIndex β) : NearLitterApprox
+noncomputable def complete (hφ : φ.Lawful) (A : ExtendedIndex β) : BaseApprox
     where
   atomPerm := φ.atomPartialPerm hφ
   litterPerm := φ.flexibleLitterPartialPerm hφ A
@@ -99,18 +99,18 @@ theorem complete_smul_litter_eq {hφ : φ.Lawful} (L : Litter) :
     φ.complete hφ A • L = φ.flexibleLitterPartialPerm hφ A L :=
   rfl
 
-theorem smul_atom_eq {hφ : φ.Lawful} {π : NearLitterPerm}
+theorem smul_atom_eq {hφ : φ.Lawful} {π : BasePerm}
     (hπ : (φ.complete hφ A).ExactlyApproximates π) {a : Atom} (ha : (φ.atomMap a).Dom) :
     π • a = (φ.atomMap a).get ha := by
   rw [← hπ.map_atom a (Or.inl (Or.inl ha)), φ.complete_smul_atom_eq ha]
 
-theorem smul_toNearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm}
+theorem smul_toNearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : BasePerm}
     (hπ : (φ.complete hφ A).ExactlyApproximates π) {L : Litter} (hL : (φ.litterMap L).Dom)
     (hφL : φ.PreciseAt hL) (hπL : π • L = ((φ.litterMap L).get hL).1) :
     π • L.toNearLitter = (φ.litterMap L).get hL := by
   refine' SetLike.coe_injective _
   ext a : 1
-  simp only [mem_smul_set_iff_inv_smul_mem, NearLitterPerm.smul_nearLitter_coe, Litter.coe_toNearLitter,
+  simp only [mem_smul_set_iff_inv_smul_mem, BasePerm.smul_nearLitter_coe, Litter.coe_toNearLitter,
     mem_litterSet, SetLike.mem_coe]
   constructor
   · intro ha
@@ -135,7 +135,7 @@ theorem smul_toNearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm
         rw [← eq_of_mem_litterSet_of_mem_litterSet ha (PartialPerm.sandboxSubset_subset _ _ hdom)]
         exact BannedLitter.litterDom L hL
     · by_contra h'
-      simp only [NearLitterPerm.IsException, mem_litterSet, not_or, Classical.not_not, ha] at h
+      simp only [BasePerm.IsException, mem_litterSet, not_or, Classical.not_not, ha] at h
       obtain ⟨b, hb, rfl⟩ :=
         hφL.diff (Or.inr ⟨by rw [← hπL, h.2, smul_inv_smul, mem_litterSet], h'⟩)
       refine' h' ((hφ.atom_mem b hb L hL).mp _)
@@ -178,15 +178,15 @@ theorem smul_toNearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm
       rw [eq_of_mem_litterSet_of_mem_litterSet (PartialPerm.sandboxSubset_subset _ _ hdom) haL]
       exact BannedLitter.litterMap L hL
 
-theorem smul_nearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : NearLitterPerm}
+theorem smul_nearLitter_eq_of_preciseAt {hφ : φ.Lawful} {π : BasePerm}
     (hπ : (φ.complete hφ A).ExactlyApproximates π) {N : NearLitter} (hN : (φ.litterMap N.1).Dom)
     (hw : φ.PreciseAt hN) (hπL : π • N.1 = ((φ.litterMap N.1).get hN).1) :
     ((π • N : NearLitter) : Set Atom) =
     ((φ.litterMap N.1).get hN : Set Atom) ∆ (π • litterSet N.1 ∆ N) := by
-  refine' (NearLitterPerm.smul_nearLitter_eq_smul_symmDiff_smul _ _).trans _
+  refine' (BasePerm.smul_nearLitter_eq_smul_symmDiff_smul _ _).trans _
   rw [← φ.smul_toNearLitter_eq_of_preciseAt hπ hN hw hπL]
   rfl
 
-end NearLitterAction
+end BaseLAction
 
 end ConNF

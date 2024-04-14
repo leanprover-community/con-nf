@@ -653,7 +653,7 @@ def newTypedNearLitter (N : NearLitter) : NewTSet :=
         forall_eq, Sum.smul_inr, Sum.inr.injEq] at h
       apply_fun SetLike.coe at h
       refine Eq.trans ?_ h
-      rw [NearLitterPerm.smul_nearLitter_coe]
+      rw [BasePerm.smul_nearLitter_coe]
       change _ '' _ = _ '' _
       simp_rw [Derivatives.coe_apply_bot]
       rfl⟩
@@ -735,10 +735,10 @@ theorem smul_newTypedNearLitter (N : NearLitter) (ρ : NewAllowable) :
     ρ • newTypedNearLitter N =
       newTypedNearLitter (NewAllowable.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _)) • N) := by
   refine Subtype.ext ?_
-  have := NearLitterPerm.smul_nearLitter_coe
+  have := BasePerm.smul_nearLitter_coe
     (NewAllowable.toStructPerm ρ (Quiver.Hom.toPath (bot_lt_coe _))) N
   simp only [newTypedNearLitter, smul_newTangle_t, smul_intro,
-    NearLitterPerm.smul_nearLitter_fst, toStructPerm, MonoidHom.coe_comp, comp_apply,
+    BasePerm.smul_nearLitter_fst, toStructPerm, MonoidHom.coe_comp, comp_apply,
     coeHom_apply, Derivatives.coe_apply_bot ρ] at this ⊢
   congr 1
   exact this.symm

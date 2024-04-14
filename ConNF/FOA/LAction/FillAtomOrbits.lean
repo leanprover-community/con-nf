@@ -1,4 +1,4 @@
-import ConNF.FOA.Action.NearLitterAction
+import ConNF.FOA.LAction.BaseLAction
 
 open Cardinal Quiver Set Sum WithBot
 
@@ -14,9 +14,9 @@ variable [Params.{u}]
 # Filling in orbits of atoms
 -/
 
-namespace NearLitterAction
+namespace BaseLAction
 
-variable (φ : NearLitterAction) (hφ : φ.Lawful)
+variable (φ : BaseLAction) (hφ : φ.Lawful)
 
 theorem mk_dom_symmDiff_le :
     #(φ.litterMap.Dom ∆ (φ.roughLitterMapOrElse '' φ.litterMap.Dom) : Set Litter) ≤
@@ -50,11 +50,11 @@ noncomputable def litterPerm (hφ : φ.Lawful) : PartialPerm Litter :=
   PartialPerm.piecewise (φ.litterPerm' hφ) (φ.idOnBanned (φ.litterPerm' hφ).domain)
     (by rw [← Set.subset_compl_iff_disjoint_left]; exact fun L h => h.2)
 
-theorem litterPerm'_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
+theorem litterPerm'_apply_eq {φ : BaseLAction} {hφ : φ.Lawful} (L : Litter)
     (hL : L ∈ φ.litterMap.Dom) : φ.litterPerm' hφ L = φ.roughLitterMapOrElse L :=
   PartialPerm.complete_apply_eq _ _ _ hL
 
-theorem litterPerm_apply_eq {φ : NearLitterAction} {hφ : φ.Lawful} (L : Litter)
+theorem litterPerm_apply_eq {φ : BaseLAction} {hφ : φ.Lawful} (L : Litter)
     (hL : L ∈ φ.litterMap.Dom) : φ.litterPerm hφ L = φ.roughLitterMapOrElse L := by
   rw [← litterPerm'_apply_eq L hL]
   exact PartialPerm.piecewise_apply_eq_left (Or.inl (Or.inl hL))
@@ -647,7 +647,7 @@ theorem orbit_atom_mem
   · rw [φ.orbitAtomMap_eq_of_mem_nextImageCoreDomain hφ a ha]
     rw [φ.nextImageCore_atom_mem hφ hdiff a ha L hL]
 
-noncomputable def fillAtomOrbits : NearLitterAction
+noncomputable def fillAtomOrbits : BaseLAction
     where
   atomMap := φ.orbitAtomMap hφ
   litterMap := φ.litterMap
@@ -909,6 +909,6 @@ theorem fillAtomOrbits_precise
         rw [← this.2, Function.iterate_succ_apply', Function.iterate_succ_apply',
           Function.iterate_succ_apply']
 
-end NearLitterAction
+end BaseLAction
 
 end ConNF

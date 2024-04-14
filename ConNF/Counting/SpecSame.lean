@@ -320,7 +320,7 @@ theorem convertNearLitter_dom_small (A : ExtendedIndex β) :
   cases this
   rfl
 
-noncomputable def convert : StructBehaviour β :=
+noncomputable def convert : StructNLAction β :=
   fun A => {
     atomMap :=
       PFun.ofGraph (ConvertAtom S T A) (convertAtom_subsingleton hσS hσT A)

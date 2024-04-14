@@ -244,14 +244,14 @@ theorem Allowable.toStructPerm_comp {β γ : TypeIndex} [LeLevel β] [i : LeLeve
 @[simp]
 theorem Allowable.toStructPerm_apply {β : TypeIndex} [LeLevel β]
     (A : Quiver.Path β ⊥) (π : Allowable β) :
-    NearLitterPerm.ofBot (Allowable.comp A π) = Allowable.toStructPerm π A :=
+    BasePerm.ofBot (Allowable.comp A π) = Allowable.toStructPerm π A :=
   congr_fun (Allowable.toStructPerm_comp A π) Quiver.Path.nil
 
 theorem Allowable.comp_bot {β : TypeIndex} [LeLevel β] (A : Quiver.Path β ⊥) (ρ : Allowable β) :
     Allowable.comp A ρ = Allowable.toStructPerm ρ A := by
-  refine NearLitterPerm.ext ?_
+  refine BasePerm.ext ?_
   ext a : 1
-  change NearLitterPerm.ofBot (Allowable.comp A ρ) • a = Allowable.toStructPerm ρ A • a
+  change BasePerm.ofBot (Allowable.comp A ρ) • a = Allowable.toStructPerm ρ A • a
   simp only [Allowable.toStructPerm_apply]
 
 @[simp]
@@ -267,13 +267,13 @@ theorem smul_mem_support {β : Λ} [LtLevel β] {c : Address β} {t : Tangle β}
   exact h
 
 @[simp]
-theorem NearLitterPerm.ofBot_comp' {β : TypeIndex} [LeLevel β] {hβ : ⊥ < β} {ρ : Allowable β} :
-    NearLitterPerm.ofBot (allowableCons hβ ρ) = Allowable.toStructPerm ρ (Quiver.Hom.toPath hβ) :=
+theorem BasePerm.ofBot_comp' {β : TypeIndex} [LeLevel β] {hβ : ⊥ < β} {ρ : Allowable β} :
+    BasePerm.ofBot (allowableCons hβ ρ) = Allowable.toStructPerm ρ (Quiver.Hom.toPath hβ) :=
   (congr_fun (allowableCons_eq β ⊥ hβ ρ) Quiver.Path.nil).symm
 
 @[simp]
-theorem ofBot_smul {X : Type _} [MulAction NearLitterPerm X] (π : Allowable ⊥) (x : X) :
-    π • x = NearLitterPerm.ofBot π • x :=
+theorem ofBot_smul {X : Type _} [MulAction BasePerm X] (π : Allowable ⊥) (x : X) :
+    π • x = BasePerm.ofBot π • x :=
   rfl
 
 @[simp]

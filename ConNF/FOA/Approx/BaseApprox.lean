@@ -17,20 +17,20 @@ variable [Params.{u}]
 -/
 
 @[ext]
-structure NearLitterApprox where
+structure BaseApprox where
   atomPerm : PartialPerm Atom
   litterPerm : PartialPerm Litter
   domain_small : ∀ L, Small (litterSet L ∩ atomPerm.domain)
 
-namespace NearLitterApprox
+namespace BaseApprox
 
-instance : SMul NearLitterApprox Atom :=
+instance : SMul BaseApprox Atom :=
   ⟨fun π => π.atomPerm⟩
 
-instance : SMul NearLitterApprox Litter :=
+instance : SMul BaseApprox Litter :=
   ⟨fun π => π.litterPerm⟩
 
-variable (π : NearLitterApprox)
+variable (π : BaseApprox)
 
 theorem smul_atom_eq {a : Atom} : π.atomPerm a = π • a :=
   rfl
@@ -41,13 +41,13 @@ theorem smul_litter_eq {L : Litter} : π.litterPerm L = π • L :=
 @[simp]
 theorem mk_smul_atom {atomPerm : PartialPerm Atom} {litterPerm : PartialPerm Litter}
     {domain_small : ∀ L, Small (litterSet L ∩ atomPerm.domain)} {a : Atom} :
-    (⟨atomPerm, litterPerm, domain_small⟩ : NearLitterApprox) • a = atomPerm a :=
+    (⟨atomPerm, litterPerm, domain_small⟩ : BaseApprox) • a = atomPerm a :=
   rfl
 
 @[simp]
 theorem mk_smul_litter {atomPerm : PartialPerm Atom} {litterPerm : PartialPerm Litter}
     {domain_small : ∀ L, Small (litterSet L ∩ atomPerm.domain)} {L : Litter} :
-    (⟨atomPerm, litterPerm, domain_small⟩ : NearLitterApprox) • L = litterPerm L :=
+    (⟨atomPerm, litterPerm, domain_small⟩ : BaseApprox) • L = litterPerm L :=
   rfl
 
 theorem smul_eq_smul_atom {a₁ a₂ : Atom} (h₁ : a₁ ∈ π.atomPerm.domain)
@@ -60,7 +60,7 @@ theorem smul_eq_smul_litter {L₁ L₂ : Litter} (h₁ : L₁ ∈ π.litterPerm.
   rw [mk_smul_litter, mk_smul_litter,
     ← π.litterPerm.eq_symm_apply h₁ (π.litterPerm.map_domain h₂), PartialPerm.left_inv _ h₂]
 
-def symm : NearLitterApprox where
+def symm : BaseApprox where
   atomPerm := π.atomPerm.symm
   litterPerm := π.litterPerm.symm
   domain_small := π.domain_small
@@ -150,15 +150,15 @@ theorem not_mem_domain_of_mem_largestSublitter {a : Atom} {L : Litter}
 
 end Generate
 
-def _root_.ConNF.NearLitterPerm.IsException (π : NearLitterPerm) (a : Atom) : Prop :=
+def _root_.ConNF.BasePerm.IsException (π : BasePerm) (a : Atom) : Prop :=
   π • a ∉ litterSet (π • a.1) ∨ π⁻¹ • a ∉ litterSet (π⁻¹ • a.1)
 
 @[mk_iff]
-structure Approximates (π₀ : NearLitterApprox) (π : NearLitterPerm) : Prop where
+structure Approximates (π₀ : BaseApprox) (π : BasePerm) : Prop where
   map_atom : ∀ a, a ∈ π₀.atomPerm.domain → π₀ • a = π • a
   map_litter : ∀ L, L ∈ π₀.litterPerm.domain → π₀ • L = π • L
 
-theorem Approximates.symm_map_atom {π₀ : NearLitterApprox} {π : NearLitterPerm}
+theorem Approximates.symm_map_atom {π₀ : BaseApprox} {π : BasePerm}
     (hπ : π₀.Approximates π) (a : Atom) (ha : a ∈ π₀.atomPerm.domain) :
     π₀.symm • a = π⁻¹ • a := by
   have := hπ.map_atom (π₀.symm • a) (π₀.symm.atomPerm.map_domain ha)
@@ -166,7 +166,7 @@ theorem Approximates.symm_map_atom {π₀ : NearLitterApprox} {π : NearLitterPe
   rw [← this, smul_left_cancel_iff]
   exact π₀.atomPerm.right_inv ha
 
-theorem Approximates.symm_map_litter {π₀ : NearLitterApprox} {π : NearLitterPerm}
+theorem Approximates.symm_map_litter {π₀ : BaseApprox} {π : BasePerm}
     (hπ : π₀.Approximates π) (L : Litter) (hL : L ∈ π₀.litterPerm.domain) :
     π₀.symm • L = π⁻¹ • L := by
   have := hπ.map_litter (π₀.symm • L) (π₀.symm.litterPerm.map_domain hL)
@@ -175,11 +175,11 @@ theorem Approximates.symm_map_litter {π₀ : NearLitterApprox} {π : NearLitter
   exact π₀.litterPerm.right_inv hL
 
 @[mk_iff]
-structure ExactlyApproximates (π₀ : NearLitterApprox) (π : NearLitterPerm) extends
+structure ExactlyApproximates (π₀ : BaseApprox) (π : BasePerm) extends
     Approximates π₀ π : Prop where
   exception_mem : ∀ a, π.IsException a → a ∈ π₀.atomPerm.domain
 
-theorem ExactlyApproximates.of_isException {π₀ : NearLitterApprox} {π : NearLitterPerm}
+theorem ExactlyApproximates.of_isException {π₀ : BaseApprox} {π : BasePerm}
     (hπ : π₀.ExactlyApproximates π) (a : Atom) (ha : a.1 ∈ π₀.litterPerm.domain) :
     π.IsException a → π₀ • a ∉ litterSet (π₀ • a.1) ∨ π₀.symm • a ∉ litterSet (π₀.symm • a.1) :=
   by
@@ -188,18 +188,18 @@ theorem ExactlyApproximates.of_isException {π₀ : NearLitterApprox} {π : Near
     hπ.symm_map_atom a (hπ.exception_mem a h)]
   exact h
 
-theorem ExactlyApproximates.mem_litterSet {π₀ : NearLitterApprox} {π : NearLitterPerm}
+theorem ExactlyApproximates.mem_litterSet {π₀ : BaseApprox} {π : BasePerm}
     (hπ : π₀.ExactlyApproximates π) (a : Atom) (ha : a ∉ π₀.atomPerm.domain) :
     π • a ∈ litterSet (π • a.1) := by contrapose! ha; exact hπ.exception_mem _ (Or.inl ha)
 
-theorem ExactlyApproximates.mem_litterSet_inv {π₀ : NearLitterApprox} {π : NearLitterPerm}
+theorem ExactlyApproximates.mem_litterSet_inv {π₀ : BaseApprox} {π : BasePerm}
     (hπ : π₀.ExactlyApproximates π) (a : Atom) (ha : a ∉ π₀.atomPerm.domain) :
     π⁻¹ • a ∈ litterSet (π⁻¹ • a.1) := by contrapose! ha; exact hπ.exception_mem _ (Or.inr ha)
 
-def Free [Level] [BasePositions] [FOAAssumptions] {β : TypeIndex} (π : NearLitterApprox)
+def Free [Level] [BasePositions] [FOAAssumptions] {β : TypeIndex} (π : BaseApprox)
     (A : ExtendedIndex β) : Prop :=
   ∀ L ∈ π.litterPerm.domain, Flexible A L
 
-end NearLitterApprox
+end BaseApprox
 
 end ConNF

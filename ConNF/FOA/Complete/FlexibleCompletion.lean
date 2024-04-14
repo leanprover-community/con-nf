@@ -1,4 +1,4 @@
-import ConNF.FOA.Approximation.NearLitterApprox
+import ConNF.FOA.Approx.BaseApprox
 
 open Set
 
@@ -9,9 +9,9 @@ universe u
 namespace ConNF
 
 variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : TypeIndex}
-  (π : NearLitterApprox) (A : ExtendedIndex β)
+  (π : BaseApprox) (A : ExtendedIndex β)
 
-namespace NearLitterApprox
+namespace BaseApprox
 
 def idOnFlexible : PartialPerm Litter where
   toFun := id
@@ -37,7 +37,7 @@ theorem flexibleCompletionLitterPerm_domain :
   rw [flexibleCompletionLitterPerm, PartialPerm.piecewise_domain, idOnFlexible_domain,
     union_diff_self]
 
-noncomputable def flexibleCompletion : NearLitterApprox
+noncomputable def flexibleCompletion : BaseApprox
     where
   atomPerm := π.atomPerm
   litterPerm := flexibleCompletionLitterPerm π A
@@ -79,6 +79,6 @@ theorem flexibleCompletion_symm_smul_flexible (hπ : π.Free A) (L : Litter) (hL
       flexibleCompletion_litterPerm_domain_free π A hπ]
     exact hL
 
-end NearLitterApprox
+end BaseApprox
 
 end ConNF

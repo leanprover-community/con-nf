@@ -1,4 +1,4 @@
-import ConNF.BaseType.NearLitterPerm
+import ConNF.BaseType.BasePerm
 import ConNF.Structural.Tree
 import ConNF.Structural.StructSet
 
@@ -32,7 +32,7 @@ each `α`-extended index. This represents how the permutation acts along each pa
 levels in the model. Note that we define structural permutations as trees of near-litter
 permutations. -/
 abbrev StructPerm : TypeIndex → Type u :=
-  Tree NearLitterPerm
+  Tree BasePerm
 
 namespace StructPerm
 
@@ -48,11 +48,11 @@ theorem smul_nearLitter_fst (π : StructPerm ⊥) (N : NearLitter) : (π • N).
 
 theorem smul_nearLitter_coe (π : StructPerm ⊥) (N : NearLitter) :
     (π • N : NearLitter) = π • (N : Set Atom) :=
-  NearLitterPerm.smul_nearLitter_coe (Tree.ofBot π) N
+  BasePerm.smul_nearLitter_coe (Tree.ofBot π) N
 
 theorem smul_nearLitter_snd (π : StructPerm ⊥) (N : NearLitter) :
     ((π • N).2 : Set Atom) = π • (N.2 : Set Atom) :=
-  NearLitterPerm.smul_nearLitter_snd (Tree.ofBot π) N
+  BasePerm.smul_nearLitter_snd (Tree.ofBot π) N
 
 @[simp]
 theorem comp_bot_smul_atom {α : TypeIndex} (π : StructPerm α)

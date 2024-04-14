@@ -121,7 +121,7 @@ theorem completeLitterMap_eq_of_inflexibleBot {A : ExtendedIndex β} {L : Litter
 
 /-- A basic definition unfold. -/
 theorem completeLitterMap_eq_of_flexible {A : ExtendedIndex β} {L : Litter} (h : Flexible A L) :
-    π.completeLitterMap A L = NearLitterApprox.flexibleCompletion (π A) A • L := by
+    π.completeLitterMap A L = BaseApprox.flexibleCompletion (π A) A • L := by
   rw [completeLitterMap_eq, litterCompletion_of_flexible _ _ _ _ h]
 
 theorem toStructPerm_bot :
@@ -134,7 +134,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
       (π.completeNearLitterMap A N.fst.toNearLitter : Set Atom) ∆
         (π.completeAtomMap A '' litterSet N.fst ∆ ↑N) := by
   simp only [completeNearLitterMap_eq, nearLitterCompletion, nearLitterCompletionMap,
-    nearLitterHypothesis_eq, NearLitterApprox.coe_largestSublitter, mem_diff,
+    nearLitterHypothesis_eq, BaseApprox.coe_largestSublitter, mem_diff,
     foaHypothesis_atomImage, NearLitter.coe_mk, Subtype.coe_mk, Litter.coe_toNearLitter,
     Litter.toNearLitter_fst, symmDiff_self, bot_eq_empty, mem_empty_iff_false, false_and_iff,
     iUnion_neg', not_false_iff, iUnion_empty, symmDiff_empty]
@@ -181,7 +181,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
         exact Or.inr ⟨a, ⟨h, ha₁.2⟩, rfl⟩
       rw [completeAtomMap_eq_of_not_mem_domain hb₂]
       simp only [mem_union, mem_diff, mem_litterSet, Sublitter.equiv_apply_fst_eq,
-        NearLitterApprox.largestSublitter_litter]
+        BaseApprox.largestSublitter_litter]
       refine' Or.inl ⟨_, _⟩
       · suffices b ∈ litterSet N.fst by
           rw [mem_litterSet] at this
@@ -193,9 +193,9 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
           have : π A • a ∈ _ := (π A).atomPerm.map_domain ha₁.2
           dsimp only at ha₂
           rw [ha₂] at this
-          exact NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
+          exact BaseApprox.not_mem_domain_of_mem_largestSublitter _
             (Sublitter.equiv_apply_mem _) this
-      · exact NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
+      · exact BaseApprox.not_mem_domain_of_mem_largestSublitter _
           (Sublitter.equiv_apply_mem _)
   · rintro (⟨ha₁ | ⟨a, ha₁, rfl⟩, ha₂⟩ | ⟨⟨a, ha₁, rfl⟩, ha₂⟩)
     · refine' Or.inl ⟨Or.inl ha₁, _⟩
@@ -228,7 +228,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
           have : π A • b ∈ _ := (π A).atomPerm.map_domain hb₁.2
           rw [hb₂] at this
           exact
-            NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
+            BaseApprox.not_mem_domain_of_mem_largestSublitter _
               (Sublitter.equiv_apply_mem _) this
       · by_cases h : a ∈ (π A).atomPerm.domain
         · refine' Or.inl ⟨_, _⟩
@@ -243,7 +243,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
             have : π A • a ∈ _ := (π A).atomPerm.map_domain h
             rw [hab] at this
             exact
-              NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
+              BaseApprox.not_mem_domain_of_mem_largestSublitter _
                 (Sublitter.equiv_apply_mem _) this
         · refine' Or.inr ⟨_, _⟩
           · exact ⟨_, ⟨a, rfl⟩, _, ⟨⟨ha₁, h⟩, rfl⟩, rfl⟩
@@ -252,7 +252,7 @@ theorem completeNearLitterMap_eq' (A : ExtendedIndex β) (N : NearLitter) :
           simp only [completeAtomMap_eq_of_not_mem_domain h] at hb₂
           have : π A • b ∈ _ := (π A).atomPerm.map_domain hb₁.2
           rw [hb₂] at this
-          exact NearLitterApprox.not_mem_domain_of_mem_largestSublitter _
+          exact BaseApprox.not_mem_domain_of_mem_largestSublitter _
             (Sublitter.equiv_apply_mem _) this
 
 theorem completeNearLitterMap_toNearLitter_eq (A : ExtendedIndex β) (L : Litter) :
@@ -261,7 +261,7 @@ theorem completeNearLitterMap_toNearLitter_eq (A : ExtendedIndex β) (L : Litter
         π A • (litterSet L ∩ (π A).atomPerm.domain) := by
   rw [completeNearLitterMap_eq, nearLitterCompletion, NearLitter.coe_mk, Subtype.coe_mk,
     nearLitterCompletionMap]
-  simp only [nearLitterHypothesis_eq, NearLitterApprox.coe_largestSublitter,
+  simp only [nearLitterHypothesis_eq, BaseApprox.coe_largestSublitter,
     Litter.coe_toNearLitter, mem_diff, Litter.toNearLitter_fst, symmDiff_self, bot_eq_empty,
     mem_empty_iff_false, false_and_iff, iUnion_neg', not_false_iff, iUnion_empty, symmDiff_empty]
   rw [completeLitterMap_eq]

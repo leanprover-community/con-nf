@@ -283,26 +283,26 @@ theorem Interferes.symm {a : Atom} {N₁ N₂ : NearLitter} (h : Interferes a N�
     exact h₂
 
 theorem Interferes.smul {a : Atom} {N₁ N₂ : NearLitter} (h : Interferes a N₁ N₂)
-    (π : NearLitterPerm) : Interferes (π • a) (π • N₁) (π • N₂) := by
+    (π : BasePerm) : Interferes (π • a) (π • N₁) (π • N₂) := by
   cases h
   case symmDiff h₁ h₂ =>
     refine Interferes.symmDiff ?_ ?_
-    · simp only [NearLitterPerm.smul_nearLitter_fst, smul_left_cancel_iff]
+    · simp only [BasePerm.smul_nearLitter_fst, smul_left_cancel_iff]
       exact h₁
     · obtain (h₂ | h₂) := h₂
       · refine Or.inl ?_
-        rw [NearLitterPerm.smul_nearLitter_coe, NearLitterPerm.smul_nearLitter_coe,
+        rw [BasePerm.smul_nearLitter_coe, BasePerm.smul_nearLitter_coe,
           mem_diff, smul_mem_smul_set_iff, smul_mem_smul_set_iff]
         exact h₂
       · refine Or.inr ?_
-        rw [NearLitterPerm.smul_nearLitter_coe, NearLitterPerm.smul_nearLitter_coe,
+        rw [BasePerm.smul_nearLitter_coe, BasePerm.smul_nearLitter_coe,
           mem_diff, smul_mem_smul_set_iff, smul_mem_smul_set_iff]
         exact h₂
   case inter h₁ h₂ =>
     refine Interferes.inter ?_ ?_
-    · simp only [NearLitterPerm.smul_nearLitter_fst, ne_eq, smul_left_cancel_iff]
+    · simp only [BasePerm.smul_nearLitter_fst, ne_eq, smul_left_cancel_iff]
       exact h₁
-    · rw [mem_inter_iff, NearLitterPerm.smul_nearLitter_coe, NearLitterPerm.smul_nearLitter_coe,
+    · rw [mem_inter_iff, BasePerm.smul_nearLitter_coe, BasePerm.smul_nearLitter_coe,
         smul_mem_smul_set_iff, smul_mem_smul_set_iff]
       exact h₂
 
@@ -312,12 +312,12 @@ theorem Precedes.smul [LeLevel β] {c d : Address β} (h : Precedes c d) (ρ : A
   case fuzz A N h c hc =>
     have := Precedes.fuzz A (Allowable.toStructPerm ρ A • N) (h.smul ρ)
         (Allowable.comp (h.path.B.cons h.path.hδ) ρ • c) ?_
-    · simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path,
+    · simp only [BasePerm.smul_nearLitter_fst, inflexibleCoe_smul_path,
         Allowable.smul_address, Allowable.toStructPerm_comp, Tree.comp_apply] at this
       simp only [Allowable.smul_address, smul_inr]
       rw [← h.path.hA] at this ⊢
       exact this
-    · simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
+    · simp only [BasePerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
         smul_support]
       change _ ∈ (_ : Set (Address h.path.δ))
       rw [Enumeration.smul_coe, smul_mem_smul_set_iff]
@@ -325,7 +325,7 @@ theorem Precedes.smul [LeLevel β] {c d : Address β} (h : Precedes c d) (ρ : A
   case fuzzBot A N h =>
     have := Precedes.fuzzBot A (Allowable.toStructPerm ρ A • N) (h.smul ρ)
     simp only [Allowable.smul_address, smul_inl, smul_inr]
-    simp only [NearLitterPerm.smul_nearLitter_fst, inflexibleBot_smul_path, inflexibleBot_smul_a,
+    simp only [BasePerm.smul_nearLitter_fst, inflexibleBot_smul_path, inflexibleBot_smul_a,
       ofBot_smul, Allowable.toStructPerm_apply] at this
     simp_rw [h.path.hA] at this ⊢
     exact this

@@ -138,9 +138,9 @@ theorem Atom.support_carrier (a : Atom) :
   simp only [support, Enumeration.singleton_carrier, mem_singleton_iff]
 
 theorem Atom.support_supports (a : Atom) :
-    MulAction.Supports NearLitterPerm (a.support : Set (Address ⊥)) a := by
+    MulAction.Supports BasePerm (a.support : Set (Address ⊥)) a := by
   intro ρ h
-  simp only [support_carrier, mem_singleton_iff, NearLitterPerm.smul_address_eq_iff, forall_eq,
+  simp only [support_carrier, mem_singleton_iff, BasePerm.smul_address_eq_iff, forall_eq,
     Sum.smul_inl, Sum.inl.injEq] at h
   exact h
 
@@ -149,7 +149,7 @@ the allowable permutations to be the near-litter permutations. -/
 instance Bot.modelData : ModelData ⊥
     where
   TSet := Atom
-  Allowable := NearLitterPerm
+  Allowable := BasePerm
   allowableToStructPerm := Tree.toBotIso.toMonoidHom
   allowableToStructPerm_injective := MulEquiv.injective _
   allowableAction := inferInstance
@@ -287,13 +287,13 @@ instance Bot.positionedTangles [BasePositions] : PositionedTangles ⊥ :=
 
 /-- The identity equivalence between `⊥`-allowable permutations and near-litter permutations.
 This equivalence is a group isomorphism. -/
-def _root_.NearLitterPerm.ofBot : Allowable ⊥ ≃ NearLitterPerm :=
+def _root_.BasePerm.ofBot : Allowable ⊥ ≃ BasePerm :=
   Equiv.refl _
 
 @[simp]
-theorem _root_.NearLitterPerm.ofBot_smul {X : Type _} [MulAction NearLitterPerm X]
+theorem _root_.BasePerm.ofBot_smul {X : Type _} [MulAction BasePerm X]
     (π : Allowable ⊥) (x : X) :
-    NearLitterPerm.ofBot π • x = π • x :=
+    BasePerm.ofBot π • x = π • x :=
   rfl
 
 end ConNF

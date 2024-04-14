@@ -1,4 +1,4 @@
-import ConNF.FOA.Action.NearLitterAction
+import ConNF.FOA.LAction.BaseLAction
 
 open Cardinal Quiver Set Sum WithBot
 
@@ -11,15 +11,15 @@ namespace ConNF
 variable [Params.{u}]
 
 @[ext]
-structure NearLitterBehaviour where
+structure BaseNLAction where
   atomMap : Atom →. Atom
   nearLitterMap : NearLitter →. NearLitter
   atomMap_dom_small : Small atomMap.Dom
   nearLitterMap_dom_small : Small nearLitterMap.Dom
 
-namespace NearLitterBehaviour
+namespace BaseNLAction
 
-structure Lawful (ξ : NearLitterBehaviour) : Prop where
+structure Lawful (ξ : BaseNLAction) : Prop where
   atomMap_injective : ∀ ⦃a b : Atom⦄ (ha : (ξ.atomMap a).Dom) (hb : (ξ.atomMap b).Dom),
     (ξ.atomMap a).get ha = (ξ.atomMap b).get hb → a = b
   atom_mem_iff : ∀ ⦃a : Atom⦄ (ha : (ξ.atomMap a).Dom)
@@ -40,7 +40,7 @@ structure Lawful (ξ : NearLitterBehaviour) : Prop where
     a ∈ ((ξ.nearLitterMap N₁).get hN₁ : Set Atom) ∩ (ξ.nearLitterMap N₂).get hN₂ →
     a ∈ ξ.atomMap.ran
 
-theorem map_nearLitter_fst {ξ : NearLitterBehaviour} (hξ : ξ.Lawful) ⦃N₁ N₂ : NearLitter⦄
+theorem map_nearLitter_fst {ξ : BaseNLAction} (hξ : ξ.Lawful) ⦃N₁ N₂ : NearLitter⦄
     (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom) :
     N₁.fst = N₂.fst ↔ ((ξ.nearLitterMap N₁).get hN₁).fst = ((ξ.nearLitterMap N₂).get hN₂).fst := by
   constructor
@@ -60,31 +60,31 @@ theorem map_nearLitter_fst {ξ : NearLitterBehaviour} (hξ : ξ.Lawful) ⦃N₁ 
     obtain ⟨b, hb, rfl⟩ := hξ.ran_of_mem_inter a h' hN₁ hN₂ ha
     exact ⟨b, hb, hb, rfl⟩
 
-def HasLitters (ξ : NearLitterBehaviour) : Prop :=
+def HasLitters (ξ : BaseNLAction) : Prop :=
   ∀ ⦃N : NearLitter⦄, (ξ.nearLitterMap N).Dom → (ξ.nearLitterMap N.1.toNearLitter).Dom
 
-def extraAtoms (ξ : NearLitterBehaviour) : Set Atom :=
+def extraAtoms (ξ : BaseNLAction) : Set Atom :=
   ⋃ (N ∈ ξ.nearLitterMap.Dom), litterSet N.1 \ N
 
-theorem extraAtoms_small (ξ : NearLitterBehaviour) : Small ξ.extraAtoms :=
+theorem extraAtoms_small (ξ : BaseNLAction) : Small ξ.extraAtoms :=
   Small.bUnion ξ.nearLitterMap_dom_small (fun N _ => N.2.2.mono (fun _ => Or.inl))
 
 @[mk_iff]
-inductive BannedLitter (ξ : NearLitterBehaviour) : Litter → Prop
+inductive BannedLitter (ξ : BaseNLAction) : Litter → Prop
   | atomMap (a : Atom) (h) : BannedLitter ξ ((ξ.atomMap a).get h).1
   | nearLitterMap (N : NearLitter) (h) : BannedLitter ξ ((ξ.nearLitterMap N).get h).1
   | diff (N : NearLitter) (h) (a : Atom) :
     a ∈ ((ξ.nearLitterMap N).get h : Set Atom) \ litterSet ((ξ.nearLitterMap N).get h).1 →
     BannedLitter ξ a.1
 
-theorem bannedLitter_of_mem {ξ : NearLitterBehaviour} (a : Atom) (N : NearLitter)
+theorem bannedLitter_of_mem {ξ : BaseNLAction} (a : Atom) (N : NearLitter)
     (hN : (ξ.nearLitterMap N).Dom) (ha : a ∈ (ξ.nearLitterMap N).get hN) : ξ.BannedLitter a.1 := by
   by_cases h : a.1 = (Part.get (nearLitterMap ξ N) hN).1
   · rw [h]
     exact BannedLitter.nearLitterMap N hN
   · exact BannedLitter.diff N hN _ ⟨ha, h⟩
 
-theorem bannedLitter_small (ξ : NearLitterBehaviour) : Small {L | ξ.BannedLitter L} := by
+theorem bannedLitter_small (ξ : BaseNLAction) : Small {L | ξ.BannedLitter L} := by
   simp only [bannedLitter_iff, mem_diff, SetLike.mem_coe, mem_litterSet]
   refine Small.union ?_ (Small.union ?_ ?_)
   · refine' lt_of_le_of_lt _ ξ.atomMap_dom_small
@@ -119,7 +119,7 @@ theorem bannedLitter_small (ξ : NearLitterBehaviour) : Small {L | ξ.BannedLitt
     rw [h] at this
     exact Subtype.coe_injective (this.trans L₂.prop.choose_spec.choose_spec.choose_spec.2.symm)
 
-theorem mk_not_bannedLitter (ξ : NearLitterBehaviour) : #{L | ¬ξ.BannedLitter L} = #μ := by
+theorem mk_not_bannedLitter (ξ : BaseNLAction) : #{L | ¬ξ.BannedLitter L} = #μ := by
   have := mk_sum_compl {L | ξ.BannedLitter L}
   rw [compl_setOf, mk_litter] at this
   rw [← this, add_eq_right]
@@ -136,28 +136,28 @@ theorem mk_not_bannedLitter (ξ : NearLitterBehaviour) : #{L | ¬ξ.BannedLitter
     refine' Cardinal.add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le Params.κ_lt_μ _
     exact lt_trans ξ.bannedLitter_small Params.κ_lt_μ
 
-theorem not_bannedLitter_nonempty (ξ : NearLitterBehaviour) : Nonempty {L | ¬ξ.BannedLitter L} := by
+theorem not_bannedLitter_nonempty (ξ : BaseNLAction) : Nonempty {L | ¬ξ.BannedLitter L} := by
   simp only [← mk_ne_zero_iff, mk_not_bannedLitter, Ne.def, mk_ne_zero, not_false_iff]
 
-noncomputable def sandboxLitter (ξ : NearLitterBehaviour) : Litter :=
+noncomputable def sandboxLitter (ξ : BaseNLAction) : Litter :=
   ξ.not_bannedLitter_nonempty.some
 
-theorem sandboxLitter_not_banned (ξ : NearLitterBehaviour) : ¬ξ.BannedLitter ξ.sandboxLitter :=
+theorem sandboxLitter_not_banned (ξ : BaseNLAction) : ¬ξ.BannedLitter ξ.sandboxLitter :=
   ξ.not_bannedLitter_nonempty.some.prop
 
-def LitterPresent (ξ : NearLitterBehaviour) (L : Litter) : Prop :=
+def LitterPresent (ξ : BaseNLAction) (L : Litter) : Prop :=
   ∃ N : NearLitter, (ξ.nearLitterMap N).Dom ∧ N.1 = L
 
-def innerAtoms (ξ : NearLitterBehaviour) (L : Litter) : Set Atom :=
+def innerAtoms (ξ : BaseNLAction) (L : Litter) : Set Atom :=
   ⋂ (N : NearLitter) (_ : (ξ.nearLitterMap N).Dom ∧ N.1 = L), N \ litterSet L
 
-def outerAtoms (ξ : NearLitterBehaviour) (L : Litter) : Set Atom :=
+def outerAtoms (ξ : BaseNLAction) (L : Litter) : Set Atom :=
   litterSet L \ (⋃ (N : NearLitter) (_ : (ξ.nearLitterMap N).Dom), N)
 
-def allOuterAtoms (ξ : NearLitterBehaviour) : Set Atom :=
+def allOuterAtoms (ξ : BaseNLAction) : Set Atom :=
   ⋃ (L : Litter) (_ : ξ.LitterPresent L), ξ.outerAtoms L
 
-theorem mem_innerAtoms_iff {ξ : NearLitterBehaviour}
+theorem mem_innerAtoms_iff {ξ : BaseNLAction}
     (L : Litter) (hL : ξ.LitterPresent L) (a : Atom) :
     a ∈ ξ.innerAtoms L ↔ a.1 ≠ L ∧ ∀ N (_ : (ξ.nearLitterMap N).Dom ∧ N.1 = L), a ∈ N := by
   obtain ⟨N, hN, rfl⟩ := hL
@@ -165,18 +165,18 @@ theorem mem_innerAtoms_iff {ξ : NearLitterBehaviour}
   aesop
 
 @[simp]
-theorem mem_outerAtoms_iff {ξ : NearLitterBehaviour} (L : Litter) (a : Atom) :
+theorem mem_outerAtoms_iff {ξ : BaseNLAction} (L : Litter) (a : Atom) :
     a ∈ ξ.outerAtoms L ↔ a.1 = L ∧ ∀ N, (ξ.nearLitterMap N).Dom → a ∉ N :=
   by simp only [outerAtoms, mem_diff, mem_litterSet, mem_iUnion, SetLike.mem_coe,
     exists_prop, not_exists, not_and]
 
 @[simp]
-theorem mem_allOuterAtoms_iff {ξ : NearLitterBehaviour} (a : Atom) :
+theorem mem_allOuterAtoms_iff {ξ : BaseNLAction} (a : Atom) :
     a ∈ ξ.allOuterAtoms ↔ ξ.LitterPresent a.1 ∧ ∀ N, (ξ.nearLitterMap N).Dom → a ∉ N :=
   by simp only [allOuterAtoms, mem_iUnion, mem_outerAtoms_iff, exists_and_left,
     exists_prop, exists_eq_left']
 
-theorem litterPresent_small (ξ : NearLitterBehaviour) : Small {L | ξ.LitterPresent L} := by
+theorem litterPresent_small (ξ : BaseNLAction) : Small {L | ξ.LitterPresent L} := by
   have : Small (⋃ (N : NearLitter) (_ : (ξ.nearLitterMap N).Dom), {N.1})
   · refine Small.bUnion ξ.nearLitterMap_dom_small ?_
     simp only [PFun.mem_dom, small_singleton, forall_exists_index, implies_true, forall_const]
@@ -185,7 +185,7 @@ theorem litterPresent_small (ξ : NearLitterBehaviour) : Small {L | ξ.LitterPre
   rintro _ ⟨N, hN, rfl⟩
   exact ⟨_, ⟨N, rfl⟩, _, ⟨hN, rfl⟩, rfl⟩
 
-theorem litterPresent_small' (ξ : NearLitterBehaviour) :
+theorem litterPresent_small' (ξ : BaseNLAction) :
     Small {N : NearLitter | N.IsLitter ∧ ∃ N', (nearLitterMap ξ N').Dom ∧ N'.fst = N.fst} := by
   have : Small {L | ∃ N, (nearLitterMap ξ N).Dom ∧ N.fst = L}
   · refine (ξ.nearLitterMap_dom_small.image (f := fun N => N.1)).mono ?_
@@ -195,13 +195,13 @@ theorem litterPresent_small' (ξ : NearLitterBehaviour) :
   rintro _ ⟨⟨L⟩, N, hN, rfl⟩
   refine ⟨N.1, ⟨N, hN, rfl⟩, rfl⟩
 
-theorem innerAtoms_small {ξ : NearLitterBehaviour} (L : Litter) (hL : ξ.LitterPresent L) :
+theorem innerAtoms_small {ξ : BaseNLAction} (L : Litter) (hL : ξ.LitterPresent L) :
     Small (ξ.innerAtoms L) := by
   obtain ⟨N, hN, rfl⟩ := hL
   refine Small.mono (biInter_subset_of_mem ⟨hN, rfl⟩) ?_
   exact Small.mono (fun _ => Or.inr) N.2.prop
 
-theorem outerAtoms_small {ξ : NearLitterBehaviour} (L : Litter) (hL : ξ.LitterPresent L) :
+theorem outerAtoms_small {ξ : BaseNLAction} (L : Litter) (hL : ξ.LitterPresent L) :
     Small (ξ.outerAtoms L) := by
   obtain ⟨N, hN, rfl⟩ := hL
   rw [outerAtoms]
@@ -210,21 +210,21 @@ theorem outerAtoms_small {ξ : NearLitterBehaviour} (L : Litter) (hL : ξ.Litter
   intro a ha
   exact ⟨_, ⟨N, rfl⟩, _, ⟨hN, rfl⟩, ha⟩
 
-theorem allOuterAtoms_small {ξ : NearLitterBehaviour} : Small ξ.allOuterAtoms :=
+theorem allOuterAtoms_small {ξ : BaseNLAction} : Small ξ.allOuterAtoms :=
   Small.bUnion ξ.litterPresent_small ξ.outerAtoms_small
 
 /-- The codomain for the inner atoms. -/
-def innerAtomsCod (ξ : NearLitterBehaviour) (L : Litter) : Set Atom :=
+def innerAtomsCod (ξ : BaseNLAction) (L : Litter) : Set Atom :=
   (⋂ (N : NearLitter) (hN : (ξ.nearLitterMap N).Dom ∧ N.1 = L), (ξ.nearLitterMap N).get hN.1) \
     ξ.atomMap.ran
 
 @[simp]
-theorem mem_innerAtomsCod_iff {ξ : NearLitterBehaviour} (L : Litter) (a : Atom) :
+theorem mem_innerAtomsCod_iff {ξ : BaseNLAction} (L : Litter) (a : Atom) :
     a ∈ ξ.innerAtomsCod L ↔ (∀ N (hN : (ξ.nearLitterMap N).Dom ∧ N.1 = L),
       a ∈ (ξ.nearLitterMap N).get hN.1) ∧ a ∉ ξ.atomMap.ran :=
   by simp only [innerAtomsCod, mem_diff, mem_iInter, SetLike.mem_coe]
 
-theorem innerAtomsCod_subset (ξ : NearLitterBehaviour)
+theorem innerAtomsCod_subset (ξ : BaseNLAction)
     (N : NearLitter) (hN : (ξ.nearLitterMap N).Dom) :
     ξ.innerAtomsCod N.1 ⊆ (ξ.nearLitterMap N).get hN := by
   intro a ha
@@ -234,7 +234,7 @@ theorem innerAtomsCod_subset (ξ : NearLitterBehaviour)
   · rintro a' ha' _ ⟨_, rfl⟩
     exact ha'
 
-theorem innerAtomsCod_eq {ξ : NearLitterBehaviour}
+theorem innerAtomsCod_eq {ξ : BaseNLAction}
     (N : NearLitter) (hN : (ξ.nearLitterMap N).Dom) :
     ξ.innerAtomsCod N.1 = ((ξ.nearLitterMap N).get hN : Set Atom) \
       ((⋃ (N' : NearLitter) (hN' : (ξ.nearLitterMap N').Dom ∧ N'.1 = N.1),
@@ -254,7 +254,7 @@ theorem innerAtomsCod_eq {ξ : NearLitterBehaviour}
     · contrapose! ha₂
       exact Or.inr ha₂
 
-theorem innerAtomsCod_eq_aux {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem innerAtomsCod_eq_aux {ξ : BaseNLAction} (hξ : ξ.Lawful)
     (N : NearLitter) (hN : (ξ.nearLitterMap N).Dom) :
     Small ((⋃ (N' : NearLitter) (hN' : (ξ.nearLitterMap N').Dom ∧ N'.1 = N.1),
       (ξ.nearLitterMap N').get hN'.1 ∆ (ξ.nearLitterMap N).get hN) ∪ ξ.atomMap.ran) := by
@@ -269,7 +269,7 @@ theorem innerAtomsCod_eq_aux {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
     rintro _ ⟨a, ha, rfl⟩
     exact ⟨a, ha, ha, rfl⟩
 
-theorem mk_innerAtomsCod {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem mk_innerAtomsCod {ξ : BaseNLAction} (hξ : ξ.Lawful)
     (L : Litter) (hL : ξ.LitterPresent L) : #(ξ.innerAtomsCod L) = #κ := by
   obtain ⟨N, hN, rfl⟩ := hL
   refine le_antisymm ?_ ?_
@@ -282,23 +282,23 @@ theorem mk_innerAtomsCod {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
     refine (Small.mono (fun _ => Or.inl) this).not_le ?_
     simp only [SetLike.coe_sort_coe, mk_nearLitter'', le_refl]
 
-theorem mk_innerAtoms_lt {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem mk_innerAtoms_lt {ξ : BaseNLAction} (hξ : ξ.Lawful)
     (L : Litter) (hL : ξ.LitterPresent L) :
     #(ξ.innerAtoms L) < #(ξ.innerAtomsCod L) := by
   rw [mk_innerAtomsCod hξ L hL]
   exact ξ.innerAtoms_small L hL
 
-noncomputable irreducible_def innerAtomsEmbedding {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+noncomputable irreducible_def innerAtomsEmbedding {ξ : BaseNLAction} (hξ : ξ.Lawful)
     (L : Litter) (hL : ξ.LitterPresent L) :
     ξ.innerAtoms L ↪ ξ.innerAtomsCod L :=
   ((Cardinal.le_def _ _).mp (mk_innerAtoms_lt hξ L hL).le).some
 
-noncomputable irreducible_def outerAtomsEmbedding (ξ : NearLitterBehaviour) :
+noncomputable irreducible_def outerAtomsEmbedding (ξ : BaseNLAction) :
     ξ.allOuterAtoms ↪ litterSet ξ.sandboxLitter :=
   ((Cardinal.le_def _ _).mp (allOuterAtoms_small.le.trans
     (le_of_eq ((mk_litterSet _).symm)))).some
 
-theorem eq_of_mem_innerAtoms {ξ : NearLitterBehaviour} (hξ : ξ.Lawful) (a : Atom)
+theorem eq_of_mem_innerAtoms {ξ : BaseNLAction} (hξ : ξ.Lawful) (a : Atom)
     (ha : ¬(ξ.atomMap a).Dom) {L₁ L₂ : Litter}
     (hL₁ : ξ.LitterPresent L₁) (hL₂ : ξ.LitterPresent L₂)
     (ha₁ : a ∈ ξ.innerAtoms L₁) (ha₂ : a ∈ ξ.innerAtoms L₂) : L₁ = L₂ := by
@@ -311,7 +311,7 @@ theorem eq_of_mem_innerAtoms {ξ : NearLitterBehaviour} (hξ : ξ.Lawful) (a : A
   by_contra h
   exact ha (hξ.dom_of_mem_inter a h hN₁ hN₂ ⟨h₁, h₂⟩)
 
-theorem innerAtoms_allOuterAtoms {ξ : NearLitterBehaviour} (a : Atom)
+theorem innerAtoms_allOuterAtoms {ξ : BaseNLAction} (a : Atom)
     {L : Litter} (hL : ξ.LitterPresent L)
     (ha₁ : a ∈ ξ.innerAtoms L) (ha₂ : a ∈ ξ.allOuterAtoms) : False := by
   rw [mem_innerAtoms_iff L hL] at ha₁
@@ -319,7 +319,7 @@ theorem innerAtoms_allOuterAtoms {ξ : NearLitterBehaviour} (a : Atom)
   obtain ⟨N, hN, rfl⟩ := hL
   refine ha₂.2 N hN (ha₁.2 N ⟨hN, rfl⟩)
 
-noncomputable def extraAtomMap (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) : Atom →. Atom :=
+noncomputable def extraAtomMap (ξ : BaseNLAction) (hξ : ξ.Lawful) : Atom →. Atom :=
   fun a => ⟨
     (ξ.atomMap a).Dom ∨ (∃ L, ξ.LitterPresent L ∧ a ∈ ξ.innerAtoms L) ∨
       a ∈ ξ.allOuterAtoms,
@@ -327,7 +327,7 @@ noncomputable def extraAtomMap (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) : At
       (fun h => ξ.innerAtomsEmbedding hξ _ h.choose_spec.1 ⟨a, h.choose_spec.2⟩)
       (fun h => ξ.outerAtomsEmbedding ⟨a, h⟩))⟩
 
-theorem extraAtomMap_dom_small (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) :
+theorem extraAtomMap_dom_small (ξ : BaseNLAction) (hξ : ξ.Lawful) :
     Small (ξ.extraAtomMap hξ).Dom := by
   refine Small.union ξ.atomMap_dom_small (Small.union ?_ ξ.allOuterAtoms_small)
   suffices : Small (⋃ (L : Litter) (_ :  ξ.LitterPresent L), ξ.innerAtoms L)
@@ -338,14 +338,14 @@ theorem extraAtomMap_dom_small (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) :
   intro L hL
   exact ξ.innerAtoms_small L hL
 
-theorem extraAtomMap_eq_of_dom {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem extraAtomMap_eq_of_dom {ξ : BaseNLAction} {hξ : ξ.Lawful}
     (a : Atom) (ha : (ξ.atomMap a).Dom) :
     (ξ.extraAtomMap hξ a).get (Or.inl ha) = (ξ.atomMap a).get ha := by
   unfold extraAtomMap
   dsimp only
   rw [Or.elim'_left]
 
-theorem extraAtomMap_eq_of_innerAtoms {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem extraAtomMap_eq_of_innerAtoms {ξ : BaseNLAction} {hξ : ξ.Lawful}
     (a : Atom) (ha : ¬(ξ.atomMap a).Dom)
     (L : Litter) (hL : ξ.LitterPresent L) (ha' : a ∈ ξ.innerAtoms L) :
     (ξ.extraAtomMap hξ a).get (Or.inr (Or.inl ⟨L, hL, ha'⟩)) =
@@ -358,7 +358,7 @@ theorem extraAtomMap_eq_of_innerAtoms {ξ : NearLitterBehaviour} {hξ : ξ.Lawfu
   subst this
   rfl
 
-theorem extraAtomMap_eq_of_allOuterAtoms {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem extraAtomMap_eq_of_allOuterAtoms {ξ : BaseNLAction} {hξ : ξ.Lawful}
     (a : Atom) (ha : ¬(ξ.atomMap a).Dom) (ha' : a ∈ ξ.allOuterAtoms) :
     (ξ.extraAtomMap hξ a).get (Or.inr (Or.inr ha')) = ξ.outerAtomsEmbedding ⟨a, ha'⟩ := by
   unfold extraAtomMap
@@ -367,7 +367,7 @@ theorem extraAtomMap_eq_of_allOuterAtoms {ξ : NearLitterBehaviour} {hξ : ξ.La
   rintro ⟨L, hL₁, haL⟩
   exact innerAtoms_allOuterAtoms a hL₁ haL ha'
 
-theorem innerAtomsEmbedding_ne_atomMap {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem innerAtomsEmbedding_ne_atomMap {ξ : BaseNLAction} {hξ : ξ.Lawful}
     {a : Atom} (ha : (ξ.atomMap a).Dom)
     {L : Litter} {hL : ξ.LitterPresent L} (b : ξ.innerAtoms L) :
     (ξ.atomMap a).get ha ≠ ξ.innerAtomsEmbedding hξ L hL b := by
@@ -376,7 +376,7 @@ theorem innerAtomsEmbedding_ne_atomMap {ξ : NearLitterBehaviour} {hξ : ξ.Lawf
   rw [← h] at this
   exact this.2 ⟨a, ha, rfl⟩
 
-theorem outerAtomsEmbedding_ne_atomMap {ξ : NearLitterBehaviour}
+theorem outerAtomsEmbedding_ne_atomMap {ξ : BaseNLAction}
     {a : Atom} (ha : (ξ.atomMap a).Dom) (b : ξ.allOuterAtoms) :
     (ξ.atomMap a).get ha ≠ ξ.outerAtomsEmbedding b := by
   intro h
@@ -386,7 +386,7 @@ theorem outerAtomsEmbedding_ne_atomMap {ξ : NearLitterBehaviour}
   rw [← this]
   exact BannedLitter.atomMap a ha
 
-theorem innerAtomsEmbedding_ne_outerAtomsEmbedding {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem innerAtomsEmbedding_ne_outerAtomsEmbedding {ξ : BaseNLAction} {hξ : ξ.Lawful}
     {L : Litter} {hL : ξ.LitterPresent L} (a : ξ.innerAtoms L) (b : ξ.allOuterAtoms) :
     (ξ.innerAtomsEmbedding hξ L hL a : Atom) ≠ ξ.outerAtomsEmbedding b := by
   intro h
@@ -398,7 +398,7 @@ theorem innerAtomsEmbedding_ne_outerAtomsEmbedding {ξ : NearLitterBehaviour} {h
   obtain ⟨N, hN, rfl⟩ := hL
   exact bannedLitter_of_mem _ _ _ (this.1 _ ⟨N, rfl⟩ _ ⟨⟨hN, rfl⟩, rfl⟩)
 
-theorem innerAtomsEmbedding_disjoint {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem innerAtomsEmbedding_disjoint {ξ : BaseNLAction} {hξ : ξ.Lawful}
     {L₁ L₂ : Litter} {hL₁ : ξ.LitterPresent L₁} {hL₂ : ξ.LitterPresent L₂}
     (a₁ : ξ.innerAtoms L₁) (a₂ : ξ.innerAtoms L₂)
     (h : (ξ.innerAtomsEmbedding hξ L₁ hL₁ a₁ : Atom) = ξ.innerAtomsEmbedding hξ L₂ hL₂ a₂) :
@@ -414,7 +414,7 @@ theorem innerAtomsEmbedding_disjoint {ξ : NearLitterBehaviour} {hξ : ξ.Lawful
   by_contra! h'
   exact h₁.2 (hξ.ran_of_mem_inter _ h' hN₁ hN₂ ⟨h₁', h₂'⟩)
 
-theorem extraAtomMap_injective {ξ : NearLitterBehaviour} {hξ : ξ.Lawful} ⦃a b : Atom⦄
+theorem extraAtomMap_injective {ξ : BaseNLAction} {hξ : ξ.Lawful} ⦃a b : Atom⦄
     (ha : (ξ.extraAtomMap hξ a).Dom) (hb : (ξ.extraAtomMap hξ b).Dom)
     (h : (ξ.extraAtomMap hξ a).get ha = (ξ.extraAtomMap hξ b).get hb) : a = b := by
   by_cases ha' : (ξ.atomMap a).Dom <;> by_cases hb' : (ξ.atomMap b).Dom
@@ -454,7 +454,7 @@ theorem extraAtomMap_injective {ξ : NearLitterBehaviour} {hξ : ξ.Lawful} ⦃a
         cases (EmbeddingLike.apply_eq_iff_eq _).mp (Subtype.coe_injective h)
         rfl
 
-theorem mem_iff_of_mem_innerAtoms {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem mem_iff_of_mem_innerAtoms {ξ : BaseNLAction} (hξ : ξ.Lawful)
     {a : Atom} {L : Litter} (hL : ξ.LitterPresent L)
     (ha' : ¬(ξ.atomMap a).Dom) (ha : a ∈ ξ.innerAtoms L)
     {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) :
@@ -468,7 +468,7 @@ theorem mem_iff_of_mem_innerAtoms {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
   · rintro rfl
     exact (ha _ ⟨N, rfl⟩ _ ⟨⟨hN, rfl⟩, rfl⟩).1
 
-theorem extraAtomMap_mem_iff {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem extraAtomMap_mem_iff {ξ : BaseNLAction} {hξ : ξ.Lawful}
     ⦃a : Atom⦄ (ha : (ξ.extraAtomMap hξ a).Dom)
     ⦃N : NearLitter⦄ (hN : (ξ.nearLitterMap N).Dom) :
     (ξ.extraAtomMap hξ a).get ha ∈ (ξ.nearLitterMap N).get hN ↔ a ∈ N := by
@@ -500,7 +500,7 @@ theorem extraAtomMap_mem_iff {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
       obtain ⟨_, ⟨L, rfl⟩, _, ⟨hL, rfl⟩, ha⟩ := ha
       cases ha.2 ⟨_, ⟨N, rfl⟩, _, ⟨hN, rfl⟩, h⟩
 
-theorem extraAtomMap_dom_of_mem_symmDiff {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem extraAtomMap_dom_of_mem_symmDiff {ξ : BaseNLAction} (hξ : ξ.Lawful)
     {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) {a : Atom} (ha : a ∈ litterSet N.1 ∆ N) :
     (ξ.extraAtomMap hξ a).Dom := by
   by_cases ha' : (ξ.atomMap a).Dom
@@ -531,7 +531,7 @@ theorem extraAtomMap_dom_of_mem_symmDiff {ξ : NearLitterBehaviour} (hξ : ξ.La
       exact ⟨N, hN, rfl⟩
     · cases ha'' N hN ha.1
 
-theorem extraAtomMap_dom_of_mem_inter {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem extraAtomMap_dom_of_mem_inter {ξ : BaseNLAction} (hξ : ξ.Lawful)
     {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) {L : Litter}
     (h : N.1 ≠ L) {a : Atom} (ha₁ : a ∈ N) (ha₂ : a.1 = L) :
     (ξ.extraAtomMap hξ a).Dom := by
@@ -546,13 +546,13 @@ theorem extraAtomMap_dom_of_mem_inter {ξ : NearLitterBehaviour} (hξ : ξ.Lawfu
     by_contra ha''
     exact ha' (hξ.dom_of_mem_symmDiff a hN'.2 hN'.1 hN (Or.inr ⟨ha₁, ha''⟩))
 
-def extraLitterMap' (ξ : NearLitterBehaviour) (hξ : ξ.Lawful)
+def extraLitterMap' (ξ : BaseNLAction) (hξ : ξ.Lawful)
     (N : NearLitter) (hN : (ξ.nearLitterMap N).Dom) : Set Atom :=
   (ξ.nearLitterMap N).get hN ∆
     ⋃ (a : Atom) (ha : a ∈ litterSet N.1 ∆ N),
       {(ξ.extraAtomMap hξ a).get (extraAtomMap_dom_of_mem_symmDiff hξ hN ha)}
 
-theorem extraLitterMap'_subset {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem extraLitterMap'_subset {ξ : BaseNLAction} {hξ : ξ.Lawful}
     {N₁ N₂ : NearLitter} (h : N₁.1 = N₂.1)
     (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom) :
     ξ.extraLitterMap' hξ N₁ hN₁ ⊆ ξ.extraLitterMap' hξ N₂ hN₂ := by
@@ -602,13 +602,13 @@ theorem extraLitterMap'_subset {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
           exact ha₃
     · cases ha₂ ha₁
 
-theorem extraLitterMap'_eq {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem extraLitterMap'_eq {ξ : BaseNLAction} {hξ : ξ.Lawful}
     {N₁ N₂ : NearLitter} (h : N₁.1 = N₂.1)
     (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom) :
     ξ.extraLitterMap' hξ N₁ hN₁ = ξ.extraLitterMap' hξ N₂ hN₂ :=
   subset_antisymm (extraLitterMap'_subset h hN₁ hN₂) (extraLitterMap'_subset h.symm hN₂ hN₁)
 
-theorem extraLitterMap'_isNearLitter {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem extraLitterMap'_isNearLitter {ξ : BaseNLAction} (hξ : ξ.Lawful)
     {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) :
     IsNearLitter ((ξ.nearLitterMap N).get hN).1 (ξ.extraLitterMap' hξ N hN) := by
   rw [extraLitterMap']
@@ -618,7 +618,7 @@ theorem extraLitterMap'_isNearLitter {ξ : NearLitterBehaviour} (hξ : ξ.Lawful
   intro a ha
   exact small_singleton _
 
-theorem extraLitterMap'_disjoint {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem extraLitterMap'_disjoint {ξ : BaseNLAction} {hξ : ξ.Lawful}
     {N₁ N₂ : NearLitter} (h : N₁.1 ≠ N₂.1)
     (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom) (a : Atom) :
     a ∉ ξ.extraLitterMap' hξ N₁ hN₁ ∩ ξ.extraLitterMap' hξ N₂ hN₂ := by
@@ -664,22 +664,22 @@ theorem extraLitterMap'_disjoint {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
       · cases ha₂ hc.1
     · cases ha₁ hb.1
 
-def extraLitterMap (ξ : NearLitterBehaviour) (hξ : ξ.Lawful)
+def extraLitterMap (ξ : BaseNLAction) (hξ : ξ.Lawful)
     (N : NearLitter) (hN : (ξ.nearLitterMap N).Dom) : NearLitter :=
   ⟨((ξ.nearLitterMap N).get hN).1, ξ.extraLitterMap' hξ N hN, extraLitterMap'_isNearLitter hξ hN⟩
 
-theorem mem_extraLitterMap_iff {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem mem_extraLitterMap_iff {ξ : BaseNLAction} {hξ : ξ.Lawful}
     {N : NearLitter} {hN : (ξ.nearLitterMap N).Dom} (a : Atom) :
     a ∈ ξ.extraLitterMap hξ N hN ↔ a ∈ ξ.extraLitterMap' hξ N hN :=
   Iff.rfl
 
-theorem extraLitterMap_eq {ξ : NearLitterBehaviour} {hξ : ξ.Lawful}
+theorem extraLitterMap_eq {ξ : BaseNLAction} {hξ : ξ.Lawful}
     {N₁ N₂ : NearLitter} (h : N₁.1 = N₂.1)
     (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom) :
     ξ.extraLitterMap hξ N₁ hN₁ = ξ.extraLitterMap hξ N₂ hN₂ :=
   NearLitter.ext (extraLitterMap'_eq h hN₁ hN₂)
 
-noncomputable def withLitters (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) : NearLitterBehaviour where
+noncomputable def withLitters (ξ : BaseNLAction) (hξ : ξ.Lawful) : BaseNLAction where
   atomMap := ξ.extraAtomMap hξ
   nearLitterMap N := ⟨(ξ.nearLitterMap N).Dom ∨ (N.IsLitter ∧ ξ.LitterPresent N.1),
     fun h => h.elim'
@@ -688,14 +688,14 @@ noncomputable def withLitters (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) : Nea
   atomMap_dom_small := ξ.extraAtomMap_dom_small hξ
   nearLitterMap_dom_small := Small.union ξ.nearLitterMap_dom_small ξ.litterPresent_small'
 
-theorem withLitters_nearLitterMap_of_dom {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem withLitters_nearLitterMap_of_dom {ξ : BaseNLAction} (hξ : ξ.Lawful)
     {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) :
     ((ξ.withLitters hξ).nearLitterMap N).get (Or.inl hN) = (ξ.nearLitterMap N).get hN := by
   unfold withLitters
   dsimp only
   rw [Or.elim'_left]
 
-theorem withLitters_nearLitterMap_fst {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem withLitters_nearLitterMap_fst {ξ : BaseNLAction} (hξ : ξ.Lawful)
     {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) :
     ((ξ.withLitters hξ).nearLitterMap N.1.toNearLitter).get (Or.inr ⟨⟨_⟩, N, hN, rfl⟩) =
       ξ.extraLitterMap hξ N hN := by
@@ -711,7 +711,7 @@ theorem withLitters_nearLitterMap_fst {ξ : NearLitterBehaviour} (hξ : ξ.Lawfu
     have : ξ.LitterPresent N.1 := ⟨N, hN, rfl⟩
     rw [extraLitterMap_eq this.choose_spec.2 this.choose_spec.1 hN]
 
-theorem extraAtomMap_mem_iff' {ξ : NearLitterBehaviour} {hξ : Lawful ξ}
+theorem extraAtomMap_mem_iff' {ξ : BaseNLAction} {hξ : Lawful ξ}
     {a : Atom} (ha : (ξ.extraAtomMap hξ a).Dom)
     {N : NearLitter} (hN : (ξ.nearLitterMap N).Dom) :
     (ξ.extraAtomMap hξ a).get ha ∈ ξ.extraLitterMap hξ N hN ↔ a.1 = N.1 := by
@@ -746,7 +746,7 @@ theorem extraAtomMap_mem_iff' {ξ : NearLitterBehaviour} {hξ : Lawful ξ}
       · rw [SetLike.mem_coe, extraAtomMap_mem_iff]
         exact ha₂
 
-theorem extraAtomMap_ran_of_mem_symmDiff {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem extraAtomMap_ran_of_mem_symmDiff {ξ : BaseNLAction} (hξ : ξ.Lawful)
     {N₁ N₂ : NearLitter} (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom)
     (hN : N₁.fst = (Litter.toNearLitter N₂.1).fst)
     {a : Atom} (ha : a ∈ ((ξ.nearLitterMap N₁).get hN₁ : Set Atom) ∆ ξ.extraLitterMap' hξ N₂ hN₂) :
@@ -771,7 +771,7 @@ theorem extraAtomMap_ran_of_mem_symmDiff {ξ : NearLitterBehaviour} (hξ : ξ.La
       obtain ⟨b, hb, rfl⟩ := ha₁
       exact ⟨_, _, rfl⟩
 
-theorem extraAtomMap_ran_of_mem_inter {ξ : NearLitterBehaviour} (hξ : ξ.Lawful)
+theorem extraAtomMap_ran_of_mem_inter {ξ : BaseNLAction} (hξ : ξ.Lawful)
     {N₁ N₂ : NearLitter} (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom)
     (hN : N₁.fst ≠ (Litter.toNearLitter N₂.1).fst)
     {a : Atom} (ha : a ∈ ((ξ.nearLitterMap N₁).get hN₁ : Set Atom) ∩ ξ.extraLitterMap' hξ N₂ hN₂) :
@@ -786,7 +786,7 @@ theorem extraAtomMap_ran_of_mem_inter {ξ : NearLitterBehaviour} (hξ : ξ.Lawfu
     rw [SetLike.mem_coe, extraAtomMap_mem_iff] at ha₁ ha₃
     exact ⟨b, _, rfl⟩
 
-theorem withLitters_lawful (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) :
+theorem withLitters_lawful (ξ : BaseNLAction) (hξ : ξ.Lawful) :
     (ξ.withLitters hξ).Lawful := by
   constructor
   case atomMap_injective => exact extraAtomMap_injective
@@ -871,6 +871,6 @@ theorem withLitters_lawful (ξ : NearLitterBehaviour) (hξ : ξ.Lawful) :
         mem_extraLitterMap_iff] at ha
       cases extraLitterMap'_disjoint (by exact h) hN₁ hN₂ a ha
 
-end NearLitterBehaviour
+end BaseNLAction
 
 end ConNF
