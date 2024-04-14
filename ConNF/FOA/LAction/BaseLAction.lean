@@ -2,6 +2,16 @@ import ConNF.FOA.Basic.CompleteOrbit
 import ConNF.FOA.Basic.Constrains
 import ConNF.FOA.Approx.BaseApprox
 
+/-!
+# Base litter actions
+
+In this file, we define base litter actions.
+
+## Main declarations
+
+* `ConNF.BaseLAction`: The type of base litter actions.
+-/
+
 open Cardinal Quiver Set Sum WithBot
 
 open scoped Cardinal Classical Pointwise symmDiff
@@ -11,10 +21,6 @@ universe u
 namespace ConNF
 
 variable [Params.{u}]
-
-/-!
-# Structural actions
--/
 
 /-- Noncomputably eliminates a disjunction into a (possibly predicative) universe. -/
 noncomputable def _root_.Or.elim' {α : Sort _} {p q : Prop}
@@ -29,7 +35,7 @@ theorem _root_.Or.elim'_right {α : Sort _} {p q : Prop}
     (h : p ∨ q) (f : p → α) (g : q → α) (hp : ¬p) : h.elim' f g = g (h.resolve_left hp) :=
   by rw [Or.elim', dif_neg hp]
 
-/-- A *near-litter action* is a partial function from atoms to atoms and a partial
+/-- A *base litter action* is a partial function from atoms to atoms and a partial
 function from litters to near-litters, both of which have small domain.
 The image of a litter under the `litter_map` should be interpreted as the intended *precise* image
 of this litter under an allowable permutation. -/
@@ -40,17 +46,22 @@ structure BaseLAction where
   atomMap_dom_small : Small atomMap.Dom
   litterMap_dom_small : Small litterMap.Dom
 
+namespace BaseLAction
+
 /-- A near litter action in which the atom and litter maps are injective (in suitable senses) and
 cohere in the sense that images of atoms in litters are mapped to atoms inside the corresponding
 near-litters. -/
-structure BaseLAction.Lawful (φ : BaseLAction) : Prop where
+structure Lawful (φ : BaseLAction) : Prop where
   atomMap_injective : ∀ ⦃a b⦄ (ha hb),
     (φ.atomMap a).get ha = (φ.atomMap b).get hb → a = b
   litterMap_injective : ∀ ⦃L₁ L₂ : Litter⦄ (hL₁ hL₂),
     (((φ.litterMap L₁).get hL₁ : Set Atom) ∩ (φ.litterMap L₂).get hL₂).Nonempty → L₁ = L₂
   atom_mem : ∀ (a : Atom) (ha L hL), a.1 = L ↔ (φ.atomMap a).get ha ∈ (φ.litterMap L).get hL
 
-namespace BaseLAction
+@[mk_iff]
+structure Approximates (ψ : BaseLAction) (π : BasePerm) : Prop where
+  map_atom : ∀ a (h : (ψ.atomMap a).Dom), π • a = (ψ.atomMap a).get h
+  map_litter : ∀ L (h : (ψ.litterMap L).Dom), π • L.toNearLitter = (ψ.litterMap L).get h
 
 variable (φ : BaseLAction)
 

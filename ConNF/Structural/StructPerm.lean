@@ -10,7 +10,7 @@ recursively-constructed subgroups of *allowable permutations* which will act on 
 we define these larger ambient groups in advance in order to set up their infrastructure of
 derivatives and so on independently of the recursion.
 
-We define structural permutations as trees of near-litter permutations.
+We define structural permutations as trees of base permutations.
 
 ## Main declarations
 
@@ -27,7 +27,7 @@ namespace ConNF
 
 variable [Params.{u}]
 
-/-- A *structural permutation* on a proper type index `α` is a near-litter permutation for
+/-- A *structural permutation* on a proper type index `α` is a base permutation for
 each `α`-extended index. This represents how the permutation acts along each path down the type
 levels in the model. Note that we define structural permutations as trees of near-litter
 permutations. -/
@@ -40,7 +40,7 @@ instance instInhabitedStructPerm (α : TypeIndex) : Inhabited (StructPerm α) :=
   ⟨fun _ => 1⟩
 
 /-! The following lemmas show how the action of `⊥`-structural permutations on near-litters
-behaves; this is exactly how near-litter permutations behave. -/
+behaves; this is exactly how base permutations behave. -/
 
 @[simp]
 theorem smul_nearLitter_fst (π : StructPerm ⊥) (N : NearLitter) : (π • N).fst = π • N.fst :=

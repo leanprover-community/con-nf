@@ -14,7 +14,7 @@ variable [Params.{u}] {β : TypeIndex}
 # Structural actions
 -/
 
-/-- A `β`-structural action is a product that assigns a near-litter action to each `β`-extended
+/-- A `β`-structural action is a product that assigns a base near-litter action to each `β`-extended
 index. -/
 abbrev StructNLAction :=
   Tree BaseNLAction
@@ -23,6 +23,9 @@ namespace StructNLAction
 
 def Lawful (ξ : StructNLAction β) : Prop :=
   ∀ A, (ξ A).Lawful
+
+def Approximates (ξ : StructNLAction β) (π : StructPerm β) : Prop :=
+  ∀ A, (ξ A).Approximates (π A)
 
 noncomputable def withLitters (ξ : StructNLAction β) (hξ : ξ.Lawful) : StructNLAction β :=
   fun A => (ξ A).withLitters (hξ A)

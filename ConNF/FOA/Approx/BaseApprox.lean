@@ -2,6 +2,19 @@ import ConNF.Mathlib.Logic.Equiv.PartialPerm
 import ConNF.FOA.Basic.Flexible
 import ConNF.FOA.Basic.Sublitter
 
+/-!
+# Base approximations
+
+In this file, we define base approximations, and what it means for a base approximation to
+(exactly) approximate some base permutation.
+
+## Main declarations
+
+* `ConNF.BaseApprox`: The type of base approximations.
+* `ConNF.BaseApprox.Approximates`, `ConNF.BaseApprox.ExactlyApproximates`: Propositions that
+    indicate that a base approximation (exactly) approximates a given base permutation.
+-/
+
 open Quiver Set Sum
 
 open scoped Cardinal Pointwise
@@ -12,10 +25,9 @@ namespace ConNF
 
 variable [Params.{u}]
 
-/-!
-# Near-litter approximations
--/
-
+/-- A *base approximation* consists of a partial permutation of atoms and a partial permutation of
+litters, in such a way that only a small amount of atoms in the domain intersect any given
+litter set. -/
 @[ext]
 structure BaseApprox where
   atomPerm : PartialPerm Atom
@@ -153,6 +165,9 @@ end Generate
 def _root_.ConNF.BasePerm.IsException (π : BasePerm) (a : Atom) : Prop :=
   π • a ∉ litterSet (π • a.1) ∨ π⁻¹ • a ∉ litterSet (π⁻¹ • a.1)
 
+/-- A base approximation *approximates* a base permutation if they agree wherever they are both
+defined. Note that a base approximation does not define images of near-litters; we only require
+that the base permutation agrees with it for atoms and litters. -/
 @[mk_iff]
 structure Approximates (π₀ : BaseApprox) (π : BasePerm) : Prop where
   map_atom : ∀ a, a ∈ π₀.atomPerm.domain → π₀ • a = π • a
@@ -174,6 +189,9 @@ theorem Approximates.symm_map_litter {π₀ : BaseApprox} {π : BasePerm}
   rw [← this, smul_left_cancel_iff]
   exact π₀.litterPerm.right_inv hL
 
+/-- A base approximation `φ` *exactly approximates* a base permutation `π` if they agree wherever
+they are both defined, and every exception of `π` is in the domain of `φ`. This allows us to
+precisely calculate images of near-litters under `π`. -/
 @[mk_iff]
 structure ExactlyApproximates (π₀ : BaseApprox) (π : BasePerm) extends
     Approximates π₀ π : Prop where
@@ -196,6 +214,8 @@ theorem ExactlyApproximates.mem_litterSet_inv {π₀ : BaseApprox} {π : BasePer
     (hπ : π₀.ExactlyApproximates π) (a : Atom) (ha : a ∉ π₀.atomPerm.domain) :
     π⁻¹ • a ∈ litterSet (π⁻¹ • a.1) := by contrapose! ha; exact hπ.exception_mem _ (Or.inr ha)
 
+/-- A base approximation is said to be *`A`-free* if all of the litters in its domain are
+`A`-flexible. -/
 def Free [Level] [BasePositions] [FOAAssumptions] {β : TypeIndex} (π : BaseApprox)
     (A : ExtendedIndex β) : Prop :=
   ∀ L ∈ π.litterPerm.domain, Flexible A L

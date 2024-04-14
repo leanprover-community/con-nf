@@ -13,16 +13,7 @@ variable [Params.{u}] [Level] [BasePositions] [FOAAssumptions] {β : Λ} [LeLeve
 
 -- TODO: Reverse equalities of BaseApprox.map_atom
 
--- TODO: Move this to a better place
-@[mk_iff]
-structure BaseLAction.Approximates (ψ : BaseLAction) (π : BasePerm) : Prop where
-  map_atom : ∀ a (h : (ψ.atomMap a).Dom), π • a = (ψ.atomMap a).get h
-  map_litter : ∀ L (h : (ψ.litterMap L).Dom), π • L.toNearLitter = (ψ.litterMap L).get h
-
 namespace StructLAction
-
-def Approximates (ψ : StructLAction β) (π : StructPerm β) : Prop :=
-  ∀ A, (ψ A).Approximates (π A)
 
 structure CoherentDom (ψ : StructLAction β) : Prop where
   mapFlexible : ψ.MapFlexible
@@ -175,16 +166,7 @@ theorem freedom_of_action (ψ : StructLAction β) (h₁ : ψ.Lawful) (h₂ : ψ.
 
 end StructLAction
 
-@[mk_iff]
-structure BaseNLAction.Approximates
-    (ξ : BaseNLAction) (π : BasePerm) : Prop where
-  map_atom : ∀ a (h : (ξ.atomMap a).Dom), π • a = (ξ.atomMap a).get h
-  map_nearLitter : ∀ N (h : (ξ.nearLitterMap N).Dom), π • N = (ξ.nearLitterMap N).get h
-
 namespace StructNLAction
-
-def Approximates (ξ : StructNLAction β) (π : StructPerm β) : Prop :=
-  ∀ A, (ξ A).Approximates (π A)
 
 structure CoherentDom (ξ : StructNLAction β) : Prop where
   mapFlexible : ∀ (A : ExtendedIndex β) (N : NearLitter) (hN : ((ξ A).nearLitterMap N).Dom),

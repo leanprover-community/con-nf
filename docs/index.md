@@ -90,4 +90,4 @@ Note, however, that this choice is arbitrary, and any other finite axiomatisatio
 
 ## Dependency graph
 
-![dependency graph](https://leanprover-community.github.io/con-nf/depgraph.png)
+[![dependency graph](https://leanprover-community.github.io/con-nf/depgraph.png)](https://leanprover-community.github.io/con-nf/depgraph.pdf)

@@ -145,7 +145,7 @@ theorem Atom.support_supports (a : Atom) :
   exact h
 
 /-- The model data at level `⊥` is constructed by taking the t-sets to be the atoms, and
-the allowable permutations to be the near-litter permutations. -/
+the allowable permutations to be the base permutations. -/
 instance Bot.modelData : ModelData ⊥
     where
   TSet := Atom
@@ -285,7 +285,7 @@ end Allowable
 instance Bot.positionedTangles [BasePositions] : PositionedTangles ⊥ :=
   ⟨BasePositions.posAtom⟩
 
-/-- The identity equivalence between `⊥`-allowable permutations and near-litter permutations.
+/-- The identity equivalence between `⊥`-allowable permutations and base permutations.
 This equivalence is a group isomorphism. -/
 def _root_.BasePerm.ofBot : Allowable ⊥ ≃ BasePerm :=
   Equiv.refl _

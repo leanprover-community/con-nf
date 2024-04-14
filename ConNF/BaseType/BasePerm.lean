@@ -2,18 +2,18 @@ import Mathlib.Data.Set.Pointwise.SMul
 import ConNF.BaseType.NearLitter
 
 /-!
-# Near-litter permutations
+# Base permutations
 
-In this file, we define near-litter permutations, their group structure, and their actions on
+In this file, we define base permutations, their group structure, and their actions on
 atoms, litters, and near-litters.
 
 ## Main declarations
 
-* `ConNF.BasePerm`: The type of near-litter permutations.
-* `ConNF.BasePerm.smul_nearLitter_coe`: The action of a near-litter permutation on a
+* `ConNF.BasePerm`: The type of base permutations.
+* `ConNF.BasePerm.smul_nearLitter_coe`: The action of a base permutation on a
     near-litter agrees with the pointwise action that treats it as a set of atoms.
 * `ConNF.BasePerm.smul_nearLitter_eq_smul_symmDiff_smul`: We can determine the action of a
-    near-litter permutation on a near-litter by knowing its precise action on the relevant litter,
+    base permutation on a near-litter by knowing its precise action on the relevant litter,
     as well as the action on all atoms in the symmetric difference between that near-litter and its
     corresponding litter.
 -/
@@ -29,9 +29,9 @@ namespace ConNF
 variable [Params.{u}] {L : Litter}
 
 /--
-A near-litter permutation is a permutation of atoms which sends near-litters to near-litters.
+A base permutation is a permutation of atoms which sends near-litters to near-litters.
 Then, the images of near-litters near the same litter must be near the same litter. Hence a
-near-litter permutation induces a permutation of litters, and we keep that as data for simplicity.
+base permutation induces a permutation of litters, and we keep that as data for simplicity.
 
 This is sometimes called a -1-allowable permutation.
 The proposition `near` can be interpreted as saying that if `s` is an `L`-near-litter, then its
@@ -58,8 +58,8 @@ namespace BasePerm
 
 variable {π π' : BasePerm}
 
-/-- The map from the type of near-litter permutations to the type of permutations of atoms is
-injective. That is, if two near-litter permutations have the same action on atoms, they are
+/-- The map from the type of base permutations to the type of permutations of atoms is
+injective. That is, if two base permutations have the same action on atoms, they are
 equal. -/
 theorem atomPerm_injective : Injective BasePerm.atomPerm := by
   rintro ⟨πa, πL, hπ⟩ ⟨πa', πL', hπ'⟩ (h : πa = πa')
@@ -72,23 +72,23 @@ theorem atomPerm_injective : Injective BasePerm.atomPerm := by
     (((hπ <| isNearLitter_litterSet _).trans <| by rw [h]).trans
       (hπ' <| isNearLitter_litterSet _).symm)
 
-/-- An extensionality result for near-litter permutations.
-If two near-litter permutations have the same action on atoms, they are equal. -/
+/-- An extensionality result for base permutations.
+If two base permutations have the same action on atoms, they are equal. -/
 @[ext]
 theorem ext (h : π.atomPerm = π'.atomPerm) : π = π' :=
   atomPerm_injective h
 
 /-!
-We are going to show that the set of near-litter permutations forms a group.
+We are going to show that the set of base permutations forms a group.
 To do this, we construct several instances, such as the existence of an identity
 element or inverse elements.
 -/
 
-/-- The identity near-litter permutation. -/
+/-- The identity base permutation. -/
 instance : One BasePerm :=
   ⟨⟨1, 1, fun _ _ => id⟩⟩
 
-/-- Any near-litter permutation admits an inverse, which is also a near-litter permutation. -/
+/-- Any base permutation admits an inverse, which is also a base permutation. -/
 instance : Inv BasePerm :=
   ⟨fun π =>
     ⟨π.atomPerm⁻¹, π.litterPerm⁻¹, fun L s h => by
@@ -97,7 +97,7 @@ instance : Inv BasePerm :=
       simpa only [Perm.image_inv, toFun_as_coe, preimage_inv, preimage_image,
         isNear_litterSet] using this.image π.atomPerm⁻¹.toFun⟩⟩
 
-/-- Near-litter permutations can be composed. -/
+/-- Base permutations can be composed. -/
 instance : Mul BasePerm :=
   ⟨fun π π' => ⟨π.atomPerm * π'.atomPerm, π.litterPerm * π'.litterPerm, fun _ _ h => h.map.map⟩⟩
 
@@ -105,7 +105,7 @@ instance : Mul BasePerm :=
 instance : Div BasePerm :=
   ⟨fun π π' => ⟨π.atomPerm / π'.atomPerm, π.litterPerm / π'.litterPerm, (π * π'⁻¹).near⟩⟩
 
-/-- We can raise near-litter permutations to a natural power since we can do this to
+/-- We can raise base permutations to a natural power since we can do this to
 permutations of atoms and litters. -/
 instance : Pow BasePerm ℕ :=
   ⟨fun π n =>
@@ -117,7 +117,7 @@ instance : Pow BasePerm ℕ :=
           have := (⟨π.atomPerm ^ n, π.litterPerm ^ n, hn⟩ * π).near
           exact this⟩⟩
 
-/-- We can raise near-litter permutations to an integer power since we can do this to
+/-- We can raise base permutations to an integer power since we can do this to
 permutations of atoms and litters. -/
 instance : Pow BasePerm ℤ :=
   ⟨fun π n =>
@@ -130,7 +130,7 @@ instance : Inhabited BasePerm :=
   ⟨1⟩
 
 /-!
-The following lemmas describe how the group of near-litter permutations interacts with the group of
+The following lemmas describe how the group of base permutations interacts with the group of
 base type permutations and the group of litter permutations. In particular, many group operations,
 such as taking the inverse, can be moved out of the near-litter context and into the (simpler) base
 permutation or litter permutation context.
@@ -187,26 +187,26 @@ theorem litterPerm_pow (π : BasePerm) (n : ℕ) : (π ^ n).litterPerm = π.litt
 theorem litterPerm_zpow (π : BasePerm) (n : ℤ) : (π ^ n).litterPerm = π.litterPerm ^ n :=
   rfl
 
-/-- Near-litter permutations form a group. -/
+/-- Base permutations form a group. -/
 instance : Group BasePerm :=
   atomPerm_injective.group _ atomPerm_one atomPerm_hMul atomPerm_inv atomPerm_div atomPerm_pow
     atomPerm_zpow
 
-/-- Near-litter permutations act on atoms via the atom permutation. -/
+/-- Base permutations act on atoms via the atom permutation. -/
 instance : MulAction BasePerm Atom
     where
   smul π := π.atomPerm
   one_smul _ := rfl
   mul_smul _ _ _ := rfl
 
-/-- Near-litter permutations act on litters via the litter permutation. -/
+/-- Base permutations act on litters via the litter permutation. -/
 instance : MulAction BasePerm Litter
     where
   smul π := π.litterPerm
   one_smul _ := rfl
   mul_smul _ _ _ := rfl
 
-/-- Near-litter permutations act on near-litters. -/
+/-- Base permutations act on near-litters. -/
 instance : MulAction BasePerm NearLitter
     where
   smul π N := ⟨π • N.1, ↑π.atomPerm⁻¹ ⁻¹' N, π.near N.2.2⟩
@@ -225,7 +225,7 @@ theorem smul_nearLitter_coe_preimage (π : BasePerm) (N : NearLitter) :
     (π • N : NearLitter) = ((π.atomPerm⁻¹ : Perm Atom) : Atom → Atom) ⁻¹' N :=
   rfl
 
-/-- The action of a near-litter perm on a near-litter agrees with the pointwise action on its
+/-- The action of a base permutation on a near-litter agrees with the pointwise action on its
 atoms. -/
 theorem smul_nearLitter_coe (π : BasePerm) (N : NearLitter) :
     (π • N : NearLitter) = π • (N : Set Atom) := by

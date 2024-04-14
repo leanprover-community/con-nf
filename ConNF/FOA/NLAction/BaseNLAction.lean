@@ -40,6 +40,12 @@ structure Lawful (ξ : BaseNLAction) : Prop where
     a ∈ ((ξ.nearLitterMap N₁).get hN₁ : Set Atom) ∩ (ξ.nearLitterMap N₂).get hN₂ →
     a ∈ ξ.atomMap.ran
 
+@[mk_iff]
+structure Approximates
+    (ξ : BaseNLAction) (π : BasePerm) : Prop where
+  map_atom : ∀ a (h : (ξ.atomMap a).Dom), π • a = (ξ.atomMap a).get h
+  map_nearLitter : ∀ N (h : (ξ.nearLitterMap N).Dom), π • N = (ξ.nearLitterMap N).get h
+
 theorem map_nearLitter_fst {ξ : BaseNLAction} (hξ : ξ.Lawful) ⦃N₁ N₂ : NearLitter⦄
     (hN₁ : (ξ.nearLitterMap N₁).Dom) (hN₂ : (ξ.nearLitterMap N₂).Dom) :
     N₁.fst = N₂.fst ↔ ((ξ.nearLitterMap N₁).get hN₁).fst = ((ξ.nearLitterMap N₂).get hN₂).fst := by

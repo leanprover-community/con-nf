@@ -17,7 +17,7 @@ variable [Params.{u}] (φ : BaseLAction) [Level]
 
 namespace BaseLAction
 
-/-- The *sandbox litter* for a near-litter action is an arbitrarily chosen litter that
+/-- The *sandbox litter* for a base litter action is an arbitrarily chosen litter that
 isn't banned. -/
 noncomputable def sandboxLitter : Litter :=
   φ.not_bannedLitter_nonempty.some
@@ -49,7 +49,7 @@ theorem disjoint_sandbox :
     rw [φ.atomMapOrElse_of_dom hb]
     exact BannedLitter.atomMap b hb
 
-/-- A local permutation induced by completing the orbits of atoms in a near-litter action.
+/-- A local permutation induced by completing the orbits of atoms in a base litter action.
 This function creates forward and backward images of atoms in the *sandbox litter*,
 a litter which is away from the domain and range of the approximation in question, so it should
 not interfere with other constructions. -/
@@ -77,7 +77,7 @@ theorem atomPartialPerm_domain_small (hφ : φ.Lawful) : Small (φ.atomPartialPe
   Small.union (Small.union φ.atomMap_dom_small (lt_of_le_of_lt mk_image_le φ.atomMap_dom_small))
     φ.sandboxSubset_small
 
-/-- A near-litter approximation built from this near-litter action.
+/-- A near-litter approximation built from this base litter action.
 Its action on atoms matches that of the action, and its rough action on litters
 matches the given litter permutation. -/
 noncomputable def complete (hφ : φ.Lawful) (A : ExtendedIndex β) : BaseApprox
