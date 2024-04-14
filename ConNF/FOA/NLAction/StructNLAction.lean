@@ -1,5 +1,19 @@
 import ConNF.FOA.NLAction.BaseNLAction
 
+/-!
+# Structural near-litter actions
+
+In this file, we define structural near-litter actions, which are trees of base near-litter actions.
+
+## Main declarations
+
+* `ConNF.StructNLAction`: A tree of base near-litter actions.
+* `ConNF.StructNLAction.Lawful`, `ConNF.StructNLAction.Approximates`: Branchwise definitions of
+    lawfulness and approximation.
+* `ConNF.StructNLAction.withLitters`: Branchwise augmentation of near-litter action to define its
+    value on all litters associated to near-litters in its domain.
+-/
+
 open Cardinal Quiver Set Sum WithBot
 
 open scoped Cardinal Classical Pointwise symmDiff
@@ -9,10 +23,6 @@ universe u
 namespace ConNF
 
 variable [Params.{u}] {β : TypeIndex}
-
-/-!
-# Structural actions
--/
 
 /-- A `β`-structural action is a product that assigns a base near-litter action to each `β`-extended
 index. -/

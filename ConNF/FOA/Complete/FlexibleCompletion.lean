@@ -1,5 +1,16 @@
 import ConNF.FOA.Approx.BaseApprox
 
+/-!
+# Induced action: Flexible litters
+
+In this file, we describe the induced action of an approximation on flexible litters.
+
+## Main declarations
+
+* `ConNF.BaseApprox.flexibleCompletion`: Augments the litter permutation of a base approximation
+    so that it is defined on all flexible litters.
+-/
+
 open Set
 
 open scoped Classical

@@ -1,6 +1,16 @@
 import ConNF.FOA.Complete.HypAction
 import ConNF.FOA.Approx
 
+/-!
+# Induced action: Atoms
+
+In this file, we describe the induced action of an approximation on atoms.
+
+## Main declarations
+
+* `ConNF.StructApprox.atomCompletion`: The induced action of a structural approximation on an atom.
+-/
+
 open Set Sum
 
 open scoped Classical

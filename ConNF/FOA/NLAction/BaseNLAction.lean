@@ -1,5 +1,25 @@
 import ConNF.FOA.LAction.BaseLAction
 
+/-!
+# Base near-litter actions
+
+In this file, we define a slight variant of litter actions, called near-litter actions.
+They allow definition of the precise image of arbitrary near-litters, not just litters.
+This means that the lawfulness conditions are more complicated, but in exchange they are more
+useful to applications of the freedom of action theorem.
+
+## Main declarations
+
+* `ConNF.BaseNLAction`: The type of base near-litter actions.
+* `ConNF.BaseNLAction.Lawful`: Injectivity requirements that allow a near-litter action to be
+    converted into an approximation.
+* `ConNF.BaseNLAction.Approximates`: A base near-litter action *approximates* a base permutation if
+    they agree wherever they are defined.
+* `ConNF.BaseNLAction.withLitters`: Augments a near-litter action to define it on all litters near
+    any near-litter in its domain. This allows us to create a litter action from it.
+* `ConNF.BaseNLAction.withLitters_lawful`: The `withLitters` extension preserves lawfulness.
+-/
+
 open Cardinal Quiver Set Sum WithBot
 
 open scoped Cardinal Classical Pointwise symmDiff
@@ -685,6 +705,8 @@ theorem extraLitterMap_eq {ξ : BaseNLAction} {hξ : ξ.Lawful}
     ξ.extraLitterMap hξ N₁ hN₁ = ξ.extraLitterMap hξ N₂ hN₂ :=
   NearLitter.ext (extraLitterMap'_eq h hN₁ hN₂)
 
+/-- Augments a near-litter action to define it on all litters near any near-litter in its domain.
+This allows us to create a litter action from it. -/
 noncomputable def withLitters (ξ : BaseNLAction) (hξ : ξ.Lawful) : BaseNLAction where
   atomMap := ξ.extraAtomMap hξ
   nearLitterMap N := ⟨(ξ.nearLitterMap N).Dom ∨ (N.IsLitter ∧ ξ.LitterPresent N.1),
