@@ -1,7 +1,7 @@
 import ConNF.Mathlib.PFun
 import ConNF.Construction
 import ConNF.FOA
-import ConNF.Counting.CountStrongOrbit
+import ConNF.Counting.CountSupportOrbit
 
 open Cardinal Function MulAction Set Sum Quiver WithBot
 

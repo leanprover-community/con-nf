@@ -5,7 +5,7 @@ import ConNF.Counting.SpecSame
 import ConNF.Counting.SupportOrbit
 import ConNF.Counting.ExistsSpec
 import ConNF.Counting.CountSpec
-import ConNF.Counting.CountStrongOrbit
+import ConNF.Counting.CountSupportOrbit
 import ConNF.Counting.Hypotheses
 import ConNF.Counting.Recode
 import ConNF.Counting.CountCodingFunction

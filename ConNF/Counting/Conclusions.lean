@@ -1,5 +1,5 @@
 import ConNF.Counting.CountSpec
-import ConNF.Counting.CountStrongOrbit
+import ConNF.Counting.CountSupportOrbit
 import ConNF.Counting.CountCodingFunction
 import ConNF.Counting.CountRaisedSingleton
 
