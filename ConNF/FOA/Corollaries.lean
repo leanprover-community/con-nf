@@ -77,23 +77,23 @@ def FOAMotive (ψ : StructLAction β) (ρ : Allowable β) : Address β → Prop
       Allowable.toStructPerm ρ A • N = ((ψ A).litterMap N.1).get hL
 
 theorem foaMotive_atom (ψ : StructLAction β) (h₁ : ψ.Lawful)
-    (ρ : Allowable β) (hρ : (ψ.rc h₁).ExactlyApproximates (Allowable.toStructPerm ρ))
+    (ρ : Allowable β) (hρ : (ψ.toApprox h₁).ExactlyApproximates (Allowable.toStructPerm ρ))
     (A : ExtendedIndex β) (a : Atom)
     (ha : ((ψ A).atomMap a).Dom) :
     Allowable.toStructPerm ρ A • a = ((ψ A).atomMap a).get ha := by
   have := (hρ A).map_atom a ?_
-  · rw [← this, rc_smul_atom_eq]
+  · rw [← this, toApprox_smul_atom_eq]
   · exact Or.inl (Or.inl (Or.inl (Or.inl ha)))
 
 theorem foaMotive_litter (ψ : StructLAction β) (h₁ : ψ.Lawful) (h₂ : ψ.Coherent)
-    (ρ : Allowable β) (hρ : (ψ.rc h₁).ExactlyApproximates (Allowable.toStructPerm ρ))
+    (ρ : Allowable β) (hρ : (ψ.toApprox h₁).ExactlyApproximates (Allowable.toStructPerm ρ))
     (A : ExtendedIndex β) (L : Litter)
     (ih : ∀ (c : Address β), c < ⟨A, inr L.toNearLitter⟩ → FOAMotive ψ ρ c)
     (hL : ((ψ A).litterMap L).Dom) :
     Allowable.toStructPerm ρ A • L = (((ψ A).litterMap L).get hL).fst := by
   obtain (hL' | ⟨⟨⟨γ, ε, hε, A, rfl⟩, a, rfl⟩⟩ |
       ⟨⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, rfl⟩⟩) := flexible_cases' A L
-  · rw [← (hρ A).map_litter L (Or.inl (Or.inl ⟨hL, hL'⟩)), rc_smul_litter_eq,
+  · rw [← (hρ A).map_litter L (Or.inl (Or.inl ⟨hL, hL'⟩)), toApprox_smul_litter_eq,
       BaseLAction.flexibleLitterPartialPerm_apply_eq _ (by exact hL) hL',
       BaseLAction.roughLitterMapOrElse,
       BaseLAction.litterMapOrElse_of_dom]
@@ -134,7 +134,7 @@ theorem foaMotive_litter (ψ : StructLAction β) (h₁ : ψ.Lawful) (h₂ : ψ.C
       exact this.symm
 
 theorem foaMotive_nearLitter (ψ : StructLAction β) (h₁ : ψ.Lawful) (h₂ : ψ.Coherent)
-    (ρ : Allowable β) (hρ : (ψ.rc h₁).ExactlyApproximates (Allowable.toStructPerm ρ))
+    (ρ : Allowable β) (hρ : (ψ.toApprox h₁).ExactlyApproximates (Allowable.toStructPerm ρ))
     (A : ExtendedIndex β) (L : Litter)
     (ih : ∀ (c : Address β), c < ⟨A, inr L.toNearLitter⟩ → FOAMotive ψ ρ c)
     (hL : ((ψ A).litterMap L).Dom) :
@@ -149,7 +149,7 @@ theorem foaMotive_nearLitter (ψ : StructLAction β) (h₁ : ψ.Lawful) (h₂ : 
 -- TODO: This isn't the Lean naming convention!
 theorem freedom_of_action (ψ : StructLAction β) (h₁ : ψ.Lawful) (h₂ : ψ.Coherent) :
     ∃ ρ : Allowable β, ψ.Approximates (Allowable.toStructPerm ρ) := by
-  obtain ⟨ρ, hρ⟩ := (ψ.rc h₁).freedom_of_action (rc_free _ _ h₂.mapFlexible)
+  obtain ⟨ρ, hρ⟩ := (ψ.toApprox h₁).freedom_of_action (toApprox_free _ _ h₂.mapFlexible)
   refine ⟨ρ, ?_⟩
   have := fun c => WellFounded.induction (constrains_wf _).transGen (C := FOAMotive ψ ρ) c ?_
   · intro A

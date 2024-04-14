@@ -10,6 +10,10 @@ In this file, we define base litter actions.
 ## Main declarations
 
 * `ConNF.BaseLAction`: The type of base litter actions.
+* `ConNF.BaseLAction.Lawful`: Injectivity requirements that allow a litter action to be converted
+    into an approximation.
+* `ConNF.BaseLAction.Approximates`: A base litter action *approximates* a base permutation if they
+    agree wherever they are defined.
 -/
 
 open Cardinal Quiver Set Sum WithBot
@@ -48,7 +52,7 @@ structure BaseLAction where
 
 namespace BaseLAction
 
-/-- A near litter action in which the atom and litter maps are injective (in suitable senses) and
+/-- A base litter action in which the atom and litter maps are injective (in suitable senses) and
 cohere in the sense that images of atoms in litters are mapped to atoms inside the corresponding
 near-litters. -/
 structure Lawful (φ : BaseLAction) : Prop where
@@ -58,6 +62,8 @@ structure Lawful (φ : BaseLAction) : Prop where
     (((φ.litterMap L₁).get hL₁ : Set Atom) ∩ (φ.litterMap L₂).get hL₂).Nonempty → L₁ = L₂
   atom_mem : ∀ (a : Atom) (ha L hL), a.1 = L ↔ (φ.atomMap a).get ha ∈ (φ.litterMap L).get hL
 
+/-- A base litter action *approximates* a base permutation if they agree wherever they are
+defined. -/
 @[mk_iff]
 structure Approximates (ψ : BaseLAction) (π : BasePerm) : Prop where
   map_atom : ∀ a (h : (ψ.atomMap a).Dom), π • a = (ψ.atomMap a).get h
@@ -170,6 +176,8 @@ theorem litterMapOrElse_of_dom {L : Litter} (hL : (φ.litterMap L).Dom) :
     φ.litterMapOrElse L = (φ.litterMap L).get hL := by
   rw [litterMapOrElse, Part.getOrElse_of_dom]
 
+/-- If `L` is in the domain, this gives the (rough) image of `L` under `φ`.
+Otherwise, this gives an arbitrary litter. -/
 noncomputable def roughLitterMapOrElse (L : Litter) : Litter :=
   (φ.litterMapOrElse L).1
 
@@ -178,18 +186,18 @@ theorem roughLitterMapOrElse_of_dom {L : Litter} (hL : (φ.litterMap L).Dom) :
   rw [roughLitterMapOrElse, litterMapOrElse_of_dom]
 
 /-!
-# Preorder structure
+## Preorder structure
 -/
 
 /-- We define that `f ≤ g` if the domain of `f` is included in the domain of `g`, and
 they agree where they are defined. -/
-structure PFun.Le {α β : Type _} (f g : α →. β) : Prop where
+structure PFun.LE {α β : Type _} (f g : α →. β) : Prop where
   dom_of_dom : ∀ a, (f a).Dom → (g a).Dom
   get_eq : ∀ a h, (f a).get h = (g a).get (dom_of_dom a h)
 
 instance {α β : Type _} : PartialOrder (α →. β)
     where
-  le := PFun.Le
+  le := PFun.LE
   le_refl f := ⟨fun a => id, fun a h => rfl⟩
   le_trans f g h fg gh :=
     ⟨fun a ha => gh.dom_of_dom a (fg.dom_of_dom a ha), fun a ha =>
@@ -297,7 +305,9 @@ theorem roughLitterMapOrElse_injOn_dom_inter_flexible (hφ : φ.Lawful) :
     InjOn φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible A L}) :=
   (φ.roughLitterMapOrElse_injOn hφ).mono (inter_subset_left _ _)
 
-noncomputable def flexibleLitterPartialPerm (hφ : φ.Lawful) (A : ExtendedIndex β) : PartialPerm Litter :=
+/-- A partial permutation that agrees with `φ` on flexible litters in its domain. -/
+noncomputable def flexibleLitterPartialPerm (hφ : φ.Lawful) (A : ExtendedIndex β) :
+    PartialPerm Litter :=
   PartialPerm.complete φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible A L})
     {L | ¬φ.BannedLitter L ∧ Flexible A L} φ.mk_dom_inter_flexible_symmDiff_le
     φ.aleph0_le_not_bannedLitter_and_flexible φ.disjoint_dom_inter_flexible_not_bannedLitter

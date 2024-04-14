@@ -1,5 +1,21 @@
 import ConNF.FOA.LAction.BaseLAction
 
+/-!
+# Filling in orbits of atoms
+
+In `ConNF.FOA.LAction.Complete`, we showed how precise litter actions can be turned into
+approximations with suitable properties. In this file, we show a process that allows us to turn
+certain actions into precise actions, by filling in orbits of atoms that interact with litters in
+exceptional ways. We later extend this to all actions in `ConNF.FOA.LAction.FillAtomRange`.
+
+## Main declarations
+
+* `ConNF.BaseLAction.fillAtomOrbits`: Fills in orbits of certain atoms that behave exceptionally,
+    but does not alter the litter map.
+* `ConNF.BaseLAction.fillAtomOrbits_precise`: Assuming a certain hypothesis on the range of `ψ`,
+    the action we obtain from the `fillAtomOrbits` procedure is precise.
+-/
+
 open Cardinal Quiver Set Sum WithBot
 
 open scoped Cardinal Classical Pointwise symmDiff
@@ -9,10 +25,6 @@ universe u
 namespace ConNF
 
 variable [Params.{u}]
-
-/-!
-# Filling in orbits of atoms
--/
 
 namespace BaseLAction
 
@@ -30,7 +42,8 @@ theorem aleph0_le_not_bannedLitter : ℵ₀ ≤ #{L | ¬φ.BannedLitter L} := by
   exact Params.μ_isStrongLimit.isLimit.aleph0_le
 
 /-- A local permutation on the set of litters that occur in the domain or range of `w`.
-This permutes both flexible and inflexible litters. -/
+This permutes both flexible and inflexible litters. This is only used to control orbits of atoms,
+and will not be used for the litter permutation in a base approximation. -/
 noncomputable def litterPerm' (hφ : φ.Lawful) : PartialPerm Litter :=
   PartialPerm.complete φ.roughLitterMapOrElse φ.litterMap.Dom {L | ¬φ.BannedLitter L}
     φ.mk_dom_symmDiff_le φ.aleph0_le_not_bannedLitter φ.disjoint_dom_not_bannedLitter
@@ -647,6 +660,8 @@ theorem orbit_atom_mem
   · rw [φ.orbitAtomMap_eq_of_mem_nextImageCoreDomain hφ a ha]
     rw [φ.nextImageCore_atom_mem hφ hdiff a ha L hL]
 
+/-- Extends an action by filling in orbits of atoms that act exceptionally with respect to litters
+in its domain. -/
 noncomputable def fillAtomOrbits : BaseLAction
     where
   atomMap := φ.orbitAtomMap hφ

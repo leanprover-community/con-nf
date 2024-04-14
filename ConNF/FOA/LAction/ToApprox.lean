@@ -3,6 +3,22 @@ import ConNF.FOA.LAction.StructLAction
 import ConNF.FOA.LAction.FillAtomRange
 import ConNF.FOA.LAction.FillAtomOrbits
 
+/-!
+# Converting actions into approximations
+
+In this file, we combine the processes defined in `ConNF.FOA.LAction.FillAtomOrbits`,
+`ConNF.FOA.LAction.FillAtomRange`, and `ConNF.FOA.LAction.Complete`, which allows us to turn
+arbitrary litter actions into approximations.
+
+## Main declarations
+
+* `ConNF.BaseLAction.toApprox`: Converts a base litter action `ψ` into a base approximation `φ` in
+    such a way that if `φ` exactly approximates `π`, then
+
+    1. `ψ` agrees with `π` on all atoms and flexible litters; and
+    2. for any near-litter `N`, if `ψ` agrees with `π` on `N.1`, then `ψ` agrees with `π` on `N`.
+-/
+
 open Quiver Set
 
 universe u
@@ -10,10 +26,6 @@ universe u
 namespace ConNF
 
 variable [Params.{u}]
-
-/-!
-# Refinements of actions
--/
 
 namespace BaseLAction
 
@@ -90,44 +102,46 @@ namespace StructLAction
 variable [Level] [BasePositions] [FOAAssumptions] {β : Λ}
 
 /-- Refine and complete this action into a structural approximation. -/
-noncomputable def rc (φ : StructLAction β) (h : φ.Lawful) : StructApprox β :=
+noncomputable def toApprox (φ : StructLAction β) (h : φ.Lawful) : StructApprox β :=
   (φ.refine h).complete refine_lawful
 
-theorem rc_smul_atom_eq {φ : StructLAction β} {h : φ.Lawful} {B : ExtendedIndex β} {a : Atom}
-    (ha : ((φ B).atomMap a).Dom) : φ.rc h B • a = ((φ B).atomMap a).get ha := by
+theorem toApprox_smul_atom_eq {φ : StructLAction β} {h : φ.Lawful} {B : ExtendedIndex β} {a : Atom}
+    (ha : ((φ B).atomMap a).Dom) : φ.toApprox h B • a = ((φ B).atomMap a).get ha := by
   refine' (BaseLAction.complete_smul_atom_eq _ _).trans _
   · exact Or.inl (Or.inl ha)
   · simp only [refine_apply, refine_atomMap ha]
 
-theorem rc_smul_litter_eq {φ : StructLAction β} {hφ : φ.Lawful} {B : ExtendedIndex β} (L : Litter) :
-    φ.rc hφ B • L = (φ.refine hφ B).flexibleLitterPartialPerm (refine_lawful B) B L :=
-  rfl
-
-theorem rc_symm_smul_litter_eq {φ : StructLAction β} {hφ : φ.Lawful} {B : ExtendedIndex β}
+theorem toApprox_smul_litter_eq {φ : StructLAction β} {hφ : φ.Lawful} {B : ExtendedIndex β}
     (L : Litter) :
-    (φ.rc hφ B).symm • L = ((φ.refine hφ B).flexibleLitterPartialPerm (refine_lawful B) B).symm L :=
+    φ.toApprox hφ B • L = (φ.refine hφ B).flexibleLitterPartialPerm (refine_lawful B) B L :=
   rfl
 
-theorem rc_free (φ : StructLAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :
-    (φ.rc h₁).Free := by
+theorem toApprox_symm_smul_litter_eq {φ : StructLAction β} {hφ : φ.Lawful} {B : ExtendedIndex β}
+    (L : Litter) :
+    (φ.toApprox hφ B).symm • L =
+      ((φ.refine hφ B).flexibleLitterPartialPerm (refine_lawful B) B).symm L :=
+  rfl
+
+theorem toApprox_free (φ : StructLAction β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :
+    (φ.toApprox h₁).Free := by
   rintro B L' ((hL' | ⟨L', hL', rfl⟩) | hL')
   · exact hL'.2
   · rw [BaseLAction.roughLitterMapOrElse_of_dom _ hL'.1]
     exact h₂ B L' hL'.1 hL'.2
   · exact (PartialPerm.sandboxSubset_subset _ _ hL').2
 
-theorem rc_comp_atomPerm {γ : Λ} {φ : StructLAction β} {hφ : φ.Lawful}
+theorem toApprox_comp_atomPerm {γ : Λ} {φ : StructLAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) :
-    (rc (φ.comp A) (hφ.comp A) B).atomPerm =
-    (φ.rc hφ (A.comp B)).atomPerm := by
-  unfold rc refine complete BaseLAction.refine BaseLAction.complete
+    (toApprox (φ.comp A) (hφ.comp A) B).atomPerm =
+    (φ.toApprox hφ (A.comp B)).atomPerm := by
+  unfold toApprox refine complete BaseLAction.refine BaseLAction.complete
   simp_rw [Tree.comp_apply]
 
-theorem rc_comp_smul_atom {γ : Λ} {φ : StructLAction β} {hφ : φ.Lawful}
+theorem toApprox_comp_smul_atom {γ : Λ} {φ : StructLAction β} {hφ : φ.Lawful}
     (A : Path (β : TypeIndex) γ) (B : ExtendedIndex γ) (a : Atom) :
-    rc (φ.comp A) (hφ.comp A) B • a = φ.rc hφ (A.comp B) • a := by
+    toApprox (φ.comp A) (hφ.comp A) B • a = φ.toApprox hφ (A.comp B) • a := by
   change BaseApprox.atomPerm _ _ = BaseApprox.atomPerm _ _
-  rw [rc_comp_atomPerm]
+  rw [toApprox_comp_atomPerm]
 
 end StructLAction
 

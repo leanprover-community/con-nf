@@ -641,7 +641,7 @@ theorem NewAllowable.smul_address_eq_smul_iff
   StructPerm.smul_address_eq_smul_iff
 
 /-- For any near-litter `N`, the code `(α, ⊥, N)` is a tangle at level `α`.
-This is called a *typed near litter*. -/
+This is called a *typed near-litter*. -/
 def newTypedNearLitter (N : NearLitter) : NewTSet :=
   ⟨intro (show Set (TSet ⊥) from N.2.1) <| Code.isEven_bot _,
     Enumeration.singleton ⟨Quiver.Hom.toPath (bot_lt_coe _), Sum.inr N⟩,

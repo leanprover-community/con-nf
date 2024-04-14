@@ -2,6 +2,19 @@ import ConNF.FOA.Basic.Flexible
 import ConNF.FOA.Approx.StructApprox
 import ConNF.FOA.LAction.Complete
 
+/-!
+# Structural litter actions
+
+In this file, we define structural litter actions, which are trees of base litter actions.
+
+## Main declarations
+
+* `ConNF.StructLAction`: A tree of base litter actions.
+* `ConNF.StructLAction.Lawful`, `ConNF.StructLAction.Approximates`: Branchwise definitions of
+    lawfulness and approximation.
+* `ConNF.StructLAction.complete`: A structural approximation given by completing orbits branchwise.
+-/
+
 open Cardinal Quiver Set Sum WithBot
 
 open scoped Cardinal Classical Pointwise symmDiff
@@ -12,12 +25,7 @@ namespace ConNF
 
 variable [Params.{u}]
 
-/-!
-# Structural actions
--/
-
-/-- A `β`-structural action is a product that assigns a base litter action to each `β`-extended
-index. -/
+/-- A `β`-structural action is a `β`-tree of base litter actions. -/
 abbrev StructLAction :=
   Tree BaseLAction
 
@@ -26,7 +34,7 @@ namespace StructLAction
 def Lawful {β : TypeIndex} (φ : StructLAction β) : Prop :=
   ∀ B, (φ B).Lawful
 
-def Approximates (ψ : StructLAction β) (π : StructPerm β) : Prop :=
+def Approximates {β : TypeIndex} (ψ : StructLAction β) (π : StructPerm β) : Prop :=
   ∀ A, (ψ A).Approximates (π A)
 
 /-- This structural action maps flexible litters to flexible litters. -/

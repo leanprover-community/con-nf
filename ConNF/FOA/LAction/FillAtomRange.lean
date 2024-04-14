@@ -1,5 +1,20 @@
 import ConNF.FOA.LAction.BaseLAction
 
+/-!
+# Filling in ranges of base litter actions
+
+In `ConNF.FOA.LAction.FillAtomOrbits`, we showed that actions can be extended to form precise
+actions, under a certain condition on the range of their atom map. In this file, we show how to
+extend arbitrary actions to satisfy this hypothesis.
+
+## Main declarations
+
+* `ConNF.BaseLAction.fillAtomRange`: Fills in images of certain atoms so that completion of orbits
+    in `ConNF.BaseLAction.fillAtomOrbits` is successful.
+* `ConNF.BaseLAction.fillAtomRange_symmDiff_subset_ran`: The technical condition required to prove
+    `ConNF.BaseLAction.fillAtomOrbits_precise`.
+-/
+
 open Cardinal Quiver Set Sum WithBot
 
 open scoped Cardinal Classical Pointwise symmDiff
@@ -9,11 +24,6 @@ universe u
 namespace ConNF
 
 variable [Params.{u}]
-
-/-!
-# Filling in ranges of near litter actions
-TODO: Rename the gadgetry created in this file.
--/
 
 namespace BaseLAction
 

@@ -1,6 +1,6 @@
 import ConNF.FOA.Basic.Constrains
 import ConNF.FOA.Complete.HypAction
-import ConNF.FOA.LAction.Refine
+import ConNF.FOA.LAction.ToApprox
 import ConNF.FOA.Complete.FlexibleCompletion
 
 open Quiver Set Sum WithBot
@@ -65,12 +65,12 @@ variable {β : Λ} [LeLevel β] [FreedomOfActionHypothesis β]
 
 noncomputable def _root_.ConNF.StructLAction.allowable {γ : Λ} [LtLevel γ]
     (φ : StructLAction γ) (h : γ < β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) : Allowable γ :=
-  (freedomOfAction_of_lt _ h _ (StructLAction.rc_free _ h₁ h₂)).choose
+  (freedomOfAction_of_lt _ h _ (StructLAction.toApprox_free _ h₁ h₂)).choose
 
 theorem _root_.ConNF.StructLAction.allowable_exactlyApproximates {γ : Λ} [LtLevel γ]
     (φ : StructLAction γ) (h : γ < β) (h₁ : φ.Lawful) (h₂ : φ.MapFlexible) :
-    (φ.rc h₁).ExactlyApproximates (Allowable.toStructPerm (φ.allowable h h₁ h₂)) :=
-  (freedomOfAction_of_lt _ h _ (StructLAction.rc_free _ h₁ h₂)).choose_spec
+    (φ.toApprox h₁).ExactlyApproximates (Allowable.toStructPerm (φ.allowable h h₁ h₂)) :=
+  (freedomOfAction_of_lt _ h _ (StructLAction.toApprox_free _ h₁ h₂)).choose_spec
 
 noncomputable def _root_.ConNF.StructLAction.hypothesisedAllowable (φ : StructLAction β)
     {A : ExtendedIndex β} (h : InflexibleCoePath A)
@@ -87,7 +87,7 @@ theorem _root_.ConNF.StructLAction.hypothesisedAllowable_exactlyApproximates (φ
     (h₁ : StructLAction.Lawful (φ.comp (h.B.cons h.hδ)))
     (h₂ : StructLAction.MapFlexible (φ.comp (h.B.cons h.hδ))) :
     StructApprox.ExactlyApproximates
-      (StructLAction.rc (φ.comp (h.B.cons h.hδ)) h₁)
+      (StructLAction.toApprox (φ.comp (h.B.cons h.hδ)) h₁)
       (Allowable.toStructPerm (φ.hypothesisedAllowable h h₁ h₂)) :=
   StructLAction.allowable_exactlyApproximates (φ.comp (h.B.cons h.hδ)) _ _ _
 

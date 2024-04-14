@@ -1,7 +1,20 @@
 import ConNF.FOA.LAction.BaseLAction
 
 /-!
-# Completed permutations
+# Completing permutations
+
+Litter actions can be turned into approximations by completing orbits of atoms and litters. In this
+file, we describe a procedure for doing this process. The base approximation that we compute will
+only remember images of `A`-flexible litters for some fixed `A`, for use in the freedom of action
+theorem.
+
+## Main declarations
+
+* `ConNF.BaseLAction.complete`: A base approximation computed from a given base litter action.
+* `ConNF.BaseLAction.smul_nearLitter_eq_of_preciseAt`: If `ψ` is a precise litter action that is
+    completed to form `φ`, and `φ` exactly approximates `π`, then precise images of near-litters
+    under `ψ` and `π` agree, so long as their rough images agree. The condition about rough images
+    is required since the completion operation forgets all but the flexible litters.
 -/
 
 open Cardinal Quiver Set Sum WithBot
@@ -78,7 +91,7 @@ theorem atomPartialPerm_domain_small (hφ : φ.Lawful) : Small (φ.atomPartialPe
     φ.sandboxSubset_small
 
 /-- A near-litter approximation built from this base litter action.
-Its action on atoms matches that of the action, and its rough action on litters
+Its action on atoms matches that of the action, and its rough action on flexible litters
 matches the given litter permutation. -/
 noncomputable def complete (hφ : φ.Lawful) (A : ExtendedIndex β) : BaseApprox
     where

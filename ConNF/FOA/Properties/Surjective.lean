@@ -118,7 +118,7 @@ theorem preimageAction_coherent (hπf : π.Free) {γ : Λ} [LeLevel γ] (A : Pat
     (B : ExtendedIndex γ) (N : NearLitter) (c : Address β)
     (hc : ⟨A.comp B, inr (π.completeNearLitterMap (A.comp B) N)⟩ ≺ c) (ρ : Allowable γ)
     (h : StructApprox.ExactlyApproximates
-      (StructLAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
+      (StructLAction.toApprox ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
       (Allowable.toStructPerm ρ)) :
     completeNearLitterMap π (A.comp B) N =
     Tree.comp B (Allowable.toStructPerm ρ) • N := by
@@ -131,7 +131,7 @@ theorem preimageAction_coherent_atom (hπf : π.Free) {γ : Λ} [LeLevel γ] (A 
     (B : ExtendedIndex γ) (a : Atom) (c : Address β)
     (hc : ⟨A.comp B, inl (π.completeAtomMap (A.comp B) a)⟩ ≺ c) (ρ : Allowable γ)
     (h : StructApprox.ExactlyApproximates
-      (StructLAction.rc ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
+      (StructLAction.toApprox ((preimageAction hπf c).comp A) ((preimageAction_lawful hπf).comp _))
       (Allowable.toStructPerm ρ)) :
     completeAtomMap π (A.comp B) a = Tree.comp B (Allowable.toStructPerm ρ) • a := by
   refine' constrainedAction_coherent_atom A B a _ _ _ _ ρ h

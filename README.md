@@ -1,6 +1,6 @@
 # New Foundations is consistent
 
-![Con(NF)](docs/social/ConNF%20social.png)
+[![Con(NF)](docs/social/ConNF%20social.png)](https://leanprover-community.github.io/con-nf/)
 
 [![.github/workflows/push_main.yml](https://github.com/leanprover-community/con-nf/actions/workflows/push_main.yml/badge.svg)](https://github.com/leanprover-community/con-nf/actions/workflows/push_main.yml)
 
