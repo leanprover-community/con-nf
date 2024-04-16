@@ -1,4 +1,3 @@
-import Mathlib.Data.Fintype.Pi
 import Mathlib.Tactic.Have
 import Mathlib.ModelTheory.Satisfiability
 
@@ -10,13 +9,16 @@ noncomputable section
 
 open FirstOrder Language Theory Structure
 
-namespace ConNF
+namespace ConNF.Specker
 
 variable {L : Language} (ϕ : L →ᴸ L) (M : Type _) [L.Structure M] [Nonempty M]
 
 /-- A weaker version of the assumption that `ϕ` is an expansion on `M`. -/
 class IsEndomorphismOn (ϕ : L →ᴸ L) (M : Type _) [L.Structure M] : Prop where
   map_onSentence : ∀ (S : L.Sentence), M ⊨ ϕ.onSentence S ↔ M ⊨ S
+
+class IsTheoryEndomorphism (ϕ : L →ᴸ L) (T : L.Theory) where
+  map_onSentence : ∀ (S : L.Sentence), ϕ.onSentence S ∈ T ↔ S ∈ T
 
 export IsEndomorphismOn (map_onSentence)
 
@@ -282,12 +284,12 @@ theorem relabel_realize₄ {n : ℕ} (F : L.Formula (Fin (n + 1))) (e : Fin (n +
   · funext i
     cases Nat.not_lt_zero i i.prop
 
-theorem specker_aux {α : Type _} [DecidableEq α] [Fintype α] {n : ℕ} (A : L.BoundedFormula Empty 1)
-    (P : α → L.Formula (Fin n))
-    (k : Fin (n + 1)) :
+theorem specker_aux' {α : Type _} [Fintype α] {n : ℕ} (A : L.BoundedFormula Empty 1)
+    (P : α → L.Formula (Fin n)) (k : Fin (n + 1)) :
     ∃ e : Fin (n + 1) → M,
     (∀ x : M, A.Realize Empty.elim (fun _ => x) → A.Realize Empty.elim (fun _ => e k)) ∧
     ∀ i, (P i).Realize (fun j => e j) ↔ (ϕ.onFormula (P i)).Realize (fun j => e j.succ) := by
+  classical
   induction n generalizing α with
   | zero =>
     refine ⟨fun _ => Classical.epsilon (fun x : M => A.Realize Empty.elim (fun _ => x)), ?_, ?_⟩
@@ -355,4 +357,244 @@ theorem specker_aux {α : Type _} [DecidableEq α] [Fintype α] {n : ℕ} (A : L
         rw [this]
         rfl
 
-end ConNF
+theorem realize_boundedFormula_congr_freeVarFinset {M : Type _} [L.Structure M]
+    {α : Type _} [DecidableEq α]
+    {n : ℕ} {F : L.BoundedFormula α n} {v₁ v₂ : α → M} {xs₁ xs₂ : Fin n → M}
+    (hv : ∀ i ∈ F.freeVarFinset, v₁ i = v₂ i) (hxs : ∀ i : Fin n, xs₁ i = xs₂ i) :
+    F.Realize v₁ xs₁ ↔ F.Realize v₂ xs₂ := by
+  rw [← F.realize_restrictFreeVar subset_rfl, ← F.realize_restrictFreeVar subset_rfl, iff_eq_eq]
+  refine congr_arg₂ _ ?_ ?_
+  · funext i
+    exact hv i i.prop
+  · funext i
+    exact hxs i
+
+theorem realize_formula_congr_freeVarFinset {M : Type _} [L.Structure M]
+    {α : Type _} [DecidableEq α] {F : L.Formula α} {t₁ t₂ : α → M}
+    (h : ∀ v ∈ F.freeVarFinset, t₁ v = t₂ v) :
+    F.Realize t₁ ↔ F.Realize t₂ :=
+  realize_boundedFormula_congr_freeVarFinset h (fun _ => rfl)
+
+@[simp]
+theorem onTerm_freeVarFinset {α β : Type _} [DecidableEq α] {T : L.Term (α ⊕ β)} :
+    (ϕ.onTerm T).varFinsetLeft = T.varFinsetLeft := by
+  induction T with
+  | var => rfl
+  | func _ ts ih => simp only [Term.varFinsetLeft, ih]
+
+@[simp]
+theorem onBoundedFormula_freeVarFinset {α : Type _} [DecidableEq α]
+    {n : ℕ} {F : L.BoundedFormula α n} :
+    (ϕ.onBoundedFormula F).freeVarFinset = F.freeVarFinset := by
+  induction F with
+  | falsum => rfl
+  | equal t₁ t₂ => simp only [BoundedFormula.freeVarFinset, onTerm_freeVarFinset]
+  | rel _ ts => simp only [BoundedFormula.freeVarFinset, Function.comp_apply, onTerm_freeVarFinset]
+  | imp f₁ f₂ ih₁ ih₂ => simp only [BoundedFormula.freeVarFinset, ih₁, ih₂]
+  | all f ih => simp only [BoundedFormula.freeVarFinset, ih]
+
+@[simp]
+theorem onFormula_freeVarFinset {α : Type _} [DecidableEq α] {F : L.Formula α} :
+    (ϕ.onFormula F).freeVarFinset = F.freeVarFinset :=
+  onBoundedFormula_freeVarFinset ϕ
+
+theorem specker_aux (A : L.BoundedFormula Empty 1) (P : Finset (L.Formula ℤ)) :
+    ∃ e : ℤ → M,
+    (∀ x : M, A.Realize Empty.elim (fun _ => x) → A.Realize Empty.elim (fun _ => e 0)) ∧
+    ∀ F ∈ P, F.Realize e ↔ (ϕ.onFormula F).Realize (e ∘ (· + 1)) := by
+  have : ∃ n : ℕ, ∀ F ∈ P, ∀ j ∈ F.freeVarFinset, -n < j ∧ j < n
+  · have : ∀ n : ℕ, ∀ j : ℤ, j.natAbs < n ↔ -n < j ∧ j < n := by omega
+    refine ⟨P.sup (fun F => F.freeVarFinset.sup Int.natAbs) + 1, ?_⟩
+    intro F hF j hj
+    rw [← this, Nat.lt_succ]
+    exact le_trans (Finset.le_sup hj)
+      (Finset.le_sup (f := fun F => F.freeVarFinset.sup Int.natAbs) hF)
+  obtain ⟨n, hP⟩ := this
+  obtain ⟨e, he₁, he₂⟩ := specker_aux' ϕ M A
+    (fun F : P => F.val.relabel (fun j : ℤ => ((j + n).toNat : Fin (2 * n + 1)))) n
+  refine ⟨fun j => e (j + n).toNat, ?_, ?_⟩
+  · intro x hx
+    simp only [zero_add, Int.toNat_ofNat]
+    exact he₁ x hx
+  · intro F hF
+    convert he₂ ⟨F, hF⟩ using 1
+    · simp only [Fin.coe_eq_castSucc, Formula.realize_relabel]
+      refine realize_formula_congr_freeVarFinset ?_
+      intro j hj
+      simp only [Function.comp_apply]
+      refine congr_arg _ ?_
+      refine Fin.val_injective ?_
+      simp only [Fin.val_nat_cast, Fin.coe_castSucc]
+      have := hP F hF j hj
+      rw [Nat.mod_eq_of_lt, Nat.mod_eq_of_lt]
+      · rw [Int.toNat_lt' (by exact Nat.succ_ne_zero _)]
+        simp only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, gt_iff_lt]
+        linarith
+      · rw [Int.toNat_lt' (by exact Nat.succ_ne_zero _)]
+        simp only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, gt_iff_lt]
+        linarith
+    · simp only [onFormula_relabel, Formula.realize_relabel]
+      refine realize_formula_congr_freeVarFinset ?_
+      intro j hj
+      simp only [Function.comp_apply]
+      refine congr_arg _ ?_
+      refine Fin.val_injective ?_
+      simp only [Fin.val_nat_cast, Fin.val_succ]
+      rw [onFormula_freeVarFinset] at hj
+      have := hP F hF j hj
+      rw [Nat.mod_eq_of_lt, Nat.mod_eq_of_lt]
+      · rw [add_assoc, add_comm 1, ← add_assoc, ← Int.toNat_add_nat]
+        rfl
+        linarith
+      · rw [Int.toNat_lt' (by exact Nat.succ_ne_zero _)]
+        simp only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, gt_iff_lt]
+        linarith
+      · rw [Int.toNat_lt' (by exact Nat.succ_ne_zero _)]
+        simp only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, gt_iff_lt]
+        linarith
+
+/-- Define the type raising endomorphism on constants indexed by `ℤ`. -/
+def raise : constantsOn ℤ →ᴸ constantsOn ℤ where
+  onFunction := fun n => match n with
+    | 0 => fun c : ℤ => c + 1
+    | 1 => PEmpty.elim
+    | 2 => PEmpty.elim
+    | (_ + 3) => PEmpty.elim
+  onRelation := fun n => match n with
+    | 0 => PEmpty.elim
+    | 1 => PEmpty.elim
+    | 2 => PEmpty.elim
+    | (_ + 3) => PEmpty.elim
+
+def speckerTheory₁ {L : Language} (ϕ : L →ᴸ L) (T : L.Theory) (A : L.BoundedFormula Empty 1) :
+    L[[ℤ]].Theory :=
+  (L.lhomWithConstants ℤ).onTheory T ∪
+  {∃' ((L.lhomWithConstants ℤ).onBoundedFormula A) ⟹
+    ((L.lhomWithConstants ℤ).onFormula A.toFormula).subst (fun _ => Constants.term (L.con 0))} ∪
+  ⋃ (F : L[[ℤ]].Sentence), {F ⇔ (ϕ.sumMap raise).onSentence F}
+
+def speckerTheory₁' {L : Language} (ϕ : L →ᴸ L) (T : L.Theory) (A : L.BoundedFormula Empty 1) :
+    L[[ℤ]].Theory :=
+  (L.lhomWithConstants ℤ).onTheory T ∪
+  {∃' ((L.lhomWithConstants ℤ).onBoundedFormula A) ⟹
+    ((L.lhomWithConstants ℤ).onFormula A.toFormula).subst (fun _ => Constants.term (L.con 0))} ∪
+  ⋃ (F : L[[ℤ]].Sentence), {F ⇔ (ϕ.sumMap raise).onSentence F}
+
+theorem isSatisfiable_union_iUnion_iff_isSatisfiable_union_iUnion_finset {L : Language} {ι : Type*}
+    (T₁ : L.Theory) (T₂ : ι → L.Theory) :
+    IsSatisfiable (T₁ ∪ ⋃ i, T₂ i) ↔ ∀ s : Finset ι, IsSatisfiable (T₁ ∪ ⋃ i ∈ s, T₂ i) := by
+  constructor
+  · intro h s
+    refine h.mono ?_
+    simp only [Set.union_subset_iff, Set.subset_union_left, Set.iUnion_subset_iff, true_and]
+    intro i _ S hS
+    simp only [Set.mem_union, Set.mem_iUnion]
+    exact Or.inr ⟨i, hS⟩
+  obtain (hι | hι) := isEmpty_or_nonempty ι
+  · simp only [Set.iUnion_of_empty, Set.union_empty, forall_const, imp_self]
+  · rw [Set.union_iUnion T₁ T₂, isSatisfiable_iUnion_iff_isSatisfiable_iUnion_finset]
+    intro h s
+    refine (h s).mono ?_
+    simp only [Set.iUnion_subset_iff, Set.union_subset_iff, Set.subset_union_left, true_and]
+    intro i hi S hS
+    simp only [Set.mem_union, Set.mem_iUnion, exists_prop]
+    exact Or.inr ⟨i, hi, hS⟩
+
+theorem isEndomorphismOn_of_isTheoryEndomorphism {L : Language} (ϕ : L →ᴸ L) (T : L.Theory)
+    (hT : T.IsMaximal) (hT' : IsTheoryEndomorphism ϕ T) (M : Type _)
+    [L.Structure M] [M ⊨ T] : IsEndomorphismOn ϕ M := by
+  constructor
+  intro S
+  obtain (hS | hS) := hT.2 S
+  · have hS' := (hT'.map_onSentence S).mpr hS
+    simp only [Model.realize_of_mem S hS, Model.realize_of_mem _ hS']
+  · have hS' := (hT'.map_onSentence _).mpr hS
+    have h₁ : ¬M ⊨ S := Model.realize_of_mem (M := M) _ hS
+    have h₂ : ¬M ⊨ ϕ.onSentence S := Model.realize_of_mem (M := M) _ hS'
+    simp only [h₂, h₁]
+
+theorem onFormula_equivSentence_symm {L L' : Language} {ϕ : L →ᴸ L'}
+    {α : Type _} (S : L[[α]].Sentence) :
+    ϕ.onFormula (Formula.equivSentence.symm S) =
+    Formula.equivSentence.symm ((ϕ.sumMap (LHom.id _)).onSentence S) := by
+  sorry
+
+theorem relabel_equivSentence {α β : Type _} (S : L[[α]].Sentence) (f : α → β) :
+    (Formula.equivSentence.symm S).relabel f =
+    Formula.equivSentence.symm ((L.lhomWithConstantsMap f).onSentence S) :=
+  sorry
+
+theorem realize_equivSentence {α : Type _} (S : L[[α]].Sentence) (v : α → M) :
+    (Formula.equivSentence.symm S).Realize v =
+    letI := constantsOn.structure v
+    S.Realize M :=
+  sorry
+
+@[simp]
+theorem equivSentence_symm_iff {α : Type _} (S T : L[[α]].Sentence) :
+    Formula.equivSentence.symm (S ⇔ T) =
+    Formula.equivSentence.symm S ⇔ Formula.equivSentence.symm T :=
+  rfl
+
+theorem comp_add_id_eq {L : Language} (ϕ : L →ᴸ L) :
+    LHom.comp (L.lhomWithConstantsMap (· + 1)) (ϕ.sumMap (LHom.id _)) = ϕ.sumMap raise := by
+  ext : 1
+  · funext n f
+    cases f
+    · rfl
+    cases' n with n; rfl
+    cases' n with n; rfl
+    cases' n with n; rfl
+    rfl
+  · funext n f
+    cases f
+    · rfl
+    cases' n with n; rfl
+    cases' n with n; rfl
+    cases' n with n; rfl
+    rfl
+
+theorem speckerTheory₁_isSatisfiable {L : Language} (ϕ : L →ᴸ L) (T : L.Theory)
+    (hT : T.IsMaximal) (hT' : IsTheoryEndomorphism ϕ T)
+    (A : L.BoundedFormula Empty 1) :
+    (speckerTheory₁ ϕ T A).IsSatisfiable := by
+  rw [speckerTheory₁, isSatisfiable_union_iUnion_iff_isSatisfiable_union_iUnion_finset]
+  intro s
+  obtain ⟨M⟩ := hT.1
+  haveI hendo := isEndomorphismOn_of_isTheoryEndomorphism ϕ T hT hT' M
+  obtain ⟨e, he₁, he₂⟩ := specker_aux ϕ M A (s.map Formula.equivSentence.symm.toEmbedding)
+  letI iMℤ : (constantsOn ℤ).Structure M := constantsOn.structure e
+  refine ⟨@ModelType.mk _ _ M inferInstance ?_ inferInstance⟩
+  simp only [model_iff, Set.mem_union, Set.mem_iUnion, exists_prop]
+  rintro S ((⟨S, hS, rfl⟩ | rfl) | ⟨S, hS, rfl⟩)
+  · rw [LHom.realize_onSentence]
+    exact M.is_model.realize_of_mem S hS
+  · simp only [Sentence.Realize, LHom.onFormula, Formula.Realize, BoundedFormula.realize_imp,
+      BoundedFormula.realize_ex, LHom.realize_onBoundedFormula, BoundedFormula.realize_subst,
+      Term.realize_constants, forall_exists_index]
+    intro x hx
+    have := he₁ x ?_
+    · have h := BoundedFormula.realize_toFormula A (Sum.elim Empty.elim (fun _ => e 0))
+      simp only [Sum.elim_comp_inl, Sum.elim_comp_inr] at h
+      rw [← h, Formula.Realize] at this
+      convert this using 1
+      funext i
+      obtain (i | _) := i
+      · cases i
+      · rfl
+    · convert hx using 1
+  · have := he₂ (Formula.equivSentence.symm S) ?_
+    · rw [onFormula_equivSentence_symm] at this
+      rw [← realize_equivSentence, equivSentence_symm_iff, Formula.realize_iff, this,
+        ← Formula.realize_relabel, iff_eq_eq, relabel_equivSentence]
+      refine congr_arg₂ _ ?_ rfl
+      simp only [EmbeddingLike.apply_eq_iff_eq, LHom.onSentence, LHom.onFormula]
+      have := LHom.comp_onBoundedFormula
+        (L.lhomWithConstantsMap (· + (1 : ℤ))) (ϕ.sumMap (LHom.id _)) (α := Empty) (n := 0)
+      have := congr_fun this S
+      dsimp only [Function.comp] at this
+      rw [← this, comp_add_id_eq]
+    · simp only [Finset.mem_map_equiv, Equiv.symm_symm, Equiv.apply_symm_apply]
+      exact hS
+
+end ConNF.Specker
