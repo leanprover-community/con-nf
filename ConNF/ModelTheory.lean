@@ -513,21 +513,566 @@ theorem isEndomorphismOn_of_isTheoryEndomorphism {L : Language} (ϕ : L →ᴸ L
     have h₂ : ¬M ⊨ ϕ.onSentence S := Model.realize_of_mem (M := M) _ hS'
     simp only [h₂, h₁]
 
+@[simp]
+theorem onBoundedFormula_relabelEquiv {α β : Type _} {L L' : Language} {n : ℕ}
+    (ϕ : L →ᴸ L') (F : L.BoundedFormula α n) (g : α ≃ β) :
+    ϕ.onBoundedFormula (BoundedFormula.relabelEquiv g F) =
+    BoundedFormula.relabelEquiv g (ϕ.onBoundedFormula F) := by
+  induction F
+  case falsum i => rfl
+  case equal i t₁ t₂ =>
+    simp only [LHom.onBoundedFormula, Term.relabelEquiv_apply, onTerm_relabel,
+      BoundedFormula.relabelEquiv, BoundedFormula.mapTermRelEquiv_apply, Equiv.coe_refl]
+    rfl
+  case rel n l R ts =>
+    simp only [LHom.onBoundedFormula, Equiv.refl_apply, Term.relabelEquiv_apply, Function.comp,
+      onTerm_relabel, BoundedFormula.relabelEquiv, BoundedFormula.mapTermRelEquiv_apply,
+      Equiv.coe_refl]
+    rfl
+  case imp i f₁ f₂ ih₁ ih₂ =>
+    simp only [LHom.onBoundedFormula, Equiv.coe_refl, BoundedFormula.relabelEquiv,
+      BoundedFormula.mapTermRelEquiv_apply, BoundedFormula.mapTermRel, BoundedFormula.imp.injEq]
+    exact ⟨ih₁, ih₂⟩
+  case all i f ih =>
+    simp only [LHom.onBoundedFormula, Equiv.coe_refl, id_eq, BoundedFormula.relabelEquiv,
+      BoundedFormula.mapTermRelEquiv_apply, BoundedFormula.mapTermRel, BoundedFormula.all.injEq]
+    exact ih
+
+@[simp]
+theorem onTerm_constantsVarsEquivLeft {L L' : Language} {ϕ : L →ᴸ L'}
+    {α β : Type _} {n : ℕ} (T : L[[α]].Term (β ⊕ Fin n)) :
+    ϕ.onTerm (Term.constantsToVars T) =
+    Term.constantsToVars ((ϕ.sumMap (LHom.id _)).onTerm T) := by
+  induction' T with x l f ts ih
+  · rfl
+  · cases' f with f f
+    · cases' l with l
+      · simp only [LHom.onTerm, Term.constantsToVars, constantsOn, mk₂_Functions, Nat.zero_eq,
+          LHom.sumMap_onFunction, LHom.id_onFunction, id_eq, Sum.map_inl, Term.func.injEq,
+          heq_eq_eq, true_and]
+        funext i
+        cases i.val.not_lt_zero i.prop
+      · simp only [LHom.onTerm, ih, constantsOn, Term.constantsToVars, mk₂_Functions,
+          LHom.sumMap_onFunction, LHom.id_onFunction, id_eq, Sum.map_inl]
+    · cases' l with l
+      · rfl
+      cases' l with l; cases f
+      cases' l with l; cases f
+      cases f
+
+theorem onRelation_sumEmpty_eq {L L' : Language} (ϕ : L →ᴸ L') {α : Type _} {l : ℕ}
+    (R : L[[α]].Relations l) :
+    ϕ.onRelation (Equiv.sumEmpty (L.Relations l) ((constantsOn α).Relations l) R) =
+    Equiv.sumEmpty (L'.Relations l) ((constantsOn α).Relations l)
+      (Sum.map (fun f => ϕ.onRelation f) id R) := by
+  obtain (R | R) := R
+  · rfl
+  · cases' l with l
+    cases R
+    cases' l with l
+    cases R
+    cases' l with l
+    cases R
+    cases R
+
+@[simp]
+theorem onBoundedFormula_constantsVarsEquiv {L L' : Language} {ϕ : L →ᴸ L'}
+    {α β : Type _} {n : ℕ} (F : L[[α]].BoundedFormula β n) :
+    ϕ.onBoundedFormula (BoundedFormula.constantsVarsEquiv F) =
+    BoundedFormula.constantsVarsEquiv ((ϕ.sumMap (LHom.id _)).onBoundedFormula F) := by
+  induction F
+  case falsum i => rfl
+  case equal i t₁ t₂ =>
+    simp only [LHom.onBoundedFormula, Term.constantsVarsEquivLeft_apply, onTerm_relabel,
+      onTerm_constantsVarsEquivLeft, constantsOn, BoundedFormula.constantsVarsEquiv, mk₂_Relations,
+      BoundedFormula.mapTermRelEquiv_apply, BoundedFormula.mapTermRel]
+    rfl
+  case rel n l R ts =>
+    simp only [LHom.onBoundedFormula, constantsOn, mk₂_Relations, Term.constantsVarsEquivLeft_apply,
+      Function.comp, onTerm_relabel, onTerm_constantsVarsEquivLeft,
+      BoundedFormula.constantsVarsEquiv, LHom.sumMap_onRelation, LHom.id_onRelation, id_eq,
+      BoundedFormula.mapTermRelEquiv_apply, BoundedFormula.mapTermRel, Relations.boundedFormula]
+    congr
+    exact onRelation_sumEmpty_eq ϕ R
+  case imp i f₁ f₂ ih₁ ih₂ =>
+    simp only [LHom.onBoundedFormula, constantsOn, mk₂_Relations, BoundedFormula.constantsVarsEquiv,
+      BoundedFormula.mapTermRelEquiv_apply, BoundedFormula.mapTermRel, BoundedFormula.imp.injEq]
+    exact ⟨ih₁, ih₂⟩
+  case all i f ih =>
+    simp only [LHom.onBoundedFormula, constantsOn, mk₂_Relations, id_eq,
+      BoundedFormula.constantsVarsEquiv, BoundedFormula.mapTermRelEquiv_apply,
+      BoundedFormula.mapTermRel, BoundedFormula.all.injEq]
+    exact ih
+
+@[simp]
 theorem onFormula_equivSentence_symm {L L' : Language} {ϕ : L →ᴸ L'}
     {α : Type _} (S : L[[α]].Sentence) :
     ϕ.onFormula (Formula.equivSentence.symm S) =
     Formula.equivSentence.symm ((ϕ.sumMap (LHom.id _)).onSentence S) := by
+  simp only [LHom.onFormula, Formula.equivSentence, Equiv.symm_symm, Equiv.trans_apply,
+    onBoundedFormula_relabelEquiv, onBoundedFormula_constantsVarsEquiv, constantsOn,
+    LHom.onSentence]
+
+theorem relabel_relabelEquiv' {α β : Type _} {n : ℕ}
+    (F : L.BoundedFormula (α ⊕ Empty) n) (f : α → β) :
+    BoundedFormula.relabel (n := 0) (Sum.inl ∘ f)
+      (BoundedFormula.relabelEquiv (Equiv.sumEmpty α Empty) F) =
+    BoundedFormula.relabelEquiv (Equiv.sumEmpty β Empty) (F.relabel (Sum.inl ∘ Sum.map f id)) := by
+  induction F
+  case falsum i => rfl
+  case equal i t₁ t₂ =>
+    simp only [BoundedFormula.relabel, BoundedFormula.mapTermRel, BoundedFormula.relabelAux,
+      Term.relabelEquiv_apply, Term.relabel_relabel, BoundedFormula.relabelEquiv,
+      BoundedFormula.mapTermRelEquiv_apply, BoundedFormula.equal.injEq]
+    refine ⟨?_, ?_⟩
+    · congr 1
+      funext x
+      obtain ((x | x) | x) := x
+      · rfl
+      · cases x
+      · rfl
+    · congr 1
+      funext x
+      obtain ((x | x) | x) := x
+      · rfl
+      · cases x
+      · rfl
+  case rel n l R ts =>
+    simp only [BoundedFormula.relabel, BoundedFormula.mapTermRel, Equiv.refl_apply, id_eq,
+      BoundedFormula.relabelAux, Term.relabelEquiv_apply, Term.relabel_relabel,
+      BoundedFormula.relabelEquiv, BoundedFormula.mapTermRelEquiv_apply, BoundedFormula.rel.injEq,
+      heq_eq_eq, true_and]
+    funext i
+    congr 1
+    funext x
+    obtain ((x | x) | x) := x
+    · rfl
+    · cases x
+    · rfl
+  case imp i f₁ f₂ ih₁ ih₂ =>
+    simp only [BoundedFormula.relabelEquiv, BoundedFormula.mapTermRelEquiv_apply, Equiv.coe_refl,
+      BoundedFormula.relabel_imp, BoundedFormula.mapTermRel] at ih₁ ih₂ ⊢
+    rw [ih₁, ih₂]
+  case all i f ih =>
+    simp only [BoundedFormula.relabelEquiv, BoundedFormula.mapTermRelEquiv_apply, Equiv.coe_refl,
+      BoundedFormula.mapTermRel, id_eq, BoundedFormula.relabel_all, Nat.add_eq, Nat.add_zero,
+      BoundedFormula.all.injEq] at ih ⊢
+    exact ih
+
+theorem relabel_relabelEquiv {α β : Type _} (F : L.Formula (α ⊕ Empty)) (f : α → β) :
+    Formula.relabel f (BoundedFormula.relabelEquiv (Equiv.sumEmpty α Empty) F) =
+    BoundedFormula.relabelEquiv (Equiv.sumEmpty β Empty) (F.relabel (Sum.map f id)) :=
+  relabel_relabelEquiv' F f
+
+theorem relabel_term_injective {α β : Type _} (f : α → β) (hf : Function.Injective f) :
+    Function.Injective (Term.relabel (L := L) f) := by
+  intro T₁ T₂ h
+  induction T₁ generalizing T₂
+  case var x =>
+    rw [Term.relabel] at h
+    cases T₂
+    · simp only [Term.relabel, Term.var.injEq] at h
+      cases hf h
+      rfl
+    · cases h
+  case func l f ts ih =>
+    rw [Term.relabel] at h
+    cases T₂
+    · cases h
+    · simp only [Term.relabel, Term.func.injEq] at h
+      cases h.1
+      simp only [heq_eq_eq, true_and] at h
+      cases h.1
+      simp only [Term.func.injEq, heq_eq_eq, true_and]
+      funext i
+      exact ih _ (congr_fun h.2 i)
+
+theorem relabel_inl_injective {α : Type _} {n : ℕ} :
+    Function.Injective (Term.relabel (L := L) (Sum.inl : α → α ⊕ Fin n)) :=
+  relabel_term_injective _ Sum.inl_injective
+
+theorem relabelAux_injective {α β : Type _} {n k : ℕ}
+    (f : α → β ⊕ Fin n) (hf : Function.Injective f) :
+    Function.Injective (BoundedFormula.relabelAux (n := n) f k) := by
+  refine Function.Injective.comp ?_ (Function.Injective.comp ?_ ?_)
+  · rw [Sum.map_injective]
+    refine ⟨fun _ _ => id, ?_⟩
+    exact Equiv.injective _
+  · exact Equiv.injective _
+  · rw [Sum.map_injective]
+    refine ⟨hf, fun _ _ => id⟩
+
+theorem relabel_injective {α β : Type _} {k n : ℕ} (f : α → β ⊕ Fin n) (hf : Function.Injective f) :
+    Function.Injective (BoundedFormula.relabel (k := k) (L := L) f) := by
+  intro F₁ F₂ h
+  induction F₁
+  case falsum =>
+    cases F₂ <;> cases h; rfl
+  case equal n t₁ t₂ =>
+    rw [BoundedFormula.relabel] at h
+    cases F₂
+    case equal =>
+      simp only [BoundedFormula.mapTermRel, BoundedFormula.relabel, BoundedFormula.equal.injEq] at h
+      cases relabel_term_injective _ (relabelAux_injective f hf) h.1
+      cases relabel_term_injective _ (relabelAux_injective f hf) h.2
+      rfl
+    all_goals cases h
+  case rel n l R ts =>
+    rw [BoundedFormula.relabel] at h
+    cases F₂
+    case rel =>
+      simp only [BoundedFormula.mapTermRel, id_eq, BoundedFormula.relabel,
+        BoundedFormula.rel.injEq] at h
+      cases h.1
+      simp only [heq_eq_eq, true_and] at h
+      cases h.1
+      simp only [BoundedFormula.rel.injEq, heq_eq_eq, true_and]
+      funext i
+      exact relabel_term_injective _ (relabelAux_injective f hf) (congr_fun h.2 i)
+    all_goals cases h
+  case imp n f₁ f₂ ih₁ ih₂ =>
+    rw [BoundedFormula.relabel] at h
+    cases F₂
+    case imp =>
+      simp only [BoundedFormula.mapTermRel, BoundedFormula.relabel, BoundedFormula.imp.injEq] at h
+      cases ih₁ h.1
+      cases ih₂ h.2
+      rfl
+    all_goals cases h
+  case all n f ih =>
+    rw [BoundedFormula.relabel] at h
+    cases F₂
+    case all =>
+      simp only [BoundedFormula.mapTermRel, BoundedFormula.castLE_rfl, BoundedFormula.relabel,
+        BoundedFormula.all.injEq] at h
+      rw [BoundedFormula.all.injEq]
+      refine ih ?_
+      simp only [BoundedFormula.relabel]
+      exact h
+    all_goals cases h
+
+theorem toFormula_injective {α : Type _} {n : ℕ} :
+    Function.Injective (BoundedFormula.toFormula (L := L) (α := α) (n := n)) := by
+  intro F₁ F₂ h
+  induction F₁
+  case falsum n =>
+    cases F₂ <;> cases h; rfl
+  case equal n t₁ t₂ =>
+    rw [BoundedFormula.toFormula] at h
+    cases F₂
+    case equal =>
+      simp only [Term.equal, Term.bdEqual, BoundedFormula.toFormula, BoundedFormula.equal.injEq,
+        relabel_inl_injective.eq_iff] at h
+      obtain ⟨rfl, rfl⟩ := h
+      rfl
+    all_goals cases h
+  case rel n k R ts =>
+    rw [BoundedFormula.toFormula] at h
+    cases F₂
+    case rel =>
+      simp only [Relations.formula, Relations.boundedFormula, BoundedFormula.toFormula,
+        BoundedFormula.rel.injEq] at h
+      cases h.1
+      simp only [heq_eq_eq, true_and] at h
+      cases h.1
+      simp only [BoundedFormula.rel.injEq, heq_eq_eq, true_and]
+      funext i
+      exact relabel_inl_injective (congr_fun h.2 i)
+    all_goals cases h
+  case imp n f₁ f₂ ih₁ ih₂ =>
+    rw [BoundedFormula.toFormula] at h
+    cases F₂
+    case imp =>
+      simp only [BoundedFormula.toFormula, BoundedFormula.imp.injEq] at h
+      cases ih₁ h.1
+      cases ih₂ h.2
+      rfl
+    all_goals cases h
+  case all n f ih =>
+    rw [BoundedFormula.toFormula] at h
+    cases F₂
+    case all =>
+      simp only [BoundedFormula.toFormula, BoundedFormula.all.injEq] at h
+      rw [BoundedFormula.all.injEq]
+      refine ih ?_
+      refine relabel_injective _ ?_ h
+      intro i j hij
+      obtain (i | i) := i <;> obtain (j | j) := j
+      · cases hij; rfl
+      · simp only [Sum.elim_inl, Function.comp_apply, Sum.elim_inr] at hij
+        set c := finSumFinEquiv.symm j
+        clear_value c
+        cases c
+        cases hij
+        cases hij
+      · simp only [Sum.elim_inl, Function.comp_apply, Sum.elim_inr] at hij
+        set c := finSumFinEquiv.symm i
+        clear_value c
+        cases c
+        cases hij
+        cases hij
+      · simp only [Sum.elim_inr, Function.comp_apply] at hij
+        have := (Sum.map_injective (f := Sum.inr) (g := id)).mpr
+          ⟨Sum.inr_injective, fun _ _ => id⟩ hij
+        rw [EmbeddingLike.apply_eq_iff_eq] at this
+        rw [this]
+    all_goals cases h
+
+theorem relabelAux_eq {α β : Type _} (f : α ≃ β) {l : ℕ} :
+    (Sum.inl ∘ (Equiv.sumCongr f (Equiv.refl (Fin l))) : α ⊕ Fin l → (β ⊕ Fin l) ⊕ Fin 0) =
+      (BoundedFormula.relabelAux (Sum.inl ∘ Sum.map id (Fin.cast (zero_add _))) 0 ∘
+        Sum.inl ∘ BoundedFormula.relabelAux (Sum.inl ∘ f) l) := by
+  funext i
+  obtain (i | i) := i
+  · rfl
+  · simp only [Function.comp_apply, Equiv.sumCongr_apply, Equiv.coe_refl, Sum.map_inr, id_eq,
+      Nat.add_zero, BoundedFormula.relabelAux, Equiv.sumAssoc_apply_inr, finSumFinEquiv_apply_right,
+      Sum.map_inl, Fin.cast_natAdd, Equiv.sumAssoc_apply_inl_inl, Sum.inl.injEq, Sum.inr.injEq]
+    rfl
+
+theorem relabel_relabel {α β γ : Type _} {n a b : ℕ} (f : α → β ⊕ Fin a) (g : β → γ ⊕ Fin b)
+    (F : L.BoundedFormula α n) :
+    (F.relabel f).relabel g =
+      (F.relabel (Sum.elim (Sum.map id (finSumFinEquiv ∘ Sum.inl) ∘ g)
+        (Sum.inr ∘ finSumFinEquiv ∘ Sum.inr) ∘ f) : L.BoundedFormula γ ((b + a) + n)).castLE
+      (by rw [add_assoc]) := by
+  induction F
+  case falsum n => rfl
+  case equal _ l t₁ t₂ =>
+    simp only [BoundedFormula.relabel, BoundedFormula.mapTermRel, BoundedFormula.relabelAux,
+      Term.relabel_relabel, BoundedFormula.castLE, BoundedFormula.equal.injEq]
+    refine ⟨?_, ?_⟩
+    · congr 1
+      funext i
+      obtain (i | i) := i
+      · simp only [Function.comp_apply, Sum.map_inl, Sum.map_map, CompTriple.comp_eq]
+        set c := f i
+        clear_value c
+        obtain (c | c) := c
+        · simp only [Equiv.sumAssoc_apply_inl_inl, Sum.map_inl, Sum.elim_inl, Function.comp_apply]
+          set d := g c
+          clear_value d
+          obtain (d | d) := d
+          · rfl
+          · rfl
+        · rfl
+      · simp only [Function.comp_apply, Sum.map_inr, id_eq, Equiv.sumAssoc_apply_inr,
+          finSumFinEquiv_apply_right, Sum.inr.injEq]
+        refine Fin.val_injective ?_
+        simp only [Fin.coe_natAdd, Fin.coe_castLE]
+        rw [add_assoc]
+    · congr 1
+      funext i
+      obtain (i | i) := i
+      · simp only [Function.comp_apply, Sum.map_inl, Sum.map_map, CompTriple.comp_eq]
+        set c := f i
+        clear_value c
+        obtain (c | c) := c
+        · simp only [Equiv.sumAssoc_apply_inl_inl, Sum.map_inl, Sum.elim_inl, Function.comp_apply]
+          set d := g c
+          clear_value d
+          obtain (d | d) := d
+          · rfl
+          · rfl
+        · rfl
+      · simp only [Function.comp_apply, Sum.map_inr, id_eq, Equiv.sumAssoc_apply_inr,
+          finSumFinEquiv_apply_right, Sum.inr.injEq]
+        refine Fin.val_injective ?_
+        simp only [Fin.coe_natAdd, Fin.coe_castLE]
+        rw [add_assoc]
+  case rel n k R ts =>
+    simp only [BoundedFormula.relabel, BoundedFormula.mapTermRel, id_eq, BoundedFormula.relabelAux,
+      Term.relabel_relabel, BoundedFormula.castLE, BoundedFormula.rel.injEq, heq_eq_eq, true_and]
+    funext j
+    simp only [Function.comp_apply, Term.relabel_relabel]
+    congr 1
+    funext i
+    obtain (i | i) := i
+    · simp only [Function.comp_apply, Sum.map_inl, Sum.map_map, CompTriple.comp_eq]
+      set c := f i
+      clear_value c
+      obtain (c | c) := c
+      · simp only [Equiv.sumAssoc_apply_inl_inl, Sum.map_inl, Sum.elim_inl, Function.comp_apply]
+        set d := g c
+        clear_value d
+        obtain (d | d) := d
+        · rfl
+        · rfl
+      · rfl
+    · simp only [Function.comp_apply, Sum.map_inr, id_eq, Equiv.sumAssoc_apply_inr,
+        finSumFinEquiv_apply_right, Sum.inr.injEq]
+      refine Fin.val_injective ?_
+      simp only [Fin.coe_natAdd, Fin.coe_castLE]
+      rw [add_assoc]
+  case imp n F₁ F₂ ih₁ ih₂ =>
+    simp only [BoundedFormula.relabel, BoundedFormula.mapTermRel, BoundedFormula.castLE,
+      BoundedFormula.imp.injEq] at ih₁ ih₂ ⊢
+    rw [ih₁, ih₂]
+    simp only [and_self]
+  case all n F ih =>
+    simp only [BoundedFormula.relabel, BoundedFormula.mapTermRel,
+      BoundedFormula.castLE_rfl, BoundedFormula.castLE, BoundedFormula.all.injEq] at ih ⊢
+    rw [ih]
+
+theorem finSumFinEquiv_symm_eq (n : ℕ) (i : Fin (0 + (n + 1))) :
+    (finSumFinEquiv.symm (Fin.cast (by rw [zero_add]) i) : Fin n ⊕ Fin 1) =
+    (finSumFinEquiv.symm i : Fin (0 + n) ⊕ Fin 1).map (Fin.cast (by rw [zero_add])) id := by
+  simp only [finSumFinEquiv, Equiv.coe_fn_symm_mk, Fin.addCases]
+  split_ifs with h₁ h₂ h₂
+  · simp only [Sum.map_inl, Sum.inl.injEq]
+    rfl
+  · simp only [Fin.coe_cast, zero_add, not_lt] at h₁ h₂
+    cases not_lt_of_le h₂ h₁
+  · simp only [Fin.coe_cast, not_lt, zero_add] at h₁ h₂
+    cases not_lt_of_le h₁ h₂
+  · simp only [id_eq, eq_mpr_eq_cast, Fin.cast_trans, Fin.coe_cast, eq_rec_constant, Sum.map_inr,
+      Sum.inr.injEq]
+    exact Subsingleton.elim _ _
+
+theorem relabel_eq_relabelEquiv' {α β : Type _} {n : ℕ} (f : α ≃ β) (F : L.BoundedFormula α n) :
+    (BoundedFormula.relabelEquiv f F).toFormula =
+    (F.relabel (n := 0) (Sum.inl ∘ f)).toFormula.relabel
+      (Sum.map id (Fin.cast (zero_add _))) := by
+  induction F
+  case falsum n => rfl
+  case equal _ l t₁ t₂ =>
+    simp only [BoundedFormula.toFormula, Term.equal, Term.bdEqual, Term.relabelEquiv_apply,
+      Term.relabel_relabel, relabelAux_eq, Nat.add_zero, Formula.relabel, BoundedFormula.relabel,
+      BoundedFormula.mapTermRel]
+  case rel n k R ts =>
+    simp only [BoundedFormula.toFormula, Relations.formula, Relations.boundedFormula,
+      Equiv.refl_apply, Term.relabelEquiv_apply, Term.relabel_relabel, relabelAux_eq, Nat.add_zero,
+      Formula.relabel, id_eq, BoundedFormula.relabel, BoundedFormula.mapTermRel]
+  case imp n f₁ f₂ ih₁ ih₂ =>
+    simp only [Formula.relabel, BoundedFormula.relabel, BoundedFormula.toFormula, Equiv.coe_refl,
+      BoundedFormula.mapTermRel, Nat.add_zero, BoundedFormula.imp.injEq] at ih₁ ih₂ ⊢
+    exact ⟨ih₁, ih₂⟩
+  case all n F ih =>
+    rw [BoundedFormula.relabelEquiv, BoundedFormula.mapTermRelEquiv_apply] at ih
+    rw [BoundedFormula.relabelEquiv, BoundedFormula.mapTermRelEquiv_apply,
+      BoundedFormula.mapTermRel, id, BoundedFormula.toFormula, Formula.relabel,
+      BoundedFormula.relabel_all, BoundedFormula.toFormula, BoundedFormula.relabel_all,
+      BoundedFormula.all.injEq, ih, Formula.relabel, relabel_relabel, relabel_relabel,
+      BoundedFormula.castLE_rfl, BoundedFormula.castLE_rfl]
+    congr 1
+    funext i
+    obtain (i | i) := i
+    · rfl
+    simp only [Nat.add_zero, Function.comp_apply, Sum.map_inr, Sum.elim_inl, Sum.elim_inr,
+      Sum.map_map, CompTriple.comp_eq]
+    have := finSumFinEquiv_symm_eq n i
+    set c : Fin (0 + n) ⊕ Fin 1 := finSumFinEquiv.symm i with hc
+    set d : Fin n ⊕ Fin 1 := finSumFinEquiv.symm (Fin.cast (by rw [zero_add]) i) with hd
+    clear_value c d
+    obtain (c | c) := c
+    · rw [Sum.map_inl] at this
+      rw [this]
+      rfl
+    · rw [Sum.map_inr] at this
+      rw [this]
+      simp only [id_eq, Sum.map_inr, Function.comp_apply, Sum.elim_inr, finSumFinEquiv_apply_right,
+        Sum.inr.injEq]
+      exact Subsingleton.elim _ _
+
+theorem relabel_id' {α : Type _} {n : ℕ} (F : L.BoundedFormula α n) :
+    (BoundedFormula.relabel (Sum.inl ∘ id : α → α ⊕ Fin 0) F).toFormula =
+      F.toFormula.relabel (Sum.map id (Fin.cast (by rw [zero_add]))) := sorry
+
+theorem relabel_id {α : Type _} (F : L.Formula α) :
+    Formula.relabel id F = F := sorry
+
+theorem relabel_eq_relabelEquiv {α β : Type _} (f : α ≃ β) (F : L.Formula α) :
+    BoundedFormula.relabelEquiv f F = F.relabel f := by
+  have := relabel_eq_relabelEquiv' f F
+  simp only [Nat.add_zero, Fin.cast_refl, Sum.map_id_id, relabel_id] at this
+  exact toFormula_injective this
+
+theorem relabel_constantsVarsEquiv' {α β : Type _} {n : ℕ}
+    (F : L[[α]].BoundedFormula Empty n) (f : α → β) :
+    (BoundedFormula.relabel (n := 0) (Sum.inl ∘ Sum.map f id)
+      (BoundedFormula.constantsVarsEquiv F)).toFormula =
+    (BoundedFormula.constantsVarsEquiv
+      ((L.lhomWithConstantsMap f).onBoundedFormula F)).toFormula.relabel
+      (Sum.map id (Fin.cast (zero_add _).symm)) := sorry
+
+theorem relabel_constantsVarsEquiv {α β : Type _} (F : L[[α]].Formula Empty) (f : α → β) :
+    Formula.relabel (Sum.map f id) (BoundedFormula.constantsVarsEquiv F) =
+    BoundedFormula.constantsVarsEquiv ((L.lhomWithConstantsMap f).onBoundedFormula F) := by
+  rw [Formula.relabel]
+  have := relabel_constantsVarsEquiv' F f
+  simp only [Nat.add_zero, Fin.cast_refl, Sum.map_id_id] at this
   sorry
 
 theorem relabel_equivSentence {α β : Type _} (S : L[[α]].Sentence) (f : α → β) :
     (Formula.equivSentence.symm S).relabel f =
-    Formula.equivSentence.symm ((L.lhomWithConstantsMap f).onSentence S) :=
-  sorry
+    Formula.equivSentence.symm ((L.lhomWithConstantsMap f).onSentence S) := by
+  simp only [Formula.equivSentence, Equiv.symm_symm, Equiv.trans_apply, relabel_relabelEquiv,
+    EmbeddingLike.apply_eq_iff_eq, relabel_constantsVarsEquiv]
+  rfl
+
+theorem realize_relabelEquiv' {α : Type _} {n : ℕ} (F : L.BoundedFormula (α ⊕ Empty) n)
+    (v : α → M) (xs : Fin n → M) :
+    BoundedFormula.Realize (BoundedFormula.relabelEquiv (Equiv.sumEmpty α Empty) F) v xs ↔
+    F.Realize (Sum.elim v Empty.elim) xs := by
+  induction F
+  case falsum i => rfl
+  case equal i t₁ t₂ =>
+    simp only [BoundedFormula.Realize, Term.relabelEquiv_apply, Term.realize_relabel]
+    rw [iff_eq_eq]
+    refine congr_arg₂ _ ?_ ?_
+    · congr 1
+      funext x
+      obtain ((x | x) | x) := x
+      · rfl
+      · cases x
+      · rfl
+    · congr 1
+      funext x
+      obtain ((x | x) | x) := x
+      · rfl
+      · cases x
+      · rfl
+  case rel n l R ts =>
+    simp only [BoundedFormula.Realize, Equiv.refl_apply, Term.relabelEquiv_apply,
+      Term.realize_relabel]
+    rw [iff_eq_eq]
+    refine congr_arg _ ?_
+    funext i
+    congr 1
+    funext x
+    obtain ((x | x) | x) := x
+    · rfl
+    · cases x
+    · rfl
+  case imp i f₁ f₂ ih₁ ih₂ =>
+    simp only [BoundedFormula.relabelEquiv, BoundedFormula.mapTermRelEquiv_apply, Equiv.coe_refl,
+      BoundedFormula.mapTermRel, BoundedFormula.realize_imp] at ih₁ ih₂ ⊢
+    rw [ih₁, ih₂]
+  case all i f ih =>
+    simp only [BoundedFormula.relabelEquiv, BoundedFormula.mapTermRelEquiv_apply, Equiv.coe_refl,
+      BoundedFormula.mapTermRel, id_eq, BoundedFormula.realize_all] at ih ⊢
+    constructor
+    · intro h y
+      rw [← ih (Fin.snoc xs y)]
+      exact h y
+    · intro h y
+      rw [ih (Fin.snoc xs y)]
+      exact h y
+
+theorem realize_relabelEquiv {α : Type _} (F : L.Formula (α ⊕ Empty)) (v : α → M) :
+    Formula.Realize (BoundedFormula.relabelEquiv (Equiv.sumEmpty α Empty) F) v ↔
+    F.Realize (Sum.elim v Empty.elim) :=
+  realize_relabelEquiv' M F v default
+
+-- theorem realize_constantsVarsEquiv {α : Type _} {n : ℕ} (F : L.BoundedFormula α n) (v : α → M) :
+--     F.Realize (BoundedFormula.constantsVarsEquiv F) (Sum.elim v Empty.elim) := sorry
 
 theorem realize_equivSentence {α : Type _} (S : L[[α]].Sentence) (v : α → M) :
     (Formula.equivSentence.symm S).Realize v =
     letI := constantsOn.structure v
-    S.Realize M :=
+    S.Realize M := by
+  simp only [Formula.equivSentence, Equiv.symm_symm, Equiv.trans_apply, eq_iff_iff,
+    realize_relabelEquiv]
   sorry
 
 @[simp]
