@@ -64,6 +64,12 @@ theorem onFormula_relabel {α β : Type _} {L L' : Language}
   onBoundedFormula_relabel ϕ F _
 
 @[simp]
+theorem onFormula_relabel' {α β : Type _} {L L' : Language}
+    (ϕ : L →ᴸ L') (F : L.Formula α) (g : α → β) :
+    ϕ.onBoundedFormula (F.relabel g) = (ϕ.onFormula F).relabel g :=
+  onBoundedFormula_relabel ϕ F _
+
+@[simp]
 theorem onFormula_realize_of_isEmpty {α : Type _} [IsEmpty α] (F : L.Formula α) (v : α → M) :
     (ϕ.onFormula F).Realize v ↔ F.Realize v := by
   have : v = (default : Empty → M) ∘ (default : α → Empty)
@@ -95,8 +101,21 @@ theorem xnorProp_realize {α : Type _} {n : ℕ} {F : L.BoundedFormula α n} {P 
   · simp only [h, not_false_eq_true, xnorProp_false, BoundedFormula.realize_not, iff_false]
 
 @[simp]
-theorem onBoundedFormula_ex {α : Type _} {n : ℕ} (F : L.BoundedFormula α (n + 1)) :
+theorem onBoundedFormula_ex {L L' : Language} {ϕ : L →ᴸ L'}
+    {α : Type _} {n : ℕ} (F : L.BoundedFormula α (n + 1)) :
     ϕ.onBoundedFormula (∃' F) = ∃' ϕ.onBoundedFormula F :=
+  rfl
+
+@[simp]
+theorem onBoundedFormula_imp {L L' : Language} {ϕ : L →ᴸ L'}
+    {α : Type _} {n : ℕ} (F G : L.BoundedFormula α n) :
+    ϕ.onBoundedFormula (F ⟹ G) = ϕ.onBoundedFormula F ⟹ ϕ.onBoundedFormula G :=
+  rfl
+
+@[simp]
+theorem onBoundedFormula_iff {L L' : Language} {ϕ : L →ᴸ L'}
+    {α : Type _} {n : ℕ} (F G : L.BoundedFormula α n) :
+    ϕ.onBoundedFormula (F ⇔ G) = ϕ.onBoundedFormula F ⇔ ϕ.onBoundedFormula G :=
   rfl
 
 @[simp]
@@ -376,14 +395,15 @@ theorem realize_formula_congr_freeVarFinset {M : Type _} [L.Structure M]
   realize_boundedFormula_congr_freeVarFinset h (fun _ => rfl)
 
 @[simp]
-theorem onTerm_freeVarFinset {α β : Type _} [DecidableEq α] {T : L.Term (α ⊕ β)} :
+theorem onTerm_freeVarFinset {L L' : Language} {ϕ : L →ᴸ L'} {α β : Type _} [DecidableEq α]
+    {T : L.Term (α ⊕ β)} :
     (ϕ.onTerm T).varFinsetLeft = T.varFinsetLeft := by
   induction T with
-  | var => rfl
+  | var x => cases x <;> rfl
   | func _ ts ih => simp only [Term.varFinsetLeft, ih]
 
 @[simp]
-theorem onBoundedFormula_freeVarFinset {α : Type _} [DecidableEq α]
+theorem onBoundedFormula_freeVarFinset {L L' : Language} {ϕ : L →ᴸ L'} {α : Type _} [DecidableEq α]
     {n : ℕ} {F : L.BoundedFormula α n} :
     (ϕ.onBoundedFormula F).freeVarFinset = F.freeVarFinset := by
   induction F with
@@ -394,9 +414,10 @@ theorem onBoundedFormula_freeVarFinset {α : Type _} [DecidableEq α]
   | all f ih => simp only [BoundedFormula.freeVarFinset, ih]
 
 @[simp]
-theorem onFormula_freeVarFinset {α : Type _} [DecidableEq α] {F : L.Formula α} :
+theorem onFormula_freeVarFinset {L L' : Language} {ϕ : L →ᴸ L'}
+    {α : Type _} [DecidableEq α] {F : L.Formula α} :
     (ϕ.onFormula F).freeVarFinset = F.freeVarFinset :=
-  onBoundedFormula_freeVarFinset ϕ
+  onBoundedFormula_freeVarFinset
 
 theorem specker_aux (A : L.BoundedFormula Empty 1) (P : Finset (L.Formula ℤ)) :
     ∃ e : ℤ → M,
@@ -543,5 +564,205 @@ def raise : constantsOn ℤ →ᴸ constantsOn ℤ where
     | 1 => PEmpty.elim
     | 2 => PEmpty.elim
     | (_ + 3) => PEmpty.elim
+
+def speckerTheory₂ {L : Language} (ϕ : L →ᴸ L) (T : L.Theory) :
+    L[[L.BoundedFormula Empty 1 × ℤ]].Theory :=
+  (L.lhomWithConstants _).onTheory T ∪
+  (⋃ (A : L.BoundedFormula Empty 1), {∃' ((L.lhomWithConstants _).onBoundedFormula A) ⟹
+    ((L.lhomWithConstants _).onFormula A.toFormula).subst
+      (fun _ => Constants.term (L.con (A, 0)))}) ∪
+  ⋃ (F : L.Formula (L.BoundedFormula Empty 1 × ℤ)), {
+    ((L.lhomWithConstants _).onFormula F).subst (fun z => Constants.term (L.con z)) ⇔
+    ((L.lhomWithConstants _).onFormula (ϕ.onFormula F)).subst
+      (fun z => Constants.term (L.con (z.1, z.2 + 1)))
+  }
+
+def speckerTheory₂' {L : Language} (ϕ : L →ᴸ L) (T : L.Theory)
+    (S : List (L.BoundedFormula Empty 1)) :
+    L[[{A | A ∈ S} × ℤ]].Theory :=
+  (L.lhomWithConstants _).onTheory T ∪
+  (⋃ (A : L.BoundedFormula Empty 1) (hA : A ∈ S),
+    {∃' ((L.lhomWithConstants ({A | A ∈ S} × ℤ)).onBoundedFormula A) ⟹
+      ((L.lhomWithConstants _).onFormula A.toFormula).subst
+        (fun _ => Constants.term (L.con (⟨A, hA⟩, 0)))}) ∪
+  ⋃ (F : L.Formula ({A | A ∈ S} × ℤ)), {
+    ((L.lhomWithConstants _).onFormula F).subst (fun z => Constants.term (L.con z)) ⇔
+    ((L.lhomWithConstants _).onFormula (ϕ.onFormula F)).subst
+      (fun z => Constants.term (L.con (z.1, z.2 + 1)))
+  }
+
+theorem lhomWithConstantsMap_injective (L : Language) {α β : Type _}
+    (f : α → β) (hf : Function.Injective f) :
+    (L.lhomWithConstantsMap f).Injective := by
+  constructor
+  · intro n
+    refine Sum.map_injective.mpr ⟨fun _ _ => id, ?_⟩
+    cases' n with n; exact hf
+    cases' n with n; exact fun x => x.elim
+    cases' n with n; exact fun x => x.elim
+    exact fun x => x.elim
+  · intro n
+    refine Sum.map_injective.mpr ⟨fun _ _ => id, ?_⟩
+    cases' n with n; exact fun x => x.elim
+    cases' n with n; exact fun x => x.elim
+    cases' n with n; exact fun x => x.elim
+    exact fun x => x.elim
+
+theorem onTerm_subst {L L' : Language} (ϕ : L →ᴸ L')
+    {α β : Type _} (T : L.Term α) (f : α → L.Term β) :
+    ϕ.onTerm (T.subst f) = (ϕ.onTerm T).subst (fun a => ϕ.onTerm (f a)) := by
+  induction T
+  case var => rfl
+  case func l f ts ih =>
+    simp only [LHom.onTerm, Term.subst, Term.func.injEq, heq_eq_eq, true_and]
+    funext i
+    exact ih i
+
+theorem onBoundedFormula_subst {L L' : Language} (ϕ : L →ᴸ L')
+    {α β : Type _} {n : ℕ} (F : L.BoundedFormula α n) (f : α → L.Term β) :
+    ϕ.onBoundedFormula (F.subst f) = (ϕ.onBoundedFormula F).subst (fun a => ϕ.onTerm (f a)) := by
+  induction F
+  case falsum => rfl
+  case equal n t₁ t₂ =>
+    simp only [LHom.onBoundedFormula, BoundedFormula.subst, onTerm_subst]
+    congr 2
+    · funext i
+      obtain (i | i) := i
+      · simp only [Sum.elim_inl, Function.comp_apply, onTerm_relabel]
+      · rfl
+    · funext i
+      obtain (i | i) := i
+      · simp only [Sum.elim_inl, Function.comp_apply, onTerm_relabel]
+      · rfl
+  case rel n k R ts =>
+    simp only [LHom.onBoundedFormula, BoundedFormula.subst]
+    congr 1
+    funext i
+    rw [Function.comp_apply, Function.comp_apply, onTerm_subst]
+    congr 1
+    funext j
+    obtain (j | j) := j
+    · simp only [Sum.elim_inl, Function.comp_apply, onTerm_relabel]
+    · rfl
+  case imp n f₁ f₂ ih₁ ih₂ =>
+    simp only [LHom.onBoundedFormula, BoundedFormula.subst, BoundedFormula.mapTermRel,
+      BoundedFormula.imp.injEq]
+    exact ⟨ih₁, ih₂⟩
+  case all n f ih =>
+    simp only [LHom.onBoundedFormula, id_eq, BoundedFormula.subst, BoundedFormula.mapTermRel,
+      BoundedFormula.all.injEq]
+    exact ih
+
+theorem comp_onBoundedFormula' {L L' L'' : Language} {α : Type _} {n : ℕ}
+    (φ : L' →ᴸ L'') (ψ : L →ᴸ L') (F : L.BoundedFormula α n) :
+    φ.onBoundedFormula (ψ.onBoundedFormula F) = (φ.comp ψ).onBoundedFormula F := by
+  rw [LHom.comp_onBoundedFormula]
+  rfl
+
+theorem comp_onSentence' {L L' L'' : Language}
+    (φ : L' →ᴸ L'') (ψ : L →ᴸ L') (F : L.Sentence) :
+    φ.onSentence (ψ.onSentence F) = (φ.comp ψ).onSentence F :=
+  comp_onBoundedFormula' φ ψ F
+
+@[simp]
+theorem comp_withConstantsMap {L : Language} {α β : Type _} (f : α → β) :
+    (L.lhomWithConstantsMap f).comp (L.lhomWithConstants α) =
+    L.lhomWithConstants β :=
+  rfl
+
+@[simp]
+theorem withConstantsMap_term {L : Language} {α β γ : Type _} (f : α → β) (x : α) :
+    ((L.lhomWithConstantsMap f).onTerm (Constants.term (L.con x)) : L[[β]].Term γ) =
+    Constants.term (L.con (f x)) := by
+  simp only [LHom.onTerm, lhomWithConstantsMap, constantsOn, Language.con, mk₂_Functions,
+    LHom.sumMap_onFunction, LHom.id_onFunction, id_eq, Sum.map_inr, Constants.term, Term.func.injEq,
+    heq_eq_eq, true_and]
+  refine ⟨rfl, ?_⟩
+  funext i
+  cases Nat.not_lt_zero i i.prop
+
+theorem realize_boundedFormula {L : Language} {M : Type _} [L.Structure M]
+    {α : Type _} (F : L.BoundedFormula α 0)
+    (v : α → M) (xs : Fin 0 → M) :
+    BoundedFormula.Realize F v xs ↔ Formula.Realize F v := by
+  rw [Formula.Realize, iff_eq_eq]
+  congr 1
+  funext i
+  cases Nat.not_lt_zero i i.prop
+
+theorem speckerTheory₂_reduction {L : Language} (ϕ : L →ᴸ L) (T : L.Theory)
+    (hT : ∀ S, (speckerTheory₂' ϕ T S).IsSatisfiable) :
+    (speckerTheory₂ ϕ T).IsSatisfiable := by
+  classical
+  rw [speckerTheory₂, isSatisfiable_union_iUnion_iff_isSatisfiable_union_iUnion_finset]
+  intro SF
+  rw [Set.union_comm, ← Set.union_assoc,
+    isSatisfiable_union_iUnion_iff_isSatisfiable_union_iUnion_finset]
+  intro SA
+  rw [Set.union_assoc, Set.union_comm]
+  set LA := default ::
+    (SA ∪ SF.biUnion (fun f => f.freeVarFinset.image (fun x => x.1))).toList with hLA
+  have := hT LA
+  rw [← isSatisfiable_onTheory_iff
+    (lhomWithConstantsMap_injective L (fun x => (x.1.val, x.2)) ?_)] at this
+  swap
+  · rintro ⟨⟨x₁, hx⟩, x₂⟩ ⟨⟨y₁, hy⟩, y₂⟩ h
+    cases h
+    rfl
+  obtain ⟨M⟩ := this
+  refine ⟨@ModelType.mk _ _ M inferInstance ?_ inferInstance⟩
+  have hM := M.is_model
+  unfold speckerTheory₂' at hM
+  simp only [model_iff, Set.mem_union, Set.mem_iUnion₂, Set.mem_iUnion, Set.mem_singleton_iff,
+    LHom.mem_onTheory] at hM ⊢
+  rintro S ((⟨S, hS, rfl⟩ | ⟨A, hA, rfl⟩) | ⟨F, hF, rfl⟩)
+  · have := hM _ ⟨_, Or.inl (Or.inl ⟨S, hS, rfl⟩), rfl⟩
+    clear hM
+    rw [comp_onSentence'] at this
+    exact this
+  · have := hM _ ⟨_, Or.inl (Or.inr ⟨A, ?_, rfl⟩), rfl⟩
+    swap
+    · rw [hLA, List.mem_cons, Finset.mem_toList, Finset.mem_union]
+      exact Or.inr (Or.inl hA)
+    clear hM
+    simp only [LHom.onSentence, LHom.onFormula, onBoundedFormula_imp, onBoundedFormula_ex] at this
+    rw [onBoundedFormula_subst, comp_onBoundedFormula', comp_onBoundedFormula',
+      comp_withConstantsMap, withConstantsMap_term] at this
+    exact this
+  · have := hM _ ⟨_, Or.inr ⟨F.relabel
+       (fun x => (if h : x.1 ∈ LA then ⟨x.1, h⟩ else ⟨default, ?_⟩, x.2)), rfl⟩, rfl⟩
+    swap
+    · rw [hLA, Set.mem_setOf, List.mem_cons]
+      exact Or.inl rfl
+    clear hM
+    rw [Sentence.Realize, Formula.Realize] at this ⊢
+    simp only [LHom.onSentence, LHom.onFormula, onBoundedFormula_iff] at this
+    rw [onBoundedFormula_subst, onBoundedFormula_subst,
+      comp_onBoundedFormula', comp_onBoundedFormula',
+      comp_withConstantsMap] at this
+    rw [BoundedFormula.realize_iff, BoundedFormula.realize_subst,
+      BoundedFormula.realize_subst] at this ⊢
+    simp only [withConstantsMap_term, onFormula_relabel'] at this
+    rw [realize_boundedFormula, realize_boundedFormula] at this ⊢
+    rw [Formula.realize_relabel, Formula.realize_relabel] at this
+    convert this using 1
+    · refine realize_formula_congr_freeVarFinset ?_
+      intro v hv
+      simp only [LHom.onFormula, onBoundedFormula_freeVarFinset] at hv
+      dsimp only [Function.comp_apply]
+      rw [dif_pos]
+      rw [hLA, List.mem_cons, Finset.mem_toList, Finset.mem_union, Finset.mem_biUnion]
+      refine Or.inr (Or.inr ⟨F, hF, ?_⟩)
+      rw [Finset.mem_image]
+      exact ⟨v, hv, rfl⟩
+    · refine realize_formula_congr_freeVarFinset ?_
+      intro v hv
+      simp only [LHom.onFormula, onBoundedFormula_freeVarFinset] at hv
+      dsimp only [Function.comp_apply]
+      rw [dif_pos]
+      rw [hLA, List.mem_cons, Finset.mem_toList, Finset.mem_union, Finset.mem_biUnion]
+      refine Or.inr (Or.inr ⟨F, hF, ?_⟩)
+      rw [Finset.mem_image]
+      exact ⟨v, hv, rfl⟩
 
 end ConNF.Specker
