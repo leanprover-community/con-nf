@@ -101,6 +101,12 @@ theorem xnorProp_realize {α : Type _} {n : ℕ} {F : L.BoundedFormula α n} {P 
   · simp only [h, not_false_eq_true, xnorProp_false, BoundedFormula.realize_not, iff_false]
 
 @[simp]
+theorem onFormula_not {L L' : Language} {ϕ : L →ᴸ L'}
+    {α : Type _} (F : L.Formula α) :
+    ϕ.onFormula ∼F = ∼(ϕ.onFormula F) :=
+  rfl
+
+@[simp]
 theorem onBoundedFormula_ex {L L' : Language} {ϕ : L →ᴸ L'}
     {α : Type _} {n : ℕ} (F : L.BoundedFormula α (n + 1)) :
     ϕ.onBoundedFormula (∃' F) = ∃' ϕ.onBoundedFormula F :=
@@ -518,6 +524,13 @@ theorem isEndomorphismOn_of_isTheoryEndomorphism {L : Language} (ϕ : L →ᴸ L
     have h₂ : ¬M ⊨ ϕ.onSentence S := Model.realize_of_mem (M := M) _ hS'
     simp only [h₂, h₁]
 
+theorem isTheoryEndomorphism_completeTheory {L : Language} (ϕ : L →ᴸ L)
+    (M : Type _) [L.Structure M] (hM : IsEndomorphismOn ϕ M) :
+    IsTheoryEndomorphism ϕ (L.completeTheory M) := by
+  constructor
+  intro
+  simp only [mem_completeTheory, map_onSentence]
+
 theorem speckerTheory₁_isSatisfiable {L : Language} (ϕ : L →ᴸ L) (T : L.Theory)
     (hT : T.IsMaximal) (hT' : IsTheoryEndomorphism ϕ T)
     (A : L.BoundedFormula Empty 1) :
@@ -552,19 +565,6 @@ theorem speckerTheory₁_isSatisfiable {L : Language} (ϕ : L →ᴸ L) (T : L.T
       BoundedFormula.realize_subst, Term.realize_constants, LHom.realize_onBoundedFormula] at this ⊢
     exact this
 
-/-- Define the type raising endomorphism on constants indexed by `ℤ`. -/
-def raise : constantsOn ℤ →ᴸ constantsOn ℤ where
-  onFunction := fun n => match n with
-    | 0 => fun c : ℤ => c + 1
-    | 1 => PEmpty.elim
-    | 2 => PEmpty.elim
-    | (_ + 3) => PEmpty.elim
-  onRelation := fun n => match n with
-    | 0 => PEmpty.elim
-    | 1 => PEmpty.elim
-    | 2 => PEmpty.elim
-    | (_ + 3) => PEmpty.elim
-
 def speckerTheory₂ {L : Language} (ϕ : L →ᴸ L) (T : L.Theory) :
     L[[L.BoundedFormula Empty 1 × ℤ]].Theory :=
   (L.lhomWithConstants _).onTheory T ∪
@@ -578,14 +578,14 @@ def speckerTheory₂ {L : Language} (ϕ : L →ᴸ L) (T : L.Theory) :
   }
 
 def speckerTheory₂' {L : Language} (ϕ : L →ᴸ L) (T : L.Theory)
-    (S : List (L.BoundedFormula Empty 1)) :
-    L[[{A | A ∈ S} × ℤ]].Theory :=
+    (S : Finset (L.BoundedFormula Empty 1)) :
+    L[[S × ℤ]].Theory :=
   (L.lhomWithConstants _).onTheory T ∪
   (⋃ (A : L.BoundedFormula Empty 1) (hA : A ∈ S),
-    {∃' ((L.lhomWithConstants ({A | A ∈ S} × ℤ)).onBoundedFormula A) ⟹
+    {∃' ((L.lhomWithConstants (S × ℤ)).onBoundedFormula A) ⟹
       ((L.lhomWithConstants _).onFormula A.toFormula).subst
         (fun _ => Constants.term (L.con (⟨A, hA⟩, 0)))}) ∪
-  ⋃ (F : L.Formula ({A | A ∈ S} × ℤ)), {
+  ⋃ (F : L.Formula (S × ℤ)), {
     ((L.lhomWithConstants _).onFormula F).subst (fun z => Constants.term (L.con z)) ⇔
     ((L.lhomWithConstants _).onFormula (ϕ.onFormula F)).subst
       (fun z => Constants.term (L.con (z.1, z.2 + 1)))
@@ -700,8 +700,8 @@ theorem speckerTheory₂_reduction {L : Language} (ϕ : L →ᴸ L) (T : L.Theor
     isSatisfiable_union_iUnion_iff_isSatisfiable_union_iUnion_finset]
   intro SA
   rw [Set.union_assoc, Set.union_comm]
-  set LA := default ::
-    (SA ∪ SF.biUnion (fun f => f.freeVarFinset.image (fun x => x.1))).toList with hLA
+  set LA := {default} ∪
+    (SA ∪ SF.biUnion (fun f => f.freeVarFinset.image (fun x => x.1))) with hLA
   have := hT LA
   rw [← isSatisfiable_onTheory_iff
     (lhomWithConstantsMap_injective L (fun x => (x.1.val, x.2)) ?_)] at this
@@ -722,7 +722,7 @@ theorem speckerTheory₂_reduction {L : Language} (ϕ : L →ᴸ L) (T : L.Theor
     exact this
   · have := hM _ ⟨_, Or.inl (Or.inr ⟨A, ?_, rfl⟩), rfl⟩
     swap
-    · rw [hLA, List.mem_cons, Finset.mem_toList, Finset.mem_union]
+    · rw [hLA, Finset.mem_union, Finset.mem_union]
       exact Or.inr (Or.inl hA)
     clear hM
     simp only [LHom.onSentence, LHom.onFormula, onBoundedFormula_imp, onBoundedFormula_ex] at this
@@ -732,7 +732,7 @@ theorem speckerTheory₂_reduction {L : Language} (ϕ : L →ᴸ L) (T : L.Theor
   · have := hM _ ⟨_, Or.inr ⟨F.relabel
        (fun x => (if h : x.1 ∈ LA then ⟨x.1, h⟩ else ⟨default, ?_⟩, x.2)), rfl⟩, rfl⟩
     swap
-    · rw [hLA, Set.mem_setOf, List.mem_cons]
+    · rw [hLA, Finset.mem_union, Finset.mem_singleton]
       exact Or.inl rfl
     clear hM
     rw [Sentence.Realize, Formula.Realize] at this ⊢
@@ -751,7 +751,7 @@ theorem speckerTheory₂_reduction {L : Language} (ϕ : L →ᴸ L) (T : L.Theor
       simp only [LHom.onFormula, onBoundedFormula_freeVarFinset] at hv
       dsimp only [Function.comp_apply]
       rw [dif_pos]
-      rw [hLA, List.mem_cons, Finset.mem_toList, Finset.mem_union, Finset.mem_biUnion]
+      rw [hLA, Finset.mem_union, Finset.mem_union, Finset.mem_biUnion]
       refine Or.inr (Or.inr ⟨F, hF, ?_⟩)
       rw [Finset.mem_image]
       exact ⟨v, hv, rfl⟩
@@ -760,9 +760,115 @@ theorem speckerTheory₂_reduction {L : Language} (ϕ : L →ᴸ L) (T : L.Theor
       simp only [LHom.onFormula, onBoundedFormula_freeVarFinset] at hv
       dsimp only [Function.comp_apply]
       rw [dif_pos]
-      rw [hLA, List.mem_cons, Finset.mem_toList, Finset.mem_union, Finset.mem_biUnion]
+      rw [hLA, Finset.mem_union, Finset.mem_union, Finset.mem_biUnion]
       refine Or.inr (Or.inr ⟨F, hF, ?_⟩)
       rw [Finset.mem_image]
       exact ⟨v, hv, rfl⟩
+
+/-- Define the type raising endomorphism on constants indexed by `α × ℤ`. -/
+def raise {α : Type _} : constantsOn (α × ℤ) →ᴸ constantsOn (α × ℤ) where
+  onFunction := fun n => match n with
+    | 0 => fun c : α × ℤ => (c.1, c.2 + 1)
+    | 1 => PEmpty.elim
+    | 2 => PEmpty.elim
+    | (_ + 3) => PEmpty.elim
+  onRelation := fun n => match n with
+    | 0 => PEmpty.elim
+    | 1 => PEmpty.elim
+    | 2 => PEmpty.elim
+    | (_ + 3) => PEmpty.elim
+
+def sentenceToFormula {L : Language} {α : Type _} (S : L[[α]].Sentence) : L.Formula α :=
+  sorry
+
+open scoped Classical in
+theorem speckerTheory₂'_step {L : Language} (ϕ : L →ᴸ L) (T : L.Theory)
+    (hT : T.IsMaximal) (hT' : IsTheoryEndomorphism ϕ T)
+    (SA : Finset (L.BoundedFormula Empty 1)) (A₀ : L.BoundedFormula Empty 1) (hA₀ : A₀ ∉ SA)
+    (hTS : (speckerTheory₂' ϕ T SA).IsSatisfiable) :
+    (speckerTheory₂' ϕ T (insert A₀ SA)).IsSatisfiable := by
+  obtain ⟨M⟩ := hTS
+  have := speckerTheory₁_isSatisfiable (ϕ.sumMap raise) (L[[SA × ℤ]].completeTheory M)
+    (completeTheory.isMaximal _ _) ?_
+  swap
+  · refine isTheoryEndomorphism_completeTheory _ _ ?_
+    constructor
+    intro S
+    have := M.is_model
+    unfold speckerTheory₂' at this
+    simp only [model_iff, Set.mem_union, Set.mem_iUnion] at this
+    have := this _ (Or.inr ⟨Formula.equivSentence.symm S, rfl⟩)
+    sorry
+  sorry
+
+theorem IsTheoryEndomorphism.realize_iff_of_isEmpty {L : Language} {ϕ : L →ᴸ L} {T : L.Theory}
+    (hT : IsTheoryEndomorphism ϕ T) (hT' : T.IsMaximal) {α : Type _} [IsEmpty α] (F : L.Formula α)
+    {M : Type _} [L.Structure M] [M ⊨ T] (v : α → M) :
+    (ϕ.onFormula F).Realize v ↔ F.Realize v := by
+  have h₁ := Formula.realize_relabel (L := L) (M := M) (φ := F)
+    (g := (IsEmpty.elim' inferInstance : α → Empty)) (v := Empty.elim)
+  refine Iff.trans ?_ (h₁.trans ?_)
+  swap
+  · rw [iff_eq_eq]
+    congr 1
+    funext x
+    exact IsEmpty.elim inferInstance x
+  have h₂ := Formula.realize_relabel (L := L) (M := M) (φ := ϕ.onFormula F)
+    (g := (IsEmpty.elim' inferInstance : α → Empty)) (v := Empty.elim)
+  refine Iff.trans ?_ (h₂.symm.trans ?_)
+  · rw [iff_eq_eq]
+    congr 1
+    funext x
+    exact IsEmpty.elim inferInstance x
+  clear h₁ h₂
+  rw [← onFormula_relabel]
+  obtain (hTF | hTF) := hT'.mem_or_not_mem (F.relabel (IsEmpty.elim' inferInstance))
+  · have h₁ := Model.realize_of_mem (M := M) _ hTF
+    have hTF' := hT.map_onSentence (F.relabel (IsEmpty.elim' inferInstance))
+    rw [LHom.onSentence] at hTF'
+    have h₂ := Model.realize_of_mem (M := M) _ (hTF'.mpr hTF)
+    rw [Sentence.Realize] at h₁ h₂
+    exact iff_of_true (by convert h₂) (by convert h₁)
+  · have h₁ := Model.realize_of_mem (M := M) _ hTF
+    have hTF' := hT.map_onSentence (Formula.not (F.relabel (IsEmpty.elim' inferInstance)))
+    rw [LHom.onSentence] at hTF'
+    have h₂ := Model.realize_of_mem (M := M) _ (hTF'.mpr hTF)
+    rw [Sentence.Realize] at h₁ h₂
+    simp only [Formula.realize_not, onFormula_not] at h₁ h₂
+    exact iff_of_false (by convert h₂) (by convert h₁)
+
+theorem speckerTheory₂'_isSatisfiable {L : Language} (ϕ : L →ᴸ L) (T : L.Theory)
+    (hT : T.IsMaximal) (hT' : IsTheoryEndomorphism ϕ T)
+    (SA : Finset (L.BoundedFormula Empty 1)) :
+    (speckerTheory₂' ϕ T SA).IsSatisfiable := by
+  classical
+  revert SA
+  refine Finset.induction (p := fun SA => (speckerTheory₂' ϕ T SA).IsSatisfiable) ?_ ?_
+  · obtain ⟨M⟩ := hT.left
+    letI : (constantsOn
+        ({x // x ∈ (∅ : Finset (L.BoundedFormula Empty 1))} × ℤ)).Structure M :=
+      constantsOn.structure (fun x => (Finset.not_mem_empty x.1.val x.1.prop).elim)
+    refine ⟨@ModelType.mk _ _ M inferInstance ?_ inferInstance⟩
+    have hM := M.is_model
+    unfold speckerTheory₂' at hM
+    rw [speckerTheory₂']
+    simp only [model_iff, Set.mem_union, Set.mem_iUnion₂, Set.mem_iUnion, Set.mem_singleton_iff,
+      LHom.mem_onTheory] at hM ⊢
+    rintro S ((⟨S, hS, rfl⟩ | ⟨A, hA, rfl⟩) | ⟨F, hF, rfl⟩)
+    · rw [LHom.realize_onSentence]
+      exact hM S hS
+    · simp only [Finset.not_mem_empty] at hA
+    · rw [Sentence.Realize, Formula.Realize, BoundedFormula.realize_iff,
+        BoundedFormula.realize_subst, BoundedFormula.realize_subst, LHom.onFormula,
+        LHom.realize_onBoundedFormula, LHom.realize_onBoundedFormula,
+        realize_boundedFormula, realize_boundedFormula, hT'.realize_iff_of_isEmpty hT]
+      rfl
+  · intro A₀ S hA₀
+    exact speckerTheory₂'_step ϕ T hT hT' S A₀ hA₀
+
+theorem speckerTheory₂_isSatisfiable {L : Language} (ϕ : L →ᴸ L) (T : L.Theory)
+    (hT : T.IsMaximal) (hT' : IsTheoryEndomorphism ϕ T) :
+    (speckerTheory₂ ϕ T).IsSatisfiable :=
+  speckerTheory₂_reduction ϕ T (speckerTheory₂'_isSatisfiable ϕ T hT hT')
 
 end ConNF.Specker
