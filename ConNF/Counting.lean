@@ -7,6 +7,7 @@ import ConNF.Counting.ExistsSpec
 import ConNF.Counting.CountSpec
 import ConNF.Counting.CountSupportOrbit
 import ConNF.Counting.Hypotheses
+import ConNF.Counting.Twist
 import ConNF.Counting.Recode
 import ConNF.Counting.CountCodingFunction
 import ConNF.Counting.CountRaisedSingleton

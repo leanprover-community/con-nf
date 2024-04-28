@@ -102,7 +102,6 @@ theorem smul_support_max (s : TSet β) (ρ : Allowable β) :
     (ρ • s).support.max = s.support.max := by
   rw [support, support, Orbit.mk_smul, Enumeration.smul_max, Enumeration.smul_max]
 
-@[simp]
 theorem smul_support (s : TSet β) (ρ : Allowable β) :
     (ρ • s).support = (ρ • s).twist • s.twist⁻¹ • s.support := by
   rw [support, support, inv_smul_smul, Orbit.mk_smul]

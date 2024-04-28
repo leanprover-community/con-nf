@@ -71,15 +71,6 @@ theorem smul_raise_eq_iff (c : Address γ) (ρ : Allowable β) :
 def Appears (s : Set (StructSet γ)) : Prop :=
   ∃ t : TSet β, s = StructSet.ofCoe (toStructSet t) γ hγ
 
-/-- Convert a set of `γ`-tangles to the (unique) `α`-tangle with that `γ`-extension,
-if it exists. -/
-noncomputable def toTSet (s : Set (StructSet γ)) (h : Appears hγ s) : TSet β :=
-  h.choose
-
-theorem toStructSet_toTSet (s : Set (StructSet γ)) (h : Appears hγ s) :
-    s = StructSet.ofCoe (toStructSet (toTSet hγ s h)) γ hγ :=
-  h.choose_spec
-
 def AppearsRaised (χs : Set (CodingFunction β)) (U : Support β) : Prop :=
   Appears hγ {u | ∃ χ ∈ χs, ∃ V ≥ U, ∃ hV : V ∈ χ,
     u ∈ StructSet.ofCoe (toStructSet ((χ.decode V).get hV)) γ hγ}
