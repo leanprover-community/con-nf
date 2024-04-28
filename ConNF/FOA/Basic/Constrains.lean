@@ -375,7 +375,7 @@ theorem reflTransClosure_small {S : Set (Address β)} (h : Small S) :
   have : Small (⋃ n : ULift ℕ, nthClosure S n.down)
   · refine' small_iUnion _ fun _ => small_nthClosure h
     rw [Cardinal.mk_denumerable]
-    exact aleph0_le_mk_Λ.trans_lt Params.Λ_lt_κ
+    exact Params.aleph0_lt_mk_κ
   convert this using 1
   ext x : 1
   simp only [mem_iUnion, ULift.exists]

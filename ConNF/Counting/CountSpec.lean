@@ -84,14 +84,16 @@ theorem mk_inflexibleBotPath (A : ExtendedIndex β) : #(InflexibleBotPath A) ≤
     true_and]
   exact mk_extendedIndex _
 
-theorem mk_specCondition (h : ∀ (δ : Λ) [LeLevel δ], δ < β → #(CodingFunction δ) < #μ) :
-    #(SpecCondition β) < #μ := by
+theorem mk_specCondition {ζ : Cardinal.{u}}
+    (hζ₁ : ζ.IsStrongLimit) (hζ₂ : #Λ ≤ ζ) (hζ₃ : #κ ≤ ζ.ord.cof) (hζ₃' : #κ < ζ) (hζ₄ : ζ ≤ #μ)
+    (h : ∀ (δ : Λ) [LeLevel δ], δ < β → #(CodingFunction δ) < ζ) :
+    #(SpecCondition β) < ζ := by
   refine (mk_le_of_injective SpecCondition.toPrime_injective).trans_lt ?_
   rw [SpecCondition']
   simp only [mk_sum, mk_prod, lift_id, mk_set, mk_pi, prod_const, mk_sigma]
-  have := Params.μ_isStrongLimit.isLimit.aleph0_le
-  have mk_extendedIndex' := (mk_extendedIndex β).trans_lt (Params.Λ_lt_κ.trans Params.κ_lt_μ)
-  have mk_pow_κ := Params.μ_isStrongLimit.2 _ Params.κ_lt_μ
+  have := hζ₁.isLimit.aleph0_le
+  have mk_extendedIndex' : #(ExtendedIndex β) < ζ := sorry --(mk_extendedIndex β).trans_lt Params.Λ_lt_μ
+  have mk_pow_κ := hζ₁.2 _ hζ₃'
   refine add_lt_of_lt this ?_ (add_lt_of_lt this ?_ (add_lt_of_lt this ?_ ?_))
   · exact mul_lt_of_lt this mk_extendedIndex' (mul_lt_of_lt this mk_pow_κ mk_pow_κ)
   · refine mul_lt_of_lt this mk_extendedIndex' (mul_lt_of_lt this mk_pow_κ ?_)
@@ -101,12 +103,12 @@ theorem mk_specCondition (h : ∀ (δ : Λ) [LeLevel δ], δ < β → #(CodingFu
         (fun (A : ExtendedIndex β) =>
           sum fun (h : InflexibleCoePath A) => #(CodingFunction h.δ) *
             ((2 ^ #κ) ^ #κ * (#κ * (2 ^ #κ) ^ #κ)))
-        (fun _ => #μ) ?_).trans_le ?_
+        (fun _ => ζ) ?_).trans_le ?_
     intro A
     refine (sum_lt_prod
         (fun (h : InflexibleCoePath A) => #(CodingFunction h.δ) *
           ((2 ^ #κ) ^ #κ * (#κ * (2 ^ #κ) ^ #κ)))
-        (fun _ => #μ) ?_).trans_le ?_
+        (fun _ => ζ) ?_).trans_le ?_
     · intro hA
       refine mul_lt_of_lt this (h hA.δ (coe_lt_coe.mp hA.δ_lt_β)) ?_
       rw [← Cardinal.power_mul, mul_eq_self Params.κ_isRegular.aleph0_le]
@@ -125,7 +127,7 @@ theorem mk_specCondition (h : ∀ (δ : Λ) [LeLevel δ], δ < β → #(CodingFu
   · refine (sum_lt_prod
         (fun (A : ExtendedIndex β) =>
           #(InflexibleBotPath A) * ((2 ^ #κ) * (2 ^ #κ) ^ #κ))
-        (fun _ => #μ) ?_).trans_le ?_
+        (fun _ => ζ) ?_).trans_le ?_
     intro A
     · refine mul_lt_of_lt this ?_ (mul_lt_of_lt this mk_pow_κ ?_)
       · exact (mk_inflexibleBotPath A).trans_lt (Params.Λ_lt_κ.trans Params.κ_lt_μ)

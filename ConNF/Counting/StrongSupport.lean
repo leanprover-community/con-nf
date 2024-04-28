@@ -98,26 +98,23 @@ def strongClosure (s : Set (Address β)) : Set (Address β) :=
 theorem interferesSet_eq (s : Set (Address β)) :
     {c : Address β | ∃ A a N₁ N₂, ⟨A, inr N₁⟩ ∈ precClosure s ∧ ⟨A, inr N₂⟩ ∈ precClosure s ∧
       Interferes a N₁ N₂ ∧ c = ⟨A, inl a⟩} =
-    ⋃ (A : ExtendedIndex β),
-    ⋃ (N₁ : NearLitter) (_ : ⟨A, inr N₁⟩ ∈ precClosure s),
-    ⋃ (N₂ : NearLitter) (_ : ⟨A, inr N₂⟩ ∈ precClosure s),
-    ⋃ (a : Atom) (_ : Interferes a N₁ N₂),
-    {⟨A, inl a⟩} := by aesop
+    ⋃ (A : ExtendedIndex β × NearLitter) (_ : ⟨A.1, inr A.2⟩ ∈ precClosure s),
+    ⋃ (N₂ : NearLitter) (_ : ⟨A.1, inr N₂⟩ ∈ precClosure s),
+    ⋃ (a : Atom) (_ : Interferes a A.2 N₂),
+    {⟨A.1, inl a⟩} := by aesop
 
 theorem strongClosure_small {s : Set (Address β)} (h : Small s) :
     Small (strongClosure s) := by
   refine Small.union ?_ (precClosure_small h)
   rw [interferesSet_eq]
-  refine small_iUnion ((mk_extendedIndex β).trans_lt Params.Λ_lt_κ) ?_
-  intro A
   refine Small.bUnion ?_ ?_
-  · refine Small.image_subset (fun N => ⟨A, inr N⟩) ?_ (precClosure_small h) ?_
+  · refine Small.image_subset (fun A => ⟨A.1, inr A.2⟩) ?_ (precClosure_small h) ?_
     · intro N N' h
-      cases h
-      rfl
+      rw [Address.mk.injEq, inr.injEq] at h
+      exact Prod.ext h.1 h.2
     · rintro _ ⟨N, hN, rfl⟩
       exact hN
-  intro N₁ _
+  rintro ⟨A, N₁⟩ _
   refine Small.bUnion ?_ ?_
   · refine Small.image_subset (fun N => ⟨A, inr N⟩) ?_ (precClosure_small h) ?_
     · intro N N' h
