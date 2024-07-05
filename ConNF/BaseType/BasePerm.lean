@@ -114,7 +114,9 @@ instance : Pow BasePerm ℕ :=
       | zero =>
           exact (1 : BasePerm).near
       | succ n hn =>
-          have := (⟨π.atomPerm ^ n, π.litterPerm ^ n, hn⟩ * π).near
+          intro L s h
+          have := (⟨π.atomPerm ^ n, π.litterPerm ^ n, hn⟩ * π).near h
+          simp only [pow_succ, coe_mul, comp_apply, mul_inv_rev]
           exact this⟩⟩
 
 /-- We can raise base permutations to an integer power since we can do this to

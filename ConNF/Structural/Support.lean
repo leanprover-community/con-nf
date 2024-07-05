@@ -1,5 +1,5 @@
-import Mathlib.GroupTheory.GroupAction.Sum
 import Mathlib.GroupTheory.GroupAction.Support
+import Mathlib.Algebra.Group.Action.Sum
 import ConNF.Structural.StructPerm
 import ConNF.Structural.Enumeration
 

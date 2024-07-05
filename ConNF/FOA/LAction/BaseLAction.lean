@@ -153,7 +153,7 @@ theorem mk_not_bannedLitter : #{L | ¬φ.BannedLitter L} = #μ := by
     exact lt_trans φ.bannedLitter_small Params.κ_lt_μ
 
 theorem not_bannedLitter_nonempty : Nonempty {L | ¬φ.BannedLitter L} := by
-  simp only [← mk_ne_zero_iff, mk_not_bannedLitter, Ne.def, mk_ne_zero, not_false_iff]
+  simp only [← mk_ne_zero_iff, mk_not_bannedLitter, ne_eq, mk_ne_zero, not_false_iff]
 
 /-- If `a` is in the domain, this is the atom map. Otherwise, this gives an arbitrary atom. -/
 noncomputable def atomMapOrElse (a : Atom) : Atom :=
@@ -283,8 +283,8 @@ theorem mk_dom_inter_flexible_symmDiff_le :
       #{L : Litter | ¬φ.BannedLitter L ∧ Flexible A L} := by
   rw [mk_not_bannedLitter_and_flexible]
   refine' le_trans (le_of_lt _) Params.κ_lt_μ.le
-  exact Small.symmDiff (Small.mono (inter_subset_left _ _) φ.litterMap_dom_small)
-    (Small.mono (inter_subset_left _ _) φ.litterMap_dom_small).image
+  exact Small.symmDiff (Small.mono inter_subset_left φ.litterMap_dom_small)
+    (Small.mono inter_subset_left φ.litterMap_dom_small).image
 
 theorem aleph0_le_not_bannedLitter_and_flexible :
     ℵ₀ ≤ #{L | ¬φ.BannedLitter L ∧ Flexible A L} := by
@@ -296,14 +296,14 @@ theorem disjoint_dom_inter_flexible_not_bannedLitter :
       (φ.litterMap.Dom ∩ {L | Flexible A L} ∪
         φ.roughLitterMapOrElse '' (φ.litterMap.Dom ∩ {L | Flexible A L}))
       {L : Litter | ¬φ.BannedLitter L ∧ Flexible A L} := by
-  refine' disjoint_of_subset _ (inter_subset_left _ _) φ.disjoint_dom_not_bannedLitter
+  refine' disjoint_of_subset _ inter_subset_left φ.disjoint_dom_not_bannedLitter
   rintro a (ha | ⟨b, hb, rfl⟩)
   exact Or.inl ha.1
   exact Or.inr ⟨b, hb.1, rfl⟩
 
 theorem roughLitterMapOrElse_injOn_dom_inter_flexible (hφ : φ.Lawful) :
     InjOn φ.roughLitterMapOrElse (φ.litterMap.Dom ∩ {L | Flexible A L}) :=
-  (φ.roughLitterMapOrElse_injOn hφ).mono (inter_subset_left _ _)
+  (φ.roughLitterMapOrElse_injOn hφ).mono inter_subset_left
 
 /-- A partial permutation that agrees with `φ` on flexible litters in its domain. -/
 noncomputable def flexibleLitterPartialPerm (hφ : φ.Lawful) (A : ExtendedIndex β) :
@@ -321,17 +321,17 @@ theorem flexibleLitterPartialPerm_apply_eq {φ : BaseLAction} {hφ : φ.Lawful} 
 theorem flexibleLitterPartialPerm_domain_small (hφ : φ.Lawful) :
     Small (φ.flexibleLitterPartialPerm hφ A).domain := by
   refine' Small.union (Small.union _ _) _
-  · exact φ.litterMap_dom_small.mono (inter_subset_left _ _)
-  · exact (φ.litterMap_dom_small.mono (inter_subset_left _ _)).image
+  · exact φ.litterMap_dom_small.mono inter_subset_left
+  · exact (φ.litterMap_dom_small.mono inter_subset_left).image
   · rw [Small]
     rw [Cardinal.mk_congr (PartialPerm.sandboxSubsetEquiv _ _)]
     simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
     refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
       refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le
         (lt_of_le_of_lt aleph0_le_mk_Λ Params.Λ_lt_κ) _ <;>
-      refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
-    exact φ.litterMap_dom_small.mono (inter_subset_left _ _)
-    exact (φ.litterMap_dom_small.mono (inter_subset_left _ _)).image
+      refine' lt_of_le_of_lt (mk_subtype_mono diff_subset) _
+    exact φ.litterMap_dom_small.mono inter_subset_left
+    exact (φ.litterMap_dom_small.mono inter_subset_left).image
 
 end BaseLAction
 

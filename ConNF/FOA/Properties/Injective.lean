@@ -250,13 +250,13 @@ theorem completeLitterMap_flexible (hπf : π.Free) {A : ExtendedIndex β} {L : 
   rw [completeLitterMap_eq_of_flexible h]
   exact BaseApprox.flexibleCompletion_smul_flexible _ _ (hπf A) _ h
 
-theorem completeLitterMap_inflexibleBot {A : ExtendedIndex β} {L : Litter}
+noncomputable def completeLitterMap_inflexibleBot {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleBot A L) : InflexibleBot A (π.completeLitterMap A L) := by
   rw [completeLitterMap_eq_of_inflexibleBot h]
   obtain ⟨⟨γ, ε, hγε, B, rfl⟩, a, rfl⟩ := h
   exact ⟨⟨γ, ε, hγε, B, rfl⟩, _, rfl⟩
 
-theorem completeLitterMap_inflexibleCoe (hπf : π.Free) {c d : Address β}
+noncomputable def completeLitterMap_inflexibleCoe (hπf : π.Free) {c d : Address β}
     (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter} (h : InflexibleCoe A L)
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d) :
     InflexibleCoe A (π.completeLitterMap A L) := by
@@ -292,7 +292,7 @@ theorem completeLitterMap_flexible_iff (hπf : π.Free) {c d : Address β}
     Flexible A (π.completeLitterMap A L) ↔ Flexible A L :=
   ⟨completeLitterMap_flexible' hπf hcd hL, completeLitterMap_flexible hπf⟩
 
-theorem completeLitterMap_inflexibleBot' (hπf : π.Free) {c d : Address β}
+noncomputable def completeLitterMap_inflexibleBot' (hπf : π.Free) {c d : Address β}
     (hcd : (ihsAction π c d).Lawful) {A : ExtendedIndex β} {L : Litter}
     (hL : ⟨A, inr L.toNearLitter⟩ ∈ reflTransConstrained c d)
     (h : InflexibleBot A (π.completeLitterMap A L)) : InflexibleBot A L := by
@@ -312,7 +312,7 @@ theorem completeLitterMap_inflexibleBot_iff (hπf : π.Free) {c d : Address β}
   ⟨fun ⟨h⟩ => ⟨completeLitterMap_inflexibleBot' hπf hcd hL h⟩, fun ⟨h⟩ =>
     ⟨completeLitterMap_inflexibleBot h⟩⟩
 
-theorem completeLitterMap_inflexibleCoe' (hπf : π.Free) {A : ExtendedIndex β} {L : Litter}
+noncomputable def completeLitterMap_inflexibleCoe' (hπf : π.Free) {A : ExtendedIndex β} {L : Litter}
     (h : InflexibleCoe A (π.completeLitterMap A L)) : InflexibleCoe A L := by
   refine' Nonempty.some _
   obtain h' | h' | h' := flexible_cases' A L
@@ -1084,7 +1084,7 @@ theorem completeAtomMap_mem_completeNearLitterMap_toNearLitter (hπf : π.Free) 
 
 theorem mem_image_iff {α β : Type _} {f : α → β} (hf : Injective f) (x : α) (s : Set α) :
     f x ∈ f '' s ↔ x ∈ s :=
-  Set.InjOn.mem_image_iff (hf.injOn Set.univ) (subset_univ _) (mem_univ _)
+  Set.InjOn.mem_image_iff hf.injOn (subset_univ _) (mem_univ _)
 
 /-- Atoms inside near-litters are mapped inside the corresponding image near-litter. -/
 theorem completeAtomMap_mem_completeNearLitterMap (hπf : π.Free) {A : ExtendedIndex β} {a : Atom}

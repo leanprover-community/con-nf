@@ -616,7 +616,7 @@ theorem disjointNL'_isNear (S : Set (Address 0)) (hS : Small S) (N : NearLitter)
     exact this
   refine Small.union ?_ ?_
   · rw [disjointNL', sdiff_sdiff_right_self]
-    exact (interference_small S hS).mono (inter_subset_right _ _)
+    exact (interference_small S hS).mono inter_subset_right
   · refine small_of_forall_not_mem ?_
     rintro x ⟨hx, hxN⟩
     simp only [disjointNL', mem_iInter, SetLike.mem_coe, and_imp] at hx

@@ -59,10 +59,14 @@ theorem ofCoe_symm : ofCoe.symm = (toCoe : _ ≃ StructSet α) :=
   rfl
 
 @[simp]
-theorem toBot_ofBot (a) : toBot (ofBot a) = a := by aesop
+theorem toBot_ofBot (a) : toBot (ofBot a) = a := by
+  unfold toBot ofBot
+  simp only [Equiv.cast_apply, cast_cast, cast_eq]
 
 @[simp]
-theorem ofBot_toBot (a) : ofBot (toBot a) = a := by aesop
+theorem ofBot_toBot (a) : ofBot (toBot a) = a := by
+  unfold toBot ofBot
+  simp only [Equiv.cast_apply, cast_cast, cast_eq]
 
 @[simp]
 theorem toCoe_ofCoe (a : StructSet α) : toCoe (ofCoe a) = a := by simp [toCoe, ofCoe]
@@ -85,6 +89,20 @@ theorem toCoe_inj {a b} : (toCoe a : StructSet α) = toCoe b ↔ a = b :=
 @[simp]
 theorem ofCoe_inj {a b : StructSet α} : ofCoe a = ofCoe b ↔ a = b :=
   ofCoe.injective.eq_iff
+
+theorem toBot_eq_iff {a b} : toBot a = b ↔ a = ofBot b := by
+  refine ⟨?_, ?_⟩
+  · rintro rfl
+    exact (ofBot_toBot a).symm
+  · rintro rfl
+    exact toBot_ofBot b
+
+theorem ofBot_eq_iff {a b} : ofBot a = b ↔ a = toBot b := by
+  refine ⟨?_, ?_⟩
+  · rintro rfl
+    exact (toBot_ofBot a).symm
+  · rintro rfl
+    exact ofBot_toBot b
 
 /-- Extensionality for structural sets at proper type indices. If two structural sets have the same
 extensions at every lower type index, then they are the same. -/

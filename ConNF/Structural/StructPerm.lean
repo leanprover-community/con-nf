@@ -73,10 +73,10 @@ theorem comp_bot_smul_nearLitter {α : TypeIndex} (π : StructPerm α)
   rfl
 
 def structSetAction : {α : TypeIndex} → StructPerm α → StructSet α → StructSet α
-  | ⊥, π, t => Tree.ofBot π • (StructSet.ofBot t)
+  | ⊥, π, t => StructSet.toBot <| Tree.ofBot π • (StructSet.ofBot t)
   | (α : Λ), π, t => StructSet.toCoe
       (fun β hβ => structSetAction (Tree.comp (Hom.toPath hβ) π) '' StructSet.ofCoe t β hβ)
-termination_by α π t => α
+termination_by α => α
 
 theorem one_structSetAction {α : TypeIndex} (t : StructSet α) : structSetAction 1 t = t := by
   have : WellFoundedLT TypeIndex := inferInstance
@@ -85,8 +85,8 @@ theorem one_structSetAction {α : TypeIndex} (t : StructSet α) : structSetActio
   intro α ih t
   induction α using WithBot.recBotCoe with
   | bot =>
-      unfold structSetAction
-      rfl
+      unfold structSetAction StructSet.toBot StructSet.ofBot
+      simp only [Tree.ofBot_one, cast_apply, one_smul, cast_cast, cast_eq]
   | coe α =>
       unfold structSetAction
       rw [StructSet.coe_ext]
@@ -103,8 +103,8 @@ theorem mul_structSetAction {α : TypeIndex} (π₁ π₂ : StructPerm α) (t : 
   intro α ih π₁ π₂ t
   induction α using WithBot.recBotCoe with
   | bot =>
-      unfold structSetAction
-      rfl
+      rw [structSetAction, structSetAction, structSetAction, StructSet.ofBot_toBot,
+        Tree.ofBot_mul, mul_smul]
   | coe α =>
       rw [structSetAction, structSetAction, structSetAction]
       simp only [Tree.comp_mul, StructSet.ofCoe_toCoe, EmbeddingLike.apply_eq_iff_eq]
@@ -119,6 +119,10 @@ instance {α : TypeIndex} : MulAction (StructPerm α) (StructSet α) where
 theorem smul_eq {α : TypeIndex} (π : StructPerm α) (t : StructSet α) :
     π • t = structSetAction π t :=
   rfl
+
+theorem smul_bot_eq (π : StructPerm ⊥) (t : StructSet ⊥) :
+    π • t = StructSet.toBot (Tree.ofBot π • StructSet.ofBot t) := by
+  rw [smul_eq, structSetAction]
 
 theorem ofCoe_smul {α : Λ} {β : TypeIndex} (π : StructPerm α) (t : StructSet α) (h : β < α) :
     StructSet.ofCoe (π • t) β h = Tree.comp (Hom.toPath h) π • StructSet.ofCoe t β h := by

@@ -48,7 +48,7 @@ structure WithoutPreimage (a : Atom) : Prop where
 theorem withoutPreimage_small : Small {a | φ.WithoutPreimage a} := by
   simp only [withoutPreimage_iff, setOf_and]
   rw [← inter_assoc]
-  refine' Small.mono (inter_subset_left _ _) _
+  refine' Small.mono inter_subset_left _
   suffices
     Small (⋃ (L : Litter) (hL), litterSet ((φ.litterMap L).get hL).1 \ (φ.litterMap L).get hL) by
     refine' Small.mono _ this
@@ -102,7 +102,7 @@ theorem mappedOutside_small (L : Litter) (hL : (φ.litterMap L).Dom) :
     Small {a | φ.MappedOutside L hL a} := by
   simp only [mappedOutside_iff, setOf_and]
   rw [← inter_assoc]
-  refine' Small.mono (inter_subset_left _ _) _
+  refine' Small.mono inter_subset_left _
   refine' Small.mono _ ((φ.litterMap L).get hL).2.prop
   exact fun x hx => Or.inr hx
 
@@ -123,7 +123,7 @@ theorem mk_mapped_outside_domain (L : Litter) :
   by_contra h
   have := Small.union (lt_of_not_le h) φ.atomMap_dom_small
   rw [diff_union_self] at this
-  exact (mk_litterSet L).not_lt (Small.mono (subset_union_left _ _) this)
+  exact (mk_litterSet L).not_lt (Small.mono subset_union_left this)
 
 /-- To each litter we associate a subset which is to contain the atoms mapped outside it. -/
 def mappedOutsideSubset (L : Litter) (hL : (φ.litterMap L).Dom) : Set Atom :=
@@ -334,7 +334,7 @@ theorem fillAtomRange_litterMap : φ.fillAtomRange.litterMap = φ.litterMap :=
 
 theorem subset_supportedActionAtomMapCore_dom :
     φ.atomMap.Dom ⊆ φ.supportedActionAtomMapCore.Dom :=
-  subset_union_left _ _
+  subset_union_left
 
 theorem subset_supportedActionAtomMapCore_ran :
     φ.atomMap.ran ⊆ φ.supportedActionAtomMapCore.ran := by

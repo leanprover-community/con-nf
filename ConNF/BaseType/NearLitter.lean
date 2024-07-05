@@ -49,11 +49,11 @@ theorem IsNearLitter.near (hs : IsNearLitter L s) (ht : IsNearLitter L t) : IsNe
 
 theorem IsNearLitter.mk_eq_κ (hs : IsNearLitter L s) : #s = #κ :=
   ((le_mk_diff_add_mk _ _).trans <|
-        add_le_of_le Params.κ_isRegular.aleph0_le (hs.mono <| subset_union_right _ _).lt.le
+        add_le_of_le Params.κ_isRegular.aleph0_le (hs.mono subset_union_right).lt.le
           (mk_litterSet _).le).eq_of_not_lt
     fun h =>
     ((mk_litterSet _).symm.trans_le <| le_mk_diff_add_mk _ _).not_lt <|
-      add_lt_of_lt Params.κ_isRegular.aleph0_le (hs.mono <| subset_union_left _ _) h
+      add_lt_of_lt Params.κ_isRegular.aleph0_le (hs.mono subset_union_left) h
 
 protected theorem IsNearLitter.nonempty (hs : IsNearLitter L s) : s.Nonempty := by
   rw [← nonempty_coe_sort, ← mk_ne_zero_iff, hs.mk_eq_κ]
@@ -248,11 +248,11 @@ theorem NearLitter.mk_inter_of_fst_eq_fst {N₁ N₂ : NearLitter} (h : N₁.fst
     #(N₁ ∩ N₂ : Set Atom) = #κ := by
   rw [← isNear_iff_fst_eq_fst] at h
   refine le_antisymm ?_ ?_
-  · exact (mk_le_mk_of_subset (inter_subset_left _ _)).trans (mk_nearLitter'' _).le
+  · exact (mk_le_mk_of_subset inter_subset_left).trans (mk_nearLitter'' _).le
   · by_contra! h'
     have := Small.union h h'
     rw [symmDiff_union_inter] at this
-    exact (this.mono (subset_union_left _ _)).not_le (le_of_eq (mk_nearLitter'' N₁).symm)
+    exact (this.mono subset_union_left).not_le (le_of_eq (mk_nearLitter'' N₁).symm)
 
 theorem NearLitter.inter_nonempty_of_fst_eq_fst {N₁ N₂ : NearLitter} (h : N₁.fst = N₂.fst) :
     (N₁ ∩ N₂ : Set Atom).Nonempty := by

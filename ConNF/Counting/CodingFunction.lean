@@ -174,10 +174,9 @@ theorem code_eq_code_iff (S S' : Support β) (t t' : TSet β)
     obtain ⟨ρ, rfl⟩ := this
     refine ⟨ρ, rfl, ?_⟩
     have := code_decode (ρ • S) t' h'
-    rw [← hc, ← Part.get_eq_iff_eq_some, decode_smul] at this
+    rw [← hc, ← Part.get_eq_iff_eq_some (ha := by exact ⟨ρ, rfl⟩), decode_smul] at this
     simp only [code_decode, Part.get_some] at this
     exact this.symm
-    exact ⟨ρ, rfl⟩
   · rintro ⟨ρ, rfl, rfl⟩
     refine ext (ρ • S) ⟨ρ, rfl⟩ ⟨1, by rw [one_smul]⟩ ?_
     simp only [code_decode, Part.get_some, decode_smul]

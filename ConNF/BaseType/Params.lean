@@ -358,13 +358,13 @@ theorem κ_succ_typein (i : κ) :
     · conv_lhs => rw [← Ordinal.enum_typein ((· < ·) : κ → κ → Prop) i]
       rw [Ordinal.enum_lt_enum (r := (· < ·))]
       · exact lt_add_one _
-      · have := Order.lt_succ i
-        rw [← Ordinal.typein_lt_typein ((· < ·) : κ → κ → Prop)] at this
-        exact (Order.succ_le_of_lt this).trans_lt (Ordinal.typein_lt_type _ _)
     have := Order.succ_le_of_lt this
     conv at this => lhs; rw [← Ordinal.enum_typein ((· < ·) : κ → κ → Prop) (Order.succ i)]
     rw [← not_lt, Ordinal.enum_le_enum] at this
     exact this
+    · have := Order.lt_succ i
+      rw [← Ordinal.typein_lt_typein ((· < ·) : κ → κ → Prop)] at this
+      exact (Order.succ_le_of_lt this).trans_lt (Ordinal.typein_lt_type _ _)
   · simp only [Ordinal.add_one_eq_succ, Order.succ_le_iff, Ordinal.typein_lt_typein,
       Order.lt_succ_iff_not_isMax, gt_iff_lt, not_isMax, not_false_eq_true]
 

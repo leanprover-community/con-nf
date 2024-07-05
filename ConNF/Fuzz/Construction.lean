@@ -91,7 +91,7 @@ theorem chooseWf_not_mem_deny [IsWellOrder α r] {deny : α → Set β}
 theorem chooseWf_ne_of_r [_inst : IsWellOrder α r] {deny : α → Set β}
     {h : ∀ x, #{ y // r y x } + #(deny x) < #β} (x₁ x₂ : α) (hx : r x₁ x₂) :
     chooseWf deny h x₁ ≠ chooseWf deny h x₂ := fun hx' =>
-  not_mem_subset (subset_union_left _ _) (chooseWf_spec x₂) ⟨x₁, hx, hx'⟩
+  not_mem_subset subset_union_left (chooseWf_spec x₂) ⟨x₁, hx, hx'⟩
 
 theorem chooseWf_injective [inst : IsWellOrder α r] {deny : α → Set β}
     {h : ∀ x, #{ y // r y x } + #(deny x) < #β} : Injective (chooseWf deny h) := by

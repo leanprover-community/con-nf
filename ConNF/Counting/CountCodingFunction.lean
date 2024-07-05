@@ -44,6 +44,7 @@ theorem recodeSurjection_surjective :
     conv in (Subtype.val '' _) => rw [image_preimage_eq_of_subset (raiseSingletons_subset_range hγ)]
     conv_rhs => rw [CodingFunction.eq_code hS,
       ← recode_eq hγ S ((χ.decode S).get hS) (χ.supports_decode S hS)]
+    rfl
 
 theorem recodeSurjection_range :
     Set.univ ⊆ Set.range (fun (x : (o : SupportOrbit β) × RecodeType hγ o) =>

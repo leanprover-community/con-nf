@@ -1,3 +1,4 @@
+import Mathlib.Algebra.GroupWithZero.Defs
 import Mathlib.Algebra.Group.Pi.Lemmas
 
 /-!

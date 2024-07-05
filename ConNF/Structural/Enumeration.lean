@@ -136,14 +136,16 @@ theorem funMap_injective {α β : Type _} [LinearOrder β] [IsWellOrder β (· <
   refine IsWellFounded.induction (· < ·) (C := fun y => ∀ x : α, f x = y → g x = y) y ?_
   clear y
   rintro y ih x rfl
-  obtain ⟨y, h₁⟩ : f x ∈ Set.range g
+  have : f x ∈ Set.range g
   · rw [← h.1]
     exact ⟨x, rfl⟩
+  obtain ⟨y, h₁⟩ := this
   rw [← h₁]
   obtain (h₂ | h₂ | h₂) := lt_trichotomy (g x) (g y)
-  · obtain ⟨z, h₃⟩ : g x ∈ Set.range f
+  · have : g x ∈ Set.range f
     · rw [h.1]
       exact ⟨x, rfl⟩
+    obtain ⟨z, h₃⟩ := this
     rw [h₁, ← h₃] at h₂
     have h₄ := ih (f z) h₂ z rfl
     have := congr_fun₂ h.2 z x

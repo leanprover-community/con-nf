@@ -82,7 +82,7 @@ theorem cloud_eq_empty (hγβ : γ ≠ β) : cloud hγβ s = ∅ ↔ s = ∅ := 
 
 @[simp]
 theorem cloud_nonempty (hγβ : γ ≠ β) : (cloud hγβ s).Nonempty ↔ s.Nonempty := by
-  simp_rw [nonempty_iff_ne_empty, Ne.def, cloud_eq_empty]
+  simp_rw [nonempty_iff_ne_empty, ne_eq, cloud_eq_empty]
 
 theorem subset_cloud (t : Tangle γ) (ht : t.set_lt ∈ s) :
     typedNearLitter '' {N | N.1 = fuzz hγβ t} ⊆ cloud hγβ s := by
@@ -362,7 +362,7 @@ only one code which is related (on the left) to any given code under the `cloud`
 theorem cloudRel'_subsingleton (c : NonemptyCode) :
     {d : NonemptyCode | d ↝ c}.Subsingleton := by
   intro d hd e he
-  simp only [Ne.def, cloudRel'_iff, mem_setOf_eq] at hd he
+  simp only [ne_eq, cloudRel'_iff, mem_setOf_eq] at hd he
   obtain ⟨β, hβ, hdβ, rfl⟩ := hd
   obtain ⟨γ, hγ, heγ, h⟩ := he
   rw [Subtype.ext_iff] at h

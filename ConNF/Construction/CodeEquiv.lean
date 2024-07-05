@@ -90,7 +90,7 @@ theorem IsEmpty.isEven_iff (hc : c.IsEmpty) : IsEven c ↔ (c.1 : TypeIndex) = �
   obtain ⟨_ | (β : Λ), s⟩ := c
   · rfl
   · simp [Code.IsEmpty] at hc
-    cases hc
+    rw [hc]
     have := not_isOdd_bot ∅ ((isEven_iff _).1 h ⟨⊥, ∅⟩ ?_)
     · cases this
     convert CloudRel.intro β _

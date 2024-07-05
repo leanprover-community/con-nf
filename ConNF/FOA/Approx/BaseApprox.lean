@@ -131,7 +131,7 @@ theorem eq_symm_apply_litter {L₁ L₂} :
 
 theorem nearLitter_domain_small (N : NearLitter) : Small ((N : Set Atom) ∩ π.atomPerm.domain) := by
   rw [← symmDiff_symmDiff_cancel_left (litterSet N.fst) N, inter_symmDiff_distrib_right]
-  exact Small.symmDiff (π.domain_small N.fst) (Small.mono (inter_subset_left _ _) N.2.prop)
+  exact Small.symmDiff (π.domain_small N.fst) (Small.mono inter_subset_left N.2.prop)
 
 section Generate
 
@@ -140,7 +140,7 @@ def largestSublitter (L : Litter) : Sublitter
     where
   litter := L
   carrier := litterSet L \ π.atomPerm.domain
-  subset := diff_subset _ _
+  subset := diff_subset
   diff_small := by simpa only [sdiff_sdiff_right_self, inf_eq_inter] using π.domain_small L
 
 @[simp]

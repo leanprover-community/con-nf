@@ -82,7 +82,7 @@ theorem sandboxSubset_small :
   refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
     refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le
       (lt_of_le_of_lt aleph0_le_mk_Λ Params.Λ_lt_κ) _ <;>
-    refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
+    refine' lt_of_le_of_lt (mk_subtype_mono diff_subset) _
   · exact φ.atomMap_dom_small
   · exact lt_of_le_of_lt mk_image_le φ.atomMap_dom_small
 
@@ -97,7 +97,7 @@ noncomputable def complete (hφ : φ.Lawful) (A : ExtendedIndex β) : BaseApprox
     where
   atomPerm := φ.atomPartialPerm hφ
   litterPerm := φ.flexibleLitterPartialPerm hφ A
-  domain_small _ := Small.mono (inter_subset_right _ _) (φ.atomPartialPerm_domain_small hφ)
+  domain_small _ := Small.mono inter_subset_right (φ.atomPartialPerm_domain_small hφ)
 
 theorem atomPartialPerm_apply_eq (hφ : φ.Lawful) {a : Atom} (ha : (φ.atomMap a).Dom) :
     φ.atomPartialPerm hφ a = (φ.atomMap a).get ha := by

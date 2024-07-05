@@ -17,7 +17,7 @@ theorem mk_bUnion_le' (s : Set ι) (f : ∀ i ∈ s, Set α) :
   apply mk_iUnion_le
 
 theorem nonempty_compl_of_mk_lt_mk (h : (#s) < (#α)) : sᶜ.Nonempty := by
-  simp_rw [Set.nonempty_iff_ne_empty, Ne.def, compl_eq_empty]
+  simp_rw [Set.nonempty_iff_ne_empty, ne_eq, compl_eq_empty]
   rintro rfl
   simp at h
 

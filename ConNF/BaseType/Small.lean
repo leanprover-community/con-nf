@@ -155,7 +155,7 @@ theorem IsNear.mk_inter (h : IsNear s t) (hs : #κ ≤ #s) : #κ ≤ #(s ∩ t :
   rw [IsNear, symmDiff_eq_sup_sdiff_inf] at h
   exact le_of_not_gt fun hst =>
     lt_irrefl _
-      (((hs.trans (mk_le_mk_of_subset (subset_union_left _ _))).trans
+      (((hs.trans (mk_le_mk_of_subset subset_union_left)).trans
             (le_mk_diff_add_mk (s ∪ t) (s ∩ t))).trans_lt
         (add_lt_of_lt Params.κ_isRegular.aleph0_le h hst))
 

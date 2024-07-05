@@ -46,9 +46,9 @@ theorem nearLitterCompletionMap_isNearLitter (π : StructApprox β) (A : Extende
     ← symmDiff_assoc, symmDiff_comm, ← Small.symmDiff_iff _]
   · rw [Set.symmDiff_def, ← diff_diff, sdiff_sdiff_right_self, union_diff_distrib,
       sdiff_sdiff_self, bot_eq_empty, empty_union]
-    exact Small.union (Small.mono (diff_subset _ _) ((π A).domain_small _))
-      (Small.mono (diff_subset _ _) (BaseApprox.nearLitter_domain_small _ _).image)
-  · exact Small.bUnion (Small.mono (diff_subset _ _) N.2.prop) fun _ _ => small_singleton _
+    exact Small.union (Small.mono diff_subset ((π A).domain_small _))
+      (Small.mono diff_subset (BaseApprox.nearLitter_domain_small _ _).image)
+  · exact Small.bUnion (Small.mono diff_subset N.2.prop) fun _ _ => small_singleton _
 
 noncomputable def nearLitterCompletion (π : StructApprox β) (A : ExtendedIndex β) (N : NearLitter)
     (H : HypAction ⟨A, inr N⟩) : NearLitter :=

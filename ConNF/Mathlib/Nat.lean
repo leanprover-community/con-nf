@@ -1,4 +1,4 @@
-import Mathlib.Data.Nat.Parity
+import Mathlib.Algebra.Ring.Parity
 
 namespace Nat
 

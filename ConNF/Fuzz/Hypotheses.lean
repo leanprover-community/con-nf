@@ -154,8 +154,13 @@ instance Bot.modelData : ModelData ⊥
   allowableToStructPerm_injective := MulEquiv.injective _
   allowableAction := inferInstance
   has_support a := ⟨a.support, a.support_supports⟩
-  toStructSet := StructSet.ofBot.toEmbedding
-  toStructSet_smul _ _ := rfl
+  toStructSet := StructSet.toBot.toEmbedding
+  toStructSet_smul π a := by
+    simp only [Equiv.coe_toEmbedding, MulEquiv.toMonoidHom_eq_coe]
+    change _ = Tree.toBotIso.toMonoidHom π • StructSet.toBot a
+    rw [StructPerm.smul_eq, StructPerm.structSetAction]
+    simp only [MulEquiv.toMonoidHom_eq_coe, MonoidHom.coe_coe, Tree.coe_toBotIso, Tree.ofBot_toBot,
+      StructSet.ofBot_toBot]
 
 /-- A t-set at level `α` together with a support for it. This is a specialisation of the notion
 of a tangle which will be defined for arbitrary type indices. -/

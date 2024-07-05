@@ -265,7 +265,6 @@ theorem completeNearLitterMap_toNearLitter_eq (A : ExtendedIndex β) (L : Litter
     Litter.coe_toNearLitter, mem_diff, Litter.toNearLitter_fst, symmDiff_self, bot_eq_empty,
     mem_empty_iff_false, false_and_iff, iUnion_neg', not_false_iff, iUnion_empty, symmDiff_empty]
   rw [completeLitterMap_eq]
-  rfl
 
 theorem eq_of_mem_completeNearLitterMap {L₁ L₂ : Litter} {A : ExtendedIndex β} (a : Atom)
     (ha₁ : a ∈ π.completeNearLitterMap A L₁.toNearLitter)

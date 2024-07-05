@@ -191,8 +191,8 @@ def restr (h : π.IsStable s) : PartialPerm α
   domain := π.domain ∩ s
   toFun_domain' := h.mapsTo
   invFun_domain' := h.symm_mapsTo
-  left_inv' := π.leftInvOn.mono (inter_subset_left _ _)
-  right_inv' := π.rightInvOn.mono (inter_subset_left _ _)
+  left_inv' := π.leftInvOn.mono inter_subset_left
+  right_inv' := π.rightInvOn.mono inter_subset_left
 
 theorem image_eq (h : π.IsStable s) : π '' (π.domain ∩ s) = π.domain ∩ s :=
   h.restr.image_domain
@@ -511,7 +511,8 @@ theorem apply_eq_of_le (h : π ≤ π') {x : α} (hx : x ∈ π.domain) : π' x 
 
 section Piecewise
 
-variable (π π') [∀ j : α, Decidable (j ∈ π.domain)] {h : Disjoint π.domain π'.domain}
+variable (π π')
+variable [∀ j : α, Decidable (j ∈ π.domain)] {h : Disjoint π.domain π'.domain}
 
 /-- Construct a partial permutation from two partial permutations with disjoint domains. -/
 def piecewise (h : Disjoint π.domain π'.domain) : PartialPerm α
@@ -565,10 +566,10 @@ theorem piecewise_apply_eq_right {x : α} (hx : x ∈ π'.domain) : piecewise π
   piecewise_eqOn_compl _ _ _ (disjoint_right.mp h hx)
 
 theorem le_piecewise_left : π ≤ piecewise π π' h :=
-  ⟨subset_union_left _ _, fun _ hx => (piecewise_apply_eq_left hx).symm⟩
+  ⟨subset_union_left, fun _ hx => (piecewise_apply_eq_left hx).symm⟩
 
 theorem le_piecewise_right : π' ≤ piecewise π π' h :=
-  ⟨subset_union_right _ _, fun _ hx => (piecewise_apply_eq_right hx).symm⟩
+  ⟨subset_union_right, fun _ hx => (piecewise_apply_eq_right hx).symm⟩
 
 end Piecewise
 

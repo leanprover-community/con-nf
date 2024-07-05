@@ -163,7 +163,7 @@ theorem mk_not_bannedLitter (ξ : BaseNLAction) : #{L | ¬ξ.BannedLitter L} = #
     exact lt_trans ξ.bannedLitter_small Params.κ_lt_μ
 
 theorem not_bannedLitter_nonempty (ξ : BaseNLAction) : Nonempty {L | ¬ξ.BannedLitter L} := by
-  simp only [← mk_ne_zero_iff, mk_not_bannedLitter, Ne.def, mk_ne_zero, not_false_iff]
+  simp only [← mk_ne_zero_iff, mk_not_bannedLitter, ne_eq, mk_ne_zero, not_false_iff]
 
 noncomputable def sandboxLitter (ξ : BaseNLAction) : Litter :=
   ξ.not_bannedLitter_nonempty.some

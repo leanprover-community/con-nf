@@ -80,12 +80,12 @@ theorem litterPerm'_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm' hφ).
   refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
     refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le
       (lt_of_le_of_lt aleph0_le_mk_Λ Params.Λ_lt_κ) _ <;>
-    refine' lt_of_le_of_lt (mk_subtype_mono (diff_subset _ _)) _
+    refine' lt_of_le_of_lt (mk_subtype_mono diff_subset) _
   exact φ.litterMap_dom_small
   exact φ.litterMap_dom_small.image
 
 theorem litterPerm_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm hφ).domain :=
-  Small.union (φ.litterPerm'_domain_small hφ) (Small.mono (diff_subset _ _) φ.bannedLitter_small)
+  Small.union (φ.litterPerm'_domain_small hφ) (Small.mono diff_subset φ.bannedLitter_small)
 
 def needForwardImages : Set Atom :=
   φ.atomMap.ran \ φ.atomMap.Dom
@@ -101,10 +101,10 @@ theorem atomMap_ran_small : Small φ.atomMap.ran := by
   rw [atomMapOrElse_of_dom]
 
 theorem needForwardImages_small : Small φ.needForwardImages :=
-  Small.mono (diff_subset _ _) φ.atomMap_ran_small
+  Small.mono diff_subset φ.atomMap_ran_small
 
 theorem needBackwardImages_small : Small φ.needBackwardImages :=
-  Small.mono (diff_subset _ _) φ.atomMap_dom_small
+  Small.mono diff_subset φ.atomMap_dom_small
 
 theorem mk_diff_dom_ran (L : Litter) :
     #(litterSet L \ (φ.atomMap.Dom ∪ φ.atomMap.ran) : Set Atom) = #κ := by
@@ -223,7 +223,7 @@ theorem nextBackwardImage_eq {L₁ L₂ : Litter} {a b : ℕ × φ.needBackwardI
     obtain (_ | n) := n <;>
     simp only [nextBackwardImage, nextBackwardImage] at h
   · simp only [nextBackwardImageDomain, Function.iterate_succ, Function.comp_apply,
-      mem_setOf_eq, Function.iterate_zero, id.def] at ha hb
+      mem_setOf_eq, Function.iterate_zero] at ha hb
     rw [← h, ha.2] at hb
     exact hb.2
   · rw [Subtype.coe_eq_iff] at h
@@ -384,7 +384,7 @@ noncomputable def nextImage (a : Atom) (ha : a ∈ φ.nextImageDomain hφ) : Ato
     (φ.nextImageCore hφ a a.1 ∘ φ.mem_orbitSet_of_mem_nextImageCoreDomain hφ)
 
 theorem nextImageDomain_small : Small (φ.nextImageDomain hφ) :=
-  Small.union (Small.mono (inter_subset_left _ _) φ.needForwardImages_small)
+  Small.union (Small.mono inter_subset_left φ.needForwardImages_small)
     (φ.nextImageCoreDomain_small hφ)
 
 theorem disjoint_needForwardImages_nextImageCoreDomain :
@@ -688,7 +688,7 @@ theorem fillAtomOrbits_litterMap : (φ.fillAtomOrbits hφ).litterMap = φ.litter
   rfl
 
 theorem subset_orbitAtomMap_dom : φ.atomMap.Dom ⊆ (φ.orbitAtomMap hφ).Dom :=
-  subset_union_left _ _
+  subset_union_left
 
 theorem subset_orbitAtomMap_ran : φ.atomMap.ran ⊆ (φ.orbitAtomMap hφ).ran := by
   rintro _ ⟨a, ha, rfl⟩

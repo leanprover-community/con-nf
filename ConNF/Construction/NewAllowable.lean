@@ -1,4 +1,3 @@
-import Mathlib.GroupTheory.GroupAction.Sigma
 import ConNF.Mathlib.Group
 import ConNF.Construction.CodeEquiv
 

@@ -1,4 +1,3 @@
-import Mathlib.GroupTheory.GroupAction.Option
 import ConNF.Mathlib.GroupAction
 import ConNF.Mathlib.Pointwise
 import ConNF.Construction.NewAllowable
@@ -223,11 +222,11 @@ theorem ext (t₁ t₂ : ExtensionalSet) (h : t₁.members γ = t₂.members γ)
       exact Code.Equiv.cloud_left _ even₂ γ (WithBot.coe_injective.ne hδγ)
   · simp only [reprCode_proper, Subtype.coe_mk, reprCode_base]
     obtain rfl | hβγ := eq_or_ne β γ
-    · dsimp only [mem_Iio, Ne.def, SetCoe.forall] at *
+    · dsimp only [mem_Iio, ne_eq, SetCoe.forall] at *
       rw [h, ← hA₂ β]
       exact Code.Equiv.cloud_left _ (Code.isEven_bot _) _ bot_ne_coe
     · refine (Code.Equiv.cloud_right _ even₁ γ <| WithBot.coe_injective.ne hβγ).trans ?_
-      dsimp only [mem_Iio, Ne.def, SetCoe.forall] at *
+      dsimp only [mem_Iio, ne_eq, SetCoe.forall] at *
       refine (Code.Equiv.of_eq <| cloudCode_mk_ne _ _ (WithBot.coe_injective.ne hβγ) (xs β)).trans ?_
       rw [hA₁ γ (WithBot.coe_injective.ne hβγ), h, ← hA₂ γ]
       exact Code.Equiv.cloud_left _ (Code.isEven_bot _) γ bot_ne_coe
@@ -236,17 +235,17 @@ theorem ext (t₁ t₂ : ExtensionalSet) (h : t₁.members γ = t₂.members γ)
     · obtain rfl | hδβ := eq_or_ne δ β
       · rw [h]
       · have := cloudCode_ne β (Code.mk δ (ys δ)) (WithBot.coe_injective.ne hδβ)
-        dsimp only [mem_Iio, Ne.def, SetCoe.forall] at *
+        dsimp only [mem_Iio, ne_eq, SetCoe.forall] at *
         rw [h, ← hA₂ _ (WithBot.coe_injective.ne hδβ), ← this]
         exact Code.Equiv.cloud_left _ even₂ _ (WithBot.coe_injective.ne hδβ)
     obtain rfl | hδγ := eq_or_ne δ γ
     · have := cloudCode_ne δ (Code.mk β (xs β)) (WithBot.coe_injective.ne hβγ)
-      dsimp only [mem_Iio, Ne.def, SetCoe.forall] at *
+      dsimp only [mem_Iio, ne_eq, SetCoe.forall] at *
       simp_rw [← h, ← hA₁ _ (WithBot.coe_injective.ne hβγ), ← this]
       exact Code.Equiv.cloud_right _ even₁ _ (WithBot.coe_injective.ne hβγ)
     refine' (Code.Equiv.cloud_right _ even₁ γ <| WithBot.coe_injective.ne hβγ).trans _
     have := cloudCode_ne γ (Code.mk (↑δ) (ys δ)) (WithBot.coe_injective.ne hδγ)
-    dsimp only [mem_Iio, Ne.def, SetCoe.forall] at *
+    dsimp only [mem_Iio, ne_eq, SetCoe.forall] at *
     rw [cloudCode_ne]
     rw [hA₁ γ (WithBot.coe_injective.ne hβγ), h, ← hA₂ γ (WithBot.coe_injective.ne hδγ)]
     rw [← this]
@@ -283,7 +282,6 @@ def intro {β : TypeIndex} [inst : LtLevel β] (s : Set (TSet β))
           exact extension_self s)
         fun δ _ hδ => by
           rw [extension_ne s δ]
-          congr
           exact congr_arg _ (extension_self s)⟩
 
 @[simp]
@@ -441,12 +439,12 @@ namespace ExtensionalSet
 /-- Extensional sets can easily be turned into structural sets. -/
 protected def toStructSet (t : ExtensionalSet) : StructSet α :=
   StructSet.ofCoe.symm (fun β hβ => match β with
-    | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ a ∈ s}
+    | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ StructSet.ofBot a ∈ s}
     | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toStructSet s = p})
 
 theorem toStructSet_ofCoe (t : ExtensionalSet) :
     StructSet.ofCoe t.toStructSet = fun β hβ => match β with
-      | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ a ∈ s}
+      | ⊥ => {a | ∃ s : Set Atom, ∃ h, t.pref = Preference.base s h ∧ StructSet.ofBot a ∈ s}
       | (β : Λ) => letI : LtLevel β := ⟨hβ⟩; {p | ∃ s ∈ t.members β, toStructSet s = p} := by
   rw [ExtensionalSet.toStructSet, Equiv.apply_symm_apply]
 
@@ -496,13 +494,21 @@ theorem toStructSet_injective : Function.Injective ExtensionalSet.toStructSet :=
   ext a : 1
   constructor
   · intro ha
-    refine ((Set.ext_iff.mp this a).mp ⟨?_, ha⟩).2
-    intro γ _
-    cases hγ ⟨γ, inferInstance⟩
+    have := (Set.ext_iff.mp this (StructSet.toBot a)).mp ⟨?_, ?_⟩
+    · simp only [mem_setOf_eq, StructSet.ofBot_toBot] at this
+      exact this.2
+    · intro γ _
+      cases hγ ⟨γ, inferInstance⟩
+    · simp only [StructSet.ofBot_toBot]
+      exact ha
   · intro ha
-    refine ((Set.ext_iff.mp this a).mpr ⟨?_, ha⟩).2
-    intro γ _
-    cases hγ ⟨γ, inferInstance⟩
+    have := (Set.ext_iff.mp this (StructSet.toBot a)).mpr ⟨?_, ?_⟩
+    · simp only [mem_setOf_eq, StructSet.ofBot_toBot] at this
+      exact this.2
+    · intro γ _
+      cases hγ ⟨γ, inferInstance⟩
+    · simp only [StructSet.ofBot_toBot]
+      exact ha
 
 theorem toStructSet_smul (ρ : NewAllowable) (t : ExtensionalSet) :
     ρ • t.toStructSet = (ρ • t).toStructSet := by
@@ -530,7 +536,8 @@ theorem toStructSet_smul (ρ : NewAllowable) (t : ExtensionalSet) :
         · cases hpref
           rfl
         · cases hpref
-      · rw [mem_smul_set_iff_inv_smul_mem]
+      · rw [Tree.comp_bot, StructPerm.smul_bot_eq, StructSet.ofBot_toBot] at ha
+        rw [Tree.comp_bot, mem_smul_set_iff_inv_smul_mem, Tree.toBot_inv_smul]
         exact ha
     · rintro ⟨s, h, hpref, ha⟩
       refine ⟨(Tree.comp (Quiver.Hom.toPath hβ) (Derivatives.toStructPerm ρ.val))⁻¹ • s,
@@ -549,7 +556,8 @@ theorem toStructSet_smul (ρ : NewAllowable) (t : ExtensionalSet) :
           simp only [Tree.comp_bot, Tree.toBot_inv_smul, Preference.base.injEq]
           erw [smul_inv_smul]
         · cases hpref
-      · simp only [Tree.comp_bot, Tree.toBot_inv_smul, smul_mem_smul_set_iff]
+      · simp only [Tree.comp_bot, StructPerm.smul_bot_eq, Tree.ofBot_inv, Tree.ofBot_toBot,
+          StructSet.ofBot_toBot, Tree.toBot_inv_smul, smul_mem_smul_set_iff]
         exact ha
   · intro β hβ
     have : LtLevel β := ⟨hβ⟩
@@ -787,13 +795,22 @@ theorem NewTSet.newSingleton'_toStructSet
     · rintro ⟨s, ⟨hs₁, hs₂⟩, hps⟩
       simp only [intro, Preference.base.injEq] at hs₂
       cases hs₂
-      cases hps
+      rw [mem_singleton_iff] at hps
+      rw [← hps] at hs₁ ⊢
+      simp only [toStructSet, Equiv.toEmbedding, StructSet.toBot, StructSet.ofBot, Equiv.cast_apply,
+        mem_singleton_iff]
+      change _ = cast _ _
+      rw [cast_cast]
       rfl
     · rintro rfl
-      refine ⟨{p}, ⟨?_, rfl⟩, rfl⟩
-      intro γ _
-      rw [extension_ne]
-      rfl
+      refine ⟨{_}, ⟨?_, rfl⟩, ?_⟩
+      · intro γ _
+        rw [extension_ne]
+      · simp only [StructSet.ofBot, toStructSet, Equiv.toEmbedding, StructSet.toBot,
+          Equiv.cast_apply, mem_singleton_iff]
+        change cast _ (cast _ _) = _
+        rw [cast_cast]
+        rfl
   · simp only [extension_self, mem_singleton_iff, exists_eq_left, setOf_eq_eq_singleton',
       singleton_eq_singleton_iff]
     rfl
