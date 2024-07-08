@@ -231,10 +231,10 @@ def interference (S : Support α) (T : Support γ) : Set (Address β) :=
     Interferes a N₁ N₂}
 
 def interference' (S : Support α) (T : Support γ) : Set (Address β) :=
-  ⋃ (A : ExtendedIndex β) (N₁ ∈ {N | raise iβ.elim ⟨A, inr N⟩ ∈ S})
-    (N₂ ∈ {N | ⟨A, inr N⟩ ∈ strongSupport (T.image (raise hγ)).small})
-    (a ∈ {a | Interferes a N₁ N₂}),
-    {⟨A, inl a⟩}
+  ⋃ (A : ExtendedIndex β × NearLitter) (_ : raise iβ.elim ⟨A.1, inr A.2⟩ ∈ S)
+    (N₂ ∈ {N | ⟨A.1, inr N⟩ ∈ strongSupport (T.image (raise hγ)).small})
+    (a ∈ {a | Interferes a A.2 N₂}),
+    {⟨A.1, inl a⟩}
 
 theorem interference_eq_interference' (S : Support α) (T : Support γ) :
     interference hγ S T = interference' hγ S T := by
@@ -243,19 +243,19 @@ theorem interference_eq_interference' (S : Support α) (T : Support γ) :
 
 theorem interference_small {S : Support α} {T : Support γ} : Small (interference hγ S T) := by
   rw [interference_eq_interference']
-  refine small_iUnion ?_ (fun A => ?_)
-  · exact (mk_extendedIndex_le β).trans_lt Params.Λ_lt_κ
-  refine Small.bUnion ?_ (fun N₁ _ => ?_)
+  refine Small.bUnion ?_ (fun A => ?_)
   · refine S.small.preimage ?_
-    intro N₁ N₂ h
-    cases h
+    rintro ⟨A₁, N₁⟩ ⟨A₂, N₂⟩ h
+    simp only at h
+    cases raise_injective _ h
     rfl
-  refine Small.bUnion ?_ (fun N₂ _ => ?_)
-  · refine (strongSupport (T.image (raise hγ)).small).small.preimage ?_
-    intro N₁ N₂ h
-    cases h
+  intro _
+  refine Small.bUnion ?_ (fun N₁ _ => ?_)
+  · refine (strongSupport _).small.preimage ?_
+    intro N₁ N₂ hN
+    cases hN
     rfl
-  refine Small.bUnion (interferes_small _ _) (fun a _ => ?_)
+  refine Small.bUnion (interferes_small _ _) (fun N₂ _ => ?_)
   exact small_singleton _
 
 def interferenceSupport (S : Support α) (T : Support γ) : Support β :=
