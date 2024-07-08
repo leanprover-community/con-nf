@@ -84,10 +84,57 @@ theorem ExtendedIndex.length_ne_zero {α : Λ} (A : ExtendedIndex α) : A.length
 
 /-- There are at most `Λ` `α`-extended type indices. -/
 @[simp]
-theorem mk_extendedIndex (α : TypeIndex) : #(ExtendedIndex α) ≤ #Λ := by
+theorem mk_extendedIndex_le (α : TypeIndex) : #(ExtendedIndex α) ≤ #Λ := by
   refine le_trans ((Cardinal.le_def _ _).2 ⟨⟨toList, toList_injective (α : TypeIndex) ⊥⟩⟩) ?_
   convert mk_list_le_max _ using 1
   simp only [mk_typeIndex, max_eq_right, aleph0_le_mk]
+
+instance {α : TypeIndex} : Quiver { γ // γ ≤ α } :=
+  ⟨(· > ·)⟩
+
+/-- Casts a path to use entries of the form `{ γ // γ ≤ α }` rather than arbitrary type indices.
+The unnecessary argument `h` is here so that `castPath h` is a non-dependent function. -/
+def castPath : {α β : TypeIndex} → (h : β ≤ α) →
+    Path α β → Path (⟨α, le_rfl⟩ : { γ // γ ≤ α }) ⟨β, h⟩
+  | α, _, _, .nil => .nil
+  | α, β, _, .cons p h' => .cons (castPath (le_of_path p) p) h'
+
+theorem castPath_injective {α β : TypeIndex} (h : β ≤ α) :
+    Function.Injective (castPath h) := by
+  intro p q hpq
+  induction p with
+  | nil =>
+    cases path_eq_nil q
+    rfl
+  | cons p h' ih =>
+    rw [castPath] at hpq
+    cases q with
+    | nil =>
+      rw [castPath] at hpq
+      cases hpq
+    | cons q h'' =>
+      rw [castPath] at hpq
+      simp only [cons.injEq, Subtype.mk.injEq] at hpq
+      cases hpq.1
+      simp only [heq_eq_eq, and_true, true_and] at hpq
+      cases ih _ hpq
+      rfl
+
+/-- There are less than `cf(μ)` `α`-extended type indices. -/
+@[simp]
+theorem mk_extendedIndex_lt_cof_μ (α : TypeIndex) : #(ExtendedIndex α) < (#μ).ord.cof := by
+  refine (mk_le_of_injective (castPath_injective (show ⊥ ≤ α from bot_le))).trans_lt ?_
+  refine lt_of_le_of_lt ((Cardinal.le_def _ _).2 ⟨⟨toList, toList_injective _ _⟩⟩) ?_
+  refine (mk_list_le_max _).trans_lt ?_
+  rw [max_lt_iff]
+  constructor
+  · exact Params.aleph0_lt_mk_κ.trans_le Params.κ_le_μ_ord_cof
+  · exact card_Iic_lt_typeIndex α
+
+/-- There are less than `cf(μ)` `α`-extended type indices. -/
+@[simp]
+theorem mk_extendedIndex_lt_μ (α : TypeIndex) : #(ExtendedIndex α) < #μ :=
+  (mk_extendedIndex_lt_cof_μ α).trans_le (Ordinal.cof_ord_le #μ)
 
 /-- If `β < γ`, we have a path directly between the two types in the opposite order.
 Note that the `⟶` symbol (long right arrow) is not the normal `→` (right arrow),

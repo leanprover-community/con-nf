@@ -35,7 +35,7 @@ class Params where
   The type indexing the levels of our model.
   This type is well-ordered.
   We inductively construct each type level by induction over `Λ`.
-  Its cardinality is smaller than `κ` and `μ`.
+  Its cardinality is smaller than `μ`.
   -/
   Λ : Type u
   [Λ_linearOrder : LinearOrder Λ]
@@ -46,10 +46,11 @@ class Params where
   Λ_isLimit : (Ordinal.type ((· < ·) : Λ → Λ → Prop)).IsLimit
   /--
   The type indexing the atoms in each litter.
-  It is well-ordered, has regular cardinality, and is larger than `Λ` but smaller than `κ`.
+  It is uncountable, well-ordered, has regular cardinality, and is smaller than `μ`.
   It also has an additive monoid structure induced by its well-ordering.
   -/
   κ : Type u
+  aleph0_lt_mk_κ : ℵ₀ < #κ
   [κ_linearOrder : LinearOrder κ]
   [κ_isWellOrder : IsWellOrder κ (· < ·)]
   κ_ord : Ordinal.type ((· < ·) : κ → κ → Prop) = (#κ).ord
@@ -61,18 +62,18 @@ class Params where
     Ordinal.typein (· < ·) i + Ordinal.typein (· < ·) j
   κ_sub_typein (i j : κ) : Ordinal.typein (· < ·) (i - j : κ) =
     Ordinal.typein (· < ·) i - Ordinal.typein (· < ·) j
-  Λ_lt_κ : #Λ < #κ
   /--
   A large type used in indexing the litters.
   This type is well-ordered.
-  Its cardinality is a strong limit, larger than `Λ` and `κ`.
-  The cofinality of the order type of `μ` is at least `κ`.
+  Its cardinality is a strong limit, at least as large as `Λ` and strictly larger than `κ`.
+  The cofinality of the order type of `μ` is at least `κ` and at least `Λ`.
   -/
   μ : Type u
   [μ_linearOrder : LinearOrder μ]
   [μ_isWellOrder : IsWellOrder μ (· < ·)]
   μ_ord : Ordinal.type ((· < ·) : μ → μ → Prop) = (#μ).ord
   μ_isStrongLimit : (#μ).IsStrongLimit
+  type_Λ_le : Ordinal.type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord.cof.ord
   κ_lt_μ : #κ < #μ
   κ_le_μ_ord_cof : #κ ≤ (#μ).ord.cof
 
@@ -219,6 +220,9 @@ noncomputable def minimalParams : Params.{0} where
     rw [Ordinal.type_nat_lt]
     exact Ordinal.omega_isLimit
   κ := (aleph 1).ord.out.α
+  aleph0_lt_mk_κ := by
+    simp only [mk_ordinal_out, card_ord]
+    exact aleph0_lt_aleph_one
   κ_ord := by simp
   κ_isRegular := by
     simp only [Cardinal.card_ord, Cardinal.mk_ordinal_out]
@@ -234,14 +238,16 @@ noncomputable def minimalParams : Params.{0} where
   κ_sub := sub_of_isWellOrder
   κ_add_typein i j := Ordinal.typein_enum _ _
   κ_sub_typein i j := Ordinal.typein_enum _ _
-  Λ_lt_κ := by
-    rw [mk_denumerable, mk_ordinal_out, card_ord]
-    exact aleph0_lt_aleph_one
   μ := (beth <| ord <| aleph 1).ord.out.α
   μ_ord := by simp
   μ_isStrongLimit := by
     simp only [Cardinal.card_ord, Cardinal.mk_ordinal_out]
     exact isStrongLimit_beth (Ordinal.IsLimit.isSuccLimit (ord_aleph_isLimit _))
+  type_Λ_le := by
+    simp only [Ordinal.type_nat_lt, mk_ordinal_out, card_ord]
+    refine le_of_lt ?_
+    rw [beth_normal.cof_eq (ord_isLimit <| aleph0_le_aleph 1), lt_ord, Ordinal.card_omega]
+    exact lt_of_lt_of_le aleph0_lt_aleph_one isRegular_aleph_one.2
   κ_lt_μ := by
     simp only [mk_out, mk_ordinal_out, card_ord]
     exact (aleph_le_beth _).trans_lt (beth_strictMono (ord_aleph_isLimit _).one_lt)
@@ -261,6 +267,15 @@ theorem aleph0_le_mk_Λ : ℵ₀ ≤ #Λ := by
 
 theorem mk_Λ_ne_zero : #Λ ≠ 0 :=
   fun h => Cardinal.aleph0_pos.not_le (aleph0_le_mk_Λ.trans h.le)
+
+theorem Λ_le_μ : #Λ ≤ #μ := by
+  have := Ordinal.card_le_card Params.type_Λ_le
+  simp only [Ordinal.card_type, card_ord] at this
+  refine this.trans ?_
+  have := Ordinal.ord_cof_le (#μ).ord
+  rw [ord_le] at this
+  refine this.trans ?_
+  rw [card_ord]
 
 instance : LinearOrder Λ := Params.Λ_linearOrder
 instance : IsWellOrder Λ (· < ·) := Params.Λ_isWellOrder
@@ -437,14 +452,67 @@ theorem mk_typeIndex : #TypeIndex = #Λ :=
   mk_option.trans <| add_eq_left aleph0_le_mk_Λ <| one_le_aleph0.trans aleph0_le_mk_Λ
 
 /-- Sets of the form `{y | y < x}` have cardinality `< μ`. -/
-theorem card_Iio_lt (x : μ) : #(Set.Iio x) < #μ :=
+theorem card_Iio_lt_μ (x : μ) : #(Set.Iio x) < #μ :=
   card_typein_lt (· < ·) x Params.μ_ord.symm
 
 /-- Sets of the form `{y | y ≤ x}` have cardinality `< μ`. -/
-theorem card_Iic_lt (x : μ) : #(Set.Iic x) < #μ := by
+theorem card_Iic_lt_μ (x : μ) : #(Set.Iic x) < #μ := by
   rw [← Set.Iio_union_right, mk_union_of_disjoint, mk_singleton]
-  -- TODO: This isn't the morally correct proof because it uses the fact `μ` is a limit cardinal.
-  · exact (add_one_le_succ _).trans_lt (Params.μ_isStrongLimit.isLimit.succ_lt (card_Iio_lt x))
-  · simp
+  refine add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le ?_ ?_
+  · exact card_Iio_lt_μ x
+  · exact one_lt_aleph0.trans_le Params.μ_isStrongLimit.isLimit.aleph0_le
+  · simp only [Set.disjoint_singleton_right, Set.mem_Iio, lt_self_iff_false, not_false_eq_true]
+
+theorem card_typein_lt' {α : Type _} {κ : Cardinal} (r : α → α → Prop) [IsWellOrder α r] (x : α)
+    (h : Ordinal.type r ≤ ord κ) :
+    Ordinal.card (Ordinal.typein r x) < κ := by
+  rw [← lt_ord]
+  exact (Ordinal.typein_lt_type r x).trans_le h
+
+theorem card_Iio_lt_Λ (x : Λ) : #(Set.Iio x) < (#μ).ord.cof :=
+  card_typein_lt' (· < ·) x Params.type_Λ_le
+
+theorem card_Iic_lt_Λ (x : Λ) : #(Set.Iic x) < (#μ).ord.cof := by
+  rw [← Set.Iio_union_right, mk_union_of_disjoint, mk_singleton]
+  refine add_lt_of_lt ?_ ?_ ?_
+  · rw [Ordinal.aleph0_le_cof]
+    exact ord_isLimit Params.μ_isStrongLimit.isLimit.aleph0_le
+  · exact card_Iio_lt_Λ x
+  · refine one_lt_aleph0.trans_le ?_
+    rw [Ordinal.aleph0_le_cof]
+    exact ord_isLimit Params.μ_isStrongLimit.isLimit.aleph0_le
+  · simp only [Set.disjoint_singleton_right, Set.mem_Iio, lt_self_iff_false, not_false_eq_true]
+
+theorem card_Iio_lt_typeIndex (x : TypeIndex) : #(Set.Iio x) < (#μ).ord.cof := by
+  induction x using WithBot.recBotCoe with
+  | bot =>
+    rw [Set.Iio_bot, mk_eq_zero, pos_iff_ne_zero, ne_eq, Ordinal.cof_eq_zero, ← ord_zero]
+    intro h
+    exact Params.μ_isStrongLimit.isLimit.ne_zero (ord_injective h)
+  | coe x =>
+    have : Set.Iio (x : TypeIndex) = WithBot.some '' Set.Iio x ∪ {⊥}
+    · ext y
+      induction y using WithBot.recBotCoe <;> simp
+    rw [this]
+    refine (mk_union_le _ _).trans_lt ?_
+    refine add_lt_of_lt ?_ ?_ ?_
+    · rw [Ordinal.aleph0_le_cof]
+      exact ord_isLimit Params.μ_isStrongLimit.isLimit.aleph0_le
+    · refine mk_image_le.trans_lt ?_
+      exact card_Iio_lt_Λ x
+    · simp only [mk_fintype, Fintype.card_ofSubsingleton, Nat.cast_one]
+      refine lt_of_lt_of_le ?_ Params.κ_le_μ_ord_cof
+      exact one_lt_aleph0.trans Params.aleph0_lt_mk_κ
+
+theorem card_Iic_lt_typeIndex (x : TypeIndex) : #(Set.Iic x) < (#μ).ord.cof := by
+  rw [← Set.Iio_union_right, mk_union_of_disjoint, mk_singleton]
+  refine add_lt_of_lt ?_ ?_ ?_
+  · rw [Ordinal.aleph0_le_cof]
+    exact ord_isLimit Params.μ_isStrongLimit.isLimit.aleph0_le
+  · exact card_Iio_lt_typeIndex x
+  · refine one_lt_aleph0.trans_le ?_
+    rw [Ordinal.aleph0_le_cof]
+    exact ord_isLimit Params.μ_isStrongLimit.isLimit.aleph0_le
+  · simp only [Set.disjoint_singleton_right, Set.mem_Iio, lt_self_iff_false, not_false_eq_true]
 
 end ConNF

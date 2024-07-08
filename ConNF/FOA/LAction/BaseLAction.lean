@@ -328,7 +328,7 @@ theorem flexibleLitterPartialPerm_domain_small (hφ : φ.Lawful) :
     simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
     refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
       refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le
-        (lt_of_le_of_lt aleph0_le_mk_Λ Params.Λ_lt_κ) _ <;>
+        Params.aleph0_lt_mk_κ _ <;>
       refine' lt_of_le_of_lt (mk_subtype_mono diff_subset) _
     exact φ.litterMap_dom_small.mono inter_subset_left
     exact (φ.litterMap_dom_small.mono inter_subset_left).image

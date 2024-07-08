@@ -119,7 +119,7 @@ def fuzzDeny (t : Tangle β) : Set μ :=
   { ν : μ | ∃ (a : Atom), pos a ≤ pos t ∧ ν = a.1.1 }
 
 theorem mk_invImage_lt (t : Tangle β) : #{ t' // t' < t } < #μ := by
-  refine lt_of_le_of_lt ?_ (show #{ ν // ν < pos t } < #μ from card_Iio_lt _)
+  refine lt_of_le_of_lt ?_ (show #{ ν // ν < pos t } < #μ from card_Iio_lt_μ _)
   refine ⟨⟨fun t' => ⟨_, t'.prop⟩, ?_⟩⟩
   intro y₁ y₂ h
   simp only [Subtype.mk.injEq, EmbeddingLike.apply_eq_iff_eq, Subtype.coe_inj] at h
@@ -133,7 +133,7 @@ theorem mk_fuzzDeny (t : Tangle β) :
   refine lt_of_le_of_lt (mk_union_le _ _) ?_
   refine add_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le ?_ ?_
   · have : #{ N : NearLitter | pos N ≤ pos t } < #μ
-    · refine lt_of_le_of_lt ?_ (card_Iic_lt (pos t))
+    · refine lt_of_le_of_lt ?_ (card_Iic_lt_μ (pos t))
       refine ⟨⟨fun a => ⟨pos a.1, a.2⟩, ?_⟩⟩
       intro a b h
       exact Subtype.coe_inj.mp (pos_injective (Subtype.coe_inj.mpr h))
@@ -142,7 +142,7 @@ theorem mk_fuzzDeny (t : Tangle β) :
     rintro ⟨_, a, ha, rfl⟩
     exact ⟨⟨a, ha⟩, rfl⟩
   · have : #{ a : Atom | pos a ≤ pos t } < #μ
-    · refine lt_of_le_of_lt ?_ (card_Iic_lt (pos t))
+    · refine lt_of_le_of_lt ?_ (card_Iic_lt_μ (pos t))
       refine ⟨⟨fun a => ⟨pos a.1, a.2⟩, ?_⟩⟩
       intro a b h
       exact Subtype.coe_inj.mp (pos_injective (Subtype.coe_inj.mpr h))

@@ -54,8 +54,7 @@ theorem mk_litter : #Litter = #μ := by
             congr_arg <| Prod.fst ∘ Subtype.val⟩⟩)
   have := mul_eq_left
     (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le)
-    (Params.Λ_lt_κ.le.trans Params.κ_lt_μ.le)
-    mk_Λ_ne_zero
+    Λ_le_μ mk_Λ_ne_zero
   simp only [mk_prod, lift_id, mk_typeIndex, mul_eq_self aleph0_le_mk_Λ, this]
 
 end ConNF

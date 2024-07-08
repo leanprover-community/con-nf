@@ -79,7 +79,7 @@ theorem litterPerm'_domain_small (hφ : φ.Lawful) : Small (φ.litterPerm' hφ).
   simp only [mk_sum, mk_prod, mk_denumerable, lift_aleph0, lift_uzero, lift_id]
   refine' add_lt_of_lt Params.κ_isRegular.aleph0_le _ _ <;>
     refine' mul_lt_of_lt Params.κ_isRegular.aleph0_le
-      (lt_of_le_of_lt aleph0_le_mk_Λ Params.Λ_lt_κ) _ <;>
+      Params.aleph0_lt_mk_κ _ <;>
     refine' lt_of_le_of_lt (mk_subtype_mono diff_subset) _
   exact φ.litterMap_dom_small
   exact φ.litterMap_dom_small.image
@@ -123,10 +123,10 @@ theorem need_images_small :
   simp only [mk_prod, mk_denumerable, lift_aleph0, lift_uzero, mk_diff_dom_ran, mk_sum, lift_id]
   rw [← mul_add]
   refine' lt_of_le_of_lt (mul_le_max _ _) (max_lt (max_lt _ _) _)
-  exact aleph0_le_mk_Λ.trans_lt Params.Λ_lt_κ
+  exact Params.aleph0_lt_mk_κ
   exact add_lt_of_lt Params.κ_isRegular.aleph0_le
     φ.needBackwardImages_small φ.needForwardImages_small
-  exact aleph0_le_mk_Λ.trans_lt Params.Λ_lt_κ
+  exact Params.aleph0_lt_mk_κ
 
 theorem le_mk_diff_dom_ran (L : Litter) :
     #(Sum (ℕ × φ.needBackwardImages) (ℕ × φ.needForwardImages)) ≤

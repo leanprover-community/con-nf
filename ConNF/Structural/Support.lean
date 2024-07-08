@@ -49,7 +49,7 @@ theorem mk_address (α : TypeIndex) : #(Address α) = #μ := by
   rw [add_eq_left (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le) le_rfl]
   exact mul_eq_right
     (Params.κ_isRegular.aleph0_le.trans Params.κ_lt_μ.le)
-    (le_trans (mk_extendedIndex α) <| le_of_lt <| lt_trans Params.Λ_lt_κ Params.κ_lt_μ)
+    (le_trans (mk_extendedIndex_le α) Λ_le_μ)
     (mk_ne_zero _)
 
 namespace StructPerm
