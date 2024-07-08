@@ -244,7 +244,7 @@ theorem interference_eq_interference' (S : Support α) (T : Support γ) :
 theorem interference_small {S : Support α} {T : Support γ} : Small (interference hγ S T) := by
   rw [interference_eq_interference']
   refine small_iUnion ?_ (fun A => ?_)
-  · exact (mk_extendedIndex β).trans_lt Params.Λ_lt_κ
+  · exact (mk_extendedIndex_le β).trans_lt Params.Λ_lt_κ
   refine Small.bUnion ?_ (fun N₁ _ => ?_)
   · refine S.small.preimage ?_
     intro N₁ N₂ h

@@ -85,7 +85,7 @@ theorem μProd_card_iio (x : μ ×ₗ α) : #{y | y < x} < #μ := by
     exact ⟨_, ⟨y.1, rfl⟩, _, ⟨μProd_fst_le hy, rfl⟩, rfl⟩
   refine (mk_subtype_le_of_subset this).trans_lt ?_
   refine (mk_biUnion_le _ _).trans_lt ?_
-  refine mul_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le (card_Iic_lt _) ?_
+  refine mul_lt_of_lt Params.μ_isStrongLimit.isLimit.aleph0_le (card_Iic_lt_μ _) ?_
   refine (ciSup_le' (a := #α) (fun _ => ?_)).trans_lt hα
   refine mk_le_of_injective (f := fun y => y.val.2) ?_
   rintro ⟨⟨a₁, b₁⟩, h₁⟩ ⟨⟨a₂, b₂⟩, h₂⟩ h

@@ -84,7 +84,7 @@ theorem mk_posDeny (t : NewTSet × Support α) : #(posDeny t) < #μ := by
   have := (small_posBound t.1 t.2).trans_le Params.κ_le_μ_ord_cof
   rw [← Params.μ_ord] at this
   obtain ⟨ν, hν⟩ := Ordinal.lt_cof_type this
-  refine (Cardinal.mk_subtype_le_of_subset ?_).trans_lt (card_Iic_lt ν)
+  refine (Cardinal.mk_subtype_le_of_subset ?_).trans_lt (card_Iic_lt_μ ν)
   rintro ν₁ ⟨ν₂, hν₂, hν₁⟩
   exact hν₁.trans (hν ν₂ hν₂).le
 
