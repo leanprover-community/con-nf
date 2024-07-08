@@ -61,7 +61,6 @@ class Params where
     Ordinal.typein (· < ·) i + Ordinal.typein (· < ·) j
   κ_sub_typein (i j : κ) : Ordinal.typein (· < ·) (i - j : κ) =
     Ordinal.typein (· < ·) i - Ordinal.typein (· < ·) j
-  Λ_lt_κ : #Λ < #κ
   /--
   A large type used in indexing the litters.
   This type is well-ordered.
@@ -73,7 +72,9 @@ class Params where
   [μ_isWellOrder : IsWellOrder μ (· < ·)]
   μ_ord : Ordinal.type ((· < ·) : μ → μ → Prop) = (#μ).ord
   μ_isStrongLimit : (#μ).IsStrongLimit
+  Λ_le_μ : #Λ ≤ #μ
   κ_lt_μ : #κ < #μ
+  Λ_le_μ_ord_cof : #Λ ≤ (#μ).ord.cof
   κ_le_μ_ord_cof : #κ ≤ (#μ).ord.cof
 
 export Params (Λ κ μ)
@@ -234,17 +235,21 @@ noncomputable def minimalParams : Params.{0} where
   κ_sub := sub_of_isWellOrder
   κ_add_typein i j := Ordinal.typein_enum _ _
   κ_sub_typein i j := Ordinal.typein_enum _ _
-  Λ_lt_κ := by
-    rw [mk_denumerable, mk_ordinal_out, card_ord]
-    exact aleph0_lt_aleph_one
   μ := (beth <| ord <| aleph 1).ord.out.α
   μ_ord := by simp
   μ_isStrongLimit := by
     simp only [Cardinal.card_ord, Cardinal.mk_ordinal_out]
     exact isStrongLimit_beth (Ordinal.IsLimit.isSuccLimit (ord_aleph_isLimit _))
+  Λ_le_μ := by
+    simp only [mk_eq_aleph0, mk_ordinal_out, card_ord]
+    exact aleph0_le_beth (aleph 1).ord
   κ_lt_μ := by
     simp only [mk_out, mk_ordinal_out, card_ord]
     exact (aleph_le_beth _).trans_lt (beth_strictMono (ord_aleph_isLimit _).one_lt)
+  Λ_le_μ_ord_cof := by
+    simp only [mk_eq_aleph0, mk_ordinal_out, card_ord]
+    rw [beth_normal.cof_eq (ord_isLimit <| aleph0_le_aleph 1)]
+    exact (aleph0_le_aleph 1).trans isRegular_aleph_one.2
   κ_le_μ_ord_cof := by
     simp only [mk_out, mk_ordinal_out, card_ord]
     rw [beth_normal.cof_eq (ord_isLimit <| aleph0_le_aleph 1)]
