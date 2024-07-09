@@ -66,25 +66,26 @@ abbrev Spec (β : Λ) := Enumeration (SpecCondition β)
 
 namespace Spec
 
+-- TODO: Rename now that we've removed `before`.
 theorem before_comp_supports (S : Support β) (hS : S.Strong)
     {i : κ} (hi : i < S.max) {A : ExtendedIndex β}
     {N : NearLitter} (h : InflexibleCoe A N.1) (hSi : S.f i hi = ⟨A, inr N⟩) :
     MulAction.Supports (Allowable h.path.δ)
-      ((S.before i hi).comp (h.path.B.cons h.path.hδ)).carrier h.t := by
+      (S.comp (h.path.B.cons h.path.hδ)).carrier h.t := by
   refine (support_supports h.t).mono ?_
-  simp only [Support.comp_carrier, Support.before_carrier, exists_and_left, preimage_setOf_eq]
+  simp only [Support.comp_carrier, exists_and_left, preimage_setOf_eq]
   rintro c hc
   have := Support.Precedes.fuzz A N h c hc
   rw [h.path.hA] at hSi
   rw [← hSi] at this
-  obtain ⟨j, hj₁, hj₂, h⟩ := hS.precedes hi _ this
-  exact ⟨j, hj₂, hj₁, h⟩
+  obtain ⟨j, hj₁, h⟩ := hS.precedes hi _ this
+  exact ⟨j, hj₁, h.symm⟩
 
 theorem before_comp_supports' (S : Support β) (hS : S.Strong)
     {i : κ} (hi : i < S.max) {A : ExtendedIndex β}
     {N : NearLitter} (h : InflexibleCoe A N.1) (hSi : S.f i hi = ⟨A, inr N⟩) :
     MulAction.Supports (Allowable h.path.δ)
-      ((S.before i hi).comp (h.path.B.cons h.path.hδ)).carrier h.t.set := by
+      (S.comp (h.path.B.cons h.path.hδ)).carrier h.t.set := by
   intro ρ hρ
   rw [← Tangle.smul_set, before_comp_supports S hS hi h hSi ρ hρ]
 
@@ -101,13 +102,15 @@ structure Specifies (σ : Spec β) (S : Support β) (hS : S.Strong) : Prop where
       S.f i hi = ⟨A, inr N⟩ →
       σ.f i (hi.trans_eq max_eq_max) = SpecCondition.flexible A
         {j | ∃ hj, ∃ (N' : NearLitter), S.f j hj = ⟨A, inr N'⟩ ∧ N'.1 = N.1}
+        /- TODO: This term can be inferred from all of the `atom_spec` results.
+        The same goes for the other near-litter cases. -/
         (fun j => {k | ∃ hj hk, ∃ (a : Atom) (N' : NearLitter),
           N'.1 = N.1 ∧ a ∈ (N : Set Atom) ∆ N' ∧
           S.f j hj = ⟨A, inr N'⟩ ∧ S.f k hk = ⟨A, inl a⟩})
   inflexibleCoe_spec (i : κ) (hi : i < S.max) (A : ExtendedIndex β) (N : NearLitter)
       (h : InflexibleCoe A N.1) (hSi : S.f i hi = ⟨A, inr N⟩) :
       σ.f i (hi.trans_eq max_eq_max) = SpecCondition.inflexibleCoe A h.path
-        (CodingFunction.code ((S.before i hi).comp (h.path.B.cons h.path.hδ))
+        (CodingFunction.code (S.comp (h.path.B.cons h.path.hδ))
           h.t.set (before_comp_supports' S hS hi h hSi))
         (fun j => {k | ∃ hj hk, ∃ (a : Atom) (N' : NearLitter),
           N'.1 = N.1 ∧ a ∈ (N : Set Atom) ∆ N' ∧

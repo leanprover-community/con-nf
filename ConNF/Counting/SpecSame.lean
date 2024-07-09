@@ -161,7 +161,7 @@ theorem support_tangle_ext (hS : S.Strong) {A : ExtendedIndex β} (P : Inflexibl
   · have := Support.Precedes.fuzz _ N ⟨P, t₁, hi₃⟩ (t₁.support.f k hku) ⟨k, hku, rfl⟩
     rw [← P.hA, ← hi₂] at this
     exact this
-  obtain ⟨j, hjT, _, hjeq⟩ := this
+  obtain ⟨j, hjT, hjeq⟩ := this
   obtain ⟨_, _, hjeq'⟩ := (Set.ext_iff.mp (congr_fun h₃ k) j).mp ⟨hku, hjT, hjeq.symm⟩
   have := hjeq'.trans hjeq
   simp only [Address.mk.injEq] at this
@@ -195,27 +195,22 @@ theorem convertNearLitter_subsingleton_inflexibleCoe (A : ExtendedIndex β) (NS 
       rw [mul_smul, smul_smul, mul_right_inv, one_smul]
     intro c hc
     rw [mul_smul, inv_smul_eq_iff]
-    have : ∃ (j : κ) (hj : j < S.max), j < i ∧ j < i' ∧ S.f j hj = ⟨(P.B.cons P.hδ).comp c.1, c.2⟩
-    · by_cases hii' : i < i'
-      · have h₇ := Support.Precedes.fuzz A NS ⟨P, t, hNS⟩ _ hc
-        rw [← P.hA, ← hiS₂] at h₇
-        obtain ⟨j, hj, hji, hjc⟩ := hS.precedes hiS₁ _ h₇
-        exact ⟨j, hj, hji, hji.trans hii', hjc⟩
-      · have h₇ := Support.Precedes.fuzz A NS ⟨P, t, hNS⟩ _ hc
-        rw [← P.hA, ← hiS₂'] at h₇
-        obtain ⟨j, hj, hji, hjc⟩ := hS.precedes hiS₁' _ h₇
-        exact ⟨j, hj, hji.trans_le (le_of_not_lt hii'), hji, hjc⟩
-    obtain ⟨j, hj, hji, hji', hjc⟩ := this
+    have : ∃ (j : κ) (hj : j < S.max), S.f j hj = ⟨(P.B.cons P.hδ).comp c.1, c.2⟩
+    · have h₇ := Support.Precedes.fuzz A NS ⟨P, t, hNS⟩ _ hc
+      rw [← P.hA, ← hiS₂] at h₇
+      obtain ⟨j, hj, hjc⟩ := hS.precedes hiS₁ _ h₇
+      exact ⟨j, hj, hjc⟩
+    obtain ⟨j, hj, hjc⟩ := this
     have h₇ := support_f_congr h₅.symm j ?_
     swap
     · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
-      exact hji
-      exact ⟨j, hji, c, hjc⟩
+      exact hj
+      exact ⟨j, hj, c, hjc⟩
     have h₈ := support_f_congr h₅'.symm j ?_
     swap
     · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
-      exact hji'
-      exact ⟨j, hji', c, hjc⟩
+      exact hj
+      exact ⟨j, hj, c, hjc⟩
     simp only [Enumeration.smul_f, Support.comp_f_eq] at h₇ h₈
     obtain ⟨d, hd⟩ := comp_eq_same hσS hσT hj (P.B.cons P.hδ) c hjc
     rw [Support.comp_decomp_eq _ _ (by exact hjc),
@@ -258,17 +253,12 @@ theorem convertNearLitter_subsingleton_inflexibleBot (A : ExtendedIndex β) (NS 
   clear h₁ h₂ h₃ h₄
   have : u = u'
   · clear h₅'
-    have : ∃ (j : κ) (hj : j < S.max), j < i ∧ j < i' ∧ S.f j hj = ⟨P.B.cons (bot_lt_coe _), inl a⟩
-    · by_cases hii' : i < i'
-      · have h₇ := Support.Precedes.fuzzBot A NS ⟨P, a, hNS⟩
-        rw [← P.hA, ← hiS₂] at h₇
-        obtain ⟨j, hj, hji, hjc⟩ := hS.precedes hiS₁ _ h₇
-        exact ⟨j, hj, hji, hji.trans hii', hjc⟩
-      · have h₇ := Support.Precedes.fuzzBot A NS ⟨P, a, hNS⟩
-        rw [← P.hA, ← hiS₂'] at h₇
-        obtain ⟨j, hj, hji, hjc⟩ := hS.precedes hiS₁' _ h₇
-        exact ⟨j, hj, hji.trans_le (le_of_not_lt hii'), hji, hjc⟩
-    obtain ⟨j, hj, hji, hji', ha⟩ := this
+    have : ∃ (j : κ) (hj : j < S.max), S.f j hj = ⟨P.B.cons (bot_lt_coe _), inl a⟩
+    · have h₇ := Support.Precedes.fuzzBot A NS ⟨P, a, hNS⟩
+      rw [← P.hA, ← hiS₂] at h₇
+      obtain ⟨j, hj, hjc⟩ := hS.precedes hiS₁ _ h₇
+      exact ⟨j, hj, hjc⟩
+    obtain ⟨j, hj, ha⟩ := this
     rw [Set.ext_iff] at h₅ h₆
     obtain ⟨_, hj₁⟩ := (h₅ j).mp ⟨hj, ha⟩
     obtain ⟨_, hj₂⟩ := (h₆ j).mp ⟨hj, ha⟩
@@ -404,9 +394,9 @@ theorem support_tangle_ext' (hT : T.Strong)
       (fun j => {k | ∃ (hj : j < t₂.support.max) (hk : k < S.max),
         ⟨(P.B.cons P.hδ).comp (t₂.support.f j hj).1, (t₂.support.f j hj).2⟩ =
           S.f k hk}))
-    {i : κ} (hi₁ : i < S.max) (hi₂ : i < T.max) {N : NearLitter}
+    {i : κ} (hi₂ : i < T.max) {N : NearLitter}
     (hi₃ : T.f i hi₂ = ⟨A, inr N⟩) (hi₄ : N.1 = fuzz P.hδε t₁)
-    (hi₅ : (T.before i hi₂).comp (P.B.cons P.hδ) = ρ • (S.before i hi₁).comp (P.B.cons P.hδ)) :
+    (hi₅ : T.comp (P.B.cons P.hδ) = ρ • S.comp (P.B.cons P.hδ)) :
     t₁ = ρ • t₂ := by
   suffices : t₁.support = ρ • t₂.support
   · refine Tangle.ext _ _ ?_ ?_
@@ -419,13 +409,13 @@ theorem support_tangle_ext' (hT : T.Strong)
   · have := Support.Precedes.fuzz _ N ⟨P, t₁, hi₄⟩ (t₁.support.f k hku) ⟨k, hku, rfl⟩
     rw [← P.hA, ← hi₃] at this
     exact this
-  obtain ⟨j, hjT, hji, hjeq⟩ := this
+  obtain ⟨j, hjT, hjeq⟩ := this
   obtain ⟨_, hjS, hjeq'⟩ := (Set.ext_iff.mp (congr_fun h₃ k) j).mp ⟨hku, hjT, hjeq.symm⟩
-  have hccS : (S.before i hi₁).CanComp (P.B.cons P.hδ) := ⟨j, hji, _, hjeq'.symm⟩
-  have hccT : (T.before i hi₂).CanComp (P.B.cons P.hδ) := ⟨j, hji, _, hjeq⟩
-  have := support_f_congr hi₅ j (Support.comp_max_eq_of_canComp hccT ▸ hji)
-  rw [Support.comp_f_eq, Support.comp_decomp_eq hccT hji hjeq,
-    Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq hccS hji hjeq'.symm] at this
+  have hccS : S.CanComp (P.B.cons P.hδ) := ⟨j, hjS, _, hjeq'.symm⟩
+  have hccT : T.CanComp (P.B.cons P.hδ) := ⟨j, hjT, _, hjeq⟩
+  have := support_f_congr hi₅ j (Support.comp_max_eq_of_canComp hccT ▸ hjT)
+  rw [Support.comp_f_eq, Support.comp_decomp_eq hccT hjT hjeq,
+    Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq hccS hjS hjeq'.symm] at this
   exact this
 
 theorem convertNearLitter_fst {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : NearLitter}
@@ -460,7 +450,7 @@ theorem convertNearLitter_fst {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : Near
     clear h₁ h₂ h₃ h₄
     have h₁' := Support.Precedes.fuzzBot A N₁ ⟨P, a₁, hN⟩
     rw [← P.hA, ← hiS'] at h₁'
-    obtain ⟨j₁, hj₁S, -, hj₁S'⟩ := hS.precedes hiS ⟨P.B.cons (bot_lt_coe _), inl a₁⟩ h₁'
+    obtain ⟨j₁, hj₁S, hj₁S'⟩ := hS.precedes hiS ⟨P.B.cons (bot_lt_coe _), inl a₁⟩ h₁'
     obtain ⟨_, hj₁T⟩ := (Set.ext_iff.mp h₁₃.2.2.1 j₁).mp ⟨hj₁S, hj₁S'⟩
     obtain ⟨_, hj₂T⟩ := (Set.ext_iff.mp h₂₄.2.2.1 j₁).mp ⟨hj₁S, hj₁S'⟩
     cases hj₁T.symm.trans hj₂T
@@ -487,40 +477,39 @@ theorem convertNearLitter_fst {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : Near
     have h₂₄'' := h₂₄.2.2.2.2
     clear h₁ h₂ h₃ h₄ h₁₃ h₂₄ hN'₃ hN'₄
     have : t₃ = ρ • t₁ :=
-      support_tangle_ext' hT P t₃ t₁ ρ h₁₃' h₁₃''.1.symm h₁₃''.2.symm hiS hiT hiT' hN₃ hρ
+      support_tangle_ext' hT P t₃ t₁ ρ h₁₃' h₁₃''.1.symm h₁₃''.2.symm hiT hiT' hN₃ hρ
     cases this
     have : t₄ = ρ' • t₁ :=
-      support_tangle_ext' hT P t₄ t₁ ρ' h₂₄' h₂₄''.1.symm h₂₄''.2.symm hjS hjT hjT' hN₄ hρ'
+      support_tangle_ext' hT P t₄ t₁ ρ' h₂₄' h₂₄''.1.symm h₂₄''.2.symm hjT hjT' hN₄ hρ'
     cases this
     have := support_supports t₁ (ρ'⁻¹ * ρ) ?_
     · rw [mul_smul, inv_smul_eq_iff] at this
       exact this
     intro c hc
     rw [mul_smul, inv_smul_eq_iff]
-    have : ∃ k hk, k < i ∧ k < j ∧ S.f k hk = ⟨(P.B.cons P.hδ).comp c.1, c.2⟩
-    · by_cases hij : i < j
-      · have hc' := Support.Precedes.fuzz A N₁ ⟨P, t₁, hN⟩ c hc
-        rw [← P.hA, ← hiS'] at hc'
-        obtain ⟨k, hk, hki, hkS⟩ := hS.precedes hiS _ hc'
-        exact ⟨k, hk, hki, hki.trans hij, hkS⟩
-      · have hc' := Support.Precedes.fuzz A N₂ ⟨P, t₁, h ▸ hN⟩ c hc
-        rw [← P.hA, ← hjS'] at hc'
-        obtain ⟨k, hk, hki, hkS⟩ := hS.precedes hjS _ hc'
-        exact ⟨k, hk, hki.trans_le (le_of_not_lt hij), hki, hkS⟩
-    obtain ⟨k, hk, hki, hkj, hkS⟩ := this
+    have : ∃ k hk, S.f k hk = ⟨(P.B.cons P.hδ).comp c.1, c.2⟩
+    · have hc' := Support.Precedes.fuzz A N₁ ⟨P, t₁, hN⟩ c hc
+      rw [← P.hA, ← hiS'] at hc'
+      obtain ⟨k, hk, hkS⟩ := hS.precedes hiS _ hc'
+      exact ⟨k, hk, hkS⟩
+    obtain ⟨k, hk, hkS⟩ := this
     obtain ⟨d, hd⟩ := comp_eq_same hσS hσT hk (P.B.cons P.hδ) c hkS
     have h₁' := support_f_congr hρ k ?_
     swap
-    · rw [Support.comp_max_eq_of_canComp]
-      exact hki
-      exact ⟨k, hki, d, hd⟩
+    · rw [Support.comp_max_eq_of_canComp, hσT.max_eq_max, ← hσS.max_eq_max]
+      exact hk
+      refine ⟨k, ?_, d, hd⟩
+      rw [hσT.max_eq_max, ← hσS.max_eq_max]
+      exact hk
     rw [Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hd),
       Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hkS)] at h₁'
     have h₂' := support_f_congr hρ' k ?_
     swap
-    · rw [Support.comp_max_eq_of_canComp]
-      exact hkj
-      exact ⟨k, hkj, d, hd⟩
+    · rw [Support.comp_max_eq_of_canComp, hσT.max_eq_max, ← hσS.max_eq_max]
+      exact hk
+      refine ⟨k, ?_, d, hd⟩
+      rw [hσT.max_eq_max, ← hσS.max_eq_max]
+      exact hk
     rw [Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hd),
       Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hkS)] at h₂'
     rw [← h₁', ← h₂']
@@ -557,7 +546,7 @@ theorem convertNearLitter_fst' {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : Nea
     clear h₁ h₂ h₃ h₄
     have h₃' := Support.Precedes.fuzzBot A N₃ ⟨P, a₃, hN₃⟩
     rw [← P.hA, ← hiT'] at h₃'
-    obtain ⟨j₁, hj₁S, -, hj₁S'⟩ := hT.precedes hiT ⟨P.B.cons (bot_lt_coe _), inl a₃⟩ h₃'
+    obtain ⟨j₁, hj₁S, hj₁S'⟩ := hT.precedes hiT ⟨P.B.cons (bot_lt_coe _), inl a₃⟩ h₃'
     obtain ⟨_, hj₁T⟩ := (Set.ext_iff.mp h₁₃.2.2.1 j₁).mpr ⟨hj₁S, hj₁S'⟩
     obtain ⟨_, hj₂T⟩ := (Set.ext_iff.mp h₂₄.2.2.1 j₁).mpr ⟨hj₁S, hj₁S'⟩
     cases hj₁T.symm.trans hj₂T
@@ -582,10 +571,10 @@ theorem convertNearLitter_fst' {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : Nea
     obtain ⟨ρ', hρ', hρ'₂⟩ := h₂₄'
     have ht₃₁ : t₃ = ρ • t₁ :=
       support_tangle_ext' hT P t₃ t₁ ρ hρ₂
-        h₁₃.2.2.2.2.1.symm h₁₃.2.2.2.2.2.symm hiS hiT hiT' hN₃ hρ
+        h₁₃.2.2.2.2.1.symm h₁₃.2.2.2.2.2.symm hiT hiT' hN₃ hρ
     have ht₃₂ : t₃ = ρ' • t₂ :=
       support_tangle_ext' hT P t₃ t₂ ρ' hρ'₂
-        h₂₄.2.2.2.2.1.symm h₂₄.2.2.2.2.2.symm hjS hjT hjT' (h ▸ hN₃) hρ'
+        h₂₄.2.2.2.2.1.symm h₂₄.2.2.2.2.2.symm hjT hjT' (h ▸ hN₃) hρ'
     cases ht₃₁
     rw [← inv_smul_eq_iff, smul_smul] at ht₃₂
     subst ht₃₂
@@ -596,30 +585,29 @@ theorem convertNearLitter_fst' {A : ExtendedIndex β} {N₁ N₂ N₃ N₄ : Nea
       exact this
     intro c hc
     rw [mul_smul]
-    have : ∃ k hk, k < i ∧ k < j ∧ T.f k hk = ⟨(P.B.cons P.hδ).comp c.1, c.2⟩
-    · by_cases hij : i < j
-      · have hc' := Support.Precedes.fuzz A N₃ ⟨P, ρ • t₁, hN₃⟩ c hc
-        rw [← P.hA, ← hiT'] at hc'
-        obtain ⟨k, hk, hki, hkT⟩ := hT.precedes hiT _ hc'
-        exact ⟨k, hk, hki, hki.trans hij, hkT⟩
-      · have hc' := Support.Precedes.fuzz A N₄ ⟨P, ρ • t₁, h ▸ hN₃⟩ c hc
-        rw [← P.hA, ← hjT'] at hc'
-        obtain ⟨k, hk, hki, hkT⟩ := hT.precedes hjT _ hc'
-        exact ⟨k, hk, hki.trans_le (le_of_not_lt hij), hki, hkT⟩
-    obtain ⟨k, hk, hki, hkj, hkT⟩ := this
+    have : ∃ k hk, T.f k hk = ⟨(P.B.cons P.hδ).comp c.1, c.2⟩
+    · have hc' := Support.Precedes.fuzz A N₃ ⟨P, ρ • t₁, hN₃⟩ c hc
+      rw [← P.hA, ← hiT'] at hc'
+      obtain ⟨k, hk, hkT⟩ := hT.precedes hiT _ hc'
+      exact ⟨k, hk, hkT⟩
+    obtain ⟨k, hk, hkT⟩ := this
     obtain ⟨d, hd⟩ := comp_eq_same hσT hσS hk (P.B.cons P.hδ) c hkT
     have h₁' := support_f_congr hρ.symm k ?_
     swap
-    · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
-      exact hki
-      exact ⟨k, hki, d, hd⟩
+    · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp, hσS.max_eq_max, ← hσT.max_eq_max]
+      exact hk
+      refine ⟨k, ?_, d, hd⟩
+      rw [hσS.max_eq_max, ← hσT.max_eq_max]
+      exact hk
     rw [Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hd),
       Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hkT)] at h₁'
     have h₂' := support_f_congr hρ'.symm k ?_
     swap
-    · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
-      exact hkj
-      exact ⟨k, hkj, d, hd⟩
+    · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp, hσS.max_eq_max, ← hσT.max_eq_max]
+      exact hk
+      refine ⟨k, ?_, d, hd⟩
+      rw [hσS.max_eq_max, ← hσT.max_eq_max]
+      exact hk
     rw [Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hd),
       Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hkT)] at h₂'
     rw [← h₁', inv_smul_smul, h₂', h₁']
@@ -684,21 +672,21 @@ theorem convert_coherentDom : (convert hσS hσT).CoherentDom := by
     rintro γ _ A ε _ hε a Nt hNt ⟨N', i, hiS, hiT, hiS', -⟩
     have := Support.Precedes.fuzzBot _ Nt ⟨⟨γ, ε, hε, A, rfl⟩, a, hNt⟩
     rw [← hiS'] at this
-    obtain ⟨j, hj, -, hjS⟩ := hS.precedes hiS _ this
+    obtain ⟨j, hj, hjS⟩ := hS.precedes hiS _ this
     obtain ⟨a', ha'⟩ := hσT.of_eq_atom (hσS.atom_spec j hj _ a hjS)
     exact ⟨a', j, hj, convIndex hσS hσT hj, hjS, ha'⟩
   case atom_dom =>
     rintro γ _ A δ _ ε _ hδ hε hδε t B a Nt hNt ha ⟨N', i, hiS, hiT, hiS', -⟩
     have := Support.Precedes.fuzz _ Nt ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, hNt⟩ _ ha
     rw [← hiS'] at this
-    obtain ⟨j, hj, -, hjS⟩ := hS.precedes hiS _ this
+    obtain ⟨j, hj, hjS⟩ := hS.precedes hiS _ this
     obtain ⟨a', ha'⟩ := hσT.of_eq_atom (hσS.atom_spec j hj _ a hjS)
     exact ⟨a', j, hj, convIndex hσS hσT hj, hjS, ha'⟩
   case nearLitter_dom =>
     rintro γ _ A δ _ ε _ hδ hε hδε t B N Nt hNt hN ⟨N', i, hiS, hiT, hiS', -⟩
     have := Support.Precedes.fuzz _ Nt ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, hNt⟩ _ hN
     rw [← hiS'] at this
-    obtain ⟨j, hj, -, hjS⟩ := hS.precedes hiS _ this
+    obtain ⟨j, hj, hjS⟩ := hS.precedes hiS _ this
     obtain (hN | ⟨⟨hN⟩⟩ | ⟨⟨hN⟩⟩) := flexible_cases' ((A.cons hδ).comp B) N.1
     · obtain ⟨N', -, h₂⟩ := hσT.of_eq_flexible (hσS.flexible_spec j hj _ N hN hjS)
       exact ⟨N', j, hj, convIndex hσS hσT hj, hjS, h₂⟩
@@ -728,7 +716,7 @@ theorem convert_coherent : (convert hσS hσT).Coherent := by
     obtain ⟨ρ', hρ', hρ''⟩ := this.1
     have : t' = ρ' • t :=
       support_tangle_ext' (S := S) hT ⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩ t' t ρ' hρ''
-        this.2.2.1.symm this.2.2.2.symm hiS hiT hiT' hNt' hρ'
+        this.2.2.1.symm this.2.2.2.symm hiT hiT' hNt' hρ'
     cases this
     clear hiS'' hiT'' this
     have := support_supports t (ρ'⁻¹ * Allowable.comp (Hom.toPath hδ) ρ) ?_
@@ -736,17 +724,17 @@ theorem convert_coherent : (convert hσS hσT).Coherent := by
       exact this.symm
     intro c hc
     rw [mul_smul, inv_smul_eq_iff]
-    have : ∃ k hk, k < i ∧ S.f k hk = ⟨(A.cons hδ).comp c.1, c.2⟩
+    have : ∃ k hk, S.f k hk = ⟨(A.cons hδ).comp c.1, c.2⟩
     · have hc' := Support.Precedes.fuzz _ Nt ⟨⟨γ, δ, ε, hδ, hε, hδε, A, rfl⟩, t, hNt⟩ c hc
       rw [← hiS'] at hc'
-      obtain ⟨k, hk, hki, hkS⟩ := hS.precedes hiS _ hc'
-      exact ⟨k, hk, hki, hkS⟩
-    obtain ⟨k, hk, hki, hkS⟩ := this
+      obtain ⟨k, hk, hkS⟩ := hS.precedes hiS _ hc'
+      exact ⟨k, hk, hkS⟩
+    obtain ⟨k, hk, hkS⟩ := this
     have h' := support_f_congr hρ'.symm k ?_
     swap
     · rw [Enumeration.smul_max, Support.comp_max_eq_of_canComp]
-      exact hki
-      exact ⟨k, hki, c, hkS⟩
+      exact hk
+      exact ⟨k, hk, c, hkS⟩
     obtain ⟨d, hd⟩ := comp_eq_same hσS hσT hk (A.cons hδ) c hkS
     rw [Enumeration.smul_f, Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hkS),
       Support.comp_f_eq, Support.comp_decomp_eq _ _ (by exact hd)] at h'
@@ -786,12 +774,12 @@ theorem convert_coherent : (convert hσS hσT).Coherent := by
       ((A.cons hε).cons (bot_lt_coe _)) Nt' ⟨⟨γ, ε, hε, A, rfl⟩, a', hNt'⟩ hiT'
     suffices : a' = Allowable.toStructPerm ρ (Hom.toPath (bot_lt_coe _)) • a
     · simp only [hNt', this, ofBot_smul, Allowable.toStructPerm_apply]
-    have : ∃ k hk, k < i ∧ S.f k hk = ⟨A.cons (bot_lt_coe _), inl a⟩
+    have : ∃ k hk, S.f k hk = ⟨A.cons (bot_lt_coe _), inl a⟩
     · have hc' := Support.Precedes.fuzzBot _ Nt ⟨⟨γ, ε, hε, A, rfl⟩, a, hNt⟩
       rw [← hiS'] at hc'
-      obtain ⟨k, hk, hki, hkS⟩ := hS.precedes hiS _ hc'
-      exact ⟨k, hk, hki, hkS⟩
-    obtain ⟨k, hk, -, hkS⟩ := this
+      obtain ⟨k, hk, hkS⟩ := hS.precedes hiS _ hc'
+      exact ⟨k, hk, hkS⟩
+    obtain ⟨k, hk, hkS⟩ := this
     rw [← h, convert_atomMap_eq hσS hσT]
     refine ⟨k, hk, convIndex hσS hσT hk, hkS, ?_⟩
     have := hiS''.symm.trans hiT''

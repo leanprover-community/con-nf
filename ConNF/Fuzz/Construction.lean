@@ -113,7 +113,8 @@ such that we could run out of available values for the function.
 
 variable [Params.{u}] [BasePositions] {β : TypeIndex} [ModelData β] [PositionedTangles β]
 
-/-- The set of elements of `ν` that `fuzz _ t` cannot be. -/
+/-- The set of elements of `ν` that `fuzz _ t` cannot be.
+TODO: This can be simplified to just `{ ν : μ | pos (⟨ν, β, γ, _⟩ : Litter) ≤ pos t }` -/
 def fuzzDeny (t : Tangle β) : Set μ :=
   { ν : μ | ∃ (N : NearLitter), pos N ≤ pos t ∧ ν = N.1.1 } ∪
   { ν : μ | ∃ (a : Atom), pos a ≤ pos t ∧ ν = a.1.1 }

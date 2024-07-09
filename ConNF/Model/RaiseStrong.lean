@@ -182,8 +182,8 @@ theorem raise_smul_raise_strong (T : Support γ) (ρ : Allowable β) :
           change raise iβ.elim _ = raise iβ.elim ⟨(C.cons hε).cons (bot_lt_coe _), inr N⟩ at hc
           have := (strongSupport_strong (T.image (raise hγ)).small).precedes hi
             (ρ⁻¹ • ⟨(C.cons hδ).comp d.path, d.value⟩) ?_
-          · obtain ⟨j, hj₁, hj₂, hj₃⟩ := this
-            refine ⟨j, hj₁, hj₂, ?_⟩
+          · obtain ⟨j, hj₁, hj₃⟩ := this
+            refine ⟨j, hj₁, ?_⟩
             rw [Enumeration.image_f, Enumeration.smul_f, hj₃, hC, raise, Hom.toPath, raiseIndex,
               ← Path.comp_cons, Path.comp_assoc, smul_inv_smul]
             rfl
@@ -210,8 +210,8 @@ theorem raise_smul_raise_strong (T : Support γ) (ρ : Allowable β) :
           change raise iβ.elim _ = raise iβ.elim ⟨(C.cons hε).cons (bot_lt_coe _), inr N⟩ at hc
           have := (strongSupport_strong (T.image (raise hγ)).small).precedes hi
             (ρ⁻¹ • ⟨C.cons (bot_lt_coe _), inl a⟩) ?_
-          · obtain ⟨j, hj₁, hj₂, hj₃⟩ := this
-            refine ⟨j, hj₁, hj₂, ?_⟩
+          · obtain ⟨j, hj₁, hj₃⟩ := this
+            refine ⟨j, hj₁, ?_⟩
             rw [Enumeration.image_f, Enumeration.smul_f, hj₃, hC, smul_inv_smul]
             rfl
           · have := raise_injective _ hc
@@ -458,16 +458,15 @@ theorem raiseRaise_strong (hρS : ∀ c : Address β, raise iβ.elim c ∈ S →
   · intro i hi c hc
     obtain (hi | ⟨hi, hi'⟩ | ⟨hi, hi'⟩) := raiseRaise_cases hi
     · rw [raiseRaise_f_eq₁ hi] at hc
-      obtain ⟨j, hj₁, hj₂, hj₃⟩ := hS.precedes _ _ hc
-      refine ⟨j, raiseRaise_hi₁ hj₁, hj₂, ?_⟩
+      obtain ⟨j, hj₁, hj₃⟩ := hS.precedes _ _ hc
+      refine ⟨j, raiseRaise_hi₁ hj₁, ?_⟩
       rw [raiseRaise_f_eq₁ hj₁, hj₃]
     · rw [raiseRaise_f_eq₂ hi hi'] at hc
-      obtain ⟨j, hj₁, hj₂, hj₃⟩ := (raise_smul_raise_strong hγ T ρ).precedes _ _ hc
-      refine ⟨S.max + j, ?_, ?_, ?_⟩
-      · rw [κ_lt_sub_iff] at hj₂
-        exact hj₂.trans ‹_›
-      · rw [κ_lt_sub_iff] at hj₂
-        exact hj₂
+      obtain ⟨j, hj₁, hj₃⟩ := (raise_smul_raise_strong hγ T ρ).precedes _ _ hc
+      refine ⟨S.max + j, ?_, ?_⟩
+      · simp only [Enumeration.image_carrier, Enumeration.image_max, Enumeration.smul_max] at hj₁
+        simp only [raiseRaise_max, Enumeration.image_carrier, add_lt_add_iff_left]
+        exact hj₁.trans_le (κ_le_self_add _ _)
       · rw [raiseRaise_f_eq₂, ← hj₃]
         · simp_rw [κ_add_sub_cancel]
           rfl

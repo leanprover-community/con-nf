@@ -117,7 +117,7 @@ theorem Spec.Specifies.smul : σ.Specifies (ρ • S) (hS.smul ρ) := by
     · simp only [BasePerm.smul_nearLitter_fst, inflexibleCoe_smul_path, inflexibleCoe_smul_t,
         Tree.inv_apply, ne_eq, eq_mp_eq_cast, CodingFunction.code_eq_code_iff]
       refine ⟨Allowable.comp (P.B.cons P.hδ) ρ, ?_, ?_⟩
-      · simp only [Support.before_smul, Support.comp_smul, BasePerm.smul_nearLitter_fst,
+      · simp only [Support.comp_smul, BasePerm.smul_nearLitter_fst,
           inflexibleCoe_smul_path, inflexibleCoe_smul_t, Tree.inv_apply, ne_eq, eq_mp_eq_cast]
       · rw [← Tangle.smul_set, smul_inv_smul]
     · ext j k

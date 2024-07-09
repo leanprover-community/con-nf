@@ -42,7 +42,7 @@ structure Strong (S : Support β) : Prop where
     {a : Atom} (ha : Interferes a N₁ N₂) :
     ∃ (j : κ) (hj : j < S.max), S.f j hj = ⟨A, inl a⟩
   precedes {i : κ} (hi : i < S.max) (c : Address β) (hc : Precedes c (S.f i hi)) :
-    ∃ (j : κ) (hj : j < S.max), j < i ∧ S.f j hj = c
+    ∃ (j : κ) (hj : j < S.max), S.f j hj = c
 
 theorem interferes_small (N₁ N₂ : NearLitter) :
     Small {a | Interferes a N₁ N₂} := by
@@ -261,11 +261,7 @@ theorem strongSupport_strong {s : Set (Address β)} (hs : Small s) : (strongSupp
   · intro i hi c hc
     have hi' := mem_of_strongSupport_f_eq hs hi
     have := precedes_mem_strongClosure s hc hi'
-    obtain ⟨j, hj, hc'⟩ := exists_of_mem_strongClosure _ _ this
-    refine ⟨j, hj, ?_, hc'⟩
-    refine lt_of_strongSupportRel hs hj hi ?_
-    rw [hc']
-    exact StrongSupportRel.precedes _ _ hc
+    exact exists_of_mem_strongClosure _ _ this
 
 theorem Interferes.symm {a : Atom} {N₁ N₂ : NearLitter} (h : Interferes a N₁ N₂) :
     Interferes a N₂ N₁ := by
@@ -344,35 +340,12 @@ theorem Strong.smul [LeLevel β] {S : Support β} (hS : S.Strong) (ρ : Allowabl
       rw [hN₂, Allowable.smul_address, map_inv, Tree.inv_apply, smul_inr]
   · intro i hi c hc
     have := hS.precedes hi (ρ⁻¹ • c) ?_
-    · obtain ⟨j, hj, hj', hc⟩ := this
-      refine ⟨j, hj, hj', ?_⟩
+    · obtain ⟨j, hj, hc⟩ := this
+      refine ⟨j, hj, ?_⟩
       rw [Enumeration.smul_f, smul_eq_iff_eq_inv_smul, hc]
     · have := hc.smul ρ⁻¹
       simp only [Enumeration.smul_f, inv_smul_smul] at this
       exact this
-
-/-- TODO: We can probably do without this. -/
-def before (S : Support β) (i : κ) (hi : i < S.max) : Support β :=
-  ⟨i, fun j hj => S.f j (hj.trans hi)⟩
-
-@[simp]
-theorem before_f (S : Support β) (i : κ) (hi : i < S.max) (j : κ) (hj : j < i) :
-    (S.before i hi).f j hj = S.f j (hj.trans hi) :=
-  rfl
-
-@[simp]
-theorem before_carrier (S : Support β) (i : κ) (hi : i < S.max) :
-    (S.before i hi).carrier = {c | ∃ j hj, j < i ∧ S.f j hj = c} := by
-  ext c
-  constructor
-  · rintro ⟨j, hj, rfl⟩
-    exact ⟨j, _, hj, rfl⟩
-  · rintro ⟨j, hj₁, hj₂, rfl⟩
-    exact ⟨j, hj₂, rfl⟩
-
-@[simp]
-theorem before_smul [LeLevel β] (S : Support β) (i : κ) (hi : i < S.max) (ρ : Allowable β) :
-    (ρ • S).before i hi = ρ • S.before i hi := rfl
 
 def CanComp {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) : Prop :=
   Set.Nonempty {i | ∃ hi, ∃ (c : Address γ), S.f i hi = ⟨A.comp c.1, c.2⟩}
@@ -573,8 +546,8 @@ theorem comp_strong {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) (h
     rw [comp_max_eq_of_canComp hS'] at hi
     have h := decomp_spec hS' hi
     have := hS.precedes hi ⟨A.comp c.1, c.2⟩ ?_
-    · obtain ⟨j, hj₁, hj₂, hj₃⟩ := this
-      refine ⟨j, ?_, hj₂, ?_⟩
+    · obtain ⟨j, hj₁, hj₃⟩ := this
+      refine ⟨j, ?_, ?_⟩
       · rw [comp_max_eq_of_canComp hS']
         exact hj₁
       · rw [comp_f_eq]
@@ -584,8 +557,10 @@ theorem comp_strong {γ : Λ} (S : Support β) (A : Path (β : TypeIndex) γ) (h
       unfold compIndex at this
       split_ifs at this with h'
       · exact this
-      · obtain ⟨j, hj₁, hj₂, hj₃⟩ := hS.precedes _ _ this
-        exact (not_lt_leastCompIndex _ _ ⟨hj₁, c, hj₃⟩ hj₂).elim
+      · obtain ⟨j, hj₁, hj₃⟩ := hS.precedes _ _ this
+        have := not_lt_leastCompIndex hS' _ ⟨hj₁, c, hj₃⟩
+        -- exact (not_lt_leastCompIndex _ _ ⟨hj₁, c, hj₃⟩ hj₂).elim
+        sorry
 
 theorem CanComp.smul [LeLevel β] {γ : Λ} [LeLevel γ] {S : Support β} {A : Path (β : TypeIndex) γ}
     (h : S.CanComp A) (ρ : Allowable β) :

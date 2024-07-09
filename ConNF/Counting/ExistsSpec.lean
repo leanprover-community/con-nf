@@ -23,7 +23,7 @@ noncomputable def Support.spec (S : Support β) (hS : S.Strong) : Spec β where
       let N := h.choose_spec.choose
       if h₁ : Nonempty (InflexibleCoe A N.1) then
         SpecCondition.inflexibleCoe A h₁.some.path
-          (CodingFunction.code ((S.before i hi).comp (h₁.some.path.B.cons h₁.some.path.hδ))
+          (CodingFunction.code (S.comp (h₁.some.path.B.cons h₁.some.path.hδ))
             h₁.some.t.set (Spec.before_comp_supports' S hS hi h₁.some h.choose_spec.choose_spec))
           (fun j => {k | ∃ hj hk, ∃ (a : Atom) (N' : NearLitter),
             N'.1 = N.1 ∧ a ∈ (N : Set Atom) ∆ N' ∧
