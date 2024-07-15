@@ -104,7 +104,7 @@ theorem path_eq_zeroPath (A : ExtendedIndex 0) : A = zeroPath := by
   · rfl
   · change (_ : TypeIndex) < _ at h h'
     cases' β with β
-    · simp only [not_lt_none] at h
+    · cases lt_irrefl _ h
     have := h'.trans_le (le_of_path A)
     cases (Params.Λ_zero_le β).not_lt (coe_lt_coe.mp this)
 
@@ -122,7 +122,8 @@ theorem eq_zero_of_leLevel (β : Λ) [i : LeLevel β] : β = 0 :=
 theorem eq_bot_zero_of_lt (γ β : TypeIndex) [iβ : LeLevel β] [iγ : LeLevel γ] (h : γ < β) :
     γ = ⊥ ∧ β = 0 := by
   cases' β with β
-  · simp only [not_lt_none] at h
+  · change γ < ⊥ at h
+    cases not_lt_bot h
   cases eq_zero_of_leLevel β
   cases' γ with γ
   · exact ⟨rfl, rfl⟩
