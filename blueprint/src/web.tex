@@ -1,0 +1,35 @@
+% This file makes the web version of the blueprint
+
+\documentclass{report}
+
+\usepackage{unicode-math}
+\usepackage{amsthm}
+\usepackage{hyperref}
+\usepackage{cleveref}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=red!50!black,
+	citecolor=green!50!black,
+	urlcolor=magenta!70!black,
+}
+
+\usepackage[showmore,dep_graph, project=../../]{blueprint}
+
+\input{macro/common}
+
+\input{macro/web}
+
+\github{https://github.com/ImperialCollegeLondon/FLT/}
+\dochome{https://ImperialCollegeLondon.github.io/FLT/docs}
+
+\title{New Foundations is consistent}
+\author{Sky Wilshaw}
+
+\begin{document}
+
+\maketitle
+
+\input{content}
+
+\end{document}

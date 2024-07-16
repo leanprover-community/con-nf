@@ -1,0 +1,47 @@
+% This file makes a printable version of the blueprint
+
+\documentclass{report}
+
+\usepackage[a4paper]{geometry}
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont[Path=../fonts/STIXTwo/,
+	UprightFont=*-Regular,
+	BoldFont=*-Bold,
+	ItalicFont=*-Italic,
+	BoldItalicFont=*-BoldItalic,
+	]{STIXTwoText}
+\setsansfont[Path=../fonts/Source_Sans_3/static/]{SourceSans3-Regular}[Ligatures={Common,TeX}]
+\setmathfont[Path=../fonts/STIXTwo/]{STIXTwoMath-Regular}
+\setmathfont[Path=../fonts/,range=\star]{TeXGyrePagellaMath}
+\setmonofont[Path=../fonts/,Scale=MatchLowercase]{FiraCode-Regular}
+
+\usepackage{xcolor}
+\usepackage{amsthm}
+\usepackage{hyperref}
+\usepackage{cleveref}
+% https://tex.stackexchange.com/a/81645
+\crefformat{section}{\S#2#1#3}
+\crefmultiformat{section}{\S\S#2#1#3}{ and~#2#1#3}{, #2#1#3}{, and~#2#1#3}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=red!50!black,
+	citecolor=green!50!black,
+	urlcolor=magenta!70!black,
+}
+
+\input{macro/common}
+
+\input{macro/print}
+
+\title{New Foundations is consistent}
+\author{Sky Wilshaw}
+
+\begin{document}
+
+\maketitle
+
+\input{content}
+
+\end{document}
