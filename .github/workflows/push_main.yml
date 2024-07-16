@@ -60,6 +60,32 @@ jobs:
       - name: copy documentation
         run: cp -R .lake/build/doc docs/
 
+      - name: checkout rewrite
+        uses: actions/checkout@v2
+        with:
+          ref: rewrite
+          path: rewrite
+          fetch-depth: 0
+
+      - name: build blueprint
+        uses: xu-cheng/texlive-action@v2
+        with:
+          docker_image: ghcr.io/xu-cheng/texlive-full:20231201
+          run: |
+            apk update
+            apk add --update make py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
+            git config --global --add safe.directory $GITHUB_WORKSPACE
+            git config --global --add safe.directory `pwd`
+            python3 -m venv env
+            source env/bin/activate
+            pip install --upgrade pip requests wheel
+            pip install invoke
+            pip install pygraphviz --global-option=build_ext --global-option="-L/usr/lib/graphviz/" --global-option="-R/usr/lib/graphviz/"
+            pip install leanblueprint
+            cd rewrite
+            inv bp web
+            cp -r blueprint/web ../docs/blueprint
+
       - name: remove .gitignore for gh-pages
         run: rm docs/.gitignore
 
