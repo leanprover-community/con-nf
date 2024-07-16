@@ -85,7 +85,7 @@ jobs:
             pip install leanblueprint
             cd rewrite
             inv bp web
-            cp -r blueprint/print ../docs/blueprint/print
+            cp -r blueprint/print ../docs/print
             cp -r blueprint/web ../docs/blueprint
 
       - name: remove .gitignore for gh-pages
