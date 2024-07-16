@@ -1,16 +1,29 @@
-\chapter{Chapter time}
+\chapter{Introduction}
+\input{chapters/introduction.tex}
 
-\begin{lemma}\label{lem:first}
-  The first lemma.
-\end{lemma}
-\begin{proposition}\label{prop:fprop}
-  \uses{lem:first}
-  The first proposition, uses \cref{lem:first}. Cite \cite{specker-choice-nf}.
-  \begin{enumerate}
-    \item Foo
-    \item Bar
-  \end{enumerate}
-\end{proposition}
+\chapter{Setting up the environment}
+\input{chapters/environment.tex}
 
-\bibliographystyle{plain}
+\chapter{Constructing the types}
+\input{chapters/construction.tex}
+
+\chapter{Freedom of action}
+\input{chapters/foa.tex}
+
+\chapter{The counting argument}
+\input{chapters/counting.tex}
+
+\chapter{Wrapping up the main induction}
+\input{chapters/induction.tex}
+
+\chapter{Verifying \texorpdfstring{\( \Con(\TTT) \)}{Con(TTT)}}
+\input{chapters/model.tex}
+
+\chapter{Model theory and verifying \texorpdfstring{\( \Con(\NF) \)}{Con(NF)}}
+\input{chapters/model_theory.tex}
+
+\chapter{Conclusion}
+\input{chapters/conclusion.tex}
+
+\bibliographystyle{plainurl}
 \bibliography{refs}
