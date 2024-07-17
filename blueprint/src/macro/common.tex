@@ -1,5 +1,7 @@
 \theoremstyle{definition}
 
+\newtheorem*{theorem*}{Theorem}
+
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{lemma}[theorem]{Lemma}
@@ -18,6 +20,9 @@
 \newcommand{\newoperator}[1]{\operatorname{\mathsf{#1}}}
 
 \newcommand{\Con}{\newoperator{Con}}
+\newcommand{\ttype}{\newoperator{type}}
+\newcommand{\mquote}[1]{\ensuremath{\text{‘}#1\text{’}}}
 
-\newcommand{\NF}{\mathsf{NF}}
-\newcommand{\TTT}{\mathsf{TTT}}
+\newcommand{\NF}{\ensuremath{\mathsf{NF}}}
+\newcommand{\TTT}{\ensuremath{\mathsf{TTT}}}
+\newcommand{\TST}{\ensuremath{\mathsf{TST}}}
