@@ -2,7 +2,6 @@ on:
   push:
     branches:
       - main
-      - rewrite
 
 permissions:
   contents: read
@@ -61,13 +60,6 @@ jobs:
       - name: copy documentation
         run: cp -R .lake/build/doc docs/
 
-      - name: checkout rewrite
-        uses: actions/checkout@v2
-        with:
-          ref: rewrite
-          path: rewrite
-          fetch-depth: 0
-
       - name: build blueprint
         uses: xu-cheng/texlive-action@v2
         with:
@@ -83,10 +75,9 @@ jobs:
             pip install invoke
             pip install pygraphviz --global-option=build_ext --global-option="-L/usr/lib/graphviz/" --global-option="-R/usr/lib/graphviz/"
             pip install leanblueprint
-            cd rewrite
             inv bp web
-            cp -r blueprint/print ../docs/print
-            cp -r blueprint/web ../docs/blueprint
+            cp -r blueprint/print docs/print
+            cp -r blueprint/web docs/blueprint
 
       - name: remove .gitignore for gh-pages
         run: rm docs/.gitignore
