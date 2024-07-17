@@ -1,0 +1,23 @@
+\theoremstyle{definition}
+
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{remarks}[theorem]{Remarks}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{examples}[theorem]{Examples}
+
+\setoperatorfont\mathsf
+
+% This is a workaround to make PlasTeX and XeLaTeX do the same thing: use the mathsf font for new operators.
+\newcommand{\newoperator}[1]{\operatorname{\mathsf{#1}}}
+
+\newcommand{\Con}{\newoperator{Con}}
+
+\newcommand{\NF}{\mathsf{NF}}
+\newcommand{\TTT}{\mathsf{TTT}}
