@@ -314,7 +314,7 @@ When we quantify over structural permutations in this paper, it should be formal
   \end{itemize}
   such that
   \begin{itemize}
-    \item if \( \pi : \AllPerm_\alpha \) and \( x : \TSet_\alpha \), then \( \pi(U_\alpha(x)) = U_\alpha(\pi(x)) \);
+    \item if \( \rho : \AllPerm_\alpha \) and \( x : \TSet_\alpha \), then \( \rho(U_\alpha(x)) = U_\alpha(\rho(x)) \);
     \item every t-set of type \( \alpha \) has an \( \alpha \)-support (\cref{def:StrSupport}) for its action under the \( \alpha \)-allowable permutations;
   \end{itemize}
 \end{definition}
@@ -329,12 +329,34 @@ When we quantify over structural permutations in this paper, it should be formal
     \item A \( \bot \)-tangle is a t-set \( x : \TSet_\bot \).\footnote{This is not the same as an atom: given arbitrary model data at type \( \bot \), we have no way of knowing if its \( \TSet \) is the same as \( \Atom \), all that we know is that \( \TSet_\bot \) embeds into \( \Atom \).}
     We define \( \set(x) = x \), and make \( \supp(x) \) be the \( \bot \)-support corresponding to the base support \( (1, f) \) where \( (0, a) \in f \) and \( a \) is the atom corresponding to the type-\( \bot \) t-set \( U_\bot(x)\).
   \end{itemize}
-  Allowable permutations \( \pi \) act on tangles \( t \) in the following way.
+  Allowable permutations \( \rho \) act on tangles \( t \) in the following way.
   \begin{itemize}
-    \item If \( \alpha : \lambda \), then \( \pi((x, S)) = (\pi(x), \pi(S)) \).
-    \item If \( \alpha \equiv \bot \), then \( \pi(x) \) is already defined.
+    \item If \( \alpha : \lambda \), then \( \rho((x, S)) = (\rho(x), \rho(S)) \).
+    \item If \( \alpha \equiv \bot \), then \( \rho(x) \) is already defined.
   \end{itemize}
   In each case, \( \supp(t) \) supports \( t \) for its action under the allowable permutations.
+\end{definition}
+\begin{proposition}[fuzz maps]
+  \label{prop:fuzz}
+  \uses{def:Tangle}
+  Let \( \beta \) be a type index with model data, and suppose that \( \Tang_\beta \) has a position function.
+  Let \( \gamma \) be any proper type index not equal to \( \beta \).
+  Then there is an injective \emph{fuzz map} \( f_{\beta,\gamma} : \Tang_\beta \to \Litter \) such that \( \iota(t) < \iota(f_{\beta,\gamma}(t)) \), and the different \( f_{\beta,\gamma} \) all have disjoint ranges.
+  In particular, for any near-litter \( N \) with \( N^\circ = f_{\beta,\gamma}(t) \), we have \( \iota(t) < \iota(N) \), and additionally, for any atom \( a \) with \( a^\circ = f_{\beta,\gamma}(t) \), we have \( \iota(t) < \iota(a) \).\footnote{We might want to encapsulate atoms and near-litters somehow. We could make a typeclass, or write theorems in terms of the coproduct \( \Atom \oplus \NearLitter \).}
+\end{proposition}
+\begin{proof}
+  \uses{prop:funOfDeny}
+  We define \( g : \Tang_\beta \to \mu \) by \cref{prop:funOfDeny}, where the denied sets are given by \( D(t) = \{ \iota(t) \} \).
+  Then we set \( f_{\beta,\gamma}(t) = (g(t), \beta, \gamma) \).
+\end{proof}
+\begin{definition}[inflexible path]
+  \label{def:InflexiblePath}
+  \uses{prop:fuzz}
+  Let \( \alpha \) be a proper type index.
+  Suppose that we have model data for all type indices \( \beta \leq \alpha \) and position functions for \( \Tang_\beta \) for all \( \beta < \alpha \).
+  For any type index \( \beta \leq \alpha \), a \emph{inflexible \( \beta \)-path} is a tuple \( I = (\gamma, \delta, \varepsilon, A) \) where \( \delta, \varepsilon < \gamma \) are distinct, the index \( \varepsilon \) is proper, and \( A : \beta \tpath \gamma \).
+  We will write \( \gamma_I, \delta_I, \varepsilon_I, A_I \) for its fields, and will also write \( f_I = f_{\delta, \varepsilon} \).
+  Inflexible paths have a coderivative operation, given by \( (\gamma, \delta, \varepsilon, A)^B = (\gamma, \delta, \varepsilon, A^B) \).
 \end{definition}
 \begin{definition}[typed near-litter]
   \label{def:TypedNearLitter}
@@ -342,21 +364,43 @@ When we quantify over structural permutations in this paper, it should be formal
   Let \( \alpha \) be a proper type index with model data, and suppose that \( \Tang_\alpha \) has a position function.
   We say that \( \alpha \) has \emph{typed near-litters} if there is a function \( \typed_\alpha : \NearLitter \to \TSet_\alpha \) such that
   \begin{itemize}
-    \item if \( \pi : \AllPerm_\alpha \) and \( N : \NearLitter \), then \( \pi(\typed_\alpha(N)) = \typed_\alpha(\pi_\bot(N)) \); and
+    \item if \( \rho : \AllPerm_\alpha \) and \( N : \NearLitter \), then \( \rho(\typed_\alpha(N)) = \typed_\alpha(\rho_\bot(N)) \); and
     \item if \( N \) is a near-litter and \( t \) is an \( \alpha \)-tangle such that \( \set(t) = \typed_\alpha(N) \), we have \( \iota(N) \leq \iota(t) \).
   \end{itemize}
   Objects of the form \( \typed_\alpha \) are called \emph{typed near-litters}.
 \end{definition}
 \begin{definition}[coherent data]
   \label{def:CoherentData}
-  \uses{def:TypedNearLitter,prop:Path.rec}
+  \uses{def:TypedNearLitter,prop:Path.rec,def:InflexiblePath}
   Let \( \alpha \) be a proper type index.
   Suppose that we have model data for all type indices \( \beta \leq \alpha \), position functions for \( \Tang_\beta \) for all \( \beta < \alpha \), and typed near-litters for all \( \beta < \alpha \).
   We say that the model data is \emph{coherent} below level \( \alpha \) if the following hold.
   \begin{itemize}
     \item For \( \gamma < \beta \leq \alpha \), there is a map \( \AllPerm_\beta \to \AllPerm_\gamma \) that commutes with the coercions from \( \AllPerm_{(-)} \) to \( \StrPerm_{(-)} \).
     We can use this map to define arbitrary derivatives of allowable permutations by \cref{prop:Path.rec}.
-    \item If \( (x, S) \) is a \( \beta \)-tangle for \( \beta < \alpha \), and \( y \) is an atom or near-litter\footnote{We might want to encapsulate atoms and near-litters somehow. We could make a typeclass, or write theorems in terms of the coproduct \( \Atom \oplus \NearLitter \).} that occurs in the range of \( S_A \), then \( \iota(y) < \iota(x, S) \).
-    \item TODO: An \( f \)-map condition.
+    \item If \( (x, S) \) is a \( \beta \)-tangle for \( \beta < \alpha \), and \( y \) is an atom or near-litter that occurs in the range of \( S_A \), then \( \iota(y) < \iota(x, S) \).
+    \item Let \( \beta \leq \alpha \), and let \( \gamma, \delta < \beta \) be distinct with \( \delta \) proper.
+    Let \( t : \Tang_\gamma \) and \( \rho : \AllPerm_\beta \).
+    Then
+    \[ (\rho_\delta)_\bot(f_{\gamma,\delta}(t)) = f_{\gamma,\delta}(\rho_\gamma(t)) \]
+    In particular, for every \( \beta \leq \alpha \), \( \beta \)-allowable permutation \( \rho \), and \( \beta \)-inflexible path \( I \), we obtain
+    \[ ((\rho_A)_\varepsilon)_\bot(f(t)) = f((\rho_A)_\delta(t)) \]
+    where subscripts of \( I \) are suppressed.
+    \item Suppose that \( \beta \leq \alpha \) and \( (\rho(\gamma))_{\gamma < \beta} \) is a collection of allowable permutations such that whenever \( \gamma, \delta < \beta \) are distinct, \( \delta \) is proper, and \( t : \Tang_\delta \), we have
+    \[ (\rho(\delta))_\bot(f_{\gamma,\delta}(t)) = f_{\gamma,\delta}(\rho(\gamma)(t)) \]
+    Then there is a \( \beta \)-allowable permutation \( \rho \) with \( \rho_\gamma = \rho(\gamma) \) for each \( \gamma < \beta \).
+    \item If \( \beta : \lambda \) and \( x : \TSet_\beta \), then for any \( \gamma < \beta \),
+    \[ U_\beta(x)(\gamma) \subseteq \ran U_\gamma \]
+    \item (extensionality) If \( \beta, \gamma : \lambda \) where \( \gamma < \beta \), the map \( U_\beta(-)(\gamma) : \TSet_\beta \to \Set (\StrSet_\gamma) \) is injective.
+    \item If \( \beta, \gamma : \lambda \) where \( \gamma < \beta \), for every \( x : \TSet_\gamma \) there is some \( y : \TSet_\beta \) such that \( U_\beta(y)(\gamma) = \{ x \} \).
+    We write \( \{ x \}_\beta \) for this object \( y \), which is uniquely defined by extensionality.
   \end{itemize}
+  Note that this structure contains data (the derivative maps for allowable permutations and the singleton operations), but the type is a subsingleton: any two inhabitants are propositionally equal.
 \end{definition}
+The strategy of our construction is as follows.
+\begin{itemize}
+  \item In \cref{c:construction}, we assume model data, position functions, and typed near-litters for all types \( \beta < \alpha \), and construct model data at level \( \alpha \).
+  \item In \cref{c:foa,c:counting}, we assume coherent data below level \( \alpha \) (along with the assumptions required for this definition to make sense) and prove that \( \#\TSet_\alpha = \#\mu \).
+  \item In \cref{c:induction}, we use the results of \cref{c:construction,c:foa,c:counting} to show that we can provide position functions and typed near-litters at level \( \alpha \).
+  We then show that these constructions may be iterated so that we may define all of the above structures at every proper type level.
+\end{itemize}
