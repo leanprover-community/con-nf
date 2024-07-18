@@ -92,7 +92,7 @@ def IH.tangleEquiv {α : Λ} (ih : IH α) :
 
 def IH.positionedTangles {α : Λ} (ih : IH α) :
     letI := ih.modelData
-    PositionedTangles α :=
+    Position (Tangle α) μ :=
   letI := ih.modelData
   ⟨⟨fun t => ih.pos (ih.tangleEquiv t),
     fun _ _ h => ih.tangleEquiv.injective (ih.pos.injective h)⟩⟩
@@ -337,13 +337,13 @@ theorem modelData_cast_support (α : Λ) (i₁ i₂ : ModelData α) (hi : i₁ =
   by subst hi; rfl
 
 theorem positionedTangles_cast_pos (α : Λ) (i₁ i₂ : ModelData α) (hi : i₁ = i₂)
-    (j₁ : letI := i₁; PositionedTangles α) (j₂ : letI := i₂; PositionedTangles α) (hj : HEq j₁ j₂)
+    (j₁ : letI := i₁; Position (Tangle α) μ) (j₂ : letI := i₂; Position (Tangle α) μ) (hj : HEq j₁ j₂)
     (t) :
     pos t = pos (cast (show (letI := i₁; Tangle α) = (letI := i₂; Tangle α) by rw [hi]) t) :=
   by subst hi; subst hj; rfl
 
 theorem typedObjects_cast_typedNearLitter (α : Λ) (i₁ i₂ : ModelData α) (hi : i₁ = i₂)
-    (j₁ : letI := i₁; PositionedTangles α) (j₂ : letI := i₂; PositionedTangles α) (hj : HEq j₁ j₂)
+    (j₁ : letI := i₁; Position (Tangle α) μ) (j₂ : letI := i₂; Position (Tangle α) μ) (hj : HEq j₁ j₂)
     (k₁ : letI := i₁; letI := j₁; TypedObjects α)
     (k₂ : letI := i₂; letI := j₂; TypedObjects α) (hk : HEq k₁ k₂) (N : NearLitter) :
     (letI := i₂; typedNearLitter N) =
@@ -352,7 +352,7 @@ theorem typedObjects_cast_typedNearLitter (α : Λ) (i₁ i₂ : ModelData α) (
 
 theorem fuzz_cast (β : TypeIndex) (γ : Λ) (hβγ : β ≠ γ)
     (i₁ i₂ : ModelData β) (hi : i₁ = i₂)
-    (j₁ : letI := i₁; PositionedTangles β) (j₂ : letI := i₂; PositionedTangles β) (hj : HEq j₁ j₂)
+    (j₁ : letI := i₁; Position (Tangle β) μ) (j₂ : letI := i₂; Position (Tangle β) μ) (hj : HEq j₁ j₂)
     (t) :
     (letI := i₁; letI := j₁; fuzz hβγ t) =
     (letI := i₂; letI := j₂; fuzz hβγ
@@ -712,7 +712,7 @@ theorem foaData_tangle_lt'_equiv_fuzz (α : Λ) (ihs : (β : Λ) → β < α →
     (letI : FOAData := buildStepFOAData α ihs; fuzz hβγ t) =
     (letI : ModelDataLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).modelData⟩
     letI : PositionedTanglesLt := ⟨fun β hβ => (ihs β (coe_lt_coe.mp hβ.elim)).positionedTangles⟩
-    letI : PositionedTangles β := PositionedTanglesLt.toPositionedTangles β
+    letI : Position (Tangle β) μ := PositionedTanglesLt.toPositionedTangles β
     fuzz hβγ (foaData_tangle_lt'_equiv α ihs β hβ t)) := by
   revert hβ hβγ
   refine WithBot.recBotCoe ?_ ?_ β

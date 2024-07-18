@@ -206,16 +206,6 @@ instance : (α : TypeIndex) → [ModelData α] → MulAction (Allowable α) (Tan
   | (α : Λ), _ => inferInstanceAs (MulAction (Allowable α) (TangleCoe α))
   | ⊥, _ => inferInstanceAs (MulAction (Allowable ⊥) Atom)
 
-/-- Provides a position function for `α`-tangles, giving each tangle a unique position `ν : μ`.
-The existence of this injection proves that there are at most `μ` tangles at level `α`, and
-therefore at most `μ` t-sets. Since `μ` has a well-ordering, this induces a well-ordering on
-`α`-tangles: to compare two tangles, simply compare their images under this map. -/
-class PositionedTangles (α : TypeIndex) [ModelData α] where
-  pos : Tangle α ↪ μ
-
-instance {α : TypeIndex} [ModelData α] [PositionedTangles α] : Position (Tangle α) μ where
-  pos := PositionedTangles.pos
-
 variable (α : Λ) [ModelData α]
 
 /-- Almost arbitrarily chosen position functions for atoms and near-litters. The only requirements
@@ -253,7 +243,7 @@ theorem lt_pos_symmDiff [BasePositions] (a : Atom) (N : NearLitter) (h : a ∈ l
 /-- Allows us to encode near-litters as `α`-tangles, together with the assertion that the position
 of typed near-litters is at least the position of the near-litter itself. This is used to prove that
 the alternative extension relation `↝` is well-founded. -/
-class TypedObjects [BasePositions] [PositionedTangles α] where
+class TypedObjects [BasePositions] [Position (Tangle α) μ] where
   /-- Encode a near-litter as an `α`-tangle. The resulting model element has a `⊥`-extension which
   contains only this near-litter. -/
   typedNearLitter : NearLitter ↪ TSet α
@@ -269,7 +259,7 @@ export TypedObjects (typedNearLitter pos_typedNearLitter)
 namespace Allowable
 
 variable {α}
-variable [BasePositions] [PositionedTangles α] [TypedObjects α]
+variable [BasePositions] [Position (Tangle α) μ] [TypedObjects α]
 
 /-- The action of allowable permutations on tangles commutes with the `typedNearLitter` function
 mapping near-litters to typed near-litters. This can be seen by representing tangles as codes. -/
@@ -281,7 +271,7 @@ theorem smul_typedNearLitter (ρ : Allowable α) (N : NearLitter) :
 end Allowable
 
 /-- The position function at level `⊥`, taken from the `BasePositions`. -/
-instance Bot.positionedTangles [BasePositions] : PositionedTangles ⊥ :=
+instance Bot.positionedTangles [BasePositions] : Position (Tangle ⊥) μ :=
   ⟨BasePositions.posAtom⟩
 
 /-- The identity equivalence between `⊥`-allowable permutations and base permutations.

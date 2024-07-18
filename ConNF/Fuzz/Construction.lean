@@ -111,7 +111,7 @@ The majority of this section is spent proving that the set of values to deny isn
 such that we could run out of available values for the function.
 -/
 
-variable [Params.{u}] [BasePositions] {β : TypeIndex} [ModelData β] [PositionedTangles β]
+variable [Params.{u}] [BasePositions] {β : TypeIndex} [ModelData β] [Position (Tangle β) μ]
 
 /-- The set of elements of `ν` that `fuzz _ t` cannot be. -/
 def fuzzDeny (t : Tangle β) : Set μ :=
@@ -187,8 +187,8 @@ theorem fuzz_γ (t : Tangle β) : (fuzz hβγ t).γ = γ :=
 
 section congr
 
-variable {β' : TypeIndex} {γ' : Λ} [ModelData β'] [PositionedTangles β']
-  [ModelData γ'] [PositionedTangles γ'] [TypedObjects γ']
+variable {β' : TypeIndex} {γ' : Λ} [ModelData β'] [Position (Tangle β') μ]
+  [ModelData γ'] [Position (Tangle γ') μ] [TypedObjects γ']
 
 theorem fuzz_congr_β {hβγ : (β : TypeIndex) ≠ γ} {hβγ' : (β' : TypeIndex) ≠ γ'}
   {t : Tangle β} {t' : Tangle β'} (h : fuzz hβγ t = fuzz hβγ' t') :

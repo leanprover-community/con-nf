@@ -39,11 +39,11 @@ instance ModelDataLt.toModelData [ModelDataLt] :
 /-- The `PositionedTangles` for each `β < α`. -/
 @[ext]
 class PositionedTanglesLt [ModelDataLt] where
-  data : ∀ β : Λ, [LtLevel β] → PositionedTangles β
+  data : ∀ β : Λ, [LtLevel β] → Position (Tangle β) μ
 
 noncomputable instance PositionedTanglesLt.toPositionedTangles
     [BasePositions] [ModelDataLt] [PositionedTanglesLt] :
-    ∀ β : TypeIndex, [LtLevel β] → PositionedTangles β
+    ∀ β : TypeIndex, [LtLevel β] → Position (Tangle β) μ
   | ⊥, _ => Bot.positionedTangles
   | (β : Λ), _ => PositionedTanglesLt.data β
 

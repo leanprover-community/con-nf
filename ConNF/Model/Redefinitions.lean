@@ -49,7 +49,7 @@ theorem constructionIH_eq (α : Λ) :
 instance modelData (α : Λ) : ModelData α :=
   (constructionIH α).modelData
 
-instance positionedTangles (α : Λ) : PositionedTangles α :=
+instance positionedTangles (α : Λ) : Position (Tangle α) μ :=
   (constructionIH α).positionedTangles
 
 instance typedObjects (α : Λ) : TypedObjects α :=
@@ -59,7 +59,7 @@ instance : ∀ β : TypeIndex, ModelData β
   | ⊥ => Bot.modelData
   | (β : Λ) => inferInstance
 
-instance : ∀ β : TypeIndex, PositionedTangles β
+instance : ∀ β : TypeIndex, Position (Tangle β) μ
   | ⊥ => Bot.positionedTangles
   | (β : Λ) => inferInstance
 
