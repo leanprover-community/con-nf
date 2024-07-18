@@ -31,8 +31,7 @@ This structure combines the following data:
 class FOAData where
   lowerModelData : ∀ β : Λ, [LeLevel β] → ModelData β
   lowerPositionedTangles : ∀ β : Λ, [LtLevel β] → PositionedTangles β
-  lowerTypedObjects : ∀ β : Λ, [LeLevel β] → TypedObjects β
-  lowerPositionedObjects : ∀ β : Λ, [LtLevel β] → PositionedObjects β
+  lowerTypedObjects : ∀ β : Λ, [LtLevel β] → TypedObjects β
 
 namespace FOAData
 
@@ -44,11 +43,8 @@ instance : ModelData β :=
 instance : PositionedTangles γ :=
   lowerPositionedTangles γ
 
-instance : TypedObjects β :=
-  lowerTypedObjects β
-
-instance : PositionedObjects γ :=
-  lowerPositionedObjects γ
+instance : TypedObjects γ :=
+  lowerTypedObjects γ
 
 instance leModelData : ∀ β : TypeIndex, [LeLevel β] → ModelData β
   | ⊥, _ => Bot.modelData

@@ -82,7 +82,7 @@ end ExtensionalSet
 
 open ExtensionalSet
 
-variable [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjectsLt]
+variable [PositionedTanglesLt] [TypedObjectsLt]
 
 /-- A *extensional set* is a collection of `β`-tangles for each lower level `β < α`, together with
 a preference for one of these extensions. -/

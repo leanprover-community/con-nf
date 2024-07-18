@@ -19,7 +19,6 @@ universe u
 namespace ConNF.Construction
 
 variable [Params.{u}] [Level] [BasePositions] [ModelDataLt] [PositionedTanglesLt] [TypedObjectsLt]
-  [PositionedObjectsLt]
 
 /-- The position of `t` must be greater than elements of this small set. Since it is small, it
 cannot be cofinal in `μ`. -/

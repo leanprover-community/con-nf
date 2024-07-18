@@ -55,9 +55,6 @@ instance positionedTangles (α : Λ) : PositionedTangles α :=
 instance typedObjects (α : Λ) : TypedObjects α :=
   (constructionIH α).typedObjects
 
-instance positionedObjects (α : Λ) : PositionedObjects α :=
-  (constructionIH α).positionedObjects
-
 instance : ∀ β : TypeIndex, ModelData β
   | ⊥ => Bot.modelData
   | (β : Λ) => inferInstance
@@ -69,7 +66,6 @@ instance : ∀ β : TypeIndex, PositionedTangles β
 instance [Level] : ModelDataLt := ⟨fun _ _ => inferInstance⟩
 instance [Level] : PositionedTanglesLt := ⟨fun _ _ => inferInstance⟩
 instance [Level] : TypedObjectsLt := fun _ _ => inferInstance
-instance [Level] : PositionedObjectsLt := fun _ _ => inferInstance
 
 theorem modelData_eq (α : Λ) :
     modelData α = (MainInduction.buildStep α
@@ -87,13 +83,6 @@ theorem typedObjects_heq (α : Λ) :
     HEq (typedObjects α) (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).typedObjects := by
   rw [typedObjects]
-  congr 1
-  rw [constructionIH_eq]
-
-theorem positionedObjects_heq (α : Λ) :
-    HEq (positionedObjects α) (MainInduction.buildStep α
-      (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).positionedObjects := by
-  unfold positionedObjects
   congr 1
   rw [constructionIH_eq]
 
@@ -201,7 +190,7 @@ theorem tSetEquiv_typedNearLitter (α : Λ) (N : NearLitter) :
     tSetEquiv α (typedNearLitter N) = (MainInduction.buildStep α
       (fun β _ => constructionIH β) (fun β _ => constructionIHProp β)).typedNearLitter N :=
   (MainInduction.typedObjects_cast_typedNearLitter
-    α _ _ (modelData_eq α) _ _ (typedObjects_heq α) N).symm
+    α _ _ (modelData_eq α) _ _ (positionedTangles_heq α) _ _ (typedObjects_heq α) N).symm
 
 def cons'Coe {α β : Λ} (hβ : (β : TypeIndex) < α) :
     Allowable α → Allowable β :=

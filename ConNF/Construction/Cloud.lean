@@ -45,7 +45,7 @@ open Code
 
 section Cloud
 
-variable [ModelDataLt] [PositionedTanglesLt] [TypedObjectsLt] [PositionedObjectsLt]
+variable [ModelDataLt] [PositionedTanglesLt] [TypedObjectsLt]
   {γ : TypeIndex} [LtLevel γ] {β : Λ} [LtLevel β]
   (hγβ : γ ≠ β)
 
@@ -209,7 +209,7 @@ theorem extension_ne (hβγ : β ≠ γ) : extension s γ = cloud hβγ s :=
 
 end Extension
 
-variable [TypedObjectsLt] [PositionedObjectsLt]
+variable [TypedObjectsLt]
   (γ : TypeIndex) [LtLevel γ] (β : Λ) [LtLevel β] (c d : Code)
 
 /-- The `cloud` map, phrased as a function on `α`-codes, but if the code's level matches `β`,

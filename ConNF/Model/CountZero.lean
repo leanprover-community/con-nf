@@ -18,9 +18,8 @@ local instance : Level := ⟨0⟩
 theorem zeroModelData_subsingleton
     (i₁ j₁ : ModelDataLt)
     (i₂ : letI := i₁; PositionedTanglesLt) (j₂ : letI := j₁; PositionedTanglesLt)
-    (i₃ : letI := i₁; TypedObjectsLt) (j₃ : letI := j₁; TypedObjectsLt)
-    (i₄ : letI := i₁; PositionedObjectsLt) (j₄ : letI := j₁; PositionedObjectsLt) :
-    (letI := i₁; letI := i₂; letI := i₃; letI := i₄
+    (i₃ : letI := i₁; letI := i₂; TypedObjectsLt) (j₃ : letI := j₁; letI := j₂; TypedObjectsLt) :
+    (letI := i₁; letI := i₂; letI := i₃
     {
       TSet := NewTSet
       Allowable := NewAllowable
@@ -33,7 +32,7 @@ theorem zeroModelData_subsingleton
       toStructSet := ⟨NewTSet.toStructSet, NewTSet.toStructSet_injective⟩
       toStructSet_smul := NewTSet.toStructSet_smul
     } : ModelData (0 : Λ)) =
-    (letI := j₁; letI := j₂; letI := j₃; letI := j₄
+    (letI := j₁; letI := j₂; letI := j₃
     {
       TSet := NewTSet
       Allowable := NewAllowable
@@ -60,10 +59,6 @@ theorem zeroModelData_subsingleton
   · funext β iβ
     cases (Params.Λ_zero_le β).not_lt (coe_lt_coe.mp iβ.elim)
   cases this
-  have : i₄ = j₄
-  · funext β iβ
-    cases (Params.Λ_zero_le β).not_lt (coe_lt_coe.mp iβ.elim)
-  cases this
   rfl
 
 local instance : ModelDataLt :=
@@ -71,8 +66,6 @@ local instance : ModelDataLt :=
 local instance : PositionedTanglesLt :=
   ⟨fun β i => ((Params.Λ_zero_le β).not_lt (coe_lt_coe.mp i.elim)).elim⟩
 local instance : TypedObjectsLt :=
-  fun β i => ((Params.Λ_zero_le β).not_lt (coe_lt_coe.mp i.elim)).elim
-local instance : PositionedObjectsLt :=
   fun β i => ((Params.Λ_zero_le β).not_lt (coe_lt_coe.mp i.elim)).elim
 
 local instance zeroModelData : ModelData (0 : Λ) :=
@@ -87,12 +80,6 @@ local instance zeroModelData : ModelData (0 : Λ) :=
       exact ⟨S, fun ρ hρ => Subtype.ext (hS ρ hρ)⟩
     toStructSet := ⟨NewTSet.toStructSet, NewTSet.toStructSet_injective⟩
     toStructSet_smul := NewTSet.toStructSet_smul
-  }
-
-local instance zeroTypedObjects : TypedObjects (0 : Λ) :=
-  {
-    typedNearLitter := ⟨newTypedNearLitter, newTypedNearLitter_injective⟩
-    smul_typedNearLitter := fun ρ N => NewAllowable.smul_newTypedNearLitter N ρ
   }
 
 def zeroPath : ExtendedIndex 0 :=
@@ -157,8 +144,7 @@ section FOA
 local instance : FOAData where
   lowerModelData β _ := eq_zero_of_leLevel β ▸ zeroModelData
   lowerPositionedTangles β _ := (not_ltLevel β).elim
-  lowerTypedObjects β _ := eq_zero_of_leLevel β ▸ zeroTypedObjects
-  lowerPositionedObjects β _ := (not_ltLevel β).elim
+  lowerTypedObjects β _ := (not_ltLevel β).elim
 
 local instance : FOAAssumptions where
   allowableCons {β _ γ _} hγβ :=

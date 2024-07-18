@@ -39,7 +39,7 @@ universe u
 namespace ConNF
 
 variable [Params.{u}] [Level] [BasePositions] {β : TypeIndex} [LtLevel β] {γ : Λ} [LtLevel γ]
-  [ModelDataLt] [TypedObjectsLt] [PositionedTanglesLt] [PositionedObjectsLt]
+  [ModelDataLt] [PositionedTanglesLt] [TypedObjectsLt]
 
 namespace Code
 

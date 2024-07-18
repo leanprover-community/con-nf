@@ -55,14 +55,10 @@ theorem TSet.code_injective {β : Λ} [LeLevel β] : Function.Injective (TSet.co
   simp only [← hc, h₁, Enumeration.smul_f] at this
   exact this.symm
 
-theorem mk_tSet (β : Λ) [LeLevel β] (hzero : #(CodingFunction 0) < #μ) : #(TSet β) = #μ := by
-  refine le_antisymm ?_ ?_
-  · refine (mk_le_of_injective TSet.code_injective).trans ?_
-    simp only [mk_prod, lift_id, mk_support]
-    exact Cardinal.mul_le_of_le (mk_codingFunction β hzero).le le_rfl
-      Params.μ_isStrongLimit.isLimit.aleph0_le
-  · have := mk_le_of_injective (typedNearLitter (α := β)).injective
-    simp only [mk_nearLitter] at this
-    exact this
+theorem mk_tSet (β : Λ) [LeLevel β] (hzero : #(CodingFunction 0) < #μ) : #(TSet β) ≤ #μ := by
+  refine (mk_le_of_injective TSet.code_injective).trans ?_
+  simp only [mk_prod, lift_id, mk_support]
+  exact Cardinal.mul_le_of_le (mk_codingFunction β hzero).le le_rfl
+    Params.μ_isStrongLimit.isLimit.aleph0_le
 
 end ConNF

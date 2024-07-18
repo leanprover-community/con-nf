@@ -48,12 +48,8 @@ noncomputable instance PositionedTanglesLt.toPositionedTangles
   | (β : Λ), _ => PositionedTanglesLt.data β
 
 /-- The `TypedObjects` for each `β < α`. -/
-abbrev TypedObjectsLt [ModelDataLt] :=
+abbrev TypedObjectsLt [BasePositions] [ModelDataLt] [PositionedTanglesLt] :=
   ∀ β : Λ, [LtLevel β] → TypedObjects β
-
-/-- The `PositionedObjects` for each `β < α`. -/
-abbrev PositionedObjectsLt [BasePositions] [ModelDataLt] [PositionedTanglesLt] [TypedObjectsLt] :=
-  ∀ β : Λ, [LtLevel β] → PositionedObjects β
 
 /-! We have to give the following things different names in the two places we define them:
 here, and in the FOA hypothesis file. -/

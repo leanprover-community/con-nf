@@ -218,19 +218,6 @@ instance {α : TypeIndex} [ModelData α] [PositionedTangles α] : Position (Tang
 
 variable (α : Λ) [ModelData α]
 
-/-- Allows us to encode near-litters as `α`-tangles. These maps are expected to cohere
-with the conditions given in `BasePositions`, but this requirement is expressed later. -/
-class TypedObjects where
-  /-- Encode a near-litter as an `α`-tangle. The resulting model element has a `⊥`-extension which
-  contains only this near-litter. -/
-  typedNearLitter : NearLitter ↪ TSet α
-  smul_typedNearLitter :
-    ∀ (ρ : Allowable α) (N : NearLitter),
-    ρ • typedNearLitter N =
-    typedNearLitter ((Allowable.toStructPerm ρ) (Quiver.Hom.toPath <| bot_lt_coe α) • N)
-
-export TypedObjects (typedNearLitter)
-
 /-- Almost arbitrarily chosen position functions for atoms and near-litters. The only requirements
 they satisfy are included in this class. These requirements are later used to prove that the
 `Constrains` relation is well-founded. -/
@@ -263,19 +250,26 @@ theorem lt_pos_symmDiff [BasePositions] (a : Atom) (N : NearLitter) (h : a ∈ l
     pos a < pos N :=
   BasePositions.lt_pos_symmDiff a N h
 
-/-- The assertion that the position of typed near-litters is at least the position of the
-near-litter itself. This is used to prove that the alternative extension relation `↝` is
-well-founded. -/
-class PositionedObjects [BasePositions] [PositionedTangles α] [TypedObjects α] : Prop where
+/-- Allows us to encode near-litters as `α`-tangles, together with the assertion that the position
+of typed near-litters is at least the position of the near-litter itself. This is used to prove that
+the alternative extension relation `↝` is well-founded. -/
+class TypedObjects [BasePositions] [PositionedTangles α] where
+  /-- Encode a near-litter as an `α`-tangle. The resulting model element has a `⊥`-extension which
+  contains only this near-litter. -/
+  typedNearLitter : NearLitter ↪ TSet α
+  smul_typedNearLitter :
+    ∀ (ρ : Allowable α) (N : NearLitter),
+    ρ • typedNearLitter N =
+    typedNearLitter ((Allowable.toStructPerm ρ) (Quiver.Hom.toPath <| bot_lt_coe α) • N)
   pos_typedNearLitter (N : NearLitter) (t : Tangle α) :
     t.set = typedNearLitter N → pos N ≤ pos t
 
-export PositionedObjects (pos_typedNearLitter)
+export TypedObjects (typedNearLitter pos_typedNearLitter)
 
 namespace Allowable
 
 variable {α}
-variable [TypedObjects α]
+variable [BasePositions] [PositionedTangles α] [TypedObjects α]
 
 /-- The action of allowable permutations on tangles commutes with the `typedNearLitter` function
 mapping near-litters to typed near-litters. This can be seen by representing tangles as codes. -/

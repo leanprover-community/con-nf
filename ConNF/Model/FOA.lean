@@ -26,7 +26,6 @@ local instance : FOAData where
   lowerModelData := fun _ _ => inferInstance
   lowerPositionedTangles := fun _ _ => inferInstance
   lowerTypedObjects := fun _ _ => inferInstance
-  lowerPositionedObjects := fun _ _ => inferInstance
 
 /-- `Allowable β` is defeq to `foaAllowable β` for every `β : TypeIndex`.
 However, it's not the case that `Allowable` is defeq to `foaAllowable`, because we need
