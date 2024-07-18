@@ -100,7 +100,7 @@ We will now establish the hierarchy of types that our model will be built inside
 \begin{definition}[path]
   \label{def:Path}
   \uses{def:TypeIndex}
-  If \( \alpha, \beta \) are type indices, then a \emph{path} \( \alpha \tpath \beta \) is a nonempty finite subset of \( \lambda^\bot \) with maximal element \( \alpha \) and minimal element \( \beta \).\footnote{In previous versions, we used ordered lists (more precisely, a quiver structure) to represent paths. This had the effect that editing paths at the bottom was much easier than editing paths at the top. In this implementation, we are making the decision to put both types of edit on equal footing (and neither will definitionally reduce).}
+  If \( \alpha, \beta \) are type indices, then a \emph{path} \( \alpha \tpath \beta \) is a nonempty finite subset of \( \lambda^\bot \) with maximal element \( \alpha \) and minimal element \( \beta \).\footnote{In previous versions, we used ordered lists (more precisely, a quiver structure) to represent paths. This had the effect that editing paths at the bottom was much easier than editing paths at the top. In this implementation, we are making the decision to put both types of edit on equal footing (and neither will definitionally reduce). TODO: It might be cleaner to still use a cons-list format but encapsulate it lots.}
   A path \( \alpha \tpath \bot \) is called an \emph{\( \alpha \)-extended index}.
   We write \( \nil(\alpha) \) for the path \( \{ \alpha \} : \alpha \tpath \alpha \).
   If \( h \) is a proof of \( \beta < \alpha \), we write \( \single(h) \) for the path \( \{ \alpha, \beta \} : \alpha \tpath \beta \).
@@ -179,13 +179,13 @@ We will also use \( x_\gamma \) to denote the derivative \( x_h \) where \( h \)
 \end{definition}
 \begin{definition}[structural permutation]
   \label{def:StrPerm}
-  \uses{def:Tree}
+  \uses{def:BasePerm,def:Tree}
   Let \( \alpha \) be a type index.
-  Then an \emph{\( \alpha \)-structural permutation} is an \( \alpha \)-tree of base permutations.
-  The type of \( \alpha \)-structural permutations is written \( \StrPerm_\alpha \).
+  Then an \emph{\( \alpha \)-structural permutation} (or just \emph{\( \alpha \)-permutation}) is an \( \alpha \)-tree of base permutations.
+  The type of \( \alpha \)-permutations is written \( \StrPerm_\alpha \).
 \end{definition}
-As an implementation detail, we create a typeclass \texttt{StrPermClass}\( _\alpha \) for permutations that `act like' \( \alpha \)-structural permutations: they have a group structure and a canonical group homomorphism to \( \StrPerm_\alpha \).
-When we quantify over structural permutations in this paper, it should be formalised using an additional quantification over \texttt{StrPermClass}\( _\alpha \).
+As an implementation detail, we create a typeclass \( \texttt{StrPermClass}_\alpha \) for permutations that `act like' \( \alpha \)-permutations: they have a group structure and a canonical group embedding into \( \StrPerm_\alpha \).
+When we quantify over structural permutations in this paper, it should be formalised using an additional quantification over \( \texttt{StrPermClass}_\alpha \).
 \begin{definition}[enumeration]
   \label{def:Enumeration}
   \uses{def:Small}
@@ -221,15 +221,19 @@ When we quantify over structural permutations in this paper, it should be formal
   A \emph{base support} is a pair \( S = (S^\Atom, S^\NearLitter) \) where \( S^\Atom \) is an enumeration of atoms and \( S^\NearLitter \) is an enumeration of near-litters.
   There are precisely \( \#\mu \) base supports.
 
-  A \emph{\( \beta \)-structural support} is a \( \beta \)-tree of base supports.
+  A \emph{\( \beta \)-structural support} (or just \emph{\( \beta \)-support}) is a \( \beta \)-tree of base supports.
+  The type of \( \beta \)-supports is writte \( \StrSupp_\beta \).
   There are precisely \( \#\mu \) structural supports for any type index \( \beta \).
-  Following \cref{def:Tree}, structural supports have derivatives, structural permutations act on structural supports, and there is a group action of \( \beta \)-structural permutations on \( \beta \)-structural supports.
-  If \( S \) is a \( \beta \)-structural support and \( A : \alpha \tpath \beta \), the coderivative \( S^A \) is the \( \alpha \)-support given by
+  Following \cref{def:Tree}, structural supports have derivatives, structural permutations act on structural supports, and there is a group action of \( \beta \)-permutations on \( \beta \)-supports.
+  If \( S \) is a \( \beta \)-support and \( A : \alpha \tpath \beta \), the coderivative \( S^A \) is the \( \alpha \)-support given by
   \[ (S^A)_B = \begin{cases}
     S_C & \text{if } B = A_C \text{ for some } C \\
     \varnothing & \text{otherwise}
   \end{cases} \]
   Thus \( (S^A)_A = S \).
+
+  Let \( \tau \) be a type, and let \( G \) be a \( \texttt{StrPermClass}_\beta \)-group that acts on \( \tau \).
+  We say that \( S \) \emph{supports} \( x : \tau \) under the action of \( G \) if whenever \( \pi : G \) fixes \( S \), it also fixes \( x \).
 \end{definition}
 \begin{definition}[structural set]
   \label{def:StrSet}
@@ -240,9 +244,119 @@ When we quantify over structural permutations in this paper, it should be formal
     \item \( \StrSet_\alpha \coloneq \prod_{\beta : \lambda^\bot} \beta < \alpha \to \StrSet_\beta \) where \( \alpha : \lambda \).
   \end{itemize}
   These equalities will in fact only be equivalences in the formalisation.
-  We define the action of \( \alpha \)-structural permutations (more precisely, inhabitants of some type with a \texttt{StrPermClass}\( _\alpha \) instance) on \( \alpha \)-structural sets by well-founded recursion.
+  We define the action of \( \alpha \)-permutations (more precisely, inhabitants of some type with a \( \texttt{StrPermClass}_\alpha \) instance) on \( \alpha \)-structural sets by well-founded recursion.
   \begin{itemize}
     \item \( \pi(x) = \pi_{\nil(\bot)}(x) \) if \( \alpha \equiv \bot \);
     \item \( \pi(x) = (\beta, h \mapsto \pi_h(x(\beta, h))) \) if \( \alpha : \lambda \).
+  \end{itemize}
+\end{definition}
+
+\section{Position functions}
+\begin{definition}[position function]
+  \label{def:Position}
+  \uses{def:Params}
+  Let \( \tau \) be a type.
+  A \emph{position function} for \( \tau \) is an injection \( \iota : \tau \to \mu \).
+  This is a typeclass.
+\end{definition}
+\begin{proposition}[injective functions from denied sets]
+  \label{prop:funOfDeny}
+  \uses{def:Params}
+  Let \( \tau \) be a type such that \( \#\tau \leq \#\mu \).
+  Let \( D : \tau \to \Set(\mu) \) be a function such that for each \( x : \tau \), the set \( D(x) \), called the \emph{denied set} of \( x \), has size less than \( \cof(\ord(\#\mu)) \).
+  Then there is an injective function \( f : \tau \to \mu \) such that if \( \nu \in D(x) \), then \( \nu < f(x) \).
+\end{proposition}
+\begin{proof}
+  Pick a well-ordering \( \prec \) of \( \tau \) of length at most \( \ord(\#\mu) \).
+  Define \( f \) by well-founded recursion on \( \prec \).
+  Suppose that we have already defined \( f \) for all \( y \prec x \).
+  Then let
+  \[ X = \{ f(y) \mid y \prec x \} \cup D(x) \]
+  This set has size less than \( \cof(\ord(\#\mu)) \), so it is not cofinal in \( \mu \).
+  So there is some \( \nu : \mu \) such that \( \forall \nu' \in X,\, \nu > \nu' \).
+  Set \( f(x) = \nu \).
+\end{proof}
+\begin{proposition}[base positions]
+  \label{prop:BasePositions}
+  \uses{def:Position}
+  There are position functions on \( \Atom, \NearLitter \) that are jointly injective and satisfy
+  \begin{itemize}
+    \item \( \iota(\NL(a^\circ)) < \iota(a) \) for every atom \( a \);
+    \item \( \iota(\NL(N^\circ)) \leq \iota(N) \) for every near-litter \( N \);
+    \item \( \iota(a) < \iota(N) \) for every near-litter \( N \) and atom \( a \in N \symmdiff \LS(N^\circ) \).\footnote{TODO: Make syntax for \( N \symmdiff \LS(N^\circ) \).}
+  \end{itemize}
+  We register these position functions as instances for use in typeclass inference.
+  We also define \( \iota(L) = \iota(\NL(L)) \) for litters.
+\end{proposition}
+\begin{proof}
+  \uses{prop:funOfDeny}
+  First, establish an equivalence \( f_\Litter : \Litter \simeq \mu \).
+  Use \cref{prop:funOfDeny} to obtain an injective map \( f_\Atom : \NearLitter \to \mu \) such that \( f_\Litter(a^\circ) < f_\Atom(a) \) for each atom \( a \).
+  Now use \cref{prop:funOfDeny} again to obtain an injective map \( f_\NearLitter : \NearLitter \to \mu \) such that
+  \[ f_\Litter(N^\circ) < f_\NearLitter(N);\quad f_\Atom(a) < f_\NearLitter(N) \text{ for } a \in N \symmdiff \LS(N^\circ) \]
+  Endow \( 3 \times \mu \) with its lexicographic order, of order type \( \ord(\#\mu) \), giving an order isomorphism \( e : 3 \times \mu \simeq \mu \).
+  Finally, we define
+  \[ \iota(a) = e(1, f_\Atom(a));\quad \iota(N) = \begin{cases}
+    e(0, f_\Litter(N^\circ)) & \text{if } N = \NL(N^\circ) \\
+    e(2, f_\NearLitter(N)) & \text{otherwise}
+  \end{cases} \]
+\end{proof}
+
+\section{Hypotheses of the recursion}
+\begin{definition}[model data]
+  \label{def:ModelData}
+  \uses{def:StrSupport,def:StrSet}
+  Let \( \alpha \) be a type index.
+  \emph{Model data} at type \( \alpha \) consists of:
+  \begin{itemize}
+    \item a \( \TSet_\alpha \) called the type of \emph{tangled sets} or \emph{t-sets}, which will be our type of model elements at level \( \alpha \), with an embedding \( U_\alpha : \TSet_\alpha \to \StrSet_\alpha \);
+    \item a group \( \AllPerm_\alpha \) called the type of \emph{allowable permutations}, with a \( \texttt{StrPermClass}_\alpha \) instance and a specified action on \( \TSet_\alpha \),
+  \end{itemize}
+  such that
+  \begin{itemize}
+    \item if \( \pi : \AllPerm_\alpha \) and \( x : \TSet_\alpha \), then \( \pi(U_\alpha(x)) = U_\alpha(\pi(x)) \);
+    \item every t-set of type \( \alpha \) has an \( \alpha \)-support (\cref{def:StrSupport}) for its action under the \( \alpha \)-allowable permutations;
+  \end{itemize}
+\end{definition}
+\begin{definition}[tangle]
+  \label{def:Tangle}
+  \uses{def:ModelData}
+  Let \( \alpha \) be a type index with model data.
+  The type \( \Tang_\alpha \) of \emph{\( \alpha \)-tangles}, as well as the operations \( \set : \Tang_\alpha \to \TSet_\alpha \) and \( \supp : \Tang_\alpha \to \StrSupp_\alpha \) are defined by cases.
+  \begin{itemize}
+    \item If \( \alpha : \lambda \), an \( \alpha \)-tangle is a pair \( t = (x, S) \) where \( x \) is a tangled set of type \( \alpha \) and \( S \) is a support for \( x \).
+    We define \( \set(t) = x \) and \( \supp(t) = S \).
+    \item A \( \bot \)-tangle is a t-set \( x : \TSet_\bot \).\footnote{This is not the same as an atom: given arbitrary model data at type \( \bot \), we have no way of knowing if its \( \TSet \) is the same as \( \Atom \), all that we know is that \( \TSet_\bot \) embeds into \( \Atom \).}
+    We define \( \set(x) = x \), and make \( \supp(x) \) be the \( \bot \)-support corresponding to the base support \( (1, f) \) where \( (0, a) \in f \) and \( a \) is the atom corresponding to the type-\( \bot \) t-set \( U_\bot(x)\).
+  \end{itemize}
+  Allowable permutations \( \pi \) act on tangles \( t \) in the following way.
+  \begin{itemize}
+    \item If \( \alpha : \lambda \), then \( \pi((x, S)) = (\pi(x), \pi(S)) \).
+    \item If \( \alpha \equiv \bot \), then \( \pi(x) \) is already defined.
+  \end{itemize}
+  In each case, \( \supp(t) \) supports \( t \) for its action under the allowable permutations.
+\end{definition}
+\begin{definition}[typed near-litter]
+  \label{def:TypedNearLitter}
+  \uses{def:ModelData,def:Tangle,prop:BasePositions}
+  Let \( \alpha \) be a proper type index with model data, and suppose that \( \Tang_\alpha \) has a position function.
+  We say that \( \alpha \) has \emph{typed near-litters} if there is a function \( \typed_\alpha : \NearLitter \to \TSet_\alpha \) such that
+  \begin{itemize}
+    \item if \( \pi : \AllPerm_\alpha \) and \( N : \NearLitter \), then \( \pi(\typed_\alpha(N)) = \typed_\alpha(\pi_\bot(N)) \); and
+    \item if \( N \) is a near-litter and \( t \) is an \( \alpha \)-tangle such that \( \set(t) = \typed_\alpha(N) \), we have \( \iota(N) \leq \iota(t) \).
+  \end{itemize}
+  Objects of the form \( \typed_\alpha \) are called \emph{typed near-litters}.
+\end{definition}
+\begin{definition}[coherent data]
+  \label{def:CoherentData}
+  \uses{def:TypedNearLitter,prop:Path.rec}
+  Let \( \alpha \) be a proper type index.
+  Suppose that we have model data for all type indices \( \beta \leq \alpha \), position functions for \( \Tang_\beta \) for all \( \beta < \alpha \), and typed near-litters for all \( \beta < \alpha \).
+  We say that the model data is \emph{coherent} below level \( \alpha \) if the following hold.
+  \begin{itemize}
+    \item For \( \gamma < \beta \leq \alpha \), there is a map \( \AllPerm_\beta \to \AllPerm_\gamma \) that commutes with the coercions from \( \AllPerm_{(-)} \) to \( \StrPerm_{(-)} \).
+    We can use this map to define arbitrary derivatives of allowable permutations by \cref{prop:Path.rec}.
+    \item If \( (x, S) \) is a \( \beta \)-tangle for \( \beta < \alpha \), and \( y \) is an atom or near-litter\footnote{We might want to encapsulate atoms and near-litters somehow. We could make a typeclass, or write theorems in terms of the coproduct \( \Atom \oplus \NearLitter \).} that occurs in the range of \( S_A \), then \( \iota(y) < \iota(x, S) \).
+    \item TODO: An \( f \)-map condition.
   \end{itemize}
 \end{definition}
