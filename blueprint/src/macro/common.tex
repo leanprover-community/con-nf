@@ -8,6 +8,13 @@
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{definition}[theorem]{Definition}
 
+% Environments that don't add nodes to the blueprint.
+\newtheorem{theorem-no-bp}[theorem]{Theorem}
+\newtheorem{proposition-no-bp}[theorem]{Proposition}
+\newtheorem{lemma-no-bp}[theorem]{Lemma}
+\newtheorem{corollary-no-bp}[theorem]{Corollary}
+\newtheorem{definition-no-bp}[theorem]{Definition}
+
 \theoremstyle{remark}
 \newtheorem{remark}[theorem]{Remark}
 \newtheorem{remarks}[theorem]{Remarks}
@@ -22,7 +29,33 @@
 \newcommand{\Con}{\newoperator{Con}}
 \newcommand{\ttype}{\newoperator{type}}
 \newcommand{\mquote}[1]{\ensuremath{\text{‘}#1\text{’}}}
+\newcommand{\ot}{\newoperator{ot}}
+\newcommand{\ord}{\newoperator{ord}}
+\newcommand{\cof}{\newoperator{cof}}
+\newcommand{\dom}{\newoperator{dom}}
+\newcommand{\ran}{\newoperator{ran}}
+\newcommand{\Set}{\newoperator{Set}}
+
+\newcommand{\StrSet}{\mathsf{StrSet}}
+\newcommand{\StrPerm}{\mathsf{StrPerm}}
 
 \newcommand{\NF}{\ensuremath{\mathsf{NF}}}
 \newcommand{\TTT}{\ensuremath{\mathsf{TTT}}}
 \newcommand{\TST}{\ensuremath{\mathsf{TST}}}
+
+\newcommand{\Ord}{\mathsf{Ord}}
+\newcommand{\Card}{\mathsf{Card}}
+\newcommand{\Prop}{\mathsf{Prop}}
+\newcommand{\Type}{\mathsf{Type}}
+\newcommand{\Sort}{\mathsf{Sort}}
+
+\newcommand{\Atom}{{\mathcal A}}
+\newcommand{\Litter}{{\mathcal L}}
+\newcommand{\NearLitter}{{\mathcal N}}
+\newcommand{\NL}{\newoperator{NL}}
+\newcommand{\LS}{\newoperator{LS}}
+
+\newcommand{\near}{\mathrel{\overset{N}{\sim}}}
+\newcommand{\tpath}{\rightsquigarrow} % "type path"
+\newcommand{\single}{\newoperator{single}}
+\newcommand{\nil}{\newoperator{nil}}

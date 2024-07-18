@@ -1,0 +1,20 @@
+\section{Cardinal arithmetic}
+
+\begin{lemma-no-bp}[mathlib]
+  \label{prop:mk_subset_mk_lt_cof}
+  Let \( \#\mu \) be a strong limit cardinal.
+  Then there are precisely \( \#\mu \)-many subsets of \( \mu \) of size strictly less than \( \cof(\ord(\#\mu)) \).
+\end{lemma-no-bp}
+\begin{proof}
+  Endow \( \mu \) with its initial well-ordering.
+  Each such subset is bounded in \( \mu \) with respect to this well-ordering as its size is less than \( \cof(\ord(\#\mu)) \).
+  So it suffices to prove there are precisely \( \#\mu \)-many bounded subsets of \( \mu \).
+  \begin{align*}
+    \#\{ s : \Set \mu \mid \exists \nu : \mu,\, \forall x \in s,\, x < \nu \}
+    &= \#\bigcup_{\nu : \mu} \{ s : \Set \mu \mid \forall x \in s,\, x < \nu \} \\
+    &\leq \sum_{\nu : \mu} \#\{ s : \Set \mu \mid \forall x \in s,\, x < \nu \} \\
+    &= \sum_{\nu : \mu} \#\{ s : \Set \{ x : \mu \mid x < \nu \}\} \\
+    &= \sum_{\nu : \mu} \underbrace{2^{\#\{ x : \mu \mid x < \nu \}}}_{<\mu} \\
+    &\leq \mu
+  \end{align*}
+\end{proof}
