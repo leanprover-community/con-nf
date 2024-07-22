@@ -1,3 +1,22 @@
+\section{Relations}
+
+\begin{definition-no-bp}
+  \label{def:coinj_cosurj}
+  Let \( R : \sigma \to \tau \to Prop \).
+  We say that \( R \) is
+  \begin{itemize}
+    \item \emph{injective}, if \( s_1 \mathrel{R} t, s_2 \mathrel{R} t \) imply \( s_1 = s_2 \);
+    \item \emph{surjective}, if for every \( t : \tau \), there is some \( s : \sigma \) such that \( s \mathrel{R} t \);
+    \item \emph{coinjective}, if \( s \mathrel{R} t_1, s \mathrel{R} t_2 \) imply \( t_1 = t_2 \);
+    \item \emph{cosurjective}, if for every \( s : \sigma \), there is some \( t : \tau \) such that \( s \mathrel{R} t \);
+    \item \emph{functional}, if \( R \) is coinjective and cosurjective, or equivalently, for every \( s : \sigma \) there is exactly one \( t : \tau \) such that \( s \mathrel{R} t \);
+    \item \emph{cofunctional}, if \( R \) is injective and surjective, or equivalently, for every \( t : \tau \) there is exactly one \( s : \sigma \) such that \( s \mathrel{R} t \);
+    \item \emph{one-to-one}, if \( R \) is injective and coinjective;
+    \item \emph{bijective}, if \( R \) is functional and cofunctional.
+  \end{itemize}
+  These definitions are from \url{https://www.kylem.net/math/relations.html}, and most of these are in mathlib under \texttt{Mathlib.Logic.Relator}.
+\end{definition-no-bp}
+
 \section{Cardinal arithmetic}
 
 \begin{lemma-no-bp}[mathlib]

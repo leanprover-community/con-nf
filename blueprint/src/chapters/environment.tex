@@ -190,7 +190,7 @@ When we quantify over structural permutations in this paper, it should be formal
   \label{def:Enumeration}
   \uses{def:Small}
   Let \( \tau \) be a type.
-  An \emph{enumeration} of \( \tau \) is a pair \( E = (i, f) \) where \( i : \kappa \) and \( f \) is a partial function \( \kappa \to \tau \), such that all domain elements of \( f \) are strictly less than \( i \).\footnote{This should be encoded as a coinjective relation \( \kappa \to \tau \to \Prop \).}
+  An \emph{enumeration} of \( \tau \) is a pair \( E = (i, f) \) where \( i : \kappa \) and \( f \) is a partial function \( \kappa \to \tau \), such that all domain elements of \( f \) are strictly less than \( i \).\footnote{This should be encoded as a coinjective relation \( \kappa \to \tau \to \Prop \); see \cref{def:coinj_cosurj}.}
   If \( x : \tau \), we write \( x \in E \) for \( x \in \ran f \).
   The set \( \{ y \mid y \in E \} \), which we may also loosely call \( E \), is small.
   We will write \( \varnothing \) for the empty enumeration \( (0, \varnothing) \).
@@ -222,7 +222,7 @@ When we quantify over structural permutations in this paper, it should be formal
   There are precisely \( \#\mu \) base supports.
 
   A \emph{\( \beta \)-structural support} (or just \emph{\( \beta \)-support}) is a \( \beta \)-tree of base supports.
-  The type of \( \beta \)-supports is writte \( \StrSupp_\beta \).
+  The type of \( \beta \)-supports is written \( \StrSupp_\beta \).
   There are precisely \( \#\mu \) structural supports for any type index \( \beta \).
   Following \cref{def:Tree}, structural supports have derivatives, structural permutations act on structural supports, and there is a group action of \( \beta \)-permutations on \( \beta \)-supports.
   If \( S \) is a \( \beta \)-support and \( A : \alpha \tpath \beta \), the coderivative \( S^A \) is the \( \alpha \)-support given by
@@ -322,19 +322,11 @@ When we quantify over structural permutations in this paper, it should be formal
   \label{def:Tangle}
   \uses{def:ModelData}
   Let \( \alpha \) be a type index with model data.
-  The type \( \Tang_\alpha \) of \emph{\( \alpha \)-tangles}, as well as the operations \( \set : \Tang_\alpha \to \TSet_\alpha \) and \( \supp : \Tang_\alpha \to \StrSupp_\alpha \) are defined by cases.
-  \begin{itemize}
-    \item If \( \alpha : \lambda \), an \( \alpha \)-tangle is a pair \( t = (x, S) \) where \( x \) is a tangled set of type \( \alpha \) and \( S \) is a support for \( x \).
-    We define \( \set(t) = x \) and \( \supp(t) = S \).
-    \item A \( \bot \)-tangle is a t-set \( x : \TSet_\bot \).\footnote{This is not the same as an atom: given arbitrary model data at type \( \bot \), we have no way of knowing if its \( \TSet \) is the same as \( \Atom \), all that we know is that \( \TSet_\bot \) embeds into \( \Atom \).}
-    We define \( \set(x) = x \), and make \( \supp(x) \) be the \( \bot \)-support corresponding to the base support \( (1, f) \) where \( (0, a) \in f \) and \( a \) is the atom corresponding to the type-\( \bot \) t-set \( U_\bot(x)\).
-  \end{itemize}
-  Allowable permutations \( \rho \) act on tangles \( t \) in the following way.
-  \begin{itemize}
-    \item If \( \alpha : \lambda \), then \( \rho((x, S)) = (\rho(x), \rho(S)) \).
-    \item If \( \alpha \equiv \bot \), then \( \rho(x) \) is already defined.
-  \end{itemize}
-  In each case, \( \supp(t) \) supports \( t \) for its action under the allowable permutations.
+  An \emph{\( \alpha \)-tangle} is a pair \( t = (x, S) \) where \( x \) is a tangled set of type \( \alpha \) and \( S \) is an \( \alpha \)-support for \( x \).
+  We define \( \set(t) = x \) and \( \supp(t) = S \).
+  The type of \( \alpha \)-tangles is denoted \( \Tang_\alpha \).
+  Allowable permutations \( \rho \) act on tangles by \( \rho((x, S)) = (\rho(x), \rho(S)) \), and so \( \supp(t) \) supports \( t \) for its action under the allowable permutations.
+  Therefore, each tangled set \( x \) is of the form \( \set(t) \) for some tangle \( t \).
 \end{definition}
 \begin{proposition}[fuzz maps]
   \label{prop:fuzz}
@@ -355,14 +347,14 @@ When we quantify over structural permutations in this paper, it should be formal
   Let \( \alpha \) be a proper type index.
   Suppose that we have model data for all type indices \( \beta \leq \alpha \) and position functions for \( \Tang_\beta \) for all \( \beta < \alpha \).
   For any type index \( \beta \leq \alpha \), a \emph{inflexible \( \beta \)-path} is a tuple \( I = (\gamma, \delta, \varepsilon, A) \) where \( \delta, \varepsilon < \gamma \) are distinct, the index \( \varepsilon \) is proper, and \( A : \beta \tpath \gamma \).
-  We will write \( \gamma_I, \delta_I, \varepsilon_I, A_I \) for its fields, and will also write \( f_I = f_{\delta, \varepsilon} \).
+  We will write \( \gamma_I, \delta_I, \varepsilon_I, A_I \) for its fields.
   Inflexible paths have a coderivative operation, given by \( (\gamma, \delta, \varepsilon, A)^B = (\gamma, \delta, \varepsilon, A^B) \).
 \end{definition}
 \begin{definition}[typed near-litter]
   \label{def:TypedNearLitter}
   \uses{def:ModelData,def:Tangle,prop:BasePositions}
   Let \( \alpha \) be a proper type index with model data, and suppose that \( \Tang_\alpha \) has a position function.
-  We say that \( \alpha \) has \emph{typed near-litters} if there is a function \( \typed_\alpha : \NearLitter \to \TSet_\alpha \) such that
+  We say that \( \alpha \) has \emph{typed near-litters} if there is an embedding \( \typed_\alpha : \NearLitter \to \TSet_\alpha \) such that
   \begin{itemize}
     \item if \( \rho : \AllPerm_\alpha \) and \( N : \NearLitter \), then \( \rho(\typed_\alpha(N)) = \typed_\alpha(\rho_\bot(N)) \); and
     \item if \( N \) is a near-litter and \( t \) is an \( \alpha \)-tangle such that \( \set(t) = \typed_\alpha(N) \), we have \( \iota(N) \leq \iota(t) \).
@@ -384,7 +376,7 @@ When we quantify over structural permutations in this paper, it should be formal
     Then
     \[ (\rho_\delta)_\bot(f_{\gamma,\delta}(t)) = f_{\gamma,\delta}(\rho_\gamma(t)) \]
     In particular, for every \( \beta \leq \alpha \), \( \beta \)-allowable permutation \( \rho \), and \( \beta \)-inflexible path \( I \), we obtain
-    \[ ((\rho_A)_\varepsilon)_\bot(f(t)) = f((\rho_A)_\delta(t)) \]
+    \[ ((\rho_A)_\varepsilon)_\bot(f_{\delta,\varepsilon}(t)) = f_{\delta,\varepsilon}((\rho_A)_\delta(t)) \]
     where subscripts of \( I \) are suppressed.
     \item Suppose that \( \beta \leq \alpha \) and \( (\rho(\gamma))_{\gamma < \beta} \) is a collection of allowable permutations such that whenever \( \gamma, \delta < \beta \) are distinct, \( \delta \) is proper, and \( t : \Tang_\delta \), we have
     \[ (\rho(\delta))_\bot(f_{\gamma,\delta}(t)) = f_{\gamma,\delta}(\rho(\gamma)(t)) \]
