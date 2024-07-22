@@ -28,7 +28,7 @@ We assume model data, position functions for \( \Tang_\beta \), and typed near-l
 \begin{proposition}
   \label{prop:cloud_injective}
   \uses{def:cloud}
-  The cloud relation is injective (\cref{def:coinj_cosurj}).
+  The cloud relation is injective (\cref{def:relation_props}).
   That is, if \( c_1, c_2 \prec d \), then \( c_1 = c_2 \).
 \end{proposition}
 \begin{proof}
@@ -101,7 +101,7 @@ We assume model data, position functions for \( \Tang_\beta \), and typed near-l
     \item If \( c \) is a \( \prec \)-even code, then \( c \looparrowright c \).
     \item If \( c \) is a \( \prec \)-even code and \( c \prec d \), then \( c \looparrowright d \).
   \end{itemize}
-  This relation is cofunctional (\cref{def:coinj_cosurj}): if \( d \) is a code, there is exactly one \( c \) such that \( c \looparrowright d \).
+  This relation is cofunctional (\cref{def:relation_props}): if \( d \) is a code, there is exactly one \( c \) such that \( c \looparrowright d \).
   Moreover, if \( c \looparrowright (\beta, s_1), (\beta, s_2) \), then \( s_1 = s_2 \).
 \end{definition}
 \begin{proof}[Proof of claim]
@@ -143,7 +143,7 @@ We assume model data, position functions for \( \Tang_\beta \), and typed near-l
 \end{proof}
 
 \section{Model data defined}
-\begin{definition}
+\begin{definition}[new allowable permutation]
   \label{def:NewAllPerm}
   \uses{prop:fuzz}
   A \emph{new allowable permutation} is a dependent function \( \rho \) of type \( \prod_{\beta < \alpha} \AllPerm_\beta \), subject to the condition
@@ -192,7 +192,7 @@ We assume model data, position functions for \( \Tang_\beta \), and typed near-l
   Suppose that \( x \in_\beta c \), so \( c \looparrowright (\beta, s) \) and \( x \in s \).
   Then \( \rho(c) \looparrowright (\beta, \rho(\beta)[s]) \), so \( \rho(\beta)(x) \in_\beta \rho(c) \) as required,
 \end{proof}
-\begin{definition}
+\begin{definition}[new t-set]
   \label{def:NewTSet}
   \uses{prop:AllPerm.smul_cloud_smul,prop:Path.rec}
   A \emph{new t-set} is an even code \( c \) such that there is an \( \alpha \)-support that supports \( c \) under the action of new allowable permutations, or a designated object called the empty set.

@@ -1,0 +1,126 @@
+\section{Base approximations}
+\begin{definition}[base approximation]
+  \label{def:BaseApprox}
+  \uses{def:NearLitter}
+  A \emph{base approximation} is a pair \( \psi = (\psi^\Atom, \psi^\Litter) \) such that \( \psi^\Atom \) and \( \psi^\Litter \) are permutative relations of atoms and litters respectively (\cref{def:relation_props}), and for each litter \( L \), the sets
+  \[ \LS(L) \cap \coim \psi^\Atom;\quad \LS(L) \cap \im \psi^\Atom \]
+  are small.
+  We make the following definitions.
+  \begin{itemize}
+    \item For an integer \( n : \mathbb Z \), the \emph{\( n \)th power} of \( \psi \) is \( \psi^n = ((\psi^\Atom)^n, (\psi^\Litter)^n) \).
+    \item The \emph{\( \psi \)-sublitter} of a litter \( L \), written \( L_\psi \), is the near-litter \( (L, \LS(L) \setminus \coim \psi^\Atom) \).
+    \item The \emph{atom graph} of \( \psi \) is the relation \( \psi^{\Atom\star} \) on atoms given by the following two constructors.\footnote{This should be implemented as the join of the two given relations.}
+    \begin{itemize}
+      \item If \( (a_1, a_2) \in \psi^\Atom \), then \( (a_1, a_2) \in \psi^{\Atom\star} \).
+      \item If \( (L_1, L_2) \in \psi^\Litter \), then
+      \[ (h_{(L_1)_\psi}(i), h_{(L_2)_\psi}(i)) \in \psi^{\Atom\star} \]
+      for some \( i : \kappa \), where for any near-litter \( N \), \( h_N \) is an equivalence \( \kappa \simeq N \) chosen in advance.\footnote{We should implement this as an injective function \( \kappa \to \Atom \) with range equal to \( N \).}
+    \end{itemize}
+    \item The \emph{near-litter graph} of \( \psi \) is the relation \( \psi^{\NearLitter\star} \) on near-litters given by
+    \[ ((L_1, s_1), (L_2, s_2)) \in \psi^{\NearLitter\star} \]
+    if and only if \( (L_1, L_2) \in \psi^\Litter \) and
+    \[ \forall a_1 \in s_1,\, \exists a_2 \in s_2,\, (a_1, a_2) \in \psi^{\Atom\star};\quad \forall a_2 \in s_2,\, \exists a_1 \in s_1,\, (a_1, a_2) \in \psi^{\Atom\star} \]
+    \item Base approximations \( \psi \) act on enumerations of atoms \( (i, f) \) by
+    \[ \psi(i, f) = (i, f');\quad f' = \{ (j, a_2) \mid (a_1, a_2) \in \psi^{\Atom\star} \wedge (j, a_1) \in f \} \]
+    and on enumeration fo near-litters \( (i, f) \) by
+    \[ \psi(i, f) = (i, f');\quad f' = \{ (j, N_2) \mid (N_1, N_2) \in \psi^{\NearLitter\star} \wedge (j, N_1) \in f \} \]
+    and so on base supports by
+    \[ \psi(S^\Atom, S^\NearLitter) = (\psi(S^\Atom), \psi(S^\NearLitter)) \]
+  \end{itemize}
+\end{definition}
+\begin{proposition}
+  \( \psi^{\Atom\star} \) is permutative.
+\end{proposition}
+\begin{proof}
+  By one of the results of \cref{prop:relation_results}, it suffices to show that the two constructors given individually yield permutative relations, and that their coimages are disjoint.
+  We already know that \( \psi^\Atom \) is permutative.
+
+  The relation given by the second constructor is one-to-one by construction, because of the equation \( h_{L_\psi}(i)^\circ = L \) which can be used to establish the the parameters of the relevant \( h \) maps coincide.
+  Furthermore, we can use the fact that \( \psi^\Litter \) has equal image and coimage to produce images and inverse images of any image or coimage element of this relation.
+  The (co)image of this relation is
+  \[ \bigcup_{L \in \coim \psi^\Litter} L_\psi = \bigcup_{L \in \coim \psi^\Litter} (\LS(L) \setminus \coim \psi^\Atom) \]
+  which is clearly disjoint from the coimage of \( \psi^\Atom \).
+  So \( \psi^{\Atom\star} \) is permutative.
+\end{proof}
+\begin{proposition}
+  \( \psi^{\NearLitter\star} \) is permutative.
+\end{proposition}
+\begin{proof}
+  TODO
+\end{proof}
+\begin{proposition}
+  For any integer \( n : \mathbb Z \), we have \( (\psi^n)^{\Atom\star} = (\psi^{\Atom\star})^n \), and \( (\psi^n)^{\NearLitter\star} = (\psi^{\NearLitter\star})^n \).
+\end{proposition}
+\begin{proof}
+  TODO: Should be a simple induction. It might be easier to first prove the result for \( n = -1 \) and use it in the following results.
+\end{proof}
+\begin{proposition}
+  If \( N \) is a near-litter, then \( N \in \coim \psi^{\NearLitter\star} \) if and only if \( N \subseteq \coim \psi^{\Atom\star} \).
+\end{proposition}
+\begin{proof}
+  TODO: Try to find a neater proof, or delete if not used.
+
+  Clearly \( N \in \coim \psi^{\NearLitter\star} \) implies \( N \subseteq \coim \psi^{\Atom\star} \).
+  If \( N \subseteq \coim \psi^{\Atom\star} \), then \( N \cap \coim \psi^{\Atom\star} \) is large, so \( \LS(N^\circ) \cap \coim \psi^{\Atom\star} \) is large as \( N \near \LS(N^\circ) \).
+  But \( \LS(N^\circ) \cap \coim \psi^\Atom \) is small, so there is some atom in \( \LS(N^\circ) \cap (\coim \psi^{\Atom\star} \setminus \coim \psi^\Atom) \).
+  Hence \( N^\circ \in \coim \psi^\Litter \).
+
+  Let \( (N^\circ, L) \in \psi^\Litter \).
+  Define
+  \[ N' = (L, \{ a_2 \mid \exists a_1 \in N,\, (a_1, a_2) \in \psi^{\Atom\star} \}) \]
+  We must check that this is a near-litter.
+  We can write
+  \begin{align*}
+    &\{ a_2 \mid \exists a_1 \in N,\, (a_1, a_2) \in \psi^{\Atom\star} \} \\
+    =\ &\{ a_2 \mid \exists a_1 \in N,\, (a_1, a_2) \in \psi^\Atom \} \cup \{ h_{(L_2)_\psi}(i) \mid \exists L_1,\, (L_1, L_2) \in \psi^\Litter \wedge h_{(L_1)_\psi}(i) \in N \}
+  \end{align*}
+  The left-hand set is small, so it suffices to show that the right-hand set is near \( \LS(L) \).
+  We can further divide the right-hand set into
+  \begin{align*}
+    &\{ h_{(L_2)_\psi}(i) \mid \exists L_1,\, (L_1, L_2) \in \psi^\Litter \wedge h_{(L_1)_\psi}(i) \in N \} \\
+    =\ &\{ h_{(L_2)_\psi}(i) \mid (N^\circ, L_2) \in \psi^\Litter \wedge h_{(N^\circ)_\psi}(i) \in N \} \cup \{ h_{(L_2)_\psi}(i) \mid \exists L_1 \neq N^\circ,\, (L_1, L_2) \in \psi^\Litter \wedge h_{(L_1)_\psi}(i) \in N \}
+  \end{align*}
+  This time, the right-hand set is small, because it is equinumerous with the small set \( N \setminus \LS(N^\circ) \).
+  The left-hand set is equal to
+  \begin{align*}
+    &\{ h_{(L_2)_\psi}(i) \mid (N^\circ, L_2) \in \psi^\Litter \wedge h_{(N^\circ)_\psi}(i) \in N \} \\
+    =\ &\{ h_{L_\psi}(i) \mid h_{(N^\circ)_\psi}(i) \in N \} \\
+    =\ &\{ h_{L_\psi}(i) \mid i : \kappa \} \setminus \{ h_{L_\psi}(i) \mid h_{(N^\circ)_\psi}(i) \in \LS(N^\circ) \setminus N \}
+  \end{align*}
+  The right-hand set is small, and the left-hand set is exactly \( L_\psi \), which is near \( \LS(L) \) as required.
+  It is easy to check that
+  \[ (N, N') \in \psi^{\NearLitter\star} \]
+  as required.
+\end{proof}
+\begin{proposition}
+  Define a partial order \( \leq \) on base approximations by
+  \[ \psi \leq \chi \leftrightarrow \psi^\Atom = \chi^\Atom \wedge \psi^\Litter \leq \chi^\Litter \]
+  Then \( \psi \leq \chi \) implies \( \psi^{\Atom\star} \leq \chi^{\Atom\star} \) and \( \psi^{\NearLitter\star} \leq \chi^{\NearLitter\star} \).
+\end{proposition}
+\begin{proof}
+  If \( L \in \coim \psi^\Litter \), then \( L_\psi = L_\chi \).
+  From this, it follows that \( \psi^{\Atom\star} \) is a subrelation of \( \chi^{\Atom\star} \), and hence the same holds for near-litters.
+\end{proof}
+\begin{proposition}[adding orbits]
+  Let \( \psi \) be a base approximation, and let \( L : \mathbb Z \to \Litter \) be a map such that
+  \[ \forall n_1, n_2, k : \mathbb Z,\, L(n_1) = L(n_2) \to L(n_1 + k) = L(n_2 + k) \]
+  and for all \( n : \mathbb Z \), we have \( L(n) \notin \coim \psi^\Litter \).
+  Then there is an extension \( \chi \geq \psi \) such that for each \( n \), \( (L(n), L(n+1)) \in \chi^\Litter \), and if \( L \in \coim \chi^\Litter \) then \( L \in \coim \psi^\Litter \) or there is \( n \) such that \( L = L(n) \).
+\end{proposition}
+\begin{proof}
+  Define the relation
+  \[ R = \{ (L(n), L(n+1)) \mid n : \mathbb Z \} \]
+  This clearly has equal image and coimage.
+  It is injective: if \( (L_1, L_3), (L_2, L_3) \in R \), then there are \( m, n : \mathbb Z \) such that
+  \[ L_1 = L(m);\quad L_3 = L(m + 1);\quad L_2 = L(n);\quad L_3 = L(n + 1) \]
+  So \( L(m + 1) = L(n + 1) \), giving \( L_1 = L(m) = L(n) = L_2 \) by substituting \( k = -1 \) in the hypothesis.
+  It is also coinjective by substituting \( k = 1 \) in the hypothesis.
+  So \( R \) is permutative.
+  Therefore, \( \psi^\Litter \sqcup R \) is a permutative relation, so \( (\psi^\Atom, \psi^\Litter \sqcup R) \) is an extension of \( \psi \), and it clearly satisfies the result.
+\end{proof}
+
+\section{Structural approximations}
+\begin{definition}
+  For a type index \( \beta \), a \emph{\( \beta \)-approximation} is a \( \beta \)-tree of base approximations.
+  We define an action of \( \beta \)-approximations \( \psi \) on \( \beta \)-supports \( S \) by \( (\psi(S))_A = \psi_A(S_A) \).
+\end{definition}
