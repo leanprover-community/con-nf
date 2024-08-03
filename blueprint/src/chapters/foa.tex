@@ -2,110 +2,114 @@
 \begin{definition}[base approximation]
   \label{def:BaseApprox}
   \uses{def:NearLitter}
-  A \emph{base approximation} is a pair \( \psi = (\psi^\Atom, \psi^\Litter) \) such that \( \psi^\Atom \) and \( \psi^\Litter \) are permutative relations of atoms and litters respectively (\cref{def:relation_props}), and for each litter \( L \), the sets
-  \[ \LS(L) \cap \coim \psi^\Atom;\quad \LS(L) \cap \im \psi^\Atom \]
+  A \emph{base approximation} is a pair \( \psi = (\psi^{E\Atom}, \psi^\Litter) \) such that \( \psi^{E\Atom} \) and \( \psi^\Litter \) are permutative relations of atoms and litters respectively (\cref{def:relation_props}), and for each litter \( L \), the sets
+  \[ \LS(L) \cap \coim \psi^{E\Atom};\quad \LS(L) \cap \im \psi^{E\Atom} \]
   are small.
+  The relation \( \psi^{E\Atom} \) is called the \emph{exceptional atom graph}, and \( \psi^\Litter \) is called the \emph{litter graph}.
   We make the following definitions.
   \begin{itemize}
-    \item For an integer \( n : \mathbb Z \), the \emph{\( n \)th power} of \( \psi \) is \( \psi^n = ((\psi^\Atom)^n, (\psi^\Litter)^n) \).
-    \item The \emph{\( \psi \)-sublitter} of a litter \( L \), written \( L_\psi \), is the near-litter \( (L, \LS(L) \setminus \coim \psi^\Atom) \).
-    \item The \emph{atom graph} of \( \psi \) is the relation \( \psi^{\Atom\star} \) on atoms given by the following two constructors.\footnote{This should be implemented as the join of the two given relations.}
-    \begin{itemize}
-      \item If \( (a_1, a_2) \in \psi^\Atom \), then \( (a_1, a_2) \in \psi^{\Atom\star} \).
-      \item If \( (L_1, L_2) \in \psi^\Litter \), then
-      \[ (h_{(L_1)_\psi}(i), h_{(L_2)_\psi}(i)) \in \psi^{\Atom\star} \]
-      for some \( i : \kappa \), where for any near-litter \( N \), \( h_N \) is an equivalence \( \kappa \simeq N \) chosen in advance.\footnote{We should implement this as an injective function \( \kappa \to \Atom \) with range equal to \( N \).}
-    \end{itemize}
-    \item The \emph{near-litter graph} of \( \psi \) is the relation \( \psi^{\NearLitter\star} \) on near-litters given by
-    \[ ((L_1, s_1), (L_2, s_2)) \in \psi^{\NearLitter\star} \]
-    if and only if \( (L_1, L_2) \in \psi^\Litter \) and
-    \[ \forall a_1 \in s_1,\, \exists a_2 \in s_2,\, (a_1, a_2) \in \psi^{\Atom\star};\quad \forall a_2 \in s_2,\, \exists a_1 \in s_1,\, (a_1, a_2) \in \psi^{\Atom\star} \]
-    \item Base approximations \( \psi \) act on enumerations of atoms \( (i, f) \) by
-    \[ \psi(i, f) = (i, f');\quad f' = \{ (j, a_2) \mid (a_1, a_2) \in \psi^{\Atom\star} \wedge (j, a_1) \in f \} \]
-    and on enumeration fo near-litters \( (i, f) \) by
-    \[ \psi(i, f) = (i, f');\quad f' = \{ (j, N_2) \mid (N_1, N_2) \in \psi^{\NearLitter\star} \wedge (j, N_1) \in f \} \]
-    and so on base supports by
-    \[ \psi(S^\Atom, S^\NearLitter) = (\psi(S^\Atom), \psi(S^\NearLitter)) \]
+    \item The \emph{inverse} of a base approximation is \( \psi^{-1} = ((\psi^{E\Atom})^{-1}, (\psi^\Litter)^{-1}) \).
+    \item If \( \psi \) and \( \chi \) are base approximations where \( \coim \psi^{E\Atom} = \coim \chi^{E\Atom} \) and \( \coim \psi^\Litter = \coim \chi^\Litter \), then their \emph{composition} \( \psi \circ \chi \) is the base approximation \( (\psi^{E\Atom} \circ \chi^{E\Atom}, \psi^\Litter \circ \chi^\Litter) \).
+    \item The \emph{\( \psi \)-sublitter} of a litter \( L \), written \( L_\psi \), is the near-litter \( (L, \LS(L) \setminus \coim \psi^{E\Atom}) \).
   \end{itemize}
 \end{definition}
-\begin{proposition}
-  \( \psi^{\Atom\star} \) is permutative.
-\end{proposition}
-\begin{proof}
-  By one of the results of \cref{prop:relation_results}, it suffices to show that the two constructors given individually yield permutative relations, and that their coimages are disjoint.
-  We already know that \( \psi^\Atom \) is permutative.
+\begin{definition}[atom graph of an approximation]
+  The \emph{typical atom graph} of \( \psi \) is the relation \( \psi^{T\Atom} \) given by the following constructor.
+  If \( (L_1, L_2) \in \psi^\Litter \), then
+  \[ (h_{(L_1)_\psi}(i), h_{(L_2)_\psi}(i)) \in \psi^{T\Atom} \]
+  for some \( i : \kappa \), where for any near-litter \( N \), \( h_N \) is an equivalence \( \kappa \simeq N \) chosen in advance.
 
-  The relation given by the second constructor is one-to-one by construction, because of the equation \( h_{L_\psi}(i)^\circ = L \) which can be used to establish the the parameters of the relevant \( h \) maps coincide.
-  Furthermore, we can use the fact that \( \psi^\Litter \) has equal image and coimage to produce images and inverse images of any image or coimage element of this relation.
-  The (co)image of this relation is
-  \[ \bigcup_{L \in \coim \psi^\Litter} L_\psi = \bigcup_{L \in \coim \psi^\Litter} (\LS(L) \setminus \coim \psi^\Atom) \]
-  which is clearly disjoint from the coimage of \( \psi^\Atom \).
-  So \( \psi^{\Atom\star} \) is permutative.
-\end{proof}
+  The \emph{atom graph} of \( \psi \) is the relation \( \psi^\Atom = \psi^{E\Atom} \sqcup \psi^{T\Atom} \): the join of the exceptional and typical atom graphs.
+\end{definition}
 \begin{proposition}
-  \( \psi^{\NearLitter\star} \) is permutative.
+  \label{prop:atom_graph_inverse}
+  \( (\psi^{T\Atom})^{-1} = (\psi^{-1})^{T\Atom} \) and hence \( (\psi^\Atom)^{-1} = (\psi^{-1})^\Atom \).
 \end{proposition}
 \begin{proof}
-  TODO
+  This follows directly from the fact that \( L_\psi = L_{\psi^{-1}} \) for any litter \( L \).
 \end{proof}
 \begin{proposition}
-  For any integer \( n : \mathbb Z \), we have \( (\psi^n)^{\Atom\star} = (\psi^{\Atom\star})^n \), and \( (\psi^n)^{\NearLitter\star} = (\psi^{\NearLitter\star})^n \).
+  The graphs \( \psi^{T\Atom} \) and \( \psi^\Atom \) are permutative.
 \end{proposition}
 \begin{proof}
-  TODO: Should be a simple induction. It might be easier to first prove the result for \( n = -1 \) and use it in the following results.
-\end{proof}
-\begin{proposition}
-  If \( N \) is a near-litter, then \( N \in \coim \psi^{\NearLitter\star} \) if and only if \( N \subseteq \coim \psi^{\Atom\star} \).
-\end{proposition}
-\begin{proof}
-  TODO: Try to find a neater proof, or delete if not used.
+  The typical atom graph is injective, because the equation \( h_{L_\psi}(i)^\circ = L \) can be used to establish the the parameters of the relevant \( h \) maps coincide.
+  Furthermore, we can use the fact that \( \psi^\Litter \) has equal image and coimage to produce images of any image element of this relation.
+  We then appeal to symmetry using \cref{prop:atom_graph_inverse} to conclude that \( \psi^{T\Atom} \) is permutative.
 
-  Clearly \( N \in \coim \psi^{\NearLitter\star} \) implies \( N \subseteq \coim \psi^{\Atom\star} \).
-  If \( N \subseteq \coim \psi^{\Atom\star} \), then \( N \cap \coim \psi^{\Atom\star} \) is large, so \( \LS(N^\circ) \cap \coim \psi^{\Atom\star} \) is large as \( N \near \LS(N^\circ) \).
-  But \( \LS(N^\circ) \cap \coim \psi^\Atom \) is small, so there is some atom in \( \LS(N^\circ) \cap (\coim \psi^{\Atom\star} \setminus \coim \psi^\Atom) \).
-  Hence \( N^\circ \in \coim \psi^\Litter \).
-
-  Let \( (N^\circ, L) \in \psi^\Litter \).
-  Define
-  \[ N' = (L, \{ a_2 \mid \exists a_1 \in N,\, (a_1, a_2) \in \psi^{\Atom\star} \}) \]
-  We must check that this is a near-litter.
-  We can write
-  \begin{align*}
-    &\{ a_2 \mid \exists a_1 \in N,\, (a_1, a_2) \in \psi^{\Atom\star} \} \\
-    =\ &\{ a_2 \mid \exists a_1 \in N,\, (a_1, a_2) \in \psi^\Atom \} \cup \{ h_{(L_2)_\psi}(i) \mid \exists L_1,\, (L_1, L_2) \in \psi^\Litter \wedge h_{(L_1)_\psi}(i) \in N \}
-  \end{align*}
-  The left-hand set is small, so it suffices to show that the right-hand set is near \( \LS(L) \).
-  We can further divide the right-hand set into
-  \begin{align*}
-    &\{ h_{(L_2)_\psi}(i) \mid \exists L_1,\, (L_1, L_2) \in \psi^\Litter \wedge h_{(L_1)_\psi}(i) \in N \} \\
-    =\ &\{ h_{(L_2)_\psi}(i) \mid (N^\circ, L_2) \in \psi^\Litter \wedge h_{(N^\circ)_\psi}(i) \in N \} \cup \{ h_{(L_2)_\psi}(i) \mid \exists L_1 \neq N^\circ,\, (L_1, L_2) \in \psi^\Litter \wedge h_{(L_1)_\psi}(i) \in N \}
-  \end{align*}
-  This time, the right-hand set is small, because it is equinumerous with the small set \( N \setminus \LS(N^\circ) \).
-  The left-hand set is equal to
-  \begin{align*}
-    &\{ h_{(L_2)_\psi}(i) \mid (N^\circ, L_2) \in \psi^\Litter \wedge h_{(N^\circ)_\psi}(i) \in N \} \\
-    =\ &\{ h_{L_\psi}(i) \mid h_{(N^\circ)_\psi}(i) \in N \} \\
-    =\ &\{ h_{L_\psi}(i) \mid i : \kappa \} \setminus \{ h_{L_\psi}(i) \mid h_{(N^\circ)_\psi}(i) \in \LS(N^\circ) \setminus N \}
-  \end{align*}
-  The right-hand set is small, and the left-hand set is exactly \( L_\psi \), which is near \( \LS(L) \) as required.
-  It is easy to check that
-  \[ (N, N') \in \psi^{\NearLitter\star} \]
-  as required.
+  The (co)image of \( \psi^{T\Atom} \) is
+  \[ \bigcup_{L \in \coim \psi^\Litter} L_\psi = \bigcup_{L \in \coim \psi^\Litter} (\LS(L) \setminus \coim \psi^{E\Atom}) \]
+  which is clearly disjoint from the coimage of \( \psi^{E\Atom} \).\footnote{This result should of course be its own lemma.}
+  So \( \psi^\Atom \) is permutative by one of the results of \cref{prop:relation_results}.
 \end{proof}
 \begin{proposition}
-  Define a partial order \( \leq \) on base approximations by
-  \[ \psi \leq \chi \leftrightarrow \psi^\Atom = \chi^\Atom \wedge \psi^\Litter \leq \chi^\Litter \]
-  Then \( \psi \leq \chi \) implies \( \psi^{\Atom\star} \leq \chi^{\Atom\star} \) and \( \psi^{\NearLitter\star} \leq \chi^{\NearLitter\star} \).
+  If \( \psi, \chi \) have equal exceptional atom and litter coimages, then \( (\psi \circ \chi)^{T\Atom} = \psi^{T\Atom} \circ \chi^{T\Atom} \).
 \end{proposition}
 \begin{proof}
-  If \( L \in \coim \psi^\Litter \), then \( L_\psi = L_\chi \).
-  From this, it follows that \( \psi^{\Atom\star} \) is a subrelation of \( \chi^{\Atom\star} \), and hence the same holds for near-litters.
+  Suppose that \( (a_1, a_3) \in (\psi \circ \chi)^{T\Atom} \), so
+  \[ a_1 = h_{(L_1)_{\psi \circ \chi}}(i);\quad a_3 = h_{(L_3)_{\psi \circ \chi}}(i);\quad (L_1, L_3) \in (\psi \circ \chi)^\Litter \]
+  Since \( (\psi \circ \chi)^\Litter = \psi^\Litter \circ \chi^\Litter \), there is \( L_2 \) such that \( (L_1, L_2) \in \chi^\Litter \) and \( (L_2, L_3) \in \psi^\Litter \).
+  Hence
+  \[ (h_{(L_1)_\chi}(i), h_{(L_2)_\chi}(i)) \in \chi^{T\Atom};\quad (h_{(L_2)_\psi}(i), h_{(L_3)_\psi}(i)) \in \psi^{T\Atom} \]
+  But \( L_{\psi \circ \chi} = L_\psi = L_\chi \), so we obtain
+  \[ (a_1, h_{(L_2)_\chi}(i)) \in \chi^{T\Atom};\quad (h_{(L_2)_\chi}(i), a_3) \in \psi^{T\Atom} \]
+  For the converse, suppose that \( (a_1, a_2) \in \chi^{T\Atom} \) and \( (a_2, a_3) \in \psi^{T\Atom} \).
+  Then
+  \[ a_1 = h_{(L_1)_\chi}(i);\quad a_2 = h_{(L_2)_\chi}(i);\quad a_2 = h_{(L_2')_\psi}(j);\quad a_3 = h_{(L_3)_\psi}(j) \]
+  We obtain \( L_2 = L_2' \), and \( (L_2)_\chi = (L_2)_\psi \) so we also conclude \( i = j \).
+  Since \( (L_1, L_2) \in \chi^\Litter \) and \( (L_2, L_3) \in \psi^\Litter \), we conclude \( (L_1, L_3) \in (\psi \circ \chi)^\Litter \), as required.
 \end{proof}
+\begin{definition}[near-litter graph of an approximation]
+  The \emph{near-litter graph} of \( \psi \) is the relation \( \psi^\NearLitter \) given by setting \( (N_1, N_2) \in \psi^\NearLitter \) if and only if \( (N_1^\circ, N_2^\circ) \in \psi^\Litter \), \( N_1 \) and \( N_2 \) are subsets of \( \coim \psi^\Atom \), and the image of \( \psi^\Atom \) on \( N_1 \) is \( N_2 \) (or equivalently, by \cref{prop:relation_results}, the coimage of \( \psi^\Atom \) on \( N_2 \) is \( N_1 \)).
+\end{definition}
+\begin{proposition}
+  \label{prop:approx_near}
+  Let \( s \) be a set of atoms near \( \LS(L) \) for some litter \( L \).
+  If \( s \subseteq \coim \psi^\Atom \) and \( (L, L') \in \psi^\Litter \), then the image of \( \psi^\Atom \) on \( s \) is near \( \LS(L') \).
+\end{proposition}
+\begin{proof}
+  We calculate
+  \begin{align*}
+    \im \psi^\Atom|_s
+    &= \im \psi^\Atom|_{\LS(L)} \symmdiff \im \psi^\Atom|_{s \symmdiff \LS(L)} \\
+    &\near \im \psi^\Atom|_{\LS(L)} \\
+    &= \im \psi^\Atom|_{\LS(L) \setminus \coim \psi^{E\Atom}} \cup \im \psi^\Atom|_{\LS(L) \cap \coim \psi^{E\Atom}} \\
+    &\near \im \psi^\Atom|_{\LS(L) \setminus \coim \psi^{E\Atom}} \\
+    &= \im \psi^{T\Atom}|_{L_\psi} \\
+    &= L'_\psi \\
+    &\near \LS(L')
+  \end{align*}
+  Many of these equalities should be their own lemmas.
+\end{proof}
+\begin{proposition}
+  \( (\psi^{-1})^\NearLitter = (\psi^\NearLitter)^{-1} \), and \( \psi^\NearLitter \) is permutative.
+\end{proposition}
+\begin{proof}
+  The first part follows from \cref{prop:atom_graph_inverse}.
+  To show \( \psi^\NearLitter \) is permutative, it suffices to show that it is injective and that its image is contained in its coimage; then, by taking inverses, the converses will also hold.
+  Suppose that \( (N_1, N_3), (N_2, N_3) \in \psi^\NearLitter \).
+  Then the coimage of \( \psi^\Atom \) on \( N_3 \) is equal to both \( N_1 \) and \( N_2 \), so \( N_1 = N_2 \), giving injectivity.
+
+  Now suppose that \( (N_1, N_2) \in \psi^\NearLitter \).
+  As \( (N_1^\circ, N_2^\circ) \in \psi^\Litter \), we must have \( (N_2^\circ, L) \in \psi^\Litter \) for some \( L \).
+  By \cref{prop:approx_near}, the image \( s \) of \( \psi^\Atom \) on \( N_2 \) is near \( \LS(L) \), so \( (L, s) \) is a near-litter, and \( (N_2, (L, s)) \in \psi^\NearLitter \) as required.
+\end{proof}
+\begin{definition}
+  Base approximations act on base supports in the following way.
+  If \( S^\Atom = (i, f) \), then \( \psi(S)^\Atom = (i, f') \) where
+  \[ f' = \{ (j, a_2) \mid (j, a_1) \in f \wedge (a_1, a_2) \in \psi^\Atom \} \]
+  The same definition is used for near-litters.
+\end{definition}
+
+\section{Extensions of approximations}
+\begin{definition}
+  We define a partial order on base approximations by setting \( \psi \leq \chi \) when \( \psi^{E\Atom} = \chi^{E\Atom} \) and \( \psi^\Litter \leq \chi^\Litter \).
+\end{definition}
 \begin{proposition}[adding orbits]
-  Let \( \psi \) be a base approximation, and let \( L : \mathbb Z \to \Litter \) be a map such that
-  \[ \forall n_1, n_2, k : \mathbb Z,\, L(n_1) = L(n_2) \to L(n_1 + k) = L(n_2 + k) \]
-  and for all \( n : \mathbb Z \), we have \( L(n) \notin \coim \psi^\Litter \).
-  Then there is an extension \( \chi \geq \psi \) such that for each \( n \), \( (L(n), L(n+1)) \in \chi^\Litter \), and if \( L \in \coim \chi^\Litter \) then \( L \in \coim \psi^\Litter \) or there is \( n \) such that \( L = L(n) \).
+  Let \( \psi \) be a base approximation, and let \( L : \mathbb N \to \Litter \) be a function such that
+  \[ L(m) = L(n) \to L(m+k) = L(n+k) \]
+  for all integers \( m, n, k : \mathbb Z \).
+  Suppose that for all \( n \), \( L(n) \notin \coim \psi^\Litter \).
+  Then there is an extension \( \chi \geq \psi \) such that \( \chi^\Litter(L(n)) = L(n+1) \) and \( \coim \chi^\Litter = \coim \psi^\Litter \cup \im L \).
 \end{proposition}
 \begin{proof}
   Define the relation
@@ -124,3 +128,87 @@
   For a type index \( \beta \), a \emph{\( \beta \)-approximation} is a \( \beta \)-tree of base approximations.
   We define an action of \( \beta \)-approximations \( \psi \) on \( \beta \)-supports \( S \) by \( (\psi(S))_A = \psi_A(S_A) \).
 \end{definition}
+\begin{definition}
+  Let \( A \) be a \( \beta \)-extended type index.
+  A litter \( L \) is \emph{\( A \)-inflexible} if there is an inflexible \( \beta \)-path \( I \) such that \( A = ((A_I)_{\varepsilon_I})_\bot \) and \( L = f_{\delta_I, \varepsilon_I}(t) \) for some \( t : \Tang_{\delta_I} \).
+  The coderivative operation works in the obvious way.
+  A litter can be \( A \)-inflexible in at most one way.\footnote{We should make \( A \)-inflexibility into a subsingleton structure.}
+
+  We say that a \( L \) is \emph{\( A \)-flexible} if it is not \( A \)-inflexible.\footnote{This is not data, but a proposition.}
+  If \( L \) is \( B_A \)-flexible, then \( L \) is \( A \)-flexible.
+\end{definition}
+\begin{definition}
+  A \( \beta \)-approximation \( \psi \) is \emph{coherent} at \( (A, L_1, L_2) \) if:
+  \begin{itemize}
+    \item If \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \), then there is some \( \delta \)-allowable permutation \( \pi \) such that
+    \[ (\psi_B)_\delta(\supp(t)) = \pi(\supp(t)) \]
+    and
+    \[ L_2 = f_{\delta,\varepsilon}(\pi(t)) \]
+    (and hence all \( \delta \)-allowable permutations \( \pi \) such that \( (\psi_B)_\delta(\supp(t)) = \pi(\supp(t)) \) satisfy \( L_2 = f_{\delta,\varepsilon}(\pi(t)) \)).
+    \item If \( L_1 \) is \( A \)-flexible, then \( L_2 \) is \( A \)-flexible.
+  \end{itemize}
+  We say that \( \psi \) is \emph{coherent} if whenever \( (L_1, L_2) \in \psi_A^\Litter \), \( \psi \) is coherent at \( (A, L_1, L_2) \).
+\end{definition}
+\begin{proposition}
+  \label{prop:inv_coherent}
+  If \( \psi \) is coherent, then \( \psi^{-1} \) is coherent.
+\end{proposition}
+\begin{proof}
+  Suppose that \( (L_1, L_2) \in (\psi^{-1}_A)^\Litter \), so \( (L_2, L_1) \in \psi_A^\Litter \).
+  Suppose first that \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \).
+  If \( L_2 \) were \( A \)-flexible, then \( L_1 \) would also be \( A \)-flexible by coherence, which is a contradiction.
+  So \( L_2 \) is \( A \)-inflexible with path \( (\gamma', \delta', \varepsilon', B') \) and tangle \( t' : \Tang_{\delta'} \), and there is \( \pi : \AllPerm_{\delta'} \) such that
+  \[ (\psi_{B'})_{\delta'}(\supp(t')) = \pi(\supp(t')) \]
+  and
+  \[ A = (B_{\varepsilon'})_\bot;\quad L_2 = f_{\delta',\varepsilon'}(t');\quad L_1 = f_{\delta',\varepsilon'}(\pi(t')) \]
+  We thus deduce \( \varepsilon = \varepsilon' \) and \( \gamma = \gamma' \) by the equations for \( A \).
+  By the equation \( L_1 = f_{\delta,\varepsilon}(t) \), we also obtain \( \delta = \delta' \) and \( t = \pi(t') \).
+  Then we find
+  \begin{align*}
+    (\psi_B)_\delta(\supp(\pi^{-1}(t))) &= \pi(\supp(\pi^{-1}(t))) \\
+    (\psi_B)_\delta(\pi^{-1}(\supp(t))) &= \pi(\pi^{-1}(\supp(t))) \\
+    (\psi_B)_\delta(\pi^{-1}(\supp(t))) &= \supp(t) \\
+    \pi^{-1}(\supp(t)) &= (\psi^{-1}_B)_\delta(\supp(t))
+  \end{align*}
+  where the last equation uses the fact that \( (\psi_B)_\delta \) is defined on all of \( \supp(t') \).
+  Finally, the equation \( L_2 = f_{\delta,\varepsilon}(\pi^{-1}(t)) \) gives coherence at \( (A, L_1, L_2) \) as required.
+
+  Now suppose that \( L_1 \) is \( A \)-flexible.
+  If \( L_2 \) were \( A \)-inflexible, then so would be \( L_1 \) by coherence.
+  So \( L_2 \) is \( A \)-flexible, as required.
+\end{proof}
+\begin{proposition}
+  If \( \psi \) and \( \chi \) are coherent and have equal coimages along all paths, then \( \psi \circ \chi \) is coherent.
+\end{proposition}
+\begin{proof}
+  Suppose that \( (L_1, L_3) \in ((\psi \circ \chi)_A)^\Litter \), so \( (L_1, L_2) \in \psi_A^\Litter \) and \( (L_2, L_3) \in \chi_A^\Litter \).
+  Suppose that \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \).
+  Then by coherence of \( \psi \), we have \( \pi \) such that
+  \[ (\psi_B)_\delta(\supp(t)) = \pi(\supp(t)) \]
+  and
+  \[ L_2 = f_{\delta,\varepsilon}(\pi(t)) \]
+  Then \( L_2 \) is \( A \)-inflexible with path \( I \) and tangle \( \pi(t) \).
+  So by coherence of \( \chi \), we have \( \pi' \) such that
+  \[ (\psi_B)_\delta(\supp(\pi(t))) = \pi'(\supp(\pi(t))) \]
+  and
+  \[ L_3 = f_{\delta,\varepsilon}(\pi'(\pi(t))) \]
+  As \( \pi'(\supp(\pi(t))) = \pi'(\pi(\supp(t))) \), we obtain the desired coherence result.
+
+  Instead, if \( L_1 \) is \( A \)-flexible, then so is \( L_2 \) by coherence of \( \psi \), and so is \( L_3 \) by coherence of \( \chi \).
+\end{proof}
+\begin{proposition}
+  If \( \psi \) is a coherent \( \beta \)-approximation and \( A \) is a path \( \beta \tpath \beta' \), then \( \psi_A \) is a coherent \( \beta' \)-approximation.
+\end{proposition}
+\begin{proof}
+  Let \( (L_1, L_2) \in (\psi_A)_B^\Litter \).
+  Suppose that \( L_1 \) is \( B \)-inflexible with path \( (\gamma, \delta, \varepsilon, C) \) and \( t : \Tang_\delta \).
+  Then \( L_1 \) is \( A_B \)-inflexible with path \( (\gamma, \delta, \varepsilon, A_C) \) and the same tangle \( t \).
+  So by coherence of \( \psi \), we obtain a \( \delta \)-allowable \( \pi \) such that
+  \[ (\psi_{(A_C)})_\delta(\supp(t)) = \pi(\supp(t)) \]
+  and
+  \[ L_2 = f_{\delta,\varepsilon}(\pi(t)) \]
+  This same \( \pi \) can thus be used to establish coherence of \( \psi_A \) at \( (B, L_1, L_2) \).
+
+  Thus, by \cref{prop:inv_coherent}, whenever \( L_2 \) is \( B \)-inflexible with path \( I \) and tangle \( t \), \( L_1 \) is also \( B \)-inflexible with path \( I \).
+  So if \( L_1 \) is \( B \)-flexible, so is \( L_2 \), as required.
+\end{proof}

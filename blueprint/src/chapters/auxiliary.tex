@@ -7,6 +7,8 @@
   \begin{itemize}
     \item the \emph{image} of \( R \) to be the set \( \im R = \{ y : \tau \mid \exists x : \sigma,\, x \mathrel{R} y \} \);
     \item the \emph{coimage} of \( R \) to be the set \( \coim R = \{ x : \sigma \mid \exists y : \tau,\, x \mathrel{R} y \} \) (note that this is \emph{not} the same as the category-theoretic coimage of a morphism);
+    \item the \emph{image of \( R \) on} \( s : \Set \sigma \) to be the set \( \im R|_s = \{ y : \tau \mid \exists x \in s,\, x \mathrel{R} y \} \);
+    \item the \emph{coimage of \( R \) on} \( t : \Set \tau \) to be the set \( \coim R|_t = \{ x : \sigma \mid \exists y \in t,\, x \mathrel{R} y \} \);
     \item the \emph{converse} of \( R \) to be the relation \( R^{-1} : \tau \to \sigma \to \Prop \) such that \( y \mathrel{R^{-1}} x \) if and only if \( x \mathrel{R} y \);
     \item if \( S : \tau \to \upsilon \to \Prop \), the \emph{composition} \( S \circ R : \sigma \to \upsilon \to \Prop \) is the relation given by \( x \mathrel{(S\circ R)} z \) if and only if there is \( y : \tau \) such that \( x \mathrel{R} y \) and \( y \mathrel{S} z \);
     \item for a natural number \( n \), the \emph{\( n \)th power} of \( R : \tau \to \tau \to Prop \) is defined by \( R^{n+1} = R \circ R^n \) and \( R^0 \) is the identity relation on \( \coim R \);
@@ -30,8 +32,10 @@
   \label{prop:relation_results}
   \begin{enumerate}
     \item \( R : \tau \to \tau \to \Prop \) is permutative if and only if it is one-to-one and for all \( x : \tau \), there exists \( y \) such that \( x \mathrel{R} y \) if and only if there exists \( y \) such that \( y \mathrel{R} x \).
-    \item If \( R, S : \tau \to \tau \to \Prop \) are permutative and \( \coim R \cap \coim S = \emptyset \), then \( R \sqcup S \) is permutative.
+    \item If \( R, S : \tau \to \tau \to \Prop \) are permutative and \( \coim R \cap \coim S = \emptyset \), then \( R \sqcup S \) is permutative and has coimage \( \coim R \cup \coim S \).
+    \item If \( R, S : \tau \to \tau \to \Prop \) are permutative and \( \coim R = \coim S \), then \( R \circ S \) is permutative and has coimage equal to that of \( R \) and \( S \).
     \item If \( R \) is permutative, then \( \coim R^n = \coim R = \im R = \im R^n \) for any natural number or integer \( n \).
+    \item If \( R \) is permutative and \( s_1, s_2 \subseteq \coim R \), then the image of \( R \) on \( s_1 \) is equal to \( s_2 \) if and only if the coimage of \( R \) on \( s_2 \) is equal to \( s_1 \).
   \end{enumerate}
 \end{proposition-no-bp}
 
