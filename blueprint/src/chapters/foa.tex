@@ -105,6 +105,7 @@
   We define a partial order on base approximations by setting \( \psi \leq \chi \) when \( \psi^{E\Atom} = \chi^{E\Atom} \) and \( \psi^\Litter \leq \chi^\Litter \).
 \end{definition}
 \begin{proposition}[adding orbits]
+  \label{prop:adding_orbits}
   Let \( \psi \) be a base approximation, and let \( L : \mathbb N \to \Litter \) be a function such that
   \[ L(m) = L(n) \to L(m+k) = L(n+k) \]
   for all integers \( m, n, k : \mathbb Z \).
@@ -149,6 +150,15 @@
   \end{itemize}
   We say that \( \psi \) is \emph{coherent} if whenever \( (L_1, L_2) \in \psi_A^\Litter \), \( \psi \) is coherent at \( (A, L_1, L_2) \).
 \end{definition}
+\begin{proposition}[adding orbits coherently]
+  \label{prop:adding_orbits_coherently}
+  Suppose that \( \psi \) is an approximation and \( L : \mathbb Z \to \Litter \) is a function satisfying the hypotheses of \cref{prop:adding_orbits}.
+  Let \( \chi \) be the extension produced by the structural version of this result.\footnote{We need the extension exactly as produced (as data), not an arbitrary extension satisfying the conclusion of the proposition.}
+  If \( \psi \) is coherent, and is additionally coherent at \( (L(n), L(n+1)) \) for each integer \( n \), then \( \chi \) is coherent.
+\end{proposition}
+\begin{proof}
+  This proof just relies on the fact that if \( (\psi_B)_\delta(\supp(t)) = \pi(\supp(t)) \), then the same holds for every extension \( \chi \) of \( \psi \).\footnote{Maybe there's a better lemma to abstract out this idea for this and \cref{prop:approx_chain}}
+\end{proof}
 \begin{proposition}
   \label{prop:inv_coherent}
   If \( \psi \) is coherent, then \( \psi^{-1} \) is coherent.
@@ -211,4 +221,85 @@
 
   Thus, by \cref{prop:inv_coherent}, whenever \( L_2 \) is \( B \)-inflexible with path \( I \) and tangle \( t \), \( L_1 \) is also \( B \)-inflexible with path \( I \).
   So if \( L_1 \) is \( B \)-flexible, so is \( L_2 \), as required.
+\end{proof}
+
+\section{Proving freedom of action}
+\begin{definition}[approximates]
+  We say that a \( \beta \)-approximation \( \psi \) \emph{approximates} a \( \beta \)-allowable permutation \( \pi \) if \( \psi_A^\Litter \leq \pi_A^\Litter \) and \( \psi_A^\Atom \leq \pi_A^\Atom \) for each path \( A : \beta \tpath \bot \).
+  If \( \psi \) approximates \( \pi \) then \( \psi^n \) approximates \( \pi^n \) for each \( n : \mathbb Z \).
+\end{definition}
+\begin{definition}[freedom of action]
+  We say that \emph{freedom of action} holds at a type index \( \delta \) if every coherent \( \delta \)-approximation approximates some \( \delta \)-allowable permutation.
+\end{definition}
+\begin{proposition}[adding flexible litters]
+  \label{prop:add_flexible_litter}
+  Let \( \psi \) be a coherent \( \beta \)-approximation, and let \( L \) be \( A \)-flexible.
+  Then there is a coherent extension \( \chi \geq \psi \) with \( L \in \coim \chi_A^\Litter \).
+\end{proposition}
+\begin{proof}
+  Define \( L' : \mathbb Z \to \Litter \) by \( L'(n) = L \), then appeal to \cref{prop:adding_orbits_coherently} to obtain \( \chi \geq \psi \).
+  All we must do is check that \( \psi \) is coherent at \( (L, L) \), which is trivial.
+\end{proof}
+\begin{proposition}[adding inflexible litters]
+  \label{prop:add_inflexible_litter}
+  Let \( \psi \) be a coherent \( \beta \)-approximation, and let \( L \) be \( A \)-inflexible with path \( (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \).
+  Suppose that \( (\psi_B)_\delta \) is defined on all of \( \supp(t) \).\footnote{This is a nontrivial definition to make.}
+  Suppose that freedom of action holds at level \( \delta \).
+  Then there is a coherent extension \( \chi \geq \psi \) with \( L \in \coim \chi_A^\Litter \).
+\end{proposition}
+\begin{proof}
+  Let \( \pi \) be a \( \delta \)-allowable permutation that \( (\psi_B)_\delta \) approximates.
+  Then for each \( n : \mathbb Z \), as \( (\psi^n_B)_\delta \) approximates \( \pi^n \), we obtain \( (\psi^n_B)_\delta(\supp(t)) = \pi^n(\supp(t)) \) as \( (\psi^n_B)_\delta \) is defined on all of \( \supp(t) \).\footnote{This should of course be its own lemma.}
+  Define \( L : \mathbb Z \to \Litter \) by \( L(n) = f_{\delta,\varepsilon}(\pi^n(t)) \).
+
+  Suppose that there is some \( n \) such that \( L(n) \in \coim \psi^\Litter \).
+  Note that
+  \begin{align*}
+    (\psi^n_B)_\delta(\supp(t)) &= \pi^n(\supp(t)) \\
+    \supp(t) &= (\psi^{-n}_B)_\delta(\pi^n(\supp(t))) \\
+    \pi^{-n}(\pi^n(\supp(t))) &= (\psi^{-n}_B)_\delta(\supp(\pi^n(t)))
+  \end{align*}
+  So as \( \psi^{-n} \) is coherent, we obtain \( (L(n), f_{\delta,\varepsilon}(t)) \in (\psi^{-n}_A)^\Litter \).
+  In particular, \( f_{\delta,\varepsilon}(t) \in \coim \psi_A^\Litter \) already, and no work needs to be done.
+
+  We first check the hypothesis of \cref{prop:adding_orbits} for adding orbits.
+  If \( f_{\delta,\varepsilon}(\pi^m(t)) = f_{\delta,\varepsilon}(\pi^n(t)) \), then \( \pi^m(t) = \pi^n(t) \), so \( \pi^{m+k}(t) = \pi^{n+k}(t) \), giving \( f_{\delta,\varepsilon}(\pi^{m+k}(t)) = f_{\delta,\varepsilon}(\pi^{n+k}(t)) \) as required.
+
+  We now check the criterion of \cref{prop:adding_orbits_coherently} for adding orbits coherently.
+  It suffices to show that \( \psi \) is coherent at \( (L(n), L(n+1)) \) for each \( n : \mathbb Z \).
+  This is witnessed by \( \pi \), which satisfies
+  \[ (\psi_B)_\delta(\supp(\pi^n(t))) = \pi(\supp(\pi^n(t))) \]
+  and
+  \[ L(n) = f_{\delta,\varepsilon}(\pi^n(t));\quad L(n+1) = f_{\delta,\varepsilon}(\pi(\pi^n(t))) \]
+  as required.\footnote{It might be helpful to abstract away the lemma \( (\psi^m_B)_\delta(\supp(\pi^n(t))) = \supp(\pi^{n+m}(t)) \) for the two places in the proof where this idea is used.}
+\end{proof}
+\begin{proposition}
+  \label{prop:approx_chain}
+  If \( (\psi_i)_{i : I} \) is a chain of coherent approximations where \( I \) is a linear order, then the supremum \( \psi \) is coherent.
+\end{proposition}
+\begin{proof}
+  Direct, using the same idea as the proof of \cref{prop:adding_orbits_coherently}.
+\end{proof}
+\begin{theorem}[freedom of action]
+  \label{thm:foa}
+  Freedom of action holds at all type indices \( \beta \leq \alpha \).
+\end{theorem}
+\begin{proof}
+  By induction, we may assume freedom of action holds at all \( \delta < \beta \).
+  Let \( \psi \) be a coherent \( \beta \)-approximation, and let \( \chi \) be a maximal coherent extension, which exists by Zorn's lemma and \cref{prop:approx_chain}.
+
+  Suppose that there is a litter \( L \) such that there exists a path \( A \) where \( L \notin \coim \chi_A^\Litter \).
+  Let \( L \) have minimal position with this property, and let \( A \) be such a path.
+
+  Suppose that \( L \) is \( A \)-flexible.
+  Then by \cref{prop:add_flexible_litter}, there is an extension \( \varphi \) of \( \chi \) such that \( L \in \coim \varphi_A^\Litter \), contradicting maximality of \( \chi \).
+
+  Suppose that \( L \) is \( A \)-inflexible, with path \( (\gamma,\delta,\varepsilon,B) \) and tangle \( t \).
+  Then \( (\psi_B)_\delta \) is defined on all of \( \supp(t) \).
+  Indeed, by \cref{def:CoherentData} (coherent data) and \cref{prop:fuzz} (fuzz maps), for each atom or near-litter \( y \) that appears in the range of \( \supp(t)_C \), we have \( \iota(y) < \iota(t) < \iota(L) \), giving the desired conclusion by minimality of the position of \( L \).
+  Thus, we obtain the same contradiction by \cref{prop:add_inflexible_litter}.
+
+  So \( \coim \chi_A^\Litter \) is the set of all litters for each path \( A \).
+  We then use the fact that our model data is coherent to recursively compute the allowable permutation \( \pi \) with the same action as \( \chi \).
+  Then \( \chi \) approximates \( \pi \), so \( \psi \) also approximates \( \pi \).\footnote{In general, if \( \psi \leq \chi \) and \( \chi \) approximates \( \pi \) then \( \psi \) approximates \( \pi \).}
 \end{proof}
