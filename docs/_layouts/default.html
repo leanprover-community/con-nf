@@ -27,11 +27,12 @@
     <h1 class="project-name">{{ page.title | default: site.title | default: site.github.repository_name }}</h1>
     <h2 class="project-tagline">{{ page.description | default: site.description | default: site.github.project_tagline
       }}</h2>
+    <a href="blueprint" class="btn">Blueprint</a>
+    <a href="print/print.pdf" class="btn">Paper</a>
     <a href="doc" class="btn">Documentation</a>
     {% if site.github.is_project_page %}
     <a href="{{ site.github.repository_url }}" class="btn">View on GitHub</a>
     {% endif %}
-    <a href="https://zeramorphic.github.io/con-nf-paper/main.l.pdf" class="btn">Draft paper</a>
     {% if site.show_downloads %}
     <a href="{{ site.github.zip_url }}" class="btn">Download .zip</a>
     <a href="{{ site.github.tar_url }}" class="btn">Download .tar.gz</a>

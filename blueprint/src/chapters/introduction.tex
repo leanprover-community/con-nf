@@ -4,7 +4,7 @@
 We will begin by discussing the mathematical background for the question of the consistency of \NF.
 We will establish the mathematical context for the proof we will present.
 In particular, our proof will not directly show the consistency of \NF; instead, we will construct a model of a related theory known as \emph{tangled type theory}, or \TTT.
-We will show that there is a structure that satisfies a particular axiomatisation of {\TTT} which we will discuss in \cref{s:theories}.
+We will show that there is a structure that satisfies a particular axiomatisation of {\TTT} which we will discuss in \cref{ss:theories:ttt}.
 The expected conclusion that {\NF} is consistent then follows from the fact that {\NF} and {\TTT} are equiconsistent \cite{holmes-ttt}.
 
 We will now outline our general strategy for the construction of a model of tangled type theory.
@@ -30,14 +30,10 @@ This will involve breaking down the model-theoretic arguments from \cite{typical
 
 Implementation details will be discussed in footnotes.
 
-\section{The theories at issue}
-\label{s:theories}
+\section{The simple theory of types}
 
 In 1937, Quine introduced \emph{New Foundations} (\NF) \cite{quine-nf}, a set theory with a very small collection of axioms.
 To give a proper exposition of the theory that we intend to prove consistent, we will first make a digression to introduce the related theory {\TST}, as explained in \cite{con-nf}.
-We will then describe the theory {\TTT}, which we will use to prove our theorem.
-
-\subsection{The simple theory of types}
 
 The \emph{simple theory of types} (known as \emph{théorie simple des types} or {\TST}) is a first order set theory with several sorts, indexed by the nonnegative integers.
 Each sort, called a \emph{type}, is comprised of \emph{sets} of that type; each variable \( \mquote{x} \) has a nonnegative integer \( \ttype(\mquote x) \) which denotes the type it belongs to.
@@ -58,7 +54,7 @@ Because extensionality at level \( n + 1 \) requires us to talk about sets at le
 By comprehension, there is a set at each nonzero type that contains all sets of the previous type.
 However, Russell-style paradoxes are avoided as formulae of the form \( x^n \in x^n \) are ill-formed.
 
-\subsection{New Foundations}
+\section{New Foundations}
 
 New Foundations is a one-sorted first-order theory based on {\TST}.
 Its primitive propositions are equality and membership.
@@ -82,7 +78,7 @@ Specker showed in \cite{specker-choice-nf} that {\NF} disproves the Axiom of Cho
 
 While our main result is that New Foundations is consistent, we attack the problem by means of an indirection through a third theory.
 
-\subsection{Tangled type theory}
+\section{Tangled type theory}
 \label{ss:theories:ttt}
 
 Introduced by Holmes in \cite{holmes-ttt}, \emph{tangled type theory} ({\TTT}) is a multi-sorted first order theory based on {\TST}.
@@ -118,7 +114,7 @@ As {\TTT} has types indexed by a limit ordinal, and sets can only contain sets o
 In particular, a model of {\TTT} is a well-founded structure.
 This was not an option with {\NF} directly, as the universal set \( V = \{ x \mid x = x \} \) would necessarily be constructed before many of its elements.
 
-\subsection{Finitely axiomatising tangled type theory}
+\section{Finitely axiomatising tangled type theory}
 
 As mentioned above, Hailperin showed in \cite{hailperin-finite-axiomatisation} that the comprehension scheme of {\NF} is equivalent to a finite conjunction of its instances.
 In fact, the same proof shows that the comprehension scheme of {\TST} (and hence that of {\TTT}) is equivalent to a finite conjunction of its instances, but instantiated at all possible type sequences.

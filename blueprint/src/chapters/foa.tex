@@ -14,6 +14,8 @@
   \end{itemize}
 \end{definition}
 \begin{definition}[atom graph of an approximation]
+  \uses{def:BaseApprox}
+  \label{def:atomGraph}
   The \emph{typical atom graph} of \( \psi \) is the relation \( \psi^{T\Atom} \) given by the following constructor.
   If \( (L_1, L_2) \in \psi^\Litter \), then
   \[ (h_{(L_1)_\psi}(i), h_{(L_2)_\psi}(i)) \in \psi^{T\Atom} \]
@@ -22,19 +24,23 @@
   The \emph{atom graph} of \( \psi \) is the relation \( \psi^\Atom = \psi^{E\Atom} \sqcup \psi^{T\Atom} \): the join of the exceptional and typical atom graphs.
 \end{definition}
 \begin{proposition}
-  \label{prop:atom_graph_inverse}
+  \uses{def:atomGraph}
+  \label{prop:atomGraph_inv}
   \( (\psi^{T\Atom})^{-1} = (\psi^{-1})^{T\Atom} \) and hence \( (\psi^\Atom)^{-1} = (\psi^{-1})^\Atom \).
 \end{proposition}
 \begin{proof}
   This follows directly from the fact that \( L_\psi = L_{\psi^{-1}} \) for any litter \( L \).
 \end{proof}
 \begin{proposition}
+  \uses{def:atomGraph}
+  \label{prop:atomGraph_permutative}
   The graphs \( \psi^{T\Atom} \) and \( \psi^\Atom \) are permutative.
 \end{proposition}
 \begin{proof}
+  \uses{prop:atomGraph_inv}
   The typical atom graph is injective, because the equation \( h_{L_\psi}(i)^\circ = L \) can be used to establish the the parameters of the relevant \( h \) maps coincide.
   Furthermore, we can use the fact that \( \psi^\Litter \) has equal image and coimage to produce images of any image element of this relation.
-  We then appeal to symmetry using \cref{prop:atom_graph_inverse} to conclude that \( \psi^{T\Atom} \) is permutative.
+  We then appeal to symmetry using \cref{prop:atomGraph_inv} to conclude that \( \psi^{T\Atom} \) is permutative.
 
   The (co)image of \( \psi^{T\Atom} \) is
   \[ \bigcup_{L \in \coim \psi^\Litter} L_\psi = \bigcup_{L \in \coim \psi^\Litter} (\LS(L) \setminus \coim \psi^{E\Atom}) \]
@@ -42,6 +48,8 @@
   So \( \psi^\Atom \) is permutative by one of the results of \cref{prop:relation_results}.
 \end{proof}
 \begin{proposition}
+  \uses{def:atomGraph}
+  \label{prop:comp_atomGraph}
   If \( \psi, \chi \) have equal exceptional atom and litter coimages, then \( (\psi \circ \chi)^{T\Atom} = \psi^{T\Atom} \circ \chi^{T\Atom} \).
 \end{proposition}
 \begin{proof}
@@ -59,9 +67,12 @@
   Since \( (L_1, L_2) \in \chi^\Litter \) and \( (L_2, L_3) \in \psi^\Litter \), we conclude \( (L_1, L_3) \in (\psi \circ \chi)^\Litter \), as required.
 \end{proof}
 \begin{definition}[near-litter graph of an approximation]
+  \uses{def:atomGraph}
+  \label{def:nearLitterGraph}
   The \emph{near-litter graph} of \( \psi \) is the relation \( \psi^\NearLitter \) given by setting \( (N_1, N_2) \in \psi^\NearLitter \) if and only if \( (N_1^\circ, N_2^\circ) \in \psi^\Litter \), \( N_1 \) and \( N_2 \) are subsets of \( \coim \psi^\Atom \), and the image of \( \psi^\Atom \) on \( N_1 \) is \( N_2 \) (or equivalently, by \cref{prop:relation_results}, the coimage of \( \psi^\Atom \) on \( N_2 \) is \( N_1 \)).
 \end{definition}
 \begin{proposition}
+  \uses{def:nearLitterGraph}
   \label{prop:approx_near}
   Let \( s \) be a set of atoms near \( \LS(L) \) for some litter \( L \).
   If \( s \subseteq \coim \psi^\Atom \) and \( (L, L') \in \psi^\Litter \), then the image of \( \psi^\Atom \) on \( s \) is near \( \LS(L') \).
@@ -81,10 +92,13 @@
   Many of these equalities should be their own lemmas.
 \end{proof}
 \begin{proposition}
+  \uses{def:nearLitterGraph}
+  \label{prop:nearLitterGraph_permutative}
   \( (\psi^{-1})^\NearLitter = (\psi^\NearLitter)^{-1} \), and \( \psi^\NearLitter \) is permutative.
 \end{proposition}
 \begin{proof}
-  The first part follows from \cref{prop:atom_graph_inverse}.
+  \uses{prop:atomGraph_permutative,prop:approx_near}
+  The first part follows from \cref{prop:atomGraph_inv}.
   To show \( \psi^\NearLitter \) is permutative, it suffices to show that it is injective and that its image is contained in its coimage; then, by taking inverses, the converses will also hold.
   Suppose that \( (N_1, N_3), (N_2, N_3) \in \psi^\NearLitter \).
   Then the coimage of \( \psi^\Atom \) on \( N_3 \) is equal to both \( N_1 \) and \( N_2 \), so \( N_1 = N_2 \), giving injectivity.
@@ -94,6 +108,8 @@
   By \cref{prop:approx_near}, the image \( s \) of \( \psi^\Atom \) on \( N_2 \) is near \( \LS(L) \), so \( (L, s) \) is a near-litter, and \( (N_2, (L, s)) \in \psi^\NearLitter \) as required.
 \end{proof}
 \begin{definition}
+  \uses{def:nearLitterGraph}
+  \label{def:smulApproxSupport}
   Base approximations act on base supports in the following way.
   If \( S^\Atom = (i, f) \), then \( \psi(S)^\Atom = (i, f') \) where
   \[ f' = \{ (j, a_2) \mid (j, a_1) \in f \wedge (a_1, a_2) \in \psi^\Atom \} \]
@@ -102,10 +118,13 @@
 
 \section{Extensions of approximations}
 \begin{definition}
+  \uses{def:BaseApprox}
+  \label{def:BaseApprox.LE}
   We define a partial order on base approximations by setting \( \psi \leq \chi \) when \( \psi^{E\Atom} = \chi^{E\Atom} \) and \( \psi^\Litter \leq \chi^\Litter \).
 \end{definition}
 \begin{proposition}[adding orbits]
-  \label{prop:adding_orbits}
+  \uses{def:BaseApprox.LE}
+  \label{prop:BaseApprox.addOrbit}
   Let \( \psi \) be a base approximation, and let \( L : \mathbb N \to \Litter \) be a function such that
   \[ L(m) = L(n) \to L(m+k) = L(n+k) \]
   for all integers \( m, n, k : \mathbb Z \).
@@ -121,15 +140,20 @@
   So \( L(m + 1) = L(n + 1) \), giving \( L_1 = L(m) = L(n) = L_2 \) by substituting \( k = -1 \) in the hypothesis.
   It is also coinjective by substituting \( k = 1 \) in the hypothesis.
   So \( R \) is permutative.
-  Therefore, \( \psi^\Litter \sqcup R \) is a permutative relation, so \( (\psi^\Atom, \psi^\Litter \sqcup R) \) is an extension of \( \psi \), and it clearly satisfies the result.
+  Therefore, \( \psi^\Litter \sqcup R \) is a permutative relation, so \( (\psi^{E\Atom}, \psi^\Litter \sqcup R) \) is an extension of \( \psi \), and it clearly satisfies the result.
 \end{proof}
 
 \section{Structural approximations}
 \begin{definition}
+  \uses{def:BaseApprox.LE,def:Tree}
+  \label{def:StrApprox}
   For a type index \( \beta \), a \emph{\( \beta \)-approximation} is a \( \beta \)-tree of base approximations.
+  We define the partial order on \( \beta \)-approximations branchwise.
   We define an action of \( \beta \)-approximations \( \psi \) on \( \beta \)-supports \( S \) by \( (\psi(S))_A = \psi_A(S_A) \).
 \end{definition}
 \begin{definition}
+  \uses{def:InflexiblePath}
+  \label{def:Inflexible}
   Let \( A \) be a \( \beta \)-extended type index.
   A litter \( L \) is \emph{\( A \)-inflexible} if there is an inflexible \( \beta \)-path \( I \) such that \( A = ((A_I)_{\varepsilon_I})_\bot \) and \( L = f_{\delta_I, \varepsilon_I}(t) \) for some \( t : \Tang_{\delta_I} \).
   The coderivative operation works in the obvious way.
@@ -139,6 +163,8 @@
   If \( L \) is \( B_A \)-flexible, then \( L \) is \( A \)-flexible.
 \end{definition}
 \begin{definition}
+  \uses{def:StrApprox,def:Inflexible,def:smulApproxSupport}
+  \label{def:Coherent}
   A \( \beta \)-approximation \( \psi \) is \emph{coherent} at \( (A, L_1, L_2) \) if:
   \begin{itemize}
     \item If \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \), then there is some \( \delta \)-allowable permutation \( \pi \) such that
@@ -151,8 +177,9 @@
   We say that \( \psi \) is \emph{coherent} if whenever \( (L_1, L_2) \in \psi_A^\Litter \), \( \psi \) is coherent at \( (A, L_1, L_2) \).
 \end{definition}
 \begin{proposition}[adding orbits coherently]
-  \label{prop:adding_orbits_coherently}
-  Suppose that \( \psi \) is an approximation and \( L : \mathbb Z \to \Litter \) is a function satisfying the hypotheses of \cref{prop:adding_orbits}.
+  \uses{prop:BaseApprox.addOrbit,def:Coherent}
+  \label{prop:StrApprox.addOrbit}
+  Suppose that \( \psi \) is an approximation and \( L : \mathbb Z \to \Litter \) is a function satisfying the hypotheses of \cref{prop:BaseApprox.addOrbit}.
   Let \( \chi \) be the extension produced by the structural version of this result.\footnote{We need the extension exactly as produced (as data), not an arbitrary extension satisfying the conclusion of the proposition.}
   If \( \psi \) is coherent, and is additionally coherent at \( (L(n), L(n+1)) \) for each integer \( n \), then \( \chi \) is coherent.
 \end{proposition}
@@ -160,7 +187,8 @@
   This proof just relies on the fact that if \( (\psi_B)_\delta(\supp(t)) = \pi(\supp(t)) \), then the same holds for every extension \( \chi \) of \( \psi \).\footnote{Maybe there's a better lemma to abstract out this idea for this and \cref{prop:approx_chain}}
 \end{proof}
 \begin{proposition}
-  \label{prop:inv_coherent}
+  \uses{def:Coherent}
+  \label{prop:Coherent.inv}
   If \( \psi \) is coherent, then \( \psi^{-1} \) is coherent.
 \end{proposition}
 \begin{proof}
@@ -188,6 +216,8 @@
   So \( L_2 \) is \( A \)-flexible, as required.
 \end{proof}
 \begin{proposition}
+  \uses{def:Coherent}
+  \label{prop:Coherent.comp}
   If \( \psi \) and \( \chi \) are coherent and have equal coimages along all paths, then \( \psi \circ \chi \) is coherent.
 \end{proposition}
 \begin{proof}
@@ -207,6 +237,8 @@
   Instead, if \( L_1 \) is \( A \)-flexible, then so is \( L_2 \) by coherence of \( \psi \), and so is \( L_3 \) by coherence of \( \chi \).
 \end{proof}
 \begin{proposition}
+  \uses{def:Coherent}
+  \label{prop:Coherent.deriv}
   If \( \psi \) is a coherent \( \beta \)-approximation and \( A \) is a path \( \beta \tpath \beta' \), then \( \psi_A \) is a coherent \( \beta' \)-approximation.
 \end{proposition}
 \begin{proof}
@@ -225,29 +257,37 @@
 
 \section{Proving freedom of action}
 \begin{definition}[approximates]
+  \uses{def:StrApprox,def:atomGraph,prop:atomGraph_inv,prop:comp_atomGraph,prop:nearLitterGraph_permutative}
+  \label{def:Approximates}
   We say that a \( \beta \)-approximation \( \psi \) \emph{approximates} a \( \beta \)-allowable permutation \( \pi \) if \( \psi_A^\Litter \leq \pi_A^\Litter \) and \( \psi_A^\Atom \leq \pi_A^\Atom \) for each path \( A : \beta \tpath \bot \).
-  If \( \psi \) approximates \( \pi \) then \( \psi^n \) approximates \( \pi^n \) for each \( n : \mathbb Z \).
+  If \( \psi \) approximates \( \pi \) then \( \psi^n \) approximates \( \pi^n \) for each \( n : \mathbb Z \).\footnote{We should define what it means for a base approximation to approximate a near-litter permutation, and define this in terms of that.}
 \end{definition}
 \begin{definition}[freedom of action]
+  \uses{def:Approximates}
+  \label{def:FreedomOfAction}
   We say that \emph{freedom of action} holds at a type index \( \delta \) if every coherent \( \delta \)-approximation approximates some \( \delta \)-allowable permutation.
 \end{definition}
 \begin{proposition}[adding flexible litters]
-  \label{prop:add_flexible_litter}
+  \uses{def:Inflexible,def:StrApprox}
+  \label{prop:StrApprox.addFlexible}
   Let \( \psi \) be a coherent \( \beta \)-approximation, and let \( L \) be \( A \)-flexible.
   Then there is a coherent extension \( \chi \geq \psi \) with \( L \in \coim \chi_A^\Litter \).
 \end{proposition}
 \begin{proof}
-  Define \( L' : \mathbb Z \to \Litter \) by \( L'(n) = L \), then appeal to \cref{prop:adding_orbits_coherently} to obtain \( \chi \geq \psi \).
+  \uses{prop:StrApprox.addOrbit}
+  Define \( L' : \mathbb Z \to \Litter \) by \( L'(n) = L \), then appeal to \cref{prop:StrApprox.addOrbit} to obtain \( \chi \geq \psi \).
   All we must do is check that \( \psi \) is coherent at \( (L, L) \), which is trivial.
 \end{proof}
 \begin{proposition}[adding inflexible litters]
-  \label{prop:add_inflexible_litter}
+  \uses{def:FreedomOfAction,def:StrApprox}
+  \label{prop:StrApprox.addInflexible}
   Let \( \psi \) be a coherent \( \beta \)-approximation, and let \( L \) be \( A \)-inflexible with path \( (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \).
   Suppose that \( (\psi_B)_\delta \) is defined on all of \( \supp(t) \).\footnote{This is a nontrivial definition to make.}
   Suppose that freedom of action holds at level \( \delta \).
   Then there is a coherent extension \( \chi \geq \psi \) with \( L \in \coim \chi_A^\Litter \).
 \end{proposition}
 \begin{proof}
+  \uses{prop:StrApprox.addOrbit,prop:Coherent.deriv,prop:Coherent.comp,prop:Coherent.inv}
   Let \( \pi \) be a \( \delta \)-allowable permutation that \( (\psi_B)_\delta \) approximates.
   Then for each \( n : \mathbb Z \), as \( (\psi^n_B)_\delta \) approximates \( \pi^n \), we obtain \( (\psi^n_B)_\delta(\supp(t)) = \pi^n(\supp(t)) \) as \( (\psi^n_B)_\delta \) is defined on all of \( \supp(t) \).\footnote{This should of course be its own lemma.}
   Define \( L : \mathbb Z \to \Litter \) by \( L(n) = f_{\delta,\varepsilon}(\pi^n(t)) \).
@@ -262,10 +302,10 @@
   So as \( \psi^{-n} \) is coherent, we obtain \( (L(n), f_{\delta,\varepsilon}(t)) \in (\psi^{-n}_A)^\Litter \).
   In particular, \( f_{\delta,\varepsilon}(t) \in \coim \psi_A^\Litter \) already, and no work needs to be done.
 
-  We first check the hypothesis of \cref{prop:adding_orbits} for adding orbits.
+  We first check the hypothesis of \cref{prop:BaseApprox.addOrbit} for adding orbits.
   If \( f_{\delta,\varepsilon}(\pi^m(t)) = f_{\delta,\varepsilon}(\pi^n(t)) \), then \( \pi^m(t) = \pi^n(t) \), so \( \pi^{m+k}(t) = \pi^{n+k}(t) \), giving \( f_{\delta,\varepsilon}(\pi^{m+k}(t)) = f_{\delta,\varepsilon}(\pi^{n+k}(t)) \) as required.
 
-  We now check the criterion of \cref{prop:adding_orbits_coherently} for adding orbits coherently.
+  We now check the criterion of \cref{prop:StrApprox.addOrbit} for adding orbits coherently.
   It suffices to show that \( \psi \) is coherent at \( (L(n), L(n+1)) \) for each \( n : \mathbb Z \).
   This is witnessed by \( \pi \), which satisfies
   \[ (\psi_B)_\delta(\supp(\pi^n(t))) = \pi(\supp(\pi^n(t))) \]
@@ -274,30 +314,33 @@
   as required.\footnote{It might be helpful to abstract away the lemma \( (\psi^m_B)_\delta(\supp(\pi^n(t))) = \supp(\pi^{n+m}(t)) \) for the two places in the proof where this idea is used.}
 \end{proof}
 \begin{proposition}
-  \label{prop:approx_chain}
+  \uses{def:Coherent}
+  \label{prop:StrApprox.chain}
   If \( (\psi_i)_{i : I} \) is a chain of coherent approximations where \( I \) is a linear order, then the supremum \( \psi \) is coherent.
 \end{proposition}
 \begin{proof}
-  Direct, using the same idea as the proof of \cref{prop:adding_orbits_coherently}.
+  Direct, using the same idea as the proof of \cref{prop:StrApprox.addOrbit}.
 \end{proof}
 \begin{theorem}[freedom of action]
-  \label{thm:foa}
+  \uses{def:FreedomOfAction}
+  \label{thm:freedom_of_action}
   Freedom of action holds at all type indices \( \beta \leq \alpha \).
 \end{theorem}
 \begin{proof}
+  \uses{prop:StrApprox.chain,prop:StrApprox.addFlexible,def:CoherentData,prop:BasePositions,prop:StrApprox.addInflexible}
   By induction, we may assume freedom of action holds at all \( \delta < \beta \).
-  Let \( \psi \) be a coherent \( \beta \)-approximation, and let \( \chi \) be a maximal coherent extension, which exists by Zorn's lemma and \cref{prop:approx_chain}.
+  Let \( \psi \) be a coherent \( \beta \)-approximation, and let \( \chi \) be a maximal coherent extension, which exists by Zorn's lemma and \cref{prop:StrApprox.chain}.
 
   Suppose that there is a litter \( L \) such that there exists a path \( A \) where \( L \notin \coim \chi_A^\Litter \).
   Let \( L \) have minimal position with this property, and let \( A \) be such a path.
 
   Suppose that \( L \) is \( A \)-flexible.
-  Then by \cref{prop:add_flexible_litter}, there is an extension \( \varphi \) of \( \chi \) such that \( L \in \coim \varphi_A^\Litter \), contradicting maximality of \( \chi \).
+  Then by \cref{prop:StrApprox.addFlexible}, there is an extension \( \varphi \) of \( \chi \) such that \( L \in \coim \varphi_A^\Litter \), contradicting maximality of \( \chi \).
 
   Suppose that \( L \) is \( A \)-inflexible, with path \( (\gamma,\delta,\varepsilon,B) \) and tangle \( t \).
   Then \( (\psi_B)_\delta \) is defined on all of \( \supp(t) \).
-  Indeed, by \cref{def:CoherentData} (coherent data) and \cref{prop:fuzz} (fuzz maps), for each atom or near-litter \( y \) that appears in the range of \( \supp(t)_C \), we have \( \iota(y) < \iota(t) < \iota(L) \), giving the desired conclusion by minimality of the position of \( L \).
-  Thus, we obtain the same contradiction by \cref{prop:add_inflexible_litter}.
+  Indeed, by \cref{def:CoherentData} (coherent data) and \cref{prop:fuzz} (fuzz maps), for each atom or near-litter \( y \) that appears in the range of \( \supp(t)_C \), we have \( \iota(y) < \iota(t) < \iota(L) \), giving the desired conclusion by minimality of the position of \( L \) and the criteria of \cref{prop:BasePositions}.
+  Thus, we obtain the same contradiction by \cref{prop:StrApprox.addInflexible}.
 
   So \( \coim \chi_A^\Litter \) is the set of all litters for each path \( A \).
   We then use the fact that our model data is coherent to recursively compute the allowable permutation \( \pi \) with the same action as \( \chi \).
