@@ -1,10 +1,12 @@
 \section{Strong supports}
 \begin{definition}
+  \uses{def:StrSupport}
   \label{def:StrSupport.Occurs}
   We define a partial order \( \preceq \) on base supports by \( S \preceq T \) if and only if \( \im S^\Atom \subseteq \im T^\Atom \) and \( \im S^\NearLitter \subseteq \im T^\NearLitter \).
   For \( \beta \)-supports, we define \( S \preceq T \) if and only if \( S_A \preceq T_A \) for each \( A \).
 \end{definition}
 \begin{definition}
+  \uses{def:StrSupport,def:InflexiblePath,def:Interference}
   \label{def:Strong}
   A \( \beta \)-support \( S \) is \emph{strong} if:
   \begin{itemize}
@@ -13,10 +15,15 @@
   \end{itemize}
 \end{definition}
 \begin{proposition}
+  \uses{def:Strong}
   \label{prop:Strong.smul}
   If \( S \) is a strong \( \beta \)-support and \( \rho \) is \( \beta \)-allowable, then \( \rho(S) \) is strong.
 \end{proposition}
+\begin{proof}
+  TODO
+\end{proof}
 \begin{proposition}
+  \uses{def:Strong}
   \label{prop:exists_strong}
   For every support \( S \), there is a strong support \( T \succeq S \).
 \end{proposition}
@@ -26,9 +33,13 @@
 
 \section{Coding functions}
 \begin{definition}
+  \uses{def:StrSupport,def:ModelData}
+  \label{def:SupportOrbit}
   For a type index \( \beta \leq \alpha \), a \emph{\( \beta \)-support orbit} is the quotient of \( \StrSupp_\beta \) under the relation of being in the same orbit under \( \beta \)-allowable permutations.\footnote{This can be implemented using \texttt{MulAction.orbitRel.Quotient}. We need to make sure there's plenty of API for support orbits to avoid code duplication.}
 \end{definition}
 \begin{definition}
+  \uses{def:SupportOrbit}
+  \label{def:CodingFunction}
   For any type index \( \beta \leq \alpha \), a \emph{\( \beta \)-coding function} is a relation \( \chi : \StrSupp_\beta \to \TSet_\beta \to \Prop \) such that:
   \begin{itemize}
     \item \( \chi \) is coinjective;
@@ -39,6 +50,7 @@
   \end{itemize}
 \end{definition}
 \begin{proposition}[extensionality for coding functions]
+  \uses{def:CodingFunction}
   \label{prop:CodingFunction.ext}
   Let \( \chi_1, \chi_2 \) be \( \beta \)-coding functions.
   If \( (S, x) \in \chi_1, \chi_2 \), then \( \chi_1 = \chi_2 \).
@@ -51,22 +63,29 @@
   Hence \( (T, y) \in \chi_2 \) as required.
 \end{proof}
 \begin{definition}
+  \uses{def:CodingFunction}
+  \label{def:code}
   Let \( t : \Tang_\beta \).
   Then we define the coding function \( \chi_t \) by the constructor
   \[ \forall \rho : \AllPerm_\beta,\, (\rho(\supp(t)), \rho(\set(t))) \in \chi \]
   This is clearly a coding function, and satisfies \( (\supp(t), \set(t)) \in \chi_t \).
 \end{definition}
 \begin{proposition}
+  \uses{def:CodingFunction}
+  \label{def:code_eq_code_iff}
   Let \( t, u : \Tang_\beta \).
   Then \( \chi_t = \chi_u \) if and only if there is a \( \beta \)-allowable \( \rho \) with \( \rho(t) = u \).
 \end{proposition}
 \begin{proof}
+  \uses{prop:CodingFunction.ext}
   If \( \rho(t) = u \), then \( (\supp(t), \set(t)) \in \chi_t \) implies \( (\supp(u), \set(u)) \in \chi_t \), giving \( \chi_t = \chi_u \) by \cref{prop:CodingFunction.ext}.
   Conversely if \( \chi_t = \chi_u \), then \( (\supp(u), \set(u)) \in \chi_t \), so there is \( \rho \) such that \( \rho(\supp(t)) = \supp(u) \), and \( (\rho(\supp(t)), \rho(\set(t))) \in \chi_t \), so by coinjectivity we obtain \( \rho(set(t)) = \set(u) \) as required.
 \end{proof}
 
 \section{Specifications}
 \begin{definition}
+  \uses{def:CodingFunction}
+  \label{def:Spec}
   An \emph{atom condition} is a pair \( (s, t) \) where \( s, t : \Set \kappa \).
   A \emph{\( \beta \)-near-litter condition} is either
   \begin{itemize}
@@ -80,6 +99,8 @@
   \end{itemize}
 \end{definition}
 \begin{definition}
+  \uses{def:Spec,def:InflexiblePath,def:code}
+  \label{def:StrSupport.spec}
   Let \( S \) be a \( \beta \)-support.
   Then \emph{its specification} is the \( \beta \)-specification \( \sigma = \spec(S) \) given by the following constructors.
   \begin{itemize}
@@ -95,6 +116,7 @@
   \end{itemize}
 \end{definition}
 \begin{proposition}
+  \uses{def:StrSupport.spec,def:code_eq_code_iff}
   \label{prop:spec_eq_spec_iff}
   Let \( S, T \) be \( \beta \)-supports.
   Then \( \spec(S) = \spec(T) \) if and only if\footnote{The following bullet points should comprise a proposition type relating \( S \) and \( T \).}
@@ -125,10 +147,13 @@
   This can be concluded by appealing to the basic behaviour of \( \rho \) and noting the coinjectivity of \( \supp(t)_B^\Atom \).
 \end{proof}
 \begin{proposition}
+  \uses{def:StrSupport.spec}
+  \label{def:spec_smul}
   Let \( \rho \) be \( \beta \)-allowable, and let \( S \) be a \( \beta \)-support.
   Then \( \spec(\rho(S)) = \spec(S) \).
 \end{proposition}
 \begin{proof}
+  \uses{prop:spec_eq_spec_iff}
   We appeal to \cref{prop:spec_eq_spec_iff}.
   Clearly the coimage condition holds.
 
@@ -154,6 +179,8 @@
   which again is trivial.
 \end{proof}
 \begin{definition}
+  \uses{def:BaseSupport}
+  \label{def:conv_base}
   Let \( S \) and \( T \) be base supports.
   We define the relations \( \conv_{S,T}^\Atom, \conv_{S,T}^\NearLitter \) by the constructors\footnote{TODO: We should abstract this out even further. This can be defined for any pair of relations with common domain.}
   \begin{align*}
@@ -163,22 +190,26 @@
   Note that \( {\conv_{S,T}^\Atom}^{-1} = \conv_{T,S}^\Atom \) and \( {\conv_{S,T}^\NearLitter}^{-1} = \conv_{T,S}^\NearLitter \).
 \end{definition}
 \begin{proposition}
+  \uses{def:conv_base,def:StrSupport.spec}
   \label{prop:conv_one_to_one}
   Let \( S, T \) be supports such that \( \spec(S) = \spec(T) \).
   Then \( \conv_{S_A, T_A}^\Atom \) is one-to-one.
 \end{proposition}
 \begin{proof}
+  \uses{prop:spec_eq_spec_iff}
   If \( (a_1, a_2), (a_1, a_3) \in \conv_{S_A, T_A}^\Atom \), then there are \( i, j \) such that \( (i, a_1), (j, a_1) \in S_A^\Atom \) and \( (i, a_2), (j, a_3) \in T_A^\Atom \).
   By \cref{prop:spec_eq_spec_iff}, we deduce \( (j, a_1) \in S_A^\Atom \leftrightarrow (j, a_2) \in T_A^\Atom \), so by coinjectivity of \( T_A^\Atom \), we deduce \( a_2 = a_3 \).
   Hence \( \conv_{S_A, T_A}^\Atom \) is coinjective.
   By symmetry, \( \conv_{S_A, T_A}^\Atom \) is one-to-one.
 \end{proof}
 \begin{proposition}
+  \uses{def:conv_base,def:StrSupport.spec}
   \label{prop:conv_mem_nearLitter_iff}
   Let \( S, T \) be supports such that \( \spec(S) = \spec(T) \).
   If \( (a_1, a_2) \in \conv_{S_A, T_A}^\Atom \) and \( (N_1, N_2) \in \conv_{S_A, T_A}^\NearLitter \), then \( a_1 \in N_1 \) if and only if \( a_2 \in N_2 \).
 \end{proposition}
 \begin{proof}
+  \uses{prop:spec_eq_spec_iff}
   As \( (a_1, a_2) \in \conv_{S_A, T_A}^\Atom \), there is \( i \) such that \( (i, a_1) \in S_A^\Atom \) and \( (i, a_2) \in T_A^\Atom \), and as \( (N_1, N_2) \in \conv_{S_A, T_A}^\NearLitter \), there is \( j \) such that \( (j, N_1) \in S_A^\NearLitter \) and \( (j, N_2) \in T_A^\NearLitter \).
   By \cref{prop:spec_eq_spec_iff}, we deduce that
   \[ \forall j,\, (\exists N,\, (j, N) \in S_A^\NearLitter \wedge a_1 \in N) \leftrightarrow (\exists N,\, (j, N) \in T_A^\NearLitter \wedge a_2 \in N) \]
@@ -187,11 +218,13 @@
   The converse holds by symmetry.
 \end{proof}
 \begin{proposition}
+  \uses{def:conv_base,def:StrSupport.spec,def:Strong}
   \label{prop:conv_circ_eq_circ_iff}
   Let \( S, T \) be supports such that \( T \) is strong and \( \spec(S) = \spec(T) \).
   If \( (N_1, N_3), (N_2, N_4) \in \conv_{S_A, T_A}^\NearLitter \), then \( N_1^\circ = N_2^\circ \) if and only if \( N_3^\circ = N_4^\circ \).
 \end{proposition}
 \begin{proof}
+  \uses{prop:spec_eq_spec_iff}
   There are \( i, j \) such that \( (i, N_1), (j, N_2) \in S_A^\NearLitter \) and \( (i, N_3), (j, N_4) \in T_A^\NearLitter \).
   Suppose that \( N_1^\circ = N_2^\circ \); we show that \( N_3^\circ = N_4^\circ \).
 
@@ -225,6 +258,7 @@
   Thus \( \rho(\supp(t)) = \rho'(\supp(t)) \), giving \( \rho(t) = \rho'(t) \), and hence \( N_3^\circ = N_4^\circ \).
 \end{proof}
 \begin{proposition}
+  \uses{def:conv_base,def:StrSupport.spec,def:Strong}
   \label{prop:conv_interf}
   Let \( S, T \) be strong supports such that \( \spec(S) = \spec(T) \).
   Then for each \( (N_1, N_3), (N_2, N_4) \in \conv_{S_A, T_A}^\NearLitter \),
@@ -268,10 +302,13 @@
   Hence \( (a, \rho_C(a)) \in (((\conv_{S,T})_B)_\delta)_C \) as required.
 \end{proof}
 \begin{proposition}
+  \uses{def:StrSupport.spec,def:Strong}
+  \label{prop:exists_allowable_of_spec_eq_spec}
   Let \( S, T \) be strong supports such that \( \spec(S) = \spec(T) \).
   Then there is an allowable permutation \( \rho \) such that \( \rho(S) = T \).
 \end{proposition}
 \begin{proof}
+  \uses{prop:conv_coherent,thm:StrAction.foa}
   By \cref{prop:conv_coherent}, we may apply \cref{thm:StrAction.foa} to \( \conv_{S,T} \) to obtain an allowable permutation \( \rho \) that \( \conv_{S,T} \) approximates, which directly gives \( \rho(S) = T \) as required.
 \end{proof}
 
