@@ -312,11 +312,111 @@
   By \cref{prop:conv_coherent}, we may apply \cref{thm:StrAction.foa} to \( \conv_{S,T} \) to obtain an allowable permutation \( \rho \) that \( \conv_{S,T} \) approximates, which directly gives \( \rho(S) = T \) as required.
 \end{proof}
 
-% some point later...
+\section{Recoding}
 \begin{definition}
+  \uses{def:CodingFunction,def:CoherentData}
+  \label{def:Combination}
+  Let \( \gamma < \beta \) be proper type indices at most \( \alpha \).
+  An object \( x : \TSet_\beta \) is called a \emph{\( \gamma \)-combination} of a set of \( \beta \)-coding functions \( s \) with respect to a \( \beta \)-support \( S \) if
+  \[ U_\beta(x)(\gamma) = \bigcup_{(V, v) \in \chi \in s,\, V \geq S} U_\beta(v)(\gamma) \]
+  By extensionality, a set of coding functions \( s \) has at most one \( \gamma \)-combination with respect to a given support \( S \).
+\end{definition}
+\begin{proposition}
+  \uses{def:Combination}
+  \label{prop:Combination.smul}
+  If \( x \) is a \( \gamma \)-combination of \( s \) with respect to \( S \) then \( \rho(x) \) is a \( \gamma \)-combination of \( s \) with respect to \( \rho(S) \).
+\end{proposition}
+\begin{proof}
+  We can calculate
+  \begin{align*}
+    U_\beta(\rho(x))(\gamma)
+    &= \rho_\gamma[U_\beta(x)(\gamma)] \\
+    &= \rho_\gamma\left[ \bigcup_{(V, v) \in \chi \in s,\, V \geq S} U_\beta(v)(\gamma) \right] \\
+    &= \bigcup_{(V, v) \in \chi \in s,\, V \geq S} \rho_\gamma\left[ U_\beta(v)(\gamma) \right] \\
+    &= \bigcup_{(V, v) \in \chi \in s,\, V \geq S} U_\beta(\rho(v))(\gamma) \\
+    &= \bigcup_{(V, v) \in \chi \in s,\, V \geq \rho(S)} U_\beta(v)(\gamma)
+  \end{align*}
+  where the last inequality uses the fact that coding functions are defined on a support orbit.
+\end{proof}
+\begin{definition}
+  \uses{def:Combination,def:SupportOrbit}
+  \label{def:raisedCodingFunction}
+  Let \( s \) be a set of \( \beta \)-coding functions, and let \( o \) be a \( \beta \)-support orbit such that for each \( S \in o \), \( s \) has a \( \gamma \)-combination \( x \) with respect to \( S \) where \( S \) supports \( x \).
+  Then the \emph{\( (\gamma,\beta) \)-raised coding function} for \( (s, o) \) is the relation \( \chi : \StrSupp_\beta \to \TSet_\beta \to \Prop \) defined by the constructor
+  \[ \forall S \in o,\, \forall x \text{ combinations of } (s, S),\, (S, x) \in \chi \]
+\end{definition}
+\begin{proposition}
+  \uses{def:raisedCodingFunction}
+  \label{prop:raisedCodingFunction_spec}
+  The \( (\gamma,\beta) \)-raised coding function for \( (s, o) \) is a coding function.
+\end{proposition}
+\begin{proof}
+  \uses{prop:Combination.smul}
+  Coinjectivity follows from uniqueness of combinations.
+  The nonemptiness and support orbit conditions follow from the definition, as does the condition that \( (S, x) \in \chi \) implies that \( S \) is a support for \( x \).
+  It remains to show that if \( (S, x) \in \chi \) and \( \rho \) is \( \beta \)-allowable, then \( (\rho(S), \rho(x)) \in \chi \), and this follows directly from \cref{prop:Combination.smul}.
+\end{proof}
+\begin{definition}[designated support]
+  \uses{def:ModelData}
+  \label{def:designatedSupport}
   For a type index \( \beta \leq \alpha \), a \emph{\( \beta \)-set orbit} is the quotient of \( \TSet_\beta \) under the relation of being in the same orbit under \( \beta \)-allowable permutations.
   We write \( [x] \) for the set orbit of \( x \).
   For each set orbit \( o \), we choose a representative \( \repr(o) : \TSet_\beta \) with \( [\repr(o)] = o \), and define a support \( S_o \) for \( \repr(o) \).
-  For each set, we choose a \( \beta \)-allowable permutation \( \twist_t \) with the property that \( \twist_t(\repr([t])) = t \), and we define the \emph{designated support} of \( t \) to be \( \twist_t(S_{[t]}) \).
+  For each set, we choose a \( \beta \)-allowable permutation \( \twist_t \) with the property that \( \twist_t(\repr([t])) = t \), and we define the \emph{designated support} of \( t \) to be \( \dsupp(t) = \twist_t(S_{[t]}) \).
   This is a support for \( t \).
 \end{definition}
+\begin{definition}
+  \uses{def:designatedSupport}
+  \label{def:raisedSingleton}
+  Let \( \gamma < \beta \) be proper type indices.
+  Let \( S \) be a \( \beta \)-support and let \( u : \TSet_\gamma \).
+  Then the \emph{\( (\gamma,\beta ) \)-raised singleton} coding function is
+  \[ \rsing(S, u) = \chi_{(\singleton_\beta(u), S + \dsupp(u)^\beta)} \]
+  A coding function is called a \emph{\( (\gamma,\beta) \)-raised singleton} if it is of the form \( \rsing(S, u) \).
+\end{definition}
+\begin{proposition}
+  \uses{def:raisedSingleton}
+  \label{prop:raise_combination}
+  Let \( \gamma < \beta \) be proper type indices, and let \( x : \TSet_\beta \).
+  Then for any support \( S \) of \( x \), \( x \) is a combination of the set
+  \[ \{ \rsing(S, u) \mid u \in U_\beta(x)(\gamma) \} \]
+\end{proposition}
+\begin{proof}
+  We must show that
+  \[ U_\beta(x)(\gamma) = \bigcup_{u \in U_\beta(x)(\gamma),\,(V,v) \in \rsing(S, u),\, V \geq S} U_\beta(v)(\gamma) \]
+  First, suppose \( u \in U_\beta(x)(\gamma) \).
+  Then we have
+  \[ (S + \dsupp(u)^\beta, \singleton_\beta(u)) \in \rsing(S, u);\quad u \in U_\beta(\singleton_\beta(u))(\gamma) \]
+  so the left-hand side is contained in the right-hand side.
+
+  For the converse, suppose that \( u \in U_\beta(x)(\gamma) \) and \( (V, v) \in \rsing(S, u) \) with \( V \geq S \).
+  As \( (V, v) \in \rsing(S, u) \), there is some \( \beta \)-allowable \( \rho \) such that
+  \[ \rho(S + \dsupp(u)^\beta) = V;\quad \rho(\singleton_\beta(u)) = v \]
+  As \( V \geq S \), we obtain \( \rho(S) = S \),\footnote{This is a good lemma.} so \( \rho(x) = x \).
+  Then
+  \begin{align*}
+    U_\beta(v)(\gamma)
+    &= U_\beta(\rho(\singleton_\beta(u)))(\gamma) \\
+    &= U_\beta(\singleton_\beta(\rho_\gamma(u)))(\gamma) \\
+    &= \{ \rho_\gamma(u) \} \\
+    &\subseteq U_\beta(\rho(x))(\gamma) \\
+    &= U_\beta(x)(\gamma)
+  \end{align*}
+  as required.
+\end{proof}
+\begin{proposition}
+  \uses{def:raisedSingleton,prop:raisedCodingFunction_spec}
+  \label{prop:recode}
+  Let \( \gamma < \beta \) be proper type indices, and let \( \chi \) be a \( \beta \)-coding function.
+  Then there is a set of \( (\gamma,\beta) \)-raised singletons \( s \) and support orbit \( o \) such that \( \chi \) is the \( (\gamma,\beta) \)-raised coding function for \( (s, o) \).
+\end{proposition}
+\begin{proof}
+  \uses{prop:raise_combination}
+  Let \( \chi \) be a \( \beta \)-coding function, and let \( (S, x) \in \chi \).
+  Let
+  \[ s = \{ \rsing(S, u) \mid u \in U_\beta(x)(\gamma) \} \]
+  Let \( o \) be the support orbit such that \( T \in o \) if and only if \( T \in \coim \chi \).
+  We claim that \( \chi \) is the raised coding function for \( (s, o) \).
+  It suffices to show that \( (S, x) \) is in this raised coding function.
+  That is, we must show that \( S \in o \), which is trivial, and that \( x \) is a combination of \( s \), which is the content of \cref{prop:raise_combination}.
+\end{proof}

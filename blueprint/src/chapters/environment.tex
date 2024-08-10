@@ -76,7 +76,7 @@ Some mathematical background not already in mathlib will be included in \cref{c:
   We write \( a \in N \) for \( a \in s \), where \( N = (L, s) \).
   Near-litters satisfy extensionality: there is at most one choice of \( L \) for each \( s \).
   Each near-litter has size \( \#\kappa \) when treated as a set of atoms.
-  The type of all near-litters is denoted \( \NearLitter \), and \( \#\NearLitter = \#\mu \) (there are \( \#\mu \) litters, and \( \#\mu \) small sets of atoms by \cref{prop:mk_subset_mk_lt_cof}; the latter observation should be its own lemma).
+  The type of all near-litters is denoted \( \NearLitter \), and \( \#\NearLitter = \#\mu \) (there are \( \#\mu \) litters, and \( \#\mu \) small sets of atoms by \cref{prop:card_subset_card_lt_cof}; the latter observation should be its own lemma).
 
   We have \( M \near N \) if and only if \( M^\circ = N^\circ \).
   If \( M^\circ = N^\circ \), then \( M \symmdiff N \) is small and \( M \cap N \) has size \( \#\kappa \).
@@ -175,7 +175,7 @@ We will also use \( x_\gamma \) to denote the derivative \( x_h \) where \( h \)
   If \( \tau \) has a group structure, then so does its type of trees: \( (t \cdot u)_A = t_A \cdot u_A \) and \( (t^{-1})_A = (t_A)^{-1} \).
   If \( \tau \) acts on \( \upsilon \), then \( \alpha \)-trees of \( \tau \) act on \( \alpha \)-trees of \( \upsilon \): \( (t(u))_A = t_A(u_A) \).
 
-  If \( \#\tau \leq \#\mu \), there are at most \( \#\mu \)-many \( \alpha \)-trees of \( \tau \), since there are less than \( \cof(\ord(\#\mu)) \)-many \( \alpha \)-extended indices, allowing us to conclude by \cref{prop:mk_subset_mk_lt_cof} as each such tree is a subset of \( (\alpha \tpath \bot) \times \tau \) of size less than \( \cof(\ord(\#\mu)) \).
+  If \( \#\tau \leq \#\mu \), there are at most \( \#\mu \)-many \( \alpha \)-trees of \( \tau \), since there are less than \( \cof(\ord(\#\mu)) \)-many \( \alpha \)-extended indices, allowing us to conclude by \cref{prop:card_subset_card_lt_cof} as each such tree is a subset of \( (\alpha \tpath \bot) \times \tau \) of size less than \( \cof(\ord(\#\mu)) \).
 \end{definition}
 \begin{definition}[structural permutation]
   \label{def:StrPerm}
@@ -213,7 +213,7 @@ When we quantify over structural permutations in this paper, it should be formal
   Every small subset of \( \tau \) is the range of some enumeration of \( \tau \).
 
   If \( \#\tau \leq \#\mu \), then there are at most \( \#\mu \)-many enumerations of \( \tau \): enumerations are determined by an element of \( \kappa \) and a small subset of \( \kappa \times \tau \).
-  If \( \#\tau < \#\mu \), then there are strictly less than \( \#\mu \)-many enumerations of \( \tau \): use the same reasoning and apply \cref{prop:mk_subset_mk_lt_cof}.
+  If \( \#\tau < \#\mu \), then there are strictly less than \( \#\mu \)-many enumerations of \( \tau \): use the same reasoning and apply \cref{prop:card_subset_card_lt_cof}.
 \end{definition}
 \begin{definition}[base support]
   \label{def:BaseSupport}
@@ -388,7 +388,7 @@ When we quantify over structural permutations in this paper, it should be formal
     \[ U_\beta(x)(\gamma) \subseteq \ran U_\gamma \]
     \item (extensionality) If \( \beta, \gamma : \lambda \) where \( \gamma < \beta \), the map \( U_\beta(-)(\gamma) : \TSet_\beta \to \Set (\StrSet_\gamma) \) is injective.
     \item If \( \beta, \gamma : \lambda \) where \( \gamma < \beta \), for every \( x : \TSet_\gamma \) there is some \( y : \TSet_\beta \) such that \( U_\beta(y)(\gamma) = \{ x \} \).
-    We write \( \{ x \}_\beta \) for this object \( y \), which is uniquely defined by extensionality.
+    We write \( \singleton_\beta(x) \) for this object \( y \), which is uniquely defined by extensionality.
   \end{itemize}
   Note that this structure contains data (the derivative maps for allowable permutations and the singleton operations), but the type is a subsingleton: any two inhabitants are propositionally equal.
 \end{definition}
