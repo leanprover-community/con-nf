@@ -53,6 +53,7 @@
   \end{itemize}
 \end{definition}
 \begin{proposition}[completing restricted orbits]
+  \uses{def:OrbitRestriction}
   \label{prop:completing_restricted_orbits}
   Let \( R : \tau \to \tau \to \Prop \) be a one-to-one relation, and let \( (t, f, \pi) \) be an orbit restriction for \( \field R \) over some type \( \sigma \).
   Then there is a permutative relation \( T \) such that
@@ -82,6 +83,7 @@
   Then there is a permutative relation \( S \) such that \( R \leq S \) and \( \coim S \subseteq \field R \cup s \).
 \end{proposition}
 \begin{proof}
+  \uses{prop:completing_restricted_orbits}
   Define the orbit restriction \( (s, f, \pi) \) for \( \field R \) over \( \Unit \).
   Note that for this to be defined, we used the inequality
   \[ \#s \geq \max(\aleph_0, \#\field R) \]

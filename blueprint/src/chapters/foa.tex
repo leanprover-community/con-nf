@@ -164,7 +164,7 @@
 \end{definition}
 \begin{definition}
   \uses{def:StrApprox,def:Inflexible,def:smulApproxSupport}
-  \label{def:Coherent}
+  \label{def:StrApprox.Coherent}
   A \( \beta \)-approximation \( \psi \) is \emph{coherent} at \( (A, L_1, L_2) \) if:
   \begin{itemize}
     \item If \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \), then there is some \( \delta \)-allowable permutation \( \rho \) such that
@@ -177,7 +177,7 @@
   We say that \( \psi \) is \emph{coherent} if whenever \( (L_1, L_2) \in \psi_A^\Litter \), \( \psi \) is coherent at \( (A, L_1, L_2) \).
 \end{definition}
 \begin{proposition}[adding orbits coherently]
-  \uses{prop:BaseApprox.addOrbit,def:Coherent}
+  \uses{prop:BaseApprox.addOrbit,def:StrApprox.Coherent}
   \label{prop:StrApprox.addOrbit}
   Suppose that \( \psi \) is an approximation and \( L : \mathbb Z \to \Litter \) is a function satisfying the hypotheses of \cref{prop:BaseApprox.addOrbit}.
   Let \( \chi \) be the extension produced by the structural version of this result.\footnote{We need the extension exactly as produced (as data), not an arbitrary extension satisfying the conclusion of the proposition.}
@@ -187,8 +187,8 @@
   This proof just relies on the fact that if \( (\psi_B)_\delta(\supp(t)) = \rho(\supp(t)) \), then the same holds for every extension \( \chi \) of \( \psi \).\footnote{Maybe there's a better lemma to abstract out this idea for this and \cref{prop:StrApprox.chain}?}
 \end{proof}
 \begin{proposition}
-  \uses{def:Coherent}
-  \label{prop:Coherent.inv}
+  \uses{def:StrApprox.Coherent}
+  \label{prop:StrApprox.Coherent.inv}
   If \( \psi \) is coherent, then \( \psi^{-1} \) is coherent.
 \end{proposition}
 \begin{proof}
@@ -216,8 +216,8 @@
   So \( L_2 \) is \( A \)-flexible, as required.
 \end{proof}
 \begin{proposition}
-  \uses{def:Coherent}
-  \label{prop:Coherent.comp}
+  \uses{def:StrApprox.Coherent}
+  \label{prop:StrApprox.Coherent.comp}
   If \( \psi \) and \( \chi \) are coherent and have equal coimages along all paths, then \( \psi \circ \chi \) is coherent.
 \end{proposition}
 \begin{proof}
@@ -237,12 +237,12 @@
   Instead, if \( L_1 \) is \( A \)-flexible, then so is \( L_2 \) by coherence of \( \psi \), and so is \( L_3 \) by coherence of \( \chi \).
 \end{proof}
 \begin{proposition}
-  \uses{def:Coherent}
-  \label{prop:Coherent.deriv}
+  \uses{def:StrApprox.Coherent}
+  \label{prop:StrApprox.Coherent.deriv}
   If \( \psi \) is a coherent \( \beta \)-approximation and \( A \) is a path \( \beta \tpath \beta' \), then \( \psi_A \) is a coherent \( \beta' \)-approximation.
 \end{proposition}
 \begin{proof}
-  \uses{prop:Coherent.inv}
+  \uses{prop:StrApprox.Coherent.inv}
   Let \( (L_1, L_2) \in (\psi_A)_B^\Litter \).
   Suppose that \( L_1 \) is \( B \)-inflexible with path \( (\gamma, \delta, \varepsilon, C) \) and \( t : \Tang_\delta \).
   Then \( L_1 \) is \( A_B \)-inflexible with path \( (\gamma, \delta, \varepsilon, A_C) \) and the same tangle \( t \).
@@ -252,20 +252,20 @@
   \[ L_2 = f_{\delta,\varepsilon}(\rho(t)) \]
   This same \( \rho \) can thus be used to establish coherence of \( \psi_A \) at \( (B, L_1, L_2) \).
 
-  Thus, by \cref{prop:Coherent.inv}, whenever \( L_2 \) is \( B \)-inflexible with path \( I \) and tangle \( t \), \( L_1 \) is also \( B \)-inflexible with path \( I \).
+  Thus, by \cref{prop:StrApprox.Coherent.inv}, whenever \( L_2 \) is \( B \)-inflexible with path \( I \) and tangle \( t \), \( L_1 \) is also \( B \)-inflexible with path \( I \).
   So if \( L_1 \) is \( B \)-flexible, so is \( L_2 \), as required.
 \end{proof}
 
 \section{Proving freedom of action}
 \begin{definition}[approximates]
   \uses{def:StrApprox,def:atomGraph,prop:atomGraph_inv,prop:comp_atomGraph,prop:nearLitterGraph_permutative}
-  \label{def:Approximates}
+  \label{def:StrApprox.Approximates}
   We say that a \( \beta \)-approximation \( \psi \) \emph{approximates} a \( \beta \)-allowable permutation \( \rho \) if \( \psi_A^\Litter \leq \rho_A^\Litter \) and \( \psi_A^\Atom \leq \rho_A^\Atom \) for each path \( A : \beta \tpath \bot \).
   If \( \psi \) approximates \( \rho \) then \( \psi^n \) approximates \( \rho^n \) for each \( n : \mathbb Z \).\footnote{We should define what it means for a base approximation to approximate a near-litter permutation, and define this in terms of that.}
   A \( \beta \)-approximation \( \psi \) \emph{exactly approximates} a \( \beta \)-allowable permutation \( \rho \) if \( \psi \) approximates \( \rho \), and in addition, if \( a \) is an atom and \( A : \beta \tpath \bot \), then \( a \notin \coim \psi_A^\Atom \) implies \( \rho(a)^\circ = \rho(a^\circ) \) and \( \rho^{-1}(a)^\circ = \rho^{-1}(a^\circ) \).
 \end{definition}
 \begin{definition}[freedom of action]
-  \uses{def:Approximates}
+  \uses{def:StrApprox.Approximates}
   \label{def:FreedomOfAction}
   We say that \emph{freedom of action} holds at a type index \( \delta \) if every coherent \( \delta \)-approximation exactly approximates some \( \delta \)-allowable permutation.
 \end{definition}
@@ -289,7 +289,7 @@
   Then there is a coherent extension \( \chi \geq \psi \) with \( L \in \coim \chi_A^\Litter \).
 \end{proposition}
 \begin{proof}
-  \uses{prop:StrApprox.addOrbit,prop:Coherent.deriv,prop:Coherent.comp,prop:Coherent.inv}
+  \uses{prop:StrApprox.addOrbit,prop:StrApprox.Coherent.deriv,prop:StrApprox.Coherent.comp,prop:StrApprox.Coherent.inv}
   Let \( \rho \) be a \( \delta \)-allowable permutation that \( (\psi_B)_\delta \) approximates.
   Then for each \( n : \mathbb Z \), as \( (\psi^n_B)_\delta \) approximates \( \rho^n \), we obtain \( (\psi^n_B)_\delta(\supp(t)) = \rho^n(\supp(t)) \) as \( (\psi^n_B)_\delta \) is defined on all of \( \supp(t) \).\footnote{This should of course be its own lemma.}
   Define \( L : \mathbb Z \to \Litter \) by \( L(n) = f_{\delta,\varepsilon}(\rho^n(t)) \).
@@ -316,7 +316,7 @@
   as required.\footnote{It might be helpful to abstract away the lemma \( (\psi^m_B)_\delta(\supp(\rho^n(t))) = \supp(\rho^{n+m}(t)) \) for the two places in the proof where this idea is used.}
 \end{proof}
 \begin{proposition}
-  \uses{def:Coherent}
+  \uses{def:StrApprox.Coherent}
   \label{prop:StrApprox.chain}
   If \( (\psi_i)_{i : I} \) is a chain of coherent approximations where \( I \) is a linear order, then the supremum \( \psi \) is coherent.
 \end{proposition}
@@ -325,7 +325,7 @@
 \end{proof}
 \begin{theorem}[freedom of action]
   \uses{def:FreedomOfAction}
-  \label{thm:freedom_of_action}
+  \label{thm:StrApprox.foa}
   Freedom of action holds at all type indices \( \beta \leq \alpha \).
 \end{theorem}
 \begin{proof}
@@ -351,6 +351,7 @@
 
 \section{Base actions}
 \begin{definition}
+  \uses{def:NearLitter}
   \label{def:Interference}
   The \emph{interference} of near-litters \( N_1, N_2 \) is
   \[ \interf(N_1, N_2) = \begin{cases}
@@ -360,6 +361,7 @@
   which is a small set of atoms.
 \end{definition}
 \begin{definition}
+  \uses{def:Interference,def:BaseSupport}
   \label{def:BaseAction}
   A \emph{base action} is a pair \( \xi = (\xi^\Atom, \xi^\NearLitter) \) such that \( \xi^\Atom \) and \( \xi^\NearLitter \) are one-to-one relations of atoms and near-litters respectively (\cref{def:relation_props}), such that
   \begin{itemize}
@@ -376,11 +378,13 @@
   \[ (N_1, N_2) \in \xi^\NearLitter \to (N_1^\circ, N_2^\circ) \in \xi^\Litter \]
 \end{definition}
 \begin{definition}
+  \uses{def:BaseAction}
   \label{def:BaseAction.Nice}
   A base action \( \xi \) is \emph{nice} if whenever \( (N_1, N_2) \in \xi^\NearLitter \),
   \[ N_1 \symmdiff \LS(N_1^\circ) \subseteq \coim \xi^\Atom;\quad N_2 \symmdiff \LS(N_2^\circ) \subseteq \im \xi^\Atom \]
 \end{definition}
 \begin{proposition}[extending orbits inside near-litters]
+  \uses{def:BaseAction}
   \label{prop:BaseAction.exists_inside}
   Every base action \( \xi \) admits an extension \( \zeta \) satisfying
   \[ \forall N \in \coim \xi^\NearLitter,\, N \setminus \LS(N^\circ) \subseteq \coim \xi^\Atom \]
@@ -408,12 +412,14 @@
   Hence \( \zeta = (\xi^\Atom \sqcup R, \xi^\NearLitter) \) is a base action and satisfies the conclusion.
 \end{proof}
 \begin{proposition}[extending orbits outside near-litters]
+  \uses{def:BaseAction}
   \label{prop:BaseAction.exists_outside}
   Every base action \( \xi \) admits an extension \( \zeta \) satisfying
   \[ \forall N \in \coim \xi^\NearLitter,\, \LS(N) \setminus N \subseteq \coim \xi^\Atom \]
 \end{proposition}
 \begin{proof}
-  Without loss of generality (as extensions are transitive), let \( \xi \) satisfy the conclusion of \cref{prop:BaseAction.exists_outside}.
+  \uses{prop:BaseAction.exists_inside}
+  Without loss of generality (as extensions are transitive), let \( \xi \) satisfy the conclusion of \cref{prop:BaseAction.exists_inside}.
 
   Let \( L \) be an arbitrary litter that whose litter set does not contain an atom in \( \im \xi^\Atom \) or \( \bigcup \im \xi^\NearLitter \).
   Define an injection
@@ -430,20 +436,24 @@
   But then as \( \xi \) satisfies the conclusion of \cref{prop:BaseAction.exists_outside}, we have \( N_1 \setminus \LS(N_1^\circ) \subseteq \coim \xi^\Atom \), which again is a contradiction.
 \end{proof}
 \begin{proposition}
+  \uses{def:BaseAction.Nice}
   \label{prop:BaseAction.exists_nice}
   Every base action has a nice extension.
 \end{proposition}
 \begin{proof}
+  \uses{prop:BaseAction.exists_outside,prop:BaseAction.exists_inside}
   Apply \cref{prop:BaseAction.exists_inside} to \( \xi \) to obtain \( \xi_1 \); apply \cref{prop:BaseAction.exists_inside} again to \( \xi_1^{-1} \) to obtain \( \xi_2 \); apply \cref{prop:BaseAction.exists_outside} to \( \xi_2 \) to obtain \( \xi_3 \), and finally apply \cref{prop:BaseAction.exists_outside} again to \( \xi_3^{-1} \) to obtain \( \xi_4 \), our target.
 \end{proof}
 
 \section{Structural actions}
 \begin{definition}
+  \uses{def:Tree,def:BaseAction,def:StrSupport}
   \label{def:StrAction}
   For a type index \( \beta \), a \emph{\( \beta \)-action} is a \( \beta \)-tree of base actions.
   We define an action of \( \beta \)-actions \( \xi \) on \( \beta \)-supports \( S \) by \( (\xi(S))_A = \xi_A(S_A) \).
 \end{definition}
 \begin{definition}
+  \uses{def:StrAction,def:Inflexible}
   \label{def:StrAction.Coherent}
   A \( \beta \)-action \( \xi \) is \emph{coherent} at \( (A, L_1, L_2) \) if:
   \begin{itemize}
@@ -457,6 +467,7 @@
   We say that \( \xi \) is \emph{coherent} if whenever \( (L_1, L_2) \in \xi_A^\Litter \), \( \xi \) is coherent at \( (A, L_1, L_2) \).
 \end{definition}
 \begin{definition}
+  \uses{def:StrAction,def:StrApprox.Coherent}
   \label{def:FlexApprox}
   Let \( A : \beta \tpath \bot \).
   An \emph{\( A \)-flexible approximation} of a base action \( \xi \) is a base approximation \( \psi \) such that
@@ -472,11 +483,13 @@
   Flexible approximations are coherent.
 \end{definition}
 \begin{proposition}
+  \uses{def:FlexApprox}
   \label{prop:exists_flexApprox}
   Every base action has an \( A \)-flexible approximation.
   Hence, every \( \beta \)-action has a flexible approximation, which can be computed branchwise.
 \end{proposition}
 \begin{proof}
+  \uses{prop:BaseAction.exists_nice,prop:completing_orbits,prop:completing_restricted_orbits}
   If \( \xi \leq \zeta \) and \( \psi \) is an \( A \)-flexible approximation for \( \zeta \), then \( \psi \) is an \( A \)-flexible approximation for \( \xi \).
   So it suffices to prove the result for nice base actions \( \xi \) by \cref{prop:BaseAction.exists_nice}.
 
@@ -520,10 +533,12 @@
   Finally, if \( a_2 \notin \coim S \) and \( a_2^\circ \neq N_2^\circ \), then \( a_2 \notin N_2 \), since \( a_2 \in N_2 \) would imply \( a_2 \in N_2 \symmdiff \LS(N_2^\circ) \), contradicting the fact that \( \xi \) is nice.
 \end{proof}
 \begin{definition}[approximates]
+  \uses{def:StrAction,def:ModelData}
   \label{def:StrAction.Approximates}
   We say that a \( \beta \)-action \( \xi \) \emph{approximates} a \( \beta \)-allowable permutation \( \rho \) if \( \xi_A^\NearLitter \leq \rho_A^\NearLitter \) and \( \xi_A^\Atom \leq \rho_A^\Atom \) for each path \( A : \beta \tpath \bot \).\footnote{Again, we should define what it means for a base action to approximate a near-litter permutation, and define this in terms of that.}
 \end{definition}
 \begin{proposition}
+  \uses{def:FlexApprox,def:StrApprox.Approximates,def:StrAction.Approximates}
   \label{prop:FlexApprox.smul_nearLitter_eq}
   Let \( \xi \) be a base action, and let \( \psi \) be an \( A \)-flexible approximation of it.
   Let \( \pi \) be a base permutation that \( \psi \) exactly approximates.
@@ -548,11 +563,13 @@
   which is equal to \( N_2 \) by part of \cref{def:FlexApprox}.
 \end{proof}
 \begin{proposition}
+  \uses{def:StrApprox.Coherent,def:FlexApprox,def:StrApprox.Approximates,def:StrAction.Approximates}
   \label{prop:approximates_of_flexApprox}
   Let \( \xi \) be a coherent \( \beta \)-action, and let \( \psi \) be a flexible approximation for it.
   If \( \psi \) exactly approximates some allowable permutation \( \rho \), then \( \xi \) approximates \( \rho \).
 \end{proposition}
 \begin{proof}
+  \uses{prop:FlexApprox.smul_nearLitter_eq}
   First, note that \( \xi_A^\Atom \leq \psi_A^{E\Atom} \) and \( \psi_A^\Atom \leq \rho_A^\Atom \) give the required result for atoms.
   Now suppose that \( (N_1, N_2) \in \xi_A^\NearLitter \); we must show that \( \rho_A(N_1) = N_2 \).
   We prove this by induction on \( \iota(N_1) \), generalising over all \( A \).
@@ -572,12 +589,15 @@
   \[ \iota(N) < \iota(t) < \iota(f_{\delta,\varepsilon}(t)) = \iota(N_1^\circ) \]
   So we may apply the inductive hypothesis, giving \( (N, ((\rho_B)_\delta)_C(N)) \in ((\xi_B)_\delta)_C^\NearLitter \) as required.
 \end{proof}
-\begin{proposition}[freedom of action for actions]
-  Every coherent base action approximates some allowable permutation.
-\end{proposition}
+\begin{theorem}[freedom of action for actions]
+  \uses{def:StrAction.Coherent,def:StrAction.Approximates}
+  \label{thm:StrAction.foa}
+  Every coherent action approximates some allowable permutation.
+\end{theorem}
 \begin{proof}
+  \uses{prop:exists_flexApprox,prop:approximates_of_flexApprox,thm:StrApprox.foa}
   Let \( \xi \) be a coherent \( \beta \)-action, and let \( \psi \) be a flexible approximation for it, which exists by \cref{prop:exists_flexApprox}.
-  Then apply \cref{thm:freedom_of_action} (freedom of action) to \( \psi \) to obtain a \( \beta \)-allowable permutation \( \rho \) that \( \psi \) exactly approximates.
+  Then apply \cref{thm:StrApprox.foa} (freedom of action) to \( \psi \) to obtain a \( \beta \)-allowable permutation \( \rho \) that \( \psi \) exactly approximates.
   Finally, appeal to \cref{prop:approximates_of_flexApprox} to conclude that \( \xi \) approximates \( \rho \).
 \end{proof}
 

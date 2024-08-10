@@ -215,12 +215,15 @@ When we quantify over structural permutations in this paper, it should be formal
   If \( \#\tau \leq \#\mu \), then there are at most \( \#\mu \)-many enumerations of \( \tau \): enumerations are determined by an element of \( \kappa \) and a small subset of \( \kappa \times \tau \).
   If \( \#\tau < \#\mu \), then there are strictly less than \( \#\mu \)-many enumerations of \( \tau \): use the same reasoning and apply \cref{prop:mk_subset_mk_lt_cof}.
 \end{definition}
-\begin{definition}[support]
-  \label{def:StrSupport}
-  \uses{def:Enumeration,def:Tree}
+\begin{definition}[base support]
+  \label{def:BaseSupport}
+  \uses{def:Enumeration,def:NearLitter}
   A \emph{base support} is a pair \( S = (S^\Atom, S^\NearLitter) \) where \( S^\Atom \) is an enumeration of atoms and \( S^\NearLitter \) is an enumeration of near-litters.
   There are precisely \( \#\mu \) base supports.
-
+\end{definition}
+\begin{definition}[structural support]
+  \label{def:StrSupport}
+  \uses{def:BaseSupport,def:Tree}
   A \emph{\( \beta \)-structural support} (or just \emph{\( \beta \)-support}) is a \( \beta \)-tree of base supports.
   The type of \( \beta \)-supports is written \( \StrSupp_\beta \).
   There are precisely \( \#\mu \) structural supports for any type index \( \beta \).
