@@ -2,9 +2,9 @@
 \begin{definition}[base approximation]
   \label{def:BaseApprox}
   \uses{def:NearLitter}
-  A \emph{base approximation} is a pair \( \psi = (\psi^{E\Atom}, \psi^\Litter) \) such that \( \psi^{E\Atom} \) and \( \psi^\Litter \) are permutative relations of atoms and litters respectively (\cref{def:relation_props}), and for each litter \( L \), the sets
-  \[ \LS(L) \cap \coim \psi^{E\Atom};\quad \LS(L) \cap \im \psi^{E\Atom} \]
-  are small.
+  A \emph{base approximation} is a pair \( \psi = (\psi^{E\Atom}, \psi^\Litter) \) such that \( \psi^{E\Atom} \) and \( \psi^\Litter \) are permutative relations of atoms and litters respectively (\cref{def:relation_props}), and for each litter \( L \), the set
+  \[ \LS(L) \cap \coim \psi^{E\Atom} \]
+  is small.
   The relation \( \psi^{E\Atom} \) is called the \emph{exceptional atom graph}, and \( \psi^\Litter \) is called the \emph{litter graph}.
   We make the following definitions.
   \begin{itemize}
@@ -129,7 +129,7 @@
   \[ L(m) = L(n) \to L(m+k) = L(n+k) \]
   for all integers \( m, n, k : \mathbb Z \).
   Suppose that for all \( n \), \( L(n) \notin \coim \psi^\Litter \).
-  Then there is an extension \( \chi \geq \psi \) such that \( \chi^\Litter(L(n)) = L(n+1) \) and \( \coim \chi^\Litter = \coim \psi^\Litter \cup \im L \).
+  Then there is an extension \( \chi \geq \psi \) such that \( \chi^\Litter(L(n)) = L(n+1) \) and \( \coim \chi^\Litter = \coim \psi^\Litter \cup \ran L \).
 \end{proposition}
 \begin{proof}
   Define the relation
@@ -167,11 +167,11 @@
   \label{def:Coherent}
   A \( \beta \)-approximation \( \psi \) is \emph{coherent} at \( (A, L_1, L_2) \) if:
   \begin{itemize}
-    \item If \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \), then there is some \( \delta \)-allowable permutation \( \pi \) such that
-    \[ (\psi_B)_\delta(\supp(t)) = \pi(\supp(t)) \]
+    \item If \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \), then there is some \( \delta \)-allowable permutation \( \rho \) such that
+    \[ (\psi_B)_\delta(\supp(t)) = \rho(\supp(t)) \]
     and
-    \[ L_2 = f_{\delta,\varepsilon}(\pi(t)) \]
-    (and hence all \( \delta \)-allowable permutations \( \pi \) such that \( (\psi_B)_\delta(\supp(t)) = \pi(\supp(t)) \) satisfy \( L_2 = f_{\delta,\varepsilon}(\pi(t)) \)).
+    \[ L_2 = f_{\delta,\varepsilon}(\rho(t)) \]
+    (and hence all \( \delta \)-allowable permutations \( \rho \) such that \( (\psi_B)_\delta(\supp(t)) = \rho(\supp(t)) \) satisfy \( L_2 = f_{\delta,\varepsilon}(\rho(t)) \)).
     \item If \( L_1 \) is \( A \)-flexible, then \( L_2 \) is \( A \)-flexible.
   \end{itemize}
   We say that \( \psi \) is \emph{coherent} if whenever \( (L_1, L_2) \in \psi_A^\Litter \), \( \psi \) is coherent at \( (A, L_1, L_2) \).
@@ -184,7 +184,7 @@
   If \( \psi \) is coherent, and is additionally coherent at \( (L(n), L(n+1)) \) for each integer \( n \), then \( \chi \) is coherent.
 \end{proposition}
 \begin{proof}
-  This proof just relies on the fact that if \( (\psi_B)_\delta(\supp(t)) = \pi(\supp(t)) \), then the same holds for every extension \( \chi \) of \( \psi \).\footnote{Maybe there's a better lemma to abstract out this idea for this and \cref{prop:approx_chain}}
+  This proof just relies on the fact that if \( (\psi_B)_\delta(\supp(t)) = \rho(\supp(t)) \), then the same holds for every extension \( \chi \) of \( \psi \).\footnote{Maybe there's a better lemma to abstract out this idea for this and \cref{prop:StrApprox.chain}?}
 \end{proof}
 \begin{proposition}
   \uses{def:Coherent}
@@ -195,21 +195,21 @@
   Suppose that \( (L_1, L_2) \in (\psi^{-1}_A)^\Litter \), so \( (L_2, L_1) \in \psi_A^\Litter \).
   Suppose first that \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \).
   If \( L_2 \) were \( A \)-flexible, then \( L_1 \) would also be \( A \)-flexible by coherence, which is a contradiction.
-  So \( L_2 \) is \( A \)-inflexible with path \( (\gamma', \delta', \varepsilon', B') \) and tangle \( t' : \Tang_{\delta'} \), and there is \( \pi : \AllPerm_{\delta'} \) such that
-  \[ (\psi_{B'})_{\delta'}(\supp(t')) = \pi(\supp(t')) \]
+  So \( L_2 \) is \( A \)-inflexible with path \( (\gamma', \delta', \varepsilon', B') \) and tangle \( t' : \Tang_{\delta'} \), and there is \( \rho : \AllPerm_{\delta'} \) such that
+  \[ (\psi_{B'})_{\delta'}(\supp(t')) = \rho(\supp(t')) \]
   and
-  \[ A = (B_{\varepsilon'})_\bot;\quad L_2 = f_{\delta',\varepsilon'}(t');\quad L_1 = f_{\delta',\varepsilon'}(\pi(t')) \]
+  \[ A = (B_{\varepsilon'})_\bot;\quad L_2 = f_{\delta',\varepsilon'}(t');\quad L_1 = f_{\delta',\varepsilon'}(\rho(t')) \]
   We thus deduce \( \varepsilon = \varepsilon' \) and \( \gamma = \gamma' \) by the equations for \( A \).
-  By the equation \( L_1 = f_{\delta,\varepsilon}(t) \), we also obtain \( \delta = \delta' \) and \( t = \pi(t') \).
+  By the equation \( L_1 = f_{\delta,\varepsilon}(t) \), we also obtain \( \delta = \delta' \) and \( t = \rho(t') \).
   Then we find
   \begin{align*}
-    (\psi_B)_\delta(\supp(\pi^{-1}(t))) &= \pi(\supp(\pi^{-1}(t))) \\
-    (\psi_B)_\delta(\pi^{-1}(\supp(t))) &= \pi(\pi^{-1}(\supp(t))) \\
-    (\psi_B)_\delta(\pi^{-1}(\supp(t))) &= \supp(t) \\
-    \pi^{-1}(\supp(t)) &= (\psi^{-1}_B)_\delta(\supp(t))
+    (\psi_B)_\delta(\supp(\rho^{-1}(t))) &= \rho(\supp(\rho^{-1}(t))) \\
+    (\psi_B)_\delta(\rho^{-1}(\supp(t))) &= \rho(\rho^{-1}(\supp(t))) \\
+    (\psi_B)_\delta(\rho^{-1}(\supp(t))) &= \supp(t) \\
+    \rho^{-1}(\supp(t)) &= (\psi^{-1}_B)_\delta(\supp(t))
   \end{align*}
   where the last equation uses the fact that \( (\psi_B)_\delta \) is defined on all of \( \supp(t') \).
-  Finally, the equation \( L_2 = f_{\delta,\varepsilon}(\pi^{-1}(t)) \) gives coherence at \( (A, L_1, L_2) \) as required.
+  Finally, the equation \( L_2 = f_{\delta,\varepsilon}(\rho^{-1}(t)) \) gives coherence at \( (A, L_1, L_2) \) as required.
 
   Now suppose that \( L_1 \) is \( A \)-flexible.
   If \( L_2 \) were \( A \)-inflexible, then so would be \( L_1 \) by coherence.
@@ -223,16 +223,16 @@
 \begin{proof}
   Suppose that \( (L_1, L_3) \in ((\psi \circ \chi)_A)^\Litter \), so \( (L_1, L_2) \in \psi_A^\Litter \) and \( (L_2, L_3) \in \chi_A^\Litter \).
   Suppose that \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \).
-  Then by coherence of \( \psi \), we have \( \pi \) such that
-  \[ (\psi_B)_\delta(\supp(t)) = \pi(\supp(t)) \]
+  Then by coherence of \( \psi \), we have \( \rho \) such that
+  \[ (\psi_B)_\delta(\supp(t)) = \rho(\supp(t)) \]
   and
-  \[ L_2 = f_{\delta,\varepsilon}(\pi(t)) \]
-  Then \( L_2 \) is \( A \)-inflexible with path \( I \) and tangle \( \pi(t) \).
-  So by coherence of \( \chi \), we have \( \pi' \) such that
-  \[ (\psi_B)_\delta(\supp(\pi(t))) = \pi'(\supp(\pi(t))) \]
+  \[ L_2 = f_{\delta,\varepsilon}(\rho(t)) \]
+  Then \( L_2 \) is \( A \)-inflexible with path \( I \) and tangle \( \rho(t) \).
+  So by coherence of \( \chi \), we have \( \rho' \) such that
+  \[ (\psi_B)_\delta(\supp(\rho(t))) = \rho'(\supp(\rho(t))) \]
   and
-  \[ L_3 = f_{\delta,\varepsilon}(\pi'(\pi(t))) \]
-  As \( \pi'(\supp(\pi(t))) = \pi'(\pi(\supp(t))) \), we obtain the desired coherence result.
+  \[ L_3 = f_{\delta,\varepsilon}(\rho'(\rho(t))) \]
+  As \( \rho'(\supp(\rho(t))) = \rho'(\rho(\supp(t))) \), we obtain the desired coherence result.
 
   Instead, if \( L_1 \) is \( A \)-flexible, then so is \( L_2 \) by coherence of \( \psi \), and so is \( L_3 \) by coherence of \( \chi \).
 \end{proof}
@@ -242,16 +242,17 @@
   If \( \psi \) is a coherent \( \beta \)-approximation and \( A \) is a path \( \beta \tpath \beta' \), then \( \psi_A \) is a coherent \( \beta' \)-approximation.
 \end{proposition}
 \begin{proof}
+  \uses{prop:Coherent.inv}
   Let \( (L_1, L_2) \in (\psi_A)_B^\Litter \).
   Suppose that \( L_1 \) is \( B \)-inflexible with path \( (\gamma, \delta, \varepsilon, C) \) and \( t : \Tang_\delta \).
   Then \( L_1 \) is \( A_B \)-inflexible with path \( (\gamma, \delta, \varepsilon, A_C) \) and the same tangle \( t \).
-  So by coherence of \( \psi \), we obtain a \( \delta \)-allowable \( \pi \) such that
-  \[ (\psi_{(A_C)})_\delta(\supp(t)) = \pi(\supp(t)) \]
+  So by coherence of \( \psi \), we obtain a \( \delta \)-allowable \( \rho \) such that
+  \[ (\psi_{(A_C)})_\delta(\supp(t)) = \rho(\supp(t)) \]
   and
-  \[ L_2 = f_{\delta,\varepsilon}(\pi(t)) \]
-  This same \( \pi \) can thus be used to establish coherence of \( \psi_A \) at \( (B, L_1, L_2) \).
+  \[ L_2 = f_{\delta,\varepsilon}(\rho(t)) \]
+  This same \( \rho \) can thus be used to establish coherence of \( \psi_A \) at \( (B, L_1, L_2) \).
 
-  Thus, by \cref{prop:inv_coherent}, whenever \( L_2 \) is \( B \)-inflexible with path \( I \) and tangle \( t \), \( L_1 \) is also \( B \)-inflexible with path \( I \).
+  Thus, by \cref{prop:Coherent.inv}, whenever \( L_2 \) is \( B \)-inflexible with path \( I \) and tangle \( t \), \( L_1 \) is also \( B \)-inflexible with path \( I \).
   So if \( L_1 \) is \( B \)-flexible, so is \( L_2 \), as required.
 \end{proof}
 
@@ -259,13 +260,14 @@
 \begin{definition}[approximates]
   \uses{def:StrApprox,def:atomGraph,prop:atomGraph_inv,prop:comp_atomGraph,prop:nearLitterGraph_permutative}
   \label{def:Approximates}
-  We say that a \( \beta \)-approximation \( \psi \) \emph{approximates} a \( \beta \)-allowable permutation \( \pi \) if \( \psi_A^\Litter \leq \pi_A^\Litter \) and \( \psi_A^\Atom \leq \pi_A^\Atom \) for each path \( A : \beta \tpath \bot \).
-  If \( \psi \) approximates \( \pi \) then \( \psi^n \) approximates \( \pi^n \) for each \( n : \mathbb Z \).\footnote{We should define what it means for a base approximation to approximate a near-litter permutation, and define this in terms of that.}
+  We say that a \( \beta \)-approximation \( \psi \) \emph{approximates} a \( \beta \)-allowable permutation \( \rho \) if \( \psi_A^\Litter \leq \rho_A^\Litter \) and \( \psi_A^\Atom \leq \rho_A^\Atom \) for each path \( A : \beta \tpath \bot \).
+  If \( \psi \) approximates \( \rho \) then \( \psi^n \) approximates \( \rho^n \) for each \( n : \mathbb Z \).\footnote{We should define what it means for a base approximation to approximate a near-litter permutation, and define this in terms of that.}
+  A \( \beta \)-approximation \( \psi \) \emph{exactly approximates} a \( \beta \)-allowable permutation \( \rho \) if \( \psi \) approximates \( \rho \), and in addition, if \( a \) is an atom and \( A : \beta \tpath \bot \), then \( a \notin \coim \psi_A^\Atom \) implies \( \rho(a)^\circ = \rho(a^\circ) \) and \( \rho^{-1}(a)^\circ = \rho^{-1}(a^\circ) \).
 \end{definition}
 \begin{definition}[freedom of action]
   \uses{def:Approximates}
   \label{def:FreedomOfAction}
-  We say that \emph{freedom of action} holds at a type index \( \delta \) if every coherent \( \delta \)-approximation approximates some \( \delta \)-allowable permutation.
+  We say that \emph{freedom of action} holds at a type index \( \delta \) if every coherent \( \delta \)-approximation exactly approximates some \( \delta \)-allowable permutation.
 \end{definition}
 \begin{proposition}[adding flexible litters]
   \uses{def:Inflexible,def:StrApprox}
@@ -288,30 +290,30 @@
 \end{proposition}
 \begin{proof}
   \uses{prop:StrApprox.addOrbit,prop:Coherent.deriv,prop:Coherent.comp,prop:Coherent.inv}
-  Let \( \pi \) be a \( \delta \)-allowable permutation that \( (\psi_B)_\delta \) approximates.
-  Then for each \( n : \mathbb Z \), as \( (\psi^n_B)_\delta \) approximates \( \pi^n \), we obtain \( (\psi^n_B)_\delta(\supp(t)) = \pi^n(\supp(t)) \) as \( (\psi^n_B)_\delta \) is defined on all of \( \supp(t) \).\footnote{This should of course be its own lemma.}
-  Define \( L : \mathbb Z \to \Litter \) by \( L(n) = f_{\delta,\varepsilon}(\pi^n(t)) \).
+  Let \( \rho \) be a \( \delta \)-allowable permutation that \( (\psi_B)_\delta \) approximates.
+  Then for each \( n : \mathbb Z \), as \( (\psi^n_B)_\delta \) approximates \( \rho^n \), we obtain \( (\psi^n_B)_\delta(\supp(t)) = \rho^n(\supp(t)) \) as \( (\psi^n_B)_\delta \) is defined on all of \( \supp(t) \).\footnote{This should of course be its own lemma.}
+  Define \( L : \mathbb Z \to \Litter \) by \( L(n) = f_{\delta,\varepsilon}(\rho^n(t)) \).
 
   Suppose that there is some \( n \) such that \( L(n) \in \coim \psi^\Litter \).
   Note that
   \begin{align*}
-    (\psi^n_B)_\delta(\supp(t)) &= \pi^n(\supp(t)) \\
-    \supp(t) &= (\psi^{-n}_B)_\delta(\pi^n(\supp(t))) \\
-    \pi^{-n}(\pi^n(\supp(t))) &= (\psi^{-n}_B)_\delta(\supp(\pi^n(t)))
+    (\psi^n_B)_\delta(\supp(t)) &= \rho^n(\supp(t)) \\
+    \supp(t) &= (\psi^{-n}_B)_\delta(\rho^n(\supp(t))) \\
+    \rho^{-n}(\rho^n(\supp(t))) &= (\psi^{-n}_B)_\delta(\supp(\rho^n(t)))
   \end{align*}
   So as \( \psi^{-n} \) is coherent, we obtain \( (L(n), f_{\delta,\varepsilon}(t)) \in (\psi^{-n}_A)^\Litter \).
   In particular, \( f_{\delta,\varepsilon}(t) \in \coim \psi_A^\Litter \) already, and no work needs to be done.
 
   We first check the hypothesis of \cref{prop:BaseApprox.addOrbit} for adding orbits.
-  If \( f_{\delta,\varepsilon}(\pi^m(t)) = f_{\delta,\varepsilon}(\pi^n(t)) \), then \( \pi^m(t) = \pi^n(t) \), so \( \pi^{m+k}(t) = \pi^{n+k}(t) \), giving \( f_{\delta,\varepsilon}(\pi^{m+k}(t)) = f_{\delta,\varepsilon}(\pi^{n+k}(t)) \) as required.
+  If \( f_{\delta,\varepsilon}(\rho^m(t)) = f_{\delta,\varepsilon}(\rho^n(t)) \), then \( \rho^m(t) = \rho^n(t) \), so \( \rho^{m+k}(t) = \rho^{n+k}(t) \), giving \( f_{\delta,\varepsilon}(\rho^{m+k}(t)) = f_{\delta,\varepsilon}(\rho^{n+k}(t)) \) as required.
 
   We now check the criterion of \cref{prop:StrApprox.addOrbit} for adding orbits coherently.
   It suffices to show that \( \psi \) is coherent at \( (L(n), L(n+1)) \) for each \( n : \mathbb Z \).
-  This is witnessed by \( \pi \), which satisfies
-  \[ (\psi_B)_\delta(\supp(\pi^n(t))) = \pi(\supp(\pi^n(t))) \]
+  This is witnessed by \( \rho \), which satisfies
+  \[ (\psi_B)_\delta(\supp(\rho^n(t))) = \rho(\supp(\rho^n(t))) \]
   and
-  \[ L(n) = f_{\delta,\varepsilon}(\pi^n(t));\quad L(n+1) = f_{\delta,\varepsilon}(\pi(\pi^n(t))) \]
-  as required.\footnote{It might be helpful to abstract away the lemma \( (\psi^m_B)_\delta(\supp(\pi^n(t))) = \supp(\pi^{n+m}(t)) \) for the two places in the proof where this idea is used.}
+  \[ L(n) = f_{\delta,\varepsilon}(\rho^n(t));\quad L(n+1) = f_{\delta,\varepsilon}(\rho(\rho^n(t))) \]
+  as required.\footnote{It might be helpful to abstract away the lemma \( (\psi^m_B)_\delta(\supp(\rho^n(t))) = \supp(\rho^{n+m}(t)) \) for the two places in the proof where this idea is used.}
 \end{proof}
 \begin{proposition}
   \uses{def:Coherent}
@@ -343,6 +345,255 @@
   Thus, we obtain the same contradiction by \cref{prop:StrApprox.addInflexible}.
 
   So \( \coim \chi_A^\Litter \) is the set of all litters for each path \( A \).
-  We then use the fact that our model data is coherent to recursively compute the allowable permutation \( \pi \) with the same action as \( \chi \).
-  Then \( \chi \) approximates \( \pi \), so \( \psi \) also approximates \( \pi \).\footnote{In general, if \( \psi \leq \chi \) and \( \chi \) approximates \( \pi \) then \( \psi \) approximates \( \pi \).}
+  We then use the fact that our model data is coherent to recursively compute the allowable permutation \( \rho \) with the same action as \( \chi \).
+  Then \( \chi \) exactly approximates \( \rho \), so \( \psi \) also exactly approximates \( \rho \).\footnote{In general, if \( \psi \leq \chi \) and \( \chi \) (exactly) approximates \( \rho \) then \( \psi \) (exactly) approximates \( \rho \).}
 \end{proof}
+
+\section{Base actions}
+\begin{definition}
+  \label{def:Interference}
+  The \emph{interference} of near-litters \( N_1, N_2 \) is
+  \[ \interf(N_1, N_2) = \begin{cases}
+    N_1 \symmdiff N_2 & \text{if } N_1^\circ = N_2^\circ \\
+    N_1 \cap N_2 & \text{if } N_1^\circ \neq N_2^\circ
+  \end{cases} \]
+  which is a small set of atoms.
+\end{definition}
+\begin{definition}
+  \label{def:BaseAction}
+  A \emph{base action} is a pair \( \xi = (\xi^\Atom, \xi^\NearLitter) \) such that \( \xi^\Atom \) and \( \xi^\NearLitter \) are one-to-one relations of atoms and near-litters respectively (\cref{def:relation_props}), such that
+  \begin{itemize}
+    \item \( \xi^\Atom \) and \( \xi^\NearLitter \) are defined on small sets;
+    \item if \( (a_1, a_2) \in \xi^\Atom \) and \( (N_1, N_2) \in \xi^\NearLitter \), then \( a_1 \in N_1 \) if and only if \( a_2 \in N_2 \);
+    \item if \( (N_1, N_3), (N_2, N_4) \in \xi^\NearLitter \), then \( N_1^\circ = N_2^\circ \) if and only if \( N_3^\circ = N_4^\circ \);
+    \item for each \( (N_1, N_3), (N_2, N_4) \in \xi^\NearLitter \),
+    \[ \interf(N_1, N_2) \subseteq \coim \xi^\Atom;\quad \interf(N_3, N_4) \subseteq \im \xi^\Atom \]
+  \end{itemize}
+  The partial order on base actions is defined by \( \xi \leq \zeta \) if and only if \( \xi^\Atom \leq \zeta^\Atom \) and \( \xi^\NearLitter = \zeta^\NearLitter \).\footnote{We should make utilities for constructing extensions of base actions, reducing the proof obligations of showing that these are base actions (e.g.\ removing the last two bullet points and not needing to prove results we already know about \( \xi \)).}
+  The inverse of \( \xi \) is \( ((\xi^\Atom)^{-1}, (\xi^\NearLitter)^{-1}) \).
+  They act on base supports in the natural way.
+  We define the one-to-one relation \( \xi^\Litter \) by the constructor
+  \[ (N_1, N_2) \in \xi^\NearLitter \to (N_1^\circ, N_2^\circ) \in \xi^\Litter \]
+\end{definition}
+\begin{definition}
+  \label{def:BaseAction.Nice}
+  A base action \( \xi \) is \emph{nice} if whenever \( (N_1, N_2) \in \xi^\NearLitter \),
+  \[ N_1 \symmdiff \LS(N_1^\circ) \subseteq \coim \xi^\Atom;\quad N_2 \symmdiff \LS(N_2^\circ) \subseteq \im \xi^\Atom \]
+\end{definition}
+\begin{proposition}[extending orbits inside near-litters]
+  \label{prop:BaseAction.exists_inside}
+  Every base action \( \xi \) admits an extension \( \zeta \) satisfying
+  \[ \forall N \in \coim \xi^\NearLitter,\, N \setminus \LS(N^\circ) \subseteq \coim \xi^\Atom \]
+\end{proposition}
+\begin{proof}
+  For each litter \( L \), there is an injection
+  \[ i_L : \bigcup_{N \in \coim \xi^\NearLitter} (N \setminus \LS(N^\circ)) \to \{ a : \Atom \mid a^\circ = L \wedge \forall N \in \im \xi^\NearLitter,\, N^\circ = L \to a \in N \} \setminus \im \xi^\Atom \]
+  by a cardinality argument.
+  Define the relation \( R \) on atoms by the constructor
+  \[ \forall (N_1, N_2) \in \xi^\NearLitter,\, \forall a \in N_1 \setminus \LS(N_1^\circ) \setminus \coim \xi^\Atom,\, (a, i_{N_2^\circ}(a)) \in R \]
+  This is one-to-one and has disjoint image and coimage from \( \xi^\Atom \).
+
+  We now show that if \( (a_1, a_2) \in R \) and \( (N_1, N_2) \in \xi^\NearLitter \), then \( a_1 \in N_1 \) if and only if \( a_2 \in N_2 \).
+  Let \( (N_1, N_2), (N_1', N_2') \in \xi^\NearLitter \), and let \( a \in N_1 \setminus \LS(N_1^\circ) \setminus \coim \xi^\Atom \).
+  Suppose that \( a \in N_1' \); we must show \( i_{N_2^\circ}(a) \in N_2' \).
+  If \( N_1^\circ \neq {N_1'}^\circ \), then \( \interf(N_1, N_1') = N_1 \cap N_1' \), so \( a \in \interf(N_1, N_1') \subseteq \coim \xi^\Atom \), a contradiction.
+  So \( N_1^\circ = {N_1'}^\circ \), giving \( N_2^\circ = {N_2'}^\circ \), so \( i_{N_2^\circ}(a) = i_{{N_2'}^\circ}(a) \in N_2' \) by definition.
+
+  Conversely, suppose that \( i_{N_2^\circ}(a) \in N_2' \); we must show \( a \in N_1' \).
+  Note that by definition, \( i_{N_2^\circ}(a) \in N_2 \).
+  So if \( N_2^\circ \neq {N_2'}^\circ \), we would have \( i_{N_2^\circ}(a) \in N_2 \cap N_2' = \interf(N_2, N_2') \subseteq \im \xi^\Atom \), a contradiction.
+  Hence \( N_2^\circ = {N_2'}^\circ \) and \( N_1^\circ = {N_1'}^\circ \).
+  Thus, if \( a \notin N_1' \), we would have \( a \in N_1 \symmdiff N_1' = \interf(N_1, N_1') \subseteq \coim \xi^\Atom \), again a contradiction.
+
+  Hence \( \zeta = (\xi^\Atom \sqcup R, \xi^\NearLitter) \) is a base action and satisfies the conclusion.
+\end{proof}
+\begin{proposition}[extending orbits outside near-litters]
+  \label{prop:BaseAction.exists_outside}
+  Every base action \( \xi \) admits an extension \( \zeta \) satisfying
+  \[ \forall N \in \coim \xi^\NearLitter,\, \LS(N) \setminus N \subseteq \coim \xi^\Atom \]
+\end{proposition}
+\begin{proof}
+  Without loss of generality (as extensions are transitive), let \( \xi \) satisfy the conclusion of \cref{prop:BaseAction.exists_outside}.
+
+  Let \( L \) be an arbitrary litter that whose litter set does not contain an atom in \( \im \xi^\Atom \) or \( \bigcup \im \xi^\NearLitter \).
+  Define an injection
+  \[ i : \bigcup_{N \in \coim \xi^\NearLitter} (\LS(N^\circ) \setminus N \setminus \coim \xi^\Atom) \to \LS(L) \]
+  by a cardinality argument.
+  Note that \( i \) has domain disjoint from \( \coim \xi^\Atom \) and image disjoint from \( \im \xi^\Atom \).
+
+  We show that \( (\xi^\Atom \sqcup \graph i, \xi^\NearLitter) \) is a base action.
+  It suffices to check that if \( (a_1, a_2) \in \graph i \) and \( (N_1, N_2) \in \xi^\NearLitter \), then \( a_1 \in N_1 \) if and only if \( a_2 \in N_2 \).
+  As \( a_2 \in \LS(L) \), we have \( a_2 \notin N_2 \).
+  Suppose that \( a_1 \in N_1 \).
+  We know that there is a near-litter \( N \in \coim \xi^\NearLitter \) such that \( a_1 \in \LS(N^\circ) \setminus N \setminus \coim \xi^\Atom \).
+  If \( N^\circ = N_1^\circ \), then \( a_1 \in N \symmdiff N_1 = \interf(N, N_1) \subseteq \coim \xi^\Atom \), a contradiction, hence \( a^\circ = N^\circ \neq N_1^\circ \).
+  But then as \( \xi \) satisfies the conclusion of \cref{prop:BaseAction.exists_outside}, we have \( N_1 \setminus \LS(N_1^\circ) \subseteq \coim \xi^\Atom \), which again is a contradiction.
+\end{proof}
+\begin{proposition}
+  \label{prop:BaseAction.exists_nice}
+  Every base action has a nice extension.
+\end{proposition}
+\begin{proof}
+  Apply \cref{prop:BaseAction.exists_inside} to \( \xi \) to obtain \( \xi_1 \); apply \cref{prop:BaseAction.exists_inside} again to \( \xi_1^{-1} \) to obtain \( \xi_2 \); apply \cref{prop:BaseAction.exists_outside} to \( \xi_2 \) to obtain \( \xi_3 \), and finally apply \cref{prop:BaseAction.exists_outside} again to \( \xi_3^{-1} \) to obtain \( \xi_4 \), our target.
+\end{proof}
+
+\section{Structural actions}
+\begin{definition}
+  \label{def:StrAction}
+  For a type index \( \beta \), a \emph{\( \beta \)-action} is a \( \beta \)-tree of base actions.
+  We define an action of \( \beta \)-actions \( \xi \) on \( \beta \)-supports \( S \) by \( (\xi(S))_A = \xi_A(S_A) \).
+\end{definition}
+\begin{definition}
+  \label{def:StrAction.Coherent}
+  A \( \beta \)-action \( \xi \) is \emph{coherent} at \( (A, L_1, L_2) \) if:
+  \begin{itemize}
+    \item If \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \), then there is some \( \delta \)-allowable permutation \( \rho \) such that
+    \[ (\xi_B)_\delta(\supp(t)) = \rho(\supp(t)) \]
+    and
+    \[ L_2 = f_{\delta,\varepsilon}(\rho(t)) \]
+    (and hence again every \( \delta \)-allowable \( \rho \) satisfying the hypothesis also satisfies the conclusion).
+    \item If \( L_1 \) is \( A \)-flexible, then \( L_2 \) is \( A \)-flexible.
+  \end{itemize}
+  We say that \( \xi \) is \emph{coherent} if whenever \( (L_1, L_2) \in \xi_A^\Litter \), \( \xi \) is coherent at \( (A, L_1, L_2) \).
+\end{definition}
+\begin{definition}
+  \label{def:FlexApprox}
+  Let \( A : \beta \tpath \bot \).
+  An \emph{\( A \)-flexible approximation} of a base action \( \xi \) is a base approximation \( \psi \) such that
+  \begin{enumerate}
+    \item \( \xi^\Atom \leq \psi^{E\Atom} \);
+    \item if \( L \in \coim \psi^\Litter \), then \( L \) is \( A \)-flexible;
+    \item if \( (N_1, N_2) \in \xi^\NearLitter \) and \( N_1^\circ \) is \( A \)-flexible, then \( (N_1^\circ, N_2^\circ) \in \psi^\Litter \);
+    \item if \( (N_1, N_2) \in \xi^\NearLitter \), then \( N_1 \symmdiff \LS(N_1^\circ) \subseteq \coim \psi^\Atom \) and \( N_2 \symmdiff \LS(N_2^\circ) \subseteq \coim \psi^\Atom \);
+    \item if \( (N_1, N_2) \in \xi^\NearLitter \), then for each atom \( a_2 \),
+    \[ a_2 \in N_2 \leftrightarrow (\exists a_1 \in N_1,\, (a_1, a_2) \in \psi^{E\Atom}) \vee (a_2 \notin \coim \psi^{E\Atom} \wedge a_2^\circ = N_2^\circ) \]
+  \end{enumerate}
+  A \emph{flexible approximation} of a \( \beta \)-action \( \xi \) is a \( \beta \)-approximation \( \psi \) such that for each \( A : \beta \tpath \bot \), the base approximation \( \psi_A \) is an \( A \)-flexible approximation of \( \xi_A \).
+  Flexible approximations are coherent.
+\end{definition}
+\begin{proposition}
+  \label{prop:exists_flexApprox}
+  Every base action has an \( A \)-flexible approximation.
+  Hence, every \( \beta \)-action has a flexible approximation, which can be computed branchwise.
+\end{proposition}
+\begin{proof}
+  If \( \xi \leq \zeta \) and \( \psi \) is an \( A \)-flexible approximation for \( \zeta \), then \( \psi \) is an \( A \)-flexible approximation for \( \xi \).
+  So it suffices to prove the result for nice base actions \( \xi \) by \cref{prop:BaseAction.exists_nice}.
+
+  Define the permutative relation \( R : \Litter \to \Litter \to \Prop \) to be a permutative extension of \( \xi^\Litter \), which exists by \cref{prop:completing_orbits}.
+  Let \( \pi \) be the permutation of litters defined by \( R \), or the identity on any litter not in \( \coim R \).
+
+  Define an orbit restriction \( (t, f, \pi) \) (\cref{def:OrbitRestriction}) for \( \field \xi^\Atom \) by
+  \[ u = \{ a : \Atom \mid \forall N \in \field \xi^\NearLitter,\, N^\circ = a^\circ \to a \in N \};\quad t = u \setminus \field \xi^\Atom \]
+  with function \( f : \Atom \to \Litter \) defined by \( f(a) = a^\circ \), and litter permutation \( \pi \).
+  We must check that for each litter \( L \), the set \( t \cap \LS(L) \) has cardinality at least \( \max(\aleph_0, \#\field \xi^\Atom) \).
+  But we can write
+  \[ t \cap \LS(L) = \LS(L) \setminus \left( \field \xi^\Atom \cup \bigcup_{N \in \field \xi^\NearLitter,\, N^\circ = L} (\LS(L) \setminus N) \right) \]
+  where the set being removed from \( \LS(L) \) is small, so \( t \cap \LS(L) \) is a large set, and \( \aleph_0 \) and \( \#\field \xi^\Atom \) are less than \( \#\kappa \), as required.
+  Then by \cref{prop:completing_restricted_orbits}, there is a permutative relation \( S \geq \xi^\Atom \) defined on a small set and contained in \( \field \xi^\Atom \cup t = \field \xi^\Atom \cup u \), such that if
+  \[ (a_1, a_2) \in S \to (a_1, a_2) \in \xi^\Atom \vee \pi(a_1^\circ) = a_2^\circ \]
+
+  Let \( T \) be a permutative extension of the restriction of \( \xi^\Litter \) to the \( A \)-flexible litters, with coimage contained entirely in the set of \( A \)-flexible litters, given by \cref{prop:completing_orbits}.
+  From this, we define a base approximation \( \psi = (S, T) \).
+
+  It remains to check that \( \psi \) is an \( A \)-flexible approximation of \( \xi \).
+  Conditions 1--3 are trivial, and condition 4 follows from the fact that we assumed \( \xi \) was nice.
+
+  We first show an auxiliary result.
+  Let \( (N_1, N_2) \in \xi^\NearLitter \), and let \( (a_1, a_2) \in S \); we will show that \( a_1 \in N_1 \leftrightarrow a_2 \in N_2 \).
+  Suppose first that \( (a_1, a_2) \in \xi^\Atom \), in which case we are done as \( \xi \) is a base action.
+  Instead, we have \( a_1 \notin \coim \xi^\Atom, a_2 \notin \im \xi^\Atom \) and \( \pi(a_1^\circ) = a_2^\circ \).
+  As \( \xi \) is nice, we must have \( a_1 \in N_1 \leftrightarrow a_1^\circ = N_1^\circ \).
+  Similarly, \( a_2 \in N_2 \leftrightarrow a_2^\circ = N_2^\circ \).
+  So if \( a_1 \in N_1 \), we conclude that \( a_2^\circ = \pi(a_1^\circ) = \pi(N_1^\circ) = N_2^\circ \) giving \( a_2 \in N_2 \), and if \( a_2 \in N_2 \), we find \( \pi(a_1^\circ) = a_2^\circ = N_2^\circ \) so \( a_1^\circ = N_1^\circ \), giving \( a_1 \in N_1 \).
+
+  We now prove condition 5, which is the equation
+  \[ a_2 \in N_2 \leftrightarrow (\exists a_1 \in N_1,\, (a_1, a_2) \in S) \vee (a_2 \notin \coim S \wedge a_2^\circ = N_2^\circ) \]
+  where \( (N_1, N_2) \in \xi^\NearLitter \).
+  Consider the first the case where \( (a_1, a_2) \in S \) and \( a_1 \in N_1 \).
+  The auxiliary lemma shows that \( a_2 \in N_2 \) as required.
+  Now consider the case where \( a_2 \notin \coim S \) and \( a_2^\circ = N_2^\circ \).
+  If \( a_2 \notin N_2 \), then \( a_2 \in N_2 \symmdiff \LS(N_2^\circ) \subseteq \im \xi^\Atom \), a contradiction.
+  Finally suppose that neither holds, so
+  \[ (\forall a_1,\, (a_1, a_2) \in S \to a_1 \notin N_1) \wedge (a_2 \in \coim S \vee a_2^\circ \neq N_2^\circ) \]
+  If \( a_2 \in \coim S \), then there is \( a_1 \) such that \( (a_1, a_2) \in S \), and we have \( a_1 \notin N_1 \), giving \( a_2 \notin N_2 \) by the auxiliary lemma.
+  Finally, if \( a_2 \notin \coim S \) and \( a_2^\circ \neq N_2^\circ \), then \( a_2 \notin N_2 \), since \( a_2 \in N_2 \) would imply \( a_2 \in N_2 \symmdiff \LS(N_2^\circ) \), contradicting the fact that \( \xi \) is nice.
+\end{proof}
+\begin{definition}[approximates]
+  \label{def:StrAction.Approximates}
+  We say that a \( \beta \)-action \( \xi \) \emph{approximates} a \( \beta \)-allowable permutation \( \rho \) if \( \xi_A^\NearLitter \leq \rho_A^\NearLitter \) and \( \xi_A^\Atom \leq \rho_A^\Atom \) for each path \( A : \beta \tpath \bot \).\footnote{Again, we should define what it means for a base action to approximate a near-litter permutation, and define this in terms of that.}
+\end{definition}
+\begin{proposition}
+  \label{prop:FlexApprox.smul_nearLitter_eq}
+  Let \( \xi \) be a base action, and let \( \psi \) be an \( A \)-flexible approximation of it.
+  Let \( \pi \) be a base permutation that \( \psi \) exactly approximates.
+  If \( (N_1, N_2) \in \xi^\NearLitter \) and \( \pi(N_1^\circ) = N_2^\circ \), then \( \pi(N_1) = N_2 \).
+\end{proposition}
+\begin{proof}
+  First, note that
+  \begin{align*}
+    \pi[N_1] &= \pi[\LS(N_1^\circ)] \symmdiff \pi[N_1 \symmdiff \LS(N_1^\circ)] \\
+    &= (\pi[\LS(N_1^\circ) \cap \coim \psi^{E\Atom}] \cup \pi[\LS(N_1^\circ) \setminus \coim \psi^{E\Atom}]) \symmdiff \pi[N_1 \symmdiff \LS(N_1^\circ)]
+  \end{align*}
+  As \( \psi \) exactly approximates \( \pi \) and \( \rho(N_1^\circ) = N_2^\circ \), we have the equation
+  \[ \pi[\LS(N_1^\circ) \setminus \coim \psi^{E\Atom}] = \LS(N_2^\circ) \setminus \coim \psi^{E\Atom} \]
+  Combining this with the fact that \( \psi^{E\Atom} \leq \pi^\Atom \), and that \( N_1 \symmdiff \LS(N_1^\circ) \subseteq \coim \psi^{E\Atom} \), we obtain
+  \begin{align*}
+    \pi[N_1]
+    &= (\im \psi^{E\Atom}|_{\LS(N_1^\circ) \cap \coim \psi^{E\Atom}} \cup (\LS(N_2^\circ) \setminus \coim \psi^{E\Atom})) \symmdiff \im \psi^{E\Atom}|_{N_1 \symmdiff \LS(N_1^\circ)} \\
+    &= (\im \psi^{E\Atom}|_{\LS(N_1^\circ) \cap \coim \psi^{E\Atom}} \symmdiff \im \psi^{E\Atom}|_{N_1 \symmdiff \LS(N_1^\circ)})  \cup (\LS(N_2^\circ) \setminus \coim \psi^{E\Atom}) \\
+    &= \im \psi^{E\Atom}|_{(\LS(N_1^\circ) \cap \coim \psi^{E\Atom}) \symmdiff (N_1 \symmdiff \LS(N_1^\circ))} \cup (\LS(N_2^\circ) \setminus \coim \psi^{E\Atom}) \\
+    &= \im \psi^{E\Atom}|_{N_1 \cap \coim \psi^{E\Atom}} \cup (\LS(N_2^\circ) \setminus \coim \psi^{E\Atom})
+  \end{align*}
+  which is equal to \( N_2 \) by part of \cref{def:FlexApprox}.
+\end{proof}
+\begin{proposition}
+  \label{prop:approximates_of_flexApprox}
+  Let \( \xi \) be a coherent \( \beta \)-action, and let \( \psi \) be a flexible approximation for it.
+  If \( \psi \) exactly approximates some allowable permutation \( \rho \), then \( \xi \) approximates \( \rho \).
+\end{proposition}
+\begin{proof}
+  First, note that \( \xi_A^\Atom \leq \psi_A^{E\Atom} \) and \( \psi_A^\Atom \leq \rho_A^\Atom \) give the required result for atoms.
+  Now suppose that \( (N_1, N_2) \in \xi_A^\NearLitter \); we must show that \( \rho_A(N_1) = N_2 \).
+  We prove this by induction on \( \iota(N_1) \), generalising over all \( A \).
+
+  By \cref{prop:FlexApprox.smul_nearLitter_eq}, it suffices to show that \( \rho_A(N_1^\circ) = N_2^\circ \).
+  Suppose that \( N_1^\circ \) is \( A \)-flexible.
+  Then by \cref{def:FlexApprox}, \( (N_1^\circ, N_2^\circ) \in \psi_A^\Litter \).
+  Hence \( \rho_A(N_1^\circ) = N_2^\circ \) as required.
+
+  Suppose not, so \( N_1^\circ \) is \( A \)-inflexible with path \( (\gamma,\delta,\varepsilon,B) \) and tangle \( t : \Tang_\delta \).
+  By coherence of \( \xi \), we know that \( (\xi_B)_\delta \) is defined on \( \supp(t) \), and it suffices to show that
+  \[ (\xi_B)_\delta(\supp(t)) = (\rho_B)_\delta(\supp(t)) \]
+  Let \( C : \delta \tpath \bot \) and \( a \) be an atom such that \( (i, a) \in \supp(t)_C^\Atom \) for some \( i \).
+  Then \( (a, ((\rho_B)_\delta)_C(a)) \in ((\xi_B)_\delta)_C^\Atom \) by the result for atoms.
+  Now suppose \( N \) is a near-litter such that \( (i, N) \in \supp(t)_C^\NearLitter \).
+  Then
+  \[ \iota(N) < \iota(t) < \iota(f_{\delta,\varepsilon}(t)) = \iota(N_1^\circ) \]
+  So we may apply the inductive hypothesis, giving \( (N, ((\rho_B)_\delta)_C(N)) \in ((\xi_B)_\delta)_C^\NearLitter \) as required.
+\end{proof}
+\begin{proposition}[freedom of action for actions]
+  Every coherent base action approximates some allowable permutation.
+\end{proposition}
+\begin{proof}
+  Let \( \xi \) be a coherent \( \beta \)-action, and let \( \psi \) be a flexible approximation for it, which exists by \cref{prop:exists_flexApprox}.
+  Then apply \cref{thm:freedom_of_action} (freedom of action) to \( \psi \) to obtain a \( \beta \)-allowable permutation \( \rho \) that \( \psi \) exactly approximates.
+  Finally, appeal to \cref{prop:approximates_of_flexApprox} to conclude that \( \xi \) approximates \( \rho \).
+\end{proof}
+
+% ---
+
+% Key fact:
+% \[ (L_1, L_2) \in \psi^\Litter \to \im \psi^{T\Atom}|_{\LS(L_1) \setminus \coim \psi^{E\Atom}} = \LS(L_2) \setminus \coim \psi^{E\Atom} \]
+% If \( (N_1^\circ, N_2^\circ) \in \psi^\Litter \) and \( N_1 \symmdiff \LS(N_1^\circ) \subseteq \coim \psi^{E\Atom} \), then
+% \begin{align*}
+%   \im \psi^\Atom|_{N_1}
+%   &= \im \psi^\Atom|_{\LS(N_1^\circ)} \symmdiff \im \psi^\Atom|_{N_1 \symmdiff \LS(N_1^\circ)} \\
+%   &= (\im \psi^{E\Atom}|_{\LS(N_1^\circ) \cap \coim \psi^{E\Atom}} \cup \im \psi^{T\Atom}|_{\LS(N_1^\circ) \setminus \coim \psi^{E\Atom}}) \symmdiff \im \psi^\Atom|_{N_1 \symmdiff \LS(N_1^\circ)} \\
+%   &= (\im \psi^{E\Atom}|_{\LS(N_1^\circ) \cap \coim \psi^{E\Atom}} \cup (\LS(N_2^\circ) \setminus \coim \psi^{E\Atom})) \symmdiff \im \psi^{E\Atom}|_{N_1 \symmdiff \LS(N_1^\circ)} \\
+%   &= (\im \psi^{E\Atom}|_{\LS(N_1^\circ) \cap \coim \psi^{E\Atom}} \symmdiff \im \psi^{E\Atom}|_{N_1 \symmdiff \LS(N_1^\circ)}) \cup (\LS(N_2^\circ) \setminus \coim \psi^{E\Atom}) \\
+%   &= (\im \psi^{E\Atom}|_{((\LS(N_1^\circ) \cap \coim \psi^{E\Atom}) \symmdiff (N_1 \symmdiff \LS(N_1^\circ)))}) \cup (\LS(N_2^\circ) \setminus \coim \psi^{E\Atom}) \\
+%   &= \im \psi^{E\Atom}|_{N_1 \cap \coim \psi^{E\Atom}} \cup (\LS(N_2^\circ) \setminus \coim \psi^{E\Atom})
+% \end{align*}
+% So we need to enforce
+% \[ (\exists a_1 \in N_1,\, (a_1, a_2) \in \psi^{E\Atom}) \vee (a_2 \notin \coim \psi^{E\Atom} \wedge a_2^\circ = N_2^\circ) \leftrightarrow a_2 \in N_2 \]
