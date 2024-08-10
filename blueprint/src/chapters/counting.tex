@@ -1,0 +1,285 @@
+\section{Strong supports}
+\begin{definition}
+  \label{def:StrSupport.Occurs}
+  We define a partial order \( \preceq \) on base supports by \( S \preceq T \) if and only if \( \im S^\Atom \subseteq \im T^\Atom \) and \( \im S^\NearLitter \subseteq \im T^\NearLitter \).
+  For \( \beta \)-supports, we define \( S \preceq T \) if and only if \( S_A \preceq T_A \) for each \( A \).
+\end{definition}
+\begin{definition}
+  \label{def:Strong}
+  A \( \beta \)-support \( S \) is \emph{strong} if:
+  \begin{itemize}
+    \item for every pair of near-litters \( N_1, N_2 \in \im S_A^\NearLitter \), we have \( \interf(N_1, N_2) \subseteq \im S_A^\Atom \); and
+    \item for every inflexible path \( I = (\gamma,\delta,\varepsilon,A) \) and \( t : \Tang_\delta \), if there is a near-litter \( N \in \im S_{{A_\varepsilon}_{-1}}^\NearLitter \) with \( N^\circ = f_{\delta,\varepsilon}(t) \), then \( \supp(t) \preceq S_{A_\delta} \).
+  \end{itemize}
+\end{definition}
+\begin{proposition}
+  \label{prop:Strong.smul}
+  If \( S \) is a strong \( \beta \)-support and \( \rho \) is \( \beta \)-allowable, then \( \rho(S) \) is strong.
+\end{proposition}
+\begin{proposition}
+  \label{prop:exists_strong}
+  For every support \( S \), there is a strong support \( T \succeq S \).
+\end{proposition}
+\begin{proof}
+  TODO
+\end{proof}
+
+\section{Coding functions}
+\begin{definition}
+  For a type index \( \beta \leq \alpha \), a \emph{\( \beta \)-support orbit} is the quotient of \( \StrSupp_\beta \) under the relation of being in the same orbit under \( \beta \)-allowable permutations.\footnote{This can be implemented using \texttt{MulAction.orbitRel.Quotient}. We need to make sure there's plenty of API for support orbits to avoid code duplication.}
+\end{definition}
+\begin{definition}
+  For any type index \( \beta \leq \alpha \), a \emph{\( \beta \)-coding function} is a relation \( \chi : \StrSupp_\beta \to \TSet_\beta \to \Prop \) such that:
+  \begin{itemize}
+    \item \( \chi \) is coinjective;
+    \item \( \chi \) is nonempty;
+    \item if \( (S, x) \in \chi \), then \( S \) is a support for \( x \);
+    \item if \( S, T \in \coim \chi \) then \( S \) and \( T \) are in the same support orbit;
+    \item if \( (S, x) \in \chi \) and \( \rho \) is \( \beta \)-allowable, then \( (\rho(S), \rho(x)) \in \chi \).
+  \end{itemize}
+\end{definition}
+\begin{proposition}[extensionality for coding functions]
+  \label{prop:CodingFunction.ext}
+  Let \( \chi_1, \chi_2 \) be \( \beta \)-coding functions.
+  If \( (S, x) \in \chi_1, \chi_2 \), then \( \chi_1 = \chi_2 \).
+\end{proposition}
+\begin{proof}
+  We show \( \chi_1 \subseteq \chi_2 \); the result then follows by antisymmetry.
+  Suppose \( (T, y) \in \chi_1 \).
+  Then \( T = \rho(S) \) for some \( \beta \)-allowable \( \rho \).
+  As \( (\rho(S), \rho(x)) \in \chi_1 \) and \( \chi_1 \) is coinjective, we obtain \( y = \rho(x) \).
+  Hence \( (T, y) \in \chi_2 \) as required.
+\end{proof}
+\begin{definition}
+  Let \( t : \Tang_\beta \).
+  Then we define the coding function \( \chi_t \) by the constructor
+  \[ \forall \rho : \AllPerm_\beta,\, (\rho(\supp(t)), \rho(\set(t))) \in \chi \]
+  This is clearly a coding function, and satisfies \( (\supp(t), \set(t)) \in \chi_t \).
+\end{definition}
+\begin{proposition}
+  Let \( t, u : \Tang_\beta \).
+  Then \( \chi_t = \chi_u \) if and only if there is a \( \beta \)-allowable \( \rho \) with \( \rho(t) = u \).
+\end{proposition}
+\begin{proof}
+  If \( \rho(t) = u \), then \( (\supp(t), \set(t)) \in \chi_t \) implies \( (\supp(u), \set(u)) \in \chi_t \), giving \( \chi_t = \chi_u \) by \cref{prop:CodingFunction.ext}.
+  Conversely if \( \chi_t = \chi_u \), then \( (\supp(u), \set(u)) \in \chi_t \), so there is \( \rho \) such that \( \rho(\supp(t)) = \supp(u) \), and \( (\rho(\supp(t)), \rho(\set(t))) \in \chi_t \), so by coinjectivity we obtain \( \rho(set(t)) = \set(u) \) as required.
+\end{proof}
+
+\section{Specifications}
+\begin{definition}
+  An \emph{atom condition} is a pair \( (s, t) \) where \( s, t : \Set \kappa \).
+  A \emph{\( \beta \)-near-litter condition} is either
+  \begin{itemize}
+    \item a \emph{flexible condition}, consisting of a set \( s : \Set \kappa \); or
+    \item an \emph{inflexible condition}, consisting of an inflexible \( \beta \)-path \( I = (\gamma,\delta,\varepsilon,A) \), a \( \delta \)-coding function \( \chi \), and two \( \delta \)-trees \( R^\Atom, R^\NearLitter \) of relations on \( \kappa \).
+  \end{itemize}
+  A \emph{\( \beta \)-specification} is a pair \( (\sigma^\Atom, \sigma^\NearLitter) \) where
+  \begin{itemize}
+    \item \( \sigma^\Atom \) is a \( \beta \)-tree of enumerations of atom conditions; and
+    \item \( \sigma^\NearLitter \) is a \( \beta \)-tree of enumerations of \( \beta \)-near-litter conditions.
+  \end{itemize}
+\end{definition}
+\begin{definition}
+  Let \( S \) be a \( \beta \)-support.
+  Then \emph{its specification} is the \( \beta \)-specification \( \sigma = \spec(S) \) given by the following constructors.
+  \begin{itemize}
+    \item Whenever \( (i, a) \in S_A^\Atom \), we have \( (i, (s, t)) \in \sigma_A^\Atom \) where
+    \[ s = \{ j : \kappa \mid (j, a) \in S_A^\Atom \};\quad t = \{ j : \kappa \mid \exists N,\, (j, N) \in S_A^\NearLitter \wedge a \in N \} \]
+    \item Whenever \( (i, N) \in S_A^\NearLitter \) and \( N^\circ \) is \( A \)-flexible, we have \( (i, c) \in \sigma_A^\NearLitter \) where \( c \) is the flexible condition given by
+    \[ s = \{ j : \kappa \mid \exists N',\, (j, N') \in S_A^\NearLitter \wedge N^\circ = {N'}^\circ \} \]
+    \item Whenever \( I = (\gamma,\delta,\varepsilon,A) \) is an inflexible \( \beta \)-path, \( t : \Tang_\delta \), and \( (i, N) \in S_{{A_\varepsilon}_{-1}}^\NearLitter \) is such that \( N^\circ = f_{\delta,\varepsilon}(t) \), we have \( (i, c) \in \sigma_{{A_\varepsilon}_{-1}}^\NearLitter \) where \( c \) is the inflexible condition given by path \( I \) and coding function \( \chi_t \), and \( R^\Atom \) and \( R^\NearLitter \) are the \( \delta \)-trees of relations given by the constructors
+    \begin{align*}
+      &\forall i,\, \forall j,\, \forall a,\, (i, a) \in S_{{A_\delta}_B}^\Atom \to (j, a) \in \supp(t)_B^\Atom \to (i, j) \in R_B^\Atom \\
+      &\forall i,\, \forall j,\, \forall N,\, (i, N) \in S_{{A_\delta}_B}^\NearLitter \to (j, N) \in \supp(t)_B^\NearLitter \to (i, j) \in R_B^\NearLitter
+    \end{align*}
+  \end{itemize}
+\end{definition}
+\begin{proposition}
+  \label{prop:spec_eq_spec_iff}
+  Let \( S, T \) be \( \beta \)-supports.
+  Then \( \spec(S) = \spec(T) \) if and only if\footnote{The following bullet points should comprise a proposition type relating \( S \) and \( T \).}
+  \begin{itemize}
+    \item \( \coim S_A^\Atom = \coim T_A^\Atom \) and \( \coim S_A^\NearLitter = \coim T_A^\NearLitter \).
+    \item (atom condition) Whenever \( (i, a_1) \in S_A^\Atom \) and \( (i, a_2) \in T_A^\Atom \), we have
+    \[ \forall j,\, (j, a_1) \in S_A^\Atom \leftrightarrow (j, a_2) \in T_A^\Atom \]
+    and
+    \[ \forall j,\, (\exists N,\, (j, N) \in S_A^\NearLitter \wedge a_1 \in N) \leftrightarrow (\exists N,\, (j, N) \in T_A^\NearLitter \wedge a_2 \in N) \]
+    \item (flexible condition) Whenever \( (i, N_1) \in S_A^\NearLitter \) and \( (i, N_2) \in T_A^\NearLitter \), if \( N_1^\circ \) is \( A \)-flexible, then so is \( N_2^\circ \), and
+    \[ \forall j,\, (\exists N',\, (j, N') \in S_A^\NearLitter \wedge N_1^\circ = {N'}^\circ) \leftrightarrow (\exists N',\, (j, N') \in T_A^\NearLitter \wedge N_2^\circ = {N'}^\circ) \]
+    \item (inflexible condition) Let \( I = (\gamma,\delta,\varepsilon) \) be an inflexible \( \beta \)-path and let \( t : \Tang_\delta \).
+    Then whenever \( (i, N_1) \in S_{{A_\varepsilon}_{-1}}^\NearLitter \) and \( (i, N_2) \in T_{{A_\varepsilon}_{-1}}^\NearLitter \) are such that \( N_1^\circ = f_{\delta,\varepsilon}(t) \), there is some \( \delta \)-allowable permutation \( \rho \) such that \( N_2^\circ = f_{\delta,\varepsilon}(\rho(t)) \), and
+    \begin{align*}
+      \forall j,\, \forall a,\, (j, a) \in \supp(t)_B^\Atom &\to \forall i,\, (i, a) \in S_{{A_\delta}_B}^\Atom \leftrightarrow (i, \rho_B(a)) \in T_{{A_\delta}_B}^\Atom \\
+      \forall j,\, \forall N,\, (j, N) \in \supp(t)_B^\NearLitter &\to \forall i,\, (i, N) \in S_{{A_\delta}_B}^\NearLitter \leftrightarrow (i, \rho_B(N)) \in T_{{A_\delta}_B}^\NearLitter
+    \end{align*}
+  \end{itemize}
+\end{proposition}
+\begin{proof}
+  % TODO: Flesh this out?
+  We will only sketch the fourth bullet point of this proof; the remainder is direct (but quite long to write down on paper).
+  Moreover, we will show this for atoms; the result for near-litters is identical.
+  The specifications \( \spec(S) \) and \( \spec(T) \) give rise to the same trees \( R^\Atom \) precisely when
+  \[ \forall i,\, \forall j,\, (\exists a,\, (i, a) \in S_{{A_\delta}_B}^\Atom \wedge (j, a) \in \supp(t)_B^\Atom) \leftrightarrow (\exists a,\, (i, a) \in T_{{A_\delta}_B}^\Atom \wedge (j, a) \in \supp(\rho(t))_B^\Atom) \]
+  We must show that this holds if and only if
+  \[ \forall j,\, \forall a,\, (j, a) \in \supp(t)_B^\Atom \to \forall i,\, (i, a) \in S_{{A_\delta}_B}^\Atom \leftrightarrow (i, \rho_B(a)) \in T_{{A_\delta}_B}^\Atom \]
+  This can be concluded by appealing to the basic behaviour of \( \rho \) and noting the coinjectivity of \( \supp(t)_B^\Atom \).
+\end{proof}
+\begin{proposition}
+  Let \( \rho \) be \( \beta \)-allowable, and let \( S \) be a \( \beta \)-support.
+  Then \( \spec(\rho(S)) = \spec(S) \).
+\end{proposition}
+\begin{proof}
+  We appeal to \cref{prop:spec_eq_spec_iff}.
+  Clearly the coimage condition holds.
+
+  For the atom condition, we must check that if \( (i, a) \in S_A^\Atom \), we have
+  \[ \forall j,\, (j, a) \in S_A^\Atom \leftrightarrow (j, \rho_A(a)) \in \rho(S)_A^\Atom \]
+  and
+  \[ \forall j,\, (\exists N,\, (j, N) \in S_A^\NearLitter \wedge a \in N) \leftrightarrow (\exists N,\, (j, N) \in \rho(S)_A^\NearLitter \wedge \rho_A(a) \in N) \]
+  both of which are trivial.
+
+  For the flexible condition, we must check that if \( (i, N) \in S_A^\NearLitter \) and \( N^\circ \) is \( A \)-flexible, then \( \rho_A(N)^\circ \) is also \( A \)-flexible (which is direct, and should already be its own lemma), and that
+  \[ \forall j,\, (\exists N',\, (j, N') \in S_A^\NearLitter \wedge N^\circ = {N'}^\circ) \leftrightarrow (\exists N',\, (j, N') \in \rho(S)_A^\NearLitter \wedge \rho(N)^\circ = {N'}^\circ) \]
+  which is similarly trivial.
+
+  Finally, for the inflexible condition, suppose that \( I = (\gamma,\delta,\varepsilon) \) is an inflexible \( \beta \)-path and \( t : \Tang_\delta \).
+  Let \( (i, N) \in S_{{A_\varepsilon}_{-1}}^\NearLitter \) be such that \( N^\circ = f_{\delta,\varepsilon}(t) \).
+  Then by the coherence condition,
+  \[ \rho_{{A_\varepsilon}_{-1}}(N)^\circ = \rho_{{A_\varepsilon}_{-1}}(N^\circ) = \rho_{{A_\varepsilon}_{-1}}(f_{\delta,\varepsilon}(t)) = f_{\delta,\varepsilon}(\rho_{A_\delta}(t)) \]
+  We must check that
+  \begin{align*}
+    \forall j,\, \forall a,\, (j, a) \in \supp(t)_B^\Atom &\to \forall i,\, (i, a) \in S_{{A_\delta}_B}^\Atom \leftrightarrow (i, (\rho_{A_\delta})_B(a)) \in \rho(S)_{{A_\delta}_B}^\Atom \\
+    \forall j,\, \forall N,\, (j, N) \in \supp(t)_B^\NearLitter &\to \forall i,\, (i, N) \in S_{{A_\delta}_B}^\NearLitter \leftrightarrow (i, (\rho_{A_\delta})_B(N)) \in \rho(S)_{{A_\delta}_B}^\NearLitter
+  \end{align*}
+  which again is trivial.
+\end{proof}
+\begin{definition}
+  Let \( S \) and \( T \) be base supports.
+  We define the relations \( \conv_{S,T}^\Atom, \conv_{S,T}^\NearLitter \) by the constructors\footnote{TODO: We should abstract this out even further. This can be defined for any pair of relations with common domain.}
+  \begin{align*}
+    &(i, a_1) \in S^\Atom \to (i, a_2) \in T^\Atom \to (a_1, a_2) \in \conv_{S,T}^\Atom \\
+    &(i, N_1) \in S^\NearLitter \to (i, N_2) \in T^\NearLitter \to (N_1, N_2) \in \conv_{S,T}^\NearLitter
+  \end{align*}
+  Note that \( {\conv_{S,T}^\Atom}^{-1} = \conv_{T,S}^\Atom \) and \( {\conv_{S,T}^\NearLitter}^{-1} = \conv_{T,S}^\NearLitter \).
+\end{definition}
+\begin{proposition}
+  \label{prop:conv_one_to_one}
+  Let \( S, T \) be supports such that \( \spec(S) = \spec(T) \).
+  Then \( \conv_{S_A, T_A}^\Atom \) is one-to-one.
+\end{proposition}
+\begin{proof}
+  If \( (a_1, a_2), (a_1, a_3) \in \conv_{S_A, T_A}^\Atom \), then there are \( i, j \) such that \( (i, a_1), (j, a_1) \in S_A^\Atom \) and \( (i, a_2), (j, a_3) \in T_A^\Atom \).
+  By \cref{prop:spec_eq_spec_iff}, we deduce \( (j, a_1) \in S_A^\Atom \leftrightarrow (j, a_2) \in T_A^\Atom \), so by coinjectivity of \( T_A^\Atom \), we deduce \( a_2 = a_3 \).
+  Hence \( \conv_{S_A, T_A}^\Atom \) is coinjective.
+  By symmetry, \( \conv_{S_A, T_A}^\Atom \) is one-to-one.
+\end{proof}
+\begin{proposition}
+  \label{prop:conv_mem_nearLitter_iff}
+  Let \( S, T \) be supports such that \( \spec(S) = \spec(T) \).
+  If \( (a_1, a_2) \in \conv_{S_A, T_A}^\Atom \) and \( (N_1, N_2) \in \conv_{S_A, T_A}^\NearLitter \), then \( a_1 \in N_1 \) if and only if \( a_2 \in N_2 \).
+\end{proposition}
+\begin{proof}
+  As \( (a_1, a_2) \in \conv_{S_A, T_A}^\Atom \), there is \( i \) such that \( (i, a_1) \in S_A^\Atom \) and \( (i, a_2) \in T_A^\Atom \), and as \( (N_1, N_2) \in \conv_{S_A, T_A}^\NearLitter \), there is \( j \) such that \( (j, N_1) \in S_A^\NearLitter \) and \( (j, N_2) \in T_A^\NearLitter \).
+  By \cref{prop:spec_eq_spec_iff}, we deduce that
+  \[ \forall j,\, (\exists N,\, (j, N) \in S_A^\NearLitter \wedge a_1 \in N) \leftrightarrow (\exists N,\, (j, N) \in T_A^\NearLitter \wedge a_2 \in N) \]
+  If \( a_1 \in N_1 \), then as \( (j, N_1) \in S_A^\NearLitter \), we deduce that there is a near-litter \( N' \) such that \( (j, N') \in T_A^\NearLitter \) and \( a \in N' \).
+  But \( T_A^\NearLitter \) is coinjective, so \( N' = N_2 \), giving \( a \in N_2 \).
+  The converse holds by symmetry.
+\end{proof}
+\begin{proposition}
+  \label{prop:conv_circ_eq_circ_iff}
+  Let \( S, T \) be supports such that \( T \) is strong and \( \spec(S) = \spec(T) \).
+  If \( (N_1, N_3), (N_2, N_4) \in \conv_{S_A, T_A}^\NearLitter \), then \( N_1^\circ = N_2^\circ \) if and only if \( N_3^\circ = N_4^\circ \).
+\end{proposition}
+\begin{proof}
+  There are \( i, j \) such that \( (i, N_1), (j, N_2) \in S_A^\NearLitter \) and \( (i, N_3), (j, N_4) \in T_A^\NearLitter \).
+  Suppose that \( N_1^\circ = N_2^\circ \); we show that \( N_3^\circ = N_4^\circ \).
+
+  First, suppose that \( N_1^\circ \) is \( A \)-flexible.
+  Then by \cref{prop:spec_eq_spec_iff}, we have
+  \[ \forall j,\, (\exists N',\, (j, N') \in S_A^\NearLitter \wedge N_1^\circ = {N'}^\circ) \leftrightarrow (\exists N',\, (j, N') \in T_A^\NearLitter \wedge N_3^\circ = {N'}^\circ) \]
+  So as \( (j, N_2) \in S_A^\NearLitter \) and \( N_1^\circ = N_2^\circ \), there is \( N' \) with \( (j, N') \in T_A^\NearLitter \) and \( N_3^\circ = {N'}^\circ \), but clearly \( N' = N_4 \), giving the result.
+
+  Now suppose that \( N_1^\circ \) is \( A \)-inflexible, so there is an inflexible \( \beta \)-path \( (\gamma,\delta,\varepsilon,B) \) and tangle \( t : \Tang_\delta \) such that
+  \[ A = {B_\varepsilon}_{-1};\quad N_1^\circ = f_{\delta,\varepsilon}(t) \]
+  Then by \cref{prop:spec_eq_spec_iff}, there is some \( \delta \)-allowable \( \rho \) such that \( N_3^\circ = f_{\delta,\varepsilon}(\rho(t)) \) and
+  \begin{align*}
+    \forall j,\, \forall a,\, (j, a) \in \supp(t)_B^\Atom &\to \forall i,\, (i, a) \in S_{{A_\delta}_B}^\Atom \leftrightarrow (i, \rho_B(a)) \in T_{{A_\delta}_B}^\Atom \\
+    \forall j,\, \forall N,\, (j, N) \in \supp(t)_B^\NearLitter &\to \forall i,\, (i, N) \in S_{{A_\delta}_B}^\NearLitter \leftrightarrow (i, \rho_B(N)) \in T_{{A_\delta}_B}^\NearLitter
+  \end{align*}
+  But as \( N_1^\circ = N_2^\circ \), we draw the same conclusion about \( N_2 \) and \( N_4 \), giving a \( \delta \)-allowable permutation \( \rho' \) such that \( N_4^\circ = f_{\delta,\varepsilon}(\rho'(t)) \); note that the inflexible path and tangle in question will be the same for both pairs.
+  We also have
+  \begin{align*}
+    \forall j,\, \forall a,\, (j, a) \in \supp(t)_B^\Atom &\to \forall i,\, (i, a) \in S_{{A_\delta}_B}^\Atom \leftrightarrow (i, \rho'_B(a)) \in T_{{A_\delta}_B}^\Atom \\
+    \forall j,\, \forall N,\, (j, N) \in \supp(t)_B^\NearLitter &\to \forall i,\, (i, N) \in S_{{A_\delta}_B}^\NearLitter \leftrightarrow (i, \rho'_B(N)) \in T_{{A_\delta}_B}^\NearLitter
+  \end{align*}
+  Combining these, we obtain
+  \begin{align*}
+    \forall j,\, \forall a,\, (j, a) \in \supp(t)_B^\Atom &\to \forall i,\, (i, \rho_B(a)) \in T_{{A_\delta}_B}^\Atom \leftrightarrow (i, \rho'_B(a)) \in T_{{A_\delta}_B}^\Atom \\
+    \forall j,\, \forall N,\, (j, N) \in \supp(t)_B^\NearLitter &\to \forall i,\, (i, \rho_B(N)) \in T_{{A_\delta}_B}^\NearLitter \leftrightarrow (i, \rho'_B(N)) \in T_{{A_\delta}_B}^\NearLitter
+  \end{align*}
+  We claim that \( \rho(\supp(t)) = \rho'(\supp(t)) \).
+  As \( T \) is strong, for each atom \( a \) such that \( (j, a) \in \supp(t)_B^\Atom \), there is some \( k \) such that \( (i, \rho_B(a)) \in T_{{A_\delta}_B}^\Atom \).
+  Thus \( \rho_B(a) = \rho'_B(a) \).
+  The same conclusion may be drawn for near-litters.
+  Thus \( \rho(\supp(t)) = \rho'(\supp(t)) \), giving \( \rho(t) = \rho'(t) \), and hence \( N_3^\circ = N_4^\circ \).
+\end{proof}
+\begin{proposition}
+  \label{prop:conv_interf}
+  Let \( S, T \) be strong supports such that \( \spec(S) = \spec(T) \).
+  Then for each \( (N_1, N_3), (N_2, N_4) \in \conv_{S_A, T_A}^\NearLitter \),
+  \[ \interf(N_1, N_2) \subseteq \coim \conv_{S_A, T_A}^\Atom;\quad \interf(N_3, N_4) \subseteq \im \conv_{S_A, T_A}^\Atom \]
+\end{proposition}
+\begin{proof}
+  As \( S \) is strong, we have \( \interf(N_1, N_2) \subseteq \im S_A^\Atom \).
+  But \( \coim \conv_{S_A, T_A}^\Atom = \im S_A^\Atom \), as required.\footnote{Make this a lemma.}
+  The result for \( \interf(N_3, N_4) \) then follows by symmetry.
+\end{proof}
+\begin{definition}
+  \uses{prop:conv_one_to_one,prop:conv_mem_nearLitter_iff,prop:conv_circ_eq_circ_iff,prop:conv_interf}
+  \label{def:conv}
+  Let \( S, T \) be strong \( \beta \)-supports such that \( \spec(S) = \spec(T) \).
+  Then for each \( A \), we define the base action \( \conv_{S_A, T_A} \) to be \( (\conv_{S_A, T_A}^\Atom, \conv_{S_A, T_A}^\NearLitter) \); this is a base action by \cref{prop:conv_one_to_one,prop:conv_mem_nearLitter_iff,prop:conv_circ_eq_circ_iff,prop:conv_interf}.
+  We now define the \( \beta \)-action \( \conv_{S,T} \) by \( (\conv_{S,T})_A = \conv_{S_A,T_A} \).
+\end{definition}
+\begin{proposition}
+  \label{prop:conv_coherent}
+  \uses{def:conv}
+  Let \( S, T \) be strong supports such that \( \spec(S) = \spec(T) \).
+  Then \( \conv_{S,T} \) is coherent.
+\end{proposition}
+\begin{proof}
+  Suppose that \( (N_1, N_2) \in \conv_{S_A,T_A}^\NearLitter \), so there is \( i \) such that \( (i, N_1) \in S_A^\NearLitter \) and \( (i, N_2) \in T_A^\NearLitter \).
+
+  Suppose that \( N_1^\circ \) is \( A \)-flexible.
+  By \cref{prop:spec_eq_spec_iff}, we immediately conclude that \( N_2^\circ \) is \( A \)-flexible as required.
+
+  Now suppose that \( N_1^\circ \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma,\delta,\varepsilon,B) \) and tangle \( t : \Tang_\delta \).
+  By \cref{prop:spec_eq_spec_iff}, there is some \( \delta \)-allowable permutation \( \rho \) such that \( N_2^\circ = f_{\delta,\varepsilon}(\rho(t)) \) and
+  \begin{align*}
+    \forall j,\, \forall a,\, (j, a) \in \supp(t)_C^\Atom &\to \forall i,\, (i, a) \in S_{{B_\delta}_C}^\Atom \leftrightarrow (i, \rho_C(a)) \in T_{{B_\delta}_C}^\Atom \\
+    \forall j,\, \forall N,\, (j, N) \in \supp(t)_C^\NearLitter &\to \forall i,\, (i, N) \in S_{{B_\delta}_C}^\NearLitter \leftrightarrow (i, \rho_C(N)) \in T_{{B_\delta}_C}^\NearLitter
+  \end{align*}
+  We must show that \( ((\conv_{S,T})_B)_\delta(\supp(t)) = \rho(\supp(t)) \).
+  We will show the result for atoms; the result for near-litters is identical.
+  Let \( (j, a) \in \supp(t)_C^\Atom \).
+  Then as \( S \) is strong, there is \( k \) such that \( (k, a) \in S_{{B_\delta}_C}^\Atom \).
+  Then by the equation above, \( (k, \rho_C(a)) \in T_{{B_\delta}_C}^\Atom \).
+  Hence \( (a, \rho_C(a)) \in (((\conv_{S,T})_B)_\delta)_C \) as required.
+\end{proof}
+\begin{proposition}
+  Let \( S, T \) be strong supports such that \( \spec(S) = \spec(T) \).
+  Then there is an allowable permutation \( \rho \) such that \( \rho(S) = T \).
+\end{proposition}
+\begin{proof}
+  By \cref{prop:conv_coherent}, we may apply \cref{thm:StrAction.foa} to \( \conv_{S,T} \) to obtain an allowable permutation \( \rho \) that \( \conv_{S,T} \) approximates, which directly gives \( \rho(S) = T \) as required.
+\end{proof}
+
+% some point later...
+\begin{definition}
+  For a type index \( \beta \leq \alpha \), a \emph{\( \beta \)-set orbit} is the quotient of \( \TSet_\beta \) under the relation of being in the same orbit under \( \beta \)-allowable permutations.
+  We write \( [x] \) for the set orbit of \( x \).
+  For each set orbit \( o \), we choose a representative \( \repr(o) : \TSet_\beta \) with \( [\repr(o)] = o \), and define a support \( S_o \) for \( \repr(o) \).
+  For each set, we choose a \( \beta \)-allowable permutation \( \twist_t \) with the property that \( \twist_t(\repr([t])) = t \), and we define the \emph{designated support} of \( t \) to be \( \twist_t(S_{[t]}) \).
+  This is a support for \( t \).
+\end{definition}
