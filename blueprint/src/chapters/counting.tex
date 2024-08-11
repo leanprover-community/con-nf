@@ -11,7 +11,7 @@
   A \( \beta \)-support \( S \) is \emph{strong} if:
   \begin{itemize}
     \item for every pair of near-litters \( N_1, N_2 \in \im S_A^\NearLitter \), we have \( \interf(N_1, N_2) \subseteq \im S_A^\Atom \); and
-    \item for every inflexible path \( I = (\gamma,\delta,\varepsilon,A) \) and \( t : \Tang_\delta \), if there is a near-litter \( N \in \im S_{{A_\varepsilon}_{-1}}^\NearLitter \) with \( N^\circ = f_{\delta,\varepsilon}(t) \), then \( \supp(t) \preceq S_{A_\delta} \).
+    \item for every inflexible path \( I = (\gamma,\delta,\varepsilon,A) \) and \( t : \Tang_\delta \), if there is a near-litter \( N \in \im S_{{A_\varepsilon}_\bot}^\NearLitter \) with \( N^\circ = f_{\delta,\varepsilon}(t) \), then \( \supp(t) \preceq S_{A_\delta} \).
   \end{itemize}
 \end{definition}
 \begin{proposition}
@@ -108,7 +108,7 @@
     \[ s = \{ j : \kappa \mid (j, a) \in S_A^\Atom \};\quad t = \{ j : \kappa \mid \exists N,\, (j, N) \in S_A^\NearLitter \wedge a \in N \} \]
     \item Whenever \( (i, N) \in S_A^\NearLitter \) and \( N^\circ \) is \( A \)-flexible, we have \( (i, c) \in \sigma_A^\NearLitter \) where \( c \) is the flexible condition given by
     \[ s = \{ j : \kappa \mid \exists N',\, (j, N') \in S_A^\NearLitter \wedge N^\circ = {N'}^\circ \} \]
-    \item Whenever \( I = (\gamma,\delta,\varepsilon,A) \) is an inflexible \( \beta \)-path, \( t : \Tang_\delta \), and \( (i, N) \in S_{{A_\varepsilon}_{-1}}^\NearLitter \) is such that \( N^\circ = f_{\delta,\varepsilon}(t) \), we have \( (i, c) \in \sigma_{{A_\varepsilon}_{-1}}^\NearLitter \) where \( c \) is the inflexible condition given by path \( I \) and coding function \( \chi_t \), and \( R^\Atom \) and \( R^\NearLitter \) are the \( \delta \)-trees of relations given by the constructors
+    \item Whenever \( I = (\gamma,\delta,\varepsilon,A) \) is an inflexible \( \beta \)-path, \( t : \Tang_\delta \), and \( (i, N) \in S_{{A_\varepsilon}_\bot}^\NearLitter \) is such that \( N^\circ = f_{\delta,\varepsilon}(t) \), we have \( (i, c) \in \sigma_{{A_\varepsilon}_\bot}^\NearLitter \) where \( c \) is the inflexible condition given by path \( I \) and coding function \( \chi_t \), and \( R^\Atom \) and \( R^\NearLitter \) are the \( \delta \)-trees of relations given by the constructors
     \begin{align*}
       &\forall i,\, \forall j,\, \forall a,\, (i, a) \in S_{{A_\delta}_B}^\Atom \to (j, a) \in \supp(t)_B^\Atom \to (i, j) \in R_B^\Atom \\
       &\forall i,\, \forall j,\, \forall N,\, (i, N) \in S_{{A_\delta}_B}^\NearLitter \to (j, N) \in \supp(t)_B^\NearLitter \to (i, j) \in R_B^\NearLitter
@@ -129,7 +129,7 @@
     \item (flexible condition) Whenever \( (i, N_1) \in S_A^\NearLitter \) and \( (i, N_2) \in T_A^\NearLitter \), if \( N_1^\circ \) is \( A \)-flexible, then so is \( N_2^\circ \), and
     \[ \forall j,\, (\exists N',\, (j, N') \in S_A^\NearLitter \wedge N_1^\circ = {N'}^\circ) \leftrightarrow (\exists N',\, (j, N') \in T_A^\NearLitter \wedge N_2^\circ = {N'}^\circ) \]
     \item (inflexible condition) Let \( I = (\gamma,\delta,\varepsilon) \) be an inflexible \( \beta \)-path and let \( t : \Tang_\delta \).
-    Then whenever \( (i, N_1) \in S_{{A_\varepsilon}_{-1}}^\NearLitter \) and \( (i, N_2) \in T_{{A_\varepsilon}_{-1}}^\NearLitter \) are such that \( N_1^\circ = f_{\delta,\varepsilon}(t) \), there is some \( \delta \)-allowable permutation \( \rho \) such that \( N_2^\circ = f_{\delta,\varepsilon}(\rho(t)) \), and
+    Then whenever \( (i, N_1) \in S_{{A_\varepsilon}_\bot}^\NearLitter \) and \( (i, N_2) \in T_{{A_\varepsilon}_\bot}^\NearLitter \) are such that \( N_1^\circ = f_{\delta,\varepsilon}(t) \), there is some \( \delta \)-allowable permutation \( \rho \) such that \( N_2^\circ = f_{\delta,\varepsilon}(\rho(t)) \), and
     \begin{align*}
       \forall j,\, \forall a,\, (j, a) \in \supp(t)_B^\Atom &\to \forall i,\, (i, a) \in S_{{A_\delta}_B}^\Atom \leftrightarrow (i, \rho_B(a)) \in T_{{A_\delta}_B}^\Atom \\
       \forall j,\, \forall N,\, (j, N) \in \supp(t)_B^\NearLitter &\to \forall i,\, (i, N) \in S_{{A_\delta}_B}^\NearLitter \leftrightarrow (i, \rho_B(N)) \in T_{{A_\delta}_B}^\NearLitter
@@ -150,7 +150,7 @@
   \uses{def:StrSupport.spec}
   \label{def:spec_smul}
   Let \( \rho \) be \( \beta \)-allowable, and let \( S \) be a \( \beta \)-support.
-  Then \( \spec(\rho(S)) = \spec(S) \).
+  Then \( \spec(\rho(S)) = \spec(S) \).\footnote{TODO: Consider removing this; I don't think it's used.}
 \end{proposition}
 \begin{proof}
   \uses{prop:spec_eq_spec_iff}
@@ -168,9 +168,9 @@
   which is similarly trivial.
 
   Finally, for the inflexible condition, suppose that \( I = (\gamma,\delta,\varepsilon) \) is an inflexible \( \beta \)-path and \( t : \Tang_\delta \).
-  Let \( (i, N) \in S_{{A_\varepsilon}_{-1}}^\NearLitter \) be such that \( N^\circ = f_{\delta,\varepsilon}(t) \).
+  Let \( (i, N) \in S_{{A_\varepsilon}_\bot}^\NearLitter \) be such that \( N^\circ = f_{\delta,\varepsilon}(t) \).
   Then by the coherence condition,
-  \[ \rho_{{A_\varepsilon}_{-1}}(N)^\circ = \rho_{{A_\varepsilon}_{-1}}(N^\circ) = \rho_{{A_\varepsilon}_{-1}}(f_{\delta,\varepsilon}(t)) = f_{\delta,\varepsilon}(\rho_{A_\delta}(t)) \]
+  \[ \rho_{{A_\varepsilon}_\bot}(N)^\circ = \rho_{{A_\varepsilon}_\bot}(N^\circ) = \rho_{{A_\varepsilon}_\bot}(f_{\delta,\varepsilon}(t)) = f_{\delta,\varepsilon}(\rho_{A_\delta}(t)) \]
   We must check that
   \begin{align*}
     \forall j,\, \forall a,\, (j, a) \in \supp(t)_B^\Atom &\to \forall i,\, (i, a) \in S_{{A_\delta}_B}^\Atom \leftrightarrow (i, (\rho_{A_\delta})_B(a)) \in \rho(S)_{{A_\delta}_B}^\Atom \\
@@ -234,7 +234,7 @@
   So as \( (j, N_2) \in S_A^\NearLitter \) and \( N_1^\circ = N_2^\circ \), there is \( N' \) with \( (j, N') \in T_A^\NearLitter \) and \( N_3^\circ = {N'}^\circ \), but clearly \( N' = N_4 \), giving the result.
 
   Now suppose that \( N_1^\circ \) is \( A \)-inflexible, so there is an inflexible \( \beta \)-path \( (\gamma,\delta,\varepsilon,B) \) and tangle \( t : \Tang_\delta \) such that
-  \[ A = {B_\varepsilon}_{-1};\quad N_1^\circ = f_{\delta,\varepsilon}(t) \]
+  \[ A = {B_\varepsilon}_\bot;\quad N_1^\circ = f_{\delta,\varepsilon}(t) \]
   Then by \cref{prop:spec_eq_spec_iff}, there is some \( \delta \)-allowable \( \rho \) such that \( N_3^\circ = f_{\delta,\varepsilon}(\rho(t)) \) and
   \begin{align*}
     \forall j,\, \forall a,\, (j, a) \in \supp(t)_B^\Atom &\to \forall i,\, (i, a) \in S_{{A_\delta}_B}^\Atom \leftrightarrow (i, \rho_B(a)) \in T_{{A_\delta}_B}^\Atom \\
@@ -419,4 +419,245 @@
   We claim that \( \chi \) is the raised coding function for \( (s, o) \).
   It suffices to show that \( (S, x) \) is in this raised coding function.
   That is, we must show that \( S \in o \), which is trivial, and that \( x \) is a combination of \( s \), which is the content of \cref{prop:raise_combination}.
+\end{proof}
+
+\section{Coding the base type}
+\begin{proposition}[the swap permutation]
+  \label{prop:exists_swap}
+  Let \( S \) be a base support that is closed under interference of near-litters.
+  Let \( a_1, a_2 \) be atoms not in \( \im S^\Atom \) such that
+  \[ \forall N \in \im S^\NearLitter,\, a_1 \in N \leftrightarrow a_2 \in N \]
+  Then there is a base permutation \( \pi \) that fixes \( S \) and maps \( a_1 \) to \( a_2 \).
+\end{proposition}
+\begin{proof}
+  Let \( i \) be an index that does not occur in \( \coim S^\Atom \), and define \( T_1, T_2 \) by
+  \[ U_n^\Atom = S^\Atom \sqcup \{ (i, a_n) \};\quad U_n^\NearLitter = S^\NearLitter \]
+  for \( n = 1, 2 \).
+  We claim that \( T_1 \) and \( T_2 \) are have the same specification, treated as \( \bot \)-supports.
+  By appealing to \cref{prop:spec_eq_spec_iff} and noting that every litter is flexible for the unique path \( \bot \tpath \bot \), it suffices to check:
+  \begin{itemize}
+    \item (atom condition) For all \( i, a_1, a_2 \), if \( (i, a_1) \in T_1^\Atom \) and \( (i, a_2) \in T_2^\Atom \), we have
+    \[ \forall j,\, (j, a_1) \in T_1^\Atom \leftrightarrow (j, a_2) \in T_2^\Atom \]
+    and
+    \[ \forall j,\, (\exists N,\, (j, N) \in T_1^\NearLitter \wedge a_1 \in N) \leftrightarrow (\exists N,\, (j, N) \in T_2^\NearLitter \wedge a_2 \in N) \]
+    \item (litter condition) For all \( i, N_1, N_2 \), if \( (i, N_1) \in T_1^\NearLitter \) and \( (i, N_2) \in T_2^\NearLitter \), we have
+    \[ \forall j,\, (\exists N',\, (j, N') \in T_1^\NearLitter \wedge N_1^\circ = {N'}^\circ) \leftrightarrow (\exists N',\, (j, N') \in T_2^\NearLitter \wedge N_2^\circ = {N'}^\circ) \]
+  \end{itemize}
+  The atom condition follows directly from the two assumptions, and the litter condition is vacuously true as \( T_1^\NearLitter = T_2^\NearLitter \).
+
+  Note also that \( T_1, T_2 \) are strong, treated as \( \bot \)-supports.
+  Then, by \cref{prop:exists_allowable_of_spec_eq_spec}, there is a \( \bot \)-allowable permutation \( \pi \) such that \( \pi(T_1) = T_2 \).
+  Thus, \( \pi(S) = S \) and \( \pi(a_1) = a_2 \).
+\end{proof}
+\begin{proposition}
+  \label{prop:supports_atoms_iff}
+  Let \( S \) be a base support that is closed under interference of near-litters.
+  Suppose that \( S \) supports a set \( s : \Set \Atom \) under the action of base permutations.
+  Then for every pair of atoms \( a_1, a_2 \), the statements
+  \[ a_1, a_2 \notin \im S^\Atom \]
+  and
+  \[ \forall N \in \im S^\NearLitter,\, a_1 \in N \leftrightarrow a_2 \in N \]
+  imply that \( a_1 \in s \leftrightarrow a_2 \in s \).
+\end{proposition}
+\begin{proof}
+  Let \( a_1, a_2 \) be atoms that satisfy the two statements.
+  By \cref{prop:exists_swap}, there is a base permutation \( \pi \) that fixes \( S \) and maps \( a_1 \) to \( a_2 \).
+  As \( S \) supports \( s \), we obtain \( \pi(s) = s \).
+  So \( a_1 \in s \) if and only if \( a_2 \in s \), as required.
+\end{proof}
+\begin{proposition}
+  \label{prop:card_supports_atoms}
+  Let \( S \) be a base support.
+  Then \( S \) supports at most \( 2^{\#\kappa} \)-many sets \( s : \Set \Atom \) under the action of base permutations.
+\end{proposition}
+\begin{proof}
+  Without loss of generality, we may assume \( S \) is closed under interference of near-litters, since extensions will support any object that the original support supports.\footnote{This closure operation should have been developed for \cref{prop:exists_strong}.}
+  The \emph{information} of a set \( s : \Set \Atom \) for a base support \( S \) is a triple \( (i^\Atom, i^\NearLitter, p) \) where
+  \begin{itemize}
+    \item \( i^\Atom \) is the set of indices \( i \) such that \( (i, a) \in S^\Atom \) for some \( a \in s \);
+    \item \( i^\NearLitter \) is the set of indices \( i \) such that \( (i, N) \in S^\NearLitter \) for some near-litter \( N \) with \( N \cap s \setminus \im S^\Atom \neq \varnothing \);
+    \item \( p \) is the proposition that every atom \( a \notin \im S^\Atom \cup \bigcup \im S^\NearLitter \) lies in \( s \).
+  \end{itemize}
+  Suppose that \( s, t \) are sets of atoms that \( S \) supports.
+  We claim that if \( s \) and \( t \) have the same information \( (i^\Atom, i^\NearLitter, p) \), they are equal.
+  By antisymmetry it suffices to show that \( s \subseteq t \).
+
+  Let \( a \in s \).
+  Suppose that \( (i, a) \in S^\Atom \) for some \( i \).
+  Then \( s \in t \) as \( s, t \) have the same \( i^\Atom \).
+
+  Now suppose that \( a \notin \im S^\Atom \), but that there is some near-litter \( N \) with \( a \in N \) and \( (i, N) \in S^\NearLitter \).
+  Then there is some atom \( a' \in N \cap t \setminus \im S^\Atom \).
+  It suffices by \cref{prop:supports_atoms_iff} to show that
+  \[ \forall N' \in \im S^\NearLitter,\, a \in N' \leftrightarrow a' \in N' \]
+  because then \( a \in t \) if and only if \( a' \in t \).
+  Suppose that \( a \in N' \) for some \( N' \in \im S^\NearLitter \).
+  If \( N^\circ \neq {N'}^\circ \), then \( a \in N \cap N' \setminus \im S^\Atom \) would contradict the assumption that \( S \) is closed under interference.
+  So \( N^\circ = {N'}^\circ \).
+  If \( a' \notin N' \), then \( a \in (N \symmdiff N') \setminus \im S^\Atom \) would also contradict the assumption that \( S \) is closed under interference.
+  Hence \( a' \in N' \) as required.
+
+  Finally, suppose that \( a \notin \im S^\Atom \) and for all near-litters \( N \in \im S^\NearLitter \), we have \( a \notin N \).
+  If \( a \notin t \), then \( p \) is false, so there is an atom \( a' \) with the same properties that does not lie in \( s \).
+  Again, it suffices by \cref{prop:supports_atoms_iff} to show that
+  \[ \forall N' \in \im S^\NearLitter,\, a \in N' \leftrightarrow a' \in N' \]
+  because then \( a \in s \) if and only if \( a' \in s \).
+  But the left-hand side and the right-hand side are both false, giving the result.
+
+  This result shows that the map that sends a set \( s \) that \( S \) supports to its information is injective, and so as there are \( 2^{\#\kappa} \)-many possible information tuples, there are at most \( 2^{\#\kappa} \)-many sets that \( S \) supports under the action of base permutations.
+\end{proof}
+
+\section{Counting}
+\begin{proposition}
+  \label{prop:card_spec}
+  Suppose that for all type indices \( \delta < \beta \), there are strictly less than \( \#\mu \)-many \( \delta \)-coding functions.
+  Then there are less than \( \#\mu \) \( \beta \)-specifications.
+\end{proposition}
+\begin{proof}
+  There are less than \( \#\mu \) atom conditions as \( \#\kappa < \#\mu \) and \( \#\mu \) is a strong limit.
+  There are less than \( \#\mu \) inflexible \( \beta \)-paths, as each is determined by three type indices less than \( \beta \) and a path with maximum less than \( \beta \), of which there are \( \#\mu \)-many.
+  There are less than \( \#\mu \)-many coding functions of any type \( \delta < \beta \), because K\"onig's theorem gives
+  \[ \sum_{\delta < \beta} \#\{\delta\text{-coding functions}\} < \prod_{\delta < \beta} \#\mu = \#\mu^{\#\{\delta < \beta\}} = \#\mu \]
+  where the last equality follows from the facts that \( \#\{\delta < \beta\} \) has cardinality less than \( \cof(\ord(\#\mu)) \) and that \( \#\mu \) is a strong limit.
+  There are less than \( \#\mu \) \( \delta \)-trees of relations on \( \kappa \) for each \( \delta \leq \alpha \), because there are less than \( \#\mu \)-many relations on \( \kappa \) as \( \#\mu \) is a strong limit, allowing us to conclude by one of the remarks in \cref{def:Tree}.
+  Hence there are less than \( \#\mu \) \( \beta \)-near-litter conditions.
+  We can again apply the result about cardinalities of types of trees to deduce that there are less than \( \#\mu \) \( \beta \)-trees of enumerations of atom conditions and of \( \beta \)-near-litter conditions, as required.
+\end{proof}
+\begin{definition}
+  \label{def:WeakSpec}
+  A \emph{weak \( \beta \)-specification} is a triple \( W = (R^\Atom, R^\NearLitter, \sigma) \) where \( R^\Atom, R^\NearLitter \) are \( \beta \)-trees of relations on \( \kappa \), and \( \sigma \) is a \( \beta \)-specification.
+  We say that a weak specification \emph{specifies} a support \( S \) if there is a strong support \( T \) such that \( \sigma = \spec(T) \), \( S \preceq T \), and
+  \begin{align*}
+    (i, j) \in R_A^\Atom &\leftrightarrow \exists a,\, (i, a) \in S_A^\Atom \wedge (j, a) \in T_A^\Atom \\
+    (i, j) \in R_A^\NearLitter &\leftrightarrow \exists N,\, (i, N) \in S_A^\NearLitter \wedge (j, N) \in T_A^\NearLitter
+  \end{align*}
+\end{definition}
+\begin{proposition}
+  \label{prop:exists_weakSpec}
+  Every support has a weak specification that specifies it.
+\end{proposition}
+\begin{proof}
+  Let \( S \) be a support, and let \( T \) be a strong support such that \( S \preceq T \), which exists by \cref{prop:exists_strong}.
+  Then simply define \( R^\Atom \) and \( R^\NearLitter \) to be the required relations.
+\end{proof}
+\begin{proposition}
+  \label{prop:exists_allowable_of_weakSpec}
+  If \( W \) is a weak specification that specifies supports \( S \) and \( T \), then there is an allowable permutation \( \rho \) such that \( \rho(S) = T \).
+\end{proposition}
+\begin{proof}
+  Let \( W = (R^\Atom, R^\NearLitter, \sigma) \), and let \( U, V \) be strong supports such that \( \spec(U) = \sigma = \spec(V) \), \( S \preceq U, T \preceq V \), and
+  \begin{align*}
+    (\exists a,\, (i, a) \in S_A^\Atom \wedge (j, a) \in U_A^\Atom) &\leftrightarrow (\exists a,\, (i, a) \in T_A^\Atom \wedge (j, a) \in V_A^\Atom) \\
+    (\exists N,\, (i, N) \in S_A^\NearLitter \wedge (j, N) \in U_A^\NearLitter) &\leftrightarrow (\exists N,\, (i, N) \in T_A^\NearLitter \wedge (j, N) \in V_A^\NearLitter)
+  \end{align*}
+  By \cref{prop:exists_allowable_of_spec_eq_spec}, there is an allowable permutation \( \rho \) such that \( \rho(U) = V \).
+  We claim that \( \rho(S) = T \).
+  Suppose \( (i, a) \in S_A^\Atom \).
+  Then as \( S \preceq U \), there is \( j \) such that \( (j, a) \in U_A^\Atom \).
+  So there is \( a' \) such that \( (i, a') \in T_A^\Atom \) and \( (j, a') \in V_A^\Atom \).
+  Then \( a' = \rho_A(a) \) as \( \rho(U) = V \), as required.
+  The same simple calculation gives the required result for near-litters.
+\end{proof}
+\begin{proposition}
+  \label{prop:card_weakSpec}
+  Suppose that for all type indices \( \delta < \beta \), there are strictly less than \( \#\mu \)-many \( \delta \)-coding functions.
+  Then there are less than \( \#\mu \) weak \( \beta \)-specifications.
+\end{proposition}
+\begin{proof}
+  Follows directly from \cref{prop:card_spec} and the remark that there are less than \( \#\mu \) \( \beta \)-trees of relations on \( \kappa \).
+\end{proof}
+\begin{proposition}
+  \label{prop:card_supportOrbit}
+  Suppose that for all type indices \( \delta < \beta \), there are strictly less than \( \#\mu \)-many \( \delta \)-coding functions.
+  Then there are less than \( \#\mu \) \( \beta \)-support orbits.
+\end{proposition}
+\begin{proof}
+  Define a function from the type of \( \beta \)-support orbits into the type of weak \( \beta \)-specifications by mapping a representative to a weak specification that specifies it; one will always exist by \cref{prop:exists_weakSpec}.
+  This is an injection: if \( o_1, o_2 \) are orbits with representatives \( S_1, S_2 \) and \( S_1, S_2 \) have the same assigned weak specification, then by \cref{prop:exists_allowable_of_weakSpec} there is an allowable permutation \( \rho \) such that \( \rho(S_1) = S_2 \), and so \( o_1 = o_2 \).
+  So we are done as there are less than \( \#\mu \) weak \( \beta \)-specifications by \cref{prop:card_weakSpec}.
+\end{proof}
+\begin{proposition}
+  \label{prop:card_codingFunction_of_card_supports}
+  Let \( \beta \) be a type index (which in practice will be \( \bot \) or the lowest proper type index).
+  Suppose that there are less than \( \#\mu \) \( \beta \)-support orbits.
+  Let \( \nu \) be a cardinal less than \( \#\mu \) such that for each \( \beta \)-support \( S \), there are at most \( \nu \)-many objects \( x : \TSet_\beta \) that \( S \) supports.
+  Then there are less than \( \#\mu \) \( \beta \)-coding functions.
+\end{proposition}
+\begin{proof}
+  Every \( \beta \)-coding function is of the form \( \chi_{(x, S)} \) where \( S \) is a representative chosen in advance for a support orbit, and \( x \) is an object that \( S \) supports under the action of \( \beta \)-allowable permutations.
+  So there are at most
+  \[ \sum_{S \text{ representatives}} \nu = \#\{\text{support orbits}\} \cdot \nu \]
+  coding functions, which is less than \( \#\mu \).
+\end{proof}
+\begin{proposition}
+  \label{prop:card_codingFunction_bot}
+  There are less than \( \#\mu \) \( \bot \)-coding functions.
+\end{proposition}
+\begin{proof}
+  By \cref{prop:card_codingFunction_of_card_supports}, it suffices to show that there are less than \( \#\mu \) \( \bot \)-support orbits and that there is a bound less than \( \#\mu \) on the amount of objects that a given \( \bot \)-support supports.
+  The first result follows from \cref{prop:card_supportOrbit}, which has vacuous assumptions in this case.
+  The second result follows from applying \cref{prop:card_supports_atoms} to singletons of atoms, after applying the bijections between \( \bot \)-supports and base supports, and between \( \bot \)-allowable permutations and base permutations.
+\end{proof}
+\begin{proposition}
+  \label{prop:card_codingFunction_min}
+  There are less than \( \#\mu \) \( \beta \)-coding functions if \( \beta \) is the minimal inhabitant of \( \lambda \).
+\end{proposition}
+\begin{proof}
+  Again, we apply \cref{prop:card_codingFunction_of_card_supports}.
+  The first claim follows from \cref{prop:card_supportOrbit}, where this time we use the fact that there are less than \( \#\mu \) \( \bot \)-coding functions (\cref{prop:card_codingFunction_bot}).
+  The second claim follows from \cref{prop:card_supports_atoms} to \( \bot \)-extensions of type \( \beta \) objects, noting that \( \beta \)-supports correspond to base supports and that \( \beta \)-allowable permutations correspond to base permutations.\footnote{One useful claim to prove for this is that there is a unique path \( \beta \tpath \bot \), and so type \( \beta \) objects satisfy \( \bot \)-extensionality by injectivity of \( U_\beta \).}
+  The fact that \( \beta \)-allowable permutations correspond to base permutations relies on the fact that we can construct a \( \beta \)-permutation from a base permutation using coherent data (\cref{def:CoherentData}).
+\end{proof}
+\begin{proposition}
+  \label{prop:card_raisedSingleton}
+  Suppose that for all type indices \( \delta < \beta \), there are strictly less than \( \#\mu \)-many \( \delta \)-coding functions.
+  Then if \( \gamma < \beta \) is a proper type index, there are strictly less than \( \#\mu \) \( (\gamma,\beta) \)-raised singletons.
+\end{proposition}
+\begin{proof}
+  A \( (\gamma,\beta) \)-raised singleton \( \rsing(S,u) = \chi_{(\singleton_\beta(u), S + \dsupp(u)^\beta)} \) is determined by a triple \( (R, o, \chi) \) where
+  \begin{itemize}
+    \item \( R \) is the \( \beta \)-tree given by \( R_A = i \) when \( S_A = (i, f) \);
+    \item \( o \) is the support orbit of \( S + \dsupp(u)^\beta \); and
+    \item \( \chi \) is the coding function \( \chi_{(u, \dsupp(u))} \).
+  \end{itemize}
+  Indeed, suppose \( \rsing(S, u) \) and \( \rsing(T, v) \) have the same triple \( (R, o, \chi) \).
+  We must show that
+  \[ \chi_{(\singleton_\beta(u), S + \dsupp(u)^\beta)} = \chi_{(\singleton_\beta(v), S + \dsupp(v)^\beta)} \]
+  Then there is a \( \beta \)-allowable \( \rho \) such that \( \rho(S + \dsupp(u)^\beta) = T + \dsupp(v)^\beta \), and as they have the same tree \( R \), we can decompose this into \( \rho(S) = T \) and \( \rho(\dsupp(u)^\beta) = \dsupp(v)^\beta \).
+  In particular, \( \rho_\beta(\dsupp(u)) = \dsupp(v) \).
+  As \( \chi_{(u, \dsupp(u))} = \chi_{(v, \dsupp(v))} \), there is a \( \gamma \)-allowable permutation \( \rho' \) such that \( \rho'(u) = v \) and \( \rho'(\dsupp(u)) = \dsupp(v) \).
+  Hence \( \rho_\beta(u) = v \).
+  This gives
+  \[ \rho(\singleton_\beta(u)) = \singleton_\beta(\rho_\beta(u)) = \singleton_\beta(v) \]
+  as required.
+
+  Now, it remains to show that there are less than \( \#\mu \) such triples \( (R, o, \chi) \).
+  But this follows directly from \cref{prop:card_supportOrbit} and the assumption on the cardinalities of the types of coding functions.
+\end{proof}
+\begin{proposition}
+  \label{prop:card_codingFunction}
+  There are less than \( \#\mu \)-many \( \beta \)-coding functions for all type indices \( \beta \leq \alpha \).
+\end{proposition}
+\begin{proof}
+  By induction we may assume that for all type indices \( \delta < \beta \), there are strictly less than \( \#\mu \)-many \( \delta \)-coding functions.
+  By \cref{prop:card_codingFunction_bot,prop:card_codingFunction_min}, we may assume that \( \beta \) is a proper type index, and that it is not minimal in \( \lambda \), so there is some proper type index \( \gamma < \beta \).
+  By \cref{prop:recode}, every \( \beta \)-coding function is determined by a set of \( (\gamma,\beta) \)-raised singletons \( s \) and support orbit \( o \).
+  The conclusion then follows from \cref{prop:card_supportOrbit,prop:card_raisedSingleton} and the fact that \( \#\mu \) is a strong limit.
+\end{proof}
+\begin{proposition}
+  \label{prop:card_tSet}
+  For each type index \( \beta \leq \alpha \), \( \#\TSet_\beta = \#\mu \).
+\end{proposition}
+\begin{proof}
+  If \( \beta \) is \( \bot \), we already know \( \#\TSet_\bot = \#\Atom = \#\mu \), so suppose \( \#\beta \) is a proper type index.
+  Each object \( x : \TSet_\beta \) is determined by a \( \beta \)-coding function and a \( \beta \)-support.
+  Since there are less than \( \#\mu \)-many \( \beta \)-coding functions (\cref{prop:card_codingFunction}) and there are exactly \( \#\mu \) \( \beta \)-supports, we obtain \( \#\TSet_\beta \leq \#\mu \).
+  Since the typed near-litter map \( \NearLitter \to \TSet_\beta \) is injective, there are at least \( \#\NearLitter = \#\mu \) inhabitants of \( \TSet_\beta \), giving the result by antisymmetry.
+\end{proof}
+\begin{proposition}
+  \label{prop:card_tangle}
+  For each type index \( \beta \leq \alpha \), \( \#\Tang_\beta = \#\mu \).
+\end{proposition}
+\begin{proof}
+  Use \cref{prop:card_tSet} and the fact that there are precisely \( \#\mu \)-many \( \beta \)-supports.
 \end{proof}
