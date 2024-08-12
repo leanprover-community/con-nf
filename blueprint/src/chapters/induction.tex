@@ -8,9 +8,9 @@ In this section, we prove a theorem on inductive constructions using a proof-irr
   An \emph{inductive construction} for \( (I, A, B) \) is a pair of functions
   \begin{align*}
     &F_A : \prod_{i : I} \prod_{d : \prod_{j : I} j \prec i \to A_j} \\
-    &\quad\left( \prod_{j : I} \prod_{h : j \prec i} B\ j\ (d\ j\ h)\ (k\ h' \mapsto d\ k\ (\operatorname{trans}(h',h))) \right) \to A_i \\
+    &\quad\left( \prod_{j : I} \prod_{h : j \prec i} B\ j\ (d\ j\ h)\ (k\ h' \mapsto d\ k\ (\newoperator{trans}(h',h))) \right) \to A_i \\
     &F_B : \prod_{i : I} \prod_{d : \prod_{j : I} j \prec i \to A_j} \\
-    &\quad\prod_{h : \left( \prod_{j : I} \prod_{h : j \prec i} B\ j\ (d\ j\ h)\ (k\ h' \mapsto d\ k\ (\operatorname{trans}(h',h))) \right)} B\ i\ (F_A\ i\ d\ h)\ d
+    &\quad\prod_{h : \left( \prod_{j : I} \prod_{h : j \prec i} B\ j\ (d\ j\ h)\ (k\ h' \mapsto d\ k\ (\newoperator{trans}(h',h))) \right)} B\ i\ (F_A\ i\ d\ h)\ d
   \end{align*}
 \end{definition}
 \begin{proposition}[inductive construction theorem for propositions]
@@ -26,18 +26,18 @@ In this section, we prove a theorem on inductive constructions using a proof-irr
   Recall that \( \Part \alpha \) denotes the type \( \sum_{p: \Prop} (p \to \alpha) \).
   For \( i : I \), we define the \emph{hypothesis} on data \( t : \prod_{j : I} j \prec i \to \Part A_j \) to be the proposition
   \begin{align*}
-    \operatorname{IH}(i, t) = &\sum_{D : \prod_{j : I} \prod_{h : j \prec i} \pr_1(t\ j\ h)} \prod_{j : I} \prod_{h : j \prec i} B\ j\ (\pr_2(t\ j\ h)\ (D\ j\ h))\\
-    &\quad(k\ h' \mapsto (\pr_2(t\ k\ (\operatorname{trans}(h',h)))\ (D\ k\ (\operatorname{trans}(h',h)))))
+    \newoperator{IH}(i, t) = &\sum_{D : \prod_{j : I} \prod_{h : j \prec i} \pr_1(t\ j\ h)} \prod_{j : I} \prod_{h : j \prec i} B\ j\ (\pr_2(t\ j\ h)\ (D\ j\ h))\\
+    &\quad(k\ h' \mapsto (\pr_2(t\ k\ (\newoperator{trans}(h',h)))\ (D\ k\ (\newoperator{trans}(h',h)))))
   \end{align*}
   Now we define \( K : \prod_{i : I} \Part A_i \) by
-  \[ K = \operatorname{fix}_{\Part A_{(-)}} \left( i t \mapsto \left\langle \operatorname{IH}(i, t), h \mapsto F_A\ i\ (j\ h' \mapsto (\pr_2(t\ j\ h')\ (\pr_1(h)\ j\ h')))\ \pr_2(h) \right\rangle \right) \]
-  where \( \operatorname{fix}_C \) is the fixed point function for \( \prec \) and induction motive \( C : I \to \Type_v \), with type
-  \[ \operatorname{fix}_C : \left( \prod_{i : I} \left( \prod_{j : I} j \prec i \to C_j \right) \to C_i \right) \to \prod_{i : I} C_i \]
-  By definition of \( \operatorname{fix} \), we obtain the equation
-  \[ K_i = \left\langle \operatorname{IH}(i, j \_ \mapsto K_j), h \mapsto F_A\ i\ (j\ h' \mapsto (\pr_2(K_j)\ (\pr_1(h)\ j\ h')))\ \pr_2(h) \right\rangle \]
+  \[ K = \newoperator{fix}_{\Part A_{(-)}} \left( i t \mapsto \left\langle \newoperator{IH}(i, t), h \mapsto F_A\ i\ (j\ h' \mapsto (\pr_2(t\ j\ h')\ (\pr_1(h)\ j\ h')))\ \pr_2(h) \right\rangle \right) \]
+  where \( \newoperator{fix}_C \) is the fixed point function for \( \prec \) and induction motive \( C : I \to \Type_v \), with type
+  \[ \newoperator{fix}_C : \left( \prod_{i : I} \left( \prod_{j : I} j \prec i \to C_j \right) \to C_i \right) \to \prod_{i : I} C_i \]
+  By definition of \( \newoperator{fix} \), we obtain the equation
+  \[ K_i = \left\langle \newoperator{IH}(i, j \_ \mapsto K_j), h \mapsto F_A\ i\ (j\ h' \mapsto (\pr_2(K_j)\ (\pr_1(h)\ j\ h')))\ \pr_2(h) \right\rangle \]
   Further, if \( h_1 : \pr_1(K_i) \), we have the equation
   \[ \pr_2(K_i)\ h_1 = F_A\ i\ (j\ h' \mapsto (\pr_2(K_j)\ (\pr_1(h_2)\ j\ h')))\ \pr_2(h_2) \]
-  where \( h_2 : \operatorname{IH}(i, j \_ \mapsto K_j) \) is obtained by casting from \( h_1 \) using the previous equation; this equation is derived from the extensionality principle of \( \Part \), which states that
+  where \( h_2 : \newoperator{IH}(i, j \_ \mapsto K_j) \) is obtained by casting from \( h_1 \) using the previous equation; this equation is derived from the extensionality principle of \( \Part \), which states that
   \[ \prod_{x, y : \Part \alpha} \left( \prod_{a : \alpha} (\exists h,\, a = \pr_2(x)\ h) \leftrightarrow (\exists h,\, a = \pr_2(y)\ h) \right) x = y \]
   Using these two equations, we may now show directly by induction on \( i \) that \( D' : \prod_{i : I} \pr_1(K_i) \).\footnote{TODO: More details?}
   From this, we may define \( G : \prod_{i : I} A_i \) by \( G_i = \pr_2(K_i)\ D'_i \).
@@ -56,10 +56,10 @@ In this section, we prove a theorem on inductive constructions using a proof-irr
   \uses{prop:IC.fix_prop}
   Define
   \[ C : \prod_{i : I} A_i \to \left(\prod_{j : I} j \prec i \to A_j\right) \to \Prop \]
-  by \( C\ i\ x\ d = \operatorname{Nonempty}(B\ i\ x\ d) \).
+  by \( C\ i\ x\ d = \newoperator{Nonempty}(B\ i\ x\ d) \).
   We then define the inductive construction \( (F_A', F_B') \) for \( (I, A, C) \) by
-  \[ F_A'\ i\ d\ h = F_A\ i\ d\ (j h' \mapsto \operatorname{some}(h\ j\ h'));\quad F_B'\ i\ d\ h = \langle F_B\ i\ d\ (j h' \mapsto \operatorname{some}(h\ j\ h')) \rangle \]
-  where \( \langle-\rangle \) is the constructor and \( \operatorname{some} \) is the noncomputable destructor of \( \operatorname{Nonempty} \).
+  \[ F_A'\ i\ d\ h = F_A\ i\ d\ (j h' \mapsto \newoperator{some}(h\ j\ h'));\quad F_B'\ i\ d\ h = \langle F_B\ i\ d\ (j h' \mapsto \newoperator{some}(h\ j\ h')) \rangle \]
+  where \( \langle-\rangle \) is the constructor and \( \newoperator{some} \) is the noncomputable destructor of \( \newoperator{Nonempty} \).
   The result is then direct from \cref{prop:IC.fix_prop}.
 \end{proof}
 
@@ -95,8 +95,8 @@ In this section, we prove a theorem on inductive constructions using a proof-irr
   \label{def:motiveStep}
   The \emph{inductive step for the main motive} is the function
   \begin{align*}
-    &\operatorname{Step}_M : \prod_{\alpha : \lambda} \prod_{M : \prod_{\beta < \alpha} \Motive_\beta} \\
-    &\quad\left( \prod_{\beta : \lambda} \prod_{h : \beta < \alpha} \Hypothesis\ \beta\ (M\ \beta\ h)\ (\gamma\ h' \mapsto M\ \gamma\ (\operatorname{trans}(h',h))) \right) \to \Motive_\alpha
+    &\newoperator{Step}_M : \prod_{\alpha : \lambda} \prod_{M : \prod_{\beta < \alpha} \Motive_\beta} \\
+    &\quad\left( \prod_{\beta : \lambda} \prod_{h : \beta < \alpha} \Hypothesis\ \beta\ (M\ \beta\ h)\ (\gamma\ h' \mapsto M\ \gamma\ (\newoperator{trans}(h',h))) \right) \to \Motive_\alpha
   \end{align*}
   given as follows.
   Given the hypotheses \( \alpha, M, H \), we use \cref{def:NewModelData} to construct model data at level \( \alpha \).
@@ -109,9 +109,9 @@ In this section, we prove a theorem on inductive constructions using a proof-irr
   \label{def:hypothesisStep}
   The \emph{inductive step for the main hypothesis} is the function
   \begin{align*}
-    &\operatorname{Step}_H : \prod_{\alpha : \lambda} \prod_{M : \prod_{\beta < \alpha} \Motive_\beta} \\
-    &\quad\prod_{H : \prod_{\beta : \lambda} \prod_{h : \beta < \alpha} \Hypothesis\ \beta\ (M\ \beta\ h)\ (\gamma\ h' \mapsto M\ \gamma\ (\operatorname{trans}(h',h)))}\\
-    &\quad\Hypothesis\ \alpha\ (\operatorname{Step}_M\ \alpha\ M\ H)\ M
+    &\newoperator{Step}_H : \prod_{\alpha : \lambda} \prod_{M : \prod_{\beta < \alpha} \Motive_\beta} \\
+    &\quad\prod_{H : \prod_{\beta : \lambda} \prod_{h : \beta < \alpha} \Hypothesis\ \beta\ (M\ \beta\ h)\ (\gamma\ h' \mapsto M\ \gamma\ (\newoperator{trans}(h',h)))}\\
+    &\quad\Hypothesis\ \alpha\ (\newoperator{Step}_M\ \alpha\ M\ H)\ M
   \end{align*}
   given as follows.
   Given the hypotheses \( \alpha, M, H \), we use the definitions from \cref{def:motiveStep} to obtain model data at level \( \alpha \) and coherent data below level \( \alpha \).
@@ -121,13 +121,13 @@ In this section, we prove a theorem on inductive constructions using a proof-irr
   \uses{def:motiveStep,def:hypothesisStep}
   \label{thm:model_construction}
   There are noncomputable functions
-  \[ \operatorname{ComputeMotive} : \prod_{\alpha : \lambda} \Motive_\alpha \]
+  \[ \newoperator{ComputeMotive} : \prod_{\alpha : \lambda} \Motive_\alpha \]
   and
-  \[ \operatorname{ComputeHypothesis} : \prod_{\alpha : \lambda} \Hypothesis\ \alpha\ \operatorname{ComputeMotive}_\alpha\ (\beta\ \_ \mapsto \operatorname{ComputeMotive}_\beta) \]
+  \[ \newoperator{ComputeHypothesis} : \prod_{\alpha : \lambda} \Hypothesis\ \alpha\ \newoperator{ComputeMotive}_\alpha\ (\beta\ \_ \mapsto \newoperator{ComputeMotive}_\beta) \]
   such that for each \( \alpha : \lambda \),
   \begin{align*}
-    \operatorname{ComputeMotive}_\alpha = &\operatorname{Step}_M\ \alpha\ (\beta\ \_ \mapsto \operatorname{ComputeMotive}_\beta)\\
-    &(\operatorname{Step}_H\ \alpha\ (\beta\ \_ \mapsto \operatorname{ComputeHypothesis}_\beta))
+    \newoperator{ComputeMotive}_\alpha = &\newoperator{Step}_M\ \alpha\ (\beta\ \_ \mapsto \newoperator{ComputeMotive}_\beta)\\
+    &(\newoperator{Step}_H\ \alpha\ (\beta\ \_ \mapsto \newoperator{ComputeHypothesis}_\beta))
   \end{align*}
 \end{theorem}
 \begin{proof}
