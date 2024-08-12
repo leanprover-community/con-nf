@@ -1,6 +1,6 @@
 \section{Relations}
 
-\begin{definition-no-bp}
+\begin{definition}
   \label{def:relation_props}
   Let \( R : \sigma \to \tau \to Prop \).
   We define
@@ -29,8 +29,9 @@
   \end{itemize}
   We also define the \emph{graph} of a function \( f : \sigma \to \tau \) to be the functional relation \( R : \sigma \to \tau \to \Prop \) given by \( (x, y) \in R \) if and only if \( f(x) = y \).
   Most of these definitions are from \url{https://www.kylem.net/math/relations.html}, and most of these are in mathlib under \texttt{Mathlib.Logic.Relator}.
-\end{definition-no-bp}
-\begin{proposition-no-bp}\mbox\negthinspace
+\end{definition}
+\begin{proposition}\mbox\negthinspace
+  \uses{def:relation_props}
   \label{prop:relation_results}
   \begin{enumerate}
     \item \( R : \tau \to \tau \to \Prop \) is permutative if and only if it is one-to-one and for all \( x : \tau \), there exists \( y \) such that \( x \mathrel{R} y \) if and only if there exists \( y \) such that \( y \mathrel{R} x \).
@@ -39,7 +40,7 @@
     \item If \( R \) is permutative, then \( \coim R^n = \coim R = \im R = \im R^n \) for any natural number or integer \( n \).
     \item If \( R \) is permutative and \( s_1, s_2 \subseteq \coim R \), then the image of \( R \) on \( s_1 \) is equal to \( s_2 \) if and only if the coimage of \( R \) on \( s_2 \) is equal to \( s_1 \).
   \end{enumerate}
-\end{proposition-no-bp}
+\end{proposition}
 \begin{definition}
   \label{def:OrbitRestriction}
   Let \( s : \Set \tau \).
@@ -92,11 +93,11 @@
 
 \section{Cardinal arithmetic}
 
-\begin{lemma-no-bp}[mathlib]
+\begin{lemma}[mathlib]
   \label{prop:card_subset_card_lt_cof}
   Let \( \#\mu \) be a strong limit cardinal.
   Then there are precisely \( \#\mu \)-many subsets of \( \mu \) of size strictly less than \( \cof(\ord(\#\mu)) \).
-\end{lemma-no-bp}
+\end{lemma}
 \begin{proof}
   Endow \( \mu \) with its initial well-ordering.
   Each such subset is bounded in \( \mu \) with respect to this well-ordering as its size is less than \( \cof(\ord(\#\mu)) \).
