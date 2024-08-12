@@ -200,4 +200,43 @@ We assume model data, position functions for \( \Tang_\beta \), and typed near-l
   We define the map \( U_\alpha \) from new t-sets to \( \StrSet_\alpha \) by cases from the top of the path in the obvious way (using \cref{prop:Path.rec} and the membership relation from \cref{prop:Code.ext}).
   It is easy to check that \( \rho(U_\alpha(x)) = U_\alpha(\rho(x)) \) by \cref{prop:AllPerm.smul_cloud_smul}.
 \end{definition}
-This fininshes our construction of model data at type level \( \alpha \).
+\begin{definition}[new model data]
+  \uses{def:NewAllPerm,def:NewTSet,prop:Code.ext}
+  \label{def:NewModelData}
+  Given model data, position functions, and typed near-litters for all types \( \beta < \alpha \), \emph{new model data} is the model data at level \( \alpha \) consisting of new t-sets (\cref{def:NewTSet}) and new allowable permutations (\cref{def:NewAllPerm}).
+  The embedding from new t-sets to \( \StrSet_\alpha \) is defined by
+  \[ U_\alpha(c)(\beta) = \{ x \mid x \in_\beta c \} \]
+\end{definition}
+
+\section{Typed near-litters, singletons, and positions}
+\begin{definition}[typed near-litters]
+  \uses{def:NewTSet}
+  \label{def:newTypedNearLitter}
+  We define a function \( \typed_\alpha \) from the type of near-litters to the type of new t-sets by mapping a near-litter \( N \) to the code \( (\bot, N) \).
+  This code is even as all codes of the form \( (\bot, s) \) are even.
+  This function is clearly injective, and satisfies
+  \[ \rho(\typed_\alpha(N)) = \typed_\alpha(\rho(\bot)(N)) \]
+  by definition.
+\end{definition}
+\begin{definition}[singletons]
+  \uses{def:NewTSet}
+  \label{def:newSingleton}
+  We define a function \( \singleton_\alpha \) for each lower type index \( \beta \) from \( \TSet_\beta \) to the type of new t-sets by \( x \mapsto (\beta, \{x\}) \).
+  The given code is even as all singleton codes are even.
+  This satisfies \( U_\alpha(\singleton_\alpha(x))(\beta) = \{ x \} \).
+\end{definition}
+\begin{proposition}[position function]
+  \uses{def:NewModelData,def:newTypedNearLitter}
+  \label{prop:newPos}
+  Using the model data from \cref{def:NewModelData}, if \( \#\Tang_\alpha \leq \#\mu \), then there is a position function on the type of \( \alpha \)-tangles,\footnote{It may be easier in practice to construct a position function on the product of the type of new t-sets and the type of \( \alpha \)-supports, and then get the required position function on tangles from this.} such that
+  \begin{itemize}
+    \item if \( N \) is a near-litter and \( t \) is an \( \alpha \)-tangle such that \( \set(t) = \typed_\alpha(N) \), we have \( \iota(N) \leq \iota(t) \); and
+    \item if \( t \) is an \( \alpha \)-tangle and \( x \) is an atom or near-litter that occurs in the range of \( \supp(t)_A \), then \( \iota(x) < \iota(t) \).
+  \end{itemize}
+\end{proposition}
+\begin{proof}
+  \uses{prop:funOfDeny}
+  We use \cref{prop:funOfDeny} to construct the position function, using denied set
+  \[ D(t) = \{ \iota(N) \mid \set(t) = \typed_\alpha(N) \} \cup \{ \iota(a) \mid a \in \im \supp(t)_A^\Atom \} \cup \{ \iota(N) \mid N \in \im \supp(t)_A^\NearLitter \} \]
+  The first set is a subsingleton and the second two sets are small, so the denied set has size less than \( \cof(\ord(\#\mu)) \) as required.
+\end{proof}

@@ -13,6 +13,7 @@ Some mathematical background not already in mathlib will be included in \cref{c:
   \item The symmetric difference of two sets is denoted \( s \symmdiff t \coloneq (s \setminus t) \cup (t \setminus s) \).
   Note that \( (s \symmdiff t) \cup (s \cap t) = s \cup t \), and the union on the left-hand side is disjoint.
   \item We use \( f[s] \) for the direct image \( \{ f(x) \mid x \in s \} \). We write \( f^{-1}[s] \) for the inverse image \( \{ x \mid f(x) \in s \} \), and \( f^{-1}(x) \) for the fibre \( \{ y \mid f(y) = x \} \).
+  \item For any type \( \alpha \), we write \( \Part \alpha \) for the type \( \sum_{p : \Prop} (p \to \alpha) \).
 \end{itemize}
 
 \section{Model parameters}
@@ -385,13 +386,14 @@ When we quantify over structural permutations in this paper, it should be formal
     \item Suppose that \( \beta \leq \alpha \) and \( (\rho(\gamma))_{\gamma < \beta} \) is a collection of allowable permutations such that whenever \( \gamma, \delta < \beta \) are distinct, \( \delta \) is proper, and \( t : \Tang_\delta \), we have
     \[ (\rho(\delta))_\bot(f_{\gamma,\delta}(t)) = f_{\gamma,\delta}(\rho(\gamma)(t)) \]
     Then there is a \( \beta \)-allowable permutation \( \rho \) with \( \rho_\gamma = \rho(\gamma) \) for each \( \gamma < \beta \).
-    \item If \( \beta : \lambda \) and \( x : \TSet_\beta \), then for any \( \gamma < \beta \),
+    \item If \( \beta \leq \alpha \) is a proper type index and \( x : \TSet_\beta \), then for any \( \gamma < \beta \),
     \[ U_\beta(x)(\gamma) \subseteq \ran U_\gamma \]
-    \item (extensionality) If \( \beta, \gamma : \lambda \) where \( \gamma < \beta \), the map \( U_\beta(-)(\gamma) : \TSet_\beta \to \Set (\StrSet_\gamma) \) is injective.
+    \item (extensionality) If \( \beta, \gamma \leq \alpha \) are proper type indices where \( \gamma < \beta \), the map \( U_\beta(-)(\gamma) : \TSet_\beta \to \Set \StrSet_\gamma \) is injective.
     \item If \( \beta, \gamma : \lambda \) where \( \gamma < \beta \), for every \( x : \TSet_\gamma \) there is some \( y : \TSet_\beta \) such that \( U_\beta(y)(\gamma) = \{ x \} \).
     We write \( \singleton_\beta(x) \) for this object \( y \), which is uniquely defined by extensionality.
   \end{itemize}
   Note that this structure contains data (the derivative maps for allowable permutations and the singleton operations), but the type is a subsingleton: any two inhabitants are propositionally equal.
+  We will not use this fact directly, but the idea will have relevance in \cref{c:induction}.
 \end{definition}
 The strategy of our construction is as follows.
 \begin{itemize}
