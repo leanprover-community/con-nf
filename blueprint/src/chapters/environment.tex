@@ -238,7 +238,7 @@ When we quantify over structural permutations in this paper, it should be formal
   Thus \( (S^A)_A = S \).
 
   Let \( \tau \) be a type, and let \( G \) be a \( \texttt{StrPermClass}_\beta \)-group that acts on \( \tau \).
-  We say that \( S \) \emph{supports} \( x : \tau \) under the action of \( G \) if whenever \( \pi : G \) fixes \( S \), it also fixes \( x \).
+  We say that \( S \) \emph{supports} \( x : \tau \) under the action of \( G \) if whenever \( \pi : G \) fixes \( S \), it also fixes \( x \), and moreover, if \( \beta = \bot \) then \( S_A^\NearLitter \) is empty for any \( A : \bot \tpath \bot \) (and of course there is exactly one such path).
 \end{definition}
 \begin{definition}[structural set]
   \label{def:StrSet}
@@ -312,7 +312,7 @@ When we quantify over structural permutations in this paper, it should be formal
   \label{def:ModelData}
   \uses{def:StrSupport,def:StrSet}
   Let \( \alpha \) be a type index.
-  \emph{Model data} at type \( \alpha \) consists of:
+  \emph{Model data} at type \( \alpha \) consists of:\footnote{A type theory problem with \texttt{export}ing this data is that under different assumptions, things like different spellings of \( \TSet_\alpha \) might require case splitting on \( \alpha \) before they become defeq (e.g.\ see the old version of \texttt{Model/FOA.lean}). There doesn't seem to be an easy way around this.}
   \begin{itemize}
     \item a \( \TSet_\alpha \) called the type of \emph{tangled sets} or \emph{t-sets}, which will be our type of model elements at level \( \alpha \), with an embedding \( U_\alpha : \TSet_\alpha \to \StrSet_\alpha \);
     \item a group \( \AllPerm_\alpha \) called the type of \emph{allowable permutations}, with a \( \texttt{StrPermClass}_\alpha \) instance and a specified action on \( \TSet_\alpha \),
