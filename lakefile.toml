@@ -5,6 +5,7 @@ defaultTargets = ["ConNF"]
 autoImplicit = false
 relaxedAutoImplicit = false
 pp.proofs.withType = false
+pp.unicode.fun = true
 
 [[require]]
 name = "mathlib"

@@ -19,6 +19,8 @@ Some mathematical background not already in mathlib will be included in \cref{c:
 \section{Model parameters}
 \begin{definition}[model parameters]
   \label{def:Params}
+  \lean{ConNF.Params}
+  \leanok
   A collection of \emph{model parameters} is a tuple \( (\lambda, {<_\lambda}, \kappa, \mu) \) such that
   \begin{itemize}
     \item \( {<} = {<_\lambda} \) is a well-order on \( \lambda \), and under this ordering, \( \lambda \) has no maximal element (so \( \ot(\lambda) \) is a limit ordinal);
@@ -35,8 +37,9 @@ Some mathematical background not already in mathlib will be included in \cref{c:
   \end{itemize}
 \end{definition}
 \begin{proposition}
-  \label{prop:Params.minimal}
   \uses{def:Params}
+  \label{prop:Params.minimal}
+  \lean{ConNF.minimalParams,ConNF.inaccessibleParams}
   The tuple \( (\mathbb N, {<_{\mathbb N}}, \aleph_1, \beth_{\omega_1}) \) is a collection of model parameters, where the symbols \( \aleph_1 \) and \( \beth_{\omega_1} \) represent particular types of that cardinality.
 \end{proposition}
 \begin{definition}[type index]
