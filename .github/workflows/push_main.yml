@@ -45,7 +45,7 @@ jobs:
         run: ~/.elan/bin/lake -Kenv=dev exe cache get
 
       - name: check ConNF.lean
-        run: lake exe mk_all --lib ConNF --check
+        run: ~/.elan/bin/lake -Kenv=dev exe mk_all --lib ConNF --check
 
       - name: build project
         run: ~/.elan/bin/lake -Kenv=dev build ConNF
