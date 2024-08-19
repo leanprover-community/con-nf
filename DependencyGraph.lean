@@ -1,5 +1,7 @@
-import Mathlib.Data.ByteArray
-import Lean
+import Batteries.Tactic.PrintDependents
+import Mathlib.Data.List.Sort
+import Mathlib.Data.String.Basic
+import Mathlib.Util.AssertNoSorry
 import ConNF
 
 open Lean
@@ -58,7 +60,7 @@ elab "#deptree " : command => do
 -- source:
 -- https://leanprover.zulipchat.com/#narrow/stream/287929-mathlib4/topic/Counting.20prerequisites.20of.20a.20theorem/near/425370265
 def getVisited (env : Environment) (decl : Name) :=
-  let (_, { visited, .. }) := Elab.Command.CollectAxioms.collect decl |>.run env |>.run {}
+  let (_, { visited, .. }) := CollectAxioms.collect decl |>.run env |>.run {}
   visited.erase decl
 
 partial def allDeclsIn (module : Name) : Elab.Command.CommandElabM (Array Name) := do

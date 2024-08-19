@@ -6,6 +6,5 @@
   "files.eol": "\n",
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
-  "files.trimTrailingWhitespace": true,
-  "search.usePCRE2": true
+  "files.trimTrailingWhitespace": true
 }

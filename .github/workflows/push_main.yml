@@ -45,15 +45,6 @@ jobs:
           dot -Tpng -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.png
           dot -Tsvg -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.svg
 
-      # - name: build lean4checker
-      #   run: |
-      #     git clone https://github.com/leanprover/lean4checker
-      #     cd lean4checker
-      #     ~/.elan/bin/lake -Kenv=dev build
-
-      # - name: check environments using lean4checker
-      #   run: grep -h '^import ConNF.' ConNF/*.lean | sed 's/import //' | xargs -n 1 -P 8 ~/.elan/bin/lake -Kenv=dev env lean4checker/build/bin/lean4checker
-
       - name: build documentation
         run: ~/.elan/bin/lake -Kenv=dev build ConNF:docs
 
@@ -100,3 +91,47 @@ jobs:
 
       - name: deploy website
         uses: actions/deploy-pages@v1
+
+  style_lint:
+    name: Lint style
+    runs-on: ubuntu-latest
+    steps:
+      - name: cleanup
+        run: |
+          find . -name . -o -prune -exec rm -rf -- {} +
+
+      - uses: actions/checkout@v4
+
+      - name: check case sensitivity
+        uses: credfeto/action-case-checker@v1.3.0
+
+      - name: look for ignored files
+        uses: credfeto/action-no-ignored-files@v1.1.0
+
+      - name: check for lean files with the executable bit set
+        shell: bash
+        run: |
+          executable_files="$(find . -name '*.lean' -type f \( -perm -u=x -o -perm -g=x -o -perm -o=x \))"
+          if [[ -n "$executable_files" ]]
+          then
+            echo "ERROR: The following Lean files have the executable bit set."
+            echo "$executable_files"
+            exit 1
+          fi
+
+      - name: install python
+        if: ${{ 'ubuntu-latest' == 'ubuntu-latest' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.8
+
+      - name: install elan
+        run: |
+          set -o pipefail
+          curl -sSfL https://github.com/leanprover/elan/releases/download/v3.1.1/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
+          ./elan-init -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "${GITHUB_PATH}"
+
+      - name: run style linters
+        run: |
+          lake exe lint-style
