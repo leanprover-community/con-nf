@@ -20,7 +20,7 @@
   If \( S \) is a strong \( \beta \)-support and \( \rho \) is \( \beta \)-allowable, then \( \rho(S) \) is strong.
 \end{proposition}
 \begin{proof}
-  TODO
+  Interference is stable under application of allowable permutations, and the required supports are also preserved under action of allowable permutations.
 \end{proof}
 \begin{proposition}
   \uses{def:Strong}
@@ -28,7 +28,19 @@
   For every support \( S \), there is a strong support \( T \succeq S \).
 \end{proposition}
 \begin{proof}
-  TODO
+  We define a relation \( R \) on pairs \( (A, N) \) where \( A : \beta \tpath \bot \) and \( N \) is a near-litter by the following constructor.
+  If \( I = (\gamma,\delta,\varepsilon,A) \) and \( t : \Tang_\delta \), then for any near-litter \( N_1 \) such that \( N_1^\circ = f_{\delta,\varepsilon}(t) \) and any path \( B : \delta \tpath \bot \) and near-litter \( N_2 \in \supp(t)_B^\NearLitter \), we define \( ((A_\delta)_B, N_2) \mathrel{R} ((A_\varepsilon)_\bot, N_1) \).
+  This is well-founded, because if \( (B, N_2) \mathrel{R} (A, N_1) \) then \( \iota(N_2) < \iota(N_1) \).
+  For any small set \( s \) of such pairs, the transitive closure of \( s \) under \( R \) is small.
+
+  Let \( S \) be a support, and let \( s \) be the transitive closure of the set of pairs \( (A, N) \) such that \( N \in \im S_A^\NearLitter \).
+  Generate a support \( T \) from \( S \) and \( s \) using the fact that every small set is the range of some enumeration.
+  This satisfies the second condition of being a strong support.
+
+  Now, for any base support \( T \), we define its \emph{interference support} to be a base support \( U \) consisting of just the atoms in the interference of all near-litters that appear in \( T \).
+  We may extend this definition to structural supports.
+
+  Finally, if \( U \) is the interference support of the \( T \) defined above, the support \( T + U \) is strong, and since \( S \succeq T \), we conclude \( S \preceq T + U \).
 \end{proof}
 
 \section{Coding functions}
@@ -148,9 +160,9 @@
 \end{proof}
 \begin{proposition}
   \uses{def:StrSupport.spec}
-  \label{def:spec_smul}
+  \label{prop:spec_smul}
   Let \( \rho \) be \( \beta \)-allowable, and let \( S \) be a \( \beta \)-support.
-  Then \( \spec(\rho(S)) = \spec(S) \).\footnote{TODO: Consider removing this; I don't think it's used.}
+  Then \( \spec(\rho(S)) = \spec(S) \).
 \end{proposition}
 \begin{proof}
   \uses{prop:spec_eq_spec_iff}
@@ -182,7 +194,7 @@
   \uses{def:BaseSupport}
   \label{def:conv_base}
   Let \( S \) and \( T \) be base supports.
-  We define the relations \( \conv_{S,T}^\Atom, \conv_{S,T}^\NearLitter \) by the constructors\footnote{TODO: We should abstract this out even further. This can be defined for any pair of relations with common domain.}
+  We define the relations \( \conv_{S,T}^\Atom, \conv_{S,T}^\NearLitter \) by the constructors\footnote{This should be abstracted out even further; this can be defined for any pair of relations with common domain.}
   \begin{align*}
     &(i, a_1) \in S^\Atom \to (i, a_2) \in T^\Atom \to (a_1, a_2) \in \conv_{S,T}^\Atom \\
     &(i, N_1) \in S^\NearLitter \to (i, N_2) \in T^\NearLitter \to (N_1, N_2) \in \conv_{S,T}^\NearLitter

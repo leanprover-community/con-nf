@@ -194,10 +194,10 @@ We assume model data, position functions for \( \Tang_\beta \), and typed near-l
 \end{proof}
 \begin{definition}[new t-set]
   \label{def:NewTSet}
-  \uses{prop:AllPerm.smul_cloud_smul,prop:Path.rec}
+  \uses{prop:AllPerm.smul_cloud_smul}
   A \emph{new t-set} is an even code \( c \) such that there is an \( \alpha \)-support that supports \( c \) under the action of new allowable permutations, or a designated object called the empty set.
   New allowable permutations act on new t-sets in the same way that they act on codes, and map the empty set to itself.
-  We define the map \( U_\alpha \) from new t-sets to \( \StrSet_\alpha \) by cases from the top of the path in the obvious way (using \cref{prop:Path.rec} and the membership relation from \cref{prop:Code.ext}).
+  We define the map \( U_\alpha \) from new t-sets to \( \StrSet_\alpha \) by cases from the top of the path in the obvious way (using recursion on paths and the membership relation from \cref{prop:Code.ext}).
   It is easy to check that \( \rho(U_\alpha(x)) = U_\alpha(\rho(x)) \) by \cref{prop:AllPerm.smul_cloud_smul}.
 \end{definition}
 \begin{definition}[new model data]

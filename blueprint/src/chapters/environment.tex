@@ -101,7 +101,14 @@ We will now establish the hierarchy of types that our model will be built inside
 \begin{definition}[path]
   \label{def:Path}
   \uses{def:TypeIndex}
-  If \( \alpha, \beta \) are type indices, then a \emph{path} \( \alpha \tpath \beta \) is a nonempty finite subset of \( \lambda^\bot \) with maximal element \( \alpha \) and minimal element \( \beta \).\footnote{In previous versions, we used ordered lists (more precisely, a quiver structure) to represent paths. This had the effect that editing paths at the bottom was much easier than editing paths at the top. In this implementation, we are making the decision to put both types of edit on equal footing (and neither will definitionally reduce). TODO: It might be cleaner to still use a cons-list format but encapsulate it lots.}
+  If \( \alpha, \beta \) are type indices, then a \emph{path} \( \alpha \tpath \beta \) is given by the constructors
+  \begin{itemize}
+    \item \( \newoperator{nil} : \alpha \tpath \alpha \);
+    \item \( \newoperator{cons} : (\gamma < \beta) \to (\alpha \tpath \beta) \to (\alpha \tpath \gamma) \).
+  \end{itemize}
+  We define by recursion a \( \newoperator{snoc} \) operation on the top of paths.
+  We also prove the induction principle for \( \newoperator{nil} \) and \( \newoperator{snoc} \).
+
   A path \( \alpha \tpath \bot \) is called an \emph{\( \alpha \)-extended index}.
   We write \( \nil(\alpha) \) for the path \( \{ \alpha \} : \alpha \tpath \alpha \).
   If \( h \) is a proof of \( \beta < \alpha \), we write \( \single(h) \) for the path \( \{ \alpha, \beta \} : \alpha \tpath \beta \).
@@ -152,19 +159,6 @@ We will also use \( x_\gamma \) to denote the derivative \( x_h \) where \( h \)
   If \( A : \alpha \tpath \beta \) and \( B : \beta \tpath \gamma \), the derivative \( A_B \) is defined to be the union \( A \cup B : \alpha \tpath \gamma \), and the coderivative \( B^A \) is defined to be \( A_B \).
 \end{definition-no-bp}
 
-\begin{proposition}[induction along paths]
-  \label{prop:Path.rec}
-  \uses{def:Path}
-  Fix a type index \( \alpha \) and universe \( u \), and let
-  \[ C : \prod_{\beta : \lambda^\bot} (\alpha \tpath \beta) \to \Sort_u \]
-  Let
-  \[ n : C(\alpha, \nil(\alpha));\quad c : \prod_{\beta, \gamma : \lambda^\bot} \prod_{A : \alpha \tpath \beta} \prod_{h : \gamma < \beta} C(\beta, A) \to C(\beta, A_h) \]
-  Then there is a term
-  \[ x : \prod_{\beta : \lambda^\bot} \prod_{A : \alpha \tpath \beta} C(\beta, A) \]
-  such that
-  \[ x(\alpha, \nil(\alpha)) = n;\quad x(\gamma, A_h) = c(\beta, \gamma, A, h, x(\beta, A)) \]
-  The same holds for paths pointing in the reverse direction.
-\end{proposition}
 \begin{definition}[tree]
   \label{def:Tree}
   \uses{def:Path}
@@ -226,16 +220,20 @@ When we quantify over structural permutations in this paper, it should be formal
 \begin{definition}[structural support]
   \label{def:StrSupport}
   \uses{def:BaseSupport,def:Tree}
-  A \emph{\( \beta \)-structural support} (or just \emph{\( \beta \)-support}) is a \( \beta \)-tree of base supports.
+  A \emph{\( \beta \)-structural support} (or just \emph{\( \beta \)-support}) is a pair \( S = (S^\Atom, S^\NearLitter) \) where \( S^\Atom \) is an enumeration of \( (\beta \tpath \bot) \times \Atom \) and \( S^\NearLitter \) is an enumeration of \( (\beta \tpath \bot) \times \NearLitter \).
   The type of \( \beta \)-supports is written \( \StrSupp_\beta \).
   There are precisely \( \#\mu \) structural supports for any type index \( \beta \).
-  Following \cref{def:Tree}, structural supports have derivatives, structural permutations act on structural supports, and there is a group action of \( \beta \)-permutations on \( \beta \)-supports.
-  If \( S \) is a \( \beta \)-support and \( A : \alpha \tpath \beta \), the coderivative \( S^A \) is the \( \alpha \)-support given by
-  \[ (S^A)_B = \begin{cases}
-    S_C & \text{if } B = A_C \text{ for some } C \\
-    \varnothing & \text{otherwise}
-  \end{cases} \]
-  Thus \( (S^A)_A = S \).
+
+  For a path \( A : \beta \tpath \bot \), we write \( S_A \) for the base support \( T \) given by
+  \[ T^\Atom = \{ (i, a) \mid (i, (A, a)) \in S^\Atom \};\quad T^\NearLitter = \{ (i, N) \mid (i, (A, N)) \in S^\NearLitter \} \]
+  More generally, for a path \( A : \beta \tpath \gamma \), we write \( S_A \) for the \( \gamma \)-support \( T \) given by
+  \[ T^\Atom = \{ (i, (B, a)) \mid (i, (A_B, a)) \in S^\Atom \};\quad T^\NearLitter = \{ (i, (B, N)) \mid (i, (A_B, N)) \in S^\NearLitter \} \]
+  For a path \( A : \alpha \tpath \beta \), we write \( S^A \) for the \( \alpha \)-support \( T \) given by
+  \[ T^\Atom = \{ (i, (A_B, a)) \mid (i, (B, a)) \in S^\Atom \};\quad T^\NearLitter = \{ (i, (A_B, N)) \mid (i, (B, N)) \in S^\NearLitter \} \]
+  Clearly, \( (S^A)_A = S \).
+
+  \( \beta \)-structural permutations act on pairs \( (A, x) \) by \( \pi(A, x) = (A, \pi_A(x)) \), where \( x \) is either an atom or a near-litter.
+  Hence, structural permutations act on structural supports.
 
   Let \( \tau \) be a type, and let \( G \) be a \( \texttt{StrPermClass}_\beta \)-group that acts on \( \tau \).
   We say that \( S \) \emph{supports} \( x : \tau \) under the action of \( G \) if whenever \( \pi : G \) fixes \( S \), it also fixes \( x \), and moreover, if \( \beta = \bot \) then \( S_A^\NearLitter \) is empty for any \( A : \bot \tpath \bot \) (and of course there is exactly one such path).
@@ -368,13 +366,13 @@ When we quantify over structural permutations in this paper, it should be formal
 \end{definition}
 \begin{definition}[coherent data]
   \label{def:CoherentData}
-  \uses{def:TypedNearLitter,prop:Path.rec,def:InflexiblePath}
+  \uses{def:TypedNearLitter,def:InflexiblePath}
   Let \( \alpha \) be a proper type index.
   Suppose that we have model data for all type indices \( \beta \leq \alpha \), position functions for \( \Tang_\beta \) for all \( \beta < \alpha \), and typed near-litters for all \( \beta < \alpha \).
   We say that the model data is \emph{coherent} below level \( \alpha \) if the following hold.
   \begin{itemize}
     \item For \( \gamma < \beta \leq \alpha \), there is a map \( \AllPerm_\beta \to \AllPerm_\gamma \) that commutes with the coercions from \( \AllPerm_{(-)} \) to \( \StrPerm_{(-)} \).
-    We can use this map to define arbitrary derivatives of allowable permutations by \cref{prop:Path.rec}.
+    We can use this map to define arbitrary derivatives of allowable permutations by recursion on paths.
     \item If \( (x, S) \) is a \( \beta \)-tangle for \( \beta < \alpha \), and \( y \) is an atom or near-litter that occurs in the range of \( S_A \), then \( \iota(y) < \iota(x, S) \).
     \item Let \( \beta \leq \alpha \), and let \( \gamma, \delta < \beta \) be distinct with \( \delta \) proper.
     Let \( t : \Tang_\gamma \) and \( \rho : \AllPerm_\beta \).
