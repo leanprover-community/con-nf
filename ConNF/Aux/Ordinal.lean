@@ -14,13 +14,57 @@ theorem card_Iio (o : Ordinal.{u}) : #(Set.Iio o) = Cardinal.lift.{u + 1} o.card
 
 instance {o : Ordinal.{u}} : LtWellOrder (Set.Iio o) where
 
-theorem type_iio (o : Ordinal.{u}) :
+theorem type_Iio (o : Ordinal.{u}) :
     type ((· < ·) : Set.Iio o → Set.Iio o → Prop) = lift.{u + 1} o := by
   have := Ordinal.lift_type_eq.{u + 1, u, u + 1}
     (r := ((· < ·) : Set.Iio o → Set.Iio o → Prop)) (s := o.out.r)
   rw [lift_id, type_out] at this
   rw [this]
   exact ⟨o.enumIsoOut.toRelIsoLT⟩
+
+def withBot_orderIso {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
+    ((· < ·) : WithBot α → WithBot α → Prop) ≃r
+      Sum.Lex (EmptyRelation (α := PUnit)) ((· < ·) : α → α → Prop) where
+  toFun := WithBot.recBotCoe (Sum.inl PUnit.unit) Sum.inr
+  invFun := Sum.elim (λ _ ↦ ⊥) (λ x ↦ x)
+  left_inv x := by cases x <;> rfl
+  right_inv x := by cases x <;> rfl
+  map_rel_iff' {x y} := by cases x <;> cases y <;>
+    simp only [Equiv.coe_fn_mk, WithBot.recBotCoe_bot, WithBot.recBotCoe_coe,
+    WithBot.coe_lt_coe, WithBot.bot_lt_coe, empty_relation_apply, lt_self_iff_false, not_lt_bot,
+    Sum.lex_inl_inl, Sum.lex_inr_inl, Sum.lex_inr_inr, Sum.Lex.sep]
+
+@[simp]
+theorem type_withBot {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
+    type ((· < ·) : WithBot α → WithBot α → Prop) = 1 + type ((· < ·) : α → α → Prop) := by
+  change _ = type EmptyRelation + _
+  rw [← type_sum_lex, type_eq]
+  exact ⟨withBot_orderIso⟩
+
+theorem noMaxOrder_of_isLimit {α : Type u} [Preorder α] [IsWellOrder α (· < ·)]
+    (h : (type ((· < ·) : α → α → Prop)).IsLimit) : NoMaxOrder α := by
+  constructor
+  intro a
+  have := (succ_lt_of_isLimit h).mpr (typein_lt_type (· < ·) a)
+  obtain ⟨b, hb⟩ := typein_surj (· < ·) this
+  use b
+  have := Order.lt_succ (typein ((· < ·) : α → α → Prop) a)
+  rw [← hb, typein_lt_typein] at this
+  exact this
+
+theorem isLimit_of_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)]
+    (h : NoMaxOrder α) : (type ((· < ·) : α → α → Prop)).IsLimit := by
+  constructor
+  · simp only [ne_eq, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty, not_false_eq_true]
+  · intro o ho
+    obtain ⟨x, hx⟩ := h.exists_gt (enum ((· < ·) : α → α → Prop) o ho)
+    refine lt_of_le_of_lt ?_ (typein_lt_type ((· < ·) : α → α → Prop) x)
+    rw [← typein_lt_typein ((· < ·) : α → α → Prop), typein_enum] at hx
+    rwa [Order.succ_le_iff]
+
+theorem isLimit_iff_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)] :
+    (type ((· < ·) : α → α → Prop)).IsLimit ↔ NoMaxOrder α :=
+  ⟨noMaxOrder_of_isLimit, isLimit_of_noMaxOrder⟩
 
 variable {c : Cardinal.{u}} (h : ℵ₀ ≤ c)
 
