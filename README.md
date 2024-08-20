@@ -8,7 +8,8 @@ In 1937, Quine proposed a set theory called "New Foundations", and since 2010, R
 In this repository, we use the interactive theorem prover Lean to verify the difficult part of his proof, thus proving that New Foundations is indeed consistent.
 The proof is now complete, and the theorem statements can be found in `ConNF/Model/Result.lean` ([source](https://github.com/leanprover-community/con-nf/blob/main/ConNF/Model/Result.lean), [docs](https://leanprover-community.github.io/con-nf/doc/ConNF/Model/Result.html)).
 
-See [our website](https://leanprover-community.github.io/con-nf/) for more information, the [documentation of our Lean code](https://leanprover-community.github.io/con-nf/doc/), and the [deformalisation paper](https://zeramorphic.github.io/con-nf-paper/main.l.pdf) that translates the Lean definitions into English. You can also read the [Blueprint](https://leanprover-community.github.io/con-nf/blueprint/) that contains a human-readable version of the proof following the Lean code, with links to the formalisations of each statement.
+See [our website](https://leanprover-community.github.io/con-nf/) for more information, the [documentation of our Lean code](https://leanprover-community.github.io/con-nf/doc/), and the [deformalisation paper](https://zeramorphic.github.io/con-nf-paper/main.l.pdf) that translates the Lean definitions into English.
+You can also read the [blueprint](https://leanprover-community.github.io/con-nf/blueprint/) that contains a human-readable version of the proof following the Lean code, with links to the formalisations of each statement.
 
 To run our code locally, install [elan](https://github.com/leanprover/elan), clone the repository, and run the following command in a terminal in the repository's root directory.
 ```
