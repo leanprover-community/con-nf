@@ -8,21 +8,7 @@ open Cardinal
 
 namespace Ordinal
 
-theorem card_Iio (o : Ordinal.{u}) : #(Set.Iio o) = Cardinal.lift.{u + 1} o.card := by
-  rw [Cardinal.eq.mpr ⟨o.enumIsoOut.toEquiv.trans Equiv.ulift.{u + 1, u}.symm⟩,
-    mk_uLift, mk_ordinal_out, lift_card]
-
-instance {o : Ordinal.{u}} : LtWellOrder (Set.Iio o) where
-
-theorem type_Iio (o : Ordinal.{u}) :
-    type ((· < ·) : Set.Iio o → Set.Iio o → Prop) = lift.{u + 1} o := by
-  have := Ordinal.lift_type_eq.{u + 1, u, u + 1}
-    (r := ((· < ·) : Set.Iio o → Set.Iio o → Prop)) (s := o.out.r)
-  rw [lift_id, type_out] at this
-  rw [this]
-  exact ⟨o.enumIsoOut.toRelIsoLT⟩
-
-def withBot_orderIso {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
+def withBotOrderIso {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
     ((· < ·) : WithBot α → WithBot α → Prop) ≃r
       Sum.Lex (EmptyRelation (α := PUnit)) ((· < ·) : α → α → Prop) where
   toFun := WithBot.recBotCoe (Sum.inl PUnit.unit) Sum.inr
@@ -39,7 +25,7 @@ theorem type_withBot {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
     type ((· < ·) : WithBot α → WithBot α → Prop) = 1 + type ((· < ·) : α → α → Prop) := by
   change _ = type EmptyRelation + _
   rw [← type_sum_lex, type_eq]
-  exact ⟨withBot_orderIso⟩
+  exact ⟨withBotOrderIso⟩
 
 theorem noMaxOrder_of_isLimit {α : Type u} [Preorder α] [IsWellOrder α (· < ·)]
     (h : (type ((· < ·) : α → α → Prop)).IsLimit) : NoMaxOrder α := by
@@ -65,6 +51,69 @@ theorem isLimit_of_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellO
 theorem isLimit_iff_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)] :
     (type ((· < ·) : α → α → Prop)).IsLimit ↔ NoMaxOrder α :=
   ⟨noMaxOrder_of_isLimit, isLimit_of_noMaxOrder⟩
+
+theorem type_Iio_lt {α : Type u} [LtWellOrder α] (x : α) :
+    type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) < type ((· < ·) : α → α → Prop) :=
+  typein_lt_type _ x
+
+def iicOrderIso {α : Type u} [LtWellOrder α] (x : α) :
+    (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) ≃r
+      Sum.Lex (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) (EmptyRelation (α := PUnit)) where
+  toFun y := if h : y = x then Sum.inr PUnit.unit else Sum.inl ⟨y, y.prop.lt_of_ne h⟩
+  invFun := Sum.elim (λ y ↦ ⟨y, y.prop.le⟩) (λ _ ↦ ⟨x, le_rfl⟩)
+  left_inv y := by aesop
+  right_inv y := by
+    dsimp only
+    split_ifs with h
+    · cases y with
+      | inl y => rw [Sum.elim_inl] at h; cases ne_of_lt y.prop h
+      | inr y => rfl
+    · cases y with
+      | inl y => rfl
+      | inr y => simp only [Sum.elim_inr, not_true_eq_false] at h
+  map_rel_iff' {y z} := by
+    simp only [Equiv.coe_fn_mk, subrel_val, Subtype.coe_lt_coe]
+    split_ifs with h h' h'
+    · rw [Sum.lex_inr_inr, empty_relation_apply, false_iff, not_lt,
+        Subtype.coe_injective (h.trans h'.symm)]
+    · simp only [Sum.lex_inr_inl, false_iff, not_lt, ← Subtype.coe_le_coe, h]
+      exact z.prop
+    · simp only [Sum.Lex.sep, true_iff]
+      rw [← Subtype.coe_lt_coe]
+      exact lt_of_le_of_ne (y.prop.trans_eq h'.symm) (h'.trans_ne (Ne.symm h)).symm
+    · simp only [Sum.lex_inl_inl, subrel_val, Subtype.coe_lt_coe]
+
+theorem type_Iic_eq {α : Type u} [LtWellOrder α] (x : α) :
+    type (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) =
+    type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) + 1 := by
+  change _ = _ + type EmptyRelation
+  rw [← type_sum_lex, type_eq]
+  exact ⟨iicOrderIso x⟩
+
+theorem type_Iic_lt {α : Type u} [LtWellOrder α] [NoMaxOrder α] (x : α) :
+    type (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) < type ((· < ·) : α → α → Prop) := by
+  rw [type_Iic_eq]
+  haveI : Nonempty α := ⟨x⟩
+  have h := isLimit_of_noMaxOrder (inferInstanceAs (NoMaxOrder α))
+  exact h.right _ (type_Iio_lt x)
+
+/-!
+## The additive structure on the set of ordinals below a cardinal
+-/
+
+theorem card_Iio (o : Ordinal.{u}) : #(Set.Iio o) = Cardinal.lift.{u + 1} o.card := by
+  rw [Cardinal.eq.mpr ⟨o.enumIsoOut.toEquiv.trans Equiv.ulift.{u + 1, u}.symm⟩,
+    mk_uLift, mk_ordinal_out, lift_card]
+
+instance {o : Ordinal.{u}} : LtWellOrder (Set.Iio o) where
+
+theorem type_Iio (o : Ordinal.{u}) :
+    type ((· < ·) : Set.Iio o → Set.Iio o → Prop) = lift.{u + 1} o := by
+  have := Ordinal.lift_type_eq.{u + 1, u, u + 1}
+    (r := ((· < ·) : Set.Iio o → Set.Iio o → Prop)) (s := o.out.r)
+  rw [lift_id, type_out] at this
+  rw [this]
+  exact ⟨o.enumIsoOut.toRelIsoLT⟩
 
 variable {c : Cardinal.{u}} (h : ℵ₀ ≤ c)
 
@@ -109,5 +158,27 @@ def iioAddMonoid : AddMonoid (Set.Iio c.ord) where
   nsmul := nsmulRec
   __ := iioAdd h
   __ := iioZero h
+
+theorem nat_lt_ord (h : ℵ₀ ≤ c) (n : ℕ) : n < c.ord := by
+  apply (nat_lt_omega n).trans_le
+  apply ord_mono at h
+  rwa [ord_aleph0] at h
+
+def iioOfNat (n : ℕ) : OfNat (Set.Iio c.ord) n where
+  ofNat := ⟨n, nat_lt_ord h n⟩
+
+theorem iioOfNat_coe (n : ℕ) :
+    letI := iioOfNat h
+    ((OfNat.ofNat n : Set.Iio c.ord) : Ordinal) = n :=
+  rfl
+
+theorem iio_noMaxOrder (h : ℵ₀ ≤ c) : NoMaxOrder (Set.Iio c.ord) := by
+  letI := iioAdd h
+  letI := iioOfNat h
+  constructor
+  intro x
+  use x + 1
+  rw [← Subtype.coe_lt_coe, iioAdd_def, lt_add_iff_pos_right, iioOfNat_coe, Nat.cast_one]
+  exact zero_lt_one
 
 end Ordinal

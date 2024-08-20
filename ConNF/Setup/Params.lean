@@ -33,7 +33,7 @@ class Params where
   μ_isStrongLimit : (#μ).IsStrongLimit
   κ_lt_μ : #κ < #μ
   κ_le_cof_μ : #κ ≤ (#μ).ord.cof
-  Λ_le_cof_μ : type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord.cof.ord
+  Λ_type_le_cof_μ : type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord.cof.ord
 
 def minimalParams : Params where
   Λ := ℕ
@@ -57,7 +57,7 @@ def minimalParams : Params where
     rw [mk_out, mk_out]
     have := beth_normal.cof_le (aleph 1).ord
     rwa [isRegular_aleph_one.cof_eq] at this
-  Λ_le_cof_μ := by
+  Λ_type_le_cof_μ := by
     rw [type_nat_lt, mk_out]
     have := beth_normal.cof_le (aleph 1).ord
     rw [isRegular_aleph_one.cof_eq, ← ord_le_ord] at this
@@ -92,11 +92,11 @@ def inaccessibleParams.{v} : Params where
   κ_le_cof_μ := by
     rw [mk_uLift, mk_out, mk_out, univ_inaccessible.2.1.cof_eq]
     exact (lift_lt_univ _).le
-  Λ_le_cof_μ := by
+  Λ_type_le_cof_μ := by
     change type (Cardinal.univ.{v, v + 1}).ord.out.r ≤ _
     rw [type_out, mk_out, univ_inaccessible.2.1.cof_eq]
 
-export Params (Λ κ μ aleph0_lt_κ κ_isRegular μ_isStrongLimit κ_lt_μ κ_le_cof_μ Λ_le_cof_μ)
+export Params (Λ κ μ aleph0_lt_κ κ_isRegular μ_isStrongLimit κ_lt_μ κ_le_cof_μ Λ_type_le_cof_μ)
 
 variable [Params.{u}]
 
@@ -107,8 +107,8 @@ instance : NoMaxOrder Λ := Params.Λ_noMaxOrder
 theorem aleph0_lt_μ : ℵ₀ < #μ :=
   aleph0_lt_κ.trans κ_lt_μ
 
-theorem type_Λ_le_μ_ord : type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord :=
-  Λ_le_cof_μ.trans <| ord_cof_le (#μ).ord
+theorem Λ_type_le_μ_ord : type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord :=
+  Λ_type_le_cof_μ.trans <| ord_cof_le (#μ).ord
 
 @[irreducible]
 def κEquiv : κ ≃ Set.Iio (#κ).ord := by
@@ -123,7 +123,17 @@ def μEquiv : μ ≃ Set.Iio (#μ).ord := by
   rw [← Cardinal.eq, mk_uLift, card_Iio, card_ord]
 
 instance : LtWellOrder κ := Equiv.ltWellOrder κEquiv
+instance (n : ℕ) : OfNat κ n :=
+  letI := iioOfNat aleph0_lt_κ.le n
+  Equiv.ofNat κEquiv n
+instance : NoMaxOrder κ :=
+  letI := iio_noMaxOrder aleph0_lt_κ.le
+  Equiv.noMaxOrder κEquiv
+
 instance : LtWellOrder μ := Equiv.ltWellOrder μEquiv
+instance : NoMaxOrder μ :=
+  letI := iio_noMaxOrder aleph0_lt_μ.le
+  Equiv.noMaxOrder μEquiv
 
 instance : Infinite Λ := NoMaxOrder.infinite
 instance : Infinite κ := by rw [infinite_iff]; exact aleph0_lt_κ.le
@@ -151,6 +161,11 @@ instance : Sub κ :=
   letI := iioSub (#κ).ord
   Equiv.sub κEquiv
 
+theorem κ_ofNat_def (n : ℕ) :
+    letI := iioOfNat aleph0_lt_κ.le n
+    OfNat.ofNat n = κEquiv.symm (OfNat.ofNat n) :=
+  rfl
+
 theorem κ_add_def (x y : κ) :
     letI := iioAddMonoid aleph0_lt_κ.le
     x + y = κEquiv.symm (κEquiv x + κEquiv y) :=
@@ -159,6 +174,11 @@ theorem κ_add_def (x y : κ) :
 theorem κ_sub_def (x y : κ) :
     letI := iioSub (#κ).ord
     x - y = κEquiv.symm (κEquiv x - κEquiv y) :=
+  rfl
+
+theorem κEquiv_ofNat (n : ℕ) :
+    (κEquiv (OfNat.ofNat n) : Ordinal) = n := by
+  rw [κ_ofNat_def, Equiv.apply_symm_apply]
   rfl
 
 theorem κEquiv_add (x y : κ) :

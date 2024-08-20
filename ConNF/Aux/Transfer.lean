@@ -123,6 +123,20 @@ theorem ltWellOrder_type [LtWellOrder β] :
   rw [Ordinal.lift_type_eq.{u, v, max u v}]
   exact ⟨e.ltIso⟩
 
+protected theorem noMaxOrder [LT β] [NoMaxOrder β] :
+    letI := e.lt
+    NoMaxOrder α := by
+  letI := e.lt
+  constructor
+  intro x
+  obtain ⟨y, hy⟩ := exists_gt (e x)
+  use e.symm y
+  rw [lt_def, apply_symm_apply]
+  exact hy
+
+protected def ofNat (n : ℕ) [OfNat β n] : OfNat α n where
+  ofNat := e.symm (OfNat.ofNat n)
+
 theorem apply_add [Add β] (x y : α) :
     letI := e.add
     e (x + y) = e x + e y := by

@@ -37,4 +37,20 @@ protected theorem TypeIndex.card :
   have := congr_arg Ordinal.card TypeIndex.type
   rwa [card_type, card_type] at this
 
+theorem Λ_card_Iio_lt (α : Λ) : #{β | β < α} < (#μ).ord.cof := by
+  have := (type_Iio_lt α).trans_le Λ_type_le_cof_μ
+  rwa [lt_ord] at this
+
+theorem Λ_card_Iic_lt (α : Λ) : #{β | β ≤ α} < (#μ).ord.cof := by
+  have := (type_Iic_lt α).trans_le Λ_type_le_cof_μ
+  rwa [lt_ord] at this
+
+theorem TypeIndex.card_Iio_lt (α : TypeIndex) : #{β | β < α} < (#μ).ord.cof := by
+  have := ((type_Iio_lt α).trans_eq TypeIndex.type).trans_le Λ_type_le_cof_μ
+  rwa [lt_ord] at this
+
+theorem TypeIndex.card_Iic_lt (α : TypeIndex) : #{β | β ≤ α} < (#μ).ord.cof := by
+  have := ((type_Iic_lt α).trans_eq TypeIndex.type).trans_le Λ_type_le_cof_μ
+  rwa [lt_ord] at this
+
 end ConNF
