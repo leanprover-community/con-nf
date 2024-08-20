@@ -54,6 +54,8 @@ Some mathematical background not already in mathlib will be included in \cref{c:
 \begin{definition}[small]
   \label{def:Small}
   \uses{def:Params}
+  \lean{ConNF.Small}
+  \leanok
   A set \( s : \Set(\tau) \) is called \emph{small} if \( \#s < \#\kappa \).
   Smallness is stable under subset, intersection, small-indexed unions, symmetric difference, direct image, injective preimage, and many other operations (each of which should be its own lemma when formalised).
   Sets \( s, t : \Set(\tau) \) are called \emph{near} if \( s \symmdiff t \) is small; in this case, we write \( s \near t \).
