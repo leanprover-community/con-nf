@@ -40,7 +40,7 @@
 			"",
 			"variable [Params.{u}]",
 			"",
-			"",
+			"-- Remember to call `lake exe mk_all --lib ConNF`.",
 			"",
 			"end ConNF",
 		],

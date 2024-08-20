@@ -108,10 +108,12 @@ We will now establish the hierarchy of types that our model will be built inside
 \begin{definition}[path]
   \label{def:Path}
   \uses{def:TypeIndex}
+  \lean{ConNF.Path}
+  \leanok
   If \( \alpha, \beta \) are type indices, then a \emph{path} \( \alpha \tpath \beta \) is given by the constructors
   \begin{itemize}
     \item \( \newoperator{nil} : \alpha \tpath \alpha \);
-    \item \( \newoperator{cons} : (\gamma < \beta) \to (\alpha \tpath \beta) \to (\alpha \tpath \gamma) \).
+    \item \( \newoperator{cons} : (\alpha \tpath \beta) \to (\gamma < \beta) \to (\alpha \tpath \gamma) \).
   \end{itemize}
   We define by recursion a \( \newoperator{snoc} \) operation on the top of paths.
   We also prove the induction principle for \( \newoperator{nil} \) and \( \newoperator{snoc} \).
