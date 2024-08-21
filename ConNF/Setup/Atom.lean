@@ -1,4 +1,5 @@
 import ConNF.Setup.Litter
+import ConNF.Setup.Small
 
 /-!
 # Atoms
@@ -34,22 +35,20 @@ structure Atom : Type u where
   litter : Litter
   index : κ
 
-instance : ToLitter Atom where
-  toLitter := Atom.litter
+instance : SuperL Atom Litter where
+  superL := Atom.litter
 
-/-- The set of atoms corresponding to litter `L`. -/
-def litterSet (L : Litter) : Set Atom :=
-  {a | a° = L}
-
-@[inherit_doc] postfix:75 "ᴬ" => litterSet
+/-- If `L` is a litter, `Lᴬ` is the set of atoms associated to that litter. -/
+instance : SuperA Litter (Set Atom) where
+  superA L := {a | aᴸ = L}
 
 @[simp]
-theorem mem_litterSet_iff (a : Atom) (L : Litter) :
-    a ∈ Lᴬ ↔ a° = L :=
+theorem mem_litter_atoms_iff (a : Atom) (L : Litter) :
+    a ∈ Lᴬ ↔ aᴸ = L :=
   Iff.rfl
 
 @[ext]
-theorem Atom.ext {a₁ a₂ : Atom} (h : a₁° = a₂°) (h' : a₁.index = a₂.index) : a₁ = a₂ := by
+theorem Atom.ext {a₁ a₂ : Atom} (h : a₁ᴸ = a₂ᴸ) (h' : a₁.index = a₂.index) : a₁ = a₂ := by
   obtain ⟨L₁, i₁⟩ := a₁
   obtain ⟨L₂, i₂⟩ := a₂
   subst h
@@ -60,7 +59,7 @@ theorem Atom.ext {a₁ a₂ : Atom} (h : a₁° = a₂°) (h' : a₁.index = a�
 well-known to mathlib. -/
 def atomEquiv : Atom ≃ Litter × κ
     where
-  toFun a := (a°, a.index)
+  toFun a := (aᴸ, a.index)
   invFun a := ⟨a.1, a.2⟩
   left_inv _ := rfl
   right_inv _ := rfl
@@ -81,10 +80,23 @@ def litterSetEquiv (L : Litter) : Lᴬ ≃ κ where
 
 /-- Each litter set has cardinality `κ`. -/
 @[simp]
-theorem mk_litterSet (L : Litter) : #(Lᴬ) = #κ :=
+theorem Litter.card_atoms (L : Litter) : #Lᴬ = #κ :=
   Cardinal.eq.mpr ⟨litterSetEquiv L⟩
 
-instance (L : Litter) : Nonempty (Lᴬ) :=
+theorem Litter.atoms_not_small (L : Litter) : ¬Small Lᴬ :=
+  L.card_atoms.not_lt
+
+instance (L : Litter) : Nonempty Lᴬ :=
   ⟨⟨L, Classical.arbitrary κ⟩, rfl⟩
+
+theorem litter_pairwise_disjoint {L₁ L₂ : Litter} (h : L₁ ≠ L₂) : Disjoint L₁ᴬ L₂ᴬ := by
+  rw [Set.disjoint_iff]
+  intro x hx
+  exact h <| hx.1.symm.trans hx.2
+
+/-- If two litters are near each other, then they are equal. -/
+theorem litter_eq_of_near {L₁ L₂ : Litter} (h : Near L₁ᴬ L₂ᴬ) : L₁ = L₂ := by
+  obtain ⟨a, ha₁, ha₂⟩ := inter_nonempty_of_near h L₁.atoms_not_small
+  exact ha₁.symm.trans ha₂
 
 end ConNF

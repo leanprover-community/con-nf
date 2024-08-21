@@ -1,3 +1,4 @@
+import ConNF.Aux.Set
 import ConNF.Setup.Params
 
 /-!
@@ -9,6 +10,7 @@ sets.
 ## Main declarations
 
 * `ConNF.Small`: A set is *small* if its cardinality is less than `#κ`.
+* `ConNF.Near`: Two sets are *near* if their symmetric difference is small.
 -/
 
 noncomputable section
@@ -77,5 +79,98 @@ theorem Small.image (f : α → β) : Small s → Small (f '' s) :=
 /-- The preimage of a small set under an injective function `f` is small. -/
 theorem Small.preimage (f : β → α) (h : f.Injective) : Small s → Small (f ⁻¹' s) :=
   (mk_preimage_of_injective f s h).trans_lt
+
+/-- The amount of small subsets of `α` is bounded below by the cardinality of `α`. -/
+theorem card_le_card_small (α : Type _) : #α ≤ #{s : Set α | Small s} := by
+  apply mk_le_of_injective (f := λ x ↦ ⟨{x}, small_singleton x⟩)
+  intro x y h
+  exact singleton_injective <| congr_arg Subtype.val h
+
+/-- There are at most `μ` small sets of a type at most as large as `μ`. -/
+theorem card_small_le (h : #α ≤ #μ) : #{s : Set α | Small s} ≤ #μ := by
+  rw [le_def] at h
+  obtain ⟨⟨f, hf⟩⟩ := h
+  rw [← mk_subset_mk_lt_cof μ_isStrongLimit.2]
+  refine mk_le_of_injective (f := λ s ↦ ⟨f '' s, ?_⟩) ?_
+  · exact mk_image_le.trans_lt <| s.prop.trans_le κ_le_cof_μ
+  · intro s t h
+    exact Subtype.val_injective <| hf.image_injective <| congr_arg Subtype.val h
+
+/-- There are exactly `μ` small sets of a type of size `μ`. -/
+theorem card_small_eq (h : #α = #μ) : #{s : Set α | Small s} = #μ := by
+  apply le_antisymm
+  · exact card_small_le h.le
+  · exact h.symm.trans_le <| card_le_card_small α
+
+theorem κ_le_of_not_small (h : ¬Small s) : #κ ≤ #s := by
+  rwa [Small, not_lt] at h
+
+/-- Two sets are called *near* if their symmetric difference is small. -/
+def Near (s t : Set α) : Prop :=
+  Small (s ∆ t)
+
+@[refl]
+theorem near_refl (s : Set α) : Near s s := by
+  rw [Near, symmDiff_self]
+  exact small_empty
+
+theorem near_rfl : Near s s :=
+  near_refl s
+
+theorem near_of_eq (h : s = t) : Near s t :=
+  h ▸ near_refl s
+
+@[symm]
+theorem near_symm (h : Near s t) : Near t s := by
+  rwa [Near, symmDiff_comm] at h
+
+@[symm]
+theorem near_trans (h₁ : Near s t) (h₂ : Near t u) : Near s u :=
+  (small_union h₁ h₂).mono (symmDiff_trans_subset s t u)
+
+theorem near_symmDiff_self_of_small (h : Small s) : Near (s ∆ t) t := by
+  rwa [Near, symmDiff_symmDiff_cancel_right]
+
+theorem card_le_of_near (h₁ : Near s t) (h₂ : ¬Small t) : #t ≤ #s := by
+  rw [Near, Small, Set.symmDiff_def, mk_union_of_disjoint disjoint_sdiff_sdiff] at h₁
+  rw [Small, not_lt] at h₂
+  have h₃ := (le_add_self.trans_lt h₁).trans_le h₂
+  by_contra! h₄
+  have := add_lt_of_lt (aleph0_lt_κ.le.trans h₂) h₃ h₄
+  exact (le_mk_diff_add_mk t s).not_lt this
+
+/-- Two large sets that are near each other have the same cardinality (and we only need to suppose
+that one of them is large to draw this conclusion). -/
+theorem card_eq_of_near (h₁ : Near s t) (h₂ : ¬Small t) : #s = #t := by
+  have := card_le_of_near h₁ h₂
+  have h₃ : ¬Small s := h₂ ∘ this.trans_lt
+  exact le_antisymm (card_le_of_near (near_symm h₁) h₃) this
+
+theorem card_inter_of_near (h₁ : Near s t) (h₂ : ¬Small s) : #(s ∩ t : Set α) = #s := by
+  apply le_antisymm
+  · apply mk_le_of_injective (f := λ x ↦ ⟨x, x.prop.1⟩)
+    intro x y h
+    rwa [Subtype.mk.injEq, Subtype.coe_inj] at h
+  · rw [← diff_symmDiff_self]
+    apply le_of_le_add (le_mk_diff_add_mk s (s ∆ t))
+    · exact aleph0_lt_κ.le.trans (κ_le_of_not_small h₂)
+    · exact h₁.trans_le (κ_le_of_not_small h₂)
+
+theorem inter_nonempty_of_near (h₁ : Near s t) (h₂ : ¬Small s) : (s ∩ t).Nonempty := by
+  rw [← mk_ne_zero_iff_nonempty, card_inter_of_near h₁ h₂]
+  exact ne_of_gt <| aleph0_pos.trans <| aleph0_lt_κ.trans_le <| κ_le_of_not_small h₂
+
+theorem card_near_le (s : Set α) (h : #α ≤ #μ) : #{t | Near t s} ≤ #μ := by
+  refine le_trans ?_ (card_small_le h)
+  apply mk_le_of_injective (f := λ t ↦ ⟨t ∆ s, t.prop⟩)
+  intro t₁ t₂ ht
+  exact Subtype.val_injective <| symmDiff_left_injective s <| congr_arg Subtype.val ht
+
+theorem card_near_eq (s : Set α) (h : #α = #μ) : #{t | Near t s} = #μ := by
+  refine trans ?_ (card_small_eq h)
+  rw [Cardinal.eq]
+  refine ⟨⟨λ t ↦ ⟨t ∆ s, t.prop⟩, λ t ↦ ⟨t ∆ s, near_symmDiff_self_of_small t.prop⟩, ?_, ?_⟩⟩ <;>
+  · intro t
+    simp only [coe_setOf, mem_setOf_eq, symmDiff_symmDiff_cancel_right, Subtype.coe_eta]
 
 end ConNF

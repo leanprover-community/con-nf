@@ -40,8 +40,13 @@ Some mathematical background not already in mathlib will be included in \cref{c:
   \uses{def:Params}
   \label{prop:Params.minimal}
   \lean{ConNF.minimalParams,ConNF.inaccessibleParams}
+  \leanok
   The tuple \( (\mathbb N, {<_{\mathbb N}}, \aleph_1, \beth_{\omega_1}) \) is a collection of model parameters, where the symbols \( \aleph_1 \) and \( \beth_{\omega_1} \) represent particular types of that cardinality.
 \end{proposition}
+\begin{proof}
+  \leanok
+  Direct.
+\end{proof}
 \begin{definition}[type index]
   \label{def:TypeIndex}
   \uses{def:Params}
@@ -83,6 +88,8 @@ Some mathematical background not already in mathlib will be included in \cref{c:
 \begin{definition}[near-litter]
   \label{def:NearLitter}
   \uses{def:Litter,def:Atom}
+  \lean{ConNF.NearLitter}
+  \leanok
   A \emph{near-litter} is a pair \( N = (L, s) : \Litter \times \Set \Atom \) such that \( s \near \LS(L) \).\footnote{Like with atoms, this should be a structure. We should create an actual constructor, rather than using the \( \langle - \rangle \) syntax.}
   We write \( (-)^\circ : \NearLitter \to \Litter \) for the operation \( (L, s) \mapsto L \).
   We write \( a \in N \) for \( a \in s \), where \( N = (L, s) \).

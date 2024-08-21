@@ -55,10 +55,20 @@ theorem card_litter : #Litter = #μ := by
     cases h
     rfl
 
-class ToLitter (X : Type _) where
-  /-- Returns a litter associated to this object. -/
-  toLitter : X → Litter
+/-- Typeclass for the `ᴸ` notation. -/
+class SuperL (X : Type _) (Y : outParam <| Type _) where
+  superL : X → Y
 
-@[inherit_doc] postfix:75 "°" => ToLitter.toLitter
+/-- Typeclass for the `ᴬ` notation. -/
+class SuperA (X : Type _) (Y : outParam <| Type _) where
+  superA : X → Y
+
+/-- Typeclass for the `ᴺ` notation. -/
+class SuperN (X : Type _) (Y : outParam <| Type _) where
+  superN : X → Y
+
+postfix:max "ᴸ" => SuperL.superL
+postfix:max "ᴬ" => SuperA.superA
+postfix:max "ᴺ" => SuperN.superN
 
 end ConNF
