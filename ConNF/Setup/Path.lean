@@ -15,7 +15,7 @@ In this file, we define the notion of a *path*, and the derivative and coderivat
 
 universe u
 
-open WithBot
+open Cardinal WithBot
 
 namespace ConNF
 
@@ -49,8 +49,12 @@ class BotSingleDerivative (X : Type _) (Y : outParam <| Type _) where
   botSderiv : X → Y
 
 /-- Typeclass for the `⇘.` notation. -/
-class BotDerivative (X : Type _) (Y : outParam <| Type _) (β : outParam TypeIndex) where
+class BotDerivative (X : Type _) (Y : outParam <| Type _) (β : outParam TypeIndex)
+    extends BotSingleDerivative X Y where
   botDeriv : X → β ↝ ⊥ → Y
+  /-- We often need to do case analysis on `β` to show that it's a proper type index here.
+  This case check doesn't need to be done in most actual use cases of the notation. -/
+  botDeriv_single : ∀ x : X, ∀ h : ⊥ < β, botDeriv x (.single h) = botSderiv x  := by intros; rfl
 
 /-- Typeclass for the `↗` notation. -/
 class SingleCoderivative (X : Type _) (Y : outParam <| Type _)
@@ -66,7 +70,7 @@ class Coderivative (X : Type _) (Y : outParam <| Type _)
 
 infixl:75 " ↘ " => SingleDerivative.sderiv
 infixl:75 " ⇘ " => Derivative.deriv
-postfix:75 " ↘." => BotSingleDerivative.botDeriv
+postfix:75 " ↘." => BotSingleDerivative.botSderiv
 infixl:75 " ⇘. " => BotDerivative.botDeriv
 infixl:75 " ↗ " => SingleCoderivative.scoderiv
 infixl:75 " ⇗ " => Coderivative.coderiv
@@ -168,6 +172,17 @@ theorem Path.recSderivGlobal_sderiv {motive : TypeIndex → Sort _}
 instance : Derivative (α ↝ β) (α ↝ γ) β γ where
   deriv A := Path.recSderivGlobal A (λ _ _ _ h B ↦ B ↘ h)
 
+instance : BotDerivative (α ↝ β) (α ↝ ⊥) β where
+  botDeriv A B := A ⇘ B
+  botSderiv A :=
+    match β with
+      | ⊥ => A
+      | (β : Λ) => A ↘ bot_lt_coe β
+  botDeriv_single A h := by
+    cases β using WithBot.recBotCoe with
+    | bot => cases lt_irrefl ⊥ h
+    | coe => rfl
+
 instance : Coderivative (β ↝ γ) (α ↝ γ) α β where
   coderiv A B := B ⇘ A
 
@@ -179,6 +194,20 @@ theorem Path.deriv_nil (A : α ↝ β) :
 @[simp]
 theorem Path.deriv_sderiv (A : α ↝ β) (B : β ↝ γ) (h : δ < γ) :
     A ⇘ (B ↘ h) = A ⇘ B ↘ h :=
+  rfl
+
+theorem Path.botDeriv_eq (A : α ↝ β) (B : β ↝ ⊥) :
+    A ⇘. B = A ⇘ B :=
+  rfl
+
+@[simp]
+theorem Path.botSderiv_bot_eq (A : α ↝ ⊥) :
+    A ↘. = A :=
+  rfl
+
+@[simp]
+theorem Path.botSderiv_coe_eq {β : Λ} (A : α ↝ β) :
+    A ↘ bot_lt_coe β = A ↘. :=
   rfl
 
 @[simp]
@@ -310,5 +339,79 @@ theorem Path.recScoderiv_scoderiv {motive : ∀ β, β ↝ γ → Sort _}
   congr 1
   · exact A.rev_rev
   · exact HEq.symm (cast_heq _ _)
+
+/-!
+## Cardinality bounds on paths
+-/
+
+def Path.toList : {β : TypeIndex} → α ↝ β → List {β | β ≤ α} :=
+  recSderiv [⟨α, le_refl α⟩] (λ _β γ A h ih ↦ ⟨γ, h.le.trans A.le⟩ :: ih)
+
+@[simp]
+theorem Path.toList_nil :
+    (.nil : α ↝ α).toList = [⟨α, le_refl α⟩] :=
+  rfl
+
+@[simp]
+theorem Path.toList_sderiv (A : α ↝ β) (h : γ < β) :
+    (A ↘ h).toList = ⟨γ, h.le.trans A.le⟩ :: A.toList :=
+  rfl
+
+@[simp]
+theorem Path.toList_ne_nil (A : α ↝ β) :
+    A.toList ≠ [] := by
+  cases A with
+  | nil => simp only [Set.coe_setOf, toList_nil, Set.mem_setOf_eq, ne_eq, List.cons_ne_self,
+      not_false_eq_true]
+  | sderiv γ δ A hδ _ => simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, ne_eq,
+      not_false_eq_true]
+
+@[simp]
+theorem Path.eq_of_toList_eq (A : α ↝ β) (B : α ↝ γ) : A.toList = B.toList → β = γ := by
+  intro h
+  cases A with
+  | nil =>
+    cases B with
+    | nil => rfl
+    | sderiv γ δ B hδ =>
+      simp only [Set.coe_setOf, toList_nil, Set.mem_setOf_eq, toList_sderiv, List.cons.injEq,
+        Subtype.mk.injEq] at h
+      exact h.1
+  | sderiv γ δ A hδ =>
+    cases B with
+    | nil => simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, toList_nil, List.cons.injEq,
+        Subtype.mk.injEq, toList_ne_nil, and_false] at h
+    | sderiv γ δ B hδ =>
+      simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, List.cons.injEq,
+        Subtype.mk.injEq] at h
+      exact h.1
+
+theorem Path.toList_injective (α β : TypeIndex) :
+    Function.Injective (toList : (α ↝ β) → List {β | β ≤ α}) := by
+  intro A B h
+  induction A with
+  | nil =>
+    cases B with
+    | nil => rfl
+    | sderiv γ δ B hδ =>
+      simp only [Set.coe_setOf, toList_nil, Set.mem_setOf_eq, toList_sderiv, List.cons.injEq,
+        true_and] at h
+      cases toList_ne_nil B h.symm
+  | sderiv γ δ A hδ ih =>
+    cases B with
+    | nil =>
+      simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, toList_nil, List.cons.injEq,
+        toList_ne_nil, and_false] at h
+    | sderiv γ' δ' B hδ' =>
+      simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, List.cons.injEq, true_and] at h
+      cases eq_of_toList_eq A B h
+      cases ih h
+      rfl
+
+theorem card_path_lt (α β : TypeIndex) : #(α ↝ β) < (#μ).ord.cof := by
+  apply (mk_le_of_injective (Path.toList_injective α β)).trans_lt
+  have : Nonempty {β | β ≤ α} := ⟨⟨α, le_refl α⟩⟩
+  rw [mk_list_eq_max_mk_aleph0 {β | β ≤ α}, max_lt_iff]
+  exact ⟨α.card_Iic_lt, aleph0_lt_κ.trans_le κ_le_cof_μ⟩
 
 end ConNF

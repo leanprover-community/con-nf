@@ -11,4 +11,5 @@ import ConNF.Setup.Params
 import ConNF.Setup.Path
 import ConNF.Setup.Relation
 import ConNF.Setup.Small
+import ConNF.Setup.Tree
 import ConNF.Setup.TypeIndex
