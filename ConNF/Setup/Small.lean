@@ -131,6 +131,9 @@ theorem near_trans (h₁ : Near s t) (h₂ : Near t u) : Near s u :=
 theorem near_symmDiff_self_of_small (h : Small s) : Near (s ∆ t) t := by
   rwa [Near, symmDiff_symmDiff_cancel_right]
 
+theorem near_image (h : Near s t) (f : α → β) : Near (f '' s) (f '' t) :=
+  (h.image f).mono subset_image_symmDiff
+
 theorem card_le_of_near (h₁ : Near s t) (h₂ : ¬Small t) : #t ≤ #s := by
   rw [Near, Small, Set.symmDiff_def, mk_union_of_disjoint disjoint_sdiff_sdiff] at h₁
   rw [Small, not_lt] at h₂

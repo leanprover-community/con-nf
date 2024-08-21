@@ -4,6 +4,7 @@ import ConNF.Aux.Set
 import ConNF.Aux.Transfer
 import ConNF.Aux.WellOrder
 import ConNF.Setup.Atom
+import ConNF.Setup.BasePerm
 import ConNF.Setup.Litter
 import ConNF.Setup.NearLitter
 import ConNF.Setup.Params

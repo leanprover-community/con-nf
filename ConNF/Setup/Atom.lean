@@ -47,7 +47,6 @@ theorem mem_litter_atoms_iff (a : Atom) (L : Litter) :
     a ∈ Lᴬ ↔ aᴸ = L :=
   Iff.rfl
 
-@[ext]
 theorem Atom.ext {a₁ a₂ : Atom} (h : a₁ᴸ = a₂ᴸ) (h' : a₁.index = a₂.index) : a₁ = a₂ := by
   obtain ⟨L₁, i₁⟩ := a₁
   obtain ⟨L₂, i₂⟩ := a₂

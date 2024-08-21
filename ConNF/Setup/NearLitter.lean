@@ -13,7 +13,6 @@ In this file, we define near-litters.
     difference if the two near-litters are near, and equal to their intersection if they are not.
 -/
 
-noncomputable section
 universe u
 
 open Cardinal Set
