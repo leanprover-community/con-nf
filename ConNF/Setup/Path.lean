@@ -88,6 +88,7 @@ theorem coderiv_single {X Y : Type _} [Coderivative X Y β γ] (x : X) (h : γ <
 instance : SingleDerivative (α ↝ β) (α ↝ γ) β γ where
   sderiv := .cons
 
+/-- The downwards recursion principle for paths. -/
 @[elab_as_elim, induction_eliminator, cases_eliminator]
 def Path.recSderiv {motive : ∀ β, α ↝ β → Sort _}
     (nil : motive α .nil)
@@ -116,6 +117,8 @@ theorem Path.le (A : α ↝ β) : β ≤ α := by
   | nil => exact le_rfl
   | sderiv β γ _A h h' => exact h.le.trans h'
 
+/-- The downwards recursion principle for paths, specialised to the case where the motive at `β`
+only depends on the fact that `β ≤ α`. -/
 def Path.recSderivLe {motive : ∀ β ≤ α, Sort _}
     (nil : motive α le_rfl)
     (sderiv : ∀ β γ, ∀ (A : α ↝ β) (h : γ < β), motive β A.le → motive γ (h.le.trans A.le)) :
@@ -137,6 +140,8 @@ theorem Path.recSderivLe_sderiv {motive : ∀ β ≤ α, Sort _}
     recSderivLe (motive := motive) nil sderiv (A ↘ h) = sderiv β γ A h (recSderiv nil sderiv A) :=
   rfl
 
+/-- The downwards recursion principle for paths, specialised to the case where the motive is not
+dependent on the relation of `β` to `α`. -/
 @[elab_as_elim]
 def Path.recSderivGlobal {motive : TypeIndex → Sort _}
     (nil : motive α)
@@ -195,7 +200,10 @@ theorem Path.coderiv_deriv (A : β ↝ γ) (h₁ : β < α) (h₂ : δ < γ) :
 ## Upwards recursion along paths
 -/
 
-/-- The same as `Path`, but the components of this path point "upwards" instead of "downwards". -/
+/--
+The same as `Path`, but the components of this path point "upwards" instead of "downwards".
+This type is only used for proving `revScoderiv`, and should be considered an implementation detail.
+-/
 inductive RevPath (α : TypeIndex) : TypeIndex → Type u
   | nil : RevPath α α
   | cons {β γ : TypeIndex} : RevPath α β → β < γ → RevPath α γ
@@ -274,6 +282,8 @@ theorem Path.recScoderiv'_cons {motive : ∀ β, β ↝ γ → Sort _}
       scoderiv α β A.rev h (recScoderiv' nil scoderiv A) :=
   rfl
 
+/-- The upwards recursion principle for paths. The `scoderiv` computation rule
+`recScoderiv_scoderiv` is not a definitional equality. -/
 @[elab_as_elim]
 def Path.recScoderiv {motive : ∀ β, β ↝ γ → Sort _}
     (nil : motive γ .nil)

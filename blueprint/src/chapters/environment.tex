@@ -65,12 +65,16 @@ Some mathematical background not already in mathlib will be included in \cref{c:
 \begin{definition}[litter]
   \label{def:Litter}
   \uses{def:Params}
+  \lean{ConNF.Litter}
+  \leanok
   A \emph{litter} is a triple \( L = (\nu, \beta, \gamma) : \mu \times \lambda^\bot \times \lambda \) where \( \beta \neq \gamma \).
   The type of all litters is denoted \( \Litter \), and \( \#\Litter = \#\mu \).
 \end{definition}
 \begin{definition}[atom]
   \label{def:Atom}
   \uses{def:Litter}
+  \lean{ConNF.Atom}
+  \leanok
   An \emph{atom} is a pair \( a = (L, i) : \Litter \times \kappa \).\footnote{This should be formalised as a structure, not as a definition. We should not use the projections of atoms unless absolutely necessary.}
   The type of all atoms is denoted \( \Atom \), and \( \#\Atom = \#\mu \).
   We write \( (-)^\circ : \Atom \to \Litter \) for the operation \( (L, i) \mapsto L \).\footnote{This must be a notation typeclass.}

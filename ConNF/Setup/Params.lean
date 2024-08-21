@@ -110,6 +110,17 @@ theorem aleph0_lt_μ : ℵ₀ < #μ :=
 theorem Λ_type_le_μ_ord : type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord :=
   Λ_type_le_cof_μ.trans <| ord_cof_le (#μ).ord
 
+theorem Λ_le_cof_μ : #Λ ≤ (#μ).ord.cof := by
+  have := card_le_of_le_ord Λ_type_le_cof_μ
+  rwa [card_type] at this
+
+theorem Λ_le_μ : #Λ ≤ #μ := by
+  have := card_le_of_le_ord Λ_type_le_μ_ord
+  rwa [card_type] at this
+
+theorem κ_le_μ : #κ ≤ #μ :=
+  κ_lt_μ.le
+
 @[irreducible]
 def κEquiv : κ ≃ Set.Iio (#κ).ord := by
   apply Equiv.ulift.{u + 1, u}.symm.trans
