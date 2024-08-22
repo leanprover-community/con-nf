@@ -35,7 +35,7 @@ class Params where
   κ_le_cof_μ : #κ ≤ (#μ).ord.cof
   Λ_type_le_cof_μ : type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord.cof.ord
 
-def minimalParams : Params where
+def Params.minimal : Params where
   Λ := ℕ
   κ := (aleph 1).out
   μ := (beth (aleph 1).ord).out
@@ -63,7 +63,7 @@ def minimalParams : Params where
     rw [isRegular_aleph_one.cof_eq, ← ord_le_ord] at this
     exact (omega_le_of_isLimit (ord_aleph_isLimit 1)).trans this
 
-def inaccessibleParams.{v} : Params where
+def Params.inaccessible.{v} : Params where
   Λ := (Cardinal.univ.{v, v + 1}).ord.out.α
   κ := ULift.{v + 1, v} (aleph 1).out
   μ := Cardinal.univ.{v, v + 1}.out
@@ -103,6 +103,11 @@ variable [Params.{u}]
 instance : Nonempty Λ := Params.Λ_nonempty
 instance : LtWellOrder Λ := Params.ΛWellOrder
 instance : NoMaxOrder Λ := Params.Λ_noMaxOrder
+
+/-- Allows us to use `termination_by` clauses with `Λ`. -/
+instance : WellFoundedRelation Λ where
+  rel := (· < ·)
+  wf := IsWellFounded.wf
 
 theorem aleph0_lt_μ : ℵ₀ < #μ :=
   aleph0_lt_κ.trans κ_lt_μ

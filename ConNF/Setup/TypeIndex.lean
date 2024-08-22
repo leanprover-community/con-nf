@@ -25,6 +25,11 @@ The base type is written `⊥`. -/
 def TypeIndex :=
   WithBot Λ
 
+/-- Allows us to use `termination_by` clauses with `TypeIndex`. -/
+instance : WellFoundedRelation TypeIndex where
+  rel := (· < ·)
+  wf := IsWellFounded.wf
+
 @[simp]
 protected theorem TypeIndex.type :
     type ((· < ·) : TypeIndex → TypeIndex → Prop) = type ((· < ·) : Λ → Λ → Prop) := by

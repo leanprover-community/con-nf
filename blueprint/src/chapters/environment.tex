@@ -200,6 +200,8 @@ We will also use \( x_\gamma \) to denote the derivative \( x_h \) where \( h \)
 \begin{definition}[structural permutation]
   \label{def:StrPerm}
   \uses{def:BasePerm,def:Tree}
+  \lean{ConNF.StrPerm}
+  \leanok
   Let \( \alpha \) be a type index.
   Then an \emph{\( \alpha \)-structural permutation} (or just \emph{\( \alpha \)-permutation}) is an \( \alpha \)-tree of base permutations.
   The type of \( \alpha \)-permutations is written \( \StrPerm_\alpha \).
@@ -243,7 +245,7 @@ When we quantify over structural permutations in this paper, it should be formal
 \end{definition}
 \begin{definition}[structural support]
   \label{def:StrSupport}
-  \uses{def:BaseSupport}
+  \uses{def:BaseSupport,def:StrPerm}
   A \emph{\( \beta \)-structural support} (or just \emph{\( \beta \)-support}) is a pair \( S = (S^\Atom, S^\NearLitter) \) where \( S^\Atom \) is an enumeration of \( (\beta \tpath \bot) \times \Atom \) and \( S^\NearLitter \) is an enumeration of \( (\beta \tpath \bot) \times \NearLitter \).
   The type of \( \beta \)-supports is written \( \StrSupp_\beta \).
   There are precisely \( \#\mu \) structural supports for any type index \( \beta \).
@@ -265,16 +267,18 @@ When we quantify over structural permutations in this paper, it should be formal
 \begin{definition}[structural set]
   \label{def:StrSet}
   \uses{def:StrPerm}
+  \lean{ConNF.StrSet}
+  \leanok
   The type of \emph{\( \alpha \)-structural sets}, denoted \( \StrSet_\alpha \), is defined by well-founded recursion on \( \lambda^\bot \).
   \begin{itemize}
     \item \( \StrSet_\bot \coloneq \Atom \);
-    \item \( \StrSet_\alpha \coloneq \prod_{\beta : \lambda^\bot} \beta < \alpha \to \StrSet_\beta \) where \( \alpha : \lambda \).
+    \item \( \StrSet_\alpha \coloneq \prod_{\beta : \lambda^\bot} \beta < \alpha \to \Set \StrSet_\beta \) where \( \alpha : \lambda \).
   \end{itemize}
   These equalities will in fact only be equivalences in the formalisation.
   We define the action of \( \alpha \)-permutations (more precisely, inhabitants of some type with a \( \texttt{StrPermClass}_\alpha \) instance) on \( \alpha \)-structural sets by well-founded recursion.
   \begin{itemize}
     \item \( \pi(x) = \pi_{\nil(\bot)}(x) \) if \( \alpha \equiv \bot \);
-    \item \( \pi(x) = (\beta, h \mapsto \pi_h(x(\beta, h))) \) if \( \alpha : \lambda \).
+    \item \( \pi(x) = (\beta, h \mapsto \pi_h[x(\beta, h)]) \) if \( \alpha : \lambda \).
   \end{itemize}
 \end{definition}
 

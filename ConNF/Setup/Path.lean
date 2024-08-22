@@ -344,27 +344,18 @@ theorem Path.recScoderiv_scoderiv {motive : ∀ β, β ↝ γ → Sort _}
 ## Cardinality bounds on paths
 -/
 
-def Path.toList : {β : TypeIndex} → α ↝ β → List {β | β ≤ α} :=
-  recSderiv [⟨α, le_refl α⟩] (λ _β γ A h ih ↦ ⟨γ, h.le.trans A.le⟩ :: ih)
+def Path.toList : {β : TypeIndex} → α ↝ β → List {β | β < α} :=
+  recSderiv [] (λ _β γ A h ih ↦ ⟨γ, h.trans_le A.le⟩ :: ih)
 
 @[simp]
 theorem Path.toList_nil :
-    (.nil : α ↝ α).toList = [⟨α, le_refl α⟩] :=
+    (.nil : α ↝ α).toList = [] :=
   rfl
 
 @[simp]
 theorem Path.toList_sderiv (A : α ↝ β) (h : γ < β) :
-    (A ↘ h).toList = ⟨γ, h.le.trans A.le⟩ :: A.toList :=
+    (A ↘ h).toList = ⟨γ, h.trans_le A.le⟩ :: A.toList :=
   rfl
-
-@[simp]
-theorem Path.toList_ne_nil (A : α ↝ β) :
-    A.toList ≠ [] := by
-  cases A with
-  | nil => simp only [Set.coe_setOf, toList_nil, Set.mem_setOf_eq, ne_eq, List.cons_ne_self,
-      not_false_eq_true]
-  | sderiv γ δ A hδ _ => simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, ne_eq,
-      not_false_eq_true]
 
 @[simp]
 theorem Path.eq_of_toList_eq (A : α ↝ β) (B : α ↝ γ) : A.toList = B.toList → β = γ := by
@@ -373,45 +364,35 @@ theorem Path.eq_of_toList_eq (A : α ↝ β) (B : α ↝ γ) : A.toList = B.toLi
   | nil =>
     cases B with
     | nil => rfl
-    | sderiv γ δ B hδ =>
-      simp only [Set.coe_setOf, toList_nil, Set.mem_setOf_eq, toList_sderiv, List.cons.injEq,
-        Subtype.mk.injEq] at h
-      exact h.1
+    | sderiv γ δ B hδ => simp only [toList_nil, toList_sderiv, Set.mem_setOf_eq] at h
   | sderiv γ δ A hδ =>
     cases B with
-    | nil => simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, toList_nil, List.cons.injEq,
-        Subtype.mk.injEq, toList_ne_nil, and_false] at h
+    | nil => simp only [toList_sderiv, Set.mem_setOf_eq, toList_nil] at h
     | sderiv γ δ B hδ =>
-      simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, List.cons.injEq,
-        Subtype.mk.injEq] at h
+      simp only [toList_sderiv, Set.mem_setOf_eq, List.cons.injEq, Subtype.mk.injEq] at h
       exact h.1
 
 theorem Path.toList_injective (α β : TypeIndex) :
-    Function.Injective (toList : (α ↝ β) → List {β | β ≤ α}) := by
+    Function.Injective (toList : (α ↝ β) → List {β | β < α}) := by
   intro A B h
   induction A with
   | nil =>
     cases B with
     | nil => rfl
-    | sderiv γ δ B hδ =>
-      simp only [Set.coe_setOf, toList_nil, Set.mem_setOf_eq, toList_sderiv, List.cons.injEq,
-        true_and] at h
-      cases toList_ne_nil B h.symm
+    | sderiv γ δ B hδ => simp only [toList_nil, toList_sderiv, Set.mem_setOf_eq] at h
   | sderiv γ δ A hδ ih =>
     cases B with
-    | nil =>
-      simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, toList_nil, List.cons.injEq,
-        toList_ne_nil, and_false] at h
+    | nil => simp only [toList_sderiv, Set.mem_setOf_eq, toList_nil] at h
     | sderiv γ' δ' B hδ' =>
-      simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, List.cons.injEq, true_and] at h
-      cases eq_of_toList_eq A B h
-      cases ih h
+      rw [toList_sderiv, toList_sderiv, List.cons.injEq] at h
+      cases eq_of_toList_eq A B h.2
+      cases ih h.2
       rfl
 
 theorem card_path_lt (α β : TypeIndex) : #(α ↝ β) < (#μ).ord.cof := by
   apply (mk_le_of_injective (Path.toList_injective α β)).trans_lt
-  have : Nonempty {β | β ≤ α} := ⟨⟨α, le_refl α⟩⟩
-  rw [mk_list_eq_max_mk_aleph0 {β | β ≤ α}, max_lt_iff]
-  exact ⟨α.card_Iic_lt, aleph0_lt_κ.trans_le κ_le_cof_μ⟩
+  apply (mk_list_le_max {β | β < α}).trans_lt
+  rw [max_lt_iff]
+  exact ⟨aleph0_lt_κ.trans_le κ_le_cof_μ, α.card_Iio_lt⟩
 
 end ConNF

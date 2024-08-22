@@ -1,0 +1,23 @@
+import ConNF.Setup.BasePerm
+import ConNF.Setup.Tree
+
+/-!
+# Structural permutations
+
+In this file, we define the type of structural permutations.
+
+## Main declarations
+
+* `ConNF.StrPerm`: The type of structural permutations.
+-/
+
+universe u
+
+namespace ConNF
+
+variable [Params.{u}] {α : TypeIndex}
+
+abbrev StrPerm : TypeIndex → Type _ :=
+  Tree BasePerm
+
+end ConNF

@@ -56,7 +56,7 @@ theorem botSderiv_eq (T : Tree X α) :
 
 /-- The group structure on the type of `α`-trees of `X` is given by "branchwise" multiplication,
 given by `Pi.group`. -/
-instance [Group X] : Group (Tree X α) :=
+instance group [Group X] : Group (Tree X α) :=
   Pi.group
 
 @[simp]
@@ -74,6 +74,8 @@ theorem inv_apply [Group X] (T : Tree X α) (A : α ↝ ⊥) :
     T⁻¹ A = (T A)⁻¹ :=
   rfl
 
+end Tree
+
 /-!
 ## Cardinality bounds on trees
 -/
@@ -87,6 +89,12 @@ theorem card_tree_lt (h : #X < #μ) : #(Tree X α) < #μ := by
   rw [Tree, ← power_def]
   exact pow_lt_of_lt μ_isStrongLimit h ((card_path_lt α ⊥).trans_le (Ordinal.cof_ord_le #μ))
 
-end Tree
+theorem card_tree_eq (h : #X = #μ) : #(Tree X α) = #μ := by
+  apply le_antisymm
+  · exact card_tree_le h.le
+  · rw [← h]
+    apply mk_le_of_injective (f := λ x _ ↦ x)
+    intro x y h
+    exact congr_fun h (Path.nil ↘.)
 
 end ConNF
