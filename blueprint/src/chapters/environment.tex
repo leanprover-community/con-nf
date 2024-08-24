@@ -212,6 +212,7 @@ When we quantify over structural permutations in this paper, it should be formal
   \label{def:Enumeration}
   \uses{def:Small}
   \lean{ConNF.Enumeration}
+  \leanok
   Let \( \tau \) be a type.
   An \emph{enumeration} of \( \tau \) is a pair \( E = (i, f) \) where \( i : \kappa \) and \( f \) is a partial function \( \kappa \to \tau \), such that all domain elements of \( f \) are strictly less than \( i \).\footnote{This should be encoded as a coinjective relation \( \kappa \to \tau \to \Prop \); see \cref{def:relation_props}.}
   If \( x : \tau \), we write \( x \in E \) for \( x \in \ran f \).
@@ -342,6 +343,8 @@ When we quantify over structural permutations in this paper, it should be formal
 \begin{definition}[model data]
   \label{def:ModelData}
   \uses{def:StrSupport,def:StrSet}
+  \lean{ConNF.ModelData}
+  \leanok
   Let \( \alpha \) be a type index.
   \emph{Model data} at type \( \alpha \) consists of:\footnote{A type theory problem with \texttt{export}ing this data is that under different assumptions, things like different spellings of \( \TSet_\alpha \) might require case splitting on \( \alpha \) before they become defeq (e.g.\ see the old version of \texttt{Model/FOA.lean}). There doesn't seem to be an easy way around this.}
   \begin{itemize}
@@ -351,12 +354,14 @@ When we quantify over structural permutations in this paper, it should be formal
   such that
   \begin{itemize}
     \item if \( \rho : \AllPerm_\alpha \) and \( x : \TSet_\alpha \), then \( \rho(U_\alpha(x)) = U_\alpha(\rho(x)) \);
-    \item every t-set of type \( \alpha \) has an \( \alpha \)-support (\cref{def:StrSupport}) for its action under the \( \alpha \)-allowable permutations;
+    \item every t-set of type \( \alpha \) has an \( \alpha \)-support (\cref{def:StrSupport}) for its action under the \( \alpha \)-allowable permutations.
   \end{itemize}
 \end{definition}
 \begin{definition}[tangle]
   \label{def:Tangle}
   \uses{def:ModelData}
+  \lean{ConNF.Tangle}
+  \leanok
   Let \( \alpha \) be a type index with model data.
   An \emph{\( \alpha \)-tangle} is a pair \( t = (x, S) \) where \( x \) is a tangled set of type \( \alpha \) and \( S \) is an \( \alpha \)-support for \( x \).
   We define \( \set(t) = x \) and \( \supp(t) = S \).
@@ -366,7 +371,7 @@ When we quantify over structural permutations in this paper, it should be formal
 \end{definition}
 \begin{proposition}[fuzz maps]
   \label{prop:fuzz}
-  \uses{def:Tangle}
+  \uses{def:Tangle,def:Position}
   Let \( \beta \) be a type index with model data, and suppose that \( \Tang_\beta \) has a position function.
   Let \( \gamma \) be any proper type index not equal to \( \beta \).
   Then there is an injective \emph{fuzz map} \( f_{\beta,\gamma} : \Tang_\beta \to \Litter \) such that \( \iota(t) < \iota(f_{\beta,\gamma}(t)) \), and the different \( f_{\beta,\gamma} \) all have disjoint ranges.

@@ -8,9 +8,11 @@ import ConNF.Setup.Atom
 import ConNF.Setup.BasePerm
 import ConNF.Setup.Enumeration
 import ConNF.Setup.Litter
+import ConNF.Setup.ModelData
 import ConNF.Setup.NearLitter
 import ConNF.Setup.Params
 import ConNF.Setup.Path
+import ConNF.Setup.PathEnumeration
 import ConNF.Setup.Small
 import ConNF.Setup.StrPerm
 import ConNF.Setup.StrSet

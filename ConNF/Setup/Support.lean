@@ -1,5 +1,4 @@
-import ConNF.Setup.StrPerm
-import ConNF.Setup.Enumeration
+import ConNF.Setup.PathEnumeration
 
 /-!
 # Supports
@@ -82,6 +81,16 @@ instance : SuperA (Support α) (Enumeration (α ↝ ⊥ × Atom)) where
 instance : SuperN (Support α) (Enumeration (α ↝ ⊥ × NearLitter)) where
   superN := nearLitters
 
+@[simp]
+theorem mk_atoms (E : Enumeration (α ↝ ⊥ × Atom)) (F : Enumeration (α ↝ ⊥ × NearLitter)) :
+    (⟨E, F⟩ : Support α)ᴬ = E :=
+  rfl
+
+@[simp]
+theorem mk_nearLitters (E : Enumeration (α ↝ ⊥ × Atom)) (F : Enumeration (α ↝ ⊥ × NearLitter)) :
+    (⟨E, F⟩ : Support α)ᴺ = F :=
+  rfl
+
 instance : Derivative (Support α) (Support β) α β where
   deriv S A := ⟨Sᴬ ⇘ A, Sᴺ ⇘ A⟩
 
@@ -92,6 +101,13 @@ instance : BotDerivative (Support α) BaseSupport α where
   botDeriv S A := ⟨Sᴬ ⇘. A, Sᴺ ⇘. A⟩
   botSderiv S := ⟨Sᴬ ↘., Sᴺ ↘.⟩
   botDeriv_single S h := by dsimp only; rw [botDeriv_single, botDeriv_single]
+
+theorem ext' {S T : Support α} (h₁ : Sᴬ = Tᴬ) (h₂ : Sᴺ = Tᴺ) : S = T := by
+  obtain ⟨SA, SN⟩ := S
+  obtain ⟨TA, TN⟩ := T
+  cases h₁
+  cases h₂
+  rfl
 
 @[ext]
 theorem ext {S T : Support α} (h : ∀ A, S ⇘. A = T ⇘. A) : S = T := by
@@ -105,6 +121,41 @@ theorem ext {S T : Support α} (h : ∀ A, S ⇘. A = T ⇘. A) : S = T := by
   · apply Enumeration.ext_path
     intro A
     exact BaseSupport.nearLitters_congr (h A)
+
+instance {α : TypeIndex} : SMul (StrPerm α) (Support α) where
+  smul π S := ⟨π • Sᴬ, π • Sᴺ⟩
+
+@[simp]
+theorem smul_atoms {α : TypeIndex} (π : StrPerm α) (S : Support α) :
+    (π • S)ᴬ = π • Sᴬ :=
+  rfl
+
+@[simp]
+theorem smul_nearLitters {α : TypeIndex} (π : StrPerm α) (S : Support α) :
+    (π • S)ᴺ = π • Sᴺ :=
+  rfl
+
+@[simp]
+theorem smul_atoms_eq_of_smul_eq {α : TypeIndex} {π : StrPerm α} {S : Support α}
+    (h : π • S = S) :
+    π • Sᴬ = Sᴬ := by
+  rw [← smul_atoms, h]
+
+@[simp]
+theorem smul_nearLitters_eq_of_smul_eq {α : TypeIndex} {π : StrPerm α} {S : Support α}
+    (h : π • S = S) :
+    π • Sᴺ = Sᴺ := by
+  rw [← smul_nearLitters, h]
+
+instance {α : TypeIndex} : MulAction (StrPerm α) (Support α) where
+  one_smul S := by
+    apply ext'
+    · rw [smul_atoms, one_smul]
+    · rw [smul_nearLitters, one_smul]
+  mul_smul π₁ π₂ S := by
+    apply ext'
+    · rw [smul_atoms, smul_atoms, smul_atoms, mul_smul]
+    · rw [smul_nearLitters, smul_nearLitters, smul_nearLitters, mul_smul]
 
 end Support
 

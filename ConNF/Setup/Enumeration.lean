@@ -1,5 +1,4 @@
 import ConNF.Aux.Rel
-import ConNF.Setup.Path
 import ConNF.Setup.Small
 
 /-!
@@ -52,6 +51,12 @@ theorem coe_small (E : Enumeration X) :
 theorem graph'_small (E : Enumeration X) :
     Small E.rel.graph' :=
   small_graph' E.dom_small E.coe_small
+
+noncomputable def empty : Enumeration X where
+  bound := 0
+  rel _ _ := False
+  lt_bound _ h := by cases h; contradiction
+  rel_coinjective := by constructor; intros; contradiction
 
 noncomputable def singleton (x : X) : Enumeration X where
   bound := 1
@@ -167,38 +172,6 @@ theorem invImage_rel {f : Y → X} {hf : f.Injective} (i : κ) (y : Y) :
 theorem mem_invImage {f : Y → X} {hf : f.Injective} (y : Y) :
     y ∈ E.invImage f hf ↔ f y ∈ E :=
   Iff.rfl
-
-/-!
-## Enumerations over paths
--/
-
-instance (X : Type u) (α β : TypeIndex) :
-    Derivative (Enumeration (α ↝ ⊥ × X)) (Enumeration (β ↝ ⊥ × X)) α β where
-  deriv E A := E.invImage (λ x ↦ (x.1 ⇗ A, x.2))
-    (λ x y h ↦ Prod.ext (Path.deriv_right_injective
-      ((Prod.mk.injEq _ _ _ _).mp h).1) ((Prod.mk.injEq _ _ _ _).mp h).2)
-
-instance (X : Type u) (α β : TypeIndex) :
-    Coderivative (Enumeration (β ↝ ⊥ × X)) (Enumeration (α ↝ ⊥ × X)) α β where
-  coderiv E A := E.image (λ x ↦ (x.1 ⇗ A, x.2))
-
-instance (X : Type u) (α : TypeIndex) :
-    BotDerivative (Enumeration (α ↝ ⊥ × X)) (Enumeration X) α where
-  botDeriv E A := E.invImage (λ x ↦ (A, x)) (Prod.mk.inj_left A)
-  botSderiv E := E.invImage (λ x ↦ (Path.nil ↘., x)) (Prod.mk.inj_left (Path.nil ↘.))
-  botDeriv_single E h := by
-    cases α using WithBot.recBotCoe with
-    | bot => cases lt_irrefl ⊥ h
-    | coe => rfl
-
-theorem ext_path {X : Type u} {α : TypeIndex} {E F : Enumeration (α ↝ ⊥ × X)}
-    (h : ∀ A, E ⇘. A = F ⇘. A) :
-    E = F := by
-  ext i x
-  · have := congr_arg bound (h (Path.nil ↘.))
-    exact this
-  · have := congr_arg rel (h x.1)
-    exact iff_of_eq (congr_fun₂ this i x.2)
 
 -- TODO: Some stuff about the partial order on enumerations and concatenation of enumerations.
 

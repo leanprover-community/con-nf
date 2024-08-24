@@ -55,20 +55,28 @@ theorem card_litter : #Litter = #μ := by
     cases h
     rfl
 
-/-- Typeclass for the `ᴸ` notation. -/
+/-- Typeclass for the `ᴸ` notation.  Used for converting to  litters, or extracting the
+"litter part" of an object. -/
 class SuperL (X : Type _) (Y : outParam <| Type _) where
   superL : X → Y
 
-/-- Typeclass for the `ᴬ` notation. -/
+/-- Typeclass for the `ᴬ` notation. Used for converting to atoms, or extracting the
+"atom part" of an object. -/
 class SuperA (X : Type _) (Y : outParam <| Type _) where
   superA : X → Y
 
-/-- Typeclass for the `ᴺ` notation. -/
+/-- Typeclass for the `ᴺ` notation. Used for converting to near-litters, or extracting the
+"near-litter part" of an object. -/
 class SuperN (X : Type _) (Y : outParam <| Type _) where
   superN : X → Y
+
+/-- Typeclass for the `ᵁ` notation. Used for forgetful operations. -/
+class SuperU (X : Type _) (Y : outParam <| Type _) where
+  superU : X → Y
 
 postfix:max "ᴸ" => SuperL.superL
 postfix:max "ᴬ" => SuperA.superA
 postfix:max "ᴺ" => SuperN.superN
+postfix:max "ᵁ" => SuperU.superU
 
 end ConNF
