@@ -241,12 +241,16 @@ When we quantify over structural permutations in this paper, it should be formal
 \begin{definition}[base support]
   \label{def:BaseSupport}
   \uses{def:Enumeration,def:NearLitter}
+  \lean{ConNF.BaseSupport}
+  \leanok
   A \emph{base support} is a pair \( S = (S^\Atom, S^\NearLitter) \) where \( S^\Atom \) is an enumeration of atoms and \( S^\NearLitter \) is an enumeration of near-litters.
   There are precisely \( \#\mu \) base supports.
 \end{definition}
 \begin{definition}[structural support]
   \label{def:StrSupport}
   \uses{def:BaseSupport,def:StrPerm}
+  \lean{ConNF.Support}
+  \leanok
   A \emph{\( \beta \)-structural support} (or just \emph{\( \beta \)-support}) is a pair \( S = (S^\Atom, S^\NearLitter) \) where \( S^\Atom \) is an enumeration of \( (\beta \tpath \bot) \times \Atom \) and \( S^\NearLitter \) is an enumeration of \( (\beta \tpath \bot) \times \NearLitter \).
   The type of \( \beta \)-supports is written \( \StrSupp_\beta \).
   There are precisely \( \#\mu \) structural supports for any type index \( \beta \).

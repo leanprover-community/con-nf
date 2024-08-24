@@ -54,7 +54,7 @@ class BotDerivative (X : Type _) (Y : outParam <| Type _) (β : outParam TypeInd
   botDeriv : X → β ↝ ⊥ → Y
   /-- We often need to do case analysis on `β` to show that it's a proper type index here.
   This case check doesn't need to be done in most actual use cases of the notation. -/
-  botDeriv_single : ∀ x : X, ∀ h : ⊥ < β, botDeriv x (.single h) = botSderiv x  := by intros; rfl
+  botDeriv_single : ∀ x : X, ∀ h : ⊥ < β, botDeriv x (.single h) = botSderiv x
 
 /-- Typeclass for the `↗` notation. -/
 class SingleCoderivative (X : Type _) (Y : outParam <| Type _)
@@ -84,6 +84,11 @@ theorem deriv_single {X Y : Type _} [Derivative X Y β γ] (x : X) (h : γ < β)
 theorem coderiv_single {X Y : Type _} [Coderivative X Y β γ] (x : X) (h : γ < β) :
     x ⇗ .single h = x ↗ h :=
   Coderivative.coderiv_single x h
+
+@[simp]
+theorem botDeriv_single {X Y : Type _} [BotDerivative X Y β] (x : X) (h : ⊥ < β) :
+    x ⇘. .single h = x ↘. :=
+  BotDerivative.botDeriv_single x h
 
 /-!
 ## Downwards recursion along paths
@@ -169,6 +174,10 @@ theorem Path.recSderivGlobal_sderiv {motive : TypeIndex → Sort _}
       sderiv β γ A h (recSderiv nil sderiv A) :=
   rfl
 
+/-!
+## Derivatives of paths
+-/
+
 instance : Derivative (α ↝ β) (α ↝ γ) β γ where
   deriv A := Path.recSderivGlobal A (λ _ _ _ h B ↦ B ↘ h)
 
@@ -217,6 +226,11 @@ theorem Path.deriv_assoc (A : α ↝ β) (B : β ↝ γ) (C : γ ↝ δ) :
   | nil => rfl
   | sderiv ε ζ C h ih => simp only [deriv_sderiv, ih]
 
+@[simp]
+theorem Path.deriv_sderiv_assoc (A : α ↝ β) (B : β ↝ γ) (h : δ < γ) :
+    A ⇘ (B ↘ h) = A ⇘ B ↘ h :=
+  rfl
+
 theorem Path.coderiv_eq_deriv (A : α ↝ β) (B : β ↝ γ) :
     B ⇗ A = A ⇘ B :=
   rfl
@@ -224,6 +238,68 @@ theorem Path.coderiv_eq_deriv (A : α ↝ β) (B : β ↝ γ) :
 theorem Path.coderiv_deriv (A : β ↝ γ) (h₁ : β < α) (h₂ : δ < γ) :
     A ↗ h₁ ↘ h₂ = A ↘ h₂ ↗ h₁ :=
   rfl
+
+theorem Path.eq_nil (A : β ↝ β) :
+    A = .nil := by
+  cases A with
+  | nil => rfl
+  | sderiv γ _ A h => cases A.le.not_lt h
+
+theorem Path.sderiv_index_injective {A : α ↝ β} {B : α ↝ γ} {hδβ : δ < β} {hδγ : δ < γ}
+    (h : A ↘ hδβ = B ↘ hδγ) :
+    β = γ := by
+  cases h
+  rfl
+
+theorem Path.sderiv_path_injective {A B : α ↝ β} {hγ : γ < β} (h : A ↘ hγ = B ↘ hγ) :
+    A = B := by
+  cases h
+  rfl
+
+theorem Path.deriv_left_injective {A B : α ↝ β} {C : β ↝ γ} (h : A ⇘ C = B ⇘ C) :
+    A = B := by
+  induction C with
+  | nil => exact h
+  | sderiv δ ε C hε ih =>
+    rw [deriv_sderiv_assoc, deriv_sderiv_assoc] at h
+    exact ih (Path.sderiv_path_injective h)
+
+theorem Path.deriv_right_injective {A : α ↝ β} {B C : β ↝ γ} (h : A ⇘ B = A ⇘ C) :
+    B = C := by
+  induction C with
+  | nil => exact B.eq_nil
+  | sderiv δ ε C hε ih =>
+    cases B with
+    | nil => cases C.le.not_lt hε
+    | sderiv ζ η B hε' =>
+      cases Path.sderiv_index_injective h
+      rw [deriv_sderiv_assoc, deriv_sderiv_assoc] at h
+      rw [ih (Path.sderiv_path_injective h)]
+
+@[simp]
+theorem Path.sderiv_left_inj {A B : α ↝ β} {h : γ < β} :
+    A ↘ h = B ↘ h ↔ A = B :=
+  ⟨Path.sderiv_path_injective, λ h ↦ h ▸ rfl⟩
+
+@[simp]
+theorem Path.deriv_left_inj {A B : α ↝ β} {C : β ↝ γ} :
+    A ⇘ C = B ⇘ C ↔ A = B :=
+  ⟨deriv_left_injective, λ h ↦ h ▸ rfl⟩
+
+@[simp]
+theorem Path.deriv_right_inj {A : α ↝ β} {B C : β ↝ γ} :
+    A ⇘ B = A ⇘ C ↔ B = C :=
+  ⟨deriv_right_injective, λ h ↦ h ▸ rfl⟩
+
+@[simp]
+theorem Path.coderiv_left_inj {A B : β ↝ γ} {C : α ↝ β} :
+    A ⇗ C = B ⇗ C ↔ A = B :=
+  deriv_right_inj
+
+@[simp]
+theorem Path.coderiv_right_inj {A : β ↝ γ} {B C : α ↝ β} :
+    A ⇗ B = A ⇗ C ↔ B = C :=
+  deriv_left_inj
 
 /-!
 ## Upwards recursion along paths
@@ -394,5 +470,12 @@ theorem card_path_lt (α β : TypeIndex) : #(α ↝ β) < (#μ).ord.cof := by
   apply (mk_list_le_max {β | β < α}).trans_lt
   rw [max_lt_iff]
   exact ⟨aleph0_lt_κ.trans_le κ_le_cof_μ, α.card_Iio_lt⟩
+
+theorem card_path_lt' (α β : TypeIndex) : #(α ↝ β) < #μ :=
+  (card_path_lt α β).trans_le (Ordinal.cof_ord_le #μ)
+
+theorem card_path_ne_zero (α : TypeIndex) : #(α ↝ ⊥) ≠ 0 :=
+  letI : Nonempty (α ↝ ⊥) := ⟨Path.nil ↘.⟩
+  mk_ne_zero _
 
 end ConNF

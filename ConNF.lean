@@ -14,5 +14,6 @@ import ConNF.Setup.Path
 import ConNF.Setup.Small
 import ConNF.Setup.StrPerm
 import ConNF.Setup.StrSet
+import ConNF.Setup.Support
 import ConNF.Setup.Tree
 import ConNF.Setup.TypeIndex

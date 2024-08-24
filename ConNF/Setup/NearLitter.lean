@@ -35,6 +35,9 @@ instance : SuperL NearLitter Litter where
 instance : SuperA NearLitter (Set Atom) where
   superA N := N.atoms
 
+instance : SuperN Litter NearLitter where
+  superN L := ⟨L, Lᴬ, near_rfl⟩
+
 @[simp]
 theorem NearLitter.mk_litter (L : Litter) (s : Set Atom) (h : Near s Lᴬ) :
     (⟨L, s, h⟩ : NearLitter)ᴸ = L :=
