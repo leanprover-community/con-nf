@@ -469,7 +469,7 @@ theorem card_path_lt (α β : TypeIndex) : #(α ↝ β) < (#μ).ord.cof := by
   apply (mk_le_of_injective (Path.toList_injective α β)).trans_lt
   apply (mk_list_le_max {β | β < α}).trans_lt
   rw [max_lt_iff]
-  exact ⟨aleph0_lt_κ.trans_le κ_le_cof_μ, α.card_Iio_lt⟩
+  exact ⟨aleph0_lt_κ.trans_le κ_le_μ_ord_cof, α.card_Iio_lt⟩
 
 theorem card_path_lt' (α β : TypeIndex) : #(α ↝ β) < #μ :=
   (card_path_lt α β).trans_le (Ordinal.cof_ord_le #μ)

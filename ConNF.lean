@@ -6,13 +6,17 @@ import ConNF.Aux.Transfer
 import ConNF.Aux.WellOrder
 import ConNF.Setup.Atom
 import ConNF.Setup.BasePerm
+import ConNF.Setup.BasePositions
+import ConNF.Setup.Deny
 import ConNF.Setup.Enumeration
+import ConNF.Setup.Fuzz
 import ConNF.Setup.Litter
 import ConNF.Setup.ModelData
 import ConNF.Setup.NearLitter
 import ConNF.Setup.Params
 import ConNF.Setup.Path
 import ConNF.Setup.PathEnumeration
+import ConNF.Setup.Position
 import ConNF.Setup.Small
 import ConNF.Setup.StrPerm
 import ConNF.Setup.StrSet

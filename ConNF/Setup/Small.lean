@@ -107,7 +107,7 @@ theorem card_small_le (h : #α ≤ #μ) : #{s : Set α | Small s} ≤ #μ := by
   obtain ⟨⟨f, hf⟩⟩ := h
   rw [← mk_subset_mk_lt_cof μ_isStrongLimit.2]
   refine mk_le_of_injective (f := λ s ↦ ⟨f '' s, ?_⟩) ?_
-  · exact mk_image_le.trans_lt <| s.prop.trans_le κ_le_cof_μ
+  · exact mk_image_le.trans_lt <| s.prop.trans_le κ_le_μ_ord_cof
   · intro s t h
     exact Subtype.val_injective <| hf.image_injective <| congr_arg Subtype.val h
 

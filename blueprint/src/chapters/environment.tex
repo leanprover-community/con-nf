@@ -292,6 +292,8 @@ When we quantify over structural permutations in this paper, it should be formal
 \begin{definition}[position function]
   \label{def:Position}
   \uses{def:Params}
+  \lean{ConNF.Position}
+  \leanok
   Let \( \tau \) be a type.
   A \emph{position function} for \( \tau \) is an injection \( \iota : \tau \to \mu \).
   This is a typeclass.
@@ -299,23 +301,26 @@ When we quantify over structural permutations in this paper, it should be formal
 \begin{proposition}[injective functions from denied sets]
   \label{prop:funOfDeny}
   \uses{def:Params}
+  \lean{ConNF.funOfDeny}
+  \leanok
   Let \( \tau \) be a type such that \( \#\tau \leq \#\mu \).
   Let \( D : \tau \to \Set(\mu) \) be a function such that for each \( x : \tau \), the set \( D(x) \), called the \emph{denied set} of \( x \), has size less than \( \cof(\ord(\#\mu)) \).
   Then there is an injective function \( f : \tau \to \mu \) such that if \( \nu \in D(x) \), then \( \nu < f(x) \).
 \end{proposition}
 \begin{proof}
+  \leanok
   Pick a well-ordering \( \prec \) of \( \tau \) of length at most \( \ord(\#\mu) \).
   Define \( f \) by well-founded recursion on \( \prec \).
   Suppose that we have already defined \( f \) for all \( y \prec x \).
   Then let
-  \[ X = \{ f(y) \mid y \prec x \} \cup D(x) \]
-  This set has size less than \( \cof(\ord(\#\mu)) \), so it is not cofinal in \( \mu \).
-  So there is some \( \nu : \mu \) such that \( \forall \nu' \in X,\, \nu > \nu' \).
+  \[ X = \{ f(y) \mid y \prec x \} \cup \{ \nu \mid \exists \nu' \in D(x),\, \nu \leq \nu' \} \]
+  This set has size strictly less than \( \mu \), so there is some \( \nu : \mu \) not contained in it.
   Set \( f(x) = \nu \).
 \end{proof}
 \begin{proposition}[base positions]
   \label{prop:BasePositions}
   \uses{def:Position}
+  \leanok
   There are position functions on \( \Atom, \NearLitter \) that are jointly injective and satisfy
   \begin{itemize}
     \item \( \iota(\NL(a^\circ)) < \iota(a) \) for every atom \( a \);
@@ -327,6 +332,7 @@ When we quantify over structural permutations in this paper, it should be formal
 \end{proposition}
 \begin{proof}
   \uses{prop:funOfDeny}
+  \leanok
   First, establish an equivalence \( f_\Litter : \Litter \simeq \mu \).
   Use \cref{prop:funOfDeny} to obtain an injective map \( f_\Atom : \NearLitter \to \mu \) such that \( f_\Litter(a^\circ) < f_\Atom(a) \) for each atom \( a \).
   Now use \cref{prop:funOfDeny} again to obtain an injective map \( f_\NearLitter : \NearLitter \to \mu \) such that
@@ -372,6 +378,8 @@ When we quantify over structural permutations in this paper, it should be formal
 \begin{proposition}[fuzz maps]
   \label{prop:fuzz}
   \uses{def:Tangle,def:Position}
+  \lean{ConNF.fuzz}
+  \leanok
   Let \( \beta \) be a type index with model data, and suppose that \( \Tang_\beta \) has a position function.
   Let \( \gamma \) be any proper type index not equal to \( \beta \).
   Then there is an injective \emph{fuzz map} \( f_{\beta,\gamma} : \Tang_\beta \to \Litter \) such that \( \iota(t) < \iota(f_{\beta,\gamma}(t)) \), and the different \( f_{\beta,\gamma} \) all have disjoint ranges.
@@ -379,6 +387,7 @@ When we quantify over structural permutations in this paper, it should be formal
 \end{proposition}
 \begin{proof}
   \uses{prop:funOfDeny}
+  \leanok
   We define \( g : \Tang_\beta \to \mu \) by \cref{prop:funOfDeny}, where the denied sets are given by \( D(t) = \{ \iota(t) \} \).
   Then we set \( f_{\beta,\gamma}(t) = (g(t), \beta, \gamma) \).
 \end{proof}

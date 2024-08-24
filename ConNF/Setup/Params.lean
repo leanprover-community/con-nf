@@ -32,8 +32,8 @@ class Params where
   κ_isRegular : (#κ).IsRegular
   μ_isStrongLimit : (#μ).IsStrongLimit
   κ_lt_μ : #κ < #μ
-  κ_le_cof_μ : #κ ≤ (#μ).ord.cof
-  Λ_type_le_cof_μ : type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord.cof.ord
+  κ_le_μ_ord_cof : #κ ≤ (#μ).ord.cof
+  Λ_type_le_μ_ord_cof : type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord.cof.ord
 
 def Params.minimal : Params where
   Λ := ℕ
@@ -53,11 +53,11 @@ def Params.minimal : Params where
     apply (aleph_le_beth 1).trans_lt
     rw [beth_strictMono.lt_iff_lt]
     exact (ord_aleph_isLimit 1).one_lt
-  κ_le_cof_μ := by
+  κ_le_μ_ord_cof := by
     rw [mk_out, mk_out]
     have := beth_normal.cof_le (aleph 1).ord
     rwa [isRegular_aleph_one.cof_eq] at this
-  Λ_type_le_cof_μ := by
+  Λ_type_le_μ_ord_cof := by
     rw [type_nat_lt, mk_out]
     have := beth_normal.cof_le (aleph 1).ord
     rw [isRegular_aleph_one.cof_eq, ← ord_le_ord] at this
@@ -89,14 +89,14 @@ def Params.inaccessible.{v} : Params where
   κ_lt_μ := by
     rw [mk_uLift, mk_out, mk_out]
     exact lift_lt_univ _
-  κ_le_cof_μ := by
+  κ_le_μ_ord_cof := by
     rw [mk_uLift, mk_out, mk_out, univ_inaccessible.2.1.cof_eq]
     exact (lift_lt_univ _).le
-  Λ_type_le_cof_μ := by
+  Λ_type_le_μ_ord_cof := by
     change type (Cardinal.univ.{v, v + 1}).ord.out.r ≤ _
     rw [type_out, mk_out, univ_inaccessible.2.1.cof_eq]
 
-export Params (Λ κ μ aleph0_lt_κ κ_isRegular μ_isStrongLimit κ_lt_μ κ_le_cof_μ Λ_type_le_cof_μ)
+export Params (Λ κ μ aleph0_lt_κ κ_isRegular μ_isStrongLimit κ_lt_μ κ_le_μ_ord_cof Λ_type_le_μ_ord_cof)
 
 variable [Params.{u}]
 
@@ -112,11 +112,14 @@ instance : WellFoundedRelation Λ where
 theorem aleph0_lt_μ : ℵ₀ < #μ :=
   aleph0_lt_κ.trans κ_lt_μ
 
+theorem aleph0_lt_μ_ord_cof : ℵ₀ < (#μ).ord.cof :=
+  aleph0_lt_κ.trans_le κ_le_μ_ord_cof
+
 theorem Λ_type_le_μ_ord : type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord :=
-  Λ_type_le_cof_μ.trans <| ord_cof_le (#μ).ord
+  Λ_type_le_μ_ord_cof.trans <| ord_cof_le (#μ).ord
 
 theorem Λ_le_cof_μ : #Λ ≤ (#μ).ord.cof := by
-  have := card_le_of_le_ord Λ_type_le_cof_μ
+  have := card_le_of_le_ord Λ_type_le_μ_ord_cof
   rwa [card_type] at this
 
 theorem Λ_le_μ : #Λ ≤ #μ := by
@@ -214,5 +217,24 @@ theorem κEquiv_lt (x y : κ) :
 theorem κEquiv_le (x y : κ) :
     x ≤ y ↔ κEquiv x ≤ κEquiv y :=
   Iff.rfl
+
+-- TODO: Unify the following two lemmas with the corresponding ones in TypeIndex somehow.
+
+theorem μ_card_Iio_lt (ν : μ) : #{ξ | ξ < ν} < #μ := by
+  have := (type_Iio_lt ν).trans_eq μ_type
+  rwa [lt_ord] at this
+
+theorem μ_card_Iic_lt (ν : μ) : #{ξ | ξ ≤ ν} < #μ := by
+  have := (type_Iic_lt ν).trans_eq μ_type
+  rwa [lt_ord] at this
+
+theorem μ_bounded_lt_of_lt_μ_ord_cof (s : Set μ) (h : #s < (#μ).ord.cof) :
+    s.Bounded (· < ·) :=
+  Ordinal.lt_cof_type (μ_type ▸ h)
+
+theorem card_lt_of_μ_bounded (s : Set μ) (h : s.Bounded (· < ·)) :
+    #s < #μ := by
+  obtain ⟨ν, hν⟩ := h
+  exact (mk_le_mk_of_subset hν).trans_lt (μ_card_Iio_lt ν)
 
 end ConNF

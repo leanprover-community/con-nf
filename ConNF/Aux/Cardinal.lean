@@ -34,6 +34,18 @@ theorem mul_le_of_le {a b c : Cardinal} (hc : ℵ₀ ≤ c) (h1 : a ≤ c) (h2 :
   rw [max_le_iff, max_le_iff]
   exact ⟨⟨h1, h2⟩, hc⟩
 
+theorem mk_biUnion_le_of_le {α β : Type _} {s : Set α} {f : ∀ x ∈ s, Set β}
+    (c : Cardinal) (h : ∀ (x : α) (h : x ∈ s), #(f x h) ≤ c) :
+    #(⋃ (x : α) (h : x ∈ s), f x h) ≤ #s * c := by
+  rw [Set.biUnion_eq_iUnion]
+  apply (mk_iUnion_le _).trans
+  refine mul_le_mul le_rfl ?_ (zero_le _) (zero_le _)
+  obtain hs | hs := isEmpty_or_nonempty s
+  · simp only [ciSup_of_empty, bot_eq_zero', zero_le]
+  · apply ciSup_le
+    intro x
+    exact h x x.prop
+
 theorem lift_isRegular (c : Cardinal.{u}) (h : IsRegular c) : IsRegular (lift.{v} c) := by
   constructor
   · rw [← lift_aleph0.{v, u}, lift_le]
@@ -49,6 +61,13 @@ theorem mk_ne_zero_iff_nonempty {α : Type _} (s : Set α) :
     #s ≠ 0 ↔ s.Nonempty := by
   rw [mk_ne_zero_iff]
   exact Set.nonempty_coe_sort
+
+theorem compl_nonempty_of_mk_lt {α : Type _} {s : Set α} (h : #s < #α) : sᶜ.Nonempty := by
+  rw [← mk_ne_zero_iff_nonempty]
+  intro h'
+  have := mk_sum_compl s
+  rw [h', add_zero] at this
+  exact h.ne this
 
 theorem mk_pow_le_of_mk_lt_ord_cof {α β : Type _}
     (hα : (#α).IsStrongLimit) (hβ : #β < (#α).ord.cof) :
