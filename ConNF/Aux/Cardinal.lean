@@ -7,6 +7,7 @@ namespace Function
 
 open Cardinal
 
+/-- An alternate spelling of `Function.graph`, useful in proving inequalities of cardinals. -/
 def graph' {α β : Type _} (f : α → β) : Set (α × β) :=
   {(x, y) | y = f x}
 
@@ -27,6 +28,11 @@ theorem card_graph'_eq {α β : Type _} (f : α → β) : #(f.graph') = #α := b
 end Function
 
 namespace Cardinal
+
+theorem mul_le_of_le {a b c : Cardinal} (hc : ℵ₀ ≤ c) (h1 : a ≤ c) (h2 : b ≤ c) : a * b ≤ c := by
+  apply (mul_le_max a b).trans
+  rw [max_le_iff, max_le_iff]
+  exact ⟨⟨h1, h2⟩, hc⟩
 
 theorem lift_isRegular (c : Cardinal.{u}) (h : IsRegular c) : IsRegular (lift.{v} c) := by
   constructor

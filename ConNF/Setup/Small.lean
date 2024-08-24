@@ -1,3 +1,4 @@
+import ConNF.Aux.Rel
 import ConNF.Aux.Set
 import ConNF.Setup.Params
 
@@ -13,8 +14,7 @@ sets.
 * `ConNF.Near`: Two sets are *near* if their symmetric difference is small.
 -/
 
-noncomputable section
-universe u
+universe u v
 
 open Cardinal Set
 open scoped symmDiff
@@ -80,6 +80,21 @@ theorem Small.image (f : α → β) : Small s → Small (f '' s) :=
 theorem Small.preimage (f : β → α) (h : f.Injective) : Small s → Small (f ⁻¹' s) :=
   (mk_preimage_of_injective f s h).trans_lt
 
+theorem κ_le_of_not_small (h : ¬Small s) : #κ ≤ #s := by
+  rwa [Small, not_lt] at h
+
+theorem iio_small (i : κ) : Small {j | j < i} := by
+  have := Ordinal.type_Iio_lt i
+  rwa [κ_type, lt_ord, Ordinal.card_type] at this
+
+theorem iic_small (i : κ) : Small {j | j ≤ i} := by
+  have := Ordinal.type_Iic_lt i
+  rwa [κ_type, lt_ord, Ordinal.card_type] at this
+
+/-!
+## Cardinality bounds on collections of small sets
+-/
+
 /-- The amount of small subsets of `α` is bounded below by the cardinality of `α`. -/
 theorem card_le_card_small (α : Type _) : #α ≤ #{s : Set α | Small s} := by
   apply mk_le_of_injective (f := λ x ↦ ⟨{x}, small_singleton x⟩)
@@ -102,8 +117,40 @@ theorem card_small_eq (h : #α = #μ) : #{s : Set α | Small s} = #μ := by
   · exact card_small_le h.le
   · exact h.symm.trans_le <| card_le_card_small α
 
-theorem κ_le_of_not_small (h : ¬Small s) : #κ ≤ #s := by
-  rwa [Small, not_lt] at h
+/-!
+## Small relations
+-/
+
+theorem small_codom_of_small_dom {r : Rel α β} (h : r.Coinjective) (h' : Small r.dom) :
+    Small r.codom := by
+  have := small_biUnion h' (f := λ x _ ↦ {y | r x y}) ?_
+  · apply this.mono
+    rintro y ⟨x, hxy⟩
+    simp only [mem_iUnion]
+    exact ⟨x, ⟨y, hxy⟩, hxy⟩
+  · intro x hx
+    apply small_of_subsingleton
+    intro y hy z hz
+    exact h.coinjective hy hz
+
+theorem small_graph' {r : Rel α β} (h₁ : Small r.dom) (h₂ : Small r.codom) :
+    Small r.graph' := by
+  have := small_biUnion h₁ (f := λ x _ ↦ {z : α × β | z.1 = x ∧ r x z.2}) ?_
+  · apply this.mono
+    rintro z hz
+    simp only [mem_iUnion]
+    exact ⟨z.1, ⟨z.2, hz⟩, rfl, hz⟩
+  · intro x hx
+    apply (h₂.image (λ y ↦ (x, y))).mono
+    rintro ⟨x', y⟩ hy
+    rw [mem_setOf_eq] at hy
+    cases hy.1
+    rw [mem_image]
+    exact ⟨y, ⟨x', hy.2⟩, rfl⟩
+
+/-!
+## Nearness
+-/
 
 /-- Two sets are called *near* if their symmetric difference is small. -/
 def Near (s t : Set α) : Prop :=

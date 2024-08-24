@@ -207,4 +207,12 @@ theorem κEquiv_sub (x y : κ) :
   rw [κ_sub_def, Equiv.apply_symm_apply]
   rfl
 
+theorem κEquiv_lt (x y : κ) :
+    x < y ↔ κEquiv x < κEquiv y :=
+  Iff.rfl
+
+theorem κEquiv_le (x y : κ) :
+    x ≤ y ↔ κEquiv x ≤ κEquiv y :=
+  Iff.rfl
+
 end ConNF
