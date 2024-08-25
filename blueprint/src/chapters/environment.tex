@@ -394,6 +394,8 @@ When we quantify over structural permutations in this paper, it should be formal
 \begin{definition}[inflexible path]
   \label{def:InflexiblePath}
   \uses{prop:fuzz}
+  \lean{ConNF.InflexiblePath}
+  \leanok
   Let \( \alpha \) be a proper type index.
   Suppose that we have model data for all type indices \( \beta \leq \alpha \) and position functions for \( \Tang_\beta \) for all \( \beta < \alpha \).
   For any type index \( \beta \leq \alpha \), a \emph{inflexible \( \beta \)-path} is a tuple \( I = (\gamma, \delta, \varepsilon, A) \) where \( \delta, \varepsilon < \gamma \) are distinct, the index \( \varepsilon \) is proper, and \( A : \beta \tpath \gamma \).
@@ -403,6 +405,8 @@ When we quantify over structural permutations in this paper, it should be formal
 \begin{definition}[typed near-litter]
   \label{def:TypedNearLitter}
   \uses{def:ModelData,def:Tangle,prop:BasePositions}
+  \lean{ConNF.TypedNearLitters}
+  \leanok
   Let \( \alpha \) be a proper type index with model data, and suppose that \( \Tang_\alpha \) has a position function.
   We say that \( \alpha \) has \emph{typed near-litters} if there is an embedding \( \typed_\alpha : \NearLitter \to \TSet_\alpha \) such that
   \begin{itemize}
@@ -414,6 +418,8 @@ When we quantify over structural permutations in this paper, it should be formal
 \begin{definition}[coherent data]
   \label{def:CoherentData}
   \uses{def:TypedNearLitter,def:InflexiblePath}
+  \lean{ConNF.CoherentData}
+  \leanok
   Let \( \alpha \) be a proper type index.
   Suppose that we have model data for all type indices \( \beta \leq \alpha \), position functions for \( \Tang_\beta \) for all \( \beta < \alpha \), and typed near-litters for all \( \beta < \alpha \).
   We say that the model data is \emph{coherent} below level \( \alpha \) if the following hold.

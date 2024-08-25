@@ -46,7 +46,7 @@ def coeEquiv {α : Λ} :
 
 /-- Extensionality for structural sets at proper type indices. If two structural sets have the same
 extensions at every lower type index, then they are the same. -/
-theorem coe_ext_iff {α : Λ} {x y : StrSet α} :
+theorem coe_ext_iff' {α : Λ} {x y : StrSet α} :
     x = y ↔ ∀ β hβ z, z ∈ coeEquiv x β hβ ↔ z ∈ coeEquiv y β hβ := by
   constructor
   · rintro rfl
@@ -93,5 +93,26 @@ theorem strPerm_smul_coe {α : Λ} (π : StrPerm α) (x : StrSet α) :
   rfl
 
 end StrSet
+
+/-!
+## Notation for typed membership
+-/
+
+class TypedMem (X Y : Type _) (β α : outParam TypeIndex) where
+  typedMem : β < α → X → Y → Prop
+
+notation:50 x:50 " ∈[" h:50 "] " y:50 => TypedMem.typedMem h x y
+
+instance {β α : TypeIndex} : TypedMem (StrSet β) (StrSet α) β α where
+  typedMem h x y :=
+    match α with
+    | ⊥ => (not_lt_bot h).elim
+    | (α : Λ) => x ∈ StrSet.coeEquiv y β h
+
+/-- Extensionality for structural sets at proper type indices. If two structural sets have the same
+extensions at every lower type index, then they are the same. -/
+theorem StrSet.coe_ext_iff {α : Λ} {x y : StrSet α} :
+    x = y ↔ ∀ β : TypeIndex, ∀ hβ : β < α, ∀ z : StrSet β, z ∈[hβ] x ↔ z ∈[hβ] y :=
+  StrSet.coe_ext_iff'
 
 end ConNF

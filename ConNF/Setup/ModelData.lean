@@ -44,16 +44,80 @@ structure Support.Supports {X : Type _} {α : TypeIndex} [PreModelData α] [MulA
   nearLitters_eq_empty_of_bot : α = ⊥ → Sᴺ = .empty
 
 class ModelData (α : TypeIndex) extends PreModelData α where
+  tSetForget_injective : Function.Injective tSetForget
+  allPermForget_injective : Function.Injective allPermForget
   allPermForget_one : (1 : AllPerm)ᵁ = 1
   allPermForget_mul (ρ₁ ρ₂ : AllPerm) : (ρ₁ * ρ₂)ᵁ = ρ₁ᵁ * ρ₂ᵁ
   smul_forget (ρ : AllPerm) (x : TSet) : (ρ • x)ᵁ = ρᵁ • xᵁ
   exists_support (x : TSet) : ∃ S : Support α, S.Supports x
+
+export ModelData (tSetForget_injective allPermForget_injective allPermForget_one allPermForget_mul
+  smul_forget exists_support)
+
+attribute [simp] allPermForget_one allPermForget_mul smul_forget
+
+@[simp]
+theorem allPermForget_inv {α : TypeIndex} [ModelData α] (ρ : AllPerm α) : ρ⁻¹ᵁ = ρᵁ⁻¹ := by
+  rw [eq_inv_iff_mul_eq_one, ← allPermForget_mul, inv_mul_cancel, allPermForget_one]
+
+theorem Support.Supports.smul_eq_smul {X : Type _} {α : TypeIndex}
+    [ModelData α] [MulAction (AllPerm α) X]
+    {S : Support α} {x : X} (h : S.Supports x) {ρ₁ ρ₂ : AllPerm α} (hρ : ρ₁ᵁ • S = ρ₂ᵁ • S) :
+    ρ₁ • x = ρ₂ • x := by
+  have := h.supports (ρ₂⁻¹ * ρ₁) ?_
+  · rwa [mul_smul, inv_smul_eq_iff] at this
+  · rwa [allPermForget_mul, mul_smul, allPermForget_inv, inv_smul_eq_iff]
+
+theorem Support.Supports.smul {X : Type _} {α : TypeIndex}
+    [ModelData α] [MulAction (AllPerm α) X]
+    {S : Support α} {x : X} (h : S.Supports x) (ρ : AllPerm α) :
+    (ρᵁ • S).Supports (ρ • x) := by
+  constructor
+  · intro σ hσ
+    rw [smul_smul, ← allPermForget_mul] at hσ
+    have := h.smul_eq_smul hσ
+    rwa [mul_smul] at this
+  · intro h'
+    rw [smul_nearLitters, h.nearLitters_eq_empty_of_bot h']
+    rfl
+
+instance {β α : TypeIndex} [ModelData β] [ModelData α] : TypedMem (TSet β) (TSet α) β α where
+  typedMem h y x := yᵁ ∈[h] xᵁ
 
 @[ext]
 structure Tangle (α : TypeIndex) [ModelData α] where
   set : TSet α
   support : Support α
   support_supports : support.Supports set
+
+instance {α : TypeIndex} [ModelData α] : SMul (AllPerm α) (Tangle α) where
+  smul ρ t := ⟨ρ • t.set, ρᵁ • t.support, t.support_supports.smul ρ⟩
+
+@[simp]
+theorem Tangle.smul_set {α : TypeIndex} [ModelData α] (ρ : AllPerm α) (t : Tangle α) :
+    (ρ • t).set = ρ • t.set :=
+  rfl
+
+@[simp]
+theorem Tangle.smul_support {α : TypeIndex} [ModelData α] (ρ : AllPerm α) (t : Tangle α) :
+    (ρ • t).support = ρᵁ • t.support :=
+  rfl
+
+theorem Tangle.smul_eq_smul {α : TypeIndex} [ModelData α] {ρ₁ ρ₂ : AllPerm α} {t : Tangle α}
+    (h : ρ₁ᵁ • t.support = ρ₂ᵁ • t.support) :
+    ρ₁ • t = ρ₂ • t :=
+  Tangle.ext (t.support_supports.smul_eq_smul h) h
+
+instance {α : TypeIndex} [ModelData α] : MulAction (AllPerm α) (Tangle α) where
+  one_smul t := by
+    ext : 1
+    · rw [Tangle.smul_set, one_smul]
+    · rw [Tangle.smul_support, allPermForget_one, one_smul]
+  mul_smul ρ₁ ρ₂ t := by
+    ext : 1
+    · rw [Tangle.smul_set, Tangle.smul_set, Tangle.smul_set, mul_smul]
+    · rw [Tangle.smul_support, Tangle.smul_support, Tangle.smul_support,
+        allPermForget_mul, mul_smul]
 
 /-!
 ## Criteria for supports
@@ -98,6 +162,8 @@ def botPreModelData : PreModelData ⊥ where
   allPermForget ρ _ := ρ
 
 def botModelData : ModelData ⊥ where
+  tSetForget_injective := StrSet.botEquiv.symm.injective
+  allPermForget_injective _ _ h := congr_fun h Path.nil
   allPermForget_one := rfl
   allPermForget_mul _ _ := rfl
   smul_forget ρ x := by

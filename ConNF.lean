@@ -7,9 +7,11 @@ import ConNF.Aux.WellOrder
 import ConNF.Setup.Atom
 import ConNF.Setup.BasePerm
 import ConNF.Setup.BasePositions
+import ConNF.Setup.CoherentData
 import ConNF.Setup.Deny
 import ConNF.Setup.Enumeration
 import ConNF.Setup.Fuzz
+import ConNF.Setup.Level
 import ConNF.Setup.Litter
 import ConNF.Setup.ModelData
 import ConNF.Setup.NearLitter

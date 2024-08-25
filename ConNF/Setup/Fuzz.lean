@@ -35,4 +35,14 @@ class TypedNearLitters {α : Λ} [ModelData α] [Position (Tangle α)] where
   typed_injective : Function.Injective typed
   pos_le_pos_of_typed (N : NearLitter) (t : Tangle α) : t.set = typed N → pos N ≤ pos t
 
+@[ext]
+structure InflexiblePath (β : TypeIndex) where
+  γ : TypeIndex
+  δ : TypeIndex
+  ε : Λ
+  hδ : δ < γ
+  hε : ε < γ
+  hδε : δ ≠ ε
+  A : β ↝ γ
+
 end ConNF
