@@ -64,16 +64,16 @@ def Params.minimal : Params where
     exact (omega_le_of_isLimit (ord_aleph_isLimit 1)).trans this
 
 def Params.inaccessible.{v} : Params where
-  Λ := (Cardinal.univ.{v, v + 1}).ord.out.α
+  Λ := (Cardinal.univ.{v, v + 1}).ord.toType
   κ := ULift.{v + 1, v} (aleph 1).out
   μ := Cardinal.univ.{v, v + 1}.out
   Λ_nonempty := by
-    rw [ord_univ, out_nonempty_iff_ne_zero, Ordinal.univ_id]
+    rw [ord_univ, toType_nonempty_iff_ne_zero, Ordinal.univ_id]
     simp only [ne_eq, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty, not_false_eq_true]
   Λ_noMaxOrder := by
     apply noMaxOrder_of_isLimit
-    change (type (Cardinal.univ.{v, v + 1}).ord.out.r).IsLimit
-    rw [type_out]
+    change (type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop)).IsLimit
+    rw [type_lt]
     apply ord_isLimit
     exact univ_inaccessible.1.le
   aleph0_lt_κ := by
@@ -93,8 +93,8 @@ def Params.inaccessible.{v} : Params where
     rw [mk_uLift, mk_out, mk_out, univ_inaccessible.2.1.cof_eq]
     exact (lift_lt_univ _).le
   Λ_type_le_μ_ord_cof := by
-    change type (Cardinal.univ.{v, v + 1}).ord.out.r ≤ _
-    rw [type_out, mk_out, univ_inaccessible.2.1.cof_eq]
+    change type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop) ≤ _
+    rw [type_lt, mk_out, univ_inaccessible.2.1.cof_eq]
 
 export Params (Λ κ μ aleph0_lt_κ κ_isRegular μ_isStrongLimit κ_lt_μ κ_le_μ_ord_cof Λ_type_le_μ_ord_cof)
 

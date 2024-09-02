@@ -43,7 +43,7 @@ theorem isLimit_of_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellO
   constructor
   · simp only [ne_eq, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty, not_false_eq_true]
   · intro o ho
-    obtain ⟨x, hx⟩ := h.exists_gt (enum ((· < ·) : α → α → Prop) o ho)
+    obtain ⟨x, hx⟩ := h.exists_gt (enum ((· < ·) : α → α → Prop) ⟨o, ho⟩)
     refine lt_of_le_of_lt ?_ (typein_lt_type ((· < ·) : α → α → Prop) x)
     rw [← typein_lt_typein ((· < ·) : α → α → Prop), typein_enum] at hx
     rwa [Order.succ_le_iff]
@@ -102,18 +102,19 @@ theorem type_Iic_lt {α : Type u} [LtWellOrder α] [NoMaxOrder α] (x : α) :
 -/
 
 theorem card_Iio (o : Ordinal.{u}) : #(Set.Iio o) = Cardinal.lift.{u + 1} o.card := by
-  rw [Cardinal.eq.mpr ⟨o.enumIsoOut.toEquiv.trans Equiv.ulift.{u + 1, u}.symm⟩,
-    mk_uLift, mk_ordinal_out, lift_card]
+  rw [Cardinal.eq.mpr ⟨o.enumIsoToType.toEquiv.trans Equiv.ulift.{u + 1, u}.symm⟩,
+    mk_uLift, mk_toType, lift_card]
 
 instance {o : Ordinal.{u}} : LtWellOrder (Set.Iio o) where
 
 theorem type_Iio (o : Ordinal.{u}) :
     type ((· < ·) : Set.Iio o → Set.Iio o → Prop) = lift.{u + 1} o := by
   have := Ordinal.lift_type_eq.{u + 1, u, u + 1}
-    (r := ((· < ·) : Set.Iio o → Set.Iio o → Prop)) (s := o.out.r)
-  rw [lift_id, type_out] at this
+    (r := ((· < ·) : Set.Iio o → Set.Iio o → Prop))
+    (s := ((· < ·) : o.toType → o.toType → Prop))
+  rw [lift_id, type_lt] at this
   rw [this]
-  exact ⟨o.enumIsoOut.toRelIsoLT⟩
+  exact ⟨o.enumIsoToType.toRelIsoLT⟩
 
 variable {c : Cardinal.{u}} (h : ℵ₀ ≤ c)
 

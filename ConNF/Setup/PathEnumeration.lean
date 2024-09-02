@@ -8,7 +8,7 @@ In this file, we provide extra features to `Enumeration`s that take values of th
 
 ## Main declarations
 
-* `ConNF.ext_path`: An extensionality principle for such `Enumeration`s.
+* `ConNF.Enumeration.ext_path`: An extensionality principle for such `Enumeration`s.
 -/
 
 noncomputable section

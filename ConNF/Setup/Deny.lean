@@ -18,10 +18,10 @@ open Cardinal Ordinal
 
 namespace ConNF
 
-def initialEquiv {X : Type _} : X ≃ (#X).ord.out.α := by
+def initialEquiv {X : Type _} : X ≃ (#X).ord.toType := by
   apply Nonempty.some
   rw [← Cardinal.eq]
-  rw [mk_ordinal_out, card_ord]
+  rw [mk_toType, card_ord]
 
 /-- Endow a type `X` with a well-order of smallest possible order type. -/
 def initialWellOrder (X : Type _) : LtWellOrder X :=
