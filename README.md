@@ -17,6 +17,12 @@ lake exe cache get
 ```
 The code can then be viewed in an editor such as Visual Studio Code, or compiled directly from the command-line using `lake build`.
 
+## License
+
+All files *not under the `Old/` subdirectory* are dual-licensed under the [Apache 2.0 license](https://opensource.org/license/apache-2-0/) and the [MIT license](https://opensource.org/license/MIT/).
+
+Files under the `Old/` subdirectory were produced partly thanks to funding from the University of Cambridge, Queens' College, and the Wes and Margaret foundation, and are *not* released under any open-source license.
+
 ## Objective
 
 It is known that New Foundations is consistent if and only if a theory called Tangled Type Theory (TTT) is consistent (see theorem 1 [here](https://randall-holmes.github.io/Papers/tangled.pdf)).
