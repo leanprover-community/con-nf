@@ -228,7 +228,6 @@ theorem typical_image_sublitter (ψ : BaseApprox) {L₁ L₂ : Litter} (h : ψ�
     · convert typical.mk L₁ L₂ h ((nearLitterEquiv (ψ.sublitter L₂)).symm ⟨a, ha⟩) using 1
       rw [Equiv.apply_symm_apply]
 
--- TODO: In the blueprint we required `s ⊆ ψᴬ.dom`.
 theorem image_near_of_near (ψ : BaseApprox) (s : Set Atom)
     {L₁ L₂ : Litter} (hL : ψᴸ L₁ L₂) (hsL : s ~ L₁ᴬ) :
     ψᴬ.image s ~ L₂ᴬ := by
@@ -249,7 +248,61 @@ theorem image_near_of_near (ψ : BaseApprox) (s : Set Atom)
     _ ~ L₂ᴬ := (ψ.sublitter L₂).atoms_near_litter
 
 def nearLitters (ψ : BaseApprox) : Rel NearLitter NearLitter :=
-  λ N₁ N₂ ↦ ψᴸ N₁ᴸ N₂ᴸ ∧ ψᴬ.image N₁ᴬ = N₂ᴬ
+  λ N₁ N₂ ↦ ψᴸ N₁ᴸ N₂ᴸ ∧ N₁ᴬ ⊆ ψᴬ.dom ∧ ψᴬ.image N₁ᴬ = N₂ᴬ
+
+instance : SuperN BaseApprox (Rel NearLitter NearLitter) where
+  superN := nearLitters
+
+theorem nearLitters_def (ψ : BaseApprox) {N₁ N₂ : NearLitter} :
+    ψᴺ N₁ N₂ ↔ ψᴸ N₁ᴸ N₂ᴸ ∧ N₁ᴬ ⊆ ψᴬ.dom ∧ ψᴬ.image N₁ᴬ = N₂ᴬ :=
+  Iff.rfl
+
+@[simp]
+theorem inv_nearLitters (ψ : BaseApprox) : ψ⁻¹ᴺ = ψᴺ.inv := by
+  ext N₁ N₂
+  rw [inv_def, nearLitters_def, nearLitters_def, inv_litters, inv_def, inv_atoms,
+    and_congr_right_iff, inv_image]
+  intro
+  constructor
+  · rintro ⟨h₁, h₂⟩
+    have := h₂.symm.trans_subset (ψᴬ.preimage_subset_dom N₁ᴬ)
+    exact ⟨this, (ψ.atoms_permutative.preimage_eq_iff_image_eq h₁ this).mp h₂⟩
+  · rintro ⟨h₁, h₂⟩
+    have := h₂.symm.trans_subset (ψᴬ.image_subset_codom N₂ᴬ)
+    exact ⟨this, (ψ.atoms_permutative.preimage_eq_iff_image_eq this h₁).mpr h₂⟩
+
+theorem atoms_subset_dom_of_nearLitters_left {ψ : BaseApprox} {N₁ N₂ : NearLitter} (h : ψᴺ N₁ N₂) :
+    N₁ᴬ ⊆ ψᴬ.dom :=
+  h.2.1
+
+theorem atoms_subset_dom_of_nearLitters_right {ψ : BaseApprox} {N₁ N₂ : NearLitter} (h : ψᴺ N₁ N₂) :
+    N₂ᴬ ⊆ ψᴬ.dom := by
+  have := atoms_subset_dom_of_nearLitters_left (show ψ⁻¹ᴺ N₂ N₁ from ψ.inv_nearLitters ▸ h)
+  rwa [inv_atoms, inv_dom, ψ.atoms_permutative.codom_eq_dom] at this
+
+theorem nearLitters_injective (ψ : BaseApprox) : ψᴺ.Injective := by
+  constructor
+  intro N₁ N₂ N₃ h₁ h₂
+  rw [nearLitters_def] at h₁ h₂
+  apply NearLitter.ext
+  apply ψ.atoms_permutative.image_injective h₁.2.1 h₂.2.1
+  exact h₁.2.2.trans h₂.2.2.symm
+
+theorem nearLitters_coinjective (ψ : BaseApprox) : ψᴺ.Coinjective := by
+  have := ψ⁻¹.nearLitters_injective
+  rwa [inv_nearLitters, inv_injective_iff] at this
+
+theorem nearLitters_codom_subset_dom (ψ : BaseApprox) : ψᴺ.codom ⊆ ψᴺ.dom := by
+  rintro N₂ ⟨N₁, h⟩
+  obtain ⟨L₃, hL₃⟩ := ψ.litters_permutative.mem_dom h.1
+  use ⟨L₃, ψᴬ.image N₂ᴬ, ψ.image_near_of_near N₂ᴬ hL₃ N₂.atoms_near_litter⟩
+  exact ⟨hL₃, atoms_subset_dom_of_nearLitters_right h, rfl⟩
+
+theorem nearLitters_permutative (ψ : BaseApprox) : ψᴺ.Permutative := by
+  refine ⟨⟨ψ.nearLitters_injective, ψ.nearLitters_coinjective⟩,
+    ⟨subset_antisymm ψ.nearLitters_codom_subset_dom ?_⟩⟩
+  have := ψ⁻¹.nearLitters_codom_subset_dom
+  rwa [inv_nearLitters] at this
 
 end BaseApprox
 

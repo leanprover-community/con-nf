@@ -76,7 +76,7 @@ theorem codomEqDom_iff' (r : Rel α α) :
     · intro ⟨y, hxy⟩
       exact h₂ x y hxy
 
-theorem OneOne.inv {r : Rel α α} (h : r.OneOne) : r.inv.OneOne :=
+theorem OneOne.inv {r : Rel α β} (h : r.OneOne) : r.inv.OneOne :=
   ⟨⟨h.coinjective⟩, ⟨h.injective⟩⟩
 
 @[simp]
@@ -98,6 +98,59 @@ theorem inv_dom {r : Rel α β} :
 theorem inv_codom {r : Rel α β} :
     r.inv.codom = r.dom :=
   rfl
+
+@[simp]
+theorem inv_image {r : Rel α β} {s : Set β} :
+    r.inv.image s = r.preimage s :=
+  rfl
+
+@[simp]
+theorem inv_preimage {r : Rel α β} {s : Set α} :
+    r.inv.preimage s = r.image s :=
+  rfl
+
+theorem Injective.image_injective {r : Rel α β} (h : r.Injective) {s t : Set α}
+    (hs : s ⊆ r.dom) (ht : t ⊆ r.dom) (hst : r.image s = r.image t) : s = t := by
+  rw [Set.ext_iff] at hst ⊢
+  intro x
+  constructor
+  · intro hx
+    obtain ⟨y, hxy⟩ := hs hx
+    obtain ⟨z, hz, hzy⟩ := (hst y).mp ⟨x, hx, hxy⟩
+    cases h.injective hxy hzy
+    exact hz
+  · intro hx
+    obtain ⟨y, hxy⟩ := ht hx
+    obtain ⟨z, hz, hzy⟩ := (hst y).mpr ⟨x, hx, hxy⟩
+    cases h.injective hxy hzy
+    exact hz
+
+theorem subset_image_of_preimage_subset {r : Rel α β} {s : Set β} (hs : s ⊆ r.codom) (t : Set α) :
+    r.preimage s ⊆ t → s ⊆ r.image t := by
+  intro hst y hy
+  obtain ⟨x, hx⟩ := hs hy
+  exact ⟨x, hst ⟨y, hy, hx⟩, hx⟩
+
+theorem Injective.preimage_subset_of_subset_image {r : Rel α β} (h : r.Injective)
+    (s : Set β) (t : Set α) :
+    s ⊆ r.image t → r.preimage s ⊆ t := by
+  rintro hst x ⟨y, hy, hxy⟩
+  obtain ⟨z, hz, hzy⟩ := hst hy
+  cases h.injective hzy hxy
+  exact hz
+
+theorem Injective.preimage_subset_iff_subset_image {r : Rel α β} (h : r.Injective)
+    (s : Set β) (hs : s ⊆ r.codom) (t : Set α) :
+    r.preimage s ⊆ t ↔ s ⊆ r.image t :=
+  ⟨subset_image_of_preimage_subset hs t, preimage_subset_of_subset_image h s t⟩
+
+theorem OneOne.preimage_eq_iff_image_eq {r : Rel α β} (h : r.OneOne)
+    {s : Set β} (hs : s ⊆ r.codom) {t : Set α} (ht : t ⊆ r.dom) :
+    r.preimage s = t ↔ r.image t = s := by
+  have h₁ := h.preimage_subset_iff_subset_image s hs t
+  have h₂ := h.inv.preimage_subset_iff_subset_image t ht s
+  rw [preimage_inv, inv_image] at h₂
+  rw [subset_antisymm_iff, subset_antisymm_iff, h₁, h₂, and_comm]
 
 theorem CodomEqDom.inv {r : Rel α α} (h : r.CodomEqDom) : r.inv.CodomEqDom := by
   rw [codomEqDom_iff] at h ⊢
@@ -138,6 +191,15 @@ theorem image_dom {r : Rel α β} :
 theorem preimage_codom {r : Rel α β} :
     r.preimage r.codom = r.dom :=
   image_dom
+
+theorem preimage_subset_dom (r : Rel α β) (t : Set β) :
+    r.preimage t ⊆ r.dom := by
+  rintro x ⟨y, _, h⟩
+  exact ⟨y, h⟩
+
+theorem image_subset_codom (r : Rel α β) (s : Set α) :
+    r.image s ⊆ r.codom :=
+  r.inv.preimage_subset_dom s
 
 theorem image_empty_of_disjoint_dom {r : Rel α β} {s : Set α} (h : Disjoint r.dom s) :
     r.image s = ∅ := by

@@ -2,6 +2,8 @@
 \begin{definition}[base approximation]
   \label{def:BaseApprox}
   \uses{def:NearLitter}
+  \lean{ConNF.BaseApprox}
+  \leanok
   A \emph{base approximation} is a pair \( \psi = (\psi^{E\Atom}, \psi^\Litter) \) such that \( \psi^{E\Atom} \) and \( \psi^\Litter \) are permutative relations of atoms and litters respectively (\cref{def:relation_props}), and for each litter \( L \), the set
   \[ \LS(L) \cap \coim \psi^{E\Atom} \]
   is small.
@@ -16,6 +18,8 @@
 \begin{definition}[atom graph of an approximation]
   \uses{def:BaseApprox}
   \label{def:atomGraph}
+  \lean{ConNF.BaseApprox.atoms}
+  \leanok
   The \emph{typical atom graph} of \( \psi \) is the relation \( \psi^{T\Atom} \) given by the following constructor.
   If \( (L_1, L_2) \in \psi^\Litter \), then
   \[ (h_{(L_1)_\psi}(i), h_{(L_2)_\psi}(i)) \in \psi^{T\Atom} \]
@@ -26,18 +30,24 @@
 \begin{proposition}
   \uses{def:atomGraph}
   \label{prop:atomGraph_inv}
+  \lean{ConNF.BaseApprox.instInv}
+  \leanok
   \( (\psi^{T\Atom})^{-1} = (\psi^{-1})^{T\Atom} \) and hence \( (\psi^\Atom)^{-1} = (\psi^{-1})^\Atom \).
 \end{proposition}
 \begin{proof}
+  \leanok
   This follows directly from the fact that \( L_\psi = L_{\psi^{-1}} \) for any litter \( L \).
 \end{proof}
 \begin{proposition}
   \uses{def:atomGraph}
   \label{prop:atomGraph_permutative}
+  \lean{ConNF.BaseApprox.typical_permutative,ConNF.BaseApprox.atoms_permutative}
+  \leanok
   The graphs \( \psi^{T\Atom} \) and \( \psi^\Atom \) are permutative.
 \end{proposition}
 \begin{proof}
   \uses{prop:atomGraph_inv}
+  \leanok
   The typical atom graph is injective, because the equation \( h_{L_\psi}(i)^\circ = L \) can be used to establish the the parameters of the relevant \( h \) maps coincide.
   Furthermore, we can use the fact that \( \psi^\Litter \) has equal image and coimage to produce images of any image element of this relation.
   We then appeal to symmetry using \cref{prop:atomGraph_inv} to conclude that \( \psi^{T\Atom} \) is permutative.
@@ -69,15 +79,20 @@
 \begin{definition}[near-litter graph of an approximation]
   \uses{def:atomGraph}
   \label{def:nearLitterGraph}
+  \lean{ConNF.BaseApprox.nearLitters}
+  \leanok
   The \emph{near-litter graph} of \( \psi \) is the relation \( \psi^\NearLitter \) given by setting \( (N_1, N_2) \in \psi^\NearLitter \) if and only if \( (N_1^\circ, N_2^\circ) \in \psi^\Litter \), \( N_1 \) and \( N_2 \) are subsets of \( \coim \psi^\Atom \), and the image of \( \psi^\Atom \) on \( N_1 \) is \( N_2 \) (or equivalently, by \cref{prop:relation_results}, the coimage of \( \psi^\Atom \) on \( N_2 \) is \( N_1 \)).
 \end{definition}
 \begin{proposition}
   \uses{def:nearLitterGraph}
   \label{prop:approx_near}
+  \lean{ConNF.BaseApprox.image_near_of_near}
+  \leanok
   Let \( s \) be a set of atoms near \( \LS(L) \) for some litter \( L \).
-  If \( s \subseteq \coim \psi^\Atom \) and \( (L, L') \in \psi^\Litter \), then the image of \( \psi^\Atom \) on \( s \) is near \( \LS(L') \).
+  If \( (L, L') \in \psi^\Litter \), then the image of \( \psi^\Atom \) on \( s \) is near \( \LS(L') \).
 \end{proposition}
 \begin{proof}
+  \leanok
   We calculate
   \begin{align*}
     \im \psi^\Atom|_s
@@ -89,15 +104,17 @@
     &= L'_\psi \\
     &\near \LS(L')
   \end{align*}
-  Many of these equalities should be their own lemmas.
 \end{proof}
 \begin{proposition}
   \uses{def:nearLitterGraph}
   \label{prop:nearLitterGraph_permutative}
+  \lean{ConNF.BaseApprox.inv_nearLitters,ConNF.BaseApprox.nearLitters_permutative}
+  \leanok
   \( (\psi^{-1})^\NearLitter = (\psi^\NearLitter)^{-1} \), and \( \psi^\NearLitter \) is permutative.
 \end{proposition}
 \begin{proof}
   \uses{prop:atomGraph_permutative,prop:approx_near}
+  \leanok
   The first part follows from \cref{prop:atomGraph_inv}.
   To show \( \psi^\NearLitter \) is permutative, it suffices to show that it is injective and that its image is contained in its coimage; then, by taking inverses, the converses will also hold.
   Suppose that \( (N_1, N_3), (N_2, N_3) \in \psi^\NearLitter \).
@@ -353,6 +370,8 @@
 \begin{definition}
   \uses{def:NearLitter}
   \label{def:Interference}
+  \lean{ConNF.Interference}
+  \leanok
   The \emph{interference} of near-litters \( N_1, N_2 \) is
   \[ \interf(N_1, N_2) = \begin{cases}
     N_1 \symmdiff N_2 & \text{if } N_1^\circ = N_2^\circ \\
