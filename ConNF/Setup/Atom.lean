@@ -94,7 +94,7 @@ theorem litter_pairwise_disjoint {L₁ L₂ : Litter} (h : L₁ ≠ L₂) : Disj
   exact h <| hx.1.symm.trans hx.2
 
 /-- If two litters are near each other, then they are equal. -/
-theorem litter_eq_of_near {L₁ L₂ : Litter} (h : Near L₁ᴬ L₂ᴬ) : L₁ = L₂ := by
+theorem litter_eq_of_near {L₁ L₂ : Litter} (h : L₁ᴬ ~ L₂ᴬ) : L₁ = L₂ := by
   obtain ⟨a, ha₁, ha₂⟩ := inter_nonempty_of_near h L₁.atoms_not_small
   exact ha₁.symm.trans ha₂
 

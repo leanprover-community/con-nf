@@ -25,7 +25,7 @@ variable [Params.{u}]
 structure NearLitter where
   litter : Litter
   atoms : Set Atom
-  atoms_near_litter' : Near atoms litterᴬ
+  atoms_near_litter' : atoms ~ litterᴬ
 
 variable {N₁ N₂ : NearLitter}
 
@@ -39,17 +39,17 @@ instance : SuperN Litter NearLitter where
   superN L := ⟨L, Lᴬ, near_rfl⟩
 
 @[simp]
-theorem NearLitter.mk_litter (L : Litter) (s : Set Atom) (h : Near s Lᴬ) :
+theorem NearLitter.mk_litter (L : Litter) (s : Set Atom) (h : s ~ Lᴬ) :
     (⟨L, s, h⟩ : NearLitter)ᴸ = L :=
   rfl
 
 @[simp]
-theorem NearLitter.mk_atoms (L : Litter) (s : Set Atom) (h : Near s Lᴬ) :
+theorem NearLitter.mk_atoms (L : Litter) (s : Set Atom) (h : s ~ Lᴬ) :
     (⟨L, s, h⟩ : NearLitter)ᴬ = s :=
   rfl
 
 theorem NearLitter.atoms_near_litter (N : NearLitter) :
-    Near Nᴬ Nᴸᴬ :=
+    Nᴬ ~ Nᴸᴬ :=
   N.atoms_near_litter'
 
 theorem NearLitter.symmDiff_small (N : NearLitter) :
@@ -64,18 +64,18 @@ theorem NearLitter.atoms_not_small (N : NearLitter) :
     ¬Small Nᴬ :=
   N.card_atoms.not_lt
 
-theorem nearLitter_litter_eq_of_near (h : Near N₁ᴬ N₂ᴬ) :
+theorem nearLitter_litter_eq_of_near (h : N₁ᴬ ~ N₂ᴬ) :
     N₁ᴸ = N₂ᴸ :=
   litter_eq_of_near <|
     near_trans (near_trans (near_symm N₁.atoms_near_litter) h) N₂.atoms_near_litter
 
 theorem near_of_litter_eq (h : N₁ᴸ = N₂ᴸ) :
-    Near N₁ᴬ N₂ᴬ :=
+    N₁ᴬ ~ N₂ᴬ :=
   near_trans N₁.atoms_near_litter (h ▸ near_symm N₂.atoms_near_litter)
 
 @[simp]
 theorem nearLitter_near_iff (N₁ N₂ : NearLitter) :
-    Near N₁ᴬ N₂ᴬ ↔ N₁ᴸ = N₂ᴸ :=
+    N₁ᴬ ~ N₂ᴬ ↔ N₁ᴸ = N₂ᴸ :=
   ⟨nearLitter_litter_eq_of_near, near_of_litter_eq⟩
 
 @[ext]
@@ -87,10 +87,10 @@ theorem NearLitter.ext (h : N₁ᴬ = N₂ᴬ) :
   subst h
   rfl
 
-theorem card_near_litter (L : Litter) : #{s | Near s Lᴬ} = #μ :=
+theorem card_near_litter (L : Litter) : #{s | s ~ Lᴬ} = #μ :=
   card_near_eq Lᴬ card_atom
 
-def nearLitterEquiv : NearLitter ≃ (L : Litter) × {s | Near s Lᴬ} where
+def nearLitterEquiv : NearLitter ≃ (L : Litter) × {s | s ~ Lᴬ} where
   toFun N := ⟨Nᴸ, Nᴬ, N.atoms_near_litter⟩
   invFun N := ⟨N.1, N.2.1, N.2.2⟩
   left_inv _ := rfl

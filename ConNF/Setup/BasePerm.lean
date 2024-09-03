@@ -24,7 +24,7 @@ variable [Params.{u}]
 structure BasePerm where
   atoms : Perm Atom
   litters : Perm Litter
-  apply_near_apply (s : Set Atom) (L : Litter) : Near s Lᴬ → Near (atoms '' s) (litters L)ᴬ
+  apply_near_apply (s : Set Atom) (L : Litter) : s ~ Lᴬ → atoms '' s ~ (litters L)ᴬ
 
 namespace BasePerm
 
@@ -41,7 +41,7 @@ instance : SMul BasePerm Litter where
   smul π L := πᴸ L
 
 theorem smul_near_smul (π : BasePerm) (s : Set Atom) (L : Litter) :
-    Near s Lᴬ → Near (π • s) (π • L)ᴬ :=
+    s ~ Lᴬ → π • s ~ (π • L)ᴬ :=
   π.apply_near_apply s L
 
 instance : SMul BasePerm NearLitter where
@@ -103,7 +103,7 @@ theorem mul_litter (π₁ π₂ : BasePerm) :
   rfl
 
 theorem inv_smul_near_inv_smul (π : BasePerm) (s : Set Atom) (L : Litter) :
-    Near s Lᴬ → Near (πᴬ⁻¹ • s) (πᴸ⁻¹ • L)ᴬ := by
+    s ~ Lᴬ → πᴬ⁻¹ • s ~ (πᴸ⁻¹ • L)ᴬ := by
   intro h
   apply near_trans (near_image h ↑πᴬ⁻¹)
   have := π.smul_near_smul (πᴸ⁻¹ L)ᴬ (πᴸ⁻¹ L) near_rfl

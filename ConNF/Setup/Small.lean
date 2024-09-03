@@ -121,17 +121,21 @@ theorem card_small_eq (h : #α = #μ) : #{s : Set α | Small s} = #μ := by
 ## Small relations
 -/
 
-theorem small_codom_of_small_dom {r : Rel α β} (h : r.Coinjective) (h' : Small r.dom) :
-    Small r.codom := by
-  have := small_biUnion h' (f := λ x _ ↦ {y | r x y}) ?_
+theorem image_small_of_coinjective {r : Rel α β} (h : r.Coinjective) {s : Set α} (hs : Small s) :
+    Small (r.image s) := by
+  have := small_biUnion hs (f := λ x _ ↦ {y | r x y}) ?_
   · apply this.mono
     rintro y ⟨x, hxy⟩
     simp only [mem_iUnion]
-    exact ⟨x, ⟨y, hxy⟩, hxy⟩
+    exact ⟨x, hxy.1, hxy.2⟩
   · intro x hx
     apply small_of_subsingleton
     intro y hy z hz
     exact h.coinjective hy hz
+
+theorem small_codom_of_small_dom {r : Rel α β} (h : r.Coinjective) (h' : Small r.dom) :
+    Small r.codom :=
+  Rel.image_dom ▸ image_small_of_coinjective h h'
 
 theorem small_graph' {r : Rel α β} (h₁ : Small r.dom) (h₂ : Small r.codom) :
     Small r.graph' := by
@@ -156,32 +160,47 @@ theorem small_graph' {r : Rel α β} (h₁ : Small r.dom) (h₂ : Small r.codom)
 def Near (s t : Set α) : Prop :=
   Small (s ∆ t)
 
+@[inherit_doc] infix:50 " ~ "  => Near
+
 @[refl]
-theorem near_refl (s : Set α) : Near s s := by
+theorem near_refl (s : Set α) : s ~ s := by
   rw [Near, symmDiff_self]
   exact small_empty
 
-theorem near_rfl : Near s s :=
+theorem near_rfl : s ~ s :=
   near_refl s
 
-theorem near_of_eq (h : s = t) : Near s t :=
+theorem near_of_eq (h : s = t) : s ~ t :=
   h ▸ near_refl s
 
 @[symm]
-theorem near_symm (h : Near s t) : Near t s := by
+theorem near_symm (h : s ~ t) : t ~ s := by
   rwa [Near, symmDiff_comm] at h
 
-@[symm]
-theorem near_trans (h₁ : Near s t) (h₂ : Near t u) : Near s u :=
+@[trans]
+theorem near_trans (h₁ : s ~ t) (h₂ : t ~ u) : s ~ u :=
   (small_union h₁ h₂).mono (symmDiff_trans_subset s t u)
 
-theorem near_symmDiff_self_of_small (h : Small s) : Near (s ∆ t) t := by
+instance {α : Type u} : Trans (Near : Set α → Set α → Prop) Near Near where
+  trans := near_trans
+
+theorem near_symmDiff_self_of_small (h : Small s) : s ∆ t ~ t := by
   rwa [Near, symmDiff_symmDiff_cancel_right]
 
-theorem near_image (h : Near s t) (f : α → β) : Near (f '' s) (f '' t) :=
+theorem near_union_of_small (h : Small s) : t ∪ s ~ t := by
+  simp only [Near, Set.symmDiff_def, union_diff_left]
+  apply small_union
+  · exact h.mono diff_subset
+  · rw [show t \ (t ∪ s) = ∅ by aesop]
+    exact small_empty
+
+theorem near_image (h : s ~ t) (f : α → β) : f '' s ~ f '' t :=
   (h.image f).mono subset_image_symmDiff
 
-theorem card_le_of_near (h₁ : Near s t) (h₂ : ¬Small t) : #t ≤ #s := by
+theorem near_symmDiff_iff (u : Set α) : u ∆ s ~ u ∆ t ↔ s ~ t := by
+  rw [Near, Near, symmDiff_comm u s, symmDiff_assoc, symmDiff_symmDiff_cancel_left]
+
+theorem card_le_of_near (h₁ : s ~ t) (h₂ : ¬Small t) : #t ≤ #s := by
   rw [Near, Small, Set.symmDiff_def, mk_union_of_disjoint disjoint_sdiff_sdiff] at h₁
   rw [Small, not_lt] at h₂
   have h₃ := (le_add_self.trans_lt h₁).trans_le h₂
@@ -191,12 +210,12 @@ theorem card_le_of_near (h₁ : Near s t) (h₂ : ¬Small t) : #t ≤ #s := by
 
 /-- Two large sets that are near each other have the same cardinality (and we only need to suppose
 that one of them is large to draw this conclusion). -/
-theorem card_eq_of_near (h₁ : Near s t) (h₂ : ¬Small t) : #s = #t := by
+theorem card_eq_of_near (h₁ : s ~ t) (h₂ : ¬Small t) : #s = #t := by
   have := card_le_of_near h₁ h₂
   have h₃ : ¬Small s := h₂ ∘ this.trans_lt
   exact le_antisymm (card_le_of_near (near_symm h₁) h₃) this
 
-theorem card_inter_of_near (h₁ : Near s t) (h₂ : ¬Small s) : #(s ∩ t : Set α) = #s := by
+theorem card_inter_of_near (h₁ : s ~ t) (h₂ : ¬Small s) : #(s ∩ t : Set α) = #s := by
   apply le_antisymm
   · apply mk_le_of_injective (f := λ x ↦ ⟨x, x.prop.1⟩)
     intro x y h
@@ -206,17 +225,17 @@ theorem card_inter_of_near (h₁ : Near s t) (h₂ : ¬Small s) : #(s ∩ t : Se
     · exact aleph0_lt_κ.le.trans (κ_le_of_not_small h₂)
     · exact h₁.trans_le (κ_le_of_not_small h₂)
 
-theorem inter_nonempty_of_near (h₁ : Near s t) (h₂ : ¬Small s) : (s ∩ t).Nonempty := by
+theorem inter_nonempty_of_near (h₁ : s ~ t) (h₂ : ¬Small s) : (s ∩ t).Nonempty := by
   rw [← mk_ne_zero_iff_nonempty, card_inter_of_near h₁ h₂]
   exact ne_of_gt <| aleph0_pos.trans <| aleph0_lt_κ.trans_le <| κ_le_of_not_small h₂
 
-theorem card_near_le (s : Set α) (h : #α ≤ #μ) : #{t | Near t s} ≤ #μ := by
+theorem card_near_le (s : Set α) (h : #α ≤ #μ) : #{t | t ~ s} ≤ #μ := by
   refine le_trans ?_ (card_small_le h)
   apply mk_le_of_injective (f := λ t ↦ ⟨t ∆ s, t.prop⟩)
   intro t₁ t₂ ht
   exact Subtype.val_injective <| symmDiff_left_injective s <| congr_arg Subtype.val ht
 
-theorem card_near_eq (s : Set α) (h : #α = #μ) : #{t | Near t s} = #μ := by
+theorem card_near_eq (s : Set α) (h : #α = #μ) : #{t | t ~ s} = #μ := by
   refine trans ?_ (card_small_eq h)
   rw [Cardinal.eq]
   refine ⟨⟨λ t ↦ ⟨t ∆ s, t.prop⟩, λ t ↦ ⟨t ∆ s, near_symmDiff_self_of_small t.prop⟩, ?_, ?_⟩⟩ <;>

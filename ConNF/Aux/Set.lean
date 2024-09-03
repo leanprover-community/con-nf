@@ -17,6 +17,13 @@ theorem Set.diff_symmDiff_self {α : Type _} (s t : Set α) :
   tauto
 
 @[simp]
+theorem Set.symmDiff_diff_self {α : Type _} (s t : Set α) :
+    s ∆ (s \ t) = s ∩ t := by
+  ext x
+  simp only [mem_symmDiff, mem_diff, mem_inter_iff]
+  tauto
+
+@[simp]
 theorem Set.inter_union_symmDiff {α : Type _} (s t : Set α) :
     s ∩ t ∪ s ∆ t = s ∪ t := by
   ext x
