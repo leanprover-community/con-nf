@@ -327,6 +327,41 @@ theorem exists_extension_of_minimal (ψ : StrApprox β) (A : β ↝ ⊥) (L : Li
       right
       use 0
 
+theorem exists_extension_of_minimal' (ψ : StrApprox β) (A : β ↝ ⊥)
+    (L : Litter) (hL : L ∉ (ψ A)ᴸ.dom) (hψ : ψ.Coherent)
+    (foa : ∀ δ < β, [LeLevel δ] → FreedomOfAction δ)
+    (hL' : ∀ B L', pos L' < pos L → L' ∈ (ψ B)ᴸ.dom) :
+    ∃ χ > ψ, χ.Coherent := by
+  have := exists_extension_of_minimal ψ A L hψ foa ?_ ?_
+  · obtain ⟨χ, hχ₁, hχ₂, hχ₃⟩ := this
+    refine ⟨χ, ⟨hχ₁, ?_⟩, hχ₂⟩
+    intro h
+    exact hL (Rel.dom_mono (h A).2 hχ₃)
+  · intro B a ha
+    apply BaseApprox.mem_dom_atoms_of_litter_mem_dom
+    exact hL' B aᴸ (a.pos_litter_lt_pos.trans ha)
+  · intro B N hN
+    apply BaseApprox.mem_dom_nearLitters
+    · apply hL'
+      exact (N.pos_litter_lt_pos).trans hN
+    · intro a ha
+      apply BaseApprox.mem_dom_atoms_of_litter_mem_dom
+      apply hL'
+      have := N.pos_atom_lt_pos a (Or.inl ha)
+      exact a.pos_litter_lt_pos.trans (this.trans hN)
+
+theorem exists_total (ψ : StrApprox β) (hψ : ψ.Coherent)
+    (foa : ∀ δ < β, [LeLevel δ] → FreedomOfAction δ) :
+    ∃ χ ≥ ψ, χ.Coherent ∧ χ.Total := by
+  obtain ⟨χ, hχ₁, hχ₂⟩ := exists_maximal_coherent ψ hψ
+  refine ⟨χ, hχ₁, hχ₂.1, ?_⟩
+  intro A L
+  induction L using pos_induction generalizing A with
+  | h L ih =>
+    by_contra hL
+    obtain ⟨χ', hχ'⟩ := exists_extension_of_minimal' χ A L hL hχ₂.1 foa (λ B L' h' ↦ ih L' h' B)
+    exact hχ'.1.2 (hχ₂.2 hχ'.2 hχ'.1.1)
+
 end StrApprox
 
 end ConNF

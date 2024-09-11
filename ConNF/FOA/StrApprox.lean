@@ -92,6 +92,17 @@ theorem smul_support_smul_eq_iff (ψ : StrApprox β) (S : Support β) (π : StrP
   rw [inv_smul_smul] at this
   rw [this]
 
+theorem smul_support_eq_smul_mono {ψ χ : StrApprox β} {S : Support β} {π : StrPerm β}
+    (hψ : ψ • S = π • S) (hψχ : ψ ≤ χ) :
+    χ • S = π • S := by
+  rw [smul_support_eq_smul_iff] at hψ ⊢
+  intro A
+  constructor
+  · intro a ha
+    exact BaseApprox.atoms_le_of_le (hψχ A) _ _ ((hψ A).1 a ha)
+  · intro N hN
+    exact BaseApprox.nearLitters_le_of_le (hψχ A) _ _ ((hψ A).2 N hN)
+
 /-- An upper bound for a chain of approximations. -/
 def upperBound (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c) : StrApprox β :=
   λ A ↦ BaseApprox.upperBound ((· A) '' c) (hc.image _ _ (λ _ _ h ↦ h A))
@@ -100,19 +111,52 @@ theorem le_upperBound (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c) :
     ∀ ψ ∈ c, ψ ≤ upperBound c hc :=
   λ ψ hψ _ ↦ BaseApprox.le_upperBound _ _ _ ⟨ψ, hψ, rfl⟩
 
-theorem exists_isMax (ψ : StrApprox β) : ∃ χ ≥ ψ, IsMax χ := by
-  have := zorn_le₀ {χ | ψ ≤ χ} ?_
-  · obtain ⟨χ, hχ₁, hχ₂⟩ := this
-    refine ⟨χ, hχ₁, ?_⟩
-    intro χ' h
-    exact hχ₂ (hχ₁.trans h) h
-  · intro c hc₁ hc₂
-    obtain rfl | hc₃ := c.eq_empty_or_nonempty
-    · refine ⟨ψ, ?_, ?_⟩
-      · exact le_refl ψ
-      · simp only [Set.mem_empty_iff_false, false_implies, implies_true]
-    · obtain ⟨ψ', hψ'⟩ := hc₃
-      exact ⟨upperBound c hc₂, (hc₁ hψ').trans (le_upperBound c hc₂ ψ' hψ'), le_upperBound c hc₂⟩
+theorem upperBound_exceptions (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
+    (A : β ↝ ⊥) (a₁ a₂ : Atom) :
+    (upperBound c hc A).exceptions a₁ a₂ ↔ ∃ ψ ∈ c, (ψ A).exceptions a₁ a₂ := by
+  simp only [upperBound, BaseApprox.upperBound]
+  rw [Rel.biSup_apply_iff]
+  simp only [Set.mem_image, exists_exists_and_eq_and]
+
+theorem upperBound_litters (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
+    (A : β ↝ ⊥) (L₁ L₂ : Litter) :
+    (upperBound c hc A)ᴸ L₁ L₂ ↔ ∃ ψ ∈ c, (ψ A)ᴸ L₁ L₂ := by
+  simp only [upperBound, BaseApprox.upperBound, BaseApprox.mk_litters]
+  rw [Rel.biSup_apply_iff]
+  simp only [Set.mem_image, exists_exists_and_eq_and]
+
+theorem upperBound_typical (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
+    (A : β ↝ ⊥) (a₁ a₂ : Atom) :
+    (upperBound c hc A).typical a₁ a₂ ↔ ∃ ψ ∈ c, (ψ A).typical a₁ a₂ := by
+  simp only [BaseApprox.typical_iff, upperBound_litters]
+  constructor
+  · rintro ⟨⟨ψ, hψ, ha⟩, i, h⟩
+    refine ⟨ψ, hψ, ha, i, ?_⟩
+    rw [BaseApprox.sublitter_eq_of_le (le_upperBound c hc ψ hψ A),
+      BaseApprox.sublitter_eq_of_le (le_upperBound c hc ψ hψ A)]
+    exact h
+  · rintro ⟨ψ, hψ, ha, i, h⟩
+    refine ⟨⟨ψ, hψ, ha⟩, i, ?_⟩
+    rw [BaseApprox.sublitter_eq_of_le (le_upperBound c hc ψ hψ A),
+      BaseApprox.sublitter_eq_of_le (le_upperBound c hc ψ hψ A)] at h
+    exact h
+
+theorem upperBound_atoms (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
+    (A : β ↝ ⊥) (a₁ a₂ : Atom) :
+    (upperBound c hc A)ᴬ a₁ a₂ ↔ ∃ ψ ∈ c, (ψ A)ᴬ a₁ a₂ := by
+  simp only [BaseApprox.atoms_def, Rel.sup_apply, upperBound_exceptions, upperBound_typical]
+  constructor
+  · rintro (⟨ψ, hψ, h⟩ | ⟨ψ, hψ, h⟩)
+    · exact ⟨ψ, hψ, Or.inl h⟩
+    · exact ⟨ψ, hψ, Or.inr h⟩
+  · rintro ⟨ψ, hψ, h | h⟩
+    · exact Or.inl ⟨ψ, hψ, h⟩
+    · exact Or.inr ⟨ψ, hψ, h⟩
+
+/-! TODO: Many of the previous lemmas are not actually needed! -/
+
+def Total (ψ : StrApprox β) : Prop :=
+  ∀ B L, L ∈ (ψ B)ᴸ.dom
 
 end StrApprox
 
@@ -354,6 +398,39 @@ theorem Coherent.comp [LeLevel β] {ψ : StrApprox β} (hψ : ψ.Coherent)
       rw [Path.deriv_sderivBot, Path.deriv_sderiv] at hA'
       exact inflexiblePath_subsingleton hA' rfl hρ₂ ht
     · cases hψ.flexible hL₁' (inflexible_deriv hL₂ A)
+
+theorem upperBound_coherent [LeLevel β] (c : Set (StrApprox β)) (hc₁ : IsChain (· ≤ ·) c)
+    (hc₂ : ∀ ψ ∈ c, ψ.Coherent) :
+    (upperBound c hc₁).Coherent := by
+  intro A L₁ L₂ hL
+  rw [upperBound_litters] at hL
+  obtain ⟨ψ, hψ, hL⟩ := hL
+  specialize hc₂ ψ hψ A L₁ L₂ hL
+  constructor
+  · intro P t hA ht
+    obtain ⟨ρ, hρ₁, hρ₂⟩ := hc₂.inflexible P t hA ht
+    refine ⟨ρ, ?_, hρ₂⟩
+    apply smul_support_eq_smul_mono hρ₁
+    intro
+    exact le_upperBound c hc₁ ψ hψ _
+  · exact hc₂.flexible
+
+theorem exists_maximal_coherent [LeLevel β] (ψ : StrApprox β) (hψ : ψ.Coherent) :
+    ∃ χ ≥ ψ, Maximal {χ | χ.Coherent} χ := by
+  have := zorn_le₀ {χ | ψ ≤ χ ∧ χ.Coherent} ?_
+  · obtain ⟨χ, hχ₁, hχ₂⟩ := this
+    refine ⟨χ, hχ₁.1, hχ₁.2, ?_⟩
+    intro χ' h₁ h₂
+    exact hχ₂ ⟨hχ₁.1.trans h₂, h₁⟩ h₂
+  · intro c hc₁ hc₂
+    obtain rfl | hc₃ := c.eq_empty_or_nonempty
+    · refine ⟨ψ, ?_, ?_⟩
+      · exact ⟨le_refl ψ, hψ⟩
+      · simp only [Set.mem_empty_iff_false, false_implies, implies_true]
+    · obtain ⟨ψ', hψ'⟩ := hc₃
+      refine ⟨upperBound c hc₂, ?_, le_upperBound c hc₂⟩
+      refine ⟨?_, upperBound_coherent c hc₂ (λ χ hχ ↦ (hc₁ hχ).2)⟩
+      exact ((hc₁ hψ').1).trans (le_upperBound c hc₂ ψ' hψ')
 
 end StrApprox
 

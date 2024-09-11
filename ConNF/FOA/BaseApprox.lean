@@ -33,6 +33,15 @@ namespace BaseApprox
 instance : SuperL BaseApprox (Rel Litter Litter) where
   superL := litters
 
+@[simp]
+theorem mk_litters (exceptions : Rel Atom Atom) (litters : Rel Litter Litter)
+    (exceptions_permutative : exceptions.Permutative)
+    (litters_permutative' : litters.Permutative)
+    (exceptions_small : ∀ L, Small (Lᴬ ∩ exceptions.dom)) :
+    (BaseApprox.mk exceptions litters exceptions_permutative
+      litters_permutative' exceptions_small)ᴸ = litters :=
+  rfl
+
 @[ext]
 theorem ext {ψ χ : BaseApprox} (h₁ : ψ.exceptions = χ.exceptions) (h₂ : ψᴸ = χᴸ) :
     ψ = χ := by
@@ -104,6 +113,13 @@ theorem nearLitterEquiv_injective {N : NearLitter} {i₁ i₂ : κ}
     i₁ = i₂ :=
   (nearLitterEquiv N).injective (Subtype.val_injective h)
 
+theorem nearLitterEquiv_congr {N₁ N₂ : NearLitter} {i₁ i₂ : κ}
+    (hN : N₁ = N₂) (hi : i₁ = i₂) :
+    (nearLitterEquiv N₁ i₁ : Atom) = nearLitterEquiv N₂ i₂ := by
+  cases hN
+  cases hi
+  rfl
+
 theorem nearLitterEquiv_mem (N : NearLitter) (i : κ) :
     (nearLitterEquiv N i : Atom) ∈ Nᴬ :=
   (nearLitterEquiv N i).prop
@@ -166,6 +182,23 @@ instance : SuperA BaseApprox (Rel Atom Atom) where
 theorem atoms_def (ψ : BaseApprox) :
     ψᴬ = ψ.exceptions ⊔ ψ.typical :=
   rfl
+
+theorem mem_dom_atoms_of_litter_mem_dom {ψ : BaseApprox} {a : Atom} (h : aᴸ ∈ ψᴸ.dom) :
+    a ∈ ψᴬ.dom := by
+  obtain ⟨L, h⟩ := h
+  rw [atoms_def, sup_dom]
+  by_cases ha : a ∈ ψ.exceptions.dom
+  · left
+    exact ha
+  · right
+    use nearLitterEquiv (ψ.sublitter L) ((nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩)
+    rw [typical_iff]
+    refine ⟨?_, (nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩, ?_, ?_⟩
+    · rwa [nearLitterEquiv_litter]
+    · rw [Equiv.apply_symm_apply]
+    · apply nearLitterEquiv_congr
+      · rw [nearLitterEquiv_litter]
+      · rfl
 
 @[simp]
 theorem inv_atoms (ψ : BaseApprox) :
@@ -261,6 +294,19 @@ instance : SuperN BaseApprox (Rel NearLitter NearLitter) where
 theorem nearLitters_def (ψ : BaseApprox) {N₁ N₂ : NearLitter} :
     ψᴺ N₁ N₂ ↔ ψᴸ N₁ᴸ N₂ᴸ ∧ N₁ᴬ ⊆ ψᴬ.dom ∧ ψᴬ.image N₁ᴬ = N₂ᴬ :=
   Iff.rfl
+
+theorem mem_dom_nearLitters {ψ : BaseApprox} {N : NearLitter}
+    (hL : Nᴸ ∈ ψᴸ.dom) (ha : ∀ a ∈ Nᴬ \ Nᴸᴬ, a ∈ ψᴬ.dom) :
+    N ∈ ψᴺ.dom := by
+  obtain ⟨L, hL⟩ := hL
+  use ⟨L, ψᴬ.image Nᴬ, ψ.image_near_of_near Nᴬ hL N.atoms_near_litter⟩
+  refine ⟨hL, ?_, rfl⟩
+  intro a ha'
+  by_cases ha'' : a ∈ Nᴸᴬ
+  · apply mem_dom_atoms_of_litter_mem_dom
+    rw [ha'']
+    exact ⟨L, hL⟩
+  · exact ha a ⟨ha', ha''⟩
 
 @[simp]
 theorem inv_nearLitters (ψ : BaseApprox) : ψ⁻¹ᴺ = ψᴺ.inv := by

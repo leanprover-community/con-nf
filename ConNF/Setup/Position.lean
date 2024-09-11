@@ -27,4 +27,9 @@ theorem card_le_of_position {X : Type _} [Position X] :
     #X ≤ #μ :=
   mk_le_of_injective pos.injective
 
+@[elab_as_elim]
+def pos_induction {X : Type _} [Position X] {C : X → Sort _} (x : X)
+    (h : ∀ x, (∀ y, pos y < pos x → C y) → C x) : C x :=
+  WellFounded.induction (InvImage.wf pos (inferInstanceAs <| IsWellFounded μ (· < ·)).wf) x h
+
 end ConNF
