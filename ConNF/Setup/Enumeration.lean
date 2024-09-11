@@ -202,6 +202,10 @@ instance {G X : Type _} [Group G] [MulAction G X] :
     · rfl
     · rw [smul_rel, smul_rel, smul_rel, mul_inv_rev, mul_smul]
 
+theorem mem_smul_iff {G X : Type _} [Group G] [MulAction G X] (x : X) (g : G) (E : Enumeration X) :
+    x ∈ g • E ↔ g⁻¹ • x ∈ E :=
+  Iff.rfl
+
 -- TODO: Some stuff about the partial order on enumerations and concatenation of enumerations.
 
 end Enumeration

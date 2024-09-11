@@ -231,6 +231,15 @@ theorem Path.deriv_sderiv_assoc (A : α ↝ β) (B : β ↝ γ) (h : δ < γ) :
     A ⇘ (B ↘ h) = A ⇘ B ↘ h :=
   rfl
 
+@[simp]
+theorem Path.deriv_scoderiv (A : α ↝ β) (B : γ ↝ δ) (h : γ < β) :
+    A ⇘ (B ↗ h) = A ↘ h ⇘ B := by
+  induction B with
+  | nil => rfl
+  | sderiv ε ζ B h' ih =>
+    rw [deriv_sderiv, ← ih]
+    rfl
+
 theorem Path.coderiv_eq_deriv (A : α ↝ β) (B : β ↝ γ) :
     B ⇗ A = A ⇘ B :=
   rfl

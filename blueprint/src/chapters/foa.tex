@@ -291,6 +291,8 @@
 \begin{definition}[approximates]
   \uses{def:StrApprox,def:atomGraph,prop:atomGraph_inv,prop:comp_atomGraph,prop:nearLitterGraph_permutative}
   \label{def:StrApprox.Approximates}
+  \lean{ConNF.StrApprox.Approximates}
+  \leanok
   We say that a \( \beta \)-approximation \( \psi \) \emph{approximates} a \( \beta \)-allowable permutation \( \rho \) if \( \psi_A^\Litter \leq \rho_A^\Litter \) and \( \psi_A^\Atom \leq \rho_A^\Atom \) for each path \( A : \beta \tpath \bot \).
   If \( \psi \) approximates \( \rho \) then \( \psi^n \) approximates \( \rho^n \) for each \( n : \mathbb Z \).\footnote{We should define what it means for a base approximation to approximate a near-litter permutation, and define this in terms of that.}
   A \( \beta \)-approximation \( \psi \) \emph{exactly approximates} a \( \beta \)-allowable permutation \( \rho \) if \( \psi \) approximates \( \rho \), and in addition, if \( a \) is an atom and \( A : \beta \tpath \bot \), then \( a \notin \coim \psi_A^\Atom \) implies \( \rho(a)^\circ = \rho(a^\circ) \) and \( \rho^{-1}(a)^\circ = \rho^{-1}(a^\circ) \).
@@ -298,16 +300,21 @@
 \begin{definition}[freedom of action]
   \uses{def:StrApprox.Approximates}
   \label{def:FreedomOfAction}
+  \lean{ConNF.StrApprox.FreedomOfAction}
+  \leanok
   We say that \emph{freedom of action} holds at a type index \( \delta \) if every coherent \( \delta \)-approximation exactly approximates some \( \delta \)-allowable permutation.
 \end{definition}
 \begin{proposition}[adding flexible litters]
   \uses{def:Inflexible,def:StrApprox}
   \label{prop:StrApprox.addFlexible}
+  \lean{ConNF.StrApprox.addFlexible}
+  \leanok
   Let \( \psi \) be a coherent \( \beta \)-approximation, and let \( L \) be \( A \)-flexible.
   Then there is a coherent extension \( \chi \geq \psi \) with \( L \in \coim \chi_A^\Litter \).
 \end{proposition}
 \begin{proof}
   \uses{prop:StrApprox.addOrbit}
+  \leanok
   Define \( L' : \mathbb Z \to \Litter \) by \( L'(n) = L \), then appeal to \cref{prop:StrApprox.addOrbit} to obtain \( \chi \geq \psi \).
   All we must do is check that \( \psi \) is coherent at \( (L, L) \), which is trivial.
 \end{proof}

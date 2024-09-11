@@ -84,6 +84,14 @@ theorem smul_support_eq_smul_iff (ψ : StrApprox β) (S : Support β) (π : StrP
   simp only [Support.ext_iff, smul_support_derivBot, Support.smul_derivBot,
     BaseApprox.smul_support_eq_smul_iff]
 
+theorem smul_support_smul_eq_iff (ψ : StrApprox β) (S : Support β) (π : StrPerm β) :
+    ψ • π • S = S ↔ ∀ A,
+      (∀ a ∈ ((π • S) ⇘. A)ᴬ, (ψ A)ᴬ a (π⁻¹ A • a)) ∧
+      (∀ N ∈ ((π • S) ⇘. A)ᴺ, (ψ A)ᴺ N (π⁻¹ A • N)) := by
+  have := smul_support_eq_smul_iff ψ (π • S) π⁻¹
+  rw [inv_smul_smul] at this
+  rw [this]
+
 end StrApprox
 
 @[ext]
@@ -96,7 +104,7 @@ structure InflexiblePath (β : TypeIndex) where
   hδε : δ ≠ ε
   A : β ↝ γ
 
-variable [Level.{u}] [CoherentData]
+variable [Level] [CoherentData]
 
 instance [LeLevel β] (P : InflexiblePath β) : LeLevel P.γ :=
   ⟨P.A.le.trans LeLevel.elim⟩
@@ -189,6 +197,63 @@ theorem coherentAt_flexible [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {L
       cases hL ⟨P, t, hA, ht⟩
     · intro
       exact h
+
+theorem coherentAt_inflexible' [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
+    {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L₂ = fuzz P.hδε t) :
+    ψ.CoherentAt A L₁ L₂ ↔ ∃ ρ : AllPerm P.δ,
+      ψ ⇘ P.A ↘ P.hδ • ρᵁ • t.support = t.support ∧ L₁ = fuzz P.hδε (ρ • t) := by
+  constructor
+  · intro h
+    obtain (⟨P', t', hA', ht'⟩ | hL) := inflexible_cases A L₁
+    · obtain ⟨ρ, h₁, h₂⟩ := h.inflexible P' t' hA' ht'
+      cases inflexiblePath_subsingleton hA hA' ht h₂
+      cases fuzz_injective <| ht.symm.trans h₂
+      use ρ⁻¹
+      rw [inv_smul_smul, Tangle.smul_support, ht', allPermForget_inv, inv_smul_smul, h₁]
+      exact ⟨rfl, rfl⟩
+    · rw [coherentAt_flexible hL] at h
+      cases h ⟨P, t, hA, ht⟩
+  · intro h
+    obtain ⟨ρ, h₁, h₂⟩ := h
+    constructor
+    · intro P' t' hA' ht'
+      cases inflexiblePath_subsingleton hA hA' h₂ ht'
+      cases fuzz_injective <| h₂.symm.trans ht'
+      refine ⟨ρ⁻¹, ?_, ?_⟩
+      · rwa [Tangle.smul_support, allPermForget_inv, inv_smul_smul]
+      · rwa [inv_smul_smul]
+    · intro h
+      cases h ⟨P, ρ • t, hA, h₂⟩
+
+theorem smul_eq_of_coherentAt_inflexible' [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
+    {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L₂ = fuzz P.hδε t)
+    (h : ψ.CoherentAt A L₁ L₂) :
+    ∀ ρ : AllPerm P.δ, ψ ⇘ P.A ↘ P.hδ • ρᵁ • t.support = t.support → L₁ = fuzz P.hδε (ρ • t) := by
+  intro ρ₁ hρ₁
+  rw [coherentAt_inflexible' hA ht] at h
+  obtain ⟨ρ₂, hρ₂, rfl⟩ := h
+  congr 1
+  apply t.smul_eq_smul
+  rw [smul_support_smul_eq_iff] at hρ₁ hρ₂
+  ext B : 1
+  rw [Support.smul_derivBot, Support.smul_derivBot, BaseSupport.smul_eq_smul_iff]
+  constructor
+  · rintro a ha
+    have h₁ := (hρ₁ B).1 (ρ₁ᵁ B • a) ?_
+    have h₂ := (hρ₂ B).1 (ρ₂ᵁ B • a) ?_
+    · rw [Tree.inv_apply, inv_smul_smul] at h₁ h₂
+      exact (BaseApprox.atoms_permutative _).injective h₂ h₁
+    · rwa [Support.smul_derivBot, BaseSupport.smul_atoms, Enumeration.mem_smul_iff, inv_smul_smul]
+    · rwa [Support.smul_derivBot, BaseSupport.smul_atoms, Enumeration.mem_smul_iff, inv_smul_smul]
+  · rintro N hN
+    have h₁ := (hρ₁ B).2 (ρ₁ᵁ B • N) ?_
+    have h₂ := (hρ₂ B).2 (ρ₂ᵁ B • N) ?_
+    · rw [Tree.inv_apply, inv_smul_smul] at h₁ h₂
+      exact (BaseApprox.nearLitters_permutative _).injective h₂ h₁
+    · rwa [Support.smul_derivBot, BaseSupport.smul_nearLitters,
+        Enumeration.mem_smul_iff, inv_smul_smul]
+    · rwa [Support.smul_derivBot, BaseSupport.smul_nearLitters,
+        Enumeration.mem_smul_iff, inv_smul_smul]
 
 theorem CoherentAt.mono [LeLevel β] {ψ χ : StrApprox β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
     (h : ψ.CoherentAt A L₁ L₂) (hψχ : ψ ≤ χ) : χ.CoherentAt A L₁ L₂ := by

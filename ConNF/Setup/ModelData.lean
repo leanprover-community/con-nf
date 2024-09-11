@@ -60,6 +60,20 @@ attribute [simp] allPermForget_one allPermForget_mul smul_forget
 theorem allPermForget_inv {α : TypeIndex} [ModelData α] (ρ : AllPerm α) : ρ⁻¹ᵁ = ρᵁ⁻¹ := by
   rw [eq_inv_iff_mul_eq_one, ← allPermForget_mul, inv_mul_cancel, allPermForget_one]
 
+@[simp]
+theorem allPermForget_npow {α : TypeIndex} [ModelData α] (ρ : AllPerm α) (n : ℕ) :
+    (ρ ^ n)ᵁ = ρᵁ ^ n := by
+  induction n with
+  | zero => rw [pow_zero, pow_zero, allPermForget_one]
+  | succ n h => rw [pow_succ, pow_succ, allPermForget_mul, h]
+
+@[simp]
+theorem allPermForget_zpow {α : TypeIndex} [ModelData α] (ρ : AllPerm α) (n : ℤ) :
+    (ρ ^ n)ᵁ = ρᵁ ^ n := by
+  induction n using Int.negInduction with
+  | nat n => rw [zpow_natCast, zpow_natCast, allPermForget_npow]
+  | neg n h => simpa only [zpow_neg, zpow_natCast, allPermForget_inv, inv_inj] using h
+
 theorem Support.Supports.smul_eq_smul {X : Type _} {α : TypeIndex}
     [ModelData α] [MulAction (AllPerm α) X]
     {S : Support α} {x : X} (h : S.Supports x) {ρ₁ ρ₂ : AllPerm α} (hρ : ρ₁ᵁ • S = ρ₂ᵁ • S) :
@@ -118,6 +132,13 @@ instance {α : TypeIndex} [ModelData α] : MulAction (AllPerm α) (Tangle α) wh
     · rw [Tangle.smul_set, Tangle.smul_set, Tangle.smul_set, mul_smul]
     · rw [Tangle.smul_support, Tangle.smul_support, Tangle.smul_support,
         allPermForget_mul, mul_smul]
+
+theorem Tangle.smul_eq {α : TypeIndex} [ModelData α] {ρ : AllPerm α} {t : Tangle α}
+    (h : ρᵁ • t.support = t.support) :
+    ρ • t = t := by
+  have := smul_eq_smul (ρ₁ := ρ) (ρ₂ := 1) (t := t) ?_
+  · rwa [one_smul] at this
+  · rwa [allPermForget_one, one_smul]
 
 /-!
 ## Criteria for supports

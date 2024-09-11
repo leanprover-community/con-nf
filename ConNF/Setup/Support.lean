@@ -86,6 +86,50 @@ instance : MulAction BasePerm BaseSupport where
     · rw [smul_atoms, smul_atoms, smul_atoms, mul_smul]
     · rw [smul_nearLitters, smul_nearLitters, smul_nearLitters, mul_smul]
 
+theorem smul_eq_smul_iff (π₁ π₂ : BasePerm) (S : BaseSupport) :
+    π₁ • S = π₂ • S ↔ (∀ a ∈ Sᴬ, π₁ • a = π₂ • a) ∧ (∀ N ∈ Sᴺ, π₁ • N = π₂ • N) := by
+  constructor
+  · intro h
+    constructor
+    · rintro a ⟨i, ha⟩
+      have := congr_arg (·ᴬ.rel i (π₁ • a)) h
+      simp only [smul_atoms, Enumeration.smul_rel, inv_smul_smul, eq_iff_iff] at this
+      have := Sᴬ.rel_coinjective.coinjective ha (this.mp ha)
+      rw [eq_inv_smul_iff] at this
+      rw [this]
+    · rintro N ⟨i, hN⟩
+      have := congr_arg (·ᴺ.rel i (π₁ • N)) h
+      simp only [smul_nearLitters, Enumeration.smul_rel, inv_smul_smul, eq_iff_iff] at this
+      have := Sᴺ.rel_coinjective.coinjective hN (this.mp hN)
+      rw [eq_inv_smul_iff] at this
+      rw [this]
+  · intro h
+    ext : 2
+    · rfl
+    · ext i a : 3
+      rw [smul_atoms, smul_atoms, Enumeration.smul_rel, Enumeration.smul_rel]
+      constructor
+      · intro ha
+        have := h.1 _ ⟨i, ha⟩
+        rw [smul_inv_smul, ← inv_smul_eq_iff] at this
+        rwa [this]
+      · intro ha
+        have := h.1 _ ⟨i, ha⟩
+        rw [smul_inv_smul, smul_eq_iff_eq_inv_smul] at this
+        rwa [← this]
+    · rfl
+    · ext i a : 3
+      rw [smul_nearLitters, smul_nearLitters, Enumeration.smul_rel, Enumeration.smul_rel]
+      constructor
+      · intro hN
+        have := h.2 _ ⟨i, hN⟩
+        rw [smul_inv_smul, ← inv_smul_eq_iff] at this
+        rwa [this]
+      · intro hN
+        have := h.2 _ ⟨i, hN⟩
+        rw [smul_inv_smul, smul_eq_iff_eq_inv_smul] at this
+        rwa [← this]
+
 end BaseSupport
 
 def baseSupportEquiv : BaseSupport ≃ Enumeration Atom × Enumeration NearLitter where
