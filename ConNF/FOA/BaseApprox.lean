@@ -411,6 +411,16 @@ def addOrbitLitters (f : ℤ → Litter) :
     Rel Litter Litter :=
   λ L₁ L₂ ↦ ∃ n : ℤ, L₁ = f n ∧ L₂ = f (n + 1)
 
+@[simp]
+theorem addOrbitLitters_dom (f : ℤ → Litter) :
+    (addOrbitLitters f).dom = Set.range f := by
+  ext L
+  constructor
+  · rintro ⟨_, n, rfl, rfl⟩
+    exact ⟨n, rfl⟩
+  · rintro ⟨n, rfl⟩
+    exact ⟨_, n, rfl, rfl⟩
+
 theorem addOrbitLitters_codomEqDom (f : ℤ → Litter) :
     (addOrbitLitters f).CodomEqDom := by
   constructor
@@ -467,6 +477,49 @@ theorem le_addOrbit :
   ⟨rfl, le_sup_left⟩
 
 end addOrbit
+
+theorem upperBound_exceptions_small (c : Set BaseApprox) (hc : IsChain (· ≤ ·) c) (L : Litter) :
+    Small (Lᴬ ∩ (⨆ ψ ∈ c, ψ.exceptions).dom) := by
+  rw [biSup_dom]
+  obtain (rfl | ⟨ψ, hψ⟩) := c.eq_empty_or_nonempty
+  · simp only [mem_empty_iff_false, iUnion_of_empty, iUnion_empty, inter_empty, small_empty]
+  · suffices ⋃ ψ ∈ c, ψ.exceptions.dom = ψ.exceptions.dom by
+      rw [this]
+      exact ψ.exceptions_small L
+    ext a
+    rw [mem_iUnion₂]
+    constructor
+    · rintro ⟨χ, hχ₁, hχ₂⟩
+      obtain (h | h) := hc.total hψ hχ₁
+      · rwa [h.1]
+      · rwa [← h.1]
+    · intro h
+      exact ⟨ψ, hψ, h⟩
+
+/-- An upper bound for a chain of base approximations. -/
+def upperBound (c : Set BaseApprox) (hc : IsChain (· ≤ ·) c) : BaseApprox where
+  exceptions := ⨆ ψ ∈ c, ψ.exceptions
+  litters := ⨆ ψ ∈ c, ψᴸ
+  exceptions_permutative := biSup_permutative_of_isChain
+    (λ ψ _ ↦ ψ.exceptions_permutative) (hc.image _ _ (λ _ _ h ↦ h.1.le))
+  litters_permutative' := biSup_permutative_of_isChain
+    (λ ψ _ ↦ ψ.litters_permutative) (hc.image _ _ (λ _ _ h ↦ h.2))
+  exceptions_small := upperBound_exceptions_small c hc
+
+theorem le_upperBound (c : Set BaseApprox) (hc : IsChain (· ≤ ·) c) :
+    ∀ ψ ∈ c, ψ ≤ upperBound c hc := by
+  intro ψ hψ
+  constructor
+  · ext a₁ a₂
+    simp only [upperBound, biSup_dom, biSup_apply_iff]
+    constructor
+    · intro h
+      exact ⟨ψ, hψ, h⟩
+    · rintro ⟨χ, hχ₁, hχ₂⟩
+      obtain (h | h) := hc.total hψ hχ₁
+      · rwa [h.1]
+      · rwa [← h.1]
+  · exact le_biSup _ hψ
 
 end BaseApprox
 

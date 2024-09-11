@@ -1,4 +1,5 @@
 import Mathlib.Data.Rel
+import Mathlib.Order.Chain
 
 open Set
 open scoped symmDiff
@@ -212,7 +213,7 @@ theorem preimage_subset_dom (r : Rel α β) (t : Set β) :
   exact ⟨y, h⟩
 
 theorem image_subset_codom (r : Rel α β) (s : Set α) :
-    r.image s ⊆ r.codom :=
+  r.image s ⊆ r.codom :=
   r.inv.preimage_subset_dom s
 
 theorem image_empty_of_disjoint_dom {r : Rel α β} {s : Set α} (h : Disjoint r.dom s) :
@@ -304,6 +305,107 @@ theorem sup_permutative {r s : Rel α α} (hr : r.Permutative) (hs : s.Permutati
   ⟨⟨sup_injective hr.toInjective hs.toInjective (hr.codom_eq_dom ▸ hs.codom_eq_dom ▸ h),
     sup_coinjective hr.toCoinjective hs.toCoinjective h⟩,
     sup_codomEqDom hr.toCodomEqDom hs.toCodomEqDom⟩
+
+@[simp]
+theorem inv_le_inv_iff {r s : Rel α β} :
+    r.inv ≤ s.inv ↔ r ≤ s := by
+  constructor
+  · intro h x y
+    exact h y x
+  · intro h y x
+    exact h x y
+
+@[simp]
+theorem iSup_apply_iff {T : Type _} {r : T → Rel α β} (x : α) (y : β) :
+    (⨆ t, r t) x y ↔ ∃ t, r t x y := by
+  constructor
+  · rintro ⟨_, ⟨⟨_, ⟨_, t, rfl⟩, rfl⟩, rfl⟩, ht⟩
+    exact ⟨t, ht⟩
+  · rintro ⟨t, ht⟩
+    exact ⟨_, ⟨⟨_, ⟨_, t, rfl⟩, rfl⟩, rfl⟩, ht⟩
+
+@[simp]
+theorem biSup_apply_iff {T : Type _} {r : T → Rel α β} {s : Set T} (x : α) (y : β) :
+    (⨆ t ∈ s, r t) x y ↔ ∃ t ∈ s, r t x y := by
+  have := iSup_apply_iff (r := λ t : s ↦ r t) x y
+  simp only [iSup_subtype'', Subtype.exists, exists_prop] at this
+  exact this
+
+theorem iSup_dom {T : Type _} (r : T → Rel α β) :
+    (⨆ t, r t).dom = ⋃ t, (r t).dom := by
+  simp only [dom, iSup_apply_iff, Set.ext_iff, mem_setOf_eq, mem_iUnion]
+  exact λ x ↦ exists_comm
+
+theorem biSup_dom {T : Type _} (r : T → Rel α β) (s : Set T) :
+    (⨆ t ∈ s, r t).dom = ⋃ t ∈ s, (r t).dom := by
+  have := iSup_dom (λ t : s ↦ r t)
+  rwa [iSup_subtype'', iUnion_coe_set] at this
+
+theorem isChain_inv {T : Type _} {r : T → Rel α β} (h : IsChain (· ≤ ·) (Set.range r)) :
+    IsChain (· ≤ ·) (Set.range (λ t ↦ (r t).inv)) := by
+  rintro _ ⟨t₁, rfl⟩ _ ⟨t₂, rfl⟩ _
+  dsimp only
+  rw [inv_le_inv_iff, inv_le_inv_iff]
+  apply h.total ⟨t₁, rfl⟩ ⟨t₂, rfl⟩
+
+theorem iSup_inv {T : Type _} {r : T → Rel α β} :
+    (⨆ t, (r t).inv) = (⨆ t, r t).inv := by
+  apply le_antisymm <;>
+  · rintro x y h
+    simp only [inv, iSup_apply_iff, flip] at h ⊢
+    exact h
+
+theorem iSup_injective_of_isChain {T : Type _} {r : T → Rel α β}
+    (h₁ : ∀ t, (r t).Injective) (h₂ : IsChain (· ≤ ·) (Set.range r)) :
+    (⨆ t, r t).Injective := by
+  constructor
+  intro x₁ x₂ y hx₁ hx₂
+  rw [iSup_apply_iff] at hx₁ hx₂
+  obtain ⟨t₁, hx₁⟩ := hx₁
+  obtain ⟨t₂, hx₂⟩ := hx₂
+  obtain (h | h) := h₂.total ⟨t₁, rfl⟩ ⟨t₂, rfl⟩
+  · exact (h₁ t₂).injective (h x₁ y hx₁) hx₂
+  · exact (h₁ t₁).injective hx₁ (h x₂ y hx₂)
+
+theorem iSup_coinjective_of_isChain {T : Type _} {r : T → Rel α β}
+    (h₁ : ∀ t, (r t).Coinjective) (h₂ : IsChain (· ≤ ·) (Set.range r)) :
+    (⨆ t, r t).Coinjective := by
+  have := iSup_injective_of_isChain (r := λ t ↦ (r t).inv) ?_ (isChain_inv h₂)
+  · rwa [iSup_inv, inv_injective_iff] at this
+  · intro t
+    rw [inv_injective_iff]
+    exact h₁ t
+
+theorem iSup_codomEqDom_of_isChain {T : Type _} {r : T → Rel α α} (h : ∀ t, (r t).CodomEqDom) :
+    (⨆ t, r t).CodomEqDom := by
+  simp only [codomEqDom_iff'] at h ⊢
+  simp only [iSup_apply_iff]
+  constructor
+  · rintro x y ⟨t, ht⟩
+    obtain ⟨u, hu⟩ := (h t).1 x y ht
+    exact ⟨u, t, hu⟩
+  · rintro x y ⟨t, ht⟩
+    obtain ⟨u, hu⟩ := (h t).2 x y ht
+    exact ⟨u, t, hu⟩
+
+theorem iSup_oneOne_of_isChain {T : Type _} {r : T → Rel α β}
+    (h₁ : ∀ t, (r t).OneOne) (h₂ : IsChain (· ≤ ·) (Set.range r)) :
+    (⨆ t, r t).OneOne :=
+  ⟨iSup_injective_of_isChain (λ t ↦ (h₁ t).toInjective) h₂,
+    iSup_coinjective_of_isChain (λ t ↦ (h₁ t).toCoinjective) h₂⟩
+
+theorem iSup_permutative_of_isChain {T : Type _} {r : T → Rel α α}
+    (h₁ : ∀ t, (r t).Permutative) (h₂ : IsChain (· ≤ ·) (Set.range r)) :
+    (⨆ t, r t).Permutative :=
+  ⟨iSup_oneOne_of_isChain (λ t ↦ (h₁ t).toOneOne) h₂,
+    iSup_codomEqDom_of_isChain (λ t ↦ (h₁ t).toCodomEqDom)⟩
+
+theorem biSup_permutative_of_isChain {T : Type _} {r : T → Rel α α} {s : Set T}
+    (h₁ : ∀ t ∈ s, (r t).Permutative) (h₂ : IsChain (· ≤ ·) (r '' s)) :
+    (⨆ t ∈ s, r t).Permutative := by
+  have := iSup_permutative_of_isChain (T := s) (λ t ↦ h₁ t t.prop) ?_
+  · rwa [iSup_subtype] at this
+  · rwa [image_eq_range] at h₂
 
 -- Compare Mathlib.Data.Rel and Mathlib.Logic.Relator.
 

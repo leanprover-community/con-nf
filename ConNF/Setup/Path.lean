@@ -205,9 +205,12 @@ theorem Path.deriv_sderiv (A : α ↝ β) (B : β ↝ γ) (h : δ < γ) :
     A ⇘ (B ↘ h) = A ⇘ B ↘ h :=
   rfl
 
-theorem Path.botDeriv_eq (A : α ↝ β) (B : β ↝ ⊥) :
-    A ⇘. B = A ⇘ B :=
-  rfl
+@[simp]
+theorem Path.deriv_sderivBot (A : α ↝ β) (B : β ↝ γ) :
+    A ⇘ (B ↘.) = A ⇘ B ↘. := by
+  cases γ using WithBot.recBotCoe with
+  | bot => rfl
+  | coe => rfl
 
 @[simp]
 theorem Path.botSderiv_bot_eq (A : α ↝ ⊥) :

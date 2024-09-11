@@ -47,6 +47,14 @@ theorem fuzz_injective {hβγ : β ≠ γ} {t₁ t₂ : Tangle β} (h : fuzz hβ
   cases h
   rfl
 
+theorem fuzz_ν (hβγ : β ≠ γ) (t : Tangle β) :
+    pos t < (fuzz hβγ t).ν :=
+  funOfDeny_gt_deny _ _ _ t _ rfl
+
+theorem pos_fuzz (hβγ : β ≠ γ) (t : Tangle β) :
+    pos t < pos (fuzz hβγ t) :=
+  (fuzz_ν hβγ t).trans (fuzz hβγ t).lt_pos
+
 end fuzz
 
 class TypedNearLitters {α : Λ} [ModelData α] [Position (Tangle α)] where

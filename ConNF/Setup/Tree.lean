@@ -32,6 +32,15 @@ theorem deriv_apply (T : Tree X α) (A : α ↝ β) (B : β ↝ ⊥) :
     (T ⇘ A) B = T (A ⇘ B) :=
   rfl
 
+theorem deriv_deriv (T : Tree X α) (A : α ↝ β) (B : β ↝ γ) :
+    T ⇘ A ⇘ B = T ⇘ (A ⇘ B) := by
+  funext C
+  simp only [deriv_apply, Path.deriv_assoc]
+
+theorem deriv_sderiv (T : Tree X α) (A : α ↝ β) (h : γ < β) :
+    T ⇘ A ↘ h = T ⇘ (A ↘ h) := by
+  rw [← Derivative.deriv_single, ← Derivative.deriv_single, deriv_deriv]
+
 @[simp]
 theorem sderiv_apply (T : Tree X α) (h : β < α) (B : β ↝ ⊥) :
     (T ↘ h) B = T (B ↗ h) :=

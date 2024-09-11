@@ -48,6 +48,11 @@ def Approximates (ψ : StrApprox β) (ρ : AllPerm β) : Prop :=
 def ExactlyApproximates (ψ : StrApprox β) (ρ : AllPerm β) : Prop :=
   ∀ A, (ψ A).ExactlyApproximates (ρᵁ A)
 
+theorem ExactlyApproximates.toApproximates {ψ : StrApprox β} {ρ : AllPerm β}
+    (h : ψ.ExactlyApproximates ρ) :
+    ψ.Approximates ρ :=
+  λ A ↦ (h A).toApproximates
+
 def FreedomOfAction (β : TypeIndex) [LeLevel β] : Prop :=
   ∀ ψ : StrApprox β, ψ.Coherent → ∃ ρ, ψ.ExactlyApproximates ρ
 
@@ -187,8 +192,8 @@ theorem smul_support_zpow {ψ : StrApprox β} {ρ : AllPerm β} (h : ψ.Approxim
     exact hLN B _ hN
 
 theorem addInflexible'_coherent {ψ : StrApprox β} {A : β ↝ ⊥}
-    {P : InflexiblePath β} {t : Tangle P.δ} {hA : A = P.A ↘ P.hε ↘.}
-    {ρ : AllPerm P.δ} {hρ : Approximates (ψ ⇘ P.A ↘ P.hδ) ρ}
+    {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.)
+    {ρ : AllPerm P.δ} (hρ : Approximates (ψ ⇘ P.A ↘ P.hδ) ρ)
     {hL : ∀ n : ℤ, fuzz P.hδε (ρ ^ n • t) ∉ (ψ A)ᴸ.dom}
     (hψ : ψ.Coherent)
     (hLA : ∀ B, ∀ a ∈ (t.support ⇘. B)ᴬ, a ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴬ.dom)
@@ -207,9 +212,9 @@ theorem addInflexible'_coherent {ψ : StrApprox β} {A : β ↝ ⊥}
   · rw [add_comm, zpow_add, zpow_one, mul_smul]
 
 theorem mem_dom_of_inflexible {ψ : StrApprox β} {A : β ↝ ⊥} {L : Litter}
-    {P : InflexiblePath β} {t : Tangle P.δ} {hA : A = P.A ↘ P.hε ↘.} {ht : L = fuzz P.hδε t}
-    {ρ : AllPerm P.δ} {hρ : Approximates (ψ ⇘ P.A ↘ P.hδ) ρ}
-    {n : ℤ} {hL : fuzz P.hδε (ρ ^ n • t) ∈ (ψ A)ᴸ.dom}
+    {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L = fuzz P.hδε t)
+    {ρ : AllPerm P.δ} (hρ : Approximates (ψ ⇘ P.A ↘ P.hδ) ρ)
+    {n : ℤ} (hL : fuzz P.hδε (ρ ^ n • t) ∈ (ψ A)ᴸ.dom)
     (hψ : ψ.Coherent)
     (hLA : ∀ B, ∀ a ∈ (t.support ⇘. B)ᴬ, a ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴬ.dom)
     (hLN : ∀ B, ∀ N ∈ (t.support ⇘. B)ᴺ, N ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴺ.dom) :
@@ -246,6 +251,81 @@ theorem mem_dom_of_inflexible {ψ : StrApprox β} {A : β ↝ ⊥} {L : Litter}
         exact hLA
       · simp only [Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv]
         exact hLN
+
+open scoped Classical in
+def addInflexible (ψ : StrApprox β) (A : β ↝ ⊥)
+    (P : InflexiblePath β) (t : Tangle P.δ) (ρ : AllPerm P.δ) : StrApprox β :=
+  if hL : ∀ n : ℤ, fuzz P.hδε (ρ ^ n • t) ∉ (ψ A)ᴸ.dom then ψ.addInflexible' P t ρ hL else ψ
+
+theorem le_addInflexible (ψ : StrApprox β) (A : β ↝ ⊥)
+    (P : InflexiblePath β) (t : Tangle P.δ) (ρ : AllPerm P.δ) :
+    ψ ≤ ψ.addInflexible A P t ρ := by
+  rw [addInflexible]
+  split_ifs
+  · exact le_addOrbit
+  · exact le_rfl
+
+theorem addInflexible_coherent {ψ : StrApprox β} {A : β ↝ ⊥}
+    {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.)
+    {ρ : AllPerm P.δ} (hρ : Approximates (ψ ⇘ P.A ↘ P.hδ) ρ)
+    (hψ : ψ.Coherent)
+    (hLA : ∀ B, ∀ a ∈ (t.support ⇘. B)ᴬ, a ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴬ.dom)
+    (hLN : ∀ B, ∀ N ∈ (t.support ⇘. B)ᴺ, N ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴺ.dom) :
+    (ψ.addInflexible A P t ρ).Coherent := by
+  rw [addInflexible]
+  split_ifs
+  · exact addInflexible'_coherent hA hρ hψ hLA hLN
+  · exact hψ
+
+theorem mem_addInflexible_dom {ψ : StrApprox β} {A : β ↝ ⊥} {L : Litter}
+    {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (hL : L = fuzz P.hδε t)
+    {ρ : AllPerm P.δ} (hρ : Approximates (ψ ⇘ P.A ↘ P.hδ) ρ)
+    (hψ : ψ.Coherent)
+    (hLA : ∀ B, ∀ a ∈ (t.support ⇘. B)ᴬ, a ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴬ.dom)
+    (hLN : ∀ B, ∀ N ∈ (t.support ⇘. B)ᴺ, N ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴺ.dom) :
+    L ∈ (ψ.addInflexible A P t ρ A)ᴸ.dom := by
+  rw [addInflexible]
+  split_ifs with hL'
+  · rw [addInflexible', addOrbit_apply, BaseApprox.addOrbit_litters, Rel.sup_dom,
+      BaseApprox.addOrbitLitters_dom]
+    right
+    use 0
+    simp only [zpow_zero, one_smul, hL]
+  · push_neg at hL'
+    obtain ⟨n, hn⟩ := hL'
+    exact mem_dom_of_inflexible hA hL hρ hn hψ hLA hLN
+
+theorem exists_extension_of_minimal (ψ : StrApprox β) (A : β ↝ ⊥) (L : Litter) (hψ : ψ.Coherent)
+    (foa : ∀ δ < β, [LeLevel δ] → FreedomOfAction δ)
+    (hLA : ∀ B, ∀ a, pos a < pos L → a ∈ (ψ B)ᴬ.dom)
+    (hLN : ∀ B, ∀ N, pos N < pos L → N ∈ (ψ B)ᴺ.dom) :
+    ∃ χ ≥ ψ, χ.Coherent ∧ L ∈ (χ A)ᴸ.dom := by
+  obtain (⟨P, t, hA, ht⟩ | hL) := inflexible_cases A L
+  · obtain ⟨ρ, hρ⟩ := foa P.δ (P.hδ.trans_le P.A.le) (ψ ⇘ (P.A ↘ P.hδ)) (hψ.comp (P.A ↘ P.hδ))
+    have h₁ : ∀ (B : P.δ ↝ ⊥), ∀ a ∈ (t.support ⇘. B)ᴬ, a ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴬ.dom := by
+      intro B a ha
+      apply hLA
+      rw [ht]
+      exact (pos_atom_lt_pos t B a ha).trans (pos_fuzz P.hδε t)
+    have h₂ : ∀ (B : P.δ ↝ ⊥), ∀ N ∈ (t.support ⇘. B)ᴺ, N ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴺ.dom := by
+      intro B N hN
+      apply hLN
+      rw [ht]
+      exact (pos_nearLitter_lt_pos t B N hN).trans (pos_fuzz P.hδε t)
+    refine ⟨addInflexible ψ A P t ρ, le_addInflexible ψ A P t ρ, ?_, ?_⟩
+    · refine addInflexible_coherent hA ?_ hψ h₁ h₂
+      rw [Tree.deriv_sderiv]
+      exact hρ.toApproximates
+    · refine mem_addInflexible_dom hA ht ?_ hψ h₁ h₂
+      rw [Tree.deriv_sderiv]
+      exact hρ.toApproximates
+  · by_cases hL' : L ∈ (ψ A)ᴸ.dom
+    · use ψ
+    · refine ⟨addFlexible ψ A L hL', le_addOrbit, addFlexible_coherent hψ hL, ?_⟩
+      rw [addFlexible, addOrbit_apply, BaseApprox.addOrbit_litters, Rel.sup_dom,
+        BaseApprox.addOrbitLitters_dom]
+      right
+      use 0
 
 end StrApprox
 

@@ -92,6 +92,28 @@ theorem smul_support_smul_eq_iff (ψ : StrApprox β) (S : Support β) (π : StrP
   rw [inv_smul_smul] at this
   rw [this]
 
+/-- An upper bound for a chain of approximations. -/
+def upperBound (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c) : StrApprox β :=
+  λ A ↦ BaseApprox.upperBound ((· A) '' c) (hc.image _ _ (λ _ _ h ↦ h A))
+
+theorem le_upperBound (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c) :
+    ∀ ψ ∈ c, ψ ≤ upperBound c hc :=
+  λ ψ hψ _ ↦ BaseApprox.le_upperBound _ _ _ ⟨ψ, hψ, rfl⟩
+
+theorem exists_isMax (ψ : StrApprox β) : ∃ χ ≥ ψ, IsMax χ := by
+  have := zorn_le₀ {χ | ψ ≤ χ} ?_
+  · obtain ⟨χ, hχ₁, hχ₂⟩ := this
+    refine ⟨χ, hχ₁, ?_⟩
+    intro χ' h
+    exact hχ₂ (hχ₁.trans h) h
+  · intro c hc₁ hc₂
+    obtain rfl | hc₃ := c.eq_empty_or_nonempty
+    · refine ⟨ψ, ?_, ?_⟩
+      · exact le_refl ψ
+      · simp only [Set.mem_empty_iff_false, false_implies, implies_true]
+    · obtain ⟨ψ', hψ'⟩ := hc₃
+      exact ⟨upperBound c hc₂, (hc₁ hψ').trans (le_upperBound c hc₂ ψ' hψ'), le_upperBound c hc₂⟩
+
 end StrApprox
 
 @[ext]
@@ -103,6 +125,14 @@ structure InflexiblePath (β : TypeIndex) where
   hε : ε < γ
   hδε : δ ≠ ε
   A : β ↝ γ
+
+instance {β β' : TypeIndex} : Coderivative (InflexiblePath β) (InflexiblePath β') β' β where
+  coderiv P B := ⟨P.γ, P.δ, P.ε, P.hδ, P.hε, P.hδε, B ⇘ P.A⟩
+
+@[simp]
+theorem InflexiblePath.coderiv_A {β β' : TypeIndex} (P : InflexiblePath β) (B : β' ↝ β) :
+    (P ⇗ B).A = B ⇘ P.A :=
+  rfl
 
 variable [Level] [CoherentData]
 
@@ -126,6 +156,14 @@ theorem not_inflexible_iff [LeLevel β] (A : β ↝ ⊥) (L : Litter) :
     ¬Inflexible A L ↔ ∀ P : InflexiblePath β, ∀ t, A = P.A ↘ P.hε ↘. → L ≠ fuzz P.hδε t := by
   rw [inflexible_iff]
   push_neg
+  rfl
+
+theorem inflexible_deriv [LeLevel β] {A : β ↝ ⊥} {L : Litter} (h : Inflexible A L)
+    {β' : TypeIndex} [LeLevel β'] (B : β' ↝ β) :
+    Inflexible (B ⇘ A) L := by
+  obtain ⟨P, t, hA, ht⟩ := h
+  refine ⟨P ⇗ B, t, ?_, ht⟩
+  rw [hA]
   rfl
 
 theorem inflexible_cases [LeLevel β] (A : β ↝ ⊥) (L : Litter) :
@@ -290,6 +328,32 @@ theorem addOrbit_coherent [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {f :
   · rw [addOrbit_apply_ne B hB]
     intro hL
     exact (hψ B L₁ L₂ hL).mono le_addOrbit
+
+theorem Coherent.comp [LeLevel β] {ψ : StrApprox β} (hψ : ψ.Coherent)
+    {γ : TypeIndex} [LeLevel γ] (A : β ↝ γ) :
+    Coherent (ψ ⇘ A) := by
+  intro B L₁ L₂ h
+  specialize hψ (A ⇘ B) L₁ L₂ h
+  constructor
+  · intro P t hA ht
+    have := hψ.inflexible (P ⇗ A) t ?_ ht
+    · obtain ⟨ρ, hρ₁, hρ₂⟩ := this
+      refine ⟨ρ, ?_, hρ₂⟩
+      rwa [InflexiblePath.coderiv_A, ← Tree.deriv_deriv] at hρ₁
+    · rw [hA]
+      rfl
+  · intro hL₁ hL₂
+    obtain (hL₁' | hL₁') := inflexible_cases (A ⇘ B) L₁
+    · obtain ⟨P, t, rfl, ht⟩ := hL₂
+      obtain ⟨P', t', hA', ht'⟩ := hL₁'
+      suffices P' = P ⇗ A by
+        cases this
+        cases hL₁ ⟨P, t', rfl, ht'⟩
+      rw [coherentAt_inflexible hA' ht'] at hψ
+      obtain ⟨ρ, hρ₁, hρ₂⟩ := hψ
+      rw [Path.deriv_sderivBot, Path.deriv_sderiv] at hA'
+      exact inflexiblePath_subsingleton hA' rfl hρ₂ ht
+    · cases hψ.flexible hL₁' (inflexible_deriv hL₂ A)
 
 end StrApprox
 

@@ -356,9 +356,12 @@
 \begin{proposition}
   \uses{def:StrApprox.Coherent}
   \label{prop:StrApprox.chain}
+  \lean{ConNF.StrApprox.exists_isMax}
+  \leanok
   If \( (\psi_i)_{i : I} \) is a chain of coherent approximations where \( I \) is a linear order, then the supremum \( \psi \) is coherent.
 \end{proposition}
 \begin{proof}
+  \leanok
   Direct, using the same idea as the proof of \cref{prop:StrApprox.addOrbit}.
 \end{proof}
 \begin{theorem}[freedom of action]
