@@ -33,6 +33,11 @@ namespace BaseApprox
 instance : SuperL BaseApprox (Rel Litter Litter) where
   superL := litters
 
+@[ext]
+theorem ext {ψ χ : BaseApprox} (h₁ : ψ.exceptions = χ.exceptions) (h₂ : ψᴸ = χᴸ) :
+    ψ = χ := by
+  cases ψ; cases χ; cases h₁; cases h₂; rfl
+
 theorem litters_permutative (ψ : BaseApprox) :
     ψᴸ.Permutative :=
   ψ.litters_permutative'
@@ -303,6 +308,83 @@ theorem nearLitters_permutative (ψ : BaseApprox) : ψᴺ.Permutative := by
     ⟨subset_antisymm ψ.nearLitters_codom_subset_dom ?_⟩⟩
   have := ψ⁻¹.nearLitters_codom_subset_dom
   rwa [inv_nearLitters] at this
+
+instance : LE BaseApprox where
+  le ψ χ := ψ.exceptions = χ.exceptions ∧ ψᴸ ≤ χᴸ
+
+instance : PartialOrder BaseApprox where
+  le_refl ψ := ⟨rfl, le_rfl⟩
+  le_trans ψ₁ ψ₂ ψ₃ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
+  le_antisymm ψ₁ ψ₂ h₁ h₂ := BaseApprox.ext h₁.1 (le_antisymm h₁.2 h₂.2)
+
+theorem litters_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
+    ψᴸ ≤ χᴸ :=
+  h.2
+
+theorem sublitter_eq_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) (L : Litter) :
+    ψ.sublitter L = χ.sublitter L := by
+  ext a
+  rw [sublitter, sublitter, NearLitter.mk_atoms, NearLitter.mk_atoms,
+    sublitterAtoms, sublitterAtoms, h.1]
+
+theorem typical_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
+    ψ.typical ≤ χ.typical := by
+  intro a₁ a₂ hψ
+  obtain ⟨L₁, L₂, hψ, i⟩ := hψ
+  rw [sublitter_eq_of_le h, sublitter_eq_of_le h]
+  exact ⟨L₁, L₂, litters_le_of_le h L₁ L₂ hψ, i⟩
+
+theorem atoms_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
+    ψᴬ ≤ χᴬ :=
+  sup_le_sup h.1.le (typical_le_of_le h)
+
+def addOrbitLitters (f : ℤ → Litter) :
+    Rel Litter Litter :=
+  λ L₁ L₂ ↦ ∃ n : ℤ, L₁ = f n ∧ L₂ = f (n + 1)
+
+theorem addOrbitLitters_codomEqDom (f : ℤ → Litter) :
+    (addOrbitLitters f).CodomEqDom := by
+  constructor
+  ext L
+  constructor
+  · rintro ⟨_, n, rfl, rfl⟩
+    exact ⟨_, n + 1, rfl, rfl⟩
+  · rintro ⟨_, n, rfl, rfl⟩
+    refine ⟨_, n - 1, rfl, ?_⟩
+    rw [sub_add_cancel]
+
+theorem addOrbitLitters_oneOne (f : ℤ → Litter) (hf : ∀ m n k, f m = f n → f (m + k) = f (n + k)) :
+    (addOrbitLitters f).OneOne := by
+  constructor
+  · constructor
+    rintro L₁ L₂ L₃ ⟨m, rfl, rfl⟩ ⟨n, rfl, h⟩
+    have := hf (m + 1) (n + 1) (-1) h
+    rwa [add_neg_cancel_right, add_neg_cancel_right] at this
+  · constructor
+    rintro L₁ L₂ L₃ ⟨m, rfl, rfl⟩ ⟨n, h, rfl⟩
+    exact hf m n 1 h
+
+theorem addOrbitLitters_permutative (f : ℤ → Litter)
+    (hf : ∀ m n k, f m = f n → f (m + k) = f (n + k)) :
+    (addOrbitLitters f).Permutative :=
+  ⟨addOrbitLitters_oneOne f hf, addOrbitLitters_codomEqDom f⟩
+
+theorem disjoint_litters_dom_addOrbitLitters_dom
+    (ψ : BaseApprox) (f : ℤ → Litter) (hfψ : ∀ n, f n ∉ ψᴸ.dom) :
+    Disjoint ψᴸ.dom (addOrbitLitters f).dom := by
+  rw [Set.disjoint_iff_forall_ne]
+  rintro _ h₁ _ ⟨_, n, rfl, rfl⟩ rfl
+  exact hfψ n h₁
+
+def addOrbit (ψ : BaseApprox) (f : ℤ → Litter)
+    (hf : ∀ m n k, f m = f n → f (m + k) = f (n + k)) (hfψ : ∀ n, f n ∉ ψᴸ.dom) : BaseApprox where
+  exceptions := ψ.exceptions
+  litters := ψ.litters ⊔ addOrbitLitters f
+  exceptions_permutative := ψ.exceptions_permutative
+  litters_permutative' :=
+    sup_permutative ψ.litters_permutative (addOrbitLitters_permutative f hf)
+      (disjoint_litters_dom_addOrbitLitters_dom ψ f hfψ)
+  exceptions_small := ψ.exceptions_small
 
 end BaseApprox
 

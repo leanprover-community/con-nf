@@ -137,11 +137,15 @@
 \begin{definition}
   \uses{def:BaseApprox}
   \label{def:BaseApprox.LE}
+  \lean{ConNF.BaseApprox.instPartialOrder}
+  \leanok
   We define a partial order on base approximations by setting \( \psi \leq \chi \) when \( \psi^{E\Atom} = \chi^{E\Atom} \) and \( \psi^\Litter \leq \chi^\Litter \).
 \end{definition}
 \begin{proposition}[adding orbits]
   \uses{def:BaseApprox.LE}
   \label{prop:BaseApprox.addOrbit}
+  \lean{ConNF.BaseApprox.addOrbit}
+  \leanok
   Let \( \psi \) be a base approximation, and let \( L : \mathbb N \to \Litter \) be a function such that
   \[ L(m) = L(n) \to L(m+k) = L(n+k) \]
   for all integers \( m, n, k : \mathbb Z \).
@@ -149,6 +153,7 @@
   Then there is an extension \( \chi \geq \psi \) such that \( \chi^\Litter(L(n)) = L(n+1) \) and \( \coim \chi^\Litter = \coim \psi^\Litter \cup \ran L \).
 \end{proposition}
 \begin{proof}
+  \leanok
   Define the relation
   \[ R = \{ (L(n), L(n+1)) \mid n : \mathbb Z \} \]
   This clearly has equal image and coimage.
