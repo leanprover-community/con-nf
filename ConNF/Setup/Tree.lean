@@ -74,6 +74,14 @@ theorem inv_apply [Group X] (T : Tree X α) (A : α ↝ ⊥) :
     T⁻¹ A = (T A)⁻¹ :=
   rfl
 
+/-- The partial order on the type of `α`-trees of `X` is given by "branchwise" comparison. -/
+instance partialOrder [PartialOrder X] : PartialOrder (Tree X α) :=
+  Pi.partialOrder
+
+theorem le_iff [PartialOrder X] (T₁ T₂ : Tree X α) :
+    T₁ ≤ T₂ ↔ ∀ A, T₁ A ≤ T₂ A :=
+  Iff.rfl
+
 end Tree
 
 /-!

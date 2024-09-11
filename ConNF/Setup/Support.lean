@@ -51,6 +51,41 @@ theorem ext {S T : BaseSupport} (h₁ : Sᴬ = Tᴬ) (h₂ : Sᴺ = Tᴺ) : S = 
   cases h₂
   rfl
 
+instance : SMul BasePerm BaseSupport where
+  smul π S := ⟨π • Sᴬ, π • Sᴺ⟩
+
+@[simp]
+theorem smul_atoms (π : BasePerm) (S : BaseSupport) :
+    (π • S)ᴬ = π • Sᴬ :=
+  rfl
+
+@[simp]
+theorem smul_nearLitters (π : BasePerm) (S : BaseSupport) :
+    (π • S)ᴺ = π • Sᴺ :=
+  rfl
+
+@[simp]
+theorem smul_atoms_eq_of_smul_eq {π : BasePerm} {S : BaseSupport}
+    (h : π • S = S) :
+    π • Sᴬ = Sᴬ := by
+  rw [← smul_atoms, h]
+
+@[simp]
+theorem smul_nearLitters_eq_of_smul_eq {π : BasePerm} {S : BaseSupport}
+    (h : π • S = S) :
+    π • Sᴺ = Sᴺ := by
+  rw [← smul_nearLitters, h]
+
+instance : MulAction BasePerm BaseSupport where
+  one_smul S := by
+    apply ext
+    · rw [smul_atoms, one_smul]
+    · rw [smul_nearLitters, one_smul]
+  mul_smul π₁ π₂ S := by
+    apply ext
+    · rw [smul_atoms, smul_atoms, smul_atoms, mul_smul]
+    · rw [smul_nearLitters, smul_nearLitters, smul_nearLitters, mul_smul]
+
 end BaseSupport
 
 def baseSupportEquiv : BaseSupport ≃ Enumeration Atom × Enumeration NearLitter where
@@ -156,6 +191,11 @@ instance {α : TypeIndex} : MulAction (StrPerm α) (Support α) where
     apply ext'
     · rw [smul_atoms, smul_atoms, smul_atoms, mul_smul]
     · rw [smul_nearLitters, smul_nearLitters, smul_nearLitters, mul_smul]
+
+@[simp]
+theorem smul_derivBot {α : TypeIndex} (π : StrPerm α) (S : Support α) (A : α ↝ ⊥) :
+    (π • S) ⇘. A = π A • (S ⇘. A) :=
+  rfl
 
 end Support
 

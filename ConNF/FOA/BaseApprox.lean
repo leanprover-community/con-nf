@@ -1,4 +1,4 @@
-import ConNF.Setup.NearLitter
+import ConNF.Setup.Support
 
 /-!
 # Base approximations
@@ -338,6 +338,75 @@ theorem atoms_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
     ψᴬ ≤ χᴬ :=
   sup_le_sup h.1.le (typical_le_of_le h)
 
+theorem nearLitters_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
+    ψᴺ ≤ χᴺ := by
+  rintro N₁ N₂ ⟨h₁, h₂, h₃⟩
+  refine ⟨litters_le_of_le h N₁ᴸ N₂ᴸ h₁, ?_, ?_⟩
+  · exact h₂.trans <| dom_mono <| atoms_le_of_le h
+  · rw [← h₃]
+    symm
+    apply image_eq_of_le_of_le (atoms_le_of_le h)
+    intro a₁ ha₁ a₂ ha₂
+    obtain ⟨a₃, ha₃⟩ := h₂ ha₁
+    cases χ.atoms_permutative.coinjective ha₂ (atoms_le_of_le h a₁ a₃ ha₃)
+    exact ha₃
+
+instance : SMul BaseApprox BaseSupport where
+  smul ψ S := ⟨Sᴬ.comp ψᴬ ψ.atoms_permutative.toCoinjective,
+    Sᴺ.comp ψᴺ ψ.nearLitters_permutative.toCoinjective⟩
+
+theorem smul_atoms (ψ : BaseApprox) (S : BaseSupport) :
+    (ψ • S)ᴬ = Sᴬ.comp ψᴬ ψ.atoms_permutative.toCoinjective :=
+  rfl
+
+theorem smul_nearLitters (ψ : BaseApprox) (S : BaseSupport) :
+    (ψ • S)ᴺ = Sᴺ.comp ψᴺ ψ.nearLitters_permutative.toCoinjective :=
+  rfl
+
+theorem smul_support_eq_smul_iff (ψ : BaseApprox) (S : BaseSupport) (π : BasePerm) :
+    ψ • S = π • S ↔ (∀ a ∈ Sᴬ, ψᴬ a (π • a)) ∧ (∀ N ∈ Sᴺ, ψᴺ N (π • N)) := by
+  constructor
+  · intro h
+    constructor
+    · rintro a ⟨i, ha⟩
+      have : (π • S)ᴬ.rel i (π • a) := by
+        rwa [BaseSupport.smul_atoms, Enumeration.smul_rel, inv_smul_smul]
+      rw [← h] at this
+      obtain ⟨b, hb, hψ⟩ := this
+      cases Sᴬ.rel_coinjective.coinjective ha hb
+      exact hψ
+    · rintro a ⟨i, ha⟩
+      have : (π • S)ᴺ.rel i (π • a) := by
+        rwa [BaseSupport.smul_nearLitters, Enumeration.smul_rel, inv_smul_smul]
+      rw [← h] at this
+      obtain ⟨b, hb, hψ⟩ := this
+      cases Sᴺ.rel_coinjective.coinjective ha hb
+      exact hψ
+  · intro h
+    ext : 2; rfl; swap; rfl
+    · ext i a : 3
+      rw [smul_atoms, BaseSupport.smul_atoms, Enumeration.smul_rel]
+      constructor
+      · rintro ⟨b, hb, hψ⟩
+        cases ψ.atoms_permutative.coinjective hψ (h.1 b ⟨i, hb⟩)
+        rwa [inv_smul_smul]
+      · intro ha
+        refine ⟨π⁻¹ • a, ha, ?_⟩
+        have := h.1 (π⁻¹ • a) ⟨i, ha⟩
+        rwa [smul_inv_smul] at this
+    · ext i a : 3
+      rw [smul_nearLitters, BaseSupport.smul_nearLitters, Enumeration.smul_rel]
+      constructor
+      · rintro ⟨b, hb, hψ⟩
+        cases ψ.nearLitters_permutative.coinjective hψ (h.2 b ⟨i, hb⟩)
+        rwa [inv_smul_smul]
+      · intro ha
+        refine ⟨π⁻¹ • a, ha, ?_⟩
+        have := h.2 (π⁻¹ • a) ⟨i, ha⟩
+        rwa [smul_inv_smul] at this
+
+section addOrbit
+
 def addOrbitLitters (f : ℤ → Litter) :
     Rel Litter Litter :=
   λ L₁ L₂ ↦ ∃ n : ℤ, L₁ = f n ∧ L₂ = f (n + 1)
@@ -385,6 +454,19 @@ def addOrbit (ψ : BaseApprox) (f : ℤ → Litter)
     sup_permutative ψ.litters_permutative (addOrbitLitters_permutative f hf)
       (disjoint_litters_dom_addOrbitLitters_dom ψ f hfψ)
   exceptions_small := ψ.exceptions_small
+
+variable {ψ : BaseApprox} {f : ℤ → Litter} {hf : ∀ m n k, f m = f n → f (m + k) = f (n + k)}
+  {hfψ : ∀ n, f n ∉ ψᴸ.dom}
+
+theorem addOrbit_litters :
+    (ψ.addOrbit f hf hfψ)ᴸ = ψᴸ ⊔ addOrbitLitters f :=
+  rfl
+
+theorem le_addOrbit :
+    ψ ≤ ψ.addOrbit f hf hfψ :=
+  ⟨rfl, le_sup_left⟩
+
+end addOrbit
 
 end BaseApprox
 

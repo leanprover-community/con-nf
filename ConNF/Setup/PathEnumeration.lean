@@ -22,6 +22,20 @@ variable [Params.{u}]
 
 namespace Enumeration
 
+/-- A helper function for making relations with domain and codomain of the form `α ↝ ⊥ × X`
+by defining it on each branch. -/
+def relWithPath {X Y : Type u} {α : TypeIndex} (f : α ↝ ⊥ → Rel X Y) :
+    Rel (α ↝ ⊥ × X) (α ↝ ⊥ × Y) :=
+  λ x y ↦ x.1 = y.1 ∧ f x.1 x.2 y.2
+
+theorem relWithPath_coinjective {X Y : Type u} {α : TypeIndex} {f : α ↝ ⊥ → Rel X Y}
+    (hf : ∀ A, (f A).Coinjective) :
+    (relWithPath f).Coinjective := by
+  constructor
+  rintro ⟨_, y₁⟩ ⟨_, y₂⟩ ⟨A, x⟩ ⟨rfl, h₁⟩ ⟨rfl, h₂⟩
+  cases (hf A).coinjective h₁ h₂
+  rfl
+
 instance (X : Type u) (α β : TypeIndex) :
     Derivative (Enumeration (α ↝ ⊥ × X)) (Enumeration (β ↝ ⊥ × X)) α β where
   deriv E A := E.invImage (λ x ↦ (x.1 ⇗ A, x.2))
@@ -68,7 +82,7 @@ instance {X : Type _} {α : TypeIndex} [MulAction BasePerm X] :
   smul π E := E.invImage (λ x ↦ (x.1, (π x.1)⁻¹ • x.2)) (mulAction_aux π)
 
 @[simp]
-theorem smul_rel {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
+theorem smulPath_rel {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
     (π : StrPerm α) (E : Enumeration (α ↝ ⊥ × X)) (i : κ) (x : α ↝ ⊥ × X) :
     (π • E).rel i x ↔ E.rel i (x.1, (π x.1)⁻¹ • x.2) :=
   Iff.rfl
@@ -78,11 +92,11 @@ instance {X : Type _} {α : TypeIndex} [MulAction BasePerm X] :
   one_smul E := by
     ext i x
     · rfl
-    · rw [smul_rel, Tree.one_apply, inv_one, one_smul]
+    · rw [smulPath_rel, Tree.one_apply, inv_one, one_smul]
   mul_smul π₁ π₂ E := by
     ext i x
     · rfl
-    · rw [smul_rel, smul_rel, smul_rel, Tree.mul_apply, mul_inv_rev, mul_smul]
+    · rw [smulPath_rel, smulPath_rel, smulPath_rel, Tree.mul_apply, mul_inv_rev, mul_smul]
 
 theorem smul_eq_of_forall_smul_eq {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
     {π : StrPerm α} {E : Enumeration (α ↝ ⊥ × X)}
@@ -100,7 +114,7 @@ theorem smul_eq_of_forall_smul_eq {X : Type _} {α : TypeIndex} [MulAction BaseP
     · intro hx
       have := h A x ⟨i, hx⟩
       rw [← this]
-      rwa [smul_rel, inv_smul_smul]
+      rwa [smulPath_rel, inv_smul_smul]
 
 theorem smul_eq_of_mem_of_smul_eq {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
     {π : StrPerm α} {E : Enumeration (α ↝ ⊥ × X)}
@@ -108,7 +122,6 @@ theorem smul_eq_of_mem_of_smul_eq {X : Type _} {α : TypeIndex} [MulAction BaseP
     π A • x = x := by
   obtain ⟨i, hx⟩ := hx
   have := congr_fun₂ (congr_arg rel h) i (A, x)
-  simp only [smul_rel, eq_iff_iff] at this
   have := E.rel_coinjective.coinjective hx (this.mpr hx)
   rw [Prod.mk.injEq, eq_inv_smul_iff] at this
   exact this.2

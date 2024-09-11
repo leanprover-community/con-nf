@@ -251,7 +251,18 @@ theorem Path.sderiv_index_injective {A : α ↝ β} {B : α ↝ γ} {hδβ : δ 
   cases h
   rfl
 
+theorem Path.sderivBot_index_injective {β γ : Λ} {A : α ↝ β} {B : α ↝ γ}
+    (h : A ↘. = B ↘.) :
+    β = γ := by
+  cases h
+  rfl
+
 theorem Path.sderiv_path_injective {A B : α ↝ β} {hγ : γ < β} (h : A ↘ hγ = B ↘ hγ) :
+    A = B := by
+  cases h
+  rfl
+
+theorem Path.sderivBot_path_injective {β : Λ} {A B : α ↝ β} (h : A ↘. = B ↘.) :
     A = B := by
   cases h
   rfl

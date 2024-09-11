@@ -5,11 +5,7 @@ open scoped symmDiff
 
 namespace Rel
 
-variable {α β : Type _}
-
--- Note the backward composition style of Rel.comp!
-@[inherit_doc]
-scoped infixr:80 " • " => Rel.comp
+variable {α β γ : Type _}
 
 @[mk_iff]
 structure Injective (r : Rel α β) : Prop where
@@ -109,6 +105,12 @@ theorem inv_preimage {r : Rel α β} {s : Set α} :
     r.inv.preimage s = r.image s :=
   rfl
 
+theorem comp_inv {r : Rel α β} {s : Rel β γ} :
+    (r.comp s).inv = s.inv.comp r.inv := by
+  ext c a
+  simp only [inv, flip, comp]
+  tauto
+
 theorem Injective.image_injective {r : Rel α β} (h : r.Injective) {s t : Set α}
     (hs : s ⊆ r.dom) (ht : t ⊆ r.dom) (hst : r.image s = r.image t) : s = t := by
   rw [Set.ext_iff] at hst ⊢
@@ -161,6 +163,18 @@ theorem Permutative.inv {r : Rel α α} (h : r.Permutative) : r.inv.Permutative 
 
 theorem Permutative.inv_dom {r : Rel α α} (h : r.Permutative) : r.inv.dom = r.dom :=
   h.codom_eq_dom
+
+theorem Injective.comp {r : Rel α β} {s : Rel β γ} (hr : r.Injective) (hs : s.Injective) :
+    (r.comp s).Injective := by
+  constructor
+  rintro a₁ a₂ c ⟨b₁, hr₁, hs₁⟩ ⟨b₂, hr₂, hs₂⟩
+  cases hs.injective hs₁ hs₂
+  exact hr.injective hr₁ hr₂
+
+theorem Coinjective.comp {r : Rel α β} {s : Rel β γ} (hr : r.Coinjective) (hs : s.Coinjective) :
+    (r.comp s).Coinjective := by
+  rw [← inv_injective_iff, comp_inv]
+  exact Injective.comp (inv_injective_iff.mpr hs) (inv_injective_iff.mpr hr)
 
 /-- An alternative spelling of `Rel.graph` that is useful for proving inequalities of cardinals. -/
 def graph' (r : Rel α β) : Set (α × β) :=
@@ -225,6 +239,15 @@ theorem Injective.image_diff {r : Rel α β} (h : r.Injective) (s t : Set α) :
 theorem Injective.image_symmDiff {r : Rel α β} (h : r.Injective) (s t : Set α) :
     r.image (s ∆ t) = r.image s ∆ r.image t := by
   rw [Set.symmDiff_def, Set.symmDiff_def, image_union, h.image_diff, h.image_diff]
+
+theorem image_eq_of_le_of_le {r s : Rel α β} (h : r ≤ s) {t : Set α} (ht : ∀ x ∈ t, s x ≤ r x) :
+    r.image t = s.image t := by
+  ext y
+  constructor
+  · rintro ⟨x, hx, hy⟩
+    exact ⟨x, hx, h x y hy⟩
+  · rintro ⟨x, hx, hy⟩
+    exact ⟨x, hx, ht x hx y hy⟩
 
 @[simp]
 theorem sup_inv {r s : Rel α β} :

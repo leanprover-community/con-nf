@@ -173,6 +173,35 @@ theorem mem_invImage {f : Y → X} {hf : f.Injective} (y : Y) :
     y ∈ E.invImage f hf ↔ f y ∈ E :=
   Iff.rfl
 
+def comp (E : Enumeration X) (r : Rel X Y) (hr : r.Coinjective) : Enumeration Y where
+  bound := E.bound
+  rel := E.rel.comp r
+  lt_bound := by
+    rintro i ⟨y, x, hy⟩
+    exact E.lt_bound i ⟨x, hy.1⟩
+  rel_coinjective := E.rel_coinjective.comp hr
+
+instance {G X : Type _} [Group G] [MulAction G X] :
+    SMul G (Enumeration X) where
+  smul π E := E.invImage (λ x ↦ π⁻¹ • x) (MulAction.injective π⁻¹)
+
+@[simp]
+theorem smul_rel {G X : Type _} [Group G] [MulAction G X]
+    (π : G) (E : Enumeration X) (i : κ) (x : X) :
+    (π • E).rel i x ↔ E.rel i (π⁻¹ • x) :=
+  Iff.rfl
+
+instance {G X : Type _} [Group G] [MulAction G X] :
+    MulAction G (Enumeration X) where
+  one_smul E := by
+    ext i x
+    · rfl
+    · rw [smul_rel, inv_one, one_smul]
+  mul_smul π₁ π₂ E := by
+    ext i x
+    · rfl
+    · rw [smul_rel, smul_rel, smul_rel, mul_inv_rev, mul_smul]
+
 -- TODO: Some stuff about the partial order on enumerations and concatenation of enumerations.
 
 end Enumeration

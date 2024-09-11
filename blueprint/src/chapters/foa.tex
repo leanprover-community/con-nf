@@ -169,6 +169,8 @@
 \begin{definition}
   \uses{def:BaseApprox.LE,def:Tree}
   \label{def:StrApprox}
+  \lean{ConNF.StrApprox}
+  \leanok
   For a type index \( \beta \), a \emph{\( \beta \)-approximation} is a \( \beta \)-tree of base approximations.
   We define the partial order on \( \beta \)-approximations branchwise.
   We define an action of \( \beta \)-approximations \( \psi \) on \( \beta \)-supports \( S \) by \( (\psi(S))_A = \psi_A(S_A) \).
@@ -176,6 +178,8 @@
 \begin{definition}
   \uses{def:InflexiblePath}
   \label{def:Inflexible}
+  \lean{ConNF.Inflexible}
+  \leanok
   Let \( A \) be a \( \beta \)-extended type index.
   A litter \( L \) is \emph{\( A \)-inflexible} if there is an inflexible \( \beta \)-path \( I \) such that \( A = ((A_I)_{\varepsilon_I})_\bot \) and \( L = f_{\delta_I, \varepsilon_I}(t) \) for some \( t : \Tang_{\delta_I} \).
   The coderivative operation works in the obvious way.
@@ -187,6 +191,8 @@
 \begin{definition}
   \uses{def:StrApprox,def:Inflexible,def:smulApproxSupport}
   \label{def:StrApprox.Coherent}
+  \lean{ConNF.StrApprox.CoherentAt,ConNF.StrApprox.Coherent}
+  \leanok
   A \( \beta \)-approximation \( \psi \) is \emph{coherent} at \( (A, L_1, L_2) \) if:
   \begin{itemize}
     \item If \( L_1 \) is \( A \)-inflexible with inflexible \( \beta \)-path \( I = (\gamma, \delta, \varepsilon, B) \) and tangle \( t : \Tang_\delta \), then there is some \( \delta \)-allowable permutation \( \rho \) such that
@@ -201,11 +207,14 @@
 \begin{proposition}[adding orbits coherently]
   \uses{prop:BaseApprox.addOrbit,def:StrApprox.Coherent}
   \label{prop:StrApprox.addOrbit}
+  \lean{ConNF.StrApprox.addOrbit_coherent}
+  \leanok
   Suppose that \( \psi \) is an approximation and \( L : \mathbb Z \to \Litter \) is a function satisfying the hypotheses of \cref{prop:BaseApprox.addOrbit}.
   Let \( \chi \) be the extension produced by the structural version of this result.\footnote{We need the extension exactly as produced (as data), not an arbitrary extension satisfying the conclusion of the proposition.}
   If \( \psi \) is coherent, and is additionally coherent at \( (L(n), L(n+1)) \) for each integer \( n \), then \( \chi \) is coherent.
 \end{proposition}
 \begin{proof}
+  \leanok
   This proof just relies on the fact that if \( (\psi_B)_\delta(\supp(t)) = \rho(\supp(t)) \), then the same holds for every extension \( \chi \) of \( \psi \).\footnote{Maybe there's a better lemma to abstract out this idea for this and \cref{prop:StrApprox.chain}?}
 \end{proof}
 \begin{proposition}

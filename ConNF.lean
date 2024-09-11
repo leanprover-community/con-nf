@@ -5,6 +5,7 @@ import ConNF.Aux.Set
 import ConNF.Aux.Transfer
 import ConNF.Aux.WellOrder
 import ConNF.FOA.BaseApprox
+import ConNF.FOA.StructApprox
 import ConNF.Setup.Atom
 import ConNF.Setup.BasePerm
 import ConNF.Setup.BasePositions

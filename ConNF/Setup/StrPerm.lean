@@ -17,7 +17,7 @@ namespace ConNF
 
 variable [Params.{u}] {α : TypeIndex}
 
-abbrev StrPerm : TypeIndex → Type _ :=
+abbrev StrPerm : TypeIndex → Type u :=
   Tree BasePerm
 
 end ConNF

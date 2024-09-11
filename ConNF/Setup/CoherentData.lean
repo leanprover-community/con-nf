@@ -9,8 +9,6 @@ In this file, we define the type of coherent data below a particular proper type
 
 ## Main declarations
 
-* `ConNF.InflexiblePath`: A pair of paths starting at `β` that describe a particular way to use
-    a `fuzz` map.
 * `ConNF.CoherentData`: Coherent data below a given level `α`.
 -/
 
