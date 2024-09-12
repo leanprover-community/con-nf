@@ -40,4 +40,7 @@ instance {β : TypeIndex} [LtLevel β] : LeLevel β where
 instance : LeLevel α where
   elim := le_rfl
 
+instance : LtLevel ⊥ where
+  elim := WithBot.bot_lt_coe α
+
 end ConNF

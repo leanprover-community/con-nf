@@ -567,6 +567,100 @@ theorem le_upperBound (c : Set BaseApprox) (hc : IsChain (· ≤ ·) c) :
       · rwa [← h.1]
   · exact le_biSup _ hψ
 
+def Total (ψ : BaseApprox) : Prop :=
+  ∀ L, L ∈ ψᴸ.dom
+
+theorem Total.atoms {ψ : BaseApprox} (h : ψ.Total) (a : Atom) :
+    a ∈ ψᴬ.dom := by
+  apply ψ.mem_dom_atoms_of_litter_mem_dom
+  apply h
+
+theorem Total.nearLitters {ψ : BaseApprox} (h : ψ.Total) (N : NearLitter) :
+    N ∈ ψᴺ.dom := by
+  apply ψ.mem_dom_nearLitters
+  · apply h
+  · intros
+    apply h.atoms
+
+theorem Total.atoms_bijective {ψ : BaseApprox} (h : ψ.Total) :
+    ψᴬ.Bijective := by
+  refine ⟨⟨ψ.atoms_permutative.toCoinjective, ?_⟩, ⟨ψ.atoms_permutative.toInjective, ?_⟩⟩
+  · constructor
+    exact h.atoms
+  · constructor
+    intro a
+    have := h.atoms a
+    rwa [← ψ.atoms_permutative.codom_eq_dom] at this
+
+theorem Total.litters_bijective {ψ : BaseApprox} (h : ψ.Total) :
+    ψᴸ.Bijective := by
+  refine ⟨⟨ψ.litters_permutative.toCoinjective, ?_⟩, ⟨ψ.litters_permutative.toInjective, ?_⟩⟩
+  · constructor
+    exact h
+  · constructor
+    intro L
+    have := h L
+    rwa [← ψ.litters_permutative.codom_eq_dom] at this
+
+theorem basePerm_apply_near_apply (ψ : BaseApprox) (h : ψ.Total) (s : Set Atom) (L : Litter) :
+    s ~ Lᴬ → ψᴬ.toEquiv h.atoms_bijective '' s ~ (ψᴸ.toEquiv h.litters_bijective L)ᴬ := by
+  intro hs
+  rw [toEquiv_image]
+  exact image_near_of_near ψ s (ψᴸ.toEquiv_rel h.litters_bijective L) hs
+
+def basePerm (ψ : BaseApprox) (h : ψ.Total) : BasePerm where
+  atoms := ψᴬ.toEquiv h.atoms_bijective
+  litters := ψᴸ.toEquiv h.litters_bijective
+  apply_near_apply := basePerm_apply_near_apply ψ h
+
+theorem basePerm_smul_atom_def {ψ : BaseApprox} {h : ψ.Total} {a : Atom} :
+    ψ.basePerm h • a = ψᴬ.toFunction h.atoms_bijective.toFunctional a :=
+  rfl
+
+theorem basePerm_smul_litter_def {ψ : BaseApprox} {h : ψ.Total} {L : Litter} :
+    ψ.basePerm h • L = ψᴸ.toFunction h.litters_bijective.toFunctional L :=
+  rfl
+
+@[simp]
+theorem basePerm_smul_atom_eq_iff {ψ : BaseApprox} {h : ψ.Total} {a₁ a₂ : Atom} :
+    ψ.basePerm h • a₁ = a₂ ↔ ψᴬ a₁ a₂ := by
+  rw [basePerm_smul_atom_def, toFunction_eq_iff]
+
+@[simp]
+theorem basePerm_inv_smul_atom_eq_iff {ψ : BaseApprox} {h : ψ.Total} {a₁ a₂ : Atom} :
+    (ψ.basePerm h)⁻¹ • a₁ = a₂ ↔ ψᴬ a₂ a₁ := by
+  rw [← basePerm_smul_atom_eq_iff (h := h), inv_smul_eq_iff, eq_comm]
+
+@[simp]
+theorem basePerm_smul_litter_eq_iff {ψ : BaseApprox} {h : ψ.Total} {L₁ L₂ : Litter} :
+    ψ.basePerm h • L₁ = L₂ ↔ ψᴸ L₁ L₂ := by
+  rw [basePerm_smul_litter_def, toFunction_eq_iff]
+
+@[simp]
+theorem basePerm_inv_smul_litter_eq_iff {ψ : BaseApprox} {h : ψ.Total} {L₁ L₂ : Litter} :
+    (ψ.basePerm h)⁻¹ • L₁ = L₂ ↔ ψᴸ L₂ L₁ := by
+  rw [← basePerm_smul_litter_eq_iff (h := h), inv_smul_eq_iff, eq_comm]
+
+@[simp]
+theorem basePerm_smul_nearLitter_eq_iff {ψ : BaseApprox} {h : ψ.Total} {N₁ N₂ : NearLitter} :
+    ψ.basePerm h • N₁ = N₂ ↔ ψᴺ N₁ N₂ := by
+  constructor
+  · intro hN
+    refine ⟨?_, ?_, ?_⟩
+    · have := congr_arg (·ᴸ) hN
+      dsimp only at this
+      rwa [BasePerm.smul_nearLitter_litter, basePerm_smul_litter_eq_iff] at this
+    · intro a _
+      exact h.atoms a
+    · have := congr_arg (·ᴬ) hN
+      dsimp only at this
+      rw [BasePerm.smul_nearLitter_atoms] at this
+      rwa [← toEquiv_image _ h.atoms_bijective]
+  · intro hN
+    ext : 1
+    have := hN.2.2
+    rwa [← toEquiv_image _ h.atoms_bijective] at this
+
 end BaseApprox
 
 end ConNF

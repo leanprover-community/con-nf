@@ -87,6 +87,27 @@ theorem inv_coinjective_iff {r : Rel α β} :
   inv_injective_iff.symm
 
 @[simp]
+theorem inv_surjective_iff {r : Rel α β} :
+    r.inv.Surjective ↔ r.Cosurjective :=
+  ⟨λ h ↦ ⟨h.surjective⟩, λ h ↦ ⟨h.cosurjective⟩⟩
+
+@[simp]
+theorem inv_cosurjective_iff {r : Rel α β} :
+    r.inv.Cosurjective ↔ r.Surjective :=
+  inv_surjective_iff.symm
+
+@[simp]
+theorem inv_functional_iff {r : Rel α β} :
+    r.inv.Functional ↔ r.Cofunctional :=
+  ⟨λ h ↦ ⟨inv_coinjective_iff.mp h.toCoinjective, inv_cosurjective_iff.mp h.toCosurjective⟩,
+    λ h ↦ ⟨inv_injective_iff.mp h.toInjective, inv_surjective_iff.mp h.toSurjective⟩⟩
+
+@[simp]
+theorem inv_cofunctional_iff {r : Rel α β} :
+    r.inv.Cofunctional ↔ r.Functional :=
+  inv_functional_iff.symm
+
+@[simp]
 theorem inv_dom {r : Rel α β} :
     r.inv.dom = r.codom :=
   rfl
@@ -406,6 +427,50 @@ theorem biSup_permutative_of_isChain {T : Type _} {r : T → Rel α α} {s : Set
   have := iSup_permutative_of_isChain (T := s) (λ t ↦ h₁ t t.prop) ?_
   · rwa [iSup_subtype] at this
   · rwa [image_eq_range] at h₂
+
+noncomputable def toFunction (r : Rel α β) (hr : r.Functional) : α → β :=
+  λ a ↦ (hr.cosurjective a).choose
+
+theorem toFunction_rel (r : Rel α β) (hr : r.Functional) (a : α) :
+    r a (r.toFunction hr a) :=
+  (hr.cosurjective a).choose_spec
+
+theorem toFunction_eq_iff (r : Rel α β) (hr : r.Functional) (a : α) (b : β) :
+    r.toFunction hr a = b ↔ r a b := by
+  constructor
+  · rintro rfl
+    exact toFunction_rel r hr a
+  · intro h
+    exact hr.coinjective (toFunction_rel r hr a) h
+
+noncomputable def toEquiv (r : Rel α β) (hr : r.Bijective) : α ≃ β where
+  toFun := r.toFunction hr.toFunctional
+  invFun := r.inv.toFunction (inv_functional_iff.mpr hr.toCofunctional)
+  left_inv a := by
+    rw [toFunction_eq_iff]
+    exact toFunction_rel r _ a
+  right_inv b := by
+    rw [toFunction_eq_iff]
+    exact toFunction_rel r.inv _ b
+
+theorem toEquiv_rel (r : Rel α β) (hr : r.Bijective) (a : α) :
+    r a (r.toEquiv hr a) :=
+  toFunction_rel r hr.toFunctional a
+
+theorem toFunction_image (r : Rel α β) (hr : r.Functional) (s : Set α) :
+    r.toFunction hr '' s = r.image s := by
+  ext y
+  constructor
+  · rintro ⟨x, hx, hy⟩
+    rw [toFunction_eq_iff] at hy
+    exact ⟨x, hx, hy⟩
+  · rintro ⟨x, hx, hy⟩
+    refine ⟨x, hx, ?_⟩
+    rwa [toFunction_eq_iff]
+
+theorem toEquiv_image (r : Rel α β) (hr : r.Bijective) (s : Set α) :
+    r.toEquiv hr '' s = r.image s :=
+  r.toFunction_image hr.toFunctional s
 
 -- Compare Mathlib.Data.Rel and Mathlib.Logic.Relator.
 

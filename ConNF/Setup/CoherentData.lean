@@ -61,10 +61,11 @@ class CoherentData extends PreCoherentData where
   smul_fuzz {γ δ : TypeIndex} {ε : Λ} [LeLevel γ] [LtLevel δ] [LtLevel ε]
     (hδ : δ < γ) (hε : ε < γ) (hδε : δ ≠ ε) (ρ : AllPerm γ) (t : Tangle δ) :
     ρᵁ ↘ hε ↘. • fuzz hδε t = fuzz hδε (ρ ↘ hδ • t)
-  exists_of_smulFuzz {γ : TypeIndex} [LeLevel γ]
+  allPerm_of_basePerm (π : BasePerm) : ∃ ρ : AllPerm ⊥, ρᵁ Path.nil = π
+  allPerm_of_smulFuzz {γ : Λ} [LeLevel γ]
     (ρs : {δ : TypeIndex} → [LtLevel δ] → δ < γ → AllPerm δ)
     (h : ∀ {δ : TypeIndex} {ε : Λ} [LeLevel γ] [LtLevel δ] [LtLevel ε]
-      (hδ : δ < γ) (hε : ε < γ) (hδε : δ ≠ ε) (t : Tangle δ),
+      (hδ : δ < γ) (hε : (ε : TypeIndex) < γ) (hδε : δ ≠ ε) (t : Tangle δ),
       (ρs hε)ᵁ ↘. • fuzz hδε t = fuzz hδε (ρs hδ • t)) :
     ∃ ρ : AllPerm γ, ∀ δ : TypeIndex, [LtLevel δ] → ∀ hδ : δ < γ, ρ ↘ hδ = ρs hδ
   typedMem_tSetForget {β : Λ} {γ : TypeIndex} [LeLevel β] [LeLevel γ]
@@ -74,7 +75,7 @@ class CoherentData extends PreCoherentData where
     y ∈[hγ] singleton hγ x ↔ y = x
 
 export CoherentData (allPermSderiv_forget pos_atom_lt_pos pos_nearLitter_lt_pos smul_fuzz
-  exists_of_smulFuzz typedMem_tSetForget typedMem_singleton_iff)
+  allPerm_of_basePerm allPerm_of_smulFuzz typedMem_tSetForget typedMem_singleton_iff)
 
 attribute [simp] allPermSderiv_forget typedMem_singleton_iff
 

@@ -14,6 +14,8 @@ In this file, we state and prove the freedom of action theorem.
     "typical" in a suitable sense.
 * `ConNF.StrApprox.FreedomOfAction`: Freedom of action for structural approximations:
     every coherent approximation exactly approximates some allowable permutation.
+* `ConNF.StrApprox.exists_exactlyApproximates`: The proof of freedom of action for structural
+    permutations.
 -/
 
 noncomputable section
@@ -31,10 +33,60 @@ structure Approximates (ψ : BaseApprox) (π : BasePerm) : Prop where
   atoms : ∀ a₁ a₂, ψᴬ a₁ a₂ → a₂ = π • a₁
   nearLitters : ∀ N₁ N₂, ψᴺ N₁ N₂ → N₂ = π • N₁
 
+theorem Approximates.litters {ψ : BaseApprox} {π : BasePerm} (h : ψ.Approximates π)
+    (L₁ L₂ : Litter) : ψᴸ L₁ L₂ → π • L₁ = L₂ := by
+  intro hL
+  obtain ⟨N, hN⟩ := ψ.mem_dom_nearLitters (N := L₁ᴺ) ⟨L₂, hL⟩ (λ a h ↦ (h.2 h.1).elim)
+  cases h.nearLitters L₁ᴺ N hN
+  rw [ψ.litters_permutative.coinjective hL hN.1]
+  rfl
+
 structure ExactlyApproximates (ψ : BaseApprox) (π : BasePerm)
     extends ψ.Approximates π : Prop where
-  smul_litter : ∀ a, a ∉ ψᴬ.dom → (π • a)ᴸ = π • aᴸ
-  inv_smul_litter : ∀ a, a ∉ ψᴬ.dom → (π⁻¹ • a)ᴸ = π⁻¹ • aᴸ
+  smul_litter : ∀ a, a ∉ ψ.exceptions.dom → (π • a)ᴸ = π • aᴸ
+  inv_smul_litter : ∀ a, a ∉ ψ.exceptions.dom → (π⁻¹ • a)ᴸ = π⁻¹ • aᴸ
+
+theorem approximates_basePerm {ψ : BaseApprox} (h : ψ.Total) :
+    ψ.Approximates (ψ.basePerm h) := by
+  constructor
+  · intro a₁ a₂ ha
+    symm
+    rwa [basePerm_smul_atom_eq_iff]
+  · intro a₁ a₂ ha
+    symm
+    rwa [basePerm_smul_nearLitter_eq_iff]
+
+theorem exactlyApproximates_basePerm {ψ : BaseApprox} (h : ψ.Total) :
+    ψ.ExactlyApproximates (ψ.basePerm h) := by
+  refine ⟨approximates_basePerm h, ?_, ?_⟩
+  · intro a ha
+    have : ψᴬ a (nearLitterEquiv (ψ.sublitter (ψ.basePerm h • aᴸ))
+        ((nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩)) := by
+      right
+      rw [typical_iff]
+      refine ⟨?_, (nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩, ?_, ?_⟩
+      · simp only [nearLitterEquiv_litter]
+        rw [← basePerm_smul_litter_eq_iff]
+      · simp only [Equiv.apply_symm_apply]
+      · apply nearLitterEquiv_congr
+        · simp only [nearLitterEquiv_litter]
+        · rfl
+    rw [← basePerm_smul_atom_eq_iff (h := h)] at this
+    rw [this, nearLitterEquiv_litter]
+  · intro a ha
+    have : ψᴬ (nearLitterEquiv (ψ.sublitter ((ψ.basePerm h)⁻¹ • aᴸ))
+        ((nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩)) a := by
+      right
+      rw [typical_iff]
+      refine ⟨?_, (nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩, ?_, ?_⟩
+      · simp only [nearLitterEquiv_litter]
+        rw [← basePerm_inv_smul_litter_eq_iff]
+      · apply nearLitterEquiv_congr
+        · simp only [nearLitterEquiv_litter]
+        · rfl
+      · simp only [Equiv.apply_symm_apply]
+    rw [← basePerm_inv_smul_atom_eq_iff (h := h)] at this
+    rw [this, nearLitterEquiv_litter]
 
 end BaseApprox
 
@@ -361,6 +413,63 @@ theorem exists_total (ψ : StrApprox β) (hψ : ψ.Coherent)
     by_contra hL
     obtain ⟨χ', hχ'⟩ := exists_extension_of_minimal' χ A L hL hχ₂.1 foa (λ B L' h' ↦ ih L' h' B)
     exact hχ'.1.2 (hχ₂.2 hχ'.2 hχ'.1.1)
+
+theorem exists_exactlyApproximates (ψ : StrApprox β) (hψ₁ : ψ.Coherent) (hψ₂ : ψ.Total) :
+    ∃ ρ, ψ.ExactlyApproximates ρ := by
+  revert β
+  intro β
+  induction β using (inferInstanceAs <| IsWellFounded TypeIndex (· < ·)).induction
+  case a _ _ β ih =>
+  induction β using WithBot.recBotCoe with
+  | bot =>
+    intro _ ψ _ hψ₂
+    obtain ⟨ρ, hρ⟩ := allPerm_of_basePerm ((ψ Path.nil).basePerm (hψ₂ Path.nil))
+    use ρ
+    intro A
+    cases A.eq_nil
+    rw [hρ]
+    exact BaseApprox.exactlyApproximates_basePerm _
+  | coe β =>
+    intro _ ψ hψ₁ hψ₂
+    choose ρs hρs using ih
+    have := allPerm_of_smulFuzz (γ := β) (λ {δ} _ hδ ↦ ρs δ hδ (ψ ↘ hδ)
+        (hψ₁.comp (Path.single hδ)) (hψ₂.comp (Path.single hδ))) ?_
+    · obtain ⟨ρ, hρ⟩ := this
+      use ρ
+      intro A
+      cases A using Path.recScoderiv with
+      | scoderiv _ δ A hδ =>
+        have : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
+        specialize hρs δ hδ (ψ ↘ hδ) (hψ₁.comp (Path.single hδ)) (hψ₂.comp (Path.single hδ))
+        rw [← hρ δ hδ] at hρs
+        have := hρs A
+        rwa [allPermSderiv_forget] at this
+    · intro δ ε _ _ _ hδ hε hδε t
+      dsimp only
+      have := hψ₁ (Path.single hε ↘.) (fuzz hδε t)
+          ((ρs ε hε (ψ ↘ hε) (hψ₁.comp (Path.single hε)) (hψ₂.comp (Path.single hε)))ᵁ
+            (Path.nil ↘.) • fuzz hδε t) ?_
+      · apply smul_eq_of_coherentAt_inflexible
+          (P := ⟨β, δ, ε, hδ, hε, hδε, Path.nil⟩) rfl rfl this
+        rw [smul_support_eq_smul_iff]
+        intro A
+        constructor
+        · intro a _
+          obtain ⟨b, hb⟩ := (hψ₂ (A ↗ hδ)).atoms a
+          cases (hρs δ hδ (ψ ↘ hδ) (hψ₁.comp (Path.single hδ))
+            (hψ₂.comp (Path.single hδ)) A).atoms a b hb
+          simp only [Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv]
+          exact hb
+        · intro N _
+          obtain ⟨N', hN'⟩ := (hψ₂ (A ↗ hδ)).nearLitters N
+          cases (hρs δ hδ (ψ ↘ hδ) (hψ₁.comp (Path.single hδ))
+            (hψ₂.comp (Path.single hδ)) A).nearLitters N N' hN'
+          simp only [Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv]
+          exact hN'
+      · obtain ⟨L, hL⟩ := hψ₂ (Path.single hε ↘.) (fuzz hδε t)
+        cases (hρs ε hε (ψ ↘ hε) (hψ₁.comp (Path.single hε)) (hψ₂.comp (Path.single hε))
+          (Path.nil ↘.)).litters _ _ hL
+        exact hL
 
 end StrApprox
 

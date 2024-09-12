@@ -367,10 +367,13 @@
 \begin{theorem}[freedom of action]
   \uses{def:FreedomOfAction}
   \label{thm:StrApprox.foa}
+  \lean{ConNF.StrApprox.exists_exactlyApproximates}
+  \leanok
   Freedom of action holds at all type indices \( \beta \leq \alpha \).
 \end{theorem}
 \begin{proof}
   \uses{prop:StrApprox.chain,prop:StrApprox.addFlexible,def:CoherentData,prop:BasePositions,prop:StrApprox.addInflexible}
+  \leanok
   By induction, we may assume freedom of action holds at all \( \delta < \beta \).
   Let \( \psi \) be a coherent \( \beta \)-approximation, and let \( \chi \) be a maximal coherent extension, which exists by Zorn's lemma and \cref{prop:StrApprox.chain}.
 

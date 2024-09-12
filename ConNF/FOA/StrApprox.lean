@@ -156,7 +156,11 @@ theorem upperBound_atoms (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
 /-! TODO: Many of the previous lemmas are not actually needed! -/
 
 def Total (ψ : StrApprox β) : Prop :=
-  ∀ B L, L ∈ (ψ B)ᴸ.dom
+  ∀ A, (ψ A).Total
+
+theorem Total.comp {ψ : StrApprox β} (hψ : ψ.Total) {γ : TypeIndex} (A : β ↝ γ) :
+    Total (ψ ⇘ A) :=
+  λ B L ↦ hψ (A ⇘ B) L
 
 end StrApprox
 

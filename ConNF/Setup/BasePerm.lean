@@ -60,6 +60,11 @@ theorem smul_nearLitter_atoms (π : BasePerm) (N : NearLitter) :
     (π • N)ᴬ = π • Nᴬ :=
   rfl
 
+@[simp]
+theorem smul_nearLitter_litter (π : BasePerm) (N : NearLitter) :
+    (π • N)ᴸ = π • Nᴸ :=
+  rfl
+
 @[ext]
 theorem ext {π₁ π₂ : BasePerm} (h : ∀ a : Atom, π₁ • a = π₂ • a) :
     π₁ = π₂ := by
