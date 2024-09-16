@@ -34,7 +34,7 @@ instance : CoeTC (Enumeration X) (Set X) where
   coe E := E.rel.codom
 
 instance : Membership X (Enumeration X) where
-  mem x E := x ∈ E.rel.codom
+  mem E x := x ∈ E.rel.codom
 
 theorem mem_iff (x : X) (E : Enumeration X) :
     x ∈ E ↔ x ∈ E.rel.codom :=

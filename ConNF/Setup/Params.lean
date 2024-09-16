@@ -47,7 +47,7 @@ def Params.minimal : Params where
     exact isRegular_aleph_one
   μ_isStrongLimit := by
     rw [mk_out]
-    exact isStrongLimit_beth <| IsLimit.isSuccLimit <| ord_aleph_isLimit 1
+    exact isStrongLimit_beth <| IsLimit.isSuccPrelimit <| ord_aleph_isLimit 1
   κ_lt_μ := by
     rw [mk_out, mk_out]
     apply (aleph_le_beth 1).trans_lt
