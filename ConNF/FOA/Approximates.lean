@@ -14,8 +14,7 @@ In this file, we state and prove the freedom of action theorem.
     "typical" in a suitable sense.
 * `ConNF.StrApprox.FreedomOfAction`: Freedom of action for structural approximations:
     every coherent approximation exactly approximates some allowable permutation.
-* `ConNF.StrApprox.exists_exactlyApproximates`: The proof of freedom of action for structural
-    permutations.
+* `ConNF.StrApprox.freedomOfAction`: The proof of freedom of action for structural permutations.
 -/
 
 noncomputable section
@@ -41,10 +40,30 @@ theorem Approximates.litters {ψ : BaseApprox} {π : BasePerm} (h : ψ.Approxima
   rw [ψ.litters_permutative.coinjective hL hN.1]
   rfl
 
+theorem Approximates.mono {ψ χ : BaseApprox} {π : BasePerm} (hχ : χ.Approximates π) (h : ψ ≤ χ) :
+    ψ.Approximates π := by
+  constructor
+  · intro a₁ a₂ hψ
+    exact hχ.atoms a₁ a₂ (atoms_le_of_le h a₁ a₂ hψ)
+  · intro N₁ N₂ hψ
+    exact hχ.nearLitters N₁ N₂ (nearLitters_le_of_le h N₁ N₂ hψ)
+
 structure ExactlyApproximates (ψ : BaseApprox) (π : BasePerm)
     extends ψ.Approximates π : Prop where
   smul_litter : ∀ a, a ∉ ψ.exceptions.dom → (π • a)ᴸ = π • aᴸ
   inv_smul_litter : ∀ a, a ∉ ψ.exceptions.dom → (π⁻¹ • a)ᴸ = π⁻¹ • aᴸ
+
+theorem ExactlyApproximates.mono {ψ χ : BaseApprox} {π : BasePerm}
+    (hχ : χ.ExactlyApproximates π) (h : ψ ≤ χ) :
+    ψ.ExactlyApproximates π := by
+  constructor
+  · exact hχ.toApproximates.mono h
+  · intro a ha
+    apply hχ.smul_litter
+    rwa [h.1] at ha
+  · intro a ha
+    apply hχ.inv_smul_litter
+    rwa [h.1] at ha
 
 theorem approximates_basePerm {ψ : BaseApprox} (h : ψ.Total) :
     ψ.Approximates (ψ.basePerm h) := by
@@ -104,6 +123,15 @@ theorem ExactlyApproximates.toApproximates {ψ : StrApprox β} {ρ : AllPerm β}
     (h : ψ.ExactlyApproximates ρ) :
     ψ.Approximates ρ :=
   λ A ↦ (h A).toApproximates
+
+theorem Approximates.mono {ψ χ : StrApprox β} {ρ : AllPerm β} (hχ : χ.Approximates ρ) (h : ψ ≤ χ) :
+    ψ.Approximates ρ :=
+  λ A ↦ (hχ A).mono (h A)
+
+theorem ExactlyApproximates.mono {ψ χ : StrApprox β} {ρ : AllPerm β}
+    (hχ : χ.ExactlyApproximates ρ) (h : ψ ≤ χ) :
+    ψ.ExactlyApproximates ρ :=
+  λ A ↦ (hχ A).mono (h A)
 
 def FreedomOfAction (β : TypeIndex) [LeLevel β] : Prop :=
   ∀ ψ : StrApprox β, ψ.Coherent → ∃ ρ, ψ.ExactlyApproximates ρ
@@ -414,7 +442,7 @@ theorem exists_total (ψ : StrApprox β) (hψ : ψ.Coherent)
     obtain ⟨χ', hχ'⟩ := exists_extension_of_minimal' χ A L hL hχ₂.1 foa (λ B L' h' ↦ ih L' h' B)
     exact hχ'.1.2 (hχ₂.2 hχ'.2 hχ'.1.1)
 
-theorem exists_exactlyApproximates (ψ : StrApprox β) (hψ₁ : ψ.Coherent) (hψ₂ : ψ.Total) :
+theorem exists_exactlyApproximates_of_total (ψ : StrApprox β) (hψ₁ : ψ.Coherent) (hψ₂ : ψ.Total) :
     ∃ ρ, ψ.ExactlyApproximates ρ := by
   revert β
   intro β
@@ -470,6 +498,16 @@ theorem exists_exactlyApproximates (ψ : StrApprox β) (hψ₁ : ψ.Coherent) (h
         cases (hρs ε hε (ψ ↘ hε) (hψ₁.comp (Path.single hε)) (hψ₂.comp (Path.single hε))
           (Path.nil ↘.)).litters _ _ hL
         exact hL
+
+theorem freedomOfAction : FreedomOfAction β := by
+  revert β
+  intro β
+  induction β using (inferInstanceAs <| IsWellFounded TypeIndex (· < ·)).induction
+  case a _ _ β ih =>
+    intro _ ψ hψ
+    obtain ⟨χ, hχ₁, hχ₂, hχ₃⟩ := exists_total ψ hψ ih
+    obtain ⟨ρ, hρ⟩ := exists_exactlyApproximates_of_total χ hχ₂ hχ₃
+    exact ⟨ρ, hρ.mono hχ₁⟩
 
 end StrApprox
 
