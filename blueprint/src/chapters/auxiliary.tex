@@ -43,6 +43,8 @@
 \end{proposition}
 \begin{definition}
   \label{def:OrbitRestriction}
+  \lean{Rel.OrbitRestriction}
+  \leanok
   Let \( s : \Set \tau \).
   An \emph{orbit restriction} for \( s \) (over some type \( \sigma \)) consists of a set \( t : \Set \tau \) disjoint from \( s \), a function \( f : \tau \to \sigma \), and a permutation \( \pi : \sigma \simeq \sigma \), such that for each \( u : \sigma \), the set \( t \cap f^{-1}(u) \) has cardinality at least \( \max(\aleph_0, \#s, \#d) \).
 
@@ -56,6 +58,8 @@
 \begin{proposition}[completing restricted orbits]
   \uses{def:OrbitRestriction}
   \label{prop:completing_restricted_orbits}
+  \lean{Rel.permutativeExtension}
+  \leanok
   Let \( R : \tau \to \tau \to \Prop \) be a one-to-one relation, and let \( (t, f, \pi) \) be an orbit restriction for \( \field R \) over some type \( \sigma \).
   Then there is a permutative relation \( T \) such that
   \begin{itemize}
@@ -66,6 +70,7 @@
   \end{itemize}
 \end{proposition}
 \begin{proof}
+  \leanok
   For each \( u : \sigma \), define an injection \( i_u : \field R \times \mathbb N \to \tau \) where \( \im i_u \subseteq t \cap f^{-1}(u) \).
   Define a relation \( S \) on \( \tau \) by the following constructors.
   \begin{align*}

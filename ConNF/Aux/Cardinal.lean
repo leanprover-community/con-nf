@@ -1,5 +1,5 @@
 import Mathlib.SetTheory.Cardinal.Cofinality
-import Mathlib.Data.Rel
+import ConNF.Aux.Rel
 
 universe u v
 
@@ -34,6 +34,19 @@ theorem mul_le_of_le {a b c : Cardinal} (hc : ℵ₀ ≤ c) (h1 : a ≤ c) (h2 :
   rw [max_le_iff, max_le_iff]
   exact ⟨⟨h1, h2⟩, hc⟩
 
+theorem mk_biUnion_le_of_le_lift {α : Type u} {β : Type v} {s : Set α} {f : ∀ x ∈ s, Set β}
+    (c : Cardinal.{v}) (h : ∀ (x : α) (h : x ∈ s), #(f x h) ≤ c) :
+    lift.{u} #(⋃ (x : α) (h : x ∈ s), f x h) ≤ lift.{v} #s * lift.{u} c := by
+  rw [Set.biUnion_eq_iUnion]
+  apply (mk_iUnion_le_lift.{v} (λ (x : s) ↦ f x x.prop)).trans
+  refine mul_le_mul le_rfl ?_ (zero_le _) (zero_le _)
+  obtain hs | hs := isEmpty_or_nonempty s
+  · simp only [ciSup_of_empty, bot_eq_zero', zero_le, lift_zero]
+  · apply ciSup_le
+    intro x
+    have := h x x.prop
+    rwa [← lift_le.{u}] at this
+
 theorem mk_biUnion_le_of_le {α β : Type _} {s : Set α} {f : ∀ x ∈ s, Set β}
     (c : Cardinal) (h : ∀ (x : α) (h : x ∈ s), #(f x h) ≤ c) :
     #(⋃ (x : α) (h : x ∈ s), f x h) ≤ #s * c := by
@@ -45,6 +58,20 @@ theorem mk_biUnion_le_of_le {α β : Type _} {s : Set α} {f : ∀ x ∈ s, Set 
   · apply ciSup_le
     intro x
     exact h x x.prop
+
+theorem mk_iUnion_le_of_le_lift {α : Type u} {β : Type v} {f : α → Set β}
+    (c : Cardinal.{v}) (h : ∀ (x : α), #(f x) ≤ c) :
+    lift.{u} #(⋃ (x : α), f x) ≤ lift.{v} #α * lift.{u} c := by
+  have := mk_biUnion_le_of_le_lift (s := Set.univ) (f := λ x _ ↦ f x) c (λ x _ ↦ h x)
+  simp only [Set.mem_univ, Set.iUnion_true, mk_univ] at this
+  exact this
+
+theorem mk_iUnion_le_of_le {α β : Type _} {f : α → Set β}
+    (c : Cardinal) (h : ∀ (x : α), #(f x) ≤ c) :
+    #(⋃ (x : α), f x) ≤ #α * c := by
+  have := mk_biUnion_le_of_le (s := Set.univ) (f := λ x _ ↦ f x) c (λ x _ ↦ h x)
+  simp only [Set.mem_univ, Set.iUnion_true, mk_univ] at this
+  exact this
 
 theorem lift_isRegular (c : Cardinal.{u}) (h : IsRegular c) : IsRegular (lift.{v} c) := by
   constructor
@@ -163,5 +190,29 @@ theorem pow_lt_of_lt {c d e : Cardinal} (hc : c.IsStrongLimit) (hd : d < c) (he 
     exact ⟨hc', hc.2 d hd, hc.2 e he⟩
   · cases eq_of_le_of_not_lt (aleph0_le_of_isSuccLimit hc.isSuccLimit) hc'
     exact power_lt_aleph0 hd he
+
+theorem card_codom_le_of_functional {α β : Type _} {r : Rel α β} (hr : r.Functional) :
+    #r.codom ≤ #r.dom := by
+  refine le_trans ?_ (mk_image_le (f := r.toFunction hr) (s := r.dom))
+  apply mk_le_mk_of_subset
+  rintro b ⟨a, h⟩
+  refine ⟨a, ⟨b, h⟩, ?_⟩
+  rwa [Rel.toFunction_eq_iff]
+
+theorem card_codom_le_of_coinjective {α β : Type _} {r : Rel α β} (hr : r.Coinjective) :
+    #r.codom ≤ #r.dom := by
+  have := card_codom_le_of_functional (r := λ (a : r.dom) b ↦ r a b) ?_
+  · refine le_trans ?_ (this.trans ?_)
+    · apply mk_le_mk_of_subset
+      rintro b ⟨a, h⟩
+      exact ⟨⟨a, b, h⟩, h⟩
+    · exact mk_subtype_le _
+  · constructor
+    · constructor
+      intro b₁ b₂ a h₁ h₂
+      exact hr.coinjective h₁ h₂
+    · constructor
+      intro a
+      exact a.prop
 
 end Cardinal

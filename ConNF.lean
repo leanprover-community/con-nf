@@ -1,5 +1,6 @@
 import ConNF.Aux.Cardinal
 import ConNF.Aux.Ordinal
+import ConNF.Aux.PermutativeExtension
 import ConNF.Aux.Rel
 import ConNF.Aux.Set
 import ConNF.Aux.Transfer
