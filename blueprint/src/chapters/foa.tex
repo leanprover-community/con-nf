@@ -431,16 +431,21 @@
 \begin{definition}
   \uses{def:BaseAction}
   \label{def:BaseAction.Nice}
+  \lean{ConNF.BaseAction.Nice}
+  \leanok
   A base action \( \xi \) is \emph{nice} if whenever \( (N_1, N_2) \in \xi^\NearLitter \),
   \[ N_1 \symmdiff \LS(N_1^\circ) \subseteq \coim \xi^\Atom;\quad N_2 \symmdiff \LS(N_2^\circ) \subseteq \im \xi^\Atom \]
 \end{definition}
 \begin{proposition}[extending orbits inside near-litters]
   \uses{def:BaseAction}
   \label{prop:BaseAction.exists_inside}
+  \lean{ConNF.BaseAction.insideExtension}
+  \leanok
   Every base action \( \xi \) admits an extension \( \zeta \) satisfying
   \[ \forall N \in \coim \xi^\NearLitter,\, N \setminus \LS(N^\circ) \subseteq \coim \xi^\Atom \]
 \end{proposition}
 \begin{proof}
+  \leanok
   For each litter \( L \), there is an injection
   \[ i_L : \bigcup_{N \in \coim \xi^\NearLitter} (N \setminus \LS(N^\circ)) \to \{ a : \Atom \mid a^\circ = L \wedge \forall N \in \im \xi^\NearLitter,\, N^\circ = L \to a \in N \} \setminus \im \xi^\Atom \]
   by a cardinality argument.

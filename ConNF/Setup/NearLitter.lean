@@ -56,6 +56,14 @@ theorem NearLitter.symmDiff_small (N : NearLitter) :
     Small (Nᴬ ∆ Nᴸᴬ) :=
   N.atoms_near_litter
 
+theorem NearLitter.diff_small (N : NearLitter) :
+    Small (Nᴬ \ Nᴸᴬ) :=
+  N.atoms_near_litter.mono (λ _ ↦ Or.inl)
+
+theorem NearLitter.diff_small' (N : NearLitter) :
+    Small (Nᴸᴬ \ Nᴬ) :=
+  N.atoms_near_litter.mono (λ _ ↦ Or.inr)
+
 theorem NearLitter.card_atoms (N : NearLitter) :
     #Nᴬ = #κ :=
   (card_eq_of_near N.atoms_near_litter Nᴸ.card_atoms.not_lt).trans Nᴸ.card_atoms

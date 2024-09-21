@@ -43,6 +43,14 @@ instance : SuperA BaseAction (Rel Atom Atom) where
 instance : SuperN BaseAction (Rel NearLitter NearLitter) where
   superN := nearLitters
 
+@[ext]
+theorem ext {ξ ζ : BaseAction} (atoms : ξᴬ = ζᴬ) (nearLitters : ξᴺ = ζᴺ) : ξ = ζ := by
+  cases ξ
+  cases ζ
+  cases atoms
+  cases nearLitters
+  rfl
+
 theorem atoms_dom_small (ξ : BaseAction) : Small ξᴬ.dom :=
   ξ.atoms_dom_small'
 
@@ -155,6 +163,212 @@ theorem litters_injective (ξ : BaseAction) : ξᴸ.Injective := by
 
 theorem litters_oneOne (ξ : BaseAction) : ξᴸ.OneOne :=
   ⟨ξ.litters_injective, ξ.litters_coinjective⟩
+
+instance : LE BaseAction where
+  le ξ ζ := ξᴬ ≤ ζᴬ ∧ ξᴺ = ζᴺ
+
+instance : PartialOrder BaseAction where
+  le_refl _ := ⟨le_rfl, rfl⟩
+  le_trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
+  le_antisymm _ _ h₁ h₂ := ext (le_antisymm h₁.1 h₂.1) h₁.2
+
+/-- A definition that can be used to reduce the proof obligations of extending a base action. -/
+def extend (ξ : BaseAction) (r : Rel Atom Atom) (r_dom_small : Small r.dom) (r_oneOne : r.OneOne)
+    (r_dom_disjoint : Disjoint ξᴬ.dom r.dom) (r_codom_disjoint : Disjoint ξᴬ.codom r.codom)
+    (r_mem_iff_mem : ∀ {a₁ a₂ N₁ N₂}, r a₁ a₂ → ξᴺ N₁ N₂ → (a₁ ∈ N₁ᴬ ↔ a₂ ∈ N₂ᴬ)) :
+    BaseAction where
+  atoms := ξᴬ ⊔ r
+  nearLitters := ξᴺ
+  atoms_dom_small' := by
+    rw [Rel.sup_dom]
+    exact small_union ξ.atoms_dom_small r_dom_small
+  nearLitters_dom_small' := ξ.nearLitters_dom_small
+  atoms_oneOne' := Rel.sup_oneOne ξ.atoms_oneOne r_oneOne r_dom_disjoint r_codom_disjoint
+  mem_iff_mem' ha hN := by
+    obtain (ha | ha) := ha
+    · exact ξ.mem_iff_mem ha hN
+    · exact r_mem_iff_mem ha hN
+  litter_eq_litter_iff' := ξ.litter_eq_litter_iff
+  interference_subset_dom' h₁ h₂ a ha := by
+    rw [Rel.sup_dom]
+    exact Or.inl (ξ.interference_subset_dom h₁ h₂ ha)
+  interference_subset_codom' h₁ h₂ a ha := by
+    rw [Rel.sup_codom]
+    exact Or.inl (ξ.interference_subset_codom h₁ h₂ ha)
+
+theorem le_extend {ξ : BaseAction} {r : Rel Atom Atom} {r_dom_small : Small r.dom}
+    {r_oneOne : r.OneOne} {r_dom_disjoint : Disjoint ξᴬ.dom r.dom}
+    {r_codom_disjoint : Disjoint ξᴬ.codom r.codom}
+    {r_mem_iff_mem : ∀ {a₁ a₂ N₁ N₂}, r a₁ a₂ → ξᴺ N₁ N₂ → (a₁ ∈ N₁ᴬ ↔ a₂ ∈ N₂ᴬ)} :
+    ξ ≤ ξ.extend r r_dom_small r_oneOne r_dom_disjoint r_codom_disjoint r_mem_iff_mem :=
+  ⟨le_sup_left, rfl⟩
+
+@[mk_iff]
+structure Nice (ξ : BaseAction) : Prop where
+  symmDiff_subset_dom : ∀ N ∈ ξᴺ.dom, Nᴬ ∆ Nᴸᴬ ⊆ ξᴬ.dom
+  symmDiff_subset_codom : ∀ N ∈ ξᴺ.codom, Nᴬ ∆ Nᴸᴬ ⊆ ξᴬ.codom
+
+/-!
+## Extending orbits inside near-litters
+-/
+
+/-- The set of atoms contained in near-litters but not the corresponding litters. -/
+def inside (ξ : BaseAction) : Set Atom :=
+  {a | ∃ N ∈ ξᴺ.dom, a ∈ Nᴬ ∧ aᴸ ≠ Nᴸ}
+
+theorem inside_small (ξ : BaseAction) :
+    Small ξ.inside := by
+  have : Small (⋃ N ∈ ξᴺ.dom, Nᴬ \ Nᴸᴬ) := by
+    apply small_biUnion ξ.nearLitters_dom_small
+    intro N _
+    exact N.diff_small
+  apply this.mono
+  rintro a ⟨N, h₁, h₂, h₃⟩
+  simp only [Set.mem_iUnion]
+  exact ⟨N, h₁, h₂, h₃⟩
+
+@[mk_iff]
+structure InsideCandidate (ξ : BaseAction) (L : Litter) (a : Atom) : Prop where
+  litter_eq : aᴸ = L
+  not_mem_codom : a ∉ ξᴬ.codom
+  mem_nearLitter {N : NearLitter} : N ∈ ξᴺ.codom → Nᴸ = L → a ∈ Nᴬ
+
+theorem insideCandidates_not_small (ξ : BaseAction) (L : Litter) :
+    ¬Small {a | ξ.InsideCandidate L a} := by
+  have h : Small (⋃ N ∈ ξᴺ.codom, ⋃ (_ : Nᴸ = L), Lᴬ \ Nᴬ) := by
+    apply small_biUnion ξ.nearLitters_codom_small
+    intro N _
+    apply small_iUnion_Prop
+    rintro rfl
+    exact N.diff_small'
+  have h' := L.atoms_not_small
+  contrapose! h'
+  apply (small_union (small_union ξ.atoms_codom_small h) h').mono
+  rintro a rfl
+  rw [Set.mem_union, or_iff_not_imp_left]
+  intro ha
+  rw [Set.mem_union, not_or] at ha
+  constructor
+  · rfl
+  · exact ha.1
+  · intro N hN₁ hN₂
+    by_contra ha'
+    apply ha.2
+    simp only [Set.mem_iUnion]
+    exact ⟨N, hN₁, hN₂, rfl, ha'⟩
+
+theorem card_inside_lt_card_insideCandidates (ξ : BaseAction) (L : Litter) :
+    #ξ.inside < #{a | ξ.InsideCandidate L a} :=
+  ξ.inside_small.trans_le <| κ_le_of_not_small <| ξ.insideCandidates_not_small L
+
+def insideMap (ξ : BaseAction) (L : Litter) :
+    ξ.inside ↪ {a | ξ.InsideCandidate L a} :=
+  Nonempty.some (ξ.card_inside_lt_card_insideCandidates L).le
+
+theorem insideMap_litter_eq {ξ : BaseAction} (L : Litter) (x : ξ.inside) :
+    (ξ.insideMap L x : Atom)ᴸ = L :=
+  (ξ.insideMap L x).prop.litter_eq
+
+theorem insideMap_not_mem_codom {ξ : BaseAction} (L : Litter) (x : ξ.inside) :
+    (ξ.insideMap L x : Atom) ∉ ξᴬ.codom :=
+  (ξ.insideMap L x).prop.not_mem_codom
+
+theorem insideMap_mem_nearLitter  {ξ : BaseAction} (L : Litter) (x : ξ.inside) {N : NearLitter} :
+    N ∈ ξᴺ.codom → Nᴸ = L → (ξ.insideMap L x : Atom) ∈ Nᴬ :=
+  (ξ.insideMap L x).prop.mem_nearLitter
+
+def insideRel (ξ : BaseAction) : Rel Atom Atom :=
+    λ a₁ a₂ ↦ ∃ N₁ N₂ h, ξᴺ N₁ N₂ ∧ a₁ ∉ ξᴬ.dom ∧ a₂ = ξ.insideMap N₂ᴸ ⟨a₁, N₁, h⟩
+
+theorem insideRel_dom_small (ξ : BaseAction) : Small ξ.insideRel.dom := by
+  apply ξ.inside_small.mono
+  rintro a ⟨_, N₁, N₂, h, _, _, rfl⟩
+  exact ⟨N₁, h⟩
+
+theorem insideRel_injective (ξ : BaseAction) : ξ.insideRel.Injective := by
+  constructor
+  rintro a b c ⟨Na₁, Na₂, ha₁, ha₂⟩ ⟨Nb₁, Nb₂, hb₁, hb₂⟩
+  have := ha₂.2.2.symm.trans hb₂.2.2
+  have ha := insideMap_litter_eq Na₂ᴸ ⟨a, Na₁, ha₁⟩
+  have hb := insideMap_litter_eq Nb₂ᴸ ⟨b, Nb₁, hb₁⟩
+  have hab := ha.symm.trans ((congr_arg (·ᴸ) this).trans hb)
+  rwa [hab, Subtype.coe_inj, EmbeddingLike.apply_eq_iff_eq, Subtype.mk_eq_mk] at this
+
+theorem insideRel_coinjective (ξ : BaseAction) : ξ.insideRel.Coinjective := by
+  constructor
+  rintro a b c ⟨Na₁, Na₂, ha₁, ha₂⟩ ⟨Nb₁, Nb₂, hb₁, hb₂⟩
+  have : Na₁ᴸ = Nb₁ᴸ := by
+    have : c ∉ interference Na₁ Nb₁ := λ h ↦ ha₂.2.1 (ξ.interference_subset_dom ha₁.1 hb₁.1 h)
+    by_contra hN
+    rw [interference_eq_of_litter_ne hN] at this
+    exact this ⟨ha₁.2.1, hb₁.2.1⟩
+  rw [ξ.litter_eq_litter_iff ha₂.1 hb₂.1] at this
+  rw [ha₂.2.2, hb₂.2.2, this]
+
+theorem insideRel_oneOne (ξ : BaseAction) : ξ.insideRel.OneOne :=
+  ⟨ξ.insideRel_injective, ξ.insideRel_coinjective⟩
+
+theorem insideRel_dom (ξ : BaseAction) : Disjoint ξᴬ.dom ξ.insideRel.dom := by
+  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  rintro a ⟨ha, _, _, _, _, _, ha', _⟩
+  contradiction
+
+theorem insideRel_codom (ξ : BaseAction) : Disjoint ξᴬ.codom ξ.insideRel.codom := by
+  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  rintro _ ⟨⟨a, ha⟩, b, N₁, N₂, h, _, _, rfl⟩
+  exact insideMap_not_mem_codom N₂ᴸ ⟨b, N₁, h⟩ ⟨a, ha⟩
+
+theorem insideRel_mem_iff_mem {ξ : BaseAction} {a₁ a₂ : Atom} {N₁ N₂ : NearLitter}
+    (ha : ξ.insideRel a₁ a₂) (hN : ξᴺ N₁ N₂) :
+    a₁ ∈ N₁ᴬ ↔ a₂ ∈ N₂ᴬ := by
+  obtain ⟨N₁', N₂', h, hN', ha₁, rfl⟩ := ha
+  constructor
+  · intro h'
+    apply insideMap_mem_nearLitter N₂'ᴸ ⟨a₁, N₁', h⟩ ⟨N₁, hN⟩
+    rw [← litter_eq_litter_iff hN hN']
+    by_contra hL
+    refine ha₁ (ξ.interference_subset_dom ⟨N₂, hN⟩ ⟨N₂', hN'⟩ ?_)
+    rw [interference_eq_of_litter_ne hL]
+    exact ⟨h', h.2.1⟩
+  · intro h'
+    contrapose! ha₁
+    apply ξ.interference_subset_dom ⟨N₂, hN⟩ ⟨N₂', hN'⟩
+    rw [interference_eq_of_litter_eq]
+    · exact Or.inr ⟨h.2.1, ha₁⟩
+    rw [litter_eq_litter_iff hN hN']
+    by_contra this
+    apply ξ.insideMap_not_mem_codom N₂'ᴸ ⟨a₁, N₁', h⟩
+    apply ξ.interference_subset_codom ⟨N₁, hN⟩ ⟨N₁', hN'⟩
+    rw [interference_eq_of_litter_ne this]
+    exact ⟨h', insideMap_mem_nearLitter N₂'ᴸ ⟨a₁, N₁', h⟩ ⟨N₁', hN'⟩ rfl⟩
+
+def insideExtension (ξ : BaseAction) : BaseAction :=
+  ξ.extend ξ.insideRel ξ.insideRel_dom_small ξ.insideRel_oneOne
+    ξ.insideRel_dom ξ.insideRel_codom insideRel_mem_iff_mem
+
+theorem insideExtension_atoms (ξ : BaseAction) :
+    ξ.insideExtensionᴬ = ξᴬ ⊔ ξ.insideRel :=
+  rfl
+
+theorem le_insideExtension (ξ : BaseAction) : ξ ≤ ξ.insideExtension :=
+  le_extend
+
+theorem insideExtension_spec (ξ : BaseAction) (N : NearLitter) (hN : N ∈ ξᴺ.dom) :
+    Nᴬ \ Nᴸᴬ ⊆ ξ.insideExtensionᴬ.dom := by
+  intro a ha
+  by_contra ha'
+  rw [insideExtension_atoms, Rel.sup_dom, Set.mem_union, not_or] at ha'
+  apply ha'.2
+  obtain ⟨N', hN⟩ := hN
+  exact ⟨_, N, N', ⟨⟨N', hN⟩, ha.1, ha.2⟩, hN, ha'.1, rfl⟩
+
+/-!
+## Extending orbits outside near-litters
+-/
+
+/-!
+## Nice extensions
+-/
 
 end BaseAction
 

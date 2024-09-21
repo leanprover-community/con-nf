@@ -317,14 +317,18 @@ theorem sup_coinjective {r s : Rel α β} (hr : r.Coinjective) (hs : s.Coinjecti
     (h : Disjoint r.dom s.dom) : (r ⊔ s).Coinjective :=
   inv_coinjective_iff.mpr <| sup_injective (inv_injective_iff.mpr hr) (inv_injective_iff.mpr hs) h
 
+theorem sup_oneOne {r s : Rel α β} (hr : r.OneOne) (hs : s.OneOne)
+    (h₁ : Disjoint r.dom s.dom) (h₂ : Disjoint r.codom s.codom) : (r ⊔ s).OneOne :=
+  ⟨sup_injective hr.toInjective hs.toInjective h₂,
+    sup_coinjective hr.toCoinjective hs.toCoinjective h₁⟩
+
 theorem sup_codomEqDom {r s : Rel α α} (hr : r.CodomEqDom) (hs : s.CodomEqDom) :
     (r ⊔ s).CodomEqDom :=
   ⟨sup_codom.trans <| hr.codom_eq_dom ▸ hs.codom_eq_dom ▸ sup_dom.symm⟩
 
 theorem sup_permutative {r s : Rel α α} (hr : r.Permutative) (hs : s.Permutative)
     (h : Disjoint r.dom s.dom) : (r ⊔ s).Permutative :=
-  ⟨⟨sup_injective hr.toInjective hs.toInjective (hr.codom_eq_dom ▸ hs.codom_eq_dom ▸ h),
-    sup_coinjective hr.toCoinjective hs.toCoinjective h⟩,
+  ⟨sup_oneOne hr.toOneOne hs.toOneOne h (hr.codom_eq_dom ▸ hs.codom_eq_dom ▸ h),
     sup_codomEqDom hr.toCodomEqDom hs.toCodomEqDom⟩
 
 @[simp]
