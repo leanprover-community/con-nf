@@ -121,6 +121,10 @@ theorem inv_atoms (ξ : BaseAction) : ξ⁻¹ᴬ = ξᴬ.inv :=
 theorem inv_nearLitters (ξ : BaseAction) : ξ⁻¹ᴺ = ξᴺ.inv :=
   rfl
 
+@[simp]
+theorem inv_inv (ξ : BaseAction) : ξ⁻¹⁻¹ = ξ :=
+  rfl
+
 theorem nearLitters_injective (ξ : BaseAction) : ξᴺ.Injective := by
   have := ξ⁻¹.nearLitters_coinjective
   rwa [inv_nearLitters, Rel.inv_coinjective_iff] at this
@@ -171,6 +175,22 @@ instance : PartialOrder BaseAction where
   le_refl _ := ⟨le_rfl, rfl⟩
   le_trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
   le_antisymm _ _ h₁ h₂ := ext (le_antisymm h₁.1 h₂.1) h₁.2
+
+theorem inv_le_inv {ξ ζ : BaseAction} (h : ξ⁻¹ ≤ ζ⁻¹) :
+    ξ ≤ ζ := by
+  constructor
+  · have := h.1
+    rwa [inv_atoms, inv_atoms, Rel.inv_le_inv_iff] at this
+  · have := h.2
+    rwa [inv_nearLitters, inv_nearLitters, Rel.inv_inj] at this
+
+theorem inv_le {ξ ζ : BaseAction} (h : ξ⁻¹ ≤ ζ) :
+    ξ ≤ ζ⁻¹ :=
+  inv_le_inv h
+
+theorem inv_le_inv_iff {ξ ζ : BaseAction} :
+    ξ⁻¹ ≤ ζ⁻¹ ↔ ξ ≤ ζ :=
+  ⟨inv_le_inv, inv_le_inv (ξ := ξ⁻¹) (ζ := ζ⁻¹)⟩
 
 /-- A definition that can be used to reduce the proof obligations of extending a base action. -/
 def extend (ξ : BaseAction) (r : Rel Atom Atom) (r_dom_small : Small r.dom) (r_oneOne : r.OneOne)
@@ -376,7 +396,13 @@ def not_sandbox_eq (ξ : BaseAction) :
   ext L
   simp only [sandbox_iff, Set.mem_union, Set.mem_iUnion, exists_prop,
     not_and_or, not_forall, not_not]
-  aesop
+  constructor
+  · rintro (⟨a, ha, rfl⟩ | ⟨N, a, rfl, hN, ha⟩)
+    · exact Or.inl ⟨a, ha, rfl⟩
+    · exact Or.inr ⟨N, hN, a, ha, rfl⟩
+  · rintro (⟨a, ha, rfl⟩ | ⟨N, hN, a, ha, rfl⟩)
+    · exact Or.inl ⟨a, ha, rfl⟩
+    · exact Or.inr ⟨N, a, rfl, hN, ha⟩
 
 theorem card_not_sandbox (ξ : BaseAction) :
     #{L | ¬ξ.Sandbox L} ≤ #κ := by
@@ -508,6 +534,64 @@ theorem outsideExtension_spec {ξ : BaseAction} {hξ : ∀ N ∈ ξᴺ.dom, Nᴬ
 /-!
 ## Nice extensions
 -/
+
+def doubleInsideExtension (ξ : BaseAction) : BaseAction :=
+  ξ.insideExtension⁻¹.insideExtension⁻¹
+
+theorem le_doubleInsideExtension (ξ : BaseAction) :
+    ξ ≤ ξ.doubleInsideExtension :=
+  ξ.le_insideExtension.trans <| inv_le <| ξ.insideExtension⁻¹.le_insideExtension
+
+theorem doubleInsideExtension_dom {ξ : BaseAction} (N : NearLitter) (hN : N ∈ ξᴺ.dom) :
+    Nᴬ \ Nᴸᴬ ⊆ ξ.doubleInsideExtensionᴬ.dom := by
+  intro a ha
+  have := ξ.insideExtension_spec N hN ha
+  rw [doubleInsideExtension, inv_atoms, insideExtension_atoms, Rel.inv_dom, Rel.sup_codom]
+  left
+  exact this
+
+theorem doubleInsideExtension_codom {ξ : BaseAction} (N : NearLitter) (hN : N ∈ ξᴺ.codom) :
+    Nᴬ \ Nᴸᴬ ⊆ ξ.doubleInsideExtensionᴬ.codom :=
+  ξ.insideExtension⁻¹.insideExtension_spec N hN
+
+theorem niceExtension_aux {ξ : BaseAction} (N : NearLitter) (hN : N ∈ ξᴺ.codom) :
+    Nᴬ \ Nᴸᴬ ⊆ (ξ.doubleInsideExtension.outsideExtension ξ.doubleInsideExtension_dom)⁻¹ᴬ.dom := by
+  intro a ha
+  rw [inv_atoms, outsideExtension_atoms, Rel.inv_dom, Rel.sup_codom]
+  left
+  exact doubleInsideExtension_codom N hN ha
+
+def niceExtension (ξ : BaseAction) : BaseAction :=
+  ((ξ.doubleInsideExtension.outsideExtension ξ.doubleInsideExtension_dom)⁻¹.outsideExtension
+    ξ.niceExtension_aux)⁻¹
+
+theorem le_niceExtension (ξ : BaseAction) :
+    ξ ≤ ξ.niceExtension :=
+  ξ.le_doubleInsideExtension.trans <|
+    (ξ.doubleInsideExtension.le_outsideExtension _).trans <| inv_le <|
+    (ξ.doubleInsideExtension.outsideExtension _)⁻¹.le_outsideExtension _
+
+theorem niceExtension_nice (ξ : BaseAction) : ξ.niceExtension.Nice := by
+  constructor
+  · rintro N hN a (ha | ha)
+    · rw [niceExtension, inv_atoms, Rel.inv_dom, outsideExtension_atoms, Rel.sup_codom]
+      left
+      rw [inv_atoms, Rel.inv_codom, outsideExtension_atoms, Rel.sup_dom]
+      left
+      exact ξ.doubleInsideExtension_dom N hN ha
+    · rw [niceExtension, inv_atoms, Rel.inv_dom, outsideExtension_atoms, Rel.sup_codom]
+      left
+      rw [inv_atoms, Rel.inv_codom]
+      exact outsideExtension_spec (ξ := ξ.doubleInsideExtension) N hN ha
+  · rintro N hN a (ha | ha)
+    · rw [niceExtension, inv_atoms, Rel.inv_codom, outsideExtension_atoms, Rel.sup_dom]
+      left
+      rw [inv_atoms, Rel.inv_dom, outsideExtension_atoms, Rel.sup_codom]
+      left
+      exact ξ.doubleInsideExtension_codom N hN ha
+    · rw [niceExtension, inv_atoms, Rel.inv_codom]
+      exact outsideExtension_spec
+        (ξ := (ξ.doubleInsideExtension.outsideExtension ξ.doubleInsideExtension_dom)⁻¹) N hN ha
 
 end BaseAction
 

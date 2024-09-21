@@ -497,9 +497,12 @@
 \begin{proposition}
   \uses{def:BaseAction.Nice}
   \label{prop:BaseAction.exists_nice}
+  \lean{ConNF.BaseAction.niceExtension}
+  \leanok
   Every base action has a nice extension.
 \end{proposition}
 \begin{proof}
+  \leanok
   \uses{prop:BaseAction.exists_outside,prop:BaseAction.exists_inside}
   Apply \cref{prop:BaseAction.exists_inside} to \( \xi \) to obtain \( \xi_1 \); apply \cref{prop:BaseAction.exists_inside} again to \( \xi_1^{-1} \) to obtain \( \xi_2 \); apply \cref{prop:BaseAction.exists_outside} to \( \xi_2 \) to obtain \( \xi_3 \), and finally apply \cref{prop:BaseAction.exists_outside} again to \( \xi_3^{-1} \) to obtain \( \xi_4 \), our target.
 \end{proof}
