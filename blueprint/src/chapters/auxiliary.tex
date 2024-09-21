@@ -84,11 +84,14 @@
 \end{proof}
 \begin{proposition}[completing orbits]
   \label{prop:completing_orbits}
+  \lean{Rel.permutativeExtension'}
+  \leanok
   Let \( R : \tau \to \tau \to \Prop \) be a one-to-one relation.
   Let \( s : \Set \tau \) be an infinite set such that \( \#\field R \leq \#s \), and \( \field R \) and \( s \) are disjoint.
   Then there is a permutative relation \( S \) such that \( R \leq S \) and \( \coim S \subseteq \field R \cup s \).
 \end{proposition}
 \begin{proof}
+  \leanok
   \uses{prop:completing_restricted_orbits}
   Define the orbit restriction \( (s, f, \pi) \) for \( \field R \) over \( \Unit \).
   Note that for this to be defined, we used the inequality

@@ -345,4 +345,38 @@ theorem permutativeExtension_permutative {r : Rel α α} (R : OrbitRestriction (
   ⟨sup_oneOne hr (newOrbits_oneOne R) (disjoint_newOrbits_dom R) (disjoint_newOrbits_codom R),
     permutativeExtension_codomEqDom R⟩
 
+def permutativeExtension' (r : Rel α α) (hr : r.OneOne) (s : Set α)
+    (hs₁ : s.Infinite) (hs₂ : #r.dom ≤ #s) (hs₃ : Disjoint (r.dom ∪ r.codom) s) :
+    Rel α α :=
+  r.permutativeExtension {
+    sandbox := s
+    sandbox_disjoint := hs₃
+    categorise := λ _ ↦ Unit.unit
+    catPerm := 1
+    le_card_categorise := by
+      intro
+      simp only [Set.mem_singleton_iff, Set.preimage_const_of_mem, Set.inter_univ, max_le_iff,
+        le_refl, and_true]
+      rw [← Set.infinite_coe_iff, Cardinal.infinite_iff] at hs₁
+      refine ⟨hs₁, ?_⟩
+      apply (mk_union_le _ _).trans
+      apply add_le_of_le hs₁ hs₂
+      exact (card_codom_le_of_coinjective hr.toCoinjective).trans hs₂
+  }
+
+theorem le_permutativeExtension' {r : Rel α α} {hr : r.OneOne} {s : Set α}
+    {hs₁ : s.Infinite} {hs₂ : #r.dom ≤ #s} {hs₃ : Disjoint (r.dom ∪ r.codom) s} :
+    r ≤ r.permutativeExtension' hr s hs₁ hs₂ hs₃ :=
+  r.le_permutativeExtension _
+
+theorem permutativeExtension'_permutative {r : Rel α α} {hr : r.OneOne} {s : Set α}
+    {hs₁ : s.Infinite} {hs₂ : #r.dom ≤ #s} {hs₃ : Disjoint (r.dom ∪ r.codom) s} :
+    (r.permutativeExtension' hr s hs₁ hs₂ hs₃).Permutative :=
+  permutativeExtension_permutative _ hr
+
+theorem dom_permutativeExtension'_subset {r : Rel α α} {hr : r.OneOne} {s : Set α}
+    {hs₁ : s.Infinite} {hs₂ : #r.dom ≤ #s} {hs₃ : Disjoint (r.dom ∪ r.codom) s} :
+    (r.permutativeExtension' hr s hs₁ hs₂ hs₃).dom ⊆ r.dom ∪ r.codom ∪ s :=
+  r.dom_permutativeExtension_subset _
+
 end Rel
