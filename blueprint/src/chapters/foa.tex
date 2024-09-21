@@ -470,10 +470,13 @@
 \begin{proposition}[extending orbits outside near-litters]
   \uses{def:BaseAction}
   \label{prop:BaseAction.exists_outside}
+  \lean{ConNF.BaseAction.outsideExtension}
+  \leanok
   Every base action \( \xi \) admits an extension \( \zeta \) satisfying
   \[ \forall N \in \coim \xi^\NearLitter,\, \LS(N) \setminus N \subseteq \coim \xi^\Atom \]
 \end{proposition}
 \begin{proof}
+  \leanok
   \uses{prop:BaseAction.exists_inside}
   Without loss of generality (as extensions are transitive), let \( \xi \) satisfy the conclusion of \cref{prop:BaseAction.exists_inside}.
 
@@ -489,7 +492,7 @@
   Suppose that \( a_1 \in N_1 \).
   We know that there is a near-litter \( N \in \coim \xi^\NearLitter \) such that \( a_1 \in \LS(N^\circ) \setminus N \setminus \coim \xi^\Atom \).
   If \( N^\circ = N_1^\circ \), then \( a_1 \in N \symmdiff N_1 = \interf(N, N_1) \subseteq \coim \xi^\Atom \), a contradiction, hence \( a^\circ = N^\circ \neq N_1^\circ \).
-  But then as \( \xi \) satisfies the conclusion of \cref{prop:BaseAction.exists_outside}, we have \( N_1 \setminus \LS(N_1^\circ) \subseteq \coim \xi^\Atom \), which again is a contradiction.
+  But then as \( \xi \) satisfies the conclusion of \cref{prop:BaseAction.exists_inside}, we have \( N_1 \setminus \LS(N_1^\circ) \subseteq \coim \xi^\Atom \), which again is a contradiction.
 \end{proof}
 \begin{proposition}
   \uses{def:BaseAction.Nice}

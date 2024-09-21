@@ -353,7 +353,7 @@ theorem insideExtension_atoms (ξ : BaseAction) :
 theorem le_insideExtension (ξ : BaseAction) : ξ ≤ ξ.insideExtension :=
   le_extend
 
-theorem insideExtension_spec (ξ : BaseAction) (N : NearLitter) (hN : N ∈ ξᴺ.dom) :
+theorem insideExtension_spec {ξ : BaseAction} (N : NearLitter) (hN : N ∈ ξᴺ.dom) :
     Nᴬ \ Nᴸᴬ ⊆ ξ.insideExtensionᴬ.dom := by
   intro a ha
   by_contra ha'
@@ -365,6 +365,145 @@ theorem insideExtension_spec (ξ : BaseAction) (N : NearLitter) (hN : N ∈ ξ�
 /-!
 ## Extending orbits outside near-litters
 -/
+
+@[mk_iff]
+structure Sandbox (ξ : BaseAction) (L : Litter) : Prop where
+  atom_not_mem (a : Atom) : a ∈ ξᴬ.codom → aᴸ ≠ L
+  nearLitter_not_mem (N : NearLitter) (a : Atom) : aᴸ = L → N ∈ ξᴺ.codom → a ∉ Nᴬ
+
+def not_sandbox_eq (ξ : BaseAction) :
+    {L | ¬ξ.Sandbox L} = (⋃ a ∈ ξᴬ.codom, {aᴸ}) ∪ (⋃ N ∈ ξᴺ.codom, ⋃ a ∈ Nᴬ, {aᴸ}) := by
+  ext L
+  simp only [sandbox_iff, Set.mem_union, Set.mem_iUnion, exists_prop,
+    not_and_or, not_forall, not_not]
+  aesop
+
+theorem card_not_sandbox (ξ : BaseAction) :
+    #{L | ¬ξ.Sandbox L} ≤ #κ := by
+  rw [not_sandbox_eq]
+  apply (mk_union_le _ _).trans
+  apply add_le_of_le κ_isRegular.aleph0_le
+  · refine (mk_biUnion_le_of_le 1 ?_).trans ?_
+    · simp only [mk_fintype, Fintype.card_ofSubsingleton, Nat.cast_one, le_refl, implies_true]
+    rw [mul_one]
+    exact ξ.atoms_codom_small.le
+  · refine (mk_biUnion_le_of_le #κ ?_).trans ?_
+    · intro N _
+      refine (mk_biUnion_le_of_le 1 ?_).trans ?_
+      · simp only [mk_fintype, Fintype.card_ofSubsingleton, Nat.cast_one, le_refl, implies_true]
+      · rw [mul_one, N.card_atoms]
+    · exact mul_le_of_le κ_isRegular.aleph0_le ξ.nearLitters_codom_small.le le_rfl
+
+theorem exists_sandbox (ξ : BaseAction) : {L | ξ.Sandbox L}.Nonempty := by
+  by_contra h
+  suffices #{L | ξ.Sandbox L} + #{L | ¬ξ.Sandbox L} ≤ #κ by
+    have h := mk_sum_compl {L | ξ.Sandbox L}
+    have := h.symm.trans_le this
+    rw [card_litter, ← not_lt] at this
+    exact this κ_lt_μ
+  rw [Set.not_nonempty_iff_eq_empty] at h
+  rw [h, mk_eq_zero, zero_add]
+  exact ξ.card_not_sandbox
+
+def sandbox (ξ : BaseAction) : Litter :=
+  ξ.exists_sandbox.some
+
+theorem sandbox_spec (ξ : BaseAction) : ξ.Sandbox ξ.sandbox :=
+  ξ.exists_sandbox.some_mem
+
+def outside (ξ : BaseAction) : Set Atom :=
+  {a | ∃ N ∈ ξᴺ.dom, a ∉ Nᴬ ∧ aᴸ = Nᴸ}
+
+theorem outside_small (ξ : BaseAction) :
+    Small ξ.outside := by
+  have : Small (⋃ N ∈ ξᴺ.dom, Nᴸᴬ \ Nᴬ) := by
+    apply small_biUnion ξ.nearLitters_dom_small
+    intro N _
+    exact N.diff_small'
+  apply this.mono
+  rintro a ⟨N, h₁, h₂, h₃⟩
+  simp only [Set.mem_iUnion]
+  exact ⟨N, h₁, h₃, h₂⟩
+
+theorem card_outside_lt_card_sandbox (ξ : BaseAction) :
+    #ξ.outside < #ξ.sandboxᴬ :=
+  ξ.outside_small.trans_le <| κ_le_of_not_small <| ξ.sandbox.atoms_not_small
+
+def outsideMap (ξ : BaseAction) : ξ.outside ↪ ξ.sandboxᴬ :=
+  Nonempty.some ξ.card_outside_lt_card_sandbox.le
+
+theorem outsideMap_litter {ξ : BaseAction} (x : ξ.outside) :
+    ξ.Sandbox (ξ.outsideMap x : Atom)ᴸ := by
+  rw [(ξ.outsideMap x).prop]
+  exact ξ.sandbox_spec
+
+def outsideRel (ξ : BaseAction) : Rel Atom Atom :=
+  λ a₁ a₂ ↦ a₁ ∉ ξᴬ.dom ∧ ∃ h, a₂ = ξ.outsideMap ⟨a₁, h⟩
+
+theorem outsideRel_dom_small (ξ : BaseAction) : Small ξ.outsideRel.dom := by
+  apply ξ.outside_small.mono
+  rintro a ⟨_, _, ha, rfl⟩
+  exact ha
+
+theorem outsideRel_injective (ξ : BaseAction) : ξ.outsideRel.Injective := by
+  constructor
+  rintro a b c ⟨_, _, hac⟩ ⟨_, _, hbc⟩
+  have := hac.symm.trans hbc
+  rwa [Subtype.coe_inj, EmbeddingLike.apply_eq_iff_eq, Subtype.mk_eq_mk] at this
+
+theorem outsideRel_coinjective (ξ : BaseAction) : ξ.outsideRel.Coinjective := by
+  constructor
+  rintro a b c ⟨_, _, rfl⟩ ⟨_, _, rfl⟩
+  rfl
+
+theorem outsideRel_oneOne (ξ : BaseAction) : ξ.outsideRel.OneOne :=
+  ⟨ξ.outsideRel_injective, ξ.outsideRel_coinjective⟩
+
+theorem outsideRel_dom (ξ : BaseAction) : Disjoint ξᴬ.dom ξ.outsideRel.dom := by
+  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  rintro a ⟨ha, _, _, _, _, _, ha', _⟩
+  contradiction
+
+theorem outsideRel_codom (ξ : BaseAction) : Disjoint ξᴬ.codom ξ.outsideRel.codom := by
+  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  rintro _ ⟨⟨a, hab⟩, b, _, hb', rfl⟩
+  exact (outsideMap_litter ⟨b, hb'⟩).atom_not_mem _ ⟨a, hab⟩ rfl
+
+theorem outsideRel_mem_iff_mem {ξ : BaseAction} (hξ : ∀ N ∈ ξᴺ.dom, Nᴬ \ Nᴸᴬ ⊆ ξᴬ.dom)
+    {a₁ a₂ : Atom} {N₁ N₂ : NearLitter}
+    (ha : ξ.outsideRel a₁ a₂) (hN : ξᴺ N₁ N₂) :
+    a₁ ∈ N₁ᴬ ↔ a₂ ∈ N₂ᴬ := by
+  obtain ⟨h₁, ⟨N₁', ⟨N₂', hN'⟩, h₂, h₃⟩, rfl⟩ := ha
+  have := (outsideMap_litter ⟨a₁, N₁', ⟨N₂', hN'⟩, h₂, h₃⟩).nearLitter_not_mem N₂ _ rfl ⟨N₁, hN⟩
+  apply (iff_false_right this).mpr
+  intro h₄
+  suffices N₁'ᴸ ≠ N₁ᴸ from h₁ (hξ N₁ ⟨N₂, hN⟩ ⟨h₄, h₃.trans_ne this⟩)
+  contrapose! h₁
+  apply ξ.interference_subset_dom ⟨N₂', hN'⟩ ⟨N₂, hN⟩
+  rw [interference_eq_of_litter_eq h₁]
+  exact Or.inr ⟨h₄, h₂⟩
+
+def outsideExtension (ξ : BaseAction) (hξ : ∀ N ∈ ξᴺ.dom, Nᴬ \ Nᴸᴬ ⊆ ξᴬ.dom) : BaseAction :=
+  ξ.extend ξ.outsideRel ξ.outsideRel_dom_small ξ.outsideRel_oneOne
+    ξ.outsideRel_dom ξ.outsideRel_codom (ξ.outsideRel_mem_iff_mem hξ)
+
+theorem outsideExtension_atoms (ξ : BaseAction) (hξ : ∀ N ∈ ξᴺ.dom, Nᴬ \ Nᴸᴬ ⊆ ξᴬ.dom) :
+    (ξ.outsideExtension hξ)ᴬ = ξᴬ ⊔ ξ.outsideRel :=
+  rfl
+
+theorem le_outsideExtension (ξ : BaseAction) (hξ : ∀ N ∈ ξᴺ.dom, Nᴬ \ Nᴸᴬ ⊆ ξᴬ.dom) :
+    ξ ≤ ξ.outsideExtension hξ :=
+  le_extend
+
+theorem outsideExtension_spec {ξ : BaseAction} {hξ : ∀ N ∈ ξᴺ.dom, Nᴬ \ Nᴸᴬ ⊆ ξᴬ.dom}
+    (N : NearLitter) (hN : N ∈ ξᴺ.dom) :
+    Nᴸᴬ \ Nᴬ ⊆ (ξ.outsideExtension hξ)ᴬ.dom := by
+  intro a ha
+  by_contra ha'
+  rw [outsideExtension_atoms, Rel.sup_dom, Set.mem_union, not_or] at ha'
+  apply ha'.2
+  obtain ⟨N', hN⟩ := hN
+  exact ⟨_, ha'.1, ⟨N, ⟨N', hN⟩, ha.2, ha.1⟩, rfl⟩
 
 /-!
 ## Nice extensions
