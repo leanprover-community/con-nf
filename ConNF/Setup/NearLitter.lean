@@ -123,23 +123,23 @@ theorem inter_small_of_litter_ne (h : N₁ᴸ ≠ N₂ᴸ) : Small (N₁ᴬ ∩ 
 theorem litter_ne_iff_inter_small (N₁ N₂ : NearLitter) : N₁ᴸ ≠ N₂ᴸ ↔ Small (N₁ᴬ ∩ N₂ᴬ) :=
   ⟨inter_small_of_litter_ne, litter_ne_of_inter_small⟩
 
-def Interference (N₁ N₂ : NearLitter) : Set Atom :=
+def interference (N₁ N₂ : NearLitter) : Set Atom :=
   {a | N₁ᴸ = N₂ᴸ ↔ ¬(a ∈ N₁ᴬ ↔ a ∈ N₂ᴬ)} ∩ (N₁ᴬ ∪ N₂ᴬ)
 
 theorem interference_eq_of_litter_eq (h : N₁ᴸ = N₂ᴸ) :
-    Interference N₁ N₂ = N₁ᴬ ∆ N₂ᴬ := by
+    interference N₁ N₂ = N₁ᴬ ∆ N₂ᴬ := by
   ext a
-  simp only [Interference, h, true_iff, mem_inter_iff, mem_setOf_eq, mem_union, mem_symmDiff]
+  simp only [interference, h, true_iff, mem_inter_iff, mem_setOf_eq, mem_union, mem_symmDiff]
   tauto
 
 theorem interference_eq_of_litter_ne (h : N₁ᴸ ≠ N₂ᴸ) :
-    Interference N₁ N₂ = N₁ᴬ ∩ N₂ᴬ := by
+    interference N₁ N₂ = N₁ᴬ ∩ N₂ᴬ := by
   ext a
-  simp only [Interference, h, false_iff, not_not, mem_inter_iff, mem_setOf_eq, mem_union]
+  simp only [interference, h, false_iff, not_not, mem_inter_iff, mem_setOf_eq, mem_union]
   tauto
 
 theorem interference_small (N₁ N₂ : NearLitter) :
-    Small (Interference N₁ N₂) := by
+    Small (interference N₁ N₂) := by
   by_cases h : N₁ᴸ = N₂ᴸ
   · rwa [interference_eq_of_litter_eq h, ← litter_eq_iff_symmDiff_small]
   · rwa [interference_eq_of_litter_ne h, ← litter_ne_iff_inter_small]
