@@ -78,7 +78,7 @@ theorem mk_pow_le_of_mk_lt_ord_cof {α β : Type _}
   have hαβ : #(β × α) = #α := by
     rw [mk_prod, lift_id, lift_id]
     apply mul_eq_right
-    · exact hα.isLimit.aleph0_le
+    · exact aleph0_le_of_isSuccLimit hα.isSuccLimit
     · exact hβ.le.trans (Ordinal.cof_ord_le (#α))
     · exact hβ'
   have := mk_subset_mk_lt_cof (α := β × α) (hαβ ▸ hα.2)
@@ -161,7 +161,7 @@ theorem pow_lt_of_lt {c d e : Cardinal} (hc : c.IsStrongLimit) (hd : d < c) (he 
   · apply (power_le_two_power d e).trans_lt
     rw [max_lt_iff, max_lt_iff]
     exact ⟨hc', hc.2 d hd, hc.2 e he⟩
-  · cases eq_of_le_of_not_lt hc.isLimit.aleph0_le hc'
+  · cases eq_of_le_of_not_lt (aleph0_le_of_isSuccLimit hc.isSuccLimit) hc'
     exact power_lt_aleph0 hd he
 
 end Cardinal
