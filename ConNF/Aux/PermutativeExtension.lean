@@ -8,12 +8,13 @@ namespace Rel
 
 variable {α β : Type _}
 
+/-- TODO: Fix the paper version of this. -/
 structure OrbitRestriction (s : Set α) (β : Type _) where
   sandbox : Set α
   sandbox_disjoint : Disjoint s sandbox
   categorise : α → β
   catPerm : Equiv.Perm β
-  le_card_categorise (b : β) : max ℵ₀ (max #s #sandbox) ≤ #(sandbox ∩ categorise ⁻¹' {b} : Set α)
+  le_card_categorise (b : β) : max ℵ₀ #s ≤ #(sandbox ∩ categorise ⁻¹' {b} : Set α)
 
 theorem le_card_categorise {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) (b : β) :
     #((r.dom ∪ r.codom : Set α) × ℕ) ≤ #(R.sandbox ∩ R.categorise ⁻¹' {b} : Set α) := by
@@ -21,7 +22,7 @@ theorem le_card_categorise {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.co
   refine le_trans ?_ (R.le_card_categorise b)
   apply mul_le_of_le
   · exact le_max_left ℵ₀ _
-  · simp only [le_max_iff, le_refl, true_or, or_true]
+  · exact le_max_right ℵ₀ _
   · exact le_max_left ℵ₀ _
 
 def catInj {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) (b : β) :

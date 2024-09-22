@@ -155,6 +155,18 @@ theorem litters_coinjective (ξ : BaseAction) : ξᴸ.Coinjective := by
   obtain ⟨N₄, N₂, h₄, rfl, h₂⟩ := h₂
   exact (litter_eq_litter_iff h₁ h₂).mp (h₃.trans h₄.symm)
 
+theorem litters_dom_small (ξ : BaseAction) : Small ξᴸ.dom := by
+  have := mk_le_of_surjective (f := λ (N : ξᴺ.dom) ↦
+      (⟨N.valᴸ, N.prop.chooseᴸ, ⟨N.prop.choose_spec⟩⟩ : ξᴸ.dom)) ?_
+  · exact this.trans_lt ξ.nearLitters_dom_small
+  · rintro ⟨L₁, L₂, hL⟩
+    rw [litters_iff] at hL
+    obtain ⟨N₁, N₂, rfl, rfl, h⟩ := hL
+    exact ⟨⟨N₁, N₂, h⟩, rfl⟩
+
+theorem litters_codom_small (ξ : BaseAction) : Small ξᴸ.codom :=
+  small_codom_of_small_dom ξ.litters_coinjective ξ.litters_dom_small
+
 @[simp]
 theorem inv_litters (ξ : BaseAction) : ξ⁻¹ᴸ = ξᴸ.inv := by
   ext L₁ L₂

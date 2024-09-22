@@ -43,6 +43,10 @@ structure CodomEqDom (r : Rel α α) : Prop where
 @[mk_iff]
 structure Permutative (r : Rel α α) extends r.OneOne, r.CodomEqDom : Prop
 
+theorem CodomEqDom.dom_union_codom {r : Rel α α} (h : r.CodomEqDom) :
+    r.dom ∪ r.codom = r.dom := by
+  rw [h.codom_eq_dom, union_self]
+
 theorem CodomEqDom.mem_dom {r : Rel α α} (h : r.CodomEqDom) {x y : α} (hxy : r x y) :
     y ∈ r.dom := by
   rw [← h.codom_eq_dom]
@@ -469,6 +473,10 @@ noncomputable def toEquiv (r : Rel α β) (hr : r.Bijective) : α ≃ β where
 theorem toEquiv_rel (r : Rel α β) (hr : r.Bijective) (a : α) :
     r a (r.toEquiv hr a) :=
   toFunction_rel r hr.toFunctional a
+
+theorem toEquiv_eq_iff (r : Rel α β) (hr : r.Bijective) (a : α) (b : β) :
+    r.toEquiv hr a = b ↔ r a b :=
+  toFunction_eq_iff r hr.toFunctional a b
 
 theorem toFunction_image (r : Rel α β) (hr : r.Functional) (s : Set α) :
     r.toFunction hr '' s = r.image s := by
