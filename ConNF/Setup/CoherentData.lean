@@ -51,6 +51,19 @@ instance [PreCoherentData] {β γ : TypeIndex} [LeLevel β] [LeLevel γ] :
       letI : LeLevel ε := ⟨h.le.trans LeLevel.elim⟩
       PreCoherentData.allPermSderiv h ρ)
 
+@[simp]
+theorem allPerm_deriv_nil [PreCoherentData] {β : TypeIndex} [LeLevel β]
+    (ρ : AllPerm β) :
+    ρ ⇘ (.nil : β ↝ β) = ρ :=
+  rfl
+
+@[simp]
+theorem allPerm_deriv_sderiv [PreCoherentData] {β γ δ : TypeIndex}
+    [LeLevel β] [LeLevel γ] [LeLevel δ]
+    (ρ : AllPerm β) (A : β ↝ γ) (h : δ < γ) :
+    ρ ⇘ (A ↘ h) = ρ ⇘ A ↘ h :=
+  rfl
+
 class CoherentData extends PreCoherentData where
   allPermSderiv_forget {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (h : γ < β) (ρ : AllPerm β) :
     (ρ ↘ h)ᵁ = ρᵁ ↘ h
@@ -78,5 +91,19 @@ export CoherentData (allPermSderiv_forget pos_atom_lt_pos pos_nearLitter_lt_pos 
   allPerm_of_basePerm allPerm_of_smulFuzz typedMem_tSetForget typedMem_singleton_iff)
 
 attribute [simp] allPermSderiv_forget typedMem_singleton_iff
+
+@[simp]
+theorem allPermDeriv_forget [CoherentData] {β γ : TypeIndex} [LeLevel β] [iγ : LeLevel γ]
+    (A : β ↝ γ) (ρ : AllPerm β) :
+    (ρ ⇘ A)ᵁ = ρᵁ ⇘ A := by
+  revert iγ
+  induction A with
+  | nil =>
+    intro
+    rw [allPerm_deriv_nil, Tree.deriv_nil]
+  | sderiv δ ε A h ih =>
+    intro
+    have : LeLevel δ := ⟨A.le.trans LeLevel.elim⟩
+    rw [allPerm_deriv_sderiv, allPermSderiv_forget, ih, Tree.deriv_sderiv]
 
 end ConNF

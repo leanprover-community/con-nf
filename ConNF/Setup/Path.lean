@@ -206,6 +206,13 @@ theorem Path.deriv_sderiv (A : α ↝ β) (B : β ↝ γ) (h : δ < γ) :
   rfl
 
 @[simp]
+theorem Path.nil_deriv (A : α ↝ β) :
+    (.nil : α ↝ α) ⇘ A = A := by
+  induction A with
+  | nil => rfl
+  | sderiv γ δ A h ih => rw [deriv_sderiv, ih]
+
+@[simp]
 theorem Path.deriv_sderivBot (A : α ↝ β) (B : β ↝ γ) :
     A ⇘ (B ↘.) = A ⇘ B ↘. := by
   cases γ using WithBot.recBotCoe with

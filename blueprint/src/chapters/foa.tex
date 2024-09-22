@@ -635,11 +635,14 @@
 \begin{proposition}
   \uses{def:StrApprox.Coherent,def:FlexApprox,def:StrApprox.Approximates,def:StrAction.Approximates}
   \label{prop:approximates_of_flexApprox}
+  \lean{ConNF.StrAction.approximates_of_flexApprox_exactlyApproximates}
+  \leanok
   Let \( \xi \) be a coherent \( \beta \)-action, and let \( \psi \) be a flexible approximation for it.
   If \( \psi \) exactly approximates some allowable permutation \( \rho \), then \( \xi \) approximates \( \rho \).
 \end{proposition}
 \begin{proof}
   \uses{prop:FlexApprox.smul_nearLitter_eq}
+  \leanok
   First, note that \( \xi_A^\Atom \leq \psi_A^{E\Atom} \) and \( \psi_A^\Atom \leq \rho_A^\Atom \) give the required result for atoms.
   Now suppose that \( (N_1, N_2) \in \xi_A^\NearLitter \); we must show that \( \rho_A(N_1) = N_2 \).
   We prove this by induction on \( \iota(N_1) \), generalising over all \( A \).
@@ -662,9 +665,12 @@
 \begin{theorem}[freedom of action for actions]
   \uses{def:StrAction.Coherent,def:StrAction.Approximates}
   \label{thm:StrAction.foa}
+  \lean{ConNF.StrAction.freedomOfAction}
+  \leanok
   Every coherent action approximates some allowable permutation.
 \end{theorem}
 \begin{proof}
+  \leanok
   \uses{prop:exists_flexApprox,prop:approximates_of_flexApprox,thm:StrApprox.foa}
   Let \( \xi \) be a coherent \( \beta \)-action, and let \( \psi \) be a flexible approximation for it, which exists by \cref{prop:exists_flexApprox}.
   Then apply \cref{thm:StrApprox.foa} (freedom of action) to \( \psi \) to obtain a \( \beta \)-allowable permutation \( \rho \) that \( \psi \) exactly approximates.

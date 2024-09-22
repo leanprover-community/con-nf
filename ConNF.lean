@@ -13,6 +13,7 @@ import ConNF.FOA.Inflexible
 import ConNF.FOA.StrAction
 import ConNF.FOA.StrActionFOA
 import ConNF.FOA.StrApprox
+import ConNF.FOA.StrApproxFOA
 import ConNF.Setup.Atom
 import ConNF.Setup.BasePerm
 import ConNF.Setup.BasePositions

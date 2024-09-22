@@ -29,6 +29,11 @@ variable [Level] [CoherentData] {β : TypeIndex} [LeLevel β] {A : β ↝ ⊥}
 def Coherent (ξ : StrAction β) : Prop :=
   ∀ A L₁ L₂, (ξ A)ᴸ L₁ L₂ → CoherentAt ξ A L₁ L₂
 
+theorem Coherent.deriv {ξ : StrAction β} (hξ : ξ.Coherent)
+    {γ : TypeIndex} [LeLevel γ] (A : β ↝ γ) :
+    Coherent (ξ ⇘ A) :=
+  λ B L₁ L₂ h ↦ (hξ (A ⇘ B) L₁ L₂ h).deriv
+
 theorem mapFlexible_of_coherent {ξ : StrAction β} (hξ : ξ.Coherent) (A : β ↝ ⊥) :
     (ξ A).MapFlexible A := by
   intro L₁ L₂ h
@@ -66,5 +71,22 @@ theorem BaseAction.Approximates.mono {ψ χ : BaseAction} {π : BasePerm}
 def StrAction.Approximates {β : TypeIndex} [ModelData β]
     (ξ : StrAction β) (ρ : AllPerm β) : Prop :=
   ∀ A, (ξ A).Approximates (ρᵁ A)
+
+def StrAction.flexApprox [Level] {β : TypeIndex} [LeLevel β] [CoherentData]
+    (ξ : StrAction β) : StrApprox β :=
+  λ A ↦ (ξ A).flexApprox A
+
+/-- TODO: Put this in the blueprint. -/
+theorem StrAction.flexApprox_coherent [Level] {β : TypeIndex} [LeLevel β] [CoherentData]
+    (ξ : StrAction β) (hξ : ∀ A, (ξ A).MapFlexible A) :
+    StrApprox.Coherent ξ.flexApprox := by
+  intro A L₁ L₂ hL
+  constructor
+  · intro P t hA ht
+    cases ((ξ A).flexApprox_flexApprox (hξ A)).flexible_of_mem_dom ⟨L₂, hL⟩ ⟨P, t, hA, ht⟩
+  · intro _
+    apply ((ξ A).flexApprox_flexApprox (hξ A)).flexible_of_mem_dom
+    rw [← (BaseApprox.litters_permutative _).codom_eq_dom]
+    exact ⟨L₁, hL⟩
 
 end ConNF
