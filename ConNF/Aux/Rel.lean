@@ -211,6 +211,22 @@ theorem Coinjective.comp {r : Rel α β} {s : Rel β γ} (hr : r.Coinjective) (h
   rw [← inv_injective_iff, comp_inv]
   exact Injective.comp (inv_injective_iff.mpr hs) (inv_injective_iff.mpr hr)
 
+theorem Injective.mono {r s : Rel α β} (hs : s.Injective) (h : r ≤ s) :
+    r.Injective := by
+  constructor
+  intro a₁ a₂ b h₁ h₂
+  exact hs.injective (h a₁ b h₁) (h a₂ b h₂)
+
+theorem Coinjective.mono {r s : Rel α β} (hs : s.Coinjective) (h : r ≤ s) :
+    r.Coinjective := by
+  constructor
+  intro b₁ b₂ a h₁ h₂
+  exact hs.coinjective (h a b₁ h₁) (h a b₂ h₂)
+
+theorem OneOne.mono {r s : Rel α β} (hs : s.OneOne) (h : r ≤ s) :
+    r.OneOne :=
+  ⟨hs.toInjective.mono h, hs.toCoinjective.mono h⟩
+
 /-- An alternative spelling of `Rel.graph` that is useful for proving inequalities of cardinals. -/
 def graph' (r : Rel α β) : Set (α × β) :=
   r.uncurry
@@ -343,6 +359,24 @@ theorem sup_permutative {r s : Rel α α} (hr : r.Permutative) (hs : s.Permutati
     (h : Disjoint r.dom s.dom) : (r ⊔ s).Permutative :=
   ⟨sup_oneOne hr.toOneOne hs.toOneOne h (hr.codom_eq_dom ▸ hs.codom_eq_dom ▸ h),
     sup_codomEqDom hr.toCodomEqDom hs.toCodomEqDom⟩
+
+@[simp]
+theorem inf_inv {r s : Rel α β} :
+    (r ⊓ s).inv = r.inv ⊓ s.inv :=
+  rfl
+
+theorem inf_apply {r s : Rel α β} {x : α} {y : β} :
+    (r ⊓ s) x y ↔ r x y ∧ s x y :=
+  Iff.rfl
+
+theorem inf_dom {r s : Rel α β} :
+    (r ⊓ s).dom ⊆ r.dom ∩ s.dom := by
+  rintro x ⟨y, hy⟩
+  exact ⟨⟨y, hy.1⟩, ⟨y, hy.2⟩⟩
+
+theorem inf_codom {r s : Rel α β} :
+    (r ⊓ s).codom ⊆ r.codom ∩ s.codom :=
+  inf_dom
 
 @[simp]
 theorem inv_le_inv_iff {r s : Rel α β} :

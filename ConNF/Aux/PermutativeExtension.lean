@@ -346,6 +346,22 @@ theorem permutativeExtension_permutative {r : Rel α α} (R : OrbitRestriction (
   ⟨sup_oneOne hr (newOrbits_oneOne R) (disjoint_newOrbits_dom R) (disjoint_newOrbits_codom R),
     permutativeExtension_codomEqDom R⟩
 
+/-- TODO: Strengthen statement in blueprint version. -/
+theorem categorise_permutativeExtension_of_oneOne
+    {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) (hr : r.OneOne)
+    {a₁ a₂ : α} (h : r.permutativeExtension R a₁ a₂) :
+    r a₁ a₂ ∨ (a₁ ∉ r.dom ∧ a₂ ∉ r.codom ∧ R.categorise a₂ = R.catPerm (R.categorise a₁)) := by
+  by_cases ha₁ : a₁ ∈ r.dom
+  · obtain ⟨b₁, h₁⟩ := ha₁
+    cases (r.permutativeExtension_permutative R hr).coinjective h (Or.inl h₁)
+    exact Or.inl h₁
+  by_cases ha₂ : a₂ ∈ r.codom
+  · obtain ⟨b₁, h₁⟩ := ha₂
+    cases (r.permutativeExtension_permutative R hr).injective h (Or.inl h₁)
+    exact Or.inl h₁
+  · simp only [ha₁, ha₂, not_false_iff, true_and]
+    exact categorise_permutativeExtension R h
+
 def permutativeExtension' (r : Rel α α) (hr : r.OneOne) (s : Set α)
     (hs₁ : s.Infinite) (hs₂ : #r.dom ≤ #s) (hs₃ : Disjoint (r.dom ∪ r.codom) s) :
     Rel α α :=

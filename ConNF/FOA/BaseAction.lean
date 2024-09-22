@@ -240,6 +240,22 @@ structure Nice (ξ : BaseAction) : Prop where
   symmDiff_subset_dom : ∀ N ∈ ξᴺ.dom, Nᴬ ∆ Nᴸᴬ ⊆ ξᴬ.dom
   symmDiff_subset_codom : ∀ N ∈ ξᴺ.codom, Nᴬ ∆ Nᴸᴬ ⊆ ξᴬ.codom
 
+theorem Nice.mem_litter_dom_iff {ξ : BaseAction} (h : ξ.Nice)
+    {N : NearLitter} (hN : N ∈ ξᴺ.dom) {a : Atom} (ha : a ∉ ξᴬ.dom) :
+    a ∈ Nᴬ ↔ aᴸ = Nᴸ := by
+  contrapose! ha
+  apply h.symmDiff_subset_dom N hN
+  rw [Set.mem_symmDiff]
+  tauto
+
+theorem Nice.mem_litter_codom_iff {ξ : BaseAction} (h : ξ.Nice)
+    {N : NearLitter} (hN : N ∈ ξᴺ.codom) {a : Atom} (ha : a ∉ ξᴬ.codom) :
+    a ∈ Nᴬ ↔ aᴸ = Nᴸ := by
+  contrapose! ha
+  apply h.symmDiff_subset_codom N hN
+  rw [Set.mem_symmDiff]
+  tauto
+
 /-!
 ## Extending orbits inside near-litters
 -/

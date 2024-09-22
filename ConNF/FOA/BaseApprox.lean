@@ -183,6 +183,14 @@ theorem atoms_def (ψ : BaseApprox) :
     ψᴬ = ψ.exceptions ⊔ ψ.typical :=
   rfl
 
+theorem exceptions_le_atoms (ψ : BaseApprox) :
+    ψ.exceptions ≤ ψᴬ :=
+  le_sup_left
+
+theorem exceptions_dom_subset_atoms_dom (ψ : BaseApprox) :
+    ψ.exceptions.dom ⊆ ψᴬ.dom :=
+  Rel.dom_mono ψ.exceptions_le_atoms
+
 theorem mem_dom_atoms_of_litter_mem_dom {ψ : BaseApprox} {a : Atom} (h : aᴸ ∈ ψᴸ.dom) :
     a ∈ ψᴬ.dom := by
   obtain ⟨L, h⟩ := h

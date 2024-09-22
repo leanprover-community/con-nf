@@ -531,6 +531,8 @@
 \begin{definition}
   \uses{def:StrAction,def:StrApprox.Coherent}
   \label{def:FlexApprox}
+  \lean{ConNF.BaseAction.FlexApprox}
+  \leanok
   Let \( A : \beta \tpath \bot \).
   An \emph{\( A \)-flexible approximation} of a base action \( \xi \) is a base approximation \( \psi \) such that
   \begin{enumerate}
@@ -547,10 +549,13 @@
 \begin{proposition}
   \uses{def:FlexApprox}
   \label{prop:exists_flexApprox}
+  \lean{ConNF.BaseAction.flexApprox_flexApprox}
+  \leanok
   Every base action has an \( A \)-flexible approximation.
   Hence, every \( \beta \)-action has a flexible approximation, which can be computed branchwise.
 \end{proposition}
 \begin{proof}
+  \leanok
   \uses{prop:BaseAction.exists_nice,prop:completing_orbits,prop:completing_restricted_orbits}
   If \( \xi \leq \zeta \) and \( \psi \) is an \( A \)-flexible approximation for \( \zeta \), then \( \psi \) is an \( A \)-flexible approximation for \( \xi \).
   So it suffices to prove the result for nice base actions \( \xi \) by \cref{prop:BaseAction.exists_nice}.
