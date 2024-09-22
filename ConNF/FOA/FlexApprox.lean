@@ -33,7 +33,20 @@ structure FlexApprox [Level] [CoherentData] {β : TypeIndex} [LeLevel β]
   mem_iff_mem {N₁ N₂ : NearLitter} : ξᴺ N₁ N₂ → ∀ a₂,
     a₂ ∈ N₂ᴬ ↔ (∃ a₁ ∈ N₁ᴬ, ψ.exceptions a₁ a₂) ∨ (a₂ ∉ ψ.exceptions.dom ∧ a₂ᴸ = N₂ᴸ)
 
-section FlexApprox
+theorem FlexApprox.mono [Level] [CoherentData] {β : TypeIndex} [LeLevel β]
+    {A : β ↝ ⊥} {ξ ζ : BaseAction} {ψ : BaseApprox} (hξ : ξ.FlexApprox A ψ) (h : ζ ≤ ξ) :
+    ζ.FlexApprox A ψ := by
+  constructor
+  · exact h.1.trans hξ.atoms_le_atoms
+  · exact hξ.flexible_of_mem_dom
+  · intro L₁ L₂ h₁ h₂
+    exact hξ.litters_of_flexible h₁ (litters_eq_of_le h ▸ h₂)
+  · intro N h'
+    exact hξ.symmDiff_subset_dom (h.2 ▸ h')
+  · intro N h'
+    exact hξ.symmDiff_subset_codom (h.2 ▸ h')
+  · intro N₁ N₂ hN a₂
+    exact hξ.mem_iff_mem (h.2 ▸ hN) a₂
 
 theorem card_litter_dom_compl {ξ : BaseAction} : #((ξᴸ.dom ∪ ξᴸ.codom)ᶜ : Set Litter) = #μ := by
   have : Infinite Litter := by
@@ -290,7 +303,7 @@ theorem dom_flexLitterPerm_subset (ξ : BaseAction) (A : β ↝ ⊥) :
     exact h.2.2
   · exact Set.diff_subset
 
-def flexApprox (ξ : BaseAction) (A : β ↝ ⊥) : BaseApprox where
+def flexApprox' (ξ : BaseAction) (A : β ↝ ⊥) : BaseApprox where
   exceptions := ξ.atomPerm
   litters := ξ.flexLitterPerm A
   exceptions_permutative := ξ.atomPerm_permutative
@@ -300,8 +313,8 @@ def flexApprox (ξ : BaseAction) (A : β ↝ ⊥) : BaseApprox where
 def MapFlexible (ξ : BaseAction) (A : β ↝ ⊥) : Prop :=
   ∀ {L₁ L₂}, ξᴸ L₁ L₂ → (Inflexible A L₁ ↔ Inflexible A L₂)
 
-theorem flexApprox_flexApprox {ξ : BaseAction} {A : β ↝ ⊥} (hξ₁ : ξ.MapFlexible A) (hξ₂ : ξ.Nice) :
-    ξ.FlexApprox A (ξ.flexApprox A) where
+theorem flexApprox_flexApprox' {ξ : BaseAction} {A : β ↝ ⊥} (hξ₁ : ξ.MapFlexible A) (hξ₂ : ξ.Nice) :
+    ξ.FlexApprox A (ξ.flexApprox' A) where
   atoms_le_atoms := ξ.le_atomPerm
   flexible_of_mem_dom h := ξ.dom_flexLitterPerm_subset A h
   litters_of_flexible h₁ h₂ := ξ.le_flexLitterPerm A _ _ ⟨h₂, h₁, by rwa [hξ₁ h₂] at h₁⟩
@@ -311,7 +324,20 @@ theorem flexApprox_flexApprox {ξ : BaseAction} {A : β ↝ ⊥} (hξ₁ : ξ.Ma
     (ξ.codom_subset_codom_atomPerm.trans (Rel.dom_mono le_sup_left))
   mem_iff_mem {N₁ N₂} h := atomPerm_mem_iff hξ₂ h
 
-end FlexApprox
+/-- A flexible approximation for `ξ` along `A`. -/
+def flexApprox (ξ : BaseAction) (A : β ↝ ⊥) : BaseApprox :=
+  ξ.niceExtension.flexApprox' A
+
+theorem niceExtension_mapFlexible {ξ : BaseAction} {A : β ↝ ⊥} (hξ : ξ.MapFlexible A) :
+    ξ.niceExtension.MapFlexible A := by
+  intro L₁ L₂ h
+  rw [niceExtension_litters] at h
+  exact hξ h
+
+theorem flexApprox_flexApprox {ξ : BaseAction} {A : β ↝ ⊥} (hξ : ξ.MapFlexible A) :
+    ξ.FlexApprox A (ξ.flexApprox A) :=
+  (flexApprox_flexApprox' (niceExtension_mapFlexible hξ) ξ.niceExtension_nice).mono
+    ξ.le_niceExtension
 
 end BaseAction
 end ConNF

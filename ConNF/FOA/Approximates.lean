@@ -381,7 +381,7 @@ theorem exists_extension_of_minimal (ψ : StrApprox β) (A : β ↝ ⊥) (L : Li
     (hLN : ∀ B, ∀ N, pos N < pos L → N ∈ (ψ B)ᴺ.dom) :
     ∃ χ ≥ ψ, χ.Coherent ∧ L ∈ (χ A)ᴸ.dom := by
   obtain (⟨P, t, hA, ht⟩ | hL) := inflexible_cases A L
-  · obtain ⟨ρ, hρ⟩ := foa P.δ (P.hδ.trans_le P.A.le) (ψ ⇘ (P.A ↘ P.hδ)) (hψ.comp (P.A ↘ P.hδ))
+  · obtain ⟨ρ, hρ⟩ := foa P.δ (P.hδ.trans_le P.A.le) (ψ ⇘ (P.A ↘ P.hδ)) (hψ.deriv (P.A ↘ P.hδ))
     have h₁ : ∀ (B : P.δ ↝ ⊥), ∀ a ∈ (t.support ⇘. B)ᴬ, a ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴬ.dom := by
       intro B a ha
       apply hLA
@@ -461,21 +461,21 @@ theorem exists_exactlyApproximates_of_total (ψ : StrApprox β) (hψ₁ : ψ.Coh
     intro _ ψ hψ₁ hψ₂
     choose ρs hρs using ih
     have := allPerm_of_smulFuzz (γ := β) (λ {δ} _ hδ ↦ ρs δ hδ (ψ ↘ hδ)
-        (hψ₁.comp (Path.single hδ)) (hψ₂.comp (Path.single hδ))) ?_
+        (hψ₁.deriv (Path.single hδ)) (hψ₂.deriv (Path.single hδ))) ?_
     · obtain ⟨ρ, hρ⟩ := this
       use ρ
       intro A
       cases A using Path.recScoderiv with
       | scoderiv _ δ A hδ =>
         have : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
-        specialize hρs δ hδ (ψ ↘ hδ) (hψ₁.comp (Path.single hδ)) (hψ₂.comp (Path.single hδ))
+        specialize hρs δ hδ (ψ ↘ hδ) (hψ₁.deriv (Path.single hδ)) (hψ₂.deriv (Path.single hδ))
         rw [← hρ δ hδ] at hρs
         have := hρs A
         rwa [allPermSderiv_forget] at this
     · intro δ ε _ _ _ hδ hε hδε t
       dsimp only
       have := hψ₁ (Path.single hε ↘.) (fuzz hδε t)
-          ((ρs ε hε (ψ ↘ hε) (hψ₁.comp (Path.single hε)) (hψ₂.comp (Path.single hε)))ᵁ
+          ((ρs ε hε (ψ ↘ hε) (hψ₁.deriv (Path.single hε)) (hψ₂.deriv (Path.single hε)))ᵁ
             (Path.nil ↘.) • fuzz hδε t) ?_
       · apply smul_eq_of_coherentAt_inflexible
           (P := ⟨β, δ, ε, hδ, hε, hδε, Path.nil⟩) rfl rfl this
@@ -484,18 +484,18 @@ theorem exists_exactlyApproximates_of_total (ψ : StrApprox β) (hψ₁ : ψ.Coh
         constructor
         · intro a _
           obtain ⟨b, hb⟩ := (hψ₂ (A ↗ hδ)).atoms a
-          cases (hρs δ hδ (ψ ↘ hδ) (hψ₁.comp (Path.single hδ))
-            (hψ₂.comp (Path.single hδ)) A).atoms a b hb
+          cases (hρs δ hδ (ψ ↘ hδ) (hψ₁.deriv (Path.single hδ))
+            (hψ₂.deriv (Path.single hδ)) A).atoms a b hb
           simp only [Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv]
           exact hb
         · intro N _
           obtain ⟨N', hN'⟩ := (hψ₂ (A ↗ hδ)).nearLitters N
-          cases (hρs δ hδ (ψ ↘ hδ) (hψ₁.comp (Path.single hδ))
-            (hψ₂.comp (Path.single hδ)) A).nearLitters N N' hN'
+          cases (hρs δ hδ (ψ ↘ hδ) (hψ₁.deriv (Path.single hδ))
+            (hψ₂.deriv (Path.single hδ)) A).nearLitters N N' hN'
           simp only [Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv]
           exact hN'
       · obtain ⟨L, hL⟩ := hψ₂ (Path.single hε ↘.) (fuzz hδε t)
-        cases (hρs ε hε (ψ ↘ hε) (hψ₁.comp (Path.single hε)) (hψ₂.comp (Path.single hε))
+        cases (hρs ε hε (ψ ↘ hε) (hψ₁.deriv (Path.single hε)) (hψ₂.deriv (Path.single hε))
           (Path.nil ↘.)).litters _ _ hL
         exact hL
 

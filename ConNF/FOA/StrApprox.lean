@@ -59,50 +59,6 @@ theorem le_addOrbit :
 
 end addOrbit
 
-instance : SMul (StrApprox β) (Support β) where
-  smul ψ S := ⟨Sᴬ.comp (Enumeration.relWithPath λ A ↦ (ψ A)ᴬ)
-      (Enumeration.relWithPath_coinjective λ A ↦ (ψ A).atoms_permutative.toCoinjective),
-    Sᴺ.comp (Enumeration.relWithPath λ A ↦ (ψ A)ᴺ)
-      (Enumeration.relWithPath_coinjective λ A ↦ (ψ A).nearLitters_permutative.toCoinjective)⟩
-
-@[simp]
-theorem smul_support_derivBot (ψ : StrApprox β) (S : Support β) (A : β ↝ ⊥) :
-    (ψ • S) ⇘. A = ψ A • (S ⇘. A) := by
-  ext : 2; rfl; swap; rfl
-  all_goals
-  · ext i a
-    constructor
-    · rintro ⟨⟨B, b⟩, h₁, h₂⟩
-      cases h₂.1
-      exact ⟨b, h₁, h₂.2⟩
-    · rintro ⟨b, h₁, h₂⟩
-      exact ⟨⟨A, b⟩, h₁, rfl, h₂⟩
-
-theorem smul_support_eq_smul_iff (ψ : StrApprox β) (S : Support β) (π : StrPerm β) :
-    ψ • S = π • S ↔ ∀ A,
-      (∀ a ∈ (S ⇘. A)ᴬ, (ψ A)ᴬ a (π A • a)) ∧ (∀ N ∈ (S ⇘. A)ᴺ, (ψ A)ᴺ N (π A • N)) := by
-  simp only [Support.ext_iff, smul_support_derivBot, Support.smul_derivBot,
-    BaseApprox.smul_support_eq_smul_iff]
-
-theorem smul_support_smul_eq_iff (ψ : StrApprox β) (S : Support β) (π : StrPerm β) :
-    ψ • π • S = S ↔ ∀ A,
-      (∀ a ∈ ((π • S) ⇘. A)ᴬ, (ψ A)ᴬ a (π⁻¹ A • a)) ∧
-      (∀ N ∈ ((π • S) ⇘. A)ᴺ, (ψ A)ᴺ N (π⁻¹ A • N)) := by
-  have := smul_support_eq_smul_iff ψ (π • S) π⁻¹
-  rw [inv_smul_smul] at this
-  rw [this]
-
-theorem smul_support_eq_smul_mono {ψ χ : StrApprox β} {S : Support β} {π : StrPerm β}
-    (hψ : ψ • S = π • S) (hψχ : ψ ≤ χ) :
-    χ • S = π • S := by
-  rw [smul_support_eq_smul_iff] at hψ ⊢
-  intro A
-  constructor
-  · intro a ha
-    exact BaseApprox.atoms_le_of_le (hψχ A) _ _ ((hψ A).1 a ha)
-  · intro N hN
-    exact BaseApprox.nearLitters_le_of_le (hψχ A) _ _ ((hψ A).2 N hN)
-
 /-- An upper bound for a chain of approximations. -/
 def upperBound (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c) : StrApprox β :=
   λ A ↦ BaseApprox.upperBound ((· A) '' c) (hc.image _ _ (λ _ _ h ↦ h A))
@@ -158,191 +114,26 @@ theorem upperBound_atoms (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
 def Total (ψ : StrApprox β) : Prop :=
   ∀ A, (ψ A).Total
 
-theorem Total.comp {ψ : StrApprox β} (hψ : ψ.Total) {γ : TypeIndex} (A : β ↝ γ) :
+theorem Total.deriv {ψ : StrApprox β} (hψ : ψ.Total) {γ : TypeIndex} (A : β ↝ γ) :
     Total (ψ ⇘ A) :=
   λ B L ↦ hψ (A ⇘ B) L
 
-end StrApprox
-
-@[ext]
-structure InflexiblePath (β : TypeIndex) where
-  γ : TypeIndex
-  δ : TypeIndex
-  ε : Λ
-  hδ : δ < γ
-  hε : ε < γ
-  hδε : δ ≠ ε
-  A : β ↝ γ
-
-instance {β β' : TypeIndex} : Coderivative (InflexiblePath β) (InflexiblePath β') β' β where
-  coderiv P B := ⟨P.γ, P.δ, P.ε, P.hδ, P.hε, P.hδε, B ⇘ P.A⟩
-
-@[simp]
-theorem InflexiblePath.coderiv_A {β β' : TypeIndex} (P : InflexiblePath β) (B : β' ↝ β) :
-    (P ⇗ B).A = B ⇘ P.A :=
-  rfl
+theorem smul_support_eq_smul_mono
+    {ξ χ : StrApprox β} {S : Support β} {π : StrPerm β}
+    (hξ : ξ • S = π • S) (hξχ : ξ ≤ χ) :
+    χ • S = π • S := by
+  rw [smul_support_eq_smul_iff] at hξ ⊢
+  intro A
+  constructor
+  · intro a ha
+    exact BaseApprox.atoms_le_of_le (hξχ A) _ _ ((hξ A).1 a ha)
+  · intro N hN
+    exact BaseApprox.nearLitters_le_of_le (hξχ A) _ _ ((hξ A).2 N hN)
 
 variable [Level] [CoherentData]
 
-instance [LeLevel β] (P : InflexiblePath β) : LeLevel P.γ :=
-  ⟨P.A.le.trans LeLevel.elim⟩
-
-instance [LeLevel β] (P : InflexiblePath β) : LtLevel P.δ :=
-  ⟨P.hδ.trans_le LeLevel.elim⟩
-
-instance [LeLevel β] (P : InflexiblePath β) : LtLevel P.ε :=
-  ⟨P.hε.trans_le LeLevel.elim⟩
-
-def Inflexible [LeLevel β] (A : β ↝ ⊥) (L : Litter) : Prop :=
-  ∃ P : InflexiblePath β, ∃ t, A = P.A ↘ P.hε ↘. ∧ L = fuzz P.hδε t
-
-theorem inflexible_iff [LeLevel β] (A : β ↝ ⊥) (L : Litter) :
-    Inflexible A L ↔ ∃ P : InflexiblePath β, ∃ t, A = P.A ↘ P.hε ↘. ∧ L = fuzz P.hδε t :=
-  Iff.rfl
-
-theorem not_inflexible_iff [LeLevel β] (A : β ↝ ⊥) (L : Litter) :
-    ¬Inflexible A L ↔ ∀ P : InflexiblePath β, ∀ t, A = P.A ↘ P.hε ↘. → L ≠ fuzz P.hδε t := by
-  rw [inflexible_iff]
-  push_neg
-  rfl
-
-theorem inflexible_deriv [LeLevel β] {A : β ↝ ⊥} {L : Litter} (h : Inflexible A L)
-    {β' : TypeIndex} [LeLevel β'] (B : β' ↝ β) :
-    Inflexible (B ⇘ A) L := by
-  obtain ⟨P, t, hA, ht⟩ := h
-  refine ⟨P ⇗ B, t, ?_, ht⟩
-  rw [hA]
-  rfl
-
-theorem inflexible_cases [LeLevel β] (A : β ↝ ⊥) (L : Litter) :
-    (∃ P : InflexiblePath β, ∃ t, A = P.A ↘ P.hε ↘. ∧ L = fuzz P.hδε t) ∨ ¬Inflexible A L :=
-  Classical.em _
-
-theorem inflexiblePath_subsingleton [LeLevel β] {A : β ↝ ⊥} {L : Litter}
-    {P₁ P₂ : InflexiblePath β} {t₁ : Tangle P₁.δ} {t₂ : Tangle P₂.δ}
-    (hP₁ : A = P₁.A ↘ P₁.hε ↘.) (hP₂ : A = P₂.A ↘ P₂.hε ↘.)
-    (ht₁ : L = fuzz P₁.hδε t₁) (ht₂ : L = fuzz P₂.hδε t₂) :
-    P₁ = P₂ := by
-  subst hP₁
-  subst ht₁
-  have := fuzz_β_eq ht₂ -- δ₁ = δ₂
-  obtain ⟨γ₁, δ₁, ε₁, _, _, _, A₁⟩ := P₁
-  obtain ⟨γ₂, δ₂, ε₂, _, _, _, A₂⟩ := P₂
-  cases this
-  cases Path.sderivBot_index_injective hP₂ -- ε₁ = ε₂
-  cases Path.sderiv_index_injective (Path.sderivBot_path_injective hP₂) -- γ₁ = γ₂
-  cases Path.sderiv_path_injective (Path.sderivBot_path_injective hP₂) -- A₁ = A₂
-  rfl
-
-namespace StrApprox
-
-/-- `ψ` is defined coherently at `(A, L₁, L₂)` (or could be defined coherently at this triple). -/
-structure CoherentAt [LeLevel β]
-    (ψ : StrApprox β) (A : β ↝ ⊥) (L₁ L₂ : Litter) : Prop where
-  inflexible (P : InflexiblePath β) (t : Tangle P.δ)
-    (hA : A = P.A ↘ P.hε ↘.) (ht : L₁ = fuzz P.hδε t) :
-    ∃ ρ : AllPerm P.δ, ψ ⇘ P.A ↘ P.hδ • t.support = ρᵁ • t.support ∧ L₂ = fuzz P.hδε (ρ • t)
-  flexible (h : ¬Inflexible A L₁) : ¬Inflexible A L₂
-
-theorem coherentAt_inflexible [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
-    {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L₁ = fuzz P.hδε t) :
-    ψ.CoherentAt A L₁ L₂ ↔ ∃ ρ : AllPerm P.δ,
-      ψ ⇘ P.A ↘ P.hδ • t.support = ρᵁ • t.support ∧ L₂ = fuzz P.hδε (ρ • t) := by
-  constructor
-  · intro h
-    exact h.inflexible P t hA ht
-  · intro h
-    constructor
-    · intro P' t' hA' ht'
-      cases inflexiblePath_subsingleton hA hA' ht ht'
-      cases fuzz_injective (ht.symm.trans ht')
-      exact h
-    · intro h'
-      cases h' ⟨P, t, hA, ht⟩
-
-theorem smul_eq_of_coherentAt_inflexible [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
-    {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L₁ = fuzz P.hδε t)
-    (h : ψ.CoherentAt A L₁ L₂) :
-    ∀ ρ : AllPerm P.δ, ψ ⇘ P.A ↘ P.hδ • t.support = ρᵁ • t.support → L₂ = fuzz P.hδε (ρ • t) := by
-  intro ρ₁ hρ₁
-  rw [coherentAt_inflexible hA ht] at h
-  obtain ⟨ρ₂, hρ₂, rfl⟩ := h
-  congr 1
-  apply t.smul_eq_smul
-  rw [← hρ₁, ← hρ₂]
-
-theorem coherentAt_flexible [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
-    (hL : ¬Inflexible A L₁) :
-    ψ.CoherentAt A L₁ L₂ ↔ ¬Inflexible A L₂ := by
-  constructor
-  · intro h
-    exact h.flexible hL
-  · intro h
-    constructor
-    · intro P t hA ht
-      cases hL ⟨P, t, hA, ht⟩
-    · intro
-      exact h
-
-theorem coherentAt_inflexible' [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
-    {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L₂ = fuzz P.hδε t) :
-    ψ.CoherentAt A L₁ L₂ ↔ ∃ ρ : AllPerm P.δ,
-      ψ ⇘ P.A ↘ P.hδ • ρᵁ • t.support = t.support ∧ L₁ = fuzz P.hδε (ρ • t) := by
-  constructor
-  · intro h
-    obtain (⟨P', t', hA', ht'⟩ | hL) := inflexible_cases A L₁
-    · obtain ⟨ρ, h₁, h₂⟩ := h.inflexible P' t' hA' ht'
-      cases inflexiblePath_subsingleton hA hA' ht h₂
-      cases fuzz_injective <| ht.symm.trans h₂
-      use ρ⁻¹
-      rw [inv_smul_smul, Tangle.smul_support, ht', allPermForget_inv, inv_smul_smul, h₁]
-      exact ⟨rfl, rfl⟩
-    · rw [coherentAt_flexible hL] at h
-      cases h ⟨P, t, hA, ht⟩
-  · intro h
-    obtain ⟨ρ, h₁, h₂⟩ := h
-    constructor
-    · intro P' t' hA' ht'
-      cases inflexiblePath_subsingleton hA hA' h₂ ht'
-      cases fuzz_injective <| h₂.symm.trans ht'
-      refine ⟨ρ⁻¹, ?_, ?_⟩
-      · rwa [Tangle.smul_support, allPermForget_inv, inv_smul_smul]
-      · rwa [inv_smul_smul]
-    · intro h
-      cases h ⟨P, ρ • t, hA, h₂⟩
-
-theorem smul_eq_of_coherentAt_inflexible' [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
-    {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L₂ = fuzz P.hδε t)
-    (h : ψ.CoherentAt A L₁ L₂) :
-    ∀ ρ : AllPerm P.δ, ψ ⇘ P.A ↘ P.hδ • ρᵁ • t.support = t.support → L₁ = fuzz P.hδε (ρ • t) := by
-  intro ρ₁ hρ₁
-  rw [coherentAt_inflexible' hA ht] at h
-  obtain ⟨ρ₂, hρ₂, rfl⟩ := h
-  congr 1
-  apply t.smul_eq_smul
-  rw [smul_support_smul_eq_iff] at hρ₁ hρ₂
-  ext B : 1
-  rw [Support.smul_derivBot, Support.smul_derivBot, BaseSupport.smul_eq_smul_iff]
-  constructor
-  · rintro a ha
-    have h₁ := (hρ₁ B).1 (ρ₁ᵁ B • a) ?_
-    have h₂ := (hρ₂ B).1 (ρ₂ᵁ B • a) ?_
-    · rw [Tree.inv_apply, inv_smul_smul] at h₁ h₂
-      exact (BaseApprox.atoms_permutative _).injective h₂ h₁
-    · rwa [Support.smul_derivBot, BaseSupport.smul_atoms, Enumeration.mem_smul_iff, inv_smul_smul]
-    · rwa [Support.smul_derivBot, BaseSupport.smul_atoms, Enumeration.mem_smul_iff, inv_smul_smul]
-  · rintro N hN
-    have h₁ := (hρ₁ B).2 (ρ₁ᵁ B • N) ?_
-    have h₂ := (hρ₂ B).2 (ρ₂ᵁ B • N) ?_
-    · rw [Tree.inv_apply, inv_smul_smul] at h₁ h₂
-      exact (BaseApprox.nearLitters_permutative _).injective h₂ h₁
-    · rwa [Support.smul_derivBot, BaseSupport.smul_nearLitters,
-        Enumeration.mem_smul_iff, inv_smul_smul]
-    · rwa [Support.smul_derivBot, BaseSupport.smul_nearLitters,
-        Enumeration.mem_smul_iff, inv_smul_smul]
-
-theorem CoherentAt.mono [LeLevel β] {ψ χ : StrApprox β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
-    (h : ψ.CoherentAt A L₁ L₂) (hψχ : ψ ≤ χ) : χ.CoherentAt A L₁ L₂ := by
+theorem coherentAt_mono [LeLevel β] {ψ χ : StrApprox β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
+    (h : CoherentAt ψ A L₁ L₂) (hψχ : ψ ≤ χ) : CoherentAt χ A L₁ L₂ := by
   obtain (⟨P, t, hA, hL⟩ | hL) := inflexible_cases A L₁
   · rw [coherentAt_inflexible hA hL] at h ⊢
     obtain ⟨ρ, hρ₁, hρ₂⟩ := h
@@ -360,48 +151,27 @@ theorem CoherentAt.mono [LeLevel β] {ψ χ : StrApprox β} {A : β ↝ ⊥} {L�
   · rwa [coherentAt_flexible hL] at h ⊢
 
 def Coherent [LeLevel β] (ψ : StrApprox β) : Prop :=
-  ∀ A L₁ L₂, (ψ A)ᴸ L₁ L₂ → ψ.CoherentAt A L₁ L₂
+  ∀ A L₁ L₂, (ψ A)ᴸ L₁ L₂ → CoherentAt ψ A L₁ L₂
 
 theorem addOrbit_coherent [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {f : ℤ → Litter}
     {hf : ∀ m n k, f m = f n → f (m + k) = f (n + k)} {hfψ : ∀ n, f n ∉ (ψ A)ᴸ.dom}
-    (hψ : ψ.Coherent) (hfc : ∀ n, ψ.CoherentAt A (f n) (f (n + 1))) :
+    (hψ : ψ.Coherent) (hfc : ∀ n, CoherentAt ψ A (f n) (f (n + 1))) :
     (ψ.addOrbit A f hf hfψ).Coherent := by
   intro B L₁ L₂
   by_cases hB : A = B
   · subst hB
     rw [addOrbit_apply, BaseApprox.addOrbit_litters]
     rintro (hL | ⟨n, rfl, rfl⟩)
-    · exact (hψ A L₁ L₂ hL).mono le_addOrbit
-    · exact (hfc n).mono le_addOrbit
+    · exact coherentAt_mono (hψ A L₁ L₂ hL) le_addOrbit
+    · exact coherentAt_mono (hfc n) le_addOrbit
   · rw [addOrbit_apply_ne B hB]
     intro hL
-    exact (hψ B L₁ L₂ hL).mono le_addOrbit
+    exact coherentAt_mono (hψ B L₁ L₂ hL) le_addOrbit
 
-theorem Coherent.comp [LeLevel β] {ψ : StrApprox β} (hψ : ψ.Coherent)
+theorem Coherent.deriv [LeLevel β] {ψ : StrApprox β} (hψ : ψ.Coherent)
     {γ : TypeIndex} [LeLevel γ] (A : β ↝ γ) :
-    Coherent (ψ ⇘ A) := by
-  intro B L₁ L₂ h
-  specialize hψ (A ⇘ B) L₁ L₂ h
-  constructor
-  · intro P t hA ht
-    have := hψ.inflexible (P ⇗ A) t ?_ ht
-    · obtain ⟨ρ, hρ₁, hρ₂⟩ := this
-      refine ⟨ρ, ?_, hρ₂⟩
-      rwa [InflexiblePath.coderiv_A, ← Tree.deriv_deriv] at hρ₁
-    · rw [hA]
-      rfl
-  · intro hL₁ hL₂
-    obtain (hL₁' | hL₁') := inflexible_cases (A ⇘ B) L₁
-    · obtain ⟨P, t, rfl, ht⟩ := hL₂
-      obtain ⟨P', t', hA', ht'⟩ := hL₁'
-      suffices P' = P ⇗ A by
-        cases this
-        cases hL₁ ⟨P, t', rfl, ht'⟩
-      rw [coherentAt_inflexible hA' ht'] at hψ
-      obtain ⟨ρ, hρ₁, hρ₂⟩ := hψ
-      rw [Path.deriv_sderivBot, Path.deriv_sderiv] at hA'
-      exact inflexiblePath_subsingleton hA' rfl hρ₂ ht
-    · cases hψ.flexible hL₁' (inflexible_deriv hL₂ A)
+    Coherent (ψ ⇘ A) :=
+  λ B L₁ L₂ h ↦ (hψ (A ⇘ B) L₁ L₂ h).deriv
 
 theorem upperBound_coherent [LeLevel β] (c : Set (StrApprox β)) (hc₁ : IsChain (· ≤ ·) c)
     (hc₂ : ∀ ψ ∈ c, ψ.Coherent) :

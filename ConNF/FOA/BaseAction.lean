@@ -1,4 +1,4 @@
-import ConNF.Setup.NearLitter
+import ConNF.FOA.Coherent
 
 /-!
 # Base actions
@@ -37,11 +37,41 @@ structure BaseAction where
 
 namespace BaseAction
 
-instance : SuperA BaseAction (Rel Atom Atom) where
-  superA := atoms
+theorem mem_symmDiff_iff_mem_symmDiff {ξ : BaseAction} {a₁ a₂ : Atom} {N₁ N₂ N₃ N₄ : NearLitter} :
+    ξ.atoms a₁ a₂ → ξ.nearLitters N₁ N₂ → ξ.nearLitters N₃ N₄ →
+      (a₁ ∈ N₁ᴬ ∆ N₃ᴬ ↔ a₂ ∈ N₂ᴬ ∆ N₄ᴬ) := by
+  intro ha hN₁₂ hN₃₄
+  simp only [Set.mem_symmDiff, ξ.mem_iff_mem' ha hN₁₂, ξ.mem_iff_mem' ha hN₃₄]
 
-instance : SuperN BaseAction (Rel NearLitter NearLitter) where
-  superN := nearLitters
+theorem nearLitters_coinjective (ξ : BaseAction) : ξ.nearLitters.Coinjective := by
+  constructor
+  intro N₁ N₂ N h₁ h₂
+  apply NearLitter.ext
+  rw [← Set.symmDiff_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  intro a ha
+  have := ξ.interference_subset_codom' ⟨_, h₁⟩ ⟨_, h₂⟩
+  rw [interference_eq_of_litter_eq ((ξ.litter_eq_litter_iff' h₁ h₂).mp rfl)] at this
+  obtain ⟨b, hba⟩ := this ha
+  rw [← mem_symmDiff_iff_mem_symmDiff hba h₁ h₂] at ha
+  simp only [symmDiff_self, Set.bot_eq_empty, Set.mem_empty_iff_false] at ha
+
+theorem nearLitters_injective (ξ : BaseAction) : ξ.nearLitters.Injective := by
+  constructor
+  intro N₁ N₂ N h₁ h₂
+  apply NearLitter.ext
+  rw [← Set.symmDiff_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  intro a ha
+  have := ξ.interference_subset_dom' ⟨_, h₁⟩ ⟨_, h₂⟩
+  rw [interference_eq_of_litter_eq ((ξ.litter_eq_litter_iff' h₁ h₂).mpr rfl)] at this
+  obtain ⟨b, hba⟩ := this ha
+  rw [mem_symmDiff_iff_mem_symmDiff hba h₁ h₂] at ha
+  simp only [symmDiff_self, Set.bot_eq_empty, Set.mem_empty_iff_false] at ha
+
+instance : BaseActionClass BaseAction where
+  atoms := atoms
+  atoms_oneOne := atoms_oneOne'
+  nearLitters := nearLitters
+  nearLitters_oneOne ξ := ⟨ξ.nearLitters_injective, ξ.nearLitters_coinjective⟩
 
 @[ext]
 theorem ext {ξ ζ : BaseAction} (atoms : ξᴬ = ζᴬ) (nearLitters : ξᴺ = ζᴺ) : ξ = ζ := by
@@ -76,23 +106,6 @@ theorem interference_subset_codom {ξ : BaseAction} {N₁ N₂ : NearLitter} :
     N₁ ∈ ξᴺ.codom → N₂ ∈ ξᴺ.codom → interference N₁ N₂ ⊆ ξᴬ.codom :=
   ξ.interference_subset_codom'
 
-theorem mem_symmDiff_iff_mem_symmDiff {ξ : BaseAction} {a₁ a₂ : Atom} {N₁ N₂ N₃ N₄ : NearLitter} :
-    ξᴬ a₁ a₂ → ξᴺ N₁ N₂ → ξᴺ N₃ N₄ → (a₁ ∈ N₁ᴬ ∆ N₃ᴬ ↔ a₂ ∈ N₂ᴬ ∆ N₄ᴬ) := by
-  intro ha hN₁₂ hN₃₄
-  simp only [Set.mem_symmDiff, mem_iff_mem ha hN₁₂, mem_iff_mem ha hN₃₄]
-
-theorem nearLitters_coinjective (ξ : BaseAction) : ξᴺ.Coinjective := by
-  constructor
-  intro N₁ N₂ N h₁ h₂
-  apply NearLitter.ext
-  rw [← Set.symmDiff_eq_empty, Set.eq_empty_iff_forall_not_mem]
-  intro a ha
-  have := interference_subset_codom ⟨_, h₁⟩ ⟨_, h₂⟩
-  rw [interference_eq_of_litter_eq ((litter_eq_litter_iff h₁ h₂).mp rfl)] at this
-  obtain ⟨b, hba⟩ := this ha
-  rw [← mem_symmDiff_iff_mem_symmDiff hba h₁ h₂] at ha
-  simp only [symmDiff_self, Set.bot_eq_empty, Set.mem_empty_iff_false] at ha
-
 theorem atoms_codom_small (ξ : BaseAction) : Small ξᴬ.codom :=
   small_codom_of_small_dom ξ.atoms_oneOne.toCoinjective ξ.atoms_dom_small
 
@@ -124,10 +137,6 @@ theorem inv_nearLitters (ξ : BaseAction) : ξ⁻¹ᴺ = ξᴺ.inv :=
 @[simp]
 theorem inv_inv (ξ : BaseAction) : ξ⁻¹⁻¹ = ξ :=
   rfl
-
-theorem nearLitters_injective (ξ : BaseAction) : ξᴺ.Injective := by
-  have := ξ⁻¹.nearLitters_coinjective
-  rwa [inv_nearLitters, Rel.inv_coinjective_iff] at this
 
 theorem nearLitters_oneOne (ξ : BaseAction) : ξᴺ.OneOne :=
   ⟨ξ.nearLitters_injective, ξ.nearLitters_coinjective⟩
@@ -187,6 +196,10 @@ instance : PartialOrder BaseAction where
   le_refl _ := ⟨le_rfl, rfl⟩
   le_trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
   le_antisymm _ _ h₁ h₂ := ext (le_antisymm h₁.1 h₂.1) h₁.2
+
+theorem litters_eq_of_le {ξ ζ : BaseAction} (h : ξ ≤ ζ) : ξᴸ = ζᴸ := by
+  ext
+  simp only [litters_iff, h.2]
 
 theorem inv_le_inv {ξ ζ : BaseAction} (h : ξ⁻¹ ≤ ζ⁻¹) :
     ξ ≤ ζ := by
@@ -620,6 +633,17 @@ theorem niceExtension_nice (ξ : BaseAction) : ξ.niceExtension.Nice := by
     · rw [niceExtension, inv_atoms, Rel.inv_codom]
       exact outsideExtension_spec
         (ξ := (ξ.doubleInsideExtension.outsideExtension ξ.doubleInsideExtension_dom)⁻¹) N hN ha
+
+@[simp]
+theorem niceExtension_nearLitters (ξ : BaseAction) :
+    ξ.niceExtensionᴺ = ξᴺ :=
+  rfl
+
+@[simp]
+theorem niceExtension_litters (ξ : BaseAction) :
+    ξ.niceExtensionᴸ = ξᴸ := by
+  ext
+  simp only [litters_iff, niceExtension_nearLitters]
 
 end BaseAction
 

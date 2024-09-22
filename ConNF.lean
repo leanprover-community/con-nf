@@ -8,7 +8,10 @@ import ConNF.Aux.WellOrder
 import ConNF.FOA.Approximates
 import ConNF.FOA.BaseAction
 import ConNF.FOA.BaseApprox
+import ConNF.FOA.Coherent
 import ConNF.FOA.FlexApprox
+import ConNF.FOA.Inflexible
+import ConNF.FOA.StrAction
 import ConNF.FOA.StrApprox
 import ConNF.Setup.Atom
 import ConNF.Setup.BasePerm

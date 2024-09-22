@@ -1,4 +1,5 @@
 import ConNF.Setup.Support
+import ConNF.FOA.Coherent
 
 /-!
 # Base approximations
@@ -405,59 +406,11 @@ theorem nearLitters_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
     cases χ.atoms_permutative.coinjective ha₂ (atoms_le_of_le h a₁ a₃ ha₃)
     exact ha₃
 
-instance : SMul BaseApprox BaseSupport where
-  smul ψ S := ⟨Sᴬ.comp ψᴬ ψ.atoms_permutative.toCoinjective,
-    Sᴺ.comp ψᴺ ψ.nearLitters_permutative.toCoinjective⟩
-
-theorem smul_atoms (ψ : BaseApprox) (S : BaseSupport) :
-    (ψ • S)ᴬ = Sᴬ.comp ψᴬ ψ.atoms_permutative.toCoinjective :=
-  rfl
-
-theorem smul_nearLitters (ψ : BaseApprox) (S : BaseSupport) :
-    (ψ • S)ᴺ = Sᴺ.comp ψᴺ ψ.nearLitters_permutative.toCoinjective :=
-  rfl
-
-theorem smul_support_eq_smul_iff (ψ : BaseApprox) (S : BaseSupport) (π : BasePerm) :
-    ψ • S = π • S ↔ (∀ a ∈ Sᴬ, ψᴬ a (π • a)) ∧ (∀ N ∈ Sᴺ, ψᴺ N (π • N)) := by
-  constructor
-  · intro h
-    constructor
-    · rintro a ⟨i, ha⟩
-      have : (π • S)ᴬ.rel i (π • a) := by
-        rwa [BaseSupport.smul_atoms, Enumeration.smul_rel, inv_smul_smul]
-      rw [← h] at this
-      obtain ⟨b, hb, hψ⟩ := this
-      cases Sᴬ.rel_coinjective.coinjective ha hb
-      exact hψ
-    · rintro a ⟨i, ha⟩
-      have : (π • S)ᴺ.rel i (π • a) := by
-        rwa [BaseSupport.smul_nearLitters, Enumeration.smul_rel, inv_smul_smul]
-      rw [← h] at this
-      obtain ⟨b, hb, hψ⟩ := this
-      cases Sᴺ.rel_coinjective.coinjective ha hb
-      exact hψ
-  · intro h
-    ext : 2; rfl; swap; rfl
-    · ext i a : 3
-      rw [smul_atoms, BaseSupport.smul_atoms, Enumeration.smul_rel]
-      constructor
-      · rintro ⟨b, hb, hψ⟩
-        cases ψ.atoms_permutative.coinjective hψ (h.1 b ⟨i, hb⟩)
-        rwa [inv_smul_smul]
-      · intro ha
-        refine ⟨π⁻¹ • a, ha, ?_⟩
-        have := h.1 (π⁻¹ • a) ⟨i, ha⟩
-        rwa [smul_inv_smul] at this
-    · ext i a : 3
-      rw [smul_nearLitters, BaseSupport.smul_nearLitters, Enumeration.smul_rel]
-      constructor
-      · rintro ⟨b, hb, hψ⟩
-        cases ψ.nearLitters_permutative.coinjective hψ (h.2 b ⟨i, hb⟩)
-        rwa [inv_smul_smul]
-      · intro ha
-        refine ⟨π⁻¹ • a, ha, ?_⟩
-        have := h.2 (π⁻¹ • a) ⟨i, ha⟩
-        rwa [smul_inv_smul] at this
+instance : BaseActionClass BaseApprox where
+  atoms ψ := ψᴬ
+  atoms_oneOne ψ := ψ.atoms_permutative.toOneOne
+  nearLitters ψ := ψᴺ
+  nearLitters_oneOne ψ := ψ.nearLitters_permutative.toOneOne
 
 section addOrbit
 

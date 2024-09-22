@@ -2,7 +2,7 @@
 
 \begin{definition}
   \label{def:relation_props}
-  Let \( R : \sigma \to \tau \to Prop \).
+  Let \( R : \sigma \to \tau \to \Prop \).
   We define
   \begin{itemize}
     \item the \emph{image} of \( R \) to be the set \( \im R = \{ y : \tau \mid \exists x : \sigma,\, x \mathrel{R} y \} \);
@@ -12,7 +12,7 @@
     \item the \emph{coimage of \( R \) on} \( t : \Set \tau \) to be the set \( \coim R|_t = \{ x : \sigma \mid \exists y \in t,\, x \mathrel{R} y \} \);
     \item the \emph{converse} of \( R \) to be the relation \( R^{-1} : \tau \to \sigma \to \Prop \) such that \( y \mathrel{R^{-1}} x \) if and only if \( x \mathrel{R} y \);
     \item if \( S : \tau \to \upsilon \to \Prop \), the \emph{composition} \( S \circ R : \sigma \to \upsilon \to \Prop \) is the relation given by \( x \mathrel{(S\circ R)} z \) if and only if there is \( y : \tau \) such that \( x \mathrel{R} y \) and \( y \mathrel{S} z \);
-    \item for a natural number \( n \), the \emph{\( n \)th power} of \( R : \tau \to \tau \to Prop \) is defined by \( R^{n+1} = R \circ R^n \) and \( R^0 \) is the identity relation on \( \coim R \);
+    \item for a natural number \( n \), the \emph{\( n \)th power} of \( R : \tau \to \tau \to \Prop \) is defined by \( R^{n+1} = R \circ R^n \) and \( R^0 \) is the identity relation on \( \coim R \);
     \item for an integer \( n \), the \emph{\( n \)th power} of \( R : \tau \to \tau \to \Prop \) is defined by \( R^{(n : \mathbb Z)} = R^n \) and \( R^{-(n : \mathbb Z)} = (R^n)^{-1} \) for \( n : \mathbb N \).\footnote{This may be implemented using \texttt{Int.negInduction} from mathlib.}
   \end{itemize}
   We say that \( R \) is
