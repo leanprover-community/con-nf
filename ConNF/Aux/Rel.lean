@@ -263,7 +263,7 @@ theorem preimage_subset_dom (r : Rel α β) (t : Set β) :
   exact ⟨y, h⟩
 
 theorem image_subset_codom (r : Rel α β) (s : Set α) :
-  r.image s ⊆ r.codom :=
+    r.image s ⊆ r.codom :=
   r.inv.preimage_subset_dom s
 
 theorem image_empty_of_disjoint_dom {r : Rel α β} {s : Set α} (h : Disjoint r.dom s) :
@@ -272,6 +272,18 @@ theorem image_empty_of_disjoint_dom {r : Rel α β} {s : Set α} (h : Disjoint r
   rw [disjoint_iff_forall_ne] at h
   rintro y ⟨x, hx₁, hx₂⟩
   exact h ⟨y, hx₂⟩ hx₁ rfl
+
+theorem image_eq_of_inter_eq {r : Rel α β} {s t : Set α} (h : s ∩ r.dom = t ∩ r.dom) :
+    r.image s = r.image t := by
+  rw [Set.ext_iff] at h ⊢
+  intro b
+  constructor
+  · rintro ⟨a, has, hab⟩
+    obtain ⟨hat, _⟩ := (h a).mp ⟨has, b, hab⟩
+    exact ⟨a, hat, hab⟩
+  · rintro ⟨a, hat, hab⟩
+    obtain ⟨has, _⟩ := (h a).mpr ⟨hat, b, hab⟩
+    exact ⟨a, has, hab⟩
 
 theorem Injective.image_diff {r : Rel α β} (h : r.Injective) (s t : Set α) :
     r.image (s \ t) = r.image s \ r.image t := by

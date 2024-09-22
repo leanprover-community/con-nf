@@ -16,20 +16,21 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal
-open scoped symmDiff
+open scoped symmDiff Pointwise
 
 namespace ConNF
 namespace BaseAction
 
 variable [Params.{u}]
 
+/-- TODO: Fix definition in blueprint to this. -/
 structure FlexApprox [Level] [CoherentData] {β : TypeIndex} [LeLevel β]
     (A : β ↝ ⊥) (ξ : BaseAction) (ψ : BaseApprox) : Prop where
   atoms_le_atoms : ξᴬ ≤ ψ.exceptions
   flexible_of_mem_dom {L : Litter} : L ∈ ψᴸ.dom → ¬Inflexible A L
   litters_of_flexible {L₁ L₂ : Litter} : ¬Inflexible A L₁ → ξᴸ L₁ L₂ → ψᴸ L₁ L₂
-  symmDiff_subset_dom {N : NearLitter} : N ∈ ξᴺ.dom → Nᴬ ∆ Nᴸᴬ ⊆ ψᴬ.dom
-  symmDiff_subset_codom {N : NearLitter} : N ∈ ξᴺ.codom → Nᴬ ∆ Nᴸᴬ ⊆ ψᴬ.codom
+  symmDiff_subset_dom {N : NearLitter} : N ∈ ξᴺ.dom → Nᴬ ∆ Nᴸᴬ ⊆ ψ.exceptions.dom
+  symmDiff_subset_codom {N : NearLitter} : N ∈ ξᴺ.codom → Nᴬ ∆ Nᴸᴬ ⊆ ψ.exceptions.codom
   mem_iff_mem {N₁ N₂ : NearLitter} : ξᴺ N₁ N₂ → ∀ a₂,
     a₂ ∈ N₂ᴬ ↔ (∃ a₁ ∈ N₁ᴬ, ψ.exceptions a₁ a₂) ∨ (a₂ ∉ ψ.exceptions.dom ∧ a₂ᴸ = N₂ᴸ)
 
@@ -47,6 +48,62 @@ theorem FlexApprox.mono [Level] [CoherentData] {β : TypeIndex} [LeLevel β]
     exact hξ.symmDiff_subset_codom (h.2 ▸ h')
   · intro N₁ N₂ hN a₂
     exact hξ.mem_iff_mem (h.2 ▸ hN) a₂
+
+/-- The main lemma about how approximations interact with actions. -/
+theorem smul_nearLitter_of_smul_litter [Level] [CoherentData] {β : TypeIndex} [LeLevel β]
+    {ξ : BaseAction} {ψ : BaseApprox} {A : β ↝ ⊥} {π : BasePerm} {N₁ N₂ : NearLitter}
+    (hξ : ξ.FlexApprox A ψ) (hψ : ψ.ExactlyApproximates π) (hNξ : ξᴺ N₁ N₂) (hNπ : π • N₁ᴸ = N₂ᴸ) :
+    π • N₁ = N₂ := by
+  apply NearLitter.ext
+  calc (π • N₁)ᴬ
+    _ = π • N₁ᴬ := rfl
+    _ = π • (N₁ᴸᴬ ∆ (N₁ᴸᴬ ∆ N₁ᴬ)) := by rw [symmDiff_symmDiff_cancel_left]
+    _ = (π • N₁ᴸᴬ) ∆ (π • N₁ᴬ ∆ N₁ᴸᴬ) := by rw [Set.smul_set_symmDiff, symmDiff_comm N₁ᴬ]
+    _ = (π • (N₁ᴸᴬ ∩ ψ.exceptions.dom ∪ N₁ᴸᴬ \ ψ.exceptions.dom)) ∆ (π • N₁ᴬ ∆ N₁ᴸᴬ) :=
+        by rw [Set.inter_union_diff]
+    _ = (π • (N₁ᴸᴬ ∩ ψ.exceptions.dom) ∪ π • (N₁ᴸᴬ \ ψ.exceptions.dom)) ∆ (π • N₁ᴬ ∆ N₁ᴸᴬ) :=
+        by rw [Set.smul_set_union]
+    _ = (π • (N₁ᴸᴬ ∩ ψ.exceptions.dom) ∪ N₂ᴸᴬ \ ψ.exceptions.dom) ∆ (π • N₁ᴬ ∆ N₁ᴸᴬ) :=
+        by rw [hψ.smulSet_nearLitter hNπ]
+    _ = ((ψ.exceptions.image (N₁ᴸᴬ ∩ ψ.exceptions.dom)) ∪ N₂ᴸᴬ \ ψ.exceptions.dom) ∆
+          (ψ.exceptions.image (N₁ᴬ ∆ N₁ᴸᴬ)) := by
+        rw [hψ.smulSet_eq_exceptions_image, hψ.smulSet_eq_exceptions_image]
+        · exact hξ.symmDiff_subset_dom ⟨N₂, hNξ⟩
+        · exact Set.inter_subset_right
+    _ = ((ψ.exceptions.image (N₁ᴸᴬ ∩ ψ.exceptions.dom)) ∆ (ψ.exceptions.image (N₁ᴬ ∆ N₁ᴸᴬ))) ∪
+          N₂ᴸᴬ \ ψ.exceptions.dom := by
+        apply Set.union_symmDiff_of_disjoint
+        rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+        rintro a ⟨ha, b, hb⟩
+        exact ha.2 (ψ.exceptions_permutative.mem_dom hb.2)
+    _ = ψ.exceptions.image ((N₁ᴸᴬ ∩ ψ.exceptions.dom) ∆ (N₁ᴬ ∆ N₁ᴸᴬ)) ∪
+          N₂ᴸᴬ \ ψ.exceptions.dom := by rw [← ψ.exceptions_permutative.image_symmDiff]
+    _ = ψ.exceptions.image (((N₁ᴸᴬ ∩ ψ.exceptions.dom) ∆ N₁ᴸᴬ) ∆ N₁ᴬ) ∪
+          N₂ᴸᴬ \ ψ.exceptions.dom := by rw [symmDiff_assoc, symmDiff_comm N₁ᴬ]
+    _ = ψ.exceptions.image ((N₁ᴸᴬ \ ψ.exceptions.dom) ∆ N₁ᴬ) ∪ N₂ᴸᴬ \ ψ.exceptions.dom :=
+        by rw [Set.inter_symmDiff_left]
+    _ = ψ.exceptions.image (N₁ᴬ \ (N₁ᴸᴬ \ ψ.exceptions.dom)) ∪ N₂ᴸᴬ \ ψ.exceptions.dom := by
+        rw [Set.symmDiff_def, Rel.image_union, Set.diff_diff, Rel.image_empty_of_disjoint_dom,
+          Set.empty_union]
+        rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+        intro a ha
+        exact ha.2.2 (Or.inl ha.1)
+    _ = ψ.exceptions.image (N₁ᴬ ∩ ψ.exceptions.dom) ∪ N₂ᴸᴬ \ ψ.exceptions.dom := by
+        congr 1
+        apply Rel.image_eq_of_inter_eq
+        ext a
+        simp only [Set.mem_inter_iff, Set.mem_diff]
+        tauto
+    _ = N₂ᴬ := by
+        ext a
+        rw [hξ.mem_iff_mem hNξ a]
+        constructor
+        · rintro (⟨b, hb, hba⟩ | ha)
+          · exact Or.inl ⟨b, hb.1, hba⟩
+          · exact Or.inr ⟨ha.2, ha.1⟩
+        · rintro (⟨b, hb, hba⟩ | ha)
+          · exact Or.inl ⟨b, ⟨hb, a, hba⟩, hba⟩
+          · exact Or.inr ⟨ha.2, ha.1⟩
 
 theorem card_litter_dom_compl {ξ : BaseAction} : #((ξᴸ.dom ∪ ξᴸ.codom)ᶜ : Set Litter) = #μ := by
   have : Infinite Litter := by
@@ -318,10 +375,8 @@ theorem flexApprox_flexApprox' {ξ : BaseAction} {A : β ↝ ⊥} (hξ₁ : ξ.M
   atoms_le_atoms := ξ.le_atomPerm
   flexible_of_mem_dom h := ξ.dom_flexLitterPerm_subset A h
   litters_of_flexible h₁ h₂ := ξ.le_flexLitterPerm A _ _ ⟨h₂, h₁, by rwa [hξ₁ h₂] at h₁⟩
-  symmDiff_subset_dom h := (hξ₂.symmDiff_subset_dom _ h).trans
-    (ξ.dom_subset_dom_atomPerm.trans (Rel.dom_mono le_sup_left))
-  symmDiff_subset_codom h := (hξ₂.symmDiff_subset_codom _ h).trans
-    (ξ.codom_subset_codom_atomPerm.trans (Rel.dom_mono le_sup_left))
+  symmDiff_subset_dom h := (hξ₂.symmDiff_subset_dom _ h).trans ξ.dom_subset_dom_atomPerm
+  symmDiff_subset_codom h := (hξ₂.symmDiff_subset_codom _ h).trans ξ.codom_subset_codom_atomPerm
   mem_iff_mem {N₁ N₂} h := atomPerm_mem_iff hξ₂ h
 
 /-- A flexible approximation for `ξ` along `A`. -/

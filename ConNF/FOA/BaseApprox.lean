@@ -406,6 +406,8 @@ theorem nearLitters_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
     cases χ.atoms_permutative.coinjective ha₂ (atoms_le_of_le h a₁ a₃ ha₃)
     exact ha₃
 
+/-- This creates new definitions of `·ᴬ` and `·ᴺ`, but the instances are definitionally equal
+so no triangles are formed. -/
 instance : BaseActionClass BaseApprox where
   atoms ψ := ψᴬ
   atoms_oneOne ψ := ψ.atoms_permutative.toOneOne
@@ -621,6 +623,130 @@ theorem basePerm_smul_nearLitter_eq_iff {ψ : BaseApprox} {h : ψ.Total} {N₁ N
     ext : 1
     have := hN.2.2
     rwa [← toEquiv_image _ h.atoms_bijective] at this
+
+structure Approximates (ψ : BaseApprox) (π : BasePerm) : Prop where
+  atoms : ∀ a₁ a₂, ψᴬ a₁ a₂ → a₂ = π • a₁
+  nearLitters : ∀ N₁ N₂, ψᴺ N₁ N₂ → N₂ = π • N₁
+
+theorem Approximates.litters {ψ : BaseApprox} {π : BasePerm} (h : ψ.Approximates π)
+    (L₁ L₂ : Litter) : ψᴸ L₁ L₂ → π • L₁ = L₂ := by
+  intro hL
+  obtain ⟨N, hN⟩ := ψ.mem_dom_nearLitters (N := L₁ᴺ) ⟨L₂, hL⟩ (λ a h ↦ (h.2 h.1).elim)
+  cases h.nearLitters L₁ᴺ N hN
+  rw [ψ.litters_permutative.coinjective hL hN.1]
+  rfl
+
+theorem Approximates.mono {ψ χ : BaseApprox} {π : BasePerm} (hχ : χ.Approximates π) (h : ψ ≤ χ) :
+    ψ.Approximates π := by
+  constructor
+  · intro a₁ a₂ hψ
+    exact hχ.atoms a₁ a₂ (atoms_le_of_le h a₁ a₂ hψ)
+  · intro N₁ N₂ hψ
+    exact hχ.nearLitters N₁ N₂ (nearLitters_le_of_le h N₁ N₂ hψ)
+
+structure ExactlyApproximates (ψ : BaseApprox) (π : BasePerm)
+    extends ψ.Approximates π : Prop where
+  smul_litter : ∀ a, a ∉ ψ.exceptions.dom → (π • a)ᴸ = π • aᴸ
+  inv_smul_litter : ∀ a, a ∉ ψ.exceptions.dom → (π⁻¹ • a)ᴸ = π⁻¹ • aᴸ
+
+theorem ExactlyApproximates.mono {ψ χ : BaseApprox} {π : BasePerm}
+    (hχ : χ.ExactlyApproximates π) (h : ψ ≤ χ) :
+    ψ.ExactlyApproximates π := by
+  constructor
+  · exact hχ.toApproximates.mono h
+  · intro a ha
+    apply hχ.smul_litter
+    rwa [h.1] at ha
+  · intro a ha
+    apply hχ.inv_smul_litter
+    rwa [h.1] at ha
+
+open scoped Pointwise in
+theorem ExactlyApproximates.smulSet_nearLitter
+    {ψ : BaseApprox} {π : BasePerm} {N₁ N₂ : NearLitter}
+    (hψ : ψ.ExactlyApproximates π) (hNπ : π • N₁ᴸ = N₂ᴸ) :
+    π • (N₁ᴸᴬ \ ψ.exceptions.dom) = N₂ᴸᴬ \ ψ.exceptions.dom := by
+  ext a
+  constructor
+  · rintro ⟨a, ⟨ha₁, ha₂⟩, rfl⟩
+    have := hψ.smul_litter a ha₂
+    rw [ha₁, hNπ] at this
+    use this
+    contrapose! ha₂
+    obtain ⟨b, hab⟩ := ψ.exceptions_permutative.codom_eq_dom ▸ ha₂
+    have := hψ.atoms b (π • a) (Or.inl hab)
+    rw [smul_left_cancel_iff] at this
+    cases this
+    exact ⟨π • a, hab⟩
+  · rintro ⟨ha₁, ha₂⟩
+    refine ⟨π⁻¹ • a, ?_, smul_inv_smul π a⟩
+    have := hψ.inv_smul_litter a ha₂
+    rw [ha₁, eq_inv_smul_iff, ← hNπ, smul_left_cancel_iff] at this
+    use this
+    contrapose! ha₂
+    obtain ⟨b, hab⟩ := ha₂
+    have := hψ.atoms (π⁻¹ • a) b (Or.inl hab)
+    rw [smul_inv_smul] at this
+    cases this
+    exact ψ.exceptions_permutative.mem_dom hab
+
+open scoped Pointwise in
+theorem Approximates.smulSet_eq_exceptions_image {ψ : BaseApprox} {π : BasePerm}
+    (hψ : ψ.Approximates π) (s : Set Atom) (hs : s ⊆ ψ.exceptions.dom) :
+    π • s = ψ.exceptions.image s := by
+  ext a
+  constructor
+  · rintro ⟨a, h, rfl⟩
+    refine ⟨a, h, ?_⟩
+    obtain ⟨b, hb⟩ := hs h
+    cases hψ.atoms a b (Or.inl hb)
+    exact hb
+  · rintro ⟨b, h, hab⟩
+    refine ⟨b, h, ?_⟩
+    cases hψ.atoms b a (Or.inl hab)
+    rfl
+
+theorem approximates_basePerm {ψ : BaseApprox} (h : ψ.Total) :
+    ψ.Approximates (ψ.basePerm h) := by
+  constructor
+  · intro a₁ a₂ ha
+    symm
+    rwa [basePerm_smul_atom_eq_iff]
+  · intro a₁ a₂ ha
+    symm
+    rwa [basePerm_smul_nearLitter_eq_iff]
+
+theorem exactlyApproximates_basePerm {ψ : BaseApprox} (h : ψ.Total) :
+    ψ.ExactlyApproximates (ψ.basePerm h) := by
+  refine ⟨approximates_basePerm h, ?_, ?_⟩
+  · intro a ha
+    have : ψᴬ a (nearLitterEquiv (ψ.sublitter (ψ.basePerm h • aᴸ))
+        ((nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩)) := by
+      right
+      rw [typical_iff]
+      refine ⟨?_, (nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩, ?_, ?_⟩
+      · simp only [nearLitterEquiv_litter]
+        rw [← basePerm_smul_litter_eq_iff]
+      · simp only [Equiv.apply_symm_apply]
+      · apply nearLitterEquiv_congr
+        · simp only [nearLitterEquiv_litter]
+        · rfl
+    rw [← basePerm_smul_atom_eq_iff (h := h)] at this
+    rw [this, nearLitterEquiv_litter]
+  · intro a ha
+    have : ψᴬ (nearLitterEquiv (ψ.sublitter ((ψ.basePerm h)⁻¹ • aᴸ))
+        ((nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩)) a := by
+      right
+      rw [typical_iff]
+      refine ⟨?_, (nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩, ?_, ?_⟩
+      · simp only [nearLitterEquiv_litter]
+        rw [← basePerm_inv_smul_litter_eq_iff]
+      · apply nearLitterEquiv_congr
+        · simp only [nearLitterEquiv_litter]
+        · rfl
+      · simp only [Equiv.apply_symm_apply]
+    rw [← basePerm_inv_smul_atom_eq_iff (h := h)] at this
+    rw [this, nearLitterEquiv_litter]
 
 end BaseApprox
 

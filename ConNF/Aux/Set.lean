@@ -37,6 +37,19 @@ theorem Set.inter_subset_symmDiff_union_symmDiff {α : Type _} {s t u v : Set α
   simp only [mem_inter_iff, mem_union, and_imp, mem_symmDiff]
   tauto
 
+theorem Set.union_symmDiff_of_disjoint {α : Type _} {s t u : Set α} (h : Disjoint t u) :
+    (s ∪ t) ∆ u = (s ∆ u) ∪ t := by
+  ext
+  simp only [Set.mem_symmDiff, Set.mem_union]
+  rw [Set.disjoint_iff_forall_ne] at h
+  tauto
+
+theorem Set.inter_symmDiff_left {α : Type _} {s t : Set α} :
+    (s ∩ t) ∆ s = s \ t := by
+  ext a
+  simp only [Set.mem_symmDiff, Set.mem_inter_iff, Set.mem_diff]
+  tauto
+
 theorem Set.smulSet_def {α β : Type _} {x : α} {s : Set β} [SMul α β] :
     x • s = (x • ·) '' s :=
   rfl

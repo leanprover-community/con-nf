@@ -607,17 +607,20 @@
 \begin{proposition}
   \uses{def:FlexApprox,def:StrApprox.Approximates,def:StrAction.Approximates}
   \label{prop:FlexApprox.smul_nearLitter_eq}
+  \lean{ConNF.BaseAction.smul_nearLitter_of_smul_litter}
+  \leanok
   Let \( \xi \) be a base action, and let \( \psi \) be an \( A \)-flexible approximation of it.
   Let \( \pi \) be a base permutation that \( \psi \) exactly approximates.
   If \( (N_1, N_2) \in \xi^\NearLitter \) and \( \pi(N_1^\circ) = N_2^\circ \), then \( \pi(N_1) = N_2 \).
 \end{proposition}
 \begin{proof}
+  \leanok
   First, note that
   \begin{align*}
     \pi[N_1] &= \pi[\LS(N_1^\circ)] \symmdiff \pi[N_1 \symmdiff \LS(N_1^\circ)] \\
     &= (\pi[\LS(N_1^\circ) \cap \coim \psi^{E\Atom}] \cup \pi[\LS(N_1^\circ) \setminus \coim \psi^{E\Atom}]) \symmdiff \pi[N_1 \symmdiff \LS(N_1^\circ)]
   \end{align*}
-  As \( \psi \) exactly approximates \( \pi \) and \( \rho(N_1^\circ) = N_2^\circ \), we have the equation
+  As \( \psi \) exactly approximates \( \pi \) and \( \pi(N_1^\circ) = N_2^\circ \), we have the equation
   \[ \pi[\LS(N_1^\circ) \setminus \coim \psi^{E\Atom}] = \LS(N_2^\circ) \setminus \coim \psi^{E\Atom} \]
   Combining this with the fact that \( \psi^{E\Atom} \leq \pi^\Atom \), and that \( N_1 \symmdiff \LS(N_1^\circ) \subseteq \coim \psi^{E\Atom} \), we obtain
   \begin{align*}
