@@ -35,3 +35,4 @@ import ConNF.Setup.StrSet
 import ConNF.Setup.Support
 import ConNF.Setup.Tree
 import ConNF.Setup.TypeIndex
+import ConNF.Support.Strong

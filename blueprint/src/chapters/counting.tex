@@ -2,12 +2,16 @@
 \begin{definition}
   \uses{def:StrSupport}
   \label{def:StrSupport.Occurs}
-  We define a partial order \( \preceq \) on base supports by \( S \preceq T \) if and only if \( \im S^\Atom \subseteq \im T^\Atom \) and \( \im S^\NearLitter \subseteq \im T^\NearLitter \).
+  \lean{ConNF.instPreorderSupport}
+  \leanok
+  We define a preorder \( \preceq \) on base supports by \( S \preceq T \) if and only if \( \im S^\Atom \subseteq \im T^\Atom \) and \( \im S^\NearLitter \subseteq \im T^\NearLitter \).
   For \( \beta \)-supports, we define \( S \preceq T \) if and only if \( S_A \preceq T_A \) for each \( A \).
 \end{definition}
 \begin{definition}
   \uses{def:StrSupport,def:InflexiblePath,def:Interference}
   \label{def:Strong}
+  \lean{ConNF.Support.Strong}
+  \leanok
   A \( \beta \)-support \( S \) is \emph{strong} if:
   \begin{itemize}
     \item for every pair of near-litters \( N_1, N_2 \in \im S_A^\NearLitter \), we have \( \interf(N_1, N_2) \subseteq \im S_A^\Atom \); and
@@ -17,9 +21,12 @@
 \begin{proposition}
   \uses{def:Strong}
   \label{prop:Strong.smul}
+  \lean{ConNF.Support.Strong.smul}
+  \leanok
   If \( S \) is a strong \( \beta \)-support and \( \rho \) is \( \beta \)-allowable, then \( \rho(S) \) is strong.
 \end{proposition}
 \begin{proof}
+  \leanok
   Interference is stable under application of allowable permutations, and the required supports are also preserved under action of allowable permutations.
 \end{proof}
 \begin{proposition}

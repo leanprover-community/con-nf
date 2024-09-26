@@ -191,6 +191,32 @@ theorem smul_rel {G X : Type _} [Group G] [MulAction G X]
     (π • E).rel i x ↔ E.rel i (π⁻¹ • x) :=
   Iff.rfl
 
+@[simp]
+theorem mem_smul {G X : Type _} [Group G] [MulAction G X]
+    (π : G) (E : Enumeration X) (x : X) :
+    x ∈ π • E ↔ π⁻¹ • x ∈ E :=
+  Iff.rfl
+
+open scoped Pointwise in
+@[simp]
+theorem smul_rel_codom {G X : Type _} [Group G] [MulAction G X]
+    (π : G) (E : Enumeration X) :
+    (π • E).rel.codom = π • E.rel.codom := by
+  ext x
+  constructor
+  · rintro ⟨i, h⟩
+    exact ⟨π⁻¹ • x, ⟨i, h⟩, smul_inv_smul π x⟩
+  · rintro ⟨x, ⟨i, h⟩, rfl⟩
+    use i
+    rwa [smul_rel, inv_smul_smul]
+
+open scoped Pointwise in
+@[simp]
+theorem smul_coe {G X : Type _} [Group G] [MulAction G X]
+    (π : G) (E : Enumeration X) :
+    ((π • E : Enumeration X) : Set X) = π • (E : Set X) :=
+  smul_rel_codom π E
+
 instance {G X : Type _} [Group G] [MulAction G X] :
     MulAction G (Enumeration X) where
   one_smul E := by

@@ -50,9 +50,27 @@ theorem Set.inter_symmDiff_left {α : Type _} {s t : Set α} :
   simp only [Set.mem_symmDiff, Set.mem_inter_iff, Set.mem_diff]
   tauto
 
-theorem Set.smulSet_def {α β : Type _} {x : α} {s : Set β} [SMul α β] :
+theorem Set.smul_set_def {α β : Type _} {x : α} {s : Set β} [SMul α β] :
     x • s = (x • ·) '' s :=
   rfl
+
+theorem Set.subset_smul_set {α β : Type _} {x : α} {s t : Set β} [Group α] [MulAction α β] :
+    t ⊆ x • s ↔ x⁻¹ • t ⊆ s := by
+  constructor
+  · rintro h _ ⟨a, ha, rfl⟩
+    simp only [← mem_smul_set_iff_inv_smul_mem]
+    exact h ha
+  · intro h a ha
+    refine ⟨x⁻¹ • a, ?_, ?_⟩
+    · apply h
+      rwa [smul_mem_smul_set_iff]
+    · simp only [smul_inv_smul]
+
+theorem Set.symmDiff_smul_set {α β : Type _} {x : α} {s t : Set β} [Group α] [MulAction α β] :
+    x • s ∆ t = (x • s) ∆ (x • t) := by
+  ext a
+  simp only [Set.mem_smul_set, Set.mem_symmDiff]
+  aesop
 
 theorem Set.bounded_lt_union {α : Type _} [LinearOrder α] {s t : Set α}
     (hs : s.Bounded (· < ·)) (ht : t.Bounded (· < ·)) :

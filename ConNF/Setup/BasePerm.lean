@@ -95,7 +95,7 @@ theorem one_litter :
 instance : Mul BasePerm where
   mul π₁ π₂ := ⟨π₁ᴬ * π₂ᴬ, π₁ᴸ * π₂ᴸ, λ s L h ↦ by
     have := π₁.smul_near_smul _ _ <| π₂.smul_near_smul s L h
-    simpa only [Set.smulSet_def, Set.image_image] using this⟩
+    simpa only [Set.smul_set_def, Set.image_image] using this⟩
 
 @[simp]
 theorem mul_atom (π₁ π₂ : BasePerm) :
@@ -113,7 +113,7 @@ theorem inv_smul_near_inv_smul (π : BasePerm) (s : Set Atom) (L : Litter) :
   apply near_trans (near_image h ↑πᴬ⁻¹)
   have := π.smul_near_smul (πᴸ⁻¹ L)ᴬ (πᴸ⁻¹ L) near_rfl
   have := near_image this ↑πᴬ⁻¹
-  simp only [smul_litter_def, smul_atom_def, Perm.apply_inv_self, Set.smulSet_def,
+  simp only [smul_litter_def, smul_atom_def, Perm.apply_inv_self, Set.smul_set_def,
     Perm.image_inv, preimage_image] at this
   rw [Perm.image_inv]
   exact near_symm this

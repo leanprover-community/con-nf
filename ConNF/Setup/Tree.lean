@@ -99,6 +99,16 @@ theorem zpow_apply [Group X] (T : Tree X α) (A : α ↝ ⊥) (n : ℤ) :
     (T ^ n) A = (T A) ^ n :=
   rfl
 
+@[simp]
+theorem inv_deriv [Group X] (T : Tree X α) (A : α ↝ β) :
+    T⁻¹ ⇘ A = (T ⇘ A)⁻¹ :=
+  rfl
+
+@[simp]
+theorem inv_sderiv [Group X] (T : Tree X α) (h : β < α) :
+    T⁻¹ ↘ h = (T ↘ h)⁻¹ :=
+  rfl
+
 /-- The partial order on the type of `α`-trees of `X` is given by "branchwise" comparison. -/
 instance partialOrder [PartialOrder X] : PartialOrder (Tree X α) :=
   Pi.partialOrder
