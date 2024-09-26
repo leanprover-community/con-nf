@@ -147,7 +147,7 @@ theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {
     simp only [Order.Preimage, Function.Embedding.coeFn_mk, subrel_val]
     exact f.map_rel_iff
   · intro x
-    obtain ⟨y, hy⟩ := f.init x.down.prop
+    obtain ⟨y, hy⟩ := f.mem_range_of_rel x.down.prop
     refine ⟨ULift.up ⟨y, ?_⟩, ?_⟩
     · have := x.down.prop
       rwa [Set.mem_setOf_eq, ← hy, f.map_rel_iff] at this
@@ -185,8 +185,8 @@ theorem typein_Iio {o : Ordinal.{u}} (x : Set.Iio o) :
   · rw [lift_id, lift_id, typein_ordinal] at this
     exact this.symm
   · rfl
-  · simp only [RelEmbedding.coe_mk, Function.Embedding.coeFn_mk, Subtype.exists, Set.mem_Iio,
-      exists_prop', nonempty_prop, exists_eq_right, Subtype.forall]
+  · simp only [RelEmbedding.coe_mk, Function.Embedding.coeFn_mk, Subtype.range_coe_subtype,
+      Set.mem_Iio, Set.mem_setOf_eq, Subtype.forall]
     intro a ha b hb
     exact hb.trans ha
 
