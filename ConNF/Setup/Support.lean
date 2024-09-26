@@ -130,6 +130,19 @@ theorem smul_eq_smul_iff (π₁ π₂ : BasePerm) (S : BaseSupport) :
         rw [smul_inv_smul, smul_eq_iff_eq_inv_smul] at this
         rwa [← this]
 
+noncomputable instance : Add BaseSupport where
+  add S T := ⟨Sᴬ + Tᴬ, Sᴺ + Tᴺ⟩
+
+@[simp]
+theorem add_atoms (S T : BaseSupport) :
+    (S + T)ᴬ = Sᴬ + Tᴬ :=
+  rfl
+
+@[simp]
+theorem add_nearLitters (S T : BaseSupport) :
+    (S + T)ᴺ = Sᴺ + Tᴺ :=
+  rfl
+
 end BaseSupport
 
 def baseSupportEquiv : BaseSupport ≃ Enumeration Atom × Enumeration NearLitter where
@@ -181,6 +194,36 @@ instance : BotDerivative (Support α) BaseSupport α where
   botSderiv S := ⟨Sᴬ ↘., Sᴺ ↘.⟩
   botDeriv_single S h := by dsimp only; rw [botDeriv_single, botDeriv_single]
 
+@[simp]
+theorem deriv_atoms {α β : TypeIndex} (S : Support α) (A : α ↝ β) :
+    Sᴬ ⇘ A = (S ⇘ A)ᴬ :=
+  rfl
+
+@[simp]
+theorem deriv_nearLitters {α β : TypeIndex} (S : Support α) (A : α ↝ β) :
+    Sᴺ ⇘ A = (S ⇘ A)ᴺ :=
+  rfl
+
+@[simp]
+theorem coderiv_atoms {α β : TypeIndex} (S : Support β) (A : α ↝ β) :
+    Sᴬ ⇗ A = (S ⇗ A)ᴬ :=
+  rfl
+
+@[simp]
+theorem coderiv_nearLitters {α β : TypeIndex} (S : Support β) (A : α ↝ β) :
+    Sᴺ ⇗ A = (S ⇗ A)ᴺ :=
+  rfl
+
+@[simp]
+theorem derivBot_atoms {α : TypeIndex} (S : Support α) (A : α ↝ ⊥) :
+    Sᴬ ⇘. A = (S ⇘. A)ᴬ :=
+  rfl
+
+@[simp]
+theorem derivBot_nearLitters {α : TypeIndex} (S : Support α) (A : α ↝ ⊥) :
+    Sᴺ ⇘. A = (S ⇘. A)ᴺ :=
+  rfl
+
 theorem ext' {S T : Support α} (h₁ : Sᴬ = Tᴬ) (h₂ : Sᴺ = Tᴺ) : S = T := by
   obtain ⟨SA, SN⟩ := S
   obtain ⟨TA, TN⟩ := T
@@ -200,6 +243,17 @@ theorem ext {S T : Support α} (h : ∀ A, S ⇘. A = T ⇘. A) : S = T := by
   · apply Enumeration.ext_path
     intro A
     exact BaseSupport.nearLitters_congr (h A)
+
+@[simp]
+theorem deriv_derivBot {α : TypeIndex} (S : Support α)
+    (A : α ↝ β) (B : β ↝ ⊥) :
+    S ⇘ A ⇘. B = S ⇘. (A ⇘ B) :=
+  rfl
+
+@[simp]
+theorem coderiv_deriv_eq {α β : TypeIndex} (S : Support β) (A : α ↝ β) :
+    S ⇗ A ⇘ A = S :=
+  ext' (Sᴬ.coderiv_deriv_eq A) (Sᴺ.coderiv_deriv_eq A)
 
 instance {α : TypeIndex} : SMul (StrPerm α) (Support α) where
   smul π S := ⟨π • Sᴬ, π • Sᴺ⟩
@@ -239,6 +293,14 @@ instance {α : TypeIndex} : MulAction (StrPerm α) (Support α) where
 @[simp]
 theorem smul_derivBot {α : TypeIndex} (π : StrPerm α) (S : Support α) (A : α ↝ ⊥) :
     (π • S) ⇘. A = π A • (S ⇘. A) :=
+  rfl
+
+noncomputable instance : Add (Support α) where
+  add S T := ⟨Sᴬ + Tᴬ, Sᴺ + Tᴺ⟩
+
+@[simp]
+theorem add_derivBot (S T : Support α) (A : α ↝ ⊥) :
+    (S + T) ⇘. A = (S ⇘. A) + (T ⇘. A) :=
   rfl
 
 end Support

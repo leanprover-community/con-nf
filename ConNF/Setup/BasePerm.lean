@@ -161,6 +161,17 @@ instance : MulAction BasePerm NearLitter where
     ext a
     simp only [smul_nearLitter_atoms, mul_smul]
 
+@[simp]
+theorem smul_interference (π : BasePerm) (N₁ N₂ : NearLitter) :
+    π • interference N₁ N₂ = interference (π • N₁) (π • N₂) := by
+  by_cases h : N₁ᴸ = N₂ᴸ
+  · rw [interference_eq_of_litter_eq h, interference_eq_of_litter_eq,
+      Set.smul_set_symmDiff, smul_nearLitter_atoms, smul_nearLitter_atoms]
+    rwa [smul_nearLitter_litter, smul_nearLitter_litter, smul_left_cancel_iff]
+  · rw [interference_eq_of_litter_ne h, interference_eq_of_litter_ne,
+      Set.smul_set_inter, smul_nearLitter_atoms, smul_nearLitter_atoms]
+    rwa [smul_nearLitter_litter, smul_nearLitter_litter, ne_eq, smul_left_cancel_iff]
+
 end BasePerm
 
 end ConNF

@@ -1,5 +1,5 @@
 import Mathlib.Logic.Equiv.TransferInstance
-import ConNF.Aux.WellOrder
+import ConNF.Aux.Ordinal
 
 universe u v
 
@@ -122,6 +122,18 @@ theorem ltWellOrder_type [LtWellOrder β] :
     Ordinal.lift.{max u v, v} (Ordinal.type ((· < ·) : β → β → Prop)) := by
   rw [Ordinal.lift_type_eq.{u, v, max u v}]
   exact ⟨e.ltIso⟩
+
+theorem ltWellOrder_typein [i : LtWellOrder β] (x : α) :
+    letI := e.ltWellOrder.toLT
+    Ordinal.lift.{max u v, v} (Ordinal.typein ((· < ·) : β → β → Prop) (e x)) =
+    Ordinal.lift.{max u v, u} (Ordinal.typein ((· < ·) : α → α → Prop) x) := by
+  letI := e.ltWellOrder
+  refine Ordinal.lift_typein_apply (r := (· < ·)) (s := (· < ·)) (f := ⟨⟨e.toEmbedding, ?_⟩, ?_⟩) x
+  · rfl
+  · simp only [RelEmbedding.coe_mk, coe_toEmbedding]
+    intro a b _
+    use e.symm b
+    exact apply_symm_apply e b
 
 protected theorem noMaxOrder [LT β] [NoMaxOrder β] :
     letI := e.lt

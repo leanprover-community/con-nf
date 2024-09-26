@@ -539,6 +539,4 @@ theorem toEquiv_image (r : Rel α β) (hr : r.Bijective) (s : Set α) :
     r.toEquiv hr '' s = r.image s :=
   r.toFunction_image hr.toFunctional s
 
--- Compare Mathlib.Data.Rel and Mathlib.Logic.Relator.
-
 end Rel

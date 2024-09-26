@@ -42,7 +42,6 @@ instance (X : Type u) (α β : TypeIndex) :
     (λ x y h ↦ Prod.ext (Path.deriv_right_injective
       ((Prod.mk.injEq _ _ _ _).mp h).1) ((Prod.mk.injEq _ _ _ _).mp h).2)
 
-@[simp]
 theorem deriv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (α ↝ ⊥ × X)) (A : α ↝ β)
     (i : κ) (x : β ↝ ⊥ × X) :
     (E ⇘ A).rel i x ↔ E.rel i (x.1 ⇗ A, x.2) :=
@@ -51,6 +50,19 @@ theorem deriv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (α ↝ ⊥ 
 instance (X : Type u) (α β : TypeIndex) :
     Coderivative (Enumeration (β ↝ ⊥ × X)) (Enumeration (α ↝ ⊥ × X)) α β where
   coderiv E A := E.image (λ x ↦ (x.1 ⇗ A, x.2))
+
+theorem coderiv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (A : α ↝ β)
+    (i : κ) (x : α ↝ ⊥ × X) :
+    (E ⇗ A).rel i x ↔ ∃ B, x.1 = A ⇘ B ∧ E.rel i (B, x.2) := by
+  constructor
+  · rintro ⟨x, h, rfl⟩
+    exact ⟨_, rfl, h⟩
+  · rintro ⟨B, h₁, h₂⟩
+    refine ⟨(B, x.2), h₂, ?_⟩
+    apply Prod.ext
+    · dsimp only
+      exact h₁.symm
+    · rfl
 
 instance (X : Type u) (α : TypeIndex) :
     BotDerivative (Enumeration (α ↝ ⊥ × X)) (Enumeration X) α where
@@ -61,6 +73,17 @@ instance (X : Type u) (α : TypeIndex) :
     | bot => cases lt_irrefl ⊥ h
     | coe => rfl
 
+theorem derivBot_rel {X : Type _} {α : TypeIndex} (E : Enumeration (α ↝ ⊥ × X)) (A : α ↝ ⊥)
+    (i : κ) (x : X) :
+    (E ⇘. A).rel i x ↔ E.rel i (A, x) :=
+  Iff.rfl
+
+@[simp]
+theorem mem_path_iff {X : Type _} {α : TypeIndex} (E : Enumeration (α ↝ ⊥ × X))
+    (A : α ↝ ⊥) (x : X) :
+    (A, x) ∈ E ↔ x ∈ E ⇘. A :=
+  Iff.rfl
+
 theorem ext_path {X : Type u} {α : TypeIndex} {E F : Enumeration (α ↝ ⊥ × X)}
     (h : ∀ A, E ⇘. A = F ⇘. A) :
     E = F := by
@@ -69,6 +92,21 @@ theorem ext_path {X : Type u} {α : TypeIndex} {E F : Enumeration (α ↝ ⊥ ×
     exact this
   · have := congr_arg rel (h x.1)
     exact iff_of_eq (congr_fun₂ this i x.2)
+
+theorem deriv_derivBot {X : Type _} {α β : TypeIndex} (E : Enumeration (α ↝ ⊥ × X))
+    (A : α ↝ β) (B : β ↝ ⊥) :
+    E ⇘ A ⇘. B = E ⇘. (A ⇘ B) :=
+  rfl
+
+@[simp]
+theorem coderiv_deriv_eq {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (A : α ↝ β) :
+    E ⇗ A ⇘ A = E := by
+  apply ext_path
+  intro B
+  ext i x
+  · rfl
+  · simp only [derivBot_rel, deriv_rel, coderiv_rel,
+      Path.coderiv_eq_deriv, Path.deriv_right_inj, exists_eq_left']
 
 theorem mulAction_aux {X : Type _} {α : TypeIndex} [MulAction BasePerm X] (π : StrPerm α) :
     Function.Injective (λ x : α ↝ ⊥ × X ↦ (x.1, (π x.1)⁻¹ • x.2)) := by

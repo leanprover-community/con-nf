@@ -126,6 +126,46 @@ theorem card_enumeration_eq (h : #X = #μ) : #(Enumeration X) = #μ :=
 namespace Enumeration
 
 /-!
+## Enumerations from sets
+-/
+
+theorem exists_equiv (s : Set X) (hs : Small s) :
+    Nonempty ((i : κ) × (s ≃ Set.Iio i)) := by
+  rw [Small] at hs
+  refine ⟨κEquiv.symm ⟨(#s).ord, ?_⟩, Nonempty.some ?_⟩
+  · rwa [Set.mem_Iio, ord_lt_ord]
+  · rw [← Cardinal.eq, Set.Iio, κ_card_Iio_eq, Equiv.apply_symm_apply, card_ord]
+
+noncomputable def ofSet (s : Set X) (hs : Small s) : Enumeration X where
+  bound := (exists_equiv s hs).some.1
+  rel i x := ∃ h, i = (exists_equiv s hs).some.2 ⟨x, h⟩
+  lt_bound := by
+    rintro _ ⟨x, h, rfl⟩
+    exact ((exists_equiv s hs).some.2 ⟨x, h⟩).prop
+  rel_coinjective := by
+    constructor
+    rintro x y i ⟨hx, hix⟩ ⟨hy, hiy⟩
+    rw [hix] at hiy
+    cases (exists_equiv s hs).some.2.injective (Subtype.coe_injective hiy)
+    rfl
+
+@[simp]
+theorem mem_ofSet_iff (s : Set X) (hs : Small s) (x : X) :
+    x ∈ ofSet s hs ↔ x ∈ s := by
+  constructor
+  · rintro ⟨i, hx, _⟩
+    exact hx
+  · intro h
+    exact ⟨(exists_equiv s hs).some.2 ⟨x, h⟩, h, rfl⟩
+
+@[simp]
+theorem ofSet_coe (s : Set X) (hs : Small s) :
+    (ofSet s hs : Set X) = s := by
+  ext x
+  rw [← mem_ofSet_iff s hs]
+  rfl
+
+/-!
 ## Operations on enumerations
 -/
 
@@ -231,6 +271,71 @@ instance {G X : Type _} [Group G] [MulAction G X] :
 theorem mem_smul_iff {G X : Type _} [Group G] [MulAction G X] (x : X) (g : G) (E : Enumeration X) :
     x ∈ g • E ↔ g⁻¹ • x ∈ E :=
   Iff.rfl
+
+/-!
+## Concatenation of enumerations
+-/
+
+noncomputable instance : Add (Enumeration X) where
+  add E F := {
+    bound := E.bound + F.bound
+    rel := E.rel ⊔ Rel.comp (E.bound + ·).graph.inv F.rel
+    lt_bound := by
+      rintro i ⟨x, hi | ⟨j, rfl, hjx⟩⟩
+      · exact (E.lt_bound i ⟨x, hi⟩).trans_le (κ_le_add E.bound F.bound)
+      · rw [add_lt_add_iff_left]
+        exact F.lt_bound j ⟨x, hjx⟩
+    rel_coinjective := by
+      constructor
+      rintro x y i (hix | ⟨j, hj, hjx⟩) (hiy | ⟨k, hk, hky⟩)
+      · exact E.rel_coinjective.coinjective hix hiy
+      · cases hk
+        have := E.lt_bound _ ⟨x, hix⟩
+        rw [add_lt_iff_neg_left] at this
+        cases (κ_zero_le k).not_lt this
+      · cases hj
+        have := E.lt_bound _ ⟨y, hiy⟩
+        rw [add_lt_iff_neg_left] at this
+        cases (κ_zero_le j).not_lt this
+      · cases hj
+        simp only [Rel.inv, flip, Function.graph_def, add_right_inj] at hk
+        cases hk
+        exact F.rel_coinjective.coinjective hjx hky
+  }
+
+@[simp]
+theorem add_bound (E F : Enumeration X) :
+    (E + F).bound = E.bound + F.bound :=
+  rfl
+
+theorem rel_add_iff {E F : Enumeration X} (i : κ) (x : X) :
+    (E + F).rel i x ↔ E.rel i x ∨ ∃ j, E.bound + j = i ∧ F.rel j x :=
+  Iff.rfl
+
+@[simp]
+theorem mem_add_iff {E F : Enumeration X} (x : X) :
+    x ∈ E + F ↔ x ∈ E ∨ x ∈ F := by
+  simp only [mem_iff, Rel.codom, Set.mem_setOf, rel_add_iff]
+  constructor
+  · rintro ⟨i, (hi | ⟨j, rfl, hj⟩)⟩
+    · exact Or.inl ⟨i, hi⟩
+    · exact Or.inr ⟨j, hj⟩
+  · rintro (⟨i, hi⟩ | ⟨j, hj⟩)
+    · exact ⟨i, Or.inl hi⟩
+    · exact ⟨_, Or.inr ⟨j, rfl, hj⟩⟩
+
+@[simp]
+theorem coe_add {E F : Enumeration X} :
+    (E + F : Set X) = (E : Set X) ∪ F := by
+  ext x
+  exact mem_add_iff x
+
+@[simp]
+theorem add_empty (E : Enumeration X) :
+    E + .empty = E := by
+  ext i x
+  · rw [add_bound, empty, add_zero]
+  · simp only [empty, rel_add_iff, and_false, exists_const, or_false]
 
 -- TODO: Some stuff about the partial order on enumerations and concatenation of enumerations.
 

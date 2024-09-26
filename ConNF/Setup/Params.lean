@@ -96,7 +96,8 @@ def Params.inaccessible.{v} : Params where
     change type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop) ≤ _
     rw [type_lt, mk_out, univ_inaccessible.2.1.cof_eq]
 
-export Params (Λ κ μ aleph0_lt_κ κ_isRegular μ_isStrongLimit κ_lt_μ κ_le_μ_ord_cof Λ_type_le_μ_ord_cof)
+export Params (Λ κ μ aleph0_lt_κ κ_isRegular μ_isStrongLimit κ_lt_μ κ_le_μ_ord_cof
+  Λ_type_le_μ_ord_cof)
 
 variable [Params.{u}]
 
@@ -217,6 +218,54 @@ theorem κEquiv_lt (x y : κ) :
 theorem κEquiv_le (x y : κ) :
     x ≤ y ↔ κEquiv x ≤ κEquiv y :=
   Iff.rfl
+
+theorem κ_zero_le (x : κ) :
+    0 ≤ x := by
+  rw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_ofNat, Nat.cast_zero]
+  exact Ordinal.zero_le _
+
+instance : CovariantClass κ κ (· + ·) (· ≤ ·) := by
+  constructor
+  intro i j k h
+  rw [κEquiv_le] at h
+  rw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_add, κEquiv_add]
+  exact (add_le_add_iff_left _).mpr h
+
+instance : CovariantClass κ κ (· + ·) (· < ·) := by
+  constructor
+  intro i j k h
+  rw [κEquiv_lt] at h
+  rw [κEquiv_lt, ← Subtype.coe_lt_coe, κEquiv_add, κEquiv_add]
+  exact (add_lt_add_iff_left _).mpr h
+
+instance : CovariantClass κ κ (Function.swap (· + ·)) (· ≤ ·) := by
+  constructor
+  intro i j k h
+  rw [κEquiv_le, ← Subtype.coe_le_coe] at h
+  rw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_add, κEquiv_add]
+  exact add_le_add_right h _
+
+theorem κ_le_add (x y : κ) :
+    x ≤ x + y :=
+  (add_zero x).symm.trans_le (add_le_add le_rfl (κ_zero_le y))
+
+instance : IsLeftCancelAdd κ := by
+  constructor
+  intro x y z h
+  rw [← κEquiv.apply_eq_iff_eq, ← Subtype.coe_inj] at h ⊢
+  rw [κEquiv_add, κEquiv_add] at h
+  exact (Ordinal.add_left_cancel _).mp h
+
+theorem κ_typein (x : κ) :
+    -- TODO: Why can't Lean find this instance?
+    letI := inferInstanceAs (IsWellOrder κ (· < ·))
+    typein (· < ·) x = κEquiv x := by
+  have := κEquiv.ltWellOrder_typein x
+  rw [Ordinal.lift_id, typein_Iio, Ordinal.lift_inj] at this
+  exact this.symm
+
+theorem κ_card_Iio_eq (x : κ) : #{y | y < x} = (κEquiv x).1.card := by
+  rw [Set.coe_setOf, card_typein, κ_typein]
 
 -- TODO: Unify the following two lemmas with the corresponding ones in TypeIndex somehow.
 

@@ -32,9 +32,12 @@
 \begin{proposition}
   \uses{def:Strong}
   \label{prop:exists_strong}
+  \lean{ConNF.Support.strong_strong}
+  \leanok
   For every support \( S \), there is a strong support \( T \succeq S \).
 \end{proposition}
 \begin{proof}
+  \leanok
   We define a relation \( R \) on pairs \( (A, N) \) where \( A : \beta \tpath \bot \) and \( N \) is a near-litter by the following constructor.
   If \( I = (\gamma,\delta,\varepsilon,A) \) and \( t : \Tang_\delta \), then for any near-litter \( N_1 \) such that \( N_1^\circ = f_{\delta,\varepsilon}(t) \) and any path \( B : \delta \tpath \bot \) and near-litter \( N_2 \in \supp(t)_B^\NearLitter \), we define \( ((A_\delta)_B, N_2) \mathrel{R} ((A_\varepsilon)_\bot, N_1) \).
   This is well-founded, because if \( (B, N_2) \mathrel{R} (A, N_1) \) then \( \iota(N_2) < \iota(N_1) \).

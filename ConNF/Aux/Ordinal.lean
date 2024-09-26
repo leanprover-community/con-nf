@@ -2,7 +2,7 @@ import ConNF.Aux.WellOrder
 import Mathlib.SetTheory.Cardinal.Ordinal
 
 noncomputable section
-universe u
+universe u v
 
 open Cardinal
 
@@ -98,6 +98,65 @@ theorem type_Iic_lt {α : Type u} [LtWellOrder α] [NoMaxOrder α] (x : α) :
   exact h.right _ (type_Iio_lt x)
 
 /-!
+## Lifting ordinals
+-/
+
+@[simp]
+theorem typein_ordinal (o : Ordinal.{u}) :
+    -- TODO: Why can't Lean find this instance?
+    letI := inferInstanceAs (IsWellOrder Ordinal (· < ·))
+    typein (· < ·) o = lift.{u + 1} o := by
+  sorry -- Waiting on Zulip to see if someone's already done this.
+
+instance ULift.isTrichotomous {α : Type u} {r : α → α → Prop} [IsTrichotomous α r] :
+    IsTrichotomous (ULift.{v} α) (InvImage r ULift.down) := by
+  constructor
+  rintro ⟨a⟩ ⟨b⟩
+  simp only [ULift.up_inj, InvImage]
+  exact IsTrichotomous.trichotomous a b
+
+instance ULift.isTrans {α : Type u} {r : α → α → Prop} [IsTrans α r] :
+    IsTrans (ULift.{v} α) (InvImage r ULift.down) := by
+  constructor
+  rintro ⟨a⟩ ⟨b⟩ ⟨c⟩
+  simp only [InvImage]
+  exact IsTrans.trans a b c
+
+instance ULift.isWellOrder {α : Type u} {r : α → α → Prop} [IsWellOrder α r] :
+    IsWellOrder (ULift.{v} α) (InvImage r ULift.down) :=
+  ⟨⟩
+
+theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {s : β → β → Prop}
+    [IsWellOrder α r] [IsWellOrder β s]
+    (f : r ≼i s) (a : α) :
+    Ordinal.lift.{max u v, v} (Ordinal.typein s (f a)) =
+    Ordinal.lift.{max u v, u} (Ordinal.typein r a) := by
+  symm
+  apply Quotient.sound
+  constructor
+  refine RelIso.ofSurjective ⟨⟨λ x ↦ ⟨f x.down, ?_⟩, ?_⟩, ?_⟩ ?_
+  · simp only [Set.mem_setOf_eq, f.map_rel_iff]
+    exact x.down.prop
+  · intro x y h
+    apply ULift.down_injective
+    apply Subtype.coe_injective
+    simp only [ULift.up_inj, Subtype.mk.injEq,
+      EmbeddingLike.apply_eq_iff_eq] at h
+    exact h
+  · intro x y
+    simp only [Order.Preimage, Function.Embedding.coeFn_mk, subrel_val]
+    exact f.map_rel_iff
+  · intro x
+    obtain ⟨y, hy⟩ := f.init x.down.prop
+    refine ⟨ULift.up ⟨y, ?_⟩, ?_⟩
+    · have := x.down.prop
+      rwa [Set.mem_setOf_eq, ← hy, f.map_rel_iff] at this
+    · apply ULift.down_injective
+      apply Subtype.coe_injective
+      simp only [Set.mem_setOf_eq, Set.coe_setOf, RelEmbedding.coe_mk, Function.Embedding.coeFn_mk]
+      exact hy
+
+/-!
 ## The additive structure on the set of ordinals below a cardinal
 -/
 
@@ -115,6 +174,21 @@ theorem type_Iio (o : Ordinal.{u}) :
   rw [lift_id, type_lt] at this
   rw [this]
   exact ⟨o.enumIsoToType.toRelIsoLT⟩
+
+@[simp]
+theorem typein_Iio {o : Ordinal.{u}} (x : Set.Iio o) :
+    typein ((· < ·) : Set.Iio o → Set.Iio o → Prop) x = lift.{u + 1} x := by
+  have := lift_typein_apply
+      (r := ((· < ·) : Set.Iio o → Set.Iio o → Prop))
+      (s := ((· < ·) : Ordinal → Ordinal → Prop))
+      (f := ⟨⟨⟨Subtype.val, Subtype.val_injective⟩, ?_⟩, ?_⟩) x
+  · rw [lift_id, lift_id, typein_ordinal] at this
+    exact this.symm
+  · rfl
+  · simp only [RelEmbedding.coe_mk, Function.Embedding.coeFn_mk, Subtype.exists, Set.mem_Iio,
+      exists_prop', nonempty_prop, exists_eq_right, Subtype.forall]
+    intro a ha b hb
+    exact hb.trans ha
 
 variable {c : Cardinal.{u}} (h : ℵ₀ ≤ c)
 
