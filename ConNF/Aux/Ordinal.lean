@@ -106,7 +106,23 @@ theorem typein_ordinal (o : Ordinal.{u}) :
     -- TODO: Why can't Lean find this instance?
     letI := inferInstanceAs (IsWellOrder Ordinal (· < ·))
     typein (· < ·) o = lift.{u + 1} o := by
-  sorry -- Waiting on Zulip to see if someone's already done this.
+  letI := inferInstanceAs (IsWellOrder Ordinal (· < ·))
+  induction o using Ordinal.induction with
+  | h o ih =>
+    apply le_antisymm
+    · by_contra! h
+      have := ih (enum ((· < ·) : Ordinal → Ordinal → Prop)
+          ⟨lift.{u + 1} o, h.trans (typein_lt_type _ o)⟩) ?_
+      · simp only [typein_enum, lift_inj] at this
+        conv_rhs at h => rw [this]
+        simp only [typein_enum, lt_self_iff_false] at h
+      · conv_rhs => rw [← enum_typein (· < ·) o]
+        exact enum_lt_enum.mpr h
+    · by_contra! h
+      rw [Ordinal.lt_lift_iff] at h
+      obtain ⟨o', ho'₁, ho'₂⟩ := h
+      rw [← ih o' ho'₂, typein_inj] at ho'₁
+      exact ho'₂.ne ho'₁
 
 instance ULift.isTrichotomous {α : Type u} {r : α → α → Prop} [IsTrichotomous α r] :
     IsTrichotomous (ULift.{v} α) (InvImage r ULift.down) := by
