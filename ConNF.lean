@@ -1,10 +1,13 @@
 import ConNF.Aux.Cardinal
 import ConNF.Aux.Ordinal
 import ConNF.Aux.PermutativeExtension
+import ConNF.Aux.ReflTransGen
 import ConNF.Aux.Rel
 import ConNF.Aux.Set
 import ConNF.Aux.Transfer
 import ConNF.Aux.WellOrder
+import ConNF.Counting.CodingFunction
+import ConNF.Counting.Strong
 import ConNF.FOA.BaseAction
 import ConNF.FOA.BaseApprox
 import ConNF.FOA.Coherent
@@ -35,4 +38,3 @@ import ConNF.Setup.StrSet
 import ConNF.Setup.Support
 import ConNF.Setup.Tree
 import ConNF.Setup.TypeIndex
-import ConNF.Support.Strong
