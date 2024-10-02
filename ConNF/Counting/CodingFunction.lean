@@ -101,8 +101,7 @@ def Tangle.code (t : Tangle β) : CodingFunction β where
   rel S x := ∃ ρ : AllPerm β, ρᵁ • t.support = S ∧ ρ • t.set = x
   rel_coinjective := by
     constructor
-    intro x₁ x₂ S ⟨ρ₁, hρ₁, hρ₁'⟩ ⟨ρ₂, hρ₂, hρ₂'⟩
-    cases hρ₂; cases hρ₁'; cases hρ₂'
+    rintro x₁ x₂ S ⟨ρ₁, hρ₁, rfl⟩ ⟨ρ₂, rfl, rfl⟩
     exact t.support_supports.smul_eq_smul hρ₁
   rel_dom_nonempty := by
     refine ⟨t.support, t.set, 1, ?_⟩
