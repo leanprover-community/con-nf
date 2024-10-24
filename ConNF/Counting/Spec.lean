@@ -282,6 +282,14 @@ structure SameSpecLE (S T : Support β) : Prop where
   convNearLitters S T A N₁ N₂ → ∀ B : P.δ ↝ ⊥, ∀ N ∈ (t.support ⇘. B)ᴺ,
   ∀ i, (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel i N ↔ (T ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel i (ρᵁ B • N))
 
+theorem SameSpec.atoms_dom_of_dom {S T : Support β} (h : SameSpec S T) {A : β ↝ ⊥}
+    {i : κ} {a : Atom} (ha : (S ⇘. A)ᴬ.rel i a) :
+    ∃ b, (T ⇘. A)ᴬ.rel i b := sorry
+
+theorem SameSpec.nearLitters_dom_of_dom {S T : Support β} (h : SameSpec S T) {A : β ↝ ⊥}
+    {i : κ} {N₁ : NearLitter} (hN₁ : (S ⇘. A)ᴺ.rel i N₁) :
+    ∃ N₂, (T ⇘. A)ᴺ.rel i N₂ := sorry
+
 theorem SameSpec.inflexible_iff' {S T : Support β} (h : SameSpec S T) {A : β ↝ ⊥}
     {N₁ N₂ : NearLitter} (h' : convNearLitters S T A N₁ N₂) :
     Inflexible A N₁ᴸ ↔ Inflexible A N₂ᴸ := by
@@ -559,9 +567,7 @@ theorem atoms_subset_of_sameSpec (h : SameSpec S T) {A : β ↝ ⊥} {i : κ} {a
     {i | (T ⇘. A)ᴬ.rel i b} ⊆ {i | (S ⇘. A)ᴬ.rel i a} := by
   intro j hj
   rw [Set.mem_setOf_eq] at hj
-  have hdom := h.atoms_dom_eq A
-  rw [Set.ext_iff] at hdom
-  obtain ⟨c, hc⟩ := (hdom j).mpr ⟨b, hj⟩
+  obtain ⟨c, hc⟩ := (sameSpec_comm h).atoms_dom_of_dom hj
   cases (h.convAtoms_oneOne A).injective ⟨i, ha, hb⟩ ⟨j, hc, hj⟩
   exact hc
 
@@ -570,9 +576,7 @@ theorem nearLitters_subset_of_sameSpec (h : SameSpec S T) {A : β ↝ ⊥} {i : 
     {i | ∃ N, (T ⇘. A)ᴺ.rel i N ∧ b ∈ Nᴬ} ⊆ {i | ∃ N, (S ⇘. A)ᴺ.rel i N ∧ a ∈ Nᴬ} := by
   intro j hj
   obtain ⟨N, hN₁, hN₂⟩ := hj
-  have hdom := h.nearLitters_dom_eq A
-  rw [Set.ext_iff] at hdom
-  obtain ⟨N', hN'⟩ := (hdom j).mpr ⟨N, hN₁⟩
+  obtain ⟨N', hN'⟩ := (sameSpec_comm h).nearLitters_dom_of_dom hN₁
   refine ⟨N', hN', ?_⟩
   have := h.atomMemRel_eq A
   rw [atomMemRel, atomMemRel] at this
@@ -585,10 +589,30 @@ theorem nearLitters_subset_of_sameSpec (h : SameSpec S T) {A : β ↝ ⊥} {i : 
   cases (S ⇘. A)ᴬ.rel_coinjective.coinjective ha hc₂
   exact hc₁
 
+theorem nearLitterCondRelFlex_of_convNearLitters_aux (h : SameSpec S T) {A : β ↝ ⊥}
+    {N₁ N₂ : NearLitter} (hN : convNearLitters S T A N₁ N₂)
+    (hN₁i : ¬Inflexible A N₁ᴸ) (hN₂i : ¬Inflexible A N₂ᴸ) (i : κ) :
+    (∃ N₃, (S ⇘. A)ᴺ.rel i N₃ ∧ N₁ᴸ = N₃ᴸ) → ∃ N₃, (T ⇘. A)ᴺ.rel i N₃ ∧ N₂ᴸ = N₃ᴸ := by
+  rintro ⟨N₃, hN₃, hN₃'⟩
+  obtain ⟨N₄, hN₄⟩ := h.nearLitters_dom_of_dom hN₃
+  refine ⟨N₄, hN₄, ?_⟩
+  rw [← h.litter_eq_iff_of_flexible hN ⟨i, hN₃, hN₄⟩ hN₁i hN₂i]
+  · exact hN₃'
+  · rwa [← hN₃']
+  · apply (h.inflexible_iff' ⟨i, hN₃, hN₄⟩).mpr.mt
+    rwa [← hN₃']
+
 theorem nearLitterCondRelFlex_of_convNearLitters (h : SameSpec S T) {A : β ↝ ⊥}
     {N₁ N₂ : NearLitter} (hN : convNearLitters S T A N₁ N₂)
     (hN₁i : ¬Inflexible A N₁ᴸ) (hN₂i : ¬Inflexible A N₂ᴸ) :
-    nearLitterCondRelFlex T A N₂ (.flex ⟨{i | ∃ N₃, (S ⇘. A)ᴺ.rel i N₃ ∧ N₁ᴸ = N₃ᴸ}⟩) := sorry
+    nearLitterCondRelFlex T A N₂ (.flex ⟨{i | ∃ N₃, (S ⇘. A)ᴺ.rel i N₃ ∧ N₁ᴸ = N₃ᴸ}⟩) := by
+  use hN₂i
+  rw [NearLitterCond.flex.injEq, FlexCond.mk.injEq]
+  ext i
+  constructor
+  · exact nearLitterCondRelFlex_of_convNearLitters_aux h hN hN₁i hN₂i i
+  · refine nearLitterCondRelFlex_of_convNearLitters_aux (sameSpec_comm h) ?_ hN₂i hN₁i i
+    rwa [← convNearLitters_inv]
 
 theorem nearLitterCondRelInflex_of_convNearLitters (h : SameSpec S T) {A : β ↝ ⊥}
     {N₁ N₂ : NearLitter} (hN : convNearLitters S T A N₁ N₂)
@@ -605,9 +629,7 @@ theorem spec_le_spec_of_sameSpec (h : SameSpec S T) :
   simp only [spec_atoms, spec_nearLitters]
   refine ⟨h.atoms_bound_eq A, ?_, h.nearLitters_bound_eq A, ?_⟩
   · rintro i _ ⟨a, ha, rfl⟩
-    have hdom := h.atoms_dom_eq A
-    rw [Set.ext_iff] at hdom
-    obtain ⟨b, hb⟩ := (hdom i).mp ⟨a, ha⟩
+    obtain ⟨b, hb⟩ := h.atoms_dom_of_dom ha
     refine ⟨b, hb, ?_⟩
     rw [AtomCond.mk.injEq]
     constructor
@@ -618,9 +640,7 @@ theorem spec_le_spec_of_sameSpec (h : SameSpec S T) :
       exact nearLitters_subset_of_sameSpec h ha hb
       exact nearLitters_subset_of_sameSpec (sameSpec_comm h) hb ha
   · rintro i c ⟨N₁, hN₁, hN'⟩
-    have hdom := h.nearLitters_dom_eq A
-    rw [Set.ext_iff] at hdom
-    obtain ⟨N₂, hN₂⟩ := (hdom i).mp ⟨N₁, hN₁⟩
+    obtain ⟨N₂, hN₂⟩ := h.nearLitters_dom_of_dom hN₁
     obtain ⟨hN₁i, rfl⟩ | ⟨P, t, hA, ht, rfl⟩ := hN'
     · have hN₂i := (h.inflexible_iff' ⟨i, hN₁, hN₂⟩).mpr.mt hN₁i
       refine ⟨N₂, hN₂, Or.inl ?_⟩
