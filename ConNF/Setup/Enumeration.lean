@@ -40,6 +40,11 @@ theorem mem_iff (x : X) (E : Enumeration X) :
     x ∈ E ↔ x ∈ E.rel.codom :=
   Iff.rfl
 
+theorem mem_congr {E F : Enumeration X} (h : E = F) :
+    ∀ x, x ∈ E ↔ x ∈ F := by
+  intro x
+  rw [h]
+
 theorem dom_small (E : Enumeration X) :
     Small E.rel.dom :=
   (iio_small E.bound).mono E.lt_bound
@@ -179,6 +184,11 @@ def image (E : Enumeration X) (f : X → Y) : Enumeration Y where
     constructor
     rintro i _ _ ⟨x₁, hx₁, rfl⟩ ⟨x₂, hx₂, rfl⟩
     rw [E.rel_coinjective.coinjective hx₁ hx₂]
+
+@[simp]
+theorem image_bound {f : X → Y} :
+    (E.image f).bound = E.bound :=
+  rfl
 
 theorem image_rel {f : X → Y} (i : κ) (y : Y) :
     (E.image f).rel i y ↔ ∃ x, E.rel i x ∧ f x = y :=

@@ -87,13 +87,13 @@ theorem ext_aux {χ₁ χ₂ : CodingFunction β} {S : Support β} {x : TSet β}
   exact χ₂.smul_rel h₂ ρ
 
 theorem ext {χ₁ χ₂ : CodingFunction β} (S : Support β) (x : TSet β)
-    (h : χ₁.rel S x ∧ χ₂.rel S x) :
+    (h₁ : χ₁.rel S x) (h₂ : χ₂.rel S x) :
     χ₁ = χ₂ := by
   apply ext'
   intro _ _
   constructor
-  · apply ext_aux h.1 h.2
-  · apply ext_aux h.2 h.1
+  · apply ext_aux h₁ h₂
+  · apply ext_aux h₂ h₁
 
 end CodingFunction
 
@@ -121,5 +121,20 @@ theorem Tangle.code_rel_self (t : Tangle β) :
     t.code.rel t.support t.set := by
   use 1
   simp only [allPermForget_one, one_smul, and_self]
+
+theorem Tangle.code_eq_code_iff (t₁ t₂ : Tangle β) :
+    t₁.code = t₂.code ↔ ∃ ρ : AllPerm β, ρ • t₁ = t₂ := by
+  constructor
+  · intro h
+    have := t₂.code_rel_self
+    rw [← h] at this
+    obtain ⟨ρ, hρ₁, hρ₂⟩ := this
+    use ρ
+    exact Tangle.ext hρ₂ hρ₁
+  · rintro ⟨ρ, rfl⟩
+    symm
+    apply CodingFunction.ext _ _ (ρ • t₁).code_rel_self
+    use ρ
+    exact ⟨rfl, rfl⟩
 
 end ConNF
