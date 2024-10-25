@@ -247,6 +247,18 @@ theorem mem_smul {G X : Type _} [Group G] [MulAction G X]
     x ∈ π • E ↔ π⁻¹ • x ∈ E :=
   Iff.rfl
 
+@[simp]
+theorem smul_rel_dom {G X : Type _} [Group G] [MulAction G X]
+    (π : G) (E : Enumeration X) :
+    (π • E).rel.dom = E.rel.dom := by
+  ext i
+  constructor
+  · rintro ⟨x, h⟩
+    exact ⟨π⁻¹ • x, h⟩
+  · rintro ⟨x, h⟩
+    use π • x
+    rwa [smul_rel, inv_smul_smul]
+
 open scoped Pointwise in
 @[simp]
 theorem smul_rel_codom {G X : Type _} [Group G] [MulAction G X]
@@ -281,6 +293,14 @@ instance {G X : Type _} [Group G] [MulAction G X] :
 theorem mem_smul_iff {G X : Type _} [Group G] [MulAction G X] (x : X) (g : G) (E : Enumeration X) :
     x ∈ g • E ↔ g⁻¹ • x ∈ E :=
   Iff.rfl
+
+theorem eq_of_smul_eq {G X : Type _} [Group G] [MulAction G X] {g₁ g₂ : G} {E : Enumeration X}
+    (h : g₁ • E = g₂ • E) (x : X) (hx : x ∈ E) : g₁ • x = g₂ • x := by
+  obtain ⟨i, hi⟩ := hx
+  have : (g₁ • E).rel i (g₁ • x) := by rwa [smul_rel, inv_smul_smul]
+  rw [h] at this
+  have := E.rel_coinjective.coinjective hi this
+  exact (eq_inv_smul_iff.mp this).symm
 
 /-!
 ## Concatenation of enumerations
