@@ -137,4 +137,11 @@ theorem Tangle.code_eq_code_iff (t₁ t₂ : Tangle β) :
     use ρ
     exact ⟨rfl, rfl⟩
 
+@[simp]
+theorem Tangle.smul_code (t : Tangle β) (ρ : AllPerm β) :
+    (ρ • t).code = t.code := by
+  symm
+  rw [code_eq_code_iff]
+  use ρ
+
 end ConNF

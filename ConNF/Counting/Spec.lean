@@ -284,11 +284,17 @@ structure SameSpecLE (S T : Support β) : Prop where
 
 theorem SameSpec.atoms_dom_of_dom {S T : Support β} (h : SameSpec S T) {A : β ↝ ⊥}
     {i : κ} {a : Atom} (ha : (S ⇘. A)ᴬ.rel i a) :
-    ∃ b, (T ⇘. A)ᴬ.rel i b := sorry
+    ∃ b, (T ⇘. A)ᴬ.rel i b := by
+  have hdom := h.atoms_dom_eq A
+  rw [Set.ext_iff] at hdom
+  exact (hdom i).mp ⟨a, ha⟩
 
 theorem SameSpec.nearLitters_dom_of_dom {S T : Support β} (h : SameSpec S T) {A : β ↝ ⊥}
     {i : κ} {N₁ : NearLitter} (hN₁ : (S ⇘. A)ᴺ.rel i N₁) :
-    ∃ N₂, (T ⇘. A)ᴺ.rel i N₂ := sorry
+    ∃ N₂, (T ⇘. A)ᴺ.rel i N₂ := by
+  have hdom := h.nearLitters_dom_eq A
+  rw [Set.ext_iff] at hdom
+  exact (hdom i).mp ⟨N₁, hN₁⟩
 
 theorem SameSpec.inflexible_iff' {S T : Support β} (h : SameSpec S T) {A : β ↝ ⊥}
     {N₁ N₂ : NearLitter} (h' : convNearLitters S T A N₁ N₂) :
@@ -501,7 +507,7 @@ theorem atoms_iff_of_inflexible_of_spec_eq_spec (h : S.spec = T.spec) (A : β �
     rw [funext_iff]; intro
     rw [funext_iff]; intro
     rw [funext_iff]; intro
-    rw [← iff_eq_eq]
+    rw [eq_iff_iff]
   have := hBa B i j
   constructor
   · intro h'
@@ -535,7 +541,7 @@ theorem nearLitters_iff_of_inflexible_of_spec_eq_spec (h : S.spec = T.spec) (A :
     rw [funext_iff]; intro
     rw [funext_iff]; intro
     rw [funext_iff]; intro
-    rw [← iff_eq_eq]
+    rw [eq_iff_iff]
   have := hBN B i j
   constructor
   · intro h'
@@ -583,7 +589,7 @@ theorem nearLitters_subset_of_sameSpec (h : SameSpec S T) {A : β ↝ ⊥} {i : 
   conv at this =>
     rw [funext_iff]; intro
     rw [funext_iff]; intro
-    rw [← iff_eq_eq]
+    rw [eq_iff_iff]
   obtain ⟨N'', hN'', c, hc₁, hc₂⟩ := (this j i).mpr ⟨N, hN₁, b, hN₂, hb⟩
   cases (S ⇘. A)ᴺ.rel_coinjective.coinjective hN' hN''
   cases (S ⇘. A)ᴬ.rel_coinjective.coinjective ha hc₂
@@ -621,7 +627,38 @@ theorem nearLitterCondRelInflex_of_convNearLitters (h : SameSpec S T) {A : β �
     nearLitterCondRelInflex T A N₂
       (.inflex P ⟨t.code,
         λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel.comp (t.support ⇘. B)ᴬ.rel.inv,
-        λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel.comp (t.support ⇘. B)ᴺ.rel.inv⟩) := sorry
+        λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel.comp (t.support ⇘. B)ᴺ.rel.inv⟩) := by
+  refine ⟨P, ρ • t, hA, hN₂, ?_⟩
+  rw [NearLitterCond.inflex.injEq]
+  refine ⟨rfl, heq_of_eq ?_⟩
+  rw [InflexCond.mk.injEq]
+  refine ⟨(t.smul_code ρ).symm, ?_, ?_⟩
+  · funext B i j
+    rw [eq_iff_iff]
+    have := h.atoms_iff_of_inflexible A N₁ N₂ P t ρ hA hN₁ hN₂ hN B
+    constructor
+    · rintro ⟨a, ha₁, ha₂⟩
+      have := (this a ⟨j, ha₂⟩ i).mp ha₁
+      refine ⟨ρᵁ B • a, this, ?_⟩
+      rwa [Tangle.smul_support, smul_derivBot, BaseSupport.smul_atoms, Rel.inv_apply,
+        Enumeration.smul_rel, inv_smul_smul]
+    · rintro ⟨a, ha₁, ha₂⟩
+      have := (this ((ρᵁ B)⁻¹ • a) ⟨j, ha₂⟩ i).mpr ?_
+      · exact ⟨(ρᵁ B)⁻¹ • a, this, ha₂⟩
+      · rwa [smul_inv_smul]
+  · funext B i j
+    rw [eq_iff_iff]
+    have := h.nearLitters_iff_of_inflexible A N₁ N₂ P t ρ hA hN₁ hN₂ hN B
+    constructor
+    · rintro ⟨N', hN'₁, hN'₂⟩
+      have := (this N' ⟨j, hN'₂⟩ i).mp hN'₁
+      refine ⟨ρᵁ B • N', this, ?_⟩
+      rwa [Tangle.smul_support, smul_derivBot, BaseSupport.smul_nearLitters, Rel.inv_apply,
+        Enumeration.smul_rel, inv_smul_smul]
+    · rintro ⟨N', hN'₁, hN'₂⟩
+      have := (this ((ρᵁ B)⁻¹ • N') ⟨j, hN'₂⟩ i).mpr ?_
+      · exact ⟨(ρᵁ B)⁻¹ • N', this, hN'₂⟩
+      · rwa [smul_inv_smul]
 
 theorem spec_le_spec_of_sameSpec (h : SameSpec S T) :
     S.spec ≤ T.spec := by
