@@ -52,13 +52,9 @@ theorem litter_eq_litter_of_convNearLitters_of_spec_eq_spec (hST : S.spec = T.sp
     N₃ᴸ = N₄ᴸ := by
   rw [spec_eq_spec_iff] at hST
   obtain (⟨P, t, hA, ht⟩ | hN₁) := inflexible_cases A N₁ᴸ
-  · have := (hST.inflexible_iff hN₁₃ P t hA).mp ⟨1, ?_⟩
-    swap
-    · rwa [one_smul]
+  · have := (hST.inflexible_iff hN₁₃ P t hA).mp ⟨1, by rwa [one_smul]⟩
     obtain ⟨ρ₁, hρ₁⟩ := this
-    have := (hST.inflexible_iff hN₂₄ P t hA).mp ⟨1, ?_⟩
-    swap
-    · rwa [one_smul, ← hN₁₂]
+    have := (hST.inflexible_iff hN₂₄ P t hA).mp ⟨1, by rwa [one_smul, ← hN₁₂]⟩
     obtain ⟨ρ₂, hρ₂⟩ := this
     suffices ρ₁ • t = ρ₂ • t by
       rwa [this, ← hρ₂] at hρ₁
@@ -200,6 +196,98 @@ def convDeriv (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) (A : β �
 
 abbrev conv (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) : StrAction β :=
   convDeriv hST hS hT
+
+theorem conv_coherentAt (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong)
+    {A : β ↝ ⊥} {N₁ N₂ : NearLitter} (hN : convNearLitters S T A N₁ N₂) :
+    CoherentAt (conv hST hS hT) A N₁ᴸ N₂ᴸ := by
+  rw [spec_eq_spec_iff] at hST
+  constructor
+  case inflexible =>
+    intro P t hA ht
+    obtain ⟨ρ, hρ⟩ := (hST.inflexible_iff hN P t hA).mp ⟨1, by rwa [one_smul]⟩
+    refine ⟨ρ, ?_, hρ⟩
+    apply ext
+    intro B
+    apply BaseSupport.ext
+    · simp only [smul_derivBot, BaseSupport.smul_atoms]
+      apply Enumeration.ext
+      · rfl
+      ext i a
+      simp only [smul_support_derivBot, Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv,
+        Enumeration.smul_rel]
+      constructor
+      · rintro ⟨b, hat, j, hjS, hjT⟩
+        have := (hST.atoms_iff_of_inflexible A N₁ N₂ P t ρ hA ht hρ hN B b ⟨i, hat⟩ j).mp hjS
+        cases (T ⇘. _)ᴬ.rel_coinjective.coinjective hjT this
+        rwa [inv_smul_smul]
+      · intro ha
+        refine ⟨(ρᵁ B)⁻¹ • a, ha, ?_⟩
+        obtain ⟨j, hjS, hjT⟩ := hN
+        obtain ⟨k, hk⟩ := (hT.support_le ⟨j, hjT⟩ P (ρ • t) hA hρ B).1 a ⟨i, ha⟩
+        have := hST.atoms_iff_of_inflexible A N₁ N₂ P t ρ hA ht hρ ⟨j, hjS, hjT⟩
+          B ((ρᵁ B)⁻¹ • a) ⟨i, ha⟩ k
+        rw [smul_inv_smul] at this
+        exact ⟨k, this.mpr hk, hk⟩
+    · simp only [smul_derivBot, BaseSupport.smul_nearLitters]
+      apply Enumeration.ext
+      · rfl
+      ext i a
+      simp only [smul_support_derivBot, Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv,
+        Enumeration.smul_rel]
+      constructor
+      · rintro ⟨b, hat, j, hjS, hjT⟩
+        have := (hST.nearLitters_iff_of_inflexible A N₁ N₂ P t ρ hA ht hρ hN B b ⟨i, hat⟩ j).mp hjS
+        cases (T ⇘. _)ᴺ.rel_coinjective.coinjective hjT this
+        rwa [inv_smul_smul]
+      · intro ha
+        refine ⟨(ρᵁ B)⁻¹ • a, ha, ?_⟩
+        obtain ⟨j, hjS, hjT⟩ := hN
+        obtain ⟨k, hk⟩ := (hT.support_le ⟨j, hjT⟩ P (ρ • t) hA hρ B).2 a ⟨i, ha⟩
+        have := hST.nearLitters_iff_of_inflexible A N₁ N₂ P t ρ hA ht hρ ⟨j, hjS, hjT⟩
+          B ((ρᵁ B)⁻¹ • a) ⟨i, ha⟩ k
+        rw [smul_inv_smul] at this
+        exact ⟨k, this.mpr hk, hk⟩
+  case flexible =>
+    intro hN₁
+    rwa [← hST.inflexible_iff' hN]
+
+theorem conv_coherent (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) :
+    (conv hST hS hT).Coherent := by
+  rintro A L₁ L₂ ⟨i, hiS, hiT⟩
+  exact conv_coherentAt hST hS hT ⟨i, hiS, hiT⟩
+
+theorem exists_conv (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) :
+    ∃ ρ : AllPerm β, ρᵁ • S = T := by
+  obtain ⟨ρ, hρ⟩ := StrAction.freedomOfAction (conv hST hS hT) (conv_coherent hST hS hT)
+  rw [spec_eq_spec_iff] at hST
+  use ρ
+  apply ext
+  intro A
+  apply BaseSupport.ext
+  · apply Enumeration.ext
+    · exact hST.atoms_bound_eq A
+    ext i a
+    constructor
+    · intro ha
+      obtain ⟨b, hb⟩ := hST.atoms_dom_of_dom ha
+      cases (hρ A).1 ((ρᵁ A)⁻¹ • a) b ⟨i, ha, hb⟩
+      rwa [smul_inv_smul] at hb
+    · intro ha
+      obtain ⟨b, hb⟩ := (sameSpec_comm hST).atoms_dom_of_dom ha
+      cases (hρ A).1 b a ⟨i, hb, ha⟩
+      rwa [smul_derivBot, BaseSupport.smul_atoms, Enumeration.smul_rel, inv_smul_smul]
+  · apply Enumeration.ext
+    · exact hST.nearLitters_bound_eq A
+    ext i a
+    constructor
+    · intro ha
+      obtain ⟨b, hb⟩ := hST.nearLitters_dom_of_dom ha
+      cases (hρ A).2 ((ρᵁ A)⁻¹ • a) b ⟨i, ha, hb⟩
+      rwa [smul_inv_smul] at hb
+    · intro ha
+      obtain ⟨b, hb⟩ := (sameSpec_comm hST).nearLitters_dom_of_dom ha
+      cases (hρ A).2 b a ⟨i, hb, ha⟩
+      rwa [smul_derivBot, BaseSupport.smul_nearLitters, Enumeration.smul_rel, inv_smul_smul]
 
 end Support
 

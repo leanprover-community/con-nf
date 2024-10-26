@@ -136,9 +136,8 @@ instance {α : TypeIndex} [ModelData α] : MulAction (AllPerm α) (Tangle α) wh
 theorem Tangle.smul_eq {α : TypeIndex} [ModelData α] {ρ : AllPerm α} {t : Tangle α}
     (h : ρᵁ • t.support = t.support) :
     ρ • t = t := by
-  have := smul_eq_smul (ρ₁ := ρ) (ρ₂ := 1) (t := t) ?_
-  · rwa [one_smul] at this
-  · rwa [allPermForget_one, one_smul]
+  have := smul_eq_smul (ρ₁ := ρ) (ρ₂ := 1) (t := t) (by rwa [allPermForget_one, one_smul])
+  rwa [one_smul] at this
 
 theorem Tangle.smul_atom_eq_of_mem_support {α : TypeIndex} [ModelData α]
     {ρ₁ ρ₂ : AllPerm α} {t : Tangle α} (h : ρ₁ • t = ρ₂ • t)

@@ -313,17 +313,13 @@ theorem SameSpec.inflexible_iff' {S T : Support β} (h : SameSpec S T) {A : β �
     Inflexible A N₁ᴸ ↔ Inflexible A N₂ᴸ := by
   constructor
   · rintro ⟨P, t, hA, ht⟩
-    have := (h.inflexible_iff h' P t hA).mp ?_
-    · obtain ⟨ρ, hρ⟩ := this
-      exact ⟨P, ρ • t, hA, hρ⟩
-    · use 1
-      rwa [one_smul]
+    have := (h.inflexible_iff h' P t hA).mp ⟨1, by rwa [one_smul]⟩
+    obtain ⟨ρ, hρ⟩ := this
+    exact ⟨P, ρ • t, hA, hρ⟩
   · rintro ⟨P, t, hA, ht⟩
-    have := (h.inflexible_iff h' P t hA).mpr ?_
-    · obtain ⟨ρ, hρ⟩ := this
-      exact ⟨P, ρ • t, hA, hρ⟩
-    · use 1
-      rwa [one_smul]
+    have := (h.inflexible_iff h' P t hA).mpr ⟨1, by rwa [one_smul]⟩
+    obtain ⟨ρ, hρ⟩ := this
+    exact ⟨P, ρ • t, hA, hρ⟩
 
 theorem sameSpec_antisymm {S T : Support β} (h₁ : SameSpecLE S T) (h₂ : SameSpecLE T S) :
     SameSpec S T where
@@ -697,10 +693,7 @@ theorem spec_le_spec_of_sameSpec (h : SameSpec S T) :
     · have hN₂i := (h.inflexible_iff' ⟨i, hN₁, hN₂⟩).mpr.mt hN₁i
       refine ⟨N₂, hN₂, Or.inl ?_⟩
       exact nearLitterCondRelFlex_of_convNearLitters h ⟨i, hN₁, hN₂⟩ hN₁i hN₂i
-    · have hN₂i := (h.inflexible_iff ⟨i, hN₁, hN₂⟩ P t hA).mp ?_
-      swap
-      · use 1
-        rwa [one_smul]
+    · have hN₂i := (h.inflexible_iff ⟨i, hN₁, hN₂⟩ P t hA).mp ⟨1, by rwa [one_smul]⟩
       obtain ⟨ρ, hρ⟩ := hN₂i
       refine ⟨N₂, hN₂, Or.inr ?_⟩
       exact nearLitterCondRelInflex_of_convNearLitters h ⟨i, hN₁, hN₂⟩ P t ρ hA ht hρ
