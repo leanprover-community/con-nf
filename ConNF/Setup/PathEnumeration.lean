@@ -154,6 +154,16 @@ theorem smul_eq_of_forall_smul_eq {X : Type _} {α : TypeIndex} [MulAction BaseP
       rw [← this]
       rwa [smulPath_rel, inv_smul_smul]
 
+theorem smul_eq_smul_of_forall_smul_eq {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
+    {π₁ π₂ : StrPerm α} {E : Enumeration (α ↝ ⊥ × X)}
+    (h : ∀ A : α ↝ ⊥, ∀ x : X, (A, x) ∈ E → π₁ A • x = π₂ A • x) :
+    π₁ • E = π₂ • E := by
+  have := smul_eq_of_forall_smul_eq (π := π₂⁻¹ * π₁) (E := E) ?_
+  · rwa [mul_smul, inv_smul_eq_iff] at this
+  intro A x hAx
+  rw [Tree.mul_apply, mul_smul, Tree.inv_apply, inv_smul_eq_iff]
+  exact h A x hAx
+
 theorem smul_eq_of_mem_of_smul_eq {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
     {π : StrPerm α} {E : Enumeration (α ↝ ⊥ × X)}
     (h : π • E = E) (A : α ↝ ⊥) (x : X) (hx : (A, x) ∈ E) :

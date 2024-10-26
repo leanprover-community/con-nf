@@ -225,6 +225,18 @@ theorem convNearLitters_inv (S T : Support β) (A : β ↝ ⊥) :
   simp only [Rel.inv, flip, convNearLitters, Rel.comp]
   tauto
 
+omit [Level] [CoherentData] [LeLevel β] in
+theorem convAtoms_dom_subset (S T : Support β) (A : β ↝ ⊥) :
+    (convAtoms S T A).dom ⊆ (S ⇘. A)ᴬ := by
+  rintro a ⟨b, i, ha, -⟩
+  exact ⟨i, ha⟩
+
+omit [Level] [CoherentData] [LeLevel β] in
+theorem convNearLitters_dom_subset (S T : Support β) (A : β ↝ ⊥) :
+    (convNearLitters S T A).dom ⊆ (S ⇘. A)ᴺ := by
+  rintro N ⟨N', i, hN, -⟩
+  exact ⟨i, hN⟩
+
 def atomMemRel (S : Support β) (A : β ↝ ⊥) : Rel κ κ :=
   (S ⇘. A)ᴺ.rel.comp (Rel.comp (λ N a ↦ a ∈ Nᴬ) (S ⇘. A)ᴬ.rel.inv)
 

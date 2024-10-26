@@ -9,6 +9,7 @@ import ConNF.Aux.WellOrder
 import ConNF.Counting.CodingFunction
 import ConNF.Counting.SmulSpec
 import ConNF.Counting.Spec
+import ConNF.Counting.SpecSame
 import ConNF.Counting.Strong
 import ConNF.FOA.BaseAction
 import ConNF.FOA.BaseApprox
