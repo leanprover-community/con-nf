@@ -180,7 +180,7 @@ def preStrong (S : Support β) : Support β :=
 
 theorem le_preStrong (S : Support β) :
     S ≤ S.preStrong :=
-  le_add.trans le_add
+  le_add_right.trans le_add_right
 
 theorem preStrong_atoms (S : Support β) (A : β ↝ ⊥) :
     (S.preStrong ⇘. A)ᴬ = (S ⇘. A)ᴬ + ((S + S.constrainsNearLitters).constrainsAtoms ⇘. A)ᴬ := by
@@ -243,7 +243,7 @@ def strong (S : Support β) : Support β :=
 
 theorem preStrong_le_strong (S : Support β) :
     S.preStrong ≤ S.strong :=
-  le_add
+  le_add_right
 
 theorem le_strong (S : Support β) :
     S ≤ S.strong :=
