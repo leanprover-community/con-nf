@@ -186,4 +186,34 @@ theorem exists_swap {S : BaseSupport} (h : S.Closed) {a₁ a₂ : Atom}
   · exact Enumeration.eq_of_smul_eq hρa
   · exact Enumeration.eq_of_smul_eq hρN
 
+open scoped Pointwise
+
+theorem mem_iff_mem_of_supports {S : BaseSupport} (h : S.Closed) {s : Set Atom}
+    (hs : ∀ π : BasePerm, π • S = S → π • s = s)
+    {a₁ a₂ : Atom} (h₁ : a₁ ∉ Sᴬ) (h₂ : a₂ ∉ Sᴬ) (ha : ∀ N ∈ Sᴺ, a₁ ∈ Nᴬ ↔ a₂ ∈ Nᴬ) :
+    a₁ ∈ s ↔ a₂ ∈ s := by
+  obtain ⟨π, hπ, rfl⟩ := exists_swap h h₁ h₂ ha
+  specialize hs π hπ
+  constructor
+  · intro h
+    rw [← hs]
+    exact Set.smul_mem_smul_set h
+  · intro h
+    rw [← hs] at h
+    exact Set.smul_mem_smul_set_iff.mp h
+
+structure Information : Type u where
+  atoms : Set κ
+  nearLitters : Set κ
+  outside : Prop
+
+def information (S : BaseSupport) (s : Set Atom) : Information where
+  atoms := {i | ∃ a ∈ s, Sᴬ.rel i a}
+  nearLitters := {i | ∃ N : NearLitter, ((Nᴬ ∩ s) \ Sᴬ).Nonempty ∧ Sᴺ.rel i N}
+  outside := ∀ a, a ∉ Sᴬ → (∀ N ∈ Sᴺ, a ∉ Nᴬ) → a ∈ s
+
+theorem subset_of_information_eq {S : BaseSupport} (hS : S.Closed) {s t : Set Atom}
+    (hs : ∀ π : BasePerm, π • S = S → π • s = s) (ht : ∀ π : BasePerm, π • S = S → π • t = t)
+    (h : information S s = information S t) : s ⊆ t := sorry
+
 end ConNF
