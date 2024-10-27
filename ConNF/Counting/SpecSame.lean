@@ -105,7 +105,7 @@ theorem interference_subset_convAtoms_dom (hST : S.spec = T.spec) (hS : S.Strong
   intro a ha
   obtain ⟨N₃, i, hiS, hiT⟩ := hN₁
   obtain ⟨N₄, j, hjS, hjT⟩ := hN₂
-  obtain ⟨k, hkS⟩ := hS.interference_subset ⟨i, hiS⟩ ⟨j, hjS⟩ a ha
+  obtain ⟨k, hkS⟩ := (hS.closed _).interference_subset ⟨i, hiS⟩ ⟨j, hjS⟩ a ha
   rw [spec_eq_spec_iff] at hST
   obtain ⟨a', hkT⟩ := hST.atoms_dom_of_dom hkS
   exact ⟨a', k, hkS, hkT⟩
@@ -117,7 +117,7 @@ theorem interference_subset_convAtoms_codom (hST : S.spec = T.spec) (hT : T.Stro
   intro a ha
   obtain ⟨N₃, i, hiS, hiT⟩ := hN₁
   obtain ⟨N₄, j, hjS, hjT⟩ := hN₂
-  obtain ⟨k, hkT⟩ := hT.interference_subset ⟨i, hiT⟩ ⟨j, hjT⟩ a ha
+  obtain ⟨k, hkT⟩ := (hT.closed _).interference_subset ⟨i, hiT⟩ ⟨j, hjT⟩ a ha
   rw [spec_eq_spec_iff] at hST
   obtain ⟨a', hkS⟩ := (sameSpec_comm hST).atoms_dom_of_dom hkT
   exact ⟨a', k, hkS, hkT⟩

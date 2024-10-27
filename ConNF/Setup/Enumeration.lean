@@ -294,13 +294,28 @@ theorem mem_smul_iff {G X : Type _} [Group G] [MulAction G X] (x : X) (g : G) (E
     x ∈ g • E ↔ g⁻¹ • x ∈ E :=
   Iff.rfl
 
-theorem eq_of_smul_eq {G X : Type _} [Group G] [MulAction G X] {g₁ g₂ : G} {E : Enumeration X}
+theorem eq_of_smul_eq_smul {G X : Type _} [Group G] [MulAction G X] {g₁ g₂ : G} {E : Enumeration X}
     (h : g₁ • E = g₂ • E) (x : X) (hx : x ∈ E) : g₁ • x = g₂ • x := by
   obtain ⟨i, hi⟩ := hx
   have : (g₁ • E).rel i (g₁ • x) := by rwa [smul_rel, inv_smul_smul]
   rw [h] at this
   have := E.rel_coinjective.coinjective hi this
   exact (eq_inv_smul_iff.mp this).symm
+
+theorem eq_of_smul_eq {G X : Type _} [Group G] [MulAction G X] {g : G} {E : Enumeration X}
+    (h : g • E = E) (x : X) (hx : x ∈ E) : g • x = x := by
+  have := eq_of_smul_eq_smul (g₁ := g) (g₂ := 1) ?_ x hx
+  · rwa [one_smul] at this
+  · rwa [one_smul]
+
+@[simp]
+theorem smul_singleton {G X : Type _} [Group G] [MulAction G X] {g : G} {x : X} :
+    g • singleton x = singleton (g • x) := by
+  apply Enumeration.ext
+  · rfl
+  · ext i y
+    rw [smul_rel]
+    simp only [singleton, and_congr_right_iff, inv_smul_eq_iff]
 
 /-!
 ## Concatenation of enumerations
@@ -366,6 +381,61 @@ theorem add_empty (E : Enumeration X) :
   ext i x
   · rw [add_bound, empty, add_zero]
   · simp only [empty, rel_add_iff, and_false, exists_const, or_false]
+
+theorem add_inj_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bound)
+    (h' : E + G = F + H) : E = F ∧ G = H := by
+  have := congr_arg (·.rel) h'
+  conv at this => dsimp only; rw [funext_iff]; intro; rw [funext_iff]; intro; rw [eq_iff_iff]
+  constructor
+  · apply Enumeration.ext h
+    ext i x
+    constructor
+    · intro hx
+      obtain (hx' | ⟨j, rfl, _⟩) := (this i x).mp (Or.inl hx)
+      · exact hx'
+      · have := E.lt_bound _ ⟨x, hx⟩
+        rw [h, add_lt_iff_neg_left] at this
+        cases (κ_zero_le j).not_lt this
+    · intro hx
+      obtain (hx' | ⟨j, rfl, _⟩) := (this i x).mpr (Or.inl hx)
+      · exact hx'
+      · have := F.lt_bound _ ⟨x, hx⟩
+        rw [h, add_lt_iff_neg_left] at this
+        cases (κ_zero_le j).not_lt this
+  · apply Enumeration.ext
+    · have := congr_arg (·.bound) h'
+      simp only [add_bound, h, add_right_inj] at this
+      exact this
+    ext i x
+    constructor
+    · intro hx
+      obtain (hx' | ⟨j, hj₁, hj₂⟩) := (this (E.bound + i) x).mp (Or.inr ⟨i, rfl, hx⟩)
+      · have := F.lt_bound _ ⟨x, hx'⟩
+        rw [h, add_lt_iff_neg_left] at this
+        cases (κ_zero_le i).not_lt this
+      · simp only [h, Rel.inv_apply, Function.graph_def, add_right_inj] at hj₁
+        rw [← hj₁]
+        exact hj₂
+    · intro hx
+      obtain (hx' | ⟨j, hj₁, hj₂⟩) := (this (F.bound + i) x).mpr (Or.inr ⟨i, rfl, hx⟩)
+      · have := E.lt_bound _ ⟨x, hx'⟩
+        rw [h, add_lt_iff_neg_left] at this
+        cases (κ_zero_le i).not_lt this
+      · simp only [h, Rel.inv_apply, Function.graph_def, add_right_inj] at hj₁
+        rw [← hj₁]
+        exact hj₂
+
+theorem add_inj_iff_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bound) :
+    E + G = F + H ↔ E = F ∧ G = H := by
+  constructor
+  · exact add_inj_of_bound_eq_bound h
+  · rintro ⟨rfl, rfl⟩
+    rfl
+
+@[simp]
+theorem smul_add {G X : Type _} [Group G] [MulAction G X] (g : G) (E F : Enumeration X) :
+    g • (E + F) = g • E + g • F :=
+  rfl
 
 -- TODO: Some stuff about the partial order on enumerations and concatenation of enumerations.
 

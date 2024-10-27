@@ -6,6 +6,7 @@ import ConNF.Aux.Rel
 import ConNF.Aux.Set
 import ConNF.Aux.Transfer
 import ConNF.Aux.WellOrder
+import ConNF.Counting.BaseCoding
 import ConNF.Counting.CodingFunction
 import ConNF.Counting.Recode
 import ConNF.Counting.SmulSpec

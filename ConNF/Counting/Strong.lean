@@ -21,6 +21,10 @@ namespace ConNF
 
 variable [Params.{u}] {β : TypeIndex}
 
+structure BaseSupport.Closed (S : BaseSupport) : Prop where
+  interference_subset {N₁ N₂ : NearLitter} :
+    N₁ ∈ Sᴺ → N₂ ∈ Sᴺ → ∀ a ∈ interference N₁ N₂, a ∈ Sᴬ
+
 namespace Support
 
 variable [Level] [CoherentData] [LeLevel β]
@@ -31,9 +35,10 @@ structure PreStrong (S : Support β) : Prop where
     (hA : A = P.A ↘ P.hε ↘.) (ht : Nᴸ = fuzz P.hδε t) :
     t.support ≤ S ⇘ (P.A ↘ P.hδ)
 
-structure Strong (S : Support β) extends S.PreStrong : Prop where
-  interference_subset {A : β ↝ ⊥} {N₁ N₂ : NearLitter} :
-    N₁ ∈ (S ⇘. A)ᴺ → N₂ ∈ (S ⇘. A)ᴺ → ∀ a ∈ interference N₁ N₂, a ∈ (S ⇘. A)ᴬ
+structure Closed (S : Support β) : Prop where
+  closed : ∀ A, (S ⇘. A).Closed
+
+structure Strong (S : Support β) extends S.PreStrong, S.Closed : Prop
 
 theorem PreStrong.smul {S : Support β} (hS : S.PreStrong) (ρ : AllPerm β) : (ρᵁ • S).PreStrong := by
   constructor
@@ -51,15 +56,19 @@ theorem PreStrong.smul {S : Support β} (hS : S.PreStrong) (ρ : AllPerm β) : (
       BasePerm.smul_nearLitter_litter, ← Tree.inv_apply, hA, ht]
     rfl
 
-theorem Strong.smul {S : Support β} (hS : S.Strong) (ρ : AllPerm β) : (ρᵁ • S).Strong := by
+theorem Closed.smul {S : Support β} (hS : S.Closed) (ρ : AllPerm β) : (ρᵁ • S).Closed := by
   constructor
-  · exact hS.toPreStrong.smul ρ
-  · intro A N₁ N₂ h₁ h₂
-    simp only [smul_derivBot, BaseSupport.smul_nearLitters, BaseSupport.smul_atoms,
-      Enumeration.mem_smul] at h₁ h₂ ⊢
-    intro a ha
-    apply hS.interference_subset h₁ h₂
-    rwa [← BasePerm.smul_interference, Set.smul_mem_smul_set_iff]
+  intro A
+  constructor
+  intro N₁ N₂ h₁ h₂
+  simp only [smul_derivBot, BaseSupport.smul_nearLitters, BaseSupport.smul_atoms,
+    Enumeration.mem_smul] at h₁ h₂ ⊢
+  intro a ha
+  apply (hS.closed A).interference_subset h₁ h₂
+  rwa [← BasePerm.smul_interference, Set.smul_mem_smul_set_iff]
+
+theorem Strong.smul {S : Support β} (hS : S.Strong) (ρ : AllPerm β) : (ρᵁ • S).Strong :=
+  ⟨hS.toPreStrong.smul ρ, hS.toClosed.smul ρ⟩
 
 def Constrains : Rel (β ↝ ⊥ × NearLitter) (β ↝ ⊥ × NearLitter) :=
   λ x y ↦ ∃ (P : InflexiblePath β) (t : Tangle P.δ) (B : P.δ ↝ ⊥),
@@ -238,39 +247,53 @@ theorem interferenceSupport_nearLitters (S : Support β) (A : β ↝ ⊥) :
     (S.interferenceSupport ⇘. A)ᴺ = .empty :=
   rfl
 
+def close (S : Support β) : Support β :=
+  S + S.interferenceSupport
+
+theorem le_close (S : Support β) :
+    S ≤ S.close :=
+  le_add_right
+
+theorem close_atoms (S : Support β) (A : β ↝ ⊥) :
+    (S.close ⇘. A)ᴬ = (S ⇘. A)ᴬ + (S.interferenceSupport ⇘. A)ᴬ :=
+  rfl
+
+theorem close_nearLitters (S : Support β) (A : β ↝ ⊥) :
+    (S.close ⇘. A)ᴺ = (S ⇘. A)ᴺ := by
+  rw [close, add_derivBot, BaseSupport.add_nearLitters, interferenceSupport_nearLitters,
+    Enumeration.add_empty]
+
+theorem close_closed (S : Support β) :
+    S.close.Closed := by
+  constructor
+  intro A
+  constructor
+  intro N₁ N₂ hN₁ hN₂ a ha
+  rw [close_nearLitters] at hN₁ hN₂
+  rw [close_atoms, Enumeration.mem_add_iff, mem_interferenceSupport_atoms]
+  exact Or.inr ⟨N₁, hN₁, N₂, hN₂, ha⟩
+
 def strong (S : Support β) : Support β :=
-  S.preStrong + S.preStrong.interferenceSupport
+  S.preStrong.close
 
 theorem preStrong_le_strong (S : Support β) :
     S.preStrong ≤ S.strong :=
-  le_add_right
+  S.preStrong.le_close
 
 theorem le_strong (S : Support β) :
     S ≤ S.strong :=
   S.le_preStrong.trans S.preStrong_le_strong
-
-theorem strong_atoms (S : Support β) (A : β ↝ ⊥) :
-    (S.strong ⇘. A)ᴬ = (S.preStrong ⇘. A)ᴬ + (S.preStrong.interferenceSupport ⇘. A)ᴬ :=
-  rfl
-
-theorem strong_nearLitters (S : Support β) (A : β ↝ ⊥) :
-    (S.strong ⇘. A)ᴺ = (S.preStrong ⇘. A)ᴺ := by
-  rw [strong, add_derivBot, BaseSupport.add_nearLitters, interferenceSupport_nearLitters,
-    Enumeration.add_empty]
 
 theorem strong_strong (S : Support β) :
     S.strong.Strong := by
   constructor
   · constructor
     intro A N hN P t hA ht
-    rw [strong_nearLitters] at hN
+    rw [strong, close_nearLitters] at hN
     apply (S.preStrong_preStrong.support_le hN P t hA ht).trans
     intro B
     exact S.preStrong_le_strong (P.A ↘ P.hδ ⇘ B)
-  · intro A N₁ N₂ hN₁ hN₂ a ha
-    rw [strong_nearLitters] at hN₁ hN₂
-    rw [strong_atoms, Enumeration.mem_add_iff, mem_interferenceSupport_atoms]
-    exact Or.inr ⟨N₁, hN₁, N₂, hN₂, ha⟩
+  · exact close_closed _
 
 end Support
 end ConNF

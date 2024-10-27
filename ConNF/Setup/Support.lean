@@ -130,6 +130,12 @@ theorem smul_eq_smul_iff (π₁ π₂ : BasePerm) (S : BaseSupport) :
         rw [smul_inv_smul, smul_eq_iff_eq_inv_smul] at this
         rwa [← this]
 
+theorem smul_eq_iff (π : BasePerm) (S : BaseSupport) :
+    π • S = S ↔ (∀ a ∈ Sᴬ, π • a = a) ∧ (∀ N ∈ Sᴺ, π • N = N) := by
+  have := smul_eq_smul_iff π 1 S
+  simp only [one_smul] at this
+  exact this
+
 noncomputable instance : Add BaseSupport where
   add S T := ⟨Sᴬ + Tᴬ, Sᴺ + Tᴺ⟩
 

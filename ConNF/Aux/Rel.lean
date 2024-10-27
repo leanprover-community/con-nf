@@ -80,6 +80,7 @@ theorem codomEqDom_iff' (r : Rel α α) :
 theorem OneOne.inv {r : Rel α β} (h : r.OneOne) : r.inv.OneOne :=
   ⟨⟨h.coinjective⟩, ⟨h.injective⟩⟩
 
+@[simp]
 theorem inv_apply {r : Rel α β} {x : α} {y : β} :
     r.inv y x ↔ r x y :=
   Iff.rfl

@@ -175,13 +175,13 @@ theorem Tangle.smul_atom_eq_of_mem_support {α : TypeIndex} [ModelData α]
     {ρ₁ ρ₂ : AllPerm α} {t : Tangle α} (h : ρ₁ • t = ρ₂ • t)
     {a : Atom} {A : α ↝ ⊥} (ha : a ∈ (t.support ⇘. A)ᴬ) :
     ρ₁ᵁ A • a = ρ₂ᵁ A • a :=
-  Enumeration.eq_of_smul_eq (congr_arg (λ t ↦ (t.support ⇘. A)ᴬ) h) a ha
+  Enumeration.eq_of_smul_eq_smul (congr_arg (λ t ↦ (t.support ⇘. A)ᴬ) h) a ha
 
 theorem Tangle.smul_nearLitter_eq_of_mem_support {α : TypeIndex} [ModelData α]
     {ρ₁ ρ₂ : AllPerm α} {t : Tangle α} (h : ρ₁ • t = ρ₂ • t)
     {N : NearLitter} {A : α ↝ ⊥} (hN : N ∈ (t.support ⇘. A)ᴺ) :
     ρ₁ᵁ A • N = ρ₂ᵁ A • N :=
-  Enumeration.eq_of_smul_eq (congr_arg (λ t ↦ (t.support ⇘. A)ᴺ) h) N hN
+  Enumeration.eq_of_smul_eq_smul (congr_arg (λ t ↦ (t.support ⇘. A)ᴺ) h) N hN
 
 /-!
 ## Criteria for supports
