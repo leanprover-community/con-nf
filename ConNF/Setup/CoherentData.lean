@@ -41,6 +41,8 @@ class PreCoherentData extends LtData where
   allPermSderiv {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (h : γ < β) : AllPerm β → AllPerm γ
   singleton {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (h : γ < β) : TSet γ → TSet β
 
+export PreCoherentData (singleton)
+
 instance [PreCoherentData] {β γ : TypeIndex} [LeLevel β] [LeLevel γ] :
     Derivative (AllPerm β) (AllPerm γ) β γ where
   deriv ρ A := A.recSderiv
@@ -81,6 +83,8 @@ class CoherentData extends PreCoherentData where
       (hδ : δ < γ) (hε : (ε : TypeIndex) < γ) (hδε : δ ≠ ε) (t : Tangle δ),
       (ρs hε)ᵁ ↘. • fuzz hδε t = fuzz hδε (ρs hδ • t)) :
     ∃ ρ : AllPerm γ, ∀ δ : TypeIndex, [LtLevel δ] → ∀ hδ : δ < γ, ρ ↘ hδ = ρs hδ
+  tSet_ext {β γ : Λ} [LeLevel β] [LeLevel γ] (hγ : (γ : TypeIndex) < β) (x y : TSet β)
+      (h : ∀ z : TSet γ, z ∈[hγ] x ↔ z ∈[hγ] y) : x = y
   typedMem_tSetForget {β : Λ} {γ : TypeIndex} [LeLevel β] [LeLevel γ]
     (hγ : γ < β) (x : TSet β) (y : StrSet γ) :
     y ∈[hγ] xᵁ → ∃ z : TSet γ, y = zᵁ
@@ -88,7 +92,7 @@ class CoherentData extends PreCoherentData where
     y ∈[hγ] singleton hγ x ↔ y = x
 
 export CoherentData (allPermSderiv_forget pos_atom_lt_pos pos_nearLitter_lt_pos smul_fuzz
-  allPerm_of_basePerm allPerm_of_smulFuzz typedMem_tSetForget typedMem_singleton_iff)
+  allPerm_of_basePerm allPerm_of_smulFuzz tSet_ext typedMem_tSetForget typedMem_singleton_iff)
 
 attribute [simp] allPermSderiv_forget typedMem_singleton_iff
 
@@ -105,5 +109,18 @@ theorem allPermDeriv_forget [CoherentData] {β γ : TypeIndex} [LeLevel β] [iγ
     intro
     have : LeLevel δ := ⟨A.le.trans LeLevel.elim⟩
     rw [allPerm_deriv_sderiv, allPermSderiv_forget, ih, Tree.deriv_sderiv]
+
+theorem allPerm_inv_sderiv [CoherentData] {β γ : TypeIndex} [LeLevel β] [iγ : LeLevel γ]
+    (h : γ < β) (ρ : AllPerm β) :
+    ρ⁻¹ ↘ h = (ρ ↘ h)⁻¹ := by
+  apply allPermForget_injective
+  rw [allPermSderiv_forget, allPermForget_inv, Tree.inv_sderiv, allPermForget_inv,
+    allPermSderiv_forget]
+
+theorem TSet.mem_smul_iff [CoherentData] {β γ : TypeIndex} [LeLevel β] [iγ : LeLevel γ]
+    {x : TSet γ} {y : TSet β} (h : γ < β) (ρ : AllPerm β) :
+    x ∈[h] ρ • y ↔ ρ⁻¹ ↘ h • x ∈[h] y := by
+  simp only [← forget_mem_forget, smul_forget, StrSet.mem_smul_iff, allPermSderiv_forget,
+    allPermForget_inv, Tree.inv_sderiv]
 
 end ConNF

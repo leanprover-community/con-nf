@@ -43,18 +43,37 @@ structure Support.Supports {X : Type _} {α : TypeIndex} [PreModelData α] [MulA
   supports (ρ : AllPerm α) : ρᵁ • S = S → ρ • x = x
   nearLitters_eq_empty_of_bot : α = ⊥ → Sᴺ = .empty
 
+theorem Support.Supports.mono {X : Type _} {α : TypeIndex} [PreModelData α]
+    [MulAction (AllPerm α) X] {S T : Support α} {x : X}
+    (hS : S.Supports x) (h : S ≤ T) (hT : α = ⊥ → Tᴺ = .empty) :
+    T.Supports x := by
+  constructor
+  · intro ρ hρ
+    apply hS.supports
+    rw [Support.smul_eq_iff] at hρ ⊢
+    intro A
+    constructor
+    · intro a ha
+      exact (hρ A).1 a ((h A).1 a ha)
+    · intro N hN
+      exact (hρ A).2 N ((h A).2 N hN)
+  · exact hT
+
 class ModelData (α : TypeIndex) extends PreModelData α where
-  tSetForget_injective : Function.Injective tSetForget
-  allPermForget_injective : Function.Injective allPermForget
+  allPermForget_injective' : Function.Injective allPermForget
   allPermForget_one : (1 : AllPerm)ᵁ = 1
   allPermForget_mul (ρ₁ ρ₂ : AllPerm) : (ρ₁ * ρ₂)ᵁ = ρ₁ᵁ * ρ₂ᵁ
   smul_forget (ρ : AllPerm) (x : TSet) : (ρ • x)ᵁ = ρᵁ • xᵁ
   exists_support (x : TSet) : ∃ S : Support α, S.Supports x
 
-export ModelData (tSetForget_injective allPermForget_injective allPermForget_one allPermForget_mul
+export ModelData (allPermForget_injective' allPermForget_one allPermForget_mul
   smul_forget exists_support)
 
 attribute [simp] allPermForget_one allPermForget_mul smul_forget
+
+theorem allPermForget_injective {α : TypeIndex} [ModelData α] {ρ₁ ρ₂ : AllPerm α}
+    (h : ρ₁ᵁ = ρ₂ᵁ) : ρ₁ = ρ₂ :=
+  allPermForget_injective' h
 
 @[simp]
 theorem allPermForget_inv {α : TypeIndex} [ModelData α] (ρ : AllPerm α) : ρ⁻¹ᵁ = ρᵁ⁻¹ := by
@@ -97,6 +116,11 @@ theorem Support.Supports.smul {X : Type _} {α : TypeIndex}
 
 instance {β α : TypeIndex} [ModelData β] [ModelData α] : TypedMem (TSet β) (TSet α) β α where
   typedMem h y x := yᵁ ∈[h] xᵁ
+
+theorem TSet.forget_mem_forget {β α : TypeIndex} [ModelData β] [ModelData α] (h : β < α)
+    {x : TSet β} {y : TSet α} :
+    xᵁ ∈[h] yᵁ ↔ x ∈[h] y :=
+  Iff.rfl
 
 @[ext]
 structure Tangle (α : TypeIndex) [ModelData α] where
@@ -194,8 +218,7 @@ def botPreModelData : PreModelData ⊥ where
   allPermForget ρ _ := ρ
 
 def botModelData : ModelData ⊥ where
-  tSetForget_injective := StrSet.botEquiv.symm.injective
-  allPermForget_injective _ _ h := congr_fun h Path.nil
+  allPermForget_injective' _ _ h := congr_fun h Path.nil
   allPermForget_one := rfl
   allPermForget_mul _ _ := rfl
   smul_forget ρ x := by

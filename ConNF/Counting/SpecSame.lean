@@ -10,8 +10,8 @@ an allowable permutation.
 
 ## Main declarations
 
-* `ConNF.exists_allPerm_of_spec_eq_spec`: Two strong supports with the same specification are
-  related by an allowable permutation.
+* `ConNF.exists_conv`: Two strong supports with the same specification are related by an allowable
+  permutation.
 -/
 
 noncomputable section
@@ -59,71 +59,31 @@ theorem litter_eq_litter_of_convNearLitters_of_spec_eq_spec (hST : S.spec = T.sp
     suffices ρ₁ • t = ρ₂ • t by
       rwa [this, ← hρ₂] at hρ₁
     apply Tangle.smul_eq_smul
-    apply ext
+    rw [smul_eq_smul_iff]
     intro B
-    apply BaseSupport.ext
-    · simp only [smul_derivBot, BaseSupport.smul_atoms]
-      apply Enumeration.ext
-      · rfl
-      ext i a
-      constructor
-      · intro ha
-        have h₁ := hST.atoms_iff_of_inflexible A N₁ N₃ P t ρ₁ hA ht hρ₁ hN₁₃ B
-          ((ρ₁ᵁ B)⁻¹ • a) ⟨i, ha⟩
-        have h₂ := hST.atoms_iff_of_inflexible A N₂ N₄ P t ρ₂ hA (hN₁₂ ▸ ht) hρ₂ hN₂₄ B
-          ((ρ₁ᵁ B)⁻¹ • a) ⟨i, ha⟩
-        have ⟨j, _, hjT⟩ := hN₁₃
-        obtain ⟨k, hk⟩ := (hT.support_le ⟨j, hjT⟩ P (ρ₁ • t) hA hρ₁ B).1 a ⟨i, ha⟩
-        simp_rw [smul_inv_smul] at h₁
-        have := (T ⇘. _)ᴬ.rel_coinjective.coinjective hk ((h₂ k).mp ((h₁ k).mpr hk))
-        rw [← inv_smul_eq_iff] at this
-        dsimp only at this
-        simp only [Enumeration.smul_rel] at ha ⊢
-        rwa [this]
-      · intro ha
-        have h₁ := hST.atoms_iff_of_inflexible A N₁ N₃ P t ρ₁ hA ht hρ₁ hN₁₃ B
-          ((ρ₂ᵁ B)⁻¹ • a) ⟨i, ha⟩
-        have h₂ := hST.atoms_iff_of_inflexible A N₂ N₄ P t ρ₂ hA (hN₁₂ ▸ ht) hρ₂ hN₂₄ B
-          ((ρ₂ᵁ B)⁻¹ • a) ⟨i, ha⟩
-        have ⟨j, _, hjT⟩ := hN₂₄
-        obtain ⟨k, hk⟩ := (hT.support_le ⟨j, hjT⟩ P (ρ₂ • t) hA hρ₂ B).1 a ⟨i, ha⟩
-        simp_rw [smul_inv_smul] at h₂
-        have := (T ⇘. _)ᴬ.rel_coinjective.coinjective hk ((h₁ k).mp ((h₂ k).mpr hk))
-        rw [← inv_smul_eq_iff] at this
-        dsimp only at this
-        simp only [Enumeration.smul_rel] at ha ⊢
-        rwa [this]
-    · simp only [smul_derivBot, BaseSupport.smul_nearLitters]
-      apply Enumeration.ext
-      · rfl
-      ext i N
-      constructor
-      · intro hN
-        have h₁ := hST.nearLitters_iff_of_inflexible A N₁ N₃ P t ρ₁ hA ht hρ₁ hN₁₃ B
-          ((ρ₁ᵁ B)⁻¹ • N) ⟨i, hN⟩
-        have h₂ := hST.nearLitters_iff_of_inflexible A N₂ N₄ P t ρ₂ hA (hN₁₂ ▸ ht) hρ₂ hN₂₄ B
-          ((ρ₁ᵁ B)⁻¹ • N) ⟨i, hN⟩
-        have ⟨j, _, hjT⟩ := hN₁₃
-        obtain ⟨k, hk⟩ := (hT.support_le ⟨j, hjT⟩ P (ρ₁ • t) hA hρ₁ B).2 N ⟨i, hN⟩
-        simp_rw [smul_inv_smul] at h₁
-        have := (T ⇘. _)ᴺ.rel_coinjective.coinjective hk ((h₂ k).mp ((h₁ k).mpr hk))
-        rw [← inv_smul_eq_iff] at this
-        dsimp only at this
-        simp only [Enumeration.smul_rel] at hN ⊢
-        rwa [this]
-      · intro hN
-        have h₁ := hST.nearLitters_iff_of_inflexible A N₁ N₃ P t ρ₁ hA ht hρ₁ hN₁₃ B
-          ((ρ₂ᵁ B)⁻¹ • N) ⟨i, hN⟩
-        have h₂ := hST.nearLitters_iff_of_inflexible A N₂ N₄ P t ρ₂ hA (hN₁₂ ▸ ht) hρ₂ hN₂₄ B
-          ((ρ₂ᵁ B)⁻¹ • N) ⟨i, hN⟩
-        have ⟨j, _, hjT⟩ := hN₂₄
-        obtain ⟨k, hk⟩ := (hT.support_le ⟨j, hjT⟩ P (ρ₂ • t) hA hρ₂ B).2 N ⟨i, hN⟩
-        simp_rw [smul_inv_smul] at h₂
-        have := (T ⇘. _)ᴺ.rel_coinjective.coinjective hk ((h₁ k).mp ((h₂ k).mpr hk))
-        rw [← inv_smul_eq_iff] at this
-        dsimp only at this
-        simp only [Enumeration.smul_rel] at hN ⊢
-        rwa [this]
+    constructor
+    · rintro a ⟨i, ha⟩
+      have h₁ := hST.atoms_iff_of_inflexible A N₁ N₃ P t ρ₁ hA ht hρ₁ hN₁₃ B a ⟨i, ha⟩
+      have h₂ := hST.atoms_iff_of_inflexible A N₂ N₄ P t ρ₂ hA (hN₁₂ ▸ ht) hρ₂ hN₂₄ B a ⟨i, ha⟩
+      have ⟨j, _, hjT⟩ := hN₁₃
+      have := (hT.support_le ⟨j, hjT⟩ P (ρ₁ • t) hA hρ₁ B).1 (ρ₁ᵁ B • a) ⟨i, ?_⟩
+      swap
+      · rwa [Tangle.smul_support, smul_derivBot, BaseSupport.smul_atoms, Enumeration.smul_rel,
+          inv_smul_smul]
+      obtain ⟨k, hk⟩ := this
+      exact (T ⇘. _)ᴬ.rel_coinjective.coinjective hk ((h₂ k).mp ((h₁ k).mpr hk))
+    · rintro N ⟨i, hN⟩
+      have h₁ := hST.nearLitters_iff_of_inflexible A N₁ N₃ P t ρ₁
+        hA ht hρ₁ hN₁₃ B N ⟨i, hN⟩
+      have h₂ := hST.nearLitters_iff_of_inflexible A N₂ N₄ P t ρ₂
+        hA (hN₁₂ ▸ ht) hρ₂ hN₂₄ B N ⟨i, hN⟩
+      have ⟨j, _, hjT⟩ := hN₁₃
+      have := (hT.support_le ⟨j, hjT⟩ P (ρ₁ • t) hA hρ₁ B).2 (ρ₁ᵁ B • N) ⟨i, ?_⟩
+      swap
+      · rwa [Tangle.smul_support, smul_derivBot, BaseSupport.smul_nearLitters, Enumeration.smul_rel,
+          inv_smul_smul]
+      obtain ⟨k, hk⟩ := this
+      exact (T ⇘. _)ᴺ.rel_coinjective.coinjective hk ((h₂ k).mp ((h₁ k).mpr hk))
   · have hN₂ : ¬Inflexible A N₂ᴸ := hN₁₂ ▸ hN₁
     have hN₃ := (hST.inflexible_iff' hN₁₃).mpr.mt hN₁
     have hN₄ := (hST.inflexible_iff' hN₂₄).mpr.mt hN₂
@@ -206,47 +166,31 @@ theorem conv_coherentAt (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong)
     intro P t hA ht
     obtain ⟨ρ, hρ⟩ := (hST.inflexible_iff hN P t hA).mp ⟨1, by rwa [one_smul]⟩
     refine ⟨ρ, ?_, hρ⟩
-    apply ext
+    rw [smul_support_eq_smul_iff]
     intro B
-    apply BaseSupport.ext
-    · simp only [smul_derivBot, BaseSupport.smul_atoms]
-      apply Enumeration.ext
-      · rfl
-      ext i a
-      simp only [smul_support_derivBot, Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv,
-        Enumeration.smul_rel]
-      constructor
-      · rintro ⟨b, hat, j, hjS, hjT⟩
-        have := (hST.atoms_iff_of_inflexible A N₁ N₂ P t ρ hA ht hρ hN B b ⟨i, hat⟩ j).mp hjS
-        cases (T ⇘. _)ᴬ.rel_coinjective.coinjective hjT this
-        rwa [inv_smul_smul]
-      · intro ha
-        refine ⟨(ρᵁ B)⁻¹ • a, ha, ?_⟩
-        obtain ⟨j, hjS, hjT⟩ := hN
-        obtain ⟨k, hk⟩ := (hT.support_le ⟨j, hjT⟩ P (ρ • t) hA hρ B).1 a ⟨i, ha⟩
-        have := hST.atoms_iff_of_inflexible A N₁ N₂ P t ρ hA ht hρ ⟨j, hjS, hjT⟩
-          B ((ρᵁ B)⁻¹ • a) ⟨i, ha⟩ k
-        rw [smul_inv_smul] at this
-        exact ⟨k, this.mpr hk, hk⟩
-    · simp only [smul_derivBot, BaseSupport.smul_nearLitters]
-      apply Enumeration.ext
-      · rfl
-      ext i a
-      simp only [smul_support_derivBot, Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv,
-        Enumeration.smul_rel]
-      constructor
-      · rintro ⟨b, hat, j, hjS, hjT⟩
-        have := (hST.nearLitters_iff_of_inflexible A N₁ N₂ P t ρ hA ht hρ hN B b ⟨i, hat⟩ j).mp hjS
-        cases (T ⇘. _)ᴺ.rel_coinjective.coinjective hjT this
-        rwa [inv_smul_smul]
-      · intro ha
-        refine ⟨(ρᵁ B)⁻¹ • a, ha, ?_⟩
-        obtain ⟨j, hjS, hjT⟩ := hN
-        obtain ⟨k, hk⟩ := (hT.support_le ⟨j, hjT⟩ P (ρ • t) hA hρ B).2 a ⟨i, ha⟩
-        have := hST.nearLitters_iff_of_inflexible A N₁ N₂ P t ρ hA ht hρ ⟨j, hjS, hjT⟩
-          B ((ρᵁ B)⁻¹ • a) ⟨i, ha⟩ k
-        rw [smul_inv_smul] at this
-        exact ⟨k, this.mpr hk, hk⟩
+    constructor
+    · rintro a ⟨i, hi⟩
+      obtain ⟨j, hjS, hjT⟩ := hN
+      have := (hT.support_le ⟨j, hjT⟩ P (ρ • t) hA hρ B).1 (ρᵁ B • a) ⟨i, ?_⟩
+      swap
+      · rwa [Tangle.smul_support, smul_derivBot, BaseSupport.smul_atoms,
+          Enumeration.smul_rel, inv_smul_smul]
+      obtain ⟨k, hk⟩ := this
+      simp only [Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv]
+      have := (hST.atoms_iff_of_inflexible A N₁ N₂ P t ρ hA ht hρ
+          ⟨j, hjS, hjT⟩ B a ⟨i, hi⟩ k).mpr hk
+      exact ⟨k, this, hk⟩
+    · rintro N ⟨i, hi⟩
+      obtain ⟨j, hjS, hjT⟩ := hN
+      have := (hT.support_le ⟨j, hjT⟩ P (ρ • t) hA hρ B).2 (ρᵁ B • N) ⟨i, ?_⟩
+      swap
+      · rwa [Tangle.smul_support, smul_derivBot, BaseSupport.smul_nearLitters,
+          Enumeration.smul_rel, inv_smul_smul]
+      obtain ⟨k, hk⟩ := this
+      simp only [Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv]
+      have := (hST.nearLitters_iff_of_inflexible A N₁ N₂ P t ρ hA ht hρ
+          ⟨j, hjS, hjT⟩ B N ⟨i, hi⟩ k).mpr hk
+      exact ⟨k, this, hk⟩
   case flexible =>
     intro hN₁
     rwa [← hST.inflexible_iff' hN]

@@ -7,10 +7,12 @@ import ConNF.Aux.Set
 import ConNF.Aux.Transfer
 import ConNF.Aux.WellOrder
 import ConNF.Counting.CodingFunction
+import ConNF.Counting.Recode
 import ConNF.Counting.SmulSpec
 import ConNF.Counting.Spec
 import ConNF.Counting.SpecSame
 import ConNF.Counting.Strong
+import ConNF.Counting.Twist
 import ConNF.FOA.BaseAction
 import ConNF.FOA.BaseApprox
 import ConNF.FOA.Coherent

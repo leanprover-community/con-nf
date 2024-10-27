@@ -268,13 +268,11 @@ theorem smul_nearLitters {α : TypeIndex} (π : StrPerm α) (S : Support α) :
     (π • S)ᴺ = π • Sᴺ :=
   rfl
 
-@[simp]
 theorem smul_atoms_eq_of_smul_eq {α : TypeIndex} {π : StrPerm α} {S : Support α}
     (h : π • S = S) :
     π • Sᴬ = Sᴬ := by
   rw [← smul_atoms, h]
 
-@[simp]
 theorem smul_nearLitters_eq_of_smul_eq {α : TypeIndex} {π : StrPerm α} {S : Support α}
     (h : π • S = S) :
     π • Sᴺ = Sᴺ := by
@@ -294,6 +292,26 @@ instance {α : TypeIndex} : MulAction (StrPerm α) (Support α) where
 theorem smul_derivBot {α : TypeIndex} (π : StrPerm α) (S : Support α) (A : α ↝ ⊥) :
     (π • S) ⇘. A = π A • (S ⇘. A) :=
   rfl
+
+theorem smul_eq_smul_iff (π₁ π₂ : StrPerm β) (S : Support β) :
+    π₁ • S = π₂ • S ↔
+      ∀ A, (∀ a ∈ (S ⇘. A)ᴬ, π₁ A • a = π₂ A • a) ∧ (∀ N ∈ (S ⇘. A)ᴺ, π₁ A • N = π₂ A • N) := by
+  constructor
+  · intro h A
+    have := congr_arg (· ⇘. A) h
+    simp only [smul_derivBot, BaseSupport.smul_eq_smul_iff] at this
+    exact this
+  · intro h
+    apply ext
+    intro A
+    simp only [smul_derivBot, BaseSupport.smul_eq_smul_iff]
+    exact h A
+
+theorem smul_eq_iff (π : StrPerm β) (S : Support β) :
+    π • S = S ↔ ∀ A, (∀ a ∈ (S ⇘. A)ᴬ, π A • a = a) ∧ (∀ N ∈ (S ⇘. A)ᴺ, π A • N = N) := by
+  have := smul_eq_smul_iff π 1 S
+  simp only [one_smul, Tree.one_apply] at this
+  exact this
 
 noncomputable instance : Add (Support α) where
   add S T := ⟨Sᴬ + Tᴬ, Sᴺ + Tᴺ⟩
@@ -319,5 +337,53 @@ theorem card_support {α : TypeIndex} : #(Support α) = #μ := by
       mul_eq_right aleph0_lt_μ.le (card_path_lt' α ⊥).le (card_path_ne_zero α)]
   · rw [mk_prod, lift_id, lift_id, card_atom,
       mul_eq_right aleph0_lt_μ.le (card_path_lt' α ⊥).le (card_path_ne_zero α)]
+
+instance : LE BaseSupport where
+  le S T := (∀ a ∈ Sᴬ, a ∈ Tᴬ) ∧ (∀ N ∈ Sᴺ, N ∈ Tᴺ)
+
+instance : Preorder BaseSupport where
+  le_refl S := ⟨λ _ ↦ id, λ _ ↦ id⟩
+  le_trans S T U h₁ h₂ := ⟨λ a h ↦ h₂.1 _ (h₁.1 a h), λ N h ↦ h₂.2 _ (h₁.2 N h)⟩
+
+theorem BaseSupport.smul_le_smul {S T : BaseSupport} (h : S ≤ T) (π : BasePerm) :
+    π • S ≤ π • T := by
+  constructor
+  · intro a
+    exact h.1 (π⁻¹ • a)
+  · intro N
+    exact h.2 (π⁻¹ • N)
+
+instance {α : TypeIndex} : LE (Support α) where
+  le S T := ∀ A, S ⇘. A ≤ T ⇘. A
+
+instance {α : TypeIndex} : Preorder (Support α) where
+  le_refl S := λ A ↦ le_rfl
+  le_trans S T U h₁ h₂ := λ A ↦ (h₁ A).trans (h₂ A)
+
+theorem Support.smul_le_smul {α : TypeIndex} {S T : Support α} (h : S ≤ T) (π : StrPerm α) :
+    π • S ≤ π • T :=
+  λ A ↦ BaseSupport.smul_le_smul (h A) (π A)
+
+theorem le_add_right {α : TypeIndex} {S T : Support α} :
+    S ≤ S + T := by
+  intro A
+  constructor
+  · intro a ha
+    simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.mem_add_iff]
+    exact Or.inl ha
+  · intro N hN
+    simp only [Support.add_derivBot, BaseSupport.add_nearLitters, Enumeration.mem_add_iff]
+    exact Or.inl hN
+
+theorem le_add_left {α : TypeIndex} {S T : Support α} :
+    S ≤ T + S := by
+  intro A
+  constructor
+  · intro a ha
+    simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.mem_add_iff]
+    exact Or.inr ha
+  · intro N hN
+    simp only [Support.add_derivBot, BaseSupport.add_nearLitters, Enumeration.mem_add_iff]
+    exact Or.inr hN
 
 end ConNF

@@ -92,6 +92,33 @@ theorem strPerm_smul_coe {α : Λ} (π : StrPerm α) (x : StrSet α) :
   rw [strPerm_smul_coe_def', Equiv.apply_symm_apply]
   rfl
 
+theorem one_strPerm_smul {α : TypeIndex} (x : StrSet α) : strPerm_smul 1 x = x := by
+  induction α using WellFoundedLT.induction
+  case a α ih =>
+    cases α using WithBot.recBotCoe
+    case bot => rw [strPerm_smul_bot_def, Tree.one_apply, one_smul, Equiv.symm_apply_apply]
+    case coe α =>
+      rw [strPerm_smul_coe_def, coe_ext_iff']
+      intro β hβ y
+      simp only [Tree.one_sderiv, Equiv.apply_symm_apply, ih β hβ, Set.image_id']
+
+theorem mul_strPerm_smul {α : TypeIndex} (π₁ π₂ : StrPerm α) (x : StrSet α) :
+    strPerm_smul (π₁ * π₂) x = strPerm_smul π₁ (strPerm_smul π₂ x) := by
+  induction α using WellFoundedLT.induction
+  case a α ih =>
+    cases α using WithBot.recBotCoe
+    case bot =>
+      simp only [strPerm_smul_bot_def, Tree.mul_apply, mul_smul, Equiv.apply_symm_apply]
+    case coe α =>
+      simp only [strPerm_smul_coe_def, coe_ext_iff']
+      intro β hβ y
+      simp only [Tree.mul_sderiv, Equiv.apply_symm_apply, Set.mem_image, exists_exists_and_eq_and,
+        ih β hβ]
+
+instance {α : TypeIndex} : MulAction (StrPerm α) (StrSet α) where
+  one_smul := one_strPerm_smul
+  mul_smul := mul_strPerm_smul
+
 end StrSet
 
 /-!
@@ -109,10 +136,21 @@ instance {β α : TypeIndex} : TypedMem (StrSet β) (StrSet α) β α where
     | ⊥ => (not_lt_bot h).elim
     | (α : Λ) => x ∈ StrSet.coeEquiv y β h
 
+theorem StrSet.mem_iff {α : Λ} {β : TypeIndex} {x : StrSet β} {y : StrSet α} (h : β < α) :
+    x ∈[h] y ↔ x ∈ coeEquiv y β h :=
+  Iff.rfl
+
 /-- Extensionality for structural sets at proper type indices. If two structural sets have the same
 extensions at every lower type index, then they are the same. -/
 theorem StrSet.coe_ext_iff {α : Λ} {x y : StrSet α} :
     x = y ↔ ∀ β : TypeIndex, ∀ hβ : β < α, ∀ z : StrSet β, z ∈[hβ] x ↔ z ∈[hβ] y :=
   StrSet.coe_ext_iff'
+
+theorem StrSet.mem_smul_iff {α β : TypeIndex} {x : StrSet β} {y : StrSet α}
+    (h : β < α) (π : StrPerm α) :
+    x ∈[h] π • y ↔ (π ↘ h)⁻¹ • x ∈[h] y := by
+  cases α using WithBot.recBotCoe
+  case bot => cases not_lt_bot h
+  case coe α => rw [mem_iff, mem_iff, strPerm_smul_coe, Set.mem_smul_set_iff_inv_smul_mem]
 
 end ConNF

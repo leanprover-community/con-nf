@@ -21,43 +21,6 @@ namespace ConNF
 
 variable [Params.{u}] {β : TypeIndex}
 
-instance : LE BaseSupport where
-  le S T := (∀ a ∈ Sᴬ, a ∈ Tᴬ) ∧ (∀ N ∈ Sᴺ, N ∈ Tᴺ)
-
-instance : Preorder BaseSupport where
-  le_refl S := ⟨λ _ ↦ id, λ _ ↦ id⟩
-  le_trans S T U h₁ h₂ := ⟨λ a h ↦ h₂.1 _ (h₁.1 a h), λ N h ↦ h₂.2 _ (h₁.2 N h)⟩
-
-theorem BaseSupport.smul_le_smul {S T : BaseSupport} (h : S ≤ T) (π : BasePerm) :
-    π • S ≤ π • T := by
-  constructor
-  · intro a
-    exact h.1 (π⁻¹ • a)
-  · intro N
-    exact h.2 (π⁻¹ • N)
-
-instance : LE (Support β) where
-  le S T := ∀ A, S ⇘. A ≤ T ⇘. A
-
-instance : Preorder (Support β) where
-  le_refl S := λ A ↦ le_rfl
-  le_trans S T U h₁ h₂ := λ A ↦ (h₁ A).trans (h₂ A)
-
-theorem Support.smul_le_smul {S T : Support β} (h : S ≤ T) (π : StrPerm β) :
-    π • S ≤ π • T :=
-  λ A ↦ BaseSupport.smul_le_smul (h A) (π A)
-
-theorem le_add {S T : Support β} :
-    S ≤ S + T := by
-  intro A
-  constructor
-  · intro a ha
-    simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.mem_add_iff]
-    exact Or.inl ha
-  · intro N hN
-    simp only [Support.add_derivBot, BaseSupport.add_nearLitters, Enumeration.mem_add_iff]
-    exact Or.inl hN
-
 namespace Support
 
 variable [Level] [CoherentData] [LeLevel β]
