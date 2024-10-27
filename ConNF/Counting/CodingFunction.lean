@@ -99,6 +99,16 @@ theorem ext {χ₁ χ₂ : CodingFunction β} (S : Support β) (x : TSet β)
   · apply ext_aux h₁ h₂
   · apply ext_aux h₂ h₁
 
+theorem exists_allPerm_of_rel {χ : CodingFunction β} {S T : Support β} {x y : TSet β}
+    (h₁ : χ.rel S x) (h₂ : χ.rel T y) :
+    ∃ ρ : AllPerm β, ρᵁ • S = T ∧ ρ • x = y := by
+  have := χ.orbit_eq_of_mem_dom ⟨x, h₁⟩ ⟨y, h₂⟩
+  rw [Support.orbit_eq_iff] at this
+  obtain ⟨ρ, hρ⟩ := this
+  refine ⟨ρ, hρ, ?_⟩
+  have := χ.smul_rel h₁ ρ
+  exact χ.rel_coinjective.coinjective this (hρ ▸ h₂)
+
 end CodingFunction
 
 def Tangle.code (t : Tangle β) : CodingFunction β where

@@ -338,6 +338,10 @@ theorem card_support {α : TypeIndex} : #(Support α) = #μ := by
   · rw [mk_prod, lift_id, lift_id, card_atom,
       mul_eq_right aleph0_lt_μ.le (card_path_lt' α ⊥).le (card_path_ne_zero α)]
 
+/-!
+## Orders on supports
+-/
+
 instance : LE BaseSupport where
   le S T := (∀ a ∈ Sᴬ, a ∈ Tᴬ) ∧ (∀ N ∈ Sᴺ, N ∈ Tᴺ)
 
@@ -352,6 +356,17 @@ theorem BaseSupport.smul_le_smul {S T : BaseSupport} (h : S ≤ T) (π : BasePer
     exact h.1 (π⁻¹ • a)
   · intro N
     exact h.2 (π⁻¹ • N)
+
+def BaseSupport.Subsupport (S T : BaseSupport) : Prop :=
+  Sᴬ.rel ≤ Tᴬ.rel ∧ Sᴺ.rel ≤ Tᴺ.rel
+
+theorem BaseSupport.smul_subsupport_smul {S T : BaseSupport} (h : S.Subsupport T) (π : BasePerm) :
+    (π • S).Subsupport (π • T) := by
+  constructor
+  · intro i a ha
+    exact h.1 i _ ha
+  · intro i N hN
+    exact h.2 i _ hN
 
 instance {α : TypeIndex} : LE (Support α) where
   le S T := ∀ A, S ⇘. A ≤ T ⇘. A
@@ -385,5 +400,43 @@ theorem le_add_left {α : TypeIndex} {S T : Support α} :
   · intro N hN
     simp only [Support.add_derivBot, BaseSupport.add_nearLitters, Enumeration.mem_add_iff]
     exact Or.inr hN
+
+def Support.Subsupport {α : TypeIndex} (S T : Support α) : Prop :=
+  ∀ A, (S ⇘. A).Subsupport (T ⇘. A)
+
+theorem Support.smul_subsupport_smul {α : TypeIndex} {S T : Support α}
+    (h : S.Subsupport T) (π : StrPerm α) :
+    (π • S).Subsupport (π • T) :=
+  λ A ↦ BaseSupport.smul_subsupport_smul (h A) (π A)
+
+theorem subsupport_add {α : TypeIndex} {S T : Support α} :
+    S.Subsupport (S + T) := by
+  intro A
+  constructor
+  · intro i a ha
+    simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.rel_add_iff]
+    exact Or.inl ha
+  · intro i N hN
+    simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.rel_add_iff]
+    exact Or.inl hN
+
+theorem smul_eq_of_subsupport {α : TypeIndex} {S T : Support α} {π : StrPerm α}
+    (h₁ : S.Subsupport T) (h₂ : S.Subsupport (π • T)) :
+    π • S = S := by
+  rw [Support.smul_eq_iff]
+  intro A
+  constructor
+  · rintro a ⟨i, hi⟩
+    have hi₁ := (h₁ A).1 i a hi
+    have hi₂ := (h₂ A).1 i a hi
+    have := (T ⇘. A)ᴬ.rel_coinjective.coinjective hi₁ hi₂
+    dsimp only at this
+    rwa [smul_eq_iff_eq_inv_smul]
+  · rintro N ⟨i, hi⟩
+    have hi₁ := (h₁ A).2 i N hi
+    have hi₂ := (h₂ A).2 i N hi
+    have := (T ⇘. A)ᴺ.rel_coinjective.coinjective hi₁ hi₂
+    dsimp only at this
+    rwa [smul_eq_iff_eq_inv_smul]
 
 end ConNF

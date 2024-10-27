@@ -101,6 +101,14 @@ theorem Support.Supports.smul_eq_smul {X : Type _} {α : TypeIndex}
   · rwa [mul_smul, inv_smul_eq_iff] at this
   · rwa [allPermForget_mul, mul_smul, allPermForget_inv, inv_smul_eq_iff]
 
+theorem Support.Supports.smul_eq_of_smul_eq {X : Type _} {α : TypeIndex}
+    [ModelData α] [MulAction (AllPerm α) X]
+    {S : Support α} {x : X} (h : S.Supports x) {ρ : AllPerm α} (hρ : ρᵁ • S = S) :
+    ρ • x = x := by
+  have := smul_eq_smul (ρ₁ := ρ) (ρ₂ := 1) h ?_
+  · rwa [one_smul] at this
+  · rwa [allPermForget_one, one_smul]
+
 theorem Support.Supports.smul {X : Type _} {α : TypeIndex}
     [ModelData α] [MulAction (AllPerm α) X]
     {S : Support α} {x : X} (h : S.Supports x) (ρ : AllPerm α) :
