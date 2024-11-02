@@ -7,6 +7,7 @@ import ConNF.Aux.Set
 import ConNF.Aux.Transfer
 import ConNF.Aux.WellOrder
 import ConNF.Counting.BaseCoding
+import ConNF.Counting.BaseCounting
 import ConNF.Counting.CodingFunction
 import ConNF.Counting.CountSupportOrbit
 import ConNF.Counting.Recode

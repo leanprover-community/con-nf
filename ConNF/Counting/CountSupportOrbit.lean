@@ -8,7 +8,8 @@ In this file, we prove an upper bound on the amount of orbits of supports that c
 
 ## Main declarations
 
-* `ConNF.card_supportOrbit_lt`: Something new.
+* `ConNF.card_supportOrbit_lt`: The amount of support orbits is strictly less than `μ`, given
+  an inductive hypothesis about the amount of coding functions at lower levels.
 -/
 
 noncomputable section

@@ -60,16 +60,21 @@ theorem Support.Supports.mono {X : Type _} {α : TypeIndex} [PreModelData α]
   · exact hT
 
 class ModelData (α : TypeIndex) extends PreModelData α where
+  tSetForget_injective' : Function.Injective tSetForget
   allPermForget_injective' : Function.Injective allPermForget
   allPermForget_one : (1 : AllPerm)ᵁ = 1
   allPermForget_mul (ρ₁ ρ₂ : AllPerm) : (ρ₁ * ρ₂)ᵁ = ρ₁ᵁ * ρ₂ᵁ
   smul_forget (ρ : AllPerm) (x : TSet) : (ρ • x)ᵁ = ρᵁ • xᵁ
   exists_support (x : TSet) : ∃ S : Support α, S.Supports x
 
-export ModelData (allPermForget_injective' allPermForget_one allPermForget_mul
+export ModelData (tSetForget_injective' allPermForget_injective' allPermForget_one allPermForget_mul
   smul_forget exists_support)
 
 attribute [simp] allPermForget_one allPermForget_mul smul_forget
+
+theorem tSetForget_injective {α : TypeIndex} [ModelData α] {x₁ x₂ : TSet α}
+    (h : x₁ᵁ = x₂ᵁ) : x₁ = x₂ :=
+  tSetForget_injective' h
 
 theorem allPermForget_injective {α : TypeIndex} [ModelData α] {ρ₁ ρ₂ : AllPerm α}
     (h : ρ₁ᵁ = ρ₂ᵁ) : ρ₁ = ρ₂ :=
@@ -226,6 +231,7 @@ def botPreModelData : PreModelData ⊥ where
   allPermForget ρ _ := ρ
 
 def botModelData : ModelData ⊥ where
+  tSetForget_injective' := Equiv.injective _
   allPermForget_injective' _ _ h := congr_fun h Path.nil
   allPermForget_one := rfl
   allPermForget_mul _ _ := rfl
