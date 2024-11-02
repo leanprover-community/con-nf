@@ -358,6 +358,7 @@ theorem card_support {α : TypeIndex} : #(Support α) = #μ := by
 ## Orders on supports
 -/
 
+-- TODO: Is this order used?
 instance : LE BaseSupport where
   le S T := (∀ a ∈ Sᴬ, a ∈ Tᴬ) ∧ (∀ N ∈ Sᴺ, N ∈ Tᴺ)
 
@@ -375,6 +376,19 @@ theorem BaseSupport.smul_le_smul {S T : BaseSupport} (h : S ≤ T) (π : BasePer
 
 def BaseSupport.Subsupport (S T : BaseSupport) : Prop :=
   Sᴬ.rel ≤ Tᴬ.rel ∧ Sᴺ.rel ≤ Tᴺ.rel
+
+theorem BaseSupport.Subsupport.le {S T : BaseSupport}
+    (h : S.Subsupport T) : S ≤ T := by
+  constructor
+  · rintro a ⟨i, hi⟩
+    exact ⟨i, h.1 i a hi⟩
+  · rintro N ⟨i, hi⟩
+    exact ⟨i, h.2 i N hi⟩
+
+theorem BaseSupport.Subsupport.trans {S T U : BaseSupport}
+    (h₁ : S.Subsupport T) (h₂ : T.Subsupport U) :
+    S.Subsupport U :=
+  ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
 
 theorem BaseSupport.smul_subsupport_smul {S T : BaseSupport} (h : S.Subsupport T) (π : BasePerm) :
     (π • S).Subsupport (π • T) := by
@@ -419,6 +433,15 @@ theorem le_add_left {α : TypeIndex} {S T : Support α} :
 
 def Support.Subsupport {α : TypeIndex} (S T : Support α) : Prop :=
   ∀ A, (S ⇘. A).Subsupport (T ⇘. A)
+
+theorem Support.Subsupport.le {α : TypeIndex} {S T : Support α}
+    (h : S.Subsupport T) : S ≤ T :=
+  λ A ↦ (h A).le
+
+theorem Support.Subsupport.trans {α : TypeIndex} {S T U : Support α}
+    (h₁ : S.Subsupport T) (h₂ : T.Subsupport U) :
+    S.Subsupport U :=
+  λ A ↦ (h₁ A).trans (h₂ A)
 
 theorem Support.smul_subsupport_smul {α : TypeIndex} {S T : Support α}
     (h : S.Subsupport T) (π : StrPerm α) :

@@ -512,4 +512,27 @@ theorem card_path_ne_zero (α : TypeIndex) : #(α ↝ ⊥) ≠ 0 :=
   letI : Nonempty (α ↝ ⊥) := ⟨Path.nil ↘.⟩
   mk_ne_zero _
 
+theorem card_path_any_lt_Λ (α : TypeIndex) : #((β : Λ) × α ↝ β) < (#μ).ord.cof := by
+  apply (mk_le_of_injective (f := λ x ↦ x.2 ↘.) ?_).trans_lt (card_path_lt α ⊥)
+  rintro ⟨β, A⟩ ⟨γ, B⟩ h
+  cases h
+  rfl
+
+theorem card_path_any_lt (α : TypeIndex) : #((β : TypeIndex) × α ↝ β) < (#μ).ord.cof := by
+  refine (mk_le_of_injective (f := λ x : (β : TypeIndex) × α ↝ β ↦
+      match x with
+      | ⟨⊥, A⟩ => (false, A)
+      | ⟨β, A⟩ => (true, A ↘.)) ?_).trans_lt ?_
+  · rintro ⟨_ | β, A⟩ ⟨_ | γ, B⟩ h
+    · cases h; rfl
+    · cases h
+    · cases h
+    · cases h; rfl
+  · simp only [mk_prod, mk_fintype, Fintype.card_bool, Nat.cast_ofNat, lift_ofNat, lift_id']
+    apply mul_lt_of_lt (aleph0_lt_κ.le.trans κ_le_μ_ord_cof)
+    · refine lt_of_lt_of_le ?_ (aleph0_lt_κ.le.trans κ_le_μ_ord_cof)
+      have := nat_lt_aleph0 2
+      rwa [Nat.cast_ofNat] at this
+    · exact card_path_lt α ⊥
+
 end ConNF

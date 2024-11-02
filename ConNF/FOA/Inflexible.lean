@@ -89,4 +89,20 @@ theorem inflexiblePath_subsingleton [LeLevel β] {A : β ↝ ⊥} {L : Litter}
   cases Path.sderiv_path_injective (Path.sderivBot_path_injective hP₂) -- A₁ = A₂
   rfl
 
+def inflexiblePathEmbedding :
+    InflexiblePath β ↪ Set.Iic β × Set.Iic β × (γ : TypeIndex) × β ↝ γ where
+  toFun P := ⟨⟨P.δ, P.hδ.le.trans P.A.le⟩, ⟨P.ε, P.hε.le.trans P.A.le⟩, P.γ, P.A⟩
+  inj' := by
+    rintro ⟨⟩ ⟨⟩ h
+    cases h
+    rfl
+
+omit [Level] [CoherentData] in
+theorem card_inflexiblePath_lt (β : TypeIndex) : #(InflexiblePath β) < (#μ).ord.cof := by
+  apply (mk_le_of_injective inflexiblePathEmbedding.injective).trans_lt
+  simp only [mk_prod, Cardinal.lift_id]
+  apply mul_lt_of_lt aleph0_lt_μ_ord_cof.le (TypeIndex.card_Iic_lt β)
+  apply mul_lt_of_lt aleph0_lt_μ_ord_cof.le (TypeIndex.card_Iic_lt β)
+  exact card_path_any_lt β
+
 end ConNF

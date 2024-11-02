@@ -45,6 +45,9 @@ def SupportOrbit (β : TypeIndex) [LeLevel β] : Type u :=
 def Support.orbit (S : Support β) : SupportOrbit β :=
   Quotient.mk (Support.setoid β) S
 
+theorem SupportOrbit.out_orbit (o : SupportOrbit β) : o.out.orbit = o := by
+  rw [Support.orbit, Quotient.out_eq]
+
 theorem SupportOrbit.exists_support (o : SupportOrbit β) : ∃ S : Support β, S.orbit = o := by
   induction o using Quot.inductionOn
   case h S => exact ⟨S, rfl⟩

@@ -32,15 +32,6 @@ structure InflexCond (δ : TypeIndex) [LeLevel δ] where
   atoms : Tree (Rel κ κ) δ
   nearLitters : Tree (Rel κ κ) δ
 
-instance : SuperA AtomCond (Set κ) where
-  superA := AtomCond.atoms
-
-instance : SuperN AtomCond (Set κ) where
-  superN := AtomCond.nearLitters
-
-instance : SuperN FlexCond (Set κ) where
-  superN := FlexCond.nearLitters
-
 instance (δ : TypeIndex) [LeLevel δ] : SuperA (InflexCond δ) (Tree (Rel κ κ) δ) where
   superA := InflexCond.atoms
 

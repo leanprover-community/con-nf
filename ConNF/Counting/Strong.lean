@@ -187,9 +187,9 @@ theorem constrainsAtoms_nearLitters (S : Support β) (A : β ↝ ⊥) :
 def preStrong (S : Support β) : Support β :=
   (S + S.constrainsNearLitters) + (S + S.constrainsNearLitters).constrainsAtoms
 
-theorem le_preStrong (S : Support β) :
-    S ≤ S.preStrong :=
-  le_add_right.trans le_add_right
+theorem subsupport_preStrong (S : Support β) :
+    S.Subsupport S.preStrong :=
+  subsupport_add.trans subsupport_add
 
 theorem preStrong_atoms (S : Support β) (A : β ↝ ⊥) :
     (S.preStrong ⇘. A)ᴬ = (S ⇘. A)ᴬ + ((S + S.constrainsNearLitters).constrainsAtoms ⇘. A)ᴬ := by
@@ -253,9 +253,9 @@ def close (S : Support β) : Support β :=
   S + S.interferenceSupport
 
 omit [Level] [CoherentData] [LeLevel β] in
-theorem le_close (S : Support β) :
-    S ≤ S.close :=
-  le_add_right
+theorem subsupport_close (S : Support β) :
+    S.Subsupport S.close :=
+  subsupport_add
 
 omit [Level] [CoherentData] [LeLevel β] in
 theorem close_atoms (S : Support β) (A : β ↝ ⊥) :
@@ -282,13 +282,13 @@ theorem close_closed (S : Support β) :
 def strong (S : Support β) : Support β :=
   S.preStrong.close
 
-theorem preStrong_le_strong (S : Support β) :
-    S.preStrong ≤ S.strong :=
-  S.preStrong.le_close
+theorem preStrong_subsupport_strong (S : Support β) :
+    S.preStrong.Subsupport S.strong :=
+  S.preStrong.subsupport_close
 
-theorem le_strong (S : Support β) :
-    S ≤ S.strong :=
-  S.le_preStrong.trans S.preStrong_le_strong
+theorem subsupport_strong (S : Support β) :
+    S.Subsupport S.strong :=
+  S.subsupport_preStrong.trans S.preStrong_subsupport_strong
 
 theorem strong_strong (S : Support β) :
     S.strong.Strong := by
@@ -298,7 +298,7 @@ theorem strong_strong (S : Support β) :
     rw [strong, close_nearLitters] at hN
     apply (S.preStrong_preStrong.support_le hN P t hA ht).trans
     intro B
-    exact S.preStrong_le_strong (P.A ↘ P.hδ ⇘ B)
+    exact (S.preStrong_subsupport_strong (P.A ↘ P.hδ ⇘ B)).le
   · exact close_closed _
 
 end Support
