@@ -214,6 +214,127 @@ def information (S : BaseSupport) (s : Set Atom) : Information where
 
 theorem subset_of_information_eq {S : BaseSupport} (hS : S.Closed) {s t : Set Atom}
     (hs : ∀ π : BasePerm, π • S = S → π • s = s) (ht : ∀ π : BasePerm, π • S = S → π • t = t)
-    (h : information S s = information S t) : s ⊆ t := sorry
+    (h : information S s = information S t) : s ⊆ t := by
+  intro a ha
+  by_cases haS : a ∈ Sᴬ
+  · obtain ⟨i, hi⟩ := haS
+    have := congr_arg Information.atoms h
+    dsimp only [information] at this
+    rw [Set.ext_iff] at this
+    obtain ⟨b, hb, hi'⟩ := (this i).mp ⟨a, ha, hi⟩
+    cases Sᴬ.rel_coinjective.coinjective hi hi'
+    exact hb
+  by_cases haN : ∃ N ∈ Sᴺ, a ∈ Nᴬ
+  · obtain ⟨N, ⟨i, hiN⟩, haN⟩ := haN
+    have := congr_arg Information.nearLitters h
+    dsimp only [information] at this
+    rw [Set.ext_iff] at this
+    obtain ⟨N₂, ⟨b, ⟨hbN, hb⟩, hbS⟩, hiN₂⟩ := (this i).mp ⟨N, ⟨a, ⟨haN, ha⟩, haS⟩, hiN⟩
+    cases Sᴺ.rel_coinjective.coinjective hiN hiN₂
+    rwa [mem_iff_mem_of_supports hS ht haS hbS]
+    rintro N' ⟨j, hj⟩
+    constructor
+    · intro haN'
+      by_cases hN : Nᴸ = N'ᴸ
+      · by_contra hbN'
+        have := hS.interference_subset ⟨i, hiN⟩ ⟨j, hj⟩ b
+        rw [interference_eq_of_litter_eq hN] at this
+        exact hbS (this (Or.inl ⟨hbN, hbN'⟩))
+      · have := hS.interference_subset ⟨i, hiN⟩ ⟨j, hj⟩ a
+        rw [interference_eq_of_litter_ne hN] at this
+        cases haS (this ⟨haN, haN'⟩)
+    · intro hbN'
+      by_cases hN : Nᴸ = N'ᴸ
+      · by_contra haN'
+        have := hS.interference_subset ⟨i, hiN⟩ ⟨j, hj⟩ a
+        rw [interference_eq_of_litter_eq hN] at this
+        exact haS (this (Or.inl ⟨haN, haN'⟩))
+      · have := hS.interference_subset ⟨i, hiN⟩ ⟨j, hj⟩ b
+        rw [interference_eq_of_litter_ne hN] at this
+        cases hbS (this ⟨hbN, hbN'⟩)
+  · have := congr_arg Information.outside h
+    dsimp only [information] at this
+    rw [eq_iff_iff] at this
+    push_neg at haN
+    refine this.mp ?_ a haS haN
+    intro b hbS hbN
+    rwa [← mem_iff_mem_of_supports hS hs haS hbS]
+    intro N hN
+    simp only [haN N hN, hbN N hN]
+
+theorem eq_of_information_eq {S : BaseSupport} (hS : S.Closed) {s t : Set Atom}
+    (hs : ∀ π : BasePerm, π • S = S → π • s = s) (ht : ∀ π : BasePerm, π • S = S → π • t = t)
+    (h : information S s = information S t) : s = t :=
+  subset_antisymm (subset_of_information_eq hS hs ht h) (subset_of_information_eq hS ht hs h.symm)
+
+theorem card_supports_le_of_closed' {S : BaseSupport} (hS : S.Closed) :
+    #{s : Set Atom // ∀ π : BasePerm, π • S = S → π • s = s} ≤ #Information := by
+  apply mk_le_of_injective (f := λ s ↦ information S s.val)
+  rintro ⟨s, hs⟩ ⟨t, ht⟩ h
+  rw [Subtype.mk_eq_mk]
+  exact eq_of_information_eq hS hs ht h
+
+def informationEquiv : Information ≃ Set κ × Set κ × Prop where
+  toFun i := ⟨i.atoms, i.nearLitters, i.outside⟩
+  invFun i := ⟨i.1, i.2.1, i.2.2⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+omit [Level] [CoherentData] in
+theorem card_information_le :
+    #Information ≤ 2 ^ #κ := by
+  rw [Cardinal.eq.mpr ⟨informationEquiv⟩]
+  simp only [mk_prod, mk_set, Cardinal.lift_id, Cardinal.lift_id', mk_fintype, Fintype.card_prop,
+    Nat.cast_ofNat, Cardinal.lift_ofNat]
+  apply mul_le_of_le
+  · have := Cardinal.power_le_power_left two_ne_zero κ_isRegular.aleph0_le
+    exact (cantor ℵ₀).le.trans this
+  · rfl
+  apply mul_le_of_le
+  · have := Cardinal.power_le_power_left two_ne_zero κ_isRegular.aleph0_le
+    exact (cantor ℵ₀).le.trans this
+  · rfl
+  · have := Cardinal.power_le_power_left two_ne_zero κ_isRegular.aleph0_le
+    have htwo := nat_lt_aleph0 2
+    rw [Nat.cast_ofNat] at htwo
+    exact htwo.le.trans ((cantor ℵ₀).le.trans this)
+
+theorem card_supports_le_of_closed {S : BaseSupport} (hS : S.Closed) :
+    #{s : Set Atom // ∀ π : BasePerm, π • S = S → π • s = s} ≤ 2 ^ #κ :=
+  le_trans (card_supports_le_of_closed' hS) card_information_le
+
+omit [Level] [CoherentData] in
+theorem BaseSupport.interference_small (S : BaseSupport) :
+    Small {a : Atom | ∃ N₁ N₂, N₁ ∈ Sᴺ ∧ N₂ ∈ Sᴺ ∧ a ∈ interference N₁ N₂} := by
+  have := (Support.ofBase S).interference_small
+  apply (this.image Prod.snd).mono
+  intro a h
+  exact ⟨⟨.nil, a⟩, h, rfl⟩
+
+theorem card_supports_le (S : BaseSupport) :
+    #{s : Set Atom // ∀ π : BasePerm, π • S = S → π • s = s} ≤ 2 ^ #κ := by
+  have := card_supports_le_of_closed (S := S + ⟨.ofSet _ S.interference_small, .empty⟩) ?_
+  · refine le_trans (mk_le_mk_of_subset ?_) this
+    intro s hs π hπ
+    apply hs
+    apply BaseSupport.ext
+    · have := congr_arg (·ᴬ) hπ
+      dsimp only at this
+      rw [BaseSupport.smul_atoms, BaseSupport.add_atoms, Enumeration.smul_add,
+        Enumeration.add_inj_iff_of_bound_eq_bound (by rfl)] at this
+      exact this.1
+    · have := congr_arg (·ᴺ) hπ
+      dsimp only at this
+      rw [BaseSupport.smul_nearLitters, BaseSupport.add_nearLitters, Enumeration.smul_add,
+        Enumeration.add_inj_iff_of_bound_eq_bound (by rfl)] at this
+      exact this.1
+  · constructor
+    intro N₁ N₂ hN₁ hN₂ a ha
+    simp only [BaseSupport.add_nearLitters, BaseSupport.mk_nearLitters,
+      Enumeration.add_empty] at hN₁ hN₂
+    rw [BaseSupport.add_atoms, BaseSupport.mk_atoms, Enumeration.mem_add_iff, BaseSupport.mk_atoms,
+      Enumeration.mem_ofSet_iff]
+    right
+    exact ⟨N₁, N₂, hN₁, hN₂, ha⟩
 
 end ConNF

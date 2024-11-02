@@ -218,7 +218,7 @@ theorem preStrong_preStrong (S : Support β) : S.preStrong.PreStrong := by
     · exact Or.inr ⟨A, N, hN, Relation.ReflTransGen.single ⟨P, t, B, rfl, hN', hA, ht⟩⟩
     · exact Or.inr ⟨A', N'', hN''₁, hN''₂.head ⟨P, t, B, rfl, hN', hA, ht⟩⟩
 
-set_option linter.unusedSectionVars false
+omit [Level] [CoherentData] [LeLevel β] in
 theorem interference_small (S : Support β) :
     Small {a : β ↝ ⊥ × Atom |
       ∃ N₁ N₂, N₁ ∈ (S ⇘. a.1)ᴺ ∧ N₂ ∈ (S ⇘. a.1)ᴺ ∧ a.2 ∈ interference N₁ N₂} := by
@@ -237,12 +237,14 @@ theorem interference_small (S : Support β) :
 def interferenceSupport (S : Support β) : Support β :=
   ⟨.ofSet _ S.interference_small, .empty⟩
 
+omit [Level] [CoherentData] [LeLevel β] in
 theorem mem_interferenceSupport_atoms (S : Support β) (A : β ↝ ⊥) (a : Atom) :
     a ∈ (S.interferenceSupport ⇘. A)ᴬ ↔
     ∃ N₁ ∈ (S ⇘. A)ᴺ, ∃ N₂ ∈ (S ⇘. A)ᴺ, a ∈ interference N₁ N₂ := by
   apply (Enumeration.mem_ofSet_iff _ S.interference_small _).trans
   simp only [exists_and_left, Set.mem_setOf_eq]
 
+omit [Level] [CoherentData] [LeLevel β] in
 theorem interferenceSupport_nearLitters (S : Support β) (A : β ↝ ⊥) :
     (S.interferenceSupport ⇘. A)ᴺ = .empty :=
   rfl
@@ -250,19 +252,23 @@ theorem interferenceSupport_nearLitters (S : Support β) (A : β ↝ ⊥) :
 def close (S : Support β) : Support β :=
   S + S.interferenceSupport
 
+omit [Level] [CoherentData] [LeLevel β] in
 theorem le_close (S : Support β) :
     S ≤ S.close :=
   le_add_right
 
+omit [Level] [CoherentData] [LeLevel β] in
 theorem close_atoms (S : Support β) (A : β ↝ ⊥) :
     (S.close ⇘. A)ᴬ = (S ⇘. A)ᴬ + (S.interferenceSupport ⇘. A)ᴬ :=
   rfl
 
+omit [Level] [CoherentData] [LeLevel β] in
 theorem close_nearLitters (S : Support β) (A : β ↝ ⊥) :
     (S.close ⇘. A)ᴺ = (S ⇘. A)ᴺ := by
   rw [close, add_derivBot, BaseSupport.add_nearLitters, interferenceSupport_nearLitters,
     Enumeration.add_empty]
 
+omit [Level] [CoherentData] [LeLevel β] in
 theorem close_closed (S : Support β) :
     S.close.Closed := by
   constructor

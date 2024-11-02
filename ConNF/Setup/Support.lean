@@ -35,6 +35,16 @@ instance : SuperA BaseSupport (Enumeration Atom) where
 instance : SuperN BaseSupport (Enumeration NearLitter) where
   superN := nearLitters
 
+@[simp]
+theorem mk_atoms {a : Enumeration Atom} {N : Enumeration NearLitter} :
+    (BaseSupport.mk a N)ᴬ = a :=
+  rfl
+
+@[simp]
+theorem mk_nearLitters {a : Enumeration Atom} {N : Enumeration NearLitter} :
+    (BaseSupport.mk a N)ᴺ = N :=
+  rfl
+
 theorem atoms_congr {S T : BaseSupport} (h : S = T) :
     Sᴬ = Tᴬ :=
   h ▸ rfl
