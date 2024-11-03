@@ -57,9 +57,4 @@ theorem pos_fuzz (hβγ : β ≠ γ) (t : Tangle β) :
 
 end fuzz
 
-class TypedNearLitters {α : Λ} [ModelData α] [Position (Tangle α)] where
-  typed : NearLitter → TSet α
-  typed_injective : Function.Injective typed
-  pos_le_pos_of_typed (N : NearLitter) (t : Tangle α) : t.set = typed N → pos N ≤ pos t
-
 end ConNF

@@ -27,17 +27,17 @@ TODO: We're going to try allowing model data at level `⊥` to vary. That is, we
 variable [Params.{u}] [Level]
 
 /-- A convenience typeclass to hold data below the current level. -/
-class LtData where
+class LeData where
   [data : (β : TypeIndex) → [LeLevel β] → ModelData β]
   [positions : (β : TypeIndex) → [LtLevel β] → Position (Tangle β)]
 
-instance [LtData] : (β : TypeIndex) → [LeLevel β] → ModelData β :=
-  LtData.data
+instance [LeData] : (β : TypeIndex) → [LeLevel β] → ModelData β :=
+  LeData.data
 
-instance [LtData] : (β : TypeIndex) → [LtLevel β] → Position (Tangle β) :=
-  LtData.positions
+instance [LeData] : (β : TypeIndex) → [LtLevel β] → Position (Tangle β) :=
+  LeData.positions
 
-class PreCoherentData extends LtData where
+class PreCoherentData extends LeData where
   allPermSderiv {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (h : γ < β) : AllPerm β → AllPerm γ
   singleton {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (h : γ < β) : TSet γ → TSet β
 
