@@ -191,4 +191,73 @@ theorem exists_combination_raisedSingleton (χ : CodingFunction β) :
     · rintro ⟨y, hy, rfl⟩
       exact ⟨_, ⟨y, hy, rfl⟩, rfl⟩
 
+structure RaisedSingletonData (β γ : Λ) [LeLevel β] [LeLevel γ] : Type u where
+  ba : κ
+  bN : κ
+  o : SupportOrbit β
+  χ : CodingFunction γ
+
+def RaisedSingletonData.mk' (S : Support β) (y : TSet γ) :
+    RaisedSingletonData β γ where
+  ba := Sᴬ.bound
+  bN := Sᴺ.bound
+  o := (S + designatedSupport y ↗ hγ).orbit
+  χ := Tangle.code ⟨y, designatedSupport y, designatedSupport_supports y⟩
+
+theorem RaisedSingletonData.mk'_eq_mk'
+    {S₁ S₂ : Support β} {y₁ y₂ : TSet γ}
+    (h : RaisedSingletonData.mk' hγ S₁ y₁ = RaisedSingletonData.mk' hγ S₂ y₂) :
+    raisedSingleton hγ S₁ y₁ = raisedSingleton hγ S₂ y₂ := by
+  rw [mk', mk', mk.injEq, Support.orbit_eq_iff, Tangle.code_eq_code_iff] at h
+  obtain ⟨ha, hN, ⟨ρ₁, hρ₁⟩, ⟨ρ₂, hρ₂⟩⟩ := h
+  rw [Support.smul_add] at hρ₁
+  have := Support.add_inj_of_bound_eq_bound ?_ ?_ hρ₁
+  swap; exact ha
+  swap; exact hN
+  obtain ⟨rfl, hρ₁y⟩ := this
+  have hρ₂y := congr_arg (·.set) hρ₂
+  dsimp only [Tangle.smul_set] at hρ₂y
+  cases hρ₂y
+  rw [raisedSingleton, raisedSingleton, Tangle.code_eq_code_iff]
+  use ρ₁
+  ext : 1
+  swap
+  · simp only [Tangle.smul_support, Support.smul_add, hρ₁y]
+  simp only [Tangle.smul_set]
+  apply tSet_ext hγ
+  intro z
+  rw [TSet.mem_smul_iff, typedMem_singleton_iff, typedMem_singleton_iff]
+  have hρ₂y' := congr_arg (·.support) hρ₂
+  simp only [Tangle.smul_support] at hρ₂y'
+  rw [← hρ₂y', Support.smul_scoderiv, Support.scoderiv_inj, ← allPermSderiv_forget] at hρ₁y
+  rw [← (designatedSupport_supports y₁).smul_eq_smul hρ₁y, allPerm_inv_sderiv, inv_smul_eq_iff]
+
+theorem card_raisedSingleton_lt' :
+    #(RaisedSingleton hγ) ≤ #(RaisedSingletonData β γ) := by
+  apply mk_le_of_injective
+    (f := λ s ↦ RaisedSingletonData.mk' hγ s.prop.choose s.prop.choose_spec.choose)
+  intro s t h
+  have := RaisedSingletonData.mk'_eq_mk' hγ h
+  rw [← s.prop.choose_spec.choose_spec, ← t.prop.choose_spec.choose_spec] at this
+  exact Subtype.coe_injective this
+
+def raisedSingletonDataEquiv (β γ : Λ) [LeLevel β] [LeLevel γ] :
+    RaisedSingletonData β γ ≃ κ × κ × SupportOrbit β × CodingFunction γ where
+  toFun d := ⟨d.ba, d.bN, d.o, d.χ⟩
+  invFun d := ⟨d.1, d.2.1, d.2.2.1, d.2.2.2⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+theorem card_raisedSingleton_lt (h₁ : #(SupportOrbit β) < #μ)
+    (h₂ : ∀ δ < (β : TypeIndex), [LeLevel δ] → #(CodingFunction δ) < #μ) :
+    #(RaisedSingleton hγ) < #μ := by
+  apply (card_raisedSingleton_lt' hγ).trans_lt
+  rw [Cardinal.eq.mpr ⟨raisedSingletonDataEquiv β γ⟩]
+  simp only [mk_prod, Cardinal.lift_id]
+  apply mul_lt_of_lt μ_isStrongLimit.aleph0_le κ_lt_μ
+  apply mul_lt_of_lt μ_isStrongLimit.aleph0_le κ_lt_μ
+  apply mul_lt_of_lt μ_isStrongLimit.aleph0_le
+  · exact h₁
+  · exact h₂ _ hγ
+
 end ConNF

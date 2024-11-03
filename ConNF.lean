@@ -9,6 +9,7 @@ import ConNF.Aux.WellOrder
 import ConNF.Counting.BaseCoding
 import ConNF.Counting.BaseCounting
 import ConNF.Counting.CodingFunction
+import ConNF.Counting.Conclusions
 import ConNF.Counting.CountSupportOrbit
 import ConNF.Counting.Recode
 import ConNF.Counting.SMulSpec

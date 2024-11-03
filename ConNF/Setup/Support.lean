@@ -271,6 +271,23 @@ theorem coderiv_deriv_eq {α β : TypeIndex} (S : Support β) (A : α ↝ β) :
     S ⇗ A ⇘ A = S :=
   ext' (Sᴬ.coderiv_deriv_eq A) (Sᴺ.coderiv_deriv_eq A)
 
+@[simp]
+theorem coderiv_inj {α β : TypeIndex} (S T : Support β) (A : α ↝ β) :
+    S ⇗ A = T ⇗ A ↔ S = T := by
+  constructor
+  swap
+  · rintro rfl
+    rfl
+  intro h
+  ext B : 1
+  have : S ⇗ A ⇘ A ⇘. B = T ⇗ A ⇘ A ⇘. B := by rw [h]
+  rwa [coderiv_deriv_eq, coderiv_deriv_eq] at this
+
+@[simp]
+theorem scoderiv_inj {α β : TypeIndex} (S T : Support β) (h : β < α) :
+    S ↗ h = T ↗ h ↔ S = T :=
+  coderiv_inj S T (.single h)
+
 instance {α : TypeIndex} : SMul (StrPerm α) (Support α) where
   smul π S := ⟨π • Sᴬ, π • Sᴺ⟩
 
@@ -309,6 +326,34 @@ theorem smul_derivBot {α : TypeIndex} (π : StrPerm α) (S : Support α) (A : �
     (π • S) ⇘. A = π A • (S ⇘. A) :=
   rfl
 
+theorem smul_coderiv {α : TypeIndex} (π : StrPerm α) (S : Support β) (A : α ↝ β) :
+    π • S ⇗ A = (π ⇘ A • S) ⇗ A := by
+  ext B i x
+  · rfl
+  · constructor
+    · rintro ⟨⟨C, x⟩, hS, hx⟩
+      simp only [Prod.mk.injEq] at hx
+      obtain ⟨rfl, rfl⟩ := hx
+      exact ⟨⟨C, x⟩, hS, rfl⟩
+    · rintro ⟨⟨C, x⟩, hS, hx⟩
+      simp only [Prod.mk.injEq] at hx
+      obtain ⟨rfl, rfl⟩ := hx
+      exact ⟨⟨C, _⟩, hS, rfl⟩
+  · rfl
+  · constructor
+    · rintro ⟨⟨C, x⟩, hS, hx⟩
+      simp only [Prod.mk.injEq] at hx
+      obtain ⟨rfl, rfl⟩ := hx
+      exact ⟨⟨C, x⟩, hS, rfl⟩
+    · rintro ⟨⟨C, a⟩, hS, hx⟩
+      simp only [Prod.mk.injEq] at hx
+      obtain ⟨rfl, rfl⟩ := hx
+      exact ⟨⟨C, _⟩, hS, rfl⟩
+
+theorem smul_scoderiv {α : TypeIndex} (π : StrPerm α) (S : Support β) (h : β < α) :
+    π • S ↗ h = (π ↘ h • S) ↗ h :=
+  smul_coderiv π S (Path.single h)
+
 theorem smul_eq_smul_iff (π₁ π₂ : StrPerm β) (S : Support β) :
     π₁ • S = π₂ • S ↔
       ∀ A, (∀ a ∈ (S ⇘. A)ᴬ, π₁ A • a = π₂ A • a) ∧ (∀ N ∈ (S ⇘. A)ᴺ, π₁ A • N = π₂ A • N) := by
@@ -336,6 +381,20 @@ noncomputable instance : Add (Support α) where
 theorem add_derivBot (S T : Support α) (A : α ↝ ⊥) :
     (S + T) ⇘. A = (S ⇘. A) + (T ⇘. A) :=
   rfl
+
+@[simp]
+theorem smul_add (S T : Support α) (π : StrPerm α) :
+    π • (S + T) = π • S + π • T :=
+  rfl
+
+theorem add_inj_of_bound_eq_bound {S T U V : Support α}
+    (ha : Sᴬ.bound = Tᴬ.bound) (hN : Sᴺ.bound = Tᴺ.bound)
+    (h' : S + U = T + V) : S = T ∧ U = V := by
+  have ha' := Enumeration.add_inj_of_bound_eq_bound ha (congr_arg (·ᴬ) h')
+  have hN' := Enumeration.add_inj_of_bound_eq_bound hN (congr_arg (·ᴺ) h')
+  constructor
+  · exact Support.ext' ha'.1 hN'.1
+  · exact Support.ext' ha'.2 hN'.2
 
 end Support
 
