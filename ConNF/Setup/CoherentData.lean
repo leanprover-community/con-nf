@@ -66,6 +66,14 @@ theorem allPerm_deriv_sderiv [PreCoherentData] {β γ δ : TypeIndex}
     ρ ⇘ (A ↘ h) = ρ ⇘ A ↘ h :=
   rfl
 
+/--
+Note that in earlier versions of the proof we additionally used the following assumption.
+```
+typedMem_tSetForget {β : Λ} {γ : TypeIndex} [LeLevel β] [LeLevel γ]
+  (hγ : γ < β) (x : TSet β) (y : StrSet γ) :
+  y ∈[hγ] xᵁ → ∃ z : TSet γ, y = zᵁ
+```
+-/
 class CoherentData extends PreCoherentData where
   allPermSderiv_forget {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (h : γ < β) (ρ : AllPerm β) :
     (ρ ↘ h)ᵁ = ρᵁ ↘ h
@@ -85,14 +93,11 @@ class CoherentData extends PreCoherentData where
     ∃ ρ : AllPerm γ, ∀ δ : TypeIndex, [LtLevel δ] → ∀ hδ : δ < γ, ρ ↘ hδ = ρs hδ
   tSet_ext {β γ : Λ} [LeLevel β] [LeLevel γ] (hγ : (γ : TypeIndex) < β) (x y : TSet β)
       (h : ∀ z : TSet γ, z ∈[hγ] x ↔ z ∈[hγ] y) : x = y
-  typedMem_tSetForget {β : Λ} {γ : TypeIndex} [LeLevel β] [LeLevel γ]
-    (hγ : γ < β) (x : TSet β) (y : StrSet γ) :
-    y ∈[hγ] xᵁ → ∃ z : TSet γ, y = zᵁ
   typedMem_singleton_iff {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (hγ : γ < β) (x y : TSet γ) :
     y ∈[hγ] singleton hγ x ↔ y = x
 
 export CoherentData (allPermSderiv_forget pos_atom_lt_pos pos_nearLitter_lt_pos smul_fuzz
-  allPerm_of_basePerm allPerm_of_smulFuzz tSet_ext typedMem_tSetForget typedMem_singleton_iff)
+  allPerm_of_basePerm allPerm_of_smulFuzz tSet_ext typedMem_singleton_iff)
 
 attribute [simp] allPermSderiv_forget typedMem_singleton_iff
 
