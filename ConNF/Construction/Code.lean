@@ -23,6 +23,7 @@ class TypedNearLitters (α : Λ) [ModelData α] [Position (Tangle α)] where
   typed : NearLitter → TSet α
   typed_injective : Function.Injective typed
   pos_le_pos_of_typed (N : NearLitter) (t : Tangle α) : t.set = typed N → pos N ≤ pos t
+  smul_typed (ρ : AllPerm α) (N : NearLitter) : ρ • typed N = typed (ρᵁ ↘. • N)
 
 export TypedNearLitters (typed)
 
@@ -193,6 +194,17 @@ theorem even_or_odd (c : Code) : c.Even ∨ c.Odd := by
       obtain (hd | hd) := ih d hd₁
       · exact .mk c d hd₁ hd
       · cases hd₂ hd
+
+@[simp]
+theorem not_even (c : Code) : ¬c.Even ↔ c.Odd := by
+  have := even_or_odd c
+  have := not_even_and_odd c
+  tauto
+
+@[simp]
+theorem not_odd (c : Code) : ¬c.Odd ↔ c.Even := by
+  have := not_even c
+  tauto
 
 inductive Represents : Rel Code Code
   | refl (c : Code) : c.Even → Represents c c

@@ -85,6 +85,11 @@ theorem one_sderiv [Group X] (h : β < α) :
   rfl
 
 @[simp]
+theorem one_sderivBot [Group X] :
+    (1 : Tree X α) ↘. = 1 :=
+  rfl
+
+@[simp]
 theorem mul_apply [Group X] (T₁ T₂ : Tree X α) (A : α ↝ ⊥) :
     (T₁ * T₂) A = T₁ A * T₂ A :=
   rfl
@@ -95,18 +100,13 @@ theorem mul_sderiv [Group X] (T₁ T₂ : Tree X α) (h : β < α) :
   rfl
 
 @[simp]
+theorem mul_sderivBot [Group X] (T₁ T₂ : Tree X α) :
+    (T₁ * T₂) ↘. = T₁ ↘. * T₂ ↘. :=
+  rfl
+
+@[simp]
 theorem inv_apply [Group X] (T : Tree X α) (A : α ↝ ⊥) :
     T⁻¹ A = (T A)⁻¹ :=
-  rfl
-
-@[simp]
-theorem npow_apply [Group X] (T : Tree X α) (A : α ↝ ⊥) (n : ℕ) :
-    (T ^ n) A = (T A) ^ n :=
-  rfl
-
-@[simp]
-theorem zpow_apply [Group X] (T : Tree X α) (A : α ↝ ⊥) (n : ℤ) :
-    (T ^ n) A = (T A) ^ n :=
   rfl
 
 @[simp]
@@ -117,6 +117,21 @@ theorem inv_deriv [Group X] (T : Tree X α) (A : α ↝ β) :
 @[simp]
 theorem inv_sderiv [Group X] (T : Tree X α) (h : β < α) :
     T⁻¹ ↘ h = (T ↘ h)⁻¹ :=
+  rfl
+
+@[simp]
+theorem inv_sderivBot [Group X] (T : Tree X α) :
+    T⁻¹ ↘. = (T ↘.)⁻¹ :=
+  rfl
+
+@[simp]
+theorem npow_apply [Group X] (T : Tree X α) (A : α ↝ ⊥) (n : ℕ) :
+    (T ^ n) A = (T A) ^ n :=
+  rfl
+
+@[simp]
+theorem zpow_apply [Group X] (T : Tree X α) (A : α ↝ ⊥) (n : ℤ) :
+    (T ^ n) A = (T A) ^ n :=
   rfl
 
 /-- The partial order on the type of `α`-trees of `X` is given by "branchwise" comparison. -/
