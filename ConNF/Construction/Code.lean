@@ -277,4 +277,41 @@ theorem Code.ext {c d : Code} (hc : c.Even) (hd : d.Even) (β : Λ) [LtLevel β]
   cases h
   exact represents_cofunctional.injective hcs hdt
 
+theorem Code.eq_of_isMin (c : Code) (hα : IsMin α) :
+    ∃ s hs, c = ⟨⊥, s, hs⟩ := by
+  obtain ⟨β, s, hs⟩ := c
+  cases β using WithBot.recBotCoe
+  case bot => exact ⟨s, hs, rfl⟩
+  case coe β hβ => cases hα.not_lt (WithBot.coe_lt_coe.mp hβ.elim)
+
+theorem Code.bot_even (s : Set (TSet ⊥)) (hs : s.Nonempty) :
+    (Code.mk ⊥ s hs).Even := by
+  constructor
+  rintro _ ⟨⟩
+
+theorem Code.members_bot (s : Set (TSet ⊥)) (hs : s.Nonempty) :
+    (Code.mk ⊥ s hs).members ⊥ = s := by
+  ext x : 1
+  constructor
+  · rintro ⟨t, ht, hxt, ⟨⟩ | ⟨_, _, _, _, _⟩⟩
+    exact hxt
+  · intro hx
+    exact ⟨s, hs, hx, .refl _ (bot_even s hs)⟩
+
+theorem Code.ext' {c d : Code} (hc : c.Even) (hd : d.Even)
+    (h : ∀ (β : TypeIndex) [LtLevel β], c.members β = d.members β) :
+    c = d := by
+  by_cases hα : IsMin α
+  · obtain ⟨s, hs, rfl⟩ := c.eq_of_isMin hα
+    obtain ⟨t, ht, rfl⟩ := d.eq_of_isMin hα
+    have := h ⊥
+    rw [members_bot, members_bot] at this
+    cases this
+    rfl
+  · rw [not_isMin_iff] at hα
+    obtain ⟨β, hβ⟩ := hα
+    have : LtLevel β := ⟨WithBot.coe_lt_coe.mpr hβ⟩
+    apply ext hc hd β
+    exact h β
+
 end ConNF

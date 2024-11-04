@@ -146,22 +146,171 @@ theorem Represents.smul {c d : Code} (h : Represents c d) (ρ : NewPerm) :
     · rwa [Code.smul_even]
     · exact hcd.smul ρ
 
-def Path.untop {β γ : TypeIndex} (A : β ↝ γ) (h : β ≠ γ) :
-    ((δ : {δ : TypeIndex // δ < β}) × δ ↝ γ) :=
-  A.recScoderiv (motive := λ ε _ ↦ ε ≠ γ → ((δ : {δ : TypeIndex // δ < ε}) × δ ↝ γ))
-    (λ h ↦ (h rfl).elim) (λ ε ζ B hζ _ h ↦ ⟨⟨ζ, hζ⟩, B⟩) h
+@[simp]
+theorem NewPerm.smul_members (ρ : NewPerm) (c : Code) (β : TypeIndex) [LtLevel β] :
+    (ρ • c).members β = ρ.sderiv β • c.members β := by
+  ext x : 1
+  constructor
+  · rintro ⟨s, hs, hx, hc⟩
+    refine ⟨(ρ.sderiv β)⁻¹ • x, ?_, smul_inv_smul _ _⟩
+    refine ⟨(ρ.sderiv β)⁻¹ • s, Set.Nonempty.smul_set hs, Set.smul_mem_smul_set hx, ?_⟩
+    have := hc.smul ρ⁻¹
+    rwa [inv_smul_smul, smul_mk, inv_sderiv] at this
+  · rintro ⟨x, ⟨s, hs, hx, hc⟩, rfl⟩
+    refine ⟨ρ.sderiv β • s, Set.Nonempty.smul_set hs, Set.smul_mem_smul_set hx, ?_⟩
+    exact hc.smul ρ
 
-def Path.recTop {β δ : TypeIndex} (hβδ : δ < β) {motive : Sort _}
-    (scoderiv : ∀ γ (h : γ < β), γ ↝ δ → motive)
-    {γ : TypeIndex} (A : β ↝ δ) : motive :=
-  sorry
+instance : SuperU NewPerm (StrPerm α) where
+  superU ρ := λ A ↦ A.recScoderiv (motive := λ β _ ↦ β ≠ ⊥ → β ≤ α → BasePerm)
+    (λ h ↦ (h rfl).elim)
+    (λ _β γ B hγβ _ _ hβα ↦ letI : LtLevel γ := ⟨hγβ.trans_le hβα⟩; (ρ.sderiv γ)ᵁ B)
+    WithBot.coe_ne_bot le_rfl
 
--- instance : SuperU NewPerm (StrPerm α) where
---   superU ρ := λ A ↦ A.recScoderiv (motive := λ β _ ↦ BasePerm) _ (λ β γ B hγβ _ ↦ _)
+theorem NewPerm.forget_def (ρ : NewPerm) (A : α ↝ ⊥) :
+    ρᵁ A = A.recScoderiv (motive := λ β _ ↦ β ≠ ⊥ → β ≤ α → BasePerm)
+      (λ h ↦ (h rfl).elim)
+      (λ _β γ B hγβ _ _ hβα ↦ letI : LtLevel γ := ⟨hγβ.trans_le hβα⟩; (ρ.sderiv γ)ᵁ B)
+      WithBot.coe_ne_bot le_rfl :=
+  rfl
 
+@[simp]
+theorem NewPerm.forget_sderiv (ρ : NewPerm) (β : TypeIndex) [LtLevel β] :
+    ρᵁ ↘ LtLevel.elim = (ρ.sderiv β)ᵁ := by
+  funext A
+  rw [Tree.sderiv_apply, NewPerm.forget_def, Path.recScoderiv_scoderiv]
+
+@[simp]
+theorem NewPerm.forget_mul (ρ₁ ρ₂ : NewPerm) :
+    (ρ₁ * ρ₂)ᵁ = ρ₁ᵁ * ρ₂ᵁ := by
+  funext A
+  cases A using Path.recScoderiv
+  case scoderiv β A hβ _ =>
+    haveI : LtLevel β := ⟨hβ⟩
+    rw [Tree.mul_apply, ← Tree.sderiv_apply (ρ₁ * ρ₂)ᵁ,
+      ← Tree.sderiv_apply ρ₁ᵁ, ← Tree.sderiv_apply ρ₂ᵁ,
+      forget_sderiv, forget_sderiv, forget_sderiv,
+      mul_sderiv, allPermForget_mul, Tree.mul_apply]
+
+@[simp]
+theorem NewPerm.forget_one :
+    (1 : NewPerm)ᵁ = 1 := by
+  funext A
+  cases A using Path.recScoderiv
+  case scoderiv β A hβ _ =>
+    haveI : LtLevel β := ⟨hβ⟩
+    rw [Tree.one_apply, ← Tree.sderiv_apply (1 : NewPerm)ᵁ, forget_sderiv,
+      one_sderiv, allPermForget_one, Tree.one_apply]
+
+@[simp]
+theorem NewPerm.forget_inv (ρ : NewPerm) :
+    ρ⁻¹ᵁ = ρᵁ⁻¹ := by
+  rw [eq_inv_iff_mul_eq_one, ← forget_mul, inv_mul_cancel, forget_one]
+
+@[ext]
 structure NewSet : Type u where
   c : Code
   hc : c.Even
   hS : ∃ S : Support α, ∀ ρ : NewPerm, ρᵁ • S = S → ρ • c = c
+
+instance : SuperU NewSet (StrSet α) where
+  superU x := StrSet.coeEquiv.symm
+    λ β hβ ↦ letI : LtLevel β := ⟨hβ⟩; (·ᵁ) '' x.c.members β
+
+theorem NewSet.forget_def (x : NewSet) :
+    xᵁ = StrSet.coeEquiv.symm
+      λ β hβ ↦ letI : LtLevel β := ⟨hβ⟩; (·ᵁ) '' x.c.members β :=
+  rfl
+
+theorem NewSet.typedMem_forget (x : NewSet) (β : TypeIndex) (hβ : β < α) (y : StrSet β) :
+    y ∈[hβ] xᵁ ↔ letI : LtLevel β := ⟨hβ⟩; y ∈ (·ᵁ) '' x.c.members β := by
+  rw [StrSet.mem_iff, forget_def, Equiv.apply_symm_apply]
+
+theorem NewSet.mem_members (x : NewSet) (β : TypeIndex) [hβ : LtLevel β] (y : TSet β) :
+    y ∈ x.c.members β ↔ yᵁ ∈[hβ.elim] xᵁ := by
+  rw [typedMem_forget]
+  constructor
+  · apply Set.mem_image_of_mem
+  · rintro ⟨z, hz, hzy⟩
+    cases tSetForget_injective hzy
+    exact hz
+
+instance : SMul NewPerm NewSet where
+  smul ρ x := ⟨ρ • x.c, (Code.smul_even ρ).mpr x.hc, by
+    obtain ⟨S, hS⟩ := x.hS
+    use ρᵁ • S
+    intro ρ' hρ'
+    have := hS (ρ⁻¹ * ρ' * ρ) ?_
+    · rwa [mul_smul, mul_smul, inv_smul_eq_iff] at this
+    · rwa [NewPerm.forget_mul, NewPerm.forget_mul, mul_smul, mul_smul,
+        NewPerm.forget_inv, inv_smul_eq_iff] ⟩
+
+@[simp]
+theorem NewSet.smul_c (ρ : NewPerm) (x : NewSet) :
+    (ρ • x).c = ρ • x.c :=
+  rfl
+
+instance : MulAction NewPerm NewSet where
+  one_smul x := by
+    ext : 1
+    rw [NewSet.smul_c, one_smul]
+  mul_smul ρ₁ ρ₂ x := by
+    ext : 1
+    simp only [NewSet.smul_c, mul_smul]
+
+def newPreModelData : PreModelData α where
+  TSet := NewSet
+  AllPerm := NewPerm
+  tSetForget := (·ᵁ)
+  allPermForget := (·ᵁ)
+
+theorem NewPerm.forget_injective (ρ₁ ρ₂ : NewPerm) (h : ρ₁ᵁ = ρ₂ᵁ) : ρ₁ = ρ₂ := by
+  ext β hβ : 3
+  apply allPermForget_injective
+  have := congr_arg (· ↘ hβ.elim) h
+  simp only [forget_sderiv] at this
+  exact this
+
+theorem NewSet.forget_injective (x y : NewSet) (h : xᵁ = yᵁ) : x = y := by
+  ext : 1
+  apply Code.ext' x.hc y.hc
+  intro β _
+  ext z
+  rw [NewSet.mem_members, NewSet.mem_members, h]
+
+theorem NewPerm.smul_forget (ρ : NewPerm) (x : NewSet) : (ρ • x)ᵁ = ρᵁ • xᵁ := by
+  rw [StrSet.coe_ext_iff]
+  intro β hβ z
+  haveI : LtLevel β := ⟨hβ⟩
+  rw [StrSet.mem_smul_iff, NewSet.typedMem_forget, NewSet.typedMem_forget,
+    NewSet.smul_c, smul_members]
+  constructor
+  · rintro ⟨y, hy, rfl⟩
+    refine ⟨(ρ.sderiv β)⁻¹ • y, ?_, ?_⟩
+    · rwa [Set.mem_smul_set_iff_inv_smul_mem] at hy
+    · simp only [ConNF.ModelData.smul_forget, allPermForget_inv, forget_sderiv]
+  · rintro ⟨y, hy, hyz⟩
+    rw [eq_inv_smul_iff] at hyz
+    cases hyz
+    refine ⟨ρ.sderiv β • y, Set.smul_mem_smul_set hy, ?_⟩
+    simp only [ConNF.ModelData.smul_forget, forget_sderiv]
+
+theorem NewSet.exists_support (x : letI := newPreModelData; TSet α) :
+    letI := newPreModelData
+    ∃ S : Support α, S.Supports x := by
+  letI := newPreModelData
+  obtain ⟨S, hS⟩ := x.hS
+  refine ⟨S, ?_, λ h ↦ (WithBot.bot_ne_coe.symm h).elim⟩
+  intro ρ hρ
+  apply NewSet.ext
+  exact hS ρ hρ
+
+def newModelData : ModelData α where
+  tSetForget_injective' := NewSet.forget_injective
+  allPermForget_injective' := NewPerm.forget_injective
+  allPermForget_one := NewPerm.forget_one
+  allPermForget_mul := NewPerm.forget_mul
+  smul_forget := NewPerm.smul_forget
+  exists_support := NewSet.exists_support
+  __ := newPreModelData
 
 end ConNF
