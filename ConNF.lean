@@ -1,4 +1,5 @@
 import ConNF.Aux.Cardinal
+import ConNF.Aux.InductiveConstruction
 import ConNF.Aux.Ordinal
 import ConNF.Aux.PermutativeExtension
 import ConNF.Aux.ReflTransGen
@@ -7,6 +8,7 @@ import ConNF.Aux.Set
 import ConNF.Aux.Transfer
 import ConNF.Aux.WellOrder
 import ConNF.Construction.Code
+import ConNF.Construction.MainInduction
 import ConNF.Construction.NewModelData
 import ConNF.Counting.BaseCoding
 import ConNF.Counting.BaseCounting
