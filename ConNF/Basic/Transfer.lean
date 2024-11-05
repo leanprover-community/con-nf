@@ -1,5 +1,5 @@
 import Mathlib.Logic.Equiv.TransferInstance
-import ConNF.Aux.Ordinal
+import ConNF.Basic.Ordinal
 
 universe u v
 

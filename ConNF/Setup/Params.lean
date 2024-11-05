@@ -1,8 +1,8 @@
 import Mathlib.Order.Interval.Set.Infinite
-import ConNF.Aux.Cardinal
-import ConNF.Aux.Ordinal
-import ConNF.Aux.Transfer
-import ConNF.Aux.WellOrder
+import ConNF.Basic.Cardinal
+import ConNF.Basic.Ordinal
+import ConNF.Basic.Transfer
+import ConNF.Basic.WellOrder
 
 /-!
 # Model parameters

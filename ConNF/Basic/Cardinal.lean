@@ -1,5 +1,5 @@
 import Mathlib.SetTheory.Cardinal.Cofinality
-import ConNF.Aux.Rel
+import ConNF.Basic.Rel
 
 universe u v
 

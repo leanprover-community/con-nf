@@ -1,5 +1,5 @@
-import ConNF.Aux.Cardinal
-import ConNF.Aux.Rel
+import ConNF.Basic.Cardinal
+import ConNF.Basic.Rel
 
 universe u
 

@@ -1,4 +1,4 @@
-import ConNF.Aux.Rel
+import ConNF.Basic.Rel
 import ConNF.Setup.Small
 
 /-!

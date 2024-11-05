@@ -1,4 +1,4 @@
-import ConNF.Aux.WellOrder
+import ConNF.Basic.WellOrder
 import Mathlib.SetTheory.Cardinal.Ordinal
 
 noncomputable section

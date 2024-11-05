@@ -1,4 +1,4 @@
-import ConNF.Aux.PermutativeExtension
+import ConNF.Basic.PermutativeExtension
 import ConNF.FOA.BaseAction
 import ConNF.FOA.StrApprox
 

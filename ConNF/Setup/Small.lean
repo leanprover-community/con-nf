@@ -1,5 +1,5 @@
-import ConNF.Aux.Rel
-import ConNF.Aux.Set
+import ConNF.Basic.Rel
+import ConNF.Basic.Set
 import ConNF.Setup.Params
 
 /-!

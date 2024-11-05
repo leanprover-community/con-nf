@@ -1,5 +1,5 @@
 import ConNF.Construction.NewModelData
-import ConNF.Aux.InductiveConstruction
+import ConNF.Basic.InductiveConstruction
 
 /-!
 # New file
