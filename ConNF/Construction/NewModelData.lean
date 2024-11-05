@@ -1,3 +1,4 @@
+import Mathlib.Algebra.Group.Action.Option
 import ConNF.Construction.Code
 
 /-!
@@ -258,9 +259,9 @@ instance : MulAction NewPerm NewSet where
     simp only [NewSet.smul_c, mul_smul]
 
 def newPreModelData : PreModelData α where
-  TSet := NewSet
+  TSet := Option NewSet
   AllPerm := NewPerm
-  tSetForget := (·ᵁ)
+  tSetForget x := x.elim (StrSet.coeEquiv.symm λ _ _ ↦ ∅) (·ᵁ)
   allPermForget := (·ᵁ)
 
 theorem NewPerm.forget_injective (ρ₁ ρ₂ : NewPerm) (h : ρ₁ᵁ = ρ₂ᵁ) : ρ₁ = ρ₂ := by
@@ -312,5 +313,51 @@ def newModelData : ModelData α where
   smul_forget := NewPerm.smul_forget
   exists_support := NewSet.exists_support
   __ := newPreModelData
+
+theorem Code.hasSet (c : Code)
+    (hc : ∃ S : Support α, ∀ ρ : NewPerm, ρᵁ • S = S → ρ • c = c) :
+    ∃ x : NewSet, Represents x.c c := by
+  obtain ⟨d, hd⟩ := represents_cofunctional.surjective c
+  refine ⟨⟨d, hd.even, ?_⟩, hd⟩
+  obtain ⟨S, hS⟩ := hc
+  use S
+  intro ρ hρ
+  have := hS ρ hρ
+  have hρd := hd.smul ρ
+  rw [this] at hρd
+  rw [← represents_cofunctional.injective hd hρd]
+
+def Code.toSet (c : Code)
+    (hc : ∃ S : Support α, ∀ ρ : NewPerm, ρᵁ • S = S → ρ • c = c) :
+    NewSet :=
+  (c.hasSet hc).choose
+
+theorem Code.toSet_spec (c : Code)
+    (hc : ∃ S : Support α, ∀ ρ : NewPerm, ρᵁ • S = S → ρ • c = c) :
+    Represents (c.toSet hc).c c :=
+  (c.hasSet hc).choose_spec
+
+def NearLitter.code (N : NearLitter) : Code :=
+  ⟨⊥, {x | StrSet.botEquiv xᵁ ∈ Nᴬ}, by
+    have : #Nᴬ ≠ 0 := sorry
+    rw [Cardinal.mk_ne_zero_iff_nonempty] at this
+    obtain ⟨a, ha⟩ := this
+     ⟩
+
+def newTyped (N : NearLitter) : NewSet :=
+  sorry
+
+local instance : ModelData α := newModelData
+
+def newPositionDeny (t : Tangle α) : Set μ :=
+  pos '' {N | t.set = some (newTyped N)} ∪
+    pos '' (t.supportᴬ.image Prod.snd : Set Atom) ∪
+    pos '' (t.supportᴺ.image Prod.snd : Set NearLitter)
+
+theorem card_newPositionDeny (t : Tangle α) :
+    #(newPositionDeny t) < (#μ).ord.cof := sorry
+
+def newPosition (h : #(Tangle α) ≤ #μ) : Position (Tangle α) where
+  pos := ⟨funOfDeny h newPositionDeny card_newPositionDeny, funOfDeny_injective _ _ _⟩
 
 end ConNF

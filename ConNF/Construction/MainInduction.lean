@@ -27,10 +27,14 @@ structure Motive (α : Λ) where
 
 structure Hypothesis (α : Λ) (M : Motive α) (N : (β : Λ) → β < α → Motive β) where
 
-theorem card_tangle_bot [ModelData ⊥] : #(Tangle ⊥) = #μ := sorry
+theorem card_tangle_bot_le [ModelData ⊥] : #(Tangle ⊥) ≤ #μ := by
+  apply card_tangle_le_of_card_tSet
+  apply (mk_le_of_injective (tSetForget_injective' (α := ⊥))).trans
+  apply (mk_le_of_injective StrSet.botEquiv.injective).trans
+  rw [card_atom]
 
 def botPosition [ModelData ⊥] : Position (Tangle ⊥) where
-  pos := ⟨funOfDeny card_tangle_bot.le (λ t ↦ {pos (StrSet.botEquiv t.setᵁ)})
+  pos := ⟨funOfDeny card_tangle_bot_le (λ t ↦ {pos (StrSet.botEquiv t.setᵁ)})
       (λ _ ↦ (mk_singleton _).trans_lt (one_lt_aleph0.trans aleph0_lt_μ_ord_cof)),
     funOfDeny_injective _ _ _⟩
 

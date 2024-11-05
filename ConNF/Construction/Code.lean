@@ -210,6 +210,9 @@ inductive Represents : Rel Code Code
   | refl (c : Code) : c.Even → Represents c c
   | cloud (c d : Code) : c.Even → Cloud c d → Represents c d
 
+theorem Represents.even {c d : Code} (h : Represents c d) : c.Even := by
+  cases h <;> assumption
+
 theorem represents_injective : Represents.Injective := by
   constructor
   rintro c₁ c₂ d (⟨_, hc₁⟩ | ⟨_, _, hc₁, hc₁d⟩) (⟨_, hc₂⟩ | ⟨_, _, hc₂, hc₂d⟩)

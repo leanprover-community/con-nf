@@ -188,6 +188,17 @@ theorem Tangle.smul_nearLitter_eq_of_mem_support {α : TypeIndex} [ModelData α]
     ρ₁ᵁ A • N = ρ₂ᵁ A • N :=
   Enumeration.eq_of_smul_eq_smul (congr_arg (λ t ↦ (t.support ⇘. A)ᴺ) h) N hN
 
+theorem card_tangle_le_of_card_tSet {α : TypeIndex} [ModelData α] (h : #(TSet α) ≤ #μ) :
+    #(Tangle α) ≤ #μ := by
+  have := mk_le_of_injective (f := λ t : Tangle α ↦ (t.set, t.support)) ?_
+  · apply this.trans
+    rw [mk_prod, lift_id, lift_id]
+    apply mul_le_of_le μ_isStrongLimit.aleph0_le h
+    rw [card_support]
+  · intro t₁ t₂ ht
+    rw [Prod.mk.injEq] at ht
+    exact Tangle.ext ht.1 ht.2
+
 /-!
 ## Criteria for supports
 -/
