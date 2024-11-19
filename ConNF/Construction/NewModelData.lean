@@ -264,6 +264,30 @@ def newPreModelData : PreModelData α where
   tSetForget x := x.elim (StrSet.coeEquiv.symm λ _ _ ↦ ∅) (·ᵁ)
   allPermForget := (·ᵁ)
 
+@[simp]
+theorem newPreModelData.tSetForget_none :
+    newPreModelData.tSetForget none = (StrSet.coeEquiv.symm λ _ _ ↦ ∅) :=
+  rfl
+
+@[simp]
+theorem newPreModelData.tSetForget_some (x : NewSet) :
+    newPreModelData.tSetForget (some x) = xᵁ :=
+  rfl
+
+@[simp]
+theorem newPreModelData.tSetForget_none' :
+    (show @TSet _ α newPreModelData from none)ᵁ = (StrSet.coeEquiv.symm λ _ _ ↦ ∅) :=
+  rfl
+
+@[simp]
+theorem newPreModelData.tSetForget_some' (x : NewSet) :
+    (show @TSet _ α newPreModelData from some x)ᵁ = xᵁ :=
+  rfl
+
+theorem StrSet.smul_none (π : StrPerm α) :
+    π • (StrSet.coeEquiv.symm λ _ _ ↦ ∅ : StrSet α) = StrSet.coeEquiv.symm λ _ _ ↦ ∅ := by
+  sorry
+
 theorem NewPerm.forget_injective (ρ₁ ρ₂ : NewPerm) (h : ρ₁ᵁ = ρ₂ᵁ) : ρ₁ = ρ₂ := by
   ext β hβ : 3
   apply allPermForget_injective
@@ -299,18 +323,38 @@ theorem NewSet.exists_support (x : letI := newPreModelData; TSet α) :
     letI := newPreModelData
     ∃ S : Support α, S.Supports x := by
   letI := newPreModelData
-  obtain ⟨S, hS⟩ := x.hS
-  refine ⟨S, ?_, λ h ↦ (WithBot.bot_ne_coe.symm h).elim⟩
-  intro ρ hρ
-  apply NewSet.ext
-  exact hS ρ hρ
+  obtain (_ | x) := x
+  · use ⟨.empty, .empty⟩
+    constructor
+    · intros
+      rfl
+    · rintro ⟨⟩
+  · obtain ⟨S, hS⟩ := x.hS
+    refine ⟨S, ?_, λ h ↦ (WithBot.bot_ne_coe.symm h).elim⟩
+    intro ρ hρ
+    apply congr_arg some
+    apply NewSet.ext
+    exact hS ρ hρ
+
+theorem NewSet.coe_ne_empty (x : NewSet) : xᵁ ≠ (StrSet.coeEquiv.symm λ _ _ ↦ ∅) := by
+  sorry
 
 def newModelData : ModelData α where
-  tSetForget_injective' := NewSet.forget_injective
+  tSetForget_injective' := by
+    rintro (_ | x) (_ | y) h
+    · rfl
+    · cases NewSet.coe_ne_empty y h.symm
+    · cases NewSet.coe_ne_empty x h
+    · rw [NewSet.forget_injective x y h]
+  tSetForget_surjective_of_bot' := by rintro ⟨⟩
   allPermForget_injective' := NewPerm.forget_injective
   allPermForget_one := NewPerm.forget_one
   allPermForget_mul := NewPerm.forget_mul
-  smul_forget := NewPerm.smul_forget
+  smul_forget := by
+    rintro ρ (_ | x)
+    · rw [newPreModelData.tSetForget_none', StrSet.smul_none]
+      rfl
+    · exact NewPerm.smul_forget ρ x
   exists_support := NewSet.exists_support
   __ := newPreModelData
 
@@ -342,9 +386,14 @@ def NearLitter.code (N : NearLitter) : Code :=
     have : #Nᴬ ≠ 0 := sorry
     rw [Cardinal.mk_ne_zero_iff_nonempty] at this
     obtain ⟨a, ha⟩ := this
-     ⟩
+    obtain ⟨x, hx⟩ := tSetForget_surjective (StrSet.botEquiv.symm a)
+    use x
+    rwa [Set.mem_setOf_eq, hx, Equiv.apply_symm_apply]⟩
 
 def newTyped (N : NearLitter) : NewSet :=
+  N.code.toSet sorry
+
+def newSingleton {γ : Λ} [LtLevel γ] (x : TSet γ) : NewSet :=
   sorry
 
 local instance : ModelData α := newModelData
@@ -359,5 +408,15 @@ theorem card_newPositionDeny (t : Tangle α) :
 
 def newPosition (h : #(Tangle α) ≤ #μ) : Position (Tangle α) where
   pos := ⟨funOfDeny h newPositionDeny card_newPositionDeny, funOfDeny_injective _ _ _⟩
+
+def newTypedNearLitters (h : #(Tangle α) ≤ #μ) :
+    letI := newPosition h; TypedNearLitters α :=
+  letI := newPosition h
+  {
+    typed := some ∘ newTyped
+    typed_injective := sorry
+    pos_le_pos_of_typed := sorry
+    smul_typed := sorry
+  }
 
 end ConNF

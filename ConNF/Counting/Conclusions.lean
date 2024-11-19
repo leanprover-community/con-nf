@@ -78,4 +78,8 @@ theorem card_tSet_le (β : TypeIndex) [LeLevel β] :
     apply mul_le_of_le μ_isStrongLimit.aleph0_le (card_codingFunction β).le
     rw [card_support]
 
+theorem card_tangle_le (β : TypeIndex) [LeLevel β] :
+    #(Tangle β) ≤ #μ :=
+  card_tangle_le_of_card_tSet (card_tSet_le β)
+
 end ConNF

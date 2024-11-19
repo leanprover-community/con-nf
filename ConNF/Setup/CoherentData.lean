@@ -39,7 +39,7 @@ instance [LeData] : (β : TypeIndex) → [LtLevel β] → Position (Tangle β) :
 
 class PreCoherentData extends LeData where
   allPermSderiv {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (h : γ < β) : AllPerm β → AllPerm γ
-  singleton {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (h : γ < β) : TSet γ → TSet β
+  singleton {β γ : Λ} [LeLevel β] [LeLevel γ] (h : (γ : TypeIndex) < β) : TSet γ → TSet β
 
 export PreCoherentData (singleton)
 
@@ -92,8 +92,9 @@ class CoherentData extends PreCoherentData where
       (ρs hε)ᵁ ↘. • fuzz hδε t = fuzz hδε (ρs hδ • t)) :
     ∃ ρ : AllPerm γ, ∀ δ : TypeIndex, [LtLevel δ] → ∀ hδ : δ < γ, ρ ↘ hδ = ρs hδ
   tSet_ext {β γ : Λ} [LeLevel β] [LeLevel γ] (hγ : (γ : TypeIndex) < β) (x y : TSet β)
-      (h : ∀ z : TSet γ, z ∈[hγ] x ↔ z ∈[hγ] y) : x = y
-  typedMem_singleton_iff {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (hγ : γ < β) (x y : TSet γ) :
+    (h : ∀ z : TSet γ, z ∈[hγ] x ↔ z ∈[hγ] y) : x = y
+  typedMem_singleton_iff {β γ : Λ} [LeLevel β] [LeLevel γ]
+    (hγ : (γ : TypeIndex) < β) (x y : TSet γ) :
     y ∈[hγ] singleton hγ x ↔ y = x
 
 export CoherentData (allPermSderiv_forget pos_atom_lt_pos pos_nearLitter_lt_pos smul_fuzz
