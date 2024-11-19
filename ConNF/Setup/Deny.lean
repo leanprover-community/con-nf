@@ -31,7 +31,7 @@ theorem initialWellOrder_type {X : Type _} :
     letI := initialWellOrder X
     type ((· < ·) : X → X → Prop) = (#X).ord := by
   have := Equiv.ltWellOrder_type (initialEquiv (X := X))
-  rwa [Ordinal.lift_id, Ordinal.lift_id, type_lt] at this
+  rwa [Ordinal.lift_id, Ordinal.lift_id, type_toType] at this
 
 theorem initialWellOrder_card_Iio {X : Type _} :
     letI := initialWellOrder X

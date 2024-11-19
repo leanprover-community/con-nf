@@ -61,7 +61,7 @@ end addOrbit
 
 /-- An upper bound for a chain of approximations. -/
 def upperBound (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c) : StrApprox β :=
-  λ A ↦ BaseApprox.upperBound ((· A) '' c) (hc.image _ _ (λ _ _ h ↦ h A))
+  λ A ↦ BaseApprox.upperBound ((· A) '' c) (hc.image _ _ _ (λ _ _ h ↦ h A))
 
 theorem le_upperBound (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c) :
     ∀ ψ ∈ c, ψ ≤ upperBound c hc :=

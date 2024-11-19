@@ -94,7 +94,7 @@ theorem strPerm_smul_coe {α : Λ} (π : StrPerm α) (x : StrSet α) :
 
 theorem one_strPerm_smul {α : TypeIndex} (x : StrSet α) : strPerm_smul 1 x = x := by
   induction α using WellFoundedLT.induction
-  case a α ih =>
+  case ind α ih =>
     cases α using WithBot.recBotCoe
     case bot => rw [strPerm_smul_bot_def, Tree.one_apply, one_smul, Equiv.symm_apply_apply]
     case coe α =>
@@ -105,7 +105,7 @@ theorem one_strPerm_smul {α : TypeIndex} (x : StrSet α) : strPerm_smul 1 x = x
 theorem mul_strPerm_smul {α : TypeIndex} (π₁ π₂ : StrPerm α) (x : StrSet α) :
     strPerm_smul (π₁ * π₂) x = strPerm_smul π₁ (strPerm_smul π₂ x) := by
   induction α using WellFoundedLT.induction
-  case a α ih =>
+  case ind α ih =>
     cases α using WithBot.recBotCoe
     case bot =>
       simp only [strPerm_smul_bot_def, Tree.mul_apply, mul_smul, Equiv.apply_symm_apply]

@@ -26,7 +26,7 @@ theorem card_codingFunction (β : TypeIndex) [LeLevel β] :
   revert β
   intro β
   induction β using WellFoundedLT.induction
-  case a β ih =>
+  case ind β ih =>
   intro
   cases β using WithBot.recBotCoe
   case bot => exact card_bot_codingFunction_lt

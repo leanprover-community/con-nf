@@ -1,5 +1,6 @@
 import ConNF.Basic.WellOrder
-import Mathlib.SetTheory.Cardinal.Ordinal
+import Mathlib.SetTheory.Cardinal.Aleph
+import Mathlib.SetTheory.Cardinal.Arithmetic
 
 noncomputable section
 universe u v
@@ -54,7 +55,7 @@ theorem isLimit_iff_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWell
 
 theorem type_Iio_lt {α : Type u} [LtWellOrder α] (x : α) :
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) < type ((· < ·) : α → α → Prop) :=
-  typein_lt_type _ x
+  @typein_lt_type _ _ (inferInstanceAs (IsWellOrder α (· < ·))) x
 
 def iicOrderIso {α : Type u} [LtWellOrder α] (x : α) :
     (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) ≃r
@@ -92,29 +93,6 @@ theorem type_Iic_lt {α : Type u} [LtWellOrder α] [NoMaxOrder α] (x : α) :
 /-!
 ## Lifting ordinals
 -/
-
-@[simp]
-theorem typein_ordinal (o : Ordinal.{u}) :
-    -- TODO: Why can't Lean find this instance?
-    letI := inferInstanceAs (IsWellOrder Ordinal (· < ·))
-    typein (· < ·) o = lift.{u + 1} o := by
-  letI := inferInstanceAs (IsWellOrder Ordinal (· < ·))
-  induction o using Ordinal.induction with
-  | h o ih =>
-    apply le_antisymm
-    · by_contra! h
-      have := ih (enum ((· < ·) : Ordinal → Ordinal → Prop)
-          ⟨lift.{u + 1} o, h.trans (typein_lt_type _ o)⟩) ?_
-      · simp only [typein_enum, lift_inj] at this
-        conv_rhs at h => rw [this]
-        simp only [typein_enum, lt_self_iff_false] at h
-      · conv_rhs => rw [← enum_typein (· < ·) o]
-        exact enum_lt_enum.mpr h
-    · by_contra! h
-      rw [Ordinal.lt_lift_iff] at h
-      obtain ⟨o', ho'₁, ho'₂⟩ := h
-      rw [← ih o' ho'₂, typein_inj] at ho'₁
-      exact ho'₂.ne ho'₁
 
 instance ULift.isTrichotomous {α : Type u} {r : α → α → Prop} [IsTrichotomous α r] :
     IsTrichotomous (ULift.{v} α) (InvImage r ULift.down) := by
@@ -158,7 +136,7 @@ theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {
     obtain ⟨y, hy⟩ := f.mem_range_of_rel x.down.prop
     refine ⟨ULift.up ⟨y, ?_⟩, ?_⟩
     · have := x.down.prop
-      rwa [Set.mem_setOf_eq, ← hy, f.map_rel_iff] at this
+      rwa [← hy, f.map_rel_iff] at this
     · apply ULift.down_injective
       apply Subtype.coe_injective
       simp only [Set.mem_setOf_eq, Set.coe_setOf, RelEmbedding.coe_mk, Function.Embedding.coeFn_mk]
@@ -179,7 +157,7 @@ theorem type_Iio (o : Ordinal.{u}) :
   have := Ordinal.lift_type_eq.{u + 1, u, u + 1}
     (r := ((· < ·) : Set.Iio o → Set.Iio o → Prop))
     (s := ((· < ·) : o.toType → o.toType → Prop))
-  rw [lift_id, type_lt] at this
+  rw [lift_id, type_toType] at this
   rw [this]
   exact ⟨o.enumIsoToType.toRelIsoLT⟩
 
@@ -243,7 +221,7 @@ def iioAddMonoid : AddMonoid (Set.Iio c.ord) where
   __ := iioZero h
 
 theorem nat_lt_ord (h : ℵ₀ ≤ c) (n : ℕ) : n < c.ord := by
-  apply (nat_lt_omega n).trans_le
+  apply (nat_lt_omega0 n).trans_le
   apply ord_mono at h
   rwa [ord_aleph0] at h
 

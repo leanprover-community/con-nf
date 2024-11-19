@@ -35,7 +35,7 @@ theorem Small.lt : Small s → #s < #κ :=
 -/
 
 theorem small_of_subsingleton (h : s.Subsingleton) : Small s :=
-  h.cardinal_mk_le_one.trans_lt <| one_lt_aleph0.trans_le aleph0_lt_κ.le
+  h.cardinalMk_le_one.trans_lt <| one_lt_aleph0.trans_le aleph0_lt_κ.le
 
 @[simp]
 theorem small_empty : Small (∅ : Set α) :=

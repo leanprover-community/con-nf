@@ -34,7 +34,7 @@ instance : WellFoundedRelation TypeIndex where
 protected theorem TypeIndex.type :
     type ((· < ·) : TypeIndex → TypeIndex → Prop) = type ((· < ·) : Λ → Λ → Prop) := by
   rw [type_withBot]
-  exact one_add_of_omega_le <| omega_le_of_isLimit Λ_type_isLimit
+  exact one_add_of_omega0_le <| omega0_le_of_isLimit Λ_type_isLimit
 
 @[simp]
 protected theorem TypeIndex.card :

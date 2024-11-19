@@ -24,46 +24,30 @@ theorem lt_def [LT β] (x y : α) :
   Iff.rfl
 
 protected def min [Min β] : Min α where
-  min x y := e.symm (min (e x) (e y))
+  min x y := e.symm (e x ⊓ e y)
 
 theorem min_def [Min β] (x y : α) :
     letI := e.min
-    min x y = e.symm (min (e x) (e y)) :=
-  rfl
-
-protected def max [Max β] : Max α where
-  max x y := e.symm (max (e x) (e y))
-
-theorem max_def [Max β] (x y : α) :
-    letI := e.max
-    max x y = e.symm (max (e x) (e y)) :=
-  rfl
-
-protected def inf [Inf β] : Inf α where
-  inf x y := e.symm (e x ⊓ e y)
-
-theorem inf_def [Inf β] (x y : α) :
-    letI := e.inf
     x ⊓ y = e.symm (e x ⊓ e y) :=
   rfl
 
-theorem apply_inf [Inf β] (x y : α) :
-    letI := e.inf
+theorem apply_min [Min β] (x y : α) :
+    letI := e.min
     e (x ⊓ y) = e x ⊓ e y := by
-  rw [inf_def, apply_symm_apply]
+  rw [min_def, apply_symm_apply]
 
-protected def sup [Sup β] : Sup α where
-  sup x y := e.symm (e x ⊔ e y)
+protected def max [Max β] : Max α where
+  max x y := e.symm (e x ⊔ e y)
 
-theorem sup_def [Sup β] (x y : α) :
-    letI := e.sup
+theorem max_def [Max β] (x y : α) :
+    letI := e.max
     x ⊔ y = e.symm (e x ⊔ e y) :=
   rfl
 
-theorem apply_sup [Sup β] (x y : α) :
-    letI := e.sup
+theorem apply_max [Max β] (x y : α) :
+    letI := e.max
     e (x ⊔ y) = e x ⊔ e y := by
-  rw [sup_def, apply_symm_apply]
+  rw [max_def, apply_symm_apply]
 
 protected def compare [Ord β] : Ord α where
   compare x y := compare (e x) (e y)
@@ -107,10 +91,10 @@ protected def partialOrder [PartialOrder β] : PartialOrder α :=
   PartialOrder.lift e e.injective
 
 protected def linearOrder [LinearOrder β] : LinearOrder α :=
-  letI := e.sup
-  letI := e.inf
+  letI := e.max
+  letI := e.min
   letI := e.compare
-  LinearOrder.liftWithOrd e e.injective e.apply_sup e.apply_inf e.compare_def
+  LinearOrder.liftWithOrd e e.injective e.apply_max e.apply_min e.compare_def
 
 protected def ltWellOrder [LtWellOrder β] : LtWellOrder α where
   wf := InvImage.wf e (inferInstanceAs <| IsWellFounded β (· < ·)).wf

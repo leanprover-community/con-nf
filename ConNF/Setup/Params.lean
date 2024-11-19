@@ -46,22 +46,23 @@ def Params.minimal : Params where
     rw [mk_out]
     exact isRegular_aleph_one
   μ_isStrongLimit := by
-    rw [mk_out]
-    exact isStrongLimit_beth <| IsLimit.isSuccPrelimit <| ord_aleph_isLimit 1
+    rw [mk_out, ord_aleph]
+    exact isStrongLimit_beth <| IsLimit.isSuccPrelimit <| isLimit_omega 1
   κ_lt_μ := by
-    rw [mk_out, mk_out]
+    rw [mk_out, mk_out, ord_aleph]
     apply (aleph_le_beth 1).trans_lt
     rw [beth_strictMono.lt_iff_lt]
-    exact (ord_aleph_isLimit 1).one_lt
+    exact (isLimit_omega 1).one_lt
   κ_le_μ_ord_cof := by
     rw [mk_out, mk_out]
-    have := beth_normal.cof_le (aleph 1).ord
+    have := isNormal_beth.cof_le (aleph 1).ord
     rwa [isRegular_aleph_one.cof_eq] at this
   Λ_type_le_μ_ord_cof := by
     rw [type_nat_lt, mk_out]
-    have := beth_normal.cof_le (aleph 1).ord
+    apply (omega0_le_of_isLimit (isLimit_omega 1)).trans
+    have := isNormal_beth.cof_le (aleph 1).ord
     rw [isRegular_aleph_one.cof_eq, ← ord_le_ord] at this
-    exact (omega_le_of_isLimit (ord_aleph_isLimit 1)).trans this
+    rwa [ord_aleph] at this ⊢
 
 def Params.inaccessible.{v} : Params where
   Λ := (Cardinal.univ.{v, v + 1}).ord.toType
@@ -73,8 +74,8 @@ def Params.inaccessible.{v} : Params where
   Λ_noMaxOrder := by
     apply noMaxOrder_of_isLimit
     change (type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop)).IsLimit
-    rw [type_lt]
-    apply ord_isLimit
+    rw [type_toType]
+    apply isLimit_ord
     exact univ_inaccessible.1.le
   aleph0_lt_κ := by
     rw [mk_uLift, mk_out, ← lift_aleph0.{v + 1, v}, lift_strictMono.lt_iff_lt]
@@ -94,7 +95,7 @@ def Params.inaccessible.{v} : Params where
     exact (lift_lt_univ _).le
   Λ_type_le_μ_ord_cof := by
     change type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop) ≤ _
-    rw [type_lt, mk_out, univ_inaccessible.2.1.cof_eq]
+    rw [type_toType, mk_out, univ_inaccessible.2.1.cof_eq]
 
 export Params (Λ κ μ aleph0_lt_κ κ_isRegular μ_isStrongLimit κ_lt_μ κ_le_μ_ord_cof
   Λ_type_le_μ_ord_cof)

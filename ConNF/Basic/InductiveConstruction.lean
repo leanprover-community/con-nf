@@ -22,7 +22,10 @@ structure IndHyp (i : I) (t : ∀ j, r j i → Part (α j)) : Prop where
     (λ k h' ↦ (t k (Trans.trans h' h)).get (dom k _))
 
 def core : ∀ i, Part (α i) :=
-  inst.fix λ i t ↦ ⟨IndHyp i t, λ h ↦ f i (λ j h' ↦ (t j h').get (h.dom j h')) h.prop⟩
+  inst.fix _ λ i t ↦ {
+    Dom := IndHyp i t
+    get := λ h ↦ f i (λ j h' ↦ (t j h').get (h.dom j h')) h.prop
+  }
 
 theorem core_eq (i : I) :
     core f i = ⟨IndHyp i (λ j _ ↦ core f j),
@@ -38,7 +41,7 @@ theorem core_get_eq (i : I) (h : (core f i).Dom) :
   exact h.symm
 
 theorem core_dom (hp : ∀ i d h, p i (f i d h) d) : ∀ i, (core f i).Dom := by
-  refine inst.fix ?_
+  refine inst.fix _ ?_
   intro i ih
   rw [core_eq]
   refine ⟨ih, ?_⟩

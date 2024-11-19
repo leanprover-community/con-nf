@@ -75,8 +75,7 @@ theorem inflexible_of_inflexible_smul {A : β ↝ ⊥} {N₁ N₂ : NearLitter}
 
 theorem litter_eq_of_flexible_smul {A : β ↝ ⊥} {N₁ N₂ N₃ N₄ : NearLitter}
     (h₁₂ : convNearLitters S (ρᵁ • S) A N₁ N₂) (h₃₄ : convNearLitters S (ρᵁ • S) A N₃ N₄)
-    (h₁ : ¬Inflexible A N₁ᴸ) (h₂ : ¬Inflexible A N₂ᴸ)
-    (h₃ : ¬Inflexible A N₃ᴸ) (h₄ : ¬Inflexible A N₄ᴸ) (h₁₃ : N₁ᴸ = N₃ᴸ) :
+    (h₁₃ : N₁ᴸ = N₃ᴸ) :
     N₂ᴸ = N₄ᴸ := by
   rw [convNearLitters_smul_iff_left] at h₁₂ h₃₄
   rw [h₁₂.2, h₃₄.2, BasePerm.smul_nearLitter_litter, BasePerm.smul_nearLitter_litter, h₁₃]
@@ -131,7 +130,9 @@ theorem sameSpecLe_smul :
   case convAtoms_injective => exact S.smul_convAtoms_injective ρ
   case atomMemRel_le => exact S.atomMemRel_smul_le ρ
   case inflexible_of_inflexible => exact S.inflexible_of_inflexible_smul ρ
-  case litter_eq_of_flexible => exact S.litter_eq_of_flexible_smul ρ
+  case litter_eq_of_flexible =>
+    intros
+    apply S.litter_eq_of_flexible_smul ρ <;> assumption
   case atoms_of_inflexible => exact S.atoms_of_inflexible_smul ρ
   case nearLitters_of_inflexible => exact S.nearLitters_of_inflexible_smul ρ
 
