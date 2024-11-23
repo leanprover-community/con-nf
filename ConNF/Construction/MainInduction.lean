@@ -15,7 +15,7 @@ In this file...
 noncomputable section
 universe u
 
-open Cardinal Ordinal
+open Cardinal Ordinal WithBot
 
 namespace ConNF
 
@@ -26,10 +26,10 @@ structure Motive (α : Λ) where
   pos : Position (Tangle α)
   typed : TypedNearLitters α
 
-structure Hypothesis (α : Λ) (M : Motive α) (N : (β : Λ) → β < α → Motive β) where
-  allPermSderiv {β : Λ} (h : β < α) : M.data.AllPerm → (N β h).data.AllPerm
+structure Hypothesis {α : Λ} (M : Motive α) (N : (β : Λ) → (β : TypeIndex) < α → Motive β) where
+  allPermSderiv {β : Λ} (h : (β : TypeIndex) < α) : M.data.AllPerm → (N β h).data.AllPerm
   allPermBotSderiv : M.data.AllPerm → botModelData.AllPerm
-  singleton {β : Λ} (h : β < α) : (N β h).data.TSet → M.data.TSet
+  singleton {β : Λ} (h : (β : TypeIndex) < α) : (N β h).data.TSet → M.data.TSet
 
 theorem card_tangle_bot_le [ModelData ⊥] : #(Tangle ⊥) ≤ #μ := by
   apply card_tangle_le_of_card_tSet
@@ -47,209 +47,146 @@ theorem pos_tangle_bot [ModelData ⊥] (t : Tangle ⊥) :
     pos (StrSet.botEquiv t.setᵁ) < pos t :=
   funOfDeny_gt_deny _ _ _ _ _ rfl
 
-def ltData (α : Λ) (M : (β : Λ) → β < α → Motive β) :
+variable {α : Λ} (M : (β : Λ) → (β : TypeIndex) < α → Motive β)
+
+def ltData :
     letI : Level := ⟨α⟩; LtData :=
   letI : Level := ⟨α⟩
   letI data : (β : TypeIndex) → [LtLevel β] → ModelData β :=
     λ β hβ ↦ β.recBotCoe (λ _ ↦ botModelData)
-      (λ β hβ ↦ (M β (WithBot.coe_lt_coe.mp hβ.elim)).data) hβ
+      (λ β hβ ↦ (M β hβ.elim).data) hβ
   letI positions : (β : TypeIndex) → [LtLevel β] → Position (Tangle β) :=
     λ β hβ ↦ β.recBotCoe (λ _ ↦ botPosition)
-      (λ β hβ ↦ (M β (WithBot.coe_lt_coe.mp hβ.elim)).pos) hβ
+      (λ β hβ ↦ (M β hβ.elim).pos) hβ
   letI typedNearLitters : (β : Λ) → [LtLevel β] → TypedNearLitters β :=
-    λ β hβ ↦ (M β (WithBot.coe_lt_coe.mp hβ.elim)).typed
+    λ β hβ ↦ (M β hβ.elim).typed
   LtData.mk (data := data) (positions := positions) (typedNearLitters := typedNearLitters)
 
-def newModelData' (α : Λ) (M : (β : Λ) → β < α → Motive β) :
+def newModelData' :
     letI : Level := ⟨α⟩; ModelData α :=
   letI : Level := ⟨α⟩
-  letI : LtData := ltData α M
+  letI : LtData := ltData M
   newModelData
 
-def castData (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (β : TypeIndex) [letI : Level := ⟨α⟩; LeLevel β] : ModelData β :=
-  if h : β = α then
-    cast (by simp_rw [h]) (newModelData' α M)
-  else
-    letI : Level := ⟨α⟩
-    haveI : LtLevel β := ⟨LeLevel.elim.lt_of_ne h⟩
-    (ltData α M).data β
-
-theorem castData_eq_of_eq (α : Λ) (M : (β : Λ) → β < α → Motive β) :
-    letI : Level := ⟨α⟩
-    letI : LeLevel α := ⟨le_rfl⟩
-    castData α M α = newModelData' α M := by
-  letI : Level := ⟨α⟩
-  rw [castData, dif_pos rfl]
-  rfl
-
-theorem castData_eq_of_lt (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (β : TypeIndex) [letI : Level := ⟨α⟩; LtLevel β] :
-    letI : Level := ⟨α⟩
-    castData α M β = (ltData α M).data β := by
-  letI : Level := ⟨α⟩
-  rw [castData, dif_neg]
-  rintro rfl
-  exact LtLevel.elim.ne rfl
-
-def liftCastDataLt (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    {D : (β : TypeIndex) → ModelData β → Type _}
-    (f : letI : Level := ⟨α⟩; (β : TypeIndex) → [LtLevel β] → D β ((ltData α M).data β))
-    (β : TypeIndex) [letI : Level := ⟨α⟩; LtLevel β] : D β (castData α M β) :=
-  cast (by rw [castData_eq_of_lt]) (f β)
-
-def liftCastDataLe (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    {D : (β : TypeIndex) → ModelData β → Type _} (β : TypeIndex)
-    (fβ : letI : Level := ⟨α⟩; [LtLevel β] → D β ((ltData α M).data β))
-    (fα : D α (newModelData' α M))
-    [letI : Level := ⟨α⟩; LeLevel β] : D β (castData α M β) :=
-  if h : β = α then
-    cast (by cases h; rw [castData_eq_of_eq]) fα
-  else
-    letI : Level := ⟨α⟩
-    haveI : LtLevel β := ⟨LeLevel.elim.lt_of_ne h⟩
-    cast (by rw [castData_eq_of_lt]) (fβ)
-
-theorem liftCastDataLe_eq_of_eq (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    {D : (β : TypeIndex) → ModelData β → Type _}
-    (fβ : letI : Level := ⟨α⟩; [LtLevel α] → D α ((ltData α M).data α))
-    (fα : D α (newModelData' α M)) :
-    letI : Level := ⟨α⟩; letI : LeLevel α := ⟨le_rfl⟩
-    liftCastDataLe α M α fβ fα = cast (by rw [castData_eq_of_eq]) fα := by
-  rw [liftCastDataLe, dif_pos rfl]
-
-theorem liftCastDataLe_eq_of_lt (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    {D : (β : TypeIndex) → ModelData β → Type _} (β : TypeIndex)
-    (fβ : letI : Level := ⟨α⟩; [LtLevel β] → D β ((ltData α M).data β))
-    (fα : D α (newModelData' α M))
-    [letI : Level := ⟨α⟩; LtLevel β] :
-    liftCastDataLe α M β fβ fα = cast (by rw [castData_eq_of_lt]) fβ := by
-  rw [liftCastDataLe, dif_neg]
-  rintro rfl
-  letI : Level := ⟨α⟩
-  exact LtLevel.elim.ne rfl
-
-def leData (α : Λ) (M : (β : Λ) → β < α → Motive β) :
+def leData :
     letI : Level := ⟨α⟩; LeData :=
   letI : Level := ⟨α⟩
-  letI data : (β : TypeIndex) → [LeLevel β] → ModelData β := castData α M
+  letI data : (β : TypeIndex) → [LeLevel β] → ModelData β :=
+    λ β hβ ↦ β.recBotCoe (λ _ ↦ botModelData)
+      (λ β hβ ↦ if h : β = α then
+          cast (by rw [h]) (newModelData' M)
+        else
+          (M β (LeLevel.elim.lt_of_ne (coe_injective.ne h))).data) hβ
   letI positions : (β : TypeIndex) → [LtLevel β] → Position (Tangle β) :=
-    liftCastDataLt α M
-      (D := λ β (x : ModelData β) ↦ Position (@Tangle _ β x)) (ltData α M).positions
+    λ β hβ ↦ β.recBotCoe (λ _ ↦ botPosition)
+      (λ β hβ ↦
+        cast (by
+          congr; unfold data; rw [recBotCoe_coe, dif_neg];
+          exact (LtLevel.elim (β := β)).ne ∘ congrArg WithBot.some)
+        (M β LtLevel.elim).pos) hβ
   LeData.mk (data := data) (positions := positions)
 
-theorem leData_tangle_α (α : Λ) (M : (β : Λ) → β < α → Motive β) :
-    letI : Level := ⟨α⟩; letI : LeLevel α := ⟨le_rfl⟩
-    (letI := leData α M; Tangle α) = (letI := newModelData' α M; Tangle α) := by
-  simp only [leData, instModelDataOfLeDataOfLeLevel, castData_eq_of_eq]
+theorem leData_data_bot :
+    (leData M).data ⊥ = botModelData :=
+  rfl
 
-def leDataTangleα (α : Λ) (M : (β : Λ) → β < α → Motive β) :
-    letI : Level := ⟨α⟩; letI : LeLevel α := ⟨le_rfl⟩
-    (letI := leData α M; Tangle α) ≃ (letI := newModelData' α M; Tangle α) :=
-  Equiv.cast (by simp only [leData, instModelDataOfLeDataOfLeLevel, castData_eq_of_eq])
+theorem leData_data_lt {β : Λ} (hβ : (β : TypeIndex) < α) :
+    (letI : Level := ⟨α⟩; letI : LeLevel β := ⟨hβ.le⟩; (leData M).data β) = (M β hβ).data := by
+  simp only [leData, recBotCoe_coe, dif_neg (hβ.ne ∘ congrArg WithBot.some)]
 
-theorem leData_tangle_lt (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (β : TypeIndex) [letI : Level := ⟨α⟩; LtLevel β] :
-    letI : Level := ⟨α⟩
-    (letI := leData α M; Tangle β) = (letI := ltData α M; Tangle β) := by
-  simp only [leData, instModelDataOfLeDataOfLeLevel, castData_eq_of_lt]
+theorem leData_data_eq :
+    (letI : Level := ⟨α⟩; letI : LeLevel α := ⟨le_rfl⟩; (leData M).data α) = newModelData' M := by
+  simp only [leData, recBotCoe_coe, dif_pos trivial, cast_eq]
 
-def leDataTangleLt (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (β : TypeIndex) [letI : Level := ⟨α⟩; LtLevel β] :
-    letI : Level := ⟨α⟩
-    (letI := leData α M; Tangle β) ≃ (letI := ltData α M; Tangle β) :=
-  Equiv.cast (leData_tangle_lt α M β)
+abbrev TSetLe (β : TypeIndex) (hβ : β ≤ α) : Type _ :=
+    letI : Level := ⟨α⟩; letI := leData M; letI : LeLevel β := ⟨hβ⟩
+    TSet β
 
-theorem leData_allPerm_α (α : Λ) (M : (β : Λ) → β < α → Motive β) :
-    letI : Level := ⟨α⟩; letI : LeLevel α := ⟨le_rfl⟩
-    (letI := leData α M; AllPerm α) = (letI := newModelData' α M; AllPerm α) := by
-  simp only [leData, instModelDataOfLeDataOfLeLevel, castData_eq_of_eq]
+abbrev AllPermLe (β : TypeIndex) (hβ : β ≤ α) : Type _ :=
+    letI : Level := ⟨α⟩; letI := leData M; letI : LeLevel β := ⟨hβ⟩
+    AllPerm β
 
-def leDataAllPermα (α : Λ) (M : (β : Λ) → β < α → Motive β) :
-    letI : Level := ⟨α⟩; letI : LeLevel α := ⟨le_rfl⟩
-    (letI := leData α M; AllPerm α) ≃ (letI := newModelData' α M; AllPerm α) :=
-  Equiv.cast (leData_allPerm_α α M)
+abbrev TangleLe (β : TypeIndex) (hβ : β ≤ α) : Type _ :=
+    letI : Level := ⟨α⟩; letI := leData M; letI : LeLevel β := ⟨hβ⟩
+    Tangle β
 
-theorem leData_allPerm_lt (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (β : TypeIndex) [letI : Level := ⟨α⟩; LtLevel β] :
-    letI : Level := ⟨α⟩
-    (letI := leData α M; AllPerm β) = (letI := ltData α M; AllPerm β) := by
-  simp only [leData, instModelDataOfLeDataOfLeLevel, castData_eq_of_lt]
+def castTSetLeBot :
+    TSetLe M ⊥ bot_le ≃ (letI := botModelData; TSet ⊥) :=
+  Equiv.refl _
 
-def leDataAllPermLt (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (β : TypeIndex) [letI : Level := ⟨α⟩; LtLevel β] :
-    letI : Level := ⟨α⟩
-    (letI := leData α M; AllPerm β) ≃ (letI := ltData α M; AllPerm β) :=
-  Equiv.cast (leData_allPerm_lt α M β)
+def castTSetLeLt {β : Λ} (hβ : (β : TypeIndex) < α) :
+    TSetLe M β hβ.le ≃ (M β hβ).data.TSet :=
+  Equiv.cast (by rw [TSetLe]; congr; exact leData_data_lt M hβ)
 
-def preCoherentData (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (H : (β : Λ) → (h : β < α) → Hypothesis β (M β h) λ γ h' ↦ M γ (h'.trans h)) :
+def castTSetLeEq {β : Λ} (hβ : (β : TypeIndex) = α) :
+    TSetLe M β hβ.le ≃ (newModelData' M).TSet :=
+  Equiv.cast (by cases hβ; rw [TSetLe]; congr; exact leData_data_eq M)
+
+def castAllPermLeBot :
+    AllPermLe M ⊥ bot_le ≃ (letI := botModelData; AllPerm ⊥) :=
+  Equiv.refl _
+
+def castAllPermLeLt {β : Λ} (hβ : (β : TypeIndex) < α) :
+    AllPermLe M β hβ.le ≃ (M β hβ).data.AllPerm :=
+  Equiv.cast (by rw [AllPermLe]; congr; exact leData_data_lt M hβ)
+
+def castAllPermLeEq {β : Λ} (hβ : (β : TypeIndex) = α) :
+    AllPermLe M β hβ.le ≃ (newModelData' M).AllPerm :=
+  Equiv.cast (by cases hβ; rw [AllPermLe]; congr; exact leData_data_eq M)
+
+def castTangleLeBot :
+    TangleLe M ⊥ bot_le ≃ (letI := botModelData; Tangle ⊥) :=
+  Equiv.refl _
+
+def castTangleLeLt {β : Λ} (hβ : (β : TypeIndex) < α) :
+    TangleLe M β hβ.le ≃ (letI := (M β hβ).data; Tangle β) :=
+  Equiv.cast (by rw [TangleLe]; congr; exact leData_data_lt M hβ)
+
+def castTangleLeEq {β : Λ} (hβ : (β : TypeIndex) = α) :
+    TangleLe M β hβ.le ≃ (letI := newModelData' M; Tangle α) :=
+  Equiv.cast (by cases hβ; rw [TangleLe]; congr; exact leData_data_eq M)
+
+variable (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h))
+
+def preCoherentData :
     letI : Level := ⟨α⟩; PreCoherentData :=
   letI : Level := ⟨α⟩
-  letI := leData α M
+  letI := leData M
   {
     allPermSderiv := λ {β γ} _ _ hγ ρ ↦
-      -- Case split on `γ = α`.
-      liftCastDataLe α M (D := λ γ Mγ ↦ γ < β → Mγ.AllPerm) γ
-        -- Case split on `β = α`.
-        (λ hγ ↦ liftCastDataLe α M
-          (D := λ _β Mβ ↦ Mβ.AllPerm → ((ltData α M).data γ).AllPerm) β
-          ( -- Case split on `β = ⊥`.
-            β.recBotCoe (C := λ β ↦ [LtLevel β] → γ < β →
-              ((ltData α M).data β).AllPerm → ((ltData α M).data γ).AllPerm)
-            (λ h ↦ (not_lt_bot h).elim)
-            (λ β _ ↦ -- Case split on `γ = ⊥`.
-              γ.recBotCoe (C := λ γ ↦ [LtLevel γ] → γ < β →
-                ((ltData α M).data β).AllPerm → ((ltData α M).data γ).AllPerm)
-              (λ _ ↦ (H β (WithBot.coe_lt_coe.mp LtLevel.elim)).allPermBotSderiv)
-              (λ _γ _ hγ ↦ (H β (WithBot.coe_lt_coe.mp LtLevel.elim)).allPermSderiv
-                  (WithBot.coe_lt_coe.mp hγ)))
-            hγ)
-          (λ ρ ↦ letI : LtData := ltData α M; ρ.sderiv γ)
-          ρ)
-        (λ h' ↦ (LeLevel.elim.not_lt h').elim) hγ
+      β.recBotCoe (C := λ β ↦ [LeLevel β] → γ < β → AllPerm β → AllPerm γ)
+        (λ hγ ↦ (WithBot.not_lt_bot γ hγ).elim)
+        (λ β _ hγ ρ ↦
+          letI : LtLevel γ := ⟨hγ.trans_le LeLevel.elim⟩
+          if h : (β : TypeIndex) = α then
+            letI := ltData M
+            γ.recBotCoe (C := λ γ ↦ [LtLevel γ] →
+                ((ltData M).data γ).AllPerm → AllPermLe M γ LtLevel.elim.le)
+              id (λ _γ _ ρ ↦ (castAllPermLeLt M _).symm ρ)
+              ((castAllPermLeEq M h ρ).sderiv γ)
+          else
+            γ.recBotCoe (C := λ γ ↦ [LtLevel γ] → γ < β →
+                ((leData M).data β).AllPerm → AllPermLe M γ LtLevel.elim.le)
+              (λ _ ρ ↦ (H β (LeLevel.elim.lt_of_ne h)).allPermBotSderiv (castAllPermLeLt M _ ρ))
+              (λ _γ _ hγ ρ ↦ (castAllPermLeLt M _).symm <|
+                (H β (LeLevel.elim.lt_of_ne h)).allPermSderiv hγ (castAllPermLeLt M _ ρ))
+              hγ ρ)
+        hγ ρ
     singleton := λ {β γ} _ _ hγ x ↦
-      -- Case split on `γ = α`.
-      liftCastDataLe α M (D := λ γ Mγ ↦ γ < β → Mγ.TSet → TSet β) γ
-      (λ _hγ ↦
-        -- Case split on `β = α`.
-        liftCastDataLe α M
-          (D := λ _β Mβ ↦ ((ltData α M).data γ).TSet → Mβ.TSet) β
-          ((H β (WithBot.coe_lt_coe.mp LtLevel.elim)).singleton (WithBot.coe_lt_coe.mp hγ))
-          (λ x ↦ letI : LtData := ltData α M; some (newSingleton x)))
-      (λ h' ↦ (LeLevel.elim.not_lt h').elim) hγ x
+      letI : LtLevel γ := ⟨hγ.trans_le LeLevel.elim⟩
+      if h : (β : TypeIndex) = α then
+        letI := ltData M
+        (castTSetLeEq M h).symm (Option.some (newSingleton (castTSetLeLt M _ x)))
+      else
+        (castTSetLeLt M _).symm ((H β (LeLevel.elim.lt_of_ne h)).singleton hγ (castTSetLeLt M _ x))
   }
 
-theorem preCoherentData_allPermSderiv_coe_coe
-    (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (H : (β : Λ) → (h : β < α) → Hypothesis β (M β h) λ γ h' ↦ M γ (h'.trans h))
-    {β γ : Λ} [letI : Level := ⟨α⟩; LtLevel β] [letI : Level := ⟨α⟩; LtLevel γ]
-    (h : (γ : TypeIndex) < β) (ρ : letI : Level := ⟨α⟩; letI := leData α M; AllPerm β) :
-    letI : Level := ⟨α⟩
-    (preCoherentData α M H).allPermSderiv h ρ = (leDataAllPermLt α M γ).symm
-      ((H β (WithBot.coe_lt_coe.mp LtLevel.elim)).allPermSderiv (WithBot.coe_lt_coe.mp h)
-        (leDataAllPermLt α M β ρ)) := by
-  unfold PreCoherentData.allPermSderiv preCoherentData
-  simp only [WithBot.recBotCoe_coe, liftCastDataLe_eq_of_lt, leDataAllPermLt, Equiv.cast_symm,
-    Equiv.cast_apply]
-  sorry
-
-theorem preCoherentData_allPermSderiv_forget
-    (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (H : (β : Λ) → (h : β < α) → Hypothesis β (M β h) λ γ h' ↦ M γ (h'.trans h))
-    {β γ : TypeIndex} [letI : Level := ⟨α⟩; LeLevel β] [letI : Level := ⟨α⟩; LeLevel γ]
-    (h : γ < β) (ρ : letI : Level := ⟨α⟩; letI := leData α M; AllPerm β) :
-    ((preCoherentData α M H).allPermSderiv h ρ)ᵁ = ((leData α M).data β).allPermForget ρ ↘ h := by
-  sorry
-
-def coherentData
-    (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (H : (β : Λ) → (h : β < α) → Hypothesis β (M β h) λ γ h' ↦ M γ (h'.trans h)) :
+def coherentData :
     letI : Level := ⟨α⟩; CoherentData :=
   letI : Level := ⟨α⟩
-  letI := preCoherentData α M H
+  letI := preCoherentData M H
   {
-    allPermSderiv_forget := preCoherentData_allPermSderiv_forget α M H
+    allPermSderiv_forget := sorry
     pos_atom_lt_pos := sorry
     pos_nearLitter_lt_pos := sorry
     smul_fuzz := sorry
@@ -259,37 +196,33 @@ def coherentData
     typedMem_singleton_iff := sorry
   }
 
-theorem construct_tangle_le_μ (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (H : (β : Λ) → (h : β < α) → Hypothesis β (M β h) λ γ h' ↦ M γ (h'.trans h)) :
-    letI := newModelData' α M
-    #(Tangle α) ≤ #μ := by
-  rw [← leData_tangle_α]
-  letI : Level := ⟨α⟩
-  letI : LeLevel α := ⟨le_rfl⟩
-  letI := coherentData α M H
-  exact card_tangle_le α
-
-def constructMotive (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (H : (β : Λ) → (h : β < α) → Hypothesis β (M β h) λ γ h' ↦ M γ (h'.trans h)) :
+def constructMotive (α : Λ) (M : (β : Λ) → (β : TypeIndex) < α → Motive β)
+    (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h)) :
     Motive α :=
   letI : Level := ⟨α⟩
-  letI : LtData := ltData α M
+  letI : LtData := ltData M
   letI := newModelData
   {
     data := newModelData,
-    pos := newPosition (construct_tangle_le_μ α M H),
-    typed := newTypedNearLitters (construct_tangle_le_μ α M H)
+    pos := newPosition sorry,
+    typed := newTypedNearLitters sorry
   }
 
-def constructHypothesis (α : Λ) (M : (β : Λ) → β < α → Motive β)
-    (H : (β : Λ) → (h : β < α) → Hypothesis β (M β h) λ γ h' ↦ M γ (h'.trans h)) :
-    Hypothesis α (constructMotive α M H) M :=
+def constructHypothesis (α : Λ) (M : (β : Λ) → (β : TypeIndex) < α → Motive β)
+    (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h)) :
+    Hypothesis (constructMotive α M H) M :=
   sorry
+
+instance : IsTrans Λ λ β γ ↦ (β : TypeIndex) < (γ : TypeIndex) :=
+  ⟨λ _ _ _ ↦ lt_trans⟩
+
+instance : IsWellFounded Λ λ β γ ↦ (β : TypeIndex) < (γ : TypeIndex) :=
+  ⟨InvImage.wf _ (wellFounded_lt)⟩
 
 def motive : (α : Λ) → Motive α :=
   ICT.fix constructMotive constructHypothesis
 
-def hypothesis : (α : Λ) → Hypothesis α (motive α) (λ β _ ↦ motive β) :=
+def hypothesis : (α : Λ) → Hypothesis (motive α) (λ β _ ↦ motive β) :=
   ICT.fix_prop constructMotive constructHypothesis
 
 theorem motive_eq : (α : Λ) →
