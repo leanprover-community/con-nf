@@ -389,7 +389,7 @@ theorem exists_exactlyApproximates_of_total (ψ : StrApprox β) (hψ₁ : ψ.Coh
         rw [← hρ δ hδ] at hρs
         have := hρs A
         rwa [allPermSderiv_forget] at this
-    · intro δ ε _ _ _ hδ hε hδε t
+    · intro δ ε _ _ hδ hε hδε t
       dsimp only
       have := hψ₁ (Path.single hε ↘.) (fuzz hδε t)
           ((ρs ε hε (ψ ↘ hε) (hψ₁.deriv (Path.single hε)) (hψ₂.deriv (Path.single hε)))ᵁ

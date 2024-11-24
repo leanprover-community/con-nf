@@ -87,7 +87,7 @@ class CoherentData extends PreCoherentData where
   allPerm_of_basePerm (π : BasePerm) : ∃ ρ : AllPerm ⊥, ρᵁ Path.nil = π
   allPerm_of_smulFuzz {γ : Λ} [LeLevel γ]
     (ρs : {δ : TypeIndex} → [LtLevel δ] → δ < γ → AllPerm δ)
-    (h : ∀ {δ : TypeIndex} {ε : Λ} [LeLevel γ] [LtLevel δ] [LtLevel ε]
+    (h : ∀ {δ : TypeIndex} {ε : Λ} [LtLevel δ] [LtLevel ε]
       (hδ : δ < γ) (hε : (ε : TypeIndex) < γ) (hδε : δ ≠ ε) (t : Tangle δ),
       (ρs hε)ᵁ ↘. • fuzz hδε t = fuzz hδε (ρs hδ • t)) :
     ∃ ρ : AllPerm γ, ∀ δ : TypeIndex, [LtLevel δ] → ∀ hδ : δ < γ, ρ ↘ hδ = ρs hδ

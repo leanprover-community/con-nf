@@ -96,7 +96,7 @@ theorem allPerm_of_basePerm_of_isMin {β : Λ} [LeLevel β] (hβ : IsMin β) (π
     cases hρ
     simp only [allPermSderiv_forget, Tree.sderiv_apply]
     rfl
-  · intro _ _ _ _ _ _ hε
+  · intro _ _ _ _ _ hε
     cases eq_bot_of_lt_of_isMin hβ hε
 
 omit [CoherentData] in
