@@ -84,6 +84,8 @@ structure Hypothesis {α : Λ} (M : Motive α) (N : (β : Λ) → (β : TypeInde
       allPermBotSderiv ρ = π
   tSet_ext (β : Λ) (hβ : (β : TypeIndex) < α) (x y : M.data.TSet) :
     (∀ z : (N β hβ).data.TSet, z ∈[hβ] x ↔ z ∈[hβ] y) → x = y
+  typedMem_singleton_iff {β : Λ} (hβ : (β : TypeIndex) < α) (x y : (N β hβ).data.TSet) :
+    y ∈[hβ] singleton hβ x ↔ y = x
 
 def castTSet {α β : TypeIndex} {D₁ : ModelData α} {D₂ : ModelData β}
     (h₁ : α = β) (h₂ : HEq D₁ D₂) :
@@ -504,8 +506,7 @@ theorem preCoherentData_allPerm_of_smulFuzz
 
 theorem preCoherent_tSet_ext
     (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h))
-    {β γ : Λ}
-    [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
+    {β γ : Λ} [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
     (hγ : (γ : TypeIndex) < β) (x y : letI : Level := ⟨α⟩; TSetLe M β LeLevel.elim)
     (hxy : letI : Level := ⟨α⟩; ∀ (z : TSetLe M γ LeLevel.elim), z ∈[hγ] x ↔ z ∈[hγ] y) :
     x = y := by
@@ -537,6 +538,46 @@ theorem preCoherent_tSet_ext
       rwa [Equiv.apply_symm_apply] at this
     · exact castTSetLeLt_forget M _ y
 
+theorem typedMem_singleton_iff
+    {β γ : Λ} [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
+    (hγ : (γ : TypeIndex) < β) (x y : letI : Level := ⟨α⟩; TSetLe M γ LeLevel.elim) :
+    y ∈[hγ] (preCoherentData M H).singleton hγ x ↔ y = x := by
+  letI : Level := ⟨α⟩
+  by_cases h : (β : TypeIndex) = α
+  · cases coe_injective h
+    unfold singleton preCoherentData
+    simp only [coe_inj, ↓reduceDIte, ← TSet.forget_mem_forget]
+    letI : LtLevel γ := ⟨hγ⟩
+    letI := newModelData' M
+    letI := ltData M
+    have := mem_newSingleton_iff (castTSetLeLt M _ x) (castTSetLeLt M _ y)
+    rw [EmbeddingLike.apply_eq_iff_eq] at this
+    have h' := TSet.forget_mem_forget
+      (x := castTSetLeLt M _ y)
+      (y := show TSet α from Option.some (newSingleton (castTSetLeLt M _ x)))
+    rw [← h'] at this
+    convert this using 2
+    · exact (castTSetLeLt_forget M _ y).symm
+    · have := castTSetLeEq_forget M
+        ((castTSetLeEq M rfl).symm (Option.some (newSingleton (castTSetLeLt M _ x))))
+      rw [Equiv.apply_symm_apply] at this
+      exact this.symm
+  · unfold singleton preCoherentData
+    simp only [coe_inj, show β ≠ α from h ∘ congr_arg _, ↓reduceDIte, ne_eq, ←
+      TSet.forget_mem_forget]
+    letI := (M β (LeLevel.elim.lt_of_ne h)).data
+    letI := (M γ (hγ.trans_le LeLevel.elim)).data
+    have := (H β (LeLevel.elim.lt_of_ne h)).typedMem_singleton_iff hγ
+      (castTSetLeLt M _ x) (castTSetLeLt M _ y)
+    rw [EmbeddingLike.apply_eq_iff_eq] at this
+    rw [← TSet.forget_mem_forget] at this
+    convert this using 2
+    · exact (castTSetLeLt_forget M _ y).symm
+    · have := castTSetLeLt_forget M (LeLevel.elim.lt_of_ne h) ((castTSetLeLt M _).symm
+        ((H β (LeLevel.elim.lt_of_ne h)).singleton hγ (castTSetLeLt M _ x)))
+      rw [Equiv.apply_symm_apply] at this
+      exact this.symm
+
 def coherentData :
     letI : Level := ⟨α⟩; CoherentData :=
   letI : Level := ⟨α⟩
@@ -549,7 +590,7 @@ def coherentData :
     allPerm_of_basePerm := λ π ↦ ⟨π, rfl⟩
     allPerm_of_smulFuzz := preCoherentData_allPerm_of_smulFuzz M H
     tSet_ext := preCoherent_tSet_ext M H
-    typedMem_singleton_iff := sorry
+    typedMem_singleton_iff := typedMem_singleton_iff M H
   }
 
 theorem newModelData_card_tangle_le
@@ -587,6 +628,8 @@ def constructHypothesis (α : Λ) (M : (β : Λ) → (β : TypeIndex) < α → M
     smul_fuzz := sorry
     smul_fuzz_bot := sorry
     allPerm_of_smul_fuzz := sorry
+    tSet_ext := sorry
+    typedMem_singleton_iff := sorry
   }
 
 instance : IsTrans Λ λ β γ ↦ (β : TypeIndex) < (γ : TypeIndex) :=

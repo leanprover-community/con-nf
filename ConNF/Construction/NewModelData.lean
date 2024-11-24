@@ -403,6 +403,10 @@ def newSingleton {γ : Λ} [LtLevel γ] (x : TSet γ) : NewSet :=
 
 local instance : ModelData α := newModelData
 
+theorem mem_newSingleton_iff {γ : Λ} [LtLevel γ] (x y : TSet γ) :
+    y ∈[LtLevel.elim] (show TSet α from some (newSingleton x)) ↔ y = x :=
+  sorry
+
 theorem not_mem_none {β : TypeIndex} [LtLevel β] (z : TSet β) :
     ¬z ∈[LtLevel.elim] (show TSet α from none) := by
   unfold TypedMem.typedMem instTypedMemTSet
