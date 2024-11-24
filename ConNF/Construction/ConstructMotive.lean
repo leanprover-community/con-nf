@@ -1,4 +1,4 @@
-import ConNF.Construction.MainMotive
+import ConNF.Construction.InductionStatement
 import ConNF.Construction.NewModelData
 import ConNF.Counting.Conclusions
 
@@ -82,10 +82,6 @@ abbrev TangleLe (β : TypeIndex) (hβ : β ≤ α) : Type _ :=
     letI : Level := ⟨α⟩; letI := leData M; letI : LeLevel β := ⟨hβ⟩
     Tangle β
 
-def castTSetLeBot :
-    TSetLe M ⊥ bot_le ≃ (letI := botModelData; TSet ⊥) :=
-  Equiv.refl _
-
 def castTSetLeLt {β : Λ} (hβ : (β : TypeIndex) < α) :
     TSetLe M β hβ.le ≃ (M β hβ).data.TSet :=
   castTSet rfl (heq_of_eq <| leData_data_lt M hβ)
@@ -94,10 +90,6 @@ def castTSetLeEq {β : Λ} (hβ : (β : TypeIndex) = α) :
     TSetLe M β hβ.le ≃ (newModelData' M).TSet :=
   castTSet hβ (by cases hβ; exact heq_of_eq <| leData_data_eq M)
 
-def castAllPermLeBot :
-    AllPermLe M ⊥ bot_le ≃ (letI := botModelData; AllPerm ⊥) :=
-  Equiv.refl _
-
 def castAllPermLeLt {β : Λ} (hβ : (β : TypeIndex) < α) :
     AllPermLe M β hβ.le ≃ (M β hβ).data.AllPerm :=
   castAllPerm rfl (heq_of_eq <| leData_data_lt M hβ)
@@ -105,10 +97,6 @@ def castAllPermLeLt {β : Λ} (hβ : (β : TypeIndex) < α) :
 def castAllPermLeEq {β : Λ} (hβ : (β : TypeIndex) = α) :
     AllPermLe M β hβ.le ≃ (newModelData' M).AllPerm :=
   castAllPerm hβ (by cases hβ; exact heq_of_eq <| leData_data_eq M)
-
-def castTangleLeBot :
-    TangleLe M ⊥ bot_le ≃ (letI := botModelData; Tangle ⊥) :=
-  Equiv.refl _
 
 def castTangleLeLt {β : Λ} (hβ : (β : TypeIndex) < α) :
     TangleLe M β hβ.le ≃ (letI := (M β hβ).data; Tangle β) :=

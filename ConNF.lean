@@ -10,7 +10,7 @@ import ConNF.Basic.WellOrder
 import ConNF.Construction.Code
 import ConNF.Construction.ConstructHypothesis
 import ConNF.Construction.ConstructMotive
-import ConNF.Construction.MainMotive
+import ConNF.Construction.InductionStatement
 import ConNF.Construction.NewModelData
 import ConNF.Construction.RunInduction
 import ConNF.Counting.BaseCoding
