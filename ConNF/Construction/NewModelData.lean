@@ -443,6 +443,22 @@ theorem card_newPositionDeny (t : Tangle α) :
 def newPosition (h : #(Tangle α) ≤ #μ) : Position (Tangle α) where
   pos := ⟨funOfDeny h newPositionDeny card_newPositionDeny, funOfDeny_injective _ _ _⟩
 
+theorem pos_atom_lt_newPosition (h : #(Tangle α) ≤ #μ) (t : Tangle α) (a : Atom)
+    (A : α ↝ ⊥) (ha : a ∈ (t.support ⇘. A)ᴬ) :
+    pos a < (newPosition h).pos t := by
+  apply funOfDeny_gt_deny
+  obtain ⟨i, hi⟩ := ha
+  refine Or.inl (Or.inr ⟨_, ?_, rfl⟩)
+  exact ⟨i, ⟨A, a⟩, hi, rfl⟩
+
+theorem pos_nearLitter_lt_newPosition (h : #(Tangle α) ≤ #μ) (t : Tangle α) (N : NearLitter)
+    (A : α ↝ ⊥) (hN : N ∈ (t.support ⇘. A)ᴺ) :
+    pos N < (newPosition h).pos t := by
+  apply funOfDeny_gt_deny
+  obtain ⟨i, hi⟩ := hN
+  refine Or.inr ⟨_, ?_, rfl⟩
+  exact ⟨i, ⟨A, N⟩, hi, rfl⟩
+
 def newTypedNearLitters (h : #(Tangle α) ≤ #μ) :
     letI := newPosition h; TypedNearLitters α :=
   letI := newPosition h
