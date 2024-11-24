@@ -82,6 +82,8 @@ structure Hypothesis {α : Λ} (M : Motive α) (N : (β : Λ) → (β : TypeInde
     ∃ ρ : M.data.AllPerm,
       (∀ (β : Λ) (hβ : (β : TypeIndex) < α), allPermSderiv hβ ρ = ρs hβ) ∧
       allPermBotSderiv ρ = π
+  tSet_ext (β : Λ) (hβ : (β : TypeIndex) < α) (x y : M.data.TSet) :
+    (∀ z : (N β hβ).data.TSet, z ∈[hβ] x ↔ z ∈[hβ] y) → x = y
 
 def castTSet {α β : TypeIndex} {D₁ : ModelData α} {D₂ : ModelData β}
     (h₁ : α = β) (h₂ : HEq D₁ D₂) :
@@ -94,6 +96,9 @@ def castAllPerm {α β : TypeIndex} {D₁ : ModelData α} {D₂ : ModelData β}
 def castTangle {α β : TypeIndex} {D₁ : ModelData α} {D₂ : ModelData β}
     (h₁ : α = β) (h₂ : HEq D₁ D₂) :
     (letI := D₁; Tangle α) ≃ (letI := D₂; Tangle β) := by cases h₁; rw [eq_of_heq h₂]
+
+theorem castTSet_forget {α : TypeIndex} {D₁ D₂ : ModelData α} (h₂ : HEq D₁ D₂) (ρ : D₁.TSet) :
+    D₂.tSetForget (castTSet rfl h₂ ρ) = D₁.tSetForget ρ := by cases h₂; rfl
 
 theorem castAllPerm_forget {α : TypeIndex} {D₁ D₂ : ModelData α} (h₂ : HEq D₁ D₂) (ρ : D₁.AllPerm) :
     D₂.allPermForget (castAllPerm rfl h₂ ρ) = D₁.allPermForget ρ := by cases h₂; rfl
@@ -216,6 +221,16 @@ def castTangleLeLt {β : Λ} (hβ : (β : TypeIndex) < α) :
 def castTangleLeEq {β : Λ} (hβ : (β : TypeIndex) = α) :
     TangleLe M β hβ.le ≃ (letI := newModelData' M; Tangle α) :=
   castTangle hβ (by cases hβ; exact heq_of_eq <| leData_data_eq M)
+
+theorem castTSetLeLt_forget {β : Λ} (hβ : (β : TypeIndex) < α) (x : TSetLe M β hβ.le) :
+    (M β hβ).data.tSetForget (castTSetLeLt M hβ x) =
+    letI : Level := ⟨α⟩; letI : LeLevel β := ⟨hβ.le⟩; ((leData M).data β).tSetForget x :=
+  castTSet_forget _ _
+
+theorem castTSetLeEq_forget (x : TSetLe M α le_rfl) :
+    (newModelData' M).tSetForget (castTSetLeEq M rfl x) =
+    letI : Level := ⟨α⟩; letI : LeLevel α := ⟨le_rfl⟩; ((leData M).data α).tSetForget x :=
+  castTSet_forget _ _
 
 theorem castAllPermLeLt_forget {β : Λ} (hβ : (β : TypeIndex) < α) (ρ : AllPermLe M β hβ.le) :
     (M β hβ).data.allPermForget (castAllPermLeLt M hβ ρ) =
@@ -487,6 +502,41 @@ theorem preCoherentData_allPerm_of_smulFuzz
       rw [← castAllPermLeLt_forget M LtLevel.elim] at this
       exact this
 
+theorem preCoherent_tSet_ext
+    (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h))
+    {β γ : Λ}
+    [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
+    (hγ : (γ : TypeIndex) < β) (x y : letI : Level := ⟨α⟩; TSetLe M β LeLevel.elim)
+    (hxy : letI : Level := ⟨α⟩; ∀ (z : TSetLe M γ LeLevel.elim), z ∈[hγ] x ↔ z ∈[hγ] y) :
+    x = y := by
+  letI : Level := ⟨α⟩
+  by_cases h : (β : TypeIndex) = α
+  · cases coe_injective h
+    apply (castTSetLeEq M rfl).injective
+    letI : LtLevel γ := ⟨hγ⟩
+    letI := ltData M
+    apply newModelData_ext γ
+    intro z
+    simp only [← TSet.forget_mem_forget] at hxy ⊢
+    convert hxy ((castTSetLeLt M hγ).symm z) using 2
+    · have := castTSetLeLt_forget M hγ ((castTSetLeLt M hγ).symm z)
+      rwa [Equiv.apply_symm_apply] at this
+    · exact castTSetLeEq_forget M x
+    · have := castTSetLeLt_forget M hγ ((castTSetLeLt M hγ).symm z)
+      rwa [Equiv.apply_symm_apply] at this
+    · exact castTSetLeEq_forget M y
+  · apply (castTSetLeLt M (LeLevel.elim.lt_of_ne h)).injective
+    apply (H β _).tSet_ext γ hγ
+    intro z
+    simp only [← TSet.forget_mem_forget] at hxy ⊢
+    convert hxy ((castTSetLeLt M (hγ.trans_le LeLevel.elim)).symm z) using 2
+    · have := castTSetLeLt_forget M (hγ.trans_le LeLevel.elim) ((castTSetLeLt M _).symm z)
+      rwa [Equiv.apply_symm_apply] at this
+    · exact castTSetLeLt_forget M _ x
+    · have := castTSetLeLt_forget M (hγ.trans_le LeLevel.elim) ((castTSetLeLt M _).symm z)
+      rwa [Equiv.apply_symm_apply] at this
+    · exact castTSetLeLt_forget M _ y
+
 def coherentData :
     letI : Level := ⟨α⟩; CoherentData :=
   letI : Level := ⟨α⟩
@@ -498,7 +548,7 @@ def coherentData :
     smul_fuzz := preCoherentData_smul_fuzz M H
     allPerm_of_basePerm := λ π ↦ ⟨π, rfl⟩
     allPerm_of_smulFuzz := preCoherentData_allPerm_of_smulFuzz M H
-    tSet_ext := sorry
+    tSet_ext := preCoherent_tSet_ext M H
     typedMem_singleton_iff := sorry
   }
 
@@ -536,6 +586,7 @@ def constructHypothesis (α : Λ) (M : (β : Λ) → (β : TypeIndex) < α → M
     pos_nearLitter_lt_pos := sorry
     smul_fuzz := sorry
     smul_fuzz_bot := sorry
+    allPerm_of_smul_fuzz := sorry
   }
 
 instance : IsTrans Λ λ β γ ↦ (β : TypeIndex) < (γ : TypeIndex) :=

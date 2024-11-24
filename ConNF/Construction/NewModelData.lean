@@ -403,6 +403,31 @@ def newSingleton {γ : Λ} [LtLevel γ] (x : TSet γ) : NewSet :=
 
 local instance : ModelData α := newModelData
 
+theorem not_mem_none {β : TypeIndex} [LtLevel β] (z : TSet β) :
+    ¬z ∈[LtLevel.elim] (show TSet α from none) := by
+  unfold TypedMem.typedMem instTypedMemTSet
+  change zᵁ ∉ _
+  erw [Equiv.apply_symm_apply]
+  exact id
+
+theorem newModelData_ext (β : Λ) [LtLevel β] (x y : TSet α)
+    (h : ∀ z : TSet β, z ∈[LtLevel.elim] x ↔ z ∈[LtLevel.elim] y) :
+    x = y := by
+  obtain (_ | x) := x <;> obtain (_ | y) := y
+  · rfl
+  · obtain ⟨z, hz⟩ := Code.members_nonempty y.hc β
+    rw [NewSet.mem_members] at hz
+    cases not_mem_none z ((h z).mpr hz)
+  · obtain ⟨z, hz⟩ := Code.members_nonempty x.hc β
+    rw [NewSet.mem_members] at hz
+    cases not_mem_none z ((h z).mp hz)
+  · apply congr_arg some
+    apply NewSet.ext
+    apply Code.ext x.hc y.hc β
+    ext z
+    rw [NewSet.mem_members, NewSet.mem_members]
+    exact h z
+
 def newPositionDeny (t : Tangle α) : Set μ :=
   pos '' {N | t.set = some (newTyped N)} ∪
     pos '' (t.supportᴬ.image Prod.snd : Set Atom) ∪
