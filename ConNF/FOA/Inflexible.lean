@@ -21,11 +21,11 @@ variable [Params.{u}] {β : TypeIndex}
 
 @[ext]
 structure InflexiblePath (β : TypeIndex) where
-  γ : TypeIndex
+  γ : Λ
   δ : TypeIndex
   ε : Λ
   hδ : δ < γ
-  hε : ε < γ
+  hε : (ε : TypeIndex) < γ
   hδε : δ ≠ ε
   A : β ↝ γ
 

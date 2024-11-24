@@ -81,8 +81,8 @@ class CoherentData extends PreCoherentData where
     a ∈ (t.support ⇘. A)ᴬ → pos a < pos t
   pos_nearLitter_lt_pos {β : TypeIndex} [LtLevel β] (t : Tangle β) (A : β ↝ ⊥) (N : NearLitter) :
     N ∈ (t.support ⇘. A)ᴺ → pos N < pos t
-  smul_fuzz {γ δ : TypeIndex} {ε : Λ} [LeLevel γ] [LtLevel δ] [LtLevel ε]
-    (hδ : δ < γ) (hε : ε < γ) (hδε : δ ≠ ε) (ρ : AllPerm γ) (t : Tangle δ) :
+  smul_fuzz {γ : Λ} {δ : TypeIndex} {ε : Λ} [LeLevel γ] [LtLevel δ] [LtLevel ε]
+    (hδ : δ < γ) (hε : (ε : TypeIndex) < γ) (hδε : δ ≠ ε) (ρ : AllPerm γ) (t : Tangle δ) :
     ρᵁ ↘ hε ↘. • fuzz hδε t = fuzz hδε (ρ ↘ hδ • t)
   allPerm_of_basePerm (π : BasePerm) : ∃ ρ : AllPerm ⊥, ρᵁ Path.nil = π
   allPerm_of_smulFuzz {γ : Λ} [LeLevel γ]

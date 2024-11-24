@@ -24,13 +24,13 @@ variable [Params.{u}] [Level] [LtData]
 @[ext]
 structure NewPerm : Type u where
   sderiv : (β : TypeIndex) → [LtLevel β] → AllPerm β
-  smul_fuzz {β : TypeIndex} {γ : Λ} [LtLevel β] [LtLevel γ] (hβγ : β ≠ γ) (t : Tangle β) :
+  smul_fuzz' {β : TypeIndex} {γ : Λ} [LtLevel β] [LtLevel γ] (hβγ : β ≠ γ) (t : Tangle β) :
     (sderiv γ)ᵁ ↘. • fuzz hβγ t = fuzz hβγ (sderiv β • t)
 
 instance : Mul NewPerm where
   mul ρ₁ ρ₂ := ⟨λ β _ ↦ ρ₁.sderiv β * ρ₂.sderiv β, by
     intro β γ _ _ hβγ t
-    simp only [allPermForget_mul, mul_smul, Tree.mul_sderivBot, NewPerm.smul_fuzz]⟩
+    simp only [allPermForget_mul, mul_smul, Tree.mul_sderivBot, NewPerm.smul_fuzz']⟩
 
 instance : One NewPerm where
   one := ⟨λ _ _ ↦ 1, by
@@ -40,7 +40,7 @@ instance : One NewPerm where
 instance : Inv NewPerm where
   inv ρ := ⟨λ β _ ↦ (ρ.sderiv β)⁻¹, by
     intro β γ _ _ hβγ t
-    simp only [allPermForget_inv, Tree.inv_sderivBot, inv_smul_eq_iff, NewPerm.smul_fuzz,
+    simp only [allPermForget_inv, Tree.inv_sderivBot, inv_smul_eq_iff, NewPerm.smul_fuzz',
       smul_inv_smul]⟩
 
 @[simp]
@@ -100,14 +100,14 @@ theorem Cloud.smul {c d : Code} (h : Cloud c d) (ρ : NewPerm) :
   · rintro ⟨y, ⟨N, ⟨t, ht, hN⟩, rfl⟩, rfl⟩
     refine ⟨(ρ.sderiv γ)ᵁ ↘. • N, ⟨ρ.sderiv β • t, ?_, ?_⟩, ?_⟩
     · rwa [Tangle.smul_set, Set.smul_mem_smul_set_iff]
-    · rw [BasePerm.smul_nearLitter_litter, hN, NewPerm.smul_fuzz]
+    · rw [BasePerm.smul_nearLitter_litter, hN, NewPerm.smul_fuzz']
     · rw [← TypedNearLitters.smul_typed]
   · rintro ⟨N, ⟨t, ⟨x, hxs, hxt⟩, hN⟩, rfl⟩
     refine ⟨(ρ.sderiv γ)⁻¹ • typed N,
         ⟨(ρ.sderiv γ)ᵁ⁻¹ ↘. • N, ⟨(ρ.sderiv β)⁻¹ • t, ?_, ?_⟩, ?_⟩, ?_⟩
     · rwa [Tangle.smul_set, ← hxt, inv_smul_smul]
     · rw [Tree.inv_sderivBot, BasePerm.smul_nearLitter_litter, inv_smul_eq_iff,
-        NewPerm.smul_fuzz, smul_inv_smul, hN]
+        NewPerm.smul_fuzz', smul_inv_smul, hN]
     · rw [Tree.inv_sderivBot, TypedNearLitters.smul_typed, allPermForget_inv, Tree.inv_sderivBot]
     · simp only [smul_inv_smul]
 
@@ -179,6 +179,11 @@ theorem NewPerm.forget_sderiv (ρ : NewPerm) (β : TypeIndex) [LtLevel β] :
     ρᵁ ↘ LtLevel.elim = (ρ.sderiv β)ᵁ := by
   funext A
   rw [Tree.sderiv_apply, NewPerm.forget_def, Path.recScoderiv_scoderiv]
+
+theorem NewPerm.smul_fuzz {β : TypeIndex} {γ : Λ} [LtLevel β] [LtLevel γ]
+    (ρ : NewPerm) (hβγ : β ≠ γ) (t : Tangle β) :
+    ρᵁ ↘ (LtLevel.elim : (γ : TypeIndex) < α) ↘. • fuzz hβγ t = fuzz hβγ (ρ.sderiv β • t) := by
+  rw [forget_sderiv, ρ.smul_fuzz']
 
 @[simp]
 theorem NewPerm.forget_mul (ρ₁ ρ₂ : NewPerm) :

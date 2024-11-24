@@ -26,21 +26,6 @@ structure Motive (α : Λ) where
   pos : Position (Tangle α)
   typed : TypedNearLitters α
 
-structure Hypothesis {α : Λ} (M : Motive α) (N : (β : Λ) → (β : TypeIndex) < α → Motive β) where
-  allPermSderiv {β : Λ} (h : (β : TypeIndex) < α) : M.data.AllPerm → (N β h).data.AllPerm
-  allPermBotSderiv : M.data.AllPerm → botModelData.AllPerm
-  singleton {β : Λ} (h : (β : TypeIndex) < α) : (N β h).data.TSet → M.data.TSet
-  allPermSderiv_forget {β : Λ} (h : (β : TypeIndex) < α) (ρ : M.data.AllPerm) :
-    (N β h).data.allPermForget (allPermSderiv h ρ) = M.data.allPermForget ρ ↘ h
-  allPermBotSderiv_forget (ρ : M.data.AllPerm) :
-    botModelData.allPermForget (allPermBotSderiv ρ) = M.data.allPermForget ρ ↘ bot_lt_coe _
-  pos_atom_lt_pos :
-    letI := M.data; letI := M.pos
-    ∀ (t : Tangle α) (A : α ↝ ⊥) (a : Atom), a ∈ (t.support ⇘. A)ᴬ → pos a < pos t
-  pos_nearLitter_lt_pos :
-    letI := M.data; letI := M.pos
-    ∀ (t : Tangle α) (A : α ↝ ⊥) (N : NearLitter), N ∈ (t.support ⇘. A)ᴺ → pos N < pos t
-
 theorem card_tangle_bot_le [ModelData ⊥] : #(Tangle ⊥) ≤ #μ := by
   apply card_tangle_le_of_card_tSet
   apply (mk_le_of_injective (ModelData.tSetForget_injective' (α := ⊥))).trans
@@ -59,6 +44,31 @@ theorem pos_tangle_bot {D : ModelData ⊥} (t : Tangle ⊥) (a : Atom) (A : ⊥ 
   refine funOfDeny_gt_deny _ _ _ _ _ ⟨_, ?_, rfl⟩
   obtain ⟨i, hi⟩ := ha
   exact ⟨i, ⟨A, a⟩, hi, rfl⟩
+
+structure Hypothesis {α : Λ} (M : Motive α) (N : (β : Λ) → (β : TypeIndex) < α → Motive β) where
+  allPermSderiv {β : Λ} (h : (β : TypeIndex) < α) : M.data.AllPerm → (N β h).data.AllPerm
+  allPermBotSderiv : M.data.AllPerm → botModelData.AllPerm
+  singleton {β : Λ} (h : (β : TypeIndex) < α) : (N β h).data.TSet → M.data.TSet
+  allPermSderiv_forget {β : Λ} (h : (β : TypeIndex) < α) (ρ : M.data.AllPerm) :
+    (N β h).data.allPermForget (allPermSderiv h ρ) = M.data.allPermForget ρ ↘ h
+  allPermBotSderiv_forget (ρ : M.data.AllPerm) :
+    botModelData.allPermForget (allPermBotSderiv ρ) = M.data.allPermForget ρ ↘ bot_lt_coe _
+  pos_atom_lt_pos :
+    letI := M.data; letI := M.pos
+    ∀ (t : Tangle α) (A : α ↝ ⊥) (a : Atom), a ∈ (t.support ⇘. A)ᴬ → pos a < pos t
+  pos_nearLitter_lt_pos :
+    letI := M.data; letI := M.pos
+    ∀ (t : Tangle α) (A : α ↝ ⊥) (N : NearLitter), N ∈ (t.support ⇘. A)ᴺ → pos N < pos t
+  smul_fuzz {β γ : Λ} (hβ : (β : TypeIndex) < α)
+      (hγ : (γ : TypeIndex) < α) (hβγ : (β : TypeIndex) ≠ γ) :
+    letI := (N β hβ).data; letI := (N β hβ).pos
+    ∀ (ρ : M.data.AllPerm) (t : Tangle β),
+    M.data.allPermForget ρ ↘ hγ ↘. • fuzz hβγ t = fuzz hβγ (allPermSderiv hβ ρ • t)
+  smul_fuzz_bot {γ : Λ} (hγ : (γ : TypeIndex) < α) :
+    letI := botModelData; letI := botPosition
+    ∀ (ρ : M.data.AllPerm) (t : Tangle ⊥),
+    M.data.allPermForget ρ ↘ hγ ↘. • fuzz (bot_ne_coe (a := γ)) t =
+      fuzz (bot_ne_coe (a := γ)) (allPermBotSderiv ρ • t)
 
 def castTSet {α β : TypeIndex} {D₁ : ModelData α} {D₂ : ModelData β}
     (h₁ : α = β) (h₂ : HEq D₁ D₂) :
@@ -79,10 +89,21 @@ theorem castTangle_support {α : TypeIndex} {D₁ D₂ : ModelData α} (h₂ : H
     (t : letI := D₁; Tangle α) :
     (castTangle rfl h₂ t).support = letI := D₁; t.support := by cases h₂; rfl
 
+theorem castAllPerm_smul {α : TypeIndex} {D₁ D₂ : ModelData α} (h₂ : HEq D₁ D₂)
+    (ρ : D₂.AllPerm) (t : letI := D₁; Tangle α) :
+    ρ • (castTangle rfl h₂ t) = letI := D₁; castTangle rfl h₂ ((castAllPerm rfl h₂).symm ρ • t) :=
+  by cases h₂; rfl
+
 theorem castTangle_pos {α β : TypeIndex} {D₁ : ModelData α} {D₂ : ModelData β}
     {E₁ : Position (Tangle α)} {E₂ : Position (Tangle β)}
     (h₁ : α = β) (h₂ : HEq D₁ D₂) (h₃ : HEq E₁ E₂) (t : Tangle α) :
     pos (castTangle h₁ h₂ t) = pos t := by cases h₁; cases h₂; cases h₃; rfl
+
+theorem castTangle_fuzz {α : TypeIndex} {D₁ D₂ : ModelData α}
+    {E₁ : letI := D₁; Position (Tangle α)} {E₂ : letI := D₂; Position (Tangle α)}
+    (h₂ : HEq D₁ D₂) (h₃ : HEq E₁ E₂) (t : letI := D₁; Tangle α) {β : Λ} (hαβ : α ≠ β) :
+    (letI := D₂; fuzz hαβ (castTangle rfl h₂ t)) = (letI := D₁; fuzz hαβ t) :=
+  by cases h₂; cases h₃; rfl
 
 variable {α : Λ} (M : (β : Λ) → (β : TypeIndex) < α → Motive β)
 
@@ -198,11 +219,29 @@ theorem castTangleLeLt_support {β : Λ} (hβ : (β : TypeIndex) < α) (t : Tang
     letI : Level := ⟨α⟩; letI : LeLevel β := ⟨hβ.le⟩; letI := (leData M).data β; t.support :=
   castTangle_support _ _
 
+theorem castAllPermLeLt_smul {β : Λ} (hβ : (β : TypeIndex) < α)
+    (ρ : (M β hβ).data.AllPerm) (t : TangleLe M β hβ.le) :
+    ρ • castTangleLeLt M hβ t = castTangleLeLt M hβ (((castAllPermLeLt M hβ).symm ρ) • t) :=
+  castAllPerm_smul _ _ _
+
+theorem castAllPermLeLt_smul' {β : Λ} (hβ : (β : TypeIndex) < α)
+    (ρ : AllPermLe M β hβ.le) (t : TangleLe M β hβ.le) :
+    castTangleLeLt M hβ (ρ • t) = castAllPermLeLt M hβ ρ • castTangleLeLt M hβ t := by
+  rw [castAllPermLeLt_smul, Equiv.symm_apply_apply]
+
 theorem castTangleLeLt_pos {β : Λ} (hβ : (β : TypeIndex) < α) (t : TangleLe M β hβ.le) :
     (M β hβ).pos.pos (castTangleLeLt M hβ t) =
     letI : Level := ⟨α⟩; letI : LtLevel β := ⟨hβ⟩; ((leData M).positions β).pos t := by
-  refine castTangle_pos _ _ ?_ _
+  apply castTangle_pos
   unfold LeData.positions leData
+  simp only [recBotCoe_coe, cast_heq]
+
+theorem castTangleLeLt_fuzz {β : Λ} (hβ : (β : TypeIndex) < α) (t : TangleLe M β hβ.le)
+    {γ : Λ} (hβγ : (β : TypeIndex) ≠ γ) :
+    (letI := (M β hβ).data; letI := (M β hβ).pos; fuzz hβγ (castTangleLeLt M hβ t)) =
+    letI : Level := ⟨α⟩; letI : LtLevel β := ⟨hβ⟩; letI := (leData M).data β; fuzz hβγ t := by
+  apply castTangle_fuzz
+  unfold instPositionTangle leData
   simp only [recBotCoe_coe, cast_heq]
 
 variable (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h))
@@ -316,6 +355,55 @@ theorem preCoherentData_pos_nearLitter_lt_pos
     apply (H β _).pos_nearLitter_lt_pos (castTangleLeLt M LtLevel.elim t) A N
     rwa [castTangleLeLt_support]
 
+theorem preCoherentData_smul_fuzz
+    {β : Λ} {γ : TypeIndex} {δ : Λ} [iβ : letI : Level := ⟨α⟩; LeLevel β]
+    [iγ : letI : Level := ⟨α⟩; LtLevel γ] [iδ : letI : Level := ⟨α⟩; LtLevel δ]
+    (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ)
+    (ρ : AllPermLe M β iβ.elim) (t : TangleLe M γ iγ.elim.le) :
+    letI : Level := ⟨α⟩; letI := preCoherentData M H
+    ((leData M).data β).allPermForget ρ ↘ hδ ↘. • fuzz hγδ t =
+    fuzz hγδ ((preCoherentData M H).allPermSderiv hγ ρ • t) := by
+  letI : Level := ⟨α⟩
+  by_cases h : (β : TypeIndex) = α
+  · cases coe_injective h
+    revert iγ
+    induction γ using recBotCoe with
+    | bot =>
+      intro _ t
+      rw [← castAllPermLeEq_forget]
+      unfold PreCoherentData.allPermSderiv preCoherentData
+      simp only [recBotCoe_bot, recBotCoe_coe, ↓reduceDIte, id_eq]
+      letI := ltData M
+      exact (castAllPermLeEq M rfl ρ).smul_fuzz hγδ t
+    | coe γ =>
+      intro _ t
+      rw [← castTangleLeLt_fuzz M hγ, ← castTangleLeLt_fuzz M hγ, ← castAllPermLeEq_forget]
+      unfold PreCoherentData.allPermSderiv preCoherentData
+      simp only [recBotCoe_coe, ↓reduceDIte]
+      letI := ltData M
+      have := (castAllPermLeEq M rfl ρ).smul_fuzz hγδ (castTangleLeLt M hγ t)
+      rwa [castAllPermLeLt_smul] at this
+  · revert iγ
+    induction γ using recBotCoe with
+    | bot =>
+      intro _ t
+      rw [← castAllPermLeLt_forget M (iβ.elim.lt_of_ne h)]
+      unfold PreCoherentData.allPermSderiv preCoherentData
+      simp only [coe_inj, recBotCoe_bot, id_eq, recBotCoe_coe, show β ≠ α from h ∘ congr_arg _,
+        ↓reduceDIte, ne_eq]
+      exact (H β (iβ.elim.lt_of_ne h)).smul_fuzz_bot hδ (castAllPermLeLt M _ ρ) t
+    | coe γ =>
+      intro _ t
+      rw [← castAllPermLeLt_forget M (iβ.elim.lt_of_ne h),
+        ← castTangleLeLt_fuzz M (hγ.trans_le LeLevel.elim),
+        ← castTangleLeLt_fuzz M (hγ.trans_le LeLevel.elim),
+        castAllPermLeLt_smul']
+      unfold PreCoherentData.allPermSderiv preCoherentData
+      simp only [coe_inj, recBotCoe_coe, imp_self, show β ≠ α from h ∘ congr_arg _,
+        IsEmpty.forall_iff, ↓reduceDIte, ne_eq, Equiv.apply_symm_apply]
+      exact (H β (iβ.elim.lt_of_ne h)).smul_fuzz hγ hδ hγδ
+        (castAllPermLeLt M _ ρ) (castTangleLeLt M _ t)
+
 def coherentData :
     letI : Level := ⟨α⟩; CoherentData :=
   letI : Level := ⟨α⟩
@@ -324,7 +412,7 @@ def coherentData :
     allPermSderiv_forget := preCoherentData_allPermSderiv_forget M H
     pos_atom_lt_pos := preCoherentData_pos_atom_lt_pos M H
     pos_nearLitter_lt_pos := preCoherentData_pos_nearLitter_lt_pos M H
-    smul_fuzz := sorry
+    smul_fuzz := preCoherentData_smul_fuzz M H
     allPerm_of_basePerm := sorry
     allPerm_of_smulFuzz := sorry
     tSet_ext := sorry
@@ -363,6 +451,8 @@ def constructHypothesis (α : Λ) (M : (β : Λ) → (β : TypeIndex) < α → M
     allPermBotSderiv_forget := sorry
     pos_atom_lt_pos := sorry
     pos_nearLitter_lt_pos := sorry
+    smul_fuzz := sorry
+    smul_fuzz_bot := sorry
   }
 
 instance : IsTrans Λ λ β γ ↦ (β : TypeIndex) < (γ : TypeIndex) :=
