@@ -1,0 +1,40 @@
+import ConNF.Basic.InductiveConstruction
+import ConNF.Construction.ConstructHypothesis
+
+/-!
+# New file
+
+In this file...
+
+## Main declarations
+
+* `ConNF.foo`: Something new.
+-/
+
+noncomputable section
+universe u
+
+open Cardinal Ordinal WithBot
+
+namespace ConNF
+
+variable [Params.{u}] {α : Λ} (M : (β : Λ) → (β : TypeIndex) < α → Motive β)
+  (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h))
+
+instance : IsTrans Λ λ β γ ↦ (β : TypeIndex) < (γ : TypeIndex) :=
+  ⟨λ _ _ _ ↦ lt_trans⟩
+
+instance : IsWellFounded Λ λ β γ ↦ (β : TypeIndex) < (γ : TypeIndex) :=
+  ⟨InvImage.wf _ (wellFounded_lt)⟩
+
+def motive : (α : Λ) → Motive α :=
+  ICT.fix constructMotive constructHypothesis
+
+def hypothesis : (α : Λ) → Hypothesis (motive α) (λ β _ ↦ motive β) :=
+  ICT.fix_prop constructMotive constructHypothesis
+
+theorem motive_eq : (α : Λ) →
+    motive α = constructMotive α (λ β _ ↦ motive β) (λ β _ ↦ hypothesis β) :=
+  ICT.fix_eq constructMotive constructHypothesis
+
+end ConNF
