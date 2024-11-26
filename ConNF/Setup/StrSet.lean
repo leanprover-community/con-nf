@@ -119,6 +119,10 @@ instance {α : TypeIndex} : MulAction (StrPerm α) (StrSet α) where
   one_smul := one_strPerm_smul
   mul_smul := mul_strPerm_smul
 
+theorem smul_none {α : Λ} (π : StrPerm α) :
+    π • (StrSet.coeEquiv.symm λ _ _ ↦ ∅ : StrSet α) = StrSet.coeEquiv.symm λ _ _ ↦ ∅ := by
+  simp only [Equiv.eq_symm_apply, strPerm_smul_coe, Equiv.apply_symm_apply, Set.smul_set_empty]
+
 end StrSet
 
 /-!

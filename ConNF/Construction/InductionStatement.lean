@@ -33,7 +33,7 @@ theorem card_tangle_bot_le [ModelData ⊥] : #(Tangle ⊥) ≤ #μ := by
 
 def botPosition [ModelData ⊥] : Position (Tangle ⊥) where
   pos := ⟨funOfDeny card_tangle_bot_le (λ t ↦ pos '' (t.supportᴬ.image Prod.snd : Set Atom))
-      (λ _ ↦ sorry),
+      λ _ ↦ mk_image_le.trans_lt ((Enumeration.coe_small _).trans_le κ_le_μ_ord_cof),
     funOfDeny_injective _ _ _⟩
 
 theorem pos_tangle_bot {D : ModelData ⊥} (t : Tangle ⊥) (a : Atom) (A : ⊥ ↝ ⊥)

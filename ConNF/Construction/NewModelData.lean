@@ -289,10 +289,6 @@ theorem newPreModelData.tSetForget_some' (x : NewSet) :
     (show @TSet _ α newPreModelData from some x)ᵁ = xᵁ :=
   rfl
 
-theorem StrSet.smul_none (π : StrPerm α) :
-    π • (StrSet.coeEquiv.symm λ _ _ ↦ ∅ : StrSet α) = StrSet.coeEquiv.symm λ _ _ ↦ ∅ := by
-  sorry
-
 theorem NewPerm.forget_injective (ρ₁ ρ₂ : NewPerm) (h : ρ₁ᵁ = ρ₂ᵁ) : ρ₁ = ρ₂ := by
   ext β hβ : 3
   apply allPermForget_injective
@@ -342,7 +338,18 @@ theorem NewSet.exists_support (x : letI := newPreModelData; TSet α) :
     exact hS ρ hρ
 
 theorem NewSet.coe_ne_empty (x : NewSet) : xᵁ ≠ (StrSet.coeEquiv.symm λ _ _ ↦ ∅) := by
-  sorry
+  intro h
+  by_cases hα : IsMin α
+  · obtain ⟨s, ⟨a, ha⟩, hs⟩ := x.c.eq_of_isMin hα
+    have : aᵁ ∈[WithBot.bot_lt_coe _] xᵁ := by rwa [← mem_members, hs, Code.members_bot]
+    rw [h, StrSet.mem_iff, Equiv.apply_symm_apply] at this
+    cases this
+  · rw [not_isMin_iff] at hα
+    obtain ⟨β, hβ⟩ := hα
+    have : LtLevel β := ⟨WithBot.coe_lt_coe.mpr hβ⟩
+    obtain ⟨y, hy⟩ := x.c.members_nonempty x.hc β
+    rw [mem_members, h, StrSet.mem_iff, Equiv.apply_symm_apply] at hy
+    cases hy
 
 def newModelData : ModelData α where
   tSetForget_injective' := by
@@ -386,32 +393,112 @@ theorem Code.toSet_spec (c : Code)
     Represents (c.toSet hc).c c :=
   (c.hasSet hc).choose_spec
 
+theorem Code.mem_toSet' (c : Code) {hc : ∃ S : Support α, ∀ ρ : NewPerm, ρᵁ • S = S → ρ • c = c}
+    (y : TSet c.β) :
+    yᵁ ∈[LtLevel.elim] (c.toSet hc)ᵁ ↔ y ∈ c.s := by
+  rw [← NewSet.mem_members, members_eq_of_represents (c.toSet_spec hc)]
+
+theorem Code.mem_toSet {β : TypeIndex} [LtLevel β] {s : Set (TSet β)} {hs : s.Nonempty}
+    {hc : ∃ S : Support α, ∀ ρ : NewPerm, ρᵁ • S = S → ρ • Code.mk β s hs = Code.mk β s hs}
+    (y : TSet β) :
+    yᵁ ∈[LtLevel.elim] (Code.toSet ⟨β, s, hs⟩ hc)ᵁ ↔ y ∈ s :=
+  Code.mem_toSet' ⟨β, s, hs⟩ y
+
+theorem NearLitter.code_aux {N : NearLitter} :
+    {x : TSet ⊥ | StrSet.botEquiv xᵁ ∈ Nᴬ}.Nonempty := by
+  have : #Nᴬ ≠ 0 := by rw [NearLitter.card_atoms]; exact mk_ne_zero κ
+  rw [Cardinal.mk_ne_zero_iff_nonempty] at this
+  obtain ⟨a, ha⟩ := this
+  obtain ⟨x, hx⟩ := tSetForget_surjective (StrSet.botEquiv.symm a)
+  use x
+  rwa [Set.mem_setOf_eq, hx, Equiv.apply_symm_apply]
+
 def NearLitter.code (N : NearLitter) : Code :=
-  ⟨⊥, {x | StrSet.botEquiv xᵁ ∈ Nᴬ}, by
-    have : #Nᴬ ≠ 0 := sorry
-    rw [Cardinal.mk_ne_zero_iff_nonempty] at this
-    obtain ⟨a, ha⟩ := this
-    obtain ⟨x, hx⟩ := tSetForget_surjective (StrSet.botEquiv.symm a)
-    use x
-    rwa [Set.mem_setOf_eq, hx, Equiv.apply_symm_apply]⟩
+  ⟨⊥, {x | StrSet.botEquiv xᵁ ∈ Nᴬ}, NearLitter.code_aux⟩
+
+theorem NearLitter.smul_code (ρ : NewPerm) (N : NearLitter) :
+    ρ • N.code = (ρᵁ ↘. • N).code := by
+  simp only [code, NewPerm.smul_mk, BasePerm.smul_nearLitter_atoms, Code.mk.injEq, heq_eq_eq,
+    true_and]
+  ext a
+  rw [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_setOf_eq, Set.mem_setOf_eq, smul_forget,
+    allPermForget_inv, StrSet.strPerm_smul_bot, Tree.inv_apply, ← NewPerm.forget_sderiv,
+    Tree.sderiv_apply, ← Set.mem_smul_set_iff_inv_smul_mem]
+  rfl
+
+theorem newTyped_aux {N : NearLitter} :
+    ∃ S : Support α, ∀ ρ : NewPerm, ρᵁ • S = S → ρ • N.code = N.code := by
+  use ⟨.empty, .singleton ⟨Path.nil ↘., N⟩⟩
+  intro ρ hρ
+  rw [Support.smul_eq_iff] at hρ
+  have := (hρ (Path.nil ↘.)).2 N ((Enumeration.mem_singleton_iff _ _).mpr rfl)
+  conv_rhs => rw [← this]
+  rw [NearLitter.smul_code]
+  rfl
 
 def newTyped (N : NearLitter) : NewSet :=
-  N.code.toSet sorry
+  N.code.toSet newTyped_aux
+
+theorem newTyped_c_eq (N : NearLitter) :
+    (newTyped N).c = N.code := by
+  have h₁ := Code.toSet_spec N.code newTyped_aux
+  have h₂ : Represents N.code N.code := Represents.refl _ (Code.bot_even _ _)
+  exact represents_cofunctional.injective h₁ h₂
+
+theorem mem_newTyped_iff (a : TSet ⊥) (N : NearLitter) :
+    aᵁ ∈[WithBot.bot_lt_coe _] (newTyped N)ᵁ ↔ StrSet.botEquiv aᵁ ∈ Nᴬ := by
+  simp only [newTyped, NearLitter.code, Code.mem_toSet, Set.mem_setOf_eq]
+
+theorem newTyped_injective : Function.Injective newTyped := by
+  intro N₁ N₂ hN
+  rw [NearLitter.ext_iff]
+  ext a
+  obtain ⟨x, hx⟩ := tSetForget_surjective (StrSet.botEquiv.symm a)
+  rw [Equiv.eq_symm_apply] at hx
+  cases hx
+  rw [← mem_newTyped_iff, ← mem_newTyped_iff, hN]
+
+theorem smul_newTyped (ρ : NewPerm) (N : NearLitter) :
+    ρ • newTyped N = newTyped (ρᵁ ↘. • N) := by
+  apply NewSet.ext
+  simp only [NewSet.smul_c, BasePerm.smul_nearLitter_atoms, newTyped_c_eq, NearLitter.smul_code]
+
+def newSingletonCode {γ : Λ} [LtLevel γ] (x : TSet γ) : Code :=
+  ⟨γ, {x}, Set.singleton_nonempty x⟩
+
+theorem newSingleton_aux {γ : Λ} [LtLevel γ] {x : TSet γ} :
+    ∃ S : Support α, ∀ ρ : NewPerm, ρᵁ • S = S → ρ • newSingletonCode x = newSingletonCode x := by
+  obtain ⟨S, hS⟩ := exists_support x
+  use S ↗ LtLevel.elim
+  intro ρ hρ
+  suffices ρ.sderiv γ • x = x by simp only [newSingletonCode, NewPerm.smul_mk,
+    Set.smul_set_singleton, Code.mk.injEq, heq_eq_eq, Set.singleton_eq_singleton_iff,
+    true_and, this]
+  apply hS.supports
+  rwa [Support.smul_scoderiv, Support.scoderiv_inj, NewPerm.forget_sderiv] at hρ
 
 def newSingleton {γ : Λ} [LtLevel γ] (x : TSet γ) : NewSet :=
-  sorry
+  (newSingletonCode x).toSet newSingleton_aux
 
 local instance : ModelData α := newModelData
 
+theorem mem_none_iff {β : TypeIndex} [LtLevel β] (y : TSet β) :
+    y ∈[LtLevel.elim] (show TSet α from none) ↔
+    yᵁ ∈[LtLevel.elim] (StrSet.coeEquiv.symm λ _ _ ↦ ∅) :=
+  Iff.rfl
+
+theorem mem_some_iff {β : TypeIndex} [LtLevel β] (y : TSet β) (x : NewSet) :
+    y ∈[LtLevel.elim] (show TSet α from some x) ↔
+    yᵁ ∈[LtLevel.elim] xᵁ :=
+  Iff.rfl
+
 theorem mem_newSingleton_iff {γ : Λ} [LtLevel γ] (x y : TSet γ) :
-    y ∈[LtLevel.elim] (show TSet α from some (newSingleton x)) ↔ y = x :=
-  sorry
+    y ∈[LtLevel.elim] (show TSet α from some (newSingleton x)) ↔ y = x := by
+  simp only [newSingleton, newSingletonCode, mem_some_iff, Code.mem_toSet, Set.mem_singleton_iff]
 
 theorem not_mem_none {β : TypeIndex} [LtLevel β] (z : TSet β) :
     ¬z ∈[LtLevel.elim] (show TSet α from none) := by
-  unfold TypedMem.typedMem instTypedMemTSet
-  change zᵁ ∉ _
-  erw [Equiv.apply_symm_apply]
+  rw [mem_none_iff, StrSet.mem_iff, Equiv.apply_symm_apply]
   exact id
 
 theorem newModelData_ext (β : Λ) [LtLevel β] (x y : TSet α)
@@ -438,7 +525,20 @@ def newPositionDeny (t : Tangle α) : Set μ :=
     pos '' (t.supportᴺ.image Prod.snd : Set NearLitter)
 
 theorem card_newPositionDeny (t : Tangle α) :
-    #(newPositionDeny t) < (#μ).ord.cof := sorry
+    #(newPositionDeny t) < (#μ).ord.cof := by
+  rw [newPositionDeny]
+  apply (mk_union_le _ _).trans_lt
+  apply add_lt_of_lt aleph0_lt_μ_ord_cof.le
+  apply (mk_union_le _ _).trans_lt
+  apply add_lt_of_lt aleph0_lt_μ_ord_cof.le
+  all_goals apply mk_image_le.trans_lt
+  · refine lt_of_le_of_lt ?_ (one_lt_aleph0.trans aleph0_lt_μ_ord_cof)
+    rw [mk_le_one_iff_set_subsingleton]
+    intro N₁ hN₁ N₂ hN₂
+    rw [Set.mem_setOf_eq] at hN₁ hN₂
+    rwa [hN₁, Option.some_inj, newTyped_injective.eq_iff] at hN₂
+  · exact (Enumeration.coe_small _).trans_le κ_le_μ_ord_cof
+  · exact (Enumeration.coe_small _).trans_le κ_le_μ_ord_cof
 
 def newPosition (h : #(Tangle α) ≤ #μ) : Position (Tangle α) where
   pos := ⟨funOfDeny h newPositionDeny card_newPositionDeny, funOfDeny_injective _ _ _⟩
@@ -459,14 +559,28 @@ theorem pos_nearLitter_lt_newPosition (h : #(Tangle α) ≤ #μ) (t : Tangle α)
   refine Or.inr ⟨_, ?_, rfl⟩
   exact ⟨i, ⟨A, N⟩, hi, rfl⟩
 
+theorem pos_le_pos_of_typed (h : #(Tangle α) ≤ #μ) (N : NearLitter) (t : Tangle α)
+    (ht : t.set = some (newTyped N)) :
+    pos N ≤ (newPosition h).pos t := by
+  apply le_of_lt
+  apply funOfDeny_gt_deny
+  refine Or.inl (Or.inl ?_)
+  simp only [ht, Set.mem_image, Set.mem_setOf_eq, EmbeddingLike.apply_eq_iff_eq, exists_eq_right]
+
+theorem smul_newTyped' (ρ : AllPerm α) (N : NearLitter) :
+    ρ • (show TSet α from some (newTyped N)) = some (newTyped (ρᵁ ↘. • N)) := by
+  change some _ = some _
+  dsimp only
+  rw [smul_newTyped ρ N]
+
 def newTypedNearLitters (h : #(Tangle α) ≤ #μ) :
     letI := newPosition h; TypedNearLitters α :=
   letI := newPosition h
   {
     typed := some ∘ newTyped
-    typed_injective := sorry
-    pos_le_pos_of_typed := sorry
-    smul_typed := sorry
+    typed_injective := (Option.some_injective _).comp newTyped_injective
+    pos_le_pos_of_typed := pos_le_pos_of_typed h
+    smul_typed := smul_newTyped'
   }
 
 end ConNF
