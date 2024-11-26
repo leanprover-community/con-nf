@@ -18,8 +18,7 @@ open Cardinal Ordinal WithBot
 
 namespace ConNF
 
-variable [Params.{u}] {α : Λ} (M : (β : Λ) → (β : TypeIndex) < α → Motive β)
-  (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h))
+variable [Params.{u}]
 
 instance : IsTrans Λ λ β γ ↦ (β : TypeIndex) < (γ : TypeIndex) :=
   ⟨λ _ _ _ ↦ lt_trans⟩
