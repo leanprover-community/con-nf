@@ -27,6 +27,7 @@ TODO: We're going to try allowing model data at level `⊥` to vary. That is, we
 variable [Params.{u}] [Level]
 
 /-- A convenience typeclass to hold data below the current level. -/
+@[ext]
 class LeData where
   [data : (β : TypeIndex) → [LeLevel β] → ModelData β]
   [positions : (β : TypeIndex) → [LtLevel β] → Position (Tangle β)]
@@ -37,6 +38,7 @@ instance [LeData] : (β : TypeIndex) → [LeLevel β] → ModelData β :=
 instance [LeData] : (β : TypeIndex) → [LtLevel β] → Position (Tangle β) :=
   LeData.positions
 
+@[ext]
 class PreCoherentData extends LeData where
   allPermSderiv {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (h : γ < β) : AllPerm β → AllPerm γ
   singleton {β γ : Λ} [LeLevel β] [LeLevel γ] (h : (γ : TypeIndex) < β) : TSet γ → TSet β
@@ -74,6 +76,7 @@ typedMem_tSetForget {β : Λ} {γ : TypeIndex} [LeLevel β] [LeLevel γ]
   y ∈[hγ] xᵁ → ∃ z : TSet γ, y = zᵁ
 ```
 -/
+@[ext]
 class CoherentData extends PreCoherentData where
   allPermSderiv_forget {β γ : TypeIndex} [LeLevel β] [LeLevel γ] (h : γ < β) (ρ : AllPerm β) :
     (ρ ↘ h)ᵁ = ρᵁ ↘ h

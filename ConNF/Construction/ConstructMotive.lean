@@ -45,16 +45,16 @@ def leData :
   letI : Level := ⟨α⟩
   letI data : (β : TypeIndex) → [LeLevel β] → ModelData β :=
     λ β hβ ↦ β.recBotCoe (λ _ ↦ botModelData)
-      (λ β hβ ↦ if h : β = α then
+      (λ β hβ ↦ if h : (β : TypeIndex) = α then
           cast (by rw [h]) (newModelData' M)
         else
-          (M β (LeLevel.elim.lt_of_ne (coe_injective.ne h))).data) hβ
+          (M β (LeLevel.elim.lt_of_ne h)).data) hβ
   letI positions : (β : TypeIndex) → [LtLevel β] → Position (Tangle β) :=
     λ β hβ ↦ β.recBotCoe (λ _ ↦ botPosition)
       (λ β hβ ↦
         cast (by
           congr; unfold data; rw [recBotCoe_coe, dif_neg];
-          exact (LtLevel.elim (β := β)).ne ∘ congrArg WithBot.some)
+          exact (LtLevel.elim (β := β)).ne)
         (M β LtLevel.elim).pos) hβ
   LeData.mk (data := data) (positions := positions)
 
@@ -64,7 +64,7 @@ theorem leData_data_bot :
 
 theorem leData_data_lt {β : Λ} (hβ : (β : TypeIndex) < α) :
     (letI : Level := ⟨α⟩; letI : LeLevel β := ⟨hβ.le⟩; (leData M).data β) = (M β hβ).data := by
-  simp only [leData, recBotCoe_coe, dif_neg (hβ.ne ∘ congrArg WithBot.some)]
+  simp only [leData, recBotCoe_coe, dif_neg hβ.ne]
 
 theorem leData_data_eq :
     (letI : Level := ⟨α⟩; letI : LeLevel α := ⟨le_rfl⟩; (leData M).data α) = newModelData' M := by
