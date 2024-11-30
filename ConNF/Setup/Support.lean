@@ -424,7 +424,6 @@ theorem add_derivBot (S T : Support α) (A : α ↝ ⊥) :
     (S + T) ⇘. A = (S ⇘. A) + (T ⇘. A) :=
   rfl
 
-@[simp]
 theorem smul_add (S T : Support α) (π : StrPerm α) :
     π • (S + T) = π • S + π • T :=
   rfl

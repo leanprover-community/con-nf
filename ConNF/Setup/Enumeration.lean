@@ -443,7 +443,6 @@ theorem add_inj_iff_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F
   · rintro ⟨rfl, rfl⟩
     rfl
 
-@[simp]
 theorem smul_add {G X : Type _} [Group G] [MulAction G X] (g : G) (E F : Enumeration X) :
     g • (E + F) = g • E + g • F :=
   rfl

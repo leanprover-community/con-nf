@@ -178,7 +178,7 @@ theorem raise_strong' (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : Al
       (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim).Strong :=
   ⟨raise_preStrong' S hS T ρ hγ, raise_closed' S hS T ρ hγ hρ⟩
 
-theorem convAtoms_injective_of_fixes {S : Support α} (hS : S.Strong) {T : Support γ}
+theorem convAtoms_injective_of_fixes {S : Support α} {T : Support γ}
     {ρ₁ ρ₂ : AllPerm β} {hγ : (γ : TypeIndex) < β}
     (hρ₁ : ρ₁ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
     (hρ₂ : ρ₂ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
@@ -188,9 +188,58 @@ theorem convAtoms_injective_of_fixes {S : Support α} (hS : S.Strong) {T : Suppo
         LtLevel.elim)
       (S + (ρ₂ᵁ • ((T ↗ hγ).strong + (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗
         LtLevel.elim) A).Injective := by
+  rw [Support.smul_eq_iff] at hρ₁ hρ₂
   constructor
   rintro a₁ a₂ a₃ ⟨i, hi₁, hi₂⟩ ⟨j, hj₁, hj₂⟩
-  sorry
+  simp only [add_derivBot, BaseSupport.add_atoms, Rel.inv_apply,
+    Enumeration.rel_add_iff] at hi₁ hi₂ hj₁ hj₂
+  obtain hi₁ | ⟨i, rfl, hi₁⟩ := hi₁
+  · obtain hi₂ | ⟨i', rfl, _⟩ := hi₂
+    swap
+    · have := Enumeration.lt_bound _ _ ⟨_, hi₁⟩
+      simp only [add_lt_iff_neg_left] at this
+      cases (κ_zero_le i').not_lt this
+    cases (Enumeration.rel_coinjective _).coinjective hi₁ hi₂
+    obtain hj₁ | ⟨j, rfl, hj₁⟩ := hj₁
+    · obtain hj₂ | ⟨j', rfl, _⟩ := hj₂
+      · exact (Enumeration.rel_coinjective _).coinjective hj₂ hj₁
+      · have := Enumeration.lt_bound _ _ ⟨_, hj₁⟩
+        simp only [add_lt_iff_neg_left] at this
+        cases (κ_zero_le j').not_lt this
+    · obtain hj₂ | hj₂ := hj₂
+      · have := Enumeration.lt_bound _ _ ⟨_, hj₂⟩
+        simp only [add_lt_iff_neg_left] at this
+        cases (κ_zero_le j).not_lt this
+      · simp only [add_right_inj, exists_eq_left] at hj₂
+        obtain ⟨B, rfl⟩ := eq_of_atom_mem_scoderiv_botDeriv ⟨j, hj₁⟩
+        simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_atoms,
+          BaseSupport.add_atoms, Enumeration.smul_rel, add_right_inj, exists_eq_left] at hj₁ hj₂
+        have := (Enumeration.rel_coinjective _).coinjective hj₁ hj₂
+        rw [← (hρ₂ B).1 a₁ ⟨_, hi₁⟩, inv_smul_smul, inv_smul_eq_iff, (hρ₁ B).1 a₁ ⟨_, hi₁⟩] at this
+        exact this.symm
+  · obtain ⟨B, rfl⟩ := eq_of_atom_mem_scoderiv_botDeriv ⟨i, hi₁⟩
+    simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_atoms,
+      BaseSupport.add_atoms, Enumeration.smul_rel, add_right_inj, exists_eq_left] at hi₁ hi₂ hj₁ hj₂
+    obtain hi₂ | hi₂ := hi₂
+    · have := Enumeration.lt_bound _ _ ⟨_, hi₂⟩
+      simp only [add_lt_iff_neg_left] at this
+      cases (κ_zero_le i).not_lt this
+    have hi := (Enumeration.rel_coinjective _).coinjective hi₁ hi₂
+    suffices hj : (ρ₁ᵁ B)⁻¹ • a₂ = (ρ₂ᵁ B)⁻¹ • a₃ by
+      rwa [← hj, smul_left_cancel_iff] at hi
+    obtain hj₁ | ⟨j, rfl, hj₁⟩ := hj₁
+    · obtain hj₂ | ⟨j', rfl, _⟩ := hj₂
+      · rw [← (hρ₁ B).1 a₂ ⟨_, hj₁⟩, ← (hρ₂ B).1 a₃ ⟨_, hj₂⟩, inv_smul_smul, inv_smul_smul]
+        exact (Enumeration.rel_coinjective _).coinjective hj₁ hj₂
+      · have := Enumeration.lt_bound _ _ ⟨_, hj₁⟩
+        simp only [add_lt_iff_neg_left] at this
+        cases (κ_zero_le j').not_lt this
+    · obtain hj₂ | hj₂ := hj₂
+      · have := Enumeration.lt_bound _ _ ⟨_, hj₂⟩
+        simp only [add_lt_iff_neg_left] at this
+        cases (κ_zero_le j).not_lt this
+      · simp only [add_right_inj, exists_eq_left] at hj₂
+        exact (Enumeration.rel_coinjective _).coinjective hj₁ hj₂
 
 theorem sameSpecLe_of_fixes (S : Support α) (hS : S.Strong) (T : Support γ) (ρ₁ ρ₂ : AllPerm β)
     (hγ : (γ : TypeIndex) < β)
@@ -226,7 +275,7 @@ theorem sameSpecLe_of_fixes (S : Support α) (hS : S.Strong) (T : Support γ) (�
     rw [smul_nearLitters, Enumeration.smulPath_rel] at h₁ ⊢
     simp only [inv_smul_smul]
     exact h₁
-  case convAtoms_injective => exact convAtoms_injective_of_fixes hS hρ₁ hρ₂
+  case convAtoms_injective => exact convAtoms_injective_of_fixes hρ₁ hρ₂
   case atomMemRel_le => sorry
   case inflexible_of_inflexible => sorry
   case atoms_of_inflexible => sorry
