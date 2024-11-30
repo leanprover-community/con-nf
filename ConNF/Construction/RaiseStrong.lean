@@ -300,22 +300,19 @@ theorem atomMemRel_le_of_fixes {S : Support α} {T : Support γ}
           exists_eq_left]
         exact Or.inr hj
 
-theorem inflexible_of_inflexible_of_fixes {S : Support α} {T : Support γ}
+theorem convNearLitters_cases {S : Support α} {T : Support γ}
     {ρ₁ ρ₂ : AllPerm β} {hγ : (γ : TypeIndex) < β}
-    (hρ₁ : ρ₁ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
-    (hρ₂ : ρ₂ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
     {A : α ↝ ⊥} {N₁ N₂ : NearLitter} :
   convNearLitters
     (S + (ρ₁ᵁ • ((T ↗ hγ).strong +
       (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim)
     (S + (ρ₂ᵁ • ((T ↗ hγ).strong +
       (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim) A N₁ N₂ →
-    ∀ (P : InflexiblePath ↑α) (t : Tangle P.δ), A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t →
-    ∃ ρ : AllPerm P.δ, N₂ᴸ = fuzz P.hδε (ρ • t) := by
-  rintro ⟨i, hN₁, hN₂⟩ ⟨γ, δ, ε, hδ, hε, hδε, A⟩ t hA ht
-  haveI : LeLevel γ := ⟨A.le⟩
-  haveI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
-  haveI : LtLevel ε := ⟨hε.trans_le LeLevel.elim⟩
+    N₁ = N₂ ∧ N₁ ∈ (S ⇘. A)ᴺ ∨
+    ∃ B : β ↝ ⊥, A = B ↗ LtLevel.elim ∧ (ρ₁ᵁ B)⁻¹ • N₁ = (ρ₂ᵁ B)⁻¹ • N₂ ∧
+      (ρ₁ᵁ B)⁻¹ • N₁ ∈ (((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport) ⇘. B)ᴺ := by
+  rintro ⟨i, hN₁, hN₂⟩
   simp only [add_derivBot, BaseSupport.add_nearLitters, Rel.inv_apply,
     Enumeration.rel_add_iff] at hN₁ hN₂
   obtain hN₁ | ⟨i, rfl, hN₁⟩ := hN₁
@@ -324,9 +321,7 @@ theorem inflexible_of_inflexible_of_fixes {S : Support α} {T : Support γ}
     · have := Enumeration.lt_bound _ _ ⟨_, hN₁⟩
       simp only [add_lt_iff_neg_left] at this
       cases (κ_zero_le i).not_lt this
-    cases (Enumeration.rel_coinjective _).coinjective hN₁ hN₂
-    use 1
-    rw [one_smul, ht]
+    exact Or.inl ⟨(Enumeration.rel_coinjective _).coinjective hN₁ hN₂, _, hN₁⟩
   · obtain ⟨B, rfl⟩ := eq_of_nearLitter_mem_scoderiv_botDeriv ⟨i, hN₁⟩
     simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_nearLitters,
       BaseSupport.add_nearLitters, Enumeration.smul_rel, add_right_inj, exists_eq_left] at hN₁ hN₂
@@ -334,7 +329,28 @@ theorem inflexible_of_inflexible_of_fixes {S : Support α} {T : Support γ}
     · have := Enumeration.lt_bound _ _ ⟨_, hN₂⟩
       simp only [add_lt_iff_neg_left] at this
       cases (κ_zero_le i).not_lt this
-    have := (Enumeration.rel_coinjective _).coinjective hN₁ hN₂
+    exact Or.inr ⟨B, rfl, (Enumeration.rel_coinjective _).coinjective hN₁ hN₂, _, hN₁⟩
+
+theorem inflexible_of_inflexible_of_fixes {S : Support α} {T : Support γ}
+    {ρ₁ ρ₂ : AllPerm β} {hγ : (γ : TypeIndex) < β}
+    (hρ₁ : ρ₁ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
+    (hρ₂ : ρ₂ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
+    {A : α ↝ ⊥} {N₁ N₂ : NearLitter} :
+    convNearLitters
+      (S + (ρ₁ᵁ • ((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim)
+      (S + (ρ₂ᵁ • ((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim) A N₁ N₂ →
+      ∀ (P : InflexiblePath ↑α) (t : Tangle P.δ), A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t →
+      ∃ ρ : AllPerm P.δ, N₂ᴸ = fuzz P.hδε (ρ • t) := by
+  rintro hN ⟨γ, δ, ε, hδ, hε, hδε, A⟩ t hA ht
+  haveI : LeLevel γ := ⟨A.le⟩
+  haveI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
+  haveI : LtLevel ε := ⟨hε.trans_le LeLevel.elim⟩
+  obtain ⟨rfl, _⟩ | ⟨B, rfl, hN'⟩ := convNearLitters_cases hN
+  · use 1
+    rw [one_smul, ht]
+  · clear hN
     cases B
     case sderiv ε B hε' _ =>
       rw [← Path.coderiv_deriv] at hA
@@ -342,9 +358,9 @@ theorem inflexible_of_inflexible_of_fixes {S : Support α} {T : Support γ}
       apply Path.sderiv_path_injective at hA
       cases B
       case nil =>
-        simp only [Path.botSderiv_coe_eq, interferenceSupport_nearLitters,
-          Enumeration.add_empty] at hN₁
-        cases not_mem_strong_botDeriv _ _ ⟨_, hN₁⟩
+        simp only [Path.botSderiv_coe_eq, add_derivBot, BaseSupport.add_nearLitters,
+          interferenceSupport_nearLitters, Enumeration.add_empty] at hN'
+        cases not_mem_strong_botDeriv _ _ hN'.2
       case sderiv ζ B hζ _ _ =>
         rw [← Path.coderiv_deriv] at hA
         cases Path.sderiv_index_injective hA
@@ -352,13 +368,212 @@ theorem inflexible_of_inflexible_of_fixes {S : Support α} {T : Support γ}
         dsimp only at hA hζ hε' B t
         cases hA
         use (ρ₂ * ρ₁⁻¹) ⇘ B ↘ hδ
-        have := (Enumeration.rel_coinjective _).coinjective hN₁ hN₂
-        rw [inv_smul_eq_iff] at this
-        rw [← smul_fuzz hδ hε hδε, ← ht, this]
+        rw [inv_smul_eq_iff] at hN'
+        rw [← smul_fuzz hδ hε hδε, ← ht, hN'.1]
         simp only [allPermDeriv_forget, allPermForget_mul, allPermForget_inv, Tree.mul_deriv,
           Tree.inv_deriv, Tree.mul_sderiv, Tree.inv_sderiv, Tree.mul_sderivBot, Tree.inv_sderivBot,
           Path.botSderiv_coe_eq, BasePerm.smul_nearLitter_litter, mul_smul]
         erw [inv_smul_smul, smul_inv_smul]
+
+theorem atoms_of_inflexible_of_fixes {S : Support α} (hS : S.Strong) {T : Support γ}
+    {ρ₁ ρ₂ : AllPerm β} {hγ : (γ : TypeIndex) < β}
+    (hρ₁ : ρ₁ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
+    (hρ₂ : ρ₂ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
+    (A : α ↝ ⊥) (N₁ N₂ : NearLitter) (P : InflexiblePath ↑α) (t : Tangle P.δ) (ρ : AllPerm P.δ) :
+    A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t → N₂ᴸ = fuzz P.hδε (ρ • t) →
+    convNearLitters
+      (S + (ρ₁ᵁ • ((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim)
+      (S + (ρ₂ᵁ • ((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim) A N₁ N₂ →
+    ∀ (B : P.δ ↝ ⊥), ∀ a ∈ (t.support ⇘. B)ᴬ, ∀ (i : κ),
+      ((S + (ρ₁ᵁ • ((T ↗ hγ).strong + (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗
+        LtLevel.elim) ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel i a →
+      ((S + (ρ₂ᵁ • ((T ↗ hγ).strong + (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗
+        LtLevel.elim) ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel i (ρᵁ B • a) := by
+  rw [Support.smul_eq_iff] at hρ₁ hρ₂
+  obtain ⟨γ, δ, ε, hδ, hε, hδε, B⟩ := P
+  haveI : LeLevel γ := ⟨B.le⟩
+  haveI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
+  haveI : LtLevel ε := ⟨hε.trans_le LeLevel.elim⟩
+  dsimp only at t ρ ⊢
+  intro hA hN₁ hN₂ hN C a ha i hi
+  obtain ⟨rfl, hN'⟩ | ⟨A, rfl, hN₁', hN₂'⟩ := convNearLitters_cases hN
+  · have haS := (hS.support_le hN' ⟨γ, δ, ε, hδ, hε, hδε, _⟩ t hA hN₁ _).1 a ha
+    rw [hN₂] at hN₁
+    have hρt := congr_arg Tangle.support (fuzz_injective hN₁)
+    rw [Tangle.smul_support, Support.smul_eq_iff] at hρt
+    simp only [add_derivBot, BaseSupport.add_atoms, Enumeration.rel_add_iff] at hi ⊢
+    rw [(hρt C).1 a ha]
+    obtain hi | ⟨i, rfl, hi⟩ := hi
+    · exact Or.inl hi
+    · simp only [add_right_inj, exists_eq_left]
+      obtain ⟨D, hD⟩ := eq_of_atom_mem_scoderiv_botDeriv ⟨i, hi⟩
+      cases B using Path.recScoderiv
+      case nil =>
+        cases Path.scoderiv_index_injective hD
+        cases Path.scoderiv_left_inj.mp hD
+        simp only [hD, Path.coderiv_deriv, Path.coderiv_deriv', scoderiv_botDeriv_eq, smul_derivBot,
+          add_derivBot, BaseSupport.smul_atoms, BaseSupport.add_atoms, Enumeration.smul_rel] at hi ⊢
+        rw [deriv_derivBot, hD] at haS
+        rw [← (hρ₂ _).1 a haS, inv_smul_smul]
+        rw [← (hρ₁ _).1 a haS, inv_smul_smul] at hi
+        exact Or.inr hi
+      case scoderiv ζ B hζ' _ =>
+        rw [Path.coderiv_deriv, Path.coderiv_deriv'] at hD
+        cases Path.scoderiv_index_injective hD
+        rw [Path.scoderiv_left_inj] at hD
+        cases hD
+        simp only [Path.coderiv_deriv, Path.coderiv_deriv', scoderiv_botDeriv_eq, smul_derivBot,
+          add_derivBot, BaseSupport.smul_atoms, BaseSupport.add_atoms, Enumeration.smul_rel] at hi ⊢
+        rw [deriv_derivBot, Path.coderiv_deriv, Path.coderiv_deriv'] at haS
+        rw [← (hρ₂ _).1 a haS, inv_smul_smul]
+        rw [← (hρ₁ _).1 a haS, inv_smul_smul] at hi
+        exact Or.inr hi
+  · simp only [add_derivBot, BaseSupport.add_nearLitters, interferenceSupport_nearLitters,
+      Enumeration.add_empty] at hN₂'
+    cases A
+    case sderiv ζ A hζ' _ =>
+      rw [← Path.coderiv_deriv] at hA
+      cases Path.sderiv_index_injective hA
+      apply Path.sderiv_path_injective at hA
+      cases A
+      case nil =>
+        cases hA
+        cases not_mem_strong_botDeriv _ _ hN₂'
+      case sderiv ζ A hζ _ _ =>
+        rw [← Path.coderiv_deriv] at hA
+        cases Path.sderiv_index_injective hA
+        apply Path.sderiv_path_injective at hA
+        cases hA
+        simp only [Path.coderiv_deriv, Path.coderiv_deriv', add_derivBot, scoderiv_botDeriv_eq,
+          smul_derivBot, BaseSupport.add_atoms, BaseSupport.smul_atoms] at hi ⊢
+        have : N₂ᴸ = (ρ₂ ⇘ A)ᵁ ↘ hζ ↘. • (ρ₁⁻¹ ⇘ A)ᵁ ↘ hζ ↘. • fuzz hδε t := by
+          rw [inv_smul_eq_iff] at hN₁'
+          rw [hN₁', Path.botSderiv_coe_eq, BasePerm.smul_nearLitter_litter,
+            BasePerm.smul_nearLitter_litter, smul_smul, smul_eq_iff_eq_inv_smul,
+            mul_inv_rev, inv_inv, mul_smul, ← Tree.inv_apply, ← allPermForget_inv] at hN₁
+          rw [hN₁]
+          simp only [allPermForget_inv, Tree.inv_apply, allPermDeriv_forget, Tree.inv_deriv,
+            Tree.inv_sderiv, Tree.inv_sderivBot]
+          rfl
+        rw [smul_fuzz hδ hε hδε, smul_fuzz hδ hε hδε] at this
+        have := fuzz_injective (hN₂.symm.trans this)
+        rw [smul_smul] at this
+        rw [t.smul_atom_eq_of_mem_support this ha]
+        rw [Enumeration.rel_add_iff] at hi ⊢
+        obtain hi | ⟨i, rfl, hi⟩ := hi
+        · left
+          simp only [allPermForget_mul, allPermSderiv_forget, allPermDeriv_forget,
+            allPermForget_inv, Tree.inv_deriv, Tree.inv_sderiv, Tree.mul_apply, Tree.sderiv_apply,
+            Tree.deriv_apply, Path.deriv_scoderiv, Tree.inv_apply, mul_smul]
+          rwa [← (hρ₁ _).1 a ⟨i, hi⟩, inv_smul_smul, (hρ₂ _).1 a ⟨i, hi⟩]
+        · refine Or.inr ⟨i, rfl, ?_⟩
+          simp only [allPermForget_mul, allPermSderiv_forget, allPermDeriv_forget,
+            allPermForget_inv, Tree.inv_deriv, Tree.inv_sderiv, Tree.mul_apply, Tree.sderiv_apply,
+            Tree.deriv_apply, Path.deriv_scoderiv, Tree.inv_apply, mul_smul, Enumeration.smul_rel,
+            inv_smul_smul]
+          exact hi
+
+theorem nearLitters_of_inflexible_of_fixes {S : Support α} (hS : S.Strong) {T : Support γ}
+    {ρ₁ ρ₂ : AllPerm β} {hγ : (γ : TypeIndex) < β}
+    (hρ₁ : ρ₁ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
+    (hρ₂ : ρ₂ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
+    (A : α ↝ ⊥) (N₁ N₂ : NearLitter) (P : InflexiblePath ↑α) (t : Tangle P.δ) (ρ : AllPerm P.δ) :
+    A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t → N₂ᴸ = fuzz P.hδε (ρ • t) →
+    convNearLitters
+      (S + (ρ₁ᵁ • ((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim)
+      (S + (ρ₂ᵁ • ((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim) A N₁ N₂ →
+    ∀ (B : P.δ ↝ ⊥), ∀ N ∈ (t.support ⇘. B)ᴺ, ∀ (i : κ),
+      ((S + (ρ₁ᵁ • ((T ↗ hγ).strong + (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗
+        LtLevel.elim) ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel i N →
+      ((S + (ρ₂ᵁ • ((T ↗ hγ).strong + (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗
+        LtLevel.elim) ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel i (ρᵁ B • N) := by
+  rw [Support.smul_eq_iff] at hρ₁ hρ₂
+  obtain ⟨γ, δ, ε, hδ, hε, hδε, B⟩ := P
+  haveI : LeLevel γ := ⟨B.le⟩
+  haveI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
+  haveI : LtLevel ε := ⟨hε.trans_le LeLevel.elim⟩
+  dsimp only at t ρ ⊢
+  intro hA hN₁ hN₂ hN C N₀ hN₀ i hi
+  obtain ⟨rfl, hN'⟩ | ⟨A, rfl, hN₁', hN₂'⟩ := convNearLitters_cases hN
+  · have haS := (hS.support_le hN' ⟨γ, δ, ε, hδ, hε, hδε, _⟩ t hA hN₁ _).2 N₀ hN₀
+    rw [hN₂] at hN₁
+    have hρt := congr_arg Tangle.support (fuzz_injective hN₁)
+    rw [Tangle.smul_support, Support.smul_eq_iff] at hρt
+    simp only [add_derivBot, BaseSupport.add_nearLitters, Enumeration.rel_add_iff] at hi ⊢
+    rw [(hρt C).2 N₀ hN₀]
+    obtain hi | ⟨i, rfl, hi⟩ := hi
+    · exact Or.inl hi
+    · simp only [add_right_inj, exists_eq_left]
+      obtain ⟨D, hD⟩ := eq_of_nearLitter_mem_scoderiv_botDeriv ⟨i, hi⟩
+      cases B using Path.recScoderiv
+      case nil =>
+        cases Path.scoderiv_index_injective hD
+        cases Path.scoderiv_left_inj.mp hD
+        simp only [hD, Path.coderiv_deriv, Path.coderiv_deriv', scoderiv_botDeriv_eq, smul_derivBot,
+          add_derivBot, BaseSupport.smul_nearLitters, BaseSupport.add_nearLitters, Enumeration.smul_rel] at hi ⊢
+        rw [deriv_derivBot, hD] at haS
+        rw [← (hρ₂ _).2 N₀ haS, inv_smul_smul]
+        rw [← (hρ₁ _).2 N₀ haS, inv_smul_smul] at hi
+        exact Or.inr hi
+      case scoderiv ζ B hζ' _ =>
+        rw [Path.coderiv_deriv, Path.coderiv_deriv'] at hD
+        cases Path.scoderiv_index_injective hD
+        rw [Path.scoderiv_left_inj] at hD
+        cases hD
+        simp only [Path.coderiv_deriv, Path.coderiv_deriv', scoderiv_botDeriv_eq, smul_derivBot,
+          add_derivBot, BaseSupport.smul_nearLitters, BaseSupport.add_nearLitters, Enumeration.smul_rel] at hi ⊢
+        rw [deriv_derivBot, Path.coderiv_deriv, Path.coderiv_deriv'] at haS
+        rw [← (hρ₂ _).2 N₀ haS, inv_smul_smul]
+        rw [← (hρ₁ _).2 N₀ haS, inv_smul_smul] at hi
+        exact Or.inr hi
+  · simp only [add_derivBot, BaseSupport.add_nearLitters, interferenceSupport_nearLitters,
+      Enumeration.add_empty] at hN₂'
+    cases A
+    case sderiv ζ A hζ' _ =>
+      rw [← Path.coderiv_deriv] at hA
+      cases Path.sderiv_index_injective hA
+      apply Path.sderiv_path_injective at hA
+      cases A
+      case nil =>
+        cases hA
+        cases not_mem_strong_botDeriv _ _ hN₂'
+      case sderiv ζ A hζ _ _ =>
+        rw [← Path.coderiv_deriv] at hA
+        cases Path.sderiv_index_injective hA
+        apply Path.sderiv_path_injective at hA
+        cases hA
+        simp only [Path.coderiv_deriv, Path.coderiv_deriv', add_derivBot, scoderiv_botDeriv_eq,
+          smul_derivBot, BaseSupport.add_nearLitters, BaseSupport.smul_nearLitters] at hi ⊢
+        have : N₂ᴸ = (ρ₂ ⇘ A)ᵁ ↘ hζ ↘. • (ρ₁⁻¹ ⇘ A)ᵁ ↘ hζ ↘. • fuzz hδε t := by
+          rw [inv_smul_eq_iff] at hN₁'
+          rw [hN₁', Path.botSderiv_coe_eq, BasePerm.smul_nearLitter_litter,
+            BasePerm.smul_nearLitter_litter, smul_smul, smul_eq_iff_eq_inv_smul,
+            mul_inv_rev, inv_inv, mul_smul, ← Tree.inv_apply, ← allPermForget_inv] at hN₁
+          rw [hN₁]
+          simp only [allPermForget_inv, Tree.inv_apply, allPermDeriv_forget, Tree.inv_deriv,
+            Tree.inv_sderiv, Tree.inv_sderivBot]
+          rfl
+        rw [smul_fuzz hδ hε hδε, smul_fuzz hδ hε hδε] at this
+        have := fuzz_injective (hN₂.symm.trans this)
+        rw [smul_smul] at this
+        rw [t.smul_nearLitter_eq_of_mem_support this hN₀]
+        rw [Enumeration.rel_add_iff] at hi ⊢
+        obtain hi | ⟨i, rfl, hi⟩ := hi
+        · left
+          simp only [allPermForget_mul, allPermSderiv_forget, allPermDeriv_forget,
+            allPermForget_inv, Tree.inv_deriv, Tree.inv_sderiv, Tree.mul_apply, Tree.sderiv_apply,
+            Tree.deriv_apply, Path.deriv_scoderiv, Tree.inv_apply, mul_smul]
+          rwa [← (hρ₁ _).2 N₀ ⟨i, hi⟩, inv_smul_smul, (hρ₂ _).2 N₀ ⟨i, hi⟩]
+        · refine Or.inr ⟨i, rfl, ?_⟩
+          simp only [allPermForget_mul, allPermSderiv_forget, allPermDeriv_forget,
+            allPermForget_inv, Tree.inv_deriv, Tree.inv_sderiv, Tree.mul_apply, Tree.sderiv_apply,
+            Tree.deriv_apply, Path.deriv_scoderiv, Tree.inv_apply, mul_smul, Enumeration.smul_rel,
+            inv_smul_smul]
+          exact hi
 
 theorem sameSpecLe_of_fixes (S : Support α) (hS : S.Strong) (T : Support γ) (ρ₁ ρ₂ : AllPerm β)
     (hγ : (γ : TypeIndex) < β)
@@ -397,8 +612,8 @@ theorem sameSpecLe_of_fixes (S : Support α) (hS : S.Strong) (T : Support γ) (�
   case convAtoms_injective => exact convAtoms_injective_of_fixes hρ₁ hρ₂
   case atomMemRel_le => exact atomMemRel_le_of_fixes hρ₁ hρ₂
   case inflexible_of_inflexible => exact inflexible_of_inflexible_of_fixes hρ₁ hρ₂
-  case atoms_of_inflexible => sorry
-  case nearLitters_of_inflexible => sorry
+  case atoms_of_inflexible => exact atoms_of_inflexible_of_fixes hS hρ₁ hρ₂
+  case nearLitters_of_inflexible => exact nearLitters_of_inflexible_of_fixes hS hρ₁ hρ₂
   case litter_eq_of_flexible => sorry
 
 theorem spec_same_of_fixes (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : AllPerm β)
