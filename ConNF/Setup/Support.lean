@@ -475,6 +475,26 @@ theorem BaseSupport.smul_le_smul {S T : BaseSupport} (h : S ≤ T) (π : BasePer
   · intro N
     exact h.2 (π⁻¹ • N)
 
+theorem BaseSupport.le_add_right {S T : BaseSupport} :
+    S ≤ S + T := by
+  constructor
+  · intro a ha
+    simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.mem_add_iff]
+    exact Or.inl ha
+  · intro N hN
+    simp only [Support.add_derivBot, BaseSupport.add_nearLitters, Enumeration.mem_add_iff]
+    exact Or.inl hN
+
+theorem BaseSupport.le_add_left {S T : BaseSupport} :
+    S ≤ T + S := by
+  constructor
+  · intro a ha
+    simp only [add_atoms, Enumeration.mem_add_iff]
+    exact Or.inr ha
+  · intro N hN
+    simp only [add_nearLitters, Enumeration.mem_add_iff]
+    exact Or.inr hN
+
 def BaseSupport.Subsupport (S T : BaseSupport) : Prop :=
   Sᴬ.rel ≤ Tᴬ.rel ∧ Sᴺ.rel ≤ Tᴺ.rel
 
@@ -510,27 +530,17 @@ theorem Support.smul_le_smul {α : TypeIndex} {S T : Support α} (h : S ≤ T) (
     π • S ≤ π • T :=
   λ A ↦ BaseSupport.smul_le_smul (h A) (π A)
 
-theorem le_add_right {α : TypeIndex} {S T : Support α} :
+theorem Support.le_add_right {α : TypeIndex} {S T : Support α} :
     S ≤ S + T := by
   intro A
-  constructor
-  · intro a ha
-    simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.mem_add_iff]
-    exact Or.inl ha
-  · intro N hN
-    simp only [Support.add_derivBot, BaseSupport.add_nearLitters, Enumeration.mem_add_iff]
-    exact Or.inl hN
+  rw [add_derivBot]
+  exact BaseSupport.le_add_right
 
-theorem le_add_left {α : TypeIndex} {S T : Support α} :
+theorem Support.le_add_left {α : TypeIndex} {S T : Support α} :
     S ≤ T + S := by
   intro A
-  constructor
-  · intro a ha
-    simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.mem_add_iff]
-    exact Or.inr ha
-  · intro N hN
-    simp only [Support.add_derivBot, BaseSupport.add_nearLitters, Enumeration.mem_add_iff]
-    exact Or.inr hN
+  rw [add_derivBot]
+  exact BaseSupport.le_add_left
 
 def Support.Subsupport {α : TypeIndex} (S T : Support α) : Prop :=
   ∀ A, (S ⇘. A).Subsupport (T ⇘. A)

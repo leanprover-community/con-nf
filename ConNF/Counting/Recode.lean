@@ -128,7 +128,7 @@ theorem scoderiv_supports_singleton (S : Support γ) (y : TSet γ) (h : S.Suppor
 theorem raisedSingleton_supports (S : Support β) (y : TSet γ) :
     (S + designatedSupport y ↗ hγ).Supports (singleton hγ y) := by
   have := scoderiv_supports_singleton hγ (designatedSupport y) y (designatedSupport_supports y)
-  apply this.mono le_add_left
+  apply this.mono Support.le_add_left
   rintro ⟨⟩
 
 def raisedSingleton (S : Support β) (y : TSet γ) : CodingFunction β :=

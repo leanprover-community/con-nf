@@ -70,6 +70,19 @@ theorem Closed.smul {S : Support β} (hS : S.Closed) (ρ : AllPerm β) : (ρᵁ 
 theorem Strong.smul {S : Support β} (hS : S.Strong) (ρ : AllPerm β) : (ρᵁ • S).Strong :=
   ⟨hS.toPreStrong.smul ρ, hS.toClosed.smul ρ⟩
 
+theorem PreStrong.add {S T : Support β} (hS : S.PreStrong) (hT : T.PreStrong) :
+    (S + T).PreStrong := by
+  constructor
+  intro A N hN P t hA ht
+  simp only [add_derivBot, BaseSupport.add_nearLitters, Enumeration.mem_add_iff] at hN
+  obtain hN | hN := hN
+  · intro B
+    simp only [deriv_derivBot, add_derivBot]
+    exact (hS.support_le hN P t hA ht B).trans (BaseSupport.le_add_right)
+  · intro B
+    simp only [deriv_derivBot, add_derivBot]
+    exact (hT.support_le hN P t hA ht B).trans (BaseSupport.le_add_left)
+
 omit [Level] [CoherentData] [LeLevel β] in
 theorem Closed.scoderiv {γ : TypeIndex} {S : Support γ} (hS : S.Closed) (hγ : γ < β) :
     (S ↗ hγ).Closed := by

@@ -21,7 +21,7 @@ variable [Params.{u}] {β γ : Λ} {hγ : (γ : TypeIndex) < β}
 
 namespace Support
 
-theorem not_mem_strongbotDeriv (S : Support γ) (N : NearLitter) :
+theorem not_mem_scoderiv_botDeriv (S : Support γ) (N : NearLitter) :
     N ∉ (S ↗ hγ ⇘. (Path.nil ↘.))ᴺ := by
   rintro ⟨i, ⟨A, N'⟩, h₁, h₂⟩
   simp only [Prod.mk.injEq] at h₂
@@ -41,11 +41,11 @@ theorem not_mem_strong_botDeriv (S : Support γ) (N : NearLitter) :
   rintro h
   rw [strong, close_nearLitters, preStrong_nearLitters, Enumeration.mem_add_iff] at h
   obtain h | h := h
-  · exact not_mem_strongbotDeriv S N h
+  · exact not_mem_scoderiv_botDeriv S N h
   · rw [mem_constrainsNearLitters_nearLitters] at h
     obtain ⟨B, N', hN', h⟩ := h
     cases h using Relation.ReflTransGen.head_induction_on
-    case refl => exact not_mem_strongbotDeriv S N hN'
+    case refl => exact not_mem_scoderiv_botDeriv S N hN'
     case head x hx₁ hx₂ _ =>
       obtain ⟨⟨γ, δ, ε, hδ, hε, hδε, A⟩, t, B, hB, hN, ht⟩ := hx₂
       simp only at hB
@@ -64,47 +64,64 @@ theorem not_mem_strong_botDeriv (S : Support γ) (N : NearLitter) :
         case nil => cases hB
         case sderiv ζ B hζ _ _ => cases hB
 
-theorem raise_preStrong (S : Support γ) (hγ : (γ : TypeIndex) < β) :
-    ((S ↗ hγ).strong ↗ LtLevel.elim).PreStrong := by
-  constructor
-  rintro A N hN ⟨γ, δ, ε, hδ, hε, hδε, A⟩ t rfl ht
-  dsimp only at hN ⊢
-  obtain ⟨i, hi⟩ := hN
-  rw [← derivBot_nearLitters, ← scoderiv_nearLitters,
-    Enumeration.derivBot_rel, Enumeration.scoderiv_rel] at hi
-  obtain ⟨B, hB₁, hB₂⟩ := hi
-  change A ↘ _ ↘ _ = _ at hB₁
-  cases B
-  case sderiv ζ B hζ' _ =>
-    rw [← Path.coderiv_deriv] at hB₁
-    cases Path.sderiv_index_injective hB₁
-    rw [Path.sderiv_left_inj] at hB₁
-    cases B
-    case nil =>
-      cases A
-      case nil =>
-        cases hB₁
-        cases not_mem_strong_botDeriv S N ⟨i, hB₂⟩
-      case sderiv ζ A hζ _ _ => cases hB₁
-    case sderiv ζ B hζ _ _ =>
-      rw [← Path.coderiv_deriv] at hB₁
-      cases Path.sderiv_index_injective hB₁
-      rw [Path.sderiv_left_inj] at hB₁
-      cases hB₁
-      simp only [Path.botSderiv_coe_eq] at hB₂
-      rw [Path.coderiv_deriv, scoderiv_deriv_eq]
-      exact (S ↗ hγ).strong_strong.support_le ⟨i, hB₂⟩ ⟨γ, δ, ε, hδ, hε, hδε, B⟩ t rfl ht
-
-theorem raise_strong (S : Support γ) (hγ : (γ : TypeIndex) < β) :
-    ((S ↗ hγ).strong ↗ LtLevel.elim).Strong :=
-  ⟨S.raise_preStrong hγ, (S ↗ hγ).strong_strong.scoderiv LtLevel.elim⟩
-
 theorem raise_preStrong' (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : AllPerm β)
-    (hγ : (γ : TypeIndex) < β)
-    (hρ : ρᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim) :
+    (hγ : (γ : TypeIndex) < β) :
     (S + (ρᵁ • ((T ↗ hγ).strong +
       (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim).PreStrong := by
-  sorry
+  apply hS.toPreStrong.add
+  constructor
+  intro A N hN P t hA ht
+  obtain ⟨A, rfl⟩ := eq_of_nearLitter_mem_scoderiv_botDeriv hN
+  simp only [scoderiv_botDeriv_eq, add_derivBot, smul_derivBot,
+    BaseSupport.add_nearLitters, BaseSupport.smul_nearLitters, interferenceSupport_nearLitters,
+    Enumeration.mem_add_iff, Enumeration.mem_smul, Enumeration.not_mem_empty, or_false] at hN
+  obtain ⟨δ, ε, ζ, hε, hζ, hεζ, B⟩ := P
+  dsimp only at *
+  cases A
+  case sderiv ζ' A hζ' _ =>
+    rw [← Path.coderiv_deriv] at hA
+    cases Path.sderiv_index_injective hA
+    apply Path.sderiv_left_inj.mp at hA
+    cases A
+    case nil =>
+      cases hA
+      cases not_mem_strong_botDeriv T _ hN
+    case sderiv ι A hι _ _ =>
+      rw [← Path.coderiv_deriv] at hA
+      cases Path.sderiv_index_injective hA
+      cases hA
+      haveI : LtLevel δ := ⟨A.le.trans_lt LtLevel.elim⟩
+      haveI : LtLevel ε := ⟨hε.trans LtLevel.elim⟩
+      haveI : LtLevel ζ := ⟨hζ.trans LtLevel.elim⟩
+      have := (T ↗ hγ).strong_strong.support_le hN ⟨δ, ε, ζ, hε, hζ, hεζ, A⟩
+          (ρ⁻¹ ⇘ A ↘ hε • t) rfl ?_
+      · simp only [Tangle.smul_support, allPermSderiv_forget, allPermDeriv_forget,
+          allPermForget_inv, Tree.inv_deriv, Tree.inv_sderiv] at this
+        have := smul_le_smul this (ρᵁ ⇘ A ↘ hε)
+        simp only [smul_inv_smul] at this
+        apply le_trans this
+        intro B
+        constructor
+        · intro a ha
+          simp only [smul_derivBot, Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv,
+            deriv_derivBot, Enumeration.mem_smul] at ha
+          rw [deriv_derivBot, ← Path.deriv_scoderiv, Path.coderiv_deriv', scoderiv_botDeriv_eq,]
+          simp only [Path.deriv_scoderiv, add_derivBot, smul_derivBot,
+            BaseSupport.add_atoms, BaseSupport.smul_atoms, Enumeration.mem_add_iff,
+            Enumeration.mem_smul]
+          exact Or.inl ha
+        · intro N hN
+          simp only [smul_derivBot, Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv,
+            deriv_derivBot, Enumeration.mem_smul] at hN
+          rw [deriv_derivBot, ← Path.deriv_scoderiv, Path.coderiv_deriv', scoderiv_botDeriv_eq,]
+          simp only [Path.deriv_scoderiv, add_derivBot, smul_derivBot,
+            BaseSupport.add_nearLitters, BaseSupport.smul_nearLitters, Enumeration.mem_add_iff,
+            Enumeration.mem_smul]
+          exact Or.inl hN
+      · rw [← smul_fuzz hε hζ hεζ, ← ht]
+        simp only [Path.botSderiv_coe_eq, BasePerm.smul_nearLitter_litter, allPermDeriv_forget,
+          allPermForget_inv, Tree.inv_deriv, Tree.inv_sderiv, Tree.inv_sderivBot]
+        rfl
 
 theorem raise_closed' (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : AllPerm β)
     (hγ : (γ : TypeIndex) < β)
@@ -158,8 +175,8 @@ theorem raise_strong' (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : Al
     (hγ : (γ : TypeIndex) < β)
     (hρ : ρᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim) :
     (S + (ρᵁ • ((T ↗ hγ).strong +
-      (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim).Strong := by
-  sorry
+      (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim).Strong :=
+  ⟨raise_preStrong' S hS T ρ hγ, raise_closed' S hS T ρ hγ hρ⟩
 
 theorem convAtoms_injective_of_fixes {S : Support α} (hS : S.Strong) {T : Support γ}
     {ρ₁ ρ₂ : AllPerm β} {hγ : (γ : TypeIndex) < β}
