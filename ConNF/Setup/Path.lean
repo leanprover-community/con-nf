@@ -258,6 +258,14 @@ theorem Path.coderiv_deriv (A : β ↝ γ) (h₁ : β < α) (h₂ : δ < γ) :
     A ↗ h₁ ↘ h₂ = A ↘ h₂ ↗ h₁ :=
   rfl
 
+theorem Path.coderiv_deriv' (A : β ↝ γ) (h : β < α) (B : γ ↝ δ) :
+    A ↗ h ⇘ B = A ⇘ B ↗ h := by
+  induction B with
+  | nil => rfl
+  | sderiv ε ζ B h' ih =>
+    rw [deriv_sderiv, ih]
+    rfl
+
 theorem Path.eq_nil (A : β ↝ β) :
     A = .nil := by
   cases A with
@@ -320,6 +328,11 @@ theorem Path.deriv_left_inj {A B : α ↝ β} {C : β ↝ γ} :
 theorem Path.deriv_right_inj {A : α ↝ β} {B C : β ↝ γ} :
     A ⇘ B = A ⇘ C ↔ B = C :=
   ⟨deriv_right_injective, λ h ↦ h ▸ rfl⟩
+
+@[simp]
+theorem Path.scoderiv_left_inj {A B : β ↝ γ} {h : β < α} :
+    A ↗ h = B ↗ h ↔ A = B :=
+  deriv_right_inj
 
 @[simp]
 theorem Path.coderiv_left_inj {A B : β ↝ γ} {C : α ↝ β} :
@@ -445,6 +458,13 @@ theorem Path.recScoderiv_scoderiv {motive : ∀ β, β ↝ γ → Sort _}
   congr 1
   · exact A.rev_rev
   · exact HEq.symm (cast_heq _ _)
+
+theorem Path.scoderiv_index_injective {A : β ↝ δ} {B : γ ↝ δ} {hβα : β < α} {hγα : γ < α}
+    (h : A ↗ hβα = B ↗ hγα) :
+    β = γ := by
+  have := congr_arg rev h
+  rw [scoderiv_rev, scoderiv_rev, RevPath.cons.injEq] at this
+  exact this.1
 
 /-!
 ## Cardinality bounds on paths

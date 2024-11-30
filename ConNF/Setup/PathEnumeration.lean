@@ -64,6 +64,19 @@ theorem coderiv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ �
       exact h₁.symm
     · rfl
 
+theorem scoderiv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (h : β < α)
+    (i : κ) (x : α ↝ ⊥ × X) :
+    (E ↗ h).rel i x ↔ ∃ B, x.1 = B ↗ h ∧ E.rel i (B, x.2) :=
+  coderiv_rel E (.single h) i x
+
+theorem eq_of_scoderiv_mem {X : Type _} {α β γ : TypeIndex} (E : Enumeration (β ↝ ⊥ × X))
+    (h : β < α) (h' : γ < α)
+    (i : κ) (A : γ ↝ ⊥) (x : X) (h : (E ↗ h).rel i ⟨A ↗ h', x⟩) :
+    β = γ := by
+  rw [scoderiv_rel] at h
+  obtain ⟨B, h₁, h₂⟩ := h
+  exact Path.scoderiv_index_injective h₁.symm
+
 instance (X : Type u) (α : TypeIndex) :
     BotDerivative (Enumeration (α ↝ ⊥ × X)) (Enumeration X) α where
   botDeriv E A := E.invImage (λ x ↦ (A, x)) (Prod.mk.inj_left A)
@@ -107,6 +120,14 @@ theorem coderiv_deriv_eq {X : Type _} {α β : TypeIndex} (E : Enumeration (β �
   · rfl
   · simp only [derivBot_rel, deriv_rel, coderiv_rel,
       Path.coderiv_eq_deriv, Path.deriv_right_inj, exists_eq_left']
+
+@[simp]
+theorem scoderiv_botDeriv_eq {X : Type _} {α β : TypeIndex} (S : Enumeration (β ↝ ⊥ × X))
+    (A : β ↝ ⊥) (h : β < α) :
+    S ↗ h ⇘. (A ↗ h) = S ⇘. A := by
+  ext i x
+  · rfl
+  · simp only [derivBot_rel, scoderiv_rel, Path.scoderiv_left_inj, exists_eq_left']
 
 theorem mulAction_aux {X : Type _} {α : TypeIndex} [MulAction BasePerm X] (π : StrPerm α) :
     Function.Injective (λ x : α ↝ ⊥ × X ↦ (x.1, (π x.1)⁻¹ • x.2)) := by

@@ -13,6 +13,7 @@ import ConNF.Construction.ConstructMotive
 import ConNF.Construction.Externalise
 import ConNF.Construction.InductionStatement
 import ConNF.Construction.NewModelData
+import ConNF.Construction.RaiseStrong
 import ConNF.Construction.RunInduction
 import ConNF.Counting.BaseCoding
 import ConNF.Counting.BaseCounting

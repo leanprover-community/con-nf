@@ -221,6 +221,16 @@ theorem deriv_nearLitters {α β : TypeIndex} (S : Support α) (A : α ↝ β) :
   rfl
 
 @[simp]
+theorem sderiv_atoms {α β : TypeIndex} (S : Support α) (h : β < α) :
+    Sᴬ ↘ h = (S ↘ h)ᴬ :=
+  rfl
+
+@[simp]
+theorem sderiv_nearLitters {α β : TypeIndex} (S : Support α) (h : β < α) :
+    Sᴺ ↘ h = (S ↘ h)ᴺ :=
+  rfl
+
+@[simp]
 theorem coderiv_atoms {α β : TypeIndex} (S : Support β) (A : α ↝ β) :
     Sᴬ ⇗ A = (S ⇗ A)ᴬ :=
   rfl
@@ -228,6 +238,16 @@ theorem coderiv_atoms {α β : TypeIndex} (S : Support β) (A : α ↝ β) :
 @[simp]
 theorem coderiv_nearLitters {α β : TypeIndex} (S : Support β) (A : α ↝ β) :
     Sᴺ ⇗ A = (S ⇗ A)ᴺ :=
+  rfl
+
+@[simp]
+theorem scoderiv_atoms {α β : TypeIndex} (S : Support β) (h : β < α) :
+    Sᴬ ↗ h = (S ↗ h)ᴬ :=
+  rfl
+
+@[simp]
+theorem scoderiv_nearLitters {α β : TypeIndex} (S : Support β) (h : β < α) :
+    Sᴺ ↗ h = (S ↗ h)ᴺ :=
   rfl
 
 @[simp]
@@ -270,6 +290,18 @@ theorem deriv_derivBot {α : TypeIndex} (S : Support α)
 theorem coderiv_deriv_eq {α β : TypeIndex} (S : Support β) (A : α ↝ β) :
     S ⇗ A ⇘ A = S :=
   ext' (Sᴬ.coderiv_deriv_eq A) (Sᴺ.coderiv_deriv_eq A)
+
+@[simp]
+theorem scoderiv_botDeriv_eq {α β : TypeIndex} (S : Support β) (A : β ↝ ⊥) (h : β < α) :
+    S ↗ h ⇘. (A ↗ h) = S ⇘. A :=
+  BaseSupport.ext (Enumeration.scoderiv_botDeriv_eq _ _ _) (Enumeration.scoderiv_botDeriv_eq _ _ _)
+
+@[simp]
+theorem scoderiv_deriv_eq {α β γ : TypeIndex} (S : Support β) (A : β ↝ γ) (h : β < α) :
+    S ↗ h ⇘ (A ↗ h) = S ⇘ A := by
+  apply ext
+  intro B
+  simp only [deriv_derivBot, ← scoderiv_botDeriv_eq S (A ⇘ B) h, Path.coderiv_deriv']
 
 @[simp]
 theorem coderiv_inj {α β : TypeIndex} (S T : Support β) (A : α ↝ β) :

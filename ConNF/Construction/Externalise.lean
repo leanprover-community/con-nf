@@ -35,7 +35,7 @@ instance globalLtData [Level] : LtData where
 
 instance globalLeData [Level] : LeData where
 
-omit [ConNF.Params.{u}] in
+omit [Params] in
 theorem heq_funext {α : Sort _} {β γ : α → Sort _} {f : (x : α) → β x} {g : (x : α) → γ x}
     (h : ∀ x, HEq (f x) (g x)) : HEq f g := by
   cases funext λ x ↦ type_eq_of_heq (h x)
@@ -106,7 +106,7 @@ theorem globalPreCoherentData_eq [Level] :
     simp only [heq_cast_eq_iff]
     rfl
 
-def globalCoherentData [Level] : CoherentData where
+instance globalCoherentData [Level] : CoherentData where
   allPermSderiv_forget := globalPreCoherentData_eq ▸ (coherentData _ _).allPermSderiv_forget
   pos_atom_lt_pos := globalPreCoherentData_eq ▸ (coherentData _ _).pos_atom_lt_pos
   pos_nearLitter_lt_pos := globalPreCoherentData_eq ▸ (coherentData _ _).pos_nearLitter_lt_pos
