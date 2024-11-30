@@ -63,6 +63,11 @@ noncomputable def empty : Enumeration X where
   lt_bound _ h := by cases h; contradiction
   rel_coinjective := by constructor; intros; contradiction
 
+@[simp]
+theorem not_mem_empty (x : X) : x ∉ Enumeration.empty := by
+  rintro ⟨i, h⟩
+  cases h
+
 noncomputable def singleton (x : X) : Enumeration X where
   bound := 1
   rel i y := i = 0 ∧ y = x
@@ -356,6 +361,12 @@ theorem add_bound (E F : Enumeration X) :
 theorem rel_add_iff {E F : Enumeration X} (i : κ) (x : X) :
     (E + F).rel i x ↔ E.rel i x ∨ ∃ j, E.bound + j = i ∧ F.rel j x :=
   Iff.rfl
+
+theorem add_rel_dom {X : Type _} (E F : Enumeration X) :
+    (E + F).rel.dom = E.rel.dom ∪ (E.bound + ·) '' F.rel.dom := by
+  ext i
+  simp only [Rel.dom, rel_add_iff, Set.mem_setOf_eq, Set.mem_union, Set.mem_image]
+  aesop
 
 @[simp]
 theorem mem_add_iff {E F : Enumeration X} (x : X) :

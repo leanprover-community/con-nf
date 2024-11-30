@@ -70,6 +70,23 @@ theorem Closed.smul {S : Support β} (hS : S.Closed) (ρ : AllPerm β) : (ρᵁ 
 theorem Strong.smul {S : Support β} (hS : S.Strong) (ρ : AllPerm β) : (ρᵁ • S).Strong :=
   ⟨hS.toPreStrong.smul ρ, hS.toClosed.smul ρ⟩
 
+omit [Level] [CoherentData] [LeLevel β] in
+theorem Closed.scoderiv {γ : TypeIndex} {S : Support γ} (hS : S.Closed) (hγ : γ < β) :
+    (S ↗ hγ).Closed := by
+  constructor
+  intro A
+  constructor
+  intro N₁ N₂ hN₁ hN₂ a ha
+  obtain ⟨i, ⟨B, N₁⟩, hi, hi'⟩ := hN₁
+  cases hi'
+  obtain ⟨j, ⟨C, N₂⟩, hj, hj'⟩ := hN₂
+  simp only [Prod.mk.injEq, Path.deriv_right_inj] at hj'
+  cases hj'.1
+  cases hj'.2
+  simp only
+  obtain ⟨k, hk⟩ := (hS.closed B).interference_subset ⟨i, hi⟩ ⟨j, hj⟩ a ha
+  exact ⟨k, ⟨B, a⟩, hk, rfl⟩
+
 def Constrains : Rel (β ↝ ⊥ × NearLitter) (β ↝ ⊥ × NearLitter) :=
   λ x y ↦ ∃ (P : InflexiblePath β) (t : Tangle P.δ) (B : P.δ ↝ ⊥),
     x.1 = P.A ↘ P.hδ ⇘ B ∧ x.2 ∈ (t.support ⇘. B)ᴺ ∧ y.1 = P.A ↘ P.hε ↘. ∧ y.2ᴸ = fuzz P.hδε t

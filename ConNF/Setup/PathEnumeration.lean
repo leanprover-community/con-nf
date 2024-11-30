@@ -121,6 +121,13 @@ theorem coderiv_deriv_eq {X : Type _} {α β : TypeIndex} (E : Enumeration (β �
   · simp only [derivBot_rel, deriv_rel, coderiv_rel,
       Path.coderiv_eq_deriv, Path.deriv_right_inj, exists_eq_left']
 
+theorem eq_of_mem_scoderiv_botDeriv {X : Type _} {α β : TypeIndex} {S : Enumeration (β ↝ ⊥ × X)}
+    {A : α ↝ ⊥} {h : β < α} {x : X} (hx : x ∈ S ↗ h ⇘. A) :
+    ∃ B : β ↝ ⊥, A = B ↗ h := by
+  obtain ⟨i, ⟨B, y⟩, hi₁, hi₂⟩ := hx
+  cases hi₂
+  exact ⟨B, rfl⟩
+
 @[simp]
 theorem scoderiv_botDeriv_eq {X : Type _} {α β : TypeIndex} (S : Enumeration (β ↝ ⊥ × X))
     (A : β ↝ ⊥) (h : β < α) :

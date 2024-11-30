@@ -291,6 +291,16 @@ theorem coderiv_deriv_eq {α β : TypeIndex} (S : Support β) (A : α ↝ β) :
     S ⇗ A ⇘ A = S :=
   ext' (Sᴬ.coderiv_deriv_eq A) (Sᴺ.coderiv_deriv_eq A)
 
+theorem eq_of_atom_mem_scoderiv_botDeriv {α β : TypeIndex} {S : Support β} {A : α ↝ ⊥}
+    {h : β < α} {a : Atom} (ha : a ∈ (S ↗ h ⇘. A)ᴬ) :
+    ∃ B : β ↝ ⊥, A = B ↗ h :=
+  Enumeration.eq_of_mem_scoderiv_botDeriv ha
+
+theorem eq_of_nearLitter_mem_scoderiv_botDeriv {α β : TypeIndex} {S : Support β} {A : α ↝ ⊥}
+    {h : β < α} {N : NearLitter} (hN : N ∈ (S ↗ h ⇘. A)ᴺ) :
+    ∃ B : β ↝ ⊥, A = B ↗ h :=
+  Enumeration.eq_of_mem_scoderiv_botDeriv hN
+
 @[simp]
 theorem scoderiv_botDeriv_eq {α β : TypeIndex} (S : Support β) (A : β ↝ ⊥) (h : β < α) :
     S ↗ h ⇘. (A ↗ h) = S ⇘. A :=
@@ -568,5 +578,16 @@ theorem smul_eq_of_subsupport {α : TypeIndex} {S T : Support α} {π : StrPerm 
     have := (T ⇘. A)ᴺ.rel_coinjective.coinjective hi₁ hi₂
     dsimp only at this
     rwa [smul_eq_iff_eq_inv_smul]
+
+theorem smul_eq_smul_of_le {α : TypeIndex} {S T : Support α} {π₁ π₂ : StrPerm α}
+    (h : S ≤ T) (h₂ : π₁ • T = π₂ • T) :
+    π₁ • S = π₂ • S := by
+  rw [Support.smul_eq_smul_iff] at h₂ ⊢
+  intro A
+  constructor
+  · intro a ha
+    exact (h₂ A).1 a ((h A).1 a ha)
+  · intro N hN
+    exact (h₂ A).2 N ((h A).2 N hN)
 
 end ConNF
