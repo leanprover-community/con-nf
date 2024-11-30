@@ -241,6 +241,65 @@ theorem convAtoms_injective_of_fixes {S : Support α} {T : Support γ}
       · simp only [add_right_inj, exists_eq_left] at hj₂
         exact (Enumeration.rel_coinjective _).coinjective hj₁ hj₂
 
+theorem atomMemRel_le_of_fixes {S : Support α} {T : Support γ}
+    {ρ₁ ρ₂ : AllPerm β} {hγ : (γ : TypeIndex) < β}
+    (hρ₁ : ρ₁ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
+    (hρ₂ : ρ₂ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
+    (A : ↑α ↝ ⊥) :
+    atomMemRel (S + (ρ₁ᵁ • ((T ↗ hγ).strong +
+      (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim) A ≤
+    atomMemRel (S + (ρ₂ᵁ • ((T ↗ hγ).strong +
+      (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim) A := by
+  rw [Support.smul_eq_iff] at hρ₁ hρ₂
+  rintro i j ⟨N, hN, a, haN, ha⟩
+  simp only [add_derivBot, BaseSupport.add_atoms, Rel.inv_apply, Enumeration.rel_add_iff,
+    BaseSupport.add_nearLitters] at ha hN
+  obtain hN | ⟨i, rfl, hi⟩ := hN
+  · obtain ha | ⟨j, rfl, hj⟩ := ha
+    · exact ⟨N, Or.inl hN, a, haN, Or.inl ha⟩
+    · obtain ⟨B, rfl⟩ := eq_of_atom_mem_scoderiv_botDeriv ⟨j, hj⟩
+      simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_atoms,
+        BaseSupport.add_atoms, Enumeration.smul_rel] at hj hN
+      refine ⟨N, Or.inl hN, ρ₂ᵁ B • (ρ₁ᵁ B)⁻¹ • a, ?_, ?_⟩
+      · dsimp only
+        rw [← (hρ₂ B).2 N ⟨_, hN⟩, BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
+        have := (hρ₁ B).2 N ⟨_, hN⟩
+        rw [smul_eq_iff_eq_inv_smul] at this
+        rwa [this, BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
+      · rw [Rel.inv_apply, add_derivBot, BaseSupport.add_atoms, Enumeration.rel_add_iff]
+        simp only [add_right_inj, scoderiv_botDeriv_eq, smul_derivBot, add_derivBot,
+          BaseSupport.smul_atoms, BaseSupport.add_atoms, Enumeration.smul_rel, inv_smul_smul,
+          exists_eq_left]
+        exact Or.inr hj
+  · obtain ⟨B, rfl⟩ := eq_of_nearLitter_mem_scoderiv_botDeriv ⟨i, hi⟩
+    simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_atoms,
+      BaseSupport.add_atoms, Enumeration.smul_rel] at hi ha
+    obtain ha | ⟨j, rfl, hj⟩ := ha
+    · refine ⟨ρ₂ᵁ B • (ρ₁ᵁ B)⁻¹ • N, ?_, a, ?_, Or.inl ha⟩
+      · rw [add_derivBot, BaseSupport.add_nearLitters, Enumeration.rel_add_iff]
+        simp only [add_right_inj, scoderiv_botDeriv_eq, smul_derivBot, add_derivBot,
+          BaseSupport.smul_nearLitters, BaseSupport.add_nearLitters, Enumeration.smul_rel,
+          inv_smul_smul, exists_eq_left]
+        exact Or.inr hi
+      · dsimp only
+        rw [← (hρ₂ B).1 a ⟨_, ha⟩, BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
+        have := (hρ₁ B).1 a ⟨_, ha⟩
+        rw [smul_eq_iff_eq_inv_smul] at this
+        rwa [this, BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
+    · refine ⟨ρ₂ᵁ B • (ρ₁ᵁ B)⁻¹ • N, ?_, ρ₂ᵁ B • (ρ₁ᵁ B)⁻¹ • a, ?_, ?_⟩
+      · rw [add_derivBot, BaseSupport.add_nearLitters, Enumeration.rel_add_iff]
+        simp only [add_right_inj, scoderiv_botDeriv_eq, smul_derivBot, add_derivBot,
+          BaseSupport.smul_nearLitters, BaseSupport.add_nearLitters, Enumeration.smul_rel,
+          inv_smul_smul, exists_eq_left]
+        exact Or.inr hi
+      · simp only [BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
+        exact haN
+      · rw [Rel.inv_apply, add_derivBot, BaseSupport.add_atoms, Enumeration.rel_add_iff]
+        simp only [add_right_inj, scoderiv_botDeriv_eq, smul_derivBot, add_derivBot,
+          BaseSupport.smul_atoms, BaseSupport.add_atoms, Enumeration.smul_rel, inv_smul_smul,
+          exists_eq_left]
+        exact Or.inr hj
+
 theorem sameSpecLe_of_fixes (S : Support α) (hS : S.Strong) (T : Support γ) (ρ₁ ρ₂ : AllPerm β)
     (hγ : (γ : TypeIndex) < β)
     (hρ₁ : ρ₁ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
@@ -276,7 +335,7 @@ theorem sameSpecLe_of_fixes (S : Support α) (hS : S.Strong) (T : Support γ) (�
     simp only [inv_smul_smul]
     exact h₁
   case convAtoms_injective => exact convAtoms_injective_of_fixes hρ₁ hρ₂
-  case atomMemRel_le => sorry
+  case atomMemRel_le => exact atomMemRel_le_of_fixes hρ₁ hρ₂
   case inflexible_of_inflexible => sorry
   case atoms_of_inflexible => sorry
   case nearLitters_of_inflexible => sorry
