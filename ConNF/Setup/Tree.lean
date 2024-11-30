@@ -80,6 +80,11 @@ theorem one_apply [Group X] (A : α ↝ ⊥) :
   rfl
 
 @[simp]
+theorem one_deriv [Group X] (A : α ↝ β) :
+    (1 : Tree X α) ⇘ A = 1 :=
+  rfl
+
+@[simp]
 theorem one_sderiv [Group X] (h : β < α) :
     (1 : Tree X α) ↘ h = 1 :=
   rfl
@@ -92,6 +97,11 @@ theorem one_sderivBot [Group X] :
 @[simp]
 theorem mul_apply [Group X] (T₁ T₂ : Tree X α) (A : α ↝ ⊥) :
     (T₁ * T₂) A = T₁ A * T₂ A :=
+  rfl
+
+@[simp]
+theorem mul_deriv [Group X] (T₁ T₂ : Tree X α) (A : α ↝ β) :
+    (T₁ * T₂) ⇘ A = T₁ ⇘ A * T₂ ⇘ A :=
   rfl
 
 @[simp]
