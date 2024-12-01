@@ -575,6 +575,86 @@ theorem nearLitters_of_inflexible_of_fixes {S : Support α} (hS : S.Strong) {T :
             inv_smul_smul]
           exact hi
 
+theorem litter_eq_of_flexible_of_fixes {S : Support α} {T : Support γ}
+    {ρ₁ ρ₂ : AllPerm β} {hγ : (γ : TypeIndex) < β}
+    (hρ₁ : ρ₁ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
+    (hρ₂ : ρ₂ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
+    {A : ↑α ↝ ⊥} {N₁ N₂ N₃ N₄ : NearLitter} :
+    convNearLitters
+      (S + (ρ₁ᵁ • ((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim)
+      (S + (ρ₂ᵁ • ((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim) A N₁ N₂ →
+    convNearLitters
+      (S + (ρ₁ᵁ • ((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim)
+      (S + (ρ₂ᵁ • ((T ↗ hγ).strong +
+        (S ↘ LtLevel.elim + (T ↗ hγ).strong).interferenceSupport)) ↗ LtLevel.elim) A N₃ N₄ →
+      ¬Inflexible A N₁ᴸ → ¬Inflexible A N₂ᴸ → ¬Inflexible A N₃ᴸ → ¬Inflexible A N₄ᴸ →
+      N₁ᴸ = N₃ᴸ → N₂ᴸ = N₄ᴸ := by
+  rw [Support.smul_eq_iff] at hρ₁ hρ₂
+  rintro ⟨i, hi₁, hi₂⟩ ⟨j, hj₁, hj₂⟩ hN₁ hN₂ hN₃ hN₄ hN₁₃
+  simp only [add_derivBot, BaseSupport.add_nearLitters, Rel.inv_apply,
+    Enumeration.rel_add_iff] at hi₁ hi₂ hj₁ hj₂
+  obtain hi₁ | ⟨i, rfl, hi₁⟩ := hi₁
+  · obtain hi₂ | ⟨i, rfl, hi₂⟩ := hi₂
+    swap
+    · have := Enumeration.lt_bound _ _ ⟨_, hi₁⟩
+      simp only [add_lt_iff_neg_left] at this
+      cases (κ_zero_le i).not_lt this
+    cases (Enumeration.rel_coinjective _).coinjective hi₁ hi₂
+    obtain hj₁ | ⟨j, rfl, hj₁⟩ := hj₁
+    · obtain hj₂ | ⟨j, rfl, hj₂⟩ := hj₂
+      swap
+      · have := Enumeration.lt_bound _ _ ⟨_, hj₁⟩
+        simp only [add_lt_iff_neg_left] at this
+        cases (κ_zero_le j).not_lt this
+      cases (Enumeration.rel_coinjective _).coinjective hj₁ hj₂
+      exact hN₁₃
+    · simp only [add_right_inj, exists_eq_left] at hj₂
+      obtain hj₂ | hj₂ := hj₂
+      · have := Enumeration.lt_bound _ _ ⟨_, hj₂⟩
+        simp only [add_lt_iff_neg_left] at this
+        cases (κ_zero_le j).not_lt this
+      obtain ⟨A, rfl⟩ := eq_of_nearLitter_mem_scoderiv_botDeriv ⟨j, hj₁⟩
+      simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_nearLitters,
+        BaseSupport.add_nearLitters, Enumeration.smul_rel] at hj₁ hj₂
+      have := congr_arg (·ᴸ) ((Enumeration.rel_coinjective _).coinjective hj₁ hj₂)
+      simp only [BasePerm.smul_nearLitter_litter] at this
+      rw [← hN₁₃, ← (hρ₁ A).2 N₁ ⟨i, hi₁⟩, BasePerm.smul_nearLitter_litter, inv_smul_smul] at this
+      have hN₁' := (hρ₂ A).2 N₁ ⟨i, hi₁⟩
+      rw [smul_eq_iff_eq_inv_smul] at hN₁'
+      rwa [hN₁', BasePerm.smul_nearLitter_litter, smul_left_cancel_iff] at this
+  · obtain hi₂ | hi₂ := hi₂
+    · have := Enumeration.lt_bound _ _ ⟨_, hi₂⟩
+      simp only [add_lt_iff_neg_left] at this
+      cases (κ_zero_le i).not_lt this
+    simp only [add_right_inj, exists_eq_left] at hi₂
+    obtain ⟨A, rfl⟩ := eq_of_nearLitter_mem_scoderiv_botDeriv ⟨i, hi₁⟩
+    simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_nearLitters,
+      BaseSupport.add_nearLitters, Enumeration.smul_rel] at hi₁ hi₂ hj₁ hj₂
+    have hN₁₂ := congr_arg (·ᴸ) ((Enumeration.rel_coinjective _).coinjective hi₁ hi₂)
+    obtain hj₁ | ⟨j, rfl, hj₁⟩ := hj₁
+    · obtain hj₂ | ⟨j, rfl, hj₂⟩ := hj₂
+      swap
+      · have := Enumeration.lt_bound _ _ ⟨_, hj₁⟩
+        simp only [add_lt_iff_neg_left] at this
+        cases (κ_zero_le j).not_lt this
+      cases (Enumeration.rel_coinjective _).coinjective hj₁ hj₂
+      simp only [BasePerm.smul_nearLitter_litter] at hN₁₂
+      rw [hN₁₃, ← (hρ₁ A).2 N₃ ⟨j, hj₁⟩, BasePerm.smul_nearLitter_litter, inv_smul_smul,
+        eq_inv_smul_iff, ← BasePerm.smul_nearLitter_litter, (hρ₂ A).2 N₃ ⟨j, hj₁⟩] at hN₁₂
+      rw [hN₁₂]
+    · simp only [add_right_inj, exists_eq_left] at hj₂
+      obtain hj₂ | hj₂ := hj₂
+      · have := Enumeration.lt_bound _ _ ⟨_, hj₂⟩
+        simp only [add_lt_iff_neg_left] at this
+        cases (κ_zero_le j).not_lt this
+      have hN₃₄ := congr_arg (·ᴸ) ((Enumeration.rel_coinjective _).coinjective hj₁ hj₂)
+      simp only [BasePerm.smul_nearLitter_litter] at hN₁₂ hN₃₄
+      rw [hN₁₃] at hN₁₂
+      rwa [hN₁₂, smul_left_cancel_iff] at hN₃₄
+
 theorem sameSpecLe_of_fixes (S : Support α) (hS : S.Strong) (T : Support γ) (ρ₁ ρ₂ : AllPerm β)
     (hγ : (γ : TypeIndex) < β)
     (hρ₁ : ρ₁ᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim)
@@ -614,7 +694,7 @@ theorem sameSpecLe_of_fixes (S : Support α) (hS : S.Strong) (T : Support γ) (�
   case inflexible_of_inflexible => exact inflexible_of_inflexible_of_fixes hρ₁ hρ₂
   case atoms_of_inflexible => exact atoms_of_inflexible_of_fixes hS hρ₁ hρ₂
   case nearLitters_of_inflexible => exact nearLitters_of_inflexible_of_fixes hS hρ₁ hρ₂
-  case litter_eq_of_flexible => sorry
+  case litter_eq_of_flexible => exact litter_eq_of_flexible_of_fixes hρ₁ hρ₂
 
 theorem spec_same_of_fixes (S : Support α) (hS : S.Strong) (T : Support γ) (ρ : AllPerm β)
     (hρ : ρᵁ • (S ↘ LtLevel.elim : Support β) = S ↘ LtLevel.elim) :
