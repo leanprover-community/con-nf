@@ -27,6 +27,7 @@ class TypedNearLitters (α : Λ) [ModelData α] [Position (Tangle α)] where
 
 export TypedNearLitters (typed)
 
+@[ext]
 class LtData where
   [data : (β : TypeIndex) → [LtLevel β] → ModelData β]
   [positions : (β : TypeIndex) → [LtLevel β] → Position (Tangle β)]

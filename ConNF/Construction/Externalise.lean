@@ -42,6 +42,20 @@ theorem heq_funext {α : Sort _} {β γ : α → Sort _} {f : (x : α) → β x}
   simp only [heq_eq_eq] at h ⊢
   exact funext h
 
+theorem globalLtData_eq [Level] :
+    globalLtData = ltData (λ β _ ↦ motive β) := by
+  apply LtData.ext
+  · ext β hβ
+    induction β using recBotCoe
+    case bot => rfl
+    case coe β => rfl
+  · apply heq_funext
+    intro β
+    induction β using recBotCoe
+    case bot => rfl
+    case coe β => rfl
+  · rfl
+
 theorem globalLeData_eq [Level] :
     globalLeData = leData (λ β _ ↦ motive β) := by
   apply LeData.ext

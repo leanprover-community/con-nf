@@ -15,6 +15,7 @@ import ConNF.Construction.InductionStatement
 import ConNF.Construction.NewModelData
 import ConNF.Construction.RaiseStrong
 import ConNF.Construction.RunInduction
+import ConNF.Construction.TTT
 import ConNF.Counting.BaseCoding
 import ConNF.Counting.BaseCounting
 import ConNF.Counting.CodingFunction
