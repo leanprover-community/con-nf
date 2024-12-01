@@ -599,4 +599,11 @@ theorem smul_eq_smul_of_le {α : TypeIndex} {S T : Support α} {π₁ π₂ : St
   · intro N hN
     exact (h₂ A).2 N ((h A).2 N hN)
 
+theorem smul_eq_of_le {α : TypeIndex} {S T : Support α} {π : StrPerm α}
+    (h : S ≤ T) (h₂ : π • T = T) :
+    π • S = S := by
+  have := smul_eq_smul_of_le h (π₁ := π) (π₂ := 1)
+  rw [one_smul, one_smul] at this
+  exact this h₂
+
 end ConNF

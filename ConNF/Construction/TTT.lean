@@ -1,4 +1,4 @@
-import ConNF.Construction.Externalise
+import ConNF.Construction.RaiseStrong
 
 /-!
 # New file
@@ -50,6 +50,22 @@ theorem allPerm_deriv_sderiv' {β γ δ : TypeIndex}
     (ρ : AllPerm β) (A : β ↝ γ) (h : δ < γ) :
     ρ ⇘ (A ↘ h) = ρ ⇘ A ↘ h :=
   rfl
+
+@[simp]
+theorem allPermSderiv_forget' {β γ : TypeIndex} (h : γ < β) (ρ : AllPerm β) :
+    (ρ ↘ h)ᵁ = ρᵁ ↘ h :=
+  letI : Level := ⟨β.recBotCoe (Nonempty.some inferInstance) id⟩
+  letI : LeLevel β := ⟨β.recBotCoe (λ _ ↦ bot_le) (λ _ h ↦ WithBot.coe_le_coe.mpr h.le)
+    (show β.recBotCoe (Nonempty.some inferInstance) id = Level.α from rfl)⟩
+  letI : LeLevel γ := ⟨h.le.trans LeLevel.elim⟩
+  allPermSderiv_forget h ρ
+
+@[simp]
+theorem allPerm_inv_sderiv' {β γ : TypeIndex} (h : γ < β) (ρ : AllPerm β) :
+    ρ⁻¹ ↘ h = (ρ ↘ h)⁻¹ := by
+  apply allPermForget_injective
+  rw [allPermSderiv_forget', allPermForget_inv, Tree.inv_sderiv, allPermForget_inv,
+    allPermSderiv_forget']
 
 def Symmetric {α β : Λ} (s : Set (TSet β)) (hβ : (β : TypeIndex) < α) : Prop :=
   ∃ S : Support α, ∀ ρ : AllPerm α, ρᵁ • S = S → ρ ↘ hβ • s = s
@@ -153,5 +169,86 @@ theorem TSet.symmetric {α β : Λ} (x : TSet α) (hβ : (β : TypeIndex) < α) 
     · intro hz
       rw [Set.mem_smul_set_iff_inv_smul_mem]
       exact (hc' z).mp hz
+
+theorem tSet_ext' {α β : Λ} (hβ : (β : TypeIndex) < α) (x y : TSet α)
+    (h : ∀ z : TSet β, z ∈[hβ] x ↔ z ∈[hβ] y) : x = y :=
+  letI : Level := ⟨α⟩
+  letI : LeLevel α := ⟨le_rfl⟩
+  letI : LtLevel β := ⟨hβ⟩
+  tSet_ext hβ x y h
+
+theorem TSet.mem_smul_iff' {α β : TypeIndex}
+    {x : TSet β} {y : TSet α} (h : β < α) (ρ : AllPerm α) :
+    x ∈[h] ρ • y ↔ ρ⁻¹ ↘ h • x ∈[h] y := by
+  letI : Level := ⟨α.recBotCoe (Nonempty.some inferInstance) id⟩
+  letI : LeLevel α := ⟨α.recBotCoe (λ _ ↦ bot_le) (λ _ h ↦ WithBot.coe_le_coe.mpr h.le)
+    (show α.recBotCoe (Nonempty.some inferInstance) id = Level.α from rfl)⟩
+  letI : LtLevel β := ⟨h.trans_le LeLevel.elim⟩
+  exact mem_smul_iff h ρ  -- For some reason, using `exact` instead of term mode speeds this up!
+
+def singleton {α β : Λ} (hβ : (β : TypeIndex) < α) (x : TSet β) : TSet α :=
+  letI : Level := ⟨α⟩
+  letI : LeLevel α := ⟨le_rfl⟩
+  letI : LtLevel β := ⟨hβ⟩
+  PreCoherentData.singleton hβ x
+
+@[simp]
+theorem typedMem_singleton_iff' {α β : Λ} (hβ : (β : TypeIndex) < α) (x y : TSet β) :
+    y ∈[hβ] singleton hβ x ↔ y = x :=
+  letI : Level := ⟨α⟩
+  letI : LeLevel α := ⟨le_rfl⟩
+  letI : LtLevel β := ⟨hβ⟩
+  typedMem_singleton_iff hβ x y
+
+@[simp]
+theorem smul_singleton {α β : Λ} (hβ : (β : TypeIndex) < α) (x : TSet β) (ρ : AllPerm α) :
+    ρ • singleton hβ x = singleton hβ (ρ ↘ hβ • x) := by
+  apply tSet_ext' hβ
+  intro z
+  rw [TSet.mem_smul_iff', allPerm_inv_sderiv', typedMem_singleton_iff', typedMem_singleton_iff',
+    inv_smul_eq_iff]
+
+theorem singleton_injective {α β : Λ} (hβ : (β : TypeIndex) < α) :
+    Function.Injective (singleton hβ) := by
+  intro x y hxy
+  have := typedMem_singleton_iff' hβ x y
+  rw [hxy, typedMem_singleton_iff'] at this
+  exact (this.mp rfl).symm
+
+theorem sUnion_singleton_symmetric_aux {α β γ : Λ}
+    (hγ : (γ : TypeIndex) < β) (hβ : (β : TypeIndex) < α) (s : Set (TSet γ)) (S : Support α)
+    (hS : ∀ ρ : AllPerm α, ρᵁ • S = S → ρ ↘ hβ • singleton hγ '' s = singleton hγ '' s) :
+    letI : Level := ⟨α⟩
+    letI : LeLevel α := ⟨le_rfl⟩
+    ∀ (ρ : AllPerm β), ρᵁ • S.strong ↘ hβ = S.strong ↘ hβ → ρ ↘ hγ • s ⊆ s := by
+  letI : Level := ⟨α⟩
+  letI : LeLevel α := ⟨le_rfl⟩
+  letI : LtLevel β := ⟨hβ⟩
+  rintro ρ hρ _ ⟨x, hx, rfl⟩
+  obtain ⟨T, hT⟩ := exists_support x
+  obtain ⟨ρ', hρ'₁, hρ'₂⟩ := Support.exists_allowable_of_fixes S.strong S.strong_strong T ρ hγ hρ
+  have hρ's := hS ρ' (smul_eq_of_le (S.subsupport_strong.le) hρ'₁)
+  have hρ'x : ρ' ↘ hβ ↘ hγ • x = ρ ↘ hγ • x := by
+    apply hT.smul_eq_smul
+    simp only [allPermSderiv_forget', allPermSderiv_forget, WithBot.recBotCoe_coe, id_eq, hρ'₂]
+  dsimp only
+  rw [← hρ'x]
+  have := (Set.ext_iff.mp hρ's (ρ' ↘ hβ • singleton hγ x)).mp ⟨_, Set.mem_image_of_mem _ hx, rfl⟩
+  rw [smul_singleton] at this
+  rwa [(singleton_injective hγ).mem_set_image] at this
+
+theorem sUnion_singleton_symmetric {α β γ : Λ} (hγ : (γ : TypeIndex) < β) (hβ : (β : TypeIndex) < α)
+    (s : Set (TSet γ)) (hs : Symmetric (singleton hγ '' s) hβ) :
+    Symmetric s hγ := by
+  letI : Level := ⟨α⟩
+  letI : LeLevel α := ⟨le_rfl⟩
+  obtain ⟨S, hS⟩ := hs
+  use S.strong ↘ hβ
+  intro ρ hρ
+  apply subset_antisymm
+  · exact sUnion_singleton_symmetric_aux hγ hβ s S hS ρ hρ
+  · have := sUnion_singleton_symmetric_aux hγ hβ s S hS ρ⁻¹ ?_
+    · rwa [allPerm_inv_sderiv', Set.set_smul_subset_iff, inv_inv] at this
+    · rw [allPermForget_inv, inv_smul_eq_iff, hρ]
 
 end ConNF
