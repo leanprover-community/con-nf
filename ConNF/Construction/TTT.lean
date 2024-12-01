@@ -135,40 +135,32 @@ theorem TSet.exists_of_symmetric {α β : Λ} (s : Set (TSet β)) (hβ : (β : T
         rwa [allPermEquiv_sderiv] at this
       · rwa [allPermEquiv_forget]
 
+theorem TSet.exists_support {α : Λ} (x : TSet α) :
+    ∃ S : Support α, ∀ ρ : AllPerm α, ρᵁ • S = S → ρ • x = x := by
+  letI : Level := ⟨α⟩
+  obtain ⟨S, hS⟩ := NewSet.exists_support (newSetEquiv.symm x)
+  use S
+  intro ρ hρ
+  have := @Support.Supports.supports _ _ _ newPreModelData _ _ _ hS (allPermEquiv.symm ρ) ?_
+  · apply tSetForget_injective
+    have := congr_arg (·ᵁ) this
+    simp only at this
+    erw [@smul_forget _ _ newModelData (allPermEquiv.symm ρ) (newSetEquiv.symm x),
+      ← allPermEquiv_forget, ← newSetEquiv_forget, Equiv.apply_symm_apply,
+      Equiv.apply_symm_apply] at this
+    rwa [smul_forget]
+  · rwa [← allPermEquiv_forget, Equiv.apply_symm_apply]
+
 theorem TSet.symmetric {α β : Λ} (x : TSet α) (hβ : (β : TypeIndex) < α) :
     Symmetric {y : TSet β | y ∈[hβ] x} hβ := by
-  letI : Level := ⟨α⟩
-  letI : LtLevel β := ⟨hβ⟩
-  set y := newSetEquiv.symm x with hy
-  rw [Equiv.eq_symm_apply] at hy
-  clear_value y
-  cases hy
-  simp only [← forget_mem_forget, newSetEquiv_forget]
-  cases y
-  case none =>
-    use ⟨.empty, .empty⟩
-    intro ρ hρ
-    ext z
-    constructor
-    · rintro ⟨z, hz, rfl⟩
-      cases not_mem_none z hz
-    · intro hz
-      cases not_mem_none z hz
-  case some y =>
-    obtain ⟨S, hS⟩ := y.hS
-    use S
-    intro ρ hρ
-    have hc := hS (allPermEquiv.symm ρ) (by rwa [← allPermEquiv_forget, Equiv.apply_symm_apply])
-    have hc' := NewPerm.smul_members (allPermEquiv.symm ρ) y.c β
-    rw [hc, ← allPermEquiv_sderiv _ hβ, Equiv.apply_symm_apply, Set.ext_iff] at hc'
-    simp only [NewSet.mem_members, Set.mem_smul_set_iff_inv_smul_mem] at hc'
-    ext z
-    constructor
-    · rintro ⟨z, hz, rfl⟩
-      exact (hc' (ρ ↘ hβ • z)).mpr (by rwa [inv_smul_smul])
-    · intro hz
-      rw [Set.mem_smul_set_iff_inv_smul_mem]
-      exact (hc' z).mp hz
+  obtain ⟨S, hS⟩ := exists_support x
+  use S
+  intro ρ hρ
+  conv_rhs => rw [← hS ρ hρ]
+  simp only [← forget_mem_forget, smul_forget, StrSet.mem_smul_iff]
+  ext y
+  rw [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_setOf_eq, Set.mem_setOf_eq,
+    smul_forget, allPermForget_inv, allPermSderiv_forget']
 
 theorem tSet_ext' {α β : Λ} (hβ : (β : TypeIndex) < α) (x y : TSet α)
     (h : ∀ z : TSet β, z ∈[hβ] x ↔ z ∈[hβ] y) : x = y :=
@@ -177,6 +169,7 @@ theorem tSet_ext' {α β : Λ} (hβ : (β : TypeIndex) < α) (x y : TSet α)
   letI : LtLevel β := ⟨hβ⟩
   tSet_ext hβ x y h
 
+@[simp]
 theorem TSet.mem_smul_iff' {α β : TypeIndex}
     {x : TSet β} {y : TSet α} (h : β < α) (ρ : AllPerm α) :
     x ∈[h] ρ • y ↔ ρ⁻¹ ↘ h • x ∈[h] y := by
@@ -214,6 +207,11 @@ theorem singleton_injective {α β : Λ} (hβ : (β : TypeIndex) < α) :
   have := typedMem_singleton_iff' hβ x y
   rw [hxy, typedMem_singleton_iff'] at this
   exact (this.mp rfl).symm
+
+@[simp]
+theorem singleton_inj {α β : Λ} {hβ : (β : TypeIndex) < α} {x y : TSet β} :
+    singleton hβ x = singleton hβ y ↔ x = y :=
+  (singleton_injective hβ).eq_iff
 
 theorem sUnion_singleton_symmetric_aux {α β γ : Λ}
     (hγ : (γ : TypeIndex) < β) (hβ : (β : TypeIndex) < α) (s : Set (TSet γ)) (S : Support α)
