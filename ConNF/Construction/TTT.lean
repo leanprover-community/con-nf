@@ -61,6 +61,13 @@ def newSetEquiv {α : Λ} :
   castTSet (D₁ := newModelData) (D₂ := globalModelData) rfl
     (by rw [globalModelData, motive_eq, constructMotive, globalLtData_eq])
 
+@[simp]
+theorem newSetEquiv_forget {α : Λ}
+    (x : letI : Level := ⟨α⟩; @TSet _ α newModelData.toPreModelData) :
+    (newSetEquiv x)ᵁ = xᵁ :=
+  letI : Level := ⟨α⟩
+  castTSet_forget (D₁ := newModelData) (D₂ := globalModelData) _ x
+
 def allPermEquiv {α : Λ} :
     letI : Level := ⟨α⟩
     NewPerm ≃ AllPerm α :=
@@ -74,7 +81,18 @@ theorem allPermEquiv_forget {α : Λ} (ρ : letI : Level := ⟨α⟩; NewPerm) :
   letI : Level := ⟨α⟩
   castAllPerm_forget (D₁ := newModelData) (D₂ := globalModelData) _ ρ
 
-theorem exists_of_symmetric {α β : Λ} (s : Set (TSet β)) (hβ : (β : TypeIndex) < α)
+theorem allPermEquiv_sderiv {α β : Λ}
+    (ρ : letI : Level := ⟨α⟩; NewPerm) (hβ : (β : TypeIndex) < α) :
+    letI : Level := ⟨α⟩
+    letI : LtLevel β := ⟨hβ⟩
+    allPermEquiv ρ ↘ hβ = ρ.sderiv β := by
+  letI : Level := ⟨α⟩
+  letI : LeLevel α := ⟨le_rfl⟩
+  letI : LtLevel β := ⟨hβ⟩
+  apply allPermForget_injective
+  rw [allPermSderiv_forget, allPermEquiv_forget, NewPerm.forget_sderiv]
+
+theorem TSet.exists_of_symmetric {α β : Λ} (s : Set (TSet β)) (hβ : (β : TypeIndex) < α)
     (hs : Symmetric s hβ) :
     ∃ x : TSet α, ∀ y : TSet β, y ∈[hβ] x ↔ y ∈ s := by
   letI : Level := ⟨α⟩
@@ -83,8 +101,7 @@ theorem exists_of_symmetric {α β : Λ} (s : Set (TSet β)) (hβ : (β : TypeIn
     obtain ⟨x, hx⟩ := this
     use newSetEquiv x
     intro y
-    rw [← hx]
-    sorry
+    rw [← hx, ← TSet.forget_mem_forget, newSetEquiv_forget]
   obtain rfl | hs' := s.eq_empty_or_nonempty
   · use none
     intro y
@@ -98,7 +115,43 @@ theorem exists_of_symmetric {α β : Λ} (s : Set (TSet β)) (hβ : (β : TypeIn
       use S
       intro ρ hρS
       have := hS (allPermEquiv ρ) ?_
-      · sorry
+      · simp only [NewPerm.smul_mk, Code.mk.injEq, heq_eq_eq, true_and]
+        rwa [allPermEquiv_sderiv] at this
       · rwa [allPermEquiv_forget]
+
+theorem TSet.symmetric {α β : Λ} (x : TSet α) (hβ : (β : TypeIndex) < α) :
+    Symmetric {y : TSet β | y ∈[hβ] x} hβ := by
+  letI : Level := ⟨α⟩
+  letI : LtLevel β := ⟨hβ⟩
+  set y := newSetEquiv.symm x with hy
+  rw [Equiv.eq_symm_apply] at hy
+  clear_value y
+  cases hy
+  simp only [← forget_mem_forget, newSetEquiv_forget]
+  cases y
+  case none =>
+    use ⟨.empty, .empty⟩
+    intro ρ hρ
+    ext z
+    constructor
+    · rintro ⟨z, hz, rfl⟩
+      cases not_mem_none z hz
+    · intro hz
+      cases not_mem_none z hz
+  case some y =>
+    obtain ⟨S, hS⟩ := y.hS
+    use S
+    intro ρ hρ
+    have hc := hS (allPermEquiv.symm ρ) (by rwa [← allPermEquiv_forget, Equiv.apply_symm_apply])
+    have hc' := NewPerm.smul_members (allPermEquiv.symm ρ) y.c β
+    rw [hc, ← allPermEquiv_sderiv _ hβ, Equiv.apply_symm_apply, Set.ext_iff] at hc'
+    simp only [NewSet.mem_members, Set.mem_smul_set_iff_inv_smul_mem] at hc'
+    ext z
+    constructor
+    · rintro ⟨z, hz, rfl⟩
+      exact (hc' (ρ ↘ hβ • z)).mpr (by rwa [inv_smul_smul])
+    · intro hz
+      rw [Set.mem_smul_set_iff_inv_smul_mem]
+      exact (hc' z).mp hz
 
 end ConNF
