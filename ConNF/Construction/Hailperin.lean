@@ -144,7 +144,7 @@ theorem smul_op (x y : TSet γ) (ρ : AllPerm α) :
 
 theorem exists_singletonImage (x : TSet β) :
     ∃ y : TSet α, ∀ z w,
-      op hγ hδ (singleton hε z) (singleton hε w) ∈[hβ] y ↔ op hδ hε z w ∈[hγ] x := by
+    op hγ hδ (singleton hε z) (singleton hε w) ∈[hβ] y ↔ op hδ hε z w ∈[hγ] x := by
   have := exists_of_symmetric {u | ∃ z w : TSet ε, op hδ hε z w ∈[hγ] x ∧
       u = op hγ hδ (singleton hε z) (singleton hε w)} hβ ?_
   · obtain ⟨y, hy⟩ := this
@@ -173,6 +173,238 @@ theorem exists_singletonImage (x : TSet β) :
         simp only [mem_smul_iff', inv_inv, smul_op, smul_inv_smul]
         exact hab
       · simp only [allPerm_inv_sderiv', smul_inv_smul]
+
+theorem exists_insertion2 (x : TSet γ) :
+    ∃ y : TSet α, ∀ a b c, op hγ hδ (singleton hε (singleton hζ a)) (op hε hζ b c) ∈[hβ] y ↔
+    op hε hζ a c ∈[hδ] x := by
+  have := exists_of_symmetric {u | ∃ a b c : TSet ζ, op hε hζ a c ∈[hδ] x ∧
+      u = op hγ hδ (singleton hε (singleton hζ a)) (op hε hζ b c)} hβ ?_
+  · obtain ⟨y, hy⟩ := this
+    use y
+    intro a b c
+    rw [hy]
+    constructor
+    · rintro ⟨a', b', c', h₁, h₂⟩
+      simp only [op_inj, singleton_inj] at h₂
+      obtain ⟨rfl, rfl, rfl⟩ := h₂
+      exact h₁
+    · intro h
+      exact ⟨a, b, c, h, rfl⟩
+  · obtain ⟨S, hS⟩ := exists_support x
+    use S ↗ hγ ↗ hβ
+    intro ρ hρ
+    simp only [Support.smul_scoderiv, Support.scoderiv_inj, ← allPermSderiv_forget'] at hρ
+    specialize hS (ρ ↘ hβ ↘ hγ) hρ
+    ext z
+    constructor
+    · rintro ⟨_, ⟨a, b, c, hx, rfl⟩, rfl⟩
+      refine ⟨ρ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • a, ρ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • b,
+        ρ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • c, ?_, ?_⟩
+      · rw [← hS]
+        simp only [mem_smul_iff', allPerm_inv_sderiv', smul_op, inv_smul_smul]
+        exact hx
+      · simp only [smul_op, smul_singleton]
+    · rintro ⟨a, b, c, hx, rfl⟩
+      rw [Set.mem_smul_set_iff_inv_smul_mem]
+      refine ⟨ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • a, ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • b,
+        ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • c, ?_, ?_⟩
+      · rw [smul_eq_iff_eq_inv_smul] at hS
+        rw [hS, mem_smul_iff']
+        simp only [inv_inv, allPerm_inv_sderiv', smul_op, smul_inv_smul]
+        exact hx
+      · simp only [smul_op, allPerm_inv_sderiv', smul_singleton]
+
+theorem exists_insertion3 (x : TSet γ) :
+    ∃ y : TSet α, ∀ a b c, op hγ hδ (singleton hε (singleton hζ a)) (op hε hζ b c) ∈[hβ] y ↔
+    op hε hζ a b ∈[hδ] x := by
+  have := exists_of_symmetric {u | ∃ a b c : TSet ζ, op hε hζ a b ∈[hδ] x ∧
+      u = op hγ hδ (singleton hε (singleton hζ a)) (op hε hζ b c)} hβ ?_
+  · obtain ⟨y, hy⟩ := this
+    use y
+    intro a b c
+    rw [hy]
+    constructor
+    · rintro ⟨a', b', c', h₁, h₂⟩
+      simp only [op_inj, singleton_inj] at h₂
+      obtain ⟨rfl, rfl, rfl⟩ := h₂
+      exact h₁
+    · intro h
+      exact ⟨a, b, c, h, rfl⟩
+  · obtain ⟨S, hS⟩ := exists_support x
+    use S ↗ hγ ↗ hβ
+    intro ρ hρ
+    simp only [Support.smul_scoderiv, Support.scoderiv_inj, ← allPermSderiv_forget'] at hρ
+    specialize hS (ρ ↘ hβ ↘ hγ) hρ
+    ext z
+    constructor
+    · rintro ⟨_, ⟨a, b, c, hx, rfl⟩, rfl⟩
+      refine ⟨ρ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • a, ρ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • b,
+        ρ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • c, ?_, ?_⟩
+      · rw [← hS]
+        simp only [mem_smul_iff', allPerm_inv_sderiv', smul_op, inv_smul_smul]
+        exact hx
+      · simp only [smul_op, smul_singleton]
+    · rintro ⟨a, b, c, hx, rfl⟩
+      rw [Set.mem_smul_set_iff_inv_smul_mem]
+      refine ⟨ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • a, ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • b,
+        ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ ↘ hε ↘ hζ • c, ?_, ?_⟩
+      · rw [smul_eq_iff_eq_inv_smul] at hS
+        rw [hS, mem_smul_iff']
+        simp only [inv_inv, allPerm_inv_sderiv', smul_op, smul_inv_smul]
+        exact hx
+      · simp only [smul_op, allPerm_inv_sderiv', smul_singleton]
+
+theorem exists_cross (x : TSet γ) :
+    ∃ y : TSet α, ∀ a, a ∈[hβ] y ↔ ∃ b c, a = op hγ hδ b c ∧ c ∈[hδ] x := by
+  have := exists_of_symmetric {a | ∃ b c, a = op hγ hδ b c ∧ c ∈[hδ] x} hβ ?_
+  · obtain ⟨y, hy⟩ := this
+    use y
+    intro a
+    rw [hy]
+    rfl
+  · obtain ⟨S, hS⟩ := exists_support x
+    use S ↗ hγ ↗ hβ
+    intro ρ hρ
+    simp only [Support.smul_scoderiv, Support.scoderiv_inj, ← allPermSderiv_forget'] at hρ
+    specialize hS (ρ ↘ hβ ↘ hγ) hρ
+    ext z
+    constructor
+    · rintro ⟨_, ⟨a, b, rfl, hab⟩, rfl⟩
+      refine ⟨ρ ↘ hβ ↘ hγ ↘ hδ • a, ρ ↘ hβ ↘ hγ ↘ hδ • b, ?_, ?_⟩
+      · simp only [smul_op]
+      · rw [← hS]
+        simp only [mem_smul_iff', allPerm_inv_sderiv', inv_smul_smul]
+        exact hab
+    · rintro ⟨a, b, rfl, hab⟩
+      rw [Set.mem_smul_set_iff_inv_smul_mem]
+      refine ⟨ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ • a, ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ • b, ?_, ?_⟩
+      · simp only [smul_op, allPerm_inv_sderiv']
+      · rw [smul_eq_iff_eq_inv_smul] at hS
+        rw [hS]
+        simp only [allPerm_inv_sderiv', mem_smul_iff', inv_inv, smul_inv_smul]
+        exact hab
+
+theorem exists_typeLower (x : TSet α) :
+    ∃ y : TSet δ, ∀ a, a ∈[hε] y ↔ ∀ b, op hγ hδ b (singleton hε a) ∈[hβ] x := by
+  have := exists_of_symmetric {a | ∀ b, op hγ hδ b (singleton hε a) ∈[hβ] x} hε ?_
+  · obtain ⟨y, hy⟩ := this
+    use y
+    intro a
+    rw [hy]
+    rfl
+  · apply sUnion_singleton_symmetric hε hδ
+    apply sUnion_singleton_symmetric hδ hγ
+    apply sUnion_singleton_symmetric hγ hβ
+    obtain ⟨S, hS⟩ := exists_support x
+    use S
+    intro ρ hρ
+    specialize hS ρ hρ
+    ext z
+    constructor
+    · rintro ⟨_, ⟨_, ⟨a, ⟨b, hb, rfl⟩, rfl⟩, rfl⟩, rfl⟩
+      simp only [smul_singleton, Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and,
+        singleton_inj, exists_eq_right]
+      intro c
+      have := hb (ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ • c)
+      rw [smul_eq_iff_eq_inv_smul] at hS
+      rw [hS] at this
+      simp only [allPerm_inv_sderiv', mem_smul_iff', inv_inv, smul_op, smul_inv_smul,
+        smul_singleton] at this
+      exact this
+    · rintro ⟨_, ⟨a, ⟨b, hb, rfl⟩, rfl⟩, rfl⟩
+      rw [Set.mem_smul_set_iff_inv_smul_mem]
+      simp only [smul_singleton, allPerm_inv_sderiv', Set.mem_image, Set.mem_setOf_eq,
+        exists_exists_and_eq_and, singleton_inj, exists_eq_right]
+      intro c
+      have := hb (ρ ↘ hβ ↘ hγ ↘ hδ • c)
+      rw [← hS] at this
+      simp only [mem_smul_iff', allPerm_inv_sderiv', smul_op, inv_smul_smul, smul_singleton] at this
+      exact this
+
+theorem exists_converse (x : TSet α) :
+    ∃ y : TSet α, ∀ a b, op hγ hδ a b ∈[hβ] y ↔ op hγ hδ b a ∈[hβ] x := by
+  have := exists_of_symmetric {a | ∃ b c, a = op hγ hδ b c ∧ op hγ hδ c b ∈[hβ] x} hβ ?_
+  · obtain ⟨y, hy⟩ := this
+    use y
+    intro a b
+    rw [hy]
+    simp only [Set.mem_setOf_eq, op_inj]
+    constructor
+    · rintro ⟨a', b', ⟨rfl, rfl⟩, h⟩
+      exact h
+    · intro h
+      exact ⟨a, b, ⟨rfl, rfl⟩, h⟩
+  · obtain ⟨S, hS⟩ := exists_support x
+    use S
+    intro ρ hρ
+    specialize hS ρ hρ
+    ext z
+    constructor
+    · rintro ⟨_, ⟨a, b, rfl, hab⟩, rfl⟩
+      refine ⟨ρ ↘ hβ ↘ hγ ↘ hδ • a, ρ ↘ hβ ↘ hγ ↘ hδ • b, ?_, ?_⟩
+      · simp only [smul_op]
+      · rw [← hS]
+        simp only [mem_smul_iff', allPerm_inv_sderiv', smul_op, inv_smul_smul]
+        exact hab
+    · rintro ⟨a, b, rfl, hab⟩
+      rw [Set.mem_smul_set_iff_inv_smul_mem]
+      refine ⟨ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ • a, ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ • b, ?_, ?_⟩
+      · simp only [smul_op, allPerm_inv_sderiv']
+      · rw [smul_eq_iff_eq_inv_smul] at hS
+        rw [hS]
+        simp only [allPerm_inv_sderiv', mem_smul_iff', inv_inv, smul_op, smul_inv_smul]
+        exact hab
+
+theorem exists_cardinalOne :
+    ∃ x : TSet α, ∀ a : TSet β, a ∈[hβ] x ↔ ∃ b, ∀ c : TSet γ, c ∈[hγ] a ↔ c = b := by
+  have := exists_of_symmetric {a | ∃ b, ∀ c : TSet γ, c ∈[hγ] a ↔ c = b} hβ ?_
+  · obtain ⟨y, hy⟩ := this
+    use y
+    intro a
+    rw [hy]
+    rfl
+  · use ⟨.empty, .empty⟩
+    intro ρ hρ
+    ext z
+    constructor
+    · rintro ⟨z, ⟨a, ha⟩, rfl⟩
+      refine ⟨ρ ↘ hβ ↘ hγ • a, ?_⟩
+      intro b
+      simp only [mem_smul_iff', allPerm_inv_sderiv', ha, inv_smul_eq_iff]
+    · rintro ⟨a, ha⟩
+      rw [Set.mem_smul_set_iff_inv_smul_mem]
+      refine ⟨ρ⁻¹ ↘ hβ ↘ hγ • a, ?_⟩
+      intro b
+      simp only [mem_smul_iff', inv_inv, allPerm_inv_sderiv', ha, smul_eq_iff_eq_inv_smul]
+
+theorem exists_subset :
+    ∃ x : TSet α, ∀ a b, op hγ hδ a b ∈[hβ] x ↔ ∀ c : TSet ε, c ∈[hε] a → c ∈[hε] b := by
+  have := exists_of_symmetric {a | ∃ b c, a = op hγ hδ b c ∧ ∀ d : TSet ε, d ∈[hε] b → d ∈[hε] c} hβ ?_
+  · obtain ⟨y, hy⟩ := this
+    use y
+    intro a b
+    rw [hy]
+    simp only [Set.mem_setOf_eq, op_inj]
+    constructor
+    · rintro ⟨a', b', ⟨rfl, rfl⟩, h⟩
+      exact h
+    · intro h
+      exact ⟨a, b, ⟨rfl, rfl⟩, h⟩
+  · use ⟨.empty, .empty⟩
+    intro ρ hρ
+    ext z
+    constructor
+    · rintro ⟨_, ⟨a, b, rfl, hab⟩, rfl⟩
+      refine ⟨ρ ↘ hβ ↘ hγ ↘ hδ • a, ρ ↘ hβ ↘ hγ ↘ hδ • b, ?_⟩
+      simp only [smul_op, mem_smul_iff', allPerm_inv_sderiv', true_and]
+      intro d
+      exact hab _
+    · rintro ⟨a, b, rfl, hab⟩
+      rw [Set.mem_smul_set_iff_inv_smul_mem]
+      refine ⟨ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ • a, ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ • b, ?_⟩
+      simp only [smul_op, allPerm_inv_sderiv', mem_smul_iff', inv_inv, true_and]
+      intro d
+      exact hab _
 
 end TSet
 
