@@ -379,7 +379,8 @@ theorem exists_cardinalOne :
 
 theorem exists_subset :
     ∃ x : TSet α, ∀ a b, op hγ hδ a b ∈[hβ] x ↔ ∀ c : TSet ε, c ∈[hε] a → c ∈[hε] b := by
-  have := exists_of_symmetric {a | ∃ b c, a = op hγ hδ b c ∧ ∀ d : TSet ε, d ∈[hε] b → d ∈[hε] c} hβ ?_
+  have := exists_of_symmetric {a | ∃ b c, a = op hγ hδ b c ∧
+      ∀ d : TSet ε, d ∈[hε] b → d ∈[hε] c} hβ ?_
   · obtain ⟨y, hy⟩ := this
     use y
     intro a b

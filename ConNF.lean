@@ -15,6 +15,7 @@ import ConNF.Construction.Hailperin
 import ConNF.Construction.InductionStatement
 import ConNF.Construction.NewModelData
 import ConNF.Construction.RaiseStrong
+import ConNF.Construction.Result
 import ConNF.Construction.RunInduction
 import ConNF.Construction.TTT
 import ConNF.Counting.BaseCoding
