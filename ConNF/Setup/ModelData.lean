@@ -100,7 +100,7 @@ theorem allPermForget_zpow {α : TypeIndex} [ModelData α] (ρ : AllPerm α) (n 
     (ρ ^ n)ᵁ = ρᵁ ^ n := by
   induction n using Int.negInduction with
   | nat n => rw [zpow_natCast, zpow_natCast, allPermForget_npow]
-  | neg n h => simpa only [zpow_neg, zpow_natCast, allPermForget_inv, inv_inj] using h
+  | neg h' n => simp only [zpow_neg, zpow_natCast, allPermForget_inv, allPermForget_npow]
 
 theorem Support.Supports.smul_eq_smul {X : Type _} {α : TypeIndex}
     [ModelData α] [MulAction (AllPerm α) X]

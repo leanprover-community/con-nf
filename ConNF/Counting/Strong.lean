@@ -164,7 +164,8 @@ def constrainsNearLitters (S : Support β) : Support β :=
 theorem mem_constrainsNearLitters_nearLitters (S : Support β) (A : β ↝ ⊥) (N : NearLitter) :
     N ∈ (S.constrainsNearLitters ⇘. A)ᴺ ↔
     ∃ B N', N' ∈ (S ⇘. B)ᴺ ∧ Relation.ReflTransGen Constrains (A, N) (B, N') := by
-  apply (Enumeration.mem_ofSet_iff _ (reflTransGen_constrains_small Sᴺ Sᴺ.coe_small) _).trans
+  apply (Enumeration.mem_ofSet_iff _
+    (reflTransGen_constrains_small (β := β) Sᴺ Sᴺ.coe_small) _).trans
   simp only [Prod.exists, Set.mem_setOf_eq]
   rfl
 
