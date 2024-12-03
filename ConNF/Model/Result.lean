@@ -1,4 +1,4 @@
-import ConNF.Construction.Hailperin
+import ConNF.Model.Hailperin
 
 /-!
 # New file

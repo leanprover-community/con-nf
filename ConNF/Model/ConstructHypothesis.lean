@@ -1,4 +1,4 @@
-import ConNF.Construction.ConstructMotive
+import ConNF.Model.ConstructMotive
 
 /-!
 # New file

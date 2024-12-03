@@ -1,4 +1,4 @@
-import ConNF.Counting.Spec
+import ConNF.Strong.Spec
 
 /-!
 # Action on specifications

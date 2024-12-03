@@ -1,5 +1,5 @@
-import ConNF.Counting.SMulSpec
-import ConNF.Counting.SpecSame
+import ConNF.Strong.SMulSpec
+import ConNF.Strong.SpecSame
 
 /-!
 # Counting support orbits

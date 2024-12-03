@@ -1,4 +1,4 @@
-import ConNF.Construction.TTT
+import ConNF.Model.TTT
 
 /-!
 # New file

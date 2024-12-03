@@ -1,4 +1,4 @@
-import ConNF.Construction.RaiseStrong
+import ConNF.Model.RaiseStrong
 
 /-!
 # New file

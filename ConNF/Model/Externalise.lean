@@ -1,4 +1,4 @@
-import ConNF.Construction.RunInduction
+import ConNF.Model.RunInduction
 
 /-!
 # Externalisation

@@ -1,4 +1,4 @@
-import ConNF.Construction.Externalise
+import ConNF.Model.Externalise
 
 /-!
 # New file

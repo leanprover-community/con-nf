@@ -1,4 +1,4 @@
-import ConNF.Counting.SpecSame
+import ConNF.Strong.SpecSame
 
 /-!
 # Coding the base type

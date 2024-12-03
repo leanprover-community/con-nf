@@ -1,5 +1,5 @@
 import ConNF.Basic.InductiveConstruction
-import ConNF.Construction.ConstructHypothesis
+import ConNF.Model.ConstructHypothesis
 
 /-!
 # New file

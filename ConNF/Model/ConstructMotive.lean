@@ -1,4 +1,4 @@
-import ConNF.Construction.InductionStatement
+import ConNF.Model.InductionStatement
 import ConNF.Construction.NewModelData
 import ConNF.Counting.Conclusions
 

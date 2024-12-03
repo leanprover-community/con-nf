@@ -43,7 +43,7 @@ elab "#deptree " : command => do
   for (gp, _) in groups imports do
     h.write ("subgraph cluster_" ++ nameCode gp ++ " {\n").toUTF8
     for (k, v) in imports do
-      if (`ConNF).isPrefixOf k && group k = gp then do
+      if (`ConNF).isPrefixOf k && k != `ConNF && group k = gp then do
         printDeps₁ k v (fun s => h.write s.toUTF8)
     h.write ("label = \"" ++ gp.toString ++ "\";\n").toUTF8
     h.write ("margin = 32;\n").toUTF8
@@ -52,7 +52,7 @@ elab "#deptree " : command => do
     h.write ("color = cyan4;\n").toUTF8
     h.write "}\n".toUTF8
   for (k, v) in imports do
-    if (`ConNF).isPrefixOf k then do
+    if (`ConNF).isPrefixOf k && k != `ConNF then do
       printDeps₂ k v (fun s => h.write s.toUTF8)
   h.write "}\n".toUTF8
 
@@ -77,10 +77,10 @@ def allFiles (env : Environment) : List Name :=
     (toString · < toString ·)
 
 def allDecls (env : Environment) : Elab.Command.CommandElabM NameSet :=
-  (fun l => RBTree.ofList (l.map (fun a => a.toList)).join) <$>
+  (fun l => RBTree.ofList (l.map (fun a => a.toList)).flatten) <$>
     (mapM allDeclsIn (allFiles env))
 
-/-- `#index` computes an index of the declations in the project and saves it to `index.csv`. -/
+/-- `#index` computes an index of the declarations in the project and saves it to `index.csv`. -/
 elab "#index " : command => do
   let env ← getEnv
   let allDecls ← allDecls env

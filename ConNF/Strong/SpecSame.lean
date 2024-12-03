@@ -1,6 +1,6 @@
 import ConNF.FOA.StrActionFOA
 import ConNF.Counting.Strong
-import ConNF.Counting.Spec
+import ConNF.Strong.Spec
 
 /-!
 # Supports with the same specification
