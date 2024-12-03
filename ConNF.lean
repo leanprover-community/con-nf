@@ -16,8 +16,10 @@ import ConNF.Base.Position
 import ConNF.Base.Small
 import ConNF.Base.TypeIndex
 import ConNF.Coherent.CoherentData
+import ConNF.Coherent.Enumeration
 import ConNF.Coherent.Fuzz
 import ConNF.Coherent.ModelData
+import ConNF.Coherent.PathEnumeration
 import ConNF.Coherent.Support
 import ConNF.Construction.Code
 import ConNF.Construction.NewModelData
@@ -39,10 +41,8 @@ import ConNF.FOA.StrApprox
 import ConNF.FOA.StrApproxFOA
 import ConNF.Levels.BasePositions
 import ConNF.Levels.Deny
-import ConNF.Coherent.Enumeration
 import ConNF.Levels.Level
 import ConNF.Levels.Path
-import ConNF.Coherent.PathEnumeration
 import ConNF.Levels.StrPerm
 import ConNF.Levels.StrSet
 import ConNF.Levels.Tree
