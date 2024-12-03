@@ -1,4 +1,4 @@
-import ConNF.Setup.Position
+import ConNF.Base.Position
 
 /-!
 # Injective functions from denied sets

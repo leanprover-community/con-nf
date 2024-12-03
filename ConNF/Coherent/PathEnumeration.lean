@@ -1,5 +1,5 @@
-import ConNF.Setup.Enumeration
-import ConNF.Setup.StrPerm
+import ConNF.Coherent.Enumeration
+import ConNF.Levels.StrPerm
 
 /-!
 # Enumerations over paths

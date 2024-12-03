@@ -1,4 +1,4 @@
-import ConNF.Setup.PathEnumeration
+import ConNF.Coherent.PathEnumeration
 
 /-!
 # Supports

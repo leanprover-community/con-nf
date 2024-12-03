@@ -1,5 +1,5 @@
-import ConNF.Basic.Rel
-import ConNF.Setup.Small
+import ConNF.Background.Rel
+import ConNF.Base.Small
 
 /-!
 # Enumerations

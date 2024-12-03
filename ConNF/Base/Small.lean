@@ -1,6 +1,6 @@
-import ConNF.Basic.Rel
-import ConNF.Basic.Set
-import ConNF.Setup.Params
+import ConNF.Background.Rel
+import ConNF.Background.Set
+import ConNF.Base.Params
 
 /-!
 # Smallness

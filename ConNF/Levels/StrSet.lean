@@ -1,4 +1,4 @@
-import ConNF.Setup.StrPerm
+import ConNF.Levels.StrPerm
 
 /-!
 # Structural sets

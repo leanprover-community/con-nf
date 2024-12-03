@@ -1,5 +1,5 @@
 import ConNF.FOA.StrActionFOA
-import ConNF.Counting.Strong
+import ConNF.Strong.Strong
 import ConNF.Strong.Spec
 
 /-!

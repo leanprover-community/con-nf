@@ -1,5 +1,5 @@
-import ConNF.Basic.Cardinal
-import ConNF.Basic.Rel
+import ConNF.Background.Cardinal
+import ConNF.Background.Rel
 
 universe u
 

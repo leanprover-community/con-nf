@@ -19,7 +19,7 @@
 		"scope": "lean4",
 		"prefix": "newfile",
 		"body": [
-			"import ConNF.Setup.Params",
+			"import ConNF.Base.Params",
 			"",
 			"/-!",
 			"# New file",

@@ -1,5 +1,5 @@
-import ConNF.Setup.BasePositions
-import ConNF.Setup.ModelData
+import ConNF.Levels.BasePositions
+import ConNF.Coherent.ModelData
 
 /-!
 # The `fuzz` map

@@ -1,4 +1,4 @@
-import ConNF.Setup.ModelData
+import ConNF.Coherent.ModelData
 
 /-!
 # Twisting sets

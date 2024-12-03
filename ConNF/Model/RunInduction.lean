@@ -1,4 +1,4 @@
-import ConNF.Basic.InductiveConstruction
+import ConNF.Background.InductiveConstruction
 import ConNF.Model.ConstructHypothesis
 
 /-!

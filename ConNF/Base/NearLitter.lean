@@ -1,4 +1,4 @@
-import ConNF.Setup.Atom
+import ConNF.Base.Atom
 
 /-!
 # Near-litters

@@ -1,6 +1,6 @@
-import ConNF.Setup.Fuzz
-import ConNF.Setup.Level
-import ConNF.Setup.ModelData
+import ConNF.Coherent.Fuzz
+import ConNF.Levels.Level
+import ConNF.Coherent.ModelData
 
 /-!
 # Coherent data

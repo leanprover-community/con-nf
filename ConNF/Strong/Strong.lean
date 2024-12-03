@@ -1,4 +1,4 @@
-import ConNF.Basic.ReflTransGen
+import ConNF.Background.ReflTransGen
 import ConNF.FOA.Inflexible
 
 /-!

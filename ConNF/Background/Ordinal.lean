@@ -1,4 +1,4 @@
-import ConNF.Basic.WellOrder
+import ConNF.Background.WellOrder
 import Mathlib.SetTheory.Cardinal.Aleph
 import Mathlib.SetTheory.Cardinal.Arithmetic
 

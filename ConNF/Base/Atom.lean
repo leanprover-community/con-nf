@@ -1,5 +1,5 @@
-import ConNF.Setup.Litter
-import ConNF.Setup.Small
+import ConNF.Base.Litter
+import ConNF.Base.Small
 
 /-!
 # Atoms

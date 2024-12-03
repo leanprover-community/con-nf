@@ -1,4 +1,4 @@
-import ConNF.Setup.TypeIndex
+import ConNF.Base.TypeIndex
 
 /-!
 # Litters

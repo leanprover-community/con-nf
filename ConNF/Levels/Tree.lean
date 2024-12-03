@@ -1,4 +1,4 @@
-import ConNF.Setup.Path
+import ConNF.Levels.Path
 
 /-!
 # Trees

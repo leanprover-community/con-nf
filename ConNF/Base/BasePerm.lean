@@ -1,5 +1,5 @@
 import Mathlib.Logic.Equiv.Defs
-import ConNF.Setup.NearLitter
+import ConNF.Base.NearLitter
 
 /-!
 # Base permutations

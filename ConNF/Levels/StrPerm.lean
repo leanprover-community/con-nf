@@ -1,5 +1,5 @@
-import ConNF.Setup.BasePerm
-import ConNF.Setup.Tree
+import ConNF.Base.BasePerm
+import ConNF.Levels.Tree
 
 /-!
 # Structural permutations

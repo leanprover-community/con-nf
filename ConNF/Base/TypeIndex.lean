@@ -1,4 +1,4 @@
-import ConNF.Setup.Params
+import ConNF.Base.Params
 
 /-!
 # Type indices
