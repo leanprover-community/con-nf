@@ -1,0 +1,32 @@
+\documentclass{article}
+
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont[Path=../fonts/STIXTwo/,
+	UprightFont=*-Regular.otf,
+	BoldFont=*-Bold.otf,
+	ItalicFont=*-Italic.otf,
+	BoldItalicFont=*-BoldItalic.otf,
+	]{STIXTwoText}
+\setsansfont[Path=../fonts/Source_Sans_3/static/]{SourceSans3-Regular.ttf}[Ligatures={Common,TeX}]
+\setmathfont[Path=../fonts/STIXTwo/]{STIXTwoMath-Regular.otf}
+\setmathfont[Path=../fonts/,range=\star]{TeXGyrePagellaMath.otf}
+\setmonofont[Path=../fonts/JuliaMono-ttf/,
+  UprightFont=*-Regular.ttf,
+  BoldFont=*-Bold.ttf,
+  ItalicFont=*-RegularItalic.ttf,
+  BoldItalicFont=*-BoldItalic.ttf]{JuliaMono}
+
+\usepackage[outputdir=build]{minted}
+\newmintinline[lean]{'lean4.py:Lean4Lexer -x'}{fontsize=\footnotesize,bgcolor=white}
+\newminted[leancode]{'lean4.py:Lean4Lexer -x'}{fontsize=\footnotesize}
+
+\usemintedstyle{xcode}
+
+\begin{document}
+
+An example of Lean code. \lean{foo bar}.
+
+\input{generated/Construction/Code.latex}
+
+\end{document}
