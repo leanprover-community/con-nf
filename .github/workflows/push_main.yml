@@ -87,8 +87,13 @@ jobs:
             pip install pygraphviz --global-option=build_ext --global-option="-L/usr/lib/graphviz/" --global-option="-R/usr/lib/graphviz/"
             pip install leanblueprint
             inv bp web
+            cd latex
+            python3 weave.py
+            latexmk -shell-escape -pdf -pdflatex=lualatex -file-line-error -halt-on-error -interaction=nonstopmode -cd -output-directory=build ./main.tex
+            cd ..
             cp -r blueprint/print docs/print
             cp -r blueprint/web docs/blueprint
+            cp latex/build/main.pdf docs/
 
       - name: remove .gitignore for gh-pages
         run: rm docs/.gitignore
