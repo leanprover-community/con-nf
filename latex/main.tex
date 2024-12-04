@@ -1,4 +1,6 @@
-\documentclass{article}
+\documentclass{report}
+
+\usepackage[a4paper]{geometry}
 
 \usepackage{fontspec}
 \usepackage{unicode-math}
@@ -19,14 +21,24 @@
 
 \usepackage[outputdir=build]{minted}
 \newmintinline[lean]{'lean4.py:Lean4Lexer -x'}{fontsize=\footnotesize,bgcolor=white}
-\newminted[leancode]{'lean4.py:Lean4Lexer -x'}{fontsize=\footnotesize}
+\newminted[leancode]{'lean4.py:Lean4Lexer -x'}{fontsize=\scriptsize,breaklines}
 
 \usemintedstyle{xcode}
 
 \begin{document}
 
-An example of Lean code. \lean{foo bar}.
+\renewcommand\thechapter{\Roman{chapter}}
 
-\input{generated/Construction/Code.latex}
+\tableofcontents
+
+\chapter{The base type}
+
+\input{generated/Base/Params.tex}
+\input{generated/Base/Small.tex}
+\input{generated/Base/TypeIndex.tex}
+\input{generated/Base/Litter.tex}
+\input{generated/Base/Atom.tex}
+\input{generated/Base/NearLitter.tex}
+\input{generated/Base/BasePerm.tex}
 
 \end{document}

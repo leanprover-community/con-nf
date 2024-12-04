@@ -136,7 +136,7 @@ class Lean4Lexer(RegexLexer):
     """
     For the Lean 4 theorem prover.
     """
-    
+
     name = 'Lean4'
     url = 'https://github.com/leanprover/lean4'
     aliases = ['lean4']
@@ -208,6 +208,7 @@ class Lean4Lexer(RegexLexer):
             (r'\S', Name.Builtin.Pseudo),
         ],
         'root': [
+            (r'<[0-9]+ lines?>', Keyword.Constant),
             (words(keywords1, prefix=r'\b', suffix=r'\b'), Keyword.Namespace),
             (words(keywords2, prefix=r'\b', suffix=r'\b'), Keyword),
             (r'@\[', Keyword.Declaration, 'attribute'),
