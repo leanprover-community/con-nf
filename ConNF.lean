@@ -18,7 +18,6 @@ import ConNF.Construction.Code
 import ConNF.Construction.NewModelData
 import ConNF.Counting.BaseCoding
 import ConNF.Counting.BaseCounting
-import ConNF.Counting.CodingFunction
 import ConNF.Counting.Conclusions
 import ConNF.Counting.CountSupportOrbit
 import ConNF.Counting.Recode
@@ -55,6 +54,7 @@ import ConNF.ModelData.Support
 import ConNF.Position.BasePositions
 import ConNF.Position.Deny
 import ConNF.Position.Position
+import ConNF.Strong.CodingFunction
 import ConNF.Strong.SMulSpec
 import ConNF.Strong.Spec
 import ConNF.Strong.SpecSame

@@ -1,5 +1,5 @@
 import ConNF.Counting.Hypotheses
-import ConNF.Counting.CodingFunction
+import ConNF.Strong.CodingFunction
 import ConNF.Counting.SupportOrbit
 import ConNF.Counting.Twist
 

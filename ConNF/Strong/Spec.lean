@@ -1,5 +1,5 @@
 import ConNF.FOA.Inflexible
-import ConNF.Counting.CodingFunction
+import ConNF.Strong.CodingFunction
 
 /-!
 # Specifications for supports

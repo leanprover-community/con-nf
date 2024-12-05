@@ -76,8 +76,6 @@ def lean_to_latex(lean: str):
 
 # Converts a block of markdown documentation to latex.
 def docs_to_latex(docs: str):
-    # Convert inline code.
-    docs = re.sub(r'`(.*?)`', r'\\lean{\1}', docs)
     # Convert italics.
     docs = re.sub(r'\*([^ ].*?)\*', r'\\textit{\1}', docs)
     # Convert quote marks.
@@ -86,8 +84,26 @@ def docs_to_latex(docs: str):
 
     output = ''
     in_list = False
+    in_code_block = False
     for line in docs.splitlines():
+        if in_code_block:
+            if line.startswith('```'):
+                # End this code block.
+                in_code_block = False
+                output += '\n' + r'\begin{leancode}' + '\n' + current_code_block.strip() + '\n' + r'\end{leancode}'
+            else:
+                current_code_block += line + '\n'
+            continue
+        if line.startswith('```'):
+            # Start a code block.
+            in_code_block = True
+            current_code_block = ""
+            continue
+
         output += '\n'
+
+        # Convert inline code.
+        line = re.sub(r'`(.*?)`', r'\\lean{\1}', line)
 
         if line.startswith('* '):
             if not in_list:

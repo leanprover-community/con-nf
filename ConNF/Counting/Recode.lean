@@ -1,5 +1,5 @@
 import ConNF.Counting.Twist
-import ConNF.Counting.CodingFunction
+import ConNF.Strong.CodingFunction
 
 /-!
 # Recoding

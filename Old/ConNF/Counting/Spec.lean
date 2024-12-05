@@ -1,6 +1,6 @@
 import ConNF.Mathlib.Support
 import ConNF.FOA.Basic.Flexible
-import ConNF.Counting.CodingFunction
+import ConNF.Strong.CodingFunction
 import ConNF.Counting.StrongSupport
 
 /-!
