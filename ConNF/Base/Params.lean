@@ -9,9 +9,6 @@ import ConNF.Background.WellOrder
 
 In this file, we define the parameters that we will use to construct our model of tangled type
 theory.
-
-## Main declarations
-* `ConNF.Params`: The type of model parameters.
 -/
 
 noncomputable section
@@ -21,6 +18,51 @@ open Cardinal Ordinal
 
 namespace ConNF
 
+/-!
+## Parameters and examples
+-/
+
+/--
+The type of model parameters. Specifically, we have:
+
+* a nonempty type `Λ` with a relation `<` that well-orders it, and gives it no maximal element;
+* a type `κ` whose cardinality is regular and strictly greater than `ℵ₀`;
+* a type `μ` whose cardinality is a strong limit, strictly greater than `κ`, and has cofinality
+  at least the cardinality of `κ` and at least the order type of `Λ`.
+
+We write `#α` for the cardinality of any type `α`.
+
+`Λ` will become our sort of type indices in the final model we build. That is, in our type
+hierarchy, each inhabitant `α : Λ` will give rise to a type `TSet α` (read
+"tangled sets of type `α`"). The element-of relation will be of type
+`{α : Λ} → {β : Λ} → β < α → TSet β → TSet α → Prop`; that is, given a proof that `β < α`, and given
+sets `x : TSet β` and `y : TSet α`, we have a proposition that asks if `x` is an element of `y`.
+
+`κ` will be a type that delimits "small" sets from "large" sets. By manipulating "large" data,
+but only allowing sufficiently "small" things in our model, we will be able to control what the
+model is able to know about itself.
+
+`μ` will be the size of each of our type levels `TSet α`. The main technical challenge of the proof
+will be to prove this cardinality bound on the sizes of our types. We will not be able to construct
+`TSet α` until we have already verified that `TSet β` has cardinality `#μ` for every `β < α`.
+
+Our model parameters are not just cardinals (or ordinals): they are *types* with the given
+cardinalities and properties. By doing this, the set-theoretic elements of (for example) `#μ`
+correspond directly to inhabitants of the type `μ`.
+
+Note that we use a capital `Λ` instead of a lowercase `λ` as the latter is reserved for anonymous
+functions in Lean's syntax.
+
+This structure is registered as a typeclass. This means that, at the start of a file, we can write
+`variable [Params.{u}]` to parametrise definitions in our file by a choice of model parameters,
+and whenever a definition or theorem involving model parameters is mentioned, Lean will implicitly
+assume that we intended this particular set of model parameters without having to write it
+ourselves.
+
+Finally, note that our model parameters are parametric over a universe `u`. We will almost never
+deal with universe levels in the proof (and in fact we can set `u = 0` without issue), but this
+gives us greater generality for almost no cost.
+-/
 class Params where
   Λ : Type u
   κ : Type u
@@ -35,6 +77,12 @@ class Params where
   κ_le_μ_ord_cof : #κ ≤ (#μ).ord.cof
   Λ_type_le_μ_ord_cof : type ((· < ·) : Λ → Λ → Prop) ≤ (#μ).ord.cof.ord
 
+/--
+The smallest collection of model parameters that we can prove to exist.
+Importantly, ZFC (with no inaccessibles) proves that this is a set of model parameters.
+We take `Λ = ω, κ = ω₁, μ = ב_ω₁` (of course, up to identification of cardinals and ordinals with
+their representative types).
+-/
 def Params.minimal : Params where
   Λ := ℕ
   κ := (aleph 1).out
@@ -64,6 +112,10 @@ def Params.minimal : Params where
     rw [isRegular_aleph_one.cof_eq, ← ord_le_ord] at this
     rwa [ord_aleph] at this ⊢
 
+/--
+We can also instantiate our model parameters with `Λ = μ`. To do this, both `#Λ` and `#μ` will need
+to be inaccessible cardinals. We simply pick `κ = ω₁` for convenience.
+-/
 def Params.inaccessible.{v} : Params where
   Λ := (Cardinal.univ.{v, v + 1}).ord.toType
   κ := ULift.{v + 1, v} (aleph 1).out
@@ -97,19 +149,35 @@ def Params.inaccessible.{v} : Params where
     change type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop) ≤ _
     rw [type_toType, mk_out, univ_inaccessible.2.1.cof_eq]
 
+/-!
+We now inform Lean that our model parameters should be accessible from the names `Λ`, `κ`, etc.
+instead of the longer `Params.Λ` and so on.
+-/
 export Params (Λ κ μ aleph0_lt_κ κ_isRegular μ_isStrongLimit κ_lt_μ κ_le_μ_ord_cof
   Λ_type_le_μ_ord_cof)
 
+/-! Assume a set of model parameters. -/
 variable [Params.{u}]
+
+/-!
+## Elementary properties
+
+We now establish the most basic elementary properties about `Λ`, `κ`, and `μ`.
+In particular, we will use choice to create well-orderings on `κ` and `μ` whose order types are
+initial, and then prove some basic facts about these orders.
+-/
 
 instance : Nonempty Λ := Params.Λ_nonempty
 instance : LtWellOrder Λ := Params.ΛWellOrder
 instance : NoMaxOrder Λ := Params.Λ_noMaxOrder
 
-/-- Allows us to use `termination_by` clauses with `Λ`. -/
+/-- This gadget allows us to use `termination_by` clauses with `Λ`, which gives us access to more
+complicated recursion and induction along `Λ`. -/
 instance : WellFoundedRelation Λ where
   rel := (· < ·)
   wf := IsWellFounded.wf
+
+/-! Basic cardinal inequalities between `ℵ₀`, `Λ`, `κ`, `μ`. -/
 
 theorem aleph0_lt_μ : ℵ₀ < #μ :=
   aleph0_lt_κ.trans κ_lt_μ
@@ -131,6 +199,8 @@ theorem Λ_le_μ : #Λ ≤ #μ := by
 theorem κ_le_μ : #κ ≤ #μ :=
   κ_lt_μ.le
 
+/-! We now construct the aforementioned well-orders on `κ` and `μ`. -/
+
 @[irreducible]
 def κEquiv : κ ≃ Set.Iio (#κ).ord := by
   apply Equiv.ulift.{u + 1, u}.symm.trans
@@ -144,12 +214,16 @@ def μEquiv : μ ≃ Set.Iio (#μ).ord := by
   rw [← Cardinal.eq, mk_uLift, card_Iio, card_ord]
 
 instance : LtWellOrder κ := Equiv.ltWellOrder κEquiv
-instance (n : ℕ) : OfNat κ n :=
-  letI := iioOfNat aleph0_lt_κ.le n
-  Equiv.ofNat κEquiv n
 instance : NoMaxOrder κ :=
   letI := iio_noMaxOrder aleph0_lt_κ.le
   Equiv.noMaxOrder κEquiv
+
+/-- We overload Lean's numeric literal syntax so that numbers such as `0` can also be interpreted
+as particular inhabitants of `κ`. We could do this for the other cardinal parameters as well, but
+we don't need it. -/
+instance (n : ℕ) : OfNat κ n :=
+  letI := iioOfNat aleph0_lt_κ.le n
+  Equiv.ofNat κEquiv n
 
 instance : LtWellOrder μ := Equiv.ltWellOrder μEquiv
 instance : NoMaxOrder μ :=
@@ -164,6 +238,7 @@ theorem Λ_type_isLimit : (type ((· < ·) : Λ → Λ → Prop)).IsLimit := by
   rw [isLimit_iff_noMaxOrder]
   infer_instance
 
+/-- The order type on `κ` really is the initial ordinal for the cardinal `#κ`. -/
 @[simp]
 theorem κ_type : type ((· < ·) : κ → κ → Prop) = (#κ).ord := by
   have := κEquiv.ltWellOrder_type
@@ -174,6 +249,8 @@ theorem μ_type : type ((· < ·) : μ → μ → Prop) = (#μ).ord := by
   have := μEquiv.ltWellOrder_type
   rwa [Ordinal.lift_id, type_Iio, Ordinal.lift_inj] at this
 
+/-- We define a monoid structure on `κ`, denoted `+`, by passing to the collection of ordinals below
+`(#κ).ord` and then computing their sum. -/
 instance : AddMonoid κ :=
   letI := iioAddMonoid aleph0_lt_κ.le
   Equiv.addMonoid κEquiv
@@ -181,6 +258,8 @@ instance : AddMonoid κ :=
 instance : Sub κ :=
   letI := iioSub (#κ).ord
   Equiv.sub κEquiv
+
+/-! Basic properties about the order and operations on `κ`. -/
 
 theorem κ_ofNat_def (n : ℕ) :
     letI := iioOfNat aleph0_lt_κ.le n
@@ -278,10 +357,13 @@ theorem μ_card_Iic_lt (ν : μ) : #{ξ | ξ ≤ ν} < #μ := by
   have := (type_Iic_lt ν).trans_eq μ_type
   rwa [lt_ord] at this
 
+/-- A set in `μ` that is smaller than the cofinality of `μ` is bounded. -/
 theorem μ_bounded_lt_of_lt_μ_ord_cof (s : Set μ) (h : #s < (#μ).ord.cof) :
     s.Bounded (· < ·) :=
   Ordinal.lt_cof_type (μ_type ▸ h)
 
+/-- A partial converse to the previous theorem: a bounded set in `μ` must have cardinality smaller
+than `μ` itself. -/
 theorem card_lt_of_μ_bounded (s : Set μ) (h : s.Bounded (· < ·)) :
     #s < #μ := by
   obtain ⟨ν, hν⟩ := h

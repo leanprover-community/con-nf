@@ -75,13 +75,7 @@ def lean_to_latex(lean: str):
         return r'\begin{leancode}' + '\n' + output + '\n' + r'\end{leancode}' + '\n'
 
 # Converts a block of markdown documentation to latex.
-def docs_to_latex(docs: str):
-    # Convert italics.
-    docs = re.sub(r'\*([^ ].*?)\*', r'\\textit{\1}', docs)
-    # Convert quote marks.
-    docs = re.sub(r'"([^ ].*?)"', '``\\1\'\'', docs)
-    docs = re.sub(r'\'([^ ].*?)\'', '`\\1\'', docs)
-
+def docs_to_latex(docs: str, file_name: str):
     output = ''
     in_list = False
     in_code_block = False
@@ -104,6 +98,11 @@ def docs_to_latex(docs: str):
 
         # Convert inline code.
         line = re.sub(r'`(.*?)`', r'\\lean{\1}', line)
+        # Convert quote marks.
+        line = re.sub(r'\'([^ ].*?)\'', '`\\1\'', line)
+        line = re.sub(r'"([^ ].*?)"', '``\\1\'\'', line)
+        # Convert italics.
+        line = re.sub(r'\*([^ ].*?)\*', r'\\textit{\1}', line)
 
         if line.startswith('* '):
             if not in_list:
@@ -121,6 +120,8 @@ def docs_to_latex(docs: str):
             if line.startswith('#' * i + ' '):
                 output += '\\' + ('sub' * (i - 1)) + 'section{' + line[i + 1:] + '}'
                 done = True
+                if i == 1:
+                    output += '\n' + r'\textit{File name: } \verb|' + file_name + '|\\textit{.}'
                 break
         if done: continue
 
@@ -132,7 +133,7 @@ def docs_to_latex(docs: str):
     return output.strip() + '\n'
 
 # Converts an entire file of lean code to latex.
-def convert(lean: str):
+def convert(lean: str, file_name: str):
     # First, extract the module documentation and regular documentation blocks.
     output = ''
     while True:
@@ -144,7 +145,7 @@ def convert(lean: str):
             i = lean.find('-/')
             doc_block = lean[result.end():i]
             output += lean_to_latex(lean[:result.start()])
-            output += docs_to_latex(doc_block)
+            output += docs_to_latex(doc_block, file_name)
             lean = lean[i+2:]
     return output
 
@@ -157,4 +158,4 @@ for root, dirs, files in os.walk('ConNF'):
         with open(os.path.join(root, file)) as f:
             content = f.read()
         with open(os.path.join(newroot, file.removesuffix('.lean') + '.tex'), 'w') as f:
-            f.write(convert(content))
+            f.write(convert(content, '.'.join([*path, file.removesuffix('.lean')])))
