@@ -1,6 +1,6 @@
-import ConNF.Coherent.Fuzz
-import ConNF.Levels.Level
-import ConNF.Coherent.ModelData
+import ConNF.ModelData.Fuzz
+import ConNF.ModelData.Level
+import ConNF.ModelData.ModelData
 
 /-!
 # Coherent data
@@ -9,7 +9,7 @@ In this file, we define the type of coherent data below a particular proper type
 
 ## Main declarations
 
-* `ConNF.CoherentData`: Coherent data below a given level `α`.
+* `ConNF.ModelDataData`: Coherent data below a given level `α`.
 -/
 
 noncomputable section

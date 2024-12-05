@@ -1,4 +1,4 @@
-import ConNF.Coherent.CoherentData
+import ConNF.ModelData.CoherentData
 import ConNF.FOA.Inflexible
 
 /-!

@@ -1,5 +1,5 @@
 import ConNF.Levels.StrSet
-import ConNF.Coherent.Support
+import ConNF.ModelData.Support
 
 /-!
 # Model data

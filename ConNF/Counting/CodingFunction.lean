@@ -1,4 +1,4 @@
-import ConNF.Coherent.CoherentData
+import ConNF.ModelData.CoherentData
 
 /-!
 # Coding functions

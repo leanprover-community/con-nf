@@ -1,4 +1,4 @@
-import ConNF.Coherent.Enumeration
+import ConNF.ModelData.Enumeration
 import ConNF.Levels.StrPerm
 
 /-!

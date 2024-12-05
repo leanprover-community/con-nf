@@ -1,4 +1,4 @@
-import ConNF.Levels.Deny
+import ConNF.Position.Deny
 import ConNF.Base.NearLitter
 
 /-!
