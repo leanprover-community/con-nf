@@ -36,6 +36,9 @@
 
 \usemintedstyle{xcode}
 
+\usepackage{biblatex}
+\addbibresource{../blueprint/src/refs.bib}
+
 \begin{document}
 
 % Replaces "chapter 2" with "chapter II" and "section 2.4" with "section 4"
@@ -68,6 +71,10 @@
 \tableofcontents
 \newpage
 \setcounter{tocdepth}{3}
+
+\chapter{Overview}
+
+\input{overview.tex}
 
 \chapter{The base type}
 
@@ -167,5 +174,7 @@
 \input{generated/Model/TTT.tex}
 \input{generated/Model/Hailperin.tex}
 \input{generated/Model/Result.tex}
+
+\printbibliography
 
 \end{document}

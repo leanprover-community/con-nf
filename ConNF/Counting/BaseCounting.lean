@@ -2,7 +2,7 @@ import ConNF.Counting.BaseCoding
 import ConNF.Counting.CountSupportOrbit
 
 /-!
-# Counting coding functions at level `⊥` and `0`
+# Counting coding functions at base type and level zero
 
 In this file, we show that there are less than `μ` coding functions at levels `⊥` and `0`.
 

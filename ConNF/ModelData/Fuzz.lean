@@ -2,7 +2,7 @@ import ConNF.Position.BasePositions
 import ConNF.ModelData.ModelData
 
 /-!
-# The `fuzz` map
+# The fuzz map
 
 In this file, we define the `fuzz` map.
 
