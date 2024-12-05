@@ -143,7 +143,7 @@ A relation `r` is called
 
 * *injective*, if `r a b` and `r a' b` imply `a = a'`;
 * *surjective*, if for every `b`, there is some `a` such that `r a b`;
-* *coinjective*, if `r a b'` and `r a b'` imply `b = b'`;
+* *coinjective*, if `r a b` and `r a b'` imply `b = b'`;
 * *cosurjective*, if for every `a`, there is some `b` such that `r a b`;
 * *one-to-one*, if `r` is both injective and coinjective;
 * *functional*, if `r` is both coinjective and cosurjective

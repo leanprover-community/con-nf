@@ -130,7 +130,7 @@ def docs_to_latex(docs: str, file_name: str):
     if in_list:
         output += '\n' + r'\end{itemize}'
 
-    return output.strip() + '\n'
+    return '\n' + output.strip() + '\n\n'
 
 # Converts an entire file of lean code to latex.
 def convert(lean: str, file_name: str):

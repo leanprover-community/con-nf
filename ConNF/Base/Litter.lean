@@ -6,10 +6,6 @@ import ConNF.Base.TypeIndex
 In this file, we define litters, which are the parts of an indexed partition of the base type of our
 model. Each litter is indexed by an element of `μ`, as well as some parameters `β` and `γ` used for
 defining the `fuzz` map later.
-
-## Main declarations
-
-* `ConNF.Litter`: The type of litters.
 -/
 
 universe u
@@ -20,7 +16,7 @@ namespace ConNF
 
 variable [Params.{u}]
 
-/-- The type indexing the partition of `ConNF.Atom`. Each atom belongs to a unique litter.
+/-- The type indexing the partition of the base type of our model.
 The field `ν : μ` is an index that enforces that there are `μ` litters.
 The fields `β` and `γ` are used in the definition of the `fuzz` map, which is an injection
 into the type of litters. -/
@@ -30,6 +26,7 @@ structure Litter where
   γ : Λ
   β_ne_γ : β ≠ γ
 
+/-- The type of litters is nonempty. -/
 instance : Nonempty Litter :=
   ⟨⟨Classical.arbitrary μ, ⊥, Classical.arbitrary Λ, bot_ne_coe⟩⟩
 
@@ -55,7 +52,15 @@ theorem card_litter : #Litter = #μ := by
     cases h
     rfl
 
-/-- Typeclass for the `ᴸ` notation.  Used for converting to  litters, or extracting the
+/-!
+## Notation typeclasses
+
+We will use Lean's typeclasses to implement some custom notation, namely the superscripts
+`ᴸ`, `ᴬ`, `ᴺ`, `ᵁ`, which will be used for converting between various common types
+(such as litters). The meanings of the notations are type-dependent.
+-/
+
+/-- Typeclass for the `ᴸ` notation. Used for converting to litters, or extracting the
 "litter part" of an object. -/
 class SuperL (X : Type _) (Y : outParam <| Type _) where
   superL : X → Y
