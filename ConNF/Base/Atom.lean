@@ -9,10 +9,6 @@ ZFU sense (for example), they are simply the elements of the model which are in 
 
 This base type does not appear in the final construction, it is just used as the foundation on which
 the subsequent layers can be built.
-
-## Main declarations
-
-* `ConNF.Atom`: The type of atoms.
 -/
 
 universe u
@@ -24,9 +20,10 @@ namespace ConNF
 variable [Params.{u}]
 
 /--
-The base type of the construction, denoted by `τ₋₁` in various papers. Instead of declaring it as an
-arbitrary type of cardinality `μ` and partitioning it into suitable sets of litters afterwards, we
-define it as `Litter × κ`, which has the correct cardinality and comes with a natural partition.
+The base type of the construction, denoted by `τ₋₁` in various papers.
+An atom consists of a litter together with an index in `κ`.
+This gives a partition of atoms into litters: we say that two atoms are in the same litter
+if their first projections are equal. These equivalence classes will be called *litter sets*.
 
 These are not 'atoms' in the ZFU, TTTU or NFU sense; they are simply the elements of the model which
 are in type `τ₋₁`.
@@ -35,13 +32,16 @@ structure Atom : Type u where
   litter : Litter
   index : κ
 
+/-- If `a` is an atom, `aᴸ` is its first projection; that is, the litter associated to it. -/
 instance : SuperL Atom Litter where
   superL := Atom.litter
 
-/-- If `L` is a litter, `Lᴬ` is the set of atoms associated to that litter. -/
+/-- If `L` is a litter, `Lᴬ` is the set of atoms associated to that litter.
+This is sometimes called the *litter set* of `L`. -/
 instance : SuperA Litter (Set Atom) where
   superA L := {a | aᴸ = L}
 
+/-- The definition of membership in a litter set. -/
 @[simp]
 theorem mem_litter_atoms_iff (a : Atom) (L : Litter) :
     a ∈ Lᴬ ↔ aᴸ = L :=
@@ -64,7 +64,7 @@ def atomEquiv : Atom ≃ Litter × κ
   right_inv _ := rfl
 
 /-- The cardinality of `Atom` is the cardinality of `μ`.
-We will prove that all types constructed in our model have cardinality equal to `μ`. -/
+We will prove that all types constructed in our model have cardinality equal to that of `μ`. -/
 @[simp]
 theorem card_atom : #Atom = #μ := by
   rw [atomEquiv.cardinal_eq, mk_prod, lift_id, lift_id, card_litter]
@@ -82,12 +82,15 @@ def litterSetEquiv (L : Litter) : Lᴬ ≃ κ where
 theorem Litter.card_atoms (L : Litter) : #Lᴬ = #κ :=
   Cardinal.eq.mpr ⟨litterSetEquiv L⟩
 
+/-- Litter sets are not small. -/
 theorem Litter.atoms_not_small (L : Litter) : ¬Small Lᴬ :=
   L.card_atoms.not_lt
 
+/-- Litter sets are nonempty. -/
 instance (L : Litter) : Nonempty Lᴬ :=
   ⟨⟨L, Classical.arbitrary κ⟩, rfl⟩
 
+/-- Litter sets are pairwise disjoint. -/
 theorem litter_pairwise_disjoint {L₁ L₂ : Litter} (h : L₁ ≠ L₂) : Disjoint L₁ᴬ L₂ᴬ := by
   rw [Set.disjoint_iff]
   intro x hx
