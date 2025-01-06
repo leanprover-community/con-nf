@@ -356,8 +356,8 @@ theorem exists_converse (x : TSet α) :
         exact hab
 
 theorem exists_cardinalOne :
-    ∃ x : TSet α, ∀ a : TSet β, a ∈[hβ] x ↔ ∃ b, ∀ c : TSet γ, c ∈[hγ] a ↔ c = b := by
-  have := exists_of_symmetric {a | ∃ b, ∀ c : TSet γ, c ∈[hγ] a ↔ c = b} hβ ?_
+    ∃ x : TSet α, ∀ a : TSet β, a ∈[hβ] x ↔ ∃ b, a = singleton hγ b := by
+  have := exists_of_symmetric {a | ∃ b, a = singleton hγ b} hβ ?_
   · obtain ⟨y, hy⟩ := this
     use y
     intro a
@@ -369,13 +369,11 @@ theorem exists_cardinalOne :
     constructor
     · rintro ⟨z, ⟨a, ha⟩, rfl⟩
       refine ⟨ρ ↘ hβ ↘ hγ • a, ?_⟩
-      intro b
-      simp only [mem_smul_iff', allPerm_inv_sderiv', ha, inv_smul_eq_iff]
+      simp only [ha, smul_singleton]
     · rintro ⟨a, ha⟩
       rw [Set.mem_smul_set_iff_inv_smul_mem]
       refine ⟨ρ⁻¹ ↘ hβ ↘ hγ • a, ?_⟩
-      intro b
-      simp only [mem_smul_iff', inv_inv, allPerm_inv_sderiv', ha, smul_eq_iff_eq_inv_smul]
+      simp only [ha, smul_singleton, allPerm_inv_sderiv']
 
 theorem exists_subset :
     ∃ x : TSet α, ∀ a b, op hγ hδ a b ∈[hβ] x ↔ ∀ c : TSet ε, c ∈[hε] a → c ∈[hε] b := by

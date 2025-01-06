@@ -21,62 +21,117 @@ variable [Params.{u}] {α β γ δ ε ζ : Λ} (hβ : (β : TypeIndex) < α) (h�
   (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < δ) (hζ : (ζ : TypeIndex) < ε)
 
 theorem ext (x y : TSet α) :
-    (∀ z : TSet β, z ∈[hβ] x ↔ z ∈[hβ] y) → x = y :=
+    (∀ z : TSet β, z ∈' x ↔ z ∈' y) → x = y :=
   tSet_ext' hβ x y
 
-theorem exists_inter (x y : TSet α) :
-    ∃ w : TSet α, ∀ z : TSet β, z ∈[hβ] w ↔ z ∈[hβ] x ∧ z ∈[hβ] y :=
-  TSet.exists_inter hβ x y
+def inter (x y : TSet α) : TSet α :=
+  (TSet.exists_inter hβ x y).choose
 
-theorem exists_compl (x : TSet α) :
-    ∃ y : TSet α, ∀ z : TSet β, z ∈[hβ] y ↔ ¬z ∈[hβ] x :=
-  TSet.exists_compl hβ x
+notation:69 x:69 " ⊓[" h "] " y:69 => _root_.ConNF.inter h x y
+notation:69 x:69 " ⊓' " y:69 => x ⊓[by assumption] y
 
+@[simp]
+theorem mem_inter_iff (x y : TSet α) :
+    ∀ z : TSet β, z ∈' x ⊓' y ↔ z ∈' x ∧ z ∈' y :=
+  (TSet.exists_inter hβ x y).choose_spec
+
+def compl (x : TSet α) : TSet α :=
+  (TSet.exists_compl hβ x).choose
+
+notation:1024 x:1024 " ᶜ[" h "]" => _root_.ConNF.compl h x
+notation:1024 x:1024 " ᶜ'" => xᶜ[by assumption]
+
+@[simp]
+theorem mem_compl_iff (x : TSet α) :
+    ∀ z : TSet β, z ∈' xᶜ' ↔ ¬z ∈' x :=
+  (TSet.exists_compl hβ x).choose_spec
+
+notation:1024 "{" x "}[" h "]" => _root_.ConNF.singleton h x
+notation:1024 "{" x "}'" => {x}[by assumption]
+
+@[simp]
 theorem mem_singleton_iff (x y : TSet β) :
-    y ∈[hβ] singleton hβ x ↔ y = x :=
+    y ∈' {x}' ↔ y = x :=
   typedMem_singleton_iff' hβ x y
 
+notation:1024 "{" x ", " y "}[" h "]" => _root_.ConNF.TSet.up h x y
+notation:1024 "{" x ", " y "}'" => {x, y}[by assumption]
+
+@[simp]
 theorem mem_up_iff (x y z : TSet β) :
-    z ∈[hβ] up hβ x y ↔ z = x ∨ z = y :=
+    z ∈' {x, y}' ↔ z = x ∨ z = y :=
   TSet.mem_up_iff hβ x y z
 
+notation:1024 "⟨" x ", " y "⟩[" h ", " h' "]" => _root_.ConNF.TSet.op h h' x y
+notation:1024 "⟨" x ", " y "⟩'" => ⟨x, y⟩[by assumption, by assumption]
+
 theorem op_def (x y : TSet γ) :
-    op hβ hγ x y = up hβ (singleton hγ x) (up hγ x y) :=
+    (⟨x, y⟩' : TSet α) = { {x}', {x, y}' }' :=
   rfl
 
-theorem exists_singletonImage (x : TSet β) :
-    ∃ y : TSet α, ∀ z w,
-    op hγ hδ (singleton hε z) (singleton hε w) ∈[hβ] y ↔ op hδ hε z w ∈[hγ] x :=
-  TSet.exists_singletonImage hβ hγ hδ hε x
+def singletonImage' (x : TSet β) : TSet α :=
+  (TSet.exists_singletonImage hβ hγ hδ hε x).choose
 
-theorem exists_insertion2 (x : TSet γ) :
-    ∃ y : TSet α, ∀ a b c, op hγ hδ (singleton hε (singleton hζ a)) (op hε hζ b c) ∈[hβ] y ↔
-    op hε hζ a c ∈[hδ] x :=
-  TSet.exists_insertion2 hβ hγ hδ hε hζ x
+@[simp]
+theorem singletonImage'_spec (x : TSet β) :
+    ∀ z w,
+    ⟨ {z}', {w}' ⟩' ∈' singletonImage' hβ hγ hδ hε x ↔ ⟨z, w⟩' ∈' x :=
+  (TSet.exists_singletonImage hβ hγ hδ hε x).choose_spec
 
-theorem exists_insertion3 (x : TSet γ) :
-    ∃ y : TSet α, ∀ a b c, op hγ hδ (singleton hε (singleton hζ a)) (op hε hζ b c) ∈[hβ] y ↔
-    op hε hζ a b ∈[hδ] x :=
-  TSet.exists_insertion3 hβ hγ hδ hε hζ x
+def insertion2' (x : TSet γ) : TSet α :=
+  (TSet.exists_insertion2 hβ hγ hδ hε hζ x).choose
 
-theorem exists_cross (x : TSet γ) :
-    ∃ y : TSet α, ∀ a, a ∈[hβ] y ↔ ∃ b c, a = op hγ hδ b c ∧ c ∈[hδ] x :=
-  TSet.exists_cross hβ hγ hδ x
+@[simp]
+theorem insertion2'_spec (x : TSet γ) :
+    ∀ a b c, ⟨ { {a}' }', ⟨b, c⟩' ⟩' ∈' insertion2' hβ hγ hδ hε hζ x ↔
+    ⟨a, c⟩' ∈' x :=
+  (TSet.exists_insertion2 hβ hγ hδ hε hζ x).choose_spec
 
-theorem exists_typeLower (x : TSet α) :
-    ∃ y : TSet δ, ∀ a, a ∈[hε] y ↔ ∀ b, op hγ hδ b (singleton hε a) ∈[hβ] x :=
-  TSet.exists_typeLower hβ hγ hδ hε x
+def insertion3' (x : TSet γ) : TSet α :=
+  (TSet.exists_insertion3 hβ hγ hδ hε hζ x).choose
 
-theorem exists_converse (x : TSet α) :
-    ∃ y : TSet α, ∀ a b, op hγ hδ a b ∈[hβ] y ↔ op hγ hδ b a ∈[hβ] x :=
-  TSet.exists_converse hβ hγ hδ x
+theorem insertion3'_spec (x : TSet γ) :
+    ∀ a b c, ⟨ { {a}' }', ⟨b, c⟩' ⟩' ∈' insertion3' hβ hγ hδ hε hζ x ↔
+    ⟨a, b⟩' ∈' x :=
+  (TSet.exists_insertion3 hβ hγ hδ hε hζ x).choose_spec
 
-theorem exists_cardinalOne :
-    ∃ x : TSet α, ∀ a : TSet β, a ∈[hβ] x ↔ ∃ b, ∀ c : TSet γ, c ∈[hγ] a ↔ c = b :=
-  TSet.exists_cardinalOne hβ hγ
+def vCross (x : TSet γ) : TSet α :=
+  (TSet.exists_cross hβ hγ hδ x).choose
 
-theorem exists_subset :
-    ∃ x : TSet α, ∀ a b, op hγ hδ a b ∈[hβ] x ↔ ∀ c : TSet ε, c ∈[hε] a → c ∈[hε] b :=
-  TSet.exists_subset hβ hγ hδ hε
+@[simp]
+theorem vCross_spec (x : TSet γ) :
+    ∀ a, a ∈' vCross hβ hγ hδ x ↔ ∃ b c, a = ⟨b, c⟩' ∧ c ∈' x :=
+  (TSet.exists_cross hβ hγ hδ x).choose_spec
+
+def typeLower (x : TSet α) : TSet δ :=
+  (TSet.exists_typeLower hβ hγ hδ hε x).choose
+
+@[simp]
+theorem mem_typeLower_iff (x : TSet α) :
+    ∀ a, a ∈' typeLower hβ hγ hδ hε x ↔ ∀ b, ⟨ b, {a}' ⟩' ∈' x :=
+  (TSet.exists_typeLower hβ hγ hδ hε x).choose_spec
+
+def converse' (x : TSet α) : TSet α :=
+  (TSet.exists_converse hβ hγ hδ x).choose
+
+@[simp]
+theorem converse'_spec (x : TSet α) :
+    ∀ a b, ⟨a, b⟩' ∈' converse' hβ hγ hδ x ↔ ⟨b, a⟩' ∈' x :=
+  (TSet.exists_converse hβ hγ hδ x).choose_spec
+
+def cardinalOne : TSet α :=
+  (TSet.exists_cardinalOne hβ hγ).choose
+
+@[simp]
+theorem mem_cardinalOne_iff :
+    ∀ a : TSet β, a ∈' cardinalOne hβ hγ ↔ ∃ b, a = {b}' :=
+  (TSet.exists_cardinalOne hβ hγ).choose_spec
+
+def subset' : TSet α :=
+  (TSet.exists_subset hβ hγ hδ hε).choose
+
+theorem subset'_spec :
+    ∀ a b, ⟨a, b⟩' ∈' subset' hβ hγ hδ hε ↔ ∀ c : TSet ε, c ∈' a → c ∈' b :=
+  (TSet.exists_subset hβ hγ hδ hε).choose_spec
 
 end ConNF
