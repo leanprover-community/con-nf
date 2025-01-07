@@ -180,6 +180,24 @@ theorem subset_spec :
   simp only [subset, mem_inter_iff, subset'_spec, mem_orderedPairs_iff, op_inj, exists_and_left,
     exists_eq', and_true]
 
+def membership : TSet α :=
+  subset hβ hγ hδ hε ⊓' cross hβ hγ hδ (cardinalOne hδ hε) (univ hδ)
+
+@[simp]
+theorem membership_spec :
+    ∀ a b, ⟨{a}', b⟩' ∈' membership hβ hγ hδ hε ↔ a ∈' b := by
+  intro a b
+  rw [membership, mem_inter_iff, subset_spec]
+  simp only [mem_cross_iff, op_inj, mem_cardinalOne_iff, mem_univ_iff, and_true, exists_and_right,
+    exists_and_left, exists_eq', exists_eq_left', singleton_inj]
+  constructor
+  · intro h
+    exact h a ((typedMem_singleton_iff' hε a a).mpr rfl)
+  · intro h c hc
+    simp only [typedMem_singleton_iff'] at hc
+    cases hc
+    exact h
+
 def powerset (x : TSet β) : TSet α :=
   dom lt_higherIndex lt_higherIndex hβ
     (subset lt_higherIndex lt_higherIndex hβ hγ ⊓[lt_higherIndex]
@@ -200,7 +218,49 @@ theorem mem_powerset_iff (x y : TSet β) :
     simp only [ExternalRel, mem_inter_iff, subset_spec, h, vCross_spec, op_inj,
       typedMem_singleton_iff', exists_eq_right, and_true, exists_eq', and_self]
 
-theorem exists_sUnion (s : Set (TSet α)) (hs : Small s) :
+/-- The set `ι²''x = {{{a}} | a ∈ x}`. -/
+def doubleSingleton (x : TSet γ) : TSet α :=
+  cross hβ hγ hδ x x ⊓' cardinalOne hβ hγ
+
+@[simp]
+theorem mem_doubleSingleton_iff (x : TSet γ) :
+    ∀ y : TSet β, y ∈' doubleSingleton hβ hγ hδ x ↔
+    ∃ z : TSet δ, z ∈' x ∧ y = { {z}' }' := by
+  sorry
+
+/-- The union of a set of *singletons*: `ι⁻¹''x = {a | {a} ∈ x}`. -/
+def singletonUnion (x : TSet α) : TSet β :=
+  typeLower lt_higherIndex lt_higherIndex hβ hγ
+    (vCross lt_higherIndex lt_higherIndex hβ x)
+
+@[simp]
+theorem mem_singletonUnion_iff (x : TSet α) :
+    ∀ y : TSet γ, y ∈' singletonUnion hβ hγ x ↔ {y}' ∈' x := by
+  sorry
+
+/--
+The union of a set of sets.
+
+```
+singletonUnion dom {⟨{a}, b⟩ | a ∈ b} ∩ (1 × x) =
+singletonUnion dom {⟨{a}, b⟩ | a ∈ b ∧ b ∈ x} =
+singletonUnion {{a} | a ∈ b ∧ b ∈ x} =
+{a | a ∈ b ∧ b ∈ x} =
+⋃ x
+```
+-/
+def sUnion (x : TSet α) : TSet β :=
+  singletonUnion hβ hγ
+    (dom lt_higherIndex lt_higherIndex hβ
+      (membership lt_higherIndex lt_higherIndex hβ hγ ⊓[lt_higherIndex]
+        cross lt_higherIndex lt_higherIndex hβ (cardinalOne hβ hγ) x))
+
+@[simp]
+theorem mem_sUnion_iff (s : TSet α) :
+    ∀ y : TSet γ, y ∈' sUnion hβ hγ s ↔ ∃ t : TSet β, t ∈' s ∧ y ∈' t := by
+  sorry
+
+theorem exists_smallUnion (s : Set (TSet α)) (hs : Small s) :
     ∃ x : TSet α, ∀ y : TSet β, y ∈' x ↔ ∃ t ∈ s, y ∈' t := by
   apply exists_of_symmetric
   have := exists_support (α := α)
@@ -248,12 +308,12 @@ theorem exists_sUnion (s : Set (TSet α)) (hs : Small s) :
 
 /-- Our model is `κ`-complete; small unions exist.
 In particular, the model knows the correct natural numbers. -/
-def sUnion (s : Set (TSet α)) (hs : Small s) : TSet α :=
-  (exists_sUnion hβ s hs).choose
+def smallUnion (s : Set (TSet α)) (hs : Small s) : TSet α :=
+  (exists_smallUnion hβ s hs).choose
 
 @[simp]
-theorem mem_sUnion_iff (s : Set (TSet α)) (hs : Small s) :
-    ∀ x : TSet β, x ∈' sUnion hβ s hs ↔ ∃ t ∈ s, x ∈' t :=
-  (exists_sUnion hβ s hs).choose_spec
+theorem mem_smallUnion_iff (s : Set (TSet α)) (hs : Small s) :
+    ∀ x : TSet β, x ∈' smallUnion hβ s hs ↔ ∃ t ∈ s, x ∈' t :=
+  (exists_smallUnion hβ s hs).choose_spec
 
 end ConNF
