@@ -213,7 +213,7 @@ theorem singleton_inj {α β : Λ} {hβ : (β : TypeIndex) < α} {x y : TSet β}
     singleton hβ x = singleton hβ y ↔ x = y :=
   (singleton_injective hβ).eq_iff
 
-theorem sUnion_singleton_symmetric_aux {α β γ : Λ}
+theorem sUnion_singleton_symmetric_aux' {α β γ : Λ}
     (hγ : (γ : TypeIndex) < β) (hβ : (β : TypeIndex) < α) (s : Set (TSet γ)) (S : Support α)
     (hS : ∀ ρ : AllPerm α, ρᵁ • S = S → ρ ↘ hβ • singleton hγ '' s = singleton hγ '' s) :
     letI : Level := ⟨α⟩
@@ -235,6 +235,19 @@ theorem sUnion_singleton_symmetric_aux {α β γ : Λ}
   rw [smul_singleton] at this
   rwa [(singleton_injective hγ).mem_set_image] at this
 
+theorem sUnion_singleton_symmetric_aux {α β γ : Λ}
+    (hγ : (γ : TypeIndex) < β) (hβ : (β : TypeIndex) < α) (s : Set (TSet γ)) (S : Support α)
+    (hS : ∀ ρ : AllPerm α, ρᵁ • S = S → ρ ↘ hβ • singleton hγ '' s = singleton hγ '' s) :
+    letI : Level := ⟨α⟩
+    letI : LeLevel α := ⟨le_rfl⟩
+    ∀ (ρ : AllPerm β), ρᵁ • S.strong ↘ hβ = S.strong ↘ hβ → ρ ↘ hγ • s = s := by
+  intro ρ hρ
+  apply subset_antisymm
+  · exact sUnion_singleton_symmetric_aux' hγ hβ s S hS ρ hρ
+  · have := sUnion_singleton_symmetric_aux' hγ hβ s S hS ρ⁻¹ ?_
+    · rwa [allPerm_inv_sderiv', Set.set_smul_subset_iff, inv_inv] at this
+    · rw [allPermForget_inv, inv_smul_eq_iff, hρ]
+
 theorem sUnion_singleton_symmetric {α β γ : Λ} (hγ : (γ : TypeIndex) < β) (hβ : (β : TypeIndex) < α)
     (s : Set (TSet γ)) (hs : Symmetric (singleton hγ '' s) hβ) :
     Symmetric s hγ := by
@@ -242,11 +255,6 @@ theorem sUnion_singleton_symmetric {α β γ : Λ} (hγ : (γ : TypeIndex) < β)
   letI : LeLevel α := ⟨le_rfl⟩
   obtain ⟨S, hS⟩ := hs
   use S.strong ↘ hβ
-  intro ρ hρ
-  apply subset_antisymm
-  · exact sUnion_singleton_symmetric_aux hγ hβ s S hS ρ hρ
-  · have := sUnion_singleton_symmetric_aux hγ hβ s S hS ρ⁻¹ ?_
-    · rwa [allPerm_inv_sderiv', Set.set_smul_subset_iff, inv_inv] at this
-    · rw [allPermForget_inv, inv_smul_eq_iff, hρ]
+  exact sUnion_singleton_symmetric_aux hγ hβ s S hS
 
 end ConNF

@@ -46,15 +46,24 @@ theorem tSet_nonempty (h : ∃ β : Λ, (β : TypeIndex) < α) : Nonempty (TSet 
   apply typeLower lt_higherIndex lt_higherIndex lt_higherIndex hα
   apply cardinalOne lt_higherIndex lt_higherIndex
 
+def empty : TSet α :=
+  (tSet_nonempty ⟨β, hβ⟩).some ⊓' (tSet_nonempty ⟨β, hβ⟩).someᶜ'
+
+@[simp]
+theorem mem_empty_iff :
+    ∀ x : TSet β, ¬x ∈' empty hβ := by
+  intro x
+  rw [empty, mem_inter_iff, mem_compl_iff]
+  exact and_not_self
+
 def univ : TSet α :=
-  (tSet_nonempty ⟨β, hβ⟩).some ⊔' (tSet_nonempty ⟨β, hβ⟩).someᶜ'
+  (empty hβ)ᶜ'
 
 @[simp]
 theorem mem_univ_iff :
     ∀ x : TSet β, x ∈' univ hβ := by
   intro x
-  rw [univ, mem_union_iff, mem_compl_iff]
-  exact em _
+  simp only [univ, mem_compl_iff, mem_empty_iff, not_false_eq_true]
 
 /-- The set of all ordered pairs. -/
 def orderedPairs : TSet α :=
@@ -151,5 +160,44 @@ def dom (r : TSet α) : TSet γ :=
 theorem mem_dom_iff (r : TSet α) (x : TSet δ) :
     x ∈' dom hβ hγ hδ r ↔ x ∈ (ExternalRel hβ hγ hδ r).dom := by
   rw [dom, mem_codom_iff, externalRel_converse, Rel.inv_codom]
+
+/-- The field of a relation. -/
+def field (r : TSet α) : TSet γ :=
+  dom hβ hγ hδ r ⊔' codom hβ hγ hδ r
+
+@[simp]
+theorem mem_field_iff (r : TSet α) (x : TSet δ) :
+    x ∈' field hβ hγ hδ r ↔ x ∈ (ExternalRel hβ hγ hδ r).field := by
+  rw [field, mem_union_iff, mem_dom_iff, mem_codom_iff, Rel.field, Set.mem_union]
+
+def subset : TSet α :=
+  subset' hβ hγ hδ hε ⊓' orderedPairs hβ hγ hδ
+
+@[simp]
+theorem subset_spec :
+    ∀ a b, ⟨a, b⟩' ∈' subset hβ hγ hδ hε ↔ a ⊆[TSet ε] b := by
+  intro a b
+  simp only [subset, mem_inter_iff, subset'_spec, mem_orderedPairs_iff, op_inj, exists_and_left,
+    exists_eq', and_true]
+
+def powerset (x : TSet β) : TSet α :=
+  dom lt_higherIndex lt_higherIndex hβ
+    (subset lt_higherIndex lt_higherIndex hβ hγ ⊓[lt_higherIndex]
+      vCross lt_higherIndex lt_higherIndex hβ {x}')
+
+@[simp]
+theorem mem_powerset_iff (x y : TSet β) :
+    x ∈' powerset hβ hγ y ↔ x ⊆[TSet γ] y := by
+  rw [powerset, mem_dom_iff]
+  constructor
+  · rintro ⟨z, h⟩
+    simp only [ExternalRel, mem_inter_iff, subset_spec, vCross_spec, op_inj,
+      typedMem_singleton_iff', exists_eq_right, exists_and_right, exists_eq', true_and] at h
+    cases h.2
+    exact h.1
+  · intro h
+    refine ⟨y, ?_⟩
+    simp only [ExternalRel, mem_inter_iff, subset_spec, h, vCross_spec, op_inj,
+      typedMem_singleton_iff', exists_eq_right, and_true, exists_eq', and_self]
 
 end ConNF

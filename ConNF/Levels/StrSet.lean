@@ -133,7 +133,14 @@ class TypedMem (X Y : Type _) (β α : outParam TypeIndex) where
   typedMem : β < α → X → Y → Prop
 
 notation:50 x:50 " ∈[" h "] " y:50 => TypedMem.typedMem h x y
-notation:50 x:50 " ∈' " y:50 => TypedMem.typedMem (by assumption) x y
+notation:50 x:50 " ∈' " y:50 => x ∈[by assumption] y
+
+def typedSubset (X : Type _) {Y : Type _} {β α : TypeIndex} [TypedMem X Y β α]
+    (h : β < α) (a b : Y) : Prop :=
+  ∀ x : X, x ∈[h] a → x ∈[h] b
+
+notation:50 x:50 " ⊆[" X ", " h "] " y:50 => typedSubset X h x y
+notation:50 x:50 " ⊆[" X "] " y:50 => x ⊆[X, by assumption] y
 
 instance {β α : TypeIndex} : TypedMem (StrSet β) (StrSet α) β α where
   typedMem h x y :=

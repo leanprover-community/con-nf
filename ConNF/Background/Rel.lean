@@ -8,6 +8,9 @@ namespace Rel
 
 variable {α β γ : Type _}
 
+def field (r : Rel α α) : Set α :=
+  r.dom ∪ r.codom
+
 @[mk_iff]
 structure Injective (r : Rel α β) : Prop where
   injective : ∀ ⦃x₁ x₂ y⦄, r x₁ y → r x₂ y → x₁ = x₂

@@ -131,7 +131,7 @@ def subset' : TSet α :=
   (TSet.exists_subset hβ hγ hδ hε).choose
 
 theorem subset'_spec :
-    ∀ a b, ⟨a, b⟩' ∈' subset' hβ hγ hδ hε ↔ ∀ c : TSet ε, c ∈' a → c ∈' b :=
+    ∀ a b : TSet δ, ⟨a, b⟩' ∈' subset' hβ hγ hδ hε ↔ a ⊆[TSet ε] b :=
   (TSet.exists_subset hβ hγ hδ hε).choose_spec
 
 end ConNF
