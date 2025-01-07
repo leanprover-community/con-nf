@@ -226,7 +226,18 @@ def doubleSingleton (x : TSet γ) : TSet α :=
 theorem mem_doubleSingleton_iff (x : TSet γ) :
     ∀ y : TSet β, y ∈' doubleSingleton hβ hγ hδ x ↔
     ∃ z : TSet δ, z ∈' x ∧ y = { {z}' }' := by
-  sorry
+  intro y
+  rw [doubleSingleton, mem_inter_iff, mem_cross_iff, mem_cardinalOne_iff]
+  constructor
+  · rintro ⟨⟨b, c, h₁, h₂, h₃⟩, ⟨a, rfl⟩⟩
+    obtain ⟨hbc, rfl⟩ := (op_eq_singleton_iff _ _ _ _ _).mp h₁.symm
+    exact ⟨c, h₃, rfl⟩
+  · rintro ⟨z, h, rfl⟩
+    constructor
+    · refine ⟨z, z, ?_⟩
+      rw [eq_comm, op_eq_singleton_iff]
+      tauto
+    · exact ⟨_, rfl⟩
 
 /-- The union of a set of *singletons*: `ι⁻¹''x = {a | {a} ∈ x}`. -/
 def singletonUnion (x : TSet α) : TSet β :=
@@ -236,7 +247,14 @@ def singletonUnion (x : TSet α) : TSet β :=
 @[simp]
 theorem mem_singletonUnion_iff (x : TSet α) :
     ∀ y : TSet γ, y ∈' singletonUnion hβ hγ x ↔ {y}' ∈' x := by
-  sorry
+  intro y
+  simp only [singletonUnion, mem_typeLower_iff, vCross_spec, op_inj]
+  constructor
+  · intro h
+    obtain ⟨a, b, ⟨rfl, rfl⟩, hy⟩ := h {y}'
+    exact hy
+  · intro h b
+    exact ⟨b, _, ⟨rfl, rfl⟩, h⟩
 
 /--
 The union of a set of sets.
@@ -256,9 +274,18 @@ def sUnion (x : TSet α) : TSet β :=
         cross lt_higherIndex lt_higherIndex hβ (cardinalOne hβ hγ) x))
 
 @[simp]
-theorem mem_sUnion_iff (s : TSet α) :
-    ∀ y : TSet γ, y ∈' sUnion hβ hγ s ↔ ∃ t : TSet β, t ∈' s ∧ y ∈' t := by
-  sorry
+theorem mem_sUnion_iff (x : TSet α) :
+    ∀ y : TSet γ, y ∈' sUnion hβ hγ x ↔ ∃ t : TSet β, t ∈' x ∧ y ∈' t := by
+  intro y
+  simp only [sUnion, mem_singletonUnion_iff, mem_dom_iff, Rel.dom, ExternalRel, mem_inter_iff,
+    mem_cross_iff, op_inj, mem_cardinalOne_iff, Set.mem_setOf_eq, membership_spec]
+  constructor
+  · rintro ⟨z, h₁, a, b, ⟨rfl, rfl⟩, ⟨c, h₂⟩, h₃⟩
+    rw [singleton_inj] at h₂
+    cases h₂
+    exact ⟨z, h₃, h₁⟩
+  · rintro ⟨z, h₂, h₃⟩
+    exact ⟨z, h₃, _, _, ⟨rfl, rfl⟩, ⟨y, rfl⟩, h₂⟩
 
 theorem exists_smallUnion (s : Set (TSet α)) (hs : Small s) :
     ∃ x : TSet α, ∀ y : TSet β, y ∈' x ↔ ∃ t ∈ s, y ∈' t := by

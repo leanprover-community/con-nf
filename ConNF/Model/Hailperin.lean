@@ -131,6 +131,13 @@ theorem op_inj (x y z w : TSet γ) :
     rfl
 
 @[simp]
+theorem op_eq_singleton_iff (x y : TSet γ) (z : TSet β) :
+    op hβ hγ x y = singleton hβ z ↔ singleton hγ x = z ∧ singleton hγ y = z := by
+  rw [op, up_eq_singleton_iff, and_congr_right_iff]
+  rintro rfl
+  simp only [up_eq_singleton_iff, true_and, singleton_inj]
+
+@[simp]
 theorem smul_up (x y : TSet β) (ρ : AllPerm α) :
     ρ • up hβ x y = up hβ (ρ ↘ hβ • x) (ρ ↘ hβ • y) := by
   apply tSet_ext' hβ
