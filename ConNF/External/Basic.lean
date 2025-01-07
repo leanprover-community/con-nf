@@ -200,4 +200,60 @@ theorem mem_powerset_iff (x y : TSet β) :
     simp only [ExternalRel, mem_inter_iff, subset_spec, h, vCross_spec, op_inj,
       typedMem_singleton_iff', exists_eq_right, and_true, exists_eq', and_self]
 
+theorem exists_sUnion (s : Set (TSet α)) (hs : Small s) :
+    ∃ x : TSet α, ∀ y : TSet β, y ∈' x ↔ ∃ t ∈ s, y ∈' t := by
+  apply exists_of_symmetric
+  have := exists_support (α := α)
+  choose S hS using this
+  refine ⟨⟨Enumeration.ofSet (⋃ t ∈ s, (S t)ᴬ) ?_, Enumeration.ofSet (⋃ t ∈ s, (S t)ᴺ) ?_⟩, ?_⟩
+  · apply small_biUnion hs
+    intros
+    exact (S _)ᴬ.coe_small
+  · apply small_biUnion hs
+    intros
+    exact (S _)ᴺ.coe_small
+  intro ρ hρ
+  suffices ∀ t ∈ s, ρ • t = t by
+    ext y
+    rw [Set.mem_smul_set_iff_inv_smul_mem]
+    constructor
+    · rintro ⟨t, h₁, h₂⟩
+      refine ⟨t, h₁, ?_⟩
+      rw [← this t h₁]
+      rwa [mem_smul_iff', allPerm_inv_sderiv']
+    · rintro ⟨t, h₁, h₂⟩
+      refine ⟨t, h₁, ?_⟩
+      have := this t h₁
+      rw [smul_eq_iff_eq_inv_smul] at this
+      rwa [this, mem_smul_iff', inv_inv, smul_inv_smul]
+  intro t ht
+  apply (hS t).supports ρ
+  refine smul_eq_of_le ?_ hρ
+  intro A
+  constructor
+  · intro a ha
+    rw [← Support.derivBot_atoms, Support.mk_atoms, ← Enumeration.mem_path_iff,
+      Enumeration.mem_ofSet_iff, Set.mem_iUnion]
+    use t
+    rw [Set.mem_iUnion]
+    use ht
+    exact ha
+  · intro a ha
+    rw [← Support.derivBot_nearLitters, Support.mk_nearLitters, ← Enumeration.mem_path_iff,
+      Enumeration.mem_ofSet_iff, Set.mem_iUnion]
+    use t
+    rw [Set.mem_iUnion]
+    use ht
+    exact ha
+
+/-- Our model is `κ`-complete; small unions exist.
+In particular, the model knows the correct natural numbers. -/
+def sUnion (s : Set (TSet α)) (hs : Small s) : TSet α :=
+  (exists_sUnion hβ s hs).choose
+
+@[simp]
+theorem mem_sUnion_iff (s : Set (TSet α)) (hs : Small s) :
+    ∀ x : TSet β, x ∈' sUnion hβ s hs ↔ ∃ t ∈ s, x ∈' t :=
+  (exists_sUnion hβ s hs).choose_spec
+
 end ConNF
