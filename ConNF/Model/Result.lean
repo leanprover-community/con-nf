@@ -24,6 +24,10 @@ theorem ext (x y : TSet α) :
     (∀ z : TSet β, z ∈' x ↔ z ∈' y) → x = y :=
   tSet_ext' hβ x y
 
+theorem ext_iff (x y : TSet α) :
+    (∀ z : TSet β, z ∈' x ↔ z ∈' y) ↔ x = y :=
+  ⟨ext hβ x y, λ h _ ↦ iff_of_eq (congr_arg _ h)⟩
+
 def inter (x y : TSet α) : TSet α :=
   (TSet.exists_inter hβ x y).choose
 
@@ -99,7 +103,7 @@ def vCross (x : TSet γ) : TSet α :=
   (TSet.exists_cross hβ hγ hδ x).choose
 
 @[simp]
-theorem vCross_spec (x : TSet γ) :
+theorem mem_vCross_iff (x : TSet γ) :
     ∀ a, a ∈' vCross hβ hγ hδ x ↔ ∃ b c, a = ⟨b, c⟩' ∧ c ∈' x :=
   (TSet.exists_cross hβ hγ hδ x).choose_spec
 
