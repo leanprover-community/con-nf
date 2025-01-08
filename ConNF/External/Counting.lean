@@ -116,15 +116,80 @@ theorem mem_cardAdd_iff (x y : TSet α) (z : TSet β) :
     rwa [inter_comm]
 
 /-- The successor of a cardinal: `x + 1 = {a ∪ {b} | a ∈ x, b ∉ a}`. -/
-def succ (x : TSet α) : TSet α := sorry
+def succ (x : TSet α) : TSet α :=
+  cardAdd hβ hγ x (cardinalOne hβ hγ)
 
-def cardinalNat (n : ℕ) : TSet α :=
-  (TSet.exists_cardinalOne hβ hγ).choose
+@[simp]
+theorem mem_succ_iff (x : TSet α) (y : TSet β) :
+    y ∈' succ hβ hγ x ↔
+    ∃ a : TSet β, a ∈' x ∧ ∃ b : TSet γ, ¬b ∈' a ∧ y = a ⊔' {b}' := by
+  simp only [succ, mem_cardAdd_iff, mem_cardinalOne_iff, exists_and_left]
+  constructor
+  · rintro ⟨a, ha, _, ⟨b, hb, rfl⟩, h, rfl⟩
+    refine ⟨a, ha, b, ?_, rfl⟩
+    intro hba
+    rw [← ext_iff hγ] at h
+    simp only [mem_inter_iff, typedMem_singleton_iff', mem_empty_iff, iff_false, not_and] at h
+    exact h b hba rfl
+  · rintro ⟨a, ha, b, hb, rfl⟩
+    refine ⟨a, ha, _, ⟨b, rfl⟩, ?_, rfl⟩
+    apply ext hγ
+    intro z
+    simp only [mem_inter_iff, typedMem_singleton_iff', mem_empty_iff, iff_false, not_and]
+    rintro h rfl
+    exact hb h
+
+def cardinalNat : ℕ → TSet α
+  | 0 => { empty hγ }'
+  | n + 1 => succ hβ hγ (cardinalNat n)
 
 @[simp]
 theorem mem_cardinalNat_iff (n : ℕ) :
     ∀ a : TSet β, a ∈' cardinalNat hβ hγ n ↔
-    ∃ s : Finset (TSet γ), s.card = n ∧ ∀ b : TSet γ, b ∈' a ↔ b ∈ s :=
-  sorry
+    ∃ s : Finset (TSet γ), s.card = n ∧ ∀ b : TSet γ, b ∈' a ↔ b ∈ s := by
+  induction n
+  case zero =>
+    intro a
+    rw [cardinalNat]
+    simp only [typedMem_singleton_iff', Finset.card_eq_zero, exists_eq_left, Finset.not_mem_empty,
+      iff_false]
+    constructor
+    · rintro rfl
+      simp only [mem_empty_iff, not_false_eq_true, implies_true]
+    · intro h
+      apply ext hγ
+      simp only [h, mem_empty_iff, implies_true]
+  case succ n ih =>
+    intro a
+    simp only [cardinalNat, mem_succ_iff, ih]
+    open scoped Classical in
+    constructor
+    · rintro ⟨b, ⟨s, hsn, hs⟩, a, ha, rfl⟩
+      refine ⟨insert a s, ?_, ?_⟩
+      · rw [Finset.card_insert_of_not_mem, hsn]
+        rwa [← hs]
+      · intro c
+        simp only [mem_union_iff, hs, typedMem_singleton_iff', Finset.mem_insert]
+        exact Or.comm
+    · rintro ⟨s, h₁, h₂⟩
+      rw [Finset.card_eq_succ] at h₁
+      obtain ⟨b, s, hbs, rfl, hns⟩ := h₁
+      refine ⟨a \' {b}', ⟨s, hns, ?_⟩, b, ?_, ?_⟩
+      · intro c
+        simp only [mem_diff_iff, h₂, Finset.mem_insert, typedMem_singleton_iff']
+        constructor
+        · rintro ⟨h₁ | h₁, h₂⟩
+          · contradiction
+          · assumption
+        · intro h
+          refine ⟨Or.inr h, ?_⟩
+          rintro rfl
+          contradiction
+      · simp only [mem_diff_iff, typedMem_singleton_iff', not_true_eq_false, and_false,
+          not_false_eq_true]
+      · apply ext hγ
+        intro z
+        simp only [h₂, Finset.mem_insert, mem_union_iff, mem_diff_iff, typedMem_singleton_iff']
+        tauto
 
 end ConNF
