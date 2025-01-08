@@ -334,7 +334,7 @@ instance : IsLeftCancelAdd κ := by
   intro x y z h
   rw [← κEquiv.apply_eq_iff_eq, ← Subtype.coe_inj] at h ⊢
   rw [κEquiv_add, κEquiv_add] at h
-  exact (Ordinal.add_left_cancel _).mp h
+  exact add_left_cancel_iff.mp h
 
 theorem κ_typein (x : κ) :
     -- TODO: Why can't Lean find this instance?

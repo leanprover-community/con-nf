@@ -42,12 +42,13 @@ theorem noMaxOrder_of_isLimit {α : Type u} [Preorder α] [IsWellOrder α (· < 
 theorem isLimit_of_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)]
     (h : NoMaxOrder α) : (type ((· < ·) : α → α → Prop)).IsLimit := by
   constructor
-  · simp only [ne_eq, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty, not_false_eq_true]
+  · simp only [isMin_iff_eq_bot, bot_eq_zero, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty,
+      not_false_eq_true]
   · intro o ho
-    obtain ⟨x, hx⟩ := h.exists_gt (enum ((· < ·) : α → α → Prop) ⟨o, ho⟩)
-    refine lt_of_le_of_lt ?_ (typein_lt_type ((· < ·) : α → α → Prop) x)
-    rw [← typein_lt_typein ((· < ·) : α → α → Prop), typein_enum] at hx
-    rwa [Order.succ_le_iff]
+    obtain ⟨x, hx⟩ := h.exists_gt (enum ((· < ·) : α → α → Prop) ⟨o, ho.1⟩)
+    have := ho.2
+    refine this ?_ (typein_lt_type ((· < ·) : α → α → Prop) x)
+    rwa [← typein_lt_typein ((· < ·) : α → α → Prop), typein_enum] at hx
 
 theorem isLimit_iff_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)] :
     (type ((· < ·) : α → α → Prop)).IsLimit ↔ NoMaxOrder α :=
@@ -88,7 +89,7 @@ theorem type_Iic_lt {α : Type u} [LtWellOrder α] [NoMaxOrder α] (x : α) :
   rw [type_Iic_eq]
   haveI : Nonempty α := ⟨x⟩
   have h := isLimit_of_noMaxOrder (inferInstanceAs (NoMaxOrder α))
-  exact h.right _ (type_Iio_lt x)
+  exact h.2.succ_lt (type_Iio_lt x)
 
 /-!
 ## Lifting ordinals
