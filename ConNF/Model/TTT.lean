@@ -245,7 +245,7 @@ theorem sUnion_singleton_symmetric_aux {α β γ : Λ}
   apply subset_antisymm
   · exact sUnion_singleton_symmetric_aux' hγ hβ s S hS ρ hρ
   · have := sUnion_singleton_symmetric_aux' hγ hβ s S hS ρ⁻¹ ?_
-    · rwa [allPerm_inv_sderiv', Set.set_smul_subset_iff, inv_inv] at this
+    · rwa [allPerm_inv_sderiv', Set.smul_set_subset_iff_subset_inv_smul_set, inv_inv] at this
     · rw [allPermForget_inv, inv_smul_eq_iff, hρ]
 
 theorem sUnion_singleton_symmetric {α β γ : Λ} (hγ : (γ : TypeIndex) < β) (hβ : (β : TypeIndex) < α)
