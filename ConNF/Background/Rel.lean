@@ -28,23 +28,23 @@ structure Cosurjective (r : Rel α β) : Prop where
   cosurjective : ∀ x, ∃ y, r x y
 
 @[mk_iff]
-structure Functional (r : Rel α β) extends r.Coinjective, r.Cosurjective : Prop
+structure Functional (r : Rel α β) : Prop extends Coinjective r, Cosurjective r
 
 @[mk_iff]
-structure Cofunctional (r : Rel α β) extends r.Injective, r.Surjective : Prop
+structure Cofunctional (r : Rel α β) : Prop extends Injective r, Surjective r
 
 @[mk_iff]
-structure OneOne (r : Rel α β) extends r.Injective, r.Coinjective : Prop
+structure OneOne (r : Rel α β) : Prop extends Injective r, Coinjective r
 
 @[mk_iff]
-structure Bijective (r : Rel α β) extends r.Functional, r.Cofunctional : Prop
+structure Bijective (r : Rel α β) : Prop extends Functional r, Cofunctional r
 
 @[mk_iff]
 structure CodomEqDom (r : Rel α α) : Prop where
   codom_eq_dom : r.codom = r.dom
 
 @[mk_iff]
-structure Permutative (r : Rel α α) extends r.OneOne, r.CodomEqDom : Prop
+structure Permutative (r : Rel α α) : Prop extends OneOne r, CodomEqDom r
 
 theorem CodomEqDom.dom_union_codom {r : Rel α α} (h : r.CodomEqDom) :
     r.dom ∪ r.codom = r.dom := by

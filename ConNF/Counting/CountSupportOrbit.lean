@@ -121,11 +121,11 @@ theorem card_weakSpec_of_card_spec (h : #(Spec β) < #μ) : #(WeakSpec β) < #μ
   apply mul_lt_of_lt μ_isStrongLimit.aleph0_le
   · apply card_tree_lt
     rw [mk_set]
-    exact μ_isStrongLimit.2 _ κ_lt_μ
+    exact μ_isStrongLimit.2 κ_lt_μ
   apply mul_lt_of_lt μ_isStrongLimit.aleph0_le
   · apply card_tree_lt
     rw [mk_set]
-    exact μ_isStrongLimit.2 _ κ_lt_μ
+    exact μ_isStrongLimit.2 κ_lt_μ
   exact h
 
 def specEquiv :
@@ -171,13 +171,13 @@ theorem card_spec_of_card_codingFunction
     apply card_enumeration_lt
     rw [Cardinal.eq.mpr ⟨atomCondEquiv⟩, mk_prod, mk_set, Cardinal.lift_id]
     exact mul_lt_of_lt μ_isStrongLimit.aleph0_le
-      (μ_isStrongLimit.2 _ κ_lt_μ) (μ_isStrongLimit.2 _ κ_lt_μ)
+      (μ_isStrongLimit.2 κ_lt_μ) (μ_isStrongLimit.2 κ_lt_μ)
   · apply card_tree_lt
     apply card_enumeration_lt
     rw [Cardinal.eq.mpr ⟨nearLitterCondEquiv⟩, mk_sum, Cardinal.lift_id, mk_sigma, Cardinal.lift_id]
     apply add_lt_of_lt μ_isStrongLimit.aleph0_le
     · rw [Cardinal.eq.mpr ⟨flexCondEquiv⟩, mk_set]
-      exact μ_isStrongLimit.2 _ κ_lt_μ
+      exact μ_isStrongLimit.2 κ_lt_μ
     · refine (sum_lt_prod _ (λ _ ↦ #μ) ?_).trans_le ?_
       · intro P
         rw [Cardinal.eq.mpr ⟨inflexCondEquiv P.δ⟩]
@@ -189,7 +189,7 @@ theorem card_spec_of_card_codingFunction
           rw [Cardinal.eq.mpr ⟨(Equiv.curry _ _ _).symm⟩]
           change #(Set (κ × κ)) < #μ
           rw [mk_set, mk_prod, Cardinal.lift_id, mul_mk_eq_max, max_self]
-          exact μ_isStrongLimit.2 _ κ_lt_μ
+          exact μ_isStrongLimit.2 κ_lt_μ
       · rw [prod_const, Cardinal.lift_id, Cardinal.lift_id]
         apply mk_pow_le_of_mk_lt_ord_cof μ_isStrongLimit
         exact card_inflexiblePath_lt β

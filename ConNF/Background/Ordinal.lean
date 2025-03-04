@@ -64,7 +64,12 @@ def iicOrderIso {α : Type u} [LtWellOrder α] (x : α) :
   toFun y := if h : y = x then Sum.inr PUnit.unit else Sum.inl ⟨y, y.prop.lt_of_ne h⟩
   invFun := Sum.elim (λ y ↦ ⟨y, y.prop.le⟩) (λ _ ↦ ⟨x, le_rfl⟩)
   left_inv y := by aesop
-  right_inv y := by aesop
+  right_inv y := by
+    obtain (y | y) := y
+    · simp only [Sum.elim_inl, Subtype.coe_eta, dite_eq_ite, ite_eq_right_iff, reduceCtorEq,
+        imp_false]
+      exact y.prop.ne
+    · simp only [Sum.elim_inr, ↓reduceDIte]
   map_rel_iff' {y z} := by
     simp only [Equiv.coe_fn_mk, subrel_val, Subtype.coe_lt_coe]
     split_ifs with h h' h'

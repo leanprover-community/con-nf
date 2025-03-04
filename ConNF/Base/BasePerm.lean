@@ -1,4 +1,4 @@
-import Mathlib.Logic.Equiv.Defs
+import Mathlib.GroupTheory.Perm.Basic
 import ConNF.Base.NearLitter
 
 /-!

@@ -1,5 +1,5 @@
+import Mathlib.Algebra.Group.Action.Pointwise.Set.Basic
 import Mathlib.Order.ConditionallyCompleteLattice.Basic
-import Mathlib.Data.Set.Pointwise.SMul
 
 open scoped symmDiff Pointwise
 

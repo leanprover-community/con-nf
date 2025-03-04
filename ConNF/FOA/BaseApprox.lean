@@ -644,8 +644,8 @@ theorem Approximates.mono {ψ χ : BaseApprox} {π : BasePerm} (hχ : χ.Approxi
   · intro N₁ N₂ hψ
     exact hχ.nearLitters N₁ N₂ (nearLitters_le_of_le h N₁ N₂ hψ)
 
-structure ExactlyApproximates (ψ : BaseApprox) (π : BasePerm)
-    extends ψ.Approximates π : Prop where
+structure ExactlyApproximates (ψ : BaseApprox) (π : BasePerm) : Prop
+    extends ψ.Approximates π where
   smul_litter : ∀ a, a ∉ ψ.exceptions.dom → (π • a)ᴸ = π • aᴸ
   inv_smul_litter : ∀ a, a ∉ ψ.exceptions.dom → (π⁻¹ • a)ᴸ = π⁻¹ • aᴸ
 

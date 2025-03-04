@@ -53,7 +53,7 @@ theorem card_codingFunction_lt_of_card_supportOrbit_lt {β : TypeIndex} [LeLevel
 theorem card_bot_codingFunction_lt :
     #(CodingFunction ⊥) < #μ := by
   apply card_codingFunction_lt_of_card_supportOrbit_lt (2 ^ #κ)
-  · exact μ_isStrongLimit.2 _ κ_lt_μ
+  · exact μ_isStrongLimit.2 κ_lt_μ
   · apply card_supportOrbit_lt
     intro δ hδ
     cases not_lt_bot hδ
@@ -114,7 +114,7 @@ theorem path_eq_of_isMin {β : Λ} [LeLevel β] (hβ : IsMin β) (A : β ↝ ⊥
 theorem card_codingFunction_lt_of_isMin {β : Λ} [LeLevel β] (hβ : IsMin β) :
     #(CodingFunction β) < #μ := by
   apply card_codingFunction_lt_of_card_supportOrbit_lt (2 ^ #κ)
-  · exact μ_isStrongLimit.2 _ κ_lt_μ
+  · exact μ_isStrongLimit.2 κ_lt_μ
   · apply card_supportOrbit_lt
     intro δ hδ
     cases eq_bot_of_lt_of_isMin hβ hδ

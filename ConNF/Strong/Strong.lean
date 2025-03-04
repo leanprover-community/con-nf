@@ -38,7 +38,7 @@ structure PreStrong (S : Support β) : Prop where
 structure Closed (S : Support β) : Prop where
   closed : ∀ A, (S ⇘. A).Closed
 
-structure Strong (S : Support β) extends S.PreStrong, S.Closed : Prop
+structure Strong (S : Support β) : Prop extends PreStrong S, Closed S
 
 theorem PreStrong.smul {S : Support β} (hS : S.PreStrong) (ρ : AllPerm β) : (ρᵁ • S).PreStrong := by
   constructor

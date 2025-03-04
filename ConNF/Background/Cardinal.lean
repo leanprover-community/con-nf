@@ -149,7 +149,9 @@ theorem mk_power_le_two_power (α β : Type _) :
         | succ n => cases n with
           | zero => simp only [zero_add, Nat.cast_one, one_power, power_one, le_max_iff,
               Nat.one_le_ofNat, true_or, or_true]
-          | succ n => linarith
+          | succ n =>
+            rw [Nat.succ_lt_succ_iff, Nat.succ_lt_succ_iff] at hα''
+            cases hα''
       · rw [not_lt] at hα''
         rw [nat_power_eq hβ hα'']
         apply le_max_of_le_right
@@ -187,7 +189,7 @@ theorem pow_lt_of_lt {c d e : Cardinal} (hc : c.IsStrongLimit) (hd : d < c) (he 
   by_cases hc' : ℵ₀ < c
   · apply (power_le_two_power d e).trans_lt
     rw [max_lt_iff, max_lt_iff]
-    exact ⟨hc', hc.2 d hd, hc.2 e he⟩
+    exact ⟨hc', hc.2 hd, hc.2 he⟩
   · cases eq_of_le_of_not_lt (aleph0_le_of_isSuccLimit hc.isSuccLimit) hc'
     exact power_lt_aleph0 hd he
 
