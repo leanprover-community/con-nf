@@ -62,12 +62,13 @@ are about permutations, not objects. -/
 theorem card_tSet_le (β : TypeIndex) [LeLevel β] :
     #(TSet β) ≤ #μ := by
   refine (mk_le_of_injective
-    (f := λ x : TSet β ↦ (Tangle.code ⟨x, designatedSupport x, designatedSupport_supports x⟩,
-      designatedSupport x)) ?_).trans ?_
+    (f := λ x : TSet β ↦ (Tangle.code
+      ⟨x, (exists_support x).choose, (exists_support x).choose_spec⟩,
+      (exists_support x).choose)) ?_).trans ?_
   · intro x y h
     rw [Prod.mk.injEq, Tangle.code_eq_code_iff] at h
     obtain ⟨⟨ρ, hρ⟩, h⟩ := h
-    have := (designatedSupport_supports x).supports ρ ?_
+    have := (exists_support x).choose_spec.supports ρ ?_
     · have hρx := congr_arg (·.set) hρ
       simp only [Tangle.smul_set] at hρx
       rw [← hρx, this]

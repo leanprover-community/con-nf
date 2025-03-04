@@ -21,7 +21,6 @@ import ConNF.Counting.BaseCounting
 import ConNF.Counting.Conclusions
 import ConNF.Counting.CountSupportOrbit
 import ConNF.Counting.Recode
-import ConNF.Counting.Twist
 import ConNF.External.Basic
 import ConNF.External.Counting
 import ConNF.External.WellOrder

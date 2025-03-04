@@ -1,4 +1,3 @@
-import ConNF.Counting.Twist
 import ConNF.Strong.CodingFunction
 
 /-!
