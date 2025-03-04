@@ -126,26 +126,38 @@ theorem scoderiv_supports_singleton (S : Support γ) (y : TSet γ) (h : S.Suppor
       · exact ⟨i, ⟨A, N⟩, hN, rfl⟩
 
 theorem raisedSingleton_supports (S : Support β) (y : TSet γ) :
-    (S + designatedSupport y ↗ hγ).Supports (singleton hγ y) := by
-  have := scoderiv_supports_singleton hγ (designatedSupport y) y (designatedSupport_supports y)
+    (S + (exists_support y).choose ↗ hγ).Supports (singleton hγ y) := by
+  have := scoderiv_supports_singleton hγ ((exists_support y).choose) y
+    ((exists_support y).choose_spec)
   apply this.mono Support.le_add_left
   rintro ⟨⟩
 
+theorem raisedSingleton_aux (S : Support β) (y : TSet γ) :
+    ((S + (exists_support y).choose ↗ hγ)).Supports (singleton hγ y) := by
+  constructor
+  case nearLitters_eq_empty_of_bot => rintro ⟨⟩
+  intro ρ hρ
+  rw [Support.smul_add] at hρ
+  obtain ⟨hρ₁, hρ₂⟩ := Support.add_inj_of_bound_eq_bound (by rfl) (by rfl) hρ
+  rw [Support.smul_scoderiv, Support.scoderiv_inj, ← allPermSderiv_forget] at hρ₂
+  rw [CoherentData.smul_singleton, (exists_support y).choose_spec.supports (ρ ↘ hγ) hρ₂]
+
 def raisedSingleton (S : Support β) (y : TSet γ) : CodingFunction β :=
-  (Tangle.mk (singleton hγ y) (S + designatedSupport y ↗ hγ) (raisedSingleton_supports hγ S y)).code
+  (Tangle.mk (singleton hγ y) (S + (exists_support y).choose ↗ hγ)
+    (raisedSingleton_aux hγ S y)).code
 
 theorem combination_raisedSingleton (x : TSet β) (S : Support β) (hxS : S.Supports x) :
     Combination hγ x S (raisedSingleton hγ S '' {y | y ∈[hγ] x}) := by
   intro y
   constructor
   · intro hy
-    refine ⟨raisedSingleton hγ S y, ⟨y, hy, rfl⟩, S + designatedSupport y ↗ hγ, singleton hγ y,
+    refine ⟨raisedSingleton hγ S y, ⟨y, hy, rfl⟩, S + (exists_support y).choose ↗ hγ, singleton hγ y,
         ?_, ?_, ?_⟩
     · exact Tangle.code_rel_self _
     · exact subsupport_add
     · rw [typedMem_singleton_iff]
   · rintro ⟨_, ⟨w, hw, rfl⟩, T, z, hTz, hST, hyz⟩
-    have : (raisedSingleton hγ _ _).rel (S + designatedSupport w ↗ hγ) (singleton hγ w) :=
+    have : (raisedSingleton hγ _ _).rel (S + (exists_support w).choose ↗ hγ) (singleton hγ w) :=
         Tangle.code_rel_self ⟨singleton hγ w, _, raisedSingleton_supports hγ S w⟩
     obtain ⟨ρ, h₁, h₂⟩ := CodingFunction.exists_allPerm_of_rel hTz this
     rw [smul_eq_iff_eq_inv_smul] at h₂
@@ -201,8 +213,8 @@ def RaisedSingletonData.mk' (S : Support β) (y : TSet γ) :
     RaisedSingletonData β γ where
   ba := Sᴬ.bound
   bN := Sᴺ.bound
-  o := (S + designatedSupport y ↗ hγ).orbit
-  χ := Tangle.code ⟨y, designatedSupport y, designatedSupport_supports y⟩
+  o := (S + ((exists_support y).choose) ↗ hγ).orbit
+  χ := Tangle.code ⟨y, (exists_support y).choose, (exists_support y).choose_spec⟩
 
 theorem RaisedSingletonData.mk'_eq_mk'
     {S₁ S₂ : Support β} {y₁ y₂ : TSet γ}
@@ -230,7 +242,7 @@ theorem RaisedSingletonData.mk'_eq_mk'
   have hρ₂y' := congr_arg (·.support) hρ₂
   simp only [Tangle.smul_support] at hρ₂y'
   rw [← hρ₂y', Support.smul_scoderiv, Support.scoderiv_inj, ← allPermSderiv_forget] at hρ₁y
-  rw [← (designatedSupport_supports y₁).smul_eq_smul hρ₁y, allPerm_inv_sderiv, inv_smul_eq_iff]
+  rw [← ((exists_support y₁).choose_spec).smul_eq_smul hρ₁y, allPerm_inv_sderiv, inv_smul_eq_iff]
 
 theorem card_raisedSingleton_lt' :
     #(RaisedSingleton hγ) ≤ #(RaisedSingletonData β γ) := by

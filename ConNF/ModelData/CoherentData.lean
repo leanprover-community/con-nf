@@ -132,4 +132,13 @@ theorem TSet.mem_smul_iff [CoherentData] {β γ : TypeIndex} [LeLevel β] [iγ :
   simp only [← forget_mem_forget, smul_forget, StrSet.mem_smul_iff, allPermSderiv_forget,
     allPermForget_inv, Tree.inv_sderiv]
 
+@[simp]
+theorem CoherentData.smul_singleton [CoherentData] {β γ : Λ} [LeLevel β] [LeLevel γ]
+    (hγ : (γ : TypeIndex) < β) (x : TSet γ) (ρ : AllPerm β) :
+    ρ • singleton hγ x = singleton hγ (ρ ↘ hγ • x) := by
+  apply tSet_ext hγ
+  intro z
+  rw [TSet.mem_smul_iff, allPerm_inv_sderiv, typedMem_singleton_iff, typedMem_singleton_iff,
+    inv_smul_eq_iff]
+
 end ConNF

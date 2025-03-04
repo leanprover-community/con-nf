@@ -122,7 +122,8 @@ theorem interference_subset_convAtoms_codom (hST : S.spec = T.spec) (hT : T.Stro
   obtain ⟨a', hkS⟩ := (sameSpec_comm hST).atoms_dom_of_dom hkT
   exact ⟨a', k, hkS, hkT⟩
 
-def convDeriv (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) (A : β ↝ ⊥) : BaseAction where
+def convDeriv (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) (A : β ↝ ⊥) :
+    BaseAction where
   atoms := convAtoms S T A
   nearLitters := convNearLitters S T A
   atoms_dom_small' := by
