@@ -79,8 +79,8 @@ theorem eq_of_scoderiv_mem {X : Type _} {α β γ : TypeIndex} (E : Enumeration 
 
 instance (X : Type u) (α : TypeIndex) :
     BotDerivative (Enumeration (α ↝ ⊥ × X)) (Enumeration X) α where
-  botDeriv E A := E.invImage (λ x ↦ (A, x)) (Prod.mk.inj_left A)
-  botSderiv E := E.invImage (λ x ↦ (Path.nil ↘., x)) (Prod.mk.inj_left (Path.nil ↘.))
+  botDeriv E A := E.invImage (λ x ↦ (A, x)) (Prod.mk_right_injective A)
+  botSderiv E := E.invImage (λ x ↦ (Path.nil ↘., x)) (Prod.mk_right_injective (Path.nil ↘.))
   botDeriv_single E h := by
     cases α using WithBot.recBotCoe with
     | bot => cases lt_irrefl ⊥ h

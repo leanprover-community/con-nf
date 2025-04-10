@@ -208,7 +208,7 @@ instance : Coderivative (Support β) (Support α) α β where
 instance : BotDerivative (Support α) BaseSupport α where
   botDeriv S A := ⟨Sᴬ ⇘. A, Sᴺ ⇘. A⟩
   botSderiv S := ⟨Sᴬ ↘., Sᴺ ↘.⟩
-  botDeriv_single S h := by dsimp only; rw [botDeriv_single, botDeriv_single]
+  botDeriv_single S h := by rw [botDeriv_single, botDeriv_single]
 
 @[simp]
 theorem deriv_atoms {α β : TypeIndex} (S : Support α) (A : α ↝ β) :

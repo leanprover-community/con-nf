@@ -313,12 +313,12 @@ theorem NewPerm.smul_forget (ρ : NewPerm) (x : NewSet) : (ρ • x)ᵁ = ρᵁ 
   · rintro ⟨y, hy, rfl⟩
     refine ⟨(ρ.sderiv β)⁻¹ • y, ?_, ?_⟩
     · rwa [Set.mem_smul_set_iff_inv_smul_mem] at hy
-    · simp only [ConNF.ModelData.smul_forget, allPermForget_inv, forget_sderiv]
+    · simp only [ConNF.smul_forget, allPermForget_inv, forget_sderiv]
   · rintro ⟨y, hy, hyz⟩
     rw [eq_inv_smul_iff] at hyz
     cases hyz
     refine ⟨ρ.sderiv β • y, Set.smul_mem_smul_set hy, ?_⟩
-    simp only [ConNF.ModelData.smul_forget, forget_sderiv]
+    simp only [ConNF.smul_forget, forget_sderiv]
 
 theorem NewSet.exists_support (x : letI := newPreModelData; TSet α) :
     letI := newPreModelData
@@ -360,11 +360,11 @@ def newModelData : ModelData α where
     · rw [NewSet.forget_injective x y h]
   tSetForget_surjective_of_bot' := by rintro ⟨⟩
   allPermForget_injective' := NewPerm.forget_injective
-  allPermForget_one := NewPerm.forget_one
-  allPermForget_mul := NewPerm.forget_mul
-  smul_forget := by
+  allPermForget_one' := NewPerm.forget_one
+  allPermForget_mul' := NewPerm.forget_mul
+  smul_forget' := by
     rintro ρ (_ | x)
-    · rw [newPreModelData.tSetForget_none', StrSet.smul_none]
+    · rw [newPreModelData.tSetForget_none, StrSet.smul_none]
       rfl
     · exact NewPerm.smul_forget ρ x
   exists_support := NewSet.exists_support

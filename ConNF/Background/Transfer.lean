@@ -98,6 +98,8 @@ protected def linearOrder [LinearOrder β] : LinearOrder α :=
 
 protected def ltWellOrder [LtWellOrder β] : LtWellOrder α where
   wf := InvImage.wf e (inferInstanceAs <| IsWellFounded β (· < ·)).wf
+  trichotomous := trichotomous
+  trans _ _ _ := _root_.trans
   __ := e.linearOrder
 
 theorem ltWellOrder_type [LtWellOrder β] :

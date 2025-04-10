@@ -63,14 +63,13 @@ class ModelData (α : TypeIndex) extends PreModelData α where
   tSetForget_injective' : Function.Injective tSetForget
   tSetForget_surjective_of_bot' : α = ⊥ → Function.Surjective tSetForget
   allPermForget_injective' : Function.Injective allPermForget
-  allPermForget_one : (1 : AllPerm)ᵁ = 1
-  allPermForget_mul (ρ₁ ρ₂ : AllPerm) : (ρ₁ * ρ₂)ᵁ = ρ₁ᵁ * ρ₂ᵁ
-  smul_forget (ρ : AllPerm) (x : TSet) : (ρ • x)ᵁ = ρᵁ • xᵁ
+  allPermForget_one' : allPermForget 1 = 1
+  allPermForget_mul' (ρ₁ ρ₂ : AllPerm) :
+    allPermForget (ρ₁ * ρ₂) = allPermForget ρ₁ * allPermForget ρ₂
+  smul_forget' (ρ : AllPerm) (x : TSet) : tSetForget (ρ • x) = allPermForget ρ • tSetForget x
   exists_support (x : TSet) : ∃ S : Support α, S.Supports x
 
-export ModelData (allPermForget_one allPermForget_mul smul_forget exists_support)
-
-attribute [simp] allPermForget_one allPermForget_mul smul_forget
+export ModelData (exists_support)
 
 theorem tSetForget_injective {α : TypeIndex} [ModelData α] {x₁ x₂ : TSet α}
     (h : x₁ᵁ = x₂ᵁ) : x₁ = x₂ :=
@@ -83,6 +82,21 @@ theorem tSetForget_surjective [ModelData ⊥] (x : StrSet ⊥) :
 theorem allPermForget_injective {α : TypeIndex} [ModelData α] {ρ₁ ρ₂ : AllPerm α}
     (h : ρ₁ᵁ = ρ₂ᵁ) : ρ₁ = ρ₂ :=
   ModelData.allPermForget_injective' h
+
+@[simp]
+theorem allPermForget_one {α : TypeIndex} [ModelData α] :
+    (1 : AllPerm α)ᵁ = 1 :=
+  ModelData.allPermForget_one'
+
+@[simp]
+theorem allPermForget_mul {α : TypeIndex} [ModelData α] (ρ₁ ρ₂ : AllPerm α) :
+    (ρ₁ * ρ₂)ᵁ = ρ₁ᵁ * ρ₂ᵁ :=
+  ModelData.allPermForget_mul' ρ₁ ρ₂
+
+@[simp]
+theorem smul_forget {α : TypeIndex} [ModelData α] (ρ : AllPerm α) (x : TSet α) :
+    (ρ • x)ᵁ = ρᵁ • xᵁ :=
+  ModelData.smul_forget' ρ x
 
 @[simp]
 theorem allPermForget_inv {α : TypeIndex} [ModelData α] (ρ : AllPerm α) : ρ⁻¹ᵁ = ρᵁ⁻¹ := by
@@ -249,13 +263,13 @@ def botModelData : ModelData ⊥ where
   tSetForget_injective' := Equiv.injective _
   tSetForget_surjective_of_bot' _ := Equiv.surjective _
   allPermForget_injective' _ _ h := congr_fun h Path.nil
-  allPermForget_one := rfl
-  allPermForget_mul _ _ := rfl
-  smul_forget ρ x := by
+  allPermForget_one' := rfl
+  allPermForget_mul' _ _ := rfl
+  smul_forget' ρ x := by
     apply StrSet.botEquiv.injective
     have : ∀ x : TSet ⊥, xᵁ = StrSet.botEquiv.symm x := λ _ ↦ rfl
+    unfold PreModelData.allPermForget botPreModelData
     simp only [this, Equiv.apply_symm_apply, StrSet.strPerm_smul_bot]
-    rfl
   exists_support x := by
     use ⟨.singleton (Path.nil, x), .empty⟩
     apply Support.supports_bot

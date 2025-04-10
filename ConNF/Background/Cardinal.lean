@@ -1,4 +1,4 @@
-import Mathlib.SetTheory.Cardinal.Cofinality
+import Mathlib.SetTheory.Cardinal.Regular
 import ConNF.Background.Rel
 
 universe u v

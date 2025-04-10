@@ -27,11 +27,10 @@ theorem not_mem_scoderiv_botDeriv (S : Support γ) (N : NearLitter) :
   simp only [Prod.mk.injEq] at h₂
   cases A
   case sderiv δ A hδ _ =>
-    simp only [Path.deriv_sderiv] at h₂
+    simp only [coderiv_single] at h₂
     cases A
     case nil => cases h₂.1
     case sderiv ζ A hζ _ =>
-      simp only [Path.deriv_sderiv] at h₂
       cases h₂.1
 
 variable [Level] [LtLevel β]

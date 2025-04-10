@@ -1,5 +1,6 @@
 import Mathlib.Data.Rel
-import Mathlib.Order.Chain
+import Mathlib.Data.Set.Lattice
+import Mathlib.Order.Preorder.Chain
 
 open Set
 open scoped symmDiff

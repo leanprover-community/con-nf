@@ -232,7 +232,7 @@ theorem newOrbits_injective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.c
         EmbeddingLike.apply_eq_iff_eq] at h ⊢
       exact ⟨h.1.symm, h.2.1.symm, h.2.2.symm⟩
     | right =>
-      simp only [catInj_inj, self_eq_add_left, AddLeftCancelMonoid.add_eq_zero,
+      simp only [catInj_inj, right_eq_add, AddLeftCancelMonoid.add_eq_zero,
         one_ne_zero, and_false] at h
 
 theorem newOrbits_coinjective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
@@ -282,7 +282,7 @@ theorem newOrbits_coinjective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r
         EmbeddingLike.apply_eq_iff_eq] at h ⊢
       exact ⟨h.1.symm, h.2.1.symm, h.2.2.symm⟩
     | left =>
-      simp only [catInj_inj, self_eq_add_left, AddLeftCancelMonoid.add_eq_zero,
+      simp only [catInj_inj, right_eq_add, AddLeftCancelMonoid.add_eq_zero,
         one_ne_zero, and_false] at h
 
 theorem newOrbits_oneOne {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :

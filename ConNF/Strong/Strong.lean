@@ -93,7 +93,7 @@ theorem Closed.scoderiv {γ : TypeIndex} {S : Support γ} (hS : S.Closed) (hγ :
   obtain ⟨i, ⟨B, N₁⟩, hi, hi'⟩ := hN₁
   cases hi'
   obtain ⟨j, ⟨C, N₂⟩, hj, hj'⟩ := hN₂
-  simp only [Prod.mk.injEq, Path.deriv_right_inj] at hj'
+  simp only [coderiv_single, Prod.mk.injEq, Path.scoderiv_left_inj] at hj'
   cases hj'.1
   cases hj'.2
   simp only

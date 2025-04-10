@@ -6,6 +6,7 @@ noncomputable section
 universe u v
 
 open Cardinal
+open scoped InitialSeg
 
 namespace Ordinal
 

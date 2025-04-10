@@ -14,6 +14,7 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal ConNF.TSet
+open scoped InitialSeg
 
 namespace ConNF
 
