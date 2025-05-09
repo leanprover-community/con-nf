@@ -40,6 +40,13 @@ theorem mem_union_iff (x y : TSet α) :
   intro z
   rw [mem_compl_iff, mem_inter_iff, mem_compl_iff, mem_compl_iff, or_iff_not_and_not]
 
+theorem union_comm (x y : TSet α) :
+    x ⊔' y = y ⊔' x := by
+  apply ext hβ
+  intro z
+  rw [mem_union_iff, mem_union_iff]
+  exact Or.comm
+
 def symmDiff (x y : TSet α) : TSet α :=
   (x ⊓' yᶜ') ⊔' (xᶜ' ⊓' y)
 

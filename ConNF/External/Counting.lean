@@ -24,11 +24,6 @@ variable [Params.{u}] {α β γ δ ε ζ η : Λ} (hβ : (β : TypeIndex) < α) 
   (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < δ) (hζ : (ζ : TypeIndex) < ε)
   (hη : (η : TypeIndex) < ζ)
 
--- ((( Ins3k disjoint) ∖
---   (( Ins2k Ins2k Sk ⊕ ( Ins2k Ins3k Sk ∪ Ins3k SIk SIk Sk )) “k ℘1℘1℘1℘11c)) “k ℘1℘1B) “k A)
-
--- ( Ins2k Ins2k Sk ⊕ ( Ins2k Ins3k Sk ∪ Ins3k SIk SIk Sk ))
-
 /-- The set `{⟨x, y⟩ | x ∩ y = ∅}` (or rather, a set that contains only these Kuratowski pairs). -/
 def disjoint : TSet α :=
   (image high high hβ
@@ -89,12 +84,22 @@ theorem mem_unionEq_iff (x y z : TSet ζ) :
   · rintro rfl a
     rw [iff_comm, not_iff, not_and_or, not_not, not_not, mem_union_iff]
 
+/-- The binary partition relation: `{⟨x, y, z⟩ | x ∩ y = ∅ ∧ x ∪ y = z}`. -/
+def binPartRel : TSet α :=
+  insertion3 hβ hγ hδ hε hζ (disjoint hδ hε hζ hη) ⊓' unionEq hβ hγ hδ hε hζ hη
+
+@[simp]
+theorem mem_binPartRel_iff (x y z : TSet ζ) :
+    ⟨ { {x}' }', ⟨y, z⟩' ⟩[hγ, hδ] ∈' binPartRel hβ hγ hδ hε hζ hη ↔
+    x ⊓' y = empty hη ∧ x ⊔' y = z := by
+  simp only [binPartRel, mem_inter_iff, insertion3_spec, mem_disjoint_iff, mem_unionEq_iff]
+  rw [union_comm]
+
 /-- The sum of two cardinals: `x + y = {a ∪ b | a ∈ x ∧ b ∈ y ∧ a ∩ b = ∅}`. -/
 def cardAdd (x y : TSet α) : TSet α :=
   image high high hβ
     (image high high high
-      (insertion3 high high high high hβ (disjoint high high hβ hγ)
-        ⊓[high] (unionEq high high high high hβ hγ))
+      (binPartRel high high high high hβ hγ)
       (singletons high high (singletons high hβ y))) x
 
 @[simp]
@@ -102,18 +107,16 @@ theorem mem_cardAdd_iff (x y : TSet α) (z : TSet β) :
     z ∈' cardAdd hβ hγ x y ↔
     ∃ a b : TSet β, a ∈' x ∧ b ∈' y ∧ a ⊓' b = empty hγ ∧ a ⊔' b = z := by
   simp only [cardAdd, mem_image_iff, Rel.image, Set.mem_setOf_eq, ExternalRel, mem_singletons_iff,
-    mem_inter_iff, exists_and_left]
+    exists_and_left]
   constructor
-  · rintro ⟨a, ha, _, ⟨_, ⟨b, hb, rfl⟩, rfl⟩, h₁, h₂⟩
-    rw [insertion3_spec, mem_disjoint_iff] at h₁
-    rw [mem_unionEq_iff] at h₂
-    cases h₂
-    rw [inter_comm] at h₁
-    exact ⟨a, ha, b, hb, h₁, rfl⟩
+  · rintro ⟨a, ha, _, ⟨_, ⟨b, hb, rfl⟩, rfl⟩, h⟩
+    rw [mem_binPartRel_iff] at h
+    refine ⟨a, ha, b, hb, ?_⟩
+    rwa [inter_comm, union_comm]
   · rintro ⟨a, ha, b, hb, h, rfl⟩
     refine ⟨a, ha, _, ⟨_, ⟨b, hb, rfl⟩, rfl⟩, ?_⟩
-    simp only [insertion3_spec, mem_disjoint_iff, mem_unionEq_iff, and_true]
-    rwa [inter_comm]
+    rw [mem_binPartRel_iff, inter_comm, union_comm]
+    exact ⟨h, rfl⟩
 
 /-- The successor of a cardinal: `x + 1 = {a ∪ {b} | a ∈ x, b ∉ a}`. -/
 def succ (x : TSet α) : TSet α :=
