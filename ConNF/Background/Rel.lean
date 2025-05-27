@@ -277,7 +277,7 @@ theorem image_subset_codom (r : Rel α β) (s : Set α) :
 
 theorem image_empty_of_disjoint_dom {r : Rel α β} {s : Set α} (h : Disjoint r.dom s) :
     r.image s = ∅ := by
-  rw [eq_empty_iff_forall_not_mem]
+  rw [eq_empty_iff_forall_notMem]
   rw [disjoint_iff_forall_ne] at h
   rintro y ⟨x, hx₁, hx₂⟩
   exact h ⟨y, hx₂⟩ hx₁ rfl

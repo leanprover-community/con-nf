@@ -83,7 +83,7 @@ theorem exists_common_support_of_internallyWellOrdered' {x : TSet δ}
   · obtain (h | ⟨y, hy⟩) := h.eq_empty_or_singleton
     · use ⟨Enumeration.empty, Enumeration.empty⟩
       intro y hy
-      rw [Set.eq_empty_iff_forall_not_mem] at h
+      rw [Set.eq_empty_iff_forall_notMem] at h
       cases h y hy
     · obtain ⟨S, hS⟩ := TSet.exists_support y
       use S ↗ hε ↗ hδ ↗ hγ

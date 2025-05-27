@@ -73,7 +73,7 @@ theorem smul_nearLitter_of_smul_litter [Level] [CoherentData] {β : TypeIndex} [
     _ = ((ψ.exceptions.image (N₁ᴸᴬ ∩ ψ.exceptions.dom)) ∆ (ψ.exceptions.image (N₁ᴬ ∆ N₁ᴸᴬ))) ∪
           N₂ᴸᴬ \ ψ.exceptions.dom := by
         apply Set.union_symmDiff_of_disjoint
-        rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+        rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
         rintro a ⟨ha, b, hb⟩
         exact ha.2 (ψ.exceptions_permutative.mem_dom hb.2)
     _ = ψ.exceptions.image ((N₁ᴸᴬ ∩ ψ.exceptions.dom) ∆ (N₁ᴬ ∆ N₁ᴸᴬ)) ∪
@@ -85,7 +85,7 @@ theorem smul_nearLitter_of_smul_litter [Level] [CoherentData] {β : TypeIndex} [
     _ = ψ.exceptions.image (N₁ᴬ \ (N₁ᴸᴬ \ ψ.exceptions.dom)) ∪ N₂ᴸᴬ \ ψ.exceptions.dom := by
         rw [Set.symmDiff_def, Rel.image_union, Set.diff_diff, Rel.image_empty_of_disjoint_dom,
           Set.empty_union]
-        rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+        rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
         intro a ha
         exact ha.2.2 (Or.inl ha.1)
     _ = ψ.exceptions.image (N₁ᴬ ∩ ψ.exceptions.dom) ∪ N₂ᴸᴬ \ ψ.exceptions.dom := by
@@ -336,7 +336,7 @@ def flexLitterPerm (ξ : BaseAction) (A : β ↝ ⊥) : Rel Litter Litter :=
       exact aleph0_lt_κ.le.trans κ_le_μ)
     ((ξ.flexLitterRel_dom_small A).le.trans (κ_le_μ.trans_eq (ξ.card_inflexible_diff_dom A).symm))
     (by
-      rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+      rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
       rintro L₁ ⟨⟨L₂, h₁⟩ | ⟨L₂, h₁⟩, h₂⟩
       · exact h₂.2 (Or.inl ⟨L₂, h₁.1⟩)
       · exact h₂.2 (Or.inr ⟨L₂, h₁.1⟩))

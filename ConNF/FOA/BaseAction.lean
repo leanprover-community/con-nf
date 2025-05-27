@@ -47,7 +47,7 @@ theorem nearLitters_coinjective (ξ : BaseAction) : ξ.nearLitters.Coinjective :
   constructor
   intro N₁ N₂ N h₁ h₂
   apply NearLitter.ext
-  rw [← Set.symmDiff_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  rw [← Set.symmDiff_eq_empty, Set.eq_empty_iff_forall_notMem]
   intro a ha
   have := ξ.interference_subset_codom' ⟨_, h₁⟩ ⟨_, h₂⟩
   rw [interference_eq_of_litter_eq ((ξ.litter_eq_litter_iff' h₁ h₂).mp rfl)] at this
@@ -59,7 +59,7 @@ theorem nearLitters_injective (ξ : BaseAction) : ξ.nearLitters.Injective := by
   constructor
   intro N₁ N₂ N h₁ h₂
   apply NearLitter.ext
-  rw [← Set.symmDiff_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  rw [← Set.symmDiff_eq_empty, Set.eq_empty_iff_forall_notMem]
   intro a ha
   have := ξ.interference_subset_dom' ⟨_, h₁⟩ ⟨_, h₂⟩
   rw [interference_eq_of_litter_eq ((ξ.litter_eq_litter_iff' h₁ h₂).mpr rfl)] at this
@@ -370,12 +370,12 @@ theorem insideRel_oneOne (ξ : BaseAction) : ξ.insideRel.OneOne :=
   ⟨ξ.insideRel_injective, ξ.insideRel_coinjective⟩
 
 theorem insideRel_dom (ξ : BaseAction) : Disjoint ξᴬ.dom ξ.insideRel.dom := by
-  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
   rintro a ⟨ha, _, _, _, _, _, ha', _⟩
   contradiction
 
 theorem insideRel_codom (ξ : BaseAction) : Disjoint ξᴬ.codom ξ.insideRel.codom := by
-  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
   rintro _ ⟨⟨a, ha⟩, b, N₁, N₂, h, _, _, rfl⟩
   exact insideMap_not_mem_codom N₂ᴸ ⟨b, N₁, h⟩ ⟨a, ha⟩
 
@@ -527,12 +527,12 @@ theorem outsideRel_oneOne (ξ : BaseAction) : ξ.outsideRel.OneOne :=
   ⟨ξ.outsideRel_injective, ξ.outsideRel_coinjective⟩
 
 theorem outsideRel_dom (ξ : BaseAction) : Disjoint ξᴬ.dom ξ.outsideRel.dom := by
-  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
   rintro a ⟨ha, _, _, _, _, _, ha', _⟩
   contradiction
 
 theorem outsideRel_codom (ξ : BaseAction) : Disjoint ξᴬ.codom ξ.outsideRel.codom := by
-  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_not_mem]
+  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
   rintro _ ⟨⟨a, hab⟩, b, _, hb', rfl⟩
   exact (outsideMap_litter ⟨b, hb'⟩).atom_not_mem _ ⟨a, hab⟩ rfl
 

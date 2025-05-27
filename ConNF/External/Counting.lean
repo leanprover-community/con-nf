@@ -154,7 +154,7 @@ theorem mem_cardinalNat_iff (n : ℕ) :
   case zero =>
     intro a
     rw [cardinalNat]
-    simp only [typedMem_singleton_iff', Finset.card_eq_zero, exists_eq_left, Finset.not_mem_empty,
+    simp only [typedMem_singleton_iff', Finset.card_eq_zero, exists_eq_left, Finset.notMem_empty,
       iff_false]
     constructor
     · rintro rfl
@@ -169,7 +169,7 @@ theorem mem_cardinalNat_iff (n : ℕ) :
     constructor
     · rintro ⟨b, ⟨s, hsn, hs⟩, a, ha, rfl⟩
       refine ⟨insert a s, ?_, ?_⟩
-      · rw [Finset.card_insert_of_not_mem, hsn]
+      · rw [Finset.card_insert_of_notMem, hsn]
         rwa [← hs]
       · intro c
         simp only [mem_union_iff, hs, typedMem_singleton_iff', Finset.mem_insert]
