@@ -89,11 +89,11 @@ theorem zsmul_atom_mem_dom_of_approximates {ψ : StrApprox β} {ρ : AllPerm β}
     (h : ψ.Approximates ρ) {A : β ↝ ⊥} {a : Atom} (ha : a ∈ (ψ A)ᴬ.dom) (n : ℤ) :
     (ρᵁ A) ^ n • a ∈ (ψ A)ᴬ.dom := by
   induction n using Int.inductionOn' (b := 0) with
-  | H0 => exact ha
-  | Hs k _ ih =>
+  | zero => exact ha
+  | succ k _ ih =>
     rw [add_comm, zpow_add, zpow_one, mul_smul]
     exact smul_atom_mem_dom_of_approximates h ih
-  | Hp k _ ih =>
+  | pred k _ ih =>
     rw [sub_eq_add_neg, add_comm, zpow_add, zpow_neg, zpow_one, mul_smul]
     exact inv_smul_atom_mem_dom_of_approximates h ih
 
@@ -101,11 +101,11 @@ theorem zsmul_nearLitter_mem_dom_of_approximates {ψ : StrApprox β} {ρ : AllPe
     (h : ψ.Approximates ρ) {A : β ↝ ⊥} {N : NearLitter} (hN : N ∈ (ψ A)ᴺ.dom) (n : ℤ) :
     (ρᵁ A) ^ n • N ∈ (ψ A)ᴺ.dom := by
   induction n using Int.inductionOn' (b := 0) with
-  | H0 => rwa [zpow_zero, one_smul]
-  | Hs k _ ih =>
+  | zero => rwa [zpow_zero, one_smul]
+  | succ k _ ih =>
     rw [add_comm, zpow_add, zpow_one, mul_smul]
     exact smul_nearLitter_mem_dom_of_approximates h ih
-  | Hp k _ ih =>
+  | pred k _ ih =>
     rw [sub_eq_add_neg, add_comm, zpow_add, zpow_neg, zpow_one, mul_smul]
     exact inv_smul_nearLitter_mem_dom_of_approximates h ih
 
@@ -217,10 +217,10 @@ theorem mem_dom_of_inflexible {ψ : StrApprox β} {A : β ↝ ⊥} {L : Litter}
     (hLN : ∀ B, ∀ N ∈ (t.support ⇘. B)ᴺ, N ∈ (ψ (P.A ↘ P.hδ ⇘ B))ᴺ.dom) :
     L ∈ (ψ A)ᴸ.dom := by
   induction n using Int.inductionOn' (b := 0) with
-  | H0 =>
+  | zero =>
     rw [zpow_zero, one_smul] at hL
     rwa [ht]
-  | Hs k _ ih =>
+  | succ k _ ih =>
     apply ih
     rw [← (ψ A).litters_permutative.codom_eq_dom] at hL
     obtain ⟨L', hL⟩ := hL
@@ -236,7 +236,7 @@ theorem mem_dom_of_inflexible {ψ : StrApprox β} {A : β ↝ ⊥} {L : Litter}
         exact hLA
       · simp only [Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv]
         exact hLN
-  | Hp k _ ih =>
+  | pred k _ ih =>
     apply ih
     obtain ⟨L', hL⟩ := hL
     have := smul_eq_of_coherentAt_inflexible hA rfl (hψ A _ L' hL) ρ ?_

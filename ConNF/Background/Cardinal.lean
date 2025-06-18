@@ -82,7 +82,7 @@ theorem lift_isRegular (c : Cardinal.{u}) (h : IsRegular c) : IsRegular (lift.{v
 
 theorem le_of_le_add {c d e : Cardinal.{u}} (h : c ≤ d + e) (hc : ℵ₀ ≤ c) (he : e < c) : c ≤ d := by
   by_contra! h'
-  exact (add_lt_of_lt hc h' he).not_le h
+  exact (add_lt_of_lt hc h' he).not_ge h
 
 theorem mk_ne_zero_iff_nonempty {α : Type _} (s : Set α) :
     #s ≠ 0 ↔ s.Nonempty := by
@@ -171,7 +171,7 @@ theorem mk_power_le_two_power (α β : Type _) :
         exact le_max_left _ _
     · rw [not_lt] at hβ
       wlog h : #α ≤ #β
-      · have := this β α hβ hα (le_of_not_le h)
+      · have := this β α hβ hα (le_of_not_ge h)
         rwa [mul_comm, max_comm (2 ^ #α)]
       · rw [mul_eq_left hβ h (ne_zero_of_lt (aleph0_pos.trans_le hα))]
         apply le_max_of_le_right

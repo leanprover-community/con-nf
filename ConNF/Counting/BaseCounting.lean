@@ -82,7 +82,7 @@ theorem eq_bot_of_lt_of_isMin {β : Λ} [LeLevel β] (hβ : IsMin β) {δ : Type
   cases δ using recBotCoe
   case bot => rfl
   case coe δ =>
-    cases hδ.not_le (coe_le_coe.mpr (hβ (coe_le_coe.mp hδ.le)))
+    cases hδ.not_ge (coe_le_coe.mpr (hβ (coe_le_coe.mp hδ.le)))
 
 theorem allPerm_of_basePerm_of_isMin {β : Λ} [LeLevel β] (hβ : IsMin β) (π : BasePerm) :
     ∃ ρ : AllPerm β, ρᵁ (Path.nil ↘.) = π := by

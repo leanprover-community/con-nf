@@ -342,11 +342,11 @@ noncomputable instance : Add (Enumeration X) where
       · cases hk
         have := E.lt_bound _ ⟨x, hix⟩
         rw [add_lt_iff_neg_left] at this
-        cases (κ_zero_le k).not_lt this
+        cases (κ_zero_le k).not_gt this
       · cases hj
         have := E.lt_bound _ ⟨y, hiy⟩
         rw [add_lt_iff_neg_left] at this
-        cases (κ_zero_le j).not_lt this
+        cases (κ_zero_le j).not_gt this
       · cases hj
         simp only [Rel.inv, flip, Function.graph_def, add_right_inj] at hk
         cases hk
@@ -406,13 +406,13 @@ theorem add_inj_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bou
       · exact hx'
       · have := E.lt_bound _ ⟨x, hx⟩
         rw [h, add_lt_iff_neg_left] at this
-        cases (κ_zero_le j).not_lt this
+        cases (κ_zero_le j).not_gt this
     · intro hx
       obtain (hx' | ⟨j, rfl, _⟩) := (this i x).mpr (Or.inl hx)
       · exact hx'
       · have := F.lt_bound _ ⟨x, hx⟩
         rw [h, add_lt_iff_neg_left] at this
-        cases (κ_zero_le j).not_lt this
+        cases (κ_zero_le j).not_gt this
   · apply Enumeration.ext
     · have := congr_arg (·.bound) h'
       simp only [add_bound, h, add_right_inj] at this
@@ -423,7 +423,7 @@ theorem add_inj_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bou
       obtain (hx' | ⟨j, hj₁, hj₂⟩) := (this (E.bound + i) x).mp (Or.inr ⟨i, rfl, hx⟩)
       · have := F.lt_bound _ ⟨x, hx'⟩
         rw [h, add_lt_iff_neg_left] at this
-        cases (κ_zero_le i).not_lt this
+        cases (κ_zero_le i).not_gt this
       · simp only [h, Rel.inv_apply, Function.graph_def, add_right_inj] at hj₁
         rw [← hj₁]
         exact hj₂
@@ -431,7 +431,7 @@ theorem add_inj_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bou
       obtain (hx' | ⟨j, hj₁, hj₂⟩) := (this (F.bound + i) x).mpr (Or.inr ⟨i, rfl, hx⟩)
       · have := E.lt_bound _ ⟨x, hx'⟩
         rw [h, add_lt_iff_neg_left] at this
-        cases (κ_zero_le i).not_lt this
+        cases (κ_zero_le i).not_gt this
       · simp only [h, Rel.inv_apply, Function.graph_def, add_right_inj] at hj₁
         rw [← hj₁]
         exact hj₂

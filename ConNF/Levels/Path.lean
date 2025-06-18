@@ -275,7 +275,7 @@ theorem Path.eq_nil (A : β ↝ β) :
     A = .nil := by
   cases A with
   | nil => rfl
-  | sderiv γ _ A h => cases A.le.not_lt h
+  | sderiv γ _ A h => cases A.le.not_gt h
 
 theorem Path.sderiv_index_injective {A : α ↝ β} {B : α ↝ γ} {hδβ : δ < β} {hδγ : δ < γ}
     (h : A ↘ hδβ = B ↘ hδγ) :
@@ -313,7 +313,7 @@ theorem Path.deriv_right_injective {A : α ↝ β} {B C : β ↝ γ} (h : A ⇘ 
   | nil => exact B.eq_nil
   | sderiv δ ε C hε ih =>
     cases B with
-    | nil => cases C.le.not_lt hε
+    | nil => cases C.le.not_gt hε
     | sderiv ζ η B hε' =>
       cases Path.sderiv_index_injective h
       rw [deriv_sderiv_assoc, deriv_sderiv_assoc] at h

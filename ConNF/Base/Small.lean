@@ -264,7 +264,7 @@ theorem card_le_of_near (h₁ : s ~ t) (h₂ : ¬Small t) : #t ≤ #s := by
   have h₃ := (le_add_self.trans_lt h₁).trans_le h₂
   by_contra! h₄
   have := add_lt_of_lt (aleph0_lt_κ.le.trans h₂) h₃ h₄
-  exact (le_mk_diff_add_mk t s).not_lt this
+  exact (le_mk_diff_add_mk t s).not_gt this
 
 /-- Two large sets that are near each other have the same cardinality (and we only need to suppose
 that one of them is large to draw this conclusion). -/

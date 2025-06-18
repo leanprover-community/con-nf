@@ -197,18 +197,18 @@ theorem convAtoms_injective_of_fixes {S : Support α} {T : Support γ}
     swap
     · have := Enumeration.lt_bound _ _ ⟨_, hi₁⟩
       simp only [add_lt_iff_neg_left] at this
-      cases (κ_zero_le i').not_lt this
+      cases (κ_zero_le i').not_gt this
     cases (Enumeration.rel_coinjective _).coinjective hi₁ hi₂
     obtain hj₁ | ⟨j, rfl, hj₁⟩ := hj₁
     · obtain hj₂ | ⟨j', rfl, _⟩ := hj₂
       · exact (Enumeration.rel_coinjective _).coinjective hj₂ hj₁
       · have := Enumeration.lt_bound _ _ ⟨_, hj₁⟩
         simp only [add_lt_iff_neg_left] at this
-        cases (κ_zero_le j').not_lt this
+        cases (κ_zero_le j').not_gt this
     · obtain hj₂ | hj₂ := hj₂
       · have := Enumeration.lt_bound _ _ ⟨_, hj₂⟩
         simp only [add_lt_iff_neg_left] at this
-        cases (κ_zero_le j).not_lt this
+        cases (κ_zero_le j).not_gt this
       · simp only [add_right_inj, exists_eq_left] at hj₂
         obtain ⟨B, rfl⟩ := eq_of_atom_mem_scoderiv_botDeriv ⟨j, hj₁⟩
         simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_atoms,
@@ -222,7 +222,7 @@ theorem convAtoms_injective_of_fixes {S : Support α} {T : Support γ}
     obtain hi₂ | hi₂ := hi₂
     · have := Enumeration.lt_bound _ _ ⟨_, hi₂⟩
       simp only [add_lt_iff_neg_left] at this
-      cases (κ_zero_le i).not_lt this
+      cases (κ_zero_le i).not_gt this
     have hi := (Enumeration.rel_coinjective _).coinjective hi₁ hi₂
     suffices hj : (ρ₁ᵁ B)⁻¹ • a₂ = (ρ₂ᵁ B)⁻¹ • a₃ by
       rwa [← hj, smul_left_cancel_iff] at hi
@@ -232,11 +232,11 @@ theorem convAtoms_injective_of_fixes {S : Support α} {T : Support γ}
         exact (Enumeration.rel_coinjective _).coinjective hj₁ hj₂
       · have := Enumeration.lt_bound _ _ ⟨_, hj₁⟩
         simp only [add_lt_iff_neg_left] at this
-        cases (κ_zero_le j').not_lt this
+        cases (κ_zero_le j').not_gt this
     · obtain hj₂ | hj₂ := hj₂
       · have := Enumeration.lt_bound _ _ ⟨_, hj₂⟩
         simp only [add_lt_iff_neg_left] at this
-        cases (κ_zero_le j).not_lt this
+        cases (κ_zero_le j).not_gt this
       · simp only [add_right_inj, exists_eq_left] at hj₂
         exact (Enumeration.rel_coinjective _).coinjective hj₁ hj₂
 
@@ -319,7 +319,7 @@ theorem convNearLitters_cases {S : Support α} {T : Support γ}
     swap
     · have := Enumeration.lt_bound _ _ ⟨_, hN₁⟩
       simp only [add_lt_iff_neg_left] at this
-      cases (κ_zero_le i).not_lt this
+      cases (κ_zero_le i).not_gt this
     exact Or.inl ⟨(Enumeration.rel_coinjective _).coinjective hN₁ hN₂, _, hN₁⟩
   · obtain ⟨B, rfl⟩ := eq_of_nearLitter_mem_scoderiv_botDeriv ⟨i, hN₁⟩
     simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_nearLitters,
@@ -327,7 +327,7 @@ theorem convNearLitters_cases {S : Support α} {T : Support γ}
     obtain hN₂ | hN₂ := hN₂
     · have := Enumeration.lt_bound _ _ ⟨_, hN₂⟩
       simp only [add_lt_iff_neg_left] at this
-      cases (κ_zero_le i).not_lt this
+      cases (κ_zero_le i).not_gt this
     exact Or.inr ⟨B, rfl, (Enumeration.rel_coinjective _).coinjective hN₁ hN₂, _, hN₁⟩
 
 theorem inflexible_of_inflexible_of_fixes {S : Support α} {T : Support γ}
@@ -600,21 +600,21 @@ theorem litter_eq_of_flexible_of_fixes {S : Support α} {T : Support γ}
     swap
     · have := Enumeration.lt_bound _ _ ⟨_, hi₁⟩
       simp only [add_lt_iff_neg_left] at this
-      cases (κ_zero_le i).not_lt this
+      cases (κ_zero_le i).not_gt this
     cases (Enumeration.rel_coinjective _).coinjective hi₁ hi₂
     obtain hj₁ | ⟨j, rfl, hj₁⟩ := hj₁
     · obtain hj₂ | ⟨j, rfl, hj₂⟩ := hj₂
       swap
       · have := Enumeration.lt_bound _ _ ⟨_, hj₁⟩
         simp only [add_lt_iff_neg_left] at this
-        cases (κ_zero_le j).not_lt this
+        cases (κ_zero_le j).not_gt this
       cases (Enumeration.rel_coinjective _).coinjective hj₁ hj₂
       exact hN₁₃
     · simp only [add_right_inj, exists_eq_left] at hj₂
       obtain hj₂ | hj₂ := hj₂
       · have := Enumeration.lt_bound _ _ ⟨_, hj₂⟩
         simp only [add_lt_iff_neg_left] at this
-        cases (κ_zero_le j).not_lt this
+        cases (κ_zero_le j).not_gt this
       obtain ⟨A, rfl⟩ := eq_of_nearLitter_mem_scoderiv_botDeriv ⟨j, hj₁⟩
       simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_nearLitters,
         BaseSupport.add_nearLitters, Enumeration.smul_rel] at hj₁ hj₂
@@ -627,7 +627,7 @@ theorem litter_eq_of_flexible_of_fixes {S : Support α} {T : Support γ}
   · obtain hi₂ | hi₂ := hi₂
     · have := Enumeration.lt_bound _ _ ⟨_, hi₂⟩
       simp only [add_lt_iff_neg_left] at this
-      cases (κ_zero_le i).not_lt this
+      cases (κ_zero_le i).not_gt this
     simp only [add_right_inj, exists_eq_left] at hi₂
     obtain ⟨A, rfl⟩ := eq_of_nearLitter_mem_scoderiv_botDeriv ⟨i, hi₁⟩
     simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_nearLitters,
@@ -638,7 +638,7 @@ theorem litter_eq_of_flexible_of_fixes {S : Support α} {T : Support γ}
       swap
       · have := Enumeration.lt_bound _ _ ⟨_, hj₁⟩
         simp only [add_lt_iff_neg_left] at this
-        cases (κ_zero_le j).not_lt this
+        cases (κ_zero_le j).not_gt this
       cases (Enumeration.rel_coinjective _).coinjective hj₁ hj₂
       simp only [BasePerm.smul_nearLitter_litter] at hN₁₂
       rw [hN₁₃, ← (hρ₁ A).2 N₃ ⟨j, hj₁⟩, BasePerm.smul_nearLitter_litter, inv_smul_smul,
@@ -648,7 +648,7 @@ theorem litter_eq_of_flexible_of_fixes {S : Support α} {T : Support γ}
       obtain hj₂ | hj₂ := hj₂
       · have := Enumeration.lt_bound _ _ ⟨_, hj₂⟩
         simp only [add_lt_iff_neg_left] at this
-        cases (κ_zero_le j).not_lt this
+        cases (κ_zero_le j).not_gt this
       have hN₃₄ := congr_arg (·ᴸ) ((Enumeration.rel_coinjective _).coinjective hj₁ hj₂)
       simp only [BasePerm.smul_nearLitter_litter] at hN₁₂ hN₃₄
       rw [hN₁₃] at hN₁₂

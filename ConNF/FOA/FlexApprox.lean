@@ -320,7 +320,7 @@ theorem card_inflexible_diff_dom (ξ : BaseAction) (A : β ↝ ⊥) :
   · apply (mk_subtype_le _).trans
     rw [card_litter]
   · by_contra! h
-    apply (le_mk_diff_add_mk {L | ¬Inflexible A L} (ξᴸ.dom ∪ ξᴸ.codom)).not_lt
+    apply (le_mk_diff_add_mk {L | ¬Inflexible A L} (ξᴸ.dom ∪ ξᴸ.codom)).not_gt
     rw [card_inflexible]
     apply add_lt_of_lt (aleph0_lt_κ.le.trans κ_le_μ) h
     apply (mk_union_le _ _).trans_lt
