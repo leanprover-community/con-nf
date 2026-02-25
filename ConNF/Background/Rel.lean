@@ -9,8 +9,26 @@ namespace Rel
 
 variable {α β γ : Type _}
 
+def dom (r : Rel α β) : Set α :=
+  {x | ∃ y, r x y}
+
+def codom (r : Rel α β) : Set β :=
+  {y | ∃ x, r x y}
+
 def field (r : Rel α α) : Set α :=
   r.dom ∪ r.codom
+
+def inv (r : Rel α β) : Rel β α :=
+  λ x y ↦ r y x
+
+def image (r : Rel α β) (s : Set α) : Set β :=
+  {y | ∃ x ∈ s, r x y}
+
+def preimage (r : Rel α β) (s : Set β) : Set α :=
+  {x | ∃ y ∈ s, r x y}
+
+def comp (r : Rel α β) (s : Rel β γ) : Rel α γ :=
+  λ x z ↦ ∃ y, r x y ∧ s y z
 
 @[mk_iff]
 structure Injective (r : Rel α β) : Prop where
@@ -152,7 +170,7 @@ theorem inv_preimage {r : Rel α β} {s : Set α} :
 theorem comp_inv {r : Rel α β} {s : Rel β γ} :
     (r.comp s).inv = s.inv.comp r.inv := by
   ext c a
-  simp only [inv, flip, comp]
+  simp only [inv, comp]
   tauto
 
 theorem Injective.image_injective {r : Rel α β} (h : r.Injective) {s t : Set α}
@@ -189,6 +207,9 @@ theorem Injective.preimage_subset_iff_subset_image {r : Rel α β} (h : r.Inject
     (s : Set β) (hs : s ⊆ r.codom) (t : Set α) :
     r.preimage s ⊆ t ↔ s ⊆ r.image t :=
   ⟨subset_image_of_preimage_subset hs t, preimage_subset_of_subset_image h s t⟩
+
+@[simp]
+theorem preimage_inv (r : Rel α β) : r.inv.preimage s = r.image s := rfl
 
 theorem OneOne.preimage_eq_iff_image_eq {r : Rel α β} (h : r.OneOne)
     {s : Set β} (hs : s ⊆ r.codom) {t : Set α} (ht : t ⊆ r.dom) :
@@ -258,8 +279,10 @@ theorem graph'_injective :
 
 @[simp]
 theorem image_dom {r : Rel α β} :
-    r.image r.dom = r.codom :=
-  preimage_eq_codom_of_domain_subset r subset_rfl
+    r.image r.dom = r.codom := by
+  ext
+  simp [image, dom, codom]
+  tauto
 
 @[simp]
 theorem preimage_codom {r : Rel α β} :
@@ -278,7 +301,7 @@ theorem image_subset_codom (r : Rel α β) (s : Set α) :
 theorem image_empty_of_disjoint_dom {r : Rel α β} {s : Set α} (h : Disjoint r.dom s) :
     r.image s = ∅ := by
   rw [eq_empty_iff_forall_notMem]
-  rw [disjoint_iff_forall_ne] at h
+  erw [Set.disjoint_iff_forall_ne] at h
   rintro y ⟨x, hx₁, hx₂⟩
   exact h ⟨y, hx₂⟩ hx₁ rfl
 
@@ -307,6 +330,11 @@ theorem Injective.image_diff {r : Rel α β} (h : r.Injective) (s t : Set α) :
     refine ⟨x, ⟨hx₁, ?_⟩, hx₂⟩
     intro hx
     exact hy ⟨x, hx, hx₂⟩
+
+theorem image_union (r : Rel α β) (s t : Set α) :
+    r.image (s ∪ t) = r.image s ∪ r.image t := by
+  simp [image]
+  aesop
 
 theorem Injective.image_symmDiff {r : Rel α β} (h : r.Injective) (s t : Set α) :
     r.image (s ∆ t) = r.image s ∆ r.image t := by
@@ -445,7 +473,7 @@ theorem iSup_inv {T : Type _} {r : T → Rel α β} :
     (⨆ t, (r t).inv) = (⨆ t, r t).inv := by
   apply le_antisymm <;>
   · rintro x y h
-    simp only [inv, iSup_apply_iff, flip] at h ⊢
+    simp only [inv, iSup_apply_iff] at h ⊢
     exact h
 
 theorem iSup_injective_of_isChain {T : Type _} {r : T → Rel α β}

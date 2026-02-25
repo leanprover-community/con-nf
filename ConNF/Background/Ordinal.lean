@@ -12,7 +12,7 @@ namespace Ordinal
 
 def withBotOrderIso {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
     ((· < ·) : WithBot α → WithBot α → Prop) ≃r
-      Sum.Lex (EmptyRelation (α := PUnit)) ((· < ·) : α → α → Prop) where
+      Sum.Lex (emptyRelation (α := PUnit)) ((· < ·) : α → α → Prop) where
   toFun := WithBot.recBotCoe (Sum.inl PUnit.unit) Sum.inr
   invFun := Sum.elim (λ _ ↦ ⊥) (λ x ↦ x)
   left_inv x := by cases x <;> rfl
@@ -25,15 +25,15 @@ def withBotOrderIso {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
 @[simp]
 theorem type_withBot {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
     type ((· < ·) : WithBot α → WithBot α → Prop) = 1 + type ((· < ·) : α → α → Prop) := by
-  change _ = type EmptyRelation + _
+  change _ = type emptyRelation + _
   rw [← type_sum_lex, type_eq]
   exact ⟨withBotOrderIso⟩
 
 theorem noMaxOrder_of_isLimit {α : Type u} [Preorder α] [IsWellOrder α (· < ·)]
-    (h : (type ((· < ·) : α → α → Prop)).IsLimit) : NoMaxOrder α := by
+    (h : Order.IsSuccLimit (type ((· < ·) : α → α → Prop))) : NoMaxOrder α := by
   constructor
   intro a
-  have := (succ_lt_of_isLimit h).mpr (typein_lt_type (· < ·) a)
+  have := h.succ_lt (typein_lt_type (· < ·) a)
   obtain ⟨b, hb⟩ := typein_surj (· < ·) this
   use b
   have := Order.lt_succ (typein ((· < ·) : α → α → Prop) a)
@@ -41,7 +41,7 @@ theorem noMaxOrder_of_isLimit {α : Type u} [Preorder α] [IsWellOrder α (· < 
   exact this
 
 theorem isLimit_of_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)]
-    (h : NoMaxOrder α) : (type ((· < ·) : α → α → Prop)).IsLimit := by
+    (h : NoMaxOrder α) : Order.IsSuccLimit (type ((· < ·) : α → α → Prop)) := by
   constructor
   · simp only [isMin_iff_eq_bot, bot_eq_zero, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty,
       not_false_eq_true]
@@ -52,7 +52,7 @@ theorem isLimit_of_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellO
     rwa [← typein_lt_typein ((· < ·) : α → α → Prop), typein_enum] at hx
 
 theorem isLimit_iff_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)] :
-    (type ((· < ·) : α → α → Prop)).IsLimit ↔ NoMaxOrder α :=
+    Order.IsSuccLimit (type ((· < ·) : α → α → Prop)) ↔ NoMaxOrder α :=
   ⟨noMaxOrder_of_isLimit, isLimit_of_noMaxOrder⟩
 
 theorem type_Iio_lt {α : Type u} [LtWellOrder α] (x : α) :
@@ -61,7 +61,7 @@ theorem type_Iio_lt {α : Type u} [LtWellOrder α] (x : α) :
 
 def iicOrderIso {α : Type u} [LtWellOrder α] (x : α) :
     (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) ≃r
-      Sum.Lex (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) (EmptyRelation (α := PUnit)) where
+      Sum.Lex (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) (emptyRelation (α := PUnit)) where
   toFun y := if h : y = x then Sum.inr PUnit.unit else Sum.inl ⟨y, y.prop.lt_of_ne h⟩
   invFun := Sum.elim (λ y ↦ ⟨y, y.prop.le⟩) (λ _ ↦ ⟨x, le_rfl⟩)
   left_inv y := by aesop
@@ -86,7 +86,7 @@ def iicOrderIso {α : Type u} [LtWellOrder α] (x : α) :
 theorem type_Iic_eq {α : Type u} [LtWellOrder α] (x : α) :
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) =
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) + 1 := by
-  change _ = _ + type EmptyRelation
+  change _ = _ + type emptyRelation
   rw [← type_sum_lex, type_eq]
   exact ⟨iicOrderIso x⟩
 
@@ -101,12 +101,12 @@ theorem type_Iic_lt {α : Type u} [LtWellOrder α] [NoMaxOrder α] (x : α) :
 ## Lifting ordinals
 -/
 
-instance ULift.isTrichotomous {α : Type u} {r : α → α → Prop} [IsTrichotomous α r] :
-    IsTrichotomous (ULift.{v} α) (InvImage r ULift.down) := by
+instance ULift.isTrichotomous {α : Type u} {r : α → α → Prop} [Std.Trichotomous r] :
+    Std.Trichotomous (InvImage r ULift.down) := by
   constructor
   rintro ⟨a⟩ ⟨b⟩
   simp only [ULift.up_inj, InvImage]
-  exact IsTrichotomous.trichotomous a b
+  exact Std.Trichotomous.trichotomous a b
 
 instance ULift.isTrans {α : Type u} {r : α → α → Prop} [IsTrans α r] :
     IsTrans (ULift.{v} α) (InvImage r ULift.down) := by
@@ -128,7 +128,7 @@ theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {
   apply Quotient.sound
   constructor
   refine RelIso.ofSurjective ⟨⟨λ x ↦ ⟨f x.down, ?_⟩, ?_⟩, ?_⟩ ?_
-  · simp only [Set.mem_setOf_eq, f.map_rel_iff]
+  · simp only [f.map_rel_iff]
     exact x.down.prop
   · intro x y h
     apply ULift.down_injective
@@ -146,7 +146,7 @@ theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {
       rwa [← hy, f.map_rel_iff] at this
     · apply ULift.down_injective
       apply Subtype.coe_injective
-      simp only [Set.mem_setOf_eq, Set.coe_setOf, RelEmbedding.coe_mk, Function.Embedding.coeFn_mk]
+      simp only [RelEmbedding.coe_mk, Function.Embedding.coeFn_mk]
       exact hy
 
 /-!
@@ -163,7 +163,7 @@ theorem type_Iio (o : Ordinal.{u}) :
     type ((· < ·) : Set.Iio o → Set.Iio o → Prop) = lift.{u + 1} o := by
   have := Ordinal.lift_type_eq.{u + 1, u, u + 1}
     (r := ((· < ·) : Set.Iio o → Set.Iio o → Prop))
-    (s := ((· < ·) : o.toType → o.toType → Prop))
+    (s := ((· < ·) : o.ToType → o.ToType → Prop))
   rw [lift_id, type_toType] at this
   rw [this]
   exact ⟨o.enumIsoToType.toRelIsoLT⟩

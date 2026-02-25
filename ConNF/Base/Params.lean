@@ -95,40 +95,44 @@ def Params.minimal : Params where
     exact isRegular_aleph_one
   μ_isStrongLimit := by
     rw [mk_out, ord_aleph]
-    exact isStrongLimit_beth <| IsLimit.isSuccPrelimit <| isLimit_omega 1
+    exact isStrongLimit_beth.mpr <| (isSuccLimit_omega 1).isSuccPrelimit
   κ_lt_μ := by
     rw [mk_out, mk_out, ord_aleph]
     apply (aleph_le_beth 1).trans_lt
     rw [beth_strictMono.lt_iff_lt]
-    exact (isLimit_omega 1).one_lt
+    exact one_lt_of_isSuccLimit (isSuccLimit_omega 1)
   κ_le_μ_ord_cof := by
     rw [mk_out, mk_out]
-    have := isNormal_beth.cof_le (aleph 1).ord
-    rwa [isRegular_aleph_one.cof_eq] at this
+    conv_lhs => rw [← isRegular_aleph_one.cof_eq]
+    exact Ordinal.cof_le_of_isNormal
+      (Order.IsNormal.comp Cardinal.isNormal_ord isNormal_beth) (ℵ_ 1).ord
   Λ_type_le_μ_ord_cof := by
     rw [type_nat_lt, mk_out]
-    apply (omega0_le_of_isLimit (isLimit_omega 1)).trans
-    have := isNormal_beth.cof_le (aleph 1).ord
-    rw [isRegular_aleph_one.cof_eq, ← ord_le_ord] at this
-    rwa [ord_aleph] at this ⊢
+    apply omega0_le_of_isSuccLimit
+    erw [Ordinal.cof_eq_of_isNormal
+      (Order.IsNormal.comp Cardinal.isNormal_ord isNormal_beth) (a := (ℵ_ 1).ord)]
+    · rw [isRegular_aleph_one.cof_eq, ord_aleph]
+      exact isSuccLimit_omega 1
+    · rw [ord_aleph]
+      exact isSuccLimit_omega 1
 
 /--
 We can also instantiate our model parameters with `Λ = μ`. To do this, both `#Λ` and `#μ` will need
 to be inaccessible cardinals. We simply pick `κ = ω₁` for convenience.
 -/
 def Params.inaccessible.{v} : Params where
-  Λ := (Cardinal.univ.{v, v + 1}).ord.toType
+  Λ := (Cardinal.univ.{v, v + 1}).ord.ToType
   κ := ULift.{v + 1, v} (aleph 1).out
   μ := Cardinal.univ.{v, v + 1}.out
   Λ_nonempty := by
-    rw [ord_univ, toType_nonempty_iff_ne_zero, Ordinal.univ_id]
+    rw [ord_univ, nonempty_toType_iff, Ordinal.univ_id]
     simp only [ne_eq, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty, not_false_eq_true]
   Λ_noMaxOrder := by
     apply noMaxOrder_of_isLimit
-    change (type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop)).IsLimit
+    change Order.IsSuccLimit (type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.ToType → _ → Prop))
     rw [type_toType]
-    apply isLimit_ord
-    exact univ_inaccessible.1.le
+    apply isSuccLimit_ord
+    exact IsInaccessible.univ.1.le
   aleph0_lt_κ := by
     rw [mk_uLift, mk_out, ← lift_aleph0.{v + 1, v}, lift_strictMono.lt_iff_lt]
     exact aleph0_lt_aleph_one
@@ -138,16 +142,20 @@ def Params.inaccessible.{v} : Params where
     exact isRegular_aleph_one
   μ_isStrongLimit := by
     rw [mk_out]
-    exact univ_inaccessible.2.2
+    constructor
+    · exact (aleph0_pos.trans IsInaccessible.univ.1).ne.symm
+    · exact IsInaccessible.univ.2.2
   κ_lt_μ := by
     rw [mk_uLift, mk_out, mk_out]
     exact lift_lt_univ _
   κ_le_μ_ord_cof := by
-    rw [mk_uLift, mk_out, mk_out, univ_inaccessible.2.1.cof_eq]
-    exact (lift_lt_univ _).le
+    simp only [mk_uLift, mk_out, lift_aleph, Ordinal.lift_one, ord_univ, cof_univ]
+    convert (lift_lt_univ (ℵ_ 1)).le
+    simp only [lift_aleph, Ordinal.lift_one]
   Λ_type_le_μ_ord_cof := by
-    change type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop) ≤ _
-    rw [type_toType, mk_out, univ_inaccessible.2.1.cof_eq]
+    change type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.ToType → _ → Prop) ≤ _
+    rw [type_toType, mk_out]
+    exact ord_le_ord.mpr (IsInaccessible.univ.2.1)
 
 /-!
 We now inform Lean that our model parameters should be accessible from the names `Λ`, `κ`, etc.
@@ -234,7 +242,7 @@ instance : Infinite Λ := NoMaxOrder.infinite
 instance : Infinite κ := by rw [infinite_iff]; exact aleph0_lt_κ.le
 instance : Infinite μ := by rw [infinite_iff]; exact aleph0_lt_μ.le
 
-theorem Λ_type_isLimit : (type ((· < ·) : Λ → Λ → Prop)).IsLimit := by
+theorem Λ_type_isLimit : Order.IsSuccLimit (type ((· < ·) : Λ → Λ → Prop)) := by
   rw [isLimit_iff_noMaxOrder]
   infer_instance
 
@@ -302,7 +310,7 @@ theorem κEquiv_le (x y : κ) :
 theorem κ_zero_le (x : κ) :
     0 ≤ x := by
   rw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_ofNat, Nat.cast_zero]
-  exact Ordinal.zero_le _
+  exact zero_le _
 
 instance : CovariantClass κ κ (· + ·) (· ≤ ·) := by
   constructor
@@ -323,7 +331,7 @@ instance : CovariantClass κ κ (Function.swap (· + ·)) (· ≤ ·) := by
   intro i j k h
   rw [κEquiv_le, ← Subtype.coe_le_coe] at h
   rw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_add, κEquiv_add]
-  exact add_le_add_right h _
+  exact add_le_add_left h _
 
 theorem κ_le_add (x y : κ) :
     x ≤ x + y :=

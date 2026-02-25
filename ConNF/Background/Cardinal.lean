@@ -41,7 +41,7 @@ theorem mk_biUnion_le_of_le_lift {α : Type u} {β : Type v} {s : Set α} {f : �
   apply (mk_iUnion_le_lift.{v} (λ (x : s) ↦ f x x.prop)).trans
   refine mul_le_mul le_rfl ?_ (zero_le _) (zero_le _)
   obtain hs | hs := isEmpty_or_nonempty s
-  · simp only [ciSup_of_empty, bot_eq_zero', zero_le, lift_zero]
+  · simp only [ciSup_of_empty, bot_eq_zero', zero_le]
   · apply ciSup_le
     intro x
     have := h x x.prop
@@ -145,7 +145,7 @@ theorem mk_power_le_two_power (α β : Type _) :
           norm_cast
           rw [zero_power]
           exact Cardinal.zero_le _
-          exact ne_zero_of_lt (aleph0_pos.trans_le hβ)
+          exact (aleph0_pos.trans_le hβ).ne.symm
         | succ n => cases n with
           | zero => simp only [zero_add, Nat.cast_one, one_power, power_one, le_max_iff,
               Nat.one_le_ofNat, true_or, or_true]
@@ -173,7 +173,7 @@ theorem mk_power_le_two_power (α β : Type _) :
       wlog h : #α ≤ #β
       · have := this β α hβ hα (le_of_not_ge h)
         rwa [mul_comm, max_comm (2 ^ #α)]
-      · rw [mul_eq_left hβ h (ne_zero_of_lt (aleph0_pos.trans_le hα))]
+      · rw [mul_eq_left hβ h (aleph0_pos.trans_le hα).ne.symm]
         apply le_max_of_le_right
         exact le_max_right _ _
 

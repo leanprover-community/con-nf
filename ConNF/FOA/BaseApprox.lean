@@ -189,8 +189,11 @@ theorem exceptions_le_atoms (ψ : BaseApprox) :
   le_sup_left
 
 theorem exceptions_dom_subset_atoms_dom (ψ : BaseApprox) :
-    ψ.exceptions.dom ⊆ ψᴬ.dom :=
-  Rel.dom_mono ψ.exceptions_le_atoms
+    ψ.exceptions.dom ⊆ ψᴬ.dom := by
+  intro a
+  simp only [dom, mem_setOf_eq, forall_exists_index]
+  intro b hb
+  exact ⟨b, exceptions_le_atoms ψ a b hb⟩
 
 theorem mem_dom_atoms_of_litter_mem_dom {ψ : BaseApprox} {a : Atom} (h : aᴸ ∈ ψᴸ.dom) :
     a ∈ ψᴬ.dom := by
@@ -247,7 +250,7 @@ theorem typical_permutative (ψ : BaseApprox) :
 
 theorem exceptions_typical_disjoint (ψ : BaseApprox) :
     Disjoint ψ.exceptions.dom ψ.typical.dom := by
-  rw [disjoint_iff_forall_ne]
+  erw [disjoint_iff_forall_ne]
   rintro a ha _ ⟨b, hb⟩ rfl
   exact not_mem_dom_of_typical hb ha
 
@@ -320,7 +323,7 @@ theorem mem_dom_nearLitters {ψ : BaseApprox} {N : NearLitter}
 @[simp]
 theorem inv_nearLitters (ψ : BaseApprox) : ψ⁻¹ᴺ = ψᴺ.inv := by
   ext N₁ N₂
-  rw [inv_def, nearLitters_def, nearLitters_def, inv_litters, inv_def, inv_atoms,
+  rw [inv, nearLitters_def, nearLitters_def, inv_litters, inv, inv_atoms,
     and_congr_right_iff, inv_image]
   intro
   constructor
@@ -397,7 +400,9 @@ theorem nearLitters_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
     ψᴺ ≤ χᴺ := by
   rintro N₁ N₂ ⟨h₁, h₂, h₃⟩
   refine ⟨litters_le_of_le h N₁ᴸ N₂ᴸ h₁, ?_, ?_⟩
-  · exact h₂.trans <| dom_mono <| atoms_le_of_le h
+  · apply h₂.trans
+    rintro a ⟨b, hab⟩
+    exact ⟨_, atoms_le_of_le h _ _ hab⟩
   · rw [← h₃]
     symm
     apply image_eq_of_le_of_le (atoms_le_of_le h)
@@ -460,7 +465,7 @@ theorem addOrbitLitters_permutative (f : ℤ → Litter)
 theorem disjoint_litters_dom_addOrbitLitters_dom
     (ψ : BaseApprox) (f : ℤ → Litter) (hfψ : ∀ n, f n ∉ ψᴸ.dom) :
     Disjoint ψᴸ.dom (addOrbitLitters f).dom := by
-  rw [Set.disjoint_iff_forall_ne]
+  erw [Set.disjoint_iff_forall_ne]
   rintro _ h₁ _ ⟨_, n, rfl, rfl⟩ rfl
   exact hfψ n h₁
 
@@ -520,7 +525,7 @@ theorem le_upperBound (c : Set BaseApprox) (hc : IsChain (· ≤ ·) c) :
   intro ψ hψ
   constructor
   · ext a₁ a₂
-    simp only [upperBound, biSup_dom, biSup_apply_iff]
+    simp only [upperBound, biSup_apply_iff]
     constructor
     · intro h
       exact ⟨ψ, hψ, h⟩

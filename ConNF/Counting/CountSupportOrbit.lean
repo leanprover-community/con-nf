@@ -58,13 +58,13 @@ theorem WeakSpec.exists_conv (σ : WeakSpec β) {S T : Support β}
   · rw [Support.smul_derivBot, BaseSupport.smul_atoms]
     apply Enumeration.ext
     · have := habU.symm.trans habV
-      rw [funext_iff] at this
+      erw [funext_iff] at this
       exact this A
     ext i a
     have := haU.symm.trans haV
     conv at this =>
-      rw [funext_iff]; intro
-      rw [funext_iff]; intro
+      erw [funext_iff]; intro
+      erw [funext_iff]; intro
       rw [eq_iff_iff]
     constructor
     · intro hS
@@ -83,13 +83,13 @@ theorem WeakSpec.exists_conv (σ : WeakSpec β) {S T : Support β}
   · rw [Support.smul_derivBot, BaseSupport.smul_nearLitters]
     apply Enumeration.ext
     · have := hNbU.symm.trans hNbV
-      rw [funext_iff] at this
+      erw [funext_iff] at this
       exact this A
     ext i N₁
     have := hNU.symm.trans hNV
     conv at this =>
-      rw [funext_iff]; intro
-      rw [funext_iff]; intro
+      erw [funext_iff]; intro
+      erw [funext_iff]; intro
       rw [eq_iff_iff]
     constructor
     · intro hS

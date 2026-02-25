@@ -38,11 +38,13 @@ theorem addAtom'_atoms_rel (S : BaseSupport) (a : Atom) (i : κ) (b : Atom) :
   · rintro (hb | ⟨_, rfl, rfl, rfl⟩)
     · exact Or.inl hb
     · refine Or.inr ⟨rfl, ?_⟩
-      simp only [add_zero]
+      simp only [_root_.add_eq_left]
+      rfl
   · rintro (hb | ⟨rfl, rfl⟩)
     · exact Or.inl hb
     · refine Or.inr ⟨0, ?_, rfl, rfl⟩
-      simp only [Rel.inv_apply, Function.graph_def, add_zero]
+      simp only [Rel.inv_apply, Function.relGraph, _root_.add_eq_left]
+      rfl
 
 theorem addAtom'_closed (S : BaseSupport) (a : Atom) (hS : S.Closed) :
     (addAtom' S a).Closed := by

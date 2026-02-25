@@ -1,4 +1,4 @@
-import Mathlib.Algebra.Equiv.TransferInstance
+import Mathlib.Algebra.Algebra.TransferInstance
 import ConNF.Background.Ordinal
 
 universe u v
@@ -98,7 +98,7 @@ protected def linearOrder [LinearOrder β] : LinearOrder α :=
 
 protected def ltWellOrder [LtWellOrder β] : LtWellOrder α where
   wf := InvImage.wf e (inferInstanceAs <| IsWellFounded β (· < ·)).wf
-  trichotomous := trichotomous
+  trichotomous := Std.Trichotomous.trichotomous
   trans _ _ _ := _root_.trans
   __ := e.linearOrder
 

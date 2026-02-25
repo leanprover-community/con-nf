@@ -31,7 +31,7 @@ def ltData :
     λ β hβ ↦ β.recBotCoe (λ _ ↦ botPosition)
       (λ β hβ ↦ (M β hβ.elim).pos) hβ
   letI typedNearLitters : (β : Λ) → [LtLevel β] → TypedNearLitters β :=
-    λ β hβ ↦ (M β hβ.elim).typed
+    λ β hβ ↦ by exact (M β hβ.elim).typed
   LtData.mk (data := data) (positions := positions) (typedNearLitters := typedNearLitters)
 
 def newModelData' :

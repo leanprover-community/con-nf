@@ -53,7 +53,8 @@ theorem nearLitters_coinjective (ξ : BaseAction) : ξ.nearLitters.Coinjective :
   rw [interference_eq_of_litter_eq ((ξ.litter_eq_litter_iff' h₁ h₂).mp rfl)] at this
   obtain ⟨b, hba⟩ := this ha
   rw [← mem_symmDiff_iff_mem_symmDiff hba h₁ h₂] at ha
-  simp only [symmDiff_self, Set.bot_eq_empty, Set.mem_empty_iff_false] at ha
+  simp only [symmDiff_self] at ha
+  cases ha
 
 theorem nearLitters_injective (ξ : BaseAction) : ξ.nearLitters.Injective := by
   constructor
@@ -65,7 +66,8 @@ theorem nearLitters_injective (ξ : BaseAction) : ξ.nearLitters.Injective := by
   rw [interference_eq_of_litter_eq ((ξ.litter_eq_litter_iff' h₁ h₂).mpr rfl)] at this
   obtain ⟨b, hba⟩ := this ha
   rw [mem_symmDiff_iff_mem_symmDiff hba h₁ h₂] at ha
-  simp only [symmDiff_self, Set.bot_eq_empty, Set.mem_empty_iff_false] at ha
+  simp only [symmDiff_self] at ha
+  cases ha
 
 instance : BaseActionClass BaseAction where
   atoms := atoms
@@ -179,7 +181,7 @@ theorem litters_codom_small (ξ : BaseAction) : Small ξᴸ.codom :=
 @[simp]
 theorem inv_litters (ξ : BaseAction) : ξ⁻¹ᴸ = ξᴸ.inv := by
   ext L₁ L₂
-  simp only [litters_iff, inv_nearLitters, exists_and_left, Rel.inv_def]
+  simp only [litters_iff, inv_nearLitters, exists_and_left, Rel.inv]
   tauto
 
 theorem litters_injective (ξ : BaseAction) : ξᴸ.Injective := by
@@ -370,12 +372,12 @@ theorem insideRel_oneOne (ξ : BaseAction) : ξ.insideRel.OneOne :=
   ⟨ξ.insideRel_injective, ξ.insideRel_coinjective⟩
 
 theorem insideRel_dom (ξ : BaseAction) : Disjoint ξᴬ.dom ξ.insideRel.dom := by
-  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
+  erw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
   rintro a ⟨ha, _, _, _, _, _, ha', _⟩
   contradiction
 
 theorem insideRel_codom (ξ : BaseAction) : Disjoint ξᴬ.codom ξ.insideRel.codom := by
-  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
+  erw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
   rintro _ ⟨⟨a, ha⟩, b, N₁, N₂, h, _, _, rfl⟩
   exact insideMap_not_mem_codom N₂ᴸ ⟨b, N₁, h⟩ ⟨a, ha⟩
 
@@ -451,13 +453,13 @@ theorem card_not_sandbox (ξ : BaseAction) :
   apply (mk_union_le _ _).trans
   apply add_le_of_le κ_isRegular.aleph0_le
   · refine (mk_biUnion_le_of_le 1 ?_).trans ?_
-    · simp only [mk_fintype, Fintype.card_ofSubsingleton, Nat.cast_one, le_refl, implies_true]
+    · simp only [mk_fintype, Fintype.card_unique, Nat.cast_one, Std.le_refl, implies_true]
     rw [mul_one]
     exact ξ.atoms_codom_small.le
   · refine (mk_biUnion_le_of_le #κ ?_).trans ?_
     · intro N _
       refine (mk_biUnion_le_of_le 1 ?_).trans ?_
-      · simp only [mk_fintype, Fintype.card_ofSubsingleton, Nat.cast_one, le_refl, implies_true]
+      · simp only [mk_fintype, Fintype.card_unique, Nat.cast_one, Std.le_refl, implies_true]
       · rw [mul_one, N.card_atoms]
     · exact mul_le_of_le κ_isRegular.aleph0_le ξ.nearLitters_codom_small.le le_rfl
 
@@ -527,12 +529,12 @@ theorem outsideRel_oneOne (ξ : BaseAction) : ξ.outsideRel.OneOne :=
   ⟨ξ.outsideRel_injective, ξ.outsideRel_coinjective⟩
 
 theorem outsideRel_dom (ξ : BaseAction) : Disjoint ξᴬ.dom ξ.outsideRel.dom := by
-  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
+  erw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
   rintro a ⟨ha, _, _, _, _, _, ha', _⟩
   contradiction
 
 theorem outsideRel_codom (ξ : BaseAction) : Disjoint ξᴬ.codom ξ.outsideRel.codom := by
-  rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
+  erw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
   rintro _ ⟨⟨a, hab⟩, b, _, hb', rfl⟩
   exact (outsideMap_litter ⟨b, hb'⟩).atom_not_mem _ ⟨a, hab⟩ rfl
 

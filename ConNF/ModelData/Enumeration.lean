@@ -79,7 +79,7 @@ noncomputable def singleton (x : X) : Enumeration X where
     exact zero_lt_one
   rel_coinjective := by
     constructor
-    cc
+    grind
 
 @[simp]
 theorem mem_singleton_iff (x y : X) :
@@ -320,16 +320,18 @@ theorem smul_singleton {G X : Type _} [Group G] [MulAction G X] {g : G} {x : X} 
   · rfl
   · ext i y
     rw [smul_rel]
-    simp only [singleton, and_congr_right_iff, inv_smul_eq_iff]
+    simp only [singleton, inv_smul_eq_iff]
 
 /-!
 ## Concatenation of enumerations
 -/
 
+def _root_.Function.relGraph (f : α → β) : Rel α β := λ a b ↦ f a = b
+
 noncomputable instance : Add (Enumeration X) where
   add E F := {
     bound := E.bound + F.bound
-    rel := E.rel ⊔ Rel.comp (E.bound + ·).graph.inv F.rel
+    rel := E.rel ⊔ Rel.comp (E.bound + ·).relGraph.inv F.rel
     lt_bound := by
       rintro i ⟨x, hi | ⟨j, rfl, hjx⟩⟩
       · exact (E.lt_bound i ⟨x, hi⟩).trans_le (κ_le_add E.bound F.bound)
@@ -348,7 +350,7 @@ noncomputable instance : Add (Enumeration X) where
         rw [add_lt_iff_neg_left] at this
         cases (κ_zero_le j).not_gt this
       · cases hj
-        simp only [Rel.inv, flip, Function.graph_def, add_right_inj] at hk
+        simp only [Rel.inv, Function.relGraph, add_right_inj] at hk
         cases hk
         exact F.rel_coinjective.coinjective hjx hky
   }
@@ -390,7 +392,9 @@ theorem coe_add {E F : Enumeration X} :
 theorem add_empty (E : Enumeration X) :
     E + .empty = E := by
   ext i x
-  · rw [add_bound, empty, add_zero]
+  · rw [add_bound, empty]
+    simp only [_root_.add_eq_left]
+    rfl
   · simp only [empty, rel_add_iff, and_false, exists_const, or_false]
 
 theorem add_inj_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bound)
@@ -424,7 +428,7 @@ theorem add_inj_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bou
       · have := F.lt_bound _ ⟨x, hx'⟩
         rw [h, add_lt_iff_neg_left] at this
         cases (κ_zero_le i).not_gt this
-      · simp only [h, Rel.inv_apply, Function.graph_def, add_right_inj] at hj₁
+      · simp only [h, Rel.inv_apply, Function.relGraph, add_right_inj] at hj₁
         rw [← hj₁]
         exact hj₂
     · intro hx
@@ -432,7 +436,7 @@ theorem add_inj_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bou
       · have := E.lt_bound _ ⟨x, hx'⟩
         rw [h, add_lt_iff_neg_left] at this
         cases (κ_zero_le i).not_gt this
-      · simp only [h, Rel.inv_apply, Function.graph_def, add_right_inj] at hj₁
+      · simp only [h, Rel.inv_apply, Function.relGraph, add_right_inj] at hj₁
         rw [← hj₁]
         exact hj₂
 

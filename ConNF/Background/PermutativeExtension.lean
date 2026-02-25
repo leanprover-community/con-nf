@@ -44,7 +44,7 @@ theorem catInj_ne_of_mem {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codo
     (x : (r.dom ∪ r.codom : Set α) × ℕ) (a : α) (ha : a ∈ r.dom ∪ r.codom) :
     (catInj R b x : α) ≠ a := by
   have := R.sandbox_disjoint
-  rw [Set.disjoint_iff_forall_ne] at this
+  erw [Set.disjoint_iff_forall_ne] at this
   exact (this ha (catInj_mem_sandbox R b x)).symm
 
 theorem catInj_injective {r : Rel α α} {R : OrbitRestriction (r.dom ∪ r.codom) β}
@@ -326,7 +326,7 @@ theorem permutativeExtension_codomEqDom {r : Rel α α} (R : OrbitRestriction (r
 
 theorem disjoint_newOrbits_dom {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
     Disjoint r.dom (newOrbits R).dom := by
-  rw [Set.disjoint_iff_forall_ne]
+  erw [Set.disjoint_iff_forall_ne]
   rintro a₁ ha₁ a₂ ⟨a₃, h⟩
   cases h with
   | right => rintro rfl; contradiction
@@ -334,7 +334,7 @@ theorem disjoint_newOrbits_dom {r : Rel α α} (R : OrbitRestriction (r.dom ∪ 
 
 theorem disjoint_newOrbits_codom {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
     Disjoint r.codom (newOrbits R).codom := by
-  rw [Set.disjoint_iff_forall_ne]
+  erw [Set.disjoint_iff_forall_ne]
   rintro a₁ ha₁ a₂ ⟨a₃, h⟩
   cases h with
   | left => rintro rfl; contradiction

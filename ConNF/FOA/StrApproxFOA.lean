@@ -333,7 +333,9 @@ theorem exists_extension_of_minimal' (ψ : StrApprox β) (A : β ↝ ⊥)
   · obtain ⟨χ, hχ₁, hχ₂, hχ₃⟩ := this
     refine ⟨χ, ⟨hχ₁, ?_⟩, hχ₂⟩
     intro h
-    exact hL (Rel.dom_mono (h A).2 hχ₃)
+    apply hL
+    obtain ⟨L', hL'⟩ := hχ₃
+    exact ⟨_, (h A).2 _ _ hL'⟩
   · intro B a ha
     apply BaseApprox.mem_dom_atoms_of_litter_mem_dom
     exact hL' B aᴸ (a.pos_litter_lt_pos.trans ha)

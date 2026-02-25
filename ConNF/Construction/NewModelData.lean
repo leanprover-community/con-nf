@@ -461,7 +461,7 @@ theorem newTyped_injective : Function.Injective newTyped := by
 theorem smul_newTyped (ρ : NewPerm) (N : NearLitter) :
     ρ • newTyped N = newTyped (ρᵁ ↘. • N) := by
   apply NewSet.ext
-  simp only [NewSet.smul_c, BasePerm.smul_nearLitter_atoms, newTyped_c_eq, NearLitter.smul_code]
+  simp only [NewSet.smul_c, newTyped_c_eq, NearLitter.smul_code]
 
 def newSingletonCode {γ : Λ} [LtLevel γ] (x : TSet γ) : Code :=
   ⟨γ, {x}, Set.singleton_nonempty x⟩
@@ -472,8 +472,7 @@ theorem newSingleton_aux {γ : Λ} [LtLevel γ] {x : TSet γ} :
   use S ↗ LtLevel.elim
   intro ρ hρ
   suffices ρ.sderiv γ • x = x by simp only [newSingletonCode, NewPerm.smul_mk,
-    Set.smul_set_singleton, Code.mk.injEq, heq_eq_eq, Set.singleton_eq_singleton_iff,
-    true_and, this]
+    Set.smul_set_singleton, this]
   apply hS.supports
   rwa [Support.smul_scoderiv, Support.scoderiv_inj, NewPerm.forget_sderiv] at hρ
 
@@ -536,7 +535,8 @@ theorem card_newPositionDeny (t : Tangle α) :
     rw [mk_le_one_iff_set_subsingleton]
     intro N₁ hN₁ N₂ hN₂
     rw [Set.mem_setOf_eq] at hN₁ hN₂
-    rwa [hN₁, Option.some_inj, newTyped_injective.eq_iff] at hN₂
+    erw [hN₁, Option.some_inj, newTyped_injective.eq_iff] at hN₂
+    exact hN₂
   · exact (Enumeration.coe_small _).trans_le κ_le_μ_ord_cof
   · exact (Enumeration.coe_small _).trans_le κ_le_μ_ord_cof
 
@@ -572,6 +572,7 @@ theorem smul_newTyped' (ρ : AllPerm α) (N : NearLitter) :
   change some _ = some _
   dsimp only
   rw [smul_newTyped ρ N]
+  rfl
 
 def newTypedNearLitters (h : #(Tangle α) ≤ #μ) :
     letI := newPosition h; TypedNearLitters α :=

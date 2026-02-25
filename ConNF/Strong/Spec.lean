@@ -125,7 +125,7 @@ theorem inflexible_of_mem_dom_nearLitterCondInflexRel
 
 theorem nearLitterCondRel_dom_disjoint {S : Support β} {A : β ↝ ⊥} :
     Disjoint (nearLitterCondRelFlex S A).dom (nearLitterCondRelInflex S A).dom := by
-  rw [Set.disjoint_iff_forall_ne]
+  erw [Set.disjoint_iff_forall_ne]
   rintro N hN₁ _ hN₂ rfl
   exact flexible_of_mem_dom_nearLitterCondFlexRel hN₁
     (inflexible_of_mem_dom_nearLitterCondInflexRel hN₂)
@@ -205,7 +205,7 @@ omit [Level] [CoherentData] [LeLevel β] in
 theorem convAtoms_inv (S T : Support β) (A : β ↝ ⊥) :
     (convAtoms S T A).inv = convAtoms T S A := by
   ext a b
-  simp only [Rel.inv, flip, convAtoms, Rel.comp]
+  simp only [Rel.inv, convAtoms, Rel.comp]
   tauto
 
 omit [Level] [CoherentData] [LeLevel β] in
@@ -213,7 +213,7 @@ omit [Level] [CoherentData] [LeLevel β] in
 theorem convNearLitters_inv (S T : Support β) (A : β ↝ ⊥) :
     (convNearLitters S T A).inv = convNearLitters T S A := by
   ext a b
-  simp only [Rel.inv, flip, convNearLitters, Rel.comp]
+  simp only [Rel.inv, convNearLitters, Rel.comp]
   tauto
 
 omit [Level] [CoherentData] [LeLevel β] in
@@ -521,10 +521,9 @@ theorem atoms_of_inflexible_of_spec_eq_spec (h : S.spec = T.spec) (A : β ↝ �
   clear hA' ht'
   obtain ⟨t', -, hN₂, -, hBa, hBN⟩ := nearLitterCondRel_inflex h₂
   cases fuzz_injective (ht₂.symm.trans hN₂)
-  simp only [Tangle.smul_support, smul_derivBot, BaseSupport.smul_atoms,
-    BaseSupport.smul_nearLitters] at hBa
+  simp only [Tangle.smul_support, smul_derivBot, BaseSupport.smul_atoms] at hBa
   conv at hBa =>
-    rw [funext_iff]; intro
+    erw [funext_iff]; intro
     rw [funext_iff]; intro
     rw [funext_iff]; intro
     rw [eq_iff_iff]
@@ -549,7 +548,7 @@ theorem nearLitters_of_inflexible_of_spec_eq_spec (h : S.spec = T.spec) (A : β 
   simp only [Tangle.smul_support, smul_derivBot, BaseSupport.smul_nearLitters,
     BaseSupport.smul_nearLitters] at hBN
   conv at hBN =>
-    rw [funext_iff]; intro
+    erw [funext_iff]; intro
     rw [funext_iff]; intro
     rw [funext_iff]; intro
     rw [eq_iff_iff]

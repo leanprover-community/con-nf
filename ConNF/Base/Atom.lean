@@ -92,7 +92,7 @@ instance (L : Litter) : Nonempty Lᴬ :=
 
 /-- Litter sets are pairwise disjoint. -/
 theorem litter_pairwise_disjoint {L₁ L₂ : Litter} (h : L₁ ≠ L₂) : Disjoint L₁ᴬ L₂ᴬ := by
-  rw [Set.disjoint_iff]
+  erw [Set.disjoint_iff]
   intro x hx
   exact h <| hx.1.symm.trans hx.2
 

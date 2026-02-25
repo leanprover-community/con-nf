@@ -33,15 +33,14 @@ theorem Set.inter_union_symmDiff {α : Type _} (s t : Set α) :
 theorem Set.inter_subset_symmDiff_union_symmDiff {α : Type _} {s t u v : Set α} (h : Disjoint u v) :
     s ∩ t ⊆ s ∆ u ∪ t ∆ v := by
   intro x
-  simp only [Set.disjoint_iff, subset_def, mem_empty_iff_false] at h
-  simp only [mem_inter_iff, mem_union, and_imp, mem_symmDiff]
-  tauto
+  simp only [mem_inter_iff, mem_union, mem_symmDiff, and_imp]
+  grind
 
 theorem Set.union_symmDiff_of_disjoint {α : Type _} {s t u : Set α} (h : Disjoint t u) :
     (s ∪ t) ∆ u = (s ∆ u) ∪ t := by
   ext
   simp only [Set.mem_symmDiff, Set.mem_union]
-  rw [Set.disjoint_iff_forall_ne] at h
+  erw [Set.disjoint_iff_forall_ne] at h
   tauto
 
 theorem Set.inter_symmDiff_left {α : Type _} {s t : Set α} :

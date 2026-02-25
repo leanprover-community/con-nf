@@ -18,7 +18,7 @@ open Cardinal Ordinal
 
 namespace ConNF
 
-def initialEquiv {X : Type _} : X ≃ (#X).ord.toType := by
+def initialEquiv {X : Type _} : X ≃ (#X).ord.ToType := by
   apply Nonempty.some
   rw [← Cardinal.eq]
   rw [mk_toType, card_ord]

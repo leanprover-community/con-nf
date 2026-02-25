@@ -43,7 +43,7 @@ order type of `Λ`. -/
 protected theorem TypeIndex.type :
     type ((· < ·) : TypeIndex → TypeIndex → Prop) = type ((· < ·) : Λ → Λ → Prop) := by
   rw [type_withBot]
-  exact one_add_of_omega0_le <| omega0_le_of_isLimit Λ_type_isLimit
+  exact one_add_of_omega0_le <| omega0_le_of_isSuccLimit Λ_type_isLimit
 
 /-- The type indices and the proper type indices have the same cardinality. -/
 @[simp]
