@@ -17,15 +17,15 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: checkout project
-        uses: actions/checkout@v2
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
         with:
           fetch-depth: 0
 
       - name: check case sensitivity
-        uses: credfeto/action-case-checker@v1.3.0
+        uses: credfeto/action-case-checker@cb652aeab29ed363bbdb7d9ee1bfcc010c46cac5 # v1.3.0
 
       - name: look for ignored files
-        uses: credfeto/action-no-ignored-files@v1.1.0
+        uses: credfeto/action-no-ignored-files@0c61dc01fd498dd8fa6786f21062be4fd158c8b1 # v1.1.0
 
       - name: check for lean files with the executable bit set
         shell: bash
@@ -56,7 +56,7 @@ jobs:
           ~/.elan/bin/lake -Kenv=dev build DependencyGraph
 
       - name: setup graphviz
-        uses: ts-graphviz/setup-graphviz@v2
+        uses: ts-graphviz/setup-graphviz@b1de5da23ed0a6d14e0aeee8ed52fdd87af2363c # v2
 
       - name: build dependency graph
         working-directory: docs
@@ -72,7 +72,7 @@ jobs:
         run: cp -R .lake/build/doc docs/
 
       - name: build blueprint
-        uses: xu-cheng/texlive-action@v2
+        uses: xu-cheng/texlive-action@f886de8159e5952a131848a5fa9c3196a2132b5d # v2
         with:
           docker_image: ghcr.io/xu-cheng/texlive-full:20231201
           run: |
@@ -99,7 +99,7 @@ jobs:
         run: rm docs/.gitignore
 
       - name: bundler deps
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1
         with:
           working-directory: docs
           ruby-version: "3.0" # Not needed with a .ruby-version file
@@ -110,9 +110,9 @@ jobs:
         run: JEKYLL_ENV=production bundle exec jekyll build
 
       - name: upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: "docs/_site"
 
       - name: deploy website
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
