@@ -207,7 +207,7 @@ theorem internallyWellOrdered_of_common_support_of_nontrivial {x : TSet γ}
         exact h.2.1
     · intro h
       obtain ⟨b, h₁, h₂⟩ := hx.exists_ne a
-      obtain (h₃ | h₃ | h₃) := WellOrderingRel.isWellOrder.trichotomous a b
+      obtain (h₃ | h₃ | h₃) := trichotomous_of WellOrderingRel a b
       · refine Or.inl ⟨b, ?_⟩
         rw [hr']
         exact ⟨h, h₁, h₃⟩
@@ -222,13 +222,13 @@ theorem internallyWellOrdered_of_common_support_of_nontrivial {x : TSet γ}
     rw [mem_field_iff, hrx]
   refine @IsWellOrder.mk _ _ ?_ ?_ ?_
   · constructor
-    intro a b
-    obtain (h | h | h) := WellOrderingRel.isWellOrder.trichotomous a.val b.val
-    · apply Or.inl
+    intro a b hab hba
+    obtain h | h | h := trichotomous_of WellOrderingRel a.val b.val
+    · refine absurd ?_ hab
       rw [InvImage, hr']
       exact ⟨(hrx a).mp a.prop, (hrx b).mp b.prop, h⟩
-    · exact Or.inr (Or.inl (Subtype.val_injective h))
-    · apply Or.inr ∘ Or.inr
+    · exact Subtype.val_injective h
+    · refine absurd ?_ hba
       rw [InvImage, hr']
       exact ⟨(hrx b).mp b.prop, (hrx a).mp a.prop, h⟩
   · constructor

@@ -323,11 +323,9 @@ theorem eq_of_smul_eq {G X : Type u} [Group G] [MulAction G X] {g : G} {E : Enum
 @[simp]
 theorem smul_singleton {G X : Type u} [Group G] [MulAction G X] {g : G} {x : X} :
     g • singleton x = singleton (g • x) := by
-  apply Enumeration.ext
+  ext ⟨i, y⟩
   · rfl
-  · ext ⟨i, y⟩
-    rw [smul_rel]
-    simp only [singleton, Set.mem_setOf_eq, inv_smul_eq_iff]
+  · simp [smul_rel, singleton, inv_smul_eq_iff]
 
 /-!
 ## Concatenation of enumerations

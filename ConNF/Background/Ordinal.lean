@@ -104,12 +104,9 @@ theorem type_Iic_lt {α : Type u} [LinearOrder α] [WellFoundedLT α] [NoMaxOrde
 ## Lifting ordinals
 -/
 
-instance ULift.isTrichotomous {α : Type u} {r : α → α → Prop} [IsTrichotomous α r] :
-    IsTrichotomous (ULift.{v} α) (InvImage r ULift.down) := by
-  constructor
-  rintro ⟨a⟩ ⟨b⟩
-  simp only [ULift.up_inj, InvImage]
-  exact IsTrichotomous.trichotomous a b
+instance ULift.trichotomous {α : Type u} {r : α → α → Prop} [Std.Trichotomous r] :
+    Std.Trichotomous (InvImage r (ULift.down : ULift.{v} α → α)) where
+  trichotomous a b h₁ h₂ := by rw [ULift.up_inj]; exact Std.Trichotomous.trichotomous _ _ h₁ h₂
 
 instance ULift.isTrans {α : Type u} {r : α → α → Prop} [IsTrans α r] :
     IsTrans (ULift.{v} α) (InvImage r ULift.down) := by
@@ -119,8 +116,7 @@ instance ULift.isTrans {α : Type u} {r : α → α → Prop} [IsTrans α r] :
   exact IsTrans.trans a b c
 
 instance ULift.isWellOrder {α : Type u} {r : α → α → Prop} [IsWellOrder α r] :
-    IsWellOrder (ULift.{v} α) (InvImage r ULift.down) :=
-  ⟨⟩
+    IsWellOrder (ULift.{v} α) (InvImage r ULift.down) where
 
 theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {s : β → β → Prop}
     [IsWellOrder α r] [IsWellOrder β s]
