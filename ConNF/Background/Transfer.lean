@@ -100,24 +100,29 @@ protected def linearOrder [LinearOrder β] : LinearOrder α :=
   letI := e.compare
   LinearOrder.liftWithOrd e e.injective e.apply_max e.apply_min e.compare_def
 
-protected def ltWellOrder [LtWellOrder β] : LtWellOrder α where
-  wf := InvImage.wf e (inferInstanceAs <| IsWellFounded β (· < ·)).wf
-  trichotomous := trichotomous
-  trans _ _ _ := _root_.trans
-  __ := e.linearOrder
+protected theorem wellFoundedLT [LinearOrder β] [WellFoundedLT β] :
+    letI := e.linearOrder
+    WellFoundedLT α :=
+  letI := e.linearOrder
+  ⟨InvImage.wf e wellFounded_lt⟩
 
-theorem ltWellOrder_type [LtWellOrder β] :
-    letI := e.ltWellOrder
+theorem type_lt [LinearOrder β] [WellFoundedLT β] :
+    letI := e.linearOrder
+    letI := e.wellFoundedLT
     Ordinal.lift.{max u v, u} (Ordinal.type ((· < ·) : α → α → Prop)) =
     Ordinal.lift.{max u v, v} (Ordinal.type ((· < ·) : β → β → Prop)) := by
+  let := e.linearOrder
+  let := e.wellFoundedLT
   rw [Ordinal.lift_type_eq.{u, v, max u v}]
   exact ⟨e.ltIso⟩
 
-theorem ltWellOrder_typein [i : LtWellOrder β] (x : α) :
-    letI := e.ltWellOrder.toLT
+theorem typein_lt [LinearOrder β] [WellFoundedLT β] (x : α) :
+    letI := e.linearOrder
+    letI := e.wellFoundedLT
     Ordinal.lift.{max u v, v} (Ordinal.typein ((· < ·) : β → β → Prop) (e x)) =
     Ordinal.lift.{max u v, u} (Ordinal.typein ((· < ·) : α → α → Prop) x) := by
-  letI := e.ltWellOrder
+  let := e.linearOrder
+  let := e.wellFoundedLT
   refine Ordinal.lift_typein_apply (r := (· < ·)) (s := (· < ·)) (f := ⟨⟨e.toEmbedding, ?_⟩, ?_⟩) x
   · rfl
   · simp only [RelEmbedding.coe_mk, coe_toEmbedding]

@@ -27,19 +27,27 @@ def initialEquiv {X : Type _} : X ≃ (#X).ord.ToType := by
   rw [mk_toType, card_ord]
 
 /-- Endow a type `X` with a well-order of smallest possible order type. -/
-def initialWellOrder (X : Type _) : LtWellOrder X :=
-  Equiv.ltWellOrder initialEquiv
+def initialLinearOrder (X : Type*) : LinearOrder X :=
+  initialEquiv.linearOrder
+
+theorem initialWellFoundedLT (X : Type*) :
+    letI := initialLinearOrder X
+    WellFoundedLT X :=
+  initialEquiv.wellFoundedLT
 
 theorem initialWellOrder_type {X : Type _} :
-    letI := initialWellOrder X
+    letI := initialLinearOrder X
+    letI := initialWellFoundedLT X
     type ((· < ·) : X → X → Prop) = (#X).ord := by
-  have := Equiv.ltWellOrder_type (initialEquiv (X := X))
+  have := Equiv.type_lt (initialEquiv (X := X))
   rwa [Ordinal.lift_id, Ordinal.lift_id, type_toType] at this
 
 theorem initialWellOrder_card_Iio {X : Type _} :
-    letI := initialWellOrder X
+    letI := initialLinearOrder X
+    letI := initialWellFoundedLT X
     ∀ x : X, #{y | y < x} < #X := by
-  letI := initialWellOrder X
+  letI := initialLinearOrder X
+  letI := initialWellFoundedLT X
   intro x
   have := type_Iio_lt x
   rwa [initialWellOrder_type, lt_ord, card_type] at this
@@ -55,9 +63,10 @@ variable [Params.{u}]
 
 theorem gtOfDeny_aux {X : Type _} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     (h₂ : ∀ x, #(deny x) < (#μ).ord.cof)
-    (x : X) (ih : letI := initialWellOrder X; (y : X) → y < x → μ) :
+    (x : X) (ih : letI := initialLinearOrder X; (y : X) → y < x → μ) :
     #(({ν | ∃ y h, ν = ih y h}) ∪ {ν | ∃ ξ ∈ deny x, ν ≤ ξ} : Set μ) < #μ := by
-  letI := initialWellOrder X
+  letI := initialLinearOrder X
+  letI := initialWellFoundedLT X
   apply (mk_union_le _ _).trans_lt
   refine add_lt_of_lt aleph0_lt_μ.le ?_ ?_
   · refine (mk_le_mk_of_subset (t := ⋃ (y : X) (h : y < x), {ih y h}) ?_).trans_lt ?_
@@ -74,31 +83,34 @@ theorem gtOfDeny_aux {X : Type _} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     exact hξ.trans_lt (hν ζ hζ)
 
 def gtOfDeny {X : Type _} (h₁ : #X ≤ #μ) (deny : X → Set μ) (h₂ : ∀ x, #(deny x) < (#μ).ord.cof)
-    (x : X) (ih : letI := initialWellOrder X; (y : X) → y < x → μ) : μ :=
+    (x : X) (ih : letI := initialLinearOrder X; (y : X) → y < x → μ) : μ :=
   chooseOfCardLt (gtOfDeny_aux h₁ deny h₂ x ih)
 
 theorem gtOfDeny_spec {X : Type _} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     (h₂ : ∀ x, #(deny x) < (#μ).ord.cof)
-    (x : X) (ih : letI := initialWellOrder X; (y : X) → y < x → μ) :
+    (x : X) (ih : letI := initialLinearOrder X; (y : X) → y < x → μ) :
     gtOfDeny h₁ deny h₂ x ih ∉ ({ν | ∃ y h, ν = ih y h}) ∪ {ν | ∃ ξ ∈ deny x, ν ≤ ξ} :=
   chooseOfCardLt_not_mem (gtOfDeny_aux h₁ deny h₂ x ih)
 
 def funOfDeny {X : Type _} (h₁ : #X ≤ #μ) (deny : X → Set μ) (h₂ : ∀ x, #(deny x) < (#μ).ord.cof) :
     X → μ :=
-  letI := initialWellOrder X
+  letI := initialLinearOrder X
+  letI := initialWellFoundedLT X
   (inferInstanceAs (IsWellFounded X (· < ·))).wf.fix (C := λ _ ↦ μ)
     (λ x ih ↦ gtOfDeny h₁ deny h₂ x ih)
 
 theorem funOfDeny_eq {X : Type _} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     (h₂ : ∀ x, #(deny x) < (#μ).ord.cof) (x : X) :
     funOfDeny h₁ deny h₂ x = gtOfDeny h₁ deny h₂ x (λ y _ ↦ funOfDeny h₁ deny h₂ y) :=
-  letI := initialWellOrder X
+  letI := initialLinearOrder X
+  letI := initialWellFoundedLT X
   (inferInstanceAs (IsWellFounded X (· < ·))).wf.fix_eq (C := λ _ ↦ μ)
     (λ x ih ↦ gtOfDeny h₁ deny h₂ x ih) x
 
 theorem funOfDeny_spec {X : Type _} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     (h₂ : ∀ x, #(deny x) < (#μ).ord.cof) (x : X) :
-    letI := initialWellOrder X
+    letI := initialLinearOrder X
+    letI := initialWellFoundedLT X
     funOfDeny h₁ deny h₂ x ∉
       ({ν | ∃ y, ∃ _h : y < x, ν = funOfDeny h₁ deny h₂ y}) ∪ {ν | ∃ ξ ∈ deny x, ν ≤ ξ} := by
   rw [funOfDeny_eq]
@@ -115,7 +127,8 @@ theorem funOfDeny_gt_deny {X : Type _} (h₁ : #X ≤ #μ) (deny : X → Set μ)
 theorem funOfDeny_injective {X : Type _} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     (h₂ : ∀ x, #(deny x) < (#μ).ord.cof) :
     Function.Injective (funOfDeny h₁ deny h₂) := by
-  letI := initialWellOrder X
+  letI := initialLinearOrder X
+  letI := initialWellFoundedLT X
   intro x y h
   wlog hxy : x ≤ y
   · exact (this h₁ deny h₂ h.symm (le_of_not_ge hxy)).symm

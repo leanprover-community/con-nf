@@ -4,7 +4,6 @@ public import Mathlib.Order.Interval.Set.Infinite
 public import ConNF.Background.Cardinal
 public import ConNF.Background.Ordinal
 public import ConNF.Background.Transfer
-public import ConNF.Background.WellOrder
 
 /-!
 # Model parameters
@@ -71,7 +70,8 @@ class Params where
   κ : Type u
   μ : Type u
   [Λ_nonempty : Nonempty Λ]
-  [ΛWellOrder : LtWellOrder Λ]
+  [ΛLinearOrder : LinearOrder Λ]
+  [ΛWellFoundedLT : WellFoundedLT Λ]
   [Λ_noMaxOrder : NoMaxOrder Λ]
   aleph0_lt_κ : ℵ₀ < #κ
   κ_isRegular : (#κ).IsRegular
@@ -171,7 +171,8 @@ initial, and then prove some basic facts about these orders.
 -/
 
 instance : Nonempty Λ := Params.Λ_nonempty
-instance : LtWellOrder Λ := Params.ΛWellOrder
+instance : LinearOrder Λ := Params.ΛLinearOrder
+instance : WellFoundedLT Λ := Params.ΛWellFoundedLT
 instance : NoMaxOrder Λ := Params.Λ_noMaxOrder
 
 /-- This gadget allows us to use `termination_by` clauses with `Λ`, which gives us access to more
@@ -216,7 +217,8 @@ def μEquiv : μ ≃ Set.Iio (#μ).ord := by
   apply Nonempty.some
   rw [← Cardinal.eq, mk_uLift, card_Iio, card_ord]
 
-instance : LtWellOrder κ := Equiv.ltWellOrder κEquiv
+instance : LinearOrder κ := κEquiv.linearOrder
+instance : WellFoundedLT κ := κEquiv.wellFoundedLT
 instance : NoMaxOrder κ :=
   letI := iio_noMaxOrder aleph0_lt_κ.le
   Equiv.noMaxOrder κEquiv
@@ -228,7 +230,8 @@ instance (n : ℕ) : OfNat κ n :=
   letI := iioOfNat aleph0_lt_κ.le n
   Equiv.ofNat κEquiv n
 
-instance : LtWellOrder μ := Equiv.ltWellOrder μEquiv
+instance : LinearOrder μ := μEquiv.linearOrder
+instance : WellFoundedLT μ := μEquiv.wellFoundedLT
 instance : NoMaxOrder μ :=
   letI := iio_noMaxOrder aleph0_lt_μ.le
   Equiv.noMaxOrder μEquiv
@@ -244,12 +247,12 @@ theorem Λ_type_isSuccLimit : Order.IsSuccLimit (type ((· < ·) : Λ → Λ →
 /-- The order type on `κ` really is the initial ordinal for the cardinal `#κ`. -/
 @[simp]
 theorem κ_type : type ((· < ·) : κ → κ → Prop) = (#κ).ord := by
-  have := κEquiv.ltWellOrder_type
+  have := κEquiv.type_lt
   rwa [Ordinal.lift_id, type_Iio, Ordinal.lift_inj] at this
 
 @[simp]
 theorem μ_type : type ((· < ·) : μ → μ → Prop) = (#μ).ord := by
-  have := μEquiv.ltWellOrder_type
+  have := μEquiv.type_lt
   rwa [Ordinal.lift_id, type_Iio, Ordinal.lift_inj] at this
 
 /-- We define a monoid structure on `κ`, denoted `+`, by passing to the collection of ordinals below
@@ -342,7 +345,7 @@ theorem κ_typein (x : κ) :
     -- TODO: Why can't Lean find this instance?
     letI := inferInstanceAs (IsWellOrder κ (· < ·))
     typein (· < ·) x = κEquiv x := by
-  have := κEquiv.ltWellOrder_typein x
+  have := κEquiv.typein_lt x
   rw [Ordinal.lift_id, typein_Iio, Ordinal.lift_inj] at this
   exact this.symm
 

@@ -1,6 +1,6 @@
 module
 
-public import ConNF.Background.WellOrder
+public import Mathlib.SetTheory.Ordinal.Arithmetic
 public import Mathlib.SetTheory.Cardinal.Aleph
 public import Mathlib.SetTheory.Cardinal.Arithmetic
 
@@ -58,11 +58,11 @@ theorem isSuccLimit_iff_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [Is
     Order.IsSuccLimit (type ((· < ·) : α → α → Prop)) ↔ NoMaxOrder α :=
   ⟨noMaxOrder_of_isSuccLimit, isSuccLimit_of_noMaxOrder⟩
 
-theorem type_Iio_lt {α : Type u} [LtWellOrder α] (x : α) :
+theorem type_Iio_lt {α : Type u} [LinearOrder α] [WellFoundedLT α] (x : α) :
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) < type ((· < ·) : α → α → Prop) :=
   @typein_lt_type _ _ (inferInstanceAs (IsWellOrder α (· < ·))) x
 
-def iicOrderIso {α : Type u} [LtWellOrder α] (x : α) :
+def iicOrderIso {α : Type u} [LinearOrder α] [WellFoundedLT α] (x : α) :
     (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) ≃r
       Sum.Lex (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) (emptyRelation (α := PUnit)) where
   toFun y := if h : y = x then Sum.inr PUnit.unit else Sum.inl ⟨y, y.prop.lt_of_ne h⟩
@@ -86,14 +86,14 @@ def iicOrderIso {α : Type u} [LtWellOrder α] (x : α) :
       exact lt_of_le_of_ne (y.prop.trans_eq h'.symm) (h'.trans_ne (Ne.symm h)).symm
     · simp only [Sum.lex_inl_inl, subrel_val, Subtype.coe_lt_coe]
 
-theorem type_Iic_eq {α : Type u} [LtWellOrder α] (x : α) :
+theorem type_Iic_eq {α : Type u} [LinearOrder α] [WellFoundedLT α] (x : α) :
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) =
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) + 1 := by
   change _ = _ + type emptyRelation
   rw [← type_sum_lex, type_eq]
   exact ⟨iicOrderIso x⟩
 
-theorem type_Iic_lt {α : Type u} [LtWellOrder α] [NoMaxOrder α] (x : α) :
+theorem type_Iic_lt {α : Type u} [LinearOrder α] [WellFoundedLT α] [NoMaxOrder α] (x : α) :
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) < type ((· < ·) : α → α → Prop) := by
   rw [type_Iic_eq]
   haveI : Nonempty α := ⟨x⟩
@@ -159,8 +159,6 @@ theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {
 theorem card_Iio (o : Ordinal.{u}) : #(Set.Iio o) = Cardinal.lift.{u + 1} o.card := by
   rw [Cardinal.eq.mpr ⟨ToType.mk.toEquiv.trans Equiv.ulift.{u + 1, u}.symm⟩,
     mk_uLift, mk_toType, lift_card]
-
-instance {o : Ordinal.{u}} : LtWellOrder (Set.Iio o) where
 
 theorem type_Iio (o : Ordinal.{u}) :
     type ((· < ·) : Set.Iio o → Set.Iio o → Prop) = lift.{u + 1} o := by

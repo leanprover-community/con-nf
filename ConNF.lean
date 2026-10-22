@@ -7,7 +7,6 @@ public import ConNF.Background.PermutativeExtension
 public import ConNF.Background.ReflTransGen
 public import ConNF.Background.Set
 public import ConNF.Background.Transfer
-public import ConNF.Background.WellOrder
 public import ConNF.Base.Atom
 public import ConNF.Base.BasePerm
 public import ConNF.Base.Litter
