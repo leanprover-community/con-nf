@@ -429,7 +429,7 @@ structure Sandbox (ξ : BaseAction) (L : Litter) : Prop where
   atom_not_mem (a : Atom) : a ∈ ξᴬ.cod → aᴸ ≠ L
   nearLitter_not_mem (N : NearLitter) (a : Atom) : aᴸ = L → N ∈ ξᴺ.cod → a ∉ Nᴬ
 
-def not_sandbox_eq (ξ : BaseAction) :
+theorem not_sandbox_eq (ξ : BaseAction) :
     {L | ¬ξ.Sandbox L} = (⋃ a ∈ ξᴬ.cod, {aᴸ}) ∪ (⋃ N ∈ ξᴺ.cod, ⋃ a ∈ Nᴬ, {aᴸ}) := by
   ext L
   simp only [sandbox_iff, Set.mem_union, Set.mem_iUnion, exists_prop,
