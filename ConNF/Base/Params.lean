@@ -95,7 +95,7 @@ def Params.minimal : Params where
     exact isRegular_aleph_one
   μ_isStrongLimit := by
     rw [mk_out, ord_aleph]
-    exact isStrongLimit_beth <| (isSuccLimit_omega 1).isSuccPrelimit
+    exact isStrongLimit_beth.mpr (isSuccLimit_omega 1).isSuccPrelimit
   κ_lt_μ := by
     rw [mk_out, mk_out, ord_aleph]
     apply (aleph_le_beth 1).trans_lt
@@ -103,12 +103,12 @@ def Params.minimal : Params where
     exact one_lt_of_isSuccLimit (isSuccLimit_omega 1)
   κ_le_μ_ord_cof := by
     rw [mk_out, mk_out]
-    have := isNormal_beth.cof_le (aleph 1).ord
+    have := Ordinal.IsNormal.cof_le (isNormal_ord.comp isNormal_beth) (aleph 1).ord
     rwa [isRegular_aleph_one.cof_eq] at this
   Λ_type_le_μ_ord_cof := by
     rw [type_nat_lt, mk_out]
     apply (omega0_le_of_isSuccLimit (isSuccLimit_omega 1)).trans
-    have := isNormal_beth.cof_le (aleph 1).ord
+    have := Ordinal.IsNormal.cof_le (isNormal_ord.comp isNormal_beth) (aleph 1).ord
     rw [isRegular_aleph_one.cof_eq, ← ord_le_ord] at this
     rwa [ord_aleph] at this ⊢
 
