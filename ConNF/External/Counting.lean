@@ -29,10 +29,10 @@ def disjoint : TSet α :=
   (image high high hβ
     (insertion3 high high hβ hγ hδ (subset hβ hγ hδ hε) ⊓[high]
       insertion2 high high hβ hγ hδ (subset hβ hγ hδ hε))
-    (singletons hβ hγ (singletons hγ hδ (cardinalOne hδ hε))))ᶜ'
+    (singletons hβ hγ (singletons hγ hδ (cardinalOne hδ hε))))ᶜ[β]
 
 theorem mem_disjoint_iff' (x y : TSet δ) :
-    ⟨x, y⟩' ∈' disjoint hβ hγ hδ hε ↔ ∀ z : TSet ε, ¬z ∈' x ⊓' y := by
+    ⟨x, y⟩[β, γ] ∈' disjoint hβ hγ hδ hε ↔ ∀ z : TSet ε, ¬z ∈' x ⊓[ε] y := by
   simp only [disjoint, mem_compl_iff, mem_image_iff, SetRel.mem_image, mem_singletons_iff,
     mem_cardinalOne_iff, Set.mem_setOf_eq, ExternalRel, mem_inter_iff, not_exists, not_and,
     forall_exists_index, and_imp, forall_eq_apply_imp_iff, insertion3_spec, subset_spec,
@@ -40,7 +40,7 @@ theorem mem_disjoint_iff' (x y : TSet δ) :
 
 @[simp]
 theorem mem_disjoint_iff (x y : TSet δ) :
-    ⟨x, y⟩' ∈' disjoint hβ hγ hδ hε ↔ x ⊓' y = empty hε := by
+    ⟨x, y⟩[β, γ] ∈' disjoint hβ hγ hδ hε ↔ x ⊓[ε] y = empty hε := by
   rw [mem_disjoint_iff']
   constructor
   · intro h
@@ -59,10 +59,10 @@ def unionEq : TSet α :=
       insertion3 high high hβ hγ hδ (singletonImage hβ hγ hδ hε
         (singletonImage hγ hδ hε hζ (subset hδ hε hζ hη)))))
     (singletons hβ hγ (singletons hγ hδ (singletons hδ hε
-      (singletons hε hζ (cardinalOne hζ hη))))))ᶜ'
+      (singletons hε hζ (cardinalOne hζ hη))))))ᶜ[β]
 
 theorem mem_unionEq_iff' (x y z : TSet ζ) :
-    ⟨ { {z}' }', ⟨y, x⟩' ⟩[hγ, hδ] ∈' unionEq hβ hγ hδ hε hζ hη ↔
+    ⟨{{z}[ε]}[δ], ⟨y, x⟩[δ, ε]⟩[β, γ] ∈' unionEq hβ hγ hδ hε hζ hη ↔
       ∀ a : TSet η, ¬(a ∈' x ↔ ¬a ∈' y ∧ ¬a ∈' z) := by
   simp only [unionEq, mem_compl_iff, mem_image_iff, SetRel.mem_image, mem_singletons_iff,
     mem_cardinalOne_iff, Set.mem_setOf_eq, ExternalRel, mem_symmDiff_iff, mem_union_iff, not_or,
@@ -71,7 +71,7 @@ theorem mem_unionEq_iff' (x y z : TSet ζ) :
 
 @[simp]
 theorem mem_unionEq_iff (x y z : TSet ζ) :
-    ⟨ { {z}' }', ⟨y, x⟩' ⟩[hγ, hδ] ∈' unionEq hβ hγ hδ hε hζ hη ↔ y ⊔' z = x := by
+    ⟨{{z}[ε]}[δ], ⟨y, x⟩[δ, ε]⟩[β, γ] ∈' unionEq hβ hγ hδ hε hζ hη ↔ y ⊔[η] z = x := by
   rw [mem_unionEq_iff']
   constructor
   · intro h
@@ -86,12 +86,12 @@ theorem mem_unionEq_iff (x y z : TSet ζ) :
 
 /-- The binary partition relation: `{⟨x, y, z⟩ | x ∩ y = ∅ ∧ x ∪ y = z}`. -/
 def binPartRel : TSet α :=
-  insertion3 hβ hγ hδ hε hζ (disjoint hδ hε hζ hη) ⊓' unionEq hβ hγ hδ hε hζ hη
+  insertion3 hβ hγ hδ hε hζ (disjoint hδ hε hζ hη) ⊓[β] unionEq hβ hγ hδ hε hζ hη
 
 @[simp]
 theorem mem_binPartRel_iff (x y z : TSet ζ) :
-    ⟨ { {x}' }', ⟨y, z⟩' ⟩[hγ, hδ] ∈' binPartRel hβ hγ hδ hε hζ hη ↔
-    x ⊓' y = empty hη ∧ x ⊔' y = z := by
+    ⟨{{x}[ε]}[δ], ⟨y, z⟩[δ, ε]⟩[β, γ] ∈' binPartRel hβ hγ hδ hε hζ hη ↔
+    x ⊓[η] y = empty hη ∧ x ⊔[η] y = z := by
   simp only [binPartRel, mem_inter_iff, insertion3_spec, mem_disjoint_iff, mem_unionEq_iff]
   rw [union_comm]
 
@@ -105,7 +105,7 @@ def cardAdd (x y : TSet α) : TSet α :=
 @[simp]
 theorem mem_cardAdd_iff (x y : TSet α) (z : TSet β) :
     z ∈' cardAdd hβ hγ x y ↔
-    ∃ a b : TSet β, a ∈' x ∧ b ∈' y ∧ a ⊓' b = empty hγ ∧ a ⊔' b = z := by
+    ∃ a b : TSet β, a ∈' x ∧ b ∈' y ∧ a ⊓[γ] b = empty hγ ∧ a ⊔[γ] b = z := by
   simp only [cardAdd, mem_image_iff, SetRel.mem_image, Set.mem_setOf_eq, ExternalRel,
     mem_singletons_iff, exists_and_left]
   constructor
@@ -125,7 +125,7 @@ def succ (x : TSet α) : TSet α :=
 @[simp]
 theorem mem_succ_iff (x : TSet α) (y : TSet β) :
     y ∈' succ hβ hγ x ↔
-    ∃ a : TSet β, a ∈' x ∧ ∃ b : TSet γ, ¬b ∈' a ∧ y = a ⊔' {b}' := by
+    ∃ a : TSet β, a ∈' x ∧ ∃ b : TSet γ, ¬b ∈' a ∧ y = a ⊔[γ] {b}[β] := by
   simp only [succ, mem_cardAdd_iff, mem_cardinalOne_iff, exists_and_left]
   constructor
   · rintro ⟨a, ha, _, ⟨b, hb, rfl⟩, h, rfl⟩
@@ -143,7 +143,7 @@ theorem mem_succ_iff (x : TSet α) (y : TSet β) :
     exact hb h
 
 def cardinalNat : ℕ → TSet α
-  | 0 => { empty hγ }'
+  | 0 => {empty hγ}[α]
   | n + 1 => succ hβ hγ (cardinalNat n)
 
 @[simp]
@@ -177,7 +177,7 @@ theorem mem_cardinalNat_iff (n : ℕ) :
     · rintro ⟨s, h₁, h₂⟩
       rw [Finset.card_eq_succ] at h₁
       obtain ⟨b, s, hbs, rfl, hns⟩ := h₁
-      refine ⟨a \' {b}', ⟨s, hns, ?_⟩, b, ?_, ?_⟩
+      refine ⟨a \[γ] {b}[β], ⟨s, hns, ?_⟩, b, ?_, ?_⟩
       · intro c
         simp only [mem_diff_iff, h₂, Finset.mem_insert, typedMem_singleton_iff']
         constructor

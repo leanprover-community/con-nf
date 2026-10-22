@@ -21,55 +21,55 @@ variable [Params.{u}] {α β γ δ ε ζ : Λ} (hβ : (β : TypeIndex) < α) (h�
   (hδ : (δ : TypeIndex) < γ) (hε : (ε : TypeIndex) < δ) (hζ : (ζ : TypeIndex) < ε)
 
 theorem inter_comm (x y : TSet α) :
-    x ⊓' y = y ⊓' x := by
+    x ⊓[β] y = y ⊓[β] x := by
   apply ext hβ
   intro z
   rw [mem_inter_iff, mem_inter_iff]
   exact And.comm
 
 def union (x y : TSet α) : TSet α :=
-  (xᶜ' ⊓' yᶜ')ᶜ'
+  (xᶜ[β] ⊓[β] yᶜ[β])ᶜ[β]
 
 notation:68 x:68 " ⊔[" h "] " y:68 => _root_.ConNF.union h x y
-notation:68 x:68 " ⊔' " y:68 => x ⊔[by assumption] y
+notation:68 x:68 " ⊔[" l "] " y:68 => ConNF.union (β := l) (by assumption) x y
 
 @[simp]
 theorem mem_union_iff (x y : TSet α) :
-    ∀ z : TSet β, z ∈' x ⊔' y ↔ z ∈' x ∨ z ∈' y := by
+    ∀ z : TSet β, z ∈' x ⊔[β] y ↔ z ∈' x ∨ z ∈' y := by
   rw [union]
   intro z
   rw [mem_compl_iff, mem_inter_iff, mem_compl_iff, mem_compl_iff, or_iff_not_and_not]
 
 theorem union_comm (x y : TSet α) :
-    x ⊔' y = y ⊔' x := by
+    x ⊔[β] y = y ⊔[β] x := by
   apply ext hβ
   intro z
   rw [mem_union_iff, mem_union_iff]
   exact Or.comm
 
 def symmDiff (x y : TSet α) : TSet α :=
-  (x ⊓' yᶜ') ⊔' (xᶜ' ⊓' y)
+  (x ⊓[β] yᶜ[β]) ⊔[β] (xᶜ[β] ⊓[β] y)
 
 notation:100 x:100 " ∆[" h "] " y:100 => _root_.ConNF.symmDiff h x y
-notation:100 x:100 " ∆' " y:100 => x ∆[by assumption] y
+notation:100 x:100 " ∆[" l "] " y:100 => ConNF.symmDiff (β := l) (by assumption) x y
 
 @[simp]
 theorem mem_symmDiff_iff (x y : TSet α) :
-    ∀ z : TSet β, z ∈' x ∆' y ↔ (z ∈' x ↔ ¬(z ∈' y)) := by
+    ∀ z : TSet β, z ∈' x ∆[β] y ↔ (z ∈' x ↔ ¬(z ∈' y)) := by
   rw [symmDiff]
   intro z
   simp only [mem_union_iff, mem_inter_iff, mem_compl_iff]
   tauto
 
 def diff (x y : TSet α) : TSet α :=
-  x ⊓' yᶜ'
+  x ⊓[β] yᶜ[β]
 
 notation:70 x:70 " \\[" h "] " y:70 => _root_.ConNF.diff h x y
-notation:70 x:70 " \\' " y:70 => x \[by assumption] y
+notation:70 x:70 " \\[" l "] " y:70 => ConNF.diff (β := l) (by assumption) x y
 
 @[simp]
 theorem mem_diff_iff (x y : TSet α) :
-    ∀ z : TSet β, z ∈' x \' y ↔ z ∈' x ∧ ¬(z ∈' y) := by
+    ∀ z : TSet β, z ∈' x \[β] y ↔ z ∈' x ∧ ¬(z ∈' y) := by
   rw [diff]
   intro z
   simp only [mem_inter_iff, mem_compl_iff]
@@ -89,7 +89,7 @@ theorem tSet_nonempty (h : ∃ β : Λ, (β : TypeIndex) < α) : Nonempty (TSet 
   apply cardinalOne high high
 
 def empty : TSet α :=
-  (tSet_nonempty ⟨β, hβ⟩).some ⊓' (tSet_nonempty ⟨β, hβ⟩).someᶜ'
+  (tSet_nonempty ⟨β, hβ⟩).some ⊓[β] (tSet_nonempty ⟨β, hβ⟩).someᶜ[β]
 
 @[simp]
 theorem mem_empty_iff :
@@ -99,7 +99,7 @@ theorem mem_empty_iff :
   exact and_not_self
 
 def univ : TSet α :=
-  (empty hβ)ᶜ'
+  (empty hβ)ᶜ[β]
 
 @[simp]
 theorem mem_univ_iff :
@@ -113,25 +113,25 @@ def orderedPairs : TSet α :=
 
 @[simp]
 theorem mem_orderedPairs_iff (x : TSet β) :
-    x ∈' orderedPairs hβ hγ hδ ↔ ∃ a b, x = ⟨a, b⟩' := by
+    x ∈' orderedPairs hβ hγ hδ ↔ ∃ a b : TSet δ, x = ⟨a, b⟩[β, γ] := by
   simp only [orderedPairs, mem_vCross_iff, mem_univ_iff, and_true]
 
 def converse (x : TSet α) : TSet α :=
-  converse' hβ hγ hδ x ⊓' orderedPairs hβ hγ hδ
+  converse' hβ hγ hδ x ⊓[β] orderedPairs hβ hγ hδ
 
 @[simp]
 theorem op_mem_converse_iff (x : TSet α) :
-    ∀ a b, ⟨a, b⟩' ∈' converse hβ hγ hδ x ↔ ⟨b, a⟩' ∈' x := by
+    ∀ a b : TSet δ, ⟨a, b⟩[β, γ] ∈' converse hβ hγ hδ x ↔ ⟨b, a⟩[β, γ] ∈' x := by
   intro a b
   simp only [converse, mem_inter_iff, converse'_spec, mem_orderedPairs_iff, op_inj, exists_and_left,
     exists_eq', and_true]
 
 def cross (x y : TSet γ) : TSet α :=
-  converse hβ hγ hδ (vCross hβ hγ hδ x) ⊓' vCross hβ hγ hδ y
+  converse hβ hγ hδ (vCross hβ hγ hδ x) ⊓[β] vCross hβ hγ hδ y
 
 @[simp]
 theorem mem_cross_iff (x y : TSet γ) :
-    ∀ a, a ∈' cross hβ hγ hδ x y ↔ ∃ b c, a = ⟨b, c⟩' ∧ b ∈' x ∧ c ∈' y := by
+    ∀ a : TSet β, a ∈' cross hβ hγ hδ x y ↔ ∃ b c : TSet δ, a = ⟨b, c⟩[β, γ] ∧ b ∈' x ∧ c ∈' y := by
   intro a
   rw [cross, mem_inter_iff, mem_vCross_iff]
   constructor
@@ -144,29 +144,29 @@ theorem mem_cross_iff (x y : TSet γ) :
     exact ⟨⟨c, b, ⟨rfl, rfl⟩, h₁⟩, ⟨b, c, ⟨rfl, rfl⟩, h₂⟩⟩
 
 def singletonImage (x : TSet β) : TSet α :=
-  singletonImage' hβ hγ hδ hε x ⊓' (cross hβ hγ hδ (cardinalOne hδ hε) (cardinalOne hδ hε))
+  singletonImage' hβ hγ hδ hε x ⊓[β] (cross hβ hγ hδ (cardinalOne hδ hε) (cardinalOne hδ hε))
 
 @[simp]
 theorem singletonImage_spec (x : TSet β) :
-    ∀ z w,
-    ⟨ {z}', {w}' ⟩' ∈' singletonImage hβ hγ hδ hε x ↔ ⟨z, w⟩' ∈' x := by
+    ∀ z w : TSet ε,
+    ⟨{z}[δ], {w}[δ]⟩[β, γ] ∈' singletonImage hβ hγ hδ hε x ↔ ⟨z, w⟩[γ, δ] ∈' x := by
   intro z w
   rw [singletonImage, mem_inter_iff, singletonImage'_spec, and_iff_left_iff_imp]
   intro hzw
   rw [mem_cross_iff]
-  refine ⟨{z}', {w}', rfl, ?_⟩
+  refine ⟨{z}[δ], {w}[δ], rfl, ?_⟩
   simp only [mem_cardinalOne_iff, singleton_inj, exists_eq', and_self]
 
 theorem exists_of_mem_singletonImage {x : TSet β} {z w : TSet δ}
-    (h : ⟨z, w⟩' ∈' singletonImage hβ hγ hδ hε x) :
-    ∃ a b, z = {a}' ∧ w = {b}' := by
+    (h : ⟨z, w⟩[β, γ] ∈' singletonImage hβ hγ hδ hε x) :
+    ∃ a b : TSet ε, z = {a}[δ] ∧ w = {b}[δ] := by
   simp only [singletonImage, mem_inter_iff, mem_cross_iff, op_inj, mem_cardinalOne_iff] at h
   obtain ⟨-, _, _, ⟨rfl, rfl⟩, ⟨a, rfl⟩, ⟨b, rfl⟩⟩ := h
   exact ⟨a, b, rfl, rfl⟩
 
 /-- Turn a model element encoding a relation into an actual relation. -/
 def ExternalRel (r : TSet α) : SetRel (TSet δ) (TSet δ) :=
-  {(x, y) | ⟨x, y⟩' ∈' r}
+  {(x, y) | ⟨x, y⟩[β, γ] ∈' r}
 
 @[simp]
 theorem externalRel_converse (r : TSet α) :
@@ -176,7 +176,7 @@ theorem externalRel_converse (r : TSet α) :
 
 /-- The codomain of a relation. -/
 def cod (r : TSet α) : TSet γ :=
-  (typeLower high hβ hγ hδ (singletonImage high hβ hγ hδ r)ᶜ[high])ᶜ'
+  (typeLower high hβ hγ hδ (singletonImage high hβ hγ hδ r)ᶜ[high])ᶜ[δ]
 
 @[simp]
 theorem mem_cod_iff (r : TSet α) (x : TSet δ) :
@@ -190,7 +190,7 @@ theorem mem_cod_iff (r : TSet α) (x : TSet δ) :
     rw [singletonImage_spec] at hy
     exact ⟨a, hy⟩
   · rintro ⟨a, ha⟩
-    use {a}'
+    use {a}[γ]
     rw [singletonImage_spec]
     exact ha
 
@@ -205,7 +205,7 @@ theorem mem_dom_iff (r : TSet α) (x : TSet δ) :
 
 /-- The field of a relation. -/
 def field (r : TSet α) : TSet γ :=
-  dom hβ hγ hδ r ⊔' cod hβ hγ hδ r
+  dom hβ hγ hδ r ⊔[δ] cod hβ hγ hδ r
 
 @[simp]
 theorem mem_field_iff (r : TSet α) (x : TSet δ) :
@@ -213,18 +213,18 @@ theorem mem_field_iff (r : TSet α) (x : TSet δ) :
   rw [field, mem_union_iff, mem_dom_iff, mem_cod_iff, SetRel.field, Set.mem_union]
 
 def subset : TSet α :=
-  subset' hβ hγ hδ hε ⊓' orderedPairs hβ hγ hδ
+  subset' hβ hγ hδ hε ⊓[β] orderedPairs hβ hγ hδ
 
 @[simp]
 theorem subset_spec :
-    ∀ a b, ⟨a, b⟩' ∈' subset hβ hγ hδ hε ↔ a ⊆[TSet ε] b := by
+    ∀ a b : TSet δ, ⟨a, b⟩[β, γ] ∈' subset hβ hγ hδ hε ↔ a ⊆[TSet ε] b := by
   intro a b
   simp only [subset, mem_inter_iff, subset'_spec, mem_orderedPairs_iff, op_inj, exists_and_left,
     exists_eq', and_true]
 
 @[simp]
 theorem singleton_subset_iff (a : TSet β) (b : TSet α) :
-    {a}' ⊆[TSet β] b ↔ a ∈' b := by
+    {a}[α] ⊆[TSet β] b ↔ a ∈' b := by
   constructor
   · intro h
     apply h a
@@ -235,11 +235,11 @@ theorem singleton_subset_iff (a : TSet β) (b : TSet α) :
     exact h
 
 def membership : TSet α :=
-  subset hβ hγ hδ hε ⊓' cross hβ hγ hδ (cardinalOne hδ hε) (univ hδ)
+  subset hβ hγ hδ hε ⊓[β] cross hβ hγ hδ (cardinalOne hδ hε) (univ hδ)
 
 @[simp]
 theorem membership_spec :
-    ∀ a b, ⟨{a}', b⟩' ∈' membership hβ hγ hδ hε ↔ a ∈' b := by
+    ∀ (a : TSet ε) (b : TSet δ), ⟨{a}[δ], b⟩[β, γ] ∈' membership hβ hγ hδ hε ↔ a ∈' b := by
   intro a b
   rw [membership, mem_inter_iff, subset_spec]
   simp only [mem_cross_iff, op_inj, mem_cardinalOne_iff, mem_univ_iff, and_true, exists_and_right,
@@ -255,7 +255,7 @@ theorem membership_spec :
 def powerset (x : TSet β) : TSet α :=
   dom high high hβ
     (subset high high hβ hγ ⊓[high]
-      vCross high high hβ {x}')
+      vCross high high hβ {x}[α])
 
 @[simp]
 theorem mem_powerset_iff (x y : TSet β) :
@@ -274,12 +274,12 @@ theorem mem_powerset_iff (x y : TSet β) :
 
 /-- The set `ι²''x = {{{a}} | a ∈ x}`. -/
 def doubleSingletons (x : TSet γ) : TSet α :=
-  cross hβ hγ hδ x x ⊓' cardinalOne hβ hγ
+  cross hβ hγ hδ x x ⊓[β] cardinalOne hβ hγ
 
 @[simp]
 theorem mem_doubleSingletons_iff (x : TSet γ) :
     ∀ y : TSet β, y ∈' doubleSingletons hβ hγ hδ x ↔
-    ∃ z : TSet δ, z ∈' x ∧ y = { {z}' }' := by
+    ∃ z : TSet δ, z ∈' x ∧ y = {{z}[γ]}[β] := by
   intro y
   rw [doubleSingletons, mem_inter_iff, mem_cross_iff, mem_cardinalOne_iff]
   constructor
@@ -301,12 +301,12 @@ def singletonUnion (x : TSet α) : TSet β :=
 
 @[simp]
 theorem mem_singletonUnion_iff (x : TSet α) :
-    ∀ y : TSet γ, y ∈' singletonUnion hβ hγ x ↔ {y}' ∈' x := by
+    ∀ y : TSet γ, y ∈' singletonUnion hβ hγ x ↔ {y}[β] ∈' x := by
   intro y
   simp only [singletonUnion, mem_typeLower_iff, mem_vCross_iff, op_inj]
   constructor
   · intro h
-    obtain ⟨a, b, ⟨rfl, rfl⟩, hy⟩ := h {y}'
+    obtain ⟨a, b, ⟨rfl, rfl⟩, hy⟩ := h {y}[β]
     exact hy
   · intro h b
     exact ⟨b, _, ⟨rfl, rfl⟩, h⟩
@@ -318,7 +318,7 @@ def singletons (x : TSet β) : TSet α :=
 
 @[simp]
 theorem mem_singletons_iff (x : TSet β) :
-    ∀ y : TSet β, y ∈' singletons hβ hγ x ↔ ∃ t : TSet γ, t ∈' x ∧ y = {t}' := by
+    ∀ y : TSet β, y ∈' singletons hβ hγ x ↔ ∃ t : TSet γ, t ∈' x ∧ y = {t}[β] := by
   intro y
   simp only [singletons, mem_singletonUnion_iff, mem_doubleSingletons_iff, singleton_inj]
 
@@ -359,7 +359,8 @@ def orderedTriples : TSet α :=
 
 @[simp]
 theorem mem_orderedTriples_iff (x : TSet β) :
-    x ∈' orderedTriples hβ hγ hδ hε hζ ↔ ∃ a b c, x = ⟨ { {a}' }', ⟨b, c⟩' ⟩' := by
+    x ∈' orderedTriples hβ hγ hδ hε hζ ↔
+      ∃ a b c : TSet ζ, x = ⟨{{a}[ε]}[δ], ⟨b, c⟩[δ, ε]⟩[β, γ] := by
   simp only [orderedTriples, mem_cross_iff, mem_doubleSingletons_iff, mem_univ_iff, true_and,
     mem_vCross_iff, and_true]
   constructor
@@ -369,28 +370,28 @@ theorem mem_orderedTriples_iff (x : TSet β) :
     exact ⟨_, _, rfl, ⟨_, rfl⟩, ⟨_, _, rfl⟩⟩
 
 def insertion2 (x : TSet γ) : TSet α :=
-  insertion2' hβ hγ hδ hε hζ x ⊓' orderedTriples hβ hγ hδ hε hζ
+  insertion2' hβ hγ hδ hε hζ x ⊓[β] orderedTriples hβ hγ hδ hε hζ
 
 @[simp]
 theorem insertion2_spec (x : TSet γ) :
-    ∀ a b c, ⟨ { {a}' }', ⟨b, c⟩' ⟩' ∈' insertion2 hβ hγ hδ hε hζ x ↔
-    ⟨a, c⟩' ∈' x := by
+    ∀ a b c : TSet ζ, ⟨{{a}[ε]}[δ], ⟨b, c⟩[δ, ε]⟩[β, γ] ∈' insertion2 hβ hγ hδ hε hζ x ↔
+    ⟨a, c⟩[δ, ε] ∈' x := by
   simp only [insertion2, mem_inter_iff, insertion2'_spec, mem_orderedTriples_iff, op_inj,
     singleton_inj, exists_and_left, exists_eq', and_true, implies_true]
 
 def insertion3 (x : TSet γ) : TSet α :=
-  insertion3' hβ hγ hδ hε hζ x ⊓' orderedTriples hβ hγ hδ hε hζ
+  insertion3' hβ hγ hδ hε hζ x ⊓[β] orderedTriples hβ hγ hδ hε hζ
 
 @[simp]
 theorem insertion3_spec (x : TSet γ) :
-    ∀ a b c, ⟨ { {a}' }', ⟨b, c⟩' ⟩' ∈' insertion3 hβ hγ hδ hε hζ x ↔
-    ⟨a, b⟩' ∈' x := by
+    ∀ a b c : TSet ζ, ⟨{{a}[ε]}[δ], ⟨b, c⟩[δ, ε]⟩[β, γ] ∈' insertion3 hβ hγ hδ hε hζ x ↔
+    ⟨a, b⟩[δ, ε] ∈' x := by
   simp only [insertion3, mem_inter_iff, insertion3'_spec, mem_orderedTriples_iff, op_inj,
     singleton_inj, exists_and_left, exists_eq', and_true, implies_true]
 
 /-- The preimage of a set under a relation. -/
 def preimage (r : TSet α) (x : TSet γ) : TSet γ :=
-  dom hβ hγ hδ (r ⊓' vCross hβ hγ hδ x)
+  dom hβ hγ hδ (r ⊓[β] vCross hβ hγ hδ x)
 
 @[simp]
 theorem mem_preimage_iff (r : TSet α) (x : TSet γ) (y : TSet δ) :

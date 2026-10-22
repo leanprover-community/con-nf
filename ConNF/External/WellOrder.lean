@@ -77,7 +77,7 @@ theorem apply_eq_of_isWellOrder' {X : Type _} {r : SetRel X X} {f : X → X}
 
 theorem exists_common_support_of_internallyWellOrdered' {x : TSet δ}
     (h : InternallyWellOrdered hγ hδ hε x) :
-    ∃ S : Support β, ∀ y, y ∈' x → S.Supports { { {y}' }' }[hγ] := by
+    ∃ S : Support β, ∀ y : TSet ε, y ∈' x → S.Supports {{{y}[δ]}[γ]}[β] := by
   obtain (h | ⟨r, h, rfl⟩) := h
   · obtain (h | ⟨y, hy⟩) := h.eq_empty_or_singleton
     · use ⟨Enumeration.empty, Enumeration.empty⟩
@@ -111,7 +111,7 @@ theorem exists_common_support_of_internallyWellOrdered' {x : TSet δ}
 
 include hγ in
 theorem Support.Supports.ofSingleton {S : Support α} {x : TSet β}
-    (h : S.Supports {x}') :
+    (h : S.Supports {x}[α]) :
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
     (S.strong ↘ hβ).Supports x := by
@@ -142,13 +142,13 @@ theorem Support.Supports.ofSingleton {S : Support α} {x : TSet β}
 
 include hγ in
 theorem supports_of_supports_singletons {S : Support α} {s : Set (TSet β)}
-    (h : ∀ x ∈ s, S.Supports {x}') :
+    (h : ∀ x ∈ s, S.Supports {x}[α]) :
     ∃ S : Support β, ∀ x ∈ s, S.Supports x :=
   ⟨_, λ x hx ↦ (h x hx).ofSingleton hβ hγ⟩
 
 theorem exists_common_support_of_internallyWellOrdered {x : TSet δ}
     (h : InternallyWellOrdered hγ hδ hε x) :
-    ∃ S : Support δ, ∀ y, y ∈' x → S.Supports {y}' := by
+    ∃ S : Support δ, ∀ y : TSet ε, y ∈' x → S.Supports {y}[δ] := by
   obtain ⟨S, hS⟩ := exists_common_support_of_internallyWellOrdered' hγ hδ hε h
   have := supports_of_supports_singletons (S := S)
       (s := singleton hδ '' (singleton hε '' {y | y ∈' x})) hγ hδ ?_
@@ -172,7 +172,7 @@ theorem internallyWellOrdered_of_common_support_of_nontrivial {x : TSet γ}
     (S : Support δ) (hS : ∀ y : TSet δ, y ∈' x → S.Supports y) :
     InternallyWellOrdered hβ hγ hδ x := by
   have := exists_of_symmetric
-      {p : TSet β | ∃ a b : TSet δ, p = ⟨a, b⟩' ∧ a ∈' x ∧ b ∈' x ∧ WellOrderingRel a b} hβ ?_
+      {p : TSet β | ∃ a b : TSet δ, p = ⟨a, b⟩[β, γ] ∧ a ∈' x ∧ b ∈' x ∧ WellOrderingRel a b} hβ ?_
   swap
   · use S ↗ hδ ↗ hγ ↗ hβ
     intro ρ hρ
