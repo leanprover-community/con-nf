@@ -15,7 +15,7 @@ In this file, we define base approximations.
 noncomputable section
 universe u
 
-open Cardinal Ordinal Rel Set
+open Cardinal Ordinal Set SetRel
 open scoped symmDiff
 
 namespace ConNF
@@ -23,19 +23,19 @@ namespace ConNF
 variable [Params.{u}]
 
 structure BaseApprox where
-  exceptions : Rel Atom Atom
-  litters : Rel Litter Litter
+  exceptions : SetRel Atom Atom
+  litters : SetRel Litter Litter
   exceptions_permutative : exceptions.Permutative
   litters_permutative' : litters.Permutative
   exceptions_small (L : Litter) : Small (Lᴬ ∩ exceptions.dom)
 
 namespace BaseApprox
 
-instance : SuperL BaseApprox (Rel Litter Litter) where
+instance : SuperL BaseApprox (SetRel Litter Litter) where
   superL := litters
 
 @[simp]
-theorem mk_litters (exceptions : Rel Atom Atom) (litters : Rel Litter Litter)
+theorem mk_litters (exceptions : SetRel Atom Atom) (litters : SetRel Litter Litter)
     (exceptions_permutative : exceptions.Permutative)
     (litters_permutative' : litters.Permutative)
     (exceptions_small : ∀ L, Small (Lᴬ ∩ exceptions.dom)) :
@@ -134,12 +134,15 @@ theorem nearLitterEquiv_not_mem_dom (ψ : BaseApprox) (L : Litter) (i : κ) :
     (nearLitterEquiv (ψ.sublitter L) i : Atom) ∉ ψ.exceptions.dom :=
   (nearLitterEquiv (ψ.sublitter L) i).prop.right
 
-inductive typical (ψ : BaseApprox) : Rel Atom Atom where
-  | mk (L₁ L₂ : Litter) (h : ψᴸ L₁ L₂) (i : κ) :
-      ψ.typical (nearLitterEquiv (ψ.sublitter L₁) i) (nearLitterEquiv (ψ.sublitter L₂) i)
+inductive Typical (ψ : BaseApprox) : Atom → Atom → Prop where
+  | mk (L₁ L₂ : Litter) (h : L₁ ~[ψᴸ] L₂) (i : κ) :
+      Typical ψ (nearLitterEquiv (ψ.sublitter L₁) i) (nearLitterEquiv (ψ.sublitter L₂) i)
+
+def typical (ψ : BaseApprox) : SetRel Atom Atom :=
+  {(a₁, a₂) | Typical ψ a₁ a₂}
 
 theorem typical_iff {ψ : BaseApprox} {a₁ a₂ : Atom} :
-    ψ.typical a₁ a₂ ↔ ψᴸ a₁ᴸ a₂ᴸ ∧ ∃ i,
+    a₁ ~[ψ.typical] a₂ ↔ a₁ᴸ ~[ψᴸ] a₂ᴸ ∧ ∃ i,
       a₁ = nearLitterEquiv (ψ.sublitter a₁ᴸ) i ∧ a₂ = nearLitterEquiv (ψ.sublitter a₂ᴸ) i := by
   constructor
   · rintro ⟨L₁, L₂, h, i⟩
@@ -147,37 +150,37 @@ theorem typical_iff {ψ : BaseApprox} {a₁ a₂ : Atom} :
     exact ⟨h, i, rfl, rfl⟩
   · rintro ⟨h, i, h₁, h₂⟩
     rw [h₁, h₂]
-    exact typical.mk a₁ᴸ a₂ᴸ h i
+    exact Typical.mk a₁ᴸ a₂ᴸ h i
 
-theorem not_mem_dom_of_typical {ψ : BaseApprox} {a₁ a₂ : Atom} (h : ψ.typical a₁ a₂) :
+theorem not_mem_dom_of_typical {ψ : BaseApprox} {a₁ a₂ : Atom} (h : a₁ ~[ψ.typical] a₂) :
     a₁ ∉ ψ.exceptions.dom := by
   rw [typical_iff] at h
   obtain ⟨-, i, h, -⟩ := h
   have := ψ.nearLitterEquiv_not_mem_dom a₁ᴸ i
   rwa [h]
 
-theorem typical_inv_of_typical {ψ : BaseApprox} {a₁ a₂ : Atom} (h : ψ.typical a₁ a₂) :
-    ψ⁻¹.typical a₂ a₁ := by
+theorem typical_inv_of_typical {ψ : BaseApprox} {a₁ a₂ : Atom} (h : a₁ ~[ψ.typical] a₂) :
+    a₂ ~[ψ⁻¹.typical] a₁ := by
   rw [typical_iff] at h ⊢
   obtain ⟨h, i, h₁, h₂⟩ := h
   rw [inv_sublitter, inv_sublitter]
   exact ⟨h, i, h₂, h₁⟩
 
 theorem typical_inv_iff_typical {ψ : BaseApprox} {a₁ a₂ : Atom} :
-    ψ⁻¹.typical a₂ a₁ ↔ ψ.typical a₁ a₂ :=
+    a₂ ~[ψ⁻¹.typical] a₁ ↔ a₁ ~[ψ.typical] a₂ :=
   ⟨typical_inv_of_typical, typical_inv_of_typical⟩
 
 @[simp]
 theorem inv_typical {ψ : BaseApprox} :
     ψ⁻¹.typical = ψ.typical.inv := by
-  ext a₁ a₂
+  ext ⟨a₁, a₂⟩
   rw [typical_inv_iff_typical]
   rfl
 
-def atoms (ψ : BaseApprox) : Rel Atom Atom :=
+def atoms (ψ : BaseApprox) : SetRel Atom Atom :=
   ψ.exceptions ⊔ ψ.typical
 
-instance : SuperA BaseApprox (Rel Atom Atom) where
+instance : SuperA BaseApprox (SetRel Atom Atom) where
   superA := atoms
 
 theorem atoms_def (ψ : BaseApprox) :
@@ -190,7 +193,7 @@ theorem exceptions_le_atoms (ψ : BaseApprox) :
 
 theorem exceptions_dom_subset_atoms_dom (ψ : BaseApprox) :
     ψ.exceptions.dom ⊆ ψᴬ.dom :=
-  Rel.dom_mono ψ.exceptions_le_atoms
+  SetRel.dom_mono ψ.exceptions_le_atoms
 
 theorem mem_dom_atoms_of_litter_mem_dom {ψ : BaseApprox} {a : Atom} (h : aᴸ ∈ ψᴸ.dom) :
     a ∈ ψᴬ.dom := by
@@ -230,20 +233,20 @@ theorem typical_coinjective (ψ : BaseApprox) :
   have := ψ⁻¹.typical_injective
   rwa [inv_typical, inv_injective_iff] at this
 
-theorem typical_codomEqDom (ψ : BaseApprox) :
-    ψ.typical.CodomEqDom := by
-  rw [codomEqDom_iff']
+theorem typical_codEqDom (ψ : BaseApprox) :
+    ψ.typical.CodEqDom := by
+  rw [codEqDom_iff']
   constructor
   · rintro _ _ ⟨L₁, L₂, h, i⟩
     obtain ⟨L₃, h'⟩ := ψ.litters_permutative.mem_dom h
-    exact ⟨_, typical.mk L₂ L₃ h' i⟩
+    exact ⟨_, Typical.mk L₂ L₃ h' i⟩
   · rintro _ _ ⟨L₁, L₂, h, i⟩
-    obtain ⟨L₀, h'⟩ := ψ.litters_permutative.mem_codom h
-    exact ⟨_, typical.mk L₀ L₁ h' i⟩
+    obtain ⟨L₀, h'⟩ := ψ.litters_permutative.mem_cod h
+    exact ⟨_, Typical.mk L₀ L₁ h' i⟩
 
 theorem typical_permutative (ψ : BaseApprox) :
     ψ.typical.Permutative :=
-  ⟨⟨ψ.typical_injective, ψ.typical_coinjective⟩, ψ.typical_codomEqDom⟩
+  ⟨⟨ψ.typical_injective, ψ.typical_coinjective⟩, ψ.typical_codEqDom⟩
 
 theorem exceptions_typical_disjoint (ψ : BaseApprox) :
     Disjoint ψ.exceptions.dom ψ.typical.dom := by
@@ -253,14 +256,14 @@ theorem exceptions_typical_disjoint (ψ : BaseApprox) :
 
 theorem atoms_permutative (ψ : BaseApprox) :
     ψᴬ.Permutative :=
-  sup_permutative ψ.exceptions_permutative ψ.typical_permutative ψ.exceptions_typical_disjoint
+  ψ.exceptions_permutative.sup ψ.typical_permutative ψ.exceptions_typical_disjoint
 
 theorem atoms_image_eq_typical_image (ψ : BaseApprox) {s : Set Atom}
     (hs : Disjoint ψ.exceptions.dom s) :
     ψᴬ.image s = ψ.typical.image s := by
   rw [atoms_def, sup_image, image_empty_of_disjoint_dom hs, empty_union]
 
-theorem typical_image_sublitter (ψ : BaseApprox) {L₁ L₂ : Litter} (h : ψᴸ L₁ L₂) :
+theorem typical_image_sublitter (ψ : BaseApprox) {L₁ L₂ : Litter} (h : L₁ ~[ψᴸ] L₂) :
     ψ.typical.image (ψ.sublitter L₁)ᴬ = (ψ.sublitter L₂)ᴬ := by
   ext a
   constructor
@@ -272,11 +275,11 @@ theorem typical_image_sublitter (ψ : BaseApprox) {L₁ L₂ : Litter} (h : ψ�
     use nearLitterEquiv (ψ.sublitter L₁) ((nearLitterEquiv (ψ.sublitter L₂)).symm ⟨a, ha⟩)
     constructor
     · exact Subtype.coe_prop _
-    · convert typical.mk L₁ L₂ h ((nearLitterEquiv (ψ.sublitter L₂)).symm ⟨a, ha⟩) using 1
-      rw [Equiv.apply_symm_apply]
+    · have := Typical.mk L₁ L₂ h ((nearLitterEquiv (ψ.sublitter L₂)).symm ⟨a, ha⟩)
+      rwa [Equiv.apply_symm_apply] at this
 
 theorem image_near_of_near (ψ : BaseApprox) (s : Set Atom)
-    {L₁ L₂ : Litter} (hL : ψᴸ L₁ L₂) (hsL : s ~ L₁ᴬ) :
+    {L₁ L₂ : Litter} (hL : L₁ ~[ψᴸ] L₂) (hsL : s ~ L₁ᴬ) :
     ψᴬ.image s ~ L₂ᴬ := by
   calc
     ψᴬ.image s
@@ -286,7 +289,7 @@ theorem image_near_of_near (ψ : BaseApprox) (s : Set Atom)
           (image_small_of_coinjective ψ.atoms_permutative.toCoinjective hsL)
     _ = ψᴬ.image ((ψ.sublitter L₁)ᴬ ∪ (L₁ᴬ ∩ ψ.exceptions.dom)) := by
           rw [sublitter_atoms, diff_union_inter]
-    _ = ψᴬ.image (ψ.sublitter L₁)ᴬ ∪ ψᴬ.image (L₁ᴬ ∩ ψ.exceptions.dom) := by rw [Rel.image_union]
+    _ = ψᴬ.image (ψ.sublitter L₁)ᴬ ∪ ψᴬ.image (L₁ᴬ ∩ ψ.exceptions.dom) := by rw [SetRel.image_union]
     _ ~ ψᴬ.image (ψ.sublitter L₁)ᴬ := near_union_of_small
           (image_small_of_coinjective ψ.atoms_permutative.toCoinjective (ψ.exceptions_small L₁))
     _ = ψ.typical.image (ψ.sublitter L₁)ᴬ :=
@@ -294,14 +297,14 @@ theorem image_near_of_near (ψ : BaseApprox) (s : Set Atom)
     _ = (ψ.sublitter L₂)ᴬ := ψ.typical_image_sublitter hL
     _ ~ L₂ᴬ := (ψ.sublitter L₂).atoms_near_litter
 
-def nearLitters (ψ : BaseApprox) : Rel NearLitter NearLitter :=
-  λ N₁ N₂ ↦ ψᴸ N₁ᴸ N₂ᴸ ∧ N₁ᴬ ⊆ ψᴬ.dom ∧ ψᴬ.image N₁ᴬ = N₂ᴬ
+def nearLitters (ψ : BaseApprox) : SetRel NearLitter NearLitter :=
+  {(N₁, N₂) | N₁ᴸ ~[ψᴸ] N₂ᴸ ∧ N₁ᴬ ⊆ ψᴬ.dom ∧ ψᴬ.image N₁ᴬ = N₂ᴬ}
 
-instance : SuperN BaseApprox (Rel NearLitter NearLitter) where
+instance : SuperN BaseApprox (SetRel NearLitter NearLitter) where
   superN := nearLitters
 
 theorem nearLitters_def (ψ : BaseApprox) {N₁ N₂ : NearLitter} :
-    ψᴺ N₁ N₂ ↔ ψᴸ N₁ᴸ N₂ᴸ ∧ N₁ᴬ ⊆ ψᴬ.dom ∧ ψᴬ.image N₁ᴬ = N₂ᴬ :=
+    N₁ ~[ψᴺ] N₂ ↔ N₁ᴸ ~[ψᴸ] N₂ᴸ ∧ N₁ᴬ ⊆ ψᴬ.dom ∧ ψᴬ.image N₁ᴬ = N₂ᴬ :=
   Iff.rfl
 
 theorem mem_dom_nearLitters {ψ : BaseApprox} {N : NearLitter}
@@ -319,26 +322,28 @@ theorem mem_dom_nearLitters {ψ : BaseApprox} {N : NearLitter}
 
 @[simp]
 theorem inv_nearLitters (ψ : BaseApprox) : ψ⁻¹ᴺ = ψᴺ.inv := by
-  ext N₁ N₂
-  rw [inv_def, nearLitters_def, nearLitters_def, inv_litters, inv_def, inv_atoms,
-    and_congr_right_iff, inv_image]
+  ext ⟨N₁, N₂⟩
+  rw [mem_inv, nearLitters_def, nearLitters_def, inv_litters, mem_inv, inv_atoms,
+    and_congr_right_iff, image_inv]
   intro
   constructor
   · rintro ⟨h₁, h₂⟩
     have := h₂.symm.trans_subset (ψᴬ.preimage_subset_dom N₁ᴬ)
     exact ⟨this, (ψ.atoms_permutative.preimage_eq_iff_image_eq h₁ this).mp h₂⟩
   · rintro ⟨h₁, h₂⟩
-    have := h₂.symm.trans_subset (ψᴬ.image_subset_codom N₂ᴬ)
+    have := h₂.symm.trans_subset (ψᴬ.image_subset_cod N₂ᴬ)
     exact ⟨this, (ψ.atoms_permutative.preimage_eq_iff_image_eq this h₁).mpr h₂⟩
 
-theorem atoms_subset_dom_of_nearLitters_left {ψ : BaseApprox} {N₁ N₂ : NearLitter} (h : ψᴺ N₁ N₂) :
+theorem atoms_subset_dom_of_nearLitters_left {ψ : BaseApprox} {N₁ N₂ : NearLitter}
+    (h : N₁ ~[ψᴺ] N₂) :
     N₁ᴬ ⊆ ψᴬ.dom :=
   h.2.1
 
-theorem atoms_subset_dom_of_nearLitters_right {ψ : BaseApprox} {N₁ N₂ : NearLitter} (h : ψᴺ N₁ N₂) :
+theorem atoms_subset_dom_of_nearLitters_right {ψ : BaseApprox} {N₁ N₂ : NearLitter}
+    (h : N₁ ~[ψᴺ] N₂) :
     N₂ᴬ ⊆ ψᴬ.dom := by
-  have := atoms_subset_dom_of_nearLitters_left (show ψ⁻¹ᴺ N₂ N₁ from ψ.inv_nearLitters ▸ h)
-  rwa [inv_atoms, inv_dom, ψ.atoms_permutative.codom_eq_dom] at this
+  have := atoms_subset_dom_of_nearLitters_left (show N₂ ~[ψ⁻¹ᴺ] N₁ from ψ.inv_nearLitters ▸ h)
+  rwa [inv_atoms, dom_inv, ψ.atoms_permutative.cod_eq_dom] at this
 
 theorem nearLitters_injective (ψ : BaseApprox) : ψᴺ.Injective := by
   constructor
@@ -352,7 +357,7 @@ theorem nearLitters_coinjective (ψ : BaseApprox) : ψᴺ.Coinjective := by
   have := ψ⁻¹.nearLitters_injective
   rwa [inv_nearLitters, inv_injective_iff] at this
 
-theorem nearLitters_codom_subset_dom (ψ : BaseApprox) : ψᴺ.codom ⊆ ψᴺ.dom := by
+theorem nearLitters_cod_subset_dom (ψ : BaseApprox) : ψᴺ.cod ⊆ ψᴺ.dom := by
   rintro N₂ ⟨N₁, h⟩
   obtain ⟨L₃, hL₃⟩ := ψ.litters_permutative.mem_dom h.1
   use ⟨L₃, ψᴬ.image N₂ᴬ, ψ.image_near_of_near N₂ᴬ hL₃ N₂.atoms_near_litter⟩
@@ -360,8 +365,8 @@ theorem nearLitters_codom_subset_dom (ψ : BaseApprox) : ψᴺ.codom ⊆ ψᴺ.d
 
 theorem nearLitters_permutative (ψ : BaseApprox) : ψᴺ.Permutative := by
   refine ⟨⟨ψ.nearLitters_injective, ψ.nearLitters_coinjective⟩,
-    ⟨subset_antisymm ψ.nearLitters_codom_subset_dom ?_⟩⟩
-  have := ψ⁻¹.nearLitters_codom_subset_dom
+    ⟨subset_antisymm ψ.nearLitters_cod_subset_dom ?_⟩⟩
+  have := ψ⁻¹.nearLitters_cod_subset_dom
   rwa [inv_nearLitters] at this
 
 instance : LE BaseApprox where
@@ -384,10 +389,10 @@ theorem sublitter_eq_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) (L : Litter) :
 
 theorem typical_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
     ψ.typical ≤ χ.typical := by
-  intro a₁ a₂ hψ
+  rintro ⟨a₁, a₂⟩ hψ
   obtain ⟨L₁, L₂, hψ, i⟩ := hψ
   rw [sublitter_eq_of_le h, sublitter_eq_of_le h]
-  exact ⟨L₁, L₂, litters_le_of_le h L₁ L₂ hψ, i⟩
+  exact ⟨L₁, L₂, litters_le_of_le h hψ, i⟩
 
 theorem atoms_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
     ψᴬ ≤ χᴬ :=
@@ -395,15 +400,15 @@ theorem atoms_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
 
 theorem nearLitters_le_of_le {ψ χ : BaseApprox} (h : ψ ≤ χ) :
     ψᴺ ≤ χᴺ := by
-  rintro N₁ N₂ ⟨h₁, h₂, h₃⟩
-  refine ⟨litters_le_of_le h N₁ᴸ N₂ᴸ h₁, ?_, ?_⟩
+  rintro ⟨N₁, N₂⟩ ⟨h₁, h₂, h₃⟩
+  refine ⟨litters_le_of_le h h₁, ?_, ?_⟩
   · exact h₂.trans <| dom_mono <| atoms_le_of_le h
   · rw [← h₃]
     symm
     apply image_eq_of_le_of_le (atoms_le_of_le h)
     intro a₁ ha₁ a₂ ha₂
     obtain ⟨a₃, ha₃⟩ := h₂ ha₁
-    cases χ.atoms_permutative.coinjective ha₂ (atoms_le_of_le h a₁ a₃ ha₃)
+    cases χ.atoms_permutative.coinjective ha₂ (atoms_le_of_le h ha₃)
     exact ha₃
 
 /-- This creates new definitions of `·ᴬ` and `·ᴺ`, but the instances are definitionally equal
@@ -417,8 +422,8 @@ instance : BaseActionClass BaseApprox where
 section addOrbit
 
 def addOrbitLitters (f : ℤ → Litter) :
-    Rel Litter Litter :=
-  λ L₁ L₂ ↦ ∃ n : ℤ, L₁ = f n ∧ L₂ = f (n + 1)
+    SetRel Litter Litter :=
+  {(L₁, L₂) | ∃ n : ℤ, L₁ = f n ∧ L₂ = f (n + 1)}
 
 @[simp]
 theorem addOrbitLitters_dom (f : ℤ → Litter) :
@@ -430,8 +435,8 @@ theorem addOrbitLitters_dom (f : ℤ → Litter) :
   · rintro ⟨n, rfl⟩
     exact ⟨_, n, rfl, rfl⟩
 
-theorem addOrbitLitters_codomEqDom (f : ℤ → Litter) :
-    (addOrbitLitters f).CodomEqDom := by
+theorem addOrbitLitters_codEqDom (f : ℤ → Litter) :
+    (addOrbitLitters f).CodEqDom := by
   constructor
   ext L
   constructor
@@ -455,7 +460,7 @@ theorem addOrbitLitters_oneOne (f : ℤ → Litter) (hf : ∀ m n k, f m = f n �
 theorem addOrbitLitters_permutative (f : ℤ → Litter)
     (hf : ∀ m n k, f m = f n → f (m + k) = f (n + k)) :
     (addOrbitLitters f).Permutative :=
-  ⟨addOrbitLitters_oneOne f hf, addOrbitLitters_codomEqDom f⟩
+  ⟨addOrbitLitters_oneOne f hf, addOrbitLitters_codEqDom f⟩
 
 theorem disjoint_litters_dom_addOrbitLitters_dom
     (ψ : BaseApprox) (f : ℤ → Litter) (hfψ : ∀ n, f n ∉ ψᴸ.dom) :
@@ -470,7 +475,7 @@ def addOrbit (ψ : BaseApprox) (f : ℤ → Litter)
   litters := ψ.litters ⊔ addOrbitLitters f
   exceptions_permutative := ψ.exceptions_permutative
   litters_permutative' :=
-    sup_permutative ψ.litters_permutative (addOrbitLitters_permutative f hf)
+    ψ.litters_permutative.sup (addOrbitLitters_permutative f hf)
       (disjoint_litters_dom_addOrbitLitters_dom ψ f hfψ)
   exceptions_small := ψ.exceptions_small
 
@@ -519,8 +524,8 @@ theorem le_upperBound (c : Set BaseApprox) (hc : IsChain (· ≤ ·) c) :
     ∀ ψ ∈ c, ψ ≤ upperBound c hc := by
   intro ψ hψ
   constructor
-  · ext a₁ a₂
-    simp only [upperBound, biSup_dom, biSup_apply_iff]
+  · ext ⟨a₁, a₂⟩
+    simp only [upperBound, mem_biSup_iff]
     constructor
     · intro h
       exact ⟨ψ, hψ, h⟩
@@ -553,7 +558,7 @@ theorem Total.atoms_bijective {ψ : BaseApprox} (h : ψ.Total) :
   · constructor
     intro a
     have := h.atoms a
-    rwa [← ψ.atoms_permutative.codom_eq_dom] at this
+    rwa [← ψ.atoms_permutative.cod_eq_dom] at this
 
 theorem Total.litters_bijective {ψ : BaseApprox} (h : ψ.Total) :
     ψᴸ.Bijective := by
@@ -563,7 +568,7 @@ theorem Total.litters_bijective {ψ : BaseApprox} (h : ψ.Total) :
   · constructor
     intro L
     have := h L
-    rwa [← ψ.litters_permutative.codom_eq_dom] at this
+    rwa [← ψ.litters_permutative.cod_eq_dom] at this
 
 theorem basePerm_apply_near_apply (ψ : BaseApprox) (h : ψ.Total) (s : Set Atom) (L : Litter) :
     s ~ Lᴬ → ψᴬ.toEquiv h.atoms_bijective '' s ~ (ψᴸ.toEquiv h.litters_bijective L)ᴬ := by
@@ -586,27 +591,27 @@ theorem basePerm_smul_litter_def {ψ : BaseApprox} {h : ψ.Total} {L : Litter} :
 
 @[simp]
 theorem basePerm_smul_atom_eq_iff {ψ : BaseApprox} {h : ψ.Total} {a₁ a₂ : Atom} :
-    ψ.basePerm h • a₁ = a₂ ↔ ψᴬ a₁ a₂ := by
+    ψ.basePerm h • a₁ = a₂ ↔ a₁ ~[ψᴬ] a₂ := by
   rw [basePerm_smul_atom_def, toFunction_eq_iff]
 
 @[simp]
 theorem basePerm_inv_smul_atom_eq_iff {ψ : BaseApprox} {h : ψ.Total} {a₁ a₂ : Atom} :
-    (ψ.basePerm h)⁻¹ • a₁ = a₂ ↔ ψᴬ a₂ a₁ := by
+    (ψ.basePerm h)⁻¹ • a₁ = a₂ ↔ a₂ ~[ψᴬ] a₁ := by
   rw [← basePerm_smul_atom_eq_iff (h := h), inv_smul_eq_iff, eq_comm]
 
 @[simp]
 theorem basePerm_smul_litter_eq_iff {ψ : BaseApprox} {h : ψ.Total} {L₁ L₂ : Litter} :
-    ψ.basePerm h • L₁ = L₂ ↔ ψᴸ L₁ L₂ := by
+    ψ.basePerm h • L₁ = L₂ ↔ L₁ ~[ψᴸ] L₂ := by
   rw [basePerm_smul_litter_def, toFunction_eq_iff]
 
 @[simp]
 theorem basePerm_inv_smul_litter_eq_iff {ψ : BaseApprox} {h : ψ.Total} {L₁ L₂ : Litter} :
-    (ψ.basePerm h)⁻¹ • L₁ = L₂ ↔ ψᴸ L₂ L₁ := by
+    (ψ.basePerm h)⁻¹ • L₁ = L₂ ↔ L₂ ~[ψᴸ] L₁ := by
   rw [← basePerm_smul_litter_eq_iff (h := h), inv_smul_eq_iff, eq_comm]
 
 @[simp]
 theorem basePerm_smul_nearLitter_eq_iff {ψ : BaseApprox} {h : ψ.Total} {N₁ N₂ : NearLitter} :
-    ψ.basePerm h • N₁ = N₂ ↔ ψᴺ N₁ N₂ := by
+    ψ.basePerm h • N₁ = N₂ ↔ N₁ ~[ψᴺ] N₂ := by
   constructor
   · intro hN
     refine ⟨?_, ?_, ?_⟩
@@ -625,11 +630,11 @@ theorem basePerm_smul_nearLitter_eq_iff {ψ : BaseApprox} {h : ψ.Total} {N₁ N
     rwa [← toEquiv_image _ h.atoms_bijective] at this
 
 structure Approximates (ψ : BaseApprox) (π : BasePerm) : Prop where
-  atoms : ∀ a₁ a₂, ψᴬ a₁ a₂ → a₂ = π • a₁
-  nearLitters : ∀ N₁ N₂, ψᴺ N₁ N₂ → N₂ = π • N₁
+  atoms : ∀ a₁ a₂, a₁ ~[ψᴬ] a₂ → a₂ = π • a₁
+  nearLitters : ∀ N₁ N₂, N₁ ~[ψᴺ] N₂ → N₂ = π • N₁
 
 theorem Approximates.litters {ψ : BaseApprox} {π : BasePerm} (h : ψ.Approximates π)
-    (L₁ L₂ : Litter) : ψᴸ L₁ L₂ → π • L₁ = L₂ := by
+    (L₁ L₂ : Litter) : L₁ ~[ψᴸ] L₂ → π • L₁ = L₂ := by
   intro hL
   obtain ⟨N, hN⟩ := ψ.mem_dom_nearLitters (N := L₁ᴺ) ⟨L₂, hL⟩ (λ a h ↦ (h.2 h.1).elim)
   cases h.nearLitters L₁ᴺ N hN
@@ -640,9 +645,9 @@ theorem Approximates.mono {ψ χ : BaseApprox} {π : BasePerm} (hχ : χ.Approxi
     ψ.Approximates π := by
   constructor
   · intro a₁ a₂ hψ
-    exact hχ.atoms a₁ a₂ (atoms_le_of_le h a₁ a₂ hψ)
+    exact hχ.atoms a₁ a₂ (atoms_le_of_le h hψ)
   · intro N₁ N₂ hψ
-    exact hχ.nearLitters N₁ N₂ (nearLitters_le_of_le h N₁ N₂ hψ)
+    exact hχ.nearLitters N₁ N₂ (nearLitters_le_of_le h hψ)
 
 structure ExactlyApproximates (ψ : BaseApprox) (π : BasePerm) : Prop
     extends ψ.Approximates π where
@@ -673,7 +678,7 @@ theorem ExactlyApproximates.smulSet_nearLitter
     rw [ha₁, hNπ] at this
     use this
     contrapose! ha₂
-    obtain ⟨b, hab⟩ := ψ.exceptions_permutative.codom_eq_dom ▸ ha₂
+    obtain ⟨b, hab⟩ := ψ.exceptions_permutative.cod_eq_dom ▸ ha₂
     have := hψ.atoms b (π • a) (Or.inl hab)
     rw [smul_left_cancel_iff] at this
     cases this
@@ -720,8 +725,8 @@ theorem exactlyApproximates_basePerm {ψ : BaseApprox} (h : ψ.Total) :
     ψ.ExactlyApproximates (ψ.basePerm h) := by
   refine ⟨approximates_basePerm h, ?_, ?_⟩
   · intro a ha
-    have : ψᴬ a (nearLitterEquiv (ψ.sublitter (ψ.basePerm h • aᴸ))
-        ((nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩)) := by
+    have : a ~[ψᴬ] (nearLitterEquiv (ψ.sublitter (ψ.basePerm h • aᴸ))
+        ((nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩) : Atom) := by
       right
       rw [typical_iff]
       refine ⟨?_, (nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩, ?_, ?_⟩
@@ -734,8 +739,8 @@ theorem exactlyApproximates_basePerm {ψ : BaseApprox} (h : ψ.Total) :
     rw [← basePerm_smul_atom_eq_iff (h := h)] at this
     rw [this, nearLitterEquiv_litter]
   · intro a ha
-    have : ψᴬ (nearLitterEquiv (ψ.sublitter ((ψ.basePerm h)⁻¹ • aᴸ))
-        ((nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩)) a := by
+    have : (nearLitterEquiv (ψ.sublitter ((ψ.basePerm h)⁻¹ • aᴸ))
+        ((nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩) : Atom) ~[ψᴬ] a := by
       right
       rw [typical_iff]
       refine ⟨?_, (nearLitterEquiv (ψ.sublitter aᴸ)).symm ⟨a, rfl, ha⟩, ?_, ?_⟩

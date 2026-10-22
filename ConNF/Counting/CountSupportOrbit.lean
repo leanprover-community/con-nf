@@ -60,7 +60,7 @@ theorem WeakSpec.exists_conv (σ : WeakSpec β) {S T : Support β}
     · have := habU.symm.trans habV
       rw [funext_iff] at this
       exact this A
-    ext i a
+    ext ⟨i, a⟩
     have := haU.symm.trans haV
     conv at this =>
       rw [funext_iff]; intro
@@ -69,15 +69,15 @@ theorem WeakSpec.exists_conv (σ : WeakSpec β) {S T : Support β}
     constructor
     · intro hS
       obtain ⟨b, hb⟩ := (this A i).mp ⟨_, hS⟩
-      have ha' := (hSU A).1 i ((ρᵁ A)⁻¹ • a) hS
-      have hb' := (hSV A).1 i b hb
+      have ha' := (hSU A).1 (show (i, (ρᵁ A)⁻¹ • a) ∈ (S ⇘. A)ᴬ.rel from hS)
+      have hb' := (hSV A).1 hb
       have := (U ⇘. A)ᴬ.rel_coinjective.coinjective ha' hb'
       simp only [smul_left_cancel_iff] at this
       rwa [this]
     · intro hT
       obtain ⟨b, hb⟩ := (this A i).mpr ⟨_, hT⟩
-      have ha' := (hSV A).1 i a hT
-      have hb' := (hSU A).1 i b hb
+      have ha' := (hSV A).1 hT
+      have hb' := (hSU A).1 hb
       have := (U ⇘. A)ᴬ.rel_coinjective.coinjective ha' hb'
       rwa [← this] at hb
   · rw [Support.smul_derivBot, BaseSupport.smul_nearLitters]
@@ -85,7 +85,7 @@ theorem WeakSpec.exists_conv (σ : WeakSpec β) {S T : Support β}
     · have := hNbU.symm.trans hNbV
       rw [funext_iff] at this
       exact this A
-    ext i N₁
+    ext ⟨i, N₁⟩
     have := hNU.symm.trans hNV
     conv at this =>
       rw [funext_iff]; intro
@@ -94,15 +94,15 @@ theorem WeakSpec.exists_conv (σ : WeakSpec β) {S T : Support β}
     constructor
     · intro hS
       obtain ⟨N₂, hN₂⟩ := (this A i).mp ⟨_, hS⟩
-      have h₁' := (hSU A).2 i ((ρᵁ A)⁻¹ • N₁) hS
-      have h₂' := (hSV A).2 i N₂ hN₂
+      have h₁' := (hSU A).2 (show (i, (ρᵁ A)⁻¹ • N₁) ∈ (S ⇘. A)ᴺ.rel from hS)
+      have h₂' := (hSV A).2 hN₂
       have := (U ⇘. A)ᴺ.rel_coinjective.coinjective h₁' h₂'
       simp only [smul_left_cancel_iff] at this
       rwa [this]
     · intro hT
       obtain ⟨N₂, hN₂⟩ := (this A i).mpr ⟨_, hT⟩
-      have h₁' := (hSV A).2 i N₁ hT
-      have h₂' := (hSU A).2 i N₂ hN₂
+      have h₁' := (hSV A).2 hT
+      have h₂' := (hSU A).2 hN₂
       have := (U ⇘. A)ᴺ.rel_coinjective.coinjective h₁' h₂'
       rwa [← this] at hN₂
 
@@ -157,7 +157,7 @@ def flexCondEquiv : FlexCond ≃ Set κ where
   right_inv _ := rfl
 
 def inflexCondEquiv (δ : TypeIndex) [LeLevel δ] :
-    InflexCond δ ≃ CodingFunction δ × Tree (Rel κ κ) δ × Tree (Rel κ κ) δ where
+    InflexCond δ ≃ CodingFunction δ × Tree (SetRel κ κ) δ × Tree (SetRel κ κ) δ where
   toFun x := (x.χ, x.atoms, x.nearLitters)
   invFun x := ⟨x.1, x.2.1, x.2.2⟩
   left_inv _ := rfl
@@ -185,8 +185,6 @@ theorem card_spec_of_card_codingFunction
         apply mul_lt_of_lt μ_isStrongLimit.aleph0_le (h P.δ (P.hδ.trans_le P.A.le))
         apply mul_lt_of_lt μ_isStrongLimit.aleph0_le <;>
         · apply card_tree_lt
-          rw [Rel]
-          rw [Cardinal.eq.mpr ⟨(Equiv.curry _ _ _).symm⟩]
           change #(Set (κ × κ)) < #μ
           rw [mk_set, mk_prod, Cardinal.lift_id, mul_mk_eq_max, max_self]
           exact μ_isStrongLimit.2 κ_lt_μ

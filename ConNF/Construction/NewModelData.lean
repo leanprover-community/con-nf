@@ -140,7 +140,7 @@ theorem Code.smul_even {c : Code} (ρ : NewPerm) :
 
 theorem Represents.smul {c d : Code} (h : Represents c d) (ρ : NewPerm) :
     Represents (ρ • c) (ρ • d) := by
-  obtain (⟨_, h⟩ | ⟨_, _, hc, hcd⟩) := h
+  obtain (⟨h⟩ | ⟨_, hc, hcd⟩) := h
   · refine .refl _ ?_
     rwa [Code.smul_even]
   · refine .cloud _ _ ?_ ?_
@@ -461,7 +461,7 @@ theorem newTyped_injective : Function.Injective newTyped := by
 theorem smul_newTyped (ρ : NewPerm) (N : NearLitter) :
     ρ • newTyped N = newTyped (ρᵁ ↘. • N) := by
   apply NewSet.ext
-  simp only [NewSet.smul_c, BasePerm.smul_nearLitter_atoms, newTyped_c_eq, NearLitter.smul_code]
+  simp only [NewSet.smul_c, newTyped_c_eq, NearLitter.smul_code]
 
 def newSingletonCode {γ : Λ} [LtLevel γ] (x : TSet γ) : Code :=
   ⟨γ, {x}, Set.singleton_nonempty x⟩
@@ -472,8 +472,7 @@ theorem newSingleton_aux {γ : Λ} [LtLevel γ] {x : TSet γ} :
   use S ↗ LtLevel.elim
   intro ρ hρ
   suffices ρ.sderiv γ • x = x by simp only [newSingletonCode, NewPerm.smul_mk,
-    Set.smul_set_singleton, Code.mk.injEq, heq_eq_eq, Set.singleton_eq_singleton_iff,
-    true_and, this]
+    Set.smul_set_singleton, this]
   apply hS.supports
   rwa [Support.smul_scoderiv, Support.scoderiv_inj, NewPerm.forget_sderiv] at hρ
 

@@ -19,6 +19,7 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal
+open scoped SetRel
 
 namespace ConNF
 
@@ -69,21 +70,21 @@ theorem le_upperBound (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c) :
 
 theorem upperBound_exceptions (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
     (A : β ↝ ⊥) (a₁ a₂ : Atom) :
-    (upperBound c hc A).exceptions a₁ a₂ ↔ ∃ ψ ∈ c, (ψ A).exceptions a₁ a₂ := by
+    a₁ ~[(upperBound c hc A).exceptions] a₂ ↔ ∃ ψ ∈ c, a₁ ~[(ψ A).exceptions] a₂ := by
   simp only [upperBound, BaseApprox.upperBound]
-  rw [Rel.biSup_apply_iff]
+  rw [SetRel.mem_biSup_iff]
   simp only [Set.mem_image, exists_exists_and_eq_and]
 
 theorem upperBound_litters (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
     (A : β ↝ ⊥) (L₁ L₂ : Litter) :
-    (upperBound c hc A)ᴸ L₁ L₂ ↔ ∃ ψ ∈ c, (ψ A)ᴸ L₁ L₂ := by
+    L₁ ~[(upperBound c hc A)ᴸ] L₂ ↔ ∃ ψ ∈ c, L₁ ~[(ψ A)ᴸ] L₂ := by
   simp only [upperBound, BaseApprox.upperBound, BaseApprox.mk_litters]
-  rw [Rel.biSup_apply_iff]
+  rw [SetRel.mem_biSup_iff]
   simp only [Set.mem_image, exists_exists_and_eq_and]
 
 theorem upperBound_typical (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
     (A : β ↝ ⊥) (a₁ a₂ : Atom) :
-    (upperBound c hc A).typical a₁ a₂ ↔ ∃ ψ ∈ c, (ψ A).typical a₁ a₂ := by
+    a₁ ~[(upperBound c hc A).typical] a₂ ↔ ∃ ψ ∈ c, a₁ ~[(ψ A).typical] a₂ := by
   simp only [BaseApprox.typical_iff, upperBound_litters]
   constructor
   · rintro ⟨⟨ψ, hψ, ha⟩, i, h⟩
@@ -99,8 +100,8 @@ theorem upperBound_typical (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
 
 theorem upperBound_atoms (c : Set (StrApprox β)) (hc : IsChain (· ≤ ·) c)
     (A : β ↝ ⊥) (a₁ a₂ : Atom) :
-    (upperBound c hc A)ᴬ a₁ a₂ ↔ ∃ ψ ∈ c, (ψ A)ᴬ a₁ a₂ := by
-  simp only [BaseApprox.atoms_def, Rel.sup_apply, upperBound_exceptions, upperBound_typical]
+    a₁ ~[(upperBound c hc A)ᴬ] a₂ ↔ ∃ ψ ∈ c, a₁ ~[(ψ A)ᴬ] a₂ := by
+  simp only [BaseApprox.atoms_def, SetRel.mem_sup, upperBound_exceptions, upperBound_typical]
   constructor
   · rintro (⟨ψ, hψ, h⟩ | ⟨ψ, hψ, h⟩)
     · exact ⟨ψ, hψ, Or.inl h⟩
@@ -126,9 +127,9 @@ theorem smul_support_eq_smul_mono
   intro A
   constructor
   · intro a ha
-    exact BaseApprox.atoms_le_of_le (hξχ A) _ _ ((hξ A).1 a ha)
+    exact BaseApprox.atoms_le_of_le (hξχ A) ((hξ A).1 a ha)
   · intro N hN
-    exact BaseApprox.nearLitters_le_of_le (hξχ A) _ _ ((hξ A).2 N hN)
+    exact BaseApprox.nearLitters_le_of_le (hξχ A) ((hξ A).2 N hN)
 
 variable [Level] [CoherentData]
 
@@ -151,7 +152,7 @@ theorem coherentAt_mono [LeLevel β] {ψ χ : StrApprox β} {A : β ↝ ⊥} {L�
   · rwa [coherentAt_flexible hL] at h ⊢
 
 def Coherent [LeLevel β] (ψ : StrApprox β) : Prop :=
-  ∀ A L₁ L₂, (ψ A)ᴸ L₁ L₂ → CoherentAt ψ A L₁ L₂
+  ∀ A L₁ L₂, L₁ ~[(ψ A)ᴸ] L₂ → CoherentAt ψ A L₁ L₂
 
 theorem addOrbit_coherent [LeLevel β] {ψ : StrApprox β} {A : β ↝ ⊥} {f : ℤ → Litter}
     {hf : ∀ m n k, f m = f n → f (m + k) = f (n + k)} {hfψ : ∀ n, f n ∉ (ψ A)ᴸ.dom}

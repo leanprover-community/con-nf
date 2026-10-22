@@ -1,10 +1,10 @@
 import ConNF.Background.Cardinal
-import ConNF.Background.Rel
+import ConNF.Mathlib.Basic.Rel
 
 noncomputable section
 open Cardinal
 
-namespace Rel
+namespace SetRel
 
 variable {α β : Type _}
 
@@ -16,8 +16,8 @@ structure OrbitRestriction (s : Set α) (β : Type _) where
   catPerm : Equiv.Perm β
   le_card_categorise (b : β) : max ℵ₀ #s ≤ #(sandbox ∩ categorise ⁻¹' {b} : Set α)
 
-theorem le_card_categorise {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) (b : β) :
-    #((r.dom ∪ r.codom : Set α) × ℕ) ≤ #(R.sandbox ∩ R.categorise ⁻¹' {b} : Set α) := by
+theorem le_card_categorise {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) (b : β) :
+    #((r.dom ∪ r.cod : Set α) × ℕ) ≤ #(R.sandbox ∩ R.categorise ⁻¹' {b} : Set α) := by
   rw [Cardinal.mk_prod, Cardinal.lift_id', Cardinal.mk_eq_aleph0 ℕ, Cardinal.lift_aleph0]
   refine le_trans ?_ (R.le_card_categorise b)
   apply mul_le_of_le
@@ -25,30 +25,30 @@ theorem le_card_categorise {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.co
   · exact le_max_right ℵ₀ _
   · exact le_max_left ℵ₀ _
 
-def catInj {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) (b : β) :
-    (r.dom ∪ r.codom : Set α) × ℕ ↪ (R.sandbox ∩ R.categorise ⁻¹' {b} : Set α) :=
+def catInj {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) (b : β) :
+    (r.dom ∪ r.cod : Set α) × ℕ ↪ (R.sandbox ∩ R.categorise ⁻¹' {b} : Set α) :=
   Nonempty.some (le_card_categorise R b)
 
-theorem catInj_mem_sandbox {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) (b : β)
-    (x : (r.dom ∪ r.codom : Set α) × ℕ) :
+theorem catInj_mem_sandbox {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) (b : β)
+    (x : (r.dom ∪ r.cod : Set α) × ℕ) :
     (catInj R b x : α) ∈ R.sandbox :=
   (catInj R b x).prop.1
 
 @[simp]
-theorem categorise_catInj {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) (b : β)
-    (x : (r.dom ∪ r.codom : Set α) × ℕ) :
+theorem categorise_catInj {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) (b : β)
+    (x : (r.dom ∪ r.cod : Set α) × ℕ) :
     R.categorise (catInj R b x) = b :=
   (catInj R b x).prop.2
 
-theorem catInj_ne_of_mem {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) (b : β)
-    (x : (r.dom ∪ r.codom : Set α) × ℕ) (a : α) (ha : a ∈ r.dom ∪ r.codom) :
+theorem catInj_ne_of_mem {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) (b : β)
+    (x : (r.dom ∪ r.cod : Set α) × ℕ) (a : α) (ha : a ∈ r.dom ∪ r.cod) :
     (catInj R b x : α) ≠ a := by
   have := R.sandbox_disjoint
   rw [Set.disjoint_iff_forall_ne] at this
   exact (this ha (catInj_mem_sandbox R b x)).symm
 
-theorem catInj_injective {r : Rel α α} {R : OrbitRestriction (r.dom ∪ r.codom) β}
-    {b₁ b₂ : β} {x₁ x₂ : (r.dom ∪ r.codom : Set α) × ℕ}
+theorem catInj_injective {r : SetRel α α} {R : OrbitRestriction (r.dom ∪ r.cod) β}
+    {b₁ b₂ : β} {x₁ x₂ : (r.dom ∪ r.cod : Set α) × ℕ}
     (h : (catInj R b₁ x₁ : α) = catInj R b₂ x₂) :
     b₁ = b₂ ∧ x₁ = x₂ := by
   have h₁ := categorise_catInj R b₁ x₁
@@ -59,8 +59,8 @@ theorem catInj_injective {r : Rel α α} {R : OrbitRestriction (r.dom ∪ r.codo
   exact ⟨rfl, h⟩
 
 @[simp]
-theorem catInj_inj {r : Rel α α} {R : OrbitRestriction (r.dom ∪ r.codom) β}
-    {b₁ b₂ : β} {a₁ a₂ : α} {h₁ : a₁ ∈ r.dom ∪ r.codom} {h₂ : a₂ ∈ r.dom ∪ r.codom} {n₁ n₂ : ℕ} :
+theorem catInj_inj {r : SetRel α α} {R : OrbitRestriction (r.dom ∪ r.cod) β}
+    {b₁ b₂ : β} {a₁ a₂ : α} {h₁ : a₁ ∈ r.dom ∪ r.cod} {h₂ : a₂ ∈ r.dom ∪ r.cod} {n₁ n₂ : ℕ} :
     (catInj R b₁ (⟨a₁, h₁⟩, n₁) : α) = catInj R b₂ (⟨a₂, h₂⟩, n₂) ↔
       b₁ = b₂ ∧ a₁ = a₂ ∧ n₁ = n₂ := by
   constructor
@@ -71,41 +71,44 @@ theorem catInj_inj {r : Rel α α} {R : OrbitRestriction (r.dom ∪ r.codom) β}
   · rintro ⟨rfl, rfl, rfl⟩
     rfl
 
-inductive NewOrbits {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) : Rel α α
-  | left (a : α) (had : a ∈ r.dom) (hac : a ∉ r.codom) :
+inductive NewOrbits {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) : α → α → Prop
+  | left (a : α) (had : a ∈ r.dom) (hac : a ∉ r.cod) :
       NewOrbits R (catInj R (R.catPerm.symm (R.categorise a)) (⟨a, Or.inl had⟩, 0)) a
-  | leftStep (n : ℕ) (a : α) (had : a ∈ r.dom) (hac : a ∉ r.codom) :
+  | leftStep (n : ℕ) (a : α) (had : a ∈ r.dom) (hac : a ∉ r.cod) :
       NewOrbits R
         (catInj R (R.catPerm.symm^[n + 2] (R.categorise a)) (⟨a, Or.inl had⟩, n + 1))
         (catInj R (R.catPerm.symm^[n + 1] (R.categorise a)) (⟨a, Or.inl had⟩, n))
-  | right (a : α) (had : a ∉ r.dom) (hac : a ∈ r.codom) :
+  | right (a : α) (had : a ∉ r.dom) (hac : a ∈ r.cod) :
       NewOrbits R a (catInj R (R.catPerm (R.categorise a)) (⟨a, Or.inr hac⟩, 0))
-  | rightStep (n : ℕ) (a : α) (had : a ∉ r.dom) (hac : a ∈ r.codom) :
+  | rightStep (n : ℕ) (a : α) (had : a ∉ r.dom) (hac : a ∈ r.cod) :
       NewOrbits R
         (catInj R (R.catPerm^[n + 1] (R.categorise a)) (⟨a, Or.inr hac⟩, n))
         (catInj R (R.catPerm^[n + 2] (R.categorise a)) (⟨a, Or.inr hac⟩, n + 1))
 
-def permutativeExtension (r : Rel α α) (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    Rel α α :=
-  r ⊔ NewOrbits R
+def newOrbits {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) : SetRel α α :=
+  {(a₁, a₂) | NewOrbits R a₁ a₂}
 
-theorem le_permutativeExtension (r : Rel α α) (R : OrbitRestriction (r.dom ∪ r.codom) β) :
+def permutativeExtension (r : SetRel α α) (R : OrbitRestriction (r.dom ∪ r.cod) β) :
+    SetRel α α :=
+  r ⊔ newOrbits R
+
+theorem le_permutativeExtension (r : SetRel α α) (R : OrbitRestriction (r.dom ∪ r.cod) β) :
     r ≤ r.permutativeExtension R :=
   le_sup_left
 
-theorem dom_permutativeExtension_subset (r : Rel α α) (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    (r.permutativeExtension R).dom ⊆ r.dom ∪ r.codom ∪ R.sandbox := by
+theorem dom_permutativeExtension_subset (r : SetRel α α) (R : OrbitRestriction (r.dom ∪ r.cod) β) :
+    (r.permutativeExtension R).dom ⊆ r.dom ∪ r.cod ∪ R.sandbox := by
   rintro a₁ ⟨a₂, h | h⟩
   · exact Or.inl (Or.inl ⟨a₂, h⟩)
   cases h with
   | right _ had hac => exact Or.inl (Or.inr hac)
   | _ => right; apply catInj_mem_sandbox
 
-theorem dom_permutativeExtension_subset' (r : Rel α α) (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    (r.permutativeExtension R).dom ⊆ (r.dom ∪ r.codom) ∪
+theorem dom_permutativeExtension_subset' (r : SetRel α α) (R : OrbitRestriction (r.dom ∪ r.cod) β) :
+    (r.permutativeExtension R).dom ⊆ (r.dom ∪ r.cod) ∪
       ((⋃ a ∈ r.dom, ⋃ n, Subtype.val '' Set.range
         (catInj R (R.catPerm.symm^[n + 1] (R.categorise a)))) ∪
-      (⋃ a ∈ r.codom, ⋃ n, Subtype.val '' Set.range
+      (⋃ a ∈ r.cod, ⋃ n, Subtype.val '' Set.range
         (catInj R (R.catPerm^[n + 1] (R.categorise a))))) := by
   rintro a₁ ⟨a₂, h | h⟩
   · exact Or.inl (Or.inl ⟨a₂, h⟩)
@@ -124,7 +127,7 @@ theorem dom_permutativeExtension_subset' (r : Rel α α) (R : OrbitRestriction (
     simp only [Set.mem_iUnion]
     exact ⟨a, hac, n , _, ⟨_, rfl⟩, rfl⟩
 
-theorem card_permutativeExtension (r : Rel α α) (R : OrbitRestriction (r.dom ∪ r.codom) β)
+theorem card_permutativeExtension (r : SetRel α α) (R : OrbitRestriction (r.dom ∪ r.cod) β)
     (hr : r.Coinjective) :
     #(r.permutativeExtension R).dom ≤ max ℵ₀ #r.dom := by
   apply (mk_le_mk_of_subset (dom_permutativeExtension_subset' r R)).trans
@@ -132,7 +135,7 @@ theorem card_permutativeExtension (r : Rel α α) (R : OrbitRestriction (r.dom �
   apply (add_le_add (mk_union_le _ _) (mk_union_le _ _)).trans
   apply add_le_of_le (le_max_left _ _) <;> apply add_le_of_le (le_max_left _ _)
   · exact le_max_right _ _
-  · exact le_max_of_le_right (card_codom_le_of_coinjective hr)
+  · exact le_max_of_le_right (card_cod_le_of_coinjective hr)
   · refine (mk_biUnion_le_of_le (max ℵ₀ #r.dom) ?_).trans ?_
     · intro a _
       have := mk_iUnion_le_of_le_lift
@@ -148,7 +151,7 @@ theorem card_permutativeExtension (r : Rel α α) (R : OrbitRestriction (r.dom �
         refine mul_le_of_le (le_max_left _ _) ?_ (le_max_left _ _)
         apply (mk_union_le _ _).trans
         apply add_le_of_le (le_max_left _ _) (le_max_right _ _)
-        exact le_max_of_le_right (card_codom_le_of_coinjective hr)
+        exact le_max_of_le_right (card_cod_le_of_coinjective hr)
     · exact mul_le_of_le (le_max_left _ _) (le_max_right _ _) le_rfl
   · refine (mk_biUnion_le_of_le (max ℵ₀ #r.dom) ?_).trans ?_
     · intro a _
@@ -165,28 +168,26 @@ theorem card_permutativeExtension (r : Rel α α) (R : OrbitRestriction (r.dom �
         refine mul_le_of_le (le_max_left _ _) ?_ (le_max_left _ _)
         apply (mk_union_le _ _).trans
         apply add_le_of_le (le_max_left _ _) (le_max_right _ _)
-        exact le_max_of_le_right (card_codom_le_of_coinjective hr)
+        exact le_max_of_le_right (card_cod_le_of_coinjective hr)
     · refine mul_le_of_le (le_max_left _ _) ?_ le_rfl
-      exact le_max_of_le_right (card_codom_le_of_coinjective hr)
+      exact le_max_of_le_right (card_cod_le_of_coinjective hr)
 
-theorem categorise_newOrbits {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β)
-    {a₁ a₂ : α} (h : NewOrbits R a₁ a₂) :
+theorem categorise_newOrbits {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β)
+    {a₁ a₂ : α} (h : a₁ ~[newOrbits R] a₂) :
     R.categorise a₂ = R.catPerm (R.categorise a₁) := by
   cases h with
   | left => simp only [categorise_catInj, Equiv.apply_symm_apply]
-  | leftStep => simp only [Function.iterate_succ_apply', Function.comp_apply,
-      categorise_catInj, Equiv.apply_symm_apply]
+  | leftStep => simp only [Function.iterate_succ_apply', categorise_catInj, Equiv.apply_symm_apply]
   | right => simp only [categorise_catInj]
-  | rightStep => simp only [Function.iterate_succ_apply', Function.comp_apply,
-      categorise_catInj, Equiv.apply_symm_apply]
+  | rightStep => simp only [Function.iterate_succ_apply', categorise_catInj]
 
-theorem categorise_permutativeExtension {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β)
-    {a₁ a₂ : α} (h : r.permutativeExtension R a₁ a₂) :
-    r a₁ a₂ ∨ R.categorise a₂ = R.catPerm (R.categorise a₁) :=
+theorem categorise_permutativeExtension {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β)
+    {a₁ a₂ : α} (h : a₁ ~[r.permutativeExtension R] a₂) :
+    a₁ ~[r] a₂ ∨ R.categorise a₂ = R.catPerm (R.categorise a₁) :=
   h.elim Or.inl (Or.inr ∘ categorise_newOrbits R)
 
-theorem newOrbits_injective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    (NewOrbits R).Injective := by
+theorem newOrbits_injective {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) :
+    (newOrbits R).Injective := by
   constructor
   intro a₁ a₂ a₃ h₁ h₂
   set a₄ := a₃ with h
@@ -201,7 +202,7 @@ theorem newOrbits_injective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.c
     cases h₂ with
     | left _ hac had => cases catInj_ne_of_mem R _ _ a₄ (Or.inl hac) h.symm
     | leftStep =>
-      simp only [Function.comp_apply, catInj_inj, add_left_inj, Function.iterate_succ_apply',
+      simp only [catInj_inj, add_left_inj, Function.iterate_succ_apply',
         EmbeddingLike.apply_eq_iff_eq] at h ⊢
       exact ⟨h.1.symm, h.2.1.symm, h.2.2.symm⟩
     | _ =>
@@ -228,15 +229,15 @@ theorem newOrbits_injective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.c
       cases h.2.1
       contradiction
     | rightStep =>
-      simp only [Function.comp_apply, catInj_inj, add_left_inj, Function.iterate_succ_apply',
+      simp only [catInj_inj, add_left_inj, Function.iterate_succ_apply',
         EmbeddingLike.apply_eq_iff_eq] at h ⊢
       exact ⟨h.1.symm, h.2.1.symm, h.2.2.symm⟩
     | right =>
       simp only [catInj_inj, right_eq_add, AddLeftCancelMonoid.add_eq_zero,
         one_ne_zero, and_false] at h
 
-theorem newOrbits_coinjective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    (NewOrbits R).Coinjective := by
+theorem newOrbits_coinjective {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) :
+    (newOrbits R).Coinjective := by
   constructor
   intro a₁ a₂ a₃ h₁ h₂
   set a₄ := a₃ with h
@@ -251,7 +252,7 @@ theorem newOrbits_coinjective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r
     cases h₂ with
     | right _ hac had => cases catInj_ne_of_mem R _ _ a₄ (Or.inr had) h.symm
     | rightStep =>
-      simp only [Function.comp_apply, catInj_inj, add_left_inj, Function.iterate_succ_apply',
+      simp only [catInj_inj, add_left_inj, Function.iterate_succ_apply',
         EmbeddingLike.apply_eq_iff_eq] at h ⊢
       exact ⟨h.1.symm, h.2.1.symm, h.2.2.symm⟩
     | _ =>
@@ -278,20 +279,20 @@ theorem newOrbits_coinjective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r
       cases h.2.1
       contradiction
     | leftStep =>
-      simp only [Function.comp_apply, catInj_inj, add_left_inj, Function.iterate_succ_apply',
+      simp only [catInj_inj, add_left_inj, Function.iterate_succ_apply',
         EmbeddingLike.apply_eq_iff_eq] at h ⊢
       exact ⟨h.1.symm, h.2.1.symm, h.2.2.symm⟩
     | left =>
       simp only [catInj_inj, right_eq_add, AddLeftCancelMonoid.add_eq_zero,
         one_ne_zero, and_false] at h
 
-theorem newOrbits_oneOne {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    (NewOrbits R).OneOne :=
+theorem newOrbits_oneOne {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) :
+    (newOrbits R).OneOne :=
   ⟨newOrbits_injective R, newOrbits_coinjective R⟩
 
-theorem permutativeExtension_codomEqDom {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    (permutativeExtension r R).CodomEqDom := by
-  rw [codomEqDom_iff']
+theorem permutativeExtension_codEqDom {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) :
+    (permutativeExtension r R).CodEqDom := by
+  rw [codEqDom_iff']
   constructor
   · rintro a₁ a₂ (h | h)
     · by_cases had : a₂ ∈ r.dom
@@ -309,7 +310,7 @@ theorem permutativeExtension_codomEqDom {r : Rel α α} (R : OrbitRestriction (r
       | right _ had hac => exact ⟨_, Or.inr (.rightStep 0 a₁ had hac)⟩
       | rightStep n a had hac => exact ⟨_, Or.inr (.rightStep (n + 1) a had hac)⟩
   · rintro a₁ a₂ (h | h)
-    · by_cases hac : a₁ ∈ r.codom
+    · by_cases hac : a₁ ∈ r.cod
       · obtain ⟨a₃, h'⟩ := hac
         exact ⟨a₃, Or.inl h'⟩
       · exact ⟨_, Or.inr (.left a₁ ⟨a₂, h⟩ hac)⟩
@@ -324,47 +325,47 @@ theorem permutativeExtension_codomEqDom {r : Rel α α} (R : OrbitRestriction (r
         | zero => exact ⟨_, Or.inr (.right a had hac)⟩
         | succ n => exact ⟨_, Or.inr (.rightStep n a had hac)⟩
 
-theorem disjoint_newOrbits_dom {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    Disjoint r.dom (NewOrbits R).dom := by
+theorem disjoint_newOrbits_dom {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) :
+    Disjoint r.dom (newOrbits R).dom := by
   rw [Set.disjoint_iff_forall_ne]
   rintro a₁ ha₁ a₂ ⟨a₃, h⟩
   cases h with
   | right => rintro rfl; contradiction
   | _ => exact (catInj_ne_of_mem R _ _ _ (Or.inl ha₁)).symm
 
-theorem disjoint_newOrbits_codom {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    Disjoint r.codom (NewOrbits R).codom := by
+theorem disjoint_newOrbits_cod {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) :
+    Disjoint r.cod (newOrbits R).cod := by
   rw [Set.disjoint_iff_forall_ne]
   rintro a₁ ha₁ a₂ ⟨a₃, h⟩
   cases h with
   | left => rintro rfl; contradiction
   | _ => exact (catInj_ne_of_mem R _ _ _ (Or.inr ha₁)).symm
 
-theorem permutativeExtension_permutative {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β)
+theorem permutativeExtension_permutative {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β)
     (hr : r.OneOne) :
     (permutativeExtension r R).Permutative :=
-  ⟨sup_oneOne hr (newOrbits_oneOne R) (disjoint_newOrbits_dom R) (disjoint_newOrbits_codom R),
-    permutativeExtension_codomEqDom R⟩
+  ⟨hr.sup (newOrbits_oneOne R) (disjoint_newOrbits_dom R) (disjoint_newOrbits_cod R),
+    permutativeExtension_codEqDom R⟩
 
 /-- TODO: Strengthen statement in blueprint version. -/
 theorem categorise_permutativeExtension_of_oneOne
-    {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) (hr : r.OneOne)
-    {a₁ a₂ : α} (h : r.permutativeExtension R a₁ a₂) :
-    r a₁ a₂ ∨ (a₁ ∉ r.dom ∧ a₂ ∉ r.codom ∧ R.categorise a₂ = R.catPerm (R.categorise a₁)) := by
+    {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) (hr : r.OneOne)
+    {a₁ a₂ : α} (h : a₁ ~[r.permutativeExtension R] a₂) :
+    a₁ ~[r] a₂ ∨ (a₁ ∉ r.dom ∧ a₂ ∉ r.cod ∧ R.categorise a₂ = R.catPerm (R.categorise a₁)) := by
   by_cases ha₁ : a₁ ∈ r.dom
   · obtain ⟨b₁, h₁⟩ := ha₁
     cases (r.permutativeExtension_permutative R hr).coinjective h (Or.inl h₁)
     exact Or.inl h₁
-  by_cases ha₂ : a₂ ∈ r.codom
+  by_cases ha₂ : a₂ ∈ r.cod
   · obtain ⟨b₁, h₁⟩ := ha₂
     cases (r.permutativeExtension_permutative R hr).injective h (Or.inl h₁)
     exact Or.inl h₁
   · simp only [ha₁, ha₂, not_false_iff, true_and]
     exact categorise_permutativeExtension R h
 
-def permutativeExtension' (r : Rel α α) (hr : r.OneOne) (s : Set α)
-    (hs₁ : s.Infinite) (hs₂ : #r.dom ≤ #s) (hs₃ : Disjoint (r.dom ∪ r.codom) s) :
-    Rel α α :=
+def permutativeExtension' (r : SetRel α α) (hr : r.OneOne) (s : Set α)
+    (hs₁ : s.Infinite) (hs₂ : #r.dom ≤ #s) (hs₃ : Disjoint (r.dom ∪ r.cod) s) :
+    SetRel α α :=
   r.permutativeExtension {
     sandbox := s
     sandbox_disjoint := hs₃
@@ -372,28 +373,27 @@ def permutativeExtension' (r : Rel α α) (hr : r.OneOne) (s : Set α)
     catPerm := 1
     le_card_categorise := by
       intro
-      simp only [Set.mem_singleton_iff, Set.preimage_const_of_mem, Set.inter_univ, max_le_iff,
-        le_refl, and_true]
+      simp only [Set.mem_singleton_iff, Set.preimage_const_of_mem, Set.inter_univ, max_le_iff]
       rw [← Set.infinite_coe_iff, Cardinal.infinite_iff] at hs₁
       refine ⟨hs₁, ?_⟩
       apply (mk_union_le _ _).trans
       apply add_le_of_le hs₁ hs₂
-      exact (card_codom_le_of_coinjective hr.toCoinjective).trans hs₂
+      exact (card_cod_le_of_coinjective hr.toCoinjective).trans hs₂
   }
 
-theorem le_permutativeExtension' {r : Rel α α} {hr : r.OneOne} {s : Set α}
-    {hs₁ : s.Infinite} {hs₂ : #r.dom ≤ #s} {hs₃ : Disjoint (r.dom ∪ r.codom) s} :
+theorem le_permutativeExtension' {r : SetRel α α} {hr : r.OneOne} {s : Set α}
+    {hs₁ : s.Infinite} {hs₂ : #r.dom ≤ #s} {hs₃ : Disjoint (r.dom ∪ r.cod) s} :
     r ≤ r.permutativeExtension' hr s hs₁ hs₂ hs₃ :=
   r.le_permutativeExtension _
 
-theorem permutativeExtension'_permutative {r : Rel α α} {hr : r.OneOne} {s : Set α}
-    {hs₁ : s.Infinite} {hs₂ : #r.dom ≤ #s} {hs₃ : Disjoint (r.dom ∪ r.codom) s} :
+theorem permutativeExtension'_permutative {r : SetRel α α} {hr : r.OneOne} {s : Set α}
+    {hs₁ : s.Infinite} {hs₂ : #r.dom ≤ #s} {hs₃ : Disjoint (r.dom ∪ r.cod) s} :
     (r.permutativeExtension' hr s hs₁ hs₂ hs₃).Permutative :=
   permutativeExtension_permutative _ hr
 
-theorem dom_permutativeExtension'_subset {r : Rel α α} {hr : r.OneOne} {s : Set α}
-    {hs₁ : s.Infinite} {hs₂ : #r.dom ≤ #s} {hs₃ : Disjoint (r.dom ∪ r.codom) s} :
-    (r.permutativeExtension' hr s hs₁ hs₂ hs₃).dom ⊆ r.dom ∪ r.codom ∪ s :=
+theorem dom_permutativeExtension'_subset {r : SetRel α α} {hr : r.OneOne} {s : Set α}
+    {hs₁ : s.Infinite} {hs₂ : #r.dom ≤ #s} {hs₃ : Disjoint (r.dom ∪ r.cod) s} :
+    (r.permutativeExtension' hr s hs₁ hs₂ hs₃).dom ⊆ r.dom ∪ r.cod ∪ s :=
   r.dom_permutativeExtension_subset _
 
-end Rel
+end SetRel

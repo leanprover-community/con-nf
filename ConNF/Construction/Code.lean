@@ -61,7 +61,7 @@ theorem cloud_aux (β : TypeIndex) [LtLevel β] (γ : Λ) [LtLevel γ] (hβγ : 
   obtain ⟨S, hS⟩ := exists_support x
   exact ⟨(fuzz hβγ ⟨x, S, hS⟩)ᴺ, ⟨x, S, hS⟩, hx, rfl⟩
 
-inductive Cloud : Rel Code Code
+inductive Cloud : Code → Code → Prop
   | mk (β : TypeIndex) [LtLevel β] (γ : Λ) [LtLevel γ] (hβγ : β ≠ γ)
       (s : Set (TSet β)) (hs : s.Nonempty) :
       Cloud
@@ -97,9 +97,9 @@ theorem subset_of_cloud {β : TypeIndex} {γ : Λ} [LtLevel β] [LtLevel γ]
   cases fuzz_injective htN
   exact ht
 
-theorem cloud_injective : Cloud.Injective := by
+theorem cloud_injective : SetRel.Injective {(c, d) | Cloud c d} := by
   constructor
-  rintro ⟨β, s, hs⟩ ⟨γ, t, ht⟩ d h₁ h₂
+  rintro ⟨β, s, hs⟩ ⟨γ, t, ht⟩ d (h₁ : Cloud _ d) (h₂ : Cloud _ d)
   obtain ⟨δ, _, u, hu, rfl⟩ := eq_coe_of_cloud h₁
   rw [cloud_mk_iff] at h₁ h₂
   obtain ⟨hβδ, rfl⟩ := h₁
@@ -207,37 +207,38 @@ theorem not_odd (c : Code) : ¬c.Odd ↔ c.Even := by
   have := not_even c
   tauto
 
-inductive Represents : Rel Code Code
+inductive Represents : Code → Code → Prop
   | refl (c : Code) : c.Even → Represents c c
   | cloud (c d : Code) : c.Even → Cloud c d → Represents c d
 
 theorem Represents.even {c d : Code} (h : Represents c d) : c.Even := by
   cases h <;> assumption
 
-theorem represents_injective : Represents.Injective := by
+theorem represents_injective : SetRel.Injective {(c, d) | Represents c d} := by
   constructor
-  rintro c₁ c₂ d (⟨_, hc₁⟩ | ⟨_, _, hc₁, hc₁d⟩) (⟨_, hc₂⟩ | ⟨_, _, hc₂, hc₂d⟩)
+  intro c₁ c₂ d (h₁ : Represents c₁ d) (h₂ : Represents c₂ d)
+  obtain (⟨hc₁⟩ | ⟨_, hc₁, hc₁d⟩) := h₁ <;> obtain (⟨hc₂⟩ | ⟨_, hc₂, hc₂d⟩) := h₂
   · rfl
   · cases not_even_and_odd c₁ ⟨hc₁, c₁, c₂, hc₂d, hc₂⟩
   · cases not_even_and_odd c₂ ⟨hc₂, c₂, c₁, hc₁d, hc₁⟩
   · exact cloud_injective.injective hc₁d hc₂d
 
-theorem represents_surjective : Represents.Surjective := by
+theorem represents_surjective : SetRel.Surjective {(c, d) | Represents c d} := by
   constructor
   intro c
   obtain (hc | ⟨_, d, hdc, hd⟩) := even_or_odd c
   · exact ⟨c, .refl c hc⟩
   · exact ⟨d, .cloud d c hd hdc⟩
 
-theorem represents_cofunctional : Represents.Cofunctional :=
+theorem represents_cofunctional : SetRel.Cofunctional {(c, d) | Represents c d} :=
   ⟨represents_injective, represents_surjective⟩
 
 theorem eq_of_represents {c : Code} {γ : TypeIndex} [LtLevel γ]
     {s t : Set (TSet γ)} {hs : s.Nonempty} {ht : t.Nonempty}
     (hcs : Represents c ⟨γ, s, hs⟩) (hct : Represents c ⟨γ, t, ht⟩) :
     s = t := by
-  obtain (⟨_, hc⟩ | ⟨_, _, hc, hcs⟩) := hcs <;>
-  obtain (⟨_, _⟩ | ⟨_, _, _, hct⟩) := hct
+  obtain (⟨hc⟩ | ⟨_, hc, hcs⟩) := hcs <;>
+  obtain (⟨_⟩ | ⟨_, _, hct⟩) := hct
   · rfl
   · obtain ⟨_, γ, hβγ, _, _⟩ := hct
     cases hβγ rfl

@@ -228,7 +228,7 @@ theorem sUnion_singleton_symmetric_aux' {α β γ : Λ}
   have hρ's := hS ρ' (smul_eq_of_le (S.subsupport_strong.le) hρ'₁)
   have hρ'x : ρ' ↘ hβ ↘ hγ • x = ρ ↘ hγ • x := by
     apply hT.smul_eq_smul
-    simp only [allPermSderiv_forget', allPermSderiv_forget, WithBot.recBotCoe_coe, id_eq, hρ'₂]
+    simp only [allPermSderiv_forget', hρ'₂]
   dsimp only
   rw [← hρ'x]
   have := (Set.ext_iff.mp hρ's (ρ' ↘ hβ • singleton hγ x)).mp ⟨_, Set.mem_image_of_mem _ hx, rfl⟩

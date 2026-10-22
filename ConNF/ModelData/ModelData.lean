@@ -269,7 +269,7 @@ def botModelData : ModelData ⊥ where
     apply StrSet.botEquiv.injective
     have : ∀ x : TSet ⊥, xᵁ = StrSet.botEquiv.symm x := λ _ ↦ rfl
     unfold PreModelData.allPermForget botPreModelData
-    simp only [this, Equiv.apply_symm_apply, StrSet.strPerm_smul_bot]
+    simp only [Equiv.apply_symm_apply, StrSet.strPerm_smul_bot]
   exists_support x := by
     use ⟨.singleton (Path.nil, x), .empty⟩
     apply Support.supports_bot

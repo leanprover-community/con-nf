@@ -15,21 +15,22 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal
+open scoped SetRel
 
 namespace ConNF
 
 variable [Params.{u}] {β : TypeIndex}
 
 class BaseActionClass (X : Type _) where
-  atoms : X → Rel Atom Atom
+  atoms : X → SetRel Atom Atom
   atoms_oneOne : ∀ ξ, (atoms ξ).OneOne
-  nearLitters : X → Rel NearLitter NearLitter
+  nearLitters : X → SetRel NearLitter NearLitter
   nearLitters_oneOne : ∀ ξ, (nearLitters ξ).OneOne
 
-instance {X : Type _} [BaseActionClass X] : SuperA X (Rel Atom Atom) where
+instance {X : Type _} [BaseActionClass X] : SuperA X (SetRel Atom Atom) where
   superA := BaseActionClass.atoms
 
-instance {X : Type _} [BaseActionClass X] : SuperN X (Rel NearLitter NearLitter) where
+instance {X : Type _} [BaseActionClass X] : SuperN X (SetRel NearLitter NearLitter) where
   superN := BaseActionClass.nearLitters
 
 instance {X : Type _} [BaseActionClass X] : SMul X BaseSupport where
@@ -55,19 +56,19 @@ theorem smul_nearLitters {X : Type _} [BaseActionClass X] (ξ : X) (S : BaseSupp
 
 theorem smul_baseSupport_eq_smul_iff {X : Type _} [BaseActionClass X]
     (ξ : X) (S : BaseSupport) (π : BasePerm) :
-    ξ • S = π • S ↔ (∀ a ∈ Sᴬ, ξᴬ a (π • a)) ∧ (∀ N ∈ Sᴺ, ξᴺ N (π • N)) := by
+    ξ • S = π • S ↔ (∀ a ∈ Sᴬ, a ~[ξᴬ] π • a) ∧ (∀ N ∈ Sᴺ, N ~[ξᴺ] π • N) := by
   constructor
   · intro h
     constructor
     · rintro a ⟨i, ha⟩
-      have : (π • S)ᴬ.rel i (π • a) := by
+      have : i ~[(π • S)ᴬ.rel] π • a := by
         rwa [BaseSupport.smul_atoms, Enumeration.smul_rel, inv_smul_smul]
       rw [← h] at this
       obtain ⟨b, hb, hξ⟩ := this
       cases Sᴬ.rel_coinjective.coinjective ha hb
       exact hξ
     · rintro a ⟨i, ha⟩
-      have : (π • S)ᴺ.rel i (π • a) := by
+      have : i ~[(π • S)ᴺ.rel] π • a := by
         rwa [BaseSupport.smul_nearLitters, Enumeration.smul_rel, inv_smul_smul]
       rw [← h] at this
       obtain ⟨b, hb, hξ⟩ := this
@@ -75,7 +76,7 @@ theorem smul_baseSupport_eq_smul_iff {X : Type _} [BaseActionClass X]
       exact hξ
   · intro h
     ext : 2; rfl; swap; rfl
-    · ext i a : 3
+    · ext ⟨i, a⟩
       rw [smul_atoms, BaseSupport.smul_atoms, Enumeration.smul_rel]
       constructor
       · rintro ⟨b, hb, hξ⟩
@@ -85,7 +86,7 @@ theorem smul_baseSupport_eq_smul_iff {X : Type _} [BaseActionClass X]
         refine ⟨π⁻¹ • a, ha, ?_⟩
         have := h.1 (π⁻¹ • a) ⟨i, ha⟩
         rwa [smul_inv_smul] at this
-    · ext i a : 3
+    · ext ⟨i, a⟩
       rw [smul_nearLitters, BaseSupport.smul_nearLitters, Enumeration.smul_rel]
       constructor
       · rintro ⟨b, hb, hξ⟩
@@ -102,7 +103,7 @@ theorem smul_support_derivBot {X : Type _} [BaseActionClass X]
     (ξ • S) ⇘. A = ξ A • (S ⇘. A) := by
   ext : 2; rfl; swap; rfl
   all_goals
-  · ext i a
+  · ext ⟨i, a⟩
     constructor
     · rintro ⟨⟨B, b⟩, h₁, h₂⟩
       cases h₂.1
@@ -113,15 +114,15 @@ theorem smul_support_derivBot {X : Type _} [BaseActionClass X]
 theorem smul_support_eq_smul_iff {X : Type _} [BaseActionClass X]
     (ξ : Tree X β) (S : Support β) (π : StrPerm β) :
     ξ • S = π • S ↔ ∀ A,
-      (∀ a ∈ (S ⇘. A)ᴬ, (ξ A)ᴬ a (π A • a)) ∧ (∀ N ∈ (S ⇘. A)ᴺ, (ξ A)ᴺ N (π A • N)) := by
+      (∀ a ∈ (S ⇘. A)ᴬ, a ~[(ξ A)ᴬ] π A • a) ∧ (∀ N ∈ (S ⇘. A)ᴺ, N ~[(ξ A)ᴺ] π A • N) := by
   simp only [Support.ext_iff, smul_support_derivBot, Support.smul_derivBot,
     smul_baseSupport_eq_smul_iff]
 
 theorem smul_support_smul_eq_iff {X : Type _} [BaseActionClass X]
     (ξ : Tree X β) (S : Support β) (π : StrPerm β) :
     ξ • π • S = S ↔ ∀ A,
-      (∀ a ∈ ((π • S) ⇘. A)ᴬ, (ξ A)ᴬ a (π⁻¹ A • a)) ∧
-      (∀ N ∈ ((π • S) ⇘. A)ᴺ, (ξ A)ᴺ N (π⁻¹ A • N)) := by
+      (∀ a ∈ ((π • S) ⇘. A)ᴬ, a ~[(ξ A)ᴬ] π⁻¹ A • a) ∧
+      (∀ N ∈ ((π • S) ⇘. A)ᴺ, N ~[(ξ A)ᴺ] π⁻¹ A • N) := by
   have := smul_support_eq_smul_iff ξ (π • S) π⁻¹
   rw [inv_smul_smul] at this
   rw [this]

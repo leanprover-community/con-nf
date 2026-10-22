@@ -71,7 +71,7 @@ theorem inv_smul_atom_mem_dom_of_approximates {ψ : StrApprox β} {ρ : AllPerm 
     (h : ψ.Approximates ρ) {A : β ↝ ⊥} {a : Atom} (ha : a ∈ (ψ A)ᴬ.dom) :
     (ρᵁ A)⁻¹ • a ∈ (ψ A)ᴬ.dom := by
   obtain ⟨b, ha⟩ := ha
-  obtain ⟨c, ha'⟩ := (ψ A).atoms_permutative.mem_codom ha
+  obtain ⟨c, ha'⟩ := (ψ A).atoms_permutative.mem_cod ha
   cases (h A).atoms c a ha'
   rw [inv_smul_smul]
   exact ⟨_, ha'⟩
@@ -80,7 +80,7 @@ theorem inv_smul_nearLitter_mem_dom_of_approximates {ψ : StrApprox β} {ρ : Al
     (h : ψ.Approximates ρ) {A : β ↝ ⊥} {N : NearLitter} (hN : N ∈ (ψ A)ᴺ.dom) :
     (ρᵁ A)⁻¹ • N ∈ (ψ A)ᴺ.dom := by
   obtain ⟨N', hN⟩ := hN
-  obtain ⟨N'', hN'⟩ := (ψ A).nearLitters_permutative.mem_codom hN
+  obtain ⟨N'', hN'⟩ := (ψ A).nearLitters_permutative.mem_cod hN
   cases (h A).nearLitters N'' N hN'
   rw [inv_smul_smul]
   exact ⟨_, hN'⟩
@@ -222,7 +222,7 @@ theorem mem_dom_of_inflexible {ψ : StrApprox β} {A : β ↝ ⊥} {L : Litter}
     rwa [ht]
   | succ k _ ih =>
     apply ih
-    rw [← (ψ A).litters_permutative.codom_eq_dom] at hL
+    rw [← (ψ A).litters_permutative.cod_eq_dom] at hL
     obtain ⟨L', hL⟩ := hL
     have := smul_eq_of_coherentAt_inflexible' hA rfl (hψ A L' _ hL) ρ⁻¹ ?_
     · rw [smul_smul, ← zpow_neg_one, ← zpow_add, neg_add_cancel_comm_assoc] at this
@@ -283,7 +283,7 @@ theorem mem_addInflexible_dom {ψ : StrApprox β} {A : β ↝ ⊥} {L : Litter}
     L ∈ (ψ.addInflexible A P t ρ A)ᴸ.dom := by
   rw [addInflexible]
   split_ifs with hL'
-  · rw [addInflexible', addOrbit_apply, BaseApprox.addOrbit_litters, Rel.sup_dom,
+  · rw [addInflexible', addOrbit_apply, BaseApprox.addOrbit_litters, SetRel.sup_dom,
       BaseApprox.addOrbitLitters_dom]
     right
     use 0
@@ -319,7 +319,7 @@ theorem exists_extension_of_minimal (ψ : StrApprox β) (A : β ↝ ⊥) (L : Li
   · by_cases hL' : L ∈ (ψ A)ᴸ.dom
     · use ψ
     · refine ⟨addFlexible ψ A L hL', le_addOrbit, addFlexible_coherent hψ hL, ?_⟩
-      rw [addFlexible, addOrbit_apply, BaseApprox.addOrbit_litters, Rel.sup_dom,
+      rw [addFlexible, addOrbit_apply, BaseApprox.addOrbit_litters, SetRel.sup_dom,
         BaseApprox.addOrbitLitters_dom]
       right
       use 0
@@ -333,7 +333,7 @@ theorem exists_extension_of_minimal' (ψ : StrApprox β) (A : β ↝ ⊥)
   · obtain ⟨χ, hχ₁, hχ₂, hχ₃⟩ := this
     refine ⟨χ, ⟨hχ₁, ?_⟩, hχ₂⟩
     intro h
-    exact hL (Rel.dom_mono (h A).2 hχ₃)
+    exact hL (SetRel.dom_mono (h A).2 hχ₃)
   · intro B a ha
     apply BaseApprox.mem_dom_atoms_of_litter_mem_dom
     exact hL' B aᴸ (a.pos_litter_lt_pos.trans ha)

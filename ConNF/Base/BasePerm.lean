@@ -1,3 +1,4 @@
+import Mathlib.Algebra.Group.Action.End
 import Mathlib.GroupTheory.Perm.Basic
 import ConNF.Base.NearLitter
 

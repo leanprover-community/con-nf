@@ -1,4 +1,4 @@
-import ConNF.Background.Rel
+import ConNF.Mathlib.Basic.Rel
 import ConNF.Base.Small
 
 /-!
@@ -14,6 +14,7 @@ In this file, we define enumerations of a type.
 universe u
 
 open Cardinal
+open scoped SetRel
 
 namespace ConNF
 
@@ -22,7 +23,7 @@ variable [Params.{u}] {X Y : Type u}
 @[ext]
 structure Enumeration (X : Type u) where
   bound : κ
-  rel : Rel κ X
+  rel : SetRel κ X
   lt_bound : ∀ i ∈ rel.dom, i < bound
   rel_coinjective : rel.Coinjective
 
@@ -31,13 +32,13 @@ variable {E F G : Enumeration X}
 namespace Enumeration
 
 instance : CoeTC (Enumeration X) (Set X) where
-  coe E := E.rel.codom
+  coe E := E.rel.cod
 
 instance : Membership X (Enumeration X) where
-  mem E x := x ∈ E.rel.codom
+  mem E x := x ∈ E.rel.cod
 
 theorem mem_iff (x : X) (E : Enumeration X) :
-    x ∈ E ↔ x ∈ E.rel.codom :=
+    x ∈ E ↔ x ∈ E.rel.cod :=
   Iff.rfl
 
 theorem mem_congr {E F : Enumeration X} (h : E = F) :
@@ -51,15 +52,15 @@ theorem dom_small (E : Enumeration X) :
 
 theorem coe_small (E : Enumeration X) :
     Small (E : Set X) :=
-  small_codom_of_small_dom E.rel_coinjective E.dom_small
+  small_cod_of_small_dom E.rel_coinjective E.dom_small
 
-theorem graph'_small (E : Enumeration X) :
-    Small E.rel.graph' :=
-  small_graph' E.dom_small E.coe_small
+theorem rel_small (E : Enumeration X) :
+    Small E.rel :=
+  small_of_small_dom_cod E.dom_small E.coe_small
 
 noncomputable def empty : Enumeration X where
   bound := 0
-  rel _ _ := False
+  rel := ∅
   lt_bound _ h := by cases h; contradiction
   rel_coinjective := by constructor; intros; contradiction
 
@@ -70,16 +71,18 @@ theorem not_mem_empty (x : X) : x ∉ Enumeration.empty := by
 
 noncomputable def singleton (x : X) : Enumeration X where
   bound := 1
-  rel i y := i = 0 ∧ y = x
+  rel := {(i, y) | i = 0 ∧ y = x}
   lt_bound i h := by
-    have : i = 0 := by simpa only [Rel.dom, exists_eq_right, Set.setOf_eq_eq_singleton,
-      Set.mem_singleton_iff] using h
+    have : i = 0 := by
+      obtain ⟨y, h, -⟩ := h
+      exact h
     rw [this, κEquiv_lt, ← Subtype.coe_lt_coe, κEquiv_ofNat, κEquiv_ofNat, Nat.cast_zero,
       Nat.cast_one]
     exact zero_lt_one
   rel_coinjective := by
     constructor
-    cc
+    rintro _ _ _ ⟨-, rfl⟩ ⟨-, rfl⟩
+    rfl
 
 @[simp]
 theorem mem_singleton_iff (x y : X) :
@@ -106,11 +109,11 @@ theorem card_enumeration_ge (X : Type u) : #X ≤ #(Enumeration X) :=
   mk_le_of_injective Enumeration.singleton_injective
 
 def enumerationEmbedding (X : Type u) : Enumeration X ↪ κ × {s : Set (κ × X) | Small s} where
-  toFun E := (E.bound, ⟨E.rel.graph', E.graph'_small⟩)
+  toFun E := (E.bound, ⟨E.rel, E.rel_small⟩)
   inj' := by
     intro E F h
     rw [Prod.mk.injEq, Subtype.mk.injEq] at h
-    exact Enumeration.ext h.1 (Rel.graph'_injective h.2)
+    exact Enumeration.ext h.1 h.2
 
 theorem card_enumeration_le (h : #X ≤ #μ) : #(Enumeration X) ≤ #μ := by
   apply (mk_le_of_injective (enumerationEmbedding X).injective).trans
@@ -148,7 +151,7 @@ theorem exists_equiv (s : Set X) (hs : Small s) :
 
 noncomputable def ofSet (s : Set X) (hs : Small s) : Enumeration X where
   bound := (exists_equiv s hs).some.1
-  rel i x := ∃ h, i = (exists_equiv s hs).some.2 ⟨x, h⟩
+  rel := {(i, x) | ∃ h, i = (exists_equiv s hs).some.2 ⟨x, h⟩}
   lt_bound := by
     rintro _ ⟨x, h, rfl⟩
     exact ((exists_equiv s hs).some.2 ⟨x, h⟩).prop
@@ -181,7 +184,7 @@ theorem ofSet_coe (s : Set X) (hs : Small s) :
 
 def image (E : Enumeration X) (f : X → Y) : Enumeration Y where
   bound := E.bound
-  rel i y := ∃ x, E.rel i x ∧ f x = y
+  rel := {(i, y) | ∃ x, i ~[E.rel] x ∧ f x = y}
   lt_bound := by
     rintro i ⟨_, x, hi, rfl⟩
     exact E.lt_bound i ⟨x, hi⟩
@@ -196,7 +199,7 @@ theorem image_bound {f : X → Y} :
   rfl
 
 theorem image_rel {f : X → Y} (i : κ) (y : Y) :
-    (E.image f).rel i y ↔ ∃ x, E.rel i x ∧ f x = y :=
+    i ~[(E.image f).rel] y ↔ ∃ x, i ~[E.rel] x ∧ f x = y :=
   Iff.rfl
 
 @[simp]
@@ -210,7 +213,7 @@ theorem mem_image {f : X → Y} (y : Y) :
 
 def invImage (E : Enumeration X) (f : Y → X) (hf : f.Injective) : Enumeration Y where
   bound := E.bound
-  rel i y := E.rel i (f y)
+  rel := {(i, y) | i ~[E.rel] f y}
   lt_bound := by
     rintro i ⟨y, hy⟩
     exact E.lt_bound i ⟨f y, hy⟩
@@ -220,7 +223,7 @@ def invImage (E : Enumeration X) (f : Y → X) (hf : f.Injective) : Enumeration 
     exact hf <| E.rel_coinjective.coinjective h₁ h₂
 
 theorem invImage_rel {f : Y → X} {hf : f.Injective} (i : κ) (y : Y) :
-    (E.invImage f hf).rel i y ↔ E.rel i (f y) :=
+    i ~[(E.invImage f hf).rel] y ↔ i ~[E.rel] f y :=
   Iff.rfl
 
 @[simp]
@@ -228,9 +231,9 @@ theorem mem_invImage {f : Y → X} {hf : f.Injective} (y : Y) :
     y ∈ E.invImage f hf ↔ f y ∈ E :=
   Iff.rfl
 
-def comp (E : Enumeration X) (r : Rel X Y) (hr : r.Coinjective) : Enumeration Y where
+def comp (E : Enumeration X) (r : SetRel X Y) (hr : r.Coinjective) : Enumeration Y where
   bound := E.bound
-  rel := E.rel.comp r
+  rel := E.rel ○ r
   lt_bound := by
     rintro i ⟨y, x, hy⟩
     exact E.lt_bound i ⟨x, hy.1⟩
@@ -243,7 +246,7 @@ instance {G X : Type _} [Group G] [MulAction G X] :
 @[simp]
 theorem smul_rel {G X : Type _} [Group G] [MulAction G X]
     (π : G) (E : Enumeration X) (i : κ) (x : X) :
-    (π • E).rel i x ↔ E.rel i (π⁻¹ • x) :=
+    i ~[(π • E).rel] x ↔ i ~[E.rel] π⁻¹ • x :=
   Iff.rfl
 
 @[simp]
@@ -266,9 +269,9 @@ theorem smul_rel_dom {G X : Type _} [Group G] [MulAction G X]
 
 open scoped Pointwise in
 @[simp]
-theorem smul_rel_codom {G X : Type _} [Group G] [MulAction G X]
+theorem smul_rel_cod {G X : Type _} [Group G] [MulAction G X]
     (π : G) (E : Enumeration X) :
-    (π • E).rel.codom = π • E.rel.codom := by
+    (π • E).rel.cod = π • E.rel.cod := by
   ext x
   constructor
   · rintro ⟨i, h⟩
@@ -282,16 +285,16 @@ open scoped Pointwise in
 theorem smul_coe {G X : Type _} [Group G] [MulAction G X]
     (π : G) (E : Enumeration X) :
     ((π • E : Enumeration X) : Set X) = π • (E : Set X) :=
-  smul_rel_codom π E
+  smul_rel_cod π E
 
 instance {G X : Type _} [Group G] [MulAction G X] :
     MulAction G (Enumeration X) where
   one_smul E := by
-    ext i x
+    ext ⟨i, x⟩
     · rfl
     · rw [smul_rel, inv_one, one_smul]
   mul_smul π₁ π₂ E := by
-    ext i x
+    ext ⟨i, x⟩
     · rfl
     · rw [smul_rel, smul_rel, smul_rel, mul_inv_rev, mul_smul]
 
@@ -302,7 +305,7 @@ theorem mem_smul_iff {G X : Type _} [Group G] [MulAction G X] (x : X) (g : G) (E
 theorem eq_of_smul_eq_smul {G X : Type _} [Group G] [MulAction G X] {g₁ g₂ : G} {E : Enumeration X}
     (h : g₁ • E = g₂ • E) (x : X) (hx : x ∈ E) : g₁ • x = g₂ • x := by
   obtain ⟨i, hi⟩ := hx
-  have : (g₁ • E).rel i (g₁ • x) := by rwa [smul_rel, inv_smul_smul]
+  have : i ~[(g₁ • E).rel] g₁ • x := by rwa [smul_rel, inv_smul_smul]
   rw [h] at this
   have := E.rel_coinjective.coinjective hi this
   exact (eq_inv_smul_iff.mp this).symm
@@ -318,9 +321,9 @@ theorem smul_singleton {G X : Type _} [Group G] [MulAction G X] {g : G} {x : X} 
     g • singleton x = singleton (g • x) := by
   apply Enumeration.ext
   · rfl
-  · ext i y
+  · ext ⟨i, y⟩
     rw [smul_rel]
-    simp only [singleton, and_congr_right_iff, inv_smul_eq_iff]
+    simp only [singleton, Set.mem_setOf_eq, inv_smul_eq_iff]
 
 /-!
 ## Concatenation of enumerations
@@ -329,7 +332,7 @@ theorem smul_singleton {G X : Type _} [Group G] [MulAction G X] {g : G} {x : X} 
 noncomputable instance : Add (Enumeration X) where
   add E F := {
     bound := E.bound + F.bound
-    rel := E.rel ⊔ Rel.comp (E.bound + ·).graph.inv F.rel
+    rel := {(i, x) | i ~[E.rel] x ∨ ∃ j, E.bound + j = i ∧ j ~[F.rel] x}
     lt_bound := by
       rintro i ⟨x, hi | ⟨j, rfl, hjx⟩⟩
       · exact (E.lt_bound i ⟨x, hi⟩).trans_le (κ_le_add E.bound F.bound)
@@ -348,8 +351,7 @@ noncomputable instance : Add (Enumeration X) where
         rw [add_lt_iff_neg_left] at this
         cases (κ_zero_le j).not_gt this
       · cases hj
-        simp only [Rel.inv, flip, Function.graph_def, add_right_inj] at hk
-        cases hk
+        cases add_left_cancel hk
         exact F.rel_coinjective.coinjective hjx hky
   }
 
@@ -359,19 +361,19 @@ theorem add_bound (E F : Enumeration X) :
   rfl
 
 theorem rel_add_iff {E F : Enumeration X} (i : κ) (x : X) :
-    (E + F).rel i x ↔ E.rel i x ∨ ∃ j, E.bound + j = i ∧ F.rel j x :=
+    i ~[(E + F).rel] x ↔ i ~[E.rel] x ∨ ∃ j, E.bound + j = i ∧ j ~[F.rel] x :=
   Iff.rfl
 
 theorem add_rel_dom {X : Type _} (E F : Enumeration X) :
     (E + F).rel.dom = E.rel.dom ∪ (E.bound + ·) '' F.rel.dom := by
   ext i
-  simp only [Rel.dom, rel_add_iff, Set.mem_setOf_eq, Set.mem_union, Set.mem_image]
+  simp only [SetRel.mem_dom, rel_add_iff, Set.mem_union, Set.mem_image]
   aesop
 
 @[simp]
 theorem mem_add_iff {E F : Enumeration X} (x : X) :
     x ∈ E + F ↔ x ∈ E ∨ x ∈ F := by
-  simp only [mem_iff, Rel.codom, Set.mem_setOf, rel_add_iff]
+  simp only [mem_iff, SetRel.mem_cod, rel_add_iff]
   constructor
   · rintro ⟨i, (hi | ⟨j, rfl, hj⟩)⟩
     · exact Or.inl ⟨i, hi⟩
@@ -389,17 +391,18 @@ theorem coe_add {E F : Enumeration X} :
 @[simp]
 theorem add_empty (E : Enumeration X) :
     E + .empty = E := by
-  ext i x
+  ext ⟨i, x⟩
   · rw [add_bound, empty, add_zero]
-  · simp only [empty, rel_add_iff, and_false, exists_const, or_false]
+  · simp only [rel_add_iff, empty, Set.mem_empty_iff_false, and_false, exists_const, or_false]
 
 theorem add_inj_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bound)
     (h' : E + G = F + H) : E = F ∧ G = H := by
   have := congr_arg (·.rel) h'
-  conv at this => dsimp only; rw [funext_iff]; intro; rw [funext_iff]; intro; rw [eq_iff_iff]
+  replace this : ∀ i x, i ~[(E + G).rel] x ↔ i ~[(F + H).rel] x :=
+    λ i x ↦ Set.ext_iff.mp this (i, x)
   constructor
   · apply Enumeration.ext h
-    ext i x
+    ext ⟨i, x⟩
     constructor
     · intro hx
       obtain (hx' | ⟨j, rfl, _⟩) := (this i x).mp (Or.inl hx)
@@ -417,14 +420,14 @@ theorem add_inj_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bou
     · have := congr_arg (·.bound) h'
       simp only [add_bound, h, add_right_inj] at this
       exact this
-    ext i x
+    ext ⟨i, x⟩
     constructor
     · intro hx
       obtain (hx' | ⟨j, hj₁, hj₂⟩) := (this (E.bound + i) x).mp (Or.inr ⟨i, rfl, hx⟩)
       · have := F.lt_bound _ ⟨x, hx'⟩
         rw [h, add_lt_iff_neg_left] at this
         cases (κ_zero_le i).not_gt this
-      · simp only [h, Rel.inv_apply, Function.graph_def, add_right_inj] at hj₁
+      · rw [h, add_right_inj] at hj₁
         rw [← hj₁]
         exact hj₂
     · intro hx
@@ -432,7 +435,7 @@ theorem add_inj_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F.bou
       · have := E.lt_bound _ ⟨x, hx'⟩
         rw [h, add_lt_iff_neg_left] at this
         cases (κ_zero_le i).not_gt this
-      · simp only [h, Rel.inv_apply, Function.graph_def, add_right_inj] at hj₁
+      · rw [h, add_right_inj] at hj₁
         rw [← hj₁]
         exact hj₂
 

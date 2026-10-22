@@ -1,31 +1,8 @@
+import ConNF.Mathlib.Basic.Rel
+import ConNF.Mathlib.SetTheory.Cardinal.Basic
 import Mathlib.SetTheory.Cardinal.Regular
-import ConNF.Background.Rel
 
 universe u v
-
-namespace Function
-
-open Cardinal
-
-/-- An alternate spelling of `Function.graph`, useful in proving inequalities of cardinals. -/
-def graph' {α β : Type _} (f : α → β) : Set (α × β) :=
-  {(x, y) | y = f x}
-
-theorem graph'_injective {α β : Type _} : Injective (graph' : (α → β) → Set (α × β)) := by
-  intro f g h
-  ext x
-  have : (x, f x) ∈ graph' f := rfl
-  rwa [h] at this
-
-theorem card_graph'_eq {α β : Type _} (f : α → β) : #(f.graph') = #α := by
-  rw [Cardinal.eq]
-  refine ⟨⟨λ x ↦ x.val.1, λ x ↦ ⟨⟨x, f x⟩, rfl⟩, ?_, ?_⟩⟩
-  · rintro ⟨⟨x, _⟩, rfl⟩
-    rfl
-  · intro x
-    rfl
-
-end Function
 
 namespace Cardinal
 
@@ -41,7 +18,7 @@ theorem mk_biUnion_le_of_le_lift {α : Type u} {β : Type v} {s : Set α} {f : �
   apply (mk_iUnion_le_lift.{v} (λ (x : s) ↦ f x x.prop)).trans
   refine mul_le_mul le_rfl ?_ (zero_le _) (zero_le _)
   obtain hs | hs := isEmpty_or_nonempty s
-  · simp only [ciSup_of_empty, bot_eq_zero', zero_le, lift_zero]
+  · simp only [ciSup_of_empty, bot_eq_zero', zero_le]
   · apply ciSup_le
     intro x
     have := h x x.prop
@@ -111,10 +88,10 @@ theorem mk_pow_le_of_mk_lt_ord_cof {α β : Type _}
   have := mk_subset_mk_lt_cof (α := β × α) (hαβ ▸ hα.2)
   refine le_trans ?_ (this.trans hαβ).le
   rw [power_def]
-  refine mk_le_of_injective (f := λ f ↦ ⟨f.graph', ?_⟩) ?_
-  · rwa [hαβ, Function.card_graph'_eq]
+  refine mk_le_of_injective (f := λ f ↦ ⟨f.graph, ?_⟩) ?_
+  · rwa [hαβ, Function.cardinalMk_graph]
   · intro f g h
-    exact Function.graph'_injective (congr_arg Subtype.val h)
+    exact Function.graph_injective (congr_arg Subtype.val h)
 
 /-- If `c` is a strong limit and `d` is not "too large", then `c ^ d = c`.
 By "too large" here, we mean large enough to be a counterexample by König's theorem on cardinals:
@@ -127,7 +104,7 @@ theorem pow_le_of_lt_ord_cof {c d : Cardinal} (hc : c.IsStrongLimit) (hd : d < c
 
 theorem mk_fun_le (α β : Type _) :
     #(α → β) ≤ #(Set (α × β)) :=
-  mk_le_of_injective (f := Function.graph') Function.graph'_injective
+  mk_le_of_injective Function.graph_injective
 
 theorem mk_power_le_two_power (α β : Type _) :
     #α ^ #β ≤ max ℵ₀ (max (2 ^ #α) (2 ^ #β)) := by
@@ -193,17 +170,17 @@ theorem pow_lt_of_lt {c d e : Cardinal} (hc : c.IsStrongLimit) (hd : d < c) (he 
   · cases eq_of_le_of_not_lt (aleph0_le_of_isSuccLimit hc.isSuccLimit) hc'
     exact power_lt_aleph0 hd he
 
-theorem card_codom_le_of_functional {α β : Type _} {r : Rel α β} (hr : r.Functional) :
-    #r.codom ≤ #r.dom := by
+theorem card_cod_le_of_functional {α β : Type _} {r : SetRel α β} (hr : r.Functional) :
+    #r.cod ≤ #r.dom := by
   refine le_trans ?_ (mk_image_le (f := r.toFunction hr) (s := r.dom))
   apply mk_le_mk_of_subset
   rintro b ⟨a, h⟩
   refine ⟨a, ⟨b, h⟩, ?_⟩
-  rwa [Rel.toFunction_eq_iff]
+  rwa [SetRel.toFunction_eq_iff]
 
-theorem card_codom_le_of_coinjective {α β : Type _} {r : Rel α β} (hr : r.Coinjective) :
-    #r.codom ≤ #r.dom := by
-  have := card_codom_le_of_functional (r := λ (a : r.dom) b ↦ r a b) ?_
+theorem card_cod_le_of_coinjective {α β : Type _} {r : SetRel α β} (hr : r.Coinjective) :
+    #r.cod ≤ #r.dom := by
+  have := card_cod_le_of_functional (r := r.restrictDomain r.dom) ?_
   · refine le_trans ?_ (this.trans ?_)
     · apply mk_le_mk_of_subset
       rintro b ⟨a, h⟩

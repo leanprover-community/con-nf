@@ -14,6 +14,7 @@ In this file, we define the notion of a support.
 universe u
 
 open Cardinal
+open scoped SetRel
 
 namespace ConNF
 
@@ -102,13 +103,13 @@ theorem smul_eq_smul_iff (π₁ π₂ : BasePerm) (S : BaseSupport) :
   · intro h
     constructor
     · rintro a ⟨i, ha⟩
-      have := congr_arg (·ᴬ.rel i (π₁ • a)) h
+      have := congr(i ~[$hᴬ.rel] π₁ • a)
       simp only [smul_atoms, Enumeration.smul_rel, inv_smul_smul, eq_iff_iff] at this
       have := Sᴬ.rel_coinjective.coinjective ha (this.mp ha)
       rw [eq_inv_smul_iff] at this
       rw [this]
     · rintro N ⟨i, hN⟩
-      have := congr_arg (·ᴺ.rel i (π₁ • N)) h
+      have := congr(i ~[$hᴺ.rel] π₁ • N)
       simp only [smul_nearLitters, Enumeration.smul_rel, inv_smul_smul, eq_iff_iff] at this
       have := Sᴺ.rel_coinjective.coinjective hN (this.mp hN)
       rw [eq_inv_smul_iff] at this
@@ -116,7 +117,7 @@ theorem smul_eq_smul_iff (π₁ π₂ : BasePerm) (S : BaseSupport) :
   · intro h
     ext : 2
     · rfl
-    · ext i a : 3
+    · ext ⟨i, a⟩
       rw [smul_atoms, smul_atoms, Enumeration.smul_rel, Enumeration.smul_rel]
       constructor
       · intro ha
@@ -128,7 +129,7 @@ theorem smul_eq_smul_iff (π₁ π₂ : BasePerm) (S : BaseSupport) :
         rw [smul_inv_smul, smul_eq_iff_eq_inv_smul] at this
         rwa [← this]
     · rfl
-    · ext i a : 3
+    · ext ⟨i, a⟩
       rw [smul_nearLitters, smul_nearLitters, Enumeration.smul_rel, Enumeration.smul_rel]
       constructor
       · intro hN
@@ -370,7 +371,7 @@ theorem smul_derivBot {α : TypeIndex} (π : StrPerm α) (S : Support α) (A : �
 
 theorem smul_coderiv {α : TypeIndex} (π : StrPerm α) (S : Support β) (A : α ↝ β) :
     π • S ⇗ A = (π ⇘ A • S) ⇗ A := by
-  ext B i x
+  ext B ⟨i, x⟩
   · rfl
   · constructor
     · rintro ⟨⟨C, x⟩, hS, hx⟩
@@ -478,10 +479,10 @@ theorem BaseSupport.le_add_right {S T : BaseSupport} :
     S ≤ S + T := by
   constructor
   · intro a ha
-    simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.mem_add_iff]
+    simp only [BaseSupport.add_atoms, Enumeration.mem_add_iff]
     exact Or.inl ha
   · intro N hN
-    simp only [Support.add_derivBot, BaseSupport.add_nearLitters, Enumeration.mem_add_iff]
+    simp only [BaseSupport.add_nearLitters, Enumeration.mem_add_iff]
     exact Or.inl hN
 
 theorem BaseSupport.le_add_left {S T : BaseSupport} :
@@ -501,9 +502,9 @@ theorem BaseSupport.Subsupport.le {S T : BaseSupport}
     (h : S.Subsupport T) : S ≤ T := by
   constructor
   · rintro a ⟨i, hi⟩
-    exact ⟨i, h.1 i a hi⟩
+    exact ⟨i, h.1 hi⟩
   · rintro N ⟨i, hi⟩
-    exact ⟨i, h.2 i N hi⟩
+    exact ⟨i, h.2 hi⟩
 
 theorem BaseSupport.Subsupport.trans {S T U : BaseSupport}
     (h₁ : S.Subsupport T) (h₂ : T.Subsupport U) :
@@ -513,10 +514,10 @@ theorem BaseSupport.Subsupport.trans {S T U : BaseSupport}
 theorem BaseSupport.smul_subsupport_smul {S T : BaseSupport} (h : S.Subsupport T) (π : BasePerm) :
     (π • S).Subsupport (π • T) := by
   constructor
-  · intro i a ha
-    exact h.1 i _ ha
-  · intro i N hN
-    exact h.2 i _ hN
+  · rintro ⟨i, a⟩ ha
+    exact h.1 ha
+  · rintro ⟨i, N⟩ hN
+    exact h.2 hN
 
 instance {α : TypeIndex} : LE (Support α) where
   le S T := ∀ A, S ⇘. A ≤ T ⇘. A
@@ -562,11 +563,11 @@ theorem subsupport_add {α : TypeIndex} {S T : Support α} :
     S.Subsupport (S + T) := by
   intro A
   constructor
-  · intro i a ha
+  · rintro ⟨i, a⟩ ha
     simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.rel_add_iff]
     exact Or.inl ha
-  · intro i N hN
-    simp only [Support.add_derivBot, BaseSupport.add_atoms, Enumeration.rel_add_iff]
+  · rintro ⟨i, N⟩ hN
+    simp only [Support.add_derivBot]
     exact Or.inl hN
 
 theorem smul_eq_of_subsupport {α : TypeIndex} {S T : Support α} {π : StrPerm α}
@@ -576,14 +577,14 @@ theorem smul_eq_of_subsupport {α : TypeIndex} {S T : Support α} {π : StrPerm 
   intro A
   constructor
   · rintro a ⟨i, hi⟩
-    have hi₁ := (h₁ A).1 i a hi
-    have hi₂ := (h₂ A).1 i a hi
+    have hi₁ := (h₁ A).1 hi
+    have hi₂ := (h₂ A).1 hi
     have := (T ⇘. A)ᴬ.rel_coinjective.coinjective hi₁ hi₂
     dsimp only at this
     rwa [smul_eq_iff_eq_inv_smul]
   · rintro N ⟨i, hi⟩
-    have hi₁ := (h₁ A).2 i N hi
-    have hi₂ := (h₂ A).2 i N hi
+    have hi₁ := (h₁ A).2 hi
+    have hi₂ := (h₂ A).2 hi
     have := (T ⇘. A)ᴺ.rel_coinjective.coinjective hi₁ hi₂
     dsimp only at this
     rwa [smul_eq_iff_eq_inv_smul]

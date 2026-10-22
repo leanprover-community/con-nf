@@ -15,6 +15,7 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal
+open scoped SetRel
 
 namespace ConNF
 
@@ -33,7 +34,7 @@ theorem addAtom'_nearLitters (S : BaseSupport) (a : Atom) :
   rfl
 
 theorem addAtom'_atoms_rel (S : BaseSupport) (a : Atom) (i : κ) (b : Atom) :
-    (addAtom' S a)ᴬ.rel i b ↔ Sᴬ.rel i b ∨ (b = a ∧ i = Sᴬ.bound) := by
+    i ~[(addAtom' S a)ᴬ.rel] b ↔ i ~[Sᴬ.rel] b ∨ (b = a ∧ i = Sᴬ.bound) := by
   constructor
   · rintro (hb | ⟨_, rfl, rfl, rfl⟩)
     · exact Or.inl hb
@@ -41,8 +42,7 @@ theorem addAtom'_atoms_rel (S : BaseSupport) (a : Atom) (i : κ) (b : Atom) :
       simp only [add_zero]
   · rintro (hb | ⟨rfl, rfl⟩)
     · exact Or.inl hb
-    · refine Or.inr ⟨0, ?_, rfl, rfl⟩
-      simp only [Rel.inv_apply, Function.graph_def, add_zero]
+    · exact Or.inr ⟨0, add_zero _, rfl, rfl⟩
 
 theorem addAtom'_closed (S : BaseSupport) (a : Atom) (hS : S.Closed) :
     (addAtom' S a).Closed := by
@@ -94,9 +94,10 @@ omit [Level] [CoherentData] in
 @[simp]
 theorem addAtom_convAtoms (S : BaseSupport) (a₁ a₂ : Atom) (A : ⊥ ↝ ⊥) :
     convAtoms (addAtom S a₁) (addAtom S a₂) A =
-      (λ a₃ a₄ ↦ (a₃ = a₄ ∧ a₃ ∈ Sᴬ) ∨ (a₃ = a₁ ∧ a₄ = a₂)) := by
-  ext a₃ a₄
-  simp only [convAtoms, Rel.comp, addAtom_derivBot, Rel.inv_apply, addAtom'_atoms_rel]
+      {(a₃, a₄) | (a₃ = a₄ ∧ a₃ ∈ Sᴬ) ∨ (a₃ = a₁ ∧ a₄ = a₂)} := by
+  ext ⟨a₃, a₄⟩
+  simp only [convAtoms, SetRel.mem_comp, addAtom_derivBot, SetRel.mem_inv, addAtom'_atoms_rel,
+    Set.mem_setOf_eq]
   constructor
   · rintro ⟨i, hi₃ | hi₃, hi₄ | hi₄⟩
     · exact Or.inl ⟨Sᴬ.rel_coinjective.coinjective hi₃ hi₄, i, hi₃⟩
@@ -110,8 +111,8 @@ theorem addAtom_convAtoms (S : BaseSupport) (a₁ a₂ : Atom) (A : ⊥ ↝ ⊥)
 omit [Level] [CoherentData] in
 @[simp]
 theorem addAtom_convNearLitters (S : BaseSupport) (a₁ a₂ : Atom) (A : ⊥ ↝ ⊥) :
-    convNearLitters (addAtom S a₁) (addAtom S a₂) A = (λ N₁ N₂ ↦ N₁ = N₂ ∧ N₁ ∈ Sᴺ) := by
-  ext N₁ N₂
+    convNearLitters (addAtom S a₁) (addAtom S a₂) A = {(N₁, N₂) | N₁ = N₂ ∧ N₁ ∈ Sᴺ} := by
+  ext ⟨N₁, N₂⟩
   constructor
   · rintro ⟨i, hi₁, hi₂⟩
     exact ⟨Sᴺ.rel_coinjective.coinjective hi₁ hi₂, i, hi₁⟩
@@ -125,7 +126,7 @@ theorem addAtom_sameSpecLe {S : BaseSupport} {a₁ a₂ : Atom}
   · intro; rfl
   · intro; rfl
   · intro A
-    simp only [addAtom_derivBot, Rel.dom, addAtom'_atoms_rel]
+    simp only [addAtom_derivBot, SetRel.dom, addAtom'_atoms_rel]
     rintro i ⟨a, hi | ⟨rfl, rfl⟩⟩
     · exact ⟨a, Or.inl hi⟩
     · exact ⟨a₂, Or.inr ⟨rfl, rfl⟩⟩
@@ -139,14 +140,14 @@ theorem addAtom_sameSpecLe {S : BaseSupport} {a₁ a₂ : Atom}
     · cases ha₂ (hb₁.1.trans hb₂.2 ▸ hb₁.2)
     · cases ha₂ (hb₂.1.trans hb₁.2 ▸ hb₂.2)
     · exact hb₁.1.trans hb₂.1.symm
-  · rintro A i j ⟨N, hi, a, haN, hj⟩
+  · rintro A ⟨i, j⟩ ⟨N, hi, a, haN, hj⟩
     refine ⟨N, hi, ?_⟩
     obtain (ha | ⟨j, rfl, rfl, rfl⟩) := hj
     · exact ⟨a, haN, Or.inl ha⟩
     · refine ⟨a₂, ?_, Or.inr ⟨_, rfl, rfl, rfl⟩⟩
-      dsimp only
-      rw [← ha]
-      · exact haN
+      simp only [Set.mem_setOf_eq] at haN ⊢
+      dsimp only at ha
+      rwa [← ha]
       · exact ⟨i, hi⟩
   · intro _ _ _ _ P
     cases P.elim_bot
@@ -208,8 +209,8 @@ structure Information : Type u where
   outside : Prop
 
 def information (S : BaseSupport) (s : Set Atom) : Information where
-  atoms := {i | ∃ a ∈ s, Sᴬ.rel i a}
-  nearLitters := {i | ∃ N : NearLitter, ((Nᴬ ∩ s) \ Sᴬ).Nonempty ∧ Sᴺ.rel i N}
+  atoms := {i | ∃ a ∈ s, i ~[Sᴬ.rel] a}
+  nearLitters := {i | ∃ N : NearLitter, ((Nᴬ ∩ s) \ Sᴬ).Nonempty ∧ i ~[Sᴺ.rel] N}
   outside := ∀ a, a ∉ Sᴬ → (∀ N ∈ Sᴺ, a ∉ Nᴬ) → a ∈ s
 
 theorem subset_of_information_eq {S : BaseSupport} (hS : S.Closed) {s t : Set Atom}

@@ -1,6 +1,6 @@
-import ConNF.Background.Rel
 import ConNF.Background.Set
 import ConNF.Base.Params
+import ConNF.Mathlib.Basic.Rel
 
 /-!
 # Small sets
@@ -12,7 +12,7 @@ sets.
 universe u v
 
 open Cardinal Set
-open scoped symmDiff
+open scoped symmDiff SetRel
 
 namespace ConNF
 
@@ -136,15 +136,17 @@ technical advantages that should hopefully become clear over the course of this 
 We will begin our study of relations by proving some smallness results for them, but we will first
 establish some terminology that will be used throughout this document.
 
-The *domain* of a relation `r` is the set `{a | ∃ b, r a b}`.
-The *codomain* of `r` is the set `{b | ∃ a, r a b}`.
+Relations are elements of `SetRel α β`, that is, sets of pairs; we write `a ~[r] b` for
+`(a, b) ∈ r`.
+The *domain* of a relation `r` is the set `{a | ∃ b, a ~[r] b}`.
+The *codomain* of `r` is the set `{b | ∃ a, a ~[r] b}`.
 
 A relation `r` is called
 
-* *injective*, if `r a b` and `r a' b` imply `a = a'`;
-* *surjective*, if for every `b`, there is some `a` such that `r a b`;
-* *coinjective*, if `r a b` and `r a b'` imply `b = b'`;
-* *cosurjective*, if for every `a`, there is some `b` such that `r a b`;
+* *injective*, if `a ~[r] b` and `a' ~[r] b` imply `a = a'`;
+* *surjective*, if for every `b`, there is some `a` such that `a ~[r] b`;
+* *coinjective*, if `a ~[r] b` and `a ~[r] b'` imply `b = b'`;
+* *cosurjective*, if for every `a`, there is some `b` such that `a ~[r] b`;
 * *one-to-one*, if `r` is both injective and coinjective;
 * *functional*, if `r` is both coinjective and cosurjective
     (so is a set-theoretic function);
@@ -153,17 +155,16 @@ A relation `r` is called
 * *bijective*, if `r` is both functional and cofunctional;
 * *permutative*, if `r` is one-to-one and its domain and codomain are equal.
 
-The *image* of a set `s` under a relation `r` is the set `{b | ∃ a ∈ s, r a b}`.
-The *graph* of a relation `r` is the set `{(a, b) | r a b}`.
+The *image* of a set `s` under a relation `r` is the set `{b | ∃ a ∈ s, a ~[r] b}`.
 We can now state our results.
 -/
 
 /-- The image of any small set under a coinjective relation is small.
 This is a generalisation of the fact that the image of a small set under a function (or functional
 relation) is small. -/
-theorem image_small_of_coinjective {r : Rel α β} (h : r.Coinjective) {s : Set α} (hs : Small s) :
+theorem image_small_of_coinjective {r : SetRel α β} (h : r.Coinjective) {s : Set α} (hs : Small s) :
     Small (r.image s) := by
-  have := small_biUnion hs (f := λ x _ ↦ {y | r x y}) ?_
+  have := small_biUnion hs (f := λ x _ ↦ {y | x ~[r] y}) ?_
   · apply this.mono
     rintro y ⟨x, hxy⟩
     simp only [mem_iUnion]
@@ -175,14 +176,14 @@ theorem image_small_of_coinjective {r : Rel α β} (h : r.Coinjective) {s : Set 
 
 /-- If the domain of a coinjective relation is small, then its codomain is also small.
 This is a special case of the previous result. -/
-theorem small_codom_of_small_dom {r : Rel α β} (h : r.Coinjective) (h' : Small r.dom) :
-    Small r.codom :=
-  Rel.image_dom ▸ image_small_of_coinjective h h'
+theorem small_cod_of_small_dom {r : SetRel α β} (h : r.Coinjective) (h' : Small r.dom) :
+    Small r.cod :=
+  SetRel.image_dom ▸ image_small_of_coinjective h h'
 
-/-- If the domain and codomain of a relation are small, then its graph is also small. -/
-theorem small_graph' {r : Rel α β} (h₁ : Small r.dom) (h₂ : Small r.codom) :
-    Small r.graph' := by
-  have := small_biUnion h₁ (f := λ x _ ↦ {z : α × β | z.1 = x ∧ r x z.2}) ?_
+/-- If the domain and codomain of a relation are small, then the relation itself is small. -/
+theorem small_of_small_dom_cod {r : SetRel α β} (h₁ : Small r.dom) (h₂ : Small r.cod) :
+    Small r := by
+  have := small_biUnion h₁ (f := λ x _ ↦ {z : α × β | z.1 = x ∧ x ~[r] z.2}) ?_
   · apply this.mono
     rintro z hz
     simp only [mem_iUnion]

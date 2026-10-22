@@ -14,7 +14,7 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal ConNF.TSet
-open scoped InitialSeg
+open scoped InitialSeg SetRel
 
 namespace ConNF
 
@@ -25,21 +25,20 @@ variable [Params.{u}] {α β γ δ ε ζ : Λ} (hβ : (β : TypeIndex) < α) (h�
 so we externalise the definition for convenience. -/
 def InternalWellOrder (r : TSet α) : Prop :=
   IsWellOrder (ExternalRel hβ hγ hδ r).field
-    (InvImage (ExternalRel hβ hγ hδ r) Subtype.val)
+    (InvImage (· ~[ExternalRel hβ hγ hδ r] ·) Subtype.val)
 
 def InternallyWellOrdered (x : TSet γ) : Prop :=
   {y : TSet δ | y ∈' x}.Subsingleton ∨ (∃ r, InternalWellOrder hβ hγ hδ r ∧ x = field hβ hγ hδ r)
 
 @[simp]
-theorem externalRel_smul (r : TSet α) (ρ : AllPerm α) :
-    ExternalRel hβ hγ hδ (ρ • r) =
-      InvImage (ExternalRel hβ hγ hδ r) ((ρ ↘ hβ ↘ hγ ↘ hδ)⁻¹ • ·) := by
-  ext a b
-  simp only [ExternalRel, mem_smul_iff', allPerm_inv_sderiv', smul_op, InvImage]
+theorem mem_externalRel_smul (r : TSet α) (ρ : AllPerm α) (a b : TSet δ) :
+    a ~[ExternalRel hβ hγ hδ (ρ • r)] b ↔
+      (ρ ↘ hβ ↘ hγ ↘ hδ)⁻¹ • a ~[ExternalRel hβ hγ hδ r] (ρ ↘ hβ ↘ hγ ↘ hδ)⁻¹ • b := by
+  simp only [ExternalRel, Set.mem_setOf_eq, mem_smul_iff', allPerm_inv_sderiv', smul_op]
 
 omit [Params] in
 /-- Well-orders are rigid. -/
-theorem apply_eq_of_isWellOrder {X : Type _} {r : Rel X X} {f : X → X}
+theorem apply_eq_of_isWellOrder {X : Type _} {r : X → X → Prop} {f : X → X}
     (hr : IsWellOrder X r) (hf : Function.Bijective f) (hf' : ∀ x y, r x y ↔ r (f x) (f y)) :
     ∀ x, f x = x := by
   let emb : r ≼i r := ⟨⟨⟨f, hf.injective⟩, λ {a b} ↦ (hf' a b).symm⟩, ?_⟩
@@ -50,9 +49,9 @@ theorem apply_eq_of_isWellOrder {X : Type _} {r : Rel X X} {f : X → X}
     exact hf.surjective _
 
 omit [Params] in
-theorem apply_eq_of_isWellOrder' {X : Type _} {r : Rel X X} {f : X → X}
-    (hr : IsWellOrder r.field (InvImage r Subtype.val)) (hf : Function.Bijective f)
-    (hf' : ∀ x y, r x y ↔ r (f x) (f y)) :
+theorem apply_eq_of_isWellOrder' {X : Type _} {r : SetRel X X} {f : X → X}
+    (hr : IsWellOrder r.field (InvImage (· ~[r] ·) Subtype.val)) (hf : Function.Bijective f)
+    (hf' : ∀ x y, x ~[r] y ↔ f x ~[r] f y) :
     ∀ x ∈ r.field, f x = x := by
   have : ∀ x ∈ r.field, f x ∈ r.field := by
     rintro x (⟨y, h⟩ | ⟨y, h⟩)
@@ -107,7 +106,7 @@ theorem exists_common_support_of_internallyWellOrdered' {x : TSet δ}
   · exact MulAction.bijective (ρ ↘ hγ ↘ hδ ↘ hε)
   · intro x y
     conv_rhs => rw [← this]
-    simp only [externalRel_smul, InvImage, inv_smul_smul]
+    simp only [mem_externalRel_smul, inv_smul_smul]
   · rwa [mem_field_iff] at ha
 
 include hγ in
@@ -195,9 +194,10 @@ theorem internallyWellOrdered_of_common_support_of_nontrivial {x : TSet γ}
   obtain ⟨r, hr⟩ := this
   right
   use r
-  have hr' : ∀ a b, ExternalRel hβ hγ hδ r a b ↔ a ∈' x ∧ b ∈' x ∧ WellOrderingRel a b := by
+  have hr' : ∀ a b, a ~[ExternalRel hβ hγ hδ r] b ↔ a ∈' x ∧ b ∈' x ∧ WellOrderingRel a b := by
     intro a b
-    rw [ExternalRel, hr]
+    change ⟨a, b⟩[hγ, hδ] ∈[hβ] r ↔ _
+    rw [hr]
     simp only [Set.mem_setOf_eq, op_inj]
     constructor
     · rintro ⟨a, b, ⟨rfl, rfl⟩, h⟩

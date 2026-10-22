@@ -95,19 +95,19 @@ def Params.minimal : Params where
     exact isRegular_aleph_one
   μ_isStrongLimit := by
     rw [mk_out, ord_aleph]
-    exact isStrongLimit_beth <| IsLimit.isSuccPrelimit <| isLimit_omega 1
+    exact isStrongLimit_beth <| (isSuccLimit_omega 1).isSuccPrelimit
   κ_lt_μ := by
     rw [mk_out, mk_out, ord_aleph]
     apply (aleph_le_beth 1).trans_lt
     rw [beth_strictMono.lt_iff_lt]
-    exact (isLimit_omega 1).one_lt
+    exact one_lt_of_isSuccLimit (isSuccLimit_omega 1)
   κ_le_μ_ord_cof := by
     rw [mk_out, mk_out]
     have := isNormal_beth.cof_le (aleph 1).ord
     rwa [isRegular_aleph_one.cof_eq] at this
   Λ_type_le_μ_ord_cof := by
     rw [type_nat_lt, mk_out]
-    apply (omega0_le_of_isLimit (isLimit_omega 1)).trans
+    apply (omega0_le_of_isSuccLimit (isSuccLimit_omega 1)).trans
     have := isNormal_beth.cof_le (aleph 1).ord
     rw [isRegular_aleph_one.cof_eq, ← ord_le_ord] at this
     rwa [ord_aleph] at this ⊢
@@ -124,11 +124,11 @@ def Params.inaccessible.{v} : Params where
     rw [ord_univ, toType_nonempty_iff_ne_zero, Ordinal.univ_id]
     simp only [ne_eq, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty, not_false_eq_true]
   Λ_noMaxOrder := by
-    apply noMaxOrder_of_isLimit
-    change (type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop)).IsLimit
+    apply noMaxOrder_of_isSuccLimit
+    change Order.IsSuccLimit (type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop))
     rw [type_toType]
-    apply isLimit_ord
-    exact univ_inaccessible.1.le
+    apply isSuccLimit_ord
+    exact IsInaccessible.univ.1.le
   aleph0_lt_κ := by
     rw [mk_uLift, mk_out, ← lift_aleph0.{v + 1, v}, lift_strictMono.lt_iff_lt]
     exact aleph0_lt_aleph_one
@@ -138,16 +138,16 @@ def Params.inaccessible.{v} : Params where
     exact isRegular_aleph_one
   μ_isStrongLimit := by
     rw [mk_out]
-    exact univ_inaccessible.2.2
+    exact IsStrongLimit.univ
   κ_lt_μ := by
     rw [mk_uLift, mk_out, mk_out]
     exact lift_lt_univ _
   κ_le_μ_ord_cof := by
-    rw [mk_uLift, mk_out, mk_out, univ_inaccessible.2.1.cof_eq]
+    rw [mk_uLift, mk_out, mk_out, IsInaccessible.univ.isRegular.cof_eq]
     exact (lift_lt_univ _).le
   Λ_type_le_μ_ord_cof := by
     change type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop) ≤ _
-    rw [type_toType, mk_out, univ_inaccessible.2.1.cof_eq]
+    rw [type_toType, mk_out, IsInaccessible.univ.isRegular.cof_eq]
 
 /-!
 We now inform Lean that our model parameters should be accessible from the names `Λ`, `κ`, etc.
@@ -234,8 +234,8 @@ instance : Infinite Λ := NoMaxOrder.infinite
 instance : Infinite κ := by rw [infinite_iff]; exact aleph0_lt_κ.le
 instance : Infinite μ := by rw [infinite_iff]; exact aleph0_lt_μ.le
 
-theorem Λ_type_isLimit : (type ((· < ·) : Λ → Λ → Prop)).IsLimit := by
-  rw [isLimit_iff_noMaxOrder]
+theorem Λ_type_isSuccLimit : Order.IsSuccLimit (type ((· < ·) : Λ → Λ → Prop)) := by
+  rw [isSuccLimit_iff_noMaxOrder]
   infer_instance
 
 /-- The order type on `κ` really is the initial ordinal for the cardinal `#κ`. -/

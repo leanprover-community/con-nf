@@ -31,7 +31,7 @@ theorem approximates_of_flexApprox_exactlyApproximates {ξ : StrAction β} (hξ 
   intro A
   constructor
   · intro a₁ a₂ ha
-    have := ((ξ A).flexApprox_flexApprox (ξ.mapFlexible_of_coherent hξ A)).atoms_le_atoms a₁ a₂ ha
+    have := ((ξ A).flexApprox_flexApprox (ξ.mapFlexible_of_coherent hξ A)).atoms_le_atoms ha
     exact (hρ A).atoms a₁ a₂ (Or.inl this)
   intro N₁ N₂ h
   symm
@@ -45,8 +45,8 @@ theorem approximates_of_flexApprox_exactlyApproximates {ξ : StrAction β} (hξ 
         rw [← this, allPermDeriv_forget]
         rfl
       rw [smul_fuzz P.hδ P.hε P.hδε]
-      obtain ⟨ρ', hρ', _⟩ := (hξ A N₁ᴸ N₂ᴸ (BaseAction.litters.mk h)).inflexible P t hA ht
-      refine (smul_eq_of_coherentAt_inflexible hA ht (hξ A N₁ᴸ N₂ᴸ (BaseAction.litters.mk h))
+      obtain ⟨ρ', hρ', _⟩ := (hξ A N₁ᴸ N₂ᴸ ⟨_, _, rfl, rfl, h⟩).inflexible P t hA ht
+      refine (smul_eq_of_coherentAt_inflexible hA ht (hξ A N₁ᴸ N₂ᴸ ⟨_, _, rfl, rfl, h⟩)
         (ρ ⇘ P.A ↘ P.hδ) ?_).symm
       simp only [smul_support_eq_smul_iff, Tree.sderiv_apply, Tree.deriv_apply, Path.deriv_scoderiv,
         allPermSderiv_forget, allPermDeriv_forget] at hρ' ⊢
@@ -55,7 +55,7 @@ theorem approximates_of_flexApprox_exactlyApproximates {ξ : StrAction β} (hξ 
       · intro a ha
         have ha' := (hρ' B).1 a ha
         have := ((ξ (P.A ↘ P.hδ ⇘ B)).flexApprox_flexApprox
-          (mapFlexible_of_coherent hξ _)).atoms_le_atoms _ _ ha'
+          (mapFlexible_of_coherent hξ _)).atoms_le_atoms ha'
         rwa [(hρ (P.A ↘ P.hδ ⇘ B)).atoms _ _ (Or.inl this)] at ha'
       · intro N hN
         have hN' := (hρ' B).2 N hN
@@ -66,7 +66,7 @@ theorem approximates_of_flexApprox_exactlyApproximates {ξ : StrAction β} (hξ 
           rw [← ht]
           exact N₁.pos_litter_lt_pos
     · have := ((ξ A).flexApprox_flexApprox (ξ.mapFlexible_of_coherent hξ A)).litters_of_flexible
-        hN₁ (BaseAction.litters.mk h)
+        hN₁ ⟨_, _, rfl, rfl, h⟩
       obtain ⟨N₃, hN₃⟩ := (ξ.flexApprox A).mem_dom_nearLitters
         (N := N₁ᴸᴺ) ⟨N₂ᴸ, this⟩ (λ a h ↦ (h.2 h.1).elim)
       rw [(ξ.flexApprox A).litters_permutative.coinjective this hN₃.1]

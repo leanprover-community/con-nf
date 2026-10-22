@@ -14,6 +14,7 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal
+open scoped SetRel
 
 namespace ConNF
 
@@ -27,7 +28,7 @@ namespace StrAction
 variable [Level] [CoherentData] {β : TypeIndex} [LeLevel β] {A : β ↝ ⊥}
 
 def Coherent (ξ : StrAction β) : Prop :=
-  ∀ A L₁ L₂, (ξ A)ᴸ L₁ L₂ → CoherentAt ξ A L₁ L₂
+  ∀ A L₁ L₂, L₁ ~[(ξ A)ᴸ] L₂ → CoherentAt ξ A L₁ L₂
 
 theorem Coherent.deriv {ξ : StrAction β} (hξ : ξ.Coherent)
     {γ : TypeIndex} [LeLevel γ] (A : β ↝ γ) :
@@ -49,11 +50,11 @@ end StrAction
 
 /-- TODO: Maybe move this to `BaseActionClass`? -/
 structure BaseAction.Approximates (ξ : BaseAction) (π : BasePerm) : Prop where
-  atoms : ∀ a₁ a₂, ξᴬ a₁ a₂ → a₂ = π • a₁
-  nearLitters : ∀ N₁ N₂, ξᴺ N₁ N₂ → N₂ = π • N₁
+  atoms : ∀ a₁ a₂, a₁ ~[ξᴬ] a₂ → a₂ = π • a₁
+  nearLitters : ∀ N₁ N₂, N₁ ~[ξᴺ] N₂ → N₂ = π • N₁
 
 theorem BaseAction.Approximates.litters {ξ : BaseAction} {π : BasePerm} (h : ξ.Approximates π)
-    (L₁ L₂ : Litter) : ξᴸ L₁ L₂ → π • L₁ = L₂ := by
+    (L₁ L₂ : Litter) : L₁ ~[ξᴸ] L₂ → π • L₁ = L₂ := by
   intro hL
   rw [litters_iff] at hL
   obtain ⟨N₁, N₂, rfl, rfl, hN⟩ := hL
@@ -64,7 +65,7 @@ theorem BaseAction.Approximates.mono {ψ χ : BaseAction} {π : BasePerm}
     ψ.Approximates π := by
   constructor
   · intro a₁ a₂ hψ
-    exact hχ.atoms a₁ a₂ (h.1 a₁ a₂ hψ)
+    exact hχ.atoms a₁ a₂ (h.1 hψ)
   · intro N₁ N₂ hψ
     exact hχ.nearLitters N₁ N₂ (h.2 ▸ hψ)
 
@@ -86,7 +87,7 @@ theorem StrAction.flexApprox_coherent [Level] {β : TypeIndex} [LeLevel β] [Coh
     cases ((ξ A).flexApprox_flexApprox (hξ A)).flexible_of_mem_dom ⟨L₂, hL⟩ ⟨P, t, hA, ht⟩
   · intro _
     apply ((ξ A).flexApprox_flexApprox (hξ A)).flexible_of_mem_dom
-    rw [← (BaseApprox.litters_permutative _).codom_eq_dom]
+    rw [← (BaseApprox.litters_permutative _).cod_eq_dom]
     exact ⟨L₁, hL⟩
 
 end ConNF

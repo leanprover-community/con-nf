@@ -16,6 +16,7 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal
+open scoped SetRel
 
 namespace ConNF
 
@@ -23,7 +24,7 @@ variable [Params.{u}] [Level] [CoherentData] {β γ : Λ} [LeLevel β] [LeLevel 
     (hγ : (γ : TypeIndex) < β)
 
 def Combination (x : TSet β) (S : Support β) (χs : Set (CodingFunction β)) : Prop :=
-  ∀ y : TSet γ, y ∈[hγ] x ↔ ∃ χ ∈ χs, ∃ T z, χ.rel T z ∧ S.Subsupport T ∧ y ∈[hγ] z
+  ∀ y : TSet γ, y ∈[hγ] x ↔ ∃ χ ∈ χs, ∃ T z, T ~[χ.rel] z ∧ S.Subsupport T ∧ y ∈[hγ] z
 
 theorem combination_unique {x₁ x₂ : TSet β} {S : Support β} {χs : Set (CodingFunction β)}
     (hx₁ : Combination hγ x₁ S χs) (hx₂ : Combination hγ x₂ S χs) :
@@ -48,13 +49,13 @@ theorem Combination.smul {x : TSet β} {S : Support β} {χs : Set (CodingFuncti
       exact this
     · rwa [TSet.mem_smul_iff, inv_inv, allPerm_inv_sderiv, smul_inv_smul]
 
-inductive RaisedRel (s : Set (CodingFunction β)) (o : SupportOrbit β) : Rel (Support β) (TSet β)
-  | mk : (S : Support β) → S.orbit = o → (x : TSet β) → Combination hγ x S s → RaisedRel s o S x
+def RaisedRel (s : Set (CodingFunction β)) (o : SupportOrbit β) : SetRel (Support β) (TSet β) :=
+  {(S, x) | S.orbit = o ∧ Combination hγ x S s}
 
 theorem raisedRel_coinjective (s : Set (CodingFunction β)) (o : SupportOrbit β) :
     (RaisedRel hγ s o).Coinjective := by
   constructor
-  rintro x₁ x₂ S ⟨_, rfl, _, hx₁⟩ ⟨_, _, _, hx₂⟩
+  rintro x₁ x₂ S ⟨rfl, hx₁⟩ ⟨_, hx₂⟩
   exact combination_unique hγ hx₁ hx₂
 
 theorem raisedRel_dom_nonempty {s : Set (CodingFunction β)} {o : SupportOrbit β}
@@ -62,13 +63,13 @@ theorem raisedRel_dom_nonempty {s : Set (CodingFunction β)} {o : SupportOrbit �
     (RaisedRel hγ s o).dom.Nonempty := by
   obtain ⟨S, hS⟩ := o.exists_support
   obtain ⟨x, hx, _⟩ := hso S hS
-  exact ⟨S, x, .mk S hS x hx⟩
+  exact ⟨S, x, hS, hx⟩
 
 theorem supports_of_raisedRel {s : Set (CodingFunction β)} {o : SupportOrbit β}
     (hso : ∀ S, S.orbit = o → ∃ x, Combination hγ x S s ∧ S.Supports x)
     {S : Support β} {x : TSet β} :
-    RaisedRel hγ s o S x → S.Supports x := by
-  rintro ⟨S, hS, x, hx⟩
+    S ~[RaisedRel hγ s o] x → S.Supports x := by
+  rintro ⟨hS, hx⟩
   obtain ⟨y, hy₁, hy₂⟩ := hso S hS
   cases combination_unique hγ hx hy₁
   exact hy₂
@@ -76,14 +77,14 @@ theorem supports_of_raisedRel {s : Set (CodingFunction β)} {o : SupportOrbit β
 theorem orbit_eq_of_mem_dom_raisedRel (s : Set (CodingFunction β)) (o : SupportOrbit β)
     {S : Support β} (hS : S ∈ (RaisedRel hγ s o).dom) :
     S.orbit = o := by
-  obtain ⟨x, _, hS⟩ := hS
+  obtain ⟨x, hS, _⟩ := hS
   exact hS
 
 theorem smul_raisedRel (s : Set (CodingFunction β)) (o : SupportOrbit β)
-    {S : Support β} {x : TSet β} (h : RaisedRel hγ s o S x) (ρ : AllPerm β) :
-    RaisedRel hγ s o (ρᵁ • S) (ρ • x) := by
-  obtain ⟨_, hS, _, hx⟩ := h
-  refine ⟨ρᵁ • S, ?_, ρ • x, ?_⟩
+    {S : Support β} {x : TSet β} (h : S ~[RaisedRel hγ s o] x) (ρ : AllPerm β) :
+    ρᵁ • S ~[RaisedRel hγ s o] ρ • x := by
+  obtain ⟨hS, hx⟩ := h
+  refine ⟨?_, ?_⟩
   · rwa [Support.smul_orbit]
   · exact hx.smul hγ ρ
 
@@ -156,7 +157,7 @@ theorem combination_raisedSingleton (x : TSet β) (S : Support β) (hxS : S.Supp
     · exact subsupport_add
     · rw [typedMem_singleton_iff]
   · rintro ⟨_, ⟨w, hw, rfl⟩, T, z, hTz, hST, hyz⟩
-    have : (raisedSingleton hγ _ _).rel (S + (exists_support w).choose ↗ hγ) (singleton hγ w) :=
+    have : S + (exists_support w).choose ↗ hγ ~[(raisedSingleton hγ _ _).rel] singleton hγ w :=
         Tangle.code_rel_self ⟨singleton hγ w, _, raisedSingleton_supports hγ S w⟩
     obtain ⟨ρ, h₁, h₂⟩ := CodingFunction.exists_allPerm_of_rel hTz this
     rw [smul_eq_iff_eq_inv_smul] at h₂
@@ -193,7 +194,7 @@ theorem exists_combination_raisedSingleton (χ : CodingFunction β) :
     · have := (χ.supports_of_rel hχ).smul ρ⁻¹
       rwa [allPermForget_inv, inv_smul_smul] at this
   · apply CodingFunction.ext S x hχ
-    refine ⟨S, rfl, x, ?_⟩
+    refine ⟨rfl, ?_⟩
     convert combination_raisedSingleton hγ x S (χ.supports_of_rel hχ) using 1
     ext χ'
     constructor

@@ -15,6 +15,7 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal
+open scoped SetRel
 
 namespace ConNF
 
@@ -29,13 +30,13 @@ structure FlexCond where
 
 structure InflexCond (δ : TypeIndex) [LeLevel δ] where
   χ : CodingFunction δ
-  atoms : Tree (Rel κ κ) δ
-  nearLitters : Tree (Rel κ κ) δ
+  atoms : Tree (SetRel κ κ) δ
+  nearLitters : Tree (SetRel κ κ) δ
 
-instance (δ : TypeIndex) [LeLevel δ] : SuperA (InflexCond δ) (Tree (Rel κ κ) δ) where
+instance (δ : TypeIndex) [LeLevel δ] : SuperA (InflexCond δ) (Tree (SetRel κ κ) δ) where
   superA := InflexCond.atoms
 
-instance (δ : TypeIndex) [LeLevel δ] : SuperN (InflexCond δ) (Tree (Rel κ κ) δ) where
+instance (δ : TypeIndex) [LeLevel δ] : SuperN (InflexCond δ) (Tree (SetRel κ κ) δ) where
   superN := InflexCond.nearLitters
 
 inductive NearLitterCond (β : TypeIndex) [LeLevel β]
@@ -81,18 +82,18 @@ instance : PartialOrder (Spec β) where
     (λ A ↦ Enumeration.ext (h₁ A).2.2.1 (le_antisymm (h₁ A).2.2.2 (h₂ A).2.2.2))
 
 def nearLitterCondRelFlex (S : Support β) (A : β ↝ ⊥) :
-    Rel NearLitter (NearLitterCond β) :=
-  λ N c ↦ ¬Inflexible A Nᴸ ∧ c = .flex ⟨{i | ∃ N', (S ⇘. A)ᴺ.rel i N' ∧ Nᴸ = N'ᴸ}⟩
+    SetRel NearLitter (NearLitterCond β) :=
+  {(N, c) | ¬Inflexible A Nᴸ ∧ c = .flex ⟨{i | ∃ N', i ~[(S ⇘. A)ᴺ.rel] N' ∧ Nᴸ = N'ᴸ}⟩}
 
 def nearLitterCondRelInflex (S : Support β) (A : β ↝ ⊥) :
-    Rel NearLitter (NearLitterCond β) :=
-  λ N c ↦ ∃ P : InflexiblePath β, ∃ t : Tangle P.δ, A = P.A ↘ P.hε ↘. ∧ Nᴸ = fuzz P.hδε t ∧
+    SetRel NearLitter (NearLitterCond β) :=
+  {(N, c) | ∃ P : InflexiblePath β, ∃ t : Tangle P.δ, A = P.A ↘ P.hε ↘. ∧ Nᴸ = fuzz P.hδε t ∧
     c = .inflex P ⟨t.code,
-      λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel.comp (t.support ⇘. B)ᴬ.rel.inv,
-      λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel.comp (t.support ⇘. B)ᴺ.rel.inv⟩
+      λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel ○ (t.support ⇘. B)ᴬ.rel.inv,
+      λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel ○ (t.support ⇘. B)ᴺ.rel.inv⟩}
 
 def nearLitterCondRel (S : Support β) (A : β ↝ ⊥) :
-    Rel NearLitter (NearLitterCond β) :=
+    SetRel NearLitter (NearLitterCond β) :=
   nearLitterCondRelFlex S A ⊔ nearLitterCondRelInflex S A
 
 theorem nearLitterCondRelFlex_coinjective
@@ -131,11 +132,11 @@ theorem nearLitterCondRel_dom_disjoint {S : Support β} {A : β ↝ ⊥} :
     (inflexible_of_mem_dom_nearLitterCondInflexRel hN₂)
 
 theorem nearLitterCondRel_inflex {S : Support β} {A : β ↝ ⊥} {N : NearLitter}
-    {P : InflexiblePath β} {χ : CodingFunction P.δ} {ta tn : Tree (Rel κ κ) P.δ} :
-    nearLitterCondRel S A N (.inflex P ⟨χ, ta, tn⟩) →
+    {P : InflexiblePath β} {χ : CodingFunction P.δ} {ta tn : Tree (SetRel κ κ) P.δ} :
+    N ~[nearLitterCondRel S A] (.inflex P ⟨χ, ta, tn⟩) →
     ∃ t : Tangle P.δ, A = P.A ↘ P.hε ↘. ∧ Nᴸ = fuzz P.hδε t ∧ χ = t.code ∧
-      (ta = λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel.comp (t.support ⇘. B)ᴬ.rel.inv) ∧
-      (tn = λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel.comp (t.support ⇘. B)ᴺ.rel.inv) := by
+      (ta = λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel ○ (t.support ⇘. B)ᴬ.rel.inv) ∧
+      (tn = λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel ○ (t.support ⇘. B)ᴺ.rel.inv) := by
   rintro (⟨_, h⟩ | ⟨P', t, hA, ht, h⟩)
   · cases h
   · rw [NearLitterCond.inflex.injEq] at h
@@ -145,8 +146,7 @@ theorem nearLitterCondRel_inflex {S : Support β} {A : β ↝ ⊥} {N : NearLitt
 
 theorem nearLitterCondRel_coinjective (S : Support β) (A : β ↝ ⊥) :
     (nearLitterCondRel S A).Coinjective :=
-  Rel.sup_coinjective
-    nearLitterCondRelFlex_coinjective
+  nearLitterCondRelFlex_coinjective.sup
     nearLitterCondRelInflex_coinjective
     nearLitterCondRel_dom_disjoint
 
@@ -160,13 +160,13 @@ theorem nearLitterCondRel_cosurjective (S : Support β) (A : β ↝ ⊥) :
 
 def Support.spec (S : Support β) : Spec β where
   atoms A := (S ⇘. A)ᴬ.image
-    (λ a ↦ ⟨{i | (S ⇘. A)ᴬ.rel i a}, {i | ∃ N, (S ⇘. A)ᴺ.rel i N ∧ a ∈ Nᴬ}⟩)
+    (λ a ↦ ⟨{i | i ~[(S ⇘. A)ᴬ.rel] a}, {i | ∃ N, i ~[(S ⇘. A)ᴺ.rel] N ∧ a ∈ Nᴬ}⟩)
   nearLitters A := (S ⇘. A)ᴺ.comp
     (nearLitterCondRel S A) (nearLitterCondRel_coinjective S A)
 
 theorem Support.spec_atoms (S : Support β) (A : β ↝ ⊥) :
     S.specᴬ A = (S ⇘. A)ᴬ.image
-      (λ a ↦ ⟨{i | (S ⇘. A)ᴬ.rel i a}, {i | ∃ N, (S ⇘. A)ᴺ.rel i N ∧ a ∈ Nᴬ}⟩) :=
+      (λ a ↦ ⟨{i | i ~[(S ⇘. A)ᴬ.rel] a}, {i | ∃ N, i ~[(S ⇘. A)ᴺ.rel] N ∧ a ∈ Nᴬ}⟩) :=
   rfl
 
 theorem Support.spec_nearLitters (S : Support β) (A : β ↝ ⊥) :
@@ -193,28 +193,24 @@ theorem Support.spec_nearLitters_dom (S : Support β) (A : β ↝ ⊥) :
     obtain ⟨c, hc⟩ := (nearLitterCondRel_cosurjective S A).cosurjective N
     exact ⟨c, N, h, hc⟩
 
-def convAtoms (S T : Support β) (A : β ↝ ⊥) : Rel Atom Atom :=
-  (S ⇘. A)ᴬ.rel.inv.comp (T ⇘. A)ᴬ.rel
+def convAtoms (S T : Support β) (A : β ↝ ⊥) : SetRel Atom Atom :=
+  (S ⇘. A)ᴬ.rel.inv ○ (T ⇘. A)ᴬ.rel
 
 def convNearLitters (S T : Support β) (A : β ↝ ⊥) :
-    Rel NearLitter NearLitter :=
-  (S ⇘. A)ᴺ.rel.inv.comp (T ⇘. A)ᴺ.rel
+    SetRel NearLitter NearLitter :=
+  (S ⇘. A)ᴺ.rel.inv ○ (T ⇘. A)ᴺ.rel
 
 omit [Level] [CoherentData] [LeLevel β] in
 @[simp]
 theorem convAtoms_inv (S T : Support β) (A : β ↝ ⊥) :
     (convAtoms S T A).inv = convAtoms T S A := by
-  ext a b
-  simp only [Rel.inv, flip, convAtoms, Rel.comp]
-  tauto
+  simp only [convAtoms, SetRel.inv_comp, SetRel.inv_inv]
 
 omit [Level] [CoherentData] [LeLevel β] in
 @[simp]
 theorem convNearLitters_inv (S T : Support β) (A : β ↝ ⊥) :
     (convNearLitters S T A).inv = convNearLitters T S A := by
-  ext a b
-  simp only [Rel.inv, flip, convNearLitters, Rel.comp]
-  tauto
+  simp only [convNearLitters, SetRel.inv_comp, SetRel.inv_inv]
 
 omit [Level] [CoherentData] [LeLevel β] in
 theorem convAtoms_dom_subset (S T : Support β) (A : β ↝ ⊥) :
@@ -228,8 +224,8 @@ theorem convNearLitters_dom_subset (S T : Support β) (A : β ↝ ⊥) :
   rintro N ⟨N', i, hN, -⟩
   exact ⟨i, hN⟩
 
-def atomMemRel (S : Support β) (A : β ↝ ⊥) : Rel κ κ :=
-  (S ⇘. A)ᴺ.rel.comp (Rel.comp (λ N a ↦ a ∈ Nᴬ) (S ⇘. A)ᴬ.rel.inv)
+def atomMemRel (S : Support β) (A : β ↝ ⊥) : SetRel κ κ :=
+  (S ⇘. A)ᴺ.rel ○ ({p : NearLitter × Atom | p.2 ∈ p.1ᴬ} ○ (S ⇘. A)ᴬ.rel.inv)
 
 structure SameSpec (S T : Support β) : Prop where
 (atoms_bound_eq : ∀ A, (S ⇘. A)ᴬ.bound = (T ⇘. A)ᴬ.bound)
@@ -238,24 +234,24 @@ structure SameSpec (S T : Support β) : Prop where
 (nearLitters_dom_eq : ∀ A, (S ⇘. A)ᴺ.rel.dom = (T ⇘. A)ᴺ.rel.dom)
 (convAtoms_oneOne : ∀ A, (convAtoms S T A).OneOne)
 (atomMemRel_eq : ∀ A, atomMemRel S A = atomMemRel T A)
-(inflexible_iff : ∀ {A N₁ N₂}, convNearLitters S T A N₁ N₂ →
+(inflexible_iff : ∀ {A N₁ N₂}, N₁ ~[convNearLitters S T A] N₂ →
   ∀ P : InflexiblePath β, ∀ t : Tangle P.δ, A = P.A ↘ P.hε ↘. →
   ((∃ ρ : AllPerm P.δ, N₁ᴸ = fuzz P.hδε (ρ • t)) ↔
   (∃ ρ : AllPerm P.δ, N₂ᴸ = fuzz P.hδε (ρ • t))))
 (litter_eq_iff_of_flexible : ∀ {A N₁ N₂ N₃ N₄},
-  convNearLitters S T A N₁ N₂ → convNearLitters S T A N₃ N₄ →
+  N₁ ~[convNearLitters S T A] N₂ → N₃ ~[convNearLitters S T A] N₄ →
   ¬Inflexible A N₁ᴸ → ¬Inflexible A N₂ᴸ → ¬Inflexible A N₃ᴸ → ¬Inflexible A N₄ᴸ →
   (N₁ᴸ = N₃ᴸ ↔ N₂ᴸ = N₄ᴸ))
 (atoms_iff_of_inflexible : ∀ A, ∀ N₁ N₂ : NearLitter,
   ∀ P : InflexiblePath β, ∀ t : Tangle P.δ, ∀ ρ : AllPerm P.δ,
   A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t → N₂ᴸ = fuzz P.hδε (ρ • t) →
-  convNearLitters S T A N₁ N₂ → ∀ B : P.δ ↝ ⊥, ∀ a ∈ (t.support ⇘. B)ᴬ,
-  ∀ i, (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel i a ↔ (T ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel i (ρᵁ B • a))
+  N₁ ~[convNearLitters S T A] N₂ → ∀ B : P.δ ↝ ⊥, ∀ a ∈ (t.support ⇘. B)ᴬ,
+  ∀ i, i ~[(S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel] a ↔ i ~[(T ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel] ρᵁ B • a)
 (nearLitters_iff_of_inflexible : ∀ A, ∀ N₁ N₂ : NearLitter,
   ∀ P : InflexiblePath β, ∀ t : Tangle P.δ, ∀ ρ : AllPerm P.δ,
   A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t → N₂ᴸ = fuzz P.hδε (ρ • t) →
-  convNearLitters S T A N₁ N₂ → ∀ B : P.δ ↝ ⊥, ∀ N ∈ (t.support ⇘. B)ᴺ,
-  ∀ i, (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel i N ↔ (T ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel i (ρᵁ B • N))
+  N₁ ~[convNearLitters S T A] N₂ → ∀ B : P.δ ↝ ⊥, ∀ N ∈ (t.support ⇘. B)ᴺ,
+  ∀ i, i ~[(S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel] N ↔ i ~[(T ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel] ρᵁ B • N)
 
 /-- A variant of `SameSpec` in which most equalities have been turned into one-directional
 implications. It can sometimes be easier to prove this in generality than to prove `SameSpec`
@@ -267,40 +263,40 @@ structure SameSpecLE (S T : Support β) : Prop where
 (nearLitters_dom_subset : ∀ A, (S ⇘. A)ᴺ.rel.dom ⊆ (T ⇘. A)ᴺ.rel.dom)
 (convAtoms_injective : ∀ A, (convAtoms S T A).Injective)
 (atomMemRel_le : ∀ A, atomMemRel S A ≤ atomMemRel T A)
-(inflexible_of_inflexible : ∀ {A N₁ N₂}, convNearLitters S T A N₁ N₂ →
+(inflexible_of_inflexible : ∀ {A N₁ N₂}, N₁ ~[convNearLitters S T A] N₂ →
   ∀ P : InflexiblePath β, ∀ t : Tangle P.δ, A = P.A ↘ P.hε ↘. →
   N₁ᴸ = fuzz P.hδε t → ∃ ρ : AllPerm P.δ, N₂ᴸ = fuzz P.hδε (ρ • t))
 (litter_eq_of_flexible : ∀ {A N₁ N₂ N₃ N₄},
-  convNearLitters S T A N₁ N₂ → convNearLitters S T A N₃ N₄ →
+  N₁ ~[convNearLitters S T A] N₂ → N₃ ~[convNearLitters S T A] N₄ →
   ¬Inflexible A N₁ᴸ → ¬Inflexible A N₂ᴸ → ¬Inflexible A N₃ᴸ → ¬Inflexible A N₄ᴸ →
   N₁ᴸ = N₃ᴸ → N₂ᴸ = N₄ᴸ)
 (atoms_of_inflexible : ∀ A, ∀ N₁ N₂ : NearLitter,
   ∀ P : InflexiblePath β, ∀ t : Tangle P.δ, ∀ ρ : AllPerm P.δ,
   A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t → N₂ᴸ = fuzz P.hδε (ρ • t) →
-  convNearLitters S T A N₁ N₂ → ∀ B : P.δ ↝ ⊥, ∀ a ∈ (t.support ⇘. B)ᴬ,
-  ∀ i, (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel i a → (T ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel i (ρᵁ B • a))
+  N₁ ~[convNearLitters S T A] N₂ → ∀ B : P.δ ↝ ⊥, ∀ a ∈ (t.support ⇘. B)ᴬ,
+  ∀ i, i ~[(S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel] a → i ~[(T ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel] ρᵁ B • a)
 (nearLitters_of_inflexible : ∀ A, ∀ N₁ N₂ : NearLitter,
   ∀ P : InflexiblePath β, ∀ t : Tangle P.δ, ∀ ρ : AllPerm P.δ,
   A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t → N₂ᴸ = fuzz P.hδε (ρ • t) →
-  convNearLitters S T A N₁ N₂ → ∀ B : P.δ ↝ ⊥, ∀ N ∈ (t.support ⇘. B)ᴺ,
-  ∀ i, (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel i N → (T ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel i (ρᵁ B • N))
+  N₁ ~[convNearLitters S T A] N₂ → ∀ B : P.δ ↝ ⊥, ∀ N ∈ (t.support ⇘. B)ᴺ,
+  ∀ i, i ~[(S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel] N → i ~[(T ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel] ρᵁ B • N)
 
 theorem SameSpec.atoms_dom_of_dom {S T : Support β} (h : SameSpec S T) {A : β ↝ ⊥}
-    {i : κ} {a : Atom} (ha : (S ⇘. A)ᴬ.rel i a) :
-    ∃ b, (T ⇘. A)ᴬ.rel i b := by
+    {i : κ} {a : Atom} (ha : i ~[(S ⇘. A)ᴬ.rel] a) :
+    ∃ b, i ~[(T ⇘. A)ᴬ.rel] b := by
   have hdom := h.atoms_dom_eq A
   rw [Set.ext_iff] at hdom
   exact (hdom i).mp ⟨a, ha⟩
 
 theorem SameSpec.nearLitters_dom_of_dom {S T : Support β} (h : SameSpec S T) {A : β ↝ ⊥}
-    {i : κ} {N₁ : NearLitter} (hN₁ : (S ⇘. A)ᴺ.rel i N₁) :
-    ∃ N₂, (T ⇘. A)ᴺ.rel i N₂ := by
+    {i : κ} {N₁ : NearLitter} (hN₁ : i ~[(S ⇘. A)ᴺ.rel] N₁) :
+    ∃ N₂, i ~[(T ⇘. A)ᴺ.rel] N₂ := by
   have hdom := h.nearLitters_dom_eq A
   rw [Set.ext_iff] at hdom
   exact (hdom i).mp ⟨N₁, hN₁⟩
 
 theorem SameSpec.inflexible_iff' {S T : Support β} (h : SameSpec S T) {A : β ↝ ⊥}
-    {N₁ N₂ : NearLitter} (h' : convNearLitters S T A N₁ N₂) :
+    {N₁ N₂ : NearLitter} (h' : N₁ ~[convNearLitters S T A] N₂) :
     Inflexible A N₁ᴸ ↔ Inflexible A N₂ᴸ := by
   constructor
   · rintro ⟨P, t, hA, ht⟩
@@ -319,7 +315,7 @@ theorem sameSpec_antisymm {S T : Support β} (h₁ : SameSpecLE S T) (h₂ : Sam
   atoms_dom_eq A := subset_antisymm (h₁.atoms_dom_subset A) (h₂.atoms_dom_subset A)
   nearLitters_dom_eq A := subset_antisymm (h₁.nearLitters_dom_subset A) (h₂.nearLitters_dom_subset A)
   convAtoms_oneOne A := ⟨h₁.convAtoms_injective A,
-    Rel.inv_injective_iff.mp (convAtoms_inv S T A ▸ h₂.convAtoms_injective A)⟩
+    SetRel.inv_injective_iff.mp (convAtoms_inv S T A ▸ h₂.convAtoms_injective A)⟩
   atomMemRel_eq A := le_antisymm (h₁.atomMemRel_le A) (h₂.atomMemRel_le A)
   inflexible_iff h P t hA := by
     constructor
@@ -401,9 +397,9 @@ variable {S T : Support β}
 
 theorem atoms_eq_of_spec_eq_spec (h : S.spec = T.spec) (A : β ↝ ⊥) :
     (S ⇘. A)ᴬ.image
-      (λ a ↦ (⟨{i | (S ⇘. A)ᴬ.rel i a}, {i | ∃ N, (S ⇘. A)ᴺ.rel i N ∧ a ∈ Nᴬ}⟩ : AtomCond)) =
+      (λ a ↦ (⟨{i | i ~[(S ⇘. A)ᴬ.rel] a}, {i | ∃ N, i ~[(S ⇘. A)ᴺ.rel] N ∧ a ∈ Nᴬ}⟩ : AtomCond)) =
     (T ⇘. A)ᴬ.image
-      (λ a ↦ ⟨{i | (T ⇘. A)ᴬ.rel i a}, {i | ∃ N, (T ⇘. A)ᴺ.rel i N ∧ a ∈ Nᴬ}⟩) :=
+      (λ a ↦ ⟨{i | i ~[(T ⇘. A)ᴬ.rel] a}, {i | ∃ N, i ~[(T ⇘. A)ᴺ.rel] N ∧ a ∈ Nᴬ}⟩) :=
   congr_fun (congr_arg (·ᴬ) h) A
 
 theorem nearLitters_eq_of_spec_eq_spec (h : S.spec = T.spec) (A : β ↝ ⊥) :
@@ -414,13 +410,13 @@ theorem nearLitters_eq_of_spec_eq_spec (h : S.spec = T.spec) (A : β ↝ ⊥) :
   congr_fun (congr_arg (·ᴺ) h) A
 
 theorem convAtoms_of_spec_eq_spec (h : S.spec = T.spec) {A : β ↝ ⊥} {a b : Atom} :
-    convAtoms S T A a b →
-    (∀ i, (S ⇘. A)ᴬ.rel i a ↔ (T ⇘. A)ᴬ.rel i b) ∧
-    (∀ i, (∃ N, (S ⇘. A)ᴺ.rel i N ∧ a ∈ Nᴬ) ↔ (∃ N, (T ⇘. A)ᴺ.rel i N ∧ b ∈ Nᴬ)) := by
+    a ~[convAtoms S T A] b →
+    (∀ i, i ~[(S ⇘. A)ᴬ.rel] a ↔ i ~[(T ⇘. A)ᴬ.rel] b) ∧
+    (∀ i, (∃ N, i ~[(S ⇘. A)ᴺ.rel] N ∧ a ∈ Nᴬ) ↔ (∃ N, i ~[(T ⇘. A)ᴺ.rel] N ∧ b ∈ Nᴬ)) := by
   rintro ⟨i, ha, hb⟩
   have := atoms_eq_of_spec_eq_spec h A
   rw [Enumeration.ext_iff] at this
-  have := (iff_of_eq <| congr_fun₂ this.2 i _).mp ⟨a, ha, rfl⟩
+  have := (Set.ext_iff.mp this.2 (i, _)).mp ⟨a, ha, rfl⟩
   obtain ⟨c, hc₁, hc₂⟩ := this
   rw [AtomCond.mk.injEq] at hc₂
   cases (T ⇘. A)ᴬ.rel_coinjective.coinjective hb hc₁
@@ -428,13 +424,13 @@ theorem convAtoms_of_spec_eq_spec (h : S.spec = T.spec) {A : β ↝ ⊥} {a b : 
   exact ⟨λ x ↦ (hc₂.1 x).symm, λ x ↦ (hc₂.2 x).symm⟩
 
 theorem convNearLitters_of_spec_eq_spec (h : S.spec = T.spec) {A : β ↝ ⊥} {N₁ N₂ : NearLitter} :
-    convNearLitters S T A N₁ N₂ →
-    ∃ c, nearLitterCondRel S A N₁ c ∧ nearLitterCondRel T A N₂ c := by
+    N₁ ~[convNearLitters S T A] N₂ →
+    ∃ c, N₁ ~[nearLitterCondRel S A] c ∧ N₂ ~[nearLitterCondRel T A] c := by
   rintro ⟨i, hN₁, hN₂⟩
   obtain ⟨c, hc⟩ := (nearLitterCondRel_cosurjective S A).cosurjective N₁
   have := nearLitters_eq_of_spec_eq_spec h A
   rw [Enumeration.ext_iff] at this
-  have := (iff_of_eq <| congr_fun₂ this.2 i c).mp ⟨N₁, hN₁, hc⟩
+  have := (Set.ext_iff.mp this.2 (i, c)).mp ⟨N₁, hN₁, hc⟩
   obtain ⟨N₃, h₁, h₂⟩ := this
   cases (T ⇘. A)ᴺ.rel_coinjective.coinjective hN₂ h₁
   cases this
@@ -467,14 +463,14 @@ theorem convAtoms_injective_of_spec_eq_spec (h : S.spec = T.spec) (A : β ↝ �
 
 theorem atomMemRel_le_of_spec_eq_spec (h : S.spec = T.spec) (A : β ↝ ⊥) :
     atomMemRel S A ≤ atomMemRel T A := by
-  rintro i j ⟨N, h₁, a, h₂, haS⟩
+  rintro ⟨i, j⟩ ⟨N, h₁, a, h₂, haS⟩
   obtain ⟨b, hbT⟩ := atoms_dom_subset_of_spec_eq_spec h A ⟨a, haS⟩
   obtain ⟨N', h₁', h₂'⟩ := ((convAtoms_of_spec_eq_spec h ⟨j, haS, hbT⟩).2 i).mp ⟨N, h₁, h₂⟩
   exact ⟨N', h₁', b, h₂', hbT⟩
 
 theorem inflexible_of_inflexible_of_spec_eq_spec (h : S.spec = T.spec) {A : β ↝ ⊥}
     {N₁ N₂ : NearLitter} :
-    convNearLitters S T A N₁ N₂ → ∀ (P : InflexiblePath β) (t : Tangle P.δ),
+    N₁ ~[convNearLitters S T A] N₂ → ∀ (P : InflexiblePath β) (t : Tangle P.δ),
       A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t → ∃ ρ : AllPerm P.δ, N₂ᴸ = fuzz P.hδε (ρ • t) := by
   intro hN P t hA ht
   obtain ⟨c, hN₁, hN₂⟩ := convNearLitters_of_spec_eq_spec h hN
@@ -490,7 +486,7 @@ theorem inflexible_of_inflexible_of_spec_eq_spec (h : S.spec = T.spec) {A : β �
 
 theorem litter_eq_of_flexible_of_spec_eq_spec (h : S.spec = T.spec) {A : β ↝ ⊥}
     {N₁ N₂ N₃ N₄ : NearLitter} :
-    convNearLitters S T A N₁ N₂ → convNearLitters S T A N₃ N₄ →
+    N₁ ~[convNearLitters S T A] N₂ → N₃ ~[convNearLitters S T A] N₄ →
     ¬Inflexible A N₁ᴸ → ¬Inflexible A N₂ᴸ → ¬Inflexible A N₃ᴸ → ¬Inflexible A N₄ᴸ →
     N₁ᴸ = N₃ᴸ → N₂ᴸ = N₄ᴸ := by
   intro h₁₂ h₃₄ h₁ h₂ _ _ h₁₃
@@ -510,8 +506,8 @@ theorem litter_eq_of_flexible_of_spec_eq_spec (h : S.spec = T.spec) {A : β ↝ 
 theorem atoms_of_inflexible_of_spec_eq_spec (h : S.spec = T.spec) (A : β ↝ ⊥)
     (N₁ N₂ : NearLitter) (P : InflexiblePath β) (t : Tangle P.δ) (ρ : AllPerm P.δ) :
     A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t → N₂ᴸ = fuzz P.hδε (ρ • t) →
-    convNearLitters S T A N₁ N₂ → ∀ (B : P.δ ↝ ⊥), ∀ a ∈ (t.support ⇘. B)ᴬ,
-    ∀ i, (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel i a → (T ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel i (ρᵁ B • a) := by
+    N₁ ~[convNearLitters S T A] N₂ → ∀ (B : P.δ ↝ ⊥), ∀ a ∈ (t.support ⇘. B)ᴬ,
+    ∀ i, i ~[(S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel] a → i ~[(T ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel] ρᵁ B • a := by
   rintro hA ht₁ ht₂ hN B a ⟨j, hj⟩ i h'
   obtain ⟨c, h₁, h₂⟩ := convNearLitters_of_spec_eq_spec h hN
   obtain (⟨h₁, -⟩ | ⟨P', t', hA', ht', rfl⟩) := h₁
@@ -521,22 +517,17 @@ theorem atoms_of_inflexible_of_spec_eq_spec (h : S.spec = T.spec) (A : β ↝ �
   clear hA' ht'
   obtain ⟨t', -, hN₂, -, hBa, hBN⟩ := nearLitterCondRel_inflex h₂
   cases fuzz_injective (ht₂.symm.trans hN₂)
-  simp only [Tangle.smul_support, smul_derivBot, BaseSupport.smul_atoms,
-    BaseSupport.smul_nearLitters] at hBa
-  conv at hBa =>
-    rw [funext_iff]; intro
-    rw [funext_iff]; intro
-    rw [funext_iff]; intro
-    rw [eq_iff_iff]
-  obtain ⟨b, hb₁, hb₂⟩ := (hBa B i j).mp ⟨a, h', hj⟩
+  simp only [Tangle.smul_support, smul_derivBot, BaseSupport.smul_atoms] at hBa
+  replace hBa := congr(i ~[$hBa B] j)
+  obtain ⟨b, hb₁, hb₂⟩ := hBa.mp ⟨a, h', hj⟩
   cases (t.support ⇘. B)ᴬ.rel_coinjective.coinjective hj hb₂
   rwa [smul_inv_smul]
 
 theorem nearLitters_of_inflexible_of_spec_eq_spec (h : S.spec = T.spec) (A : β ↝ ⊥)
     (N₁ N₂ : NearLitter) (P : InflexiblePath β) (t : Tangle P.δ) (ρ : AllPerm P.δ) :
     A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t → N₂ᴸ = fuzz P.hδε (ρ • t) →
-    convNearLitters S T A N₁ N₂ → ∀ (B : P.δ ↝ ⊥), ∀ N ∈ (t.support ⇘. B)ᴺ,
-    ∀ i, (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel i N → (T ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel i (ρᵁ B • N) := by
+    N₁ ~[convNearLitters S T A] N₂ → ∀ (B : P.δ ↝ ⊥), ∀ N ∈ (t.support ⇘. B)ᴺ,
+    ∀ i, i ~[(S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel] N → i ~[(T ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel] ρᵁ B • N := by
   rintro hA ht₁ ht₂ hN B N ⟨j, hj⟩ i h'
   obtain ⟨c, h₁, h₂⟩ := convNearLitters_of_spec_eq_spec h hN
   obtain (⟨h₁, -⟩ | ⟨P', t', hA', ht', rfl⟩) := h₁
@@ -548,12 +539,8 @@ theorem nearLitters_of_inflexible_of_spec_eq_spec (h : S.spec = T.spec) (A : β 
   cases fuzz_injective (ht₂.symm.trans hN₂)
   simp only [Tangle.smul_support, smul_derivBot, BaseSupport.smul_nearLitters,
     BaseSupport.smul_nearLitters] at hBN
-  conv at hBN =>
-    rw [funext_iff]; intro
-    rw [funext_iff]; intro
-    rw [funext_iff]; intro
-    rw [eq_iff_iff]
-  obtain ⟨b, hb₁, hb₂⟩ := (hBN B i j).mp ⟨N, h', hj⟩
+  replace hBN := congr(i ~[$hBN B] j)
+  obtain ⟨b, hb₁, hb₂⟩ := hBN.mp ⟨N, h', hj⟩
   cases (t.support ⇘. B)ᴺ.rel_coinjective.coinjective hj hb₂
   rwa [smul_inv_smul]
 
@@ -571,8 +558,8 @@ theorem sameSpecLe_of_spec_eq_spec (h : S.spec = T.spec) :
   nearLitters_of_inflexible := nearLitters_of_inflexible_of_spec_eq_spec h
 
 theorem atoms_subset_of_sameSpec (h : SameSpec S T) {A : β ↝ ⊥} {i : κ} {a b : Atom}
-    (ha : (S ⇘. A)ᴬ.rel i a) (hb : (T ⇘. A)ᴬ.rel i b) :
-    {i | (T ⇘. A)ᴬ.rel i b} ⊆ {i | (S ⇘. A)ᴬ.rel i a} := by
+    (ha : i ~[(S ⇘. A)ᴬ.rel] a) (hb : i ~[(T ⇘. A)ᴬ.rel] b) :
+    {i | i ~[(T ⇘. A)ᴬ.rel] b} ⊆ {i | i ~[(S ⇘. A)ᴬ.rel] a} := by
   intro j hj
   rw [Set.mem_setOf_eq] at hj
   obtain ⟨c, hc⟩ := (sameSpec_comm h).atoms_dom_of_dom hj
@@ -580,27 +567,24 @@ theorem atoms_subset_of_sameSpec (h : SameSpec S T) {A : β ↝ ⊥} {i : κ} {a
   exact hc
 
 theorem nearLitters_subset_of_sameSpec (h : SameSpec S T) {A : β ↝ ⊥} {i : κ} {a b : Atom}
-    (ha : (S ⇘. A)ᴬ.rel i a) (hb : (T ⇘. A)ᴬ.rel i b) :
-    {i | ∃ N, (T ⇘. A)ᴺ.rel i N ∧ b ∈ Nᴬ} ⊆ {i | ∃ N, (S ⇘. A)ᴺ.rel i N ∧ a ∈ Nᴬ} := by
+    (ha : i ~[(S ⇘. A)ᴬ.rel] a) (hb : i ~[(T ⇘. A)ᴬ.rel] b) :
+    {i | ∃ N, i ~[(T ⇘. A)ᴺ.rel] N ∧ b ∈ Nᴬ} ⊆ {i | ∃ N, i ~[(S ⇘. A)ᴺ.rel] N ∧ a ∈ Nᴬ} := by
   intro j hj
   obtain ⟨N, hN₁, hN₂⟩ := hj
   obtain ⟨N', hN'⟩ := (sameSpec_comm h).nearLitters_dom_of_dom hN₁
   refine ⟨N', hN', ?_⟩
   have := h.atomMemRel_eq A
-  rw [atomMemRel, atomMemRel] at this
-  conv at this =>
-    rw [funext_iff]; intro
-    rw [funext_iff]; intro
-    rw [eq_iff_iff]
-  obtain ⟨N'', hN'', c, hc₁, hc₂⟩ := (this j i).mpr ⟨N, hN₁, b, hN₂, hb⟩
+  unfold atomMemRel at this
+  replace this := congr(j ~[$this] i)
+  obtain ⟨N'', hN'', c, hc₁, hc₂⟩ := this.mpr ⟨N, hN₁, b, hN₂, hb⟩
   cases (S ⇘. A)ᴺ.rel_coinjective.coinjective hN' hN''
   cases (S ⇘. A)ᴬ.rel_coinjective.coinjective ha hc₂
   exact hc₁
 
 theorem nearLitterCondRelFlex_of_convNearLitters_aux (h : SameSpec S T) {A : β ↝ ⊥}
-    {N₁ N₂ : NearLitter} (hN : convNearLitters S T A N₁ N₂)
+    {N₁ N₂ : NearLitter} (hN : N₁ ~[convNearLitters S T A] N₂)
     (hN₁i : ¬Inflexible A N₁ᴸ) (hN₂i : ¬Inflexible A N₂ᴸ) (i : κ) :
-    (∃ N₃, (S ⇘. A)ᴺ.rel i N₃ ∧ N₁ᴸ = N₃ᴸ) → ∃ N₃, (T ⇘. A)ᴺ.rel i N₃ ∧ N₂ᴸ = N₃ᴸ := by
+    (∃ N₃, i ~[(S ⇘. A)ᴺ.rel] N₃ ∧ N₁ᴸ = N₃ᴸ) → ∃ N₃, i ~[(T ⇘. A)ᴺ.rel] N₃ ∧ N₂ᴸ = N₃ᴸ := by
   rintro ⟨N₃, hN₃, hN₃'⟩
   obtain ⟨N₄, hN₄⟩ := h.nearLitters_dom_of_dom hN₃
   refine ⟨N₄, hN₄, ?_⟩
@@ -611,9 +595,9 @@ theorem nearLitterCondRelFlex_of_convNearLitters_aux (h : SameSpec S T) {A : β 
     rwa [← hN₃']
 
 theorem nearLitterCondRelFlex_of_convNearLitters (h : SameSpec S T) {A : β ↝ ⊥}
-    {N₁ N₂ : NearLitter} (hN : convNearLitters S T A N₁ N₂)
+    {N₁ N₂ : NearLitter} (hN : N₁ ~[convNearLitters S T A] N₂)
     (hN₁i : ¬Inflexible A N₁ᴸ) (hN₂i : ¬Inflexible A N₂ᴸ) :
-    nearLitterCondRelFlex T A N₂ (.flex ⟨{i | ∃ N₃, (S ⇘. A)ᴺ.rel i N₃ ∧ N₁ᴸ = N₃ᴸ}⟩) := by
+    N₂ ~[nearLitterCondRelFlex T A] (.flex ⟨{i | ∃ N₃, i ~[(S ⇘. A)ᴺ.rel] N₃ ∧ N₁ᴸ = N₃ᴸ}⟩) := by
   use hN₂i
   rw [NearLitterCond.flex.injEq, FlexCond.mk.injEq]
   ext i
@@ -623,39 +607,37 @@ theorem nearLitterCondRelFlex_of_convNearLitters (h : SameSpec S T) {A : β ↝ 
     rwa [← convNearLitters_inv]
 
 theorem nearLitterCondRelInflex_of_convNearLitters (h : SameSpec S T) {A : β ↝ ⊥}
-    {N₁ N₂ : NearLitter} (hN : convNearLitters S T A N₁ N₂)
+    {N₁ N₂ : NearLitter} (hN : N₁ ~[convNearLitters S T A] N₂)
     (P : InflexiblePath β) (t : Tangle P.δ) (ρ : AllPerm P.δ)
     (hA : A = P.A ↘ P.hε ↘.) (hN₁ : N₁ᴸ = fuzz P.hδε t) (hN₂ : N₂ᴸ = fuzz P.hδε (ρ • t)) :
-    nearLitterCondRelInflex T A N₂
-      (.inflex P ⟨t.code,
-        λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel.comp (t.support ⇘. B)ᴬ.rel.inv,
-        λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel.comp (t.support ⇘. B)ᴺ.rel.inv⟩) := by
+    N₂ ~[nearLitterCondRelInflex T A]
+      .inflex P ⟨t.code,
+        λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴬ.rel ○ (t.support ⇘. B)ᴬ.rel.inv,
+        λ B ↦ (S ⇘. (P.A ↘ P.hδ ⇘ B))ᴺ.rel ○ (t.support ⇘. B)ᴺ.rel.inv⟩ := by
   refine ⟨P, ρ • t, hA, hN₂, ?_⟩
   rw [NearLitterCond.inflex.injEq]
   refine ⟨rfl, heq_of_eq ?_⟩
   rw [InflexCond.mk.injEq]
   refine ⟨(t.smul_code ρ).symm, ?_, ?_⟩
-  · funext B i j
-    rw [eq_iff_iff]
+  · ext B ⟨i, j⟩
     have := h.atoms_iff_of_inflexible A N₁ N₂ P t ρ hA hN₁ hN₂ hN B
     constructor
     · rintro ⟨a, ha₁, ha₂⟩
       have := (this a ⟨j, ha₂⟩ i).mp ha₁
       refine ⟨ρᵁ B • a, this, ?_⟩
-      rwa [Tangle.smul_support, smul_derivBot, BaseSupport.smul_atoms, Rel.inv_apply,
+      rwa [Tangle.smul_support, smul_derivBot, BaseSupport.smul_atoms, SetRel.mem_inv,
         Enumeration.smul_rel, inv_smul_smul]
     · rintro ⟨a, ha₁, ha₂⟩
       have := (this ((ρᵁ B)⁻¹ • a) ⟨j, ha₂⟩ i).mpr ?_
       · exact ⟨(ρᵁ B)⁻¹ • a, this, ha₂⟩
       · rwa [smul_inv_smul]
-  · funext B i j
-    rw [eq_iff_iff]
+  · ext B ⟨i, j⟩
     have := h.nearLitters_iff_of_inflexible A N₁ N₂ P t ρ hA hN₁ hN₂ hN B
     constructor
     · rintro ⟨N', hN'₁, hN'₂⟩
       have := (this N' ⟨j, hN'₂⟩ i).mp hN'₁
       refine ⟨ρᵁ B • N', this, ?_⟩
-      rwa [Tangle.smul_support, smul_derivBot, BaseSupport.smul_nearLitters, Rel.inv_apply,
+      rwa [Tangle.smul_support, smul_derivBot, BaseSupport.smul_nearLitters, SetRel.mem_inv,
         Enumeration.smul_rel, inv_smul_smul]
     · rintro ⟨N', hN'₁, hN'₂⟩
       have := (this ((ρᵁ B)⁻¹ • N') ⟨j, hN'₂⟩ i).mpr ?_
@@ -667,7 +649,7 @@ theorem spec_le_spec_of_sameSpec (h : SameSpec S T) :
   intro A
   simp only [spec_atoms, spec_nearLitters]
   refine ⟨h.atoms_bound_eq A, ?_, h.nearLitters_bound_eq A, ?_⟩
-  · rintro i _ ⟨a, ha, rfl⟩
+  · rintro ⟨i, _⟩ ⟨a, ha, rfl⟩
     obtain ⟨b, hb⟩ := h.atoms_dom_of_dom ha
     refine ⟨b, hb, ?_⟩
     rw [AtomCond.mk.injEq]
@@ -678,7 +660,7 @@ theorem spec_le_spec_of_sameSpec (h : SameSpec S T) :
     · apply subset_antisymm
       exact nearLitters_subset_of_sameSpec h ha hb
       exact nearLitters_subset_of_sameSpec (sameSpec_comm h) hb ha
-  · rintro i c ⟨N₁, hN₁, hN'⟩
+  · rintro ⟨i, c⟩ ⟨N₁, hN₁, hN'⟩
     obtain ⟨N₂, hN₂⟩ := h.nearLitters_dom_of_dom hN₁
     obtain ⟨hN₁i, rfl⟩ | ⟨P, t, hA, ht, rfl⟩ := hN'
     · have hN₂i := (h.inflexible_iff' ⟨i, hN₁, hN₂⟩).mpr.mt hN₁i

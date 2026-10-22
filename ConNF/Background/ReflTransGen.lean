@@ -1,16 +1,16 @@
 import ConNF.Background.Cardinal
-import ConNF.Background.Rel
+import ConNF.Mathlib.Basic.Rel
 
 universe u
 
 noncomputable section
-open Cardinal Relation
+open Cardinal
 
-namespace Rel
+namespace Relation
 
-variable {α : Type u} {r : Rel α α} {κ : Cardinal}
+variable {α : Type u} {r : α → α → Prop} {κ : Cardinal}
 
-def reflTransGen₁ (r : Rel α α) (s : Set α) : Set α :=
+def reflTransGen₁ (r : α → α → Prop) (s : Set α) : Set α :=
   ⋃ x ∈ s, {y | r y x}
 
 theorem card_reflTransGen₁_lt (hr : ∀ y, #{x | r x y} < κ) (hκ : κ.IsRegular)
@@ -20,7 +20,7 @@ theorem card_reflTransGen₁_lt (hr : ∀ y, #{x | r x y} < κ) (hκ : κ.IsRegu
   intro x _
   exact hr x
 
-def reflTransGenₙ (r : Rel α α) : ℕ → Set α → Set α :=
+def reflTransGenₙ (r : α → α → Prop) : ℕ → Set α → Set α :=
   Nat.iterate (reflTransGen₁ r)
 
 theorem card_reflTransGenₙ_lt (hr : ∀ y, #{x | r x y} < κ) (hκ : κ.IsRegular)
@@ -32,10 +32,10 @@ theorem card_reflTransGenₙ_lt (hr : ∀ y, #{x | r x y} < κ) (hκ : κ.IsRegu
     rw [reflTransGenₙ, Function.iterate_succ']
     exact card_reflTransGen₁_lt hr hκ _ ih
 
-def reflTransGen' (r : Rel α α) : Rel α α :=
+def reflTransGen' (r : α → α → Prop) : α → α → Prop :=
   λ x y ↦ x ∈ ⋃ n, {x | reflTransGenₙ r n {y} x}
 
-theorem reflTransGen'_iff (r : Rel α α) (x y : α) :
+theorem reflTransGen'_iff (r : α → α → Prop) (x y : α) :
     reflTransGen' r x y ↔ ReflTransGen r x y := by
   rw [reflTransGen', reflTransGenₙ, Set.mem_iUnion]
   unfold reflTransGen₁
@@ -93,4 +93,4 @@ theorem card_transGen_le (hr : ∀ y, #{x | r x y} ≤ κ) (hκ : ℵ₀ ≤ κ)
     #{x | TransGen r x y} ≤ κ :=
   (mk_le_mk_of_subset (λ _ ↦ TransGen.to_reflTransGen)).trans (card_reflTransGen_le hr hκ y)
 
-end Rel
+end Relation

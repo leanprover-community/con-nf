@@ -50,7 +50,7 @@ theorem coe_ext_iff' {α : Λ} {x y : StrSet α} :
     x = y ↔ ∀ β hβ z, z ∈ coeEquiv x β hβ ↔ z ∈ coeEquiv y β hβ := by
   constructor
   · rintro rfl
-    simp only [implies_true, forall_const]
+    simp only [implies_true]
   · intro h
     apply coeEquiv.injective
     ext β hβ t

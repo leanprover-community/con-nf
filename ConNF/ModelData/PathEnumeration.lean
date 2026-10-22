@@ -15,6 +15,7 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal
+open scoped SetRel
 
 namespace ConNF
 
@@ -24,15 +25,22 @@ namespace Enumeration
 
 /-- A helper function for making relations with domain and codomain of the form `α ↝ ⊥ × X`
 by defining it on each branch. -/
-def relWithPath {X Y : Type u} {α : TypeIndex} (f : α ↝ ⊥ → Rel X Y) :
-    Rel (α ↝ ⊥ × X) (α ↝ ⊥ × Y) :=
-  λ x y ↦ x.1 = y.1 ∧ f x.1 x.2 y.2
+def relWithPath {X Y : Type u} {α : TypeIndex} (f : α ↝ ⊥ → SetRel X Y) :
+    SetRel (α ↝ ⊥ × X) (α ↝ ⊥ × Y) :=
+  {(x, y) | x.1 = y.1 ∧ x.2 ~[f x.1] y.2}
 
-theorem relWithPath_coinjective {X Y : Type u} {α : TypeIndex} {f : α ↝ ⊥ → Rel X Y}
+theorem mem_relWithPath {X Y : Type u} {α : TypeIndex} {f : α ↝ ⊥ → SetRel X Y}
+    {x : α ↝ ⊥ × X} {y : α ↝ ⊥ × Y} :
+    x ~[relWithPath f] y ↔ x.1 = y.1 ∧ x.2 ~[f x.1] y.2 :=
+  Iff.rfl
+
+theorem relWithPath_coinjective {X Y : Type u} {α : TypeIndex} {f : α ↝ ⊥ → SetRel X Y}
     (hf : ∀ A, (f A).Coinjective) :
     (relWithPath f).Coinjective := by
   constructor
-  rintro ⟨_, y₁⟩ ⟨_, y₂⟩ ⟨A, x⟩ ⟨rfl, h₁⟩ ⟨rfl, h₂⟩
+  rintro ⟨_, y₁⟩ ⟨_, y₂⟩ ⟨A, x⟩ h₁ h₂
+  obtain ⟨rfl, h₁⟩ := mem_relWithPath.mp h₁
+  obtain ⟨rfl, h₂⟩ := mem_relWithPath.mp h₂
   cases (hf A).coinjective h₁ h₂
   rfl
 
@@ -44,7 +52,7 @@ instance (X : Type u) (α β : TypeIndex) :
 
 theorem deriv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (α ↝ ⊥ × X)) (A : α ↝ β)
     (i : κ) (x : β ↝ ⊥ × X) :
-    (E ⇘ A).rel i x ↔ E.rel i (x.1 ⇗ A, x.2) :=
+    i ~[(E ⇘ A).rel] x ↔ i ~[E.rel] (x.1 ⇗ A, x.2) :=
   Iff.rfl
 
 instance (X : Type u) (α β : TypeIndex) :
@@ -53,7 +61,7 @@ instance (X : Type u) (α β : TypeIndex) :
 
 theorem coderiv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (A : α ↝ β)
     (i : κ) (x : α ↝ ⊥ × X) :
-    (E ⇗ A).rel i x ↔ ∃ B, x.1 = A ⇘ B ∧ E.rel i (B, x.2) := by
+    i ~[(E ⇗ A).rel] x ↔ ∃ B, x.1 = A ⇘ B ∧ i ~[E.rel] (B, x.2) := by
   constructor
   · rintro ⟨x, h, rfl⟩
     exact ⟨_, rfl, h⟩
@@ -66,12 +74,12 @@ theorem coderiv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ �
 
 theorem scoderiv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (h : β < α)
     (i : κ) (x : α ↝ ⊥ × X) :
-    (E ↗ h).rel i x ↔ ∃ B, x.1 = B ↗ h ∧ E.rel i (B, x.2) :=
+    i ~[(E ↗ h).rel] x ↔ ∃ B, x.1 = B ↗ h ∧ i ~[E.rel] (B, x.2) :=
   coderiv_rel E (.single h) i x
 
 theorem eq_of_scoderiv_mem {X : Type _} {α β γ : TypeIndex} (E : Enumeration (β ↝ ⊥ × X))
     (h : β < α) (h' : γ < α)
-    (i : κ) (A : γ ↝ ⊥) (x : X) (h : (E ↗ h).rel i ⟨A ↗ h', x⟩) :
+    (i : κ) (A : γ ↝ ⊥) (x : X) (h : i ~[(E ↗ h).rel] ⟨A ↗ h', x⟩) :
     β = γ := by
   rw [scoderiv_rel] at h
   obtain ⟨B, h₁, h₂⟩ := h
@@ -88,7 +96,7 @@ instance (X : Type u) (α : TypeIndex) :
 
 theorem derivBot_rel {X : Type _} {α : TypeIndex} (E : Enumeration (α ↝ ⊥ × X)) (A : α ↝ ⊥)
     (i : κ) (x : X) :
-    (E ⇘. A).rel i x ↔ E.rel i (A, x) :=
+    i ~[(E ⇘. A).rel] x ↔ i ~[E.rel] (A, x) :=
   Iff.rfl
 
 @[simp]
@@ -100,11 +108,11 @@ theorem mem_path_iff {X : Type _} {α : TypeIndex} (E : Enumeration (α ↝ ⊥ 
 theorem ext_path {X : Type u} {α : TypeIndex} {E F : Enumeration (α ↝ ⊥ × X)}
     (h : ∀ A, E ⇘. A = F ⇘. A) :
     E = F := by
-  ext i x
+  ext ⟨i, x⟩
   · have := congr_arg bound (h (Path.nil ↘.))
     exact this
   · have := congr_arg rel (h x.1)
-    exact iff_of_eq (congr_fun₂ this i x.2)
+    exact Set.ext_iff.mp this (i, x.2)
 
 theorem deriv_derivBot {X : Type _} {α β : TypeIndex} (E : Enumeration (α ↝ ⊥ × X))
     (A : α ↝ β) (B : β ↝ ⊥) :
@@ -116,7 +124,7 @@ theorem coderiv_deriv_eq {X : Type _} {α β : TypeIndex} (E : Enumeration (β �
     E ⇗ A ⇘ A = E := by
   apply ext_path
   intro B
-  ext i x
+  ext ⟨i, x⟩
   · rfl
   · simp only [derivBot_rel, deriv_rel, coderiv_rel,
       Path.coderiv_eq_deriv, Path.deriv_right_inj, exists_eq_left']
@@ -132,7 +140,7 @@ theorem eq_of_mem_scoderiv_botDeriv {X : Type _} {α β : TypeIndex} {S : Enumer
 theorem scoderiv_botDeriv_eq {X : Type _} {α β : TypeIndex} (S : Enumeration (β ↝ ⊥ × X))
     (A : β ↝ ⊥) (h : β < α) :
     S ↗ h ⇘. (A ↗ h) = S ⇘. A := by
-  ext i x
+  ext ⟨i, x⟩
   · rfl
   · simp only [derivBot_rel, scoderiv_rel, Path.scoderiv_left_inj, exists_eq_left']
 
@@ -150,17 +158,17 @@ instance {X : Type _} {α : TypeIndex} [MulAction BasePerm X] :
 @[simp]
 theorem smulPath_rel {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
     (π : StrPerm α) (E : Enumeration (α ↝ ⊥ × X)) (i : κ) (x : α ↝ ⊥ × X) :
-    (π • E).rel i x ↔ E.rel i (x.1, (π x.1)⁻¹ • x.2) :=
+    i ~[(π • E).rel] x ↔ i ~[E.rel] (x.1, (π x.1)⁻¹ • x.2) :=
   Iff.rfl
 
 instance {X : Type _} {α : TypeIndex} [MulAction BasePerm X] :
     MulAction (StrPerm α) (Enumeration (α ↝ ⊥ × X)) where
   one_smul E := by
-    ext i x
+    ext ⟨i, x⟩
     · rfl
     · rw [smulPath_rel, Tree.one_apply, inv_one, one_smul]
   mul_smul π₁ π₂ E := by
-    ext i x
+    ext ⟨i, x⟩
     · rfl
     · rw [smulPath_rel, smulPath_rel, smulPath_rel, Tree.mul_apply, mul_inv_rev, mul_smul]
 
@@ -168,10 +176,9 @@ theorem smul_eq_of_forall_smul_eq {X : Type _} {α : TypeIndex} [MulAction BaseP
     {π : StrPerm α} {E : Enumeration (α ↝ ⊥ × X)}
     (h : ∀ A : α ↝ ⊥, ∀ x : X, (A, x) ∈ E → π A • x = x) :
     π • E = E := by
-  ext i x
+  ext ⟨i, A, x⟩
   · rfl
-  · obtain ⟨A, x⟩ := x
-    constructor
+  · constructor
     · intro hx
       have := h A ((π A)⁻¹ • x) ⟨i, hx⟩
       rw [smul_inv_smul] at this
@@ -197,7 +204,7 @@ theorem smul_eq_of_mem_of_smul_eq {X : Type _} {α : TypeIndex} [MulAction BaseP
     (h : π • E = E) (A : α ↝ ⊥) (x : X) (hx : (A, x) ∈ E) :
     π A • x = x := by
   obtain ⟨i, hx⟩ := hx
-  have := congr_fun₂ (congr_arg rel h) i (A, x)
+  have := congr(i ~[rel $h] (A, x))
   have := E.rel_coinjective.coinjective hx (this.mpr hx)
   rw [Prod.mk.injEq, eq_inv_smul_iff] at this
   exact this.2

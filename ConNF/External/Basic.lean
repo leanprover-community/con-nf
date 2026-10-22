@@ -72,7 +72,7 @@ theorem mem_diff_iff (x y : TSet α) :
     ∀ z : TSet β, z ∈' x \' y ↔ z ∈' x ∧ ¬(z ∈' y) := by
   rw [diff]
   intro z
-  simp only [mem_union_iff, mem_inter_iff, mem_compl_iff]
+  simp only [mem_inter_iff, mem_compl_iff]
 
 def higherIndex (α : Λ) : Λ :=
   (exists_gt α).choose
@@ -165,23 +165,23 @@ theorem exists_of_mem_singletonImage {x : TSet β} {z w : TSet δ}
   exact ⟨a, b, rfl, rfl⟩
 
 /-- Turn a model element encoding a relation into an actual relation. -/
-def ExternalRel (r : TSet α) : Rel (TSet δ) (TSet δ) :=
-  λ x y ↦ ⟨x, y⟩' ∈' r
+def ExternalRel (r : TSet α) : SetRel (TSet δ) (TSet δ) :=
+  {(x, y) | ⟨x, y⟩' ∈' r}
 
 @[simp]
 theorem externalRel_converse (r : TSet α) :
     ExternalRel hβ hγ hδ (converse hβ hγ hδ r) = (ExternalRel hβ hγ hδ r).inv := by
-  ext
-  simp only [ExternalRel, op_mem_converse_iff, Rel.inv_apply]
+  ext ⟨x, y⟩
+  simp only [ExternalRel, op_mem_converse_iff, SetRel.mem_inv, Set.mem_setOf_eq]
 
 /-- The codomain of a relation. -/
-def codom (r : TSet α) : TSet γ :=
+def cod (r : TSet α) : TSet γ :=
   (typeLower high hβ hγ hδ (singletonImage high hβ hγ hδ r)ᶜ[high])ᶜ'
 
 @[simp]
-theorem mem_codom_iff (r : TSet α) (x : TSet δ) :
-    x ∈' codom hβ hγ hδ r ↔ x ∈ (ExternalRel hβ hγ hδ r).codom := by
-  simp only [codom, mem_compl_iff, mem_typeLower_iff, not_forall, not_not]
+theorem mem_cod_iff (r : TSet α) (x : TSet δ) :
+    x ∈' cod hβ hγ hδ r ↔ x ∈ (ExternalRel hβ hγ hδ r).cod := by
+  simp only [cod, mem_compl_iff, mem_typeLower_iff, not_forall, not_not]
   constructor
   · rintro ⟨y, hy⟩
     obtain ⟨a, b, rfl, hb⟩ := exists_of_mem_singletonImage high hβ hγ hδ hy
@@ -196,21 +196,21 @@ theorem mem_codom_iff (r : TSet α) (x : TSet δ) :
 
 /-- The domain of a relation. -/
 def dom (r : TSet α) : TSet γ :=
-  codom hβ hγ hδ (converse hβ hγ hδ r)
+  cod hβ hγ hδ (converse hβ hγ hδ r)
 
 @[simp]
 theorem mem_dom_iff (r : TSet α) (x : TSet δ) :
     x ∈' dom hβ hγ hδ r ↔ x ∈ (ExternalRel hβ hγ hδ r).dom := by
-  rw [dom, mem_codom_iff, externalRel_converse, Rel.inv_codom]
+  rw [dom, mem_cod_iff, externalRel_converse, SetRel.cod_inv]
 
 /-- The field of a relation. -/
 def field (r : TSet α) : TSet γ :=
-  dom hβ hγ hδ r ⊔' codom hβ hγ hδ r
+  dom hβ hγ hδ r ⊔' cod hβ hγ hδ r
 
 @[simp]
 theorem mem_field_iff (r : TSet α) (x : TSet δ) :
     x ∈' field hβ hγ hδ r ↔ x ∈ (ExternalRel hβ hγ hδ r).field := by
-  rw [field, mem_union_iff, mem_dom_iff, mem_codom_iff, Rel.field, Set.mem_union]
+  rw [field, mem_union_iff, mem_dom_iff, mem_cod_iff, SetRel.field, Set.mem_union]
 
 def subset : TSet α :=
   subset' hβ hγ hδ hε ⊓' orderedPairs hβ hγ hδ
@@ -269,8 +269,8 @@ theorem mem_powerset_iff (x y : TSet β) :
     exact h.1
   · intro h
     refine ⟨y, ?_⟩
-    simp only [ExternalRel, mem_inter_iff, subset_spec, h, mem_vCross_iff, op_inj,
-      typedMem_singleton_iff', exists_eq_right, and_true, exists_eq', and_self]
+    simp only [ExternalRel, Set.mem_setOf_eq, mem_inter_iff, subset_spec, h, mem_vCross_iff,
+      op_inj, typedMem_singleton_iff', exists_eq_right, and_true, exists_eq', and_self]
 
 /-- The set `ι²''x = {{{a}} | a ∈ x}`. -/
 def doubleSingletons (x : TSet γ) : TSet α :=
@@ -343,8 +343,8 @@ def sUnion (x : TSet α) : TSet β :=
 theorem mem_sUnion_iff (x : TSet α) :
     ∀ y : TSet γ, y ∈' sUnion hβ hγ x ↔ ∃ t : TSet β, t ∈' x ∧ y ∈' t := by
   intro y
-  simp only [sUnion, mem_singletonUnion_iff, mem_dom_iff, Rel.dom, ExternalRel, mem_inter_iff,
-    mem_cross_iff, op_inj, mem_cardinalOne_iff, Set.mem_setOf_eq, membership_spec]
+  simp only [sUnion, mem_singletonUnion_iff, mem_dom_iff, SetRel.mem_dom, ExternalRel,
+    mem_inter_iff, mem_cross_iff, op_inj, mem_cardinalOne_iff, Set.mem_setOf_eq, membership_spec]
   constructor
   · rintro ⟨z, h₁, a, b, ⟨rfl, rfl⟩, ⟨c, h₂⟩, h₃⟩
     rw [singleton_inj] at h₂
@@ -395,8 +395,8 @@ def preimage (r : TSet α) (x : TSet γ) : TSet γ :=
 @[simp]
 theorem mem_preimage_iff (r : TSet α) (x : TSet γ) (y : TSet δ) :
     y ∈' preimage hβ hγ hδ r x ↔ y ∈ (ExternalRel hβ hγ hδ r).preimage {a | a ∈' x} := by
-  simp only [preimage, mem_dom_iff, Rel.dom, ExternalRel, mem_inter_iff, mem_vCross_iff, op_inj,
-    Set.mem_setOf_eq, Rel.preimage, Rel.image, Rel.inv, flip]
+  simp only [preimage, mem_dom_iff, SetRel.mem_dom, ExternalRel, mem_inter_iff, mem_vCross_iff,
+    op_inj, Set.mem_setOf_eq, SetRel.mem_preimage]
   constructor
   · rintro ⟨a, h₁, _, _, ⟨rfl, rfl⟩, h₂⟩
     exact ⟨a, h₂, h₁⟩
@@ -410,7 +410,7 @@ def image (r : TSet α) (x : TSet γ) : TSet γ :=
 @[simp]
 theorem mem_image_iff (r : TSet α) (x : TSet γ) (y : TSet δ) :
     y ∈' image hβ hγ hδ r x ↔ y ∈ (ExternalRel hβ hγ hδ r).image {a | a ∈' x} := by
-  simp only [image, mem_preimage_iff, externalRel_converse, Rel.preimage_inv]
+  simp only [image, mem_preimage_iff, externalRel_converse, SetRel.preimage_inv]
 
 theorem exists_smallUnion (s : Set (TSet α)) (hs : Small s) :
     ∃ x : TSet α, ∀ y : TSet β, y ∈' x ↔ ∃ t ∈ s, y ∈' t := by

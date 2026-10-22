@@ -100,7 +100,7 @@ theorem Closed.scoderiv {γ : TypeIndex} {S : Support γ} (hS : S.Closed) (hγ :
   obtain ⟨k, hk⟩ := (hS.closed B).interference_subset ⟨i, hi⟩ ⟨j, hj⟩ a ha
   exact ⟨k, ⟨B, a⟩, hk, rfl⟩
 
-def Constrains : Rel (β ↝ ⊥ × NearLitter) (β ↝ ⊥ × NearLitter) :=
+def Constrains : β ↝ ⊥ × NearLitter → β ↝ ⊥ × NearLitter → Prop :=
   λ x y ↦ ∃ (P : InflexiblePath β) (t : Tangle P.δ) (B : P.δ ↝ ⊥),
     x.1 = P.A ↘ P.hδ ⇘ B ∧ x.2 ∈ (t.support ⇘. B)ᴺ ∧ y.1 = P.A ↘ P.hε ↘. ∧ y.2ᴸ = fuzz P.hδε t
 
@@ -152,7 +152,7 @@ theorem constrains_small (y : β ↝ ⊥ × NearLitter) :
 
 theorem reflTransGen_constrains_small (s : Set (β ↝ ⊥ × NearLitter)) (hs : Small s) :
     Small {x | ∃ y ∈ s, Relation.ReflTransGen Constrains x y} := by
-  have := Rel.card_reflTransGen_lt (constrains_small (β := β)) κ_isRegular aleph0_lt_κ
+  have := Relation.card_reflTransGen_lt (constrains_small (β := β)) κ_isRegular aleph0_lt_κ
   convert small_biUnion hs (λ x _ ↦ this x) using 1
   ext x
   simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop', nonempty_prop]

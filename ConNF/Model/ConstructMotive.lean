@@ -16,6 +16,7 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal WithBot
+open scoped SetRel
 
 namespace ConNF
 
@@ -263,7 +264,7 @@ theorem preCoherentData_pos_nearLitter_lt_pos
   | bot =>
     rintro _ t ⟨i, ha⟩
     letI := botModelData
-    change t.supportᴺ.rel i ⟨A, N⟩ at ha
+    change i ~[t.supportᴺ.rel] ⟨A, N⟩ at ha
     rw [t.support_supports.nearLitters_eq_empty_of_bot rfl] at ha
     cases ha
   | coe β =>
@@ -307,7 +308,7 @@ theorem preCoherentData_smul_fuzz
       rw [← castAllPermLeLt_forget M (iβ.elim.lt_of_ne h)]
       unfold PreCoherentData.allPermSderiv preCoherentData
       simp only [coe_inj, recBotCoe_bot, id_eq, recBotCoe_coe, show β ≠ α from h ∘ congr_arg _,
-        ↓reduceDIte, ne_eq]
+        ↓reduceDIte]
       exact (H β (iβ.elim.lt_of_ne h)).smul_fuzz_bot hδ (castAllPermLeLt M _ ρ) t
     | coe γ =>
       intro _ t
@@ -316,8 +317,8 @@ theorem preCoherentData_smul_fuzz
         ← castTangleLeLt_fuzz M (hγ.trans_le LeLevel.elim),
         castAllPermLeLt_smul']
       unfold PreCoherentData.allPermSderiv preCoherentData
-      simp only [coe_inj, recBotCoe_coe, imp_self, show β ≠ α from h ∘ congr_arg _,
-        IsEmpty.forall_iff, ↓reduceDIte, ne_eq, Equiv.apply_symm_apply]
+      simp only [coe_inj, recBotCoe_coe, show β ≠ α from h ∘ congr_arg _,
+        ↓reduceDIte, Equiv.apply_symm_apply]
       exact (H β (iβ.elim.lt_of_ne h)).smul_fuzz hγ hδ hγδ
         (castAllPermLeLt M _ ρ) (castTangleLeLt M _ t)
 
@@ -372,7 +373,6 @@ theorem preCoherentData_allPerm_of_smulFuzz
           ↓reduceDIte, Equiv.apply_symm_apply, Equiv.symm_apply_apply,
           show β ≠ α from h ∘ congr_arg _, hρ₁, hρ₂]
     · intro γ δ hγ hδ hγδ t
-      simp only [recBotCoe_coe]
       letI : LtLevel γ := ⟨hγ.trans_le LeLevel.elim⟩
       letI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
       rw [castAllPermLeLt_smul'' M, castTangleLeLt_fuzz M]
@@ -381,7 +381,6 @@ theorem preCoherentData_allPerm_of_smulFuzz
         ← castAllPermLeLt_forget M LtLevel.elim] at this
     · intro δ hδ t
       letI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
-      simp only [recBotCoe_coe, recBotCoe_bot]
       have := hρs (bot_lt_coe β) hδ bot_ne_coe t
       rw [← castAllPermLeLt_forget M LtLevel.elim] at this
       exact this
@@ -445,8 +444,7 @@ theorem typedMem_singleton_iff
       rw [Equiv.apply_symm_apply] at this
       exact this.symm
   · unfold singleton preCoherentData
-    simp only [coe_inj, show β ≠ α from h ∘ congr_arg _, ↓reduceDIte, ne_eq, ←
-      TSet.forget_mem_forget]
+    simp only [coe_inj, show β ≠ α from h ∘ congr_arg _, ↓reduceDIte, ← TSet.forget_mem_forget]
     letI := (M β (LeLevel.elim.lt_of_ne h)).data
     letI := (M γ (hγ.trans_le LeLevel.elim)).data
     have := (H β (LeLevel.elim.lt_of_ne h)).typedMem_singleton_iff hγ

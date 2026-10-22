@@ -1,4 +1,4 @@
-import Mathlib.Algebra.Equiv.TransferInstance
+import Mathlib.Algebra.Group.TransferInstance
 import ConNF.Background.Ordinal
 
 universe u v

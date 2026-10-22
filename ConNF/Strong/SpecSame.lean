@@ -18,6 +18,7 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal
+open scoped SetRel
 
 namespace ConNF
 
@@ -27,20 +28,20 @@ namespace Support
 
 theorem atom_mem_of_mem_of_spec_eq_spec (hST : S.spec = T.spec)
     {a₁ a₂ : Atom} {N₁ N₂ : NearLitter} {A : β ↝ ⊥}
-    (ha : convAtoms S T A a₁ a₂) (hN : convNearLitters S T A N₁ N₂) (haN : a₁ ∈ N₁ᴬ) :
+    (ha : a₁ ~[convAtoms S T A] a₂) (hN : N₁ ~[convNearLitters S T A] N₂) (haN : a₁ ∈ N₁ᴬ) :
     a₂ ∈ N₂ᴬ := by
   rw [spec_eq_spec_iff] at hST
   obtain ⟨i, ha₁, ha₂⟩ := ha
   obtain ⟨j, hN₁, hN₂⟩ := hN
-  obtain ⟨N₃, hN₃, a₃, haN', ha₃⟩ :=
-    (iff_of_eq (congr_fun₂ (hST.atomMemRel_eq A) j i)).mp ⟨N₁, hN₁, a₁, haN, ha₁⟩
+  replace hST := congr(j ~[$(hST.atomMemRel_eq A)] i)
+  obtain ⟨N₃, hN₃, a₃, haN', ha₃⟩ := hST.mp ⟨N₁, hN₁, a₁, haN, ha₁⟩
   cases (T ⇘. A)ᴬ.rel_coinjective.coinjective ha₂ ha₃
   cases (T ⇘. A)ᴺ.rel_coinjective.coinjective hN₂ hN₃
   exact haN'
 
 theorem atom_mem_iff_mem_of_spec_eq_spec (hST : S.spec = T.spec)
     {a₁ a₂ : Atom} {N₁ N₂ : NearLitter} {A : β ↝ ⊥}
-    (ha : convAtoms S T A a₁ a₂) (hN : convNearLitters S T A N₁ N₂) :
+    (ha : a₁ ~[convAtoms S T A] a₂) (hN : N₁ ~[convNearLitters S T A] N₂) :
     a₁ ∈ N₁ᴬ ↔ a₂ ∈ N₂ᴬ :=
   ⟨atom_mem_of_mem_of_spec_eq_spec hST ha hN,
     atom_mem_of_mem_of_spec_eq_spec hST.symm
@@ -48,7 +49,8 @@ theorem atom_mem_iff_mem_of_spec_eq_spec (hST : S.spec = T.spec)
 
 theorem litter_eq_litter_of_convNearLitters_of_spec_eq_spec (hST : S.spec = T.spec) (hT : T.Strong)
     {N₁ N₂ N₃ N₄ : NearLitter} {A : β ↝ ⊥}
-    (hN₁₃ : convNearLitters S T A N₁ N₃) (hN₂₄ : convNearLitters S T A N₂ N₄) (hN₁₂ : N₁ᴸ = N₂ᴸ) :
+    (hN₁₃ : N₁ ~[convNearLitters S T A] N₃) (hN₂₄ : N₂ ~[convNearLitters S T A] N₄)
+    (hN₁₂ : N₁ᴸ = N₂ᴸ) :
     N₃ᴸ = N₄ᴸ := by
   rw [spec_eq_spec_iff] at hST
   obtain (⟨P, t, hA, ht⟩ | hN₁) := inflexible_cases A N₁ᴸ
@@ -92,7 +94,7 @@ theorem litter_eq_litter_of_convNearLitters_of_spec_eq_spec (hST : S.spec = T.sp
 -- TODO: Fix blueprint: we need both that T is strong and that S is strong.
 theorem litter_eq_litter_iff_of_convNearLitters_of_spec_eq_spec (hST : S.spec = T.spec)
     (hS : S.Strong) (hT : T.Strong) {N₁ N₂ N₃ N₄ : NearLitter} {A : β ↝ ⊥}
-    (hN₁₃ : convNearLitters S T A N₁ N₃) (hN₂₄ : convNearLitters S T A N₂ N₄) :
+    (hN₁₃ : N₁ ~[convNearLitters S T A] N₃) (hN₂₄ : N₂ ~[convNearLitters S T A] N₄) :
     N₁ᴸ = N₂ᴸ ↔ N₃ᴸ = N₄ᴸ :=
   ⟨litter_eq_litter_of_convNearLitters_of_spec_eq_spec hST hT hN₁₃ hN₂₄,
     litter_eq_litter_of_convNearLitters_of_spec_eq_spec hST.symm hS
@@ -110,10 +112,10 @@ theorem interference_subset_convAtoms_dom (hST : S.spec = T.spec) (hS : S.Strong
   obtain ⟨a', hkT⟩ := hST.atoms_dom_of_dom hkS
   exact ⟨a', k, hkS, hkT⟩
 
-theorem interference_subset_convAtoms_codom (hST : S.spec = T.spec) (hT : T.Strong)
+theorem interference_subset_convAtoms_cod (hST : S.spec = T.spec) (hT : T.Strong)
     {N₁ N₂ : NearLitter} {A : β ↝ ⊥}
-    (hN₁ : N₁ ∈ (convNearLitters S T A).codom) (hN₂ : N₂ ∈ (convNearLitters S T A).codom) :
-    interference N₁ N₂ ⊆ (convAtoms S T A).codom := by
+    (hN₁ : N₁ ∈ (convNearLitters S T A).cod) (hN₂ : N₂ ∈ (convNearLitters S T A).cod) :
+    interference N₁ N₂ ⊆ (convAtoms S T A).cod := by
   intro a ha
   obtain ⟨N₃, i, hiS, hiT⟩ := hN₁
   obtain ⟨N₄, j, hjS, hjT⟩ := hN₂
@@ -140,26 +142,26 @@ def convDeriv (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) (A : β �
     rw [spec_eq_spec_iff] at hST
     constructor
     · intro ha
-      obtain ⟨N₃, hN₃T, a₃, haN₃, ha₃T⟩ := (iff_of_eq (congr_fun₂ (hST.atomMemRel_eq A) j i)).mp
-        ⟨N₁, hjS, a₁, ha, hiS⟩
+      replace hST := congr(j ~[$(hST.atomMemRel_eq A)] i)
+      obtain ⟨N₃, hN₃T, a₃, haN₃, ha₃T⟩ := hST.mp ⟨N₁, hjS, a₁, ha, hiS⟩
       cases (T ⇘. A)ᴬ.rel_coinjective.coinjective hiT ha₃T
       cases (T ⇘. A)ᴺ.rel_coinjective.coinjective hjT hN₃T
       exact haN₃
     · intro ha
-      obtain ⟨N₃, hN₃S, a₃, haN₃, ha₃S⟩ := (iff_of_eq (congr_fun₂ (hST.atomMemRel_eq A) j i)).mpr
+      obtain ⟨N₃, hN₃S, a₃, haN₃, ha₃S⟩ := (Set.ext_iff.mp (hST.atomMemRel_eq A) (j, i)).mpr
         ⟨N₂, hjT, a₂, ha, hiT⟩
       cases (S ⇘. A)ᴬ.rel_coinjective.coinjective hiS ha₃S
       cases (S ⇘. A)ᴺ.rel_coinjective.coinjective hjS hN₃S
       exact haN₃
   litter_eq_litter_iff' := litter_eq_litter_iff_of_convNearLitters_of_spec_eq_spec hST hS hT
   interference_subset_dom' := interference_subset_convAtoms_dom hST hS
-  interference_subset_codom' := interference_subset_convAtoms_codom hST hT
+  interference_subset_cod' := interference_subset_convAtoms_cod hST hT
 
 abbrev conv (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) : StrAction β :=
   convDeriv hST hS hT
 
 theorem conv_coherentAt (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong)
-    {A : β ↝ ⊥} {N₁ N₂ : NearLitter} (hN : convNearLitters S T A N₁ N₂) :
+    {A : β ↝ ⊥} {N₁ N₂ : NearLitter} (hN : N₁ ~[convNearLitters S T A] N₂) :
     CoherentAt (conv hST hS hT) A N₁ᴸ N₂ᴸ := by
   rw [spec_eq_spec_iff] at hST
   constructor
@@ -198,8 +200,8 @@ theorem conv_coherentAt (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong)
 
 theorem conv_coherent (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) :
     (conv hST hS hT).Coherent := by
-  rintro A L₁ L₂ ⟨i, hiS, hiT⟩
-  exact conv_coherentAt hST hS hT ⟨i, hiS, hiT⟩
+  rintro A _ _ ⟨N₁, N₂, rfl, rfl, hN⟩
+  exact conv_coherentAt hST hS hT hN
 
 theorem exists_conv (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) :
     ∃ ρ : AllPerm β, ρᵁ • S = T := by
@@ -211,7 +213,7 @@ theorem exists_conv (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) :
   apply BaseSupport.ext
   · apply Enumeration.ext
     · exact hST.atoms_bound_eq A
-    ext i a
+    ext ⟨i, a⟩
     constructor
     · intro ha
       obtain ⟨b, hb⟩ := hST.atoms_dom_of_dom ha
@@ -223,7 +225,7 @@ theorem exists_conv (hST : S.spec = T.spec) (hS : S.Strong) (hT : T.Strong) :
       rwa [smul_derivBot, BaseSupport.smul_atoms, Enumeration.smul_rel, inv_smul_smul]
   · apply Enumeration.ext
     · exact hST.nearLitters_bound_eq A
-    ext i a
+    ext ⟨i, a⟩
     constructor
     · intro ha
       obtain ⟨b, hb⟩ := hST.nearLitters_dom_of_dom ha

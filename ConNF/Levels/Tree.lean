@@ -19,7 +19,7 @@ namespace ConNF
 variable [Params.{u}] {X Y : Type _} {α β γ : TypeIndex}
 
 /-- An `α`-tree of `X` associates an object of type `X` to each path `α ↝ ⊥`. -/
-def Tree (X : Type _) (α : TypeIndex) :=
+abbrev Tree (X : Type _) (α : TypeIndex) :=
   (α ↝ ⊥) → X
 
 namespace Tree

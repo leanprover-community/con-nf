@@ -3,7 +3,7 @@ import ConNF.Background.InductiveConstruction
 import ConNF.Background.Ordinal
 import ConNF.Background.PermutativeExtension
 import ConNF.Background.ReflTransGen
-import ConNF.Background.Rel
+import ConNF.Mathlib.Basic.Rel
 import ConNF.Background.Set
 import ConNF.Background.Transfer
 import ConNF.Background.WellOrder

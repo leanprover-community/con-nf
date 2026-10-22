@@ -14,12 +14,13 @@ noncomputable section
 universe u
 
 open Cardinal Ordinal
+open scoped SetRel
 
 namespace ConNF
 
 variable [Params.{u}] [Level] [CoherentData] {β : TypeIndex} [LeLevel β]
 
-def Support.orbitRel : Rel (Support β) (Support β) :=
+def Support.orbitRel : Support β → Support β → Prop :=
   λ S T ↦ ∃ ρ : AllPerm β, ρᵁ • S = T
 
 theorem Support.orbitRel_isEquivalence :
@@ -64,29 +65,29 @@ theorem Support.smul_orbit {S : Support β} {ρ : AllPerm β} :
   use ρ
 
 structure CodingFunction (β : TypeIndex) [LeLevel β] where
-  rel : Rel (Support β) (TSet β)
+  rel : SetRel (Support β) (TSet β)
   rel_coinjective : rel.Coinjective
   rel_dom_nonempty : rel.dom.Nonempty
-  supports_of_rel {S : Support β} {x : TSet β} : rel S x → S.Supports x
+  supports_of_rel {S : Support β} {x : TSet β} : S ~[rel] x → S.Supports x
   orbit_eq_of_mem_dom {S T : Support β} : S ∈ rel.dom → T ∈ rel.dom → S.orbit = T.orbit
-  smul_rel {S : Support β} {x : TSet β} (h : rel S x) (ρ : AllPerm β) : rel (ρᵁ • S) (ρ • x)
+  smul_rel {S : Support β} {x : TSet β} (h : S ~[rel] x) (ρ : AllPerm β) : ρᵁ • S ~[rel] ρ • x
 
 namespace CodingFunction
 
 theorem ext' {χ₁ χ₂ : CodingFunction β}
-    (h : ∀ S x, χ₁.rel S x ↔ χ₂.rel S x) : χ₁ = χ₂ := by
+    (h : ∀ S x, S ~[χ₁.rel] x ↔ S ~[χ₂.rel] x) : χ₁ = χ₂ := by
   obtain ⟨r₁, _⟩ := χ₁
   obtain ⟨r₂, _⟩ := χ₂
   have : r₁ = r₂ := by
-    ext S x
+    ext ⟨S, x⟩
     exact h S x
   cases this
   rfl
 
 theorem ext_aux {χ₁ χ₂ : CodingFunction β} {S : Support β} {x : TSet β}
-    (h₁ : χ₁.rel S x) (h₂ : χ₂.rel S x) :
+    (h₁ : S ~[χ₁.rel] x) (h₂ : S ~[χ₂.rel] x) :
     χ₁.rel ≤ χ₂.rel := by
-  intro T y h
+  rintro ⟨T, y⟩ h
   have := χ₁.orbit_eq_of_mem_dom ⟨x, h₁⟩ ⟨y, h⟩
   rw [Support.orbit_eq_iff] at this
   obtain ⟨ρ, rfl⟩ := this
@@ -94,7 +95,7 @@ theorem ext_aux {χ₁ χ₂ : CodingFunction β} {S : Support β} {x : TSet β}
   exact χ₂.smul_rel h₂ ρ
 
 theorem ext {χ₁ χ₂ : CodingFunction β} (S : Support β) (x : TSet β)
-    (h₁ : χ₁.rel S x) (h₂ : χ₂.rel S x) :
+    (h₁ : S ~[χ₁.rel] x) (h₂ : S ~[χ₂.rel] x) :
     χ₁ = χ₂ := by
   apply ext'
   intro _ _
@@ -103,7 +104,7 @@ theorem ext {χ₁ χ₂ : CodingFunction β} (S : Support β) (x : TSet β)
   · apply ext_aux h₂ h₁
 
 theorem exists_allPerm_of_rel {χ : CodingFunction β} {S T : Support β} {x y : TSet β}
-    (h₁ : χ.rel S x) (h₂ : χ.rel T y) :
+    (h₁ : S ~[χ.rel] x) (h₂ : T ~[χ.rel] y) :
     ∃ ρ : AllPerm β, ρᵁ • S = T ∧ ρ • x = y := by
   have := χ.orbit_eq_of_mem_dom ⟨x, h₁⟩ ⟨y, h₂⟩
   rw [Support.orbit_eq_iff] at this
@@ -115,7 +116,7 @@ theorem exists_allPerm_of_rel {χ : CodingFunction β} {S T : Support β} {x y :
 end CodingFunction
 
 def Tangle.code (t : Tangle β) : CodingFunction β where
-  rel S x := ∃ ρ : AllPerm β, ρᵁ • t.support = S ∧ ρ • t.set = x
+  rel := {(S, x) | ∃ ρ : AllPerm β, ρᵁ • t.support = S ∧ ρ • t.set = x}
   rel_coinjective := by
     constructor
     rintro x₁ x₂ S ⟨ρ₁, hρ₁, rfl⟩ ⟨ρ₂, rfl, rfl⟩
@@ -135,7 +136,7 @@ def Tangle.code (t : Tangle β) : CodingFunction β where
     simp only [allPermForget_mul, mul_smul, and_self]
 
 theorem Tangle.code_rel_self (t : Tangle β) :
-    t.code.rel t.support t.set := by
+    t.support ~[t.code.rel] t.set := by
   use 1
   simp only [allPermForget_one, one_smul, and_self]
 

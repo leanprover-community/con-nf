@@ -29,19 +29,19 @@ theorem type_withBot {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
   rw [← type_sum_lex, type_eq]
   exact ⟨withBotOrderIso⟩
 
-theorem noMaxOrder_of_isLimit {α : Type u} [Preorder α] [IsWellOrder α (· < ·)]
-    (h : (type ((· < ·) : α → α → Prop)).IsLimit) : NoMaxOrder α := by
+theorem noMaxOrder_of_isSuccLimit {α : Type u} [Preorder α] [IsWellOrder α (· < ·)]
+    (h : Order.IsSuccLimit (type ((· < ·) : α → α → Prop))) : NoMaxOrder α := by
   constructor
   intro a
-  have := (succ_lt_of_isLimit h).mpr (typein_lt_type (· < ·) a)
+  have := h.succ_lt_iff.mpr (typein_lt_type (· < ·) a)
   obtain ⟨b, hb⟩ := typein_surj (· < ·) this
   use b
   have := Order.lt_succ (typein ((· < ·) : α → α → Prop) a)
   rw [← hb, typein_lt_typein] at this
   exact this
 
-theorem isLimit_of_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)]
-    (h : NoMaxOrder α) : (type ((· < ·) : α → α → Prop)).IsLimit := by
+theorem isSuccLimit_of_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)]
+    (h : NoMaxOrder α) : Order.IsSuccLimit (type ((· < ·) : α → α → Prop)) := by
   constructor
   · simp only [isMin_iff_eq_bot, bot_eq_zero, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty,
       not_false_eq_true]
@@ -51,9 +51,9 @@ theorem isLimit_of_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellO
     refine this ?_ (typein_lt_type ((· < ·) : α → α → Prop) x)
     rwa [← typein_lt_typein ((· < ·) : α → α → Prop), typein_enum] at hx
 
-theorem isLimit_iff_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)] :
-    (type ((· < ·) : α → α → Prop)).IsLimit ↔ NoMaxOrder α :=
-  ⟨noMaxOrder_of_isLimit, isLimit_of_noMaxOrder⟩
+theorem isSuccLimit_iff_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)] :
+    Order.IsSuccLimit (type ((· < ·) : α → α → Prop)) ↔ NoMaxOrder α :=
+  ⟨noMaxOrder_of_isSuccLimit, isSuccLimit_of_noMaxOrder⟩
 
 theorem type_Iio_lt {α : Type u} [LtWellOrder α] (x : α) :
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) < type ((· < ·) : α → α → Prop) :=
@@ -94,7 +94,7 @@ theorem type_Iic_lt {α : Type u} [LtWellOrder α] [NoMaxOrder α] (x : α) :
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) < type ((· < ·) : α → α → Prop) := by
   rw [type_Iic_eq]
   haveI : Nonempty α := ⟨x⟩
-  have h := isLimit_of_noMaxOrder (inferInstanceAs (NoMaxOrder α))
+  have h := isSuccLimit_of_noMaxOrder (inferInstanceAs (NoMaxOrder α))
   exact h.2.succ_lt (type_Iio_lt x)
 
 /-!
@@ -128,7 +128,7 @@ theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {
   apply Quotient.sound
   constructor
   refine RelIso.ofSurjective ⟨⟨λ x ↦ ⟨f x.down, ?_⟩, ?_⟩, ?_⟩ ?_
-  · simp only [Set.mem_setOf_eq, f.map_rel_iff]
+  · simp only [f.map_rel_iff]
     exact x.down.prop
   · intro x y h
     apply ULift.down_injective
@@ -146,7 +146,7 @@ theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {
       rwa [← hy, f.map_rel_iff] at this
     · apply ULift.down_injective
       apply Subtype.coe_injective
-      simp only [Set.mem_setOf_eq, Set.coe_setOf, RelEmbedding.coe_mk, Function.Embedding.coeFn_mk]
+      simp only [RelEmbedding.coe_mk, Function.Embedding.coeFn_mk]
       exact hy
 
 /-!
