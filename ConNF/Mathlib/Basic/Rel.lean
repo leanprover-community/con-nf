@@ -354,39 +354,39 @@ lemma inv_le_inv_iff {r s : SetRel α β} :
   ⟨λ h ↦ by simpa only [inv_inv] using inv_mono h, inv_mono⟩
 
 @[simp]
-lemma mem_iSup_iff {T : Type _} {r : T → SetRel α β} (x : α) (y : β) :
+lemma mem_iSup_iff {T : Type*} {r : T → SetRel α β} (x : α) (y : β) :
     x ~[⨆ t, r t] y ↔ ∃ t, x ~[r t] y :=
   Set.mem_iUnion
 
 @[simp]
-lemma mem_biSup_iff {T : Type _} {r : T → SetRel α β} {s : Set T} (x : α) (y : β) :
+lemma mem_biSup_iff {T : Type*} {r : T → SetRel α β} {s : Set T} (x : α) (y : β) :
     x ~[⨆ t ∈ s, r t] y ↔ ∃ t ∈ s, x ~[r t] y :=
   Set.mem_iUnion₂.trans (by simp only [exists_prop])
 
-lemma iSup_dom {T : Type _} (r : T → SetRel α β) :
+lemma iSup_dom {T : Type*} (r : T → SetRel α β) :
     (⨆ t, r t).dom = ⋃ t, (r t).dom := by
   ext x
   simp only [mem_dom, mem_iSup_iff, mem_iUnion]
   exact exists_comm
 
-lemma biSup_dom {T : Type _} (r : T → SetRel α β) (s : Set T) :
+lemma biSup_dom {T : Type*} (r : T → SetRel α β) (s : Set T) :
     (⨆ t ∈ s, r t).dom = ⋃ t ∈ s, (r t).dom := by
   have := iSup_dom (λ t : s ↦ r t)
   rwa [iSup_subtype'', iUnion_coe_set] at this
 
-lemma isChain_inv {T : Type _} {r : T → SetRel α β} (h : IsChain (· ≤ ·) (Set.range r)) :
+lemma isChain_inv {T : Type*} {r : T → SetRel α β} (h : IsChain (· ≤ ·) (Set.range r)) :
     IsChain (· ≤ ·) (Set.range (λ t ↦ (r t).inv)) := by
   rintro _ ⟨t₁, rfl⟩ _ ⟨t₂, rfl⟩ _
   dsimp only
   rw [inv_le_inv_iff, inv_le_inv_iff]
   apply h.total ⟨t₁, rfl⟩ ⟨t₂, rfl⟩
 
-lemma iSup_inv {T : Type _} {r : T → SetRel α β} :
+lemma iSup_inv {T : Type*} {r : T → SetRel α β} :
     (⨆ t, (r t).inv) = (⨆ t, r t).inv := by
   ext ⟨x, y⟩
   exact (mem_iSup_iff x y).trans (mem_iSup_iff (r := r) y x).symm
 
-lemma iSup_injective_of_isChain {T : Type _} {r : T → SetRel α β}
+lemma iSup_injective_of_isChain {T : Type*} {r : T → SetRel α β}
     (h₁ : ∀ t, (r t).Injective) (h₂ : IsChain (· ≤ ·) (Set.range r)) :
     (⨆ t, r t).Injective := by
   constructor
@@ -398,7 +398,7 @@ lemma iSup_injective_of_isChain {T : Type _} {r : T → SetRel α β}
   · exact (h₁ t₂).injective (h hx₁) hx₂
   · exact (h₁ t₁).injective hx₁ (h hx₂)
 
-lemma iSup_coinjective_of_isChain {T : Type _} {r : T → SetRel α β}
+lemma iSup_coinjective_of_isChain {T : Type*} {r : T → SetRel α β}
     (h₁ : ∀ t, (r t).Coinjective) (h₂ : IsChain (· ≤ ·) (Set.range r)) :
     (⨆ t, r t).Coinjective := by
   have := iSup_injective_of_isChain (r := λ t ↦ (r t).inv) ?_ (isChain_inv h₂)
@@ -407,7 +407,7 @@ lemma iSup_coinjective_of_isChain {T : Type _} {r : T → SetRel α β}
     rw [inv_injective_iff]
     exact h₁ t
 
-lemma iSup_codEqDom_of_isChain {T : Type _} {r : T → SetRel α α}
+lemma iSup_codEqDom_of_isChain {T : Type*} {r : T → SetRel α α}
     (h : ∀ t, (r t).CodEqDom) : CodEqDom (⨆ t, r t : SetRel α α) := by
   simp only [codEqDom_iff'] at h ⊢
   constructor
@@ -420,19 +420,19 @@ lemma iSup_codEqDom_of_isChain {T : Type _} {r : T → SetRel α α}
     obtain ⟨u, hu⟩ := (h t).2 x y ht
     exact ⟨u, (mem_iSup_iff u x).mpr ⟨t, hu⟩⟩
 
-lemma iSup_oneOne_of_isChain {T : Type _} {r : T → SetRel α β}
+lemma iSup_oneOne_of_isChain {T : Type*} {r : T → SetRel α β}
     (h₁ : ∀ t, (r t).OneOne) (h₂ : IsChain (· ≤ ·) (Set.range r)) :
     (⨆ t, r t).OneOne :=
   ⟨iSup_injective_of_isChain (λ t ↦ (h₁ t).toInjective) h₂,
     iSup_coinjective_of_isChain (λ t ↦ (h₁ t).toCoinjective) h₂⟩
 
-lemma iSup_permutative_of_isChain {T : Type _} {r : T → SetRel α α}
+lemma iSup_permutative_of_isChain {T : Type*} {r : T → SetRel α α}
     (h₁ : ∀ t, (r t).Permutative) (h₂ : IsChain (· ≤ ·) (Set.range r)) :
     (⨆ t, r t).Permutative :=
   ⟨iSup_oneOne_of_isChain (λ t ↦ (h₁ t).toOneOne) h₂,
     iSup_codEqDom_of_isChain (λ t ↦ (h₁ t).toCodEqDom)⟩
 
-lemma biSup_permutative_of_isChain {T : Type _} {r : T → SetRel α α} {s : Set T}
+lemma biSup_permutative_of_isChain {T : Type*} {r : T → SetRel α α} {s : Set T}
     (h₁ : ∀ t ∈ s, (r t).Permutative) (h₂ : IsChain (· ≤ ·) (r '' s)) :
     (⨆ t ∈ s, r t).Permutative := by
   have := iSup_permutative_of_isChain (T := s) (λ t ↦ h₁ t t.prop) ?_

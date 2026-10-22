@@ -20,7 +20,7 @@ open scoped symmDiff SetRel
 
 namespace ConNF
 
-variable [Params.{u}] {ι α β : Type _} {s t u : Set α}
+variable [Params.{u}] {ι α β : Type u} {s t u : Set α}
 
 /-- We say that a set is *small* if its cardinality is less than `#κ`. -/
 def Small (s : Set α) : Prop :=
@@ -108,7 +108,7 @@ theorem iic_small (i : κ) : Small {j | j ≤ i} := by
 -/
 
 /-- The amount of small subsets of any type `α` is bounded below by the cardinality of `α`. -/
-theorem card_le_card_small (α : Type _) : #α ≤ #{s : Set α | Small s} := by
+theorem card_le_card_small (α : Type u) : #α ≤ #{s : Set α | Small s} := by
   apply mk_le_of_injective (f := λ x ↦ ⟨{x}, small_singleton x⟩)
   intro x y h
   exact singleton_injective <| congr_arg Subtype.val h

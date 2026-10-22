@@ -9,10 +9,10 @@ open Cardinal
 
 namespace SetRel
 
-variable {α β : Type _}
+variable {α β : Type*}
 
 /-- TODO: Fix the paper version of this. -/
-structure OrbitRestriction (s : Set α) (β : Type _) where
+structure OrbitRestriction (s : Set α) (β : Type*) where
   sandbox : Set α
   sandbox_disjoint : Disjoint s sandbox
   categorise : α → β

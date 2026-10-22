@@ -14,23 +14,23 @@ namespace ConNF
 
 variable [Params.{u}] {β : TypeIndex}
 
-class BaseActionClass (X : Type _) where
+class BaseActionClass (X : Type*) where
   atoms : X → SetRel Atom Atom
   atoms_oneOne : ∀ ξ, (atoms ξ).OneOne
   nearLitters : X → SetRel NearLitter NearLitter
   nearLitters_oneOne : ∀ ξ, (nearLitters ξ).OneOne
 
-instance {X : Type _} [BaseActionClass X] : SuperA X (SetRel Atom Atom) where
+instance {X : Type*} [BaseActionClass X] : SuperA X (SetRel Atom Atom) where
   superA := BaseActionClass.atoms
 
-instance {X : Type _} [BaseActionClass X] : SuperN X (SetRel NearLitter NearLitter) where
+instance {X : Type*} [BaseActionClass X] : SuperN X (SetRel NearLitter NearLitter) where
   superN := BaseActionClass.nearLitters
 
-instance {X : Type _} [BaseActionClass X] : SMul X BaseSupport where
+instance {X : Type*} [BaseActionClass X] : SMul X BaseSupport where
   smul ξ S := ⟨Sᴬ.comp ξᴬ (BaseActionClass.atoms_oneOne ξ).toCoinjective,
     Sᴺ.comp ξᴺ (BaseActionClass.nearLitters_oneOne ξ).toCoinjective⟩
 
-instance {X : Type _} [BaseActionClass X] {β : TypeIndex} :
+instance {X : Type*} [BaseActionClass X] {β : TypeIndex} :
     SMul (Tree X β) (Support β) where
   smul ξ S := ⟨Sᴬ.comp (Enumeration.relWithPath λ A ↦ (ξ A)ᴬ)
       (Enumeration.relWithPath_coinjective
@@ -39,15 +39,15 @@ instance {X : Type _} [BaseActionClass X] {β : TypeIndex} :
       (Enumeration.relWithPath_coinjective
         λ A ↦ (BaseActionClass.nearLitters_oneOne (ξ A)).toCoinjective)⟩
 
-theorem smul_atoms {X : Type _} [BaseActionClass X] (ξ : X) (S : BaseSupport) :
+theorem smul_atoms {X : Type*} [BaseActionClass X] (ξ : X) (S : BaseSupport) :
     (ξ • S)ᴬ = Sᴬ.comp ξᴬ (BaseActionClass.atoms_oneOne ξ).toCoinjective :=
   rfl
 
-theorem smul_nearLitters {X : Type _} [BaseActionClass X] (ξ : X) (S : BaseSupport) :
+theorem smul_nearLitters {X : Type*} [BaseActionClass X] (ξ : X) (S : BaseSupport) :
     (ξ • S)ᴺ = Sᴺ.comp ξᴺ (BaseActionClass.nearLitters_oneOne ξ).toCoinjective :=
   rfl
 
-theorem smul_baseSupport_eq_smul_iff {X : Type _} [BaseActionClass X]
+theorem smul_baseSupport_eq_smul_iff {X : Type*} [BaseActionClass X]
     (ξ : X) (S : BaseSupport) (π : BasePerm) :
     ξ • S = π • S ↔ (∀ a ∈ Sᴬ, a ~[ξᴬ] π • a) ∧ (∀ N ∈ Sᴺ, N ~[ξᴺ] π • N) := by
   constructor
@@ -91,7 +91,7 @@ theorem smul_baseSupport_eq_smul_iff {X : Type _} [BaseActionClass X]
         rwa [smul_inv_smul] at this
 
 @[simp]
-theorem smul_support_derivBot {X : Type _} [BaseActionClass X]
+theorem smul_support_derivBot {X : Type*} [BaseActionClass X]
     (ξ : Tree X β) (S : Support β) (A : β ↝ ⊥) :
     (ξ • S) ⇘. A = ξ A • (S ⇘. A) := by
   ext : 2; rfl; swap; rfl
@@ -104,14 +104,14 @@ theorem smul_support_derivBot {X : Type _} [BaseActionClass X]
     · rintro ⟨b, h₁, h₂⟩
       exact ⟨⟨A, b⟩, h₁, rfl, h₂⟩
 
-theorem smul_support_eq_smul_iff {X : Type _} [BaseActionClass X]
+theorem smul_support_eq_smul_iff {X : Type*} [BaseActionClass X]
     (ξ : Tree X β) (S : Support β) (π : StrPerm β) :
     ξ • S = π • S ↔ ∀ A,
       (∀ a ∈ (S ⇘. A)ᴬ, a ~[(ξ A)ᴬ] π A • a) ∧ (∀ N ∈ (S ⇘. A)ᴺ, N ~[(ξ A)ᴺ] π A • N) := by
   simp only [Support.ext_iff, smul_support_derivBot, Support.smul_derivBot,
     smul_baseSupport_eq_smul_iff]
 
-theorem smul_support_smul_eq_iff {X : Type _} [BaseActionClass X]
+theorem smul_support_smul_eq_iff {X : Type*} [BaseActionClass X]
     (ξ : Tree X β) (S : Support β) (π : StrPerm β) :
     ξ • π • S = S ↔ ∀ A,
       (∀ a ∈ ((π • S) ⇘. A)ᴬ, a ~[(ξ A)ᴬ] π⁻¹ A • a) ∧
@@ -123,14 +123,14 @@ theorem smul_support_smul_eq_iff {X : Type _} [BaseActionClass X]
 variable [Level] [CoherentData]
 
 /-- `ξ` is defined coherently at `(A, L₁, L₂)` (or could be defined coherently at this triple). -/
-structure CoherentAt [LeLevel β] {X : Type _} [BaseActionClass X]
+structure CoherentAt [LeLevel β] {X : Type u} [BaseActionClass X]
     (ξ : Tree X β) (A : β ↝ ⊥) (L₁ L₂ : Litter) : Prop where
   inflexible (P : InflexiblePath β) (t : Tangle P.δ)
     (hA : A = P.A ↘ P.hε ↘.) (ht : L₁ = fuzz P.hδε t) :
     ∃ ρ : AllPerm P.δ, ξ ⇘ P.A ↘ P.hδ • t.support = ρᵁ • t.support ∧ L₂ = fuzz P.hδε (ρ • t)
   flexible (h : ¬Inflexible A L₁) : ¬Inflexible A L₂
 
-theorem coherentAt_inflexible [LeLevel β] {X : Type _} [BaseActionClass X]
+theorem coherentAt_inflexible [LeLevel β] {X : Type u} [BaseActionClass X]
     {ξ : Tree X β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
     {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L₁ = fuzz P.hδε t) :
     CoherentAt ξ A L₁ L₂ ↔ ∃ ρ : AllPerm P.δ,
@@ -147,7 +147,7 @@ theorem coherentAt_inflexible [LeLevel β] {X : Type _} [BaseActionClass X]
     · intro h'
       cases h' ⟨P, t, hA, ht⟩
 
-theorem smul_eq_of_coherentAt_inflexible [LeLevel β] {X : Type _} [BaseActionClass X]
+theorem smul_eq_of_coherentAt_inflexible [LeLevel β] {X : Type u} [BaseActionClass X]
     {ξ : Tree X β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
     {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L₁ = fuzz P.hδε t)
     (h : CoherentAt ξ A L₁ L₂) :
@@ -159,7 +159,7 @@ theorem smul_eq_of_coherentAt_inflexible [LeLevel β] {X : Type _} [BaseActionCl
   apply t.smul_eq_smul
   rw [← hρ₁, ← hρ₂]
 
-theorem coherentAt_flexible [LeLevel β] {X : Type _} [BaseActionClass X]
+theorem coherentAt_flexible [LeLevel β] {X : Type u} [BaseActionClass X]
     {ξ : Tree X β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
     (hL : ¬Inflexible A L₁) :
     CoherentAt ξ A L₁ L₂ ↔ ¬Inflexible A L₂ := by
@@ -173,7 +173,7 @@ theorem coherentAt_flexible [LeLevel β] {X : Type _} [BaseActionClass X]
     · intro
       exact h
 
-theorem coherentAt_inflexible' [LeLevel β] {X : Type _} [BaseActionClass X]
+theorem coherentAt_inflexible' [LeLevel β] {X : Type u} [BaseActionClass X]
     {ξ : Tree X β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
     {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L₂ = fuzz P.hδε t) :
     CoherentAt ξ A L₁ L₂ ↔ ∃ ρ : AllPerm P.δ,
@@ -201,7 +201,7 @@ theorem coherentAt_inflexible' [LeLevel β] {X : Type _} [BaseActionClass X]
     · intro h
       cases h ⟨P, ρ • t, hA, h₂⟩
 
-theorem smul_eq_of_coherentAt_inflexible' [LeLevel β] {X : Type _} [BaseActionClass X]
+theorem smul_eq_of_coherentAt_inflexible' [LeLevel β] {X : Type u} [BaseActionClass X]
     {ξ : Tree X β} {A : β ↝ ⊥} {L₁ L₂ : Litter}
     {P : InflexiblePath β} {t : Tangle P.δ} (hA : A = P.A ↘ P.hε ↘.) (ht : L₂ = fuzz P.hδε t)
     (h : CoherentAt ξ A L₁ L₂) :
@@ -232,7 +232,7 @@ theorem smul_eq_of_coherentAt_inflexible' [LeLevel β] {X : Type _} [BaseActionC
     · rwa [Support.smul_derivBot, BaseSupport.smul_nearLitters,
         Enumeration.mem_smul_iff, inv_smul_smul]
 
-theorem CoherentAt.deriv [LeLevel β] {γ : TypeIndex} [LeLevel γ] {X : Type _} [BaseActionClass X]
+theorem CoherentAt.deriv [LeLevel β] {γ : TypeIndex} [LeLevel γ] {X : Type u} [BaseActionClass X]
     {ξ : Tree X β} {L₁ L₂ : Litter} (A : β ↝ γ) (B : γ ↝ ⊥) (h : CoherentAt ξ (A ⇘ B) L₁ L₂) :
     CoherentAt (ξ ⇘ A) B L₁ L₂ := by
   constructor

@@ -37,23 +37,23 @@ def Path.single {α β : TypeIndex} (h : β < α) : α ↝ β :=
   .cons .nil h
 
 /-- Typeclass for the `↘` notation. -/
-class SingleDerivative (X : Type _) (Y : outParam <| Type _)
+class SingleDerivative (X : Type*) (Y : outParam <| Type*)
     (β : outParam TypeIndex) (γ : TypeIndex) where
   sderiv : X → γ < β → Y
 
 /-- Typeclass for the `⇘` notation. -/
-class Derivative (X : Type _) (Y : outParam <| Type _)
+class Derivative (X : Type*) (Y : outParam <| Type*)
     (β : outParam TypeIndex) (γ : TypeIndex) extends SingleDerivative X Y β γ where
   deriv : X → β ↝ γ → Y
   sderiv x h := deriv x (.single h)
   deriv_single : ∀ x : X, ∀ h : γ < β, deriv x (.single h) = sderiv x h := by intros; rfl
 
 /-- Typeclass for the `↘.` notation. -/
-class BotSingleDerivative (X : Type _) (Y : outParam <| Type _) where
+class BotSingleDerivative (X : Type*) (Y : outParam <| Type*) where
   botSderiv : X → Y
 
 /-- Typeclass for the `⇘.` notation. -/
-class BotDerivative (X : Type _) (Y : outParam <| Type _) (β : outParam TypeIndex)
+class BotDerivative (X : Type*) (Y : outParam <| Type*) (β : outParam TypeIndex)
     extends BotSingleDerivative X Y where
   botDeriv : X → β ↝ ⊥ → Y
   /-- We often need to do case analysis on `β` to show that it's a proper type index here.
@@ -61,12 +61,12 @@ class BotDerivative (X : Type _) (Y : outParam <| Type _) (β : outParam TypeInd
   botDeriv_single : ∀ x : X, ∀ h : ⊥ < β, botDeriv x (.single h) = botSderiv x
 
 /-- Typeclass for the `↗` notation. -/
-class SingleCoderivative (X : Type _) (Y : outParam <| Type _)
+class SingleCoderivative (X : Type*) (Y : outParam <| Type*)
     (β : TypeIndex) (γ : outParam TypeIndex) where
   scoderiv : X → γ < β → Y
 
 /-- Typeclass for the `⇗` notation. -/
-class Coderivative (X : Type _) (Y : outParam <| Type _)
+class Coderivative (X : Type*) (Y : outParam <| Type*)
     (β : TypeIndex) (γ : outParam TypeIndex) extends SingleCoderivative X Y β γ where
   coderiv : X → β ↝ γ → Y
   scoderiv x h := coderiv x (.single h)
@@ -80,17 +80,17 @@ infixl:75 " ↗ " => SingleCoderivative.scoderiv
 infixl:75 " ⇗ " => Coderivative.coderiv
 
 @[simp]
-theorem deriv_single {X Y : Type _} [Derivative X Y β γ] (x : X) (h : γ < β) :
+theorem deriv_single {X Y : Type*} [Derivative X Y β γ] (x : X) (h : γ < β) :
     x ⇘ .single h = x ↘ h :=
   Derivative.deriv_single x h
 
 @[simp]
-theorem coderiv_single {X Y : Type _} [Coderivative X Y β γ] (x : X) (h : γ < β) :
+theorem coderiv_single {X Y : Type*} [Coderivative X Y β γ] (x : X) (h : γ < β) :
     x ⇗ .single h = x ↗ h :=
   Coderivative.coderiv_single x h
 
 @[simp]
-theorem botDeriv_single {X Y : Type _} [BotDerivative X Y β] (x : X) (h : ⊥ < β) :
+theorem botDeriv_single {X Y : Type*} [BotDerivative X Y β] (x : X) (h : ⊥ < β) :
     x ⇘. .single h = x ↘. :=
   BotDerivative.botDeriv_single x h
 
@@ -103,7 +103,7 @@ instance : SingleDerivative (α ↝ β) (α ↝ γ) β γ where
 
 /-- The downwards recursion principle for paths. -/
 @[elab_as_elim, induction_eliminator, cases_eliminator]
-def Path.recSderiv {motive : ∀ β, α ↝ β → Sort _}
+def Path.recSderiv {motive : ∀ β, α ↝ β → Sort*}
     (nil : motive α .nil)
     (sderiv : ∀ β γ (A : α ↝ β) (h : γ < β), motive β A → motive γ (A ↘ h)) :
     {β : TypeIndex} → (A : α ↝ β) → motive β A
@@ -111,14 +111,14 @@ def Path.recSderiv {motive : ∀ β, α ↝ β → Sort _}
   | _, .cons A h => sderiv _ _ A h (recSderiv nil sderiv A)
 
 @[simp]
-theorem Path.recSderiv_nil {motive : ∀ β, α ↝ β → Sort _}
+theorem Path.recSderiv_nil {motive : ∀ β, α ↝ β → Sort*}
     (nil : motive α .nil)
     (sderiv : ∀ β γ (A : α ↝ β) (h : γ < β), motive β A → motive γ (A ↘ h)) :
     recSderiv (motive := motive) nil sderiv .nil = nil :=
   rfl
 
 @[simp]
-theorem Path.recSderiv_sderiv {motive : ∀ β, α ↝ β → Sort _}
+theorem Path.recSderiv_sderiv {motive : ∀ β, α ↝ β → Sort*}
     (nil : motive α .nil)
     (sderiv : ∀ β γ (A : α ↝ β) (h : γ < β), motive β A → motive γ (A ↘ h))
     {β γ : TypeIndex} (A : α ↝ β) (h : γ < β) :
@@ -132,21 +132,21 @@ theorem Path.le (A : α ↝ β) : β ≤ α := by
 
 /-- The downwards recursion principle for paths, specialised to the case where the motive at `β`
 only depends on the fact that `β ≤ α`. -/
-def Path.recSderivLe {motive : ∀ β ≤ α, Sort _}
+def Path.recSderivLe {motive : ∀ β ≤ α, Sort*}
     (nil : motive α le_rfl)
     (sderiv : ∀ β γ, ∀ (A : α ↝ β) (h : γ < β), motive β A.le → motive γ (h.le.trans A.le)) :
     {β : TypeIndex} → (A : α ↝ β) → motive β A.le :=
   Path.recSderiv (motive := λ β A ↦ motive β A.le) nil sderiv
 
 @[simp]
-theorem Path.recSderivLe_nil {motive : ∀ β ≤ α, Sort _}
+theorem Path.recSderivLe_nil {motive : ∀ β ≤ α, Sort*}
     (nil : motive α le_rfl)
     (sderiv : ∀ β γ (A : α ↝ β) (h : γ < β), motive β A.le → motive γ (h.le.trans A.le)) :
     recSderivLe (motive := motive) nil sderiv .nil = nil :=
   rfl
 
 @[simp]
-theorem Path.recSderivLe_sderiv {motive : ∀ β ≤ α, Sort _}
+theorem Path.recSderivLe_sderiv {motive : ∀ β ≤ α, Sort*}
     (nil : motive α le_rfl)
     (sderiv : ∀ β γ (A : α ↝ β) (h : γ < β), motive β A.le → motive γ (h.le.trans A.le))
     {β γ : TypeIndex} (A : α ↝ β) (h : γ < β) :
@@ -156,21 +156,21 @@ theorem Path.recSderivLe_sderiv {motive : ∀ β ≤ α, Sort _}
 /-- The downwards recursion principle for paths, specialised to the case where the motive is not
 dependent on the relation of `β` to `α`. -/
 @[elab_as_elim]
-def Path.recSderivGlobal {motive : TypeIndex → Sort _}
+def Path.recSderivGlobal {motive : TypeIndex → Sort*}
     (nil : motive α)
     (sderiv : ∀ β γ, α ↝ β → γ < β → motive β → motive γ) :
     {β : TypeIndex} → α ↝ β → motive β :=
   Path.recSderiv (motive := λ β _ ↦ motive β) nil sderiv
 
 @[simp]
-theorem Path.recSderivGlobal_nil {motive : TypeIndex → Sort _}
+theorem Path.recSderivGlobal_nil {motive : TypeIndex → Sort*}
     (nil : motive α)
     (sderiv : ∀ β γ, α ↝ β → γ < β → motive β → motive γ) :
     recSderivGlobal (motive := motive) nil sderiv .nil = nil :=
   rfl
 
 @[simp]
-theorem Path.recSderivGlobal_sderiv {motive : TypeIndex → Sort _}
+theorem Path.recSderivGlobal_sderiv {motive : TypeIndex → Sort*}
     (nil : motive α)
     (sderiv : ∀ β γ, α ↝ β → γ < β → motive β → motive γ)
     {β γ : TypeIndex} (A : α ↝ β) (h : γ < β) :
@@ -367,7 +367,7 @@ inductive RevPath (α : TypeIndex) : TypeIndex → Type u
 
 /-- A computable statement of the recursion principle for `RevPath`. This needs to be written due
 to a current limitation in the Lean 4 kernel: it cannot generate code for the `.rec` functions. -/
-def RevPath.rec' {motive : (β : TypeIndex) → RevPath α β → Sort _}
+def RevPath.rec' {motive : (β : TypeIndex) → RevPath α β → Sort*}
     (nil : motive α RevPath.nil)
     (cons : {β γ : TypeIndex} → (A : RevPath α β) → (h : β < γ) →
       motive β A → motive γ (A.cons h)) :
@@ -417,21 +417,21 @@ theorem Path.rev_rev (A : α ↝ β) : A.rev.rev = A := by
   | nil => rfl
   | sderiv γ δ A h ih => rw [Path.sderiv_rev, RevPath.snoc_rev, ih]
 
-def Path.recScoderiv' {motive : ∀ β, β ↝ γ → Sort _}
+def Path.recScoderiv' {motive : ∀ β, β ↝ γ → Sort*}
     (nil : motive γ .nil)
     (scoderiv : ∀ α β (A : β ↝ γ) (h : β < α), motive β A → motive α (A ↗ h))
     {β : TypeIndex} (A : RevPath γ β) : motive β A.rev :=
   RevPath.rec' (motive := λ β A ↦ motive β A.rev) nil (λ A ↦ scoderiv _ _ A.rev) A
 
 @[simp]
-theorem Path.recScoderiv'_nil {motive : ∀ β, β ↝ γ → Sort _}
+theorem Path.recScoderiv'_nil {motive : ∀ β, β ↝ γ → Sort*}
     (nil : motive γ .nil)
     (scoderiv : ∀ α β (A : β ↝ γ) (h : β < α), motive β A → motive α (A ↗ h)) :
     recScoderiv' (motive := motive) nil scoderiv .nil = nil :=
   rfl
 
 @[simp]
-theorem Path.recScoderiv'_cons {motive : ∀ β, β ↝ γ → Sort _}
+theorem Path.recScoderiv'_cons {motive : ∀ β, β ↝ γ → Sort*}
     (nil : motive γ .nil)
     (scoderiv : ∀ α β (A : β ↝ γ) (h : β < α), motive β A → motive α (A ↗ h))
     (A : RevPath γ β) (h : β < α) :
@@ -442,21 +442,21 @@ theorem Path.recScoderiv'_cons {motive : ∀ β, β ↝ γ → Sort _}
 /-- The upwards recursion principle for paths. The `scoderiv` computation rule
 `recScoderiv_scoderiv` is not a definitional equality. -/
 @[elab_as_elim]
-def Path.recScoderiv {motive : ∀ β, β ↝ γ → Sort _}
+def Path.recScoderiv {motive : ∀ β, β ↝ γ → Sort*}
     (nil : motive γ .nil)
     (scoderiv : ∀ α β (A : β ↝ γ) (h : β < α), motive β A → motive α (A ↗ h))
     {β : TypeIndex} (A : β ↝ γ) : motive β A :=
   cast (by rw [A.rev_rev]) (recScoderiv' nil scoderiv A.rev)
 
 @[simp]
-theorem Path.recScoderiv_nil {motive : ∀ β, β ↝ γ → Sort _}
+theorem Path.recScoderiv_nil {motive : ∀ β, β ↝ γ → Sort*}
     (nil : motive γ .nil)
     (scoderiv : ∀ α β (A : β ↝ γ) (h : β < α), motive β A → motive α (A ↗ h)) :
     recScoderiv (motive := motive) nil scoderiv .nil = nil :=
   rfl
 
 @[simp]
-theorem Path.recScoderiv_scoderiv {motive : ∀ β, β ↝ γ → Sort _}
+theorem Path.recScoderiv_scoderiv {motive : ∀ β, β ↝ γ → Sort*}
     (nil : motive γ .nil)
     (scoderiv : ∀ α β (A : β ↝ γ) (h : β < α), motive β A → motive α (A ↗ h))
     {α β : TypeIndex} (A : β ↝ γ) (h : β < α) :

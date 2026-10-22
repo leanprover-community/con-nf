@@ -11,7 +11,7 @@ ones (i.e. defined using the global `TSet`/`AllPerm` definitions).
 
 @[expose] public noncomputable section
 
-universe u
+universe u v w
 
 open Cardinal Ordinal WithBot
 
@@ -35,7 +35,7 @@ instance globalLtData [Level] : LtData where
 instance globalLeData [Level] : LeData where
 
 omit [Params] in
-theorem heq_funext {α : Sort _} {β γ : α → Sort _} {f : (x : α) → β x} {g : (x : α) → γ x}
+theorem heq_funext {α : Sort w} {β γ : α → Sort v} {f : (x : α) → β x} {g : (x : α) → γ x}
     (h : ∀ x, HEq (f x) (g x)) : HEq f g := by
   cases funext λ x ↦ type_eq_of_heq (h x)
   simp only [heq_eq_eq] at h ⊢
@@ -90,7 +90,7 @@ instance globalPreCoherentData [Level] : PreCoherentData where
 
 omit [Params] in
 @[simp]
-theorem heq_cast_eq_iff {α β γ : Type _} {x : α} {y : β} {h : α = γ} :
+theorem heq_cast_eq_iff {α β γ : Type v} {x : α} {y : β} {h : α = γ} :
     HEq (cast h x) y ↔ HEq x y := by
   cases h
   rw [cast_eq]

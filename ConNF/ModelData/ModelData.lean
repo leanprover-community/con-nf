@@ -42,12 +42,12 @@ instance {α : TypeIndex} [PreModelData α] : SuperU (TSet α) (StrSet α) where
 instance {α : TypeIndex} [PreModelData α] : SuperU (AllPerm α) (StrPerm α) where
   superU := PreModelData.allPermForget
 
-structure Support.Supports {X : Type _} {α : TypeIndex} [PreModelData α] [MulAction (AllPerm α) X]
+structure Support.Supports {X : Type*} {α : TypeIndex} [PreModelData α] [MulAction (AllPerm α) X]
     (S : Support α) (x : X) : Prop where
   supports (ρ : AllPerm α) : ρᵁ • S = S → ρ • x = x
   nearLitters_eq_empty_of_bot : α = ⊥ → Sᴺ = .empty
 
-theorem Support.Supports.mono {X : Type _} {α : TypeIndex} [PreModelData α]
+theorem Support.Supports.mono {X : Type*} {α : TypeIndex} [PreModelData α]
     [MulAction (AllPerm α) X] {S T : Support α} {x : X}
     (hS : S.Supports x) (h : S ≤ T) (hT : α = ⊥ → Tᴺ = .empty) :
     T.Supports x := by
@@ -120,7 +120,7 @@ theorem allPermForget_zpow {α : TypeIndex} [ModelData α] (ρ : AllPerm α) (n 
   | nat n => rw [zpow_natCast, zpow_natCast, allPermForget_npow]
   | neg h' n => simp only [zpow_neg, zpow_natCast, allPermForget_inv, allPermForget_npow]
 
-theorem Support.Supports.smul_eq_smul {X : Type _} {α : TypeIndex}
+theorem Support.Supports.smul_eq_smul {X : Type*} {α : TypeIndex}
     [ModelData α] [MulAction (AllPerm α) X]
     {S : Support α} {x : X} (h : S.Supports x) {ρ₁ ρ₂ : AllPerm α} (hρ : ρ₁ᵁ • S = ρ₂ᵁ • S) :
     ρ₁ • x = ρ₂ • x := by
@@ -128,7 +128,7 @@ theorem Support.Supports.smul_eq_smul {X : Type _} {α : TypeIndex}
   · rwa [mul_smul, inv_smul_eq_iff] at this
   · rwa [allPermForget_mul, mul_smul, allPermForget_inv, inv_smul_eq_iff]
 
-theorem Support.Supports.smul_eq_of_smul_eq {X : Type _} {α : TypeIndex}
+theorem Support.Supports.smul_eq_of_smul_eq {X : Type*} {α : TypeIndex}
     [ModelData α] [MulAction (AllPerm α) X]
     {S : Support α} {x : X} (h : S.Supports x) {ρ : AllPerm α} (hρ : ρᵁ • S = S) :
     ρ • x = x := by
@@ -136,7 +136,7 @@ theorem Support.Supports.smul_eq_of_smul_eq {X : Type _} {α : TypeIndex}
   · rwa [one_smul] at this
   · rwa [allPermForget_one, one_smul]
 
-theorem Support.Supports.smul {X : Type _} {α : TypeIndex}
+theorem Support.Supports.smul {X : Type*} {α : TypeIndex}
     [ModelData α] [MulAction (AllPerm α) X]
     {S : Support α} {x : X} (h : S.Supports x) (ρ : AllPerm α) :
     (ρᵁ • S).Supports (ρ • x) := by
@@ -225,7 +225,7 @@ theorem card_tangle_le_of_card_tSet {α : TypeIndex} [ModelData α] (h : #(TSet 
 ## Criteria for supports
 -/
 
-theorem Support.supports_coe {α : Λ} {X : Type _} [PreModelData α] [MulAction (AllPerm α) X]
+theorem Support.supports_coe {α : Λ} {X : Type*} [PreModelData α] [MulAction (AllPerm α) X]
     (S : Support α) (x : X)
     (h : ∀ ρ : AllPerm α,
       (∀ A : α ↝ ⊥, ∀ a ∈ (S ⇘. A)ᴬ, ρᵁ A • a = a) →
@@ -241,7 +241,7 @@ theorem Support.supports_coe {α : Λ} {X : Type _} [PreModelData α] [MulAction
   · intro h
     cases h
 
-theorem Support.supports_bot {X : Type _} [PreModelData ⊥] [MulAction (AllPerm ⊥) X]
+theorem Support.supports_bot {X : Type*} [PreModelData ⊥] [MulAction (AllPerm ⊥) X]
     (E : Enumeration (⊥ ↝ ⊥ × Atom)) (x : X)
     (h : ∀ ρ : AllPerm ⊥, (∀ A : ⊥ ↝ ⊥, ∀ x : Atom, (A, x) ∈ E → ρᵁ A • x = x) → ρ • x = x) :
     (⟨E, .empty⟩ : Support ⊥).Supports x := by

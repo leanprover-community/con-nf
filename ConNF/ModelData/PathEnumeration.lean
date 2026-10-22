@@ -53,7 +53,7 @@ instance (X : Type u) (α β : TypeIndex) :
     (λ x y h ↦ Prod.ext (Path.deriv_right_injective
       ((Prod.mk.injEq _ _ _ _).mp h).1) ((Prod.mk.injEq _ _ _ _).mp h).2)
 
-theorem deriv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (α ↝ ⊥ × X)) (A : α ↝ β)
+theorem deriv_rel {X : Type u} {α β : TypeIndex} (E : Enumeration (α ↝ ⊥ × X)) (A : α ↝ β)
     (i : κ) (x : β ↝ ⊥ × X) :
     i ~[(E ⇘ A).rel] x ↔ i ~[E.rel] (x.1 ⇗ A, x.2) :=
   Iff.rfl
@@ -62,7 +62,7 @@ instance (X : Type u) (α β : TypeIndex) :
     Coderivative (Enumeration (β ↝ ⊥ × X)) (Enumeration (α ↝ ⊥ × X)) α β where
   coderiv E A := E.image (λ x ↦ (x.1 ⇗ A, x.2))
 
-theorem coderiv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (A : α ↝ β)
+theorem coderiv_rel {X : Type u} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (A : α ↝ β)
     (i : κ) (x : α ↝ ⊥ × X) :
     i ~[(E ⇗ A).rel] x ↔ ∃ B, x.1 = A ⇘ B ∧ i ~[E.rel] (B, x.2) := by
   constructor
@@ -75,12 +75,12 @@ theorem coderiv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ �
       exact h₁.symm
     · rfl
 
-theorem scoderiv_rel {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (h : β < α)
+theorem scoderiv_rel {X : Type u} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (h : β < α)
     (i : κ) (x : α ↝ ⊥ × X) :
     i ~[(E ↗ h).rel] x ↔ ∃ B, x.1 = B ↗ h ∧ i ~[E.rel] (B, x.2) :=
   coderiv_rel E (.single h) i x
 
-theorem eq_of_scoderiv_mem {X : Type _} {α β γ : TypeIndex} (E : Enumeration (β ↝ ⊥ × X))
+theorem eq_of_scoderiv_mem {X : Type u} {α β γ : TypeIndex} (E : Enumeration (β ↝ ⊥ × X))
     (h : β < α) (h' : γ < α)
     (i : κ) (A : γ ↝ ⊥) (x : X) (h : i ~[(E ↗ h).rel] ⟨A ↗ h', x⟩) :
     β = γ := by
@@ -97,13 +97,13 @@ instance (X : Type u) (α : TypeIndex) :
     | bot => cases lt_irrefl ⊥ h
     | coe => rfl
 
-theorem derivBot_rel {X : Type _} {α : TypeIndex} (E : Enumeration (α ↝ ⊥ × X)) (A : α ↝ ⊥)
+theorem derivBot_rel {X : Type u} {α : TypeIndex} (E : Enumeration (α ↝ ⊥ × X)) (A : α ↝ ⊥)
     (i : κ) (x : X) :
     i ~[(E ⇘. A).rel] x ↔ i ~[E.rel] (A, x) :=
   Iff.rfl
 
 @[simp]
-theorem mem_path_iff {X : Type _} {α : TypeIndex} (E : Enumeration (α ↝ ⊥ × X))
+theorem mem_path_iff {X : Type u} {α : TypeIndex} (E : Enumeration (α ↝ ⊥ × X))
     (A : α ↝ ⊥) (x : X) :
     (A, x) ∈ E ↔ x ∈ E ⇘. A :=
   Iff.rfl
@@ -117,13 +117,13 @@ theorem ext_path {X : Type u} {α : TypeIndex} {E F : Enumeration (α ↝ ⊥ ×
   · have := congr_arg rel (h x.1)
     exact Set.ext_iff.mp this (i, x.2)
 
-theorem deriv_derivBot {X : Type _} {α β : TypeIndex} (E : Enumeration (α ↝ ⊥ × X))
+theorem deriv_derivBot {X : Type u} {α β : TypeIndex} (E : Enumeration (α ↝ ⊥ × X))
     (A : α ↝ β) (B : β ↝ ⊥) :
     E ⇘ A ⇘. B = E ⇘. (A ⇘ B) :=
   rfl
 
 @[simp]
-theorem coderiv_deriv_eq {X : Type _} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (A : α ↝ β) :
+theorem coderiv_deriv_eq {X : Type u} {α β : TypeIndex} (E : Enumeration (β ↝ ⊥ × X)) (A : α ↝ β) :
     E ⇗ A ⇘ A = E := by
   apply ext_path
   intro B
@@ -132,7 +132,7 @@ theorem coderiv_deriv_eq {X : Type _} {α β : TypeIndex} (E : Enumeration (β �
   · simp only [derivBot_rel, deriv_rel, coderiv_rel,
       Path.coderiv_eq_deriv, Path.deriv_right_inj, exists_eq_left']
 
-theorem eq_of_mem_scoderiv_botDeriv {X : Type _} {α β : TypeIndex} {S : Enumeration (β ↝ ⊥ × X)}
+theorem eq_of_mem_scoderiv_botDeriv {X : Type u} {α β : TypeIndex} {S : Enumeration (β ↝ ⊥ × X)}
     {A : α ↝ ⊥} {h : β < α} {x : X} (hx : x ∈ S ↗ h ⇘. A) :
     ∃ B : β ↝ ⊥, A = B ↗ h := by
   obtain ⟨i, ⟨B, y⟩, hi₁, hi₂⟩ := hx
@@ -140,31 +140,31 @@ theorem eq_of_mem_scoderiv_botDeriv {X : Type _} {α β : TypeIndex} {S : Enumer
   exact ⟨B, rfl⟩
 
 @[simp]
-theorem scoderiv_botDeriv_eq {X : Type _} {α β : TypeIndex} (S : Enumeration (β ↝ ⊥ × X))
+theorem scoderiv_botDeriv_eq {X : Type u} {α β : TypeIndex} (S : Enumeration (β ↝ ⊥ × X))
     (A : β ↝ ⊥) (h : β < α) :
     S ↗ h ⇘. (A ↗ h) = S ⇘. A := by
   ext ⟨i, x⟩
   · rfl
   · simp only [derivBot_rel, scoderiv_rel, Path.scoderiv_left_inj, exists_eq_left']
 
-theorem mulAction_aux {X : Type _} {α : TypeIndex} [MulAction BasePerm X] (π : StrPerm α) :
+theorem mulAction_aux {X : Type*} {α : TypeIndex} [MulAction BasePerm X] (π : StrPerm α) :
     Function.Injective (λ x : α ↝ ⊥ × X ↦ (x.1, (π x.1)⁻¹ • x.2)) := by
   rintro ⟨A₁, x₁⟩ ⟨A₂, x₂⟩ h
   rw [Prod.mk.injEq] at h
   cases h.1
   exact Prod.ext h.1 (smul_left_cancel _ h.2)
 
-instance {X : Type _} {α : TypeIndex} [MulAction BasePerm X] :
+instance {X : Type u} {α : TypeIndex} [MulAction BasePerm X] :
     SMul (StrPerm α) (Enumeration (α ↝ ⊥ × X)) where
   smul π E := E.invImage (λ x ↦ (x.1, (π x.1)⁻¹ • x.2)) (mulAction_aux π)
 
 @[simp]
-theorem smulPath_rel {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
+theorem smulPath_rel {X : Type u} {α : TypeIndex} [MulAction BasePerm X]
     (π : StrPerm α) (E : Enumeration (α ↝ ⊥ × X)) (i : κ) (x : α ↝ ⊥ × X) :
     i ~[(π • E).rel] x ↔ i ~[E.rel] (x.1, (π x.1)⁻¹ • x.2) :=
   Iff.rfl
 
-instance {X : Type _} {α : TypeIndex} [MulAction BasePerm X] :
+instance {X : Type u} {α : TypeIndex} [MulAction BasePerm X] :
     MulAction (StrPerm α) (Enumeration (α ↝ ⊥ × X)) where
   one_smul E := by
     ext ⟨i, x⟩
@@ -175,7 +175,7 @@ instance {X : Type _} {α : TypeIndex} [MulAction BasePerm X] :
     · rfl
     · rw [smulPath_rel, smulPath_rel, smulPath_rel, Tree.mul_apply, mul_inv_rev, mul_smul]
 
-theorem smul_eq_of_forall_smul_eq {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
+theorem smul_eq_of_forall_smul_eq {X : Type u} {α : TypeIndex} [MulAction BasePerm X]
     {π : StrPerm α} {E : Enumeration (α ↝ ⊥ × X)}
     (h : ∀ A : α ↝ ⊥, ∀ x : X, (A, x) ∈ E → π A • x = x) :
     π • E = E := by
@@ -192,7 +192,7 @@ theorem smul_eq_of_forall_smul_eq {X : Type _} {α : TypeIndex} [MulAction BaseP
       rw [← this]
       rwa [smulPath_rel, inv_smul_smul]
 
-theorem smul_eq_smul_of_forall_smul_eq {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
+theorem smul_eq_smul_of_forall_smul_eq {X : Type u} {α : TypeIndex} [MulAction BasePerm X]
     {π₁ π₂ : StrPerm α} {E : Enumeration (α ↝ ⊥ × X)}
     (h : ∀ A : α ↝ ⊥, ∀ x : X, (A, x) ∈ E → π₁ A • x = π₂ A • x) :
     π₁ • E = π₂ • E := by
@@ -202,7 +202,7 @@ theorem smul_eq_smul_of_forall_smul_eq {X : Type _} {α : TypeIndex} [MulAction 
   rw [Tree.mul_apply, mul_smul, Tree.inv_apply, inv_smul_eq_iff]
   exact h A x hAx
 
-theorem smul_eq_of_mem_of_smul_eq {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
+theorem smul_eq_of_mem_of_smul_eq {X : Type u} {α : TypeIndex} [MulAction BasePerm X]
     {π : StrPerm α} {E : Enumeration (α ↝ ⊥ × X)}
     (h : π • E = E) (A : α ↝ ⊥) (x : X) (hx : (A, x) ∈ E) :
     π A • x = x := by
@@ -212,7 +212,7 @@ theorem smul_eq_of_mem_of_smul_eq {X : Type _} {α : TypeIndex} [MulAction BaseP
   rw [Prod.mk.injEq, eq_inv_smul_iff] at this
   exact this.2
 
-theorem smul_eq_iff {X : Type _} {α : TypeIndex} [MulAction BasePerm X]
+theorem smul_eq_iff {X : Type u} {α : TypeIndex} [MulAction BasePerm X]
     (π : StrPerm α) (E : Enumeration (α ↝ ⊥ × X)) :
     π • E = E ↔ ∀ A : α ↝ ⊥, ∀ x : X, (A, x) ∈ E → π A • x = x :=
   ⟨smul_eq_of_mem_of_smul_eq, smul_eq_of_forall_smul_eq⟩

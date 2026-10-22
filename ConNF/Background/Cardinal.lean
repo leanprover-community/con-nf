@@ -28,7 +28,7 @@ theorem mk_biUnion_le_of_le_lift {α : Type u} {β : Type v} {s : Set α} {f : �
     have := h x x.prop
     rwa [← lift_le.{u}] at this
 
-theorem mk_biUnion_le_of_le {α β : Type _} {s : Set α} {f : ∀ x ∈ s, Set β}
+theorem mk_biUnion_le_of_le {α β : Type u} {s : Set α} {f : ∀ x ∈ s, Set β}
     (c : Cardinal) (h : ∀ (x : α) (h : x ∈ s), #(f x h) ≤ c) :
     #(⋃ (x : α) (h : x ∈ s), f x h) ≤ #s * c := by
   rw [Set.biUnion_eq_iUnion]
@@ -47,7 +47,7 @@ theorem mk_iUnion_le_of_le_lift {α : Type u} {β : Type v} {f : α → Set β}
   simp only [Set.mem_univ, Set.iUnion_true, mk_univ] at this
   exact this
 
-theorem mk_iUnion_le_of_le {α β : Type _} {f : α → Set β}
+theorem mk_iUnion_le_of_le {α β : Type u} {f : α → Set β}
     (c : Cardinal) (h : ∀ (x : α), #(f x) ≤ c) :
     #(⋃ (x : α), f x) ≤ #α * c := by
   have := mk_biUnion_le_of_le (s := Set.univ) (f := λ x _ ↦ f x) c (λ x _ ↦ h x)
@@ -65,19 +65,19 @@ theorem le_of_le_add {c d e : Cardinal.{u}} (h : c ≤ d + e) (hc : ℵ₀ ≤ c
   by_contra! h'
   exact (add_lt_of_lt hc h' he).not_ge h
 
-theorem mk_ne_zero_iff_nonempty {α : Type _} (s : Set α) :
+theorem mk_ne_zero_iff_nonempty {α : Type*} (s : Set α) :
     #s ≠ 0 ↔ s.Nonempty := by
   rw [mk_ne_zero_iff]
   exact Set.nonempty_coe_sort
 
-theorem compl_nonempty_of_mk_lt {α : Type _} {s : Set α} (h : #s < #α) : sᶜ.Nonempty := by
+theorem compl_nonempty_of_mk_lt {α : Type*} {s : Set α} (h : #s < #α) : sᶜ.Nonempty := by
   rw [← mk_ne_zero_iff_nonempty]
   intro h'
   have := mk_sum_compl s
   rw [h', add_zero] at this
   exact h.ne this
 
-theorem mk_pow_le_of_mk_lt_ord_cof {α β : Type _}
+theorem mk_pow_le_of_mk_lt_ord_cof {α β : Type u}
     (hα : (#α).IsStrongLimit) (hβ : #β < (#α).ord.cof) :
     #α ^ #β ≤ #α := by
   by_cases hβ' : #β = 0
@@ -93,7 +93,7 @@ theorem mk_pow_le_of_mk_lt_ord_cof {α β : Type _}
   refine le_trans ?_ (this.trans hαβ).le
   rw [power_def]
   refine mk_le_of_injective (f := λ f ↦ ⟨f.graph, ?_⟩) ?_
-  · rwa [hαβ, Function.cardinalMk_graph]
+  · rwa [hαβ, Function.cardinalMk_graph, Cardinal.lift_id]
   · intro f g h
     exact Function.graph_injective (congr_arg Subtype.val h)
 
@@ -106,11 +106,11 @@ theorem pow_le_of_lt_ord_cof {c d : Cardinal} (hc : c.IsStrongLimit) (hd : d < c
   induction d using inductionOn
   exact mk_pow_le_of_mk_lt_ord_cof hc hd
 
-theorem mk_fun_le (α β : Type _) :
+theorem mk_fun_le (α β : Type u) :
     #(α → β) ≤ #(Set (α × β)) :=
   mk_le_of_injective Function.graph_injective
 
-theorem mk_power_le_two_power (α β : Type _) :
+theorem mk_power_le_two_power (α β : Type u) :
     #α ^ #β ≤ max ℵ₀ (max (2 ^ #α) (2 ^ #β)) := by
   -- Brutal case analysis - there's got to be a cleaner proof.
   by_cases hα : #α < ℵ₀
@@ -174,7 +174,7 @@ theorem pow_lt_of_lt {c d e : Cardinal} (hc : c.IsStrongLimit) (hd : d < c) (he 
   · cases eq_of_le_of_not_lt (aleph0_le_of_isSuccLimit hc.isSuccLimit) hc'
     exact power_lt_aleph0 hd he
 
-theorem card_cod_le_of_functional {α β : Type _} {r : SetRel α β} (hr : r.Functional) :
+theorem card_cod_le_of_functional {α β : Type u} {r : SetRel α β} (hr : r.Functional) :
     #r.cod ≤ #r.dom := by
   refine le_trans ?_ (mk_image_le (f := r.toFunction hr) (s := r.dom))
   apply mk_le_mk_of_subset
@@ -182,7 +182,7 @@ theorem card_cod_le_of_functional {α β : Type _} {r : SetRel α β} (hr : r.Fu
   refine ⟨a, ⟨b, h⟩, ?_⟩
   rwa [SetRel.toFunction_eq_iff]
 
-theorem card_cod_le_of_coinjective {α β : Type _} {r : SetRel α β} (hr : r.Coinjective) :
+theorem card_cod_le_of_coinjective {α β : Type u} {r : SetRel α β} (hr : r.Coinjective) :
     #r.cod ≤ #r.dom := by
   have := card_cod_le_of_functional (r := r.restrictDomain r.dom) ?_
   · refine le_trans ?_ (this.trans ?_)

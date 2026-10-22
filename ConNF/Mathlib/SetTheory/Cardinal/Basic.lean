@@ -9,8 +9,13 @@ open Cardinal
 
 namespace Function
 
-@[simp] lemma cardinalMk_graph {α β : Type _} (f : α → β) : #f.graph = #α := by
-  rw [Cardinal.eq]
-  exact ⟨⟨fun x ↦ x.val.1, fun x ↦ ⟨⟨x, f x⟩, rfl⟩, by rintro ⟨⟨x, _⟩, rfl⟩; rfl, fun x ↦ rfl⟩⟩
+universe u v
+
+@[simp] lemma cardinalMk_graph {α : Type u} {β : Type v} (f : α → β) :
+    #f.graph = Cardinal.lift.{v} #α := by
+  rw [← Cardinal.mk_uLift]
+  exact Cardinal.mk_congr
+    ⟨fun x ↦ ⟨x.val.1⟩, fun x ↦ ⟨⟨x.down, f x.down⟩, rfl⟩, by rintro ⟨⟨x, _⟩, rfl⟩; rfl,
+      fun x ↦ rfl⟩
 
 end Function

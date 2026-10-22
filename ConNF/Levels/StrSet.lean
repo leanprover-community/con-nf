@@ -133,13 +133,13 @@ end StrSet
 ## Notation for typed membership
 -/
 
-class TypedMem (X Y : Type _) (β α : outParam TypeIndex) where
+class TypedMem (X Y : Type*) (β α : outParam TypeIndex) where
   typedMem : β < α → X → Y → Prop
 
 notation:50 x:50 " ∈[" h "] " y:50 => TypedMem.typedMem h x y
 notation:50 x:50 " ∈' " y:50 => x ∈[by assumption] y
 
-def typedSubset (X : Type _) {Y : Type _} {β α : TypeIndex} [TypedMem X Y β α]
+def typedSubset (X : Type*) {Y : Type*} {β α : TypeIndex} [TypedMem X Y β α]
     (h : β < α) (a b : Y) : Prop :=
   ∀ x : X, x ∈[h] a → x ∈[h] b
 

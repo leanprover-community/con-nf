@@ -20,10 +20,10 @@ open Cardinal
 
 namespace ConNF
 
-variable [Params.{u}] {X Y : Type _} {α β γ : TypeIndex}
+variable [Params.{u}] {X Y : Type u} {α β γ : TypeIndex}
 
 /-- An `α`-tree of `X` associates an object of type `X` to each path `α ↝ ⊥`. -/
-abbrev Tree (X : Type _) (α : TypeIndex) :=
+abbrev Tree (X : Type*) (α : TypeIndex) :=
   (α ↝ ⊥) → X
 
 namespace Tree

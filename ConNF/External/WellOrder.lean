@@ -31,7 +31,7 @@ theorem mem_externalRel_smul (r : TSet α) (ρ : AllPerm α) (a b : TSet δ) :
 
 omit [Params] in
 /-- Well-orders are rigid. -/
-theorem apply_eq_of_isWellOrder {X : Type _} {r : X → X → Prop} {f : X → X}
+theorem apply_eq_of_isWellOrder {X : Type*} {r : X → X → Prop} {f : X → X}
     (hr : IsWellOrder X r) (hf : Function.Bijective f) (hf' : ∀ x y, r x y ↔ r (f x) (f y)) :
     ∀ x, f x = x := by
   let emb : r ≼i r := ⟨⟨⟨f, hf.injective⟩, λ {a b} ↦ (hf' a b).symm⟩, ?_⟩
@@ -42,7 +42,7 @@ theorem apply_eq_of_isWellOrder {X : Type _} {r : X → X → Prop} {f : X → X
     exact hf.surjective _
 
 omit [Params] in
-theorem apply_eq_of_isWellOrder' {X : Type _} {r : SetRel X X} {f : X → X}
+theorem apply_eq_of_isWellOrder' {X : Type*} {r : SetRel X X} {f : X → X}
     (hr : IsWellOrder r.field (InvImage (· ~[r] ·) Subtype.val)) (hf : Function.Bijective f)
     (hf' : ∀ x y, x ~[r] y ↔ f x ~[r] f y) :
     ∀ x ∈ r.field, f x = x := by

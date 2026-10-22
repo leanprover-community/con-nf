@@ -243,24 +243,24 @@ def comp (E : Enumeration X) (r : SetRel X Y) (hr : r.Coinjective) : Enumeration
     exact E.lt_bound i ⟨x, hy.1⟩
   rel_coinjective := E.rel_coinjective.comp hr
 
-instance {G X : Type _} [Group G] [MulAction G X] :
+instance {G X : Type u} [Group G] [MulAction G X] :
     SMul G (Enumeration X) where
   smul π E := E.invImage (λ x ↦ π⁻¹ • x) (MulAction.injective π⁻¹)
 
 @[simp]
-theorem smul_rel {G X : Type _} [Group G] [MulAction G X]
+theorem smul_rel {G X : Type u} [Group G] [MulAction G X]
     (π : G) (E : Enumeration X) (i : κ) (x : X) :
     i ~[(π • E).rel] x ↔ i ~[E.rel] π⁻¹ • x :=
   Iff.rfl
 
 @[simp]
-theorem mem_smul {G X : Type _} [Group G] [MulAction G X]
+theorem mem_smul {G X : Type u} [Group G] [MulAction G X]
     (π : G) (E : Enumeration X) (x : X) :
     x ∈ π • E ↔ π⁻¹ • x ∈ E :=
   Iff.rfl
 
 @[simp]
-theorem smul_rel_dom {G X : Type _} [Group G] [MulAction G X]
+theorem smul_rel_dom {G X : Type u} [Group G] [MulAction G X]
     (π : G) (E : Enumeration X) :
     (π • E).rel.dom = E.rel.dom := by
   ext i
@@ -273,7 +273,7 @@ theorem smul_rel_dom {G X : Type _} [Group G] [MulAction G X]
 
 open scoped Pointwise in
 @[simp]
-theorem smul_rel_cod {G X : Type _} [Group G] [MulAction G X]
+theorem smul_rel_cod {G X : Type u} [Group G] [MulAction G X]
     (π : G) (E : Enumeration X) :
     (π • E).rel.cod = π • E.rel.cod := by
   ext x
@@ -286,12 +286,12 @@ theorem smul_rel_cod {G X : Type _} [Group G] [MulAction G X]
 
 open scoped Pointwise in
 @[simp]
-theorem smul_coe {G X : Type _} [Group G] [MulAction G X]
+theorem smul_coe {G X : Type u} [Group G] [MulAction G X]
     (π : G) (E : Enumeration X) :
     ((π • E : Enumeration X) : Set X) = π • (E : Set X) :=
   smul_rel_cod π E
 
-instance {G X : Type _} [Group G] [MulAction G X] :
+instance {G X : Type u} [Group G] [MulAction G X] :
     MulAction G (Enumeration X) where
   one_smul E := by
     ext ⟨i, x⟩
@@ -302,11 +302,11 @@ instance {G X : Type _} [Group G] [MulAction G X] :
     · rfl
     · rw [smul_rel, smul_rel, smul_rel, mul_inv_rev, mul_smul]
 
-theorem mem_smul_iff {G X : Type _} [Group G] [MulAction G X] (x : X) (g : G) (E : Enumeration X) :
+theorem mem_smul_iff {G X : Type u} [Group G] [MulAction G X] (x : X) (g : G) (E : Enumeration X) :
     x ∈ g • E ↔ g⁻¹ • x ∈ E :=
   Iff.rfl
 
-theorem eq_of_smul_eq_smul {G X : Type _} [Group G] [MulAction G X] {g₁ g₂ : G} {E : Enumeration X}
+theorem eq_of_smul_eq_smul {G X : Type u} [Group G] [MulAction G X] {g₁ g₂ : G} {E : Enumeration X}
     (h : g₁ • E = g₂ • E) (x : X) (hx : x ∈ E) : g₁ • x = g₂ • x := by
   obtain ⟨i, hi⟩ := hx
   have : i ~[(g₁ • E).rel] g₁ • x := by rwa [smul_rel, inv_smul_smul]
@@ -314,14 +314,14 @@ theorem eq_of_smul_eq_smul {G X : Type _} [Group G] [MulAction G X] {g₁ g₂ :
   have := E.rel_coinjective.coinjective hi this
   exact (eq_inv_smul_iff.mp this).symm
 
-theorem eq_of_smul_eq {G X : Type _} [Group G] [MulAction G X] {g : G} {E : Enumeration X}
+theorem eq_of_smul_eq {G X : Type u} [Group G] [MulAction G X] {g : G} {E : Enumeration X}
     (h : g • E = E) (x : X) (hx : x ∈ E) : g • x = x := by
   have := eq_of_smul_eq_smul (g₁ := g) (g₂ := 1) ?_ x hx
   · rwa [one_smul] at this
   · rwa [one_smul]
 
 @[simp]
-theorem smul_singleton {G X : Type _} [Group G] [MulAction G X] {g : G} {x : X} :
+theorem smul_singleton {G X : Type u} [Group G] [MulAction G X] {g : G} {x : X} :
     g • singleton x = singleton (g • x) := by
   apply Enumeration.ext
   · rfl
@@ -368,7 +368,7 @@ theorem rel_add_iff {E F : Enumeration X} (i : κ) (x : X) :
     i ~[(E + F).rel] x ↔ i ~[E.rel] x ∨ ∃ j, E.bound + j = i ∧ j ~[F.rel] x :=
   Iff.rfl
 
-theorem add_rel_dom {X : Type _} (E F : Enumeration X) :
+theorem add_rel_dom {X : Type u} (E F : Enumeration X) :
     (E + F).rel.dom = E.rel.dom ∪ (E.bound + ·) '' F.rel.dom := by
   ext i
   simp only [SetRel.mem_dom, rel_add_iff, Set.mem_union, Set.mem_image]
@@ -450,7 +450,7 @@ theorem add_inj_iff_of_bound_eq_bound {E F G H : Enumeration X} (h : E.bound = F
   · rintro ⟨rfl, rfl⟩
     rfl
 
-theorem smul_add {G X : Type _} [Group G] [MulAction G X] (g : G) (E F : Enumeration X) :
+theorem smul_add {G X : Type u} [Group G] [MulAction G X] (g : G) (E F : Enumeration X) :
     g • (E + F) = g • E + g • F :=
   rfl
 

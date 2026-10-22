@@ -64,15 +64,15 @@ theorem leData_data_eq :
     (letI : Level := ⟨α⟩; letI : LeLevel α := ⟨le_rfl⟩; (leData M).data α) = newModelData' M := by
   simp only [leData, recBotCoe_coe, dif_pos trivial, cast_eq]
 
-abbrev TSetLe (β : TypeIndex) (hβ : β ≤ α) : Type _ :=
+abbrev TSetLe (β : TypeIndex) (hβ : β ≤ α) : Type u :=
     letI : Level := ⟨α⟩; letI := leData M; letI : LeLevel β := ⟨hβ⟩
     TSet β
 
-abbrev AllPermLe (β : TypeIndex) (hβ : β ≤ α) : Type _ :=
+abbrev AllPermLe (β : TypeIndex) (hβ : β ≤ α) : Type u :=
     letI : Level := ⟨α⟩; letI := leData M; letI : LeLevel β := ⟨hβ⟩
     AllPerm β
 
-abbrev TangleLe (β : TypeIndex) (hβ : β ≤ α) : Type _ :=
+abbrev TangleLe (β : TypeIndex) (hβ : β ≤ α) : Type u :=
     letI : Level := ⟨α⟩; letI := leData M; letI : LeLevel β := ⟨hβ⟩
     Tangle β
 

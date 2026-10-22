@@ -66,21 +66,21 @@ We will use Lean's typeclasses to implement some custom notation, namely the sup
 
 /-- Typeclass for the `ᴸ` notation. Used for converting to litters, or extracting the
 "litter part" of an object. -/
-class SuperL (X : Type _) (Y : outParam <| Type _) where
+class SuperL (X : Type*) (Y : outParam <| Type*) where
   superL : X → Y
 
 /-- Typeclass for the `ᴬ` notation. Used for converting to atoms, or extracting the
 "atom part" of an object. -/
-class SuperA (X : Type _) (Y : outParam <| Type _) where
+class SuperA (X : Type*) (Y : outParam <| Type*) where
   superA : X → Y
 
 /-- Typeclass for the `ᴺ` notation. Used for converting to near-litters, or extracting the
 "near-litter part" of an object. -/
-class SuperN (X : Type _) (Y : outParam <| Type _) where
+class SuperN (X : Type*) (Y : outParam <| Type*) where
   superN : X → Y
 
 /-- Typeclass for the `ᵁ` notation. Used for forgetful operations. -/
-class SuperU (X : Type _) (Y : outParam <| Type _) where
+class SuperU (X : Type*) (Y : outParam <| Type*) where
   superU : X → Y
 
 postfix:max "ᴸ" => SuperL.superL
