@@ -2,16 +2,6 @@ import ConNF.Model.InductionStatement
 import ConNF.Construction.NewModelData
 import ConNF.Counting.Conclusions
 
-/-!
-# New file
-
-In this file...
-
-## Main declarations
-
-* `ConNF.foo`: Something new.
--/
-
 noncomputable section
 universe u
 

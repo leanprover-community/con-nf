@@ -5,10 +5,6 @@ import ConNF.Construction.Code
 # Construction of model data
 
 In this file, we construct model data at type `α`, given that it is defined at all types below `α`.
-
-## Main declarations
-
-* `ConNF.foo`: Something new.
 -/
 
 noncomputable section

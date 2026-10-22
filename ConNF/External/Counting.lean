@@ -1,16 +1,8 @@
 import ConNF.External.Basic
 
 /-!
-# New file
-
-In this file...
-
 We are roughly following Scott Fenton's development of NF:
 <https://us.metamath.org/nfeuni/mmnf.html>.
-
-## Main declarations
-
-* `ConNF.foo`: Something new.
 -/
 
 noncomputable section

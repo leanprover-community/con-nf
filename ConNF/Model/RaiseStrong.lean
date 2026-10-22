@@ -1,15 +1,5 @@
 import ConNF.Model.Externalise
 
-/-!
-# New file
-
-In this file...
-
-## Main declarations
-
-* `ConNF.foo`: Something new.
--/
-
 noncomputable section
 universe u
 

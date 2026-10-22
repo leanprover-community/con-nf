@@ -4,10 +4,6 @@ import ConNF.ModelData.CoherentData
 # Codes
 
 In this file, we define codes and clouds.
-
-## Main declarations
-
-* `ConNF.foo`: Something new.
 -/
 
 noncomputable section

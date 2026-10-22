@@ -6,10 +6,6 @@ import ConNF.Strong.SpecSame
 
 In this file, we prove a consequence of freedom of action for `⊥`: a base support can support at
 most `2 ^ #κ`-many different sets of atoms under the action of base permutations.
-
-## Main declarations
-
-* `ConNF.foo`: Something new.
 -/
 
 noncomputable section

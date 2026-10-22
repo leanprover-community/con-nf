@@ -5,10 +5,6 @@ import ConNF.Model.RunInduction
 
 In this file, we convert many of our *internal* results (i.e. inside the induction) to *external*
 ones (i.e. defined using the global `TSet`/`AllPerm` definitions).
-
-## Main declarations
-
-* `ConNF.foo`: Something new.
 -/
 
 noncomputable section
