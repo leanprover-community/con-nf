@@ -117,7 +117,7 @@ We can also instantiate our model parameters with `Λ = μ`. To do this, both `#
 to be inaccessible cardinals. We simply pick `κ = ω₁` for convenience.
 -/
 def Params.inaccessible.{v} : Params where
-  Λ := (Cardinal.univ.{v, v + 1}).ord.toType
+  Λ := (Cardinal.univ.{v, v + 1}).ord.ToType
   κ := ULift.{v + 1, v} (aleph 1).out
   μ := Cardinal.univ.{v, v + 1}.out
   Λ_nonempty := by
@@ -125,7 +125,7 @@ def Params.inaccessible.{v} : Params where
     simp only [ne_eq, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty, not_false_eq_true]
   Λ_noMaxOrder := by
     apply noMaxOrder_of_isSuccLimit
-    change Order.IsSuccLimit (type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop))
+    change Order.IsSuccLimit (type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.ToType → _ → Prop))
     rw [type_toType]
     apply isSuccLimit_ord
     exact IsInaccessible.univ.1.le
@@ -146,7 +146,7 @@ def Params.inaccessible.{v} : Params where
     rw [mk_uLift, mk_out, mk_out, IsInaccessible.univ.isRegular.cof_eq]
     exact (lift_lt_univ _).le
   Λ_type_le_μ_ord_cof := by
-    change type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.toType → _ → Prop) ≤ _
+    change type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.ToType → _ → Prop) ≤ _
     rw [type_toType, mk_out, IsInaccessible.univ.isRegular.cof_eq]
 
 /-!
@@ -302,7 +302,7 @@ theorem κEquiv_le (x y : κ) :
 theorem κ_zero_le (x : κ) :
     0 ≤ x := by
   rw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_ofNat, Nat.cast_zero]
-  exact Ordinal.zero_le _
+  exact zero_le _
 
 instance : CovariantClass κ κ (· + ·) (· ≤ ·) := by
   constructor
@@ -322,8 +322,7 @@ instance : CovariantClass κ κ (Function.swap (· + ·)) (· ≤ ·) := by
   constructor
   intro i j k h
   rw [κEquiv_le, ← Subtype.coe_le_coe] at h
-  rw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_add, κEquiv_add]
-  exact add_le_add_right h _
+  grw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_add, κEquiv_add, h]
 
 theorem κ_le_add (x y : κ) :
     x ≤ x + y :=

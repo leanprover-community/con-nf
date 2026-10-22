@@ -146,9 +146,9 @@ theorem inv_smul_near_inv_smul (π : BasePerm) (s : Set Atom) (L : Litter) :
   apply near_trans (near_image h ↑πᴬ⁻¹)
   have := π.smul_near_smul (πᴸ⁻¹ L)ᴬ (πᴸ⁻¹ L) near_rfl
   have := near_image this ↑πᴬ⁻¹
-  simp only [smul_litter_def, smul_atom_def, Perm.apply_inv_self, Set.smul_set_def,
-    Perm.image_inv, preimage_image] at this
-  rw [Perm.image_inv]
+  simp only [smul_litter_def, smul_atom_def, Perm.inv_def, Equiv.apply_symm_apply, Set.smul_set_def,
+    Equiv.image_symm_eq_preimage, preimage_image] at this
+  rw [Perm.inv_def, Equiv.image_symm_eq_preimage]
   exact near_symm this
 
 /-- The inverse of a permutation. -/

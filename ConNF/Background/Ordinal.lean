@@ -154,7 +154,7 @@ theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {
 -/
 
 theorem card_Iio (o : Ordinal.{u}) : #(Set.Iio o) = Cardinal.lift.{u + 1} o.card := by
-  rw [Cardinal.eq.mpr ⟨o.enumIsoToType.toEquiv.trans Equiv.ulift.{u + 1, u}.symm⟩,
+  rw [Cardinal.eq.mpr ⟨ToType.mk.toEquiv.trans Equiv.ulift.{u + 1, u}.symm⟩,
     mk_uLift, mk_toType, lift_card]
 
 instance {o : Ordinal.{u}} : LtWellOrder (Set.Iio o) where
@@ -163,10 +163,10 @@ theorem type_Iio (o : Ordinal.{u}) :
     type ((· < ·) : Set.Iio o → Set.Iio o → Prop) = lift.{u + 1} o := by
   have := Ordinal.lift_type_eq.{u + 1, u, u + 1}
     (r := ((· < ·) : Set.Iio o → Set.Iio o → Prop))
-    (s := ((· < ·) : o.toType → o.toType → Prop))
+    (s := ((· < ·) : o.ToType → o.ToType → Prop))
   rw [lift_id, type_toType] at this
   rw [this]
-  exact ⟨o.enumIsoToType.toRelIsoLT⟩
+  exact ⟨ToType.mk.toRelIsoLT⟩
 
 @[simp]
 theorem typein_Iio {o : Ordinal.{u}} (x : Set.Iio o) :
