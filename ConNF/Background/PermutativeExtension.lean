@@ -71,23 +71,23 @@ theorem catInj_inj {r : Rel α α} {R : OrbitRestriction (r.dom ∪ r.codom) β}
   · rintro ⟨rfl, rfl, rfl⟩
     rfl
 
-inductive newOrbits {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) : Rel α α
+inductive NewOrbits {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) : Rel α α
   | left (a : α) (had : a ∈ r.dom) (hac : a ∉ r.codom) :
-      newOrbits R (catInj R (R.catPerm.symm (R.categorise a)) (⟨a, Or.inl had⟩, 0)) a
+      NewOrbits R (catInj R (R.catPerm.symm (R.categorise a)) (⟨a, Or.inl had⟩, 0)) a
   | leftStep (n : ℕ) (a : α) (had : a ∈ r.dom) (hac : a ∉ r.codom) :
-      newOrbits R
+      NewOrbits R
         (catInj R (R.catPerm.symm^[n + 2] (R.categorise a)) (⟨a, Or.inl had⟩, n + 1))
         (catInj R (R.catPerm.symm^[n + 1] (R.categorise a)) (⟨a, Or.inl had⟩, n))
   | right (a : α) (had : a ∉ r.dom) (hac : a ∈ r.codom) :
-      newOrbits R a (catInj R (R.catPerm (R.categorise a)) (⟨a, Or.inr hac⟩, 0))
+      NewOrbits R a (catInj R (R.catPerm (R.categorise a)) (⟨a, Or.inr hac⟩, 0))
   | rightStep (n : ℕ) (a : α) (had : a ∉ r.dom) (hac : a ∈ r.codom) :
-      newOrbits R
+      NewOrbits R
         (catInj R (R.catPerm^[n + 1] (R.categorise a)) (⟨a, Or.inr hac⟩, n))
         (catInj R (R.catPerm^[n + 2] (R.categorise a)) (⟨a, Or.inr hac⟩, n + 1))
 
 def permutativeExtension (r : Rel α α) (R : OrbitRestriction (r.dom ∪ r.codom) β) :
     Rel α α :=
-  r ⊔ newOrbits R
+  r ⊔ NewOrbits R
 
 theorem le_permutativeExtension (r : Rel α α) (R : OrbitRestriction (r.dom ∪ r.codom) β) :
     r ≤ r.permutativeExtension R :=
@@ -170,7 +170,7 @@ theorem card_permutativeExtension (r : Rel α α) (R : OrbitRestriction (r.dom �
       exact le_max_of_le_right (card_codom_le_of_coinjective hr)
 
 theorem categorise_newOrbits {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β)
-    {a₁ a₂ : α} (h : newOrbits R a₁ a₂) :
+    {a₁ a₂ : α} (h : NewOrbits R a₁ a₂) :
     R.categorise a₂ = R.catPerm (R.categorise a₁) := by
   cases h with
   | left => simp only [categorise_catInj, Equiv.apply_symm_apply]
@@ -186,7 +186,7 @@ theorem categorise_permutativeExtension {r : Rel α α} (R : OrbitRestriction (r
   h.elim Or.inl (Or.inr ∘ categorise_newOrbits R)
 
 theorem newOrbits_injective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    (newOrbits R).Injective := by
+    (NewOrbits R).Injective := by
   constructor
   intro a₁ a₂ a₃ h₁ h₂
   set a₄ := a₃ with h
@@ -236,7 +236,7 @@ theorem newOrbits_injective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.c
         one_ne_zero, and_false] at h
 
 theorem newOrbits_coinjective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    (newOrbits R).Coinjective := by
+    (NewOrbits R).Coinjective := by
   constructor
   intro a₁ a₂ a₃ h₁ h₂
   set a₄ := a₃ with h
@@ -286,7 +286,7 @@ theorem newOrbits_coinjective {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r
         one_ne_zero, and_false] at h
 
 theorem newOrbits_oneOne {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    (newOrbits R).OneOne :=
+    (NewOrbits R).OneOne :=
   ⟨newOrbits_injective R, newOrbits_coinjective R⟩
 
 theorem permutativeExtension_codomEqDom {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
@@ -297,35 +297,35 @@ theorem permutativeExtension_codomEqDom {r : Rel α α} (R : OrbitRestriction (r
     · by_cases had : a₂ ∈ r.dom
       · obtain ⟨a₃, h'⟩ := had
         exact ⟨a₃, Or.inl h'⟩
-      · exact ⟨_, Or.inr (newOrbits.right a₂ had ⟨a₁, h⟩)⟩
+      · exact ⟨_, Or.inr (.right a₂ had ⟨a₁, h⟩)⟩
     · cases h with
       | left _ had hac =>
         obtain ⟨a₃, h⟩ := had
         exact ⟨a₃, Or.inl h⟩
       | leftStep n a had hac =>
         cases n with
-        | zero => exact ⟨_, Or.inr (newOrbits.left a had hac)⟩
-        | succ n => exact ⟨_, Or.inr (newOrbits.leftStep n a had hac)⟩
-      | right _ had hac => exact ⟨_, Or.inr (newOrbits.rightStep 0 a₁ had hac)⟩
-      | rightStep n a had hac => exact ⟨_, Or.inr (newOrbits.rightStep (n + 1) a had hac)⟩
+        | zero => exact ⟨_, Or.inr (.left a had hac)⟩
+        | succ n => exact ⟨_, Or.inr (.leftStep n a had hac)⟩
+      | right _ had hac => exact ⟨_, Or.inr (.rightStep 0 a₁ had hac)⟩
+      | rightStep n a had hac => exact ⟨_, Or.inr (.rightStep (n + 1) a had hac)⟩
   · rintro a₁ a₂ (h | h)
     · by_cases hac : a₁ ∈ r.codom
       · obtain ⟨a₃, h'⟩ := hac
         exact ⟨a₃, Or.inl h'⟩
-      · exact ⟨_, Or.inr (newOrbits.left a₁ ⟨a₂, h⟩ hac)⟩
+      · exact ⟨_, Or.inr (.left a₁ ⟨a₂, h⟩ hac)⟩
     · cases h with
-      | left _ had hac => exact ⟨_, Or.inr (newOrbits.leftStep 0 a₂ had hac)⟩
-      | leftStep n a had hac => exact ⟨_, Or.inr (newOrbits.leftStep (n + 1) a had hac)⟩
+      | left _ had hac => exact ⟨_, Or.inr (.leftStep 0 a₂ had hac)⟩
+      | leftStep n a had hac => exact ⟨_, Or.inr (.leftStep (n + 1) a had hac)⟩
       | right _ had hac =>
         obtain ⟨a₃, h⟩ := hac
         exact ⟨a₃, Or.inl h⟩
       | rightStep n a had hac =>
         cases n with
-        | zero => exact ⟨_, Or.inr (newOrbits.right a had hac)⟩
-        | succ n => exact ⟨_, Or.inr (newOrbits.rightStep n a had hac)⟩
+        | zero => exact ⟨_, Or.inr (.right a had hac)⟩
+        | succ n => exact ⟨_, Or.inr (.rightStep n a had hac)⟩
 
 theorem disjoint_newOrbits_dom {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    Disjoint r.dom (newOrbits R).dom := by
+    Disjoint r.dom (NewOrbits R).dom := by
   rw [Set.disjoint_iff_forall_ne]
   rintro a₁ ha₁ a₂ ⟨a₃, h⟩
   cases h with
@@ -333,7 +333,7 @@ theorem disjoint_newOrbits_dom {r : Rel α α} (R : OrbitRestriction (r.dom ∪ 
   | _ => exact (catInj_ne_of_mem R _ _ _ (Or.inl ha₁)).symm
 
 theorem disjoint_newOrbits_codom {r : Rel α α} (R : OrbitRestriction (r.dom ∪ r.codom) β) :
-    Disjoint r.codom (newOrbits R).codom := by
+    Disjoint r.codom (NewOrbits R).codom := by
   rw [Set.disjoint_iff_forall_ne]
   rintro a₁ ha₁ a₂ ⟨a₃, h⟩
   cases h with
