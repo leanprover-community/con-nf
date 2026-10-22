@@ -11,7 +11,7 @@ public import Mathlib.Data.Part
 
 universe u v w
 
-variable {I : Type u} {r : I → I → Prop} [IsTrans I r] [inst : IsWellFounded I r]
+variable {I : Type u} {r : I → I → Prop} [IsTrans I r] [WellFounded r]
   {α : I → Type v} {p : ∀ i, α i → (∀ j, r j i → α j) → Prop}
   (f : ∀ i, ∀ d : (∀ j, r j i → α j),
     (∀ j, ∀ h : r j i, p j (d j h) (λ k h' ↦ d k (Trans.trans h' h))) →
@@ -26,7 +26,7 @@ structure IndHyp (i : I) (t : ∀ j, r j i → Part (α j)) : Prop where
     (λ k h' ↦ (t k (Trans.trans h' h)).get (dom k _))
 
 def core : ∀ i, Part (α i) :=
-  inst.fix _ λ i t ↦ {
+  ‹WellFounded r›.fix λ i t ↦ {
     Dom := IndHyp i t
     get := λ h ↦ f i (λ j h' ↦ (t j h').get (h.dom j h')) h.prop
   }
@@ -34,7 +34,7 @@ def core : ∀ i, Part (α i) :=
 theorem core_eq (i : I) :
     core f i = ⟨IndHyp i (λ j _ ↦ core f j),
       λ h ↦ f i (λ j h' ↦ (core f j).get (h.dom j h')) h.prop⟩ :=
-  IsWellFounded.fix_eq _ _ _
+  ‹WellFounded r›.fix_eq _ _
 
 theorem core_get_eq (i : I) (h : (core f i).Dom) :
     letI hc : IndHyp i (λ j _ ↦ core f j) := by rwa [core_eq] at h
@@ -45,7 +45,7 @@ theorem core_get_eq (i : I) (h : (core f i).Dom) :
   exact h.symm
 
 theorem core_dom (hp : ∀ i d h, p i (f i d h) d) : ∀ i, (core f i).Dom := by
-  refine inst.fix _ ?_
+  refine ‹WellFounded r›.fix ?_
   intro i ih
   rw [core_eq]
   refine ⟨ih, ?_⟩
@@ -74,7 +74,7 @@ theorem fix'_eq (i : I) :
   rw [fix', core_get_eq]
   rfl
 
-variable {I : Type u} {r : I → I → Prop} [IsTrans I r] [inst : IsWellFounded I r]
+variable {I : Type u} {r : I → I → Prop} [IsTrans I r] [WellFounded r]
   {α : I → Type v} {p : ∀ i, α i → (∀ j, r j i → α j) → Sort w}
   (f : ∀ i, ∀ d : (∀ j, r j i → α j),
     (∀ j, ∀ h : r j i, p j (d j h) (λ k h' ↦ d k (Trans.trans h' h))) →

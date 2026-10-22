@@ -16,8 +16,8 @@ variable [Params.{u}]
 instance : IsTrans Λ λ β γ ↦ (β : TypeIndex) < (γ : TypeIndex) :=
   ⟨λ _ _ _ ↦ lt_trans⟩
 
-instance : IsWellFounded Λ λ β γ ↦ (β : TypeIndex) < (γ : TypeIndex) :=
-  ⟨InvImage.wf _ (wellFounded_lt)⟩
+instance : WellFounded fun β γ : Λ ↦ (β : TypeIndex) < (γ : TypeIndex) :=
+  InvImage.wf _ wellFounded_lt
 
 def motive : (α : Λ) → Motive α :=
   ICT.fix constructMotive constructHypothesis

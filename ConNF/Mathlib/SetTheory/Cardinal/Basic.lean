@@ -1,6 +1,6 @@
 module
 
-public import Mathlib.Data.Rel
+public import Mathlib.Basic.Rel
 public import Mathlib.SetTheory.Cardinal.Defs
 
 public section

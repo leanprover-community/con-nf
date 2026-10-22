@@ -42,9 +42,7 @@ protected def ltIso [LT β] :
 
 protected theorem wellFoundedLT [DecidableEq α] [LinearOrder β] [WellFoundedLT β] :
     letI := e.linearOrder
-    WellFoundedLT α :=
-  letI := e.linearOrder
-  ⟨InvImage.wf e wellFounded_lt⟩
+    WellFoundedLT α := InvImage.wf e wellFounded_lt
 
 theorem type_lt [DecidableEq α] [LinearOrder β] [WellFoundedLT β] :
     letI := e.linearOrder

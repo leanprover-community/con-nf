@@ -222,8 +222,7 @@ theorem newOrbits_injective {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ 
     | right =>
       rw [catInj_inj] at h
       exact h.2.1.symm
-    | rightStep => simp only [catInj_inj, AddLeftCancelMonoid.add_eq_zero,
-        one_ne_zero, and_false] at h
+    | rightStep => simp only [catInj_inj, Nat.add_eq_zero_iff, one_ne_zero, and_false] at h
   | rightStep =>
     cases h₂ with
     | left _ hac had => cases catInj_ne_of_mem R _ _ a₄ (Or.inl hac) h.symm
@@ -236,8 +235,7 @@ theorem newOrbits_injective {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ 
         EmbeddingLike.apply_eq_iff_eq] at h ⊢
       exact ⟨h.1.symm, h.2.1.symm, h.2.2.symm⟩
     | right =>
-      simp only [catInj_inj, right_eq_add, AddLeftCancelMonoid.add_eq_zero,
-        one_ne_zero, and_false] at h
+      simp only [catInj_inj, right_eq_add, Nat.add_eq_zero_iff, one_ne_zero, and_false] at h
 
 theorem newOrbits_coinjective {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) :
     (newOrbits R).Coinjective := by
@@ -272,8 +270,7 @@ theorem newOrbits_coinjective {r : SetRel α α} (R : OrbitRestriction (r.dom �
     | left =>
       rw [catInj_inj] at h
       exact h.2.1.symm
-    | leftStep => simp only [catInj_inj, AddLeftCancelMonoid.add_eq_zero,
-        one_ne_zero, and_false] at h
+    | leftStep => simp only [catInj_inj, Nat.add_eq_zero_iff, one_ne_zero, and_false] at h
   | leftStep =>
     cases h₂ with
     | right _ hac had => cases catInj_ne_of_mem R _ _ a₄ (Or.inr had) h.symm
@@ -286,8 +283,7 @@ theorem newOrbits_coinjective {r : SetRel α α} (R : OrbitRestriction (r.dom �
         EmbeddingLike.apply_eq_iff_eq] at h ⊢
       exact ⟨h.1.symm, h.2.1.symm, h.2.2.symm⟩
     | left =>
-      simp only [catInj_inj, right_eq_add, AddLeftCancelMonoid.add_eq_zero,
-        one_ne_zero, and_false] at h
+      simp only [catInj_inj, right_eq_add, Nat.add_eq_zero_iff, one_ne_zero, and_false] at h
 
 theorem newOrbits_oneOne {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) :
     (newOrbits R).OneOne :=

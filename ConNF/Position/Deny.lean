@@ -97,14 +97,14 @@ theorem gtOfDeny_spec {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ)
 def funOfDeny {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ) (h₂ : ∀ x, #(deny x) < (#μ).ord.cof) :
     X → μ :=
   letI := initialLinearOrder X
-  letI := initialWellFoundedLT X
+  have := initialWellFoundedLT X
   wellFounded_lt.fix (C := fun _ ↦ μ) (fun x ih ↦ gtOfDeny h₁ deny h₂ x ih)
 
 theorem funOfDeny_eq {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     (h₂ : ∀ x, #(deny x) < (#μ).ord.cof) (x : X) :
     funOfDeny h₁ deny h₂ x = gtOfDeny h₁ deny h₂ x (λ y _ ↦ funOfDeny h₁ deny h₂ y) :=
   letI := initialLinearOrder X
-  letI := initialWellFoundedLT X
+  have := initialWellFoundedLT X
   wellFounded_lt.fix_eq (C := fun _ ↦ μ) (fun x ih ↦ gtOfDeny h₁ deny h₂ x ih) x
 
 theorem funOfDeny_spec {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ)

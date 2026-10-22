@@ -38,7 +38,7 @@ def TypeIndex :=
 /-- Allows us to use `termination_by` clauses with `TypeIndex`. -/
 instance : WellFoundedRelation TypeIndex where
   rel := (· < ·)
-  wf := IsWellFounded.wf
+  wf := wellFounded_lt
 
 /-- Because the order type of `Λ` is infinite, the order type of the type indices is the same as the
 order type of `Λ`. -/

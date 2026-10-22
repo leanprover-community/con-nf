@@ -45,12 +45,12 @@ variable {ψ : StrApprox β} {A : β ↝ ⊥} {f : ℤ → Litter}
 
 theorem addOrbit_apply :
     ψ.addOrbit A f hf hfψ A = (ψ A).addOrbit f hf hfψ := by
-  rw [addOrbit, dif_pos]
+  rw [addOrbit, dite_eq_left]
   rfl
 
 theorem addOrbit_apply_ne (B : β ↝ ⊥) (hB : A ≠ B) :
     ψ.addOrbit A f hf hfψ B = ψ B := by
-  rw [addOrbit, dif_neg hB]
+  rw [addOrbit, dite_eq_right hB]
 
 theorem le_addOrbit :
     ψ ≤ ψ.addOrbit A f hf hfψ := by

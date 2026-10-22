@@ -51,7 +51,7 @@ def leData :
     λ β hβ ↦ β.recBotCoe (λ _ ↦ botPosition)
       (λ β hβ ↦
         cast (by
-          congr; unfold data; rw [recBotCoe_coe, dif_neg];
+          congr; unfold data; rw [recBotCoe_coe, dite_eq_right];
           exact (LtLevel.elim (β := β)).ne)
         (M β LtLevel.elim).pos) hβ
   LeData.mk (data := data) (positions := positions)
@@ -62,11 +62,11 @@ theorem leData_data_bot :
 
 theorem leData_data_lt {β : Λ} (hβ : (β : TypeIndex) < α) :
     (letI : Level := ⟨α⟩; letI : LeLevel β := ⟨hβ.le⟩; (leData M).data β) = (M β hβ).data := by
-  simp only [leData, recBotCoe_coe, dif_neg hβ.ne]
+  simp only [leData, recBotCoe_coe, dite_eq_right hβ.ne]
 
 theorem leData_data_eq :
     (letI : Level := ⟨α⟩; letI : LeLevel α := ⟨le_rfl⟩; (leData M).data α) = newModelData' M := by
-  simp only [leData, recBotCoe_coe, dif_pos trivial, cast_eq]
+  simp only [leData, recBotCoe_coe, dite_eq_left trivial, cast_eq]
 
 abbrev TSetLe (β : TypeIndex) (hβ : β ≤ α) : Type u :=
     letI : Level := ⟨α⟩; letI := leData M; letI : LeLevel β := ⟨hβ⟩

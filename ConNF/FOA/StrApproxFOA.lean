@@ -365,7 +365,7 @@ theorem exists_exactlyApproximates_of_total (ψ : StrApprox β) (hψ₁ : ψ.Coh
     ∃ ρ, ψ.ExactlyApproximates ρ := by
   revert β
   intro β
-  induction β using (inferInstance : IsWellFounded TypeIndex (· < ·)).induction
+  induction β using WellFoundedLT.induction
   case ind _ _ β ih =>
   induction β using WithBot.recBotCoe with
   | bot =>
@@ -420,7 +420,7 @@ theorem exists_exactlyApproximates_of_total (ψ : StrApprox β) (hψ₁ : ψ.Coh
 theorem freedomOfAction : FreedomOfAction β := by
   revert β
   intro β
-  induction β using (inferInstance : IsWellFounded TypeIndex (· < ·)).induction
+  induction β using WellFoundedLT.induction
   case ind _ _ β ih =>
     intro _ ψ hψ
     obtain ⟨χ, hχ₁, hχ₂, hχ₃⟩ := exists_total ψ hψ ih

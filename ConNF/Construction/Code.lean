@@ -150,7 +150,7 @@ theorem Code.cloud_subrelation : Subrelation Cloud (InvImage (· < ·) pos) := b
   contrapose! this
   exact hν₂.trans_le this
 
-theorem cloud_wf : WellFounded Cloud := Code.cloud_subrelation.wf <| InvImage.wf _ IsWellFounded.wf
+theorem cloud_wf : WellFounded Cloud := Code.cloud_subrelation.wf <| InvImage.wf _ wellFounded_lt
 
 theorem eq_of_cloud {c : Code} {γ : TypeIndex} [LtLevel γ]
     {s t : Set (TSet γ)} {hs : s.Nonempty} {ht : t.Nonempty}

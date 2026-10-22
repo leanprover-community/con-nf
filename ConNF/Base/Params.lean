@@ -182,7 +182,7 @@ instance : NoMaxOrder Λ := Params.Λ_noMaxOrder
 complicated recursion and induction along `Λ`. -/
 instance : WellFoundedRelation Λ where
   rel := (· < ·)
-  wf := IsWellFounded.wf
+  wf := wellFounded_lt
 
 /-! Basic cardinal inequalities between `ℵ₀`, `Λ`, `κ`, `μ`. -/
 

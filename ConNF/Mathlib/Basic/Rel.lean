@@ -1,7 +1,7 @@
 module
 
-public import Mathlib.Data.Rel
-public import Mathlib.Data.Set.Lattice
+public import Mathlib.Basic.Rel
+public import Mathlib.Data.Set.Lattice.Bounded
 public import Mathlib.Order.Preorder.Chain
 
 @[expose] public section
