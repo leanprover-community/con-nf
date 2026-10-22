@@ -12,61 +12,6 @@ namespace Equiv
 variable {α : Type u} {β : Type v} (e : α ≃ β)
 
 @[implicit_reducible]
-protected def le [LE β] : LE α where
-  le := InvImage (· ≤ ·) e
-
-theorem le_def [LE β] (x y : α) :
-    letI := e.le
-    x ≤ y ↔ e x ≤ e y :=
-  Iff.rfl
-
-@[implicit_reducible]
-protected def lt [LT β] : LT α where
-  lt := InvImage (· < ·) e
-
-theorem lt_def [LT β] (x y : α) :
-    letI := e.lt
-    x < y ↔ e x < e y :=
-  Iff.rfl
-
-@[implicit_reducible]
-protected def min [Min β] : Min α where
-  min x y := e.symm (e x ⊓ e y)
-
-theorem min_def [Min β] (x y : α) :
-    letI := e.min
-    x ⊓ y = e.symm (e x ⊓ e y) :=
-  rfl
-
-theorem apply_min [Min β] (x y : α) :
-    letI := e.min
-    e (x ⊓ y) = e x ⊓ e y := by
-  rw [min_def, apply_symm_apply]
-
-@[implicit_reducible]
-protected def max [Max β] : Max α where
-  max x y := e.symm (e x ⊔ e y)
-
-theorem max_def [Max β] (x y : α) :
-    letI := e.max
-    x ⊔ y = e.symm (e x ⊔ e y) :=
-  rfl
-
-theorem apply_max [Max β] (x y : α) :
-    letI := e.max
-    e (x ⊔ y) = e x ⊔ e y := by
-  rw [max_def, apply_symm_apply]
-
-@[implicit_reducible]
-protected def compare [Ord β] : Ord α where
-  compare x y := compare (e x) (e y)
-
-theorem compare_def [Ord β] (x y : α) :
-    letI := e.compare
-    compare x y = compare (e x) (e y) :=
-  rfl
-
-@[implicit_reducible]
 protected def decidableLE [LE β] [DecidableRel ((· ≤ ·) : β → β → Prop)] :
     letI := e.le
     DecidableRel ((· ≤ ·) : α → α → Prop) :=
@@ -95,28 +40,13 @@ protected def ltIso [LT β] :
   map_rel_iff' := Iff.rfl
   __ := e
 
-@[implicit_reducible]
-protected def preorder [Preorder β] : Preorder α :=
-  Preorder.lift e
-
-@[implicit_reducible]
-protected def partialOrder [PartialOrder β] : PartialOrder α :=
-  PartialOrder.lift e e.injective
-
-@[implicit_reducible]
-protected def linearOrder [LinearOrder β] : LinearOrder α :=
-  letI := e.max
-  letI := e.min
-  letI := e.compare
-  LinearOrder.liftWithOrd e e.injective e.apply_max e.apply_min e.compare_def
-
-protected theorem wellFoundedLT [LinearOrder β] [WellFoundedLT β] :
+protected theorem wellFoundedLT [DecidableEq α] [LinearOrder β] [WellFoundedLT β] :
     letI := e.linearOrder
     WellFoundedLT α :=
   letI := e.linearOrder
   ⟨InvImage.wf e wellFounded_lt⟩
 
-theorem type_lt [LinearOrder β] [WellFoundedLT β] :
+theorem type_lt [DecidableEq α] [LinearOrder β] [WellFoundedLT β] :
     letI := e.linearOrder
     letI := e.wellFoundedLT
     Ordinal.lift.{max u v, u} (Ordinal.type ((· < ·) : α → α → Prop)) =
@@ -126,7 +56,7 @@ theorem type_lt [LinearOrder β] [WellFoundedLT β] :
   rw [Ordinal.lift_type_eq.{u, v, max u v}]
   exact ⟨e.ltIso⟩
 
-theorem typein_lt [LinearOrder β] [WellFoundedLT β] (x : α) :
+theorem typein_lt [DecidableEq α] [LinearOrder β] [WellFoundedLT β] (x : α) :
     letI := e.linearOrder
     letI := e.wellFoundedLT
     Ordinal.lift.{max u v, v} (Ordinal.typein ((· < ·) : β → β → Prop) (e x)) =
@@ -148,7 +78,7 @@ protected theorem noMaxOrder [LT β] [NoMaxOrder β] :
   intro x
   obtain ⟨y, hy⟩ := exists_gt (e x)
   use e.symm y
-  rw [lt_def, apply_symm_apply]
+  rw [← lt_def, apply_symm_apply]
   exact hy
 
 @[implicit_reducible]

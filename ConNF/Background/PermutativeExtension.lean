@@ -139,7 +139,7 @@ theorem card_permutativeExtension (r : SetRel α α) (R : OrbitRestriction (r.do
   apply add_le_of_le (le_max_left _ _) <;> apply add_le_of_le (le_max_left _ _)
   · exact le_max_right _ _
   · exact le_max_of_le_right (card_cod_le_of_coinjective hr)
-  · refine (mk_biUnion_le_of_le (max ℵ₀ #r.dom) ?_).trans ?_
+  · refine (mk_biUnion_le_mul_of_le (max ℵ₀ #r.dom) ?_).trans ?_
     · intro a _
       have := mk_iUnion_le_of_le_lift
           (f := λ n ↦ Subtype.val '' Set.range (catInj R (R.catPerm.symm^[n + 1] (R.categorise a))))
@@ -156,7 +156,7 @@ theorem card_permutativeExtension (r : SetRel α α) (R : OrbitRestriction (r.do
         apply add_le_of_le (le_max_left _ _) (le_max_right _ _)
         exact le_max_of_le_right (card_cod_le_of_coinjective hr)
     · exact mul_le_of_le (le_max_left _ _) (le_max_right _ _) le_rfl
-  · refine (mk_biUnion_le_of_le (max ℵ₀ #r.dom) ?_).trans ?_
+  · refine (mk_biUnion_le_mul_of_le (max ℵ₀ #r.dom) ?_).trans ?_
     · intro a _
       have := mk_iUnion_le_of_le_lift
           (f := λ n ↦ Subtype.val '' Set.range (catInj R (R.catPerm^[n + 1] (R.categorise a))))

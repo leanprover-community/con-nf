@@ -29,18 +29,19 @@ def initialEquiv {X : Type*} : X ≃ (#X).ord.ToType := by
 /-- Endow a type `X` with a well-order of smallest possible order type. -/
 @[implicit_reducible]
 def initialLinearOrder (X : Type*) : LinearOrder X :=
-  initialEquiv.linearOrder
+  open scoped Classical in initialEquiv.linearOrder
 
 theorem initialWellFoundedLT (X : Type*) :
     letI := initialLinearOrder X
     WellFoundedLT X :=
-  initialEquiv.wellFoundedLT
+  open scoped Classical in initialEquiv.wellFoundedLT
 
 theorem initialWellOrder_type {X : Type*} :
     letI := initialLinearOrder X
     letI := initialWellFoundedLT X
     type ((· < ·) : X → X → Prop) = (#X).ord := by
-  have := Equiv.type_lt (initialEquiv (X := X))
+  classical
+  have := (initialEquiv (X := X)).type_lt
   rwa [Ordinal.lift_id, Ordinal.lift_id, type_toType] at this
 
 theorem initialWellOrder_card_Iio {X : Type*} :
@@ -74,7 +75,7 @@ theorem gtOfDeny_aux {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     · rintro _ ⟨y, h, rfl⟩
       simp only [Set.mem_iUnion, Set.mem_singleton_iff]
       exact ⟨y, h, rfl⟩
-    apply (mk_biUnion_le_of_le 1 (λ _ _ ↦ (mk_singleton _).le)).trans_lt ?_
+    apply (mk_biUnion_le_mul_of_le 1 (λ _ _ ↦ (mk_singleton _).le)).trans_lt ?_
     rw [mul_one]
     exact (initialWellOrder_card_Iio _).trans_le h₁
   · apply card_lt_of_μ_bounded

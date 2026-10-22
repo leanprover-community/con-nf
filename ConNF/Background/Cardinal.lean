@@ -10,17 +10,12 @@ universe u v
 
 namespace Cardinal
 
-theorem mul_le_of_le {a b c : Cardinal} (hc : ℵ₀ ≤ c) (h1 : a ≤ c) (h2 : b ≤ c) : a * b ≤ c := by
-  apply (mul_le_max a b).trans
-  rw [max_le_iff, max_le_iff]
-  exact ⟨⟨h1, h2⟩, hc⟩
-
-theorem mk_biUnion_le_of_le_lift {α : Type u} {β : Type v} {s : Set α} {f : ∀ x ∈ s, Set β}
+theorem mk_biUnion_le_mul_of_le_lift {α : Type u} {β : Type v} {s : Set α} {f : ∀ x ∈ s, Set β}
     (c : Cardinal.{v}) (h : ∀ (x : α) (h : x ∈ s), #(f x h) ≤ c) :
     lift.{u} #(⋃ (x : α) (h : x ∈ s), f x h) ≤ lift.{v} #s * lift.{u} c := by
   rw [Set.biUnion_eq_iUnion]
   apply (mk_iUnion_le_lift.{v} (λ (x : s) ↦ f x x.prop)).trans
-  refine mul_le_mul le_rfl ?_ (zero_le _) (zero_le _)
+  refine mul_le_mul le_rfl ?_ zero_le zero_le
   obtain hs | hs := isEmpty_or_nonempty s
   · simp only [ciSup_of_empty, bot_eq_zero', zero_le]
   · apply ciSup_le
@@ -28,12 +23,12 @@ theorem mk_biUnion_le_of_le_lift {α : Type u} {β : Type v} {s : Set α} {f : �
     have := h x x.prop
     rwa [← lift_le.{u}] at this
 
-theorem mk_biUnion_le_of_le {α β : Type u} {s : Set α} {f : ∀ x ∈ s, Set β}
+theorem mk_biUnion_le_mul_of_le {α β : Type u} {s : Set α} {f : ∀ x ∈ s, Set β}
     (c : Cardinal) (h : ∀ (x : α) (h : x ∈ s), #(f x h) ≤ c) :
     #(⋃ (x : α) (h : x ∈ s), f x h) ≤ #s * c := by
   rw [Set.biUnion_eq_iUnion]
   apply (mk_iUnion_le _).trans
-  refine mul_le_mul le_rfl ?_ (zero_le _) (zero_le _)
+  refine mul_le_mul le_rfl ?_ zero_le zero_le
   obtain hs | hs := isEmpty_or_nonempty s
   · simp only [ciSup_of_empty, bot_eq_zero', zero_le]
   · apply ciSup_le
@@ -43,14 +38,14 @@ theorem mk_biUnion_le_of_le {α β : Type u} {s : Set α} {f : ∀ x ∈ s, Set 
 theorem mk_iUnion_le_of_le_lift {α : Type u} {β : Type v} {f : α → Set β}
     (c : Cardinal.{v}) (h : ∀ (x : α), #(f x) ≤ c) :
     lift.{u} #(⋃ (x : α), f x) ≤ lift.{v} #α * lift.{u} c := by
-  have := mk_biUnion_le_of_le_lift (s := Set.univ) (f := λ x _ ↦ f x) c (λ x _ ↦ h x)
+  have := mk_biUnion_le_mul_of_le_lift (s := Set.univ) (f := λ x _ ↦ f x) c (λ x _ ↦ h x)
   simp only [Set.mem_univ, Set.iUnion_true, mk_univ] at this
   exact this
 
 theorem mk_iUnion_le_of_le {α β : Type u} {f : α → Set β}
     (c : Cardinal) (h : ∀ (x : α), #(f x) ≤ c) :
     #(⋃ (x : α), f x) ≤ #α * c := by
-  have := mk_biUnion_le_of_le (s := Set.univ) (f := λ x _ ↦ f x) c (λ x _ ↦ h x)
+  have := mk_biUnion_le_mul_of_le (s := Set.univ) (f := λ x _ ↦ f x) c (λ x _ ↦ h x)
   simp only [Set.mem_univ, Set.iUnion_true, mk_univ] at this
   exact this
 
@@ -125,7 +120,7 @@ theorem mk_power_le_two_power (α β : Type u) :
         | zero =>
           norm_cast
           rw [zero_power]
-          exact Cardinal.zero_le _
+          exact zero_le
           exact (aleph0_pos.trans_le hβ).ne'
         | succ n => cases n with
           | zero => simp only [zero_add, Nat.cast_one, one_power, power_one, le_max_iff,

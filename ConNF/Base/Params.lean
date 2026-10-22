@@ -220,8 +220,9 @@ def μEquiv : μ ≃ Set.Iio (#μ).ord := by
   apply Nonempty.some
   rw [← Cardinal.eq, mk_uLift, card_Iio, card_ord]
 
-instance : LinearOrder κ := κEquiv.linearOrder
-instance : WellFoundedLT κ := κEquiv.wellFoundedLT
+instance : LinearOrder κ := open scoped Classical in κEquiv.linearOrder
+instance : WellFoundedLT κ := open scoped Classical in κEquiv.wellFoundedLT
+
 instance : NoMaxOrder κ :=
   letI := iio_noMaxOrder aleph0_lt_κ.le
   Equiv.noMaxOrder κEquiv
@@ -236,9 +237,9 @@ instance : Sub κ :=
   letI := iioSub (#κ).ord
   Equiv.sub κEquiv
 
+instance : LinearOrder μ := open scoped Classical in μEquiv.linearOrder
+instance : WellFoundedLT μ := open scoped Classical in μEquiv.wellFoundedLT
 
-instance : LinearOrder μ := μEquiv.linearOrder
-instance : WellFoundedLT μ := μEquiv.wellFoundedLT
 instance : NoMaxOrder μ :=
   letI := iio_noMaxOrder aleph0_lt_μ.le
   μEquiv.noMaxOrder
@@ -312,7 +313,7 @@ theorem κEquiv_le (x y : κ) :
 theorem κ_zero_le (x : κ) :
     0 ≤ x := by
   rw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_zero]
-  exact zero_le _
+  exact zero_le
 
 instance : CovariantClass κ κ (· + ·) (· ≤ ·) := by
   constructor

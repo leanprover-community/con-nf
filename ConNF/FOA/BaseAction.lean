@@ -447,13 +447,13 @@ theorem card_not_sandbox (ξ : BaseAction) :
   rw [not_sandbox_eq]
   apply (mk_union_le _ _).trans
   apply add_le_of_le κ_isRegular.aleph0_le
-  · refine (mk_biUnion_le_of_le 1 ?_).trans ?_
+  · refine (mk_biUnion_le_mul_of_le 1 ?_).trans ?_
     · simp only [mk_singleton, le_refl, implies_true]
     rw [mul_one]
     exact ξ.atoms_cod_small.le
-  · refine (mk_biUnion_le_of_le #κ ?_).trans ?_
+  · refine (mk_biUnion_le_mul_of_le #κ ?_).trans ?_
     · intro N _
-      refine (mk_biUnion_le_of_le 1 ?_).trans ?_
+      refine (mk_biUnion_le_mul_of_le 1 ?_).trans ?_
       · simp only [mk_singleton, le_refl, implies_true]
       · rw [mul_one, N.card_atoms]
     · exact mul_le_of_le κ_isRegular.aleph0_le ξ.nearLitters_cod_small.le le_rfl

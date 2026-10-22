@@ -68,7 +68,8 @@ theorem small_symmDiff (hs : Small s) (ht : Small t) : Small (s ∆ t) :=
 theorem small_iUnion (hι : #ι < #κ) {f : ι → Set α} (hf : ∀ i, Small (f i)) :
     Small (⋃ i, f i) :=
   (mk_iUnion_le _).trans_lt <|
-    mul_lt_of_lt Params.κ_isRegular.aleph0_le hι <| iSup_lt_of_isRegular Params.κ_isRegular hι hf
+    mul_lt_of_lt Params.κ_isRegular.aleph0_le hι <|
+      iSup_lt_of_lt_cof_ord (hι.trans_eq Params.κ_isRegular.cof_ord.symm) hf
 
 /-- It is occasionally useful to take an indexed union over the proofs of a proposition, for example
 when taking a union over the elements of some set. In these cases, if the resulting set is small
