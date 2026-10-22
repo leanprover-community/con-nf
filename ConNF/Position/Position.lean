@@ -38,6 +38,6 @@ lower than `x`, we can produce `C x` for all `x`. -/
 @[elab_as_elim]
 def pos_induction {X : Type u} [Position X] {C : X → Sort*} (x : X)
     (h : ∀ x, (∀ y, pos y < pos x → C y) → C x) : C x :=
-  WellFounded.fix (InvImage.wf pos (inferInstanceAs <| IsWellFounded μ (· < ·)).wf) h x
+  (InvImage.wf pos wellFounded_lt).fix h x
 
 end ConNF

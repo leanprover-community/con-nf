@@ -27,6 +27,7 @@ def initialEquiv {X : Type*} : X ≃ (#X).ord.ToType := by
   rw [mk_toType, card_ord]
 
 /-- Endow a type `X` with a well-order of smallest possible order type. -/
+@[implicit_reducible]
 def initialLinearOrder (X : Type*) : LinearOrder X :=
   initialEquiv.linearOrder
 
@@ -49,7 +50,7 @@ theorem initialWellOrder_card_Iio {X : Type*} :
   letI := initialLinearOrder X
   letI := initialWellFoundedLT X
   intro x
-  have := type_Iio_lt x
+  have := type_Iio_lt_type x
   rwa [initialWellOrder_type, lt_ord, card_type] at this
 
 def chooseOfCardLt {X : Type*} {s : Set X} (h : #s < #X) : X :=
@@ -96,16 +97,14 @@ def funOfDeny {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ) (h₂ : ∀
     X → μ :=
   letI := initialLinearOrder X
   letI := initialWellFoundedLT X
-  (inferInstanceAs (IsWellFounded X (· < ·))).wf.fix (C := λ _ ↦ μ)
-    (λ x ih ↦ gtOfDeny h₁ deny h₂ x ih)
+  wellFounded_lt.fix (C := fun _ ↦ μ) (fun x ih ↦ gtOfDeny h₁ deny h₂ x ih)
 
 theorem funOfDeny_eq {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     (h₂ : ∀ x, #(deny x) < (#μ).ord.cof) (x : X) :
     funOfDeny h₁ deny h₂ x = gtOfDeny h₁ deny h₂ x (λ y _ ↦ funOfDeny h₁ deny h₂ y) :=
   letI := initialLinearOrder X
   letI := initialWellFoundedLT X
-  (inferInstanceAs (IsWellFounded X (· < ·))).wf.fix_eq (C := λ _ ↦ μ)
-    (λ x ih ↦ gtOfDeny h₁ deny h₂ x ih) x
+  wellFounded_lt.fix_eq (C := fun _ ↦ μ) (fun x ih ↦ gtOfDeny h₁ deny h₂ x ih) x
 
 theorem funOfDeny_spec {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     (h₂ : ∀ x, #(deny x) < (#μ).ord.cof) (x : X) :

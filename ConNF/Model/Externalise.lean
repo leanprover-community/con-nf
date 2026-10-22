@@ -79,7 +79,7 @@ theorem globalLeData_eq [Level] :
     case bot => rfl
     case coe β =>
       rw [leData]
-      simp only [recBotCoe_bot, recBotCoe_coe]
+      simp only [recBotCoe_coe]
       exact HEq.symm (cast_heq _ _)
 
 instance globalPreCoherentData [Level] : PreCoherentData where

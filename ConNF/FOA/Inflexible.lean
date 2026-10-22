@@ -51,7 +51,7 @@ theorem inflexible_iff [LeLevel β] (A : β ↝ ⊥) (L : Litter) :
 theorem not_inflexible_iff [LeLevel β] (A : β ↝ ⊥) (L : Litter) :
     ¬Inflexible A L ↔ ∀ P : InflexiblePath β, ∀ t, A = P.A ↘ P.hε ↘. → L ≠ fuzz P.hδε t := by
   rw [inflexible_iff]
-  push_neg
+  push Not
   rfl
 
 theorem inflexible_deriv [LeLevel β] {A : β ↝ ⊥} {L : Litter} (h : Inflexible A L)

@@ -256,7 +256,7 @@ theorem subset_of_information_eq {S : BaseSupport} (hS : S.Closed) {s t : Set At
   · have := congr_arg Information.outside h
     dsimp only [information] at this
     rw [eq_iff_iff] at this
-    push_neg at haN
+    push Not at haN
     refine this.mp ?_ a haS haN
     intro b hbS hbN
     rwa [← mem_iff_mem_of_supports hS hs haS hbS]

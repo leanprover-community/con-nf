@@ -32,7 +32,7 @@ theorem type_withBot {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
   rw [← type_sum_lex, type_eq]
   exact ⟨withBotOrderIso⟩
 
-theorem noMaxOrder_of_isSuccLimit {α : Type u} [Preorder α] [IsWellOrder α (· < ·)]
+theorem noMaxOrder_of_isSuccLimit_type {α : Type*} [Preorder α] [IsWellOrder α (· < ·)]
     (h : Order.IsSuccLimit (type ((· < ·) : α → α → Prop))) : NoMaxOrder α := by
   constructor
   intro a
@@ -43,22 +43,22 @@ theorem noMaxOrder_of_isSuccLimit {α : Type u} [Preorder α] [IsWellOrder α (�
   rw [← hb, typein_lt_typein] at this
   exact this
 
-theorem isSuccLimit_of_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)]
-    (h : NoMaxOrder α) : Order.IsSuccLimit (type ((· < ·) : α → α → Prop)) := by
+lemma isSuccLimit_type_of_noMaxOrder {α : Type*} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)]
+    [NoMaxOrder α] : Order.IsSuccLimit (type ((· < ·) : α → α → Prop)) := by
   constructor
   · simp only [isMin_iff_eq_bot, bot_eq_zero, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty,
       not_false_eq_true]
   · intro o ho
-    obtain ⟨x, hx⟩ := h.exists_gt (enum ((· < ·) : α → α → Prop) ⟨o, ho.1⟩)
+    obtain ⟨x, hx⟩ := exists_gt (enum ((· < ·) : α → α → Prop) ⟨o, ho.1⟩)
     have := ho.2
     refine this ?_ (typein_lt_type ((· < ·) : α → α → Prop) x)
     rwa [← typein_lt_typein ((· < ·) : α → α → Prop), typein_enum] at hx
 
-theorem isSuccLimit_iff_noMaxOrder {α : Type u} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)] :
+theorem isSuccLimit_type_iff_noMaxOrder {α : Type*} [Nonempty α] [Preorder α] [IsWellOrder α (· < ·)] :
     Order.IsSuccLimit (type ((· < ·) : α → α → Prop)) ↔ NoMaxOrder α :=
-  ⟨noMaxOrder_of_isSuccLimit, isSuccLimit_of_noMaxOrder⟩
+  ⟨noMaxOrder_of_isSuccLimit_type, fun _ ↦ isSuccLimit_type_of_noMaxOrder⟩
 
-theorem type_Iio_lt {α : Type u} [LinearOrder α] [WellFoundedLT α] (x : α) :
+theorem type_Iio_lt_type {α : Type u} [LinearOrder α] [WellFoundedLT α] (x : α) :
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) < type ((· < ·) : α → α → Prop) :=
   @typein_lt_type _ _ (inferInstanceAs (IsWellOrder α (· < ·))) x
 
@@ -96,9 +96,8 @@ theorem type_Iic_eq {α : Type u} [LinearOrder α] [WellFoundedLT α] (x : α) :
 theorem type_Iic_lt {α : Type u} [LinearOrder α] [WellFoundedLT α] [NoMaxOrder α] (x : α) :
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) < type ((· < ·) : α → α → Prop) := by
   rw [type_Iic_eq]
-  haveI : Nonempty α := ⟨x⟩
-  have h := isSuccLimit_of_noMaxOrder (inferInstanceAs (NoMaxOrder α))
-  exact h.2.succ_lt (type_Iio_lt x)
+  have : Nonempty α := ⟨x⟩
+  exact isSuccLimit_type_of_noMaxOrder.succ_lt (type_Iio_lt_type x)
 
 /-!
 ## Lifting ordinals
@@ -188,9 +187,11 @@ theorem add_lt_ord (h : ℵ₀ ≤ c) {x y : Ordinal.{u}}
   rw [card_add]
   exact Cardinal.add_lt_of_lt h hx hy
 
+@[implicit_reducible]
 def iioAdd : Add (Set.Iio c.ord) where
   add x y := ⟨x + y, add_lt_ord h x.prop y.prop⟩
 
+@[implicit_reducible]
 def iioSub (o : Ordinal) : Sub (Set.Iio o) where
   sub x y := ⟨x - y, (sub_le_self x y).trans_lt x.prop⟩
 
@@ -198,6 +199,7 @@ theorem ord_pos (h : ℵ₀ ≤ c) : 0 < c.ord := by
   rw [lt_ord, card_zero]
   exact aleph0_pos.trans_le h
 
+@[implicit_reducible]
 def iioZero : Zero (Set.Iio c.ord) where
   zero := ⟨0, ord_pos h⟩
 
@@ -207,6 +209,7 @@ theorem iioAdd_def (x y : Set.Iio c.ord) :
     ((x + y : Set.Iio c.ord) : Ordinal) = x + y :=
   rfl
 
+@[implicit_reducible]
 def iioAddMonoid : AddMonoid (Set.Iio c.ord) where
   add_assoc x y z := by
     apply Subtype.val_injective
@@ -225,16 +228,36 @@ def iioAddMonoid : AddMonoid (Set.Iio c.ord) where
   __ := iioZero h
 
 theorem nat_lt_ord (h : ℵ₀ ≤ c) (n : ℕ) : n < c.ord := by
-  apply (nat_lt_omega0 n).trans_le
+  apply (natCast_lt_omega0 n).trans_le
   apply ord_mono at h
   rwa [ord_aleph0] at h
 
+@[implicit_reducible]
 def iioOfNat (n : ℕ) : OfNat (Set.Iio c.ord) n where
   ofNat := ⟨n, nat_lt_ord h n⟩
 
+@[simp]
 theorem iioOfNat_coe (n : ℕ) :
     letI := iioOfNat h
     ((OfNat.ofNat n : Set.Iio c.ord) : Ordinal) = n :=
+  rfl
+
+@[implicit_reducible]
+def iioAddMonoidWithOne : AddMonoidWithOne (Set.Iio c.ord) where
+  __ := iioAddMonoid h
+  natCast n := ⟨n, nat_lt_ord h n⟩
+  natCast_zero := Subtype.ext Nat.cast_zero
+  natCast_succ n := by
+    apply Subtype.val_injective
+    letI := iioAdd h
+    rw [iioAdd_def]
+    exact Nat.cast_succ n
+  one := ⟨1, by simpa using nat_lt_ord h 1⟩
+
+@[simp]
+theorem iioNatCast_coe (n : ℕ) :
+    letI := iioAddMonoidWithOne h
+    ((n : Set.Iio c.ord) : Ordinal) = n :=
   rfl
 
 theorem iio_noMaxOrder (h : ℵ₀ ≤ c) : NoMaxOrder (Set.Iio c.ord) := by

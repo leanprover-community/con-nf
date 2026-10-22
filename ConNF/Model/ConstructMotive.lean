@@ -15,6 +15,8 @@ namespace ConNF
 
 variable [Params.{u}] {α : Λ} (M : (β : Λ) → (β : TypeIndex) < α → Motive β)
 
+set_option backward.isDefEq.respectTransparency false in
+@[implicit_reducible]
 def ltData :
     letI : Level := ⟨α⟩; LtData :=
   letI : Level := ⟨α⟩
@@ -28,12 +30,14 @@ def ltData :
     λ β hβ ↦ (M β hβ.elim).typed
   LtData.mk (data := data) (positions := positions) (typedNearLitters := typedNearLitters)
 
+@[implicit_reducible]
 def newModelData' :
     letI : Level := ⟨α⟩; ModelData α :=
   letI : Level := ⟨α⟩
   letI : LtData := ltData M
   newModelData
 
+@[implicit_reducible]
 def leData :
     letI : Level := ⟨α⟩; LeData :=
   letI : Level := ⟨α⟩
@@ -158,6 +162,7 @@ theorem castTangleLeLt_fuzz {β : Λ} (hβ : (β : TypeIndex) < α) (t : TangleL
 variable (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h))
 
 variable (α) in
+@[implicit_reducible]
 def preCoherentData :
     letI : Level := ⟨α⟩; PreCoherentData :=
   letI : Level := ⟨α⟩
@@ -267,6 +272,7 @@ theorem preCoherentData_pos_nearLitter_lt_pos
     apply (H β _).pos_nearLitter_lt_pos (castTangleLeLt M LtLevel.elim t) A N
     rwa [castTangleLeLt_support]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem preCoherentData_smul_fuzz
     {β : Λ} {γ : TypeIndex} {δ : Λ} [iβ : letI : Level := ⟨α⟩; LeLevel β]
     [iγ : letI : Level := ⟨α⟩; LtLevel γ] [iδ : letI : Level := ⟨α⟩; LtLevel δ]
@@ -316,6 +322,7 @@ theorem preCoherentData_smul_fuzz
       exact (H β (iβ.elim.lt_of_ne h)).smul_fuzz hγ hδ hγδ
         (castAllPermLeLt M _ ρ) (castTangleLeLt M _ t)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem preCoherentData_allPerm_of_smulFuzz
     {β : Λ} [iβ : letI : Level := ⟨α⟩; LeLevel β]
     (ρs : letI : Level := ⟨α⟩; {γ : TypeIndex} → [LtLevel γ] → γ < β → AllPermLe M γ LeLevel.elim)
@@ -413,6 +420,7 @@ theorem preCoherent_tSet_ext
       rwa [Equiv.apply_symm_apply] at this
     · exact castTSetLeLt_forget M _ y
 
+set_option backward.isDefEq.respectTransparency false in
 theorem typedMem_singleton_iff
     {β γ : Λ} [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
     (hγ : (γ : TypeIndex) < β) (x y : letI : Level := ⟨α⟩; TSetLe M γ LeLevel.elim) :
@@ -452,6 +460,7 @@ theorem typedMem_singleton_iff
       rw [Equiv.apply_symm_apply] at this
       exact this.symm
 
+@[implicit_reducible]
 def coherentData :
     letI : Level := ⟨α⟩; CoherentData :=
   letI : Level := ⟨α⟩

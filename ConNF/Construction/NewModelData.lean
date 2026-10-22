@@ -262,6 +262,7 @@ instance : MulAction NewPerm NewSet where
     ext : 1
     simp only [NewSet.smul_c, mul_smul]
 
+@[implicit_reducible]
 def newPreModelData : PreModelData α where
   TSet := Option NewSet
   AllPerm := NewPerm
@@ -350,6 +351,7 @@ theorem NewSet.coe_ne_empty (x : NewSet) : xᵁ ≠ (StrSet.coeEquiv.symm λ _ _
     rw [mem_members, h, StrSet.mem_iff, Equiv.apply_symm_apply] at hy
     cases hy
 
+@[implicit_reducible]
 def newModelData : ModelData α where
   tSetForget_injective' := by
     rintro (_ | x) (_ | y) h
@@ -533,11 +535,12 @@ theorem card_newPositionDeny (t : Tangle α) :
   · refine lt_of_le_of_lt ?_ (one_lt_aleph0.trans aleph0_lt_μ_ord_cof)
     rw [mk_le_one_iff_set_subsingleton]
     intro N₁ hN₁ N₂ hN₂
-    rw [Set.mem_setOf_eq] at hN₁ hN₂
-    rwa [hN₁, Option.some_inj, newTyped_injective.eq_iff] at hN₂
+    rw [hN₁] at hN₂
+    exact newTyped_injective (Option.some_inj.mp hN₂)
   · exact (Enumeration.coe_small _).trans_le κ_le_μ_ord_cof
   · exact (Enumeration.coe_small _).trans_le κ_le_μ_ord_cof
 
+@[implicit_reducible]
 def newPosition (h : #(Tangle α) ≤ #μ) : Position (Tangle α) where
   pos := ⟨funOfDeny h newPositionDeny card_newPositionDeny, funOfDeny_injective _ _ _⟩
 
@@ -571,6 +574,7 @@ theorem smul_newTyped' (ρ : AllPerm α) (N : NearLitter) :
   dsimp only
   rw [smul_newTyped ρ N]
 
+@[implicit_reducible]
 def newTypedNearLitters (h : #(Tangle α) ≤ #μ) :
     letI := newPosition h; TypedNearLitters α :=
   letI := newPosition h

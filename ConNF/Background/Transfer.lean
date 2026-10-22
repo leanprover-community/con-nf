@@ -11,6 +11,7 @@ namespace Equiv
 
 variable {α : Type u} {β : Type v} (e : α ≃ β)
 
+@[implicit_reducible]
 protected def le [LE β] : LE α where
   le := InvImage (· ≤ ·) e
 
@@ -19,6 +20,7 @@ theorem le_def [LE β] (x y : α) :
     x ≤ y ↔ e x ≤ e y :=
   Iff.rfl
 
+@[implicit_reducible]
 protected def lt [LT β] : LT α where
   lt := InvImage (· < ·) e
 
@@ -27,6 +29,7 @@ theorem lt_def [LT β] (x y : α) :
     x < y ↔ e x < e y :=
   Iff.rfl
 
+@[implicit_reducible]
 protected def min [Min β] : Min α where
   min x y := e.symm (e x ⊓ e y)
 
@@ -40,6 +43,7 @@ theorem apply_min [Min β] (x y : α) :
     e (x ⊓ y) = e x ⊓ e y := by
   rw [min_def, apply_symm_apply]
 
+@[implicit_reducible]
 protected def max [Max β] : Max α where
   max x y := e.symm (e x ⊔ e y)
 
@@ -53,6 +57,7 @@ theorem apply_max [Max β] (x y : α) :
     e (x ⊔ y) = e x ⊔ e y := by
   rw [max_def, apply_symm_apply]
 
+@[implicit_reducible]
 protected def compare [Ord β] : Ord α where
   compare x y := compare (e x) (e y)
 
@@ -61,11 +66,13 @@ theorem compare_def [Ord β] (x y : α) :
     compare x y = compare (e x) (e y) :=
   rfl
 
+@[implicit_reducible]
 protected def decidableLE [LE β] [DecidableRel ((· ≤ ·) : β → β → Prop)] :
     letI := e.le
     DecidableRel ((· ≤ ·) : α → α → Prop) :=
   λ x y ↦ inferInstanceAs (Decidable (e x ≤ e y))
 
+@[implicit_reducible]
 protected def decidableLT [LT β] [DecidableRel ((· < ·) : β → β → Prop)] :
     letI := e.lt
     DecidableRel ((· < ·) : α → α → Prop) :=
@@ -88,12 +95,15 @@ protected def ltIso [LT β] :
   map_rel_iff' := Iff.rfl
   __ := e
 
+@[implicit_reducible]
 protected def preorder [Preorder β] : Preorder α :=
   Preorder.lift e
 
+@[implicit_reducible]
 protected def partialOrder [PartialOrder β] : PartialOrder α :=
   PartialOrder.lift e e.injective
 
+@[implicit_reducible]
 protected def linearOrder [LinearOrder β] : LinearOrder α :=
   letI := e.max
   letI := e.min
@@ -141,6 +151,7 @@ protected theorem noMaxOrder [LT β] [NoMaxOrder β] :
   rw [lt_def, apply_symm_apply]
   exact hy
 
+@[implicit_reducible]
 protected def ofNat (n : ℕ) [OfNat β n] : OfNat α n where
   ofNat := e.symm (OfNat.ofNat n)
 

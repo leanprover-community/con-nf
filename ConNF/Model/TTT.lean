@@ -63,6 +63,7 @@ theorem allPerm_inv_sderiv' {β γ : TypeIndex} (h : γ < β) (ρ : AllPerm β) 
 def Symmetric {α β : Λ} (s : Set (TSet β)) (hβ : (β : TypeIndex) < α) : Prop :=
   ∃ S : Support α, ∀ ρ : AllPerm α, ρᵁ • S = S → ρ ↘ hβ • s = s
 
+set_option backward.isDefEq.respectTransparency false in
 def newSetEquiv {α : Λ} :
     letI : Level := ⟨α⟩
     @TSet _ α newModelData.toPreModelData ≃ TSet α :=
@@ -77,6 +78,7 @@ theorem newSetEquiv_forget {α : Λ}
   letI : Level := ⟨α⟩
   castTSet_forget (D₁ := newModelData) (D₂ := globalModelData) _ x
 
+set_option backward.isDefEq.respectTransparency false in
 def allPermEquiv {α : Λ} :
     letI : Level := ⟨α⟩
     NewPerm ≃ AllPerm α :=
@@ -90,6 +92,7 @@ theorem allPermEquiv_forget {α : Λ} (ρ : letI : Level := ⟨α⟩; NewPerm) :
   letI : Level := ⟨α⟩
   castAllPerm_forget (D₁ := newModelData) (D₂ := globalModelData) _ ρ
 
+set_option backward.isDefEq.respectTransparency false in
 theorem allPermEquiv_sderiv {α β : Λ}
     (ρ : letI : Level := ⟨α⟩; NewPerm) (hβ : (β : TypeIndex) < α) :
     letI : Level := ⟨α⟩

@@ -518,9 +518,9 @@ def upperBound (c : Set BaseApprox) (hc : IsChain (· ≤ ·) c) : BaseApprox wh
   exceptions := ⨆ ψ ∈ c, ψ.exceptions
   litters := ⨆ ψ ∈ c, ψᴸ
   exceptions_permutative := biSup_permutative_of_isChain
-    (λ ψ _ ↦ ψ.exceptions_permutative) (hc.image _ _ _ (λ _ _ h ↦ h.1.le))
+    (λ ψ _ ↦ ψ.exceptions_permutative) (hc.image_of_map_rel _ _ _ (λ _ _ h ↦ h.1.le))
   litters_permutative' := biSup_permutative_of_isChain
-    (λ ψ _ ↦ ψ.litters_permutative) (hc.image _ _ _ (λ _ _ h ↦ h.2))
+    (λ ψ _ ↦ ψ.litters_permutative) (hc.image_of_map_rel _ _ _ (λ _ _ h ↦ h.2))
   exceptions_small := upperBound_exceptions_small c hc
 
 theorem le_upperBound (c : Set BaseApprox) (hc : IsChain (· ≤ ·) c) :

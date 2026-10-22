@@ -220,27 +220,20 @@ theorem internallyWellOrdered_of_common_support_of_nontrivial {x : TSet γ}
   · apply ext hδ
     intro z
     rw [mem_field_iff, hrx]
-  refine @IsWellOrder.mk _ _ ?_ ?_ ?_
-  · constructor
-    intro a b hab hba
-    obtain h | h | h := trichotomous_of WellOrderingRel a.val b.val
-    · refine absurd ?_ hab
-      rw [InvImage, hr']
-      exact ⟨(hrx a).mp a.prop, (hrx b).mp b.prop, h⟩
-    · exact Subtype.val_injective h
-    · refine absurd ?_ hba
-      rw [InvImage, hr']
-      exact ⟨(hrx b).mp b.prop, (hrx a).mp a.prop, h⟩
-  · constructor
-    intro a b c h₁ h₂
-    rw [InvImage, hr'] at h₁ h₂ ⊢
-    exact ⟨h₁.1, h₂.2.1, WellOrderingRel.isWellOrder.trans _ _ _ h₁.2.2 h₂.2.2⟩
-  · constructor
-    apply InvImage.wf
+  refine @IsWellOrder.mk _ _ ⟨?_⟩ ⟨fun a b hab hba ↦ ?_⟩
+  · apply InvImage.wf
     refine Subrelation.wf ?_ WellOrderingRel.isWellOrder.wf
     intro a b h
     rw [hr'] at h
     exact h.2.2
+  obtain h | h | h := trichotomous_of WellOrderingRel a.val b.val
+  · refine absurd ?_ hab
+    rw [InvImage, hr']
+    exact ⟨(hrx a).mp a.prop, (hrx b).mp b.prop, h⟩
+  · exact Subtype.val_injective h
+  · refine absurd ?_ hba
+    rw [InvImage, hr']
+    exact ⟨(hrx b).mp b.prop, (hrx a).mp a.prop, h⟩
 
 theorem internallyWellOrdered_of_common_support {x : TSet γ}
     (S : Support δ) (hS : ∀ y : TSet δ, y ∈' x → S.Supports y) :

@@ -81,8 +81,8 @@ theorem mk_pow_le_of_mk_lt_ord_cof {α β : Type u}
     (hα : (#α).IsStrongLimit) (hβ : #β < (#α).ord.cof) :
     #α ^ #β ≤ #α := by
   by_cases hβ' : #β = 0
-  · rw [hβ', power_zero]
-    exact one_le_iff_ne_zero.mpr hα.1
+  · rw [hβ', power_zero, Cardinal.one_le_iff_ne_zero]
+    exact hα.1
   have hαβ : #(β × α) = #α := by
     rw [mk_prod, lift_id, lift_id]
     apply mul_eq_right

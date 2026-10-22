@@ -80,8 +80,8 @@ noncomputable def singleton (x : X) : Enumeration X where
     have : i = 0 := by
       obtain ⟨y, h, -⟩ := h
       exact h
-    rw [this, κEquiv_lt, ← Subtype.coe_lt_coe, κEquiv_ofNat, κEquiv_ofNat, Nat.cast_zero,
-      Nat.cast_one]
+    rw [this, κEquiv_lt, ← Subtype.coe_lt_coe, κEquiv_zero, ← Nat.cast_one,
+      κEquiv_natCast, Nat.cast_one]
     exact zero_lt_one
   rel_coinjective := by
     constructor

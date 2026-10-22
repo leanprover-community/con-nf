@@ -59,51 +59,37 @@ theorem WeakSpec.exists_conv (σ : WeakSpec β) {S T : Support β}
   intro A
   apply BaseSupport.ext
   · rw [Support.smul_derivBot, BaseSupport.smul_atoms]
-    apply Enumeration.ext
-    · have := habU.symm.trans habV
-      rw [funext_iff] at this
-      exact this A
     ext ⟨i, a⟩
-    have := haU.symm.trans haV
-    conv at this =>
-      rw [funext_iff]; intro
-      rw [funext_iff]; intro
-      rw [eq_iff_iff]
+    · exact congr($(habU.symm.trans habV) A)
+    have := congr($(haU.symm.trans haV) A i)
     constructor
     · intro hS
-      obtain ⟨b, hb⟩ := (this A i).mp ⟨_, hS⟩
+      obtain ⟨b, hb⟩ := this.mp ⟨_, hS⟩
       have ha' := (hSU A).1 (show (i, (ρᵁ A)⁻¹ • a) ∈ (S ⇘. A)ᴬ.rel from hS)
       have hb' := (hSV A).1 hb
       have := (U ⇘. A)ᴬ.rel_coinjective.coinjective ha' hb'
       simp only [smul_left_cancel_iff] at this
       rwa [this]
     · intro hT
-      obtain ⟨b, hb⟩ := (this A i).mpr ⟨_, hT⟩
+      obtain ⟨b, hb⟩ := this.mpr ⟨_, hT⟩
       have ha' := (hSV A).1 hT
       have hb' := (hSU A).1 hb
       have := (U ⇘. A)ᴬ.rel_coinjective.coinjective ha' hb'
       rwa [← this] at hb
   · rw [Support.smul_derivBot, BaseSupport.smul_nearLitters]
-    apply Enumeration.ext
-    · have := hNbU.symm.trans hNbV
-      rw [funext_iff] at this
-      exact this A
     ext ⟨i, N₁⟩
-    have := hNU.symm.trans hNV
-    conv at this =>
-      rw [funext_iff]; intro
-      rw [funext_iff]; intro
-      rw [eq_iff_iff]
+    · exact congr($(hNbU.symm.trans hNbV) A)
+    have := congr($(hNU.symm.trans hNV) A i)
     constructor
     · intro hS
-      obtain ⟨N₂, hN₂⟩ := (this A i).mp ⟨_, hS⟩
+      obtain ⟨N₂, hN₂⟩ := this.mp ⟨_, hS⟩
       have h₁' := (hSU A).2 (show (i, (ρᵁ A)⁻¹ • N₁) ∈ (S ⇘. A)ᴺ.rel from hS)
       have h₂' := (hSV A).2 hN₂
       have := (U ⇘. A)ᴺ.rel_coinjective.coinjective h₁' h₂'
       simp only [smul_left_cancel_iff] at this
       rwa [this]
     · intro hT
-      obtain ⟨N₂, hN₂⟩ := (this A i).mpr ⟨_, hT⟩
+      obtain ⟨N₂, hN₂⟩ := this.mpr ⟨_, hT⟩
       have h₁' := (hSV A).2 hT
       have h₂' := (hSU A).2 hN₂
       have := (U ⇘. A)ᴺ.rel_coinjective.coinjective h₁' h₂'

@@ -58,7 +58,7 @@ protected theorem TypeIndex.card :
 /-- Initial segments of `Λ` (excluding the endpoint) have cardinalities less than the cofinality of
 `μ`. This means that maps from such initial segments into `μ` cannot be cofinal. -/
 theorem Λ_card_Iio_lt (α : Λ) : #{β | β < α} < (#μ).ord.cof := by
-  have := (type_Iio_lt α).trans_le Λ_type_le_μ_ord_cof
+  have := (type_Iio_lt_type α).trans_le Λ_type_le_μ_ord_cof
   rwa [lt_ord] at this
 
 /-- Initial segments of `Λ` (including the endpoint) have cardinalities less than the
@@ -70,7 +70,7 @@ theorem Λ_card_Iic_lt (α : Λ) : #{β | β ≤ α} < (#μ).ord.cof := by
 /-- Initial segments of the type indices (including the endpoint) have cardinalities less than the
 cofinality of `μ`. -/
 theorem TypeIndex.card_Iio_lt (α : TypeIndex) : #{β | β < α} < (#μ).ord.cof := by
-  have := ((type_Iio_lt α).trans_eq TypeIndex.type).trans_le Λ_type_le_μ_ord_cof
+  have := ((type_Iio_lt_type α).trans_eq TypeIndex.type).trans_le Λ_type_le_μ_ord_cof
   rwa [lt_ord] at this
 
 /-- Initial segments of the type indices (including the endpoint) have cardinalities less than the

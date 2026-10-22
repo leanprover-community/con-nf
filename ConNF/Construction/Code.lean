@@ -138,24 +138,19 @@ theorem Code.positions_lt_of_cloud {c d : Code} (h : Cloud c d) :
   exact TypedNearLitters.pos_le_pos_of_typed N t hu.symm
 
 def Code.pos (c : Code) : μ :=
-  WellFounded.min (inferInstanceAs (WellFoundedLT μ)).wf
-    c.positions c.positions_nonempty
+  wellFounded_lt.min c.positions c.positions_nonempty
 
 theorem Code.cloud_subrelation : Subrelation Cloud (InvImage (· < ·) pos) := by
   intro c d h
   have := positions_lt_of_cloud h d.pos (WellFounded.min_mem _ _ _)
   obtain ⟨ν, hν₁, hν₂⟩ := this
   rw [InvImage]
-  have := WellFounded.not_lt_min (inferInstanceAs (WellFoundedLT μ)).wf
-    c.positions c.positions_nonempty hν₁
+  have := wellFounded_lt.not_lt_min  c.positions hν₁
   rw [← not_le]
   contrapose! this
   exact hν₂.trans_le this
 
-theorem cloud_wf : WellFounded Cloud := by
-  apply Code.cloud_subrelation.wf
-  apply InvImage.wf
-  exact (inferInstanceAs (WellFoundedLT μ)).wf
+theorem cloud_wf : WellFounded Cloud := Code.cloud_subrelation.wf <| InvImage.wf _ IsWellFounded.wf
 
 theorem eq_of_cloud {c : Code} {γ : TypeIndex} [LtLevel γ]
     {s t : Set (TSet γ)} {hs : s.Nonempty} {ht : t.Nonempty}
@@ -189,7 +184,7 @@ theorem even_or_odd (c : Code) : c.Even ∨ c.Odd := by
     · left
       exact .mk c h'
     · right
-      push_neg at h'
+      push Not at h'
       obtain ⟨d, hd₁, hd₂⟩ := h'
       obtain (hd | hd) := ih d hd₁
       · exact .mk c d hd₁ hd

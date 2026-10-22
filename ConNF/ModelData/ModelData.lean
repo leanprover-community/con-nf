@@ -34,7 +34,7 @@ class PreModelData (α : TypeIndex) where
 
 export PreModelData (TSet AllPerm)
 
-attribute [instance] PreModelData.allPermGroup PreModelData.allAction
+attribute [implicit_reducible, instance] PreModelData.allPermGroup PreModelData.allAction
 
 instance {α : TypeIndex} [PreModelData α] : SuperU (TSet α) (StrSet α) where
   superU := PreModelData.tSetForget
@@ -257,12 +257,14 @@ theorem Support.supports_bot {X : Type*} [PreModelData ⊥] [MulAction (AllPerm 
 ## Model data at level `⊥`
 -/
 
+@[implicit_reducible]
 def botPreModelData : PreModelData ⊥ where
   TSet := Atom
   AllPerm := BasePerm
   tSetForget := StrSet.botEquiv.symm
   allPermForget ρ _ := ρ
 
+@[implicit_reducible]
 def botModelData : ModelData ⊥ where
   tSetForget_injective' := Equiv.injective _
   tSetForget_surjective_of_bot' _ := Equiv.surjective _

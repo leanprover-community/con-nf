@@ -74,8 +74,8 @@ theorem card_reflTransGen_lt (hr : ∀ y, #{x | r x y} < κ)
   rw [card_iUnion_lt_iff_forall_of_isRegular hκ₁]
   · simp only [ULift.forall]
     apply card_reflTransGenₙ_lt hr hκ₁
-    simp only [mk_fintype, Fintype.card_ofSubsingleton, Nat.cast_one]
-    exact one_lt_aleph0.trans hκ₂
+    grw [mk_singleton, ← hκ₂]
+    exact one_lt_aleph0
   · rw [mk_eq_aleph0]
     exact hκ₂
 

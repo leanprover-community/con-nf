@@ -506,8 +506,8 @@ theorem Path.eq_of_toList_eq (A : α ↝ β) (B : α ↝ γ) : A.toList = B.toLi
     | nil => simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, toList_nil,
         reduceCtorEq] at h
     | sderiv γ δ B hδ =>
-      simp only [toList_sderiv, Set.mem_setOf_eq, List.cons.injEq, Subtype.mk.injEq] at h
-      exact h.1
+      simp only [toList_sderiv, Set.mem_setOf_eq, List.cons.injEq] at h
+      exact congr($(h.1).val)
 
 theorem Path.toList_injective (α β : TypeIndex) :
     Function.Injective (toList : (α ↝ β) → List {β | β < α}) := by

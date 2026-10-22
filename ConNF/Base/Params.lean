@@ -4,6 +4,7 @@ public import Mathlib.Order.Interval.Set.Infinite
 public import ConNF.Background.Cardinal
 public import ConNF.Background.Ordinal
 public import ConNF.Background.Transfer
+public import Mathlib.Algebra.Ring.TransferInstance
 
 /-!
 # Model parameters
@@ -86,6 +87,7 @@ Importantly, ZFC (with no inaccessibles) proves that this is a set of model para
 We take `Λ = ω, κ = ω₁, μ = ב_ω₁` (of course, up to identification of cardinals and ordinals with
 their representative types).
 -/
+@[implicit_reducible]
 def Params.minimal : Params where
   Λ := ℕ
   κ := (aleph 1).out
@@ -106,28 +108,29 @@ def Params.minimal : Params where
     exact one_lt_of_isSuccLimit (isSuccLimit_omega 1)
   κ_le_μ_ord_cof := by
     rw [mk_out, mk_out]
-    have := cof_le_of_isNormal (isNormal_ord.comp isNormal_beth) (aleph 1).ord
-    rwa [isRegular_aleph_one.cof_eq] at this
+    have := le_cof_map_of_isNormal (isNormal_ord.comp isNormal_beth) (aleph 1).ord
+    rwa [isRegular_aleph_one.cof_ord] at this
   Λ_type_le_μ_ord_cof := by
     rw [type_nat_lt, mk_out]
     apply (omega0_le_of_isSuccLimit (isSuccLimit_omega 1)).trans
-    have := cof_le_of_isNormal (isNormal_ord.comp isNormal_beth) (aleph 1).ord
-    rw [isRegular_aleph_one.cof_eq, ← ord_le_ord] at this
+    have := le_cof_map_of_isNormal (isNormal_ord.comp isNormal_beth) (aleph 1).ord
+    rw [isRegular_aleph_one.cof_ord, ← ord_le_ord] at this
     rwa [ord_aleph] at this ⊢
 
 /--
 We can also instantiate our model parameters with `Λ = μ`. To do this, both `#Λ` and `#μ` will need
 to be inaccessible cardinals. We simply pick `κ = ω₁` for convenience.
 -/
+@[implicit_reducible]
 def Params.inaccessible.{v} : Params where
   Λ := (Cardinal.univ.{v, v + 1}).ord.ToType
   κ := ULift.{v + 1, v} (aleph 1).out
   μ := Cardinal.univ.{v, v + 1}.out
   Λ_nonempty := by
-    rw [ord_univ, toType_nonempty_iff_ne_zero, Ordinal.univ_id]
+    rw [ord_univ, nonempty_toType_iff, ← type_lt_ordinal]
     simp only [ne_eq, type_eq_zero_iff_isEmpty, not_isEmpty_of_nonempty, not_false_eq_true]
   Λ_noMaxOrder := by
-    apply noMaxOrder_of_isSuccLimit
+    apply noMaxOrder_of_isSuccLimit_type
     change Order.IsSuccLimit (type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.ToType → _ → Prop))
     rw [type_toType]
     apply isSuccLimit_ord
@@ -146,11 +149,11 @@ def Params.inaccessible.{v} : Params where
     rw [mk_uLift, mk_out, mk_out]
     exact lift_lt_univ _
   κ_le_μ_ord_cof := by
-    rw [mk_uLift, mk_out, mk_out, IsInaccessible.univ.isRegular.cof_eq]
+    rw [mk_uLift, mk_out, mk_out, IsInaccessible.univ.isRegular.cof_ord]
     exact (lift_lt_univ _).le
   Λ_type_le_μ_ord_cof := by
     change type ((· < ·) : (Cardinal.univ.{v, v + 1}).ord.ToType → _ → Prop) ≤ _
-    rw [type_toType, mk_out, IsInaccessible.univ.isRegular.cof_eq]
+    rw [type_toType, mk_out, IsInaccessible.univ.isRegular.cof_ord]
 
 /-!
 We now inform Lean that our model parameters should be accessible from the names `Λ`, `κ`, etc.
@@ -223,26 +226,29 @@ instance : NoMaxOrder κ :=
   letI := iio_noMaxOrder aleph0_lt_κ.le
   Equiv.noMaxOrder κEquiv
 
-/-- We overload Lean's numeric literal syntax so that numbers such as `0` can also be interpreted
-as particular inhabitants of `κ`. We could do this for the other cardinal parameters as well, but
-we don't need it. -/
-instance (n : ℕ) : OfNat κ n :=
-  letI := iioOfNat aleph0_lt_κ.le n
-  Equiv.ofNat κEquiv n
+/-- We define a monoid structure on `κ`, denoted `+`, by passing to the collection of ordinals below
+`(#κ).ord` and then computing their sum. -/
+instance : AddMonoidWithOne κ :=
+  letI := iioAddMonoidWithOne aleph0_lt_κ.le
+  κEquiv.addMonoidWithOne
+
+instance : Sub κ :=
+  letI := iioSub (#κ).ord
+  Equiv.sub κEquiv
+
 
 instance : LinearOrder μ := μEquiv.linearOrder
 instance : WellFoundedLT μ := μEquiv.wellFoundedLT
 instance : NoMaxOrder μ :=
   letI := iio_noMaxOrder aleph0_lt_μ.le
-  Equiv.noMaxOrder μEquiv
+  μEquiv.noMaxOrder
 
 instance : Infinite Λ := NoMaxOrder.infinite
 instance : Infinite κ := by rw [infinite_iff]; exact aleph0_lt_κ.le
 instance : Infinite μ := by rw [infinite_iff]; exact aleph0_lt_μ.le
 
-theorem Λ_type_isSuccLimit : Order.IsSuccLimit (type ((· < ·) : Λ → Λ → Prop)) := by
-  rw [isSuccLimit_iff_noMaxOrder]
-  infer_instance
+theorem Λ_type_isSuccLimit : Order.IsSuccLimit (type ((· < ·) : Λ → Λ → Prop)) :=
+  isSuccLimit_type_of_noMaxOrder
 
 /-- The order type on `κ` really is the initial ordinal for the cardinal `#κ`. -/
 @[simp]
@@ -255,25 +261,20 @@ theorem μ_type : type ((· < ·) : μ → μ → Prop) = (#μ).ord := by
   have := μEquiv.type_lt
   rwa [Ordinal.lift_id, type_Iio, Ordinal.lift_inj] at this
 
-/-- We define a monoid structure on `κ`, denoted `+`, by passing to the collection of ordinals below
-`(#κ).ord` and then computing their sum. -/
-instance : AddMonoid κ :=
-  letI := iioAddMonoid aleph0_lt_κ.le
-  Equiv.addMonoid κEquiv
-
-instance : Sub κ :=
-  letI := iioSub (#κ).ord
-  Equiv.sub κEquiv
-
 /-! Basic properties about the order and operations on `κ`. -/
 
-theorem κ_ofNat_def (n : ℕ) :
+theorem κ_natCast_def (n : ℕ) :
+    letI := iioAddMonoidWithOne aleph0_lt_κ.le
+    (n : κ) = κEquiv.symm n :=
+  rfl
+
+theorem κ_ofNat_def (n : ℕ) [n.AtLeastTwo] :
     letI := iioOfNat aleph0_lt_κ.le n
     OfNat.ofNat n = κEquiv.symm (OfNat.ofNat n) :=
   rfl
 
 theorem κ_add_def (x y : κ) :
-    letI := iioAddMonoid aleph0_lt_κ.le
+    letI := iioAddMonoidWithOne aleph0_lt_κ.le
     x + y = κEquiv.symm (κEquiv x + κEquiv y) :=
   rfl
 
@@ -282,10 +283,13 @@ theorem κ_sub_def (x y : κ) :
     x - y = κEquiv.symm (κEquiv x - κEquiv y) :=
   rfl
 
-theorem κEquiv_ofNat (n : ℕ) :
-    (κEquiv (OfNat.ofNat n) : Ordinal) = n := by
-  rw [κ_ofNat_def, Equiv.apply_symm_apply]
-  rfl
+theorem κEquiv_natCast (n : ℕ) : (κEquiv (n : κ) : Ordinal) = n := by simp [κ_natCast_def]
+
+theorem κEquiv_ofNat (n : ℕ) [n.AtLeastTwo] : (κEquiv (OfNat.ofNat n) : Ordinal) = n :=
+  κEquiv_natCast n
+
+theorem κEquiv_zero : (κEquiv 0 : Ordinal) = 0 := by
+  rw [← Nat.cast_zero, κEquiv_natCast, Nat.cast_zero]
 
 theorem κEquiv_add (x y : κ) :
     (κEquiv (x + y) : Ordinal) = (κEquiv x : Ordinal) + κEquiv y := by
@@ -307,7 +311,7 @@ theorem κEquiv_le (x y : κ) :
 
 theorem κ_zero_le (x : κ) :
     0 ≤ x := by
-  rw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_ofNat, Nat.cast_zero]
+  rw [κEquiv_le, ← Subtype.coe_le_coe, κEquiv_zero]
   exact zero_le _
 
 instance : CovariantClass κ κ (· + ·) (· ≤ ·) := by
@@ -341,21 +345,22 @@ instance : IsLeftCancelAdd κ := by
   rw [κEquiv_add, κEquiv_add] at h
   exact add_left_cancel_iff.mp h
 
+
 theorem κ_typein (x : κ) :
     -- TODO: Why can't Lean find this instance?
-    letI := inferInstanceAs (IsWellOrder κ (· < ·))
+    letI : IsWellOrder κ (· < ·) := isWellOrder_lt
     typein (· < ·) x = κEquiv x := by
   have := κEquiv.typein_lt x
   rw [Ordinal.lift_id, typein_Iio, Ordinal.lift_inj] at this
   exact this.symm
 
 theorem κ_card_Iio_eq (x : κ) : #{y | y < x} = (κEquiv x).1.card := by
-  rw [Set.coe_setOf, card_typein, κ_typein]
+  rw [Set.coe_setOf, ← card_typein, κ_typein]
 
 -- TODO: Unify the following two lemmas with the corresponding ones in TypeIndex somehow.
 
 theorem μ_card_Iio_lt (ν : μ) : #{ξ | ξ < ν} < #μ := by
-  have := (type_Iio_lt ν).trans_eq μ_type
+  have := (type_Iio_lt_type ν).trans_eq μ_type
   rwa [lt_ord] at this
 
 theorem μ_card_Iic_lt (ν : μ) : #{ξ | ξ ≤ ν} < #μ := by
@@ -364,8 +369,14 @@ theorem μ_card_Iic_lt (ν : μ) : #{ξ | ξ ≤ ν} < #μ := by
 
 /-- A set in `μ` that is smaller than the cofinality of `μ` is bounded. -/
 theorem μ_bounded_lt_of_lt_μ_ord_cof (s : Set μ) (h : #s < (#μ).ord.cof) :
-    s.Bounded (· < ·) :=
-  Ordinal.lt_cof_type (μ_type ▸ h)
+    s.Bounded (· < ·) := by
+  rw [← μ_type, cof_type] at h
+  by_contra hs
+  refine (Order.cof_le ?_).not_gt h
+  intro a
+  simp only [Set.Bounded, not_exists, not_forall, not_lt] at hs
+  obtain ⟨b, hb, hab⟩ := hs a
+  exact ⟨b, hb, hab⟩
 
 /-- A partial converse to the previous theorem: a bounded set in `μ` must have cardinality smaller
 than `μ` itself. -/

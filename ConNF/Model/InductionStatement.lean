@@ -24,6 +24,7 @@ theorem card_tangle_bot_le [ModelData ⊥] : #(Tangle ⊥) ≤ #μ := by
   apply (mk_le_of_injective StrSet.botEquiv.injective).trans
   rw [card_atom]
 
+@[implicit_reducible]
 def botPosition [ModelData ⊥] : Position (Tangle ⊥) where
   pos := ⟨funOfDeny card_tangle_bot_le (λ t ↦ pos '' (t.supportᴬ.image Prod.snd : Set Atom))
       λ _ ↦ mk_image_le.trans_lt ((Enumeration.coe_small _).trans_le κ_le_μ_ord_cof),

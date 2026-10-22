@@ -95,7 +95,7 @@ theorem κ_le_of_not_small (h : ¬Small s) : #κ ≤ #s := by
 
 /-- Initial segments of `κ` (excluding the endpoint) are small. -/
 theorem iio_small (i : κ) : Small {j | j < i} := by
-  have := Ordinal.type_Iio_lt i
+  have := Ordinal.type_Iio_lt_type i
   rwa [κ_type, lt_ord, Ordinal.card_type] at this
 
 /-- Initial segments of `κ` (including the endpoint) are small. -/

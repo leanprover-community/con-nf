@@ -357,9 +357,7 @@ theorem inflexible_of_inflexible_of_fixes {S : Support α} {T : Support γ}
       case sderiv ζ B hζ _ _ =>
         rw [← Path.coderiv_deriv] at hA
         cases Path.sderiv_index_injective hA
-        apply Path.sderiv_path_injective at hA
-        dsimp only at hA hζ hε' B t
-        cases hA
+        dsimp only at hζ hε' B t
         use (ρ₂ * ρ₁⁻¹) ⇘ B ↘ hδ
         rw [inv_smul_eq_iff] at hN'
         rw [← smul_fuzz hδ hε hδε, ← ht, hN'.1]
