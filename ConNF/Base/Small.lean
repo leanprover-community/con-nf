@@ -197,7 +197,7 @@ theorem small_of_small_dom_cod {r : SetRel α β} (h₁ : Small r.dom) (h₂ : S
   · intro x hx
     apply (h₂.image (λ y ↦ (x, y))).mono
     rintro ⟨x', y⟩ hy
-    rw [mem_setOf_eq] at hy
+    rw [mem_ofPred_eq] at hy
     cases hy.1
     rw [mem_image]
     exact ⟨y, ⟨x', hy.2⟩, rfl⟩
@@ -312,6 +312,6 @@ theorem card_near_eq (s : Set α) (h : #α = #μ) : #{t | t ~ s} = #μ := by
   rw [Cardinal.eq]
   refine ⟨⟨λ t ↦ ⟨t ∆ s, t.prop⟩, λ t ↦ ⟨t ∆ s, near_symmDiff_self_of_small t.prop⟩, ?_, ?_⟩⟩ <;>
   · intro t
-    simp only [coe_setOf, mem_setOf_eq, symmDiff_symmDiff_cancel_right, Subtype.coe_eta]
+    simp only [coe_ofPred, mem_ofPred_eq, symmDiff_symmDiff_cancel_right, Subtype.coe_eta]
 
 end ConNF

@@ -50,7 +50,7 @@ theorem exists_up (x y : TSet β) :
   simp only [Set.smul_set_def, Set.image, Set.mem_insert_iff, Set.mem_singleton_iff,
     exists_eq_or_imp, hS, exists_eq_left, hT]
   ext z
-  rw [Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq]
+  rw [Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_ofPred_eq]
   aesop
 
 /-- The unordered pair. -/
@@ -151,7 +151,7 @@ theorem exists_singletonImage (x : TSet β) :
     use y
     intro z w
     rw [hy]
-    simp only [Set.mem_setOf_eq, op_inj, singleton_inj, exists_eq_right_right', exists_eq_right']
+    simp only [Set.mem_ofPred_eq, op_inj, singleton_inj, exists_eq_right_right', exists_eq_right']
   · obtain ⟨S, hS⟩ := exists_support x
     use S ↗ hβ
     intro ρ hρ
@@ -166,7 +166,7 @@ theorem exists_singletonImage (x : TSet β) :
       · simp only [smul_op, smul_singleton]
     · rintro ⟨z, w, hab, rfl⟩
       refine ⟨ρ⁻¹ ↘ hβ • op hγ hδ (singleton hε z) (singleton hε w), ?_, ?_⟩
-      · simp only [allPerm_inv_sderiv', smul_op, smul_singleton, Set.mem_setOf_eq, op_inj,
+      · simp only [allPerm_inv_sderiv', smul_op, smul_singleton, Set.mem_ofPred_eq, op_inj,
           singleton_inj, exists_eq_right_right', exists_eq_right']
         rw [smul_eq_iff_eq_inv_smul] at hS
         rw [hS]
@@ -302,7 +302,7 @@ theorem exists_typeLower (x : TSet α) :
     ext z
     constructor
     · rintro ⟨_, ⟨_, ⟨a, ⟨b, hb, rfl⟩, rfl⟩, rfl⟩, rfl⟩
-      simp only [smul_singleton, Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and,
+      simp only [smul_singleton, Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and,
         singleton_inj, exists_eq_right]
       intro c
       have := hb (ρ⁻¹ ↘ hβ ↘ hγ ↘ hδ • c)
@@ -313,7 +313,7 @@ theorem exists_typeLower (x : TSet α) :
       exact this
     · rintro ⟨_, ⟨a, ⟨b, hb, rfl⟩, rfl⟩, rfl⟩
       rw [Set.mem_smul_set_iff_inv_smul_mem]
-      simp only [smul_singleton, allPerm_inv_sderiv', Set.mem_image, Set.mem_setOf_eq,
+      simp only [smul_singleton, allPerm_inv_sderiv', Set.mem_image, Set.mem_ofPred_eq,
         exists_exists_and_eq_and, singleton_inj, exists_eq_right]
       intro c
       have := hb (ρ ↘ hβ ↘ hγ ↘ hδ • c)
@@ -328,7 +328,7 @@ theorem exists_converse (x : TSet α) :
     use y
     intro a b
     rw [hy]
-    simp only [Set.mem_setOf_eq, op_inj]
+    simp only [Set.mem_ofPred_eq, op_inj]
     constructor
     · rintro ⟨a', b', ⟨rfl, rfl⟩, h⟩
       exact h
@@ -383,7 +383,7 @@ theorem exists_subset :
     use y
     intro a b
     rw [hy]
-    simp only [Set.mem_setOf_eq, op_inj]
+    simp only [Set.mem_ofPred_eq, op_inj]
     constructor
     · rintro ⟨a', b', ⟨rfl, rfl⟩, h⟩
       exact h

@@ -196,13 +196,14 @@ def preCoherentData :
         (castTSetLeLt M _).symm ((H β (LeLevel.elim.lt_of_ne h)).singleton hγ (castTSetLeLt M _ x))
   }
 
+set_option backward.isDefEq.respectTransparency false in
 theorem preCoherentData_allPermSderiv_forget {β γ : TypeIndex}
     [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
     (hγ : γ < β) (ρ : AllPermLe M β iβ.elim) :
     ((leData M).data γ).allPermForget ((preCoherentData α M H).allPermSderiv hγ ρ) =
     ((leData M).data β).allPermForget ρ ↘ hγ := by
-  letI : Level := ⟨α⟩
-  letI : LtData := ltData M
+  let : Level := ⟨α⟩
+  let : LtData := ltData M
   unfold PreCoherentData.allPermSderiv preCoherentData
   dsimp only
   revert iβ iγ
@@ -219,7 +220,7 @@ theorem preCoherentData_allPermSderiv_forget {β γ : TypeIndex}
         exact (NewPerm.forget_sderiv ((castAllPermLeEq M h) ρ) ⊥).symm
       | coe γ =>
         intro _ hγ ρ
-        haveI : LtLevel γ := ⟨hγ⟩
+        have : LtLevel γ := ⟨hγ⟩
         rw [← castAllPermLeEq_forget, ← castAllPermLeLt_forget M hγ]
         simp only [recBotCoe_coe, Equiv.apply_symm_apply]
         exact (NewPerm.forget_sderiv ((castAllPermLeEq M h) ρ) γ).symm
@@ -240,7 +241,7 @@ theorem preCoherentData_pos_atom_lt_pos
     {β : TypeIndex} [iβ : letI : Level := ⟨α⟩; LtLevel β] (t : TangleLe M β iβ.elim.le)
     (A : β ↝ ⊥) (a : Atom) (ha : a ∈ (letI := (leData M).data β; Tangle.support t ⇘. A)ᴬ) :
     pos a < ((leData M).positions β).pos t := by
-  letI : Level := ⟨α⟩
+  let : Level := ⟨α⟩
   revert iβ
   induction β using recBotCoe with
   | bot =>
@@ -257,12 +258,12 @@ theorem preCoherentData_pos_nearLitter_lt_pos
     {β : TypeIndex} [iβ : letI : Level := ⟨α⟩; LtLevel β] (t : TangleLe M β iβ.elim.le)
     (A : β ↝ ⊥) (N : NearLitter) (hN : N ∈ (letI := (leData M).data β; Tangle.support t ⇘. A)ᴺ) :
     pos N < ((leData M).positions β).pos t := by
-  letI : Level := ⟨α⟩
+  let : Level := ⟨α⟩
   revert iβ
   induction β using recBotCoe with
   | bot =>
     rintro _ t ⟨i, ha⟩
-    letI := botModelData
+    let := botModelData
     change i ~[t.supportᴺ.rel] ⟨A, N⟩ at ha
     rw [t.support_supports.nearLitters_eq_empty_of_bot rfl] at ha
     cases ha
@@ -281,7 +282,7 @@ theorem preCoherentData_smul_fuzz
     letI : Level := ⟨α⟩; letI := preCoherentData α M H
     ((leData M).data β).allPermForget ρ ↘ hδ ↘. • fuzz hγδ t =
     fuzz hγδ ((preCoherentData α M H).allPermSderiv hγ ρ • t) := by
-  letI : Level := ⟨α⟩
+  let : Level := ⟨α⟩
   by_cases h : (β : TypeIndex) = α
   · cases coe_injective h
     revert iγ
@@ -291,14 +292,14 @@ theorem preCoherentData_smul_fuzz
       rw [← castAllPermLeEq_forget]
       unfold PreCoherentData.allPermSderiv preCoherentData
       simp only [recBotCoe_bot, recBotCoe_coe, ↓reduceDIte, id_eq]
-      letI := ltData M
+      let := ltData M
       exact (castAllPermLeEq M rfl ρ).smul_fuzz hγδ t
     | coe γ =>
       intro _ t
       rw [← castTangleLeLt_fuzz M hγ, ← castTangleLeLt_fuzz M hγ, ← castAllPermLeEq_forget]
       unfold PreCoherentData.allPermSderiv preCoherentData
       simp only [recBotCoe_coe, ↓reduceDIte]
-      letI := ltData M
+      let := ltData M
       have := (castAllPermLeEq M rfl ρ).smul_fuzz hγδ (castTangleLeLt M hγ t)
       rwa [castAllPermLeLt_smul] at this
   · revert iγ
@@ -334,10 +335,10 @@ theorem preCoherentData_allPerm_of_smulFuzz
     letI : Level := ⟨α⟩
     ∃ ρ : AllPermLe M β LeLevel.elim, ∀ (γ : TypeIndex) [LtLevel γ] (hγ : γ < β),
       (preCoherentData α M H).allPermSderiv hγ ρ = ρs hγ := by
-  letI : Level := ⟨α⟩
+  let : Level := ⟨α⟩
   by_cases h : (β : TypeIndex) = α
   · cases coe_injective h
-    letI := ltData M
+    let := ltData M
     refine ⟨(castAllPermLeEq M rfl).symm ⟨λ β iβ ↦ β.recBotCoe
         (λ _ ↦ ρs (bot_lt_coe _)) (λ β iβ ↦ castAllPermLeLt M iβ.elim (ρs iβ.elim)) iβ, ?_⟩, ?_⟩
     · intro β
@@ -374,30 +375,31 @@ theorem preCoherentData_allPerm_of_smulFuzz
           ↓reduceDIte, Equiv.apply_symm_apply, Equiv.symm_apply_apply,
           show β ≠ α from h ∘ congr_arg _, hρ₁, hρ₂]
     · intro γ δ hγ hδ hγδ t
-      letI : LtLevel γ := ⟨hγ.trans_le LeLevel.elim⟩
-      letI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
+      let : LtLevel γ := ⟨hγ.trans_le LeLevel.elim⟩
+      let : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
       rw [castAllPermLeLt_smul'' M, castTangleLeLt_fuzz M]
       have := hρs hγ hδ hγδ ((castTangleLeLt M LtLevel.elim).symm t)
       rwa [← castTangleLeLt_fuzz M LtLevel.elim, Equiv.apply_symm_apply,
         ← castAllPermLeLt_forget M LtLevel.elim] at this
     · intro δ hδ t
-      letI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
+      let : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
       have := hρs (bot_lt_coe β) hδ bot_ne_coe t
       rw [← castAllPermLeLt_forget M LtLevel.elim] at this
       exact this
 
+set_option backward.isDefEq.respectTransparency false in
 theorem preCoherent_tSet_ext
     (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h))
     {β γ : Λ} [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
     (hγ : (γ : TypeIndex) < β) (x y : letI : Level := ⟨α⟩; TSetLe M β LeLevel.elim)
     (hxy : letI : Level := ⟨α⟩; ∀ (z : TSetLe M γ LeLevel.elim), z ∈[hγ] x ↔ z ∈[hγ] y) :
     x = y := by
-  letI : Level := ⟨α⟩
+  let : Level := ⟨α⟩
   by_cases h : (β : TypeIndex) = α
   · cases coe_injective h
     apply (castTSetLeEq M rfl).injective
-    letI : LtLevel γ := ⟨hγ⟩
-    letI := ltData M
+    let : LtLevel γ := ⟨hγ⟩
+    let := ltData M
     apply newModelData_ext γ
     intro z
     simp only [← TSet.forget_mem_forget] at hxy ⊢
@@ -425,14 +427,14 @@ theorem typedMem_singleton_iff
     {β γ : Λ} [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
     (hγ : (γ : TypeIndex) < β) (x y : letI : Level := ⟨α⟩; TSetLe M γ LeLevel.elim) :
     y ∈[hγ] (preCoherentData α M H).singleton hγ x ↔ y = x := by
-  letI : Level := ⟨α⟩
+  let : Level := ⟨α⟩
   by_cases h : (β : TypeIndex) = α
   · cases coe_injective h
     unfold singleton preCoherentData
     simp only [coe_inj, ↓reduceDIte, ← TSet.forget_mem_forget]
-    letI : LtLevel γ := ⟨hγ⟩
-    letI := newModelData' M
-    letI := ltData M
+    let : LtLevel γ := ⟨hγ⟩
+    let := newModelData' M
+    let := ltData M
     have := mem_newSingleton_iff (castTSetLeLt M _ x) (castTSetLeLt M _ y)
     rw [EmbeddingLike.apply_eq_iff_eq] at this
     have h' := TSet.forget_mem_forget
@@ -447,8 +449,8 @@ theorem typedMem_singleton_iff
       exact this.symm
   · unfold singleton preCoherentData
     simp only [coe_inj, show β ≠ α from h ∘ congr_arg _, ↓reduceDIte, ← TSet.forget_mem_forget]
-    letI := (M β (LeLevel.elim.lt_of_ne h)).data
-    letI := (M γ (hγ.trans_le LeLevel.elim)).data
+    let := (M β (LeLevel.elim.lt_of_ne h)).data
+    let := (M γ (hγ.trans_le LeLevel.elim)).data
     have := (H β (LeLevel.elim.lt_of_ne h)).typedMem_singleton_iff hγ
       (castTSetLeLt M _ x) (castTSetLeLt M _ y)
     rw [EmbeddingLike.apply_eq_iff_eq] at this
@@ -480,9 +482,9 @@ theorem newModelData_card_tangle_le
     (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h)) :
     #(letI := newModelData' M; Tangle α) ≤ #μ := by
   rw [← Cardinal.eq.mpr ⟨castTangleLeEq M rfl⟩]
-  letI := coherentData M H
-  letI : Level := ⟨α⟩
-  letI : LeLevel α := ⟨le_rfl⟩
+  let := coherentData M H
+  let : Level := ⟨α⟩
+  let : LeLevel α := ⟨le_rfl⟩
   exact card_tangle_le_of_card_tSet (card_tSet_le α)
 
 def constructMotive (α : Λ) (M : (β : Λ) → (β : TypeIndex) < α → Motive β)

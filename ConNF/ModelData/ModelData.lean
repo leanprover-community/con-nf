@@ -264,6 +264,7 @@ def botPreModelData : PreModelData ⊥ where
   tSetForget := StrSet.botEquiv.symm
   allPermForget ρ _ := ρ
 
+set_option backward.isDefEq.respectTransparency false in
 @[implicit_reducible]
 def botModelData : ModelData ⊥ where
   tSetForget_injective' := Equiv.injective _

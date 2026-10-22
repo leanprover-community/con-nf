@@ -98,17 +98,17 @@ theorem allPermEquiv_sderiv {α β : Λ}
     letI : Level := ⟨α⟩
     letI : LtLevel β := ⟨hβ⟩
     allPermEquiv ρ ↘ hβ = ρ.sderiv β := by
-  letI : Level := ⟨α⟩
-  letI : LeLevel α := ⟨le_rfl⟩
-  letI : LtLevel β := ⟨hβ⟩
+  let : Level := ⟨α⟩
+  let : LeLevel α := ⟨le_rfl⟩
+  let : LtLevel β := ⟨hβ⟩
   apply allPermForget_injective
   rw [allPermSderiv_forget, allPermEquiv_forget, NewPerm.forget_sderiv]
 
 theorem TSet.exists_of_symmetric {α β : Λ} (s : Set (TSet β)) (hβ : (β : TypeIndex) < α)
     (hs : Symmetric s hβ) :
     ∃ x : TSet α, ∀ y : TSet β, y ∈[hβ] x ↔ y ∈ s := by
-  letI : Level := ⟨α⟩
-  letI : LtLevel β := ⟨hβ⟩
+  let : Level := ⟨α⟩
+  let : LtLevel β := ⟨hβ⟩
   suffices ∃ x : (@TSet _ α newModelData.toPreModelData), ∀ y : TSet β, yᵁ ∈[hβ] xᵁ ↔ y ∈ s by
     obtain ⟨x, hx⟩ := this
     use newSetEquiv x
@@ -131,9 +131,10 @@ theorem TSet.exists_of_symmetric {α β : Λ} (s : Set (TSet β)) (hβ : (β : T
         rwa [allPermEquiv_sderiv] at this
       · rwa [allPermEquiv_forget]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem TSet.exists_support {α : Λ} (x : TSet α) :
     ∃ S : Support α, ∀ ρ : AllPerm α, ρᵁ • S = S → ρ • x = x := by
-  letI : Level := ⟨α⟩
+  let : Level := ⟨α⟩
   obtain ⟨S, hS⟩ := NewSet.exists_support (newSetEquiv.symm x)
   use S
   intro ρ hρ
@@ -155,7 +156,7 @@ theorem TSet.symmetric {α β : Λ} (x : TSet α) (hβ : (β : TypeIndex) < α) 
   conv_rhs => rw [← hS ρ hρ]
   simp only [← forget_mem_forget, smul_forget, StrSet.mem_smul_iff]
   ext y
-  rw [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_setOf_eq, Set.mem_setOf_eq,
+  rw [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_ofPred_eq, Set.mem_ofPred_eq,
     smul_forget, allPermForget_inv, allPermSderiv_forget']
 
 theorem tSet_ext' {α β : Λ} (hβ : (β : TypeIndex) < α) (x y : TSet α)
@@ -169,10 +170,10 @@ theorem tSet_ext' {α β : Λ} (hβ : (β : TypeIndex) < α) (x y : TSet α)
 theorem TSet.mem_smul_iff' {α β : TypeIndex}
     {x : TSet β} {y : TSet α} (h : β < α) (ρ : AllPerm α) :
     x ∈[h] ρ • y ↔ ρ⁻¹ ↘ h • x ∈[h] y := by
-  letI : Level := ⟨α.recBotCoe (Nonempty.some inferInstance) id⟩
-  letI : LeLevel α := ⟨α.recBotCoe (λ _ ↦ bot_le) (λ _ h ↦ WithBot.coe_le_coe.mpr h.le)
+  let : Level := ⟨α.recBotCoe (Nonempty.some inferInstance) id⟩
+  let : LeLevel α := ⟨α.recBotCoe (λ _ ↦ bot_le) (λ _ h ↦ WithBot.coe_le_coe.mpr h.le)
     (show α.recBotCoe (Nonempty.some inferInstance) id = Level.α from rfl)⟩
-  letI : LtLevel β := ⟨h.trans_le LeLevel.elim⟩
+  let : LtLevel β := ⟨h.trans_le LeLevel.elim⟩
   exact mem_smul_iff h ρ  -- For some reason, using `exact` instead of term mode speeds this up!
 
 def singleton {α β : Λ} (hβ : (β : TypeIndex) < α) (x : TSet β) : TSet α :=
@@ -215,9 +216,9 @@ theorem sUnion_singleton_symmetric_aux' {α β γ : Λ}
     letI : Level := ⟨α⟩
     letI : LeLevel α := ⟨le_rfl⟩
     ∀ (ρ : AllPerm β), ρᵁ • S.strong ↘ hβ = S.strong ↘ hβ → ρ ↘ hγ • s ⊆ s := by
-  letI : Level := ⟨α⟩
-  letI : LeLevel α := ⟨le_rfl⟩
-  letI : LtLevel β := ⟨hβ⟩
+  let : Level := ⟨α⟩
+  let : LeLevel α := ⟨le_rfl⟩
+  let : LtLevel β := ⟨hβ⟩
   rintro ρ hρ _ ⟨x, hx, rfl⟩
   obtain ⟨T, hT⟩ := exists_support x
   obtain ⟨ρ', hρ'₁, hρ'₂⟩ := Support.exists_allowable_of_fixes S.strong S.strong_strong T ρ hγ hρ
@@ -247,8 +248,8 @@ theorem sUnion_singleton_symmetric_aux {α β γ : Λ}
 theorem sUnion_singleton_symmetric {α β γ : Λ} (hγ : (γ : TypeIndex) < β) (hβ : (β : TypeIndex) < α)
     (s : Set (TSet γ)) (hs : Symmetric (singleton hγ '' s) hβ) :
     Symmetric s hγ := by
-  letI : Level := ⟨α⟩
-  letI : LeLevel α := ⟨le_rfl⟩
+  let : Level := ⟨α⟩
+  let : LeLevel α := ⟨le_rfl⟩
   obtain ⟨S, hS⟩ := hs
   use S.strong ↘ hβ
   exact sUnion_singleton_symmetric_aux hγ hβ s S hS

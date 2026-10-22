@@ -151,14 +151,14 @@ theorem constrains_small (y : β ↝ ⊥ × NearLitter) :
   obtain (⟨P, t, hA, ht⟩ | h) := inflexible_cases A Nᴸ
   · simp only [constrains_iff_of_inflexible P t hA ht]
     exact (t.support ⇗ (P.A ↘ P.hδ))ᴺ.coe_small
-  · simp only [not_constrains_of_flexible h, Set.setOf_false, small_empty]
+  · simp only [not_constrains_of_flexible h, Set.ofPred_false, small_empty]
 
 theorem reflTransGen_constrains_small (s : Set (β ↝ ⊥ × NearLitter)) (hs : Small s) :
     Small {x | ∃ y ∈ s, Relation.ReflTransGen Constrains x y} := by
   have := Relation.card_reflTransGen_lt (constrains_small (β := β)) κ_isRegular aleph0_lt_κ
   convert small_biUnion hs (λ x _ ↦ this x) using 1
   ext x
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop', nonempty_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop', nonempty_prop]
 
 /-- A support that contains all of the near-litters that transitively constrain something in `S`. -/
 def constrainsNearLitters (S : Support β) : Support β :=
@@ -169,7 +169,7 @@ theorem mem_constrainsNearLitters_nearLitters (S : Support β) (A : β ↝ ⊥) 
     ∃ B N', N' ∈ (S ⇘. B)ᴺ ∧ Relation.ReflTransGen Constrains (A, N) (B, N') := by
   apply (Enumeration.mem_ofSet_iff _
     (reflTransGen_constrains_small (β := β) Sᴺ Sᴺ.coe_small) _).trans
-  simp only [Prod.exists, Set.mem_setOf_eq]
+  simp only [Prod.exists, Set.mem_ofPred_eq]
   rfl
 
 theorem constrainsNearLitters_atoms (S : Support β) (A : β ↝ ⊥) :
@@ -276,7 +276,7 @@ theorem mem_interferenceSupport_atoms (S : Support β) (A : β ↝ ⊥) (a : Ato
     a ∈ (S.interferenceSupport ⇘. A)ᴬ ↔
     ∃ N₁ ∈ (S ⇘. A)ᴺ, ∃ N₂ ∈ (S ⇘. A)ᴺ, a ∈ interference N₁ N₂ := by
   apply (Enumeration.mem_ofSet_iff _ S.interference_small _).trans
-  simp only [exists_and_left, Set.mem_setOf_eq]
+  simp only [exists_and_left, Set.mem_ofPred_eq]
 
 omit [Level] [CoherentData] [LeLevel β] in
 theorem interferenceSupport_nearLitters (S : Support β) (A : β ↝ ⊥) :

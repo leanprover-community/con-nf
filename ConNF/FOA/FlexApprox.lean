@@ -185,7 +185,7 @@ theorem diff_insideAll_small (ξ : BaseAction) (L : Litter) :
     Small (Lᴬ \ ξ.insideAll) := by
   have : Lᴬ \ ξ.insideAll ⊆ (⋃ N ∈ {N | (N ∈ ξᴺ.dom ∨ N ∈ ξᴺ.cod) ∧ Nᴸ = L}, Lᴬ \ Nᴬ) := by
     rintro a ⟨rfl, ha⟩
-    rw [insideAll, Set.mem_setOf_eq] at ha
+    rw [insideAll, Set.mem_ofPred_eq] at ha
     push Not at ha
     obtain ⟨N, hN, h₁, h₂⟩ := ha
     exact Set.mem_biUnion (x := N) ⟨hN, h₁⟩ ⟨rfl, h₂⟩

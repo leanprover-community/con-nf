@@ -48,8 +48,8 @@ theorem initialWellOrder_card_Iio {X : Type*} :
     letI := initialLinearOrder X
     letI := initialWellFoundedLT X
     ∀ x : X, #{y | y < x} < #X := by
-  letI := initialLinearOrder X
-  letI := initialWellFoundedLT X
+  let := initialLinearOrder X
+  have := initialWellFoundedLT X
   intro x
   have := type_Iio_lt_type x
   rwa [initialWellOrder_type, lt_ord, card_type] at this
@@ -67,8 +67,8 @@ theorem gtOfDeny_aux {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     (h₂ : ∀ x, #(deny x) < (#μ).ord.cof)
     (x : X) (ih : letI := initialLinearOrder X; (y : X) → y < x → μ) :
     #(({ν | ∃ y h, ν = ih y h}) ∪ {ν | ∃ ξ ∈ deny x, ν ≤ ξ} : Set μ) < #μ := by
-  letI := initialLinearOrder X
-  letI := initialWellFoundedLT X
+  let := initialLinearOrder X
+  have := initialWellFoundedLT X
   apply (mk_union_le _ _).trans_lt
   refine add_lt_of_lt aleph0_lt_μ.le ?_ ?_
   · refine (mk_le_mk_of_subset (t := ⋃ (y : X) (h : y < x), {ih y h}) ?_).trans_lt ?_
@@ -127,8 +127,7 @@ theorem funOfDeny_gt_deny {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ)
 theorem funOfDeny_injective {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     (h₂ : ∀ x, #(deny x) < (#μ).ord.cof) :
     Function.Injective (funOfDeny h₁ deny h₂) := by
-  letI := initialLinearOrder X
-  letI := initialWellFoundedLT X
+  let := initialLinearOrder X
   intro x y h
   wlog hxy : x ≤ y
   · exact (this h₁ deny h₂ h.symm (le_of_not_ge hxy)).symm

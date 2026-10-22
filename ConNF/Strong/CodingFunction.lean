@@ -49,6 +49,7 @@ def SupportOrbit (β : TypeIndex) [LeLevel β] : Type u :=
 def Support.orbit (S : Support β) : SupportOrbit β :=
   Quotient.mk (Support.setoid β) S
 
+set_option backward.isDefEq.respectTransparency false in
 theorem SupportOrbit.out_orbit (o : SupportOrbit β) : o.out.orbit = o := by
   rw [Support.orbit, Quotient.out_eq]
 

@@ -59,12 +59,12 @@ theorem isSuccLimit_type_iff_noMaxOrder {α : Type*} [Nonempty α] [Preorder α]
   ⟨noMaxOrder_of_isSuccLimit_type, fun _ ↦ isSuccLimit_type_of_noMaxOrder⟩
 
 theorem type_Iio_lt_type {α : Type u} [LinearOrder α] [WellFoundedLT α] (x : α) :
-    type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) < type ((· < ·) : α → α → Prop) :=
+    type (Subrel ((· < ·) : α → α → Prop) (· < x)) < type ((· < ·) : α → α → Prop) :=
   @typein_lt_type _ _ (inferInstanceAs (IsWellOrder α (· < ·))) x
 
 def iicOrderIso {α : Type u} [LinearOrder α] [WellFoundedLT α] (x : α) :
-    (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) ≃r
-      Sum.Lex (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) (emptyRelation (α := PUnit)) where
+    (Subrel ((· < ·) : α → α → Prop) (· ≤ x)) ≃r
+      Sum.Lex (Subrel ((· < ·) : α → α → Prop) (· < x)) (emptyRelation (α := PUnit)) where
   toFun y := if h : y = x then Sum.inr PUnit.unit else Sum.inl ⟨y, y.prop.lt_of_ne h⟩
   invFun := Sum.elim (λ y ↦ ⟨y, y.prop.le⟩) (λ _ ↦ ⟨x, le_rfl⟩)
   left_inv y := by aesop
@@ -87,14 +87,14 @@ def iicOrderIso {α : Type u} [LinearOrder α] [WellFoundedLT α] (x : α) :
     · simp only [Sum.lex_inl_inl, subrel_val, Subtype.coe_lt_coe]
 
 theorem type_Iic_eq {α : Type u} [LinearOrder α] [WellFoundedLT α] (x : α) :
-    type (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) =
-    type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) + 1 := by
+    type (Subrel ((· < ·) : α → α → Prop) (· ≤ x)) =
+    type (Subrel ((· < ·) : α → α → Prop) (· < x)) + 1 := by
   change _ = _ + type emptyRelation
   rw [← type_sum_lex, type_eq]
   exact ⟨iicOrderIso x⟩
 
 theorem type_Iic_lt {α : Type u} [LinearOrder α] [WellFoundedLT α] [NoMaxOrder α] (x : α) :
-    type (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) < type ((· < ·) : α → α → Prop) := by
+    type (Subrel ((· < ·) : α → α → Prop) (· ≤ x)) < type ((· < ·) : α → α → Prop) := by
   rw [type_Iic_eq]
   have : Nonempty α := ⟨x⟩
   exact isSuccLimit_type_of_noMaxOrder.succ_lt (type_Iio_lt_type x)
@@ -135,7 +135,7 @@ theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {
       EmbeddingLike.apply_eq_iff_eq] at h
     exact h
   · intro x y
-    simp only [Order.Preimage, Function.Embedding.coeFn_mk, subrel_val]
+    simp only [Order.Preimage, subrel_val]
     exact f.map_rel_iff
   · intro x
     obtain ⟨y, hy⟩ := f.mem_range_of_rel x.down.prop
@@ -144,7 +144,7 @@ theorem lift_typein_apply {α : Type u} {β : Type v} {r : α → α → Prop} {
       rwa [← hy, f.map_rel_iff] at this
     · apply ULift.down_injective
       apply Subtype.coe_injective
-      simp only [RelEmbedding.coe_mk, Function.Embedding.coeFn_mk]
+      simp only [RelEmbedding.coe_mk]
       exact hy
 
 /-!
@@ -175,7 +175,7 @@ theorem typein_Iio {o : Ordinal.{u}} (x : Set.Iio o) :
     exact this.symm
   · rfl
   · simp only [RelEmbedding.coe_mk, Function.Embedding.coeFn_mk, Subtype.range_coe_subtype,
-      Set.mem_Iio, Set.mem_setOf_eq, Subtype.forall]
+      Set.mem_Iio, Set.mem_ofPred_eq, Subtype.forall]
     intro a ha b hb
     exact hb.trans ha
 
@@ -249,7 +249,7 @@ def iioAddMonoidWithOne : AddMonoidWithOne (Set.Iio c.ord) where
   natCast_zero := Subtype.ext Nat.cast_zero
   natCast_succ n := by
     apply Subtype.val_injective
-    letI := iioAdd h
+    let := iioAdd h
     rw [iioAdd_def]
     exact Nat.cast_succ n
   one := ⟨1, by simpa using nat_lt_ord h 1⟩
@@ -261,8 +261,8 @@ theorem iioNatCast_coe (n : ℕ) :
   rfl
 
 theorem iio_noMaxOrder (h : ℵ₀ ≤ c) : NoMaxOrder (Set.Iio c.ord) := by
-  letI := iioAdd h
-  letI := iioOfNat h
+  let := iioAdd h
+  let := iioOfNat h
   constructor
   intro x
   use x + 1

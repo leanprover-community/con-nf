@@ -76,17 +76,17 @@ theorem catInj_inj {r : SetRel α α} {R : OrbitRestriction (r.dom ∪ r.cod) β
 
 inductive NewOrbits {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) : α → α → Prop
   | left (a : α) (had : a ∈ r.dom) (hac : a ∉ r.cod) :
-      NewOrbits R (catInj R (R.catPerm.symm (R.categorise a)) (⟨a, Or.inl had⟩, 0)) a
+      NewOrbits R (catInj R (R.catPerm.symm (R.categorise a)) (⟨a, Set.mem_union_left _ had⟩, 0)) a
   | leftStep (n : ℕ) (a : α) (had : a ∈ r.dom) (hac : a ∉ r.cod) :
       NewOrbits R
-        (catInj R (R.catPerm.symm^[n + 2] (R.categorise a)) (⟨a, Or.inl had⟩, n + 1))
-        (catInj R (R.catPerm.symm^[n + 1] (R.categorise a)) (⟨a, Or.inl had⟩, n))
+        (catInj R (R.catPerm.symm^[n + 2] (R.categorise a)) (⟨a, Set.mem_union_left _ had⟩, n + 1))
+        (catInj R (R.catPerm.symm^[n + 1] (R.categorise a)) (⟨a, Set.mem_union_left _ had⟩, n))
   | right (a : α) (had : a ∉ r.dom) (hac : a ∈ r.cod) :
-      NewOrbits R a (catInj R (R.catPerm (R.categorise a)) (⟨a, Or.inr hac⟩, 0))
+      NewOrbits R a (catInj R (R.catPerm (R.categorise a)) (⟨a, Set.mem_union_right _ hac⟩, 0))
   | rightStep (n : ℕ) (a : α) (had : a ∉ r.dom) (hac : a ∈ r.cod) :
       NewOrbits R
-        (catInj R (R.catPerm^[n + 1] (R.categorise a)) (⟨a, Or.inr hac⟩, n))
-        (catInj R (R.catPerm^[n + 2] (R.categorise a)) (⟨a, Or.inr hac⟩, n + 1))
+        (catInj R (R.catPerm^[n + 1] (R.categorise a)) (⟨a, Set.mem_union_right _ hac⟩, n))
+        (catInj R (R.catPerm^[n + 2] (R.categorise a)) (⟨a, Set.mem_union_right _ hac⟩, n + 1))
 
 def newOrbits {r : SetRel α α} (R : OrbitRestriction (r.dom ∪ r.cod) β) : SetRel α α :=
   {(a₁, a₂) | NewOrbits R a₁ a₂}

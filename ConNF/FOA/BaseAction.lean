@@ -343,6 +343,7 @@ theorem insideRel_dom_small (ξ : BaseAction) : Small ξ.insideRel.dom := by
   rintro a ⟨_, N₁, N₂, h, _, _, rfl⟩
   exact ⟨N₁, h⟩
 
+set_option backward.isDefEq.respectTransparency false in
 theorem insideRel_injective (ξ : BaseAction) : ξ.insideRel.Injective := by
   constructor
   rintro a b c ⟨Na₁, Na₂, ha₁, ha₂⟩ ⟨Nb₁, Nb₂, hb₁, hb₂⟩
@@ -592,6 +593,7 @@ theorem doubleInsideExtension_cod {ξ : BaseAction} (N : NearLitter) (hN : N ∈
     Nᴬ \ Nᴸᴬ ⊆ ξ.doubleInsideExtensionᴬ.cod :=
   ξ.insideExtension⁻¹.insideExtension_spec N hN
 
+set_option backward.isDefEq.respectTransparency false in
 theorem niceExtension_aux {ξ : BaseAction} (N : NearLitter) (hN : N ∈ ξᴺ.cod) :
     Nᴬ \ Nᴸᴬ ⊆ (ξ.doubleInsideExtension.outsideExtension ξ.doubleInsideExtension_dom)⁻¹ᴬ.dom := by
   intro a ha
@@ -609,6 +611,7 @@ theorem le_niceExtension (ξ : BaseAction) :
     (ξ.doubleInsideExtension.le_outsideExtension _).trans <| inv_le <|
     (ξ.doubleInsideExtension.outsideExtension _)⁻¹.le_outsideExtension _
 
+set_option backward.isDefEq.respectTransparency false in
 theorem niceExtension_nice (ξ : BaseAction) : ξ.niceExtension.Nice := by
   constructor
   · rintro N hN a (ha | ha)

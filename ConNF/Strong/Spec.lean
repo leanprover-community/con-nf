@@ -134,6 +134,7 @@ theorem nearLitterCondRel_dom_disjoint {S : Support β} {A : β ↝ ⊥} :
   exact flexible_of_mem_dom_nearLitterCondFlexRel hN₁
     (inflexible_of_mem_dom_nearLitterCondInflexRel hN₂)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem nearLitterCondRel_inflex {S : Support β} {A : β ↝ ⊥} {N : NearLitter}
     {P : InflexiblePath β} {χ : CodingFunction P.δ} {ta tn : Tree (SetRel κ κ) P.δ} :
     N ~[nearLitterCondRel S A] (.inflex P ⟨χ, ta, tn⟩) →
@@ -564,7 +565,7 @@ theorem atoms_subset_of_sameSpec (h : SameSpec S T) {A : β ↝ ⊥} {i : κ} {a
     (ha : i ~[(S ⇘. A)ᴬ.rel] a) (hb : i ~[(T ⇘. A)ᴬ.rel] b) :
     {i | i ~[(T ⇘. A)ᴬ.rel] b} ⊆ {i | i ~[(S ⇘. A)ᴬ.rel] a} := by
   intro j hj
-  rw [Set.mem_setOf_eq] at hj
+  rw [Set.mem_ofPred_eq] at hj
   obtain ⟨c, hc⟩ := (sameSpec_comm h).atoms_dom_of_dom hj
   cases (h.convAtoms_oneOne A).injective ⟨i, ha, hb⟩ ⟨j, hc, hj⟩
   exact hc
@@ -609,6 +610,7 @@ theorem nearLitterCondRelFlex_of_convNearLitters (h : SameSpec S T) {A : β ↝ 
   · refine nearLitterCondRelFlex_of_convNearLitters_aux (sameSpec_comm h) ?_ hN₂i hN₁i i
     rwa [← convNearLitters_inv]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem nearLitterCondRelInflex_of_convNearLitters (h : SameSpec S T) {A : β ↝ ⊥}
     {N₁ N₂ : NearLitter} (hN : N₁ ~[convNearLitters S T A] N₂)
     (P : InflexiblePath β) (t : Tangle P.δ) (ρ : AllPerm P.δ)

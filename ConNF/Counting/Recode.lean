@@ -170,7 +170,7 @@ theorem combination_raisedSingleton (x : TSet β) (S : Support β) (hxS : S.Supp
     have : S.Subsupport (ρᵁ • T) := h₁.symm ▸ subsupport_add
     have := smul_eq_of_subsupport hST this
     rw [← hxS.smul_eq_of_smul_eq this] at hw
-    rwa [Set.mem_setOf_eq, TSet.mem_smul_iff, allPerm_inv_sderiv, inv_smul_smul] at hw
+    rwa [Set.mem_ofPred_eq, TSet.mem_smul_iff, allPerm_inv_sderiv, inv_smul_smul] at hw
 
 def RaisedSingleton : Type u :=
   { χ : CodingFunction β // ∃ S : Support β, ∃ y : TSet γ, χ = raisedSingleton hγ S y }

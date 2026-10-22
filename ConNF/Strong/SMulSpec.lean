@@ -63,7 +63,7 @@ theorem atomMemRel_smul_le (A : β ↝ ⊥) :
   rintro ⟨i, j⟩ ⟨N, hNS, a, haN, haj⟩
   refine ⟨ρᵁ A • N, ?_, ρᵁ A • a, ?_, ?_⟩
   · rwa [smul_derivBot, BaseSupport.smul_nearLitters, Enumeration.smul_rel, inv_smul_smul]
-  · simp only [Set.mem_setOf_eq, BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
+  · simp only [Set.mem_ofPred_eq, BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
     exact haN
   · rwa [smul_derivBot, BaseSupport.smul_atoms, SetRel.mem_inv, Enumeration.smul_rel, inv_smul_smul]
 

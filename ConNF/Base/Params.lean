@@ -356,7 +356,7 @@ theorem κ_typein (x : κ) :
   exact this.symm
 
 theorem κ_card_Iio_eq (x : κ) : #{y | y < x} = (κEquiv x).1.card := by
-  rw [Set.coe_setOf, ← card_typein, κ_typein]
+  rw [Set.coe_ofPred, ← card_typein, κ_typein]
 
 -- TODO: Unify the following two lemmas with the corresponding ones in TypeIndex somehow.
 

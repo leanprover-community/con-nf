@@ -191,7 +191,7 @@ theorem NewPerm.forget_mul (ρ₁ ρ₂ : NewPerm) :
   funext A
   cases A using Path.recScoderiv
   case scoderiv β A hβ _ =>
-    haveI : LtLevel β := ⟨hβ⟩
+    have : LtLevel β := ⟨hβ⟩
     rw [Tree.mul_apply, ← Tree.sderiv_apply (ρ₁ * ρ₂)ᵁ,
       ← Tree.sderiv_apply ρ₁ᵁ, ← Tree.sderiv_apply ρ₂ᵁ,
       forget_sderiv, forget_sderiv, forget_sderiv,
@@ -203,7 +203,7 @@ theorem NewPerm.forget_one :
   funext A
   cases A using Path.recScoderiv
   case scoderiv β A hβ _ =>
-    haveI : LtLevel β := ⟨hβ⟩
+    have : LtLevel β := ⟨hβ⟩
     rw [Tree.one_apply, ← Tree.sderiv_apply (1 : NewPerm)ᵁ, forget_sderiv,
       one_sderiv, allPermForget_one, Tree.one_apply]
 
@@ -307,7 +307,7 @@ theorem NewSet.forget_injective (x y : NewSet) (h : xᵁ = yᵁ) : x = y := by
 theorem NewPerm.smul_forget (ρ : NewPerm) (x : NewSet) : (ρ • x)ᵁ = ρᵁ • xᵁ := by
   rw [StrSet.coe_ext_iff]
   intro β hβ z
-  haveI : LtLevel β := ⟨hβ⟩
+  have : LtLevel β := ⟨hβ⟩
   rw [StrSet.mem_smul_iff, NewSet.typedMem_forget, NewSet.typedMem_forget,
     NewSet.smul_c, smul_members]
   constructor
@@ -324,7 +324,7 @@ theorem NewPerm.smul_forget (ρ : NewPerm) (x : NewSet) : (ρ • x)ᵁ = ρᵁ 
 theorem NewSet.exists_support (x : letI := newPreModelData; TSet α) :
     letI := newPreModelData
     ∃ S : Support α, S.Supports x := by
-  letI := newPreModelData
+  let := newPreModelData
   obtain (_ | x) := x
   · use ⟨.empty, .empty⟩
     constructor
@@ -338,6 +338,7 @@ theorem NewSet.exists_support (x : letI := newPreModelData; TSet α) :
     apply NewSet.ext
     exact hS ρ hρ
 
+set_option backward.isDefEq.respectTransparency false in
 theorem NewSet.coe_ne_empty (x : NewSet) : xᵁ ≠ (StrSet.coeEquiv.symm λ _ _ ↦ ∅) := by
   intro h
   by_cases hα : IsMin α
@@ -413,7 +414,7 @@ theorem NearLitter.code_aux {N : NearLitter} :
   obtain ⟨a, ha⟩ := this
   obtain ⟨x, hx⟩ := tSetForget_surjective (StrSet.botEquiv.symm a)
   use x
-  rwa [Set.mem_setOf_eq, hx, Equiv.apply_symm_apply]
+  rwa [Set.mem_ofPred_eq, hx, Equiv.apply_symm_apply]
 
 def NearLitter.code (N : NearLitter) : Code :=
   ⟨⊥, {x | StrSet.botEquiv xᵁ ∈ Nᴬ}, NearLitter.code_aux⟩
@@ -423,7 +424,7 @@ theorem NearLitter.smul_code (ρ : NewPerm) (N : NearLitter) :
   simp only [code, NewPerm.smul_mk, BasePerm.smul_nearLitter_atoms, Code.mk.injEq, heq_eq_eq,
     true_and]
   ext a
-  rw [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_setOf_eq, Set.mem_setOf_eq, smul_forget,
+  rw [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_ofPred_eq, Set.mem_ofPred_eq, smul_forget,
     allPermForget_inv, StrSet.strPerm_smul_bot, Tree.inv_apply, ← NewPerm.forget_sderiv,
     Tree.sderiv_apply, ← Set.mem_smul_set_iff_inv_smul_mem]
   rfl
@@ -449,7 +450,7 @@ theorem newTyped_c_eq (N : NearLitter) :
 
 theorem mem_newTyped_iff (a : TSet ⊥) (N : NearLitter) :
     aᵁ ∈[WithBot.bot_lt_coe _] (newTyped N)ᵁ ↔ StrSet.botEquiv aᵁ ∈ Nᴬ := by
-  simp only [newTyped, NearLitter.code, Code.mem_toSet, Set.mem_setOf_eq]
+  simp only [newTyped, NearLitter.code, Code.mem_toSet, Set.mem_ofPred_eq]
 
 theorem newTyped_injective : Function.Injective newTyped := by
   intro N₁ N₂ hN
@@ -561,14 +562,16 @@ theorem pos_nearLitter_lt_newPosition (h : #(Tangle α) ≤ #μ) (t : Tangle α)
   refine Or.inr ⟨_, ?_, rfl⟩
   exact ⟨i, ⟨A, N⟩, hi, rfl⟩
 
+set_option backward.isDefEq.respectTransparency false in
 theorem pos_le_pos_of_typed (h : #(Tangle α) ≤ #μ) (N : NearLitter) (t : Tangle α)
     (ht : t.set = some (newTyped N)) :
     pos N ≤ (newPosition h).pos t := by
   apply le_of_lt
   apply funOfDeny_gt_deny
   refine Or.inl (Or.inl ?_)
-  simp only [ht, Set.mem_image, Set.mem_setOf_eq, EmbeddingLike.apply_eq_iff_eq, exists_eq_right]
+  simp only [ht, Set.mem_image, Set.mem_ofPred_eq, EmbeddingLike.apply_eq_iff_eq, exists_eq_right]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem smul_newTyped' (ρ : AllPerm α) (N : NearLitter) :
     ρ • (show TSet α from some (newTyped N)) = some (newTyped (ρᵁ ↘. • N)) := by
   change some _ = some _

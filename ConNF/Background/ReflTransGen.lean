@@ -70,7 +70,7 @@ theorem card_reflTransGen_lt (hr : ∀ y, #{x | r x y} < κ)
   suffices #(⋃ n : ULift.{u} ℕ, {x | reflTransGenₙ r n.down {y} x}) < κ by
     convert this using 3
     ext x
-    simp only [Set.mem_iUnion, Set.mem_setOf_eq, ULift.exists]
+    simp only [Set.mem_iUnion, ULift.exists]
   rw [card_iUnion_lt_iff_forall_of_isRegular hκ₁]
   · simp only [ULift.forall]
     apply card_reflTransGenₙ_lt hr hκ₁

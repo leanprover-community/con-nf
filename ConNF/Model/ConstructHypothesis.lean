@@ -97,8 +97,8 @@ theorem constructMotive_allPerm_of_smul_fuzz :
     ∃ ρ : (constructMotive α M H).data.AllPerm,
       (∀ (β : Λ) (hβ : (β : TypeIndex) < α), constructAllPermSderiv M H hβ ρ = ρs hβ) ∧
       constructAllPermBotSderiv M H ρ = π := by
-  letI : Level := ⟨α⟩
-  letI := ltData M
+  let : Level := ⟨α⟩
+  let := ltData M
   intro ρs π h₁ h₂
   refine ⟨⟨λ β iβ ↦ β.recBotCoe (λ _ ↦ π) (λ β iβ ↦ ρs iβ.elim) iβ, ?_⟩, ?_, ?_⟩
   · intro β

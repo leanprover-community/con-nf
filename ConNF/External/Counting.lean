@@ -29,7 +29,7 @@ def disjoint : TSet α :=
 theorem mem_disjoint_iff' (x y : TSet δ) :
     ⟨x, y⟩[β, γ] ∈' disjoint hβ hγ hδ hε ↔ ∀ z : TSet ε, ¬z ∈' x ⊓[ε] y := by
   simp only [disjoint, mem_compl_iff, mem_image_iff, SetRel.mem_image, mem_singletons_iff,
-    mem_cardinalOne_iff, Set.mem_setOf_eq, ExternalRel, mem_inter_iff, not_exists, not_and,
+    mem_cardinalOne_iff, Set.mem_ofPred_eq, ExternalRel, mem_inter_iff, not_exists, not_and,
     forall_exists_index, and_imp, forall_eq_apply_imp_iff, insertion3_spec, subset_spec,
     singleton_subset_iff, insertion2_spec]
 
@@ -60,7 +60,7 @@ theorem mem_unionEq_iff' (x y z : TSet ζ) :
     ⟨{{z}[ε]}[δ], ⟨y, x⟩[δ, ε]⟩[β, γ] ∈' unionEq hβ hγ hδ hε hζ hη ↔
       ∀ a : TSet η, ¬(a ∈' x ↔ ¬a ∈' y ∧ ¬a ∈' z) := by
   simp only [unionEq, mem_compl_iff, mem_image_iff, SetRel.mem_image, mem_singletons_iff,
-    mem_cardinalOne_iff, Set.mem_setOf_eq, ExternalRel, mem_symmDiff_iff, mem_union_iff, not_or,
+    mem_cardinalOne_iff, Set.mem_ofPred_eq, ExternalRel, mem_symmDiff_iff, mem_union_iff, not_or,
     not_exists, not_and, forall_exists_index, and_imp, forall_eq_apply_imp_iff, insertion2_spec,
     subset_spec, singleton_subset_iff, insertion3_spec, singletonImage_spec]
 
@@ -101,7 +101,7 @@ def cardAdd (x y : TSet α) : TSet α :=
 theorem mem_cardAdd_iff (x y : TSet α) (z : TSet β) :
     z ∈' cardAdd hβ hγ x y ↔
     ∃ a b : TSet β, a ∈' x ∧ b ∈' y ∧ a ⊓[γ] b = empty hγ ∧ a ⊔[γ] b = z := by
-  simp only [cardAdd, mem_image_iff, SetRel.mem_image, Set.mem_setOf_eq, ExternalRel,
+  simp only [cardAdd, mem_image_iff, SetRel.mem_image, Set.mem_ofPred_eq, ExternalRel,
     mem_singletons_iff, exists_and_left]
   constructor
   · rintro ⟨a, ha, _, ⟨_, ⟨b, hb, rfl⟩, rfl⟩, h⟩

@@ -165,7 +165,7 @@ def ExternalRel (r : TSet α) : SetRel (TSet δ) (TSet δ) :=
 theorem externalRel_converse (r : TSet α) :
     ExternalRel hβ hγ hδ (converse hβ hγ hδ r) = (ExternalRel hβ hγ hδ r).inv := by
   ext ⟨x, y⟩
-  simp only [ExternalRel, op_mem_converse_iff, SetRel.mem_inv, Set.mem_setOf_eq]
+  simp only [ExternalRel, op_mem_converse_iff, SetRel.mem_inv, Set.mem_ofPred_eq]
 
 /-- The codomain of a relation. -/
 def cod (r : TSet α) : TSet γ :=
@@ -262,7 +262,7 @@ theorem mem_powerset_iff (x y : TSet β) :
     exact h.1
   · intro h
     refine ⟨y, ?_⟩
-    simp only [ExternalRel, Set.mem_setOf_eq, mem_inter_iff, subset_spec, h, mem_vCross_iff,
+    simp only [ExternalRel, Set.mem_ofPred_eq, mem_inter_iff, subset_spec, h, mem_vCross_iff,
       op_inj, typedMem_singleton_iff', exists_eq_right, and_true, exists_eq', and_self]
 
 /-- The set `ι²''x = {{{a}} | a ∈ x}`. -/
@@ -337,7 +337,7 @@ theorem mem_sUnion_iff (x : TSet α) :
     ∀ y : TSet γ, y ∈' sUnion hβ hγ x ↔ ∃ t : TSet β, t ∈' x ∧ y ∈' t := by
   intro y
   simp only [sUnion, mem_singletonUnion_iff, mem_dom_iff, SetRel.mem_dom, ExternalRel,
-    mem_inter_iff, mem_cross_iff, op_inj, mem_cardinalOne_iff, Set.mem_setOf_eq, membership_spec]
+    mem_inter_iff, mem_cross_iff, op_inj, mem_cardinalOne_iff, Set.mem_ofPred_eq, membership_spec]
   constructor
   · rintro ⟨z, h₁, a, b, ⟨rfl, rfl⟩, ⟨c, h₂⟩, h₃⟩
     rw [singleton_inj] at h₂
@@ -390,7 +390,7 @@ def preimage (r : TSet α) (x : TSet γ) : TSet γ :=
 theorem mem_preimage_iff (r : TSet α) (x : TSet γ) (y : TSet δ) :
     y ∈' preimage hβ hγ hδ r x ↔ y ∈ (ExternalRel hβ hγ hδ r).preimage {a | a ∈' x} := by
   simp only [preimage, mem_dom_iff, SetRel.mem_dom, ExternalRel, mem_inter_iff, mem_vCross_iff,
-    op_inj, Set.mem_setOf_eq, SetRel.mem_preimage]
+    op_inj, Set.mem_ofPred_eq, SetRel.mem_preimage]
   constructor
   · rintro ⟨a, h₁, _, _, ⟨rfl, rfl⟩, h₂⟩
     exact ⟨a, h₂, h₁⟩
@@ -406,6 +406,7 @@ theorem mem_image_iff (r : TSet α) (x : TSet γ) (y : TSet δ) :
     y ∈' image hβ hγ hδ r x ↔ y ∈ (ExternalRel hβ hγ hδ r).image {a | a ∈' x} := by
   simp only [image, mem_preimage_iff, externalRel_converse, SetRel.preimage_inv]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem exists_smallUnion (s : Set (TSet α)) (hs : Small s) :
     ∃ x : TSet α, ∀ y : TSet β, y ∈' x ↔ ∃ t ∈ s, y ∈' t := by
   apply exists_of_symmetric

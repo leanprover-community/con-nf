@@ -180,13 +180,13 @@ def interference (N₁ N₂ : NearLitter) : Set Atom :=
 theorem interference_eq_of_litter_eq (h : N₁ᴸ = N₂ᴸ) :
     interference N₁ N₂ = N₁ᴬ ∆ N₂ᴬ := by
   ext a
-  simp only [interference, h, true_iff, mem_inter_iff, mem_setOf_eq, mem_union, mem_symmDiff]
+  simp only [interference, h, true_iff, mem_inter_iff, mem_ofPred_eq, mem_union, mem_symmDiff]
   tauto
 
 theorem interference_eq_of_litter_ne (h : N₁ᴸ ≠ N₂ᴸ) :
     interference N₁ N₂ = N₁ᴬ ∩ N₂ᴬ := by
   ext a
-  simp only [interference, h, false_iff, not_not, mem_inter_iff, mem_setOf_eq, mem_union]
+  simp only [interference, h, false_iff, not_not, mem_inter_iff, mem_ofPred_eq, mem_union]
   tauto
 
 theorem interference_small (N₁ N₂ : NearLitter) :

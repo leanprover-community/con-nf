@@ -498,14 +498,14 @@ theorem Path.eq_of_toList_eq (A : α ↝ β) (B : α ↝ γ) : A.toList = B.toLi
   | nil =>
     cases B with
     | nil => rfl
-    | sderiv γ δ B hδ => simp only [Set.coe_setOf, toList_nil, toList_sderiv, Set.mem_setOf_eq,
+    | sderiv γ δ B hδ => simp only [Set.coe_ofPred, toList_nil, toList_sderiv, Set.mem_ofPred_eq,
         List.nil_eq, reduceCtorEq] at h
   | sderiv γ δ A hδ =>
     cases B with
-    | nil => simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, toList_nil,
+    | nil => simp only [Set.coe_ofPred, toList_sderiv, Set.mem_ofPred_eq, toList_nil,
         reduceCtorEq] at h
     | sderiv γ δ B hδ =>
-      simp only [toList_sderiv, Set.mem_setOf_eq, List.cons.injEq] at h
+      simp only [toList_sderiv, Set.mem_ofPred_eq, List.cons.injEq] at h
       exact congr($(h.1).val)
 
 theorem Path.toList_injective (α β : TypeIndex) :
@@ -515,11 +515,11 @@ theorem Path.toList_injective (α β : TypeIndex) :
   | nil =>
     cases B with
     | nil => rfl
-    | sderiv γ δ B hδ => simp only [Set.coe_setOf, toList_nil, toList_sderiv, Set.mem_setOf_eq,
+    | sderiv γ δ B hδ => simp only [Set.coe_ofPred, toList_nil, toList_sderiv, Set.mem_ofPred_eq,
         List.nil_eq, reduceCtorEq] at h
   | sderiv γ δ A hδ ih =>
     cases B with
-    | nil => simp only [Set.coe_setOf, toList_sderiv, Set.mem_setOf_eq, toList_nil,
+    | nil => simp only [Set.coe_ofPred, toList_sderiv, Set.mem_ofPred_eq, toList_nil,
         reduceCtorEq] at h
     | sderiv γ' δ' B hδ' =>
       rw [toList_sderiv, toList_sderiv, List.cons.injEq] at h

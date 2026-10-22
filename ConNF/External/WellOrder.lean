@@ -27,7 +27,7 @@ def InternallyWellOrdered (x : TSet γ) : Prop :=
 theorem mem_externalRel_smul (r : TSet α) (ρ : AllPerm α) (a b : TSet δ) :
     a ~[ExternalRel hβ hγ hδ (ρ • r)] b ↔
       (ρ ↘ hβ ↘ hγ ↘ hδ)⁻¹ • a ~[ExternalRel hβ hγ hδ r] (ρ ↘ hβ ↘ hγ ↘ hδ)⁻¹ • b := by
-  simp only [ExternalRel, Set.mem_setOf_eq, mem_smul_iff', allPerm_inv_sderiv', smul_op]
+  simp only [ExternalRel, Set.mem_ofPred_eq, mem_smul_iff', allPerm_inv_sderiv', smul_op]
 
 omit [Params] in
 /-- Well-orders are rigid. -/
@@ -114,11 +114,11 @@ theorem Support.Supports.ofSingleton {S : Support α} {x : TSet β}
   have := sUnion_singleton_symmetric_aux hγ hβ {y | y ∈' x} S ?_ ρ hρ
   · apply ConNF.ext hγ
     intro z
-    simp only [Set.ext_iff, Set.mem_setOf_eq, Set.mem_smul_set_iff_inv_smul_mem] at this
+    simp only [Set.ext_iff, Set.mem_ofPred_eq, Set.mem_smul_set_iff_inv_smul_mem] at this
     rw [mem_smul_iff', allPerm_inv_sderiv', this]
   · intro ρ hρ
     ext z
-    simp only [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_image, Set.mem_setOf_eq]
+    simp only [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_image, Set.mem_ofPred_eq]
     have := h.supports ρ hρ
     simp only [smul_singleton, singleton_inj] at this
     constructor
@@ -146,17 +146,17 @@ theorem exists_common_support_of_internallyWellOrdered {x : TSet δ}
   have := supports_of_supports_singletons (S := S)
       (s := singleton hδ '' (singleton hε '' {y | y ∈' x})) hγ hδ ?_
   swap
-  · simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and, forall_exists_index,
+  · simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and, forall_exists_index,
       and_imp, forall_apply_eq_imp_iff₂]
     exact hS
   obtain ⟨T, hT⟩ := this
   have := supports_of_supports_singletons (S := T)
       (s := singleton hε '' {y | y ∈' x}) hδ hε ?_
   swap
-  · simp only [Set.mem_image, Set.mem_setOf_eq, forall_exists_index, and_imp,
+  · simp only [Set.mem_image, Set.mem_ofPred_eq, forall_exists_index, and_imp,
       forall_apply_eq_imp_iff₂] at hT ⊢
     exact hT
-  simp only [Set.mem_image, Set.mem_setOf_eq, forall_exists_index, and_imp,
+  simp only [Set.mem_image, Set.mem_ofPred_eq, forall_exists_index, and_imp,
     forall_apply_eq_imp_iff₂] at this
   exact this
 
@@ -171,7 +171,7 @@ theorem internallyWellOrdered_of_common_support_of_nontrivial {x : TSet γ}
     intro ρ hρ
     ext z
     simp only [Support.smul_scoderiv, ← allPermSderiv_forget', Support.scoderiv_inj] at hρ
-    simp only [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_setOf_eq]
+    simp only [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_ofPred_eq]
     constructor
     · rintro ⟨a, b, h₁, h₂, h₃, h₄⟩
       refine ⟨a, b, ?_, h₂, h₃, h₄⟩
@@ -191,7 +191,7 @@ theorem internallyWellOrdered_of_common_support_of_nontrivial {x : TSet γ}
     intro a b
     change ⟨a, b⟩[hγ, hδ] ∈[hβ] r ↔ _
     rw [hr]
-    simp only [Set.mem_setOf_eq, op_inj]
+    simp only [Set.mem_ofPred_eq, op_inj]
     constructor
     · rintro ⟨a, b, ⟨rfl, rfl⟩, h⟩
       exact h

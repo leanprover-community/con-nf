@@ -62,18 +62,14 @@ theorem typein_lt [DecidableEq α] [LinearOrder β] [WellFoundedLT β] (x : α) 
     Ordinal.lift.{max u v, v} (Ordinal.typein ((· < ·) : β → β → Prop) (e x)) =
     Ordinal.lift.{max u v, u} (Ordinal.typein ((· < ·) : α → α → Prop) x) := by
   let := e.linearOrder
-  let := e.wellFoundedLT
-  refine Ordinal.lift_typein_apply (r := (· < ·)) (s := (· < ·)) (f := ⟨⟨e.toEmbedding, ?_⟩, ?_⟩) x
-  · rfl
-  · simp only [RelEmbedding.coe_mk, coe_toEmbedding]
-    intro a b _
-    use e.symm b
-    exact apply_symm_apply e b
+  have := e.wellFoundedLT
+  exact Ordinal.lift_typein_apply (r := (· < ·)) (s := (· < ·)) (f := ⟨⟨e.toEmbedding, .rfl⟩,
+    fun a b _ ↦ ⟨e.symm b, by simp⟩⟩) x
 
 protected theorem noMaxOrder [LT β] [NoMaxOrder β] :
     letI := e.lt
     NoMaxOrder α := by
-  letI := e.lt
+  let := e.lt
   constructor
   intro x
   obtain ⟨y, hy⟩ := exists_gt (e x)

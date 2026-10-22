@@ -83,9 +83,9 @@ theorem raise_preStrong' (S : Support α) (hS : S.Strong) (T : Support γ) (ρ :
       rw [← Path.coderiv_deriv] at hA
       cases Path.sderiv_index_injective hA
       cases hA
-      haveI : LtLevel δ := ⟨A.le.trans_lt LtLevel.elim⟩
-      haveI : LtLevel ε := ⟨hε.trans LtLevel.elim⟩
-      haveI : LtLevel ζ := ⟨hζ.trans LtLevel.elim⟩
+      have : LtLevel δ := ⟨A.le.trans_lt LtLevel.elim⟩
+      have : LtLevel ε := ⟨hε.trans LtLevel.elim⟩
+      have : LtLevel ζ := ⟨hζ.trans LtLevel.elim⟩
       have := (T ↗ hγ).strong_strong.support_le hN ⟨δ, ε, ζ, hε, hζ, hεζ, A⟩
           (ρ⁻¹ ⇘ A ↘ hε • t) rfl ?_
       · simp only [Tangle.smul_support, allPermSderiv_forget, allPermDeriv_forget,
@@ -254,7 +254,7 @@ theorem atomMemRel_le_of_fixes {S : Support α} {T : Support γ}
       simp only [scoderiv_botDeriv_eq, smul_derivBot, add_derivBot, BaseSupport.smul_atoms,
         BaseSupport.add_atoms, Enumeration.smul_rel] at hj hN
       refine ⟨N, Or.inl hN, ρ₂ᵁ B • (ρ₁ᵁ B)⁻¹ • a, ?_, ?_⟩
-      · simp only [Set.mem_setOf_eq]
+      · simp only [Set.mem_ofPred_eq]
         rw [← (hρ₂ B).2 N ⟨_, hN⟩, BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
         have := (hρ₁ B).2 N ⟨_, hN⟩
         rw [smul_eq_iff_eq_inv_smul] at this
@@ -274,7 +274,7 @@ theorem atomMemRel_le_of_fixes {S : Support α} {T : Support γ}
           BaseSupport.smul_nearLitters, BaseSupport.add_nearLitters, Enumeration.smul_rel,
           inv_smul_smul, exists_eq_left]
         exact Or.inr hi
-      · simp only [Set.mem_setOf_eq]
+      · simp only [Set.mem_ofPred_eq]
         rw [← (hρ₂ B).1 a ⟨_, ha⟩, BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
         have := (hρ₁ B).1 a ⟨_, ha⟩
         rw [smul_eq_iff_eq_inv_smul] at this
@@ -285,7 +285,7 @@ theorem atomMemRel_le_of_fixes {S : Support α} {T : Support γ}
           BaseSupport.smul_nearLitters, BaseSupport.add_nearLitters, Enumeration.smul_rel,
           inv_smul_smul, exists_eq_left]
         exact Or.inr hi
-      · simp only [Set.mem_setOf_eq, BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
+      · simp only [Set.mem_ofPred_eq, BasePerm.smul_nearLitter_atoms, Set.smul_mem_smul_set_iff]
         exact haN
       · rw [SetRel.mem_inv, add_derivBot, BaseSupport.add_atoms, Enumeration.rel_add_iff]
         simp only [add_right_inj, scoderiv_botDeriv_eq, smul_derivBot, add_derivBot,
@@ -337,9 +337,9 @@ theorem inflexible_of_inflexible_of_fixes {S : Support α} {T : Support γ}
       ∀ (P : InflexiblePath ↑α) (t : Tangle P.δ), A = P.A ↘ P.hε ↘. → N₁ᴸ = fuzz P.hδε t →
       ∃ ρ : AllPerm P.δ, N₂ᴸ = fuzz P.hδε (ρ • t) := by
   rintro hN ⟨γ, δ, ε, hδ, hε, hδε, A⟩ t hA ht
-  haveI : LeLevel γ := ⟨A.le⟩
-  haveI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
-  haveI : LtLevel ε := ⟨hε.trans_le LeLevel.elim⟩
+  have : LeLevel γ := ⟨A.le⟩
+  have : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
+  have : LtLevel ε := ⟨hε.trans_le LeLevel.elim⟩
   obtain ⟨rfl, _⟩ | ⟨B, rfl, hN'⟩ := convNearLitters_cases hN
   · use 1
     rw [one_smul, ht]
@@ -386,9 +386,9 @@ theorem atoms_of_inflexible_of_fixes {S : Support α} (hS : S.Strong) {T : Suppo
         (P.A ↘ P.hδ ⇘ B))ᴬ.rel] ρᵁ B • a := by
   rw [Support.smul_eq_iff] at hρ₁ hρ₂
   obtain ⟨γ, δ, ε, hδ, hε, hδε, B⟩ := P
-  haveI : LeLevel γ := ⟨B.le⟩
-  haveI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
-  haveI : LtLevel ε := ⟨hε.trans_le LeLevel.elim⟩
+  have : LeLevel γ := ⟨B.le⟩
+  have : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
+  have : LtLevel ε := ⟨hε.trans_le LeLevel.elim⟩
   dsimp only at t ρ ⊢
   intro hA hN₁ hN₂ hN C a ha i hi
   obtain ⟨rfl, hN'⟩ | ⟨A, rfl, hN₁', hN₂'⟩ := convNearLitters_cases hN
@@ -488,9 +488,9 @@ theorem nearLitters_of_inflexible_of_fixes {S : Support α} (hS : S.Strong) {T :
         (P.A ↘ P.hδ ⇘ B))ᴺ.rel] ρᵁ B • N := by
   rw [Support.smul_eq_iff] at hρ₁ hρ₂
   obtain ⟨γ, δ, ε, hδ, hε, hδε, B⟩ := P
-  haveI : LeLevel γ := ⟨B.le⟩
-  haveI : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
-  haveI : LtLevel ε := ⟨hε.trans_le LeLevel.elim⟩
+  have : LeLevel γ := ⟨B.le⟩
+  have : LtLevel δ := ⟨hδ.trans_le LeLevel.elim⟩
+  have : LtLevel ε := ⟨hε.trans_le LeLevel.elim⟩
   dsimp only at t ρ ⊢
   intro hA hN₁ hN₂ hN C N₀ hN₀ i hi
   obtain ⟨rfl, hN'⟩ | ⟨A, rfl, hN₁', hN₂'⟩ := convNearLitters_cases hN

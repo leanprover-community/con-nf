@@ -97,7 +97,7 @@ theorem addAtom_convAtoms (S : BaseSupport) (a₁ a₂ : Atom) (A : ⊥ ↝ ⊥)
       {(a₃, a₄) | (a₃ = a₄ ∧ a₃ ∈ Sᴬ) ∨ (a₃ = a₁ ∧ a₄ = a₂)} := by
   ext ⟨a₃, a₄⟩
   simp only [convAtoms, SetRel.mem_comp, addAtom_derivBot, SetRel.mem_inv, addAtom'_atoms_rel,
-    Set.mem_setOf_eq]
+    Set.mem_ofPred_eq]
   constructor
   · rintro ⟨i, hi₃ | hi₃, hi₄ | hi₄⟩
     · exact Or.inl ⟨Sᴬ.rel_coinjective.coinjective hi₃ hi₄, i, hi₃⟩
@@ -145,7 +145,7 @@ theorem addAtom_sameSpecLe {S : BaseSupport} {a₁ a₂ : Atom}
     obtain (ha | ⟨j, rfl, rfl, rfl⟩) := hj
     · exact ⟨a, haN, Or.inl ha⟩
     · refine ⟨a₂, ?_, Or.inr ⟨_, rfl, rfl, rfl⟩⟩
-      simp only [Set.mem_setOf_eq] at haN ⊢
+      simp only [Set.mem_ofPred_eq] at haN ⊢
       dsimp only at ha
       rwa [← ha]
       · exact ⟨i, hi⟩
