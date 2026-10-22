@@ -1,5 +1,7 @@
-import ConNF.FOA.Inflexible
-import ConNF.Strong.CodingFunction
+module
+
+public import ConNF.FOA.Inflexible
+public import ConNF.Strong.CodingFunction
 
 /-!
 # Specifications for supports
@@ -11,7 +13,8 @@ In this file, we define the notion of a specification for a support.
 * `ConNF.Spec`: Specifications for supports.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

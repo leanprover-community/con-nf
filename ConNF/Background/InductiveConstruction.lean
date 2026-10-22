@@ -1,9 +1,13 @@
-import Mathlib.Order.RelClasses
-import Mathlib.Data.Part
+module
+
+public import Mathlib.Order.RelClasses
+public import Mathlib.Data.Part
 
 /-!
 # The inductive construction theorem
 -/
+
+@[expose] public section
 
 universe u v w
 

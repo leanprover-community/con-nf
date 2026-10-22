@@ -1,4 +1,6 @@
-import ConNF.Strong.Spec
+module
+
+public import ConNF.Strong.Spec
 
 /-!
 # Action on specifications
@@ -12,7 +14,8 @@ of allowable permutations.
 of allowable permutations.
 -/
 
-noncomputable section
+public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

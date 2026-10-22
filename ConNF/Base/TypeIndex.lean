@@ -1,4 +1,6 @@
-import ConNF.Base.Params
+module
+
+public import ConNF.Base.Params
 
 /-!
 # Type indices
@@ -17,7 +19,8 @@ It is important to take note of the difference between a type-in-Lean and a type
 hopefully it should be clear from context which is meant.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

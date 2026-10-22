@@ -1,5 +1,7 @@
-import ConNF.Counting.BaseCoding
-import ConNF.Counting.CountSupportOrbit
+module
+
+public import ConNF.Counting.BaseCoding
+public import ConNF.Counting.CountSupportOrbit
 
 /-!
 # Counting coding functions at base type and level zero
@@ -12,7 +14,8 @@ In this file, we show that there are less than `μ` coding functions at levels `
   `μ` coding functions at levels `⊥` and `0`.
 -/
 
-noncomputable section
+public noncomputable section
+
 universe u
 
 open Cardinal Ordinal WithBot

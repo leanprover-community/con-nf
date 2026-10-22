@@ -1,8 +1,11 @@
-import ConNF.Model.InductionStatement
-import ConNF.Construction.NewModelData
-import ConNF.Counting.Conclusions
+module
 
-noncomputable section
+public import ConNF.Model.InductionStatement
+public import ConNF.Construction.NewModelData
+public import ConNF.Counting.Conclusions
+
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal WithBot

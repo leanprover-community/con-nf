@@ -1,6 +1,9 @@
-import ConNF.Model.Externalise
+module
 
-noncomputable section
+public import ConNF.Model.Externalise
+
+public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

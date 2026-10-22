@@ -1,6 +1,9 @@
-import ConNF.Model.TTT
+module
 
-noncomputable section
+public import ConNF.Model.TTT
+
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

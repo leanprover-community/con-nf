@@ -1,5 +1,7 @@
-import ConNF.ModelData.CoherentData
-import ConNF.FOA.BaseApprox
+module
+
+public import ConNF.ModelData.CoherentData
+public import ConNF.FOA.BaseApprox
 
 /-!
 # Structural approximations
@@ -15,7 +17,8 @@ In this file, we define structural approximations, which are trees of base appro
     applying a `fuzz` map along this path.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

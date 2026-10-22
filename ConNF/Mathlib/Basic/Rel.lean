@@ -1,6 +1,10 @@
-import Mathlib.Data.Rel
-import Mathlib.Data.Set.Lattice
-import Mathlib.Order.Preorder.Chain
+module
+
+public import Mathlib.Data.Rel
+public import Mathlib.Data.Set.Lattice
+public import Mathlib.Order.Preorder.Chain
+
+@[expose] public section
 
 open Set
 open scoped symmDiff SetRel

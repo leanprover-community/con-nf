@@ -1,4 +1,8 @@
-import Mathlib.SetTheory.Ordinal.Arithmetic
+module
+
+public import Mathlib.SetTheory.Ordinal.Arithmetic
+
+@[expose] public section
 
 class LtWellOrder (α : Type _) extends LinearOrder α, IsWellOrder α (· < ·)
 

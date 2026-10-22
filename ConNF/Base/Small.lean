@@ -1,6 +1,8 @@
-import ConNF.Background.Set
-import ConNF.Base.Params
-import ConNF.Mathlib.Basic.Rel
+module
+
+public import ConNF.Background.Set
+public import ConNF.Base.Params
+public import ConNF.Mathlib.Basic.Rel
 
 /-!
 # Small sets
@@ -8,6 +10,8 @@ import ConNF.Mathlib.Basic.Rel
 In this file, we define the notion of a small set, and prove many of the basic properties of small
 sets.
 -/
+
+@[expose] public section
 
 universe u v
 

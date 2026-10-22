@@ -1,4 +1,6 @@
-import ConNF.Base.Params
+module
+
+public import ConNF.Base.Params
 
 /-!
 # Position functions
@@ -8,6 +10,8 @@ well-foundedness constraints in our model are enforced by position functions, wh
 into `μ`. If we can define a relation on a type with a position function such that `r x y` only if
 `pos x < pos y`, then `r` must be well-founded; this situation will occur frequently.
 -/
+
+@[expose] public section
 
 universe u
 

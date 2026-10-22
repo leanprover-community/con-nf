@@ -1,11 +1,14 @@
-import ConNF.External.Basic
+module
+
+public import ConNF.External.Basic
 
 /-!
 We are roughly following Scott Fenton's development of NF:
 <https://us.metamath.org/nfeuni/mmnf.html>.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal ConNF.TSet

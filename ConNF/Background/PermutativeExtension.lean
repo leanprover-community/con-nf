@@ -1,7 +1,10 @@
-import ConNF.Background.Cardinal
-import ConNF.Mathlib.Basic.Rel
+module
 
-noncomputable section
+public import ConNF.Background.Cardinal
+public import ConNF.Mathlib.Basic.Rel
+
+@[expose] public noncomputable section
+
 open Cardinal
 
 namespace SetRel

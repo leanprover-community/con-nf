@@ -1,5 +1,7 @@
-import ConNF.Mathlib.Basic.Rel
-import ConNF.Base.Small
+module
+
+public import ConNF.Mathlib.Basic.Rel
+public import ConNF.Base.Small
 
 /-!
 # Enumerations
@@ -10,6 +12,8 @@ In this file, we define enumerations of a type.
 
 * `ConNF.Enumeration`: The type family of enumerations.
 -/
+
+@[expose] public section
 
 universe u
 

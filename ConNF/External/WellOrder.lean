@@ -1,6 +1,9 @@
-import ConNF.External.Basic
+module
 
-noncomputable section
+public import ConNF.External.Basic
+
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal ConNF.TSet

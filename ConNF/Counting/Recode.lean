@@ -1,4 +1,6 @@
-import ConNF.Strong.CodingFunction
+module
+
+public import ConNF.Strong.CodingFunction
 
 /-!
 # Recoding
@@ -12,7 +14,8 @@ of a particular class of `γ`-coding functions, called *raised* coding functions
   expressed in terms of a set of `γ`-coding functions and a `β`-support orbit.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

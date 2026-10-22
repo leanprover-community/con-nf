@@ -1,5 +1,7 @@
-import ConNF.Levels.StrSet
-import ConNF.ModelData.Support
+module
+
+public import ConNF.Levels.StrSet
+public import ConNF.ModelData.Support
 
 /-!
 # Model data
@@ -10,6 +12,8 @@ In this file, we define what model data at a type index means.
 
 * `ConNF.ModelData`: The type of model data at a given type index.
 -/
+
+@[expose] public section
 
 universe u
 

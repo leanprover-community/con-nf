@@ -1,4 +1,6 @@
-import ConNF.FOA.StrApprox
+module
+
+public import ConNF.FOA.StrApprox
 
 /-!
 # Freedom of action for structural permutations
@@ -17,7 +19,8 @@ In this file, we state and prove the freedom of action theorem for structural pe
 * `ConNF.StrApprox.freedomOfAction`: The proof of freedom of action for structural permutations.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

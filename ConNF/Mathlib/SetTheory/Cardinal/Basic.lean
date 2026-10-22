@@ -1,5 +1,9 @@
-import Mathlib.Data.Rel
-import Mathlib.SetTheory.Cardinal.Defs
+module
+
+public import Mathlib.Data.Rel
+public import Mathlib.SetTheory.Cardinal.Defs
+
+public section
 
 open Cardinal
 

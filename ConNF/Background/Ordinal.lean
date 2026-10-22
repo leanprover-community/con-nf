@@ -1,8 +1,11 @@
-import ConNF.Background.WellOrder
-import Mathlib.SetTheory.Cardinal.Aleph
-import Mathlib.SetTheory.Cardinal.Arithmetic
+module
 
-noncomputable section
+public import ConNF.Background.WellOrder
+public import Mathlib.SetTheory.Cardinal.Aleph
+public import Mathlib.SetTheory.Cardinal.Arithmetic
+
+@[expose] public noncomputable section
+
 universe u v
 
 open Cardinal

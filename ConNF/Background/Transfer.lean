@@ -1,5 +1,9 @@
-import Mathlib.Algebra.Group.TransferInstance
-import ConNF.Background.Ordinal
+module
+
+public import Mathlib.Algebra.Group.TransferInstance
+public import ConNF.Background.Ordinal
+
+@[expose] public section
 
 universe u v
 

@@ -1,5 +1,7 @@
-import ConNF.Position.BasePositions
-import ConNF.ModelData.ModelData
+module
+
+public import ConNF.Position.BasePositions
+public import ConNF.ModelData.ModelData
 
 /-!
 # The fuzz map
@@ -11,7 +13,8 @@ In this file, we define the `fuzz` map.
 * `ConNF.fuzz`: The `fuzz` map.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

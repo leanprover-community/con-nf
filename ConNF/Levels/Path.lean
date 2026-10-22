@@ -1,4 +1,6 @@
-import ConNF.Base.TypeIndex
+module
+
+public import ConNF.Base.TypeIndex
 
 /-!
 # Paths of type indices
@@ -12,6 +14,8 @@ In this file, we define the notion of a *path*, and the derivative and coderivat
     Downwards induction principles for paths.
 * `ConNF.Path.recScoderiv`: An upwards induction principle for paths.
 -/
+
+@[expose] public section
 
 universe u
 

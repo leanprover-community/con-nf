@@ -1,5 +1,7 @@
-import ConNF.ModelData.Support
-import ConNF.FOA.Coherent
+module
+
+public import ConNF.ModelData.Support
+public import ConNF.FOA.Coherent
 
 /-!
 # Base approximations
@@ -12,7 +14,8 @@ In this file, we define base approximations.
   permutation of near-litters.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal Set SetRel

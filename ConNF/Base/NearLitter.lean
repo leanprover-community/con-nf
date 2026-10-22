@@ -1,4 +1,6 @@
-import ConNF.Base.Atom
+module
+
+public import ConNF.Base.Atom
 
 /-!
 # Near-litters
@@ -9,6 +11,8 @@ set. Large families of near-litters will be used to obscure certain information 
 Since there is exactly one litter near a given near-litter, we will store this litter as
 extra data, which helps improve some definitional equalities.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -1,5 +1,7 @@
-import ConNF.Background.ReflTransGen
-import ConNF.FOA.Inflexible
+module
+
+public import ConNF.Background.ReflTransGen
+public import ConNF.FOA.Inflexible
 
 /-!
 # Strong supports
@@ -11,7 +13,8 @@ In this file, we define strong supports.
 * `ConNF.Support.Strong`: The property that a support is strong.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

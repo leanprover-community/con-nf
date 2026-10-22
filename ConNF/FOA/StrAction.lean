@@ -1,4 +1,6 @@
-import ConNF.FOA.FlexApprox
+module
+
+public import ConNF.FOA.FlexApprox
 
 /-!
 # Structural actions
@@ -10,7 +12,8 @@ In this file, we define structural actions, and prove the freedom of action theo
 * `ConNF.StrAction`: Structural actions.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

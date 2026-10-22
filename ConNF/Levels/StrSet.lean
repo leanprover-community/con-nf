@@ -1,4 +1,6 @@
-import ConNF.Levels.StrPerm
+module
+
+public import ConNF.Levels.StrPerm
 
 /-!
 # Structural sets
@@ -10,6 +12,8 @@ construct the types of our model
 
 * `ConNF.StrSet`: The type family of structural sets.
 -/
+
+@[expose] public section
 
 universe u
 

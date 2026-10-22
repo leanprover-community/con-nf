@@ -1,5 +1,7 @@
-import ConNF.Mathlib.SetTheory.Cardinal.Order
-import ConNF.Strong.SpecSame
+module
+
+public import ConNF.Mathlib.SetTheory.Cardinal.Order
+public import ConNF.Strong.SpecSame
 
 /-!
 # Coding the base type
@@ -8,7 +10,8 @@ In this file, we prove a consequence of freedom of action for `⊥`: a base supp
 most `2 ^ #κ`-many different sets of atoms under the action of base permutations.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

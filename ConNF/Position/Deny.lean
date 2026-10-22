@@ -1,4 +1,6 @@
-import ConNF.Position.Position
+module
+
+public import ConNF.Position.Position
 
 /-!
 # Injective functions from denied sets
@@ -11,7 +13,8 @@ constraints.
 * `ConNF.funOfDeny`: An injective function satisfying particular requirements.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

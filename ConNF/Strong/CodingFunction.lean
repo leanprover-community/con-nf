@@ -1,4 +1,6 @@
-import ConNF.ModelData.CoherentData
+module
+
+public import ConNF.ModelData.CoherentData
 
 /-!
 # Coding functions
@@ -10,7 +12,8 @@ In this file, we define coding functions.
 * `ConNF.CodingFunction`: The type of coding functions.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

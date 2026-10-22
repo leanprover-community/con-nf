@@ -1,4 +1,6 @@
-import ConNF.Base.TypeIndex
+module
+
+public import ConNF.Base.TypeIndex
 
 /-!
 # Litters
@@ -7,6 +9,8 @@ In this file, we define litters, which are the parts of an indexed partition of 
 model. Each litter is indexed by an element of `μ`, as well as some parameters `β` and `γ` used for
 defining the `fuzz` map later.
 -/
+
+@[expose] public section
 
 universe u
 

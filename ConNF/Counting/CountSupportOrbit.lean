@@ -1,5 +1,7 @@
-import ConNF.Strong.SMulSpec
-import ConNF.Strong.SpecSame
+module
+
+public import ConNF.Strong.SMulSpec
+public import ConNF.Strong.SpecSame
 
 /-!
 # Counting support orbits
@@ -12,7 +14,8 @@ In this file, we prove an upper bound on the amount of orbits of supports that c
   an inductive hypothesis about the amount of coding functions at lower levels.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

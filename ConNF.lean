@@ -1,65 +1,67 @@
-import ConNF.Background.Cardinal
-import ConNF.Background.InductiveConstruction
-import ConNF.Background.Ordinal
-import ConNF.Background.PermutativeExtension
-import ConNF.Background.ReflTransGen
-import ConNF.Background.Set
-import ConNF.Background.Transfer
-import ConNF.Background.WellOrder
-import ConNF.Base.Atom
-import ConNF.Base.BasePerm
-import ConNF.Base.Litter
-import ConNF.Base.NearLitter
-import ConNF.Base.Params
-import ConNF.Base.Small
-import ConNF.Base.TypeIndex
-import ConNF.Construction.Code
-import ConNF.Construction.NewModelData
-import ConNF.Counting.BaseCoding
-import ConNF.Counting.BaseCounting
-import ConNF.Counting.Conclusions
-import ConNF.Counting.CountSupportOrbit
-import ConNF.Counting.Recode
-import ConNF.External.Basic
-import ConNF.External.Counting
-import ConNF.External.WellOrder
-import ConNF.FOA.BaseAction
-import ConNF.FOA.BaseApprox
-import ConNF.FOA.Coherent
-import ConNF.FOA.FlexApprox
-import ConNF.FOA.Inflexible
-import ConNF.FOA.StrAction
-import ConNF.FOA.StrActionFOA
-import ConNF.FOA.StrApprox
-import ConNF.FOA.StrApproxFOA
-import ConNF.Levels.Path
-import ConNF.Levels.StrPerm
-import ConNF.Levels.StrSet
-import ConNF.Levels.Tree
-import ConNF.Mathlib.Basic.Rel
-import ConNF.Mathlib.SetTheory.Cardinal.Basic
-import ConNF.Mathlib.SetTheory.Cardinal.Order
-import ConNF.Model.ConstructHypothesis
-import ConNF.Model.ConstructMotive
-import ConNF.Model.Externalise
-import ConNF.Model.Hailperin
-import ConNF.Model.InductionStatement
-import ConNF.Model.RaiseStrong
-import ConNF.Model.Result
-import ConNF.Model.RunInduction
-import ConNF.Model.TTT
-import ConNF.ModelData.CoherentData
-import ConNF.ModelData.Enumeration
-import ConNF.ModelData.Fuzz
-import ConNF.ModelData.Level
-import ConNF.ModelData.ModelData
-import ConNF.ModelData.PathEnumeration
-import ConNF.ModelData.Support
-import ConNF.Position.BasePositions
-import ConNF.Position.Deny
-import ConNF.Position.Position
-import ConNF.Strong.CodingFunction
-import ConNF.Strong.SMulSpec
-import ConNF.Strong.Spec
-import ConNF.Strong.SpecSame
-import ConNF.Strong.Strong
+module
+
+public import ConNF.Background.Cardinal
+public import ConNF.Background.InductiveConstruction
+public import ConNF.Background.Ordinal
+public import ConNF.Background.PermutativeExtension
+public import ConNF.Background.ReflTransGen
+public import ConNF.Background.Set
+public import ConNF.Background.Transfer
+public import ConNF.Background.WellOrder
+public import ConNF.Base.Atom
+public import ConNF.Base.BasePerm
+public import ConNF.Base.Litter
+public import ConNF.Base.NearLitter
+public import ConNF.Base.Params
+public import ConNF.Base.Small
+public import ConNF.Base.TypeIndex
+public import ConNF.Construction.Code
+public import ConNF.Construction.NewModelData
+public import ConNF.Counting.BaseCoding
+public import ConNF.Counting.BaseCounting
+public import ConNF.Counting.Conclusions
+public import ConNF.Counting.CountSupportOrbit
+public import ConNF.Counting.Recode
+public import ConNF.External.Basic
+public import ConNF.External.Counting
+public import ConNF.External.WellOrder
+public import ConNF.FOA.BaseAction
+public import ConNF.FOA.BaseApprox
+public import ConNF.FOA.Coherent
+public import ConNF.FOA.FlexApprox
+public import ConNF.FOA.Inflexible
+public import ConNF.FOA.StrAction
+public import ConNF.FOA.StrActionFOA
+public import ConNF.FOA.StrApprox
+public import ConNF.FOA.StrApproxFOA
+public import ConNF.Levels.Path
+public import ConNF.Levels.StrPerm
+public import ConNF.Levels.StrSet
+public import ConNF.Levels.Tree
+public import ConNF.Mathlib.Basic.Rel
+public import ConNF.Mathlib.SetTheory.Cardinal.Basic
+public import ConNF.Mathlib.SetTheory.Cardinal.Order
+public import ConNF.Model.ConstructHypothesis
+public import ConNF.Model.ConstructMotive
+public import ConNF.Model.Externalise
+public import ConNF.Model.Hailperin
+public import ConNF.Model.InductionStatement
+public import ConNF.Model.RaiseStrong
+public import ConNF.Model.Result
+public import ConNF.Model.RunInduction
+public import ConNF.Model.TTT
+public import ConNF.ModelData.CoherentData
+public import ConNF.ModelData.Enumeration
+public import ConNF.ModelData.Fuzz
+public import ConNF.ModelData.Level
+public import ConNF.ModelData.ModelData
+public import ConNF.ModelData.PathEnumeration
+public import ConNF.ModelData.Support
+public import ConNF.Position.BasePositions
+public import ConNF.Position.Deny
+public import ConNF.Position.Position
+public import ConNF.Strong.CodingFunction
+public import ConNF.Strong.SMulSpec
+public import ConNF.Strong.Spec
+public import ConNF.Strong.SpecSame
+public import ConNF.Strong.Strong

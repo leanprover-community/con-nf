@@ -1,8 +1,10 @@
-import Mathlib.Order.Interval.Set.Infinite
-import ConNF.Background.Cardinal
-import ConNF.Background.Ordinal
-import ConNF.Background.Transfer
-import ConNF.Background.WellOrder
+module
+
+public import Mathlib.Order.Interval.Set.Infinite
+public import ConNF.Background.Cardinal
+public import ConNF.Background.Ordinal
+public import ConNF.Background.Transfer
+public import ConNF.Background.WellOrder
 
 /-!
 # Model parameters
@@ -11,7 +13,8 @@ In this file, we define the parameters that we will use to construct our model o
 theory.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

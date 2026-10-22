@@ -1,6 +1,8 @@
-import ConNF.Background.PermutativeExtension
-import ConNF.FOA.BaseAction
-import ConNF.FOA.StrApprox
+module
+
+public import ConNF.Background.PermutativeExtension
+public import ConNF.FOA.BaseAction
+public import ConNF.FOA.StrApprox
 
 /-!
 # Flexible approximations
@@ -12,7 +14,8 @@ In this file, we define flexible approximations.
 * `ConNF.FlexApprox`: Flexible approximations.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

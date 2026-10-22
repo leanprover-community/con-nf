@@ -1,4 +1,6 @@
-import ConNF.ModelData.CoherentData
+module
+
+public import ConNF.ModelData.CoherentData
 
 /-!
 # Codes
@@ -6,7 +8,8 @@ import ConNF.ModelData.CoherentData
 In this file, we define codes and clouds.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

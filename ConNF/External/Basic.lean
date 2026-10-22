@@ -1,6 +1,9 @@
-import ConNF.Model.Result
+module
 
-noncomputable section
+public import ConNF.Model.Result
+
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal ConNF.TSet

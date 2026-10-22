@@ -1,5 +1,7 @@
-import Mathlib.Algebra.Group.Action.Option
-import ConNF.Construction.Code
+module
+
+public import Mathlib.Algebra.Group.Action.Option
+public import ConNF.Construction.Code
 
 /-!
 # Construction of model data
@@ -7,7 +9,8 @@ import ConNF.Construction.Code
 In this file, we construct model data at type `α`, given that it is defined at all types below `α`.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

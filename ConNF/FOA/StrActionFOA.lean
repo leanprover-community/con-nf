@@ -1,5 +1,7 @@
-import ConNF.FOA.StrAction
-import ConNF.FOA.StrApproxFOA
+module
+
+public import ConNF.FOA.StrAction
+public import ConNF.FOA.StrApproxFOA
 
 /-!
 # Freedom of action for structural actions
@@ -11,7 +13,8 @@ In this file, we state and prove the freedom of action theorem for structural ac
 * `ConNF.StrAction.freedomOfAction`: Freedom of action for structural actions.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

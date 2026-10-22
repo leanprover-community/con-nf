@@ -1,7 +1,10 @@
-import ConNF.ModelData.CoherentData
-import ConNF.FOA.Inflexible
+module
 
-noncomputable section
+public import ConNF.ModelData.CoherentData
+public import ConNF.FOA.Inflexible
+
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

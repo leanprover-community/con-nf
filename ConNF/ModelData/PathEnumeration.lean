@@ -1,5 +1,7 @@
-import ConNF.ModelData.Enumeration
-import ConNF.Levels.StrPerm
+module
+
+public import ConNF.ModelData.Enumeration
+public import ConNF.Levels.StrPerm
 
 /-!
 # Enumerations over paths
@@ -11,7 +13,8 @@ In this file, we provide extra features to `Enumeration`s that take values of th
 * `ConNF.Enumeration.ext_path`: An extensionality principle for such `Enumeration`s.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

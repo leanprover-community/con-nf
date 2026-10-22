@@ -1,6 +1,8 @@
-import ConNF.ModelData.Fuzz
-import ConNF.ModelData.Level
-import ConNF.ModelData.ModelData
+module
+
+public import ConNF.ModelData.Fuzz
+public import ConNF.ModelData.Level
+public import ConNF.ModelData.ModelData
 
 /-!
 # Coherent data
@@ -12,7 +14,8 @@ In this file, we define the type of coherent data below a particular proper type
 * `ConNF.ModelDataData`: Coherent data below a given level `α`.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

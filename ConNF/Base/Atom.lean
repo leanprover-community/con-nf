@@ -1,5 +1,7 @@
-import ConNF.Base.Litter
-import ConNF.Base.Small
+module
+
+public import ConNF.Base.Litter
+public import ConNF.Base.Small
 
 /-!
 # Atoms
@@ -10,6 +12,8 @@ ZFU sense (for example), they are simply the elements of the model which are in 
 This base type does not appear in the final construction, it is just used as the foundation on which
 the subsequent layers can be built.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -1,6 +1,10 @@
-import ConNF.Mathlib.Basic.Rel
-import ConNF.Mathlib.SetTheory.Cardinal.Basic
-import Mathlib.SetTheory.Cardinal.Regular
+module
+
+public import ConNF.Mathlib.Basic.Rel
+public import ConNF.Mathlib.SetTheory.Cardinal.Basic
+public import Mathlib.SetTheory.Cardinal.Regular
+
+public section
 
 universe u v
 

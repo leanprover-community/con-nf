@@ -1,6 +1,8 @@
-import Mathlib.Algebra.Group.Action.End
-import Mathlib.GroupTheory.Perm.Basic
-import ConNF.Base.NearLitter
+module
+
+public import Mathlib.Algebra.Group.Action.End
+public import Mathlib.GroupTheory.Perm.Basic
+public import ConNF.Base.NearLitter
 
 /-!
 # Base permutations
@@ -9,6 +11,8 @@ In this file, we define the group of *base permutations*, and their actions on a
 near-litters. In the paper, these are called *`-1`-allowable permutations*, but that term has a
 different meaning in this formalisation.
 -/
+
+@[expose] public section
 
 universe u
 

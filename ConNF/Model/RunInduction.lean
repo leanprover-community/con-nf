@@ -1,7 +1,10 @@
-import ConNF.Background.InductiveConstruction
-import ConNF.Model.ConstructHypothesis
+module
 
-noncomputable section
+public import ConNF.Background.InductiveConstruction
+public import ConNF.Model.ConstructHypothesis
+
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal WithBot

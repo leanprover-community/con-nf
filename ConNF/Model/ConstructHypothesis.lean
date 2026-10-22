@@ -1,6 +1,9 @@
-import ConNF.Model.ConstructMotive
+module
 
-noncomputable section
+public import ConNF.Model.ConstructMotive
+
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal WithBot

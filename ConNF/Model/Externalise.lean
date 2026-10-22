@@ -1,4 +1,6 @@
-import ConNF.Model.RunInduction
+module
+
+public import ConNF.Model.RunInduction
 
 /-!
 # Externalisation
@@ -7,7 +9,8 @@ In this file, we convert many of our *internal* results (i.e. inside the inducti
 ones (i.e. defined using the global `TSet`/`AllPerm` definitions).
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal WithBot

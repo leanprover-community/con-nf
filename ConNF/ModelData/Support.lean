@@ -1,4 +1,6 @@
-import ConNF.ModelData.PathEnumeration
+module
+
+public import ConNF.ModelData.PathEnumeration
 
 /-!
 # Supports
@@ -10,6 +12,8 @@ In this file, we define the notion of a support.
 * `ConNF.BaseSupport`: The type of supports of atoms.
 * `ConNF.Support`: The type of supports of objects of arbitrary type indices.
 -/
+
+@[expose] public section
 
 universe u
 

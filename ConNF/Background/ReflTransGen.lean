@@ -1,5 +1,9 @@
-import ConNF.Background.Cardinal
-import ConNF.Mathlib.Basic.Rel
+module
+
+public import ConNF.Background.Cardinal
+public import ConNF.Mathlib.Basic.Rel
+
+@[expose] public section
 
 universe u
 

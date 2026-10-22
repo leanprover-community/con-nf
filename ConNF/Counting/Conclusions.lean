@@ -1,6 +1,8 @@
-import ConNF.Counting.BaseCounting
-import ConNF.Counting.CountSupportOrbit
-import ConNF.Counting.Recode
+module
+
+public import ConNF.Counting.BaseCounting
+public import ConNF.Counting.CountSupportOrbit
+public import ConNF.Counting.Recode
 
 /-!
 # Concluding the counting argument
@@ -12,7 +14,8 @@ In this file, we finish the counting argument.
 * `ConNF.card_tSet_le`: There are at most `μ`-many t-sets at each level.
 -/
 
-noncomputable section
+public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

@@ -1,4 +1,6 @@
-import ConNF.Levels.Path
+module
+
+public import ConNF.Levels.Path
 
 /-!
 # Trees
@@ -9,6 +11,8 @@ In this file, we define the notion of a tree on a type.
 
 * `ConNF.Tree`: The type family of trees parametrised by a given type.
 -/
+
+@[expose] public section
 
 universe u
 

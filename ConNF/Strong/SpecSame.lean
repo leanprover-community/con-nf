@@ -1,6 +1,8 @@
-import ConNF.FOA.StrActionFOA
-import ConNF.Strong.Strong
-import ConNF.Strong.Spec
+module
+
+public import ConNF.FOA.StrActionFOA
+public import ConNF.Strong.Strong
+public import ConNF.Strong.Spec
 
 /-!
 # Supports with the same specification
@@ -14,7 +16,8 @@ an allowable permutation.
   permutation.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

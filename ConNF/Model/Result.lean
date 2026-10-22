@@ -1,6 +1,9 @@
-import ConNF.Model.Hailperin
+module
 
-noncomputable section
+public import ConNF.Model.Hailperin
+
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal ConNF.TSet

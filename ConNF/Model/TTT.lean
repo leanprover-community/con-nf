@@ -1,6 +1,9 @@
-import ConNF.Model.RaiseStrong
+module
 
-noncomputable section
+public import ConNF.Model.RaiseStrong
+
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

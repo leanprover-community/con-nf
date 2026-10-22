@@ -1,4 +1,6 @@
-import ConNF.FOA.Coherent
+module
+
+public import ConNF.FOA.Coherent
 
 /-!
 # Base actions
@@ -10,7 +12,8 @@ In this file, we define base actions.
 * `ConNF.BaseAction`: The type of base actions.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal

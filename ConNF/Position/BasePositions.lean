@@ -1,5 +1,7 @@
-import ConNF.Position.Deny
-import ConNF.Base.NearLitter
+module
+
+public import ConNF.Position.Deny
+public import ConNF.Base.NearLitter
 
 /-!
 # Base positions
@@ -13,7 +15,8 @@ In this file, we define position functions for atoms, litters, and near-litters.
 * `ConNF.instPositionNearLitter`: The position function for near-litters.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal

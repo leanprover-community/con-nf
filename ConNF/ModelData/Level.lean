@@ -1,4 +1,6 @@
-import ConNF.Base.TypeIndex
+module
+
+public import ConNF.Base.TypeIndex
 
 /-!
 # Levels
@@ -11,6 +13,8 @@ In this file, we provide a typeclass `Level` that stores the current type level 
 * `ConNF.LtLevel`: A type index less than the current level.
 * `ConNF.LeLevel`: A type index less than or equal to the current level.
 -/
+
+@[expose] public section
 
 universe u
 

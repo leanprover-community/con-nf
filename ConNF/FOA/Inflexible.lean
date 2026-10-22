@@ -1,6 +1,9 @@
-import ConNF.ModelData.CoherentData
+module
 
-noncomputable section
+public import ConNF.ModelData.CoherentData
+
+@[expose] public noncomputable section
+
 universe u
 
 open Cardinal Ordinal
