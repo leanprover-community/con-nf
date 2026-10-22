@@ -122,7 +122,7 @@ theorem mk_power_le_two_power (α β : Type _) :
           norm_cast
           rw [zero_power]
           exact Cardinal.zero_le _
-          exact ne_zero_of_lt (aleph0_pos.trans_le hβ)
+          exact (aleph0_pos.trans_le hβ).ne'
         | succ n => cases n with
           | zero => simp only [zero_add, Nat.cast_one, one_power, power_one, le_max_iff,
               Nat.one_le_ofNat, true_or, or_true]
@@ -150,7 +150,7 @@ theorem mk_power_le_two_power (α β : Type _) :
       wlog h : #α ≤ #β
       · have := this β α hβ hα (le_of_not_ge h)
         rwa [mul_comm, max_comm (2 ^ #α)]
-      · rw [mul_eq_left hβ h (ne_zero_of_lt (aleph0_pos.trans_le hα))]
+      · rw [mul_eq_left hβ h (aleph0_pos.trans_le hα).ne']
         apply le_max_of_le_right
         exact le_max_right _ _
 

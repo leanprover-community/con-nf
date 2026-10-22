@@ -12,7 +12,7 @@ namespace Ordinal
 
 def withBotOrderIso {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
     ((· < ·) : WithBot α → WithBot α → Prop) ≃r
-      Sum.Lex (EmptyRelation (α := PUnit)) ((· < ·) : α → α → Prop) where
+      Sum.Lex (emptyRelation (α := PUnit)) ((· < ·) : α → α → Prop) where
   toFun := WithBot.recBotCoe (Sum.inl PUnit.unit) Sum.inr
   invFun := Sum.elim (λ _ ↦ ⊥) (λ x ↦ x)
   left_inv x := by cases x <;> rfl
@@ -25,7 +25,7 @@ def withBotOrderIso {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
 @[simp]
 theorem type_withBot {α : Type u} [Preorder α] [IsWellOrder α (· < ·)] :
     type ((· < ·) : WithBot α → WithBot α → Prop) = 1 + type ((· < ·) : α → α → Prop) := by
-  change _ = type EmptyRelation + _
+  change _ = type emptyRelation + _
   rw [← type_sum_lex, type_eq]
   exact ⟨withBotOrderIso⟩
 
@@ -61,7 +61,7 @@ theorem type_Iio_lt {α : Type u} [LtWellOrder α] (x : α) :
 
 def iicOrderIso {α : Type u} [LtWellOrder α] (x : α) :
     (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) ≃r
-      Sum.Lex (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) (EmptyRelation (α := PUnit)) where
+      Sum.Lex (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) (emptyRelation (α := PUnit)) where
   toFun y := if h : y = x then Sum.inr PUnit.unit else Sum.inl ⟨y, y.prop.lt_of_ne h⟩
   invFun := Sum.elim (λ y ↦ ⟨y, y.prop.le⟩) (λ _ ↦ ⟨x, le_rfl⟩)
   left_inv y := by aesop
@@ -86,7 +86,7 @@ def iicOrderIso {α : Type u} [LtWellOrder α] (x : α) :
 theorem type_Iic_eq {α : Type u} [LtWellOrder α] (x : α) :
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iic x)) =
     type (Subrel ((· < ·) : α → α → Prop) (Set.Iio x)) + 1 := by
-  change _ = _ + type EmptyRelation
+  change _ = _ + type emptyRelation
   rw [← type_sum_lex, type_eq]
   exact ⟨iicOrderIso x⟩
 

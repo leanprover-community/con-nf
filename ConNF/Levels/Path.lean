@@ -554,10 +554,8 @@ theorem card_path_any_lt (α : TypeIndex) : #((β : TypeIndex) × α ↝ β) < (
     · cases h
     · cases h; rfl
   · simp only [mk_prod, mk_fintype, Fintype.card_bool, Nat.cast_ofNat, lift_ofNat, lift_id']
-    apply mul_lt_of_lt (aleph0_lt_κ.le.trans κ_le_μ_ord_cof)
-    · refine lt_of_lt_of_le ?_ (aleph0_lt_κ.le.trans κ_le_μ_ord_cof)
-      have := nat_lt_aleph0 2
-      rwa [Nat.cast_ofNat] at this
-    · exact card_path_lt α ⊥
+    refine mul_lt_of_lt (aleph0_lt_κ.le.trans κ_le_μ_ord_cof) ?_ (card_path_lt α ⊥)
+    grw [← κ_le_μ_ord_cof, ← aleph0_lt_κ]
+    exact ofNat_lt_aleph0
 
 end ConNF

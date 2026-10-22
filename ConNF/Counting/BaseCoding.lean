@@ -1,3 +1,4 @@
+import ConNF.Mathlib.SetTheory.Cardinal.Order
 import ConNF.Strong.SpecSame
 
 /-!
@@ -288,17 +289,14 @@ theorem card_information_le :
   simp only [mk_prod, mk_set, Cardinal.lift_id, Cardinal.lift_id', mk_fintype, Fintype.card_prop,
     Nat.cast_ofNat, Cardinal.lift_ofNat]
   apply mul_le_of_le
-  · have := Cardinal.power_le_power_left two_ne_zero κ_isRegular.aleph0_le
-    exact (cantor ℵ₀).le.trans this
+  · grw [← κ_isRegular.aleph0_le, ← cantor]
+    exact two_ne_zero
   · rfl
   apply mul_le_of_le
-  · have := Cardinal.power_le_power_left two_ne_zero κ_isRegular.aleph0_le
-    exact (cantor ℵ₀).le.trans this
+  · grw [← κ_isRegular.aleph0_le, ← cantor]
+    exact two_ne_zero
   · rfl
-  · have := Cardinal.power_le_power_left two_ne_zero κ_isRegular.aleph0_le
-    have htwo := nat_lt_aleph0 2
-    rw [Nat.cast_ofNat] at htwo
-    exact htwo.le.trans ((cantor ℵ₀).le.trans this)
+  · grw [← κ_isRegular.aleph0_le, ← one_lt_aleph0] <;> simp
 
 theorem card_supports_le_of_closed {S : BaseSupport} (hS : S.Closed) :
     #{s : Set Atom // ∀ π : BasePerm, π • S = S → π • s = s} ≤ 2 ^ #κ :=

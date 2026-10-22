@@ -3,7 +3,6 @@ import ConNF.Background.InductiveConstruction
 import ConNF.Background.Ordinal
 import ConNF.Background.PermutativeExtension
 import ConNF.Background.ReflTransGen
-import ConNF.Mathlib.Basic.Rel
 import ConNF.Background.Set
 import ConNF.Background.Transfer
 import ConNF.Background.WellOrder
@@ -37,6 +36,9 @@ import ConNF.Levels.Path
 import ConNF.Levels.StrPerm
 import ConNF.Levels.StrSet
 import ConNF.Levels.Tree
+import ConNF.Mathlib.Basic.Rel
+import ConNF.Mathlib.SetTheory.Cardinal.Basic
+import ConNF.Mathlib.SetTheory.Cardinal.Order
 import ConNF.Model.ConstructHypothesis
 import ConNF.Model.ConstructMotive
 import ConNF.Model.Externalise
