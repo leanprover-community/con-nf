@@ -85,9 +85,9 @@ theorem globalLeData_eq [Level] :
 
 instance globalPreCoherentData [Level] : PreCoherentData where
   allPermSderiv h := cast (by rw [globalLeData_eq])
-    ((preCoherentData (λ β _ ↦ motive β) (λ β _ ↦ hypothesis β)).allPermSderiv h)
+    ((preCoherentData α (λ β _ ↦ motive β) (λ β _ ↦ hypothesis β)).allPermSderiv h)
   singleton h := cast (by rw [globalLeData_eq])
-    ((preCoherentData (λ β _ ↦ motive β) (λ β _ ↦ hypothesis β)).singleton h)
+    ((preCoherentData α (λ β _ ↦ motive β) (λ β _ ↦ hypothesis β)).singleton h)
 
 omit [Params] in
 @[simp]
@@ -97,7 +97,7 @@ theorem heq_cast_eq_iff {α β γ : Type _} {x : α} {y : β} {h : α = γ} :
   rw [cast_eq]
 
 theorem globalPreCoherentData_eq [Level] :
-    globalPreCoherentData = preCoherentData (λ β _ ↦ motive β) (λ β _ ↦ hypothesis β) := by
+    globalPreCoherentData = preCoherentData α (λ β _ ↦ motive β) (λ β _ ↦ hypothesis β) := by
   have := globalLeData_eq
   rw [LeData.ext_iff] at this
   apply PreCoherentData.ext

@@ -164,6 +164,7 @@ theorem castTangleLeLt_fuzz {β : Λ} (hβ : (β : TypeIndex) < α) (t : TangleL
 
 variable (H : (β : Λ) → (h : (β : TypeIndex) < α) → Hypothesis (M β h) λ γ h' ↦ M γ (h'.trans h))
 
+variable (α) in
 def preCoherentData :
     letI : Level := ⟨α⟩; PreCoherentData :=
   letI : Level := ⟨α⟩
@@ -200,7 +201,7 @@ def preCoherentData :
 theorem preCoherentData_allPermSderiv_forget {β γ : TypeIndex}
     [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
     (hγ : γ < β) (ρ : AllPermLe M β iβ.elim) :
-    ((leData M).data γ).allPermForget ((preCoherentData M H).allPermSderiv hγ ρ) =
+    ((leData M).data γ).allPermForget ((preCoherentData α M H).allPermSderiv hγ ρ) =
     ((leData M).data β).allPermForget ρ ↘ hγ := by
   letI : Level := ⟨α⟩
   letI : LtData := ltData M
@@ -278,9 +279,9 @@ theorem preCoherentData_smul_fuzz
     [iγ : letI : Level := ⟨α⟩; LtLevel γ] [iδ : letI : Level := ⟨α⟩; LtLevel δ]
     (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ)
     (ρ : AllPermLe M β iβ.elim) (t : TangleLe M γ iγ.elim.le) :
-    letI : Level := ⟨α⟩; letI := preCoherentData M H
+    letI : Level := ⟨α⟩; letI := preCoherentData α M H
     ((leData M).data β).allPermForget ρ ↘ hδ ↘. • fuzz hγδ t =
-    fuzz hγδ ((preCoherentData M H).allPermSderiv hγ ρ • t) := by
+    fuzz hγδ ((preCoherentData α M H).allPermSderiv hγ ρ • t) := by
   letI : Level := ⟨α⟩
   by_cases h : (β : TypeIndex) = α
   · cases coe_injective h
@@ -328,11 +329,11 @@ theorem preCoherentData_allPerm_of_smulFuzz
     (hρs : letI : Level := ⟨α⟩; ∀ {γ : TypeIndex} {δ : Λ}
       [LtLevel γ] [LtLevel δ] (hγ : γ < β) (hδ : (δ : TypeIndex) < β) (hγδ : γ ≠ δ)
       (t : TangleLe M γ LeLevel.elim),
-      letI := preCoherentData M H;
+      letI := preCoherentData α M H;
       ((leData M).data δ).allPermForget (ρs hδ) ↘. • fuzz hγδ t = fuzz hγδ (ρs hγ • t)) :
     letI : Level := ⟨α⟩
     ∃ ρ : AllPermLe M β LeLevel.elim, ∀ (γ : TypeIndex) [LtLevel γ] (hγ : γ < β),
-      (preCoherentData M H).allPermSderiv hγ ρ = ρs hγ := by
+      (preCoherentData α M H).allPermSderiv hγ ρ = ρs hγ := by
   letI : Level := ⟨α⟩
   by_cases h : (β : TypeIndex) = α
   · cases coe_injective h
@@ -422,7 +423,7 @@ theorem preCoherent_tSet_ext
 theorem typedMem_singleton_iff
     {β γ : Λ} [iβ : letI : Level := ⟨α⟩; LeLevel β] [iγ : letI : Level := ⟨α⟩; LeLevel γ]
     (hγ : (γ : TypeIndex) < β) (x y : letI : Level := ⟨α⟩; TSetLe M γ LeLevel.elim) :
-    y ∈[hγ] (preCoherentData M H).singleton hγ x ↔ y = x := by
+    y ∈[hγ] (preCoherentData α M H).singleton hγ x ↔ y = x := by
   letI : Level := ⟨α⟩
   by_cases h : (β : TypeIndex) = α
   · cases coe_injective h
@@ -461,7 +462,7 @@ theorem typedMem_singleton_iff
 def coherentData :
     letI : Level := ⟨α⟩; CoherentData :=
   letI : Level := ⟨α⟩
-  letI := preCoherentData M H
+  letI := preCoherentData α M H
   {
     allPermSderiv_forget := preCoherentData_allPermSderiv_forget M H
     pos_atom_lt_pos := preCoherentData_pos_atom_lt_pos M H
