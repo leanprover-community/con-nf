@@ -64,7 +64,7 @@ theorem smul_nearLitter_of_smul_litter [Level] [CoherentData] {β : TypeIndex} [
     _ = π • (N₁ᴸᴬ ∆ (N₁ᴸᴬ ∆ N₁ᴬ)) := by rw [symmDiff_symmDiff_cancel_left]
     _ = (π • N₁ᴸᴬ) ∆ (π • N₁ᴬ ∆ N₁ᴸᴬ) := by rw [Set.smul_set_symmDiff, symmDiff_comm N₁ᴬ]
     _ = (π • (N₁ᴸᴬ ∩ ψ.exceptions.dom ∪ N₁ᴸᴬ \ ψ.exceptions.dom)) ∆ (π • N₁ᴬ ∆ N₁ᴸᴬ) :=
-        by rw [Set.inter_union_diff]
+        by rw [Set.inter_union_sdiff]
     _ = (π • (N₁ᴸᴬ ∩ ψ.exceptions.dom) ∪ π • (N₁ᴸᴬ \ ψ.exceptions.dom)) ∆ (π • N₁ᴬ ∆ N₁ᴸᴬ) :=
         by rw [Set.smul_set_union]
     _ = (π • (N₁ᴸᴬ ∩ ψ.exceptions.dom) ∪ N₂ᴸᴬ \ ψ.exceptions.dom) ∆ (π • N₁ᴬ ∆ N₁ᴸᴬ) :=
@@ -87,8 +87,8 @@ theorem smul_nearLitter_of_smul_litter [Level] [CoherentData] {β : TypeIndex} [
     _ = ψ.exceptions.image ((N₁ᴸᴬ \ ψ.exceptions.dom) ∆ N₁ᴬ) ∪ N₂ᴸᴬ \ ψ.exceptions.dom :=
         by rw [Set.inter_symmDiff_left]
     _ = ψ.exceptions.image (N₁ᴬ \ (N₁ᴸᴬ \ ψ.exceptions.dom)) ∪ N₂ᴸᴬ \ ψ.exceptions.dom := by
-        rw [Set.symmDiff_def, SetRel.image_union, Set.diff_diff, SetRel.image_empty_of_disjoint_dom,
-          Set.empty_union]
+        rw [Set.symmDiff_def, SetRel.image_union, Set.sdiff_sdiff,
+          SetRel.image_empty_of_disjoint_dom, Set.empty_union]
         rw [Set.disjoint_iff_inter_eq_empty, Set.eq_empty_iff_forall_notMem]
         intro a ha
         exact ha.2.2 (Or.inl ha.1)
@@ -96,7 +96,7 @@ theorem smul_nearLitter_of_smul_litter [Level] [CoherentData] {β : TypeIndex} [
         congr 1
         apply SetRel.image_eq_of_inter_eq
         ext a
-        simp only [Set.mem_inter_iff, Set.mem_diff]
+        simp only [Set.mem_inter_iff, Set.mem_sdiff]
         tauto
     _ = N₂ᴬ := by
         ext a
@@ -208,7 +208,7 @@ theorem card_insideAll_inter (ξ : BaseAction) (L : Litter) :
     apply (small_union (small_union (small_union h (ξ.diff_insideAll_small L))
       ξ.atoms_dom_small) ξ.atoms_cod_small).mono
     intro a ha
-    simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_diff, not_or, mem_litter_atoms_iff]
+    simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_sdiff, not_or, mem_litter_atoms_iff]
     tauto
 
 def orbitRestriction (ξ : BaseAction) : SetRel.OrbitRestriction (ξᴬ.dom ∪ ξᴬ.cod) Litter where
@@ -254,7 +254,7 @@ theorem atomPerm_dom_subset (ξ : BaseAction) :
     ξ.atomPerm.dom ⊆ ξᴬ.dom ∪ ξᴬ.cod ∪ ξ.insideAll := by
   apply (ξᴬ.dom_permutativeExtension_subset _).trans
   dsimp only [orbitRestriction]
-  rw [Set.union_diff_self]
+  rw [Set.union_sdiff_self]
 
 theorem atomPerm_small (ξ : BaseAction) :
     Small ξ.atomPerm.dom := by
@@ -324,7 +324,7 @@ theorem card_inflexible_diff_dom (ξ : BaseAction) (A : β ↝ ⊥) :
   · apply (mk_subtype_le _).trans
     rw [card_litter]
   · by_contra! h
-    apply (le_mk_diff_add_mk {L | ¬Inflexible A L} (ξᴸ.dom ∪ ξᴸ.cod)).not_gt
+    apply (le_mk_sdiff_add_mk {L | ¬Inflexible A L} (ξᴸ.dom ∪ ξᴸ.cod)).not_gt
     rw [card_inflexible]
     apply add_lt_of_lt (aleph0_lt_κ.le.trans κ_le_μ) h
     apply (mk_union_le _ _).trans_lt
@@ -362,7 +362,7 @@ theorem dom_flexLitterPerm_subset (ξ : BaseAction) (A : β ↝ ⊥) :
     exact h.2.1
   · rintro L₁ ⟨L₂, h⟩
     exact h.2.2
-  · exact Set.diff_subset
+  · exact Set.sdiff_subset
 
 def flexApprox' (ξ : BaseAction) (A : β ↝ ⊥) : BaseApprox where
   exceptions := ξ.atomPerm

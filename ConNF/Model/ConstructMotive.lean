@@ -401,7 +401,7 @@ theorem preCoherent_tSet_ext
     apply newModelData_ext γ
     intro z
     simp only [← TSet.forget_mem_forget] at hxy ⊢
-    convert hxy ((castTSetLeLt M hγ).symm z) using 2
+    convert hxy ((castTSetLeLt M hγ).symm z) using 2 <;> try rfl
     · have := castTSetLeLt_forget M hγ ((castTSetLeLt M hγ).symm z)
       rwa [Equiv.apply_symm_apply] at this
     · exact castTSetLeEq_forget M x

@@ -317,12 +317,10 @@ theorem card_supports_le (S : BaseSupport) :
     apply hs
     apply BaseSupport.ext
     · have := congr_arg (·ᴬ) hπ
-      dsimp only at this
       rw [BaseSupport.smul_atoms, BaseSupport.add_atoms, Enumeration.smul_add,
         Enumeration.add_inj_iff_of_bound_eq_bound (by rfl)] at this
       exact this.1
     · have := congr_arg (·ᴺ) hπ
-      dsimp only at this
       rw [BaseSupport.smul_nearLitters, BaseSupport.add_nearLitters, Enumeration.smul_add,
         Enumeration.add_inj_iff_of_bound_eq_bound (by rfl)] at this
       exact this.1

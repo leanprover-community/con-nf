@@ -17,14 +17,14 @@ theorem Set.symmDiff_trans_subset {α : Type*} (s t u : Set α) :
 theorem Set.diff_symmDiff_self {α : Type*} (s t : Set α) :
     s \ (s ∆ t) = s ∩ t := by
   ext x
-  simp only [mem_symmDiff, mem_diff, mem_inter_iff]
+  simp only [mem_symmDiff, mem_sdiff, mem_inter_iff]
   tauto
 
 @[simp]
 theorem Set.symmDiff_diff_self {α : Type*} (s t : Set α) :
     s ∆ (s \ t) = s ∩ t := by
   ext x
-  simp only [mem_symmDiff, mem_diff, mem_inter_iff]
+  simp only [mem_symmDiff, mem_sdiff, mem_inter_iff]
   tauto
 
 @[simp]
@@ -51,7 +51,7 @@ theorem Set.union_symmDiff_of_disjoint {α : Type*} {s t u : Set α} (h : Disjoi
 theorem Set.inter_symmDiff_left {α : Type*} {s t : Set α} :
     (s ∩ t) ∆ s = s \ t := by
   ext a
-  simp only [Set.mem_symmDiff, Set.mem_inter_iff, Set.mem_diff]
+  simp only [Set.mem_symmDiff, Set.mem_inter_iff, Set.mem_sdiff]
   tauto
 
 theorem Set.smul_set_def {α β : Type*} {x : α} {s : Set β} [SMul α β] :

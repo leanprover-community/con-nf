@@ -129,9 +129,9 @@ theorem one_litter :
 
 /-- The composition of permutations. -/
 instance : Mul BasePerm where
-  mul π₁ π₂ := ⟨π₁ᴬ * π₂ᴬ, π₁ᴸ * π₂ᴸ, λ s L h ↦ by
-    have := π₁.smul_near_smul _ _ <| π₂.smul_near_smul s L h
-    simpa only [Set.smul_set_def, Set.image_image] using this⟩
+  mul π₁ π₂ := ⟨π₁ᴬ * π₂ᴬ, π₁ᴸ * π₂ᴸ, fun s L h ↦ by
+    simpa [Set.smul_set_def, Set.image_image, smul_atom_def, smul_litter_def]
+      using π₁.smul_near_smul _ _ <| π₂.smul_near_smul s L h⟩
 
 @[simp]
 theorem mul_atom (π₁ π₂ : BasePerm) :

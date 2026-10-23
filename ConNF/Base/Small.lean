@@ -3,6 +3,7 @@ module
 public import ConNF.Background.Set
 public import ConNF.Base.Params
 public import ConNF.Mathlib.Basic.Rel
+public import ConNF.Mathlib.Data.Set.Image
 
 /-!
 # Small sets
@@ -250,9 +251,9 @@ theorem near_symmDiff_self_of_small (h : Small s) : s ∆ t ~ t := by
 
 /-- If `s` is small, then `t ∪ s` is near `t` for any `t`. -/
 theorem near_union_of_small (h : Small s) : t ∪ s ~ t := by
-  simp only [Near, Set.symmDiff_def, union_diff_left]
+  simp only [Near, Set.symmDiff_def, union_sdiff_left]
   apply small_union
-  · exact h.mono diff_subset
+  · exact h.mono sdiff_subset
   · rw [show t \ (t ∪ s) = ∅ by aesop]
     exact small_empty
 
@@ -270,7 +271,7 @@ theorem card_le_of_near (h₁ : s ~ t) (h₂ : ¬Small t) : #t ≤ #s := by
   have h₃ := (le_add_self.trans_lt h₁).trans_le h₂
   by_contra! h₄
   have := add_lt_of_lt (aleph0_lt_κ.le.trans h₂) h₃ h₄
-  exact (le_mk_diff_add_mk t s).not_gt this
+  exact (le_mk_sdiff_add_mk t s).not_gt this
 
 /-- Two large sets that are near each other have the same cardinality (and we only need to suppose
 that one of them is large to draw this conclusion). -/
@@ -287,7 +288,7 @@ theorem card_inter_of_near (h₁ : s ~ t) (h₂ : ¬Small s) : #(s ∩ t : Set �
     intro x y h
     rwa [Subtype.mk.injEq, Subtype.coe_inj] at h
   · rw [← diff_symmDiff_self]
-    apply le_of_le_add (le_mk_diff_add_mk s (s ∆ t))
+    apply le_of_le_add (le_mk_sdiff_add_mk s (s ∆ t))
     · exact aleph0_lt_κ.le.trans (κ_le_of_not_small h₂)
     · exact h₁.trans_le (κ_le_of_not_small h₂)
 

@@ -92,6 +92,7 @@ theorem Cloud.smul {c d : Code} (h : Cloud c d) (ρ : NewPerm) :
     Cloud (ρ • c) (ρ • d) := by
   obtain ⟨β, γ, hβγ, s, hs⟩ := h
   convert Cloud.mk β γ hβγ (ρ.sderiv β • s) (Set.smul_set_nonempty.mpr hs) using 1
+  · rw [NewPerm.smul_mk]
   rw [NewPerm.smul_mk, Code.mk.injEq, heq_eq_eq]
   use rfl
   ext x

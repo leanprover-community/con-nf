@@ -291,7 +291,7 @@ theorem image_near_of_near (ψ : BaseApprox) (s : Set Atom)
     _ ~ ψᴬ.image L₁ᴬ := near_symmDiff_self_of_small
           (image_small_of_coinjective ψ.atoms_permutative.toCoinjective hsL)
     _ = ψᴬ.image ((ψ.sublitter L₁)ᴬ ∪ (L₁ᴬ ∩ ψ.exceptions.dom)) := by
-          rw [sublitter_atoms, diff_union_inter]
+          rw [sublitter_atoms, sdiff_union_inter]
     _ = ψᴬ.image (ψ.sublitter L₁)ᴬ ∪ ψᴬ.image (L₁ᴬ ∩ ψ.exceptions.dom) := by rw [SetRel.image_union]
     _ ~ ψᴬ.image (ψ.sublitter L₁)ᴬ := near_union_of_small
           (image_small_of_coinjective ψ.atoms_permutative.toCoinjective (ψ.exceptions_small L₁))
@@ -619,12 +619,10 @@ theorem basePerm_smul_nearLitter_eq_iff {ψ : BaseApprox} {h : ψ.Total} {N₁ N
   · intro hN
     refine ⟨?_, ?_, ?_⟩
     · have := congr_arg (·ᴸ) hN
-      dsimp only at this
       rwa [BasePerm.smul_nearLitter_litter, basePerm_smul_litter_eq_iff] at this
     · intro a _
       exact h.atoms a
     · have := congr_arg (·ᴬ) hN
-      dsimp only at this
       rw [BasePerm.smul_nearLitter_atoms] at this
       rwa [← toEquiv_image _ h.atoms_bijective]
   · intro hN

@@ -351,7 +351,7 @@ lemma inf_cod {r s : SetRel α β} :
 @[simp]
 lemma inv_le_inv_iff {r s : SetRel α β} :
     r.inv ≤ s.inv ↔ r ≤ s :=
-  ⟨λ h ↦ by simpa only [inv_inv] using inv_mono h, inv_mono⟩
+  ⟨fun h ↦ by simpa [inv_inv] using inv_mono h, inv_mono⟩
 
 @[simp]
 lemma mem_iSup_iff {T : Type*} {r : T → SetRel α β} (x : α) (y : β) :

@@ -164,7 +164,6 @@ theorem addInflexible_aux (P : InflexiblePath β) (t : Tangle P.δ) (ρ : AllPer
       fuzz P.hδε (ρ ^ (m + k) • t) = fuzz P.hδε (ρ ^ (n + k) • t) := by
   intro m n k h
   have := congr_arg (ρ ^ k • ·) (fuzz_injective h)
-  dsimp only at this
   rw [smul_smul, smul_smul, ← zpow_add, ← zpow_add, add_comm, add_comm k] at this
   rw [this]
 
@@ -393,7 +392,6 @@ theorem exists_exactlyApproximates_of_total (ψ : StrApprox β) (hψ₁ : ψ.Coh
         have := hρs A
         rwa [allPermSderiv_forget] at this
     · intro δ ε _ _ hδ hε hδε t
-      dsimp only
       have := hψ₁ (Path.single hε ↘.) (fuzz hδε t)
           ((ρs ε hε (ψ ↘ hε) (hψ₁.deriv (Path.single hε)) (hψ₂.deriv (Path.single hε)))ᵁ
             (Path.nil ↘.) • fuzz hδε t) ?_

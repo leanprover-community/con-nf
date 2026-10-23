@@ -38,6 +38,7 @@ public import ConNF.Levels.StrPerm
 public import ConNF.Levels.StrSet
 public import ConNF.Levels.Tree
 public import ConNF.Mathlib.Basic.Rel
+public import ConNF.Mathlib.Data.Set.Image
 public import ConNF.Mathlib.SetTheory.Cardinal.Basic
 public import ConNF.Mathlib.SetTheory.Cardinal.Order
 public import ConNF.Model.ConstructHypothesis

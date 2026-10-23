@@ -492,7 +492,6 @@ theorem Path.toList_sderiv (A : α ↝ β) (h : γ < β) :
     (A ↘ h).toList = ⟨γ, h.trans_le A.le⟩ :: A.toList :=
   rfl
 
-@[simp]
 theorem Path.eq_of_toList_eq (A : α ↝ β) (B : α ↝ γ) : A.toList = B.toList → β = γ := by
   intro h
   cases A with
