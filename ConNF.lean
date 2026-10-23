@@ -1,4 +1,4 @@
-module
+module  -- shake: keep-all --deprecated_module: ignore
 
 public import ConNF.Background.Cardinal
 public import ConNF.Background.InductiveConstruction
