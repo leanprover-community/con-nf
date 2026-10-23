@@ -58,12 +58,12 @@ jobs:
       - name: setup graphviz
         uses: ts-graphviz/setup-graphviz@b1de5da23ed0a6d14e0aeee8ed52fdd87af2363c # v2
 
-      - name: build dependency graph
-        working-directory: docs
-        run: |
-          dot -Tpdf -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.pdf
-          dot -Tpng -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.png
-          dot -Tsvg -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.svg
+      # - name: build dependency graph
+      #   working-directory: docs
+      #   run: |
+      #     dot -Tpdf -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.pdf
+      #     dot -Tpng -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.png
+      #     dot -Tsvg -Gnewrank=true -Goverlaps=false -Gsplines=ortho depgraph.dot > depgraph.svg
 
       - name: build documentation
         run: ~/.elan/bin/lake -Kenv=dev build ConNF:docs
