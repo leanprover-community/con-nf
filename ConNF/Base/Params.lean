@@ -107,15 +107,11 @@ def Params.minimal : Params where
     rw [beth_strictMono.lt_iff_lt]
     exact one_lt_of_isSuccLimit (isSuccLimit_omega 1)
   κ_le_μ_ord_cof := by
-    rw [mk_out, mk_out]
-    have := le_cof_map_of_isNormal (isNormal_ord.comp isNormal_beth) (aleph 1).ord
-    rwa [isRegular_aleph_one.cof_ord] at this
+    simpa using le_cof_map_of_isNormal (isNormal_ord.comp isNormal_beth) (aleph 1).ord
   Λ_type_le_μ_ord_cof := by
-    rw [type_nat_lt, mk_out]
+    rw [type_nat_lt]
     apply (omega0_le_of_isSuccLimit (isSuccLimit_omega 1)).trans
-    have := le_cof_map_of_isNormal (isNormal_ord.comp isNormal_beth) (aleph 1).ord
-    rw [isRegular_aleph_one.cof_ord, ← ord_le_ord] at this
-    rwa [ord_aleph] at this ⊢
+    simpa [← ord_le_ord] using le_cof_map_of_isNormal (isNormal_ord.comp isNormal_beth) (aleph 1).ord
 
 /--
 We can also instantiate our model parameters with `Λ = μ`. To do this, both `#Λ` and `#μ` will need

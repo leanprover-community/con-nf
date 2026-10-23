@@ -152,7 +152,7 @@ theorem coherentAt_mono [LeLevel β] {ψ χ : StrApprox β} {A : β ↝ ⊥} {L�
     · intro a ha
       apply BaseApprox.nearLitters_le_of_le (hψχ (P.A ⇘ (B ↗ P.hδ)))
       exact (hρ₁ B).2 a ha
-  · rwa [coherentAt_flexible hL] at h ⊢
+  · simpa [coherentAt_flexible hL] using h
 
 def Coherent [LeLevel β] (ψ : StrApprox β) : Prop :=
   ∀ A L₁ L₂, L₁ ~[(ψ A)ᴸ] L₂ → CoherentAt ψ A L₁ L₂
