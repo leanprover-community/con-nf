@@ -187,7 +187,8 @@ theorem constrainsAtoms_small (S : Support β) :
     Small {a | ConstrainsAtom S a} := by
   suffices Small (⋃ N ∈ Sᴺ,
       ⋃ (x : (P : InflexiblePath β) × Tangle P.δ)
-        (_ : N.1 = x.1.A ↘ x.1.hε ↘. ∧ N.2ᴸ = fuzz x.1.hδε x.2),
+        (_ : x ∈ {x : (P : InflexiblePath β) × Tangle P.δ |
+          N.1 = x.1.A ↘ x.1.hε ↘. ∧ N.2ᴸ = fuzz x.1.hδε x.2}),
       (x.2.supportᴬ ⇗ (x.1.A ↘ x.1.hδ) : Set (β ↝ ⊥ × Atom))) by
     apply this.mono
     rintro ⟨_, a⟩ ⟨P, t, B, A, N, rfl, ha, hA, ht, hN⟩

@@ -61,7 +61,7 @@ theorem WeakSpec.exists_conv (σ : WeakSpec β) {S T : Support β}
   · rw [Support.smul_derivBot, BaseSupport.smul_atoms]
     ext ⟨i, a⟩
     · exact congr($(habU.symm.trans habV) A)
-    have := congr($(haU.symm.trans haV) A i)
+    have := congr(i ∈ $(haU.symm.trans haV) A)
     constructor
     · intro hS
       obtain ⟨b, hb⟩ := this.mp ⟨_, hS⟩
@@ -79,7 +79,7 @@ theorem WeakSpec.exists_conv (σ : WeakSpec β) {S T : Support β}
   · rw [Support.smul_derivBot, BaseSupport.smul_nearLitters]
     ext ⟨i, N₁⟩
     · exact congr($(hNbU.symm.trans hNbV) A)
-    have := congr($(hNU.symm.trans hNV) A i)
+    have := congr(i ∈ $(hNU.symm.trans hNV) A)
     constructor
     · intro hS
       obtain ⟨N₂, hN₂⟩ := this.mp ⟨_, hS⟩

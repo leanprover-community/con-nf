@@ -147,7 +147,7 @@ theorem Code.cloud_subrelation : Subrelation Cloud (InvImage (· < ·) pos) := b
   rw [InvImage]
   have := wellFounded_lt.not_lt_min  c.positions hν₁
   rw [← not_le]
-  contrapose! this
+  contrapose this
   exact hν₂.trans_le this
 
 theorem cloud_wf : WellFounded Cloud := Code.cloud_subrelation.wf <| InvImage.wf _ wellFounded_lt

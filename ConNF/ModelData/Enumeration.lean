@@ -52,7 +52,7 @@ theorem mem_congr {E F : Enumeration X} (h : E = F) :
 
 theorem dom_small (E : Enumeration X) :
     Small E.rel.dom :=
-  (iio_small E.bound).mono E.lt_bound
+  (iio_small E.bound).mono fun i hi ↦ E.lt_bound i hi
 
 theorem coe_small (E : Enumeration X) :
     Small (E : Set X) :=

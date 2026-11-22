@@ -3,7 +3,6 @@ module
 public import ConNF.Background.Set
 public import ConNF.Base.Params
 public import ConNF.Mathlib.Basic.Rel
-public import ConNF.Mathlib.Data.Set.Image
 
 /-!
 # Small sets

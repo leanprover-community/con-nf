@@ -284,7 +284,7 @@ lemma mem_sup {r s : SetRel α β} {x : α} {y : β} :
 lemma sup_dom {r s : SetRel α β} :
     (r ⊔ s).dom = r.dom ∪ s.dom := by
   ext x
-  simp only [mem_dom, mem_union, mem_sup, exists_or]
+  simp only [mem_dom, mem_union, exists_or]
 
 @[simp]
 lemma sup_cod {r s : SetRel α β} :

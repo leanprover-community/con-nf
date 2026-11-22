@@ -423,7 +423,7 @@ theorem NearLitter.smul_code (ρ : NewPerm) (N : NearLitter) :
   simp only [code, NewPerm.smul_mk, BasePerm.smul_nearLitter_atoms, Code.mk.injEq, heq_eq_eq,
     true_and]
   ext a
-  rw [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_ofPred_eq, Set.mem_ofPred_eq, smul_forget,
+  rw [Set.mem_smul_set_iff_inv_smul_mem, Set.mem_ofPred_eq, smul_forget,
     allPermForget_inv, StrSet.strPerm_smul_bot, Tree.inv_apply, ← NewPerm.forget_sderiv,
     Tree.sderiv_apply, ← Set.mem_smul_set_iff_inv_smul_mem]
   rfl

@@ -75,6 +75,7 @@ theorem gtOfDeny_aux {X : Type u} (h₁ : #X ≤ #μ) (deny : X → Set μ)
     · rintro _ ⟨y, h, rfl⟩
       simp only [Set.mem_iUnion, Set.mem_singleton_iff]
       exact ⟨y, h, rfl⟩
+    change #(⋃ (y : X) (h : y ∈ Set.Iio x), {ih y h}) < #μ
     apply (mk_biUnion_le_mul_of_le 1 (λ _ _ ↦ (mk_singleton _).le)).trans_lt ?_
     rw [mul_one]
     exact (initialWellOrder_card_Iio _).trans_le h₁

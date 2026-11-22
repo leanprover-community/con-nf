@@ -312,7 +312,7 @@ theorem BaseSupport.interference_small (S : BaseSupport) :
 theorem card_supports_le (S : BaseSupport) :
     #{s : Set Atom // ∀ π : BasePerm, π • S = S → π • s = s} ≤ 2 ^ #κ := by
   have := card_supports_le_of_closed (S := S + ⟨.ofSet _ S.interference_small, .empty⟩) ?_
-  · refine le_trans (mk_le_mk_of_subset ?_) this
+  · refine le_trans (mk_subtype_mono ?_) this
     intro s hs π hπ
     apply hs
     apply BaseSupport.ext

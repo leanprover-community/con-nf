@@ -689,7 +689,7 @@ theorem ExactlyApproximates.smulSet_nearLitter
     have := hψ.inv_smul_litter a ha₂
     rw [ha₁, eq_inv_smul_iff, ← hNπ, smul_left_cancel_iff] at this
     use this
-    contrapose! ha₂
+    contrapose ha₂
     obtain ⟨b, hab⟩ := ha₂
     have := hψ.atoms (π⁻¹ • a) b (Or.inl hab)
     rw [smul_inv_smul] at this

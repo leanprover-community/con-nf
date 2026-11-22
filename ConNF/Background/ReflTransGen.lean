@@ -37,7 +37,7 @@ theorem card_reflTransGenₙ_lt (hr : ∀ y, #{x | r x y} < κ) (hκ : κ.IsRegu
     exact card_reflTransGen₁_lt hr hκ _ ih
 
 def reflTransGen' (r : α → α → Prop) : α → α → Prop :=
-  λ x y ↦ x ∈ ⋃ n, {x | reflTransGenₙ r n {y} x}
+  λ x y ↦ x ∈ ⋃ n, reflTransGenₙ r n {y}
 
 theorem reflTransGen'_iff (r : α → α → Prop) (x y : α) :
     reflTransGen' r x y ↔ ReflTransGen r x y := by
@@ -66,8 +66,8 @@ theorem card_reflTransGen_lt (hr : ∀ y, #{x | r x y} < κ)
     (hκ₁ : κ.IsRegular) (hκ₂ : ℵ₀ < κ) (y : α) :
     #{x | ReflTransGen r x y} < κ := by
   simp only [← reflTransGen'_iff, reflTransGen']
-  change #(⋃ n, {x | reflTransGenₙ r n {y} x}) < κ
-  suffices #(⋃ n : ULift.{u} ℕ, {x | reflTransGenₙ r n.down {y} x}) < κ by
+  change #(⋃ n, reflTransGenₙ r n {y}) < κ
+  suffices #(⋃ n : ULift.{u} ℕ, reflTransGenₙ r n.down {y}) < κ by
     convert this using 3
     ext x
     simp only [Set.mem_iUnion, ULift.exists]

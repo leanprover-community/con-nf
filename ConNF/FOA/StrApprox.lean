@@ -194,7 +194,7 @@ theorem upperBound_coherent [LeLevel β] (c : Set (StrApprox β)) (hc₁ : IsCha
   · exact hc₂.flexible
 
 theorem exists_maximal_coherent [LeLevel β] (ψ : StrApprox β) (hψ : ψ.Coherent) :
-    ∃ χ ≥ ψ, Maximal {χ | χ.Coherent} χ := by
+    ∃ χ ≥ ψ, Maximal (fun χ : StrApprox β ↦ χ.Coherent) χ := by
   have := zorn_le₀ {χ | ψ ≤ χ ∧ χ.Coherent} ?_
   · obtain ⟨χ, hχ₁, hχ₂⟩ := this
     refine ⟨χ, hχ₁.1, hχ₁.2, ?_⟩

@@ -192,7 +192,7 @@ theorem diff_insideAll_small (ξ : BaseAction) (L : Litter) :
   apply Small.mono this
   apply small_biUnion
   · apply (small_union ξ.nearLitters_dom_small ξ.nearLitters_cod_small).mono
-    exact Set.sep_subset _ _
+    exact fun _ h ↦ h.1
   · rintro N ⟨_, rfl⟩
     exact N.diff_small'
 

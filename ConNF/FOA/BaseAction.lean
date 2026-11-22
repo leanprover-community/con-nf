@@ -300,7 +300,7 @@ theorem insideCandidates_not_small (ξ : BaseAction) (L : Litter) :
     rintro rfl
     exact N.diff_small'
   have h' := L.atoms_not_small
-  contrapose! h'
+  contrapose h'
   apply (small_union (small_union ξ.atoms_cod_small h) h').mono
   rintro a rfl
   rw [Set.mem_union, or_iff_not_imp_left]
@@ -390,7 +390,7 @@ theorem insideRel_mem_iff_mem {ξ : BaseAction} {a₁ a₂ : Atom} {N₁ N₂ : 
     rw [interference_eq_of_litter_ne hL]
     exact ⟨h', h.2.1⟩
   · intro h'
-    contrapose! ha₁
+    contrapose ha₁
     apply ξ.interference_subset_dom ⟨N₂, hN⟩ ⟨N₂', hN'⟩
     rw [interference_eq_of_litter_eq]
     · exact Or.inr ⟨h.2.1, ha₁⟩
@@ -543,7 +543,7 @@ theorem outsideRel_mem_iff_mem {ξ : BaseAction} (hξ : ∀ N ∈ ξᴺ.dom, N�
   apply (iff_false_right this).mpr
   intro h₄
   suffices N₁'ᴸ ≠ N₁ᴸ from h₁ (hξ N₁ ⟨N₂, hN⟩ ⟨h₄, h₃.trans_ne this⟩)
-  contrapose! h₁
+  contrapose h₁
   apply ξ.interference_subset_dom ⟨N₂', hN'⟩ ⟨N₂, hN⟩
   rw [interference_eq_of_litter_eq h₁]
   exact Or.inr ⟨h₄, h₂⟩

@@ -409,7 +409,7 @@ theorem mem_image_iff (r : TSet α) (x : TSet γ) (y : TSet δ) :
 set_option backward.isDefEq.respectTransparency false in
 theorem exists_smallUnion (s : Set (TSet α)) (hs : Small s) :
     ∃ x : TSet α, ∀ y : TSet β, y ∈' x ↔ ∃ t ∈ s, y ∈' t := by
-  apply exists_of_symmetric
+  refine exists_of_symmetric {y | ∃ t ∈ s, y ∈' t} hβ ?_
   have := exists_support (α := α)
   choose S hS using this
   refine ⟨⟨Enumeration.ofSet (⋃ t ∈ s, (S t)ᴬ) ?_, Enumeration.ofSet (⋃ t ∈ s, (S t)ᴺ) ?_⟩, ?_⟩

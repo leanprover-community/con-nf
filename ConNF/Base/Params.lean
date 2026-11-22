@@ -380,6 +380,6 @@ than `μ` itself. -/
 theorem card_lt_of_μ_bounded (s : Set μ) (h : s.Bounded (· < ·)) :
     #s < #μ := by
   obtain ⟨ν, hν⟩ := h
-  exact (mk_le_mk_of_subset hν).trans_lt (μ_card_Iio_lt ν)
+  exact (mk_le_mk_of_subset (t := Set.Iio ν) fun b hb ↦ hν b hb).trans_lt (μ_card_Iio_lt ν)
 
 end ConNF
