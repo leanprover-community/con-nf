@@ -169,18 +169,18 @@ def preCoherentData :
   letI := leData M
   {
     allPermSderiv := λ {β γ} _ _ hγ ρ ↦
-      β.recBotCoe (C := λ β ↦ [LeLevel β] → γ < β → AllPerm β → AllPerm γ)
+      β.recBotCoe (motive := λ β ↦ [LeLevel β] → γ < β → AllPerm β → AllPerm γ)
         (λ hγ ↦ (not_lt_bot hγ).elim)
         (λ β _ hγ ρ ↦
           letI : LtLevel γ := ⟨hγ.trans_le LeLevel.elim⟩
           if h : (β : TypeIndex) = α then
             letI := ltData M
-            γ.recBotCoe (C := λ γ ↦ [LtLevel γ] →
+            γ.recBotCoe (motive := λ γ ↦ [LtLevel γ] →
                 ((ltData M).data γ).AllPerm → AllPermLe M γ LeLevel.elim)
               id (λ _γ _ ρ ↦ (castAllPermLeLt M _).symm ρ)
               ((castAllPermLeEq M h ρ).sderiv γ)
           else
-            γ.recBotCoe (C := λ γ ↦ [LtLevel γ] → γ < β →
+            γ.recBotCoe (motive := λ γ ↦ [LtLevel γ] → γ < β →
                 ((leData M).data β).AllPerm → AllPermLe M γ LeLevel.elim)
               (λ _ ρ ↦ (H β (LeLevel.elim.lt_of_ne h)).allPermBotSderiv (castAllPermLeLt M _ ρ))
               (λ _γ _ hγ ρ ↦ (castAllPermLeLt M _).symm <|
